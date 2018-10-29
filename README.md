@@ -176,6 +176,7 @@ sense is a dictionary that may contain the following keys (among others, and mor
 * ``wikipedia``: link to wikipedia page from the word sense/gloss
 * ``topics``: topic categories specified for the sense (these may also be in "tags")
 * ``taxon``: links to taxonomical data
+* ``categories``: Category links specified for the page
 * ``color``: specification of RGB color values (hex or CSS color name)
 * ``value``: value represented by the word (e.g., for numerals)
 * ``unit``: information about some represent units, particularly SI units
@@ -214,6 +215,15 @@ each dictionary has the following keys (and possibly others):
 * ``sense``: optional sense for which the translation is (this is a free-text string, and may not match any gloss exactly)
 * ``alt``: an optional alternative form of the translation
 * ``roman``: an optional romanization of the translation.
+
+## Known issues
+
+* Extracting linkages (hypernyms, etc.) does not capture all links.
+It is fairly common to use simple lists with hyperlinks for these
+linkages, and such hyperlinks are not currently extracted.  The
+intention is to fix this soon.
+* Some holonyms/meronyms are currently stored under the sense, while other linkages are under the word.  This should be looked into and made consistent.
+* Some information that is global for a page, such as category links for the page, may only be included in the last part-of-speech defined on the page or even the last language defined on the page.  This should be fixed.
 
 ## Dependencies
 
