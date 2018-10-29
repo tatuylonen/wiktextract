@@ -12,8 +12,8 @@ import sys
 import json
 import hashlib
 import argparse
-import wiktionary
-import wiktlangs
+import wiktextract
+from wiktextract import wiktlangs
 
 
 # Pages whose titles have any of these prefixes are ignored.
@@ -71,7 +71,8 @@ def capture_page(title, text, pages_dir):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Wiktionary data extractor")
+    parser = argparse.ArgumentParser(
+        description="Multilingual Wiktionary data extractor")
     parser.add_argument("path", type=str,
                         help="Input file (.../enwiktionary-<date>-"
                         "pages-articles.xml[.bz2])")
@@ -132,13 +133,13 @@ if __name__ == "__main__":
         return capture_page(title, text, args.pages_dir)
 
     try:
-        ctx = wiktionary.parse_wiktionary(args.path, word_cb,
-                                          capture_cb,
-                                          capture_languages=args.language,
-                                          capture_pronunciation=
-                                          args.pronunciation,
-                                          capture_translations=
-                                          args.translations)
+        ctx = wiktextract.parse_wiktionary(
+            args.path,
+            word_cb,
+            capture_cb,
+            capture_languages=args.language,
+            capture_pronunciation=args.pronunciation,
+            capture_translations=args.translations)
     finally:
         if out_path and out_path != "-":
             out_f.close()

@@ -8,7 +8,7 @@ import bz2
 import collections
 from lxml import etree
 import wikitextparser
-import wiktlangs
+from wiktextract import wiktlangs
 
 
 # These XML tags are ignored when parsing.

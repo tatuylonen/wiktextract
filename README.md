@@ -93,6 +93,9 @@ You may want to add command line options:
 * --pages-dir DIR: save all wiktionary pages under this directory (mostly for debugging)
 * --help: displays help text
 
+Extracting all of English Wiktionary may take about an hour, depending
+on the speed of your system.
+
 ## Calling the library
 
 The library can be called as follows:
@@ -231,4 +234,4 @@ is licensed under the MIT license.  See the [LICENSE](LICENSE) file
 for details.
 
 Credit and linking to the project's web site and/or citing any future
-papers on the project would be appreciated.
+papers on the project would be highly appreciated.
