@@ -114,7 +114,7 @@ if __name__ == "__main__":
     out_path = args.out
     if out_path and out_path != "-":
         out_tmp_path = out_path + ".tmp"
-        out_f = open(out_path, "w", buffering=1024*1024)
+        out_f = open(out_tmp_path, "w", buffering=1024*1024)
     else:
         out_tmp_path = out_path
         out_f = sys.stdout

@@ -70,6 +70,7 @@ ignored_templates = set([
     "circa2",
     "cite",
     "cite book",
+    "Cite news",
     "cite news",
     "cite-book",
     "cite-journal",
