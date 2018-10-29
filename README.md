@@ -225,6 +225,9 @@ intention is to fix this soon.
 * Some holonyms/meronyms are currently stored under the sense, while other linkages are under the word.  This should be looked into and made consistent.
 * Some information that is global for a page, such as category links for the page, may only be included in the last part-of-speech defined on the page or even the last language defined on the page.  This should be fixed.
 
+This software is still quite new and should still be considered a beta
+version.
+
 ## Dependencies
 
 This package depends on the following other packages:
