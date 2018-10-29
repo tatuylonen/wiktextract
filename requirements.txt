@@ -1,0 +1,2 @@
+lxml>=4.2.5
+wikitextparser>=0.22.0
