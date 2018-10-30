@@ -18,7 +18,7 @@ information extraction most likely works out of the box for any
 language.
 
 The library extracts glosses, parts-of-speech, declension/conjugation
-information where available, translations for all languages when
+information when available, translations for all languages when
 available, pronunciations (including audio file links), qualifiers
 including usage notes, word forms, links between words including
 hypernyms, hyponyms, holonyms, meronyms, related words, derived terms,
@@ -73,7 +73,7 @@ back if you test and make this work with Python2.
 The ``wiktwords`` script is the easiest way to extract data from
 Wiktionary.  Just download the data dump file from
 [dumps.wikimedia.org](https://dumps.wikimedia.org/enwiktionary/) and
-run the script.  The correct dump file has a name something like
+run the script.  The correct dump file the name
 ``enwiktionary-<date>-pages-articles.xml.bz2``.
 
 The simplest command line is:
@@ -132,10 +132,10 @@ capture.  It defaults to ``["English", "Translingual"]``.
 information for words.  Translation information seems to be most
 widely available for the English language, which has translations into
 other languages.  The translation information increases the size and
-loading timne of the captured data substantially, so this is disabled
+loading time of the captured data substantially, so this is disabled
 by default.
 
-``capture_pronunciation`` can be set to True t capture pronunciation
+``capture_pronunciation`` can be set to True to capture pronunciation
 information for words.  Typically, this includes IPA transcriptions
 and any audio files included in the word entries, along with other
 information.  However, the type and amount of pronunciation
@@ -153,7 +153,7 @@ following keys (others may also be present or added later):
 * ``conjugation``: conjugation/declension entries found for the word
 * ``heads``: part-of-speech specific head tags for the word.  Useful for, e.g., obtaining comparatives, superlatives, and other inflection information for many languages.  Each value is a dictionary, basically containing the arguments of the corresponding template in Wiktionary, with the template name under "template_name".
 * ``hyphenation``: list of hyphenations for the word when available.  Each hyphenation is a vector of syllables.
-* ``pinyin``: for Chinese words, the romanized translitteration, when available
+* ``pinyin``: for Chinese words, the romanized transliteration, when available
 * ``synonyms``: synonym linkages for the word (see below)
 * ``antonyms``: antonym linkages for the word (see below)
 * ``hypernyms``: hypernym linkages for the word (see below)
@@ -179,8 +179,8 @@ sense is a dictionary that may contain the following keys (among others, and mor
 * ``categories``: Category links specified for the page
 * ``color``: specification of RGB color values (hex or CSS color name)
 * ``value``: value represented by the word (e.g., for numerals)
-* ``unit``: information about some represent units, particularly SI units
-* ``alt_of``: list of words that this sense is an alternative form or abbreviation of
+* ``unit``: information about units of measurement, particularly SI units, tagged to the word
+* ``alt_of``: list of words of which this sense is an alternative form or abbreviation
 * ``inflection_of``: list of words that this sense is an inflection of
 * ``conjugation``: list of templates indicating conjugation/declension (list of dictionaries containing the arguments of the Wiktionary template, with template name under "template_name")
 
@@ -214,7 +214,7 @@ each dictionary has the following keys (and possibly others):
 * ``word``: the translation in the specified language
 * ``sense``: optional sense for which the translation is (this is a free-text string, and may not match any gloss exactly)
 * ``alt``: an optional alternative form of the translation
-* ``roman``: an optional romanization of the translation.
+* ``roman``: an optional romanization of the translation
 
 ## Known issues
 
@@ -246,5 +246,5 @@ Copyright (c) 2018 Tatu Ylonen.  This package is free for both
 commercial and non-commercial use.  It is licensed under the MIT
 license.  See the [LICENSE](LICENSE) file for details.
 
-Credit and linking to the project's web site and/or citing any future
+Credit and linking to the project's website and/or citing any future
 papers on the project would be highly appreciated.
