@@ -1,6 +1,7 @@
 # Wiktextract
 
-Wiktionary dump file parser and multilingual data extractor
+This Python package is a Wiktionary dump file parser and multilingual
+data extractor.
 
 ## Overview
 
@@ -60,13 +61,12 @@ cd wiktextract
 python3 setup.py install
 ```
 
-This will install the ``wiktextract`` module and the ``wiktwords`` script.
+This will install the ``wiktextract`` package and the ``wiktwords`` script.
 
-Note that this software has currently only been tested with Python3.
-
-There should be no fundamental reason why back-porting to Python 2.7
-would be difficult; it just hasn't been tested yet.  Please report
-back if you test and make this work with Python2.
+Note that this software has currently only been tested with Python 3.
+Back-porting to Python 2.7 should not be difficult; it just hasn't been
+tested yet.  Please report back if you test and make this work with
+Python 2.
 
 ## Using the command-line tool
 
@@ -216,6 +216,12 @@ each dictionary has the following keys (and possibly others):
 * ``alt``: an optional alternative form of the translation
 * ``roman``: an optional romanization of the translation
 
+## Related packages
+
+The [wiktfinnish](https://github.com/tatuylonen/wiktfinnish) package
+can be used to interpret Finnish noun declications and verb
+conjugations and for generating Finnish inflected word forms.
+
 ## Known issues
 
 * Extracting linkages (hypernyms, etc.) does not capture all links.
@@ -237,14 +243,19 @@ This package depends on the following other packages:
 
 ## Contributing
 
-Please email to ylo at clausal.com if you wish to contribute, have
-patches, or suggestions.
+The official repository of this project is on
+[github](https://github.com/tatuylonen/wiktextract).
+
+Please email to ylo at clausal.com if you wish to contribute or have
+patches or suggestions.
 
 ## License
 
 Copyright (c) 2018 Tatu Ylonen.  This package is free for both
 commercial and non-commercial use.  It is licensed under the MIT
-license.  See the [LICENSE](LICENSE) file for details.
+license.  See the file
+[LICENSE](https://github.com/tatuylonen/wiktextract/blob/master/LICENSE)
+for details.
 
 Credit and linking to the project's website and/or citing any future
 papers on the project would be highly appreciated.
