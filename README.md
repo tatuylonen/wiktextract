@@ -1,24 +1,17 @@
 # Wiktextract
 
-This Python package is a Wiktionary dump file parser and multilingual
-data extractor.
+Python package and script is a tool for extracing data from Wiktionary
+data dumps.
 
 ## Overview
 
-Thois is a Python3 package for extracting information from Wiktionary
-data dumps.  It reads the
+This is a Python package and tool for extracting information from
+Wiktionary data dumps.  It reads the
 ``enwiktionary-<date>-pages-articles.xml.bz2`` file (or corresponding
 files from other wiktionaries) and returns Python dictionaries
-containing most of the information from Wiktionary.
+containing most of the information in Wiktionary.
 
-The library is capable of extracting information for any language.
-However, so far it has mostly been tested with English and Finnish,
-and to some extent German and Spanish.  Changes to extract information
-for any additional languages are likely to be small.  Basic
-information extraction most likely works out of the box for any
-language.
-
-The library extracts glosses, parts-of-speech, declension/conjugation
+This tool extracts glosses, parts-of-speech, declension/conjugation
 information when available, translations for all languages when
 available, pronunciations (including audio file links), qualifiers
 including usage notes, word forms, links between words including
@@ -30,13 +23,20 @@ information such as what word it is a form of, what is the RGB value
 of the color it represents, what is the numeric value of a number,
 what SI unit it represents, etc.
 
-This library will be useful for many natural language processing,
+The tool is capable of extracting information for any language.
+However, so far it has mostly been tested with English and Finnish,
+and to some extent German and Spanish.  Changes to extract information
+for any additional languages are likely to be small.  Basic
+information extraction most likely works out of the box for any
+language.
+
+This utility will be useful for many natural language processing,
 semantic parsing, machine translation, and language generation
 applications both in research and industry.
 
-The library can be easily used to extract machine translation
-dictionaries, language understanding dictionaries, semantically
-annotated dictionaries, and morphological dictionaries with
+The tool can be used to extract machine translation dictionaries,
+language understanding dictionaries, semantically annotated
+dictionaries, and morphological dictionaries with
 declension/conjugation information (where this information is
 available for the target language).  Dozens of languages have
 extensive vocabulary in ``enwiktionary``, and several thousand
