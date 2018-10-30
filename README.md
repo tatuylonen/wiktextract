@@ -52,7 +52,8 @@ extracting information from Wiktionary as of November 2018.
 
 ## Installing
 
-To install ``wiktextract``, use:
+To install ``wiktextract``, use ``pip`` (or ``pip3``, as appropriate),
+or clone the repository and install from the source:
 
 ```
 git clone https://github.com/tatuylonen/wiktextract.git
