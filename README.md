@@ -242,9 +242,9 @@ patches, or suggestions.
 
 ## License
 
-This package is free for both commercial and non-commercial use.  It
-is licensed under the MIT license.  See the [LICENSE](LICENSE) file
-for details.
+Copyright (c) 2018 Tatu Ylonen.  This package is free for both
+commercial and non-commercial use.  It is licensed under the MIT
+license.  See the [LICENSE](LICENSE) file for details.
 
 Credit and linking to the project's web site and/or citing any future
 papers on the project would be highly appreciated.
