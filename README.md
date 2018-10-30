@@ -1,7 +1,6 @@
 # Wiktextract
 
-Python package and script is a tool for extracing data from Wiktionary
-data dumps.
+This is a utility and Python package for for extracing data from Wiktionary.
 
 ## Overview
 
