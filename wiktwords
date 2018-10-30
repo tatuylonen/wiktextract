@@ -154,7 +154,7 @@ if __name__ == "__main__":
     if args.statistics:
         print("")
         print("LANGUAGE COUNTS")
-        for k, cnt in sorted(language_counts.items(),
+        for k, cnt in sorted(ctx.language_counts.items(),
                              key=lambda x: -x[1]):
             print("  {:>7d} {}".format(cnt, k))
             if cnt < 1000:
@@ -164,13 +164,13 @@ if __name__ == "__main__":
 
         print("")
         print("POS HEADER USAGE")
-        for k, cnt in sorted(pos_counts.items(),
+        for k, cnt in sorted(ctx.pos_counts.items(),
                              key=lambda x: -x[1]):
             print("  {:>7d} {}".format(cnt, k))
 
         print("")
         print("POS SUBSECTION HEADER USAGE")
-        for k, cnt in sorted(section_counts.items(),
+        for k, cnt in sorted(ctx.section_counts.items(),
                              key=lambda x: -x[1]):
             print("  {:>7d} {}".format(cnt, k))
 
