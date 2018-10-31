@@ -79,7 +79,7 @@ run the script.  The correct dump file the name
 The simplest command line is:
 
 ```
-wiktwords data/enwiktionary-latest-pages-articles.xml.bz2 --out wikt.words --language English
+wiktwords data/enwiktionary-latest-pages-articles.xml.bz2 --out wikt.words --language English --all
 ```
 
 You may want to add command line options:
@@ -87,6 +87,7 @@ You may want to add command line options:
 * --out FILE: specifies the name of the file to write (specifying "-" as the file writes to stdout)
 * --language LANGUAGE: extracts the given language (this option may be specified multiple times; by default, English and Translingual words are extracted)
 * --list-languages: prints a list of supported language names
+* --all: causes all data to be captured for the selected languages
 * --translations: causes translations to be captured
 * --pronunciation: causes pronunciation information to be captured
 * --statistics: prints useful statistics at the end

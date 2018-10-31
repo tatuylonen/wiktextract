@@ -78,8 +78,6 @@ if __name__ == "__main__":
                         "pages-articles.xml[.bz2])")
     parser.add_argument("--out", type=str, default=None,
                         help="Path where to write output (- for stdout)")
-    parser.add_argument("--translations", action="store_true", default=False,
-                        help="Capture translations")
     parser.add_argument("--language", type=str, action="append", default=[],
                         help="Language to capture (can specify multiple tiems, "
                         "defaults to English and Translingual)")
@@ -87,11 +85,20 @@ if __name__ == "__main__":
                         help="Print list of supported languages")
     parser.add_argument("--pages-dir", type=str, default=None,
                         help="Directory under which to store all pages")
+    parser.add_argument("--all", action="store_true", default=False,
+                        help="Capture all data for the selected languages")
+    parser.add_argument("--translations", action="store_true", default=False,
+                        help="Capture translations")
     parser.add_argument("--pronunciation", action="store_true", default=False,
                         help="Capture pronunciation information")
     parser.add_argument("--statistics", action="store_true", default=False,
                         help="Print statistics")
     args = parser.parse_args()
+
+    # The --all option turns on capturing all data types
+    if args.all:
+        args.translations = True
+        args.pronunciation = True
 
     # If --list-languages has been specified, just print the list of supported
     # languages
