@@ -336,6 +336,9 @@ pos_map = {
     "verbs": "verb",
 }
 
+# Set of all possible parts-of-speech returned by wiktionary reading.
+PARTS_OF_SPEECH = set(pos_map.values())
+
 # Templates ({{name|...}}) that will be replaced by the value of their
 # first argument when cleaning up titles/values.
 clean_arg1_tags = [

@@ -148,7 +148,7 @@ Information returned for each word is a dictionary.  The dictionary has the
 following keys (others may also be present or added later):
 
 * ``word``: the word form
-* pos: part-of-speech, such as "noun", "verb", "adj", "adv", "pron", "determiner", "prep" (preposition), "postp" (postposition), and many others.
+* pos: part-of-speech, such as "noun", "verb", "adj", "adv", "pron", "determiner", "prep" (preposition), "postp" (postposition), and many others.  The complete list of possibel values returned by the package can be found in ``wiktextract.PARTS_OF_SPEECH``.
 * ``senses``: word senses for this word/part-of-speech (see below)
 * ``conjugation``: conjugation/declension entries found for the word
 * ``heads``: part-of-speech specific head tags for the word.  Useful for, e.g., obtaining comparatives, superlatives, and other inflection information for many languages.  Each value is a dictionary, basically containing the arguments of the corresponding template in Wiktionary, with the template name under "template_name".

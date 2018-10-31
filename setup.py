@@ -2,12 +2,11 @@
 #
 # Copyright (c) 2018 Tatu Ylonen.  See LICENSE and https://ylonen.org
 
-import setuptools
+from setuptools import setup
 
 with open("README.md", "r") as f:
     long_description = f.read()
 
-from distutils.core import setup
 setup(name="wiktextract",
       version="0.1.2",
       description="Wiktionary dump file parser and multilingual data extractor",
