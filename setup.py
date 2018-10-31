@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+#
+# Copyright (c) 2018 Tatu Ylonen.  See LICENSE and https://ylonen.org
 
 import setuptools
 

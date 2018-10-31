@@ -4,7 +4,7 @@
 # mostly been used with enwiktionary, but should be usable with other
 # wiktionaries as well.
 #
-# Copyright (c) 2018 Tatu Ylonen.  See LICENSE.
+# Copyright (c) 2018 Tatu Ylonen.  See LICENSE and https://ylonen.org
 
 import os
 import re

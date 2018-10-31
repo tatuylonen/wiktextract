@@ -1,7 +1,7 @@
 # Wiktionary parser for extracting a lexicon and various other information
 # from wiktionary.
 #
-# Copyright (c) 2018 Tatu Ylonen.  See file LICENSE.
+# Copyright (c) 2018 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
 import bz2

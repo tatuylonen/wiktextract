@@ -1,7 +1,7 @@
 # This file lists language names used in Wikitionary, as subtitles for sections
 # on each language.
 #
-# Copyright (c) 2018 Tatu Ylonen.  See file LICENSE.
+# Copyright (c) 2018 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 # -*- fundamental -*-
 # Note: Using python mode with this lst practically crashes emacs when,
