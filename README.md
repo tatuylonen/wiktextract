@@ -50,7 +50,9 @@ or standard output in JSON format for processing by other tools.
 As far as we know, this is the most comprehensive tool available for
 extracting information from Wiktionary as of November 2018.
 
-## Installing
+## Getting started
+
+### Installing
 
 To install ``wiktextract``, use ``pip`` (or ``pip3``, as appropriate),
 or clone the repository and install from the source:
@@ -67,6 +69,17 @@ Note that this software has currently only been tested with Python 3.
 Back-porting to Python 2.7 should not be difficult; it just hasn't been
 tested yet.  Please report back if you test and make this work with
 Python 2.
+
+### Running tests
+
+This package includes tests written using the ``unittest`` framework.
+They can be run using, for example, ``nose``, which can be installed
+using ``pip3 install nose``.
+
+To run the tests, just use the following command in the top-level directory:
+```
+nosetests
+```
 
 ## Using the command-line tool
 

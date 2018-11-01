@@ -27,7 +27,6 @@ class WiktExtractTests(unittest.TestCase):
         num_redirects = 0
 
         def word_cb(data):
-            print("WORD_CB:", data)
             nonlocal num_transl
             nonlocal num_pron
             nonlocal num_conj
@@ -49,8 +48,7 @@ class WiktExtractTests(unittest.TestCase):
             if data.get("translations"):
                 num_transl += 1
             sounds = data.get("pronunciations", ())
-            if sounds and any("ipas" in x for x in sounds):
-                print(word, sounds)
+            if sounds and any("ipa" in x for x in sounds):
                 num_pron += 1
 
         path = "wiktextract/tests/test-pages-articles.xml.bz2"
@@ -76,4 +74,3 @@ class WiktExtractTests(unittest.TestCase):
         assert num_conj > 0
         assert num_transl > 0
         assert num_pron > 0
-        assert FALSE
