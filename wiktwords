@@ -89,8 +89,12 @@ if __name__ == "__main__":
                         help="Capture all data for the selected languages")
     parser.add_argument("--translations", action="store_true", default=False,
                         help="Capture translations")
-    parser.add_argument("--pronunciation", action="store_true", default=False,
+    parser.add_argument("--pronunciations", action="store_true", default=False,
                         help="Capture pronunciation information")
+    parser.add_argument("--linkages", action="store_true", default=False,
+                        help="Capture linkages (hypernyms, synonyms, etc)")
+    parser.add_argument("--compounds", action="store_true", default=False,
+                        help="Capture compound words using each word")
     parser.add_argument("--statistics", action="store_true", default=False,
                         help="Print statistics")
     args = parser.parse_args()
@@ -98,7 +102,9 @@ if __name__ == "__main__":
     # The --all option turns on capturing all data types
     if args.all:
         args.translations = True
-        args.pronunciation = True
+        args.pronunciations = True
+        args.linkages = True
+        args.compounds = True
 
     # If --list-languages has been specified, just print the list of supported
     # languages
@@ -116,11 +122,15 @@ if __name__ == "__main__":
             if x not in wiktlangs.languages:
                 print("Invalid language:", x)
                 sys.exit(1)
+    print("Capturing words for:", ", ".join(args.language))
 
     # Open output file.
     out_path = args.out
     if out_path and out_path != "-":
-        out_tmp_path = out_path + ".tmp"
+        if out_path.startswith("/dev/"):
+            out_tmp_path = out_path
+        else:
+            out_tmp_path = out_path + ".tmp"
         out_f = open(out_tmp_path, "w", buffering=1024*1024)
     else:
         out_tmp_path = out_path
@@ -144,9 +154,11 @@ if __name__ == "__main__":
             args.path,
             word_cb,
             capture_cb,
-            capture_languages=args.language,
-            capture_pronunciation=args.pronunciation,
-            capture_translations=args.translations)
+            languages=args.language,
+            pronunciations=args.pronunciations,
+            translations=args.translations,
+            linkages=args.linkages,
+            compounds=args.compounds)
     finally:
         if out_path and out_path != "-":
             out_f.close()

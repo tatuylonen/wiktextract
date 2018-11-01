@@ -130,6 +130,7 @@ ignored_templates = set([
     "lang",
     "list",
     "ll",
+    "lookfrom",
     "m",
     "mention",
     "mid2",
@@ -211,6 +212,7 @@ ignored_templates = set([
     "stroke order",
     "stub-gloss",
     "sub",
+    "suffixsee",
     "sup",
     "syndiff",
     "t-check",
@@ -537,21 +539,26 @@ clean_replace_map = {
     "gloss": r"(\1)",
 }
 
-# Regular expression for replacing templates by their arg1.
+# Note: arg_re contains two sets of parenthesis
+arg_re = r"\|(([^|{}]|\{\{[^}]*\}\})*)"
+
+# Matches more arguments and end of template
+args_end_re = r"(" + arg_re + r")*\}\}"
+
+# Regular expression for replacing templates by their arg1.  arg1 is \2
 clean_arg1_re = re.compile(r"(?s)\{\{(" +
                            "|".join(re.escape(x) for x in clean_arg1_tags) +
-                           r")\|([^|}]*?)(\|[^|}]*?)*\}\}")
+                           r")" + arg_re + args_end_re)
 
-# Regular expression for replacing templates by their arg2.
+# Regular expression for replacing templates by their arg2.  arg2 is \4
 clean_arg2_re = re.compile(r"(?s)\{\{(" +
                            "|".join(re.escape(x) for x in clean_arg2_tags) +
-                           r")\|([^|}]*?)\|([^|}]*?)(\|[^|}]*?)*\}\}")
+                           r")" + arg_re + arg_re + args_end_re)
 
-# Regular expression for replacing templates by their arg3.
+# Regular expression for replacing templates by their arg3.  arg3 is \6
 clean_arg3_re = re.compile(r"(?s)\{\{(" +
                            "|".join(re.escape(x) for x in clean_arg3_tags) +
-                           r")\|([^|}]*?)\|([^|}]*?)"
-                           r"\|([^|}]*?)(\|[^|}]*?)*\}\}")
+                           r")" + arg_re + arg_re + arg_re + args_end_re)
 
 # Mapping from German verb form arguments to "canonical" values in
 # word sense tags."""
@@ -654,7 +661,7 @@ es_verb_form_map = {
 template_allowed_pos_map = {
     "abbr": ["abbrev"],
     "abbr": ["abbrev"],
-    "noun": ["noun", "abbrev", "pron", "name"],
+    "noun": ["noun", "abbrev", "pron", "name", "num"],
     "proper noun": ["noun", "name", "proper-noun"],
     "proper-noun": ["name", "noun", "proper-noun"],
     "verb": ["verb", "phrase"],
@@ -769,18 +776,18 @@ def clean_value(title):
     # Replace tags for which we have replacements.
     for k, v in clean_replace_map.items():
         if v.find("\\") < 0:
-            title = re.sub(r"\{\{" + re.escape(k) +
-                           r"\}\}", v, title)
+            title = re.sub(r"\{\{" + re.escape(k) + r"\}\}", v, title)
         else:
             title = re.sub(r"\{\{" + re.escape(k) +
-                           r"\|([^|}]*?)(\|[^|}]*?)*?"
-                           r"\}\}", v, title)
-    # Replace tags by their arguments.  Note that they may be nexted, so we
-    # must keep repeating this until there is no change.
+                           r"((" + arg_re + r")*)\}\}",
+                           v, title)
+    # Replace tags by their arguments.  Note that they may be nested, so we
+    # keep repeating this until there is no change.  The regexps can only
+    # handle one level of nesting (i.e., one template inside another).
     while True:
         orig = title
-        title = re.sub(clean_arg3_re, r"\4", title)
-        title = re.sub(clean_arg2_re, r"\3", title)
+        title = re.sub(clean_arg3_re, r"\6", title)
+        title = re.sub(clean_arg2_re, r"\4", title)
         title = re.sub(clean_arg1_re, r"\2", title)
         if title == orig:
             break
@@ -799,8 +806,9 @@ def clean_value(title):
     # Replace various empases (quoted text) by its value.
     title = re.sub(r"''+(([^']|'[^'])+?)''+", r"\1", title)
     # XXX should replace HTML entities (I've not seen them yet though)
+    title = re.sub("&nbsp;", " ", title)
     # Replace whitespace sequences by a single space.
-    title = re.sub(r"\s\s+", " ", title)
+    title = re.sub(r"\s+", " ", title)
     # Strip surrounding whitespace.
     title = title.strip()
     return title
@@ -1213,8 +1221,7 @@ def parse_sense(word, text):
                 data_append(data, "alt_of", x)
                 data_append(data, "tags", "abbreviation")
         elif name in ("only used in", "only in"):
-            # XXX what was this for?
-            print(word, "ONLY USED IN", t_arg(t, 1))
+            # This appears to be used in "man" for "man enough"
             data_append(data, "only_in", t_arg(t, 1))
         # This tag indicates the word is an inflection of another word, but
         # in a complicated way that we won't try to parse here.  We include
@@ -1569,8 +1576,9 @@ def parse_preamble(word, data, pos, text, p):
     for node in p.lists():
         for item in node.items:
             sense = parse_sense(word, str(item))
-            if plural:
-                data_append(sense, "tags", "plural")
+            if plural and "plural" not in sense.get("tags", ()):
+                sense["tags"] = list(sorted(set(sense.get("tags", []) +
+                                                ["plural"])))
             data_append(data, "senses", sense)
     # XXX there might be word senses encoded in other ways, without using
     # a list for them.  Do some tests to find out how common this is.
@@ -1578,86 +1586,124 @@ def parse_preamble(word, data, pos, text, p):
 
 def parse_pronunciation(word, data, text, p):
     """Extracts pronunciation information for the word."""
-    sounds = []
-    variant = {}
-    for t in p.templates:
-        name = t.name.strip()
-        # Silently ignore templates that we don't care about.
-        if name in ignored_templates:
-            continue
-        # Pronunciation may be qualified by accent/dialect/variant.  These are
-        # recorded under "tags".
-        elif name in ("a", "accent"):
-            data_extend(variant, "tags", clean_quals(t_vec(t)))
-        elif name in ("lb", "qual", "qualifier", "q", "qf", "context",
-                      "term-context", "tcx", "term-label", "tlb", "i"):
-            data_extend(variant, "tags", clean_quals(t_vec(t)[1:]))
-        # Extact IPA pronunciation specification under "ipas".
-        elif name in ("IPA", "ipa"):
-            data_append(variant, "ipas",
-                        (t_arg(t, "lang"), t_arg(t, 1)))
-        # Extract special variants of the IPA template.  Store these as
-        # dictionaries under "special_ipas".
-        elif re.search("IPA", name):
-            data_append(variant, "special_ipas", template_args_to_dict(t))
-        # If English pronunciation (enPR) has been specified, record them
-        # under "en_pr".
-        elif name == "enPR":
-            data_append(variant, "en_pr", t_arg(t, 1))
-        # There are also some other forms of pronunciation information that
-        # we collect; it is not yet clear what all these mean.
-        elif name in ("it-stress",):
-            data_append(variant, "stress", t_arg(t, 1))
-        elif name == "PIE root":
-            data_append(variant, "pie_root", t_arg(t, 2))
-        # If an audio file has been specified for the word, collect those under
-        # "audios".
-        elif name in ("audio", "audio-pron"):
-            data_append(variant, "audios",
-                        (t_arg(t, "lang"),
-                         t_arg(t, 1),
-                         t_arg(t, 2)))
-        # If homophones have been specified, collect those under "homophones".
-        elif name in ("homophones", "homophone"):
-            data_extend(variant, "homophones", t_vec(t))
-        # These templates are silently ignored for pronunciation information
-        # collection purposes.
-        elif name in ("inflection of", "l", "link", "m", "w", "W", "label",
-                      "gloss", "zh-m", "zh-l", "ja-l",
-                      "ux", "ant", "syn", "synonyms", "antonyms", "wikipedia",
-                      "alternative form of", "alt form",
-                      "altform", "alt-form", "abb", "rareform",
-                      "alter", "sense", "hyph", "honoraltcaps",
-                      "hyphenation", "non-gloss definition", "n-g", "non-gloss",
-                      "ngd", "topics", "top", "c", "C", "categorize",
-                      "catlangname", "categorise",
-                      "senseid", "defn", "ja-r", "ja-l",
-                      "place:Brazil/state",
-                      "place:Brazil/municipality",
-                      "place", "taxlink", "Wikipedia",
-                      "color panel", "pedlink", "vern", "prefix", "affix",
-                      "suffix", "wikispecies", "ISBN", "slim-wikipedia", "swp",
-                      "comcatlite",
-                      "given name", "surname", "head"):
-            continue
-        # Any templates matching these are silently ignored for pronunciation
-        # information collection purposes.
-        elif re.search(r"^R:|^RQ:|^&|"
-                       r"-form|-def|-verb|-adj|-noun|-adv|"
-                       r"-prep| of$|"
-                       r"-romanization|-romanji|-letter|"
-                       r"^en-|^fi-|",
-                       name):
-            continue
-        else:
-            # Warn about unhandled templates.
-            print(word, "UNRECOGNIZED PRONUNCIATION", str(t))
 
-    # If we got some useful pronunciation information, save it under "sounds"
-    # in the word entry.  XXX what else should be considered useful, or should
-    # we just always store it if any information was obtained?
-    if variant:
-        data_append(data, "sounds", variant)
+    def parse_variant(text):
+        variant = {}
+        sense = None
+
+        p = wikitextparser.parse(text)
+        for t in p.templates:
+            name = t.name.strip()
+            # Silently ignore templates that we don't care about.
+            if name in ignored_templates:
+                continue
+            elif name == "sense":
+                # Some words, like "house" (English) have a two-level structure
+                # with different pronunciations for verbs and nouns, with
+                # {{sense|...}} used to distinguish them
+                sense = t_arg(t, 1)
+            # Pronunciation may be qualified by
+            # accent/dialect/variant.  These are recorded under
+            # "tags".  See
+            # https://en.wiktionary.org/wiki/Module:accent_qualifier/data
+            elif name in ("a", "accent"):
+                data_extend(variant, "accent", clean_quals(t_vec(t)))
+            # These other qualifiers and context markers may be used for
+            # similar things, but their values are less well defined.
+            elif name in ("qual", "qualifier", "q", "qf"):
+                data_extend(variant, "tags", t_vec(t))
+            elif name in ("lb", "context",
+                          "term-context", "tcx", "term-label", "tlb", "i"):
+                print(word, "Pronunciation qualifier:", str(t))
+                data_extend(variant, "tags", clean_quals(t_vec(t)[1:]))
+            # Extact IPA pronunciation specification under "ipa".
+            elif name in ("IPA", "ipa"):
+                data_append(variant, "ipa",
+                            (t_arg(t, "lang"), t_arg(t, 1)))
+            # Extract special variants of the IPA template.  Store these as
+            # dictionaries under "special_ipa".
+            elif re.search("IPA", name):
+                data_append(variant, "special_ipa", template_args_to_dict(t))
+            # If English pronunciation (enPR) has been specified, record them
+            # under "enpr".
+            elif name == "enPR":
+                data_append(variant, "enpr", t_arg(t, 1))
+            # There are also some other forms of pronunciation information that
+            # we collect; it is not yet clear what all these mean.
+            elif name in ("it-stress",):
+                data_append(variant, "stress", t_arg(t, 1))
+            elif name == "PIE root":
+                data_append(variant, "pie_root", t_arg(t, 2))
+            # If an audio file has been specified for the word,
+            # collect those under "audios".
+            elif name in ("audio", "audio-pron"):
+                data_append(variant, "audios",
+                            (t_arg(t, "lang"),
+                             t_arg(t, 1),
+                             t_arg(t, 2)))
+            # If homophones have been specified, collect those under
+            # "homophones".
+            elif name in ("homophones", "homophone"):
+                data_extend(variant, "homophones", t_vec(t))
+            elif name == "hyphenation":
+                # This is often in pronunciation, but we'll store it at top
+                # level in the entry
+                data_append(data, "hyphenation", t_vec(t))
+            # These templates are silently ignored for pronunciation information
+            # collection purposes.
+            elif name in ("inflection of", "l", "link", "m", "w", "W", "label",
+                          "gloss", "zh-m", "zh-l", "ja-l",
+                          "ux", "ant", "syn", "synonyms", "antonyms",
+                          "wikipedia",
+                          "alternative form of", "alt form",
+                          "altform", "alt-form", "abb", "rareform",
+                          "alter", "hyph", "honoraltcaps",
+                          "non-gloss definition", "n-g", "non-gloss",
+                          "ngd", "topics", "top", "c", "C", "categorize",
+                          "catlangname", "categorise",
+                          "senseid", "defn", "ja-r", "ja-l",
+                          "place:Brazil/state",
+                          "place:Brazil/municipality",
+                          "place", "taxlink", "Wikipedia",
+                          "color panel", "pedlink", "vern", "prefix", "affix",
+                          "suffix", "wikispecies", "ISBN", "slim-wikipedia",
+                          "swp", "comcatlite",
+                          "given name", "surname", "head"):
+                continue
+            # Any templates matching these are silently ignored for
+            # pronunciation information collection purposes.
+            elif re.search(r"^R:|^RQ:|^&|"
+                           r"-form|-def|-verb|-adj|-noun|-adv|"
+                           r"-prep| of$|"
+                           r"-romanization|-romanji|-letter|"
+                           r"^en-|^fi-|",
+                           name):
+                continue
+            else:
+                # Warn about unhandled templates.
+                print(word, "UNRECOGNIZED PRONUNCIATION", str(t))
+
+        if sense:
+            variant["sense"] = sense
+
+        # If we got some useful pronunciation information, save it
+        # under "sounds" in the word entry.
+        if len(set(variant.keys()) - set(["tags", "sense", "accent"])):
+            data_append(data, "pronunciations", variant)
+
+    # If the pronunciation section does not contain a list, parse it all
+    # as a single pronunciation variant.  Otherwise parse each list item
+    # separately.
+    spans = []
+    for node in p.lists():
+        spans.append(node.span)
+        for item in node.items:
+            parse_variant(str(item))
+    for s, e in reversed(spans):
+        text = text[:s] + text[e:]
+    text = text.strip()
+    if text:
+        parse_variant(text)
 
 
 def parse_linkage(word, data, kind, text, p, sense_text=None):
@@ -1666,163 +1712,259 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
     header); however, it is not entirely reliable.  The particular template
     types used may also indicate what type of link it is; we trust that
     information more."""
-    # XXX this section needs more work, in particular lists containing
-    # entries are not handled currently and they are very common.
 
-    # XXX might want to ignore parts in parenthesis; e.g., "cat" has
-    # extra stuff there that are not really Synonyms
+    added = set()
 
-    # XXX handle rel-top better; it can be used to group synonyms by sense and
-    # indicates the sense
+    def parse_item(text, kind, is_item):
 
-    # XXX topic areas, also often indicated in list headers
-
-    sense_text = None
-    qualifiers = ()
-
-    def add_linkage(kind, v):
-        nonlocal qualifiers
-        v = {"word": v}
-        if sense_text:
-            v["sense"] = sense_text
-        if qualifiers:
-            v["tags"] = qualifiers
-        data_append(data, kind, v)
+        sense_text = None
         qualifiers = ()
 
-    # Iterate over all templates XXX also needs to handle lists
-    for t in p.templates:
-        name = t.name.strip()
-        # Skip silently ignored tags
-        if name in ignored_templates:
-            continue
-        # Link tags just use the default kind
-        elif name in ("l", "link"):
-            add_linkage(kind, t_arg(t, 2))
-        # Wikipedia links also suggest a linkage of the default kind
-        elif name in ("wikipedia", "w"):
-            add_linkage(kind, t_arg(t, 1))
-        # Japanese links seem to commonly use "ja-r" template.  Use the
-        # default linkage for them, and collect the "hiragana" mapping for the
-        # catagana term when available (actually using them would require
-        # later postprocessing).
-        elif name == "ja-r":
-            kata = t_arg(t, 1)
-            hira = t_arg(t, 2)
-            add_linkage(kind, kata)
-            if hira:
-                data_append(data, "hiragana", (kata, hira))
-        # Handle various types of common Japanese/Chinese links.
-        elif name in ("ja-l", "lang", "zh-l"):
-            add_linkage(kind, t_arg(t, 1))
-        # Vernacular names seem to be specified fairly often, but not
-        # always intended as the actual link.  For now, we'll skip them.
-        # XXX should look into these more thoroughly.
-        elif name == "vern":
-            pass  # Skip here
-        # Taxonomical links often seem to be to superclasses of what the
-        # linkage should be.  Skip them for now.
-        # XXX should look into these more thoroughly.
-        elif name == "taxlink":
-            pass  # Skip here, these often seem to be superclasses etc
-        # Qualifiers modify the next link.  We make the (questionable)
-        # assumption that they only refer to the next link.
-        elif name in ("q", "qual", "qualifier", "qf", "i", "topics"):
-            qualifiers = clean_quals(t_vec(t)[1:])
-        # Label tags are frequently used to specify qualifiers.
-        elif name in ("lb", "lbl", "label", "cln", "C", "categorize",
-                      "categorise",
-                      "catlangname", "c", "a", "accent"):
-            qualifiers = clean_quals(t_vec(t)[1:])
-        # Gloss templates are sometimes used to qualify the sense in which the
-        # link is intended.
-        elif name in ("sense", "gloss", "s"):
-            sense_text = t_arg(t, 1)
-        # Synonym templates expressly indicate the link as a synonym.
-        elif name in ("syn", "synonyms"):
-            for x in t_vec(t)[1:]:
-                add_linkage("synonyms", x)
-        elif name in ("syn2", "syn3", "syn4"):
-            qualifiers = []
-            sense_text = t_arg(t, "title")
-            for x in t_vec(t):
-                add_linkage("synonyms", x)
-            sense_text = None
-        # Antonym templates expressly indicate the link as an antonym.
-        elif name in ("ant", "antonyms"):
-            add_linkage("antonyms", t_arg(t, 2))
-        elif name in ("ant4", "ant3", "ant2"):
-            qualifiers = []
-            sense_text = t_arg(t, "title")
-            for x in t_vec(t):
-                add_linkage("antonyms", x)
-            sense_text = None
-        # Hypernym templates expressly indicate the link as a hypernym.
-        elif name in ("hyp4-u", "hyp4", "hyp3"):
-            qualifiers = []
-            sense_text = t_arg(t, "title")
-            for x in t_vec(t):
-                add_linkage("hypernyms", x)
-            sense_text = None
-        # Derived term links expressly indicate the link as a derived term.
-        # XXX is this semantic meaning always clear, or are these also used
-        # in other linkage subsections for just formatting purposes?
-        elif name in ("der4", "der3", "der2", "der1", "zh-der"):
-            qualifiers = []
-            sense_text = t_arg(t, "title")
-            for x in t_vec(t):
-                add_linkage("derived", x)
-            sense_text = None
-        # Related term links expressly indicate the link is a related term.
-        # XXX are these also used for other purposes?
-        elif name in ("rel4", "rel3", "rel2", "rel1"):
-            qualifiers = []
-            sense_text = t_arg(t, "title")
-            for x in t_vec(t):
-                add_linkage("related", x)
-            sense_text = None
-        # These templates start a range with links of the specific kind.
-        elif name in ("rel-top3", "rel-top4", "rel-top2", "rel-top",
-                      "hyp-top3", "hyp-top4", "hyp-top2",
-                      "der-top", "der-top2", "der-top3", "der-top4"):
-            # XXX these should set kind.  Extensively used with Finnish.
-            qualifiers = []
-            sense_text = t_arg(t, 1)
-        # These templates end a range with links of the specific kind.
-        elif name in ("rel-bottom", "rel-bottom1", "rel-bottom2",
-                      "rel-bottom3", "rel-bottom4"):
-            qualifiers = []
-            sense_text = None
-        # These templates seem to be frequently used for things that
-        # aren't particularly useful for linking.
-        elif name in ("t", "t+", "ux", "trans-top", "w", "pedlink",
-                      "affixes", "ISBN", "specieslite", "projectlink",
-                      "wikispecies", "comcatlite", "wikidata"):
-            continue
-        # Silently skip any templates matching these.
-        elif re.search("^list:|^R:", name):
-            continue
-        # It is common to use special templates to indicate genus or higher
-        # classes for species.  We just convert those templates to hypernym
-        # links.
-        elif re.match("^[A-Za-z].*? Hypernyms$", name):
-            m = re.match("^([A-Za-z].*?) Hypernyms$", name)
-            v = m.group(1)
-            data_append(data, "hypernyms", v)
-        else:
-            # Warn about unhandled templates.
-            print(word, "LINKAGE", str(t))
+        def add_linkage(kind, v):
+            nonlocal qualifiers
+            v = v.strip()
+            if v.startswith("See also"):  # Used to refer to thesauri
+                return
+            if v.find(" Thesaurus:") >= 0:  # Thesaurus links handled separately
+                return
+            if v.lower() == "see also":
+                return
+            if v.startswith("Category:"):
+                # These are probably from category links at the end of page,
+                # which could end up in any section.
+                return
+            if v.startswith(":Category:"):
+                v = v[1:]
+            elif v.startswith("See "):
+                v = v[4:]
+            if v.endswith("."):
+                v = v[:-1]
+            v = v.strip()
+            if not v:
+                return
+            key = (kind, v, sense_text, tuple(sorted(qualifiers)))
+            if key in added:
+                return
+            added.add(key)
+            v = {"word": v}
+            if sense_text:
+                v["sense"] = sense_text
+            if qualifiers:
+                v["tags"] = qualifiers
+            data_append(data, kind, v)
+            qualifiers = ()
 
-    # XXX sometimes compounds are just a list with links to the words.
-    # See, e.g., "sama" (Finnish).  This is also not uncommon in various asian
-    # entries.
+        # Parse the item text.
+        p = wikitextparser.parse(text)
+        if len(text) < 200 and text and text[0] not in "*:":
+            item = clean_value(text)
+            if item:
+                if item.startswith("For more, see "):
+                    item = item[14:]
 
-    # XXX sometimes compounds have meaning in them.  Sometimes this is in the
-    # entry itself, separated by colon.  Sometimes the list item contains
-    # a plain text colon and the meanings after it.
+                for t in p.templates:
+                    name = t.name.strip()
+                    if name == "sense":
+                        sense_text = t_arg(t, 1)
+                    elif name == "l":
+                        add_linkage(kind, t_arg(t, 2))
+
+                found = False
+                for m in re.finditer(r"''+([^']+)''+", text):
+                    v = m.group(1)
+                    v = clean_value(v)
+                    if v.startswith("(") and v.endswith(")"):
+                        # These seem to often be qualifiers
+                        sense_text = v[1:-1]
+                        continue
+                    add_linkage(kind, v)
+                    found = True
+                if found:
+                    return
+
+                m = re.match(r"^\((([^)]|\([^)]+\))*)\):? ?(.*)$", item)
+                if m:
+                    q = m.group(1)
+                    sense_text = q
+                    item = m.group(3)
+                # Parenthesized parts at the end often contain extra stuff
+                # that we don't want
+                item = re.sub(r"\([^)]+\)\s*", "", item)
+                # Semicolons and dashes commonly occur here in phylum hypernyms
+                for v in item.split("; "):
+                    for vv in v.split(", "):
+                        vv = vv.split(" - ")[0]
+                        add_linkage(kind, vv)
+
+                # Add thesaurus links
+                if kind == "synonyms":
+                    for t in p.wikilinks:
+                        target = t.target.strip()
+                        if target.startswith("Thesaurus:"):
+                            add_linkage("synonyms", target)
+                return
+
+        # Iterate over all templates
+        for t in p.templates:
+            name = t.name.strip()
+            # Skip silently ignored tags
+            if name in ignored_templates:
+                continue
+            # Link tags just use the default kind
+            elif name in ("l", "link"):
+                add_linkage(kind, t_arg(t, 2))
+            # Wikipedia links also suggest a linkage of the default kind
+            elif name in ("wikipedia", "w"):
+                add_linkage(kind, t_arg(t, 1))
+            # Japanese links seem to commonly use "ja-r" template.
+            # Use the default linkage for them, and collect the
+            # "hiragana" mapping for the catagana term when available
+            # (actually using them would require later
+            # postprocessing).
+            elif name == "ja-r":
+                kata = t_arg(t, 1)
+                hira = t_arg(t, 2)
+                add_linkage(kind, kata)
+                if hira:
+                    data_append(data, "hiragana", (kata, hira))
+            # Handle various types of common Japanese/Chinese links.
+            elif name in ("ja-l", "lang", "zh-l"):
+                add_linkage(kind, t_arg(t, 1))
+            # Vernacular names seem to be specified fairly often, but not
+            # always intended as the actual link.  For now, we'll skip them.
+            # XXX should look into these more thoroughly.
+            elif name == "vern":
+                pass  # Skip here
+            # Taxonomical links often seem to be to superclasses of what the
+            # linkage should be.  Skip them for now.
+            # XXX should look into these more thoroughly.
+            elif name == "taxlink":
+                pass  # Skip here, these often seem to be superclasses etc
+            # Qualifiers modify the next link.  We make the (questionable)
+            # assumption that they only refer to the next link.
+            elif name in ("q", "qual", "qualifier", "qf", "i", "topics"):
+                qualifiers = clean_quals(t_vec(t)[1:])
+            # Label tags are frequently used to specify qualifiers.
+            elif name in ("lb", "lbl", "label", "cln", "C", "categorize",
+                          "categorise",
+                          "catlangname", "c", "a", "accent"):
+                qualifiers = clean_quals(t_vec(t)[1:])
+            # Gloss templates are sometimes used to qualify the sense
+            # in which the link is intended.
+            elif name in ("sense", "gloss", "s"):
+                sense_text = t_arg(t, 1)
+            # Synonym templates expressly indicate the link as a synonym.
+            elif name in ("syn", "synonyms"):
+                for x in t_vec(t)[1:]:
+                    add_linkage("synonyms", x)
+            elif name in ("syn2", "syn3", "syn4", "syn5", "syn1",
+                          "syn2-u", "syn3-u", "syn4-u", "syn5-u"):
+                qualifiers = []
+                sense_text = t_arg(t, "title")
+                for x in t_vec(t):
+                    add_linkage("synonyms", x)
+                sense_text = None
+            # Antonym templates expressly indicate the link as an antonym.
+            elif name in ("ant", "antonyms"):
+                add_linkage("antonyms", t_arg(t, 2))
+            elif name in ("ant5", "ant4", "ant3", "ant2", "ant1",
+                          "ant5-u", "ant4-u", "ant3-u", "ant2-u"):
+                qualifiers = []
+                sense_text = t_arg(t, "title")
+                for x in t_vec(t):
+                    add_linkage("antonyms", x)
+                sense_text = None
+            # Hyponym templates expressly indicate the link as a hyponym.
+            elif name in ("hyp5", "hyp4", "hyp3", "hyp2", "hyp1",
+                          "hyp5-u", "hyp4-u", "hyp3-u", "hyp2-u"):
+                qualifiers = []
+                sense_text = t_arg(t, "title")
+                for x in t_vec(t):
+                    add_linkage("hyponyms", x)
+                sense_text = None
+            # Derived term links expressly indicate the link as a derived term.
+            # XXX is this semantic meaning always clear, or are these also used
+            # in other linkage subsections for just formatting purposes?
+            elif name in ("der5", "der4", "der3", "der2", "der1", "zh-der",
+                          "der5-u", "der4-u", "der3-u", "der2-u"):
+                qualifiers = []
+                sense_text = t_arg(t, "title")
+                for x in t_vec(t):
+                    add_linkage("derived", x)
+                sense_text = None
+            # Related term links expressly indicate the link is a related term.
+            # XXX are these also used for other purposes?
+            elif name in ("rel5", "rel4", "rel3", "rel2", "rel1",
+                          "rel5-u", "rel4-u", "rel3-u", "rel2-u"):
+                qualifiers = []
+                sense_text = t_arg(t, "title")
+                for x in t_vec(t):
+                    add_linkage("related", x)
+                sense_text = None
+            # These templates start a range with links of the specific kind.
+            elif name in ("rel-top3", "rel-top4", "rel-top5",
+                          "rel-top2", "rel-top"):
+                qualifiers = []
+                sense_text = t_arg(t, 1)
+                kind = "related"
+            elif name in ("hyp-top3", "hyp-top4", "hyp-top5", "hyp-top2"):
+                qualifiers = []
+                sense_text = t_arg(t, 1)
+                kind = "hyponym"
+            elif name in ("der-top", "der-top2", "der-top3", "der-top4",
+                          "der-top5"):
+                qualifiers = []
+                sense_text = t_arg(t, 1)
+                kind = "derived"
+            # These templates end a range with links of the specific kind.
+            elif name in ("rel-bottom", "rel-bottom1", "rel-bottom2",
+                          "rel-bottom3", "rel-bottom4", "rel-bottom5"):
+                qualifiers = []
+                sense_text = None
+            # These templates seem to be frequently used for things that
+            # aren't particularly useful for linking.
+            elif name in ("t", "t+", "ux", "trans-top", "w", "pedlink",
+                          "affixes", "ISBN", "specieslite", "projectlink",
+                          "wikispecies", "comcatlite", "wikidata"):
+                continue
+            # Silently skip any templates matching these.
+            elif re.search("^list:|^R:", name):
+                continue
+            # It is common to use special templates to indicate genus or higher
+            # classes for species.  We just convert those templates to hypernym
+            # links.
+            elif re.match("^[A-Za-z].*? Hypernyms$", name):
+                m = re.match("^([A-Za-z].*?) Hypernyms$", name)
+                v = m.group(1)
+                add_linkage("hypernyms", v)
+
+            else:
+                # Warn about unhandled templates.
+                print(word, "LINKAGE", str(t))
+
+        # Add thesaurus links
+        for t in p.wikilinks:
+            target = t.target.strip()
+            if target.startswith("Thesaurus:"):
+                add_linkage("synonyms", target)
 
 
-def parse_any(word, base, data, text, pos, p, capture_translations):
+    # If the linkage section does not contain a list, parse it all
+    # as a single pronunciation variant.  Otherwise parse each list item
+    # separately.
+    spans = []
+    for node in p.lists():
+        spans.append(node.span)
+        for item in node.items:
+            parse_item(str(item), kind, True)
+    for s, e in reversed(spans):
+        text = text[:s] + text[e:]
+    text = text.strip()
+    if text:
+        parse_item(text, kind, False)
+
+
+def parse_any(word, base, data, text, pos, sectitle, p, capture_translations):
     """This function is called for all subsections of a word entry to parse
     information that might be in any section and that can be interpreted
     without knowing the specific section."""
@@ -1863,15 +2005,18 @@ def parse_any(word, base, data, text, pos, p, capture_translations):
                 markers = vec[2:]  # gender/class markers
                 alt = t_arg(t, "alt")
                 roman = t_arg(t, "tr")
+                script = t_arg(t, "sc")
                 t = {"lang": lang, "word": transl}
                 if translation_sense:
                     t["sense"] = translation_sense
                 if markers:
-                    t["markers"] = markers
+                    t["tags"] = markers
                 if alt:
                     t["alt"] = alt
                 if roman:
                     t["roman"] = roman
+                if script:
+                    t["script"] = script
                 data_append(data, "translations", t)
         # Collect any conjugation/declension information for the word.
         # These are highly language-specific, and this may require tweaking
@@ -1885,6 +2030,8 @@ def parse_any(word, base, data, text, pos, p, capture_translations):
         # we don't try to interpret it here (there seems to be some variation).
         elif name == "enum":
             data_append(data, "enum", t_vec(t))
+        elif name == "IPA" and sectitle != "pronunciation":
+            print(word, "IPA OUTSIDE PRONUNCIATION ", sectitle)
 
     # Parse category links.  These may provide semantic and other information
     # about the word.  Note that category links are global for the word; we
@@ -1946,7 +2093,7 @@ def page_iter(word, text, ctx):
                 # XXX this merging needs more work
                 dt = base.copy()
                 for k, v in x.items():
-                    if k in dt:
+                    if k in dt and k not in ("sounds",):
                         dt[k] = dt[k] + v
                     else:
                         dt[k] = v
@@ -1993,7 +2140,18 @@ def page_iter(word, text, ctx):
 
             # Check if this is a language we are capturing.  If not, just
             # skip the section.
-            if language not in ctx.capture_languages or pos is None:
+            if language not in ctx.capture_languages:
+                continue
+
+            if pos is None:
+                # Have not yet seen a part-of-speech.  However, this initial
+                # part frequently contains pronunciation information that
+                # is shared by all parts of speech.  We don't care here
+                # whether it is under a ``pronunciation`` subsection, because
+                # the structure may vary.
+                if ctx.capture_pronunciation:
+                    p = wikitextparser.parse(text)
+                    parse_pronunciation(word, base, text, p)
                 continue
 
             # Remove any numbers at the end of the section title.
@@ -2024,23 +2182,30 @@ def page_iter(word, text, ctx):
             # the first subsection for the language).
             if sectitle == "":  # Preamble
                 parse_preamble(word, data, pos, text, p)
-                # Some have produnciation in the head
-                if ctx.capture_pronunciation:
-                    parse_pronunciation(word, data, text, p)
             # If the section title title indicates pronunciation, parse it here.
             elif sectitle == "pronunciation":
                 if ctx.capture_pronunciation:
-                    parse_pronunciation(word, base, text, p)
+                    parse_pronunciation(word, data, text, p)
             # Parse various linkage sections, defaulting to the linkage type
             # indicated by the section header.
             elif sectitle == "synonyms":
-                parse_linkage(word, data, "synonyms", text, p)
+                if ctx.capture_linkages:
+                    parse_linkage(word, data, "synonyms", text, p)
             elif sectitle == "hypernyms":
-                parse_linkage(word, data, "hypernyms", text, p)
+                if ctx.capture_linkages:
+                    parse_linkage(word, data, "hypernyms", text, p)
             elif sectitle == "hyponyms":
-                parse_linkage(word, data, "hyponyms", text, p)
+                if ctx.capture_linkages:
+                    parse_linkage(word, data, "hyponyms", text, p)
             elif sectitle == "antonyms":
-                parse_linkage(word, data, "antonyms", text, p)
+                if ctx.capture_linkages:
+                    parse_linkage(word, data, "antonyms", text, p)
+            elif sectitle == "derived terms":
+                if ctx.capture_linkages:
+                    parse_linkage(word, data, "derived", text, p)
+            elif sectitle == "related terms":
+                if ctx.capture_linkages:
+                    parse_linkage(word, data, "related", text, p)
             # Parse abbreviations.
             elif sectitle == "abbreviations":
                 parse_linkage(word, data, "abbreviations", text, p)
@@ -2049,7 +2214,8 @@ def page_iter(word, text, ctx):
                 parse_linkage(word, data, "abbreviations", text, p)
             # Parse compounds using the word.
             elif sectitle == "compounds":
-                parse_linkage(word, data, "compounds", text, p)
+                if ctx.capture_compounds:
+                    parse_linkage(word, data, "compounds", text, p)
             # We skip declension information here, as it is parsed from all
             # sections in parse_any().
             elif sectitle in ("declension", "conjugation"):
@@ -2057,7 +2223,8 @@ def page_iter(word, text, ctx):
             # XXX warn on other sections
 
             # Some information is parsed from any section.
-            parse_any(word, base, data, text, pos, p, ctx.capture_translations)
+            parse_any(word, base, data, text, pos, sectitle,
+                      p, ctx.capture_translations)
 
         # Finally flush the last language.
         flush()
@@ -2120,18 +2287,23 @@ class WiktionaryTarget(object):
 
     def __init__(self, word_cb, capture_cb,
                  capture_languages, capture_translations,
-                 capture_pronunciation):
+                 capture_pronunciation, capture_linkages,
+                 capture_compounds):
         assert callable(word_cb)
         assert capture_cb is None or callable(capture_cb)
         assert isinstance(capture_languages, (list, tuple, set))
         for x in capture_languages:
             assert isinstance(x, str)
         assert capture_translations in (True, False)
+        assert capture_linkages in (True, False)
+        assert capture_translations in (True, False)
         self.word_cb = word_cb
         self.capture_cb = capture_cb
         self.capture_languages = capture_languages
         self.capture_translations = capture_translations
         self.capture_pronunciation = capture_pronunciation
+        self.capture_linkages = capture_linkages
+        self.capture_compounds = capture_compounds
         self.tag = None
         self.namespaces = {}
         self.stack = []
@@ -2238,25 +2410,27 @@ class WiktionaryTarget(object):
 
 
 def parse_wiktionary(path, word_cb, capture_cb=None,
-                     capture_languages=["English", "Translingual"],
-                     capture_translations=False,
-                     capture_pronunciation=False):
+                     languages=["English", "Translingual"],
+                     translations=False,
+                     pronunciations=False,
+                     linkages=False,
+                     compounds=False):
     """Parses Wiktionary from the dump file ``path`` (which should
     point to a "enwiktionary-<date>-pages-articles.xml.bz2" file.
     This calls ``capture_cb(title)`` for each raw page (if provided),
     and if it returns True, and calls ``word_cb(data)`` for all words
-    defined for languages in ``capture_languages``.  This includes
-    translations in ``data`` if ``capture_translations`` is True, and
-    pronunciation information if ``capture_pronunciation`` is True."""
+    defined for languages in ``languages``.  This includes
+    translations in ``data`` if ``translations`` is True, and
+    pronunciation information if ``pronunciation`` is True."""
     assert isinstance(path, str)
     assert callable(word_cb)
     assert capture_cb is None or callable(capture_cb)
-    assert isinstance(capture_languages, (list, tuple, set))
-    for x in capture_languages:
+    assert isinstance(languages, (list, tuple, set))
+    for x in languages:
         assert isinstance(x, str)
         assert x in wiktlangs.languages
-    assert capture_translations in (True, False)
-    assert capture_pronunciation in (True, False)
+    assert translations in (True, False)
+    assert pronunciations in (True, False)
 
     # Open the input file.
     if path.endswith(".bz2"):
@@ -2267,8 +2441,8 @@ def parse_wiktionary(path, word_cb, capture_cb=None,
     try:
         # Create parsing context.
         ctx = WiktionaryTarget(word_cb, capture_cb,
-                               capture_languages, capture_translations,
-                               capture_pronunciation)
+                               languages, translations,
+                               pronunciations, linkages, compounds)
         # Parse the XML file.
         parser = etree.XMLParser(target=ctx)
         etree.parse(wikt_f, parser)
@@ -2305,3 +2479,16 @@ def parse_wiktionary(path, word_cb, capture_cb=None,
 # category relationships defined?  Wikimedia Commons?
 
 # XXX check Unsupported titles/* and how to get their real title
+
+# XXX test "sama" (Finnish) to check that linkages for list items are correct
+
+# XXX test "juttu" (Finnish) to check that sense is correctly included in
+# linkages
+
+# XXX check pronunciations for "house" to see that "noun" and "verb" senses
+# are correctly parsed
+
+# XXX test "cat" (english) linkage - stuff at end in parenthesis
+
+# XXX test "Friday" - it has embedded template in Related terms (currently
+# handled wrong)
