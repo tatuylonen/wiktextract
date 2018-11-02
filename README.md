@@ -89,13 +89,13 @@ Wiktionary.  Just download the data dump file from
 run the script.  The correct dump file the name
 ``enwiktionary-<date>-pages-articles.xml.bz2``.
 
-The simplest command line is:
+The command-line tool may be invoced as follows:
 
 ```
 wiktwords data/enwiktionary-latest-pages-articles.xml.bz2 --out wikt.words --language English --all
 ```
 
-You may want to add command line options:
+The following command-line options are supported:
 
 * --out FILE: specifies the name of the file to write (specifying "-" as the file writes to stdout)
 * --language LANGUAGE: extracts the given language (this option may be specified multiple times; by default, English and Translingual words are extracted)
@@ -105,6 +105,7 @@ You may want to add command line options:
 * --pronunciation: causes pronunciation information to be captured
 * --linkages: causes linkages (hypernyms etc.) to be captured
 * --compounds: causes compound words using each word to be captured
+* --redirects: causes redirects to be extracted
 * --statistics: prints useful statistics at the end
 * --pages-dir DIR: save all wiktionary pages under this directory (mostly for debugging)
 * --help: displays help text
@@ -124,7 +125,8 @@ ctx = wiktextract.parse_wiktionary(
     capture_cb=None,
     languages=["English", "Translingual"],
     translations=False,
-    pronunciations=False):
+    pronunciations=False,
+    redirects=False):
 ```
 
 The ``parse_wiktionary`` call will call ``word_cb(data)`` for words
@@ -166,6 +168,10 @@ hypernyms, antonyms, synonyms, etc.
 ``compounds`` should be set to True to capture compound words containing
 the word.
 
+``redirects`` should be set to True to capture redirects.  Redirects
+are not associated with any specific language and thus requesting them
+returns them for words in all languages.
+
 ## Format of extracted redirects
 
 Some pages in Wiktionary are redirects.  For these, ``word_cb`` will
@@ -173,7 +179,9 @@ be called with data in a special format.  In this case, the dictionary
 will have the key ``redirect``, which will contain the name of the
 word the entry redirects to.  The key ``word`` contains the word/term
 that contains the redirect.  Redirect entries do not have ``pos`` or
-any of the other fields.
+any of the other fields.  Redirects also are not associated with any
+language, so all redirects are always returned regardless of the captured
+languages (if extracting redirects has been requested).
 
 ## Format of the extracted word entries
 

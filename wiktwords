@@ -73,7 +73,7 @@ def capture_page(title, text, pages_dir):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Multilingual Wiktionary data extractor")
-    parser.add_argument("path", type=str,
+    parser.add_argument("path", type=str, nargs="?", default=None,
                         help="Input file (.../enwiktionary-<date>-"
                         "pages-articles.xml[.bz2])")
     parser.add_argument("--out", type=str, default=None,
@@ -95,6 +95,8 @@ if __name__ == "__main__":
                         help="Capture linkages (hypernyms, synonyms, etc)")
     parser.add_argument("--compounds", action="store_true", default=False,
                         help="Capture compound words using each word")
+    parser.add_argument("--redirects", action="store_true", default=False,
+                        help="Capture redirects")
     parser.add_argument("--statistics", action="store_true", default=False,
                         help="Print statistics")
     args = parser.parse_args()
@@ -105,14 +107,19 @@ if __name__ == "__main__":
         args.pronunciations = True
         args.linkages = True
         args.compounds = True
+        args.redirects = True
 
     # If --list-languages has been specified, just print the list of supported
     # languages
     if args.list_languages:
         print("Supported languages:")
-        for lang in wiktlangs.languages:
+        for lang in sorted(wiktlangs.languages):
             print("    {}".format(lang))
         sys.exit(0)
+
+    if not args.path:
+        print("The PATH argument for wiktionary dump file is mandatory.")
+        sys.exit(1)
 
     # Default to English and Translingual if language not specified.
     if not args.language:
@@ -158,7 +165,8 @@ if __name__ == "__main__":
             pronunciations=args.pronunciations,
             translations=args.translations,
             linkages=args.linkages,
-            compounds=args.compounds)
+            compounds=args.compounds,
+            redirects=args.redirects)
     finally:
         if out_path and out_path != "-":
             out_f.close()

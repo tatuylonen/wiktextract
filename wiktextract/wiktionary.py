@@ -2288,7 +2288,7 @@ class WiktionaryTarget(object):
     def __init__(self, word_cb, capture_cb,
                  capture_languages, capture_translations,
                  capture_pronunciation, capture_linkages,
-                 capture_compounds):
+                 capture_compounds, capture_redirects):
         assert callable(word_cb)
         assert capture_cb is None or callable(capture_cb)
         assert isinstance(capture_languages, (list, tuple, set))
@@ -2304,6 +2304,7 @@ class WiktionaryTarget(object):
         self.capture_pronunciation = capture_pronunciation
         self.capture_linkages = capture_linkages
         self.capture_compounds = capture_compounds
+        self.capture_redirects = capture_redirects
         self.tag = None
         self.namespaces = {}
         self.stack = []
@@ -2386,8 +2387,9 @@ class WiktionaryTarget(object):
                               "Scribunto"):
                 return
             if redirect:
-                data = {"redirect": redirect, "word": title}
-                self.word_cb(data)
+                if self.capture_redirects:
+                    data = {"redirect": redirect, "word": title}
+                    self.word_cb(data)
             else:
                 # If a capture callback has been provided, skip this page.
                 if self.capture_cb and not self.capture_cb(title, self.text):
@@ -2414,14 +2416,14 @@ def parse_wiktionary(path, word_cb, capture_cb=None,
                      translations=False,
                      pronunciations=False,
                      linkages=False,
-                     compounds=False):
-    """Parses Wiktionary from the dump file ``path`` (which should
-    point to a "enwiktionary-<date>-pages-articles.xml.bz2" file.
-    This calls ``capture_cb(title)`` for each raw page (if provided),
-    and if it returns True, and calls ``word_cb(data)`` for all words
-    defined for languages in ``languages``.  This includes
-    translations in ``data`` if ``translations`` is True, and
-    pronunciation information if ``pronunciation`` is True."""
+                     compounds=False,
+                     redirects=False):
+    """Parses Wiktionary from the dump file ``path`` (which should point
+    to a "enwiktionary-<date>-pages-articles.xml.bz2" file.  This
+    calls ``capture_cb(title)`` for each raw page (if provided), and
+    if it returns True, and calls ``word_cb(data)`` for all words
+    defined for languages in ``languages``.  The other keyword
+    arguments control what data is to be extracted."""
     assert isinstance(path, str)
     assert callable(word_cb)
     assert capture_cb is None or callable(capture_cb)
@@ -2431,6 +2433,9 @@ def parse_wiktionary(path, word_cb, capture_cb=None,
         assert x in wiktlangs.languages
     assert translations in (True, False)
     assert pronunciations in (True, False)
+    assert linkages in (True, False)
+    assert compounds in (True, False)
+    assert redirects in (True, False)
 
     # Open the input file.
     if path.endswith(".bz2"):
@@ -2442,7 +2447,8 @@ def parse_wiktionary(path, word_cb, capture_cb=None,
         # Create parsing context.
         ctx = WiktionaryTarget(word_cb, capture_cb,
                                languages, translations,
-                               pronunciations, linkages, compounds)
+                               pronunciations, linkages, compounds,
+                               redirects)
         # Parse the XML file.
         parser = etree.XMLParser(target=ctx)
         etree.parse(wikt_f, parser)
