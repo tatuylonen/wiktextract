@@ -43,6 +43,7 @@ ignored_templates = set([
     "A.D.",
     "Clade",  # XXX Might want to dig information from this for hypernyms
     "CURRENTYEAR",
+    "EtymOnLine",
     "EtymOnline",
     "IPAchar",
     "LR",
@@ -203,7 +204,7 @@ ignored_templates = set([
     "seeCites",
     "seemoreCites",
     "seemorecites",
-    "seeMoreCities",
+    "seeMoreCites",
     "seeSynonyms",
     "sic",
     "smallcaps",
@@ -345,7 +346,9 @@ PARTS_OF_SPEECH = set(pos_map.values())
 # first argument when cleaning up titles/values.
 clean_arg1_tags = [
     "...",
+    "Br. English form of",
     "W",
+    "Wikipedia",
     "abb",
     "abbreviation of",
     "abbreviation",
@@ -365,6 +368,7 @@ clean_arg1_tags = [
     "alternative form of",
     "alternative name of",
     "alternative name of",
+    "alternative plural of",
     "alternative spelling of",
     "alternative term for",
     "alternative typography of",
@@ -389,6 +393,7 @@ clean_arg1_tags = [
     "deliberate misspelling of",
     "diminutive of",
     "ellipsis of",
+    "ellipse of",
     "elongated form of",
     "en-archaic second-person singular of",
     "en-archaic third-person singular of",
@@ -456,6 +461,7 @@ clean_arg1_tags = [
     "present tense of",
     "pronunciation spelling of",
     "pronunciation spelling",
+    "pronunciation respelling of",
     "rare form of",
     "rare spelling of",
     "rareform",
@@ -479,6 +485,7 @@ clean_arg1_tags = [
     "swp",
     "taxlink",
     "taxlinknew",
+    "uncommon spelling of",
     "unsupported",
     "verb",
     "vern",
@@ -529,6 +536,7 @@ clean_replace_map = {
     "sumti": r"x\1",
     "inflection of": r"inflection of \1",
     "given name": r"\1 given name",
+    "forename": r"\1 given name",
     "historical given name": r"\1 given name",
     "surname": r"\1 surname",
     "taxon": r"a taxonomic \1",
@@ -662,6 +670,7 @@ template_allowed_pos_map = {
     "abbr": ["abbrev"],
     "abbr": ["abbrev"],
     "noun": ["noun", "abbrev", "pron", "name", "num"],
+    "plural noun": ["noun", "name"],
     "proper noun": ["noun", "name", "proper-noun"],
     "proper-noun": ["name", "noun", "proper-noun"],
     "verb": ["verb", "phrase"],
@@ -739,6 +748,10 @@ sectitle_corrections = {
     "pronunciaton": "pronunciation",
     "pronunciayion": "pronunciation",
     "pronuniation": "pronunciation",
+    "pronunciation 1": "pronunciation",
+    "pronunciation 2": "pronunciation",
+    "pronunciation 3": "pronunciation",
+    "pronunciation 4": "pronunciation",
     "quptations": "quotations",
     "realted terms": "related terms",
     "refereces": "references",
@@ -1055,7 +1068,9 @@ def parse_sense(word, text):
         # such, and tag with gender when available.  We also tag the term
         # as meaning an organism (though this might not be the case in rare
         # cases) and "person" (if it has a gender).
-        elif name in ("given name", "historical given name"):
+        elif name in ("given name",
+                      "forename",
+                      "historical given name"):
             gender = t_arg(t, 1)
             data_extend(data, "tags", ["given name", "organism"])
             if gender in ("male", "female", "unisex"):
@@ -1120,7 +1135,7 @@ def parse_sense(word, text):
         # typically Wikipedia.  Record such links under "wikipedia".
         elif name in ("slim-wikipedia", "wikipedia", "wikispecies", "w", "W",
                       "swp", "pedlink", "specieslink", "comcatlite",
-                      "taxlinknew"):
+                      "Wikipedia", "taxlinknew"):
             v = t_arg(t, 1)
             if not v:
                 v = word
@@ -1162,16 +1177,21 @@ def parse_sense(word, text):
                       "alternative case form of", "alt-sp",
                       "standard form of", "alternative typography of",
                       "elongated form of", "alternative name of",
+                      "uncommon spelling of",
                       "combining form of",
                       "morse code of",
                       "caret notation of",
                       "alternative term for", "altspell"):
             data_append(data, "alt_of", t_arg(t, 1))
+        elif name in ("Br. English form of",):
+            data_append(data, "alt_of", t_arg(t, 1))
+            data_append(data, "tags", "british")
         # Some words are marked as being pronunciation spellings, or
         # "eye dialect" words.  Record the canonical word under "alt_of" and
         # add a "spoken" tag.
         elif name in ("eye dialect of", "eye dialect", "eye-dialect of",
                       "pronunciation spelling",
+                      "pronunciation respelling of",
                       "pronunciation spelling of"):
             data_append(data, "alt_of", t_arg(t, 1))
             data_append(data, "tags", "spoken")
@@ -1213,7 +1233,7 @@ def parse_sense(word, text):
         elif name in ("abbreviation of", "short for", "initialism of",
                       "acronym of", "contraction of", "clipping of",
                       "clip", "clipping", "short form of", "ellipsis of",
-                      "short of", "abbreviation", "abb"):
+                      "ellipse of", "short of", "abbreviation", "abb"):
             for x in t_vec(t):
                 if x.startswith("w:"):
                     x = x[2:]
@@ -1295,7 +1315,9 @@ def parse_sense(word, text):
             data_append(data, "inflection_of", t_arg(t, 1))
             data_append(data, "tags", "plural")
             data_append(data, "tags", "nominative")
-        elif name in ("plural of", "plural form of"):
+        elif name in ("plural of",
+                      "alternative plural of",
+                      "plural form of"):
             data_append(data, "inflection_of", t_arg(t, 1))
             data_append(data, "tags", "plural")
         elif name in ("singular of", "singular form of"):
@@ -1482,15 +1504,23 @@ def parse_sense(word, text):
             data_append(data, "tags", "state")
             data_append(data, "meronyms", t_arg(t, "capital"))
             data_append(data, "holonyms", "Brazil")
+        elif name in ("place:Brazil/capital",):
+            data_append(data, "tags", "place")
+            data_append(data, "tags", "city")
+            data_append(data, "tags", "capital")
+            data_append(data, "holonyms", "Brazil")
         elif name in ("place:Brazil/state capital",
                       "place:state capital of Brazil"):
             data_append(data, "tags", "place")
             data_append(data, "tags", "city")
             data_append(data, "holonyms", t_arg(t, "state"))
-        elif name in ("place:Brazil/municipality",):
+            data_append(data, "holonyms", "Brazil")
+        elif name in ("place:Brazil/municipality",
+                      "place:municipality of Brazil"):
             data_append(data, "tags", "place")
             data_append(data, "tags", "region")
             data_append(data, "holonyms", t_arg(t, "state"))
+            data_append(data, "holonyms", "Brazil")
         # Skip various templates in this processing.  We silence warnings
         # about unhandled tags for these.  (Many of them are handled
         # elsewhere.)
@@ -1554,7 +1584,7 @@ def parse_preamble(word, data, pos, text, p):
         # Also Warn about potentially incorrect templates for the
         # part-of-speech (common error in Wiktionary that should be corrected
         # there).
-        m = re.search("^head$|^[a-z][a-z][a-z]?-(plural noun|noun|verb|adj|adv|name|proper-noun|pron)(-|$)", name)
+        m = re.search("^head$|^[a-z][a-z][a-z]?-(plural noun|noun|verb|adj|adv|name|proper-noun|pron|phrase)(-|$)", name)
         if m:
             tagpos = m.group(1) or pos
             if ((tagpos not in template_allowed_pos_map or
@@ -1654,7 +1684,7 @@ def parse_pronunciation(word, data, text, p):
             elif name in ("inflection of", "l", "link", "m", "w", "W", "label",
                           "gloss", "zh-m", "zh-l", "ja-l",
                           "ux", "ant", "syn", "synonyms", "antonyms",
-                          "wikipedia",
+                          "wikipedia", "Wikipedia",
                           "alternative form of", "alt form",
                           "altform", "alt-form", "abb", "rareform",
                           "alter", "hyph", "honoraltcaps",
@@ -1664,10 +1694,10 @@ def parse_pronunciation(word, data, text, p):
                           "senseid", "defn", "ja-r", "ja-l",
                           "place:Brazil/state",
                           "place:Brazil/municipality",
-                          "place", "taxlink", "Wikipedia",
+                          "place", "taxlink",
                           "color panel", "pedlink", "vern", "prefix", "affix",
                           "suffix", "wikispecies", "ISBN", "slim-wikipedia",
-                          "swp", "comcatlite",
+                          "swp", "comcatlite", "forename",
                           "given name", "surname", "head"):
                 continue
             # Any templates matching these are silently ignored for
@@ -1814,7 +1844,7 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
             elif name in ("l", "link"):
                 add_linkage(kind, t_arg(t, 2))
             # Wikipedia links also suggest a linkage of the default kind
-            elif name in ("wikipedia", "w"):
+            elif name in ("wikipedia", "Wikipedia", "w"):
                 add_linkage(kind, t_arg(t, 1))
             # Japanese links seem to commonly use "ja-r" template.
             # Use the default linkage for them, and collect the
