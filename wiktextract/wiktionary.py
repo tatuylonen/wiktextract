@@ -681,6 +681,7 @@ template_allowed_pos_map = {
     "pron": ["pron", "noun"],
     "name": ["name", "noun", "proper-noun"],
     "adv": ["adv", "intj", "conj", "particle"],
+    "phrase": ["phrase"],
 }
 
 
@@ -820,6 +821,9 @@ def clean_value(title):
     title = re.sub(r"''+(([^']|'[^'])+?)''+", r"\1", title)
     # XXX should replace HTML entities (I've not seen them yet though)
     title = re.sub("&nbsp;", " ", title)
+    # This unicode quote seems to be used instead of apostrophe quite randomly
+    # (about 4% of apostrophes in English entries, some in Finnish entries).
+    title = re.sub("\u2019", "'", title)  # Note: no r"..." here!
     # Replace whitespace sequences by a single space.
     title = re.sub(r"\s+", " ", title)
     # Strip surrounding whitespace.
@@ -1384,6 +1388,7 @@ def parse_sense(word, text):
                        "2p": ["2", "plural"],
                        "3p": ["3", "plural"],
                        "p": ["plural"],
+                       "plural": ["plural"],
                        "s": ["singular"],
                        "pass": ["passive"],
                        "cond": ["conditional"],
@@ -2145,7 +2150,7 @@ def page_iter(word, text, ctx):
                 language = sectitle
                 ctx.language_counts[language] += 1
                 pos = None
-                base = {"word": word, "lang": language}
+                base = {"word": clean_value(word), "lang": language}
                 data = {}
                 datas = []
                 sectitle = ""
