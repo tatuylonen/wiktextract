@@ -533,6 +533,7 @@ clean_replace_map = {
     "B.C.": "B.C.",
     "A.D.": "A.D.",
     "AD": "AD",
+    "Latn-def": "latin character",
     "sumti": r"x\1",
     "inflection of": r"inflection of \1",
     "given name": r"\1 given name",
@@ -553,10 +554,11 @@ arg_re = r"\|(([^|{}]|\{\{[^}]*\}\})*)"
 # Matches more arguments and end of template
 args_end_re = r"(" + arg_re + r")*\}\}"
 
-# Regular expression for replacing templates by their arg1.  arg1 is \2
+# Regular expression for replacing templates by their arg1.  arg1 is \3
 clean_arg1_re = re.compile(r"(?s)\{\{(" +
                            "|".join(re.escape(x) for x in clean_arg1_tags) +
-                           r")" + arg_re + args_end_re)
+                           r")" + "(\|lang=[^}|]+)?" +
+                           arg_re + args_end_re)
 
 # Regular expression for replacing templates by their arg2.  arg2 is \4
 clean_arg2_re = re.compile(r"(?s)\{\{(" +
@@ -792,8 +794,11 @@ def clean_value(title):
         if v.find("\\") < 0:
             title = re.sub(r"\{\{" + re.escape(k) + r"\}\}", v, title)
         else:
+            v = re.sub(r"\\3", r"\\6", v)
+            v = re.sub(r"\\2", r"\\4", v)
+            v = re.sub(r"\\1", r"\\2", v)
             title = re.sub(r"\{\{" + re.escape(k) +
-                           r"((" + arg_re + r")*)\}\}",
+                           r"(" + arg_re + r")*\}\}",
                            v, title)
     # Replace tags by their arguments.  Note that they may be nested, so we
     # keep repeating this until there is no change.  The regexps can only
@@ -802,7 +807,7 @@ def clean_value(title):
         orig = title
         title = re.sub(clean_arg3_re, r"\6", title)
         title = re.sub(clean_arg2_re, r"\4", title)
-        title = re.sub(clean_arg1_re, r"\2", title)
+        title = re.sub(clean_arg1_re, r"\3", title)
         if title == orig:
             break
     # Remove any remaining templates.
@@ -826,6 +831,8 @@ def clean_value(title):
     title = re.sub("\u2019", "'", title)  # Note: no r"..." here!
     # Replace whitespace sequences by a single space.
     title = re.sub(r"\s+", " ", title)
+    # Remove whitespace before periods and commas etc
+    title = re.sub(r" ([.,;:!?)])", r"\1", title)
     # Strip surrounding whitespace.
     title = title.strip()
     return title
@@ -1039,15 +1046,15 @@ def parse_sense(word, text):
         elif name == "ux":
             data_append(data, "examples", (t_arg(t, 2), t_arg(t, 3)))
         # Additional "gloss" templates are added under "glosses"
-        elif name == "gloss":
-            gloss = t_arg(t, 1)
-            data_append(data, "glosses", gloss)
+        #elif name == "gloss":
+        #    gloss = t_arg(t, 1)
+        #    data_append(data, "glosses", gloss)
         # Various words have non-gloss definitions; we collect them under
         # "nonglosses".  For many purposes they might be treated similar to
         # glosses, though.
-        elif name in ("non-gloss definition", "n-g", "ngd", "non-gloss"):
-            gloss = t_arg(t, 1)
-            data_append(data, "nonglosses", gloss)
+        #elif name in ("non-gloss definition", "n-g", "ngd", "non-gloss"):
+        #    gloss = t_arg(t, 1)
+        #    data_append(data, "nonglosses", gloss)
         # The senseid template seems to have varied uses. Sometimes it contains
         # a Wikidata id Q<numbers>; at other times it seems to be something
         # else.  We collect them under "senseid".  XXX this needs more study
@@ -1540,7 +1547,9 @@ def parse_sense(word, text):
                       "mul-domino def",
                       "mul-cjk stroke-def",
                       "mul-semaphore-for",
-                      "Han char", "zh-only"):
+                      "Han char", "zh-only",
+                      "gloss",
+                      "non-gloss definition", "n-g", "ngd", "non-gloss"):
             continue
         # There are whole patterns of templates that we don't want warnings for.
         elif re.search(r"IPA|^RQ:|^R:|"
@@ -2533,3 +2542,7 @@ def parse_wiktionary(path, word_cb, capture_cb=None,
 
 # XXX test "Friday" - it has embedded template in Related terms (currently
 # handled wrong)
+
+# XXX Finnish ällös seems to leave [[w:Optative mood|optative]] in gloss ???
+
+# XXX Finnish binääri leaves binäärinen#Compounds in gloss

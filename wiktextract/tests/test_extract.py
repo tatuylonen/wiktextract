@@ -59,7 +59,8 @@ class WiktExtractTests(unittest.TestCase):
                                      translations=True,
                                      pronunciations=True,
                                      linkages=True,
-                                     compounds=True)
+                                     compounds=True,
+                                     redirects=True)
         print("Test data parsing complete")
         assert num_redirects > 0
         assert len(words) > 100
