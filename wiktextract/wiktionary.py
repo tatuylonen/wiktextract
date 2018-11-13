@@ -1139,10 +1139,30 @@ def parse_sense(word, text):
             data_append(data, "value", t_arg(t, 2))
         # SI units of measurement appear to have tags that identify them
         # as such.  Add the information under "unit" and tag them as "unit".
-        elif name in ("SI-unit", "SI-unit-abb", "SI-unit-abb2", "SI-unit-2",
-                      "SI-unit-np", "SI-unit-abbnp"):
-            data_append(data, "unit", t_vec(t))
+        elif name in ("SI-unit", "SI-unit-2",
+                      "SI-unit-np"):
+            print(word, name, template_args_to_dict(t))
+            data_append(data, "unit", template_args_to_dict(t))
             data_append(data, "tags", "unit")
+        elif name in ("SI-unit-abb", "SI-unit-abbnp"):
+            data_append(data, "unit", template_args_to_dict(t))
+            data_append(data, "tags", "unit")
+            mul = t_arg(t, 1)
+            base = t_arg(t, 2)
+            metric = t_arg(t, 3)
+            gloss = ("{}{}, a unit of measurement for {}"
+                     "".format(mul, base, metric))
+            data_append(data, "glosses", gloss)
+        elif name == "SI-unit-abb2":
+            data_append(data, "unit", template_args_to_dict(t))
+            data_append(data, "tags", "unit")
+            mul = t_arg(t, 1)
+            base = t_arg(t, 2)
+            base2 = t_arg(t, 3)
+            metric = t_arg(t, 4)
+            gloss = ("{}{}, a unit of measurement for {}"
+                     "".format(mul, base, metric))
+            data_append(data, "glosses", gloss)
         # There are various templates that links to other Wikimedia projects,
         # typically Wikipedia.  Record such links under "wikipedia".
         elif name in ("slim-wikipedia", "wikipedia", "wikispecies", "w", "W",
