@@ -225,6 +225,7 @@ ignored_templates = set([
     "translation only",
     "trans-mid",
     "trans-bottom",
+    "uncertain",
     "unk",
     "unsupported",
     "used in phrasal verbs",
@@ -1164,8 +1165,12 @@ def parse_sense(word, text):
         # There are even morse code sequences (and semaphore (flag)) positions
         # defined in the Translingual portion of Wiktionary.  Collect
         # morse code information under "morse_code".
-        elif name == "morse code for":
+        elif name in ("morse code for", "morse code of",
+                      "morse code abbreviation",
+                      "morse code prosign"):
             data_append(data, "morse_code", t_arg(t, 1))
+        elif name in ("mul-semaphore-for", "mul-semaphore for"):
+            data_append(data, "semaphore", t_arg(t, 1))
         # Some glosses identify the word as a character.  If so, tag it as
         # "character".
         elif (name == "Latn-def" or re.search("-letter$", name)):
@@ -1190,7 +1195,6 @@ def parse_sense(word, text):
                       "elongated form of", "alternative name of",
                       "uncommon spelling of",
                       "combining form of",
-                      "morse code of",
                       "caret notation of",
                       "alternative term for", "altspell"):
             data_append(data, "alt_of", t_arg(t, 1))
@@ -1546,7 +1550,6 @@ def parse_sense(word, text):
                       "mul-kanadef",
                       "mul-domino def",
                       "mul-cjk stroke-def",
-                      "mul-semaphore-for",
                       "Han char", "zh-only",
                       "gloss",
                       "non-gloss definition", "n-g", "ngd", "non-gloss"):
