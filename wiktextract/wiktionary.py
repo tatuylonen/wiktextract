@@ -551,7 +551,8 @@ clean_replace_map = {
 }
 
 # Note: arg_re contains two sets of parenthesis
-arg_re = r"\|(([^|{}]|\{\{[^}]*\}\})*)"
+arg_re = (r"(\|[-_a-zA-Z0-9]+=[^}|]+)*"
+          r"\|(([^|{}]|\{\{[^}]*\}\}|\[\[[^]]+\]\]|\[[^]]+\])*)")
 
 # Matches more arguments and end of template
 args_end_re = r"(" + arg_re + r")*\}\}"
@@ -559,7 +560,7 @@ args_end_re = r"(" + arg_re + r")*\}\}"
 # Regular expression for replacing templates by their arg1.  arg1 is \3
 clean_arg1_re = re.compile(r"(?s)\{\{(" +
                            "|".join(re.escape(x) for x in clean_arg1_tags) +
-                           r")" + "(\|lang=[^}|]+)?" +
+                           r")" +
                            arg_re + args_end_re)
 
 # Regular expression for replacing templates by their arg2.  arg2 is \4
@@ -796,19 +797,20 @@ def clean_value(title):
         if v.find("\\") < 0:
             title = re.sub(r"\{\{" + re.escape(k) + r"\}\}", v, title)
         else:
-            v = re.sub(r"\\3", r"\\6", v)
-            v = re.sub(r"\\2", r"\\4", v)
-            v = re.sub(r"\\1", r"\\2", v)
+            v = re.sub(r"\\2", r"\\7", v)
+            v = re.sub(r"\\1", r"\\4", v)
             title = re.sub(r"\{\{" + re.escape(k) +
-                           r"(" + arg_re + r")*\}\}",
+                           r"((" + arg_re + r")"
+                           r"(" + arg_re + r")?)?"
+                           r"\}\}",
                            v, title)
     # Replace tags by their arguments.  Note that they may be nested, so we
     # keep repeating this until there is no change.  The regexps can only
     # handle one level of nesting (i.e., one template inside another).
     while True:
         orig = title
-        title = re.sub(clean_arg3_re, r"\6", title)
-        title = re.sub(clean_arg2_re, r"\4", title)
+        title = re.sub(clean_arg3_re, r"\9", title)
+        title = re.sub(clean_arg2_re, r"\6", title)
         title = re.sub(clean_arg1_re, r"\3", title)
         if title == orig:
             break

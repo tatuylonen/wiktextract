@@ -36,6 +36,16 @@ class WiktExtractTests(unittest.TestCase):
         v = wiktionary.clean_value(v)
         self.assertEqual(v, "This is a female given name")
 
+    def test_cv_repl1_arg1(self):
+        v = "This is a {{given name|lang=fi|female}}"
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a female given name")
+
+    def test_cv_repl1_arg2(self):
+        v = "This is a {{given name|female|lang=fi}}"
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a female given name")
+
     def test_cv_arg1(self):
         v = "This is a {{w|test}}."
         v = wiktionary.clean_value(v)
@@ -141,8 +151,9 @@ class WiktExtractTests(unittest.TestCase):
         v = wiktionary.clean_value(v)
         self.assertEqual(v, "Run?")
 
-    def test_all(self):
+    def test_long(self):
         # Just parse through the data and make sure that we find some words
+        # This takes about 1.5 minutes.
 
         langs = collections.defaultdict(int)
         words = collections.defaultdict(int)
