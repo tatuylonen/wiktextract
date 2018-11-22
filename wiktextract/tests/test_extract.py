@@ -1,6 +1,7 @@
 import unittest
 import collections
 import wiktextract
+from wiktextract import wiktionary
 
 class WiktExtractTests(unittest.TestCase):
 
@@ -14,6 +15,131 @@ class WiktExtractTests(unittest.TestCase):
         assert "adv" in poses
         assert "num" in poses
         assert len(poses) < 50
+
+    def test_cv_plain(self):
+        v = "This is a test."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_comment(self):
+        v = "This <!--comment--> is a test."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_repl0(self):
+        v = "This is 1500 {{BC}}"
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is 1500 BC")
+
+    def test_cv_repl1(self):
+        v = "This is a {{given name|female}}"
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a female given name")
+
+    def test_cv_arg1(self):
+        v = "This is a {{w|test}}."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_arg2(self):
+        v = "This is a {{w|test article|test value}}."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test value.")
+
+    def test_cv_arg3(self):
+        v = "This is a {{w2|fi||test}}."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_arg_nest(self):
+        v = "This is a {{w2|fi||{{given name|male}}}}."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a male given name.")
+
+    def test_cv_unk(self):
+        v = "This is a {{unknown-asdxfa}} test."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_ref(self):
+        v = "This <ref>junk\nmore junk</ref> is a test."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_html(self):
+        v = "This <thispurportstobeatag> is a test."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_html2(self):
+        v = "This </thispurportstobeatag> is a test."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_link1(self):
+        v = "This is a [[test]]."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_link2(self):
+        v = "This is a [[w:foo|test]]."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_htmllink(self):
+        v = "This is a [http://ylonen.org test]."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_q2(self):
+        v = "This is a ''test''."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_q3(self):
+        v = "This is a '''test'''."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_nbsp(self):
+        v = "This is a&nbsp;test."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_gt(self):
+        v = "This is a &lt;test&gt;."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a <test>.")
+
+    def test_cv_gt(self):
+        v = "This is a t\u2019est."
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a t'est.")
+
+    def test_cv_sp(self):
+        v = "  This\nis \na\n   test.\t"
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a test.")
+
+    def test_cv_presp(self):
+        v = " This : is a test . "
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This: is a test.")
+
+    def test_cv_presp(self):
+        v = " This ; is a test , "
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This; is a test,")
+
+    def test_cv_excl(self):
+        v = " Run !\n"
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "Run!")
+
+    def test_cv_ques(self):
+        v = " Run ?\n"
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "Run?")
 
     def test_all(self):
         # Just parse through the data and make sure that we find some words

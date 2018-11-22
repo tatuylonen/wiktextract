@@ -5,6 +5,7 @@
 
 import re
 import bz2
+import html
 import collections
 from lxml import etree
 import wikitextparser
@@ -817,16 +818,17 @@ def clean_value(title):
     title = re.sub(r"(?s)<ref>.*?</ref>", "", title)
     # Remove any remaining HTML tags.
     title = re.sub(r"(?s)<[^>]+>", "", title)
-    # Replace links with [[...|...] by their only or second argument
-    title = re.sub(r"\[\[(([^]|]+?\|)?)([^]|]+?)\]\]", r"\3", title)
+    # Replace links with [[...|...]] by their only or second argument
+    title = re.sub(r"\[\[(([^]|]+\|)?)([^]|]+?)\]\]", r"\3", title)
     # Replace HTML links [url display] (with space) by the display value.
     title = re.sub(r"\[[^ ]+?\s+([^]]+?)\]", r"\1", title)
     # Replace remaining HTML links by the URL.
     title = re.sub(r"\[([^]]+)\]", r"\1", title)
     # Replace various empases (quoted text) by its value.
     title = re.sub(r"''+(([^']|'[^'])+?)''+", r"\1", title)
-    # XXX should replace HTML entities (I've not seen them yet though)
-    title = re.sub("&nbsp;", " ", title)
+    # Replace HTML entities
+    title = html.unescape(title)
+    title = re.sub("\xa0", " ", title)  # nbsp
     # This unicode quote seems to be used instead of apostrophe quite randomly
     # (about 4% of apostrophes in English entries, some in Finnish entries).
     title = re.sub("\u2019", "'", title)  # Note: no r"..." here!
@@ -1053,9 +1055,9 @@ def parse_sense(word, text):
         # Various words have non-gloss definitions; we collect them under
         # "nonglosses".  For many purposes they might be treated similar to
         # glosses, though.
-        #elif name in ("non-gloss definition", "n-g", "ngd", "non-gloss"):
-        #    gloss = t_arg(t, 1)
-        #    data_append(data, "nonglosses", gloss)
+        elif name in ("non-gloss definition", "n-g", "ngd", "non-gloss"):
+            gloss = t_arg(t, 1)
+            data_append(data, "nonglosses", gloss)
         # The senseid template seems to have varied uses. Sometimes it contains
         # a Wikidata id Q<numbers>; at other times it seems to be something
         # else.  We collect them under "senseid".  XXX this needs more study
