@@ -339,6 +339,7 @@ pos_map = {
     "verb": "verb",
     "verbal noun": "noun",
     "verbs": "verb",
+    "digit": "digit",   # I don't think this is actually used in Wiktionary
 }
 
 # Set of all possible parts-of-speech returned by wiktionary reading.
@@ -541,12 +542,12 @@ clean_replace_map = {
     "given name": r"\1 given name",
     "forename": r"\1 given name",
     "historical given name": r"\1 given name",
-    "surname": r"\1 surname",
-    "taxon": r"a taxonomic \1",
-    "SI-unit": "a unit of measurement",
-    "SI-unit-abb2": "a unit of measurement",
-    "SI-unit-2": "a unit of measurement",
-    "SI-unit-np": "a unit of measurement",
+    "surname": r"surname",
+    "taxon": r"taxonomic \1",
+    "SI-unit": "unit of measurement",
+    "SI-unit-abb2": "unit of measurement",
+    "SI-unit-2": "unit of measurement",
+    "SI-unit-np": "unit of measurement",
     "gloss": r"(\1)",
 }
 
@@ -795,13 +796,15 @@ def clean_value(title):
     # Replace tags for which we have replacements.
     for k, v in clean_replace_map.items():
         if v.find("\\") < 0:
-            title = re.sub(r"\{\{" + re.escape(k) + r"\}\}", v, title)
+            title = re.sub(r"\{\{" + re.escape(k) +
+                           r"(" + arg_re + r")*\}\}", v, title)
         else:
             v = re.sub(r"\\2", r"\\7", v)
             v = re.sub(r"\\1", r"\\4", v)
             title = re.sub(r"\{\{" + re.escape(k) +
-                           r"((" + arg_re + r")"
-                           r"(" + arg_re + r")?)?"
+                           r"((" + arg_re + r")" +
+                           r"(" + arg_re + r")?)?" +
+                           r"(" + arg_re + r")*" +
                            r"\}\}",
                            v, title)
     # Replace tags by their arguments.  Note that they may be nested, so we

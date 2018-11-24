@@ -46,6 +46,16 @@ class WiktExtractTests(unittest.TestCase):
         v = wiktionary.clean_value(v)
         self.assertEqual(v, "This is a female given name")
 
+    def test_cv_repl1_surname(self):
+        v = "This is a {{surname|from=nickname|lang=fi}}"
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "This is a surname")
+
+    def test_cv_repl1_taxon(self):
+        v = "{{taxon|genus|family|Talpidae|[[insectivore]] mammals; typical [[mole]]s}}"
+        v = wiktionary.clean_value(v)
+        self.assertEqual(v, "taxonomic genus")
+
     def test_cv_arg1(self):
         v = "This is a {{w|test}}."
         v = wiktionary.clean_value(v)
