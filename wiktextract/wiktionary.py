@@ -821,6 +821,9 @@ def clean_value(title):
     title = re.sub(r"\{\{[^}]+\}\}", "", title)
     # Remove references (<ref>...</ref>).
     title = re.sub(r"(?s)<ref>.*?</ref>", "", title)
+    # Replace <br/> by comma space (it is used to express alternatives in some
+    # declensions)
+    title = re.sub(r"(?s)<br/?>", ", ", title)
     # Remove any remaining HTML tags.
     title = re.sub(r"(?s)<[^>]+>", "", title)
     # Replace links with [[...|...]] by their only or second argument
@@ -837,6 +840,8 @@ def clean_value(title):
     # This unicode quote seems to be used instead of apostrophe quite randomly
     # (about 4% of apostrophes in English entries, some in Finnish entries).
     title = re.sub("\u2019", "'", title)  # Note: no r"..." here!
+    # Replace strange unicode quotes with normal quotes
+    title = re.sub(r"”", '"', title)
     # Replace whitespace sequences by a single space.
     title = re.sub(r"\s+", " ", title)
     # Remove whitespace before periods and commas etc
@@ -910,7 +915,7 @@ def template_args_to_dict(t):
     for x in t.arguments:
         name = x.name.strip()
         value = x.value
-        ht[name] = value
+        ht[name] = clean_value(value)
     ht["template_name"] = t.name.strip()
     return ht
 
