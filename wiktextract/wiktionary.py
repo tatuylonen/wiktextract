@@ -539,6 +539,7 @@ clean_replace_map = {
     "Latn-def": "latin character",
     "sumti": r"x\1",
     "inflection of": r"inflection of \1",
+    "synonym of": r"synonym of \1",
     "given name": r"\1 given name",
     "forename": r"\1 given name",
     "historical given name": r"\1 given name",
