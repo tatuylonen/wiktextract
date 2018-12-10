@@ -1122,15 +1122,20 @@ def parse_sense(word, text):
             data_extend(data, "tags", t_vec(t)[1:])
         # Many nouns that are species and other organism types have taxon
         # links using various templates.  Store those links under
-        # "taxon" without trying to interpret them here.
-        elif name in ("taxlink", "taxon", "taxlinkwiki"):
+        # "taxon" (try to extract the species name).
+        elif name in ("taxlink", "taxlinkwiki"):
+            x = t_arg(t, 1)
+            m = re.search(r"(.*) (subsp\.|f.)", x)
+            if m:
+                x = m.group(1)
             data_append(data, "taxon", t_vec(t))
             data_append(data, "tags", "organism")
-        # Many organisms have vernacular names.  If such is specified,
-        # mark the word sense as an alternative term for the same and tag it
-        # as an "organism".
+        elif name == "taxon":
+            data_append(data, "taxon", t_arg(t, 3))
+            data_append(data, "tags", "organism")
+        # Many organisms have vernacular names.
         elif name == "vern":
-            data_append(data, "alt_of", t_arg(t, 1))
+            data_append(data, "taxon", t_arg(t, 1))
             data_append(data, "tags", "organism")
         # Many colors have a color panel that defines the RGB value of the
         # color.  This provides a physical reference for what the color means
