@@ -426,7 +426,6 @@ clean_arg1_tags = [
     "imperative of",
     "informal form of"
     "informal spelling of",
-    "initialism of",
     "ja-l",
     "ja-r",
     "lenition of",
@@ -539,6 +538,7 @@ clean_replace_map = {
     "Latn-def": "latin character",
     "sumti": r"x\1",
     "inflection of": r"inflection of \1",
+    "initialism of": r"initialism of \1",
     "synonym of": r"synonym of \1",
     "given name": r"\1 given name",
     "forename": r"\1 given name",
@@ -1278,16 +1278,16 @@ def parse_sense(word, text):
         # (there are many ways to do this!), include "alt_of" and tag it
         # as an "abbreviation".  Also, if it includes wikipedia links,
         # include those under "wikipedia".
-        elif name in ("abbreviation of", "short for", "initialism of",
-                      "acronym of", "contraction of", "clipping of",
-                      "clip", "clipping", "short form of", "ellipsis of",
-                      "ellipse of", "short of", "abbreviation", "abb"):
-            for x in t_vec(t):
-                if x.startswith("w:"):
-                    x = x[2:]
-                    data_append(data, "wikipedia", x)
-                data_append(data, "alt_of", x)
-                data_append(data, "tags", "abbreviation")
+        elif name in ("initialism of", "abbreviation of", "short for",
+                      "acronym of", "clipping of", "clip", "clipping",
+                      "short form of", "ellipsis of", "ellipse of",
+                      "short of", "abbreviation", "abb", "contraction of"):
+            x = t_arg(t, 1)
+            if x.startswith("w:"):
+                x = x[2:]
+                data_append(data, "wikipedia", x)
+            data_append(data, "alt_of", x)
+            data_append(data, "tags", "abbreviation")
         elif name in ("only used in", "only in"):
             # This appears to be used in "man" for "man enough"
             data_append(data, "only_in", t_arg(t, 1))
