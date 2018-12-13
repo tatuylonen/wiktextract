@@ -8,7 +8,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 setup(name="wiktextract",
-      version="0.1.7",
+      version="0.2.0",
       description="Wiktionary dump file parser and multilingual data extractor",
       long_description=long_description,
       long_description_content_type="text/markdown",
