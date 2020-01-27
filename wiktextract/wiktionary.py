@@ -578,7 +578,7 @@ clean_replace_map = {
     "init of": r"initialism of \1",
     "synonym of": r"synonym of \1",
     "syn of": r"synonym of \1",
-    "given name": r"(given name)",
+    "given name": r"\1 given name",
     "forename": r"\1 given name",
     "historical given name": r"\1 given name",
     "surname": r"surname",
@@ -1262,7 +1262,7 @@ def parse_sense(word, text):
         elif (name == "Latn-def" or re.search("-letter$", name)):
               if not gloss:
                   data_append(data, "tags", "character")
-        elif name ("translation hub", "translation only"):
+        elif name in ("translation hub", "translation only"):
             data_append(data, "tags", "translation_hub")
         # There are various ways to specify that a word is a synonym or
         # alternative spelling/form of another word.  We record these all
@@ -1768,8 +1768,9 @@ def parse_pronunciation(word, data, text, p):
                 data_extend(variant, "tags", clean_quals(t_vec(t)[1:]))
             # Extact IPA pronunciation specification under "ipa".
             elif name in ("IPA", "ipa"):
-                data_append(variant, "ipa",
-                            (t_arg(t, "lang"), t_arg(t, 1)))
+                vec = t_vec(t)
+                for ipa in vec[1:]:
+                    data_append(variant, "ipa", (vec[0], ipa))
             # Extract special variants of the IPA template.  Store these as
             # dictionaries under "special_ipa".
             elif re.search("IPA", name):
@@ -2076,7 +2077,7 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
                           "col4", "col4-u", "col5", "col5-u"):
                 qualifiers = []
                 sense_text = t_arg(t, "title")
-                for x in t_vec(t)[2:]:
+                for x in t_vec(t)[1:]:
                     add_linkage(kind, x)
             # These templates seem to be frequently used for things that
             # aren't particularly useful for linking.
