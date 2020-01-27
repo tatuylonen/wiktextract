@@ -5,10 +5,14 @@ This is a utility and Python package for for extracing data from Wiktionary.
 ## Overview
 
 This is a Python package and tool for extracting information from
-Wiktionary data dumps.  It reads the
-``enwiktionary-<date>-pages-articles.xml.bz2`` file (or corresponding
-files from other wiktionaries) and returns Python dictionaries
-containing most of the information in Wiktionary.
+English Wiktionary (enwiktionary) data dumps.  Note that the English
+Wiktionary contains extensive dictionaries and inflectional
+information for many languages, not just English.  Only its glosses
+and internal tagging are in English.
+
+This tool reads the ``enwiktionary-<date>-pages-articles.xml.bz2``
+file and outputs JSON-format dictionaries containing most of the
+information in Wiktionary.
 
 This tool extracts glosses, parts-of-speech, declension/conjugation
 information when available, translations for all languages when
@@ -27,7 +31,15 @@ However, so far it has mostly been tested with English and Finnish,
 and to some extent German and Spanish.  Changes to extract information
 for any additional languages are likely to be small.  Basic
 information extraction most likely works out of the box for any
-language.
+language, but you may need to tweak the code to extract inflection or
+pronunciation information for other languages.
+
+There are currently no plans to support reading non-English
+wiktionaries, even though many other languages can also be extracted
+from ``enwiktionary``.  Adding support for other Wiktionaries would
+require extensive work and maintenance, as each Wiktionary uses a
+different tagging scheme.  Again, the English Wiktionary contains a
+good coverage of many languages.
 
 This utility will be useful for many natural language processing,
 semantic parsing, machine translation, and language generation
@@ -281,6 +293,12 @@ This package depends on the following other packages:
 
 * [lxml](https://lxml.de)
 * [wikitextparser](https://pypi.org/project/WikiTextParser/)
+
+## Related tools
+
+Several other tools also exist for parsing Wiktionaries.  These
+include [Dbnary](http://kaiko.getalp.org/about-dbnary/) and
+[Wikiparse](https://github.com/frankier/wikiparse).
 
 ## Contributing
 

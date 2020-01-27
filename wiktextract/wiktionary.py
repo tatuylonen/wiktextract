@@ -1,7 +1,7 @@
 # Wiktionary parser for extracting a lexicon and various other information
 # from wiktionary.
 #
-# Copyright (c) 2018 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2018-2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
 import bz2
@@ -60,6 +60,7 @@ ignored_templates = set([
     "ante",
     "attention",
     "attn",
+    "back-form",
     "bor",
     "borrowed",
     "bottom",
@@ -72,6 +73,7 @@ ignored_templates = set([
     "circa2",
     "cite",
     "cite book",
+    "Cite book",
     "Cite news",
     "cite news",
     "cite-book",
@@ -87,6 +89,18 @@ ignored_templates = set([
     "cog",
     "col-top",
     "col-bottom",
+    "col",
+    "col-u",
+    "col1",
+    "col1-u",
+    "col2",
+    "col2-u",
+    "col3",
+    "col3-u",
+    "col4",
+    "col4-u",
+    "col5",
+    "col5-u",
     "datedef",
     "def-date",
     "defdate",
@@ -122,6 +136,7 @@ ignored_templates = set([
     "hyp-mid3",
     "hyp-bottom3",
     "hyp-bottom",
+    "indtr",
     "inh",
     "inherited",
     "interwiktionary",
@@ -133,12 +148,15 @@ ignored_templates = set([
     "list",
     "ll",
     "lookfrom",
+    "Lookfrom",
     "m",
     "mention",
+    "mid",
     "mid2",
     "mid3",
     "mid4",
     "mid4",
+    "mid5",
     "middot",
     "multiple images",
     "nb...",
@@ -158,6 +176,8 @@ ignored_templates = set([
     "picdiclabel/new",
     "pos_v",
     "post",
+    "prefixlanglemma",
+    "punctuation",
     "quote-book",
     "quote-journal",
     "quote-magazine",
@@ -183,6 +203,7 @@ ignored_templates = set([
     "rfc-tsort",
     "rfc-sense",
     "rfcite-sense",
+    "rfclarify",
     "rfd-redundant",
     "rfd-sense",
     "rfdate",
@@ -220,10 +241,13 @@ ignored_templates = set([
     "t-check",
     "t+check",
     "table:colors/fi",
+    "tea room sense",
     "top2",
     "top3",
     "top4",
+    "top5",
     "translation only",
+    "translation hub",
     "trans-mid",
     "trans-bottom",
     "uncertain",
@@ -352,17 +376,22 @@ clean_arg1_tags = [
     "Br. English form of",
     "W",
     "Wikipedia",
+    "wtorw",
     "abb",
+    "abbr of",
     "abbreviation of",
     "abbreviation",
     "acronym of",
     "agent noun of",
+    "alt case",
     "alt form of",
     "alt form",
     "alt form",
     "alt-form",
+    "alt sp",
     "alt-sp",
     "altcaps",
+    "alter",
     "alternate form of",
     "alternate spelling of",
     "alternative capitalisation of",
@@ -378,6 +407,7 @@ clean_arg1_tags = [
     "altform",
     "altspell",
     "altspelling",
+    "aphetic form of",
     "apocopic form of",
     "archaic form of",
     "archaic spelling of",
@@ -399,6 +429,7 @@ clean_arg1_tags = [
     "ellipse of",
     "elongated form of",
     "en-archaic second-person singular of",
+    "en-archaic second-person singular past of",
     "en-archaic third-person singular of",
     "en-comparative of",
     "en-irregular plural of",
@@ -428,6 +459,7 @@ clean_arg1_tags = [
     "informal spelling of",
     "ja-l",
     "ja-r",
+    "keyword",
     "lenition of",
     "masculine plural of",
     "masculine singular of",
@@ -444,9 +476,11 @@ clean_arg1_tags = [
     "nominative plural of",
     "non-gloss definition",
     "non-gloss",
+    "non gloss definition",
     "nonstandard form of",
     "nonstandard spelling of",
     "nowrap",
+    "obs sp",
     "obsolete form of",
     "obsolete spelling of",
     "obsolete typography of",
@@ -489,6 +523,7 @@ clean_arg1_tags = [
     "taxlinknew",
     "uncommon spelling of",
     "unsupported",
+    "upright",
     "verb",
     "vern",
     "w",
@@ -538,9 +573,12 @@ clean_replace_map = {
     "Latn-def": "latin character",
     "sumti": r"x\1",
     "inflection of": r"inflection of \1",
+    "infl of": r"inflection of \1",
     "initialism of": r"initialism of \1",
+    "init of": r"initialism of \1",
     "synonym of": r"synonym of \1",
-    "given name": r"\1 given name",
+    "syn of": r"synonym of \1",
+    "given name": r"(given name)",
     "forename": r"\1 given name",
     "historical given name": r"\1 given name",
     "surname": r"surname",
@@ -550,6 +588,7 @@ clean_replace_map = {
     "SI-unit-2": "unit of measurement",
     "SI-unit-np": "unit of measurement",
     "gloss": r"(\1)",
+    "gl": r"(\1)",
 }
 
 # Note: arg_re contains two sets of parenthesis
@@ -688,7 +727,7 @@ template_allowed_pos_map = {
     "pron": ["pron", "noun"],
     "name": ["name", "noun", "proper-noun"],
     "adv": ["adv", "intj", "conj", "particle"],
-    "phrase": ["phrase"],
+    "phrase": ["phrase", "noun phrase", "verb phrase", "prep phrase"],
 }
 
 
@@ -946,7 +985,7 @@ def clean_quals(vec):
         # actually modify the following value.  We combine them with the
         # following value using a space.
         while (i < len(vec) - 1 and
-               vec[-1] in ("usually", "often", "rarely", "strongly",
+               vec[-1] in ("usually", "often", "rarely", "strongly", "now",
                            "extremely", "including",
                            "chiefly", "sometimes", "mostly", "with", "now")):
             x += " " + vec[i]
@@ -1050,7 +1089,7 @@ def parse_sense(word, text):
         # they also seem to be sometimes used for other purposes, so this
         # may result in extra tags that perhaps should be elsewhere.
         elif name in ("lb", "label", "context", "term-context", "term-label",
-                      "lbl", "tlb", "tcx"):
+                      "lbl", "tlb", "tcx", "1"):
             data_extend(data, "tags", clean_quals(t_vec(t)[1:]))
         # Qualifiers are pretty clear; they provide useful information about
         # the word sense, such as field of study, dialect, or usage notes.
@@ -1066,7 +1105,8 @@ def parse_sense(word, text):
         # Various words have non-gloss definitions; we collect them under
         # "nonglosses".  For many purposes they might be treated similar to
         # glosses, though.
-        elif name in ("non-gloss definition", "n-g", "ngd", "non-gloss"):
+        elif name in ("non-gloss definition", "n-g", "ngd", "non-gloss",
+                      "non gloss definition"):
             gloss = t_arg(t, 1)
             data_append(data, "nonglosses", gloss)
         # The senseid template seems to have varied uses. Sometimes it contains
@@ -1096,15 +1136,24 @@ def parse_sense(word, text):
         elif name in ("given name",
                       "forename",
                       "historical given name"):
-            gender = t_arg(t, 1)
-            data_extend(data, "tags", ["given name", "organism"])
-            if gender in ("male", "female", "unisex"):
-                data_append(data, "tags", gender)
-                data_append(data, "tags", "person")
-            elif gender == "male or female":
-                pass
-            elif gender:
-                print(word, "PARSE_SENSE: unrecognized gender", repr(gender))
+            for k, v in template_args_to_dict(t).items():
+                if k in ("template_name", "usage", "f", "var", "var2",
+                         "from", "from2",
+                         "diminutive", "dim", "dim2", "dim3", "dim4", "dim5",
+                         "dim6", "dim7", "dim8", "eq", "A", "3"):
+                    continue
+                if v == "en" or (k == "1" and len(v) <= 3):
+                    continue
+                if v in ("male", "female", "unisex", "male_or_female"):
+                    if v == "make_or_female":
+                        data_append(data, "tags", "female")
+                        data_append(data, "tags", "male")
+                    else:
+                        data_append(data, "tags", v)
+                    data_append(data, "tags", "person")
+                    continue
+                print(word, "PARSE_SENSE: unrecognized gender",
+                      repr(k), "=", repr(v), "in", str(t))
         # Surnames are also often tagged as such, and we tag the sense
         # with "surname" and "person".
         elif name == "surname":
@@ -1159,7 +1208,6 @@ def parse_sense(word, text):
         # as such.  Add the information under "unit" and tag them as "unit".
         elif name in ("SI-unit", "SI-unit-2",
                       "SI-unit-np"):
-            print(word, name, template_args_to_dict(t))
             data_append(data, "unit", template_args_to_dict(t))
             data_append(data, "tags", "unit")
         elif name in ("SI-unit-abb", "SI-unit-abbnp"):
@@ -1185,7 +1233,7 @@ def parse_sense(word, text):
         # typically Wikipedia.  Record such links under "wikipedia".
         elif name in ("slim-wikipedia", "wikipedia", "wikispecies", "w", "W",
                       "swp", "pedlink", "specieslink", "comcatlite",
-                      "Wikipedia", "taxlinknew"):
+                      "Wikipedia", "taxlinknew", "wtorw"):
             v = t_arg(t, 1)
             if not v:
                 v = word
@@ -1214,10 +1262,12 @@ def parse_sense(word, text):
         elif (name == "Latn-def" or re.search("-letter$", name)):
               if not gloss:
                   data_append(data, "tags", "character")
+        elif name ("translation hub", "translation only"):
+            data_append(data, "tags", "translation_hub")
         # There are various ways to specify that a word is a synonym or
         # alternative spelling/form of another word.  We record these all
         # under "alt_of".
-        elif name in ("synonym of", "altname", "synonym",
+        elif name in ("synonym of", "syn of", "altname", "synonym",
                       "alternative form of", "alt form", "alt form of",
                       "alternative spelling of", "aspirate mutation of",
                       "alternate spelling of", "altspelling", "standspell",
@@ -1226,16 +1276,19 @@ def parse_sense(word, text):
                       "alt form", "altform", "alt-form",
                       "apocopic form of", "altcaps",
                       "alternative name of", "honoraltcaps",
-                      "alternative capitalisation of",
+                      "honor alt case",
+                      "alternative capitalisation of", "alt case",
                       "alternative capitalization of", "alternate form of",
-                      "alternative case form of", "alt-sp",
+                      "alternative case form of", "alt-sp", "alt sp",
                       "standard form of", "alternative typography of",
                       "elongated form of", "alternative name of",
-                      "uncommon spelling of",
+                      "uncommon spelling of", "city nickname",
                       "combining form of",
                       "caret notation of",
-                      "alternative term for", "altspell"):
+                      "alternative term for", "altspell", "alter"):
             data_append(data, "alt_of", t_arg(t, 1))
+        elif name in ("synonyms",):
+            data_append(data, "alt_of", t_arg(t, 2))
         elif name in ("Br. English form of",):
             data_append(data, "alt_of", t_arg(t, 1))
             data_append(data, "tags", "british")
@@ -1250,7 +1303,7 @@ def parse_sense(word, text):
             data_append(data, "tags", "spoken")
         # If the gloss is marked as an obsolete/archaic spelling,
         # include "alt_of" and tag the gloss as "archaic".
-        elif name in ("obsolete spelling of", "obsolete form of",
+        elif name in ("obsolete spelling of", "obsolete form of", "obs sp",
                       "obsolete typography of", "rareform",
                       "superseded spelling of", "former name of",
                       "archaic spelling of", "dated spelling of",
@@ -1283,8 +1336,10 @@ def parse_sense(word, text):
         # (there are many ways to do this!), include "alt_of" and tag it
         # as an "abbreviation".  Also, if it includes wikipedia links,
         # include those under "wikipedia".
-        elif name in ("initialism of", "abbreviation of", "short for",
+        elif name in ("initialism of", "init of",
+                      "abbreviation of", "abbr of", "short for",
                       "acronym of", "clipping of", "clip", "clipping",
+                      "clip of", "aphetic form of",
                       "short form of", "ellipsis of", "ellipse of",
                       "short of", "abbreviation", "abb", "contraction of"):
             x = t_arg(t, 1)
@@ -1299,7 +1354,7 @@ def parse_sense(word, text):
         # This tag indicates the word is an inflection of another word, but
         # in a complicated way that we won't try to parse here.  We include
         # the information under "complex_inflection_of".
-        elif name == "inflection of":
+        elif name in ("inflection of", "infl of"):
             data_append(data, "complex_inflection_of", template_args_to_dict(t))
         # There are many templates that indicate a word is an inflected form
         # of another word.  Such tags are handled here.  For all of them,
@@ -1330,6 +1385,9 @@ def parse_sense(word, text):
         elif name == "feminine noun of":
             data_append(data, "inflection_of", t_arg(t, 1))
             data_append(data, "tags", "feminine")
+        elif name == "verbal noun of":
+            data_append(data, "inflection_of", t_arg(t, 1))
+            data_append(data, "tags", "verbal_noun")
         elif name == "masculine singular of":
             data_append(data, "inflection_of", t_arg(t, 1))
             data_append(data, "tags", "masculine")
@@ -1341,7 +1399,8 @@ def parse_sense(word, text):
         elif name == "feminine of":
             data_append(data, "inflection_of", t_arg(t, 1))
             data_append(data, "tags", "feminine")
-        elif name in ("present participle of", "gerund of"):
+        elif name in ("present participle of", "gerund of",
+                      "en-ing form of"):
             data_append(data, "inflection_of", t_arg(t, 1))
             data_append(data, "tags", "participle")
             data_append(data, "tags", "present")
@@ -1399,6 +1458,9 @@ def parse_sense(word, text):
         elif name == "en-archaic second-person singular of":
             data_append(data, "inflection_of", t_arg(t, 1))
             data_extend(data, "tags", ["singular", "archaic", "present", "2"])
+        elif name == "en-archaic second-person singular past of":
+            data_append(data, "inflection_of", t_arg(t, 1))
+            data_extend(data, "tags", ["singular", "archaic", "past", "2"])
         elif name == "second-person singular of":
             data_append(data, "inflection_of", t_arg(t, 1))
             data_extend(data, "tags", ["singular", "present", "2"])
@@ -1580,16 +1642,18 @@ def parse_sense(word, text):
         # elsewhere.)
         elif name in ("audio", "audio-pron",
                       "IPA", "ipa", "a", "accent", "l", "link", "m",
-                      "zh-m", "zh-l", "ja-l", "sumti",
+                      "zh-m", "zh-l", "ja-l", "ja-def", "sumti", "ko-l",
                       "alter", "ISBN", "syn",
                       "hyph", "hyphenation", "ja-r", "ja-l", "homophones",
                       "pinyin reading of", "enPR",
                       "mul-kangxi radical-def", "speciesabbrev",
+                      "mul-shuowen radical-def",
                       "mul-kanadef",
                       "mul-domino def",
                       "mul-cjk stroke-def",
                       "Han char", "zh-only",
-                      "gloss",
+                      "gloss", "gl",
+                      "upright", "tea room sense",
                       "non-gloss definition", "n-g", "ngd", "non-gloss"):
             continue
         # There are whole patterns of templates that we don't want warnings for.
@@ -1597,6 +1661,8 @@ def parse_sense(word, text):
                        r"-romanization$|-romanji$|romanization of$",
                        name):
             continue
+        elif name == "hot sense":
+            data_append(data, "tags", "hot_sense")
         # Otherwise warn about an unhandled template.  It is normal to get
         # a few of these warnings whenever this is run; such templates may
         # later be added to the silencing list above or proper handling may
@@ -1699,7 +1765,6 @@ def parse_pronunciation(word, data, text, p):
                 data_extend(variant, "tags", t_vec(t))
             elif name in ("lb", "context",
                           "term-context", "tcx", "term-label", "tlb", "i"):
-                print(word, "Pronunciation qualifier:", str(t))
                 data_extend(variant, "tags", clean_quals(t_vec(t)[1:]))
             # Extact IPA pronunciation specification under "ipa".
             elif name in ("IPA", "ipa"):
@@ -1737,7 +1802,7 @@ def parse_pronunciation(word, data, text, p):
             # These templates are silently ignored for pronunciation information
             # collection purposes.
             elif name in ("inflection of", "l", "link", "m", "w", "W", "label",
-                          "gloss", "zh-m", "zh-l", "ja-l",
+                          "gloss", "zh-m", "zh-l", "ja-l", "wtorw",
                           "ux", "ant", "syn", "synonyms", "antonyms",
                           "wikipedia", "Wikipedia",
                           "alternative form of", "alt form",
@@ -1825,7 +1890,7 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
             if v.endswith("."):
                 v = v[:-1]
             v = v.strip()
-            if not v:
+            if v in ("", "en",):
                 return
             key = (kind, v, sense_text, tuple(sorted(qualifiers)))
             if key in added:
@@ -1971,7 +2036,8 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
             # XXX is this semantic meaning always clear, or are these also used
             # in other linkage subsections for just formatting purposes?
             elif name in ("der5", "der4", "der3", "der2", "der1", "zh-der",
-                          "der5-u", "der4-u", "der3-u", "der2-u"):
+                          "der5-u", "der4-u", "der3-u", "der2-u",
+                          "derived terms", "rootsee", "prefixsee"):
                 qualifiers = []
                 sense_text = t_arg(t, "title")
                 for x in t_vec(t):
@@ -1997,7 +2063,7 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
                 sense_text = t_arg(t, 1)
                 kind = "hyponym"
             elif name in ("der-top", "der-top2", "der-top3", "der-top4",
-                          "der-top5"):
+                          "der-top5", "der top", "der bottom"):
                 qualifiers = []
                 sense_text = t_arg(t, 1)
                 kind = "derived"
@@ -2006,11 +2072,18 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
                           "rel-bottom3", "rel-bottom4", "rel-bottom5"):
                 qualifiers = []
                 sense_text = None
+            elif name in ("col1", "col1-u", "col2", "col2-u", "col3", "col3-u",
+                          "col4", "col4-u", "col5", "col5-u"):
+                qualifiers = []
+                sense_text = t_arg(t, "title")
+                for x in t_vec(t)[2:]:
+                    add_linkage(kind, x)
             # These templates seem to be frequently used for things that
             # aren't particularly useful for linking.
             elif name in ("t", "t+", "ux", "trans-top", "w", "pedlink",
                           "affixes", "ISBN", "specieslite", "projectlink",
-                          "wikispecies", "comcatlite", "wikidata"):
+                          "wikispecies", "comcatlite", "wikidata",
+                          "mid5", "top5"):
                 continue
             # Silently skip any templates matching these.
             elif re.search("^list:|^R:", name):
