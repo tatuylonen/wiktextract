@@ -647,6 +647,7 @@ clean_replace_map = {
     "de-umlautless spelling of": ["umlautless spelling of {arg1}"],
     "pt-obsolute-hellenism": ["obsolete hellenism of {arg1}"],
     "pt-obsolute hellenism": ["obsolete hellenism of {arg1}"],
+    "mul-semaphore for": ["semaphore for {arg1}"],
     "diminutive plural of": ["diminutive plural of {arg2}"],
     "blend of": ["blend of {arg2}"],
     #"pt-superseded-silent-letter-1990":
