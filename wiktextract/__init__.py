@@ -2,7 +2,13 @@
 #
 # Copyright (c) 2018-2020 Tatu Ylonen.  See LICENSE and https://ylonen.org
 
-from wiktextract.wiktionary import parse_wiktionary, PARTS_OF_SPEECH
+from wiktextract.wiktionary import parse_wiktionary
 from wiktextract import wiktlangs
+from wiktextract.page import WiktionaryConfig, PARTS_OF_SPEECH, clean_value
 
-__all__ = ("parse_wiktionary", "wiktlangs", "PARTS_OF_SPEECH")
+__all__ = (
+    "WiktionaryConfig",
+    "parse_wiktionary",
+    "wiktlangs",
+    "PARTS_OF_SPEECH",
+)

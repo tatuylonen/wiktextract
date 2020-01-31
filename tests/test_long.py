@@ -1,7 +1,7 @@
 import unittest
 import collections
 import wiktextract
-from wiktextract import wiktionary
+from wiktextract.wiktionary import WiktionaryConfig, parse_wiktionary
 
 class LongTests(unittest.TestCase):
 
@@ -44,14 +44,17 @@ class LongTests(unittest.TestCase):
 
         path = "tests/test-pages-articles.xml.bz2"
         print("Parsing test data")
-        wiktextract.parse_wiktionary(path, word_cb,
-                                     languages=["English", "Finnish",
-                                                "Translingual"],
-                                     translations=True,
-                                     pronunciations=True,
-                                     linkages=True,
-                                     compounds=True,
-                                     redirects=True)
+        config = WiktionaryConfig(capture_languages=["English", "Finnish",
+                                                     "Spanish", "German",
+                                                     "Chinese", "Japanese",
+                                                     "Italian", "Portuguese",
+                                                     "Translingual"],
+                                  capture_translations=True,
+                                  capture_pronunciation=True,
+                                  capture_linkages=True,
+                                  capture_compounds=True,
+                                  capture_redirects=True)
+        ctx = parse_wiktionary(path, config, word_cb, None)
         print("Test data parsing complete")
         assert num_redirects > 0
         assert len(words) > 100

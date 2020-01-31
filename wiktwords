@@ -13,7 +13,7 @@ import json
 import hashlib
 import argparse
 import wiktextract
-from wiktextract import wiktlangs
+from wiktextract import wiktlangs, WiktionaryConfig
 
 
 # Pages whose titles have any of these prefixes are ignored.
@@ -163,17 +163,16 @@ if __name__ == "__main__":
     def capture_cb(title, text):
         return capture_page(title, text, args.pages_dir)
 
+    config = WiktionaryConfig(capture_languages=args.language,
+                              capture_translations=args.translations,
+                              capture_pronunciation=args.pronunciations,
+                              capture_linkages=args.linkages,
+                              capture_compounds=args.compounds,
+                              capture_redirects=args.redirects)
+
     try:
-        ctx = wiktextract.parse_wiktionary(
-            args.path,
-            word_cb,
-            capture_cb,
-            languages=args.language,
-            pronunciations=args.pronunciations,
-            translations=args.translations,
-            linkages=args.linkages,
-            compounds=args.compounds,
-            redirects=args.redirects)
+        ctx = wiktextract.parse_wiktionary(args.path, config, word_cb,
+                                           capture_cb)
     finally:
         if out_path and out_path != "-":
             out_f.close()
@@ -188,7 +187,7 @@ if __name__ == "__main__":
     if args.statistics:
         print("")
         print("LANGUAGE COUNTS")
-        for k, cnt in sorted(ctx.language_counts.items(),
+        for k, cnt in sorted(config.language_counts.items(),
                              key=lambda x: -x[1]):
             print("  {:>7d} {}".format(cnt, k))
             if cnt < 1000:
@@ -198,13 +197,13 @@ if __name__ == "__main__":
 
         print("")
         print("POS HEADER USAGE")
-        for k, cnt in sorted(ctx.pos_counts.items(),
+        for k, cnt in sorted(config.pos_counts.items(),
                              key=lambda x: -x[1]):
             print("  {:>7d} {}".format(cnt, k))
 
         print("")
         print("POS SUBSECTION HEADER USAGE")
-        for k, cnt in sorted(ctx.section_counts.items(),
+        for k, cnt in sorted(config.section_counts.items(),
                              key=lambda x: -x[1]):
             print("  {:>7d} {}".format(cnt, k))
 
