@@ -164,6 +164,8 @@ ignored_templates = set([
     "mid4",
     "mid5",
     "middot",
+    "mul-kangxi radical-def",
+    "mul-shuowen radical-def",
     "multiple images",
     "nb...",
     "nbsp",
@@ -576,6 +578,8 @@ clean_replace_map = {
                     "singular of {arg2}"],
     "agent noun of": ["agent noun of {arg2} ({arg4})",
                       "agent noun of {arg2}"],
+    "verbal noun of": ["verbal noun of {arg2} ({arg4})",
+                       "verbal noun of {arg2}"],
     "feminine noun of": ["feminine noun of {arg2} ({arg4})",
                          "feminine noun of {arg2}"],
     "masculine noun of": ["masculine noun of {arg2} ({arg4})",
@@ -670,6 +674,7 @@ clean_replace_map = {
     "link": ["{arg3} ({arg4})", "{arg2} ({arg4})", "{arg3}", "{arg2}"],
     "SI-unit": ["An SI unit of {arg4}"],  # XXX
     "SI-unit-abb": ["An SI unit of {arg3}"],  # XXX
+    "SI-unit-abb2": ["An SI unit of {arg4}"],  # XXX
     "SI-unit-2": ["An SI unit of {arg3}"],  # XXX
     "SI-unit-np": ["An SI unit of {arg4}"],  # XXX
     "taxon": [r"taxonomic {arg1}"],  # XXX needs special formatting
