@@ -1,5 +1,6 @@
 # Wiktionary parser for extracting a lexicon and various other information
-# from wiktionary.
+# from wiktionary.  This file contains code to uncompress the Wiktionary
+# dump file and to separate it into individual pages.
 #
 # Copyright (c) 2018-2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
@@ -7,7 +8,8 @@ import re
 import bz2
 from lxml import etree
 from wiktextract import wiktlangs
-from wiktextract.page import WiktionaryConfig, parse_page
+from .page import parse_page
+from .config import WiktionaryConfig
 
 # These XML tags are ignored when parsing.
 ignore_xml_tags = set(["sha1", "comment", "username", "timestamp",

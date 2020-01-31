@@ -1,155 +1,17 @@
-# Code for parsing information from a Wiktionary page.
+# Code for parsing information from a single Wiktionary page.
 #
 # Copyright (c) 2018-2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
-import html
 import collections
 import wikitextparser
-from wiktextract import wiktlangs
+from . import wiktlangs
+from .parts_of_speech import part_of_speech_map, PARTS_OF_SPEECH
+from .config import WiktionaryConfig
+from .sectitle_corrections import sectitle_corrections
+from .clean import clean_value, clean_quals
+from .places import place_prefixes  # XXX move processing to places.py
 from .wikttemplates import *
-
-
-class WiktionaryConfig(object):
-    """This class holds configuration data for Wiktionary parsing."""
-    def __init__(self,
-                 capture_languages=["English", "Translingual"],
-                 capture_translations=False,
-                 capture_pronunciation=False,
-                 capture_linkages=False,
-                 capture_compounds=False,
-                 capture_redirects=False):
-        if capture_languages is not None:
-            assert isinstance(capture_languages, (list, tuple, set))
-            for x in capture_languages:
-                assert isinstance(x, str)
-        assert (capture_languages is None or
-                isinstance(capture_languages, (list, tuple, set)))
-        assert capture_translations in (True, False)
-        assert capture_pronunciation in (True, False)
-        assert capture_linkages in (True, False)
-        assert capture_compounds in (True, False)
-        assert capture_redirects in (True, False)
-        self.capture_languages = capture_languages
-        self.capture_translations = capture_translations
-        self.capture_pronunciation = capture_pronunciation
-        self.capture_linkages = capture_linkages
-        self.capture_compounds = capture_compounds
-        self.capture_redirects = capture_redirects
-        self.language_counts = collections.defaultdict(int)
-        self.pos_counts = collections.defaultdict(int)
-        self.section_counts = collections.defaultdict(int)
-
-
-# XXX
-lang_codes = set(["en", "fr", "fi", "de", "it", "pt", "es", "ja", "zh", "sv"])
-
-# This dictionary maps section titles in articles to parts-of-speech.  There
-# is a lot of variety and misspellings, and this tries to deal with those.
-pos_map = {
-    "abbreviation": "abbrev",
-    "acronym": "abbrev",
-    "adjectival": "adj_noun",
-    "adjectival noun": "adj_noun",
-    "adjectival verb": "adj_verb",
-    "adjective": "adj",
-    "adjectuve": "adj",
-    "adjectives": "adj",
-    "adverb": "adv",
-    "adverbs": "adv",
-    "adverbial phrase": "adv_phrase",
-    "affix": "affix",
-    "adjective suffix": "affix",
-    "article": "article",
-    "character": "character",
-    "circumfix": "circumfix",
-    "circumposition": "circumpos",
-    "classifier": "classifier",
-    "clipping": "abbrev",
-    "clitic": "clitic",
-    "command form": "cmd",
-    "command conjugation": "cmd_conj",
-    "combining form": "combining_form",
-    "comparative": "adj_comp",
-    "conjunction": "conj",
-    "conjuntion": "conj",
-    "contraction": "abbrev",
-    "converb": "converb",
-    "counter": "counter",
-    "determiner": "det",
-    "diacritical mark": "character",
-    "enclitic": "clitic",
-    "enclitic particle": "clitic",
-    "gerund": "gerund",
-    "glyph": "character",
-    "han character": "character",
-    "han characters": "character",
-    "ideophone": "noun",  # XXX
-    "infix": "infix",
-    "infinitive": "verb",
-    "initialism": "abbrev",
-    "interfix": "interfix",
-    "interjection": "intj",
-    "interrogative pronoun": "pron",
-    "intransitive verb": "verb",
-    "instransitive verb": "verb",
-    "letter": "letter",
-    "ligature": "character",
-    "label": "character",
-    "nom character": "character",
-    "nominal nuclear clause": "clause",
-    "νoun": "noun",
-    "nouɲ": "noun",
-    "noun": "noun",
-    "nouns": "noun",
-    "noum": "noun",
-    "number": "num",
-    "numeral": "num",
-    "ordinal number": "ordinal",
-    "participle": "verb",
-    "particle": "particle",
-    "past participle": "verb",
-    "perfect expression": "verb",
-    "perfection expression": "verb",
-    "perfect participle": "verb",
-    "personal pronoun": "pron",
-    "phrasal verb": "phrasal_verb",
-    "phrase": "phrase",
-    "phrases": "phrase",
-    "possessive determiner": "det",
-    "possessive pronoun": "det",
-    "postposition": "postp",
-    "predicative": "predicative",
-    "prefix": "prefix",
-    "preposition": "prep",
-    "prepositions": "prep",
-    "prepositional expressions": "prep",
-    "prepositional phrase": "prep_phrase",
-    "prepositional pronoun": "pron",
-    "present participle": "verb",
-    "preverb": "verb",
-    "pronoun": "pron",
-    "proper noun": "name",
-    "proper oun": "name",
-    "proposition": "prep",  # Appears to be a misspelling of preposition
-    "proverb": "proverb",
-    "punctuation mark": "punct",
-    "punctuation": "punct",
-    "relative": "conj",
-    "root": "root",
-    "syllable": "character",
-    "suffix": "suffix",
-    "suffix form": "suffix",
-    "symbol": "symbol",
-    "transitive verb": "verb",
-    "verb": "verb",
-    "verbal noun": "noun",
-    "verbs": "verb",
-    "digit": "digit",   # I don't think this is actually used in Wiktionary
-}
-
-# Set of all possible parts-of-speech returned by wiktionary reading.
-PARTS_OF_SPEECH = set(pos_map.values())
 
 # Mapping from German verb form arguments to "canonical" values in
 # word sense tags."""
@@ -310,251 +172,26 @@ template_allowed_pos_map = {
     "abbr": ["abbrev"],
     "abbr": ["abbrev"],
     "noun": ["noun", "abbrev", "pron", "name", "num", "adj_noun"],
-    "plural noun": ["noun", "name", "proper-noun"],
-    "proper noun": ["noun", "name", "proper-noun"],
-    "proper-noun": ["name", "noun", "proper-noun"],
+    "plural noun": ["noun", "name"],
+    "proper noun": ["noun", "name"],
+    "proper-noun": ["name", "noun"],
     "verb": ["verb", "phrase"],
     "plural noun": ["noun"],
     "adv": ["adv"],
     "particle": ["adv", "particle"],
     "adj": ["adj", "adj_noun"],
     "pron": ["pron", "noun"],
-    "name": ["name", "noun", "proper-noun"],
+    "name": ["name", "noun"],
     "adv": ["adv", "intj", "conj", "particle"],
-    "phrase": ["phrase", "prep_phrase", "noun phrase", "verb phrase",
-               "intj phrase"],
+    "phrase": ["phrase", "prep_phrase"],
 }
+for k, v in template_allowed_pos_map.items():
+    for x in v:
+        if x not in PARTS_OF_SPEECH:
+            print("BAD PART OF SPEECH {!r} IN template_allowed_pos_map: {}={}"
+                  "".format(x, k, v))
+            assert False
 
-
-# Corrections for misspelled section titles.  This basically maps the actual
-# subsection title to the title that will be used when we parse it.  We should
-# really review and fix all Wiktionary entries that use these, especially the
-# misspellings.  In some cases we should improve the code to handle the
-# additional information provided by the section title (e.g., gender).
-# XXX do that later.
-sectitle_corrections = {
-    "adjectif": "adjective",
-    "alernative forms": "alternative forms",
-    "antonyid": "antonyms",
-    "antoynms": "antonyms",
-    "conjugaton 1": "declension",  # XXX
-    "conjugaton 2": "declension",  # XXX
-    "coordinate terid": "coordinate terms",
-    "decelsnion": "declension",
-    "decentants": "descendants",
-    "declension (fem.)": "declension",  # XXX should utilize this
-    "declension (masc.)": "declension",  # XXX should utilize this
-    "declension (neut.)": "declension",  # XXX should utilize this
-    "declension (person)": "declension",  # XXX
-    "declension for adjectives": "declension",
-    "declension for feminine": "declension",  # XXX
-    "declension for nouns": "declension",
-    "declension for sense 1 only": "declension",  # XXX
-    "declension for sense 2 only": "declension",  # XXX
-    "declension for words with singular and plural": "declension",  # XXX
-    "declension for words with singular only": "declension",  # XXX
-    "declination": "declension",
-    "deived terms": "derived terms",
-    "derived teerms": "derived terms",
-    "derived temrs": "derived terms",
-    "derived terrms": "derived terms",
-    "derived words": "derived terms",
-    "derivedt terms": "derived terms",
-    "deriveed terms": "derived terms",
-    "derivered terms": "derived terms",
-    "etimology": "etymology",
-    "etymlogy": "etymology",
-    "etymology2": "etymology",
-    "expresion": "expression",
-    "feminine declension": "declension",  # XXX
-    "holonyid": "holonyms",
-    "hypernym": "hypernyms",
-    "hyponyid": "hyponyms",
-    "inflection 1 (fem.)": "declension",  # XXX
-    "inflection 1 (way)": "declension",  # XXX
-    "inflection 2 (neut.)": "declension",  # XXX
-    "inflection 2 (time)": "declension",  # XXX
-    "inflection": "declension",
-    "masculine declension": "declension",  # XXX
-    "nouns and adjective": "noun",  # XXX not really correct
-    "nouns and adjectives": "noun",   # XXX this isn't really correct
-    "nouns and other parts of speech": "noun",   # XXX not really correct
-    "opposite": "antonyms",
-    "participles": "verb",
-    "pronounciation": "pronunciation",
-    "pronuncation": "pronunciation",
-    "pronunciaion": "pronunciation",
-    "pronunciation and usage notes": "pronunciation",
-    "pronunciationi": "pronunciation",
-    "pronunciations": "pronunciation",
-    "pronunciaton": "pronunciation",
-    "pronunciayion": "pronunciation",
-    "pronuniation": "pronunciation",
-    "pronunciation 1": "pronunciation",
-    "pronunciation 2": "pronunciation",
-    "pronunciation 3": "pronunciation",
-    "pronunciation 4": "pronunciation",
-    "quptations": "quotations",
-    "realted terms": "related terms",
-    "refereces": "references",
-    "referenes": "references",
-    "refererences": "references",
-    "referneces": "references",
-    "refernecs": "references",
-    "related names": "related terms",
-    "related terid": "related terms",
-    "synomyms": "synonyms",
-    "synonmys": "synonyms",
-    "synonym": "synonyms",
-    "synonymes": "synonyms",
-    "syonyms": "synonyms",
-    "syonynms": "synonyms",
-    "usagw note": "usage note",
-}
-
-# Mapping from place prefixes in {{place|...}} templates to the type of place.
-# Administrative divisions
-#   - country
-#   - province  (e.g. state, territory, prefecture, canton, voivodeship, oblast)
-#   - municipality, city  (incl. borough, town, village, community)
-#   - district  (generally smaller subdivisions of cities or small adm regions)
-# Geographic divisions
-#   - continent
-#   - region (generally within a continent)
-#   - area   (generally smaller than a region)
-#   - place  (generally well-defined relatively small area/point)
-# Types of geographic formations
-#   - archipelago
-#   - body-of-water  (includes seas, lakes, rivers)
-place_prefixes = {
-    "Hui and Tu autonomous county": "municipality",
-    "Hui autonomous county": "municipality",
-    "Korean autonomous prefecture": "province",
-    "P": "province",
-    "Tibetan autonomous prefecture": "province",
-    "Yi autonomous prefecture": "province",
-    "acomm": "municipality",
-    "ar": "archipelago",
-    "arch": "archipelago",
-    "archipelago": "archipelago",
-    "area": "area",
-    "autonomous community": "municipality",
-    "autonomous county": "municipality",
-    "autonomous prefecture": "province",
-    "autonomous province": "province",
-    "autonomous region": "municipality",
-    "autonomous republic": "province",
-    "bay": "body-of-water",
-    "bor": "municipality",
-    "borough": "municipality",
-    "c": "country",
-    "c2": "country",
-    "can": "province",
-    "canton": "province",
-    "carea": "district",
-    "cc": "country",
-    "cdp": "district",
-    "CDP": "district",
-    "census area": "municipality",
-    "city": "city",
-    "co": "municipality",
-    "cobor": "municipality",
-    "community": "municipality",
-    "cont": "continent",
-    "continent": "continent",
-    "contregion": "region",
-    "council area": "district",
-    "country": "country",
-    "county borough": "municipality",
-    "county": "municipality",
-    "county-level city": "city",
-    "department": "province",
-    "dept": "province",
-    "direct-administered municipality": "municipality",
-    "direct-administered municipality ": "municipality",
-    "dist": "district",
-    "distmun": "municipality",
-    "district": "district",
-    "district municipality": "municipality",
-    "empire": "country",
-    "en:country": "country",
-    "en:island": "island",
-    "en:province": "province",
-    "en:state": "province",
-    "glen": "village",
-    "federal subject": "province",
-    "forestry district": "area",
-    "former township": "municipality",
-    "house": "place",
-    "isl": "island",
-    "island": "island",
-    "krai": "province",
-    "league": "province",
-    "lbor": "municipality",
-    "lgarea": "area",
-    "lgdist": "district",
-    "lieutenancy area": "municipality",
-    "local government district": "district",
-    "m": "municipality",
-    "macroregion": "region",
-    "metbor": "municipality",
-    "metropolis": "city",
-    "metropolitan borough": "municipality",
-    "moor": "district",
-    "mountain": "place",
-    "mun": "municipality",
-    "municipality": "municipality",
-    "muniplacity": "municipality",
-    "neighborhood": "district",
-    "obl": "province",
-    "oblast": "province",
-    "ocean": "body-of-water",
-    "overseas department": "province",
-    "p": "province",
-    "par": "district",
-    "parish": "district",
-    "pen": "area",
-    "penisula": "area",
-    "pref": "province",
-    "prefecture": "province",
-    "prefecture-level": "city",
-    "prefecture-level city": "city",
-    "prov": "province",
-    "prov;": "province",
-    "province": "province",
-    "r": "region",
-    "range": "area",
-    "region": "region",
-    "regional unit": "municipality",
-    "rep": "country",
-    "republic": "country",
-    "riv": "body-of-water",
-    "river": "body-of-water",
-    "rural township": "municipality",
-    "s": "province",
-    "sar": "municipality",
-    "sea": "body-of-water",
-    "special municipality": "municipality",
-    "state": "province",
-    "strait": "body-of-water",
-    "sub-prefecture level city": "city",
-    "sub-prefecture-level city": "city",
-    "sub-provincial city": "city",
-    "subdistrict": "district",
-    "subprefecture": "province",
-    "terr": "province",
-    "territory": "province",
-    "town": "municipality",
-    "township": "municipality",
-    "twp": "municipality",
-    "unitary authority": "municipality",
-    "urban township": "municipality",
-    "valley": "region",
-    "village": "district",
-    "voi": "province",
-    "voivodeship": "province",
-    "ward": "district",
-}
 
 # Keys in ``data`` that can only have string values (a list of them)
 str_keys = ("tags", "glosses")
@@ -563,254 +200,12 @@ dict_keys = ("pronunciations", "senses", "synonyms", "related",
              "antonyms", "hypernyms", "holonyms")
 
 
-# Note: arg_re contains two sets of parenthesis
-arg_re = (r"\|("
-          r"([^|{}]|"
-          r"\{\{[^{}]+?\}\}|"
-          r"\[\[[^]]+?\]\]|"
-          r"\[[^]]+?\])*)")
-
-# Matches more arguments and end of template
-args_end_re = r"\s*\}\}"
-
-# Regexp used in clean_replace_regexp
-clean_rege = (r"(?s)\{\{([^}|]+)" +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              # 10
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              # 20
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              # 30
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r"(" + arg_re +
-              r")?)?)?)?)?)?)?)?)?)?" +
-              r")?)?)?)?)?)?)?)?)?)?" +
-              r")?)?)?)?)?)?)?)?)?)?" +
-              r")?)?)?)?)?)?)?)?)?)?" +
-              args_end_re)
-clean_re = re.compile(clean_rege)
-
-# Indexes of groups in clean_re
-template_groupidxs = tuple(3 + 3 * i for i in range(0, 9))
-
-# Regular expression for matching template arguments that have a name
-template_arg_with_name_re = re.compile(r"^([-_a-zA-Z0-9\s]+)=(.*)$")
-
-# def prepare_dest(v):
-#     for i in range(len(template_groupidxs) - 1, 0, -1):
-#         src = r"\\{}([^0-9]|$)".format(i)
-#         dst = r"\\{}\1".format(template_groupidxs[i])
-#         v = re.sub(src, dst, v)
-#     return v
-
-arg1_dest = ["{arg1}"]
-arg2_dest = ["{arg2}"]
-arg3_dest = ["{arg3}"]
-clean_dest_ht = {}
-for k in clean_arg1_tags:
-    clean_dest_ht[k] = arg1_dest
-for k in clean_arg2_tags:
-    if k in clean_dest_ht:
-        print("TAG {} MULTIPLY DEFINED".format(k))
-        assert False
-    clean_dest_ht[k] = arg2_dest
-for k in clean_arg3_tags:
-    if k in clean_dest_ht:
-        print("TAG {} MULTIPLY DEFINED".format(k))
-        assert False
-    clean_dest_ht[k] = arg3_dest
-for k, dests in clean_replace_map.items():
-    if k in clean_dest_ht:
-        print("TAG {} MULTIPLY DEFINED".format(k))
-        assert False
-    if not isinstance(dests, (list, tuple)):
-        print("NON-LIST DESTS in clean_replace_map: {}: {}".format(k, dests))
-        assert False
-    clean_dest_ht[k] = dests
-
-
-def clean_replace_regexp(word, v):
-    """Performs regexp substitutions on a string being cleaned up."""
-
-    def clean_gen_repl(m):
-        """Finds the substitution for for a clean-up match."""
-        # print("{} CLEAN_GEN_REPL {}".format(word, m.group(0)))
-        tag = m.group(1).strip()
-        tag = re.sub(r"\s+", " ", tag)
-        for prefix in ("R:", "RQ:", "table:", "list:", "DEFAULTSORT:"):
-            if tag.startswith(prefix):
-                return ""
-        if tag not in clean_dest_ht:
-            if tag in ignored_templates:
-                return ""
-            # Fall to using default expansion
-        else:
-            lst = list(x or "" for x in m.groups())
-            parts = list(lst[i - 1].strip()
-                         for i in template_groupidxs if i <= len(lst))
-            kwargs = {"word": word}
-            argnum = 1
-            for g in parts:
-                argm = re.match(template_arg_with_name_re, g)
-                if argm is None:
-                    if g != "":
-                        kwargs["arg{}".format(argnum)] = g
-                    argnum += 1
-                else:
-                    k = argm.group(1).strip()
-                    v = argm.group(2).strip()
-                    k = re.sub(r"\s+", " ", k)
-                    if k.isdigit():
-                        k = "arg" + k
-                    kwargs[k] = v
-            dests = clean_dest_ht[tag]
-            #print("{} CLEAN: dests={} kwargs={} lst={} parts={}"
-            #      "".format(word, dests, kwargs, lst, parts))
-            for dest in dests:
-                try:
-                    ret = dest.format(**kwargs)
-                    return ret
-                except (KeyError, ValueError):
-                    #print("{} CLEAN_GEN_REPL: FAILED DEST {} FOR {} IN {}"
-                    #      "".format(word, dest, kwargs, m.group(0)))
-                    continue
-            else:
-                print("{} CLEAN_GEN_REPL: BAD DESTS IN {} FOR {}"
-                      "".format(word, dests, m.group(0)))
-        # Default expansion for the template concatenates arguments, except
-        # named arguments
-        groups = list(x or "" for x in m.groups())
-        lst = []
-        for i in range(0, len(groups)):
-            x = groups[i]
-            idx = x.find("/")
-            if idx >= 0:
-                if x[:idx] in place_prefixes and not x[idx + 1:].find("/"):
-                    x = x[idx + 1:]
-            lst.append(x)
-        parts = list(lst[i - 1].strip() for i in template_groupidxs
-                     if i <= len(lst) and
-                     re.match(template_arg_with_name_re, lst[i - 1]) is None and
-                     lst[i - 1] not in ("_", ""))
-        if parts and parts[0] in lang_codes:
-            parts = parts[1:]
-        ret = " ".join(parts).strip()
-        if tag in default_parenthesize_tags:
-            ret = "(" + ret + ")"
-        if tag not in default_tags and tag not in default_parenthesize_tags:
-            print("{} NO REPLACEMENT FOR {} IN {}"
-                  "".format(word, tag, m.group(0)))
-            #print("{} CLEAN_GEN_REPL {} {} {} -> {}"
-            #      "".format(word, tag, m.group(0), parts, ret))
-        return ret
-
-
-    # Repeat replacements as there could be nested structures
-    try:
-        iter = 0
-        while True:
-            v, count = re.subn(clean_re, clean_gen_repl, v)
-            if count == 0:
-                break
-            iter += 1
-            if iter > 10:
-                print("CLEAN_REPLACE_REGEXP EXCESS ITERATIONS", repr(v))
-                assert False
-    except re.error:
-        print("CLEAN_REPLACE_REGEXP ERROR CLEANING {}".format(repr(v)))
-    return v
-
-
 def remove_html_comments(text):
     """Removes HTML comments from the value."""
     assert isinstance(text, str)
     text = re.sub(r"(?s)<!--.*?-->", "", text)
     text = text.strip()
     return text
-
-
-def clean_value(word, title):
-    """Cleans a title or value into a normal string.  This should basically
-    remove any Wikimedia formatting from it: HTML tags, templates, links,
-    emphasis, etc.  This will also merge multiple whitespaces into one
-    normal space and will remove any surrounding whitespace."""
-    # Remove HTML comments
-    title = remove_html_comments(title)
-    # Replace templates according to our our replacement tables
-    # clean_arg_arg1_tags, clean_arg2_tags, clean_arg3_tags, clean_replace_map.
-    title = clean_replace_regexp(word, title)
-    # Remove any remaining templates.
-    for m in re.finditer(r"\{\{[^}]+\}\}", title):
-        print("{} CLEAN_VALUE REMAINING TEMPLATE: {}"
-              "".format(word, m.group(0)))
-    title = re.sub(r"\{\{[^}]+\}\}", "", title)
-    # Remove references (<ref>...</ref>).
-    title = re.sub(r"(?s)<ref>.*?</ref>", "", title)
-    # Replace <br/> by comma space (it is used to express alternatives in some
-    # declensions)
-    title = re.sub(r"(?s)<br/?>", ", ", title)
-    # Remove any remaining HTML tags.
-    title = re.sub(r"(?s)<[^>]+>", "", title)
-    # Replace links with [[...|...]] by their only or second argument
-    title = re.sub(r"\[\[(([^]|]+\|)?)([^]|]+?)\]\]", r"\3", title)
-    # Replace HTML links [url display] (with space) by the display value.
-    title = re.sub(r"\[[^ ]+?\s+([^]]+?)\]", r"\1", title)
-    # Replace remaining HTML links by the URL.
-    title = re.sub(r"\[([^]]+)\]", r"\1", title)
-    # Replace various empases (quoted text) by its value.
-    title = re.sub(r"''+(([^']|'[^'])+?)''+", r"\1", title)
-    # Replace HTML entities
-    title = html.unescape(title)
-    title = re.sub("\xa0", " ", title)  # nbsp
-    # This unicode quote seems to be used instead of apostrophe quite randomly
-    # (about 4% of apostrophes in English entries, some in Finnish entries).
-    title = re.sub("\u2019", "'", title)  # Note: no r"..." here!
-    # Replace strange unicode quotes with normal quotes
-    title = re.sub(r"”", '"', title)
-    # Replace unicode long dash by normal dash
-    title = re.sub(r"–", "-", title)
-    # Replace whitespace sequences by a single space.
-    title = re.sub(r"\s+", " ", title)
-    # Remove whitespace before periods and commas etc
-    title = re.sub(r" ([.,;:!?)])", r"\1", title)
-    # Strip surrounding whitespace.
-    title = title.strip()
-    return title
 
 
 def split_subsections(word, text):
@@ -916,78 +311,6 @@ def template_args_to_dict(word, t):
         ht[name] = clean_value(word, value)
     ht["template_name"] = t.name.strip()
     return ht
-
-
-quals_left_connect = set(["usually", "often", "rarely", "strongly", "now",
-                          "extremely", "including", "slightly",
-                          "especially",
-                          "chiefly", "sometimes", "mostly", "then"])
-quals_strip = set(["usually", "often", "strongly", "extremely", "chiefly",
-                   "mostly", "especially"])
-quals_both_connect = ("in", "_", "with", "outside")
-quals_skip = ("or", "and")
-quals_standalone = set(["present", "past", "participle", "infinitive",
-                        "future", "subjunctive", "imperative",
-                        "transitive", "intransitive", "reflexive",
-                        "nominative", "genitive", "accusative", "dative",
-                        "plural", "singular", "feminine",
-                        "modal", "auxiliary",
-                        "definite", "indefinite",
-                        "countable", "uncountable",
-                        "masculine"])
-quals_map = {
-    "in the plural": ["plural"],
-    "in the singular": ["singular"],
-    "dated": ["archaic"],
-}
-
-def clean_quals(vec):
-    """Extracts and cleans qualifier values from the vector of arguments.
-    Qualifiers are generally usage or other notes such as "archaic",
-    "colloquial", "chemistry", "british", etc.  There is no standard set
-    of values for them and the set probably varies from language to
-    language."""
-    assert isinstance(vec, (list, tuple))
-    for x in vec:
-        assert isinstance(x, str)
-
-    tags = []
-    i = 0
-    if vec and vec[0] in lang_codes:
-        # If the qualifiers are from a template that has language tags,
-        # those hould be removed from the vector before passing it to
-        # this function.  This warning indicates the caller probably
-        # forgot to remove the language tag.
-        print("clean_quals: WARNING: {} in vec: {}".format(x, vec))
-        i += 1
-    while i < len(vec):
-        tagparts = [vec[i]]
-        i += 1
-        # Certain modifiers are often written as separate arguments but
-        # actually modify the following value.  We combine them with the
-        # following value using a space.
-        while (i < len(vec) and
-               vec[i] not in quals_skip and
-               vec[i] not in quals_standalone and
-               (vec[i - 1] in quals_left_connect or
-                vec[i - 1] in quals_both_connect or
-                vec[i] in quals_both_connect)):
-            v = vec[i]
-            if v != "_":
-                tagparts.append(v)
-            i += 1
-        tag = " ".join(tagparts)
-        if tag in quals_map:
-            tags.extend(quals_map[tag])
-        elif tag in quals_skip:
-            pass
-        elif len(tagparts) == 2 and tagparts[1] in quals_strip:
-            tags.append(tagparts[1])
-            tags.append(tag)
-        else:
-            tags.append(tag)
-    # print("CLEAN_QUALS: {} -> {}".format(vec, tags))
-    return tags
 
 
 def t_vec(word, t):
@@ -2799,11 +2122,11 @@ def page_iter(word, text, config):
                 # a new language or a misspelling or a previously unsupported
                 # subtitle.
                 sectitle = sectitle.lower()
-                if sectitle in pos_map:
+                if sectitle in part_of_speech_map:
                     # New part-of-speech.  Flush the old part-of-speech.
                     flush()
                     # Initialize for parsing the new part-of-speech.
-                    pos = pos_map[sectitle]
+                    pos = part_of_speech_map[sectitle]
                     config.pos_counts[pos] += 1
                     data = {}
                     sectitle = ""
@@ -2835,7 +2158,11 @@ def page_iter(word, text, config):
 
             # Apply corrections to common misspellings in sectitle
             if sectitle in sectitle_corrections:
-                sectitle = sectitle_corrections[sectitle]
+                dt = sectitle_corrections[sectitle]
+                correct = dt["correct"]
+                #if dt.get("error"):
+                #    XXX report error, displaying sectitle and correct
+                sectitle = correct
 
             # Mostly ignore etymology sections, as they often seem to contain
             # links that could be misinterpreted as something else.

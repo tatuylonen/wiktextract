@@ -1,7 +1,8 @@
 import unittest
 import collections
 import wiktextract
-from wiktextract.page import clean_value
+from wiktextract.clean import clean_value, clean_quals
+
 
 class WiktExtractTests(unittest.TestCase):
 
@@ -165,3 +166,5 @@ class WiktExtractTests(unittest.TestCase):
         v = "{{acronym of|es|{{w|Geroa Bai|lang=es}}}}"
         v = clean_value("WORD", v)
         self.assertEqual(v, "acronym of Geroa Bai")
+
+# XXX tests for clean_quals
