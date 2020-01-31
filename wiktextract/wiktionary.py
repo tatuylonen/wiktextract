@@ -10,7 +10,10 @@ import collections
 from lxml import etree
 import wikitextparser
 from wiktextract import wiktlangs
+from .wikttemplates import *
 
+# XXX
+lang_codes = set(["en", "fr", "fi", "de", "it", "pt", "es", "ja", "zh", "sv"])
 
 # These XML tags are ignored when parsing.
 ignore_tags = set(["sha1", "comment", "username", "timestamp",
@@ -22,245 +25,6 @@ ignore_tags = set(["sha1", "comment", "username", "timestamp",
 
 # Other tags are ignored inside these tags.
 stack_ignore = ["contributor"]
-
-# These Wiktionary templates are silently ignored (though some of them may be
-# used when cleaning up titles and values).
-ignored_templates = set([
-    "-",
-    "=",
-    "*",
-    "!",
-    ",",
-    "...",
-    "AD",
-    "BCE",
-    "B.C.E.",
-    "Book-B",
-    "C.",
-    "CE",
-    "C.E.",
-    "BC",
-    "B.C.",
-    "A.D.",
-    "Clade",  # XXX Might want to dig information from this for hypernyms
-    "CURRENTYEAR",
-    "EtymOnLine",
-    "EtymOnline",
-    "IPAchar",
-    "LR",
-    "PAGENAME",
-    "Q",
-    "Webster 1913",
-    "\\",
-    "abbreviation-old",
-    "af",
-    "affix",
-    "altcaps",
-    "anchor",
-    "ante",
-    "attention",
-    "attn",
-    "back-form",
-    "bor",
-    "borrowed",
-    "bottom",
-    "bottom2",
-    "bottom3",
-    "bottom4",
-    "bullet",
-    "checksense",
-    "circa",
-    "circa2",
-    "cite",
-    "cite book",
-    "Cite book",
-    "Cite news",
-    "cite news",
-    "cite-book",
-    "cite-journal",
-    "cite-magazine",
-    "cite-news",
-    "cite-newgroup",
-    "cite-song",
-    "cite-text",
-    "cite-video",
-    "cite-web",
-    "cite web",
-    "cog",
-    "col-top",
-    "col-bottom",
-    "col",
-    "col-u",
-    "col1",
-    "col1-u",
-    "col2",
-    "col2-u",
-    "col3",
-    "col3-u",
-    "col4",
-    "col4-u",
-    "col5",
-    "col5-u",
-    "datedef",
-    "def-date",
-    "defdate",
-    "defdt",
-    "defn",
-    "der",
-    "der-bottom",
-    "der-bottom2",
-    "der-bottom3",
-    "der-bottom4",
-    "der-mid2",
-    "der-mid3",
-    "der-mid4",
-    "der-mid",
-    "derived",
-    "dot",
-    "doublet",
-    "eggcorn of",
-    "ellipsis",
-    "em dash",
-    "en dash",
-    "etyl",
-    "example needed",
-    "examples",
-    "examples-right",
-    "frac",
-    "g",  # gender - too rare to be useful
-    "gloss-stub",
-    "glossary",
-    "hyp2",
-    "hyp-top",
-    "hyp-mid",
-    "hyp-mid3",
-    "hyp-bottom3",
-    "hyp-bottom",
-    "indtr",
-    "inh",
-    "inherited",
-    "interwiktionary",
-    "ISO 639",
-    "jump",
-    "katharevousa",
-    "ko-inline",
-    "lang",
-    "list",
-    "ll",
-    "lookfrom",
-    "Lookfrom",
-    "m",
-    "mention",
-    "mid",
-    "mid2",
-    "mid3",
-    "mid4",
-    "mid4",
-    "mid5",
-    "middot",
-    "multiple images",
-    "nb...",
-    "nbsp",
-    "ndash",
-    "no entry",
-    "noncog",
-    "noncognate",
-    "nowrap",
-    "nuclide",
-    "overline",
-    "phrasebook",
-    "pedia",
-    "pedialite",
-    "picdic",
-    "picdiclabel",
-    "picdiclabel/new",
-    "pos_v",
-    "post",
-    "prefixlanglemma",
-    "punctuation",
-    "quote-book",
-    "quote-journal",
-    "quote-magazine",
-    "quote-news",
-    "quote-newsgroup",
-    "quote-song",
-    "quote-text",
-    "quote-video",
-    "quote-web",
-    "redirect",
-    "rel-bottom",
-    "rel-mid",
-    "rel-mid2",
-    "rel-mid3",
-    "rel-mid4",
-    "rfap",
-    "rfc",
-    "rfc-auto",
-    "rfc-def",
-    "rfc-header",
-    "rfc-level",
-    "rfc-subst",
-    "rfc-tsort",
-    "rfc-sense",
-    "rfcite-sense",
-    "rfclarify",
-    "rfd-redundant",
-    "rfd-sense",
-    "rfdate",
-    "rfdatek",
-    "rfdef",
-    "rfe",
-    "rfex",
-    "rfexample",
-    "rfm-sense",
-    "rfgloss",
-    "rfquote",
-    "rfquote-sense",
-    "rfquotek",
-    "rft-sense",
-    "rfv-sense",
-    "rhymes",
-    "rhymes",
-    "see",
-    "see also",
-    "seeCites",
-    "seemoreCites",
-    "seemorecites",
-    "seeMoreCites",
-    "seeSynonyms",
-    "sic",
-    "smallcaps",
-    "soplink",
-    "spndash",
-    "stroke order",
-    "stub-gloss",
-    "sub",
-    "suffixsee",
-    "sup",
-    "syndiff",
-    "t-check",
-    "t+check",
-    "table:colors/fi",
-    "tea room sense",
-    "top2",
-    "top3",
-    "top4",
-    "top5",
-    "translation only",
-    "translation hub",
-    "trans-mid",
-    "trans-bottom",
-    "uncertain",
-    "unk",
-    "unsupported",
-    "used in phrasal verbs",
-    "was wotd",
-    "wikisource1911Enc",
-    "wikivoyage",
-    "ws",
-    "ws link",
-    "zh-hg",
-])
 
 # This dictionary maps section titles in articles to parts-of-speech.  There
 # is a lot of variety and misspellings, and this tries to deal with those.
@@ -304,7 +68,7 @@ pos_map = {
     "han characters": "character",
     "ideophone": "noun",  # XXX
     "infix": "infix",
-    "infinitive": "participle",
+    "infinitive": "verb",
     "initialism": "abbrev",
     "interfix": "interfix",
     "interjection": "intj",
@@ -324,12 +88,12 @@ pos_map = {
     "number": "num",
     "numeral": "num",
     "ordinal number": "ordinal",
-    "participle": "participle",  # XXX
+    "participle": "verb",
     "particle": "particle",
-    "past participle": "participle",  # XXX
-    "perfect expression": "participle",  # XXX
-    "perfection expression": "participle",  # XXX
-    "perfect participle": "participle",  # XXX
+    "past participle": "verb",
+    "perfect expression": "verb",
+    "perfection expression": "verb",
+    "perfect participle": "verb",
     "personal pronoun": "pron",
     "phrasal verb": "phrasal_verb",
     "phrase": "phrase",
@@ -344,7 +108,7 @@ pos_map = {
     "prepositional expressions": "prep",
     "prepositional phrase": "prep_phrase",
     "prepositional pronoun": "pron",
-    "present participle": "participle",
+    "present participle": "verb",
     "preverb": "verb",
     "pronoun": "pron",
     "proper noun": "name",
@@ -369,251 +133,6 @@ pos_map = {
 # Set of all possible parts-of-speech returned by wiktionary reading.
 PARTS_OF_SPEECH = set(pos_map.values())
 
-# Templates ({{name|...}}) that will be replaced by the value of their
-# first argument when cleaning up titles/values.
-clean_arg1_tags = [
-    "...",
-    "Br. English form of",
-    "W",
-    "Wikipedia",
-    "wtorw",
-    "abb",
-    "abbr of",
-    "abbreviation of",
-    "abbreviation",
-    "acronym of",
-    "agent noun of",
-    "alt case",
-    "alt form of",
-    "alt form",
-    "alt form",
-    "alt-form",
-    "alt sp",
-    "alt-sp",
-    "altcaps",
-    "alter",
-    "alternate form of",
-    "alternate spelling of",
-    "alternative capitalisation of",
-    "alternative capitalization of",
-    "alternative case form of",
-    "alternative form of",
-    "alternative name of",
-    "alternative name of",
-    "alternative plural of",
-    "alternative spelling of",
-    "alternative term for",
-    "alternative typography of",
-    "altform",
-    "altspell",
-    "altspelling",
-    "aphetic form of",
-    "apocopic form of",
-    "archaic form of",
-    "archaic spelling of",
-    "aspirate mutation of",
-    "attributive form of",
-    "attributive of",
-    "caret notation of",
-    "clip",
-    "clipping of",
-    "clipping",
-    "common misspelling of",
-    "comparative of",
-    "contraction of",
-    "dated form of",
-    "dated spelling of",
-    "deliberate misspelling of",
-    "diminutive of",
-    "ellipsis of",
-    "ellipse of",
-    "elongated form of",
-    "en-archaic second-person singular of",
-    "en-archaic second-person singular past of",
-    "en-archaic third-person singular of",
-    "en-comparative of",
-    "en-irregular plural of",
-    "en-past of",
-    "en-second person singular past of",
-    "en-second-person singular past of",
-    "en-simple past of",
-    "en-superlative of",
-    "en-third person singular of",
-    "en-third-person singular of",
-    "euphemistic form of",
-    "euphemistic spelling of",
-    "eye dialect of",
-    "eye dialect",
-    "eye-dialect of",
-    "femine of",
-    "feminine noun of",
-    "feminine plural of",
-    "feminine singular of",
-    "form of",
-    "former name of",
-    "gerund of",
-    "hard mutation of",
-    "honoraltcaps",
-    "imperative of",
-    "informal form of"
-    "informal spelling of",
-    "ja-l",
-    "ja-r",
-    "keyword",
-    "lenition of",
-    "masculine plural of",
-    "masculine singular of",
-    "misconstruction of",
-    "misspelling of",
-    "mixed mutation of",
-    "n-g",
-    "native or resident of",
-    "nb...",
-    "neuter plural of",
-    "neuter singular of",
-    "ngd",
-    "nobr",
-    "nominative plural of",
-    "non-gloss definition",
-    "non-gloss",
-    "non gloss definition",
-    "nonstandard form of",
-    "nonstandard spelling of",
-    "nowrap",
-    "obs sp",
-    "obsolete form of",
-    "obsolete spelling of",
-    "obsolete typography of",
-    "overwrite",
-    "past of",
-    "past sense of",
-    "past tense of",
-    "pedlink",
-    "pedlink",
-    "plural form of",
-    "plural of",
-    "present of",
-    "present particle of",
-    "present tense of",
-    "pronunciation spelling of",
-    "pronunciation spelling",
-    "pronunciation respelling of",
-    "rare form of",
-    "rare spelling of",
-    "rareform",
-    "second person singular past of",
-    "second-person singular of",
-    "second-person singular past of",
-    "short for",
-    "short form of",
-    "short of",
-    "singular form of",
-    "singular of",
-    "slim-wikipedia",
-    "soft mutation of",
-    "standard form of",
-    "standard spelling of",
-    "standspell",
-    "sub",
-    "sup",
-    "superlative of",
-    "superseded spelling of",
-    "swp",
-    "taxlink",
-    "taxlinknew",
-    "uncommon spelling of",
-    "unsupported",
-    "upright",
-    "verb",
-    "vern",
-    "w",
-    "wikipedia",
-    "wikisaurus",
-    "wikispecies",
-    "zh-m",
-]
-
-# Templates that will be replaced by their second argument when cleaning up
-# titles/values.
-clean_arg2_tags = [
-    "zh-l",
-    "ja-l",
-    "l",
-    "defn",
-    "w",
-    "m",
-    "mention",
-]
-
-# Templates that will be replaced by their third argument when cleaning up
-# titles/values.
-clean_arg3_tags = [
-    "w2",
-]
-
-# Templates that will be replaced by a value when cleaning up titles/values.
-# The replacements may refer to the first argument of the template using \1.
-#
-# Note that there is a non-zero runtime cost for each replacement in this
-# dictionary; keep its size reasonable.
-clean_replace_map = {
-    "en dash": " - ",
-    "em dash": " - ",
-    "ndash": " - ",
-    "\\": " / ",
-    "...": "...",
-    "BCE": "BCE",
-    "B.C.E.": "B.C.E.",
-    "CE": "CE",
-    "C.E.": "C.E.",
-    "BC": "BC",
-    "B.C.": "B.C.",
-    "A.D.": "A.D.",
-    "AD": "AD",
-    "Latn-def": "latin character",
-    "sumti": r"x\1",
-    "inflection of": r"inflection of \1",
-    "infl of": r"inflection of \1",
-    "initialism of": r"initialism of \1",
-    "init of": r"initialism of \1",
-    "synonym of": r"synonym of \1",
-    "syn of": r"synonym of \1",
-    "given name": r"\1 given name",
-    "forename": r"\1 given name",
-    "historical given name": r"\1 given name",
-    "surname": r"surname",
-    "taxon": r"taxonomic \1",
-    "SI-unit": "unit of measurement",
-    "SI-unit-abb2": "unit of measurement",
-    "SI-unit-2": "unit of measurement",
-    "SI-unit-np": "unit of measurement",
-    "gloss": r"(\1)",
-    "gl": r"(\1)",
-}
-
-# Note: arg_re contains two sets of parenthesis
-arg_re = (r"(\|[-_a-zA-Z0-9]+=[^}|]+)*"
-          r"\|(([^|{}]|\{\{[^}]*\}\}|\[\[[^]]+\]\]|\[[^]]+\])*)")
-
-# Matches more arguments and end of template
-args_end_re = r"(" + arg_re + r")*\}\}"
-
-# Regular expression for replacing templates by their arg1.  arg1 is \3
-clean_arg1_re = re.compile(r"(?s)\{\{(" +
-                           "|".join(re.escape(x) for x in clean_arg1_tags) +
-                           r")" +
-                           arg_re + args_end_re)
-
-# Regular expression for replacing templates by their arg2.  arg2 is \4
-clean_arg2_re = re.compile(r"(?s)\{\{(" +
-                           "|".join(re.escape(x) for x in clean_arg2_tags) +
-                           r")" + arg_re + arg_re + args_end_re)
-
-# Regular expression for replacing templates by their arg3.  arg3 is \6
-clean_arg3_re = re.compile(r"(?s)\{\{(" +
-                           "|".join(re.escape(x) for x in clean_arg3_tags) +
-                           r")" + arg_re + arg_re + arg_re + args_end_re)
-
 # Mapping from German verb form arguments to "canonical" values in
 # word sense tags."""
 de_verb_form_map = {
@@ -627,11 +146,14 @@ de_verb_form_map = {
     "pp": ["past participle"],
     "i": ["imperative"],
     "s": ["singular"],
+    "sg": ["singular"],
     "p": ["plural"],
     "g": ["present"],
     "v": ["past"],
     "k1": ["subjunctive 1"],
     "k2": ["subjunctive 2"],
+    "a": ["subordinate"],
+    "yes": ["subordinate"],
 }
 
 # Mapping from Spanish verb form values to "canonical" values."""
@@ -665,13 +187,15 @@ es_verb_form_map = {
     "pret": ["preterite"],
     "preterit": ["preterite"],
     "preterite": ["preterite"],
-    "imp": ["past"],
-    "imperfect": ["past"],
+    # ??? imperative or imperfect? "imp": ["past"],
+    "imperfect": ["imperfect"],
+    "past": ["past"],
     "fut": ["future"],
     "future": ["future"],
     "cond": ["conditional"],
     "conditional": ["conditional"],
     "s": ["singular"],
+    "sg": ["singular"],
     "sing": ["singular"],
     "singular": ["singular"],
     "p": ["plural"],
@@ -688,6 +212,7 @@ es_verb_form_map = {
     "third": ["3"],
     "third person": ["3"],
     "third-person": ["3"],
+    "impersonal": ["impersonal"],
     "y": ["formal"],
     "yes": ["formal"],
     "no": ["not formal"],
@@ -705,8 +230,59 @@ es_verb_form_map = {
     "f": ["feminine"],
     "fem": ["feminine"],
     "feminine": ["feminine"],
+    "n": ["informal"],
 }
 
+nl_verb_form_map = {
+    # Argument names under which we search for values.
+    "_keys": ["p", "n", "t", "m"],
+    # Mapping of values in arguments to canonical values
+    "1": ["1"],
+    "2": ["2"],
+    "2-gij": ["2"],
+    "2-u": ["2"],
+    "3": ["3"],
+    "123": ["1", "2", "3"],
+    "13": ["1", "3"],
+    "23": ["2", "3"],
+    "imp": ["imperative"],
+    "sg": ["singular"],
+    "pl": ["plural"],
+    "pres": ["present"],
+    "past": ["past"],
+    "ind": ["indicative"],
+    "indc": ["indicative"],
+    "subj": ["subjunctive"],
+    "ind+subj": ["indicative", "subjective"],
+    "ptc": ["participle"],
+}
+
+generic_verb_form_map = {
+    "_keys": ["4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"],
+    "1s": ["1", "singular"],
+    "2s": ["2", "singular"],
+    "3s": ["3", "singular"],
+    "1p": ["1", "plural"],
+    "2p": ["2", "plural"],
+    "3p": ["3", "plural"],
+    "pres": ["present"],
+    "past": ["past"],
+    "impf": ["imperfect"],
+    "perf": ["perfect"],
+    "plup": ["pluperfect"],
+    "ind": ["indicative"],
+    "sub": ["subjunctive"],
+    "imp": ["imperative"],
+    "sim": ["simple"],
+    "cond": ["conditional"],
+    "conditional": ["conditional"],
+    "conj": ["conjunctive"],
+    "conjunctive": ["conjunctive"],
+    "quot": ["quotative"],
+    "quotative": ["quotative"],
+    "deb": ["debitive"],
+    "debitive": ["debitive"],
+}
 
 # Mapping from a template name (without language prefix) for the main word
 # (e.g., fi-noun, fi-adj, en-verb) to permitted parts-of-speech in which
@@ -715,19 +291,20 @@ es_verb_form_map = {
 template_allowed_pos_map = {
     "abbr": ["abbrev"],
     "abbr": ["abbrev"],
-    "noun": ["noun", "abbrev", "pron", "name", "num"],
-    "plural noun": ["noun", "name"],
+    "noun": ["noun", "abbrev", "pron", "name", "num", "adj_noun"],
+    "plural noun": ["noun", "name", "proper-noun"],
     "proper noun": ["noun", "name", "proper-noun"],
     "proper-noun": ["name", "noun", "proper-noun"],
     "verb": ["verb", "phrase"],
     "plural noun": ["noun"],
     "adv": ["adv"],
     "particle": ["adv", "particle"],
-    "adj": ["adj"],
+    "adj": ["adj", "adj_noun"],
     "pron": ["pron", "noun"],
     "name": ["name", "noun", "proper-noun"],
     "adv": ["adv", "intj", "conj", "particle"],
-    "phrase": ["phrase", "noun phrase", "verb phrase", "prep phrase"],
+    "phrase": ["phrase", "prep_phrase", "noun phrase", "verb phrase",
+               "intj phrase"],
 }
 
 
@@ -817,47 +394,372 @@ sectitle_corrections = {
     "usagw note": "usage note",
 }
 
+# Mapping from place prefixes in {{place|...}} templates to the type of place.
+# Administrative divisions
+#   - country
+#   - province  (e.g. state, territory, prefecture, canton, voivodeship, oblast)
+#   - municipality, city  (incl. borough, town, village, community)
+#   - district  (generally smaller subdivisions of cities or small adm regions)
+# Geographic divisions
+#   - continent
+#   - region (generally within a continent)
+#   - area   (generally smaller than a region)
+#   - place  (generally well-defined relatively small area/point)
+# Types of geographic formations
+#   - archipelago
+#   - body-of-water  (includes seas, lakes, rivers)
+place_prefixes = {
+    "Hui and Tu autonomous county": "municipality",
+    "Hui autonomous county": "municipality",
+    "Korean autonomous prefecture": "province",
+    "P": "province",
+    "Tibetan autonomous prefecture": "province",
+    "Yi autonomous prefecture": "province",
+    "acomm": "municipality",
+    "ar": "archipelago",
+    "arch": "archipelago",
+    "archipelago": "archipelago",
+    "area": "area",
+    "autonomous community": "municipality",
+    "autonomous county": "municipality",
+    "autonomous prefecture": "province",
+    "autonomous province": "province",
+    "autonomous region": "municipality",
+    "autonomous republic": "province",
+    "bay": "body-of-water",
+    "bor": "municipality",
+    "borough": "municipality",
+    "c": "country",
+    "c2": "country",
+    "can": "province",
+    "canton": "province",
+    "carea": "district",
+    "cc": "country",
+    "cdp": "district",
+    "CDP": "district",
+    "census area": "municipality",
+    "city": "city",
+    "co": "municipality",
+    "cobor": "municipality",
+    "community": "municipality",
+    "cont": "continent",
+    "continent": "continent",
+    "contregion": "region",
+    "council area": "district",
+    "country": "country",
+    "county borough": "municipality",
+    "county": "municipality",
+    "county-level city": "city",
+    "department": "province",
+    "dept": "province",
+    "direct-administered municipality": "municipality",
+    "direct-administered municipality ": "municipality",
+    "dist": "district",
+    "distmun": "municipality",
+    "district": "district",
+    "district municipality": "municipality",
+    "empire": "country",
+    "en:country": "country",
+    "en:island": "island",
+    "en:province": "province",
+    "en:state": "province",
+    "glen": "village",
+    "federal subject": "province",
+    "forestry district": "area",
+    "former township": "municipality",
+    "house": "place",
+    "isl": "island",
+    "island": "island",
+    "krai": "province",
+    "league": "province",
+    "lbor": "municipality",
+    "lgarea": "area",
+    "lgdist": "district",
+    "lieutenancy area": "municipality",
+    "local government district": "district",
+    "m": "municipality",
+    "macroregion": "region",
+    "metbor": "municipality",
+    "metropolis": "city",
+    "metropolitan borough": "municipality",
+    "moor": "district",
+    "mountain": "place",
+    "mun": "municipality",
+    "municipality": "municipality",
+    "muniplacity": "municipality",
+    "neighborhood": "district",
+    "obl": "province",
+    "oblast": "province",
+    "ocean": "body-of-water",
+    "overseas department": "province",
+    "p": "province",
+    "par": "district",
+    "parish": "district",
+    "pen": "area",
+    "penisula": "area",
+    "pref": "province",
+    "prefecture": "province",
+    "prefecture-level": "city",
+    "prefecture-level city": "city",
+    "prov": "province",
+    "prov;": "province",
+    "province": "province",
+    "r": "region",
+    "range": "area",
+    "region": "region",
+    "regional unit": "municipality",
+    "rep": "country",
+    "republic": "country",
+    "riv": "body-of-water",
+    "river": "body-of-water",
+    "rural township": "municipality",
+    "s": "province",
+    "sar": "municipality",
+    "sea": "body-of-water",
+    "special municipality": "municipality",
+    "state": "province",
+    "strait": "body-of-water",
+    "sub-prefecture level city": "city",
+    "sub-prefecture-level city": "city",
+    "sub-provincial city": "city",
+    "subdistrict": "district",
+    "subprefecture": "province",
+    "terr": "province",
+    "territory": "province",
+    "town": "municipality",
+    "township": "municipality",
+    "twp": "municipality",
+    "unitary authority": "municipality",
+    "urban township": "municipality",
+    "valley": "region",
+    "village": "district",
+    "voi": "province",
+    "voivodeship": "province",
+    "ward": "district",
+}
+
+# Keys in ``data`` that can only have string values (a list of them)
+str_keys = ("tags", "glosses")
+# Keys in ``data`` that can only have dict values (a list of them)
+dict_keys = ("pronunciations", "senses", "synonyms", "related",
+             "antonyms", "hypernyms", "holonyms")
+
+
+# Note: arg_re contains two sets of parenthesis
+arg_re = (r"\|("
+          r"([^|{}]|"
+          r"\{\{[^{}]+?\}\}|"
+          r"\[\[[^]]+?\]\]|"
+          r"\[[^]]+?\])*)")
+
+# Matches more arguments and end of template
+args_end_re = r"\s*\}\}"
+
+# Regexp used in clean_replace_regexp
+clean_rege = (r"(?s)\{\{([^}|]+)" +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              # 10
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              # 20
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              # 30
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r"(" + arg_re +
+              r")?)?)?)?)?)?)?)?)?)?" +
+              r")?)?)?)?)?)?)?)?)?)?" +
+              r")?)?)?)?)?)?)?)?)?)?" +
+              r")?)?)?)?)?)?)?)?)?)?" +
+              args_end_re)
+clean_re = re.compile(clean_rege)
+
+# Indexes of groups in clean_re
+template_groupidxs = tuple(3 + 3 * i for i in range(0, 9))
+
+# Regular expression for matching template arguments that have a name
+template_arg_with_name_re = re.compile(r"^([-_a-zA-Z0-9\s]+)=(.*)$")
+
+# def prepare_dest(v):
+#     for i in range(len(template_groupidxs) - 1, 0, -1):
+#         src = r"\\{}([^0-9]|$)".format(i)
+#         dst = r"\\{}\1".format(template_groupidxs[i])
+#         v = re.sub(src, dst, v)
+#     return v
+
+arg1_dest = ["{arg1}"]
+arg2_dest = ["{arg2}"]
+arg3_dest = ["{arg3}"]
+clean_dest_ht = {}
+for k in clean_arg1_tags:
+    clean_dest_ht[k] = arg1_dest
+for k in clean_arg2_tags:
+    if k in clean_dest_ht:
+        print("TAG {} MULTIPLY DEFINED".format(k))
+        assert False
+    clean_dest_ht[k] = arg2_dest
+for k in clean_arg3_tags:
+    if k in clean_dest_ht:
+        print("TAG {} MULTIPLY DEFINED".format(k))
+        assert False
+    clean_dest_ht[k] = arg3_dest
+for k, dests in clean_replace_map.items():
+    if k in clean_dest_ht:
+        print("TAG {} MULTIPLY DEFINED".format(k))
+        assert False
+    if not isinstance(dests, (list, tuple)):
+        print("NON-LIST DESTS in clean_replace_map: {}: {}".format(k, dests))
+        assert False
+    clean_dest_ht[k] = dests
+
+
+def clean_replace_regexp(word, v):
+    """Performs regexp substitutions on a string being cleaned up."""
+
+    def clean_gen_repl(m):
+        """Finds the substitution for for a clean-up match."""
+        # print("{} CLEAN_GEN_REPL {}".format(word, m.group(0)))
+        tag = m.group(1).strip()
+        tag = re.sub(r"\s+", " ", tag)
+        for prefix in ("R:", "RQ:", "table:", "list:", "DEFAULTSORT:"):
+            if tag.startswith(prefix):
+                return ""
+        if tag not in clean_dest_ht:
+            if tag in ignored_templates:
+                return ""
+            # Fall to using default expansion
+        else:
+            lst = list(x or "" for x in m.groups())
+            parts = list(lst[i - 1].strip()
+                         for i in template_groupidxs if i <= len(lst))
+            kwargs = {"word": word}
+            argnum = 1
+            for g in parts:
+                argm = re.match(template_arg_with_name_re, g)
+                if argm is None:
+                    if g != "":
+                        kwargs["arg{}".format(argnum)] = g
+                    argnum += 1
+                else:
+                    k = argm.group(1).strip()
+                    v = argm.group(2).strip()
+                    k = re.sub(r"\s+", " ", k)
+                    if k.isdigit():
+                        k = "arg" + k
+                    kwargs[k] = v
+            dests = clean_dest_ht[tag]
+            #print("{} CLEAN: dests={} kwargs={} lst={} parts={}"
+            #      "".format(word, dests, kwargs, lst, parts))
+            for dest in dests:
+                try:
+                    ret = dest.format(**kwargs)
+                    return ret
+                except (KeyError, ValueError):
+                    #print("{} CLEAN_GEN_REPL: FAILED DEST {} FOR {} IN {}"
+                    #      "".format(word, dest, kwargs, m.group(0)))
+                    continue
+            else:
+                print("{} CLEAN_GEN_REPL: BAD DESTS IN {} FOR {}"
+                      "".format(word, dests, m.group(0)))
+        # Default expansion for the template concatenates arguments, except
+        # named arguments
+        groups = list(x or "" for x in m.groups())
+        lst = []
+        for i in range(0, len(groups)):
+            x = groups[i]
+            idx = x.find("/")
+            if idx >= 0:
+                if x[:idx] in place_prefixes and not x[idx + 1:].find("/"):
+                    x = x[idx + 1:]
+            lst.append(x)
+        parts = list(lst[i - 1].strip() for i in template_groupidxs
+                     if i <= len(lst) and
+                     re.match(template_arg_with_name_re, lst[i - 1]) is None and
+                     lst[i - 1] not in ("_", ""))
+        if parts and parts[0] in lang_codes:
+            parts = parts[1:]
+        ret = " ".join(parts).strip()
+        if tag in default_parenthesize_tags:
+            ret = "(" + ret + ")"
+        if tag not in default_tags and tag not in default_parenthesize_tags:
+            print("{} NO REPLACEMENT FOR {} IN {}"
+                  "".format(word, tag, m.group(0)))
+            #print("{} CLEAN_GEN_REPL {} {} {} -> {}"
+            #      "".format(word, tag, m.group(0), parts, ret))
+        return ret
+
+
+    # Repeat replacements as there could be nested structures
+    try:
+        iter = 0
+        while True:
+            v, count = re.subn(clean_re, clean_gen_repl, v)
+            if count == 0:
+                break
+            iter += 1
+            if iter > 10:
+                print("CLEAN_REPLACE_REGEXP EXCESS ITERATIONS", repr(v))
+                assert False
+    except re.error:
+        print("CLEAN_REPLACE_REGEXP ERROR CLEANING {}".format(repr(v)))
+    return v
+
 
 def remove_html_comments(text):
     """Removes HTML comments from the value."""
     assert isinstance(text, str)
-    text = text.strip()
     text = re.sub(r"(?s)<!--.*?-->", "", text)
+    text = text.strip()
     return text
 
 
-def clean_value(title):
+def clean_value(word, title):
     """Cleans a title or value into a normal string.  This should basically
     remove any Wikimedia formatting from it: HTML tags, templates, links,
     emphasis, etc.  This will also merge multiple whitespaces into one
     normal space and will remove any surrounding whitespace."""
     # Remove HTML comments
-    title = re.sub(r"(?s)<!--.*?-->", "", title)
-    # Replace tags for which we have replacements.
-    for k, v in clean_replace_map.items():
-        if v.find("\\") < 0:
-            title = re.sub(r"\{\{" + re.escape(k) +
-                           r"(" + arg_re + r")*\}\}", v, title)
-        else:
-            v = re.sub(r"\\2", r"\\7", v)
-            v = re.sub(r"\\1", r"\\4", v)
-            title = re.sub(r"\{\{" + re.escape(k) +
-                           r"((" + arg_re + r")" +
-                           r"(" + arg_re + r")?)?" +
-                           r"(" + arg_re + r")*" +
-                           r"\}\}",
-                           v, title)
-    # Replace tags by their arguments.  Note that they may be nested, so we
-    # keep repeating this until there is no change.  The regexps can only
-    # handle one level of nesting (i.e., one template inside another).
-    while True:
-        orig = title
-        title = re.sub(clean_arg3_re, r"\9", title)
-        title = re.sub(clean_arg2_re, r"\6", title)
-        title = re.sub(clean_arg1_re, r"\3", title)
-        if title == orig:
-            break
+    title = remove_html_comments(title)
+    # Replace templates according to our our replacement tables
+    # clean_arg_arg1_tags, clean_arg2_tags, clean_arg3_tags, clean_replace_map.
+    title = clean_replace_regexp(word, title)
     # Remove any remaining templates.
+    for m in re.finditer(r"\{\{[^}]+\}\}", title):
+        print("{} CLEAN_VALUE REMAINING TEMPLATE: {}"
+              "".format(word, m.group(0)))
     title = re.sub(r"\{\{[^}]+\}\}", "", title)
     # Remove references (<ref>...</ref>).
     title = re.sub(r"(?s)<ref>.*?</ref>", "", title)
@@ -882,6 +784,8 @@ def clean_value(title):
     title = re.sub("\u2019", "'", title)  # Note: no r"..." here!
     # Replace strange unicode quotes with normal quotes
     title = re.sub(r"”", '"', title)
+    # Replace unicode long dash by normal dash
+    title = re.sub(r"–", "-", title)
     # Replace whitespace sequences by a single space.
     title = re.sub(r"\s+", " ", title)
     # Remove whitespace before periods and commas etc
@@ -891,7 +795,7 @@ def clean_value(title):
     return title
 
 
-def split_subsections(text):
+def split_subsections(word, text):
     """Split the text into a linear sequence of sections.  Note that we
     ignore the nesting structure of subtitles, since that seems to be
     poorly enforced in Wiktionary.  This returns a list of (subtitle,
@@ -902,7 +806,7 @@ def split_subsections(text):
     text = remove_html_comments(text)
     # Find start and end offsets and titles for all subsections
     regexp = r"(?s)(^|\n)==+([^=\n]+?)==+"
-    offsets = list((m.start(), m.end(), clean_value(m.group(2)))
+    offsets = list((m.start(), m.end(), clean_value(word, m.group(2)))
                    for m in re.finditer(regexp, text))
     # Add a dummy section at end of text.
     offsets.append((len(text), len(text), ""))
@@ -917,7 +821,7 @@ def split_subsections(text):
         # Get end offset from the entry for the next subsection
         end = offsets[i + 1][0]
         # Clean the section title
-        subtitle = clean_value(subtitle)
+        subtitle = clean_value(word, subtitle)
         # Add an entry for the subsection.
         subsection = text[start: end]
         subsections.append((subtitle, subsection))
@@ -929,6 +833,10 @@ def data_append(data, key, value):
     is created if it does not exist."""
     assert isinstance(data, dict)
     assert isinstance(key, str)
+    if key in str_keys:
+        assert isinstance(value, str)
+    elif key in dict_keys:
+        assert isinstance(value, dict)
     lst = data.get(key, [])
     lst.append(value)
     if lst:
@@ -940,13 +848,45 @@ def data_extend(data, key, values):
     assert isinstance(data, dict)
     assert isinstance(key, str)
     assert isinstance(values, (list, tuple))
+    if key in str_keys:
+        for x in values:
+            assert isinstance(x, str)
+    elif key in dict_keys:
+        for x in values:
+            assert isinstance(x, dict)
     lst = data.get(key, [])
     lst.extend(values)
     if lst:
         data[key] = lst
 
 
-def template_args_to_dict(t):
+def data_inflection_of(word, data, t, tags):
+    """Adds an "inflection_of" value to ``data`` for the last argument of
+    template ``t``.  Adds ``tags`` to the "tags" value in ``data``."""
+    assert isinstance(data, dict)
+    assert isinstance(tags, (list, tuple))
+    vec = t_vec(word, t)
+    if len(vec) == 0:
+        print("ERROR DATA_INFLECTION_OF:", str(t), data, tags)
+        return
+    data_append(data, "inflection_of", vec[-1])
+    data_extend(data, "tags", tags)
+
+
+def data_alt_of(word, data, t, tags):
+    """Adds an "alt_of" value to ``data`` for the last argument of
+    template ``t``.  Adds ``tags`` to the "tags" value in ``data``."""
+    assert isinstance(data, dict)
+    assert isinstance(tags, (list, tuple))
+    vec = t_vec(word, t)
+    if len(vec) == 0:
+        print("ERROR DATA_ALT_OF:", str(t), data, tags)
+        return
+    data_append(data, "alt_of", vec[-1])
+    data_extend(data, "tags", tags)
+
+
+def template_args_to_dict(word, t):
     """Returns a dictionary containing the template arguments.  This is
     typically used when the argument dictionary will be returned from the
     parsing.  Positional arguments will be keyed by numeric strings.
@@ -955,10 +895,33 @@ def template_args_to_dict(t):
     for x in t.arguments:
         name = x.name.strip()
         value = x.value
-        ht[name] = clean_value(value)
+        ht[name] = clean_value(word, value)
     ht["template_name"] = t.name.strip()
     return ht
 
+
+quals_left_connect = set(["usually", "often", "rarely", "strongly", "now",
+                          "extremely", "including", "slightly",
+                          "especially",
+                          "chiefly", "sometimes", "mostly", "then"])
+quals_strip = set(["usually", "often", "strongly", "extremely", "chiefly",
+                   "mostly", "especially"])
+quals_both_connect = ("in", "_", "with", "outside")
+quals_skip = ("or", "and")
+quals_standalone = set(["present", "past", "participle", "infinitive",
+                        "future", "subjunctive", "imperative",
+                        "transitive", "intransitive", "reflexive",
+                        "nominative", "genitive", "accusative", "dative",
+                        "plural", "singular", "feminine",
+                        "modal", "auxiliary",
+                        "definite", "indefinite",
+                        "countable", "uncountable",
+                        "masculine"])
+quals_map = {
+    "in the plural": ["plural"],
+    "in the singular": ["singular"],
+    "dated": ["archaic"],
+}
 
 def clean_quals(vec):
     """Extracts and cleans qualifier values from the vector of arguments.
@@ -971,54 +934,64 @@ def clean_quals(vec):
         assert isinstance(x, str)
 
     tags = []
-    for i in range(len(vec)):
-        x = vec[i]
+    i = 0
+    if vec and vec[0] in lang_codes:
+        # If the qualifiers are from a template that has language tags,
+        # those hould be removed from the vector before passing it to
+        # this function.  This warning indicates the caller probably
+        # forgot to remove the language tag.
+        print("clean_quals: WARNING: {} in vec: {}".format(x, vec))
         i += 1
-        if x in ("en", "fi"):
-            # If the qualifiers are from a template that has language tags,
-            # those hould be removed from the vector before passing it to
-            # this function.  This warning indicates the caller probably
-            # forgot to remove the language tag.
-            print("clean_quals: WARNING: {} in vec: {}".format(x, vec))
-            continue
+    while i < len(vec):
+        tagparts = [vec[i]]
+        i += 1
         # Certain modifiers are often written as separate arguments but
         # actually modify the following value.  We combine them with the
         # following value using a space.
-        while (i < len(vec) - 1 and
-               vec[-1] in ("usually", "often", "rarely", "strongly", "now",
-                           "extremely", "including",
-                           "chiefly", "sometimes", "mostly", "with", "now")):
-            x += " " + vec[i]
+        while (i < len(vec) and
+               vec[i] not in quals_skip and
+               vec[i] not in quals_standalone and
+               (vec[i - 1] in quals_left_connect or
+                vec[i - 1] in quals_both_connect or
+                vec[i] in quals_both_connect)):
+            v = vec[i]
+            if v != "_":
+                tagparts.append(v)
             i += 1
-        # Values may be combined using "and" and "or" or "_".  We replace
-        # all these by a space and combine.
-        while (i < len(vec) - 2 and
-               vec[i] in ("_", "and", "or")):
-            x += " " + vec[i + 1]
-            i += 2
-        tags.append(x)
+        tag = " ".join(tagparts)
+        if tag in quals_map:
+            tags.extend(quals_map[tag])
+        elif tag in quals_skip:
+            pass
+        elif len(tagparts) == 2 and tagparts[1] in quals_strip:
+            tags.append(tagparts[1])
+            tags.append(tag)
+        else:
+            tags.append(tag)
+    # print("CLEAN_QUALS: {} -> {}".format(vec, tags))
     return tags
 
 
-def t_vec(t):
+def t_vec(word, t):
     """Returns a list containing positional template arguments.  Empty strings
     will be added for any omitted arguments.  The vector will include the last
     non-empty supplied argument, but not values beyond it."""
     vec = []
     for i in range(1, 20):
-        v = t_arg(t, i)
+        v = t_arg(word, t, i)
         vec.append(v)
     while vec and not vec[-1]:
         vec.pop()
     return vec
 
 
-def t_arg(t, arg):
+def t_arg(word, t, arg):
     """Retrieves argument ``arg`` from the template.  The argument may be
     identified either by its number or a string name.  Positional argument
     numbers start at 1.  This returns the empty string for arguments that
     don't exist.  The argument value is cleaned before returning."""
     # If the argument specifier is an integer, convert it to a string.
+    assert isinstance(word, str)
     if isinstance(arg, int):
         arg = str(arg)
     assert isinstance(arg, str)
@@ -1028,7 +1001,7 @@ def t_arg(t, arg):
     if v is None:
         return ""
     # Otherwise clean the value.
-    return clean_value(v.value)
+    return clean_value(word, v.value)
 
 
 def verb_form_map_fn(word, data, name, t, form_map):
@@ -1037,10 +1010,10 @@ def verb_form_map_fn(word, data, name, t, form_map):
     lot of misspellings and inconsistencies in how the values are entered in
     Wiktionary.  ``data`` here is the word sense."""
     # Add an indication that the word sense is a form of an other word.
-    data_append(data, "form_of", t_arg(t, 1))
+    data_append(data, "form_of", t_arg(word, t, 1))
     # Iterate over the specified keys in the template.
     for k in form_map["_keys"]:
-        v = t_arg(t, k)
+        v = t_arg(word, t, k)
         if not v:
             continue
         # Got a value for key.  Now map the value.  Each entry in the
@@ -1052,7 +1025,7 @@ def verb_form_map_fn(word, data, name, t, form_map):
                 assert isinstance(x, str)
                 data_append(data, "tags", x)
         else:
-            print(word, "UNKNOWN VERB FORM KEY", k, "IN", name, "of:",
+            print(word, "UNKNOWN VERB FORM KEY VALUE", k, "IN", name, "of:",
                   v, "in:", str(t))
 
 
@@ -1069,7 +1042,7 @@ def parse_sense(word, text):
     # the useful information is in the tagging within the text.  Note that
     # some entries don't really have a gloss text; for them, we may only
     # obtain some machine-readable linkages.
-    gloss = clean_value(text)
+    gloss = clean_value(word, text)
     data = {}
     if gloss:
         # Got a gloss for this sense.
@@ -1082,50 +1055,52 @@ def parse_sense(word, text):
     for t in p.templates:
         name = t.name.strip()
 
-        # Check for silently ignored templates, and skip them.
-        if name in ignored_templates:
-            continue
         # Labels and various other links are used for qualifiers. However,
         # they also seem to be sometimes used for other purposes, so this
         # may result in extra tags that perhaps should be elsewhere.
-        elif name in ("lb", "label", "context", "term-context", "term-label",
-                      "lbl", "tlb", "tcx", "1"):
-            data_extend(data, "tags", clean_quals(t_vec(t)[1:]))
+        if name in ("lb", "label", "context", "term-context", "term-label",
+                      "lbl", "tlb", "tcx"):
+            # XXX make sure these all start with a language code
+            data_extend(data, "tags", clean_quals(t_vec(word, t)[1:]))
+        elif name == "g2":
+            v = t_arg(word, t, 1)
+            if v == "m":
+                data_append(data, "tags", "masculine")
+            elif v == "f":
+                data_append(data, "tags", "feminine")
+            elif v == "n":
+                data_append(data, "tags", "neuter")
+            else:
+                print("{} UNRECOGNIZED GENDER {} IN {}".format(word, v, t))
         # Qualifiers are pretty clear; they provide useful information about
         # the word sense, such as field of study, dialect, or usage notes.
-        elif name in ("qual", "qualifier", "q", "qf", "i"):
-            data_extend(data, "tags", clean_quals(t_vec(t)))
+        elif name in ("qual", "qualifier", "q", "qf", "i", "a", "accent"):
+            data_extend(data, "tags", clean_quals(t_vec(word, t)))
         # Usage examples are collected under "examples"
-        elif name == "ux":
-            data_append(data, "examples", (t_arg(t, 2), t_arg(t, 3)))
+        elif name in ("ux", "uxi"):
+            data_append(data, "examples",
+                        (t_arg(word, t, 2), t_arg(word, t, 3)))
+        # XXX check these, I think they should go away
         # Additional "gloss" templates are added under "glosses"
         #elif name == "gloss":
-        #    gloss = t_arg(t, 1)
+        #    gloss = t_arg(word, t, 1)
         #    data_append(data, "glosses", gloss)
         # Various words have non-gloss definitions; we collect them under
         # "nonglosses".  For many purposes they might be treated similar to
         # glosses, though.
         elif name in ("non-gloss definition", "n-g", "ngd", "non-gloss",
                       "non gloss definition"):
-            gloss = t_arg(t, 1)
+            gloss = t_arg(word, t, 1)
             data_append(data, "nonglosses", gloss)
         # The senseid template seems to have varied uses. Sometimes it contains
         # a Wikidata id Q<numbers>; at other times it seems to be something
         # else.  We collect them under "senseid".  XXX this needs more study
         elif name == "senseid":
-            data_append(data, "senseid", t_arg(t, 2))
+            data_append(data, "senseid", t_arg(word, t, 2))
         # The "sense" templates are treated as additional glosses.
         elif name == "sense":
-            gloss = t_arg(t, 1)
+            gloss = t_arg(word, t, 1)
             data_append(data, "glosses", gloss)
-        # US state names seem to have a special tagging as such.  We tag them
-        # as places, indicate that they are a part of the Unites States, and
-        # are places of type "state".
-        elif name == "USstate":
-            data_append(data, "tags", "place")
-            data_append(data, "holonyms", "United States")
-            data_append(data, "place", {"type": "state",
-                                        "english": [word]})
         # These weird templates seem to be used to indicate a literal sense.
         elif name in ("&lit", "&oth"):
             data_append(data, "tags", "literal")
@@ -1136,29 +1111,35 @@ def parse_sense(word, text):
         elif name in ("given name",
                       "forename",
                       "historical given name"):
-            for k, v in template_args_to_dict(t).items():
+            data_append(data, "tags", "person")
+            for k, v in template_args_to_dict(word, t).items():
                 if k in ("template_name", "usage", "f", "var", "var2",
-                         "from", "from2",
-                         "diminutive", "dim", "dim2", "dim3", "dim4", "dim5",
-                         "dim6", "dim7", "dim8", "eq", "A", "3"):
+                         "from", "from2", "from3", "from4", "from5", "fron",
+                         "fromt", "meaning", "m", "mt", "f",
+                         "diminutive", "diminutive2",
+                         "dim", "dim2", "dim3", "dim4", "dim5",
+                         "dim6", "dim7", "dim8", "eq", "eq2", "eq3", "eq4",
+                         "eq5", "A", "3"):
+                    continue
+                if k == "sort":
+                    data_append(data, "sort", v)
                     continue
                 if v == "en" or (k == "1" and len(v) <= 3):
                     continue
-                if v in ("male", "female", "unisex", "male_or_female"):
-                    if v == "make_or_female":
-                        data_append(data, "tags", "female")
-                        data_append(data, "tags", "male")
-                    else:
-                        data_append(data, "tags", v)
-                    data_append(data, "tags", "person")
-                    continue
-                print(word, "PARSE_SENSE: unrecognized gender",
-                      repr(k), "=", repr(v), "in", str(t))
+                if v in ("male_or_female", "unisex"):
+                    pass
+                elif v == "male":
+                    data_append(data, "tags", "masculine")
+                elif v == "female":
+                    data_append(data, "tags", "feminine")
+                else:
+                    print(word, "PARSE_SENSE: unrecognized gender",
+                          repr(k), "=", repr(v), "in", str(t))
         # Surnames are also often tagged as such, and we tag the sense
         # with "surname" and "person".
         elif name == "surname":
             data_extend(data, "tags", ["surname", "person"])
-            from_ = t_arg(t, "from")
+            from_ = t_arg(word, t, "from")
             if from_:
                 data_append(data, "origin", from_)
         # Various tags seem to indicate topical categories that the
@@ -1166,25 +1147,25 @@ def parse_sense(word, text):
         # XXX similar things are also express by qualifiers (fields of study);
         # should investigate if these should be combined.
         elif name in ("topics", "categorize", "catlangname", "c", "C", "cln",
-                      "top", "categorise"):
-            data_extend(data, "topics", t_vec(t)[1:])
-            data_extend(data, "tags", t_vec(t)[1:])
+                      "top", "categorise", "catlangcode"):
+            data_extend(data, "topics", t_vec(word, t)[1:])
+            data_extend(data, "tags", t_vec(word, t)[1:])
         # Many nouns that are species and other organism types have taxon
         # links using various templates.  Store those links under
         # "taxon" (try to extract the species name).
         elif name in ("taxlink", "taxlinkwiki"):
-            x = t_arg(t, 1)
+            x = t_arg(word, t, 1)
             m = re.search(r"(.*) (subsp\.|f.)", x)
             if m:
                 x = m.group(1)
-            data_append(data, "taxon", t_vec(t))
+            data_append(data, "taxon", t_vec(word, t))
             data_append(data, "tags", "organism")
         elif name == "taxon":
-            data_append(data, "taxon", t_arg(t, 3))
+            data_append(data, "taxon", t_arg(word, t, 3))
             data_append(data, "tags", "organism")
         # Many organisms have vernacular names.
         elif name == "vern":
-            data_append(data, "taxon", t_arg(t, 1))
+            data_append(data, "taxon", t_arg(word, t, 1))
             data_append(data, "tags", "organism")
         # Many colors have a color panel that defines the RGB value of the
         # color.  This provides a physical reference for what the color means
@@ -1192,40 +1173,40 @@ def parse_sense(word, text):
         # RGB value under "color".  Sometimes it may be a CSS color
         # name, sometimes an RGB value in hex.
         elif name in ("color panel", "colour panel"):
-            v = t_vec(t)
+            v = t_vec(word, t)
             if len(v) == 1:
                 data_append(data, "color", v[0])
             else:
                 data_append(data, "color", v[1])
         elif name in ("colorbox", "colourbox"):
-            data_append(data, "color", t_arg(t, 1))
+            data_append(data, "color", t_arg(word, t, 1))
         # Numbers often have a number box, which will indicate the numeric
         # value meant by the word.  We record the numeric value under "value".
         # (There is also other information that we don't currently capture.)
         elif name == "number box":
-            data_append(data, "value", t_arg(t, 2))
+            data_append(data, "value", t_arg(word, t, 2))
         # SI units of measurement appear to have tags that identify them
         # as such.  Add the information under "unit" and tag them as "unit".
         elif name in ("SI-unit", "SI-unit-2",
                       "SI-unit-np"):
-            data_append(data, "unit", template_args_to_dict(t))
-            data_append(data, "tags", "unit")
+            data_append(data, "unit", template_args_to_dict(word, t))
+            data_append(data, "tags", "unit-of-measurement")
         elif name in ("SI-unit-abb", "SI-unit-abbnp"):
-            data_append(data, "unit", template_args_to_dict(t))
-            data_append(data, "tags", "unit")
-            mul = t_arg(t, 1)
-            base = t_arg(t, 2)
-            metric = t_arg(t, 3)
+            data_append(data, "unit", template_args_to_dict(word, t))
+            data_append(data, "tags", "unit-of-measurement")
+            mul = t_arg(word, t, 1)
+            base = t_arg(word, t, 2)
+            metric = t_arg(word, t, 3)
             gloss = ("{}{}, a unit of measurement for {}"
                      "".format(mul, base, metric))
             data_append(data, "glosses", gloss)
         elif name == "SI-unit-abb2":
-            data_append(data, "unit", template_args_to_dict(t))
-            data_append(data, "tags", "unit")
-            mul = t_arg(t, 1)
-            base = t_arg(t, 2)
-            base2 = t_arg(t, 3)
-            metric = t_arg(t, 4)
+            data_append(data, "unit", template_args_to_dict(word, t))
+            data_append(data, "tags", "unit-of-measurement")
+            mul = t_arg(word, t, 1)
+            base = t_arg(word, t, 2)
+            base2 = t_arg(word, t, 3)
+            metric = t_arg(word, t, 4)
             gloss = ("{}{}, a unit of measurement for {}"
                      "".format(mul, base, metric))
             data_append(data, "glosses", gloss)
@@ -1233,30 +1214,23 @@ def parse_sense(word, text):
         # typically Wikipedia.  Record such links under "wikipedia".
         elif name in ("slim-wikipedia", "wikipedia", "wikispecies", "w", "W",
                       "swp", "pedlink", "specieslink", "comcatlite",
-                      "Wikipedia", "taxlinknew", "wtorw"):
-            v = t_arg(t, 1)
+                      "Wikipedia", "taxlinknew", "wtorw", "wj"):
+            v = t_arg(word, t, 1)
             if not v:
                 v = word
             data_append(data, "wikipedia", v)
-        # Various words are marked as place names.  Tag such words as a
-        # "place", by the place type, and add a link under "holonyms" if what
-        # the place is part of has been specified.
-        elif name == "place":
-            data_append(data, "tags", "place")
-            data_append(data, "tags", t_arg(t, 2))
-            for i in range(3, 10):
-                v = t_arg(t, i)
-                if v:
-                    data_append(data, "holonyms", v)
+        elif name in ("w2",):
+            data_append(data, "wikipedia", t_arg(word, t, 2))
         # There are even morse code sequences (and semaphore (flag)) positions
         # defined in the Translingual portion of Wiktionary.  Collect
         # morse code information under "morse_code".
         elif name in ("morse code for", "morse code of",
                       "morse code abbreviation",
                       "morse code prosign"):
-            data_append(data, "morse_code", t_arg(t, 1))
-        elif name in ("mul-semaphore-for", "mul-semaphore for"):
-            data_append(data, "semaphore", t_arg(t, 1))
+            data_append(data, "morse_code", t_arg(word, t, 1))
+        elif name in ("mul-semaphore-for", "mul-semaphore for",
+                      "ja-semaphore for"):
+            data_append(data, "semaphore", t_arg(word, t, 1))
         # Some glosses identify the word as a character.  If so, tag it as
         # "character".
         elif (name == "Latn-def" or re.search("-letter$", name)):
@@ -1267,31 +1241,37 @@ def parse_sense(word, text):
         # There are various ways to specify that a word is a synonym or
         # alternative spelling/form of another word.  We record these all
         # under "alt_of".
-        elif name in ("synonym of", "syn of", "altname", "synonym",
-                      "alternative form of", "alt form", "alt form of",
+        elif name in ("alternative form of", "alt form", "alt form of",
+                      "alternative_form_of",
                       "alternative spelling of", "aspirate mutation of",
-                      "alternate spelling of", "altspelling", "standspell",
-                      "standard spelling of", "soft mutation of",
+                      "alternate spelling of", "altspelling",
+                      "pt-apocopic-verb",
+                      "soft mutation of",
                       "hard mutation of", "mixed mutation of", "lenition of",
                       "alt form", "altform", "alt-form",
                       "apocopic form of", "altcaps",
-                      "alternative name of", "honoraltcaps",
-                      "honor alt case",
+                      "alternative name of",
                       "alternative capitalisation of", "alt case",
                       "alternative capitalization of", "alternate form of",
+                      "Template:alternative case form of",
                       "alternative case form of", "alt-sp", "alt sp",
                       "standard form of", "alternative typography of",
                       "elongated form of", "alternative name of",
-                      "uncommon spelling of", "city nickname",
+                      "city nickname",
                       "combining form of",
-                      "caret notation of",
+                      "caret notation of", "syncopic form of",
                       "alternative term for", "altspell", "alter"):
-            data_append(data, "alt_of", t_arg(t, 1))
-        elif name in ("synonyms",):
-            data_append(data, "alt_of", t_arg(t, 2))
+            data_alt_of(word, data, t, ["alternative_spelling"])
+        elif name == "spelling of":
+            data_alt_of(word, data, t, t_arg(word, t, 2).lower().split())
+        elif name in ("honoraltcaps", "honor alt case"):
+            data_alt_of(word, data, t, ["honorable"])
+        elif name in ("standspell", "standard spelling of", "stand sp"):
+            data_alt_of(word, data, t, ["standard_spelling"])
+        elif name in ("synonyms", "synonym of", "syn of", "altname", "synonym"):
+            data_alt_of(word, data, t, ["synonym"])
         elif name in ("Br. English form of",):
-            data_append(data, "alt_of", t_arg(t, 1))
-            data_append(data, "tags", "british")
+            data_alt_of(word, data, t, ["UK"])
         # Some words are marked as being pronunciation spellings, or
         # "eye dialect" words.  Record the canonical word under "alt_of" and
         # add a "spoken" tag.
@@ -1299,39 +1279,39 @@ def parse_sense(word, text):
                       "pronunciation spelling",
                       "pronunciation respelling of",
                       "pronunciation spelling of"):
-            data_append(data, "alt_of", t_arg(t, 1))
-            data_append(data, "tags", "spoken")
+            data_alt_of(word, data, t, ["spoken"])
         # If the gloss is marked as an obsolete/archaic spelling,
         # include "alt_of" and tag the gloss as "archaic".
         elif name in ("obsolete spelling of", "obsolete form of", "obs sp",
-                      "obsolete typography of", "rareform",
-                      "superseded spelling of", "former name of",
+                      "obs form", "obsolete typography of", "obsolete sp",
+                      "medieval spelling of"):
+            data_alt_of(word, data, t, ["archaic", "obsolete"])
+        elif name in ("superseded spelling of", "former name of",
                       "archaic spelling of", "dated spelling of",
                       "archaic form of", "dated form of"):
-            data_append(data, "alt_of", t_arg(t, 1))
-            data_append(data, "tags", "archaic")
+            data_alt_of(word, data, t, ["archaic"])
         # If the gloss is marked as an informal spqlling, include "alt_of" and
         # tag it as "colloquial".
         elif name in ("informal spelling of", "informal form of"):
-            data_append(data, "alt_of", t_arg(t, 1))
-            data_append(data, "tags", "colloquial")
+            data_alt_of(word, data, t, ["informal"])
         # If the gloss is marked as an euphemistic spelling, include "alt_of"
         # and tag it as "euphemism".
         elif name in ("euphemistic form of", "euphemistic spelling of"):
-            data_append(data, "alt_of", t_arg(t, 1))
-            data_append(data, "tags", "euphemism")
+            data_alt_of(word, data, t, ["euphemism"])
         # If the gloss is indicated as a misspelling or non-standard spelling
         # of another word, include "alt_of" and tag it as a "misspelling".
         elif name in ("deliberate misspelling of", "misconstruction of",
                       "misspelling of", "common misspelling of",
-                      "nonstandard form of", "nonstandard spelling of"):
-            data_append(data, "alt_of", t_arg(t, 1))
-            data_append(data, "tags", "misspelling")
+                      "misspelling form of", "missp",
+                      "nonstandard form of", "nonstandard spelling of",
+                      "de-umlautless spelling of"):
+            data_alt_of(word, data, t, ["misspelling"])
         # If the gloss is indicated as a rare form of anothe word, include
         # "alt_of" and tag it as "rare".
-        elif name in ("rare form of", "rare spelling of"):
-            data_append(data, "alt_of", t_arg(t, 1))
-            data_append(data, "tags", "rare")
+        elif name in ("rare form of", "rare spelling of",
+                      "rareform", "uncommon spelling of",
+                      "uncommon form of", "rare sp"):
+            data_alt_of(word, data, t, ["rare"])
         # If the gloss is marked as an abbreviation of another term
         # (there are many ways to do this!), include "alt_of" and tag it
         # as an "abbreviation".  Also, if it includes wikipedia links,
@@ -1342,7 +1322,7 @@ def parse_sense(word, text):
                       "clip of", "aphetic form of",
                       "short form of", "ellipsis of", "ellipse of",
                       "short of", "abbreviation", "abb", "contraction of"):
-            x = t_arg(t, 1)
+            x = t_arg(word, t, 2)
             if x.startswith("w:"):
                 x = x[2:]
                 data_append(data, "wikipedia", x)
@@ -1350,148 +1330,527 @@ def parse_sense(word, text):
             data_append(data, "tags", "abbreviation")
         elif name in ("only used in", "only in"):
             # This appears to be used in "man" for "man enough"
-            data_append(data, "only_in", t_arg(t, 1))
+            data_append(data, "only_in", t_arg(word, t, 1))
         # This tag indicates the word is an inflection of another word, but
         # in a complicated way that we won't try to parse here.  We include
         # the information under "complex_inflection_of".
         elif name in ("inflection of", "infl of"):
-            data_append(data, "complex_inflection_of", template_args_to_dict(t))
+            data_append(data, "complex_inflection_of",
+                        template_args_to_dict(word, t))
         # There are many templates that indicate a word is an inflected form
         # of another word.  Such tags are handled here.  For all of them,
         # we include the base form under "inflection_of" and add tags to
         # indicate the type of inflection/derivation.
-        elif name == "inflected form of":
-            data_append(data, "inflection_of", t_arg(t, 1))
+        elif name in ("inflected form of", "form of"):
+            tgs = set(t_arg(word, t, 2).lower().split()) - set(["form", "of"])
+            data_inflection_of(word, data, t, list(tgs))
+        elif name == "native or resident of":
+            data_inflection_of(word, data, t, ["person"])
         elif name == "agent noun of":
-            data_append(data, "agent_of", t_arg(t, 1))
-            # XXX does this imply a person or organism?
-            data_append(data, "tags", "agent")
+            data_inflection_of(word, data, t, ["agent"])
+        elif name == "nominalization of":
+            data_inflection_of(word, data, t, ["nominalization"])
         elif name == "feminine plural of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "feminine")
-            data_append(data, "tags", "plural")
+            data_inflection_of(word, data, t, ["feminine", "plural"])
         elif name == "feminine singular of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "feminine")
-            data_append(data, "tags", "singular")
+            data_inflection_of(word, data, t, ["feminine", "singular"])
         elif name == "masculine plural of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "masculine")
-            data_append(data, "tags", "plural")
+            data_inflection_of(word, data, t, ["masculine", "plural"])
         elif name == "neuter plural of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "neuter")
-            data_append(data, "tags", "plural")
-        elif name == "feminine noun of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "feminine")
+            data_inflection_of(word, data, t, ["neuter", "plural"])
+        elif name in ("feminine noun of", "feminine equivalent of"):
+            data_inflection_of(word, data, t, ["feminine"])
         elif name == "verbal noun of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "verbal_noun")
+            data_inflection_of(word, data, t, ["verbal_noun"])
         elif name == "masculine singular of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "masculine")
-            data_append(data, "tags", "singular")
+            data_inflection_of(word, data, t, ["masculine", "singular"])
         elif name == "neuter singular of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "neuter")
-            data_append(data, "tags", "singular")
+            data_inflection_of(word, data, t, ["neuter", "singular"])
         elif name == "feminine of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "feminine")
+            data_inflection_of(word, data, t, ["feminine"])
+        elif name in ("masculine of", "masculine noun of"):
+            data_inflection_of(word, data, t, ["masculine"])
+        elif name == "participle of":
+            data_inflection_of(word, data, t, ["participle"])
         elif name in ("present participle of", "gerund of",
                       "en-ing form of"):
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "participle")
-            data_append(data, "tags", "present")
+            data_inflection_of(word, data, t, ["participle", "present"])
         elif name in ("present tense of", "present of"):
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "present")
-        elif name in ("past of", "past sense of",
-                      "past tense of",
-                      "en-simple past of", "en-past of"):
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "past")
+            data_inflection_of(word, data, t, ["present"])
+        elif name in ("past of", "past sense of", "en-past of",
+                      "past tense of", "en-simple past of"):
+            data_inflection_of(word, data, t, ["past"])
+        elif name == "passive of":
+            data_inflection_of(word, data, t, ["passive"])
         elif name == "past participle of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "participle")
-            data_append(data, "tags", "past")
+            data_inflection_of(word, data, t, ["past", "participle"])
+        elif name == "feminine plural past participle of":
+            data_inflection_of(word, data, t,
+                               ["feminine", "plural", "past", "participle"])
+        elif name == "feminine singular past participle of":
+            data_inflection_of(word, data, t,
+                               ["feminine", "singular", "past", "participle"])
+        elif name == "masculine plural past participle of":
+            data_inflection_of(word, data, t,
+                               ["masculine", "plural", "past", "participle"])
+        elif name == "masculine singular past participle of":
+            data_inflection_of(word, data, t,
+                               ["masculine", "singular", "past", "participle"])
+        elif name == "perfective form of":
+            data_inflection_of(word, data, t, ["perfective"])
         elif name in ("en-third-person singular of",
                       "en-third person singular of"):
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_extend(data, "tags", ["present", "singular", "3"])
+            data_inflection_of(word, data, t, ["present", "singular", "3"])
         elif name == "imperative of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "imperative")
+            data_inflection_of(word, data, t, ["imperative"])
         elif name == "nominative plural of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "plural")
-            data_append(data, "tags", "nominative")
-        elif name in ("plural of",
-                      "alternative plural of",
+            data_inflection_of(word, data, t, ["plural", "nominative"])
+        elif name in ("alternative plural of", "plural of",
+                      "en-plural noun",
                       "plural form of"):
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "plural")
+            data_inflection_of(word, data, t, ["plural"])
         elif name in ("singular of", "singular form of"):
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "singular")
-        elif name == "diminutive of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "diminutive")
-        elif name == "form of":
-            data_append(data, "inflection_of", t_arg(t, 2))
-            data_append(data, "tags", t_arg(t, 1))
+            data_inflection_of(word, data, t, ["singular"])
+        elif name in ("diminutive of", "dim of"):
+            data_inflection_of(word, data, t, ["diminutive"])
+        elif name == "endearing form of":
+            data_inflection_of(word, data, t, ["endearing"])
+        elif name == "vocative plural of":
+            data_inflection_of(word, data, t, ["vocative", "plural"])
+        elif name == "vocative singular of":
+            data_inflection_of(word, data, t, ["vocative", "plural"])
+        elif name == "imperfective form of":
+            data_inflection_of(word, data, t, ["imperfective"])
+        elif name == "perfective form of":
+            data_inflection_of(word, data, t, ["perfective"])
         elif name in ("comparative of", "en-comparative of"):
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "comparative")
+            data_inflection_of(word, data, t, ["comparative"])
         elif name in ("superlative of", "en-superlative of"):
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "superlative")
+            data_inflection_of(word, data, t, ["superlative"])
         elif name in ("attributive of", "attributive form of"):
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "attributive")
-        # Handle some English-specific word form taggings.
+            data_inflection_of(word, data, t, ["attributive"])
+        elif name == "accusative singular of":
+            data_inflection_of(word, data, t, ["accusative", "singular"])
+        elif name == "accusative plural of":
+            data_inflection_of(word, data, t, ["accusative", "plural"])
+        elif name == "genitive of":
+            data_inflection_of(word, data, t, ["genitive"])
+        elif name == "genitive singular of":
+            data_inflection_of(word, data, t, ["genitive", "singular"])
+        elif name == "genitive plural of":
+            data_inflection_of(word, data, t, ["genitive", "plural"])
+        elif name == "dative plural of":
+            data_inflection_of(word, data, t, ["dative", "plural"])
+        elif name == "dative of":
+            data_inflection_of(word, data, t, ["dative"])
+        elif name == "dative singular of":
+            data_inflection_of(word, data, t, ["dative", "singular"])
+        elif name == "female equivalent of":
+            data_inflection_of(word, data, t, ["feminine"])
+        elif name == "augmentative of":
+            data_inflection_of(word, data, t, ["augmentative"])
+        elif name == "reflexive of":
+            data_inflection_of(word, data, t, ["reflexive"])
         elif name == "en-irregular plural of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "plural")
-            data_append(data, "tags", "irregular")
+            data_inflection_of(word, data, t, ["plural", "irregular"])
         elif name == "en-archaic second-person singular of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_extend(data, "tags", ["singular", "archaic", "present", "2"])
+            data_inflection_of(word, data, t,
+                               ["archaic", "singular", "present", "2"])
         elif name == "en-archaic second-person singular past of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_extend(data, "tags", ["singular", "archaic", "past", "2"])
+            data_inflection_of(word, data, t,
+                               ["archaic", "singular", "past", "2"])
         elif name == "second-person singular of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_extend(data, "tags", ["singular", "present", "2"])
+            data_inflection_of(word, data, t, ["singular", "present", "2"])
+        elif name == "topic form":
+            data_inflection_of(word, data, t, ["topic"])
         elif name in ("en-second-person singular past of",
                       "en-second person singular past of",
                       "second-person singular past of",
                       "second person singular past of"):
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_extend(data, "tags", ["singular", "past", "2"])
+            data_inflection_of(word, data, t, ["singular", "past", "2"])
         elif name == "en-archaic third-person singular of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_extend(data, "tags", ["singular", "archaic", "3"])
-        # Handle some Spanish-specific word form taggings.
+            data_inflection_of(word, data, t, ["archaic", "singular", "3"])
+        elif name == "pejorative of":
+            data_inflection_of(word, data, t, ["pejorative"])
+        elif name == "noun form of":
+            data_append(data, "inflection_of", t_arg(word, t, 2))
+            for x in t_vec(word, t)[2:]:
+                if not x:
+                    continue
+                if x in ("acc", "accusative"):
+                    data_append(data, "tags", "accusative")
+                elif x in ("gen", "genitive"):
+                    data_append(data, "tags", "genitive")
+                elif x in ("dat", "dative"):
+                    data_append(data, "tags", "dative")
+                elif x in ("nom", "nominative"):
+                    data_append(data, "tags", "nominative")
+                elif x in ("s", "sg", "singular"):
+                    data_append(data, "tags", "singular")
+                elif x in ("p", "pl", "plural"):
+                    data_append(data, "tags", "plural")
+                elif x in ("def", "definite"):
+                    data_append(data, "tags", "definite")
+                elif x in ("loc", "locative"):
+                    data_append(data, "tags", "locative")
+                elif x in ("voc", "vocative"):
+                    data_append(data, "tags", "vocative")
+                elif x in ("ins", "instrumental"):
+                    data_append(data, "tags", "instrumental")
+                elif x in ("ess", "essive"):
+                    data_append(data, "tags", "essive")
+                elif x in ("ela", "elative"):
+                    data_append(data, "tags", "elative")
+                elif x in ("ade", "adessive"):
+                    data_append(data, "tags", "adessive")
+                elif x in ("ine", "inessive"):
+                    data_append(data, "tags", "inessive")
+                else:
+                    print("{} UNHANDLED {} IN {}".format(word, x, t))
+                    break
+        elif name == "+preo":
+            data_append(data, "object_preposition", t_arg(word, t, 2))
+        elif name in ("+obj", "construed with"):
+            v = t_arg(word, t, 2)
+            if v in ("dat", "dative"):
+                data_append(data, "tags", "object_dative")
+            elif v in ("acc", "accusative"):
+                data_append(data, "tags", "object_accusative")
+            elif v in ("ela", "elative"):
+                data_append(data, "tags", "object_elative")
+            elif v in ("abl", "ablative"):
+                data_append(data, "tags", "object_ablative")
+            elif v in ("gen", "genitive"):
+                data_append(data, "tags", "object_genitive")
+            elif v in ("nom", "nominative"):
+                data_append(data, "tags", "object_nominative")
+            elif v in ("ins", "instructive"):
+                data_append(data, "tags", "object_instructive")
+            elif v == "with":
+                data_append(data, "tags", "object_with")
+            else:
+                print("{} UNHANDLED +OBJ {}".format(word, t))
+        elif name == "verb form of":
+            verb_form_map_fn(word, data, name, t, generic_verb_form_map)
+        # Handle some Spanish-specific tags
+        elif name == "es-adj form of":
+            vec = t_vec(word, t)
+            data_append(data, "inflection_of", vec[0])
+            for x in vec[1:]:
+                if x == "f":
+                    data_append(data, "tags", "feminine")
+                elif x == "m":
+                    data_append(data, "tags", "masculine")
+                elif x == "sg":
+                    data_append(data, "tags", "singular")
+                elif x == "pl":
+                    data_append(data, "tags", "plural")
+                else:
+                    print("{} ES-ADJ FORM OF UNKNOWN {} IN {}"
+                          "".format(word, x, t))
+        elif name == "es-compound of":
+            stem = t_arg(word, t, 1)
+            inf_ending = t_arg(word, t, 2)
+            infinitive = stem + inf_ending
+            form = t_arg(word, t, 3) or infinitive
+            pron1 = t_arg(word, t, 4)
+            pron2 = t_arg(word, t, 5)
+            mood = t_arg(word, t, "mood")
+            person = t_arg(word, t, "person")
+            data_append(data, "inflection_of", infinitive)
+            data_append(data, "tags", "pron-compound")
+            data_append(data, "pron1", pron1)
+            if pron2:
+                data_append(data, "pron2", pron2)
+            if mood in ("inf", "infinitive"):
+                data_append(data, "tags", "infinitive")
+            elif mood in ("part", "participle", "adv", "adverbial", "ger",
+                          "gedund", "gerundive", "gerundio",
+                          "present participle", "present-participle"):
+                data_append(data, "tags", "participle")
+            elif mood in ("imp", "imperative"):
+                data_append(data, "tags", "imperative")
+            elif mood in ("pret", "preterite"):
+                data_append(data, "tags", "preterite")
+            elif mood in ("pres", "present"):
+                data_append(data, "tags", "present")
+            elif mood in ("refl", "reflexive"):
+                data_append(data, "tags", "reflexive")
+            elif mood in ("impf", "imperfect"):
+                data_append(data, "tags", "imperfect")
+            elif mood == "subjunctive":
+                data_append(data, "tags", "subjunctive")
+            else:
+                print("{} UNRECOGNIZED MOOD IN {}".format(word, t))
+            if person in ("tú", "tu", "inf"):
+                data_extend(data, "tags", ["2", "singular", "informal"])
+            elif person in ("vosotros", "v", "inf-pl"):
+                data_extend(data, "tags", ["2", "plural", "informal"])
+            elif person in ("nosotros",):
+                data_extend(data, "tags", ["3"])
+            elif person in ("usted", "ud", "f"):
+                data_extend(data, "tags", ["2", "singular", "formal"])
+            elif person in ("ustedes", "uds", "f-pl"):
+                data_extend(data, "tags", ["2", "plural", "formal"])
+            elif person == "vos":
+                data_extend(data, "tags", ["1", "singular", "nominative"])
+            elif person == "él":
+                data_extend(data, "tags", ["3", "singular", "masculine"])
+            elif person == "s":
+                data_extend(data, "tags", ["singular"])
+            elif person == "me":
+                data_extend(data, "tags", ["1", "singular", "accusative"])
+            elif person == "se":
+                data_extend(data, "tags", ["1", "singular", "reflexive"])
+            elif person == "le":
+                data_extend(data, "tags", ["3", "singular", "dative"])
+            elif person:
+                print("{} UNRECOGNIZED PERSON IN {}".format(word, t))
         elif name == "es-verb form of":
             verb_form_map_fn(word, data, name, t, es_verb_form_map)
-        # Handle some German-specific word form taggings.
+        elif name == "es-demonstrative-accent-usage":
+            data_append(data, "tags", "demonstrative-accent")
+        # Handle some Italian-specific tags
+        elif name == "it-adj form of":
+            data_append(data, "inflection_of", t_arg(word, t, 1))
+            for x in t_vec(word, t)[1:]:
+                if x in ("f", "feminine"):
+                    data_append(data, "tags", "feminine")
+                elif x in ("m", "male"):
+                    data_append(data, "tags", "masculine")
+                elif x in ("s", "sg", "singular"):
+                    data_append(data, "tags", "singular")
+                elif x in ("p", "pl", "plural"):
+                    data_append(data, "tags", "plural")
+                else:
+                    print("{} UNRECOGNIZED {} IN {}".format(word, x, t))
+        # Handle some Dutch-specific tags
+        elif name == "nl-verb form of":
+            verb_form_map_fn(word, data, name, t, nl_verb_form_map)
+        elif name == "nl-noun form of":
+            form = t_arg(word, t, 1)
+            base = t_arg(word, t, 2)
+            data_append(data, "inflection_of", base)
+            if form == "sg":
+                data_append(data, "tags", "singular")
+            elif form == "pl":
+                data_append(data, "tags", "plural")
+            elif form == "dim":
+                data_append(data, "tags", "diminutive")
+            elif form == "gen":
+                data_append(data, "tags", "genitive")
+            elif form == "dat":
+                data_append(data, "tags", "dative")
+            elif form == "acc":
+                data_append(data, "tags", "accusative")
+            else:
+                print(word, "NL-NOUN FORM OF", str(t))
+        elif name == "nl-adj form of":
+            form = t_arg(word, t, 1)
+            base = t_arg(word, t, 2)
+            data_append(data, "inflection_of", base)
+            if form == "infl":
+                data_append(data, "tags", "inflected")
+            elif form == "part":
+                data_append(data, "tags", "partitive")
+            elif form == "comp":
+                data_append(data, "tags", "comparative")
+            elif form == "sup":
+                data_append(data, "tags", "superlative")
+            else:
+                print(word, "NL-ADJ FORM OF", str(t))
+        elif name == "nl-pronadv of":
+            data_append(data, "derived_from", t_arg(word, t, 1))
+            data_append(data, "derived_from", t_arg(word, t, 2))
+            data_append(data, "tags", "pronadv")
+        # Handle some Swedish-specific word form taggings
+        elif name == "sv-noun-form-def":
+            data_inflection_of(word, data, t, ["definite"])
+        elif name == "definite singular of":
+            data_inflection_of(word, data, t, ["definite", "singular"])
+        elif name == "definite plural of":
+            data_inflection_of(word, data, t, ["definite", "plural"])
+        elif name == "indefinite plural of":
+            data_inflection_of(word, data, t, ["indefinite", "plural"])
+        elif name == "sv-noun-form-def-pl":
+            data_inflection_of(word, data, t, ["definite", "plural"])
+        elif name == "sv-noun-form-indef-pl":
+            data_inflection_of(word, data, t, ["plural", "indefinite"])
+        elif name == "sv-noun-form-indef-gen":
+            data_inflection_of(word, data, t, ["genitive", "indefinite"])
+        elif name == "sv-noun-form-indef-gen-pl":
+            data_inflection_of(word, data, t,
+                               ["genitive", "indefinite", "plural"])
+        elif name == "sv-noun-form-def-gen-pl":
+            data_inflection_of(word, data, t,
+                               ["genitive", "definite", "plural"])
+        elif name == "sv-proper-noun-gen":
+            data_inflection_of(word, data, t, ["genitive"])
+        elif name == "sv-noun-form-def-gen":
+            data_inflection_of(word, data, t, ["genitive", "definite"])
+        elif name == "sv-noun-form-abs-def+pl":
+            data_inflection_of(word, data, t,
+                               ["absolute", "definite", "plural"])
+        elif name == "sv-noun-form-abs-pl":
+            data_inflection_of(word, data, t, ["absolute", "plural"])
+        elif name == "sv-adj-form-abs-def-m":
+            data_inflection_of(word, data, t,
+                               ["absolute", "definite", "masculine"])
+        elif name == "sv-adj-form-abs-indef-n":
+            data_inflection_of(word, data, t,
+                               ["absolute", "indefinite", "neuter"])
+        elif name == "sv-adj-form-abs-def+pl":
+            data_inflection_of(word, data, t,
+                               ["absolute", "definite", "plural"])
+        elif name == "sv-adj-form-abs-pl":
+            data_inflection_of(word, data, t, ["absolute", "plural"])
+        elif name == "sv-adj-form-abs-def":
+            data_inflection_of(word, data, t, ["absolute", "definite"])
+        elif name in ("sv-adj-form-comp", "sv-adv-form-comp"):
+            data_inflection_of(word, data, t, ["comparative"])
+        elif name in ("sv-adj-form-sup", "sv-adv-form-sup"):
+            data_inflection_of(word, data, t, ["superlative"])
+        elif name == "sv-adj-form-sup-attr":
+            data_inflection_of(word, data, t, ["superlative", "attributive"])
+        elif name == "sv-adj-form-sup-attr-m":
+            data_inflection_of(word, data, t,
+                               ["superlative", "attributive", "masculine"])
+        elif name in ("sv-adj-form-sup-pred", "superlative predicative of"):
+            data_inflection_of(word, data, t, ["superlative", "predicative"])
+        elif name == "sv-verb-form-pre":
+            data_inflection_of(word, data, t, ["present"])
+        elif name == "sv-verb-form-imp":
+            data_inflection_of(word, data, t, ["imperative"])
+        elif name == "sv-verb-form-past":
+            data_inflection_of(word, data, t, ["past"])
+        elif name == "sv-verb-form-sup":
+            data_inflection_of(word, data, t, ["supine"])
+        elif name == "sv-verb-form-sup-pass":
+            data_inflection_of(word, data, t, ["supine", "passive"])
+        elif name == "sv-verb-form-subjunctive":
+            data_inflection_of(word, data, t, ["subjunctive"])
+        elif name == "sv-verb-form-inf-pass":
+            data_inflection_of(word, data, t, ["infinitive", "passive"])
+        elif name == "sv-verb-form-pre-pass":
+            data_inflection_of(word, data, t, ["present", "passive"])
+        elif name == "sv-verb-form-past-pass":
+            data_inflection_of(word, data, t, ["past", "passive"])
+        elif name == "sv-verb-form-prepart":
+            data_inflection_of(word, data, t, ["participle", "present"])
+        elif name == "sv-verb-form-pastpart":
+            data_inflection_of(word, data, t, ["participle", "past"])
+        # Handle some German-specific word form taggings
         elif name == "de-verb form of":
             verb_form_map_fn(word, data, name, t, de_verb_form_map)
-        # Handle some Finnish-specific
+        elif name == "de-zu-infinitive of":
+            data_inflection_of(word, data, t, ["infinitive"])
+        elif name == "de-superseded spelling of":
+            data_append(data, "alt_of", t_arg(word, t, 1))
+            data_append(data, "tags", "archaic")
+        # Handle some Portuguese-specific tags
+        elif name in ("pt-verb form of", "pt-verb-form-of"):
+            data_inflection_of(word, data, t, [])
+        elif name in ("pt-obsolete-hellenism", "pt-obsolete hellenism"):
+            data_alt_of(word, data, t, ["archaic", "obsolete", "hellenism"])
+        elif name in ("pt-superseded-silent-letter-1990",
+                      "pt-superseded-hyphen",
+                      "pt-superseded-paroxytone"):
+            data_alt_of(word, data, t, ["archaic"])
+        elif name in ("pt-obsolete-éia",
+                      "pt-obsolete-ü",
+                      "pt-obsolete-ôo",
+                      "pt-obsolete-secondary-stress",
+                      "pt-obsolete-differential-accent",
+                      "pt-obsolete-silent-letter-1911"):
+            data_alt_of(word, data, t, ["archaic", "obsolete"])
+        elif name in ("pt-adj form of", "pt-adj-form-of"):
+            data_append(data, "inflection_of", t_arg(word, t, 1))
+            for x in t_vec(word, t)[1:]:
+                if x in ("f", "female"):
+                    data_append(data, "tags", "feminine")
+                elif x in ("m", "male"):
+                    data_append(data, "tags", "masculine")
+                elif x in ("s", "sg", "singular"):
+                    data_append(data, "tags", "singular")
+                elif x in ("p", "pl", "plural"):
+                    data_append(data, "tags", "plural")
+                elif x in ("mf", "m-f", "f-m"):
+                    pass
+                elif x in ("dim", "diminutive"):
+                    data_append(data, "tags", "diminutive")
+                else:
+                    print("{} PT-ADJ FORM OF UNKNOWN {} IN {}"
+                          "".format(word, x, t))
+        elif name == "pt-noun form of":
+            data_append(data, "inflection_of", t_arg(word, t, 1))
+            for x in t_vec(word, t)[1:]:
+                if x in ("onlym", "m", "male"):
+                    data_append(data, "tags", "masculine")
+                elif x in ("onlyf", "f", "female"):
+                    data_append(data, "tags", "feminine")
+                elif x in ("s", "sg", "singular"):
+                    data_append(data, "tags", "singular")
+                elif x in ("p", "pl", "plural"):
+                    data_append(data, "tags", "plural")
+                else:
+                    print("{} PT-NOUN FORM OF UNKNOWN {} IN {}"
+                          "".format(word, x, t))
+        # Handle some Japanese-specific tags
+        elif name == "ja-kana-def":
+            data_append(data, "tags", "ja-kana-def")
+        elif name in ("ja-kyujitai spelling of", "ja-kyu sp"):
+            data_append(data, "kyujitai-spelling", t_arg(word, t, 1))
+        elif name == "ja-past of verb":
+            data_inflection_of(word, data, t, ["past"])
+        elif name == "ja-usex":
+            data_append(data, "examples", ("ja", t_arg(word, t, 1)))
+        elif name == "ja-verb":
+            for k, v in template_args_to_dict(word, t).items():
+                data_append(data, "inflection_of", v)
+        # Handle some Chinese-specific tags
+        elif name in ("zh-old-name", "18th c."):
+            data_append(data, "tags", "archaic")
+        elif name in ("zh-alt-form", "zh-altname", "zh-alt-name",
+                      "zh-alt-term", "zh-altterm"):
+            data_append(data, "alt_of", t_arg(word, t, 1))
+        elif name in ("zh-short", "zh-abbrev", "zh-short-comp"):
+            data_append(data, "tags", "abbreviation")
+            for x in t_vec(word, t):
+                data_append(data, "alt_of", x)
+        elif name == "zh-misspelling":
+            data_append(data, "alt_of", t_arg(word, t, 1))
+            data_append(data, "tags", "misspelling")
+        elif name in ("zh-synonym", "zh-synonym of", "zh-syn-saurus"):
+            data_append(data, "tags", "synonym")
+            base = t_arg(word, t, 1)
+            if base != word:
+                data_append(data, "alt_of", base)
+        elif name in ("zh-dial", "zh-erhua form of"):
+            base = t_arg(word, t, 1)
+            if base != word:
+                data_append(data, "alt_of", base)
+                data_append(data, "tags", "dialectical")
+        elif name == "zh-mw":
+            data_extend(data, "classifier", t_vec(word, t))
+        elif name == "zh-classifier":
+            data_append(data, "tags", "classifier")
+        elif name == "zh-div":
+            # Seems to indicate type of a place (town, etc) in some entries
+            # but the value is in Chinese
+            data_append(data, "hypernym", t_arg(word, t, 1))
+        elif name in ("†", "zh-obsolete"):
+            data_extend(data, "tags", ["archaic", "obsolete"])
+        # Handle some Finnish-specific tags
         elif name == "fi-infinitive of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "infinitive")
-            if t_arg(t, "t"):
-                data_append(data, "tags", "inf-" + t_arg(t, "t"))
+            data_inflection_of(word, data, t, ["infinitive"])
+            if t_arg(word, t, "t"):
+                data_append(data, "tags", "infinitive-" + t_arg(word, t, "t"))
         elif name == "fi-participle of":
-            data_append(data, "inflection_of", t_arg(t, 1))
-            data_append(data, "tags", "participle")
-            if t_arg(t, "t"):
-                data_append(data, "tags", "pcp-" + t_arg(t, "t"))
+            data_inflection_of(word, data, t, ["participle"])
+            if t_arg(word, t, "t"):
+                data_append(data, "tags", "participle-" + t_arg(word, t, "t"))
         elif name == "fi-verb form of":
-            data_append(data, "inflection_of", t_arg(t, 1))
+            data_append(data, "inflection_of", t_arg(word, t, 1))
             mapping = {"1s": ["1", "singular"],
                        "2s": ["2", "singular"],
                        "3s": ["3", "singular"],
@@ -1511,7 +1870,7 @@ def parse_sense(word, text):
                 k = k.name.strip()
                 if k in ("1", "c", "nodot", "suffix"):
                     continue
-                v = t_arg(t, k)
+                v = t_arg(word, t, k)
                 if v in mapping:
                     v = mapping[v]
                 else:
@@ -1519,9 +1878,9 @@ def parse_sense(word, text):
                     v = [v]
                 data_extend(data, "tags", v)
         elif name in ("fi-form of", "conjugation of"):
-            data_append(data, "inflection_of", t_arg(t, 1))
+            data_append(data, "inflection_of", t_arg(word, t, 1))
             for k in ("suffix", "suffix2", "suffix3"):
-                suffix = t_arg(t, k)
+                suffix = t_arg(word, t, k)
                 if suffix:
                     data_append(data, "suffix", suffix)
             for k in t.arguments:
@@ -1529,7 +1888,7 @@ def parse_sense(word, text):
                 if k in ("1", "2", "3", "suffix", "suffix2", "suffix3",
                          "c", "n", "type", "lang"):
                     continue
-                v = t_arg(t, k)
+                v = t_arg(word, t, k)
                 if not v or v == "-":
                     continue
                 if v in ("first-person", "first person", "1p"):
@@ -1613,47 +1972,110 @@ def parse_sense(word, text):
                     data_append(data, "tags", "past")
                 else:
                     data_append(data, "tags", v)
+        # Various words are marked as place names.  Tag such words as a
+        # "place", by the place type, and add a link under "holonyms" if what
+        # the place is part of has been specified.
+        elif name == "place":
+            data_append(data, "tags", "place")
+            transl = t_arg(word, t, "t")
+            if transl:
+                data_append(data, "alt_of", transl)
+            vec = t_vec(word, t)
+            for x in t_arg(word, t, 1).split("/"):
+                data_append(data, "tags", x)
+                data_append(data, "hypernyms", {"word": x})
+            # XXX many templates have non-first arguments not containing /
+            # that are a definition/gloss, and some have def=
+            for x in vec[2:]:
+                if not x:
+                    continue
+                idx = x.find("/")
+                if idx >= 0:
+                    prefix = x[:idx]
+                    if prefix in place_prefixes:
+                        kind = place_prefixes[prefix]
+                        v = x[idx + 1:]
+                        if v.startswith("en:") or v.startswith("es:"):
+                            v = v[3:]
+                        if v.find(":") >= 0:
+                            print("{} SUSPICIOUS UNHANDLED PLACE {}"
+                                  "".format(word, x))
+                        data_append(data, "holonyms",
+                                    {"word": v,
+                                     "type": kind})
+                    else:
+                        print("{} PLACE UNRECOGNIZED HOLONYM {} IN {}"
+                              "".format(word, x, t))
+                else:
+                    data_append(data, "holonyms", {"word": x})
+        # US state names seem to have a special tagging as such.  We tag them
+        # as places, indicate that they are a part of the Unites States, and
+        # are places of type "state".
+        elif name == "USstate":
+            data_append(data, "tags", "place")
+            data_append(data, "holonyms", "United States")
+            data_append(data, "place", {"type": "state",
+                                        "english": [word]})
         # Brazilian states and state capitals seem to use their own tagging.
         # Collect this information in tags and links.
         elif name == "place:Brazil/state":
             data_append(data, "tags", "place")
-            data_append(data, "tags", "state")
-            data_append(data, "meronyms", t_arg(t, "capital"))
-            data_append(data, "holonyms", "Brazil")
+            data_append(data, "tags", "province")
+            capital = t_arg(word, t, "capital")
+            if capital:
+                data_append(data, "meronyms", {"word": capital,
+                                               "type": "city"})
+            data_append(data, "holonyms", {"word": "Brazil",
+                                           "type": "country"})
         elif name in ("place:Brazil/capital",):
             data_append(data, "tags", "place")
             data_append(data, "tags", "city")
-            data_append(data, "tags", "capital")
-            data_append(data, "holonyms", "Brazil")
+            data_append(data, "holonyms", {"word": "Brazil",
+                                           "type": "country"})
         elif name in ("place:Brazil/state capital",
                       "place:state capital of Brazil"):
             data_append(data, "tags", "place")
             data_append(data, "tags", "city")
-            data_append(data, "holonyms", t_arg(t, "state"))
-            data_append(data, "holonyms", "Brazil")
+            state = t_arg(word, t, "state")
+            if state:
+                data_append(data, "holonyms", {"word": state,
+                                               "type": "province"})
+            data_append(data, "holonyms", {"word": "Brazil",
+                                           "type": "country"})
         elif name in ("place:Brazil/municipality",
                       "place:municipality of Brazil"):
             data_append(data, "tags", "place")
-            data_append(data, "tags", "region")
-            data_append(data, "holonyms", t_arg(t, "state"))
-            data_append(data, "holonyms", "Brazil")
+            data_append(data, "tags", "municipality")
+            if state:
+                data_append(data, "holonyms", {"word": state,
+                                               "type": "province"})
+            data_append(data, "holonyms", {"word": "Brazil",
+                                           "type": "country"})
         # Skip various templates in this processing.  We silence warnings
         # about unhandled tags for these.  (Many of them are handled
         # elsewhere.)
         elif name in ("audio", "audio-pron",
-                      "IPA", "ipa", "a", "accent", "l", "link", "m",
+                      "IPA", "ipa", "l", "link", "l-self", "m", "m+",
                       "zh-m", "zh-l", "ja-l", "ja-def", "sumti", "ko-l",
-                      "alter", "ISBN", "syn",
-                      "hyph", "hyphenation", "ja-r", "ja-l", "homophones",
+                      "alter", "ISBN", "syn", "ISSN",
+                      "hyph", "hyphenation", "ja-r", "ja-l", "l/ja", "l-ja",
+                      "lj",
+                      "homophones",
                       "pinyin reading of", "enPR",
                       "mul-kangxi radical-def", "speciesabbrev",
                       "mul-shuowen radical-def",
                       "mul-kanadef",
                       "mul-domino def",
                       "mul-cjk stroke-def",
+                      "ja-see",
                       "Han char", "zh-only",
+                      "Brai-def",
+                      "abbreviated",
+                      "transterm",
+                      "phrasal verb",
+                      "quote",
                       "gloss", "gl",
-                      "upright", "tea room sense",
+                      "upright", "tea room sense", "1",
                       "non-gloss definition", "n-g", "ngd", "non-gloss"):
             continue
         # There are whole patterns of templates that we don't want warnings for.
@@ -1669,13 +2091,19 @@ def parse_sense(word, text):
         # be added for them.  For a few templates, they have intentionally
         # not yet been silenced because they could be useful but their use is
         # still too rare to bother collecting them.
-        else:
-            print(word, "INSIDE GLOSS:", repr(name), str(t))
+        elif (name not in ignored_templates and name not in default_tags and
+              name not in default_parenthesize_tags):
+            m = re.match(r"^table:([^/]*)(/[a-z0-9]+)?$", name)
+            if m:
+                category = m.group(1)
+                data_append(data, "tags", category)
+                continue
+            print(word, "UNRECOGNIZED INSIDE GLOSS:", repr(name), str(t))
+
     # Various fields should only contain strings.  Check that they do
     # (helps find bugs fast).  Also remove any duplicates from the lists and
     # sort them into ascending order for easier reading.
-    for k in ("tags", "glosses", "holonyms" "meronyms", "hypernyms", "hyponyms",
-              "antonyms", "synonyms", "derived", "form_of", "alt_of",
+    for k in ("tags", "glosses", "form_of", "alt_of",
               "inflection_of", "color", "wikidata"):
         if k not in data:
             continue
@@ -1705,7 +2133,7 @@ def parse_preamble(word, data, pos, text, p):
         # Also Warn about potentially incorrect templates for the
         # part-of-speech (common error in Wiktionary that should be corrected
         # there).
-        m = re.search("^head$|^[a-z][a-z][a-z]?-(plural noun|noun|verb|adj|adv|name|proper-noun|pron|phrase)(-|$)", name)
+        m = re.search("^head$|^[a-z][a-z][a-z]?-(plural noun|noun|verb|adj|adv|name|proper-noun|pron|phrase|decl-noun)(-|$)", name)
         if m:
             tagpos = m.group(1) or pos
             if ((tagpos not in template_allowed_pos_map or
@@ -1713,14 +2141,14 @@ def parse_preamble(word, data, pos, text, p):
                 m.group(0) != "head"):
                 print(word, "SUSPECT POS", pos, tagpos, str(t))
             # Record the head template under "heads".
-            data_append(data, "heads", template_args_to_dict(t))
+            data_append(data, "heads", template_args_to_dict(word, t))
         # If hyphenation information has been provided, record it.
         elif name in ("hyphenation", "hyph"):
-            data_append(data, "hyphenation", t_vec(t))
+            data_append(data, "hyphenation", t_vec(word, t))
         # If pinyin reading has been provided, record it (this is reading
         # of a Chinese word in romanized forms, i.e., western characters).
         elif name == "pinyin reading of":
-            data_extend(data, "pinyin", t_vec(t))
+            data_extend(data, "pinyin", t_vec(word, t))
         # XXX what other potentially useful information might be available?
 
     # Parse word senses for the part-of-speech.
@@ -1746,63 +2174,63 @@ def parse_pronunciation(word, data, text, p):
         for t in p.templates:
             name = t.name.strip()
             # Silently ignore templates that we don't care about.
-            if name in ignored_templates:
-                continue
-            elif name == "sense":
+            if name == "sense":
                 # Some words, like "house" (English) have a two-level structure
                 # with different pronunciations for verbs and nouns, with
                 # {{sense|...}} used to distinguish them
-                sense = t_arg(t, 1)
+                sense = t_arg(word, t, 1)
             # Pronunciation may be qualified by
             # accent/dialect/variant.  These are recorded under
             # "tags".  See
             # https://en.wiktionary.org/wiki/Module:accent_qualifier/data
             elif name in ("a", "accent"):
-                data_extend(variant, "accent", clean_quals(t_vec(t)))
+                data_extend(variant, "accent", clean_quals(t_vec(word, t)))
             # These other qualifiers and context markers may be used for
             # similar things, but their values are less well defined.
             elif name in ("qual", "qualifier", "q", "qf"):
-                data_extend(variant, "tags", t_vec(t))
+                data_extend(variant, "tags", t_vec(word, t))
             elif name in ("lb", "context",
                           "term-context", "tcx", "term-label", "tlb", "i"):
-                data_extend(variant, "tags", clean_quals(t_vec(t)[1:]))
+                data_extend(variant, "tags", clean_quals(t_vec(word, t)[1:]))
             # Extact IPA pronunciation specification under "ipa".
             elif name in ("IPA", "ipa"):
-                vec = t_vec(t)
+                vec = t_vec(word, t)
                 for ipa in vec[1:]:
                     data_append(variant, "ipa", (vec[0], ipa))
             # Extract special variants of the IPA template.  Store these as
             # dictionaries under "special_ipa".
             elif re.search("IPA", name):
-                data_append(variant, "special_ipa", template_args_to_dict(t))
+                data_append(variant, "special_ipa",
+                            template_args_to_dict(word, t))
             # If English pronunciation (enPR) has been specified, record them
             # under "enpr".
             elif name == "enPR":
-                data_append(variant, "enpr", t_arg(t, 1))
+                data_append(variant, "enpr", t_arg(word, t, 1))
             # There are also some other forms of pronunciation information that
             # we collect; it is not yet clear what all these mean.
             elif name in ("it-stress",):
-                data_append(variant, "stress", t_arg(t, 1))
+                data_append(variant, "stress", t_arg(word, t, 1))
             elif name == "PIE root":
-                data_append(variant, "pie_root", t_arg(t, 2))
+                data_append(variant, "pie_root", t_arg(word, t, 2))
             # If an audio file has been specified for the word,
             # collect those under "audios".
             elif name in ("audio", "audio-pron"):
                 data_append(variant, "audios",
-                            (t_arg(t, "lang"),
-                             t_arg(t, 1),
-                             t_arg(t, 2)))
+                            (t_arg(word, t, "lang"),
+                             t_arg(word, t, 1),
+                             t_arg(word, t, 2)))
             # If homophones have been specified, collect those under
             # "homophones".
             elif name in ("homophones", "homophone"):
-                data_extend(variant, "homophones", t_vec(t))
+                data_extend(variant, "homophones", t_vec(word, t))
             elif name == "hyphenation":
                 # This is often in pronunciation, but we'll store it at top
                 # level in the entry
-                data_append(data, "hyphenation", t_vec(t))
+                data_append(data, "hyphenation", t_vec(word, t))
             # These templates are silently ignored for pronunciation information
             # collection purposes.
-            elif name in ("inflection of", "l", "link", "m", "w", "W", "label",
+            elif name in ("inflection of", "l", "link", "l-self",
+                          "m", "w", "W", "label",
                           "gloss", "zh-m", "zh-l", "ja-l", "wtorw",
                           "ux", "ant", "syn", "synonyms", "antonyms",
                           "wikipedia", "Wikipedia",
@@ -1810,8 +2238,7 @@ def parse_pronunciation(word, data, text, p):
                           "altform", "alt-form", "abb", "rareform",
                           "alter", "hyph", "honoraltcaps",
                           "non-gloss definition", "n-g", "non-gloss",
-                          "ngd", "topics", "top", "c", "C", "categorize",
-                          "catlangname", "categorise",
+                          "ngd", "topics", "top",
                           "senseid", "defn", "ja-r", "ja-l",
                           "place:Brazil/state",
                           "place:Brazil/municipality",
@@ -1869,7 +2296,7 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
     def parse_item(text, kind, is_item):
 
         sense_text = None
-        qualifiers = ()
+        qualifiers = []
 
         def add_linkage(kind, v):
             nonlocal qualifiers
@@ -1903,12 +2330,12 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
             if qualifiers:
                 v["tags"] = qualifiers
             data_append(data, kind, v)
-            qualifiers = ()
+            qualifiers = []
 
         # Parse the item text.
         p = wikitextparser.parse(text)
         if len(text) < 200 and text and text[0] not in "*:":
-            item = clean_value(text)
+            item = clean_value(word, text)
             if item:
                 if item.startswith("For more, see "):
                     item = item[14:]
@@ -1916,14 +2343,14 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
                 for t in p.templates:
                     name = t.name.strip()
                     if name == "sense":
-                        sense_text = t_arg(t, 1)
+                        sense_text = t_arg(word, t, 1)
                     elif name == "l":
-                        add_linkage(kind, t_arg(t, 2))
+                        add_linkage(kind, t_arg(word, t, 2))
 
                 found = False
                 for m in re.finditer(r"''+([^']+)''+", text):
                     v = m.group(1)
-                    v = clean_value(v)
+                    v = clean_value(word, v)
                     if v.startswith("(") and v.endswith(")"):
                         # These seem to often be qualifiers
                         sense_text = v[1:-1]
@@ -1958,29 +2385,28 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
         # Iterate over all templates
         for t in p.templates:
             name = t.name.strip()
-            # Skip silently ignored tags
-            if name in ignored_templates:
-                continue
             # Link tags just use the default kind
-            elif name in ("l", "link"):
-                add_linkage(kind, t_arg(t, 2))
+            if name in ("l", "link", "l/ja", "1"):
+                add_linkage(kind, t_arg(word, t, 2))
             # Wikipedia links also suggest a linkage of the default kind
-            elif name in ("wikipedia", "Wikipedia", "w"):
-                add_linkage(kind, t_arg(t, 1))
+            elif name in ("wikipedia", "Wikipedia", "w", "wp"):
+                add_linkage(kind, t_arg(word, t, 1))
+            elif name in ("w2",):
+                add_linkage(kind, t_arg(word, t, 2))
             # Japanese links seem to commonly use "ja-r" template.
             # Use the default linkage for them, and collect the
             # "hiragana" mapping for the catagana term when available
             # (actually using them would require later
             # postprocessing).
             elif name == "ja-r":
-                kata = t_arg(t, 1)
-                hira = t_arg(t, 2)
+                kata = t_arg(word, t, 1)
+                hira = t_arg(word, t, 2)
                 add_linkage(kind, kata)
                 if hira:
                     data_append(data, "hiragana", (kata, hira))
             # Handle various types of common Japanese/Chinese links.
             elif name in ("ja-l", "lang", "zh-l"):
-                add_linkage(kind, t_arg(t, 1))
+                add_linkage(kind, t_arg(word, t, 1))
             # Vernacular names seem to be specified fairly often, but not
             # always intended as the actual link.  For now, we'll skip them.
             # XXX should look into these more thoroughly.
@@ -1994,43 +2420,62 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
             # Qualifiers modify the next link.  We make the (questionable)
             # assumption that they only refer to the next link.
             elif name in ("q", "qual", "qualifier", "qf", "i", "topics"):
-                qualifiers = clean_quals(t_vec(t)[1:])
+                qualifiers.extend(clean_quals(t_vec(word, t)[1:]))
             # Label tags are frequently used to specify qualifiers.
             elif name in ("lb", "lbl", "label", "cln", "C", "categorize",
-                          "categorise",
+                          "categorise", "catlangcode",
                           "catlangname", "c", "a", "accent"):
-                qualifiers = clean_quals(t_vec(t)[1:])
+                qualifiers.extend(clean_quals(t_vec(word, t)[1:]))
+            elif name == "g2":
+                v = t_arg(word, t, 1)
+                if v == "m":
+                    qualifiers.append("masculine")
+                elif v == "f":
+                    qualifiers.append("feminine")
+                elif v == "n":
+                    qualifiers.append("neuter")
+                elif v == "c":
+                    qualifiers.append("common")
+                elif v == "p":
+                    qualifiers.append("plural")
+                elif v == "m-p":
+                    qualifiers.extend(["masculine", "plural"])
+                elif v == "f-p":
+                    qualifiers.extend(["feminine", "plural"])
+                else:
+                    print("{} UNRECOGNIZED GENDER {} IN {}"
+                          "".format(word, v, t))
             # Gloss templates are sometimes used to qualify the sense
             # in which the link is intended.
             elif name in ("sense", "gloss", "s"):
-                sense_text = t_arg(t, 1)
+                sense_text = t_arg(word, t, 1)
             # Synonym templates expressly indicate the link as a synonym.
             elif name in ("syn", "synonyms"):
-                for x in t_vec(t)[1:]:
+                for x in t_vec(word, t)[1:]:
                     add_linkage("synonyms", x)
             elif name in ("syn2", "syn3", "syn4", "syn5", "syn1",
                           "syn2-u", "syn3-u", "syn4-u", "syn5-u"):
                 qualifiers = []
-                sense_text = t_arg(t, "title")
-                for x in t_vec(t):
+                sense_text = t_arg(word, t, "title")
+                for x in t_vec(word, t):
                     add_linkage("synonyms", x)
                 sense_text = None
             # Antonym templates expressly indicate the link as an antonym.
             elif name in ("ant", "antonyms"):
-                add_linkage("antonyms", t_arg(t, 2))
+                add_linkage("antonyms", t_arg(word, t, 2))
             elif name in ("ant5", "ant4", "ant3", "ant2", "ant1",
                           "ant5-u", "ant4-u", "ant3-u", "ant2-u"):
                 qualifiers = []
-                sense_text = t_arg(t, "title")
-                for x in t_vec(t):
+                sense_text = t_arg(word, t, "title")
+                for x in t_vec(word, t):
                     add_linkage("antonyms", x)
                 sense_text = None
             # Hyponym templates expressly indicate the link as a hyponym.
             elif name in ("hyp5", "hyp4", "hyp3", "hyp2", "hyp1",
                           "hyp5-u", "hyp4-u", "hyp3-u", "hyp2-u"):
                 qualifiers = []
-                sense_text = t_arg(t, "title")
-                for x in t_vec(t):
+                sense_text = t_arg(word, t, "title")
+                for x in t_vec(word, t):
                     add_linkage("hyponyms", x)
                 sense_text = None
             # Derived term links expressly indicate the link as a derived term.
@@ -2038,10 +2483,12 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
             # in other linkage subsections for just formatting purposes?
             elif name in ("der5", "der4", "der3", "der2", "der1", "zh-der",
                           "der5-u", "der4-u", "der3-u", "der2-u",
+                          "zh-der",
+                          "Template:User:Donnanz/der3-u",
                           "derived terms", "rootsee", "prefixsee"):
                 qualifiers = []
-                sense_text = t_arg(t, "title")
-                for x in t_vec(t):
+                sense_text = t_arg(word, t, "title")
+                for x in t_vec(word, t):
                     add_linkage("derived", x)
                 sense_text = None
             # Related term links expressly indicate the link is a related term.
@@ -2049,24 +2496,31 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
             elif name in ("rel5", "rel4", "rel3", "rel2", "rel1",
                           "rel5-u", "rel4-u", "rel3-u", "rel2-u"):
                 qualifiers = []
-                sense_text = t_arg(t, "title")
-                for x in t_vec(t):
+                sense_text = t_arg(word, t, "title")
+                for x in t_vec(word, t):
                     add_linkage("related", x)
                 sense_text = None
+            # Some languages mark compass directions as linkages
+            elif name in "compass":
+                args = template_args_to_dict(word, t)
+                for key in ("n", "ne", "e", "se", "s", "sw", "w", "ne"):
+                    v = args.get(key)
+                    if v:
+                        add_linkage("related", v)
             # These templates start a range with links of the specific kind.
             elif name in ("rel-top3", "rel-top4", "rel-top5",
                           "rel-top2", "rel-top"):
                 qualifiers = []
-                sense_text = t_arg(t, 1)
+                sense_text = t_arg(word, t, 1)
                 kind = "related"
             elif name in ("hyp-top3", "hyp-top4", "hyp-top5", "hyp-top2"):
                 qualifiers = []
-                sense_text = t_arg(t, 1)
+                sense_text = t_arg(word, t, 1)
                 kind = "hyponym"
             elif name in ("der-top", "der-top2", "der-top3", "der-top4",
                           "der-top5", "der top", "der bottom"):
                 qualifiers = []
-                sense_text = t_arg(t, 1)
+                sense_text = t_arg(word, t, 1)
                 kind = "derived"
             # These templates end a range with links of the specific kind.
             elif name in ("rel-bottom", "rel-bottom1", "rel-bottom2",
@@ -2076,18 +2530,52 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
             elif name in ("col1", "col1-u", "col2", "col2-u", "col3", "col3-u",
                           "col4", "col4-u", "col5", "col5-u"):
                 qualifiers = []
-                sense_text = t_arg(t, "title")
-                for x in t_vec(t)[1:]:
+                sense_text = t_arg(word, t, "title")
+                for x in t_vec(word, t)[1:]:
                     add_linkage(kind, x)
+            elif name == "bullet list":
+                qualifiers = []
+                sense_text = None
+                for x in t_vec(word, t):
+                    add_linkage(kind, x)
+            elif name in ("zh-synonym", "zh-syn-saurus"):
+                kind = "synonyms"
+                base = t_arg(word, t, 1)
+                if base != word:
+                    add_linkage(kind, base)
+            elif name in ("zh-ant-saurus"):
+                kind = "antonyms"
+                base = t_arg(word, t, 1)
+                if base != word:
+                    add_linkage(kind, base)
+            elif name == "zh-dial":
+                qualifiers.append("dialectical")
+                kind = "synonyms"
+                base = t_arg(word, t, 1)
+                if base != word:
+                    add_linkage(kind, base)
+
             # These templates seem to be frequently used for things that
             # aren't particularly useful for linking.
             elif name in ("t", "t+", "ux", "trans-top", "w", "pedlink",
                           "affixes", "ISBN", "specieslite", "projectlink",
                           "wikispecies", "comcatlite", "wikidata",
-                          "mid5", "top5"):
+                          "mid5", "top5", "compass-fi", "derivsee",
+                          "zh-cat",
+                          "presidential nomics",
+                          "video frames",
+                          "polyominoes",
+                          "mediagenic terms",
+                          "common names of Valerianella locusta",
+                          "Japanese demonstratives",
+                          "Spanish possessive adjectives",
+                          "Spanish possessive pronouns",
+                          "French possessive adjectives",
+                          "French possessive pronouns",
+                          "French personal pronouns"):
                 continue
             # Silently skip any templates matching these.
-            elif re.search("^list:|^R:", name):
+            elif re.search("^(list:|R:|table:)", name):
                 continue
             # It is common to use special templates to indicate genus or higher
             # classes for species.  We just convert those templates to hypernym
@@ -2097,9 +2585,9 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
                 v = m.group(1)
                 add_linkage("hypernyms", v)
 
-            else:
+            elif name not in ignored_templates:
                 # Warn about unhandled templates.
-                print(word, "LINKAGE", str(t))
+                print(word, "UNHANDLED LINKAGE", str(t))
 
         # Add thesaurus links
         for t in p.wikilinks:
@@ -2134,14 +2622,14 @@ def parse_any(word, base, data, text, pos, sectitle, p, capture_translations):
         # descriptions.  XXX see how to handle these, and if they should be
         # merged with "alt_of" in word senses.
         if name == "alter":
-            data_extend(data, "alternate", t_vec(t))
+            data_extend(data, "alternate", t_vec(word, t))
         # If a reference to a book by ISBN has been provided, save its ISBN.
         elif name == "ISBN":
-            data_append(data, "isbn", t_arg(t, 1))
+            data_append(data, "isbn", t_arg(word, t, 1))
         # This template marks the beginning of a group of translations, and
         # may provide a word sense for the translations.
         elif name == "trans-top":
-            translation_sense = t_arg(t, 1)
+            translation_sense = t_arg(word, t, 1)
         elif name == "trans-bottom":
             translation_sense = None
         # These templates indicate translations for the word.  We capture
@@ -2156,15 +2644,15 @@ def parse_any(word, base, data, text, pos, sectitle, p, capture_translations):
         #   roman   - romanization of the translation, if available
         elif name in ("t", "t+"):  # translations
             if capture_translations:
-                vec = t_vec(t)
+                vec = t_vec(word, t)
                 if len(vec) < 2:
                     continue
                 lang = vec[0]
                 transl = vec[1]
                 markers = vec[2:]  # gender/class markers
-                alt = t_arg(t, "alt")
-                roman = t_arg(t, "tr")
-                script = t_arg(t, "sc")
+                alt = t_arg(word, t, "alt")
+                roman = t_arg(word, t, "tr")
+                script = t_arg(word, t, "sc")
                 t = {"lang": lang, "word": transl}
                 if translation_sense:
                     t["sense"] = translation_sense
@@ -2181,14 +2669,21 @@ def parse_any(word, base, data, text, pos, sectitle, p, capture_translations):
         # These are highly language-specific, and this may require tweaking
         # as support for more languages is added.
         elif re.match("^[a-z][a-z][a-z]?-(conj|decl|infl|conjugation|declension|inflection)($|-)", name):
-            args = template_args_to_dict(t)
+            args = template_args_to_dict(word, t)
             data_append(data, "conjugation", args)
         # The "enum" template links words that are in a sequence to the next
         # and previous words in the sequence, as well as may provide a topic
         # for the sequence.  Collect this information when available, but
         # we don't try to interpret it here (there seems to be some variation).
         elif name == "enum":
-            data_append(data, "enum", t_vec(t))
+            lang = t_arg(word, t, 1)
+            prev_value = t_arg(word, t, 2)
+            next_value = t_arg(word, t, 3)
+            value = t_arg(word, t, 4)
+            data_append(data, "enum", {"lang": lang,
+                                       "prev": prev_value,
+                                       "next": next_value,
+                                       "value": value})
         elif name == "IPA" and sectitle != "pronunciation":
             print(word, "IPA OUTSIDE PRONUNCIATION ", sectitle)
 
@@ -2213,7 +2708,7 @@ def parse_etymology(word, data, text, p):
     for t in p.templates:
         name = t.name.strip()
         if name in ("compound", "affix", "prefix"):
-            data_append(data, "compound", template_args_to_dict(t))
+            data_append(data, "compound", template_args_to_dict(word, t))
 
 
 def page_iter(word, text, ctx):
@@ -2226,7 +2721,7 @@ def page_iter(word, text, ctx):
 
     # Divide the text into subsections.  We ignore the tree structure of
     # sections because it has so many inconsistencies.
-    sections = split_subsections(text)
+    sections = split_subsections(word, text)
 
     def iter_fn():
         language = None
@@ -2238,7 +2733,10 @@ def page_iter(word, text, ctx):
         def flush():
             # Flushes information about the current part-of-speech entry.
             nonlocal data
-            if language in ctx.capture_languages and pos is not None:
+            if pos is None:
+                return
+            if (ctx.capture_languages is None or
+                language in ctx.capture_languages):
                 data["pos"] = pos
                 datas.append(data)
                 data = {}
@@ -2274,7 +2772,7 @@ def page_iter(word, text, ctx):
                 language = sectitle
                 ctx.language_counts[language] += 1
                 pos = None
-                base = {"word": clean_value(word), "lang": language}
+                base = {"word": clean_value(word, word), "lang": language}
                 data = {}
                 datas = []
                 sectitle = ""
@@ -2299,7 +2797,8 @@ def page_iter(word, text, ctx):
 
             # Check if this is a language we are capturing.  If not, just
             # skip the section.
-            if language not in ctx.capture_languages:
+            if (ctx.capture_languages is not None and
+                language not in ctx.capture_languages):
                 continue
 
             if pos is None:
@@ -2393,11 +2892,12 @@ def page_iter(word, text, ctx):
     return iter_fn()
 
 
-def parse_text(word, text, ctx):
-    """Parses the text of a Wiktionary page and returns a list of dictionaries,
-    one for each word/part-of-speech defined on the page for the languages
-    specified by ``capture_languages``.  ``word`` is page title, and ``text``
-    is page text in Wikimedia format.  Other arguments indicate what is
+def parse_page(word, text, ctx):
+    """Parses the text of a Wiktionary page and returns a list of
+    dictionaries, one for each word/part-of-speech defined on the page
+    for the languages specified by ``capture_languages`` (None means
+    all available languages).  ``word`` is page title, and ``text`` is
+    page text in Wikimedia format.  Other arguments indicate what is
     captured."""
     assert isinstance(word, str)
     assert isinstance(text, str)
@@ -2450,9 +2950,10 @@ class WiktionaryTarget(object):
                  capture_compounds, capture_redirects):
         assert callable(word_cb)
         assert capture_cb is None or callable(capture_cb)
-        assert isinstance(capture_languages, (list, tuple, set))
-        for x in capture_languages:
-            assert isinstance(x, str)
+        if capture_languages is not None:
+            assert isinstance(capture_languages, (list, tuple, set))
+            for x in capture_languages:
+                assert isinstance(x, str)
         assert capture_translations in (True, False)
         assert capture_linkages in (True, False)
         assert capture_translations in (True, False)
@@ -2531,12 +3032,12 @@ class WiktionaryTarget(object):
         elif tag == "model":
             self.model = data
             if data not in ("wikitext", "Scribunto", "css", "javascript",
-                            "sanitized-css"):
+                            "sanitized-css", "json"):
                 print("UNRECOGNIZED MODEL", data)
         elif tag == "format":
             self.format = data
             if data not in ("text/x-wiki", "text/plain",
-                            "text/css", "text/javascript"):
+                            "text/css", "text/javascript", "application/json"):
                 print("UNRECOGNIZED FORMAT", data)
         elif tag == "page":
             pageid = self.pageid
@@ -2555,7 +3056,7 @@ class WiktionaryTarget(object):
                     return
                 # Parse the page, and call ``word_cb`` for each captured
                 # word.
-                ret = parse_text(title, self.text, self)
+                ret = parse_page(title, self.text, self)
                 for data in ret:
                     self.word_cb(data)
         else:
@@ -2586,10 +3087,11 @@ def parse_wiktionary(path, word_cb, capture_cb=None,
     assert isinstance(path, str)
     assert callable(word_cb)
     assert capture_cb is None or callable(capture_cb)
-    assert isinstance(languages, (list, tuple, set))
-    for x in languages:
-        assert isinstance(x, str)
-        assert x in wiktlangs.languages
+    if languages is not None:
+        assert isinstance(languages, (list, tuple, set))
+        for x in languages:
+            assert isinstance(x, str)
+            assert x in wiktlangs.languages
     assert translations in (True, False)
     assert pronunciations in (True, False)
     assert linkages in (True, False)

@@ -4,7 +4,7 @@
 # mostly been used with enwiktionary, but should be usable with other
 # wiktionaries as well.
 #
-# Copyright (c) 2018 Tatu Ylonen.  See LICENSE and https://ylonen.org
+# Copyright (c) 2018-2020 Tatu Ylonen.  See LICENSE and https://ylonen.org
 
 import os
 import re
@@ -81,6 +81,8 @@ if __name__ == "__main__":
     parser.add_argument("--language", type=str, action="append", default=[],
                         help="Language to capture (can specify multiple tiems, "
                         "defaults to English and Translingual)")
+    parser.add_argument("--all-languages", action="store_true", default=False,
+                        help="Extract words for all languages")
     parser.add_argument("--list-languages", action="store_true", default=False,
                         help="Print list of supported languages")
     parser.add_argument("--pages-dir", type=str, default=None,
@@ -129,7 +131,12 @@ if __name__ == "__main__":
             if x not in wiktlangs.languages:
                 print("Invalid language:", x)
                 sys.exit(1)
-    print("Capturing words for:", ", ".join(args.language))
+
+    if args.all_languages:
+        args.language = None
+        print("Capturing words for all available languages")
+    else:
+        print("Capturing words for:", ", ".join(args.language))
 
     # Open output file.
     out_path = args.out
