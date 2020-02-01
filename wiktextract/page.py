@@ -681,7 +681,7 @@ def parse_sense(word, text):
         elif name in ("feminine noun of", "feminine equivalent of"):
             data_inflection_of(word, data, t, ["feminine"])
         elif name == "verbal noun of":
-            data_inflection_of(word, data, t, ["verbal_noun"])
+            data_inflection_of(word, data, t, ["verbal noun"])
         elif name == "masculine singular of":
             data_inflection_of(word, data, t, ["masculine", "singular"])
         elif name == "neuter singular of":
@@ -847,7 +847,7 @@ def parse_sense(word, text):
             elif v in ("ins", "instructive"):
                 data_append(data, "tags", "object_instructive")
             elif v == "with":
-                data_append(data, "tags", "object_with")
+                data_append(data, "object_preposition", "with")
             else:
                 print("{} UNHANDLED +OBJ {}".format(word, t))
         elif name == "verb form of":
@@ -910,7 +910,7 @@ def parse_sense(word, text):
                 data_extend(data, "tags", ["3"])
             elif person in ("usted", "ud", "f"):
                 data_extend(data, "tags", ["2", "singular", "formal"])
-            elif person in ("ustedes", "uds", "f-pl"):
+            elif person in ("ustedes", "uds", "uds.", "f-pl"):
                 data_extend(data, "tags", ["2", "plural", "formal"])
             elif person == "vos":
                 data_extend(data, "tags", ["1", "singular", "nominative"])
@@ -969,14 +969,14 @@ def parse_sense(word, text):
             form = t_arg(word, t, 1)
             base = t_arg(word, t, 2)
             data_append(data, "inflection_of", base)
-            if form == "infl":
-                data_append(data, "tags", "inflected")
-            elif form == "part":
+            if form == "part":
                 data_append(data, "tags", "partitive")
             elif form == "comp":
                 data_append(data, "tags", "comparative")
             elif form == "sup":
                 data_append(data, "tags", "superlative")
+            elif form == "infl":
+                pass  # XXX does this have special meaning?
             else:
                 print(word, "NL-ADJ FORM OF", str(t))
         elif name == "nl-pronadv of":
@@ -1158,7 +1158,8 @@ def parse_sense(word, text):
         elif name == "zh-div":
             # Seems to indicate type of a place (town, etc) in some entries
             # but the value is in Chinese
-            data_append(data, "hypernym", t_arg(word, t, 1))
+            # XXX check this
+            data_append(data, "hypernyms", t_arg(word, t, 1))
         elif name in ("†", "zh-obsolete"):
             data_extend(data, "tags", ["archaic", "obsolete"])
         # Handle some Finnish-specific tags

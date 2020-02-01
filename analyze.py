@@ -17,6 +17,7 @@ known_data_keys = set([
     "heads",
     "hiragana",
     "hypernyms",
+    "hypernym",  # XXX remove this, or check zh-div
     "hyphenation",
     "hyponyms",
     "isbn",
@@ -34,19 +35,25 @@ known_data_keys = set([
 known_sense_keys = set([
     "agent_of",
     "alt_of",
+    "classifier",
     "color",
     "complex_inflection_of",
+    "derived_from",
     "examples",
     "form_of",
     "glosses",
     "holonyms",
     "hypernyms",
     "inflection_of",
+    "kyujitai-spelling",
     "morse_code",
     "nonglosses",
     "object_preposition",
     "only_in",
     "origin",
+    "pron1",
+    "pron2",
+    "sort",
     "senseid",
     "suffix",
     "tags",
@@ -64,20 +71,76 @@ lingform_tags = set([
     "singular",
     "present",
     "past",
+    "perfect",
+    "perfective",  # XXX
+    "imperfect",
+    "imperfective",  # XXX canonicalize to imperfect?
+    "pluperfect",
+    "negative",
+    "connegative",
     "future",
     "modal",
     "auxiliary",
+    "modal auxiliary verb",  # XXX
+    "augmentative",
     "imperative",
+    "imperative only",  # XX
     "conditional",
+    "indicative",
+    "preterite",
+    "affirmative",
+    "subjective",
+    "objective",
+    "aorist",
+    "semelfactive",
+    "iterative",
+    "copulative",
+    "causative",
+    "optative",
+    "hortative",
+    "desirative",
+    "evaluative",
+    "depreciative",
+    "expletive",
+    "catenative",
     "passive",
+    "passive form",  # XXX
+    "passive voice",  #XXX
+    "passive sense",  #XXX
+    "in a passive sense",  # XXX
+    "mediopassive",
+    "in mediopassive",  # XXX
+    "active",
+    "active verb",  # XXX
+    "active voice",  # XXX
+    "in active",  # XXX
+    "active sense",  # XXX
+    "middle",
+    "middle voice",
+    "in middle",
+    "in the middle voice",
     "potential",
     "participle",
+    "participle-past",  # XXX canonicalize to ["participle", "past"]
+    "participle-pres",  # XXX canonicalize to ["participle", "present"]
+    "participle-agnt",  # XXX canonicalize to something
+    "participle-nega",  # XXX canonicalize to something
+    "participle-past_pasv",  # XXX canonicalize
+    "participle-pres_pasv",  # XXX canonicalize
     "infinitive",
+    "infinitive-2a",
+    "infinitive-2p",
+    "infinitive-3a",
+    "infinitive-3p",
+    "infinitive-4",
     "stative",
+    "absolute",
     "nominative",
+    "nominative form",
     "genitive",
     "possessive",
     "accusative",
+    "accusative (partitive-accusative)",  # XXX
     "dative",
     "essive",
     "partitive",
@@ -86,11 +149,13 @@ lingform_tags = set([
     "elative",
     "illative",
     "adessive",
-    "abltative",
+    "ablative",
     "allative",
     "abessive",
     "comitative",
-    "instrumentative",
+    "instructive",
+    "locative",
+    "vocative",
     "feminine",
     "masculine",
     "neuter",
@@ -104,9 +169,11 @@ lingform_tags = set([
     "superlative",
     "attributive",
     "attributively",  # XXX canonicalize
+    "attributive usage",  # XXX
     "predicative",
     "used only predicatively",  # XXX canonicalize
     "predicative only",  # XXX canonicalize
+    "non-attributive",  # XXX
     "used as a predicative noun",   # XXX canonicalize
     "derogatory",
     "diminutive",
@@ -114,6 +181,8 @@ lingform_tags = set([
     "affectionate",  # XXX canonicalize?
     "hypocoristic",
     "pejorative",  # XXX canonicalize to "offensive"?
+    "pejoratively",  # XXX
+    "derogative",  # XXX
     "offensive",
     "racial slur",  # XXX canonicalize to "offensive"?
     "ethnic slur",  # XXX canonicalize
@@ -121,6 +190,7 @@ lingform_tags = set([
     "offensive slang",  # XXX canonicalize to both offensive and slang
     "dismissive",  # XXX canonicalize to offensive?  XXX check
     "subjunctive",
+    "subordinate",
     "supine",
     "humorous",
     "satirical",  # XXX canonicalize
@@ -129,10 +199,12 @@ lingform_tags = set([
     "ironic",  # XXX canonicalize?
     "archaic",
     "obsolete",
+    "obsolete form",  # XXX canonicalize to obsolete
     "obsolescent",  # XXX canonicalize to obsolete?
     "dialectical",
     "dialect",   # XXX canonicalize to dialectical
     "dialectal",  # XXX canonicalize to dialectical
+    "dialectal form",  # XXX canoncialize
     "eye dialect",
     "slang",
     "misconstructed",
@@ -153,6 +225,7 @@ lingform_tags = set([
     "coarse",
     "spoken",
     "literal",  # XXX normalize to something?
+    "literally",  # XXX seems to indicate literal translations
     "literary",
     "academic",  # XXX normalize to literary?
     "countable",
@@ -165,20 +238,22 @@ lingform_tags = set([
     "intransitive",
     "ditransitive",
     "ambitransitive",
-    "interrogative",
     "poetic",
     "euphemistic",
     "euphemism",  # XXX normalize to euphemistic
     "uncommon",
     "rare",
+    "rare form",  # XXX canonicalize to rare
     "obscure",  # XXX canonicalize to rare
     "neologism",
     "onomatopoeia",
+    "ideophonic",  # XXX canonicalize to onomatopoeia?
     "irregular",
     "regional",  # XXX check
     "proscribed",
     "historical",  # XXX normalize to archaic
     "historic",  # XXX normalize to archaic
+    "pseudo-archaic",  # XXX normalize to archaic
     "reflexive",
     "reflexive pronoun",  # normalize to reflexive
     "plural only",
@@ -188,6 +263,7 @@ lingform_tags = set([
     "plurale tantum",  # XXX normalize to plural only?
     "pluralized",  # XXX normalize to plural only
     "always plural",  # XXX normalize
+    "plural noun",  # XXX canonicalize
     "translation_hub",
     "postpositive",
     "hyperbole",  # XXX check where this is used
@@ -204,6 +280,10 @@ lingform_tags = set([
     "metonymic",  # XXX canonicalize
     "emphatic",
     "collective",  # XXX check where this is used
+    "collectively",   #XXX
+    "collective noun",  #XXX
+    "frequentative",
+    "distributive",
     "capitalized",  # XXX seems to be "often capitalized"
     "childish",
     "impersonal",
@@ -223,12 +303,95 @@ lingform_tags = set([
     "place",
     "organism",
     "unit-of-measurement",
+    "inanimate",
+    "animate",
     "in combination",  # XXX check
     "especially in combination",  # XXX check, canonicalize?
     "in combinations",  # XXX check, canonicalize?
+    "pron-compound",
     "rhetoric",   # XXX check, this might be a topic or a mix
     "rhetorical question",  # XXX check, is this same as rhetoric???
     "conjunctive",  # XXX this largely needs to be determined from topics
+    "disjunctive",  # XXX
+    "substantive",  # XXX should really change part-of-speech?
+    "noun",   # XXX canonicalize to substantive?
+    "as a noun",  # XXX canonicalize
+    "used as a noun",  # XXX canonicalize?
+    "verbal noun",
+    "locative noun",  # XXX check
+    "proper noun",  # XXX check
+    "mass noun",  # XXX canonicalize (uncountable)
+    "adjective",  # XXX should really change part-of-speech?
+    "adjectival",  # XXX canonicalize to adjective?
+    "as an adjective",  # XXX canonicalize to adjective?
+    "adjectival usage",  # XXX canonicalize to adjective?
+    "pronoun",   # XXX should affect part-of-speech?
+    "demonstrative",
+    "demonstrative pronoun",  # XXX canonicalize
+    "relative",
+    "possessive pronoun",  # XXX canonicalize to possessive?  part-of-speech?
+    "personal pronoun",  #  XXX how to canonicalize?
+    "reciprocal pronoun",  # XXX how to canonicalize?
+    "interrogative",
+    "interrogative pronoun",  # XXX canonicalize
+    "indefinite pronoun",
+    "definite pronoun",
+    "indefinite personal pronoun",
+    "first-person singular pronoun",  # XXX canonicalize
+    "third-person feminine singular pronoun",  #XXX
+    "first person singular pronoun",  #XXX
+    "second-person singular pronoun",  #XXX
+    "first person singular personal pronoun",
+    "third-person feminine plural pronoun",
+    "third-person masculine plural pronoun",
+    "third-person masculine singular pronoun",
+    "third-person plural pronoun",
+    "third person masculine singular pronoun",
+    "indefinite third-person singular pronoun",
+    "first-person plural pronoun",
+    "object pronoun",
+    "bound object pronoun",
+    "relative and indefinite pronoun",
+    "personal pronouns",
+    "reflexive-possessive pronoun",
+    "substantive interrogative pronoun",
+    "adverbial",
+    "adverb",  # XXX
+    "as an adverb",  # XXX
+    "ordinal adverbial",  # XXX
+    "cardinal adverbial",  # XXX
+    "adverbially",  # XXX
+    "adverbial form",  # XXX
+    "used adverbially",  # XXX
+    "as adverb",  # XXX
+    "demonstrative adverb",  # XXX canonicalize
+    "sentential adverb",
+    "verb",  # XXX part-of-speech?
+    "verbal",  # XXX
+    "impersonal verb",  # XXX
+    "reflexive verb",   # XXX
+    "false verb",  # XXX
+    "classifier",
+    "definite article",
+    "indefinite article",
+    "modal particle",
+    "interrogative particle",
+    "agent",
+    "patient",
+    "focus",
+    "active/agent-focus",  # XXX
+    "patient-focus",
+    "relative/goal-focus",  # XXX
+    "agent focus",
+    "external/agent focus",
+    "object_accusative",
+    "object_dative",
+    "object_genitive",
+    "object_nominative",
+    "object_instructive",
+    "object_elative",
+    "object_ablative",
+    "defective",
 ])
 
 lingform_end_re = re.compile(r" (" + "|".join(lingform_tags) + ")$")
