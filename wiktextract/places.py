@@ -66,6 +66,7 @@ place_prefixes = {
     "distmun": "municipality",
     "district": "district",
     "district municipality": "municipality",
+    "div": "province",
     "empire": "country",
     "en:country": "country",
     "en:island": "island",

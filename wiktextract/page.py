@@ -250,10 +250,14 @@ def data_append(data, key, value):
         assert isinstance(value, str)
     elif key in dict_keys:
         assert isinstance(value, dict)
+    if key == "tags":
+        if value == "":
+            return
+        if value == "en":
+            print("EN IN TAGS: {}".format(data))
     lst = data.get(key, [])
     lst.append(value)
-    if lst:
-        data[key] = lst
+    data[key] = lst
 
 
 def data_extend(data, key, values):
@@ -261,16 +265,8 @@ def data_extend(data, key, values):
     assert isinstance(data, dict)
     assert isinstance(key, str)
     assert isinstance(values, (list, tuple))
-    if key in str_keys:
-        for x in values:
-            assert isinstance(x, str)
-    elif key in dict_keys:
-        for x in values:
-            assert isinstance(x, dict)
-    lst = data.get(key, [])
-    lst.extend(values)
-    if lst:
-        data[key] = lst
+    for x in values:
+        data_append(data, key, x)
 
 
 def data_inflection_of(word, data, t, tags):
@@ -419,8 +415,9 @@ def parse_sense(word, text):
             data_extend(data, "tags", clean_quals(t_vec(word, t)))
         # Usage examples are collected under "examples"
         elif name in ("ux", "uxi"):
-            data_append(data, "examples",
-                        (t_arg(word, t, 2), t_arg(word, t, 3)))
+            pass
+            #data_append(data, "examples",
+            #            (t_arg(word, t, 2), t_arg(word, t, 3)))
         # XXX check these, I think they should go away
         # Additional "gloss" templates are added under "glosses"
         #elif name == "gloss":
@@ -440,8 +437,7 @@ def parse_sense(word, text):
             data_append(data, "senseid", t_arg(word, t, 2))
         # The "sense" templates are treated as additional glosses.
         elif name == "sense":
-            gloss = t_arg(word, t, 1)
-            data_append(data, "glosses", gloss)
+            data_append(data, "tags", t_arg(word, t, 1))
         # These weird templates seem to be used to indicate a literal sense.
         elif name in ("&lit", "&oth"):
             data_append(data, "tags", "literal")
@@ -452,7 +448,7 @@ def parse_sense(word, text):
         elif name in ("given name",
                       "forename",
                       "historical given name"):
-            data_append(data, "tags", "person")
+            data_extend(data, "tags", ["person", "given_name"])
             for k, v in template_args_to_dict(word, t).items():
                 if k in ("template_name", "usage", "f", "var", "var2",
                          "from", "from2", "from3", "from4", "from5", "fron",
@@ -529,28 +525,10 @@ def parse_sense(word, text):
         # SI units of measurement appear to have tags that identify them
         # as such.  Add the information under "unit" and tag them as "unit".
         elif name in ("SI-unit", "SI-unit-2",
-                      "SI-unit-np"):
+                      "SI-unit-np", "SI-unit-abb", "SI-unit-abbnp",
+                      "SI-unit-abb2"):
             data_append(data, "unit", template_args_to_dict(word, t))
             data_append(data, "tags", "unit-of-measurement")
-        elif name in ("SI-unit-abb", "SI-unit-abbnp"):
-            data_append(data, "unit", template_args_to_dict(word, t))
-            data_append(data, "tags", "unit-of-measurement")
-            mul = t_arg(word, t, 1)
-            base = t_arg(word, t, 2)
-            metric = t_arg(word, t, 3)
-            gloss = ("{}{}, a unit of measurement for {}"
-                     "".format(mul, base, metric))
-            data_append(data, "glosses", gloss)
-        elif name == "SI-unit-abb2":
-            data_append(data, "unit", template_args_to_dict(word, t))
-            data_append(data, "tags", "unit-of-measurement")
-            mul = t_arg(word, t, 1)
-            base = t_arg(word, t, 2)
-            base2 = t_arg(word, t, 3)
-            metric = t_arg(word, t, 4)
-            gloss = ("{}{}, a unit of measurement for {}"
-                     "".format(mul, base, metric))
-            data_append(data, "glosses", gloss)
         # There are various templates that links to other Wikimedia projects,
         # typically Wikipedia.  Record such links under "wikipedia".
         elif name in ("slim-wikipedia", "wikipedia", "wikispecies", "w", "W",
@@ -596,7 +574,7 @@ def parse_sense(word, text):
                       "alternative capitalization of", "alternate form of",
                       "Template:alternative case form of",
                       "alternative case form of", "alt-sp", "alt sp",
-                      "standard form of", "alternative typography of",
+                      "alternative typography of",
                       "elongated form of", "alternative name of",
                       "city nickname",
                       "combining form of",
@@ -606,8 +584,9 @@ def parse_sense(word, text):
         elif name == "spelling of":
             data_alt_of(word, data, t, t_arg(word, t, 2).lower().split())
         elif name in ("honoraltcaps", "honor alt case"):
-            data_alt_of(word, data, t, ["honorable"])
-        elif name in ("standspell", "standard spelling of", "stand sp"):
+            data_alt_of(word, data, t, ["honorific"])
+        elif name in ("standspell", "standard spelling of", "stand sp",
+                      "standard form of"):
             data_alt_of(word, data, t, ["standard_spelling"])
         elif name in ("synonyms", "synonym of", "syn of", "altname", "synonym"):
             data_alt_of(word, data, t, ["synonym"])
@@ -671,7 +650,7 @@ def parse_sense(word, text):
             data_append(data, "tags", "abbreviation")
         elif name in ("only used in", "only in"):
             # This appears to be used in "man" for "man enough"
-            data_append(data, "only_in", t_arg(word, t, 1))
+            data_append(data, "only_in", t_arg(word, t, 2))
         # This tag indicates the word is an inflection of another word, but
         # in a complicated way that we won't try to parse here.  We include
         # the information under "complex_inflection_of".
@@ -1144,7 +1123,8 @@ def parse_sense(word, text):
         elif name == "ja-past of verb":
             data_inflection_of(word, data, t, ["past"])
         elif name == "ja-usex":
-            data_append(data, "examples", ("ja", t_arg(word, t, 1)))
+            pass
+            #data_append(data, "examples", ("ja", t_arg(word, t, 1)))
         elif name == "ja-verb":
             for k, v in template_args_to_dict(word, t).items():
                 data_append(data, "inflection_of", v)
@@ -1322,7 +1302,10 @@ def parse_sense(word, text):
             if transl:
                 data_append(data, "alt_of", transl)
             vec = t_vec(word, t)
-            for x in t_arg(word, t, 1).split("/"):
+            if len(vec) < 2:
+                print("{} BAD PLACE {}".format(word, t))
+                continue
+            for x in vec[1].split("/"):
                 data_append(data, "tags", x)
                 data_append(data, "hypernyms", {"word": x})
             # XXX many templates have non-first arguments not containing /
@@ -1579,7 +1562,7 @@ def parse_pronunciation(word, data, text, p):
                           "altform", "alt-form", "abb", "rareform",
                           "alter", "hyph", "honoraltcaps",
                           "non-gloss definition", "n-g", "non-gloss",
-                          "ngd", "topics", "top",
+                          "ngd",
                           "senseid", "defn", "ja-r", "ja-l",
                           "place:Brazil/state",
                           "place:Brazil/municipality",
@@ -1760,13 +1743,12 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
                 pass  # Skip here, these often seem to be superclasses etc
             # Qualifiers modify the next link.  We make the (questionable)
             # assumption that they only refer to the next link.
-            elif name in ("q", "qual", "qualifier", "qf", "i", "topics"):
+            elif name in ("q", "qual", "qualifier", "qf", "i",
+                          "lb", "lbl", "label", "a", "accent"):
                 qualifiers.extend(clean_quals(t_vec(word, t)[1:]))
-            # Label tags are frequently used to specify qualifiers.
-            elif name in ("lb", "lbl", "label", "cln", "C", "categorize",
-                          "categorise", "catlangcode",
-                          "catlangname", "c", "a", "accent"):
-                qualifiers.extend(clean_quals(t_vec(word, t)[1:]))
+            elif name in ("C", "categorize", "categorise", "catlangcode",
+                          "catlangname", "c", "top", "cln"):
+                data_extend(data, "topics", t_vec(word, t)[1:])
             elif name == "g2":
                 v = t_arg(word, t, 1)
                 if v == "m":

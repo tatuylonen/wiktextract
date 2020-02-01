@@ -165,6 +165,6 @@ class WiktExtractTests(unittest.TestCase):
     def test_cv_nested1(self):
         v = "{{acronym of|es|{{w|Geroa Bai|lang=es}}}}"
         v = clean_value("WORD", v)
-        self.assertEqual(v, "acronym of Geroa Bai")
+        self.assertEqual(v, 'acronym of "Geroa Bai"')
 
 # XXX tests for clean_quals

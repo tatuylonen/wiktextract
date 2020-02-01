@@ -3,3 +3,9 @@ build/
 MANIFEST
 dist/
 *.egg-info/
+htmlcov
+htmlcov.new
+temp-*
+temp
+pages
+.coverage*

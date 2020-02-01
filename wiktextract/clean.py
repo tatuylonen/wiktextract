@@ -263,23 +263,28 @@ def clean_value(word, title):
 # topic areas, inflectional forms, etc.
 ######################################################################
 
-quals_left_connect = set(["usually", "often", "rarely", "strongly", "now",
-                          "extremely", "including", "slightly",
-                          "especially",
-                          "chiefly", "sometimes", "mostly", "then"])
+quals_left_connect = set(["usually", "often", "rarely", "strongly",
+                          "extremely", "including", "slightly", "possibly",
+                          "especially", "of", "a", "mildly", "specifically",
+                          "more", "generally", "particularly", "mainly",
+                          "literally", "somewhat",
+                          "narrowly", "quite", "not", "originally",
+                          "except", "formerly", "properly", "always", "later",
+                          "chiefly", "sometimes", "mostly", "then", "strictly"])
 quals_strip = set(["usually", "often", "strongly", "extremely", "chiefly",
-                   "mostly", "especially"])
+                   "mostly", "especially", "highly", "particularly"])
 quals_both_connect = ("in", "_", "with", "outside")
-quals_skip = ("or", "and")
-quals_standalone = set(["present", "past", "participle", "infinitive",
-                        "future", "subjunctive", "imperative",
-                        "transitive", "intransitive", "reflexive",
-                        "nominative", "genitive", "accusative", "dative",
-                        "plural", "singular", "feminine",
-                        "modal", "auxiliary",
-                        "definite", "indefinite",
-                        "countable", "uncountable",
-                        "masculine"])
+quals_skip = ("or", "and", "&", ",", "now", "very", "also", "later")
+quals_standalone = set([#"present", "past", "participle", "infinitive",
+                        #"future", "subjunctive", "imperative",
+                        #"transitive", "intransitive", "reflexive",
+                        #"nominative", "genitive", "accusative", "dative",
+                        #"plural", "singular", "feminine", "masculine",
+                        #"neuter",
+                        #"modal", "auxiliary",
+                        #"definite", "indefinite",
+                        #"countable", "uncountable",
+])
 quals_map = {
     "in the plural": ["plural"],
     "in the singular": ["singular"],
@@ -306,12 +311,16 @@ def clean_quals(vec):
         print("clean_quals: WARNING: {} in vec: {}".format(x, vec))
         i += 1
     while i < len(vec):
+        if vec[i] in quals_skip:
+            i += 1
+            continue
         tagparts = [vec[i]]
         i += 1
         # Certain modifiers are often written as separate arguments but
         # actually modify the following value.  We combine them with the
         # following value using a space.
         while (i < len(vec) and
+               vec[i - 1] not in quals_skip and
                vec[i] not in quals_skip and
                vec[i] not in quals_standalone and
                (vec[i - 1] in quals_left_connect or
