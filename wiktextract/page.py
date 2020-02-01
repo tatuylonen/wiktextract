@@ -1159,7 +1159,8 @@ def parse_sense(word, text):
             # Seems to indicate type of a place (town, etc) in some entries
             # but the value is in Chinese
             # XXX check this
-            data_append(data, "hypernyms", t_arg(word, t, 1))
+            data_append(data, "hypernyms",
+                        {"word": t_arg(word, t, 1)})
         elif name in ("†", "zh-obsolete"):
             data_extend(data, "tags", ["archaic", "obsolete"])
         # Handle some Finnish-specific tags
