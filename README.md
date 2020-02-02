@@ -115,6 +115,7 @@ The following command-line options are supported:
 * --out FILE: specifies the name of the file to write (specifying "-" as the file writes to stdout)
 * --language LANGUAGE: extracts the given language (this option may be specified multiple times; by default, English and Translingual words are extracted)
 * --list-languages: prints a list of supported language names
+* --all-languages: extract words for all available languages
 * --all: causes all data to be captured for the selected languages
 * --translations: causes translations to be captured
 * --pronunciation: causes pronunciation information to be captured
