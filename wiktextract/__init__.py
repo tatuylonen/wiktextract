@@ -3,7 +3,7 @@
 # Copyright (c) 2018-2020 Tatu Ylonen.  See LICENSE and https://ylonen.org
 
 from .wiktionary import parse_wiktionary
-from . import wiktlangs
+from .wiktlangs import wiktionary_languages
 from .config import WiktionaryConfig
 from .page import clean_value
 from .parts_of_speech import PARTS_OF_SPEECH
@@ -11,6 +11,6 @@ from .parts_of_speech import PARTS_OF_SPEECH
 __all__ = (
     "WiktionaryConfig",
     "parse_wiktionary",
-    "wiktlangs",
+    "wiktionary_languages",
     "PARTS_OF_SPEECH",
 )

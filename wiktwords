@@ -12,8 +12,7 @@ import sys
 import json
 import hashlib
 import argparse
-import wiktextract
-from wiktextract import wiktlangs, WiktionaryConfig
+from wiktextract import WiktionaryConfig, parse_wiktionary, wiktionary_languages
 
 
 # Pages whose titles have any of these prefixes are ignored.
@@ -115,7 +114,7 @@ if __name__ == "__main__":
     # languages
     if args.list_languages:
         print("Supported languages:")
-        for lang in sorted(wiktlangs.languages):
+        for lang in sorted(wiktionary_languages):
             print("    {}".format(lang))
         sys.exit(0)
 
@@ -128,7 +127,7 @@ if __name__ == "__main__":
         args.language = ["English", "Translingual"]
     else:
         for x in args.language:
-            if x not in wiktlangs.languages:
+            if x not in wiktionary_languages:
                 print("Invalid language:", x)
                 sys.exit(1)
 
@@ -171,8 +170,7 @@ if __name__ == "__main__":
                               capture_redirects=args.redirects)
 
     try:
-        ctx = wiktextract.parse_wiktionary(args.path, config, word_cb,
-                                           capture_cb)
+        ctx = parse_wiktionary(args.path, config, word_cb, capture_cb)
     finally:
         if out_path and out_path != "-":
             out_f.close()
