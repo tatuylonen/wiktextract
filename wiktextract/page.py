@@ -184,6 +184,7 @@ template_allowed_pos_map = {
     "name": ["name", "noun"],
     "adv": ["adv", "intj", "conj", "particle"],
     "phrase": ["phrase", "prep_phrase"],
+    "noun phrase": ["phrase"],
 }
 for k, v in template_allowed_pos_map.items():
     for x in v:
@@ -435,7 +436,7 @@ def parse_sense(word, text):
         elif name == "senseid":
             data_append(data, "senseid", t_arg(word, t, 2))
         # The "sense" templates are treated as additional glosses.
-        elif name == "sense":
+        elif name in ("sense", "Sense"):
             data_append(data, "tags", t_arg(word, t, 1))
         # These weird templates seem to be used to indicate a literal sense.
         elif name in ("&lit", "&oth"):
@@ -590,7 +591,8 @@ def parse_sense(word, text):
         elif name in ("standspell", "standard spelling of", "stand sp",
                       "standard form of"):
             data_alt_of(word, data, t, ["standard_spelling"])
-        elif name in ("synonyms", "synonym of", "syn of", "altname", "synonym"):
+        elif name in ("synonyms", "synonym of", "syonyms",
+                      "syn of", "altname", "synonym"):
             data_alt_of(word, data, t, ["synonym"])
         elif name in ("Br. English form of",):
             data_alt_of(word, data, t, ["UK"])
@@ -862,6 +864,8 @@ def parse_sense(word, text):
                 data_append(data, "tags", "object_nominative")
             elif v in ("ins", "instructive"):
                 data_append(data, "tags", "object_instructive")
+            elif v in ("obl", "oblique"):
+                data_append(data, "tags", "object_oblique")
             elif v == "with":
                 data_append(data, "object_preposition", "with")
             elif v == "avec":
@@ -1179,24 +1183,27 @@ def parse_sense(word, text):
             # XXX check this
             data_append(data, "hypernyms",
                         {"word": t_arg(word, t, 1)})
-        elif name in ("ant", "antonyms"):
+        elif name in ("ant", "antonym", "antonyms"):
             for x in t_vec(word, t)[1:]:
                 data_append(data, "antonyms", {"word": x})
-        elif name in ("hypo", "hyponyms"):
+        elif name in ("hypo", "hyponym", "hyponyms"):
             for x in t_vec(word, t)[1:]:
                 data_append(data, "hyponyms", {"word": x})
         elif name == "coordinate terms":
             for x in t_vec(word, t)[1:]:
                 data_append(data, "coordinate_terms", {"word": x})
-        elif name in ("hyper", "hypernyms"):
+        elif name in ("hyper", "hypernym", "hypernyms"):
             for x in t_vec(word, t)[1:]:
                 data_append(data, "hypernyms", {"word": x})
-        elif name in ("meronyms",):
+        elif name in ("mer", "meronym", "meronyms",):
             for x in t_vec(word, t)[1:]:
                 data_append(data, "meronyms", {"word": x})
-        elif name in ("holonyms",):
+        elif name in ("holonyms", "holonym"):
             for x in t_vec(word, t)[1:]:
                 data_append(data, "holonyms", {"word": x})
+        elif name in ("troponyms", "troponym"):
+            for x in t_vec(word, t)[1:]:
+                data_append(data, "troponyms", {"word": x})
         elif name in ("derived", "derived terms"):
             for x in t_vec(word, t)[1:]:
                 data_append(data, "derived", {"word": x})
@@ -1424,11 +1431,12 @@ def parse_sense(word, text):
                       "zh-m", "zh-l", "ja-l", "ja-def", "sumti", "ko-l",
                       "alter", "ISBN", "syn", "ISSN", "gbooks", "OCLC",
                       "hyph", "hyphenation", "ja-r", "ja-l", "l/ja", "l-ja",
-                      "lj", "c.", "a.", "CURRENTDAY", "CURRENTMONTHNAME",
+                      "lj", "c.", "ca.", "a.", "CURRENTDAY", "CURRENTMONTHNAME",
                       "CURRENTYEAR", "...", "…", "mdash", "SIC", "LCC",
-                      "homophones", "wsource", "nobr",
-                      "pinyin reading of", "enPR",
-                      "mul-kangxi radical-def", "speciesabbrev",
+                      "homophones", "wsource", "nobr", "NNBS", "@", "CE", "BC",
+                      "pinyin reading of", "enPR", "J2G", "C.E.", "BCE", "A.D.",
+                      "B.C.E.",
+                      "mul-kangxi radical-def", "speciesabbrev", "'",
                       "mul-shuowen radical-def",
                       "mul-kanadef",
                       "mul-domino def",
@@ -1439,13 +1447,13 @@ def parse_sense(word, text):
                       "abbreviated",
                       "transterm",
                       "phrasal verb",
-                      "quote", "quote-booken", "quote-jounalen",
+                      "quote", "quote-booken", "quote-jounalen", "quotebook",
                       "quote-hansard", "quote-video game",
-                      "quote-us-patent",
-                      "glossary",
-                      "small", "bottom5",
-                      "glink", "projectlink",
-                      "gloss", "gl",
+                      "quote-us-patent", "quote-wikipedia",
+                      "glossary", "The Last Man",
+                      "small", "bottom5", "source",
+                      "glink", "projectlink", "maintenance line", "JSTOR",
+                      "gloss", "gl", "clear", "abbr", "nc",
                       "upright", "tea room sense", "1",
                       "non-gloss definition", "n-g", "ngd", "non-gloss"):
             continue
@@ -1931,7 +1939,12 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
                 base = t_arg(word, t, 1)
                 if base != word:
                     add_linkage(kind, base)
-
+            elif name in ("Template:letter-shaped", "letter-shaped"):
+                data_append(data, "topics",
+                            "English terms defived from the shape of letters")
+            elif name in ("Template:object-shaped", "object-shaped"):
+                data_append(data, "topics",
+                            "English terms defived from the shape of objects")
             # These templates seem to be frequently used for things that
             # aren't particularly useful for linking.
             elif name in ("t", "t+", "ux", "trans-top", "w", "pedlink",
@@ -2006,7 +2019,7 @@ def parse_any(word, base, data, text, pos, sectitle, p, capture_translations):
             for i in range(0, brk):
                 alt = vec[i]
                 dialect = ""
-                if brk + 1 + 1 < len(vec):
+                if brk + 1 + i < len(vec):
                     dialect = vec[brk + 1 + i]
                 dt = {"word": alt}
                 if dialect:
