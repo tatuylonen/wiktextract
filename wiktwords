@@ -100,6 +100,8 @@ if __name__ == "__main__":
                         help="Capture redirects")
     parser.add_argument("--statistics", action="store_true", default=False,
                         help="Print statistics")
+    parser.add_argument("--verbose", action="store_true", default=False,
+                        help="Print verbose status messages")
     args = parser.parse_args()
 
     # The --all option turns on capturing all data types
@@ -167,7 +169,8 @@ if __name__ == "__main__":
                               capture_pronunciation=args.pronunciations,
                               capture_linkages=args.linkages,
                               capture_compounds=args.compounds,
-                              capture_redirects=args.redirects)
+                              capture_redirects=args.redirects,
+                              verbose=args.verbose)
 
     try:
         ctx = parse_wiktionary(args.path, config, word_cb, capture_cb)

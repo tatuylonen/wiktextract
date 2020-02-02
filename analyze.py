@@ -403,6 +403,7 @@ lingform_tags = set([
     "lenition",
     "prothesis",
     "singulative",
+    "relational",
 ])
 
 lingform_end_re = re.compile(r" (" + "|".join(lingform_tags) + ")$")

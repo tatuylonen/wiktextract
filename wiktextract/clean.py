@@ -19,15 +19,14 @@ lang_codes = set(["en", "fr", "fi", "de", "it", "pt", "es", "ja", "zh", "sv"])
 ######################################################################
 
 # Note: arg_re contains two sets of parenthesis
-arg_re = (r"\|("
-          r"([^|{}]|"
-          r"\{\{[^{}]+?\}\}|"
-          r"\{[^{}]+?\}|"
-          r"\[\[[^]]+?\]\]|"
-          r"\[[^]]+?\])*)")
+arg_re = (r"\|(("
+          r"[^][|{}]|"
+          #r"\{\{[^{}]+?\}\}|"
+          r"\{[^{}]+?\}"
+          r")*)")
 
 # Matches more arguments and end of template
-args_end_re = r"\s*\}\}"
+args_end_re = r"\}\}"
 
 # Regexp used in clean_replace_regexp
 clean_rege = (r"(?s)\{\{([^}|]+)" +
@@ -78,7 +77,9 @@ clean_rege = (r"(?s)\{\{([^}|]+)" +
               r")?)?)?)?)?)?)?)?)?)?" +
               r")?)?)?)?)?)?)?)?)?)?" +
               r")?)?)?)?)?)?)?)?)?)?" +
-              args_end_re)
+              args_end_re +
+              r"|\[\[[^][{}]+?\]\]" +
+              r"|\[[^][{}]+?\]")
 clean_re = re.compile(clean_rege)
 
 # Indexes of groups in clean_re
@@ -125,7 +126,27 @@ def clean_replace_regexp(word, v):
 
     def clean_gen_repl(m):
         """Finds the substitution for for a clean-up match."""
-        # print("{} CLEAN_GEN_REPL {}".format(word, m.group(0)))
+        #print("{} CLEAN_GEN_REPL {}".format(word, m.group(0)))
+        t = m.group(0)
+        if t.startswith("[["):
+            vec = t[2:-2].split("|")
+            if len(vec) > 2:
+                print("{} LINK WITH TOO MANY ARGS: {}".format(word, t))
+            if len(vec) >= 2:
+                return vec[1]
+            v = vec[0]
+            if v.startswith("Category:"):
+                return ""
+            if v.startswith(":Category:"):
+                v = v[10:]
+            return v
+        if t.startswith("["):
+            vec = t[1:-1].split(" ")
+            if vec[0].startswith("http:") or vec[0].startswith("https:"):
+                vec = vec[1:]
+            return " ".join(vec)
+        # Otherwise it must be a template
+        assert t.startswith("{{")
         tag = m.group(1).strip()
         tag = re.sub(r"\s+", " ", tag)
         for prefix in ("R:", "RQ:", "table:", "list:", "DEFAULTSORT:"):
@@ -200,6 +221,7 @@ def clean_replace_regexp(word, v):
         iter = 0
         while True:
             v, count = re.subn(clean_re, clean_gen_repl, v)
+            #print("CLEAN_REPLACE_REGEXP", count)
             if count == 0:
                 break
             iter += 1
@@ -231,10 +253,6 @@ def clean_value(word, title):
     title = re.sub(r"(?s)<br/?>", ", ", title)
     # Remove any remaining HTML tags.
     title = re.sub(r"(?s)<[^>]+>", "", title)
-    # Replace links with [[...|...]] by their only or second argument
-    title = re.sub(r"\[\[(([^]|]+\|)?)([^]|]+?)\]\]", r"\3", title)
-    # Replace HTML links [url display] (with space) by the display value.
-    title = re.sub(r"\[[^ ]+?\s+([^]]+?)\]", r"\1", title)
     # Replace remaining HTML links by the URL.
     title = re.sub(r"\[([^]]+)\]", r"\1", title)
     # Replace various empases (quoted text) by its value.

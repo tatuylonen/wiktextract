@@ -5,7 +5,7 @@
 import re
 import collections
 import wikitextparser
-from . import wiktlangs
+from .wiktlangs import wiktionary_languages
 from .parts_of_speech import part_of_speech_map, PARTS_OF_SPEECH
 from .config import WiktionaryConfig
 from .sectitle_corrections import sectitle_corrections
@@ -367,7 +367,7 @@ def verb_form_map_fn(word, data, name, t, form_map):
                   v, "in:", str(t))
 
 
-def parse_sense(word, text):
+def parse_sense(word, data, text, use_text):
     """Parses a word sense from the text.  The text is usually a list item
     from the beginning of the dictionary entry (i.e., before the first
     subtitle).  There is a lot of information and linkings in the sense
@@ -376,15 +376,15 @@ def parse_sense(word, text):
     The goal here is to obtain any information that might be helpful in
     automatically determining the meaning of the word sense."""
 
-    # The gloss is just the value cleaned into a string.  However, much of
-    # the useful information is in the tagging within the text.  Note that
-    # some entries don't really have a gloss text; for them, we may only
-    # obtain some machine-readable linkages.
-    gloss = clean_value(word, text)
-    data = {}
-    if gloss:
-        # Got a gloss for this sense.
-        data_append(data, "glosses", gloss)
+    if use_text:
+        # The gloss is just the value cleaned into a string.  However, much of
+        # the useful information is in the tagging within the text.  Note that
+        # some entries don't really have a gloss text; for them, we may only
+        # obtain some machine-readable linkages.
+        gloss = clean_value(word, text)
+        if gloss:
+            # Got a gloss for this sense.
+            data_append(data, "glosses", gloss)
 
     # Parse the Wikimedia coding from the text.
     p = wikitextparser.parse(text)
@@ -434,7 +434,7 @@ def parse_sense(word, text):
         # a Wikidata id Q<numbers>; at other times it seems to be something
         # else.  We collect them under "senseid".  XXX this needs more study
         elif name == "senseid":
-            data_append(data, "senseid", t_arg(word, t, 2))
+            data_append(data, "wikidata", t_arg(word, t, 2))
         # The "sense" templates are treated as additional glosses.
         elif name in ("sense", "Sense"):
             data_append(data, "tags", t_arg(word, t, 1))
@@ -479,14 +479,6 @@ def parse_sense(word, text):
             from_ = t_arg(word, t, "from")
             if from_:
                 data_append(data, "origin", from_)
-        # Various tags seem to indicate topical categories that the
-        # word belongs to.  These are added under "topics".
-        # XXX similar things are also express by qualifiers (fields of study);
-        # should investigate if these should be combined.
-        elif name in ("topics", "categorize", "catlangname", "c", "C", "cln",
-                      "top", "categorise", "catlangcode"):
-            data_extend(data, "topics", t_vec(word, t)[1:])
-            data_extend(data, "tags", t_vec(word, t)[1:])
         # Many nouns that are species and other organism types have taxon
         # links using various templates.  Store those links under
         # "taxon" (try to extract the species name).
@@ -519,11 +511,13 @@ def parse_sense(word, text):
                     v = "#" + v[0] + v[0] + v[1] + v[1] + v[2] + v[2]
                 data_append(data, "color", v)
         elif name in ("colorbox", "colourbox"):
+            data_append(data, "tags", "color_value")
             data_append(data, "color", t_arg(word, t, 1))
         # Numbers often have a number box, which will indicate the numeric
         # value meant by the word.  We record the numeric value under "value".
         # (There is also other information that we don't currently capture.)
         elif name == "number box":
+            data_append(data, "tags", "number_value")
             data_append(data, "value", t_arg(word, t, 2))
         # SI units of measurement appear to have tags that identify them
         # as such.  Add the information under "unit" and tag them as "unit".
@@ -1534,17 +1528,17 @@ def parse_preamble(word, data, pos, text, p):
     for node in p.lists():
         for item in node.items:
             txt = str(item)
-        for node2 in node.sublists():
-            for item2 in node2.items:
-                txt += "\n  " + str(item2)
-            for node3 in node2.sublists():
-                for item3 in node3.items:
-                    txt += "\n    " + str(item3)
-        sense = parse_sense(word, txt)
-        if plural and "plural" not in sense.get("tags", ()):
-            sense["tags"] = list(sorted(set(sense.get("tags", []) +
-                                            ["plural"])))
-        data_append(data, "senses", sense)
+            sense = {}
+            parse_sense(word, sense, txt, True)
+            for node2 in node.sublists():
+                for item2 in node2.items:
+                    parse_sense(word, sense, str(item2), False)
+                for node3 in node2.sublists():
+                    for item3 in node3.items:
+                        parse_sense(word, sense, str(item3), False)
+            if plural and "plural" not in sense.get("tags", ()):
+                data_append(sense, "tags", "plural")
+            data_append(data, "senses", sense)
     # XXX there might be word senses encoded in other ways, without using
     # a list for them.  Do some tests to find out how common this is.
 
@@ -1578,6 +1572,12 @@ def parse_pronunciation(word, data, text, p):
             elif name in ("lb", "context",
                           "term-context", "tcx", "term-label", "tlb", "i"):
                 data_extend(variant, "tags", clean_quals(t_vec(word, t)[1:]))
+            # Various tags seem to indicate topical categories that the
+            # word belongs to.  These are added under "topics".
+            elif name in ("topics", "categorize", "catlangname", "c", "C",
+                          "cln",
+                          "top", "categorise", "catlangcode"):
+                data_extend(data, "topics", t_vec(word, t)[1:])
             # Extact IPA pronunciation specification under "ipa".
             elif name in ("IPA", "ipa"):
                 vec = t_vec(word, t)
@@ -1808,9 +1808,13 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
             elif name in ("q", "qual", "qualifier", "qf", "i",
                           "lb", "lbl", "label", "a", "accent"):
                 qualifiers.extend(clean_quals(t_vec(word, t)[1:]))
-            elif name in ("C", "categorize", "categorise", "catlangcode",
-                          "catlangname", "c", "top", "cln"):
+            # Various tags seem to indicate topical categories that the
+            # word belongs to.  These are added under "topics".
+            elif name in ("topics", "categorize", "catlangname", "c", "C",
+                          "cln",
+                          "top", "categorise", "catlangcode"):
                 data_extend(data, "topics", t_vec(word, t)[1:])
+            # XXX temporary tag accroding to its documentation
             elif name == "g2":
                 v = t_arg(word, t, 1)
                 if v == "m":
@@ -2162,7 +2166,7 @@ def page_iter(word, text, config):
         # Iterate over all sections on the page, looking for sections whose
         # name matches the name of a known language.
         for sectitle, text in sections:
-            if sectitle in wiktlangs.languages:
+            if sectitle in wiktionary_languages:
                 # Found section for a langauge.  First flush any information
                 # for the previous language.
                 flush()
@@ -2308,6 +2312,9 @@ def parse_page(word, text, config):
     assert isinstance(word, str)
     assert isinstance(text, str)
     assert isinstance(config, WiktionaryConfig)
+
+    if config.verbose:
+        print("parsing page:", word)
 
     # Collect all words from the page.
     datas = list(x for x in page_iter(word, text, config))

@@ -14,7 +14,8 @@ class WiktionaryConfig(object):
                  capture_pronunciation=False,
                  capture_linkages=False,
                  capture_compounds=False,
-                 capture_redirects=False):
+                 capture_redirects=False,
+                 verbose=False):
         if capture_languages is not None:
             assert isinstance(capture_languages, (list, tuple, set))
             for x in capture_languages:
@@ -32,6 +33,7 @@ class WiktionaryConfig(object):
         self.capture_linkages = capture_linkages
         self.capture_compounds = capture_compounds
         self.capture_redirects = capture_redirects
+        self.verbose = verbose
         self.language_counts = collections.defaultdict(int)
         self.pos_counts = collections.defaultdict(int)
         self.section_counts = collections.defaultdict(int)

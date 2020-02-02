@@ -1,3 +1,5 @@
+XXX check variant vs. data in page.py; is variant properly added?
+
 Implement code to generate HTML from a dictionary file.
 
 XXX Redo formatting of {{place|...}} (need custom code)

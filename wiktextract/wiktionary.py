@@ -7,7 +7,7 @@
 import re
 import bz2
 from lxml import etree
-from wiktextract import wiktlangs
+from .wiktlangs import wiktionary_languages
 from .page import parse_page
 from .config import WiktionaryConfig
 
@@ -150,7 +150,7 @@ def parse_wiktionary(path, config, word_cb, capture_cb=None):
         assert isinstance(languages, (list, tuple, set))
         for x in languages:
             assert isinstance(x, str)
-            assert x in wiktlangs.languages
+            assert x in wiktionary_languages
 
     # Open the input file.
     if path.endswith(".bz2"):
