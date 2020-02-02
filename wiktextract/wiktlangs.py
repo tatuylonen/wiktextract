@@ -1,7 +1,7 @@
 # This file lists language names used in Wikitionary, as subtitles for sections
 # on each language.
 #
-# Copyright (c) 2018 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2018-2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 # -*- fundamental -*-
 # Note: Using python mode with this lst practically crashes emacs when,
@@ -13,7 +13,7 @@
 # another pass over the Wiktionary data, and thus slow down operation.
 
 # Languages that should be ignored.
-languages = set([
+wiktionary_languages = set([
     # This list includes Word, Undetermined, Translingual
     "'Are'are",
     "A'ou",

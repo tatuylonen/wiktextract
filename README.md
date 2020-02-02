@@ -134,15 +134,17 @@ on the speed of your system.
 The library can be called as follows:
 
 ```
-import wiktextract
+from wiktextract import (WiktionaryConfig, parse_wiktionary,
+                         wiktionary_languages, PARTS_OF_SPEECH)
 
-ctx = wiktextract.parse_wiktionary(
-    path, word_cb,
-    capture_cb=None,
-    languages=["English", "Translingual"],
-    translations=False,
-    pronunciations=False,
-    redirects=False):
+config = WiktionaryConfig(
+             capture_languages=["English", "Translingual"],
+             capture_translations=True,
+             capture_pronunciation=True,
+             capture_linkages=True,
+             capture_compounds=True,
+             capture_redirects=True)
+parse_wiktionary(path, config, word_cb, capture_cb)
 ```
 
 The ``parse_wiktionary`` call will call ``word_cb(data)`` for words
@@ -161,30 +163,30 @@ pages to disk or capture certain pages for different analyses (e.g., extracting
 hierarchies, classes, thesauri, or topic-specific word lists).  If this
 callback is None, all pages are analyzed.
 
-``languages`` should be a list, tuple, or set of language names to
+``capture_languages`` should be a list, tuple, or set of language names to
 capture.  It defaults to ``["English", "Translingual"]``.
 
-``translations`` can be set to True to capture translation
+``capture_translations`` can be set to True to capture translation
 information for words.  Translation information seems to be most
 widely available for the English language, which has translations into
 other languages.  The translation information increases the size and
 loading time of the captured data substantially, so this is disabled
 by default.
 
-``pronunciations`` should be set to True to capture pronunciation
+``capture_pronunciations`` should be set to True to capture pronunciation
 information for words.  Typically, this includes IPA transcriptions
 and any audio files included in the word entries, along with other
 information.  However, the type and amount of pronunciation
 information varies widely between languages.  This is disabled by
 default since many applications won't need the information.
 
-``linkages`` should be set to True to capture linkages between word, such as
-hypernyms, antonyms, synonyms, etc.
+``capture_linkages`` should be set to True to capture linkages between
+word, such as hypernyms, antonyms, synonyms, etc.
 
-``compounds`` should be set to True to capture compound words containing
-the word.
+``capture_compounds`` should be set to True to capture compound words
+containing the word.
 
-``redirects`` should be set to True to capture redirects.  Redirects
+``capture_redirects`` should be set to True to capture redirects.  Redirects
 are not associated with any specific language and thus requesting them
 returns them for words in all languages.
 
@@ -220,6 +222,8 @@ following keys (others may also be present or added later):
 * ``related``: related word linkages for the word (see below)
 * ``pronunciations``: contains pronunciation information when collected (see below)
 * ``translations``: contains translation information when collected (see below)
+
+XXX update this, there are now some additional fields and some format changes
 
 ### Word senses
 
@@ -314,9 +318,9 @@ patches or suggestions.
 
 ## License
 
-Copyright (c) 2018 [Tatu Ylonen](https://ylonen.org).  This package is
-free for both commercial and non-commercial use.  It is licensed under
-the MIT license.  See the file
+Copyright (c) 2018-2020 [Tatu Ylonen](https://ylonen.org).  This
+package is free for both commercial and non-commercial use.  It is
+licensed under the MIT license.  See the file
 [LICENSE](https://github.com/tatuylonen/wiktextract/blob/master/LICENSE)
 for details.
 
