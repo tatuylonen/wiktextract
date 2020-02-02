@@ -414,10 +414,9 @@ def parse_sense(word, text):
         elif name in ("qual", "qualifier", "q", "qf", "i", "a", "accent"):
             data_extend(data, "tags", clean_quals(t_vec(word, t)))
         # Usage examples are collected under "examples"
-        elif name in ("ux", "uxi"):
-            pass
-            #data_append(data, "examples",
-            #            (t_arg(word, t, 2), t_arg(word, t, 3)))
+        elif name in ("ux", "uxi", "usex"):
+            data_append(data, "examples",
+                        (t_arg(word, t, 2), t_arg(word, t, 3)))
         # XXX check these, I think they should go away
         # Additional "gloss" templates are added under "glosses"
         #elif name == "gloss":
@@ -510,11 +509,14 @@ def parse_sense(word, text):
         # RGB value under "color".  Sometimes it may be a CSS color
         # name, sometimes an RGB value in hex.
         elif name in ("color panel", "colour panel"):
-            v = t_vec(word, t)
-            if len(v) == 1:
-                data_append(data, "color", v[0])
-            else:
-                data_append(data, "color", v[1])
+            vec = t_vec(word, t)
+            for v in vec:
+                if re.match(r"^[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]"
+                            r"[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]$", v):
+                    v = "#" + v
+                elif re.match(r"^[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]$", v):
+                    v = "#" + v[0] + v[0] + v[1] + v[1] + v[2] + v[2]
+                data_append(data, "color", v)
         elif name in ("colorbox", "colourbox"):
             data_append(data, "color", t_arg(word, t, 1))
         # Numbers often have a number box, which will indicate the numeric
@@ -606,7 +608,7 @@ def parse_sense(word, text):
                       "obs form", "obsolete typography of", "obsolete sp",
                       "medieval spelling of"):
             data_alt_of(word, data, t, ["archaic", "obsolete"])
-        elif name in ("superseded spelling of", "former name of",
+        elif name in ("superseded spelling of", "former name of", "sup sp",
                       "archaic spelling of", "dated spelling of",
                       "archaic form of", "dated form of"):
             data_alt_of(word, data, t, ["archaic"])
@@ -618,6 +620,18 @@ def parse_sense(word, text):
         # and tag it as "euphemism".
         elif name in ("euphemistic form of", "euphemistic spelling of"):
             data_alt_of(word, data, t, ["euphemism"])
+        # Eclipsis refers to mutation of initial sound, e.g., in Irish
+        elif name == "eclipsis of":
+            data_alt_of(word, data, t, ["eclipsis"])
+        # Singulative form is an individuation of a collective or mass noun
+        elif name == "singulative of":
+            data_alt_of(word, data, t, ["singulative"])
+        # Lenition refers to a weakening of the articularion of a consonant
+        elif name in ("lenition of", "ga-lenition of"):
+            data_alt_of(word, data, t, ["lenition"])
+        # Prothesis is prepending of phonemes without changing morphology
+        elif name in ("t-prothesis of", "h-prothesis of"):
+            data_alt_of(word, data, t, ["prothesis"])
         # If the gloss is indicated as a misspelling or non-standard spelling
         # of another word, include "alt_of" and tag it as a "misspelling".
         elif name in ("deliberate misspelling of", "misconstruction of",
@@ -680,8 +694,10 @@ def parse_sense(word, text):
             data_inflection_of(word, data, t, ["neuter", "plural"])
         elif name in ("feminine noun of", "feminine equivalent of"):
             data_inflection_of(word, data, t, ["feminine"])
-        elif name == "verbal noun of":
+        elif name in ("verbal noun of", "ar-verbal noun of"):
             data_inflection_of(word, data, t, ["verbal noun"])
+        elif name == "abstract noun of":
+            data_inflection_of(word, data, t, ["abstract noun"])
         elif name == "masculine singular of":
             data_inflection_of(word, data, t, ["masculine", "singular"])
         elif name == "neuter singular of":
@@ -848,6 +864,8 @@ def parse_sense(word, text):
                 data_append(data, "tags", "object_instructive")
             elif v == "with":
                 data_append(data, "object_preposition", "with")
+            elif v == "avec":
+                data_append(data, "object_preposition", "avec")
             else:
                 print("{} UNHANDLED +OBJ {}".format(word, t))
         elif name == "verb form of":
@@ -1161,6 +1179,27 @@ def parse_sense(word, text):
             # XXX check this
             data_append(data, "hypernyms",
                         {"word": t_arg(word, t, 1)})
+        elif name in ("ant", "antonyms"):
+            for x in t_vec(word, t)[1:]:
+                data_append(data, "antonyms", {"word": x})
+        elif name in ("hypo", "hyponyms"):
+            for x in t_vec(word, t)[1:]:
+                data_append(data, "hyponyms", {"word": x})
+        elif name == "coordinate terms":
+            for x in t_vec(word, t)[1:]:
+                data_append(data, "coordinate_terms", {"word": x})
+        elif name in ("hyper", "hypernyms"):
+            for x in t_vec(word, t)[1:]:
+                data_append(data, "hypernyms", {"word": x})
+        elif name in ("meronyms",):
+            for x in t_vec(word, t)[1:]:
+                data_append(data, "meronyms", {"word": x})
+        elif name in ("holonyms",):
+            for x in t_vec(word, t)[1:]:
+                data_append(data, "holonyms", {"word": x})
+        elif name in ("derived", "derived terms"):
+            for x in t_vec(word, t)[1:]:
+                data_append(data, "derived", {"word": x})
         elif name in ("†", "zh-obsolete"):
             data_extend(data, "tags", ["archaic", "obsolete"])
         # Handle some Finnish-specific tags
@@ -1380,13 +1419,14 @@ def parse_sense(word, text):
         # Skip various templates in this processing.  We silence warnings
         # about unhandled tags for these.  (Many of them are handled
         # elsewhere.)
-        elif name in ("audio", "audio-pron",
+        elif name in ("audio", "audio-pron",  #XXX audio seems more common, CHK
                       "IPA", "ipa", "l", "link", "l-self", "m", "m+",
                       "zh-m", "zh-l", "ja-l", "ja-def", "sumti", "ko-l",
-                      "alter", "ISBN", "syn", "ISSN",
+                      "alter", "ISBN", "syn", "ISSN", "gbooks", "OCLC",
                       "hyph", "hyphenation", "ja-r", "ja-l", "l/ja", "l-ja",
-                      "lj",
-                      "homophones",
+                      "lj", "c.", "a.", "CURRENTDAY", "CURRENTMONTHNAME",
+                      "CURRENTYEAR", "...", "…", "mdash", "SIC", "LCC",
+                      "homophones", "wsource", "nobr",
                       "pinyin reading of", "enPR",
                       "mul-kangxi radical-def", "speciesabbrev",
                       "mul-shuowen radical-def",
@@ -1399,7 +1439,12 @@ def parse_sense(word, text):
                       "abbreviated",
                       "transterm",
                       "phrasal verb",
-                      "quote",
+                      "quote", "quote-booken", "quote-jounalen",
+                      "quote-hansard", "quote-video game",
+                      "quote-us-patent",
+                      "glossary",
+                      "small", "bottom5",
+                      "glink", "projectlink",
                       "gloss", "gl",
                       "upright", "tea room sense", "1",
                       "non-gloss definition", "n-g", "ngd", "non-gloss"):
@@ -1480,11 +1525,18 @@ def parse_preamble(word, data, pos, text, p):
     # Parse word senses for the part-of-speech.
     for node in p.lists():
         for item in node.items:
-            sense = parse_sense(word, str(item))
-            if plural and "plural" not in sense.get("tags", ()):
-                sense["tags"] = list(sorted(set(sense.get("tags", []) +
-                                                ["plural"])))
-            data_append(data, "senses", sense)
+            txt = str(item)
+        for node2 in node.sublists():
+            for item2 in node2.items:
+                txt += "\n  " + str(item2)
+            for node3 in node2.sublists():
+                for item3 in node3.items:
+                    txt += "\n    " + str(item3)
+        sense = parse_sense(word, txt)
+        if plural and "plural" not in sense.get("tags", ()):
+            sense["tags"] = list(sorted(set(sense.get("tags", []) +
+                                            ["plural"])))
+        data_append(data, "senses", sense)
     # XXX there might be word senses encoded in other ways, without using
     # a list for them.  Do some tests to find out how common this is.
 
@@ -1569,7 +1621,7 @@ def parse_pronunciation(word, data, text, p):
                           "place:Brazil/state",
                           "place:Brazil/municipality",
                           "place", "taxlink",
-                          "color panel", "pedlink", "vern", "prefix", "affix",
+                          "pedlink", "vern", "prefix", "affix",
                           "suffix", "wikispecies", "ISBN", "slim-wikipedia",
                           "swp", "comcatlite", "forename",
                           "given name", "surname", "head"):
@@ -1947,7 +1999,17 @@ def parse_any(word, base, data, text, pos, sectitle, p, capture_translations):
         # descriptions.  XXX see how to handle these, and if they should be
         # merged with "alt_of" in word senses.
         if name == "alter":
-            data_extend(data, "alternate", t_vec(word, t))
+            vec = t_vec(word, t)
+            for brk in range(0, len(vec)):
+                if vec[brk] == "":
+                    break
+            for i in range(0, brk):
+                alt = vec[i]
+                dialect = vec[brk + 1 + i]
+                dt = {"word": alt}
+                if dialect:
+                    dt["dialect"] = dialect
+                data_append(data, "alternative", dt)
         # If a reference to a book by ISBN has been provided, save its ISBN.
         elif name == "ISBN":
             data_append(data, "isbn", t_arg(word, t, 1))

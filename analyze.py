@@ -156,12 +156,15 @@ lingform_tags = set([
     "instructive",
     "locative",
     "vocative",
+    "instrumental",
     "feminine",
     "masculine",
     "neuter",
     "formal",
     "formally",  # XXX canonicalize?
     "informal",
+    "polite",
+    "humble",
     "definite",
     "indefinite",
     "hypercorrect",
@@ -198,6 +201,7 @@ lingform_tags = set([
     "sarcastic",  # XXX canonicalize?
     "ironic",  # XXX canonicalize?
     "archaic",
+    "archaic form",
     "obsolete",
     "obsolete form",  # XXX canonicalize to obsolete
     "obsolescent",  # XXX canonicalize to obsolete?
@@ -269,6 +273,7 @@ lingform_tags = set([
     "hyperbole",  # XXX check where this is used
     "figurative",
     "figuratively",  # XXX canonicalize
+    "by extension",  # XXX
     "metaphorical",  # XXX canonicalize with figurative?
     "metaphoric",  # XXX canonicalize to figurative?
     "metaphor",  # XXX canonicalize
@@ -290,6 +295,7 @@ lingform_tags = set([
     "physical",  # XXX where used?
     "social",  # XXX where used?
     "abstract",
+    "abstract noun",
     "honorific",
     "idiomatic",
     "idiom",  # XXX canonicalize to idiomatic
@@ -355,7 +361,8 @@ lingform_tags = set([
     "personal pronouns",
     "reflexive-possessive pronoun",
     "substantive interrogative pronoun",
-    "adverbial",
+    "pronominal",  # XXX means: "takes reflexive pronoun"
+    "adverbial",  # XXX check, pronominal means "takes reflexive pronoun"
     "adverb",  # XXX
     "as an adverb",  # XXX
     "ordinal adverbial",  # XXX
@@ -392,6 +399,10 @@ lingform_tags = set([
     "object_elative",
     "object_ablative",
     "defective",
+    "eclipsis",
+    "lenition",
+    "prothesis",
+    "singulative",
 ])
 
 lingform_end_re = re.compile(r" (" + "|".join(lingform_tags) + ")$")
@@ -400,6 +411,7 @@ data_keys = collections.defaultdict(int)
 sense_keys = collections.defaultdict(int)
 topic_ht = collections.defaultdict(int)
 tag_ht = collections.defaultdict(int)
+color_ht = collections.defaultdict(int)
 
 def add_sense(word, data, sense):
     for k in data.keys():
@@ -437,7 +449,12 @@ def add_sense(word, data, sense):
     alt_of = sense.get("alt_of", ())
     sense_hypernyms = sense.get("hypernyms", [])  # XXX from {{place|...}
     hypernyms += sense_hypernyms
-    sense_holonyms = sense.get("holonyms", [])  # XXX from {{place|...}}
+    holonyms = sense.get("holonyms", [])  # XXX from {{place|...}}
+    sense_antonyms = sense.get("antonyms", [])
+    antonyms += sense_antonyms
+    sense_hyponyms = sense.get("hyponyms", [])
+    hyponyms += sense_hyponyms
+    coordinate_terms = sense.get("coordinate_terms", [])
     taxon = sense.get("taxon", ())
     wikipedia = sense.get("wikipedia", ())
     origin = sense.get("origin", ())
@@ -462,8 +479,11 @@ def add_sense(word, data, sense):
     #if object_preposition:
     #    print("{}: OBJECT PREPOSITION: {}: {}"
     #          "".format(word, object_preposition, glosses))
-    for tag in tags:
-        tag_ht[tag] += 1
+    #for tag in tags:
+    #    tag_ht[tag] += 1
+    for color in color:
+        print(color)
+        color_ht[color] += 1
 
 #with open("temp.tmp") as f:
 cnt = 0
@@ -506,7 +526,7 @@ if False:
     print("{} different topics, {} instances"
           "".format(len(topic_ht), sum(topic_ht.values())))
 
-if True:
+if False:
     print("TAGS")
     of_cnt = 0
     with_cnt = 0
@@ -525,3 +545,10 @@ if True:
     print("{} different tags, {} instances, {} of, {} with, {} lingform"
           "".format(len(tag_ht), sum(tag_ht.values()),
                     of_cnt, with_cnt, lingform_cnt))
+
+if True:
+    print("COLORS")
+    for k, v in sorted(color_ht.items(), key=lambda x: x[1]):
+        print("{:<20s} {}".format(k, v))
+    print("{} different colors, {} instances"
+          "".format(len(color_ht), sum(color_ht.values())))
