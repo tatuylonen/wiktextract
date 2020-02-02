@@ -2005,7 +2005,9 @@ def parse_any(word, base, data, text, pos, sectitle, p, capture_translations):
                     break
             for i in range(0, brk):
                 alt = vec[i]
-                dialect = vec[brk + 1 + i]
+                dialect = ""
+                if brk + 1 + 1 < len(vec):
+                    dialect = vec[brk + 1 + i]
                 dt = {"word": alt}
                 if dialect:
                     dt["dialect"] = dialect
