@@ -385,6 +385,7 @@ clean_arg1_tags = [
 # titles/values.
 clean_arg2_tags = [
     "defn",
+    "t+",
 ]
 
 # Templates that will be replaced by their third argument when cleaning up
@@ -430,6 +431,24 @@ clean_replace_map = {
     'CURRENTYEAR': ["1873"],
     'nc': ["{arg3}", "{arg2}"],
     "zh-l": ["{arg1}; {arg2} ({arg3}; {arg4})",
+             "{arg1} ({arg2}; {arg3})",
+             "{arg1} ({arg2})",
+             "{arg1} ({tr}; {gloss})",
+             "{arg1} ({gloss})",
+             "{arg1}"],
+    "ja-l": ["{arg1}; {arg2} ({arg3}; {arg4})",
+             "{arg1} ({arg2}; {arg3})",
+             "{arg1} ({arg2})",
+             "{arg1} ({tr}; {gloss})",
+             "{arg1} ({gloss})",
+             "{arg1}"],
+    "ko-l": ["{arg1}; {arg2} ({arg3}; {arg4})",
+             "{arg1} ({arg2}; {arg3})",
+             "{arg1} ({arg2})",
+             "{arg1} ({tr}; {gloss})",
+             "{arg1} ({gloss})",
+             "{arg1}"],
+    "th-l": ["{arg1}; {arg2} ({arg3}; {arg4})",
              "{arg1} ({arg2}; {arg3})",
              "{arg1} ({arg2})",
              "{arg1} ({tr}; {gloss})",
@@ -808,6 +827,7 @@ clean_replace_map = {
     'link': ['{arg3} ({arg4})', '{arg2} ({arg4})', '{arg3}', '{arg2}'],
     'SI-unit': ['SI unit of {arg4}', 'SI unit of measurement'],  # XXX
     'SI-unit-abb': ['SI unit of {arg3}'],  # XXX
+    'SI-unit-abbnp': ['SI unit of {arg3}'],  # XXX
     'SI-unit-abb2': ['SI unit of {arg4}'],  # XXX
     'SI-unit-2': ['SI unit of {arg3}'],  # XXX
     'SI-unit-np': ['SI unit of {arg4}'],  # XXX

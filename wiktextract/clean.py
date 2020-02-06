@@ -10,9 +10,10 @@ import re
 import html
 from .wikttemplates import *
 from .places import place_prefixes
+from .languages import all_languages
 
-# XXX
-lang_codes = set(["en", "fr", "fi", "de", "it", "pt", "es", "ja", "zh", "sv"])
+# Set of all language codes defined in Wiktionary
+lang_codes = set(x["code"] for x in all_languages)
 
 ######################################################################
 # Cleaning values into plain text.
@@ -322,13 +323,6 @@ def clean_quals(vec):
 
     tags = []
     i = 0
-    if vec and vec[0] in lang_codes:
-        # If the qualifiers are from a template that has language tags,
-        # those hould be removed from the vector before passing it to
-        # this function.  This warning indicates the caller probably
-        # forgot to remove the language tag.
-        print("clean_quals: WARNING: {} in vec: {}".format(x, vec))
-        i += 1
     while i < len(vec):
         if vec[i] in quals_skip:
             i += 1

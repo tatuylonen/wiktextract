@@ -6,6 +6,7 @@
 
 import re
 import bz2
+import subprocess
 from lxml import etree
 from .wiktlangs import wiktionary_languages
 from .page import parse_page
@@ -153,8 +154,12 @@ def parse_wiktionary(path, config, word_cb, capture_cb=None):
             assert x in wiktionary_languages
 
     # Open the input file.
+    subp = None
     if path.endswith(".bz2"):
-        wikt_f = bz2.BZ2File(path, "r", buffering=(4 * 1024 * 1024))
+        subp = subprocess.Popen(["bzcat", path], stdout=subprocess.PIPE,
+                                bufsize=8*1024*1024)
+        wikt_f = subp.stdout
+        #wikt_f = bz2.BZ2File(path, "r", buffering=(4 * 1024 * 1024))
     else:
         wikt_f = open(path, "rb", buffering=(4 * 1024 * 1024))
 
@@ -166,6 +171,9 @@ def parse_wiktionary(path, config, word_cb, capture_cb=None):
         etree.parse(wikt_f, parser)
     finally:
         wikt_f.close()
+        if subp:
+            subp.kill()
+            subp.wait()
 
     # Return the parsing context.
     return ctx

@@ -6,12 +6,8 @@ the senses in question.
 XXX It is fairly common to have {{en-phrase}} under ==Verb==.  What
 part-of-speech should these be?
 
-XXX generate proper list of language tags and start using it
-
 Qualifiers specified after {{l|...}} do not get included in output,
 e.g., Galician "ano" Etymology 2
-
-Galiacian Proverb list has a strange item
 
 XXX check handling of "alter" at the beginning of parse_any(), is it correct?
 
@@ -84,3 +80,5 @@ Capture coordinate terms under Coordinate terms header
 # XXX Finnish binääri leaves binäärinen#Compounds in gloss
 
 XXX check ====Alternative forms====, e.g., clinicopathologic
+
+XXX consider changing audios format to something more usable/extensible

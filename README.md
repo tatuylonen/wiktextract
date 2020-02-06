@@ -209,7 +209,7 @@ following keys (others may also be present or added later):
 * ``word``: the word form
 * pos: part-of-speech, such as "noun", "verb", "adj", "adv", "pron", "determiner", "prep" (preposition), "postp" (postposition), and many others.  The complete list of possibel values returned by the package can be found in ``wiktextract.PARTS_OF_SPEECH``.
 * ``senses``: word senses for this word/part-of-speech (see below)
-* ``conjugation``: conjugation/declension entries found for the word
+* ``conjugation``: conjugation and declension entries found for the word, as dictionaries
 * ``heads``: part-of-speech specific head tags for the word.  Useful for, e.g., obtaining comparatives, superlatives, and other inflection information for many languages.  Each value is a dictionary, basically containing the arguments of the corresponding template in Wiktionary, with the template name under "template_name".
 * ``hyphenation``: list of hyphenations for the word when available.  Each hyphenation is a sequence of syllables.
 * ``pinyin``: for Chinese words, the romanized transliteration, when available
@@ -260,7 +260,7 @@ list of dictionaries, each of which may contain the following keys,
 among others:
 
 * ``audios``: list of audio files referenced as a list of ``(languagecode, filename, description)``
-* ``ipa``: pronunciation specifications in IPA format as tuples (lang, ipatext)
+* ``ipa``: pronunciation specifications as IPA strings
 * ``special_ipa``: special IPA-like specifications (sometimes macros calling code in Wiktionary), as list of dictionaries
 * ``enpr``: pronunciations in English pronunciation format as list of strings
 * ``homophones``: list of homophones for the word

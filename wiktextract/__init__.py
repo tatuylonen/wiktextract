@@ -7,6 +7,7 @@ from .wiktlangs import wiktionary_languages
 from .config import WiktionaryConfig
 from .page import clean_value, parse_page
 from .parts_of_speech import PARTS_OF_SPEECH
+from .languages import all_languages, all_families
 
 __all__ = (
     "WiktionaryConfig",
@@ -14,4 +15,6 @@ __all__ = (
     "wiktionary_languages",
     "PARTS_OF_SPEECH",
     "parse_page",
+    "all_languages",
+    "all_families",
 )

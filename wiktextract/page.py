@@ -5,13 +5,16 @@
 import re
 import collections
 import wikitextparser
-from .wiktlangs import wiktionary_languages
 from .parts_of_speech import part_of_speech_map, PARTS_OF_SPEECH
 from .config import WiktionaryConfig
 from .sectitle_corrections import sectitle_corrections
 from .clean import clean_value, clean_quals
 from .places import place_prefixes  # XXX move processing to places.py
 from .wikttemplates import *
+from .languages import all_languages
+
+# Mapping from language name to language info
+wiktionary_languages = {x["name"]: x for x in all_languages}
 
 # Mapping from German verb form arguments to "canonical" values in
 # word sense tags."""
@@ -164,6 +167,137 @@ generic_verb_form_map = {
     "debitive": ["debitive"],
 }
 
+head_pos_map = {
+    "adjective": "adj",
+    "adjectives": "adj",
+    "adjective form": "adj",
+    "adjective forms": "adj",
+    "mutated adjective": "adj",
+    "mutated adjectives": "adj",
+    "adverb": "adv",
+    "adverbs": "adv",
+    "pronominal adverb": "adv",
+    "pronominal adverbs": "adv",
+    "conjunction": "conj",
+    "conjunctions": "conj",
+    "determiner": "det",
+    "determiners": "det",
+    "determiner form": "det",
+    "determiner forms": "det",
+    "interjection": "intj",
+    "interjections": "intj",
+    "noun": "noun",
+    "nouns": "noun",
+    "mutated noun": "noun",
+    "mutated nouns": "noun",
+    "numeral": "num",
+    "numerals": "num",
+    "number": "num",
+    "numbers": "num",
+    "particle": "particle",
+    "particles": "particle",
+    "particle form": "particle",
+    "particle forms": "particle",
+    "postposition": "postp",
+    "postpositions": "postp",
+    "preposition": "prep",
+    "prepositions": "prep",
+    "pronoun": "pron",
+    "pronouns": "pron",
+    "pronoun form": "pron",
+    "pronoun forms": "pron",
+    "prepositional pronoun": "pron",  # XXX or preposition?
+    "prepositional pronouns": "pron",
+    "proper noun": "name",
+    "proper nouns": "name",
+    "proper noun form": "name",
+    "proper noun forms": "name",
+    "proper noun plural form": "name",
+    "proper noun plural forms": "name",
+    "verb": "verb",
+    "verbs": "verb",
+    "abbreviation": "abbrev",
+    "abbreviations": "abbrev",
+    "pronoun": "pron",
+    "pronouns": "pron",
+    "phrase": "phrase",
+    "phrases": "phrase",
+    "classifier": "classifier",
+    "classifiers": "classifier",
+    "punctuation": "punct",
+    "punctuations": "punct",
+    "letter": "letter",
+    "letters": "letter",
+    "character": "character",
+    "characters": "character",
+    "glyph": "character",
+    "glyphs": "glyph",
+    "counter": "counter",
+    "counters": "counter",
+    "infix": "infix",
+    "infixes": "infix",
+    "circumfix": "circumfix",
+    "circumfixes": "circumfix",
+    "interfix": "interfix",
+    "interfix": "interfix",
+    "prefix": "prefix",
+    "prefixes": "prefix",
+    "suffix": "suffix",
+    "suffixes": "suffix",
+    "affix": "affix",
+    "affixes": "affix",
+    "combining form": "combining_form",
+    "combining forms": "combining_form",
+    "clitic": "clitic",
+    "clitics": "clitic",
+    "article": "article",
+    "articles": "article",
+    "article form": "article",
+    "article forms": "article",
+    "syllable": "syllable",
+    "syllables": "syllable",
+    "noun plural form": "noun",
+    "noun plural forms": "noun",
+    "noun form": "noun",
+    "noun forms": "noun",
+    "verb form": "verb",
+    "verb forms": "verb",
+    "present participle": "verb",
+    "present participles": "verb",
+    "past participle": "verb",
+    "past participles": "verb",
+    "present participle form": "verb",
+    "present participle forms": "verb",
+    "past participle form": "verb",
+    "past participle forms": "verb",
+    "infinitive": "verb",
+    "infinitives": "verb",
+    "comparative adjective": "adj",
+    "comparative adjectives": "adj",
+    "superlative adjective": "adj",
+    "superlative adjectives": "adj",
+    "misspelling": "misspelling",
+    "misspellings": "misspelling",
+    "obsolete verb form": "verb",
+    "obsolete verb forms": "verb",
+    "contraction": "abbrev",
+    "contractions": "abbrev",
+    "initialism": "abbrev",
+    "initialisms": "abbrev",
+    "prepositional phrase": "phrase",
+    "prepositional phrases": "phrase",
+    "comparative adverb": "adv",
+    "comparative adverbs": "adv",
+    "superlative adverb": "adv",
+    "superlative adverbs": "adv",
+    "symbol": "symbol",
+    "symbols": "symbol",
+    "proverb": "proverb",
+    "proverbs": "proverb",
+    "Han char": "character",
+    "kanji": "character",
+}
+
 # Mapping from a template name (without language prefix) for the main word
 # (e.g., fi-noun, fi-adj, en-verb) to permitted parts-of-speech in which
 # it could validly occur.  This is used as just a sanity check to give
@@ -177,7 +311,6 @@ template_allowed_pos_map = {
     "proper-noun": ["name", "noun"],
     "verb": ["verb", "phrase"],
     "gerund": ["verb"],
-    "plural noun": ["noun"],
     "adv": ["adv"],
     "particle": ["adv", "particle"],
     "adj": ["adj", "adj_noun"],
@@ -194,6 +327,7 @@ template_allowed_pos_map = {
     "letter": ["letter"],
     "kanji": ["character"],
     "cont": ["abbrev"],
+    "misspelling": ["noun", "adj", "verb", "adv"],
 }
 for k, v in template_allowed_pos_map.items():
     for x in v:
@@ -376,7 +510,7 @@ def verb_form_map_fn(word, data, name, t, form_map):
                   v, "in:", str(t))
 
 
-def parse_sense(word, data, text, use_text, config):
+def parse_sense(word, data, language, text, use_text, config):
     """Parses a word sense from the text.  The text is usually a list item
     from the beginning of the dictionary entry (i.e., before the first
     subtitle).  There is a lot of information and linkings in the sense
@@ -418,13 +552,14 @@ def parse_sense(word, data, text, use_text, config):
             elif v == "n":
                 data_append(data, "tags", "neuter")
             else:
-                print("{} UNRECOGNIZED GENDER {} IN {}".format(word, v, t))
+                print("{} {} UNRECOGNIZED GENDER {} IN {}"
+                      "".format(word, language, v, t))
         # Qualifiers are pretty clear; they provide useful information about
         # the word sense, such as field of study, dialect, or usage notes.
         elif name in ("qual", "qualifier", "q", "qf", "i", "a", "accent"):
             data_extend(data, "tags", clean_quals(t_vec(word, t)))
         # Usage examples are collected under "examples"
-        elif name in ("ux", "uxi", "usex", "afex", "zh-x"):
+        elif name in ("ux", "uxi", "usex", "afex", "zh-x", "prefixusex"):
             data_append(data, "examples", template_args_to_dict(word, t))
         # XXX check these, I think they should go away
         # Additional "gloss" templates are added under "glosses"
@@ -478,7 +613,7 @@ def parse_sense(word, data, text, use_text, config):
                 elif v == "female":
                     data_append(data, "tags", "feminine")
                 else:
-                    print(word, "PARSE_SENSE: unrecognized gender",
+                    print(word, language, "PARSE_SENSE: unrecognized gender",
                           repr(k), "=", repr(v), "in", str(t))
         # Surnames are also often tagged as such, and we tag the sense
         # with "surname" and "person".
@@ -542,9 +677,11 @@ def parse_sense(word, data, text, use_text, config):
             v = t_arg(word, t, 1)
             if not v:
                 v = word
-            data_append(data, "wikipedia", v)
+            if use_text:  # Skip wikipedia links in examples
+                data_append(data, "wikipedia", v)
         elif name in ("w2",):
-            data_append(data, "wikipedia", t_arg(word, t, 2))
+            if use_text:  # Skip wikipedia links in examples
+                data_append(data, "wikipedia", t_arg(word, t, 2))
         # There are even morse code sequences (and semaphore (flag)) positions
         # defined in the Translingual portion of Wiktionary.  Collect
         # morse code information under "morse_code".
@@ -662,7 +799,8 @@ def parse_sense(word, data, text, use_text, config):
             x = t_arg(word, t, 2)
             if x.startswith("w:"):
                 x = x[2:]
-                data_append(data, "wikipedia", x)
+                if use_text:  # Skip wikipedia links in examples
+                    data_append(data, "wikipedia", x)
             data_append(data, "alt_of", x)
             data_append(data, "tags", "abbreviation")
         elif name in ("only used in", "only in"):
@@ -850,7 +988,8 @@ def parse_sense(word, data, text, use_text, config):
                 elif x in ("ine", "inessive"):
                     data_append(data, "tags", "inessive")
                 else:
-                    print("{} UNHANDLED {} IN {}".format(word, x, t))
+                    print("{} {} UNHANDLED {} IN {}"
+                          "".format(word, language, x, t))
                     break
         elif name == "+preo":
             data_append(data, "object_preposition", t_arg(word, t, 2))
@@ -880,7 +1019,7 @@ def parse_sense(word, data, text, use_text, config):
             elif v == "avec":
                 data_append(data, "object_preposition", "avec")
             else:
-                print("{} UNHANDLED +OBJ {}".format(word, t))
+                print("{} {} UNHANDLED +OBJ {}".format(word, language, t))
         elif name == "verb form of":
             verb_form_map_fn(word, data, name, t, generic_verb_form_map)
         # Handle some Spanish-specific tags
@@ -897,8 +1036,8 @@ def parse_sense(word, data, text, use_text, config):
                 elif x == "pl":
                     data_append(data, "tags", "plural")
                 else:
-                    print("{} ES-ADJ FORM OF UNKNOWN {} IN {}"
-                          "".format(word, x, t))
+                    print("{} {} ES-ADJ FORM OF UNKNOWN {} IN {}"
+                          "".format(word, language, x, t))
         elif name == "es-compound of":
             stem = t_arg(word, t, 1)
             inf_ending = t_arg(word, t, 2)
@@ -932,7 +1071,7 @@ def parse_sense(word, data, text, use_text, config):
             elif mood == "subjunctive":
                 data_append(data, "tags", "subjunctive")
             else:
-                print("{} UNRECOGNIZED MOOD IN {}".format(word, t))
+                print("{} {} UNRECOGNIZED MOOD IN {}".format(word, language, t))
             if person in ("tú", "tu", "inf"):
                 data_extend(data, "tags",
                             ["second-person", "singular", "informal"])
@@ -964,7 +1103,8 @@ def parse_sense(word, data, text, use_text, config):
                 data_extend(data, "tags",
                             ["third-person", "singular", "dative"])
             elif person:
-                print("{} UNRECOGNIZED PERSON IN {}".format(word, t))
+                print("{} {} UNRECOGNIZED PERSON IN {}"
+                      "".format(word, language, t))
         elif name == "es-verb form of":
             verb_form_map_fn(word, data, name, t, es_verb_form_map)
         elif name == "es-demonstrative-accent-usage":
@@ -982,7 +1122,8 @@ def parse_sense(word, data, text, use_text, config):
                 elif x in ("p", "pl", "plural"):
                     data_append(data, "tags", "plural")
                 else:
-                    print("{} UNRECOGNIZED {} IN {}".format(word, x, t))
+                    print("{} {} UNRECOGNIZED {} IN {}"
+                          "".format(word, language, x, t))
         # Handle some Dutch-specific tags
         elif name == "nl-verb form of":
             verb_form_map_fn(word, data, name, t, nl_verb_form_map)
@@ -1003,7 +1144,7 @@ def parse_sense(word, data, text, use_text, config):
             elif form == "acc":
                 data_append(data, "tags", "accusative")
             else:
-                print(word, "NL-NOUN FORM OF", str(t))
+                print(word, language, "NL-NOUN FORM OF", str(t))
         elif name == "nl-adj form of":
             form = t_arg(word, t, 1)
             base = t_arg(word, t, 2)
@@ -1017,7 +1158,7 @@ def parse_sense(word, data, text, use_text, config):
             elif form == "infl":
                 pass  # XXX does this have special meaning?
             else:
-                print(word, "NL-ADJ FORM OF", str(t))
+                print(word, language, "NL-ADJ FORM OF", str(t))
         elif name == "nl-pronadv of":
             # XXX two arguments that the word is made of?
             data_append(data, "tags", "pronadv")
@@ -1137,8 +1278,8 @@ def parse_sense(word, data, text, use_text, config):
                 elif x in ("dim", "diminutive"):
                     data_append(data, "tags", "diminutive")
                 else:
-                    print("{} PT-ADJ FORM OF UNKNOWN {} IN {}"
-                          "".format(word, x, t))
+                    print("{} {} PT-ADJ FORM OF UNKNOWN {} IN {}"
+                          "".format(word, language, x, t))
         elif name == "pt-noun form of":
             data_append(data, "inflection_of", t_arg(word, t, 1))
             for x in t_vec(word, t)[1:]:
@@ -1151,8 +1292,8 @@ def parse_sense(word, data, text, use_text, config):
                 elif x in ("p", "pl", "plural"):
                     data_append(data, "tags", "plural")
                 else:
-                    print("{} PT-NOUN FORM OF UNKNOWN {} IN {}"
-                          "".format(word, x, t))
+                    print("{} {} PT-NOUN FORM OF UNKNOWN {} IN {}"
+                          "".format(word, language, x, t))
         # Handle some Japanese-specific tags
         elif name == "ja-kana-def":
             data_append(data, "tags", "ja-kana-def")
@@ -1259,7 +1400,7 @@ def parse_sense(word, data, text, use_text, config):
                 if v in mapping:
                     v = mapping[v]
                 else:
-                    print(word, "FI-VERB FORM OF", v, str(t))
+                    print(word, language, "FI-VERB FORM OF", v, str(t))
                     v = [v]
                 data_extend(data, "tags", v)
         elif name in ("fi-form of", "conjugation of"):
@@ -1314,7 +1455,7 @@ def parse_sense(word, data, text, use_text, config):
                                  "eventive",
                                  "singular and plural", "passive",
                                  "indicative", "conditional", "potential"):
-                        print(word, "FI-FORM UNRECOGNIZED", v, str(t))
+                        print(word, language, "FI-FORM UNRECOGNIZED", v, str(t))
                 if v in ("singular and plural", "singular or plural"):
                     data_append(data, "tags", "singular")
                     data_append(data, "tags", "plural")
@@ -1367,7 +1508,7 @@ def parse_sense(word, data, text, use_text, config):
                 data_append(data, "alt_of", transl)
             vec = t_vec(word, t)
             if len(vec) < 2:
-                print("{} BAD PLACE {}".format(word, t))
+                print("{} {} BAD PLACE {}".format(word, language, t))
                 continue
             for x in vec[1].split("/"):
                 data_append(data, "tags", x)
@@ -1384,17 +1525,18 @@ def parse_sense(word, data, text, use_text, config):
                         kind = place_prefixes[prefix]
                         v = x[idx + 1:]
                         if (v.startswith("en:") or v.startswith("es:") or
-                            v.startswith("fr:")):
+                            v.startswith("fr:") or v.startswith("it:") or
+                            v.startswith("it:")):
                             v = v[3:]
                         if v.find(":") >= 0:
-                            print("{} SUSPICIOUS UNHANDLED PLACE {}"
-                                  "".format(word, x))
+                            print("{} {} SUSPICIOUS UNHANDLED PLACE {}"
+                                  "".format(word, language, x))
                         data_append(data, "holonyms",
                                     {"word": v,
                                      "type": kind})
                     else:
-                        print("{} PLACE UNRECOGNIZED HOLONYM {} IN {}"
-                              "".format(word, x, t))
+                        print("{} {} PLACE UNRECOGNIZED HOLONYM {} IN {}"
+                              "".format(word, language, x, t))
                 else:
                     data_append(data, "holonyms", {"word": x})
         # US state names seem to have a special tagging as such.  We tag them
@@ -1445,9 +1587,10 @@ def parse_sense(word, data, text, use_text, config):
         # elsewhere.)
         elif name in ("audio", "audio-pron",  #XXX audio seems more common, CHK
                       "IPA", "ipa", "l", "link", "l-self", "m", "m+",
-                      "zh-m", "zh-l", "ja-l", "ja-def", "sumti", "ko-l",
+                      "zh-m", "zh-l", "ja-l", "ja-def", "sumti", "ko-l", "vi-l",
                       "alter", "ISBN", "syn", "ISSN", "gbooks", "OCLC",
                       "hyph", "hyphenation", "ja-r", "ja-l", "l/ja", "l-ja",
+                      "ja-r/args",
                       "lj", "c.", "ca.", "a.", "CURRENTDAY", "CURRENTMONTHNAME",
                       "CURRENTYEAR", "...", "…", "mdash", "SIC", "LCC",
                       "homophones", "wsource", "nobr", "NNBS", "@", "CE", "BC",
@@ -1478,12 +1621,12 @@ def parse_sense(word, data, text, use_text, config):
                       "source Louis-Ferdinand Céline",
                       "presidential nomics",
                       "video frames",
-                      "w:William Logan (poet)",
-                      "blockquote",
+                      "w:William Logan (poet)", "w:",
+                      "blockquote", "comment",
                       "non-gloss definition", "n-g", "ngd", "non-gloss"):
             continue
         # There are whole patterns of templates that we don't want warnings for.
-        elif re.search(r"IPA|^RQ:|^R:|"
+        elif re.search(r"IPA|^(RQ:|Template:RQ:|R:)|"
                        r"-romanization$|-romanji$|romanization of$",
                        name):
             continue
@@ -1502,7 +1645,8 @@ def parse_sense(word, data, text, use_text, config):
                 category = m.group(1)
                 data_append(data, "topics", {"word": category})
                 continue
-            print(word, "UNRECOGNIZED INSIDE GLOSS:", repr(name), str(t))
+            print(word, language, "UNRECOGNIZED INSIDE GLOSS:",
+                  repr(name), str(t))
 
     # Various fields should only contain strings.  Check that they do
     # (helps find bugs fast).  Also remove any duplicates from the lists and
@@ -1513,22 +1657,23 @@ def parse_sense(word, data, text, use_text, config):
             continue
         for x in data[k]:
             if not isinstance(x, str):
-                print(word, "INTERNAL ERROR GLOSS PARSING", k, data.get(k, ()))
+                print(word, language, "INTERNAL ERROR GLOSS PARSING",
+                      k, data.get(k, ()))
                 assert False
         data[k] = list(set(sorted(data[k])))
 
     return data
 
 
-def parse_preamble(word, data, pos, pos_sectitle, text, p, config):
+def parse_preamble(word, data, language, pos, pos_sectitle, text, p, config):
     """Parse the head template for the word (part-of-speech) and other
     stuff that affects all senses.  Then parse the word sense defintions."""
     heads = []
-    plural = False
+    add_tags = []
     for t in p.templates:
         name = t.name.strip()
         if re.search("plural", name):
-            plural = True
+            add_tags.append("plural")
         # Note: want code below in addition to code above.
         # Record the head template fo the word entry. This often contains
         # important inflection information (e.g., comparatives and verb
@@ -1537,16 +1682,29 @@ def parse_preamble(word, data, pos, pos_sectitle, text, p, config):
         # Also Warn about potentially incorrect templates for the
         # part-of-speech (common error in Wiktionary that should be corrected
         # there).
-        m = re.search("^(head|Han char)$|^[a-z][a-z][a-z]?-(plural noun|noun|verb|adj|adv|name|proper-noun|pron|phrase|decl-noun|prefix|clitic|number|ordinal|syllable|suffix|affix|pos|gerund|combining form|converb|cont)(-|$)", name)
+        m = re.search(r"^(head|Han char)$|" +
+                      r"^(" + "|".join(wiktionary_languages.keys()) + r")" +
+                      r"-(plural-noun|plural noun|noun|verb|adj|adv|name|proper-noun|proper noun|pron|phrase|decl-noun|prefix|clitic|number|ordinal|syllable|suffix|affix|pos|gerund|combining form|converb|cont|con|interj|det|part|postp|prep)(-|$)", name)
         if m:
-            tagpos = m.group(2) or pos
+            tagpos = m.group(1)
+            if tagpos == "head":
+                tagpos = t_arg(word, t, 2)
+                if tagpos in head_pos_map:
+                    tagpos = head_pos_map[tagpos]
+                else:
+                    print("{} {} HEAD UNRECOGNIZED TAGPOS {} UNDER POS {} IN {}"
+                          "".format(word, language, tagpos, pos, t))
+            elif tagpos == "Han char":
+                tagpos = "character"
+            else:
+                tagpos = m.group(3)
             # XXX some of them need to be mapped, e.g., clitic, ordinal
             if ((tagpos not in template_allowed_pos_map or
                  pos not in template_allowed_pos_map[tagpos]) and
                 m.group(0) != "head" and
-                m.group(0) != pos):
-                print("{} SUSPECT TAGPOS {} UNDER POS {}: {}"
-                      "".format(word, tagpos, pos, str(t)))
+                tagpos != pos):
+                print("{} {} SUSPECT TAGPOS {} UNDER POS {}: {}"
+                      "".format(word, language, tagpos, pos, str(t)))
             # Record the head template under "heads".
             data_append(data, "heads", template_args_to_dict(word, t))
         # If hyphenation information has been provided, record it.
@@ -1562,23 +1720,29 @@ def parse_preamble(word, data, pos, pos_sectitle, text, p, config):
     for node in p.lists():
         for item in node.items:
             txt = str(item)
+            if txt.startswith("*::"):
+                continue  # Possibly a bug in wikitextparser
             sense = {}
-            parse_sense(word, sense, txt, True, config)
+            parse_sense(word, sense, language, txt, True, config)
             for node2 in node.sublists():
                 for item2 in node2.items:
-                    parse_sense(word, sense, str(item2), False, config)
+                    parse_sense(word, sense, language, str(item2), False,
+                                config)
                 for node3 in node2.sublists():
                     for item3 in node3.items:
-                        parse_sense(word, sense, str(item3), False, config)
-            if plural and "plural" not in sense.get("tags", ()):
-                data_append(sense, "tags", "plural")
+                        parse_sense(word, sense, language, str(item3), False,
+                                    config)
+            for tag in add_tags:
+                if tag not in sense.get("tags", ()):
+                    data_append(sense, "tags", "plural")
             data_append(data, "senses", sense)
 
     # XXX there might be word senses encoded in other ways, without using
     # a list for them.  Do some tests to find out how common this is.
     if not data.get("senses"):
-        print("{} NO SENSES FOUND FOR POS {} SECTION {}"
-              "".format(word, pos, pos_sectitle))
+        if pos not in ("character", "symbol", "letter"):
+            print("{} {} NO SENSES FOUND FOR POS {} SECTION {}"
+                  "".format(word, language, pos, pos_sectitle))
 
 
 def parse_pronunciation(word, data, text, p):
@@ -1621,7 +1785,7 @@ def parse_pronunciation(word, data, text, p):
             elif name in ("IPA", "ipa"):
                 vec = t_vec(word, t)
                 for ipa in vec[1:]:
-                    data_append(variant, "ipa", (vec[0], ipa))
+                    data_append(variant, "ipa", ipa)
             elif name in ("IPAchar", "audio-IPA"):
                 # These are used in text to format as IPA characters
                 # or to specify inline audio
@@ -1668,7 +1832,7 @@ def parse_pronunciation(word, data, text, p):
                           "alter", "hyph", "honoraltcaps",
                           "non-gloss definition", "n-g", "non-gloss",
                           "ngd",
-                          "senseid", "defn", "ja-r", "ja-l",
+                          "senseid", "defn", "ja-r", "ja-l", "ja-r/args",
                           "place:Brazil/state",
                           "place:Brazil/municipality",
                           "place", "taxlink",
@@ -1769,19 +1933,28 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
                 if item.startswith("For more, see "):
                     item = item[14:]
 
+                links = []
                 for t in p.templates:
                     name = t.name.strip()
                     if name == "sense":
                         sense_text = t_arg(word, t, 1)
                     elif name == "l":
-                        add_linkage(kind, t_arg(word, t, 2))
+                        links.append((kind, t_arg(word, t, 2)))
+                    elif name == "qualifier":
+                        qualifiers.extend(t_vec(word, t))
+                if links:
+                    saved_qualifiers = []
+                    for kind, link in links:
+                        qualifiers = saved_qualifiers
+                        add_linkage(kind, link)
+                        return
 
                 found = False
                 for m in re.finditer(r"''+([^']+)''+", text):
                     v = m.group(1)
                     v = clean_value(word, v)
                     if v.startswith("(") and v.endswith(")"):
-                        # These seem to often be qualifiers
+                        # XXX These seem to often be qualifiers
                         sense_text = v[1:-1]
                         continue
                     add_linkage(kind, v)
@@ -1827,14 +2000,15 @@ def parse_linkage(word, data, kind, text, p, sense_text=None):
             # "hiragana" mapping for the catagana term when available
             # (actually using them would require later
             # postprocessing).
-            elif name == "ja-r":
+            elif name in ("ja-r", "ja-r/args"):
                 kata = t_arg(word, t, 1)
                 hira = t_arg(word, t, 2)
                 add_linkage(kind, kata)
-                if hira:
-                    data_append(data, "hiragana", (kata, hira))
+                # XXX this goes into wrong place
+                #if hira:
+                #    data_append(data, "hiragana", (kata, hira))
             # Handle various types of common Japanese/Chinese links.
-            elif name in ("ja-l", "lang", "zh-l", "ko-l"):
+            elif name in ("ja-l", "lang", "zh-l", "ko-l", "vi-l"):
                 add_linkage(kind, t_arg(word, t, 1))
             # Vernacular names seem to be specified fairly often, but not
             # always intended as the actual link.  For now, we'll skip them.
@@ -2225,10 +2399,13 @@ def page_iter(word, text, config):
                     yield x
 
                 # Initialize for parsing words in the new language.
+                langdata = wiktionary_languages[sectitle]
                 language = sectitle
                 config.language_counts[language] += 1
                 pos = None
-                base = {"word": clean_value(word, word), "lang": language}
+                base = {"word": clean_value(word, word),
+                        "lang": language,
+                        "lang_code": langdata["code"]}
                 data = {}
                 datas = []
                 sectitle = ""
@@ -2305,7 +2482,8 @@ def page_iter(word, text, config):
             # If the section title is empty, it is the preamble (text before
             # the first subsection for the language).
             if sectitle == "":  # Preamble
-                parse_preamble(word, data, pos, pos_sectitle, text, p, config)
+                parse_preamble(word, data, language, pos, pos_sectitle, text,
+                               p, config)
             # If the section title title indicates pronunciation, parse it here.
             elif sectitle == "pronunciation":
                 if config.capture_pronunciation:
@@ -2327,7 +2505,7 @@ def page_iter(word, text, config):
             elif sectitle == "derived terms":
                 if config.capture_linkages:
                     parse_linkage(word, data, "derived", text, p)
-            elif sectitle == "related terms":
+            elif sectitle in ("related terms", "related characters"):
                 if config.capture_linkages:
                     parse_linkage(word, data, "related", text, p)
             # Parse abbreviations.
@@ -2415,10 +2593,7 @@ def parse_page(word, text, config):
             for t in topics:
                 t["inaccurate"] = True
             for data in lang_datas[:-1]:
-                if "topics" not in data:
-                    data["topics"] = []
-                for t in topics:
-                    data["topics"].append(t.copy())
+                data["topics"] = data.get("topics", []) + topics
 
     # Return the resulting words
     return datas

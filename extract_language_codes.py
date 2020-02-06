@@ -196,8 +196,10 @@ with open("wiktextract/languages.py", "w") as f:
     f.write("# This file is autotically generated from Wiktionary by the\n")
     f.write("# extract_language_codes.py script.  DO NOT EDIT.\n")
     f.write("\n")
-    f.write('all_languages = {}\n'
+    f.write("import json\n")
+    f.write("\n")
+    f.write('all_languages = json.loads("""\n{}\n""")\n'
             ''.format(json.dumps(all_languages, sort_keys=True, indent=4)))
     f.write("\n")
-    f.write('all_families = {}\n'
+    f.write('all_families = json.loads("""\n{}\n""")\n'
             ''.format(json.dumps(all_families, sort_keys=True, indent=4)))
