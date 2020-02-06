@@ -5,7 +5,7 @@
 from .wiktionary import parse_wiktionary
 from .wiktlangs import wiktionary_languages
 from .config import WiktionaryConfig
-from .page import clean_value
+from .page import clean_value, parse_page
 from .parts_of_speech import PARTS_OF_SPEECH
 
 __all__ = (
@@ -13,4 +13,5 @@ __all__ = (
     "parse_wiktionary",
     "wiktionary_languages",
     "PARTS_OF_SPEECH",
+    "parse_page",
 )

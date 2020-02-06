@@ -12,8 +12,8 @@ import sys
 import json
 import hashlib
 import argparse
-from wiktextract import WiktionaryConfig, parse_wiktionary, wiktionary_languages
-
+from wiktextract import (WiktionaryConfig, parse_wiktionary,
+                         wiktionary_languages, parse_page)
 
 # Pages whose titles have any of these prefixes are ignored.
 ignore_prefixes = set(["Index", "Help", "MediaWiki", "Citations",
@@ -98,10 +98,14 @@ if __name__ == "__main__":
                         help="Capture compound words using each word")
     parser.add_argument("--redirects", action="store_true", default=False,
                         help="Capture redirects")
+    parser.add_argument("--examples", action="store_true", default=False,
+                        help="Capture examples")
     parser.add_argument("--statistics", action="store_true", default=False,
                         help="Print statistics")
     parser.add_argument("--verbose", action="store_true", default=False,
                         help="Print verbose status messages")
+    parser.add_argument("--page", type=str,
+                        help="Parse a single Wiktionary page (for debugging)")
     args = parser.parse_args()
 
     # The --all option turns on capturing all data types
@@ -111,6 +115,7 @@ if __name__ == "__main__":
         args.linkages = True
         args.compounds = True
         args.redirects = True
+        args.examples = True
 
     # If --list-languages has been specified, just print the list of supported
     # languages
@@ -120,8 +125,9 @@ if __name__ == "__main__":
             print("    {}".format(lang))
         sys.exit(0)
 
-    if not args.path:
-        print("The PATH argument for wiktionary dump file is mandatory.")
+    if not args.path and not args.page:
+        print("The PATH argument for wiktionary dump file is mandatory")
+        print("(unless --page is specified).")
         sys.exit(1)
 
     # Default to English and Translingual if language not specified.
@@ -170,10 +176,23 @@ if __name__ == "__main__":
                               capture_linkages=args.linkages,
                               capture_compounds=args.compounds,
                               capture_redirects=args.redirects,
+                              capture_examples=args.examples,
                               verbose=args.verbose)
 
     try:
-        ctx = parse_wiktionary(args.path, config, word_cb, capture_cb)
+        if args.page:
+            # Parse a single Wiktionary page (extracted using --pages-dir)
+            if args.path:
+                print("Normal input file should not be specified with --path")
+                sys.exit(1)
+            with open(args.page, "r") as f:
+                text = f.read()
+            ret = parse_page("TESTPAGE", text, config)
+            for x in ret:
+                word_cb(x)
+        else:
+            # Parse the normal full Wiktionary data dump
+            parse_wiktionary(args.path, config, word_cb, capture_cb)
     finally:
         if out_path and out_path != "-":
             out_f.close()

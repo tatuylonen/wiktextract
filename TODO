@@ -1,6 +1,23 @@
-XXX check variant vs. data in page.py; is variant properly added?
+XXX Some very common words (e.g., green, die, time, plant, be, king)
+have separate translation pages, e.g., green/translations).  There are
+enough of these that they should be handled separately and added to
+the senses in question.
 
-Implement code to generate HTML from a dictionary file.
+XXX It is fairly common to have {{en-phrase}} under ==Verb==.  What
+part-of-speech should these be?
+
+XXX generate proper list of language tags and start using it
+
+Qualifiers specified after {{l|...}} do not get included in output,
+e.g., Galician "ano" Etymology 2
+
+Galiacian Proverb list has a strange item
+
+XXX check handling of "alter" at the beginning of parse_any(), is it correct?
+
+XXX change wiktwords to output senses rather than words
+
+XXX check variant vs. data in page.py; is variant properly added?
 
 XXX Redo formatting of {{place|...}} (need custom code)
 
@@ -15,27 +32,6 @@ gender&meaning.  Are these more common?
 - check: Japanese (need consultation?)
   - ja-verb form of
 
-Chinese
-Swedish
-Norwegian
-Danish
-Hungarian
-Estonian
-Czech
-Arabic
-Hebrew
-Mandarin
-Hindi
-Malay
-Russian
-Bengali
-Punjavi
-Greek
-Ancient Greek
-Classical Greek
-Latin
-Turkish
-
 Check:
   Pinuin reading of
   mul-kangxi radical-def
@@ -43,14 +39,48 @@ Check:
   mul-kanadef
   mul-domino def
   mul-cjk stroke-def
-  Han char
   Brai-def
   speciesabbrev
 
 Capture coordinate terms under Coordinate terms header
 
 
-OLD TIMING FOR Spanish: 2964 seconds
-time python3 ./wiktwords --all --language Spanish --out temp-es-all.json data/enwiktionary-20200120-pages-articles.xml.bz2
+# XXX pages linked under "Category:English glossaries" may be interesting
+# to check out
 
-Check: attardi/wikiextractor
+# XXX pages linked under "Category:English appendices" may be interesting
+# to check out
+
+# XXX pages like "Appendix:Glossary of ..." seem interesting, might want to
+# extract data from them?
+
+# XXX "Appendix:Animals" seems to contain helpful information that we might
+# want to extract.
+
+# XXX Thesaurus:* pages seem potentially useful
+
+# XXX Check out: Appendix:Roget's thesaurus classification.  Could this be
+# helpful in hypernyms etc?
+
+# Category:<langcode>:All topics and its subcategories seems very interesting.
+# The English category tree looks very promising.  XXX where are the
+# category relationships defined?  Wikimedia Commons?
+
+# XXX check Unsupported titles/* and how to get their real title
+
+# XXX test "sama" (Finnish) to check that linkages for list items are correct
+
+# XXX test "juttu" (Finnish) to check that sense is correctly included in
+# linkages
+
+# XXX check pronunciations for "house" to see that "noun" and "verb" senses
+# are correctly parsed
+
+# XXX test "Friday" - it has embedded template in Related terms (currently
+# handled wrong)
+
+# XXX Finnish ällös seems to leave [[w:Optative mood|optative]] in gloss ???
+
+# XXX Finnish binääri leaves binäärinen#Compounds in gloss
+
+XXX check ====Alternative forms====, e.g., clinicopathologic

@@ -45,7 +45,7 @@ known_sense_keys = set([
     "holonyms",
     "hypernyms",
     "inflection_of",
-    "kyujitai-spelling",
+    "kyujitai_spelling",
     "morse_code",
     "nonglosses",
     "object_preposition",
@@ -54,12 +54,12 @@ known_sense_keys = set([
     "pron1",
     "pron2",
     "sort",
-    "senseid",
     "suffix",
     "tags",
     "taxon",
     "topics",
     "unit",
+    "wikidata",
     "wikipedia",
 ])
 

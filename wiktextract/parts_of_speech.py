@@ -6,106 +6,335 @@
 # This dictionary maps section titles in articles to parts-of-speech.  There
 # is a lot of variety and misspellings, and this tries to deal with those.
 part_of_speech_map = {
-    "abbreviation": "abbrev",
-    "acronym": "abbrev",
-    "adjectival": "adj_noun",
-    "adjectival noun": "adj_noun",
-    "adjectival verb": "adj_verb",
-    "adjective": "adj",
-    "adjectuve": "adj",
-    "adjectives": "adj",
-    "adverb": "adv",
-    "adverbs": "adv",
-    "adverbial phrase": "adv_phrase",
-    "affix": "affix",
-    "adjective suffix": "affix",
-    "article": "article",
-    "character": "character",
-    "circumfix": "circumfix",
-    "circumposition": "circumpos",
-    "classifier": "classifier",
-    "clipping": "abbrev",
-    "clitic": "clitic",
-    "command form": "cmd",
-    "command conjugation": "cmd_conj",
-    "combining form": "combining_form",
-    "comparative": "adj_comp",
-    "conjunction": "conj",
-    "conjuntion": "conj",
-    "contraction": "abbrev",
-    "converb": "converb",
-    "counter": "counter",
-    "determiner": "det",
-    "diacritical mark": "character",
-    "enclitic": "clitic",
-    "enclitic particle": "clitic",
-    "gerund": "gerund",
-    "glyph": "character",
-    "han character": "character",
-    "han characters": "character",
-    "ideophone": "noun",  # XXX
-    "infix": "infix",
-    "infinitive": "verb",
-    "initialism": "abbrev",
-    "interfix": "interfix",
-    "interjection": "intj",
-    "interrogative pronoun": "pron",
-    "intransitive verb": "verb",
-    "instransitive verb": "verb",
-    "letter": "letter",
-    "ligature": "character",
-    "label": "character",
-    "nom character": "character",
-    "nominal nuclear clause": "clause",
-    "νoun": "noun",
-    "nouɲ": "noun",
-    "noun": "noun",
-    "nouns": "noun",
-    "noum": "noun",
-    "number": "num",
-    "numeral": "num",
-    "ordinal number": "ordinal",
-    "participle": "verb",
-    "particle": "particle",
-    "past participle": "verb",
-    "perfect expression": "verb",
-    "perfection expression": "verb",
-    "perfect participle": "verb",
-    "personal pronoun": "pron",
-    "phrasal verb": "phrasal_verb",
-    "phrase": "phrase",
-    "phrases": "phrase",
-    "possessive determiner": "det",
-    "possessive pronoun": "det",
-    "postposition": "postp",
-    "predicative": "predicative",
-    "prefix": "prefix",
-    "preposition": "prep",
-    "prepositions": "prep",
-    "prepositional expressions": "prep",
-    "prepositional phrase": "prep_phrase",
-    "prepositional pronoun": "pron",
-    "present participle": "verb",
-    "preverb": "verb",
-    "pronoun": "pron",
-    "proper noun": "name",
-    "proper oun": "name",
-    "proposition": "prep",  # Appears to be a misspelling of preposition
-    "proverb": "proverb",
-    "punctuation mark": "punct",
-    "punctuation": "punct",
-    "relative": "conj",
-    "root": "root",
-    "syllable": "character",
-    "suffix": "suffix",
-    "suffix form": "suffix",
-    "symbol": "symbol",
-    "transitive verb": "verb",
-    "verb": "verb",
-    "verbal noun": "noun",
-    "verbs": "verb",
-    "digit": "digit",   # I don't think this is actually used in Wiktionary
+    "abbreviation": {
+        "pos": "abbrev",
+        "tags": ["abbreviation"],
+    },
+    "acronym": {
+        "pos": "abbrev",
+        "tags": ["abbreviation"],
+    },
+    "adjectival": {
+        "pos": "adj_noun",
+    },
+    "adjectival noun": {
+        "pos": "adj_noun",
+    },
+    "adjectival verb": {
+        "pos": "adj_verb",
+    },
+    "adjective": {
+        "pos": "adj",
+    },
+    "adjectuve": {
+        "pos": "adj",
+        "error": "Misspelled subtitle",
+    },
+    "adjectives": {
+        "pos": "adj",
+        "warning": "Usually used in singular",
+    },
+    "adverb": {
+        "pos": "adv",
+    },
+    "adverbs": {
+        "pos": "adv",
+        "warning": "Usually used in singular",
+    },
+    "adverbial phrase": {
+        "pos": "adv_phrase",
+    },
+    "affix": {
+        "pos": "affix",
+    },
+    "adjective suffix": {
+        "pos": "affix",
+    },
+    "article": {
+        "pos": "article",
+    },
+    "character": {
+        "pos": "character",
+    },
+    "circumfix": {
+        "pos": "circumfix",
+    },
+    "circumposition": {
+        "pos": "circumpos",
+    },
+    "classifier": {
+        "pos": "classifier",
+    },
+    "clipping": {
+        "pos": "abbrev",
+        "tags": ["abbreviation"],
+    },
+    "clitic": {
+        "pos": "suffix",
+        "tags": ["clitic"],
+    },
+    "combining form": {
+        "pos": "combining_form",
+        # XXX should change to affix/suffix/prefix?
+    },
+    "comparative": {
+        "pos": "adj",
+        "tags": ["comparative"],
+    },
+    "conjunction": {
+        "pos": "conj",
+    },
+    "conjuntion": {
+        "pos": "conj",
+        "error": "Misspelled subtitle",
+    },
+    "contraction": {
+        "pos": "abbrev",
+        "tags": ["abbreviation"],
+    },
+    "converb": {
+        "pos": "converb",
+    },
+    "counter": {
+        "pos": "counter",
+    },
+    "determiner": {
+        "pos": "det",
+    },
+    "diacritical mark": {
+        "pos": "character",
+    },
+    "enclitic": {
+        "pos": "suffix",
+        "tags": ["clitic"],
+    },
+    "enclitic particle": {
+        "pos": "suffix",
+        "tags": ["clitic"],
+    },
+    "gerund": {
+        "pos": "verb",
+        "tags": ["participle", "gerund"],
+    },
+    "han character": {
+        "pos": "character",
+    },
+    "han characters": {
+        "pos": "character",
+        "warning": "Usually used in singular",
+    },
+    "ideophone": {
+        "pos": "noun",
+        "tags": ["ideophone"],
+    },
+    "infix": {
+        "pos": "infix",
+    },
+    "infinitive": {
+        "pos": "verb",
+        "tags": ["infinitive"],
+    },
+    "initialism": {
+        "pos": "abbrev",
+        "tags": ["abbreviation"],
+    },
+    "interfix": {
+        "pos": "interfix",
+    },
+    "interjection": {
+        "pos": "intj",
+    },
+    "interrogative pronoun": {
+        "pos": "pron",
+        "tags": ["interrogative"],
+    },
+    "intransitive verb": {
+        "pos": "verb",
+        "tags": ["intransitive"],
+    },
+    "instransitive verb": {
+        "pos": "verb",
+        "tags": ["intransitive"],
+        "error": "Misspelled subtitle",
+    },
+    "kanji": {
+        "pos": "character",
+    },
+    "letter": {
+        "pos": "letter",
+    },
+    "ligature": {
+        "pos": "character",
+        "tags": ["ligature"],
+    },
+    "label": {
+        "pos": "character",
+    },
+    "nom character": {
+        "pos": "character",
+    },
+    "nominal nuclear clause": {
+        "pos": "clause",
+    },
+    "νoun": {
+        "pos": "noun",
+        "error": "Misspelled subtitle",
+    },
+    "nouɲ": {
+        "pos": "noun",
+        "error": "Misspelled subtitle",
+    },
+    "noun": {
+        "pos": "noun",
+    },
+    "nouns": {
+        "pos": "noun",
+        "warning": "Usually in singular",
+    },
+    "noum": {
+        "pos": "noun",
+        "error": "Misspelled subtitle",
+    },
+    "number": {
+        "pos": "num",
+    },
+    "numeral": {
+        "pos": "num",
+    },
+    "ordinal number": {
+        "pos": "num",
+        "tags": ["ordinal"],
+    },
+    "participle": {
+        "pos": "verb",
+        "tags": ["participle"],
+    },
+    "particle": {
+        "pos": "particle",
+        # XXX Many of these seem to be prefixes or suffixes
+    },
+    "past participle": {
+        "pos": "verb",
+        "tags": ["participle", "past"],
+    },
+    "perfect expression": {
+        "pos": "verb",
+    },
+    "perfection expression": {
+        "pos": "verb",
+    },
+    "perfect participle": {
+        "pos": "verb",
+        "tags": ["participle", "perfect"],
+    },
+    "personal pronoun": {
+        "pos": "pron",
+        "tags": ["person"],
+    },
+    "phrase": {
+        "pos": "phrase",
+    },
+    "phrases": {
+        "pos": "phrase",
+        "warning": "Usually used in singular",
+    },
+    "possessive determiner": {
+        "pos": "det",
+        "tags": ["possessive"],
+    },
+    "possessive pronoun": {
+        "pos": "det",
+        "tags": ["possessive"],
+    },
+    "postposition": {
+        "pos": "postp",
+    },
+    "predicative": {
+        "pos": "adj",
+        "tags": ["predicative"],
+    },
+    "prefix": {
+        "pos": "prefix",
+    },
+    "preposition": {
+        "pos": "prep",
+    },
+    "prepositions": {
+        "pos": "prep",
+        "warning": "Usually used in singular",
+    },
+    "prepositional expressions": {
+        "pos": "prep",
+    },
+    "prepositional phrase": {
+        "pos": "prep_phrase",
+    },
+    "prepositional pronoun": {
+        "pos": "pron",
+        "tags": ["prepositional"],
+    },
+    "present participle": {
+        "pos": "verb",
+        "tags": ["participle", "present"],
+    },
+    "preverb": {
+        "pos": "preverb",
+    },
+    "pronoun": {
+        "pos": "pron",
+    },
+    "proper noun": {
+        "pos": "name",
+    },
+    "proper oun": {
+        "pos": "name",
+        "error": "Misspelled subtitle",
+    },
+    "proposition": {
+        "pos": "prep",  # Appears to be a misspelling of preposition
+        "error": "Misspelled subtitle",
+    },
+    "proverb": {
+        "pos": "proverb",
+    },
+    "punctuation mark": {
+        "pos": "punct",
+    },
+    "punctuation": {
+        "pos": "punct",
+    },
+    "relative": {
+        "pos": "conj",
+        "tags": ["relative"],
+    },
+    "syllable": {
+        "pos": "syllable",
+    },
+    "suffix": {
+        "pos": "suffix",
+    },
+    "suffix form": {
+        "pos": "suffix",
+    },
+    "symbol": {
+        "pos": "symbol",
+    },
+    "transitive verb": {
+        "pos": "verb",
+        "tags": ["transitive"],
+    },
+    "verb": {
+        "pos": "verb",
+    },
+    "verbal noun": {
+        "pos": "noun",
+        "tags": ["verbal"],
+    },
+    "verbs": {
+        "pos": "verb",
+        "warning": "Usually in singular",
+    },
 }
 
 # Set of all possible parts-of-speech returned by wiktionary reading.
-PARTS_OF_SPEECH = set(part_of_speech_map.values())
+PARTS_OF_SPEECH = set(x["pos"] for x in part_of_speech_map.values())

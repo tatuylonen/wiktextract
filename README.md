@@ -304,14 +304,17 @@ This package depends on the following other packages:
 
 ## Related tools
 
-Several other tools also exist for parsing Wiktionaries.  These
-include [Dbnary](http://kaiko.getalp.org/about-dbnary/) and
-[Wikiparse](https://github.com/frankier/wikiparse).
+A few other tools also exist for parsing Wiktionaries.  These include
+[Dbnary](http://kaiko.getalp.org/about-dbnary/),
+[Wikiparse](https://github.com/frankier/wikiparse), and [DKPro
+JWKTL](https://dkpro.github.io/dkpro-jwktl/).
 
 ## Contributing
 
 The official repository of this project is on
 [github](https://github.com/tatuylonen/wiktextract).
+
+Please report bugs and other issues on github.
 
 Please email to ylo at clausal.com if you wish to contribute or have
 patches or suggestions.

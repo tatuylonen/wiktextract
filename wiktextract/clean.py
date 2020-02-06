@@ -131,7 +131,7 @@ def clean_replace_regexp(word, v):
         if t.startswith("[["):
             vec = t[2:-2].split("|")
             if len(vec) > 2:
-                print("{} LINK WITH TOO MANY ARGS: {}".format(word, t))
+                return vec[2]
             if len(vec) >= 2:
                 return vec[1]
             v = vec[0]
