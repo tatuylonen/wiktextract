@@ -108,21 +108,42 @@ class WiktionaryTarget(object):
             pageid = self.pageid
             title = self.title
             redirect = self.redirect
+            self.config.num_pages += 1
+
+            # Enforce limit on number of pages (for debugging)
+            # XXX how do we abort reading
+            if self.config.limit and self.config.num_pages > self.config.limit:
+                if self.config.num_pages == self.config.limit + 1:
+                    print("REACHED MAXIMUM NUMBER OF PAGES TO PROCESS")
+                    self.aborted = True
+                return
+
             if self.model in ("css", "sanitized-css", "javascript",
                               "Scribunto"):
                 return
+
             if redirect:
                 if self.config.capture_redirects:
                     data = {"redirect": redirect, "word": title}
                     self.word_cb(data)
-            else:
-                # If a capture callback has been provided, skip this page.
-                if self.capture_cb and not self.capture_cb(title, self.text):
                     return
+
+            # If a capture callback has been provided and returns False,
+            # skip this page.
+            if self.capture_cb and not self.capture_cb(title, self.text):
+                return
+
+            if title.endswith("/translations"):
+                # XXX parse as a special translation page
+                pass
+            else:
                 # Parse the page, and call ``word_cb`` for each captured
                 # word.
                 ret = parse_page(title, self.text, self.config)
                 for data in ret:
+                    # XXX check for "translation_link" and postpone if
+                    # present, process after all others using
+                    # translations from separate translation pages
                     self.word_cb(data)
         else:
             print("UNSUPPORTED", tag, len(data), attrs)
@@ -166,9 +187,14 @@ def parse_wiktionary(path, config, word_cb, capture_cb=None):
     try:
         # Create parsing context.
         ctx = WiktionaryTarget(config, word_cb, capture_cb)
+        ctx.aborted = False
         # Parse the XML file.
         parser = etree.XMLParser(target=ctx)
-        etree.parse(wikt_f, parser)
+        while not ctx.aborted:
+            data = wikt_f.read(1024 * 1024)
+            if not data:
+                break
+            parser.feed(data)
     finally:
         wikt_f.close()
         if subp:

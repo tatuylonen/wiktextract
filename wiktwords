@@ -54,6 +54,7 @@ def capture_page(title, text, pages_dir):
             m = re.match(r"^(Category:[^_ :]+)[_ :]*(.*)", title)
             if m:
                 title = m.group(1) + ":" + m.group(2)
+            # XXX Capture some?
 
     if pages_dir is not None:
         title = re.sub(r"[^-\w_.:/]", "_", title)
@@ -77,6 +78,8 @@ if __name__ == "__main__":
                         "pages-articles.xml[.bz2])")
     parser.add_argument("--out", type=str, default=None,
                         help="Path where to write output (- for stdout)")
+    parser.add_argument("--errors", type=str,
+                        help="File in which to save error information")
     parser.add_argument("--language", type=str, action="append", default=[],
                         help="Language to capture (can specify multiple tiems, "
                         "defaults to English and Translingual)")
@@ -102,10 +105,12 @@ if __name__ == "__main__":
                         help="Capture examples")
     parser.add_argument("--statistics", action="store_true", default=False,
                         help="Print statistics")
-    parser.add_argument("--verbose", action="store_true", default=False,
-                        help="Print verbose status messages")
     parser.add_argument("--page", type=str,
                         help="Parse a single Wiktionary page (for debugging)")
+    parser.add_argument("--limit", type=int,
+                        help="Process at most this many pages (for debugging)")
+    parser.add_argument("--verbose", action="store_true", default=False,
+                        help="Print verbose status messages (for debugging)")
     args = parser.parse_args()
 
     # The --all option turns on capturing all data types
@@ -177,6 +182,7 @@ if __name__ == "__main__":
                               capture_compounds=args.compounds,
                               capture_redirects=args.redirects,
                               capture_examples=args.examples,
+                              limit=args.limit,
                               verbose=args.verbose)
 
     try:
@@ -229,3 +235,57 @@ if __name__ == "__main__":
 
         print("")
         print("{} WORDS CAPTURED".format(word_count))
+
+    if args.errors:
+        with open(args.errors, "w") as f:
+            json.dump({
+                "errors": config.errors,
+                "warnings": config.warnings,
+                "debugs": config.debugs,
+                "unrecognized_counts": config.unrecognized_template_counts,
+                "unrecognized_samples": config.unrecognized_template_samples,
+                "unrendered_counts": config.unrendered_template_counts,
+                "unrendered_samples": config.unrendered_template_samples,
+                "unknown_value_counts": config.unknown_value_counts,
+                }, f)
+
+    def dump_un(title, limit, counts, samples):
+        items = []
+        counts_ht = {}
+        samples_ht = {}
+        for k, v in counts.items():
+            counts_ht[k] = v
+        lst = list(sorted(counts_ht.items(), reverse=True,
+                          key=lambda x: x[1]))
+        if lst:
+            print(title)
+            for k, cnt in lst[:limit]:
+                print("{:5d} {}".format(cnt, k))
+                for kk, vv in samples[k].items():
+                    for sample in vv:
+                        print("        {}".format(sample))
+
+    def dump_val(title, limit, counts):
+        items = []
+        counts_ht = {}
+        for k, v in counts.items():
+            for kk, vv in v.items():
+                counts_ht[k, kk] = vv
+        lst = list(sorted(counts_ht.items(), reverse=True,
+                          key=lambda x: x[1]))
+        if lst:
+            print("")
+            print(title)
+            for (k, kk), v in lst[:limit]:
+                print("  {:5d} {}: {}".format(v, k, kk))
+
+    dump_un("TOP 20 UNRECOGNIZED TEMPLATES", 20,
+            config.unrecognized_template_counts,
+            config.unrecognized_template_samples)
+
+    dump_un("TOP 20 UNRENDERED TEMPLATES", 20,
+            config.unrendered_template_counts,
+            config.unrendered_template_samples)
+
+    dump_val("TOP 20 UNKNOWN VALUES", 20,
+             config.unknown_value_counts)

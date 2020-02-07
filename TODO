@@ -2,6 +2,7 @@ XXX Some very common words (e.g., green, die, time, plant, be, king)
 have separate translation pages, e.g., green/translations).  There are
 enough of these that they should be handled separately and added to
 the senses in question.
+  - see "translation_link"
 
 XXX It is fairly common to have {{en-phrase}} under ==Verb==.  What
 part-of-speech should these be?

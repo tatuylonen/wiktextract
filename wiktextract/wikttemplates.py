@@ -44,6 +44,7 @@ ignored_templates = set([
     "abbreviation-old",
     "af",
     "affix",
+    "affixes",
     "altcaps",
     "alter",
     "anchor",
@@ -126,6 +127,7 @@ ignored_templates = set([
     "Template:User:Donnanz/der3-u",
     "der4",
     "der5",
+    "der bottom",
     "der-bottom",
     "der-bottom2",
     "der-bottom3",
@@ -134,6 +136,7 @@ ignored_templates = set([
     "der-mid3",
     "der-mid4",
     "der-mid",
+    "der top",
     "der-top",
     "der-top2",
     "der-top3",
@@ -342,9 +345,11 @@ ignored_templates = set([
     "usex",
     "ux",
     "uxi",
+    "vi-der",
     "video frames",
     "w:William Logan (poet)",
     "was wotd",
+    "wikisaurus:movement",
     "wikisource1911Enc",
     "wikivoyage",
     "ws",
@@ -454,6 +459,14 @@ clean_replace_map = {
              "{arg1} ({tr}; {gloss})",
              "{arg1} ({gloss})",
              "{arg1}"],
+    "vi-l": ["{arg1}; {arg2} ({arg3}; {arg4})",
+             "{arg1} ({arg2}; {arg3})",
+             "{arg1} ({arg2})",
+             "{arg1} ({tr}; {gloss})",
+             "{arg1} ({gloss})",
+             "{arg1}"],
+    "l/gl": ["{arg1}"],
+    "hanja form of": ["{arg1} ({arg2})"],
     #'sumti': [r'x\1'],
     'initialism of': [r'initialism of "{arg3}" ({arg4})',
                       r'initialism of "{arg2}" ({arg4})',
@@ -463,6 +476,12 @@ clean_replace_map = {
                 r'initialism of "{arg2}" ({arg4})',
                 r'initialism of "{arg3}"',
                 r'initialism of "{arg2}"'],
+    'Nom form of': [r'Vietnamese Nôm form of "{arg1}" ({arg2})',
+                    r'Vietnamese Nôm form of "{arg1}"'],
+    'Han tu form of': [r'Vietnamese Hán reading "{arg1}" ({arg2})',
+                       r'Vietnamese Hán reading "{arg1}"'],
+    'Han form of': [r'Vietnamese Hán reading "{arg1}" ({arg2})',
+                    r'Vietnamese Hán reading "{arg1}"'],
     'present participle of': [r'present participle of "{arg2}"'],
     'past participle of': [r'past participle of "{arg2}"'],
     'synonym of': [r'synonym of "{arg2}"'],
@@ -528,6 +547,10 @@ clean_replace_map = {
                  'alternative case of "{arg2}" ({arg4})',
                  'alternative case of "{arg3}"',
                  'alternative case of "{arg2}"'],
+    'soft mutation of': ['soft mutation of "{arg3}" ({arg4})',
+                         'soft mutation of "{arg2}" ({arg4})',
+                         'soft mutation of "{arg3}"',
+                         'soft mutation of "{arg2}"'],
     'obsolete spelling of': ['obsolete spelling of "{arg2}" ({arg4})',
                              'obsolete spelling of "{arg2}"'],
     'obs sp': ['obsolete spelling of "{arg2}" ({arg4})',
@@ -822,6 +845,14 @@ clean_replace_map = {
              r'{arg1} ({arg3})',
              r'{arg1} ({arg2})',
              r'{arg1}'],
+    "ryu-r": [r'{arg1} ({arg2}; {lit}; {gloss})',
+              r'{arg1} ({arg2}; {lit}; {arg3})',
+              r'{arg1} ({arg2}; {gloss})',
+              r'{arg1} ({arg2}; {arg3})',
+              r'{arg1} ({gloss})',
+              r'{arg1} ({arg3})',
+              r'{arg1} ({arg2})',
+              r'{arg1}'],
     'l-self': ['{arg3} ({arg4})', '{arg2} ({arg4})', '{arg3}', '{arg2}'],
     'll': ['{arg3} ({arg4})', '{arg2} ({arg4})', '{arg3}', '{arg2}'],
     'link': ['{arg3} ({arg4})', '{arg2} ({arg4})', '{arg3}', '{arg2}'],
@@ -876,6 +907,7 @@ default_parenthesize_tags = set([
     'term-label',
     'tlb',
     'noun form of',  # XXX needs special formatting
+    'verb form of',  # XXX
     'fi-form of',  # XXX needs special formatting
     'fi-participle of', # XXX needs special formatting
     'fi-infinitive of', # XXX needs special formatting
@@ -889,6 +921,15 @@ default_parenthesize_tags = set([
     'pt-verb form of',  # XXX needs special formatting
     'et-verb form of',  # XXX needs special formatting
     'el-form-of-verb',  # XXX needs special formatting
+    'nl-verb form of',  # XXX
+    'nl-noun form of',  # XXX
+    'nl-adj form of',  # XXX
+    'lv-inflection of',  # XXX
+    'pt-verb-form-of',  # XXX
+    'ca-verb form of',  # XXX
+    'nn-verb-form of',  # XXX
+    'eo-form of',  # XXX
+    'za-sawndip form of',  # XXX
     'inflection of',  # XXX needs special formatting
     'infl of',  # XXX needs special formatting
     't',  # XXX needs special formatting
