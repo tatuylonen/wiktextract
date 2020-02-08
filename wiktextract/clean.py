@@ -200,7 +200,7 @@ def clean_replace_regexp(config, v):
                     continue
             else:
                 config.unrendered_template(t, tag, list(kwargs.keys()),
-                                           "NO COMPATIBLE RENDERING RULE")
+                                           "no compatible rendering rule")
         # Default expansion for the template concatenates arguments, except
         # named arguments
         groups = list(x or "" for x in m.groups())
@@ -223,7 +223,7 @@ def clean_replace_regexp(config, v):
             ret = "(" + ret + ")"
         if tag not in default_tags and tag not in default_parenthesize_tags:
             config.unrendered_template(t, tag, list(kwargs.keys()),
-                                       "UNRECOGNIZED")
+                                       "unrecognized")
         return ret
 
     # Repeat replacements as there could be nested structures
@@ -236,10 +236,10 @@ def clean_replace_regexp(config, v):
                 break
             iter += 1
             if iter > 10:
-                config.debug("CLEAN DID NOT TERMINATE: {!r}".format(v))
+                config.debug("clean did not terminate: {!r}".format(v))
                 assert False
     except re.error:
-        config.debug("REGEXP ERROR CLEANING {!r}".format(v))
+        config.debug("regexp error while cleaning {!r}".format(v))
     return v
 
 

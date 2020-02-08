@@ -17,9 +17,9 @@ from wiktextract import (WiktionaryConfig, parse_wiktionary,
 
 # Pages whose titles have any of these prefixes are ignored.
 ignore_prefixes = set(["Index", "Help", "MediaWiki", "Citations",
-                       "Reconstruction", "Concordance",
+                       #"Reconstruction", "Concordance",
                        "Rhymes", "Thread",
-                       "Summary", "File",
+                       #"Summary", "File",
                        "Transwiki",
 ])
 

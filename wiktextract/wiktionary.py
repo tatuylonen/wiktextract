@@ -118,6 +118,11 @@ class WiktionaryTarget(object):
                     self.aborted = True
                 return
 
+            # If a capture callback has been provided and returns False,
+            # skip this page.
+            if self.capture_cb and not self.capture_cb(title, self.text):
+                return
+
             if self.model in ("css", "sanitized-css", "javascript",
                               "Scribunto"):
                 return
@@ -127,11 +132,6 @@ class WiktionaryTarget(object):
                     data = {"redirect": redirect, "word": title}
                     self.word_cb(data)
                     return
-
-            # If a capture callback has been provided and returns False,
-            # skip this page.
-            if self.capture_cb and not self.capture_cb(title, self.text):
-                return
 
             if title.endswith("/translations"):
                 # XXX parse as a special translation page

@@ -302,6 +302,7 @@ ignored_templates = set([
     "rfv-sense",
     "rhymes",
     "rhymes",
+    "roa-opt-cite-cantigas",
     "see",
     "see also",
     "seeCites",
@@ -356,6 +357,7 @@ ignored_templates = set([
     "ws link",
     "wsource",
     "zh-cat",
+    "zh-dial",
     "zh-der",
     "zh-hg",
 ])
@@ -435,6 +437,9 @@ clean_replace_map = {
     'CURRENTMONTHNAME': ["February"],
     'CURRENTYEAR': ["1873"],
     'nc': ["{arg3}", "{arg2}"],
+    "morse code for": ['morse code for "{arg1}" ({gloss})',
+                       'morse code for "{arg1}"',
+                       'morse code for "{gloss}"'],
     "zh-l": ["{arg1}; {arg2} ({arg3}; {arg4})",
              "{arg1} ({arg2}; {arg3})",
              "{arg1} ({arg2})",
@@ -467,6 +472,7 @@ clean_replace_map = {
              "{arg1}"],
     "l/gl": ["{arg1}"],
     "hanja form of": ["{arg1} ({arg2})"],
+    "specieslite": ["{arg1}", "{word}"],
     #'sumti': [r'x\1'],
     'initialism of': [r'initialism of "{arg3}" ({arg4})',
                       r'initialism of "{arg2}" ({arg4})',
@@ -551,6 +557,14 @@ clean_replace_map = {
                          'soft mutation of "{arg2}" ({arg4})',
                          'soft mutation of "{arg3}"',
                          'soft mutation of "{arg2}"'],
+    'mixed mutation of': ['mixed mutation of "{arg3}" ({arg4})',
+                          'mixed mutation of "{arg2}" ({arg4})',
+                          'mixed mutation of "{arg3}"',
+                          'mixed mutation of "{arg2}"'],
+    'hard mutation of': ['hard mutation of "{arg3}" ({arg4})',
+                         'hard mutation of "{arg2}" ({arg4})',
+                         'hard mutation of "{arg3}"',
+                         'hard mutation of "{arg2}"'],
     'obsolete spelling of': ['obsolete spelling of "{arg2}" ({arg4})',
                              'obsolete spelling of "{arg2}"'],
     'obs sp': ['obsolete spelling of "{arg2}" ({arg4})',
@@ -626,6 +640,8 @@ clean_replace_map = {
               'misspelling of "{arg2}"'],
     'misspelling form of': ['misspelling form of "{arg2}" ({arg4})',
                             'misspelling form of "{arg2}"'],
+    'lenition of': ['lenition of "{arg2}" ({arg4})',
+                    'lenition of "{arg2}"'],
     'city nickname': ['A nickname for "{arg2}"'],
     'deliberate misspelling of': ['deliberate misspelling of "{arg2}" ({arg4})',
                                   'deliberate misspelling of "{arg2}"'],
@@ -677,6 +693,12 @@ clean_replace_map = {
     'feminine singular past participle of':
     ['feminine singular past participle of "{arg2}" ({arg4})',
      'feminine singular past participle of "{arg2}"'],
+    'masculine singular past participle of':
+    ['masculine singular past participle of "{arg2}" ({arg4})',
+     'masculine singular past participle of "{arg2}"'],
+    'supine of':
+    ['supine of "{arg2}" ({arg4})',
+     'supine of "{arg2}"'],
     'definite singular of': ['definite singular of "{arg2}" ({arg4})',
                              'definite singular of "{arg2}"'],
     'definite plural of': ['definite plural of "{arg2}" ({arg4})',
@@ -863,6 +885,58 @@ clean_replace_map = {
     'SI-unit-2': ['SI unit of {arg3}'],  # XXX
     'SI-unit-np': ['SI unit of {arg4}'],  # XXX
     'taxon': [r'taxonomic {arg1}'],  # XXX needs special formatting
+
+    'Passeriformes Hypernyms':
+    ['"Eukaryota" - superkingdom; "Animalia" - kingdom; '
+     '"Bilateria" - subkingdom; "Deuterostomia" - infrakingdom; '
+     '"Chordata" - phylum; "Vertebrata" - subphylum; '
+     '"Gnathostomata" - infraphylum; "Reptilia" - class; '
+     '"Aves" - subclass; "Neognathae" - infraclass; '
+     '"Neoaves" - superorder; "Passeriformes" - order'],
+
+    'Thraupidae Hypernyms':
+    ['"Eukaryota" - superkingdom; "Animalia" - kingdom; '
+     '"Bilateria" - subkingdom; "Deuterostomia" - infrakingdom; '
+     '"Chordata" - phylum; "Vertebrata" - subphylum; '
+     '"Gnathostomata" - infraphylum; "Reptilia" - class; '
+     '"Aves" - subclass; "Neognathae" - infraclass; '
+     '"Neoaves" - superorder; "Passeriformes" - order; '
+     '"Passeri" - suborder; "Passerida" - infraorder; '
+     '"Passeroidea" - superfamily; "Thraupidae" - family'],
+
+    'Tyrannidae Hypernyms':
+    ['"Eukaryota" - superkingdom; "Animalia" - kingdom; '
+     '"Bilateria" - subkingdom; "Deuterostomia" - infrakingdom; '
+     '"Chordata" - phylum; "Vertebrata" - subphylum; '
+     '"Gnathostomata" - infraphylum; "Reptilia" - class; '
+     '"Aves" - subclass; "Neognathae" - infraclass; '
+     '"Neoaves" - superorder; "Passeriformes" - order; '
+     '"Tyranni" - suborder; "Tyrannides"; infraorder; '
+     '"Tyrannida" - parvorder; "Tyrannidae" - family'],
+
+    'Trochilidae Hypernyms':
+    ['"Eukaryota" - superkingdom; "Animalia" - kingdom; '
+     '"Bilateria" - subkingdom; "Deuterostomia" - infrakingdom; '
+     '"Chordata" - phylum; "Vertebrata" - subphylum; '
+     '"Gnathostomata" - infraphylum; "Reptilia" - class; '
+     '"Aves" - subclass; "Neognathae" - infraclass; '
+     '"Neoaves" - superorder; "Apodiformes" - order; '
+     '"Trochilidae" - family'],
+
+    'angiosperms Hypernyms':
+    ['"Eukaryota" - superkingdom; "Plantae" - kingdom; '
+     '"Viridiplantae" - subkingdom; "Streptophyta" - infrakingdom; '
+     '"Embryophyta" - superphylum; "Tracheophyta" - phylum; '
+     '"Spermatophytina" - subphylum; "angiosperms"'],
+
+    'Fabaceae Hypernyms':
+    ['"Eukaryota" - superkingdom; "Plantae" - kingdom; '
+     '"Viridiplantae" - subkingdom; "Streptophyta" - infrakingdom; '
+     '"Embryophyta" - superphylum; "Tracheophyta" - phylum; '
+     '"Spermatophytina" - subphylum; "angiosperms", "eudicots", '
+     '"core eudicots", "rosids", "eurosids I" - clades; '
+     '"Fabales" - order; "Fabaceae" - family'],
+
 }
 
 default_tags = set([
@@ -908,6 +982,7 @@ default_parenthesize_tags = set([
     'tlb',
     'noun form of',  # XXX needs special formatting
     'verb form of',  # XXX
+    'inflection of',  # XXX
     'fi-form of',  # XXX needs special formatting
     'fi-participle of', # XXX needs special formatting
     'fi-infinitive of', # XXX needs special formatting
@@ -930,7 +1005,12 @@ default_parenthesize_tags = set([
     'nn-verb-form of',  # XXX
     'eo-form of',  # XXX
     'za-sawndip form of',  # XXX
-    'inflection of',  # XXX needs special formatting
+    'lib-conjugation of',  # XXX
+    'hu-participle',  # XXX
+    'enm-plural subjunctive of',  # XXX
+    'enm-plural of',  # XXX
+    'nn-inf',  # XXX
+    'iu-spel',  # XXX
     'infl of',  # XXX needs special formatting
     't',  # XXX needs special formatting
     'Latn-def', # XXX needs special handling

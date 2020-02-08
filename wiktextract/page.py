@@ -186,6 +186,8 @@ head_pos_map = {
     "adjectives": "adj",
     "adjective form": "adj",
     "adjective forms": "adj",
+    "adjective comparative form": "adj",
+    "adjective comparative forms": "adj",
     "mutated adjective": "adj",
     "mutated adjectives": "adj",
     "adverb": "adv",
@@ -292,10 +294,10 @@ head_pos_map = {
     "verb forms": "verb",
     "mutated verb": "verb",
     "mutated verbs": "verb",
-    "participle": "participle",
-    "participles": "participle",
-    "participle form": "participle",
-    "participle forms": "participle",
+    "participle": "verb",
+    "participles": "verb",
+    "participle form": "verb",
+    "participle forms": "verb",
     "present participle": "verb",
     "present participles": "verb",
     "past participle": "verb",
@@ -312,6 +314,7 @@ head_pos_map = {
     "superlative adjectives": "adj",
     "misspelling": "misspelling",
     "misspellings": "misspelling",
+    "misconstruction": "misspelling",
     "obsolete verb form": "verb",
     "obsolete verb forms": "verb",
     "contraction": "abbrev",
@@ -326,6 +329,11 @@ head_pos_map = {
     "superlative adverbs": "adv",
     "symbol": "symbol",
     "symbols": "symbol",
+    "diacritical mark": "symbol",
+    "diacritical marks": "symbol",
+    "ligature": "symbol",
+    "ligatures": "symbol",
+    "logogram": "symbol",
     "proverb": "proverb",
     "proverbs": "proverb",
     "Han char": "character",
@@ -359,7 +367,7 @@ template_allowed_pos_map = {
     "noun phrase": ["phrase"],
     "ordinal": ["num"],
     "number": ["num"],
-    "pos": ["affix", "name"],
+    "pos": ["affix", "name", "num"],
     "suffix": ["suffix"],
     "character": ["character"],
     "letter": ["letter"],
@@ -371,6 +379,7 @@ template_allowed_pos_map = {
     "prep": ["prep", "postp"],
     "postp": ["postp"],
     "misspelling": ["noun", "adj", "verb", "adv"],
+    "part-form": ["verb"],
 }
 for k, v in template_allowed_pos_map.items():
     for x in v:
@@ -631,7 +640,7 @@ def parse_sense(config, data, text, use_text):
                         clean_quals(config, t_vec(config, t)))
         # Usage examples are collected under "examples"
         elif name in ("ux", "uxi", "usex", "afex", "zh-x", "prefixusex",
-                      "ko-usex", "ko-x"):
+                      "ko-usex", "ko-x", "hi-x"):
             data_append(config, data, "examples", t_dict(config, t))
         # XXX check these, I think they should go away
         # Additional "gloss" templates are added under "glosses"
@@ -789,7 +798,7 @@ def parse_sense(config, data, text, use_text):
                       "alternative typography of",
                       "elongated form of", "alternative name of",
                       "city nickname", "Nom form of", "han tu form of",
-                      "han form of", "soft mutation of",
+                      "han form of",
                       "combining form of",
                       "caret notation of", "syncopic form of",
                       "alternative term for", "altspell", "alter"):
@@ -1063,6 +1072,9 @@ def parse_sense(config, data, text, use_text):
                     data_append(config, data, "tags", "partitive")
                 elif x in ("acc//dat"):
                     data_extend(config, data, "tags", ["accusative", "dative"])
+                elif x in ("nom//acc"):
+                    data_extend(config, data, "tags",
+                                ["accusative", "nominative"])
                 else:
                     config.unknown_value(t, x)
         elif name == "+preo":
@@ -1088,6 +1100,8 @@ def parse_sense(config, data, text, use_text):
                 data_append(config, data, "tags", "object_instructive")
             elif v in ("obl", "oblique"):
                 data_append(config, data, "tags", "object_oblique")
+            elif v in ("loc", "locative"):
+                data_append(config, data, "tags", "object_locative")
             elif v in ("participial",):
                 data_append(config, data, "tags", "object_participial")
             elif v in ("subj", "subjunctive"):
@@ -1097,6 +1111,9 @@ def parse_sense(config, data, text, use_text):
                 data_append(config, data, "object_preposition", "with")
             elif v == "avec":
                 data_append(config, data, "object_preposition", "avec")
+            elif not v:
+                config.warning("empty object construction argument in {}"
+                               "".format(t))
             else:
                 config.unknown_value(t, v)
         elif name == "verb form of":
@@ -1299,7 +1316,7 @@ def parse_sense(config, data, text, use_text):
             data_inflection_of(config, data, t, ["imperative"])
         elif name == "sv-verb-form-past":
             data_inflection_of(config, data, t, ["past"])
-        elif name == "sv-verb-form-sup":
+        elif name in ("supine of", "sv-verb-form-sup"):
             data_inflection_of(config, data, t, ["supine"])
         elif name == "sv-verb-form-sup-pass":
             data_inflection_of(config, data, t, ["supine", "passive"])
@@ -1388,7 +1405,7 @@ def parse_sense(config, data, text, use_text):
         elif name in ("zh-alt-form", "zh-altname", "zh-alt-name",
                       "zh-alt-term", "zh-altterm"):
             data_append(config, data, "alt_of", t_arg(config, t, 1))
-        elif name in ("zh-short", "zh-abbrev", "zh-short-comp"):
+        elif name in ("zh-short", "zh-abbrev", "zh-short-comp", "mfe-short of"):
             data_append(config, data, "tags", "abbreviation")
             for x in t_vec(config, t):
                 data_append(config, data, "alt_of", x)
@@ -1687,6 +1704,7 @@ def parse_sense(config, data, text, use_text):
                       "quote web", "quote-web", "quote-webpage",
                       "quote-article", "cite-av",
                       "glossary", "The Last Man",
+                      "tpi-cite-bible",
                       "small", "bottom5", "source",
                       "glink", "projectlink", "maintenance line", "JSTOR",
                       "gloss", "gl", "clear", "abbr", "nc",
@@ -1719,7 +1737,7 @@ def parse_sense(config, data, text, use_text):
                 category = m.group(1)
                 data_append(config, data, "topics", {"word": category})
                 continue
-            config.unrecognized_template(t, "INSIDE GLOSS")
+            config.unrecognized_template(t, "inside gloss")
 
     # Various fields should only contain strings.  Check that they do
     # (helps find bugs fast).  Also remove any duplicates from the lists and
@@ -1929,7 +1947,7 @@ def parse_pronunciation(config, data, text, p):
                 continue
             else:
                 # Warn about unhandled templates.
-                config.unrecognized_template(t, "PRONUNCIATION")
+                config.unrecognized_template(t, "pronunciation")
 
         if sense:
             variant["sense"] = sense
@@ -2260,6 +2278,9 @@ def parse_linkage(config, data, kind, text, p, sense_text=None):
                           "polyominoes",
                           "mediagenic terms",
                           "common names of Valerianella locusta",
+                          "ga-prepositional contractions",
+                          "ga-copular forms",
+                          "compoundsee",
                           "Japanese demonstratives",
                           "Spanish possessive adjectives",
                           "Spanish possessive pronouns",
@@ -2280,7 +2301,7 @@ def parse_linkage(config, data, kind, text, p, sense_text=None):
 
             elif name not in ignored_templates:
                 # Warn about unhandled templates.
-                config.unrecognized_template(t, "LINKAGE")
+                config.unrecognized_template(t, "linkage")
 
         # Add thesaurus links
         for t in p.wikilinks:
