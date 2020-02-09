@@ -2473,6 +2473,8 @@ def page_iter(config, text):
 
     def iter_fn():
         language = None
+        config.language = None
+        config.pos = None
         pos = None
         pos_sectitle = None
         base = {}

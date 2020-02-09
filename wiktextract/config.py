@@ -7,8 +7,13 @@ import sys
 import collections
 
 
+
 def int_dict():
     return collections.defaultdict(int)
+
+
+def int_dict_dict():
+    return collections.defaultdict(int_dict)
 
 
 def list_dict():
@@ -58,11 +63,11 @@ class WiktionaryConfig(object):
         self.debugs = []
         self.unrecognized_template_counts = collections.defaultdict(int)
         self.unrendered_template_counts = collections.defaultdict(int)
-        # These map (tag, sorted(argkeys)) -> str(template), max 3 each
+        # These map [tag][sorted(argkeys)] -> list of (lang, pos, str(template)
         self.unrecognized_template_samples = collections.defaultdict(list_dict)
         self.unrendered_template_samples = collections.defaultdict(list_dict)
-        # This maps (tag, value) to int
-        self.unknown_value_counts = collections.defaultdict(int_dict)
+        # This maps [lang][tag][value] to int
+        self.unknown_value_counts = collections.defaultdict(int_dict_dict)
         # The word, language, and part-of-speech currently being processed.
         # These are here to avoid having to pass so many arguments to so many
         # functions.
@@ -103,7 +108,8 @@ class WiktionaryConfig(object):
                                 if x.value.strip()))
         argnames = ", ".join(argnames)
         if len(self.unrecognized_template_samples[name][argnames]) < 2:
-            self.unrecognized_template_samples[name][argnames].append(str(t))
+            self.unrecognized_template_samples[name][argnames].append(
+                (self.language, self.pos, str(t)))
 
     def unrendered_template(self, t, name, args, ctx):
         assert isinstance(ctx, str)
@@ -117,10 +123,11 @@ class WiktionaryConfig(object):
         argnames = tuple(sorted(args))
         argnames = ", ".join(argnames)
         if len(self.unrendered_template_samples[name][argnames]) < 2:
-            self.unrendered_template_samples[name][argnames].append(t)
+            self.unrendered_template_samples[name][argnames].append(
+                (self.language, self.pos, str(t)))
 
     def unknown_value(self, t, value):
         assert isinstance(value, str)
         self.error("unknown value {!r} in {}".format(value, t))
         name = t.name.strip()
-        self.unknown_value_counts[name][value] += 1
+        self.unknown_value_counts[self.language][name][value] += 1

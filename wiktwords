@@ -12,14 +12,15 @@ import sys
 import json
 import hashlib
 import argparse
+import collections
 from wiktextract import (WiktionaryConfig, parse_wiktionary,
                          wiktionary_languages, parse_page)
 
 # Pages whose titles have any of these prefixes are ignored.
 ignore_prefixes = set(["Index", "Help", "MediaWiki", "Citations",
-                       #"Reconstruction", "Concordance",
+                       "Reconstruction", "Concordance",
                        "Rhymes", "Thread",
-                       #"Summary", "File",
+                       "Summary", "File",
                        "Transwiki",
 ])
 
@@ -35,6 +36,7 @@ def capture_page(title, text, pages_dir):
     assert isinstance(title, str)
     assert isinstance(text, str)
     assert pages_dir is None or isinstance(pages_dir, str)
+
     analyze = False
     m = re.match(r"^([A-Z][a-z][-a-zA-Z0-9_]+):(.+)$", title)
     if not m:
@@ -47,14 +49,14 @@ def capture_page(title, text, pages_dir):
     else:
         prefix, tail = m.groups()
         if prefix in ignore_prefixes:
-            return False
-        if prefix not in recognized_prefixes:
+            analyze = False
+        elif prefix not in recognized_prefixes:
             print("UNRECOGNIZED PREFIX", title)
-        if prefix == "Category":
-            m = re.match(r"^(Category:[^_ :]+)[_ :]*(.*)", title)
-            if m:
-                title = m.group(1) + ":" + m.group(2)
-            # XXX Capture some?
+        # if prefix == "Category":
+        #     m = re.match(r"^(Category:[^_ :]+)[_ :]*(.*)", title)
+        #     if m:
+        #         title = m.group(1) + ":" + m.group(2)
+        #     # XXX Capture some?
 
     if pages_dir is not None:
         title = re.sub(r"[^-\w_.:/]", "_", title)
@@ -267,10 +269,15 @@ if __name__ == "__main__":
 
     def dump_val(title, limit, counts):
         items = []
-        counts_ht = {}
-        for k, v in counts.items():
-            for kk, vv in v.items():
-                counts_ht[k, kk] = vv
+        counts_ht = collections.defaultdict(int)
+        for la, la_val in counts.items():
+            for name, name_val in la_val.items():
+                for value, cnt in name_val.items():
+                    counts_ht[name, value] += cnt
+        for la, la_val in counts.items():
+            for name, name_val in la_val.items():
+                for value, v in name_val.items():
+                    counts_ht[name, value] = v
         lst = list(sorted(counts_ht.items(), reverse=True,
                           key=lambda x: x[1]))
         if lst:
