@@ -253,7 +253,7 @@ def clean_value(config, title):
     title = clean_replace_regexp(config, title)
     # Remove any remaining templates.
     for m in re.finditer(r"\{\{[^}]+\}\}", title):
-        config.error("POSSIBLE SYNTAX ERROR: {}".format(m.group(0)))
+        config.error("possible syntax error: {}".format(m.group(0)))
     title = re.sub(r"\{\{[^}]+\}\}", "", title)
     # Remove references (<ref>...</ref>).
     title = re.sub(r"(?s)<ref>.*?</ref>", "", title)

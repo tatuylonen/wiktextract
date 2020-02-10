@@ -359,6 +359,7 @@ template_allowed_pos_map = {
     "gerund": ["verb"],
     "adv": ["adv"],
     "particle": ["adv", "particle"],
+    "part-form": ["adv", "particle"],
     "adj": ["adj", "adj_noun"],
     "pron": ["pron", "noun"],
     "name": ["name", "noun"],
@@ -455,7 +456,8 @@ def data_append(config, data, key, value):
             return
         if value in languages_by_code:
             if value not in ("law", "toy", "and", "etc", "the", "god", "adj",
-                             "man", "an", "tax", "or", "war", "job", "box"):
+                             "man", "an", "tax", "or", "war", "job", "box",
+                             "pop", "cay"):
                 config.debug("language code {} in tags: {}".format(value, data))
     lst = data.get(key, [])
     lst.append(value)
