@@ -252,4 +252,7 @@ return v
 ret = lua.execute(sandbox + code)
 print("RET", ret)
 ret = re.sub(r"<.*?>", "", ret)
+ret = re.sub(r"&#32;", "", ret)
+ret = re.sub(r"\[\[(Wiktionary|Category|Appendix):[^]]*\]\]", "", ret)
+ret = re.sub(r"\(\):", "", ret)
 print("CLEAN", ret)
