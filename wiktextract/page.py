@@ -12,6 +12,7 @@ from .clean import clean_value, clean_quals
 from .places import place_prefixes  # XXX move processing to places.py
 from .wikttemplates import *
 from .languages import all_languages
+from .unsupported_titles import unsupported_title_map
 
 # Mapping from language name to language info
 languages_by_name = {x["name"]: x for x in all_languages}
@@ -2671,12 +2672,21 @@ def parse_page(word, text, config):
     assert isinstance(text, str)
     assert isinstance(config, WiktionaryConfig)
 
+    if config.verbose:
+        print("parsing page:", word)
+
+    unsupported_prefix = "Unsupported titles/"
+    if word.startswith(unsupported_prefix):
+        w = word[len(unsupported_prefix):]
+        if w in unsupported_title_map:
+            word = unsupported_title_map[w]
+        else:
+            config.debug("Unimplemented title: {}"
+                         "".format(word))
+
     config.word = word
     config.language = None
     config.pos = None
-
-    if config.verbose:
-        print("parsing page:", word)
 
     # Collect all words from the page.
     datas = list(x for x in page_iter(config, text))
