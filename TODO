@@ -4,11 +4,23 @@ enough of these that they should be handled separately and added to
 the senses in question.
   - see "translation_link"
 
+Map Participle part-of-speech to verb with the proper tag
+
+Consider combining Symbol, Letter, Character, Punctuation, Glyph part-of-speech
+
+Consider combining affix, prefix, suffix, infix, circumfix, interfix
+part-of-speech
+
 XXX It is fairly common to have {{en-phrase}} under ==Verb==.  What
 part-of-speech should these be?
 
-Qualifiers specified after {{l|...}} do not get included in output,
-e.g., Galician "ano" Etymology 2
+XXX Check Spanish "capitales" - has two es-noun items with different
+gender&meaning.  Are these more common?  Currently only one of them
+gets included.
+
+XXX Qualifiers specified in linkages after {{l|...}} do not get
+included in output, e.g., Galician "ano" Etymology 2.  Not sure how
+common this is overall.
 
 XXX check handling of "alter" at the beginning of parse_any(), is it correct?
 
@@ -17,9 +29,8 @@ XXX change wiktwords to output senses rather than words
 XXX check variant vs. data in page.py; is variant properly added?
 
 XXX Redo formatting of {{place|...}} (need custom code)
-
-Check Spanish "capitales" - has two es-noun items with different
-gender&meaning.  Are these more common?
+XXX lots of other things also need custom code.  Perhaps just call the lua
+code of modules for that?
 
 - check: Portuguese (need consultation?)
   - pt-pron def (various ways to express pronoun)

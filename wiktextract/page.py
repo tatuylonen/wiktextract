@@ -13,6 +13,7 @@ from .places import place_prefixes  # XXX move processing to places.py
 from .wikttemplates import *
 from .languages import all_languages
 from .unsupported_titles import unsupported_title_map
+from .form_of import form_of_map
 
 # Mapping from language name to language info
 languages_by_name = {x["name"]: x for x in all_languages}
@@ -370,7 +371,7 @@ template_allowed_pos_map = {
     "ordinal": ["num"],
     "number": ["num"],
     "pos": ["affix", "name", "num"],
-    "suffix": ["suffix"],
+    "suffix": ["suffix", "affix"],
     "character": ["character"],
     "letter": ["letter"],
     "kanji": ["character"],
@@ -378,6 +379,7 @@ template_allowed_pos_map = {
     "interj": ["intj"],
     "con": ["conj"],
     "part": ["particle"],
+    "part-form": ["participle"],
     "prep": ["prep", "postp"],
     "postp": ["postp"],
     "misspelling": ["noun", "adj", "verb", "adv"],
@@ -458,7 +460,7 @@ def data_append(config, data, key, value):
         if value in languages_by_code:
             if value not in ("law", "toy", "and", "etc", "the", "god", "adj",
                              "man", "an", "tax", "or", "war", "job", "box",
-                             "pop", "cay"):
+                             "pop", "cay", "lay", "nut", "bay"):
                 config.debug("language code {} in tags: {}".format(value, data))
     lst = data.get(key, [])
     lst.append(value)
@@ -570,7 +572,7 @@ def verb_form_map_fn(config, data, name, t, form_map):
     assert isinstance(name, str)
     assert isinstance(form_map, dict)
     # Add an indication that the word sense is a form of an other word.
-    data_append(config, data, "form_of", t_arg(config, t, 1))
+    data_append(config, data, "inflection_of", t_arg(config, t, 1))
     # Iterate over the specified keys in the template.
     for k in form_map["_keys"]:
         v = t_arg(config, t, k)
@@ -643,7 +645,8 @@ def parse_sense(config, data, text, use_text):
                         clean_quals(config, t_vec(config, t)))
         # Usage examples are collected under "examples"
         elif name in ("ux", "uxi", "usex", "afex", "zh-x", "prefixusex",
-                      "ko-usex", "ko-x", "hi-x"):
+                      "ko-usex", "ko-x", "hi-x", "ja-usex-inline", "ja-x",
+                      "quotei"):
             data_append(config, data, "examples", t_dict(config, t))
         # XXX check these, I think they should go away
         # Additional "gloss" templates are added under "glosses"
@@ -802,10 +805,11 @@ def parse_sense(config, data, text, use_text):
                       "elongated form of", "alternative name of",
                       "city nickname", "Nom form of", "han tu form of",
                       "han form of",
-                      "combining form of",
                       "caret notation of", "syncopic form of",
                       "alternative term for", "altspell", "alter"):
             data_alt_of(config, data, t, ["alternative_spelling"])
+        elif name in ("combining form of",):
+            data_alt_of(config, data, t, ["combining_form"])
         elif name == "spelling of":
             data_alt_of(config, data, t, t_arg(config, t, 2).lower().split())
         elif name in ("honoraltcaps", "honor alt case"):
@@ -861,9 +865,10 @@ def parse_sense(config, data, text, use_text):
         elif name in ("deliberate misspelling of", "misconstruction of",
                       "misspelling of", "common misspelling of",
                       "misspelling form of", "missp",
-                      "nonstandard form of", "nonstandard spelling of",
                       "de-umlautless spelling of"):
             data_alt_of(config, data, t, ["misspelling"])
+        elif name in ("nonstandard form of", "nonstandard spelling of"):
+            data_alt_of(config, data, t, ["nonstandard"])
         # If the gloss is indicated as a rare form of another word, include
         # "alt_of" and tag it as "rare".
         elif name in ("rare form of", "rare spelling of",
@@ -901,8 +906,27 @@ def parse_sense(config, data, text, use_text):
         # we include the base form under "inflection_of" and add tags to
         # indicate the type of inflection/derivation.
         elif name in ("inflected form of", "form of"):
-            tgs = set(t_arg(config, t, 2).lower().split()) - set(["form", "of"])
-            data_inflection_of(config, data, t, list(tgs))
+            # At least for "form of", tags here is plain wrong for most
+            # cases, while in some cases it may be appropriate.
+            form = t_arg(config, t, 2)
+            term = t_arg(config, t, 3)
+            if form in form_of_map:
+                dt = form_of_map[form]
+                if dt.get("error"):
+                    config.error("Potentially erroneus word form specifier: "
+                                 "{!r}".format(form))
+                if "alt_of" in dt:
+                    data_extend(config, data, "tags", dt["alt_of"])
+                    data_append(config, data, "alt_of", term)
+                elif "inflection_of" in dt:
+                    data_extend(config, data, "tags", dt["inflection_of"])
+                    data_append(config, data, "inflection_of", term)
+                else:
+                    config.debug("Internal unimplemented word form specifier: "
+                                 "{!r}".format(form))
+            else:
+                config.error("Unrecognized work form specifier: {!r}"
+                             "".format(form))
         elif name == "native or resident of":
             data_inflection_of(config, data, t, ["person"])
         elif name == "agent noun of":
@@ -1115,8 +1139,8 @@ def parse_sense(config, data, text, use_text):
             elif v == "avec":
                 data_append(config, data, "object_preposition", "avec")
             elif not v:
-                config.warning("empty object construction argument in {}"
-                               "".format(t))
+                config.warning("empty/missing object construction argument "
+                               "in {}".format(t))
             else:
                 config.unknown_value(t, v)
         elif name == "verb form of":
@@ -1390,8 +1414,6 @@ def parse_sense(config, data, text, use_text):
                 else:
                     config.unknown_value(t, x)
         # Handle some Japanese-specific tags
-        elif name == "ja-kana-def":
-            data_append(config, data, "tags", "ja-kana-def")
         elif name in ("ja-kyujitai spelling of", "ja-kyu sp"):
             data_append(config, data, "kyujitai_spelling", t_arg(config, t, 1))
         elif name == "ja-past of verb":
@@ -1694,11 +1716,12 @@ def parse_sense(config, data, text, use_text):
                       "mul-shuowen radical-def",
                       "mul-kanadef",
                       "mul-domino def",
-                      "mul-cjk stroke-def",
+                      "mul-cjk stroke-def", "ryu-def", "ja-def",
+                      "ja-kanjitab", "ja-kana-def",
                       "ja-see",
                       "Han char", "zh-only", "sqbrace",
                       "Brai-def",
-                      "abbreviated",
+                      "abbreviated", "ruby", "hanja form of",
                       "transterm",
                       "phrasal verb", "compound",
                       "quote", "quote-booken", "quote-jounalen", "quotebook",
@@ -1745,7 +1768,7 @@ def parse_sense(config, data, text, use_text):
     # Various fields should only contain strings.  Check that they do
     # (helps find bugs fast).  Also remove any duplicates from the lists and
     # sort them into ascending order for easier reading.
-    for k in ("tags", "glosses", "form_of", "alt_of",
+    for k in ("tags", "glosses", "alt_of",
               "inflection_of", "color", "wikidata"):
         if k not in data:
             continue
@@ -1781,7 +1804,7 @@ def parse_preamble(config, data, pos_sectitle, text, p):
         # there).
         m = re.search(r"^(head|Han char)$|" +
                       r"^(" + "|".join(languages_by_code.keys()) + r")" +
-                      r"-(plural-noun|plural noun|noun|verb|adj|adv|name|proper-noun|proper noun|prop|pron|phrase|decl noun|decl-noun|prefix|clitic|number|ordinal|syllable|suffix|affix|pos|gerund|combining form|combining-form|converb|cont|con|interj|det|part|postp|prep)(-|$)", name)
+                      r"-(plural-noun|plural noun|noun|verb|adj|adv|name|proper-noun|proper noun|prop|pron|phrase|decl noun|decl-noun|prefix|clitic|number|ordinal|syllable|suffix|affix|pos|gerund|combining form|combining-form|converb|cont|con|interj|det|part|part-form|postp|prep)(-|$)", name)
         if m:
             tagpos = m.group(1)
             if tagpos == "head":

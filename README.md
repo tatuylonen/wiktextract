@@ -2,8 +2,7 @@
 
 This is a utility and Python package for for extracing data from Wiktionary.
 
-**New release expected mid-February 2020; currently undergoing rapid
-  development**
+**New release expected in mid-March 2020 (delayed from mid-Feb)**
 
 ## Overview
 
