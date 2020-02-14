@@ -1554,6 +1554,9 @@ def parse_sense(config, data, text, use_text):
                     v = "past"
                 if k != "case":
                     if v not in ("1", "2", "3", "impersonal",
+                                 "first-person",
+                                 "second-person",
+                                 "third-person",
                                  "first-person singular",
                                  "first-person plural",
                                  "second-person singular",
