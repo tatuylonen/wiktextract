@@ -323,6 +323,10 @@ part_of_speech_map = {
         "pos": "verb",
         "tags": ["transitive"],
     },
+    "unknown": {
+        "pos": "unknown",
+        # for languages like Chinese where we don't have the part-of-speech of a word
+    },
     "verb": {
         "pos": "verb",
     },

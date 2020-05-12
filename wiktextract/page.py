@@ -2406,11 +2406,12 @@ def page_iter(config, text):
                 # a new language or a misspelling or a previously unsupported
                 # subtitle.
                 sectitle = sectitle.lower()
-                if sectitle in part_of_speech_map:
+                isUnknownPos = language == "Chinese" and sectitle == "definitions"
+                if sectitle in part_of_speech_map or isUnknownPos:
                     # New part-of-speech.  Flush the old part-of-speech.
                     flush()
                     # Initialize for parsing the new part-of-speech.
-                    pos_ht = part_of_speech_map[sectitle]
+                    pos_ht = part_of_speech_map["unknown" if isUnknownPos else sectitle]
                     pos = pos_ht["pos"]
                     pos_sectitle = sectitle
                     # XXX errors if pos_ht["error"]
