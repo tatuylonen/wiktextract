@@ -1680,13 +1680,13 @@ def parse_preamble(config, data, pos_sectitle, text, p):
 
     # Parse word senses for the part-of-speech.
     for node in p.lists():
-        for item in node.items:
+        for index, item in enumerate(node.items):
             txt = str(item)
             if txt.startswith("*::"):
                 continue  # Possibly a bug in wikitextparser
             sense = {}
             parse_sense(config, sense, txt, True)
-            for node2 in node.sublists():
+            for node2 in node.sublists(index):
                 for item2 in node2.items:
                     parse_sense(config, sense, str(item2), False)
                 for node3 in node2.sublists():
