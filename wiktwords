@@ -159,7 +159,7 @@ if __name__ == "__main__":
             out_tmp_path = out_path
         else:
             out_tmp_path = out_path + ".tmp"
-        out_f = open(out_tmp_path, "w", buffering=1024*1024)
+        out_f = open(out_tmp_path, "w", buffering=1024*1024, encoding="utf8")
     else:
         out_tmp_path = out_path
         out_f = sys.stdout
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     def word_cb(data):
         global word_count
         word_count += 1
-        out_f.write(json.dumps(data))
+        out_f.write(json.dumps(data, ensure_ascii = False))
         out_f.write("\n")
         if not out_path or out_path == "-":
             out_f.flush()
