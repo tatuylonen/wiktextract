@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 #
 # Main program for extracting a dictionary from wiktionary.  This has
 # mostly been used with enwiktionary, but should be usable with other
@@ -109,8 +109,6 @@ if __name__ == "__main__":
                         help="Print statistics")
     parser.add_argument("--page", type=str,
                         help="Parse a single Wiktionary page (for debugging)")
-    parser.add_argument("--limit", type=int,
-                        help="Process at most this many pages (for debugging)")
     parser.add_argument("--verbose", action="store_true", default=False,
                         help="Print verbose status messages (for debugging)")
     args = parser.parse_args()
@@ -184,7 +182,6 @@ if __name__ == "__main__":
                               capture_compounds=args.compounds,
                               capture_redirects=args.redirects,
                               capture_examples=args.examples,
-                              limit=args.limit,
                               verbose=args.verbose)
 
     try:

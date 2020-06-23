@@ -22,6 +22,33 @@ def list_dict():
 
 class WiktionaryConfig(object):
     """This class holds configuration data for Wiktionary parsing."""
+
+    __slots__ = (
+        "capture_languages",
+        "capture_translations",
+        "capture_pronunciation",
+        "capture_linkages",
+        "capture_compounds",
+        "capture_redirects",
+        "capture_examples",
+        "verbose",
+        "num_pages",
+        "language_counts",
+        "pos_counts",
+        "section_counts",
+        "errors",
+        "warnings",
+        "debugs",
+        "unrecognized_template_counts",
+        "unrendered_template_counts",
+        "unrecognized_template_samples",
+        "unrendered_template_samples",
+        "unknown_value_counts",
+        "word",
+        "language",
+        "pos",
+    )
+
     def __init__(self,
                  capture_languages=["English", "Translingual"],
                  capture_translations=False,
@@ -30,7 +57,6 @@ class WiktionaryConfig(object):
                  capture_compounds=False,
                  capture_redirects=False,
                  capture_examples=False,
-                 limit=None,
                  verbose=False):
         if capture_languages is not None:
             assert isinstance(capture_languages, (list, tuple, set))
@@ -51,7 +77,6 @@ class WiktionaryConfig(object):
         self.capture_redirects = capture_redirects
         self.capture_examples = capture_examples
         self.verbose = verbose
-        self.limit = limit
         # Some fields for statistics
         self.num_pages = 0
         self.language_counts = collections.defaultdict(int)
@@ -74,6 +99,61 @@ class WiktionaryConfig(object):
         self.word = None
         self.language = None
         self.pos = None
+
+    def to_kwargs(self):
+        return {
+            "capture_languages": self.capture_languages,
+            "capture_translations": self.capture_translations,
+            "capture_pronunciation": self.capture_pronunciation,
+            "capture_linkages": self.capture_linkages,
+            "capture_compounds": self.capture_compounds,
+            "capture_redirects": self.capture_redirects,
+            "capture_examples": self.capture_examples,
+            "verbose": self.verbose,
+        }
+
+    def to_return(self):
+        return {
+            "num_pages": self.num_pages,
+            "language_counts": self.language_counts,
+            "pos_counts": self.pos_counts,
+            "section_counts": self.section_counts,
+            "errors": self.errors,
+            "warnings": self.warnings,
+            "debugs": self.debugs,
+            "unrecognized_template_counts": self.unrecognized_template_counts,
+            "unrendered_template_counts": self.unrendered_template_counts,
+            "unrecognized_template_samples": self.unrecognized_template_samples,
+            "unrendered_template_samples": self.unrendered_template_samples,
+            "unknown_value_counts": self.unknown_value_counts,
+        }
+
+    def merge_return(self, ret):
+        assert isinstance(ret, dict)
+        self.num_pages += ret["num_pages"]
+        for k, v in ret["language_counts"].items():
+            self.language_counts[k] += v
+        for k, v in ret["pos_counts"].items():
+            self.pos_counts[k] += v
+        for k, v in ret["section_counts"].items():
+            self.section_counts[k] += v
+        self.errors.extend(ret["errors"])
+        self.warnings.extend(ret["warnings"])
+        self.debugs.extend(ret["debugs"])
+        for k, v in ret["unrecognized_template_counts"].items():
+            self.unrecognized_template_counts[k] += v
+        for k, v in ret["unrendered_template_counts"].items():
+            self.unrendered_template_counts[k] += v
+        for k, v in ret["unrecognized_template_samples"].items():
+            for kk, vv in v.items():
+                self.unrecognized_template_samples[k][kk].extend(vv)
+        for k, v in ret["unrendered_template_samples"].items():
+            for kk, vv in v.items():
+                self.unrendered_template_samples[k][kk].extend(vv)
+        for k, v in ret["unknown_value_counts"].items():
+            for kk, vv in v.items():
+                for kkk, vvv in vvv.items():
+                    self.unknown_value_counts[k][kk][kkk] += vvv
 
     def error(self, msg):
         assert isinstance(msg, str)

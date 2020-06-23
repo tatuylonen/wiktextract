@@ -765,7 +765,7 @@ def parse_sense(config, data, text, use_text):
                     config.debug("Internal unimplemented word form specifier: "
                                  "{!r}".format(form))
             else:
-                config.error("Unrecognized work form specifier: {!r}"
+                config.error("Unrecognized word form specifier: {!r}"
                              "".format(form))
         elif name == "native or resident of":
             data_inflection_of(config, data, t, ["person"])
@@ -1483,6 +1483,9 @@ def parse_sense(config, data, text, use_text):
                 idx = x.find("/")
                 if idx >= 0:
                     prefix = x[:idx]
+                    m = re.match(r"(?i)^(.+):(pref|suf|Suf)$", prefix)
+                    if m:
+                        prefix = m.group(1)
                     if prefix in place_prefixes:
                         kind = place_prefixes[prefix]
                         v = x[idx + 1:]
