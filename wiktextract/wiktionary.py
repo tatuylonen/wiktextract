@@ -34,7 +34,6 @@ class WiktionaryTarget(object):
     """This class is used for XML parsing the Wiktionary dump file."""
 
     __slots__ = (
-        "word_cb",
         "capture_cb",
         "config",
         "tag",
@@ -52,11 +51,9 @@ class WiktionaryTarget(object):
         "ofs",
     )
 
-    def __init__(self, config, word_cb, capture_cb):
+    def __init__(self, config, capture_cb):
         assert isinstance(config, WiktionaryConfig)
-        assert callable(word_cb)
         assert capture_cb is None or callable(capture_cb)
-        self.word_cb = word_cb
         self.capture_cb = capture_cb
         self.config = config
         self.tag = None
@@ -81,7 +78,7 @@ arg_re = re.compile(
     rb"""([^"'>/=\s]+)(\s*=\s*("[^"]*"|'[^']*'|[^ \t\n"'`=<>]*))?"""
 )
 
-def make_chunk_iter(f, ctx, config, capture_cb):
+def make_chunk_iter(f, ctx, config):
     words = []
 
     def word_cb(data):
@@ -257,6 +254,45 @@ def article_chunk_fn(chunk):
     return stats, lst
 
 
+def process_input(path, config, ctx, chunk_fn):
+    """Processes the entire input once, calling chunk_fn for each chunk.
+    A chunk is a list (config_kwargs, data) where ``data`` is a dict
+    containing at least "title" and "text" keys.  This returns a list
+    of the values returned by ``chunk_fn`` in arbitrary order.  Each return
+    value must be json-serializable."""
+    assert isinstance(path, str)
+    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(ctx, WiktionaryTarget)
+    assert callable(chunk_fn)
+
+    # Open the input file, optionally decompressing on the fly (in a parallel
+    # process to maximize concurrency).  This requires the ``buffer`` program.
+    subp = None
+    if path.endswith(".bz2"):
+        cmd = "bzcat {} | buffer -m 16M".format(path)
+        subp = subprocess.Popen(["/bin/sh", "-c", cmd], stdout=subprocess.PIPE,
+                                bufsize=256*1024)
+        wikt_f = subp.stdout
+    else:
+        wikt_f = open(path, "rb", buffering=(256 * 1024))
+
+    # Create an iterator that produces chunks of articles to process.
+    chunk_iter = make_chunk_iter(wikt_f, ctx, config)
+
+    # Process the chunks in parallel and combine results into a list.
+    # The order of the resulting values is arbitrary.
+    pool = multiprocessing.Pool()
+    try:
+        results = list(pool.imap_unordered(article_chunk_fn, chunk_iter))
+    finally:
+        wikt_f.close()
+        if subp:
+            subp.kill()
+            subp.wait()
+
+    return results
+
+
 def parse_wiktionary(path, config, word_cb, capture_cb=None):
     """Parses Wiktionary from the dump file ``path`` (which should point
     to a "enwiktionary-<date>-pages-articles.xml.bz2" file.  This
@@ -274,28 +310,8 @@ def parse_wiktionary(path, config, word_cb, capture_cb=None):
             assert isinstance(x, str)
             assert x in wiktionary_languages
 
-    # Open the input file.
-    subp = None
-    if path.endswith(".bz2"):
-        cmd = "bzcat {} | buffer -m 16M".format(path)
-        subp = subprocess.Popen(["/bin/sh", "-c", cmd], stdout=subprocess.PIPE,
-                                bufsize=256*1024)
-        wikt_f = subp.stdout
-        #wikt_f = bz2.BZ2File(path, "r", buffering=(4 * 1024 * 1024))
-    else:
-        wikt_f = open(path, "rb", buffering=(256 * 1024))
-
-    ctx = WiktionaryTarget(config, word_cb, capture_cb)
-    chunk_iter = make_chunk_iter(wikt_f, ctx, config, capture_cb)
-
-    pool = multiprocessing.Pool()
-    try:
-        results = list(pool.imap_unordered(article_chunk_fn, chunk_iter))
-    finally:
-        wikt_f.close()
-        if subp:
-            subp.kill()
-            subp.wait()
+    ctx = WiktionaryTarget(config, capture_cb)
+    results = process_input(path, config, ctx, article_chunk_fn)
 
     words = []
     for stats, lst in results:

@@ -152,7 +152,7 @@ class WiktionaryConfig(object):
                 self.unrendered_template_samples[k][kk].extend(vv)
         for k, v in ret["unknown_value_counts"].items():
             for kk, vv in v.items():
-                for kkk, vvv in vvv.items():
+                for kkk, vvv in vv.items():
                     self.unknown_value_counts[k][kk][kkk] += vvv
 
     def error(self, msg):
