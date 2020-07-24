@@ -190,7 +190,7 @@ if __name__ == "__main__":
             if args.path:
                 print("Normal input file should not be specified with --path")
                 sys.exit(1)
-            with open(args.page, "r") as f:
+            with open(args.page, "r", encoding="utf-8") as f:
                 text = f.read()
             ret = parse_page("TESTPAGE", text, config)
             for x in ret:
