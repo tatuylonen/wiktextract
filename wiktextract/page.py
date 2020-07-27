@@ -429,8 +429,33 @@ def verb_form_map_fn(config, data, name, t, form_map):
         else:
             config.unknown_value(t, v)
 
+def parse_old_quotation(config, data, node, index):
+    """There are two types of quotes: inline and templatized.
+    Here we try to parse the former type. It requires a bit of work
+    """
+    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(data, dict)
 
-def parse_sense(config, data, text, use_text):
+    quotations = []
+    for subnode in node.sublists(index):
+        if re.match(r"(\\#)+\\\*", subnode.pattern):
+            for index2, item in enumerate(subnode.items):
+                quotation = {}
+                quotation_title = item.strip()
+                if len(subnode.sublists()) > index2:
+                    quotation_text = clean_value(config, subnode.sublists()[index2].items[0]).strip()
+                    title_regex = r"'''(?P<year>\d+)'''( (?P<month>\w+) (?P<day>\d+))?,(?P<author>[^,]+), ?(''|\")(?P<title>.*?)(''|\")(, ?(?P<publisher>[^,]+?), ?(?P<page>.*))?:"
+                    match = re.search(title_regex, quotation_title)
+                    if match:
+                        groups = match.groupdict()
+                        quotation = groups.copy()
+                        quotation['text'] = quotation_text
+                    quotations.append(quotation)
+    data_append(config, data, "quotations", quotations)
+
+
+
+def parse_sense(config, data, text, first_level):
     """Parses a word sense from the text.  The text is usually a list item
     from the beginning of the dictionary entry (i.e., before the first
     subtitle).  There is a lot of information and linkings in the sense
@@ -441,20 +466,21 @@ def parse_sense(config, data, text, use_text):
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(data, dict)
     assert isinstance(text, str)
-    assert use_text in (True, False)
+    assert first_level in (True, False)
 
-    if use_text:
-        # The gloss is just the value cleaned into a string.  However, much of
-        # the useful information is in the tagging within the text.  Note that
-        # some entries don't really have a gloss text; for them, we may only
-        # obtain some machine-readable linkages.
-        gloss = clean_value(config, text)
-        if gloss:
-            # Got a gloss for this sense.
-            data_append(config, data, "glosses", gloss)
+
+    # The gloss is just the value cleaned into a string.  However, much of
+    # the useful information is in the tagging within the text.  Note that
+    # some entries don't really have a gloss text; for them, we may only
+    # obtain some machine-readable linkages.
+    gloss = clean_value(config, text)
+    if gloss:
+        # Got a gloss for this sense.
+        data_append(config, data, "glosses", gloss)
 
     # Parse the Wikimedia coding from the text.
     p = wikitextparser.parse(text)
+
 
     # Iterate over all templates in the text.
     for t in p.templates:
@@ -603,10 +629,10 @@ def parse_sense(config, data, text, use_text):
             v = t_arg(config, t, 1)
             if not v:
                 v = config.word
-            if use_text:  # Skip wikipedia links in examples
+            if first_level:  # Skip wikipedia links in examples
                 data_append(config, data, "wikipedia", v)
         elif name in ("w2",):
-            if use_text:  # Skip wikipedia links in examples
+            if first_level:  # Skip wikipedia links in examples
                 data_append(config, data, "wikipedia", t_arg(config, t, 2))
         # There are even morse code sequences (and semaphore (flag)) positions
         # defined in the Translingual portion of Wiktionary.  Collect
@@ -728,7 +754,7 @@ def parse_sense(config, data, text, use_text):
             x = t_arg(config, t, 2)
             if x.startswith("w:"):
                 x = x[2:]
-                if use_text:  # Skip wikipedia links in examples
+                if first_level:  # Skip wikipedia links in examples
                     data_append(config, data, "wikipedia", x)
             data_append(config, data, "alt_of", x)
             data_append(config, data, "tags", "abbreviation")
@@ -1682,6 +1708,14 @@ def parse_preamble(config, data, pos_sectitle, text, p):
         # XXX what other potentially useful information might be available?
 
     # Parse word senses for the part-of-speech.
+    # Idea: certain times words may have hierarchically structured senses.
+    # Empirically speaking, it looks like verbs can have at most 2 levels
+    # (upper sense, and lower sense; cfr. "run").
+    # Verbs thus follow the sense -> usage form. I'll call usage "subsense
+    # For nouns or adjectives, the nesting can reach up to 4 levels of depth.
+    # cfr. "nettle" or "head" (as a noun) or "good" (as an adjective)
+    # This category thus follows the sense -> subsense -> usage form.
+    # The fourth category can be excluded (for the moment).
     for node in p.lists():
         for index, item in enumerate(node.items):
             txt = str(item)
@@ -1689,12 +1723,25 @@ def parse_preamble(config, data, pos_sectitle, text, p):
                 continue  # Possibly a bug in wikitextparser
             sense = {}
             parse_sense(config, sense, txt, True)
+            parse_old_quotation(config, sense, node, index)
             for node2 in node.sublists(index):
-                for item2 in node2.items:
-                    parse_sense(config, sense, str(item2), False)
-                for node3 in node2.sublists():
-                    for item3 in node3.items:
-                        parse_sense(config, sense, str(item3), False)
+                for index2, item2 in enumerate(node2.items):
+                    subsense = {}
+                    parse_sense(config, subsense, str(item2), False)
+                    parse_old_quotation(config, subsense, node, index)
+                    for node3 in node2.sublists(index2):
+                        for item3 in node3.items:
+                            usage = {}
+                            parse_sense(config, usage, str(item3), False)
+                            parse_old_quotation(config, usage, node, index)
+                            if usage == {}:
+                                continue
+                            # If usage only contains examples, just extend the current list already.
+                            elif list(usage.keys()) != ['examples']:
+                                data_append(config, subsense, "usages", usage)
+                            else:
+                                data_extend(config, subsense, "examples", usage['examples'])
+                    data_append(config, sense, "subsenses", subsense)
             for tag in add_tags:
                 if tag not in sense.get("tags", ()):
                     data_append(config, sense, "tags", "plural")
