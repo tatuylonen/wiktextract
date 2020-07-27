@@ -465,7 +465,10 @@ def parse_old_quotation(config, data, node, index):
                         finally:
                             quotation['text'] = quotation_text
                 quotations.append(quotation)
-    data_append(config, data, "quotations", quotations)
+
+    # Avoid pushing a list of empty quotations
+    if any([len(quot.keys()) for quot in quotations]):
+        data_append(config, data, "quotations", quotations)
 
 
 
