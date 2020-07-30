@@ -487,7 +487,6 @@ def parse_old_example(config, data, node, index):
 
     examples = []
     for subnode in node.sublists(index):
-        print(subnode.pattern)
         if re.match(r"(\\#)+\[:;\]", subnode.pattern):
             for index2, item in enumerate(subnode.items):
                 example = clean_value(config, item.strip())
