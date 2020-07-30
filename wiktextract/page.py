@@ -479,11 +479,7 @@ def parse_old_example(config, data, node, index):
     - the sentence is in italic (double quote)
     - it contains the example word in bold (triple quote).
 
-    :param config:
-    :param data:
-    :param node:
-    :param index:
-    :return:
+    By now only the first condition is checked.
     """
 
     assert isinstance(config, WiktionaryConfig)
