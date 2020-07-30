@@ -471,6 +471,34 @@ def parse_old_quotation(config, data, node, index):
         data_append(config, data, "quotations", quotations)
 
 
+def parse_old_example(config, data, node, index):
+    """
+    Parse a list of examples that use the old, non-templatized format.
+    Such examples have the following characteristics:
+    - each line starts with one or more numbered point and colon point (#:, ##:)
+    - the sentence is in italic (double quote)
+    - it contains the example word in bold (triple quote).
+
+    :param config:
+    :param data:
+    :param node:
+    :param index:
+    :return:
+    """
+
+    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(data, dict)
+
+    examples = []
+    for subnode in node.sublists(index):
+        print(subnode.pattern)
+        if re.match(r"(\\#)+\[:;\]", subnode.pattern):
+            for index2, item in enumerate(subnode.items):
+                example = clean_value(config, item.strip())
+                examples.append(example)
+    # Avoid pushing a list of empty quotations
+    if len(examples) > 0:
+        data_extend(config, data, "examples", examples)
 
 def parse_sense(config, data, text, first_level):
     """Parses a word sense from the text.  The text is usually a list item
@@ -1741,20 +1769,29 @@ def parse_preamble(config, data, pos_sectitle, text, p):
             sense = {}
             parse_sense(config, sense, txt, True)
             parse_old_quotation(config, sense, node, index)
+            parse_old_example(config, sense, node, index)
+
             for node2 in node.sublists(index):
                 for index2, item2 in enumerate(node2.items):
                     subsense = {}
                     # Mixed ordered and unordered lists applies to quotations only.
-                    if not re.match(r"(\\#)+\\\*", node2.pattern):
+                    if not (re.match(r"(\\#)+\\\*", node2.pattern) or
+                            re.match(r"(\\#)+\[:;\]", node2.pattern)):
                         parse_sense(config, subsense, str(item2), False)
+
                     parse_old_quotation(config, subsense, node2, index2)
+                    parse_old_example(config, subsense, node2, index2)
                     for node3 in node2.sublists(index2):
                         for index3, item3 in enumerate(node3.items):
                             usage = {}
                             # Mixed ordered and unordered lists applies to quotations only.
-                            if not re.match(r"(\\#)+\\\*", node3.pattern):
+                            if not (re.match(r"(\\#)+\\\*", node3.pattern) or
+                                    re.match(r"(\\#)+\[:;\]", node3.pattern)):
                                 parse_sense(config, usage, str(item3), False)
+
                             parse_old_quotation(config, usage, node3, index3)
+                            parse_old_example(config, usage, node3, index3)
+
                             if usage == {}:
                                 continue
                             # If usage only contains examples, just extend the current list already.
@@ -1762,7 +1799,12 @@ def parse_preamble(config, data, pos_sectitle, text, p):
                                 data_append(config, subsense, "usages", usage)
                             else:
                                 data_extend(config, subsense, "examples", usage['examples'])
-                    data_append(config, sense, "subsenses", subsense)
+                    if subsense == {}:
+                        continue
+                    elif list(subsense.keys()) != ['examples']:
+                        data_append(config, sense, "subsenses", subsense)
+                    else:
+                        data_extend(config, sense, "examples", subsense['examples'])
             for tag in add_tags:
                 if tag not in sense.get("tags", ()):
                     data_append(config, sense, "tags", "plural")
