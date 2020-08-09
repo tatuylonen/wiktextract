@@ -22,8 +22,8 @@ ignore_xml_tags = set(["sha1", "comment", "username", "timestamp",
                        "ns", "restrictions", "contributor", "username",
                        "minor", "parentid", "namespaces", "revision",
                        "siteinfo", "mediawiki",
-                       "id", "revision", "namespace",
-                       "model", "format",
+                       "id", "revision", "namespace", "format",
+                       # "model",
 ])
 
 # Other tags are ignored inside these tags.
@@ -43,7 +43,6 @@ class WiktionaryTarget(object):
         "title",
         "redirect",
         "model",
-        "format",
         "aborted",
         "data",
         "args",
@@ -63,7 +62,6 @@ class WiktionaryTarget(object):
         self.title = None
         self.redirect = None
         self.model = None
-        self.format = None
         self.aborted = False
         self.data = []
         self.args = b""
@@ -78,7 +76,7 @@ arg_re = re.compile(
     rb"""([^"'>/=\s]+)(\s*=\s*("[^"]*"|'[^']*'|[^ \t\n"'`=<>]*))?"""
 )
 
-def make_chunk_iter(f, ctx, config):
+def make_article_iter(f, ctx, config):
     words = []
 
     def word_cb(data):
@@ -100,7 +98,6 @@ def make_chunk_iter(f, ctx, config):
             ctx.title = None
             ctx.redirect = None
             ctx.model = None
-            ctx.format = None
         elif tag in xml_stack_ignore:
             ctx.stack_ignore = True
 
@@ -136,7 +133,6 @@ def make_chunk_iter(f, ctx, config):
             ctx.redirect = attrs.get("title")
         elif tag == "page":
             title = ctx.title
-            redirect = ctx.redirect
             ctx.config.num_pages += 1
 
             # If a capture callback has been provided and returns False,
@@ -144,33 +140,18 @@ def make_chunk_iter(f, ctx, config):
             if ctx.capture_cb and not ctx.capture_cb(title, ctx.text):
                 return None
 
-            #if ctx.model in ("css", "sanitized-css", "javascript",
-            #                  "Scribunto"):
-            #    return None
-
-            if redirect:
+            if ctx.redirect:
                 if ctx.config.capture_redirects:
-                    data = {"redirect": redirect, "word": title}
+                    data = {"redirect": ctx.redirect, "word": title}
                     return data
 
-            if title.endswith("/translations"):
-                # XXX parse as a special translation page
-                pass
-            else:
-                # Parse the page, and call ``word_cb`` for each captured
-                # word.
-                data = {"title": title, "text": ctx.text}
-                return data
-        # elif tag == "model":
-        #     ctx.model = data
-        #     if data not in ("wikitext", "Scribunto", "css", "javascript",
-        #                     "sanitized-css", "json"):
-        #         print("UNRECOGNIZED MODEL", data)
-        # elif tag == "format":
-        #     ctx.format = data
-        #     if data not in ("text/x-wiki", "text/plain",
-        #                     "text/css", "text/javascript", "application/json"):
-        #         print("UNRECOGNIZED FORMAT", data)
+            # Parse the page, and call ``word_cb`` for each captured
+            # word.
+            data = {"title": title, "text": ctx.text,
+                    "model": ctx.model}
+            return data
+        elif tag == "model":
+            ctx.model = data
         else:
             attrs = parse_attrs(ctx.args)
             print("UNSUPPORTED", tag, len(data), attrs)
@@ -214,10 +195,16 @@ def make_chunk_iter(f, ctx, config):
             traceback.print_exc()
             raise
 
+    return article_iter()
+
+def make_chunk_iter(f, ctx, config):
+    assert isinstance(ctx, WiktionaryTarget)
+    assert isinstance(config, WiktionaryConfig)
+
     chunk_len = 200
     config_kwargs = config.to_kwargs()
     chunk = []
-    for art in article_iter():
+    for art in make_article_iter(f, ctx, config):
         chunk.append(art)
         if len(chunk) >= chunk_len:
             yield [config_kwargs, chunk]
@@ -225,36 +212,8 @@ def make_chunk_iter(f, ctx, config):
     if chunk:
         yield [config_kwargs, chunk]
 
-def article_fn(config, data):
-    assert isinstance(config, WiktionaryConfig)
-    assert isinstance(data, dict)
-    if "redirect" in data:
-        return [data]
-    title = data["title"]
-    text = data["text"]
-    # Decode entities.  This assumes only HTML entities used in Wiktionary XML.
-    text = html.unescape(text)
 
-    if title.startswith("Thesaurus:"):
-        # XXX add handling of thesaurus pages
-        return []
-
-    # Decode the page.
-    return parse_page(title, text, config)
-
-
-def article_chunk_fn(chunk):
-    assert isinstance(chunk, (list, tuple)) and len(chunk) == 2
-    config_kwargs = chunk[0]
-    config = WiktionaryConfig(**config_kwargs)
-    lst = []
-    for data in chunk[1]:
-        lst.extend(article_fn(config, data))
-    stats = config.to_return()
-    return stats, lst
-
-
-def process_input(path, config, ctx, chunk_fn):
+def process_input(path, config, ctx, make_iter, chunk_fn):
     """Processes the entire input once, calling chunk_fn for each chunk.
     A chunk is a list (config_kwargs, data) where ``data`` is a dict
     containing at least "title" and "text" keys.  This returns a list
@@ -263,6 +222,7 @@ def process_input(path, config, ctx, chunk_fn):
     assert isinstance(path, str)
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, WiktionaryTarget)
+    assert callable(make_iter)
     assert callable(chunk_fn)
 
     # Open the input file, optionally decompressing on the fly (in a parallel
@@ -277,13 +237,13 @@ def process_input(path, config, ctx, chunk_fn):
         wikt_f = open(path, "rb", buffering=(256 * 1024))
 
     # Create an iterator that produces chunks of articles to process.
-    chunk_iter = make_chunk_iter(wikt_f, ctx, config)
+    iter = make_iter(wikt_f, ctx, config)
 
     # Process the chunks in parallel and combine results into a list.
     # The order of the resulting values is arbitrary.
     pool = multiprocessing.Pool()
     try:
-        results = list(pool.imap_unordered(article_chunk_fn, chunk_iter))
+        results = list(pool.imap_unordered(chunk_fn, iter))
     finally:
         wikt_f.close()
         if subp:
@@ -291,6 +251,140 @@ def process_input(path, config, ctx, chunk_fn):
             subp.wait()
 
     return results
+
+
+def capture_specials_fn(dt):
+    """Captures certain special pages that are needed for processing other
+    pages."""
+    assert isinstance(dt, dict)
+    title = dt["title"]
+    text = dt["text"]
+    model = dt["model"]
+    #print(title)
+
+    if model in ("css", "javascript", "sanitized-css", "json"):
+        return []
+
+    if title.endswith("/documentation"):
+        return []
+
+    idx = title.find(":")
+    if idx > 3:
+        cat = title[:idx]
+        rest = title[idx + 1:]
+        if cat == "Category":
+            return [[cat, rest, text]]
+        elif cat == "Module":
+            if model == "Scribunto":
+                return [["Scribunto", rest, text]]
+            return [[cat, rest, text]]
+        elif cat == "Template":
+            return [[cat, rest, text]]
+        elif cat == "Citations":
+            return []
+        elif cat == "Reconstruction":
+            # print("Reconstruction", rest)
+            return []
+        elif cat == "Appendix":
+            # print("Appendix", rest)
+            return []
+        elif cat == "Rhymes":
+            return []
+        elif cat == "Wiktionary":
+            return []
+        elif cat == "Thread":
+            return []
+        elif cat == "Index":
+            return []
+        elif cat == "Thesaurus":
+            if rest.endswith("/translations"):
+                return [["Translations", title[:-len("/translations")], text]]
+            return [[cat, title, text]]
+        elif cat == "MediaWiki":
+            return []
+        elif cat == "Concordance":
+            return []
+        elif cat == "Sign gloss":
+            return []
+        elif cat == "Help":
+            return []
+        elif cat == "File":
+            return []
+
+    if model == "Scribunto":
+        print("Unexpected Scribunto:", title)
+        return []
+
+    if title.endswith("/translations"):
+        return [["Translations", title[:-len("/translations")], text]]
+
+    return []
+
+
+def capture_chunk_fn(chunk):
+    assert isinstance(chunk, (list, tuple)) and len(chunk) == 2
+    lst = []
+    for dt in chunk[1]:
+        lst.extend(capture_specials_fn(dt))
+    return lst
+
+
+def article_fn(config, data):
+    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(data, dict)
+    if "redirect" in data:
+        return [data]
+    title = data["title"]
+    text = data["text"]
+    model = data["model"]
+
+    # Skip code pages here
+    if model in ("css", "sanitized-css", "javascript",
+                 "Scribunto", "json"):
+        return []
+
+    # Skip pages with certain prefixes
+    idx = title.find(":")
+    if idx > 3:
+        cat = title[:idx]
+        if cat in ("Category",
+                   "Module",
+                   "Template",
+                   "Citations",
+                   "Reconstruction",
+                   "Appendix",
+                   "Rhymes",
+                   "Wiktionary",
+                   "Thread",
+                   "Index",
+                   "Thesaurus",
+                   "MediaWiki",
+                   "Concordance",
+                   "Sign gloss",
+                   "Help",
+                   "File"):
+            return []
+
+    # Skip special translation pages (these are handled in a separate pass)
+    if title.endswith("/translations"):
+        return []
+
+    # Decode entities.  This assumes only HTML entities used in Wiktionary XML.
+    text = html.unescape(text)
+
+    # Decode the page.
+    return parse_page(title, text, config)
+
+
+def article_chunk_fn(chunk):
+    assert isinstance(chunk, (list, tuple)) and len(chunk) == 2
+    config_kwargs = chunk[0]
+    config = WiktionaryConfig(**config_kwargs)
+    lst = []
+    for data in chunk[1]:
+        lst.extend(article_fn(config, data))
+    stats = config.to_return()
+    return stats, lst
 
 
 def parse_wiktionary(path, config, word_cb, capture_cb=None):
@@ -310,8 +404,21 @@ def parse_wiktionary(path, config, word_cb, capture_cb=None):
             assert isinstance(x, str)
             assert x in wiktionary_languages
 
+    print("First pass - extracting macros and certain special pages")
+    ctx = WiktionaryTarget(config, None)
+    results = process_input(path, WiktionaryConfig(), ctx,
+                            make_chunk_iter,
+                            capture_chunk_fn)
+    specials = []
+    for x in results:
+        specials.extend(x)
+    with open("tempXXXspecials.json", "w") as f:
+        json.dump(specials, f, indent=2, sort_keys=True)
+
+    print("Second pass - extracting words")
     ctx = WiktionaryTarget(config, capture_cb)
-    results = process_input(path, config, ctx, article_chunk_fn)
+    results = process_input(path, config, ctx, make_chunk_iter,
+                            article_chunk_fn)
 
     words = []
     for stats, lst in results:

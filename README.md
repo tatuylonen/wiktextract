@@ -3,7 +3,9 @@
 This is a utility and Python package for for extracing data from Wiktionary.
 
 **Currently working on this, and the repository may be broken on some
-  days.  New release with major changes expected in July 2020.**
+  days.  New release with major changes expected in August 2020.  This has
+  gotten significantly delayed, and I apologize, but now I finally really
+  should be able to work on this in August.**
 
 ## Overview
 
