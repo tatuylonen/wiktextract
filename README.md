@@ -7,6 +7,9 @@ This is a utility and Python package for for extracing data from Wiktionary.
   gotten significantly delayed, and I apologize, but now I finally really
   should be able to work on this in August.**
 
+**Until then, please use the version on pypi (``pip install wiktextract``)
+  or look at branches which contain earlier versions.**
+
 ## Overview
 
 This is a Python package and tool for extracting information from
