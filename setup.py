@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2018 Tatu Ylonen.  See LICENSE and https://ylonen.org
+# Copyright (c) 2018-2020 Tatu Ylonen.  See LICENSE and https://ylonen.org
 
 from setuptools import setup
 
@@ -26,7 +26,6 @@ setup(name="wiktextract",
           "Intended Audience :: Science/Research",
           "License :: OSI Approved :: MIT License",
           "Natural Language :: English",
-          "Natural Language :: Finnish",
           "Operating System :: OS Independent",
           "Operating System :: POSIX :: Linux",
           "Programming Language :: Python",

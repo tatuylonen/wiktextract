@@ -257,6 +257,8 @@ def capture_specials_fn(dt):
     """Captures certain special pages that are needed for processing other
     pages."""
     assert isinstance(dt, dict)
+    if "redirect" in dt:
+        return []
     title = dt["title"]
     text = dt["text"]
     model = dt["model"]
