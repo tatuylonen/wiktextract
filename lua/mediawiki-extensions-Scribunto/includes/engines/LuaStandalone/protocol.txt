@@ -1,0 +1,176 @@
+The Lua standalone engine has a message-based protocol for communicating between
+PHP and Lua.
+
+Messages start with a 16 byte header. The first 8 bytes are the body length in
+hexadecimal. The second 8 bytes are (length * 2 - 1) also in hexadecimal.
+
+For messages passed from PHP to Lua, the body is encoded as a Lua expression.
+The expression may reference a table in a variable called "chunks", which
+contains an array of functions.
+
+Messages passed from Lua to PHP have their body encoded in PHP serialize()
+format, and then "\\", "\r", and "\n" are replaced with "\\\\", "\\r", and
+"\\n" to avoid issues with text-mode file handles. They may include instances
+of function objects which have an "id" member for passing back to Lua as an
+index in the chunk table.
+
+The expressions encoded into the message bodies are associative arrays. The "op"
+member of the array gives the operation to be performed by the message.
+
+Every request message demands exactly one response message in reply. When a
+request message is sent, the responder does not need to send the corresponding
+response message as its next message. It may instead send its own request
+message. In this way, a stack of pending requests can be accumulated. This
+mechanism allows re-entrant and recursive calls.
+
+All numerically-indexed arrays should start from index 1 unless otherwise
+specified. Note that the number of values in an array may not match what Lua's
+'#' operator returns if the array contains nils.
+
+== Request messages sent from PHP to Lua ==
+
+=== loadString ===
+
+Load some executable Lua code (a "chunk") and return the resulting function ID.
+
+Message parameters:
+* op: "loadString"
+* text: The string to load
+* chunkName: The name of the string, for use in error messages
+
+On success, the response message is:
+
+* op: "return"
+* nvalues: 1
+* values: An array with a single element with the ID in it
+
+On failure, the response message is:
+
+* op: "error"
+* value: The error message
+
+=== call ===
+
+Call a Lua function.
+
+Message parameters:
+* op: "call"
+* id: The chunk ID
+* nargs: Number of arguments, including nils
+* args: The argument array
+
+On success, the response message is:
+
+* op: "return"
+* nvalues: Number of return values, including nils
+* values: All return values as an array
+
+On failure, the response message is:
+
+* op: "error"
+* value: The value given to error(), usually an error message
+* trace: A table giving a backtrace of the stack as it was when error() was
+  called, in a similar format to the one used by debug.getinfo(). Element 1 of
+  the table is the function that called error(), element 2 is the function that
+  called that, and so on.
+
+=== registerLibrary ===
+
+Register a set of functions in the sandbox environment.
+
+Message parameters:
+* op: "registerLibrary"
+* name: The global variable name to register. May contain "." characters to
+  specify a global variable subtable.
+* functions: An associative array mapping function name to ID
+
+On success, the response message is:
+
+* op: "return"
+* nvalues: 0
+* values: An empty array
+
+On failure the response message is:
+
+* op: "error"
+* value: The error message
+
+=== getStatus ===
+
+Get status information about the Lua process.
+
+Message parameters:
+* op: "getStatus"
+
+On success, the response message is:
+
+* op: "return"
+* nvalues: 1
+* values: An array with a single element, which is an associative array mapping
+  status key to value. The status keys are:
+** pid: The process identifier
+** time: The amount of user and system time spent by the process, measured in clock ticks
+** vsize: The virtual memory size in bytes
+** rss: The resident set size in bytes
+
+On failure, the response message is:
+
+* op: "return"
+* nvalues: 0
+* values: An empty array
+
+=== cleanupChunks ===
+
+Tell Lua to release any chunks no longer referenced by PHP.
+
+Message parameters:
+* op: "cleanupChunks"
+* ids: Table with keys being the chunk IDs still referenced by PHP, and non-falsey values
+
+The response message is:
+
+* op: "return"
+* nvalues: 0
+* values: An empty array
+
+=== quit ===
+
+Request graceful shutdown.
+
+Message parameters:
+* op: "quit"
+
+No return message will be sent.
+
+=== testquit ===
+
+Request non-graceful shutdown, for testing.
+
+Message parameters:
+* op: "testquit"
+
+No return message will be sent.
+
+== Request messages sent from Lua to PHP ==
+
+=== call ===
+
+Call a PHP function.
+
+Message parameters:
+* op: "call"
+* id: The function ID given by registerLibrary
+* nargs: Number of arguments, including nils
+* args: An array giving the function arguments
+
+On success, the response message is:
+
+* op: "return"
+* nvalues: Number of return values, including nils
+* values: All return values as an array
+
+On failure the response message is:
+
+* op: "error"
+* value: The error message
+

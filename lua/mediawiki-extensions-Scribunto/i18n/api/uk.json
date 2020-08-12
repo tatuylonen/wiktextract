@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Piramidion",
+			"Ата"
+		]
+	},
+	"apihelp-scribunto-console-description": "Внутрішній модуль обробки XHR-запитів з консолі Scribunto.",
+	"apihelp-scribunto-console-summary": "Внутрішній модуль обробки XHR-запитів з консолі Scribunto.",
+	"apihelp-scribunto-console-param-title": "Назва модуля для тесту.",
+	"apihelp-scribunto-console-param-content": "Новий вміст модуля.",
+	"apihelp-scribunto-console-param-session": "Токен сесії.",
+	"apihelp-scribunto-console-param-question": "Наступний рядок для оцінки як скрипта.",
+	"apihelp-scribunto-console-param-clear": "Встановіть для очистки поточного стану сесії."
+}

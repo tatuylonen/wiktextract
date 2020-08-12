@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lloffiwr",
+			"Ham II"
+		]
+	},
+	"scribunto-lua-error": "Gwall Lua: $2.",
+	"scribunto-limitreport-timeusage-value": "$1/$2 eiliad"
+}

@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amire80",
+			"Anomie",
+			"Gomada",
+			"Mormegil",
+			"Nemo bis",
+			"Raymond",
+			"Shirayuki",
+			"Siebrand",
+			"Snævar",
+			"Liuxinyu970226",
+			"Umherirrender",
+			"Base"
+		]
+	},
+	"apihelp-scribunto-console-description": "{{doc-apihelp-description|scribunto-console}}",
+	"apihelp-scribunto-console-summary": "{{doc-apihelp-summary|scribunto-console}}",
+	"apihelp-scribunto-console-param-title": "{{doc-apihelp-param|scribunto-console|title}}",
+	"apihelp-scribunto-console-param-content": "{{doc-apihelp-param|scribunto-console|content}}",
+	"apihelp-scribunto-console-param-session": "{{doc-apihelp-param|scribunto-console|session}}",
+	"apihelp-scribunto-console-param-question": "{{doc-apihelp-param|scribunto-console|question}}",
+	"apihelp-scribunto-console-param-clear": "Probably a way to delete the history, variables etc. of the Scribunto debug console, i.e. an environment where Lua modules can be tested (not currently documented).\n----\n{{doc-apihelp-param|scribunto-console|clear}}"
+}

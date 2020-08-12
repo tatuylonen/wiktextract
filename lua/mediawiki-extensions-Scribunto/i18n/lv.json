@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Edgars2007",
+			"Papuass"
+		]
+	},
+	"scribunto-line": "$1. rindā",
+	"scribunto-module-line": "$1, $2. rinda",
+	"scribunto-parser-dialog-title": "Skripta kļūda",
+	"scribunto-error-short": "Skripta kļūda: $1",
+	"scribunto-error-long": "Skripta kļūdas:\n\n$1",
+	"scribunto-doc-page-does-not-exist": "''Šī moduļa dokumentāciju var izveidot [[$1]] lapā''",
+	"scribunto-doc-page-header": "'''Šī ir [[$1]] moduļa dokumentācijas lapa'''",
+	"scribunto-console-title": "Atkļūdošanas konsole",
+	"scribunto-console-current-src": "konsoles ievade",
+	"scribunto-console-clear": "Notīrīt",
+	"scribunto-common-error-category": "Lapas ar skriptu kļūdām",
+	"scribunto-common-nosuchmodule": "Skripta kļūda: Nav tāda moduļa \"$2\".",
+	"scribunto-common-nofunction": "Skripta kļūda: Jānorāda izsaucamā funkcija.",
+	"scribunto-common-nosuchfunction": "Skripta kļūda: Funckija \"$2\" nepastāv.",
+	"scribunto-common-notafunction": "Skripta kļūda: \"$2\" nav fubkcija.",
+	"scribunto-lua-in-function": "funkcijā \"$1\"",
+	"scribunto-lua-in-function-at": "funkcijā $1:$2",
+	"scribunto-lua-error-location": "Lua kļūda $1: $2.",
+	"scribunto-lua-error": "Lua kļūda: $2.",
+	"scribunto-luastandalone-proc-error": "Lua kļūda: Nevar izveidot procesu.",
+	"scribunto-luastandalone-proc-error-msg": "Lua kļūda: Nevar izveidot procesu: $2",
+	"scribunto-module-with-errors-category": "Scribunto moduļi ar kļūdām",
+	"scribunto-module-with-errors-category-desc": "Modulī ir kļūda.",
+	"scribunto-limitreport-timeusage": "Lua laika lietojums",
+	"scribunto-limitreport-timeusage-value": "$1/$2 sekundes",
+	"scribunto-limitreport-memusage": "Lua atmiņas lietojums",
+	"scribunto-limitreport-profile": "Lua profils",
+	"scribunto-limitreport-profile-ms": "$1 ms",
+	"scribunto-limitreport-logs": "Lua žurnāli",
+	"nstab-module": "Modulis",
+	"tooltip-ca-nstab-module": "Apskatīt moduļa lapu"
+}

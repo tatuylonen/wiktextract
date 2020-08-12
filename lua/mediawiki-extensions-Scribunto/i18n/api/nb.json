@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jeblad",
+			"Jon Harald Søby"
+		]
+	},
+	"apihelp-scribunto-console-description": "Intern modul for å behandle XHR-forespørsler fra Scribunto-konsollen.",
+	"apihelp-scribunto-console-summary": "Intern modul for å betjene XHR-forespørsler fra Scribunto-konsollen.",
+	"apihelp-scribunto-console-param-title": "Tittelen til modulen som testes",
+	"apihelp-scribunto-console-param-content": "Det nye innholdet til modulen",
+	"apihelp-scribunto-console-param-session": "Sessjonens token.",
+	"apihelp-scribunto-console-param-question": "Den neste linjen som skal kjøres som et script.",
+	"apihelp-scribunto-console-param-clear": "Sett for å slette den gjeldende sesjonstilstanden."
+}

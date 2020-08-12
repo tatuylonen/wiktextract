@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"DzWiki",
+			"Palapa",
+			"Srdjan m",
+			"Obsuser"
+		]
+	},
+	"scribunto-doc-page-name": "Module:$1/dok",
+	"scribunto-doc-page-does-not-exist": "''Dokumentaciju za ovaj modul možete napraviti na stranici [[$1]]''",
+	"scribunto-doc-page-header": "'''Ovo je stranica dokumentacije za [[$1]]'''",
+	"scribunto-console-clear": "Očisti",
+	"scribunto-common-timeout": "Isteklo je dodijeljeno vrijeme za rad skripti.",
+	"scribunto-lua-error": "Lua greška: $2.",
+	"scribunto-limitreport-timeusage": "Lua – upotreba vremena",
+	"scribunto-limitreport-timeusage-value": "$1/$2 sekundi",
+	"scribunto-limitreport-memusage": "Lua – upotreba memorije"
+}

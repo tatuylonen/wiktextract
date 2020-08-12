@@ -1,0 +1,5 @@
+{
+	"ignore": [
+		"./includes/engines/LuaStandalone/binaries/lua5_1_5_mac_lion_fat_generic/lua"
+	]
+}

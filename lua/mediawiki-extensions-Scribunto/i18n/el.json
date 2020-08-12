@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Geraki",
+			"Evropi",
+			"Αντιγόνη"
+		]
+	},
+	"scribunto-doc-page-name": "Module:$1/τεκμηρίωση",
+	"scribunto-common-error-category": "Σελίδες με σφάλματα δέσμης ενεργειών",
+	"scribunto-lua-error": "Σφάλμα Lua: $2.",
+	"scribunto-module-with-errors-category": "Modules Scribunto με σφάλματα"
+}

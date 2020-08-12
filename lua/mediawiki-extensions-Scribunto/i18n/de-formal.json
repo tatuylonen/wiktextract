@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kghbln"
+		]
+	},
+	"scribunto-console-too-large": "Dieser Konsolensitzung ist zu umfangreich. Bitte deaktivieren Sie die Konsolenprotokollierung oder verringeren Sie die Größe des Moduls."
+}

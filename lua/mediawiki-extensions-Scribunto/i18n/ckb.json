@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Calak",
+			"Asoxor",
+			"Épine"
+		]
+	},
+	"scribunto-line": "لە ڕیزی $1",
+	"scribunto-module-line": "لە $1 لە ڕیزی $2",
+	"scribunto-parser-dialog-title": "ھەڵەی دەق",
+	"scribunto-error-short": "ھەڵەی دەق: $1",
+	"scribunto-error-long": "ھەڵەکانی دەق: \n\n$1",
+	"scribunto-doc-page-does-not-exist": "\"بەڵگەدارکردنی ئەم مۆدیوولە دەکرێ لە [[$1]]دا دروست بکرێ\"",
+	"scribunto-doc-page-header": "'''ئەمە پەڕەیەکی بەڵگەدارکردنە بۆ [[$1]]'''",
+	"scribunto-console-clear": "سڕینەوە",
+	"scribunto-common-nosuchmodule": "ھەڵەی دەق: مۆدیوول بە ناوی «$2» بوونی نییە.",
+	"scribunto-lua-error-location": "ھەڵەی لوا $1:$2.",
+	"scribunto-lua-error": "ھەڵەی زمانی لوا: $2.",
+	"scribunto-limitreport-timeusage-value": "$1/$2 چرکە",
+	"nstab-module": "مۆدیوول",
+	"tooltip-ca-nstab-module": "بینینی پەڕەی مۆدیوول"
+}

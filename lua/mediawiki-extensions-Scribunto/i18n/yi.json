@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"פוילישער",
+			"පසිඳු කාවින්ද"
+		]
+	},
+	"scribunto-line": "אין שורה $1",
+	"scribunto-module-line": "אין $1, שורה $2",
+	"scribunto-parser-dialog-title": "סקריפט פֿעלער",
+	"scribunto-error-short": "סקריפט פֿעלער: $1",
+	"scribunto-error-long": "סקריפט פֿעלער:\n\n$1",
+	"scribunto-doc-page-name": "Module:$1/דאק",
+	"scribunto-doc-page-does-not-exist": "מען קען שאפן דאקומענטאציע פאר דעם מאדול ביי [[$1]]",
+	"scribunto-doc-page-header": "'''דאָס איז דער דאקומענטאציע בלאַט פֿאַר [[$1]]'''",
+	"scribunto-console-clear": "רייניקן",
+	"scribunto-common-error-category": "בלעטער מיט סקריפט פֿעלער",
+	"scribunto-common-nosuchmodule": "סקריפט־פעלער: נישט פאראן אזא מאדול \"$2\" .",
+	"scribunto-common-nosuchfunction": "סקריפט פֿעלער: די פֿונקציע \"$2\" עקזיסטירט נישט.",
+	"scribunto-common-notafunction": "סקריפט פֿעלער: \"$2\" איז נישט קיין פֿונקציע.",
+	"scribunto-lua-in-function": "אין פֿונקציע \"$1\"",
+	"scribunto-lua-error-location": "לוא־פעלער $1: $2.",
+	"scribunto-lua-error": "לוא־פעלער: $2.",
+	"scribunto-limitreport-profile": "לוא פראפֿיל",
+	"nstab-module": "מאדול",
+	"tooltip-ca-nstab-module": "באַקוקן דעם מאדול־בלאַט"
+}

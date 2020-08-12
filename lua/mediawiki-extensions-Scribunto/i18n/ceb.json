@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bentong Isles"
+		]
+	},
+	"scribunto-lua-error": "Problema sa Lua: $2."
+}

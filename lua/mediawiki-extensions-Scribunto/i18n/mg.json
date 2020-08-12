@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jagwar"
+		]
+	},
+	"scribunto-lua-error": "Hadisoana Lua: $2.",
+	"scribunto-limitreport-profile-ms": "$1 ms"
+}

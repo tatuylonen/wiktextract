@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dgstranz",
+			"Fitoschido",
+			"Lemondoge",
+			"Macofe",
+			"Ryo567"
+		]
+	},
+	"apihelp-scribunto-console-description": "Módulo interno para el mantenimiento de XHR las solicitudes de los Scribunto de la consola.",
+	"apihelp-scribunto-console-param-title": "El título del módulo que probar.",
+	"apihelp-scribunto-console-param-content": "El nuevo contenido del módulo.",
+	"apihelp-scribunto-console-param-session": "Ficha de sesión.",
+	"apihelp-scribunto-console-param-question": "El próximo renglón que evaluar como secuencia de órdenes.",
+	"apihelp-scribunto-console-param-clear": "Marcar para borrar el estado de la sesión actual."
+}

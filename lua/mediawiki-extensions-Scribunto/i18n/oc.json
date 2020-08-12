@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cedric31"
+		]
+	},
+	"scribunto-common-error-category": "Paginas amb d'errors d'escript",
+	"scribunto-common-error-category-desc": "I a agut una error al moment del tractament dels moduls contenguts sus la pagina.",
+	"scribunto-common-nosuchmodule": "Error d'escript : lo modul « $2 » existís pas.",
+	"scribunto-common-nosuchfunction": "Error d'escript : la foncion « $2 » existís pas.",
+	"scribunto-common-no-details": "Cap de detalh mai es pas disponible.",
+	"scribunto-lua-error": "Error de Lua : $2.",
+	"scribunto-luastandalone-gone": "Error LUA : Error intèrna : L'interpretador s'es ja arrestat.",
+	"scribunto-luastandalone-signal": "Error LUA : Error intèrna: L'interpretador s'es arrestat amb lo senhal « $2 »."
+}

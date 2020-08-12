@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sahran",
+			"Uzdil"
+		]
+	},
+	"scribunto-console-clear": "تازىلا",
+	"scribunto-lua-error": "Lua خاتالىقى: $2."
+}

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lokal Profil",
+			"WikiPhoenix"
+		]
+	},
+	"apihelp-scribunto-console-description": "Intern modul för att betjäna XHR-förfrågningar från Scribunto-konsolen.",
+	"apihelp-scribunto-console-param-title": "Titeln på modulen som ska testas.",
+	"apihelp-scribunto-console-param-content": "Modulens nya innehåll.",
+	"apihelp-scribunto-console-param-session": "Sessionsnyckel.",
+	"apihelp-scribunto-console-param-question": "Nästa rad att utvärdera som ett skript."
+}

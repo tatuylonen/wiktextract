@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"DCLXVI",
+			"Termininja",
+			"පසිඳු කාවින්ද",
+			"StanProg",
+			"ShockD",
+			"Ted Masters"
+		]
+	},
+	"scribunto-line": "на ред $1",
+	"scribunto-module-line": "в $1 на ред $2",
+	"scribunto-parser-dialog-title": "Грешка в скрипта",
+	"scribunto-error-short": "Грешка в скрипта: $1",
+	"scribunto-error-long": "Грешки в скрипта:\n\n$1",
+	"scribunto-doc-page-name": "Module:$1/doc",
+	"scribunto-doc-page-does-not-exist": "''Документация за този модул може да бъде създадена на [[$1]]''",
+	"scribunto-doc-page-header": "'''Това е страница с документация за [[$1]]'''",
+	"scribunto-console-title": "Конзола за отстраняване на грешки",
+	"scribunto-console-clear": "Изчистване",
+	"scribunto-common-error-category": "Страници с грешки в скрипта",
+	"scribunto-common-error-category-desc": "Грешка при обработката на модула в страницата.",
+	"scribunto-common-nosuchmodule": "Грешка в скрипта: Не съществува модул с име „$2“.",
+	"scribunto-common-nofunction": "Грешка в скрипта: Необходимо е да се посочи име на функция.",
+	"scribunto-common-nosuchfunction": "Грешка в скрипта: Функцията „$2“ не съществува.",
+	"scribunto-common-timeout": "Времето, отделено за изпълнение на скриптове, е изтекло.",
+	"scribunto-common-oom": "Количеството памет, отделено за изпълнение на скриптове, е надвишено.",
+	"scribunto-lua-in-function": "във функцията „$1“",
+	"scribunto-lua-in-main": "в основната част от кода",
+	"scribunto-lua-in-function-at": "във функцията $1:$2",
+	"scribunto-lua-error-location": "Грешка в Lua $1: $2.",
+	"scribunto-lua-error": "Грешка в Lua: $2.",
+	"scribunto-luastandalone-proc-error": "Грешка в Lua: Не може да бъде създаден процес.",
+	"scribunto-luastandalone-decode-error": "Грешка в Lua: Вътрешна грешка: Не може да се декодира съобщението.",
+	"scribunto-module-with-errors-category": "Модули с грешки",
+	"scribunto-module-with-errors-category-desc": "Модулът съдържа грешка.",
+	"nstab-module": "Модул"
+}

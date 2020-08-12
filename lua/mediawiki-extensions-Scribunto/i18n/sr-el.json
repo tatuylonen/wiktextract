@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"Milicevic01",
+			"Сербијана",
+			"Obsuser"
+		]
+	},
+	"scribunto-line": "na liniji $1",
+	"scribunto-parser-dialog-title": "Greška u skripti",
+	"scribunto-error-short": "Greška u skripti: $1",
+	"scribunto-doc-page-name": "Module:$1/dok",
+	"scribunto-doc-page-does-not-exist": "''Dokumentacija za ovaj modul se može napraviti na [[$1]]''",
+	"scribunto-doc-page-header": "'''Ovo je dokumentaciona podstranica za [[$1]]'''",
+	"scribunto-console-clear": "Očisti",
+	"scribunto-common-error-category": "Stranice sa greškama u skripti",
+	"scribunto-common-nosuchmodule": "Greška u skripti: Ne postoji modul „$2”.",
+	"scribunto-common-timeout": "Vreme izdvojeno za pokretanje skripti je isteklo.",
+	"scribunto-common-no-details": "Nije dostupno više informacija.",
+	"scribunto-lua-error-location": "Lua greška $1: $2.",
+	"scribunto-lua-error": "Lua greška: $2.",
+	"scribunto-limitreport-timeusage": "Vreme korišćenja Lua",
+	"scribunto-limitreport-timeusage-value": "$1/$2 sekundi",
+	"scribunto-limitreport-memusage": "Memorija korišćenja Lua",
+	"nstab-module": "Modul"
+}

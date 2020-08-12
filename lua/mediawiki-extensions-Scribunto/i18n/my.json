@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ninjastrikers",
+			"Dr Lotus Black"
+		]
+	},
+	"scribunto-console-clear": "ရှင်းလင်း",
+	"scribunto-common-error-category": "Script အမှားရှိနေသော စာမျက်နှာများ",
+	"scribunto-lua-error": "Lua အမှား - $2။",
+	"nstab-module": "မော်ဂျူး",
+	"tooltip-ca-nstab-module": "မော်ဂျူးစာမျက်နှာကို ကြည့်ရန်"
+}

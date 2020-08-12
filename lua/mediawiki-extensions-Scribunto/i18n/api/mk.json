@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06"
+		]
+	},
+	"apihelp-scribunto-console-description": "Внатрешен модул за опслужување на XHR-барања од конзолата на Scribunto.",
+	"apihelp-scribunto-console-summary": "Внатрешен модул за опслужување на XHR-барања од конзолата на Scribunto.",
+	"apihelp-scribunto-console-param-title": "Наслов на модулот што се испробува.",
+	"apihelp-scribunto-console-param-content": "Новата содржина на модулот.",
+	"apihelp-scribunto-console-param-session": "Шифра на седницата.",
+	"apihelp-scribunto-console-param-question": "Следниот ред за проверка како скрипта.",
+	"apihelp-scribunto-console-param-clear": "Задајте го за да ја исчистите тековната состојба на седницата."
+}

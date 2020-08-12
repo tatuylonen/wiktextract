@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"01miki10",
+			"Nike"
+		]
+	},
+	"apihelp-scribunto-console-param-title": "Testattavan moduulin nimi.",
+	"apihelp-scribunto-console-param-content": "Moduulin uusi sisältö.",
+	"apihelp-scribunto-console-param-session": "Istuntopoletti."
+}

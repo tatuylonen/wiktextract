@@ -1,0 +1,40 @@
+{
+	"@metadata": {
+		"authors": [
+			"AnakngAraw",
+			"Sky Harbor"
+		]
+	},
+	"scribunto-desc": "Baskagan para sa pagbabaon ng mga wikang pampagpapanitik papaloob sa mga pahina ng MediaWiki",
+	"scribunto-line": "sa guhit na $1",
+	"scribunto-module-line": "sa loob ng $1 na nasa guhit na $2",
+	"scribunto-parser-dialog-title": "Kamalian sa panitik",
+	"scribunto-error-short": "Kamalian sa panitik: $1",
+	"scribunto-error-long": "Mga kamalian sa panitik:\n\n$1",
+	"scribunto-console-intro": "* Ang mga luwas ng modulo ay makukuha bilang ang nagpapabagu-bagong \"p\", kasama na ang hindi pa nasasagip na mga pagbabago.\n* Magpauna ng \"=\" sa isang guhit upang mahatulan ito bilang isang pagpapahayag, o gamitin ang paglimbag ().\n* Gamitin ang mw.log() na nasa kodigo ng modulo upang makapagpadala ng mga mensahe sa kahang pantaban na ito.",
+	"scribunto-console-title": "Kahang pantaban ng sira",
+	"scribunto-console-too-large": "Ang inilaang panahon sa kahang pantaban ay napakalaki. Paki hawiin ang kasaysayan ng kahang pantaban o bawasan ang sukat ng modyul.",
+	"scribunto-console-current-src": "pagpapasok sa kahang pantaban",
+	"scribunto-console-clear": "Hawiin",
+	"scribunto-console-cleared": "Hinawi ang katayuan ng kahang pantaban dahil isinapanahon ang modyul.",
+	"scribunto-common-nosuchmodule": "Kamalian sa panitik: Walang ganyang modulo",
+	"scribunto-common-nofunction": "Kamalian sa panitik: Dapat kang magtukoy ng isang tungkuling tatawagin.",
+	"scribunto-common-nosuchfunction": "Kamalian sa panitik: Ang tinukoy mong tungkulin ay hindi umiiral.",
+	"scribunto-common-timeout": "Ang panahong inilaan para sa pagpapatakbo ng mga panitik ay lipas na.",
+	"scribunto-common-oom": "Ang dami ng pinahintulutang alaala para sa pagpapatakbo ng mga panitik ay nalampasan na.",
+	"scribunto-common-backtrace": "Paurong na pagbabakas:",
+	"scribunto-lua-in-function": "sa loob ng tungkuling \"$1\"",
+	"scribunto-lua-in-main": "sa loob ng pangunahing tipak",
+	"scribunto-lua-in-function-at": "sa loob ng tungkuling nasa $1:$2",
+	"scribunto-lua-backtrace-line": "$1: $2",
+	"scribunto-lua-error-location": "Kamalian ng lua na $1: $2",
+	"scribunto-lua-error": "Kamaliang Lua: $2",
+	"scribunto-lua-notarrayreturn": "Kamalian sa panitik: Ang modulo ay nagbalik ng isang bagay na bukod sa isang talahanayan, dapat itong magbalik ng isang talahanayan ng pag-aangkat.",
+	"scribunto-luastandalone-proc-error": "Kamalian ng lua: hindi malikha ang proseso",
+	"scribunto-luastandalone-decode-error": "Kamalian ng lua: panloob na kamalian: hindi nagawang alamin ang kodigo ng mensahe",
+	"scribunto-luastandalone-write-error": "Kamalian ng lua: panloob na kamalian: kamalian sa pagsusulat sa tubo",
+	"scribunto-luastandalone-read-error": "Kamalian sa lua: kamaliang panloob: kamalian sa pagbabasa mula sa tubo",
+	"scribunto-luastandalone-gone": "Kamalian sa lua: panloob na kamalian: lumabas na ang tagapagpaunawa",
+	"scribunto-luastandalone-signal": "Kamalian sa lua: panloob na kamalian: huminto ang tagapagpaliwanag na mayroong senyas na \"$2\"",
+	"scribunto-luastandalone-exited": "Kamalian sa lua: panloob na kamalian: ang tagapagpaunawa ay lumabas na mayroong katayuang $2"
+}

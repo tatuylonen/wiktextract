@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cwlin0416",
+			"Kly"
+		]
+	},
+	"apihelp-scribunto-console-description": "來自 Scribunto 主控台用於服務 XHR 請求的內部模組。",
+	"apihelp-scribunto-console-summary": "來自 Scribunto 主控台用於服務 XHR 請求的內部模組。",
+	"apihelp-scribunto-console-param-title": "要測試的模組標題。",
+	"apihelp-scribunto-console-param-content": "模組的新內容。",
+	"apihelp-scribunto-console-param-session": "Session 令牌。",
+	"apihelp-scribunto-console-param-question": "要評估為腳本的下一行。",
+	"apihelp-scribunto-console-param-clear": "設定來清除目前 session 狀態。"
+}

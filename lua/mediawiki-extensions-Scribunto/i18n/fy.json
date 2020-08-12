@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robin0van0der0vliet",
+			"Robin van der Vliet",
+			"PiefPafPier"
+		]
+	},
+	"scribunto-line": "op rigel $1",
+	"scribunto-module-line": "yn $1 op rigel $2",
+	"scribunto-console-current-src": "konsoleynfier",
+	"scribunto-common-error-category": "Siden mei skriptflaters",
+	"scribunto-lua-error-location": "Lua-flater $1: $2",
+	"scribunto-lua-error": "Luaflater: $2",
+	"scribunto-limitreport-timeusage-value": "$1/$2 sekonden"
+}

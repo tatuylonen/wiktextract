@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fraxinus",
+			"Bugoslav",
+			"Obsuser"
+		]
+	},
+	"scribunto-desc": "Sučelje za inkorporiranje skriptnih jezika u stranice MediaWikija",
+	"scribunto-common-error-category": "Stranice s pogreškama u skripti",
+	"scribunto-common-timeout": "Vrijeme izdvojeno za pokretanje skripti je isteklo.",
+	"scribunto-lua-error": "Lua pogreška: $2.",
+	"scribunto-module-with-errors-category": "Moduli Scribuntoa s pogreškama",
+	"nstab-module": "Modul"
+}

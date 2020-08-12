@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Antonytse",
+			"Yueman",
+			"Hello903hello"
+		]
+	},
+	"scribunto-doc-page-does-not-exist": "''呢個模組嘅解說可以喺[[$1]]度開''",
+	"scribunto-doc-page-header": "'''呢版係[[$1]]嘅解說版'''",
+	"scribunto-common-error-category": "有腳本錯誤嘅版",
+	"scribunto-lua-error": "Lua出錯：$2。",
+	"scribunto-luastandalone-decode-error": "Lua錯：内部錯：解碼唔到訊息。",
+	"scribunto-limitreport-profile-ms": "$1毫秒",
+	"nstab-module": "模組",
+	"tooltip-ca-nstab-module": "睇吓模組頁"
+}

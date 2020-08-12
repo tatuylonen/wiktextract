@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"Borichèt",
+			"Dragonòt",
+			"පසිඳු කාවින්ද"
+		]
+	},
+	"scribunto-desc": "Quàder për l'antëgrassion dij langagi ëd copin an dle pàgine ëd MediaWiki",
+	"scribunto-line": "a la linia $1",
+	"scribunto-module-line": "an $1 a la linia $2",
+	"scribunto-parser-dialog-title": "Eror ëd copion",
+	"scribunto-error-short": "Eror ëd copion: $1",
+	"scribunto-error-long": "Eror ëd copion:\n\n$1",
+	"scribunto-console-intro": "* J'esportassion ëd mòdul a son disponìbij com la variàbil «p», comprèise le modìfiche nen salvà.\n* Ch'a ancamin-a na linia con «=» për valutela com n'espression, o ch'a deuvra print().\n* Ch'a deuvra mw.log() ant ël còdes dël mòdul për mandé dij mëssagi a costa plancia.",
+	"scribunto-console-title": "Plancia d'eliminassion dij givo",
+	"scribunto-console-too-large": "Sta session ëd plancia a l'é tròp gròssa. Për piasì, ch'a scancela la stòria dla plancia o ch'a riduv la dimension dël mòdul.",
+	"scribunto-console-current-src": "anseriment ëd la plancia",
+	"scribunto-console-clear": "Scancela",
+	"scribunto-console-cleared": "Lë stat ëd la plancia a l'é stàit ëscancelà përché ël mòdul a l'é stàit agiornà.",
+	"scribunto-common-error-category": "Pàgine con eror ëd copion",
+	"scribunto-common-nosuchmodule": "Eror ëd copion: Gnun mòduj parèj.",
+	"scribunto-common-nofunction": "Eror ëd copion. A dev specifiché na funsion da ciamé.",
+	"scribunto-common-nosuchfunction": "Eror ëd copion. La funsion ch'a l'ha specificà a esist nen.",
+	"scribunto-common-timeout": "Ël temp assignà për fé andé ij copion a l'é finì.",
+	"scribunto-common-oom": "La quantità ëd memòria assignà për fé marcé ij copion a l'é stàita sorpassà.",
+	"scribunto-common-backtrace": "Marca andré:",
+	"scribunto-lua-in-function": "ant la funsion \"$1\"",
+	"scribunto-lua-in-main": "ant ël blòch prinsipal",
+	"scribunto-lua-in-function-at": "ant la funsion a $1:$2",
+	"scribunto-lua-error-location": "Eror Lua $1: $2.",
+	"scribunto-lua-error": "Eror Lua: $2.",
+	"scribunto-lua-notarrayreturn": "Eror ëd copion: Ël mòdul a l'ha dàit quaicòs d'àutr nopà che na tàula. A dovrìa dé na tàula d'esportassion.",
+	"scribunto-luastandalone-proc-error": "Eror Lua: As peul pa creesse un process.",
+	"scribunto-luastandalone-decode-error": "Eror Lua: Eror intern: A peul pa decodifichesse ël mëssagi.",
+	"scribunto-luastandalone-write-error": "Eror Lua: Eror intern: Eror scrivend ant ël canal.",
+	"scribunto-luastandalone-read-error": "Eror Lua: Eror intern: Eror ëd letura dal canal.",
+	"scribunto-luastandalone-gone": "Eror Lua: Eror intern: L'antérpret a l'ha già finì.",
+	"scribunto-luastandalone-signal": "Eror Lua: Eror intern: L'antérpret a l'ha finì con ël signal «$2».",
+	"scribunto-luastandalone-exited": "Eror Lua: Eror intern: L'antérpret a l'ha finì con lë statù $2."
+}

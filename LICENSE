@@ -1,6 +1,11 @@
+NOTE: Some files under lua/mediawiki-extensions-Scribunto have different
+license (GPL).  Other files are covered by this license.
+
+----
+
 MIT License
 
-Copyright (c) 2018 Tatu Ylonen, https://ylonen.org
+Copyright (c) 2018-2020 Tatu Ylonen, https://ylonen.org
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"ElangoRamanujam",
+			"Jayarathina"
+		]
+	},
+	"scribunto-common-no-details": "மேல் விபரங்களேதும் கிடைக்கவில்லை.",
+	"scribunto-lua-error": "லூவா பிழை: $2."
+}

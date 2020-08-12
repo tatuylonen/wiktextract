@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jean-paul echaquan",
+			"Benoit Rochon"
+		]
+	},
+	"scribunto-lua-error-location": "Lua oniparin $1: $2.",
+	"scribunto-lua-error": "Lua oniparin: $2."
+}

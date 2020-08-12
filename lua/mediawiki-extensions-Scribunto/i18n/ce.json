@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Умар"
+		]
+	},
+	"scribunto-desc": "MediaWiki агӀонашкахь скриптийн мотт лато хӀума",
+	"scribunto-parser-dialog-title": "Скриптан гӀалат",
+	"scribunto-error-short": "Скриптан гӀалат: $1",
+	"scribunto-doc-page-does-not-exist": "''ХӀокху модулах лаьцна хааман [[$1]] агӀо кхолла мега''",
+	"scribunto-console-intro": "* ХӀокху модульс экспорт еш ерг, лело луш ю хийцалуш «p» сана, Ӏалаш бина боцу хийцамашца.\n* Хьалха йилла билгало «=», дош сана къаста ян я лела йе print().\n* Модулан кодан юкъахь лела йе mw.log() хаам консуль чохь гучу балийта.",
+	"scribunto-console-title": "Лелоран консуль",
+	"scribunto-console-clear": "ЦӀанъян",
+	"scribunto-common-error-category": "Сриптийн гӀалаташ долу агӀонаш",
+	"scribunto-common-error-category-desc": "АгӀона тӀе тоьхна йолу модулаш кеч ечу хенахь гӀалат даьлла.",
+	"scribunto-common-nosuchmodule": "Скриптан гӀалат: Иштта модуль яц «$2».",
+	"scribunto-common-nosuchfunction": "Скриптан гӀалат: Функцеш «$2» яц.",
+	"scribunto-common-no-details": "Мадарра дац.",
+	"scribunto-lua-error": "Lua гӀалат: $2.",
+	"scribunto-module-with-errors-category": "Scribunto модуль гӀалаташца",
+	"scribunto-module-with-errors-category-desc": "Модуль чохь гӀалаташ ду.",
+	"scribunto-limitreport-timeusage": "Lua лелоран хан",
+	"scribunto-limitreport-timeusage-value": "$1/$2 секунд",
+	"scribunto-limitreport-virtmemusage": "Виртуалан барам Lua",
+	"scribunto-limitreport-memusage": "Lua меттиг лелор",
+	"scribunto-limitreport-profile": "Профиль Lua",
+	"scribunto-limitreport-profile-ms": "$1 мс",
+	"scribunto-limitreport-logs": "Lua тептарш"
+}

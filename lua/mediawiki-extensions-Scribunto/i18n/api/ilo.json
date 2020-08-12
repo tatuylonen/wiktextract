@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lam-ang"
+		]
+	},
+	"apihelp-scribunto-console-description": "Internal a modulo para iti panaserbisio dagiti kiddaw ti XHR manipud iti konsola ti Scribunto.",
+	"apihelp-scribunto-console-summary": "Internal a modulo para iti panaserbisio dagiti kiddaw ti XHR manipud iti konsola ti Scribunto.",
+	"apihelp-scribunto-console-param-title": "Ti titulo ti modulo a masubokan.",
+	"apihelp-scribunto-console-param-content": "Ti baro a linaon ti modulo.",
+	"apihelp-scribunto-console-param-session": "Tandaan ti sesion.",
+	"apihelp-scribunto-console-param-question": "Ti sumaruno a linia a pategan a kas eskritu.",
+	"apihelp-scribunto-console-param-clear": "Isaad a dalusan ti kasasaad ti agdama a sesion."
+}

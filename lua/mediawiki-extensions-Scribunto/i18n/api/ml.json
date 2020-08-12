@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Praveenp"
+		]
+	},
+	"apihelp-scribunto-console-param-title": "പരീക്ഷിക്കാനുള്ള ഘടകത്തിന്റെ തലക്കെട്ട്.",
+	"apihelp-scribunto-console-param-content": "ഘടകത്തിന്റെ പുതിയ ഉള്ളടക്കം.",
+	"apihelp-scribunto-console-param-session": "സെഷൻ ചീട്ട്.",
+	"apihelp-scribunto-console-param-question": "സ്ക്രിപ്റ്റ് ആയി പരിശോധിക്കാനുള്ള അടുത്ത വരി.",
+	"apihelp-scribunto-console-param-clear": "ഇപ്പൊഴത്തെ സെഷൻ സ്ഥിതി ശൂന്യമാക്കിയതായി സജ്ജീകരിക്കുക."
+}

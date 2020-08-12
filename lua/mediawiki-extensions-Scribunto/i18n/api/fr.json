@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Wladek92"
+		]
+	},
+	"apihelp-scribunto-console-description": "Module interne pour les requêtes de service XHR à partir de la console Scribunto.",
+	"apihelp-scribunto-console-summary": "Module interne gérant les requêtes XHR à partir de la console Scribunto.",
+	"apihelp-scribunto-console-param-title": "Le titre du module à tester.",
+	"apihelp-scribunto-console-param-content": "Le nouveau contenu du module.",
+	"apihelp-scribunto-console-param-session": "Jeton de session.",
+	"apihelp-scribunto-console-param-question": "La ligne suivante à évaluer comme un script.",
+	"apihelp-scribunto-console-param-clear": "Positionner pour effacer l'état de la session courante."
+}

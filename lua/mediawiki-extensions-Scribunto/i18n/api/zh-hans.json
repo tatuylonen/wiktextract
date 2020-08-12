@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Liuxinyu970226",
+			"Yfdyh000"
+		]
+	},
+	"apihelp-scribunto-console-description": "从Scribunto控制台提供XHR请求的内部模块。",
+	"apihelp-scribunto-console-summary": "从Scribunto控制台提供XHR请求的内部模块。",
+	"apihelp-scribunto-console-param-title": "要测试的模块的标题。",
+	"apihelp-scribunto-console-param-content": "模块的新内容。",
+	"apihelp-scribunto-console-param-session": "会话令牌。",
+	"apihelp-scribunto-console-param-question": "要作为脚本评估的下一行。",
+	"apihelp-scribunto-console-param-clear": "设置以清除当前的会话状态。"
+}

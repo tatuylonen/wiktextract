@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Wizardist",
+			"Чаховіч Уладзіслаў",
+			"Mechanizatar"
+		]
+	},
+	"scribunto-desc": "Фрэймворк для выкарыстання скрыптавых моў на старонках MediaWiki",
+	"scribunto-line": "на радку $1",
+	"scribunto-module-line": "у $1 на радку $2",
+	"scribunto-parser-dialog-title": "Памылка скрыпта",
+	"scribunto-error-short": "Памылка скрыпта: $1",
+	"scribunto-error-long": "Памылкі скрыпта:\n\n$1",
+	"scribunto-doc-page-name": "Module:$1/Дакументацыя",
+	"scribunto-doc-page-does-not-exist": "''Дакументацыю да гэтага модуля можна стварыць у [[$1]]''",
+	"scribunto-doc-page-header": "'''Гэта старонка дакументацыі для [[$1]]'''",
+	"scribunto-console-intro": "* Экспартаваныя звесткі модуля даступныя праз зменную «p», у тым ліку незахаваныя змены.\n* Калі хочаце вылічыць радок як выраз, ужывайце перад радком знак «=», або выкарыстоўвайце print().\n* Каб дасылаць паведамленні ў гэтую кансоль, выкарыстоўвайце mw.log() у кодзе модуля.",
+	"scribunto-console-title": "Кансоль адладкі",
+	"scribunto-console-clear": "Ачысціць",
+	"scribunto-common-error-category": "Старонкі з памылкамі ў скрыптах",
+	"scribunto-common-nosuchmodule": "Памылка скрыпта: модуль \"$2\" не існуе.",
+	"scribunto-common-nofunction": "Памылка скрыпта: Вы павінны пазначыць функцыю для выкліку.",
+	"scribunto-common-nosuchfunction": "Памылка скрыпта: функцыя \"$2\" не існуе.",
+	"scribunto-common-notafunction": "Памылка скрыпта: \"$2\" гэта не функцыя.",
+	"scribunto-common-backtrace": "Шлях выклікаў:",
+	"scribunto-lua-in-function": "у функцыі «$1»",
+	"scribunto-lua-in-main": "у асноўнай частцы коду",
+	"scribunto-lua-in-function-at": "у функцыі $1:$2",
+	"scribunto-lua-error-location": "Памылка Lua $1: $2.",
+	"scribunto-lua-error": "Памылка Lua: $2."
+}

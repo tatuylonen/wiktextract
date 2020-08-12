@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amankel'dy"
+		]
+	},
+	"scribunto-desc": "MediaWiki беттеріндегі скрипттік тілдерді қосу құрылғысы",
+	"scribunto-line": "$1 жолында",
+	"scribunto-module-line": "$1 ішіндегі $2 жолында",
+	"scribunto-parser-dialog-title": "Скрипт қатесі",
+	"scribunto-error-short": "Скрипт қатесі: $1",
+	"scribunto-error-long": "Скрипт қатесі:\n\n$1",
+	"scribunto-doc-page-name": "Module:$1/doc",
+	"scribunto-doc-page-does-not-exist": "''Бұл модульдің құжаттамасын [[$1]] бетінде бастай аласыз''",
+	"scribunto-doc-page-header": "'''Бұл [[$1]] модуліне арналған құжаттама беті'''",
+	"scribunto-console-intro": "* Осы модулдің экспорттайтыны «p» айнымалысы ретінде, сақталмаған өзгерістермен бірге қолжетімді.\n* Жолды өрнек ретінде есептеу үшін алдын ала «=» деп белгілеңіз немесе print() қолданыңыз.\n* Модульде хабарлама шығару үшін mw.log() қолданыңыз.",
+	"scribunto-console-title": "Ретке келтіру консолы",
+	"scribunto-console-too-large": "Консолдың бұл сеансы өте үлкен. Өтініш, не консолдың тарихын тазалаңыз, не болмаса модульдің өлшемін кішірейтіңіз.",
+	"scribunto-console-current-src": "консолды енгізу",
+	"scribunto-console-clear": "Тазалау"
+}

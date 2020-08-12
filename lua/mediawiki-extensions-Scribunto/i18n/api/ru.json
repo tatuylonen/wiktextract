@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"MaxBioHazard",
+			"Okras"
+		]
+	},
+	"apihelp-scribunto-console-param-content": "Новое содержимое модуля.",
+	"apihelp-scribunto-console-param-session": "Токен сессии."
+}

@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Railfail536",
+			"Woytecr",
+			"Rail"
+		]
+	},
+	"apihelp-scribunto-console-description": "Wewnętrzny moduł obsługi żądań XHR z konsoli Scribunto.",
+	"apihelp-scribunto-console-summary": "Wewnętrzny moduł obsługi żądań XHR z konsoli Scribunto.",
+	"apihelp-scribunto-console-param-title": "Tytuł modułu do przetestowania.",
+	"apihelp-scribunto-console-param-content": "Nowa zawartość modułu.",
+	"apihelp-scribunto-console-param-session": "Token sesji.",
+	"apihelp-scribunto-console-param-question": "Następny wiersz do wykonania jako skrypt.",
+	"apihelp-scribunto-console-param-clear": "Ustaw, aby wyczyścić stan bieżącej sesji"
+}

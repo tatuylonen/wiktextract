@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Minisarm",
+			"Stelistcristi",
+			"XXN",
+			"Andreyyshore",
+			"Strainu",
+			"Andrei Stroe"
+		]
+	},
+	"scribunto-line": "la linia $1",
+	"scribunto-module-line": "în $1 la linia $2",
+	"scribunto-parser-dialog-title": "Eroare în script",
+	"scribunto-error-short": "Eroare în script: $1",
+	"scribunto-error-long": "Erori în script:\n\n$1",
+	"scribunto-doc-page-name": "Modul:$1/doc",
+	"scribunto-doc-page-does-not-exist": "''Documentația acestui modul poate fi creată la [[$1]]''",
+	"scribunto-doc-page-header": "'''Aceasta este pagina de documentație pentru [[$1]]'''",
+	"scribunto-console-title": "Consolă de depanare",
+	"scribunto-console-clear": "Șterge",
+	"scribunto-console-cleared": "Starea consolei a fost ștearsă deoarece modulul a fost actualizat.",
+	"scribunto-common-error-category": "Pagini cu erori de script",
+	"scribunto-common-nosuchmodule": "Eroare în script: Nu există modulul „$2”.",
+	"scribunto-common-nofunction": "Eroare în script: Trebuie să specificați o funcție pentru apelare.",
+	"scribunto-common-nosuchfunction": "Eroare în script: Funcția „$2” nu există.",
+	"scribunto-lua-in-function-at": "în funcția de la $1:$2",
+	"scribunto-lua-error-location": "Eroare Lua $1: $2",
+	"scribunto-lua-error": "Eroare Lua: $2.",
+	"scribunto-limitreport-timeusage-value": "$1/$2 secunde",
+	"scribunto-limitreport-virtmemusage": "Mărime virtuală Lua",
+	"scribunto-limitreport-profile": "Profil Lua",
+	"scribunto-limitreport-profile-ms": "$1 ms",
+	"nstab-module": "Modul",
+	"tooltip-ca-nstab-module": "Vezi modulul"
+}

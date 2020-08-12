@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cem Rize"
+		]
+	},
+	"scribunto-lua-error": "Lua hatası: $2"
+}

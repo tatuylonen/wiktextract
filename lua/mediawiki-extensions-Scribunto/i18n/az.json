@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Wertuose",
+			"Serkanland",
+			"Toghrul Rahimli"
+		]
+	},
+	"scribunto-doc-page-header": "''Bu, [[$1]] səhifəsinin sənədləşmə səhifəsidir.''",
+	"scribunto-common-error-category": "Skript xətası olan səhifələr",
+	"scribunto-lua-error": "Lua səhvi: $2.",
+	"scribunto-limitreport-timeusage-value": "$1/$2 saniyə",
+	"nstab-module": "Modul"
+}

@@ -1,0 +1,39 @@
+The lua binaries were compiled from a manually patched 5.1.5 source tree, in order
+to address security vulnerabilities reported in CVE-2014-5461.
+
+The Windows binaries were compiled statically and do not link against the Visual C++
+runtime libraries. They should function on Windows 7 and higher, and Windows Server
+2008 and higher.
+
+The Linux binaries were compiled using "make generic". Lua does not use
+autoconf, rather it encourages users to edit the makefile. The makefile patch
+used to create the Linux binaries is in generic.patch.
+
+Compiling with "make generic" avoids introducing dynamic library dependencies
+other than libc. This makes the binaries work on a far greater variety of Linux
+distributions.
+
+More information on the patch process may be found in the corresponding Phabricator
+issue: https://phabricator.wikimedia.org/T72541
+
+The following copyright and license restrictions apply to these Lua binaries:
+
+Copyright © 2005-2011 Tecgraf/PUC-Rio and the Kepler Project.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

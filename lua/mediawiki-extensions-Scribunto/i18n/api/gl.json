@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Elisardojm"
+		]
+	},
+	"apihelp-scribunto-console-description": "Módulo interno para servir peticións XHR dende a consola Scribunto.",
+	"apihelp-scribunto-console-summary": "Módulo interno para servir peticións XHR dende a consola Scribunto.",
+	"apihelp-scribunto-console-param-title": "Título do módulo a probar.",
+	"apihelp-scribunto-console-param-content": "Novo contido do módulo.",
+	"apihelp-scribunto-console-param-session": "Identificador de sesión.",
+	"apihelp-scribunto-console-param-question": "Liña seguinte a evaluar como script.",
+	"apihelp-scribunto-console-param-clear": "Baleirar o estado de sesión actual."
+}

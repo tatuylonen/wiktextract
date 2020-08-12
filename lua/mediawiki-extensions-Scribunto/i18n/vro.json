@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Võrok"
+		]
+	},
+	"scribunto-lua-error": "Lua-viga: $2."
+}

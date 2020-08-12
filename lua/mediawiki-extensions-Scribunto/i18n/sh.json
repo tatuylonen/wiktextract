@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"OC Ripper"
+		]
+	},
+	"scribunto-lua-error": "Lua pogreška: $2."
+}

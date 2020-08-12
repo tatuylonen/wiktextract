@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Athena in Wonderland"
+		]
+	},
+	"apihelp-scribunto-console-description": "Módulo anterno pa respunder ls pedidos XHR benidos de la cunsuola Scribunto.",
+	"apihelp-scribunto-console-summary": "Módulo anterno pa respunder ls pedidos XHR benidos de la cunsuola Scribunto.",
+	"apihelp-scribunto-console-param-title": "L títalo de l módulo a ser testado.",
+	"apihelp-scribunto-console-param-content": "L nuobo cuntenido de l módulo.",
+	"apihelp-scribunto-console-param-session": "Chabe de la sesson.",
+	"apihelp-scribunto-console-param-question": "La próssima lhinha a abaluar cumo un quemando.",
+	"apihelp-scribunto-console-param-clear": "Defenir pa lhimpar l stado de la sesson atual."
+}

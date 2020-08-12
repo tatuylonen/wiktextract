@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"NoiX180",
+			"Pras"
+		]
+	},
+	"scribunto-desc": "Rangka kerja kanggo nyisipaké basa skrip nèng kaca MediaWiki",
+	"scribunto-line": "ing larik $1",
+	"scribunto-module-line": "ing $1 larik $2",
+	"scribunto-parser-dialog-title": "Masalah skrip",
+	"scribunto-error-short": "Masalah skrip: $1",
+	"scribunto-error-long": "Masalah skrip:\n\n$1",
+	"scribunto-doc-page-name": "Module:$1/doc",
+	"scribunto-doc-page-does-not-exist": "''Dhokumèntasi modhul iki bisa digawé ing [[$1]]''",
+	"scribunto-doc-page-header": "'''Iki kaca dhokumèntasiné [[$1]]'''",
+	"scribunto-console-title": "Debug konsol",
+	"scribunto-console-clear": "Resiki",
+	"scribunto-common-error-category": "Kaca mawa masalah skrip",
+	"scribunto-common-nosuchmodule": "Masalah skrip: Modhul \"$2\" ora ana.",
+	"scribunto-common-nofunction": "Masalah skrip: Panjenengan kudu ngisi fungsi sing arep dianggo.",
+	"scribunto-common-nosuchfunction": "Masalah skrip: Fungsi \"$2\" ora ana.",
+	"scribunto-common-notafunction": "Masalah skrip: \"$2\" dudu fungsi.",
+	"scribunto-lua-error-location": "Masalah Lua $1: $2.",
+	"scribunto-lua-error": "Masalah Lua: $2.",
+	"scribunto-lua-notarrayreturn": "Masalah skrip: Modhulé mbalèkaké aji $2. Kuduné tabèl èspor banjur pulih.",
+	"scribunto-module-with-errors-category-desc": "Modhulé ngemu masalah ing njeroné.",
+	"scribunto-limitreport-timeusage": "Panggunané wektu Lua",
+	"scribunto-limitreport-timeusage-value": "$1/$2 sekon",
+	"nstab-module": "Modhul",
+	"tooltip-ca-nstab-module": "Deleng kaca modhul"
+}

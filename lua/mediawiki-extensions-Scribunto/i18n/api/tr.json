@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"BaRaN6161 TURK"
+		]
+	},
+	"apihelp-scribunto-console-description": "Scribunto konsolundan XHR taleplerine hizmet vermek için dahili modül.",
+	"apihelp-scribunto-console-summary": "Scribunto konsolundan XHR taleplerine hizmet vermek için dahili modül.",
+	"apihelp-scribunto-console-param-title": "Test edilecek modülün adı.",
+	"apihelp-scribunto-console-param-content": "Modülün yeni içeriği.",
+	"apihelp-scribunto-console-param-session": "Oturum belirteci.",
+	"apihelp-scribunto-console-param-question": "Bir betik olarak değerlendirilecek bir sonraki satır.",
+	"apihelp-scribunto-console-param-clear": "Geçerli oturum durumunu silmek için ayarlayın."
+}

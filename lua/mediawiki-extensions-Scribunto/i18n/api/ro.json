@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Strainu"
+		]
+	},
+	"apihelp-scribunto-console-param-title": "Titllul modulului de testat",
+	"apihelp-scribunto-console-param-content": "Noul conținut al modulului.",
+	"apihelp-scribunto-console-param-session": "Token de sesiune."
+}

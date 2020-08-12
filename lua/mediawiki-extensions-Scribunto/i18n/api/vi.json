@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Minh Nguyen"
+		]
+	},
+	"apihelp-scribunto-console-description": "Mô đun nội bộ để phản hồi các yêu cầu XHR từ bảng điều khiển Scribunto.",
+	"apihelp-scribunto-console-param-title": "Tên mô đun để thử.",
+	"apihelp-scribunto-console-param-content": "Nội dung mới của mô đun.",
+	"apihelp-scribunto-console-param-session": "Dấu phiên làm việc.",
+	"apihelp-scribunto-console-param-question": "Dòng sau để đánh giá như một kịch bản.",
+	"apihelp-scribunto-console-param-clear": "Đặt để xóa trạng thái phiên làm việc hiện tại."
+}

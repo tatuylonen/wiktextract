@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Srtxg",
+			"Reptilien.19831209BE1"
+		]
+	},
+	"scribunto-doc-page-header": "'''Çouci, c' est l' pådje di documintaedje po [[$1]]'''",
+	"scribunto-common-error-category": "Pådjes avou des flotches di scripe",
+	"scribunto-lua-error": "Aroke Lua: $2."
+}

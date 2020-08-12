@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Erdemaslancan",
+			"Mirzali",
+			"Gorizon",
+			"Gırd",
+			"Orbot707"
+		]
+	},
+	"scribunto-line": "xeta $1 de",
+	"scribunto-module-line": "Xetay pele $1 dı rêza $2 de ya",
+	"scribunto-parser-dialog-title": "Xırabiya scripti",
+	"scribunto-error-short": "Xırabiya scripti: $1",
+	"scribunto-error-long": "Xırabiya scripti:\n$1",
+	"scribunto-doc-page-name": "Module:$1/dok",
+	"scribunto-doc-page-does-not-exist": "Seba na module şıma şenê yû pela dokumani vırazê [[$1]]",
+	"scribunto-doc-page-header": "[[$1]] seba pela dokumani ya na",
+	"scribunto-console-title": "Konsolê xırabin weçinayış",
+	"scribunto-console-current-src": "Konsolê cıkewtışi",
+	"scribunto-console-clear": "Pak kerê",
+	"scribunto-common-error-category": "Xırabiya skriptiya pele",
+	"scribunto-common-nosuchmodule": "Xırabiya skripti: \"$2\" nameya yew modul çıniyo.",
+	"scribunto-common-backtrace": "Peydşiyayış:",
+	"scribunto-lua-in-function": "Fonksiyonê \"$1\" dı",
+	"scribunto-lua-error": "Xetay lua: $2.",
+	"scribunto-luastandalone-proc-error": "Xetay lua: Proses nêşeno bıvıraziyo.",
+	"scribunto-module-with-errors-category-desc": "Module dê yew xeta esta",
+	"scribunto-limitreport-timeusage": "Karıtışê dema Lua",
+	"scribunto-limitreport-timeusage-value": "$1/$2 saniyeyi",
+	"scribunto-limitreport-virtmemusage": "Virtual gırdiya Lua",
+	"scribunto-limitreport-memusage": "Xefızay Lua karnayış",
+	"scribunto-limitreport-profile": "Profilê lua",
+	"scribunto-limitreport-profile-ms": "$1 ms",
+	"scribunto-limitreport-logs": "Qeydê lua",
+	"nstab-module": "Modul",
+	"tooltip-ca-nstab-module": "Pela moduli bıvinê"
+}

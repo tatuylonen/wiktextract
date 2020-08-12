@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"सरोज कुमार ढकाल",
+			"बिप्लब आनन्द",
+			"NehalDaveND"
+		]
+	},
+	"scribunto-console-clear": "सफागर्ने",
+	"scribunto-lua-error": "लुआ त्रुटि: $2।",
+	"scribunto-module-with-errors-category": "स्क्रिबुन्टो मोड्युल त्रुटि सहित"
+}

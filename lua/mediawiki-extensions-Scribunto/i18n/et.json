@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Avjoska",
+			"Pikne",
+			"Cumbril"
+		]
+	},
+	"scribunto-desc": "Raamistik, mis võimaldab põimida MediaWiki lehekülgedesse skriptikeeli.",
+	"scribunto-line": "$1. real",
+	"scribunto-module-line": "kohal $1 $2. real",
+	"scribunto-parser-dialog-title": "Skriptitõrge",
+	"scribunto-error-short": "Skriptitõrge: $1",
+	"scribunto-error-long": "Skriptitõrked:\n\n$1",
+	"scribunto-doc-page-does-not-exist": "''Selle mooduli dokumentatsiooni saab kirjutada asukohta [[$1]]''.",
+	"scribunto-doc-page-header": "'''See on üksuse [[$1]] dokumentatsiooni lehekülg.'''",
+	"scribunto-console-title": "Veatõrje konsool",
+	"scribunto-console-current-src": "konsoolisisend",
+	"scribunto-console-clear": "Puhasta",
+	"scribunto-common-error-category": "Skriptitõrgetega leheküljed",
+	"scribunto-common-error-category-desc": "Leheküljel olevate moodulite töötlemisel ilmnes tõrge.",
+	"scribunto-common-nosuchmodule": "Skriptitõrge: Moodulit \"$2\" pole.",
+	"scribunto-common-nosuchfunction": "Skriptitõrge: Funktsioon \"$2\" puudub.",
+	"scribunto-common-notafunction": "Skriptitõrge: \"$2\" pole funktsioon.",
+	"scribunto-lua-in-function": "funktsioonis \"$1\"",
+	"scribunto-lua-error-location": "Lua tõrge $1: $2.",
+	"scribunto-lua-error": "Lua tõrge: $2.",
+	"scribunto-lua-notarrayreturn": "Skriptitõrge: Moodul peaks väljastama eksporditabeli, kuid väljastas $2-tüüpi väärtuse.",
+	"scribunto-module-with-errors-category": "Tõrgetega Scribunto-moodulid",
+	"scribunto-module-with-errors-category-desc": "Moodulis on tõrge.",
+	"scribunto-limitreport-timeusage": "Lua ajakasutus",
+	"scribunto-limitreport-timeusage-value": "$1/$2 sekundit",
+	"scribunto-limitreport-virtmemusage": "Lua virtuaalne suurus",
+	"scribunto-limitreport-estmemusage": "Lua hinnanguline mälukasutus",
+	"scribunto-limitreport-memusage": "Lua mälukasutus",
+	"scribunto-limitreport-profile": "Lua profiil",
+	"nstab-module": "Moodul",
+	"tooltip-ca-nstab-module": "Vaata mooduli lehekülge"
+}

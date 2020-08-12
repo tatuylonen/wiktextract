@@ -1,0 +1,8 @@
+.scribunto-error {
+	cursor: pointer;
+}
+
+.scribunto-error:hover,
+.scribunto-error:focus {
+	text-decoration: underline;
+}

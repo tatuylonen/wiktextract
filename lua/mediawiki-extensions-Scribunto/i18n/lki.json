@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hosseinblue",
+			"Lakzon"
+		]
+	},
+	"scribunto-doc-page-name": "Module:$1/توضیحات",
+	"scribunto-lua-error": ". خطا لوآ: $2"
+}

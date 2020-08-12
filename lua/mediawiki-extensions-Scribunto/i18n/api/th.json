@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Octahedron80",
+			"Patsagorn Y."
+		]
+	},
+	"apihelp-scribunto-console-description": "มอดูลภายในสำหรับให้บริการการร้องขอ XHR จากคอนโซลสกรีบุนโท",
+	"apihelp-scribunto-console-summary": "มอดูลภายในสำหรับให้บริการการร้องขอ XHR จากคอนโซล Scribunto",
+	"apihelp-scribunto-console-param-title": "ชื่อเรื่องของมอดูลเพื่อทดสอบ",
+	"apihelp-scribunto-console-param-content": "เนื้อหาใหม่ของมอดูล",
+	"apihelp-scribunto-console-param-session": "โทเค็นช่วงเวลาสื่อสาร",
+	"apihelp-scribunto-console-param-question": "บรรทัดถัดไปที่จะประเมินเป็นสคริปต์",
+	"apihelp-scribunto-console-param-clear": "ตั้งค่าเพื่อล้างสถานะช่วงเวลาสื่อสารปัจจุบัน"
+}

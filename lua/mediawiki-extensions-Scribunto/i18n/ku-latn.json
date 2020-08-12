@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ghybu",
+			"Gomada",
+			"George Animal",
+			"McDutchie"
+		]
+	},
+	"scribunto-line": "li ser rêza $1",
+	"scribunto-module-line": "di $1 de, li ser rêza $2",
+	"scribunto-parser-dialog-title": "Çewtiya nivîsê",
+	"scribunto-error-short": "Çewtiya nivîsê: $1",
+	"scribunto-error-long": "Çewtiyên nivîsê:\n\n$1",
+	"scribunto-doc-page-name": "Module:$1/belge",
+	"scribunto-doc-page-header": "'''Ev rûpela belgekirinê ya [[$1]] ye'''",
+	"scribunto-console-clear": "Jê bibe",
+	"scribunto-common-error-category": "Rûpelên bi çewtiyên kodê",
+	"scribunto-common-nosuchmodule": "Çewtiya nivîsê: Moduleke bi vî rengî \"$2\" tune ye.",
+	"scribunto-lua-error-location": "Çewtiya Lua'yê $1: $2.",
+	"scribunto-lua-error": "Çewtiya Lua'yê: $2.",
+	"nstab-module": "Modul",
+	"tooltip-ca-nstab-module": "Rûpela modulê bibîne"
+}

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tacsipacsi"
+		]
+	},
+	"apihelp-scribunto-console-description": "Belső modul a Scribunto konzolról érkező XHR-kérések kiszolgálására.",
+	"apihelp-scribunto-console-param-title": "A tesztelendő modul címe.",
+	"apihelp-scribunto-console-param-content": "A modul új tartalma.",
+	"apihelp-scribunto-console-param-session": "Munkamenettoken.",
+	"apihelp-scribunto-console-param-question": "A következő parancsfájlként kiértékelendő sor.",
+	"apihelp-scribunto-console-param-clear": "Add meg az aktuális munkamenet-állapot törléséhez."
+}

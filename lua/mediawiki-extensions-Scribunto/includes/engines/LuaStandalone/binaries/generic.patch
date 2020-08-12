@@ -1,0 +1,22 @@
+diff -ru lua-5.1.5~/src/Makefile lua-5.1.5/src/Makefile
+--- lua-5.1.5~/src/Makefile	2012-02-14 07:41:22.000000000 +1100
++++ lua-5.1.5/src/Makefile	2012-04-11 16:13:04.548558332 +1000
+@@ -7,15 +7,15 @@
+ # Your platform. See PLATS for possible values.
+ PLAT= none
+ 
+-CC= gcc
+-CFLAGS= -O2 -Wall $(MYCFLAGS)
++CC=gcc
++CFLAGS=-fpie -O2 -Wall $(MYCFLAGS)
+ AR= ar rcu
+ RANLIB= ranlib
+ RM= rm -f
+ LIBS= -lm $(MYLIBS)
+ 
+ MYCFLAGS=
+-MYLDFLAGS=
++MYLDFLAGS=-pie
+ MYLIBS=
+ 
+ # == END OF USER SETTINGS. NO NEED TO CHANGE ANYTHING BELOW THIS LINE =========

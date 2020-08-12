@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Iltever",
+			"Ernác"
+		]
+	},
+	"scribunto-lua-error": "Lua халат: $2."
+}

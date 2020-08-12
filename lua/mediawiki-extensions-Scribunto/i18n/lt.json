@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hugo.arg",
+			"Eitvys200"
+		]
+	},
+	"scribunto-lua-error": "Lua klaida: $2.",
+	"nstab-module": "Modulis",
+	"tooltip-ca-nstab-module": "Žiūrėti modulio puslapį"
+}

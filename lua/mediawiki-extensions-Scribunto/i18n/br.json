@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fohanno",
+			"Y-M D"
+		]
+	},
+	"scribunto-line": "d'al linenn $1",
+	"scribunto-module-line": "e $1 d'al linenn $2",
+	"scribunto-console-clear": "Riñsañ",
+	"scribunto-lua-error-location": "Fazi Lua $1 : $2.",
+	"scribunto-lua-error": "Fazi Lua : $2.",
+	"scribunto-module-with-errors-category-desc": "Ur fazi a zo er modulenn.",
+	"scribunto-limitreport-timeusage-value": "$1/$2 eilenn",
+	"scribunto-limitreport-profile-ms": "$1 me"
+}

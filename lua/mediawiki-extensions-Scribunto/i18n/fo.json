@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"EileenSanda"
+		]
+	},
+	"scribunto-line": "á linju $1",
+	"scribunto-module-line": "í $1 á linju $2",
+	"scribunto-parser-dialog-title": "Script feilur",
+	"scribunto-error-short": "Script feilur: $1",
+	"scribunto-error-long": "Script feilir:\n\n$1",
+	"scribunto-doc-page-name": "Module:$1/doc",
+	"scribunto-doc-page-does-not-exist": "''Tú kanst upprætta kunningarsíðu um hetta modulið á [[$1]]''",
+	"scribunto-doc-page-header": "'''Hetta er kunningarsíðan viðvíkjandi [[$1]]'''",
+	"scribunto-console-clear": "Tak burtur",
+	"scribunto-common-error-category": "Síður við script-feilum",
+	"scribunto-common-nosuchmodule": "Script feilur: Onki sovorði modul \"$2\".",
+	"scribunto-common-nosuchfunction": "Script feilur: Funktiónin \"$2\" er ikki til.",
+	"scribunto-common-notafunction": "Script feilur: \"$2\" er ikki ein funktión.",
+	"scribunto-common-no-details": "Ongin onnur kunning er tøk.",
+	"scribunto-lua-in-function": "í funktión $1",
+	"scribunto-lua-in-function-at": "í funktiónini á $1:$2",
+	"scribunto-lua-error-location": "Lua feilur $1: $2.",
+	"scribunto-lua-error": "Lua feilur: $2.",
+	"scribunto-luastandalone-proc-error": "Lua feilur: Kann ikki skapa tilgongdina.",
+	"scribunto-luastandalone-proc-error-msg": "Lua feilur: Kann ikki skapa tilgond: $2",
+	"scribunto-module-with-errors-category": "Scribunto modulir við feilum",
+	"scribunto-module-with-errors-category-desc": "Tað er ein feilur í modulinum.",
+	"scribunto-limitreport-timeusage": "Tíðarnýtsla hjá Lua",
+	"scribunto-limitreport-timeusage-value": "$1/$2 sekund"
+}

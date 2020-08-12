@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"පසිඳු කාවින්ද",
+			"Subi",
+			"Sator",
+			"McDutchie"
+		]
+	},
+	"scribunto-line": "$1. lerroan",
+	"scribunto-doc-page-name": "Module:$1/dok",
+	"scribunto-console-clear": "Garbitu",
+	"scribunto-lua-error-location": "Luanda errorea $1:$2.",
+	"scribunto-lua-error": "Lua errorea:$2.",
+	"scribunto-limitreport-profile-ms": "$1 ms",
+	"nstab-module": "Modulua"
+}

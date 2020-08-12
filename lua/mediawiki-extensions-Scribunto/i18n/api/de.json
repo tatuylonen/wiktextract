@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Metalhead64"
+		]
+	},
+	"apihelp-scribunto-console-description": "Internes Modul zur Verarbeitung von XHR-Anfragen der Scribunto-Konsole.",
+	"apihelp-scribunto-console-summary": "Internes Modul zur Verarbeitung von XHR-Anfragen der Scribunto-Konsole.",
+	"apihelp-scribunto-console-param-title": "Der Titel des zu testenden Moduls.",
+	"apihelp-scribunto-console-param-content": "Der neue Inhalt des Moduls.",
+	"apihelp-scribunto-console-param-session": "Sitzungs-Token.",
+	"apihelp-scribunto-console-param-question": "Die nächste Zeile, die als Skript evaluiert werden soll.",
+	"apihelp-scribunto-console-param-clear": "Setzt den aktuellen Sitzungsstatus fest oder löscht ihn."
+}

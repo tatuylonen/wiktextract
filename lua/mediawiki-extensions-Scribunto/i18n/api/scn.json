@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pippinu",
+			"Sarvaturi"
+		]
+	},
+	"apihelp-scribunto-console-description": "Mòdulu nternu pi sèrviri addumannati XHR dâ console Scribunto.",
+	"apihelp-scribunto-console-param-title": "Lu tìtulu dû mòdulu di pruvari.",
+	"apihelp-scribunto-console-param-content": "Lu cuntinutu novu dû mòdulu.",
+	"apihelp-scribunto-console-param-session": "Token dâ sissioni.",
+	"apihelp-scribunto-console-param-question": "La pròssima riga di valutari comu script.",
+	"apihelp-scribunto-console-param-clear": "Attivari p'azzirari lu statu currenti dâ sissioni."
+}

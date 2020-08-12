@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Victor Vasiliev",
+			"Base"
+		]
+	},
+	"apihelp-scribunto-console-description": "Internal module for servicing XHR requests from the Scribunto console.",
+	"apihelp-scribunto-console-summary": "Internal module for servicing XHR requests from the Scribunto console.",
+	"apihelp-scribunto-console-param-title": "The title of the module to test.",
+	"apihelp-scribunto-console-param-content": "The new content of the module.",
+	"apihelp-scribunto-console-param-session": "Session token.",
+	"apihelp-scribunto-console-param-question": "The next line to evaluate as a script.",
+	"apihelp-scribunto-console-param-clear": "Set to clear the current session state."
+}

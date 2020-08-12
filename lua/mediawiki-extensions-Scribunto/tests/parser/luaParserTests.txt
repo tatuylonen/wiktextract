@@ -1,0 +1,495 @@
+!! article
+Module:Test
+!! text
+local p = {}
+
+local isoTestData = ''
+
+local bit = require('bit')
+
+function p.tooFewArgs()
+  require()
+end
+
+function p.getAllArgs( frame )
+    local buf = {}
+	local names = {}
+	local values = {}
+    for name, value in pairs( frame.args ) do
+		table.insert(names, name)
+		values[name] = value
+	end
+	table.sort(names, function (a, b) return tostring(a) < tostring(b) end)
+	for index, name in ipairs(names) do
+        if #buf ~= 0 then
+            table.insert( buf, ', ' )
+        end
+        table.insert( buf, name .. '=' .. values[name] )
+    end
+    return table.concat( buf )
+end
+
+function p.getAllArgs2( frame )
+    local buf = {}
+	local names = {}
+	local values = {}
+    for name, value in frame:argumentPairs() do
+		table.insert(names, name)
+		values[name] = value
+	end
+	table.sort(names, function (a, b) return tostring(a) < tostring(b) end)
+	for index, name in ipairs(names) do
+        if #buf ~= 0 then
+            table.insert( buf, ', ' )
+        end
+        table.insert( buf, name .. '=' .. values[name] )
+    end
+    return table.concat( buf )
+end
+
+function p.getNumericArgs( frame )
+	local buf = {}
+	for index, value in ipairs(frame.args) do
+		if #buf ~= 0 then
+			table.insert( buf, ', ' )
+		end
+		table.insert( buf, index .. '=' .. value )
+	end
+	return table.concat( buf )
+end
+
+function p.getArg( frame )
+    local name = frame.args[1]
+    return frame:getArgument( name ):expand()
+end
+
+function p.getArgLength( frame )
+	local name = frame.args[1]
+	return #(frame.args[name])
+end
+
+function p.getArgType( frame )
+	local name = frame.args[1]
+	return type( frame.args[name] )
+end
+
+function p.hello()
+  return 'hello'
+end
+
+function p.emptyTable()
+  return {}
+end
+
+function p.import()
+  return require('Module:Test2').countBeans()
+end
+
+function p.bitop()
+    return bit.bor(1, bit.bor(2, bit.bor(4, 8)))
+end
+
+function p.isolationTestUpvalue( frame )
+    isoTestData = isoTestData .. frame.args[1]
+    return isoTestData
+end
+
+function p.isolationTestGlobal( frame )
+	if isoTestDataGlobal == nil then
+		isoTestDataGlobal = ''
+	end
+    isoTestDataGlobal = isoTestDataGlobal .. frame.args[1]
+    return isoTestDataGlobal
+end
+
+function p.getParentArgs( frame )
+	return p.getAllArgs( frame:getParent() )
+end
+
+function p.testExpandTemplate( frame )
+	return frame:expandTemplate{
+		title = 'Scribunto_all_args',
+		args = { x = 1, y = 2, z = '|||' }
+	}
+end
+
+function p.testExpandTemplateWithHeaders( frame )
+	return frame:expandTemplate{
+		title = 'Scribunto_template_with_headers'
+	}
+end
+
+function p.testNewTemplateParserValue( frame )
+	return
+		frame:newTemplateParserValue{
+			title = 'Scribunto_all_args',
+			args = { x = 1, y = 2, z = 'blah' }
+		} : expand()
+end
+
+function p.testPreprocess( frame )
+	return frame:preprocess( '{{Scribunto_all_args|{{{1}}}}}|x=y' )
+end
+
+function p.testNewParserValue( frame )
+	return frame:newParserValue( '{{Scribunto_all_args|{{{1}}}}}|x=y' ):expand()
+end
+
+function p.null( frame )
+	return '\0'
+end
+
+function p.isSubsting( frame )
+	return tostring( mw.isSubsting() )
+end
+
+function p.getFrameTitle( frame )
+	return frame:getTitle()
+end
+
+p['test=InFunctionName'] = function( frame )
+	return frame.args[1]
+end
+
+function p.testStrippedCss( frame )
+	return mw.html.create( 'div' ):css( 'color', frame.args[1] )
+end
+
+function p.testFrameCaching( frame )
+	return string.format(
+		'Parent frame is the root: %s. Child frame is the root: %s.',
+		frame:getParent():preprocess('<includeonly>no</includeonly><noinclude>yes</noinclude>'),
+		frame:preprocess('<includeonly>no</includeonly><noinclude>yes</noinclude>')
+	)
+end
+
+return p
+!! endarticle
+
+
+!! article
+Module:Test2
+!! text
+return {
+	countBeans = function ()
+		return 3
+	end
+}
+!! endarticle
+
+
+!! article
+Module:Metatables
+!! text
+local p, mt1, mt2 = {}, {}, {}
+
+mt1.__index = {}
+
+function p.zero(frame)
+	return 'You called the zero method from p'
+end
+
+function mt1.__index.one(frame)
+	return 'You called the one method from mt1'
+end
+
+function mt2.__index(t, k)
+	return function(frame)
+		return 'You called the ' .. k .. ' method from mt2'
+	end
+end
+
+setmetatable(mt1.__index, mt2)
+setmetatable(p, mt1)
+
+return p
+!! endarticle
+
+!! article
+Template:Scribunto_all_args
+!! text
+{{#invoke:test|getParentArgs}}
+!! endarticle
+
+!! article
+Template:Scribunto_template_with_headers
+!! text
+== bar ==
+!! endarticle
+
+!! article
+Template:Scribunto_frame_caching
+!! text
+{{#invoke:test|testFrameCaching}}
+!! endarticle
+
+!! test
+Scribunto: no such module
+!! input
+{{#invoke:foo|bar}}
+!! result
+<p><strong class="error"><span class="scribunto-error" id="mw-scribunto-error-0">Script error: No such module &quot;foo&quot;.</span></strong>
+</p>
+!! end
+
+!! test
+Scribunto: no such function
+!! input
+{{#invoke:test|blah}}
+!! result
+<p><strong class="error"><span class="scribunto-error" id="mw-scribunto-error-0">Script error: The function &quot;blah&quot; does not exist.</span></strong>
+</p>
+!! end
+
+!! test
+Scribunto: hello world
+!! input
+{{#invoke:test|hello}}
+!! result
+<p>hello
+</p>
+!! end
+
+!! test
+Scribunto: getAllArgs
+!! input
+{{#invoke:test|getAllArgs|x|y|z|a=1|b=2|c=3|7=?}}
+!! result
+<p>1=x, 2=y, 3=z, 7=?, a=1, b=2, c=3
+</p>
+!! end
+
+!! test
+Scribunto: getAllArgs, deprecated style
+!! input
+{{#invoke:test|getAllArgs2|x|y|z|a=1|b=2|c=3|7=?}}
+!! result
+<p>1=x, 2=y, 3=z, 7=?, a=1, b=2, c=3
+</p>
+!! end
+
+!! test
+Scribunto: getNumericArgs
+!! input
+{{#invoke:test|getNumericArgs|x|y|z|a=1|b=2|c=3|7=?}}
+!! result
+<p>1=x, 2=y, 3=z
+</p>
+!! end
+
+!! test
+Scribunto: named numeric parameters
+!! input
+{{#invoke:test|getArg|2|a|2=b}}
+{{#invoke:test|getArg|2|2=a|b}}
+!! result
+<p>b
+b
+</p>
+!! end
+
+!! test
+Scribunto: template-style argument trimming
+!! input
+{{#invoke:test|getArgLength|2| x }}
+{{#invoke:test|getArgLength|2|2= x }}
+!! result
+<p>3
+1
+</p>
+!! end
+
+!! test
+Scribunto: missing argument
+!! input
+{{#invoke:test|getArgType|2}}
+{{#invoke:test|getArgType|blah}}
+!! result
+<p>nil
+nil
+</p>
+!! end
+
+!! test
+Scribunto: parent frame access
+!! input
+{{Scribunto_all_args|x|y|z|a = 1|b = 2|c = 3}}
+!! result
+<p>1=x, 2=y, 3=z, a=1, b=2, c=3
+</p>
+!! end
+
+!! test
+Scribunto: expandTemplate
+!! input
+{{#invoke:test|testExpandTemplate}}
+!! result
+<p>x=1, y=2, z=|||
+</p>
+!! end
+
+!! test
+Scribunto: expandTemplate with headers
+!! input
+==foo==
+{{#invoke:test|testExpandTemplateWithHeaders}}
+!! result
+<h2><span class="mw-headline" id="foo">foo</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="/index.php?title=Parser_test&amp;action=edit&amp;section=1" title="Edit section: foo">edit</a><span class="mw-editsection-bracket">]</span></span></h2>
+<h2><span class="mw-headline" id="bar">bar</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="/index.php?title=Template:Scribunto_template_with_headers&amp;action=edit&amp;section=T-1" title="Template:Scribunto template with headers">edit</a><span class="mw-editsection-bracket">]</span></span></h2>
+!! end
+
+!! test
+Scribunto: newTemplateParserValue
+!! input
+{{#invoke:test|testNewTemplateParserValue}}
+!! result
+<p>x=1, y=2, z=blah
+</p>
+!! end
+
+!! test
+Scribunto: preprocess
+!! input
+{{#invoke:test|testPreprocess|foo}}
+!! result
+<p>1=foo|x=y
+</p>
+!! end
+
+!! test
+Scribunto: newParserValue
+!! input
+{{#invoke:test|testNewParserValue|foo}}
+!! result
+<p>1=foo|x=y
+</p>
+!! end
+
+!! test
+Scribunto: table return
+!! input
+{{#invoke:test|emptyTable}}
+!! result
+<p>table
+</p>
+!! end
+
+!! test
+Scribunto: require
+!! input
+{{#invoke:test|import}}
+!! result
+<p>3
+</p>
+!! end
+
+!! test
+Scribunto: access to a module imported at the chunk level
+!! input
+{{#invoke:test|bitop}}
+!! result
+<p>15
+</p>
+!! end
+
+!! test
+Scribunto: invoke instance upvalue isolation
+!! input
+{{#invoke:test|isolationTestUpvalue|1}}
+{{#invoke:test|isolationTestUpvalue|2}}
+{{#invoke:test|isolationTestUpvalue|3}}
+!! result
+<p>1
+2
+3
+</p>
+!! end
+
+!! test
+Scribunto: invoke instance global isolation
+!! input
+{{#invoke:test|isolationTestGlobal|1}}
+{{#invoke:test|isolationTestGlobal|2}}
+{{#invoke:test|isolationTestGlobal|3}}
+!! result
+<p>1
+2
+3
+</p>
+!! end
+
+!! test
+Scribunto: ASCII null
+!! input
+{{#invoke:test|null}}
+!! result
+<p>�
+</p>
+!! end
+
+!! test
+Scribunto: isSubsting during PST
+!! options
+pst
+!! input
+{{safesubst:#invoke:test|isSubsting}}
+!! result
+true
+!! end
+
+!! test
+Scribunto: isSubsting during normal parse
+!! input
+{{safesubst:#invoke:test|isSubsting}}
+!! result
+<p>false
+</p>
+!! end
+
+!! test
+Scribunto: frame:getTitle
+!! input
+{{#invoke:test|getFrameTitle}}
+!! result
+<p>Module:Test
+</p>
+!! end
+
+!! test
+Scribunto: Metatable on export table
+!! input
+{{#invoke:Metatables|zero}}
+{{#invoke:Metatables|one}}
+{{#invoke:Metatables|two}}
+!! result
+<p>You called the zero method from p
+You called the one method from mt1
+You called the two method from mt2
+</p>
+!! end
+
+!! test
+Scribunto: Correct argument numbering with equals sign in function name
+!! input
+{{#invoke:test|test=InFunctionName|good|bad}}
+!! result
+<p>good
+</p>
+!! end
+
+!! test
+Scribunto: Strip markers in CSS
+!! input
+{{#invoke:test|testStrippedCss|<nowiki>#ff0000</nowiki>}}
+!! result
+<div style="color:#ff0000"></div>
+!! end
+
+!! test
+Scribunto: Parser output isn't incorrectly cached across frames
+!! input
+Root: {{#invoke:test|testFrameCaching}} Template: {{Scribunto frame caching}}
+!! result
+<p>Root: Parent frame is the root: yes. Child frame is the root: no. Template: Parent frame is the root: no. Child frame is the root: no.
+</p>
+!! end

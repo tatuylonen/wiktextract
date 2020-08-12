@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mainframe98",
+			"Robin van der Vliet"
+		]
+	},
+	"apihelp-scribunto-console-param-title": "De titel van de module om te testen.",
+	"apihelp-scribunto-console-param-content": "De nieuwe inhoud van de module.",
+	"apihelp-scribunto-console-param-session": "Sessiesleutel.",
+	"apihelp-scribunto-console-param-question": "De volgende regel om als script te evalueren."
+}
