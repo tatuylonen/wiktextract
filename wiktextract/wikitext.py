@@ -17,7 +17,6 @@ class NodeKind(enum.Enum):
     ITALIC = enum.auto(),
     BOLD = enum.auto(),
     BOLD_ITALIC = enum.auto(),
-    NOWIKI = enum.auto(),
     HLINE = enum.auto(),
     LIST_ITEM = enum.auto(),  # args = token for this item
     PREFORMATTED = enum.auto(),  # Preformatted inline text
@@ -25,7 +24,6 @@ class NodeKind(enum.Enum):
     PRERAW = enum.auto(),  # Preformatted text where specials not interpreted
     HTML = enum.auto(),
     INTERNAL_LINK = enum.auto(),
-    LINK_TRAIL = enum.auto(),
     TEMPLATE = enum.auto(),
     TEMPLATEVAR = enum.auto(),
     PARSERFN = enum.auto(),
@@ -46,7 +44,6 @@ class NodeKind(enum.Enum):
 
 HAVE_ARGS_KINDS = (
     NodeKind.INTERNAL_LINK,
-    NodeKind.LINK_TRAIL,
     NodeKind.TEMPLATE,
     NodeKind.TEMPLATEVAR,
     NodeKind.PARSERFN,
@@ -60,13 +57,11 @@ MUST_CLOSE_KINDS = (
     NodeKind.ITALIC,
     NodeKind.BOLD_ITALIC,
     NodeKind.BOLD,
-    NodeKind.NOWIKI,
     NodeKind.PREFORMATTED,
     NodeKind.PREBLOCK,
     NodeKind.PRERAW,
     NodeKind.HTML,
     NodeKind.INTERNAL_LINK,
-    NodeKind.LINK_TRAIL,
     NodeKind.TEMPLATE,
     NodeKind.TEMPLATEVAR,
     NodeKind.PARSERFN,
@@ -95,6 +90,15 @@ class WikiNode(object):
         self.children = []   # list of str and WikiNode
         self.loc = loc
 
+    def __str__(self):
+        return "<{}({}) {}>".format(self.kind.name,
+                                    self.args if isinstance(self.args, str)
+                                    else ", ".join(map(repr, self.args)),
+                                    ", ".join(map(repr, self.children)))
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class ParseCtx(object):
     """Parsing context for parsing WikiMedia text.  This contains the parser
@@ -106,6 +110,7 @@ class ParseCtx(object):
         "beginning_of_line",
         "errors",
         "pagetitle",
+        "nowiki",
     )
 
     def __init__(self, pagetitle):
@@ -117,6 +122,7 @@ class ParseCtx(object):
         self.beginning_of_line = True
         self.errors = []
         self.pagetitle = pagetitle
+        self.nowiki = False
 
     def push(self, kind):
         assert isinstance(kind, NodeKind)
@@ -487,9 +493,8 @@ def tag_fn(ctx, token):
         name = name.lower()
         # Handle <nowiki> start tag
         if name == "nowiki":
-            ctx.push(NodeKind.NOWIKI)
-            if also_end:
-                ctx.pop(False)
+            if not also_end:
+                ctx.nowiki = True
             return
 
         # Handle other start tag
@@ -510,8 +515,8 @@ def tag_fn(ctx, token):
     name = name.lower()
     if name == "nowiki":
         # Handle </nowiki> end tag
-        if top.kind == NodeKind.NOWIKI:
-            ctx.pop(False)
+        if ctx.nowiki:
+            ctx.nowiki = False
         else:
             ctx.error("unexpected </nowiki>")
         return
@@ -550,9 +555,9 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=)|=[^=])+?)\s*(={2,6})\s*$|"
                       r"!!|"
                       r"\||"
                       r"^----+|"
-                      r"^([-*:;#]+)\s*|"
-                      r"<\s*([-a-zA-Z0-9]+)\s*(/?)\s*>|"  # XXX attrs
-                      r"<\s*(/)\s*([-a-zA-Z0-9]+)\s*>|"
+                      r"^[-*:;#]+\s*|"
+                      r"<\s*[-a-zA-Z0-9]+\s*/?\s*>|"  # XXX attrs
+                      r"<\s*/\s*[-a-zA-Z0-9]+\s*>|"
                       r"https?://[a-zA-Z0-9.]+|"
                       r":")
 
@@ -583,6 +588,7 @@ tokenops = {
 def token_iter(text):
     """Tokenizes MediaWiki page content.  This yields (is_token, text) for
     each token.  ``is_token`` is False for text and True for other tokens."""
+    assert isinstance(text, str)
     pos = 0
     for m in re.finditer(token_re, text):
         start = m.start()
@@ -601,16 +607,26 @@ def token_iter(text):
         yield False, text[pos:]
 
 
-def parse(pagetitle, text):
+def parse_with_ctx(pagetitle, text):
     """Parses a Wikitext document into a tree.  This returns a WikiNode object
-    that is the root of the parse tree."""
+    that is the root of the parse tree and the parse context."""
+    assert isinstance(pagetitle, str)
+    assert isinstance(text, str)
     # Create parse context.  This also pushes a ROOT node on the stack.
     ctx = ParseCtx(pagetitle)
     # Process all tokens from the input.
     for is_token, token in token_iter(text):
         assert isinstance(token, str)
         top = ctx.stack[-1]
-        if not is_token or top.kind == NodeKind.NOWIKI:
+        if (not is_token or
+            (ctx.nowiki and
+             not re.match(r"(?i)<\s*/\s*nowiki\s*>", token))):
+            if is_token:
+                # Remove the artificially added prefix from subtitle tokens
+                if token.startswith("<=="):
+                    token = token[1:]
+                elif token.startswith(">=="):
+                    token = token[1:]
             text_fn(ctx, token)
         else:
             if token in tokenops:
@@ -623,15 +639,15 @@ def parse(pagetitle, text):
                 hline_fn(ctx, token)
             elif token.startswith("<") and len(token):
                 tag_fn(ctx, token)
-            elif re.match(r"[-*:;#]+", token):
+            elif ctx.beginning_of_line and re.match(r"[-*:;#]+", token):
                 list_fn(ctx, token)
             elif re.match(r"https?://.*", token):
                 url_fn(ctx, token)
             else:
-                print("Unhandled token:", repr(token))
+                text_fn(ctx, token)
+        ctx.linenum += len(list(re.finditer("\n", token)))
         ctx.beginning_of_line = token.endswith("\n")
         if ctx.beginning_of_line:
-            ctx.linenum += 1
             # Some nodes are automatically popped on newline
             if ctx.stack[-1].kind in (NodeKind.PREFORMATTED,):
                 ctx.pop()
@@ -641,7 +657,17 @@ def parse(pagetitle, text):
             break
         ctx.pop(True)
     assert len(ctx.stack) == 1
-    return ctx.stack[0]
+    return ctx.stack[0], ctx
+
+
+def parse(pagetitle, text):
+    """Parse a wikitext document into a tree.  This returns a WikiNode
+    object that is the root of the parse tree and the parse context."""
+    assert isinstance(pagetitle, str)
+    assert isinstance(text, str)
+    tree, ctx = parse_with_ctx(pagetitle, text)
+    return tree
+
 
 def print_tree(tree, indent):
     """Prints the parse tree for debugging purposes."""
@@ -655,6 +681,7 @@ def print_tree(tree, indent):
         print_tree(child, indent + 2)
 
 
-data = open("pages/Words/ho/horse.txt", "r").read()
-tree = parse("horse", data)
-print_tree(tree, 0)
+# Very simple test:
+# data = open("pages/Words/ho/horse.txt", "r").read()
+# tree = parse("horse", data)
+# print_tree(tree, 0)
