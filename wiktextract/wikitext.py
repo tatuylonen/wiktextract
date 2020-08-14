@@ -79,7 +79,9 @@ class NodeKind(enum.Enum):
     HTML = enum.auto(),
 
     # An internal Wikimedia link (marked with [[...]]).  The link arguments
-    # are in args.  This tag is also used for media inclusion.
+    # are in args.  This tag is also used for media inclusion.  Links with
+    # trailing word end immediately after the link have the trailing part
+    # in link children.
     LINK = enum.auto(),
 
     # A template call (transclusion).  Template name is in first argument
@@ -137,7 +139,6 @@ HAVE_ARGS_KINDS = (
 MUST_CLOSE_KINDS = (
     NodeKind.ITALIC,
     NodeKind.BOLD,
-    NodeKind.PREFORMATTED,
     NodeKind.PRE,
     NodeKind.HTML,
     NodeKind.LINK,
@@ -194,6 +195,7 @@ class ParseCtx(object):
         "errors",
         "pagetitle",
         "nowiki",
+        "suppress_special",
     )
 
     def __init__(self, pagetitle):
@@ -206,6 +208,7 @@ class ParseCtx(object):
         self.errors = []
         self.pagetitle = pagetitle
         self.nowiki = False
+        self.suppress_special = False
 
     def push(self, kind):
         assert isinstance(kind, NodeKind)
@@ -213,6 +216,7 @@ class ParseCtx(object):
         top = self.stack[-1]
         top.children.append(node)
         self.stack.append(node)
+        self.suppress_special = False
         return node
 
     def pop(self, warn_unclosed):
@@ -261,22 +265,41 @@ class ParseCtx(object):
 
 
 def text_fn(ctx, text):
-    node = ctx.stack[-1]
     # Some nodes are automatically popped on newline/text
-    if node.kind == NodeKind.LIST_ITEM:
-        if (node.children and isinstance(node.children[-1], str) and
-            node.children.endswith("\n")):
-            ctx.pop(False)
-    elif node.kind == NodeKind.PREFORMATTED:
-        if (node.children and isinstance(node.children[-1], str) and
-            node.children.endswith("\n") and
-            not text.startswith(" ") and not text.isspace()):
-            ctx.pop(False)
+    if ctx.beginning_of_line and not ctx.nowiki:
+        node = ctx.stack[-1]
+        if node.kind == NodeKind.LIST_ITEM:
+            if (node.children and isinstance(node.children[-1], str) and
+                node.children[-1].endswith("\n")):
+                ctx.pop(False)
+        elif node.kind == NodeKind.PREFORMATTED:
+            if (node.children and isinstance(node.children[-1], str) and
+                node.children[-1].endswith("\n") and
+                not text.startswith(" ") and not text.isspace()):
+                ctx.pop(False)
+
+    # If the previous child was a link that doesn't yet have children,
+    # and the text to be added starts with valid word characters, assume they
+    # are link trail and add them as a child of the link.
+    node = ctx.stack[-1]
+    if (node.children and isinstance(node.children[-1], WikiNode) and
+        node.children[-1].kind == NodeKind.LINK and
+        not node.children[-1].children and
+        not ctx.suppress_special):
+        m = re.match(r"(?s)(\w+)(.*)", text)
+        if m:
+            node.children[-1].children.append(m.group(1))
+            text = m.group(2)
+            if not text:
+                return
 
     # If the previous child was also text, merge this additional text with it
     if node.children:
         prev = node.children[-1]
         if isinstance(prev, str):
+            # XXX this can result in O(N^2) complexity for long texts.  Change
+            # to do the merging in ctx.push() and ctx.pop() using "".join(...)
+            # for a whole sequence of strings.
             node.children[-1] = prev + text
             return
 
@@ -376,11 +399,6 @@ def bold_fn(ctx, token):
         ctx.pop(False)
     if push_italic:
         ctx.push(NodeKind.ITALIC)
-
-def preformatted_fn(ctx, token):
-    top = ctx.stack[-1]
-    if top != NodeKind.PREFORMATTED:
-        ctx.push(NodeKind.PREFORMATTED)
 
 def ilink_start_fn(ctx, token):
     ctx.push(NodeKind.LINK)
@@ -544,6 +562,32 @@ def table_row_cell_fn(ctx, token):
     ctx.push(NodeKind.TABLE_CELL)
 
 
+def whitespace_fn(ctx, token):
+    """Handler function for whitespaces.  Spaces are special in certain
+    contexts, such as inside external link syntax [url text], where
+    they separate the URL form the display text.  Otherwise spaces are
+    treated as normal text.  Note that this puts each word of
+    multi-word display text in its own argument.  Spaces at the start of a
+    line indicate preformatted text."""
+    node = ctx.stack[-1]
+
+    # Spaces at the beginning of a line indicate preformatted text
+    if ctx.beginning_of_line and token == " ":
+        if node.kind != NodeKind.PREFORMATTED:
+            ctx.push(NodeKind.PREFORMATTED)
+        text_fn(ctx, token)
+        return
+
+    # Spaces inside an external link divide its arguments
+    if node.kind == NodeKind.URL:
+        node.args.append(node.children)
+        node.children = []
+        return
+
+    # Otherwise just treat it as plain text.
+    text_fn(ctx, token)
+
+
 def vbar_fn(ctx, token):
     """Handler function for vertical bar |.  The interpretation of
     the vertical bar depends on context; it can separate arguments to
@@ -613,17 +657,29 @@ def tag_fn(ctx, token):
     """Handler function for tokens that look like HTML tags and their end
     tags.  This includes various built-in tags that aren't actually
     HTML, including <nowiki>."""
+
+    # If it is a HTML comment, just drop it
+    if token.startswith("<!"):
+        return
+
     # Try to parse it as a start tag
-    m = re.match(r"<\s*([-a-zA-Z0-9]+)\s*(/?)\s*>", token)  # XXX attrs
+    m = re.match(r"""<\s*([-a-zA-Z0-9]+)\s*(\b[-a-z0-9]+(=("[^"]*"|"""
+                 r"""'[^']*'|[^ \t\n"'`=<>]*))?\s*)*(/?)\s*>""", token)
     if m:
         # This is a start tag
         name = m.group(1)
-        also_end = m.group(2) == "/"
+        attrs = m.group(2)
+        also_end = m.group(5) == "/"
         top = ctx.stack[-1]
         name = name.lower()
         # Handle <nowiki> start tag
         if name == "nowiki":
-            if not also_end:
+            if also_end:
+                # Cause certain behaviors to be suppressed, particularly
+                # link trail processing.  This will be automatically reset
+                # when the next child is inserted in ctx.push().
+                ctx.suppress_special = True
+            else:
                 ctx.nowiki = True
             return
 
@@ -644,7 +700,8 @@ def tag_fn(ctx, token):
         node = ctx.push(NodeKind.HTML)
         node.args.append(name)
         node.children.append(token)
-        node.attrs["_also_close"] = True
+        if also_end:
+            node.attrs["_also_close"] = True
         # XXX handle attrs
 
         # Pop it immediately, as we don't store anything other than the
@@ -661,6 +718,11 @@ def tag_fn(ctx, token):
         # Handle </nowiki> end tag
         if ctx.nowiki:
             ctx.nowiki = False
+            # Cause certain special behaviors to be suppressed,
+            # particularly link trail processing.  This will be
+            # automatically reset when the next child is inserted in
+            # ctx.push().
+            ctx.suppress_special = True
         else:
             ctx.error("unexpected </nowiki>")
             text_fn(ctx, token)
@@ -690,10 +752,12 @@ def tag_fn(ctx, token):
 
 
 # Regular expression for matching a token in WikiMedia text
-token_re = re.compile(r"(?m)^(={2,6})\s*(([^=)|=[^=])+?)\s*(={2,6})\s*$|"
+token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"'''|"
                       r"''|"
-                      r"^ |"   # Space at beginning means preformatted
+                      r" |"   # Space at beginning of line means preformatted
+                      r"\n|"
+                      r"\t|"
                       r"\[\[|"
                       r"\]\]|"
                       r"\[|"
@@ -711,7 +775,9 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=)|=[^=])+?)\s*(={2,6})\s*$|"
                       r"\||"
                       r"^----+|"
                       r"^[-*:;#]+\s*|"
-                      r"<\s*[-a-zA-Z0-9]+\s*/?\s*>|"  # XXX attrs
+                      r"<!\s*--((?s).)*?--\s*>|"
+                      r"""<\s*[-a-zA-Z0-9]+\s*(\b[-a-z0-9]+(=("[^"]*"|"""
+                      r"""'[^']*'|[^ \t\n"'`=<>]*))?\s*)*(/\s*)?>|"""
                       r"<\s*/\s*[-a-zA-Z0-9]+\s*>|"
                       r"https?://[a-zA-Z0-9.]+|"
                       r":")
@@ -720,7 +786,6 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=)|=[^=])+?)\s*(={2,6})\s*$|"
 tokenops = {
     "'''": bold_fn,
     "''": italic_fn,
-    " ": preformatted_fn,
     "[[": ilink_start_fn,
     "]]": ilink_end_fn,
     "[": elink_start_fn,
@@ -736,6 +801,9 @@ tokenops = {
     "|-": table_row_fn,
     "||": table_row_cell_fn,
     "|": vbar_fn,
+    " ": whitespace_fn,
+    "\n": whitespace_fn,
+    "\t": whitespace_fn,
 }
 
 
