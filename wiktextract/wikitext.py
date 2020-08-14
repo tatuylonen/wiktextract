@@ -3,73 +3,156 @@
 # Copyright (c) 2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
-import sys
 import enum
+
+
+# HTML tags that are allowed in input.  These are generated as HTML nodes
+# to distinguish them from text.  Note that only the tags themselves are
+# made HTML nodes to distinguisth them from plain text ("<" in returned plain
+# text should be rendered as "&lt;" in HTML).  This does not try to match
+# HTML start tags against HTML end tags, and only the tag itself is included
+# as children of HTML nodes.
+ALLOWED_HTML_TAGS = set([
+    "H1", "h2", "h3", "h4", "h5", "h6",
+    "p", "br", "hr",
+    "abbr", "b", "bdi", "bdo", "blockquote", "cite", "code", "data", "del",
+    "dfn", "em", "i", "ins", "kbd", "nark", "q", "rp", "rt", "ruby",
+    "s", "samp", "small", "strong", "sub", "sup", "time", "u", "var", "wbr",
+    "dl", "dt", "dd",
+    "ol", "ul", "li",
+    "div", "span",
+    "table", "td", "tr", "th", "caption", "thead", "tfoot", "tbody",
+    "center", "font", "rb", "strike", "tt",
+])
+
 
 @enum.unique
 class NodeKind(enum.Enum):
+    # Root node of the tree.  This represents the parsed document.
+    # Its arguments are [pagetitle].
     ROOT = enum.auto(),
+
+    # Level2 subtitle.  Arguments are the title, children are what the section
+    # contains.
     LEVEL2 = enum.auto(),
+
+    # Level3 subtitle
     LEVEL3 = enum.auto(),
+
+    # Level4 subtitle
     LEVEL4 = enum.auto(),
+
+    # Level5 subtitle
     LEVEL5 = enum.auto(),
+
+    # Level6 subtitle
     LEVEL6 = enum.auto(),
+
+    # Content to be rendered in italic.  Content is in children.
     ITALIC = enum.auto(),
+
+    # Content to be rendered in bold.  Content is in children.
     BOLD = enum.auto(),
-    BOLD_ITALIC = enum.auto(),
+
+    # Horizontal line.  No arguments or children.
     HLINE = enum.auto(),
+
+    # A list item.  Nested items will be in children.  Items on the same
+    # level will be on the same level.  There is no explicit node for a list.
+    # The first arg is the token for this item (e.g.,, "##").  Children
+    # is what goes in this list item.
     LIST_ITEM = enum.auto(),  # args = token for this item
+
+    # Preformatted text were markup is interpreted.  Content is in children.
+    # Indicated in WikiText by starting lines with a space.
     PREFORMATTED = enum.auto(),  # Preformatted inline text
-    PREBLOCK = enum.auto(),  # Preformatted block
-    PRERAW = enum.auto(),  # Preformatted text where specials not interpreted
+
+    # Preformatted text where markup is NOT interpreted.  Content is in
+    # children. Indicated in WikiText by <pre>...</pre>.
+    PRE = enum.auto(),  # Preformatted text where specials not interpreted
+
+    # HTML tag (open or close tag).  The first arg is the name of the tag.
+    # Children contains the entire tag (but not contents of paired tags).
+    # Attrs contains _close with value True if this is a close tag.  It contains
+    # _also_close with value True if this is an open tag with a slash at the
+    # end of the tag.
     HTML = enum.auto(),
-    INTERNAL_LINK = enum.auto(),
+
+    # An internal Wikimedia link (marked with [[...]]).  The link arguments
+    # are in args.  This tag is also used for media inclusion.
+    LINK = enum.auto(),
+
+    # A template call (transclusion).  Template name is in first argument
+    # and template arguments in subsequent args.  Children are not used.
+    # In WikiText {{name|arg1|...}}.
     TEMPLATE = enum.auto(),
+
+    # A template argument expansion.  Variable name is in first argument and
+    # subsequent arguments in remaining arguments.  Children are not used.
+    # In WikiText {{{name|...}}}
     TEMPLATEVAR = enum.auto(),
+
+    # A parser function invocation.  Parser function name is in first argument
+    # and subsequent arguments are its parameters.  Children are not used.
+    # In WikiText {{name:arg1|arg2|...}}.
     PARSERFN = enum.auto(),
+
+    # An external URL.  The first argument is the URL.  Children are not used.
     URL = enum.auto(),
-    MEDIA = enum.auto(),
+
+    # A table.  Content is in children.
     TABLE = enum.auto(),
+
+    # A table caption (under TABLE).  Content is in children.
     TABLE_CAPTION = enum.auto(),
+
+    # A table header row (under TABLE).  Content is in children.
     TABLE_HEADER_ROW = enum.auto(),
+
+    # A table header cell (under TABLE_HEADER_ROW).  Content is in children.
     TABLE_HEADER_CELL = enum.auto(),
+
+    # A table row (under TABLE).  Content is in children.
     TABLE_ROW = enum.auto(),
+
+    # A table cell (under TABLE_ROW).  Content is in children.
     TABLE_CELL = enum.auto(),
+
     # XXX <ref ...> and <references />
     # XXX -{ ... }- syntax, see
-    # https://www.mediawiki.org/wiki/Writing_systems/Syntax ??
 
-    # __NOTOC__
+    # XXX __NOTOC__
 
 
 HAVE_ARGS_KINDS = (
-    NodeKind.INTERNAL_LINK,
+    NodeKind.LINK,
     NodeKind.TEMPLATE,
     NodeKind.TEMPLATEVAR,
     NodeKind.PARSERFN,
     NodeKind.URL,
-    NodeKind.MEDIA,
 )
 
 
 # Node kinds that generate an error if they have not been properly closed.
 MUST_CLOSE_KINDS = (
     NodeKind.ITALIC,
-    NodeKind.BOLD_ITALIC,
     NodeKind.BOLD,
     NodeKind.PREFORMATTED,
-    NodeKind.PREBLOCK,
-    NodeKind.PRERAW,
+    NodeKind.PRE,
     NodeKind.HTML,
-    NodeKind.INTERNAL_LINK,
+    NodeKind.LINK,
     NodeKind.TEMPLATE,
     NodeKind.TEMPLATEVAR,
     NodeKind.PARSERFN,
     NodeKind.URL,
-    NodeKind.MEDIA,
     NodeKind.TABLE,
 )
 
+# Node kinds that are automatically closed at a newline
+CLOSE_AT_NEWLINE_KINDS = (
+    NodeKind.PREFORMATTED,
+    NodeKind.LIST_ITEM,
+)
 
 class WikiNode(object):
     """Node in the parse tree for WikiMedia text."""
@@ -139,6 +222,17 @@ class ParseCtx(object):
         not having been closed."""
         assert warn_unclosed in (True, False)
         node = self.stack[-1]
+
+        # When popping BOLD and ITALIC nodes, if the node has no children,
+        # just remove the node from it's parent's children.  We may otherwise
+        # generate spurious empty BOLD and ITALIC nodes when closing them
+        # out-of-order (which happens always with '''''bolditalic''''').
+        if node.kind in (NodeKind.BOLD, NodeKind.ITALIC) and not node.children:
+            self.stack.pop()
+            assert self.stack[-1].children[-1].kind == node.kind
+            self.stack[-1].children.pop()
+            return
+
         # If the node has arguments, move remamining children to be the last
         # argument
         if node.kind in HAVE_ARGS_KINDS:
@@ -162,13 +256,32 @@ class ParseCtx(object):
         if loc is None:
             loc = self.linenum
         msg = "{}:{}: ERROR: {}".format(self.pagetitle, loc, msg)
-        print(msg, file=sys.stderr)
+        print(msg)
         self.errors.append(msg)
 
 
 def text_fn(ctx, text):
-    top = ctx.stack[-1]
-    top.children.append(text)
+    node = ctx.stack[-1]
+    # Some nodes are automatically popped on newline/text
+    if node.kind == NodeKind.LIST_ITEM:
+        if (node.children and isinstance(node.children[-1], str) and
+            node.children.endswith("\n")):
+            ctx.pop(False)
+    elif node.kind == NodeKind.PREFORMATTED:
+        if (node.children and isinstance(node.children[-1], str) and
+            node.children.endswith("\n") and
+            not text.startswith(" ") and not text.isspace()):
+            ctx.pop(False)
+
+    # If the previous child was also text, merge this additional text with it
+    if node.children:
+        prev = node.children[-1]
+        if isinstance(prev, str):
+            node.children[-1] = prev + text
+            return
+
+    # Add a text child
+    node.children.append(text)
 
 def hline_fn(ctx, token):
     ctx.push(NodeKind.HLINE)
@@ -224,29 +337,45 @@ def subtitle_end_fn(ctx, token):
     node.args.append(node.children)
     node.children = []
 
-def bolditalic_fn(ctx, token):
-    if ctx.have(NodeKind.BOLD_ITALIC):
-        # Close current formatting
-        ctx.pop(False)
-    else:
-        # Push new formatting node
-        ctx.push(NodeKind.BOLD_ITALIC)
-
 def italic_fn(ctx, token):
-    if ctx.have(NodeKind.ITALIC):
-        # Close current formatting
-        ctx.pop(False)
-    else:
+    if not ctx.have(NodeKind.ITALIC):
         # Push new formatting node
         ctx.push(NodeKind.ITALIC)
+        return
+
+    # Pop the italic.  If there is an intervening BOLD, push it afterwards
+    # to allow closing them in either order.
+    push_bold = False
+    while True:
+        node = ctx.stack[-1]
+        if node.kind == NodeKind.ITALIC:
+            ctx.pop(False)
+            break
+        if node.kind == NodeKind.BOLD:
+            push_bold = True
+        ctx.pop(False)
+    if push_bold:
+        ctx.push(NodeKind.BOLD)
 
 def bold_fn(ctx, token):
-    if ctx.have(NodeKind.BOLD):
-        # Close current formatting
-        ctx.pop(False)
-    else:
+    if not ctx.have(NodeKind.BOLD):
         # Push new formatting node
         ctx.push(NodeKind.BOLD)
+        return
+
+    # Pop the bold.  If there is an intervening ITALIC, push it afterwards
+    # to allow closing them in either order.
+    push_italic = False
+    while True:
+        node = ctx.stack[-1]
+        if node.kind == NodeKind.BOLD:
+            ctx.pop(False)
+            break
+        if node.kind == NodeKind.ITALIC:
+            push_italic = True
+        ctx.pop(False)
+    if push_italic:
+        ctx.push(NodeKind.ITALIC)
 
 def preformatted_fn(ctx, token):
     top = ctx.stack[-1]
@@ -254,15 +383,15 @@ def preformatted_fn(ctx, token):
         ctx.push(NodeKind.PREFORMATTED)
 
 def ilink_start_fn(ctx, token):
-    ctx.push(NodeKind.INTERNAL_LINK)
+    ctx.push(NodeKind.LINK)
 
 def ilink_end_fn(ctx, token):
-    if not ctx.have(NodeKind.INTERNAL_LINK):
+    if not ctx.have(NodeKind.LINK):
         text_fn(ctx, token)
         return
     while True:
         node = ctx.stack[-1]
-        if node.kind == NodeKind.INTERNAL_LINK:
+        if node.kind == NodeKind.LINK:
             ctx.pop(False)
             break
         if node.kind in kind_to_level:
@@ -291,7 +420,7 @@ def url_fn(ctx, token):
         text_fn(ctx, token)
         return
     node = ctx.push(NodeKind.URL)
-    node.children.append(token)
+    text_fn(ctx, token)
     ctx.pop(False)
 
 def templarg_start_fn(ctx, token):
@@ -446,6 +575,7 @@ def table_end_fn(ctx, token):
 def list_fn(ctx, token):
     """Handles various tokens that start unordered or ordered list items,
     description list items, or indented lines."""
+    token = token.strip()
     top = ctx.stack[-1]
 
     # A colon inside a template means it is a parser function call.  We use
@@ -455,7 +585,7 @@ def list_fn(ctx, token):
         return
 
     # An external link
-    if top.kind in (NodeKind.INTERNAL_LINK, NodeKind.URL):
+    if top.kind in (NodeKind.LINK, NodeKind.URL):
         text_fn(ctx, token)
         return
 
@@ -497,21 +627,35 @@ def tag_fn(ctx, token):
                 ctx.nowiki = True
             return
 
-        # Handle other start tag
+        # Handle <pre> start tag
+        if name == "pre":
+            if not also_end:
+                ctx.push(NodeKind.PRE)
+            return
+
+        # Generate error from tags that are not allowed HTML tags
+        if name not in ALLOWED_HTML_TAGS:
+            ctx.error("html tag <{}> not allowed in WikiText"
+                      "".format(name))
+            text_fn(ctx, token)
+            return
+
+        # Handle other start tag.  We push HTML tags as HTML nodes.
         node = ctx.push(NodeKind.HTML)
         node.args.append(name)
+        node.children.append(token)
+        node.attrs["_also_close"] = True
         # XXX handle attrs
 
-        # If it is also an end tag, pop it immediately.
-        if also_end:
-            ctx.pop(False)
+        # Pop it immediately, as we don't store anything other than the
+        # tag itself under a HTML tag.
+        ctx.pop(False)
         return
 
     # Since it was not a start tag, it should be an end tag
     m = re.match(r"<\s*/\s*([-a-zA-Z0-9]+)\s*>", token)
     assert m  # If fails, then mismatch between regexp here and tokenization
     name = m.group(1)
-    top = ctx.stack[-1]
     name = name.lower()
     if name == "nowiki":
         # Handle </nowiki> end tag
@@ -519,23 +663,34 @@ def tag_fn(ctx, token):
             ctx.nowiki = False
         else:
             ctx.error("unexpected </nowiki>")
+            text_fn(ctx, token)
+        return
+    if name == "pre":
+        # Handle </pre> end tag
+        node = ctx.stack[-1]
+        if node.kind != NodeKind.PRE:
+            ctx.error("unexpected </pre>")
+            text_fn(ctx, token)
+            return
+        ctx.pop(False)
         return
 
-    # Handle other end tag
-    while True:
-        node = ctx.stack[-1]
-        if node.kind == NodeKind.HTML and node.args[0] == name:
-            ctx.pop(False)
-            break
-        if node.kind in kind_to_level:
-            break
-        ctx.pop(True)
-    return
+    if name not in ALLOWED_HTML_TAGS:
+        ctx.error("html tag </{}> not allowed in WikiText"
+                  "".format(name))
+        text_fn(ctx, token)
+        return
+
+    # Push a HTML node for the end tag
+    node = ctx.push(NodeKind.HTML)
+    node.args.append(name)
+    node.children.append(token)
+    node.attrs["_close"] = True
+    ctx.pop(False)
 
 
 # Regular expression for matching a token in WikiMedia text
 token_re = re.compile(r"(?m)^(={2,6})\s*(([^=)|=[^=])+?)\s*(={2,6})\s*$|"
-                      r"'''''|"
                       r"'''|"
                       r"''|"
                       r"^ |"   # Space at beginning means preformatted
@@ -563,7 +718,6 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=)|=[^=])+?)\s*(={2,6})\s*$|"
 
 # Dictionary mapping fixed form tokens to handler functions.
 tokenops = {
-    "'''''": bolditalic_fn,
     "'''": bold_fn,
     "''": italic_fn,
     " ": preformatted_fn,
@@ -617,10 +771,12 @@ def parse_with_ctx(pagetitle, text):
     # Process all tokens from the input.
     for is_token, token in token_iter(text):
         assert isinstance(token, str)
-        top = ctx.stack[-1]
+        node = ctx.stack[-1]
         if (not is_token or
             (ctx.nowiki and
-             not re.match(r"(?i)<\s*/\s*nowiki\s*>", token))):
+             not re.match(r"(?i)<\s*/\s*nowiki\s*>", token)) or
+            (node.kind == NodeKind.PRE and
+             not re.match(r"(?i)<\s*/\s*pre\s*>", token))):
             if is_token:
                 # Remove the artificially added prefix from subtitle tokens
                 if token.startswith("<=="):
@@ -647,10 +803,6 @@ def parse_with_ctx(pagetitle, text):
                 text_fn(ctx, token)
         ctx.linenum += len(list(re.finditer("\n", token)))
         ctx.beginning_of_line = token.endswith("\n")
-        if ctx.beginning_of_line:
-            # Some nodes are automatically popped on newline
-            if ctx.stack[-1].kind in (NodeKind.PREFORMATTED,):
-                ctx.pop()
     while True:
         node = ctx.stack[-1]
         if node.kind == NodeKind.ROOT:
@@ -662,7 +814,9 @@ def parse_with_ctx(pagetitle, text):
 
 def parse(pagetitle, text):
     """Parse a wikitext document into a tree.  This returns a WikiNode
-    object that is the root of the parse tree and the parse context."""
+    object that is the root of the parse tree and the parse context.
+    This does not expand HTML entities; that should be done after processing
+    templates."""
     assert isinstance(pagetitle, str)
     assert isinstance(text, str)
     tree, ctx = parse_with_ctx(pagetitle, text)
@@ -670,7 +824,8 @@ def parse(pagetitle, text):
 
 
 def print_tree(tree, indent):
-    """Prints the parse tree for debugging purposes."""
+    """Prints the parse tree for debugging purposes.  This does not expand
+    HTML entities; that should be done after processing templates."""
     assert isinstance(tree, (WikiNode, str))
     assert isinstance(indent, int)
     if isinstance(tree, str):
