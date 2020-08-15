@@ -183,6 +183,8 @@ PARSER_FUNCTIONS = set([
 
 @enum.unique
 class NodeKind(enum.Enum):
+    """Node types in the parse tree."""
+
     # Root node of the tree.  This represents the parsed document.
     # Its arguments are [pagetitle].
     ROOT = enum.auto(),
@@ -289,6 +291,23 @@ class NodeKind(enum.Enum):
     # XXX __NOTOC__
 
 
+# Maps subtitle token to its kind
+subtitle_to_kind = {
+    "==": NodeKind.LEVEL2,
+    "===": NodeKind.LEVEL3,
+    "====": NodeKind.LEVEL4,
+    "=====": NodeKind.LEVEL5,
+    "======": NodeKind.LEVEL6,
+}
+
+
+# Maps subtitle node kind to its level.  Keys include all title/subtitle nodes
+# (this is also used like a set of all subtitle kinds, including the root).
+kind_to_level = { v: len(k) for k, v in subtitle_to_kind.items() }
+kind_to_level[NodeKind.ROOT] = 1
+
+
+# Node types that have arguments separated by the vertical bar (|)
 HAVE_ARGS_KINDS = (
     NodeKind.LINK,
     NodeKind.TEMPLATE,
@@ -312,14 +331,17 @@ MUST_CLOSE_KINDS = (
     NodeKind.TABLE,
 )
 
+
 # Node kinds that are automatically closed at a newline
 CLOSE_AT_NEWLINE_KINDS = (
     NodeKind.PREFORMATTED,
     NodeKind.LIST_ITEM,
 )
 
+
 class WikiNode(object):
     """Node in the parse tree for WikiMedia text."""
+
     __slots__ = (
         "kind",
         "args",
@@ -348,9 +370,9 @@ class WikiNode(object):
 
 
 class ParseCtx(object):
-    """Parsing context for parsing WikiMedia text.  This contains the parser
-    stack, which also implicitly contains all text parsed so far and the
-    partial parse tree."""
+    """Parsing context for parsing WikiText.  This contains the parser
+    stack and other state, and also implicitly contains all text
+    parsed so far and the partial parse tree."""
     __slots__ = (
         "stack",
         "linenum",
@@ -374,6 +396,7 @@ class ParseCtx(object):
         self.suppress_special = False
 
     def push(self, kind):
+        """Pushes a new node of the specified kind onto the stack."""
         assert isinstance(kind, NodeKind)
         node = WikiNode(kind, self.linenum)
         prev = self.stack[-1]
@@ -386,7 +409,9 @@ class ParseCtx(object):
         """Pops a node from the stack.  If the node has arguments, this moves
         remaining children of the node into its arguments.  If ``warn_unclosed``
         is True, this warns about nodes that should be explicitly closed
-        not having been closed."""
+        not having been closed.  Also performs certain other operations on
+        the parse tree; this is a place for various kludges that manipulate
+        the nodes when their parsing completes."""
         assert warn_unclosed in (True, False)
         node = self.stack[-1]
 
@@ -438,7 +463,9 @@ class ParseCtx(object):
         self.errors.append(msg)
 
 
-def text_fn(ctx, text):
+def text_fn(ctx, token):
+    """Inserts the token as raw text into the parse tree."""
+
     # Some nodes are automatically popped on newline/text
     if ctx.beginning_of_line and not ctx.nowiki:
         node = ctx.stack[-1]
@@ -480,24 +507,16 @@ def text_fn(ctx, text):
     # Add a text child
     node.children.append(text)
 
+
 def hline_fn(ctx, token):
+    """Processes a horizontal line token."""
     ctx.push(NodeKind.HLINE)
     ctx.pop(True)
 
-# Maps subtitle token to its kind
-subtitle_to_kind = {
-    "==": NodeKind.LEVEL2,
-    "===": NodeKind.LEVEL3,
-    "====": NodeKind.LEVEL4,
-    "=====": NodeKind.LEVEL5,
-    "======": NodeKind.LEVEL6,
-}
 
-# Maps subtitle node kind to its level.  Keys include all title/subtitle nodes.
-kind_to_level = { v: len(k) for k, v in subtitle_to_kind.items() }
-kind_to_level[NodeKind.ROOT] = 1
 
 def subtitle_start_fn(ctx, token):
+    """Processes a subtitle start token.  The token has < prepended to it."""
     assert isinstance(ctx, ParseCtx)
     assert isinstance(token, str)
     kind = subtitle_to_kind[token[1:]]
@@ -515,7 +534,9 @@ def subtitle_start_fn(ctx, token):
     # a close node, though the close node could have an incorrect level.
     ctx.push(kind)
 
+
 def subtitle_end_fn(ctx, token):
+    """Processes a subtitle end token.  The token has > prepended to it."""
     assert isinstance(ctx, ParseCtx)
     assert isinstance(token, str)
     kind = subtitle_to_kind[token[1:]]
@@ -534,7 +555,9 @@ def subtitle_end_fn(ctx, token):
     node.args.append(node.children)
     node.children = []
 
+
 def italic_fn(ctx, token):
+    """Processes an italic start/end token ('')."""
     if not ctx.have(NodeKind.ITALIC):
         # Push new formatting node
         ctx.push(NodeKind.ITALIC)
@@ -554,7 +577,9 @@ def italic_fn(ctx, token):
     if push_bold:
         ctx.push(NodeKind.BOLD)
 
+
 def bold_fn(ctx, token):
+    """Processes a bold start/end token (''')."""
     if not ctx.have(NodeKind.BOLD):
         # Push new formatting node
         ctx.push(NodeKind.BOLD)
@@ -574,10 +599,14 @@ def bold_fn(ctx, token):
     if push_italic:
         ctx.push(NodeKind.ITALIC)
 
+
 def ilink_start_fn(ctx, token):
+    """Processes an internal link start token "[["."""
     ctx.push(NodeKind.LINK)
 
+
 def ilink_end_fn(ctx, token):
+    """Processes an internal link end token "]]"."""
     if not ctx.have(NodeKind.LINK):
         text_fn(ctx, token)
         return
@@ -590,10 +619,14 @@ def ilink_end_fn(ctx, token):
             break  # Never pop past section header
         ctx.pop(True)
 
+
 def elink_start_fn(ctx, token):
+    """Processes an external link start token "["."""
     ctx.push(NodeKind.URL)
 
+
 def elink_end_fn(ctx, token):
+    """Processes an external link end token "]"."""
     if not ctx.have(NodeKind.URL):
         text_fn(ctx, token)
         return
@@ -606,7 +639,10 @@ def elink_end_fn(ctx, token):
             break  # Never pop past section header
         ctx.pop(True)
 
+
 def url_fn(ctx, token):
+    """Processes an URL written as URL in the text (an external link is
+    automatically generated)."""
     node = ctx.stack[-1]
     if node.kind == NodeKind.URL:
         text_fn(ctx, token)
@@ -615,13 +651,14 @@ def url_fn(ctx, token):
     text_fn(ctx, token)
     ctx.pop(False)
 
+
 def templarg_start_fn(ctx, token):
-    """Handler for template argument reference start token {{{."""
+    """Handler for template argument reference start token "{{{"."""
     ctx.push(NodeKind.TEMPLATEVAR)
 
 
 def templarg_end_fn(ctx, token):
-    """Handler for template argument reference end token }}}."""
+    """Handler for template argument reference end token "}}}"."""
     if not ctx.have(NodeKind.TEMPLATEVAR):
         text_fn(ctx, token)
         return
@@ -636,12 +673,12 @@ def templarg_end_fn(ctx, token):
 
 
 def templ_start_fn(ctx, token):
-    """Handler for template start token {{."""
+    """Handler for template start token "{{"."""
     ctx.push(NodeKind.TEMPLATE)
 
 
 def templ_end_fn(ctx, token):
-    """Handler function for template end token }}."""
+    """Handler function for template end token "}}"."""
     if not ctx.have(NodeKind.TEMPLATE) and not ctx.have(NodeKind.PARSERFN):
         text_fn(ctx, token)
         return
@@ -656,8 +693,9 @@ def templ_end_fn(ctx, token):
 
 
 def colon_fn(ctx, token):
-    """Handler for a special colon (:) within a template call.  This indicates
-    that it is actually a parser function call."""
+    """Handler for a special colon ":" within a template call.  This indicates
+    that it is actually a parser function call.  This is called from list_fn()
+    when it detects that it is inside a template node."""
     node = ctx.stack[-1]
 
     # Unless we are in the first argument of a template, treat a colon that is
@@ -676,12 +714,12 @@ def colon_fn(ctx, token):
 
 
 def table_start_fn(ctx, token):
-    """Handler for table start token {|."""
+    """Handler for table start token "{|"."""
     ctx.push(NodeKind.TABLE)
 
 
 def table_caption_fn(ctx, token):
-    """Handler for table caption token |+."""
+    """Handler for table caption token "|+"."""
     if not ctx.have(NodeKind.TABLE):
         text_fn(ctx, token)
         return
@@ -723,7 +761,7 @@ def table_hdr_cell_fn(ctx, token):
 
 
 def table_row_fn(ctx, token):
-    """Handler function for table row separator |-."""
+    """Handler function for table row separator "|-"."""
     if not ctx.have(NodeKind.TABLE):
         text_fn(ctx, token)
         return
@@ -736,7 +774,7 @@ def table_row_fn(ctx, token):
 
 
 def table_row_cell_fn(ctx, token):
-    """Handler function for table row cell separator."""
+    """Handler function for table row cell separator | or ||."""
     if not ctx.have(NodeKind.TABLE):
         text_fn(ctx, token)
         return
@@ -814,7 +852,7 @@ def double_vbar_fn(ctx, token):
 
 
 def table_end_fn(ctx, token):
-    """Handler function for end of a table token |}."""
+    """Handler function for end of a table token "|}"."""
     if not ctx.have(NodeKind.TABLE):
         text_fn(ctx, token)
         return
@@ -830,7 +868,8 @@ def table_end_fn(ctx, token):
 
 def list_fn(ctx, token):
     """Handles various tokens that start unordered or ordered list items,
-    description list items, or indented lines."""
+    description list items, or indented lines.  This also recognizes the
+    colon used to separate parser function name from its first argument."""
     token = token.strip()
     node = ctx.stack[-1]
 
@@ -871,6 +910,9 @@ def list_fn(ctx, token):
 
 
 def tag_add_attrs(node, attrs, also_end):
+    """Parses HTML tag attributes from ``attrs`` and adds them to
+    ``node.attrs``.  Also sets node.attrs["_also_close"] based on
+    ``also_end``."""
     assert isinstance(node, WikiNode)
     assert isinstance(attrs, str)
     assert also_end in (True, False)
@@ -893,7 +935,8 @@ def tag_add_attrs(node, attrs, also_end):
 def tag_fn(ctx, token):
     """Handler function for tokens that look like HTML tags and their end
     tags.  This includes various built-in tags that aren't actually
-    HTML, including <nowiki>."""
+    HTML, including <nowiki>.  Some WikiText tags that resemble HTML
+    are described as HTML nodes, even though they are not really HTML."""
 
     # If it is a HTML comment, just drop it
     if token.startswith("<!"):
@@ -986,12 +1029,14 @@ def tag_fn(ctx, token):
 
 
 def magicword_fn(ctx, token):
+    """Handles a magic word, such as "__NOTOC__"."""
     node = ctx.push(NodeKind.MAGIC_WORD)
     node.args = token
     ctx.pop(False)
 
 
-# Regular expression for matching a token in WikiMedia text
+# Regular expression for matching a token in WikiMedia text.  This is used for
+# tokenizing the input.
 token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"'''|"
                       r"''|"
@@ -1025,7 +1070,9 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"|".join(r"\b{}\b".format(x) for x in MAGIC_WORDS) +
                       r")")
 
-# Dictionary mapping fixed form tokens to handler functions.
+
+# Dictionary mapping fixed form tokens to their handler functions.
+# Tokens that have variable form are handled in the code in token_iter().
 tokenops = {
     "'''": bold_fn,
     "''": italic_fn,
@@ -1187,7 +1234,7 @@ def parse(pagetitle, text):
     return tree
 
 
-def print_tree(tree, indent):
+def print_tree(tree, indent=0):
     """Prints the parse tree for debugging purposes.  This does not expand
     HTML entities; that should be done after processing templates."""
     assert isinstance(tree, (WikiNode, str))
