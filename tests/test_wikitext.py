@@ -335,6 +335,17 @@ dasfasddasfdas
         self.assertEqual(b.children, [])
         self.assertEqual(c, " link")
 
+    def test_url4(self):
+        tree = parse("test", "this [https://wikipedia.com here multiword] link")
+        self.assertEqual(len(tree.children), 3)
+        a, b, c = tree.children
+        self.assertEqual(a, "this ")
+        self.assertEqual(b.kind, NodeKind.URL)
+        self.assertEqual(b.args, [["https://wikipedia.com"],
+                                  ["here multiword"]])
+        self.assertEqual(b.children, [])
+        self.assertEqual(c, " link")
+
     def test_preformatted1(self):
         tree = parse("test", """
  Start each line with a space.
@@ -472,6 +483,24 @@ def foo(x):
         self.assertEqual(d.children, [])
         self.assertEqual(b.args[1], ["bar"])
 
+    def test_template8(self):
+        # Namespace specifiers, e.g., {{int:xyz}} should not generate
+        # parser functions
+        tree = parse("test", "{{int:xyz}}")
+        self.assertEqual(len(tree.children), 1)
+        b = tree.children[0]
+        self.assertEqual(b.kind, NodeKind.TEMPLATE)
+        self.assertEqual(b.args, [["int:xyz"]])
+
+    def test_template9(self):
+        # Main namespace references, e.g., {{:xyz}} should not
+        # generate parser functions
+        tree = parse("test", "{{:xyz}}")
+        self.assertEqual(len(tree.children), 1)
+        b = tree.children[0]
+        self.assertEqual(b.kind, NodeKind.TEMPLATE)
+        self.assertEqual(b.args, [[":xyz"]])
+
     def test_templatevar1(self):
         tree = parse("test", "{{{foo}}}")
         self.assertEqual(len(tree.children), 1)
@@ -533,11 +562,5 @@ def foo(x):
 
 # XXX test:
 # XXX TABLE and its subnodes
-# XXX <ref>
-# XXX CHECK -{ ... }- SYNTAX
 # XXX magic links (e.g., ISBN) https://www.mediawiki.org/wiki/Markup_spec/BNF/Magic_links
 # XXX change URL non-first parameters to all go in second parameter
-# XXX <onlyinclude>, <noinclude>, <includeonly>
-# XXX <math>
-# XXX <html>
-# XXX <gallery>

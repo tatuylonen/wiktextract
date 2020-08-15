@@ -23,6 +23,8 @@ ALLOWED_HTML_TAGS = set([
     "div", "span",
     "table", "td", "tr", "th", "caption", "thead", "tfoot", "tbody",
     "center", "font", "rb", "strike", "tt",
+    "onlyinclude", "noinclude", "includeonly",
+    "math", "gallery", "ref",
 ])
 
 # MediaWiki magic words.  See https://www.mediawiki.org/wiki/Help:Magic_words
@@ -176,7 +178,6 @@ PARSER_FUNCTIONS = set([
     "#section-x",
     "#statements",
     "#target",
-    "int",
 ])
 
 
@@ -229,7 +230,8 @@ class NodeKind(enum.Enum):
     # Children contains the entire tag (but not contents of paired tags).
     # Attrs contains _close with value True if this is a close tag.  It contains
     # _also_close with value True if this is an open tag with a slash at the
-    # end of the tag.
+    # end of the tag.  The special tags <onlyinclude>, <noinclude>, and
+    # <includeonly> also generate this tag.
     HTML = enum.auto(),
 
     # An internal Wikimedia link (marked with [[...]]).  The link arguments
@@ -254,7 +256,8 @@ class NodeKind(enum.Enum):
     # Children are not used.  In WikiText {{name:arg1|arg2|...}}.
     PARSERFN = enum.auto(),
 
-    # An external URL.  The first argument is the URL.  Children are not used.
+    # An external URL.  The first argument is the URL.  The second optional
+    # argument is the display text. Children are not used.
     URL = enum.auto(),
 
     # A table.  Content is in children.
@@ -656,21 +659,11 @@ def colon_fn(ctx, token):
     that it is actually a parser function call."""
     node = ctx.stack[-1]
 
-    print("COLON")
-
     # Unless we are in the first argument of a template, treat a colon that is
     # not at the beginning of a
     if (node.kind != NodeKind.TEMPLATE or node.args or
-        len(node.children) != 1 or not isinstance(node.children[0], str)):
-        text_fn(ctx, token)
-        return
-
-    # XXX I am not quite sure if all parser function names need to be
-    # known in advance or if any template with a colon in the name should
-    # be considered a parser function call.
-    if node.children[0] not in PARSER_FUNCTIONS:
-        print("DEBUG: unrecognized possible parser function: {}"
-              "".format(node.children[0]))
+        len(node.children) != 1 or not isinstance(node.children[0], str) or
+        node.children[0] not in PARSER_FUNCTIONS):
         text_fn(ctx, token)
         return
 
@@ -760,8 +753,9 @@ def whitespace_fn(ctx, token):
         text_fn(ctx, token)
         return
 
-    # Spaces inside an external link divide its arguments
-    if node.kind == NodeKind.URL:
+    # Spaces inside an external link divide its first argument from its
+    # second argument.  All remaining words go into the second argument.
+    if node.kind == NodeKind.URL and not node.args:
         node.args.append(node.children)
         node.children = []
         return
@@ -806,7 +800,6 @@ def list_fn(ctx, token):
 
     # A colon inside a template means it is a parser function call.  We use
     # colon_fn() to handle that kind of colon.
-    print("LIST_FN", repr(token))
     if token == ":" and node.kind == NodeKind.TEMPLATE:
         colon_fn(ctx, token)
         return
