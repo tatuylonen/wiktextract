@@ -6,6 +6,7 @@ import os.path
 import collections
 import lupa
 from lupa import LuaRuntime
+from wiktextract import wikitext
 
 # List of search paths for Lua libraries.
 builtin_lua_search_paths = [
@@ -14,6 +15,10 @@ builtin_lua_search_paths = [
 
 page = open("temp-pages/Words/an/animal.txt").read()
 print("Len of source page", len(page))
+
+tree = wikitext.parse("animal", page)
+wikitext.print_tree(tree)
+sys.exit(1)
 
 with open("tempXXXspecials.json") as f:
     lst = json.load(f)
