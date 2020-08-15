@@ -360,10 +360,11 @@ class WikiNode(object):
         self.loc = loc
 
     def __str__(self):
-        return "<{}({}) {}>".format(self.kind.name,
-                                    self.args if isinstance(self.args, str)
-                                    else ", ".join(map(repr, self.args)),
-                                    ", ".join(map(repr, self.children)))
+        return "<{}({}){} {}>".format(self.kind.name,
+                                      self.args if isinstance(self.args, str)
+                                      else ", ".join(map(repr, self.args)),
+                                      self.attrs,
+                                      ", ".join(map(repr, self.children)))
 
     def __repr__(self):
         return self.__str__()
@@ -476,7 +477,7 @@ def text_fn(ctx, token):
         elif node.kind == NodeKind.PREFORMATTED:
             if (node.children and isinstance(node.children[-1], str) and
                 node.children[-1].endswith("\n") and
-                not text.startswith(" ") and not text.isspace()):
+                not token.startswith(" ") and not token.isspace()):
                 ctx.pop(False)
 
     # If the previous child was a link that doesn't yet have children,
@@ -487,7 +488,7 @@ def text_fn(ctx, token):
         node.children[-1].kind == NodeKind.LINK and
         not node.children[-1].children and
         not ctx.suppress_special):
-        m = re.match(r"(?s)(\w+)(.*)", text)
+        m = re.match(r"(?s)(\w+)(.*)", token)
         if m:
             node.children[-1].children.append(m.group(1))
             text = m.group(2)
@@ -501,11 +502,11 @@ def text_fn(ctx, token):
             # XXX this can result in O(N^2) complexity for long texts.  Change
             # to do the merging in ctx.push() and ctx.pop() using "".join(...)
             # for a whole sequence of strings.
-            node.children[-1] = prev + text
+            node.children[-1] = prev + token
             return
 
     # Add a text child
-    node.children.append(text)
+    node.children.append(token)
 
 
 def hline_fn(ctx, token):
@@ -718,8 +719,31 @@ def table_start_fn(ctx, token):
     ctx.push(NodeKind.TABLE)
 
 
+def table_check_attrs(ctx):
+    """Checks if the table has attributes, and if so, parses them."""
+    node = ctx.stack[-1]
+    if node.kind != NodeKind.TABLE or len(node.children) != 1:
+        return
+    if not isinstance(node.children[0], str):
+        return
+    attrs = node.children.pop()
+    parse_attrs(node, attrs, False)
+
+
+def table_row_check_attrs(ctx):
+    """Checks if the table row has attributes, and if so, parses them."""
+    node = ctx.stack[-1]
+    if node.kind != NodeKind.TABLE_ROW or len(node.children) != 1:
+        return
+    if not isinstance(node.children[0], str):
+        return
+    attrs = node.children.pop()
+    parse_attrs(node, attrs, False)
+
+
 def table_caption_fn(ctx, token):
     """Handler for table caption token "|+"."""
+    table_check_attrs(ctx)
     if not ctx.have(NodeKind.TABLE):
         text_fn(ctx, token)
         return
@@ -733,7 +757,7 @@ def table_caption_fn(ctx, token):
 
 def table_hdr_cell_fn(ctx, token):
     """Handler function for table header row cell separator ! or !!."""
-    print("HDR_CELL_FN", token)
+    table_check_attrs(ctx)
     if not ctx.have(NodeKind.TABLE):
         text_fn(ctx, token)
         return
@@ -762,6 +786,7 @@ def table_hdr_cell_fn(ctx, token):
 
 def table_row_fn(ctx, token):
     """Handler function for table row separator "|-"."""
+    table_check_attrs(ctx)
     if not ctx.have(NodeKind.TABLE):
         text_fn(ctx, token)
         return
@@ -775,9 +800,28 @@ def table_row_fn(ctx, token):
 
 def table_row_cell_fn(ctx, token):
     """Handler function for table row cell separator | or ||."""
+    table_row_check_attrs(ctx)
+    table_check_attrs(ctx)
+
     if not ctx.have(NodeKind.TABLE):
         text_fn(ctx, token)
         return
+
+    if token == "|" and not ctx.beginning_of_line:
+        # This might separate attributes for captions, header cells, and
+        # data cells
+        node = ctx.stack[-1]
+        if (not node.attrs and len(node.children) == 1 and
+            isinstance(node.children[0], str)):
+            if node.kind in (NodeKind.TABLE_CAPTION,
+                             NodeKind.TABLE_HEADER_CELL,
+                             NodeKind.TABLE_CELL):
+                attrs = node.children.pop()
+                parse_attrs(node, attrs, False)
+                return
+        text_fn(ctx, token)
+        return
+
     while True:
         node = ctx.stack[-1]
         if node.kind == NodeKind.TABLE_ROW:
@@ -831,11 +875,7 @@ def vbar_fn(ctx, token):
         node.children = []
         return
 
-    if ctx.beginning_of_line:
-        table_row_cell_fn(ctx, token)
-        return
-
-    text_fn(ctx, token)
+    table_row_cell_fn(ctx, token)
 
 
 def double_vbar_fn(ctx, token):
@@ -909,7 +949,7 @@ def list_fn(ctx, token):
     node.args = token
 
 
-def tag_add_attrs(node, attrs, also_end):
+def parse_attrs(node, attrs, also_end):
     """Parses HTML tag attributes from ``attrs`` and adds them to
     ``node.attrs``.  Also sets node.attrs["_also_close"] based on
     ``also_end``."""
@@ -965,7 +1005,7 @@ def tag_fn(ctx, token):
         # Handle <pre> start tag
         if name == "pre":
             node = ctx.push(NodeKind.PRE)
-            tag_add_attrs(node, attrs, also_end)
+            parse_attrs(node, attrs, also_end)
             if also_end:
                 ctx.pop(False)
             return
@@ -980,7 +1020,7 @@ def tag_fn(ctx, token):
         # Handle other start tag.  We push HTML tags as HTML nodes.
         node = ctx.push(NodeKind.HTML)
         node.args = name
-        tag_add_attrs(node, attrs, also_end)
+        parse_attrs(node, attrs, also_end)
 
         # Pop it immediately, as we don't store anything other than the
         # tag itself under a HTML tag.
@@ -1053,8 +1093,8 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"\{\||"
                       r"\|\+|"
                       r"\|-|"
-                      r"^!|"
                       r"!!|"
+                      r"^!|"
                       r"\|\||"
                       r"\||"
                       r"^----+|"
@@ -1243,6 +1283,8 @@ def print_tree(tree, indent=0):
         print("{}{}".format(" " * indent, repr(tree)))
         return
     print("{}{} {}".format(" " * indent, tree.kind.name, tree.args))
+    for k, v in tree.attrs.items():
+        print("{}    {}={}".format(" " * indent, k, v))
     for child in tree.children:
         print_tree(child, indent + 2)
 

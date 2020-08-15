@@ -614,9 +614,8 @@ def foo(x):
         t = tree.children[0]
         self.assertEqual(t.kind, NodeKind.TABLE)
         self.assertEqual(t.args, [])
-        self.assertEqual(len(t.children), 3)
-        x, a, b = t.children
-        self.assertEqual(x, "\n")
+        self.assertEqual(len(t.children), 2)
+        a, b = t.children
         self.assertEqual(a.kind, NodeKind.TABLE_ROW)
         self.assertEqual(len(a.children), 3)
         aa, ab, ac = a.children
@@ -626,9 +625,8 @@ def foo(x):
         self.assertEqual(ab.children, ["Apple"])
         self.assertEqual(ac.kind, NodeKind.TABLE_CELL)
         self.assertEqual(ac.children, ["more\n"])
-        self.assertEqual(len(b.children), 4)
-        x, ba, bb, bc = b.children
-        self.assertEqual(x, "\n")
+        self.assertEqual(len(b.children), 3)
+        ba, bb, bc = b.children
         self.assertEqual(ba.kind, NodeKind.TABLE_CELL)
         self.assertEqual(ba.children, ["Bread"])
         self.assertEqual(bb.kind, NodeKind.TABLE_CELL)
@@ -644,22 +642,19 @@ def foo(x):
         t = tree.children[0]
         self.assertEqual(t.kind, NodeKind.TABLE)
         self.assertEqual(t.args, [])
-        self.assertEqual(len(t.children), 3)
-        x, a, b = t.children
-        self.assertEqual(x, "\n")
+        self.assertEqual(len(t.children), 2)
+        a, b = t.children
         self.assertEqual(a.kind, NodeKind.TABLE_ROW)
-        self.assertEqual(len(a.children), 4)
-        x, aa, ab, ac = a.children
-        self.assertEqual(x, "\n")
+        self.assertEqual(len(a.children), 3)
+        aa, ab, ac = a.children
         self.assertEqual(aa.kind, NodeKind.TABLE_CELL)
         self.assertEqual(aa.children, ["Orange"])
         self.assertEqual(ab.kind, NodeKind.TABLE_CELL)
         self.assertEqual(ab.children, ["Apple"])
         self.assertEqual(ac.kind, NodeKind.TABLE_CELL)
         self.assertEqual(ac.children, ["more\n"])
-        self.assertEqual(len(b.children), 4)
-        x, ba, bb, bc = b.children
-        self.assertEqual(x, "\n")
+        self.assertEqual(len(b.children), 3)
+        ba, bb, bc = b.children
         self.assertEqual(ba.kind, NodeKind.TABLE_CELL)
         self.assertEqual(ba.children, ["Bread"])
         self.assertEqual(bb.kind, NodeKind.TABLE_CELL)
@@ -669,17 +664,17 @@ def foo(x):
 
     def test_table_complex1(self):
         tree = parse("test",
-                     "{|\n|+ cap!!tion!||t|ext\n!H1!!H2!!H3\n|"
-                     "-\n|Orange||Apple||more!!\n|-\n|Bread||Pie||more\n!\n|}")
+                     "{|\n|+ cap!!tion!||text\n!H1!!H2!!H3\n|"
+                     "-\n|Orange||Apple||more!!\n|-\n|Bread||Pie||more\n|}")
         print(tree)
         self.assertEqual(len(tree.children), 1)
         t = tree.children[0]
         self.assertEqual(t.kind, NodeKind.TABLE)
         self.assertEqual(t.args, [])
-        self.assertEqual(len(t.children), 5)
-        x, c, h, a, b = t.children
+        self.assertEqual(len(t.children), 4)
+        c, h, a, b = t.children
         self.assertEqual(c.kind, NodeKind.TABLE_CAPTION)
-        self.assertEqual(c.children, [" cap!!tion!||t|ext\n"])
+        self.assertEqual(c.children, [" cap!!tion!||text\n"])
         self.assertEqual(h.kind, NodeKind.TABLE_HEADER_ROW)
         self.assertEqual(len(h.children), 3)
         ha, hb, hc = h.children
@@ -690,26 +685,78 @@ def foo(x):
         self.assertEqual(hc.kind, NodeKind.TABLE_HEADER_CELL)
         self.assertEqual(hc.children, ["H3\n"])
 
-        self.assertEqual(x, "\n")
         self.assertEqual(a.kind, NodeKind.TABLE_ROW)
-        self.assertEqual(len(a.children), 4)
-        x, aa, ab, ac = a.children
-        self.assertEqual(x, "\n")
+        self.assertEqual(len(a.children), 3)
+        aa, ab, ac = a.children
         self.assertEqual(aa.kind, NodeKind.TABLE_CELL)
         self.assertEqual(aa.children, ["Orange"])
         self.assertEqual(ab.kind, NodeKind.TABLE_CELL)
         self.assertEqual(ab.children, ["Apple"])
         self.assertEqual(ac.kind, NodeKind.TABLE_CELL)
         self.assertEqual(ac.children, ["more!!\n"])
-        self.assertEqual(len(b.children), 4)
-        x, ba, bb, bc = b.children
-        self.assertEqual(x, "\n")
+        self.assertEqual(len(b.children), 3)
+        ba, bb, bc = b.children
         self.assertEqual(ba.kind, NodeKind.TABLE_CELL)
         self.assertEqual(ba.children, ["Bread"])
         self.assertEqual(bb.kind, NodeKind.TABLE_CELL)
         self.assertEqual(bb.children, ["Pie"])
         self.assertEqual(bc.kind, NodeKind.TABLE_CELL)
-        self.assertEqual(bc.children, ["more\n!\n"])
+        self.assertEqual(bc.children, ["more\n"])
+
+    def test_table_attrs1(self):
+        tree = parse("test", """{| class="table"
+|+ class="caption" |cap!!tion!||text
+!class="h1"|H1!!class="h2"|H2!!class="h3"|H3
+|- class="row1"
+|class="cell1"|Orange||class="cell2"|Apple||class="cell3"|more!!
+|- class="row2"
+|Bread||Pie||more!
+|}""")
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.TABLE)
+        self.assertEqual(t.attrs.get("class"), "table")
+        self.assertEqual(t.args, [])
+        self.assertEqual(len(t.children), 4)
+        c, h, a, b = t.children
+        self.assertEqual(c.kind, NodeKind.TABLE_CAPTION)
+        self.assertEqual(c.attrs.get("class"), "caption")
+        self.assertEqual(c.children, ["cap!!tion!||text\n"])
+        self.assertEqual(h.kind, NodeKind.TABLE_HEADER_ROW)
+        self.assertEqual(len(h.children), 3)
+        ha, hb, hc = h.children
+        self.assertEqual(ha.kind, NodeKind.TABLE_HEADER_CELL)
+        self.assertEqual(ha.attrs.get("class"), "h1")
+        self.assertEqual(ha.children, ["H1"])
+        self.assertEqual(hb.kind, NodeKind.TABLE_HEADER_CELL)
+        self.assertEqual(hb.attrs.get("class"), "h2")
+        self.assertEqual(hb.children, ["H2"])
+        self.assertEqual(hc.kind, NodeKind.TABLE_HEADER_CELL)
+        self.assertEqual(hc.attrs.get("class"), "h3")
+        self.assertEqual(hc.children, ["H3\n"])
+        self.assertEqual(a.kind, NodeKind.TABLE_ROW)
+        self.assertEqual(a.attrs.get("class"), "row1")
+        self.assertEqual(len(a.children), 3)
+        aa, ab, ac = a.children
+        self.assertEqual(aa.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(aa.attrs.get("class"), "cell1")
+        self.assertEqual(aa.children, ["Orange"])
+        self.assertEqual(ab.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(ab.attrs.get("class"), "cell2")
+        self.assertEqual(ab.children, ["Apple"])
+        self.assertEqual(ac.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(ac.attrs.get("class"), "cell3")
+        self.assertEqual(ac.children, ["more!!\n"])
+        self.assertEqual(b.kind, NodeKind.TABLE_ROW)
+        self.assertEqual(b.attrs.get("class"), "row2")
+        self.assertEqual(len(b.children), 3)
+        ba, bb, bc = b.children
+        self.assertEqual(ba.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(ba.children, ["Bread"])
+        self.assertEqual(bb.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(bb.children, ["Pie"])
+        self.assertEqual(bc.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(bc.children, ["more!\n"])
 
 
 
@@ -718,3 +765,6 @@ def foo(x):
 # disabled by default in MediaWiki since version 1.28 and Wiktionary
 # does not really seem to use them and they are not particularly
 # important.  See https://www.mediawiki.org/wiki/Help:Magic_links
+
+# XXX each row in a table may contain a header cell
+# XXX header cells can also take attrs with a vertical bar
