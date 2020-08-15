@@ -695,18 +695,31 @@ def table_caption_fn(ctx, token):
 
 def table_hdr_cell_fn(ctx, token):
     """Handler function for table header row cell separator ! or !!."""
+    print("HDR_CELL_FN", token)
     if not ctx.have(NodeKind.TABLE):
         text_fn(ctx, token)
         return
     while True:
         node = ctx.stack[-1]
         if node.kind == NodeKind.TABLE_HEADER_ROW:
-            break
+            ctx.push(NodeKind.TABLE_HEADER_CELL)
+            return
         if node.kind == NodeKind.TABLE:
             ctx.push(NodeKind.TABLE_HEADER_ROW)
-            break
+            ctx.push(NodeKind.TABLE_HEADER_CELL)
+            return
+        if node.kind == NodeKind.TABLE_CAPTION:
+            if ctx.beginning_of_line:
+                ctx.pop(False)
+                ctx.push(NodeKind.TABLE_HEADER_ROW)
+                ctx.push(NodeKind.TABLE_HEADER_CELL)
+            else:
+                text_fn(ctx, token)
+            return
+        if node.kind in (NodeKind.TABLE_CELL, NodeKind.TABLE_ROW):
+            text_fn(ctx, token)
+            return
         ctx.pop(True)
-    ctx.push(NodeKind.TABLE_HEADER_CELL)
 
 
 def table_row_fn(ctx, token):
@@ -734,6 +747,10 @@ def table_row_cell_fn(ctx, token):
         if node.kind == NodeKind.TABLE:
             ctx.push(NodeKind.TABLE_ROW)
             break
+        if node.kind in (NodeKind.TABLE_HEADER_ROW, NodeKind.TABLE_HEADER_CELL,
+                         NodeKind.TABLE_CAPTION):
+            text_fn(ctx, token)
+            return
         ctx.pop(True)
     ctx.push(NodeKind.TABLE_CELL)
 
@@ -776,6 +793,23 @@ def vbar_fn(ctx, token):
         node.children = []
         return
 
+    if ctx.beginning_of_line:
+        table_row_cell_fn(ctx, token)
+        return
+
+    text_fn(ctx, token)
+
+
+def double_vbar_fn(ctx, token):
+    """Handle function for double vertical bar ||.  This is used as a column
+    separator in tables.  If it occurs in other contexts, it should be
+    interpreted as two vertical bars."""
+    node = ctx.stack[-1]
+    if node.kind in HAVE_ARGS_KINDS:
+        vbar_fn(ctx, "|")
+        vbar_fn(ctx, "|")
+        return
+
     table_row_cell_fn(ctx, token)
 
 
@@ -787,10 +821,11 @@ def table_end_fn(ctx, token):
     while True:
         node = ctx.stack[-1]
         if node.kind == NodeKind.TABLE:
+            ctx.pop(False)
             break
         if node.kind in kind_to_level:
             break  # Always break before section headers
-    ctx.pop(False)
+        ctx.pop(True)
 
 
 def list_fn(ctx, token):
@@ -969,12 +1004,13 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"\]|"
                       r"\{\{+|"
                       r"\}\}+|"
-                      r"\{\|"
-                      r"\|\}|"
+                      r"\|\}+|"
+                      r"\{\||"
                       r"\|\+|"
                       r"\|-|"
                       r"^!|"
                       r"!!|"
+                      r"\|\||"
                       r"\||"
                       r"^----+|"
                       r"^[-*:;#]+\s*|"
@@ -1004,9 +1040,10 @@ tokenops = {
     "{|": table_start_fn,
     "|}": table_end_fn,
     "|+": table_caption_fn,
-    "!-": table_hdr_cell_fn,
+    "!": table_hdr_cell_fn,
+    "!!": table_hdr_cell_fn,
     "|-": table_row_fn,
-    "||": table_row_cell_fn,
+    "||": double_vbar_fn,
     "|": vbar_fn,
     " ": whitespace_fn,
     "\n": whitespace_fn,
@@ -1049,6 +1086,24 @@ def token_iter(text):
                 print("Unsupported brace sequence {}".format(token))
                 yield False, token
         elif token.startswith("}}"):
+            toklen = len(token)
+            if toklen in (2, 3):
+                yield True, token
+            elif toklen == 4:
+                yield True, "}}"
+                yield True, "}}"
+            elif toklen == 5:
+                yield True, "}}}"
+                yield True, "}}"
+            elif toklen == 6:
+                yield True, "}}}"
+                yield True, "}}}"
+            else:
+                print("Unsupported brace sequence {}".format(token))
+                yield False, token
+        elif token.startswith("|}}"):
+            yield True, "|"
+            token = token[1:]
             toklen = len(token)
             if toklen in (2, 3):
                 yield True, token

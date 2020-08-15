@@ -1,7 +1,9 @@
+# Tests for WikiText parsing
+#
+# Copyright (c) 2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+
 import unittest
 from wiktextract.wikitext import parse, parse_with_ctx, NodeKind
-
-
 
 class WikiTextTests(unittest.TestCase):
 
@@ -589,7 +591,6 @@ def foo(x):
 
     def test_parserfn3(self):
         tree = parse("test", "{{#invoke:testmod|testfn|testarg1|testarg2}}")
-        print(tree)
         self.assertEqual(len(tree.children), 1)
         b = tree.children[0]
         self.assertEqual(b.kind, NodeKind.PARSERFN)
@@ -597,9 +598,121 @@ def foo(x):
                                   ["testarg1"], ["testarg2"]])
         self.assertEqual(b.children, [])
 
+    def test_table_empty(self):
+        tree = parse("test", "{||}")
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.TABLE)
+        self.assertEqual(t.args, [])
+        self.assertEqual(t.children, [])
 
-# XXX test:
-# XXX TABLE and its subnodes
+    def test_table_simple(self):
+        tree = parse("test",
+                     "{|\n|Orange||Apple||more\n|-\n|Bread||Pie||more\n|}")
+        print(tree)
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.TABLE)
+        self.assertEqual(t.args, [])
+        self.assertEqual(len(t.children), 3)
+        x, a, b = t.children
+        self.assertEqual(x, "\n")
+        self.assertEqual(a.kind, NodeKind.TABLE_ROW)
+        self.assertEqual(len(a.children), 3)
+        aa, ab, ac = a.children
+        self.assertEqual(aa.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(aa.children, ["Orange"])
+        self.assertEqual(ab.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(ab.children, ["Apple"])
+        self.assertEqual(ac.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(ac.children, ["more\n"])
+        self.assertEqual(len(b.children), 4)
+        x, ba, bb, bc = b.children
+        self.assertEqual(x, "\n")
+        self.assertEqual(ba.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(ba.children, ["Bread"])
+        self.assertEqual(bb.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(bb.children, ["Pie"])
+        self.assertEqual(bc.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(bc.children, ["more\n"])
+
+    def test_table_simple2(self):
+        tree = parse("test",
+                     "{|\n|-\n|Orange||Apple||more\n|-\n|Bread||Pie||more\n|}")
+        print(tree)
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.TABLE)
+        self.assertEqual(t.args, [])
+        self.assertEqual(len(t.children), 3)
+        x, a, b = t.children
+        self.assertEqual(x, "\n")
+        self.assertEqual(a.kind, NodeKind.TABLE_ROW)
+        self.assertEqual(len(a.children), 4)
+        x, aa, ab, ac = a.children
+        self.assertEqual(x, "\n")
+        self.assertEqual(aa.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(aa.children, ["Orange"])
+        self.assertEqual(ab.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(ab.children, ["Apple"])
+        self.assertEqual(ac.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(ac.children, ["more\n"])
+        self.assertEqual(len(b.children), 4)
+        x, ba, bb, bc = b.children
+        self.assertEqual(x, "\n")
+        self.assertEqual(ba.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(ba.children, ["Bread"])
+        self.assertEqual(bb.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(bb.children, ["Pie"])
+        self.assertEqual(bc.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(bc.children, ["more\n"])
+
+    def test_table_complex1(self):
+        tree = parse("test",
+                     "{|\n|+ cap!!tion!||t|ext\n!H1!!H2!!H3\n|"
+                     "-\n|Orange||Apple||more!!\n|-\n|Bread||Pie||more\n!\n|}")
+        print(tree)
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.TABLE)
+        self.assertEqual(t.args, [])
+        self.assertEqual(len(t.children), 5)
+        x, c, h, a, b = t.children
+        self.assertEqual(c.kind, NodeKind.TABLE_CAPTION)
+        self.assertEqual(c.children, [" cap!!tion!||t|ext\n"])
+        self.assertEqual(h.kind, NodeKind.TABLE_HEADER_ROW)
+        self.assertEqual(len(h.children), 3)
+        ha, hb, hc = h.children
+        self.assertEqual(ha.kind, NodeKind.TABLE_HEADER_CELL)
+        self.assertEqual(ha.children, ["H1"])
+        self.assertEqual(hb.kind, NodeKind.TABLE_HEADER_CELL)
+        self.assertEqual(hb.children, ["H2"])
+        self.assertEqual(hc.kind, NodeKind.TABLE_HEADER_CELL)
+        self.assertEqual(hc.children, ["H3\n"])
+
+        self.assertEqual(x, "\n")
+        self.assertEqual(a.kind, NodeKind.TABLE_ROW)
+        self.assertEqual(len(a.children), 4)
+        x, aa, ab, ac = a.children
+        self.assertEqual(x, "\n")
+        self.assertEqual(aa.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(aa.children, ["Orange"])
+        self.assertEqual(ab.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(ab.children, ["Apple"])
+        self.assertEqual(ac.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(ac.children, ["more!!\n"])
+        self.assertEqual(len(b.children), 4)
+        x, ba, bb, bc = b.children
+        self.assertEqual(x, "\n")
+        self.assertEqual(ba.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(ba.children, ["Bread"])
+        self.assertEqual(bb.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(bb.children, ["Pie"])
+        self.assertEqual(bc.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(bc.children, ["more\n!\n"])
+
+
+
 
 # Note: Magic links (e.g., ISBN, RFC) are not supported.  They are
 # disabled by default in MediaWiki since version 1.28 and Wiktionary
