@@ -226,12 +226,13 @@ class NodeKind(enum.Enum):
     # children. Indicated in WikiText by <pre>...</pre>.
     PRE = enum.auto(),  # Preformatted text where specials not interpreted
 
-    # HTML tag (open or close tag).  The first arg is the name of the tag.
-    # Children contains the entire tag (but not contents of paired tags).
-    # Attrs contains _close with value True if this is a close tag.  It contains
-    # _also_close with value True if this is an open tag with a slash at the
-    # end of the tag.  The special tags <onlyinclude>, <noinclude>, and
-    # <includeonly> also generate this tag.
+    # HTML tag (open or close tag).  Args is the name of the tag
+    # directly (i.e., not a list).  Attrs contains tag attributes and
+    # "_close" with value True if this is a close tag.  It contains
+    # "_also_close" with value True if this is an open tag with a
+    # slash at the end of the tag.  The special tags <onlyinclude>,
+    # <noinclude>, and <includeonly> also generate this tag.  Children
+    # of HTML nodes are not used.
     HTML = enum.auto(),
 
     # An internal Wikimedia link (marked with [[...]]).  The link arguments
@@ -834,6 +835,26 @@ def list_fn(ctx, token):
     node.args = token
 
 
+def tag_add_attrs(node, attrs, also_end):
+    assert isinstance(node, WikiNode)
+    assert isinstance(attrs, str)
+    assert also_end in (True, False)
+
+    # Set _also_close if needed
+    if also_end:
+        node.attrs["_also_close"] = True
+
+    # Extract attributes from the tag into the node.attrs dictionary
+    for m in re.finditer(r"""(?si)\b([^"'>/=\0-\037\s]+)"""
+                        r"""(=("[^"]*"|'[^']*'|[^"'<>`\s]*))?\s*""",
+                         attrs):
+        name = m.group(1)
+        value = m.group(3) or ""
+        if value.startswith("'") or value.startswith('"'):
+            value = value[1:-1]
+        node.attrs[name] = value
+
+
 def tag_fn(ctx, token):
     """Handler function for tokens that look like HTML tags and their end
     tags.  This includes various built-in tags that aren't actually
@@ -844,13 +865,13 @@ def tag_fn(ctx, token):
         return
 
     # Try to parse it as a start tag
-    m = re.match(r"""<\s*([-a-zA-Z0-9]+)\s*(\b[-a-z0-9]+(=("[^"]*"|"""
-                 r"""'[^']*'|[^ \t\n"'`=<>]*))?\s*)*(/?)\s*>""", token)
+    m = re.match(r"""<\s*([-a-zA-Z0-9]+)\s*((\b[-a-z0-9]+(=("[^"]*"|"""
+                 r"""'[^']*'|[^ \t\n"'`=<>]*))?\s*)*)(/?)\s*>""", token)
     if m:
         # This is a start tag
         name = m.group(1)
         attrs = m.group(2)
-        also_end = m.group(5) == "/"
+        also_end = m.group(6) == "/"
         name = name.lower()
         # Handle <nowiki> start tag
         if name == "nowiki":
@@ -865,8 +886,10 @@ def tag_fn(ctx, token):
 
         # Handle <pre> start tag
         if name == "pre":
-            if not also_end:
-                ctx.push(NodeKind.PRE)
+            node = ctx.push(NodeKind.PRE)
+            tag_add_attrs(node, attrs, also_end)
+            if also_end:
+                ctx.pop(False)
             return
 
         # Generate error from tags that are not allowed HTML tags
@@ -878,11 +901,8 @@ def tag_fn(ctx, token):
 
         # Handle other start tag.  We push HTML tags as HTML nodes.
         node = ctx.push(NodeKind.HTML)
-        node.args.append(name)
-        node.children.append(token)
-        if also_end:
-            node.attrs["_also_close"] = True
-        # XXX handle attrs
+        node.args = name
+        tag_add_attrs(node, attrs, also_end)
 
         # Pop it immediately, as we don't store anything other than the
         # tag itself under a HTML tag.
@@ -925,8 +945,7 @@ def tag_fn(ctx, token):
 
     # Push a HTML node for the end tag
     node = ctx.push(NodeKind.HTML)
-    node.args.append(name)
-    node.children.append(token)
+    node.args = name
     node.attrs["_close"] = True
     ctx.pop(False)
 

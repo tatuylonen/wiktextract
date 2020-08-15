@@ -120,12 +120,12 @@ dasfasddasfdas
         self.assertEqual(a.kind, NodeKind.HTML)
         self.assertEqual(a.attrs.get("_close", False), False)
         self.assertEqual(a.attrs.get("_also_close", False), False)
-        self.assertEqual(a.children, ["""<span id="anchor">"""])
+        self.assertEqual(a.children, [])
         self.assertEqual(b, "hdr text")
         self.assertEqual(c.kind, NodeKind.HTML)
         self.assertEqual(c.attrs.get("_close", False), True)
         self.assertEqual(c.attrs.get("_also_close", False), False)
-        self.assertEqual(c.children, ["""</span>"""])
+        self.assertEqual(c.children, [])
         self.assertEqual(h.children, ["\ndata"])
 
     def test_nowiki1(self):
@@ -161,12 +161,43 @@ dasfasddasfdas
         self.assertEqual(len(tree.children), 3)
         a, b, c = tree.children
         self.assertEqual(a.kind, NodeKind.HTML)
-        self.assertEqual(a.args, ["b"])
-        self.assertEqual(a.children, ["<b>"])
+        self.assertEqual(a.args, "b")
+        self.assertEqual(a.children, [])
         self.assertEqual(b, "foo")
         self.assertEqual(c.kind, NodeKind.HTML)
-        self.assertEqual(c.args, ["b"])
-        self.assertEqual(c.children, ["</b>"])
+        self.assertEqual(c.args, "b")
+        self.assertEqual(c.children, [])
+
+    def test_html2(self):
+        tree = parse("test", """<div style='color: red' width="40" """
+                     """max-width=100 bogus>red text</div>""")
+        self.assertEqual(len(tree.children), 3)
+        a, b, c = tree.children
+        self.assertEqual(a.kind, NodeKind.HTML)
+        self.assertEqual(a.args, "div")
+        self.assertEqual(a.attrs.get("_close", False), False)
+        self.assertEqual(a.attrs.get("_also_close", False), False)
+        self.assertEqual(a.attrs.get("style", False), "color: red")
+        self.assertEqual(a.attrs.get("width", False), "40")
+        self.assertEqual(a.attrs.get("max-width", False), "100")
+        self.assertEqual(a.attrs.get("bogus", False), "")
+        self.assertEqual(a.children, [])
+        self.assertEqual(b, "red text")
+        self.assertEqual(c.kind, NodeKind.HTML)
+        self.assertEqual(c.args, "div")
+        self.assertEqual(c.attrs.get("_close", False), True)
+        self.assertEqual(c.children, [])
+
+    def test_html3(self):
+        tree = parse("test", """<br class="big" />""")
+        self.assertEqual(len(tree.children), 1)
+        h = tree.children[0]
+        self.assertEqual(h.kind, NodeKind.HTML)
+        self.assertEqual(h.args, "br")
+        self.assertEqual(h.attrs.get("class", False), "big")
+        self.assertEqual(h.attrs.get("_close", False), False)
+        self.assertEqual(h.attrs.get("_also_close", False), True)
+        self.assertEqual(h.children, [])
 
     def test_html_unknown(self):
         tree, ctx = parse_with_ctx("test", "a<unknown>foo</unknown>b")
@@ -385,6 +416,16 @@ def foo(x):
         self.assertEqual(b.children, ["preformatted &amp; '''not bold''' text"])
         self.assertEqual(c, " after")
 
+    def test_pre2(self):
+        tree = parse("test", """<PRE style="color: red">line1\nline2</pre>""")
+        self.assertEqual(len(tree.children), 1)
+        h = tree.children[0]
+        self.assertEqual(h.kind, NodeKind.PRE)
+        self.assertEqual(h.args, [])
+        self.assertEqual(h.attrs.get("_close", False), False)
+        self.assertEqual(h.attrs.get("_also_close", False), False)
+        self.assertEqual(h.attrs.get("style", False), "color: red")
+
     def test_comment1(self):
         tree = parse("test", "foo<!-- not\nshown-->bar")
         self.assertEqual(tree.children, ["foobar"])
@@ -557,10 +598,10 @@ def foo(x):
         self.assertEqual(b.children, [])
 
 
-# XXX implement:
-# XXX html tag attrs, including for <pre style="color: red">
-
 # XXX test:
 # XXX TABLE and its subnodes
-# XXX magic links (e.g., ISBN) https://www.mediawiki.org/wiki/Markup_spec/BNF/Magic_links
-# XXX change URL non-first parameters to all go in second parameter
+
+# Note: Magic links (e.g., ISBN, RFC) are not supported.  They are
+# disabled by default in MediaWiki since version 1.28 and Wiktionary
+# does not really seem to use them and they are not particularly
+# important.  See https://www.mediawiki.org/wiki/Help:Magic_links
