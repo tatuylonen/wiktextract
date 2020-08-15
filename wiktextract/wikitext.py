@@ -269,14 +269,12 @@ class NodeKind(enum.Enum):
     # A table caption (under TABLE).  Content is in children.
     TABLE_CAPTION = enum.auto(),
 
-    # A table header row (under TABLE).  Content is in children.
-    TABLE_HEADER_ROW = enum.auto(),
-
-    # A table header cell (under TABLE_HEADER_ROW).  Content is in children.
-    TABLE_HEADER_CELL = enum.auto(),
-
     # A table row (under TABLE).  Content is in children.
     TABLE_ROW = enum.auto(),
+
+    # A table header cell (under TABLE_ROW).  Content is in children.
+    # Rows where all cells are header cells are header rows.
+    TABLE_HEADER_CELL = enum.auto(),
 
     # A table cell (under TABLE_ROW).  Content is in children.
     TABLE_CELL = enum.auto(),
@@ -757,28 +755,29 @@ def table_caption_fn(ctx, token):
 
 def table_hdr_cell_fn(ctx, token):
     """Handler function for table header row cell separator ! or !!."""
+    table_row_check_attrs(ctx)
     table_check_attrs(ctx)
     if not ctx.have(NodeKind.TABLE):
         text_fn(ctx, token)
         return
     while True:
         node = ctx.stack[-1]
-        if node.kind == NodeKind.TABLE_HEADER_ROW:
+        if node.kind == NodeKind.TABLE_ROW:
             ctx.push(NodeKind.TABLE_HEADER_CELL)
             return
         if node.kind == NodeKind.TABLE:
-            ctx.push(NodeKind.TABLE_HEADER_ROW)
+            ctx.push(NodeKind.TABLE_ROW)
             ctx.push(NodeKind.TABLE_HEADER_CELL)
             return
         if node.kind == NodeKind.TABLE_CAPTION:
             if ctx.beginning_of_line:
                 ctx.pop(False)
-                ctx.push(NodeKind.TABLE_HEADER_ROW)
+                ctx.push(NodeKind.TABLE_ROW)
                 ctx.push(NodeKind.TABLE_HEADER_CELL)
             else:
                 text_fn(ctx, token)
             return
-        if node.kind in (NodeKind.TABLE_CELL, NodeKind.TABLE_ROW):
+        if node.kind == NodeKind.TABLE_CELL:
             text_fn(ctx, token)
             return
         ctx.pop(True)
@@ -798,7 +797,7 @@ def table_row_fn(ctx, token):
     ctx.push(NodeKind.TABLE_ROW)
 
 
-def table_row_cell_fn(ctx, token):
+def table_cell_fn(ctx, token):
     """Handler function for table row cell separator | or ||."""
     table_row_check_attrs(ctx)
     table_check_attrs(ctx)
@@ -829,8 +828,7 @@ def table_row_cell_fn(ctx, token):
         if node.kind == NodeKind.TABLE:
             ctx.push(NodeKind.TABLE_ROW)
             break
-        if node.kind in (NodeKind.TABLE_HEADER_ROW, NodeKind.TABLE_HEADER_CELL,
-                         NodeKind.TABLE_CAPTION):
+        if node.kind == NodeKind.TABLE_CAPTION:
             text_fn(ctx, token)
             return
         ctx.pop(True)
@@ -875,7 +873,7 @@ def vbar_fn(ctx, token):
         node.children = []
         return
 
-    table_row_cell_fn(ctx, token)
+    table_cell_fn(ctx, token)
 
 
 def double_vbar_fn(ctx, token):
@@ -888,7 +886,7 @@ def double_vbar_fn(ctx, token):
         vbar_fn(ctx, "|")
         return
 
-    table_row_cell_fn(ctx, token)
+    table_cell_fn(ctx, token)
 
 
 def table_end_fn(ctx, token):
@@ -939,7 +937,6 @@ def list_fn(ctx, token):
         if node.kind in (NodeKind.HTML, NodeKind.TEMPLATE,
                          NodeKind.TEMPLATEVAR, NodeKind.PARSERFN,
                          NodeKind.TABLE,
-                         NodeKind.TABLE_HEADER_ROW,
                          NodeKind.TABLE_HEADER_CELL,
                          NodeKind.TABLE_ROW,
                          NodeKind.TABLE_CELL):

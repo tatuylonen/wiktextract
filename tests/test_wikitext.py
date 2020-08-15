@@ -675,7 +675,7 @@ def foo(x):
         c, h, a, b = t.children
         self.assertEqual(c.kind, NodeKind.TABLE_CAPTION)
         self.assertEqual(c.children, [" cap!!tion!||text\n"])
-        self.assertEqual(h.kind, NodeKind.TABLE_HEADER_ROW)
+        self.assertEqual(h.kind, NodeKind.TABLE_ROW)
         self.assertEqual(len(h.children), 3)
         ha, hb, hc = h.children
         self.assertEqual(ha.kind, NodeKind.TABLE_HEADER_CELL)
@@ -722,7 +722,7 @@ def foo(x):
         self.assertEqual(c.kind, NodeKind.TABLE_CAPTION)
         self.assertEqual(c.attrs.get("class"), "caption")
         self.assertEqual(c.children, ["cap!!tion!||text\n"])
-        self.assertEqual(h.kind, NodeKind.TABLE_HEADER_ROW)
+        self.assertEqual(h.kind, NodeKind.TABLE_ROW)
         self.assertEqual(len(h.children), 3)
         ha, hb, hc = h.children
         self.assertEqual(ha.kind, NodeKind.TABLE_HEADER_CELL)
@@ -758,13 +758,72 @@ def foo(x):
         self.assertEqual(bc.kind, NodeKind.TABLE_CELL)
         self.assertEqual(bc.children, ["more!\n"])
 
-
+    def test_table_rowhdrs(self):
+        tree = parse("test", """{| class="wikitable"
+|-
+! scope="col"| Item
+! scope="col"| Quantity
+! scope="col"| Price
+|-
+! scope="row"| Bread
+| 0.3 kg
+| $0.65
+|-
+! scope="row"| Butter
+| 0.125 kg
+| $1.25
+|-
+! scope="row" colspan="2"| Total
+| $1.90
+|}""")
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.TABLE)
+        self.assertEqual(t.attrs.get("class"), "wikitable")
+        self.assertEqual(t.args, [])
+        self.assertEqual(len(t.children), 4)
+        h, a, b, c = t.children
+        self.assertEqual(h.kind, NodeKind.TABLE_ROW)
+        self.assertEqual(len(h.children), 3)
+        ha, hb, hc = h.children
+        self.assertEqual(ha.kind, NodeKind.TABLE_HEADER_CELL)
+        self.assertEqual(ha.attrs.get("scope"), "col")
+        self.assertEqual(ha.children, [" Item\n"])
+        self.assertEqual(hb.kind, NodeKind.TABLE_HEADER_CELL)
+        self.assertEqual(hb.attrs.get("scope"), "col")
+        self.assertEqual(hb.children, [" Quantity\n"])
+        self.assertEqual(hc.kind, NodeKind.TABLE_HEADER_CELL)
+        self.assertEqual(hc.attrs.get("scope"), "col")
+        self.assertEqual(hc.children, [" Price\n"])
+        self.assertEqual(a.kind, NodeKind.TABLE_ROW)
+        self.assertEqual(len(a.children), 3)
+        aa, ab, ac = a.children
+        self.assertEqual(aa.kind, NodeKind.TABLE_HEADER_CELL)
+        self.assertEqual(aa.attrs.get("scope"), "row")
+        self.assertEqual(aa.children, [" Bread\n"])
+        self.assertEqual(ab.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(ab.children, [" 0.3 kg\n"])
+        self.assertEqual(ac.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(ac.children, [" $0.65\n"])
+        self.assertEqual(b.kind, NodeKind.TABLE_ROW)
+        self.assertEqual(len(b.children), 3)
+        ba, bb, bc = b.children
+        self.assertEqual(ba.kind, NodeKind.TABLE_HEADER_CELL)
+        self.assertEqual(ba.attrs.get("scope"), "row")
+        self.assertEqual(ba.children, [" Butter\n"])
+        self.assertEqual(bb.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(bc.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(len(c.children), 2)
+        ca, cb = c.children
+        self.assertEqual(ca.kind, NodeKind.TABLE_HEADER_CELL)
+        self.assertEqual(ca.attrs.get("scope"), "row")
+        self.assertEqual(ca.attrs.get("colspan"), "2")
+        self.assertEqual(ca.children, [" Total\n"])
+        self.assertEqual(cb.kind, NodeKind.TABLE_CELL)
+        self.assertEqual(cb.children, [" $1.90\n"])
 
 
 # Note: Magic links (e.g., ISBN, RFC) are not supported.  They are
 # disabled by default in MediaWiki since version 1.28 and Wiktionary
 # does not really seem to use them and they are not particularly
 # important.  See https://www.mediawiki.org/wiki/Help:Magic_links
-
-# XXX each row in a table may contain a header cell
-# XXX header cells can also take attrs with a vertical bar
