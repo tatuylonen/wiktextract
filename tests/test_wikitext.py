@@ -3,7 +3,7 @@
 # Copyright (c) 2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
-from wiktextract.wikitext import parse, parse_with_ctx, NodeKind
+from wiktextract.wikitext import parse, parse_with_ctx, print_tree, NodeKind
 
 class WikiTextTests(unittest.TestCase):
 
@@ -224,7 +224,7 @@ dasfasddasfdas
         self.assertEqual(b.children, ["bold test"])
         self.assertEqual(c, " b")
 
-    def test_bolditalic(self):
+    def test_bolditalic1(self):
         tree = parse("test", "a '''''bold italic test''''' b")
         self.assertEqual(len(tree.children), 3)
         a, b, c = tree.children
@@ -234,6 +234,26 @@ dasfasddasfdas
         ba = b.children[0]
         self.assertEqual(ba.kind, NodeKind.ITALIC)
         self.assertEqual(ba.children, ["bold italic test"])
+
+    def test_bolditalic2(self):
+        # Mismatch in bold/italic close ordering is permitted
+        tree = parse("test", "''' ''bold italic test'''<nowiki/>''")
+        self.assertEqual(len(tree.children), 1)
+        self.assertEqual(tree.children[0].kind, NodeKind.BOLD)
+        a, b = tree.children[0].children
+        self.assertEqual(a, " ")
+        self.assertEqual(b.kind, NodeKind.ITALIC)
+        self.assertEqual(b.children, ["bold italic test"])
+
+    def test_bolditalic3(self):
+        # Mismatch in bold/italic close ordering is permitted
+        tree = parse("test", "'' '''bold italic test''<nowiki/>'''")
+        self.assertEqual(len(tree.children), 1)
+        self.assertEqual(tree.children[0].kind, NodeKind.ITALIC)
+        a, b = tree.children[0].children
+        self.assertEqual(a, " ")
+        self.assertEqual(b.kind, NodeKind.BOLD)
+        self.assertEqual(b.children, ["bold italic test"])
 
     def test_hline(self):
         tree = parse("test", "foo\n----\nmore")
@@ -284,6 +304,24 @@ dasfasddasfdas
         self.assertEqual(c.kind, NodeKind.LIST_ITEM)
         self.assertEqual(c.args, "#")
         self.assertEqual(c.children, ["item2\n"])
+
+    def test_listend1(self):
+        tree = parse("test", "# item1\nFoo\n")
+        self.assertEqual(len(tree.children), 2)
+        a, b = tree.children
+        self.assertEqual(a.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(a.args, "#")
+        self.assertEqual(a.children, ["item1\n"])
+        self.assertEqual(b, "Foo\n")
+
+    def test_listend2(self):
+        tree = parse("test", "#\nitem1\nFoo\n")
+        self.assertEqual(len(tree.children), 2)
+        a, b = tree.children
+        self.assertEqual(a.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(a.args, "#")
+        self.assertEqual(a.children, ["item1\n"])
+        self.assertEqual(b, "Foo\n")
 
     def test_link1(self):
         tree = parse("test", "a [[Main Page]] b")
@@ -544,6 +582,54 @@ def foo(x):
         self.assertEqual(b.kind, NodeKind.TEMPLATE)
         self.assertEqual(b.args, [[":xyz"]])
 
+    def test_template10(self):
+        tree = parse("test", "{{{{a}}}}")
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.TEMPLATE)
+        self.assertEqual(t.children, [])
+        self.assertEqual(len(t.args), 1)
+        tt = t.args[0][0]
+        self.assertEqual(tt.kind, NodeKind.TEMPLATE)
+        self.assertEqual(tt.args, [["a"]])
+        self.assertEqual(tt.children, [])
+
+    def test_template11(self):
+        tree = parse("test", "{{{{{a}}}}}")
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.TEMPLATE)
+        self.assertEqual(t.children, [])
+        self.assertEqual(len(t.args), 1)
+        tt = t.args[0][0]
+        self.assertEqual(tt.kind, NodeKind.TEMPLATEVAR)
+        self.assertEqual(tt.args, [["a"]])
+        self.assertEqual(tt.children, [])
+
+    def test_template12(self):
+        tree = parse("test", "{{{{{a|}}}}}")
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.TEMPLATE)
+        self.assertEqual(t.children, [])
+        self.assertEqual(len(t.args), 1)
+        tt = t.args[0][0]
+        self.assertEqual(tt.kind, NodeKind.TEMPLATEVAR)
+        self.assertEqual(tt.args, [["a"], []])
+        self.assertEqual(tt.children, [])
+
+    def test_template13(self):
+        tree = parse("test", "{{{{a|}}}}")
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.TEMPLATE)
+        self.assertEqual(t.children, [])
+        self.assertEqual(len(t.args), 1)
+        tt = t.args[0][0]
+        self.assertEqual(tt.kind, NodeKind.TEMPLATE)
+        self.assertEqual(tt.args, [["a"], []])
+        self.assertEqual(tt.children, [])
+
     def test_templatevar1(self):
         tree = parse("test", "{{{foo}}}")
         self.assertEqual(len(tree.children), 1)
@@ -570,6 +656,30 @@ def foo(x):
         self.assertEqual(c.args, [["foo"]])
         self.assertEqual(b.args[1:], [["bar"], ["baz"]])
         self.assertEqual(b.children, [])
+
+    def test_templatevar4(self):
+        tree = parse("test", "{{{{{{1}}}}}}")
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.TEMPLATEVAR)
+        self.assertEqual(t.children, [])
+        self.assertEqual(len(t.args), 1)
+        tt = t.args[0][0]
+        self.assertEqual(tt.kind, NodeKind.TEMPLATEVAR)
+        self.assertEqual(tt.args, [["1"]])
+        self.assertEqual(tt.children, [])
+
+    def test_templatevar5(self):
+        tree = parse("test", "{{{{{{1|}}}}}}")
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.TEMPLATEVAR)
+        self.assertEqual(t.children, [])
+        self.assertEqual(len(t.args), 1)
+        tt = t.args[0][0]
+        self.assertEqual(tt.kind, NodeKind.TEMPLATEVAR)
+        self.assertEqual(tt.args, [["1"], []])
+        self.assertEqual(tt.children, [])
 
     def test_parserfn1(self):
         tree = parse("test", "{{CURRENTYEAR}}x")
@@ -609,7 +719,6 @@ def foo(x):
     def test_table_simple(self):
         tree = parse("test",
                      "{|\n|Orange||Apple||more\n|-\n|Bread||Pie||more\n|}")
-        print(tree)
         self.assertEqual(len(tree.children), 1)
         t = tree.children[0]
         self.assertEqual(t.kind, NodeKind.TABLE)
@@ -637,7 +746,6 @@ def foo(x):
     def test_table_simple2(self):
         tree = parse("test",
                      "{|\n|-\n|Orange||Apple||more\n|-\n|Bread||Pie||more\n|}")
-        print(tree)
         self.assertEqual(len(tree.children), 1)
         t = tree.children[0]
         self.assertEqual(t.kind, NodeKind.TABLE)
@@ -662,11 +770,22 @@ def foo(x):
         self.assertEqual(bc.kind, NodeKind.TABLE_CELL)
         self.assertEqual(bc.children, ["more\n"])
 
+    def test_table_hdr1(self):
+        tree = parse("test", "{|\n!Header\n|}")
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.TABLE)
+        self.assertEqual(len(t.children), 1)
+        a = t.children[0]
+        self.assertEqual(a.kind, NodeKind.TABLE_ROW)
+        self.assertEqual(len(a.children), 1)
+        b = a.children[0]
+        self.assertEqual(b.kind, NodeKind.TABLE_HEADER_CELL)
+        self.assertEqual(b.children, ["Header\n"])
+
     def test_table_complex1(self):
         tree = parse("test",
                      "{|\n|+ cap!!tion!||text\n!H1!!H2!!H3\n|"
                      "-\n|Orange||Apple||more!!\n|-\n|Bread||Pie||more\n|}")
-        print(tree)
         self.assertEqual(len(tree.children), 1)
         t = tree.children[0]
         self.assertEqual(t.kind, NodeKind.TABLE)
@@ -706,7 +825,7 @@ def foo(x):
     def test_table_attrs1(self):
         tree = parse("test", """{| class="table"
 |+ class="caption" |cap!!tion!||text
-!class="h1"|H1!!class="h2"|H2!!class="h3"|H3
+!class="h1"|H1!!class="h2"|H2!!class="h3"|H3|x
 |- class="row1"
 |class="cell1"|Orange||class="cell2"|Apple||class="cell3"|more!!
 |- class="row2"
@@ -733,7 +852,7 @@ def foo(x):
         self.assertEqual(hb.children, ["H2"])
         self.assertEqual(hc.kind, NodeKind.TABLE_HEADER_CELL)
         self.assertEqual(hc.attrs.get("class"), "h3")
-        self.assertEqual(hc.children, ["H3\n"])
+        self.assertEqual(hc.children, ["H3|x\n"])
         self.assertEqual(a.kind, NodeKind.TABLE_ROW)
         self.assertEqual(a.attrs.get("class"), "row1")
         self.assertEqual(len(a.children), 3)
@@ -821,6 +940,170 @@ def foo(x):
         self.assertEqual(ca.children, [" Total\n"])
         self.assertEqual(cb.kind, NodeKind.TABLE_CELL)
         self.assertEqual(cb.children, [" $1.90\n"])
+
+    def test_error1(self):
+        tree, ctx = parse_with_ctx("test", "'''")
+        self.assertEqual(len(ctx.errors), 1)
+
+    def test_error2(self):
+        tree, ctx = parse_with_ctx("test", "=== ''' ===")
+        self.assertEqual(len(ctx.errors), 1)
+
+    def test_error3(self):
+        tree, ctx = parse_with_ctx("test", "=== Test ======")
+        self.assertEqual(len(ctx.errors), 1)
+
+    def test_error4(self):
+        tree, ctx = parse_with_ctx("test", "[['''x]]")
+        self.assertEqual(len(ctx.errors), 1)
+        self.assertEqual(tree.children[0].kind, NodeKind.LINK)
+
+    def test_error5(self):
+        tree, ctx = parse_with_ctx("test", "['''x]")
+        self.assertEqual(len(ctx.errors), 1)
+        self.assertEqual(tree.children[0].kind, NodeKind.URL)
+
+    def test_error6(self):
+        tree, ctx = parse_with_ctx("test", "{{foo|'''x}}")
+        self.assertEqual(len(ctx.errors), 1)
+        self.assertEqual(tree.children[0].kind, NodeKind.TEMPLATE)
+
+    def test_error7(self):
+        tree, ctx = parse_with_ctx("test", "{{{foo|'''x}}}")
+        self.assertEqual(len(ctx.errors), 1)
+        self.assertEqual(tree.children[0].kind, NodeKind.TEMPLATEVAR)
+
+    def test_error8(self):
+        tree, ctx = parse_with_ctx("test", "</pre>")
+        self.assertEqual(len(ctx.errors), 1)
+
+    def test_error9(self):
+        tree, ctx = parse_with_ctx("test", "</nowiki>")
+        self.assertEqual(len(ctx.errors), 1)
+
+    def test_plain1(self):
+        tree = parse("test", "]]")
+        self.assertEqual(tree.children, ["]]"])
+
+    def test_plain2(self):
+        tree = parse("test", "]")
+        self.assertEqual(tree.children, ["]"])
+
+    def test_plain3(self):
+        tree = parse("test", "}}")
+        self.assertEqual(tree.children, ["}}"])
+
+    def test_plain4(self):
+        tree = parse("test", "}}}")
+        self.assertEqual(tree.children, ["}}}"])
+
+    def test_plain5(self):
+        tree = parse("test", "|+")
+        self.assertEqual(tree.children, ["|+"])
+
+    def test_plain6(self):
+        tree = parse("test", "|}")
+        self.assertEqual(tree.children, ["|}"])
+
+    def test_plain7(self):
+        tree = parse("test", "|+")
+        self.assertEqual(tree.children, ["|+"])
+
+    def test_plain8(self):
+        tree = parse("test", "|")
+        self.assertEqual(tree.children, ["|"])
+
+    def test_plain9(self):
+        tree = parse("test", "||")
+        self.assertEqual(tree.children, ["||"])
+
+    def test_plain10(self):
+        tree = parse("test", "!")
+        self.assertEqual(tree.children, ["!"])
+
+    def test_plain11(self):
+        tree = parse("test", "!!")
+        self.assertEqual(tree.children, ["!!"])
+
+    def test_nonsense1(self):
+        tree = parse("test", "<pre />")
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.PRE)
+
+    def test_nonsense2(self):
+        tree, ctx = parse_with_ctx("test", "{{{{{{{{")
+        self.assertEqual(tree.children, ["{{{{{{{{"])
+        self.assertEqual(len(ctx.errors), 1)
+
+    def test_nonsense3(self):
+        tree, ctx = parse_with_ctx("test", "}}}}}}}}")
+        self.assertEqual(tree.children, ["}}}}}}}}"])
+        self.assertEqual(len(ctx.errors), 1)
+
+    def test_nonsense4(self):
+        tree, ctx = parse_with_ctx("test", "|}}}}}}}}")
+        self.assertEqual(tree.children, ["|}}}}}}}}"])
+        self.assertEqual(len(ctx.errors), 1)
+
+    def test_print_tree(self):
+        tree = parse("test", """{| class="wikitable"
+|-
+! scope="col"| Item
+! scope="col"| Quantity
+! scope="col"| Price
+|-
+! scope="row"| Bread
+| 0.3 kg
+| $0.65
+|-
+! scope="row"| Butter
+| 0.125 kg
+| $1.25
+|-
+! scope="row" colspan="2"| Total
+| $1.90
+|}""")
+        print_tree(tree)
+
+    def test_str(self):
+        tree = parse("test", """{| class="wikitable"
+|-
+! scope="col"| Item
+! scope="col"| Quantity
+! scope="col"| Price
+|-
+! scope="row"| Bread
+| 0.3 kg
+| $0.65
+|-
+! scope="row"| Butter
+| 0.125 kg
+| $1.25
+|-
+! scope="row" colspan="2"| Total
+| $1.90
+|}""")
+        print(str(tree))
+
+    def test_repr(self):
+        tree = parse("test", """{| class="wikitable"
+|-
+! scope="col"| Item
+! scope="col"| Quantity
+! scope="col"| Price
+|-
+! scope="row"| Bread
+| 0.3 kg
+| $0.65
+|-
+! scope="row"| Butter
+| 0.125 kg
+| $1.25
+|-
+! scope="row" colspan="2"| Total
+| $1.90
+|}""")
+        print(repr(tree))
 
 
 # Note: Magic links (e.g., ISBN, RFC) are not supported.  They are

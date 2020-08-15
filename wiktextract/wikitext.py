@@ -414,6 +414,11 @@ class ParseCtx(object):
         assert warn_unclosed in (True, False)
         node = self.stack[-1]
 
+        # Warn about unclosed syntaxes.
+        if warn_unclosed and node.kind in MUST_CLOSE_KINDS:
+            self.error("format {} not properly closed, started on line {}"
+                       "".format(node.kind.name, node.loc))
+
         # When popping BOLD and ITALIC nodes, if the node has no children,
         # just remove the node from it's parent's children.  We may otherwise
         # generate spurious empty BOLD and ITALIC nodes when closing them
@@ -429,9 +434,6 @@ class ParseCtx(object):
         if node.kind in HAVE_ARGS_KINDS:
             node.args.append(node.children)
             node.children = []
-        if warn_unclosed and node.kind in MUST_CLOSE_KINDS:
-            self.error("format {} not properly closed, started on line {}"
-                       "".format(node.kind.name, node.loc))
 
         # When popping a TEMPLATE, check if its name is a constant that
         # is a known parser function (including predefined variable).
@@ -489,8 +491,8 @@ def text_fn(ctx, token):
         m = re.match(r"(?s)(\w+)(.*)", token)
         if m:
             node.children[-1].children.append(m.group(1))
-            text = m.group(2)
-            if not text:
+            token = m.group(2)
+            if not token:
                 return
 
     # If the previous child was also text, merge this additional text with it
@@ -511,7 +513,6 @@ def hline_fn(ctx, token):
     """Processes a horizontal line token."""
     ctx.push(NodeKind.HLINE)
     ctx.pop(True)
-
 
 
 def subtitle_start_fn(ctx, token):
@@ -614,8 +615,6 @@ def ilink_end_fn(ctx, token):
         if node.kind == NodeKind.LINK:
             ctx.pop(False)
             break
-        if node.kind in kind_to_level:
-            break  # Never pop past section header
         ctx.pop(True)
 
 
@@ -634,8 +633,6 @@ def elink_end_fn(ctx, token):
         if node.kind == NodeKind.URL:
             ctx.pop(False)
             break
-        if node.kind in kind_to_level:
-            break  # Never pop past section header
         ctx.pop(True)
 
 
@@ -666,8 +663,6 @@ def templarg_end_fn(ctx, token):
         if node.kind == NodeKind.TEMPLATEVAR:
             ctx.pop(False)
             break
-        if node.kind in kind_to_level:
-            break  # Never pop past section header
         ctx.pop(True)
 
 
@@ -686,8 +681,6 @@ def templ_end_fn(ctx, token):
         if node.kind in (NodeKind.TEMPLATE, NodeKind.PARSERFN):
             ctx.pop(False)
             break
-        if node.kind in kind_to_level:
-            break  # Never pop past section header
         ctx.pop(True)
 
 
@@ -899,8 +892,6 @@ def table_end_fn(ctx, token):
         if node.kind == NodeKind.TABLE:
             ctx.pop(False)
             break
-        if node.kind in kind_to_level:
-            break  # Always break before section headers
         ctx.pop(True)
 
 
@@ -1137,7 +1128,7 @@ for x in MAGIC_WORDS:
     tokenops[x] = magicword_fn
 
 
-def token_iter(text):
+def token_iter(ctx, text):
     """Tokenizes MediaWiki page content.  This yields (is_token, text) for
     each token.  ``is_token`` is False for text and True for other tokens."""
     assert isinstance(text, str)
@@ -1150,7 +1141,7 @@ def token_iter(text):
         token = m.group(0)
         if token.startswith("=="):
             yield True, "<" + m.group(1)
-            for x in token_iter(m.group(2)):
+            for x in token_iter(ctx, m.group(2)):
                 yield x
             yield True, ">" + m.group(4)
         elif token.startswith("{{"):
@@ -1167,7 +1158,7 @@ def token_iter(text):
                 yield True, "{{{"
                 yield True, "{{{"
             else:
-                print("Unsupported brace sequence {}".format(token))
+                ctx.error("Unsupported brace sequence {}".format(token))
                 yield False, token
         elif token.startswith("}}"):
             toklen = len(token)
@@ -1183,7 +1174,7 @@ def token_iter(text):
                 yield True, "}}}"
                 yield True, "}}}"
             else:
-                print("Unsupported brace sequence {}".format(token))
+                ctx.error("Unsupported brace sequence {}".format(token))
                 yield False, token
         elif token.startswith("|}}"):
             yield True, "|"
@@ -1201,7 +1192,7 @@ def token_iter(text):
                 yield True, "}}}"
                 yield True, "}}}"
             else:
-                print("Unsupported brace sequence {}".format(token))
+                ctx.error("Unsupported brace sequence {}".format(token))
                 yield False, token
         else:
             yield True, token
@@ -1217,7 +1208,7 @@ def parse_with_ctx(pagetitle, text):
     # Create parse context.  This also pushes a ROOT node on the stack.
     ctx = ParseCtx(pagetitle)
     # Process all tokens from the input.
-    for is_token, token in token_iter(text):
+    for is_token, token in token_iter(ctx, text):
         assert isinstance(token, str)
         node = ctx.stack[-1]
         if (not is_token or
