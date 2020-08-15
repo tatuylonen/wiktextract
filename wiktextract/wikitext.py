@@ -25,6 +25,160 @@ ALLOWED_HTML_TAGS = set([
     "center", "font", "rb", "strike", "tt",
 ])
 
+# MediaWiki magic words.  See https://www.mediawiki.org/wiki/Help:Magic_words
+MAGIC_WORDS = set([
+    "__NOTOC__",
+    "__FORCETOC__",
+    "__TOC__",
+    "__NOEDITSECTION__",
+    "__NEWSECTIONLINK__",
+    "__NONEWSECTIONLINK__",
+    "__NOGALLERY__",
+    "__HIDDENCAT__",
+    "__EXPECTUNUSEDCATEGORY__",
+    "__NOCONTENTCONVERT__",
+    "__NOCC__",
+    "__NOTITLECONVERT__",
+    "__NOTC__",
+    "__START__",
+    "__END__",
+    "__INDEX__",
+    "__NOINDEX__",
+    "__STATICREDIRECT__",
+    "__NOGLOBAL__",
+    "__DISAMBIG__",
+])
+
+# This list should include names of predefined parser functions and
+# predefined variables (some of which can take arguments using the same
+# syntax as parser functions and we treat them as parser functions).
+# See https://en.wikipedia.org/wiki/Help:Magic_words#Parser_functions
+PARSER_FUNCTIONS = set([
+    "FULLPAGENAME",
+    "PAGENAME",
+    "BASEPAGENAME",
+    "ROOTPAGENAME",
+    "SUBPAGENAME",
+    "ARTICLEPAGENAME",
+    "SUBJECTPAGENAME",
+    "TALKPAGENAME",
+    "NAMESPACENUMBER",
+    "NAMESPACE",
+    "ARTICLESPACE",
+    "SUBJECTSPACE",
+    "TALKSPACE",
+    "FULLPAGENAMEE",
+    "PAGENAMEE",
+    "BASEPAGENAMEE",
+    "ROOTPAGENAMEE",
+    "SUBPAGENAMEE",
+    "ARTICLEPAGENAMEE",
+    "SUBJECTPAGENAMEE",
+    "TALKPAGENAMEE",
+    "NAMESPACENUMBERE",
+    "NAMESPACEE",
+    "ARTICLESPACEE",
+    "SUBJECTSPACEE",
+    "TALKSPACEE",
+    "SHORTDESC",
+    "SITENAME",
+    "SERVER",
+    "SERVERNAME",
+    "SCRIPTPATH",
+    "CURRENTVERSION",
+    "CURRENTYEAR",
+    "CURRENTMONTH",
+    "CURRENTMONTHNAME",
+    "CURRENTMONTHABBREV",
+    "CURRENTDAY",
+    "CURRENTDAY2",
+    "CUEEWNTDOW",
+    "CURRENTDAYNAME",
+    "CURRENTTIME",
+    "CURRENTHOUR",
+    "CURRENTWEEK",
+    "CURRENTTIMESTAMP",
+    "LOCALYEAR",
+    "LOCALMONTH",
+    "LOCALMONTHNAME",
+    "LOCALMONTHABBREV",
+    "LOCALDAY",
+    "LOCALDAY2",
+    "LOCALDOW",
+    "LOCALDAYNAME",
+    "LOCALTIME",
+    "LOCALHOUR",
+    "LOCALWEEK",
+    "LOCALTIMESTAMP",
+    "REVISIONDAY",
+    "REVISIONDAY2",
+    "REVISIONMONTH",
+    "REVISIONYEAR",
+    "REVISIONTIMESTAMP",
+    "REVISIONUSER",
+    "NUMBEROFPAGES",
+    "NUMBEROFARTICLES",
+    "NUMBEROFFILES",
+    "NUMBEROFEDITS",
+    "NUMBEROFUSERS",
+    "NUMBEROFADMINS",
+    "NUMBEROFACTIVEUSERS",
+    "PAGEID",
+    "PAGESIZE",
+    "PROTECTIONLEVEL",
+    "PROTECTIONEXPIRY",
+    "PENDINGCHANGELEVEL",
+    "PAGESINCATEGORY",
+    "NUMBERINGROUP",
+    "lc",
+    "lcfirst",
+    "uc",
+    "ucfirst",
+    "formatnum",
+    "#dateformat",
+    "formatdate",
+    "padleft",
+    "padright",
+    "plural",
+    "#time",
+    "#timel",
+    "gender",
+    "#tag",
+    "localurl",
+    "fullurl",
+    "canonicalurl",
+    "filepath",
+    "urlencode",
+    "anchorencode",
+    "ns",
+    "nse",
+    "#rel2abs",
+    "#titleparts",
+    "#expr",
+    "#if",
+    "#ifeq",
+    "#iferror",
+    "#ifexpr",
+    "#ifexist",
+    "#switch",
+    "#babel",
+    "#categorytree",
+    "#coordinates",
+    "#invoke",
+    "#language",
+    "#lst",
+    "#lsth",
+    "#lstx",
+    "#property",
+    "#related",
+    "#section",
+    "#section-h",
+    "#section-x",
+    "#statements",
+    "#target",
+    "int",
+])
+
 
 @enum.unique
 class NodeKind(enum.Enum):
@@ -59,7 +213,7 @@ class NodeKind(enum.Enum):
 
     # A list item.  Nested items will be in children.  Items on the same
     # level will be on the same level.  There is no explicit node for a list.
-    # The first arg is the token for this item (e.g.,, "##").  Children
+    # Args is directly the token for this item (not as a list).  Children
     # is what goes in this list item.
     LIST_ITEM = enum.auto(),  # args = token for this item
 
@@ -94,9 +248,10 @@ class NodeKind(enum.Enum):
     # In WikiText {{{name|...}}}
     TEMPLATEVAR = enum.auto(),
 
-    # A parser function invocation.  Parser function name is in first argument
-    # and subsequent arguments are its parameters.  Children are not used.
-    # In WikiText {{name:arg1|arg2|...}}.
+    # A parser function invocation.  This is also used for built-in
+    # variables such as {{PAGENAME}}.  Parser function name is in
+    # first argument and subsequent arguments are its parameters.
+    # Children are not used.  In WikiText {{name:arg1|arg2|...}}.
     PARSERFN = enum.auto(),
 
     # An external URL.  The first argument is the URL.  Children are not used.
@@ -119,6 +274,10 @@ class NodeKind(enum.Enum):
 
     # A table cell (under TABLE_ROW).  Content is in children.
     TABLE_CELL = enum.auto(),
+
+    # A MediaWiki magic word.  The magic word is assigned directly to args
+    # (not as a list).  Children are not used.
+    MAGIC_WORD = enum.auto(),
 
     # XXX <ref ...> and <references />
     # XXX -{ ... }- syntax, see
@@ -200,9 +359,9 @@ class ParseCtx(object):
 
     def __init__(self, pagetitle):
         assert isinstance(pagetitle, str)
-        top_node = WikiNode(NodeKind.ROOT, 0)
-        top_node.args.append(pagetitle)
-        self.stack = [top_node]
+        node = WikiNode(NodeKind.ROOT, 0)
+        node.args.append(pagetitle)
+        self.stack = [node]
         self.linenum = 1
         self.beginning_of_line = True
         self.errors = []
@@ -213,8 +372,8 @@ class ParseCtx(object):
     def push(self, kind):
         assert isinstance(kind, NodeKind)
         node = WikiNode(kind, self.linenum)
-        top = self.stack[-1]
-        top.children.append(node)
+        prev = self.stack[-1]
+        prev.children.append(node)
         self.stack.append(node)
         self.suppress_special = False
         return node
@@ -245,6 +404,17 @@ class ParseCtx(object):
         if warn_unclosed and node.kind in MUST_CLOSE_KINDS:
             self.error("format {} not properly closed, started on line {}"
                        "".format(node.kind.name, node.loc))
+
+        # When popping a TEMPLATE, check if its name is a constant that
+        # is a known parser function (including predefined variable).
+        # If so, turn this node into a PARSERFN node.
+        if (node.kind == NodeKind.TEMPLATE and node.args and
+            len(node.args[0]) == 1 and isinstance(node.args[0][0], str) and
+            node.args[0][0] in PARSER_FUNCTIONS):
+            # Change node type to PARSERFN.  Otherwise it has identical
+            # structure to a TEMPLATE.
+            node.kind = NodeKind.PARSERFN
+
         self.stack.pop()
 
     def have(self, kind):
@@ -484,19 +654,31 @@ def templ_end_fn(ctx, token):
 def colon_fn(ctx, token):
     """Handler for a special colon (:) within a template call.  This indicates
     that it is actually a parser function call."""
-    top = ctx.stack[-1]
+    node = ctx.stack[-1]
+
+    print("COLON")
 
     # Unless we are in the first argument of a template, treat a colon that is
     # not at the beginning of a
-    if top.kind != NodeKind.TEMPLATE or top.args:
+    if (node.kind != NodeKind.TEMPLATE or node.args or
+        len(node.children) != 1 or not isinstance(node.children[0], str)):
+        text_fn(ctx, token)
+        return
+
+    # XXX I am not quite sure if all parser function names need to be
+    # known in advance or if any template with a colon in the name should
+    # be considered a parser function call.
+    if node.children[0] not in PARSER_FUNCTIONS:
+        print("DEBUG: unrecognized possible parser function: {}"
+              "".format(node.children[0]))
         text_fn(ctx, token)
         return
 
     # Colon in the first argument of {{name:...}} turns it into a parser
     # function call.
-    top.kind = NodeKind.PARSERFN
-    top.args.append(top.children)
-    top.children = []
+    node.kind = NodeKind.PARSERFN
+    node.args.append(node.children)
+    node.children = []
 
 
 def table_start_fn(ctx, token):
@@ -620,16 +802,22 @@ def list_fn(ctx, token):
     """Handles various tokens that start unordered or ordered list items,
     description list items, or indented lines."""
     token = token.strip()
-    top = ctx.stack[-1]
+    node = ctx.stack[-1]
 
     # A colon inside a template means it is a parser function call.  We use
     # colon_fn() to handle that kind of colon.
-    if token == ":" and top.kind == NodeKind.TEMPLATE:
+    print("LIST_FN", repr(token))
+    if token == ":" and node.kind == NodeKind.TEMPLATE:
         colon_fn(ctx, token)
         return
 
-    # An external link
-    if top.kind in (NodeKind.LINK, NodeKind.URL):
+    # Colons can occur inside links and don't mean a list item
+    if node.kind in (NodeKind.LINK, NodeKind.URL):
+        text_fn(ctx, token)
+        return
+
+    # List items must start a new line; otherwise treat as text
+    if not ctx.beginning_of_line:
         text_fn(ctx, token)
         return
 
@@ -670,7 +858,6 @@ def tag_fn(ctx, token):
         name = m.group(1)
         attrs = m.group(2)
         also_end = m.group(5) == "/"
-        top = ctx.stack[-1]
         name = name.lower()
         # Handle <nowiki> start tag
         if name == "nowiki":
@@ -751,6 +938,12 @@ def tag_fn(ctx, token):
     ctx.pop(False)
 
 
+def magicword_fn(ctx, token):
+    node = ctx.push(NodeKind.MAGIC_WORD)
+    node.args = token
+    ctx.pop(False)
+
+
 # Regular expression for matching a token in WikiMedia text
 token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"'''|"
@@ -762,10 +955,8 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"\]\]|"
                       r"\[|"
                       r"\]|"
-                      r"\{\{\{|"
-                      r"\}\}\}|"
-                      r"\{\{|"
-                      r"\}\}|"
+                      r"\{\{+|"
+                      r"\}\}+|"
                       r"\{\|"
                       r"\|\}|"
                       r"\|\+|"
@@ -775,12 +966,16 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"\||"
                       r"^----+|"
                       r"^[-*:;#]+\s*|"
+                      r":|"   # sometimes special when not beginning of line
                       r"<!\s*--((?s).)*?--\s*>|"
                       r"""<\s*[-a-zA-Z0-9]+\s*(\b[-a-z0-9]+(=("[^"]*"|"""
                       r"""'[^']*'|[^ \t\n"'`=<>]*))?\s*)*(/\s*)?>|"""
                       r"<\s*/\s*[-a-zA-Z0-9]+\s*>|"
                       r"https?://[a-zA-Z0-9.]+|"
-                      r":")
+                      r":|" +
+                      r"(" +
+                      r"|".join(r"\b{}\b".format(x) for x in MAGIC_WORDS) +
+                      r")")
 
 # Dictionary mapping fixed form tokens to handler functions.
 tokenops = {
@@ -805,6 +1000,8 @@ tokenops = {
     "\n": whitespace_fn,
     "\t": whitespace_fn,
 }
+for x in MAGIC_WORDS:
+    tokenops[x] = magicword_fn
 
 
 def token_iter(text):
@@ -823,6 +1020,38 @@ def token_iter(text):
             for x in token_iter(m.group(2)):
                 yield x
             yield True, ">" + m.group(4)
+        elif token.startswith("{{"):
+            toklen = len(token)
+            if toklen in (2, 3):
+                yield True, token
+            elif toklen == 4:
+                yield True, "{{"
+                yield True, "{{"
+            elif toklen == 5:
+                yield True, "{{"
+                yield True, "{{{"
+            elif toklen == 6:
+                yield True, "{{{"
+                yield True, "{{{"
+            else:
+                print("Unsupported brace sequence {}".format(token))
+                yield False, token
+        elif token.startswith("}}"):
+            toklen = len(token)
+            if toklen in (2, 3):
+                yield True, token
+            elif toklen == 4:
+                yield True, "}}"
+                yield True, "}}"
+            elif toklen == 5:
+                yield True, "}}}"
+                yield True, "}}"
+            elif toklen == 6:
+                yield True, "}}}"
+                yield True, "}}}"
+            else:
+                print("Unsupported brace sequence {}".format(token))
+                yield False, token
         else:
             yield True, token
     if pos != len(text):
@@ -863,7 +1092,7 @@ def parse_with_ctx(pagetitle, text):
                 hline_fn(ctx, token)
             elif token.startswith("<") and len(token):
                 tag_fn(ctx, token)
-            elif ctx.beginning_of_line and re.match(r"[-*:;#]+", token):
+            elif re.match(r"[-*:;#]+", token):
                 list_fn(ctx, token)
             elif re.match(r"https?://.*", token):
                 url_fn(ctx, token)

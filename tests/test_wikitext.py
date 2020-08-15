@@ -27,6 +27,10 @@ class WikiTextTests(unittest.TestCase):
         tree = parse("test", "some}}text")
         self.assertEqual(tree.children, ["some}}text"])
 
+    def test_text5(self):
+        tree = parse("test", "some* text")
+        self.assertEqual(tree.children, ["some* text"])
+
     def test_hdr2a(self):
         tree = parse("test", "==Foo==")
         assert len(tree.children) == 1
@@ -378,14 +382,162 @@ def foo(x):
         tree = parse("test", "foo<!-- not\nshown-->bar <! -- second -- > now")
         self.assertEqual(tree.children, ["foobar  now"])
 
+    def test_magicword1(self):
+        tree = parse("test", "a __NOTOC__ b")
+        self.assertEqual(len(tree.children), 3)
+        a, b, c = tree.children
+        self.assertEqual(a, "a ")
+        self.assertEqual(b.kind, NodeKind.MAGIC_WORD)
+        self.assertEqual(b.args, "__NOTOC__")
+        self.assertEqual(b.children, [])
+        self.assertEqual(c, " b")
+
+    def test_template1(self):
+        tree = parse("test", "a{{foo}}b")
+        print(tree)
+        self.assertEqual(len(tree.children), 3)
+        a, b, c = tree.children
+        self.assertEqual(a, "a")
+        self.assertEqual(b.kind, NodeKind.TEMPLATE)
+        self.assertEqual(b.args, [["foo"]])
+        self.assertEqual(b.children, [])
+        self.assertEqual(c, "b")
+
+    def test_template2(self):
+        tree = parse("test", "{{foo|bar||z|1-1/2|}}")
+        self.assertEqual(len(tree.children), 1)
+        b = tree.children[0]
+        self.assertEqual(b.kind, NodeKind.TEMPLATE)
+        self.assertEqual(b.args, [["foo"], ["bar"], [], ["z"], ["1-1/2"], []])
+        self.assertEqual(b.children, [])
+
+    def test_template3(self):
+        tree = parse("test", "{{\nfoo\n|\nname=testi|bar\n|\nbaz}}")
+        self.assertEqual(len(tree.children), 1)
+        b = tree.children[0]
+        self.assertEqual(b.kind, NodeKind.TEMPLATE)
+        self.assertEqual(b.args, [["\nfoo\n"], ["\nname=testi"], ["bar\n"],
+                                  ["\nbaz"]])
+        self.assertEqual(b.children, [])
+
+    def test_template4(self):
+        tree = parse("test", "{{foo bar|name=test word|tässä}}")
+        self.assertEqual(len(tree.children), 1)
+        b = tree.children[0]
+        self.assertEqual(b.kind, NodeKind.TEMPLATE)
+        self.assertEqual(b.args, [["foo bar"], ["name=test word"],
+                                  ["tässä"]])
+        self.assertEqual(b.children, [])
+
+    def test_template5(self):
+        tree = parse("test", "{{foo bar|name=test word|tässä}}")
+        self.assertEqual(len(tree.children), 1)
+        b = tree.children[0]
+        self.assertEqual(b.kind, NodeKind.TEMPLATE)
+        self.assertEqual(b.args, [["foo bar"], ["name=test word"],
+                                  ["tässä"]])
+        self.assertEqual(b.children, [])
+
+    def test_template6(self):
+        tree = parse("test", "{{foo bar|{{nested|[[link]]}}}}")
+        self.assertEqual(len(tree.children), 1)
+        b = tree.children[0]
+        self.assertEqual(b.kind, NodeKind.TEMPLATE)
+        self.assertEqual(len(b.args), 2)
+        self.assertEqual(b.args[0], ["foo bar"])
+        c = b.args[1]
+        self.assertIsInstance(c, list)
+        self.assertEqual(len(c), 1)
+        d = c[0]
+        self.assertEqual(d.kind, NodeKind.TEMPLATE)
+        self.assertEqual(len(d.args), 2)
+        self.assertEqual(d.args[0], ["nested"])
+        self.assertEqual(len(d.args[1]), 1)
+        e = d.args[1][0]
+        self.assertEqual(e.kind, NodeKind.LINK)
+        self.assertEqual(e.args, [["link"]])
+
+    def test_template7(self):
+        tree = parse("test", "{{{{{foo}}}|bar}}")
+        self.assertEqual(len(tree.children), 1)
+        b = tree.children[0]
+        self.assertEqual(b.kind, NodeKind.TEMPLATE)
+        self.assertEqual(len(b.args), 2)
+        c = b.args[0]
+        self.assertIsInstance(c, list)
+        self.assertEqual(len(c), 1)
+        d = c[0]
+        self.assertEqual(d.kind, NodeKind.TEMPLATEVAR)
+        self.assertEqual(d.args, [["foo"]])
+        self.assertEqual(d.children, [])
+        self.assertEqual(b.args[1], ["bar"])
+
+    def test_templatevar1(self):
+        tree = parse("test", "{{{foo}}}")
+        self.assertEqual(len(tree.children), 1)
+        b = tree.children[0]
+        self.assertEqual(b.kind, NodeKind.TEMPLATEVAR)
+        self.assertEqual(b.args, [["foo"]])
+        self.assertEqual(b.children, [])
+
+    def test_templatevar2(self):
+        tree = parse("test", "{{{foo|bar|baz}}}")
+        self.assertEqual(len(tree.children), 1)
+        b = tree.children[0]
+        self.assertEqual(b.kind, NodeKind.TEMPLATEVAR)
+        self.assertEqual(b.args, [["foo"], ["bar"], ["baz"]])
+        self.assertEqual(b.children, [])
+
+    def test_templatevar3(self):
+        tree = parse("test", "{{{{{{foo}}}|bar|baz}}}")
+        self.assertEqual(len(tree.children), 1)
+        b = tree.children[0]
+        self.assertEqual(b.kind, NodeKind.TEMPLATEVAR)
+        c = b.args[0][0]
+        self.assertEqual(c.kind, NodeKind.TEMPLATEVAR)
+        self.assertEqual(c.args, [["foo"]])
+        self.assertEqual(b.args[1:], [["bar"], ["baz"]])
+        self.assertEqual(b.children, [])
+
+    def test_parserfn1(self):
+        tree = parse("test", "{{CURRENTYEAR}}x")
+        self.assertEqual(len(tree.children), 2)
+        b = tree.children[0]
+        self.assertEqual(b.kind, NodeKind.PARSERFN)
+        self.assertEqual(b.args, [["CURRENTYEAR"]])
+        self.assertEqual(b.children, [])
+        self.assertEqual(tree.children[1], "x")
+
+    def test_parserfn2(self):
+        tree = parse("test", "{{PAGESIZE:TestPage}}")
+        print(tree)
+        self.assertEqual(len(tree.children), 1)
+        b = tree.children[0]
+        self.assertEqual(b.kind, NodeKind.PARSERFN)
+        self.assertEqual(b.args, [["PAGESIZE"], ["TestPage"]])
+        self.assertEqual(b.children, [])
+
+    def test_parserfn3(self):
+        tree = parse("test", "{{#invoke:testmod|testfn|testarg1|testarg2}}")
+        print(tree)
+        self.assertEqual(len(tree.children), 1)
+        b = tree.children[0]
+        self.assertEqual(b.kind, NodeKind.PARSERFN)
+        self.assertEqual(b.args, [["#invoke"], ["testmod"], ["testfn"],
+                                  ["testarg1"], ["testarg2"]])
+        self.assertEqual(b.children, [])
+
+
 # XXX implement:
 # XXX html tag attrs, including for <pre style="color: red">
 
 # XXX test:
-# XXX TEMPLATE
-# XXX TEMPLATEVAR
-# XXX PARSERFN
 # XXX TABLE and its subnodes
-# XXX __NOTOC__
 # XXX <ref>
 # XXX CHECK -{ ... }- SYNTAX
+# XXX magic links (e.g., ISBN) https://www.mediawiki.org/wiki/Markup_spec/BNF/Magic_links
+# XXX change URL non-first parameters to all go in second parameter
+# XXX <onlyinclude>, <noinclude>, <includeonly>
+# XXX <math>
+# XXX <html>
+# XXX <gallery>
