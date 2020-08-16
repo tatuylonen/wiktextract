@@ -12,20 +12,265 @@ import enum
 # text should be rendered as "&lt;" in HTML).  This does not try to match
 # HTML start tags against HTML end tags, and only the tag itself is included
 # as children of HTML nodes.
-ALLOWED_HTML_TAGS = set([
-    "H1", "h2", "h3", "h4", "h5", "h6",
-    "p", "br", "hr",
-    "abbr", "b", "bdi", "bdo", "blockquote", "cite", "code", "data", "del",
-    "dfn", "em", "i", "ins", "kbd", "nark", "q", "rp", "rt", "ruby",
-    "s", "samp", "small", "strong", "sub", "sup", "time", "u", "var", "wbr",
-    "dl", "dt", "dd",
-    "ol", "ul", "li",
-    "div", "span",
-    "table", "td", "tr", "th", "caption", "thead", "tfoot", "tbody",
-    "center", "font", "rb", "strike", "tt",
-    "onlyinclude", "noinclude", "includeonly",
-    "math", "gallery", "ref",
-])
+#
+# The value is a list (acceptable_parents, permitted_content), based on
+# the tables in HTML elements under
+# https://developer.mozilla.org/en-US/docs/Web/HTML
+# (and arbitrarily selected for non-HTML elements).  Acceptable_parents
+# contains a list of tags and content types used in permitted_content
+# ("flow", "text", or tag name).  Having "flow" as permitted content implies
+# "phrasing and "text", and "phrasing" implies "text".
+#
+# no-end-tag set to true means the tag should not have an end tag.
+# close-next lists tags that automatically closes this tag.  Closing a
+# parent tag will also silently close them.  Otherwise a missing end tag
+# results in an error message.
+ALLOWED_HTML_TAGS = {
+    "abbr": {
+        "parents": ["phrasing"],
+        "content": ["flow"]},
+    "b": {
+        "parents": ["phrasing"],
+        "content": ["flow"]},
+    "bdi": {
+        "parents": ["phrasing"],
+        "content": ["flow"]},
+    "bdo": {
+        "parents": ["phrasing"],
+        "content": ["flow"]},
+    "blockquote": {
+        "parents": ["flow"],
+        "content": ["flow"]},
+    "br": {
+        "parents": ["phrasing"],
+        "no-end-tag": True,
+        "content": []},
+    "caption": {
+        "parents": ["table"],
+        "content": ["flow"]},
+    "center": {
+        "parents": ["flow"],
+        "content": ["phrasing"]},
+    "cite": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "code": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "data": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "dd": {
+        "parents": ["dl", "div"],
+        "close-next": ["dd", "dt"],
+        "content": ["flow"]},
+    "del": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "dfn": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "div": {
+        "parents": ["flow", "dl"],
+        "content": ["flow"]},
+    "dl": {
+        "parents": ["flow"],
+        "content": []},
+    "dt": {
+        "parents": ["dl", "div"],
+        "close-next": ["dd", "dt"],
+        "content": ["flow"]},
+    "em": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "font": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "gallery": {
+        "parents": ["flow"],
+        "content": ["phrasing"]},
+    "h1": {
+        "parents": ["flow"],
+        "content": ["phrasing"]},
+    "h2": {
+        "parents": ["flow"],
+        "content": ["phrasing"]},
+    "h3": {
+        "parents": ["flow"],
+        "content": ["phrasing"]},
+    "h4": {
+        "parents": ["flow"],
+        "content": ["phrasing"]},
+    "h5": {
+        "parents": ["flow"],
+        "content": ["phrasing"]},
+    "h6": {
+        "parents": ["flow"],
+        "content": ["phrasing"]},
+    "hr": {
+        "parents": ["flow"],
+        "no-end-tag": True,
+        "content": []},
+    "i": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "includeonly": {
+        "parents": ["*"],
+        "content": ["*"]},
+    "ins": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "kbd": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "li": {
+        "parents": ["ul", "ol", "menu"],
+        "close-next": ["li"],
+        "content": ["flow"]},
+    "math": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "mark": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "noinclude": {
+        "parents": ["*"],
+        "content": ["*"]},
+    "ol": {
+        "parents": ["flow"],
+        "content": ["flow"]},
+    "onlyinclude": {
+        "parents": ["*"],
+        "content": ["*"]},
+    "p": {
+        "parents": ["flow"],
+        "close-next": ["p", "address", "article", "aside", "blockquote",
+                       "div", "dl", "fieldset", "footer", "form", "h1", "h2",
+                       "h3", "h4", "h5", "h6", "header", "hr", "menu", "nav",
+                       "ol", "pre", "section", "table", "ul"],
+        "content": ["phrasing"]},
+    "q": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "rb": {
+        "parents": ["ruby"],
+        "close-next": ["rt", "rtc", "rp", "rb"],
+        "content": ["phrasing"]},
+    "ref": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "rp": {
+        "parents": ["ruby"],
+        "close-next": ["rt", "rtc", "rp", "rb"],
+        "content": ["text"]},
+    "rt": {
+        "parents": ["ruby", "rtc"],
+        "close-next": ["rt", "rtc", "rp", "rb"],
+        "content": ["phrasing"]},
+    "rtc": {
+        "parents": ["ruby"],
+        "close-next": ["rt", "rtc", "rb"],
+        "content": ["phrasing"]},
+    "ruby": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "s": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "samp": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "small": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "span": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "strike": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "strong": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "sub": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "sup": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "table": {
+        "parents": ["flow"],
+        "content": []},
+    "tbody": {
+        "parents": ["table"],
+        "close-next": ["thead", "tbody", "tfoot"],
+        "content": []},
+    "td": {
+        "parents": ["tr"],
+        "close-next": ["th", "td"],
+        "content": ["flow"]},
+    "tfoot": {
+        "parents": ["table"],
+        "close-next": ["thead", "tbody", "tfoot"],
+        "content": []},
+    "th": {
+        "parents": ["tr"],
+        "close-next": ["th", "td"],
+        "content": ["flow"]},
+    "thead": {
+        "parents": ["table"],
+        "close-next": ["thead", "tbody", "tfoot"],
+        "content": []},
+    "time": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "tr": {
+        "parents": ["table", "thead", "tfoot", "tbody"],
+        "close-next": ["tr"],
+        "content": []},
+    "tt": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "u": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "ul": {
+        "parents": ["flow"],
+        "content": ["flow"]},
+    "var": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
+    "wbr": {
+        "parents": ["phrasing"],
+        "no-end-tag": True,
+        "content": []},
+}
+
+# Set of tags that can be parents of "flow" parents
+HTML_FLOW_PARENTS = set(k for k, v in ALLOWED_HTML_TAGS.items()
+                        if "flow" in v.get("content", [])
+                        or "*" in v.get("content", []))
+
+# Set of tags that can be parents of "phrasing" parents (includes those
+# of flow parents since flow implies phrasing)
+HTML_PHRASING_PARENTS = set(k for k, v in ALLOWED_HTML_TAGS.items()
+                            if "phrasing" in v.get("content", []) or
+                            "flow" in v.get("content", []) or
+                            "*" in v.get("content", []))
+
+# Mapping from HTML tag or "text" to permitted parent tags
+HTML_PERMITTED_PARENTS = {
+    k: ((HTML_FLOW_PARENTS
+         if "flow" in v.get("parents", []) or "*" in v.get("parents", [])
+         else set()) |
+        (HTML_PHRASING_PARENTS
+         if "phrasing" in v.get("parents", []) or "*" in v.get("parents", [])
+         else set()) |
+        set(v.get("parents", [])))
+    for k, v in ALLOWED_HTML_TAGS.items()
+}
+HTML_PERMITTED_PARENTS["text"] = HTML_PHRASING_PARENTS
+
 
 # MediaWiki magic words.  See https://www.mediawiki.org/wiki/Help:Magic_words
 MAGIC_WORDS = set([
@@ -228,15 +473,6 @@ class NodeKind(enum.Enum):
     # children. Indicated in WikiText by <pre>...</pre>.
     PRE = enum.auto(),  # Preformatted text where specials not interpreted
 
-    # HTML tag (open or close tag).  Args is the name of the tag
-    # directly (i.e., not a list).  Attrs contains tag attributes and
-    # "_close" with value True if this is a close tag.  It contains
-    # "_also_close" with value True if this is an open tag with a
-    # slash at the end of the tag.  The special tags <onlyinclude>,
-    # <noinclude>, and <includeonly> also generate this tag.  Children
-    # of HTML nodes are not used.
-    HTML = enum.auto(),
-
     # An internal Wikimedia link (marked with [[...]]).  The link arguments
     # are in args.  This tag is also used for media inclusion.  Links with
     # trailing word end immediately after the link have the trailing part
@@ -282,6 +518,16 @@ class NodeKind(enum.Enum):
     # A MediaWiki magic word.  The magic word is assigned directly to args
     # (not as a list).  Children are not used.
     MAGIC_WORD = enum.auto(),
+
+    # HTML tag (open or close tag).  Pairs of open and close tags are
+    # merged into a single node and the content between them is stored
+    # in the node's children.  Args is the name of the tag directly
+    # (i.e., not a list and always without a slash).  Attrs contains
+    # attributes from the HTML start tag.  The special tags
+    # <onlyinclude>, <noinclude>, and <includeonly> as well as WikiText-related
+    # tags with HTML-like syntax also generate this tag (with the exception
+    # of <pre> and <nowiki>, which are handled specially).
+    HTML = enum.auto(),
 
     # XXX <ref ...> and <references />
     # XXX -{ ... }- syntax, see
@@ -416,8 +662,12 @@ class ParseCtx(object):
 
         # Warn about unclosed syntaxes.
         if warn_unclosed and node.kind in MUST_CLOSE_KINDS:
-            self.error("format {} not properly closed, started on line {}"
-                       "".format(node.kind.name, node.loc))
+            if node.kind == NodeKind.HTML:
+                self.error("HTML tag <{}> not properly closed, started on "
+                           "line {}".format(node.args, node.loc))
+            else:
+                self.error("format {} not properly closed, started on line {}"
+                           "".format(node.kind.name, node.loc))
 
         # When popping BOLD and ITALIC nodes, if the node has no children,
         # just remove the node from it's parent's children.  We may otherwise
@@ -718,7 +968,7 @@ def table_check_attrs(ctx):
     if not isinstance(node.children[0], str):
         return
     attrs = node.children.pop()
-    parse_attrs(node, attrs, False)
+    parse_attrs(node, attrs)
 
 
 def table_row_check_attrs(ctx):
@@ -729,7 +979,7 @@ def table_row_check_attrs(ctx):
     if not isinstance(node.children[0], str):
         return
     attrs = node.children.pop()
-    parse_attrs(node, attrs, False)
+    parse_attrs(node, attrs)
 
 
 def table_caption_fn(ctx, token):
@@ -809,7 +1059,7 @@ def table_cell_fn(ctx, token):
                              NodeKind.TABLE_HEADER_CELL,
                              NodeKind.TABLE_CELL):
                 attrs = node.children.pop()
-                parse_attrs(node, attrs, False)
+                parse_attrs(node, attrs)
                 return
         text_fn(ctx, token)
         return
@@ -937,17 +1187,11 @@ def list_fn(ctx, token):
     node.args = token
 
 
-def parse_attrs(node, attrs, also_end):
+def parse_attrs(node, attrs):
     """Parses HTML tag attributes from ``attrs`` and adds them to
-    ``node.attrs``.  Also sets node.attrs["_also_close"] based on
-    ``also_end``."""
+    ``node.attrs``."""
     assert isinstance(node, WikiNode)
     assert isinstance(attrs, str)
-    assert also_end in (True, False)
-
-    # Set _also_close if needed
-    if also_end:
-        node.attrs["_also_close"] = True
 
     # Extract attributes from the tag into the node.attrs dictionary
     for m in re.finditer(r"""(?si)\b([^"'>/=\0-\037\s]+)"""
@@ -993,26 +1237,44 @@ def tag_fn(ctx, token):
         # Handle <pre> start tag
         if name == "pre":
             node = ctx.push(NodeKind.PRE)
-            parse_attrs(node, attrs, also_end)
+            parse_attrs(node, attrs)
             if also_end:
                 ctx.pop(False)
             return
 
-        # Generate error from tags that are not allowed HTML tags
+        # Give an error on unsupported HTML tags.  WikiText limits the set of
+        # tags that are allowed.
         if name not in ALLOWED_HTML_TAGS:
             ctx.error("html tag <{}> not allowed in WikiText"
                       "".format(name))
             text_fn(ctx, token)
             return
 
+        # Automatically close parent HTML tags that should be ended by this tag
+        # until we have a parent that is not a HTML tag or that is an allowed
+        # parent for this node
+        permitted_parents = HTML_PERMITTED_PARENTS.get(name, set())
+        while True:
+            node = ctx.stack[-1]
+            if node.kind != NodeKind.HTML:
+                break
+            if node.args in permitted_parents:
+                break
+            close_next = ALLOWED_HTML_TAGS.get(node.args, {}).get(
+                "close-next", [])
+            # Warn about unclosed tag unless it is one we close automatically
+            ctx.pop(name not in close_next)
+
         # Handle other start tag.  We push HTML tags as HTML nodes.
         node = ctx.push(NodeKind.HTML)
         node.args = name
-        parse_attrs(node, attrs, also_end)
+        parse_attrs(node, attrs)
 
-        # Pop it immediately, as we don't store anything other than the
-        # tag itself under a HTML tag.
-        ctx.pop(False)
+        # If the tag contains a trailing slash or it is an empty tag,
+        # close it immediately.
+        no_end_tag = ALLOWED_HTML_TAGS.get(name, {}).get("no-end-tag")
+        if no_end_tag or also_end:
+            ctx.pop(False)
         return
 
     # Since it was not a start tag, it should be an end tag
@@ -1043,17 +1305,37 @@ def tag_fn(ctx, token):
         ctx.pop(False)
         return
 
+    # Give an error on unsupported HTML tags.  WikiText limits the set of
+    # tags that are allowed.
     if name not in ALLOWED_HTML_TAGS:
         ctx.error("html tag </{}> not allowed in WikiText"
                   "".format(name))
         text_fn(ctx, token)
         return
 
-    # Push a HTML node for the end tag
-    node = ctx.push(NodeKind.HTML)
-    node.args = name
-    node.attrs["_close"] = True
-    ctx.pop(False)
+    # See if we can find the opening tag from the stack
+    for i in range(0, len(ctx.stack)):
+        node = ctx.stack[i]
+        if node.kind == NodeKind.HTML and node.args == name:
+            break
+    else:
+        # No corresponding start tag found
+        ctx.error("no corresponding start tag found for {}".format(token))
+        return
+
+    # Close nodes until we close the corresponding start tag
+    while True:
+        node = ctx.stack[-1]
+        if node.kind == NodeKind.HTML and node.args == name:
+            # Found the corresponding start tag.  Close this node and
+            # then stop.
+            ctx.pop(False)
+            break
+        # If close-next is set, then end tag is optional and can be closed
+        # implicitly by closing the parent tag
+        close_next = ALLOWED_HTML_TAGS.get(node.args, {}).get(
+            "close-next", None)
+        ctx.pop(close_next is None)
 
 
 def magicword_fn(ctx, token):

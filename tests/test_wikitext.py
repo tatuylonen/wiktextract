@@ -112,22 +112,17 @@ dasfasddasfdas
         self.assertEqual(h6.children, ["\ndasfasddasfdas\n"])
 
     def test_hdr_anchor(self):
-        tree = parse("test", """==<span id="anchor">hdr text</span>==\ndata""")
+        tree = parse("test", """==<Span id="anchor">hdr text</span>==\ndata""")
         self.assertEqual(len(tree.children), 1)
         h = tree.children[0]
         self.assertEqual(h.kind, NodeKind.LEVEL2)
         self.assertEqual(len(h.args), 1)
-        self.assertEqual(len(h.args[0]), 3)
-        a, b, c = h.args[0]
+        self.assertEqual(len(h.args[0]), 1)
+        a = h.args[0][0]
         self.assertEqual(a.kind, NodeKind.HTML)
-        self.assertEqual(a.attrs.get("_close", False), False)
-        self.assertEqual(a.attrs.get("_also_close", False), False)
-        self.assertEqual(a.children, [])
-        self.assertEqual(b, "hdr text")
-        self.assertEqual(c.kind, NodeKind.HTML)
-        self.assertEqual(c.attrs.get("_close", False), True)
-        self.assertEqual(c.attrs.get("_also_close", False), False)
-        self.assertEqual(c.children, [])
+        self.assertEqual(a.args, "span")
+        self.assertEqual(a.attrs.get("id"), "anchor")
+        self.assertEqual(a.children, ["hdr text"])
         self.assertEqual(h.children, ["\ndata"])
 
     def test_nowiki1(self):
@@ -160,35 +155,24 @@ dasfasddasfdas
 
     def test_html1(self):
         tree = parse("test", "<b>foo</b>")
-        self.assertEqual(len(tree.children), 3)
-        a, b, c = tree.children
+        self.assertEqual(len(tree.children), 1)
+        a = tree.children[0]
         self.assertEqual(a.kind, NodeKind.HTML)
         self.assertEqual(a.args, "b")
-        self.assertEqual(a.children, [])
-        self.assertEqual(b, "foo")
-        self.assertEqual(c.kind, NodeKind.HTML)
-        self.assertEqual(c.args, "b")
-        self.assertEqual(c.children, [])
+        self.assertEqual(a.children, ["foo"])
 
     def test_html2(self):
         tree = parse("test", """<div style='color: red' width="40" """
-                     """max-width=100 bogus>red text</div>""")
-        self.assertEqual(len(tree.children), 3)
-        a, b, c = tree.children
+                     """max-width=100 bogus>red text</DIV>""")
+        self.assertEqual(len(tree.children), 1)
+        a = tree.children[0]
         self.assertEqual(a.kind, NodeKind.HTML)
         self.assertEqual(a.args, "div")
-        self.assertEqual(a.attrs.get("_close", False), False)
-        self.assertEqual(a.attrs.get("_also_close", False), False)
         self.assertEqual(a.attrs.get("style", False), "color: red")
         self.assertEqual(a.attrs.get("width", False), "40")
         self.assertEqual(a.attrs.get("max-width", False), "100")
         self.assertEqual(a.attrs.get("bogus", False), "")
-        self.assertEqual(a.children, [])
-        self.assertEqual(b, "red text")
-        self.assertEqual(c.kind, NodeKind.HTML)
-        self.assertEqual(c.args, "div")
-        self.assertEqual(c.attrs.get("_close", False), True)
-        self.assertEqual(c.children, [])
+        self.assertEqual(a.children, ["red text"])
 
     def test_html3(self):
         tree = parse("test", """<br class="big" />""")
@@ -197,9 +181,84 @@ dasfasddasfdas
         self.assertEqual(h.kind, NodeKind.HTML)
         self.assertEqual(h.args, "br")
         self.assertEqual(h.attrs.get("class", False), "big")
-        self.assertEqual(h.attrs.get("_close", False), False)
-        self.assertEqual(h.attrs.get("_also_close", False), True)
         self.assertEqual(h.children, [])
+
+    def test_html4(self):
+        tree, ctx = parse_with_ctx("test", """<div><span>foo</span></div>""")
+        self.assertEqual(len(tree.children), 1)
+        a = tree.children[0]
+        self.assertEqual(a.kind, NodeKind.HTML)
+        self.assertEqual(a.args, "div")
+        self.assertEqual(len(a.children), 1)
+        b = a.children[0]
+        self.assertEqual(b.kind, NodeKind.HTML)
+        self.assertEqual(b.args, "span")
+        self.assertEqual(b.children, ["foo"])
+        self.assertEqual(len(ctx.errors), 0)
+
+    def test_html5(self):
+        tree, ctx = parse_with_ctx("test", """<div><span>foo</div></span>""")
+        self.assertEqual(len(tree.children), 1)
+        a = tree.children[0]
+        self.assertEqual(a.kind, NodeKind.HTML)
+        self.assertEqual(a.args, "div")
+        self.assertEqual(len(a.children), 1)
+        b = a.children[0]
+        self.assertEqual(b.kind, NodeKind.HTML)
+        self.assertEqual(b.args, "span")
+        self.assertEqual(b.children, ["foo"])
+        self.assertEqual(len(ctx.errors), 2)
+
+    def test_html6(self):
+        tree, ctx = parse_with_ctx("test", """<div><span>foo</div>""")
+        self.assertEqual(len(tree.children), 1)
+        a = tree.children[0]
+        self.assertEqual(a.kind, NodeKind.HTML)
+        self.assertEqual(a.args, "div")
+        self.assertEqual(len(a.children), 1)
+        b = a.children[0]
+        self.assertEqual(b.kind, NodeKind.HTML)
+        self.assertEqual(b.args, "span")
+        self.assertEqual(b.children, ["foo"])
+        self.assertEqual(len(ctx.errors), 1)
+
+    def test_html7(self):
+        tree, ctx = parse_with_ctx("test", """<ul><li>foo<li>bar</ul>""")
+        self.assertEqual(len(tree.children), 1)
+        a = tree.children[0]
+        self.assertEqual(a.kind, NodeKind.HTML)
+        self.assertEqual(a.args, "ul")
+        self.assertEqual(len(a.children), 2)
+        b, c = a.children
+        self.assertEqual(b.kind, NodeKind.HTML)
+        self.assertEqual(b.args, "li")
+        self.assertEqual(b.children, ["foo"])
+        self.assertEqual(c.kind, NodeKind.HTML)
+        self.assertEqual(c.args, "li")
+        self.assertEqual(c.children, ["bar"])
+        self.assertEqual(len(ctx.errors), 0)
+
+    def test_html8(self):
+        tree, ctx = parse_with_ctx("test", "==Title==\n<ul><li>foo<li>bar</ul>"
+                                   "</div>")
+        self.assertEqual(len(tree.children), 1)
+        h = tree.children[0]
+        self.assertEqual(h.kind, NodeKind.LEVEL2)
+        self.assertEqual(h.args, [["Title"]])
+        self.assertEqual(len(h.children), 2)
+        x, a = h.children
+        self.assertEqual(x, "\n")
+        self.assertEqual(a.kind, NodeKind.HTML)
+        self.assertEqual(a.args, "ul")
+        self.assertEqual(len(a.children), 2)
+        b, c = a.children
+        self.assertEqual(b.kind, NodeKind.HTML)
+        self.assertEqual(b.args, "li")
+        self.assertEqual(b.children, ["foo"])
+        self.assertEqual(c.kind, NodeKind.HTML)
+        self.assertEqual(c.args, "li")
+        self.assertEqual(c.children, ["bar"])
+        self.assertEqual(len(ctx.errors), 1)
 
     def test_html_unknown(self):
         tree, ctx = parse_with_ctx("test", "a<unknown>foo</unknown>b")
