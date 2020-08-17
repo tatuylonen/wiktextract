@@ -645,12 +645,36 @@ class ParseCtx(object):
     def push(self, kind):
         """Pushes a new node of the specified kind onto the stack."""
         assert isinstance(kind, NodeKind)
+        self.merge_str_children()
         node = WikiNode(kind, self.linenum)
         prev = self.stack[-1]
         prev.children.append(node)
         self.stack.append(node)
         self.suppress_special = False
         return node
+
+    def merge_str_children(self):
+        """Merges multiple consecutive str children into one.  We merge them
+        as a separate step, because this gives linear worst-case time, vs.
+        quadratic worst case (albeit with lower constant factor) if we just
+        added to the previously accumulated string in text_fn() instead."""
+        node = self.stack[-1]
+        lst = node.children
+        lstlen = len(lst)
+        if lstlen < 2:
+            return
+        for i in range(lstlen - 1, -1, -1):
+            if not isinstance(lst[i], str):
+                break
+        else:
+            # All children are strings
+            node.children = ["".join(lst)]
+            return
+        cnt = lstlen - i - 1
+        if cnt < 2:
+            return
+        node.children = lst[:-cnt]
+        node.children.append("".join(lst[-cnt:]))
 
     def pop(self, warn_unclosed):
         """Pops a node from the stack.  If the node has arguments, this moves
@@ -660,6 +684,7 @@ class ParseCtx(object):
         the parse tree; this is a place for various kludges that manipulate
         the nodes when their parsing completes."""
         assert warn_unclosed in (True, False)
+        self.merge_str_children()
         node = self.stack[-1]
 
         # Warn about unclosed syntaxes.
@@ -707,6 +732,8 @@ class ParseCtx(object):
             node.attrs["def"] = node.children
             node.children = head
 
+        # Remove the topmost node from the stack.  It should be on its parent's
+        # chilren list.
         self.stack.pop()
 
     def have(self, kind):
@@ -728,52 +755,58 @@ class ParseCtx(object):
 
 def text_fn(ctx, token):
     """Inserts the token as raw text into the parse tree."""
-
-    # Some nodes are automatically popped on newline/text
-    if ctx.beginning_of_line and not ctx.nowiki:
-        while True:
-            node = ctx.stack[-1]
-            if node.kind == NodeKind.LIST_ITEM:
-                if (node.children and isinstance(node.children[-1], str) and
-                    not node.children[-1].isspace() and
-                    node.children[-1].endswith("\n")):
-                    ctx.pop(False)
-                    continue
-            elif node.kind == NodeKind.LIST:
-                ctx.pop(False)
-                continue
-            elif node.kind == NodeKind.PREFORMATTED:
-                if (node.children and isinstance(node.children[-1], str) and
-                    node.children[-1].endswith("\n") and
-                    not token.startswith(" ") and not token.isspace()):
-                    ctx.pop(False)
-                    continue
-            break
-
-    # If the previous child was a link that doesn't yet have children,
-    # and the text to be added starts with valid word characters, assume they
-    # are link trail and add them as a child of the link.
     node = ctx.stack[-1]
-    if (node.children and isinstance(node.children[-1], WikiNode) and
-        node.children[-1].kind == NodeKind.LINK and
-        not node.children[-1].children and
-        not ctx.suppress_special):
-        m = re.match(r"(?s)(\w+)(.*)", token)
-        if m:
-            node.children[-1].children.append(m.group(1))
-            token = m.group(2)
-            if not token:
-                return
-
-    # If the previous child was also text, merge this additional text with it
-    if node.children:
-        prev = node.children[-1]
-        if isinstance(prev, str):
-            # XXX this can result in O(N^2) complexity for long texts.  Change
-            # to do the merging in ctx.push() and ctx.pop() using "".join(...)
-            # for a whole sequence of strings.
-            node.children[-1] = prev + token
+    # Special formatting is only processed if not inside <nowiki>
+    if not ctx.nowiki:
+        # Whitespaces inside an external link divide its first argument from its
+        # second argument.  All remaining words go into the second argument.
+        if token.isspace() and node.kind == NodeKind.URL and not node.args:
+            ctx.merge_str_children()
+            node.args.append(node.children)
+            node.children = []
             return
+
+        # Some nodes are automatically popped on newline/text
+        if ctx.beginning_of_line:
+            while True:
+                node = ctx.stack[-1]
+                if node.kind == NodeKind.LIST_ITEM:
+                    ctx.merge_str_children()
+                    if (node.children and isinstance(node.children[-1], str) and
+                        not node.children[-1].isspace() and
+                        node.children[-1].endswith("\n")):
+                        ctx.pop(False)
+                        continue
+                elif node.kind == NodeKind.LIST:
+                    ctx.pop(False)
+                    continue
+                elif node.kind == NodeKind.PREFORMATTED:
+                    ctx.merge_str_children()
+                    if (node.children and isinstance(node.children[-1], str) and
+                        node.children[-1].endswith("\n") and
+                        not token.startswith(" ") and not token.isspace()):
+                        ctx.pop(False)
+                        continue
+                break
+
+            # Spaces at the beginning of a line indicate preformatted text
+            if token.endswith(" "):
+                if node.kind != NodeKind.PREFORMATTED:
+                    node = ctx.push(NodeKind.PREFORMATTED)
+
+        # If the previous child was a link that doesn't yet have children,
+        # and the text to be added starts with valid word characters, assume
+        # they are link trail and add them as a child of the link.
+        if (node.children and isinstance(node.children[-1], WikiNode) and
+            node.children[-1].kind == NodeKind.LINK and
+            not node.children[-1].children and
+            not ctx.suppress_special):
+            m = re.match(r"(?s)(\w+)(.*)", token)
+            if m:
+                node.children[-1].children.append(m.group(1))
+                token = m.group(2)
+                if not token:
+                    return
 
     # Add a text child
     node.children.append(token)
@@ -834,6 +867,7 @@ def subtitle_end_fn(ctx, token):
     node = ctx.stack[-1]
     if node.kind != kind:
         ctx.error("subtitle start and end markers level mismatch")
+    ctx.merge_str_children()
     node.args.append(node.children)
     node.children = []
 
@@ -974,14 +1008,23 @@ def colon_fn(ctx, token):
 
     # Unless we are in the first argument of a template, treat a colon that is
     # not at the beginning of a
-    if (node.kind != NodeKind.TEMPLATE or node.args or
-        len(node.children) != 1 or not isinstance(node.children[0], str) or
+    if node.kind != NodeKind.TEMPLATE or node.args:
+        text_fn(ctx, token)
+        return
+
+    # Merge string children.  This is needed for both the following text and
+    # for args.
+    ctx.merge_str_children()
+
+    # Check if the template argument is a parser function name.
+    if (len(node.children) != 1 or not isinstance(node.children[0], str) or
         node.children[0] not in PARSER_FUNCTIONS):
         text_fn(ctx, token)
         return
 
     # Colon in the first argument of {{name:...}} turns it into a parser
     # function call.
+    ctx.merge_str_children()
     node.kind = NodeKind.PARSERFN
     node.args.append(node.children)
     node.children = []
@@ -995,9 +1038,10 @@ def table_start_fn(ctx, token):
 def table_check_attrs(ctx):
     """Checks if the table has attributes, and if so, parses them."""
     node = ctx.stack[-1]
-    if node.kind != NodeKind.TABLE or len(node.children) != 1:
+    if node.kind != NodeKind.TABLE:
         return
-    if not isinstance(node.children[0], str):
+    ctx.merge_str_children()
+    if len(node.children) != 1 or not isinstance(node.children[0], str):
         return
     attrs = node.children.pop()
     parse_attrs(node, attrs)
@@ -1006,9 +1050,10 @@ def table_check_attrs(ctx):
 def table_row_check_attrs(ctx):
     """Checks if the table row has attributes, and if so, parses them."""
     node = ctx.stack[-1]
-    if node.kind != NodeKind.TABLE_ROW or len(node.children) != 1:
+    if node.kind != NodeKind.TABLE_ROW:
         return
-    if not isinstance(node.children[0], str):
+    ctx.merge_str_children()
+    if len(node.children) != 1 or not isinstance(node.children[0], str):
         return
     attrs = node.children.pop()
     parse_attrs(node, attrs)
@@ -1084,6 +1129,7 @@ def table_cell_fn(ctx, token):
     if token == "|" and not ctx.beginning_of_line:
         # This might separate attributes for captions, header cells, and
         # data cells
+        ctx.merge_str_children()
         node = ctx.stack[-1]
         if (not node.attrs and len(node.children) == 1 and
             isinstance(node.children[0], str)):
@@ -1110,33 +1156,6 @@ def table_cell_fn(ctx, token):
     ctx.push(NodeKind.TABLE_CELL)
 
 
-def whitespace_fn(ctx, token):
-    """Handler function for whitespaces.  Spaces are special in certain
-    contexts, such as inside external link syntax [url text], where
-    they separate the URL form the display text.  Otherwise spaces are
-    treated as normal text.  Note that this puts each word of
-    multi-word display text in its own argument.  Spaces at the start of a
-    line indicate preformatted text."""
-    node = ctx.stack[-1]
-
-    # Spaces at the beginning of a line indicate preformatted text
-    if ctx.beginning_of_line and token == " ":
-        if node.kind != NodeKind.PREFORMATTED:
-            ctx.push(NodeKind.PREFORMATTED)
-        text_fn(ctx, token)
-        return
-
-    # Spaces inside an external link divide its first argument from its
-    # second argument.  All remaining words go into the second argument.
-    if node.kind == NodeKind.URL and not node.args:
-        node.args.append(node.children)
-        node.children = []
-        return
-
-    # Otherwise just treat it as plain text.
-    text_fn(ctx, token)
-
-
 def vbar_fn(ctx, token):
     """Handler function for vertical bar |.  The interpretation of
     the vertical bar depends on context; it can separate arguments to
@@ -1144,6 +1163,7 @@ def vbar_fn(ctx, token):
     also separate table row cells."""
     node = ctx.stack[-1]
     if node.kind in HAVE_ARGS_KINDS:
+        ctx.merge_str_children()
         node.args.append(node.children)
         node.children = []
         return
@@ -1205,6 +1225,7 @@ def list_fn(ctx, token):
             # Got definition for a head in a definition list on the same line
             # Shuffle attrs["head"] and children (they will be unshuffled
             # in ctx.pop()) and do not change the stack otherwise
+            ctx.merge_str_children()
             node.attrs["head"] = node.children
             node.children = []
             return
@@ -1223,6 +1244,7 @@ def list_fn(ctx, token):
             # Got definition for a definition list item, on a separate line.
             # Shuffle attrs["head"] and children (they will be unshuffled in
             # ctx.pop()) and do not change the stack otherwise
+            ctx.merge_str_children()
             node.attrs["head"] = node.children
             node.children = []
             return
@@ -1287,7 +1309,7 @@ def parse_attrs(node, attrs):
 
     # Extract attributes from the tag into the node.attrs dictionary
     for m in re.finditer(r"""(?si)\b([^"'>/=\0-\037\s]+)"""
-                        r"""(=("[^"]*"|'[^']*'|[^"'<>`\s]*))?\s*""",
+                         r"""(=("[^"]*"|'[^']*'|[^"'<>`\s]*))?\s*""",
                          attrs):
         name = m.group(1)
         value = m.group(3) or ""
@@ -1442,9 +1464,8 @@ def magicword_fn(ctx, token):
 token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"'''|"
                       r"''|"
-                      r" |"   # Space at beginning of line means preformatted
-                      r"\n|"
-                      r"\t|"
+                      r"[ \t]+\n*|"
+                      r"\n+|"
                       r"\[\[|"
                       r"\]\]|"
                       r"\[|"
@@ -1460,7 +1481,7 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"\|\||"
                       r"\||"
                       r"^----+|"
-                      r"^[-*:;#]+|"
+                      r"^[*:;#]+|"
                       r":|"   # sometimes special when not beginning of line
                       r"<!\s*--((?s).)*?--\s*>|"
                       r"""<\s*[-a-zA-Z0-9]+\s*(\b[-a-z0-9]+(=("[^"]*"|"""
@@ -1472,6 +1493,15 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"|".join(r"\b{}\b".format(x) for x in MAGIC_WORDS) +
                       r")")
 
+
+# Matches a </nowiki> end token
+nowiki_end_re = re.compile(r"(?i)<\s*/\s*nowiki\s*>")
+
+# Matches a </pre> end token
+pre_end_re = re.compile(r"(?i)<\s*/\s*pre\s*>")
+
+# Matches a list item prefix
+list_prefix_re = re.compile(r"[*:;#]+")
 
 # Dictionary mapping fixed form tokens to their handler functions.
 # Tokens that have variable form are handled in the code in token_iter().
@@ -1494,9 +1524,12 @@ tokenops = {
     "|-": table_row_fn,
     "||": double_vbar_fn,
     "|": vbar_fn,
-    " ": whitespace_fn,
-    "\n": whitespace_fn,
-    "\t": whitespace_fn,
+    # The following are here only because it speeds up operations over handling
+    # them in the general way (by about 10% in overall parsing speed)
+    " ": text_fn,
+    "\n": text_fn,
+    "\t": text_fn,
+    "\n\n": text_fn,
 }
 for x in MAGIC_WORDS:
     tokenops[x] = magicword_fn
@@ -1513,11 +1546,9 @@ def token_iter(ctx, text):
             yield False, text[pos:start]
         pos = m.end()
         token = m.group(0)
-        if token.startswith("=="):
-            yield True, "<" + m.group(1)
-            for x in token_iter(ctx, m.group(2)):
-                yield x
-            yield True, ">" + m.group(4)
+        if token[0] not in "={}|":
+            # This case is redundant but speeds up overall parsing by 5%
+            yield True, token
         elif token.startswith("{{"):
             toklen = len(token)
             if toklen in (2, 3):
@@ -1550,6 +1581,11 @@ def token_iter(ctx, text):
             else:
                 ctx.error("Unsupported brace sequence {}".format(token))
                 yield False, token
+        elif token.startswith("=="):
+            yield True, "<" + m.group(1)
+            for x in token_iter(ctx, m.group(2)):
+                yield x
+            yield True, ">" + m.group(4)
         elif token.startswith("|}}"):
             yield True, "|"
             token = token[1:]
@@ -1583,45 +1619,52 @@ def parse_with_ctx(pagetitle, text):
     ctx = ParseCtx(pagetitle)
     # Process all tokens from the input.
     for is_token, token in token_iter(ctx, text):
-        assert isinstance(token, str)
         node = ctx.stack[-1]
-        if (not is_token or
-            (ctx.nowiki and
-             not re.match(r"(?i)<\s*/\s*nowiki\s*>", token)) or
-            (node.kind == NodeKind.PRE and
-             not re.match(r"(?i)<\s*/\s*pre\s*>", token))):
-            if is_token:
-                # Remove the artificially added prefix from subtitle tokens
-                if token.startswith("<=="):
-                    token = token[1:]
-                elif token.startswith(">=="):
-                    token = token[1:]
+        if not is_token:
+            # Process it as normal text.
+            text_fn(ctx, token)
+        elif ((ctx.nowiki and not re.match(nowiki_end_re, token)) or
+              (node.kind == NodeKind.PRE and not re.match(pre_end_re, token))):
+            # Remove the artificially added prefix from subtitle tokens.
+            # Then process the token as normal text as we are in a
+            # non-interpreting context.
+            if token.startswith("<=="):
+                token = token[1:]
+            elif token.startswith(">=="):
+                token = token[1:]
             text_fn(ctx, token)
         else:
+            # Process it as a token.  In some contexts some tokens may still
+            # be interpreted as text.
             if token in tokenops:
                 tokenops[token](ctx, token)
             elif token.startswith("<=="):  # Note: < added by tokenizer
                 subtitle_start_fn(ctx, token)
             elif token.startswith(">=="):  # Note: > added by tokenizer
                 subtitle_end_fn(ctx, token)
-            elif token.startswith("----"):
-                hline_fn(ctx, token)
             elif token.startswith("<") and len(token):
                 tag_fn(ctx, token)
-            elif re.match(r"[-*:;#]+", token):
+            elif token.startswith("----"):
+                hline_fn(ctx, token)
+            elif re.match(list_prefix_re, token):
                 list_fn(ctx, token)
-            elif re.match(r"https?://.*", token):
+            elif token.startswith("https://") or token.startswith("http://"):
                 url_fn(ctx, token)
             else:
                 text_fn(ctx, token)
-        ctx.linenum += len(list(re.finditer("\n", token)))
-        ctx.beginning_of_line = token.endswith("\n")
+        ctx.linenum += token.count("\n")
+        ctx.beginning_of_line = token[-1] == "\n"
+    # We are at the end of the text.  Keep popping stack until we only have
+    # the root node left.  This is used to finalize processing any nodes
+    # on the stack.
     while True:
         node = ctx.stack[-1]
         if node.kind == NodeKind.ROOT:
             break
         ctx.pop(True)
     assert len(ctx.stack) == 1
+    # If the last children are strings, merge them to one string.
+    ctx.merge_str_children()
     return ctx.stack[0], ctx
 
 

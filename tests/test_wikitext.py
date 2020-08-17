@@ -316,6 +316,7 @@ dasfasddasfdas
 
     def test_hline(self):
         tree = parse("test", "foo\n*item\n----\nmore")
+        print(tree)
         self.assertEqual(len(tree.children), 4)
         a, b, c, d = tree.children
         self.assertEqual(a, "foo\n")
