@@ -459,6 +459,11 @@ class NodeKind(enum.Enum):
     # Horizontal line.  No arguments or children.
     HLINE = enum.auto(),
 
+    # A list.  Each list will be started with this node, also nested
+    # lists.  Args contains the prefix used to open the list.
+    # Children will contain LIST_ITEM nodes that belong to this list.
+    LIST = enum.auto(),  # args = prefix for all items of this list
+
     # A list item.  Nested items will be in children.  Items on the same
     # level will be on the same level.  There is no explicit node for a list.
     # Args is directly the token for this item (not as a list).  Children
@@ -573,13 +578,6 @@ MUST_CLOSE_KINDS = (
     NodeKind.PARSERFN,
     NodeKind.URL,
     NodeKind.TABLE,
-)
-
-
-# Node kinds that are automatically closed at a newline
-CLOSE_AT_NEWLINE_KINDS = (
-    NodeKind.PREFORMATTED,
-    NodeKind.LIST_ITEM,
 )
 
 
@@ -726,6 +724,9 @@ def text_fn(ctx, token):
                     node.children[-1].endswith("\n")):
                     ctx.pop(False)
                     continue
+            elif node.kind == NodeKind.LIST:
+                ctx.pop(False)
+                continue
             elif node.kind == NodeKind.PREFORMATTED:
                 if (node.children and isinstance(node.children[-1], str) and
                     node.children[-1].endswith("\n") and
@@ -1175,8 +1176,11 @@ def list_fn(ctx, token):
     # Pop any lower-level list items
     while True:
         node = ctx.stack[-1]
-        if (node.kind == NodeKind.LIST_ITEM and len(node.args) < len(token) and
+        if (node.kind == NodeKind.LIST_ITEM and
+            len(node.args) < len(token) and
             token[len(node.args)] == node.args):
+            break
+        if node.kind == NodeKind.LIST and node.args == token:
             break
         if node.kind in kind_to_level:
             break  # Always break before section header
@@ -1188,6 +1192,9 @@ def list_fn(ctx, token):
                          NodeKind.TABLE_CELL):
             break
         ctx.pop(True)
+    if node.kind != NodeKind.LIST or node.args != token:
+        node = ctx.push(NodeKind.LIST)
+        node.args = token
     node = ctx.push(NodeKind.LIST_ITEM)
     node.args = token
 
