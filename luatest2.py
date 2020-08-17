@@ -2,11 +2,18 @@ import re
 import sys
 import html
 import json
+import time
 import os.path
 import collections
 import lupa
 from lupa import LuaRuntime
+
+import pyximport; pyximport.install(pyimport=True)
 from wiktextract import wikitext
+
+#import pstats
+#import cProfile
+
 
 # List of search paths for Lua libraries.
 builtin_lua_search_paths = [
@@ -16,13 +23,22 @@ builtin_lua_search_paths = [
 page = open("temp-pages/Words/an/animal.txt").read()
 print("Len of source page", len(page))
 
-tree = wikitext.parse("animal", page)
-wikitext.print_tree(tree)
+#pr = cProfile.Profile()
+#pr.enable()
+start_t = time.time()
+multiplier = 100
+for i in range(multiplier):
+    tree = wikitext.parse("animal", page)
+t = time.time() - start_t
+print("{:.1f} chars/sec".format(multiplier * len(page) / t))
+#pr.disable()
+#ps = pstats.Stats(pr).sort_stats(pstats.SortKey.CUMULATIVE)
+#ps.print_stats()
 sys.exit(1)
+wikitext.print_tree(tree)
 
 with open("tempXXXspecials.json") as f:
     lst = json.load(f)
-
 
 # Extract module and template definitions from the collected special pages.
 modules = {}
@@ -37,7 +53,15 @@ for tag, title, text in lst:
         continue
     if title.startswith("User:"):
         continue
+
+    print(title)
+    tree = wikitext.parse(title, text)
+    print("============================================================")
+    wikitext.print_tree(tree)
+
     modules[title] = text
+
+sys.exit(1)
 
 print("Total length of modules:", sum(len(x) for x in modules.values()))
 print("Total length of templates:", sum(len(x) for x in templates.values()))
