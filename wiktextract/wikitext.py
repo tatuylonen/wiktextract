@@ -781,6 +781,18 @@ def text_fn(ctx, token):
 
 def hline_fn(ctx, token):
     """Processes a horizontal line token."""
+    # Pop nodes from the stack until we reach a LEVEL2 subtitle or a
+    # table element.  We also won't pop HTML nodes as they might appear
+    # in template definitions.
+    while True:
+        node = ctx.stack[-1]
+        if node.kind in (NodeKind.ROOT, NodeKind.LEVEL2,
+                         NodeKind.TABLE, NodeKind.TABLE_CAPTION,
+                         NodeKind.TABLE_ROW, NodeKind.TABLE_HEADER_CELL,
+                         NodeKind.TABLE_CELL, NodeKind.HTML):
+            break
+        ctx.pop(True)
+
     ctx.push(NodeKind.HLINE)
     ctx.pop(True)
 

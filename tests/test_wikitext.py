@@ -315,12 +315,13 @@ dasfasddasfdas
         self.assertEqual(b.children, ["bold italic test"])
 
     def test_hline(self):
-        tree = parse("test", "foo\n----\nmore")
-        self.assertEqual(len(tree.children), 3)
-        a, b, c = tree.children
+        tree = parse("test", "foo\n*item\n----\nmore")
+        self.assertEqual(len(tree.children), 4)
+        a, b, c, d = tree.children
         self.assertEqual(a, "foo\n")
-        self.assertEqual(b.kind, NodeKind.HLINE)
-        self.assertEqual(c, "\nmore")
+        self.assertEqual(b.kind, NodeKind.LIST)
+        self.assertEqual(c.kind, NodeKind.HLINE)
+        self.assertEqual(d, "\nmore")
 
     def test_ul(self):
         tree = parse("test", "foo\n\n* item1\n** item1.1\n** item1.2\n"
