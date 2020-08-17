@@ -1171,7 +1171,8 @@ def list_fn(ctx, token):
     # Pop any lower-level list items
     while True:
         node = ctx.stack[-1]
-        if node.kind == NodeKind.LIST_ITEM and len(node.args) < len(token):
+        if (node.kind == NodeKind.LIST_ITEM and len(node.args) < len(token) and
+            token[len(node.args)] == node.args):
             break
         if node.kind in kind_to_level:
             break  # Always break before section header
