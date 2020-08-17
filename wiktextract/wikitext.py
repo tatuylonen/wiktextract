@@ -719,16 +719,20 @@ def text_fn(ctx, token):
 
     # Some nodes are automatically popped on newline/text
     if ctx.beginning_of_line and not ctx.nowiki:
-        node = ctx.stack[-1]
-        if node.kind == NodeKind.LIST_ITEM:
-            if (node.children and isinstance(node.children[-1], str) and
-                node.children[-1].endswith("\n")):
-                ctx.pop(False)
-        elif node.kind == NodeKind.PREFORMATTED:
-            if (node.children and isinstance(node.children[-1], str) and
-                node.children[-1].endswith("\n") and
-                not token.startswith(" ") and not token.isspace()):
-                ctx.pop(False)
+        while True:
+            node = ctx.stack[-1]
+            if node.kind == NodeKind.LIST_ITEM:
+                if (node.children and isinstance(node.children[-1], str) and
+                    node.children[-1].endswith("\n")):
+                    ctx.pop(False)
+                    continue
+            elif node.kind == NodeKind.PREFORMATTED:
+                if (node.children and isinstance(node.children[-1], str) and
+                    node.children[-1].endswith("\n") and
+                    not token.startswith(" ") and not token.isspace()):
+                    ctx.pop(False)
+                    continue
+            break
 
     # If the previous child was a link that doesn't yet have children,
     # and the text to be added starts with valid word characters, assume they
