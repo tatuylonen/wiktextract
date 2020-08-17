@@ -462,12 +462,16 @@ class NodeKind(enum.Enum):
     # A list.  Each list will be started with this node, also nested
     # lists.  Args contains the prefix used to open the list.
     # Children will contain LIST_ITEM nodes that belong to this list.
+    # For definition lists the prefix ends in ";".
     LIST = enum.auto(),  # args = prefix for all items of this list
 
     # A list item.  Nested items will be in children.  Items on the same
     # level will be on the same level.  There is no explicit node for a list.
     # Args is directly the token for this item (not as a list).  Children
-    # is what goes in this list item.
+    # is what goes in this list item.  List items where the prefix ends in
+    # ";" are definition list items.  For them, children contain the item
+    # to be defined and node.attrs["def"] contains the definition, which has
+    # the same format as children (i.e., a list of strings and WikiNode).
     LIST_ITEM = enum.auto(),  # args = token for this item
 
     # Preformatted text were markup is interpreted.  Content is in children.
@@ -693,6 +697,16 @@ class ParseCtx(object):
             # structure to a TEMPLATE.
             node.kind = NodeKind.PARSERFN
 
+        # When popping description list nodes that have a definition,
+        # shuffle attrs["head"] and children to have head in children and
+        # definition in attrs["def"]
+        if (node.kind == NodeKind.LIST_ITEM and node.args.endswith(";") and
+            "head" in node.attrs):
+            head = node.attrs["head"]
+            del node.attrs["head"]
+            node.attrs["def"] = node.children
+            node.children = head
+
         self.stack.pop()
 
     def have(self, kind):
@@ -721,6 +735,7 @@ def text_fn(ctx, token):
             node = ctx.stack[-1]
             if node.kind == NodeKind.LIST_ITEM:
                 if (node.children and isinstance(node.children[-1], str) and
+                    not node.children[-1].isspace() and
                     node.children[-1].endswith("\n")):
                     ctx.pop(False)
                     continue
@@ -1154,7 +1169,6 @@ def list_fn(ctx, token):
     """Handles various tokens that start unordered or ordered list items,
     description list items, or indented lines.  This also recognizes the
     colon used to separate parser function name from its first argument."""
-    token = token.strip()
     node = ctx.stack[-1]
 
     # A colon inside a template means it is a parser function call.  We use
@@ -1168,14 +1182,38 @@ def list_fn(ctx, token):
         text_fn(ctx, token)
         return
 
-    # List items must start a new line; otherwise treat as text
+    # List items must start a new line; otherwise treat as text.  This is
+    # particularly the case for colon, which is recognized as a token also
+    # in the middle of a line.  Some of these cases were handled above; some
+    # are handled here.
     if not ctx.beginning_of_line:
+        node = ctx.stack[-1]
+        if (token == ":" and node.kind == NodeKind.LIST_ITEM and
+            node.args.endswith(";") and "head" not in node.attrs):
+            # Got definition for a head in a definition list on the same line
+            # Shuffle attrs["head"] and children (they will be unshuffled
+            # in ctx.pop()) and do not change the stack otherwise
+            node.attrs["head"] = node.children
+            node.children = []
+            return
+        # Otherwise treat colons that do not start a line as normal text
         text_fn(ctx, token)
         return
+
+    # XXX implement using e.g. ##: to continue a list item after a sublist
 
     # Pop any lower-level list items
     while True:
         node = ctx.stack[-1]
+        if (node.kind == NodeKind.LIST_ITEM and node.args.endswith(";") and
+            token.endswith(":") and token[:-1] == node.args[:-1] and
+            "head" not in node.attrs):
+            # Got definition for a definition list item, on a separate line.
+            # Shuffle attrs["head"] and children (they will be unshuffled in
+            # ctx.pop()) and do not change the stack otherwise
+            node.attrs["head"] = node.children
+            node.children = []
+            return
         if (node.kind == NodeKind.LIST_ITEM and
             len(node.args) < len(token) and
             token[len(node.args)] == node.args):
@@ -1380,7 +1418,7 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"\|\||"
                       r"\||"
                       r"^----+|"
-                      r"^[-*:;#]+\s*|"
+                      r"^[-*:;#]+|"
                       r":|"   # sometimes special when not beginning of line
                       r"<!\s*--((?s).)*?--\s*>|"
                       r"""<\s*[-a-zA-Z0-9]+\s*(\b[-a-z0-9]+(=("[^"]*"|"""

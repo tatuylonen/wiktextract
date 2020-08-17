@@ -336,23 +336,23 @@ dasfasddasfdas
         self.assertEqual(ba.args, "*")
         self.assertEqual(len(ba.children), 2)
         baa, bab = ba.children
-        self.assertEqual(baa, "item1\n")
+        self.assertEqual(baa, " item1\n")
         self.assertEqual(bab.kind, NodeKind.LIST)
         self.assertEqual(bab.args, "**")
         self.assertEqual(len(bab.children), 2)
         baba, babb = bab.children
         self.assertEqual(baba.kind, NodeKind.LIST_ITEM)
         self.assertEqual(baba.args, "**")
-        self.assertEqual(baba.children, ["item1.1\n"])
+        self.assertEqual(baba.children, [" item1.1\n"])
         self.assertEqual(babb.kind, NodeKind.LIST_ITEM)
         self.assertEqual(babb.args, "**")
-        self.assertEqual(babb.children, ["item1.2\n"])
+        self.assertEqual(babb.children, [" item1.2\n"])
         self.assertEqual(bb.kind, NodeKind.LIST_ITEM)
         self.assertEqual(bb.args, "*")
-        self.assertEqual(bb.children, ["item2\n"])
+        self.assertEqual(bb.children, [" item2\n"])
 
     def test_ol(self):
-        tree = parse("test", "foo\n\n# item1\n## item1.1\n## item1.2\n"
+        tree = parse("test", "foo\n\n# item1\n##item1.1\n## item1.2\n"
                      "# item2\n")
         self.assertEqual(len(tree.children), 2)
         a, b = tree.children
@@ -365,7 +365,7 @@ dasfasddasfdas
         self.assertEqual(ba.args, "#")
         self.assertEqual(len(ba.children), 2)
         baa, bab = ba.children
-        self.assertEqual(baa, "item1\n")
+        self.assertEqual(baa, " item1\n")
         self.assertEqual(bab.kind, NodeKind.LIST)
         self.assertEqual(bab.args, "##")
         self.assertEqual(len(bab.children), 2)
@@ -375,10 +375,64 @@ dasfasddasfdas
         self.assertEqual(baba.children, ["item1.1\n"])
         self.assertEqual(babb.kind, NodeKind.LIST_ITEM)
         self.assertEqual(babb.args, "##")
-        self.assertEqual(babb.children, ["item1.2\n"])
+        self.assertEqual(babb.children, [" item1.2\n"])
         self.assertEqual(bb.kind, NodeKind.LIST_ITEM)
         self.assertEqual(bb.args, "#")
-        self.assertEqual(bb.children, ["item2\n"])
+        self.assertEqual(bb.children, [" item2\n"])
+
+    def test_dl(self):
+        tree = parse("test", """; Mixed definition lists
+; item 1 : definition
+:; sub-item 1 plus term
+:: two colons plus definition
+:; sub-item 2 : colon plus definition
+; item 2
+: back to the main list
+""")
+        print(tree)
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.LIST)
+        self.assertEqual(t.args, ";")
+        self.assertNotIn("head", t.attrs)
+        self.assertNotIn("def", t.attrs)
+        self.assertEqual(len(t.children), 3)
+        a, b, c = t.children
+        self.assertEqual(a.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(a.args, ";")
+        self.assertEqual(a.children, [" Mixed definition lists\n"])
+        self.assertEqual(a.attrs, {})
+        self.assertEqual(b.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(b.args, ";")
+        self.assertEqual(b.children, [" item 1 "])
+        self.assertNotIn("head", b.attrs)
+        self.assertIn("def", b.attrs)
+        bdef = b.attrs.get("def")
+        self.assertEqual(len(bdef), 2)
+        self.assertEqual(bdef[0], " definition\n")
+        bdef1 = bdef[1]
+        self.assertEqual(bdef1.kind, NodeKind.LIST)
+        self.assertEqual(bdef1.args, ":;")
+        self.assertNotIn("head", bdef1.attrs)
+        self.assertNotIn("def", bdef1.attrs)
+        self.assertEqual(len(bdef1.children), 2)
+        bdef1a, bdef1b = bdef1.children
+        self.assertEqual(bdef1a.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(bdef1a.args, ":;")
+        self.assertEqual(bdef1a.children, [" sub-item 1 plus term\n"])
+        self.assertNotIn("head", bdef1a.attrs)
+        self.assertEqual(bdef1a.attrs.get("def"),
+                         [" two colons plus definition\n"])
+        self.assertEqual(bdef1b.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(bdef1b.args, ":;")
+        self.assertEqual(bdef1b.children, [" sub-item 2 "])
+        self.assertNotIn("head", bdef1b.attrs)
+        self.assertEqual(bdef1b.attrs.get("def"), [" colon plus definition\n"])
+        self.assertEqual(c.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(c.args, ";")
+        self.assertNotIn("head", c.attrs)
+        self.assertEqual(c.attrs.get("def"), [" back to the main list\n"])
+        self.assertEqual(c.children, [" item 2\n"])
 
     def test_listend1(self):
         tree = parse("test", "# item1\nFoo\n")
@@ -391,7 +445,7 @@ dasfasddasfdas
         aa = a.children[0]
         self.assertEqual(aa.kind, NodeKind.LIST_ITEM)
         self.assertEqual(aa.args, "#")
-        self.assertEqual(aa.children, ["item1\n"])
+        self.assertEqual(aa.children, [" item1\n"])
         self.assertEqual(b, "Foo\n")
 
     def test_listend2(self):
@@ -404,7 +458,7 @@ dasfasddasfdas
         aa = a.children[0]
         self.assertEqual(aa.kind, NodeKind.LIST_ITEM)
         self.assertEqual(aa.args, "#")
-        self.assertEqual(aa.children, ["item1\n"])
+        self.assertEqual(aa.children, ["\nitem1\n"])
         self.assertEqual(b, "Foo\n")
 
     def test_link1(self):
