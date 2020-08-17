@@ -389,7 +389,6 @@ dasfasddasfdas
 ; item 2
 : back to the main list
 """)
-        print(tree)
         self.assertEqual(len(tree.children), 1)
         t = tree.children[0]
         self.assertEqual(t.kind, NodeKind.LIST)
@@ -434,9 +433,40 @@ dasfasddasfdas
         self.assertEqual(c.attrs.get("def"), [" back to the main list\n"])
         self.assertEqual(c.children, [" item 2\n"])
 
+    def test_list_continue(self):
+        tree = parse("test", """#list item A1
+##list item B1
+##list item B2
+#:continuing list item A1
+#list item A2
+""")
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.LIST)
+        self.assertEqual(len(t.children), 2)
+        a, b = t.children
+        self.assertEqual(a.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(a.args, "#")
+        self.assertEqual(len(a.children), 3)
+        aa, ab, ac = a.children
+        self.assertEqual(aa, "list item A1\n")
+        self.assertEqual(ab.kind, NodeKind.LIST)
+        self.assertEqual(ab.args, "##")
+        self.assertEqual(len(ab.children), 2)
+        aba, abb = ab.children
+        self.assertEqual(aba.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(aba.args, "##")
+        self.assertEqual(aba.children, ["list item B1\n"])
+        self.assertEqual(abb.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(abb.args, "##")
+        self.assertEqual(abb.children, ["list item B2\n"])
+        self.assertEqual(ac, "continuing list item A1\n")
+        self.assertEqual(b.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(b.args, "#")
+        self.assertEqual(b.children, ["list item A2\n"])
+
     def test_listend1(self):
         tree = parse("test", "# item1\nFoo\n")
-        print(tree)
         self.assertEqual(len(tree.children), 2)
         a, b = tree.children
         self.assertEqual(a.kind, NodeKind.LIST)
@@ -460,6 +490,43 @@ dasfasddasfdas
         self.assertEqual(aa.args, "#")
         self.assertEqual(aa.children, ["\nitem1\n"])
         self.assertEqual(b, "Foo\n")
+
+    def test_liststart1(self):
+        tree = parse("test", "==Foo==\n#item1")
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.LEVEL2)
+        self.assertEqual(t.args, [["Foo"]])
+        self.assertEqual(len(t.children), 2)
+        x, a = t.children
+        self.assertEqual(x, "\n")
+        self.assertEqual(a.kind, NodeKind.LIST)
+        self.assertEqual(a.args, "#")
+        self.assertEqual(len(a.children), 1)
+        b = a.children[0]
+        self.assertEqual(b.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(b.args, "#")
+        self.assertEqual(b.children, ["item1"])
+
+    def test_liststart2(self):
+        tree = parse("test", "{{Foo|\n#item1}}")
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.TEMPLATE)
+        self.assertEqual(t.children, [])
+        self.assertEqual(len(t.args), 2)
+        a, b = t.args
+        self.assertEqual(a, ["Foo"])
+        self.assertIsInstance(b, list)
+        ba, bb = b
+        self.assertEqual(ba, "\n")
+        self.assertEqual(bb.kind, NodeKind.LIST)
+        self.assertEqual(bb.args, "#")
+        self.assertEqual(len(bb.children), 1)
+        bba = bb.children[0]
+        self.assertEqual(bba.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(bba.args, "#")
+        self.assertEqual(bba.children, ["item1"])
 
     def test_link1(self):
         tree = parse("test", "a [[Main Page]] b")
@@ -624,7 +691,6 @@ def foo(x):
 
     def test_template1(self):
         tree = parse("test", "a{{foo}}b")
-        print(tree)
         self.assertEqual(len(tree.children), 3)
         a, b, c = tree.children
         self.assertEqual(a, "a")
@@ -830,7 +896,6 @@ def foo(x):
 
     def test_parserfn2(self):
         tree = parse("test", "{{PAGESIZE:TestPage}}")
-        print(tree)
         self.assertEqual(len(tree.children), 1)
         b = tree.children[0]
         self.assertEqual(b.kind, NodeKind.PARSERFN)
@@ -1119,6 +1184,14 @@ def foo(x):
         tree, ctx = parse_with_ctx("test", "</nowiki>")
         self.assertEqual(len(ctx.errors), 1)
 
+    def test_error10(self):
+        tree, ctx = parse_with_ctx("test", "{| ''\n|-\n'' |}")
+        self.assertEqual(len(ctx.errors), 2)
+
+    def test_error11(self):
+        tree, ctx = parse_with_ctx("test", "{| ''\n|+\n'' |}")
+        self.assertEqual(len(ctx.errors), 2)
+
     def test_plain1(self):
         tree = parse("test", "]]")
         self.assertEqual(tree.children, ["]]"])
@@ -1163,6 +1236,10 @@ def foo(x):
         tree = parse("test", "!!")
         self.assertEqual(tree.children, ["!!"])
 
+    def test_plain12(self):
+        tree = parse("test", "|-")
+        self.assertEqual(tree.children, ["|-"])
+
     def test_nonsense1(self):
         tree = parse("test", "<pre />")
         t = tree.children[0]
@@ -1182,6 +1259,14 @@ def foo(x):
         tree, ctx = parse_with_ctx("test", "|}}}}}}}}")
         self.assertEqual(tree.children, ["|}}}}}}}}"])
         self.assertEqual(len(ctx.errors), 1)
+
+    def test_nonsense5(self):
+        tree, ctx = parse_with_ctx("test", "{|''foo''\n|-\n|}")
+        self.assertEqual(len(ctx.errors), 0)
+
+    def test_nonsense6(self):
+        tree, ctx = parse_with_ctx("test", "{|\n|-''foo''\n|col\n|}")
+        self.assertEqual(len(ctx.errors), 0)
 
     def test_print_tree(self):
         tree = parse("test", """{| class="wikitable"

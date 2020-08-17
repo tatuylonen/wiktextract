@@ -1200,11 +1200,11 @@ def list_fn(ctx, token):
         text_fn(ctx, token)
         return
 
-    # XXX implement using e.g. ##: to continue a list item after a sublist
-
     # Pop any lower-level list items
     while True:
         node = ctx.stack[-1]
+
+        # Check for a definition in a definition list
         if (node.kind == NodeKind.LIST_ITEM and node.args.endswith(";") and
             token.endswith(":") and token[:-1] == node.args[:-1] and
             "head" not in node.attrs):
@@ -1214,14 +1214,37 @@ def list_fn(ctx, token):
             node.attrs["head"] = node.children
             node.children = []
             return
+
+        # Check for continuing an earlier list item, possibly after an
+        # intervening sublist
+        if (node.kind == NodeKind.LIST_ITEM and token.endswith(":") and
+            node.args == token[:-1]):
+            # Suffixing a list item prefix with a colon can be used to continue
+            # the same item after an intervening sublist.  In this case we
+            # just return with the continued list item at the top of the stack.
+            return
+
+        # Check for a previous list item on the same level (adding new item to
+        # an earlier list)
         if (node.kind == NodeKind.LIST_ITEM and
             len(node.args) < len(token) and
             token[len(node.args)] == node.args):
             break
+
+        # Check for adding an item to the same list.  If the list has a
+        # different prefix, we will close it and either add to a parent list
+        # or start a new list.  Note that definition list definitions were
+        # already handled above so we won't be seeing them here.
         if node.kind == NodeKind.LIST and node.args == token:
             break
+
+        # Stop popping if we are at a header.  Headers cannot be used inside
+        # list items.  In this case we always start a new list.
         if node.kind in kind_to_level:
             break  # Always break before section header
+
+        # There are various kinds of nodes that can contain lists.  We won't
+        # pop them.
         if node.kind in (NodeKind.HTML, NodeKind.TEMPLATE,
                          NodeKind.TEMPLATEVAR, NodeKind.PARSERFN,
                          NodeKind.TABLE,
@@ -1229,10 +1252,17 @@ def list_fn(ctx, token):
                          NodeKind.TABLE_ROW,
                          NodeKind.TABLE_CELL):
             break
+
+        # Otherwise pop the current node, possibly causing an error message.
+        # For example, italics or bold must be contained in a single list item.
         ctx.pop(True)
+
+    # If not already in a list, create a new list.
     if node.kind != NodeKind.LIST or node.args != token:
         node = ctx.push(NodeKind.LIST)
         node.args = token
+
+    # Add a new list item to the list.
     node = ctx.push(NodeKind.LIST_ITEM)
     node.args = token
 
