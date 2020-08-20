@@ -3,13 +3,14 @@ import sys
 import html
 import json
 import time
+import textwrap
 import os.path
 import collections
 import lupa
 from lupa import LuaRuntime
 
-import pyximport; pyximport.install(pyimport=True)
 from wiktextract import wikitext
+from wiktextract.wikitext import WikiNode, NodeKind
 
 #import pstats
 #import cProfile
@@ -20,22 +21,256 @@ builtin_lua_search_paths = [
     "mediawiki-extensions-Scribunto/includes/engines/LuaCommon/lualib",
 ]
 
-page = open("temp-pages/Words/an/animal.txt").read()
-print("Len of source page", len(page))
+MAX_LEN = 75
 
-#pr = cProfile.Profile()
-#pr.enable()
-start_t = time.time()
-multiplier = 100
-for i in range(multiplier):
-    tree = wikitext.parse("animal", page)
-t = time.time() - start_t
-print("{:.1f} chars/sec".format(multiplier * len(page) / t))
-#pr.disable()
-#ps = pstats.Stats(pr).sort_stats(pstats.SortKey.CUMULATIVE)
-#ps.print_stats()
-sys.exit(1)
+page = open("tests/animal.txt").read()
+#print("Len of source page", len(page))
+
+langs = collections.defaultdict(int)
+
+
+# XXX fix animal.txt <3> processing inside template arg
+
+# XXX fix list nesting for #* prefixes in animal.txt
+
+
+class FmtCtx(object):
+    __slots__ = ("parts", "indent", "pos", "inpara", "nowrap", "space")
+    def __init__(self):
+        self.parts = []
+        self.indent = 0
+        self.pos = 0
+        self.inpara = False
+        self.nowrap = False
+        self.space = False
+
+    def add(self, txt):
+        assert isinstance(txt, str)
+        for w in re.split(r"(\s+)", txt):
+            if not w:
+                continue
+            if w.isspace():
+                self.space = True
+                continue
+            # We are adding a non-space segment
+            if (self.pos > 0 and self.pos + len(w) + 1 > MAX_LEN and
+                not self.nowrap and
+                (self.space or
+                 (not self.parts[-1][-1].isalnum() or
+                  not self.parts[-1][-1].isalnum()))):
+                self.parts.append("\n")
+                self.pos = 0
+                self.space = False
+                if self.pos == 0 and self.indent > 0:
+                    self.parts.append(" " * self.indent)
+                    self.pos += self.indent
+            if self.space:
+                self.space = False
+                if (self.pos > 0 and not self.nowrap and self.parts and
+                      not self.parts[-1][-1].isspace()):
+                    self.parts.append(" ")
+                    self.pos += 1
+            self.parts.append(w)
+            self.pos += len(w)
+            self.inpara = True
+            self.nowrap = False
+
+    def add_prefix(self, txt):
+        assert isinstance(txt, str)
+        self.newline()
+        if self.pos == 0 and self.indent > 0:
+            self.parts.append(" " * self.indent)
+            self.pos += self.indent
+        self.parts.append(txt)
+        self.pos += len(txt)
+        self.nowrap = True
+        self.inpara = True
+        self.space = False
+
+    def newline(self):
+        if self.parts and not self.parts[-1].endswith("\n"):
+            self.parts.append("\n")
+            self.pos = 0
+
+    def newpara(self):
+        if self.inpara:
+            self.newline()
+            self.parts.append("\n")
+            self.inpara = False
+            self.nowrap = False
+
+def list_to_text(ctx, node):
+    prefix = node.args
+    number = 1
+    ctx.newline()
+    for child in node.children:
+        if not isinstance(child, WikiNode) or child.kind != NodeKind.LIST_ITEM:
+            print("Unexpected item under list: {}".format(child.kind))
+            continue
+        if prefix.endswith("#"):
+                p = "{}. ".format(number)
+                number += 1
+        elif prefix.endswith("*"):
+            p = "* "
+        elif prefix.endswith(":"):
+            p = "    "
+        else:
+            p = "? "
+        ctx.add_prefix(p)
+        ctx.indent += len(p)
+        to_text_recurse(ctx, child)
+        ctx.indent -= len(p)
+        ctx.newline()
+
+def link_to_text(ctx, node):
+    assert isinstance(node, WikiNode)
+    trail = to_text(node.children).strip()
+    page = to_text(node.args[0]).strip()
+    if len(node.args) > 1:
+        txt = to_text(node.args[1]).strip()
+    else:
+        txt = page
+    if not txt:
+        # Pipe trick
+        txt = page
+        idx = txt.find(":")
+        if idx >= 0:
+            txt = txt[idx + 1:]
+        idx = txt.find("(")
+        if idx >= 0:
+            txt = txt[:idx]
+        else:
+            idx = txt.find(",")
+            if idx >= 0:
+                txt = txt[:idx]
+        txt = txt.strip()
+    # XXX should we do some inflection with trail links?
+    ctx.add(txt + trail)
+
+def template_to_text(ctx, node):
+    ctx.add("{{")
+    to_text_list(ctx, node.args[0])
+    for x in node.args[1:]:
+        ctx.add("|")
+        to_text_list(ctx, x)
+    ctx.add("}}")
+
+def templatevar_to_text(ctx, node):
+    ctx.add("{{{")
+    to_text_list(ctx, node.args[0])
+    for x in node.args[1:]:
+        ctx.add("|")
+        to_text_list(ctx, x)
+    ctx.add("}}}")
+
+def parserfn_to_text(node):
+    ctx.add("{{")
+    to_text_list(ctx, node.args[0])
+    ctx.add(":")
+    if len(node.args) > 1:
+        to_text_list(node.args[1])
+        for x in node.args[2:]:
+            ctx.add("|")
+            to_text_list(ctx, x)
+    ctx.add("}}")
+
+def title_to_text(ctx, node, underline):
+    txt = to_text(node.args[0]).strip()
+    ctx.newpara()
+    ctx.add_prefix(txt)
+    ctx.newline()
+    ctx.add_prefix(underline * len(txt))
+    ctx.newpara()
+    to_text_list(ctx, node.children)
+
+def to_text_list(ctx, lst):
+    assert isinstance(lst, (list, tuple))
+    for x in lst:
+        to_text_recurse(ctx, x)
+
+def to_text_recurse(ctx, node):
+    assert isinstance(node, (str, WikiNode))
+    if isinstance(node, str):
+        ctx.add(node)
+        return
+    kind = node.kind
+    if kind == NodeKind.LEVEL2:
+        title_to_text(ctx, node, "#")
+    elif kind == NodeKind.LEVEL3:
+        title_to_text(ctx, node, "=")
+    elif kind == NodeKind.LEVEL4:
+        title_to_text(ctx, node, "-")
+    elif kind == NodeKind.LEVEL5:
+        title_to_text(ctx, node, "~")
+    elif kind == NodeKind.LEVEL6:
+        title_to_text(ctx, node, ".")
+    elif kind == NodeKind.LIST:
+        list_to_text(ctx, node)
+    elif kind == NodeKind.HLINE:
+        ctx.newpara()
+        ctx.add_prefix("-" * (MAX_LEN - ctx.indent))
+        ctx.newpara()
+    elif kind == NodeKind.PRE:
+        ctx.newpara()
+        txt = "".join(node.children).strip()
+        for line in txt.split("\n"):
+            ctx.add_prefix(line)
+            ctx.newline()
+        ctx.newpara()
+    elif kind == NodeKind.LINK:
+        link_to_text(ctx, node)
+    elif kind == NodeKind.TEMPLATE:
+        template_to_text(ctx, node)
+    elif kind == NodeKind.TEMPLATEVAR:
+        templatevar_to_text(ctx, node)
+    elif kind == NodeKind.PARSERFN:
+        parserfn_to_text(ctx, node)
+    elif kind == NodeKind.URL:
+        if len(node.args) > 1:
+            to_text_list(ctx, node.args[1])
+        else:
+            to_text_list(ctx, node.args[0])
+    elif kind == NodeKind.TABLE:
+        parts.append("<XXX TABLE>")
+    elif kind == NodeKind.MAGIC_WORD:
+        # Magic word - generate no output
+        # XXX check if some should generate output
+        pass
+    else:
+        to_text_list(ctx, node.children)
+
+
+def to_text(lst):
+    assert isinstance(lst, (list, tuple))
+    ctx = FmtCtx()
+    for x in lst:
+        to_text_recurse(ctx, x)
+    return "".join(ctx.parts).strip()
+
+
+def analyze_node(node):
+    if isinstance(node, str):
+        return
+    assert isinstance(node, WikiNode)
+    kind = node.kind
+    if kind == NodeKind.LEVEL2:
+        title = to_text(node.args[0])
+        langs[title] += 1
+
+    for x in node.children:
+        analyze_node(x)
+
+tree = wikitext.parse("animal", page)
+analyze_node(tree)
+#for k, v in sorted(langs.items(), key=lambda x: x[1], reverse=True):
+#    print(v, k)
+
+print(to_text(tree.children))
+print("============================")
 wikitext.print_tree(tree)
+
+sys.exit(1)
+
 
 with open("tempXXXspecials.json") as f:
     lst = json.load(f)
