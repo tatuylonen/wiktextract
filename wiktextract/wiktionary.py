@@ -414,8 +414,11 @@ def parse_wiktionary(path, config, word_cb, capture_cb=None):
     specials = []
     for x in results:
         specials.extend(x)
-    with open("tempXXXspecials.json", "w") as f:
-        json.dump(specials, f, indent=2, sort_keys=True)
+
+    # XXX this is temporary code
+    if False:
+        with open("tempXXXspecials.json", "w") as f:
+            json.dump(specials, f, indent=2, sort_keys=True)
 
     print("Second pass - extracting words")
     ctx = WiktionaryTarget(config, capture_cb)

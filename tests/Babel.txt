@@ -1,0 +1,118 @@
+<!-- This file was taken from Wiktionary, template "Babel", and therefore
+this file is licensed under the Wiktionary license,
+https://en.wiktionary.org/wiki/Wiktionary:Copyrights.  Essentially,
+this means dual licensing under both the Creative Commons
+Attribution-ShareAlike 3.0 Unported License (CC-BY_SA) and the GNU
+Free Documentation License (GFDL). -->
+
+<includeonly><!--
+-->{| name="userboxes" id="userboxes" style="float: {{#switch:{{{align|}}}|left|none|inherit={{{align|}}}|right}}; margin-left: 1em; margin-bottom: 0.5em; width: {{{width|248px}}}; border: {{{bordercolor|#99B3FF}}} solid 1px; clear: {{#switch:{{{align|}}}|left|none|inherit={{{align|}}}|right}}"
+|-
+! style="background-color: {{{color|inherit}}}; text-align: center" colspan="10" | {{{header|[[Wiktionary:Babel]]}}}
+|- style="vertical-align:top;"
+| <!--
+-->{{#if:{{{1|}}}|{{#if:{{subst:isValidPageName|{{{1}}}}}|{{User {{{1}}}|g={{{g|}}}}}|{{{1}}}}}|style="text-align:center"{{!}}This user cannot read or write any languages. Assistance is required.}}<!--
+-->{{#if:{{{2|}}}|{{#if:{{subst:isValidPageName|{{{2}}}}}|{{User {{{2}}}|g={{{g|}}}}}|{{{2}}}}}}}<!--
+-->{{#if:{{{3|}}}|{{#if:{{subst:isValidPageName|{{{3}}}}}|{{User {{{3}}}|g={{{g|}}}}}|{{{3}}}}}}}<!--
+-->{{#if:{{{4|}}}|{{#if:{{subst:isValidPageName|{{{4}}}}}|{{User {{{4}}}|g={{{g|}}}}}|{{{4}}}}}}}<!--
+-->{{#if:{{{5|}}}|{{#if:{{subst:isValidPageName|{{{5}}}}}|{{User {{{5}}}|g={{{g|}}}}}|{{{5}}}}}}}<!--
+-->{{#if:{{{6|}}}|{{#if:{{subst:isValidPageName|{{{6}}}}}|{{User {{{6}}}|g={{{g|}}}}}|{{{6}}}}}}}<!--
+-->{{#if:{{{7|}}}|{{#if:{{subst:isValidPageName|{{{7}}}}}|{{User {{{7}}}|g={{{g|}}}}}|{{{7}}}}}}}<!--
+-->{{#if:{{{8|}}}|{{#if:{{subst:isValidPageName|{{{8}}}}}|{{User {{{8}}}|g={{{g|}}}}}|{{{8}}}}}}}<!--
+-->{{#if:{{{9|}}}|{{#if:{{subst:isValidPageName|{{{9}}}}}|{{User {{{9}}}|g={{{g|}}}}}|{{{9}}}}}}}<!--
+-->{{#if:{{{10|}}}|{{#if:{{subst:isValidPageName|{{{10}}}}}|{{User {{{10}}}|g={{{g|}}}}}|{{{10}}}}}}}<!--
+-->{{#if:{{{11|}}}|{{#if:{{subst:isValidPageName|{{{11}}}}}|{{User {{{11}}}|g={{{g|}}}}}|{{{11}}}}}}}<!--
+-->{{#if:{{{12|}}}|{{#if:{{subst:isValidPageName|{{{12}}}}}|{{User {{{12}}}|g={{{g|}}}}}|{{{12}}}}}}}<!--
+-->{{#if:{{{13|}}}|{{#if:{{subst:isValidPageName|{{{13}}}}}|{{User {{{13}}}|g={{{g|}}}}}|{{{13}}}}}}}<!--
+-->{{#if:{{{14|}}}|{{#if:{{subst:isValidPageName|{{{14}}}}}|{{User {{{14}}}|g={{{g|}}}}}|{{{14}}}}}}}<!--
+-->{{#if:{{{15|}}}|{{#if:{{subst:isValidPageName|{{{15}}}}}|{{User {{{15}}}|g={{{g|}}}}}|{{{15}}}}}}}<!--
+-->{{#if:{{{16|}}}|{{#if:{{subst:isValidPageName|{{{16}}}}}|{{User {{{16}}}|g={{{g|}}}}}|{{{16}}}}}}}<!--
+-->{{#if:{{{17|}}}|{{#if:{{subst:isValidPageName|{{{17}}}}}|{{User {{{17}}}|g={{{g|}}}}}|{{{17}}}}}}}<!--
+-->{{#if:{{{18|}}}|{{#if:{{subst:isValidPageName|{{{18}}}}}|{{User {{{18}}}|g={{{g|}}}}}|{{{18}}}}}}}<!--
+-->{{#if:{{{19|}}}|{{#if:{{subst:isValidPageName|{{{19}}}}}|{{User {{{19}}}|g={{{g|}}}}}|{{{19}}}}}}}<!--
+-->{{#if:{{{20|}}}|{{#if:{{subst:isValidPageName|{{{20}}}}}|{{User {{{20}}}|g={{{g|}}}}}|{{{20}}}}}}}<!--
+-->{{#if:{{{21|}}}|{{#if:{{subst:isValidPageName|{{{21}}}}}|{{User {{{21}}}|g={{{g|}}}}}|{{{21}}}}}}}<!--
+-->{{#if:{{{22|}}}|{{#if:{{subst:isValidPageName|{{{22}}}}}|{{User {{{22}}}|g={{{g|}}}}}|{{{22}}}}}}}<!--
+-->{{#if:{{{23|}}}|{{#if:{{subst:isValidPageName|{{{23}}}}}|{{User {{{23}}}|g={{{g|}}}}}|{{{23}}}}}}}<!--
+-->{{#if:{{{24|}}}|{{#if:{{subst:isValidPageName|{{{24}}}}}|{{User {{{24}}}|g={{{g|}}}}}|{{{24}}}}}}}<!--
+-->{{#if:{{{25|}}}|{{#if:{{subst:isValidPageName|{{{25}}}}}|{{User {{{25}}}|g={{{g|}}}}}|{{{25}}}}}}}<!--
+-->{{#if:{{{26|}}}|{{#if:{{subst:isValidPageName|{{{26}}}}}|{{User {{{26}}}|g={{{g|}}}}}|{{{26}}}}}}}<!--
+-->{{#if:{{{27|}}}|{{#if:{{subst:isValidPageName|{{{27}}}}}|{{User {{{27}}}|g={{{g|}}}}}|{{{27}}}}}}}<!--
+-->{{#if:{{{28|}}}|{{#if:{{subst:isValidPageName|{{{28}}}}}|{{User {{{28}}}|g={{{g|}}}}}|{{{28}}}}}}}<!--
+-->{{#if:{{{29|}}}|{{#if:{{subst:isValidPageName|{{{29}}}}}|{{User {{{29}}}|g={{{g|}}}}}|{{{29}}}}}}}<!--
+-->{{#if:{{{30|}}}|{{#if:{{subst:isValidPageName|{{{30}}}}}|{{User {{{30}}}|g={{{g|}}}}}|{{{30}}}}}}}<!--
+-->{{#if:{{{31|}}}|{{#if:{{subst:isValidPageName|{{{31}}}}}|{{User {{{31}}}|g={{{g|}}}}}|{{{31}}}}}}}<!--
+-->{{#if:{{{32|}}}|{{#if:{{subst:isValidPageName|{{{32}}}}}|{{User {{{32}}}|g={{{g|}}}}}|{{{32}}}}}}}<!--
+-->{{#if:{{{33|}}}|{{#if:{{subst:isValidPageName|{{{33}}}}}|{{User {{{33}}}|g={{{g|}}}}}|{{{33}}}}}}}<!--
+-->{{#if:{{{34|}}}|{{#if:{{subst:isValidPageName|{{{34}}}}}|{{User {{{34}}}|g={{{g|}}}}}|{{{34}}}}}}}<!--
+-->{{#if:{{{35|}}}|{{#if:{{subst:isValidPageName|{{{35}}}}}|{{User {{{35}}}|g={{{g|}}}}}|{{{35}}}}}}}<!--
+-->{{#if:{{{36|}}}|{{#if:{{subst:isValidPageName|{{{36}}}}}|{{User {{{36}}}|g={{{g|}}}}}|{{{36}}}}}}}<!--
+-->{{#if:{{{37|}}}|{{#if:{{subst:isValidPageName|{{{37}}}}}|{{User {{{37}}}|g={{{g|}}}}}|{{{37}}}}}}}<!--
+-->{{#if:{{{38|}}}|{{#if:{{subst:isValidPageName|{{{38}}}}}|{{User {{{38}}}|g={{{g|}}}}}|{{{38}}}}}}}<!--
+-->{{#if:{{{39|}}}|{{#if:{{subst:isValidPageName|{{{39}}}}}|{{User {{{39}}}|g={{{g|}}}}}|{{{39}}}}}}}<!--
+-->{{#if:{{{40|}}}|{{#if:{{subst:isValidPageName|{{{40}}}}}|{{User {{{40}}}|g={{{g|}}}}}|{{{40}}}}}}}<!--
+-->{{#if:{{{41|}}}|{{#if:{{subst:isValidPageName|{{{41}}}}}|{{User {{{41}}}|g={{{g|}}}}}|{{{41}}}}}}}<!--
+-->{{#if:{{{42|}}}|{{#if:{{subst:isValidPageName|{{{42}}}}}|{{User {{{42}}}|g={{{g|}}}}}|{{{42}}}}}}}<!--
+-->{{#if:{{{43|}}}|{{#if:{{subst:isValidPageName|{{{43}}}}}|{{User {{{43}}}|g={{{g|}}}}}|{{{43}}}}}}}<!--
+-->{{#if:{{{44|}}}|{{#if:{{subst:isValidPageName|{{{44}}}}}|{{User {{{44}}}|g={{{g|}}}}}|{{{44}}}}}}}<!--
+-->{{#if:{{{45|}}}|{{#if:{{subst:isValidPageName|{{{45}}}}}|{{User {{{45}}}|g={{{g|}}}}}|{{{45}}}}}}}<!--
+-->{{#if:{{{46|}}}|{{#if:{{subst:isValidPageName|{{{46}}}}}|{{User {{{46}}}|g={{{g|}}}}}|{{{46}}}}}}}<!--
+-->{{#if:{{{47|}}}|{{#if:{{subst:isValidPageName|{{{47}}}}}|{{User {{{47}}}|g={{{g|}}}}}|{{{47}}}}}}}<!--
+-->{{#if:{{{48|}}}|{{#if:{{subst:isValidPageName|{{{48}}}}}|{{User {{{48}}}|g={{{g|}}}}}|{{{48}}}}}}}<!--
+-->{{#if:{{{49|}}}|{{#if:{{subst:isValidPageName|{{{49}}}}}|{{User {{{49}}}|g={{{g|}}}}}|{{{49}}}}}}}<!--
+-->{{#if:{{{50|}}}|{{#if:{{subst:isValidPageName|{{{50}}}}}|{{User {{{50}}}|g={{{g|}}}}}|{{{50}}}}}}}<!--
+-->{{#if:{{{51|}}}|{{#if:{{subst:isValidPageName|{{{51}}}}}|{{User {{{51}}}|g={{{g|}}}}}|{{{51}}}}}}}<!--
+-->{{#if:{{{52|}}}|{{#if:{{subst:isValidPageName|{{{52}}}}}|{{User {{{52}}}|g={{{g|}}}}}|{{{52}}}}}}}<!--
+-->{{#if:{{{53|}}}|{{#if:{{subst:isValidPageName|{{{53}}}}}|{{User {{{53}}}|g={{{g|}}}}}|{{{53}}}}}}}<!--
+-->{{#if:{{{54|}}}|{{#if:{{subst:isValidPageName|{{{54}}}}}|{{User {{{54}}}|g={{{g|}}}}}|{{{54}}}}}}}<!--
+-->{{#if:{{{55|}}}|{{#if:{{subst:isValidPageName|{{{55}}}}}|{{User {{{55}}}|g={{{g|}}}}}|{{{55}}}}}}}<!--
+-->{{#if:{{{56|}}}|{{#if:{{subst:isValidPageName|{{{56}}}}}|{{User {{{56}}}|g={{{g|}}}}}|{{{56}}}}}}}<!--
+-->{{#if:{{{57|}}}|{{#if:{{subst:isValidPageName|{{{57}}}}}|{{User {{{57}}}|g={{{g|}}}}}|{{{57}}}}}}}<!--
+-->{{#if:{{{58|}}}|{{#if:{{subst:isValidPageName|{{{58}}}}}|{{User {{{58}}}|g={{{g|}}}}}|{{{58}}}}}}}<!--
+-->{{#if:{{{59|}}}|{{#if:{{subst:isValidPageName|{{{59}}}}}|{{User {{{59}}}|g={{{g|}}}}}|{{{59}}}}}}}<!--
+-->{{#if:{{{60|}}}|{{#if:{{subst:isValidPageName|{{{60}}}}}|{{User {{{60}}}|g={{{g|}}}}}|{{{60}}}}}}}<!--
+-->{{#if:{{{61|}}}|{{#if:{{subst:isValidPageName|{{{61}}}}}|{{User {{{61}}}|g={{{g|}}}}}|{{{61}}}}}}}<!--
+-->{{#if:{{{62|}}}|{{#if:{{subst:isValidPageName|{{{62}}}}}|{{User {{{62}}}|g={{{g|}}}}}|{{{62}}}}}}}<!--
+-->{{#if:{{{63|}}}|{{#if:{{subst:isValidPageName|{{{63}}}}}|{{User {{{63}}}|g={{{g|}}}}}|{{{63}}}}}}}<!--
+-->{{#if:{{{64|}}}|{{#if:{{subst:isValidPageName|{{{64}}}}}|{{User {{{64}}}|g={{{g|}}}}}|{{{64}}}}}}}<!--
+-->{{#if:{{{65|}}}|{{#if:{{subst:isValidPageName|{{{65}}}}}|{{User {{{65}}}|g={{{g|}}}}}|{{{65}}}}}}}<!--
+-->{{#if:{{{66|}}}|{{#if:{{subst:isValidPageName|{{{66}}}}}|{{User {{{66}}}|g={{{g|}}}}}|{{{66}}}}}}}<!--
+-->{{#if:{{{67|}}}|{{#if:{{subst:isValidPageName|{{{67}}}}}|{{User {{{67}}}|g={{{g|}}}}}|{{{67}}}}}}}<!--
+-->{{#if:{{{68|}}}|{{#if:{{subst:isValidPageName|{{{68}}}}}|{{User {{{68}}}|g={{{g|}}}}}|{{{68}}}}}}}<!--
+-->{{#if:{{{69|}}}|{{#if:{{subst:isValidPageName|{{{69}}}}}|{{User {{{69}}}|g={{{g|}}}}}|{{{69}}}}}}}<!--
+-->{{#if:{{{70|}}}|{{#if:{{subst:isValidPageName|{{{70}}}}}|{{User {{{70}}}|g={{{g|}}}}}|{{{70}}}}}}}<!--
+-->{{#if:{{{71|}}}|{{#if:{{subst:isValidPageName|{{{71}}}}}|{{User {{{71}}}|g={{{g|}}}}}|{{{71}}}}}}}<!--
+-->{{#if:{{{72|}}}|{{#if:{{subst:isValidPageName|{{{72}}}}}|{{User {{{72}}}|g={{{g|}}}}}|{{{72}}}}}}}<!--
+-->{{#if:{{{73|}}}|{{#if:{{subst:isValidPageName|{{{73}}}}}|{{User {{{73}}}|g={{{g|}}}}}|{{{73}}}}}}}<!--
+-->{{#if:{{{74|}}}|{{#if:{{subst:isValidPageName|{{{74}}}}}|{{User {{{74}}}|g={{{g|}}}}}|{{{74}}}}}}}<!--
+-->{{#if:{{{75|}}}|{{#if:{{subst:isValidPageName|{{{75}}}}}|{{User {{{75}}}|g={{{g|}}}}}|{{{75}}}}}}}<!--
+-->{{#if:{{{76|}}}|{{#if:{{subst:isValidPageName|{{{76}}}}}|{{User {{{76}}}|g={{{g|}}}}}|{{{76}}}}}}}<!--
+-->{{#if:{{{77|}}}|{{#if:{{subst:isValidPageName|{{{77}}}}}|{{User {{{77}}}|g={{{g|}}}}}|{{{77}}}}}}}<!--
+-->{{#if:{{{78|}}}|{{#if:{{subst:isValidPageName|{{{78}}}}}|{{User {{{78}}}|g={{{g|}}}}}|{{{78}}}}}}}<!--
+-->{{#if:{{{79|}}}|{{#if:{{subst:isValidPageName|{{{79}}}}}|{{User {{{79}}}|g={{{g|}}}}}|{{{79}}}}}}}<!--
+-->{{#if:{{{80|}}}|{{#if:{{subst:isValidPageName|{{{80}}}}}|{{User {{{80}}}|g={{{g|}}}}}|{{{80}}}}}}}<!--
+-->{{#if:{{{81|}}}|{{#if:{{subst:isValidPageName|{{{81}}}}}|{{User {{{81}}}|g={{{g|}}}}}|{{{81}}}}}}}<!--
+-->{{#if:{{{82|}}}|{{#if:{{subst:isValidPageName|{{{82}}}}}|{{User {{{82}}}|g={{{g|}}}}}|{{{82}}}}}}}<!--
+-->{{#if:{{{83|}}}|{{#if:{{subst:isValidPageName|{{{83}}}}}|{{User {{{83}}}|g={{{g|}}}}}|{{{83}}}}}}}<!--
+-->{{#if:{{{84|}}}|{{#if:{{subst:isValidPageName|{{{84}}}}}|{{User {{{84}}}|g={{{g|}}}}}|{{{84}}}}}}}<!--
+-->{{#if:{{{85|}}}|{{#if:{{subst:isValidPageName|{{{85}}}}}|{{User {{{85}}}|g={{{g|}}}}}|{{{85}}}}}}}<!--
+-->{{#if:{{{86|}}}|{{#if:{{subst:isValidPageName|{{{86}}}}}|{{User {{{86}}}|g={{{g|}}}}}|{{{86}}}}}}}<!--
+-->{{#if:{{{87|}}}|{{#if:{{subst:isValidPageName|{{{87}}}}}|{{User {{{87}}}|g={{{g|}}}}}|{{{87}}}}}}}<!--
+-->{{#if:{{{88|}}}|{{#if:{{subst:isValidPageName|{{{88}}}}}|{{User {{{88}}}|g={{{g|}}}}}|{{{88}}}}}}}<!--
+-->{{#if:{{{89|}}}|{{#if:{{subst:isValidPageName|{{{89}}}}}|{{User {{{89}}}|g={{{g|}}}}}|{{{89}}}}}}}<!--
+-->{{#if:{{{90|}}}|{{#if:{{subst:isValidPageName|{{{90}}}}}|{{User {{{90}}}|g={{{g|}}}}}|{{{90}}}}}}}<!--
+-->{{#if:{{{91|}}}|{{#if:{{subst:isValidPageName|{{{91}}}}}|{{User {{{91}}}|g={{{g|}}}}}|{{{91}}}}}}}<!--
+-->{{#if:{{{92|}}}|{{#if:{{subst:isValidPageName|{{{92}}}}}|{{User {{{92}}}|g={{{g|}}}}}|{{{92}}}}}}}<!--
+-->{{#if:{{{93|}}}|{{#if:{{subst:isValidPageName|{{{93}}}}}|{{User {{{93}}}|g={{{g|}}}}}|{{{93}}}}}}}<!--
+-->{{#if:{{{94|}}}|{{#if:{{subst:isValidPageName|{{{94}}}}}|{{User {{{94}}}|g={{{g|}}}}}|{{{94}}}}}}}<!--
+-->{{#if:{{{95|}}}|{{#if:{{subst:isValidPageName|{{{95}}}}}|{{User {{{95}}}|g={{{g|}}}}}|{{{95}}}}}}}<!--
+-->{{#if:{{{96|}}}|{{#if:{{subst:isValidPageName|{{{96}}}}}|{{User {{{96}}}|g={{{g|}}}}}|{{{96}}}}}}}<!--
+-->{{#if:{{{97|}}}|{{#if:{{subst:isValidPageName|{{{97}}}}}|{{User {{{97}}}|g={{{g|}}}}}|{{{97}}}}}}}<!--
+-->{{#if:{{{98|}}}|{{#if:{{subst:isValidPageName|{{{98}}}}}|{{User {{{98}}}|g={{{g|}}}}}|{{{98}}}}}}}<!--
+-->{{#if:{{{99|}}}|{{#if:{{subst:isValidPageName|{{{99}}}}}|{{User {{{99}}}|g={{{g|}}}}}|{{{99}}}}}}}<!--
+-->{{#if:{{{100|}}}|{{#if:{{subst:isValidPageName|{{{100}}}}}|{{User {{{100}}}|g={{{g|}}}}}|{{{100}}}}}}}
+|-
+| style="background-color: {{{color|inherit}}}; text-align: center;" colspan="10" | {{{footer|Search [[:Category:User languages|user languages]] or [[:Category:User scripts|scripts]]}}}
+|}<!--
+--></includeonly><!--
+--><noinclude>{{documentation}}</noinclude>

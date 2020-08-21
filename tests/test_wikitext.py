@@ -3,7 +3,8 @@
 # Copyright (c) 2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
-from wiktextract.wikitext import parse, parse_with_ctx, print_tree, NodeKind
+from wiktextract.wikitext import (parse, parse_with_ctx, print_tree, NodeKind,
+                                  WikiNode)
 
 class WikiTextTests(unittest.TestCase):
 
@@ -11,7 +12,7 @@ class WikiTextTests(unittest.TestCase):
         tree = parse("test", "")
         self.assertEqual(tree.kind, NodeKind.ROOT)
         self.assertEqual(tree.children, [])
-        self.assertEqual(tree.args, ["test"])
+        self.assertEqual(tree.args, [["test"]])
 
     def test_text(self):
         tree = parse("test", "some text")
@@ -260,6 +261,16 @@ dasfasddasfdas
         self.assertEqual(c.children, ["bar"])
         self.assertEqual(len(ctx.errors), 1)
 
+    def test_html9(self):
+        tree, ctx = parse_with_ctx("test", "<b <!-- bar -->>foo</b>")
+        self.assertEqual(len(tree.children), 1)
+        a = tree.children[0]
+        assert isinstance(a, WikiNode)
+        self.assertEqual(a.kind, NodeKind.HTML)
+        self.assertEqual(a.args, "b")
+        self.assertEqual(a.children, ["foo"])
+        self.assertEqual(len(ctx.errors), 0)
+
     def test_html_unknown(self):
         tree, ctx = parse_with_ctx("test", "a<unknown>foo</unknown>b")
         self.assertEqual(tree.children, ["a<unknown>foo</unknown>b"])
@@ -316,7 +327,6 @@ dasfasddasfdas
 
     def test_hline(self):
         tree = parse("test", "foo\n*item\n----\nmore")
-        print(tree)
         self.assertEqual(len(tree.children), 4)
         a, b, c, d = tree.children
         self.assertEqual(a, "foo\n")
@@ -435,7 +445,7 @@ dasfasddasfdas
         self.assertEqual(c.attrs.get("def"), [" back to the main list\n"])
         self.assertEqual(c.children, [" item 2\n"])
 
-    def test_list_continue(self):
+    def test_list_cont1(self):
         tree = parse("test", """#list item A1
 ##list item B1
 ##list item B2
@@ -466,6 +476,21 @@ dasfasddasfdas
         self.assertEqual(b.kind, NodeKind.LIST_ITEM)
         self.assertEqual(b.args, "#")
         self.assertEqual(b.children, ["list item A2\n"])
+
+    def test_list_cont2(self):
+        tree = parse("test", """# list item
+   A1
+#list item B1
+""")
+        self.assertEqual(len(tree.children), 1)
+        t = tree.children[0]
+        self.assertEqual(t.kind, NodeKind.LIST)
+        self.assertEqual(len(t.children), 2)
+        a, b = t.children
+        self.assertEqual(a.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(a.children, [" list item\n   A1\n"])
+        self.assertEqual(b.kind, NodeKind.LIST_ITEM)
+        self.assertEqual(b.children, ["list item B1\n"])
 
     def test_listend1(self):
         tree = parse("test", "# item1\nFoo\n")
@@ -680,6 +705,10 @@ def foo(x):
     def test_comment2(self):
         tree = parse("test", "foo<!-- not\nshown-->bar <! -- second -- > now")
         self.assertEqual(tree.children, ["foobar  now"])
+
+    def test_comment3(self):
+        tree = parse("test", "fo<nowiki>o<!-- not\nshown-->b</nowiki>ar")
+        self.assertEqual(tree.children, ["foo<!-- not\nshown-->bar"])
 
     def test_magicword1(self):
         tree = parse("test", "a __NOTOC__ b")
@@ -1249,18 +1278,17 @@ def foo(x):
 
     def test_nonsense2(self):
         tree, ctx = parse_with_ctx("test", "{{{{{{{{")
-        self.assertEqual(tree.children, ["{{{{{{{{"])
-        self.assertEqual(len(ctx.errors), 1)
+        self.assertEqual(len(ctx.errors), 3)
 
     def test_nonsense3(self):
         tree, ctx = parse_with_ctx("test", "}}}}}}}}")
         self.assertEqual(tree.children, ["}}}}}}}}"])
-        self.assertEqual(len(ctx.errors), 1)
+        self.assertEqual(len(ctx.errors), 0)
 
     def test_nonsense4(self):
         tree, ctx = parse_with_ctx("test", "|}}}}}}}}")
         self.assertEqual(tree.children, ["|}}}}}}}}"])
-        self.assertEqual(len(ctx.errors), 1)
+        self.assertEqual(len(ctx.errors), 0)
 
     def test_nonsense5(self):
         tree, ctx = parse_with_ctx("test", "{|''foo''\n|-\n|}")
@@ -1308,7 +1336,8 @@ def foo(x):
 ! scope="row" colspan="2"| Total
 | $1.90
 |}""")
-        print(str(tree))
+        x = str(tree)  # This print is part of the text, do not remove
+        assert isinstance(x, str)
 
     def test_repr(self):
         tree = parse("test", """{| class="wikitable"
@@ -1328,10 +1357,28 @@ def foo(x):
 ! scope="row" colspan="2"| Total
 | $1.90
 |}""")
-        print(repr(tree))
+        x = repr(tree)
+        assert isinstance(x, str)
 
+    def test_file_animal(self):
+        text = open("tests/animal.txt", "r").read()
+        tree, ctx = parse_with_ctx("animal", text)
+        self.assertEqual(len(ctx.errors), 0)
+
+    def test_file_Babel(self):
+        text = open("tests/Babel.txt", "r").read()
+        tree, ctx = parse_with_ctx("Babel", text)
+        self.assertEqual(len(ctx.errors), 0)
+
+    def test_file_fi_gradation(self):
+        text = open("tests/fi-gradation.txt", "r").read()
+        tree, ctx = parse_with_ctx("fi-gradation", text)
+        self.assertEqual(len(ctx.errors), 0)
 
 # Note: Magic links (e.g., ISBN, RFC) are not supported.  They are
 # disabled by default in MediaWiki since version 1.28 and Wiktionary
 # does not really seem to use them and they are not particularly
 # important.  See https://www.mediawiki.org/wiki/Help:Magic_links
+
+# XXX currently handling of <nowiki> does not conform.  Check out and test
+# all examples on: https://en.wikipedia.org/wiki/Help:Wikitext

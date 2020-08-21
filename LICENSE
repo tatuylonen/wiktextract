@@ -1,5 +1,8 @@
 NOTE: Some files under lua/mediawiki-extensions-Scribunto have different
-license (GPL).  Other files are covered by this license.
+license (GPL).  Also, certain files under tests/ are under Wiktionary license.
+
+The license below applies, unless otherwise noted in individual files or
+subdirectories.
 
 ----
 

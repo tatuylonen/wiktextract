@@ -32,6 +32,9 @@ ALLOWED_HTML_TAGS = {
     "b": {
         "parents": ["phrasing"],
         "content": ["flow"]},
+    "big": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
     "bdi": {
         "parents": ["phrasing"],
         "content": ["flow"]},
@@ -633,7 +636,7 @@ class ParseCtx(object):
     def __init__(self, pagetitle):
         assert isinstance(pagetitle, str)
         node = WikiNode(NodeKind.ROOT, 0)
-        node.args.append(pagetitle)
+        node.args.append([pagetitle])
         self.stack = [node]
         self.linenum = 1
         self.beginning_of_line = True
@@ -771,6 +774,9 @@ def text_fn(ctx, token):
             while True:
                 node = ctx.stack[-1]
                 if node.kind == NodeKind.LIST_ITEM:
+                    if token.startswith(" ") or token[0].startswith("\t"):
+                        node.children.append(token)
+                        return
                     ctx.merge_str_children()
                     if (node.children and isinstance(node.children[-1], str) and
                         not node.children[-1].isspace() and
@@ -790,7 +796,7 @@ def text_fn(ctx, token):
                 break
 
             # Spaces at the beginning of a line indicate preformatted text
-            if token.endswith(" "):
+            if token.startswith(" ") or token.startswith("\t"):
                 if node.kind != NodeKind.PREFORMATTED:
                     node = ctx.push(NodeKind.PREFORMATTED)
 
@@ -838,8 +844,10 @@ def subtitle_start_fn(ctx, token):
     level = kind_to_level[kind]
 
     # Keep popping subtitles and other formats until the next subtitle
-    # is of a higher level.
-    while True:
+    # is of a higher level - but only if there are remaining subtitles.
+    # Subtitles sometimes occur inside <noinclude> and similar tags, and we
+    # don't want to force closing those.
+    while any(x.kind in kind_to_level for x in ctx.stack):
         node = ctx.stack[-1]
         if kind_to_level.get(node.kind, 99) < level:
             break
@@ -1258,19 +1266,24 @@ def list_fn(ctx, token):
             # just return with the continued list item at the top of the stack.
             return
 
-        # Check for a previous list item on the same level (adding new item to
-        # an earlier list).
-        if (node.kind == NodeKind.LIST_ITEM and
-            len(node.args) < len(token) and
-            token[:len(node.args)] == node.args):
+        # Check for another list item on the same level (adding a new
+        # list item to an earlier list)
+        if node.kind == NodeKind.LIST_ITEM and node.args == token:
+            ctx.pop(False)
             break
 
         # Check for adding an item to the same list.  If the list has a
         # different prefix, we will close it and either add to a parent list
         # or start a new list.  Note that definition list definitions were
         # already handled above so we won't be seeing them here.
-        if node.kind == NodeKind.LIST and node.args == token:
-            break
+        if node.kind == NodeKind.LIST_ITEM and len(node.args) < len(token):
+            for i in range(len(node.args)):
+                if token[i] not in (":", node.args[i]):
+                    break  # Tokens do not match
+            else:
+                # Tokens match (with non-last : matching * or #)
+                # Create a sublist
+                break
 
         # Stop popping if we are at a header.  Headers cannot be used inside
         # list items.  In this case we always start a new list.
@@ -1292,7 +1305,8 @@ def list_fn(ctx, token):
         ctx.pop(True)
 
     # If not already in a list, create a new list.
-    if node.kind != NodeKind.LIST or node.args != token:
+    node = ctx.stack[-1]
+    if node.kind != NodeKind.LIST:
         node = ctx.push(NodeKind.LIST)
         node.args = token
 
@@ -1309,7 +1323,8 @@ def parse_attrs(node, attrs):
 
     # Extract attributes from the tag into the node.attrs dictionary
     for m in re.finditer(r"""(?si)\b([^"'>/=\0-\037\s]+)"""
-                         r"""(=("[^"]*"|'[^']*'|[^"'<>`\s]*))?\s*""",
+                         r"""(=("[^"]*"|'[^']*'|[^"'<>`\s]*))?"""
+                         r"(\s|<!\s*--.*?--\s*>)*""",
                          attrs):
         name = m.group(1)
         value = m.group(3) or ""
@@ -1326,16 +1341,23 @@ def tag_fn(ctx, token):
 
     # If it is a HTML comment, just drop it
     if token.startswith("<!"):
+        if ctx.nowiki:
+            text_fn(ctx, token)
         return
 
+    print("TAG_FN", repr(token))
+
     # Try to parse it as a start tag
-    m = re.match(r"""<\s*([-a-zA-Z0-9]+)\s*((\b[-a-z0-9]+(=("[^"]*"|"""
-                 r"""'[^']*'|[^ \t\n"'`=<>]*))?\s*)*)(/?)\s*>""", token)
+    m = re.match(r"""<\s*([-a-zA-Z0-9]+)(\s|<!\s*--(?s).*?--\s*>)*"""
+                 r"""((\b[-a-z0-9]+(=("[^"]*"|"""
+                 r"""'[^']*'|[^ \t\n"'`=<>]*))?"""
+                 r"""(\s|<!\s*--.*?--\s*>)*)*)(/?)\s*>""", token)
     if m:
         # This is a start tag
         name = m.group(1)
-        attrs = m.group(2)
-        also_end = m.group(6) == "/"
+        attrs = m.group(3)
+        also_end = m.group(8) == "/"
+        print("TAG", repr(name), repr(attrs), repr(also_end))
         name = name.lower()
         # Handle <nowiki> start tag
         if name == "nowiki":
@@ -1439,6 +1461,12 @@ def tag_fn(ctx, token):
             break
     else:
         # No corresponding start tag found
+        if name in ("br", "hl", "wbr"):
+            # This is incorrect but occurs; synthesize empty tag
+            node = ctx.push(NodeKind.HTML)
+            ctx.args = name
+            ctx.pop(False)
+            return
         ctx.error("no corresponding start tag found for {}".format(token))
         return
 
@@ -1450,12 +1478,15 @@ def tag_fn(ctx, token):
             # then stop.
             ctx.pop(False)
             break
-        # If close-next is set, then end tag is optional and can be closed
-        # implicitly by closing the parent tag
-        close_next = ALLOWED_HTML_TAGS.get(node.args, {}).get(
-            "close-next", None)
-        ctx.pop(close_next is None)
-
+        if node.kind == NodeKind.HTML:
+            # If close-next is set, then end tag is optional and can be closed
+            # implicitly by closing the parent tag
+            close_next = ALLOWED_HTML_TAGS.get(node.args, {}).get(
+                "close-next", None)
+            if close_next:
+                ctx.pop(False)
+                continue
+        ctx.pop(True)
 
 def magicword_fn(ctx, token):
     """Handles a magic word, such as "__NOTOC__"."""
@@ -1489,8 +1520,10 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"^[*:;#]+|"
                       r":|"   # sometimes special when not beginning of line
                       r"<!\s*--((?s).)*?--\s*>|"
-                      r"""<\s*[-a-zA-Z0-9]+\s*(\b[-a-z0-9]+(=("[^"]*"|"""
-                      r"""'[^']*'|[^ \t\n"'`=<>]*))?\s*)*(/\s*)?>|"""
+                      r"""<\s*[-a-zA-Z0-9]+(\s|<!\s*--(?s).*?--\s*>)*"""
+                        r"""(\b[-a-z0-9]+(=("[^"]*"|"""
+                        r"""'[^']*'|[^ \t\n"'`=<>]*))?"""
+                        r"""(\s|<!\s*--.*?--\s*>)*)*(/\s*)?>|"""
                       r"<\s*/\s*[-a-zA-Z0-9]+\s*>|"
                       r"https?://[a-zA-Z0-9.]+|"
                       r":|" +
@@ -1551,69 +1584,59 @@ def token_iter(ctx, text):
             yield False, text[pos:start]
         pos = m.end()
         token = m.group(0)
-        if token[0] not in "={}|":
-            # This case is redundant but speeds up overall parsing by 5%
-            yield True, token
-        elif token.startswith("{{"):
-            toklen = len(token)
-            if toklen in (2, 3):
-                yield True, token
-            elif toklen == 4:
-                yield True, "{{"
-                yield True, "{{"
-            elif toklen == 5:
-                yield True, "{{"
-                yield True, "{{{"
-            elif toklen == 6:
-                yield True, "{{{"
-                yield True, "{{{"
-            else:
-                ctx.error("Unsupported brace sequence {}".format(token))
-                yield False, token
-        elif token.startswith("}}"):
-            toklen = len(token)
-            if toklen in (2, 3):
-                yield True, token
-            elif toklen == 4:
-                yield True, "}}"
-                yield True, "}}"
-            elif toklen == 5:
-                yield True, "}}}"
-                yield True, "}}"
-            elif toklen == 6:
-                yield True, "}}}"
-                yield True, "}}}"
-            else:
-                ctx.error("Unsupported brace sequence {}".format(token))
-                yield False, token
-        elif token.startswith("=="):
+        if token.startswith("=="):
             yield True, "<" + m.group(1)
             for x in token_iter(ctx, m.group(2)):
                 yield x
             yield True, ">" + m.group(4)
-        elif token.startswith("|}}"):
-            yield True, "|"
-            token = token[1:]
-            toklen = len(token)
-            if toklen in (2, 3):
-                yield True, token
-            elif toklen == 4:
-                yield True, "}}"
-                yield True, "}}"
-            elif toklen == 5:
-                yield True, "}}}"
-                yield True, "}}"
-            elif toklen == 6:
-                yield True, "}}}"
-                yield True, "}}}"
-            else:
-                ctx.error("Unsupported brace sequence {}".format(token))
-                yield False, token
         else:
             yield True, token
     if pos != len(text):
         yield False, text[pos:]
 
+
+def brace_open(ctx, token):
+    orig = token
+    while ((len(token) % 2 == 0 and len(token) % 3 != 0) or
+           len(token) % 3 == 2):
+        templ_start_fn(ctx, "{{")
+        token = token[2:]
+    while len(token) >= 3:
+        templarg_start_fn(ctx, "{{{")
+        token = token[3:]
+    if token:
+        text_fn(ctx, token)
+
+def brace_close(ctx, token):
+    orig = token
+    while token:
+        for i in range(len(ctx.stack) - 1, -1, -1):
+            node = ctx.stack[i]
+            kind = node.kind
+            if kind == NodeKind.TEMPLATEVAR and token.startswith("}}}"):
+                templarg_end_fn(ctx, "}}}")
+                token = token[3:]
+                break
+            elif (kind in (NodeKind.TEMPLATE, NodeKind.PARSERFN)
+                  and token.startswith("}}")):
+                templ_end_fn(ctx, "}}")
+                token = token[2:]
+                break
+            elif token.startswith("|}"):
+                if kind in (NodeKind.TABLE, NodeKind.TABLE_CAPTION,
+                            NodeKind.TABLE_ROW, NodeKind.TABLE_CELL,
+                            NodeKind.TABLE_HEADER_CELL):
+                    table_end_fn(ctx, "|}")
+                    token = token[2:]
+                    break
+                elif kind in (NodeKind.TEMPLATEVAR, NodeKind.TEMPLATE,
+                              NodeKind.PARSERFN):
+                    vbar_fn(ctx, "|")
+                    token = token[1:]
+                    break
+        else:
+            text_fn(ctx, token)
+            break
 
 def parse_with_ctx(pagetitle, text):
     """Parses a Wikitext document into a tree.  This returns a WikiNode object
@@ -1643,6 +1666,12 @@ def parse_with_ctx(pagetitle, text):
             # be interpreted as text.
             if token in tokenops:
                 tokenops[token](ctx, token)
+            elif token.startswith("{{"):
+                brace_open(ctx, token)
+            elif token.startswith("}}"):
+                brace_close(ctx, token)
+            elif token.startswith("|}}"):
+               brace_close(ctx, token)
             elif token.startswith("<=="):  # Note: < added by tokenizer
                 subtitle_start_fn(ctx, token)
             elif token.startswith(">=="):  # Note: > added by tokenizer

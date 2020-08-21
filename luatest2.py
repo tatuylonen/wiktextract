@@ -1,5 +1,6 @@
 import re
 import sys
+import copy
 import html
 import json
 import time
@@ -28,16 +29,103 @@ page = open("tests/animal.txt").read()
 
 langs = collections.defaultdict(int)
 
+print("Loading specials (templates & modules)")
+with open("tempXXXspecials.json") as f:
+    specials = json.load(f)
+print("Extracting definitions", len(specials))
+
+
+def canonicalize_template_name(name):
+    assert isinstance(name, str)
+    name = re.sub(r"_", " ", name)
+    name = re.sub(r"\s+", " ", name)
+    name = name.strip()
+    name = name[0].lower() + name[1:]
+    return name
+
+
+def template_to_body(title, text):
+    tree = wikitext.parse(title, text)
+    explicit_body = []
+
+    def recurse_list(lst):
+        ret = []
+        for x in lst:
+            ret1 = recurse(x)
+            if isinstance(ret1, list):
+                ret.extend(ret1)
+            elif ret1 is not None:
+                ret.append(ret1)
+        return ret
+
+    def recurse(node):
+        """This may return str, WikiNode, or list."""
+        if isinstance(node, str):
+            return node
+        assert isinstance(node, WikiNode)
+        kind = node.kind
+        if kind == NodeKind.HTML:
+            tag = node.args
+            assert isinstance(tag, str)
+            if tag == "onlyinclude":
+                explicit_body.extend(recurse_list(node.children))
+            elif tag == "includeonly":
+                return recurse_list(node.children)
+            elif tag == "noinclude":
+                return None
+        # print("Recursing into {}".format(node.kind))
+        new_node = copy.copy(node)
+        new_node.children = recurse_list(node.children)
+        if isinstance(node.args, (list, tuple)):
+            new_node.args = list(recurse_list(x) for x in node.args)
+        return new_node
+
+    body = recurse(tree)
+    if explicit_body:
+        return explicit_body
+    # print("{} BODY".format(title))
+    # wikitext.print_tree(body)
+    return body
+
+
+# Extract module and template definitions from the collected special pages.
+modules = {}
+templates = {}
+for tag, title, text in specials:
+    # XXX should this be enabled? title = html.unescape(title)
+    if tag == "Scribunto":
+        continue
+    if title.endswith("/testcases"):
+        continue
+    if title.startswith("User:"):
+        continue
+    if tag != "Template":
+        continue
+
+    print(tag, title)
+    text = html.unescape(text)
+    body = template_to_body(title, text)
+    name = canonicalize_template_name(title)
+    templates[name] = body
 
 class FmtCtx(object):
-    __slots__ = ("parts", "indent", "pos", "inpara", "nowrap", "space")
+    __slots__ = (
+        "indent",  # Current indent for text
+        "inpara",  # True if inside paragraph
+        "nowrap",  # True to suppress line wrap at current position
+        "parts",   # Text accumulated here (list of str)
+        "pos",     # Character position on current line
+        "space",   # True if space should be inserted before next text
+        "variables",  # Dictionary mapping template arg name (str) to value
+    )
     def __init__(self):
-        self.parts = []
         self.indent = 0
-        self.pos = 0
         self.inpara = False
         self.nowrap = False
+        self.parts = []
+        self.pos = 0
         self.space = False
+        self.variables = {}
 
     def add(self, txt):
         assert isinstance(txt, str)
@@ -48,6 +136,7 @@ class FmtCtx(object):
                 self.space = True
                 continue
             # We are adding a non-space segment
+            w = html.unescape(w)
             if (self.pos > 0 and self.pos + len(w) + 1 > MAX_LEN and
                 not self.nowrap and
                 (self.space or
@@ -119,10 +208,10 @@ def list_to_text(ctx, node):
 
 def link_to_text(ctx, node):
     assert isinstance(node, WikiNode)
-    trail = to_text(node.children).strip()
-    page = to_text(node.args[0]).strip()
+    trail = to_text(ctx, node.children).strip()
+    page = to_text(ctx, node.args[0]).strip()
     if len(node.args) > 1:
-        txt = to_text(node.args[1]).strip()
+        txt = to_text(ctx, node.args[1]).strip()
     else:
         txt = page
     if not txt:
@@ -142,13 +231,46 @@ def link_to_text(ctx, node):
     # XXX should we do some inflection with trail links?
     ctx.add(txt + trail)
 
+
 def template_to_text(ctx, node):
-    ctx.add("{{")
-    to_text_list(ctx, node.args[0])
-    for x in node.args[1:]:
-        ctx.add("|")
-        to_text_list(ctx, x)
-    ctx.add("}}")
+    assert isinstance(ctx, FmtCtx)
+    assert isinstance(node, WikiNode)
+
+    # Clean up template name to canonical form
+    name = to_text(ctx, node.args[0])
+    name = canonicalize_template_name(name)
+
+    body = templates.get(name)
+
+    if body is None:
+        print("Reference to undefined template {!r}".format(name))
+        ctx.add("{{")
+        to_text_list(ctx, node.args[0])
+        for x in node.args[1:]:
+            ctx.add("|")
+            to_text_list(ctx, x)
+        ctx.add("}}")
+        return
+
+    old_vars = ctx.variables
+    new_vars = old_vars.copy()
+    argnum = 1
+    for x in node.args[1]:
+        txt = to_text(ctx, x)
+        m = re.match(r"(?s)^([^][#<>\{\}\|])=(.*)$", txt)
+        if m:
+            argname = m.group(1).strip()
+            argvalue = m.group(2).strip()
+        else:
+            argname = str(argnum)
+            argnum += 1
+            argvalue = txt
+        new_vars[argname] = argvalue
+
+    ctx.variables = new_vars
+    to_text_list(ctx, body)
+    ctx.variables = old_vars
+
 
 def templatevar_to_text(ctx, node):
     ctx.add("{{{")
@@ -170,7 +292,7 @@ def parserfn_to_text(node):
     ctx.add("}}")
 
 def title_to_text(ctx, node, underline):
-    txt = to_text(node.args[0]).strip()
+    txt = to_text(ctx, node.args[0]).strip()
     ctx.newpara()
     ctx.add_prefix(txt)
     ctx.newline()
@@ -235,12 +357,17 @@ def to_text_recurse(ctx, node):
         to_text_list(ctx, node.children)
 
 
-def to_text(lst):
+def to_text(ctx, lst):
+    """Converts content from ``lst`` to text (str).  Template variables are
+    taken from ``ctx``, but otherwise a new context will be used and ``ctx``
+    will not be modified."""
+    assert isinstance(ctx, FmtCtx)
     assert isinstance(lst, (list, tuple))
-    ctx = FmtCtx()
+    new_ctx = FmtCtx()
+    new_ctx.variables = ctx.variables.copy()
     for x in lst:
-        to_text_recurse(ctx, x)
-    return "".join(ctx.parts).strip()
+        to_text_recurse(new_ctx, x)
+    return "".join(new_ctx.parts)
 
 
 def analyze_node(node):
@@ -249,7 +376,8 @@ def analyze_node(node):
     assert isinstance(node, WikiNode)
     kind = node.kind
     if kind == NodeKind.LEVEL2:
-        title = to_text(node.args[0])
+        ctx = FmtCtx()
+        title = to_text(ctx, node.args[0]).strip()
         langs[title] += 1
 
     for x in node.children:
@@ -260,36 +388,10 @@ analyze_node(tree)
 #for k, v in sorted(langs.items(), key=lambda x: x[1], reverse=True):
 #    print(v, k)
 
-print(to_text(tree.children))
+ctx = FmtCtx()
+print(to_text(ctx, tree.children).strip())
 print("============================")
 wikitext.print_tree(tree)
-
-sys.exit(1)
-
-
-with open("tempXXXspecials.json") as f:
-    lst = json.load(f)
-
-# Extract module and template definitions from the collected special pages.
-modules = {}
-templates = {}
-for tag, title, text in lst:
-    text = html.unescape(text)
-    if tag == "Template":
-        templates[title] = text
-    if tag != "Scribunto":
-        continue
-    if title.endswith("/testcases"):
-        continue
-    if title.startswith("User:"):
-        continue
-
-    print(title)
-    tree = wikitext.parse(title, text)
-    print("============================================================")
-    wikitext.print_tree(tree)
-
-    modules[title] = text
 
 sys.exit(1)
 
