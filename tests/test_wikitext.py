@@ -133,7 +133,7 @@ dasfasddasfdas
         h2b = tree.children[1]
         self.assertEqual(h2a.kind, NodeKind.LEVEL2)
         self.assertEqual(h2b.kind, NodeKind.LEVEL2)
-        self.assertEqual(h2a.children, ["\na\n===Bar===\nb\n"])
+        self.assertEqual(h2a.children, ["\na &equals;&equals;&equals;Bar&equals;&equals;&equals; b\n"])
         self.assertEqual(h2b.args, [["Zappa"]])
         self.assertEqual(h2b.children, ["\nc\n"])
 
@@ -670,13 +670,13 @@ Next para""")
         tree = parse("test", """
  <nowiki>
 def foo(x):
-  print(foo)
+  print(x)
 </nowiki>""")
         self.assertEqual(len(tree.children), 2)
         self.assertEqual(tree.children[0], "\n")
         p = tree.children[1]
         self.assertEqual(p.kind, NodeKind.PREFORMATTED)
-        self.assertEqual(p.children, [" \ndef foo(x):\n  print(foo)\n"])
+        self.assertEqual(p.children, ["  def foo(x)&colon; print(x) "])
 
     def test_pre1(self):
         tree = parse("test", """
@@ -708,7 +708,8 @@ def foo(x):
 
     def test_comment3(self):
         tree = parse("test", "fo<nowiki>o<!-- not\nshown-->b</nowiki>ar")
-        self.assertEqual(tree.children, ["foo<!-- not\nshown-->bar"])
+        self.assertEqual(tree.children,
+                         ["foo&lt;&excl;-- not shown--&gt;bar"])
 
     def test_magicword1(self):
         tree = parse("test", "a __NOTOC__ b")
@@ -1271,6 +1272,10 @@ def foo(x):
         tree = parse("test", "|-")
         self.assertEqual(tree.children, ["|-"])
 
+    def test_plain13(self):
+        tree = parse("test", "&lt;nowiki/>")
+        self.assertEqual(tree.children, ["&lt;nowiki/>"])
+
     def test_nonsense1(self):
         tree = parse("test", "<pre />")
         t = tree.children[0]
@@ -1382,3 +1387,24 @@ def foo(x):
 
 # XXX currently handling of <nowiki> does not conform.  Check out and test
 # all examples on: https://en.wikipedia.org/wiki/Help:Wikitext
+
+# XXX test nowiki vs. table markup.  See last paragraph before subtitle "Pre"
+# on https://en.wikipedia.org/wiki/Help:Wikitext
+
+# XXX change nowiki to work by escaping.  Ensure <!-- --> is made visible
+# by nowiki.
+
+# XXX change how <pre> parser tag works.  Preprocess by escaping?
+# XXX <pre> should quote spaces to &nbsp; and newlines to &#10;?
+
+# XXX add code for early template expansion (templates that contain table
+# formatting or unbalanced tags)
+
+# XXX add code for expanding templates (early) in table attributes, tag
+# attributes, etc.  Generally, must change table attribute syntax to
+# allow templates.
+
+# XXX implement <nowiki/> marking for links, templates
+
+# XXX check if some templates are predefined, e.g. {{^|...}} (the void template)
+# It would seem that they are.  Also {{!}} (|) etc.

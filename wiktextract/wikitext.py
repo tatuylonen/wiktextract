@@ -4,6 +4,7 @@
 
 import re
 import enum
+import html
 
 
 # HTML tags that are allowed in input.  These are generated as HTML nodes
@@ -629,7 +630,6 @@ class ParseCtx(object):
         "beginning_of_line",
         "errors",
         "pagetitle",
-        "nowiki",
         "suppress_special",
     )
 
@@ -642,7 +642,6 @@ class ParseCtx(object):
         self.beginning_of_line = True
         self.errors = []
         self.pagetitle = pagetitle
-        self.nowiki = False
         self.suppress_special = False
 
     def push(self, kind):
@@ -759,60 +758,58 @@ class ParseCtx(object):
 def text_fn(ctx, token):
     """Inserts the token as raw text into the parse tree."""
     node = ctx.stack[-1]
-    # Special formatting is only processed if not inside <nowiki>
-    if not ctx.nowiki:
-        # Whitespaces inside an external link divide its first argument from its
-        # second argument.  All remaining words go into the second argument.
-        if token.isspace() and node.kind == NodeKind.URL and not node.args:
-            ctx.merge_str_children()
-            node.args.append(node.children)
-            node.children = []
-            return
+    # Whitespaces inside an external link divide its first argument from its
+    # second argument.  All remaining words go into the second argument.
+    if token.isspace() and node.kind == NodeKind.URL and not node.args:
+        ctx.merge_str_children()
+        node.args.append(node.children)
+        node.children = []
+        return
 
-        # Some nodes are automatically popped on newline/text
-        if ctx.beginning_of_line:
-            while True:
-                node = ctx.stack[-1]
-                if node.kind == NodeKind.LIST_ITEM:
-                    if token.startswith(" ") or token[0].startswith("\t"):
-                        node.children.append(token)
-                        return
-                    ctx.merge_str_children()
-                    if (node.children and isinstance(node.children[-1], str) and
-                        not node.children[-1].isspace() and
-                        node.children[-1].endswith("\n")):
-                        ctx.pop(False)
-                        continue
-                elif node.kind == NodeKind.LIST:
+    # Some nodes are automatically popped on newline/text
+    if ctx.beginning_of_line:
+        while True:
+            node = ctx.stack[-1]
+            if node.kind == NodeKind.LIST_ITEM:
+                if token.startswith(" ") or token[0].startswith("\t"):
+                    node.children.append(token)
+                    return
+                ctx.merge_str_children()
+                if (node.children and isinstance(node.children[-1], str) and
+                    not node.children[-1].isspace() and
+                    node.children[-1].endswith("\n")):
                     ctx.pop(False)
                     continue
-                elif node.kind == NodeKind.PREFORMATTED:
-                    ctx.merge_str_children()
-                    if (node.children and isinstance(node.children[-1], str) and
-                        node.children[-1].endswith("\n") and
-                        not token.startswith(" ") and not token.isspace()):
-                        ctx.pop(False)
-                        continue
-                break
+            elif node.kind == NodeKind.LIST:
+                ctx.pop(False)
+                continue
+            elif node.kind == NodeKind.PREFORMATTED:
+                ctx.merge_str_children()
+                if (node.children and isinstance(node.children[-1], str) and
+                    node.children[-1].endswith("\n") and
+                    not token.startswith(" ") and not token.isspace()):
+                    ctx.pop(False)
+                    continue
+            break
 
-            # Spaces at the beginning of a line indicate preformatted text
-            if token.startswith(" ") or token.startswith("\t"):
-                if node.kind != NodeKind.PREFORMATTED:
-                    node = ctx.push(NodeKind.PREFORMATTED)
+        # Spaces at the beginning of a line indicate preformatted text
+        if token.startswith(" ") or token.startswith("\t"):
+            if node.kind != NodeKind.PREFORMATTED:
+                node = ctx.push(NodeKind.PREFORMATTED)
 
-        # If the previous child was a link that doesn't yet have children,
-        # and the text to be added starts with valid word characters, assume
-        # they are link trail and add them as a child of the link.
-        if (node.children and isinstance(node.children[-1], WikiNode) and
-            node.children[-1].kind == NodeKind.LINK and
-            not node.children[-1].children and
-            not ctx.suppress_special):
-            m = re.match(r"(?s)(\w+)(.*)", token)
-            if m:
-                node.children[-1].children.append(m.group(1))
-                token = m.group(2)
-                if not token:
-                    return
+    # If the previous child was a link that doesn't yet have children,
+    # and the text to be added starts with valid word characters, assume
+    # they are link trail and add them as a child of the link.
+    if (node.children and isinstance(node.children[-1], WikiNode) and
+        node.children[-1].kind == NodeKind.LINK and
+        not node.children[-1].children and
+        not ctx.suppress_special):
+        m = re.match(r"(?s)(\w+)(.*)", token)
+        if m:
+            node.children[-1].children.append(m.group(1))
+            token = m.group(2)
+            if not token:
+                return
 
     # Add a text child
     node.children.append(token)
@@ -1323,8 +1320,7 @@ def parse_attrs(node, attrs):
 
     # Extract attributes from the tag into the node.attrs dictionary
     for m in re.finditer(r"""(?si)\b([^"'>/=\0-\037\s]+)"""
-                         r"""(=("[^"]*"|'[^']*'|[^"'<>`\s]*))?"""
-                         r"(\s|<!\s*--.*?--\s*>)*""",
+                         r"""(=("[^"]*"|'[^']*'|[^"'<>`\s]*))?\s*""",
                          attrs):
         name = m.group(1)
         value = m.group(3) or ""
@@ -1336,38 +1332,31 @@ def parse_attrs(node, attrs):
 def tag_fn(ctx, token):
     """Handler function for tokens that look like HTML tags and their end
     tags.  This includes various built-in tags that aren't actually
-    HTML, including <nowiki>.  Some WikiText tags that resemble HTML
-    are described as HTML nodes, even though they are not really HTML."""
+    HTML.  Some WikiText tags that resemble HTML are described as HTML
+    nodes, even though they are not really HTML."""
 
-    # If it is a HTML comment, just drop it
-    if token.startswith("<!"):
-        if ctx.nowiki:
-            text_fn(ctx, token)
-        return
-
-    print("TAG_FN", repr(token))
+    # Note: <nowiki> and HTML comments have already been handled in
+    # preprocessing
 
     # Try to parse it as a start tag
-    m = re.match(r"""<\s*([-a-zA-Z0-9]+)(\s|<!\s*--(?s).*?--\s*>)*"""
-                 r"""((\b[-a-z0-9]+(=("[^"]*"|"""
-                 r"""'[^']*'|[^ \t\n"'`=<>]*))?"""
-                 r"""(\s|<!\s*--.*?--\s*>)*)*)(/?)\s*>""", token)
+    m = re.match(r"""<\s*([-a-zA-Z0-9]+)\s*((\b[-a-z0-9]+(=("[^"]*"|"""
+                 r"""'[^']*'|[^ \t\n"'`=<>]*))?\s*)*)(/?)\s*>""", token)
     if m:
         # This is a start tag
         name = m.group(1)
-        attrs = m.group(3)
-        also_end = m.group(8) == "/"
-        print("TAG", repr(name), repr(attrs), repr(also_end))
+        attrs = m.group(2)
+        also_end = m.group(6) == "/"
         name = name.lower()
-        # Handle <nowiki> start tag
+
+        # Check for unmatched <nowiki> start tag.  <nowiki> should be handled
+        # in preprocessing, but an unmatched start tag may be missed.
         if name == "nowiki":
             if also_end:
-                # Cause certain behaviors to be suppressed, particularly
-                # link trail processing.  This will be automatically reset
-                # when the next child is inserted in ctx.push().
-                ctx.suppress_special = True
-            else:
-                ctx.nowiki = True
+                # XXX mark current link/template/templatearg/parserfn as
+                # nowiki, cause it to be expanded by escaped plaintext
+                return
+            ctx.error("unmatched <nowiki>")
+            text_fn(ctx, token)
             return
 
         # Handle <pre> start tag
@@ -1386,8 +1375,8 @@ def tag_fn(ctx, token):
             # them may need to be reconsidered in the future if
             # problems arise.
             if not name.isdigit():
-                ctx.error("html tag <{}> not allowed in WikiText"
-                          "".format(name))
+                ctx.error("html tag <{}{}> not allowed in WikiText"
+                          "".format(name, "/" if also_end else ""))
             text_fn(ctx, token)
             return
 
@@ -1423,19 +1412,7 @@ def tag_fn(ctx, token):
     assert m  # If fails, then mismatch between regexp here and tokenization
     name = m.group(1)
     name = name.lower()
-    if name == "nowiki":
-        # Handle </nowiki> end tag
-        if ctx.nowiki:
-            ctx.nowiki = False
-            # Cause certain special behaviors to be suppressed,
-            # particularly link trail processing.  This will be
-            # automatically reset when the next child is inserted in
-            # ctx.push().
-            ctx.suppress_special = True
-        else:
-            ctx.error("unexpected </nowiki>")
-            text_fn(ctx, token)
-        return
+
     if name == "pre":
         # Handle </pre> end tag
         node = ctx.stack[-1]
@@ -1488,6 +1465,7 @@ def tag_fn(ctx, token):
                 continue
         ctx.pop(True)
 
+
 def magicword_fn(ctx, token):
     """Handles a magic word, such as "__NOTOC__"."""
     node = ctx.push(NodeKind.MAGIC_WORD)
@@ -1519,11 +1497,8 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"^----+|"
                       r"^[*:;#]+|"
                       r":|"   # sometimes special when not beginning of line
-                      r"<!\s*--((?s).)*?--\s*>|"
-                      r"""<\s*[-a-zA-Z0-9]+(\s|<!\s*--(?s).*?--\s*>)*"""
-                        r"""(\b[-a-z0-9]+(=("[^"]*"|"""
-                        r"""'[^']*'|[^ \t\n"'`=<>]*))?"""
-                        r"""(\s|<!\s*--.*?--\s*>)*)*(/\s*)?>|"""
+                      r"""<\s*[-a-zA-Z0-9]+\s*(\b[-a-z0-9]+(=("[^"]*"|"""
+                        r"""'[^']*'|[^ \t\n"'`=<>]*))?\s*)*(/\s*)?>|"""
                       r"<\s*/\s*[-a-zA-Z0-9]+\s*>|"
                       r"https?://[a-zA-Z0-9.]+|"
                       r":|" +
@@ -1531,9 +1506,6 @@ token_re = re.compile(r"(?m)^(={2,6})\s*(([^=]|=[^=])+?)\s*(={2,6})\s*$|"
                       r"|".join(r"\b{}\b".format(x) for x in MAGIC_WORDS) +
                       r")")
 
-
-# Matches a </nowiki> end token
-nowiki_end_re = re.compile(r"(?i)<\s*/\s*nowiki\s*>")
 
 # Matches a </pre> end token
 pre_end_re = re.compile(r"(?i)<\s*/\s*pre\s*>")
@@ -1638,6 +1610,34 @@ def brace_close(ctx, token):
             text_fn(ctx, token)
             break
 
+
+def nowiki_sub_fn(m):
+    """This function escapes the contents of a <nowiki> ... </nowiki> pair."""
+    text = m.group(1)
+    text = re.sub(r";", "&semi;", text)
+    text = html.escape(text, quote=True)
+    text = re.sub(r"=", "&equals;", text)
+    text = re.sub(r"\*", "&ast;", text)
+    text = re.sub(r"#", "&num;", text)
+    text = re.sub(r":", "&colon;", text)
+    text = re.sub(r"!", "&excl;", text)
+    text = re.sub(r"\|", "&vert;", text)
+    text = re.sub(r"\[", "&lsqb;", text)
+    text = re.sub(r"\]", "&rsqb;", text)
+    text = re.sub(r"\{", "&lbrace;", text)
+    text = re.sub(r"\s+", " ", text)
+    return text
+
+
+def preprocess_text(text, transcluded):
+    assert isinstance(text, str)
+    assert transcluded in (True, False)
+    text = re.sub(r"(?si)<\s*nowiki\s*>(.*?)<\s*/\s*nowiki\s*>", nowiki_sub_fn,
+                  text)
+    text = re.sub(r"(?s)<!\s*--.*?--\s*>", "", text)
+    return text
+
+
 def parse_with_ctx(pagetitle, text):
     """Parses a Wikitext document into a tree.  This returns a WikiNode object
     that is the root of the parse tree and the parse context."""
@@ -1651,8 +1651,7 @@ def parse_with_ctx(pagetitle, text):
         if not is_token:
             # Process it as normal text.
             text_fn(ctx, token)
-        elif ((ctx.nowiki and not re.match(nowiki_end_re, token)) or
-              (node.kind == NodeKind.PRE and not re.match(pre_end_re, token))):
+        elif (node.kind == NodeKind.PRE and not re.match(pre_end_re, token)):
             # Remove the artificially added prefix from subtitle tokens.
             # Then process the token as normal text as we are in a
             # non-interpreting context.
@@ -1709,6 +1708,7 @@ def parse(pagetitle, text):
     templates."""
     assert isinstance(pagetitle, str)
     assert isinstance(text, str)
+    text = preprocess_text(text, False)
     tree, ctx = parse_with_ctx(pagetitle, text)
     return tree
 

@@ -102,7 +102,7 @@ for tag, title, text in specials:
     if tag != "Template":
         continue
 
-    print(tag, title)
+    # print(tag, title)
     text = html.unescape(text)
     body = template_to_body(title, text)
     name = canonicalize_template_name(title)
