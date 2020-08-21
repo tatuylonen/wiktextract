@@ -1259,10 +1259,10 @@ def list_fn(ctx, token):
             return
 
         # Check for a previous list item on the same level (adding new item to
-        # an earlier list)
+        # an earlier list).
         if (node.kind == NodeKind.LIST_ITEM and
             len(node.args) < len(token) and
-            token[len(node.args)] == node.args):
+            token[:len(node.args)] == node.args):
             break
 
         # Check for adding an item to the same list.  If the list has a
@@ -1359,8 +1359,13 @@ def tag_fn(ctx, token):
         # Give an error on unsupported HTML tags.  WikiText limits the set of
         # tags that are allowed.
         if name not in ALLOWED_HTML_TAGS:
-            ctx.error("html tag <{}> not allowed in WikiText"
-                      "".format(name))
+            # Wiktionary seems to use markings like <3> in some
+            # languages.  Treat them as text.  This method of handling
+            # them may need to be reconsidered in the future if
+            # problems arise.
+            if not name.isdigit():
+                ctx.error("html tag <{}> not allowed in WikiText"
+                          "".format(name))
             text_fn(ctx, token)
             return
 
