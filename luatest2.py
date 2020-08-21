@@ -29,11 +29,6 @@ page = open("tests/animal.txt").read()
 langs = collections.defaultdict(int)
 
 
-# XXX fix animal.txt <3> processing inside template arg
-
-# XXX fix list nesting for #* prefixes in animal.txt
-
-
 class FmtCtx(object):
     __slots__ = ("parts", "indent", "pos", "inpara", "nowrap", "space")
     def __init__(self):
