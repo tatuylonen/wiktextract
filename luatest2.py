@@ -52,16 +52,17 @@ def template_to_body(title, text):
         ret = []
         for x in lst:
             ret1 = recurse(x)
-            if isinstance(ret1, list):
+            if isinstance(ret1, (list, tuple)):
                 ret.extend(ret1)
             elif ret1 is not None:
+                assert isinstance(ret1, (str, WikiNode))
                 ret.append(ret1)
         return ret
 
     def recurse(node):
         """This may return str, WikiNode, or list."""
         if isinstance(node, str):
-            return node
+            return [node]
         assert isinstance(node, WikiNode)
         kind = node.kind
         if kind == NodeKind.HTML:
@@ -78,7 +79,7 @@ def template_to_body(title, text):
         new_node.children = recurse_list(node.children)
         if isinstance(node.args, (list, tuple)):
             new_node.args = list(recurse_list(x) for x in node.args)
-        return new_node
+        return [new_node]
 
     body = recurse(tree)
     if explicit_body:
@@ -105,6 +106,7 @@ for tag, title, text in specials:
     # print(tag, title)
     text = html.unescape(text)
     body = template_to_body(title, text)
+    assert isinstance(body, (list, tuple))
     name = canonicalize_template_name(title)
     templates[name] = body
 
@@ -252,10 +254,11 @@ def template_to_text(ctx, node):
         ctx.add("}}")
         return
 
+    assert isinstance(body, (list, tuple))
     old_vars = ctx.variables
     new_vars = old_vars.copy()
     argnum = 1
-    for x in node.args[1]:
+    for x in node.args:
         txt = to_text(ctx, x)
         m = re.match(r"(?s)^([^][#<>\{\}\|])=(.*)$", txt)
         if m:
@@ -268,7 +271,7 @@ def template_to_text(ctx, node):
         new_vars[argname] = argvalue
 
     ctx.variables = new_vars
-    to_text_list(ctx, body)
+    to_text_recurse(ctx, body)
     ctx.variables = old_vars
 
 
@@ -474,9 +477,10 @@ def invoke_script(name, ht):
         print("Invalid function name in lua call:", fn_name)
         return "<<INVALID FUNCTION NAME: {}>>".format(fn_name)
 
-    fn = lua.eval("lua_invoke")(name, fn_name, ht)
-    print("LUA EXPANSION RETURNED:", ret)
-    return ret
+    text = lua.eval("lua_invoke")(name, fn_name, ht)
+    print("LUA EXPANSION RETURNED:", text)
+    text = maybe_automatic_newline(text)
+    return text
 
 def expand(text, param_ht):
     def expand_template_param(m):
@@ -493,6 +497,9 @@ def expand(text, param_ht):
 
     def expand_template_body(name, body, ht):
         """Expands template body, processing only included material."""
+        assert isinstance(name, str)
+        assert isinstance(body, (list, tuple))
+        assert isinstance(ht, dict)
         # First handle <onlyinclude> by removing everything outside it
         if re.search("(?i)<\s*onlyinclude\s*>", body):
             lst = []
@@ -510,10 +517,19 @@ def expand(text, param_ht):
 
         # XXX should we add parameter for template name?
 
-        return expand(body, ht)
+        text = expand(body, ht)
+        text = maybe_automatic_newline(text)
+        return text
+
+    def maybe_automatic_newline(text):
+        if text and (text[0] in "#*:;" or text.startswith("{|")):
+            text = "\n" + text
+        return text
 
     def invoke_template(name, ht):
         if name.startswith("#"):
+            # XXX this is not correct?  They are PARSERFN and not all
+            # PARSERFN start with #.
             return invoke_special(name, ht)
         if name in templates:
             return expand_template_body(name, templates[name], ht)

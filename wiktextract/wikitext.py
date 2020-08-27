@@ -1441,7 +1441,7 @@ def tag_fn(ctx, token):
         if name in ("br", "hl", "wbr"):
             # This is incorrect but occurs; synthesize empty tag
             node = ctx.push(NodeKind.HTML)
-            ctx.args = name
+            node.args = name
             ctx.pop(False)
             return
         ctx.error("no corresponding start tag found for {}".format(token))

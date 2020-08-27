@@ -271,6 +271,26 @@ dasfasddasfdas
         self.assertEqual(a.children, ["foo"])
         self.assertEqual(len(ctx.errors), 0)
 
+    def test_html10(self):
+        tree, ctx = parse_with_ctx("test", "<br />")
+        self.assertEqual(len(ctx.errors), 0)
+        self.assertEqual(len(tree.children), 1)
+        a = tree.children[0]
+        assert isinstance(a, WikiNode)
+        self.assertEqual(a.kind, NodeKind.HTML)
+        self.assertEqual(a.args, "br")
+        self.assertEqual(a.children, [])
+
+    def test_html11(self):
+        tree, ctx = parse_with_ctx("test", "<wbr>")  # Omits closing tag
+        self.assertEqual(len(ctx.errors), 0)
+        self.assertEqual(len(tree.children), 1)
+        a = tree.children[0]
+        assert isinstance(a, WikiNode)
+        self.assertEqual(a.kind, NodeKind.HTML)
+        self.assertEqual(a.args, "wbr")
+        self.assertEqual(a.children, [])
+
     def test_html_unknown(self):
         tree, ctx = parse_with_ctx("test", "a<unknown>foo</unknown>b")
         self.assertEqual(tree.children, ["a<unknown>foo</unknown>b"])
@@ -1380,10 +1400,12 @@ def foo(x):
         tree, ctx = parse_with_ctx("fi-gradation", text)
         self.assertEqual(len(ctx.errors), 0)
 
-# Note: Magic links (e.g., ISBN, RFC) are not supported.  They are
-# disabled by default in MediaWiki since version 1.28 and Wiktionary
-# does not really seem to use them and they are not particularly
-# important.  See https://www.mediawiki.org/wiki/Help:Magic_links
+# Note: Magic links (e.g., ISBN, RFC) are not supported and there is
+# currently no plan to start supporting them unless someone comes up
+# with a real need.  They are disabled by default in MediaWiki since
+# version 1.28 and Wiktionary does not really seem to use them and
+# they do not seem particularly important.  See
+# https://www.mediawiki.org/wiki/Help:Magic_links
 
 # XXX currently handling of <nowiki> does not conform.  Check out and test
 # all examples on: https://en.wikipedia.org/wiki/Help:Wikitext
