@@ -57,8 +57,8 @@ def template_to_body(title, text):
     # HTML comments
     text = wikitext.preprocess_text(text)
     # Remove all text inside <noinclude> ... </noinclude>
-    text = re.sub(r"(?is)<\s*noinclude\s*>(.*?)<\s*/\s*noinclude\s*>",
-                  r"\1", text)
+    text = re.sub(r"(?is)<\s*noinclude\s*>.*?<\s*/\s*noinclude\s*>",
+                  "", text)
     text = re.sub(r"(?is)<\s*noinclude\s*/\s*>", "", text)
     # <onlyinclude> tags, if present, include the only text that will be
     # transcluded.  All other text is ignored.
@@ -106,11 +106,12 @@ def analyze_template(name, body):
     prev = body
     while True:
         unpaired_text = re.sub(
-            r"(?s)(^|\n)\{\|([^\n]|\n+[^|]|\n+\|[^}]|\n+\{[^|])*?\n+\|\}",
+            r"(?s)(^|\n)\{\|([^\n]|\n+[^{|]|\n+\|[^}]|\n+\{[^|])*?\n+\|\}",
             r"", prev)
         if unpaired_text == prev:
             break
         prev = unpaired_text
+    #print("unpaired_text {!r}".format(unpaired_text))
 
     # Determine if the template contains an unpaired table
     contains_unpaired_table = re.search(r"(?s)(^|\n)(\{\||\|\})",
@@ -194,7 +195,7 @@ for tag, title, text in specials:
 
     # print(tag, title)
     name = canonicalize_template_name(title)
-    #if name != "roa-gal-conj-coeudr":
+    #if name != "Sv-decl-noun":
     #    continue
     text = html.unescape(text)
     body = template_to_body(title, text)
@@ -615,6 +616,9 @@ def expand(text, param_ht):
         assert isinstance(name, str)
         assert isinstance(body, (list, tuple))
         assert isinstance(ht, dict)
+
+        # XXX aren't these old junk? cf. template_to_body???
+
         # First handle <onlyinclude> by removing everything outside it
         if re.search("(?i)<\s*onlyinclude\s*>", body):
             lst = []
