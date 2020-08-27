@@ -291,6 +291,17 @@ dasfasddasfdas
         self.assertEqual(a.args, "wbr")
         self.assertEqual(a.children, [])
 
+    def test_html12(self):
+        tree, ctx = parse_with_ctx("test", "<tt><nowiki>{{f|oo}}</nowiki></tt>")
+        self.assertEqual(len(ctx.errors), 0)
+        self.assertEqual(len(tree.children), 1)
+        a = tree.children[0]
+        assert isinstance(a, WikiNode)
+        self.assertEqual(a.kind, NodeKind.HTML)
+        self.assertEqual(a.args, "tt")
+        self.assertEqual(a.children,
+                         ["&lbrace;&lbrace;f&vert;oo&rbrace;&rbrace;"])
+
     def test_html_unknown(self):
         tree, ctx = parse_with_ctx("test", "a<unknown>foo</unknown>b")
         self.assertEqual(tree.children, ["a<unknown>foo</unknown>b"])
@@ -717,6 +728,17 @@ def foo(x):
         self.assertEqual(h.attrs.get("_close", False), False)
         self.assertEqual(h.attrs.get("_also_close", False), False)
         self.assertEqual(h.attrs.get("style", False), "color: red")
+
+    # XXX reconsider how pre should work.
+    # def test_pre3(self):
+    #     tree = parse("test", """<pre>The <pre> tag ignores [[wiki]] ''markup'' as does the <nowiki>tag</nowiki>.</pre>""")
+    #     self.assertEqual(len(tree.children), 1)
+    #     a = tree.children[0]
+    #     self.assertEqual(a.kind, NodeKind.PRE)
+    #     self.assertEqual(a.children,
+    #                      ["The &lt;pre&gt; tag ignores &lbsqb;&lsqb;wiki"
+    #                       "&rsqb;&rsqb; &apos;&apos;markup&apos;&apos; as "
+    #                       "does the &lt;nowiki&gt;tag&lt;/nowiki&gt;."])
 
     def test_comment1(self):
         tree = parse("test", "foo<!-- not\nshown-->bar")
@@ -1410,11 +1432,10 @@ def foo(x):
 # XXX currently handling of <nowiki> does not conform.  Check out and test
 # all examples on: https://en.wikipedia.org/wiki/Help:Wikitext
 
+# XXX implement <nowiki/> marking for links, templates
+
 # XXX test nowiki vs. table markup.  See last paragraph before subtitle "Pre"
 # on https://en.wikipedia.org/wiki/Help:Wikitext
-
-# XXX change nowiki to work by escaping.  Ensure <!-- --> is made visible
-# by nowiki.
 
 # XXX change how <pre> parser tag works.  Preprocess by escaping?
 # XXX <pre> should quote spaces to &nbsp; and newlines to &#10;?
@@ -1426,7 +1447,7 @@ def foo(x):
 # attributes, etc.  Generally, must change table attribute syntax to
 # allow templates.
 
-# XXX implement <nowiki/> marking for links, templates
-
 # XXX check if some templates are predefined, e.g. {{^|...}} (the void template)
 # It would seem that they are.  Also {{!}} (|) etc.
+
+# XXX test {{unsupported|]}} and {{unsupported|[}}

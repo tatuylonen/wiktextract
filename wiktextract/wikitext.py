@@ -121,6 +121,11 @@ ALLOWED_HTML_TAGS = {
     "includeonly": {
         "parents": ["*"],
         "content": ["*"]},
+    # From InputBox extension, see
+    # https://www.mediawiki.org/wiki/Extension:InputBox
+    "inputbox": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
     "ins": {
         "parents": ["phrasing"],
         "content": ["phrasing"]},
@@ -213,6 +218,12 @@ ALLOWED_HTML_TAGS = {
         "parents": ["tr"],
         "close-next": ["th", "td"],
         "content": ["flow"]},
+    # From TemplateStyles extension; see
+    # https://www.mediawiki.org/wiki/Extension:TemplateStyles
+    "templatestyles": {
+        "parents": ["phrasing"],
+        "no-end-tag": True,
+        "content": []},
     "tfoot": {
         "parents": ["table"],
         "close-next": ["thead", "tbody", "tfoot"],
@@ -249,6 +260,9 @@ ALLOWED_HTML_TAGS = {
         "no-end-tag": True,
         "content": []},
 }
+
+# HTML tags that are also parsed in the preparse phase
+PRE_PARSE_TAGS = ["noinclude", "includeonly", "onlyinclude"]
 
 # Set of tags that can be parents of "flow" parents
 HTML_FLOW_PARENTS = set(k for k, v in ALLOWED_HTML_TAGS.items()
@@ -625,11 +639,12 @@ class ParseCtx(object):
     stack and other state, and also implicitly contains all text
     parsed so far and the partial parse tree."""
     __slots__ = (
-        "stack",
-        "linenum",
         "beginning_of_line",
         "errors",
+        "linenum",
         "pagetitle",
+        "pre_parse",
+        "stack",
         "suppress_special",
     )
 
@@ -637,11 +652,12 @@ class ParseCtx(object):
         assert isinstance(pagetitle, str)
         node = WikiNode(NodeKind.ROOT, 0)
         node.args.append([pagetitle])
-        self.stack = [node]
-        self.linenum = 1
         self.beginning_of_line = True
         self.errors = []
+        self.linenum = 1
         self.pagetitle = pagetitle
+        self.pre_parse = False
+        self.stack = [node]
         self.suppress_special = False
 
     def push(self, kind):
@@ -837,6 +853,9 @@ def subtitle_start_fn(ctx, token):
     """Processes a subtitle start token.  The token has < prepended to it."""
     assert isinstance(ctx, ParseCtx)
     assert isinstance(token, str)
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     kind = subtitle_to_kind[token[1:]]
     level = kind_to_level[kind]
 
@@ -847,6 +866,8 @@ def subtitle_start_fn(ctx, token):
     while any(x.kind in kind_to_level for x in ctx.stack):
         node = ctx.stack[-1]
         if kind_to_level.get(node.kind, 99) < level:
+            break
+        if node.kind == NodeKind.HTML:
             break
         ctx.pop(True)
 
@@ -859,6 +880,9 @@ def subtitle_end_fn(ctx, token):
     """Processes a subtitle end token.  The token has > prepended to it."""
     assert isinstance(ctx, ParseCtx)
     assert isinstance(token, str)
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     kind = subtitle_to_kind[token[1:]]
 
     # Keep popping formats until we get to the subtitle node
@@ -879,6 +903,9 @@ def subtitle_end_fn(ctx, token):
 
 def italic_fn(ctx, token):
     """Processes an italic start/end token ('')."""
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     if not ctx.have(NodeKind.ITALIC):
         # Push new formatting node
         ctx.push(NodeKind.ITALIC)
@@ -901,6 +928,9 @@ def italic_fn(ctx, token):
 
 def bold_fn(ctx, token):
     """Processes a bold start/end token (''')."""
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     if not ctx.have(NodeKind.BOLD):
         # Push new formatting node
         ctx.push(NodeKind.BOLD)
@@ -923,14 +953,19 @@ def bold_fn(ctx, token):
 
 def ilink_start_fn(ctx, token):
     """Processes an internal link start token "[["."""
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     ctx.push(NodeKind.LINK)
 
 
 def ilink_end_fn(ctx, token):
     """Processes an internal link end token "]]"."""
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     if not ctx.have(NodeKind.LINK):
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
     while True:
         node = ctx.stack[-1]
         if node.kind == NodeKind.LINK:
@@ -941,14 +976,19 @@ def ilink_end_fn(ctx, token):
 
 def elink_start_fn(ctx, token):
     """Processes an external link start token "["."""
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     ctx.push(NodeKind.URL)
 
 
 def elink_end_fn(ctx, token):
     """Processes an external link end token "]"."""
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     if not ctx.have(NodeKind.URL):
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
     while True:
         node = ctx.stack[-1]
         if node.kind == NodeKind.URL:
@@ -960,10 +1000,12 @@ def elink_end_fn(ctx, token):
 def url_fn(ctx, token):
     """Processes an URL written as URL in the text (an external link is
     automatically generated)."""
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     node = ctx.stack[-1]
     if node.kind == NodeKind.URL:
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
     node = ctx.push(NodeKind.URL)
     text_fn(ctx, token)
     ctx.pop(False)
@@ -977,8 +1019,7 @@ def templarg_start_fn(ctx, token):
 def templarg_end_fn(ctx, token):
     """Handler for template argument reference end token "}}}"."""
     if not ctx.have(NodeKind.TEMPLATEVAR):
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
     while True:
         node = ctx.stack[-1]
         if node.kind == NodeKind.TEMPLATEVAR:
@@ -995,8 +1036,7 @@ def templ_start_fn(ctx, token):
 def templ_end_fn(ctx, token):
     """Handler function for template end token "}}"."""
     if not ctx.have(NodeKind.TEMPLATE) and not ctx.have(NodeKind.PARSERFN):
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
     while True:
         node = ctx.stack[-1]
         if node.kind in (NodeKind.TEMPLATE, NodeKind.PARSERFN):
@@ -1014,8 +1054,7 @@ def colon_fn(ctx, token):
     # Unless we are in the first argument of a template, treat a colon that is
     # not at the beginning of a
     if node.kind != NodeKind.TEMPLATE or node.args:
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
 
     # Merge string children.  This is needed for both the following text and
     # for args.
@@ -1024,8 +1063,7 @@ def colon_fn(ctx, token):
     # Check if the template argument is a parser function name.
     if (len(node.children) != 1 or not isinstance(node.children[0], str) or
         node.children[0] not in PARSER_FUNCTIONS):
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
 
     # Colon in the first argument of {{name:...}} turns it into a parser
     # function call.
@@ -1037,6 +1075,9 @@ def colon_fn(ctx, token):
 
 def table_start_fn(ctx, token):
     """Handler for table start token "{|"."""
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     ctx.push(NodeKind.TABLE)
 
 
@@ -1066,10 +1107,12 @@ def table_row_check_attrs(ctx):
 
 def table_caption_fn(ctx, token):
     """Handler for table caption token "|+"."""
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     table_check_attrs(ctx)
     if not ctx.have(NodeKind.TABLE):
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
     while True:
         node = ctx.stack[-1]
         if node.kind == NodeKind.TABLE:
@@ -1080,11 +1123,13 @@ def table_caption_fn(ctx, token):
 
 def table_hdr_cell_fn(ctx, token):
     """Handler function for table header row cell separator ! or !!."""
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     table_row_check_attrs(ctx)
     table_check_attrs(ctx)
     if not ctx.have(NodeKind.TABLE):
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
     while True:
         node = ctx.stack[-1]
         if node.kind == NodeKind.TABLE_ROW:
@@ -1103,17 +1148,18 @@ def table_hdr_cell_fn(ctx, token):
                 text_fn(ctx, token)
             return
         if node.kind == NodeKind.TABLE_CELL:
-            text_fn(ctx, token)
-            return
+            return text_fn(ctx, token)
         ctx.pop(True)
 
 
 def table_row_fn(ctx, token):
     """Handler function for table row separator "|-"."""
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     table_check_attrs(ctx)
     if not ctx.have(NodeKind.TABLE):
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
     while True:
         node = ctx.stack[-1]
         if node.kind == NodeKind.TABLE:
@@ -1124,12 +1170,14 @@ def table_row_fn(ctx, token):
 
 def table_cell_fn(ctx, token):
     """Handler function for table row cell separator | or ||."""
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     table_row_check_attrs(ctx)
     table_check_attrs(ctx)
 
     if not ctx.have(NodeKind.TABLE):
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
 
     if token == "|" and not ctx.beginning_of_line:
         # This might separate attributes for captions, header cells, and
@@ -1144,8 +1192,7 @@ def table_cell_fn(ctx, token):
                 attrs = node.children.pop()
                 parse_attrs(node, attrs)
                 return
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
 
     while True:
         node = ctx.stack[-1]
@@ -1155,8 +1202,7 @@ def table_cell_fn(ctx, token):
             ctx.push(NodeKind.TABLE_ROW)
             break
         if node.kind == NodeKind.TABLE_CAPTION:
-            text_fn(ctx, token)
-            return
+            return text_fn(ctx, token)
         ctx.pop(True)
     ctx.push(NodeKind.TABLE_CELL)
 
@@ -1191,9 +1237,11 @@ def double_vbar_fn(ctx, token):
 
 def table_end_fn(ctx, token):
     """Handler function for end of a table token "|}"."""
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     if not ctx.have(NodeKind.TABLE):
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
     while True:
         node = ctx.stack[-1]
         if node.kind == NodeKind.TABLE:
@@ -1206,6 +1254,9 @@ def list_fn(ctx, token):
     """Handles various tokens that start unordered or ordered list items,
     description list items, or indented lines.  This also recognizes the
     colon used to separate parser function name from its first argument."""
+    if ctx.pre_parse:
+        return text_fn(ctx, token)
+
     node = ctx.stack[-1]
 
     # A colon inside a template means it is a parser function call.  We use
@@ -1216,8 +1267,7 @@ def list_fn(ctx, token):
 
     # Colons can occur inside links and don't mean a list item
     if node.kind in (NodeKind.LINK, NodeKind.URL):
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
 
     # List items must start a new line; otherwise treat as text.  This is
     # particularly the case for colon, which is recognized as a token also
@@ -1235,8 +1285,7 @@ def list_fn(ctx, token):
             node.children = []
             return
         # Otherwise treat colons that do not start a line as normal text
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
 
     # Pop any lower-level list items
     while True:
@@ -1348,6 +1397,10 @@ def tag_fn(ctx, token):
         also_end = m.group(6) == "/"
         name = name.lower()
 
+        # If preparsing, only handle template control tags like <noinclude>
+        if ctx.pre_parse and name not in PRE_PARSE_TAGS:
+            return text_fn(ctx, token)
+
         # Check for unmatched <nowiki> start tag.  <nowiki> should be handled
         # in preprocessing, but an unmatched start tag may be missed.
         if name == "nowiki":
@@ -1356,8 +1409,7 @@ def tag_fn(ctx, token):
                 # nowiki, cause it to be expanded by escaped plaintext
                 return
             ctx.error("unmatched <nowiki>")
-            text_fn(ctx, token)
-            return
+            return text_fn(ctx, token)
 
         # Handle <pre> start tag
         if name == "pre":
@@ -1377,8 +1429,7 @@ def tag_fn(ctx, token):
             if not name.isdigit():
                 ctx.error("html tag <{}{}> not allowed in WikiText"
                           "".format(name, "/" if also_end else ""))
-            text_fn(ctx, token)
-            return
+            return text_fn(ctx, token)
 
         # Automatically close parent HTML tags that should be ended by this tag
         # until we have a parent that is not a HTML tag or that is an allowed
@@ -1413,13 +1464,16 @@ def tag_fn(ctx, token):
     name = m.group(1)
     name = name.lower()
 
+    # If preparsing, only handle template control tags like <noinclude>
+    if ctx.pre_parse and name not in PRE_PARSE_TAGS:
+        return text_fn(ctx, token)
+
     if name == "pre":
         # Handle </pre> end tag
         node = ctx.stack[-1]
         if node.kind != NodeKind.PRE:
             ctx.error("unexpected </pre>")
-            text_fn(ctx, token)
-            return
+            return text_fn(ctx, token)
         ctx.pop(False)
         return
 
@@ -1428,8 +1482,7 @@ def tag_fn(ctx, token):
     if name not in ALLOWED_HTML_TAGS:
         ctx.error("html tag </{}> not allowed in WikiText"
                   "".format(name))
-        text_fn(ctx, token)
-        return
+        return text_fn(ctx, token)
 
     # See if we can find the opening tag from the stack
     for i in range(0, len(ctx.stack)):
@@ -1607,8 +1660,7 @@ def brace_close(ctx, token):
                     token = token[1:]
                     break
         else:
-            text_fn(ctx, token)
-            break
+            return text_fn(ctx, token)
 
 
 def nowiki_sub_fn(m):
@@ -1625,26 +1677,29 @@ def nowiki_sub_fn(m):
     text = re.sub(r"\[", "&lsqb;", text)
     text = re.sub(r"\]", "&rsqb;", text)
     text = re.sub(r"\{", "&lbrace;", text)
+    text = re.sub(r"\}", "&rbrace;", text)
     text = re.sub(r"\s+", " ", text)
     return text
 
 
-def preprocess_text(text, transcluded):
+def preprocess_text(text):
     assert isinstance(text, str)
-    assert transcluded in (True, False)
     text = re.sub(r"(?si)<\s*nowiki\s*>(.*?)<\s*/\s*nowiki\s*>", nowiki_sub_fn,
                   text)
     text = re.sub(r"(?s)<!\s*--.*?--\s*>", "", text)
     return text
 
 
-def parse_with_ctx(pagetitle, text):
+def parse_with_ctx(pagetitle, text, pre_parse=False):
     """Parses a Wikitext document into a tree.  This returns a WikiNode object
     that is the root of the parse tree and the parse context."""
     assert isinstance(pagetitle, str)
     assert isinstance(text, str)
+    assert pre_parse in (True, False)
+    text = preprocess_text(text)
     # Create parse context.  This also pushes a ROOT node on the stack.
     ctx = ParseCtx(pagetitle)
+    ctx.pre_parse = pre_parse
     # Process all tokens from the input.
     for is_token, token in token_iter(ctx, text):
         node = ctx.stack[-1]
@@ -1701,15 +1756,16 @@ def parse_with_ctx(pagetitle, text):
     return ctx.stack[0], ctx
 
 
-def parse(pagetitle, text):
+def parse(pagetitle, text, pre_parse=False):
     """Parse a wikitext document into a tree.  This returns a WikiNode
     object that is the root of the parse tree and the parse context.
     This does not expand HTML entities; that should be done after processing
-    templates."""
+    templates.  If ``pre_parse`` is True, then this only does limited
+    parsing for pre-processing of templates."""
     assert isinstance(pagetitle, str)
     assert isinstance(text, str)
-    text = preprocess_text(text, False)
-    tree, ctx = parse_with_ctx(pagetitle, text)
+    assert pre_parse in (True, False)
+    tree, ctx = parse_with_ctx(pagetitle, text, pre_parse=pre_parse)
     return tree
 
 
