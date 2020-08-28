@@ -2,7 +2,8 @@
 #
 # Copyright (c) 2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-
+import re
+import html
 from .wikihtml import ALLOWED_HTML_TAGS
 
 
@@ -30,6 +31,38 @@ def ifeq_fn(title, fn_name, args, stack):
     if args[0].strip() == args[1].strip():
         return args[2].strip()
     return args[3].strip()
+
+
+def switch_fn(title, fn_name, args, stack):
+    """Implements #switch parser function."""
+    if len(args) < 3:
+        print("{}: too few arguments for #switch ({}) at {}"
+              "".format(title, len(args), stack))
+        while len(args) < 3:
+            args.append("")
+    val = args[0].strip()
+    match_next = False
+    defval = None
+    last = None
+    for i in range(1, len(args)):
+        arg = args[i].strip()
+        m = re.match(r"(?s)^([^=]+)=(.*)$", arg)
+        if not m:
+            last = arg
+            if arg == val:
+                match_next = True
+            continue
+        k, v = m.groups()
+        k = k.strip()
+        v = v.strip()
+        if k == val or match_next:
+            return v
+        if k == "#default":
+            defval = v
+        last = v
+    if defval is not None:
+        return defval
+    return last or ""
 
 
 def tag_fn(title, fn_name, args, stack):
@@ -177,7 +210,7 @@ PARSER_FUNCTIONS = {
     "#iferror": unimplemented_fn,
     "#ifexpr": unimplemented_fn,
     "#ifexist": unimplemented_fn,
-    "#switch": unimplemented_fn,
+    "#switch": switch_fn,
     "#babel": unimplemented_fn,
     "#categorytree": unimplemented_fn,
     "#coordinates": unimplemented_fn,
