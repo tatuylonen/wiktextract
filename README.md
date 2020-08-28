@@ -200,7 +200,7 @@ returns them for words in all languages.
 Some pages in Wiktionary are redirects.  For these, ``word_cb`` will
 be called with data in a special format.  In this case, the dictionary
 will have the key ``redirect``, which will contain the name of the
-word the entry redirects to.  The key ``word`` contains the word/term
+word the entry redirects to.  The key ``title`` contains the word/term
 that contains the redirect.  Redirect entries do not have ``pos`` or
 any of the other fields.  Redirects also are not associated with any
 language, so all redirects are always returned regardless of the captured

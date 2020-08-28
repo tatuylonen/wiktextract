@@ -1,9 +1,14 @@
+# Tests/experiments related to WikiText parsing and Lua extension invocation
+#
+# Copyright (c) 2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+
 import re
 import sys
 import copy
 import html
 import json
 import time
+import base64
 import textwrap
 import os.path
 import collections
@@ -12,6 +17,7 @@ from lupa import LuaRuntime
 
 from wiktextract import wikitext
 from wiktextract.wikitext import WikiNode, NodeKind
+from wiktextract.wikiparserfns import PARSER_FUNCTIONS
 
 #import pstats
 #import cProfile
@@ -24,15 +30,10 @@ builtin_lua_search_paths = [
 
 MAX_LEN = 75
 
-page = open("tests/animal.txt").read()
-#print("Len of source page", len(page))
-
 langs = collections.defaultdict(int)
 
-print("Loading specials (templates & modules)")
-with open("tempXXXspecials.json") as f:
-    specials = json.load(f)
-print("Extracting definitions", len(specials))
+PAIRED_HTML_TAGS = set(k for k, v in wikitext.ALLOWED_HTML_TAGS.items()
+                       if not v.get("no-end-tag") and not v.get("close-next"))
 
 
 def canonicalize_template_name(name):
@@ -45,6 +46,18 @@ def canonicalize_template_name(name):
     name = name.strip()
     if name:
         name = name[0].upper() + name[1:]
+    return name
+
+
+def canonicalize_parserfn_name(name):
+    """Canonicalizes a parser function name by making its first character
+    uppercase and replacing underscores by spaces and sequences of
+    whitespace by a single whitespace."""
+    assert isinstance(name, str)
+    name = re.sub(r"_", " ", name)
+    name = re.sub(r"\s+", " ", name)
+    name = name.strip()
+    name = name.lower()  # Parser function names are case-insensitive
     return name
 
 
@@ -146,17 +159,36 @@ def analyze_template(name, body):
     #     print("... {!r} ...".format(outside[m.start() - 10:m.end() + 10]))
     #     print(repr(outside))
 
+    # Check for unpaired HTML tags
+    tag_cnts = collections.defaultdict(int)
+    for m in re.finditer(r"(?si)<\s*(/\s*)?({})\b\s*[^>]*(/\s*)?>"
+                         r"".format("|".join(PAIRED_HTML_TAGS)), outside):
+        start_slash = m.group(1)
+        tagname = m.group(2)
+        end_slash = m.group(3)
+        if start_slash:
+            tag_cnts[tagname] -= 1
+        elif not end_slash:
+            tag_cnts[tagname] += 1
+    contains_unbalanced_html = any(v != 0 for v in tag_cnts.values())
+    # if contains_unbalanced_html:
+    #     print(name, "UNBALANCED HTML")
+    #     for k, v in tag_cnts.items():
+    #         if v != 0:
+    #             print("  {} {}".format(v, k))
+
     # Determine whether this template should be pre-expanded
     pre_expand = (contains_list or contains_unpaired_table or
-                  contains_table_element)
+                  contains_table_element or contains_unbalanced_html)
 
-    if pre_expand:
-        print(name,
-              {"list": contains_list,
-               "unpaired_table": contains_unpaired_table,
-               "table_element": contains_table_element,
-               "pre_expand": pre_expand,
-        })
+    # if pre_expand:
+    #     print(name,
+    #           {"list": contains_list,
+    #            "unpaired_table": contains_unpaired_table,
+    #            "table_element": contains_table_element,
+    #            "unbalanced_html": contains_unbalanced_html,
+    #            "pre_expand": pre_expand,
+    #     })
 
     # Determine which other templates are called from unpaired text.
     # None of the flags we currently gather propagate outside a paired
@@ -172,18 +204,32 @@ def analyze_template(name, body):
 
     return included_templates, pre_expand
 
+print("Loading specials (templates & modules)")
+with open("tempXXXspecials.json") as f:
+    specials = json.load(f)
+print("Analyzing templates", len(specials))
 
 # Extract module and template definitions from the collected special pages.
+# We also determine which templates need to be pre-expanded to allow parsing
+# the resulting structure.  (This determination is somewhat heuristic and
+# is not guaranteed to always produce optimal results.  However, it
+# significantly improves the parseability of the resulting structure of a
+# page.)
 modules = {}
 templates = {}
+templates["!"] = "&vert;"
 contains_list_set = set()
 contains_table_element_set = set()
 contains_unpaired_table = set()
-need_expand = set()
+need_pre_expand = set()
 included_map = collections.defaultdict(set)
 expand_q = []
+redirects = {}
 for tag, title, text in specials:
     # XXX should this be enabled? title = html.unescape(title)
+    if tag == "#redirect":
+        redirects[title] = text
+        continue
     if tag == "Scribunto":
         continue
     if title.endswith("/testcases"):
@@ -204,27 +250,48 @@ for tag, title, text in specials:
     for x in included_templates:
         included_map[x].add(name)
     if pre_expand:
-        need_expand.add(name)
+        need_pre_expand.add(name)
         expand_q.append(name)
     templates[name] = body
 
+# Propagate pre_expand from lower-level templates to all templates that
+# refer to them
 while expand_q:
     name = expand_q.pop()
     if name not in included_map:
         continue
     for inc in included_map[name]:
-        if inc in need_expand:
+        if inc in need_pre_expand:
             continue
-        print("propagating EXP {} -> {}".format(name, inc))
-        need_expand.add(inc)
+        #print("propagating EXP {} -> {}".format(name, inc))
+        need_pre_expand.add(inc)
         expand_q.append(name)
 
-for name in templates.keys():
-    if name in need_expand:
-        print("EXP", name)
-    #else:
-    #    print("   ", name)
-sys.exit(1)
+# Copy template definitions to redirects to them
+for k, v in redirects.items():
+    if not k.startswith("Template:"):
+        continue
+    k = k[9:]
+    if not v.startswith("Template:"):
+        continue
+    v = v[9:]
+    k = canonicalize_template_name(k)
+    v = canonicalize_template_name(v)
+    if v not in templates:
+        # print("{} redirects to non-existent template {}".format(k, v))
+        continue
+    if k in templates:
+        print("{} -> {} is redirect but already in templates".format(k, v))
+        continue
+    templates[k] = templates[v]
+    if v in need_pre_expand:
+        need_pre_expand.add(k)
+
+# for name in templates.keys():
+#     if name in need_pre_expand:
+#         print("EXP", name)
+#     #else:
+#     #    print("   ", name)
 
 class FmtCtx(object):
     __slots__ = (
@@ -502,15 +569,261 @@ def analyze_node(node):
     for x in node.children:
         analyze_node(x)
 
+
+def expand_listed_templates(title, text, expand_templates):
+    """Expands templates whose names are in ``template_names`` and their
+    arguments (including also all other templates referenced from the
+    arguments).  This may call Lua code.  This returns text with the named
+    templates expanded; other templates are not expanded."""
+    assert isinstance(title, str)
+    assert isinstance(text, str)
+    assert isinstance(expand_templates, (set, dict))
+    # Magic prefix for encoding already processed templates and template
+    # arguments
+    magic = base64.b64encode(os.urandom(16), altchars=b"#!").decode("utf-8")
+    cookies = []
+    rev_ht = {}
+
+    def save_value(kind, args):
+        """Saves a value of a particular kind and returns a unique magic
+        cookie for it."""
+        assert kind in ("T", "A", "P")  # Template, arg, parserfn
+        assert isinstance(args, (list, tuple))
+        args = tuple(args)
+        v = (kind, args)
+        if v in rev_ht:
+            return "!" + magic + kind + str(rev_ht[v]) + "!"
+        idx = len(cookies)
+        cookies.append(v)
+        rev_ht[v] = idx
+        ret = "!" + magic + kind + str(idx) + "!"
+        return ret
+
+    def repl_arg(m):
+        """Replacement function for template arguments."""
+        orig = m.group(1)
+        args = orig.split("|")
+        return save_value("A", args)
+
+    def repl_templ(m):
+        """Replacement function for templates {{...}} and template
+        functions."""
+        orig = m.group(1)
+        args = orig.split("|")
+        ofs = args[0].find(":")
+        if ofs > 0:
+            # It might be a parser function call
+            fn_name = canonicalize_parserfn_name(args[0][:ofs])
+            # Check if it is a recognized parser function name
+            if fn_name in PARSER_FUNCTIONS:
+                return save_value("P", [fn_name, args[0][ofs + 1:]] + args[1:])
+        # As a compatibility feature, recognize parser functions also as the
+        # first argument of a template, whether there are more arguments or
+        # not.  This is used for magic words and some parser functions have
+        # an implicit compatibility template that essentially does this.
+        fn_name = canonicalize_parserfn_name(args[0])
+        if fn_name in PARSER_FUNCTIONS:
+            return save_value("P", [fn_name] + args)
+        # Otherwise it is a normal template expansion
+        return save_value("T", args)
+
+    def encode(text):
+        """Encode all templates, template arguments, and parser function calls
+        in the text, from innermost to outermost."""
+        while True:
+            prev = text
+            # XXX encode [[ ... | ... ]] - otherwise it can split template
+            # arguments.  We do nothing but expand arguments for these at this
+            # stage.
+            while True:
+                text = re.sub(r"(?s)\{\{\{(([^{}]|\}[^}]|\}\}[^}])+?)\}\}\}",
+                              repl_arg, prev)
+                if text == prev:
+                    break
+                prev = text
+            text = re.sub(r"(?s)\{\{(([^{}]|\}[^}])+?)\}\}",
+                          repl_templ, text)
+            if text == prev:
+                break
+            prev = text
+        return text
+
+    def unexpanded_template(tname, ht):
+        """Formats an unexpanded template (whose arguments may have been
+        partially or fully expanded)."""
+        assert isinstance(tname, str)
+        assert isinstance(ht, dict)
+        args = [tname]
+        more_args = []
+        for k, v in ht.items():
+            if isinstance(k, int):
+                while len(args) <= k:
+                    args.append("")
+                args[k] = v
+            else:
+                more_args.append("{}={}".format(k, v))
+        args += list(sorted(more_args))
+        return "{{" + "|".join(args) + "}}"
+
+    def unexpanded_parserfn(fn_name, args):
+        """Formats an unexpanded parser function call (whose arguments may
+        have been partially or fully expanded)."""
+        assert isinstance(fn_name, str)
+        assert isinstance(args, (list, tuple))
+        return "{{" + fn_name + ":" + "|".join(args) + "}}"
+
+    def expand(coded, argmap, stack):
+        assert isinstance(coded, str)
+        assert isinstance(argmap, dict)
+        assert isinstance(stack, list)
+        parts = []
+        pos = 0
+        for m in re.finditer(r"!{}(.)(\d+)!".format(magic), coded):
+            new_pos = m.start()
+            if new_pos > pos:
+                parts.append(coded[pos:new_pos])
+            pos = m.end()
+            kind = m.group(1)
+            idx = int(m.group(2))
+            kind2, args = cookies[idx]
+            assert isinstance(args, tuple)
+            assert kind == kind2
+            if kind == "T":
+                # Template transclusion
+                stack.append("TEMPLATE_NAME")
+                tname = expand(args[0], argmap, stack)
+                stack.pop()
+                name = canonicalize_template_name(tname)
+                stack.append(name)
+                ht = {}
+                num = 1
+                for i in range(1, len(args)):
+                    arg = args[i]
+                    stack.append("ARG{}".format(i))
+                    arg = expand(arg, argmap, stack)
+                    stack.pop()
+                    ofs = arg.find("=")
+                    if ofs <= 0:
+                        k = num
+                        num += 1
+                    else:
+                        k = arg[:ofs].strip()
+                        if k.isdigit():
+                             k = int(k)
+                             if k < 1 or k > 1000:
+                                 print("{}: invalid argument number {}"
+                                       "".format(title, k))
+                                 k = 1000
+                        arg = arg[ofs + 1:]
+                    ht[k] = arg
+
+                # Check if this template is defined
+                if name not in templates:
+                    stack.pop()
+                    print("{}: uses undefined template {!r} at {}"
+                          "".format(title, tname, stack))
+                    parts.append(unexpanded_template(tname, ht))
+                    continue
+
+                # Limit recursion depth
+                if len(stack) >= 20:
+                    stack.pop()
+                    print("{}: too deep expansion of templates via {}"
+                          "".format(title, stack))
+                    parts.append(unexpanded_template(tname, ht))
+                    continue
+
+                # If this template is not one of those we want to expand,
+                # return it unexpanded (but with arguments possibly expanded)
+                if name not in expand_templates:
+                    parts.append(unexpanded_template(tname, ht))
+                    continue
+
+                body = templates[name]
+                encoded_body = encode(body)
+                t = expand(encoded_body, argmap, stack)
+                stack.pop()  # template name
+                parts.append(t)
+            elif kind == "A":
+                # Template argument reference
+                if len(args) > 2:
+                    print("{}: too many args ({}) in argument reference {!r}"
+                          "".format(title, len(args), args))
+                stack.append("ARG_NAME")
+                k = expand(args[0], argmap, stack).strip()
+                stack.pop()
+                if k.isdigit():
+                    k = int(k)
+                if k in argmap:
+                    v = argmap[k]  # Already expanded
+                    parts.append(v)
+                elif len(args) > 1:
+                    stack.append("ARG{}-DEFVAL".format(k))
+                    v = expand(args[1], argmap, stack)
+                    stack.pop()
+                    parts.append(v)
+                else:
+                    parts.append("{{{" + str(k) + "}}}")
+            elif kind == "P":
+                # Parser function call
+                expanded_args = []
+                stack.append("PARSERFN_FN")
+                fn_name = expand(args[0], argmap, stack)
+                stack.pop()
+                fn_name = canonicalize_parserfn_name(fn_name)
+                stack.append(fn_name)
+                for i in range(1, len(args)):
+                    arg = args[i]
+                    stack.append("ARG{}".format(i))
+                    arg = expand(arg, argmap, stack)
+                    stack.pop()
+                    expanded_args.append(arg)
+                fn = PARSER_FUNCTIONS[fn_name]
+                ret = fn(title, fn_name, expanded_args, stack)
+                stack.pop()  # fn_name
+                # XXX if lua code calls frame:preprocess(), then we should
+                # apparently encode and expand the return value, similarly to
+                # template bodies (without argument expansion)
+                parts.append(ret)
+            else:
+                print("{}: unsupported cookie kind {!r} in {}"
+                      "".format(title, kind, m.group(0)))
+                parts.append(m.group(0))
+        parts.append(coded[pos:])
+        return "".join(parts)
+
+    # Encode all template calls, template arguments, and parser function
+    # calls on the page.  This is an inside-out operation.
+    print("Encoding")
+    encoded = encode(text)
+
+    # Recursively expand the selected templates.  This is an outside-in
+    # operation.
+    print("Expanding")
+    expanded = expand(encoded, {}, [title])
+
+    return expanded
+
+
+# Process test page
+page = open("tests/animal.txt").read()
+page = wikitext.preprocess_text(page)
+print("=== Expanding templates")
+page = expand_listed_templates("animal", page, templates)
+# XXX expand only need_pre_expand here (now expanding all for testing purposes)
+print(page)
+print("=== Parsing")
 tree = wikitext.parse("animal", page)
-analyze_node(tree)
+print("=== Printing")
+wikitext.print_tree(tree)
+#analyze_node(tree)
 #for k, v in sorted(langs.items(), key=lambda x: x[1], reverse=True):
 #    print(v, k)
+sys.exit(1)
 
 ctx = FmtCtx()
 print(to_text(ctx, tree.children).strip())
 print("============================")
-wikitext.print_tree(tree)
 
 sys.exit(1)
 
@@ -539,6 +852,7 @@ def iter_sub(regexp, fn, text):
     return text
 
 def lua_loader(modname):
+
     """This function is called from the Lua sandbox to load a Lua module.
     This will load it from either the user-defined modules on special
     pages or from a built-in module in the file system.  This returns None

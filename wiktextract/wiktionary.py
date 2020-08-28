@@ -109,6 +109,8 @@ def make_article_iter(f, ctx, config):
                 value = m.group(3).decode("utf-8")
             else:
                 value = ""
+            if value.startswith("'") or value.startswith('"'):
+                value = value[1:-1]
             attrs[name] = value
         return attrs
 
@@ -142,7 +144,7 @@ def make_article_iter(f, ctx, config):
 
             if ctx.redirect:
                 if ctx.config.capture_redirects:
-                    data = {"redirect": ctx.redirect, "word": title}
+                    data = {"redirect": ctx.redirect, "title": title}
                     return data
 
             # Parse the page, and call ``word_cb`` for each captured
@@ -257,9 +259,14 @@ def capture_specials_fn(dt):
     """Captures certain special pages that are needed for processing other
     pages."""
     assert isinstance(dt, dict)
-    if "redirect" in dt:
-        return []
     title = dt["title"]
+    if "redirect" in dt:
+        idx = title.find(":")
+        if idx > 3:
+            cat = title[:idx]
+            rest = title[idx + 1:]
+            return [["#redirect", title, dt["redirect"]]]
+        return []
     text = dt["text"]
     model = dt["model"]
     #print(title)
@@ -274,6 +281,8 @@ def capture_specials_fn(dt):
     if idx > 3:
         cat = title[:idx]
         rest = title[idx + 1:]
+        if "redirect" in dt:
+            return [[cat, rest, dt["redirect"]]]
         if cat == "Category":
             return [[cat, rest, text]]
         elif cat == "Module":
@@ -416,7 +425,7 @@ def parse_wiktionary(path, config, word_cb, capture_cb=None):
         specials.extend(x)
 
     # XXX this is temporary code
-    if False:
+    if True:
         with open("tempXXXspecials.json", "w") as f:
             json.dump(specials, f, indent=2, sort_keys=True)
 
