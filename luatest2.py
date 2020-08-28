@@ -281,7 +281,8 @@ for k, v in redirects.items():
         # print("{} redirects to non-existent template {}".format(k, v))
         continue
     if k in templates:
-        print("{} -> {} is redirect but already in templates".format(k, v))
+        if k != v:
+            print("{} -> {} is redirect but already in templates".format(k, v))
         continue
     templates[k] = templates[v]
     if v in need_pre_expand:
