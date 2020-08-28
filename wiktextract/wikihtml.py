@@ -116,6 +116,11 @@ ALLOWED_HTML_TAGS = {
     "i": {
         "parents": ["phrasing"],
         "content": ["phrasing"]},
+    # From ImageMap extension, see
+    # https://www.mediawiki.org/wiki/Extension:ImageMap
+    "imagemap": {
+        "parents": ["phrasing"],
+        "content": ["phrasing"]},
     "includeonly": {
         "parents": ["*"],
         "content": ["*"]},
