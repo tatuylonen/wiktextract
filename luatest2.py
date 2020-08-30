@@ -17,7 +17,7 @@ from lupa import LuaRuntime
 
 from wiktextract import wikitext
 from wiktextract.wikitext import WikiNode, NodeKind
-from wiktextract.wikiparserfns import PARSER_FUNCTIONS
+from wiktextract.wikiparserfns import PARSER_FUNCTIONS, call_parser_function
 
 #import pstats
 #import cProfile
@@ -44,8 +44,9 @@ def canonicalize_template_name(name):
     name = re.sub(r"_", " ", name)
     name = re.sub(r"\s+", " ", name)
     name = name.strip()
-    if name:
-        name = name[0].upper() + name[1:]
+    if name[:9].lower() == "template:":
+        name = name[9:]
+    name = name.capitalize()
     return name
 
 
@@ -57,7 +58,8 @@ def canonicalize_parserfn_name(name):
     name = re.sub(r"_", " ", name)
     name = re.sub(r"\s+", " ", name)
     name = name.strip()
-    name = name.lower()  # Parser function names are case-insensitive
+    if name not in PARSER_FUNCTIONS:
+        name = name.lower()  # Parser function names are case-insensitive
     return name
 
 
@@ -139,13 +141,13 @@ def analyze_template(name, body):
         #print("=== OUTSIDE ITER")
         prev = outside
         while True:
-            newt = re.sub(r"(?s)\{\{\{([^{}]|\}[^}]|\}\}[^}])+?\}\}\}",
+            newt = re.sub(r"(?s)\{\{\{([^{}]|\}[^}]|\}\}[^}])*?\}\}\}",
                           "", prev)
             if newt == prev:
                 break
             prev = newt
         #print("After arg elim: {!r}".format(newt))
-        newt = re.sub(r"(?s)\{\{([^{}]|\}[^}])+?\}\}", "", newt)
+        newt = re.sub(r"(?s)\{\{([^{}]|\}[^}])*?\}\}", "", newt)
         #print("After templ elim: {!r}".format(newt))
         if newt == outside:
             break
@@ -281,8 +283,7 @@ for k, v in redirects.items():
         # print("{} redirects to non-existent template {}".format(k, v))
         continue
     if k in templates:
-        if k != v:
-            print("{} -> {} is redirect but already in templates".format(k, v))
+        # print("{} -> {} is redirect but already in templates".format(k, v))
         continue
     templates[k] = templates[v]
     if v in need_pre_expand:
@@ -588,7 +589,7 @@ def expand_listed_templates(title, text, expand_templates):
     def save_value(kind, args):
         """Saves a value of a particular kind and returns a unique magic
         cookie for it."""
-        assert kind in ("T", "A", "P")  # Template, arg, parserfn
+        assert kind in ("T", "A", "P", "L")  # Template, arg, parserfn, link
         assert isinstance(args, (list, tuple))
         args = tuple(args)
         v = (kind, args)
@@ -611,37 +612,43 @@ def expand_listed_templates(title, text, expand_templates):
         functions."""
         orig = m.group(1)
         args = orig.split("|")
-        ofs = args[0].find(":")
+        name = args[0].strip()
+        if name[:10].lower() == "safesubst:":
+            name = name[10:]
+        ofs = name.find(":")
         if ofs > 0:
             # It might be a parser function call
-            fn_name = canonicalize_parserfn_name(args[0][:ofs])
+            fn_name = canonicalize_parserfn_name(name[:ofs])
             # Check if it is a recognized parser function name
             if fn_name in PARSER_FUNCTIONS:
-                return save_value("P", [fn_name, args[0][ofs + 1:]] + args[1:])
+                return save_value("P", [fn_name, name[ofs + 1:]] + args[1:])
         # As a compatibility feature, recognize parser functions also as the
         # first argument of a template, whether there are more arguments or
         # not.  This is used for magic words and some parser functions have
         # an implicit compatibility template that essentially does this.
-        fn_name = canonicalize_parserfn_name(args[0])
+        fn_name = canonicalize_parserfn_name(name)
         if fn_name in PARSER_FUNCTIONS:
             return save_value("P", [fn_name] + args)
         # Otherwise it is a normal template expansion
         return save_value("T", args)
+
+    def repl_link(m):
+        """Replacement function for links [[...]]."""
+        orig = m.group(1)
+        return save_value("L", (orig,))
 
     def encode(text):
         """Encode all templates, template arguments, and parser function calls
         in the text, from innermost to outermost."""
         while True:
             prev = text
-            # XXX encode [[ ... | ... ]] - otherwise it can split template
-            # arguments.  We do nothing but expand arguments for these at this
-            # stage.
+            text = re.sub(r"\[\[([^][{}]+)\]\]", repl_link, text)
             while True:
+                prev2 = text
                 text = re.sub(r"(?s)\{\{\{(([^{}]|\}[^}]|\}\}[^}])+?)\}\}\}",
-                              repl_arg, prev)
-                if text == prev:
+                              repl_arg, text)
+                if text == prev2:
                     break
-                prev = text
             text = re.sub(r"(?s)\{\{(([^{}]|\}[^}])+?)\}\}",
                           repl_templ, text)
             if text == prev:
@@ -742,7 +749,7 @@ def expand_listed_templates(title, text, expand_templates):
 
                 body = templates[name]
                 encoded_body = encode(body)
-                t = expand(encoded_body, argmap, stack)
+                t = expand(encoded_body, ht, stack)
                 stack.pop()  # template name
                 parts.append(t)
             elif kind == "A":
@@ -753,39 +760,49 @@ def expand_listed_templates(title, text, expand_templates):
                 stack.append("ARG_NAME")
                 k = expand(args[0], argmap, stack).strip()
                 stack.pop()
+                stack.append("ARG{}-DEFVAL".format(k))
+                if len(args) >= 2:
+                    defval = expand(args[1], argmap, stack)
+                else:
+                    defval = None
+                stack.pop()
                 if k.isdigit():
                     k = int(k)
-                if k in argmap:
-                    v = argmap[k]  # Already expanded
+                v = argmap.get(k, defval)
+                if v is not None:
                     parts.append(v)
-                elif len(args) > 1:
-                    stack.append("ARG{}-DEFVAL".format(k))
-                    v = expand(args[1], argmap, stack)
-                    stack.pop()
-                    parts.append(v)
-                else:
-                    parts.append("{{{" + str(k) + "}}}")
+                    continue
+                # The argument is not defined (or name is empty)
+                assert defval is None
+                arg = "{{{" + str(k) + "}}}"
+                parts.append(arg)
             elif kind == "P":
                 # Parser function call
-                expanded_args = []
                 stack.append("PARSERFN_FN")
                 fn_name = expand(args[0], argmap, stack)
                 stack.pop()
                 fn_name = canonicalize_parserfn_name(fn_name)
                 stack.append(fn_name)
+                expanded_args = []
                 for i in range(1, len(args)):
                     arg = args[i]
                     stack.append("ARG{}".format(i))
                     arg = expand(arg, argmap, stack)
                     stack.pop()
                     expanded_args.append(arg)
-                fn = PARSER_FUNCTIONS[fn_name]
-                ret = fn(title, fn_name, expanded_args, stack)
+                ret = call_parser_function(fn_name, expanded_args, title, stack)
                 stack.pop()  # fn_name
                 # XXX if lua code calls frame:preprocess(), then we should
                 # apparently encode and expand the return value, similarly to
                 # template bodies (without argument expansion)
                 parts.append(ret)
+            elif kind == "L":
+                # Link to another page
+                content = args[0]
+                stack.append("[[link]]")
+                content = expand(content, argmap, stack)
+                stack.pop()
+                parts.append("[[" + content + "]]")
             else:
                 print("{}: unsupported cookie kind {!r} in {}"
                       "".format(title, kind, m.group(0)))

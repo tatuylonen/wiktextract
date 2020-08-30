@@ -3,3 +3,4 @@ wikitextparser>=0.22.0
 nose
 requests
 lupa
+dateparser
