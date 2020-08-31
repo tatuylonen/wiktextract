@@ -572,6 +572,28 @@ def analyze_node(node):
         analyze_node(x)
 
 
+class ExpandCtx(object):
+    __slots__ = (
+        "title",         # current page title
+        "template_name", # name of template currently being expanded
+        "templates",     # dict temlate name -> definition
+        "template_fn",   # None or function to expand template
+        "invoke_fn",     # None or function to invoke Lua macro
+    )
+    def __init__(self, title, templates, template_fn, invoke_fn):
+        """Creates an expansion context used for expanding some or all
+        templates from WikiText."""
+        assert isinstance(title, str)
+        assert isinstance(templates, dict)
+        assert template_fn is None or callable(template_fn)
+        assert invoke_fn is None or callable(invoke_fn)
+        self.title = title
+        self.template_name = None
+        self.templates = templates
+        self.template_fn = template_fn
+        self.invoke_fn = invoke_fn
+
+
 def expand_listed_templates(title, text, expand_templates):
     """Expands templates whose names are in ``template_names`` and their
     arguments (including also all other templates referenced from the
@@ -580,6 +602,7 @@ def expand_listed_templates(title, text, expand_templates):
     assert isinstance(title, str)
     assert isinstance(text, str)
     assert isinstance(expand_templates, (set, dict))
+    ctx = ExpandCtx(title, templates, None, None)  # XXX template_fn, invoke_fn
     # Magic prefix for encoding already processed templates and template
     # arguments
     magic = base64.b64encode(os.urandom(16), altchars=b"#!").decode("utf-8")
@@ -645,7 +668,7 @@ def expand_listed_templates(title, text, expand_templates):
             text = re.sub(r"\[\[([^][{}]+)\]\]", repl_link, text)
             while True:
                 prev2 = text
-                text = re.sub(r"(?s)\{\{\{(([^{}]|\}[^}]|\}\}[^}])+?)\}\}\}",
+                text = re.sub(r"(?s)\{\{\{(([^{}]|\}[^}]|\}\}[^}])*?)\}\}\}",
                               repl_arg, text)
                 if text == prev2:
                     break
@@ -717,16 +740,18 @@ def expand_listed_templates(title, text, expand_templates):
                     else:
                         k = arg[:ofs].strip()
                         if k.isdigit():
-                             k = int(k)
-                             if k < 1 or k > 1000:
-                                 print("{}: invalid argument number {}"
-                                       "".format(title, k))
-                                 k = 1000
+                            k = int(k)
+                            if k < 1 or k > 1000:
+                                print("{}: invalid argument number {}"
+                                      "".format(title, k))
+                                k = 1000
+                            if num <= k:
+                                num = k + 1
                         arg = arg[ofs + 1:]
                     ht[k] = arg
 
                 # Check if this template is defined
-                if name not in templates:
+                if name not in ctx.templates:
                     stack.pop()
                     print("{}: uses undefined template {!r} at {}"
                           "".format(title, tname, stack))
@@ -747,9 +772,16 @@ def expand_listed_templates(title, text, expand_templates):
                     parts.append(unexpanded_template(tname, ht))
                     continue
 
-                body = templates[name]
-                encoded_body = encode(body)
-                t = expand(encoded_body, ht, stack)
+                # Expand the body, either using ``template_fn`` or using
+                # normal template expansion
+                if ctx.template_fn is not None:
+                    t = template_fn(name, ht)
+                else:
+                    body = ctx.templates[name]
+                    encoded_body = encode(body)
+                    t = expand(encoded_body, ht, stack)
+
+                assert isinstance(t, str)
                 stack.pop()  # template name
                 parts.append(t)
             elif kind == "A":
@@ -790,7 +822,11 @@ def expand_listed_templates(title, text, expand_templates):
                     arg = expand(arg, argmap, stack)
                     stack.pop()
                     expanded_args.append(arg)
-                ret = call_parser_function(fn_name, expanded_args, title, stack)
+                if fn_name == "#invoke" and ctx.invoke_fn is not None:
+                    ret = ctx.invoke_fn(fn_name, expanded_args, stack)
+                else:
+                    ret = call_parser_function(fn_name, expanded_args,
+                                               title, stack)
                 stack.pop()  # fn_name
                 # XXX if lua code calls frame:preprocess(), then we should
                 # apparently encode and expand the return value, similarly to

@@ -22,9 +22,10 @@ def if_fn(title, fn_name, args, stack):
     else:
         while len(args) < 3:
             args.append("")
-    if args[0].isspace():
-        return args[2].strip()
-    return args[1].strip()
+    v = args[0].strip()
+    if v:
+        return args[1].strip()
+    return args[2].strip()
 
 
 def ifeq_fn(title, fn_name, args, stack):
@@ -309,6 +310,26 @@ def padleft_fn(title, fn_name, args, stack):
     return v
 
 
+def padright_fn(title, fn_name, args, stack):
+    """Implements the ns parser function."""
+    if len(args) < 2:
+        print("{}: too few arguments for {}"
+              "".format(title, fn_name))
+    v = args[0] if len(args) >= 1 else ""
+    cnt = args[1].strip() if len(args) >= 2 else "0"
+    pad = args[2] if len(args) >= 3 and args[2] else "0"
+    if not cnt.isdigit():
+        print("{}: pad length is not integer: {!r}".format(title, cnt))
+        cnt = 0
+    else:
+        cnt = int(cnt)
+    if cnt - len(v) > len(pad):
+        v = (pad * ((cnt - len(v)) // len(pad)))
+    if len(v) < cnt:
+        v = pad[:cnt - len(v)] + v
+    return v
+
+
 def unimplemented_fn(title, fn_name, args, stack):
     print("{}: unimplemented parserfn {} at {}".format(title, fn_name, stack))
     return "{{" + fn_name + ":" + "|".join(args) + "}}"
@@ -403,7 +424,7 @@ PARSER_FUNCTIONS = {
     "#dateformat": dateformat_fn,
     "#formatdate": dateformat_fn,
     "padleft": padleft_fn,
-    "padright": unimplemented_fn,
+    "padright": padright_fn,
     "plural": unimplemented_fn,
     "#time": unimplemented_fn,
     "#timel": unimplemented_fn,
