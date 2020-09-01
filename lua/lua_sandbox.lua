@@ -95,8 +95,8 @@ function mw_title.getCurrentTitle()
 end
 
 mw_text = {
-   -- decode
-   -- encode
+   -- decode (set from Python)
+   -- encode (set from Python)
    -- jsonDecode
    -- jsonEncode
    -- killMarkers
@@ -168,7 +168,7 @@ mw = {
   logObject = mw_logObject,
   -- message.*
   -- site.*
-  -- text = mw_text,
+  text = mw_text,
   title = mw_title,
   -- uri.*
   -- ustring = ustring,
@@ -213,6 +213,12 @@ frame = {
 function lua_set_loader(loader)
   python_loader.call = loader
   ustring = require("ustring.ustring")
+
+end
+
+function lua_set_fns(mw_text_decode, mw_text_encode)
+  mw.text.decode = mw_text_decode
+  mw.text.encode = mw_text_encode
 end
 
 -- This function implements the {{#invoke:...}} parser function.

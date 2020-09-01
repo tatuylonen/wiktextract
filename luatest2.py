@@ -12,6 +12,7 @@ import base64
 import textwrap
 import os.path
 import collections
+import html.entities
 import lupa
 from lupa import LuaRuntime
 
@@ -25,7 +26,7 @@ from wiktextract.wikiparserfns import PARSER_FUNCTIONS, call_parser_function
 
 # List of search paths for Lua libraries.
 builtin_lua_search_paths = [
-    "mediawiki-extensions-Scribunto/includes/engines/LuaCommon/lualib",
+    "lua/mediawiki-extensions-Scribunto/includes/engines/LuaCommon/lualib",
 ]
 
 MAX_LEN = 75
@@ -233,6 +234,8 @@ for tag, title, text in specials:
         redirects[title] = text
         continue
     if tag == "Scribunto":
+        text = html.unescape(text)
+        modules[title] = text
         continue
     if title.endswith("/testcases"):
         continue
@@ -594,7 +597,7 @@ class ExpandCtx(object):
         self.invoke_fn = invoke_fn
 
 
-def expand_listed_templates(title, text, expand_templates):
+def expand_listed_templates(title, text, expand_templates, invoke_fn):
     """Expands templates whose names are in ``template_names`` and their
     arguments (including also all other templates referenced from the
     arguments).  This may call Lua code.  This returns text with the named
@@ -602,7 +605,8 @@ def expand_listed_templates(title, text, expand_templates):
     assert isinstance(title, str)
     assert isinstance(text, str)
     assert isinstance(expand_templates, (set, dict))
-    ctx = ExpandCtx(title, templates, None, None)  # XXX template_fn, invoke_fn
+    assert callable(invoke_fn)
+    ctx = ExpandCtx(title, templates, None, invoke_fn)  # template_fn
     # Magic prefix for encoding already processed templates and template
     # arguments
     magic = base64.b64encode(os.urandom(16), altchars=b"#!").decode("utf-8")
@@ -859,11 +863,119 @@ def expand_listed_templates(title, text, expand_templates):
     return expanded
 
 
+def lua_loader(modname):
+    """This function is called from the Lua sandbox to load a Lua module.
+    This will load it from either the user-defined modules on special
+    pages or from a built-in module in the file system.  This returns None
+    if the module could not be loaded."""
+    if modname.startswith("Module:"):
+        modname = modname[7:]
+    if modname in modules:
+        return modules[modname]
+    path = modname
+    path = re.sub(r":", "/", path)
+    path = re.sub(r" ", "_", path)
+    path = re.sub(r"\.", "/", path)
+    path = re.sub(r"//+", "/", path)
+    path = re.sub(r"\.\.", ".", path)
+    if path.startswith("/"):
+        path = path[1:]
+    path += ".lua"
+    for prefix in builtin_lua_search_paths:
+        p = prefix + "/" + path
+        if os.path.isfile(p):
+            with open(p, "r") as f:
+                data = f.read()
+            return data
+    print("MODULE NOT FOUND:", modname)
+    return None
+
+
+def mw_text_decode(text, decodeNamedEntities=False):
+    """Implements the mw.text.decode function for Lua code."""
+    if decodeNamedEntities:
+        return html.unescape(text)
+
+    # Otherwise decode only selected entities
+    parts = []
+    pos = 0
+    for m in re.finditer(r"&(lt|gt|amp|quot|nbsp);", text):
+        if pos < m.start():
+            parts.append(text[pos:m.start()])
+        pos = m.end()
+        tag = m.group(1)
+        if tag == "lt":
+            parts.append("<")
+        elif tag == "gt":
+            parts.append(">")
+        elif tag == "amp":
+            parts.append("&")
+        elif tag == "quot":
+            parts.append('"')
+        elif tag == "nbsp":
+            parts.append("\xa0")
+        else:
+            assert False
+    parts.append(text[pos:])
+    return "".join(parts)
+
+def mw_text_encode(text, charset='<>&\xa0'):
+    """Implements the mw.text.encode function for Lua code."""
+    parts = []
+    for ch in text:
+        if ch in charset:
+            chn = ord(ch)
+            if chn in html.entities.codepoint2name:
+                parts.append("&" + html.entities.codepoint2name.get(ch) + ";")
+            else:
+                parts.append(ch)
+        else:
+            parts.append(ch)
+    return "".join(parts)
+
+
+# Load Lua sandbox code.
+lua_sandbox = open("lua/lua_sandbox.lua").read()
+
+def filter_attribute_access(obj, attr_name, is_setting):
+    print("FILTER:", attr_name, is_setting)
+    if isinstance(attr_name, unicode):
+        if not attr_name.startswith("_"):
+            return attr_name
+    raise AttributeError("access denied")
+
+lua = LuaRuntime(unpack_returned_tuples=True,
+                 register_eval=False,
+                 attribute_filter=filter_attribute_access)
+lua.execute(lua_sandbox)
+lua.eval("lua_set_loader")(lua_loader)
+lua.eval("lua_set_fns")(mw_text_decode,
+                        mw_text_encode)
+
+
+def invoke_fn(fn_name, args, stack):
+    """This is called to expand a #invoke parser function."""
+    print("#invoke", args, stack)
+    if len(args) < 2:
+        print("{} {}: too few arguments at {}"
+              "".format(fn_name, args, stack))
+        return "{{" + args[0] + ":" + "|".join(args[1:]) + "}}"
+
+    # Get module and function name
+    modname = args[0]
+    modfn = args[1]
+
+    # Call the Lua function in the given module
+    text = lua.eval("lua_invoke")(modname, modfn, args)
+    text = maybe_automatic_newline(text)
+    return text
+
+
 # Process test page
 page = open("tests/animal.txt").read()
 page = wikitext.preprocess_text(page)
 print("=== Expanding templates")
-page = expand_listed_templates("animal", page, templates)
+page = expand_listed_templates("animal", page, templates, invoke_fn)
 # XXX expand only need_pre_expand here (now expanding all for testing purposes)
 print(page)
 print("=== Parsing")
@@ -905,50 +1017,6 @@ def iter_sub(regexp, fn, text):
             break
     return text
 
-def lua_loader(modname):
-
-    """This function is called from the Lua sandbox to load a Lua module.
-    This will load it from either the user-defined modules on special
-    pages or from a built-in module in the file system.  This returns None
-    if the module could not be loaded."""
-    if modname.startswith("Module:"):
-        modname = modname[7:]
-    if modname in modules:
-        return modules[modname]
-    path = modname
-    path = re.sub(r":", "/", path)
-    path = re.sub(r" ", "_", path)
-    path = re.sub(r"\.", "/", path)
-    path = re.sub(r"//+", "/", path)
-    path = re.sub(r"\.\.", ".", path)
-    if path.startswith("/"):
-        path = path[1:]
-    path += ".lua"
-    for prefix in builtin_lua_search_paths:
-        p = prefix + "/" + path
-        if os.path.isfile(p):
-            with open(p, "r") as f:
-                data = f.read()
-            return data
-    print("MODULE NOT FOUND:", modname)
-    return None
-
-# Load Lua sandbox code.
-lua_sandbox = open("lua_sandbox.lua").read()
-
-def filter_attribute_access(obj, attr_name, is_setting):
-    print("FILTER:", attr_name, is_setting)
-    if isinstance(attr_name, unicode):
-        if not attr_name.startswith("_"):
-            return attr_name
-    raise AttributeError("access denied")
-
-lua = LuaRuntime(unpack_returned_tuples=True,
-                 register_eval=False,
-                 attribute_filter=filter_attribute_access)
-lua.execute(lua_sandbox)
-lua.eval("lua_set_loader")(lua_loader)
-
 def invoke_script(name, ht):
     if name not in modules:
         print("UNRECOGNIZED SCRIPT:", name)
@@ -956,7 +1024,7 @@ def invoke_script(name, ht):
     if name.find('"') >= 0:
         print("Invalid lua module name:", name)
         return "<<INVALID LUA MODULE NAME: {}>>".format(name)
-    fn_name = ht.get("1")
+    fn_name = ht.get(1)
     if not fn_name or fn_name.find('"') >= 0:
         print("Invalid function name in lua call:", fn_name)
         return "<<INVALID FUNCTION NAME: {}>>".format(fn_name)
