@@ -967,7 +967,6 @@ def invoke_fn(fn_name, args, stack):
 
     # Call the Lua function in the given module
     text = lua.eval("lua_invoke")(modname, modfn, args)
-    text = maybe_automatic_newline(text)
     return text
 
 
