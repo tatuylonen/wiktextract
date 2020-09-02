@@ -102,10 +102,10 @@ mw_text = {
    -- killMarkers
    -- listToText
    -- nowiki
-   -- split below
-   -- gsplit below
+   -- split (see below)
+   -- gsplit (see below)
    -- tag
-   -- trim below
+   -- trim (see below)
    -- truncate
    -- unstripNoWiki
    -- unstrip
@@ -148,6 +148,40 @@ function mw_text.gsplit(text, pattern, plain)
   end, nil, nil
 end
 
+mw_language = {
+   -- fetchLanguageName(code, inLanguage)
+   -- fetchLanguageNames(inLanguage=None, include=None)
+   -- getContentLanguage()
+   -- getFallbacksFor(code)
+   -- isKnownLanguageTag(code)  -- assigned in lua_set_fns
+   -- isSupportedLanguage(code)
+   -- isValidBuiltInCode(code)
+   -- isValidCode(code)
+   -- new(code)
+   -- :getCode()
+   -- :getFallbackLanguages()
+   -- :isRTL()
+   -- :lc(s)
+   -- :lcfirst(s)
+   -- :uc(s)
+   -- :ucfirst(s)
+   -- :caseFold(s)
+   -- :formatNum(n, options=None)
+   -- :formatdate(format, timestamp, local)
+   -- :formatDuration(seconds, allowedIntervals=None)
+   -- :parseFormattedNumber(s)
+   -- :convertPlural(n, forms)
+   -- :plural(n, forms)
+   -- :convertGrammar(word, case)
+   -- :grammar(case, word)
+   -- :gender(what, masculine, feminine, neutral) / :gender(what, {masculine, feminine, neutral})
+   -- :getArrow(direction)
+   -- :getDir()
+   -- :getDirMark(opposite)
+   -- :getDirMarkEntity(opposite)
+   -- :getDurationIntervals(seconds, allowedIntervals)
+}
+
 function mw_dumpObject(obj)
   print("MW_DUMPOBJECT")
 end
@@ -162,7 +196,7 @@ mw = {
   -- html.*
   -- incrementExpensiveFunctionCount
   -- isSubsting
-  -- language.*
+  language = mw_language,
   loadData = mw_loadData,
   log = mw_log,
   logObject = mw_logObject,
@@ -171,7 +205,7 @@ mw = {
   text = mw_text,
   title = mw_title,
   -- uri.*
-  -- ustring = ustring,
+  -- ustring = ustring,  -- assigned in lua-set-loader
 }
 
 function page_getTitle(self)
@@ -179,55 +213,38 @@ function page_getTitle(self)
   return "TESTWORD"
 end
 
-page_frame = {
-  getTitle = page_getTitle,
-  args = {"talossa"},
-}
-
-function frame_getTitle(self)
-  print("frame_getTitle called")
-  return "Module:IPA"
-end
-
-function frame_getParent(self)
-  print("frame_getParent called")
-  return page_frame
-end
-
-frame = {
-   -- argumentPairs NOT USED IN enwiktionary
-   -- callParserFunction used 30
-   -- expandTemplate used 113
-   -- extensionTag used 29
-   -- getArgument NOT USED IN enwiktionary
-  getParent = frame_getParent, -- used 810
-  getTitle = frame_getTitle, -- used 19
-  -- newChild used 12
-  -- newParserValue NOT USED in enwiktionary
-  -- newTemplateParserValue NOT USED in enwiktionary
-  -- preprocess used 67
-}
-
 -- This should be called immediately after loading the sandbox to set the
 -- Python function that will be used for loading Lua modules.
 function lua_set_loader(loader)
   python_loader.call = loader
-  ustring = require("ustring.ustring")
-
+  ustring = require("ustring:ustring")
+  mw.ustring = ustring
 end
 
-function lua_set_fns(mw_text_decode, mw_text_encode)
+function lua_set_fns(mw_text_decode, mw_text_encode,
+                     mw_language_is_known_language_tag)
   mw.text.decode = mw_text_decode
   mw.text.encode = mw_text_encode
+  mw.language.isKnownLanguageTag = mw_language_is_known_language_tag
 end
 
 -- This function implements the {{#invoke:...}} parser function.
 -- XXX need better handling of parent frame and frame
-function lua_invoke(mod_name, fn_name, args)
+-- This returns (true, value) if successful, (false, error) if exception.
+function lua_invoke(mod_name, fn_name, frame)
   mod = require(mod_name)
   fn = mod[fn_name]
-  frame["args"] = args
-  return fn(frame)
+  frame.argumentPairs = function () return pairs(frame.args) end
+  pframe = frame:getParent()
+  if pframe ~= nil then
+     pframe.argumentPairs = function () return pairs(pframe.args) end
+  end
+  mw.getCurrentFrame = function() return frame end
+  if fn == nil then
+     return {false, "\tNo function '" .. fn_name .. "' in module " .. mod_name}
+  else
+     return xpcall(function() return fn(frame) end, debug.traceback)
+  end
 end
 
 env = {}

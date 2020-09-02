@@ -9,8 +9,9 @@ import html
 import json
 import time
 import base64
-import textwrap
 import os.path
+import textwrap
+import traceback
 import collections
 import html.entities
 import lupa
@@ -19,6 +20,7 @@ from lupa import LuaRuntime
 from wiktextract import wikitext
 from wiktextract.wikitext import WikiNode, NodeKind
 from wiktextract.wikiparserfns import PARSER_FUNCTIONS, call_parser_function
+from wiktextract import languages
 
 #import pstats
 #import cProfile
@@ -35,6 +37,9 @@ langs = collections.defaultdict(int)
 
 PAIRED_HTML_TAGS = set(k for k, v in wikitext.ALLOWED_HTML_TAGS.items()
                        if not v.get("no-end-tag") and not v.get("close-next"))
+
+KNOWN_LANGUAGE_TAGS = set(x["code"] for x in languages.all_languages
+                          if x.get("code") and x.get("name"))
 
 
 def canonicalize_template_name(name):
@@ -707,10 +712,11 @@ def expand_listed_templates(title, text, expand_templates, invoke_fn):
         assert isinstance(args, (list, tuple))
         return "{{" + fn_name + ":" + "|".join(args) + "}}"
 
-    def expand(coded, argmap, stack):
+    def expand(coded, argmap, stack, parent):
         assert isinstance(coded, str)
         assert isinstance(argmap, dict)
         assert isinstance(stack, list)
+        assert isinstance(parent, (tuple, type(None)))
         parts = []
         pos = 0
         for m in re.finditer(r"!{}(.)(\d+)!".format(magic), coded):
@@ -726,7 +732,7 @@ def expand_listed_templates(title, text, expand_templates, invoke_fn):
             if kind == "T":
                 # Template transclusion
                 stack.append("TEMPLATE_NAME")
-                tname = expand(args[0], argmap, stack)
+                tname = expand(args[0], argmap, stack, parent)
                 stack.pop()
                 name = canonicalize_template_name(tname)
                 stack.append(name)
@@ -735,7 +741,7 @@ def expand_listed_templates(title, text, expand_templates, invoke_fn):
                 for i in range(1, len(args)):
                     arg = args[i]
                     stack.append("ARG{}".format(i))
-                    arg = expand(arg, argmap, stack)
+                    arg = expand(arg, argmap, stack, parent)
                     stack.pop()
                     ofs = arg.find("=")
                     if ofs <= 0:
@@ -783,7 +789,8 @@ def expand_listed_templates(title, text, expand_templates, invoke_fn):
                 else:
                     body = ctx.templates[name]
                     encoded_body = encode(body)
-                    t = expand(encoded_body, ht, stack)
+                    t = expand(encoded_body, ht, stack,
+                               (name, ht))
 
                 assert isinstance(t, str)
                 stack.pop()  # template name
@@ -794,11 +801,11 @@ def expand_listed_templates(title, text, expand_templates, invoke_fn):
                     print("{}: too many args ({}) in argument reference {!r}"
                           "".format(title, len(args), args))
                 stack.append("ARG_NAME")
-                k = expand(args[0], argmap, stack).strip()
+                k = expand(args[0], argmap, stack, parent).strip()
                 stack.pop()
                 stack.append("ARG{}-DEFVAL".format(k))
                 if len(args) >= 2:
-                    defval = expand(args[1], argmap, stack)
+                    defval = expand(args[1], argmap, stack, parent)
                 else:
                     defval = None
                 stack.pop()
@@ -815,7 +822,7 @@ def expand_listed_templates(title, text, expand_templates, invoke_fn):
             elif kind == "P":
                 # Parser function call
                 stack.append("PARSERFN_FN")
-                fn_name = expand(args[0], argmap, stack)
+                fn_name = expand(args[0], argmap, stack, parent)
                 stack.pop()
                 fn_name = canonicalize_parserfn_name(fn_name)
                 stack.append(fn_name)
@@ -823,11 +830,11 @@ def expand_listed_templates(title, text, expand_templates, invoke_fn):
                 for i in range(1, len(args)):
                     arg = args[i]
                     stack.append("ARG{}".format(i))
-                    arg = expand(arg, argmap, stack)
+                    arg = expand(arg, argmap, stack, parent)
                     stack.pop()
                     expanded_args.append(arg)
                 if fn_name == "#invoke" and ctx.invoke_fn is not None:
-                    ret = ctx.invoke_fn(fn_name, expanded_args, stack)
+                    ret = ctx.invoke_fn(expanded_args, stack, parent)
                 else:
                     ret = call_parser_function(fn_name, expanded_args,
                                                title, stack)
@@ -840,7 +847,7 @@ def expand_listed_templates(title, text, expand_templates, invoke_fn):
                 # Link to another page
                 content = args[0]
                 stack.append("[[link]]")
-                content = expand(content, argmap, stack)
+                content = expand(content, argmap, stack, parent)
                 stack.pop()
                 parts.append("[[" + content + "]]")
             else:
@@ -858,7 +865,7 @@ def expand_listed_templates(title, text, expand_templates, invoke_fn):
     # Recursively expand the selected templates.  This is an outside-in
     # operation.
     print("Expanding")
-    expanded = expand(encoded, {}, [title])
+    expanded = expand(encoded, {}, [title], None)
 
     return expanded
 
@@ -868,6 +875,7 @@ def lua_loader(modname):
     This will load it from either the user-defined modules on special
     pages or from a built-in module in the file system.  This returns None
     if the module could not be loaded."""
+    print("Loading", modname)
     if modname.startswith("Module:"):
         modname = modname[7:]
     if modname in modules:
@@ -875,7 +883,7 @@ def lua_loader(modname):
     path = modname
     path = re.sub(r":", "/", path)
     path = re.sub(r" ", "_", path)
-    path = re.sub(r"\.", "/", path)
+    # path = re.sub(r"\.", "/", path)
     path = re.sub(r"//+", "/", path)
     path = re.sub(r"\.\.", ".", path)
     if path.startswith("/"):
@@ -934,6 +942,11 @@ def mw_text_encode(text, charset='<>&\xa0'):
     return "".join(parts)
 
 
+def mw_language_is_known_language_tag(code):
+    """Implements the mw.language.isKnownLanguageTag function for Lua code."""
+    print("in isKnownLanguageTag")
+    return code in KNOWN_LANGUAGE_TAGS
+
 # Load Lua sandbox code.
 lua_sandbox = open("lua/lua_sandbox.lua").read()
 
@@ -950,31 +963,116 @@ lua = LuaRuntime(unpack_returned_tuples=True,
 lua.execute(lua_sandbox)
 lua.eval("lua_set_loader")(lua_loader)
 lua.eval("lua_set_fns")(mw_text_decode,
-                        mw_text_encode)
+                        mw_text_encode,
+                        mw_language_is_known_language_tag)
 
 
-def invoke_fn(fn_name, args, stack):
+def invoke_fn(invoke_args, stack, parent):
     """This is called to expand a #invoke parser function."""
-    print("#invoke", args, stack)
-    if len(args) < 2:
-        print("{} {}: too few arguments at {}"
-              "".format(fn_name, args, stack))
-        return "{{" + args[0] + ":" + "|".join(args[1:]) + "}}"
+    assert isinstance(invoke_args, (list, tuple))
+    assert isinstance(stack, list)
+    assert isinstance(parent, (tuple, type(None)))
+    print("#invoke", invoke_args, "stack", stack)
+    if len(invoke_args) < 2:
+        print("#invoke {}: too few arguments at {}"
+              "".format(invoke_args, stack))
+        return "{{" + invoke_args[0] + ":" + "|".join(invoke_args[1:]) + "}}"
 
     # Get module and function name
-    modname = args[0]
-    modfn = args[1]
+    modname = invoke_args[0]
+    modfn = invoke_args[1]
+
+    def getArgument(frame_args, k):
+        assert isinstance(frame_args, dict)
+        v = frame_args[k]
+        if v is None:
+            return v
+        obj = {"expand": lambda obj: v}
+        return lua.table_from(obj)
+
+    def value_with_expand(frame, expander, x):
+        assert isinstance(frame, dict)
+        assert isinstance(expander, str)
+        assert isinstance(x, str)
+        obj = {"expand": lambda obj: frame[expander](x)}
+        return lua.table_from(obj)
+
+    def make_frame(pframe, title, args):
+        assert pframe is None or isinstance(pframe, dict)
+        assert isinstance(title, str)
+        assert isinstance(args, (list, tuple, dict))
+        # Convert args to a dictionary with default value None
+        if isinstance(args, dict):
+            frame_args = args
+        else:
+            frame_args = {}
+            for i in range(len(args)):
+                frame_args[i + 1] = args[i]
+        frame_args = lua.table_from(frame_args)
+
+        # Create frame object as dictionary with default value None
+        frame = collections.defaultdict(lambda: None)
+        frame["getParent"] = lambda self: pframe
+        frame["getTitle"] = lambda self: title
+        frame["args"] = frame_args
+        frame["getArgument"] = lambda self, x: getArgument(frame_args, x)
+        frame["newParserValue"] = \
+            lambda self, x: value_with_expand(self, "preprocess", x)
+        frame["newTemplateParserValue"] = \
+            lambda self, x: value_with_expand(self, "expand", x)
+        frame["newChild"] = lambda self, title="", args="": \
+            make_frame(self, title, args)
+        # argumentPairs is set in lua_sandbox.lua
+        # XXX callParserFunction(name=None, args=None) used 30
+        # XXX expandTemplate(title=None, args=None) used 113
+        # XXX extensionTag(name=None, content=None, args=None) used 29
+        # XXX preprocess(text=None) used 67
+        return frame
+
+    # Create parent frame (for page being processed) and current frame
+    # (for module being called)
+    if parent is not None:
+        print("INVOKE_FN PARENT:", parent)
+        page_title, page_args = parent
+        pframe = make_frame(None, page_title, page_args)
+    else:
+        pframe = None
+    frame = make_frame(pframe, modname, invoke_args[2:])
 
     # Call the Lua function in the given module
-    text = lua.eval("lua_invoke")(modname, modfn, args)
-    return text
+    ok, text = lua.eval("lua_invoke")(modname, modfn, frame)
+    if ok:
+        return str(text)
+    print("LUA ERROR IN #invoke {} at {}".format(invoke_args, stack))
+    if isinstance(text, Exception):
+        parts = [str(text)]
+        lst = traceback.format_exception(etype=type(text),
+                                         value=text,
+                                         tb=text.__traceback__)
+        for x in lst:
+            parts.append("\t" + x.strip())
+        text = "\n".join(parts)
+    elif not isinstance(text, str):
+        text = str(text)
+    parts = []
+    in_traceback = 0
+    for line in text.split("\n"):
+        s = line.strip()
+        if s == "[C]: in function 'xpcall'":
+            break
+        parts.append(line)
+    print("\n".join(parts))
+    return ("&lt;&lt;LUA EXECUTION ERROR in {}.{}&gt;&gt;"
+            "".format(modname, modfn))
 
 
 # Process test page
 page = open("tests/animal.txt").read()
+page_title = "animal"
 page = wikitext.preprocess_text(page)
 print("=== Expanding templates")
-page = expand_listed_templates("animal", page, templates, invoke_fn)
+page = expand_listed_templates(page_title, page, templates, invoke_fn)
+
 # XXX expand only need_pre_expand here (now expanding all for testing purposes)
 print(page)
 print("=== Parsing")
