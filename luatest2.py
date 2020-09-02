@@ -972,7 +972,7 @@ def invoke_fn(invoke_args, stack, parent):
     assert isinstance(invoke_args, (list, tuple))
     assert isinstance(stack, list)
     assert isinstance(parent, (tuple, type(None)))
-    print("#invoke", invoke_args, "stack", stack)
+    print("#invoke", invoke_args, "parent", parent, "stack", stack)
     if len(invoke_args) < 2:
         print("#invoke {}: too few arguments at {}"
               "".format(invoke_args, stack))
@@ -1032,7 +1032,6 @@ def invoke_fn(invoke_args, stack, parent):
     # Create parent frame (for page being processed) and current frame
     # (for module being called)
     if parent is not None:
-        print("INVOKE_FN PARENT:", parent)
         page_title, page_args = parent
         pframe = make_frame(None, page_title, page_args)
     else:
@@ -1246,6 +1245,13 @@ for m in re.finditer(r"""[^a-zA-Z0-9._]([a-zA-Z0-9._]+)""", all_defs):
 for k, v in sorted(cnts.items(), key=lambda x: x[1], reverse=True):
     print(v, k)
 
-# XXX analyze_template should inspect table start, table end, table elements
-# and list items separately and limit their spread by whether they occur
-# inside a paired table open-close
+# XXX implement mw.title.new (return None if invalid title)
+
+# XXX implement title object .exists property (collect page names in phase 1)
+
+# XXX implement title object .fullText property
+
+# XXX implement mw.uri.decode
+
+# XXX try to reduce unnecessary evaluation of arguments; only evaluate
+# them when actually used
