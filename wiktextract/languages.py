@@ -1,5 +1,7 @@
-# This file is autotically generated from Wiktionary by the
+# This file is automagically generated from Wiktionary by the
 # extract_language_codes.py script.  DO NOT EDIT.
+#
+# This file is distributed under the Wiktionary license terms.
 
 all_languages = [
     {
