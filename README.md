@@ -3,9 +3,11 @@
 This is a utility and Python package for for extracing data from Wiktionary.
 
 **Currently working on this, and the repository may be broken on some
-  days.  New release with major changes expected in August 2020.  This has
-  gotten significantly delayed, and I apologize, but now I finally really
-  should be able to work on this in August.**
+  days.  New release with major changes expected in September 2020.  This has
+  gotten significantly delayed, and I apologize, but now I'm finally able
+  to work on this almost full-time.  I'm trying to make this expand
+  templates and Lua macros, as producing a high-quality result without them
+  has gotten increasingly difficult and is difficult to maintain.**
 
 **Until then, please use the version on pypi (``pip install wiktextract``)
   or look at branches which contain earlier versions.**
