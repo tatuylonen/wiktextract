@@ -19,7 +19,8 @@ from lupa import LuaRuntime
 
 from wiktextract import wikitext
 from wiktextract.wikitext import WikiNode, NodeKind
-from wiktextract.wikiparserfns import PARSER_FUNCTIONS, call_parser_function
+from wiktextract.wikiparserfns import (PARSER_FUNCTIONS, call_parser_function,
+                                       tag_fn)
 from wiktextract import languages
 
 #import pstats
@@ -947,6 +948,28 @@ def mw_language_is_known_language_tag(code):
     print("in isKnownLanguageTag")
     return code in KNOWN_LANGUAGE_TAGS
 
+
+def get_page_info(title):
+    """Retrieves information about a page identified by its table (with
+    namespace prefix.  This returns a lua table with fields "id", "exists",
+    and "redirectTo".  This is used for retrieving information about page
+    titles."""
+    assert isinstance(title, str)
+
+    # XXX actually look at information collected in phase 1 to determine
+    page_id = 0  # XXX collect required info in phase 1
+    page_exists = False  # XXX collect required info in Phase 1
+    redirect_to = redirects.get(title, None)
+
+    # whether the page exists and what its id might be
+    dt = {
+        "id": page_id,
+        "exists": page_exists,
+        "redirectTo": redirect_to,
+    }
+    return lua.table_from(dt)
+
+
 # Load Lua sandbox code.
 lua_sandbox = open("lua/lua_sandbox.lua").read()
 
@@ -964,7 +987,8 @@ lua.execute(lua_sandbox)
 lua.eval("lua_set_loader")(lua_loader)
 lua.eval("lua_set_fns")(mw_text_decode,
                         mw_text_encode,
-                        mw_language_is_known_language_tag)
+                        mw_language_is_known_language_tag,
+                        get_page_info)
 
 
 def invoke_fn(invoke_args, stack, parent):
@@ -972,7 +996,7 @@ def invoke_fn(invoke_args, stack, parent):
     assert isinstance(invoke_args, (list, tuple))
     assert isinstance(stack, list)
     assert isinstance(parent, (tuple, type(None)))
-    print("#invoke", invoke_args, "parent", parent, "stack", stack)
+    # print("#invoke", invoke_args, "parent", parent, "stack", stack)
     if len(invoke_args) < 2:
         print("#invoke {}: too few arguments at {}"
               "".format(invoke_args, stack))
@@ -1010,6 +1034,17 @@ def invoke_fn(invoke_args, stack, parent):
                 frame_args[i + 1] = args[i]
         frame_args = lua.table_from(frame_args)
 
+        def extensionTag(frame, lua_args):
+            #print(list(lua_args.items()))
+            name = lua_args["name"] or ""
+            content = lua_args["content"] or ""
+            args = lua_args["args"] or ""
+            #print("extensionTag frame={} name={} content={} args={}"
+            #      "".format(frame, name, content, args))
+            return tag_fn(title, "#tag", [name, content + "".join(args)],
+                          ["[make_frame]"])
+
+
         # Create frame object as dictionary with default value None
         frame = collections.defaultdict(lambda: None)
         frame["getParent"] = lambda self: pframe
@@ -1022,6 +1057,7 @@ def invoke_fn(invoke_args, stack, parent):
             lambda self, x: value_with_expand(self, "expand", x)
         frame["newChild"] = lambda self, title="", args="": \
             make_frame(self, title, args)
+        frame["extensionTag"] = extensionTag
         # argumentPairs is set in lua_sandbox.lua
         # XXX callParserFunction(name=None, args=None) used 30
         # XXX expandTemplate(title=None, args=None) used 113
@@ -1245,13 +1281,14 @@ for m in re.finditer(r"""[^a-zA-Z0-9._]([a-zA-Z0-9._]+)""", all_defs):
 for k, v in sorted(cnts.items(), key=lambda x: x[1], reverse=True):
     print(v, k)
 
-# XXX implement mw.title.new (return None if invalid title)
-
-# XXX implement title object .exists property (collect page names in phase 1)
-
-# XXX implement title object .fullText property
+# XXX implement mw.language
 
 # XXX implement mw.uri.decode
 
 # XXX try to reduce unnecessary evaluation of arguments; only evaluate
 # them when actually used
+
+# XXX cite-meta calls #invoke for string:sub and gives wrong argument type
+
+# XXX must convert arguments to #invoke to lua strings from Python strings
+# Lua strings e.g. have a gsub method
