@@ -2,6 +2,7 @@
 # extract_language_codes.py script.  DO NOT EDIT.
 #
 # This file is distributed under the Wiktionary license terms.
+# See https://en.wiktionary.org/wiki/Wiktionary:Copyrights
 
 all_languages = [
     {
