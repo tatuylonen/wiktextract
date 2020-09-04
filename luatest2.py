@@ -29,6 +29,7 @@ from wiktextract import languages
 
 # List of search paths for Lua libraries.
 builtin_lua_search_paths = [
+    "lua",
     "lua/mediawiki-extensions-Scribunto/includes/engines/LuaCommon/lualib",
 ]
 
@@ -984,11 +985,11 @@ lua = LuaRuntime(unpack_returned_tuples=True,
                  register_eval=False,
                  attribute_filter=filter_attribute_access)
 lua.execute(lua_sandbox)
-lua.eval("lua_set_loader")(lua_loader)
-lua.eval("lua_set_fns")(mw_text_decode,
-                        mw_text_encode,
-                        mw_language_is_known_language_tag,
-                        get_page_info)
+lua.eval("lua_set_loader")(lua_loader,
+                           mw_text_decode,
+                           mw_text_encode,
+                           mw_language_is_known_language_tag,
+                           get_page_info)
 
 
 def invoke_fn(invoke_args, stack, parent):
