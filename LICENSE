@@ -1,5 +1,9 @@
 NOTE: Some files under lua/mediawiki-extensions-Scribunto have different
-license (GPL).  Also, certain files under tests/ are under Wiktionary license.
+license (GPL), a copy of which can be found in
+lua/mediawiki-extensions-Scribunto/COPYING.  Also, certain files under tests/
+are under Wiktionary license (CC-BY-SA or GFDL at your choice); this is
+indicated in the affected files.  The Wiktionary license text can be found at:
+https://en.wiktionary.org/wiki/Wiktionary:Copyrights.
 
 The license below applies, unless otherwise noted in individual files or
 subdirectories.
