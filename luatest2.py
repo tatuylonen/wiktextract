@@ -861,12 +861,12 @@ def expand_listed_templates(title, text, expand_templates, invoke_fn):
 
     # Encode all template calls, template arguments, and parser function
     # calls on the page.  This is an inside-out operation.
-    print("Encoding")
+    # print("Encoding")
     encoded = encode(text)
 
     # Recursively expand the selected templates.  This is an outside-in
     # operation.
-    print("Expanding")
+    # print("Expanding")
     expanded = expand(encoded, {}, [title], None)
 
     return expanded
@@ -877,7 +877,7 @@ def lua_loader(modname):
     This will load it from either the user-defined modules on special
     pages or from a built-in module in the file system.  This returns None
     if the module could not be loaded."""
-    print("Loading", modname)
+    # print("Loading", modname)
     if modname.startswith("Module:"):
         modname = modname[7:]
     if modname in modules:

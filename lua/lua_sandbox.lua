@@ -46,8 +46,6 @@ function lua_set_loader(loader, mw_text_decode, mw_text_encode,
                         get_page_info)
   python_loader = loader
   mw = require("mw")
-  ustring = require("ustring:ustring")
-  mw.ustring = ustring
   mw.text.decode = mw_text_decode
   mw.text.encode = mw_text_encode
   mw.language.isKnownLanguageTag = mw_language_is_known_language_tag

@@ -21,11 +21,8 @@ mw = {
    site = require("mw_site"),
    text = require("mw_text"),
    title = require("mw_title"),
-   -- site  -- assigned in lua_set_fns() from code in mw_site.lua
-   -- text -- assigned in lua_set_fns() from code in mw_text.lua
-   -- title -- assigned in lua_set_fns() from code in mw_title.lua
    -- XXX uri.*
-   -- ustring -- assigned in lua_set_loader()
+   ustring = require("ustring:ustring")
 }
 
 -- mw.site = require("mw_site")
