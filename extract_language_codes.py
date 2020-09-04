@@ -197,6 +197,7 @@ with open("wiktextract/languages.py", "w") as f:
     f.write("# extract_language_codes.py script.  DO NOT EDIT.\n")
     f.write("#\n")
     f.write("# This file is distributed under the Wiktionary license terms.\n")
+    f.write("# https://en.wiktionary.org/wiki/Wiktionary:Copyrights\n")
     f.write("\n")
     f.write("import json\n")
     f.write("\n")

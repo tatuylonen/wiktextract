@@ -42,7 +42,9 @@ PAIRED_HTML_TAGS = set(k for k, v in wikitext.ALLOWED_HTML_TAGS.items()
 
 KNOWN_LANGUAGE_TAGS = set(x["code"] for x in languages.all_languages
                           if x.get("code") and x.get("name"))
-
+LANGUAGE_CODE_TO_NAME = { x["code"]: x["name"]
+                          for x in languages.all_languages
+                          if x.get("code") and x.get("name") }
 
 def canonicalize_template_name(name):
     """Canonicalizes a template name by making its first character uppercase
@@ -944,12 +946,6 @@ def mw_text_encode(text, charset='<>&\xa0'):
     return "".join(parts)
 
 
-def mw_language_is_known_language_tag(code):
-    """Implements the mw.language.isKnownLanguageTag function for Lua code."""
-    print("in isKnownLanguageTag")
-    return code in KNOWN_LANGUAGE_TAGS
-
-
 def get_page_info(title):
     """Retrieves information about a page identified by its table (with
     namespace prefix.  This returns a lua table with fields "id", "exists",
@@ -971,6 +967,21 @@ def get_page_info(title):
     return lua.table_from(dt)
 
 
+def fetch_language_name(code):
+    if code in LANGUAGE_CODE_TO_NAME:
+        return LANGUAGE_CODE_TO_NAME[code]
+    return None
+
+
+def fetch_language_names(include):
+    include = str(include)
+    if include == "all":
+        ret = LANGUAGE_CODE_TO_NAME
+    else:
+        ret = {"en": "English"}
+    return lua.table_from(dt)
+
+
 # Load Lua sandbox code.
 lua_sandbox = open("lua/lua_sandbox.lua").read()
 
@@ -988,8 +999,9 @@ lua.execute(lua_sandbox)
 lua.eval("lua_set_loader")(lua_loader,
                            mw_text_decode,
                            mw_text_encode,
-                           mw_language_is_known_language_tag,
-                           get_page_info)
+                           get_page_info,
+                           fetch_language_name,
+                           fetch_language_names)
 
 
 def invoke_fn(invoke_args, stack, parent):
@@ -1023,16 +1035,30 @@ def invoke_fn(invoke_args, stack, parent):
         return lua.table_from(obj)
 
     def make_frame(pframe, title, args):
-        assert pframe is None or isinstance(pframe, dict)
         assert isinstance(title, str)
         assert isinstance(args, (list, tuple, dict))
         # Convert args to a dictionary with default value None
         if isinstance(args, dict):
             frame_args = args
         else:
+            assert isinstance(args, (list, tuple))
             frame_args = {}
-            for i in range(len(args)):
-                frame_args[i + 1] = args[i]
+            num = 1
+            for arg in args:
+                ofs = arg.find("=")
+                if ofs <= 0:
+                    k = num
+                    num += 1
+                else:
+                    k = arg[:ofs].strip()
+                    if k.isdigit():
+                        k = int(k)
+                        if k < 1 or k > 1000:
+                            k = 1000
+                        if num <= k:
+                            num = k + 1
+                    arg = arg[ofs + 1:]
+                frame_args[k] = arg
         frame_args = lua.table_from(frame_args)
 
         def extensionTag(frame, lua_args):
@@ -1047,7 +1073,7 @@ def invoke_fn(invoke_args, stack, parent):
 
 
         # Create frame object as dictionary with default value None
-        frame = collections.defaultdict(lambda: None)
+        frame = {}
         frame["getParent"] = lambda self: pframe
         frame["getTitle"] = lambda self: title
         frame["args"] = frame_args
@@ -1064,7 +1090,7 @@ def invoke_fn(invoke_args, stack, parent):
         # XXX expandTemplate(title=None, args=None) used 113
         # XXX extensionTag(name=None, content=None, args=None) used 29
         # XXX preprocess(text=None) used 67
-        return frame
+        return lua.table_from(frame)
 
     # Create parent frame (for page being processed) and current frame
     # (for module being called)
@@ -1076,6 +1102,7 @@ def invoke_fn(invoke_args, stack, parent):
     frame = make_frame(pframe, modname, invoke_args[2:])
 
     # Call the Lua function in the given module
+    sys.stdout.flush()
     ok, text = lua.eval("lua_invoke")(modname, modfn, frame)
     if ok:
         return str(text)
@@ -1287,9 +1314,12 @@ for k, v in sorted(cnts.items(), key=lambda x: x[1], reverse=True):
 # XXX implement mw.uri.decode
 
 # XXX try to reduce unnecessary evaluation of arguments; only evaluate
-# them when actually used
+# them when actually used (esp. frame.args on #invoke)
 
 # XXX cite-meta calls #invoke for string:sub and gives wrong argument type
 
 # XXX must convert arguments to #invoke to lua strings from Python strings
 # Lua strings e.g. have a gsub method
+
+# XXX mw.ustring is not same as ustring; see
+# https://www.mediawiki.org/wiki/Extension:Scribunto/Lua_reference_manual#Ustring_patterns and notes on e.g. upper and lower calling mw.language versions

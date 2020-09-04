@@ -191,10 +191,12 @@ function mw_title.new(text, namespace)
    if not namespace then namespace = "Main" end
    local idx = string.find(text, ":")
    if idx ~= nil then
-      namespace = string.sub(text, 1, idx - 1)
-      text = string.sub(text, idx + 1)
+      local ns1 = string.sub(text, 1, idx - 1)
+      if mw.site.findNamespace(namespace) then
+         namespace = ns1
+         text = string.sub(text, idx + 1)
+      end
    end
-   assert(namespace)
    return mw_title.makeTitle(namespace, text)
 end
 

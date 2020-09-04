@@ -21,15 +21,12 @@ mw = {
    site = require("mw_site"),
    text = require("mw_text"),
    title = require("mw_title"),
-   -- XXX uri.*
+   uri = require("mw_uri"),
    ustring = require("ustring:ustring")
 }
 
--- mw.site = require("mw_site")
--- mw.title = require("mw_title")
--- mw.language = require("mw_language")
--- mw.text = require("mw_text")
-
+-- This can also be accessed with just the mw prefix
+mw.getContentLanguage = mw.language.getContentLanguage
 
 function mw.addWarning(text)
    print("mw.addWarning", text)
