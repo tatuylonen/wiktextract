@@ -709,13 +709,6 @@ def expand_listed_templates(title, text, expand_templates, invoke_fn):
         args += list(sorted(more_args))
         return "{{" + "|".join(args) + "}}"
 
-    def unexpanded_parserfn(fn_name, args):
-        """Formats an unexpanded parser function call (whose arguments may
-        have been partially or fully expanded)."""
-        assert isinstance(fn_name, str)
-        assert isinstance(args, (list, tuple))
-        return "{{" + fn_name + ":" + "|".join(args) + "}}"
-
     def expand(coded, argmap, stack, parent):
         assert isinstance(coded, str)
         assert isinstance(argmap, dict)
@@ -829,18 +822,14 @@ def expand_listed_templates(title, text, expand_templates, invoke_fn):
                 fn_name = expand(args[0], argmap, stack, parent)
                 stack.pop()
                 fn_name = canonicalize_parserfn_name(fn_name)
+                args = list(args[1:])
                 stack.append(fn_name)
-                expanded_args = []
-                for i in range(1, len(args)):
-                    arg = args[i]
-                    stack.append("ARG{}".format(i))
-                    arg = expand(arg, argmap, stack, parent)
-                    stack.pop()
-                    expanded_args.append(arg)
+                stack_copy = copy.copy(stack)
+                expander = lambda arg: expand(arg, argmap, stack_copy, parent)
                 if fn_name == "#invoke" and ctx.invoke_fn is not None:
-                    ret = ctx.invoke_fn(expanded_args, stack, parent)
+                    ret = ctx.invoke_fn(args, expander, stack, parent)
                 else:
-                    ret = call_parser_function(fn_name, expanded_args,
+                    ret = call_parser_function(fn_name, args, expander,
                                                title, stack)
                 stack.pop()  # fn_name
                 # XXX if lua code calls frame:preprocess(), then we should
@@ -1004,11 +993,13 @@ lua.eval("lua_set_loader")(lua_loader,
                            fetch_language_names)
 
 
-def invoke_fn(invoke_args, stack, parent):
+def invoke_fn(invoke_args, expander, stack, parent):
     """This is called to expand a #invoke parser function."""
     assert isinstance(invoke_args, (list, tuple))
+    assert callable(expander)
     assert isinstance(stack, list)
     assert isinstance(parent, (tuple, type(None)))
+    print("invoke_fn", invoke_args)
     # print("#invoke", invoke_args, "parent", parent, "stack", stack)
     if len(invoke_args) < 2:
         print("#invoke {}: too few arguments at {}"
@@ -1024,14 +1015,14 @@ def invoke_fn(invoke_args, stack, parent):
         v = frame_args[k]
         if v is None:
             return v
-        obj = {"expand": lambda obj: v}
+        obj = {"expand": lambda obj: expander(v)}
         return lua.table_from(obj)
 
-    def value_with_expand(frame, expander, x):
+    def value_with_expand(frame, fexpander, x):
         assert isinstance(frame, dict)
-        assert isinstance(expander, str)
+        assert isinstance(fexpander, str)
         assert isinstance(x, str)
-        obj = {"expand": lambda obj: frame[expander](x)}
+        obj = {"expand": lambda obj: frame[fexpander](x)}
         return lua.table_from(obj)
 
     def make_frame(pframe, title, args):
@@ -1089,14 +1080,20 @@ def invoke_fn(invoke_args, stack, parent):
         # XXX callParserFunction(name=None, args=None) used 30
         # XXX expandTemplate(title=None, args=None) used 113
         # XXX extensionTag(name=None, content=None, args=None) used 29
-        # XXX preprocess(text=None) used 67
+        frame["preprocess"] = lambda self, text: expander(text)
         return lua.table_from(frame)
 
     # Create parent frame (for page being processed) and current frame
     # (for module being called)
     if parent is not None:
         page_title, page_args = parent
-        pframe = make_frame(None, page_title, page_args)
+        expanded_key_args = {}
+        for k, v in page_args.items():
+            if isinstance(k, str):
+                expanded_key_args[expander(k)] = v
+            else:
+                expanded_key_args[k] = v
+        pframe = make_frame(None, page_title, expanded_key_args)
     else:
         pframe = None
     frame = make_frame(pframe, modname, invoke_args[2:])
