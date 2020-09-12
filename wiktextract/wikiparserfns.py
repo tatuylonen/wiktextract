@@ -86,7 +86,7 @@ def switch_fn(title, fn_name, args, expander, stack):
             return v
         if k == "#default":
             defval = v
-        last = v
+        last = None
     if defval is not None:
         return defval
     return last or ""
@@ -111,7 +111,7 @@ def tag_fn(title, fn_name, args, expander, stack):
                   "".format(title, x, stack))
             continue
         name, value = m.groups()
-        attrs.append("{}={}".format(name, html.escape(value)))
+        attrs.append('{}="{}"'.format(name, html.escape(value)))
     if attrs:
         attrs = " " + " ".join(attrs)
     else:
@@ -125,6 +125,8 @@ def tag_fn(title, fn_name, args, expander, stack):
 def fullpagename_fn(title, fn_name, args, expander, stack):
     """Implements the FULLPAGENAME magic word/parser function."""
     t = expander(args[0]) if args else title
+    print("fullpagename t={} args={} title={}"
+          "".format(t, args, title))
     t = re.sub(r"\s+", " ", t)
     t = t.strip()
     ofs = t.find(":")
@@ -133,8 +135,6 @@ def fullpagename_fn(title, fn_name, args, expander, stack):
     elif ofs > 0:
         ns = t[:ofs].capitalize()
         t = t[ofs + 1:].capitalize()
-        if ns == "Project":
-            ns = PROJECT_NAME
         t = ns + ":" + t
     else:
         t = t.capitalize()
@@ -147,9 +147,7 @@ def pagename_fn(title, fn_name, args, expander, stack):
     t = re.sub(r"\s+", " ", t)
     t = t.strip()
     ofs = t.find(":")
-    if ofs == 0:
-        t = t[1:].capitalize()
-    elif ofs > 0:
+    if ofs >= 0:
         t = t[ofs + 1:].capitalize()
     else:
         t = t.capitalize()
@@ -158,19 +156,17 @@ def pagename_fn(title, fn_name, args, expander, stack):
 
 def namespace_fn(title, fn_name, args, expander, stack):
     """Implements the NAMESPACE magic word/parser function."""
+    # XXX check what this should return when no namespace given
     t = expander(args[0]) if args else title
     t = re.sub(r"\s+", " ", t)
     t = t.strip()
     ofs = t.find(":")
-    if ofs == 0:
-        ns = PROJECT_NAME
-    elif ofs > 0:
+    if ofs >= 0:
         ns = t[:ofs].capitalize()
         if ns == "Project":
-            ns = PROJECT_NAME
-    else:
-        ns = PROJECT_NAME
-    return ns
+            return PROJECT_NAME
+        return ns
+    return ""
 
 
 def lc_fn(title, fn_name, args, expander, stack):
@@ -179,7 +175,7 @@ def lc_fn(title, fn_name, args, expander, stack):
         print("{}: wrong number of arguments for {} ({})"
               "".format(title, fn_name, len(args)))
         args.append("")
-    return expander(args[0]).strip().upper()
+    return expander(args[0]).strip().lower()
 
 
 def lcfirst_fn(title, fn_name, args, expander, stack):
@@ -217,6 +213,8 @@ def dateformat_fn(title, fn_name, args, expander, stack):
               "".format(title, fn_name, len(args)))
         args.append("")
     arg0 = expander(args[0])
+    if not re.search(r"\d\d\d", arg0):
+        arg0 += " 3333"
     dt = dateparser.parse(arg0)
     if not dt:
         print("{}: invalid date format in {}: {!r}"
@@ -229,22 +227,22 @@ def dateformat_fn(title, fn_name, args, expander, stack):
     date_only = dt.hour == 0 and dt.minute == 0 and dt.second == 0
     if fmt == "mdy":
         if date_only:
-            if dt.year == 0:
-                return dt.strftime("%B %d")
-            return dt.strftime("%B %d, %Y")
-        return dt.strftime("%B %d, %Y %H:%M:%S")
+            if dt.year == 3333:
+                return dt.strftime("%b %d")
+            return dt.strftime("%b %d, %Y")
+        return dt.strftime("%b %d, %Y %H:%M:%S")
     elif fmt == "dmy":
         if date_only:
-            if dt.year == 0:
-                return dt.strftime("%d %B")
-            return dt.strftime("%d %B %Y")
-        return dt.strftime("%d %B %Y %H:%M:%S")
+            if dt.year == 3333:
+                return dt.strftime("%d %b")
+            return dt.strftime("%d %b %Y")
+        return dt.strftime("%d %b %Y %H:%M:%S")
     elif fmt == "ymd":
         if date_only:
-            if dt.year == 0:
-                return dt.strftime("%B %d")
-            return dt.date().isoformat()
-        return dt.isoformat(sep=" ")
+            if dt.year == 3333:
+                return dt.strftime("%b %d")
+            return dt.strftime("%Y %b %d")
+        return dt.strftime("%Y %b %d %H:%M:%S")
     # Otherwise format into ISO format
     if date_only:
         return dt.date().isoformat()
@@ -261,12 +259,12 @@ def urlencode_fn(title, fn_name, args, expander, stack):
     fmt = expander(args[1]) if len(args) > 1 else "QUERY"
     url = arg0.strip()
     if fmt == "PATH":
-        return urllib.parse.quote(url)
+        return urllib.parse.quote(url, safe="")
     elif fmt == "QUERY":
         return urllib.parse.quote_plus(url)
     # All else in WIKI encoding
     url = re.sub(r"\s+", "_", url)
-    return urllib.parse.quote(url)
+    return urllib.parse.quote(url, safe="/:")
 
 
 def anchorencode_fn(title, fn_name, args, expander, stack):
@@ -334,6 +332,111 @@ def padright_fn(title, fn_name, args, expander, stack):
     if len(v) < cnt:
         v = pad[:cnt - len(v)] + v
     return v
+
+
+def len_fn(title, fn_name, args, expander, stack):
+    """Implements the #len parser function."""
+    v = expander(args[0])
+    return str(len(v))
+
+
+def pos_fn(title, fn_name, args, expander, stack):
+    """Implements the #pos parser function."""
+    if len(args) < 2:
+        print("{}: too few arguments".format(title))
+    while len(args) < 3:
+        args.append("")
+    arg0 = expander(args[0])
+    arg1 = expander(args[1])
+    offset = expander(args[2]).strip()
+    if not offset or not offset.isdigit():
+        offset = "0"
+    offset = int(offset)
+    idx = arg0.find(arg1, offset)
+    if idx >= 0:
+        return str(idx)
+    return ""
+
+
+def rpos_fn(title, fn_name, args, expander, stack):
+    """Implements the #rpos parser function."""
+    if len(args) < 2:
+        print("{}: too few arguments".format(title))
+    while len(args) < 3:
+        args.append("")
+    arg0 = expander(args[0])
+    arg1 = expander(args[1])
+    offset = expander(args[2]).strip()
+    if not offset or not offset.isdigit():
+        offset = "0"
+    offset = int(offset)
+    idx = arg0.rfind(arg1, offset)
+    if idx >= 0:
+        return str(idx)
+    return ""
+
+
+def sub_fn(title, fn_name, args, expander, stack):
+    """Implements the #sub parser function."""
+    if len(args) < 2:
+        print("{}: too few arguments".format(title))
+    while len(args) < 3:
+        args.append("")
+    arg0 = expander(args[0])
+    start = expander(args[1]).strip()
+    length = expander(args[2]).strip()
+    if not start or not start.isdigit():
+        start = "0"
+    start = int(start)
+    if start < 0:
+        start = max(0, len(arg0) + start)
+    start = min(start, len(arg0))
+    if not length or not length.isdigit():
+        length = max(0, len(arg0) - start)
+    length = int(length)
+    if length < 0:
+        length = max(0, len(arg0) - start + length)
+    return arg0[start:start + length]
+
+
+def replace_fn(title, fn_name, args, expander, stack):
+    """Implements the #replace parser function."""
+    if len(args) < 3:
+        print("{}: too few arguments".format(title))
+    while len(args) < 3:
+        args.append("")
+    arg0 = expander(args[0])
+    arg1 = expander(args[1]) or " "
+    arg2 = expander(args[2])
+    return arg0.replace(arg1, arg2)
+
+
+def explode_fn(title, fn_name, args, expander, stack):
+    """Implements the #explode parser function."""
+    if len(args) < 3:
+        print("{}: too few arguments".format(title))
+    while len(args) < 4:
+        args.append("")
+    arg0 = expander(args[0])
+    delim = expander(args[1]) or " "
+    position = expander(args[2]).strip()
+    limit = expander(args[3]).strip()
+    if not position or not position.isdigit():
+        position = "0"
+    position = int(position)
+    if not limit or not limit.isdigit():
+        limit = "1"
+    limit = int(limit)
+    parts = arg0.split(delim)
+    if position > len(parts):
+        position = len(parts)
+    return delim.join(parts[position : position + limit])
+
+
+def urldecode_fn(title, fn_name, args, expander, stack):
+    """Implements the #urldecode parser function."""
+    arg0 = expander(args[0]).strip()
+    return urllib.parse.unquote(args[0])
 
 
 def unimplemented_fn(title, fn_name, args, expander, stack):
@@ -468,6 +571,14 @@ PARSER_FUNCTIONS = {
     "#section-x": unimplemented_fn,
     "#statements": unimplemented_fn,
     "#target": unimplemented_fn,
+    # From Help:Extension:ParserFunctions
+    "#len": len_fn,
+    "#pos": pos_fn,
+    "#rpos": rpos_fn,
+    "#sub": sub_fn,
+    "#replace": replace_fn,
+    "#explode": explode_fn,
+    "#urldecode": urldecode_fn,
 }
 
 
