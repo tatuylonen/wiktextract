@@ -667,4 +667,6 @@ class WikiProcTests(unittest.TestCase):
         self.assertEqual(ret, "abcxcxxbcxcxxx")
 
 # XXX test passing template arguments to another template
+# XXX test case variations of template names and parser function names
+# XXX test | syntax for parser functions (as compatibility for :)
 # XXX test calling Lua modules
