@@ -287,14 +287,145 @@ def anchorencode_fn(title, fn_name, args, expander, stack):
     return anchor
 
 
+class Namespace(object):
+    __slots__ = (
+        "aliases",
+        "canonicalName",
+        "defaultContentModel",
+        "hasGenderDistinction",
+        "id",
+        "isCapitalized",
+        "isContent",
+        "isIncludable",
+        "isMovable",
+        "isSubject",
+        "isTalk",
+        "name",
+        "subject",
+        "talk",
+    )
+
+    def __init__(self, aliases=[], canonicalName="",
+                 defaultContentModel="wikitext", hasGenderDistinction=True,
+                 id=None, isCapitalized=False, isContent=False,
+                 isIncludable=False,
+                 isMovable=False, isSubject=False, isTalk=False,
+                 name="", subject=None, talk=None):
+        assert name
+        assert id is not None
+        self.aliases = aliases
+        self.canonicalName = canonicalName
+        self.defaultContentModel = defaultContentModel
+        self.hasGenderDistinction = hasGenderDistinction
+        self.id = id
+        self.isCapitalized = isCapitalized
+        self.isContent = isContent
+        self.isIncludable = isIncludable
+        self.isMovable = isMovable
+        self.isSubject = isSubject
+        self.isTalk = isTalk
+        self.name = name
+        self.subject = subject
+        self.talk = talk
+
+# These duplicate definitions in lua/mw_site.lua
+media_ns = Namespace(id=-2, name="Media", isSubject=True)
+special_ns = Namespace(id=-1, name="Special", isSubject=True)
+main_ns = Namespace(id=0, name="Main", isContent=True, isSubject=True)
+talk_ns = Namespace(id=1, name="Talk", isTalk=True, subject=main_ns)
+user_ns = Namespace(id=2, name="User", isSubject=True)
+user_talk_ns = Namespace(id=3, name="User_talk", isTalk=True,
+                         subject=user_ns)
+project_ns = Namespace(id=4, name="Project", isSubject=True)
+project_talk_ns = Namespace(id=5, name="Project_talk", isTalk=True,
+                            subject=project_ns)
+image_ns = Namespace(id=6, name="File", aliases=["Image"],
+                     isSubject=True)
+image_talk_ns = Namespace(id=7, name="File_talk",
+                          aliases=["Image_talk"],
+                          isTalk=True, subject=image_ns)
+mediawiki_ns = Namespace(id=8, name="MediaWiki", isSubject=True)
+mediawiki_talk_ns = Namespace(id=9, name="MediaWiki_talk",
+                              isTalk=True, subject=mediawiki_ns)
+template_ns = Namespace(id=10, name="Template", isSubject=True)
+template_talk_ns = Namespace(id=11, name="Template_talk", isTalk=True,
+                             subject=template_ns)
+help_ns = Namespace(id=12, name="Help", isSubject=True)
+help_talk_ns = Namespace(id=13, name="Help_talk", isTalk=True,
+                         subject=help_ns)
+category_ns = Namespace(id=14, name="Category", isSubject=True)
+category_talk_ns = Namespace(id=15, name="Category_talk", isTalk=True,
+                             subject=category_ns)
+module_ns = Namespace(id=828, name="Module", isIncludable=True,
+                      isSubject=True)
+module_talk_ns = Namespace(id=829, name="Module_talk", isTalk=True,
+                           subject=module_ns)
+main_ns.talk = talk_ns
+user_ns.talk = user_talk_ns
+project_ns.talk = project_talk_ns
+mediawiki_ns.talk = mediawiki_talk_ns
+template_ns.talk = template_talk_ns
+help_ns.talk = help_talk_ns
+category_ns.talk = category_talk_ns
+module_ns.talk = module_talk_ns
+
+namespaces = {}
+
+def add_ns(t, ns):
+   t[ns.id] = ns
+
+add_ns(namespaces, media_ns)
+add_ns(namespaces, special_ns)
+add_ns(namespaces, main_ns)
+add_ns(namespaces, talk_ns)
+add_ns(namespaces, user_ns)
+add_ns(namespaces, user_talk_ns)
+add_ns(namespaces, project_ns)
+add_ns(namespaces, project_talk_ns)
+add_ns(namespaces, image_ns)
+add_ns(namespaces, image_talk_ns)
+add_ns(namespaces, mediawiki_ns)
+add_ns(namespaces, mediawiki_talk_ns)
+add_ns(namespaces, template_ns)
+add_ns(namespaces, template_talk_ns)
+add_ns(namespaces, help_ns)
+add_ns(namespaces, help_talk_ns)
+add_ns(namespaces, category_ns)
+add_ns(namespaces, category_talk_ns)
+add_ns(namespaces, module_ns)
+add_ns(namespaces, module_talk_ns)
+
+
 def ns_fn(title, fn_name, args, expander, stack):
     """Implements the ns parser function."""
-    print("{}: ns {}".format(title, args))
-    return "XXX"
+    t = expander(args[0]).strip().upper()
+    print("ns_fn", t)
+    if t and t.isdigit():
+        t = int(t)
+        ns = namespaces.get(t)
+    else:
+        for ns in namespaces.values():
+            print("checking", ns.name)
+            if ns.name and t == ns.name.upper():
+                break
+            if ns.canonicalName and t == ns.canonicalName.upper():
+                break
+            for a in ns.aliases:
+                if t == a.upper():
+                    break
+            else:
+                continue
+            break
+        else:
+            ns = None
+    print("ns=", ns)
+    if ns is None:
+        return ""
+    return ns.name
 
 
 def padleft_fn(title, fn_name, args, expander, stack):
-    """Implements the ns parser function."""
+    """Implements the padleft parser function."""
     if len(args) < 2:
         print("{}: too few arguments for {}"
               "".format(title, fn_name))
@@ -307,20 +438,20 @@ def padleft_fn(title, fn_name, args, expander, stack):
     else:
         cnt = int(cnt)
     if cnt - len(v) > len(pad):
-        v = (pad * ((cnt - len(v)) // len(pad)))
+        pad = (pad * ((cnt - len(v)) // len(pad)))
     if len(v) < cnt:
         v = pad[:cnt - len(v)] + v
     return v
 
 
 def padright_fn(title, fn_name, args, expander, stack):
-    """Implements the ns parser function."""
+    """Implements the padright parser function."""
     if len(args) < 2:
         print("{}: too few arguments for {}"
               "".format(title, fn_name))
     v = expander(args[0]) if len(args) >= 1 else ""
     cnt = expander(args[1]).strip() if len(args) >= 2 else "0"
-    arg2 = expander(args[2])
+    arg2 = expander(args[2]) if len(args) >= 3 and args[2] else "0"
     pad = arg2 if len(args) >= 3 and arg2 else "0"
     if not cnt.isdigit():
         print("{}: pad length is not integer: {!r}".format(title, cnt))
@@ -328,22 +459,22 @@ def padright_fn(title, fn_name, args, expander, stack):
     else:
         cnt = int(cnt)
     if cnt - len(v) > len(pad):
-        v = (pad * ((cnt - len(v)) // len(pad)))
+        pad = (pad * ((cnt - len(v)) // len(pad)))
     if len(v) < cnt:
-        v = pad[:cnt - len(v)] + v
+        v = v + pad[:cnt - len(v)]
     return v
 
 
 def len_fn(title, fn_name, args, expander, stack):
     """Implements the #len parser function."""
-    v = expander(args[0])
+    v = expander(args[0]).strip()
     return str(len(v))
 
 
 def pos_fn(title, fn_name, args, expander, stack):
     """Implements the #pos parser function."""
     if len(args) < 2:
-        print("{}: too few arguments".format(title))
+        return ""
     while len(args) < 3:
         args.append("")
     arg0 = expander(args[0])
@@ -361,7 +492,7 @@ def pos_fn(title, fn_name, args, expander, stack):
 def rpos_fn(title, fn_name, args, expander, stack):
     """Implements the #rpos parser function."""
     if len(args) < 2:
-        print("{}: too few arguments".format(title))
+        return ""
     while len(args) < 3:
         args.append("")
     arg0 = expander(args[0])
@@ -385,18 +516,49 @@ def sub_fn(title, fn_name, args, expander, stack):
     arg0 = expander(args[0])
     start = expander(args[1]).strip()
     length = expander(args[2]).strip()
-    if not start or not start.isdigit():
-        start = "0"
-    start = int(start)
+    try:
+        start = int(start)
+    except ValueError:
+        start = 0
     if start < 0:
         start = max(0, len(arg0) + start)
     start = min(start, len(arg0))
-    if not length or not length.isdigit():
+    try:
+        length = int(length)
+    except ValueError:
+        length = 0
+    if length == 0:
         length = max(0, len(arg0) - start)
-    length = int(length)
-    if length < 0:
+    elif length < 0:
         length = max(0, len(arg0) - start + length)
-    return arg0[start:start + length]
+    return arg0[start : start + length]
+
+
+def pad_fn(title, fn_name, args, expander, stack):
+    """Implements the pad parser function."""
+    if len(args) < 2:
+        print("{}: too few arguments for {}"
+              "".format(title, fn_name))
+    v = expander(args[0]) if len(args) >= 1 else ""
+    cnt = expander(args[1]).strip() if len(args) >= 2 else "0"
+    pad = expander(args[2]) if len(args) >= 3 and args[2] else "0"
+    direction = expander(args[3]) if len(args) >= 4 else ""
+    if not cnt.isdigit():
+        print("{}: pad length is not integer: {!r}".format(title, cnt))
+        cnt = 0
+    else:
+        cnt = int(cnt)
+    if cnt - len(v) > len(pad):
+        pad = (pad * ((cnt - len(v)) // len(pad) + 1))
+    if len(v) < cnt:
+        padlen = cnt - len(v)
+        if direction == "right":
+            v = v + pad[:padlen]
+        elif direction == "center":
+            v = pad[:padlen // 2] + v + pad[:padlen - padlen // 2]
+        else:  # left
+            v = pad[:padlen] + v
+    return v
 
 
 def replace_fn(title, fn_name, args, expander, stack):
@@ -421,22 +583,30 @@ def explode_fn(title, fn_name, args, expander, stack):
     delim = expander(args[1]) or " "
     position = expander(args[2]).strip()
     limit = expander(args[3]).strip()
-    if not position or not position.isdigit():
-        position = "0"
-    position = int(position)
-    if not limit or not limit.isdigit():
-        limit = "1"
-    limit = int(limit)
+    try:
+        position = int(position)
+    except ValueError:
+        position = 0
+    try:
+        limit = int(limit)
+    except ValueError:
+        limit = 0
     parts = arg0.split(delim)
-    if position > len(parts):
-        position = len(parts)
-    return delim.join(parts[position : position + limit])
+    if limit > 0 and len(parts) > limit:
+        parts = parts[:limit - 1] + [delim.join(parts[limit - 1:])]
+    print("parts", parts)
+    if position < 0:
+        position = len(parts) + position
+    if position < 0 or position >= len(parts):
+        return ""
+    return parts[position]
 
 
 def urldecode_fn(title, fn_name, args, expander, stack):
     """Implements the #urldecode parser function."""
     arg0 = expander(args[0]).strip()
-    return urllib.parse.unquote(args[0])
+    ret = urllib.parse.unquote_plus(args[0])
+    return ret
 
 
 def unimplemented_fn(title, fn_name, args, expander, stack):
@@ -546,7 +716,7 @@ PARSER_FUNCTIONS = {
     "urlencode": urlencode_fn,
     "anchorencode": anchorencode_fn,
     "ns": ns_fn,
-    "nse": unimplemented_fn,
+    "nse": ns_fn,  # We don't have spaces in ns names
     "#rel2abs": unimplemented_fn,
     "#titleparts": unimplemented_fn,
     "#expr": unimplemented_fn,
@@ -576,9 +746,11 @@ PARSER_FUNCTIONS = {
     "#pos": pos_fn,
     "#rpos": rpos_fn,
     "#sub": sub_fn,
+    "#pad": pad_fn,
     "#replace": replace_fn,
     "#explode": explode_fn,
     "#urldecode": urldecode_fn,
+    "#urlencode": urlencode_fn,
 }
 
 

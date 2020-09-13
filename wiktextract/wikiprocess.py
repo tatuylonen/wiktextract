@@ -102,7 +102,7 @@ class ExpandCtx(object):
             functions."""
             orig = m.group(1)
             args = orig.split("|")
-            name = args[0].strip()
+            name = args[0].lstrip()
             if name[:10].lower() == "safesubst:":
                 name = name[10:]
             ofs = name.find(":")
@@ -111,8 +111,8 @@ class ExpandCtx(object):
                 fn_name = canonicalize_parserfn_name(name[:ofs])
                 # Check if it is a recognized parser function name
                 if fn_name in PARSER_FUNCTIONS or fn_name.startswith("#"):
-                    return self.save_value("P", [fn_name, name[ofs + 1:]] +
-                                           args[1:])
+                    args = [fn_name, name[ofs + 1:]] + args[1:]
+                    return self.save_value("P", args)
             # As a compatibility feature, recognize parser functions also as the
             # first argument of a template, whether there are more arguments or
             # not.  This is used for magic words and some parser functions have

@@ -327,4 +327,240 @@ class WikiProcTests(unittest.TestCase):
                               "{{urlencode:x:y/z kä|PATH}}", None)
         self.assertEqual(ret, "x%3Ay%2Fz%20k%C3%A4")
 
-    # XXX next: anchorencode
+    def test_achorencode1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{anchorencode:x:y/z kä}}", None)
+        self.assertEqual(ret, "x:y/z_kä")
+
+    def test_ns1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{ns:6}}", None)
+        self.assertEqual(ret, "File")
+
+    def test_ns2(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{ns:File}}", None)
+        self.assertEqual(ret, "File")
+
+    def test_ns3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{ns:Image}}", None)
+        self.assertEqual(ret, "File")
+
+    def test_ns4(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{ns:Nonexistentns}}", None)
+        self.assertEqual(ret, "")
+
+    def test_padleft1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{padleft:xyz|5}}", None)
+        self.assertEqual(ret, "00xyz")
+
+    def test_padleft2(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{padleft:xyz|5|_}}", None)
+        self.assertEqual(ret, "__xyz")
+
+    def test_padleft3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{padleft:xyz|5|abc}}", None)
+        self.assertEqual(ret, "abxyz")
+
+    def test_padleft4(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{padleft:xyz|2}}", None)
+        self.assertEqual(ret, "xyz")
+
+    def test_padleft5(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{padleft:|1|xyz}}", None)
+        self.assertEqual(ret, "x")
+
+    def test_padright1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{padright:xyz|5}}", None)
+        self.assertEqual(ret, "xyz00")
+
+    def test_padright2(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{padright:xyz|5|_}}", None)
+        self.assertEqual(ret, "xyz__")
+
+    def test_padright3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{padright:xyz|5|abc}}", None)
+        self.assertEqual(ret, "xyzab")
+
+    def test_padright4(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{padright:xyz|2}}", None)
+        self.assertEqual(ret, "xyz")
+
+    def test_padright5(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{padright:|1|xyz}}", None)
+        self.assertEqual(ret, "x")
+
+    def test_len1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#len: xyz }}", None)
+        self.assertEqual(ret, "3")
+
+    # XXX we currently don't implement <nowiki> ... </nowiki> handling
+    # in #len, #pos etc according to spec.  See:
+    # https://www.mediawiki.org/wiki/Extension:StringFunctions
+
+    def test_pos1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#pos: xyzayz |yz}}", None)
+        self.assertEqual(ret, "2")
+
+    def test_pos2(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#pos: xyzayz |zz}}", None)
+        self.assertEqual(ret, "")
+
+    def test_pos3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#pos: xyzayz }}", None)
+        self.assertEqual(ret, "")
+
+    def test_rpos1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#rpos: xyzayz |yz}}", None)
+        self.assertEqual(ret, "5")
+
+    def test_rpos2(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#rpos: xyzayz |zz}}", None)
+        self.assertEqual(ret, "")
+
+    def test_rpos3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#rpos: xyzayz }}", None)
+        self.assertEqual(ret, "")
+
+    def test_sub1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#sub: xyzayz |3}}", None)
+        self.assertEqual(ret, "zayz ")
+
+    def test_sub2(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#sub:Icecream|3}}", None)
+        self.assertEqual(ret, "cream")
+
+    def test_sub3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#sub:Icecream|0|3}}", None)
+        self.assertEqual(ret, "Ice")
+
+    def test_sub4(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#sub:Icecream|-3}}", None)
+        self.assertEqual(ret, "eam")
+
+    def test_sub5(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#sub:Icecream|3|3}}", None)
+        self.assertEqual(ret, "cre")
+
+    def test_sub6(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#sub:Icecream|3|-3}}", None)
+        self.assertEqual(ret, "cr")
+
+    def test_sub7(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#sub:Icecream|-3|2}}", None)
+        self.assertEqual(ret, "ea")
+
+    def test_sub8(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#sub:Icecream|3|0}}", None)
+        self.assertEqual(ret, "cream")
+
+    def test_sub9(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#sub:Icecream|3|-6}}", None)
+        self.assertEqual(ret, "")
+
+    def test_pad1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#pad:Ice|10|xX}}", None)
+        self.assertEqual(ret, "xXxXxXxIce")
+
+    def test_pad2(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#pad:Ice|5|x|left}}", None)
+        self.assertEqual(ret, "xxIce")
+
+    def test_pad3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#pad:Ice|5|x|right}}", None)
+        self.assertEqual(ret, "Icexx")
+
+    def test_pad4(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#pad:Ice|5|x|center}}", None)
+        self.assertEqual(ret, "xIcex")
+
+    def test_pad5(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#pad:Ice|5|x}}", None)
+        self.assertEqual(ret, "xxIce")
+
+    def test_replace1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#replace:Icecream|e|E}}", None)
+        self.assertEqual(ret, "IcEcrEam")
+
+    def test_replace2(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#replace:Icecream|e|}}", None)
+        self.assertEqual(ret, "Iccram")
+
+    def test_replace3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#replace:Icecream|ea|EAEA}}", None)
+        self.assertEqual(ret, "IcecrEAEAm")
+
+    def test_explode1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt",
+                              "{{#explode:And if you tolerate this| |2}}", None)
+        self.assertEqual(ret, "you")
+
+    def test_explode2(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt",
+                              "{{#explode:String/Functions/Code|/|-1}}", None)
+        self.assertEqual(ret, "Code")
+
+    def test_explode3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt",
+                              "{{#explode:Split%By%Percentage%Signs|%|2}}",
+                              None)
+        self.assertEqual(ret, "Percentage")
+
+    def test_explode4(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt",
+                              "{{#explode:And if you tolerate this thing| "
+                              "|2|3}}",
+                              None)
+        self.assertEqual(ret, "you tolerate this thing")
+
+    def test_f_urlencode1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt",
+                              "{{#urlencode:x:y/z kä}}", None)
+        self.assertEqual(ret, "x%3Ay%2Fz+k%C3%A4")
+
+    def test_f_urldecode1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt",
+                              "{{#urldecode:x%3Ay%2Fz+k%C3%A4}}", None)
+        self.assertEqual(ret, "x:y/z kä")

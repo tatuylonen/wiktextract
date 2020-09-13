@@ -9,7 +9,7 @@ local Namespace = {
    isMovable = false,
    defaultContentModel = "wikitext",
    aliases = {},
-   associated = nil,  -- ???
+   associated = {},
 }
 
 function Namespace:new(obj)
@@ -22,6 +22,7 @@ function Namespace:new(obj)
    return obj
 end
 
+-- These duplicate definitions in wikiparserfns.py
 local media_ns = Namespace:new{id=-2, name="Media", isSubject=true}
 local special_ns = Namespace:new{id=-1, name="Special", isSubject=true}
 local main_ns = Namespace:new{id=0, name="Main", isContent=true, isSubject=true}
@@ -32,9 +33,11 @@ local user_talk_ns = Namespace:new{id=3, name="User_talk", isTalk=true,
 local project_ns = Namespace:new{id=4, name="Project", isSubject=true}
 local project_talk_ns = Namespace:new{id=5, name="Project_talk", isTalk=true,
                                       subject=project_ns}
-local image_ns = Namespace:new{id=6, name="Image", isSubject=true}
-local image_talk_ns = Namespace:new{id=7, name="Image_talk", isTalk=true,
-                                    subject=image_ns}
+local image_ns = Namespace:new{id=6, name="File", aliases={"Image"},
+                               isSubject=true}
+local image_talk_ns = Namespace:new{id=7, name="File_talk",
+                                    aliases={"Image_talk"},
+                                    isTalk=true, subject=image_ns}
 local mediawiki_ns = Namespace:new{id=8, name="MediaWiki", isSubject=true}
 local mediawiki_talk_ns = Namespace:new{id=9, name="MediaWiki_talk",
                                         isTalk=true, subject=mediawiki_ns}
