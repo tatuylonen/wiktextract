@@ -665,3 +665,6 @@ class WikiProcTests(unittest.TestCase):
             ]])
         ret = expand_wikitext(ctx, "Tt", "{{testmod|abc}}")
         self.assertEqual(ret, "abcxcxxbcxcxxx")
+
+# XXX test passing template arguments to another template
+# XXX test calling Lua modules
