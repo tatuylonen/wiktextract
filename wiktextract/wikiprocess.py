@@ -56,6 +56,7 @@ class ExpandCtx(object):
         "lua",		 # Lua runtime or None if not yet initialized
         "modules",	 # Lua code for defined Lua modules
         "need_pre_expand",  # Set of template names to be expanded before parse
+        "redirects",	 # Redirects in the wikimedia project
         "rev_ht",	 # Mapping from text to magic cookie
         "rev_ht_base",   # Rev_ht from processing template bodies
         "template_fn",   # None or function to expand template
@@ -78,9 +79,9 @@ class ExpandCtx(object):
         args = tuple(args)
         v = (kind, args)
         if v in self.rev_ht_base:
-            return "!" + magic + kind + str(rev_ht[v]) + "!"
+            return "!" + magic + kind + str(self.rev_ht[v]) + "!"
         if v in self.rev_ht:
-            return "!" + magic + kind + str(rev_ht[v]) + "!"
+            return "!" + magic + kind + str(self.rev_ht[v]) + "!"
         idx = len(self.cookies)
         self.cookies.append(v)
         self.rev_ht[v] = idx
@@ -233,7 +234,7 @@ def analyze_template(name, body):
     pre_expand = False
 
     # Determine if the template starts with a list item
-    contains_list = re.search(r"(?s)^[#*;:]", body) is not None
+    contains_list = re.match(r"(?s)^[#*;:]", body) is not None
 
     # Remove paired tables
     prev = body
@@ -338,13 +339,13 @@ def phase1_to_ctx(phase1_data):
     ctx.templates = {}
     ctx.templates["!"] = "&vert;"
     ctx.need_pre_expand = set()
+    ctx.redirects = {}
     included_map = collections.defaultdict(set)
     expand_q = []
-    redirects = {}
     for tag, title, text in phase1_data:
         # XXX should this be enabled? title = html.unescape(title)
         if tag == "#redirect":
-            redirects[title] = text
+            ctx.redirects[title] = text
             continue
         if tag == "Scribunto":
             text = html.unescape(text)
@@ -366,7 +367,7 @@ def phase1_to_ctx(phase1_data):
         for x in included_templates:
             included_map[x].add(name)
         if pre_expand:
-            need_pre_expand.add(name)
+            ctx.need_pre_expand.add(name)
             expand_q.append(name)
         ctx.templates[name] = body
 
@@ -377,14 +378,14 @@ def phase1_to_ctx(phase1_data):
         if name not in included_map:
             continue
         for inc in included_map[name]:
-            if inc in need_pre_expand:
+            if inc in ctx.need_pre_expand:
                 continue
             #print("propagating EXP {} -> {}".format(name, inc))
-            need_pre_expand.add(inc)
+            ctx.need_pre_expand.add(inc)
             expand_q.append(name)
 
     # Copy template definitions to redirects to them
-    for k, v in redirects.items():
+    for k, v in ctx.redirects.items():
         if not k.startswith("Template:"):
             continue
         k = k[9:]
@@ -401,13 +402,13 @@ def phase1_to_ctx(phase1_data):
             #       "".format(k, v))
             continue
         ctx.templates[k] = ctx.templates[v]
-        if v in need_pre_expand:
-            need_pre_expand.add(k)
+        if v in ctx.need_pre_expand:
+            ctx.need_pre_expand.add(k)
 
     return ctx
 
 
-def lua_loader(modname):
+def lua_loader(ctx, modname):
     """This function is called from the Lua sandbox to load a Lua module.
     This will load it from either the user-defined modules on special
     pages or from a built-in module in the file system.  This returns None
@@ -415,8 +416,8 @@ def lua_loader(modname):
     # print("Loading", modname)
     if modname.startswith("Module:"):
         modname = modname[7:]
-    if modname in modules:
-        return modules[modname]
+    if modname in ctx.modules:
+        return ctx.modules[modname]
     path = modname
     path = re.sub(r":", "/", path)
     path = re.sub(r" ", "_", path)
@@ -479,7 +480,7 @@ def mw_text_encode(text, charset='<>&\xa0'):
     return "".join(parts)
 
 
-def get_page_info(title):
+def get_page_info(ctx, title):
     """Retrieves information about a page identified by its table (with
     namespace prefix.  This returns a lua table with fields "id", "exists",
     and "redirectTo".  This is used for retrieving information about page
@@ -489,7 +490,7 @@ def get_page_info(title):
     # XXX actually look at information collected in phase 1 to determine
     page_id = 0  # XXX collect required info in phase 1
     page_exists = False  # XXX collect required info in Phase 1
-    redirect_to = redirects.get(title, None)
+    redirect_to = ctx.redirects.get(title, None)
 
     # whether the page exists and what its id might be
     dt = {
@@ -497,7 +498,7 @@ def get_page_info(title):
         "exists": page_exists,
         "redirectTo": redirect_to,
     }
-    return lua.table_from(dt)
+    return ctx.lua.table_from(dt)
 
 
 def fetch_language_name(code):
@@ -508,7 +509,7 @@ def fetch_language_name(code):
     return None
 
 
-def fetch_language_names(include):
+def fetch_language_names(ctx, include):
     """This function is called from Lua code as part of the mw.language
     implementation.  This returns a list of known language names."""
     include = str(include)
@@ -516,7 +517,7 @@ def fetch_language_names(include):
         ret = LANGUAGE_CODE_TO_NAME
     else:
         ret = {"en": "English"}
-    return lua.table_from(dt)
+    return ctx.lua.table_from(dt)
 
 
 def initialize_lua(ctx):
@@ -536,16 +537,16 @@ def initialize_lua(ctx):
                      register_eval=False,
                      attribute_filter=filter_attribute_access)
     lua.execute(lua_sandbox)
-    lua.eval("lua_set_loader")(lua_loader,
+    lua.eval("lua_set_loader")(lambda x: lua_loader(ctx, x),
                                mw_text_decode,
                                mw_text_encode,
-                               get_page_info,
+                               lambda x: get_page_info(ctx, x),
                                fetch_language_name,
-                               fetch_language_names)
+                               lambda x: fetch_language_names(ctx, x))
     ctx.lua = lua
 
 
-def expand_wikitext(ctx, title, text, expand_templates,
+def expand_wikitext(ctx, title, text, expand_templates=None,
                     template_fn=None):
     """Expands templates and parser functions (and optionally Lua macros)
     from ``text`` (which is from page with title ``title``).
@@ -604,6 +605,7 @@ def expand_wikitext(ctx, title, text, expand_templates,
         # Initialize the Lua sandbox if not already initialized
         if ctx.lua is None:
             initialize_lua(ctx)
+        lua = ctx.lua
 
         # Get module and function name
         modname = invoke_args[0]
@@ -658,9 +660,10 @@ def expand_wikitext(ctx, title, text, expand_templates,
                 args = lua_args["args"] or ""
                 #print("extensionTag frame={} name={} content={} args={}"
                 #      "".format(frame, name, content, args))
+                stack_copy = copy.copy(stack)
                 return tag_fn(title, "#tag", [name, content + "".join(args)],
+                              lambda x: x,  # Already expanded
                               ["[make_frame]"])
-
 
             # Create frame object as dictionary with default value None
             frame = {}
@@ -807,6 +810,10 @@ def expand_wikitext(ctx, title, text, expand_templates,
                     body = ctx.templates[name]
                     # XXX optimize by pre-encoding bodies during preprocessing
                     # (Each template is typically used many times)
+                    # Determine if the template starts with a list item
+                    contains_list = re.match(r"(?s)^[#*;:]", body) is not None
+                    if contains_list:
+                        body = "\n" + body
                     encoded_body = ctx.encode(body)
                     t = expand(encoded_body, ht, stack,
                                (name, ht))
@@ -848,8 +855,8 @@ def expand_wikitext(ctx, title, text, expand_templates,
                 stack.append(fn_name)
                 stack_copy = copy.copy(stack)
                 expander = lambda arg: expand(arg, argmap, stack_copy, parent)
-                if fn_name == "#invoke" and ctx.invoke_fn is not None:
-                    ret = ctx.invoke_fn(args, expander, stack, parent)
+                if fn_name == "#invoke":
+                    ret = invoke_fn(args, expander, stack, parent)
                 else:
                     ret = call_parser_function(fn_name, args, expander,
                                                title, stack)
