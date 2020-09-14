@@ -666,6 +666,14 @@ class WikiProcTests(unittest.TestCase):
         ret = expand_wikitext(ctx, "Tt", "{{testmod|abc}}")
         self.assertEqual(ret, "abcxcxxbcxcxxx")
 
+    def test_template17(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testmod", "a{{testmod2|{{{1}}}}}b"],
+            ["Template", "testmod2", "x{{{1}}}y"],
+        ])
+        ret = expand_wikitext(ctx, "Tt", "{{testmod|zz}}")
+        self.assertEqual(ret, "axzzyb")
+
 # XXX test passing template arguments to another template
 # XXX test case variations of template names and parser function names
 # XXX test | syntax for parser functions (as compatibility for :)

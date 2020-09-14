@@ -23,6 +23,7 @@ def if_fn(title, fn_name, args, expander, stack):
         while len(args) < 3:
             args.append("")
     v = expander(args[0]).strip()
+    print("if_fn cond:", repr(v))
     if v:
         return expander(args[1]).strip()
     return expander(args[2]).strip()

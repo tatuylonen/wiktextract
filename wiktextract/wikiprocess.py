@@ -3,6 +3,7 @@
 #
 # Copyright (c) 2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
+import os
 import re
 import sys
 import copy
@@ -44,6 +45,7 @@ LANGUAGE_CODE_TO_NAME = { x["code"]: x["name"]
 # Create unique value (128-random value) that is used as a magic cookie for
 # special codes used to represent nested structures during encoding/expansion
 magic = base64.b64encode(os.urandom(16), altchars=b"#!").decode("utf-8")
+magic = re.sub(r"=", "-", magic)
 
 
 class ExpandCtx(object):
@@ -727,13 +729,82 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
         return ("&lt;&lt;LUA EXECUTION ERROR in {}.{}&gt;&gt;"
                 "".format(modname, modfn))
 
-    def expand(coded, argmap, stack, parent):
+    def expand(coded, stack, parent):
         """This function does most of the work for expanding encoded templates,
         arguments, and parser functions."""
         assert isinstance(coded, str)
-        assert isinstance(argmap, dict)
         assert isinstance(stack, list)
         assert isinstance(parent, (tuple, type(None)))
+
+        def expand_args(coded, argmap):
+            assert isinstance(coded, str)
+            assert isinstance(argmap, dict)
+            parts = []
+            pos = 0
+            for m in re.finditer(r"!{}(.)(\d+)!".format(magic), coded):
+                new_pos = m.start()
+                if new_pos > pos:
+                    parts.append(coded[pos:new_pos])
+                pos = m.end()
+                kind = m.group(1)
+                idx = int(m.group(2))
+                kind = m.group(1)
+                kind2, args = ctx.cookies[idx]
+                assert isinstance(args, tuple)
+                assert kind == kind2
+                if kind == "T":
+                    # Template transclusion - map arguments in its arguments
+                    new_args = tuple(map(lambda x: expand_args(x, argmap),
+                                         args))
+                    parts.append(ctx.save_value(kind, new_args))
+                    continue
+                if kind == "A":
+                    # Template argument reference
+                    if len(args) > 2:
+                        print("{}: too many args ({}) in argument reference "
+                              "{!r}".format(title, len(args), args))
+                    stack.append("ARG-NAME")
+                    k = expand(expand_args(args[0], argmap),
+                               stack, parent).strip()
+                    stack.pop()
+                    if k.isdigit():
+                        k = int(k)
+                    v = argmap.get(k, None)
+                    if v is not None:
+                        parts.append(v)
+                        continue
+                    if len(args) >= 2:
+                        stack.append("ARG-DEFVAL")
+                        ret = expand(expand_args(args[1], argmap),
+                                     stack, parent)
+                        stack.pop()
+                        parts.append(ret)
+                        continue
+                    # The argument is not defined (or name is empty)
+                    arg = "{{{" + str(k) + "}}}"
+                    parts.append(arg)
+                    continue
+                if kind == "P":
+                    # Parser function call
+                    new_args = tuple(map(lambda x: expand_args(x, argmap),
+                                         args))
+                    print("argmap:", argmap)
+                    print("expanded parserfn args:", repr(new_args))
+                    parts.append(ctx.save_value(kind, new_args))
+                    continue
+                if kind == "L":
+                    # Link to another page
+                    content = args[0]
+                    content = expand_args(content, argmap)
+                    parts.append("[[" + content + "]]")
+                    continue
+                print("{}: expand_arg: unsupported cookie kind {!r} in {}"
+                      "".format(title, kind, m.group(0)))
+                parts.append(m.group(0))
+            parts.append(coded[pos:])
+            return "".join(parts)
+
+        # Main code of expand()
         parts = []
         pos = 0
         for m in re.finditer(r"!{}(.)(\d+)!".format(magic), coded):
@@ -749,7 +820,7 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
             if kind == "T":
                 # Template transclusion
                 stack.append("TEMPLATE_NAME")
-                tname = expand(args[0], argmap, stack, parent)
+                tname = expand(args[0], stack, parent)
                 stack.pop()
                 name = canonicalize_template_name(tname)
                 stack.append(name)
@@ -759,9 +830,6 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                 num = 1
                 for i in range(1, len(args)):
                     arg = args[i]
-                    stack.append("ARG{}".format(i))
-                    arg = expand(arg, argmap, stack, parent)
-                    stack.pop()
                     ofs = arg.find("=")
                     if ofs <= 0:
                         k = num
@@ -776,7 +844,14 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                                 k = 1000
                             if num <= k:
                                 num = k + 1
+                        else:
+                            stack.append("ARGNAME")
+                            k = expand(k, stack, parent)
+                            stack.pop()
                         arg = arg[ofs + 1:]
+                    stack.append("ARGVAL")
+                    arg = expand(arg, stack, parent)
+                    stack.pop()
                     ht[k] = arg
 
                 # Check if this template is defined
@@ -792,12 +867,14 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                     stack.pop()
                     print("{}: too deep expansion of templates via {}"
                           "".format(title, stack))
+                    assert False
                     parts.append(unexpanded_template(tname, ht))
                     continue
 
                 # If this template is not one of those we want to expand,
                 # return it unexpanded (but with arguments possibly expanded)
                 if name not in expand_templates:
+                    stack.pop()
                     parts.append(unexpanded_template(tname, ht))
                     continue
 
@@ -815,46 +892,27 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                     if contains_list:
                         body = "\n" + body
                     encoded_body = ctx.encode(body)
-                    t = expand(encoded_body, ht, stack,
-                               (name, ht))
+                    # Expand template arguments recursively
+                    encoded_body = expand_args(encoded_body, ht)
+                    # Otherwise expand the body
+                    t = expand(encoded_body, stack, (name, ht))
 
                 assert isinstance(t, str)
                 stack.pop()  # template name
                 parts.append(t)
             elif kind == "A":
-                # Template argument reference
-                if len(args) > 2:
-                    print("{}: too many args ({}) in argument reference {!r}"
-                          "".format(title, len(args), args))
-                stack.append("ARG_NAME")
-                k = expand(args[0], argmap, stack, parent).strip()
-                stack.pop()
-                stack.append("ARG{}-DEFVAL".format(k))
-                if len(args) >= 2:
-                    defval = expand(args[1], argmap, stack, parent)
-                else:
-                    defval = None
-                stack.pop()
-                if k.isdigit():
-                    k = int(k)
-                v = argmap.get(k, defval)
-                if v is not None:
-                    parts.append(v)
-                    continue
-                # The argument is not defined (or name is empty)
-                assert defval is None
-                arg = "{{{" + str(k) + "}}}"
+                # The argument is outside transcluded template body
+                arg = "{{{" + "|".join(args) + "}}}"
                 parts.append(arg)
             elif kind == "P":
                 # Parser function call
                 stack.append("PARSERFN_FN")
-                fn_name = expand(args[0], argmap, stack, parent)
+                fn_name = expand(args[0], stack, parent)
                 stack.pop()
                 fn_name = canonicalize_parserfn_name(fn_name)
                 args = list(args[1:])
                 stack.append(fn_name)
-                stack_copy = copy.copy(stack)
-                expander = lambda arg: expand(arg, argmap, stack_copy, parent)
+                expander = lambda arg: expand(arg, stack, parent)
                 if fn_name == "#invoke":
                     ret = invoke_fn(args, expander, stack, parent)
                 else:
@@ -869,11 +927,11 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                 # Link to another page
                 content = args[0]
                 stack.append("[[link]]")
-                content = expand(content, argmap, stack, parent)
+                content = expand(content, stack, parent)
                 stack.pop()
                 parts.append("[[" + content + "]]")
             else:
-                print("{}: unsupported cookie kind {!r} in {}"
+                print("{}: expand: unsupported cookie kind {!r} in {}"
                       "".format(title, kind, m.group(0)))
                 parts.append(m.group(0))
         parts.append(coded[pos:])
@@ -887,6 +945,6 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
     # Recursively expand the selected templates.  This is an outside-in
     # operation.
     # print("Expanding")
-    expanded = expand(encoded, {}, [title], None)
+    expanded = expand(encoded, [title], None)
 
     return expanded
