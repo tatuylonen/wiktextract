@@ -339,13 +339,15 @@ def phase1_to_ctx(phase1_data):
     ctx = ExpandCtx()
     ctx.modules = {}
     ctx.templates = {}
+    # Some predefined templates
     ctx.templates["!"] = "&vert;"
+    ctx.templates["(("] = "&lbrace;&lbrace;"
+    ctx.templates["))"] = "&rbrace;&rbrace;"
     ctx.need_pre_expand = set()
     ctx.redirects = {}
     included_map = collections.defaultdict(set)
     expand_q = []
     for tag, title, text in phase1_data:
-        # XXX should this be enabled? title = html.unescape(title)
         if tag == "#redirect":
             ctx.redirects[title] = text
             continue
@@ -613,14 +615,6 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
         modname = invoke_args[0]
         modfn = invoke_args[1]
 
-        def getArgument(frame_args, k):
-            assert isinstance(frame_args, dict)
-            v = frame_args[k]
-            if v is None:
-                return v
-            obj = {"expand": lambda obj: expander(v)}
-            return lua.table_from(obj)
-
         def value_with_expand(frame, fexpander, x):
             assert isinstance(frame, dict)
             assert isinstance(fexpander, str)
@@ -667,24 +661,91 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                               lambda x: x,  # Already expanded
                               ["[make_frame]"])
 
+            def callParserFunction(frame, *args):
+                if len(args) < 1:
+                    print("callParserFunction: missing name at {}".format(stack))
+                    return ""
+                name = args[0]
+                if not isinstance(name, str):
+                    new_args = list(name["args"].values())
+                    name = name["name"] or ""
+                else:
+                    new_args = []
+                name = str(name)
+                for arg in args[1:]:
+                    if isinstance(arg, (int, float, str)):
+                        new_args.append(str(arg))
+                    else:
+                        for k, v in sorted(arg.items(), key=lambda x: str(x[0])):
+                            new_args.append(str(v))
+                name = canonicalize_parserfn_name(name)
+                if name not in PARSER_FUNCTIONS:
+                    print("frame:callParserFunction(): undefined function "
+                          "{!r} at {}".format(name, stack))
+                    return ""
+                return call_parser_function(name, new_args, lambda x: x,
+                                            ctx.title, stack)
+
+            def expand_all_templates(encoded):
+                # Expand all templates here, even if otherwise only
+                # expanding some of them
+                nonlocal expand_templates
+                saved_expand_templates = expand_templates
+                try:
+                    expand_templates = ctx.templates
+                    ret = expand(encoded, stack, parent)
+                finally:
+                    expand_templates = saved_expand_templates
+                return ret
+
+            def preprocess(frame, *args):
+                if len(args) < 1:
+                    print("preprocess: missing arg at {}".format(stack))
+                    return ""
+                v = args[0]
+                if not isinstance(v, str):
+                    v = str(v["text"] or "")
+                # Expand all templates, in case the Lua code actually inspects
+                # the output.
+                return expand_all_templates(v)
+
+            def expandTemplate(frame, *args):
+                if len(args) < 1:
+                    print("expandTemplate: missing arguments at {}"
+                          "".format(stack))
+                    return ""
+                dt = args[0]
+                if isinstance(dt, (int, float, str, type(None))):
+                    print("expandTemplate: arguments should be named at {}"
+                          "".format(stack))
+                    return ""
+                title = dt["title"] or ""
+                args = dt["args"] or {}
+                new_args = [title]
+                for k, v in sorted(args.items(), key=lambda x: str(x[0])):
+                    new_args.append("{}={}".format(k, v))
+                encoded = ctx.save_value("T", new_args)
+                ret = expand_all_templates(encoded)
+                return ret
+
             # Create frame object as dictionary with default value None
             frame = {}
+            frame["args"] = frame_args
+            # argumentPairs is set in lua_sandbox.lua
+            frame["callParserFunction"] = callParserFunction
+            frame["extensionTag"] = extensionTag
+            frame["expandTemplate"] = expandTemplate
+            # getArgument is set in lua_sandbox.lua
             frame["getParent"] = lambda self: pframe
             frame["getTitle"] = lambda self: title
-            frame["args"] = frame_args
-            frame["getArgument"] = lambda self, x: getArgument(frame_args, x)
+            frame["preprocess"] = preprocess
+            # XXX still untested:
             frame["newParserValue"] = \
                 lambda self, x: value_with_expand(self, "preprocess", x)
             frame["newTemplateParserValue"] = \
                 lambda self, x: value_with_expand(self, "expand", x)
-            frame["newChild"] = lambda self, title="", args="": \
+            frame["newChild"] = lambda title="", args="": \
                 make_frame(self, title, args)
-            frame["extensionTag"] = extensionTag
-            # argumentPairs is set in lua_sandbox.lua
-            # XXX callParserFunction(name=None, args=None) used 30
-            # XXX expandTemplate(title=None, args=None) used 113
-            # XXX extensionTag(name=None, content=None, args=None) used 29
-            frame["preprocess"] = lambda self, text: expander(text)
             return lua.table_from(frame)
 
         # Create parent frame (for page being processed) and current frame
@@ -706,6 +767,8 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
         sys.stdout.flush()
         ok, text = lua.eval("lua_invoke")(modname, modfn, frame)
         if ok:
+            if text is None:
+                text = "nil"
             return str(text)
         print("LUA ERROR IN #invoke {} at {}".format(invoke_args, stack))
         if isinstance(text, Exception):
@@ -726,8 +789,7 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                 break
             parts.append(line)
         print("\n".join(parts))
-        return ("&lt;&lt;LUA EXECUTION ERROR in {}.{}&gt;&gt;"
-                "".format(modname, modfn))
+        return ""
 
     def expand(coded, stack, parent):
         """This function does most of the work for expanding encoded templates,
@@ -788,8 +850,6 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                     # Parser function call
                     new_args = tuple(map(lambda x: expand_args(x, argmap),
                                          args))
-                    print("argmap:", argmap)
-                    print("expanded parserfn args:", repr(new_args))
                     parts.append(ctx.save_value(kind, new_args))
                     continue
                 if kind == "L":
@@ -829,7 +889,7 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                 ht = {}
                 num = 1
                 for i in range(1, len(args)):
-                    arg = args[i]
+                    arg = str(args[i])
                     ofs = arg.find("=")
                     if ofs <= 0:
                         k = num
@@ -895,7 +955,7 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                     # Expand template arguments recursively
                     encoded_body = expand_args(encoded_body, ht)
                     # Otherwise expand the body
-                    t = expand(encoded_body, stack, (name, ht))
+                    t = expand(encoded_body, stack, (tname.strip(), ht))
 
                 assert isinstance(t, str)
                 stack.pop()  # template name

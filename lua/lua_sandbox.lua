@@ -54,44 +54,54 @@ function lua_set_loader(loader, mw_text_decode, mw_text_encode,
 end
 
 function frame_args_index(new_args, key)
-   print("frame_args_index", key)
-   local v = new_args.orig[key]
+   -- print("frame_args_index", key)
+   local v = new_args._orig[key]
    if v == nil then return nil end
-   local frame = new_args.frame
-   return frame:preprocess(v)
+   if not new_args._preprocessed[key] then
+      local frame = new_args._frame
+      v = frame:preprocess(v)
+      -- Cache preprocessed value so we only preprocess each argument once
+      new_args._preprocessed[key] = true
+      new_args._orig[key] = v
+   end
+   -- print("frame_args_index", key, "->", v)
+   return v
 end
 
 function frame_args_pairs(new_args)
-   print("frame_args_pairs")
-   local frame = new_args.frame
+   -- print("frame_args_pairs")
+   local frame = new_args._frame
    local function stateless_iter(new_args, key)
       if key == nil then key = "***nil***" end
-      local nkey = new_args.next_key[key]
+      local nkey = new_args._next_key[key]
       if nkey == nil then return nil end
       local v = new_args[nkey]
       if v == nil then return nil end
-      v = frame:preprocess(v)
       return nkey, v
    end
    return stateless_iter, new_args, nil
 end
 
 function frame_args_ipairs(new_args)
-   print("frame_args_ipairs")
-   local frame = new_args.frame
+   -- print("frame_args_ipairs")
+   local frame = new_args._frame
    local function stateless_iter(new_args, key)
       if key == nil then key = 1 else key = key + 1 end
       local v = new_args[key]
       if v == nil then return nil end
-      v = frame:preprocess(v)
       return key, v
    end
    return stateless_iter, new_args, nil
 end
 
+function frame_args_len(new_args)
+   return #new_args._orig
+end
+
 frame_args_meta = {
    __index = frame_args_index,
-   __pairs = frame_args_pairs
+   __pairs = frame_args_pairs,
+   __len = frame_args_len
 }
 
 function prepare_frame_args(frame)
@@ -101,9 +111,17 @@ function prepare_frame_args(frame)
      next_key[prev] = k
      prev = k
   end
-  new_args = {orig = frame.args, frame = frame, next_key = next_key}
+  new_args = {_orig = frame.args, _frame = frame, _next_key = next_key,
+              _preprocessed = {}}
   setmetatable(new_args, frame_args_meta)
   frame.args = new_args
+end
+
+function frame_get_argument(frame, name)
+   if type(name) == "table" then name = name.name end
+   v = frame.args[name]
+   if v == nil then return nil end
+   return { expand = function() return v end }
 end
 
 -- This function implements the {{#invoke:...}} parser function.
@@ -120,11 +138,13 @@ function lua_invoke(mod_name, fn_name, frame)
   -- Convert frame.args into a metatable that preprocesses the values
   prepare_frame_args(frame)
   -- Implement some additional functions for frame
-  frame.argumentPairs = function () return pairs(frame.args) end
+  frame.argumentPairs = function (frame) return pairs(frame.args) end
+  frame.getArgument = frame_get_argument
   local pframe = frame:getParent()
   if pframe ~= nil then
      prepare_frame_args(pframe)
      pframe.argumentPairs = function () return pairs(pframe.args) end
+     pframe.getArgument = frame_get_argument
   end
   mw.getCurrentFrame = function() return frame end
   if fn == nil then

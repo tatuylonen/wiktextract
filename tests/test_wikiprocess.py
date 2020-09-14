@@ -674,7 +674,588 @@ class WikiProcTests(unittest.TestCase):
         ret = expand_wikitext(ctx, "Tt", "{{testmod|zz}}")
         self.assertEqual(ret, "axzzyb")
 
-# XXX test passing template arguments to another template
+    def test_template18(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testmod", "a{{testmod2|{{{1}}}}}b"],
+            ["Template", "testmod2", "{{#if:{{{1}}}|x|y}}"],
+        ])
+        ret = expand_wikitext(ctx, "Tt", "{{testmod|zz}}")
+        self.assertEqual(ret, "axb")
+
+    def test_template19(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testmod", "a{{testmod2|{{{1}}}}}b"],
+            ["Template", "testmod2", "{{#if:{{{1}}}|x|y}}"],
+        ])
+        ret = expand_wikitext(ctx, "Tt", "{{testmod|}}")
+        self.assertEqual(ret, "ayb")
+
+    def test_template20(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testmod", "a{{testmod2|{{{1}}}}}b"],
+            ["Template", "testmod2", "{{#if:{{{1}}}|x|y}}"],
+        ])
+        ret = expand_wikitext(ctx, "Tt", "{{testmod}}")
+        self.assertEqual(ret, "axb")  # condition expands to {{{1}}}
+
+    def test_template21(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testmod", "a{{testmod2|{{{1}}}}}b"],
+            ["Template", "testmod2", "c{{testmod3|{{{1}}}}}d"],
+            ["Template", "testmod3", "f{{{1}}}g"],
+        ])
+        ret = expand_wikitext(ctx, "Tt", "{{testmod}}")
+        self.assertEqual(ret, "acf{{{1}}}gdb")
+
+    def test_template22(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testmod", "a{{testmod2|{{{1}}}}}b"],
+            ["Template", "testmod2", "c{{testmod3|{{{1}}}}}d"],
+            ["Template", "testmod3", "f{{{1}}}g"],
+        ])
+        ret = expand_wikitext(ctx, "Tt", "{{testmod|}}")
+        self.assertEqual(ret, "acfgdb")
+
+    def test_template23(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testmod", "a{{testmod2|{{{1}}}}}b"],
+            ["Template", "testmod2", "c{{testmod3|{{{1}}}}}d"],
+            ["Template", "testmod3", "f{{{1}}}g"],
+        ])
+        ret = expand_wikitext(ctx, "Tt", "{{testmod|zz}}")
+        self.assertEqual(ret, "acfzzgdb")
+
+    def test_template24(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testmod", "a{{{1}}}b"],
+        ])
+        ret = expand_wikitext(ctx, "Tt", "{{testmod|{{!}}}}")
+        self.assertEqual(ret, "a&vert;b")
+
+    def test_template25(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testmod", "a{{{1}}}b"],
+        ])
+        # This example is from
+        # https://www.mediawiki.org/wiki/Extension:Scribunto/Lua_reference_manual#frame:getTitle,
+        # under frame:expandTemplate examples
+        ret = expand_wikitext(ctx, "Tt", "{{testmod|{{((}}!{{))}}}}")
+        self.assertEqual(ret, "a&lbrace;&lbrace;!&rbrace;&rbrace;b")
+
+    def test_invoke1(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return "in test"
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "a{{#invoke:testmod|testfn}}b")
+        self.assertEqual(ret, "ain testb")
+
+    def test_invoke2(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return tostring(#frame.args)
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "0")
+
+    def test_invoke3(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return tostring(#frame.args)
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn|a|b}}")
+        self.assertEqual(ret, "2")
+
+    def test_invoke4(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame.args[1]
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn|a|b}}")
+        self.assertEqual(ret, "a")
+
+    def test_invoke5(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame.args.foo
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn|foo=bar|a}}")
+        self.assertEqual(ret, "bar")
+
+    def test_invoke6(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame.args["foo"]
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn|foo=bar|a}}")
+        self.assertEqual(ret, "bar")
+
+    def test_invoke7(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             "{{#invoke:testmod|testfn|foo={{{1}}}|{{{2}}}}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame.args["foo"]
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl|a|b}}")
+        self.assertEqual(ret, "a")
+
+    def test_invoke8(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             "{{#invoke:testmod|testfn|foo={{{1}}}|{{{2}}}}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame.args["foo"]
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl|a|b}}")
+        self.assertEqual(ret, "a")
+
+    def test_invoke9(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             "{{#invoke:testmod|testfn|foo={{{1}}}|{{{2}}}}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame.args.foo
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl|a|b}}")
+        self.assertEqual(ret, "a")
+
+    def test_invoke10(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             "{{#invoke:testmod|testfn|foo={{{1}}}|{{{2}}}}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame.args[1]
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl|a|b}}")
+        self.assertEqual(ret, "b")
+
+    def test_invoke11(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             "{{#invoke:testmod|testfn}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return tostring(frame.args.foo)
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl}}")
+        self.assertEqual(ret, "nil")
+
+    def test_frame_parent1(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             "{{#invoke:testmod|testfn}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return tostring(frame:getParent().args[1])
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl}}")
+        self.assertEqual(ret, "nil")
+
+    def test_frame_parent2(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             "{{#invoke:testmod|testfn}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:getParent().args[1]
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl|foo|bar}}")
+        self.assertEqual(ret, "foo")
+
+    def test_frame_parent3(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             "{{#invoke:testmod|testfn}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:getParent().args[2]
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl|foo|bar}}")
+        self.assertEqual(ret, "bar")
+
+    def test_frame_parent4(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             "{{#invoke:testmod|testfn}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return tostring(frame:getParent().args[3])
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl|foo|bar}}")
+        self.assertEqual(ret, "nil")
+
+    def test_frame_parent5(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             "{{#invoke:testmod|testfn}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:getParent().args.foo
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl|foo|bar|foo=zap}}")
+        self.assertEqual(ret, "zap")
+
+    def test_frame_parent6(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl", "{{#invoke:testmod|testfn}}"],
+            ["Template", "testtempl2", "foo{{{1|}}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  local parent = frame:getParent()
+  return parent.args[1] .. parent.args[2]
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl|{{testtempl2|zz}}|yy}}")
+        self.assertEqual(ret, "foozzyy")
+
+    def test_frame_parent7(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             "{{#invoke:testmod|testfn}}"],
+            ["Template", "testtempl2", "foo{{{1|}}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:getTitle()
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl|{{testtempl2|zz}}|yy}}")
+        self.assertEqual(ret, "testmod")
+
+    def test_frame_parent8(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             "{{#invoke:testmod|testfn}}"],
+            ["Template", "testtempl2", "foo{{{1|}}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:getParent():getTitle()
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl|{{testtempl2|zz}}|yy}}")
+        self.assertEqual(ret, "testtempl")
+
+    def test_frame_parent9(self):
+        # parent of parent should be nil
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl", "{{#invoke:testmod|testfn}}"],
+            ["Template", "testtempl2", "{{testtempl}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:getParent():getParent()
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl2}}")
+        self.assertEqual(ret, "nil")
+
+    def test_frame_callParserFunction1(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:callParserFunction("#tag", {"br"})
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "<br />")
+
+    def test_frame_callParserFunction2(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:callParserFunction{name = "#tag", args = {"br"}}
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "<br />")
+
+    def test_frame_callParserFunction3(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:callParserFunction("#tag", "br")
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "<br />")
+
+    def test_frame_callParserFunction4(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:callParserFunction("#tag", "div", "content")
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "<div>content</div>")
+
+    def test_frame_getArgument1(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:getArgument(1).expand()
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn|a|b}}")
+        self.assertEqual(ret, "a")
+
+    def test_frame_getArgument2(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:getArgument(2).expand()
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn|a|b}}")
+        self.assertEqual(ret, "b")
+
+    def test_frame_getArgument3(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:getArgument(3)
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn|a|b}}")
+        self.assertEqual(ret, "nil")
+
+    def test_frame_getArgument4(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:getArgument("foo").expand()
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn|foo=bar}}")
+        self.assertEqual(ret, "bar")
+
+    def test_frame_getArgument5(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:getArgument{name = "foo"}.expand()
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn|foo=bar}}")
+        self.assertEqual(ret, "bar")
+
+    def test_frame_getArgument6(self):
+        ctx = phase1_to_ctx([
+            ["Template", "templ", "{{#invoke:testmod|testfn|a|b}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:getParent():getArgument(2).expand()
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{templ|x|y}}")
+        self.assertEqual(ret, "y")
+
+    def test_frame_preprocess1(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtemplate", "foo{{{1}}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:preprocess("a{{testtemplate|a}}b")
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn|foo=bar}}")
+        self.assertEqual(ret, "afooab")
+
+    def test_frame_preprocess2(self):
+        ctx = phase1_to_ctx([
+            ["Template", "testtemplate", "foo{{{1}}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:preprocess{text = "a{{testtemplate|a}}b"}
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn|foo=bar}}")
+        self.assertEqual(ret, "afooab")
+
+    def test_frame_argumentPairs1(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  local ret = ""
+  for k, v in frame:argumentPairs() do
+    ret = ret .. "|" .. tostring(k) .. "=" .. tostring(v)
+  end
+  return ret
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn|foo=bar}}")
+        self.assertEqual(ret, "|foo=bar")
+
+    def test_frame_argumentPairs2(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  local ret = ""
+  for k, v in frame:argumentPairs() do
+    ret = ret .. "|" .. tostring(k) .. "=" .. tostring(v)
+  end
+  return ret
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn|a|b}}")
+        self.assertEqual(ret, "|1=a|2=b")
+
+    def test_frame_argumentPairs3(self):
+        ctx = phase1_to_ctx([
+            ["Template", "templ", "{{#invoke:testmod|testfn|a|b}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  local ret = ""
+  for k, v in frame:getParent():argumentPairs() do
+    ret = ret .. "|" .. tostring(k) .. "=" .. tostring(v)
+  end
+  return ret
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{templ|x|y}}")
+        self.assertEqual(ret, "|1=x|2=y")
+
+    def test_frame_expandTemplate1(self):
+        ctx = phase1_to_ctx([
+            ["Template", "templ", "a{{{1}}}b{{{2}}}c{{{k}}}d"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:expandTemplate{title="templ", args={"foo", "bar", k=4}}
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "afoobbarc4d")
+
+    def test_frame_expandTemplate2(self):
+        ctx = phase1_to_ctx([
+            ["Template", "templ", "a{{{1}}}b"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:expandTemplate{title="templ", args={"|"}}
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "a|b")
+
+    def test_frame_expandTemplate3(self):
+        ctx = phase1_to_ctx([
+            ["Template", "templ", "a{{{1}}}b"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:expandTemplate{title="templ", args={"{{!}}"}}
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "a{{!}}b")
+
+
+# XXX test frame:extensionTag (AND FIX ITS ARGUMENTS - must support both
+# positional and named)
+# XXX test frame:newParserValue
+# XXX test frame:newTemplateParserValue
+# XXX test frame:newChild
+# XXX test redirects for templates and Lua modules
 # XXX test case variations of template names and parser function names
 # XXX test | syntax for parser functions (as compatibility for :)
-# XXX test calling Lua modules
+# XXX test why luatest3 der3 expansion for Spanish fails
