@@ -906,7 +906,7 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                     continue
 
                 # Limit recursion depth
-                if len(stack) >= 20:
+                if len(stack) >= 100:
                     print("{}: too deep expansion of templates via {}"
                           "".format(title, stack))
                     parts.append(unexpanded_template(args))

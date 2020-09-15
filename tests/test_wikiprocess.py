@@ -1360,6 +1360,9 @@ return export
 # parser function is actually passed to another template in a parameter
 # and called from the subordinate template)
 
+# XXX Fix and test giving parameter to FULLPAGENAME, PAGENAME, etc.  Currently
+# not implemented.
+
 # XXX test frame:newParserValue
 # XXX test frame:newTemplateParserValue
 # XXX test frame:newChild

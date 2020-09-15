@@ -80,11 +80,11 @@ function mw.loadData(modname)
 end
 
 function mw.log(...)
-   print("mw.log", ...)
+   -- print("mw.log", ...)
 end
 
 function mw.logObject(obj)
-   print("mw.logObject", obj)
+   -- print("mw.logObject", obj)
 end
 
 return mw
