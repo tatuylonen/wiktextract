@@ -742,6 +742,44 @@ class WikiProcTests(unittest.TestCase):
         ret = expand_wikitext(ctx, "Tt", "{{testmod|{{((}}!{{))}}}}")
         self.assertEqual(ret, "a&lbrace;&lbrace;!&rbrace;&rbrace;b")
 
+    # def test_template26(self):
+    #     ctx = phase1_to_ctx([
+    #         ["#redirect", "Template:rel3", "Template:col3"],
+    #         ["Template", "col3", "{{check|lang={{{lang|}}}|"
+    #          "{{#invoke:columns|display|sort=1|collapse=1|columns=3}}}}"],
+    #         ["Template", "check",
+    #          "{{deprecated code|active={{#if:{{{lang|}}}|yes|no}}|"
+    #          "text=deprecated use of {{para|lang}} parameter|"
+    #          "tooltip=deprecated 'lang'|{{{1}}}}}"],
+    #         ["Template", "deprecated code",
+    #          """{{#ifeq:{{{active|}}}|no|{{{1}}}|"""
+    #          """<div class="deprecated" title="{{#if:{{{tooltip|}}}|"""
+    #          """{{{tooltip}}}|This is a deprecated template usage.}}">''"""
+    #          """([[:Category:Successfully deprecated templates|"""
+    #          """{{#if:{{{text|}}}|{{{text}}}|deprecated template usage}}]])''"""
+    #          """{{{1}}}</div>"""
+    #          """{{categorize|und|Pages using deprecated templates}}}}"""],
+    #         ["Template", "para",
+    #          """<code>&#124;{{#if:{{{}}}|{{#if:{{{1|}}}|{{{1}}}=}}{{{2|}}}|="""
+    #          """{{{1|}}}}}</code>{{#if:{{{3|}}}|&nbsp;({{#if:{{{req|}}}|"""
+    #          """'''''required''''',&nbsp;}}"""
+    #          """{{#if:{{{opt|}}}|''optional'',&nbsp;}}{{{3}}})|"""
+    #          """{{#if:{{{req|}}}|&nbsp;('''''required''''')}}"""
+    #          """{{#if:{{{opt|}}}|&nbsp;(''optional'')}}}}"""],
+    #         ["Template", "categorize",
+    #          """{{#invoke:utilities|template_categorize}}"""],
+    #     ])
+    #     ret = expand_wikitext(ctx, "Tt", "{{rel3|es|animálculo|animalidad}}")
+    #     self.assertEqual(ret, "XXX")
+
+    def test_redirect1(self):
+        ctx = phase1_to_ctx([
+            ["#redirect", "Template:oldtemp", "Template:testtemp"],
+            ["Template", "testtemp", "a{{{1}}}b"],
+        ])
+        ret = expand_wikitext(ctx, "Tt", "{{oldtemp|foo}}")
+        self.assertEqual(ret, "afoob")
+
     def test_invoke1(self):
         ctx = phase1_to_ctx([
             ["Scribunto", "testmod", """
@@ -883,6 +921,24 @@ return export
 """]])
         ret = expand_wikitext(ctx, "Tt", "{{testtempl}}")
         self.assertEqual(ret, "nil")
+
+    def test_invoke12(self):
+        # Testing that intervening template call does not mess up arguments
+        # (this was once a bug)
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             "{{templ2|{{#invoke:testmod|testfn}}}}"],
+            ["Template", "templ2", "{{{1}}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  print("parent title:", frame:getParent():getTitle())
+  return tostring(frame:getParent().args[0])
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl|arg1}}")
+        self.assertEqual(ret, "arg1")
 
     def test_frame_parent1(self):
         ctx = phase1_to_ctx([
@@ -1249,9 +1305,61 @@ return export
         ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
         self.assertEqual(ret, "a{{!}}b")
 
+    def test_frame_extensionTag1(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:extensionTag("ref", "some text")
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "<ref>some text</ref>")
 
-# XXX test frame:extensionTag (AND FIX ITS ARGUMENTS - must support both
-# positional and named)
+    def test_frame_extensionTag2(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:extensionTag("ref", "some text", "class=foo")
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, '<ref class="foo">some text</ref>')
+
+    def test_frame_extensionTag3(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:extensionTag{name="ref", content="some text",
+                            args={class="bar", id="test"}}
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, '<ref class="bar" id="test">some text</ref>')
+
+    def test_frame_extensionTag4(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return frame:extensionTag("br")
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, '<br />')
+
+
+# XXX parser function frame:getParent() value: must be from the most recent
+# template before the template containing the parser function (even if the
+# parser function is actually passed to another template in a parameter
+# and called from the subordinate template)
+
 # XXX test frame:newParserValue
 # XXX test frame:newTemplateParserValue
 # XXX test frame:newChild

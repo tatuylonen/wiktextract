@@ -130,9 +130,16 @@ end
 function lua_invoke(mod_name, fn_name, frame)
   local mod = require(mod_name)
   local fn = mod[fn_name]
+  local pframe = frame:getParent()
   -- print("lua_invoke", mod_name, fn_name)
   -- for k, v in pairs(frame.args) do
   --    print("", k, type(k), v, type(v))
+  -- end
+  -- if pframe ~= nil then
+  --    print("parent")
+  --    for k, v in pairs(pframe.args) do
+  --       print("", k, type(k), v, type(v))
+  --    end
   -- end
   io.flush()
   -- Convert frame.args into a metatable that preprocesses the values
@@ -140,7 +147,6 @@ function lua_invoke(mod_name, fn_name, frame)
   -- Implement some additional functions for frame
   frame.argumentPairs = function (frame) return pairs(frame.args) end
   frame.getArgument = frame_get_argument
-  local pframe = frame:getParent()
   if pframe ~= nil then
      prepare_frame_args(pframe)
      pframe.argumentPairs = function () return pairs(pframe.args) end

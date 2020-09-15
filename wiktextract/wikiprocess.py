@@ -391,9 +391,11 @@ def phase1_to_ctx(phase1_data):
     # Copy template definitions to redirects to them
     for k, v in ctx.redirects.items():
         if not k.startswith("Template:"):
+            # print("Unhandled redirect src", k)
             continue
         k = k[9:]
         if not v.startswith("Template:"):
+            # print("Unhandled redirect dst", v)
             continue
         v = v[9:]
         k = canonicalize_template_name(k)
@@ -550,11 +552,11 @@ def initialize_lua(ctx):
     ctx.lua = lua
 
 
-def expand_wikitext(ctx, title, text, expand_templates=None,
+def expand_wikitext(ctx, title, text, templates_to_expand=None,
                     template_fn=None):
     """Expands templates and parser functions (and optionally Lua macros)
     from ``text`` (which is from page with title ``title``).
-    ``expand_templates`` should be a set (or dictionary) containing
+    ``templates_to_expand`` should be a set (or dictionary) containing
     those canonicalized template names that should be expanded (None
     expands all).  ``template_fn``, if given, will be used to
     expand templates; if it is not defined or returns None, the
@@ -564,32 +566,20 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
     assert isinstance(ctx, ExpandCtx)
     assert isinstance(title, str)
     assert isinstance(text, str)
-    assert isinstance(expand_templates, (set, dict, type(None)))
+    assert isinstance(templates_to_expand, (set, dict, type(None)))
     assert template_fn is None or callable(template_fn)
     ctx.title = title
     ctx.template_fn = template_fn
     ctx.cookies = []
     ctx.rev_ht = {}
 
-    # If expand_templates is None, then expand all known templates
-    if expand_templates is None:
-        expand_templates = ctx.templates
+    # If templates_to_expand is None, then expand all known templates
+    if templates_to_expand is None:
+        templates_to_expand = ctx.templates
 
-    def unexpanded_template(tname, ht):
+    def unexpanded_template(args):
         """Formats an unexpanded template (whose arguments may have been
         partially or fully expanded)."""
-        assert isinstance(tname, str)
-        assert isinstance(ht, dict)
-        args = [tname]
-        more_args = []
-        for k, v in ht.items():
-            if isinstance(k, int):
-                while len(args) <= k:
-                    args.append("")
-                args[k] = v
-            else:
-                more_args.append("{}={}".format(k, v))
-        args += list(sorted(more_args))
         return "{{" + "|".join(args) + "}}"
 
     def invoke_fn(invoke_args, expander, stack, parent):
@@ -598,7 +588,7 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
         assert callable(expander)
         assert isinstance(stack, list)
         assert isinstance(parent, (tuple, type(None)))
-        print("invoke_fn", invoke_args)
+        # print("invoke_fn", invoke_args)
         # print("#invoke", invoke_args, "parent", parent, "stack", stack)
         if len(invoke_args) < 2:
             print("#invoke {}: too few arguments at {}"
@@ -649,17 +639,44 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                     frame_args[k] = arg
             frame_args = lua.table_from(frame_args)
 
-            def extensionTag(frame, lua_args):
-                #print(list(lua_args.items()))
-                name = lua_args["name"] or ""
-                content = lua_args["content"] or ""
-                args = lua_args["args"] or ""
-                #print("extensionTag frame={} name={} content={} args={}"
-                #      "".format(frame, name, content, args))
-                stack_copy = copy.copy(stack)
-                return tag_fn(title, "#tag", [name, content + "".join(args)],
-                              lambda x: x,  # Already expanded
-                              ["[make_frame]"])
+            def extensionTag(frame, *args):
+                if len(args) < 1:
+                    print("extensionTag: missing arguments at {}".format(stack))
+                    return ""
+                dt = args[0]
+                if not isinstance(dt, (str, int, float, type(None))):
+                    name = str(dt["name"] or "")
+                    content = str(dt["content"] or "")
+                    attrs = dt["args"] or {}
+                elif len(args) == 1:
+                    name = str(args[0])
+                    content = ""
+                    attrs = {}
+                elif len(args) == 2:
+                    name = str(args[0] or "")
+                    content = str(args[1] or "")
+                    attrs = {}
+                else:
+                    name = str(args[0] or "")
+                    content = str(args[1] or "")
+                    attrs = args[2] or {}
+                if not isinstance(attrs, str):
+                    attrs = list(v if isinstance(k, int) else
+                                 '{}="{}"'
+                                 .format(k, html.escape(v, quote=True))
+                                 for k, v in sorted(attrs.items(),
+                                                    key=lambda x: str(x[0])))
+                elif not attrs:
+                    attrs = []
+                else:
+                    attrs = [attrs]
+
+                stack.append("extensionTag()")
+                ret = tag_fn(title, "#tag", [name, content] + attrs,
+                             lambda x: x,  # Already expanded
+                             stack)
+                stack.pop()
+                return ret
 
             def callParserFunction(frame, *args):
                 if len(args) < 1:
@@ -686,16 +703,11 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                 return call_parser_function(name, new_args, lambda x: x,
                                             ctx.title, stack)
 
-            def expand_all_templates(encoded):
+            def expand_all_templates(text):
                 # Expand all templates here, even if otherwise only
                 # expanding some of them
-                nonlocal expand_templates
-                saved_expand_templates = expand_templates
-                try:
-                    expand_templates = ctx.templates
-                    ret = expand(encoded, stack, parent)
-                finally:
-                    expand_templates = saved_expand_templates
+                encoded = ctx.encode(text)
+                ret = expand(encoded, stack, parent, ctx.templates)
                 return ret
 
             def preprocess(frame, *args):
@@ -791,12 +803,13 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
         print("\n".join(parts))
         return ""
 
-    def expand(coded, stack, parent):
+    def expand(coded, stack, parent, templates_to_expand):
         """This function does most of the work for expanding encoded templates,
         arguments, and parser functions."""
         assert isinstance(coded, str)
         assert isinstance(stack, list)
         assert isinstance(parent, (tuple, type(None)))
+        assert isinstance(templates_to_expand, (set, dict))
 
         def expand_args(coded, argmap):
             assert isinstance(coded, str)
@@ -827,7 +840,7 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                               "{!r}".format(title, len(args), args))
                     stack.append("ARG-NAME")
                     k = expand(expand_args(args[0], argmap),
-                               stack, parent).strip()
+                               stack, parent, ctx.templates).strip()
                     stack.pop()
                     if k.isdigit():
                         k = int(k)
@@ -837,8 +850,7 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                         continue
                     if len(args) >= 2:
                         stack.append("ARG-DEFVAL")
-                        ret = expand(expand_args(args[1], argmap),
-                                     stack, parent)
+                        ret = expand_args(args[1], argmap)
                         stack.pop()
                         parts.append(ret)
                         continue
@@ -880,12 +892,34 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
             if kind == "T":
                 # Template transclusion
                 stack.append("TEMPLATE_NAME")
-                tname = expand(args[0], stack, parent)
+                tname = expand(args[0], stack, parent, templates_to_expand)
                 stack.pop()
                 name = canonicalize_template_name(tname)
-                stack.append(name)
                 if name.startswith("Template:"):
                     name = name[9:]
+
+                # Check if this template is defined
+                if name not in ctx.templates:
+                    print("{}: undefined template {!r} at {}"
+                          "".format(title, tname, stack))
+                    parts.append(unexpanded_template(args))
+                    continue
+
+                # Limit recursion depth
+                if len(stack) >= 20:
+                    print("{}: too deep expansion of templates via {}"
+                          "".format(title, stack))
+                    parts.append(unexpanded_template(args))
+                    continue
+
+                # If this template is not one of those we want to expand,
+                # return it unexpanded (but with arguments possibly expanded)
+                if name not in templates_to_expand:
+                    parts.append(unexpanded_template(args))
+                    continue
+
+                # Construct and expand template arguments
+                stack.append(name)
                 ht = {}
                 num = 1
                 for i in range(1, len(args)):
@@ -895,6 +929,10 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                         k = num
                         num += 1
                     else:
+                        # Note: Writespace is stripped around named
+                        # parameter names and values per
+                        # https://en.wikipedia.org/wiki/Help:Template
+                        # (but not around unnamed parameters)
                         k = arg[:ofs].strip()
                         if k.isdigit():
                             k = int(k)
@@ -906,37 +944,12 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                                 num = k + 1
                         else:
                             stack.append("ARGNAME")
-                            k = expand(k, stack, parent)
+                            k = expand(k, stack, parent, ctx.templates)
                             stack.pop()
-                        arg = arg[ofs + 1:]
-                    stack.append("ARGVAL")
-                    arg = expand(arg, stack, parent)
-                    stack.pop()
+                        arg = arg[ofs + 1:].strip()
+                    # The arguments will be expand below when we expand the
+                    # body
                     ht[k] = arg
-
-                # Check if this template is defined
-                if name not in ctx.templates:
-                    stack.pop()
-                    print("{}: uses undefined template {!r} at {}"
-                          "".format(title, tname, stack))
-                    parts.append(unexpanded_template(tname, ht))
-                    continue
-
-                # Limit recursion depth
-                if len(stack) >= 20:
-                    stack.pop()
-                    print("{}: too deep expansion of templates via {}"
-                          "".format(title, stack))
-                    assert False
-                    parts.append(unexpanded_template(tname, ht))
-                    continue
-
-                # If this template is not one of those we want to expand,
-                # return it unexpanded (but with arguments possibly expanded)
-                if name not in expand_templates:
-                    stack.pop()
-                    parts.append(unexpanded_template(tname, ht))
-                    continue
 
                 # Expand the body, either using ``template_fn`` or using
                 # normal template expansion
@@ -954,8 +967,24 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                     encoded_body = ctx.encode(body)
                     # Expand template arguments recursively
                     encoded_body = expand_args(encoded_body, ht)
+                    # The meaning of parent frame (frame:getParent()) is a bit
+                    # unclear.  In case a parserfn call is passed to a frame
+                    # as a parameter, it turns out not to be the arguments to the
+                    # template that uses the parameter.  It might be either
+                    # the first template called from the page or arguments
+                    # to the template literally containing the parserfn
+                    # call (regardless of where it is actually called).
+                    # Here we assume it will be the outermost template, i.e.,
+                    # the one called directly from the page.
+                    # XXX this should be verified and tested against actual
+                    # MediaWiki.
+                    # XXX THIS IS WRONG.  E.g. enm-head calls head, which assumes
+                    # its getting its arguments from previous template.
+                    # Must ensure parserfn gets parent from the
+                    new_parent = parent if parent else (tname.strip(), ht)
                     # Otherwise expand the body
-                    t = expand(encoded_body, stack, (tname.strip(), ht))
+                    t = expand(encoded_body, stack, new_parent,
+                               templates_to_expand)
 
                 assert isinstance(t, str)
                 stack.pop()  # template name
@@ -967,12 +996,12 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
             elif kind == "P":
                 # Parser function call
                 stack.append("PARSERFN_FN")
-                fn_name = expand(args[0], stack, parent)
+                fn_name = expand(args[0], stack, parent, ctx.templates)
                 stack.pop()
                 fn_name = canonicalize_parserfn_name(fn_name)
                 args = list(args[1:])
                 stack.append(fn_name)
-                expander = lambda arg: expand(arg, stack, parent)
+                expander = lambda arg: expand(arg, stack, parent, ctx.templates)
                 if fn_name == "#invoke":
                     ret = invoke_fn(args, expander, stack, parent)
                 else:
@@ -987,7 +1016,7 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
                 # Link to another page
                 content = args[0]
                 stack.append("[[link]]")
-                content = expand(content, stack, parent)
+                content = expand(content, stack, parent, templates_to_expand)
                 stack.pop()
                 parts.append("[[" + content + "]]")
             else:
@@ -1005,6 +1034,6 @@ def expand_wikitext(ctx, title, text, expand_templates=None,
     # Recursively expand the selected templates.  This is an outside-in
     # operation.
     # print("Expanding")
-    expanded = expand(encoded, [title], None)
+    expanded = expand(encoded, [title], None, templates_to_expand)
 
     return expanded
