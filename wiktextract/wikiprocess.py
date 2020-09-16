@@ -345,8 +345,8 @@ def phase1_to_ctx(phase1_data):
     ctx.templates = {}
     # Some predefined templates
     ctx.templates["!"] = "&vert;"
-    ctx.templates["(("] = "&lbrace;&lbrace;"
-    ctx.templates["))"] = "&rbrace;&rbrace;"
+    ctx.templates["%28%28"] = "&lbrace;&lbrace;"  # {{((}}
+    ctx.templates["%29%29"] = "&rbrace;&rbrace;"  # {{))}}
     ctx.need_pre_expand = set()
     ctx.redirects = {}
     included_map = collections.defaultdict(set)
@@ -750,7 +750,7 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                     new_args.append("{}={}".format(k, v))
                 sys.stdout.flush()
                 encoded = ctx.save_value("T", new_args)
-                stack.push("frame:expandTemplate()")
+                stack.append("frame:expandTemplate()")
                 ret = expand_all_templates(encoded)
                 stack.pop()
                 return ret

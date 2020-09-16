@@ -1429,6 +1429,15 @@ return export
                          "http&colon;//example.com\n")
 
 
+# XXX check and test {{#invoke:string|sub|1|3}}
+#   (used at least in cite-meta template)
+# XXX implement compat function for table.getn in sandbox (deprecated in
+#   current Lua but used in e.g. pt-noun template)
+# XXX Implement #expr parser function
+# XXX Implement #titleparts parser function
+# XXX figure out why template R:L&S not found in luatest3.py
+# XXX figure out why module:parameters:196 fails (mw.title.getCurrentTitle()?)
+
 # XXX test frame:newParserValue
 # XXX test frame:newTemplateParserValue
 # XXX test frame:newChild
