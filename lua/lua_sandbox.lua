@@ -115,6 +115,8 @@ function prepare_frame_args(frame)
               _preprocessed = {}}
   setmetatable(new_args, frame_args_meta)
   frame.args = new_args
+  frame.argumentPairs = function (frame) return pairs(frame.args) end
+  frame.getArgument = frame_get_argument
 end
 
 function frame_get_argument(frame, name)
@@ -145,12 +147,8 @@ function lua_invoke(mod_name, fn_name, frame)
   -- Convert frame.args into a metatable that preprocesses the values
   prepare_frame_args(frame)
   -- Implement some additional functions for frame
-  frame.argumentPairs = function (frame) return pairs(frame.args) end
-  frame.getArgument = frame_get_argument
   if pframe ~= nil then
      prepare_frame_args(pframe)
-     pframe.argumentPairs = function () return pairs(pframe.args) end
-     pframe.getArgument = frame_get_argument
   end
   mw.getCurrentFrame = function() return frame end
   if fn == nil then

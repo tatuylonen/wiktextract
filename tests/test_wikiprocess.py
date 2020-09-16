@@ -1388,6 +1388,47 @@ return export
         ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
         self.assertEqual(ret, '<br />')
 
+
+
+    def test_mw_text_nowiki1(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return mw.text.nowiki("#[foo]{{a|b}}")
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "&num;&lsqb;foo&rsqb;&lbrace;&lbrace;a&vert;"
+                         "b&rbrace;&rbrace;")
+
+    def test_mw_text_nowiki2(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", r"""
+local export = {}
+function export.testfn(frame)
+  return mw.text.nowiki("\n#<foo>'#=\n\nX\n")
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "\n&num;&lt;foo&gt;&apos;#&#61;\n&NewLine;X\n")
+
+    def test_mw_text_nowiki3(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", r"""
+local export = {}
+function export.testfn(frame)
+  return mw.text.nowiki('"test"\n----\nhttp://example.com\n')
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "&quot;test&quot;\n&minus;---\n"
+                         "http&colon;//example.com\n")
+
+
 # XXX test frame:newParserValue
 # XXX test frame:newTemplateParserValue
 # XXX test frame:newChild

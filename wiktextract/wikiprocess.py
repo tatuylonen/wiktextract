@@ -164,6 +164,10 @@ def canonicalize_template_name(name):
     assert isinstance(name, str)
     name = re.sub(r"_", " ", name)
     name = re.sub(r"\s+", " ", name)
+    name = re.sub(r"\(", "%28", name)
+    name = re.sub(r"\)", "%29", name)
+    name = re.sub(r"&", "%26", name)
+    name = re.sub(r"\+", "%2B", name)
     name = name.strip()
     if name[:9].lower() == "template:":
         name = name[9:]
@@ -589,7 +593,7 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
         assert isinstance(stack, list)
         assert isinstance(parent, (tuple, type(None)))
         # print("invoke_fn", invoke_args)
-        # print("#invoke", invoke_args, "parent", parent, "stack", stack)
+        # sys.stdout.flush()
         if len(invoke_args) < 2:
             print("#invoke {}: too few arguments at {}"
                   "".format(invoke_args, stack))
@@ -680,7 +684,8 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
 
             def callParserFunction(frame, *args):
                 if len(args) < 1:
-                    print("callParserFunction: missing name at {}".format(stack))
+                    print("callParserFunction: missing name at {}"
+                          .format(stack))
                     return ""
                 name = args[0]
                 if not isinstance(name, str):
@@ -693,7 +698,8 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                     if isinstance(arg, (int, float, str)):
                         new_args.append(str(arg))
                     else:
-                        for k, v in sorted(arg.items(), key=lambda x: str(x[0])):
+                        for k, v in sorted(arg.items(),
+                                           key=lambda x: str(x[0])):
                             new_args.append(str(v))
                 name = canonicalize_parserfn_name(name)
                 if name not in PARSER_FUNCTIONS:
@@ -703,11 +709,13 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                 return call_parser_function(name, new_args, lambda x: x,
                                             ctx.title, stack)
 
-            def expand_all_templates(text):
+            def expand_all_templates(encoded):
                 # Expand all templates here, even if otherwise only
-                # expanding some of them
-                encoded = ctx.encode(text)
-                ret = expand(encoded, stack, parent, ctx.templates)
+                # expanding some of them.  We stay quiet about undefined
+                # templates here, because Wiktionary Module:ugly hacks
+                # generates them all the time.
+                ret = expand(encoded, stack, parent, ctx.templates,
+                             quiet=True)
                 return ret
 
             def preprocess(frame, *args):
@@ -719,7 +727,11 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                     v = str(v["text"] or "")
                 # Expand all templates, in case the Lua code actually inspects
                 # the output.
-                return expand_all_templates(v)
+                v = ctx.encode(v)
+                stack.append("frame:preprocess()")
+                ret = expand_all_templates(v)
+                stack.pop()
+                return ret
 
             def expandTemplate(frame, *args):
                 if len(args) < 1:
@@ -736,8 +748,11 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                 new_args = [title]
                 for k, v in sorted(args.items(), key=lambda x: str(x[0])):
                     new_args.append("{}={}".format(k, v))
+                sys.stdout.flush()
                 encoded = ctx.save_value("T", new_args)
+                stack.push("frame:expandTemplate()")
                 ret = expand_all_templates(encoded)
+                stack.pop()
                 return ret
 
             # Create frame object as dictionary with default value None
@@ -777,7 +792,9 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
 
         # Call the Lua function in the given module
         sys.stdout.flush()
+        stack.append("Lua:{}:{}()".format(modname, modfn))
         ok, text = lua.eval("lua_invoke")(modname, modfn, frame)
+        stack.pop()
         if ok:
             if text is None:
                 text = "nil"
@@ -803,13 +820,14 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
         print("\n".join(parts))
         return ""
 
-    def expand(coded, stack, parent, templates_to_expand):
+    def expand(coded, stack, parent, templates_to_expand, quiet=False):
         """This function does most of the work for expanding encoded templates,
         arguments, and parser functions."""
         assert isinstance(coded, str)
         assert isinstance(stack, list)
         assert isinstance(parent, (tuple, type(None)))
         assert isinstance(templates_to_expand, (set, dict))
+        assert quiet in (False, True)
 
         def expand_args(coded, argmap):
             assert isinstance(coded, str)
@@ -900,8 +918,9 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
 
                 # Check if this template is defined
                 if name not in ctx.templates:
-                    print("{}: undefined template {!r} at {}"
-                          "".format(title, tname, stack))
+                    if not quiet:
+                        print("{}: undefined template {!r} at {}"
+                              "".format(title, tname, stack))
                     parts.append(unexpanded_template(args))
                     continue
 

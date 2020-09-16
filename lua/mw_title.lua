@@ -106,16 +106,43 @@ local mw_title = {
 }
 
 function mw_title.makeTitle(namespace, title, fragment, interwiki)
-   assert(title)
+   if title == nil or title == "" then return nil end
+   if title:find("%%[0-9a-fA-F][0-9a-fA-F]") then return nil end
+   if title:find("#") then return nil end
+   if title:find("<") then return nil end
+   if title:find(">") then return nil end
+   if title:find("%[") then return nil end
+   if title:find("%]") then return nil end
+   if title:find("|") then return nil end
+   if title:find("{") then return nil end
+   if title:find("}") then return nil end
+   if title:find("_") then return nil end
+   if title:sub(1, 1) == ":" then return nil end
+   if title == "." or title == ".." then return nil end
+   if title:sub(1, 2) == "./" or title:sub(1, 3) == "../" then return nil end
+   if title:find("/%./") or title:find("/%.%./") then return nil end
+   if title:sub(-2) == "/." or title:sub(-3) == "/.." then return nil end
+   if #title > 255 then return nil end
+   if title:sub(1, 1) == " " or title:sub(-1) == " " then return nil end
+   if title:find("  ") then return nil end
+   if title:find("~~~~") then return nil end
+   local prefixes = {"Talk:", "WP:", "WT:", "Project:", "Image:",
+                     "Media:", "Special:"}
+   -- XXX other disallowed prefixes, see
+   -- https://www.mediawiki.org/wiki/Special:Interwiki
+   for i, prefix in ipairs(prefixes) do
+      if title:sub(1, #prefix) == prefix then return nil end
+   end
+   -- XXX there are also other disallowed titles, see
+   -- https://www.mediawiki.org/wiki/Manual:Page_title
    if not namespace then namespace = "Main" end
    local ns = mw.site.findNamespace(namespace)
    if not ns then
-      print("mw.title.makeTitle: could not find namespace",
-            namespace, title, fragment, interwiki)
-      assert(ns)
+      return nil
    end
    if interwiki then
-      print("mw_title.makeTitle called with interwiki", interwiki)
+      print("XXX unimplemented: mw_title.makeTitle called with interwiki",
+            interwiki)
    end
    -- XXX how should interwiki be handled?
    -- w: (wikipedia)

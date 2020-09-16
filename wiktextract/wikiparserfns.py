@@ -127,8 +127,6 @@ def tag_fn(title, fn_name, args, expander, stack):
 def fullpagename_fn(title, fn_name, args, expander, stack):
     """Implements the FULLPAGENAME magic word/parser function."""
     t = expander(args[0]) if args else title
-    print("fullpagename t={} args={} title={}"
-          "".format(t, args, title))
     t = re.sub(r"\s+", " ", t)
     t = t.strip()
     ofs = t.find(":")
