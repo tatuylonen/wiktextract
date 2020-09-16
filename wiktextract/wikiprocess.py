@@ -947,8 +947,13 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                             k = expand(k, stack, parent, ctx.templates)
                             stack.pop()
                         arg = arg[ofs + 1:].strip()
-                    # The arguments will be expand below when we expand the
-                    # body
+                    # Expand arguments in the context of the frame where
+                    # they are defined.  This makes a difference for
+                    # calls to #invoke within a template argument (the
+                    # parent frame would be different).
+                    stack.append("ARGVAL-{}".format(k))
+                    arg = expand(arg, stack, parent, ctx.templates)
+                    stack.pop()
                     ht[k] = arg
 
                 # Expand the body, either using ``template_fn`` or using
@@ -965,23 +970,14 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                     if contains_list:
                         body = "\n" + body
                     encoded_body = ctx.encode(body)
-                    # Expand template arguments recursively
+                    # Expand template arguments recursively.  The arguments
+                    # are already expanded.
                     encoded_body = expand_args(encoded_body, ht)
-                    # The meaning of parent frame (frame:getParent()) is a bit
-                    # unclear.  In case a parserfn call is passed to a frame
-                    # as a parameter, it turns out not to be the arguments to the
-                    # template that uses the parameter.  It might be either
-                    # the first template called from the page or arguments
-                    # to the template literally containing the parserfn
-                    # call (regardless of where it is actually called).
-                    # Here we assume it will be the outermost template, i.e.,
-                    # the one called directly from the page.
-                    # XXX this should be verified and tested against actual
-                    # MediaWiki.
-                    # XXX THIS IS WRONG.  E.g. enm-head calls head, which assumes
-                    # its getting its arguments from previous template.
-                    # Must ensure parserfn gets parent from the
-                    new_parent = parent if parent else (tname.strip(), ht)
+                    # Expand the body using the calling template/page as
+                    # the parent frame for any parserfn calls
+                    new_parent = (tname.strip(), ht)
+                    # XXX no real need to expand here, it will expanded on
+                    # next iteration anyway (assuming parent unchanged)
                     # Otherwise expand the body
                     t = expand(encoded_body, stack, new_parent,
                                templates_to_expand)

@@ -203,6 +203,12 @@ class WikiProcTests(unittest.TestCase):
         ret = expand_wikitext(ctx, "Help:Tt/doc", "{{FULLPAGENAME}}")
         self.assertEqual(ret, "Help:Tt/doc")
 
+    def test_fullpagename3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Help:Tt/doc",
+                              "{{FULLPAGENAME:Template:Mark/doc}}")
+        self.assertEqual(ret, "Template:Mark/doc")
+
     def test_pagename1(self):
         ctx = phase1_to_ctx([])
         ret = expand_wikitext(ctx, "Tt", "{{PAGENAME}}")
@@ -213,6 +219,12 @@ class WikiProcTests(unittest.TestCase):
         ret = expand_wikitext(ctx, "Help:Tt/doc", "{{PAGENAME}}")
         self.assertEqual(ret, "Tt/doc")
 
+    def test_pagename3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Help:Tt/doc",
+                              "{{PAGENAME:Template:Mark/doc}}")
+        self.assertEqual(ret, "Mark/doc")
+
     def test_namespace1(self):
         ctx = phase1_to_ctx([])
         ret = expand_wikitext(ctx, "Help:Tt/doc", "{{NAMESPACE}}")
@@ -222,6 +234,12 @@ class WikiProcTests(unittest.TestCase):
         ctx = phase1_to_ctx([])
         ret = expand_wikitext(ctx, "Tt/doc", "{{NAMESPACE}}")
         self.assertEqual(ret, "")
+
+    def test_namespace3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Help:Tt/doc",
+                              "{{NAMESPACE:Template:Kk}}")
+        self.assertEqual(ret, "Template")
 
     def test_uc(self):
         ctx = phase1_to_ctx([])
@@ -932,8 +950,24 @@ return export
             ["Scribunto", "testmod", """
 local export = {}
 function export.testfn(frame)
-  print("parent title:", frame:getParent():getTitle())
-  return tostring(frame:getParent().args[0])
+  return tostring(frame:getParent().args[1])
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl|arg1}}")
+        self.assertEqual(ret, "arg1")
+
+    def test_invoke13(self):
+        # Testing that intervening template call does not mess up arguments
+        # (this was once a bug)
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             "{{templ2|{{#invoke:testmod|testfn}}}}"],
+            ["Template", "templ2", "{{{1}}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return tostring(frame:getParent().args[1])
 end
 return export
 """]])
@@ -1354,19 +1388,10 @@ return export
         ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
         self.assertEqual(ret, '<br />')
 
-
-# XXX parser function frame:getParent() value: must be from the most recent
-# template before the template containing the parser function (even if the
-# parser function is actually passed to another template in a parameter
-# and called from the subordinate template)
-
-# XXX Fix and test giving parameter to FULLPAGENAME, PAGENAME, etc.  Currently
-# not implemented.
-
 # XXX test frame:newParserValue
 # XXX test frame:newTemplateParserValue
 # XXX test frame:newChild
-# XXX test redirects for templates and Lua modules
+# XXX test redirects for Lua modules.  Are they possible?
 # XXX test case variations of template names and parser function names
 # XXX test | syntax for parser functions (as compatibility for :)
 # XXX test why luatest3 der3 expansion for Spanish fails
