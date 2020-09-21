@@ -368,6 +368,15 @@ class WikiProcTests(unittest.TestCase):
                               "{{#dateformat:25 December|dmy}}")
         self.assertEqual(ret, "25 Dec")
 
+    def test_fullurl1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt",
+                              "{{fullurl:Test page|action=edit}}")
+        self.assertEqual(ret, "//dummy.host/index.php?"
+                         "title=Test+page&action=edit")
+
+    # XXX implement and test interwiki prefixes for fullurl
+
     def test_urlencode1(self):
         ctx = phase1_to_ctx([])
         ret = expand_wikitext(ctx, "Tt",
@@ -1902,12 +1911,6 @@ return export
                          "http&colon;//example.com\n")
 
 
-# XXX check and test {{#invoke:string|sub|1|3}}
-#   (used at least in cite-meta template)
-# XXX implement compat function for table.getn in sandbox (deprecated in
-#   current Lua but used in e.g. pt-noun template)
-# XXX Implement #expr parser function
-# XXX Implement #titleparts parser function
 # XXX figure out why template R:L&S not found in luatest3.py
 # XXX figure out why module:parameters:196 fails (mw.title.getCurrentTitle()?)
 
@@ -1916,5 +1919,3 @@ return export
 # XXX test frame:newChild
 # XXX test redirects for Lua modules.  Are they possible?
 # XXX test case variations of template names and parser function names
-# XXX test | syntax for parser functions (as compatibility for :)
-# XXX test why luatest3 der3 expansion for Spanish fails

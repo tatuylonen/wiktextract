@@ -105,17 +105,18 @@ def tag_fn(title, fn_name, args, expander, stack):
         return "{{" + fn_name + ":" + "|".join(args) + "}}"
     content = expander(args[1]) if len(args) >= 2 else ""
     attrs = []
-    for x in args[2:]:
-        x = expander(x)
-        m = re.match(r"""(?s)^([^=<>'"]+)=(.*)$""", x)
-        if not m:
-            print("{}: invalid attribute format {!r} missing name at {}"
-                  "".format(title, x, stack))
-            continue
-        name, value = m.groups()
-        if not value.startswith('"') and not value.startswith("'"):
-            value = '"' + html.escape(value, quote=True) + '"'
-        attrs.append('{}={}'.format(name, value))
+    if len(args) > 2:
+        for x in args[2:]:
+            x = expander(x)
+            m = re.match(r"""(?s)^([^=<>'"]+)=(.*)$""", x)
+            if not m:
+                print("{}: invalid attribute format {!r} missing name at {}"
+                      "".format(title, x, stack))
+                continue
+            name, value = m.groups()
+            if not value.startswith('"') and not value.startswith("'"):
+                value = '"' + html.escape(value, quote=True) + '"'
+            attrs.append('{}={}'.format(name, value))
     if attrs:
         attrs = " " + " ".join(attrs)
     else:
@@ -244,6 +245,23 @@ def dateformat_fn(title, fn_name, args, expander, stack):
     if date_only:
         return dt.date().isoformat()
     return dt.isoformat()
+
+
+def fullurl_fn(title, fn_name, args, expander, stack):
+    """Implements the fullurl parser function."""
+    arg0 = expander(args[0]).strip() if args else ""
+    # XXX handle interwiki prefixes in arg0
+    url = "//dummy.host/index.php?title=" + urllib.parse.quote_plus(arg0)
+    if len(args) > 1:
+        for arg in args[1:]:
+            arg = expander(arg).strip()
+            m = re.match(r"^([^=]+)=(.*)$", arg)
+            if not m:
+                url += "&" + urllib.parse.quote_plus(arg)
+            else:
+                url += ("&" + urllib.parse.quote_plus(m.group(1)) + "=" +
+                        urllib.parse.quote_plus(m.group(2)))
+    return url
 
 
 def urlencode_fn(title, fn_name, args, expander, stack):
@@ -911,7 +929,7 @@ PARSER_FUNCTIONS = {
     "gender": unimplemented_fn,
     "#tag": tag_fn,
     "localurl": unimplemented_fn,
-    "fullurl": unimplemented_fn,
+    "fullurl": fullurl_fn,
     "canonicalurl": unimplemented_fn,
     "filepath": unimplemented_fn,
     "urlencode": urlencode_fn,
