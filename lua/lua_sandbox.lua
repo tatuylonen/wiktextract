@@ -130,7 +130,13 @@ end
 -- XXX need better handling of parent frame and frame
 -- This returns (true, value) if successful, (false, error) if exception.
 function lua_invoke(mod_name, fn_name, frame)
-  local mod = require(mod_name)
+  local success
+  local mod
+  success, mod = xpcall(function() return require(mod_name) end,
+     debug.traceback)
+  if not success then
+     return False, "\tLoading module failed in #invoke: " .. mod_name
+  end
   local fn = mod[fn_name]
   local pframe = frame:getParent()
   -- print("lua_invoke", mod_name, fn_name)
@@ -152,7 +158,7 @@ function lua_invoke(mod_name, fn_name, frame)
   end
   mw.getCurrentFrame = function() return frame end
   if fn == nil then
-     return {false, "\tNo function '" .. fn_name .. "' in module " .. mod_name}
+     return false, "\tNo function '" .. fn_name .. "' in module " .. mod_name
   end
   return xpcall(function() return fn(frame) end, debug.traceback)
 end
@@ -172,6 +178,12 @@ local new_os = {
    difftime = os.difftime,
    time = os.time,
 }
+
+-- This is a compatibility function for an older version of Lua (the getn
+-- function was deprecated and then removed, but it is used in Wiktionary)
+function table.getn(tbl)
+   return #tbl
+end
 
 env = {}
 env["_G"] = env
@@ -203,6 +215,10 @@ env["tostring"] = tostring
 env["type"] = type
 env["unpack"] = table.unpack
 env["xpcall"] = xpcall   -- MODIFY
+
+-- Wiktionary uses a Module named "string".  Force it to be loaded by
+-- require() when requested (it is used in many places in Wiktionary).
+package.loaded["string"] = nil
 
 local _ENV = env
 

@@ -2,6 +2,7 @@
 #
 # Copyright (c) 2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
+import math
 import unittest
 from wiktextract.wikiprocess import ExpandCtx, phase1_to_ctx, expand_wikitext
 
@@ -77,6 +78,16 @@ class WikiProcTests(unittest.TestCase):
         ctx = phase1_to_ctx([])
         ret = expand_wikitext(ctx, "Tt", "a{{#ifeq:a||T}}b")
         self.assertEqual(ret, "ab")
+
+    def test_ifexpr1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "a{{#ifexpr:1+3>2|T|F}}b")
+        self.assertEqual(ret, "aTb")
+
+    def test_ifexpr2(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "a{{#ifexpr:1-4>sin(pi/2)|T|F}}b")
+        self.assertEqual(ret, "aFb")
 
     def test_ifexists1(self):
         ctx = phase1_to_ctx([])
@@ -225,6 +236,42 @@ class WikiProcTests(unittest.TestCase):
                               "{{PAGENAME:Template:Mark/doc}}")
         self.assertEqual(ret, "Mark/doc")
 
+    def test_subpagename1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Help:Tt/doc/subdoc",
+                              "{{SUBPAGENAME}}")
+        self.assertEqual(ret, "subdoc")
+
+    def test_subpagename2(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Help:Tt/doc/subdoc",
+                              "{{SUBPAGENAME:Template:test/subtest}}")
+        self.assertEqual(ret, "subtest")
+
+    def test_subpagename3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Help:Tt",
+                              "{{SUBPAGENAME}}")
+        self.assertEqual(ret, "Tt")
+
+    def test_subpagename4(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Help:Tt",
+                              "{{SUBPAGENAME:Foo/bar}}")
+        self.assertEqual(ret, "bar")
+
+    def test_subpagename5(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Help:Tt/doc",
+                              "{{SUBPAGENAME}}")
+        self.assertEqual(ret, "doc")
+
+    def test_subpagename6(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Help:Tt",
+                              "{{SUBPAGENAME:Help:TestPage}}")
+        self.assertEqual(ret, "TestPage")
+
     def test_namespace1(self):
         ctx = phase1_to_ctx([])
         ret = expand_wikitext(ctx, "Help:Tt/doc", "{{NAMESPACE}}")
@@ -370,6 +417,366 @@ class WikiProcTests(unittest.TestCase):
         ret = expand_wikitext(ctx, "Tt", "{{ns:Nonexistentns}}")
         self.assertEqual(ret, "")
 
+    def test_titleparts1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#titleparts:foo}}")
+        self.assertEqual(ret, "foo")
+
+    def test_titleparts2(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#titleparts:foo/bar/baz}}")
+        self.assertEqual(ret, "foo/bar/baz")
+
+    def test_titleparts3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#titleparts:Help:foo/bar/baz}}")
+        self.assertEqual(ret, "Help:foo/bar/baz")
+
+    def test_titleparts4(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#titleparts:foo|1|-1}}")
+        self.assertEqual(ret, "foo")
+
+    def test_titleparts5(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#titleparts:foo/bar/baz|1|-2}}")
+        self.assertEqual(ret, "bar")
+
+    def test_titleparts6(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#titleparts:Help:foo/bar/baz|2|1}}")
+        self.assertEqual(ret, "foo/bar")
+
+    def test_titleparts7(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#titleparts:Help:foo/bar/baz||-2}}")
+        self.assertEqual(ret, "bar/baz")
+
+    def test_titleparts8(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#titleparts:Help:foo/bar/baz|2}}")
+        self.assertEqual(ret, "Help:foo")
+
+    def test_expr1(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr}}")
+        self.assertEqual(ret, "Expression error near <end>")
+
+    def test_expr2(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|1 + 2.34}}")
+        self.assertEqual(ret, "3.34")
+
+    def test_expr3(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|1 + 2.34}}")
+        self.assertEqual(ret, "3.34")
+
+    def test_expr4(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|-12}}")
+        self.assertEqual(ret, "-12")
+
+    def test_expr5(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|-trunc12}}")
+        self.assertEqual(ret, "-12")
+
+    def test_expr6(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|-trunc(-2^63)}}")
+        self.assertEqual(ret, "9223372036854775808")
+
+    def test_expr7(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|-trunc(-2^63)}}")
+        self.assertEqual(ret, "9223372036854775808")
+
+    def test_expr8(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|2e3}}")
+        self.assertEqual(ret, "2000")
+
+    def test_expr9(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|-2.3e-4}}")
+        self.assertEqual(ret, "-0.00022999999999999998")
+
+    def test_expr10(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|(trunc2)e(trunc-3)}}")
+        self.assertEqual(ret, "0.002")
+
+    def test_expr11(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|(trunc2)e(trunc0)}}")
+        self.assertEqual(ret, "2")
+
+    def test_expr12(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|(trunc2)e(trunc18)}}")
+        self.assertEqual(ret, "2000000000000000000")
+
+    def test_expr13(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|6e(5-2)e-2}}")
+        self.assertEqual(ret, "60")
+
+    def test_expr14(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|1e.5}}")
+        self.assertEqual(ret, "3.1622776601683795")
+
+    def test_expr15(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|exp43}}")
+        self.assertEqual(ret, "4727839468229346304")
+
+    def test_expr16(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|exp trunc0}}")
+        self.assertEqual(ret, "1")
+
+    def test_expr17(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|ln2}}")
+        self.assertEqual(ret, "0.6931471805599453")
+
+    def test_expr18(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|ln trunc1}}")
+        self.assertEqual(ret, "0")
+
+    def test_expr19(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|ln.5e-323}}")
+        self.assertEqual(ret, "-744.4400719213812")
+
+    def test_expr20(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|abs-2}}")
+        self.assertEqual(ret, "2")
+
+    def test_expr21(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|sqrt 4}}")
+        self.assertEqual(ret, "2")
+
+    def test_expr22(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|trunc1.2}}")
+        self.assertEqual(ret, "1")
+
+    def test_expr23(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|trunc-1.2}}")
+        self.assertEqual(ret, "-1")
+
+    def test_expr24(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|floor1.2}}")
+        self.assertEqual(ret, "1")
+
+    def test_expr25(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|floor-1.2}}")
+        self.assertEqual(ret, "-2")
+
+    def test_expr26(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|ceil1.2}}")
+        self.assertEqual(ret, "2")
+
+    def test_expr27(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|ceil-1.2}}")
+        self.assertEqual(ret, "-1")
+
+    def test_expr28(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|sin(30*pi/180)}}")
+        self.assertEqual(ret, "0.49999999999999994")
+
+    def test_expr29(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|cos.1}}")
+        self.assertEqual(ret, "0.9950041652780258")
+
+    def test_expr30(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|tan.1}}")
+        self.assertEqual(ret, "0.10033467208545055")
+
+    def test_expr31(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|asin.1}}")
+        self.assertEqual(ret, "0.1001674211615598")
+
+    def test_expr32(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|acos.1}}")
+        self.assertEqual(ret, "1.4706289056333368")
+
+    def test_expr33(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|atan.1}}")
+        self.assertEqual(ret, "0.09966865249116204")
+
+    def test_expr34(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|not0}}")
+        self.assertEqual(ret, "1")
+
+    def test_expr35(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|not1}}")
+        self.assertEqual(ret, "0")
+
+    def test_expr36(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|not trunc2.1}}")
+        self.assertEqual(ret, "0")
+
+    def test_expr37(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|2^3}}")
+        self.assertEqual(ret, "8")
+
+    def test_expr38(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|2^-3}}")
+        self.assertEqual(ret, "0.125")
+
+    def test_expr39(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|2*3}}")
+        self.assertEqual(ret, "6")
+
+    def test_expr40(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|(trunc2)*3}}")
+        self.assertEqual(ret, "6")
+
+    def test_expr41(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|1 + 2 * 3}}")
+        self.assertEqual(ret, "7")
+
+    def test_expr42(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|4/2}}")
+        self.assertEqual(ret, "2")
+
+    def test_expr43(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|5 div 2}}")
+        self.assertEqual(ret, "2.5")
+
+    def test_expr44(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|5 mod 2}}")
+        self.assertEqual(ret, "1")
+
+    def test_expr45(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|5+2}}")
+        self.assertEqual(ret, "7")
+
+    def test_expr46(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|5.1--2.7}}")
+        self.assertEqual(ret, "7.8")
+
+    def test_expr47(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|9.876round2}}")
+        self.assertEqual(ret, "9.88")
+
+    def test_expr48(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|trunc1234round trunc-2}}")
+        self.assertEqual(ret, "1200")
+
+    def test_expr49(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|3.0=3}}")
+        self.assertEqual(ret, "1")
+
+    def test_expr50(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|3.1=3.0}}")
+        self.assertEqual(ret, "0")
+
+    def test_expr51(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|3.0<>3.0}}")
+        self.assertEqual(ret, "0")
+
+    def test_expr52(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|3.1!=3.0}}")
+        self.assertEqual(ret, "1")
+
+    def test_expr53(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|3.0<3.1}}")
+        self.assertEqual(ret, "1")
+
+    def test_expr54(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|3.0<3.0}}")
+        self.assertEqual(ret, "0")
+
+    def test_expr55(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|3.1>3.0}}")
+        self.assertEqual(ret, "1")
+
+    def test_expr56(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|3.1>3.1}}")
+        self.assertEqual(ret, "0")
+
+    def test_expr57(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|3.1>=3.0}}")
+        self.assertEqual(ret, "1")
+
+    def test_expr58(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|3.1>=3.1}}")
+        self.assertEqual(ret, "1")
+
+    def test_expr59(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|3.0<=3.1}}")
+        self.assertEqual(ret, "1")
+
+    def test_expr60(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|3.0<=3.0}}")
+        self.assertEqual(ret, "1")
+
+    def test_expr61(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|3.1<=3.0}}")
+        self.assertEqual(ret, "0")
+
+    def test_expr62(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|e}}")
+        self.assertEqual(ret, str(math.e))
+
+    def test_expr63(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|pi}}")
+        self.assertEqual(ret, str(math.pi))
+
+    def test_expr64(self):
+        ctx = phase1_to_ctx([])
+        ret = expand_wikitext(ctx, "Tt", "{{#expr|+trunc1.1}}")
+        self.assertEqual(ret, "1")
+
     def test_padleft1(self):
         ctx = phase1_to_ctx([])
         ret = expand_wikitext(ctx, "Tt", "{{padleft:xyz|5}}")
@@ -442,7 +849,7 @@ class WikiProcTests(unittest.TestCase):
     def test_pos3(self):
         ctx = phase1_to_ctx([])
         ret = expand_wikitext(ctx, "Tt", "{{#pos: xyzayz }}")
-        self.assertEqual(ret, "")
+        self.assertEqual(ret, "0")
 
     def test_rpos1(self):
         ctx = phase1_to_ctx([])
@@ -457,7 +864,7 @@ class WikiProcTests(unittest.TestCase):
     def test_rpos3(self):
         ctx = phase1_to_ctx([])
         ret = expand_wikitext(ctx, "Tt", "{{#rpos: xyzayz }}")
-        self.assertEqual(ret, "")
+        self.assertEqual(ret, "7")
 
     def test_sub1(self):
         ctx = phase1_to_ctx([])
@@ -760,7 +1167,16 @@ class WikiProcTests(unittest.TestCase):
         ret = expand_wikitext(ctx, "Tt", "{{testmod|{{((}}!{{))}}}}")
         self.assertEqual(ret, "a&lbrace;&lbrace;!&rbrace;&rbrace;b")
 
-    # def test_template26(self):
+    def test_template26(self):
+        ctx = phase1_to_ctx([
+            ["Template", "foo", 'a{{{1}}}b'],
+        ])
+        # This tests that the "=" is not interpretated as indicating argument
+        # name on the left.
+        ret = expand_wikitext(ctx, "Tt", '{{foo|<span class="foo">bar</span>}}')
+        self.assertEqual(ret, 'a<span class="foo">bar</span>b')
+
+    # def test_templateXXX(self):
     #     ctx = phase1_to_ctx([
     #         ["#redirect", "Template:rel3", "Template:col3"],
     #         ["Template", "col3", "{{check|lang={{{lang|}}}|"
@@ -973,6 +1389,63 @@ return export
 """]])
         ret = expand_wikitext(ctx, "Tt", "{{testtempl|arg1}}")
         self.assertEqual(ret, "arg1")
+
+    def test_invoke14(self):
+        # Testing that argument names are handled correctly if = inside HTML tag
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl",
+             """{{#invoke:testmod|testfn|<span class="foo">bar</span>}}"""],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return tostring(frame.args[1])
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl}}")
+        self.assertEqual(ret, """<span class="foo">bar</span>""")
+
+    def test_invoke15(self):
+        # Testing safesubst:
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl", "{{safesubst:#invoke:testmod|testfn}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return "correct"
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl}}")
+        self.assertEqual(ret, """correct""")
+
+    def test_invoke16(self):
+        # Testing safesubst:, with space before
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl", "{{ safesubst:#invoke:testmod|testfn}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return "correct"
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl}}")
+        self.assertEqual(ret, """correct""")
+
+    def test_invoke17(self):
+        # Testing safesubst:, with space before
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl", "{{#invoke:\ntestmod\n|\ntestfn\n}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return "correct"
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl}}")
+        self.assertEqual(ret, """correct""")
 
     def test_frame_parent1(self):
         ctx = phase1_to_ctx([

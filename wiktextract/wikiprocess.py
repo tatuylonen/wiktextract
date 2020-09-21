@@ -24,8 +24,10 @@ from wiktextract import languages
 
 # List of search paths for Lua libraries.
 builtin_lua_search_paths = [
-    "lua",
-    "lua/mediawiki-extensions-Scribunto/includes/engines/LuaCommon/lualib",
+    # [path, ignore_modules]
+    ["lua", ["string"]],
+    ["lua/mediawiki-extensions-Scribunto/includes/engines/LuaCommon/lualib",
+     []],
 ]
 
 # Set of HTML tags that need an explicit end tag.
@@ -171,7 +173,8 @@ def canonicalize_template_name(name):
     name = name.strip()
     if name[:9].lower() == "template:":
         name = name[9:]
-    name = name.capitalize()
+    if name:
+        name = name[0].upper() + name[1:]
     return name
 
 
@@ -352,11 +355,12 @@ def phase1_to_ctx(phase1_data):
     included_map = collections.defaultdict(set)
     expand_q = []
     for tag, title, text in phase1_data:
+        title = html.unescape(title)
+        text = html.unescape(text)
         if tag == "#redirect":
             ctx.redirects[title] = text
             continue
         if tag == "Scribunto":
-            text = html.unescape(text)
             ctx.modules[title] = text
             continue
         if title.endswith("/testcases"):
@@ -368,7 +372,6 @@ def phase1_to_ctx(phase1_data):
 
         # print(tag, title)
         name = canonicalize_template_name(title)
-        text = html.unescape(text)
         body = template_to_body(title, text)
         assert isinstance(body, str)
         included_templates, pre_expand = analyze_template(name, body)
@@ -437,13 +440,14 @@ def lua_loader(ctx, modname):
     if path.startswith("/"):
         path = path[1:]
     path += ".lua"
-    for prefix in builtin_lua_search_paths:
+    for prefix, exceptions in builtin_lua_search_paths:
+        if modname in exceptions:
+            continue
         p = prefix + "/" + path
         if os.path.isfile(p):
             with open(p, "r") as f:
                 data = f.read()
             return data
-    print("MODULE NOT FOUND:", modname)
     return None
 
 
@@ -606,8 +610,8 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
         lua = ctx.lua
 
         # Get module and function name
-        modname = invoke_args[0]
-        modfn = invoke_args[1]
+        modname = invoke_args[0].strip()
+        modfn = invoke_args[1].strip()
 
         def value_with_expand(frame, fexpander, x):
             assert isinstance(frame, dict)
@@ -627,19 +631,20 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                 frame_args = {}
                 num = 1
                 for arg in args:
-                    ofs = arg.find("=")
-                    if ofs <= 0:
-                        k = num
-                        num += 1
-                    else:
-                        k = arg[:ofs].strip()
+                    m = re.match(r"""^\s*([^<>="']+?)\s*=\s*(.*?)\s*$""", arg)
+                    if m:
+                        # Have argument name
+                        k, arg = m.groups()
                         if k.isdigit():
                             k = int(k)
                             if k < 1 or k > 1000:
                                 k = 1000
                             if num <= k:
                                 num = k + 1
-                        arg = arg[ofs + 1:]
+                    else:
+                        # No argument name
+                        k = num
+                        num += 1
                     frame_args[k] = arg
             frame_args = lua.table_from(frame_args)
 
@@ -943,16 +948,13 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                 num = 1
                 for i in range(1, len(args)):
                     arg = str(args[i])
-                    ofs = arg.find("=")
-                    if ofs <= 0:
-                        k = num
-                        num += 1
-                    else:
-                        # Note: Writespace is stripped around named
-                        # parameter names and values per
+                    m = re.match(r"""^\s*([^<>="']+?)\s*=\s*(.*?)\s*$""", arg)
+                    if m:
+                        # Note: Whitespace is stripped by the regexp
+                        # around named parameter names and values per
                         # https://en.wikipedia.org/wiki/Help:Template
                         # (but not around unnamed parameters)
-                        k = arg[:ofs].strip()
+                        k, arg = m.groups()
                         if k.isdigit():
                             k = int(k)
                             if k < 1 or k > 1000:
@@ -965,7 +967,9 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                             stack.append("ARGNAME")
                             k = expand(k, stack, parent, ctx.templates)
                             stack.pop()
-                        arg = arg[ofs + 1:].strip()
+                    else:
+                        k = num
+                        num += 1
                     # Expand arguments in the context of the frame where
                     # they are defined.  This makes a difference for
                     # calls to #invoke within a template argument (the
