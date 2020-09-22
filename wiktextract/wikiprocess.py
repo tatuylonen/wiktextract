@@ -763,14 +763,14 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
         # Create parent frame (for page being processed) and current frame
         # (for module being called)
         if parent is not None:
-            page_title, page_args = parent
+            parent_title, page_args = parent
             expanded_key_args = {}
             for k, v in page_args.items():
                 if isinstance(k, str):
                     expanded_key_args[expander(k)] = v
                 else:
                     expanded_key_args[k] = v
-            pframe = make_frame(None, page_title, expanded_key_args)
+            pframe = make_frame(None, parent_title, expanded_key_args)
         else:
             pframe = None
         frame = make_frame(pframe, modname, invoke_args[2:])
@@ -1022,7 +1022,19 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                     encoded_body = expand_args(encoded_body, ht)
                     # Expand the body using the calling template/page as
                     # the parent frame for any parserfn calls
-                    new_parent = (tname.strip(), ht)
+                    new_title = tname.strip()
+                    for prefix in ("Media", "Special", "Main", "Talk", "User",
+                                   "User_talk", "Project", "Project_talk",
+                                   "File", "Image", "File_talk",
+                                   "MediaWiki", "MediaWiki_talk",
+                                   "Template", "Template_talk",
+                                   "Help", "Help_talk", "Category",
+                                   "Category_talk", "Module", "Module_talk"):
+                        if tname.startswith(prefix + ":"):
+                            break
+                    else:
+                        new_title = "Template:" + new_title
+                    new_parent = (new_title, ht)
                     # XXX no real need to expand here, it will expanded on
                     # next iteration anyway (assuming parent unchanged)
                     # Otherwise expand the body

@@ -1924,6 +1924,44 @@ return export
         self.assertEqual(ret, "&quot;test&quot;\n&minus;---\n"
                          "http&colon;//example.com\n")
 
+    def test_mw_title1(self):
+        ctx = phase1_to_ctx([
+            ["Template", "templ", "{{#invoke:testmod|testfn}}"],
+            ["Scribunto", "testmod", r"""
+local export = {}
+function export.testfn(frame)
+   return mw.title.getCurrentTitle().nsText
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{templ}}")
+        self.assertEqual(ret, "Main")
+
+    def test_mw_title2(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", r"""
+local export = {}
+function export.testfn(frame)
+   local t = mw.title.makeTitle("Main", "R:L&S")
+   return t.nsText
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "Main")
+
+    def test_mw_title3(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", r"""
+local export = {}
+function export.testfn(frame)
+   local t = mw.title.new("R:L&S", "Main")
+   return t.nsText
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "Main")
 
 # XXX figure out why template R:L&S not found in luatest3.py
 # XXX figure out why module:parameters:196 fails (mw.title.getCurrentTitle()?)

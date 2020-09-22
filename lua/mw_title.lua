@@ -169,11 +169,11 @@ function mw_title.makeTitle(namespace, title, fragment, interwiki)
    if namespace == "Main" then
       fullName = title
    else
-      fullName = namespace + ":" + title
+      fullName = namespace .. ":" .. title
    end
    local withFrag
    if fragment then
-      withFrag = fullName + "#" + fragment
+      withFrag = fullName .. "#" .. fragment
    else
       withFrag = fullName
    end
@@ -219,7 +219,8 @@ function mw_title.new(text, namespace)
    local idx = string.find(text, ":")
    if idx ~= nil then
       local ns1 = string.sub(text, 1, idx - 1)
-      if mw.site.findNamespace(namespace) then
+      local nsobj = mw.site.findNamespace(ns1)
+      if nsobj ~= nil then
          namespace = ns1
          text = string.sub(text, idx + 1)
       end
@@ -229,7 +230,7 @@ end
 
 function mw_title.getCurrentTitle()
    local frame = mw.getCurrentFrame()
-   local parent = frame:getParent()
+   local parent = frame:getParent() or frame
    local title = parent:getTitle()
    local newtitle = mw_title.new(title, "Main")
    return newtitle
