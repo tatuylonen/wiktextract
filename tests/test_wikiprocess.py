@@ -848,7 +848,7 @@ class WikiProcTests(unittest.TestCase):
     def test_pos1(self):
         ctx = phase1_to_ctx([])
         ret = expand_wikitext(ctx, "Tt", "{{#pos: xyzayz |yz}}")
-        self.assertEqual(ret, "2")
+        self.assertEqual(ret, "1")
 
     def test_pos2(self):
         ctx = phase1_to_ctx([])
@@ -857,28 +857,28 @@ class WikiProcTests(unittest.TestCase):
 
     def test_pos3(self):
         ctx = phase1_to_ctx([])
-        ret = expand_wikitext(ctx, "Tt", "{{#pos: xyzayz }}")
-        self.assertEqual(ret, "0")
+        ret = expand_wikitext(ctx, "Tt", "{{#pos: xyz ayz }}")
+        self.assertEqual(ret, "3")
 
     def test_rpos1(self):
         ctx = phase1_to_ctx([])
         ret = expand_wikitext(ctx, "Tt", "{{#rpos: xyzayz |yz}}")
-        self.assertEqual(ret, "5")
+        self.assertEqual(ret, "4")
 
     def test_rpos2(self):
         ctx = phase1_to_ctx([])
         ret = expand_wikitext(ctx, "Tt", "{{#rpos: xyzayz |zz}}")
-        self.assertEqual(ret, "")
+        self.assertEqual(ret, "-1")
 
     def test_rpos3(self):
         ctx = phase1_to_ctx([])
-        ret = expand_wikitext(ctx, "Tt", "{{#rpos: xyzayz }}")
-        self.assertEqual(ret, "7")
+        ret = expand_wikitext(ctx, "Tt", "{{#rpos: xy za yz }}")
+        self.assertEqual(ret, "5")
 
     def test_sub1(self):
         ctx = phase1_to_ctx([])
         ret = expand_wikitext(ctx, "Tt", "{{#sub: xyzayz |3}}")
-        self.assertEqual(ret, "zayz ")
+        self.assertEqual(ret, "ayz")
 
     def test_sub2(self):
         ctx = phase1_to_ctx([])
@@ -1443,7 +1443,21 @@ return export
         self.assertEqual(ret, """correct""")
 
     def test_invoke17(self):
-        # Testing safesubst:, with space before
+        # Testing safesubst: coming from template
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl", "{{ {{templ2}}#invoke:testmod|testfn}}"],
+            ["Template", "templ2", "safesubst:"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return "correct"
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl}}")
+        self.assertEqual(ret, """correct""")
+
+    def test_invoke18(self):
         ctx = phase1_to_ctx([
             ["Template", "testtempl", "{{#invoke:\ntestmod\n|\ntestfn\n}}"],
             ["Scribunto", "testmod", """

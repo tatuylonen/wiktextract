@@ -715,7 +715,7 @@ def len_fn(title, fn_name, args, expander, stack):
 
 def pos_fn(title, fn_name, args, expander, stack):
     """Implements the #pos parser function."""
-    arg0 = expander(args[0]) if args else ""
+    arg0 = expander(args[0]).strip() if args else ""
     arg1 = expander(args[1]) or " " if len(args) >= 2 else " "
     offset = expander(args[2]).strip() if len(args) >= 3 else ""
     if not offset or not offset.isdigit():
@@ -729,7 +729,7 @@ def pos_fn(title, fn_name, args, expander, stack):
 
 def rpos_fn(title, fn_name, args, expander, stack):
     """Implements the #rpos parser function."""
-    arg0 = expander(args[0]) if args else ""
+    arg0 = expander(args[0]).strip() if args else ""
     arg1 = expander(args[1]) or " " if len(args) >= 2 else " "
     offset = expander(args[2]).strip() if len(args) >= 3 else ""
     if not offset or not offset.isdigit():
@@ -738,12 +738,12 @@ def rpos_fn(title, fn_name, args, expander, stack):
     idx = arg0.rfind(arg1, offset)
     if idx >= 0:
         return str(idx)
-    return ""
+    return "-1"
 
 
 def sub_fn(title, fn_name, args, expander, stack):
     """Implements the #sub parser function."""
-    arg0 = expander(args[0]) if args else ""
+    arg0 = expander(args[0]).strip() if args else ""
     start = expander(args[1]).strip() if len(args) >= 2 else ""
     length = expander(args[2]).strip() if len(args) >= 3 else ""
     try:
@@ -766,7 +766,7 @@ def sub_fn(title, fn_name, args, expander, stack):
 
 def pad_fn(title, fn_name, args, expander, stack):
     """Implements the pad parser function."""
-    v = expander(args[0]) if args else ""
+    v = expander(args[0]).strip() if args else ""
     cnt = expander(args[1]).strip() if len(args) >= 2 else ""
     pad = expander(args[2]) if len(args) >= 3 and args[2] else "0"
     direction = expander(args[3]) if len(args) >= 4 else ""
@@ -790,7 +790,7 @@ def pad_fn(title, fn_name, args, expander, stack):
 
 def replace_fn(title, fn_name, args, expander, stack):
     """Implements the #replace parser function."""
-    arg0 = expander(args[0]) if args else ""
+    arg0 = expander(args[0]).strip() if args else ""
     arg1 = expander(args[1]) or " " if len(args) >= 2 else " "
     arg2 = expander(args[2]) if len(args) >= 3 else ""
     return arg0.replace(arg1, arg2)
@@ -798,7 +798,7 @@ def replace_fn(title, fn_name, args, expander, stack):
 
 def explode_fn(title, fn_name, args, expander, stack):
     """Implements the #explode parser function."""
-    arg0 = expander(args[0]) if args else ""
+    arg0 = expander(args[0]).strip() if args else ""
     delim = expander(args[1]) or " " if len(args) >= 2 else " "
     position = expander(args[2]).strip() if len(args) >= 3 else ""
     limit = expander(args[3]).strip() if len(args) >= 4 else ""

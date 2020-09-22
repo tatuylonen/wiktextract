@@ -78,7 +78,7 @@ class ExpandCtx(object):
     def save_value(self, kind, args):
         """Saves a value of a particular kind and returns a unique magic
         cookie for it."""
-        assert kind in ("T", "A", "P", "L")  # Template, arg, parserfn, link
+        assert kind in ("T", "A", "L")  # Template/parserfn, arg, link
         assert isinstance(args, (list, tuple))
         args = tuple(args)
         v = (kind, args)
@@ -103,29 +103,9 @@ class ExpandCtx(object):
             return self.save_value("A", args)
 
         def repl_templ(m):
-            """Replacement function for templates {{...}} and template
+            """Replacement function for templates {{...}} and parser
             functions."""
-            orig = m.group(1)
-            args = orig.split("|")
-            name = args[0].lstrip()
-            if name[:10].lower() == "safesubst:":
-                name = name[10:]
-            ofs = name.find(":")
-            if ofs > 0:
-                # It might be a parser function call
-                fn_name = canonicalize_parserfn_name(name[:ofs])
-                # Check if it is a recognized parser function name
-                if fn_name in PARSER_FUNCTIONS or fn_name.startswith("#"):
-                    args = [fn_name, name[ofs + 1:]] + args[1:]
-                    return self.save_value("P", args)
-            # As a compatibility feature, recognize parser functions also as the
-            # first argument of a template, whether there are more arguments or
-            # not.  This is used for magic words and some parser functions have
-            # an implicit compatibility template that essentially does this.
-            fn_name = canonicalize_parserfn_name(name)
-            if fn_name in PARSER_FUNCTIONS or fn_name.startswith("#"):
-                return self.save_value("P", [fn_name] + args[1:])
-            # Otherwise it is a normal template expansion
+            args = m.group(1).split("|")
             return self.save_value("T", args)
 
         def repl_link(m):
@@ -881,12 +861,6 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                     arg = "{{{" + str(k) + "}}}"
                     parts.append(arg)
                     continue
-                if kind == "P":
-                    # Parser function call
-                    new_args = tuple(map(lambda x: expand_args(x, argmap),
-                                         args))
-                    parts.append(ctx.save_value(kind, new_args))
-                    continue
                 if kind == "L":
                     # Link to another page
                     content = args[0]
@@ -898,6 +872,22 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                 parts.append(m.group(0))
             parts.append(coded[pos:])
             return "".join(parts)
+
+        def expand_parserfn(fn_name, args):
+            # Call parser function
+            stack.append(fn_name)
+            expander = lambda arg: expand(arg, stack, parent, ctx.templates)
+            if fn_name == "#invoke":
+                ret = invoke_fn(args, expander, stack, parent)
+            else:
+                ret = call_parser_function(fn_name, args, expander,
+                                           title, stack)
+            stack.pop()  # fn_name
+            # XXX if lua code calls frame:preprocess(), then we should
+            # apparently encode and expand the return value, similarly to
+            # template bodies (without argument expansion)
+            # XXX current implementation of preprocess() does not match!!!
+            return ret
 
         # Main code of expand()
         parts = []
@@ -913,26 +903,60 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
             assert isinstance(args, tuple)
             assert kind == kind2
             if kind == "T":
-                # Template transclusion
-                stack.append("TEMPLATE_NAME")
-                tname = expand(args[0], stack, parent, templates_to_expand)
-                stack.pop()
-                name = canonicalize_template_name(tname)
-                if name.startswith("Template:"):
-                    name = name[9:]
-
-                # Check if this template is defined
-                if name not in ctx.templates:
-                    if not quiet:
-                        print("{}: undefined template {!r} at {}"
-                              "".format(title, tname, stack))
-                    parts.append(unexpanded_template(args))
-                    continue
-
+                # Template transclusion or parser function call
                 # Limit recursion depth
                 if len(stack) >= 100:
                     print("{}: too deep expansion of templates via {}"
                           "".format(title, stack))
+                    parts.append(unexpanded_template(args))
+                    continue
+
+                # Expand template/parserfn name
+                stack.append("TEMPLATE_NAME")
+                tname = expand(args[0], stack, parent, templates_to_expand)
+                stack.pop()
+
+                # Strip safesubst: and subst: prefixes
+                tname = tname.strip()
+                if tname[:10].lower() == "safesubst:":
+                    tname = tname[10:]
+                elif tname[:6].lower() == "subst:":
+                    tname = tname[6:]
+
+                # Check if it is a parser function call
+                ofs = tname.find(":")
+                if ofs > 0:
+                    # It might be a parser function call
+                    fn_name = canonicalize_parserfn_name(tname[:ofs])
+                    # Check if it is a recognized parser function name
+                    if fn_name in PARSER_FUNCTIONS or fn_name.startswith("#"):
+                        ret = expand_parserfn(fn_name,
+                                              (tname[ofs + 1:].lstrip(),) +
+                                              args[1:])
+                        parts.append(ret)
+                        continue
+
+                # As a compatibility feature, recognize parser functions
+                # also as the first argument of a template (withoout colon),
+                # whether there are more arguments or not.  This is used
+                # for magic words and some parser functions have an implicit
+                # compatibility template that essentially does this.
+                fn_name = canonicalize_parserfn_name(tname)
+                if fn_name in PARSER_FUNCTIONS or fn_name.startswith("#"):
+                    ret = expand_parserfn(fn_name, args[1:])
+                    parts.append(ret)
+                    continue
+
+                # Otherwise it must be a template expansion
+                name = canonicalize_template_name(tname)
+                if name.startswith("Template:"):
+                    name = name[9:]
+
+                # Check for undefined templates
+                if name not in ctx.templates:
+                    if not quiet:
+                        print("{}: undefined template {!r} at {}"
+                              "".format(title, tname, stack))
                     parts.append(unexpanded_template(args))
                     continue
 
@@ -1012,25 +1036,6 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                 # The argument is outside transcluded template body
                 arg = "{{{" + "|".join(args) + "}}}"
                 parts.append(arg)
-            elif kind == "P":
-                # Parser function call
-                stack.append("PARSERFN_FN")
-                fn_name = expand(args[0], stack, parent, ctx.templates)
-                stack.pop()
-                fn_name = canonicalize_parserfn_name(fn_name)
-                args = list(args[1:])
-                stack.append(fn_name)
-                expander = lambda arg: expand(arg, stack, parent, ctx.templates)
-                if fn_name == "#invoke":
-                    ret = invoke_fn(args, expander, stack, parent)
-                else:
-                    ret = call_parser_function(fn_name, args, expander,
-                                               title, stack)
-                stack.pop()  # fn_name
-                # XXX if lua code calls frame:preprocess(), then we should
-                # apparently encode and expand the return value, similarly to
-                # template bodies (without argument expansion)
-                parts.append(ret)
             elif kind == "L":
                 # Link to another page
                 content = args[0]
