@@ -103,7 +103,7 @@ local Language = {
    -- :getDurationIntervals(seconds, allowedIntervals)
 }
 
-function Language:new(o)
+function Language:new(obj)
    obj = obj or {}
    setmetatable(obj, self)
    self.__index = self

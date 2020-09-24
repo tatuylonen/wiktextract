@@ -459,14 +459,14 @@ def mw_text_decode(text, decodeNamedEntities=False):
     parts.append(text[pos:])
     return "".join(parts)
 
-def mw_text_encode(text, charset='<>&\xa0'):
+def mw_text_encode(text, charset='<>&\xa0"'):
     """Implements the mw.text.encode function for Lua code."""
     parts = []
-    for ch in text:
+    for ch in str(text):
         if ch in charset:
             chn = ord(ch)
             if chn in html.entities.codepoint2name:
-                parts.append("&" + html.entities.codepoint2name.get(ch) + ";")
+                parts.append("&" + html.entities.codepoint2name.get(chn) + ";")
             else:
                 parts.append(ch)
         else:
@@ -518,7 +518,7 @@ def initialize_lua(ctx):
     assert isinstance(ctx, ExpandCtx)
     assert ctx.lua is None
     # Load Lua sandbox code.
-    lua_sandbox = open("lua/lua_sandbox.lua").read()
+    lua_sandbox = open("lua/sandbox.lua").read()
 
     def filter_attribute_access(obj, attr_name, is_setting):
         print("FILTER:", attr_name, is_setting)
@@ -743,11 +743,11 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
             # Create frame object as dictionary with default value None
             frame = {}
             frame["args"] = frame_args
-            # argumentPairs is set in lua_sandbox.lua
+            # argumentPairs is set in sandbox.lua
             frame["callParserFunction"] = callParserFunction
             frame["extensionTag"] = extensionTag
             frame["expandTemplate"] = expandTemplate
-            # getArgument is set in lua_sandbox.lua
+            # getArgument is set in sandbox.lua
             frame["getParent"] = lambda self: pframe
             frame["getTitle"] = lambda self: title
             frame["preprocess"] = preprocess
@@ -778,7 +778,13 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
         # Call the Lua function in the given module
         sys.stdout.flush()
         stack.append("Lua:{}:{}()".format(modname, modfn))
-        ok, text = lua.eval("lua_invoke")(modname, modfn, frame)
+        ret = lua.eval("lua_invoke")(modname, modfn, frame)
+        if not isinstance(ret, (list, tuple)):
+            ok, text = ret, ""
+        elif len(ret) == 1:
+            ok, text = ret[0], ""
+        else:
+            ok, text = ret[0], ret[1]
         stack.pop()
         if ok:
             if text is None:

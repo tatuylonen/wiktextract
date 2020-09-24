@@ -1309,13 +1309,15 @@ def preprocess_text(text):
     return text
 
 
-def parse_with_ctx(pagetitle, text, pre_parse=False):
+def parse_with_ctx(pagetitle, text, pre_parse=False, no_preprocess=True):
     """Parses a Wikitext document into a tree.  This returns a WikiNode object
     that is the root of the parse tree and the parse context."""
     assert isinstance(pagetitle, str)
     assert isinstance(text, str)
     assert pre_parse in (True, False)
-    text = preprocess_text(text)
+    assert no_preprocess in (True, False)
+    if not no_preprocess:
+        text = preprocess_text(text)
     # Create parse context.  This also pushes a ROOT node on the stack.
     ctx = ParseCtx(pagetitle)
     ctx.pre_parse = pre_parse

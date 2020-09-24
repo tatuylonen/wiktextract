@@ -9,13 +9,13 @@ mw = {
    -- clone  (see below)
    -- dumpObject  (see below)
    -- getCurrentFrame -- assigned in lua_invoke for each call
-   hash = mw_hash,
-   -- XXX html.*
+   hash = require("mw_hash"),
+   html = require("mw_html"),
    -- incrementExpensiveFunctionCount (see below)
    -- isSubsting  (see below)
    language = require("mw_language"),
    -- loadData  (see below)
-   log = mw_log,
+   -- log  (see below)
    -- logObject  (see below)
    -- XXX message.*
    site = require("mw_site"),

@@ -8,6 +8,19 @@ from wiktextract.wikiprocess import ExpandCtx, phase1_to_ctx, expand_wikitext
 
 class WikiProcTests(unittest.TestCase):
 
+    def scribunto(self, expected_ret, body):
+        """This runs a very basic test of scribunto code."""
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", r"""
+local export = {}
+function export.testfn(frame)
+""" + body + """
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, expected_ret)
+
     def test_basic(self):
         ctx = phase1_to_ctx([])
         ret = expand_wikitext(ctx, "Tt", "Some text")
@@ -1236,23 +1249,14 @@ return export
         self.assertEqual(ret, "ain testb")
 
     def test_invoke2(self):
-        ctx = phase1_to_ctx([
-            ["Scribunto", "testmod", """
-local export = {}
-function export.testfn(frame)
-  return tostring(#frame.args)
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
-        self.assertEqual(ret, "0")
+        self.scribunto("0", """return tostring(#frame.args)""")
 
     def test_invoke3(self):
         ctx = phase1_to_ctx([
             ["Scribunto", "testmod", """
 local export = {}
 function export.testfn(frame)
-  return tostring(#frame.args)
+            return tostring(#frame.args)
 end
 return export
 """]])
@@ -1583,7 +1587,7 @@ end
 return export
 """]])
         ret = expand_wikitext(ctx, "Tt", "{{testtempl|{{testtempl2|zz}}|yy}}")
-        self.assertEqual(ret, "testtempl")
+        self.assertEqual(ret, "Template:testtempl")
 
     def test_frame_parent9(self):
         # parent of parent should be nil
@@ -1601,52 +1605,20 @@ return export
         self.assertEqual(ret, "nil")
 
     def test_frame_callParserFunction1(self):
-        ctx = phase1_to_ctx([
-            ["Scribunto", "testmod", """
-local export = {}
-function export.testfn(frame)
-  return frame:callParserFunction("#tag", {"br"})
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
-        self.assertEqual(ret, "<br />")
+        self.scribunto("<br />", """
+        return frame:callParserFunction("#tag", {"br"})""")
 
     def test_frame_callParserFunction2(self):
-        ctx = phase1_to_ctx([
-            ["Scribunto", "testmod", """
-local export = {}
-function export.testfn(frame)
-  return frame:callParserFunction{name = "#tag", args = {"br"}}
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
-        self.assertEqual(ret, "<br />")
+        self.scribunto("<br />", """
+        return frame:callParserFunction{name = "#tag", args = {"br"}}""")
 
     def test_frame_callParserFunction3(self):
-        ctx = phase1_to_ctx([
-            ["Scribunto", "testmod", """
-local export = {}
-function export.testfn(frame)
-  return frame:callParserFunction("#tag", "br")
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
-        self.assertEqual(ret, "<br />")
+        self.scribunto("<br />", """
+        return frame:callParserFunction("#tag", "br")""")
 
     def test_frame_callParserFunction4(self):
-        ctx = phase1_to_ctx([
-            ["Scribunto", "testmod", """
-local export = {}
-function export.testfn(frame)
-  return frame:callParserFunction("#tag", "div", "content")
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
-        self.assertEqual(ret, "<div>content</div>")
+        self.scribunto("<div>content</div>", """
+        return frame:callParserFunction("#tag", "div", "content")""")
 
     def test_frame_getArgument1(self):
         ctx = phase1_to_ctx([
@@ -1836,93 +1808,35 @@ return export
         self.assertEqual(ret, "a{{!}}b")
 
     def test_frame_extensionTag1(self):
-        ctx = phase1_to_ctx([
-            ["Scribunto", "testmod", """
-local export = {}
-function export.testfn(frame)
-  return frame:extensionTag("ref", "some text")
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
-        self.assertEqual(ret, "<ref>some text</ref>")
+        self.scribunto("<ref>some text</ref>", """
+        return frame:extensionTag("ref", "some text")""")
 
     def test_frame_extensionTag2(self):
-        ctx = phase1_to_ctx([
-            ["Scribunto", "testmod", """
-local export = {}
-function export.testfn(frame)
-  return frame:extensionTag("ref", "some text", "class=foo")
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
-        self.assertEqual(ret, '<ref class="foo">some text</ref>')
+        self.scribunto('<ref class="foo">some text</ref>', """
+        return frame:extensionTag("ref", "some text", "class=foo")""")
 
     def test_frame_extensionTag3(self):
-        ctx = phase1_to_ctx([
-            ["Scribunto", "testmod", """
-local export = {}
-function export.testfn(frame)
-  return frame:extensionTag{name="ref", content="some text",
-                            args={class="bar", id="test"}}
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
-        self.assertEqual(ret, '<ref class="bar" id="test">some text</ref>')
+        self.scribunto('<ref class="bar" id="test">some text</ref>', """
+        return frame:extensionTag{name="ref", content="some text",
+        args={class="bar", id="test"}}""")
 
     def test_frame_extensionTag4(self):
-        ctx = phase1_to_ctx([
-            ["Scribunto", "testmod", """
-local export = {}
-function export.testfn(frame)
-  return frame:extensionTag("br")
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
-        self.assertEqual(ret, '<br />')
-
-
+        self.scribunto("<br />", """
+        return frame:extensionTag("br")""")
 
     def test_mw_text_nowiki1(self):
-        ctx = phase1_to_ctx([
-            ["Scribunto", "testmod", """
-local export = {}
-function export.testfn(frame)
-  return mw.text.nowiki("#[foo]{{a|b}}")
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
-        self.assertEqual(ret, "&num;&lsqb;foo&rsqb;&lbrace;&lbrace;a&vert;"
-                         "b&rbrace;&rbrace;")
+        self.scribunto("&num;&lsqb;foo&rsqb;&lbrace;&lbrace;a&vert;"
+                       "b&rbrace;&rbrace;", """
+                       return mw.text.nowiki("#[foo]{{a|b}}")""")
 
     def test_mw_text_nowiki2(self):
-        ctx = phase1_to_ctx([
-            ["Scribunto", "testmod", r"""
-local export = {}
-function export.testfn(frame)
-  return mw.text.nowiki("\n#<foo>'#=\n\nX\n")
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
-        self.assertEqual(ret, "\n&num;&lt;foo&gt;&apos;#&#61;\n&NewLine;X\n")
+        self.scribunto("\n&num;&lt;foo&gt;&apos;#&#61;\n&NewLine;X\n", r"""
+        return mw.text.nowiki("\n#<foo>'#=\n\nX\n")""")
 
     def test_mw_text_nowiki3(self):
-        ctx = phase1_to_ctx([
-            ["Scribunto", "testmod", r"""
-local export = {}
-function export.testfn(frame)
-  return mw.text.nowiki('"test"\n----\nhttp://example.com\n')
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
-        self.assertEqual(ret, "&quot;test&quot;\n&minus;---\n"
-                         "http&colon;//example.com\n")
+        self.scribunto("&quot;test&quot;\n&minus;---\n"
+                       "http&colon;//example.com\n", r"""
+          return mw.text.nowiki('"test"\n----\nhttp://example.com\n')""")
 
     def test_mw_title1(self):
         ctx = phase1_to_ctx([
@@ -1935,33 +1849,148 @@ end
 return export
 """]])
         ret = expand_wikitext(ctx, "Tt", "{{templ}}")
-        self.assertEqual(ret, "Main")
+        self.assertEqual(ret, "Template")
 
     def test_mw_title2(self):
-        ctx = phase1_to_ctx([
-            ["Scribunto", "testmod", r"""
-local export = {}
-function export.testfn(frame)
-   local t = mw.title.makeTitle("Main", "R:L&S")
-   return t.nsText
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
-        self.assertEqual(ret, "Main")
+        self.scribunto("Main", """
+        local t = mw.title.makeTitle("Main", "R:L&S")
+        return t.nsText""")
 
     def test_mw_title3(self):
-        ctx = phase1_to_ctx([
-            ["Scribunto", "testmod", r"""
-local export = {}
-function export.testfn(frame)
-   local t = mw.title.new("R:L&S", "Main")
-   return t.nsText
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
-        self.assertEqual(ret, "Main")
+        self.scribunto("Main", """
+        local t = mw.title.new("R:L&S", "Main")
+        return t.nsText""")
+
+    def test_mw_html1(self):
+        self.scribunto("<table></table>", """
+        local t = mw.html.create("table")
+        return tostring(t)""")
+
+    def test_mw_html2(self):
+        self.scribunto("<br />", """
+        local t = mw.html.create("br")
+        return tostring(t)""")
+
+    def test_mw_html3(self):
+        self.scribunto("<div />", """
+        local t = mw.html.create("div", { selfClosing = true })
+        return tostring(t)""")
+
+    def test_mw_html4(self):
+        self.scribunto("<div>Plain text</div>", """
+        local t = mw.html.create("div")
+        t:wikitext("Plain text")
+        return tostring(t)""")
+
+    def test_mw_html5(self):
+        self.scribunto("<span></span>", """
+        local t = mw.html.create("div")
+        t2 = t:tag("span")
+        return tostring(t2)""")
+
+    def test_mw_html6(self):
+        self.scribunto('<div foo="bar"></div>', """
+        local t = mw.html.create("div")
+        t:attr("foo", "bar")
+        return tostring(t)""")
+
+    def test_mw_html7(self):
+        self.scribunto('<div foo="b&quot;&gt;ar"></div>', """
+        local t = mw.html.create("div")
+        t:attr({foo='b">ar'})
+        return tostring(t)""")
+
+    def test_mw_html8(self):
+        self.scribunto("nil", """
+        local t = mw.html.create("div")
+        return tostring(t:getAttr("foo"))""")
+
+    def test_mw_html9(self):
+        self.scribunto("bar", """
+        local t = mw.html.create("div")
+        t:attr("foo", "bar")
+        return tostring(t:getAttr("foo"))""")
+
+    def test_mw_html10(self):
+        self.scribunto('<div class="bar"></div>', """
+        local t = mw.html.create("div")
+        t:addClass("bar")
+        return tostring(t)""")
+
+    def test_mw_html11(self):
+        self.scribunto('<div class="bar foo"></div>', """
+        local t = mw.html.create("div")
+        t:addClass("bar")
+        t:addClass("foo")
+        t:addClass("bar")
+        return tostring(t)""")
+
+    def test_mw_html11(self):
+        self.scribunto('<div style="foo:bar;"></div>', """
+        local t = mw.html.create("div")
+        t:css("foo", "bar")
+        return tostring(t)""")
+
+    def test_mw_html12(self):
+        self.scribunto('<div style="foo:bar;"></div>', """
+        local t = mw.html.create("div")
+        t:css({foo="bar"})
+        return tostring(t)""")
+
+    def test_mw_html13(self):
+        self.scribunto('<div style="foo:bar;width:300px;"></div>', """
+        local t = mw.html.create("div")
+        t:cssText("foo:bar;")
+        t:cssText("width:300px")
+        return tostring(t)""")
+
+    def test_mw_html14(self):
+        self.scribunto('<div style="label:&quot;foo&quot;;"></div>', """
+        local t = mw.html.create("div")
+        t:cssText('label:"foo"')
+        return tostring(t)""")
+
+    def test_mw_html15(self):
+        self.scribunto('<div style="label:&quot;foo&quot;;"></div>', """
+        local t = mw.html.create("div")
+        t:css("label", '"foo"')
+        return tostring(t)""")
+
+    def test_mw_html16(self):
+        self.scribunto('<div><br /></div>', """
+        local t = mw.html.create("div")
+        t:node(mw.html.create("br"))
+        return tostring(t)""")
+
+    def test_mw_html17(self):
+        self.scribunto('<div><span>A</span></div>', """
+        local t = mw.html.create("div")
+        t:node("<span>A</span>")   -- Should this be supported?
+        return tostring(t)""")
+
+    def test_mw_html18(self):
+        self.scribunto('<span><br /></span>', """
+        local t = mw.html.create("div")
+        local t2 = t:tag("span")
+        local t3 = t2:tag("br")
+        return tostring(t3:done())""")
+
+    def test_mw_html19(self):
+        self.scribunto('<div><span><br /></span></div>', """
+        local t = mw.html.create("div")
+        local t2 = t:tag("span")
+        local t3 = t2:tag("br")
+        return tostring(t3:allDone())""")
+
+    def test_mw_html20(self):
+        self.scribunto('<div><span><br />A<hr /></span></div>', """
+        local t = mw.html.create("div")
+        local t2 = t:tag("span")
+        local t3 = t2:tag("br")
+        t2:wikitext("A")
+        local t4 = t2:tag("hr")
+        return tostring(t3:allDone())""")
+
 
 # XXX figure out why template R:L&S not found in luatest3.py
 # XXX figure out why module:parameters:196 fails (mw.title.getCurrentTitle()?)

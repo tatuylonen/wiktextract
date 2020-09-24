@@ -26,6 +26,10 @@ function new_loader(modname)
   -- Wikimedia uses an older version of Lua.  Make certain substitutions
   -- to make existing code run on more modern versions of Lua.
   content = string.gsub(content, "%%\\%[", "%%[")
+  content = string.gsub(content, "\\:", ":")
+  content = string.gsub(content, "\\,", ",")
+  content = string.gsub(content, "\\%(", "(")
+  content = string.gsub(content, "\\%)", ")")
 
   -- Load the content into the Lua interpreter.
   local ret = assert(load(content, modname, "bt", env))
@@ -135,7 +139,8 @@ function lua_invoke(mod_name, fn_name, frame)
   success, mod = xpcall(function() return require(mod_name) end,
      debug.traceback)
   if not success then
-     return False, "\tLoading module failed in #invoke: " .. mod_name
+     return False, ("\tLoading module failed in #invoke: " ..
+                       mod_name .. "\n" .. mod)
   end
   local fn = mod[fn_name]
   local pframe = frame:getParent()
