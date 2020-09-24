@@ -48,6 +48,7 @@ function Html:_push_css()
       end
    end
    if #parts == 0 then return "" end
+   table.sort(parts)
    local css = table.concat(parts, "")
    self._css = {}
    self:cssText(css)
@@ -63,6 +64,7 @@ function Html:_attrs_to_string()
       end
    end
    if #parts == 0 then return "" end
+   table.sort(parts)
    return table.concat(parts, "")
 end
 

@@ -1991,12 +1991,59 @@ return export
         local t4 = t2:tag("hr")
         return tostring(t3:allDone())""")
 
+    def test_mw_uri1(self):
+        self.scribunto("b+c", """
+        return mw.uri.encode("b c")""")
 
-# XXX figure out why template R:L&S not found in luatest3.py
-# XXX figure out why module:parameters:196 fails (mw.title.getCurrentTitle()?)
+    def test_mw_uri2(self):
+        self.scribunto("%2Ffoo%2Fb%20ar", """
+        return mw.uri.encode("/foo/b ar", "PATH")""")
+
+    def test_mw_uri3(self):
+        self.scribunto("/foo/b_ar", """
+        return mw.uri.encode("/foo/b_ar", "WIKI")""")
+
+    def test_mw_uri4(self):
+        self.scribunto("/foo/b ar c", """
+        return mw.uri.decode("%2Ffoo%2Fb%20ar+c")""")
+
+    def test_mw_uri5(self):
+        self.scribunto("/foo/b ar+c", """
+        return mw.uri.decode("%2Ffoo%2Fb%20ar+c", "PATH")""")
+
+    def test_mw_uri6(self):
+        self.scribunto("foo_bar", """
+        return mw.uri.anchorEncode("foo bar")""")
+
+    def test_mw_uri8(self):
+        self.scribunto("foo=b+ar&x=1", """
+        return mw.uri.buildQueryString({foo="b ar", x=1})""")
+
+    def test_mw_uri9(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", r"""
+local export = {}
+function export.testfn(frame)
+   local q = mw.uri.parseQueryString("a=1&b=a+b&c")
+   return tostring(q.a) .. tostring(q.b) .. tostring(q.c) .. tostring(q.d)
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "1a bfalsenil")
+
+    def test_mw_uri10(self):
+        self.scribunto("https://foo.org/bar?bar&foo=1&z=a%22+b", """
+        local u = mw.uri.canonicalUrl("https://foo.org/bar",
+        {foo=1, z='a" b', bar=false})
+        return tostring(u)""")
+
+# XXX should mw.uri.encode(x, "PATH") really encode / as %2A?
+# Check scribunto test cases.
+# XXX fix uri10 test - bugs in mw_uri.lua
+# XXX more tests and implementation for mw.uri
 
 # XXX test frame:newParserValue
 # XXX test frame:newTemplateParserValue
 # XXX test frame:newChild
-# XXX test redirects for Lua modules.  Are they possible?
 # XXX test case variations of template names and parser function names

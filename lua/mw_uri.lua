@@ -39,11 +39,11 @@ function Uri:update()
    -- internal function for updating userInfo, hostPoret, authority,
    -- queryString, relativePath, fullUrl after computing rest
    local enc = function(s) return mw.uri.encode(s, "QUERY") end
-   local url = enc(self.protocol) + "://"
+   local url = enc(self.protocol) .. "://"
    if self.user then
       local userinfo = enc(self.user)
       if self.password then
-         userinfo = userinfo + ":" + enc(self.password)
+         userinfo = userinfo .. ":" .. enc(self.password)
       end
       self.userInfo = userinfo
    else
@@ -51,38 +51,38 @@ function Uri:update()
    end
    local hostport = self.host
    if self.port and self.port ~= 80 then
-      hostport = hostport + ":" + tostring(self.port)
+      hostport = hostport .. ":" .. tostring(self.port)
    end
    self.hostPort = hostport
    if self.userInfo ~= "" then
-      self.authority = self.userInfo + "@" + self.hostPort
+      self.authority = self.userInfo .. "@" .. self.hostPort
    else
       self.authority = self.hostPort
    end
-   url = url + self.authority
+   url = url .. self.authority
    local relpath = mw.uri.encode(self.path, "PATH")
    if #self.query > 0 then
       local qs = ""
       local first = true
       for k, v in pairs(self.query) do
-         local p = enc(tostring(k)) + "=" + enc(tostring(v))
+         local p = enc(tostring(k)) .. "=" .. enc(tostring(v))
          if first then
-            qs = qs + p
+            qs = qs .. p
             first = false
          else
-            qs = qs + "&" + p
+            qs = qs .. "&" .. p
          end
       end
       self.queryString = qs
-      relpath = relpath + "?" + qs
+      relpath = relpath .. "?" .. qs
    else
       self.queryString = ""
    end
    if self.fragment then
-      relpath = relpath + "#" + enc(self.fragment)
+      relpath = relpath .. "#" .. enc(self.fragment)
    end
    self.relativePath = relpath
-   url = url + relpath
+   url = url .. relpath
    self.fullUrl = url
 end
 
@@ -160,7 +160,7 @@ function Uri:parse(s)
       end
    else
       -- no query string
-      ofs = string.find("#")
+      ofs = string.find(s, "#")
       if ofs then
          -- have fragment
          local path = string.sub(s, 1, ofs - 1)
@@ -222,8 +222,9 @@ local mw_uri = {
 }
 
 function mw_uri.anchorEncode(s)
-   -- XXX this may need to use the special anchor encoding in MediaWiki
-   return mw.uri.encode(s, "PATH")
+   -- XXX how exactly should this work?
+   s = s:gsub(" ", "_")
+   return s
 end
 
 function mw_uri.localUrl(page, query)
@@ -237,7 +238,7 @@ end
 function mw_uri.canonicalUrl(page, query)
    local uri = Uri:new{}
    uri:parse(page)
-   uri.extend(query)
+   uri:extend(query)
    -- might want to set protocol, host
    return uri
 end
@@ -256,6 +257,45 @@ function mw_uri.new(s)
       url.query = mw.clone(s.query)
       url.fragment = s.fragment
    end
+end
+
+function mw_uri.buildQueryString(args)
+   local parts = {}
+   for k, v in pairs(args) do
+      if type(v) ~= "function" then
+         local x = k .. "=" .. mw.uri.encode(tostring(v), "QUERY")
+         table.insert(parts, x)
+      end
+   end
+   table.sort(parts)
+   return table.concat(parts, "&")
+end
+
+function mw_uri.parseQueryString(s, i, j)
+   if i == nil then i = 1 end
+   if i < 0 then i = #s + i end
+   if j == nil then j = #s - i + 1 end
+   s = "&" .. string.sub(s, i, j) .. "&"
+   args = {}
+   for k in string.gmatch(s, "&([^&]+)") do
+      local ofs = string.find(k, "=")
+      if ofs == nil then
+         v = false
+      else
+         v = string.sub(k, ofs + 1)
+         k = string.sub(k, 1, ofs - 1)
+         v = mw.uri.decode(v)
+      end
+      if args[k] ~= nil then
+         local lst = args[k]
+         if type(lst) ~= "table" then lst = {lst} end
+         table.insert(lst, v)
+         args[k] = lst
+      else
+         args[k] = v
+      end
+   end
+   return args
 end
 
 return mw_uri
