@@ -2004,22 +2004,38 @@ return export
         return mw.uri.encode("/foo/b_ar", "WIKI")""")
 
     def test_mw_uri4(self):
+        self.scribunto("__foo+b%C3%A1r+%2B+baz__", r"""
+        return mw.uri.encode("__foo b\195\161r + baz__")""")
+
+    def test_mw_uri5(self):
+        self.scribunto("__foo+b%C3%A1r+%2B+%2Fbaz%2F__", r"""
+        return mw.uri.encode('__foo b\195\161r + /baz/__', 'QUERY')""")
+
+    def test_mw_uri6(self):
+        self.scribunto("__foo%20b%C3%A1r%20%2B%20%2Fbaz%2F__", r"""
+        return mw.uri.encode('__foo b\195\161r + /baz/__', 'PATH')""")
+
+    def test_mw_uri7(self):
+        self.scribunto('__foo_b%C3%A1r_%2B_/baz/__', r"""
+        return mw.uri.encode('__foo b\195\161r + /baz/__', 'WIKI')""")
+
+    def test_mw_uri8(self):
         self.scribunto("/foo/b ar c", """
         return mw.uri.decode("%2Ffoo%2Fb%20ar+c")""")
 
-    def test_mw_uri5(self):
+    def test_mw_uri9(self):
         self.scribunto("/foo/b ar+c", """
         return mw.uri.decode("%2Ffoo%2Fb%20ar+c", "PATH")""")
 
-    def test_mw_uri6(self):
+    def test_mw_uri10(self):
         self.scribunto("foo_bar", """
         return mw.uri.anchorEncode("foo bar")""")
 
-    def test_mw_uri8(self):
+    def test_mw_uri11(self):
         self.scribunto("foo=b+ar&x=1", """
         return mw.uri.buildQueryString({foo="b ar", x=1})""")
 
-    def test_mw_uri9(self):
+    def test_mw_uri12(self):
         ctx = phase1_to_ctx([
             ["Scribunto", "testmod", r"""
 local export = {}
@@ -2032,16 +2048,19 @@ return export
         ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
         self.assertEqual(ret, "1a bfalsenil")
 
-    def test_mw_uri10(self):
-        self.scribunto("https://foo.org/bar?bar&foo=1&z=a%22+b", """
-        local u = mw.uri.canonicalUrl("https://foo.org/bar",
-        {foo=1, z='a" b', bar=false})
-        return tostring(u)""")
+    def test_mw_uri13(self):
+        self.scribunto("https://wiki.local/wiki/Example?action=edit", r"""
+        return mw.uri.canonicalUrl("Example", {action="edit"})""")
 
-# XXX should mw.uri.encode(x, "PATH") really encode / as %2A?
-# Check scribunto test cases.
-# XXX fix uri10 test - bugs in mw_uri.lua
-# XXX more tests and implementation for mw.uri
+    def test_mw_uri15(self):
+        self.scribunto("/w/index.php?action=edit&title=Example", r"""
+        return mw.uri.localUrl("Example", {action="edit"})""")
+
+    def test_mw_uri16(self):
+        self.scribunto("//wiki.local/w/index.php?action=edit&title=Example", r"""
+        return mw.uri.fullUrl("Example", {action="edit"})""")
+
+
 
 # XXX test frame:newParserValue
 # XXX test frame:newTemplateParserValue

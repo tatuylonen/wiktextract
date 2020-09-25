@@ -5,7 +5,7 @@
 
 local scribunto_mwuri = require("mw.uri")
 
-local DEFAULT_HOST = "dummy.host"
+local DEFAULT_HOST = "wiki.local"
 
 local Uri = {
    protocol = "https",
@@ -13,7 +13,7 @@ local Uri = {
    -- password
    host = DEFAULT_HOST,
    port = 80,
-   path = "/",
+   path = "/w/index.php",
    query = {},
    fragment = ""
    -- userInfo
@@ -21,7 +21,7 @@ local Uri = {
    -- authority
    -- queryString
    -- relativePath
-   -- fullUrl (internal)
+   -- completeUrl (internal)
 }
 
 function Uri:new(obj)
@@ -32,12 +32,12 @@ function Uri:new(obj)
 end
 
 function Uri:__tostring()
-   return self.fullUrl
+   return self.completeUrl
 end
 
 function Uri:update()
    -- internal function for updating userInfo, hostPoret, authority,
-   -- queryString, relativePath, fullUrl after computing rest
+   -- queryString, relativePath, completeUrl after computing rest
    local enc = function(s) return mw.uri.encode(s, "QUERY") end
    local url = enc(self.protocol) .. "://"
    if self.user then
@@ -60,30 +60,29 @@ function Uri:update()
       self.authority = self.hostPort
    end
    url = url .. self.authority
-   local relpath = mw.uri.encode(self.path, "PATH")
-   if #self.query > 0 then
-      local qs = ""
-      local first = true
-      for k, v in pairs(self.query) do
-         local p = enc(tostring(k)) .. "=" .. enc(tostring(v))
-         if first then
-            qs = qs .. p
-            first = false
+   local relpath = mw.uri.encode(self.path, "WIKI")
+   local qs = {}
+   local first = true
+   for k, v in pairs(self.query) do
+      if type(v) ~= "function" then
+         if v == false then
+            table.insert(qs, k)
          else
-            qs = qs .. "&" .. p
+            table.insert(qs, enc(tostring(k)) .. "=" .. enc(tostring(v)))
          end
       end
-      self.queryString = qs
-      relpath = relpath .. "?" .. qs
-   else
-      self.queryString = ""
    end
-   if self.fragment then
+   table.sort(qs)
+   self.queryString = table.concat(qs, "&")
+   if self.queryString ~= "" then
+      relpath = relpath .. "?" .. self.queryString
+   end
+   if self.fragment and self.fragment ~= "" then
       relpath = relpath .. "#" .. enc(self.fragment)
    end
    self.relativePath = relpath
    url = url .. relpath
-   self.fullUrl = url
+   self.completeUrl = url
 end
 
 function Uri:parse(s)
@@ -92,55 +91,50 @@ function Uri:parse(s)
       ofs = string.find(s, ":")
       self.protocol = string.sub(s, 1, ofs - 1)
       s = string.sub(s, ofs + 1)
-   else
-      self.protocol = "http"
    end
    if string.sub(s, 1, 2) == "//" then
       s = string.sub(s, 3)
-   end
-   -- next is optional user@password, followed by mandatory host
-   if string.match(s, "[^#?/@]+@.*") then
-      ofs = string.find(s, "@")
-      local userpass = string.sub(s, 1, ofs - 1)
-      s = string.sub(s, ofs + 1)
-      ofs = string.find(userpass, ":")
-      if ofs then
-         local user = string.sub(userpass, 1, ofs - 1)
-         local pass = string.sub(userpass, ofs + 1)
-         self.user = mw.uri.decode(user, "QUERY")
-         self.pass = mw.uri.decode(pass, "QUERY")
-      else
-         self.user = nil
-         self.password = nil
+      -- next is optional user@password, followed by mandatory host
+      if string.match(s, "[^#?/@]+@.*") then
+         ofs = string.find(s, "@")
+         local userpass = string.sub(s, 1, ofs - 1)
+         s = string.sub(s, ofs + 1)
+         ofs = string.find(userpass, ":")
+         if ofs then
+            local user = string.sub(userpass, 1, ofs - 1)
+            local pass = string.sub(userpass, ofs + 1)
+            self.user = mw.uri.decode(user, "QUERY")
+            self.pass = mw.uri.decode(pass, "QUERY")
+         end
       end
-   end
-   -- next is mandatory host
-   local host
-   ofs = string.find(s, "/")
-   if ofs then
-      host = string.sub(s, 1, ofs - 1)
-      s = string.sub(s, ofs)  -- initial / is part of path
-      self.host = mw.uri.decode(host, "QUERY")
-   else
-      -- there is no path, but there could be fragment or query string
-      ofs = string.find(s, "#")
+      -- next is host
+      local host
+      ofs = string.find(s, "/")
       if ofs then
          host = string.sub(s, 1, ofs - 1)
-         s = string.sub(s, ofs - 1)
+         s = string.sub(s, ofs)  -- initial / is part of path
          self.host = mw.uri.decode(host, "QUERY")
       else
-         ofs = string.find(s, "?")
+         -- there is no path, but there could be fragment or query string
+         ofs = string.find(s, "#")
          if ofs then
             host = string.sub(s, 1, ofs - 1)
             s = string.sub(s, ofs - 1)
             self.host = mw.uri.decode(host, "QUERY")
          else
-            self.host = mw.uri.decode(host, s)
-            s = ""
+            ofs = string.find(s, "?")
+            if ofs then
+               host = string.sub(s, 1, ofs - 1)
+               s = string.sub(s, ofs - 1)
+               self.host = mw.uri.decode(host, "QUERY")
+            else
+               self.host = mw.uri.decode(host, s)
+               s = ""
+            end
          end
       end
    end
-   -- whatever remains is fragment and/or query string
+   -- whatever remains is path, fragment and/or query string
    local qs = ""
    ofs = string.find(s, "?")
    if ofs then
@@ -200,7 +194,7 @@ function Uri:parse(s)
       end
    end
 
-   -- Compute fullUrl and its components
+   -- Compute completeUrl and its components
    self:update()
 end
 
@@ -208,9 +202,12 @@ function Uri:clone()
    return mw.clone(self)
 end
 
-function Uri:extend(parameters)
-   for k, v in pairs(parameters) do
-      self.query[k] = v
+function Uri:extend(query)
+   if query == nil then return end
+   for k, v in pairs(query) do
+      if type(v) ~= "function" then
+         self.query[k] = v
+      end
    end
    self:update()
 end
@@ -228,19 +225,24 @@ function mw_uri.anchorEncode(s)
 end
 
 function mw_uri.localUrl(page, query)
-   return mw.uri.canonicalUrl(page, query)
+   local uri = Uri:new{}
+   uri:extend({title=page})
+   uri:extend(query)
+   return uri.relativePath
 end
 
 function mw_uri.fullUrl(page, query)
-   return mw.uri.canonicalUrl(page, query)
+   local uri = Uri:new{}
+   uri:extend({title=page})
+   uri:extend(query)
+   return "//" .. uri.hostPort .. uri.relativePath
 end
 
 function mw_uri.canonicalUrl(page, query)
    local uri = Uri:new{}
-   uri:parse(page)
+   uri:parse("/wiki/" .. mw.uri.encode(page, "WIKI"))
    uri:extend(query)
-   -- might want to set protocol, host
-   return uri
+   return uri.completeUrl
 end
 
 function mw_uri.new(s)
