@@ -10,35 +10,35 @@ python_loader = nil
 -- This function loads new a new module, whether built-in or defined in the
 -- data file.
 function new_loader(modname)
-  local content = nil
-  if python_loader ~= nil then
-    content = python_loader(modname)
-  else
-     error("PYTHON LOADER NOT SET - call lua_set_loader() first")
-  end
-  if content == nil then
-     error("MODULE NOT FOUND: " .. modname)
-  end
+   local content = nil
+   if python_loader ~= nil then
+      content = python_loader(modname)
+   else
+      error("PYTHON LOADER NOT SET - call lua_set_loader() first")
+   end
+   if content == nil then
+      error("MODULE NOT FOUND: " .. modname)
+   end
 
-  -- Wikimedia uses an older version of Lua.  Make certain substitutions
-  -- to make existing code run on more modern versions of Lua.
-  content = string.gsub(content, "\\\\", "\\134")
-  content = string.gsub(content, "%%\\%[", "%%%%[")
-  content = string.gsub(content, "\\:", ":")
-  content = string.gsub(content, "\\,", ",")
-  content = string.gsub(content, "\\%(", "%%(")
-  content = string.gsub(content, "\\%)", "%%)")
-  content = string.gsub(content, "\\%+", "%%+")
-  content = string.gsub(content, "\\%*", "%%*")
-  content = string.gsub(content, "\\>", ">")
-  content = string.gsub(content, "\\%.", "%%.")
-  content = string.gsub(content, "\\%?", "%%?")
-  content = string.gsub(content, "\\%-", "%%-")
-  content = string.gsub(content, "\\!", "!")
+   -- Wikimedia uses an older version of Lua.  Make certain substitutions
+   -- to make existing code run on more modern versions of Lua.
+   content = string.gsub(content, "\\\\", "\\134")
+   content = string.gsub(content, "%%\\%[", "%%%%[")
+   content = string.gsub(content, "\\:", ":")
+   content = string.gsub(content, "\\,", ",")
+   content = string.gsub(content, "\\%(", "%%(")
+   content = string.gsub(content, "\\%)", "%%)")
+   content = string.gsub(content, "\\%+", "%%+")
+   content = string.gsub(content, "\\%*", "%%*")
+   content = string.gsub(content, "\\>", ">")
+   content = string.gsub(content, "\\%.", "%%.")
+   content = string.gsub(content, "\\%?", "%%?")
+   content = string.gsub(content, "\\%-", "%%-")
+   content = string.gsub(content, "\\!", "!")
 
-  -- Load the content into the Lua interpreter.
-  local ret = assert(load(content, modname, "bt", env))
-  return ret
+   -- Load the content into the Lua interpreter.
+   local ret = assert(load(content, modname, "bt", env))
+   return ret
 end
 
 -- Register the new loader as the only package searcher in Lua.
@@ -53,14 +53,14 @@ package.searchers[1] = new_loader
 function lua_set_loader(loader, mw_text_decode, mw_text_encode,
                         get_page_info, get_page_content, fetch_language_name,
                         fetch_language_names)
-  python_loader = loader
-  mw = require("mw")
-  mw.text.decode = mw_text_decode
-  mw.text.encode = mw_text_encode
-  mw.title.python_get_page_info = get_page_info
-  mw.title.python_get_page_content = get_page_content
-  mw.language.python_fetch_language_name = fetch_language_name
-  mw.language.python_fetch_language_names = fetch_language_names
+   python_loader = loader
+   mw = require("mw")
+   mw.text.decode = mw_text_decode
+   mw.text.encode = mw_text_encode
+   mw.title.python_get_page_info = get_page_info
+   mw.title.python_get_page_content = get_page_content
+   mw.language.python_fetch_language_name = fetch_language_name
+   mw.language.python_fetch_language_names = fetch_language_names
 end
 
 function frame_args_index(new_args, key)

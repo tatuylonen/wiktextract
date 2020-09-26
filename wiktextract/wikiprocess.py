@@ -345,7 +345,8 @@ def phase1_to_ctx(phase1_data):
             ctx.redirects[title] = text
             continue
         if tag == "Scribunto":
-            ctx.modules[title] = text
+            modname1 = re.sub(" ", "_", title)
+            ctx.modules[modname1] = text
             continue
         if tag == "Thesaurus":
             ctx.page_contents[title] = text
@@ -414,10 +415,12 @@ def lua_loader(ctx, modname):
     pages or from a built-in module in the file system.  This returns None
     if the module could not be loaded."""
     # print("Loading", modname)
+    modname = modname.strip()
     if modname.startswith("Module:"):
         modname = modname[7:]
-    if modname in ctx.modules:
-        return ctx.modules[modname]
+    modname1 = re.sub(" ", "_", modname)
+    if modname1 in ctx.modules:
+        return ctx.modules[modname1]
     path = modname
     path = re.sub(r":", "/", path)
     path = re.sub(r" ", "_", path)
@@ -435,6 +438,7 @@ def lua_loader(ctx, modname):
             with open(p, "r") as f:
                 data = f.read()
             return data
+    print("load_loader: NOT FOUND:", modname, path)
     return None
 
 
