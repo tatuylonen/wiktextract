@@ -2358,6 +2358,9 @@ return export
                               fullpage="RAWCONTENT")
         self.assertEqual(ret, "RAWCONTENT")
 
+# XXX title:getContent() must be implemented at least for Thesaurus pages
+# (we can easily capture Thesaurus pages in phase1)
+
 # XXX implement mw.title.makeTitle with interwiki; t.interwiki field
 # XXX implement mw.title.exists by calling python get_page_info (cf isRedirect)
 # XXX mw.title subpage functions should only consider those parent pages
