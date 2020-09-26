@@ -35,7 +35,13 @@ def process_file(path):
         return
     print("Processing {}".format(path))
     page = open(path).read()
-    title = os.path.basename(path)[:-4]
+    m = re.match(r"(?s)^TITLE: ([^\n]*)\n", page)
+    if m:
+        title = m.group(1)
+        page = page[m.end():]
+    else:
+        title = os.path.basename(path)[:-4]
+
     text = wikitext.preprocess_text(page)
     ret = expand_wikitext(expand_ctx, title, text)
     if ret.find("{{") >= 0:
@@ -47,6 +53,8 @@ def process_file(path):
     tree, parse_ctx = wikitext.parse_with_ctx(title, text, no_preprocess=True)
     if parse_ctx.errors:
         print("{}: HAD PARSE ERRORS".format(path))
+        for e in parse_ctx.errors:
+            print(e)
 
 def recurse(path):
     if os.path.isfile(path):

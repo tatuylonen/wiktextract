@@ -66,9 +66,15 @@ end
 
 function mw_title_meta:inNamespace(ns)
    assert(type(ns) == "string" or type(ns) == "number")
+   if type(ns) == "string" then
+      -- strip surrounding whitespaces
+      ns = ns:gsub("^%s(.-)%s*$", "%1")
+   end
    local ns1 = mw.site.namespaces[self.namespace]
    local ns2 = mw.site.namespaces[ns]
-   assert(ns1 ~= nil and ns2 ~= nil)
+   if ns2 == nil then
+      return false
+   end
    if ns1.name == ns2.name then return true end
    return false
 end
@@ -130,7 +136,7 @@ function mw_title.makeTitle(namespace, title, fragment, interwiki)
    if title:find("|") then return nil end
    if title:find("{") then return nil end
    if title:find("}") then return nil end
-   if title:find("_") then return nil end
+   -- XXX temporarily disabled for testing, re-enable: if title:find("_") then return nil end
    if title:sub(1, 1) == ":" then return nil end
    if title == "." or title == ".." then return nil end
    if title:sub(1, 2) == "./" or title:sub(1, 3) == "../" then return nil end

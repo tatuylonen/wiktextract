@@ -2378,6 +2378,35 @@ return export
         self.scribunto("0005", r"""
         return string.format("%.4X", 4.7)""")
 
+    def test_sandbox1(self):
+        # For security, Python should not be callable from Lua modules
+        self.scribunto("", r"""
+        return python.eval("1")""")
+
+    def test_sandbox2(self):
+        # For security, dangerous Lua functions should not be callable from
+        # Lua modules (only expressly allowed modules and functions should be
+        # available)
+        self.scribunto("True", r"""
+        return os.exit == nil""")
+
+    def test_sandbox3(self):
+        self.scribunto("True", r"""
+        return _ENV["os"].exit == nil""")
+
+    def test_sandbox4(self):
+        self.scribunto("True", r"""
+        return _G["os"].exit == nil""")
+
+    def test_sandbox5(self):
+        # This is to test the other tests, to make sure an existing function is
+        # properly detected
+        self.scribunto("False", r"""
+        return _G["os"].clock == nil""")
+
+
+# XXX it seems that e.g. zh-pron calls string:gsub with invalid unicode in
+# pattern, which fails.  string should probably not be alias for ustring.
 
 # XXX title:getContent() must be implemented at least for Thesaurus pages
 # (we can easily capture Thesaurus pages in phase1)
@@ -2391,3 +2420,6 @@ return export
 # XXX test frame:newTemplateParserValue
 # XXX test frame:newChild
 # XXX test case variations of template names and parser function names
+
+# XXX re-enable preventing "_" in mw_title.makeTitle (now disabled so we can
+# test using saved file names as titles)

@@ -25,7 +25,7 @@ from wiktextract import languages
 # List of search paths for Lua libraries.
 builtin_lua_search_paths = [
     # [path, ignore_modules]
-    ["lua", ["string"]],
+    ["lua", ["string", "debug"]],
     ["lua/mediawiki-extensions-Scribunto/includes/engines/LuaCommon/lualib",
      []],
 ]
@@ -515,7 +515,7 @@ def get_page_content(ctx, title):
     print("{}: attempted to access page content for {} which is not available"
           .format(ctx.title, title))
     sys.stdout.flush()
-    return None
+    return ""
 
 
 def fetch_language_name(code):
@@ -784,7 +784,7 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                 lambda self, x: value_with_expand(self, "preprocess", x)
             frame["newTemplateParserValue"] = \
                 lambda self, x: value_with_expand(self, "expand", x)
-            frame["newChild"] = lambda title="", args="": \
+            frame["newChild"] = lambda self, title="", args="": \
                 make_frame(self, title, args)
             return lua.table_from(frame)
 
@@ -806,19 +806,23 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
         # Call the Lua function in the given module
         sys.stdout.flush()
         stack.append("Lua:{}:{}()".format(modname, modfn))
-        ret = lua.eval("lua_invoke")(modname, modfn, frame, ctx.title)
-        if not isinstance(ret, (list, tuple)):
-            ok, text = ret, ""
-        elif len(ret) == 1:
-            ok, text = ret[0], ""
-        else:
-            ok, text = ret[0], ret[1]
+        try:
+            ret = lua.eval("lua_invoke")(modname, modfn, frame, ctx.title)
+            if not isinstance(ret, (list, tuple)):
+                ok, text = ret, ""
+            elif len(ret) == 1:
+                ok, text = ret[0], ""
+            else:
+                ok, text = ret[0], ret[1]
+        except UnicodeDecodeError:
+            print("ERROR: {}: invalid unicode returned by {} at {}"
+                  .format(ctx.title, invoke_args, stack))
+            ok, text = True, ""
         stack.pop()
         if ok:
             if text is None:
                 text = "nil"
             return str(text)
-        print("LUA ERROR IN #invoke {} at {}".format(invoke_args, stack))
         if isinstance(text, Exception):
             parts = [str(text)]
             lst = traceback.format_exception(etype=type(text),
@@ -829,14 +833,19 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
             text = "\n".join(parts)
         elif not isinstance(text, str):
             text = str(text)
-        parts = []
-        in_traceback = 0
-        for line in text.split("\n"):
-            s = line.strip()
-            if s == "[C]: in function 'xpcall'":
-                break
-            parts.append(line)
-        print("\n".join(parts))
+        if text.find("'debug.error'") >= 0:
+            print("ERROR at {}".format(stack))
+            print(re.sub(r".*?:\d+: ", "", text.split("\n")[0]))
+        else:
+            print("LUA ERROR IN #invoke {} at {}".format(invoke_args, stack))
+            parts = []
+            in_traceback = 0
+            for line in text.split("\n"):
+                s = line.strip()
+                if s == "[C]: in function 'xpcall'":
+                    break
+                parts.append(line)
+            print("\n".join(parts))
         return ""
 
     def expand(coded, stack, parent, templates_to_expand, quiet=False):

@@ -171,6 +171,10 @@ ALLOWED_HTML_TAGS = {
     "ref": {
         "parents": ["phrasing"],
         "content": ["phrasing"]},
+    "references": {
+        "parents": ["flow"],
+        "no-end-tag": True,
+        "content": []},
     "rp": {
         "parents": ["ruby"],
         "close-next": ["rt", "rtc", "rp", "rb"],

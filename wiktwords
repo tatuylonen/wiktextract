@@ -9,6 +9,7 @@
 import os
 import re
 import sys
+import html
 import json
 import hashlib
 import argparse
@@ -29,15 +30,16 @@ recognized_prefixes = set(["Category", "Appendix", "Wiktionary",
                            "Thesaurus", "Module", "Template"])
 
 
-def capture_page(title, text, pages_dir):
+def capture_page(orig_title, text, pages_dir):
     """Checks if the page needs special handling (and maybe saving).
     Returns True if the page should be processed normally as a
     dictionary entry."""
-    assert isinstance(title, str)
+    assert isinstance(orig_title, str)
     assert isinstance(text, str)
     assert pages_dir is None or isinstance(pages_dir, str)
 
     analyze = False
+    title = orig_title
     m = re.match(r"^([A-Z][a-z][-a-zA-Z0-9_]+):(.+)$", title)
     if not m:
         if len(title) > 100:
@@ -67,6 +69,8 @@ def capture_page(title, text, pages_dir):
         dirpath = os.path.dirname(path)
         os.makedirs(dirpath, exist_ok=True)
         with open(path, "w") as f:
+            f.write("TITLE: {}\n".format(orig_title))
+            text = html.unescape(text)
             f.write(text)
 
     return analyze

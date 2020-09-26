@@ -160,6 +160,10 @@ end
 
 function mw_site.findNamespace(name)
    -- Internal function to find the namespace object corresponding to a name
+   if type(name) == "string" then
+      -- strip surrounding whitespaces
+      name = name:gsub("^%s(.-)%s*$", "%1")
+   end
    for k, v in pairs(mw.site.namespaces) do
       if mw.site.matchNamespaceName(v, name) then
          return v

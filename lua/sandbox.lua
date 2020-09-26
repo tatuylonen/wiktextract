@@ -7,7 +7,6 @@ local env = _ENV
 unpack = table.unpack
 
 mw = nil  -- assigned in lua_set_loader()
-ustring = nil -- assigned in lua_set_fns()
 python_loader = nil
 
 -- This function loads new a new module, whether built-in or defined in the
@@ -25,16 +24,19 @@ function new_loader(modname)
 
   -- Wikimedia uses an older version of Lua.  Make certain substitutions
   -- to make existing code run on more modern versions of Lua.
-  content = string.gsub(content, "%%\\%[", "%%[")
+  content = string.gsub(content, "\\\\", "\\134")
+  content = string.gsub(content, "%%\\%[", "%%%%[")
   content = string.gsub(content, "\\:", ":")
   content = string.gsub(content, "\\,", ",")
-  content = string.gsub(content, "\\%(", "(")
-  content = string.gsub(content, "\\%)", ")")
-  content = string.gsub(content, "\\%+", "+")
-  content = string.gsub(content, "\\%*", "*")
+  content = string.gsub(content, "\\%(", "%%(")
+  content = string.gsub(content, "\\%)", "%%)")
+  content = string.gsub(content, "\\%+", "%%+")
+  content = string.gsub(content, "\\%*", "%%*")
   content = string.gsub(content, "\\>", ">")
-  content = string.gsub(content, "\\%.", ".")
-  content = string.gsub(content, "\\%?", "?")
+  content = string.gsub(content, "\\%.", "%%.")
+  content = string.gsub(content, "\\%?", "%%?")
+  content = string.gsub(content, "\\%-", "%%-")
+  content = string.gsub(content, "\\!", "!")
 
   -- Load the content into the Lua interpreter.
   local ret = assert(load(content, modname, "bt", env))
@@ -229,7 +231,48 @@ function string.format(fmt, ...)
    return orig_format(fmt, unpack(new_args))
 end
 
+-- Original gsub does not accept "%]" in replacement string in modern Lua,
+-- while apparently some older versions did.  This is used in Wiktionary.
+-- Thus we mungle the replacement string accordingly.
+local orig_gsub = string.gsub
+function string.gsub(text, pattern, repl)
+   --print(string.format("string.gsub %q %q %q", text, pattern, tostring(repl)))
+   if type(repl) == "string" then
+      repl = orig_gsub(repl, "%%]", "]")
+   end
+   return orig_gsub(text, pattern, repl)
+end
 
+-- Original table.insert in Lua 5.1 allows inserting beyond the end of the
+-- table.  Lua 5.3 does not.  Implement the old functionality for compatibility;
+-- Wiktionary relies on it.
+local orig_insert = table.insert
+function table.insert(...)
+   local args = {...}
+   if #args < 3 then
+      orig_insert(unpack(args))
+   else
+      local pos = args[2]
+      if pos > #args then
+         args[1][pos] = args[2]
+      else
+         orig_insert(unpack(args))
+      end
+   end
+end
+
+-- Wiktionary uses a Module named "string".  Force it to be loaded by
+-- require() when requested (it is used in many places in Wiktionary).
+package.loaded["string"] = nil
+
+-- Wiktionary uses a Module named "debug".  Force it to be loaded by
+-- require() when requested.
+package.loaded["debug"] = nil
+
+-- Construct a new restricted environment.  Lua modules should only be able
+-- to access the functionality that is available in this restricted
+-- environment.  Please report an issue on github if you find a way to
+-- circumvent the environment restrictions and access outside the sandbox.
 env = {}
 env["_G"] = env
 env["_VERSION"] = _VERSION
@@ -261,13 +304,10 @@ env["type"] = type
 env["unpack"] = table.unpack
 env["xpcall"] = xpcall   -- MODIFY
 
--- Wiktionary uses a Module named "string".  Force it to be loaded by
--- require() when requested (it is used in many places in Wiktionary).
-package.loaded["string"] = nil
-
+-- Start using the new environment we just constructed.
 local _ENV = env
 
--- built-in modules:
+-- XXX missing built-in modules?
     -- bit32
     -- libraryUtil
     -- luabit

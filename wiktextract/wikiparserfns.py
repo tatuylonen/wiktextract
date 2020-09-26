@@ -538,17 +538,18 @@ binary_or_fns = {
 
 def expr_fn(title, fn_name, args, expander, stack):
     """Implements the #titleparts parser function."""
-    t = expander(args[0]).strip().lower() if args else ""
+    full_expr = expander(args[0]).strip().lower() if args else ""
+    full_expr = full_expr or ""
     tokens = list(m.group(0) for m in
                   re.finditer(r"\d+(\.\d*)?|\.\d+|[a-z]+|"
-                              r"!=|<>|>=|<=|[^\s]", t))
+                              r"!=|<>|>=|<=|[^\s]", full_expr))
     tokidx = 0
 
     def expr_error(tok):
         if tok is None:
             tok = "<end>"
-        print("{}: #expr error near {} at {}"
-              .format(title, tok, stack))
+        print("{}: #expr error near {} in {!r} at {}"
+              .format(title, tok, full_expr, stack))
         return "Expression error near {}".format(tok)
 
     def get_token():
@@ -830,7 +831,7 @@ def urldecode_fn(title, fn_name, args, expander, stack):
 
 def unimplemented_fn(title, fn_name, args, expander, stack):
     print("{}: unimplemented parserfn {} at {}".format(title, fn_name, stack))
-    return "{{" + fn_name + ":" + "|".join(args) + "}}"
+    return "{{" + fn_name + ":" + "|".join(map(str, args)) + "}}"
 
 
 # This list should include names of predefined parser functions and
@@ -914,6 +915,7 @@ PARSER_FUNCTIONS = {
     "PENDINGCHANGELEVEL": unimplemented_fn,
     "PAGESINCATEGORY": unimplemented_fn,
     "NUMBERINGROUP": unimplemented_fn,
+    "DEFAULTSORT": unimplemented_fn,
     "lc": lc_fn,
     "lcfirst": lcfirst_fn,
     "uc": uc_fn,
