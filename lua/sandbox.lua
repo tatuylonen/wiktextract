@@ -33,8 +33,8 @@ function new_loader(modname)
   content = string.gsub(content, "\\%+", "+")
   content = string.gsub(content, "\\%*", "*")
   content = string.gsub(content, "\\>", ">")
-  content = string.gsub(content, "\\.", ".")
-  content = string.gsub(content, "\\?", "?")
+  content = string.gsub(content, "\\%.", ".")
+  content = string.gsub(content, "\\%?", "?")
 
   -- Load the content into the Lua interpreter.
   local ret = assert(load(content, modname, "bt", env))
