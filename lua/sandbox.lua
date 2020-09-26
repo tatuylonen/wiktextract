@@ -4,8 +4,6 @@
 
 local env = _ENV
 
-unpack = table.unpack
-
 mw = nil  -- assigned in lua_set_loader()
 python_loader = nil
 
@@ -228,7 +226,7 @@ function string.format(fmt, ...)
    if i < #args then
       print("Warning: extra arguments to string.format")
    end
-   return orig_format(fmt, unpack(new_args))
+   return orig_format(fmt, table.unpack(new_args))
 end
 
 -- Original gsub does not accept "%]" in replacement string in modern Lua,
@@ -245,18 +243,20 @@ end
 
 -- Original table.insert in Lua 5.1 allows inserting beyond the end of the
 -- table.  Lua 5.3 does not.  Implement the old functionality for compatibility;
--- Wiktionary relies on it.
+-- Wiktionary relies on it.  Also, it seems Wiktionary calls insert with
+-- only one argument (or the second argument nil).  Ignore those calls.
 local orig_insert = table.insert
 function table.insert(...)
    local args = {...}
+   if #args < 2 then return end
    if #args < 3 then
-      orig_insert(unpack(args))
+      orig_insert(table.unpack(args))
    else
       local pos = args[2]
       if pos > #args then
          args[1][pos] = args[2]
       else
-         orig_insert(unpack(args))
+         orig_insert(table.unpack(args))
       end
    end
 end

@@ -2404,8 +2404,10 @@ return export
         self.scribunto("False", r"""
         return _G["os"].clock == nil""")
 
+# XXX issues in ko-headword seem to suggest a possible problem in
+# unicode patterns in mw.ustring.gsub.
 
-# XXX it seems that e.g. zh-pron calls string:gsub with invalid unicode in
+# XXX it seems that e.g. zh-pron calls (u?)string:gsub with invalid unicode in
 # pattern, which fails.  string should probably not be alias for ustring.
 
 # XXX title:getContent() must be implemented at least for Thesaurus pages
