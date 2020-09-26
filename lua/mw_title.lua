@@ -249,6 +249,7 @@ function mw_title.getCurrentTitle()
    local t = mw_title.new(mw._pageTitle)
    if t == nil then
       print("mw.title.getCurrentTitle returns nil:", mw._pageTitle)
+   end
    return t
    -- local frame = mw.getCurrentFrame()
    -- local parent = frame:getParent() or frame
