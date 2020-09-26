@@ -57,6 +57,7 @@ class ExpandCtx(object):
     __slots__ = (
         "cookies",	 # Mapping from magic cookie -> expansion data
         "cookies_base",  # Cookies for processing template bodies
+        "fullpage",	 # The unprocessed text of the current page (or None)
         "lua",		 # Lua runtime or None if not yet initialized
         "modules",	 # Lua code for defined Lua modules
         "need_pre_expand",  # Set of template names to be expanded before parse
@@ -71,6 +72,7 @@ class ExpandCtx(object):
     def __init__(self):
         self.cookies_base = []
         self.cookies = []
+        self.fullpage = None
         self.lua = None
         self.rev_ht_base = {}
         self.rev_ht = {}
@@ -495,6 +497,17 @@ def get_page_info(ctx, title):
     return ctx.lua.table_from(dt)
 
 
+def get_page_content(ctx, title):
+    """Retrieves the full content of the page identified by the title.
+    Currently this will only return content for the current page.
+    This returns None if the page is other than the current page, and
+    False if the page does not exist (currently not implemented)."""
+    assert isinstance(title, str)
+    if title == ctx.title:
+        return ctx.fullpage
+    return None
+
+
 def fetch_language_name(code):
     """This function is called from Lua code as part of the mw.language
     inmplementation.  This maps a language code to its name."""
@@ -535,30 +548,35 @@ def initialize_lua(ctx):
                                mw_text_decode,
                                mw_text_encode,
                                lambda x: get_page_info(ctx, x),
+                               lambda x: get_page_content(ctx, x),
                                fetch_language_name,
                                lambda x: fetch_language_names(ctx, x))
     ctx.lua = lua
 
 
 def expand_wikitext(ctx, title, text, templates_to_expand=None,
-                    template_fn=None):
+                    template_fn=None, fullpage=None):
     """Expands templates and parser functions (and optionally Lua macros)
     from ``text`` (which is from page with title ``title``).
     ``templates_to_expand`` should be a set (or dictionary) containing
     those canonicalized template names that should be expanded (None
-    expands all).  ``template_fn``, if given, will be used to
-    expand templates; if it is not defined or returns None, the
-    default expansion will be used (it can also be used to capture
-    template arguments).  This returns the text with the given
-    templates expanded."""
+    expands all).  ``template_fn``, if given, will be used to expand
+    templates; if it is not defined or returns None, the default
+    expansion will be used (it can also be used to capture template
+    arguments).  If ``fullpage`` is specified, it should be the
+    original content of the given page (with any preprocesing); this
+    may be used by Lua code (title:getContent()).  This returns the
+    text with the given templates expanded."""
     assert isinstance(ctx, ExpandCtx)
     assert isinstance(title, str)
     assert isinstance(text, str)
     assert isinstance(templates_to_expand, (set, dict, type(None)))
     assert template_fn is None or callable(template_fn)
+    assert isinstance(fullpage, (str, type(None)))
     ctx.title = title
     ctx.template_fn = template_fn
     ctx.cookies = []
+    ctx.fullpage = fullpage
     ctx.rev_ht = {}
 
     # If templates_to_expand is None, then expand all known templates
@@ -778,7 +796,7 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
         # Call the Lua function in the given module
         sys.stdout.flush()
         stack.append("Lua:{}:{}()".format(modname, modfn))
-        ret = lua.eval("lua_invoke")(modname, modfn, frame)
+        ret = lua.eval("lua_invoke")(modname, modfn, frame, ctx.title)
         if not isinstance(ret, (list, tuple)):
             ok, text = ret, ""
         elif len(ret) == 1:

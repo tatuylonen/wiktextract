@@ -1838,29 +1838,6 @@ return export
                        "http&colon;//example.com\n", r"""
           return mw.text.nowiki('"test"\n----\nhttp://example.com\n')""")
 
-    def test_mw_title1(self):
-        ctx = phase1_to_ctx([
-            ["Template", "templ", "{{#invoke:testmod|testfn}}"],
-            ["Scribunto", "testmod", r"""
-local export = {}
-function export.testfn(frame)
-   return mw.title.getCurrentTitle().nsText
-end
-return export
-"""]])
-        ret = expand_wikitext(ctx, "Tt", "{{templ}}")
-        self.assertEqual(ret, "Template")
-
-    def test_mw_title2(self):
-        self.scribunto("Main", """
-        local t = mw.title.makeTitle("Main", "R:L&S")
-        return t.nsText""")
-
-    def test_mw_title3(self):
-        self.scribunto("Main", """
-        local t = mw.title.new("R:L&S", "Main")
-        return t.nsText""")
-
     def test_mw_html1(self):
         self.scribunto("<table></table>", """
         local t = mw.html.create("table")
@@ -2060,7 +2037,331 @@ return export
         self.scribunto("//wiki.local/w/index.php?action=edit&title=Example", r"""
         return mw.uri.fullUrl("Example", {action="edit"})""")
 
+    def test_mw_title1(self):
+        ctx = phase1_to_ctx([
+            ["Template", "templ", "{{#invoke:testmod|testfn}}"],
+            ["Scribunto", "testmod", r"""
+local export = {}
+function export.testfn(frame)
+   return mw.title.getCurrentTitle().fullText
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{templ}}")
+        self.assertEqual(ret, "Tt")
 
+    def test_mw_title2(self):
+        self.scribunto("Main", """
+        local t = mw.title.makeTitle("Main", "R:L&S")
+        return t.nsText""")
+
+    def test_mw_title3(self):
+        self.scribunto("Main", """
+        local t = mw.title.new("R:L&S", "Main")
+        return t.nsText""")
+
+    def test_mw_title4(self):
+        self.scribunto("R:L&S", """
+        local t = mw.title.new("R:L&S", "Main")
+        return t.text""")
+
+    def test_mw_title5(self):
+        self.scribunto("Module:R:L&S/foo/bar", """
+        local t = mw.title.new("R:L&S/foo/bar", "Module")
+        return t.prefixedText""")
+
+    def test_mw_title6(self):
+        self.scribunto("True", r"""
+        return mw.title.equals(mw.title.new("Foo"), mw.title.new("Foo"))""")
+
+    def test_mw_title7(self):
+        self.scribunto("False", r"""
+        return mw.title.equals(mw.title.new("Foo"), mw.title.new("Bar"))""")
+
+    def test_mw_title8(self):
+        self.scribunto("0", r"""
+        return mw.title.compare(mw.title.new("Foo"), mw.title.new("Foo"))""")
+
+    def test_mw_title9(self):
+        self.scribunto("1", r"""
+        return mw.title.compare(mw.title.new("Foo"), mw.title.new("Bar"))""")
+
+    def test_mw_title10(self):
+        self.scribunto("0", r"""
+        return mw.title.compare(mw.title.new("Foo"), mw.title.new("Foo"))""")
+
+    def test_mw_title11(self):
+        self.scribunto("False", r"""
+        return mw.title.new("Foo") <=  mw.title.new("Bar")""")
+
+    def test_mw_title12(self):
+        self.scribunto("True", r"""
+        return mw.title.new("Foo") <= mw.title.new("Foo")""")
+
+    def test_mw_title13(self):
+        self.scribunto("True", r"""
+        return mw.title.new("Foo") >  mw.title.new("Bar")""")
+
+    def test_mw_title14(self):
+        self.scribunto("Module:Foo", r"""
+        local t = mw.title.new("Foo", "Module")
+        return t.prefixedText""")
+
+    def test_mw_title15(self):
+        self.scribunto("User:Foo", r"""
+        local t = mw.title.new("Foo", 2)
+        return t.prefixedText""")
+
+    def test_mw_title16(self):
+        self.scribunto("Module:Foo", r"""
+        local t = mw.title.new("Foo", mw.site.namespaces.Module.id)
+        return t.prefixedText""")
+
+    def test_mw_title17(self):
+        self.scribunto("nil", r"""
+        local t = mw.title.new("Foo", "UnknownSpace")
+        return tostring(t)""")
+
+    def test_mw_title18(self):
+        self.scribunto("Module:Test#Frag", r"""
+        local t = mw.title.makeTitle("Module", "Test", "Frag")
+        return t.fullText""")
+
+    def test_mw_title19(self):
+        self.scribunto("Test", r"""
+        local t = mw.title.makeTitle(nil, "Test")
+        return t.fullText""")
+
+    def test_mw_title20(self):
+        self.scribunto("nil", r"""
+        local t = mw.title.makeTitle("Main", "{{")
+        return tostring(t)""")
+
+    def test_mw_title21(self):
+        self.scribunto("1", r"""
+        local t = mw.title.makeTitle("Talk", "Test")
+        return t.namespace""")
+
+    def test_mw_title22(self):
+        self.scribunto("1", r"""
+        local t = mw.title.makeTitle("Talk", "Test")
+        return t.namespace""")
+
+    def test_mw_title23(self):
+        self.scribunto("Frag", r"""
+        local t = mw.title.makeTitle("Talk", "Test", "Frag")
+        return t.fragment""")
+
+    def test_mw_title24(self):
+        self.scribunto("Talk", r"""
+        local t = mw.title.makeTitle(1, "Test", "Frag")
+        return t.nsText""")
+
+    def test_mw_title25(self):
+        self.scribunto("User", r"""
+        local t = mw.title.makeTitle(3, "Test", "Frag")
+        return t.subjectNsText""")
+
+    def test_mw_title26(self):
+        self.scribunto("Test", r"""
+        local t = mw.title.makeTitle(3, "Test", "Frag")
+        return t.text""")
+
+    def test_mw_title27(self):
+        self.scribunto("User_talk:Test", r"""
+        local t = mw.title.makeTitle(3, "Test", "Frag")
+        return t.prefixedText""")
+
+    def test_mw_title27(self):
+        self.scribunto("User_talk:Test", r"""
+        local t = mw.title.makeTitle(3, "Test", "Frag")
+        return t.prefixedText""")
+
+    def test_mw_title28(self):
+        self.scribunto("User_talk:Test#Frag", r"""
+        local t = mw.title.makeTitle(3, "Test", "Frag")
+        return t.fullText""")
+
+    def test_mw_title29(self):
+        self.scribunto("Test", r"""
+        local t = mw.title.makeTitle(3, "Test/foo/bar", "Frag")
+        return t.rootText""")
+
+    def test_mw_title30(self):
+        self.scribunto("Test/foo", r"""
+        local t = mw.title.makeTitle(3, "Test/foo/bar", "Frag")
+        return t.baseText""")
+
+    def test_mw_title31(self):
+        self.scribunto("bar", r"""
+        local t = mw.title.makeTitle(3, "Test/foo/bar", "Frag")
+        return t.subpageText""")
+
+    def test_mw_title32(self):
+        self.scribunto("False", r"""
+        local t = mw.title.makeTitle(3, "Test/foo/bar", "Frag")
+        return t.canTalk""")
+
+    def test_mw_title33(self):
+        self.scribunto("True", r"""
+        local t = mw.title.makeTitle("Main", "Test")
+        return t.isContentPage""")
+
+    def test_mw_title34(self):
+        self.scribunto("False", r"""
+        local t = mw.title.makeTitle(3, "Test/foo/bar", "Frag")
+        return t.isExternal""")
+
+    def test_mw_title35(self):
+        self.scribunto("False", r"""
+        local t = mw.title.makeTitle(3, "Test/foo/bar", "Frag")
+        return t.isRedirect""")
+
+    def test_mw_title36(self):
+        # test for redirect that exists
+        ctx = phase1_to_ctx([
+            ["#redirect", "Main:Foo", "Main:Bar"],
+            ["Scribunto", "testmod", """
+            local export = {}
+            function export.testfn(frame)
+            local t = mw.title.makeTitle("Main", "Foo", "Frag")
+            return t.isRedirect
+            end
+            return export"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "True")
+
+    def test_mw_title37(self):
+        self.scribunto("False", r"""
+        local t = mw.title.makeTitle(3, "Test/foo/bar", "Frag")
+        return t.isSpecialPage""")
+
+    def test_mw_title38(self):
+        self.scribunto("True", r"""
+        local t = mw.title.makeTitle(3, "Test/foo/bar", "Frag")
+        return t.isSubpage""")
+
+    def test_mw_title39(self):
+        self.scribunto("True", r"""
+        local t = mw.title.makeTitle(3, "Test/foo/bar", "Frag")
+        return t.isTalkPage""")
+
+    def test_mw_title40(self):
+        self.scribunto("True", r"""
+        local t = mw.title.makeTitle("Main", "Test/foo/bar", "Frag")
+        return t:isSubpageOf(mw.title.new("Test/foo"))""")
+
+    def test_mw_title41(self):
+        self.scribunto("False", r"""
+        local t = mw.title.makeTitle("Main", "Test/foo/bar", "Frag")
+        return t:isSubpageOf(mw.title.new("Test/foo/baz"))""")
+
+    def test_mw_title42(self):
+        self.scribunto("True", r"""
+        local t = mw.title.makeTitle("Main", "Test/foo/bar", "Frag")
+        return t:inNamespace("Main")""")
+
+    def test_mw_title43(self):
+        self.scribunto("False", r"""
+        local t = mw.title.makeTitle("Main", "Test/foo/bar", "Frag")
+        return t:inNamespace(3)""")
+
+    def test_mw_title44(self):
+        self.scribunto("True", r"""
+        local t = mw.title.makeTitle("Main", "Test/foo/bar", "Frag")
+        return t:inNamespaces("Module", "Main")""")
+
+    def test_mw_title45(self):
+        self.scribunto("True", r"""
+        local t = mw.title.makeTitle("User_talk", "Test/foo/bar", "Frag")
+        return t:hasSubjectNamespace("User")""")
+
+    def test_mw_title46(self):
+        self.scribunto("wikitext", r"""
+        local t = mw.title.makeTitle(3, "Test/foo/bar", "Frag")
+        return t.contentModel""")
+
+    def test_mw_title47(self):
+        self.scribunto("Test/foo", r"""
+        local t = mw.title.makeTitle("Main", "Test/foo/bar", "Frag")
+        return t.basePageTitle.fullText""")
+
+    def test_mw_title48(self):
+        self.scribunto("Test", r"""
+        local t = mw.title.makeTitle("Main", "Test/foo/bar", "Frag")
+        return t.rootPageTitle.fullText""")
+
+    def test_mw_title49(self):
+        self.scribunto("Talk:Test/foo/bar", r"""
+        local t = mw.title.makeTitle("Main", "Test/foo/bar", "Frag")
+        return t.talkPageTitle.fullText""")
+
+    def test_mw_title50(self):
+        self.scribunto("Test/foo/bar", r"""
+        local t = mw.title.makeTitle("Talk", "Test/foo/bar", "Frag")
+        return t.subjectPageTitle.fullText""")
+
+    def test_mw_title51(self):
+        # test for redirect target
+        ctx = phase1_to_ctx([
+            ["#redirect", "Main:Foo", "Main:Bar"],
+            ["Scribunto", "testmod", """
+            local export = {}
+            function export.testfn(frame)
+               local t = mw.title.makeTitle("Main", "Foo", "Frag")
+               return t.redirectTarget.fullText
+            end
+            return export"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}")
+        self.assertEqual(ret, "Bar")
+
+    def test_mw_title52(self):
+        self.scribunto("Test/foo/bar/z", r"""
+        local t = mw.title.makeTitle("Main", "Test/foo/bar", "Frag")
+        return t:subPageTitle("z").fullText""")
+
+    def test_mw_title53(self):
+        self.scribunto("Test/foo/b_ar", r"""
+        local t = mw.title.makeTitle("Main", "Test/foo/b ar", "Frag")
+        return t:partialUrl()""")
+
+    def test_mw_title54(self):
+        self.scribunto("http://wiki.local/w/index.php?"
+                       "a=1&title=Test%2Ffoo%2Fb+ar#Frag", r"""
+        local t = mw.title.makeTitle("Main", "Test/foo/b ar", "Frag")
+        return t:fullUrl({a=1}, "http")""")
+
+    def test_mw_title55(self):
+        self.scribunto("/w/index.php?a=1&title=Test%2Ffoo%2Fb+ar#Frag", r"""
+        local t = mw.title.makeTitle("Main", "Test/foo/b ar", "Frag")
+        return t:localUrl({a=1})""")
+
+    def test_mw_title56(self):
+        self.scribunto("https://wiki.local/wiki/Test/foo/b_ar?a=1#Frag", r"""
+        local t = mw.title.makeTitle("Main", "Test/foo/b ar", "Frag")
+        return t:canonicalUrl({a=1})""")
+
+    def test_mw_title57(self):
+        # test for redirect target
+        ctx = phase1_to_ctx([
+            ["#redirect", "Main:Foo", "Main:Bar"],
+            ["Scribunto", "testmod", """
+            local export = {}
+            function export.testfn(frame)
+               local t = mw.title.getCurrentTitle().text
+               local t2 = mw.title.new(t)
+               local c = t2:getContent()
+               return c
+            end
+            return export"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}",
+                              fullpage="RAWCONTENT")
+        self.assertEqual(ret, "RAWCONTENT")
+
+# XXX implement mw.title.makeTitle with interwiki; t.interwiki field
+# XXX implement mw.title.exists by calling python get_page_info (cf isRedirect)
+# XXX mw.title subpage functions should only consider those parent pages
+# as subpages that actually exist
 
 # XXX test frame:newParserValue
 # XXX test frame:newTemplateParserValue

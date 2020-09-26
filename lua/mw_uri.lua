@@ -225,24 +225,36 @@ function mw_uri.anchorEncode(s)
 end
 
 function mw_uri.localUrl(page, query)
+   local fragment = page:gmatch("#(.*)$", "")() or ""
+   page = page:gsub("#.*$", "")
    local uri = Uri:new{}
    uri:extend({title=page})
    uri:extend(query)
-   return uri.relativePath
+   local ret = uri.relativePath
+   if fragment ~= "" then ret = ret .. "#" .. fragment end
+   return ret
 end
 
 function mw_uri.fullUrl(page, query)
+   local fragment = page:gmatch("#(.*)$", "")() or ""
+   page = page:gsub("#.*$", "")
    local uri = Uri:new{}
    uri:extend({title=page})
    uri:extend(query)
-   return "//" .. uri.hostPort .. uri.relativePath
+   local ret = "//" .. uri.hostPort .. uri.relativePath
+   if fragment ~= "" then ret = ret .. "#" .. fragment end
+   return ret
 end
 
 function mw_uri.canonicalUrl(page, query)
+   local fragment = page:gmatch("#(.*)$", "")() or ""
+   page = page:gsub("#.*$", "")
    local uri = Uri:new{}
    uri:parse("/wiki/" .. mw.uri.encode(page, "WIKI"))
    uri:extend(query)
-   return uri.completeUrl
+   local ret = uri.completeUrl
+   if fragment ~= "" then ret = ret .. "#" .. fragment end
+   return ret
 end
 
 function mw_uri.new(s)

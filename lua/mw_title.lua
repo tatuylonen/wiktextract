@@ -4,12 +4,37 @@
 -- Copyright (c) 2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 local mw_title_meta = {
-   contentModel = "wikitext",
-   talkPageTitle = nil,
-   protectionLevels = { nil },
-   cascadingProtection = { restrictions = {}, sources = {} },
-   canTalk = false
 }
+
+function mw_title_meta:__index(key)
+   local v = rawget(mw_title_meta, key)
+   if v ~= nil then return v end
+   if key == "basePageTitle" then
+      return mw.title.new(self.baseText, self.nsText)
+   end
+   if key == "rootPageTitle" then
+      return mw.title.new(self.rootText, self.nsText)
+   end
+   if key == "subjectPageTitle" then
+      return mw.title.new(self.text, self.subjectNsText)
+   end
+   if key == "contentModel" then return "wikitext" end
+   if key == "talkPageTitle" then
+      local talk_ns = mw.site.namespaces[self.namespace].talk
+      if talk_ns == nil then return nil end
+      return mw.title.new(self.text, talk_ns.name)
+   end
+   if key == "protectionLevels" then return { nil } end
+   if key == "cascadingProtection" then
+      return { restrictions = {}, sources = {} }
+   end
+   if key == "canTalk" then return false end
+   if key == "redirectTarget" then
+      return mw.title.new(self._redirectTarget)
+   end
+   return nil
+end
+
 function mw_title_meta.__eq(a, b)
    return a.prefixedText == b.prefixedText
 end
@@ -18,83 +43,72 @@ function mw_title_meta.__lt(a, b)
    return a.prefixedText < b.prefixedText
 end
 
-function mw_title_meta.__tostring(a)
-   return a.prefixedText
+function mw_title_meta:__tostring()
+   return self.prefixedText
 end
 
-function mw_title_meta.isSubpageOf(titleobj, titleobj2)
+function mw_title_meta:isSubpageOf(titleobj2)
    assert(type(titleobj2) == "table")
-   local t1 = titleobj.text
-   local t2 = titleobj2.text
-   if len(t1) >= len(t2) then
+   if self.nsText ~= titleobj2.nsText then return false end
+   local t1 = titleobj2.text
+   local t2 = self.text
+   if #t1 >= #t2 then
       return false
    end
-   if string.sub(t2, 1, len(t1)) ~= t1 then
+   if string.sub(t2, 1, #t1) ~= t1 then
       return false
    end
-   if string.sub(t2, len(t1), len(t1)) ~= "/" then
+   if string.sub(t2, #t1 + 1, #t1 + 1) ~= "/" then
       return false
    end
    return true
 end
 
-function mw_title_meta.inNamespace(titleobj, ns)
-   assert(type(ns) == "string")
-   v = mw.site.namespaces[titleobj.namespace]
-   if ns == v.name then return true end
-   if ns == v.canonicalName then return true end
-   for i, alias in ipairs(v.aliases) do
-      if ns == alias then return true end
+function mw_title_meta:inNamespace(ns)
+   assert(type(ns) == "string" or type(ns) == "number")
+   local ns1 = mw.site.namespaces[self.namespace]
+   local ns2 = mw.site.namespaces[ns]
+   assert(ns1 ~= nil and ns2 ~= nil)
+   if ns1.name == ns2.name then return true end
+   return false
+end
+
+function mw_title_meta:inNamespaces(...)
+   for i, ns in ipairs({...}) do
+      if self:inNamespace(ns) then return true end
    end
    return false
 end
 
-function mw_title_meta.inNamespaces(titleobj, ...)
-   for i, ns in ipairs(...) do
-      if titleobj.inNamespace(ns) then return true end
-   end
-   return false
+function mw_title_meta:hasSubjectNamespace(namespace)
+   local ns = mw.site.findNamespace(namespace)
+   return ns.name == self.subjectNsText
 end
 
-function mw_title_meta.hasSubjectNamespace(titleobj, ns)
-   error("XXX hasSubjectNamespace not yet implemented")
+function mw_title_meta:subPageTitle(text)
+   return mw.title.makeTitle(self.namespace, self.text .. "/" .. text)
 end
 
-function mw_title_meta.subPageTitle(titleobj, text)
-   error("XXX subPageTitle not yet implemented")
+function mw_title_meta:partialUrl()
+   return mw.uri.encode(self.text, "WIKI")
 end
 
-function mw_title_meta.partialUrl(titleobj)
-   error("XXX partialUrl not yet implemented")
+function mw_title_meta:fullUrl(query, proto)
+   local uri = mw.uri.fullUrl(self.fullText, query)
+   if proto ~= nil and proto ~= "" then uri = proto .. ":" .. uri end
+   return uri
 end
 
-function mw_title_meta.fullUrl(titleobj, query, proto)
-   error("XXX fullUrl not yet implemented")
+function mw_title_meta:localUrl(query)
+   return mw.uri.localUrl(self.fullText, query)
 end
 
-function mw_title_meta.localUrl(titleobj, query)
-   error("XXX localUrl not yet implemented")
+function mw_title_meta:canonicalUrl(query)
+   return mw.uri.canonicalUrl(self.fullText, query)
 end
 
-function mw_title_meta.canonicalUrl(titleobj, query)
-   error("XXX canonicalUrl not yet implemented")
-end
-
-function mw_title_meta.getContent(titleobj)
-   error("XXX getContent not yet implemented")
-end
-
-function mw_title_meta.__index(titleobj, key)
-   if v == "basePageTitle" then
-      error("XXX basePageTitle not yet implemented")
-   end
-   if v == "rootPageTitle" then
-      error("XXX rootPageTitle not yet implemented")
-   end
-   if v == "subjectPageTitle" then
-      error("XXX subjectPageTitle not yet implemented")
-   end
-   return nil
+function mw_title_meta:getContent()
+   return mw.title.python_get_page_content(self.fullText)
 end
 
 local mw_title = {
@@ -135,13 +149,13 @@ function mw_title.makeTitle(namespace, title, fragment, interwiki)
    end
    -- XXX there are also other disallowed titles, see
    -- https://www.mediawiki.org/wiki/Manual:Page_title
-   if not namespace then namespace = "Main" end
+   if not namespace or namespace == "" then namespace = "Main" end
    local ns = mw.site.findNamespace(namespace)
    if not ns then
       return nil
    end
    if interwiki then
-      print("XXX unimplemented: mw_title.makeTitle called with interwiki",
+      error("XXX unimplemented: mw_title.makeTitle called with interwiki: " ..
             interwiki)
    end
    -- XXX how should interwiki be handled?
@@ -162,14 +176,14 @@ function mw_title.makeTitle(namespace, title, fragment, interwiki)
          break
       end
    end
-   local root = string.gsub(title, "/.*", "")
-   local parent = string.gsub(title, "/[^/]*", "")
-   local subpage = string.gsub(title, ".*/", "")
+   local root = string.gsub(title, "/.*$", "")
+   local parent = string.gsub(title, "/[^/]*$", "")
+   local subpage = string.gsub(title, "^.*/", "")
    local fullName
-   if namespace == "Main" then
+   if ns.name == "Main" then
       fullName = title
    else
-      fullName = namespace .. ":" .. title
+      fullName = ns.name .. ":" .. title
    end
    local withFrag
    if fragment then
@@ -179,21 +193,20 @@ function mw_title.makeTitle(namespace, title, fragment, interwiki)
    end
 
    -- mw_title.python_get_page_info is set in lua_set_fns
-   local dt = mw_title.python_get_page_info(fullName)
+   local dt = mw_title.python_get_page_info(ns.name .. ":" .. title)
    local id = dt.id
    local exists = dt.exists
    local redirectTo = dt.redirectTo
 
    local t = {
-      __index = mw_title_meta,
-      namespace = ns,
+      namespace = ns.id,
       id = id,
-      interwiki = interwiki,
+      interwiki = interwiki or "",
       fragment = fragment,
-      nsText = namespace,    -- ???
-      subjectNsText = namespace,  -- ???
+      nsText = ns.name,    -- ???
+      subjectNsText = (ns.subject or ns).name,
       text = title,
-      prefixedText = fullName,
+      prefixedText = ns.name .. ":" .. title,
       fullText = withFrag,
       rootText = root,
       baseText = parent,
@@ -205,15 +218,19 @@ function mw_title.makeTitle(namespace, title, fragment, interwiki)
       isExternal = interwiki ~= nil,  -- ???
       isLocal = interwiki == nil,   -- ???
       isRedirect = redirectTo ~= nil,
-      isSpecialPage = namespace == "Special",
+      isSpecialPage = ns.name == "Special",
       isSubpage = title ~= base,
-      redirectTarget = redirectTo,
+      isTalkPage = ns.name == "Talk" or string.find(ns.name, "_talk") ~= nil,
+      _redirectTarget = redirectTo,
    }
    setmetatable(t, mw_title_meta)
    return t
 end
 
 function mw_title.new(text, namespace)
+   if type(text) == "number" then
+      error("XXX mw.title.new with id not yet implemented")
+   end
    assert(type(text) == "string")
    if not namespace then namespace = "Main" end
    local idx = string.find(text, ":")
@@ -229,22 +246,23 @@ function mw_title.new(text, namespace)
 end
 
 function mw_title.getCurrentTitle()
-   local frame = mw.getCurrentFrame()
-   local parent = frame:getParent() or frame
-   local title = parent:getTitle()
-   local newtitle = mw_title.new(title, "Main")
-   return newtitle
+   return mw_title.new(mw._pageTitle)
+   -- local frame = mw.getCurrentFrame()
+   -- local parent = frame:getParent() or frame
+   -- local title = parent:getTitle()
+   -- local newtitle = mw_title.new(title, "Main")
+   -- return newtitle
 end
 
 function mw_title.equals(a, b)
-   return a.fullName == b.fullName
+   return a.fullText == b.fullText
 end
 
 function mw_title.compare(a, b)
    if a.interwiki < b.interwiki then return -1 end
    if a.interwiki > b.interwiki then return 1 end
-   if a.namespace < b.namespace then return -1 end
-   if a.namespace > b.namespace then return 1 end
+   if a.nsText < b.nsText then return -1 end
+   if a.nsText > b.nsText then return 1 end
    if a.text < b.text then return -1 end
    if a.text > b.text then return 1 end
    return 0

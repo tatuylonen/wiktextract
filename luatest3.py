@@ -42,7 +42,8 @@ def process_file(path):
         print("{}: HAVE {{{{".format(title))
 
     text = expand_wikitext(expand_ctx, title, text,
-                           templates_to_expand=expand_ctx.need_pre_expand)
+                           templates_to_expand=expand_ctx.need_pre_expand,
+                           rawpage=page)
     tree, parse_ctx = wikitext.parse_with_ctx(title, text, no_preprocess=True)
     if parse_ctx.errors:
         print("{}: HAD PARSE ERRORS".format(path))

@@ -30,6 +30,8 @@ function new_loader(modname)
   content = string.gsub(content, "\\,", ",")
   content = string.gsub(content, "\\%(", "(")
   content = string.gsub(content, "\\%)", ")")
+  content = string.gsub(content, "\\%+", "+")
+  content = string.gsub(content, "\\%*", "*")
 
   -- Load the content into the Lua interpreter.
   local ret = assert(load(content, modname, "bt", env))
@@ -46,13 +48,14 @@ package.searchers[1] = new_loader
 -- other Python functions that implement some of the functionality needed
 -- for executing Scribunto code (these functions are called from Lua code).
 function lua_set_loader(loader, mw_text_decode, mw_text_encode,
-                        get_page_info, fetch_language_name,
+                        get_page_info, get_page_content, fetch_language_name,
                         fetch_language_names)
   python_loader = loader
   mw = require("mw")
   mw.text.decode = mw_text_decode
   mw.text.encode = mw_text_encode
   mw.title.python_get_page_info = get_page_info
+  mw.title.python_get_page_content = get_page_content
   mw.language.python_fetch_language_name = fetch_language_name
   mw.language.python_fetch_language_names = fetch_language_names
 end
@@ -133,7 +136,7 @@ end
 -- This function implements the {{#invoke:...}} parser function.
 -- XXX need better handling of parent frame and frame
 -- This returns (true, value) if successful, (false, error) if exception.
-function lua_invoke(mod_name, fn_name, frame)
+function lua_invoke(mod_name, fn_name, frame, page_title)
   local success
   local mod
   success, mod = xpcall(function() return require(mod_name) end,
@@ -162,6 +165,7 @@ function lua_invoke(mod_name, fn_name, frame)
      prepare_frame_args(pframe)
   end
   mw.getCurrentFrame = function() return frame end
+  mw._pageTitle = page_title
   if fn == nil then
      return false, "\tNo function '" .. fn_name .. "' in module " .. mod_name
   end

@@ -11,11 +11,11 @@ local Namespace = {
    aliases = {},
    associated = {},
 }
+Namespace.__index = Namespace
 
 function Namespace:new(obj)
    obj = obj or {}
    setmetatable(obj, self)
-   self.__index = self
    obj.canonicalName = obj.name
    obj.displayName = obj.name
    obj.hasSubpages = obj.name == "Main" or obj.name == "Module"
@@ -64,7 +64,10 @@ category_ns.talk = category_talk_ns
 module_ns.talk = module_talk_ns
 
 function add_ns(t, ns)
+   assert(ns.name ~= nil)
+   assert(ns.id ~= nil)
    t[ns.id] = ns
+   t[ns.name] = ns
 end
 
 local mw_site_namespaces = {}
@@ -141,6 +144,10 @@ local mw_site = {
 function mw_site.matchNamespaceName(v, name)
    -- Internal function to match namespace against name
    -- namespace prefixes are case-insensitive
+   if type(name) == "number" then
+      if name == v.id then return true end
+      return false
+   end
    assert(type(name) == "string")
    name = string.upper(name)
    if name == string.upper(v.name) then return true end
@@ -153,7 +160,6 @@ end
 
 function mw_site.findNamespace(name)
    -- Internal function to find the namespace object corresponding to a name
-   assert(type(name) == "string")
    for k, v in pairs(mw.site.namespaces) do
       if mw.site.matchNamespaceName(v, name) then
          return v
