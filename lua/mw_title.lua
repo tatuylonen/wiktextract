@@ -246,7 +246,10 @@ function mw_title.new(text, namespace)
 end
 
 function mw_title.getCurrentTitle()
-   return mw_title.new(mw._pageTitle)
+   local t = mw_title.new(mw._pageTitle)
+   if t == nil then
+      print("mw.title.getCurrentTitle returns nil:", mw._pageTitle)
+   return t
    -- local frame = mw.getCurrentFrame()
    -- local parent = frame:getParent() or frame
    -- local title = parent:getTitle()

@@ -98,6 +98,7 @@ function Html:node(builder)
    if builder then
       table.insert(self._children, builder)
    end
+   return self
 end
 
 function Html:wikitext1(v)
@@ -113,10 +114,12 @@ function Html:wikitext(...)
    for k, v in ipairs({...}) do
       self:wikitext1(v)
    end
+   return self
 end
 
 function Html:newline()
    table.insert(self._children, "\n")
+   return self
 end
 
 function Html:tag(tagName, args)
@@ -135,6 +138,7 @@ function Html:attr(name, value)
       end
    end
    self._attrs[name] = value
+   return self
 end
 
 function Html:getAttr(name)
@@ -154,6 +158,7 @@ function Html:addClass(new_class)
       classes = classes .. " " .. new_class
    end
    self:attr("class", classes)
+   return self
 end
 
 function Html:css(name, value)
@@ -165,8 +170,8 @@ function Html:css(name, value)
       end
       return
    end
-
    self._css[name] = value
+   return self
 end
 
 function Html:cssText(new_css)
@@ -179,6 +184,7 @@ function Html:cssText(new_css)
       css = css .. new_css
    end
    self:attr("style", css)
+   return self
 end
 
 function Html:done()

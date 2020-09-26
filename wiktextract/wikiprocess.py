@@ -61,6 +61,7 @@ class ExpandCtx(object):
         "lua",		 # Lua runtime or None if not yet initialized
         "modules",	 # Lua code for defined Lua modules
         "need_pre_expand",  # Set of template names to be expanded before parse
+        "page_contents",  # Full content for selected pages (e.g., Thesaurus)
         "redirects",	 # Redirects in the wikimedia project
         "rev_ht",	 # Mapping from text to magic cookie
         "rev_ht_base",   # Rev_ht from processing template bodies
@@ -74,6 +75,7 @@ class ExpandCtx(object):
         self.cookies = []
         self.fullpage = None
         self.lua = None
+        self.page_contents = {}
         self.rev_ht_base = {}
         self.rev_ht = {}
 
@@ -345,6 +347,9 @@ def phase1_to_ctx(phase1_data):
         if tag == "Scribunto":
             ctx.modules[title] = text
             continue
+        if tag == "Thesaurus":
+            ctx.page_contents[title] = text
+            continue
         if title.endswith("/testcases"):
             continue
         if title.startswith("User:"):
@@ -505,6 +510,11 @@ def get_page_content(ctx, title):
     assert isinstance(title, str)
     if title == ctx.title:
         return ctx.fullpage
+    if title in ctx.page_contents:
+        return ctx.page_contents[title]
+    print("{}: attempted to access page content for {} which is not available"
+          .format(ctx.title, title))
+    sys.stdout.flush()
     return None
 
 

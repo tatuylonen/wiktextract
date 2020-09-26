@@ -32,6 +32,9 @@ function new_loader(modname)
   content = string.gsub(content, "\\%)", ")")
   content = string.gsub(content, "\\%+", "+")
   content = string.gsub(content, "\\%*", "*")
+  content = string.gsub(content, "\\>", ">")
+  content = string.gsub(content, "\\.", ".")
+  content = string.gsub(content, "\\?", "?")
 
   -- Load the content into the Lua interpreter.
   local ret = assert(load(content, modname, "bt", env))
@@ -193,6 +196,39 @@ local new_os = {
 function table.getn(tbl)
    return #tbl
 end
+
+-- This is a compatibility function for an older version of Lua.  Apparently
+-- the math.mod function was renamed to math.fmod in Lua 5.1.
+function math.mod(a, b)
+   return math.fmod(a, b)
+end
+
+-- With the introduction of 64-bit integer type in Lua 5.3, the %d and similar
+-- formats in string.format no longer accept floating point arguments.  Remedy
+-- that by expressly converting arguments to such formatting codes into
+-- integers.
+local orig_format = string.format
+function string.format(fmt, ...)
+   local args = {...}
+   local new_args = {}
+   local i = 1
+   for m in string.gmatch(fmt, "%%[-# +'0-9.]*([cdEefgGiouXxqs%%])") do
+      if m ~= "%" then
+         local arg = args[i]
+         i = i + 1
+         if (m == "d" or m == "i" or m == "o" or m == "u" or m == "x" or
+             m == "X" or m == "c") then
+            arg = math.floor(arg + 0.5)
+         end
+         table.insert(new_args, arg)
+      end
+   end
+   if i < #args then
+      print("Warning: extra arguments to string.format")
+   end
+   return orig_format(fmt, unpack(new_args))
+end
+
 
 env = {}
 env["_G"] = env

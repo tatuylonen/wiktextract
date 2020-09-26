@@ -2358,6 +2358,27 @@ return export
                               fullpage="RAWCONTENT")
         self.assertEqual(ret, "RAWCONTENT")
 
+    def test_table_getn(self):
+        self.scribunto("3", r"""
+        return table.getn({"a", "b", "c"})""")
+
+    def test_math_mod(self):
+        self.scribunto("2", r"""
+        return math.mod(12, 5)""")
+
+    def test_string_format1(self):
+        self.scribunto("00005", r"""
+        return string.format("%05d", 4.7)""")
+
+    def test_string_format2(self):
+        self.scribunto("00005 % foo 1.1 -6 ", r"""
+        return string.format("%05d %% %s %.1f %-#3d", 4.7, "foo", 1.1, -6)""")
+
+    def test_string_format3(self):
+        self.scribunto("0005", r"""
+        return string.format("%.4X", 4.7)""")
+
+
 # XXX title:getContent() must be implemented at least for Thesaurus pages
 # (we can easily capture Thesaurus pages in phase1)
 
