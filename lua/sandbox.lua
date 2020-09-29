@@ -22,7 +22,7 @@ function new_loader(modname)
 
    -- Wikimedia uses an older version of Lua.  Make certain substitutions
    -- to make existing code run on more modern versions of Lua.
-   content = string.gsub(content, "\\\\", "\\134")
+   content = string.gsub(content, "\\\\", "\\092")
    content = string.gsub(content, "%%\\%[", "%%%%[")
    content = string.gsub(content, "\\:", ":")
    content = string.gsub(content, "\\,", ",")
