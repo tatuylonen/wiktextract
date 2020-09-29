@@ -253,7 +253,7 @@ function table.insert(...)
       orig_insert(table.unpack(args))
    else
       local pos = args[2]
-      if pos > #args then
+      if pos > #args[1] + 1 then
          args[1][pos] = args[2]
       else
          orig_insert(table.unpack(args))
