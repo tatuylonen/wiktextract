@@ -978,9 +978,28 @@ PARSER_FUNCTIONS = {
 def call_parser_function(fn_name, args, expander, pagetitle, stack):
     """Calls the given parser function with the given arguments."""
     assert isinstance(fn_name, str)
-    assert isinstance(args, (list, tuple))
+    assert isinstance(args, (list, tuple, dict))
     assert callable(expander)
     assert isinstance(pagetitle, str)
     assert isinstance(stack, list)
     fn = PARSER_FUNCTIONS[fn_name]
+    have_keyed_args = False
+    if isinstance(args, dict):
+        dict_args = args.copy()
+        new_args = []
+        for i in range(1, 1000):
+            v = args.get(i, None)
+            if v is None:
+                break
+            new_args.append(v)
+        for i in range(1, len(new_args) + 1):
+            del args[i]
+        have_keyed_args = len(args) > 0
+        args = new_args
+    else:
+        dict_args = dict(zip(range(1, len(args) + 1), args))
+    if have_keyed_args:
+        print("{}: {}: ERROR: named arguments not supported: {} at {}"
+              .format(pagetitle, fn_name, args, stack))
+        return ""
     return fn(pagetitle, fn_name, args, expander, stack)

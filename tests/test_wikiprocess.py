@@ -1462,6 +1462,7 @@ return export
         self.assertEqual(ret, """correct""")
 
     def test_invoke18(self):
+        # Tests whitespaces within #invoke
         ctx = phase1_to_ctx([
             ["Template", "testtempl", "{{#invoke:\ntestmod\n|\ntestfn\n}}"],
             ["Scribunto", "testmod", """
@@ -1473,6 +1474,20 @@ return export
 """]])
         ret = expand_wikitext(ctx, "Tt", "{{testtempl}}")
         self.assertEqual(ret, """correct""")
+
+    def test_invoke19(self):
+        # Tests fetching a frame argument that does not exist
+        ctx = phase1_to_ctx([
+            ["Template", "testtempl", "{{#invoke:testmod|testfn}}"],
+            ["Scribunto", "testmod", """
+local export = {}
+function export.testfn(frame)
+  return tostring(frame.args.nonex) .. tostring(frame:getParent().args.nonex2)
+end
+return export
+"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{testtempl}}")
+        self.assertEqual(ret, """nilnil""")
 
     def test_frame_parent1(self):
         ctx = phase1_to_ctx([
@@ -1823,6 +1838,34 @@ return export
     def test_frame_extensionTag4(self):
         self.scribunto("<br />", """
         return frame:extensionTag("br")""")
+
+    def test_frame_newChild1(self):
+        self.scribunto("", """
+        return frame:newChild():getTitle()""")
+
+    def test_frame_newChild2(self):
+        self.scribunto("FOO", """
+        return frame:newChild{title="FOO"}:getTitle()""")
+
+    def test_frame_newChild3(self):
+        self.scribunto("FOO|1=a|2=b", """
+        local f = frame:newChild{title="FOO", args={"a", "b"}}
+        local s = {}
+        for k, v in pairs(f.args) do
+           table.insert(s, tostring(k) .. "=" .. tostring(v))
+        end
+        table.sort(s)
+        return f:getTitle() .. "|" .. table.concat(s, "|")""")
+
+    def test_frame_newChild4(self):
+        self.scribunto("FOO|1=a|bar=c|foo=b", """
+        local f = frame:newChild{title="FOO", args={"a", foo="b", bar="c"}}
+        local s = {}
+        for k, v in pairs(f.args) do
+           table.insert(s, tostring(k) .. "=" .. tostring(v))
+        end
+        table.sort(s)
+        return f:getTitle() .. "|" .. table.concat(s, "|")""")
 
     def test_mw_text_nowiki1(self):
         self.scribunto("&num;&lsqb;foo&rsqb;&lbrace;&lbrace;a&vert;"
@@ -2344,7 +2387,6 @@ return export
     def test_mw_title57(self):
         # test for redirect target
         ctx = phase1_to_ctx([
-            ["#redirect", "Main:Foo", "Main:Bar"],
             ["Scribunto", "testmod", """
             local export = {}
             function export.testfn(frame)
@@ -2357,6 +2399,26 @@ return export
         ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn}}",
                               fullpage="RAWCONTENT")
         self.assertEqual(ret, "RAWCONTENT")
+
+    def test_mw_clone1(self):
+        self.scribunto("21AAa", r"""
+        local x = {1, "a", math.sin, foo={"a", "b"}}
+        local v = mw.clone(x)
+        x[1] = 2
+        x.foo[1] = "AA"
+        return x[1] .. v[1] .. x.foo[1] .. v.foo[1]""")
+
+    def test_mw_clone99(self):
+        ctx = phase1_to_ctx([
+            ["Scribunto", "testmod", """
+            local export = {}
+            function export.testfn(frame)
+               local c = mw.clone(frame.args)
+               return c[1] .. c.foo .. tostring(c.nonex)
+            end
+            return export"""]])
+        ret = expand_wikitext(ctx, "Tt", "{{#invoke:testmod|testfn|a|foo=bar}}")
+        self.assertEqual(ret, "abarnil")
 
     def test_table_getn(self):
         self.scribunto("3", r"""

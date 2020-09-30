@@ -114,6 +114,17 @@ frame_args_meta = {
    __len = frame_args_len
 }
 
+function frame_new_child(frame, o)
+   local title = (o and o.title) or ""
+   local args = (o and o.args) or {}
+   local new_frame = mw.clone(frame)
+   new_frame.getParent = function() return frame end
+   new_frame.getTitle = function() return title end
+   new_frame.args = args
+   prepare_frame_args(new_frame)
+   return new_frame
+end
+
 function prepare_frame_args(frame)
   local next_key = {}
   local prev = "***nil***"
@@ -127,6 +138,7 @@ function prepare_frame_args(frame)
   frame.args = new_args
   frame.argumentPairs = function (frame) return pairs(frame.args) end
   frame.getArgument = frame_get_argument
+  frame.newChild = frame_new_child
 end
 
 function frame_get_argument(frame, name)

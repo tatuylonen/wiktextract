@@ -40,20 +40,25 @@ function mw.allToString(...)
    return ret
 end
 
-function deepcopy(obj, visited)
+local function deepcopy(obj, visited)
    -- non-table objects can be returned as-is
    if type(obj) ~= "table" then return obj end
    -- handle cyclic data structures
    if visited[obj] ~= nil then return visited[obj] end
-   -- copy the table
+   -- Create new table
    local new_table = {}
+   -- track that we have visited this node and save the copy
+   visited[obj] = new_table
+   -- clear metatable during the copy, as it could interfere
+   local old_meta = getmetatable(obj)
+   setmetatable(obj, nil)
+   -- Copy fields of the object
    for k, v in pairs(obj) do
       new_table[deepcopy(k, visited)] = deepcopy(v, visited)
    end
-   -- copy metatable pointer
-   setmetatable(new_table, getmetatable(obj))
-   -- track that we have visited this node and save the copy
-   visited[obj] = new_table
+   -- copy metatable pointer for copy
+   setmetatable(obj, old_meta)
+   setmetatable(new_table, old_meta)
    return new_table
 end
 

@@ -706,7 +706,11 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                     return ""
                 name = args[0]
                 if not isinstance(name, str):
-                    new_args = list(name["args"].values())
+                    new_args = name["args"]
+                    if isinstance(new_args, str):
+                        new_args = { 1: new_args }
+                    else:
+                        new_args = dict(new_args)
                     name = name["name"] or ""
                 else:
                     new_args = []
@@ -788,8 +792,7 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                 lambda self, x: value_with_expand(self, "preprocess", x)
             frame["newTemplateParserValue"] = \
                 lambda self, x: value_with_expand(self, "expand", x)
-            frame["newChild"] = lambda self, title="", args="": \
-                make_frame(self, title, args)
+            # newChild set in sandbox.lua
             return lua.table_from(frame)
 
         # Create parent frame (for page being processed) and current frame
