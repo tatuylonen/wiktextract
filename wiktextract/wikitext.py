@@ -265,6 +265,7 @@ class ParseCtx(object):
         "pre_parse",
         "stack",
         "suppress_special",
+        "warnings",
     )
 
     def __init__(self, pagetitle):
@@ -278,6 +279,7 @@ class ParseCtx(object):
         self.pre_parse = False
         self.stack = [node]
         self.suppress_special = False
+        self.warnings = []
 
     def push(self, kind):
         """Pushes a new node of the specified kind onto the stack."""
@@ -388,6 +390,14 @@ class ParseCtx(object):
         msg = "{}:{}: ERROR: {}".format(self.pagetitle, loc, msg)
         print(msg)
         self.errors.append(msg)
+
+    def warning(self, msg, loc=None):
+        """Prints a parsing warning message and records it in self.warnings."""
+        if loc is None:
+            loc = self.linenum
+        msg = "{}:{}: warning: {}".format(self.pagetitle, loc, msg)
+        print(msg)
+        self.warnings.append(msg)
 
 
 def text_fn(ctx, token):
@@ -1038,7 +1048,7 @@ def tag_fn(ctx, token):
                 ctx.pop(False)
             return
 
-        # Give an error on unsupported HTML tags.  WikiText limits the set of
+        # Give a warning on unsupported HTML tags.  WikiText limits the set of
         # tags that are allowed.
         if name not in ALLOWED_HTML_TAGS:
             # Wiktionary seems to use markings like <3> in some
@@ -1046,8 +1056,8 @@ def tag_fn(ctx, token):
             # them may need to be reconsidered in the future if
             # problems arise.
             if not name.isdigit():
-                ctx.error("html tag <{}{}> not allowed in WikiText"
-                          "".format(name, "/" if also_end else ""))
+                ctx.warning("html tag <{}{}> not allowed in WikiText"
+                            "".format(name, "/" if also_end else ""))
             return text_fn(ctx, token)
 
         # Automatically close parent HTML tags that should be ended by this tag
@@ -1096,11 +1106,11 @@ def tag_fn(ctx, token):
         ctx.pop(False)
         return
 
-    # Give an error on unsupported HTML tags.  WikiText limits the set of
+    # Give a warning on unsupported HTML tags.  WikiText limits the set of
     # tags that are allowed.
     if name not in ALLOWED_HTML_TAGS:
-        ctx.error("html tag </{}> not allowed in WikiText"
-                  "".format(name))
+        ctx.warning("html tag </{}> not allowed in WikiText"
+                    "".format(name))
         return text_fn(ctx, token)
 
     # See if we can find the opening tag from the stack
