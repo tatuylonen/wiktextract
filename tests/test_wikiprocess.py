@@ -2732,6 +2732,13 @@ return export
 # XXX Implement:
 #   #time
 #   TALKSPACE
+#   BASEPAGENAME   (make sure also recognized {{BASEPAGENAME:}}
+#   fullurle
+#   PAGENAMEE
+#   CURRENTMONTHNAME
+
+# XXX add warning about unbalanced parentheses; should try to handle
+# them heuristically as a last resort
 
 # XXX #tag is used to create <nowiki>, allow and implement
 
@@ -2739,6 +2746,15 @@ return export
 
 # XXX change unrecognized HTML tag parse error to a warning.  Collect
 # warnings in a list
+
+# XXX implement #categorytree (note named arguments)
+
+# XXX pass ctx to parserfns and get title from there, default space,
+# mediawiki language from there
+
+# XXX there seems to be some issue in parameter processing:
+# see pages/Words/fí/fíkinn.txt (gives warning about parameter fíkn), I think
+# I may be checking for "=" in parameter at wrong time relative to expansions
 
 # XXX implement mw.title.makeTitle with interwiki; t.interwiki field
 # XXX implement mw.title.exists by calling python get_page_info (cf isRedirect)
