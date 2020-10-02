@@ -209,7 +209,7 @@ function mw_title.makeTitle(namespace, title, fragment, interwiki)
       id = id,
       interwiki = interwiki or "",
       fragment = fragment,
-      nsText = ns.name,    -- ???
+      nsText = ns.name ~= "Main" and ns.name or "",
       subjectNsText = (ns.subject or ns).name,
       text = title,
       prefixedText = ns.name .. ":" .. title,
@@ -234,6 +234,7 @@ function mw_title.makeTitle(namespace, title, fragment, interwiki)
 end
 
 function mw_title.new(text, namespace)
+   if text == nil then return nil end
    if type(text) == "number" then
       error("XXX mw.title.new with id not yet implemented")
    end
