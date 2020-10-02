@@ -45,8 +45,9 @@ def process_file(path):
     start_page(expand_ctx, title, page)
     text = wikitext.preprocess_text(page)
     ret = expand_wikitext(expand_ctx, text)
-    if ret.find("{{") >= 0:
-        print("{}: HAVE {{{{".format(title))
+    m = re.search(r"\{\{+[^}]*\}\}+", ret)
+    if m:
+        print("{}: BRACES REMAIN: {}".format(title, m.group(0)))
 
     text = expand_wikitext(expand_ctx, text,
                            templates_to_expand=expand_ctx.need_pre_expand)

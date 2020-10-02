@@ -2322,12 +2322,12 @@ return export
         self.assertEqual(ret, "Tt")
 
     def test_mw_title2(self):
-        self.scribunto("Main", """
+        self.scribunto("", """
         local t = mw.title.makeTitle("Main", "R:L&S")
         return t.nsText""")
 
     def test_mw_title3(self):
-        self.scribunto("Main", """
+        self.scribunto("", """
         local t = mw.title.new("R:L&S", "Main")
         return t.nsText""")
 
@@ -2726,14 +2726,19 @@ return export
         self.scribunto("False", r"""
         return _G["os"].clock == nil""")
 
-# XXX issues in ko-headword seem to suggest a possible problem in
-# unicode patterns in mw.ustring.gsub.
-
-# XXX it seems that e.g. zh-pron calls (u?)string:gsub with invalid unicode in
-# pattern, which fails.  string should probably not be alias for ustring.
-
 # XXX title:getContent() must be implemented at least for Thesaurus pages
 # (we can easily capture Thesaurus pages in phase1)
+
+# XXX Implement:
+#   #time
+#   TALKSPACE
+
+# XXX #tag is used to create <nowiki>, allow and implement
+
+# XXX Why do I sometimes get {{{...}}} remaining in final text?
+
+# XXX change unrecognized HTML tag parse error to a warning.  Collect
+# warnings in a list
 
 # XXX implement mw.title.makeTitle with interwiki; t.interwiki field
 # XXX implement mw.title.exists by calling python get_page_info (cf isRedirect)

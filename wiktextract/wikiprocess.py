@@ -65,6 +65,7 @@ class ExpandCtx(object):
         "redirects",	 # Redirects in the wikimedia project
         "rev_ht",	 # Mapping from text to magic cookie
         "rev_ht_base",   # Rev_ht from processing template bodies
+        "stack",	 # Saved stack before calling Lua function
         "template_fn",   # None or function to expand template
         "template_name", # name of template currently being expanded
         "templates",     # dict temlate name -> definition
@@ -78,6 +79,7 @@ class ExpandCtx(object):
         self.page_contents = {}
         self.rev_ht_base = {}
         self.rev_ht = {}
+        self.stack = []
 
     def save_value(self, kind, args):
         """Saves a value of a particular kind and returns a unique magic
@@ -438,7 +440,8 @@ def lua_loader(ctx, modname):
             with open(p, "r") as f:
                 data = f.read()
             return data
-    print("load_loader: NOT FOUND:", modname, path)
+    print("{}: ERROR: Lua module not found: NOT FOUND: {} at {}"
+          .format(ctx.title, modname, ctx.stack))
     return None
 
 
@@ -516,9 +519,11 @@ def get_page_content(ctx, title):
         return ctx.fullpage
     if title in ctx.page_contents:
         return ctx.page_contents[title]
-    print("{}: attempted to access page content for {} which is not available"
-          .format(ctx.title, title))
-    sys.stdout.flush()
+    # XXX pages commonly try to access content from other pages, and that
+    # really should be supported somehow
+    # print("{}: attempted to access page content for {} which is not available"
+    #       .format(ctx.title, title))
+    # sys.stdout.flush()
     return ""
 
 
@@ -707,6 +712,8 @@ def expand_wikitext(ctx, text, templates_to_expand=None,
                              lambda x: x,  # Already expanded
                              stack)
                 stack.pop()
+                # Expand any templates from the result
+                ret = preprocess(frame, ret)
                 return ret
 
             def callParserFunction(frame, *args):
@@ -823,6 +830,8 @@ def expand_wikitext(ctx, text, templates_to_expand=None,
         # Call the Lua function in the given module
         sys.stdout.flush()
         stack.append("Lua:{}:{}()".format(modname, modfn))
+        old_stack = ctx.stack
+        ctx.stack = stack
         try:
             ret = lua.eval("lua_invoke")(modname, modfn, frame, ctx.title)
             if not isinstance(ret, (list, tuple)):
@@ -835,6 +844,8 @@ def expand_wikitext(ctx, text, templates_to_expand=None,
             print("ERROR: {}: invalid unicode returned by {} at {}"
                   .format(ctx.title, invoke_args, stack))
             ok, text = True, ""
+        finally:
+            ctx.stack = old_stack
         stack.pop()
         if ok:
             if text is None:
@@ -851,8 +862,10 @@ def expand_wikitext(ctx, text, templates_to_expand=None,
         elif not isinstance(text, str):
             text = str(text)
         if text.find("'debug.error'") >= 0:
-            print("ERROR at {}".format(stack))
-            print(re.sub(r".*?:\d+: ", "", text.split("\n")[0]))
+            # print("ERROR at {}".format(stack))
+            print("{}: {}"
+                  .format(ctx.title,
+                          re.sub(r".*?:\d+: ", "", text.split("\n")[0])))
         else:
             print("LUA ERROR IN #invoke {} at {}".format(invoke_args, stack))
             parts = []
@@ -900,7 +913,8 @@ def expand_wikitext(ctx, text, templates_to_expand=None,
                     # Template argument reference
                     if len(args) > 2:
                         print("{}: too many args ({}) in argument reference "
-                              "{!r}".format(ctx.title, len(args), args))
+                              "{!r} at {}"
+                              .format(ctx.title, len(args), args, stack))
                     stack.append("ARG-NAME")
                     k = expand(expand_args(args[0], argmap),
                                stack, parent, ctx.templates).strip()
@@ -947,7 +961,7 @@ def expand_wikitext(ctx, text, templates_to_expand=None,
             # apparently encode and expand the return value, similarly to
             # template bodies (without argument expansion)
             # XXX current implementation of preprocess() does not match!!!
-            return ret
+            return str(ret)
 
         # Main code of expand()
         parts = []
