@@ -50,6 +50,17 @@ local help_talk_ns = Namespace:new{id=13, name="Help_talk", isTalk=true,
 local category_ns = Namespace:new{id=14, name="Category", isSubject=true}
 local category_talk_ns = Namespace:new{id=15, name="Category_talk", isTalk=true,
                                        subject=category_ns}
+local appendix_ns = Namespace:new{id=100, name="Appendix", isSubject=true}
+local appendix_talk_ns = Namespace:new{id=101, name="Appendix_talk",
+                                       isTalk=true, subject=appendix_ns}
+local thesaurus_ns = Namespace:new{id=110, name="Thesaurus", isSubject=true}
+local thesaurus_talk_ns = Namespace:new{id=111, name="Thesaurus_talk",
+                                       isTalk=true, subject=thesaurus_ns}
+local reconstruction_ns = Namespace:new{id=118, name="Reconstruction",
+                                        isSubject=true}
+local reconstruction_talk_ns = Namespace:new{id=119, name="Reconstruction_talk",
+                                             isTalk=true,
+                                             subject=reconstruction_ns}
 local module_ns = Namespace:new{id=828, name="Module", isIncludable=true,
                                 isSubject=true}
 local module_talk_ns = Namespace:new{id=829, name="Module_talk", isTalk=true,
@@ -61,6 +72,9 @@ mediawiki_ns.talk = mediawiki_talk_ns
 template_ns.talk = template_talk_ns
 help_ns.talk = help_talk_ns
 category_ns.talk = category_talk_ns
+appendix_ns.talk = appendix_talk_ns
+thesaurus_ns.talk = thesaurus_talk_ns
+reconstruction_ns.talk = reconstruction_talk_ns
 module_ns.talk = module_talk_ns
 
 function add_ns(t, ns)
@@ -89,11 +103,20 @@ add_ns(mw_site_namespaces, help_ns)
 add_ns(mw_site_namespaces, help_talk_ns)
 add_ns(mw_site_namespaces, category_ns)
 add_ns(mw_site_namespaces, category_talk_ns)
+add_ns(mw_site_namespaces, appendix_ns)
+add_ns(mw_site_namespaces, appendix_talk_ns)
+add_ns(mw_site_namespaces, thesaurus_ns)
+add_ns(mw_site_namespaces, thesaurus_talk_ns)
+add_ns(mw_site_namespaces, reconstruction_ns)
+add_ns(mw_site_namespaces, reconstruction_talk_ns)
 add_ns(mw_site_namespaces, module_ns)
 add_ns(mw_site_namespaces, module_talk_ns)
 
 local mw_site_contentNamespaces = {}
 add_ns(mw_site_contentNamespaces, main_ns)
+add_ns(mw_site_contentNamespaces, appendix_ns)
+add_ns(mw_site_contentNamespaces, thesaurus_ns)
+add_ns(mw_site_contentNamespaces, reconstruction_ns)
 
 local mw_site_subjectNamespaces = {}
 add_ns(mw_site_subjectNamespaces, media_ns)
@@ -106,6 +129,9 @@ add_ns(mw_site_subjectNamespaces, mediawiki_ns)
 add_ns(mw_site_subjectNamespaces, template_ns)
 add_ns(mw_site_subjectNamespaces, help_ns)
 add_ns(mw_site_subjectNamespaces, category_ns)
+add_ns(mw_site_subjectNamespaces, appendix_ns)
+add_ns(mw_site_subjectNamespaces, thesaurus_ns)
+add_ns(mw_site_subjectNamespaces, reconstruction_ns)
 add_ns(mw_site_subjectNamespaces, module_ns)
 
 local mw_site_talkNamespaces = {}
@@ -117,6 +143,9 @@ add_ns(mw_site_talkNamespaces, mediawiki_talk_ns)
 add_ns(mw_site_talkNamespaces, template_talk_ns)
 add_ns(mw_site_talkNamespaces, help_talk_ns)
 add_ns(mw_site_talkNamespaces, category_talk_ns)
+add_ns(mw_site_talkNamespaces, appendix_talk_ns)
+add_ns(mw_site_talkNamespaces, thesaurus_talk_ns)
+add_ns(mw_site_talkNamespaces, reconstruction_talk_ns)
 add_ns(mw_site_talkNamespaces, module_talk_ns)
 
 function mw_site_index(x, ns)
