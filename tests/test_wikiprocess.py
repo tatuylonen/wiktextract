@@ -2749,6 +2749,9 @@ return export
 
 # XXX implement #categorytree (note named arguments)
 
+# XXX it seems sometimes expressions are generated that have an empty value
+# (that should probably be interpreted as zero), e.g., "<176"
+
 # XXX pass ctx to parserfns and get title from there, default space,
 # mediawiki language from there
 
