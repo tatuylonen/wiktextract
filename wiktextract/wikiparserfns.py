@@ -468,7 +468,6 @@ def ns_fn(title, fn_name, args, expander, stack):
             break
         else:
             ns = None
-    print("ns=", ns)
     if ns is None:
         return ""
     return ns.name
