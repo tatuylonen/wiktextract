@@ -152,39 +152,48 @@ end
 -- XXX need better handling of parent frame and frame
 -- This returns (true, value) if successful, (false, error) if exception.
 function lua_invoke(mod_name, fn_name, frame, page_title)
-  local success
-  local mod
-  success, mod = xpcall(function() return require(mod_name) end,
-     debug.traceback)
-  if not success then
-     return False, ("\tLoading module failed in #invoke: " ..
-                       mod_name .. "\n" .. mod)
-  end
-  local fn = mod[fn_name]
-  local pframe = frame:getParent()
-  -- print("lua_invoke", mod_name, fn_name)
-  -- for k, v in pairs(frame.args) do
-  --    print("", k, type(k), v, type(v))
-  -- end
-  -- if pframe ~= nil then
-  --    print("parent")
-  --    for k, v in pairs(pframe.args) do
-  --       print("", k, type(k), v, type(v))
-  --    end
-  -- end
-  io.flush()
-  -- Convert frame.args into a metatable that preprocesses the values
-  prepare_frame_args(frame)
-  -- Implement some additional functions for frame
-  if pframe ~= nil then
-     prepare_frame_args(pframe)
-  end
-  mw.getCurrentFrame = function() return frame end
-  mw._pageTitle = page_title
-  if fn == nil then
-     return false, "\tNo function '" .. fn_name .. "' in module " .. mod_name
-  end
-  return xpcall(function() return fn(frame) end, debug.traceback)
+   -- Initialize frame and parent frame
+   local pframe = frame:getParent()
+   -- print("lua_invoke", mod_name, fn_name)
+   -- for k, v in pairs(frame.args) do
+   --    print("", k, type(k), v, type(v))
+   -- end
+   -- if pframe ~= nil then
+   --    print("parent")
+   --    for k, v in pairs(pframe.args) do
+   --       print("", k, type(k), v, type(v))
+   --    end
+   -- end
+   io.flush()
+   -- Convert frame.args into a metatable that preprocesses the values
+   prepare_frame_args(frame)
+   -- Implement some additional functions for frame
+   if pframe ~= nil then
+      prepare_frame_args(pframe)
+   end
+
+   -- Initialize some fields that will be referenced from functions
+   mw._frame = frame
+   mw._pageTitle = page_title
+
+   -- Load the module.  Note that the initilizations above must be done before
+   -- loading the module, as the module could refer to, e.g., page title
+   -- during loading.
+   local success
+   local mod
+   success, mod = xpcall(function() return require(mod_name) end,
+      debug.traceback)
+   if not success then
+      return False, ("\tLoading module failed in #invoke: " ..
+                        mod_name .. "\n" .. mod)
+   end
+   -- Look up the target function in the module
+   local fn = mod[fn_name]
+   if fn == nil then
+      return false, "\tNo function '" .. fn_name .. "' in module " .. mod_name
+   end
+   -- Call the function in the module
+   return xpcall(function() return fn(frame) end, debug.traceback)
 end
 
 -- math.log10 seems to be sometimes missing???

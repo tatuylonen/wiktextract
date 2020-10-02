@@ -568,8 +568,22 @@ def initialize_lua(ctx):
     ctx.lua = lua
 
 
-def expand_wikitext(ctx, title, text, templates_to_expand=None,
-                    template_fn=None, fullpage=None):
+def start_page(ctx, title, fullpage=None):
+    """Starts a new page for expanding WikiText.  This saves the title and
+    full page source in the context.  Calling this is mandatory for each
+    page; expand_wikitext() can then be called multiple times for the same
+    page."""
+    assert isinstance(ctx, ExpandCtx)
+    assert isinstance(title, str)
+    assert fullpage is None or isinstance(fullpage, str)
+    # Note: some Lua modules save page title or other per-page data in global
+    # variables and thus must be reloaded for each page.
+    ctx.lua = None  # Force reloading modules for every page
+    ctx.title = title
+    ctx.fullpage = fullpage
+
+def expand_wikitext(ctx, text, templates_to_expand=None,
+                    template_fn=None):
     """Expands templates and parser functions (and optionally Lua macros)
     from ``text`` (which is from page with title ``title``).
     ``templates_to_expand`` should be a set (or dictionary) containing
@@ -582,15 +596,11 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
     may be used by Lua code (title:getContent()).  This returns the
     text with the given templates expanded."""
     assert isinstance(ctx, ExpandCtx)
-    assert isinstance(title, str)
     assert isinstance(text, str)
     assert isinstance(templates_to_expand, (set, dict, type(None)))
     assert template_fn is None or callable(template_fn)
-    assert isinstance(fullpage, (str, type(None)))
-    ctx.title = title
     ctx.template_fn = template_fn
     ctx.cookies = []
-    ctx.fullpage = fullpage
     ctx.rev_ht = {}
 
     # If templates_to_expand is None, then expand all known templates
@@ -890,7 +900,7 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                     # Template argument reference
                     if len(args) > 2:
                         print("{}: too many args ({}) in argument reference "
-                              "{!r}".format(title, len(args), args))
+                              "{!r}".format(ctx.title, len(args), args))
                     stack.append("ARG-NAME")
                     k = expand(expand_args(args[0], argmap),
                                stack, parent, ctx.templates).strip()
@@ -918,7 +928,7 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                     parts.append("[[" + content + "]]")
                     continue
                 print("{}: expand_arg: unsupported cookie kind {!r} in {}"
-                      "".format(title, kind, m.group(0)))
+                      "".format(ctx.title, kind, m.group(0)))
                 parts.append(m.group(0))
             parts.append(coded[pos:])
             return "".join(parts)
@@ -931,7 +941,7 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                 ret = invoke_fn(args, expander, stack, parent)
             else:
                 ret = call_parser_function(fn_name, args, expander,
-                                           title, stack)
+                                           ctx.title, stack)
             stack.pop()  # fn_name
             # XXX if lua code calls frame:preprocess(), then we should
             # apparently encode and expand the return value, similarly to
@@ -957,7 +967,7 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                 # Limit recursion depth
                 if len(stack) >= 100:
                     print("{}: too deep expansion of templates via {}"
-                          "".format(title, stack))
+                          "".format(ctx.title, stack))
                     parts.append(unexpanded_template(args))
                     continue
 
@@ -1006,7 +1016,7 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                 if name not in ctx.templates:
                     if not quiet:
                         print("{}: undefined template {!r} at {}"
-                              "".format(title, tname, stack))
+                              "".format(ctx.title, tname, stack))
                     parts.append(unexpanded_template(args))
                     continue
 
@@ -1033,7 +1043,7 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                             k = int(k)
                             if k < 1 or k > 1000:
                                 print("{}: invalid argument number {}"
-                                      "".format(title, k))
+                                      "".format(ctx.title, k))
                                 k = 1000
                             if num <= k:
                                 num = k + 1
@@ -1107,7 +1117,7 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
                 parts.append("[[" + content + "]]")
             else:
                 print("{}: expand: unsupported cookie kind {!r} in {}"
-                      "".format(title, kind, m.group(0)))
+                      "".format(ctx.title, kind, m.group(0)))
                 parts.append(m.group(0))
         parts.append(coded[pos:])
         return "".join(parts)
@@ -1120,6 +1130,6 @@ def expand_wikitext(ctx, title, text, templates_to_expand=None,
     # Recursively expand the selected templates.  This is an outside-in
     # operation.
     # print("Expanding")
-    expanded = expand(encoded, [title], None, templates_to_expand)
+    expanded = expand(encoded, [ctx.title], None, templates_to_expand)
 
     return expanded

@@ -92,4 +92,11 @@ function mw.logObject(obj)
    -- print("mw.logObject", obj)
 end
 
+function mw.getCurrentFrame()
+   return mw._frame
+end
+
+-- mw.getLanguage is an alias for mw.language.new
+mw.getLanguage = mw.language.new
+
 return mw

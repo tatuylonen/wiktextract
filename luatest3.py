@@ -10,7 +10,7 @@ import sys
 import json
 import os.path
 from wiktextract import wikitext
-from wiktextract import ExpandCtx, phase1_to_ctx, expand_wikitext
+from wiktextract import ExpandCtx, phase1_to_ctx, start_page, expand_wikitext
 
 print("Loading specials (templates & modules)")
 with open("tempXXXspecials.json") as f:
@@ -42,14 +42,14 @@ def process_file(path):
     else:
         title = os.path.basename(path)[:-4]
 
+    start_page(expand_ctx, title, page)
     text = wikitext.preprocess_text(page)
-    ret = expand_wikitext(expand_ctx, title, text)
+    ret = expand_wikitext(expand_ctx, text)
     if ret.find("{{") >= 0:
         print("{}: HAVE {{{{".format(title))
 
-    text = expand_wikitext(expand_ctx, title, text,
-                           templates_to_expand=expand_ctx.need_pre_expand,
-                           fullpage=page)
+    text = expand_wikitext(expand_ctx, text,
+                           templates_to_expand=expand_ctx.need_pre_expand)
     tree, parse_ctx = wikitext.parse_with_ctx(title, text, no_preprocess=True)
     if parse_ctx.errors:
         print("{}: HAD PARSE ERRORS".format(path))
