@@ -168,6 +168,12 @@ def subpagename_fn(title, fn_name, args, expander, stack):
     else:
         return pagename_fn(title, fn_name, [t], lambda x: x, stack)
 
+def namespacenumber_fn(title, fn_name, args, expander, stack):
+    """Implements the NAMESPACENUMBER magic word/parser function."""
+    # XXX currently hard-coded to return the name space number for the Main
+    # namespace
+    return 0
+
 
 def namespace_fn(title, fn_name, args, expander, stack):
     """Implements the NAMESPACE magic word/parser function."""
@@ -182,6 +188,44 @@ def namespace_fn(title, fn_name, args, expander, stack):
         return ns
     return ""
 
+def currentyear_fn(title, fn_name, args, expander, stack):
+    """Implements the CURRENTYEAR magic word."""
+    return str(datetime.datetime.utcnow().year)
+
+def currentmonth_fn(title, fn_name, args, expander, stack):
+    """Implements the CURRENTMONTH magic word."""
+    return "{:02d".format(datetime.datetime.utcnow().month)
+
+def currentmonth1_fn(title, fn_name, args, expander, stack):
+    """Implements the CURRENTMONTH magic word."""
+    return "{:d}".format(datetime.datetime.utcnow().month)
+
+def currentday_fn(title, fn_name, args, expander, stack):
+    """Implements the CURRENTDAY magic word."""
+    return "{:d}".format(datetime.datetime.utcnow().day)
+
+def currentday2_fn(title, fn_name, args, expander, stack):
+    """Implements the CURRENTDAY2 magic word."""
+    return "{:02d}".format(datetime.datetime.utcnow().day)
+
+def currentdow_fn(title, fn_name, args, expander, stack):
+    """Implements the CURRENTDOW magic word."""
+    return "{:d}".format(datetime.datetime.utcnow().weekday())
+
+
+def displaytitle_fn(title, fn_name, args, expander, stack):
+    """Implements the DISPLAYTITLE magic word/parser function."""
+    t = expander(args[0]) if args else ""
+    # XXX this should at least remove html tags h1 h2 h3 h4 h5 h6 div blockquote
+    # ol ul li hr table tr th td dl dd caption p ruby rb rt rtc rp br
+    # Looks as if this should also set the display title for the page in ctx???
+    return t
+
+def defaultsort_fn(title, fn_nae, args, expander, stack):
+    """Implements the DEFAULTSORT magic word/parser function."""
+    # XXX apparently this should set the title by which this page is
+    # sorted in category listings
+    return ""
 
 def lc_fn(title, fn_name, args, expander, stack):
     """Implements the lc parser function (lowercase)."""
@@ -591,6 +635,9 @@ def expr_fn(title, fn_name, args, expander, stack):
             return math.e
         if tok == "pi":
             return math.pi
+        if tok == "nil":
+            #print("{}: nil in expr {!r} at {}".format(title, full_expr, stack))
+            return 0
         return expr_error(tok)
 
     def generic_binary(tok, parser, fns, assoc="left"):
@@ -706,6 +753,17 @@ def padright_fn(title, fn_name, args, expander, stack):
     if len(v) < cnt:
         v = v + pad[:cnt - len(v)]
     return v
+
+
+def plural_fn(title, fn_name, args, expander, stack):
+    """Implements the #plural parser function."""
+    expr = expander(args[0]).strip() if args else "0"
+    v = expr_fn(title, fn_name, [expr], lambda x: x, stack)
+    # XXX for some language codes, this is more complex.  See {{plural:...}} in
+    # https://www.mediawiki.org/wiki/Help:Magic_words
+    if v == 1:
+        return expander(args[1]).strip() if len(args) >= 2 else ""
+    return expander(args[2]).strip() if len(args) >= 3 else ""
 
 
 def len_fn(title, fn_name, args, expander, stack):
@@ -847,7 +905,7 @@ PARSER_FUNCTIONS = {
     "ARTICLEPAGENAME": unimplemented_fn,
     "SUBJECTPAGENAME": unimplemented_fn,
     "TALKPAGENAME": unimplemented_fn,
-    "NAMESPACENUMBER": unimplemented_fn,
+    "NAMESPACENUMBER": namespacenumber_fn,
     "NAMESPACE": namespace_fn,
     "ARTICLESPACE": unimplemented_fn,
     "SUBJECTSPACE": unimplemented_fn,
@@ -871,13 +929,14 @@ PARSER_FUNCTIONS = {
     "SERVERNAME": unimplemented_fn,
     "SCRIPTPATH": unimplemented_fn,
     "CURRENTVERSION": unimplemented_fn,
-    "CURRENTYEAR": unimplemented_fn,
-    "CURRENTMONTH": unimplemented_fn,
+    "CURRENTYEAR": currentyear_fn,
+    "CURRENTMONTH": currentmonth_fn,
+    "CURRENTMONTH1": currentmonth1_fn,
     "CURRENTMONTHNAME": unimplemented_fn,
     "CURRENTMONTHABBREV": unimplemented_fn,
-    "CURRENTDAY": unimplemented_fn,
-    "CURRENTDAY2": unimplemented_fn,
-    "CUEEWNTDOW": unimplemented_fn,
+    "CURRENTDAY": currentday_fn,
+    "CURRENTDAY2": currentday2_fn,
+    "CUEEWNTDOW": currentdow_fn,
     "CURRENTDAYNAME": unimplemented_fn,
     "CURRENTTIME": unimplemented_fn,
     "CURRENTHOUR": unimplemented_fn,
@@ -915,7 +974,9 @@ PARSER_FUNCTIONS = {
     "PENDINGCHANGELEVEL": unimplemented_fn,
     "PAGESINCATEGORY": unimplemented_fn,
     "NUMBERINGROUP": unimplemented_fn,
-    "DEFAULTSORT": unimplemented_fn,
+    "DISPLAYTITLE": displaytitle_fn,
+    "displaytitle": displaytitle_fn,
+    "DEFAULTSORT": defaultsort_fn,
     "lc": lc_fn,
     "lcfirst": lcfirst_fn,
     "uc": uc_fn,
@@ -925,7 +986,7 @@ PARSER_FUNCTIONS = {
     "#formatdate": dateformat_fn,
     "padleft": padleft_fn,
     "padright": padright_fn,
-    "plural": unimplemented_fn,
+    "plural": plural_fn,
     "#time": unimplemented_fn,
     "#timel": unimplemented_fn,
     "gender": unimplemented_fn,
