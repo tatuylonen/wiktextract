@@ -51,7 +51,7 @@ def ifexpr_fn(title, fn_name, args, expander, stack):
     try:
         ret = int(cond)
     except ValueError:
-        return ""
+        ret = 0
     if ret:
         return expander(arg1)
     return expander(arg2)
