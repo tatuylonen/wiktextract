@@ -148,7 +148,7 @@ dasfasddasfdas
     def test_nowiki4(self):
         tree, ctx = parse_with_ctx("test", "a</nowiki>b")
         self.assertEqual(tree.children, ["a</nowiki>b"])
-        self.assertEqual(len(ctx.errors), 1)
+        self.assertEqual(len(ctx.warnings), 1)
 
     def test_entity_noexpand(self):
         tree = parse("test", "R&amp;D")
@@ -305,7 +305,7 @@ dasfasddasfdas
     def test_html_unknown(self):
         tree, ctx = parse_with_ctx("test", "a<unknown>foo</unknown>b")
         self.assertEqual(tree.children, ["a<unknown>foo</unknown>b"])
-        self.assertEqual(len(ctx.errors), 2)
+        self.assertEqual(len(ctx.warnings), 2)
 
     def test_italic(self):
         tree = parse("test", "a ''italic test'' b")
@@ -1256,7 +1256,7 @@ def foo(x):
 
     def test_error9(self):
         tree, ctx = parse_with_ctx("test", "</nowiki>")
-        self.assertEqual(len(ctx.errors), 1)
+        self.assertEqual(len(ctx.warnings), 1)
 
     def test_error10(self):
         tree, ctx = parse_with_ctx("test", "{| ''\n|-\n'' |}")

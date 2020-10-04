@@ -248,6 +248,8 @@ def clean_value(config, title):
     remove any Wikimedia formatting from it: HTML tags, templates, links,
     emphasis, etc.  This will also merge multiple whitespaces into one
     normal space and will remove any surrounding whitespace."""
+    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(title, str)
     # Replace templates according to our our replacement tables
     # clean_arg_arg1_tags, clean_arg2_tags, clean_arg3_tags, clean_replace_map.
     title = clean_replace_regexp(config, title)
