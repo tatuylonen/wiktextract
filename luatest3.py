@@ -13,7 +13,7 @@ from wiktextract import wikitext
 from wiktextract import ExpandCtx, phase1_to_ctx, start_page, expand_wikitext
 
 print("Loading specials (templates & modules)")
-with open("tempXXXspecials.json") as f:
+with open("tempXXXspecials.bak", "r") as f:
     specials = json.load(f)
 
 print("Analyzing templates", len(specials))

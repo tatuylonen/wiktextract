@@ -194,7 +194,7 @@ def currentyear_fn(title, fn_name, args, expander, stack):
 
 def currentmonth_fn(title, fn_name, args, expander, stack):
     """Implements the CURRENTMONTH magic word."""
-    return "{:02d".format(datetime.datetime.utcnow().month)
+    return "{:02d}".format(datetime.datetime.utcnow().month)
 
 def currentmonth1_fn(title, fn_name, args, expander, stack):
     """Implements the CURRENTMONTH magic word."""
