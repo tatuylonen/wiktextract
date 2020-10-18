@@ -1,5 +1,0 @@
-[gerrit]
-host=gerrit.wikimedia.org
-port=29418
-project=mediawiki/extensions/Scribunto.git
-track=1
