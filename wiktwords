@@ -94,7 +94,7 @@ if __name__ == "__main__":
     parser.add_argument("--list-languages", action="store_true", default=False,
                         help="Print list of supported languages")
     parser.add_argument("--pages-dir", type=str, default=None,
-                        help="Directory under which to store all pages")
+                        help="Directory under which to save all pages")
     parser.add_argument("--all", action="store_true", default=False,
                         help="Capture all data for the selected languages")
     parser.add_argument("--translations", action="store_true", default=False,
