@@ -8,7 +8,6 @@ from .config import WiktionaryConfig
 from .page import clean_value, parse_page
 from .parts_of_speech import PARTS_OF_SPEECH
 from .languages import all_languages, all_families
-from .wikiprocess import ExpandCtx, phase1_to_ctx, start_page, expand_wikitext
 
 __all__ = (
     "WiktionaryConfig",
@@ -18,8 +17,4 @@ __all__ = (
     "parse_page",
     "all_languages",
     "all_families",
-    "ExpandCtx",
-    "phase1_to_ctx",
-    "start_page",
-    "expand_wikitext",
 )
