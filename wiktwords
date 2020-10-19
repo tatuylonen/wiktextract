@@ -30,14 +30,17 @@ recognized_prefixes = set(["Category", "Appendix", "Wiktionary",
                            "Thesaurus", "Module", "Template"])
 
 
-def capture_page(orig_title, text, pages_dir):
+def capture_page(model, orig_title, text, pages_dir):
     """Checks if the page needs special handling (and maybe saving).
     Returns True if the page should be processed normally as a
     dictionary entry."""
+    assert isinstance(model, str)
     assert isinstance(orig_title, str)
     assert isinstance(text, str)
     assert pages_dir is None or isinstance(pages_dir, str)
 
+    if model == "wikitext":
+        text = "TITLE: {}\n".format(orig_title) + text
     analyze = False
     title = orig_title
     m = re.match(r"^([A-Z][a-z][-a-zA-Z0-9_]+):(.+)$", title)
@@ -176,8 +179,8 @@ if __name__ == "__main__":
         if not out_path or out_path == "-":
             out_f.flush()
 
-    def capture_cb(title, text):
-        return capture_page(title, text, args.pages_dir)
+    def capture_cb(model, title, text):
+        return capture_page(model, title, text, args.pages_dir)
 
     config = WiktionaryConfig(capture_languages=args.language,
                               capture_translations=args.translations,

@@ -22,11 +22,11 @@ def page_handler(model, title, text):
         print("{}: BRACES REMAIN: {}".format(title, m.group(0)))
 
     tree = ctx.parse(text, pre_expand=True)
-    if ctx.errors:
-        for e in ctx.errors:
-            print("{}: {}".format(title, e))
-        for e in ctx.warnings:
-            print("{}: WARNING: {}".format(title, e))
+    #if ctx.errors:
+    #    for e in ctx.errors:
+    #        print("{}: {}".format(title, e))
+    #    for e in ctx.warnings:
+    #        print("{}: WARNING: {}".format(title, e))
     sys.stdout.flush()
     return ctx.errors
 
@@ -38,6 +38,6 @@ for lst in ret:
         counts[err] += 1
 
 print("=== MOST COMMON ERRORS")
-errors = list(sorted(counts.items(), key=lambda x: x[1]))
+errors = list(sorted(counts.items(), key=lambda x: x[1], reverse=True))
 for err, cnt in errors[:20]:
     print(cnt, err)
