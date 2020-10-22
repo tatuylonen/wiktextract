@@ -35,7 +35,8 @@ ret = ctx.process(path, page_handler)
 counts = collections.defaultdict(int)
 for lst in ret:
     for err in lst:
-        counts[err] += 1
+        msg = err["msg"]
+        counts[msg] += 1
 
 print("=== MOST COMMON ERRORS")
 errors = list(sorted(counts.items(), key=lambda x: x[1], reverse=True))
