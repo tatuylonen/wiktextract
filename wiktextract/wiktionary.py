@@ -44,6 +44,7 @@ translation_suffixes = [
 def capture_specials_fn(dt):
     """Captures certain special pages that are needed for processing other
     pages."""
+    # XXX remove this?  Move some of the code to other places?
     assert isinstance(dt, dict)
     title = dt["title"]
     if "redirect" in dt:
@@ -141,6 +142,10 @@ def parse_wiktionary(path, config, word_cb, capture_cb=None):
     def page_handler(model, title, text):
         if capture_cb is not None:
             capture_cb(model, title, text)
+        if model == "redirect":
+            config1 = WiktionaryConfig()
+            return ([{"title": title, "redirect": text}],
+                    config1.to_return())
         if model != "wikitext":
             return
         idx = title.find(":")
