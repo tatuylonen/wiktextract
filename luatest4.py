@@ -56,7 +56,7 @@ def page_handler(model, title, text):
             continue
         t = node.args[0][0]
         assert isinstance(t, str)
-        print("  {} - {}".format(t))
+        print("  {} - {}".format(title, t))
         titles.append(t)
     sys.stdout.flush()
     return titles, ctx.errors
