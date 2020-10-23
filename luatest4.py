@@ -14,22 +14,41 @@ LANGUAGE_NAMES = set(x.get("name") for x in ALL_LANGUAGES)
 
 path = "data/enwiktionary-20200920-pages-articles.xml.bz2"
 
-ignore_prefixes = [
-    "Talk", "Media", "User", "Project",
-    "Image", "MediaWiki", "Template", "Help", "Category",
-    "Appendix", "Thesaurus", "Reconstruction", "Module",
-]
+ignore_prefixes = set([
+    "Appendix",
+    "Category",
+    "Citations",
+    "Concordance",
+    "File",
+    "Help",
+    "Image",
+    "Index",
+    "Media",
+    "MediaWiki",
+    "Module",
+    "Project",
+    "Reconstruction",
+    "Rhymes",
+    "Sign gloss",
+    "Summary",
+    "Talk",
+    "Template",
+    "Thesaurus",
+    "Thread",
+    "User",
+    "Wiktionary",
+])
 
 def page_handler(model, title, text):
     if model != "wikitext":
         return None
 
     # Skip pages with certain prefixes
-    for p in ignore_prefixes:
-        if title.startswith(p + ":"):
+    ofs = title.find(":")
+    if ofs >= 0:
+        prefix = title[:ofs]
+        if prefix in ignore_prefixes:
             return None
-    if title.find("_talk:") >= 0:
-        return None
 
     # XXX testing bugs
     # if title != "soil":
