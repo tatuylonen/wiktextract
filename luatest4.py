@@ -15,6 +15,15 @@ path = "data/enwiktionary-20200920-pages-articles.xml.bz2"
 def page_handler(model, title, text):
     if model != "wikitext":
         return None
+
+    # XXX
+    if title != "soil":
+        return None
+    expanded = ctx.expand(text, pre_only=True)
+    print(expanded)
+    sys.stdout.flush()
+    return None
+
     print("Processing {}".format(title))
     expanded = ctx.expand(text)
     m = re.search(r"\{\{+[^}]*\}\}+", expanded)

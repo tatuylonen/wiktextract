@@ -3,7 +3,7 @@
 This is a utility and Python package for for extracing data from Wiktionary.
 
 **Currently working on this, and the repository may be broken on some
-  days.  New release with major changes expected in <del>September</del> October 2020.  This has
+  days.  New release with major changes expected in <del>September</del> October/November 2020.  This has
   gotten significantly delayed, and I apologize, but now I'm finally able
   to work on this almost full-time.  I'm trying to make this expand
   templates and Lua macros, as producing a high-quality result without them
@@ -11,6 +11,14 @@ This is a utility and Python package for for extracing data from Wiktionary.
 
 **Until then, please use the version on pypi (``pip install wiktextract``)
   or look at branches which contain earlier versions.**
+
+**I'm just starting big changes to use the new template and Lua macro
+  expansion code in
+  [wikitextprocessor](https://github.com/tatuylonen/wikitextprocessor).
+  Everything will be broken until about end of October.  You can check
+  out the most recent code before the changes using the tag
+  ``before_changes_20201023``, i.e., using ``git checkout
+  tags/before_changes_20201023 -b <branchname>``.**
 
 ## Overview
 
