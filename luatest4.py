@@ -8,7 +8,9 @@ import os
 import re
 import sys
 import collections
-from wikitextprocessor import Wtp, NodeKind
+from wikitextprocessor import Wtp, NodeKind, ALL_LANGUAGES
+
+LANGUAGE_NAMES = set(x.get("name") for x in ALL_LANGUAGES)
 
 path = "data/enwiktionary-20200920-pages-articles.xml.bz2"
 
@@ -25,6 +27,7 @@ def page_handler(model, title, text):
     # return None
 
     print("Processing {}".format(title))
+    sys.stdout.flush()
 
     # Test fully expanding the page (all templates)
     expanded = ctx.expand(text)
@@ -49,12 +52,12 @@ def page_handler(model, title, text):
             continue
         if (len(node.args) != 1 or len(node.args[0]) != 1 or
             not isinstance(node.args[0][0], str)):
-            print("  {}: {}".format(node.kind, node.children))
+            print("  {} - {}: {}".format(title, node.kind, node.children))
             continue
-        title = node.args[0][0]
-        assert isinstance(title, str)
-        print("  {}".format(title))
-        titles.append(title)
+        t = node.args[0][0]
+        assert isinstance(t, str)
+        print("  {} - {}".format(t))
+        titles.append(t)
     sys.stdout.flush()
     return titles, ctx.errors
 
@@ -78,3 +81,8 @@ print("=== Saving title counts in temp-titles.json")
 titles = list(sorted(title_counts.items(), key=lambda x: x[1], reverse=True))
 with open("temp-titles.json", "w") as f:
     json.dump(titles, f)
+
+print("=== Saving non-language titles in temp-nonlangs.json")
+non_lang_titles = list(x for x in titles if x[0] not in LANGUAGE_NAMES)
+with open("temp-nonlangs.json", "w") as f:
+    json.dump(non_lang_titles, f)
