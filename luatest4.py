@@ -7,6 +7,7 @@
 import os
 import re
 import sys
+import json
 import collections
 from wikitextprocessor import Wtp, NodeKind, ALL_LANGUAGES
 
