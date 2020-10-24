@@ -119,7 +119,8 @@ def capture_specials_fn(dt):
     return []
 
 
-def parse_wiktionary(path, config, word_cb, capture_cb=None):
+def parse_wiktionary(path, config, word_cb, capture_cb=None,
+                     cache_file=None, phase1_only=False):
     """Parses Wiktionary from the dump file ``path`` (which should point
     to a "enwiktionary-<date>-pages-articles.xml.bz2" file.  This
     calls ``capture_cb(title)`` for each raw page (if provided), and
@@ -129,6 +130,7 @@ def parse_wiktionary(path, config, word_cb, capture_cb=None):
     assert isinstance(config, WiktionaryConfig)
     assert callable(word_cb)
     assert capture_cb is None or callable(capture_cb)
+    assert cache_file is None or isinstance(cache_file, str)
     languages = config.capture_languages
     if languages is not None:
         assert isinstance(languages, (list, tuple, set))
@@ -136,7 +138,7 @@ def parse_wiktionary(path, config, word_cb, capture_cb=None):
             assert isinstance(x, str)
             assert x in wiktionary_languages
 
-    ctx = Wtp()
+    ctx = Wtp(cache_file=cache_file)
     config_kwargs = config.to_kwargs()
 
     def page_handler(model, title, text):
@@ -168,7 +170,7 @@ def parse_wiktionary(path, config, word_cb, capture_cb=None):
         stats = config1.to_return()
         return (ret, stats)
 
-    results = ctx.process(path, page_handler)
+    results = ctx.process(path, page_handler, phase1_only)
     words = []
     for ret, stats in results:
         config.merge_return(stats)

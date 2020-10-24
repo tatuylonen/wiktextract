@@ -116,6 +116,9 @@ if __name__ == "__main__":
                         help="Print statistics")
     parser.add_argument("--page", type=str,
                         help="Parse a single Wiktionary page (for debugging)")
+    parser.add_argument("--cache", type=str,
+                        help="File prefix where phase1 results are saved; "
+                        "speeds up processing a single page tremendously")
     parser.add_argument("--verbose", action="store_true", default=False,
                         help="Print verbose status messages (for debugging)")
     args = parser.parse_args()
@@ -137,9 +140,10 @@ if __name__ == "__main__":
             print("    {}".format(lang))
         sys.exit(0)
 
-    if not args.path and not args.page:
-        print("The PATH argument for wiktionary dump file is mandatory")
-        print("(unless --page is specified).")
+    if not args.path and not args.cache:
+        print("The PATH argument for wiktionary dump file is normally "
+              "mandatory.")
+        print("Alternatively, --cache with --page can be used.")
         sys.exit(1)
 
     # Default to English and Translingual if language not specified.
@@ -192,19 +196,28 @@ if __name__ == "__main__":
                               verbose=args.verbose)
 
     try:
+        if args.path:
+            # Parse the normal full Wiktionary data dump
+            parse_wiktionary(args.path, config, word_cb, capture_cb,
+                             cache_file=args.cache,
+                             phase1_only=(args.page is not None))
+
         if args.page:
             # Parse a single Wiktionary page (extracted using --pages-dir)
-            if args.path:
-                print("Normal input file should not be specified with --path")
-                sys.exit(1)
+            if not args.cache:
+                print("NOTE: you probably want to use --cache with --page or "
+                      "otherwise processing will be very slow.")
             with open(args.page, "r") as f:
                 text = f.read()
-            ret = parse_page("TESTPAGE", text, config)
+            m = re.match(r"(?s)^TITLE: ([^\n])\n", text)
+            if m:
+                title = m.group(1)
+                text = text[m.end()]
+            else:
+                title = "Test page"
+            ret = parse_page(title, text, config)
             for x in ret:
                 word_cb(x)
-        else:
-            # Parse the normal full Wiktionary data dump
-            parse_wiktionary(args.path, config, word_cb, capture_cb)
     finally:
         if out_path and out_path != "-":
             out_f.close()
