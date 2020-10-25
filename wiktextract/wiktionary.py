@@ -6,7 +6,6 @@
 
 import re
 from wikitextprocessor import Wtp
-from .wiktlangs import wiktionary_languages
 from .page import parse_page
 from .config import WiktionaryConfig
 
@@ -136,7 +135,6 @@ def parse_wiktionary(path, config, word_cb, capture_cb=None,
         assert isinstance(languages, (list, tuple, set))
         for x in languages:
             assert isinstance(x, str)
-            assert x in wiktionary_languages
 
     ctx = Wtp(cache_file=cache_file)
     config_kwargs = config.to_kwargs()

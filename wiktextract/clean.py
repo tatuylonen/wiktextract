@@ -8,14 +8,13 @@
 
 import re
 import html
+from wikitextprocessor import ALL_LANGUAGES
 from .wikttemplates import *
 from .places import place_prefixes
-from .languages import all_languages
 from .config import WiktionaryConfig
 
-
 # Set of all language codes defined in Wiktionary
-lang_codes = set(x["code"] for x in all_languages)
+lang_codes = set(x["code"] for x in ALL_LANGUAGES)
 
 ######################################################################
 # Cleaning values into plain text.

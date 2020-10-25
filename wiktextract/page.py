@@ -5,22 +5,22 @@
 import re
 import collections
 import wikitextparser
+from wikitextprocessor import ALL_LANGUAGES
 from .parts_of_speech import part_of_speech_map, PARTS_OF_SPEECH
 from .config import WiktionaryConfig
 from .sectitle_corrections import sectitle_corrections
 from .clean import clean_value, clean_quals
 from .places import place_prefixes  # XXX move processing to places.py
 from .wikttemplates import *
-from .languages import all_languages
 from .unsupported_titles import unsupported_title_map
 from .form_of import form_of_map
 from .head_map import head_pos_map
 
 # Mapping from language name to language info
-languages_by_name = {x["name"]: x for x in all_languages}
+languages_by_name = {x["name"]: x for x in ALL_LANGUAGES}
 
 # Mapping from language code to language info
-languages_by_code = {x["code"]: x for x in all_languages}
+languages_by_code = {x["code"]: x for x in ALL_LANGUAGES}
 
 # Matches en:, fr:, etc.
 langtag_colon_re = re.compile(r"^(" + "|".join(languages_by_code.keys()) +

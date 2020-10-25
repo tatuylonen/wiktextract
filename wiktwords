@@ -14,8 +14,11 @@ import json
 import hashlib
 import argparse
 import collections
-from wiktextract import (WiktionaryConfig, parse_wiktionary,
-                         wiktionary_languages, parse_page)
+from wikitextprocessor import ALL_LANGUAGES
+from wiktextract import (WiktionaryConfig, parse_wiktionary, parse_page)
+
+# Compute set of all language names
+all_langs = set(x["name"] for x in ALL_LANGUAGES)
 
 # Pages whose titles have any of these prefixes are ignored.
 ignore_prefixes = set(["Index", "Help", "MediaWiki", "Citations",
@@ -136,7 +139,7 @@ if __name__ == "__main__":
     # languages
     if args.list_languages:
         print("Supported languages:")
-        for lang in sorted(wiktionary_languages):
+        for lang in sorted(all_langs):
             print("    {}".format(lang))
         sys.exit(0)
 
@@ -151,7 +154,7 @@ if __name__ == "__main__":
         args.language = ["English", "Translingual"]
     else:
         for x in args.language:
-            if x not in wiktionary_languages:
+            if x not in all_langs:
                 print("Invalid language:", x)
                 sys.exit(1)
 
