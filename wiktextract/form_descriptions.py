@@ -517,6 +517,7 @@ def distw(titleparts, word):
             for tw in titleparts)
     return w
 
+
 def map_with(ht, lst):
     assert isinstance(ht, dict)
     assert isinstance(lst, list)
@@ -531,6 +532,7 @@ def map_with(ht, lst):
         else:
             raise RuntimeError("map_with unexpected value: {!r}".format(x))
     return ret
+
 
 def decode_tags(config, lst):
     assert isinstance(config, WiktionaryConfig)
@@ -562,6 +564,7 @@ def decode_tags(config, lst):
                            .format(w, lst))
     return tags
 
+
 def add_tags(ctx, config, data, lst):
     assert isinstance(ctx, Wtp)
     assert isinstance(config, WiktionaryConfig)
@@ -570,6 +573,7 @@ def add_tags(ctx, config, data, lst):
     tags = decode_tags(config, lst)
     if tags:
         data_extend(config, data, "tags", tags)
+
 
 def add_related(ctx, config, data, lst, related):
     assert isinstance(ctx, Wtp)
@@ -580,6 +584,7 @@ def add_related(ctx, config, data, lst, related):
     if related:
         tags = decode_tags(config, lst)
         data_append(config, data, "forms", {"tags": tags, "form": related})
+
 
 def parse_word_head(ctx, config, pos, text, data):
     """Parses the head line for a word for in a particular language and
@@ -658,6 +663,7 @@ def parse_word_head(ctx, config, pos, text, data):
             else:
                 add_tags(ctx, config, data, lst)
 
+
 def parse_sense_tags(ctx, config, text, data):
     assert isinstance(ctx, Wtp)
     assert isinstance(config, WiktionaryConfig)
@@ -668,6 +674,7 @@ def parse_sense_tags(ctx, config, text, data):
     # XXX should check which tags are valid XXX do we want to warn about
     # unknown ones here
     data_extend(config, data, "tags", tags)
+
 
 def parse_pronunciation_tags(ctx, config, text, data):
     assert isinstance(ctx, Wtp)
