@@ -31,6 +31,16 @@ languages_by_code = {x["code"]: x for x in ALL_LANGUAGES}
 langtag_colon_re = re.compile(r"^(" + "|".join(languages_by_code.keys()) +
                               r"):")
 
+# Matches head tag
+head_tag_re = re.compile(r"^(head|Han char)$|" +
+                         r"^(" + "|".join(languages_by_code.keys()) + r")"
+                         r"-(plural-noun|plural noun|noun|verb|adj|adv|"
+                         r"name|proper-noun|proper noun|prop|pron|phrase|"
+                         r"decl noun|decl-noun|prefix|clitic|number|ordinal|"
+                         r"syllable|suffix|affix|pos|gerund|combining form|"
+                         r"combining-form|converb|cont|con|interj|det|part|"
+                         r"part-form|postp|prep)(-|$)")
+
 # Mapping from a template name (without language prefix) for the main word
 # (e.g., fi-noun, fi-adj, en-verb) to permitted parts-of-speech in which
 # it could validly occur.  This is used as just a sanity check to give
@@ -2109,11 +2119,13 @@ def parse_language(ctx, config, langnode, language):
 
     word = ctx.title  # XXX translations for titles to words
     base = {"word": word, "lang": language}
-    etym_data = {}  # For one etymology
-    pos_data = {}  # For a current part-of-speech
-    datas = []
-    stack = []
     sense_data = {}
+    pos_data = {}  # For a current part-of-speech
+    etym_data = {}  # For one etymology
+    pos_datas = []
+    etym_datas = []
+    page_datas = []
+    stack = []
 
     def merge_base(data, base):
         for k, v in base.items():
@@ -2129,12 +2141,29 @@ def parse_language(ctx, config, langnode, language):
         nonlocal sense_data
         if not sense_data:
             return
-        merge_base(sense_data, pos_data)
-        merge_base(sense_data, etym_data)
-        merge_base(sense_data, base)
         print("push_sense:", sense_data)
-        datas.append(sense_data)
+        pos_datas.append(sense_data)
         sense_data = {}
+
+    def push_pos():
+        nonlocal pos_data
+        nonlocal pos_datas
+        push_sense()
+        for data in pos_datas:
+            merge_base(data, pos_data)
+            etym_datas.append(data)
+        pos_data = {}
+        pos_datas = []
+
+    def push_etym():
+        nonlocal etym_data
+        nonlocal etym_datas
+        push_pos()
+        for data in etym_datas:
+            merge_base(data, etym_data)
+            page_datas.append(data)
+        etym_data = {}
+        etym_datas = []
 
     def sense_template_fn(name, ht):
         if name in ("LDL",):
@@ -2165,6 +2194,13 @@ def parse_language(ctx, config, langnode, language):
             parse_sense_tags(ctx, config, m.group(1), sense_data)
             gloss = gloss[m.end():].strip()
         data_append(config, sense_data, "glosses", gloss)
+
+    def head_template_fn(name, ht):
+        m = re.search(head_tag_re, name)
+        if m:
+            ht["template_name"] = name
+            data_append(config, pos_data, "heads", ht)
+        return None
 
     def parse_part_of_speech(posnode, pos):
         assert isinstance(posnode, WikiNode)
@@ -2198,7 +2234,7 @@ def parse_language(ctx, config, langnode, language):
         # XXX use template_fn in clean_node to check that the head macro
         # is compatible with the current part-of-speech and generate warning
         # if not.  Use template_allowed_pos_map.
-        text = clean_node(config, ctx, pre)
+        text = clean_node(config, ctx, pre, head_template_fn)
         parse_word_head(ctx, config, pos, text, pos_data)
         for node in lists:
             for node in node.children:
@@ -2257,9 +2293,42 @@ def parse_language(ctx, config, langnode, language):
                 parse_pronunciation_tags(ctx, config, tagstext, pron)
                 data_append(config, data, "sounds", pron)
             data_extend(config, data, "sounds", audios)
+            # XXX what about {{hyphenation|...}}, {{hyph|...}}
+            # and those used to be stored under "hyphenation"
             m = re.search(r"\bSyllabification: ([^\s,]*)", text)
             if m:
                 data_append(config, data, "syllabification", m.group(1))
+
+    def parse_declension_conjugation(node):
+        print("parse_decl_conj:", node)
+        assert isinstance(node, WikiNode)
+        captured = False
+
+        def decl_conj_template_fn(name, ht):
+            capture = (re.search(r"-(conj|decl|infl|conjugation|"
+                                 r"declension|inflection)($|-)", name) or
+                       name in ())  # XXX additional templates?
+            if capture:
+                ht["template_name"] = name
+                data_append(config, pos_data, "conjugation", ht)
+                nonlocal captured
+                captured = True
+                return ""
+
+            # XXX this should be in sense parsing
+            # if name == "pinyin reading of" and 1 in ht:
+            #     data_append(config, pos_data, "forms",
+            #                 {"form": ht[1], "tags": ["pinyin of"]})
+            #     return ""
+
+            return None
+
+        text = ctx.node_to_html(node, template_fn=decl_conj_template_fn)
+        if not captured:
+            # XXX try to parse either a WikiText table or a HTML table that
+            # contains the inflectional paradigm
+            # XXX should we try to capture it even if we got the template?
+            pass
 
     def process_children(langnode):
         nonlocal etym_data
@@ -2274,10 +2343,11 @@ def parse_language(ctx, config, langnode, language):
                 # XXX should at least capture "also" at top of page
                 if node.kind in (NodeKind.HLINE,):
                     continue
-                print("      UNEXPECTED: {}".format(node))
+                # print("      UNEXPECTED: {}".format(node))
                 continue
             t = clean_node(config, ctx, node.args)
             pos = t.lower()
+            print("T:", repr(t))
             if t == "Pronunciation":
                 if config.capture_pronunciation:
                     parse_pronunciation(node)
@@ -2285,7 +2355,7 @@ def parse_language(ctx, config, langnode, language):
                         config.warning("no pronunciations found from "
                                        "pronunciation section")
             elif t.startswith("Etymology"):
-                push_sense()
+                push_etym()
                 etym_data = {}
                 pos_data = {}
                 # XXX parse etymology section, up to the next subtitle
@@ -2301,19 +2371,18 @@ def parse_language(ctx, config, langnode, language):
                 if "tags" in dt:
                     tags_extend(pos_data, dt["tags"])
                 parse_part_of_speech(node, pos)
-                push_sense()
+                push_pos()
                 pos_data = {}
+                process_children(node)
             elif t == "Translations":
                 # XXX capture these
                 # XXX handle links to separate translation pages
                 #  {{see translation subpage|Noun}}
                 pass
-            elif t == "Declension":
-                # XXX process declension
-                # XXX conjugation?
-                pass
+            elif t in ("Declension", "Conjugation"):
+                parse_declension_conjugation(node)
             elif t in ("Hypernyms", "Hyponyms", "Synonyms", "Antonyms",
-                       "Derived terms", "Related terms"):
+                       "Derived terms", "Related terms", "Alternative forms"):
                 # XXX process these links
                 pass
             elif t in ("Anagrams", "Further reading", "References",
@@ -2331,13 +2400,19 @@ def parse_language(ctx, config, langnode, language):
                 process_children(node)
                 stack.pop()
 
+    # Process the section
     process_children(langnode)
-    push_sense()
-    # XXX old: datas.extend(parse_words(ctx, config, langnode))
 
-    # XXX merge any other data that should be merged from other parts of
-    # the page or from related pages
-    return datas
+    # Finalize word entires
+    push_etym()
+    ret = []
+    for data in page_datas:
+        merge_base(data, base)
+        # XXX merge any other data that should be merged from other parts of
+        # the page or from related pages
+        ret.append(data)
+
+    return ret
 
     # If the section title is empty, it is the preamble (text before
     # the first subsection for the language).
@@ -2512,16 +2587,13 @@ def clean_node(config, ctx, node, template_fn=None):
     v = clean_value(config, v)
     return v
 
+# XXX implement proper merging of information from different layers for
+# a word sense; for example, declension not currently merged
+
 # XXX handle {{also|...}}
 
 # XXX handle synonyms, antonyms, alternative forms, etc
 
 # XXX handle declension
 
-# XXX parse word head and try to interpret inflectional form and inflected forms
-
 # XXX clean links like w:Sheffield correctly (word Wednesday)
-
-# XXX check crow head
-
-# XXX extract Syllabification: from Pronunciation section if available
