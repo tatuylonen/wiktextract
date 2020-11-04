@@ -2305,10 +2305,10 @@ def parse_language(ctx, config, langnode, language):
         captured = False
 
         def decl_conj_template_fn(name, ht):
-            capture = (re.search(r"-(conj|decl|infl|conjugation|"
-                                 r"declension|inflection)($|-)", name) or
-                       name in ())  # XXX additional templates?
-            if capture:
+            print("decl_conj_template_fn", name, ht)
+            m = re.search(r"-(conj|decl|infl|conjugation|"
+                          r"declension|inflection)($|-)", name)
+            if m:
                 ht["template_name"] = name
                 data_append(config, pos_data, "conjugation", ht)
                 nonlocal captured
@@ -2356,11 +2356,10 @@ def parse_language(ctx, config, langnode, language):
                                        "pronunciation section")
             elif t.startswith("Etymology"):
                 push_etym()
-                etym_data = {}
-                pos_data = {}
                 # XXX parse etymology section, up to the next subtitle
                 process_children(node)
             elif pos in part_of_speech_map:
+                push_pos()
                 dt = part_of_speech_map[pos]
                 if "warning" in dt:
                     config.warning("{}: {}".format(t, dt["warning"]))
@@ -2369,10 +2368,8 @@ def parse_language(ctx, config, langnode, language):
                 # Parse word senses for the part-of-speech
                 pos = dt["pos"]
                 if "tags" in dt:
-                    tags_extend(pos_data, dt["tags"])
+                    data_extend(config, pos_data, "tags", dt["tags"])
                 parse_part_of_speech(node, pos)
-                push_pos()
-                pos_data = {}
                 process_children(node)
             elif t == "Translations":
                 # XXX capture these
@@ -2587,13 +2584,8 @@ def clean_node(config, ctx, node, template_fn=None):
     v = clean_value(config, v)
     return v
 
-# XXX implement proper merging of information from different layers for
-# a word sense; for example, declension not currently merged
-
 # XXX handle {{also|...}}
 
 # XXX handle synonyms, antonyms, alternative forms, etc
-
-# XXX handle declension
 
 # XXX clean links like w:Sheffield correctly (word Wednesday)
