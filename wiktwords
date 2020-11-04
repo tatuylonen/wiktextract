@@ -14,8 +14,9 @@ import json
 import hashlib
 import argparse
 import collections
-from wikitextprocessor import ALL_LANGUAGES
-from wiktextract import (WiktionaryConfig, parse_wiktionary, parse_page)
+from wikitextprocessor import Wtp, ALL_LANGUAGES
+from wiktextract import (WiktionaryConfig, parse_wiktionary,
+                         reprocess_wiktionary, parse_page)
 
 # Compute set of all language names
 all_langs = set(x["name"] for x in ALL_LANGUAGES)
@@ -122,6 +123,8 @@ if __name__ == "__main__":
     parser.add_argument("--cache", type=str,
                         help="File prefix where phase1 results are saved; "
                         "speeds up processing a single page tremendously")
+    parser.add_argument("--num-threads", type=int, default=None,
+                        help="Number of parallel processes (default: #cpus)")
     parser.add_argument("--verbose", action="store_true", default=False,
                         help="Print verbose status messages (for debugging)")
     args = parser.parse_args()
@@ -178,6 +181,9 @@ if __name__ == "__main__":
 
     word_count = 0
 
+    # Create expansion context
+    ctx = Wtp(cache_file=args.cache, num_threads=args.num_threads)
+
     def word_cb(data):
         global word_count
         word_count += 1
@@ -201,8 +207,7 @@ if __name__ == "__main__":
     try:
         if args.path:
             # Parse the normal full Wiktionary data dump
-            parse_wiktionary(args.path, config, word_cb, capture_cb,
-                             cache_file=args.cache,
+            parse_wiktionary(ctx, args.path, config, word_cb, capture_cb,
                              phase1_only=(args.page is not None))
 
         if args.page:
@@ -212,15 +217,20 @@ if __name__ == "__main__":
                       "otherwise processing will be very slow.")
             with open(args.page, "r") as f:
                 text = f.read()
-            m = re.match(r"(?s)^TITLE: ([^\n])\n", text)
+            m = re.match(r"(?s)^TITLE: ([^\n]*)\n", text)
             if m:
                 title = m.group(1)
-                text = text[m.end()]
+                text = text[m.end():]
             else:
                 title = "Test page"
-            ret = parse_page(title, text, config)
+            ret = parse_page(ctx, title, text, config)
             for x in ret:
                 word_cb(x)
+
+        if not args.path and not args.page:
+            # Parse again from the cache file
+            reprocess_wiktionary(ctx, config, word_cb, capture_cb)
+
     finally:
         if out_path and out_path != "-":
             out_f.close()

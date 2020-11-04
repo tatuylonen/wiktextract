@@ -97,10 +97,10 @@ def page_handler(model, title, text):
 ctx = Wtp()
 ret = ctx.process(path, page_handler)
 counts = collections.defaultdict(int)
-titles = collections.defaultdict(list)
+titles_ht = collections.defaultdict(list)
 for page_title, titles, errors in ret:
     for title in titles:
-        titles[title].append(page_title)
+        titles_ht[title].append(page_title)
     for err in errors:
         msg = err["msg"]
         counts[msg] += 1
@@ -111,6 +111,6 @@ for err, cnt in errors[:40]:
     print(cnt, err)
 
 print("=== Saving non-language titles in temp-nonlangs.json")
-non_lang_titles = list(x for x in titles if x[0] not in LANGUAGE_NAMES)
+non_lang_titles = list(x for x in titles_ht if x[0] not in LANGUAGE_NAMES)
 with open("temp-nonlangs.json", "w") as f:
     json.dump(non_lang_titles, f)

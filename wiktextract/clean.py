@@ -260,7 +260,7 @@ def clean_value(config, title):
     title = re.sub(r"(?s)<ref>.*?</ref>", "", title)
     # Replace <br/> by comma space (it is used to express alternatives in some
     # declensions)
-    title = re.sub(r"(?s)<br/?>", ", ", title)
+    title = re.sub(r"(?s)<br\s*/?>", ", ", title)
     # Remove any remaining HTML tags.
     title = re.sub(r"(?s)<[^>]+>", "", title)
     # Replace remaining HTML links by the URL.

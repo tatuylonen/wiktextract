@@ -1,0 +1,656 @@
+TITLE: animal
+<!-- This file was taken from Wiktionary, word animal", and therefore
+this file is licensed under the Wiktionary license,
+https://en.wiktionary.org/wiki/Wiktionary:Copyrights.  Essentially,
+this means dual licensing under both the Creative Commons
+Attribution-ShareAlike 3.0 Unported License (CC-BY_SA) and the GNU
+Free Documentation License (GFDL). -->
+
+{{also|Animal|animâl}}
+==English==
+{{wikipedia|dab=animal (disambiguation)|animal}}
+{{wikipedia}}
+
+===Pronunciation===
+* {{a|UK|US}} {{enPR|ăn'ĭməl}}, {{IPA|en|/ˈænɪməl/}}
+* {{audio|en|en-us-animal.ogg|Audio (US)}}
+{{picdic|image=Lightmatter chimp.jpg
+|detail1=
+{{picdicimg|en|image=Eukaryota diversity 2.jpg|link=organism}}
+|detail2=
+{{picdicimg|en|image=Tiger in the water.jpg|link=mammal}}
+{{picdicimg|en|image=Discus fish.jpg|link=fish}}
+{{picdicimg|en|image=Notophthalmus viridescensPCCA20040816-3983A.jpg|link=amphibian}}
+{{picdicimg|en|image=Tuatara.jpg|link=reptile}}
+{{picdicimg|en|image=Cyanocitta cristata FWS.jpg|link=bird}}
+{{picdicimg|en|image=Osmia rufa couple (aka).jpg|link=insect}}
+}}
+
+===Etymology 1===
+From {{inh|en|enm|animal}}, from {{der|en|fro|animal}}, from {{der|en|la|animal}}, a nominal use of an adjective from {{m|la|animale}}, neuter of {{m|la|animālis}}, from {{m|la|anima|t=breath, spirit}}. Displaced native Middle English {{m|enm|deor|deor, der|animal}} (from {{cog|ang|dēor|t=animal}}), {{cog|enm|reother|t=animal, neat}} (from {{cog|ang|hriþer|hrīþer, hrȳþer|t=neat, ox}}).
+
+====Noun====
+{{en-noun}}
+
+# In {{l|en|scientific}} usage, a [[multicellular]] [[organism]] that is usually {{l|en|mobile}}, whose {{l|en|cell}}s are not encased in a rigid [[cell wall]] (distinguishing it from {{l|en|plant|plants}} and {{l|en|fungi}}) and which derives energy solely from the consumption of other [[organism]]s (distinguishing it from {{l|en|plant|plants}}).
+#: {{ux|en|A cat is an '''animal''', not a plant. Humans are also '''animals''', under the scientific definition, as we are not plants.}}
+#* {{RQ:Browne Pseudodoxia Epidemica|book=3|chapter=Of the Cameleon|page=133|passage=It cannot be denied it [the [[chameleon]]] is (if not the moſt of any) a very abſtemious '''animall''', and ſuch as by reaſon of its frigidity, paucity of bloud, and latitancy in the winter (about which time the obſervations are often made) will long ſubſist without a viſible ſuſtentation.}}
+#: {{syn|en|beast|creature}}
+# In [[non-scientific]] usage, any member of the kingdom [[Animalia]] other than a {{l|en|human}}.
+#: {{syn|en|beast}}
+# In non-scientific usage, any land-living {{l|en|vertebrate}} (i.e. not {{l|en|fish|fishes}}, {{l|en|insect|insects}}, etc.).
+#* {{quote-journal|en|year=2013|month=July-August|author={{w|Henry Petroski}}
+|title=[http://www.americanscientist.org/issues/pub/2013/4/geothermal-energy Geothermal Energy]
+|volume=101|issue=4|magazine={{w|American Scientist}}
+|passage=Ancient nomads, wishing to ward off the evening chill and enjoy a meal around a campfire, had to collect wood and then spend time and effort coaxing the heat of friction out from between sticks to kindle a flame. With more settled people, '''animals''' were harnessed to capstans or caged in treadmills to turn grist into meal.}}
+# {{lb|en|figuratively}} A person who behaves wildly; a bestial, brutal, brutish, cruel, or inhuman person.
+#: {{ux|en|My students are '''animals'''.}}
+#: {{syn|en|brute|monster|savage}}
+# {{lb|en|informal}} A person of a particular {{l|en|type}}.
+#: {{ux|en|He's a political '''animal'''.}}
+# {{l|en|matter|Matter}}, {{l|en|thing}}.
+#: {{ux|en|a whole different '''animal'''}}
+
+=====Hyponyms=====
+* See also [[Thesaurus:animal]]
+
+=====Related terms=====
+{{rel4
+|en|anima
+|Animalia
+|animate
+|animus
+}}
+
+=====Translations=====
+See {{section link|animal/translations#Noun}}.
+
+===Etymology 2===
+From {{der|en|la|animālis}}, from either {{m|la|anima|t=breath, spirit}} or {{m|la|animus}}. Originally distinct from the noun, it became associated with attributive use of the noun and is now indistinguishable from it.
+
+====Adjective====
+{{en-adj|-}}
+
+# Of or relating to [[animals]].
+#: {{ux|en|'''animal''' instincts}}
+#: {{syn|en|beastly|bestial}}
+# Raw, base, unhindered by social codes.
+#: {{ux|en|'''animal''' passions}}
+#: {{syn|en|animalistic|beastly|bestial|untamed|wild}}
+# Pertaining to the [[spirit]] or [[soul]]; relating to sensation or innervation.
+#* '''2003''', Roy Porter, ''Flesh in the Age of Reason'' (Penguin 2004), page 47:
+#*: To explain what activated the flesh, ‘'''animal''' spirits’ were posited, superfine fluids which shuttled between the mind and the vitals, conveying messages and motion.
+# {{lb|en|slang|Ireland}} Excellent
+
+=====Derived terms=====
+{{col3-u|en|animal feed
+|animalistic
+|animal liberation
+|animal magnetism
+|animal rights
+|manimal
+|party animal
+|political animal
+|power animal
+|spirit animal
+}}
+
+=====Translations=====
+{{trans-top|of animals}}
+* Albanian: {{t+|sq|kafshë}}
+* Asturian: {{t-simple|ast|animal|langname=Asturian|interwiki=1}}
+* Breton: {{t-simple|br|loenel|langname=Breton}}
+* Bulgarian: {{t+|bg|животински|m}}, {{t+|bg|необуздан|m}}
+* Catalan: {{t-simple|ca|animal|langname=Catalan|interwiki=1}}
+* Czech: {{t-simple|cs|zvířecí|langname=Czech|interwiki=1}}
+* Danish: {{t-simple|da|dyrisk|langname=Danish}}
+* Dutch: {{t+|nl|dierlijk}}, {{t-simple|nl|dierlijke|langname=Dutch|interwiki=1}}
+* Finnish: {{t+|fi|eläin}}- {{qualifier|in compounds}}
+* French: {{t-simple|fr|animal|langname=French|interwiki=1}}
+* Galician: {{t-simple|gl|animal|langname=Galician|interwiki=1}}
+* German: {{t-simple|de|tierisch|langname=German|interwiki=1}}
+* Greek: {{t+|el|ζωώδης}}
+* Hebrew: {{t|he|חַיָּתִי|m|tr=ḥayyatí}}
+* Hungarian: {{t-simple|hu|állati|langname=Hungarian|interwiki=1}}
+* Icelandic: {{t-simple|is|dýrslegur|langname=Icelandic}}
+* Ido: {{t+|io|animala}}, {{t-simple|io|animalala|langname=Ido|interwiki=1}}
+* Indonesian {{t+|id|binatang}}, {{t+|id|hewan}}, {{t+|id|satwa}}
+* Interlingua: {{t-simple|ia|animal|langname=Interlingua}}
+* Interlingue: {{t+|ie|animal}}
+* Irish: {{t-simple|ga|ainmhíoch|langname=Irish}}
+* Italian: {{t-simple|it|animale|langname=Italian|interwiki=1}}
+* Japanese: {{t|ja|生き物の|tr=ikimono no}}
+* Kabuverdianu: {{t|kea|limária}}
+* Kurdish: {{t+|ku|ajal}}
+*: Sorani: {{t+|ku|حەیوانی}}
+{{trans-mid}}
+* Latin: {{t-simple|la|animalis|langname=Latin|interwiki=1}}
+* Latvian: {{t|lv|dzīvnieka}}, {{t-simple|lv|dzīvniecisks|langname=Latvian}}
+* Macedonian: {{t|mk|живо́тински}}
+* Malay:
+*: Jawi: {{t|ms|بيناتڠ}}, {{t|ms|حيوان}}, {{t|ms|ستوا}}
+*: Rumi: {{t+|ms|binatang}}, {{t+|ms|haiwan}}, {{t|ms|satwa}}
+* Norwegian: {{t-simple|no|dyrisk|langname=Norwegian}}
+*: Bokmål: {{t|nb|animalsk}}
+*: Nynorsk: {{t|nn|animalsk}}
+* Persian: {{t+|fa|حیوانی|tr=heyvâni}}
+* Polish: {{t-simple|pl|zwierzęcy|langname=Polish|interwiki=1}}
+* Portuguese: {{t-simple|pt|animal|langname=Portuguese|interwiki=1}}
+* Romanian: {{t+|ro|animal}}, {{t-simple|ro|animalic|langname=Romanian|interwiki=1}}
+* Russian: {{t+|ru|звери́ный|m}}
+* Serbo-Croatian:
+*: Cyrillic: {{t|sh|анималан}}, {{t|sh|животињски}}
+*: Roman: {{t+|sh|animalan}}, {{t+|sh|životinjski}}
+* Slovak: {{t|sk|zvierací|m}}
+* Slovene: {{t-simple|sl|živálski|langname=Slovene}}
+* Spanish: {{t-simple|es|animal|langname=Spanish|interwiki=1}}
+* Swahili: {{t|sw|kinyama}}, {{t-simple|sw|mifugo|langname=Swahili|interwiki=1}}
+* Swedish: {{t-simple|sv|djurisk|langname=Swedish|interwiki=1}}
+* Turkish: {{t+|tr|hayvansal}}, {{t-simple|tr|hayvanca|langname=Turkish|interwiki=1}}, {{t-simple|tr|hayvanî|langname=Turkish|interwiki=1}}
+{{trans-bottom}}
+
+{{trans-top|unhindered by social codes}}
+* Bulgarian: {{t+|bg|животински|n-p}}
+* Catalan: {{t-simple|ca|animal|langname=Catalan|interwiki=1}}
+* Finnish: {{t-simple|fi|eläimellinen|langname=Finnish|interwiki=1}}
+* Galician: {{t+|gl|animal}}
+* Greek: {{t+|el|άγριος}}
+* Hebrew: {{t|he|חַיָּתִי|m|tr=ḥayyatí}}, {{t|he|בַּהֲמִי|m|tr=behemí}}
+* Icelandic: {{t-simple|is|dýrslegur|langname=Icelandic}}
+* Irish: {{t-simple|ga|ainmhíoch|langname=Irish}}
+* Italian: {{t-simple|it|animale|langname=Italian|interwiki=1}}
+{{trans-mid}}
+* Latvian: {{t-simple|lv|dzīvniecisks|langname=Latvian}}
+* Macedonian: {{t|mk|живо́тински}}
+* Portuguese: {{t-simple|pt|animal|langname=Portuguese|interwiki=1}}
+* Romanian: {{t-simple|ro|sălbatic|langname=Romanian|interwiki=1}}
+* Serbo-Croatian:
+*: Cyrillic: {{t|sh|анималан}}, {{t|sh|животињски}}
+*: Roman: {{t+|sh|animalan}}, {{t+|sh|životinjski}}
+* Swahili: {{t|sw|kinyama}}, {{t-simple|sw|mifugo|langname=Swahili|interwiki=1}}
+* Turkish: {{t+|tr|hayvanî}}, {{t-simple|tr|hayvanca|langname=Turkish|interwiki=1}}
+{{trans-bottom}}
+
+{{trans-top|of soul}}
+* Finnish: {{t|fi|animaalinen}}, {{t|fi|sielullinen}}
+* Hungarian: {{t-simple|hu|lelki|langname=Hungarian|interwiki=1}}
+* Italian: {{t-simple|it|animale|langname=Italian|interwiki=1}}
+{{trans-mid}}
+* Macedonian: {{t|mk|ду́шевен}}
+* Romanian: {{t-simple|ro|sufletesc|langname=Romanian|interwiki=1}}
+{{trans-bottom}}
+
+===See also===
+* {{l|en|Appendix:Animals|Wiktionary appendix of terms relating to animals}}
+
+===References===
+* {{R:OneLook}}
+
+===Anagrams===
+* {{anagrams|en|a=aailmn|Almain|Malian|Manila|Milana|al-Amin|aminal|lamina|maalin|manila}}
+
+----
+
+==Asturian==
+
+===Etymology===
+Borrowed from {{bor|ast|la|animal}}.
+
+===Adjective===
+{{ast-adj-mf|pl=animales}}
+
+# {{l|en|animal}}
+
+===Noun===
+{{ast-noun|m|animales}}
+
+# {{l|en|animal}}
+
+[[Category:ast:Animals]]
+
+----
+
+==Catalan==
+
+===Etymology===
+Borrowed from {{bor|ca|la|animal}}.
+
+===Pronunciation===
+* {{ca-IPA}}
+* {{rhymes|ca|al}}
+
+===Adjective===
+{{ca-adj|mf}}
+
+# {{l|en|animal}}
+
+===Noun===
+{{ca-noun|m}}
+
+# {{l|en|animal}}
+
+====Derived terms====
+* {{l|ca|animalitzar|t=to animalize}}
+
+[[Category:ca:Animals]]
+
+----
+
+==Cebuano==
+
+===Etymology 1===
+From {{bor|ceb|en|animal}}, from {{der|ceb|enm|animal}}, from {{der|ceb|fro|animal}}, from {{der|ceb|la|animal}}, a nominal use of an adjective from {{m|la|animale}}, neuter of {{m|la|animālis}}, from {{m|la|anima|t=breath, spirit}}.
+
+====Noun====
+{{head|ceb|noun}}
+
+# {{l|en|animal}}
+# {{lb|ceb|pejorative}} a [[contemptible]] person
+# {{lb|ceb|sometimes humurous}}, a [[crazy]] person
+
+====Adjective====
+{{head|ceb|adjective}}
+
+# {{lb|ceb|sometimes humurous}}, [[crazy]]
+# [[contemptible]], deserving contempt
+# [[ruthless]]; without [[pity]] or [[compassion]]; [[cruel]], [[pitiless]]
+
+===Etymology 2===
+From {{bor|ceb|es|animal}}, from {{der|ceb|la|animal}}.
+
+====Interjection====
+{{head|ceb|interjection}}
+
+# {{lb|ceb|vulgar}} {{n-g|used as an expression of [[disgust]], [[anger]], etc.}}
+
+----
+
+==French==
+
+===Etymology===
+Borrowed from {{bor|fr|la|animal}}. Compare the archaic inherited doublet {{doublet|fr|aumaille|notext=1}} and its variant {{doublet|fr|armaille|notext=1}}, both from the Latin neuter plural {{m|la|animālia}}.
+
+===Pronunciation===
+* {{fr-IPA}}
+* {{audio|fr|Fr-un animal-fr.ogg|(un animal)}}
+* {{audio|fr|Fr-animal.ogg|Audio}}
+* {{homophones|fr|animale|animales}}
+
+===Noun===
+{{fr-noun|m|animaux}}
+
+# {{l|en|animal}}
+#: {{syn|fr|bête|bestiole}}
+
+====Derived terms====
+{{der3
+|fr|animal de compagnie
+|animalerie
+}}
+
+===Adjective===
+{{fr-adj}}
+
+# {{l|en|animal}}
+#: {{syn|fr|bestial}}
+#: {{ant|fr|végétal}}
+
+===Further reading===
+* {{R:TLFi}}
+
+===Anagrams===
+* {{l|fr|lamina}}
+
+[[Category:fr:Animals]]
+
+----
+
+==Galician==
+
+===Etymology===
+Borrowed from {{bor|gl|la|animal}}.
+
+===Adjective===
+{{gl-adj|pl=animais}}
+
+# {{l|en|animal}}
+
+===Noun===
+{{gl-noun|m|animais}}
+
+# {{l|en|animal}}
+
+[[Category:gl:Animals]]
+
+----
+
+==Haitian Creole==
+
+===Etymology===
+From {{der|ht|fr|animal}}, from {{der|ht|la|animal}}.
+
+===Noun===
+{{head|ht|noun}}
+
+# {{l|en|animal}} <!-- This language section up to here was created using Template:new ht entry -->
+#: {{syn|ht|zannimo}}
+
+[[Category:ht:Animals]]
+
+----
+
+==Interlingua==
+
+===Pronunciation===
+* {{IPA|ia|/a.niˈmal/}}
+
+===Noun===
+{{ia-noun|es}}
+
+# {{l|en|animal}}
+
+----
+
+==Kabuverdianu==
+
+===Etymology===
+From {{der|kea|pt|animal}}.
+
+===Noun===
+{{head|kea|noun}}
+
+# [[beast]]
+# {{l|en|animal}}
+
+----
+
+==Latin==
+
+===Etymology===
+From {{m|la|animāle}}, nominative neuter singular of {{m|la|animālis}}.
+
+===Pronunciation===
+* {{la-IPA|animal}}
+
+===Noun===
+{{la-noun|animal<3>}}
+
+# {{l|en|animal}}
+# [[living]] [[creature]]
+
+====Declension====
+{{la-ndecl|animal<3>}}
+
+====Synonyms====
+* {{l|la|animālis}}
+* {{l|la|bestia}}
+
+====Related terms====
+{{rel3
+|la|anima
+|animō
+|animus
+}}
+
+====Descendants====
+{{top3}}
+* {{desc|rup|nãmalj}}, {{l|rup|nãmaljiu}}
+* {{desc|ast|animal}}
+* {{desc|br|aneval}}
+* {{desc|ca|animal}}
+* {{desc|en|animal}}
+* {{desc|frp|armalye}}, {{l|frp|animal}} {{qualifier|borrowing}}
+* {{desc|fr|animal}}, {{l|fr|aumaille}}, {{l|fr|armaille}}
+* {{desc|fur|animâl}}, {{l|fur|nemâl}}
+* {{desc|gl|almallo}}, {{l|gl|animal}} {{qualifier|borrowing}}
+* {{desc|it|animale}}
+* {{desc|mt|annimal}}
+* {{desc|nrf|animâ}} {{qualifier|France}}, {{l|nrf|annima}} {{qualifier|Jersey}}
+* {{desc|pt|animal}}, {{l|pt|almalho}}, {{l|pt|alimanha}}, {{l|pt|alimária}}
+* {{desc|rgn|animêl}}
+* {{desc|ro|animal}}, {{l|ro|nămaie}}
+* {{desc|rm|animal}}
+* {{desc|scn|armali}}, {{l|scn|armalu}}
+* {{desc|es|alimaña}}, {{l|es|almaje}}, {{l|es|animal}}
+* {{desc|roa-tar|anemale}}
+* {{desc|vec|animal}}, {{l|vec|anemal}}
+* {{desc|cy|anifail}}
+{{bottom}}
+
+===References===
+* {{R:L&S}}
+* {{R:Elementary Lewis}}
+* {{R:du Cange}}
+* {{R:Gaffiot}}
+* {{R:M&A}}
+
+----
+
+==Middle English==
+
+===Pronunciation===
+* {{IPA|enm|/aniˈmaːl/|/aˈnimal/}}
+
+===Etymology 1===
+Borrowed from {{bor|enm|fro|animal}}, from {{der|enm|la|animal}}.
+
+====Alternative forms====
+* {{alter|enm|animale}}
+
+====Noun====
+{{enm-noun|animales}}
+
+# An {{l|en|animal}} (considered to include humans)
+
+=====Descendants=====
+* {{desc|en|animal}}
+* {{desc|sco|ainimal}}
+
+=====References=====
+* {{R:MED Online|entry=animāl (n.)|id=MED1656|accessdate=2019-01-16}}
+
+===Etymology 2===
+Borrowed from {{bor|enm|la|animālis}}.
+
+====Alternative forms====
+* {{alter|enm|animale|animall|anymal|anymall}}
+
+====Adjective====
+{{enm-adj}}
+
+# Related to the [[soul]] or [[spirit]] of a living being (i.e. [[sentience]] or [[sapience]])
+
+=====Descendants=====
+* {{desc|en|animal}}
+
+=====References=====
+* {{R:MED Online|entry=animāl (adj.)|id=MED1657|accessdate=2019-01-16}}
+
+[[Category:enm:Animals]]
+
+----
+
+==Middle French==
+
+===Noun===
+{{frm-noun|m|animaux|pl2=animaulx}}
+
+# {{l|en|animal}}
+#: {{syn|frm|beste}}
+
+----
+
+==Papiamentu==
+
+===Etymology===
+From {{der|pap|pt|animal}} and {{der|pap|es|animal}}.
+
+===Noun===
+{{head|pap|noun}}
+
+# [[beast]]
+# {{l|en|animal}}
+
+----
+
+==Portuguese==
+
+===Etymology===
+Borrowed from {{bor|pt|la|animal}}. See also {{doublet|pt|alimária|notext=1}}, an inherited doublet.
+
+===Pronunciation===
+* {{a|BR}} {{IPA|pt|/ˌɐ.ni.ˈmaw/|/ˌa.ni.ˈmaw/}}
+* {{a|PT}} {{IPA|pt|/ɐ.ni.ˈmaɫ/}}
+* {{hyphenation|pt|a|ni|mal}}
+* {{rhymes|pt|aw}}
+
+===Adjective===
+{{pt-adj|anima|l}}
+
+# {{lb|pt|biology}} {{l|en|animal}} {{gloss|relating to animals}}
+# {{lb|pt|Brazil|slang}} {{l|en|cool}}; {{l|en|awesome}}
+
+====Inflection====
+{{pt-adj-infl|anima|l}}
+
+====Quotations====
+{{seeCites|pt}}
+
+===Noun===
+{{pt-noun|m}}|animais
+
+# {{lb|pt|biology}} {{l|en|animal}} {{gloss|any member of the kingdom Animalia}}
+# {{lb|pt|non-scientific usage}} {{l|en|animal}} {{gloss|an animal other than a human, especially a vertebrate}}
+#: {{syn|pt|besta|bicho}}
+# {{lb|pt|colloquial}} {{l|en|twat}}; {{l|en|idiot}}; {{l|en|moron}}
+#: {{syn|pt|idiota}}
+# {{lb|pt|colloquial}} {{l|en|beast}} {{gloss|a cruel person}}
+#: {{syn|pt|monstro}}
+
+====Quotations====
+{{seeCites|pt}}
+
+====Derived terms====
+{{der3
+|pt|{{l|pt|animalizar|t=to animalize}}
+|{{l|pt|animalzinho|pos=diminutive}}
+|{{l|pt|animalzão|pos=augmentative}}
+}}
+
+----
+
+==Romanian==
+
+===Etymology===
+Borrowed from {{bor|ro|fr|animal}}, from {{der|ro|la|animal}}. {{doublet|ro|nămaie}}.
+
+===Pronunciation===
+* {{IPA|ro|/a.niˈmal/}}
+
+===Adjective===
+{{ro-adj|4}}
+
+# {{l|en|animal}}, [[animalistic]]
+# [[brutal]]
+
+====Declension====
+{{ro-adj-4}}
+
+===Adverb===
+{{ro-adv}}
+
+# [[brutally]]
+
+===Noun===
+{{ro-noun|n|animale}}
+
+# {{l|en|animal}}
+
+====Declension====
+{{ro-noun-n}}
+
+----
+
+==Romansch==
+
+===Etymology===
+Borrowed from {{bor|rm|la|animal}}.
+
+===Noun===
+{{rm-noun|m}}
+
+# {{lb|rm|Rumantsch Grischun|Sursilvan|Sutsilvan|Surmiran|Vallader}} {{l|en|animal}}
+
+====Synonyms====
+* {{qualifier|Rumantsch Grischun|Sursilvan|Surmiran}} {{l|rm|biestg}}
+* {{qualifier|Rumantsch Grischun|Sutsilvan}} {{l|rm|bestga}}
+* {{qualifier|Sursilvan}} {{l|rm|tier}}, {{l|rm|bestia}}
+* {{qualifier|Puter|Vallader}} {{l|rm|bes-cha}}
+
+[[Category:rm:Animals]]
+
+----
+
+==Spanish==
+
+===Etymology===
+Borrowed from {{bor|es|la|animal}}. See also {{doublet|es|alimaña|notext=1}}, an inherited doublet.
+
+===Pronunciation===
+* {{es-IPA}}
+* {{rhymes|es|al}}
+
+===Adjective===
+{{es-adj|pl=animales}}
+
+# {{l|en|animal}}
+
+===Noun===
+{{es-noun|m}}
+
+# {{l|en|animal}}
+
+====Derived terms====
+{{der3|es
+|animal de carga
+|animalada
+|animalero
+|animalesco
+|animalillo
+|animalismo
+|animalista
+|animalístico
+|animalito
+|animalizar
+|animalmente
+|animalucho}}
+
+====Related terms====
+{{rel3|es
+|animálculo
+|animalidad}}
+
+===Anagrams===
+* {{l|es|lámina}}
+* {{l|es|lamina}}
+
+===Further reading===
+* {{R:DRAE}}
+
+[[Category:Spanish basic words]]
+
+----
+
+==Tok Pisin==
+
+===Etymology===
+From {{inh|tpi|en|animal}}.
+
+===Noun===
+{{head|tpi|noun}}
+
+# {{l|en|animal}} {{gloss|members of Kingdom [[Animalia]] that are not humans}}
+#* {{tpi-cite-bible|Gen|1|25|God i kamapim ol kain kain '''animal''' bilong ples na ol bikpela na liklik '''animal''' bilong bus. God i lukim olgeta dispela samting i gutpela, na em i amamas.}}
+#: {{syn|tpi|abus}}
+
+{{LDL|tpi}}

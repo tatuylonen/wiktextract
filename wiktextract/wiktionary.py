@@ -6,7 +6,7 @@
 
 import re
 from wikitextprocessor import Wtp
-from .page import parse_page
+from .newpage import parse_page
 from .config import WiktionaryConfig
 
 # Title prefixes that indicate that the page is not a normal page and
@@ -118,57 +118,86 @@ def capture_specials_fn(dt):
     return []
 
 
-def parse_wiktionary(path, config, word_cb, capture_cb=None,
-                     cache_file=None, phase1_only=False):
+def page_handler(ctx, model, title, text, capture_cb, config_kwargs):
+    if capture_cb is not None:
+        capture_cb(model, title, text)
+    if model == "redirect":
+        config1 = WiktionaryConfig()
+        return ([{"title": title, "redirect": text}],
+                config1.to_return())
+    if model != "wikitext":
+        return
+    idx = title.find(":")
+    if idx >= 0:
+        prefix = title[:idx]
+        if prefix in special_prefixes:
+            return
+    for suffix in ignore_suffixes:
+        if title.endswith(suffix):
+            return
+    for suffix in translation_suffixes:
+        if title.endswith(suffix):
+            return  # XXX
+    # XXX translation suffixes?
+    # XXX Thesaurus pages?
+    # XXX Sign gloss pages?
+    # XXX Reconstruction pages?
+    config1 = WiktionaryConfig(**config_kwargs)
+    ret = parse_page(ctx, title, text, config1)
+    stats = config1.to_return()
+    return (ret, stats)
+
+
+def parse_wiktionary(ctx, path, config, word_cb, capture_cb=None,
+                     phase1_only=False):
     """Parses Wiktionary from the dump file ``path`` (which should point
     to a "enwiktionary-<date>-pages-articles.xml.bz2" file.  This
     calls ``capture_cb(title)`` for each raw page (if provided), and
     if it returns True, and calls ``word_cb(data)`` for all words
     defined for languages in ``languages``."""
+    assert isinstance(ctx, Wtp)
     assert isinstance(path, str)
     assert isinstance(config, WiktionaryConfig)
     assert callable(word_cb)
     assert capture_cb is None or callable(capture_cb)
-    assert cache_file is None or isinstance(cache_file, str)
+    assert phase1_only in (True, False)
     languages = config.capture_languages
     if languages is not None:
         assert isinstance(languages, (list, tuple, set))
         for x in languages:
             assert isinstance(x, str)
 
-    ctx = Wtp(cache_file=cache_file)
     config_kwargs = config.to_kwargs()
 
-    def page_handler(model, title, text):
-        if capture_cb is not None:
-            capture_cb(model, title, text)
-        if model == "redirect":
-            config1 = WiktionaryConfig()
-            return ([{"title": title, "redirect": text}],
-                    config1.to_return())
-        if model != "wikitext":
-            return
-        idx = title.find(":")
-        if idx >= 0:
-            prefix = title[:idx]
-            if prefix in special_prefixes:
-                return
-        for suffix in ignore_suffixes:
-            if title.endswith(suffix):
-                return
-        for suffix in translation_suffixes:
-            if title.endswith(suffix):
-                return  # XXX
-        # XXX translation suffixes?
-        # XXX Thesaurus pages?
-        # XXX Sign gloss pages?
-        # XXX Reconstruction pages?
-        config1 = WiktionaryConfig(**config_kwargs)
-        ret = parse_page(title, text, config1)
-        stats = config1.to_return()
-        return (ret, stats)
+    def page_cb(model, title, text):
+        return page_handler(ctx, model, title, text, capture_cb, config_kwargs)
 
-    results = ctx.process(path, page_handler, phase1_only)
+    results = ctx.process(path, page_cb, phase1_only=phase1_only)
+    process_finalize(results, config, word_cb)
+
+
+def reprocess_wiktionary(ctx, config, word_cb, capture_cb):
+    """Reprocesses the Wiktionary from the cache file."""
+    assert isinstance(ctx, Wtp)
+    assert isinstance(config, WiktionaryConfig)
+    assert callable(word_cb)
+    assert capture_cb is None or callable(capture_cb)
+
+    config_kwargs = config.to_kwargs()
+
+    def page_cb(model, title, text):
+        return page_handler(ctx, model, title, text, capture_cb, config_kwargs)
+
+    results = ctx.reprocess(page_cb)
+    process_finalize(results, config, word_cb)
+
+
+def process_finalize(results, config, word_cb):
+    """Finalizes processing or reprocessing the Wiktionary."""
+    assert isinstance(results, (list, tuple))
+    assert isinstance(config, WiktionaryConfig)
+    assert callable(word_cb)
+
     words = []
     for ret, stats in results:
         config.merge_return(stats)
@@ -177,7 +206,5 @@ def parse_wiktionary(path, config, word_cb, capture_cb=None,
     # XXX Merge information from separate translations and thesaurus pages
 
     for w in words:
-        word_cb(w)
 
-    # Return the parsing context.
-    return ctx
+        word_cb(w)
