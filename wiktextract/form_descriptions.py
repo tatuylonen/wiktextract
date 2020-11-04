@@ -594,7 +594,7 @@ def parse_word_head(ctx, config, pos, text, data):
     assert isinstance(pos, str)
     assert isinstance(text, str)
     assert isinstance(data, dict)
-    print("parse_word_head:", ctx.title, text)
+    print("parse_word_head:", text)
     title = ctx.title
     titleparts = list(m.group(0) for m in re.finditer(word_re, title))
 
@@ -669,7 +669,7 @@ def parse_sense_tags(ctx, config, text, data):
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(text, str)
     assert isinstance(data, dict)
-    print("parse_sense_tags", text)
+    # print("parse_sense_tags:", text)
     tags = map_with(paren_map, text.split(","))
     # XXX should check which tags are valid XXX do we want to warn about
     # unknown ones here
@@ -681,7 +681,6 @@ def parse_pronunciation_tags(ctx, config, text, data):
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(text, str)
     assert isinstance(data, dict)
-    print("parse_pronunciation_tags", text)
     tags = map_with(paren_map, text.split(","))
     # XXX should check which tags are valid for pronunciations
     # XXX do we want to warn about unknown ones here?
