@@ -80,8 +80,9 @@ clean_rege = (r"(?s)\{\{([^}|]+)" +
               r")?)?)?)?)?)?)?)?)?)?" +
               r")?)?)?)?)?)?)?)?)?)?" +
               args_end_re +
-              r"|\[\[[^][{}]+?\]\]" +
-              r"|\[[^][{}]+?\]")
+              r"|\[\[[^][{}]+?\]\]"
+              # + r"|\[[^][{}]+?\]"
+)
 clean_re = re.compile(clean_rege)
 
 # Indexes of groups in clean_re
@@ -142,11 +143,11 @@ def clean_replace_regexp(config, v):
             if v.startswith(":Category:"):
                 v = v[10:]
             return v
-        if t.startswith("["):
-            vec = t[1:-1].split(" ")
-            if vec[0].startswith("http:") or vec[0].startswith("https:"):
-                vec = vec[1:]
-            return " ".join(vec)
+        # if t.startswith("["):
+        #     vec = t[1:-1].split(" ")
+        #     if vec[0].startswith("http:") or vec[0].startswith("https:"):
+        #         vec = vec[1:]
+        #     return " ".join(vec)
         # Otherwise it must be a template
         assert t.startswith("{{")
         tag = m.group(1).strip()
@@ -264,7 +265,8 @@ def clean_value(config, title):
     # Remove any remaining HTML tags.
     title = re.sub(r"(?s)<[^>]+>", "", title)
     # Replace remaining HTML links by the URL.
-    title = re.sub(r"\[([^]]+)\]", r"\1", title)
+    # XXX this breaks [...] in pronunciation section
+    # title = re.sub(r"\[([^]]+)\]", r"\1", title)
     # Replace various empases (quoted text) by its value.
     title = re.sub(r"''+(([^']|'[^'])+?)''+", r"\1", title)
     # Replace HTML entities

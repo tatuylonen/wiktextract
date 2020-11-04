@@ -1,0 +1,353 @@
+TITLE: talo
+<!-- This file was taken from Wiktionary, word animal", and therefore
+this file is licensed under the Wiktionary license,
+https://en.wiktionary.org/wiki/Wiktionary:Copyrights.  Essentially,
+this means dual licensing under both the Creative Commons
+Attribution-ShareAlike 3.0 Unported License (CC-BY_SA) and the GNU
+Free Documentation License (GFDL). -->
+
+{{also|taló|tálo|tālo|ťalo}}
+==Finnish==
+{{Finnish index|t|a}}
+
+===Etymology===
+From {{inh|fi|fiu-fin-pro|*talo||farm; house}}. Possibly related to {{m|fi|talas||shelter for boats; fish drying hut}}. Cognates include {{cog|et|talu||farm}}; {{cog|se|dállu||house; farm}} is a Finnic loan.<ref>[http://kaino.kotus.fi/algu/index.php?t=sanue&sanue_id=43976&kkieli=en Álgu database: Word family ''talo, talas'']</ref>
+
+===Pronunciation===
+{{fi-pronunciation}}
+
+===Noun===
+{{head|fi|noun}}
+
+# [[house]]
+# [[building]]
+#: {{syn|fi|rakennus|pytinki}}
+# {{lb|fi|now|uncommon}} [[farm]], [[homestead]]
+#: {{syn|fi|maatila|tila|farmi}}
+
+====Declension====
+{{fi-decl-valo|tal|||o|a}}
+
+====Derived terms====
+{{der2|fi
+|talollinen
+|talous}}
+
+====Compounds====
+{{der4|fi
+|aravatalo
+|asuintalo
+|atriumtalo
+|aurinkotalo
+|autiotalo
+|betonitalo
+|eduskuntatalo
+|ekotalo
+|elementtitalo
+|harjatalo
+|harkkotalo
+|hometalo
+|häätalo
+|höylähirsitalo
+|ilotalo
+|jugendtalo
+|kantatalo
+|karjalantalo
+|kaupungintalo
+|kaupunkitalo
+|kerrostalo
+|ketjutalo
+|kirjastotalo
+|kivitalo
+|konserttitalo
+|konttitalo
+|korttitalo
+|kotitalo
+|koulutalo
+|kulmatalo
+|kummitustalo
+|kunnantalo
+|köyhäintalo
+|lamellitalo
+|lehtitalo
+|liiketalo
+|lomatalo
+|luhtitalo
+|maalaistalo
+|maatalo
+|majatalo
+|miljoonatalo
+|moduulitalo
+|monitoimitalo
+|muotitalo
+|naapuritalo
+|nuorisotalo
+|oikeustalo
+|olkitalo
+|omakotitalo
+|oopperatalo
+|osaketalo
+|osakuntatalo
+|paikoitustalo
+|palokunnantalo
+|palvelutalo
+|paritalo
+|parkkitalo
+|parlamenttitalo
+|pientalo
+|piispantalo
+|piparkakkutalo
+|pistetalo
+|pohjalaistalo
+|pullotalo
+|purkutalo
+|puutalo
+|pysäköintitalo
+|pyöröhirsitalo
+|rinnetalo
+|rivitalo
+|seuraintalo
+|seurakuntatalo
+|seurantalo
+|seuratalo
+|seurojentalo
+|sukutalo
+|surutalo
+|talojohto
+|talokauppa
+|talokohtainen
+|talokontti
+|talon etu
+|talonemäntä
+|talonisäntä
+|talonkauppa
+|talonkirja
+|talonmies
+|talonomistaja
+|talonpaikka
+|talonpito
+|talonpoika
+|talonrakennus
+|talonvahti
+|talonvaltaus
+|talonvanhin
+|talonviini
+|talonväki
+|talopaketti
+|talopesula
+|taloryhmä
+|talorähjä
+|taloröttelö
+|talotehdas
+|talotyyppi
+|taloyhtiö
+|tavaratalo
+|teatteritalo
+|terassitalo
+|tiilitalo
+|toimistotalo
+|toimitalo
+|tornitalo
+|turvatalo
+|tyyppitalo
+|työväentalo
+|urheilutalo
+|uudistalo
+|vaivaistalo
+|valmistalo
+|vanhustentalo
+|vierastalo
+|virastotalo
+|virkatalo
+|vuokratalo
+|yksinäistalo
+|ylioppilastalo
+|ökytalo
+}}
+
+===References===
+<references/>
+
+===Anagrams===
+* {{anagrams|fi|a=alot|laot|lato|loat|olat|tola}}
+
+[[Category:fi:Buildings]]
+
+----
+
+==Galician==
+
+===Etymology===
+From {{der|gl|la|thallus}}, from {{der|gl|grc|θαλλός}}.
+
+===Noun===
+{{gl-noun|m}}
+
+# {{lb|gl|botany}} [[stem]], [[shaft]]
+
+===Further reading===
+* {{R:DRAG}}
+
+----
+
+==Italian==
+
+===Etymology===
+From {{der|it|la|tālus}}.
+
+===Noun===
+{{it-noun|m}}
+
+# {{lb|it|archaic}} [[knucklebones]]
+# {{lb|it|skeleton}} (colloquial) [[talus]], [[talus bone]]
+
+====Synonyms====
+* {{l|it|astragalo}}
+
+===Anagrams===
+* {{l|it|alto}}, {{l|it|lato}}
+
+===Further reading===
+* {{R:it:Treccani}}
+
+----
+
+==Latin==
+
+===Noun===
+{{la-noun-form|tālō}}
+
+# {{inflection of|la|tālus||dat|s}}
+# {{inflection of|la|tālus||abl|s}}
+
+===References===
+* {{R:du Cange}}
+
+----
+
+==Portuguese==
+
+===Etymology===
+From {{inh|pt|la|thallus}}, from {{der|pt|grc|θαλλός}}.
+
+===Noun===
+{{pt-noun|m}}
+
+# {{lb|pt|botany}} [[stem]], [[shaft]]
+
+===Further reading===
+* {{R:Priberam}}
+
+----
+
+==Samoan==
+
+===Etymology===
+From {{inh|sm|poz-pol-pro|*talo}}.
+
+===Noun===
+{{head|sm|noun}}
+
+# [[taro]]
+
+====See also====
+* {{l|sm|'oso}}
+
+[[Category:sm:Plants]]
+[[Category:sm:Polynesian canoe plants]]
+
+----
+
+==Spanish==
+
+===Pronunciation===
+* {{es-IPA}}
+
+===Etymology 1===
+From {{der|es|la|thallus}}, from {{der|es|grc|θαλλός}}.
+
+====Noun====
+{{es-noun|m}}
+
+# {{lb|es|botany}} [[stem]], [[shaft]]
+
+===Etymology 2===
+{{nonlemma}}
+
+====Verb====
+{{head|es|verb form}}
+
+# {{es-verb form of|ending=ar|mood=indicative|tense=present|pers=1|number=singular|talar}}
+
+===Further reading===
+* {{R:DRAE}}
+
+----
+
+==Tagalog==
+
+===Verb===
+{{head|tl|verb}}
+
+# to be [[defeat]]ed; to [[lose]]
+#: {{ux|tl|'''Natalo''' kami sa basketbol.|We '''lost''' in the basketball game.}}
+# to [[defeat]]; to [[surpass]]; to [[win]] over
+#: {{ux|tl|Baka '''talunin''' ka ni Paul.|Paul might '''defeat''' you.}}
+
+====Conjugation====
+{{tl-infl|C=t|V=a|R=lo|N=n|E=n|SC=t|NC=t|CC=t|SR=lu|in=in|in2=in|in3=|ni=}}
+
+===Adjective===
+{{head|tl|adjective}}
+
+# [[defeated]]; [[beaten]]; [[surpassed]]
+#: {{ux|tl|Nagsisiawayan ang mga manlalaro sa '''natalong''' tim.|The players in the '''losing''' team argued with each other.}}
+
+----
+
+==Tongan==
+{{wikipedia|lang=to}}
+
+===Etymology===
+From {{inh|to|poz-pol-pro|*talo}}.
+
+===Pronunciation===
+{{to-IPA}}
+
+===Noun===
+{{head|to|noun}}
+
+# [[taro]]
+
+{{topics|to|Plants|Polynesian canoe plants}}
+
+----
+
+==Võro==
+
+===Etymology===
+From {{inh|vro|fiu-fin-pro|*talo}}.
+
+===Noun===
+{{vro-noun|talo|tallo}}
+
+# [[farm]], [[farmstead]]
+
+====Inflection====
+{{vro-decl-stems|a|talo|talo|tallo|tallo|tallõ|gen_pl2=talla|tallõ|par_pl2=talla|tallõ|ill_pl2=tallõhe|ill_pl3=talla|ill_pl4=tallahe|talõ|all_pl2=tallõ|all_pl3=tala|all_pl4=talla}}
+
+----
+
+==Welsh==
+
+===Pronunciation===
+* {{a|cy-N}} {{IPA|cy|/ˈtalɔ/}}
+* {{a|cy-S}} {{IPA|cy|/ˈtaːlɔ/|/ˈtalɔ/}}
+
+===Verb===
+{{head|cy|verb form}}
+
+# {{lb|cy|literary}} {{inflection of|cy|talu||3|s|subj}}
+
+===Mutation===
+{{cy-mut-auto}}
