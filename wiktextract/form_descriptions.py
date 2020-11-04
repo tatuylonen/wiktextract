@@ -445,6 +445,7 @@ valid_tags = [
     "classifier",
     "kyūjitai",
     "shinjitai",
+    "zhuyin",
     "brazilian orthography",
     "european orthography",
     "classical milanese orthography",
