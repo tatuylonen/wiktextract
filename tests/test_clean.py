@@ -110,6 +110,16 @@ class WiktExtractTests(unittest.TestCase):
         v = clean_value(self.config, v)
         self.assertEqual(v, "This is a test.")
 
+    def test_cv_link3(self):
+        v = "This is a [[w:foo|]]."
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "This is a foo.")
+
+    def test_cv_link4(self):
+        v = "This is a [[bar]]."
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "This is a bar.")
+
     def test_cv_htmllink(self):
         v = "This is a [http://ylonen.org test]."
         v = clean_value(self.config, v)

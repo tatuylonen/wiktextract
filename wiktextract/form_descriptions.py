@@ -38,6 +38,10 @@ form_map = {
     "c": "common",  # common gender in at least West Frisian
     "&": "and",
     "abbreviated": "abbreviation",
+    "な": "-na",
+    "い": "-i",
+    "たり": "-tari",
+    "たり": "-nari",
 }
 
 # Maps strings into one or more other strings.  This is applied at multiple
@@ -494,6 +498,11 @@ valid_tags = [
     "error",
     "canonical",  # Used to mark the canonical word from from head
     "figurative",
+    "-na",  # Japanese inflection type
+    "-i",   # Japanese inflection type
+    "-tari",  # Japanese inflection type
+    "-nari",  # Japanese inflection type
+    "suru",  # Japanese verb inflection type
 ]
 
 valid_tree = {}

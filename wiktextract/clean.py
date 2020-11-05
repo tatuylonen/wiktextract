@@ -133,15 +133,22 @@ def clean_replace_regexp(config, v):
         t = m.group(0)
         if t.startswith("[["):
             vec = t[2:-2].split("|")
-            if len(vec) > 2:
-                return vec[2]
-            if len(vec) >= 2:
-                return vec[1]
             v = vec[0]
             if v.startswith("Category:"):
                 return ""
             if v.startswith(":Category:"):
                 v = v[10:]
+            if len(vec) > 2:
+                return vec[2]
+            if len(vec) >= 2:
+                if vec[1]:
+                    return vec[1]
+                else:
+                    # Pipe trick
+                    m = re.match(r"\s*([a-zA-Z0-9]+:)?([^(]+)(\s*\()?", vec[0])
+                    if m:
+                        return m.group(2)
+                    return vec[0]
             return v
         # if t.startswith("["):
         #     vec = t[1:-1].split(" ")
@@ -258,16 +265,24 @@ def clean_value(config, title):
         config.error("possible syntax error: {}".format(m.group(0)))
     title = re.sub(r"\{\{[^}]+\}\}", "", title)
     # Remove references (<ref>...</ref>).
-    title = re.sub(r"(?s)<ref>.*?</ref>", "", title)
+    title = re.sub(r"(?s)<ref>\s*.*?</ref>\n*", "", title)
     # Replace <br/> by comma space (it is used to express alternatives in some
     # declensions)
-    title = re.sub(r"(?s)<br\s*/?>", ", ", title)
+    title = re.sub(r"(?s)<br\s*/?>\n*", ", ", title)
     # Remove any remaining HTML tags.
-    title = re.sub(r"(?s)<[^>]+>", "", title)
+    title = re.sub(r"(?s)<[^/][^>]+>\s*", "", title)
+    title = re.sub(r"(?s)<\s*/\s*[^>]+>\n*", "", title)
+    # Replace links by their text
+    title = re.sub(r"(?s)\[\[([^]|]+)\|([^]|]+)\]\]", r"\2", title)
+    title = re.sub(r"(?s)\[\[([a-zA-z0-9]+:)?([^]|]+)(\s*\([^])|]*\)\s*)?"
+                   r"\|\]\]",
+                   r"\2", title)
+    title = re.sub(r"(?s)\[\[([^]|]+)\]\]", r"\1", title)
     # Replace remaining HTML links by the URL.
-    # XXX this breaks [...] in pronunciation section
+    # XXX this breaks [...] in pronunciation section.  Change to keep HTML
+    # entities longer, and then restore this code.
     # title = re.sub(r"\[([^]]+)\]", r"\1", title)
-    # Replace various empases (quoted text) by its value.
+    # Replace various emphases (quoted text) by its value.
     title = re.sub(r"''+(([^']|'[^'])+?)''+", r"\1", title)
     # Replace HTML entities
     title = html.unescape(title)
