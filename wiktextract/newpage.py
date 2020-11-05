@@ -2709,6 +2709,8 @@ def clean_node(config, ctx, value, template_fn=None):
     v = clean_value(config, v)
     return v
 
+# XXX Review link extraction code - which cases are not yet handled?
+
 # XXX clean links like w:Sheffield correctly (word Wednesday)
 
 # XXX add parsing chinese pronunciations, see 傻瓜 https://en.wiktionary.org/wiki/%E5%82%BB%E7%93%9C#Chinese
