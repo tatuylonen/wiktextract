@@ -1,0 +1,45 @@
+TITLE: 大切
+<!-- This file was taken from Wiktionary, word animal", and therefore
+this file is licensed under the Wiktionary license,
+https://en.wiktionary.org/wiki/Wiktionary:Copyrights.  Essentially,
+this means dual licensing under both the Creative Commons
+Attribution-ShareAlike 3.0 Unported License (CC-BY_SA) and the GNU
+Free Documentation License (GFDL). -->
+
+==Japanese==
+{{ja-kanjitab|たい|せつ|yomi=kanon}}
+
+===Pronunciation===
+{{ja-pron|たいせつ|acc=0|acc_ref=SMK2,ZAJ}}
+
+===Etymology===
+From {{m|ja|大|sc=Jpan|tr=tai|gloss=of great intensity}} + {{m|ja|切|sc=Jpan|tr=setsu|gloss=urgent, pressing, close}}
+
+===Adjectival noun===
+{{ja-adj|infl=na|たいせつ}}
+
+# [[important]], [[weighty]]
+#: {{ja-usex|[[誰]][[よりも]]'''大%切'''な[[人]]|だれ より も '''たい%せつ''' な ひと|the most important person in the world|lit=a person who is more '''important''' than anyone else}}
+# [[valuable]]
+
+====See also====
+* {{ja-r|重%要|じゅう%よう}}
+* {{ja-r|大%事|だい%じ}}
+
+====Inflection====
+{{ja-na|たいせつ}}
+
+===Noun===
+{{ja-noun|たいせつ}}
+
+# [[importance]], [[weight]]
+# [[value]]
+
+====Related terms====
+* {{ja-r|大%切り|おお%ぎり}}: last piece on the program, close, conclusion, large chop
+
+====See also====
+* {{ja-r|重%要|じゅう%よう}}
+
+===References===
+<references/>
