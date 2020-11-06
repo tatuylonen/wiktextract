@@ -265,12 +265,12 @@ def clean_value(config, title):
         config.error("possible syntax error: {}".format(m.group(0)))
     title = re.sub(r"\{\{[^}]+\}\}", "", title)
     # Remove references (<ref>...</ref>).
-    title = re.sub(r"(?s)<ref>\s*.*?</ref>\n*", "", title)
+    title = re.sub(r"(?s)<\s*ref>\s*.*?<\s*/\s*ref>\n*", "", title)
     # Replace <br/> by comma space (it is used to express alternatives in some
     # declensions)
-    title = re.sub(r"(?s)<br\s*/?>\n*", ", ", title)
+    title = re.sub(r"(?s)<\s*br\s*/?>\n*", ", ", title)
     # Remove any remaining HTML tags.
-    title = re.sub(r"(?s)<[^/][^>]+>\s*", "", title)
+    title = re.sub(r"(?s)<\s*[^/][^>]*>\s*", "", title)
     title = re.sub(r"(?s)<\s*/\s*[^>]+>\n*", "", title)
     # Replace links by their text
     title = re.sub(r"(?s)\[\[([^]|]+)\|([^]|]+)\]\]", r"\2", title)

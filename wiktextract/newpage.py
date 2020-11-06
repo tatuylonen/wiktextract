@@ -1425,7 +1425,7 @@ def parse_preamble(config, data, pos_sectitle, text, p):
         for item in node.items:
             txt = str(item)
             if txt.startswith("*::"):
-                continue  # Possibly a bug in wikitextparser
+                continue
             sense = {}
             parse_sense(config, sense, txt, True)
             for node2 in node.sublists():
@@ -2209,11 +2209,16 @@ def parse_language(ctx, config, langnode, language):
         if m:
             parse_sense_tags(ctx, config, m.group(1), sense_data)
             gloss = gloss[m.end():].strip()
+        # Kludge, some glosses have a comma after initial qualifiers in
+        # parentheses
+        if gloss.startswith(", "):
+            gloss = gloss[2:]
         data_append(config, sense_data, "glosses", gloss)
 
     def head_template_fn(name, ht):
         m = re.search(head_tag_re, name)
         if m:
+            ht = ht.copy()
             ht["template_name"] = name
             data_append(config, pos_data, "heads", ht)
         return None
@@ -2250,7 +2255,7 @@ def parse_language(ctx, config, langnode, language):
         # XXX use template_fn in clean_node to check that the head macro
         # is compatible with the current part-of-speech and generate warning
         # if not.  Use template_allowed_pos_map.
-        text = clean_node(config, ctx, pre, head_template_fn)
+        text = clean_node(config, ctx, pre, template_fn=head_template_fn)
         parse_word_head(ctx, config, pos, text, pos_data)
         for node in lists:
             for node in node.children:
@@ -2267,6 +2272,7 @@ def parse_language(ctx, config, langnode, language):
         data = etym_data if etym_data else base
         enprs = []
         audios = []
+        rhymes = []
 
         def parse_pronunciation_template_fn(name, ht):
             if name == "enPR":
@@ -2310,6 +2316,15 @@ def parse_language(ctx, config, langnode, language):
                 pron = {field: m.group(1)}
                 parse_pronunciation_tags(ctx, config, tagstext, pron)
                 data_append(config, data, "sounds", pron)
+            # Check if it contains Rhymes
+            m = re.search(r"\bRhymes: ([^\s,]+(,\s*[^\s,]+)*)", text)
+            if m:
+                for ending in m.group(1).split(","):
+                    ending = ending.strip()
+                    if ending:
+                        pron = {"rhymes": ending}
+                        parse_pronunciation_tags(ctx, config, tagstext, pron)
+                        data_append(config, data, "sounds", pron)
             #print("parse_pronunciation tagstext={} text={}"
             #      .format(tagstext, text))
             for m in re.finditer("/[^/,]+?/|\[[^]0-9,/][^],/]*?\]", text):
@@ -2337,6 +2352,7 @@ def parse_language(ctx, config, langnode, language):
             m = re.search(r"-(conj|decl|infl|conjugation|"
                           r"declension|inflection)($|-)", name)
             if m:
+                ht = ht.copy()
                 ht["template_name"] = name
                 data_append(config, pos_data, "conjugation", ht)
                 nonlocal captured
@@ -2692,18 +2708,17 @@ def clean_node(config, ctx, value, template_fn=None):
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, Wtp)
     assert template_fn is None or callable(template_fn)
-    #print("CLEAN_NODE:", value)
 
     def recurse(value):
         if isinstance(value, str):
-            v = value
+            ret = value
         elif isinstance(value, (list, tuple)):
-            v = "".join(map(recurse, value))
+            ret = "".join(map(recurse, value))
         elif isinstance(value, WikiNode):
-            v = ctx.node_to_html(value, template_fn=template_fn)
+            ret = ctx.node_to_html(value, template_fn=template_fn)
         else:
-            v = str(value)
-        return v
+            ret = str(value)
+        return ret
 
     v = recurse(value)
     v = clean_value(config, v)
@@ -2727,3 +2742,8 @@ def clean_node(config, ctx, value, template_fn=None):
 # XXX implement capturing translations
 
 # XXX handle {{also|...}} at page start (e.g. animal.txt)
+
+# XXX implement parsing {{ja-see-kango|xxx}} specially, see むひ
+
+# XXX handle <ruby> specially in clean or perhaps already earler, see
+# e.g. 無比 (Japanese)

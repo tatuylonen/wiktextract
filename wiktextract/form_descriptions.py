@@ -11,43 +11,36 @@ from .config import WiktionaryConfig
 from .datautils import (data_append, data_extend, data_inflection_of,
                         data_alt_of)
 
-# Maps individual words from form descriptions.  This is primarily used for
-# expanding abbreviations and some canonicalization.
-form_map = {
-    "m": "masculine",
-    "m.": "masculine",
-    "male": "masculine",
-    "f": "feminine",
-    "f.": "feminine",
-    "fem.": "feminine",
-    "female": "feminine",
-    "sg": "singular",
-    "pl": "plural",
-    "indef.": "indefinite",
-    "gen.": "genitive",
-    "n": "neuter",
-    "inan": "inanimate",
-    "anim": "animate",
-    "pers": "person",
-    "impf.": "imperfect",
-    "impf": "imperfect",
-    "pf": "perfective",
-    "unc": "uncountable",
-    "trans.": "transitive",
-    "npers": "impersonal",
-    "c": "common",  # common gender in at least West Frisian
-    "&": "and",
-    "abbreviated": "abbreviation",
-    "な": "-na",
-    "い": "-i",
-    "たり": "-tari",
-    "たり": "-nari",
-}
-
 # Maps strings into one or more other strings.  This is applied at multiple
 # levels of partitioning the description.
 
 paren_map = {
+    "m": ["masculine"],
+    "m.": ["masculine"],
+    "male": ["masculine"],
+    "f": ["feminine"],
+    "f.": ["feminine"],
+    "fem.": ["feminine"],
+    "female": ["feminine"],
+    "sg": ["singular"],
+    "pl": ["plural"],
+    "indef.": ["indefinite"],
+    "gen.": ["genitive"],
+    "n": ["neuter"],
+    "inan": ["inanimate"],
+    "anim": ["animate"],
+    "pers": ["person"],
+    "impf.": ["imperfect"],
+    "impf": ["imperfect"],
+    "pf": ["perfective"],
+    "unc": ["uncountable"],
+    "trans.": ["transitive"],
+    "npers": ["impersonal"],
+    "c": ["common"],  # common gender in at least West Frisian
+    "&": ["and"],
+    "abbreviated": ["abbreviation"],
+    "†-tari": ["-tari"],
+    "†-nari": ["-nari"],
     "countable and uncountable": ["countable", "uncountable"],
     "masculine and feminine plural": ["masculine plural", "feminine plural"],
     "definite singular and plural": ["definite singular", "definite plural"],
@@ -290,7 +283,7 @@ valid_tags = [
     "diminutive",
     "pejorative",
     "diminutive of",
-    "infinitive"
+    "infinitive",
     "da-infinitive",
     "first-person",
     "second-person",
@@ -503,7 +496,16 @@ valid_tags = [
     "-tari",  # Japanese inflection type
     "-nari",  # Japanese inflection type
     "suru",  # Japanese verb inflection type
+    "former reform[s] only",
 ]
+
+# Words that can be part of form description
+valid_words = set(["or", "and"])
+for x in valid_tags:
+    valid_words.update(x.split(" "))
+for x in paren_map.keys():
+    valid_words.update(x.split(" "))
+
 
 valid_tree = {}
 for tag in valid_tags:
@@ -515,7 +517,10 @@ for tag in valid_tags:
             new_node = {}
             node[w] = new_node
             node = new_node
-    node["$"] = tag
+    if "$" in node:
+        node["$"] += (tag,)
+    else:
+        node["$"] = (tag,)
 
 # Regexp used to find "words" from word heads and linguistic descriptions
 word_re = re.compile(r"[^ ,;()\u200e]+|\([^)]*\)")
@@ -555,8 +560,7 @@ def decode_tags(config, lst):
                 node = node[w]
                 break
             elif "$" in node:
-                tag = node["$"]
-                tags.append(tag)
+                tags.extend(node["$"])
                 node = valid_tree
             else:
                 config.warning("unsupported tag component {!r} in {}"
@@ -567,11 +571,11 @@ def decode_tags(config, lst):
                 break
     if node is not valid_tree:
         if "$" in node:
-            tag = node["$"]
-            tags.append(tag)
+            tags.extend(node["$"])
         else:
-            config.warning("unsupported tag component {!r} in {}"
-                           .format(w, lst))
+            config.warning("uncompleted tag ending in {}".format(lst))
+            if "error" not in tags:
+                tags.append("error")
     return tags
 
 
@@ -590,10 +594,14 @@ def add_related(ctx, config, data, lst, related):
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(lst, list)
     assert isinstance(related, list)
+    lst = map_with(paren_map, [" ".join(lst)])
     related = " ".join(related)
-    if related:
-        tags = decode_tags(config, lst)
-        data_append(config, data, "forms", {"tags": tags, "form": related})
+    for related in related.split(" or "):
+        if related:
+            for x in lst:
+                tags = decode_tags(config, x.split(" "))
+                data_append(config, data, "forms", {"tags": tags,
+                                                    "form": related})
 
 
 def parse_word_head(ctx, config, pos, text, data):
@@ -612,16 +620,16 @@ def parse_word_head(ctx, config, pos, text, data):
     base = re.sub(r"\([^)]*\)", "", text)
     base = re.sub(r"\s+", " ", base).strip()
     for desc in map_with(paren_map, base.split(";")):
-        for alt in map_with(paren_map, base.split(" or ")):
+        for alt in map_with(paren_map, desc.split(" or ")):
             baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
-            baseparts = list(map(lambda x: form_map.get(x, x), baseparts))
-            lst = []
+            lst = []  # Word form (NOT tags)
             i = 0
             while i < len(baseparts):
                 word = baseparts[i]
-                w = distw(titleparts, word)
-                if word == title or (w <= 0.5 and word not in blocked and
-                                     word not in valid_tags):
+                w = distw(titleparts, word)  # 0=identical .. 1=very different
+                if (word == title or word in blocked or
+                    ((w <= 0.7 or len(word) < 6) and
+                     word not in valid_words)):
                     lst.append(word)
                 else:
                     break
@@ -645,22 +653,20 @@ def parse_word_head(ctx, config, pos, text, data):
         new_desc = []
         for desc in descriptors:
             for semi in map_with(paren_map, desc.split(";")):
-                for alt in map_with(paren_map, semi.split(",")):
-                    new_desc.extend(map_with(paren_map, alt.split(" or ")))
+                new_desc.extend(map_with(paren_map, semi.split(",")))
         for desc in new_desc:
             parts = list(m.group(0) for m in re.finditer(word_re, desc))
-            parts = list(map(lambda x: form_map.get(x, x), parts))
             lst = []
             i = 0
             while i < len(parts):
                 part = parts[i]
-                w = distw(titleparts, part)
+                w = distw(titleparts, part)  # 0=identical .. 1=very different
                 if (part != title and
-                    (part in valid_tags or
-                     (w > 0.5 and
+                    (part in valid_words or
+                     (w > 0.7 and len(part) >= 6 and
                       (not lst or lst[-1] not in (
                           "comparative", "superlative", "classifier")) and
-                     part not in blocked))):
+                      part not in blocked))):
                     # Consider it part of a descriptor
                     lst.append(part)
                 else:
@@ -668,10 +674,12 @@ def parse_word_head(ctx, config, pos, text, data):
                     break
                 i = i + 1
             related = parts[i:]
-            if related:
-                add_related(ctx, config, data, lst, related)
-            else:
-                add_tags(ctx, config, data, lst)
+            for tagspec in " ".join(lst).split(" or "):
+                lst = tagspec.split(" ")
+                if related:
+                    add_related(ctx, config, data, lst, related)
+                else:
+                    add_tags(ctx, config, data, lst)
 
 
 def parse_sense_tags(ctx, config, text, data):
