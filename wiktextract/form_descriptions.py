@@ -27,6 +27,7 @@ paren_map = {
     "indef.": ["indefinite"],
     "gen.": ["genitive"],
     "n": ["neuter"],
+    "pl": ["plural"],
     "inan": ["inanimate"],
     "anim": ["animate"],
     "pers": ["person"],
@@ -225,6 +226,7 @@ valid_tags = [
     "feminine",
     "neuter",
     "common",
+    "epicene",
     "gender indeterminate",
     "singular",
     "singulative",
@@ -555,6 +557,8 @@ def decode_tags(config, lst):
     tags = []
     node = valid_tree
     for w in lst:
+        if not w:
+            continue
         while True:
             if w in node:
                 node = node[w]
@@ -637,8 +641,6 @@ def parse_word_head(ctx, config, pos, text, data):
             rest = baseparts[i:]
             # lst is canonical form of the word
             # rest is additional tags (often gender m/f/n/c/...)
-            #print("word (lst)", lst)
-            #print("rest", rest)
             if title != " ".join(lst):
                 add_related(ctx, config, data, ["canonical"], lst)
             # XXX here we should only look at a subset of tags allowed
@@ -703,3 +705,56 @@ def parse_pronunciation_tags(ctx, config, text, data):
     # XXX should check which tags are valid for pronunciations
     # XXX do we want to warn about unknown ones here?
     data_extend(config, data, "tags", tags)
+
+
+def parse_translation_desc(ctx, config, text, data):
+    assert isinstance(ctx, Wtp)
+    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(text, str)
+    assert isinstance(data, dict)
+
+    print("parse_translation_desc:", text)
+
+    # Handle the part of the head that is not in parentheses
+    base = re.sub(r"\([^)]*\)", "", text)
+    base = re.sub(r"\s+", " ", base).strip()
+    baseparts = list(m.group(0) for m in re.finditer(word_re, base))
+    lst = []  # Word form (NOT tags)
+    i = 0
+    while i < len(baseparts):
+        word = baseparts[i]
+        if word == "•":
+            continue
+        if word in blocked or not lst or word not in valid_words:
+            lst.append(word)
+        else:
+            break
+        i += 1
+    rest = baseparts[i:]
+    # lst is canonical form of the word
+    # rest is additional tags (often gender m/f/n/c/...)
+
+    print("TRANSLATION WORD: {}".format(" ".join(lst)))
+    print("TRANSLATION TAGS: {}".format(rest))
+
+    data["word"] = " ".join(lst)
+    # XXX here we should only look at a subset of tags allowed
+    # in the translation
+    for tagdesc in map_with(paren_map, [" ".join(rest)]):
+        add_tags(ctx, config, data, tagdesc.split(" "))
+
+    # Handle parenthesized descriptors for the word form and links to
+    # related words
+    parens = list(m.group(1) for m in re.finditer(r"\(([^)]*)\)", text))
+    for paren in parens:
+        descriptors = map_with(paren_map, [paren])
+        for desc in descriptors:
+            for semi in map_with(paren_map, desc.split(";")):
+                for new_desc in map_with(paren_map, semi.split(",")):
+                    if new_desc in valid_tags:
+                        add_tags(ctx, config, data, new_desc)
+                    elif "alt" not in data:
+                        data["roman"] = new_desc
+                    else:
+                        config.warning("maybe more than one romanization: {!r}"
+                                       .format(text))

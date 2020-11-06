@@ -138,8 +138,6 @@ def clean_replace_regexp(config, v):
                 return ""
             if v.startswith(":Category:"):
                 v = v[10:]
-            if len(vec) > 2:
-                return vec[2]
             if len(vec) >= 2:
                 if vec[1]:
                     return vec[1]
