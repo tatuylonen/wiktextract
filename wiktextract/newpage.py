@@ -3,6 +3,7 @@
 # Copyright (c) 2018-2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
+import html
 import collections
 import wikitextparser
 from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
@@ -2130,6 +2131,12 @@ template_linkage_mappings = [
 ]
 
 
+def decode_html_entities(v):
+    if not isinstance(v, str):
+        return v
+    return html.unescape(v)
+
+
 def parse_language(ctx, config, langnode, language, lang_code):
     """Iterates over the text of the page, returning words (parts-of-speech)
     defined on the page one at a time.  (Individual word senses for the
@@ -2165,13 +2172,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
         nonlocal sense_data
         if not sense_data:
             return
-        print("push_sense:", sense_data)
         pos_datas.append(sense_data)
         sense_data = {}
 
     def push_pos():
         nonlocal pos_data
         nonlocal pos_datas
+        print("PUSH_POS", pos_data)
         push_sense()
         for data in pos_datas:
             merge_base(data, pos_data)
@@ -2224,11 +2231,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
         data_append(config, sense_data, "glosses", gloss)
 
     def head_template_fn(name, ht):
+        print("HEAD_TEMPLATE_FN", name, ht)
         m = re.search(head_tag_re, name)
         if m:
-            ht = ht.copy()
-            ht["template_name"] = name
-            data_append(config, pos_data, "heads", ht)
+            new_ht = {}
+            for k, v in ht.items():
+                new_ht[decode_html_entities(k)] = decode_html_entities(v)
+            new_ht["template_name"] = name
+            data_append(config, pos_data, "heads", new_ht)
         return None
 
     def parse_part_of_speech(posnode, pos):
@@ -2363,12 +2373,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         def decl_conj_template_fn(name, ht):
             print("decl_conj_template_fn", name, ht)
-            m = re.search(r"-(conj|decl|infl|conjugation|"
+            m = re.search(r"-(conj|decl|ndecl|adecl|infl|conjugation|"
                           r"declension|inflection)($|-)", name)
             if m:
-                ht = ht.copy()
-                ht["template_name"] = name
-                data_append(config, pos_data, "conjugation", ht)
+                new_ht = {}
+                # Convert html entities that may be used in the arguments
+                for k, v in ht.items():
+                    new_ht[decode_html_entities(k)] = decode_html_entities(v)
+                new_ht["template_name"] = name
+                data_append(config, pos_data, "conjugation", new_ht)
                 nonlocal captured
                 captured = True
                 return ""
@@ -2501,157 +2514,166 @@ def parse_language(ctx, config, langnode, language, lang_code):
             else:
                 print("LINKAGE UNEXPECTED:", node)
 
-    def parse_translation_item(contents, sense, data, lang=None):
-        assert isinstance(contents, list)
-        assert sense is None or isinstance(sense, str)
-        assert isinstance(data, dict)
-        assert lang is None or isinstance(lang, str)
-        print("PARSE_TRANSLATION_ITEM:", contents)
-
-        langcode = None
-
-        def translation_item_template_fn(name, ht):
-            nonlocal langcode
-            # print("TRANSLATION_ITEM_TEMPLATE_FN:", name, ht)
-            if name in ("t+", "t-simple", "t"):
-                code = ht.get(1)
-                if code:
-                    if langcode and code != langcode:
-                        config.warning("differing language codes {} vs {} in "
-                                       "translation item: {!r} {}"
-                                       .format(langcode, code, name, ht))
-                    langcode = code
-                return None
-            if name in ("m", "redlink category", "isValidPageName"):
-                return None
-            if name == "trans-see":
-                config.warning("UNIMPLEMENTED trans-see template")
-                return ""
-            if name.endswith("-top"):
-                return ""
-            if name.endswith("-bottom"):
-                return ""
-            if name.endswith("-mid"):
-                return ""
-            print("UNHANDLED TRANSLATION ITEM TEMPLATE: {!r} {!r}"
-                  .format(name, ht))
-            return None
-
-        sublists = list(x for x in contents
-                        if isinstance(x, WikiNode) and x.kind == NodeKind.LIST)
-        contents = list(x for x in contents
-                        if not isinstance(x, WikiNode) or
-                        x.kind != NodeKind.LIST)
-
-        item = clean_node(config, ctx, contents,
-                          template_fn=translation_item_template_fn)
-        print("    TRANSLATION ITEM:", item)
-
-        # Translation items should start with a language name
-        m = re.match("\*?\s*([-a-zA-Z0-9][-a-zA-Z0-9 ]*):\s*", item)
-        if not m:
-            config.error("no language name in translation item {!r}"
-                         .format(item))
-            return
-        sublang = m.group(1)
-        item = item[m.end():]
-        tags = []
-        if lang is not None:
-            tags.append(sublang)
-        else:
-            lang = sublang
-
-        # There may be multiple translations, separated by comma
-        for part in item.split(","):
-            part = part.strip()
-            # Strip language links
-            part = re.sub(langlink_re, "", part)
-            tr = {"lang": lang, "code": langcode}
-            if tags:
-                tr["tags"] = tags
-            if sense:
-                tr["sense"] = sense
-            parse_translation_desc(ctx, config, part, tr)
-            data_append(config, data, "translations", tr)
-
-        m = re.match(r"\(([^)]+)\) ", item)
-        qualifier = None
-        if m:
-            qualifier = m.group(1)
-            item = item[m.end():]
-        else:
-            m = re.search(" \(([^)]+)\)$", item)
-            if m:
-                qualifier = m.group(1)
-                item = item[:m.start()]
-
-        # Handle sublists.  They are frequently used for different scripts
-        # for the language and different variants of the langauge.  We will
-        # include the lower-level header as a tag in those cases.
-        for listnode in sublists:
-            assert listnode.kind == NodeKind.LIST
-            for node in listnode.children:
-                if not isinstance(node, WikiNode):
-                    continue
-                if node.kind == NodeKind.LIST_ITEM:
-                    parse_translation_item(node.children, sense, data,
-                                           lang=sublang)
-
-    def parse_translation_template(data, node):
-        assert isinstance(data, dict)
-        assert isinstance(node, WikiNode)
-        print("PARSE_TRANSLATION_TEMPLATE:", node)
-        # XXX handle links to separate translation pages
-        #  {{see translation subpage|Noun}}
-        # template: {{see also|Thesaurus:xxx/translations}}
-
-    def parse_translation_table(data, tablenode):
-        assert isinstance(data, dict)
-        assert isinstance(tablenode, WikiNode)
-        # print("PARSE_TRANSLATION_TABLE:", tablenode)
-        for node in tablenode.children:
-            #print("TABLE NODE", node)
-            if not isinstance(node, WikiNode):
-                continue
-            if node.kind == NodeKind.TABLE_ROW:
-                for cell in node.children:
-                    #print("TABLE CELL", cell)
-                    if not isinstance(cell, WikiNode):
-                        continue
-                    if cell.kind == NodeKind.TABLE_CELL:
-                        parse_translations(data, cell)
-
     def parse_translations(data, xlatnode):
         assert isinstance(data, dict)
         assert isinstance(xlatnode, WikiNode)
         #print("PARSE_TRANSLATIONS:", xlatnode)
+        sense = None
 
-        for node in xlatnode.children:
-            if isinstance(node, str):
-                node = node.strip()
-                if node:
-                    print("TRANSLATIONS STR:", repr(node))
-                continue
-            assert isinstance(node, WikiNode)
-            kind = node.kind
-            if kind == NodeKind.LIST:
-                for item in node.children:
-                    if not isinstance(item, WikiNode):
-                        continue
-                    if item.kind != NodeKind.LIST_ITEM:
-                        continue
-                    parse_translation_item(item.children, None, data) #XXX sense
-            elif kind == NodeKind.TEMPLATE:
-                parse_translation_template(data, node)
-            elif kind == NodeKind.TABLE:
-                parse_translation_table(data, node)
-            elif kind == NodeKind.HTML:
-                for item in node.children:
-                    if not isinstance(item, WikiNode):
-                        continue
-                    parse_translations(data, item)
+        def parse_translation_item(contents, lang=None):
+            assert isinstance(contents, list)
+            assert lang is None or isinstance(lang, str)
+            # print("PARSE_TRANSLATION_ITEM:", contents)
+
+            langcode = None
+
+            def translation_item_template_fn(name, ht):
+                nonlocal langcode
+                # print("TRANSLATION_ITEM_TEMPLATE_FN:", name, ht)
+                if name in ("t+", "t%2B", "t-simple", "t"):
+                    code = ht.get(1)
+                    if code:
+                        if langcode and code != langcode:
+                            config.warning("differing language codes {} vs "
+                                           "{} in translation item: {!r} {}"
+                                           .format(langcode, code, name, ht))
+                        langcode = code
+                    return None
+                if name in ("m", "redlink category", "isValidPageName"):
+                    return None
+                if name == "trans-see":
+                    config.error("UNIMPLEMENTED trans-see template")
+                    return ""
+                if name.endswith("-top"):
+                    return ""
+                if name.endswith("-bottom"):
+                    return ""
+                if name.endswith("-mid"):
+                    return ""
+                config.debug("UNHANDLED TRANSLATION ITEM TEMPLATE: {!r}"
+                             .format(name))
+                return None
+
+            sublists = list(x for x in contents
+                            if isinstance(x, WikiNode) and
+                            x.kind == NodeKind.LIST)
+            contents = list(x for x in contents
+                            if not isinstance(x, WikiNode) or
+                            x.kind != NodeKind.LIST)
+
+            item = clean_node(config, ctx, contents,
+                              template_fn=translation_item_template_fn)
+            print("    TRANSLATION ITEM: {}  [{}]".format(item, sense))
+
+            # Translation items should start with a language name
+            m = re.match("\*?\s*([- \w][- \w]*):\s*", item)
+            if not m:
+                config.error("no language name in translation item {!r}"
+                             .format(item))
+                return
+            sublang = m.group(1)
+            item = item[m.end():]
+            tags = []
+            if lang is not None:
+                tags.append(sublang)
             else:
-                print("TRANSLATION UNEXPECTED:", node)
+                lang = sublang
+
+            # There may be multiple translations, separated by comma
+            for part in item.split(","):
+                part = part.strip()
+                if not part:
+                    continue
+                # Strip language links
+                part = re.sub(langlink_re, "", part)
+                tr = {"lang": lang, "code": langcode}
+                if tags:
+                    tr["tags"] = tags
+                if sense:
+                    tr["sense"] = sense
+                parse_translation_desc(ctx, config, part, tr)
+                if tr.get("word"):  # Set and not empty
+                    data_append(config, data, "translations", tr)
+
+            m = re.match(r"\(([^)]+)\) ", item)
+            qualifier = None
+            if m:
+                qualifier = m.group(1)
+                item = item[m.end():]
+            else:
+                m = re.search(" \(([^)]+)\)$", item)
+                if m:
+                    qualifier = m.group(1)
+                    item = item[:m.start()]
+
+            # Handle sublists.  They are frequently used for different scripts
+            # for the language and different variants of the langauge.  We will
+            # include the lower-level header as a tag in those cases.
+            for listnode in sublists:
+                assert listnode.kind == NodeKind.LIST
+                for node in listnode.children:
+                    if not isinstance(node, WikiNode):
+                        continue
+                    if node.kind == NodeKind.LIST_ITEM:
+                        parse_translation_item(node.children, lang=sublang)
+
+        def parse_translation_template(node):
+            assert isinstance(node, WikiNode)
+            config.error("UNIMPLEMENTED: parse_translation_template")
+            # XXX handle links to separate translation pages
+            #  {{see translation subpage|Noun}}
+            # template: {{see also|Thesaurus:xxx/translations}}
+
+        def parse_translation_table(tablenode):
+            assert isinstance(tablenode, WikiNode)
+            # print("PARSE_TRANSLATION_TABLE:", tablenode)
+            for node in tablenode.children:
+                #print("TABLE NODE", node)
+                if not isinstance(node, WikiNode):
+                    continue
+                if node.kind == NodeKind.TABLE_ROW:
+                    for cell in node.children:
+                        #print("TABLE CELL", cell)
+                        if not isinstance(cell, WikiNode):
+                            continue
+                        if cell.kind == NodeKind.TABLE_CELL:
+                            parse_translation_recurse(cell)
+
+        def parse_translation_recurse(xlatnode):
+            nonlocal sense
+            for node in xlatnode.children:
+                if isinstance(node, str):
+                    node = node.strip()
+                    if node:
+                        sense = node
+                        print("SENSE:", sense)
+                    continue
+                assert isinstance(node, WikiNode)
+                kind = node.kind
+                if kind == NodeKind.LIST:
+                    for item in node.children:
+                        if not isinstance(item, WikiNode):
+                            continue
+                        if item.kind != NodeKind.LIST_ITEM:
+                            continue
+                        parse_translation_item(item.children)
+                elif kind == NodeKind.TEMPLATE:
+                    parse_translation_template(node)
+                elif kind == NodeKind.TABLE:
+                    parse_translation_table(node)
+                elif kind == NodeKind.HTML:
+                    for item in node.children:
+                        if not isinstance(item, WikiNode):
+                            continue
+                        parse_translation_recurse(item)
+                else:
+                    ctx.error("UNIMPLEMENTED: parse_translations: unexpected {}"
+                              .format(node.kind))
+
+        # Main code of parse_translation().  We want ``sense`` to be assigned
+        # regardless of recursion levels, and thus the code is structured
+        # to define at this level and recurse in parse_translation_recurse().
+        parse_translation_recurse(xlatnode)
 
     def process_children(langnode):
         nonlocal etym_data
@@ -2876,6 +2898,7 @@ def clean_node(config, ctx, value, template_fn=None):
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, Wtp)
     assert template_fn is None or callable(template_fn)
+    # print("CLEAN_NODE:", repr(value))
 
     def recurse(value):
         if isinstance(value, str):

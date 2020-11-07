@@ -214,6 +214,8 @@ paren_map = {
     "mutated form": ["mutated"],
     "auxiliary verb": ["auxiliary"],
     "male equivalent": ["masculine"],
+    "in compounds": ["compounds"],
+    "sometimes humurous": ["humorous"],
 }
 
 blocked = set(["të", "a", "e", "al", "þou", "?", "lui", "auf", "op", "ein",
@@ -283,6 +285,7 @@ valid_tags = [
     "indefinite",
     "collective",
     "diminutive",
+    "augmentative",
     "pejorative",
     "diminutive of",
     "infinitive",
@@ -499,6 +502,13 @@ valid_tags = [
     "-nari",  # Japanese inflection type
     "suru",  # Japanese verb inflection type
     "former reform[s] only",
+    "compounds",
+    "slang",
+    "derogatory",
+    "humorous",
+    "sometimes",
+    "vulgar",
+    "non-scientific usage",
 ]
 
 # Words that can be part of form description
@@ -509,9 +519,12 @@ for x in paren_map.keys():
     valid_words.update(x.split(" "))
 
 
-valid_tree = {}
-for tag in valid_tags:
-    node = valid_tree
+def add_to_valid_tree(tree, tag):
+    """Helper function for building trees of valid tags/sequences during
+    initialization."""
+    assert isinstance(tree, dict)
+    assert isinstance(tag, str)
+    node = tree
     for w in tag.split(" "):
         if w in node:
             node = node[w]
@@ -524,88 +537,117 @@ for tag in valid_tags:
     else:
         node["$"] = (tag,)
 
+# Tree of valid final tags
+valid_tree = {}
+for tag in valid_tags:
+    add_to_valid_tree(valid_tree, tag)
+
+# Tree of sequences considered to be tags (includes sequences that are
+# mapped to something that becomes one or more valid tags)
+valid_sequences = {}
+for tag in list(valid_tags) + list(paren_map.keys()):
+    add_to_valid_tree(valid_sequences, tag)
+
 # Regexp used to find "words" from word heads and linguistic descriptions
 word_re = re.compile(r"[^ ,;()\u200e]+|\([^)]*\)")
 
+
 def distw(titleparts, word):
-    # Returns 1 if words completely distinct, 0 if identical, or otherwise
-    # something in between
-    w = min(Levenshtein.distance(word, tw) / max(len(tw), len(word))
-            for tw in titleparts)
+    """Computes how distinct ``word`` is from the most similar word in
+    ``titleparts``.  Returns 1 if words completely distinct, 0 if
+    identical, or otherwise something in between."""
+    w = min(Levenshtein.distance(word, tw) / max(len(tw), len(word)) for
+            tw in titleparts)
     return w
 
 
 def map_with(ht, lst):
     assert isinstance(ht, dict)
-    assert isinstance(lst, list)
+    assert isinstance(lst, (list, tuple))
     ret = []
     for x in lst:
         x = x.strip()
         x = ht.get(x, x)
         if isinstance(x, str):
             ret.append(x)
-        elif isinstance(x, list):
+        elif isinstance(x, (list, tuple)):
             ret.extend(x)
         else:
             raise RuntimeError("map_with unexpected value: {!r}".format(x))
     return ret
 
 
-def decode_tags(config, lst):
+def decode_tags(config, lst, allow_any=False):
+    """Decodes tags, doing some canonicalizations.  This returns a list of
+    lists of tags."""
     assert isinstance(config, WiktionaryConfig)
-    assert isinstance(lst, list)
-    tags = []
-    node = valid_tree
-    for w in lst:
-        if not w:
-            continue
-        while True:
-            if w in node:
-                node = node[w]
-                break
-            elif "$" in node:
+    assert isinstance(lst, (list, tuple))
+    lsts = [[]]
+    for x in lst:
+        assert isinstance(x, str)
+        for alt in map_with(paren_map, [x]):
+            lsts = list(lst1 + [alt] for lst1 in lsts)
+    lsts = map_with(paren_map, list(map(lambda x: " ".join(x), lsts)))
+    lsts = list(map(lambda x: x.split(" "), lsts))
+    tagsets = set()
+    for lst in lsts:
+        tags = []
+        node = valid_tree
+        for w in lst:
+            if not w:
+                continue
+            while True:
+                if w in node:
+                    node = node[w]
+                    break
+                elif "$" in node:
+                    tags.extend(node["$"])
+                    node = valid_tree
+                else:
+                    if allow_any:
+                        tag = " ".join(lst)
+                        if tag not in tags:
+                            tags.append(tag)
+                    else:
+                        config.warning("unsupported tag component {!r} in {}"
+                                       .format(w, lst))
+                        if "error" not in tags:
+                            tags.append("error")
+                    node = valid_tree
+                    break
+        if node is not valid_tree:
+            if "$" in node:
                 tags.extend(node["$"])
-                node = valid_tree
             else:
-                config.warning("unsupported tag component {!r} in {}"
-                               .format(w, lst))
+                config.warning("uncompleted tag ending in {}".format(lst))
                 if "error" not in tags:
                     tags.append("error")
-                node = valid_tree
-                break
-    if node is not valid_tree:
-        if "$" in node:
-            tags.extend(node["$"])
-        else:
-            config.warning("uncompleted tag ending in {}".format(lst))
-            if "error" not in tags:
-                tags.append("error")
-    return tags
+        tagsets.add(tuple(sorted(tags)))
+    return list(tagsets)
 
 
-def add_tags(ctx, config, data, lst):
+def add_tags(ctx, config, data, lst, allow_any=False):
     assert isinstance(ctx, Wtp)
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(data, dict)
-    assert isinstance(lst, list)
-    tags = decode_tags(config, lst)
-    if tags:
+    assert isinstance(lst, (list, tuple))
+    tagsets = decode_tags(config, lst, allow_any=allow_any)
+    for tags in tagsets:
         data_extend(config, data, "tags", tags)
 
 
 def add_related(ctx, config, data, lst, related):
     assert isinstance(ctx, Wtp)
     assert isinstance(config, WiktionaryConfig)
-    assert isinstance(lst, list)
-    assert isinstance(related, list)
-    lst = map_with(paren_map, [" ".join(lst)])
+    assert isinstance(lst, (list, tuple))
+    assert isinstance(related, (list, tuple))
     related = " ".join(related)
     for related in related.split(" or "):
         if related:
-            for x in lst:
-                tags = decode_tags(config, x.split(" "))
-                data_append(config, data, "forms", {"tags": tags,
-                                                    "form": related})
+            tagsets = decode_tags(config, lst)
+            for tags in tagsets:
+                data_append(config, data, "forms",
+                            {"tags": tags, "form": related})
 
 
 def parse_word_head(ctx, config, pos, text, data):
@@ -623,25 +665,31 @@ def parse_word_head(ctx, config, pos, text, data):
     # Handle the part of the head that is not in parentheses
     base = re.sub(r"\([^)]*\)", "", text)
     base = re.sub(r"\s+", " ", base).strip()
-    for desc in map_with(paren_map, base.split(";")):
+    descs = map_with(paren_map, base.split(";"))
+    for desc_i, desc in enumerate(descs):
+        desc = desc.strip()
         for alt in map_with(paren_map, desc.split(" or ")):
             baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
-            lst = []  # Word form (NOT tags)
-            i = 0
-            while i < len(baseparts):
-                word = baseparts[i]
-                w = distw(titleparts, word)  # 0=identical .. 1=very different
-                if (word == title or word in blocked or
-                    ((w <= 0.7 or len(word) < 6) and
-                     word not in valid_words)):
-                    lst.append(word)
-                else:
-                    break
-                i += 1
-            rest = baseparts[i:]
+            if " ".join(baseparts) in valid_tags and desc_i > 0:
+                lst = []
+                rest = baseparts
+            else:
+                lst = []  # Word form (NOT tags)
+                i = 0
+                while i < len(baseparts):
+                    word = baseparts[i]
+                    w = distw(titleparts, word)  # 0=identical..1=very different
+                    if (word == title or word in blocked or
+                        ((w <= 0.7 or len(word) < 6) and
+                         word not in valid_tags)):
+                        lst.append(word)
+                    else:
+                        break
+                    i += 1
+                rest = baseparts[i:]
             # lst is canonical form of the word
             # rest is additional tags (often gender m/f/n/c/...)
-            if title != " ".join(lst):
+            if lst and title != " ".join(lst):
                 add_related(ctx, config, data, ["canonical"], lst)
             # XXX here we should only look at a subset of tags allowed
             # in the base
@@ -651,6 +699,7 @@ def parse_word_head(ctx, config, pos, text, data):
     # related words
     parens = list(m.group(1) for m in re.finditer(r"\(([^)]*)\)", text))
     for paren in parens:
+        paren = paren.strip()
         descriptors = map_with(paren_map, [paren])
         new_desc = []
         for desc in descriptors:
@@ -659,23 +708,31 @@ def parse_word_head(ctx, config, pos, text, data):
         for desc in new_desc:
             parts = list(m.group(0) for m in re.finditer(word_re, desc))
             lst = []
+            node = valid_sequences
+            last_valid = 0
             i = 0
             while i < len(parts):
                 part = parts[i]
                 w = distw(titleparts, part)  # 0=identical .. 1=very different
                 if (part != title and
-                    (part in valid_words or
-                     (w > 0.7 and len(part) >= 6 and
-                      (not lst or lst[-1] not in (
-                          "comparative", "superlative", "classifier")) and
-                      part not in blocked))):
+                    (part in node or
+                     ("$" in node and part in valid_sequences))):
                     # Consider it part of a descriptor
                     lst.append(part)
+                    if part in node:
+                        if "$" in node:
+                            last_valid = i
+                        node = node[part]
+                    else:
+                        assert "$" in node
+                        node = valid_sequences[part]
                 else:
                     # Consider the rest as a related term
                     break
-                i = i + 1
-            related = parts[i:]
+                i += 1
+            if "$" in node:
+                last_valid = i
+            related = parts[last_valid:]
             for tagspec in " ".join(lst).split(" or "):
                 lst = tagspec.split(" ")
                 if related:
@@ -691,9 +748,13 @@ def parse_sense_tags(ctx, config, text, data):
     assert isinstance(data, dict)
     # print("parse_sense_tags:", text)
     tags = map_with(paren_map, text.split(","))
-    # XXX should check which tags are valid XXX do we want to warn about
-    # unknown ones here
-    data_extend(config, data, "tags", tags)
+    for tag in tags:
+        tagsets = decode_tags(config, tag.split(" "), allow_any=True)
+        # XXX should think how to handle distinct options better,
+        # e.g., "singular and plural genitive"; that can't really be
+        # done with changing the calling convention of this function.
+        for tags in tagsets:
+            data_extend(config, data, "tags", tags)
 
 
 def parse_pronunciation_tags(ctx, config, text, data):
@@ -702,9 +763,13 @@ def parse_pronunciation_tags(ctx, config, text, data):
     assert isinstance(text, str)
     assert isinstance(data, dict)
     tags = map_with(paren_map, text.split(","))
-    # XXX should check which tags are valid for pronunciations
-    # XXX do we want to warn about unknown ones here?
-    data_extend(config, data, "tags", tags)
+    for tag in tags:
+        tagsets = decode_tags(config, tag.split(" "), allow_any=True)
+        # XXX should think how to handle distinct options better,
+        # e.g., "singular and plural genitive"; that can't really be
+        # done with changing the calling convention of this function.
+        for tags in tagsets:
+            data_extend(config, data, "tags", tags)
 
 
 def parse_translation_desc(ctx, config, text, data):
@@ -712,8 +777,7 @@ def parse_translation_desc(ctx, config, text, data):
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(text, str)
     assert isinstance(data, dict)
-
-    print("parse_translation_desc:", text)
+    # print("parse_translation_desc:", text)
 
     # Handle the part of the head that is not in parentheses
     base = re.sub(r"\([^)]*\)", "", text)
@@ -733,10 +797,6 @@ def parse_translation_desc(ctx, config, text, data):
     rest = baseparts[i:]
     # lst is canonical form of the word
     # rest is additional tags (often gender m/f/n/c/...)
-
-    print("TRANSLATION WORD: {}".format(" ".join(lst)))
-    print("TRANSLATION TAGS: {}".format(rest))
-
     data["word"] = " ".join(lst)
     # XXX here we should only look at a subset of tags allowed
     # in the translation
@@ -752,7 +812,8 @@ def parse_translation_desc(ctx, config, text, data):
             for semi in map_with(paren_map, desc.split(";")):
                 for new_desc in map_with(paren_map, semi.split(",")):
                     if new_desc in valid_tags:
-                        add_tags(ctx, config, data, new_desc)
+                        add_tags(ctx, config, data, [new_desc],
+                                 allow_any=True)
                     elif "alt" not in data:
                         data["roman"] = new_desc
                     else:
