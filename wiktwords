@@ -189,7 +189,7 @@ if __name__ == "__main__":
         word_count += 1
         out_f.write(json.dumps(data))
         out_f.write("\n")
-        if not out_path or out_path == "-":
+        if not out_path or out_path == "-" or word_count % 1000 == 0:
             out_f.flush()
 
     def capture_cb(model, title, text):

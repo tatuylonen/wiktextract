@@ -9,7 +9,7 @@ import Levenshtein
 from wikitextprocessor import Wtp
 from .config import WiktionaryConfig
 from .datautils import (data_append, data_extend, data_inflection_of,
-                        data_alt_of)
+                        data_alt_of, split_at_comma_semi)
 
 # Maps strings into one or more other strings.  This is applied at multiple
 # levels of partitioning the description.
@@ -73,6 +73,7 @@ paren_map = {
     "class 3/4": ["class 3", "class 4"],
     "class 7/8": ["class 7", "class 8"],
     "class 1/2": ["class 1", "class 2"],
+    "class 11/10": ["class 11", "class 10"],
     "first/second declension": ["first declension", "second declension"],
     "genitive/dative": ["genitive", "dative"],
     "first/second-declension suffix":
@@ -197,6 +198,12 @@ paren_map = {
     "+ objective": ["with objective"],
     "with objective case": ["with objective"],
     "plus objective": ["with objective"],
+    "+ present form": ["with present"],
+    "+ [noun phrase] + subjunctive (verb)":
+    ["with noun phrase", "with subjunctive"],
+    "+ [nounphrase] + subjunctive":
+    ["with noun phrase", "with subjunctive"],
+    "optative mood +": ["with optative"],
     "p-past": ["passive past"],
     "ppp": ["passive perfect participle"],
     "not used in plural form": ["no plural"],
@@ -207,15 +214,24 @@ paren_map = {
     "changed conjunct form": ["conjunct"],
     "biblical hebrew pausal form": ["pausal"],
     "emphatic form": ["emphatic"],
+    "emphatically": ["emphatic"],
     "standard form": ["standard"],
     "augmented form": ["augmented"],
     "active form": ["active"],
     "passive form": ["passive"],
     "mutated form": ["mutated"],
     "auxiliary verb": ["auxiliary"],
+    "modal auxiliary verb": ["auxiliary", "modal"],
+    "transitive verb": ["transitive"],
+    "intransitive verb": ["intransitive"],
     "male equivalent": ["masculine"],
     "in compounds": ["compounds"],
     "sometimes humurous": ["humorous"],
+    "attribute": ["attributive"],
+    "in the past subjunctive": ["past", "subjunctive"],
+    "use the subjunctive tense of the verb that follows": ["with subjunctive"],
+    "kyūjitai": "kyūjitai form",
+    "shinjitai kanji": "shinjitai",
 }
 
 blocked = set(["të", "a", "e", "al", "þou", "?", "lui", "auf", "op", "ein",
@@ -281,7 +297,8 @@ valid_tags = [
     "relative",
     "ergative",
     "absolutive",
-    "definitive",
+    "definitive",  # XXX is this used same as "definite", opposite indefinite?
+    "definite",
     "indefinite",
     "collective",
     "diminutive",
@@ -443,11 +460,16 @@ valid_tags = [
     "adjectival",
     "verbal noun",
     "auxiliary",
+    "modal",
     "numeral",
     "classifier",
     "kyūjitai",
     "shinjitai",
+    "hangeul",
     "zhuyin",
+    "revised jeon",
+    "McCune-Reischauer chŏn",
+    "Yale cen",
     "brazilian orthography",
     "european orthography",
     "classical milanese orthography",
@@ -471,9 +493,12 @@ valid_tags = [
     "with instrumental",
     "with elative",
     "with absolutive",
-    "with subjunctive",
     "with partitive",
     "with possessive suffix",
+    "with present",
+    "with noun phrase",
+    "with subjunctive",
+    "with optative",
     "krama",
     "ngoko",
     "krama-ngoko",
@@ -508,8 +533,21 @@ valid_tags = [
     "humorous",
     "sometimes",
     "vulgar",
+    "idiomatic",
     "non-scientific usage",
+    "simple", # XXX occurs in things like "simple past", should be ignored
+    "Cyrilling spelling",
+    "Old Polish",
+    "Badiu",
+    "Santiago",
+    "São Vicente",
+    "Westphalian",
 ]
+
+ignored_parens = set([
+    "please verify",
+])
+
 
 # Words that can be part of form description
 valid_words = set(["or", "and"])
@@ -590,31 +628,40 @@ def decode_tags(config, lst, allow_any=False):
     lsts = map_with(paren_map, list(map(lambda x: " ".join(x), lsts)))
     lsts = list(map(lambda x: x.split(" "), lsts))
     tagsets = set()
+    next_i = 0
     for lst in lsts:
         tags = []
         node = valid_tree
-        for w in lst:
+        for i, w in enumerate(lst):
             if not w:
                 continue
-            while True:
-                if w in node:
-                    node = node[w]
-                    break
-                elif "$" in node:
-                    tags.extend(node["$"])
-                    node = valid_tree
+            if "$" in node:
+                tags.extend(node["$"])
+                next_i = i + 1
+            if w in node:
+                node = node[w]
+                continue
+            if "$" in node and w in valid_tree:
+                node = valid_tree[w]
+                continue
+            if allow_any:
+                tag = " ".join(lst[next_i:i + 1])
+                next_i = i + 1
+                if tag not in tags:
+                    tags.append(tag)
+                if w in valid_tree:
+                    node = valid_tree[w]
                 else:
-                    if allow_any:
-                        tag = " ".join(lst)
-                        if tag not in tags:
-                            tags.append(tag)
-                    else:
-                        config.warning("unsupported tag component {!r} in {}"
-                                       .format(w, lst))
-                        if "error" not in tags:
-                            tags.append("error")
                     node = valid_tree
-                    break
+            else:
+                config.warning("unsupported tag component {!r} in {}"
+                               .format(w, lst))
+                if "error" not in tags:
+                    tags.append("error")
+                if w in valid_tree:
+                    node = valid_tree[w]
+                else:
+                    node = valid_tree
         if node is not valid_tree:
             if "$" in node:
                 tags.extend(node["$"])
@@ -623,7 +670,8 @@ def decode_tags(config, lst, allow_any=False):
                 if "error" not in tags:
                     tags.append("error")
         tagsets.add(tuple(sorted(tags)))
-    return list(tagsets)
+    ret = list(tagsets)
+    return ret
 
 
 def add_tags(ctx, config, data, lst, allow_any=False):
@@ -631,6 +679,8 @@ def add_tags(ctx, config, data, lst, allow_any=False):
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(data, dict)
     assert isinstance(lst, (list, tuple))
+    for x in lst:
+        assert isinstance(x, str)
     tagsets = decode_tags(config, lst, allow_any=allow_any)
     for tags in tagsets:
         data_extend(config, data, "tags", tags)
@@ -640,14 +690,17 @@ def add_related(ctx, config, data, lst, related):
     assert isinstance(ctx, Wtp)
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(lst, (list, tuple))
+    for x in lst:
+        assert isinstance(x, str)
     assert isinstance(related, (list, tuple))
     related = " ".join(related)
     for related in related.split(" or "):
         if related:
             tagsets = decode_tags(config, lst)
             for tags in tagsets:
-                data_append(config, data, "forms",
-                            {"tags": tags, "form": related})
+                form = {"form": related}
+                data_extend(config, form, "tags", tags)
+                data_append(config, data, "forms", form)
 
 
 def parse_word_head(ctx, config, pos, text, data):
@@ -665,14 +718,14 @@ def parse_word_head(ctx, config, pos, text, data):
     # Handle the part of the head that is not in parentheses
     base = re.sub(r"\([^)]*\)", "", text)
     base = re.sub(r"\s+", " ", base).strip()
-    descs = map_with(paren_map, base.split(";"))
+    descs = map_with(paren_map, split_at_comma_semi(base))
     for desc_i, desc in enumerate(descs):
         desc = desc.strip()
         for alt in map_with(paren_map, desc.split(" or ")):
             baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
             if " ".join(baseparts) in valid_tags and desc_i > 0:
-                lst = []
-                rest = baseparts
+                lst = []  # Word form
+                rest = baseparts  # Tags
             else:
                 lst = []  # Word form (NOT tags)
                 i = 0
@@ -681,7 +734,7 @@ def parse_word_head(ctx, config, pos, text, data):
                     w = distw(titleparts, word)  # 0=identical..1=very different
                     if (word == title or word in blocked or
                         ((w <= 0.7 or len(word) < 6) and
-                         word not in valid_tags)):
+                         word not in valid_tags and word not in paren_map)):
                         lst.append(word)
                     else:
                         break
@@ -703,8 +756,7 @@ def parse_word_head(ctx, config, pos, text, data):
         descriptors = map_with(paren_map, [paren])
         new_desc = []
         for desc in descriptors:
-            for semi in map_with(paren_map, desc.split(";")):
-                new_desc.extend(map_with(paren_map, semi.split(",")))
+            new_desc.extend(map_with(paren_map, re.split(r"[,;]", desc)))
         for desc in new_desc:
             parts = list(m.group(0) for m in re.finditer(word_re, desc))
             lst = []
@@ -747,7 +799,7 @@ def parse_sense_tags(ctx, config, text, data):
     assert isinstance(text, str)
     assert isinstance(data, dict)
     # print("parse_sense_tags:", text)
-    tags = map_with(paren_map, text.split(","))
+    tags = map_with(paren_map, re.split(r"[,;]", text))
     for tag in tags:
         tagsets = decode_tags(config, tag.split(" "), allow_any=True)
         # XXX should think how to handle distinct options better,
@@ -762,7 +814,7 @@ def parse_pronunciation_tags(ctx, config, text, data):
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(text, str)
     assert isinstance(data, dict)
-    tags = map_with(paren_map, text.split(","))
+    tags = map_with(paren_map, re.split(r"[,;]", text))
     for tag in tags:
         tagsets = decode_tags(config, tag.split(" "), allow_any=True)
         # XXX should think how to handle distinct options better,
@@ -780,7 +832,7 @@ def parse_translation_desc(ctx, config, text, data):
     # print("parse_translation_desc:", text)
 
     # Handle the part of the head that is not in parentheses
-    base = re.sub(r"\([^)]*\)", "", text)
+    base = re.sub(r"\([^)]*\):?", "", text)
     base = re.sub(r"\s+", " ", base).strip()
     baseparts = list(m.group(0) for m in re.finditer(word_re, base))
     lst = []  # Word form (NOT tags)
@@ -801,21 +853,37 @@ def parse_translation_desc(ctx, config, text, data):
     # XXX here we should only look at a subset of tags allowed
     # in the translation
     for tagdesc in map_with(paren_map, [" ".join(rest)]):
-        add_tags(ctx, config, data, tagdesc.split(" "))
+        for tagpart in tagdesc.split(" or "):
+            add_tags(ctx, config, data, tagpart.split(" "))
 
     # Handle parenthesized descriptors for the word form and links to
     # related words
     parens = list(m.group(1) for m in re.finditer(r"\(([^)]*)\)", text))
     for paren in parens:
+        paren = paren.strip()
+        if paren.endswith(":"):
+            paren = paren[:-1]  # Probably mistakes
+        if paren in ignored_parens:
+            continue
         descriptors = map_with(paren_map, [paren])
         for desc in descriptors:
-            for semi in map_with(paren_map, desc.split(";")):
-                for new_desc in map_with(paren_map, semi.split(",")):
-                    if new_desc in valid_tags:
-                        add_tags(ctx, config, data, [new_desc],
-                                 allow_any=True)
-                    elif "alt" not in data:
-                        data["roman"] = new_desc
-                    else:
-                        config.warning("maybe more than one romanization: {!r}"
-                                       .format(text))
+            for new_desc in map_with(paren_map, re.split(r"[,;]", desc)):
+                new_desc = new_desc.strip()
+                if new_desc.startswith("e.g."):
+                    continue
+                if new_desc.startswith("cf."):
+                    continue
+                if new_desc.startswith("literally "):
+                    continue
+                if new_desc.startswith("also expressed with"):
+                    continue
+                if new_desc in valid_tags:
+                    add_tags(ctx, config, data, [new_desc],
+                             allow_any=True)
+                elif "alt" not in data:
+                    data["roman"] = new_desc
+                else:
+                    config.warning("maybe more than one romanization: {!r}"
+                                   .format(text))
+
+# XXX change to use split_at_comma_semi

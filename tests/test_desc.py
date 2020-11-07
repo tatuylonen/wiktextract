@@ -4,6 +4,7 @@ import wiktextract
 from wiktextract.form_descriptions import decode_tags, parse_word_head
 from wiktextract import WiktionaryConfig
 from wikitextprocessor import Wtp
+from wiktextract.datautils import split_at_comma_semi
 
 
 class WiktExtractTests(unittest.TestCase):
@@ -16,34 +17,34 @@ class WiktExtractTests(unittest.TestCase):
     def test_empty(self):
         ret = decode_tags(self.config, [])
         self.assertEqual(self.config.warnings, [])
-        self.assertEqual(ret, [])
+        self.assertEqual(ret, [()])
 
     def test_singular(self):
         ret = decode_tags(self.config, ["singular"])
         self.assertEqual(self.config.warnings, [])
-        self.assertEqual(ret, ["singular"])
+        self.assertEqual(ret, [("singular",)])
 
     def test_unknown(self):
         ret = decode_tags(self.config, ["unknowntag"])
         self.assertNotEqual(self.config.warnings, [])
-        self.assertEqual(ret, ["error"])
+        self.assertEqual(ret, [("error",)])
 
     def test_plural_partitive(self):
-        ret = decode_tags(self.config, ["plural", "partitive"])
+        ret = decode_tags(self.config, ["partitive", "plural"])
         self.assertEqual(self.config.warnings, [])
-        self.assertEqual(ret, ["plural", "partitive"])
+        self.assertEqual(ret, [("partitive", "plural")])
 
     def test_combo(self):
         ret = decode_tags(self.config, ["class", "2a",
                                         "stress", "pattern", "1"])
         self.assertEqual(self.config.warnings, [])
-        self.assertEqual(ret, ["class 2a", "stress pattern 1"])
+        self.assertEqual(ret, [("class 2a", "stress pattern 1")])
 
     def test_combo_err(self):
         ret = decode_tags(self.config, ["class", "2a",
                                         "stress", "pattern", "xyz"])
         self.assertNotEqual(self.config.warnings, [])
-        self.assertEqual(ret, ["class 2a", "error"])
+        self.assertEqual(ret, [("class 2a", "error")])
 
     def test_head1(self):
         data = {}
@@ -108,8 +109,8 @@ class WiktExtractTests(unittest.TestCase):
         parse_word_head(self.ctx, self.config, "noun",
                         "testpage f (plurale tantum, stem testpag, inanimate)",
                         data)
-        self.assertEqual(self.config.warnings, [])
         print(data)
+        self.assertEqual(self.config.warnings, [])
         self.assertEqual(data, {"tags": ["feminine", "plurale tantum",
                                          "inanimate"],
                                 "forms": [{"tags": ["stem"],
@@ -127,3 +128,25 @@ class WiktExtractTests(unittest.TestCase):
                                          "inanimate", "with dative"],
                                 "forms": [{"tags": ["stem"],
                                            "form": "testpag"}]})
+
+    def test_comma_semi1(self):
+        self.assertEqual(split_at_comma_semi(""), [])
+
+    def test_comma_semi2(self):
+        self.assertEqual(split_at_comma_semi("foo bar"), ["foo bar"])
+
+    def test_comma_semi3(self):
+        self.assertEqual(split_at_comma_semi("foo bar, zappa"),
+                         ["foo bar", "zappa"])
+
+    def test_comma_semi4(self):
+        self.assertEqual(split_at_comma_semi("foo , bar; zappa"),
+                         ["foo", "bar", "zappa"])
+
+    def test_comma_semi5(self):
+        self.assertEqual(split_at_comma_semi("a (foo, bar); zappa"),
+                         ["a (foo bar)", "zappa"])
+
+    def test_comma_semi5(self):
+        self.assertEqual(split_at_comma_semi("a (foo, bar)[1; zappa], z"),
+                         ["a (foo, bar)[1; zappa]", "z"])

@@ -172,8 +172,10 @@ def parse_wiktionary(ctx, path, config, word_cb, capture_cb=None,
     def page_cb(model, title, text):
         return page_handler(ctx, model, title, text, capture_cb, config_kwargs)
 
-    results = ctx.process(path, page_cb, phase1_only=phase1_only)
-    process_finalize(results, config, word_cb)
+    for ret, stats in ctx.process(path, page_cb, phase1_only=phase1_only):
+        config.merge_return(stats)
+        for w in ret:
+            word_cb(w)
 
 
 def reprocess_wiktionary(ctx, config, word_cb, capture_cb):
@@ -188,23 +190,7 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb):
     def page_cb(model, title, text):
         return page_handler(ctx, model, title, text, capture_cb, config_kwargs)
 
-    results = ctx.reprocess(page_cb)
-    process_finalize(results, config, word_cb)
-
-
-def process_finalize(results, config, word_cb):
-    """Finalizes processing or reprocessing the Wiktionary."""
-    assert isinstance(results, (list, tuple))
-    assert isinstance(config, WiktionaryConfig)
-    assert callable(word_cb)
-
-    words = []
-    for ret, stats in results:
+    for ret, stats in ctx.reprocess(page_cb):
         config.merge_return(stats)
-        words.extend(ret)
-
-    # XXX Merge information from separate translations and thesaurus pages
-
-    for w in words:
-
-        word_cb(w)
+        for w in ret:
+            word_cb(w)

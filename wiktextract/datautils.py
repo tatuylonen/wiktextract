@@ -2,6 +2,7 @@
 #
 # Copyright (c) 2018-2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
+import re
 from .config import WiktionaryConfig
 from wikitextprocessor import ALL_LANGUAGES
 
@@ -80,3 +81,42 @@ def data_alt_of(config, data, t, tags):
         return
     data_append(config, data, "alt_of", vec[-1])
     data_extend(config, data, "tags", tags)
+
+
+def split_at_comma_semi(text):
+    """Splits the text at commas and semicolons, unless they are inside
+    parenthesis."""
+    lst = []
+    paren_cnt = 0
+    bracket_cnt = 0
+    ofs = 0
+    parts = []
+    for m in re.finditer(r"[][(),;]", text):
+        if ofs < m.start():
+            parts.append(text[ofs:m.start()])
+        ofs = m.end()
+        token = m.group(0)
+        if token == "[":
+            bracket_cnt += 1
+            parts.append(token)
+        elif token == "]":
+            bracket_cnt -= 1
+            parts.append(token)
+        elif token == "(":
+            paren_cnt += 1
+            parts.append(token)
+        elif token == ")":
+            paren_cnt -= 1
+            parts.append(token)
+        elif paren_cnt > 0 or bracket_cnt > 0:
+            parts.append(token)
+        else:
+            assert token in ",;"
+            if parts:
+                lst.append("".join(parts).strip())
+                parts = []
+    if ofs < len(text):
+        parts.append(text[ofs:])
+    if parts:
+        lst.append("".join(parts).strip())
+    return lst
