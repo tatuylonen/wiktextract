@@ -136,6 +136,8 @@ def clean_replace_regexp(config, v):
             v = vec[0]
             if v.startswith("Category:"):
                 return ""
+            if v.startswith("Image:") or v.startswith("File:"):
+                return ""
             if v.startswith(":Category:"):
                 v = v[10:]
             if len(vec) >= 2:
@@ -262,6 +264,8 @@ def clean_value(config, title):
     for m in re.finditer(r"\{\{[^}]+\}\}", title):
         config.error("possible syntax error: {}".format(m.group(0)))
     title = re.sub(r"\{\{[^}]+\}\}", "", title)
+    # Remove tables
+    title = re.sub(r"(?s)\{\|.*?\|}", " ", title)
     # Remove references (<ref>...</ref>).
     title = re.sub(r"(?s)<\s*ref>\s*.*?<\s*/\s*ref>\n*", "", title)
     # Replace <br/> by comma space (it is used to express alternatives in some

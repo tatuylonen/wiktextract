@@ -14,7 +14,7 @@ from .datautils import (data_append, data_extend, data_inflection_of,
 # Maps strings into one or more other strings.  This is applied at multiple
 # levels of partitioning the description.
 
-paren_map = {
+xlat_tags_map = {
     "m": ["masculine"],
     "m.": ["masculine"],
     "male": ["masculine"],
@@ -40,6 +40,8 @@ paren_map = {
     "c": ["common"],  # common gender in at least West Frisian
     "&": ["and"],
     "abbreviated": ["abbreviation"],
+    "diminutives": ["diminutive"],
+    "old": ["archaic"],
     "†-tari": ["-tari"],
     "†-nari": ["-nari"],
     "countable and uncountable": ["countable", "uncountable"],
@@ -230,8 +232,10 @@ paren_map = {
     "attribute": ["attributive"],
     "in the past subjunctive": ["past", "subjunctive"],
     "use the subjunctive tense of the verb that follows": ["with subjunctive"],
-    "kyūjitai": "kyūjitai form",
-    "shinjitai kanji": "shinjitai",
+    "kyūjitai form": ["kyūjitai"],
+    "shinjitai kanji": ["shinjitai"],
+    "militaryu slang": ["military", "slang"],
+    "alternative plural": ["plural"],
 }
 
 blocked = set(["të", "a", "e", "al", "þou", "?", "lui", "auf", "op", "ein",
@@ -250,7 +254,6 @@ valid_tags = [
     "singulative",
     "plural",
     "paucal",
-    "alternative plural",
     "also",
     "plural only",
     "plurale tantum",
@@ -259,10 +262,9 @@ valid_tags = [
     "comparative",
     "superlative",
     "comparable",
-    "not comparable",
+    "not comparable",  # Neither superlative nor comparative
     "no comparative",
     "no superlative",
-    "predicative superlative",
     "excessive",
     "inanimate",
     "animate",
@@ -477,6 +479,7 @@ valid_tags = [
     "traditional orthography spelling",
     "northern dialect",
     "dialectal",
+    "baby talk",
     "obsolete",
     "archaic",
     "historical",
@@ -542,6 +545,7 @@ valid_tags = [
     "Santiago",
     "São Vicente",
     "Westphalian",
+    "military",
 ]
 
 ignored_parens = set([
@@ -553,7 +557,7 @@ ignored_parens = set([
 valid_words = set(["or", "and"])
 for x in valid_tags:
     valid_words.update(x.split(" "))
-for x in paren_map.keys():
+for x in xlat_tags_map.keys():
     valid_words.update(x.split(" "))
 
 
@@ -583,11 +587,11 @@ for tag in valid_tags:
 # Tree of sequences considered to be tags (includes sequences that are
 # mapped to something that becomes one or more valid tags)
 valid_sequences = {}
-for tag in list(valid_tags) + list(paren_map.keys()):
+for tag in list(valid_tags) + list(xlat_tags_map.keys()):
     add_to_valid_tree(valid_sequences, tag)
 
 # Regexp used to find "words" from word heads and linguistic descriptions
-word_re = re.compile(r"[^ ,;()\u200e]+|\([^)]*\)")
+word_re = re.compile(r"[^ ,;()\u200e]+|\(([^()]|\([^)]*\))*\)")
 
 
 def distw(titleparts, word):
@@ -623,9 +627,9 @@ def decode_tags(config, lst, allow_any=False):
     lsts = [[]]
     for x in lst:
         assert isinstance(x, str)
-        for alt in map_with(paren_map, [x]):
+        for alt in map_with(xlat_tags_map, [x]):
             lsts = list(lst1 + [alt] for lst1 in lsts)
-    lsts = map_with(paren_map, list(map(lambda x: " ".join(x), lsts)))
+    lsts = map_with(xlat_tags_map, list(map(lambda x: " ".join(x), lsts)))
     lsts = list(map(lambda x: x.split(" "), lsts))
     tagsets = set()
     next_i = 0
@@ -696,11 +700,21 @@ def add_related(ctx, config, data, lst, related):
     related = " ".join(related)
     for related in related.split(" or "):
         if related:
-            tagsets = decode_tags(config, lst)
-            for tags in tagsets:
-                form = {"form": related}
-                data_extend(config, form, "tags", tags)
-                data_append(config, data, "forms", form)
+            m = re.match(r"\(([^()]|\([^)]*\))*\)\s*", related)
+            if m:
+                paren = m.group(1)
+                related = related[m.end():]
+                tagsets1 = decode_tags(config,
+                                       split_at_comma_semi(paren))
+            else:
+                tagsets1 = [[]]
+            tagsets2 = decode_tags(config, lst)
+            for tags1 in tagsets1:
+                for tags2 in tagsets2:
+                    form = {"form": related}
+                    data_extend(config, form, "tags", tags1)
+                    data_extend(config, form, "tags", tags2)
+                    data_append(config, data, "forms", form)
 
 
 def parse_word_head(ctx, config, pos, text, data):
@@ -716,12 +730,13 @@ def parse_word_head(ctx, config, pos, text, data):
     titleparts = list(m.group(0) for m in re.finditer(word_re, title))
 
     # Handle the part of the head that is not in parentheses
-    base = re.sub(r"\([^)]*\)", "", text)
+    base = re.sub(r"\(([^()]|\([^(]*\))*\)", " ", text)
+    base = re.sub(r"\?", " ", base)  # Removes uncertain articles etc
     base = re.sub(r"\s+", " ", base).strip()
-    descs = map_with(paren_map, split_at_comma_semi(base))
+    descs = map_with(xlat_tags_map, split_at_comma_semi(base))
     for desc_i, desc in enumerate(descs):
         desc = desc.strip()
-        for alt in map_with(paren_map, desc.split(" or ")):
+        for alt in map_with(xlat_tags_map, desc.split(" or ")):
             baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
             if " ".join(baseparts) in valid_tags and desc_i > 0:
                 lst = []  # Word form
@@ -734,7 +749,7 @@ def parse_word_head(ctx, config, pos, text, data):
                     w = distw(titleparts, word)  # 0=identical..1=very different
                     if (word == title or word in blocked or
                         ((w <= 0.7 or len(word) < 6) and
-                         word not in valid_tags and word not in paren_map)):
+                         word not in valid_tags and word not in xlat_tags_map)):
                         lst.append(word)
                     else:
                         break
@@ -750,13 +765,14 @@ def parse_word_head(ctx, config, pos, text, data):
 
     # Handle parenthesized descriptors for the word form and links to
     # related words
-    parens = list(m.group(1) for m in re.finditer(r"\(([^)]*)\)", text))
+    parens = list(m.group(1) for m in
+                  re.finditer(r"\((([^()]|\([^)]*\))*)\)", text))
     for paren in parens:
         paren = paren.strip()
-        descriptors = map_with(paren_map, [paren])
+        descriptors = map_with(xlat_tags_map, [paren])
         new_desc = []
         for desc in descriptors:
-            new_desc.extend(map_with(paren_map, re.split(r"[,;]", desc)))
+            new_desc.extend(map_with(xlat_tags_map, split_at_comma_semi(desc)))
         for desc in new_desc:
             parts = list(m.group(0) for m in re.finditer(word_re, desc))
             lst = []
@@ -799,14 +815,13 @@ def parse_sense_tags(ctx, config, text, data):
     assert isinstance(text, str)
     assert isinstance(data, dict)
     # print("parse_sense_tags:", text)
-    tags = map_with(paren_map, re.split(r"[,;]", text))
-    for tag in tags:
-        tagsets = decode_tags(config, tag.split(" "), allow_any=True)
-        # XXX should think how to handle distinct options better,
-        # e.g., "singular and plural genitive"; that can't really be
-        # done with changing the calling convention of this function.
-        for tags in tagsets:
-            data_extend(config, data, "tags", tags)
+    tags = map_with(xlat_tags_map, split_at_comma_semi(text))
+    tagsets = decode_tags(config, tags, allow_any=True)
+    # XXX should think how to handle distinct options better,
+    # e.g., "singular and plural genitive"; that can't really be
+    # done with changing the calling convention of this function.
+    for tags in tagsets:
+        data_extend(config, data, "tags", tags)
 
 
 def parse_pronunciation_tags(ctx, config, text, data):
@@ -814,14 +829,16 @@ def parse_pronunciation_tags(ctx, config, text, data):
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(text, str)
     assert isinstance(data, dict)
-    tags = map_with(paren_map, re.split(r"[,;]", text))
-    for tag in tags:
-        tagsets = decode_tags(config, tag.split(" "), allow_any=True)
-        # XXX should think how to handle distinct options better,
-        # e.g., "singular and plural genitive"; that can't really be
-        # done with changing the calling convention of this function.
-        for tags in tagsets:
-            data_extend(config, data, "tags", tags)
+    tags = map_with(xlat_tags_map, split_at_comma_semi(text))
+    # XXX should think how to handle distinct options better,
+    # e.g., "singular and plural genitive"; that can't really be
+    # done with changing the calling convention of this function.
+
+    # XXX remove this?
+    #tagsets = decode_tags(config, tags, allow_any=True)
+    #for tags in tagsets:
+    #    data_extend(config, data, "tags", tags)
+    data_extend(config, data, "tags", tags)
 
 
 def parse_translation_desc(ctx, config, text, data):
@@ -832,7 +849,7 @@ def parse_translation_desc(ctx, config, text, data):
     # print("parse_translation_desc:", text)
 
     # Handle the part of the head that is not in parentheses
-    base = re.sub(r"\([^)]*\):?", "", text)
+    base = re.sub(r"\(([^()]|\([^)]*\))*\):?", "", text)
     base = re.sub(r"\s+", " ", base).strip()
     baseparts = list(m.group(0) for m in re.finditer(word_re, base))
     lst = []  # Word form (NOT tags)
@@ -852,27 +869,36 @@ def parse_translation_desc(ctx, config, text, data):
     data["word"] = " ".join(lst)
     # XXX here we should only look at a subset of tags allowed
     # in the translation
-    for tagdesc in map_with(paren_map, [" ".join(rest)]):
+    for tagdesc in map_with(xlat_tags_map, [" ".join(rest)]):
         for tagpart in tagdesc.split(" or "):
             add_tags(ctx, config, data, tagpart.split(" "))
 
     # Handle parenthesized descriptors for the word form and links to
     # related words
-    parens = list(m.group(1) for m in re.finditer(r"\(([^)]*)\)", text))
+    parens = list(m.group(1) for m in
+                  re.finditer(r"\((([^()]|\([^)]*\))*)\)", text))
     for paren in parens:
         paren = paren.strip()
         if paren.endswith(":"):
             paren = paren[:-1]  # Probably mistakes
         if paren in ignored_parens:
             continue
-        descriptors = map_with(paren_map, [paren])
+        if paren.startswith("numeral:"):
+            data["numeral"] = paren[8:].strip()
+            continue
+        descriptors = map_with(xlat_tags_map, [paren])
         for desc in descriptors:
-            for new_desc in map_with(paren_map, re.split(r"[,;]", desc)):
+            for new_desc in map_with(xlat_tags_map, split_at_comma_semi(desc)):
                 new_desc = new_desc.strip()
                 if new_desc.startswith("e.g."):
                     continue
                 if new_desc.startswith("cf."):
                     continue
+                if new_desc.startswith("use with "):
+                    # See e.g., "ten", Finnish translation; the intention is
+                    # to ignore this and all later comma-separated components
+                    # of this parenthesized part.
+                    break
                 if new_desc.startswith("literally "):
                     continue
                 if new_desc.startswith("also expressed with"):
@@ -880,6 +906,8 @@ def parse_translation_desc(ctx, config, text, data):
                 if new_desc in valid_tags:
                     add_tags(ctx, config, data, [new_desc],
                              allow_any=True)
+                elif new_desc[0].isupper() and not ctx.title[0].isupper():
+                    data_append(config, data, "tags", new_desc)
                 elif "alt" not in data:
                     data["roman"] = new_desc
                 else:

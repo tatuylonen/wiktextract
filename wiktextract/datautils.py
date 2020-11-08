@@ -33,7 +33,7 @@ def data_append(config, data, key, value):
         if value in languages_by_code:
             if value not in ("law", "toy", "and", "etc", "the", "god", "adj",
                              "man", "an", "tax", "or", "war", "job", "box",
-                             "pop", "cay", "lay", "nut", "bay", "sea"):
+                             "pop", "cay", "lay", "nut", "bay", "sea", "now"):
                 config.debug("language code {} in tags: {}".format(value, data))
     lst = data.get(key, [])
     lst.append(value)

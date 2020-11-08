@@ -47,6 +47,7 @@ class WiktionaryConfig(object):
         "word",
         "language",
         "pos",
+        "subsection",
     )
 
     def __init__(self,
@@ -99,6 +100,7 @@ class WiktionaryConfig(object):
         self.word = None
         self.language = None
         self.pos = None
+        self.subsection = None
 
     def to_kwargs(self):
         return {
@@ -159,24 +161,33 @@ class WiktionaryConfig(object):
         assert isinstance(msg, str)
         self.errors.append({"word": self.word, "lang": self.language,
                             "pos": self.pos, "msg": msg})
-        print("{} IN {}/{}: ERROR: {}"
-              "".format(self.word, self.language, self.pos, msg))
+        pos = self.pos if self.pos else "top-level"
+        if self.subsection:
+            pos += " in " + self.subsection
+        print("{}: {}/{}: ERROR: {}"
+              "".format(self.word, self.language, pos, msg))
         sys.stdout.flush()
 
     def warning(self, msg):
         assert isinstance(msg, str)
         self.warnings.append({"word": self.word, "lang": self.language,
                               "pos": self.pos, "msg": msg})
-        print("{} IN {}/{}: WARNING: {}"
-              "".format(self.word, self.language, self.pos, msg))
+        pos = self.pos if self.pos else "top-level"
+        if self.subsection:
+            pos += " in " + self.subsection
+        print("{}: {}/{}: WARNING: {}"
+              "".format(self.word, self.language, pos, msg))
         sys.stdout.flush()
 
     def debug(self, msg):
         assert isinstance(msg, str)
         self.debugs.append({"word": self.word, "lang": self.language,
                             "pos": self.pos, "msg": msg})
-        print("{} IN {}/{}: DEBUG: {}"
-              "".format(self.word, self.language, self.pos, msg))
+        pos = self.pos if self.pos else "top-level"
+        if self.subsection:
+            pos += " in " + self.subsection
+        print("{}: {}/{}: DEBUG: {}"
+              "".format(self.word, self.language, pos, msg))
         sys.stdout.flush()
 
     def unrecognized_template(self, t, ctx):
