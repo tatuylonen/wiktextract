@@ -2544,14 +2544,14 @@ def parse_page(word, text, config):
     if config.verbose:
         print("parsing page:", word)
 
+    config.word = word  # For error messages in title, adjusted below
     unsupported_prefix = "Unsupported titles/"
     if word.startswith(unsupported_prefix):
         w = word[len(unsupported_prefix):]
         if w in unsupported_title_map:
             word = unsupported_title_map[w]
         else:
-            config.debug("Unimplemented title: {}"
-                         "".format(word))
+            config.warning("unimplemented title")
 
     config.word = word
     config.language = None

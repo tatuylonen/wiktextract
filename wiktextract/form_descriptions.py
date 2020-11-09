@@ -30,7 +30,7 @@ xlat_tags_map = {
     "pl": ["plural"],
     "inan": ["inanimate"],
     "anim": ["animate"],
-    "pers": ["person"],
+    "pers": ["person"],  # XXX check what this really is used for? personal?
     "impf.": ["imperfect"],
     "impf": ["imperfect"],
     "pf": ["perfective"],
@@ -38,7 +38,7 @@ xlat_tags_map = {
     "trans.": ["transitive"],
     "npers": ["impersonal"],
     "c": ["common"],  # common gender in at least West Frisian
-    "&": ["and"],
+    # "&": ["and"],  XXX this seems to be causing problems, at least "& cetera"
     "abbreviated": ["abbreviation"],
     "diminutives": ["diminutive"],
     "old": ["archaic"],
@@ -143,6 +143,9 @@ xlat_tags_map = {
     "lowercase": ["lower case"],
     "phonemic reduplicative": ["reduplicated"],
     "objective case": ["objective"],
+    "first person": ["first-person"],
+    "second person": ["second-person"],
+    "third person": ["third-person"],
     "genitive case": ["genitive"],
     "dative case": ["dative"],
     "ergative cases": ["ergative"],
@@ -238,6 +241,8 @@ xlat_tags_map = {
     "alternative plural": ["plural"],
     "dialectical": ["dialectal"],
     "dated": ["archaic"],
+    "dated or regional": ["archaic", "regional"],
+    "archaic ortography": ["archaic"],
 }
 
 blocked = set(["të", "a", "e", "al", "þou", "?", "lui", "auf", "op", "ein",
@@ -245,7 +250,7 @@ blocked = set(["të", "a", "e", "al", "þou", "?", "lui", "auf", "op", "ein",
                "dou", "†yodan", "at", "feito", "mná", "peces", "har",
                "an", "u"])
 
-valid_tags = [
+valid_tags = set([
     "masculine",
     "feminine",
     "neuter",
@@ -255,6 +260,7 @@ valid_tags = [
     "singular",
     "singulative",  # Individuation of a collective or mass noun
     "plural",
+    "no plural",
     "paucal",
     "also",
     "plural only",
@@ -271,19 +277,16 @@ valid_tags = [
     "inanimate",
     "animate",
     "person",
+    "personal",
     "impersonal",
     "abstract",
     "natural",
     "demonstrative",
-    "personal pronoun",
     "subjective pronoun",
     "nominative",
     "genitive",
     "no genitive",
     "possessive",
-    "first-person possessive",
-    "second-person possessive",
-    "third-person possessive",
     "possessive suffix",
     "possessive determiner",
     "accusative",
@@ -313,6 +316,7 @@ valid_tags = [
     "collective",
     "diminutive",
     "endearing",
+    "emphatic",
     "augmentative",
     "pejorative",
     "diminutive of",
@@ -366,6 +370,7 @@ valid_tags = [
     "intransitive",
     "ambitransitive",
     "stative",
+    "pronoun",
     "pronominal state",
     "nominal state",
     "invariable",
@@ -472,6 +477,7 @@ valid_tags = [
     "adjective",
     "adjectival",
     "verbal noun",
+    "verb",
     "abstract noun",
     "auxiliary",
     "modal",
@@ -494,6 +500,7 @@ valid_tags = [
     "baby talk",
     "obsolete",
     "archaic",
+    "regional",
     "historical",
     "hellenism",
     "literary",
@@ -552,19 +559,28 @@ valid_tags = [
     "derogatory",
     "humorous",
     "sometimes",
+    "usually",
+    "usually in the",
     "vulgar",
     "euphemism",
     "idiomatic",
     "non-scientific usage",
     "simple", # XXX occurs in things like "simple past", should be ignored
-    "Cyrilling spelling",
+    "Cyrillic spelling",
     "Old Polish",
     "Badiu",
     "Santiago",
     "São Vicente",
     "Westphalian",
     "military",
-]
+    "biology",
+    "computing",
+    "science",
+    "economics",
+    "music",
+    "sports",
+    "uncommon",
+])
 
 ignored_parens = set([
     "please verify",
@@ -676,7 +692,7 @@ def decode_tags(config, lst, allow_any=False):
                 else:
                     node = valid_tree
             else:
-                config.warning("unsupported tag component {!r} in {}"
+                config.warning("unsupported tag at {!r} in {}"
                                .format(w, lst))
                 if "error" not in tags:
                     tags.append("error")
@@ -743,7 +759,7 @@ def parse_word_head(ctx, config, pos, text, data):
     assert isinstance(pos, str)
     assert isinstance(text, str)
     assert isinstance(data, dict)
-    print("parse_word_head:", text)
+    #print("parse_word_head:", text)
     title = ctx.title
     titleparts = list(m.group(0) for m in re.finditer(word_re, title))
 
@@ -766,7 +782,8 @@ def parse_word_head(ctx, config, pos, text, data):
                     word = baseparts[i]
                     w = distw(titleparts, word)  # 0=identical..1=very different
                     if (word == title or word in blocked or
-                        ((w <= 0.7 or len(word) < 6) and
+                        word in titleparts or
+                        ((w <= 0.7 or len(word) <= 4) and
                          word not in valid_tags and word not in xlat_tags_map)):
                         lst.append(word)
                     else:
@@ -800,25 +817,31 @@ def parse_word_head(ctx, config, pos, text, data):
             while i < len(parts):
                 part = parts[i]
                 w = distw(titleparts, part)  # 0=identical .. 1=very different
-                if (part != title and
+                if (part != title and part not in titleparts and
+                    (w >= 0.7 or len(word) < 4) and
                     (part in node or
                      ("$" in node and part in valid_sequences))):
                     # Consider it part of a descriptor
-                    lst.append(part)
                     if part in node:
                         if "$" in node:
+                            lst.extend(parts[last_valid:i])
                             last_valid = i
                         node = node[part]
                     else:
                         assert "$" in node
+                        lst.extend(parts[last_valid:i])
+                        last_valid = i
                         node = valid_sequences[part]
                 else:
                     # Consider the rest as a related term
                     break
                 i += 1
             if "$" in node:
+                lst.extend(parts[last_valid:i])
                 last_valid = i
             related = parts[last_valid:]
+            # XXX check if related contains valid tag sequences and warn if
+            # so
             for tagspec in " ".join(lst).split(" or "):
                 lst = tagspec.split(" ")
                 if related:

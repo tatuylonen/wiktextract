@@ -265,7 +265,7 @@ def clean_value(config, title):
         config.error("possible syntax error: {}".format(m.group(0)))
     title = re.sub(r"\{\{[^}]+\}\}", "", title)
     # Remove tables
-    title = re.sub(r"(?s)\{\|.*?\|}", " ", title)
+    title = re.sub(r"(?s)\{\|.*?\|\}", " ", title)
     # Remove references (<ref>...</ref>).
     title = re.sub(r"(?s)<\s*ref>\s*.*?<\s*/\s*ref>\n*", "", title)
     # Replace <br/> by comma space (it is used to express alternatives in some

@@ -15,6 +15,15 @@ str_keys = ("tags", "glosses")
 dict_keys = ("pronunciations", "senses", "synonyms", "related",
              "antonyms", "hypernyms", "holonyms", "forms")
 
+# Language codes that are also normal words and thus we won't warn about
+# them as tags
+not_treated_as_language_codes = set([
+    "law", "toy", "and", "etc", "the", "god", "adj",
+    "man", "an", "tax", "or", "war", "job", "box",
+    "de", "by", "des", "but", "for", "set", "as",
+    "pop", "cay", "lay", "nut", "bay", "sea", "now",
+    "to", "pas", "see", "se", "et",
+])
 
 def data_append(config, data, key, value):
     """Appends ``value`` under ``key`` in the dictionary ``data``.  The key
@@ -31,9 +40,7 @@ def data_append(config, data, key, value):
         if value == "":
             return
         if value in languages_by_code:
-            if value not in ("law", "toy", "and", "etc", "the", "god", "adj",
-                             "man", "an", "tax", "or", "war", "job", "box",
-                             "pop", "cay", "lay", "nut", "bay", "sea", "now"):
+            if value not in not_treated_as_language_codes:
                 config.debug("language code {} in tags: {}".format(value, data))
     lst = data.get(key, [])
     lst.append(value)
