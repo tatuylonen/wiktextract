@@ -23,6 +23,9 @@ from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_tags, parse_pronunciation_tags,
     parse_translation_desc, xlat_tags_map, valid_tags)
 
+# NodeKind values for subtitles
+LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
+               NodeKind.LEVEL5, NodeKind.LEVEL6)
 
 # Mapping from language name to language info
 languages_by_name = {x["name"]: x for x in ALL_LANGUAGES}
@@ -73,6 +76,9 @@ panel_templates = set([
     "hu-corr",
     "hu-suff-pron",
     "list:compass points/en",
+    "list:compass points/zh",
+    "list:compass points/ja",
+    "ca-compass",
     "mediagenic terms",
     "picdic",
     "picdicimg",
@@ -86,6 +92,8 @@ panel_templates = set([
     "video frames",
     "wikipedia",
     "zh-forms",
+    "CJKV",
+    "ko-hanja-search",
 ])
 
 # Mapping from a template name (without language prefix) for the main word
@@ -731,6 +739,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             config.warning("no senses found")
         pos_data = {}
         pos_datas = []
+        config.pos = None
+        config.subsection = None
 
     def push_etym():
         nonlocal etym_data
@@ -813,6 +823,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if name == "vi-readings":
             # XXX extract?
             return ""
+        if name == "ja-kanji":
+            # XXX extract?
+            return ""
         if name == "picdic" or name == "picdicimg":
             # XXX extract?
             return ""
@@ -848,8 +861,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if kind == NodeKind.LIST:
                 lists.append(node)
                 break
-            elif kind in (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
-                          NodeKind.LEVEL5, NodeKind.LEVEL6):
+            elif kind in LEVEL_KINDS:
                 break
             elif kind == NodeKind.LINK:
                 # We might collect relevant links as they are often pictures
@@ -883,8 +895,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
     def parse_pronunciation(node):
         assert isinstance(node, WikiNode)
-        if node.kind in (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
-                         NodeKind.LEVEL5, NodeKind.LEVEL6):
+        if node.kind in LEVEL_KINDS:
             node = node.children
         data = etym_data if etym_data else base
         enprs = []
@@ -1053,6 +1064,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 nonlocal sense
                 nonlocal english
                 nonlocal qualifier
+                if name in panel_templates:
+                    return ""
                 if name in ("sense", "s"):
                     sense = ht.get(1)
                     return ""
@@ -1196,9 +1209,22 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # XXX certain things can only be parsed from the output, e.g.,
             # zh-dial
 
-        def parse_linkage_table(node):
-            config.warning("UNIMPLEMENTED: parse_linkage_table: {}"
-                           .format(node))
+        def parse_linkage_table(tablenode):
+            assert isinstance(tablenode, WikiNode)
+            # XXX e.g. etelä/Finnish uses compass-fi, which gets
+            # pre-expanded into a table here
+            # # print("PARSE_LINKAGE_TABLE:", tablenode)
+            # for node in tablenode.children:
+            #     #print("TABLE NODE", node)
+            #     if not isinstance(node, WikiNode):
+            #         continue
+            #     if node.kind == NodeKind.TABLE_ROW:
+            #         for cell in node.children:
+            #             #print("TABLE CELL", cell)
+            #             if not isinstance(cell, WikiNode):
+            #                 continue
+            #             if cell.kind == NodeKind.TABLE_CELL:
+            #                 parse_linkage_recurse(cell)
 
         def parse_linkage_recurse(linkagenode):
             assert isinstance(linkagenode, WikiNode)
@@ -1225,6 +1251,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # Recurse to process inside the HTML for most tags
                     if node.args not in ("gallery", "ref", "cite", "caption"):
                         parse_linkage_recurse(node)
+                elif kind in LEVEL_KINDS:
+                    break
+                elif kind in (NodeKind.BOLD, NodeKind.ITALIC):
+                    # Skip these on top level; at least sometimes bold is
+                    # used for indicating subtitle
+                    continue
                 else:
                     extras.append(node)
 
@@ -1439,6 +1471,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         if not isinstance(item, WikiNode):
                             continue
                         parse_translation_recurse(item)
+                elif kind in LEVEL_KINDS:
+                    # Sub-levels will be recursed elsewhere
+                    break
                 else:
                     sense_parts.append(node)
                     sense = None
@@ -1455,8 +1490,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if not isinstance(node, WikiNode):
                 # print("  X{}".format(repr(node)[:40]))
                 continue
-            if node.kind not in (NodeKind.LEVEL3, NodeKind.LEVEL4,
-                                 NodeKind.LEVEL5, NodeKind.LEVEL6):
+            if node.kind not in LEVEL_KINDS:
                 # XXX handle e.g. wikipedia links at the top of a language
                 # XXX should at least capture "also" at top of page
                 if node.kind in (NodeKind.HLINE,):
@@ -1516,7 +1550,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 else:
                     data = etym_data
                 parse_linkage(data, "derived", node)
-            elif pos in ("related terms", "related characters"):
+            elif pos in ("related terms", "related characters", "see also"):
                 if stack[-1] in part_of_speech_map:
                     data = pos_data
                 else:
@@ -1569,6 +1603,9 @@ def parse_top_template(config, ctx, node):
             # word, capture them
             return ""
         if name == "cardinalbox":
+            # XXX capture
+            return ""
+        if name == "character info":
             # XXX capture
             return ""
         config.warning("UNIMPLEMENTED top-level template: {} {}"
@@ -1792,12 +1829,6 @@ def clean_node(config, ctx, value, template_fn=None):
 
 # XXX check translation hub
 
-# XXX warn if no senses found for a part-of-speech
-
-# XXX warn if no parts-of-speech found for a language
-
-# XXX warn if no languages found for a page
-
 # XXX check allowed head templates, see template_allowed_pos_map
 
 # XXX test that config.capture_* options work
@@ -1817,3 +1848,23 @@ def clean_node(config, ctx, value, template_fn=None):
 # mi/Serbo-Croatian (pronoun).  Should probably strip these templates, but
 # not strip as aggressively as normal clean_value() does.  HTML tags and links
 # should be stripped.
+
+# XXX review inserting error/warning tags in words that trigger errors/warnings
+
+# XXX clean up extra calls to map_with in form_descriptions.py; now handled
+# in decode_tags()
+
+# XXX handle word class prefixes in linkages, see sade/Finnish,
+# "adjectives: sateeton, sateinen"
+
+# XXX find out why ITALIC/BOLD parsing errors in sade/Finnish
+
+# XXX parse "Derived characters" section.  It may contain multiple
+# space-separated characters in same list item.
+
+# XXX parse Han character, Kanji, etc into a word sense
+
+# XXX extract Readings section (e.g., Kanji characters)
+
+# XXX should probably handle "Lua module not found" differently, perhaps
+# silently returning an error that can be handled using #iferror

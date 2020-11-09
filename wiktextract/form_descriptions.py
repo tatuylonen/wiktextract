@@ -67,6 +67,8 @@ xlat_tags_map = {
     "dative and accusative singular":
     ["dative singular", "accusative singular"],
     "simple past and past participle": ["simple past", "past participle"],
+    "simple past": ["past"],
+    "simple present": ["present"],
     "genitive/dative": ["genitive", "dative"],
     "first/second-declension adjective":
     ["first-declension adjective", "second-declension adjective"],
@@ -208,6 +210,7 @@ xlat_tags_map = {
     ["with noun phrase", "with subjunctive"],
     "+ [nounphrase] + subjunctive":
     ["with noun phrase", "with subjunctive"],
+    "+ number": ["with number"],
     "optative mood +": ["with optative"],
     "p-past": ["passive past"],
     "ppp": ["passive perfect participle"],
@@ -240,6 +243,7 @@ xlat_tags_map = {
     "militaryu slang": ["military", "slang"],
     "alternative plural": ["plural"],
     "dialectical": ["dialectal"],
+    "dialect": ["dialectal"],
     "dated": ["archaic"],
     "dated or regional": ["archaic", "regional"],
     "archaic ortography": ["archaic"],
@@ -495,6 +499,7 @@ valid_tags = set([
     "classical milanese orthography",
     "old orthography",
     "traditional orthography spelling",
+    "form vowel harmony variant",
     "northern dialect",
     "dialectal",
     "baby talk",
@@ -523,6 +528,7 @@ valid_tags = set([
     "with noun phrase",
     "with subjunctive",
     "with optative",
+    "with number",
     "krama",
     "ngoko",
     "krama-ngoko",
@@ -548,6 +554,7 @@ valid_tags = set([
     "error",
     "canonical",  # Used to mark the canonical word from from head
     "figurative",
+    "by extension",
     "-na",  # Japanese inflection type
     "-i",   # Japanese inflection type
     "-tari",  # Japanese inflection type
@@ -565,7 +572,6 @@ valid_tags = set([
     "euphemism",
     "idiomatic",
     "non-scientific usage",
-    "simple", # XXX occurs in things like "simple past", should be ignored
     "Cyrillic spelling",
     "Old Polish",
     "Badiu",
@@ -577,6 +583,12 @@ valid_tags = set([
     "computing",
     "science",
     "economics",
+    "card games",
+    "physics",
+    "chemistry",
+    "legal",
+    "linguistics",
+    "meteorology",
     "music",
     "sports",
     "uncommon",
@@ -595,11 +607,12 @@ for x in xlat_tags_map.keys():
     valid_words.update(x.split(" "))
 
 
-def add_to_valid_tree(tree, tag):
+def add_to_valid_tree(tree, tag, v):
     """Helper function for building trees of valid tags/sequences during
     initialization."""
     assert isinstance(tree, dict)
     assert isinstance(tag, str)
+    assert isinstance(v, str)
     node = tree
     for w in tag.split(" "):
         if w in node:
@@ -609,20 +622,26 @@ def add_to_valid_tree(tree, tag):
             node[w] = new_node
             node = new_node
     if "$" in node:
-        node["$"] += (tag,)
+        node["$"] += (v,)
     else:
-        node["$"] = (tag,)
+        node["$"] = (v,)
 
 # Tree of valid final tags
 valid_tree = {}
 for tag in valid_tags:
-    add_to_valid_tree(valid_tree, tag)
+    add_to_valid_tree(valid_tree, tag, tag)
 
 # Tree of sequences considered to be tags (includes sequences that are
 # mapped to something that becomes one or more valid tags)
 valid_sequences = {}
-for tag in list(valid_tags) + list(xlat_tags_map.keys()):
-    add_to_valid_tree(valid_sequences, tag)
+for tag in valid_tags:
+    add_to_valid_tree(valid_sequences, tag, tag)
+for k, v in xlat_tags_map.items():
+    assert isinstance(k, str)
+    assert isinstance(v, list)
+    for vv in v:
+        assert isinstance(vv, str)
+        add_to_valid_tree(valid_sequences, k, vv)
 
 # Regexp used to find "words" from word heads and linguistic descriptions
 word_re = re.compile(r"[^ ,;()\u200e]+|\(([^()]|\([^)]*\))*\)")
@@ -666,47 +685,59 @@ def decode_tags(config, lst, allow_any=False):
     lsts = map_with(xlat_tags_map, list(map(lambda x: " ".join(x), lsts)))
     lsts = list(map(lambda x: x.split(" "), lsts))
     tagsets = set()
-    next_i = 0
     for lst in lsts:
         tags = []
-        node = valid_tree
+        nodes = [(valid_sequences, 0)]
         for i, w in enumerate(lst):
             if not w:
                 continue
+            new_nodes = []
+
+            def add_new(node, next_i):
+                for node2, next_i2 in new_nodes:
+                    if node2 is node and next_i2 == next_i:
+                        break
+                else:
+                    new_nodes.append((node, next_i))
+
+            max_next_i = max(x[1] for x in nodes)
+            for node, next_i in nodes:
+                if w in node:
+                    add_new(node[w], next_i)
+                if "$" in node:
+                    tags.extend(node["$"])
+                    if w in valid_sequences:
+                        add_new(valid_sequences[w], i)
+                if w not in node and "$" not in node:
+                    if allow_any:
+                        tag = " ".join(lst[next_i:i + 1])
+                        next_i = i + 1
+                        if tag not in tags:
+                            tags.append(tag)
+                        if w in valid_sequences:
+                            new_nodes.append(valid_sequences[w], i)
+                    else:
+                        config.warning("unsupported tag at {!r} in {}"
+                                       .format(w, lst))
+                        if "error" not in tags:
+                            tags.append("error")
+                        if w in valid_sequences:
+                            new_nodes.append(valid_sequences[w], next_i)
+            if not new_nodes:
+                add_new(valid_sequences, max_next_i)
+            nodes = new_nodes
+
+        valid_end = False
+        for node, next_i in nodes:
             if "$" in node:
                 tags.extend(node["$"])
-                next_i = i + 1
-            if w in node:
-                node = node[w]
-                continue
-            if "$" in node and w in valid_tree:
-                node = valid_tree[w]
-                continue
-            if allow_any:
-                tag = " ".join(lst[next_i:i + 1])
-                next_i = i + 1
-                if tag not in tags:
-                    tags.append(tag)
-                if w in valid_tree:
-                    node = valid_tree[w]
-                else:
-                    node = valid_tree
-            else:
-                config.warning("unsupported tag at {!r} in {}"
-                               .format(w, lst))
-                if "error" not in tags:
-                    tags.append("error")
-                if w in valid_tree:
-                    node = valid_tree[w]
-                else:
-                    node = valid_tree
-        if node is not valid_tree:
-            if "$" in node:
-                tags.extend(node["$"])
-            else:
-                config.warning("uncompleted tag ending in {}".format(lst))
-                if "error" not in tags:
-                    tags.append("error")
+                valid_end = True
+        max_next_i = max(x[1] for x in nodes)
+        if not valid_end and any(lst[max_next_i]):
+            config.warning("incomplete tag ending in {}"
+                           .format(lst[max_next_i:]))
+            if "error" not in tags:
+                tags.append("error")
         tagsets.add(tuple(sorted(tags)))
     ret = list(tagsets)
     return ret

@@ -162,6 +162,7 @@ class WiktionaryConfig(object):
         self.errors.append({"word": self.word, "lang": self.language,
                             "pos": self.pos, "msg": msg})
         pos = self.pos if self.pos else "top-level"
+        lang = self.language if self.language else "top level"
         if self.subsection:
             pos += " in " + self.subsection
         print("{}: {}/{}: ERROR: {}"
@@ -173,10 +174,11 @@ class WiktionaryConfig(object):
         self.warnings.append({"word": self.word, "lang": self.language,
                               "pos": self.pos, "msg": msg})
         pos = self.pos if self.pos else "top-level"
+        lang = self.language if self.language else "top level"
         if self.subsection:
             pos += " in " + self.subsection
         print("{}: {}/{}: WARNING: {}"
-              "".format(self.word, self.language, pos, msg))
+              "".format(self.word, lang, pos, msg))
         sys.stdout.flush()
 
     def debug(self, msg):
@@ -184,10 +186,11 @@ class WiktionaryConfig(object):
         self.debugs.append({"word": self.word, "lang": self.language,
                             "pos": self.pos, "msg": msg})
         pos = self.pos if self.pos else "top-level"
+        lang = self.language if lang else "top level"
         if self.subsection:
             pos += " in " + self.subsection
         print("{}: {}/{}: DEBUG: {}"
-              "".format(self.word, self.language, pos, msg))
+              "".format(self.word, lang, pos, msg))
         sys.stdout.flush()
 
     def unrecognized_template(self, t, ctx):
