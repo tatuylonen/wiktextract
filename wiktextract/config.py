@@ -166,7 +166,7 @@ class WiktionaryConfig(object):
         if self.subsection:
             pos += " in " + self.subsection
         print("{}: {}/{}: ERROR: {}"
-              "".format(self.word, self.language, pos, msg))
+              "".format(self.word, lang, pos, msg))
         sys.stdout.flush()
 
     def warning(self, msg):
@@ -186,7 +186,7 @@ class WiktionaryConfig(object):
         self.debugs.append({"word": self.word, "lang": self.language,
                             "pos": self.pos, "msg": msg})
         pos = self.pos if self.pos else "top-level"
-        lang = self.language if lang else "top level"
+        lang = self.language if self.language else "top level"
         if self.subsection:
             pos += " in " + self.subsection
         print("{}: {}/{}: DEBUG: {}"

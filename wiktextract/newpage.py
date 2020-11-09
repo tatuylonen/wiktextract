@@ -1868,3 +1868,9 @@ def clean_node(config, ctx, value, template_fn=None):
 
 # XXX should probably handle "Lua module not found" differently, perhaps
 # silently returning an error that can be handled using #iferror
+
+# XXX parse word senses from second-level enumerated list items,
+# see e.g. gay/English/Adjective
+
+# XXX handle qualifiers starting with "of " specially.  They are quite common
+# for adjectives, describing what the adjective can characterize

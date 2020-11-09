@@ -245,6 +245,7 @@ xlat_tags_map = {
     "dialectical": ["dialectal"],
     "dialect": ["dialectal"],
     "dated": ["archaic"],
+    "possibly obsolete": ["archaic"],
     "dated or regional": ["archaic", "regional"],
     "archaic ortography": ["archaic"],
 }
@@ -300,6 +301,7 @@ valid_tags = set([
     "dative",
     "oblique",
     "locative",
+    "lative",
     "ablative",
     "essive",
     "inessive",
@@ -529,6 +531,10 @@ valid_tags = set([
     "with subjunctive",
     "with optative",
     "with number",
+    "with meel",
+    "with kala",
+    "with järgi",
+    "with välja",
     "krama",
     "ngoko",
     "krama-ngoko",
@@ -583,15 +589,49 @@ valid_tags = set([
     "computing",
     "science",
     "economics",
+    "ethnic",
+    "capitalized",
+    "psychology",
+    "slur",
+    "geology",
+    "mineralogy",
+    "Internet",
+    "typography",
+    "definition",
+    "Internet",
+    "typography",
     "card games",
     "physics",
     "chemistry",
     "legal",
     "linguistics",
     "meteorology",
+    "astronomy",
+    "astrophysics",
+    "mythology",
+    "communism",
+    "business",
+    "finance",
+    "architecture",
+    "cryptography",
+    "anatomy",
+    "mathematics",
+    "programming",
+    "engineering",
+    "biochemistry",
+    "automotive",
+    "chess",
+    "writing",
+    "paganism",
+    "genetics",
     "music",
     "sports",
+    "transport",
+    "sexuality",
+    "pharmacology",
+    "vegetable",
     "uncommon",
+    "beer",
 ])
 
 ignored_parens = set([
@@ -715,14 +755,14 @@ def decode_tags(config, lst, allow_any=False):
                         if tag not in tags:
                             tags.append(tag)
                         if w in valid_sequences:
-                            new_nodes.append(valid_sequences[w], i)
+                            add_new(valid_sequences[w], i)
                     else:
                         config.warning("unsupported tag at {!r} in {}"
                                        .format(w, lst))
                         if "error" not in tags:
                             tags.append("error")
                         if w in valid_sequences:
-                            new_nodes.append(valid_sequences[w], next_i)
+                            add_new(valid_sequences[w], next_i)
             if not new_nodes:
                 add_new(valid_sequences, max_next_i)
             nodes = new_nodes
