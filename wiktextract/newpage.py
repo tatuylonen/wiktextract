@@ -62,6 +62,7 @@ additional_expand_templates = set([
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
 panel_templates = set([
+    "CJKV",
     "French personal pronouns",
     "French possessive adjectives",
     "French possessive pronouns",
@@ -69,16 +70,18 @@ panel_templates = set([
     "LDL",
     "Spanish possessive adjectives",
     "Spanish possessive pronouns",
+    "Webster 1913",
     "attn",
+    "ca-compass",
     "checksense",
     "compass-fi",
     "examples",
     "hu-corr",
     "hu-suff-pron",
+    "ko-hanja-search",
     "list:compass points/en",
-    "list:compass points/zh",
     "list:compass points/ja",
-    "ca-compass",
+    "list:compass points/zh",
     "mediagenic terms",
     "picdic",
     "picdicimg",
@@ -86,14 +89,15 @@ panel_templates = set([
     "predidential nomics",
     "rfap",
     "rfc",
+    "rfclarify",
+    "rfex",
     "rfp",
     "rfref",
     "stroke order",  # XXX consider capturing this?
+    "tbot entry",
     "video frames",
     "wikipedia",
     "zh-forms",
-    "CJKV",
-    "ko-hanja-search",
 ])
 
 # Mapping from a template name (without language prefix) for the main word
@@ -753,9 +757,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         etym_datas = []
 
     def sense_template_fn(name, ht):
-        if name in ("LDL",):
-            return ""
-        if name in "rfdef":
+        if name in panel_templates:
             return ""
         if name in ("syn", "synonyms"):
             for i in range(2, 20):
@@ -776,6 +778,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                if not isinstance(x, WikiNode) or
                x.kind not in (NodeKind.LIST,)]
         gloss = clean_node(config, ctx, lst, template_fn=sense_template_fn)
+        if gloss.startswith("# "):
+            gloss = gloss[2:]
         if not gloss:
             config.warning("{}: empty gloss".format(pos))
         m = re.match(r"^\((([^()]|\([^)]*\))*)\):?\s*", gloss)
@@ -792,11 +796,19 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         gloss = re.sub(r"\s*\(([^)]*)\)", sense_repl, gloss)
 
+        # Check to make sure we don't have unhandled list items in gloss
+        ofs = max(gloss.find("#"), gloss.find("*"))
+        if ofs > 10:
+            config.warning("gloss may contain unhandled list items: {}"
+                           .format(gloss))
+
         # Kludge, some glosses have a comma after initial qualifiers in
         # parentheses
         if gloss.startswith(",") or gloss.startswith(":"):
             gloss = gloss[1:]
         gloss = gloss.strip()
+        if gloss.startswith("N. of "):
+            gloss = "Name of " +  gloss[6:]
         if gloss:
             data_append(config, sense_data, "glosses", gloss)
 
@@ -1589,6 +1601,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # the page or from related pages
         ret.append(data)
 
+    # Copy all tags to word senses and remove duplicate tags
+    for data in ret:
+        if "tags" not in data:
+            continue
+        if "senses" not in data:
+            continue
+        tags = data["tags"]
+        del data["tags"]
+        for sense in data["senses"]:
+            data_extend(config, data, "tags", tags)
+            data["tags"] = list(sorted(set(data["tags"])))
+
     return ret
 
 
@@ -1626,6 +1650,10 @@ def parse_page(ctx, word, text, config):
     assert isinstance(word, str)
     assert isinstance(text, str)
     assert isinstance(config, WiktionaryConfig)
+
+    # Skip words that have been moved to the Attic
+    if word.startswith("/(Attic) "):
+        return []
 
     if config.verbose:
         print("Parsing page:", word)
@@ -1874,3 +1902,65 @@ def clean_node(config, ctx, value, template_fn=None):
 
 # XXX handle qualifiers starting with "of " specially.  They are quite common
 # for adjectives, describing what the adjective can characterize
+
+# XXX handle (classifier XXX) at beginning of gloss; also (classifier: XXX)
+# and (classifiers: XXX, XXX, XXX)
+
+# XXX parse redirects, create alt_of
+
+# XXX parse see also, create "related"?
+
+# XXX parse "object of a preposition", "indirect object of a verb",
+# "(direct object of a verb)", "(as the object of a preposition)",
+# "(as the direct object of a verbal noun)",
+# in parenthesis at the end of gloss
+
+# XXX check "inflection of" as the start of gloss - there are lots but is
+# the form indicated on these somehow?  The ones I see have extra ##
+
+# XXX some form descriptors may start with a capital letter.  Recognize
+# even if the first word starts with a capital.  e.g. First-person
+
+# XXX add warnings about / in places where we try to parse tags
+
+# XXX sometimes form-of glosses have case at the end, e.g.:
+# Third active infinitive of aktuaalistuain abessive case.
+# There seem to be quite a lot of these.
+
+# XXX how about gloss "The name of the letter X",
+# "The name of the Latin-script letter X"
+# "The name of the Latin-script digraph XY",
+# "The name of the Hebrew-script letter X"
+# "The name of the Greek-script letter X"
+# "The name of the Devanagari letter X"
+# "The name of the Cyrillic-script letter X"
+# "The name of the Assamese character X"
+# "The name of the Arabic-script letter X"
+# "The XXX letter of the YYY alphabet..."
+# the same without The
+# Letter of the X syllabary, transcribed as X
+# Letter of the Tagbanwa abugida, transcribed as syllable X
+# Letter of the X script, transcribed as X
+# Letter of the X alphabet ...
+# Letter of the X alphabet: ...
+
+# XXX how about gloss "Synonym of ..." - there are a lot of these!
+
+# XXX check "Kanji characters outside the ..."
+
+# XXX would be better to process form_description using actual case and only
+# revert to lowercase if not found (now all entered in lowercase at startup)
+
+# XXX recognize "See also X" from end of gloss and move to a "See also" section
+
+# XXX implement alt_of map
+
+# XXX implement form_of
+
+# XXX review xlat map
+
+# XXX implement "of" at end of head parens, mark with form_of or alt_of
+
+# XXX implement form-of and alt-of tags
+
+# XXX implement and test parsing form-of and alt-of from glosses
