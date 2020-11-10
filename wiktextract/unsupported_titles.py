@@ -78,7 +78,7 @@ unsupported_title_map = {
     "Colon small p": ":p",
     "Cifrão": "[Cifrão]",  # Should be dollar sign with two vertical lines
     "Old Israeli shekel": "[Old Israeli shekel]",  # Should be the symbol
-    ":3": ":3",
+    "Colon three": ":3",
     "Amp": "&amp;",
     "Colon lowercase thorn": ":þ",
     "Colon left curly bracket": ":{",
