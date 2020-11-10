@@ -208,6 +208,7 @@ xlat_tags_map = {
     "+ instrumental case": "with-instrumental",
     "with instrumental case": "with-instrumental",
     "plus instrumental": "with-instrumental",
+    "+ locative": "with-locative",
     "+ locative case": "with-locative",
     "+absolutive": "with-absolutive",
     "+ absolutive": "with-absolutive",
@@ -646,7 +647,7 @@ alt_of_map = {
 blocked = set(["të", "a", "e", "al", "þou", "?", "lui", "auf", "op", "ein",
                "af", "uit", "aus", "ab", "zu", "on", "off", "um", "faço",
                "dou", "†yodan", "at", "feito", "mná", "peces", "har",
-               "an", "u"])
+               "an", "u", "ce", "for"])
 
 valid_tags = set([
     "masculine",

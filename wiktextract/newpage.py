@@ -1810,7 +1810,7 @@ def clean_node(config, ctx, value, template_fn=None):
 
 # XXX linkages may have senses, e.g. "singular" English "(being only one):"
 
-# XXX check use of sense numbers in translations
+# XXX check use of sense numbers in translations (check "eagle"/English)
 
 # XXX check how common are "## especially ''[[Pica pica]]'' as in "magpie"
 
@@ -1915,9 +1915,6 @@ def clean_node(config, ctx, value, template_fn=None):
 # "(as the direct object of a verbal noun)",
 # in parenthesis at the end of gloss
 
-# XXX check "inflection of" as the start of gloss - there are lots but is
-# the form indicated on these somehow?  The ones I see have extra ##
-
 # XXX some form descriptors may start with a capital letter.  Recognize
 # even if the first word starts with a capital.  e.g. First-person
 
@@ -1953,14 +1950,7 @@ def clean_node(config, ctx, value, template_fn=None):
 
 # XXX recognize "See also X" from end of gloss and move to a "See also" section
 
-# XXX implement alt_of map
-
-# XXX implement form_of
-
-# XXX review xlat map
-
-# XXX implement "of" at end of head parens, mark with form_of or alt_of
-
-# XXX implement form-of and alt-of tags
-
 # XXX implement and test parsing form-of and alt-of from glosses
+
+# XXX check "inflection of" as the start of gloss - there are lots but is
+# the form indicated on these somehow?  The ones I see have extra ##
