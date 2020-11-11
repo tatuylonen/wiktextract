@@ -1954,3 +1954,10 @@ def clean_node(config, ctx, value, template_fn=None):
 
 # XXX check "inflection of" as the start of gloss - there are lots but is
 # the form indicated on these somehow?  The ones I see have extra ##
+
+# XXX utilize <span class="form-of-definition use-with-mention"> in
+# identifying form-ofs.  However, "talossa" does not have
+# form-of-definition, only use-with.  Also the word that it is a form
+# of seems to be in class="form-of-definition-link for English, but
+# Finnish just has it in <i class="Latn mention">.  However it will
+# clearly be one of the links, following "of".
