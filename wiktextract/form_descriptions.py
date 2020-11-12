@@ -11,34 +11,42 @@ from .config import WiktionaryConfig
 from .datautils import (data_append, data_extend, data_inflection_of,
                         data_alt_of, split_at_comma_semi)
 
-# Maps strings into one or more other strings.  This is applied at multiple
-# levels of partitioning the description.
 
-xlat_tags_map = {
+# Mappings for tags in template head line ends outside parentheses
+xlat_head_map = {
     "m": "masculine",
-    "m.": "masculine",
-    "male": "masculine",
     "f": "feminine",
-    "f.": "feminine",
-    "fem.": "feminine",
-    "female": "feminine",
+    "n": "neuter",
+    "c": "common",  # common gender in at least West Frisian
     "sg": "singular",
     "pl": "plural",
-    "indef.": "indefinite",
-    "gen.": "genitive",
-    "n": "neuter",
-    "pl": "plural",
+    "du": "dual",
     "inan": "inanimate",
     "anim": "animate",
     "pers": "person",  # XXX check what this really is used for? personal?
-    "impf.": "imperfect",
+    "npers": "impersonal",
+    "vir": "virile",
+    "nvir": "nonvirile",
+    "anml": "animal",
     "impf": "imperfect",
     "pf": "perfective",
+    "?": "",
+}
+
+# General mapping for linguistic tags.  Value is a string of space-separated
+# tags, or list of alternative sets of tags.  Alternative forms in the same
+# category can all be listed in the same string (e.g., multiple genders).
+xlat_tags_map = {
+    "m.": "masculine",
+    "male": "masculine",
+    "f.": "feminine",
+    "fem.": "feminine",
+    "female": "feminine",
+    "indef.": "indefinite",
+    "gen.": "genitive",
+    "impf.": "imperfect",
     "unc": "uncountable",
     "trans.": "transitive",
-    "npers": "impersonal",
-    "agri.": "agriculture",
-    "c": "common",  # common gender in at least West Frisian
     "abbreviated": "abbreviation",
     "diminutives": "diminutive",
     "†-tari": "-tari",
@@ -55,14 +63,14 @@ xlat_tags_map = {
     "feminine and neuter plural": "feminine neuter plural",
     "masculine and feminine": "masculine feminine",
     "masculine and neuter": "masculine neuter",
-    "masculine and plural": ["masculine", "plural"],
+    "masculine and plural": "masculine plural",
     "female and neuter": "feminine neuter",
     "singular and plural": "singular plural",
     "plural and weak singular": ["plural", "weak singular"],
     "dative-directional": "dative",
     "preterite and supine": "preterite supine",
     "genitive and dative": "genitive dative",
-    "genitive and plural": ["genitive", "plural"],
+    "genitive and plural": "genitive plural",
     "dative and accusative": "dative accusative",
     "accusative/illative": "accusative illative",
     "dative and accusative singular": "dative accusative singular",
@@ -120,10 +128,10 @@ xlat_tags_map = {
     "nominative accusative definite singular",
     "+ genitive or possessive suffix": "with-genitive with-possessive-suffix",
     "+ genitive possessive suffix or elative":
-    ["with-genitive with-possessive-suffix", "with-elative"],
+    "with-genitive with-possessive-suffix with-elative",
     "+ partitive or (less common) possessive suffix":
-    ["with-partitive", "with-possessive-suffix"],
-    "no perfect or supine stem": ["no-perfect no-supine"],
+    "with-partitive with-possessive-suffix",
+    "no perfect or supine stem": "no-perfect no-supine",
     "adverbial locative noun in the pa, ku, or mu locative classes":
     "adverbial locative",
     "comparative -": "no-comparative",
@@ -144,6 +152,7 @@ xlat_tags_map = {
     "plural not attested": "no-plural",
     "no plural forms": "no-plural",
     "used only predicatively": "not-attributive",
+    "predicatively": "predicative",
     "present tense": "present",
     "past tense": "past",
     "feminine counterpart": "feminine",
@@ -181,14 +190,17 @@ xlat_tags_map = {
     "+ genitive case": "with-genitive",
     "genitive +": "with-genitive",
     "with genitive case": "with-genitive",
+    "with genitive": "with-genitive",
     "+dative": "with-dative",
     "+ dative case": "with-dative",
     "+ dative": "with-dative",
     "plus dative": "with-dative",
+    "with dative": "with-dative",
     "+ accusative": "with-accusative",
     "+ accusative case": "with-accusative",
     "+accusative": "with-accusative",
     "with accusative case": "with-accusative",
+    "with accusative": "with-accusative",
     "plus accusative": "with-accusative",
     "governs the accusative": "with-accusative",
     "+ partitive": "with-partitive",
@@ -196,39 +208,49 @@ xlat_tags_map = {
     "+partitive": "with-partitive",
     "with partitive case": "with-partitive",
     "plus partitive": "with-partitive",
+    "with partitive": "with-partitive",
     "+ablative": "with-ablative",
     "+ ablative": "with-ablative",
     "with ablative case": "with-ablative",
     "plus ablative": "with-ablative",
+    "with ablative": "with-ablative",
     "+ subjunctive": "with-subjunctive",
     "+subjunctive": "with-subjunctive",
     "plus subjunctive": "with-subjunctive",
+    "with subjunctive": "with-subjunctive",
     "+ instrumental": "with-instrumental",
     "+instrumental": "with-instrumental",
     "+ instrumental case": "with-instrumental",
     "with instrumental case": "with-instrumental",
+    "with instrumental": "with-instrumental",
     "plus instrumental": "with-instrumental",
     "+ locative": "with-locative",
     "+ locative case": "with-locative",
+    "with locative": "with-locative",
     "+absolutive": "with-absolutive",
     "+ absolutive": "with-absolutive",
     "with absolutive case": "with-absolutive",
+    "with absolutive": "with-absolutive",
     "+ absolutive case": "with-absolutive",
     "plus absolutive": "with-absolutive",
     "+elative": "with-elative",
     "+ elative": "with-elative",
     "with elative case": "with-elative",
+    "with elative": "with-elative",
     "plus elative": "with-elative",
     "+objective": "with-objective",
     "+ objective": "with-objective",
     "with objective case": "with-objective",
+    "with objective": "with-objective",
     "plus objective": "with-objective",
     "+ present form": "with-present",
     "+ noun phrase] + subjunctive (verb)":
     "with-noun-phrase with-subjunctive",
+    "with noun phrase": "with-noun-phrase",
     "+ [nounphrase] + subjunctive":
     "with-noun-phrase with-subjunctive",
     "+ number": "with-number",
+    "with number": "with-number",
     "optative mood +": "with-optative",
     "p-past": "passive past",
     "ppp": "passive perfect participle",
@@ -259,27 +281,24 @@ xlat_tags_map = {
     "use the subjunctive tense of the verb that follows": "with-subjunctive",
     "kyūjitai form": "kyūjitai",
     "shinjitai kanji": "shinjitai",
-    "militaryu slang": "military slang",
     "dialectical": "dialectal",
     "dialect": "dialectal",
     "possibly obsolete": "archaic",
     "19th century": "archaic",
     "dated or regional": "archaic regional",
     "archaic ortography": "archaic",
-    '"manner of action"': "manner-of-action",
     "in the plural": "plural-only",
     "derogative": "derogatory",
-    "collective sense": "collective",
-    "law": "legal",
-    "rail transport": "transport",
+    "collective sense": "collectively",
     "relatively rare": "rare",
     "very informal": "informal",
     "with a + inf.": "with-a with-infinitive",
     "with di + inf.": "with-di with-infinitive",
     "with che + subj.": "with-che with-subjunctive",
     "with inf.": "with-infinitive",
-    "~ се": "with-ce",
+    # XXX re-enable "~ се": "with-ce",
     "strong/mixed": "strong mixed",
+    "auxiliary sein": "with-sein",
     "nominative/accusative": "nominative accusative",
     "masculine/feminine": "masculine feminine",
     "masculine/neuter": "masculine neuter",
@@ -509,21 +528,23 @@ xlat_tags_map = {
     "abstract noun": "abstract-noun",
     "genitive as verbal noun": "genitive verbal-noun",
     "genitive singular as substantive": "genitive singular substantive",
-    "proper name": "proper-name",
+    "female names": "feminine proper-noun",
+    "proper name": "proper-noun",
+    "proper noun": "proper-noun",
+    "proper nouns": "proper-noun",
     "usually in the": "usually",
     "non-scientific usage": "non-scientific",
-    "card games": "card-games",
-    "manner of action": "manner-of-action",
     "krama inggil": "krama-inggil",
     "McCune-Reischauer chŏn": "McCune-Reischauer-chŏn",
     "gender indeterminate": "gender-indeterminate",
     "singular only": "singular-only",
     "plural only": "plural-only",
     "imperative only": "imperative-only",
-    "by extension": "by-extension",
-    "by metonymy": "by-metonymy",
-    "by semantic narrowing": "by-semantic-narrowing",
-    "by semantic widening": "by-semantic-widening",
+    "by extension": "broadly",
+    "by metonymy": "metonymically",
+    "by semantic narrowing": "narrowly",
+    "by semantic widening": "broadly",
+    "strict sense": "strict-sense",
     "baby talk": "baby-talk",
     "middle infinitive": "middle-infinitive",
     "first infinitive": "first-infinitive",
@@ -637,11 +658,711 @@ xlat_tags_map = {
     "compound of": "compound-of",
     "form of": "form-of",
     "humurous": "humorous",
+    "ironic": "humorous",
+    "figuratively or literally": "figuratively literally",
+    "figuative": "figuratively",
+    "humorously": "humorous",
+    "jocular": "humorous",
+    "northern dialects": "dialectal",
+    "archaic or loosely": "archaic broadly",
+    "used attributively": "attributive",
+    "used predicatively": "predicative",
+    "used substatively": "substantive",
+    "unofficial spelling": "nonstandard",
+    "capitalised": "capitalized",
+    "rhetorical question": "rhetoric",
+    "old-fashioned": "dated",
+    "rarely used": "rare",
+    "rarely": "rare",
+    "fossil word": "archaic",
+    "brusque": "impolite",
+    "verbs": "verb",
+    "local use": "regional",
+    "more generally": "broadly",
+    "loosely": "broadly",
+    "broad sense": "broadly",
+    "hypocoristic": "familiar",
+    "hyperbolic": "excessive",
+    "18th century": "obsolete",
+    "9th century": "obsolete",
+    "17th century": "obsolete",
+    "10th century": "obsolete",
+    "16th century": "obsolete",
+    "14th century": "obsolete",
+    "12th century": "obsolete",
+    "post-classical": "obsolete",
+    "early 20th century": "archaic",
+    "20th century": "dated",
+    "mid-20th century": "dated",
+    "mid-19th century": "obsolete",
+    "before 20th century": "obsolete",
+    "19th to 20th century": "archaic",
+    "15th century": "obsolete",
+    "11th century": "obsolete",
+    "until early 20th century": "obsolete",
+    "since the 16th century": "dated",
+    "late 16th century": "obsolete",
+    "late 14th century": "obsolete",
+    "in usage until 20th century": "obsolete",
+    "in the 17th century": "obsolete",
+    "in the 16 th century": "obsolete",
+    "in Scots until the seventeenth century": "obsolete",
+    "in 10th century": "obsolete",
+    "early 17th century": "obsolete",
+    "chiefly 18th century": "obsolete",
+    "chiefly 12th century": "obsolete",
+    "before 16th century": "obsolete",
+    "attested in the 16th century": "obsolete",
+    "5th century": "obsolete",
+    "19th to early 20th century": "obsolete",
+    "19th-mid 20th century": "obsolete",
+    "19 the century": "obsolete",
+    "19th-early 20th century": "obsolete",
+    "19th century": "obsolete",
+    "1776-19th century": "obsolete",
+    "15th-16th century": "obsolete",
+    "collective": "collectively",
+    "used formally in Spain": "Spain",
+    "nouns": "noun",
+    "with the particle lai": "with-lai",
+    "adjectives": "adjective",
+    "non-standard since 2012": "nonstandard",
+    "colloquialism": "colloquial",
+    "non-standard since 1917": "nonstandard",
+    "conditional mood": "conditional",
+    "figurative": "figuratively",
+    "reciprocal": "reflexive",
+    "compound words": "compound",
+    "girl": "person feminine",
+    "woman": "person feminine",
+    "form of address": "term-of-address",
+    "term of address": "term-of-address",
+    "as a term of address": "term-of-address",
+    "direct address": "term-of-address",
+    "face-to-face address term": "term-of-address",
+    "address": "term-of-address",
+    "endearingly": "endearing",
+    "elliptically": "ellipsis",
+    "elegant": "formal",  # Elegant or Formal Thai
+    "nonce word": "neologism",
+    "attributively": "attributive",
+    "poetic term": "poetic",
+    "poetic meter": "poetic",
 }
 
-# These mappings suggest the word form should go in alt_of
-# XXX these include final of/by
-alt_of_map = {
+# Translation map for topics.
+# XXX revisit this mapping.  Create more fine-tuned hierarchy
+topic_generalize_map = {
+    "card games": "games",
+    "board games": "games",
+    "ball games": "games",
+    "rock paper scissors": "games",
+    '"manner of action"': "manner",
+    "manner of action": "manner",
+    "planets of the Solar system": "planets",
+    "planets": "astronomy region",
+    "continents": "geography region",
+    "countries of Africa": "countries",
+    "countries of Europe": "countries",
+    "countries of Asia": "countries",
+    "countries of South America": "countries",
+    "countries of North America": "countries",
+    "countries of Central America": "countries",
+    "countries of Oceania": "countries",
+    "countries": "region",
+    "country": "countries",
+    "the country": "countries",
+    "regions of Armenia": "region",
+    "region around the Ruppel river": "region",
+    "geographical region": "region",
+    "winegrowing region": "region",
+    "the historical region": "region",
+    "region": "geography location",
+    "geography": "natural-sciences",
+    "natural-sciences": "sciences",
+    "states of India": "states",
+    "states of Australia": "states",
+    "states": "region",
+    "city": "cities",
+    "cities": "region",
+    "prefectures of Japan": "prefectures",
+    "prefecture": "region",
+    "software": "computing",
+    "text messaging": "communications telephone",
+    "billiards": "games",
+    "blackjack": "games",
+    "backgammon": "games",
+    "bridge": "games",
+    "darts": "games",
+    "human-sciences": "sciences",
+    "anthropology": "human-sciences",
+    "anthropodology": "anthropology",
+    "ornithology": "biology",
+    "ornitology": "ornithology",
+    "entomology": "biology",
+    "medicine": "sciences",
+    "anatomy": "medicine",
+    "bone": "anatomy",
+    "body": "anatomy",
+    "scientific": "sciences",
+    "scholarly": "sciences",
+    "neuroanatomy": "anatomy neurology",
+    "neurotoxicology": "neurology toxicology",
+    "neurobiology": "neurology",
+    "neurophysiology": "physiology neurology",
+    "nephrology": "medicine",
+    "hepatology": "medicine",
+    "endocrinology": "medicine",
+    "gynaecology": "medicine",
+    "mammology": "medicine",
+    "urology": "medicine",
+    "neurology": "medicine neuroscience",
+    "neuroscience": "human-sciences",
+    "gerontology": "medicine",
+    "andrology": "medicine",
+    "phycology": "botany",
+    "planktology": "botany",
+    "oncology": "medicine",
+    "hematology": "medicine",
+    "physiology": "medicine",
+    "gastroenterology": "medicine",
+    "surgery": "medicine",
+    "pharmacology": "medicine",
+    "drugs": "pharmacology",
+    "cytology": "biology medicine",
+    "healthcare": "government",
+    "cardiology": "medicine",
+    "dentistry": "medicine",
+    "odontology": "dentistry",
+    "pathology": "medicine",
+    "toxicology": "medicine",
+    "dermatology": "medicine",
+    "epidemiology": "medicine",
+    "psychiatry": "medicine psychology",
+    "psychoanalysis": "medicine psychology",
+    "phrenology": "medicine psychology",
+    "psychology": "medicine human-sciences",
+    "sociology": "social-science",
+    "social science": "social-science",
+    "social sciences": "social-science",
+    "social-science": "human-sciences",
+    "demographics": "demography",
+    "immunology": "medicine",
+    "immunologic sense": "medicine",
+    "anesthesiology": "medicine",
+    "xenobiology": "biology",
+    "sinology": "geography",
+    "psychopathology": "psychiatry",
+    "histopathology": "pathology histology",
+    "histology": "biology",
+    "patology": "pathology",
+    "virology": "medicine",
+    "bacteriology": "medicine",
+    "parapsychology": "psychology pseudoscience",
+    "psyschology": "psychology error",
+    "printing technology": "printing",
+    "litography": "printing",
+    "iconography": "history",
+    "geomorphology": "geology",
+    "phytopathology": "botany pathology",
+    "bryology": "botany",
+    "opthalmology": "medicine",
+    "embryology": "medicine",
+    "illness": "medicine",
+    "parasitology": "medicine",
+    "teratology": "medicine",
+    "speech therapy": "medicine",
+    "speech pathology": "medicine",
+    "radiology": "medicine",
+    "radiography": "radiology",
+    "vaccinology": "medicine",
+    "traumatology": "medicine",
+    "microbiology": "biology medicine",
+    "pulmonology": "medicine",
+    "pneumology": "pulmonology",
+    "biology": "natural-sciences",
+    "strong topology": "topology",
+    "sociobiology": "social-science biology",
+    "radio technology": "electrical-engineering radio",
+    "authorship": "legal",
+    "volcanology": "geology",
+    "gemmology": "gemology",
+    "gemology": "geology",
+    "conchology": "zoology",
+    "comics": "literature",
+    "codicology": "history",
+    "zoology": "biology",
+    "botany": "biology",
+    "malacology": "biology",
+    "geology": "geography",
+    "mineralogy": "geology chemistry",
+    "mineralology": "mineralogy",
+    "biochemistry": "microbiology chemistry",
+    "language": "linguistics",
+    "grammar": "linguistics",
+    "syntax": "linguistics",
+    "semantics": "linguistics",
+    "epistemology": "philosophy",
+    "ontology": "epistemology",
+    "etymology": "linguistics",
+    "ethnology": "anthropology",
+    "ethnography": "anthropology",
+    "historical ethnography": "ethnography history",
+    "entertainment industry": "economics",
+    "electrochemistry": "chemistry",
+    "classical studies": "history",
+    "textual criticism": "linguistics",
+    "nanotechnology": "engineering",
+    "electromagnetism": "physics",
+    "biotechnology": "engineering medicine",
+    "systems theory": "mathematics",
+    "computer games": "games",
+    "graphic design": "arts",
+    "criminology": "legal human-sciences",
+    "penology": "criminology",
+    "pragmatics": "linguistics",
+    "morphology": "linguistics",
+    "phonology": "linguistics",
+    "phonetics": "phonology",
+    "prosody": "phonology",
+    "lexicography": "linguistics",
+    "lexicology": "linguistics",
+    "narratology": "linguistics",
+    "linguistic": "linguistics",
+    "translation studies": "linguistics",
+    "semiotics": "linguistics",
+    "dialectology": "linguistics",
+    "ortography": "linguistics",
+    "beekeeping": "agriculture",
+    "officialese": "government",
+    "textiles": "manufacturing",
+    "weaving": "textiles",
+    "quilting": "textiles",
+    "knitting": "textiles",
+    "sewing": "textiles",
+    "cutting": "textiles",
+    "furniture": "manufacturing lifestyle",
+    "caving": "sports",
+    "country dancing": "dancing",
+    "dancing": "sports",
+    "hip-hop": "dancing",
+    "cheerleading": "sports",
+    "bowling": "sports",
+    "athletics": "sports",
+    "acrobatics": "sports",
+    "martial arts": "martial-arts",
+    "martial-arts": "sports military",
+    "meterology": "meteorology",
+    "meteorology": "geography",
+    "weather": "meteorology",
+    "climate": "meteorology",
+    "cryptozoology": "zoology",
+    "lepidopterology": "zoology",
+    "nematology": "zoology",
+    "campanology": "history",
+    "vexillology": "history",
+    "phenomenology": "philosophy",
+    "seismology": "geology",
+    "cosmology": "astronomy",
+    "astrogeology": "astronomy geology",
+    "areology": "astrology geology",
+    "stratigraphy": "geology",
+    "orography": "geology",
+    "stenography": "writing",
+    "palynology": "chemistry microbiology",
+    "lichenology": "botany",
+    "seasons": "weather",
+    "information technology": "computing",
+    "mathematics": "philosophy",
+    "mathematics": "philosophy",
+    "algebra": "mathematics",
+    "calculus": "mathematics",
+    "arithmetics": "mathematics",
+    "statistics": "mathematics",
+    "geometry": "mathematics",
+    "logic": "mathematics philosophy",
+    "trigonometry": "mathematics",
+    "mathematical analysis": "mathematics",
+    "ethics": "philosophy",
+    "existentialism": "philosophy",
+    "religion": "philosophy lifestyle",
+    "philosophy": "human-sciences",
+    "transport": "economics",
+    "shipping": "economics",
+    "railways": "vehicles",
+    "automotive": "vehicles",
+    "automobile": "vehicles",
+    "vehicles": "transport",
+    "tourism": "economics",
+    "travel": "tourism lifestyle",
+    "travel industry": "tourism",
+    "parliamentary procedure": "government",
+    "food": "lifestyle",
+    "vegetable": "food",
+    "beer": "food",
+    "brewing": "food manufacturing",
+    "cooking": "food",
+    "sexuality": "lifestyle",
+    "seduction community": "sexuality",
+    "BDSM": "sexuality",
+    "LGBT": "sexuality",
+    "sexual orientations": "sexuality",
+    "romantic orientations": "sexuality",
+    "prostitution": "sexuality",
+    "sexology": "sexuality",
+    "biblical": "religion",
+    "ecclesiastical": "religion",
+    "genetics": "biology medicine",
+    "medical terminology": "medicine",
+    "mycology": "biology",
+    "paganism": "religion",
+    "mechanical-engineering": "engineering",
+    "mechanics": "mechanical-engineering",
+    "lubricants": "mechanical-engineering",
+    "measurement": "engineering",
+    "thermodynamics": "physics",
+    "signal processing": "computing mathematics",
+    "topology": "mathematics",
+    "algebraic topology": "topology",
+    "norm topology": "topology",
+    "linear algebra": "mathematics",
+    "number theory": "mathematics",
+    "insurance": "economics",
+    "taxation": "economics government",
+    "sugar-making": "manufacturing",
+    "glassmaking": "manufacturing",
+    "food manufacture": "manufacturing",
+    "manufacturing": "economics",
+    "optics": "physics engineering",
+    "physical-sciences": "sciences",
+    "chemistry": "physical-sciences",
+    "ceramics": "chemistry engineering",
+    "chess": "games",
+    "checkers": "games",
+    "mahjong": "games",
+    "crystallography": "chemistry",
+    "fluids": "chemistry physics engineering",
+    "science": "sciences",
+    "physics": "physical-sciences",
+    "electrical-engineering": "engineering",
+    "electricity": "electrical-engineering physics",
+    "electronics": "electrical-engineering",
+    "programming": "computing",
+    "databases": "computing",
+    "visual art": "arts",
+    "crafts": "arts hobbies",
+    "papercraft": "crafts",
+    "bowmaking": "crafts",
+    "lutherie": "crafts",
+    "history": "human-sciences",
+    "heraldry": "hobbies nobility",
+    "philately": "hobbies",
+    "hobbies": "lifestyle",
+    "numismatics": "hobbies",
+    "chronology": "horology",
+    "horology": "hobbies",
+    "cryptography": "computing",
+    "finance": "economics",
+    "finances": "finance",
+    "accounting": "finance",
+    "business": "economics",
+    "politics": "government",
+    "communism": "ideology",
+    "socialism": "ideology",
+    "capitalism": "ideology",
+    "feudalism": "politics",
+    "fascism": "ideology",
+    "white supremacist ideology": "ideology",
+    "pedology": "geography",
+    "biogeography": "geography biology",
+    "cryptocurrency": "finance",
+    "nobility": "monarchy",
+    "monarchy": "politics",
+    "demography": "social-science statistics government",
+    "historical demography": "demography",
+    "chromatography": "chemistry",
+    "anarchism": "politics",
+    "diplomacy": "politics",
+    "regionalism": "politics",
+    "economic liberalism": "politics",
+    "agri.": "agriculture",
+    "agriculture": "food manufacturing",
+    "horticulture": "agriculture",
+    "fashion": "lifestyle textiles",
+    "cosmetics": "lifestyle",
+    "design": "arts lifestyle",
+    "money": "finance",
+    "oceanography": "geography",
+    "geological oceanography": "geology oceanography",
+    "angelology": "theology",
+    "woodworking": "carpentry",
+    "art": "arts",
+    "television": "broadcasting",
+    "broadcasting": "media",
+    "radio": "broadcasting",
+    "radio communications": "radio",
+    "journalism": "media",
+    "writing": "journalism literature",
+    "editing": "writing",
+    "film": "television",
+    "cinematography": "film",
+    "drama": "film theater",
+    "printing": "publishing",
+    "publishing": "media",
+    "science-fiction": "literature",
+    "science fiction": "science-fiction",
+    "fiction": "literature",
+    "pornography": "media sexuality",
+    "naturism": "lifestyle",
+    "veganism": "lifestyle",
+    "urbanism": "lifestyle",
+    "Kantianism": "philosophy",
+    "newspapers": "journalism",
+    "telegraphy": "telecommunications",
+    "wireless telegraphy": "telegraphy",
+    "telegram": "telegraphy",
+    "audio": "radio television electrical-engineering",
+    "literature": "publishing",
+    "folklore": "arts history",
+    "music": "publishing arts",
+    "guitar": "music",
+    "musicology": "music human-sciences",
+    "talking": "communications",
+    "militaryu": "military",
+    "army": "military",
+    "navy": "military",
+    "naval": "navy",
+    "weaponry": "military tools",
+    "weapon": "weaponry",
+    "firearms": "weaponry",
+    "fortifications": "military",
+    "fortification": "fortifications",
+    "law enforcement": "government",
+    "archaeology": "history",
+    "epigraphy": "history",
+    "paleontology": "history natural-sciences",
+    "palæontology": "paleontology",
+    "paleobiology": "paleontology biology",
+    "paleoanthropology": "paleontology anthropology",
+    "paleogeography": "paleontology geography",
+    "palentology": "paleontology error",
+    "papyrology": "history",
+    "hagiography": "history religion",
+    "palaeography": "history",
+    "historical geography": "geography history",
+    "historiography": "history",
+    "calligraphy": "arts",
+    "ichthyology": "zoology",
+    "herpetology": "zoology",
+    "glaciology": "geography",
+    "arachnology": "zoology",
+    "veterinary pathology": "zoology pathology",
+    "acarology": "arachnology",
+    "mythology": "human-sciences",
+    "ufology": "mythology",
+    "fundamental interactions": "physics",
+    "quantum field theory": "physics",
+    "extragalactic medium": "cosmology",
+    "extra-cluster medium": "cosmology",
+    "uranography": "cartography astronomy",
+    "astrocartography": "cartography astronomy",
+    "mining": "manufacturing",
+    "forestry": "manufacturing",
+    "metalworking": "crafts",
+    "metallurgy": "engineering",
+    "communication": "communications",
+    "telecommunications": "electrical-engineering communications",
+    "telephony": "telecommunications communications",
+    "bookbinding": "crafts publishing",
+    "petrology": "geology",
+    "petroleum": "petrology energy",
+    "petrography": "petrology",
+    "energy": "engineering physics",
+    "shipbuilding": "manufacturing",
+    "plumbing": "construction",
+    "roofing": "construction",
+    "carpentry": "construction",
+    "construction": "manufacturing",
+    "piledriving": "construction",
+    "masonry": "construction",
+    "tools": "engineering",
+    "cranes": "tools",
+    "colleges": "education",
+    "higher education": "education",
+    "clothing": "textiles fashion",
+    "alchemy": "pseudoscience",
+    "photography": "hobbies arts",
+    "videography": "photography film",
+    "horses": "sports lifestyle",
+    "equestrianism": "horses",
+    "demoscene": "computing",
+    "golf": "sports lifestyle",
+    "tennis": "sports",
+    "hunting": "lifestyle agriculture",
+    "fishing": "lifestyle agriculture",
+    "birdwashing": "hobbies",
+    "fisheries": "ecology",
+    "climatology": "geography ecology",
+    "limnology": "ecology",
+    "informatics": "computing",
+    "marketing": "business",
+    "advertising": "marketing",
+    "electrotechnology": "electrical-engineering",
+    "electromagnetic radiation": "electromagnetism",
+    "electronics manufacturing": "manufacturing electrical-engineering",
+    "electric power": "energy electrical-engineering",
+    "electronic communication": "telecommunications",
+    "electrical device": "electrical-engineering",
+    "enology": "oenology",
+    "oenology": "food",
+    "wine": "oenology lifestyle",
+    "cigars": "lifestyle",
+    "smoking": "lifestyle",
+    "gambling": "games",
+    "exercise": "sports",
+    "acting": "drama",
+    "theater": "arts",
+    "comedy": "theater film",
+    "dominoes": "games",
+    "pocket billiards": "games",
+    "pool": "games",
+    "graphical user interface": "computing",
+    "mysticism": "philosophy",
+    "philology": "philosophy",
+    "enthnology": "human-sciences",
+    "feminism": "ideology",
+    "creationism": "ideology religion",
+    "shamanism": "religion",
+    "ideology": "politics philosophy",
+    "politology": "political-science",
+    "political-science": "human-sciences",
+    "political science": "political-science",
+    "cartomancy": "mysticism",
+    "tarot": "mysticism",
+    "tasseography": "mysticism",
+    "theology": "religion",
+    "religionists": "religion",
+    "spiritualism": "religion",
+    "horse racing": "horses",
+    "horse-racing": "horses",
+    "equitation": "horses",
+    "farriery": "horses",
+    "motor racing": "sports",
+    "spinning": "sports",
+    "gymnastics": "sports",
+    "cricket": "sports",
+    "volleyball": "sports",
+    "lacrosse": "sports",
+    "rugby": "sports",
+    "bodybuilding": "sports",
+    "falconry": "hunting",
+    "parachuting": "sports",
+    "squash": "sports",
+    "curling": "sports",
+    "motorcycling": "sports",
+    "swimming": "sports",
+    "diving": "sports",
+    "underwater diving": "diving",
+    "basketball": "sports",
+    "baseball": "sports",
+    "soccer": "sports",
+    "snooker": "sports",
+    "snowboarding": "sports",
+    "skateboarding": "sports",
+    "weightlifting": "sports",
+    "skiing": "sports",
+    "mountaineering": "sports",
+    "skating": "sports",
+    "cycling": "sports",
+    "rowing": "sports",
+    "boxing": "martial-arts",
+    "bullfighting": "sports",
+    "archery": "martial-arts",
+    "fencing": "martial-arts",
+    "climbing": "sports",
+    "surfing": "sports",
+    "ballooning": "sports",
+    "sailmaking": "manufacturing nautical",
+    "sailing": "nautical",
+    "maritime": "nautical",
+    "ropemaking": "manufacturing nautical",
+    "retail": "commerce",
+    "commercial": "commerce",
+    "retailing": "commerce",
+    "electrical": "electricity",
+    "category theory": "mathematics computing",
+    "in technical contexts": "engineering physics chemistry",
+    "technology": "engineering",
+    "technical": "engineering",
+    "stock exchange": "finance",
+    "surveying": "geography",
+    "networking": "computing",
+    "computer sciences": "computing",
+    "computer software": "computing",
+    "software compilation": "computing",
+    "computer languages": "computing",
+    "computer hardware": "computing",
+    "computer graphics": "computing",
+    "meats": "food",
+    "meat": "meats",
+    "web design": "computing",
+    "aviation": "aeronautics",
+    "aerospace": "aeronautics",
+    "investment": "finance",
+    "computing theory": "computing mathematics",
+    "information theory": "mathematics computing",
+    "set theory": "mathematics",
+    "order theory": "mathematics",
+    "graph theory": "mathematics",
+    "mathematical analysis": "mathematics",
+    "cellular automata": "computing mathematics",
+    "game theory": "mathematics computing",
+    "behavioral sciences": "psychology",
+    "space sciences": "astronomy",
+    "applied sciences": "sciences engineering",
+    "(sport)": "sports",
+    "stock ticker symbol": "finance",
+    "banking": "economics",
+    "commerce": "economics",
+    "cryptocurrency": "finance",
+    "cartography": "geography",
+    "ecology": "biology",
+    "hydrology": "geography",
+    "hydrography": "hydrology oceanography",
+    "topography": "geography",
+    "bibliography": "history literature",
+    "polygraphy": "legal",
+    "planetology": "astronomy",
+    "astrology": "mysticism",
+    "astrology signs": "astrology",
+    "linguistic morphology": "morphology",
+    "science": "sciences",
+    "video games": "games",
+    "role-playing games": "games",
+    "poker": "games",
+    "wrestling": "martial-arts",
+    "professional wrestling": "wrestling",
+    "sumo": "wrestling",
+    "law": "legal",
+    "court": "legal government",
+    "rail transport": "railways",
+    "colour": "color",
+    "color": "property",
+    "time": "property",
+    "days of the week": "weekdays",
+    "weekdays": "time",
+    "temporal location": "time",
+    "location": "property",
+    "time": "property",
+    "heading": "property",
+    "manner": "property",
+    "monotheism": "religion",
+    "Catholicism": "Christianity",
+    "Protestantism": "Christianity",
+    "occultism": "religion",
+    "buddhism": "religion",
+    "hinduism": "religion",
+    "Roman Catholicism": "Catholicism",
 }
 
 blocked = set(["të", "a", "e", "al", "þou", "?", "lui", "auf", "op", "ein",
@@ -680,9 +1401,12 @@ valid_tags = set([
     "inanimate",
     "animate",
     "person",
+    "partner",
     "personal",
     "impersonal",
     "abstract",
+    "physical",
+    "material",
     "natural",
     "demonstrative",
     "subjective-pronoun",
@@ -734,7 +1458,7 @@ valid_tags = set([
     "definitive",  # XXX is this used same as "definite", opposite indefinite?
     "definite",
     "indefinite",
-    "collective",
+    "collectively",
     "diminutive",
     "endearing",
     "emphatic",
@@ -746,6 +1470,7 @@ valid_tags = set([
     "contracted",
     "pejorative",
     "infinitive",
+    "middle",
     "middle-infinitive",
     "first-infinitive",
     "second-infinitive",
@@ -757,6 +1482,7 @@ valid_tags = set([
     "second-person",
     "third-person",
     "fourth-person",
+    "virile",
     "nonvirile",
     "present",
     "future",
@@ -832,6 +1558,7 @@ valid_tags = set([
     "durative",
     "transitive",
     "intransitive",
+    "ditransitive",
     "ambitransitive",
     "stative",
     "pronoun",
@@ -908,6 +1635,7 @@ valid_tags = set([
     "stem",
     "possessed",
     "ordinal",
+    "cardinal",
     "conjunct",
     "used-in-the-form",
     "construct",
@@ -932,13 +1660,16 @@ valid_tags = set([
     "agent",
     "adverbial",
     "adverb",
+    "term-of-address",
     "pronominal",
     "reflexive",
     "adjective",
     "adjectival",
     "verbal-noun",
     "substantive",
+    "article",
     "verb",
+    "noun",
     "abstract-noun",
     "auxiliary",
     "modal",
@@ -960,6 +1691,7 @@ valid_tags = set([
     "polytonic",
     "dialectal",
     "baby-talk",
+    "childish",
     "obsolete",
     "archaic",
     "regional",
@@ -969,7 +1701,10 @@ valid_tags = set([
     "neologism",
     "rhetoric",
     "informal",
+    "polite",
+    "impolite",
     "familiar",
+    "humble",
     "poetic",
     "formal",
     "honorific",
@@ -1003,6 +1738,7 @@ valid_tags = set([
     "with-optative",
     "with-number",
     "with-che",
+    "with-lai",
     "with-meel",
     "with-kala",
     "with-järgi",
@@ -1056,11 +1792,14 @@ valid_tags = set([
     "medial",
     "error",
     "canonical",  # Used to mark the canonical word from from the head tag
-    "figurative",
-    "by-extension",
-    "by-metonymy",
-    "by-semantic-narrowing",
-    "by-semantic-widening",
+    "figuratively",
+    "metonymically",
+    "broadly",
+    "narrowly",
+    "strict-sense",
+    "literally",
+    "deictically",
+    "anaphorically",
     "-na",  # Japanese inflection type
     "-i",   # Japanese inflection type
     "-tari",  # Japanese inflection type
@@ -1070,12 +1809,18 @@ valid_tags = set([
     "in-compounds",
     "slang",
     "derogatory",
+    "proscribed",
     "humorous",
     "sarcastic",
     "rare",
-    "proper-name",
+    "proper-noun",
+    "surnames",
     "sometimes",
+    "somewhat",
+    "especially",
+    "specifically",
     "chiefly",
+    "often",
     "usually",
     "vulgar",
     "offensive",
@@ -1086,37 +1831,12 @@ valid_tags = set([
     "capitalized",
     "typography",
     "definition",
-    "Internet",
-    "military",
-    "agriculture",
-    "aviation",
-    "baseball",
-    "biology",
-    "medicine",
-    "botany",
-    "zoology",
-    "computing",
-    "science",
     "economics",
-    "psychology",
-    "clothing",
     "slur",
-    "geology",
-    "mineralogy",
-    "Internet",
-    "physics",
-    "chemistry",
-    "legal",
-    "linguistics",
-    "grammar",
-    "meteorology",
-    "astronomy",
-    "astrology",
-    "arithmetic",
-    "metrology",
-    "astrophysics",
-    "mythology",
-    "card-games",
+    "capitalized",
+    "onomatopoeia",
+    "expressively",
+    "ideophonic",
     "dated",
     "exaggerated",
     "initialism",
@@ -1130,41 +1850,188 @@ valid_tags = set([
     "latin",
     "euphemistic",
     "traditional",
-    "communism",
-    "business",
-    "finance",
-    "architecture",
-    "cryptography",
-    "anatomy",
-    "mathematics",
-    "geometry",
-    "programming",
-    "engineering",
-    "biochemistry",
-    "automotive",
-    "chess",
-    "writing",
-    "paganism",
-    "genetics",
-    "music",
-    "sports",
-    "cooking",
-    "transport",
-    "sexuality",
-    "pharmacology",
-    "vegetable",
     "uncommon",
-    "beer",
     "būdinys",
-    "manner-of-action",
     "front-vowel",
     "form-of",
     "alt-of",
     "compound-of",
+    "US",
+    "relational",
+    "sequence",
 ])
-for t in valid_tags:
-    if t.find(" ") >= 0:
-        print("WARNING: TAG CONTAINS SPACE:", t)
+
+valid_topics = set([
+    "Catholicism",
+    "Christianity",
+    "Internet",
+    "Internet",
+    "aeronautics",
+    "agriculture",
+    "anatomy",
+    "animal",
+    "anthropology",
+    "arachnology",
+    "architecture",
+    "arithmetic",
+    "arts",
+    "astrology",
+    "astronomy",
+    "astrophysics",
+    "ball-games",
+    "biology",
+    "board-games",
+    "botany",
+    "broadcasting",
+    "business",
+    "card-games",
+    "carpentry",
+    "cartography",
+    "chemistry",
+    "cities",
+    "color",
+    "commerce",
+    "communications",
+    "computing",
+    "construction",
+    "cosmology",
+    "countries",
+    "court",
+    "crafts",
+    "criminology",
+    "demography",
+    "dancing",
+    "dentistry",
+    "diving",
+    "drama",
+    "drugs",
+    "ecology",
+    "economics",
+    "education",
+    "electrical-engineering",
+    "electricity",
+    "electromagnetism",
+    "energy",
+    "engineering",
+    "epistemology",
+    "error",
+    "ethnography",
+    "fantasy",
+    "fashion",
+    "film",
+    "finance",
+    "food",
+    "fortifications",
+    "games",
+    "gemology",
+    "geography",
+    "geology",
+    "government",
+    "heading",
+    "healthcare",
+    "histology",
+    "history",
+    "hobbies",
+    "horology",
+    "horses",
+    "human-sciences",
+    "hunting",
+    "hydrology",
+    "ideology",
+    "journalism",
+    "legal",
+    "lifestyle",
+    "linguistics",
+    "literature",
+    "location",
+    "management",
+    "manner",
+    "manufacturing",
+    "marketing",
+    "martial-arts",
+    "mathematics",
+    "meats",
+    "mechanical-engineering",
+    "media",
+    "medicine",
+    "meteorology",
+    "metrology",
+    "microbiology",
+    "military",
+    "mineralogy",
+    "mining",
+    "monarchy",
+    "morphology",
+    "music",
+    "mysticism",
+    "mythology",
+    "natural-sciences",
+    "nautical",
+    "navy",
+    "neurology",
+    "neuroscience",
+    "nobility",
+    "oceanography",
+    "oenology",
+    "organization",
+    "ornithology",
+    "paleontology",
+    "pathology",
+    "petrology",
+    "pharmacology",
+    "philosophy",
+    "phonology",
+    "photography",
+    "physical-sciences",
+    "physics",
+    "physiology",
+    "planets",
+    "political-science",
+    "politics",
+    "publishing",
+    "pulmonology",
+    "prefectures",
+    "printing",
+    "property",
+    "pseudoscience",
+    "psychiatry",
+    "psychology",
+    "radio",
+    "radiology",
+    "railways",
+    "region",
+    "religion",
+    "science-fiction",
+    "sciences",
+    "sexuality",
+    "social-science",
+    "socialism",
+    "sports",
+    "states",
+    "statistics",
+    "telecommunications",
+    "telegraphy",
+    "telephone",
+    "television",
+    "temperature",
+    "textiles",
+    "theater",
+    "theology",
+    "time",
+    "tools",
+    "topology",
+    "tourism",
+    "toxicology",
+    "transport",
+    "vehicles",
+    "weaponry",
+    "weather",
+    "weekdays",
+    "wrestling",
+    "writing",
+    "zoology",
+])
+
 
 ignored_parens = set([
     "please verify",
@@ -1179,10 +2046,11 @@ for x in xlat_tags_map.keys():
     valid_words.update(x.split(" "))
 
 
-def add_to_valid_tree(tree, tag, v):
+def add_to_valid_tree(tree, field, tag, v):
     """Helper function for building trees of valid tags/sequences during
     initialization."""
     assert isinstance(tree, dict)
+    assert field in ("tags", "topics")
     assert isinstance(tag, str)
     assert v is None or isinstance(v, str)
     node = tree
@@ -1194,35 +2062,80 @@ def add_to_valid_tree(tree, tag, v):
             node[w] = new_node
             node = new_node
     if "$" not in node:
-        node["$"] = ()
-    if v is not None and v not in node["$"]:
-        node["$"] += (v,)
+        node["$"] = {}
+    node = node["$"]
+    if field not in node:
+        node[field] = ()
+    if v is not None and v not in node[field]:
+        node[field] += (v,)
 
-# Tree of valid final tags
-valid_tree = {}
-for tag in valid_tags:
-    add_to_valid_tree(valid_tree, tag, tag)
+
+def add_to_valid_tree1(tree, field, k, v, valid_values):
+    assert isinstance(tree, dict)
+    assert isinstance(field, str)
+    assert isinstance(k, str)
+    assert v is None or isinstance(v, (list, tuple, str))
+    assert isinstance(valid_values, set)
+    if not v:
+        add_to_valid_tree(valid_sequences, field, k, None)
+        return
+    elif isinstance(v, str):
+        v = [v]
+    q = []
+    for vv in v:
+        assert isinstance(vv, str)
+        add_to_valid_tree(valid_sequences, field, k, vv)
+        add_to_valid_tree(valid_sequences, field, k.lower(), vv)
+        vvs = vv.split(" ")
+        q.extend(vvs)
+        for x in vvs:
+            if x not in valid_values and x[0].islower():
+                print("WARNING: {} in mapping {!r} but not in valid_values"
+                      .format(x, k))
+    return q
+
+
+def add_to_valid_tree_mapping(tree, field, mapping, valid_values, recurse):
+    for k, v in mapping.items():
+        assert isinstance(k, str)
+        assert isinstance(v, (list, str))
+        if isinstance(v, str):
+            v = [v]
+        q = []
+        for vv in v:
+            vv = vv.split(" ")
+            q.extend(add_to_valid_tree1(tree, field, k, vv, valid_values))
+        if recurse:
+            visited = set()
+            while q:
+                v = q.pop()
+                if v in visited:
+                    continue
+                visited.add(v)
+                if v not in mapping:
+                    continue
+                for vv in mapping[v].split(" "):
+                    qq = add_to_valid_tree1(tree, field, k, vv, valid_values)
+                    q.extend(qq)
+
 
 # Tree of sequences considered to be tags (includes sequences that are
 # mapped to something that becomes one or more valid tags)
 valid_sequences = {}
 for tag in valid_tags:
-    add_to_valid_tree(valid_sequences, tag, tag)
-for k, v in xlat_tags_map.items():
-    assert isinstance(k, str)
-    assert isinstance(v, (list, str))
-    if not v:
-        add_to_valid_tree(valid_sequences, k, None)
-    elif isinstance(v, str):
-        v = [v]
-    for vv in v:
-        assert isinstance(vv, str)
-        add_to_valid_tree(valid_sequences, k, vv)
-        add_to_valid_tree(valid_sequences, k.lower(), vv)
-        for x in vv.split(" "):
-            if x not in valid_tags and x[0].islower():
-                print("WARNING: {} in {!r} xlat map but not in valid_tags"
-                      .format(x, k))
+    add_to_valid_tree(valid_sequences, "tags", tag, tag)
+add_to_valid_tree_mapping(valid_sequences, "tags", xlat_tags_map,
+                          valid_tags, False)
+# Add topics to the same table, with all generalized topics also added
+for topic in valid_topics:
+    add_to_valid_tree(valid_sequences, "topics", topic, topic)
+# Let each original topic value stand alone.  These are not generally on
+# valid_topics.
+for topic in topic_generalize_map:
+    add_to_valid_tree(valid_sequences, "topics", topic, topic)
+# Add canonicalized/generalized topic values
+add_to_valid_tree_mapping(valid_sequences, "topics", topic_generalize_map,
+                          valid_topics, True)
 
 # Regexp used to find "words" from word heads and linguistic descriptions
 word_re = re.compile(r"[^ ,;()\u200e]+|\(([^()]|\([^)]*\))*\)")
@@ -1265,6 +2178,7 @@ def decode_tags(config, lst, allow_any=False):
             lsts = list(lst1 + [alt] for lst1 in lsts)
     lsts = map_with(xlat_tags_map, list(map(lambda x: " ".join(x), lsts)))
     lsts = list(map(lambda x: x.split(" "), lsts))
+    topics = []
     tagsets = set()
     for lst in lsts:
         tags = []
@@ -1286,7 +2200,8 @@ def decode_tags(config, lst, allow_any=False):
                 if w in node:
                     add_new(node[w], next_i)
                 if "$" in node:
-                    tags.extend(node["$"])
+                    tags.extend(node["$"].get("tags", ()))
+                    topics.extend(node["$"].get("topics", ()))
                     if w in valid_sequences:
                         add_new(valid_sequences[w], i)
                 if w not in node and "$" not in node:
@@ -1310,7 +2225,8 @@ def decode_tags(config, lst, allow_any=False):
         valid_end = False
         for node, next_i in nodes:
             if "$" in node:
-                tags.extend(node["$"])
+                tags.extend(node["$"].get("tags", ()))
+                topics.extend(node["$"].get("topics", ()))
                 valid_end = True
         max_next_i = max(x[1] for x in nodes)
         if not valid_end and any(lst[max_next_i]):
@@ -1322,7 +2238,7 @@ def decode_tags(config, lst, allow_any=False):
                 tags.append("error")
         tagsets.add(tuple(sorted(tags)))
     ret = list(tagsets)
-    return ret
+    return ret, topics
 
 
 def add_tags(ctx, config, data, lst, allow_any=False):
@@ -1332,7 +2248,8 @@ def add_tags(ctx, config, data, lst, allow_any=False):
     assert isinstance(lst, (list, tuple))
     for x in lst:
         assert isinstance(x, str)
-    tagsets = decode_tags(config, lst, allow_any=allow_any)
+    tagsets, topics = decode_tags(config, lst, allow_any=allow_any)
+    data_extend(config, data, "topics", topics)
     for tags in tagsets:
         data_extend(config, data, "tags", tags)
 
@@ -1355,29 +2272,40 @@ def add_related(ctx, config, data, lst, related):
             if m:
                 paren = m.group(1)
                 related = related[m.end():]
-                tagsets1 = decode_tags(config,
-                                       split_at_comma_semi(paren))
+                tagsets1, topics1 = decode_tags(config,
+                                                split_at_comma_semi(paren))
             else:
                 tagsets1 = [[]]
-            tagsets2 = decode_tags(config, lst)
+                topics1 = []
+            tagsets2, topics2 = decode_tags(config, lst)
             for tags1 in tagsets1:
+                assert isinstance(tags1, (list, tuple))
                 for tags2 in tagsets2:
+                    assert isinstance(tags1, (list, tuple))
                     if "alt-of" in tags2:
                         data_extend(config, data, "tags", tags1)
                         data_extend(config, data, "tags", tags2)
+                        data_extend(config, data, "topics", topics1)
+                        data_extend(config, data, "topics", topics2)
                         data_append(config, data, "alt_of", related)
                     elif "form-of" in tags2:
-                        data_append(config, data, "tags", tags1)
-                        data_append(config, data, "tags", tags2)
+                        data_extend(config, data, "tags", tags1)
+                        data_extend(config, data, "tags", tags2)
+                        data_extend(config, data, "topics", topics1)
+                        data_extend(config, data, "topics", topics2)
                         data_append(config, data, "inflection_of", related)
                     elif "compound-of" in tags2:
-                        data_append(config, data, "tags", tags1)
-                        data_append(config, data, "tags", tags2)
+                        data_extend(config, data, "tags", tags1)
+                        data_extend(config, data, "tags", tags2)
+                        data_extend(config, data, "topics", topics1)
+                        data_extend(config, data, "topics", topics2)
                         data_append(config, data, "compound", related)
                     else:
                         form = {"form": related}
                         data_extend(config, form, "tags", tags1)
                         data_extend(config, form, "tags", tags2)
+                        data_extend(config, form, "topics", topics1)
+                        data_extend(config, form, "topics", topics2)
                         data_append(config, data, "forms", form)
 
 
@@ -1389,7 +2317,7 @@ def parse_word_head(ctx, config, pos, text, data):
     assert isinstance(pos, str)
     assert isinstance(text, str)
     assert isinstance(data, dict)
-    #print("parse_word_head:", text)
+    # print("parse_word_head:", text)
     title = ctx.title
     titleparts = list(m.group(0) for m in re.finditer(word_re, title))
 
@@ -1401,27 +2329,37 @@ def parse_word_head(ctx, config, pos, text, data):
     for desc_i, desc in enumerate(descs):
         desc = desc.strip()
         for alt in map_with(xlat_tags_map, desc.split(" or ")):
-            # XXX change this to parse the part after the word form using
-            # valid_sequences
             baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
             if " ".join(baseparts) in valid_tags and desc_i > 0:
                 lst = []  # Word form
                 rest = baseparts  # Tags
             else:
-                lst = []  # Word form (NOT tags)
-                i = 0
-                while i < len(baseparts):
-                    word = baseparts[i]
-                    w = distw(titleparts, word)  # 0=identical..1=very different
-                    if (word == title or word in blocked or
-                        word in titleparts or
-                        ((w <= 0.7 or len(word) <= 4) and
-                         word not in valid_tags and word not in xlat_tags_map)):
-                        lst.append(word)
-                    else:
+                rest = []
+                lst = []
+                for i in range(len(baseparts) - 1, -1, -1):
+                    part = baseparts[i]
+                    if part not in xlat_head_map:
+                        lst = baseparts[:i + 1]
                         break
-                    i += 1
-                rest = baseparts[i:]
+                    rest.append(xlat_head_map[part])
+                rest = list(reversed(rest))
+
+                # XXX remove old code below?
+                # lst = lst[:i + 1]
+                # lst = []  # Word form (NOT tags)
+                # i = 0
+                # while i < len(baseparts):
+                #     word = baseparts[i]
+                #     w = distw(titleparts, word)  # 0=identical..1=very different
+                #     if (word == title or word in blocked or
+                #         word in titleparts or
+                #         ((w <= 0.7 or len(word) <= 4) and
+                #          word not in valid_tags and word not in xlat_tags_map)):
+                #         lst.append(word)
+                #     else:
+                #         break
+                #     i += 1
+                # rest = baseparts[i:]
             # lst is canonical form of the word
             # rest is additional tags (often gender m/f/n/c/...)
             if lst and title != " ".join(lst):
@@ -1450,7 +2388,7 @@ def parse_word_head(ctx, config, pos, text, data):
                 part = parts[i]
                 w = distw(titleparts, part)  # 0=identical .. 1=very different
                 if (part != title and part not in titleparts and
-                    (w >= 0.7 or len(word) < 4) and
+                    (w >= 0.7 or len(part) < 4) and
                     (part in node or
                      ("$" in node and part in valid_sequences))):
                     # Consider it part of a descriptor
@@ -1499,7 +2437,8 @@ def parse_sense_tags(ctx, config, text, data):
     # print("parse_sense_tags:", text)
     for semi in split_at_comma_semi(text):
         tags = map_with(xlat_tags_map, [semi])
-        tagsets = decode_tags(config, tags, allow_any=True)
+        tagsets, topics = decode_tags(config, tags, allow_any=True)
+        data_extend(config, data, "topics", topics)
         # XXX should think how to handle distinct options better,
         # e.g., "singular and plural genitive"; that can't really be
         # done with changing the calling convention of this function.
@@ -1555,7 +2494,20 @@ def parse_translation_desc(ctx, config, text, data):
     # in the translation
     for tagdesc in map_with(xlat_tags_map, [" ".join(rest)]):
         for tagpart in tagdesc.split(" or "):
-            add_tags(ctx, config, data, tagpart.split(" "))
+            lst = []
+            for part in tagpart.split(" "):
+                if not part or part == "or":
+                    continue
+                if part in xlat_head_map:
+                    lst.append(xlat_head_map[part])
+                elif part.startswith("("):
+                    continue
+                elif part.startswith('"') or part.startswith('“'):
+                    continue
+                else:
+                    config.warning("unexpected part in translation: {!r} in "
+                                   "{!r}".format(part, text))
+            add_tags(ctx, config, data, lst)
 
     # Handle parenthesized descriptors for the word form and links to
     # related words

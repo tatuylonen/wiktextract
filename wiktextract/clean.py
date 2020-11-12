@@ -250,7 +250,7 @@ def clean_replace_regexp(config, v):
     return v
 
 
-def clean_value(config, title):
+def clean_value(config, title, no_strip=False):
     """Cleans a title or value into a normal string.  This should basically
     remove any Wikimedia formatting from it: HTML tags, templates, links,
     emphasis, etc.  This will also merge multiple whitespaces into one
@@ -267,10 +267,12 @@ def clean_value(config, title):
     # Remove tables
     title = re.sub(r"(?s)\{\|.*?\|\}", " ", title)
     # Remove references (<ref>...</ref>).
-    title = re.sub(r"(?s)<\s*ref>\s*.*?<\s*/\s*ref>\n*", "", title)
+    title = re.sub(r"(?si)<\s*ref>\s*.*?<\s*/\s*ref>\n*", "", title)
     # Replace <br/> by comma space (it is used to express alternatives in some
     # declensions)
-    title = re.sub(r"(?s)<\s*br\s*/?>\n*", ", ", title)
+    title = re.sub(r"(?si)<\s*br\s*/?>\n*", ", ", title)
+    # Change <div> and </div> to newlines
+    title = re.sub(r"(?si)<\s*/?\s*div\b[^>]*>", "\n", title)
     # Remove any remaining HTML tags.
     title = re.sub(r"(?s)<\s*[^/][^>]*>\s*", "", title)
     title = re.sub(r"(?s)<\s*/\s*[^>]+>\n*", "", title)
@@ -301,7 +303,8 @@ def clean_value(config, title):
     # Remove whitespace before periods and commas etc
     title = re.sub(r" ([.,;:!?)])", r"\1", title)
     # Strip surrounding whitespace.
-    title = title.strip()
+    if not no_strip:
+        title = title.strip()
     return title
 
 
