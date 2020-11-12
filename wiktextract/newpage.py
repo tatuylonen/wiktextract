@@ -2058,16 +2058,19 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX recognize "See also X" from end of gloss and move to a "See also" section
 
-# XXX extract category links under "topics"
+# XXX htmlgen: include translations
+
+# XXX remove [Mid 19th century.] and similar from end of gloss
+# (ebelian/English/Adjective)
 
 # XXX implement and test parsing form-of and alt-of from glosses
 
 # XXX check "inflection of" as the start of gloss - there are lots but is
 # the form indicated on these somehow?  The ones I see have extra ##
 
-# XXX htmlgen: include translations
-
-# XXX htmlgen: include topics and categories in the new way
-
-# XXX remove [Mid 19th century.] and similar from end of gloss
-# (ebelian/English/Adjective)
+# XXX utilize <span class="form-of-definition use-with-mention"> in
+# identifying form-ofs.  However, "talossa" does not have
+# form-of-definition, only use-with.  Also the word that it is a form
+# of seems to be in class="form-of-definition-link for English, but
+# Finnish just has it in <i class="Latn mention">.  However it will
+# clearly be one of the links, following "of".
