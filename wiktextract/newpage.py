@@ -21,7 +21,8 @@ from .datautils import (data_append, data_extend, data_inflection_of,
                         data_alt_of, split_at_comma_semi)
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_tags, parse_pronunciation_tags,
-    parse_translation_desc, xlat_tags_map, valid_tags)
+    parse_translation_desc, xlat_tags_map, valid_tags,
+    parse_alt_or_inflection_of)
 
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
@@ -821,6 +822,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             return ""
         if name.startswith("RQ:"):
             return ""
+        if name in ("defdate",):
+            return ""
         if name in ("syn", "synonyms"):
             for i in range(2, 20):
                 w = ht.get(i)
@@ -856,7 +859,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
             parse_sense_tags(ctx, config, v, sense_data)
             return ""
 
+        # Replace parenthesized expressions commonly used for sense tags
         gloss = re.sub(r"\s*\(([^)]*)\)", sense_repl, gloss)
+
+        # Remove common suffix "[from 14th c.]" and similar
+        gloss = re.sub(r"\s\[[^]]*\]\s*$", "", gloss)
 
         # Check to make sure we don't have unhandled list items in gloss
         ofs = max(gloss.find("#"), gloss.find("*"))
@@ -871,8 +878,25 @@ def parse_language(ctx, config, langnode, language, lang_code):
         gloss = gloss.strip()
         if gloss.startswith("N. of "):
             gloss = "Name of " +  gloss[6:]
-        if gloss:
-            data_append(config, sense_data, "glosses", gloss)
+        if not gloss:
+            return
+
+        # Check if this gloss describes an alt-of or inflection-of
+        tags, base = parse_alt_or_inflection_of(gloss)
+        if "alt-of" in tags:
+            data_extend(config, sense_data, "tags", tags)
+            data_append(config, sense_data, "alt_of", base)
+        elif "compound-of" in tags:
+            data_extend(config, sense_data, "tags", tags)
+            data_append(config, sense_data, "compound", base)
+        elif tags and base.startswith("of "):
+            base = base[3:]
+            tags.append("form-of")
+            data_extend(config, sense_data, "tags", tags)
+            data_append(config, sense_data, "form_of", base)
+
+        # Add the gloss for the sense.
+        data_append(config, sense_data, "glosses", gloss)
 
     def head_template_fn(name, ht):
         # print("HEAD_TEMPLATE_FN", name, ht)
@@ -905,6 +929,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if name == "picdic" or name == "picdicimg":
             # XXX extract?
             return ""
+        if name in ("tlb", "term-context", "term-label", "tcx"):
+            i = 2
+            while True:
+                v = ht.get(i)
+                if v is None:
+                    break
+                v = clean_value(config, v)
+                data_append(config, pos_data, "tags", v)
+                i += 1
+            return ""
         m = re.search(head_tag_re, name)
         if m:
             new_ht = {}
@@ -925,8 +959,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
         first_para = True
         for node in posnode.children:
             if isinstance(node, str):
-                for p in re.split(r"\n\n+", node):
-                    if pre:
+                for m in re.finditer(r"\n+|[^\n]+", node):
+                    p = m.group(0)
+                    if p.startswith("\n") and pre:
                         first_para = False
                         break
                     if p:
@@ -981,7 +1016,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
         have_pronunciations = False
 
         def parse_pronunciation_template_fn(name, ht):
-            nonlocal have_pronunciations
             if name == "enPR":
                 enpr = ht.get(1)
                 if enpr:
@@ -1066,7 +1100,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 have_pronunciations = True
 
         # Add data that was collected in template_fn
-        data_extend(config, data, "sounds", audios)
+        if audios:
+            data_extend(config, data, "sounds", audios)
+            have_pronunciations = True
         for enpr in enprs:
             pron = {"enpr": enpr}
             # XXX need to parse enpr separately for each list item to get
@@ -1370,7 +1406,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             langcode = None
             if sense is None:
-                sense = clean_node(config, ctx, data, sense_parts)
+                sense = clean_node(config, ctx, data, sense_parts).strip()
 
             def translation_item_template_fn(name, ht):
                 nonlocal langcode
@@ -1446,10 +1482,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 part = re.sub(langlink_re, "", part)
                 tr = {"lang": lang, "code": langcode}
                 if tags:
-                    tr["tags"] = tags
+                    tr["tags"] = list(tags)  # Copy so we don't modify others
                 if sense:
                     if sense == "Translations to be checked":
-                        data_append(config, tr, "tags", "to be checked")
+                        pass
                     else:
                         tr["sense"] = sense
                 parse_translation_desc(ctx, config, part, tr)
@@ -1530,10 +1566,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             nonlocal sense_parts
             for node in xlatnode.children:
                 if isinstance(node, str):
-                    node = node.strip()
-                    if node:
-                        sense_parts.append(node)
-                        sense = None
+                    sense_parts.append(node)
+                    sense = None
                     continue
                 assert isinstance(node, WikiNode)
                 kind = node.kind
@@ -1926,8 +1960,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # Handle the parenthesized expression.  Note that sometimes it is not taxlink,
 # just an italicized link in parenthesis
 
-# XXX debug and fix "The gender specification "{{{g}}}" is not valid" error
-
 # XXX figure out:  (maybe string vs. ustring error in my lua code?)
 # duck: ERROR: invalid unicode returned by ('translations', 'show') parent ('Template:t', {1: 'xal', 2: 'нуһсн'}) at ['duck', 't', '#invoke', 'Lua:translations:show()']
 
@@ -1939,6 +1971,8 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX parse translations from referenced translation pages; "section link"
 # is one tag that is used for this
+
+# XXX parse translations from "see" pages.  Check "be"/English.
 
 # XXX parse synonyms and other linkages from (referenced) thesaurus pages
 
@@ -2053,15 +2087,10 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX check "Kanji characters outside the ..."
 
-# XXX would be better to process form_description using actual case and only
-# revert to lowercase if not found (now all entered in lowercase at startup)
+# XXX parenthized parts in linkages are often word senses.  Perhaps separate
+# to a sense field.  Need support in htmlgen too.
 
 # XXX recognize "See also X" from end of gloss and move to a "See also" section
-
-# XXX htmlgen: include translations
-
-# XXX remove [Mid 19th century.] and similar from end of gloss
-# (ebelian/English/Adjective)
 
 # XXX implement and test parsing form-of and alt-of from glosses
 

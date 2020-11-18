@@ -444,7 +444,7 @@ xlat_tags_map = {
     "no comparative": "no-comparative",
     "no plural": "no-plural",
     "no singular": "plural-only",
-    "not comparable": "no-comparative no-superlative",
+    "not comparable": "not-comparable",
     "plurale tantum": "plurale-tantum",
     "possessive suffix": "possessive-suffix",
     "possessive determiner": "possessive-determiner",
@@ -748,6 +748,8 @@ xlat_tags_map = {
     "attributively": "attributive",
     "poetic term": "poetic",
     "poetic meter": "poetic",
+    "in certain phrases": "in-certain-phrases",
+    "deprecated template usage": "deprecated-template",
 }
 
 # Translation map for topics.
@@ -1086,7 +1088,7 @@ topic_generalize_map = {
     "regionalism": "politics",
     "economic liberalism": "politics",
     "agri.": "agriculture",
-    "agriculture": "food manufacturing",
+    "agriculture": "lifestyle",
     "horticulture": "agriculture",
     "fashion": "lifestyle textiles",
     "cosmetics": "lifestyle",
@@ -1248,6 +1250,7 @@ topic_generalize_map = {
     "equitation": "horses",
     "farriery": "horses",
     "motor racing": "sports",
+    "racing": "sports",
     "spinning": "sports",
     "gymnastics": "sports",
     "cricket": "sports",
@@ -1311,12 +1314,15 @@ topic_generalize_map = {
     "investment": "finance",
     "computing theory": "computing mathematics",
     "information theory": "mathematics computing",
+    "probability": "mathematics",
+    "probability theory": "mathematics",
     "set theory": "mathematics",
     "order theory": "mathematics",
     "graph theory": "mathematics",
     "mathematical analysis": "mathematics",
     "cellular automata": "computing mathematics",
     "game theory": "mathematics computing",
+    "computational": "computing",
     "behavioral sciences": "psychology",
     "space sciences": "astronomy",
     "applied sciences": "sciences engineering",
@@ -1395,6 +1401,7 @@ valid_tags = set([
     "comparative",
     "superlative",
     "comparable",
+    "not-comparable",
     "no-comparative",
     "no-superlative",
     "excessive",
@@ -1807,6 +1814,7 @@ valid_tags = set([
     "suru",  # Japanese verb inflection type
     "compound",
     "in-compounds",
+    "in-certain-phrases",
     "slang",
     "derogatory",
     "proscribed",
@@ -1816,6 +1824,7 @@ valid_tags = set([
     "proper-noun",
     "surnames",
     "sometimes",
+    "possibly",
     "somewhat",
     "especially",
     "specifically",
@@ -1859,6 +1868,7 @@ valid_tags = set([
     "US",
     "relational",
     "sequence",
+    "deprecated-template",
 ])
 
 valid_topics = set([
@@ -2213,8 +2223,9 @@ def decode_tags(config, lst, allow_any=False):
                         if w in valid_sequences:
                             add_new(valid_sequences[w], i)
                     else:
-                        config.warning("unsupported tag at {!r} in {}"
-                                       .format(w, lst))
+                        rest = tags[max_next_i:]
+                        tag = " ".join(rest)
+                        config.unknown_tag(tag)
                         tags.append("error")
                         if w in valid_sequences:
                             add_new(valid_sequences[w], next_i)
@@ -2233,8 +2244,7 @@ def decode_tags(config, lst, allow_any=False):
             rest = lst[max_next_i:]
             tag = " ".join(rest)
             if tag and not tag[0].isupper():
-                config.warning("incomplete tag ending in {}"
-                               .format(lst[max_next_i:]))
+                config.unknown_tag(tag)
                 tags.append("error")
         tagsets.add(tuple(sorted(tags)))
     ret = list(tagsets)
@@ -2394,8 +2404,8 @@ def parse_word_head(ctx, config, pos, text, data):
                     # Consider it part of a descriptor
                     if part in node:
                         if "$" in node:
-                            lst.extend(parts[last_valid:i])
-                            last_valid = i
+                            lst.extend(parts[last_valid:i + 1])
+                            last_valid = i + 1
                         node = node[part]
                     else:
                         assert "$" in node
@@ -2475,18 +2485,21 @@ def parse_translation_desc(ctx, config, text, data):
     base = re.sub(r"\(([^()]|\([^)]*\))*\):?", "", text)
     base = re.sub(r"\s+", " ", base).strip()
     baseparts = list(m.group(0) for m in re.finditer(word_re, base))
-    lst = []  # Word form (NOT tags)
-    i = 0
-    while i < len(baseparts):
+    rest = []  # Tags
+    i = len(baseparts) - 1
+    while i > 0:
         word = baseparts[i]
         if word == "•":
-            continue
-        if word in blocked or not lst or word not in valid_words:
-            lst.append(word)
+            pass
+        elif word in xlat_head_map:
+            rest.append(xlat_head_map[word])
+        elif word in ("or", "and"):
+            rest.append(word)
         else:
             break
-        i += 1
-    rest = baseparts[i:]
+        i -= 1
+    lst = baseparts[: i + 1]  # word form
+    rest = list(reversed(rest))
     # lst is canonical form of the word
     # rest is additional tags (often gender m/f/n/c/...)
     data["word"] = " ".join(lst)
@@ -2500,11 +2513,13 @@ def parse_translation_desc(ctx, config, text, data):
                     continue
                 if part in xlat_head_map:
                     lst.append(xlat_head_map[part])
+                elif part in valid_tags:
+                    lst.append(part)
                 elif part.startswith("("):
                     continue
                 elif part.startswith('"') or part.startswith('“'):
                     continue
-                else:
+                elif part not in valid_tags:
                     config.warning("unexpected part in translation: {!r} in "
                                    "{!r}".format(part, text))
             add_tags(ctx, config, data, lst)
@@ -2554,3 +2569,48 @@ def parse_translation_desc(ctx, config, text, data):
                     config.warning("maybe more than one romanization: {!r}"
                                    .format(text))
                     data_append(config, data, "tags", "error")
+
+def parse_alt_or_inflection_of(gloss):
+    """Tries to parse an inflection-of or alt-of description."""
+    tags = set()
+    nodes = [(valid_sequences, 0)]
+    lst = gloss.split(" ")
+    last = None
+    for i, w in enumerate(lst):
+        if not w:
+            continue
+        new_nodes = []
+
+        def add_new(node, next_i):
+            for node2, next_i2 in new_nodes:
+                if node2 is node and next_i2 == next_i:
+                    break
+            else:
+                new_nodes.append((node, next_i))
+
+        max_next_i = max(x[1] for x in nodes)
+        for node, next_i in nodes:
+            if w in node:
+                add_new(node[w], next_i)
+            elif w.lower() in node:
+                add_new(node[w.lower()], next_i)
+            if "$" in node:
+                for x in node["$"].get("tags", ()):
+                    tags.add(x)
+                if w in valid_sequences:
+                    add_new(valid_sequences[w], i)
+                elif w.lower() in valid_sequences:
+                    add_new(valid_sequences[w.lower()], i)
+                last = i
+        if not new_nodes:
+            add_new(valid_sequences, max_next_i)
+        nodes = new_nodes
+
+    if last == 0:
+        return [], gloss
+
+    tags = list(sorted(tags))
+    base = " ".join(lst[last:])
+    if base.endswith("."):
+        base = base[:-1]
+    return tags, base

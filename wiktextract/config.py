@@ -225,3 +225,8 @@ class WiktionaryConfig(object):
         self.error("unknown value {!r} in {}".format(value, t))
         name = t.name.strip()
         self.unknown_value_counts[self.language][name][value] += 1
+
+    def unknown_tag(self, tag):
+        assert isinstance(tag, str)
+        self.warning("unrecognized tag {!r}".format(tag))
+        self.unknown_value_counts[self.language]["tag"][tag] += 1

@@ -267,7 +267,7 @@ def clean_value(config, title, no_strip=False):
     # Remove tables
     title = re.sub(r"(?s)\{\|.*?\|\}", " ", title)
     # Remove references (<ref>...</ref>).
-    title = re.sub(r"(?si)<\s*ref>\s*.*?<\s*/\s*ref>\n*", "", title)
+    title = re.sub(r"(?is)<\s*ref\s*[^>]*?>\s*.*?<\s*/\s*ref\s*>\n*", "", title)
     # Replace <br/> by comma space (it is used to express alternatives in some
     # declensions)
     title = re.sub(r"(?si)<\s*br\s*/?>\n*", ", ", title)
