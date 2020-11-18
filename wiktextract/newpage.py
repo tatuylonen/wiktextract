@@ -841,6 +841,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         lst = [x for x in contents
                if not isinstance(x, WikiNode) or
                x.kind not in (NodeKind.LIST,)]
+        sublists = [x for x in contents
+                    if isinstance(x, WikiNode) and x.kind == NodeKind.LIST]
         gloss = clean_node(config, ctx, sense_data, lst,
                            template_fn=sense_template_fn)
         if gloss.startswith("# "):
@@ -2010,8 +2012,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX implement support for image files in {{mul-symbol|...}} head, e.g.,
 # Unsupported titles/Cifrão
 
-# XXX make sure Alternative forms section is parsed (see, e.g., "& cetera")
-
 # XXX Some declination/conjugation template arguments contain templates, e.g.
 # mi/Serbo-Croatian (pronoun).  Should probably strip these templates, but
 # not strip as aggressively as normal clean_value() does.  HTML tags and links
@@ -2022,15 +2022,8 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX clean up extra calls to map_with in form_descriptions.py; now handled
 # in decode_tags()
 
-# XXX handle word class prefixes in linkages, see sade/Finnish,
-# "adjectives: sateeton, sateinen"
-
-# XXX find out why ITALIC/BOLD parsing errors in sade/Finnish
-
 # XXX parse "Derived characters" section.  It may contain multiple
 # space-separated characters in same list item.
-
-# XXX parse Han character, Kanji, etc into a word sense
 
 # XXX extract Readings section (e.g., Kanji characters)
 
@@ -2043,26 +2036,12 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX handle qualifiers starting with "of " specially.  They are quite common
 # for adjectives, describing what the adjective can characterize
 
-# XXX handle (classifier XXX) at beginning of gloss; also (classifier: XXX)
-# and (classifiers: XXX, XXX, XXX)
-
-# XXX parse redirects, create alt_of
-
-# XXX parse see also, create "related"?
-
 # XXX parse "object of a preposition", "indirect object of a verb",
 # "(direct object of a verb)", "(as the object of a preposition)",
 # "(as the direct object of a verbal noun)",
 # in parenthesis at the end of gloss
 
-# XXX some form descriptors may start with a capital letter.  Recognize
-# even if the first word starts with a capital.  e.g. First-person
-
 # XXX add warnings about / in places where we try to parse tags
-
-# XXX sometimes form-of glosses have case at the end, e.g.:
-# Third active infinitive of aktuaalistuain abessive case.
-# There seem to be quite a lot of these.
 
 # XXX how about gloss "The name of the letter X",
 # "The name of the Latin-script letter X"
@@ -2083,7 +2062,7 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX how about gloss "Synonym of ..." - there are a lot of these!
 
-# XXX handle "Wiktionary appendixs of terms relating to animals" ("animal")
+# XXX handle "Wiktionary appendix of terms relating to animals" ("animal")
 
 # XXX check "Kanji characters outside the ..."
 
@@ -2092,14 +2071,19 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX recognize "See also X" from end of gloss and move to a "See also" section
 
-# XXX implement and test parsing form-of and alt-of from glosses
+# XXX handle word class prefixes in linkages, see sade/Finnish,
+# "adjectives: sateeton, sateinen"
 
-# XXX check "inflection of" as the start of gloss - there are lots but is
-# the form indicated on these somehow?  The ones I see have extra ##
+# XXX make sure Alternative forms section is parsed (see, e.g., "& cetera")
+# Also add to htmlgen.
 
-# XXX utilize <span class="form-of-definition use-with-mention"> in
-# identifying form-ofs.  However, "talossa" does not have
-# form-of-definition, only use-with.  Also the word that it is a form
-# of seems to be in class="form-of-definition-link for English, but
-# Finnish just has it in <i class="Latn mention">.  However it will
-# clearly be one of the links, following "of".
+# XXX handle (classifier XXX) at beginning of gloss; also (classifier: XXX)
+# and (classifiers: XXX, XXX, XXX)
+
+# XXX parse redirects, create alt_of
+
+# XXX parse see also, create "related"?
+
+# XXX parse Han character, Kanji, etc into a word sense
+
+# XXX find out why ITALIC/BOLD parsing errors in sade/Finnish

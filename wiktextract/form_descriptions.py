@@ -2575,7 +2575,7 @@ def parse_alt_or_inflection_of(gloss):
     tags = set()
     nodes = [(valid_sequences, 0)]
     lst = gloss.split(" ")
-    last = None
+    last = 0
     for i, w in enumerate(lst):
         if not w:
             continue
@@ -2609,8 +2609,17 @@ def parse_alt_or_inflection_of(gloss):
     if last == 0:
         return [], gloss
 
+    # It is fairly common for form_of glosses to end with something like
+    # "ablative case".  Parse that ending.
+    lst = lst[last:]
+    if len(lst) >= 3 and lst[-1] == "case":
+        node = valid_sequences.get(lst[-2])
+        if node and "$" in node:
+            tags.extend(node["$"].get("tags", ()))
+            lst = lst[:-2]
+
     tags = list(sorted(tags))
-    base = " ".join(lst[last:])
+    base = " ".join(lst)
     if base.endswith("."):
         base = base[:-1]
     return tags, base
