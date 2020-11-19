@@ -12,13 +12,8 @@ This is a utility and Python package for for extracing data from Wiktionary.
 **Until then, please use the version on pypi (``pip install wiktextract``)
   or look at branches which contain earlier versions.**
 
-**I'm just starting big changes to use the new template and Lua macro
-  expansion code in
-  [wikitextprocessor](https://github.com/tatuylonen/wikitextprocessor).
-  Everything will be broken until about end of October.  You can check
-  out the most recent code before the changes using the tag
-  ``before_changes_20201023``, i.e., using ``git checkout
-  tags/before_changes_20201023 -b <branchname>``.**
+The current extracted version is available for browsing and download at:
+[https://dictionary.kaikki.org](https://dictionary.kaikki.org).
 
 ## Overview
 
