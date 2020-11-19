@@ -843,12 +843,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                x.kind not in (NodeKind.LIST,)]
         sublists = [x for x in contents
                     if isinstance(x, WikiNode) and x.kind == NodeKind.LIST]
+
         gloss = clean_node(config, ctx, sense_data, lst,
                            template_fn=sense_template_fn)
         if gloss.startswith("# "):
             gloss = gloss[2:]
-        if not gloss:
-            config.warning("{}: empty gloss at {}".format(pos, "/".join(stack)))
         m = re.match(r"^\((([^()]|\([^)]*\))*)\):?\s*", gloss)
         if m:
             parse_sense_tags(ctx, config, m.group(1), sense_data)
@@ -880,8 +879,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
         gloss = gloss.strip()
         if gloss.startswith("N. of "):
             gloss = "Name of " +  gloss[6:]
-        if not gloss:
-            return
 
         # Check if this gloss describes an alt-of or inflection-of
         tags, base = parse_alt_or_inflection_of(gloss)
@@ -897,8 +894,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
             data_extend(config, sense_data, "tags", tags)
             data_append(config, sense_data, "form_of", base)
 
-        # Add the gloss for the sense.
-        data_append(config, sense_data, "glosses", gloss)
+        if not gloss:
+            config.debug("{}: empty gloss at {}".format(pos, "/".join(stack)))
+            data_append(config, sense_data, "tags", "empty-gloss")
+        else:
+            # Add the gloss for the sense.
+            data_append(config, sense_data, "glosses", gloss)
 
     def head_template_fn(name, ht):
         # print("HEAD_TEMPLATE_FN", name, ht)
@@ -1902,7 +1903,7 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
     # Capture categories if category_data has been given
     if category_data is not None:
-        for m in re.finditer(r"\[\[:?Category:([^]|]+)", v):
+        for m in re.finditer(r"(?is)\[\[:?\s*Category\s*:([^]|]+)", v):
             cat = clean_value(config, m.group(1))
             m = re.match(r"[a-z]{2,4}:", cat)
             if m:
@@ -2060,7 +2061,52 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # Letter of the X alphabet ...
 # Letter of the X alphabet: ...
 
-# XXX how about gloss "Synonym of ..." - there are a lot of these!
+# XXX how about gloss "Synonym of ..." - there are a lot of these (~30k)
+#   - english version is not uncommon in parenthesized quotes
+#   - sometimes multiple synonyms, with comma
+#   - sometimes followed by an explanation after comma
+#   - sometimes followed by english translation after comma
+#   - sometimes followed by an explanation in parenthesis
+#   - sometimes followed by a colon and a normal gloss
+#   - sometimes followed by a slash and a normal gloss
+#   - sometimes followed by "(with an added emphasis on the person.)"
+#   - sometimes followed with -ra/-re  (usage guidance)
+#   - sometimes followed by a scientific name in parenthesis
+#   - sometimes followed by a latin translitteration in parenthesis
+#   - sometimes followed by a semicolon and gloss
+#   - sometimes followed by latin translitteration and quoted translation inside
+#       same parentheses, which may be further followed by colon and gloss
+
+# XXX how about gloss "Compound of XXX and YYY".  There are 100k of these.
+#   - sometimes followed by semicolon and notes or "-" and notes
+#   - sometimes Compound of gerund of XXX and YYY
+#   - sometimes Compound of imperative (noi form) of XXX and YYY
+#   - sometimes Compound of imperative (tu form) of XXX and YYY
+#   - sometimes Compound of imperative (vo form) of XXX and YYY
+#   - sometimes Compound of imperative (voi form) of XXX and YYY
+#   - sometimes Compound of imperative of XXX and YYY
+#   - sometimes Compound of indicative present of XXX and YYY
+#   - sometimes Compound of masculine plural past participle of XXX and YYY
+#   - sometimes Compound of past participle of XXX and YYY
+#   - sometimes Compound of present indicative of XXX and YYY
+#   - sometimes Compound of past participle of XXX and YYY
+#   - sometimes Compound of plural past participle of XXX and YYY
+#   - sometimes Compound of second-person singular imperative of XXX and YYY
+#   - sometimes Compound of in base a and YYY
+#   - sometimes Compound of in merito a and YYY
+#   - sometimes Compound of in mezzo a and YYY
+#   - sometimes Compound of in seguito a and YYY
+#   - sometimes Compound of nel bel mezzo di and YYY
+#   - sometimes Compound of per mezzo di and YYY
+#   - sometimes Compound of per opera di and YYY
+#   - sometimes Compound of XXX, YYY and ZZZ
+#   - sometimes Compound of XXX + YYY
+#   - sometimes Compound of the gerund of XXX and YYY
+#   - sometimes Compound of the imperfect XXX and the pronoun YYY
+#   - sometimes Compound of the infinitive XXX and the pronoun YYY
+
+# XXX occasionally Alternative form of ... followed by Alternative spelling of,
+#   see &c
 
 # XXX handle "Wiktionary appendix of terms relating to animals" ("animal")
 
@@ -2073,6 +2119,9 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX handle word class prefixes in linkages, see sade/Finnish,
 # "adjectives: sateeton, sateinen"
+
+# Look at "prenderle"/Italian - two heads under same part-of-speech.  Second
+# head ends up inside first gloss.
 
 # XXX make sure Alternative forms section is parsed (see, e.g., "& cetera")
 # Also add to htmlgen.
@@ -2087,3 +2136,5 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX parse Han character, Kanji, etc into a word sense
 
 # XXX find out why ITALIC/BOLD parsing errors in sade/Finnish
+
+# XXX grep for ''''' from glosses

@@ -133,13 +133,14 @@ def clean_replace_regexp(config, v):
         t = m.group(0)
         if t.startswith("[["):
             vec = t[2:-2].split("|")
-            v = vec[0]
-            if v.startswith("Category:"):
+            v = vec[0].strip()
+            if re.match(r"(?is)Category\s*:", v):
                 return ""
-            if v.startswith("Image:") or v.startswith("File:"):
+            if re.match(r"(?is)(Image|File)\s*:", v):
                 return ""
-            if v.startswith(":Category:"):
-                v = v[10:]
+            m = re.match(r"(?is):\s*Category\s*:", v)
+            if m:
+                v = v[m.end():]
             if len(vec) >= 2:
                 if vec[1]:
                     return vec[1]
