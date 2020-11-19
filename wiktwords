@@ -43,8 +43,6 @@ def capture_page(model, orig_title, text, pages_dir):
     assert isinstance(text, str)
     assert pages_dir is None or isinstance(pages_dir, str)
 
-    if model == "wikitext":
-        text = "TITLE: {}\n".format(orig_title) + text
     analyze = False
     title = orig_title
     m = re.match(r"^([A-Z][a-z][-a-zA-Z0-9_]+):(.+)$", title)
