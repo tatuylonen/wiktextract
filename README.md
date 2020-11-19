@@ -13,7 +13,7 @@ This is a utility and Python package for for extracing data from Wiktionary.
   or look at branches which contain earlier versions.**
 
 The current extracted version is available for browsing and download at:
-[https://dictionary.kaikki.org](https://dictionary.kaikki.org).
+[http://dictionary.kaikki.org](http://dictionary.kaikki.org).
 
 ## Overview
 
@@ -62,7 +62,7 @@ The tool can be used to extract machine translation dictionaries,
 language understanding dictionaries, semantically annotated
 dictionaries, and morphological dictionaries with
 declension/conjugation information (where this information is
-available for the target language).  Dozens of languages have
+gavailable for the target language).  Dozens of languages have
 extensive vocabulary in ``enwiktionary``, and several thousand
 languages have partial coverage.
 
