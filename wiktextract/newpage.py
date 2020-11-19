@@ -70,6 +70,7 @@ panel_templates = set([
     "French possessive adjectives",
     "French possessive pronouns",
     "Japanese demonstratives",
+    "Latn-script",
     "LDL",
     "MW1913Abbr",
     "Nuttall",
@@ -99,6 +100,7 @@ panel_templates = set([
     "mediagenic terms",
     "merge",
     "missing template",
+    "morse links",
     "move",
     "no inline",
     "picdic",
@@ -210,35 +212,8 @@ for k, v in template_allowed_pos_map.items():
             assert False
 
 
-def verb_form_map_fn(config, data, name, t, form_map):
-    """Maps values in a language-specific verb form map into values for "tags"
-    that are reasonably uniform across languages.  This also deals with a
-    lot of misspellings and inconsistencies in how the values are entered in
-    Wiktionary.  ``data`` here is the word sense."""
-    assert isinstance(config, WiktionaryConfig)
-    assert isinstance(data, dict)
-    assert isinstance(name, str)
-    assert isinstance(form_map, dict)
-    # Add an indication that the word sense is a form of an other word.
-    data_append(config, data, "inflection_of", t_arg(config, t, 1))
-    # Iterate over the specified keys in the template.
-    for k in form_map["_keys"]:
-        v = t_arg(config, t, k)
-        if not v:
-            continue
-        # Got a value for key.  Now map the value.  Each entry in the
-        # dictionary should be a list of tags to add.
-        if v in form_map:
-            lst = form_map[v]
-            assert isinstance(lst, (list, tuple))
-            for x in lst:
-                assert isinstance(x, str)
-                data_append(config, data, "tags", x)
-        else:
-            config.unknown_value(t, v)
 
-
-def parse_sense(config, data, text, use_text):
+def parse_sense_XXXold_going_away(config, data, text, use_text):
     """Parses a word sense from the text.  The text is usually a list item
     from the beginning of the dictionary entry (i.e., before the first
     subtitle).  There is a lot of information and linkings in the sense
@@ -246,6 +221,10 @@ def parse_sense(config, data, text, use_text):
     various encodings used in Wiktionary into a fairly uniform form.
     The goal here is to obtain any information that might be helpful in
     automatically determining the meaning of the word sense."""
+
+    # XXX this function is going away!  Still need to review what this captures
+    # and reimplement some of them
+
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(data, dict)
     assert isinstance(text, str)
@@ -277,31 +256,11 @@ def parse_sense(config, data, text, use_text):
             # XXX make sure these all start with a language code
             data_extend(config, data, "tags",
                         clean_quals(config, t_vec(config, t)[1:]))
-        elif name == "g2":
-            v = t_arg(config, t, 1)
-            if v == "m":
-                data_append(config, data, "tags", "masculine")
-            elif v == "f":
-                data_append(config, data, "tags", "feminine")
-            elif v == "n":
-                data_append(config, data, "tags", "neuter")
-            else:
-                config.unknown_value(t, v)
-        # Qualifiers are pretty clear; they provide useful information about
-        # the word sense, such as field of study, dialect, or usage notes.
-        elif name in ("qual", "qualifier", "q", "qf", "i", "a", "accent"):
-            data_extend(config, data, "tags",
-                        clean_quals(config, t_vec(config, t)))
         # Usage examples are collected under "examples"
         elif name in ("ux", "uxi", "usex", "afex", "zh-x", "prefixusex",
                       "ko-usex", "ko-x", "hi-x", "ja-usex-inline", "ja-x",
                       "quotei"):
             data_append(config, data, "examples", t_dict(config, t))
-        # XXX check these, I think they should go away
-        # Additional "gloss" templates are added under "glosses"
-        #elif name == "gloss":
-        #    gloss = t_arg(config, t, 1)
-        #    data_append(config, data, "glosses", gloss)
         # Various words have non-gloss definitions; we collect them under
         # "nonglosses".  For many purposes they might be treated similar to
         # glosses, though.
@@ -424,27 +383,11 @@ def parse_sense(config, data, text, use_text):
                       "morse code abbreviation",
                       "morse code prosign"):
             data_append(config, data, "morse_code", t_arg(config, t, 1))
-        elif name in ("mul-semaphore-for", "mul-semaphore for",
-                      "ja-semaphore for"):
-            data_append(config, data, "semaphore", t_arg(config, t, 1))
-        # Some glosses identify the word as a character.  If so, tag it as
-        # "character".
-        elif (name == "Latn-def" or re.search("-letter$", name)):
-            data_append(config, data, "tags", "character")
         elif name in ("translation hub", "translation only"):
             data_append(config, data, "tags", "translation_hub")
-        elif name in ("combining form of",):
-            data_alt_of(config, data, t, ["combining_form"])
-        elif name in ("only used in", "only in"):
-            # This appears to be used in "man" for "man enough"
-            data_append(config, data, "only_in", t_arg(config, t, 2))
-        elif name == "native or resident of":
-            data_inflection_of(config, data, t, ["person"])
-        elif name == "topic form":
-            data_inflection_of(config, data, t, ["topic"])
         elif name == "+preo":
             data_append(config, data, "object_preposition", t_arg(config, t, 2))
-        elif name in ("+obj", "+OBJ", "construed with"):
+        elif name in ("+obj", "construed with"):
             if t_arg(config, t, "lang"):
                 v = t_arg(config, t, 1)
             else:
@@ -481,18 +424,6 @@ def parse_sense(config, data, text, use_text):
                                "in {}".format(t))
             else:
                 config.unknown_value(t, v)
-        elif name == "es-compound of":
-            stem = t_arg(config, t, 1)
-            inf_ending = t_arg(config, t, 2)
-            infinitive = stem + inf_ending
-            form = t_arg(config, t, 3) or infinitive
-            pron1 = t_arg(config, t, 4)
-            pron2 = t_arg(config, t, 5)
-            mood = t_arg(config, t, "mood")
-            person = t_arg(config, t, "person")
-            data_append(config, data, "inflection_of", infinitive)
-            data_append(config, data, "tags", "pron-compound")
-            data_append(config, data, "pron1", pron1)
         elif name == "es-demonstrative-accent-usage":
             data_append(config, data, "tags", "demonstrative-accent")
         # Handle some Japanese-specific tags
@@ -641,91 +572,18 @@ def parse_sense(config, data, text, use_text):
                                                "type": "province"})
             data_append(config, data, "holonyms", {"word": "Brazil",
                                            "type": "country"})
-        elif name == "hot sense":
-            data_append(config, data, "tags", "hot_sense")
-        # Otherwise warn about an unhandled template.  It is normal to get
-        # a few of these warnings whenever this is run; such templates may
-        # later be added to the silencing list above or proper handling may
-        # be added for them.  For a few templates, they have intentionally
-        # not yet been silenced because they could be useful but their use is
-        # still too rare to bother collecting them.
-        elif (name not in ignored_templates and name not in default_tags and
-              name not in default_parenthesize_tags):
-            m = re.match(r"^table:([^/]*)(/[a-z0-9]+)?$", name)
-            if m:
-                category = m.group(1)
-                data_append(config, data, "topics", {"word": category})
-                continue
-            config.unrecognized_template(t, "inside gloss")
-
-    # Various fields should only contain strings.  Check that they do
-    # (helps find bugs fast).  Also remove any duplicates from the lists and
-    # sort them into ascending order for easier reading.
-    for k in ("tags", "glosses", "alt_of",
-              "inflection_of", "color", "wikidata"):
-        if k not in data:
-            continue
-        for x in data[k]:
-            if not isinstance(x, str):
-                config.debug("produced incorrect non-string data for {}: {}"
-                             "".format(k, data))
-
-    return data
 
 
-def parse_pronunciation(config, data, text, p):
+def parse_pronunciation_XXX_old_going_away(config, data, text, p):
     """Extracts pronunciation information for the word."""
-    assert isinstance(config, WiktionaryConfig)
-    assert isinstance(data, dict)
-    assert isinstance(text, str)
 
-    # XXX this function being removed
+    # XXX this function being removed, but still has some things that should
+    # be captured by the new version
 
-    # Pronunciation may be qualified by
-    # accent/dialect/variant.  These are recorded under
-    # "tags".  See
-    # https://en.wiktionary.org/wiki/Module:accent_qualifier/data
-    if name in ("a", "accent"):
-        data_extend(config, variant, "accent", clean_quals(config, t_vec(config, t)))
-    # Extact IPA pronunciation specification under "ipa".
-    elif name in ("IPA", "ipa"):
-        vec = t_vec(config, t)
-        for ipa in vec[1:]:
-            data_append(config, variant, "ipa", ipa)
-    elif name in ("IPAchar", "audio-IPA"):
-        # These are used in text to format as IPA characters
-        # or to specify inline audio
-        pass
-    # Extract special variants of the IPA template.  Store these as
-    # dictionaries under "special_ipa".
-    elif re.search("IPA", name):
-        data_append(config, variant, "special_ipa",
-                    t_dict(config, t))
-    # If English pronunciation (enPR) has been specified, record them
-    # under "enpr".
-    elif name == "enPR":
-        data_append(config, variant, "enpr", t_arg(config, t, 1))
-    # There are also some other forms of pronunciation information that
-    # we collect; it is not yet clear what all these mean.
-    elif name in ("it-stress",):
-        data_append(config, variant, "stress", t_arg(config, t, 1))
-    elif name == "PIE root":
+    # XXX stuff removed
+    # XXX "PIE root" has been replaced by "root" in Nov 2020
+    if name == "PIE root":
         data_append(config, variant, "pie_root", t_arg(config, t, 2))
-    # If an audio file has been specified for the word,
-    # collect those under "audios".
-    elif name in ("audio", "audio-pron"):
-        data_append(config, variant, "audios",
-                    (t_arg(config, t, "lang"),
-                     t_arg(config, t, 1),
-                     t_arg(config, t, 2)))
-    # If homophones have been specified, collect those under
-    # "homophones".
-    elif name in ("homophones", "homophone"):
-        data_extend(config, variant, "homophones", t_vec(config, t))
-    elif name == "hyphenation":
-        # This is often in pronunciation, but we'll store it at top
-        # level in the entry
-        data_append(config, data, "hyphenation", t_vec(config, t))
 
 
 ######################################################################
@@ -817,23 +675,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
         etym_data = {}
         etym_datas = []
 
-    def sense_template_fn(name, ht):
-        if name in panel_templates:
-            return ""
-        if name.startswith("RQ:"):
-            return ""
-        if name in ("defdate",):
-            return ""
-        if name in ("syn", "synonyms"):
-            for i in range(2, 20):
-                w = ht.get(i)
-                if not w:
-                    break
-                data_append(config, sense_data, "synonyms",
-                            {"word": w})
-            return ""
-        return None
-
     def parse_sense(pos, contents):
         assert isinstance(pos, str)
         assert isinstance(contents, (list, tuple))
@@ -843,6 +684,28 @@ def parse_language(ctx, config, langnode, language, lang_code):
                x.kind not in (NodeKind.LIST,)]
         sublists = [x for x in contents
                     if isinstance(x, WikiNode) and x.kind == NodeKind.LIST]
+        additional_glosses = []
+
+        def sense_template_fn(name, ht):
+            if name in panel_templates:
+                return ""
+            if name.startswith("RQ:"):
+                return ""
+            if name in ("defdate",):
+                return ""
+            if name in ("syn", "synonyms"):
+                for i in range(2, 20):
+                    w = ht.get(i)
+                    if not w:
+                        break
+                    data_append(config, sense_data, "synonyms",
+                                {"word": w})
+                return ""
+            if name == "gloss":
+                gl = ht.get(1)
+                if gl:
+                    additional_glosses.append(gl)
+            return None
 
         gloss = clean_node(config, ctx, sense_data, lst,
                            template_fn=sense_template_fn)
@@ -904,6 +767,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         else:
             # Add the gloss for the sense.
             data_append(config, sense_data, "glosses", gloss)
+        for gl in additional_glosses:
+            data_append(config, sense_data, "glosses", gl)
 
     def head_template_fn(name, ht):
         # print("HEAD_TEMPLATE_FN", name, ht)
@@ -1031,7 +896,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if name == "audio":
                 filename = ht.get(2) or ""
                 desc = ht.get(3) or ""
-                audio = {"file": filename}
+                audio = {"audio": filename}
                 m = re.search(r"\((([^()]|\([^)]*\))*)\)", desc)
                 if m:
                     parse_pronunciation_tags(ctx, config, m.group(1), audio)
@@ -1039,6 +904,25 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     audio["text"] = desc
                 audios.append(audio)
                 return ""
+            if name == "audio-pron":
+                filename = ht.get(2) or ""
+                ipa = ht.get("ipa")
+                dial = ht.get("dial")
+                country = ht.get("country")
+                audio = {"audio": filename}
+                if dial:
+                    audio["text"] = dial
+                    data_append(config, audio, "tags", dial)
+                if country:
+                    data_append(config, audio, "tags", country.upper())
+                audios.append(audio)
+                if ipa:
+                    pron = {"ipa": ipa}
+                    if dial:
+                        data_append(config, pron, "tags", dial)
+                    if country:
+                        data_append(config, pron, "tags", country.upper())
+                    data_append(config, data, "sounds", pron)
             if name in panel_templates:
                 return ""
             if name.startswith("RQ:"):
@@ -1928,7 +1812,7 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
                 cat = ""
             if cat.find(" redlinks") >= 0:
                 cat = ""
-            if cat:
+            if cat and cat not in category_data.get("categories", ()):
                 data_append(config, category_data, "categories", cat)
 
     v = clean_value(config, v)
@@ -1966,8 +1850,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX linkages may have senses, e.g. "singular" English "(being only one):"
 
 # XXX check use of sense numbers in translations (check "eagle"/English)
-
-# XXX check how common are "## especially ''[[Pica pica]]'' as in "magpie"
 
 # XXX capture {{taxlink|...}} and {{verb|...}} in linkage and gloss.
 # Handle the parenthesized expression.  Note that sometimes it is not taxlink,
@@ -2014,7 +1896,7 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX test that config.capture_* options work
 
-# XXX distinguish non-gloss definition from gloss
+# XXX distinguish non-gloss definition from gloss, see e.g. βούλομαι
 
 # XXX check "unsupported tag component 'E' warning / in "word"
 
@@ -2051,6 +1933,12 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # "(direct object of a verb)", "(as the object of a preposition)",
 # "(as the direct object of a verbal noun)",
 # in parenthesis at the end of gloss
+
+# XXX parse [+infinitive = XXX], [+accusative = XXX], etc in gloss
+# see e.g. βούλομαι.  These come from {{+obj|...}}, might also just parse
+# the template.
+
+# XXX parse "construed with XXX" from sense qualifiers or capture "construed with" template
 
 # XXX add warnings about / in places where we try to parse tags
 
@@ -2129,6 +2017,24 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX parse Han character, Kanji, etc into a word sense
 
-# XXX find out why ITALIC/BOLD parsing errors in sade/Finnish
+# XXX grep for ''''' from glosses, make sure there are no extras
 
-# XXX grep for ''''' from glosses
+# XXX handle "XXX/derived terms" pages
+
+# XXX parse {{zh-see|XXX}} - see 共青团
+
+# XXX parse {{topics|lang|...|...}} - these seem to generate
+# topic-related Categories.  However they can only be associated with
+# the language, not sense or part-of-speech (unless inside sense).
+# These are cleaner than trying to capture Category links.
+
+# XXX capture topic hierarchy from Category pages in Wiktionary
+#   - Module:category tree/topic cat/data/* (except /documentation)
+#   - beware, at least .../Places contains real code besides data
+#   - Load place types from Module:place/data
+#   - also: Module:place/shared-data/tables
+#   - also: Module:place/shared-data
+# May be best to actually load these modules as Lua code or to even run a
+# specific Lua module to dump the data.
+
+# XXX review most common Lua errors!

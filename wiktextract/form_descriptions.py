@@ -655,6 +655,7 @@ xlat_tags_map = {
     "Mongolian spelling of": "alt-of Mongolia",
     "Leet spelling of": "alt-of Leet",
     "plural of": "form-of plural",
+    "combining form of": "in-compounds form-of",
     "compound of": "compound-of",
     "compound of gerund of": "compound-of",
     "compound of imperative (noi form) of": "compound-of",
@@ -672,6 +673,7 @@ xlat_tags_map = {
     "compound of the imperfect": "compound-of",
     "compound of the infinitive": "compound-of",
     "synonym of": "synonym-of",
+    "topicalized form of": "topic form-of",
     "form of": "form-of",
     "humurous": "humorous",
     "ironic": "humorous",
@@ -1407,6 +1409,8 @@ valid_tags = set([
     "no-nominative-plural",
     "duoplural",  # two or more in number
     "dual",       # two in number
+    "exclusive",
+    "inclusive",
     "paucal",
     "also",
     "singular-only",
@@ -1885,6 +1889,7 @@ valid_tags = set([
     "US",
     "relational",
     "sequence",
+    "topic",
     "deprecated-template",
 ])
 
@@ -2595,7 +2600,8 @@ def parse_alt_or_inflection_of(config, gloss):
     """Tries to parse an inflection-of or alt-of description."""
     tags = set()
     nodes = [(valid_sequences, 0)]
-    lst = gloss.split(" ")
+    gloss = re.sub(r"\s+", " ", gloss)
+    lst = gloss.strip().split(" ")
     last = 0
     for i, w in enumerate(lst):
         if not w:
@@ -2640,9 +2646,7 @@ def parse_alt_or_inflection_of(config, gloss):
             lst = lst[:-2]
 
     tags = list(sorted(tags))
-    base = " ".join(lst)
-    if base.endswith("."):
-        base = base[:-1]
+    base = " ".join(lst).strip()
     # Clean up some common additional stuff
     base = re.sub(r"(?s)(:|;| - ).*", "", base)
     base = re.sub(r"\s+(with an added emphasis on the person.)", "", base)
@@ -2650,6 +2654,9 @@ def parse_alt_or_inflection_of(config, gloss):
     base = re.sub(r"\s+\([^)]*\)", "", base)  # Remove all (...) groups
     # Note: base might still contain comma-separated values and values
     # separated by "and"
+    base = base.strip()
+    if base.endswith("."):
+        base = base[:-1]
     if base.find(".") >= 0:
         config.debug(". remains in alt_of/inflection_of: {}".format(base))
     return tags, base
