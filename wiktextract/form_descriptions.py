@@ -656,6 +656,22 @@ xlat_tags_map = {
     "Leet spelling of": "alt-of Leet",
     "plural of": "form-of plural",
     "compound of": "compound-of",
+    "compound of gerund of": "compound-of",
+    "compound of imperative (noi form) of": "compound-of",
+    "compound of imperative (tu form) of": "compound-of",
+    "compound of imperative (vo form) of": "compound-of",
+    "compound of imperative (voi form) of": "compound-of",
+    "compound of imperative of": "compound-of",
+    "compound of indicative present of": "compound-of",
+    "compound of masculine plural past participle of": "compound-of",
+    "compound of past participle of": "compound-of",
+    "compound of present indicative of": "compound-of",
+    "compound of plural past participle of": "compound-of",
+    "compound of second-person singular imperative of": "compound-of",
+    "compound of the gerund of": "compound-of",
+    "compound of the imperfect": "compound-of",
+    "compound of the infinitive": "compound-of",
+    "synonym of": "synonym-of",
     "form of": "form-of",
     "humurous": "humorous",
     "ironic": "humorous",
@@ -1865,6 +1881,7 @@ valid_tags = set([
     "form-of",
     "alt-of",
     "compound-of",
+    "synonym-of",
     "US",
     "relational",
     "sequence",
@@ -2218,8 +2235,6 @@ def decode_tags(config, lst, allow_any=False):
                     if allow_any:
                         tag = " ".join(lst[next_i:i + 1])
                         next_i = i + 1
-                        if tag not in tags:
-                            tags.append(tag)
                         if w in valid_sequences:
                             add_new(valid_sequences[w], i)
                     else:
@@ -2240,10 +2255,13 @@ def decode_tags(config, lst, allow_any=False):
                 topics.extend(node["$"].get("topics", ()))
                 valid_end = True
         max_next_i = max(x[1] for x in nodes)
-        if not valid_end and any(lst[max_next_i]):
+        if not valid_end and any(lst[max_next_i:]):
             rest = lst[max_next_i:]
             tag = " ".join(rest)
-            if tag and not tag[0].isupper():
+            if tag and allow_any:
+                if tag not in tags:
+                    tags.append(tag)
+            elif tag and not tag[0].isupper():
                 config.unknown_tag(tag)
                 tags.append("error")
         tagsets.add(tuple(sorted(tags)))
@@ -2422,7 +2440,10 @@ def parse_word_head(ctx, config, pos, text, data):
                     break
                 # Stop if we have completed parsing something that is always
                 # followed by a word form
-                if "alt-of" in lst or "form-of" in lst or "compound-of" in lst:
+                if ("alt-of" in lst or
+                    "form-of" in lst or
+                    "compound-of" in lst or
+                    "synonym-of" in lst):
                     break
                 i += 1
             if "$" in node:
@@ -2570,7 +2591,7 @@ def parse_translation_desc(ctx, config, text, data):
                                    .format(text))
                     data_append(config, data, "tags", "error")
 
-def parse_alt_or_inflection_of(gloss):
+def parse_alt_or_inflection_of(config, gloss):
     """Tries to parse an inflection-of or alt-of description."""
     tags = set()
     nodes = [(valid_sequences, 0)]
@@ -2622,4 +2643,13 @@ def parse_alt_or_inflection_of(gloss):
     base = " ".join(lst)
     if base.endswith("."):
         base = base[:-1]
+    # Clean up some common additional stuff
+    base = re.sub(r"(?s)(:|;| - ).*", "", base)
+    base = re.sub(r"\s+(with an added emphasis on the person.)", "", base)
+    base = re.sub(r"\s+with -ra/-re$", "", base)
+    base = re.sub(r"\s+\([^)]*\)", "", base)  # Remove all (...) groups
+    # Note: base might still contain comma-separated values and values
+    # separated by "and"
+    if base.find(".") >= 0:
+        config.debug(". remains in alt_of/inflection_of: {}".format(base))
     return tags, base

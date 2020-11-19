@@ -134,6 +134,9 @@ def clean_replace_regexp(config, v):
         if t.startswith("[["):
             vec = t[2:-2].split("|")
             v = vec[0].strip()
+            m = re.match(r"(?is):\s*Category\s*:\s*", v)
+            if m:
+                return v[m.end():]
             if re.match(r"(?is)Category\s*:", v):
                 return ""
             if re.match(r"(?is)(Image|File)\s*:", v):

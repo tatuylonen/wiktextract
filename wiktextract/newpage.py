@@ -881,13 +881,17 @@ def parse_language(ctx, config, langnode, language, lang_code):
             gloss = "Name of " +  gloss[6:]
 
         # Check if this gloss describes an alt-of or inflection-of
-        tags, base = parse_alt_or_inflection_of(gloss)
+        tags, base = parse_alt_or_inflection_of(config, gloss)
         if "alt-of" in tags:
             data_extend(config, sense_data, "tags", tags)
             data_append(config, sense_data, "alt_of", base)
         elif "compound-of" in tags:
             data_extend(config, sense_data, "tags", tags)
-            data_append(config, sense_data, "compound", base)
+            data_append(config, sense_data, "compound_of", base)
+        elif "synonym-of" in tags:
+            dt = { "word": base }
+            data_extend(config, dt, "tags", tags)
+            data_append(config, sense_data, "synonyms", dt)
         elif tags and base.startswith("of "):
             base = base[3:]
             tags.append("form-of")
@@ -1164,21 +1168,21 @@ def parse_language(ctx, config, langnode, language, lang_code):
         have_linkages = False
         extras = []
 
-        def parse_linkage_item(item, field, sense=None):
-            assert isinstance(item, (str, list, tuple))
+        def parse_linkage_item(contents, field, sense=None):
+            assert isinstance(contents, (str, list, tuple))
             assert isinstance(field, str)
-            if not isinstance(item, (list, tuple)):
-                item = [item]
+            if not isinstance(contents, (list, tuple)):
+                contents = [contents]
             qualifier = None
             english = None
 
             # XXX recognize items that refer to thesaurus, e.g.:
             # "word" synonyms: "vocable; see also Thesaurus:word"
 
-            sublists = [x for x in item if isinstance(x, WikiNode) and
+            sublists = [x for x in contents if isinstance(x, WikiNode) and
                         x.kind == NodeKind.LIST]
-            item = [x for x in item if not isinstance(x, WikiNode) or
-                    x.kind != NodeKind.LIST]
+            contents = [x for x in contents if not isinstance(x, WikiNode) or
+                        x.kind != NodeKind.LIST]
 
             def linkage_item_template_fn(name, ht):
                 nonlocal sense
@@ -1216,7 +1220,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # XXX wikipedia, Wikipedia, w, wp, w2 link types
                 return None
 
-            item = clean_node(config, ctx, data, item,
+            item = clean_node(config, ctx, data, contents,
                               template_fn=linkage_item_template_fn)
 
             def english_repl(m):
@@ -1250,21 +1254,27 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if item.find("(") >= 0 and item.find(", though ") < 0:
                 config.debug("linkage item has remaining parentheses: {}"
                              .format(item))
+                print("LINKATE ITEM CONTENTS:", contents)
+                print("HTML:", ctx.node_to_html(contents))
 
             item = re.sub(r"\s*\(\s*\)", "", item)
             item = item.strip()
-            # XXX stripped item text starts with "See also [[...]]"
+            # XXX check for: stripped item text starts with "See also [[...]]"
             if item and not sublists:
-                dt = {"word": item}
-                if qualifier:
-                    parse_sense_tags(ctx, config, qualifier, dt)
-                if english:
-                    dt["translation"] = english
-                if sense:
-                    dt["sense"] = sense
-                data_append(config, data, field, dt)
-                nonlocal have_linkages
-                have_linkages = True
+                for item1 in split_at_comma_semi(item):
+                    item1 = item1.strip()
+                    if not item1:
+                        continue
+                    dt = {"word": item1}
+                    if qualifier:
+                        parse_sense_tags(ctx, config, qualifier, dt)
+                        if english:
+                            dt["translation"] = english
+                    if sense:
+                        dt["sense"] = sense
+                    data_append(config, data, field, dt)
+                    nonlocal have_linkages
+                    have_linkages = True
 
             # Some words have a word sense in a top-level list item and
             # use sublists for actual links
@@ -1927,6 +1937,8 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
     # Strip any unhandled templates and other stuff.  This is mostly intended
     # to clean up erroneous codings in the original text.
     v = re.sub(r"(?s)\{\{.*", "", v)
+    # Some templates create <sup>(Category: ...)</sup>; remove
+    v = re.sub(r"(?s)\s*\(Category:[^)]*\)", "", v)
     return v
 
 # XXX cf "word" translations under "watchword" and "proverb" - what kind of
@@ -2060,22 +2072,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # Letter of the X script, transcribed as X
 # Letter of the X alphabet ...
 # Letter of the X alphabet: ...
-
-# XXX how about gloss "Synonym of ..." - there are a lot of these (~30k)
-#   - english version is not uncommon in parenthesized quotes
-#   - sometimes multiple synonyms, with comma
-#   - sometimes followed by an explanation after comma
-#   - sometimes followed by english translation after comma
-#   - sometimes followed by an explanation in parenthesis
-#   - sometimes followed by a colon and a normal gloss
-#   - sometimes followed by a slash and a normal gloss
-#   - sometimes followed by "(with an added emphasis on the person.)"
-#   - sometimes followed with -ra/-re  (usage guidance)
-#   - sometimes followed by a scientific name in parenthesis
-#   - sometimes followed by a latin translitteration in parenthesis
-#   - sometimes followed by a semicolon and gloss
-#   - sometimes followed by latin translitteration and quoted translation inside
-#       same parentheses, which may be further followed by colon and gloss
 
 # XXX how about gloss "Compound of XXX and YYY".  There are 100k of these.
 #   - sometimes followed by semicolon and notes or "-" and notes
