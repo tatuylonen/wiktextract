@@ -1254,8 +1254,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if item.find("(") >= 0 and item.find(", though ") < 0:
                 config.debug("linkage item has remaining parentheses: {}"
                              .format(item))
-                print("LINKATE ITEM CONTENTS:", contents)
-                print("HTML:", ctx.node_to_html(contents))
 
             item = re.sub(r"\s*\(\s*\)", "", item)
             item = item.strip()
