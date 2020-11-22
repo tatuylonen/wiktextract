@@ -125,6 +125,8 @@ if __name__ == "__main__":
                         help="Number of parallel processes (default: #cpus)")
     parser.add_argument("--verbose", action="store_true", default=False,
                         help="Print verbose status messages (for debugging)")
+    parser.add_argument("--human-readable", action="store_true", default=False,
+                        help="Write output in human-readable JSON")
     args = parser.parse_args()
 
     # The --all option turns on capturing all data types
@@ -185,7 +187,10 @@ if __name__ == "__main__":
     def word_cb(data):
         global word_count
         word_count += 1
-        out_f.write(json.dumps(data))
+        if args.human_readable:
+            out_f.write(json.dumps(data, indent=2, sort_keys=True))
+        else:
+            out_f.write(json.dumps(data))
         out_f.write("\n")
         if not out_path or out_path == "-" or word_count % 1000 == 0:
             out_f.flush()

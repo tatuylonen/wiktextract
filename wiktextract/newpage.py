@@ -605,8 +605,8 @@ template_linkage_mappings = [
 
 
 def decode_html_entities(v):
-    if not isinstance(v, str):
-        return v
+    if isinstance(v, int):
+        v = str(v)
     return html.unescape(v)
 
 
@@ -633,6 +633,60 @@ def parse_language(ctx, config, langnode, language, lang_code):
     page_datas = []
     stack = []
 
+    def clean_tr_sense(text):
+        # Cleans up some aspects of a word sense or gloss before comparison
+        # (this is helper function for move_clear_translations())
+        text = text.lower()
+        if text.endswith("."):
+            text = text[:-1]
+        if text.startswith("slang: "):
+            text = text[7:]
+        return text.strip()
+
+    def move_clear_translations(data):
+        # After parsing a part-of-speech, move those translations for
+        # which there is no ambiguity to their respective senses
+        if "translations" not in data:
+            return
+        translations = collections.defaultdict(list)
+        for tr in data["translations"]:
+            sensetext = tr.get("sense", "")
+            sensetext = clean_tr_sense(sensetext)
+            translations[sensetext].append(tr)
+        del data["translations"]
+
+        senses_with_no_translations = []
+        for sense in data.get("senses", ()):
+            for gloss in sense.get("glosses", ()):
+                gloss = clean_tr_sense(gloss)
+                for k, v in translations.items():
+                    if (gloss == k or
+                        gloss.startswith(k + ",") or
+                        gloss.startswith(k + " or ")):
+                        data_extend(config, sense, "translations", v)
+                        del translations[k]
+                        break
+                else:
+                    continue
+                break
+            else:
+                senses_with_no_translations.append(sense)
+
+        # Any remaining translations go to those senses that did not have
+        # translations, or to all if all senses had translations.  When there
+        # is ambiguity, the translation is marked "inaccurate".
+        if (len(senses_with_no_translations) == 1 and
+            len(list(translations)) == 1):
+            sense = senses_with_no_translations[0]
+            for k, v in translations.items():
+                data_extend(config, sense, "translations", v)
+            return
+
+        # Leave any translations that we couldn't assign to the original data
+        if translations:
+            for k, v in translations.items():
+                data_extend(config, data, "translations", v)
+
     def merge_base(data, base):
         for k, v in base.items():
             if k not in data:
@@ -657,6 +711,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if pos_datas:
             data = {"senses": pos_datas}
             merge_base(data, pos_data)
+            move_clear_translations(data)
             etym_datas.append(data)
         elif config.pos:
             config.warning("no senses found")
@@ -745,20 +800,24 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         # Check if this gloss describes an alt-of or inflection-of
         tags, base = parse_alt_or_inflection_of(config, gloss)
+        ftags = list(tag for tag in tags if tag != "form-of") # Spurious
         if "alt-of" in tags:
-            data_extend(config, sense_data, "tags", tags)
+            data_extend(config, sense_data, "tags", ftags)
             data_append(config, sense_data, "alt_of", base)
         elif "compound-of" in tags:
-            data_extend(config, sense_data, "tags", tags)
+            data_extend(config, sense_data, "tags", ftags)
             data_append(config, sense_data, "compound_of", base)
         elif "synonym-of" in tags:
             dt = { "word": base }
-            data_extend(config, dt, "tags", tags)
+            data_extend(config, dt, "tags", ftags)
             data_append(config, sense_data, "synonyms", dt)
         elif tags and base.startswith("of "):
             base = base[3:]
-            tags.append("form-of")
-            data_extend(config, sense_data, "tags", tags)
+            data_extend(config, sense_data, "tags", "form-of")
+            data_extend(config, sense_data, "tags", ftags)
+            data_append(config, sense_data, "form_of", base)
+        elif "form-of" in tags:
+            data_extend(config, sense_data, "tags", tags)  # Including form-of
             data_append(config, sense_data, "form_of", base)
 
         if not gloss:
@@ -1381,6 +1440,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if sense:
                     if sense == "Translations to be checked":
                         pass
+                    elif sense.startswith(":The translations below need to be "
+                                          "checked"):
+                        pass
                     else:
                         tr["sense"] = sense
                 parse_translation_desc(ctx, config, part, tr)
@@ -1432,6 +1494,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if name in ("trans-top", "trans-bottom", "trans-mid"):
                     # XXX capture id from trans-top?  Capture sense here
                     # instead of trying to parse it from expanded content?
+                    return None
+                if name == "checktrans-top":
                     return ""
                 if name == "trans-top-also":
                     # XXX capture?
@@ -1767,6 +1831,7 @@ def parse_page(ctx, word, text, config):
                 if new_topics:
                     data["topics"] = new_topics
         ret.extend(lang_datas)
+
     # Return the resulting words
     return ret
 
@@ -2013,6 +2078,8 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX parse redirects, create alt_of
 
+# XXX Handle "; also YYY" syntax in initialisms (see AA/Proper name)
+
 # XXX parse see also, create "related"?
 
 # XXX parse Han character, Kanji, etc into a word sense
@@ -2037,4 +2104,33 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # May be best to actually load these modules as Lua code or to even run a
 # specific Lua module to dump the data.
 
-# XXX review most common Lua errors!
+# XXX review most common Lua errors!  Particularly form-of/templates
+# inflection_of_t.  This might be related to deprecated lang param usage.
+# Perhaps I'm returning wrong value from require() when there is an error?
+
+# Handle Japanese parentheses in linkage items.  It think this relates
+# to <ruby>.
+
+# Check awake/English - strange unrecognized tags
+
+# XXX ensure there is a time limit for calling Lua functions.  Implement in
+# sandbox.
+# See: https://stackoverflow.com/questions/3400851/execution-time-limit-for-a-lua-script-called-from-the-c-api
+
+# Perform NFC normalization for strings returned by Lua code in sandbox.
+# Try to replace invalid sequences by replacement character U+FFFD.
+
+# Change all uses of string in lua sandbox/libraries to ustring
+
+# bang/English - translations have garbage on definitions to be checked
+
+# bang/English - alt_of missing from "Alternative form of bhang"
+
+# bang/English/Verb check taggs for "bangs" (present present sim,ple simple singular third-person)
+
+# Why does eccentric/English/Adjective get tag "contraction" when that word
+# only occurs in its gloss???
+
+# XXX huh/Finnish creates duplicate sense???
+
+# XXX fix single-line bold/italic bug in wikitextprocessor

@@ -287,9 +287,7 @@ def clean_value(config, title, no_strip=False):
                    r"\2", title)
     title = re.sub(r"(?s)\[\[([^]|]+)\]\]", r"\1", title)
     # Replace remaining HTML links by the URL.
-    # XXX this breaks [...] in pronunciation section.  Change to keep HTML
-    # entities longer, and then restore this code.
-    # title = re.sub(r"\[([^]]+)\]", r"\1", title)
+    title = re.sub(r"\[(https?:[^]]+)\]", r"", title)
     # Replace various emphases (quoted text) by its value.
     title = re.sub(r"''+(([^']|'[^'])+?)''+", r"\1", title)
     # Replace HTML entities
