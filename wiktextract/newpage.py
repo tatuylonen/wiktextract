@@ -2134,3 +2134,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX huh/Finnish creates duplicate sense???
 
 # XXX fix single-line bold/italic bug in wikitextprocessor
+
+# XXX check cut/English/Noun, forms show "countable uncountable, cuts [plural]"
+# (An engraved block or plate)
