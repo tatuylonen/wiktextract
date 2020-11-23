@@ -93,9 +93,6 @@ panel_templates = set([
     "hu-corr",
     "hu-suff-pron",
     "ko-hanja-search",
-    "list:compass points/en",
-    "list:compass points/ja",
-    "list:compass points/zh",
     "look",
     "mediagenic terms",
     "merge",
@@ -162,6 +159,14 @@ panel_templates = set([
     "wikipedia",
     "zh-forms",
 ])
+
+# Template name prefixes used for language-specific panel templates
+panel_prefixes = [
+    "list:compass points/",
+    "list:Latin script letters/",
+    "RQ:",
+]
+
 
 # Mapping from a template name (without language prefix) for the main word
 # (e.g., fi-noun, fi-adj, en-verb) to permitted parts-of-speech in which
@@ -610,6 +615,19 @@ def decode_html_entities(v):
     return html.unescape(v)
 
 
+def is_panel_template(name):
+    """Checks if ``name`` is a known panel template name (i.e., one that
+    produces an infobox in Wiktionary, but this also recognizes certain other
+    templates that we do not wish to expand)."""
+    assert isinstance(name, str)
+    if name in panel_templates:
+        return True
+    for prefix in panel_prefixes:
+        if name.startswith(prefix):
+            return True
+    return False
+
+
 def parse_language(ctx, config, langnode, language, lang_code):
     """Iterates over the text of the page, returning words (parts-of-speech)
     defined on the page one at a time.  (Individual word senses for the
@@ -742,9 +760,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         additional_glosses = []
 
         def sense_template_fn(name, ht):
-            if name in panel_templates:
-                return ""
-            if name.startswith("RQ:"):
+            if is_panel_template(name):
                 return ""
             if name in ("defdate",):
                 return ""
@@ -813,7 +829,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             data_append(config, sense_data, "synonyms", dt)
         elif tags and base.startswith("of "):
             base = base[3:]
-            data_extend(config, sense_data, "tags", "form-of")
+            data_append(config, sense_data, "tags", "form-of")
             data_extend(config, sense_data, "tags", ftags)
             data_append(config, sense_data, "form_of", base)
         elif "form-of" in tags:
@@ -831,9 +847,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
     def head_template_fn(name, ht):
         # print("HEAD_TEMPLATE_FN", name, ht)
-        if name in panel_templates:
-            return ""
-        if name.startswith("RQ:"):
+        if is_panel_template(name):
             return ""
         if name == "number box":
             # XXX extract numeric value?
@@ -982,9 +996,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if country:
                         data_append(config, pron, "tags", country.upper())
                     data_append(config, data, "sounds", pron)
-            if name in panel_templates:
-                return ""
-            if name.startswith("RQ:"):
+            if is_panel_template(name):
                 return ""
             return None
 
@@ -1131,9 +1143,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 nonlocal sense
                 nonlocal english
                 nonlocal qualifier
-                if name in panel_templates:
-                    return ""
-                if name.startswith("RQ:"):
+                if is_panel_template(name):
                     return ""
                 if name in ("sense", "s"):
                     sense = clean_value(config, ht.get(1))
@@ -1194,6 +1204,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     else:
                         qualifier = t
                     item = item[:m.start()] + item[m.end():]
+            item = re.sub(r"\s*\(\)", "", item)
             if item.find("(") >= 0 and item.find(", though ") < 0:
                 config.debug("linkage item has remaining parentheses: {}"
                              .format(item))
@@ -1257,9 +1268,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if name == "zh-dial":
                     parse_dialectal_synonyms(name, ht)
                     return ""
-                if name in panel_templates:
-                    return ""
-                if name.startswith("RQ:"):
+                if is_panel_template(name):
                     return ""
                 for prefix, t in template_linkage_mappings:
                     if re.search(r"(^|[-/\s]){}($|\b|[0-9])".format(prefix),
@@ -1484,12 +1493,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if name == "see translation subpage":
                     # XXX capture
                     return ""
-                if name in panel_templates:
-                    return ""
-                if name.startswith("RQ:"):
+                if is_panel_template(name):
                     return ""
                 if name in ("c", "C", "categorize", "cat", "catlangname",
                             "topics", "top", "qualifier",):
+                    # These are expanded in the default way
                     return None
                 if name in ("trans-top", "trans-bottom", "trans-mid"):
                     # XXX capture id from trans-top?  Capture sense here
