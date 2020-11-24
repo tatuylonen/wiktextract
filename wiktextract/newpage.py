@@ -167,6 +167,32 @@ panel_prefixes = [
     "RQ:",
 ]
 
+ignored_category_patterns = [
+    re.compile(r"Requests for "),
+    re.compile("Terms with manual "),
+    re.compile("Terms with redundant "),
+    re.compile("Reference templates lacking"),
+    re.compile("Entries using missing taxonomic name"),
+    re.compile(".* redlinks"),
+    re.compile(".* lemmas$"),
+    re.compile(".* nouns$"),
+    re.compile(".* verbs$"),
+    re.compile(".* adverbs$"),
+    re.compile(".* adjectives$"),
+    re.compile(".* abbreviations$"),
+    re.compile(".* missing plurals$"),
+    re.compile(".*-syllable words$"),
+    re.compile(".* terms with IPA pronunciation"),
+    re.compile(".* terms with .* senses$"),
+    re.compile(".* slang$"),
+    re.compile("Entries missing "),
+    re.compile(".* terms with homophones"),
+    re.compile(".* terms$"),
+    re.compile(".* vulgarities$"),
+    re.compile(".* terms with usage examples$"),
+    re.compile(".* colloquialisms$"),
+    re.compile(".* words without vowels$"),
+]
 
 # Mapping from a template name (without language prefix) for the main word
 # (e.g., fi-noun, fi-adj, en-verb) to permitted parts-of-speech in which
@@ -751,12 +777,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
     def parse_sense(pos, contents):
         assert isinstance(pos, str)
         assert isinstance(contents, (list, tuple))
-        push_sense()
         lst = [x for x in contents
                if not isinstance(x, WikiNode) or
                x.kind not in (NodeKind.LIST,)]
-        sublists = [x for x in contents
-                    if isinstance(x, WikiNode) and x.kind == NodeKind.LIST]
         additional_glosses = []
 
         def sense_template_fn(name, ht):
@@ -948,7 +971,61 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # I assume those will get parsed as separate lists, but
                     # we don't want to include such examples as word senses.
                     continue
-                parse_sense(pos, node.children)
+                contents = node.children
+                sublists = [x for x in contents
+                            if isinstance(x, WikiNode) and
+                            x.kind == NodeKind.LIST
+                            and x.args == "##"]
+                if not sublists:
+                    push_sense()
+                    parse_sense(pos, contents)
+                    continue
+                # This entry has sublists of entries.  We should contain
+                # gloss information from both.  Sometimes the outer gloss
+                # is more non-gloss or tags, sometimes it is a coarse sense
+                # and the inner glosses are more specific.  The outer one does
+                # not seem to have qualifiers.
+                outer = [x for x in contents
+                         if not isinstance(x, WikiNode) or
+                         x.kind != NodeKind.LIST]
+
+                def outer_template_fn(name, ht):
+                    if is_panel_template(name):
+                        return ""
+                    if name in ("defdate",):
+                        return ""
+                    if name in ("syn", "synonyms"):
+                        return ""
+                    return None
+
+                cats = {}
+                outer_text = clean_node(config, ctx, cats, outer,
+                                        template_fn=outer_template_fn)
+                for sublist in sublists:
+                    assert sublist.kind == NodeKind.LIST
+                    for item in sublist.children:
+                        if not isinstance(item, WikiNode):
+                            continue
+                        if item.kind != NodeKind.LIST_ITEM:
+                            continue
+                        push_sense()
+                        data_extend(config, sense_data, "categories",
+                                    cats.get("categories", ()))
+                        # XXX is it always a gloss?  Maybe non-gloss?
+                        tags = ()
+                        if outer_text == "A pejorative:":
+                            tags = ["pejorative"]
+                            outer_text = None
+                        elif outer_text == "Short forms.":
+                            tags = ["abbreviation"]
+                            outer_text = None
+                        elif outer_text == "Technical or specialized senses.":
+                            outer_text = None
+                        data_extend(config, sense_data, "tags", tags)
+                        if outer_text:
+                            data_append(config, sense_data, "glosses",
+                                        outer_text)
+                        parse_sense(pos, item.children)
 
     def parse_pronunciation(node):
         assert isinstance(node, WikiNode)
@@ -1076,12 +1153,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if not have_pronunciations:
             config.warning("no pronunciations found from pronunciation section")
 
-    def parse_declension_conjugation(node):
-        # print("parse_decl_conj:", node)
+    def parse_inflection(node):
+        # print("parse_inflection:", node)
         assert isinstance(node, WikiNode)
         captured = False
 
-        def decl_conj_template_fn(name, ht):
+        def inflection_template_fn(name, ht):
             # print("decl_conj_template_fn", name, ht)
             m = re.search(r"-(conj|decl|ndecl|adecl|infl|conjugation|"
                           r"declension|inflection)($|-)", name)
@@ -1098,15 +1175,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 captured = True
                 return ""
 
-            # XXX this should be in sense parsing
-            # if name == "pinyin reading of" and 1 in ht:
-            #     data_append(config, pos_data, "forms",
-            #                 {"form": ht[1], "tags": ["pinyin of"]})
-            #     return ""
-
             return None
 
-        text = ctx.node_to_html(node, template_fn=decl_conj_template_fn)
+        text = ctx.node_to_html(node, template_fn=inflection_template_fn)
         if not captured:
             # XXX try to parse either a WikiText table or a HTML table that
             # contains the inflectional paradigm
@@ -1618,7 +1689,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     data = etym_data
                 parse_translations(data, node)
             elif t in ("Declension", "Conjugation", "Inflection"):
-                parse_declension_conjugation(node)
+                parse_inflection(node)
             elif pos in ("hypernyms", "hyponyms", "antonyms", "synonyms",
                          "abbreviations", "proverbs"):
                 if stack[-1].lower() in part_of_speech_map:
@@ -1875,20 +1946,16 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
             m = re.match(r"[a-z]{2,4}:", cat)
             if m:
                 cat = cat[m.end():]
-            if cat.startswith("Requests for "):
-                cat = ""
-            if cat.startswith("Terms with manual "):
-                cat = ""
-            if cat.startswith("Terms with redundant "):
-                cat == ""
-            if cat.startswith("Reference templates lacking"):
-                cat = ""
-            if cat.startswith("Entries using missing taxonomic name"):
-                cat = ""
-            if cat.find(" redlinks") >= 0:
-                cat = ""
-            if cat and cat not in category_data.get("categories", ()):
-                data_append(config, category_data, "categories", cat)
+            cat = re.sub(r"\s+", " ", cat)
+            cat = cat.strip()
+            if not cat:
+                continue
+            for x in ignored_category_patterns:
+                if re.match(x, cat):
+                    break
+            else:
+                if cat not in category_data.get("categories", ()):
+                    data_append(config, category_data, "categories", cat)
 
     v = clean_value(config, v)
     # Strip any unhandled templates and other stuff.  This is mostly intended
@@ -1998,9 +2065,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX should probably handle "Lua module not found" differently, perhaps
 # silently returning an error that can be handled using #iferror
 
-# XXX parse word senses from second-level enumerated list items,
-# see e.g. gay/English/Adjective
-
 # XXX handle qualifiers starting with "of " specially.  They are quite common
 # for adjectives, describing what the adjective can characterize
 
@@ -2094,8 +2158,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX parse Han character, Kanji, etc into a word sense
 
-# XXX grep for ''''' from glosses, make sure there are no extras
-
 # XXX handle "XXX/derived terms" pages
 
 # XXX parse {{zh-see|XXX}} - see 共青团
@@ -2136,28 +2198,15 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # bang/English - alt_of missing from "Alternative form of bhang"
 
-# bang/English/Verb check taggs for "bangs" (present present sim,ple simple singular third-person)
+# bang/English/Verb check tags for "bangs" (present present simple simple singular third-person)
 
 # Why does eccentric/English/Adjective get tag "contraction" when that word
 # only occurs in its gloss???
 
-# XXX huh/Finnish creates duplicate sense???
-
-# XXX fix single-line bold/italic bug in wikitextprocessor
-
 # XXX check cut/English/Noun, forms show "countable uncountable, cuts [plural]"
 # (An engraved block or plate)
-
-# XXX handle sublists in word senses - check e.g. quarter/English/Noun
-
-# XXX warn about "English ordinal numbers" with no adj sense with "ordinal" tag
 
 # XXX in linkage, don't lump all parenthesis togerther, see
 # quarter/English/Noun/Synonyms, sense "section of a town"
 
-# Drop some categories:
-#  - English lemmas
-#  - English terms with IPA pronunciation
-#  - English n-syllable words
-#  - for "nouns", "verbs", "adjectives", only include in respective
-#    part-of-speech
+# XXX fix wiktextract tests

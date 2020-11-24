@@ -703,6 +703,7 @@ xlat_tags_map = {
     "old-fashioned": "dated",
     "rarely used": "rare",
     "rarely": "rare",
+    "now rare": "archaic",
     "fossil word": "archaic",
     "brusque": "impolite",
     "verbs": "verb",
@@ -2214,7 +2215,7 @@ def map_with(ht, lst):
 
 def decode_tags(config, lst, allow_any=False):
     """Decodes tags, doing some canonicalizations.  This returns a list of
-    lists of tags."""
+    lists of tags and a list of topics."""
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(lst, (list, tuple))
     lsts = [[]]
@@ -2283,7 +2284,7 @@ def decode_tags(config, lst, allow_any=False):
             elif tag and not tag[0].isupper():
                 config.unknown_tag(tag)
                 tags.append("error")
-        tagsets.add(tuple(sorted(tags)))
+        tagsets.add(tuple(sorted(set(tags))))
     ret = list(tagsets)
     return ret, topics
 

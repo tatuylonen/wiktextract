@@ -17,34 +17,40 @@ class WiktExtractTests(unittest.TestCase):
     def test_empty(self):
         ret = decode_tags(self.config, [])
         self.assertEqual(self.config.warnings, [])
-        self.assertEqual(ret, [()])
+        self.assertEqual(ret, ([()], []))
 
     def test_singular(self):
-        ret = decode_tags(self.config, ["singular"])
+        ret, topics = decode_tags(self.config, ["singular"])
         self.assertEqual(self.config.warnings, [])
         self.assertEqual(ret, [("singular",)])
 
+    def test_topics(self):
+        ret, topics = decode_tags(self.config, ["singular", "nautical"])
+        self.assertEqual(self.config.warnings, [])
+        self.assertEqual(ret, [("singular",)])
+        self.assertEqual(topics, ["nautical"])
+
     def test_unknown(self):
-        ret = decode_tags(self.config, ["unknowntag"])
+        ret, topics = decode_tags(self.config, ["unknowntag"])
         self.assertNotEqual(self.config.warnings, [])
         self.assertEqual(ret, [("error",)])
 
     def test_plural_partitive(self):
-        ret = decode_tags(self.config, ["partitive", "plural"])
+        ret, topics = decode_tags(self.config, ["partitive", "plural"])
         self.assertEqual(self.config.warnings, [])
         self.assertEqual(ret, [("partitive", "plural")])
 
     def test_combo(self):
-        ret = decode_tags(self.config, ["class", "2a",
-                                        "stress", "pattern", "1"])
+        ret, topics = decode_tags(self.config, ["class", "2a",
+                                                "stress", "pattern", "1"])
         self.assertEqual(self.config.warnings, [])
-        self.assertEqual(ret, [("class 2a", "stress pattern 1")])
+        self.assertEqual(ret, [("class-2a", "stress-pattern-1")])
 
     def test_combo_err(self):
-        ret = decode_tags(self.config, ["class", "2a",
-                                        "stress", "pattern", "xyz"])
+        ret, topics = decode_tags(self.config, ["class", "2a",
+                                                "stress", "pattern", "xyz"])
         self.assertNotEqual(self.config.warnings, [])
-        self.assertEqual(ret, [("class 2a", "error")])
+        self.assertEqual(ret, [("class-2a", "error")])
 
     def test_head1(self):
         data = {}
@@ -101,7 +107,7 @@ class WiktExtractTests(unittest.TestCase):
         parse_word_head(self.ctx, self.config, "noun",
                         "testpage f (plurale tantum, inanimate)", data)
         self.assertEqual(self.config.warnings, [])
-        self.assertEqual(data, {"tags": ["feminine", "plurale tantum",
+        self.assertEqual(data, {"tags": ["feminine", "plurale-tantum",
                                          "inanimate"]})
 
     def test_head9(self):
@@ -111,7 +117,7 @@ class WiktExtractTests(unittest.TestCase):
                         data)
         print(data)
         self.assertEqual(self.config.warnings, [])
-        self.assertEqual(data, {"tags": ["feminine", "plurale tantum",
+        self.assertEqual(data, {"tags": ["feminine", "plurale-tantum",
                                          "inanimate"],
                                 "forms": [{"tags": ["stem"],
                                            "form": "testpag"}]})
@@ -124,8 +130,8 @@ class WiktExtractTests(unittest.TestCase):
                         data)
         self.assertEqual(self.config.warnings, [])
         print(data)
-        self.assertEqual(data, {"tags": ["feminine", "plurale tantum",
-                                         "inanimate", "with dative"],
+        self.assertEqual(data, {"tags": ["feminine", "plurale-tantum",
+                                         "inanimate", "with-dative"],
                                 "forms": [{"tags": ["stem"],
                                            "form": "testpag"}]})
 
