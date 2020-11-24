@@ -8,19 +8,24 @@
 part_of_speech_map = {
     "abbreviation": {
         "pos": "abbrev",
+        "warning": "Part-of-speech Abbreviation is proscribed",
         "tags": ["abbreviation"],
     },
     "acronym": {
         "pos": "abbrev",
+        "warning": "Part-of-speech Acronym is proscribed",
         "tags": ["abbreviation"],
     },
     "adjectival": {
         "pos": "adj_noun",
+        "warning": "Part-of-speech Adjectival is not valid",
     },
     "adjectival noun": {
+        # Not listed as allowed, but common
         "pos": "adj_noun",
     },
     "adjectival verb": {
+        # Not listed as allowed, but common
         "pos": "adj_verb",
     },
     "adjective": {
@@ -28,7 +33,7 @@ part_of_speech_map = {
     },
     "adjectuve": {
         "pos": "adj",
-        "error": "Misspelled subtitle",
+        "warning": "Misspelled subtitle",
     },
     "adjectives": {
         "pos": "adj",
@@ -43,12 +48,17 @@ part_of_speech_map = {
     },
     "adverbial phrase": {
         "pos": "adv_phrase",
+        "warning": "Part-of-speech Adverbial phrase is proscribed",
     },
     "affix": {
         "pos": "affix",
     },
     "adjective suffix": {
-        "pos": "affix",
+        "pos": "suffix",
+        "warning": "Part-of-speech Adjective suffix is proscribed",
+    },
+    "ambiposition": {
+        "pos": "ambiposition",
     },
     "article": {
         "pos": "article",
@@ -58,6 +68,7 @@ part_of_speech_map = {
     },
     "circumfix": {
         "pos": "circumfix",
+        "tags": ["morpheme"],
     },
     "circumposition": {
         "pos": "circumpos",
@@ -67,15 +78,17 @@ part_of_speech_map = {
     },
     "clipping": {
         "pos": "abbrev",
+        "warning": "Part-of-speech Clipping is proscribed",
         "tags": ["abbreviation"],
     },
     "clitic": {
         "pos": "suffix",
+        "warning": "Part-of-speech Clitic is proscribed",
         "tags": ["clitic"],
     },
     "combining form": {
         "pos": "combining_form",
-        # XXX should change to affix/suffix/prefix?
+        "tags": ["morpheme"],
     },
     "comparative": {
         "pos": "adj",
@@ -103,6 +116,7 @@ part_of_speech_map = {
     },
     "diacritical mark": {
         "pos": "character",
+        "tags": ["diacritic"],
     },
     "enclitic": {
         "pos": "suffix",
@@ -114,32 +128,52 @@ part_of_speech_map = {
     },
     "gerund": {
         "pos": "verb",
+        "warning": "Part-of-speech Gerund is proscribed",
         "tags": ["participle", "gerund"],
     },
     "han character": {
         "pos": "character",
+        "tags": ["han"],
     },
     "han characters": {
         "pos": "character",
+        "tags": ["han"],
         "warning": "Usually used in singular",
+    },
+    "hanja": {
+        "pos": "character",
+        "tags": ["hanja"],
+    },
+    "hanzi": {
+        "pos": "character",
+        "tags": ["hanzi"],
     },
     "ideophone": {
         "pos": "noun",
         "tags": ["ideophone"],
     },
+    "idiom": {
+        "pos": "phrase",
+        "tags": "idiomatic",
+        "warning": "Part-of-speech Idiom is proscribed",
+    },
     "infix": {
         "pos": "infix",
+        "tags": ["morpheme"],
     },
     "infinitive": {
         "pos": "verb",
+        "warning": "Part-of-speech Infinitive is proscribed",
         "tags": ["infinitive"],
     },
     "initialism": {
         "pos": "abbrev",
+        "warning": "Part-of-speech Initialism is proscribed",
         "tags": ["abbreviation"],
     },
     "interfix": {
         "pos": "interfix",
+        "tags": ["morpheme"],
     },
     "interjection": {
         "pos": "intj",
@@ -150,31 +184,29 @@ part_of_speech_map = {
     },
     "intransitive verb": {
         "pos": "verb",
+        "warning": "Part-of-speech Intransitive verb is proscribed",
         "tags": ["intransitive"],
     },
     "instransitive verb": {
         "pos": "verb",
         "tags": ["intransitive"],
-        "error": "Misspelled subtitle",
+        "warning": "Misspelled subtitle",
     },
     "kanji": {
         "pos": "character",
+        "tags": ["kanji"],
     },
     "letter": {
-        "pos": "letter",
+        "pos": "character",
+        "tags": ["letter"],
     },
     "ligature": {
         "pos": "character",
         "tags": ["ligature"],
     },
-    "label": {
-        "pos": "character",
-    },
-    "nom character": {
-        "pos": "character",
-    },
     "nominal nuclear clause": {
         "pos": "clause",
+        "warning": "Part-of-speech Nominal nuclear clause is proscribed",
     },
     "νoun": {
         "pos": "noun",
@@ -187,6 +219,10 @@ part_of_speech_map = {
     "noun": {
         "pos": "noun",
     },
+    "noun form": {
+        "pos": "noun",
+        "warning": "Part-of-speech Noun form is proscribed",
+    },
     "nouns": {
         "pos": "noun",
         "warning": "Usually in singular",
@@ -197,12 +233,14 @@ part_of_speech_map = {
     },
     "number": {
         "pos": "num",
+        "tags": ["number"],
     },
     "numeral": {
         "pos": "num",
     },
     "ordinal number": {
-        "pos": "num",
+        "pos": "adj",
+        "warning": "Ordinal numbers should be adjectives",
         "tags": ["ordinal"],
     },
     "participle": {
@@ -255,6 +293,7 @@ part_of_speech_map = {
     },
     "prefix": {
         "pos": "prefix",
+        "tags": ["morpheme"],
     },
     "preposition": {
         "pos": "prep",
@@ -265,16 +304,19 @@ part_of_speech_map = {
     },
     "prepositional expressions": {
         "pos": "prep",
+        "warning": "Part-of-speech Prepositional expressions is proscribed",
     },
     "prepositional phrase": {
         "pos": "prep_phrase",
     },
     "prepositional pronoun": {
         "pos": "pron",
+        "warning": "Part-of-speech Prepositional pronoun is proscribed",
         "tags": ["prepositional"],
     },
     "present participle": {
         "pos": "verb",
+        "warning": "Part-of-speech Present participle is proscribed",
         "tags": ["participle", "present"],
     },
     "preverb": {
@@ -299,22 +341,35 @@ part_of_speech_map = {
     },
     "punctuation mark": {
         "pos": "punct",
+        "tags": ["punctuation"],
     },
     "punctuation": {
         "pos": "punct",
+        "warning": "Part-of-speech Punctuation should be Punctuation mark",
+        "tags": ["punctuation"],
     },
     "relative": {
         "pos": "conj",
         "tags": ["relative"],
     },
-    "syllable": {
-        "pos": "syllable",
+    "romanization": {
+        "pos": "romanization",
+    },
+    "root": {
+        "pos": "root",
+        "tags": ["morpheme"],
     },
     "suffix": {
         "pos": "suffix",
+        "tags": ["morpheme"],
     },
     "suffix form": {
         "pos": "suffix",
+        "warning": "Part-of-speech Suffix form is proscribed",
+        "tags": ["morpheme"],
+    },
+    "syllable": {
+        "pos": "syllable",
     },
     "symbol": {
         "pos": "symbol",
@@ -325,6 +380,10 @@ part_of_speech_map = {
     },
     "verb": {
         "pos": "verb",
+    },
+    "verb form": {
+        "pos": "verb",
+        "warning": "Part-of-speech Verb form is proscribed",
     },
     "verbal noun": {
         "pos": "noun",

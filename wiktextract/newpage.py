@@ -197,7 +197,7 @@ template_allowed_pos_map = {
     "pos": ["affix", "name", "num"],
     "suffix": ["suffix", "affix"],
     "character": ["character"],
-    "letter": ["letter"],
+    "letter": ["character"],
     "kanji": ["character"],
     "cont": ["abbrev"],
     "interj": ["intj"],
@@ -1093,7 +1093,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     v = decode_html_entities(v)
                     new_ht[decode_html_entities(k)] = v
                 new_ht["template_name"] = name
-                data_append(config, pos_data, "conjugation", new_ht)
+                data_append(config, pos_data, "inflection", new_ht)
                 nonlocal captured
                 captured = True
                 return ""
@@ -1617,7 +1617,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 else:
                     data = etym_data
                 parse_translations(data, node)
-            elif t in ("Declension", "Conjugation"):
+            elif t in ("Declension", "Conjugation", "Inflection"):
                 parse_declension_conjugation(node)
             elif pos in ("hypernyms", "hyponyms", "antonyms", "synonyms",
                          "abbreviations", "proverbs"):
@@ -1653,6 +1653,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 parse_linkage(data, "coordinates", node)
             elif t in ("Anagrams", "Further reading", "References",
                        "Quotations", "Descendants"):
+                # XXX does the Descendants section have something we'd like
+                # to capture?
                 pass
 
             # XXX parse interesting templates also from other sections.  E.g.,
@@ -2145,3 +2147,17 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX check cut/English/Noun, forms show "countable uncountable, cuts [plural]"
 # (An engraved block or plate)
+
+# XXX handle sublists in word senses - check e.g. quarter/English/Noun
+
+# XXX warn about "English ordinal numbers" with no adj sense with "ordinal" tag
+
+# XXX in linkage, don't lump all parenthesis togerther, see
+# quarter/English/Noun/Synonyms, sense "section of a town"
+
+# Drop some categories:
+#  - English lemmas
+#  - English terms with IPA pronunciation
+#  - English n-syllable words
+#  - for "nouns", "verbs", "adjectives", only include in respective
+#    part-of-speech

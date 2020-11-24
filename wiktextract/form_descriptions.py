@@ -510,7 +510,14 @@ xlat_tags_map = {
     "type u": "type-u",
     "type up": "type-up",
     "type a": "type-a",
-    "ordinal form of": "ordinal",
+    "ordinal form of": "ordinal form-of",
+    "the ordinal form of the number": "ordinal form-of",
+    "the ordinal form of": "ordinal form-of",
+    "the ordinal of": "ordinal form-of",
+    "the ordinal number corresponding to the cardinal number":
+    "ordinal form-of",
+    "the ordinal form of the cardinal number": "ordinal form-of",
+    "the ordinal number": "ordinal form-of",
     "used in the form": "used-in-the-form",
     "upper case": "upper-case",
     "lower case": "lower-case",
@@ -540,6 +547,7 @@ xlat_tags_map = {
     "singular only": "singular-only",
     "plural only": "plural-only",
     "imperative only": "imperative-only",
+    "in general sense": "broadly",
     "by extension": "broadly",
     "by metonymy": "metonymically",
     "by semantic narrowing": "narrowly",
@@ -609,6 +617,8 @@ xlat_tags_map = {
     "clipping of": "alt-of clipping abbreviation",
     "X-system spelling of": "alt-of X-system",
     "H-system spelling of": "alt-of H-system",
+    "Pinyin transcription of": "alt-of pinyin",
+    "Rōmaji transcription of": "alt-of romaji",
     "visual rendering of Morse code for":
     "alt-of visual-rendering morse-code",
     "soft mutation of": "alt-of soft",
@@ -769,6 +779,7 @@ xlat_tags_map = {
     "poetic meter": "poetic",
     "in certain phrases": "in-certain-phrases",
     "deprecated template usage": "deprecated-template",
+    "diacritical mark": "diacritic",
 }
 
 # Translation map for topics.
@@ -1705,6 +1716,8 @@ valid_tags = set([
     "classifier",
     "kyūjitai",
     "shinjitai",
+    "pinyin",
+    "romaji",
     "X-system",
     "visual-rendering",
     "morse-code",
@@ -1862,6 +1875,7 @@ valid_tags = set([
     "definition",
     "economics",
     "slur",
+    "diacritic",
     "capitalized",
     "onomatopoeia",
     "expressively",
