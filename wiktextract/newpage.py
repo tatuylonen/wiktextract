@@ -192,6 +192,11 @@ ignored_category_patterns = [
     re.compile(".* terms with usage examples$"),
     re.compile(".* colloquialisms$"),
     re.compile(".* words without vowels$"),
+    re.compile(".* contractions$"),
+    re.compile(".* terms with audio links$"),
+    re.compile(".* terms with quotations$"),
+    re.compile("etyl cleanup/"),
+    re.compile(".* templates to be cleaned"),
 ]
 
 # Mapping from a template name (without language prefix) for the main word
@@ -1161,7 +1166,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         def inflection_template_fn(name, ht):
             # print("decl_conj_template_fn", name, ht)
             m = re.search(r"-(conj|decl|ndecl|adecl|infl|conjugation|"
-                          r"declension|inflection)($|-)", name)
+                          r"declension|inflection|mut|mutation)($|-)", name)
             if m:
                 new_ht = {}
                 # Convert html entities that may be used in the arguments
@@ -1177,12 +1182,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             return None
 
-        text = ctx.node_to_html(node, template_fn=inflection_template_fn)
-        if not captured:
-            # XXX try to parse either a WikiText table or a HTML table that
-            # contains the inflectional paradigm
-            # XXX should we try to capture it even if we got the template?
-            pass
+        # Clean the node.  This captures category links and calls the template
+        # function.
+        clean_node(config, ctx, etym_data, node,
+                   template_fn=inflection_template_fn)
+        # XXX try to parse either a WikiText table or a HTML table that
+        # contains the inflectional paradigm
+        # XXX should we try to capture it even if we got the template?
 
     def parse_linkage(data, field, linkagenode):
         assert isinstance(data, dict)
@@ -1656,8 +1662,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if node.kind in (NodeKind.HLINE,):
                     continue
                 # print("      UNEXPECTED: {}".format(node))
+                # Clean the node to collect category links
+                clean_node(config, ctx, etym_data, node)
                 continue
-            t = clean_node(config, ctx, None, node.args)
+            t = clean_node(config, ctx, etym_data, node.args)
             config.subsection = t
             config.section_counts[t] += 1
             pos = t.lower()
@@ -1688,7 +1696,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 else:
                     data = etym_data
                 parse_translations(data, node)
-            elif t in ("Declension", "Conjugation", "Inflection"):
+            elif t in ("Declension", "Conjugation", "Inflection", "Mutation"):
                 parse_inflection(node)
             elif pos in ("hypernyms", "hyponyms", "antonyms", "synonyms",
                          "abbreviations", "proverbs"):
@@ -1954,6 +1962,10 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
                 if re.match(x, cat):
                     break
             else:
+                if cat.endswith(" female given names"):
+                    data_append(config, category_data, "tags", "feminine")
+                elif cat.endswith(" male given names"):
+                    data_append(config, category_data, "tags", "masculine")
                 if cat not in category_data.get("categories", ()):
                     data_append(config, category_data, "categories", cat)
 
@@ -2203,10 +2215,8 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # Why does eccentric/English/Adjective get tag "contraction" when that word
 # only occurs in its gloss???
 
-# XXX check cut/English/Noun, forms show "countable uncountable, cuts [plural]"
-# (An engraved block or plate)
+# XXX implement parsing of tags from first-level gloss in two-level lists
+#    (see cut/English/Noun)
 
-# XXX in linkage, don't lump all parenthesis togerther, see
-# quarter/English/Noun/Synonyms, sense "section of a town"
-
-# XXX fix wiktextract tests
+# XXX in parse_head_tags(), should create multiple forms if
+# node["$"].get("tags") contains multiple sets of tags (e.g., cut/English/Verb)

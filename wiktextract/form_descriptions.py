@@ -2391,23 +2391,6 @@ def parse_word_head(ctx, config, pos, text, data):
                         break
                     rest.append(xlat_head_map[part])
                 rest = list(reversed(rest))
-
-                # XXX remove old code below?
-                # lst = lst[:i + 1]
-                # lst = []  # Word form (NOT tags)
-                # i = 0
-                # while i < len(baseparts):
-                #     word = baseparts[i]
-                #     w = distw(titleparts, word)  # 0=identical..1=very different
-                #     if (word == title or word in blocked or
-                #         word in titleparts or
-                #         ((w <= 0.7 or len(word) <= 4) and
-                #          word not in valid_tags and word not in xlat_tags_map)):
-                #         lst.append(word)
-                #     else:
-                #         break
-                #     i += 1
-                # rest = baseparts[i:]
             # lst is canonical form of the word
             # rest is additional tags (often gender m/f/n/c/...)
             if lst and title != " ".join(lst):
@@ -2436,18 +2419,18 @@ def parse_word_head(ctx, config, pos, text, data):
                 part = parts[i]
                 w = distw(titleparts, part)  # 0=identical .. 1=very different
                 if (part != title and part not in titleparts and
-                    (w >= 0.7 or len(part) < 4) and
+                    (w >= 0.6 or len(part) < 4) and
                     (part in node or
                      ("$" in node and part in valid_sequences))):
                     # Consider it part of a descriptor
                     if part in node:
                         if "$" in node:
-                            lst.extend(parts[last_valid:i + 1])
+                            lst.extend(node["$"].get("tags", ()))
                             last_valid = i + 1
                         node = node[part]
                     else:
                         assert "$" in node
-                        lst.extend(parts[last_valid:i])
+                        lst.extend(node["$"].get("tags", ()))
                         last_valid = i
                         node = valid_sequences[part]
                 elif w == "of" and lst and "of" not in node:
@@ -2458,6 +2441,7 @@ def parse_word_head(ctx, config, pos, text, data):
                 else:
                     # Consider the rest as a related term
                     break
+                i += 1
                 # Stop if we have completed parsing something that is always
                 # followed by a word form
                 if ("alt-of" in lst or
@@ -2465,9 +2449,8 @@ def parse_word_head(ctx, config, pos, text, data):
                     "compound-of" in lst or
                     "synonym-of" in lst):
                     break
-                i += 1
             if "$" in node:
-                lst.extend(parts[last_valid:i])
+                lst.extend(node["$"].get("tags", ()))
                 last_valid = i
             related = parts[last_valid:]
             # XXX check if related contains valid tag sequences and warn if
