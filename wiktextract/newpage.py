@@ -170,47 +170,64 @@ panel_prefixes = [
 ]
 
 ignored_category_patterns = [
-    re.compile(r"Requests for "),
-    re.compile("Terms with manual "),
-    re.compile("Terms with redundant "),
-    re.compile("Reference templates lacking"),
-    re.compile("Entries using missing taxonomic name"),
-    re.compile(".* term requests"),
-    re.compile(".* redlinks"),
-    re.compile(".* red links"),
-    re.compile(".* lemmas$"),
-    re.compile(".* nouns$"),
-    re.compile(".* verbs$"),
-    re.compile(".* adverbs$"),
-    re.compile(".* adjectives$"),
-    re.compile(".* abbreviations$"),
-    re.compile(".* interjections$"),
-    re.compile(".* syllables$"),
-    re.compile(".* missing plurals$"),
-    re.compile(".*-syllable words$"),
-    re.compile(".* terms with IPA pronunciation"),
-    re.compile(".* terms with .* senses$"),
-    re.compile(".* slang$"),
-    re.compile("Entries missing "),
-    re.compile(".* terms with homophones"),
-    re.compile(".* terms$"),
-    re.compile(".* vulgarities$"),
-    re.compile(".* terms with usage examples$"),
-    re.compile(".* colloquialisms$"),
-    re.compile(".* words without vowels$"),
-    re.compile(".* contractions$"),
-    re.compile(".* terms with audio links$"),
-    re.compile(".* terms with quotations$"),
-    re.compile("etyl cleanup/"),
-    re.compile(".* templates to be cleaned"),
-    re.compile(".* terms inherited from "),
-    re.compile(".* terms borrowed from "),
-    re.compile(".* terms derived from "),
-    re.compile(".* terms with unknown etymologies"),
-    re.compile(".* terms needing to be assigned to a sense"),
-    re.compile(".* non-lemma forms"),
-    re.compile(".* pinyin$"),
+    ".* term requests",
+    ".* redlinks",
+    ".* red links",
+    ".* lemmas$",
+    ".* nouns$",
+    ".* verbs$",
+    ".* adverbs$",
+    ".* adjectives$",
+    ".* abbreviations$",
+    ".* interjections$",
+    ".* misspellings$",
+    ".* Han characters$",
+    ".* syllables$",
+    ".* forms$",
+    ".* language$",
+    ".* missing plurals$",
+    ".*-syllable words$",
+    ".* terms with IPA pronunciation",
+    ".* terms with audio pronunciation",
+    ".* terms with .* senses$",
+    ".* slang$",
+    ".* terms with homophones",
+    ".* terms$",
+    ".* vulgarities$",
+    ".* terms with usage examples$",
+    ".* colloquialisms$",
+    ".* words without vowels$",
+    ".* contractions$",
+    ".* terms with audio links$",
+    ".* terms with quotations$",
+    ".* templates to be cleaned",
+    ".* terms inherited from ",
+    ".* terms borrowed from ",
+    ".* terms derived from ",
+    ".* terms coined by ",
+    ".* terms calqued from ",
+    ".* calques$",
+    ".* ortographic borrowings from ",
+    ".* terms spelled with ",
+    ".* words suffixed with ",
+    ".* words prefixed with ",
+    ".* terms with unknown etymologies",
+    ".* terms needing to be assigned to a sense",
+    ".* non-lemma forms",
+    ".* pinyin$",
+    "Requests for ",
+    "Terms with manual ",
+    "Terms with redundant ",
+    "Reference templates lacking",
+    "Entries using missing taxonomic name",
+    "Entries missing ",
+    "etyl cleanup/",
+    "Translation table header lacks gloss",
+    "Entries needing topical attention",
+    "English words following the I before E except after C rule",
+    "IPA for English using",
 ]
+ignored_cat_re = re.compile("|".join(ignored_category_patterns))
 
 # Mapping from a template name (without language prefix) for the main word
 # (e.g., fi-noun, fi-adj, en-verb) to permitted parts-of-speech in which
@@ -1520,7 +1537,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             m = re.match("\*?\s*([-' \w][-' \w]*):\s*", item)
             if not m:
                 if not lang or item.find(":") >= 0:
-                    config.error("no language name in translation item {!r}"
+                    config.error("no recognized language name in translation "
+                                 "item {!r}"
                                  .format(item))
                 return
             sublang = m.group(1)
@@ -1692,7 +1710,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if node.kind not in LEVEL_KINDS:
                 # XXX handle e.g. wikipedia links at the top of a language
                 # XXX should at least capture "also" at top of page
-                if node.kind in (NodeKind.HLINE,):
+                if node.kind in (NodeKind.HLINE, NodeKind.LIST,
+                                 NodeKind.LIST_ITEM):
                     continue
                 # print("      UNEXPECTED: {}".format(node))
                 # Clean the node to collect category links
@@ -1994,16 +2013,14 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
             cat = cat.strip()
             if not cat:
                 continue
-            for x in ignored_category_patterns:
-                if re.match(x, cat):
-                    break
-            else:
-                if cat.endswith(" female given names"):
-                    data_append(config, category_data, "tags", "feminine")
-                elif cat.endswith(" male given names"):
-                    data_append(config, category_data, "tags", "masculine")
-                if cat not in category_data.get("categories", ()):
-                    data_append(config, category_data, "categories", cat)
+            if re.match(ignored_cat_re, cat):
+                continue
+            if cat.find(" female given names") >= 0:
+                data_append(config, category_data, "tags", "feminine")
+            elif cat.find(" male given names") >= 0:
+                data_append(config, category_data, "tags", "masculine")
+            if cat not in category_data.get("categories", ()):
+                data_append(config, category_data, "categories", cat)
 
     v = clean_value(config, v)
     # Strip any unhandled templates and other stuff.  This is mostly intended
@@ -2251,3 +2268,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # node["$"].get("tags") contains multiple sets of tags (e.g., cut/English/Verb)
 
 # In HTML, show pronunciations after word, not in senses (also don't move them)
+
+# Make sure the "form of/templates" Lua error gets fixed - see
+# e.g. bad/English/Verb - there are millions of these
