@@ -226,6 +226,8 @@ ignored_category_patterns = [
     "Entries needing topical attention",
     "English words following the I before E except after C rule",
     "IPA for English using",
+    " IPA pronunciation",
+    "IPA pronunciations with invalid IPA characters",
 ]
 ignored_cat_re = re.compile("|".join(ignored_category_patterns))
 
