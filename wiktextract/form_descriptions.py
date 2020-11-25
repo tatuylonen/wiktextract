@@ -573,6 +573,8 @@ xlat_tags_map = {
     "revised jeon": "revised-jeon",
     "form used before": "archaic",
     "front vowel harmony variant": "front-vowel",
+    "romanization of": "alt-of romanization",
+    "romanisation of": "alt-of romanization",
     "archaic spelling of": "alt-of archaic",
     "obsolete typography of": "alt-of obsolete",
     "obsolete spelling of": "alt-of obsolete",
@@ -786,6 +788,7 @@ xlat_tags_map = {
 # Translation map for topics.
 # XXX revisit this mapping.  Create more fine-tuned hierarchy
 topic_generalize_map = {
+    "(sport)": "sports",
     "card games": "games",
     "board games": "games",
     "ball games": "games",
@@ -1713,11 +1716,11 @@ valid_tags = set([
     "auxiliary",
     "modal",
     "numeral",
-    "roman",
     "classifier",
     "kyūjitai",
     "shinjitai",
     "pinyin",
+    "romanization",
     "romaji",
     "X-system",
     "visual-rendering",
