@@ -104,6 +104,7 @@ panel_templates = set([
     "picdicimg",
     "polyominoes",
     "predidential nomics",
+    "request box",
     "rf-sound example",
     "rfaccents",
     "rfap",
@@ -122,6 +123,7 @@ panel_templates = set([
     "rfdatek",
     "rfdef",
     "rfe",
+    "rfe/dowork",
     "rfex",
     "rfexp",
     "rfform",
@@ -173,13 +175,17 @@ ignored_category_patterns = [
     re.compile("Terms with redundant "),
     re.compile("Reference templates lacking"),
     re.compile("Entries using missing taxonomic name"),
+    re.compile(".* term requests"),
     re.compile(".* redlinks"),
+    re.compile(".* red links"),
     re.compile(".* lemmas$"),
     re.compile(".* nouns$"),
     re.compile(".* verbs$"),
     re.compile(".* adverbs$"),
     re.compile(".* adjectives$"),
     re.compile(".* abbreviations$"),
+    re.compile(".* interjections$"),
+    re.compile(".* syllables$"),
     re.compile(".* missing plurals$"),
     re.compile(".*-syllable words$"),
     re.compile(".* terms with IPA pronunciation"),
@@ -197,6 +203,13 @@ ignored_category_patterns = [
     re.compile(".* terms with quotations$"),
     re.compile("etyl cleanup/"),
     re.compile(".* templates to be cleaned"),
+    re.compile(".* terms inherited from "),
+    re.compile(".* terms borrowed from "),
+    re.compile(".* terms derived from "),
+    re.compile(".* terms with unknown etymologies"),
+    re.compile(".* terms needing to be assigned to a sense"),
+    re.compile(".* non-lemma forms"),
+    re.compile(".* pinyin$"),
 ]
 
 # Mapping from a template name (without language prefix) for the main word
@@ -912,6 +925,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 data_append(config, pos_data, "tags", v)
                 i += 1
             return ""
+        if name == "head":
+            t = ht.get(2, "")
+            if t == "pinyin":
+                data_append(config, pos_data, "tags", "pinyin")
+            elif t == "romanization":
+                data_append(config, pos_data, "tags", "romanization")
         m = re.search(head_tag_re, name)
         if m:
             new_ht = {}
@@ -1165,6 +1184,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         def inflection_template_fn(name, ht):
             # print("decl_conj_template_fn", name, ht)
+            if is_panel_template(name):
+                return ""
+            if name in ("is-u-mutation",):
+                # These are not to be captured as an exception to the
+                # generic code below
+                return None
             m = re.search(r"-(conj|decl|ndecl|adecl|infl|conjugation|"
                           r"declension|inflection|mut|mutation)($|-)", name)
             if m:
@@ -1561,6 +1586,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             assert isinstance(node, WikiNode)
 
             def template_fn(name, ht):
+                if is_panel_template(name):
+                    return ""
                 if name == "see also":
                     # XXX capture
                     return ""
@@ -1569,8 +1596,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     return ""
                 if name == "see translation subpage":
                     # XXX capture
-                    return ""
-                if is_panel_template(name):
                     return ""
                 if name in ("c", "C", "categorize", "cat", "catlangname",
                             "topics", "top", "qualifier",):
@@ -1652,6 +1677,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
     def process_children(langnode):
         nonlocal etym_data
         nonlocal pos_data
+
+        def skip_template_fn(name, ht):
+            """This is called for otherwise unprocessed parts of the page.
+            We still expand them so that e.g. Category links get captured."""
+            if is_panel_template(name):
+                return ""
+            return None
+
         for node in langnode.children:
             if not isinstance(node, WikiNode):
                 # print("  X{}".format(repr(node)[:40]))
@@ -1663,7 +1696,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     continue
                 # print("      UNEXPECTED: {}".format(node))
                 # Clean the node to collect category links
-                clean_node(config, ctx, etym_data, node)
+                clean_node(config, ctx, etym_data, node,
+                           template_fn=skip_template_fn)
                 continue
             t = clean_node(config, ctx, etym_data, node.args)
             config.subsection = t
@@ -1788,6 +1822,8 @@ def parse_top_template(config, ctx, node):
     assert isinstance(node, WikiNode)
 
     def template_fn(name, ht):
+        if is_panel_template(name):
+            return ""
         if name == "also":
             # XXX shows related words that might really have been the intended
             # word, capture them
@@ -2174,6 +2210,10 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX parse {{zh-see|XXX}} - see 共青团
 
+# XXX is the Usage notes section parseable in any useful way?  E.g., there
+# is a template {{cmn-toneless-note}}.  Are there other templates that would
+# be useful and common enough to parse, e.g., into tags?
+
 # XXX parse {{topics|lang|...|...}} - these seem to generate
 # topic-related Categories.  However they can only be associated with
 # the language, not sense or part-of-speech (unless inside sense).
@@ -2201,17 +2241,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # sandbox.
 # See: https://stackoverflow.com/questions/3400851/execution-time-limit-for-a-lua-script-called-from-the-c-api
 
-# Perform NFC normalization for strings returned by Lua code in sandbox.
-# Try to replace invalid sequences by replacement character U+FFFD.
-
-# Change all uses of string in lua sandbox/libraries to ustring
-
-# bang/English - translations have garbage on definitions to be checked
-
-# bang/English - alt_of missing from "Alternative form of bhang"
-
-# bang/English/Verb check tags for "bangs" (present present simple simple singular third-person)
-
 # Why does eccentric/English/Adjective get tag "contraction" when that word
 # only occurs in its gloss???
 
@@ -2220,3 +2249,5 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX in parse_head_tags(), should create multiple forms if
 # node["$"].get("tags") contains multiple sets of tags (e.g., cut/English/Verb)
+
+# In HTML, show pronunciations after word, not in senses (also don't move them)
