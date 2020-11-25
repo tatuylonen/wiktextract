@@ -2271,10 +2271,29 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX in parse_head_tags(), should create multiple forms if
 # node["$"].get("tags") contains multiple sets of tags (e.g., cut/English/Verb)
 
-# In HTML, show pronunciations after word, not in senses (also don't move them)
+# Check te/Spanish/pron, See also section (warning, has unexpected format)
 
-# Make sure the "form of/templates" Lua error gets fixed - see
-# e.g. bad/English/Verb - there are millions of these
+# Check alt_of with "." remaining.  Find them all to a separate list
+# and analyze.
+
+# XXX related terms, wikipedia, Wikispecies links.  See "permit"/English/Noun
+
+# XXX check "ice"/English/Noun - why "|en" at the end of gloss?  Also,
+# why only one noun sense and not 10?
+
+# XXX rename newpage.py to page.py
 
 # XXX something wrong with parsing head: hack/English/Verb forms gets
-# "hacking" [present] (participle missing)
+# "hacking" [present] (participle missing).  Add test for this (for
+# parse_word_head) and then debug.
+
+# XXX check ITALIC not properly closed, word "-a"
+
+# Module Module:accent_qualifuer is not found even though it exists.  Probably
+# template name canonicalization issue somewhere.  Word "alkoholik"
+
+# Make sure the "gender and number" problem gets fixed - e.g. "pizza"
+# There are lots of these - ANOTHER BIG ISSUE.
+
+# Make sure the "form of/templates" Lua error gets fixed - see
+# e.g. bad/English/Verb - there are millions of these.  BIGGEST ISSUE.
