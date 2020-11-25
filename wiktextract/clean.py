@@ -263,10 +263,10 @@ def clean_value(config, title, no_strip=False):
     assert isinstance(title, str)
     # Replace templates according to our our replacement tables
     # clean_arg_arg1_tags, clean_arg2_tags, clean_arg3_tags, clean_replace_map.
-    title = clean_replace_regexp(config, title)
+    # title = clean_replace_regexp(config, title)
     # Remove any remaining templates.
-    for m in re.finditer(r"\{\{[^}]+\}\}", title):
-        config.error("possible syntax error: {}".format(m.group(0)))
+    #for m in re.finditer(r"\{\{+[^}]+\}+", title):
+    #    config.error("possible syntax error: {}".format(m.group(0)))
     title = re.sub(r"\{\{[^}]+\}\}", "", title)
     # Remove tables
     title = re.sub(r"(?s)\{\|.*?\|\}", " ", title)
@@ -281,6 +281,7 @@ def clean_value(config, title, no_strip=False):
     title = re.sub(r"(?s)<\s*[^/][^>]*>\s*", "", title)
     title = re.sub(r"(?s)<\s*/\s*[^>]+>\n*", "", title)
     # Replace links by their text
+    title = re.sub(r"(?s)\[\[\s*Category:([^]]+)\]\]", r"", title)
     title = re.sub(r"(?s)\[\[([^]|]+)\|([^]|]+)\]\]", r"\2", title)
     title = re.sub(r"(?s)\[\[([a-zA-z0-9]+:)?([^]|]+)(\s*\([^])|]*\)\s*)?"
                    r"\|\]\]",
