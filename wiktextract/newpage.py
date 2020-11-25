@@ -742,7 +742,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 gloss = clean_tr_sense(gloss)
                 for k, v in translations.items():
                     if (gloss == k or
+                        gloss.startswith("A " + k) or
                         gloss.startswith(k + ",") or
+                        gloss.startswith(k + ".") or
                         gloss.startswith(k + " or ")):
                         data_extend(config, sense, "translations", v)
                         del translations[k]
@@ -2273,3 +2275,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # Make sure the "form of/templates" Lua error gets fixed - see
 # e.g. bad/English/Verb - there are millions of these
+
+# XXX something wrong with parsing head: hack/English/Verb forms gets
+# "hacking" [present] (participle missing)
