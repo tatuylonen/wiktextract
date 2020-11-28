@@ -11,9 +11,8 @@ from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
 from .parts_of_speech import part_of_speech_map, PARTS_OF_SPEECH
 from .config import WiktionaryConfig
 from .sectitle_corrections import sectitle_corrections
-from .clean import clean_value, clean_quals
+from .clean import clean_value
 from .places import place_prefixes  # XXX move processing to places.py
-from .wikttemplates import *
 from .unsupported_titles import unsupported_title_map
 from .form_of import form_of_map
 from .head_map import head_pos_map
@@ -314,16 +313,8 @@ def parse_sense_XXXold_going_away(config, data, text, use_text):
     for t in p.templates:
         name = t.name.strip()
 
-        # Labels and various other links are used for qualifiers. However,
-        # they also seem to be sometimes used for other purposes, so this
-        # may result in extra tags that perhaps should be elsewhere.
-        if name in ("lb", "label", "context", "term-context", "term-label",
-                      "lbl", "tlb", "tcx"):
-            # XXX make sure these all start with a language code
-            data_extend(config, data, "tags",
-                        clean_quals(config, t_vec(config, t)[1:]))
         # Usage examples are collected under "examples"
-        elif name in ("ux", "uxi", "usex", "afex", "zh-x", "prefixusex",
+        if name in ("ux", "uxi", "usex", "afex", "zh-x", "prefixusex",
                       "ko-usex", "ko-x", "hi-x", "ja-usex-inline", "ja-x",
                       "quotei"):
             data_append(config, data, "examples", t_dict(config, t))

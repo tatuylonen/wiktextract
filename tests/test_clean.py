@@ -1,7 +1,7 @@
 import unittest
 import collections
 import wiktextract
-from wiktextract.clean import clean_value, clean_quals
+from wiktextract.clean import clean_value
 from wiktextract import WiktionaryConfig
 
 
