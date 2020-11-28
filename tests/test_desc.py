@@ -33,7 +33,7 @@ class WiktExtractTests(unittest.TestCase):
     def test_unknown(self):
         ret, topics = decode_tags(self.config, ["unknowntag"])
         self.assertNotEqual(self.config.warnings, [])
-        self.assertEqual(ret, [("error",)])
+        self.assertEqual(ret, [("error-unknown-tag",)])
 
     def test_plural_partitive(self):
         ret, topics = decode_tags(self.config, ["partitive", "plural"])
@@ -50,7 +50,7 @@ class WiktExtractTests(unittest.TestCase):
         ret, topics = decode_tags(self.config, ["class", "2a",
                                                 "stress", "pattern", "xyz"])
         self.assertNotEqual(self.config.warnings, [])
-        self.assertEqual(ret, [("class-2a", "error")])
+        self.assertEqual(ret, [("class-2a", "error-unknown-tag")])
 
     def test_head1(self):
         data = {}
