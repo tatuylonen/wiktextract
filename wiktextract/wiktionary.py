@@ -6,7 +6,7 @@
 
 import re
 from wikitextprocessor import Wtp
-from .newpage import parse_page
+from .page import parse_page
 from .config import WiktionaryConfig
 
 # Title prefixes that indicate that the page is not a normal page and

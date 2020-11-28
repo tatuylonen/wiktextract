@@ -4,7 +4,7 @@
 
 from .wiktionary import parse_wiktionary, reprocess_wiktionary
 from .config import WiktionaryConfig
-from .newpage import clean_value, parse_page
+from .page import clean_value, parse_page
 from .parts_of_speech import PARTS_OF_SPEECH
 
 __all__ = (
