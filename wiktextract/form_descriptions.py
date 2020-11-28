@@ -2264,7 +2264,7 @@ def decode_tags(config, lst, allow_any=False):
                         rest = tags[max_next_i:]
                         tag = " ".join(rest)
                         config.unknown_tag(tag)
-                        tags.append("error")
+                        tags.append("error-unknown-tag")
                         if w in valid_sequences:
                             add_new(valid_sequences[w], next_i)
             if not new_nodes:
@@ -2286,7 +2286,7 @@ def decode_tags(config, lst, allow_any=False):
                     tags.append(tag)
             elif tag and not tag[0].isupper():
                 config.unknown_tag(tag)
-                tags.append("error")
+                tags.append("error-unknown-tag")
         tagsets.add(tuple(sorted(set(tags))))
     ret = list(tagsets)
     return ret, topics
@@ -2313,6 +2313,8 @@ def add_related(ctx, config, data, lst, related):
         assert isinstance(x, str)
     assert isinstance(related, (list, tuple))
     related = " ".join(related)
+    if related == "[please provide]":
+        return
     if related == "-":
         config.warning("add_related: unhandled {} related form {}"
                        .format(lst), related)
@@ -2369,6 +2371,12 @@ def parse_word_head(ctx, config, pos, text, data):
     assert isinstance(text, str)
     assert isinstance(data, dict)
     # print("parse_word_head:", text)
+
+    if text.find("Lua execution error") >= 0:
+        return
+    if text.find("Lua timeout error") >= 0:
+        return
+
     title = ctx.title
     titleparts = list(m.group(0) for m in re.finditer(word_re, title))
 
@@ -2464,7 +2472,6 @@ def parse_word_head(ctx, config, pos, text, data):
                     add_related(ctx, config, data, lst, related)
                 else:
                     add_tags(ctx, config, data, lst)
-
 
 def parse_sense_tags(ctx, config, text, data):
     assert isinstance(ctx, Wtp)
@@ -2595,7 +2602,7 @@ def parse_translation_desc(ctx, config, text, data):
                 else:
                     config.warning("maybe more than one romanization: {!r}"
                                    .format(text))
-                    data_append(config, data, "tags", "error")
+                    data_append(config, data, "tags", "error-multiple-paren")
 
 def parse_alt_or_inflection_of(config, gloss):
     """Tries to parse an inflection-of or alt-of description."""
