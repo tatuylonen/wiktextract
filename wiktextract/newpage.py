@@ -58,8 +58,6 @@ langlink_re = re.compile(r"\s*\((" + "|".join(languages_by_code.keys()) +
 # Additional templates to be expanded in the pre-expand phase
 additional_expand_templates = set([
     "multitrans",
-    "pt-verb-form-of",  # Produces list items
-    "inflection of",    # Produces list items
 ])
 
 # Templates that are used to form panels on pages and that
@@ -813,9 +811,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
         etym_data = {}
         etym_datas = []
 
-    def parse_sense(pos, contents):
+    def parse_sense(pos, contents, sense_base):
         assert isinstance(pos, str)
         assert isinstance(contents, (list, tuple))
+        assert isinstance(sense_base, dict)  # Added to every sense
         lst = [x for x in contents
                if not isinstance(x, WikiNode) or
                x.kind not in (NodeKind.LIST,)]
@@ -831,7 +830,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     w = ht.get(i)
                     if not w:
                         break
-                    data_append(config, sense_data, "synonyms",
+                    data_append(config, sense_base, "synonyms",
                                 {"word": w})
                 return ""
             if name == "gloss":
@@ -840,72 +839,84 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     additional_glosses.append(gl)
             return None
 
-        gloss = clean_node(config, ctx, sense_data, lst,
-                           template_fn=sense_template_fn)
-        if gloss.startswith("# "):
-            gloss = gloss[2:]
-        m = re.match(r"^\((([^()]|\([^)]*\))*)\):?\s*", gloss)
-        if m:
-            parse_sense_tags(ctx, config, m.group(1), sense_data)
-            gloss = gloss[m.end():].strip()
+        rawgloss = clean_node(config, ctx, sense_base, lst,
+                              template_fn=sense_template_fn)
+        # The gloss could contain templates that produce more list items.
+        # This happens commonly with, e.g., {{inflection of|...}}.  Split
+        # to parts.
+        subglosses = re.split(r"[#*]+\s*", rawgloss)
+        for gloss in subglosses:
+            if not gloss and len(subglosses) > 1:
+                continue
+            # Push a new sense (if the last one is not empty)
+            push_sense()
+            # Copy data for all senses to this sense
+            for k, v in sense_base.items():
+                data_extend(config, sense_data, k, v)
+            # Parse the gloss for this particular sense
+            m = re.match(r"^\((([^()]|\([^)]*\))*)\):?\s*", gloss)
+            if m:
+                parse_sense_tags(ctx, config, m.group(1), sense_data)
+                gloss = gloss[m.end():].strip()
 
-        def sense_repl(m):
-            v = m.group(1)
-            if v not in valid_tags and v not in xlat_tags_map:
-                return m.group(0)
-            parse_sense_tags(ctx, config, v, sense_data)
-            return ""
+            def sense_repl(m):
+                v = m.group(1)
+                if v not in valid_tags and v not in xlat_tags_map:
+                    return m.group(0)
+                parse_sense_tags(ctx, config, v, sense_data)
+                return ""
 
-        # Replace parenthesized expressions commonly used for sense tags
-        gloss = re.sub(r"\s*\(([^)]*)\)", sense_repl, gloss)
+            # Replace parenthesized expressions commonly used for sense tags
+            gloss = re.sub(r"\s*\(([^)]*)\)", sense_repl, gloss)
 
-        # Remove common suffix "[from 14th c.]" and similar
-        gloss = re.sub(r"\s\[[^]]*\]\s*$", "", gloss)
+            # Remove common suffix "[from 14th c.]" and similar
+            gloss = re.sub(r"\s\[[^]]*\]\s*$", "", gloss)
 
-        # Check to make sure we don't have unhandled list items in gloss
-        ofs = max(gloss.find("#"), gloss.find("*"))
-        if ofs > 10:
-            config.warning("gloss may contain unhandled list items: {}"
-                           .format(gloss))
+            # Check to make sure we don't have unhandled list items in gloss
+            ofs = max(gloss.find("#"), gloss.find("*"))
+            if ofs > 10:
+                config.warning("gloss may contain unhandled list items: {}"
+                               .format(gloss))
 
-        # Kludge, some glosses have a comma after initial qualifiers in
-        # parentheses
-        if gloss.startswith(",") or gloss.startswith(":"):
-            gloss = gloss[1:]
-        gloss = gloss.strip()
-        if gloss.startswith("N. of "):
-            gloss = "Name of " +  gloss[6:]
+            # Kludge, some glosses have a comma after initial qualifiers in
+            # parentheses
+            if gloss.startswith(",") or gloss.startswith(":"):
+                gloss = gloss[1:]
+            gloss = gloss.strip()
+            if gloss.startswith("N. of "):
+                gloss = "Name of " +  gloss[6:]
 
-        # Check if this gloss describes an alt-of or inflection-of
-        tags, base = parse_alt_or_inflection_of(config, gloss)
-        ftags = list(tag for tag in tags if tag != "form-of") # Spurious
-        if "alt-of" in tags:
-            data_extend(config, sense_data, "tags", ftags)
-            data_append(config, sense_data, "alt_of", base)
-        elif "compound-of" in tags:
-            data_extend(config, sense_data, "tags", ftags)
-            data_append(config, sense_data, "compound_of", base)
-        elif "synonym-of" in tags:
-            dt = { "word": base }
-            data_extend(config, dt, "tags", ftags)
-            data_append(config, sense_data, "synonyms", dt)
-        elif tags and base.startswith("of "):
-            base = base[3:]
-            data_append(config, sense_data, "tags", "form-of")
-            data_extend(config, sense_data, "tags", ftags)
-            data_append(config, sense_data, "form_of", base)
-        elif "form-of" in tags:
-            data_extend(config, sense_data, "tags", tags)  # Including form-of
-            data_append(config, sense_data, "form_of", base)
+            # Check if this gloss describes an alt-of or inflection-of
+            tags, base = parse_alt_or_inflection_of(config, gloss)
+            ftags = list(tag for tag in tags if tag != "form-of") # Spurious
+            if "alt-of" in tags:
+                data_extend(config, sense_data, "tags", ftags)
+                data_append(config, sense_data, "alt_of", base)
+            elif "compound-of" in tags:
+                data_extend(config, sense_data, "tags", ftags)
+                data_append(config, sense_data, "compound_of", base)
+            elif "synonym-of" in tags:
+                dt = { "word": base }
+                data_extend(config, dt, "tags", ftags)
+                data_append(config, sense_data, "synonyms", dt)
+            elif tags and base.startswith("of "):
+                base = base[3:]
+                data_append(config, sense_data, "tags", "form-of")
+                data_extend(config, sense_data, "tags", ftags)
+                data_append(config, sense_data, "form_of", base)
+            elif "form-of" in tags:
+                data_extend(config, sense_data, "tags", tags)
+                data_append(config, sense_data, "form_of", base)
 
-        if not gloss:
-            config.debug("{}: empty gloss at {}".format(pos, "/".join(stack)))
-            data_append(config, sense_data, "tags", "empty-gloss")
-        else:
-            # Add the gloss for the sense.
-            data_append(config, sense_data, "glosses", gloss)
-        for gl in additional_glosses:
-            data_append(config, sense_data, "glosses", gl)
+            if not gloss:
+                config.debug("{}: empty gloss at {}"
+                             .format(pos, "/".join(stack)))
+                data_append(config, sense_data, "tags", "empty-gloss")
+            else:
+                # Add the gloss for the sense.
+                data_append(config, sense_data, "glosses", gloss)
+            for gl in additional_glosses:
+                data_append(config, sense_data, "glosses", gl)
 
     def head_template_fn(name, ht):
         # print("HEAD_TEMPLATE_FN", name, ht)
@@ -1022,8 +1033,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             x.kind == NodeKind.LIST
                             and x.args == "##"]
                 if not sublists:
-                    push_sense()
-                    parse_sense(pos, contents)
+                    parse_sense(pos, contents, {})
                     continue
                 # This entry has sublists of entries.  We should contain
                 # gloss information from both.  Sometimes the outer gloss
@@ -1053,8 +1063,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             continue
                         if item.kind != NodeKind.LIST_ITEM:
                             continue
-                        push_sense()
-                        data_extend(config, sense_data, "categories",
+                        sense_base = {}
+                        data_extend(config, sense_base, "categories",
                                     cats.get("categories", ()))
                         # XXX is it always a gloss?  Maybe non-gloss?
                         tags = ()
@@ -1066,11 +1076,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             outer_text = None
                         elif outer_text == "Technical or specialized senses.":
                             outer_text = None
-                        data_extend(config, sense_data, "tags", tags)
+                        data_extend(config, sense_base, "tags", tags)
                         if outer_text:
-                            data_append(config, sense_data, "glosses",
+                            data_append(config, sense_base, "glosses",
                                         outer_text)
-                        parse_sense(pos, item.children)
+                        parse_sense(pos, item.children, sense_base)
 
     def parse_pronunciation(node):
         assert isinstance(node, WikiNode)
@@ -1127,7 +1137,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # XXX fix enpr tags
         text = clean_node(config, ctx, data, node,
                           template_fn=parse_pronunciation_template_fn)
-        for origtext in text.split("*"):  # List items generated by macros
+        for origtext in re.split(r"[*#]+", text):  # Items generated by macros
             text = origtext
             m = re.match("^[*#\s]*\((([^()]|\([^)]*\))*?)\)", text)
             if m:
@@ -2006,8 +2016,15 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
     v = recurse(value)
 
-    # Capture categories if category_data has been given
+    # Capture categories if category_data has been given.  We also track
+    # Lua execution errors here.
     if category_data is not None:
+        # Check for Lua execution error
+        if v.find('<strong "error">Lua execution error') >= 0:
+            data_append(config, category_data, "tags", "error-lua-exec")
+        if v.find('<strong "error">Lua timeout error') >= 0:
+            data_append(config, category_data, "tags", "error-lua-timeout")
+        # Capture Category tags
         for m in re.finditer(r"(?is)\[\[:?\s*Category\s*:([^]|]+)", v):
             cat = clean_value(config, m.group(1))
             m = re.match(r"[a-z]{2,4}:", cat)
@@ -2291,9 +2308,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # Module Module:accent_qualifuer is not found even though it exists.  Probably
 # template name canonicalization issue somewhere.  Word "alkoholik"
-
-# Make sure the "gender and number" problem gets fixed - e.g. "pizza"
-# There are lots of these - ANOTHER BIG ISSUE.
 
 # Make sure the "form of/templates" Lua error gets fixed - see
 # e.g. bad/English/Verb - there are millions of these.  BIGGEST ISSUE.
