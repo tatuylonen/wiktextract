@@ -119,6 +119,7 @@ def capture_specials_fn(dt):
 
 
 def page_handler(ctx, model, title, text, capture_cb, config_kwargs):
+    title = title.strip()
     if capture_cb is not None:
         capture_cb(model, title, text)
     if model == "redirect":
