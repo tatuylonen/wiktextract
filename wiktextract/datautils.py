@@ -4,7 +4,7 @@
 
 import re
 from .config import WiktionaryConfig
-from wikitextprocessor import ALL_LANGUAGES
+from wikitextprocessor import ALL_LANGUAGES, Wtp
 
 # Mapping from language code to language info
 languages_by_code = {x["code"]: x for x in ALL_LANGUAGES}
@@ -25,10 +25,10 @@ not_treated_as_language_codes = set([
     "to", "pas", "see", "se", "et",
 ])
 
-def data_append(config, data, key, value):
+def data_append(ctx, data, key, value):
     """Appends ``value`` under ``key`` in the dictionary ``data``.  The key
     is created if it does not exist."""
-    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(ctx, Wtp)
     assert isinstance(data, dict)
     assert isinstance(key, str)
 
@@ -41,53 +41,21 @@ def data_append(config, data, key, value):
             return
         if value in languages_by_code:
             if value not in not_treated_as_language_codes:
-                config.debug("language code {} in tags: {}".format(value, data))
+                ctx.debug("language code {} in tags: {}".format(value, data))
     lst = data.get(key, [])
     lst.append(value)
     data[key] = lst
 
 
-def data_extend(config, data, key, values):
+def data_extend(ctx, data, key, values):
     """Appends all values in a list under ``key`` in the dictionary ``data``."""
-    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(ctx, Wtp)
     assert isinstance(data, dict)
     assert isinstance(key, str)
     assert isinstance(values, (list, tuple))
 
     for x in values:
-        data_append(config, data, key, x)
-
-
-def data_inflection_of(config, data, t, tags):
-    """Adds an "inflection_of" value to ``data`` for the last argument of
-    template ``t``.  Adds ``tags`` to the "tags" value in ``data``."""
-    assert isinstance(config, WiktionaryConfig)
-    assert isinstance(data, dict)
-    assert isinstance(tags, (list, tuple))
-
-    vec = t_vec(config, t)
-    if len(vec) == 0:
-        config.debug("data_inflection_of empty vec: {} {} {}"
-                     "".format(str(t), data, tags))
-        return
-    data_append(config, data, "inflection_of", vec[-1])
-    data_extend(config, data, "tags", tags)
-
-
-def data_alt_of(config, data, t, tags):
-    """Adds an "alt_of" value to ``data`` for the last argument of
-    template ``t``.  Adds ``tags`` to the "tags" value in ``data``."""
-    assert isinstance(config, WiktionaryConfig)
-    assert isinstance(data, dict)
-    assert isinstance(tags, (list, tuple))
-
-    vec = t_vec(config, t)
-    if len(vec) == 0:
-        config.debug("data_alt_of empty vec: {} {} {}"
-                     "".format(str(t), data, tags))
-        return
-    data_append(config, data, "alt_of", vec[-1])
-    data_extend(config, data, "tags", tags)
+        data_append(ctx, data, key, x)
 
 
 def split_at_comma_semi(text):
