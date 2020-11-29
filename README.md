@@ -7,7 +7,7 @@ This is a utility and Python package for for extracing data from Wiktionary.
   December 2020, finally).**
 
 The current extracted version is available for browsing and download
-at: [http://dictionary.kaikki.org](http://dictionary.kaikki.org).
+at: [https://kaikki.org/dictionary/](http://kaikki.org/dictionary/).
 (Beware, it is my development version, and may be broken on some days.
 It should stabilize when I release 2.0.0.)
 
