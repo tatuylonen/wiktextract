@@ -2312,7 +2312,7 @@ def add_related(ctx, data, lst, related):
         return
     if related == "-":
         ctx.warning("add_related: unhandled {} related form {}"
-                    .format(lst), related)
+                    .format(lst, related))
         return
     for related in related.split(" or "):
         if related:
