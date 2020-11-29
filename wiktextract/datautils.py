@@ -6,24 +6,11 @@ import re
 from .config import WiktionaryConfig
 from wikitextprocessor import ALL_LANGUAGES, Wtp
 
-# Mapping from language code to language info
-languages_by_code = {x["code"]: x for x in ALL_LANGUAGES}
-
 # Keys in ``data`` that can only have string values (a list of them)
 str_keys = ("tags", "glosses")
 # Keys in ``data`` that can only have dict values (a list of them)
 dict_keys = ("pronunciations", "senses", "synonyms", "related",
              "antonyms", "hypernyms", "holonyms", "forms")
-
-# Language codes that are also normal words and thus we won't warn about
-# them as tags
-not_treated_as_language_codes = set([
-    "law", "toy", "and", "etc", "the", "god", "adj",
-    "man", "an", "tax", "or", "war", "job", "box",
-    "de", "by", "des", "but", "for", "set", "as",
-    "pop", "cay", "lay", "nut", "bay", "sea", "now",
-    "to", "pas", "see", "se", "et",
-])
 
 def data_append(ctx, data, key, value):
     """Appends ``value`` under ``key`` in the dictionary ``data``.  The key
@@ -39,9 +26,6 @@ def data_append(ctx, data, key, value):
     if key == "tags":
         if value == "":
             return
-        if value in languages_by_code:
-            if value not in not_treated_as_language_codes:
-                ctx.debug("language code {} in tags: {}".format(value, data))
     lst = data.get(key, [])
     lst.append(value)
     data[key] = lst
