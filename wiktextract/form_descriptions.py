@@ -7,9 +7,7 @@
 import re
 import Levenshtein
 from wikitextprocessor import Wtp
-from .config import WiktionaryConfig
-from .datautils import (data_append, data_extend, data_inflection_of,
-                        data_alt_of, split_at_comma_semi)
+from .datautils import data_append, data_extend, split_at_comma_semi
 
 
 # Mappings for tags in template head line ends outside parentheses
@@ -2085,6 +2083,8 @@ valid_topics = set([
 
 ignored_parens = set([
     "please verify",
+    "in words with back vowel harmony",
+    "in words with front vowel harmony",
 ])
 
 
@@ -2216,10 +2216,9 @@ def map_with(ht, lst):
     return ret
 
 
-def decode_tags(config, lst, allow_any=False):
+def decode_tags(lst, allow_any=False):
     """Decodes tags, doing some canonicalizations.  This returns a list of
     lists of tags and a list of topics."""
-    assert isinstance(config, WiktionaryConfig)
     assert isinstance(lst, (list, tuple))
     lsts = [[]]
     for x in lst:
@@ -2263,7 +2262,6 @@ def decode_tags(config, lst, allow_any=False):
                     else:
                         rest = tags[max_next_i:]
                         tag = " ".join(rest)
-                        config.unknown_tag(tag)
                         tags.append("error-unknown-tag")
                         if w in valid_sequences:
                             add_new(valid_sequences[w], next_i)
@@ -2285,29 +2283,26 @@ def decode_tags(config, lst, allow_any=False):
                 if tag not in tags:
                     tags.append(tag)
             elif tag and not tag[0].isupper():
-                config.unknown_tag(tag)
                 tags.append("error-unknown-tag")
         tagsets.add(tuple(sorted(set(tags))))
     ret = list(tagsets)
     return ret, topics
 
 
-def add_tags(ctx, config, data, lst, allow_any=False):
+def add_tags(ctx, data, lst, allow_any=False):
     assert isinstance(ctx, Wtp)
-    assert isinstance(config, WiktionaryConfig)
     assert isinstance(data, dict)
     assert isinstance(lst, (list, tuple))
     for x in lst:
         assert isinstance(x, str)
-    tagsets, topics = decode_tags(config, lst, allow_any=allow_any)
-    data_extend(config, data, "topics", topics)
+    tagsets, topics = decode_tags(lst, allow_any=allow_any)
+    data_extend(ctx, data, "topics", topics)
     for tags in tagsets:
-        data_extend(config, data, "tags", tags)
+        data_extend(ctx, data, "tags", tags)
 
 
-def add_related(ctx, config, data, lst, related):
+def add_related(ctx, data, lst, related):
     assert isinstance(ctx, Wtp)
-    assert isinstance(config, WiktionaryConfig)
     assert isinstance(lst, (list, tuple))
     for x in lst:
         assert isinstance(x, str)
@@ -2316,8 +2311,8 @@ def add_related(ctx, config, data, lst, related):
     if related == "[please provide]":
         return
     if related == "-":
-        config.warning("add_related: unhandled {} related form {}"
-                       .format(lst), related)
+        ctx.warning("add_related: unhandled {} related form {}"
+                    .format(lst), related)
         return
     for related in related.split(" or "):
         if related:
@@ -2325,48 +2320,46 @@ def add_related(ctx, config, data, lst, related):
             if m:
                 paren = m.group(1)
                 related = related[m.end():]
-                tagsets1, topics1 = decode_tags(config,
-                                                split_at_comma_semi(paren))
+                tagsets1, topics1 = decode_tags(split_at_comma_semi(paren))
             else:
                 tagsets1 = [[]]
                 topics1 = []
-            tagsets2, topics2 = decode_tags(config, lst)
+            tagsets2, topics2 = decode_tags(lst)
             for tags1 in tagsets1:
                 assert isinstance(tags1, (list, tuple))
                 for tags2 in tagsets2:
                     assert isinstance(tags1, (list, tuple))
                     if "alt-of" in tags2:
-                        data_extend(config, data, "tags", tags1)
-                        data_extend(config, data, "tags", tags2)
-                        data_extend(config, data, "topics", topics1)
-                        data_extend(config, data, "topics", topics2)
-                        data_append(config, data, "alt_of", related)
+                        data_extend(ctx, data, "tags", tags1)
+                        data_extend(ctx, data, "tags", tags2)
+                        data_extend(ctx, data, "topics", topics1)
+                        data_extend(ctx, data, "topics", topics2)
+                        data_append(ctx, data, "alt_of", related)
                     elif "form-of" in tags2:
-                        data_extend(config, data, "tags", tags1)
-                        data_extend(config, data, "tags", tags2)
-                        data_extend(config, data, "topics", topics1)
-                        data_extend(config, data, "topics", topics2)
-                        data_append(config, data, "inflection_of", related)
+                        data_extend(ctx, data, "tags", tags1)
+                        data_extend(ctx, data, "tags", tags2)
+                        data_extend(ctx, data, "topics", topics1)
+                        data_extend(ctx, data, "topics", topics2)
+                        data_append(ctx, data, "inflection_of", related)
                     elif "compound-of" in tags2:
-                        data_extend(config, data, "tags", tags1)
-                        data_extend(config, data, "tags", tags2)
-                        data_extend(config, data, "topics", topics1)
-                        data_extend(config, data, "topics", topics2)
-                        data_append(config, data, "compound", related)
+                        data_extend(ctx, data, "tags", tags1)
+                        data_extend(ctx, data, "tags", tags2)
+                        data_extend(ctx, data, "topics", topics1)
+                        data_extend(ctx, data, "topics", topics2)
+                        data_append(ctx, data, "compound", related)
                     else:
                         form = {"form": related}
-                        data_extend(config, form, "tags", tags1)
-                        data_extend(config, form, "tags", tags2)
-                        data_extend(config, form, "topics", topics1)
-                        data_extend(config, form, "topics", topics2)
-                        data_append(config, data, "forms", form)
+                        data_extend(ctx, form, "tags", tags1)
+                        data_extend(ctx, form, "tags", tags2)
+                        data_extend(ctx, form, "topics", topics1)
+                        data_extend(ctx, form, "topics", topics2)
+                        data_append(ctx, data, "forms", form)
 
 
-def parse_word_head(ctx, config, pos, text, data):
+def parse_word_head(ctx, pos, text, data):
     """Parses the head line for a word for in a particular language and
     part-of-speech, extracting tags and related forms."""
     assert isinstance(ctx, Wtp)
-    assert isinstance(config, WiktionaryConfig)
     assert isinstance(pos, str)
     assert isinstance(text, str)
     assert isinstance(data, dict)
@@ -2405,10 +2398,10 @@ def parse_word_head(ctx, config, pos, text, data):
             # lst is canonical form of the word
             # rest is additional tags (often gender m/f/n/c/...)
             if lst and title != " ".join(lst):
-                add_related(ctx, config, data, ["canonical"], lst)
+                add_related(ctx, data, ["canonical"], lst)
             # XXX here we should only look at a subset of tags allowed
             # in the base
-            add_tags(ctx, config, data, rest)
+            add_tags(ctx, data, rest)
 
     # Handle parenthesized descriptors for the word form and links to
     # related words
@@ -2469,31 +2462,29 @@ def parse_word_head(ctx, config, pos, text, data):
             for tagspec in " ".join(lst).split(" or "):
                 lst = tagspec.split(" ")
                 if related:
-                    add_related(ctx, config, data, lst, related)
+                    add_related(ctx, data, lst, related)
                 else:
-                    add_tags(ctx, config, data, lst)
+                    add_tags(ctx, data, lst)
 
-def parse_sense_tags(ctx, config, text, data):
+def parse_sense_tags(ctx, text, data):
     assert isinstance(ctx, Wtp)
-    assert isinstance(config, WiktionaryConfig)
     assert isinstance(text, str)
     assert isinstance(data, dict)
     # print("parse_sense_tags:", text)
     for semi in split_at_comma_semi(text):
         tags = map_with(xlat_tags_map, [semi])
-        tagsets, topics = decode_tags(config, tags, allow_any=True)
-        data_extend(config, data, "topics", topics)
+        tagsets, topics = decode_tags(tags, allow_any=True)
+        data_extend(ctx, data, "topics", topics)
         # XXX should think how to handle distinct options better,
         # e.g., "singular and plural genitive"; that can't really be
         # done with changing the calling convention of this function.
         # XXX should handle cases where it is actually form-of or alt-of
         for tags in tagsets:
-            data_extend(config, data, "tags", tags)
+            data_extend(ctx, data, "tags", tags)
 
 
-def parse_pronunciation_tags(ctx, config, text, data):
+def parse_pronunciation_tags(ctx, text, data):
     assert isinstance(ctx, Wtp)
-    assert isinstance(config, WiktionaryConfig)
     assert isinstance(text, str)
     assert isinstance(data, dict)
     tags = map_with(xlat_tags_map, split_at_comma_semi(text))
@@ -2502,15 +2493,14 @@ def parse_pronunciation_tags(ctx, config, text, data):
     # done with changing the calling convention of this function.
 
     # XXX remove this?
-    #tagsets = decode_tags(config, tags, allow_any=True)
+    #tagsets = decode_tags(tags, allow_any=True)
     #for tags in tagsets:
-    #    data_extend(config, data, "tags", tags)
-    data_extend(config, data, "tags", tags)
+    #    data_extend(ctx, data, "tags", tags)
+    data_extend(ctx, data, "tags", tags)
 
 
-def parse_translation_desc(ctx, config, text, data):
+def parse_translation_desc(ctx, text, data):
     assert isinstance(ctx, Wtp)
-    assert isinstance(config, WiktionaryConfig)
     assert isinstance(text, str)
     assert isinstance(data, dict)
     # print("parse_translation_desc:", text)
@@ -2554,9 +2544,9 @@ def parse_translation_desc(ctx, config, text, data):
                 elif part.startswith('"') or part.startswith('“'):
                     continue
                 elif part not in valid_tags:
-                    config.warning("unexpected part in translation: {!r} in "
-                                   "{!r}".format(part, text))
-            add_tags(ctx, config, data, lst)
+                    ctx.warning("unexpected part in translation: {!r} in "
+                                "{!r}".format(part, text))
+            add_tags(ctx, data, lst)
 
     # Handle parenthesized descriptors for the word form and links to
     # related words
@@ -2593,18 +2583,17 @@ def parse_translation_desc(ctx, config, text, data):
                 if new_desc.startswith("also expressed with"):
                     continue
                 if new_desc in valid_tags:
-                    add_tags(ctx, config, data, [new_desc],
-                             allow_any=True)
+                    add_tags(ctx, data, [new_desc], allow_any=True)
                 elif new_desc[0].isupper() and not ctx.title[0].isupper():
-                    data_append(config, data, "tags", new_desc)
+                    data_append(ctx, data, "tags", new_desc)
                 elif "alt" not in data:
                     data["roman"] = new_desc
                 else:
-                    config.warning("maybe more than one romanization: {!r}"
-                                   .format(text))
-                    data_append(config, data, "tags", "error-multiple-paren")
+                    ctx.warning("maybe more than one romanization: {!r}"
+                                .format(text))
+                    data_append(ctx, data, "tags", "error-multiple-paren")
 
-def parse_alt_or_inflection_of(config, gloss):
+def parse_alt_or_inflection_of(ctx, gloss):
     """Tries to parse an inflection-of or alt-of description."""
     tags = set()
     nodes = [(valid_sequences, 0)]
@@ -2666,5 +2655,5 @@ def parse_alt_or_inflection_of(config, gloss):
     if base.endswith("."):
         base = base[:-1]
     if base.find(".") >= 0:
-        config.debug(". remains in alt_of/inflection_of: {}".format(base))
+        ctx.debug(". remains in alt_of/inflection_of: {}".format(base))
     return tags, base
