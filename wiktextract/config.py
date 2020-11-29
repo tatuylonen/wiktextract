@@ -36,18 +36,7 @@ class WiktionaryConfig(object):
         "language_counts",
         "pos_counts",
         "section_counts",
-        "errors",
-        "warnings",
-        "debugs",
-        "unrecognized_template_counts",
-        "unrendered_template_counts",
-        "unrecognized_template_samples",
-        "unrendered_template_samples",
-        "unknown_value_counts",
         "word",
-        "language",
-        "pos",
-        "subsection",
     )
 
     def __init__(self,
@@ -84,23 +73,8 @@ class WiktionaryConfig(object):
         self.pos_counts = collections.defaultdict(int)
         self.section_counts = collections.defaultdict(int)
         # Some fields related to errors
-        self.errors = []
-        self.warnings = []
-        self.debugs = []
-        self.unrecognized_template_counts = collections.defaultdict(int)
-        self.unrendered_template_counts = collections.defaultdict(int)
-        # These map [tag][sorted(argkeys)] -> list of (lang, pos, str(template)
-        self.unrecognized_template_samples = collections.defaultdict(list_dict)
-        self.unrendered_template_samples = collections.defaultdict(list_dict)
-        # This maps [lang][tag][value] to int
-        self.unknown_value_counts = collections.defaultdict(int_dict_dict)
-        # The word, language, and part-of-speech currently being processed.
-        # These are here to avoid having to pass so many arguments to so many
-        # functions.
+        # The word currently being processed.
         self.word = None
-        self.language = None
-        self.pos = None
-        self.subsection = None
 
     def to_kwargs(self):
         return {
@@ -120,14 +94,6 @@ class WiktionaryConfig(object):
             "language_counts": self.language_counts,
             "pos_counts": self.pos_counts,
             "section_counts": self.section_counts,
-            "errors": self.errors,
-            "warnings": self.warnings,
-            "debugs": self.debugs,
-            "unrecognized_template_counts": self.unrecognized_template_counts,
-            "unrendered_template_counts": self.unrendered_template_counts,
-            "unrecognized_template_samples": self.unrecognized_template_samples,
-            "unrendered_template_samples": self.unrendered_template_samples,
-            "unknown_value_counts": self.unknown_value_counts,
         }
 
     def merge_return(self, ret):
@@ -139,94 +105,3 @@ class WiktionaryConfig(object):
             self.pos_counts[k] += v
         for k, v in ret["section_counts"].items():
             self.section_counts[k] += v
-        self.errors.extend(ret["errors"])
-        self.warnings.extend(ret["warnings"])
-        self.debugs.extend(ret["debugs"])
-        for k, v in ret["unrecognized_template_counts"].items():
-            self.unrecognized_template_counts[k] += v
-        for k, v in ret["unrendered_template_counts"].items():
-            self.unrendered_template_counts[k] += v
-        for k, v in ret["unrecognized_template_samples"].items():
-            for kk, vv in v.items():
-                self.unrecognized_template_samples[k][kk].extend(vv)
-        for k, v in ret["unrendered_template_samples"].items():
-            for kk, vv in v.items():
-                self.unrendered_template_samples[k][kk].extend(vv)
-        for k, v in ret["unknown_value_counts"].items():
-            for kk, vv in v.items():
-                for kkk, vvv in vv.items():
-                    self.unknown_value_counts[k][kk][kkk] += vvv
-
-    def error(self, msg):
-        assert isinstance(msg, str)
-        self.errors.append({"word": self.word, "lang": self.language,
-                            "pos": self.pos, "msg": msg})
-        pos = self.pos if self.pos else "top-level"
-        lang = self.language if self.language else "top level"
-        if self.subsection:
-            pos += " in " + self.subsection
-        print("{}: {}/{}: ERROR: {}"
-              "".format(self.word, lang, pos, msg))
-        sys.stdout.flush()
-
-    def warning(self, msg):
-        assert isinstance(msg, str)
-        self.warnings.append({"word": self.word, "lang": self.language,
-                              "pos": self.pos, "msg": msg})
-        pos = self.pos if self.pos else "top-level"
-        lang = self.language if self.language else "top level"
-        if self.subsection:
-            pos += " in " + self.subsection
-        print("{}: {}/{}: WARNING: {}"
-              "".format(self.word, lang, pos, msg))
-        sys.stdout.flush()
-
-    def debug(self, msg):
-        assert isinstance(msg, str)
-        self.debugs.append({"word": self.word, "lang": self.language,
-                            "pos": self.pos, "msg": msg})
-        pos = self.pos if self.pos else "top-level"
-        lang = self.language if self.language else "top level"
-        if self.subsection:
-            pos += " in " + self.subsection
-        print("{}: {}/{}: DEBUG: {}"
-              "".format(self.word, lang, pos, msg))
-        sys.stdout.flush()
-
-    def unrecognized_template(self, t, ctx):
-        assert isinstance(ctx, str)
-        self.error("unrecognized template in {}: {}".format(ctx, t))
-        name = t.name.strip()
-        self.unrecognized_template_counts[name] += 1
-        argnames = tuple(sorted(x.name.strip() for x in t.arguments
-                                if x.value.strip()))
-        argnames = ", ".join(argnames)
-        if len(self.unrecognized_template_samples[name][argnames]) < 2:
-            self.unrecognized_template_samples[name][argnames].append(
-                (self.language, self.pos, str(t)))
-
-    def unrendered_template(self, t, name, args, ctx):
-        assert isinstance(ctx, str)
-        assert isinstance(t, str)
-        assert isinstance(name, str)
-        assert isinstance(args, (list, tuple))
-        for x in args:
-            assert isinstance(x, str)
-        self.debug("unrenderable template: {}: {}".format(ctx, t))
-        self.unrendered_template_counts[name] += 1
-        argnames = tuple(sorted(args))
-        argnames = ", ".join(argnames)
-        if len(self.unrendered_template_samples[name][argnames]) < 2:
-            self.unrendered_template_samples[name][argnames].append(
-                (self.language, self.pos, str(t)))
-
-    def unknown_value(self, t, value):
-        assert isinstance(value, str)
-        self.error("unknown value {!r} in {}".format(value, t))
-        name = t.name.strip()
-        self.unknown_value_counts[self.language][name][value] += 1
-
-    def unknown_tag(self, tag):
-        assert isinstance(tag, str)
-        self.warning("unrecognized tag {!r}".format(tag))
-        self.unknown_value_counts[self.language]["tag"][tag] += 1
