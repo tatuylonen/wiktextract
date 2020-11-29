@@ -124,28 +124,30 @@ def page_handler(ctx, model, title, text, capture_cb, config_kwargs):
         capture_cb(model, title, text)
     if model == "redirect":
         config1 = WiktionaryConfig()
-        return ([{"title": title, "redirect": text}],
-                config1.to_return())
-    if model != "wikitext":
-        return
-    idx = title.find(":")
-    if idx >= 0:
-        prefix = title[:idx]
-        if prefix in special_prefixes:
-            return
-    for suffix in ignore_suffixes:
-        if title.endswith(suffix):
-            return
-    for suffix in translation_suffixes:
-        if title.endswith(suffix):
-            return  # XXX
-    # XXX translation suffixes?
-    # XXX Thesaurus pages?
-    # XXX Sign gloss pages?
-    # XXX Reconstruction pages?
-    config1 = WiktionaryConfig(**config_kwargs)
-    ret = parse_page(ctx, title, text, config1)
+        ret = [{"title": title, "redirect": text}]
+    else:
+        if model != "wikitext":
+            return None
+        idx = title.find(":")
+        if idx >= 0:
+            prefix = title[:idx]
+            if prefix in special_prefixes:
+                return None
+        for suffix in ignore_suffixes:
+            if title.endswith(suffix):
+                return None
+        for suffix in translation_suffixes:
+            if title.endswith(suffix):
+                return None # XXX
+        # XXX translation suffixes?
+        # XXX Thesaurus pages?
+        # XXX Sign gloss pages?
+        # XXX Reconstruction pages?
+        config1 = WiktionaryConfig(**config_kwargs)
+        ret = parse_page(ctx, title, text, config1)
     stats = config1.to_return()
+    for k, v in ctx.to_return().items():
+        stats[k] = v
     return (ret, stats)
 
 
