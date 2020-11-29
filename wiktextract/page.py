@@ -2298,3 +2298,68 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # parse_word_head) and then debug.
 
 # Check linkage sol/Norwegian Nynorsk/Noun (looks like unhandled item list)
+
+# слава/Belarusian/Noun: ERROR: LUA error in #invoke ('be-noun', 'show') parent ('Template:be-ndecl', {1: 'сла́ва<sg />'}) at ['слава', 'be-ndecl', '#invoke']
+# [string "be-noun"]:1147: Unrecognized indicator 'sg /': 'sg /'
+# stack traceback:
+# 	[C]: in function 'error'
+# 	[string "be-noun"]:1147: in field 'parse_indicator_spec'
+# 	[string "Module:inflection utilities"]:631: in upvalue 'parse_multiword_spec'
+# 	[string "Module:inflection utilities"]:730: in function 'Module:inflection utilities.parse_inflected_text'
+# 	(...tail calls...)
+# 	[string "be-noun"]:2512: in function 'be-noun.do_generate_forms'
+# 	[string "be-noun"]:2612: in function 'be-noun.show'
+# 	(...tail calls...)
+# 	[C]: in function 'xpcall'
+# 	[string "<python>"]:234: in function 'lua_invoke'
+
+# Մալթա/Armenian: ERROR: LUA error in #invoke ('hy-pronunciation', 'pronunciation', 'system=west', '\U0010206f') parent None at ['Մալթա', 'IPA', 'ARGVAL-2', '#invoke']
+# [string "hy-pronunciation"]:140: attempt to index a nil value
+# stack traceback:
+# 	[string "hy-pronunciation"]:140: in function 'hy-pronunciation.pronunciation'
+# 	(...tail calls...)
+# 	[C]: in function 'xpcall'
+# 	[string "<python>"]:234: in function 'lua_invoke'
+
+# afon/Old English/Verb: ERROR: LUA error in #invoke ('ang-verb', 'show') parent ('Template:ang-conj', {1: 'āfōn<s7 />'}) at ['afon', 'ang-conj', '#invoke']
+# [string "ang-verb"]:1576: Unrecognized strong class: 7
+# stack traceback:
+# 	[C]: in function 'error'
+# 	[string "ang-verb"]:1576: in function 'ang-verb.show'
+# 	(...tail calls...)
+# 	[C]: in function 'xpcall'
+# 	[string "<python>"]:234: in function 'lua_invoke'
+
+# `/Welsh/Diacritical mark: ERROR: LUA error in #invoke ('ConvertNumeric', 'numeral_to_english\n', 'À\n', 'adj=\n', 'case=\n', 'ord=on\n', 'sp=\U001021dd\n', 'zero=\n') parent ('Template:ordinal to word', {1: 'À'}) at ['`', 'Latn-def', '#switch', '#switch', '#if', 'ordinal to word', '#invoke']
+# [string "ConvertNumeric"]:501: Invalid decimal numeral
+# stack traceback:
+# 	[C]: in function 'error'
+# 	[string "ConvertNumeric"]:501: in function 'ConvertNumeric.spell_number'
+# 	[string "ConvertNumeric"]:573: in function 'ConvertNumeric.numeral_to_english'
+# 	(...tail calls...)
+# 	[C]: in function 'xpcall'
+# 	[string "<python>"]:234: in function 'lua_invoke'
+
+# muffle/English: ERROR: LUA error in #invoke ('redlink category', 'cat', '1=frk', '2=*vël', 'template=m') parent ('Template:redlink category', {1: 'frk', 2: '*vël', 'template': 'm'}) at ['muffle', 'm', 'redlink category', '#switch', '#switch', '#switch', '#ifeq', '#invoke']
+# [string "Module:links"]:62: attempt to index a nil value (local 'lang')
+# stack traceback:
+# 	[string "Module:links"]:62: in function 'Module:links.getLinkPage'
+# 	[string "redlink category"]:15: in function 'redlink category.cat'
+# 	(...tail calls...)
+# 	[C]: in function 'xpcall'
+# 	[string "<python>"]:234: in function 'lua_invoke'
+
+# акула/Ukrainian/Noun: ERROR: LUA error in #invoke ('uk-be-headword', 'show', 'nouns', 'lang=uk') parent ('Template:uk-noun', {1: 'аку́ла<anml />'}) at ['акула', 'uk-noun', '#invoke']
+# [string "Module:uk-noun"]:1321: Unrecognized indicator 'anml /': 'anml /'
+# stack traceback:
+# 	[C]: in function 'error'
+# 	[string "Module:uk-noun"]:1321: in field 'parse_indicator_spec'
+# 	[string "Module:inflection utilities"]:631: in upvalue 'parse_multiword_spec'
+# 	[string "Module:inflection utilities"]:730: in function 'Module:inflection utilities.parse_inflected_text'
+# 	(...tail calls...)
+# 	[string "Module:uk-noun"]:2556: in function 'Module:uk-noun.do_generate_forms'
+# 	[string "uk-be-headword"]:143: in field 'func'
+# 	[string "uk-be-headword"]:96: in function 'uk-be-headword.show'
+# 	(...tail calls...)
+# 	[C]: in function 'xpcall'
+# 	[string "<python>"]:234: in function 'lua_invoke'
