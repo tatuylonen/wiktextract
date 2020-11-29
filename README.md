@@ -14,7 +14,7 @@ It should stabilize when I release 2.0.0.)
 Note: extracting all data for all languages from English Wiktionary takes
 about 7 hours on a modern 24-core desktop.  You may want to download
 the pre-extracted data rather than run it yourself.  Or if you run it
-yourself, be prepared to wait from several hours to couple of days.
+yourself, be prepared to wait from several hours to a couple of days.
 Expanding Lua macros is not cheap, but it enables superior extraction
 quality!
 
