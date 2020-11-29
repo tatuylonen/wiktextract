@@ -15,108 +15,96 @@ class WiktExtractTests(unittest.TestCase):
         self.ctx.start_page("testpage")
 
     def test_empty(self):
-        ret = decode_tags(self.config, [])
-        self.assertEqual(self.config.warnings, [])
+        ret = decode_tags([])
         self.assertEqual(ret, ([()], []))
 
     def test_singular(self):
-        ret, topics = decode_tags(self.config, ["singular"])
-        self.assertEqual(self.config.warnings, [])
+        ret, topics = decode_tags(["singular"])
         self.assertEqual(ret, [("singular",)])
 
     def test_topics(self):
-        ret, topics = decode_tags(self.config, ["singular", "nautical"])
-        self.assertEqual(self.config.warnings, [])
+        ret, topics = decode_tags(["singular", "nautical"])
         self.assertEqual(ret, [("singular",)])
         self.assertEqual(topics, ["nautical"])
 
     def test_unknown(self):
-        ret, topics = decode_tags(self.config, ["unknowntag"])
-        self.assertNotEqual(self.config.warnings, [])
+        ret, topics = decode_tags(["unknowntag"])
         self.assertEqual(ret, [("error-unknown-tag",)])
 
     def test_plural_partitive(self):
-        ret, topics = decode_tags(self.config, ["partitive", "plural"])
-        self.assertEqual(self.config.warnings, [])
+        ret, topics = decode_tags(["partitive", "plural"])
         self.assertEqual(ret, [("partitive", "plural")])
 
     def test_combo(self):
-        ret, topics = decode_tags(self.config, ["class", "2a",
-                                                "stress", "pattern", "1"])
-        self.assertEqual(self.config.warnings, [])
+        ret, topics = decode_tags(["class", "2a",
+                                   "stress", "pattern", "1"])
         self.assertEqual(ret, [("class-2a", "stress-pattern-1")])
 
     def test_combo_err(self):
-        ret, topics = decode_tags(self.config, ["class", "2a",
-                                                "stress", "pattern", "xyz"])
-        self.assertNotEqual(self.config.warnings, [])
+        ret, topics = decode_tags(["class", "2a",
+                                   "stress", "pattern", "xyz"])
         self.assertEqual(ret, [("class-2a", "error-unknown-tag")])
 
     def test_head1(self):
         data = {}
-        parse_word_head(self.ctx, self.config, "noun", "", data)
-        self.assertEqual(self.config.warnings, [])
+        parse_word_head(self.ctx, "noun", "", data)
+        self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(data, {})
 
     def test_head2(self):
         data = {}
-        parse_word_head(self.ctx, self.config, "noun", "testpage", data)
-        self.assertEqual(self.config.warnings, [])
+        parse_word_head(self.ctx, "noun", "testpage", data)
+        self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(data, {})
 
     def test_head3(self):
         data = {}
-        parse_word_head(self.ctx, self.config, "noun",
-                        "testpAge", data)
-        self.assertEqual(self.config.warnings, [])
+        parse_word_head(self.ctx, "noun", "testpAge", data)
+        self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(data, {"forms": [{"form": "testpAge",
                                            "tags": ["canonical"]}]})
 
     def test_head4(self):
         data = {}
-        parse_word_head(self.ctx, self.config, "noun",
-                        "testpage f", data)
-        self.assertEqual(self.config.warnings, [])
+        parse_word_head(self.ctx, "noun", "testpage f", data)
+        self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(data, {"tags": ["feminine"]})
 
     def test_head5(self):
         data = {}
-        parse_word_head(self.ctx, self.config, "noun",
-                        "testpAge m", data)
-        self.assertEqual(self.config.warnings, [])
+        parse_word_head(self.ctx, "noun", "testpAge m", data)
+        self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(data, {"forms": [{"form": "testpAge",
                                            "tags": ["canonical"]}],
                                 "tags": ["masculine"]})
 
     def test_head6(self):
         data = {}
-        parse_word_head(self.ctx, self.config, "noun",
-                        "testpage n", data)
-        self.assertEqual(self.config.warnings, [])
+        parse_word_head(self.ctx, "noun", "testpage n", data)
+        self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(data, {"tags": ["neuter"]})
 
     def test_head7(self):
         data = {}
-        parse_word_head(self.ctx, self.config, "noun",
-                        "testpage c", data)
-        self.assertEqual(self.config.warnings, [])
+        parse_word_head(self.ctx, "noun", "testpage c", data)
+        self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(data, {"tags": ["common"]})
 
     def test_head8(self):
         data = {}
-        parse_word_head(self.ctx, self.config, "noun",
+        parse_word_head(self.ctx, "noun",
                         "testpage f (plurale tantum, inanimate)", data)
-        self.assertEqual(self.config.warnings, [])
+        self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(data, {"tags": ["feminine", "plurale-tantum",
                                          "inanimate"]})
 
     def test_head9(self):
         data = {}
-        parse_word_head(self.ctx, self.config, "noun",
+        parse_word_head(self.ctx, "noun",
                         "testpage f (plurale tantum, stem testpag, inanimate)",
                         data)
         print(data)
-        self.assertEqual(self.config.warnings, [])
+        self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(data, {"tags": ["feminine", "plurale-tantum",
                                          "inanimate"],
                                 "forms": [{"tags": ["stem"],
@@ -124,11 +112,11 @@ class WiktExtractTests(unittest.TestCase):
 
     def test_head10(self):
         data = {}
-        parse_word_head(self.ctx, self.config, "noun",
+        parse_word_head(self.ctx, "noun",
                         "testpage f (plurale tantum, stem testpag, inanimate) "
                         "(+ dative)",
                         data)
-        self.assertEqual(self.config.warnings, [])
+        self.assertEqual(self.ctx.warnings, [])
         print(data)
         self.assertEqual(data, {"tags": ["feminine", "plurale-tantum",
                                          "inanimate", "with-dative"],
