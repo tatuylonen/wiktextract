@@ -3,17 +3,23 @@
 This is a utility and Python package for for extracing data from Wiktionary.
 
 **Currently working on this, and the repository may be broken on some
-  days.  New release with major changes expected in <del>September</del> October/November 2020.  This has
-  gotten significantly delayed, and I apologize, but now I'm finally able
-  to work on this almost full-time.  I'm trying to make this expand
-  templates and Lua macros, as producing a high-quality result without them
-  has gotten increasingly difficult and is difficult to maintain.**
+  days.  I'm getting close to releasing 2.0.0 (probably first week of
+  December 2020, finally).**
 
-**Until then, please use the version on pypi (``pip install wiktextract``)
-  or look at branches which contain earlier versions.**
+The current extracted version is available for browsing and download
+at: [http://dictionary.kaikki.org](http://dictionary.kaikki.org).
+(Beware, it is my development version, and may be broken on some days.
+It should stabilize when I release 2.0.0.)
 
-The current extracted version is available for browsing and download at:
-[http://dictionary.kaikki.org](http://dictionary.kaikki.org).
+Note: extracting all data from all languages from Wiktionary takes
+about 7 hours on a modern 24-core desktop.  You may want to download
+the pre-extracted data rather than run it yourself.  Or if you run it
+yourself, be prepared to wait from several hours to couple of days.
+Expanding Lua macros is not cheap, but it enables superior extraction
+quality!
+
+**Documentation below needs to be updated; I plan to do that before
+  the 2.0.0 release.**
 
 ## Overview
 
