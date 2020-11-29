@@ -11,7 +11,7 @@ at: [https://kaikki.org/dictionary/](http://kaikki.org/dictionary/).
 (Beware, it is my development version, and may be broken on some days.
 It should stabilize when I release 2.0.0.)
 
-Note: extracting all data from all languages from Wiktionary takes
+Note: extracting all data for all languages from English Wiktionary takes
 about 7 hours on a modern 24-core desktop.  You may want to download
 the pre-extracted data rather than run it yourself.  Or if you run it
 yourself, be prepared to wait from several hours to couple of days.
