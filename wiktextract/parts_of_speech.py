@@ -154,7 +154,7 @@ part_of_speech_map = {
     },
     "idiom": {
         "pos": "phrase",
-        "tags": "idiomatic",
+        "tags": ["idiomatic"],
         "warning": "Part-of-speech Idiom is proscribed",
     },
     "infix": {
@@ -394,6 +394,9 @@ part_of_speech_map = {
         "warning": "Usually in singular",
     },
 }
+for k, v in part_of_speech_map.items():
+    if "tags" in v:
+        assert isinstance(v["tags"], (list, tuple))
 
 # Set of all possible parts-of-speech returned by wiktionary reading.
 PARTS_OF_SPEECH = set(x["pos"] for x in part_of_speech_map.values())
