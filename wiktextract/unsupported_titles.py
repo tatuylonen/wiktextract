@@ -18,6 +18,7 @@ unsupported_title_map = {
     "Colon hyphen right paren": ":-)",
     "Colon left paren": ":(",
     "Colon right paren": ":)",
+    "Colon slash": ":/",
     "Curly brackets": "{}",
     "Double colon": "::",
     "Double period": "..",
