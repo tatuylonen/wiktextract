@@ -274,14 +274,9 @@ if __name__ == "__main__":
     if args.errors:
         with open(args.errors, "w") as f:
             json.dump({
-                "errors": config.errors,
-                "warnings": config.warnings,
-                "debugs": config.debugs,
-                "unrecognized_counts": config.unrecognized_template_counts,
-                "unrecognized_samples": config.unrecognized_template_samples,
-                "unrendered_counts": config.unrendered_template_counts,
-                "unrendered_samples": config.unrendered_template_samples,
-                "unknown_value_counts": config.unknown_value_counts,
+                "errors": ctx.errors,
+                "warnings": ctx.warnings,
+                "debugs": ctx.debugs,
                 }, f)
 
     def dump_un(title, limit, counts, samples):
@@ -318,14 +313,3 @@ if __name__ == "__main__":
             print(title)
             for (k, kk), v in lst[:limit]:
                 print("  {:5d} {}: {}".format(v, k, kk))
-
-    dump_un("TOP 20 UNRECOGNIZED TEMPLATES", 20,
-            config.unrecognized_template_counts,
-            config.unrecognized_template_samples)
-
-    dump_un("TOP 20 UNRENDERED TEMPLATES", 20,
-            config.unrendered_template_counts,
-            config.unrendered_template_samples)
-
-    dump_val("TOP 20 UNKNOWN VALUES", 20,
-             config.unknown_value_counts)
