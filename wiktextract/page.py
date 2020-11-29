@@ -105,8 +105,10 @@ panel_templates = set([
     "no inline",
     "picdic",
     "picdicimg",
+    "picdiclabel",
     "polyominoes",
     "predidential nomics",
+    "punctuation",  # This actually gets pre-expanded
     "request box",
     "rf-sound example",
     "rfaccents",
@@ -943,7 +945,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if name == "ja-kanji":
             # XXX extract?
             return ""
-        if name == "picdic" or name == "picdicimg":
+        if name == "picdic" or name == "picdicimg" or name == "picdiclabel":
             # XXX extract?
             return ""
         if name in ("tlb", "term-context", "term-label", "tcx"):
@@ -2063,18 +2065,7 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX cf "word" translations under "watchword" and "proverb" - what kind of
 # link/ext is this?  {{trans-see|watchword}}
 
-# XXX for translations, when there is more than one sense in the correct
-# part-of-speech, mark translations as inexact (we don't usually know which
-# sense they refer to)
-
-# XXX Review link extraction code - which cases are not yet handled?
-
 # XXX add parsing chinese pronunciations, see 傻瓜 https://en.wiktionary.org/wiki/%E5%82%BB%E7%93%9C#Chinese
-
-# XXX need to change when html.unescape is called to decode html entities.
-# Now done in node_to_text, but must be moved to some later step to
-# distinguish IPA brackets from [https://...] links.  Fix clean, it should
-# remove link brackets.  Fix related tests.
 
 # XXX implement parsing {{ja-see-kango|xxx}} specially, see むひ
 
@@ -2275,18 +2266,10 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # May be best to actually load these modules as Lua code or to even run a
 # specific Lua module to dump the data.
 
-# XXX review most common Lua errors!  Particularly form-of/templates
-# inflection_of_t.  This might be related to deprecated lang param usage.
-# Perhaps I'm returning wrong value from require() when there is an error?
-
 # Handle Japanese parentheses in linkage items.  It think this relates
 # to <ruby>.
 
 # Check awake/English - strange unrecognized tags
-
-# XXX ensure there is a time limit for calling Lua functions.  Implement in
-# sandbox.
-# See: https://stackoverflow.com/questions/3400851/execution-time-limit-for-a-lua-script-called-from-the-c-api
 
 # Why does eccentric/English/Adjective get tag "contraction" when that word
 # only occurs in its gloss???
@@ -2315,6 +2298,3 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # parse_word_head) and then debug.
 
 # Check linkage sol/Norwegian Nynorsk/Noun (looks like unhandled item list)
-
-# qua/Latin/Adverb - Lua error "This module function does not require
-# any parameters"
