@@ -16,12 +16,11 @@ from .places import place_prefixes  # XXX move processing to places.py
 from .unsupported_titles import unsupported_title_map
 from .form_of import form_of_map
 from .head_map import head_pos_map
-from .datautils import (data_append, data_extend, data_inflection_of,
-                        data_alt_of, split_at_comma_semi)
+from .datautils import (data_append, data_extend, split_at_comma_semi)
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_tags, parse_pronunciation_tags,
-    parse_translation_desc, xlat_tags_map, valid_tags,
-    parse_alt_or_inflection_of)
+    parse_alt_or_inflection_of,
+    parse_translation_desc, xlat_tags_map, valid_tags)
 
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
@@ -32,11 +31,6 @@ languages_by_name = {x["name"]: x for x in ALL_LANGUAGES}
 
 # Mapping from language code to language info
 languages_by_code = {x["code"]: x for x in ALL_LANGUAGES}
-
-# Matches en:, fr:, etc.
-# XXX remove this
-langtag_colon_re = re.compile(r"^(" + "|".join(languages_by_code.keys()) +
-                              r"):")
 
 # Matches head tag
 head_tag_re = re.compile(r"^(head|Han char)$|" +
@@ -58,6 +52,18 @@ langlink_re = re.compile(r"\s*\((" + "|".join(languages_by_code.keys()) +
 additional_expand_templates = set([
     "multitrans",
 ])
+
+linkage_fields = [
+    "synonyms",
+    "hypernyms",
+    "hyponyms",
+    "holonyms",
+    "meronyms",
+    "derived",
+    "related",
+    "coordinate_terms",
+    "troponyms",
+]
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -178,6 +184,8 @@ ignored_category_patterns = [
     ".* abbreviations$",
     ".* interjections$",
     ".* misspellings$",
+    ".* suffixes$",
+    ".* prefixes$",
     ".* Han characters$",
     ".* syllables$",
     ".* forms$",
@@ -477,8 +485,8 @@ def parse_sense_XXXold_going_away(config, data, text, use_text):
             elif v == "avec":
                 data_append(config, data, "object_preposition", "avec")
             elif not v:
-                config.warning("empty/missing object construction argument "
-                               "in {}".format(t))
+                ctx.warning("empty/missing object construction argument "
+                            "in {}".format(t))
             else:
                 config.unknown_value(t, v)
         elif name == "es-demonstrative-accent-usage":
@@ -691,9 +699,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
     assert isinstance(lang_code, str)
     # print("parse_language", language)
 
-    config.pos = None
-    config.subsection = None
-    word = ctx.title  # XXX translations for titles to words
+    word = ctx.title
     base = {"word": word, "lang": language, "lang_code": lang_code}
     sense_data = {}
     pos_data = {}  # For a current part-of-speech
@@ -703,9 +709,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
     page_datas = []
     stack = []
 
-    def clean_tr_sense(text):
+    def clean_item_sense(text):
         # Cleans up some aspects of a word sense or gloss before comparison
-        # (this is helper function for move_clear_translations())
+        # (this is helper function for disambiguate_clear_cases())
         text = text.lower()
         if text.endswith("."):
             text = text[:-1]
@@ -713,51 +719,52 @@ def parse_language(ctx, config, langnode, language, lang_code):
             text = text[7:]
         return text.strip()
 
-    def move_clear_translations(data):
-        # After parsing a part-of-speech, move those translations for
-        # which there is no ambiguity to their respective senses
-        if "translations" not in data:
+    def disambiguate_clear_cases(data, field):
+        # After parsing a part-of-speech, move those data items in the
+        # given field fields for which there is no ambiguity to their
+        # respective senses.  Assumes the data items have a "sense" field.
+        if field not in data:
             return
-        translations = collections.defaultdict(list)
-        for tr in data["translations"]:
-            sensetext = tr.get("sense", "")
-            sensetext = clean_tr_sense(sensetext)
-            translations[sensetext].append(tr)
-        del data["translations"]
+        items = collections.defaultdict(list)
+        for item in data[field]:
+            sensetext = item.get("sense", "")
+            sensetext = clean_item_sense(sensetext)
+            items[sensetext].append(item)
+        del data[field]
 
-        senses_with_no_translations = []
+        senses_with_no_items = []
         for sense in data.get("senses", ()):
             for gloss in sense.get("glosses", ()):
-                gloss = clean_tr_sense(gloss)
-                for k, v in translations.items():
+                gloss = clean_item_sense(gloss)
+                for k, v in items.items():
                     if (gloss == k or
-                        gloss.startswith("A " + k) or
+                        gloss.startswith("a " + k) or
                         gloss.startswith(k + ",") or
                         gloss.startswith(k + ".") or
                         gloss.startswith(k + " or ")):
-                        data_extend(config, sense, "translations", v)
-                        del translations[k]
+                        data_extend(ctx, sense, field, v)
+                        del items[k]
                         break
                 else:
                     continue
                 break
             else:
-                senses_with_no_translations.append(sense)
+                senses_with_no_items.append(sense)
 
-        # Any remaining translations go to those senses that did not have
-        # translations, or to all if all senses had translations.  When there
-        # is ambiguity, the translation is marked "inaccurate".
-        if (len(senses_with_no_translations) == 1 and
-            len(list(translations)) == 1):
-            sense = senses_with_no_translations[0]
-            for k, v in translations.items():
-                data_extend(config, sense, "translations", v)
+        # Any remaining items go to those senses that did not have any
+        # items.  When there is ambiguity, the item is left at
+        # word-level.
+        if (len(senses_with_no_items) == 1 and
+            len(list(items)) == 1):
+            sense = senses_with_no_items[0]
+            for k, v in items.items():
+                data_extend(ctx, sense, field, v)
             return
 
-        # Leave any translations that we couldn't assign to the original data
-        if translations:
-            for k, v in translations.items():
-                data_extend(config, data, "translations", v)
+        # Leave any items that we couldn't assign to the original data
+        if items:
+            for k, v in items.items():
+                data_extend(ctx, data, field, v)
 
     def merge_base(data, base):
         for k, v in base.items():
@@ -766,8 +773,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             elif isinstance(data[k], list):
                 data[k].extend(v)
             elif data[k] != v:
-                config.warning("conflicting values for {}: {} vs {}"
-                               .format(k, data[k], v))
+                ctx.warning("conflicting values for {}: {} vs {}"
+                            .format(k, data[k], v))
 
     def push_sense():
         nonlocal sense_data
@@ -783,14 +790,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if pos_datas:
             data = {"senses": pos_datas}
             merge_base(data, pos_data)
-            move_clear_translations(data)
+            disambiguate_clear_cases(data, "translations")
+            for field in linkage_fields:
+                disambiguate_clear_cases(data, field)
             etym_datas.append(data)
-        elif config.pos:
-            config.warning("no senses found")
+        elif ctx.subsection:  # part-of-speech
+            ctx.warning("no senses found")
         pos_data = {}
         pos_datas = []
-        config.pos = None
-        config.subsection = None
+        ctx.start_subsection(None)
 
     def push_etym():
         nonlocal etym_data
@@ -821,7 +829,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     w = ht.get(i)
                     if not w:
                         break
-                    data_append(config, sense_base, "synonyms",
+                    data_append(ctx, sense_base, "synonyms",
                                 {"word": w})
                 return ""
             if name == "gloss":
@@ -843,18 +851,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
             push_sense()
             # Copy data for all senses to this sense
             for k, v in sense_base.items():
-                data_extend(config, sense_data, k, v)
+                data_extend(ctx, sense_data, k, v)
             # Parse the gloss for this particular sense
             m = re.match(r"^\((([^()]|\([^)]*\))*)\):?\s*", gloss)
             if m:
-                parse_sense_tags(ctx, config, m.group(1), sense_data)
+                parse_sense_tags(ctx, m.group(1), sense_data)
                 gloss = gloss[m.end():].strip()
 
             def sense_repl(m):
                 v = m.group(1)
                 if v not in valid_tags and v not in xlat_tags_map:
                     return m.group(0)
-                parse_sense_tags(ctx, config, v, sense_data)
+                parse_sense_tags(ctx, v, sense_data)
                 return ""
 
             # Replace parenthesized expressions commonly used for sense tags
@@ -866,8 +874,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # Check to make sure we don't have unhandled list items in gloss
             ofs = max(gloss.find("#"), gloss.find("*"))
             if ofs > 10:
-                config.warning("gloss may contain unhandled list items: {}"
-                               .format(gloss))
+                ctx.warning("gloss may contain unhandled list items: {}"
+                            .format(gloss))
 
             # Kludge, some glosses have a comma after initial qualifiers in
             # parentheses
@@ -878,36 +886,36 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 gloss = "Name of " +  gloss[6:]
 
             # Check if this gloss describes an alt-of or inflection-of
-            tags, base = parse_alt_or_inflection_of(config, gloss)
+            tags, base = parse_alt_or_inflection_of(ctx, gloss)
             ftags = list(tag for tag in tags if tag != "form-of") # Spurious
             if "alt-of" in tags:
-                data_extend(config, sense_data, "tags", ftags)
-                data_append(config, sense_data, "alt_of", base)
+                data_extend(ctx, sense_data, "tags", ftags)
+                data_append(ctx, sense_data, "alt_of", base)
             elif "compound-of" in tags:
-                data_extend(config, sense_data, "tags", ftags)
-                data_append(config, sense_data, "compound_of", base)
+                data_extend(ctx, sense_data, "tags", ftags)
+                data_append(ctx, sense_data, "compound_of", base)
             elif "synonym-of" in tags:
                 dt = { "word": base }
-                data_extend(config, dt, "tags", ftags)
-                data_append(config, sense_data, "synonyms", dt)
+                data_extend(ctx, dt, "tags", ftags)
+                data_append(ctx, sense_data, "synonyms", dt)
             elif tags and base.startswith("of "):
                 base = base[3:]
-                data_append(config, sense_data, "tags", "form-of")
-                data_extend(config, sense_data, "tags", ftags)
-                data_append(config, sense_data, "form_of", base)
+                data_append(ctx, sense_data, "tags", "form-of")
+                data_extend(ctx, sense_data, "tags", ftags)
+                data_append(ctx, sense_data, "form_of", base)
             elif "form-of" in tags:
-                data_extend(config, sense_data, "tags", tags)
-                data_append(config, sense_data, "form_of", base)
+                data_extend(ctx, sense_data, "tags", tags)
+                data_append(ctx, sense_data, "form_of", base)
 
             if not gloss:
-                config.debug("{}: empty gloss at {}"
+                ctx.debug("{}: empty gloss at {}"
                              .format(pos, "/".join(stack)))
-                data_append(config, sense_data, "tags", "empty-gloss")
+                data_append(ctx, sense_data, "tags", "empty-gloss")
             else:
                 # Add the gloss for the sense.
-                data_append(config, sense_data, "glosses", gloss)
+                data_append(ctx, sense_data, "glosses", gloss)
             for gl in additional_glosses:
-                data_append(config, sense_data, "glosses", gl)
+                data_append(ctx, sense_data, "glosses", gl)
 
     def head_template_fn(name, ht):
         # print("HEAD_TEMPLATE_FN", name, ht)
@@ -945,22 +953,22 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if v is None:
                     break
                 v = clean_value(config, v)
-                data_append(config, pos_data, "tags", v)
+                data_append(ctx, pos_data, "tags", v)
                 i += 1
             return ""
         if name == "head":
             t = ht.get(2, "")
             if t == "pinyin":
-                data_append(config, pos_data, "tags", "pinyin")
+                data_append(ctx, pos_data, "tags", "pinyin")
             elif t == "romanization":
-                data_append(config, pos_data, "tags", "romanization")
+                data_append(ctx, pos_data, "tags", "romanization")
         m = re.search(head_tag_re, name)
         if m:
             new_ht = {}
             for k, v in ht.items():
                 new_ht[decode_html_entities(k)] = decode_html_entities(v)
             new_ht["template_name"] = name
-            data_append(config, pos_data, "heads", new_ht)
+            data_append(ctx, pos_data, "heads", new_ht)
         return None
 
     def parse_part_of_speech(posnode, pos):
@@ -999,18 +1007,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
             elif first_para:
                 pre.append(node)
         if not lists:
-            config.warning("{}: no sense list found".format(pos))
+            ctx.warning("{}: no sense list found".format(pos))
             return
         # XXX use template_fn in clean_node to check that the head macro
         # is compatible with the current part-of-speech and generate warning
         # if not.  Use template_allowed_pos_map.
         text = clean_node(config, ctx, pos_data, pre,
                           template_fn=head_template_fn)
-        parse_word_head(ctx, config, pos, text, pos_data)
+        parse_word_head(ctx, pos, text, pos_data)
         for node in lists:
             for node in node.children:
                 if node.kind != NodeKind.LIST_ITEM:
-                    config.warning("{}: non-list-item inside list".format(pos))
+                    ctx.warning("{}: non-list-item inside list".format(pos))
                     continue
                 if node.args[-1] == ":":
                     # Sometimes there may be lists with indented examples
@@ -1060,7 +1068,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         if item.kind != NodeKind.LIST_ITEM:
                             continue
                         sense_base = {}
-                        data_extend(config, sense_base, "categories",
+                        data_extend(ctx, sense_base, "categories",
                                     cats.get("categories", ()))
                         # XXX is it always a gloss?  Maybe non-gloss?
                         tags = ()
@@ -1072,9 +1080,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             outer_text = None
                         elif outer_text == "Technical or specialized senses.":
                             outer_text = None
-                        data_extend(config, sense_base, "tags", tags)
+                        data_extend(ctx, sense_base, "tags", tags)
                         if outer_text:
-                            data_append(config, sense_base, "glosses",
+                            data_append(ctx, sense_base, "glosses",
                                         outer_text)
                         parse_sense(pos, item.children, sense_base)
 
@@ -1086,9 +1094,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
         enprs = []
         audios = []
         rhymes = []
-        have_pronunciations = False
+        have_panel_templates = False
 
         def parse_pronunciation_template_fn(name, ht):
+            nonlocal have_panel_templates
+            if is_panel_template(name):
+                have_panel_templates = True
+                return ""
             if name == "enPR":
                 enpr = ht.get(1)
                 if enpr:
@@ -1100,7 +1112,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 audio = {"audio": filename}
                 m = re.search(r"\((([^()]|\([^)]*\))*)\)", desc)
                 if m:
-                    parse_pronunciation_tags(ctx, config, m.group(1), audio)
+                    parse_pronunciation_tags(ctx, m.group(1), audio)
                 if desc:
                     audio["text"] = desc
                 audios.append(audio)
@@ -1113,19 +1125,17 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 audio = {"audio": filename}
                 if dial:
                     audio["text"] = dial
-                    data_append(config, audio, "tags", dial)
+                    data_append(ctx, audio, "tags", dial)
                 if country:
-                    data_append(config, audio, "tags", country.upper())
+                    data_append(ctx, audio, "tags", country.upper())
                 audios.append(audio)
                 if ipa:
                     pron = {"ipa": ipa}
                     if dial:
-                        data_append(config, pron, "tags", dial)
+                        data_append(ctx, pron, "tags", dial)
                     if country:
-                        data_append(config, pron, "tags", country.upper())
-                    data_append(config, data, "sounds", pron)
-            if is_panel_template(name):
-                return ""
+                        data_append(ctx, pron, "tags", country.upper())
+                    data_append(ctx, data, "sounds", pron)
             return None
 
         # XXX change this code to iterate over node as a LIST, warning about
@@ -1133,6 +1143,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # XXX fix enpr tags
         text = clean_node(config, ctx, data, node,
                           template_fn=parse_pronunciation_template_fn)
+        have_pronunciations = False
         for origtext in re.split(r"[*#]+", text):  # Items generated by macros
             text = origtext
             m = re.match("^[*#\s]*\((([^()]|\([^)]*\))*?)\)", text)
@@ -1150,8 +1161,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             m = re.search(r"\(Tokyo\) +([^ ]+) +\[", origtext)
             if m:
                 pron = {field: m.group(1)}
-                parse_pronunciation_tags(ctx, config, tagstext, pron)
-                data_append(config, data, "sounds", pron)
+                parse_pronunciation_tags(ctx, tagstext, pron)
+                data_append(ctx, data, "sounds", pron)
                 have_pronunciations = True
             # Check if it contains Rhymes
             m = re.search(r"\bRhymes: ([^\s,]+(,\s*[^\s,]+)*)", text)
@@ -1160,8 +1171,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     ending = ending.strip()
                     if ending:
                         pron = {"rhymes": ending}
-                        parse_pronunciation_tags(ctx, config, tagstext, pron)
-                        data_append(config, data, "sounds", pron)
+                        parse_pronunciation_tags(ctx, tagstext, pron)
+                        data_append(ctx, data, "sounds", pron)
                         have_pronunciations = True
             # Check if it contains homophones
             m = re.search(r"\bHomophones?: ([^\s,]+(,\s*[^\s,]+)*)", text)
@@ -1170,39 +1181,39 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     word = word.strip()
                     if word:
                         pron = {"homophone": word}
-                        parse_pronunciation_tags(ctx, config, tagstext, pron)
-                        data_append(config, data, "sounds", pron)
+                        parse_pronunciation_tags(ctx, tagstext, pron)
+                        data_append(ctx, data, "sounds", pron)
                         have_pronunciations = True
 
             #print("parse_pronunciation tagstext={} text={}"
             #      .format(tagstext, text))
             for m in re.finditer("/[^/,]+?/|\[[^]0-9,/][^],/]*?\]", text):
                 pron = {field: m.group(0)}
-                parse_pronunciation_tags(ctx, config, tagstext, pron)
-                data_append(config, data, "sounds", pron)
+                parse_pronunciation_tags(ctx, tagstext, pron)
+                data_append(ctx, data, "sounds", pron)
                 have_pronunciations = True
 
             # XXX what about {{hyphenation|...}}, {{hyph|...}}
             # and those used to be stored under "hyphenation"
             m = re.search(r"\b(Syllabification|Hyphenation): ([^\s,]*)", text)
             if m:
-                data_append(config, data, "hyphenation", m.group(2))
+                data_append(ctx, data, "hyphenation", m.group(2))
                 have_pronunciations = True
 
         # Add data that was collected in template_fn
         if audios:
-            data_extend(config, data, "sounds", audios)
+            data_extend(ctx, data, "sounds", audios)
             have_pronunciations = True
         for enpr in enprs:
             pron = {"enpr": enpr}
             # XXX need to parse enpr separately for each list item to get
             # tags correct!
-            # parse_pronunciation_tags(ctx, config, tagstext, pron)
-            data_append(config, data, "sounds", pron)
+            # parse_pronunciation_tags(ctx, tagstext, pron)
+            data_append(ctx, data, "sounds", pron)
             have_pronunciations = True
 
-        if not have_pronunciations:
-            config.warning("no pronunciations found from pronunciation section")
+        if not have_pronunciations and not have_panel_templates:
+            ctx.warning("no pronunciations found from pronunciation section")
 
     def parse_inflection(node):
         # print("parse_inflection:", node)
@@ -1227,7 +1238,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     v = decode_html_entities(v)
                     new_ht[decode_html_entities(k)] = v
                 new_ht["template_name"] = name
-                data_append(config, pos_data, "inflection", new_ht)
+                data_append(ctx, pos_data, "inflection", new_ht)
                 nonlocal captured
                 captured = True
                 return ""
@@ -1250,6 +1261,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if not config.capture_linkages:
             return
         have_linkages = False
+        have_panel_template = False
         extras = []
 
         def parse_linkage_item(contents, field, sense=None):
@@ -1272,7 +1284,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 nonlocal sense
                 nonlocal english
                 nonlocal qualifier
+                nonlocal have_panel_template
                 if is_panel_template(name):
+                    have_panel_template = True
                     return ""
                 if name in ("sense", "s"):
                     sense = clean_value(config, ht.get(1))
@@ -1295,9 +1309,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     return ""
                 if name in ("bullet list",):
                     # XXX check how this is used in linkage
-                    config.warning("UNIMPLEMENTED - check linkage template: "
-                                   "{} {}"
-                                   .format(name, ht))
+                    ctx.warning("UNIMPLEMENTED - check linkage template: "
+                                "{} {}"
+                                .format(name, ht))
                     return None
                 # XXX wikipedia, Wikipedia, w, wp, w2 link types
                 return None
@@ -1335,8 +1349,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     item = item[:m.start()] + item[m.end():]
             item = re.sub(r"\s*\(\)", "", item)
             if item.find("(") >= 0 and item.find(", though ") < 0:
-                config.debug("linkage item has remaining parentheses: {}"
-                             .format(item))
+                ctx.debug("linkage item has remaining parentheses: {}"
+                          .format(item))
 
             item = re.sub(r"\s*\(\s*\)", "", item)
             item = item.strip()
@@ -1348,12 +1362,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         continue
                     dt = {"word": item1}
                     if qualifier:
-                        parse_sense_tags(ctx, config, qualifier, dt)
+                        parse_sense_tags(ctx, qualifier, dt)
                         if english:
                             dt["translation"] = english
                     if sense:
                         dt["sense"] = sense
-                    data_append(config, data, field, dt)
+                    data_append(ctx, data, field, dt)
                     nonlocal have_linkages
                     have_linkages = True
 
@@ -1372,12 +1386,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
         def parse_linkage_ext(title, field):
             assert isinstance(title, str)
             assert isinstance(field, str)
-            config.error("UNIMPLEMENTED: parse_linkage_ext: {} / {}"
-                         .format(title, field))
+            ctx.error("UNIMPLEMENTED: parse_linkage_ext: {} / {}"
+                      .format(title, field))
 
         def parse_dialectal_synonyms(name, ht):
-            config.error("UNIMPLEMENTED: parse_dialectal_synonyms: {} {}"
-                         .format(name, ht))
+            ctx.error("UNIMPLEMENTED: parse_dialectal_synonyms: {} {}"
+                      .format(name, ht))
 
         def parse_linkage_template(node):
             # print("LINKAGE TEMPLATE:", node)
@@ -1385,6 +1399,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
             def linkage_template_fn(name, ht):
                 # print("LINKAGE_TEMPLATE_FN:", name, ht)
                 nonlocal field
+                nonlocal have_panel_template
+                if is_panel_template(name):
+                    have_panel_template = True
+                    return ""
                 if name == "see also":
                     parse_linkage_ext(ht.get(1, ""), field)
                     return ""
@@ -1396,8 +1414,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     return ""
                 if name == "zh-dial":
                     parse_dialectal_synonyms(name, ht)
-                    return ""
-                if is_panel_template(name):
                     return ""
                 for prefix, t in template_linkage_mappings:
                     if re.search(r"(^|[-/\s]){}($|\b|[0-9])".format(prefix),
@@ -1478,8 +1494,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         parse_linkage_recurse(linkagenode)
         if not have_linkages:
             parse_linkage_item(extras, field)
-        if not have_linkages:
-            config.warning("no linkages found")
+        if not have_linkages and not have_panel_template:
+            ctx.warning("no linkages found")
 
     def parse_translations(data, xlatnode):
         assert isinstance(data, dict)
@@ -1507,15 +1523,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     code = ht.get(1)
                     if code:
                         if langcode and code != langcode:
-                            config.warning("differing language codes {} vs "
-                                           "{} in translation item: {!r} {}"
-                                           .format(langcode, code, name, ht))
+                            ctx.warning("differing language codes {} vs "
+                                        "{} in translation item: {!r} {}"
+                                        .format(langcode, code, name, ht))
                         langcode = code
                     return None
                 if name in ("t-needed", "checktrans-top"):
                     return ""
                 if name == "trans-see":
-                    config.error("UNIMPLEMENTED trans-see template")
+                    ctx.error("UNIMPLEMENTED trans-see template")
                     return ""
                 if name.endswith("-top"):
                     return ""
@@ -1523,7 +1539,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     return ""
                 if name.endswith("-mid"):
                     return ""
-                #config.debug("UNHANDLED TRANSLATION ITEM TEMPLATE: {!r}"
+                #ctx.debug("UNHANDLED TRANSLATION ITEM TEMPLATE: {!r}"
                 #             .format(name))
                 return None
 
@@ -1540,16 +1556,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             if re.search(r"\(\d+\)|\[\d+\]", item):
                 if not item.find("numeral:"):
-                    config.warning("POSSIBLE SENSE NUMBER IN ITEM: {}"
-                                   .format(item))
+                    ctx.warning("POSSIBLE SENSE NUMBER IN ITEM: {}"
+                                .format(item))
 
             # Translation items should start with a language name
             m = re.match("\*?\s*([-' \w][-' \w]*):\s*", item)
             if not m:
                 if not lang or item.find(":") >= 0:
-                    config.error("no recognized language name in translation "
-                                 "item {!r}"
-                                 .format(item))
+                    ctx.error("no recognized language name in translation "
+                              "item {!r}"
+                              .format(item))
                 return
             sublang = m.group(1)
             item = item[m.end():]
@@ -1584,9 +1600,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         pass
                     else:
                         tr["sense"] = sense
-                parse_translation_desc(ctx, config, part, tr)
+                parse_translation_desc(ctx, part, tr)
                 if tr.get("word"):  # Set and not empty
-                    data_append(config, data, "translations", tr)
+                    data_append(ctx, data, "translations", tr)
 
             m = re.match(r"\((([^()]|\([^)]*\))*)\) ", item)
             qualifier = None
@@ -1638,8 +1654,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if name == "trans-top-also":
                     # XXX capture?
                     return ""
-                config.error("UNIMPLEMENTED: parse_translation_template: {} {}"
-                             .format(name, ht))
+                ctx.error("UNIMPLEMENTED: parse_translation_template: {} {}"
+                          .format(name, ht))
                 return ""
             clean_node(config, ctx, data, [node], template_fn=template_fn)
 
@@ -1729,7 +1745,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                            template_fn=skip_template_fn)
                 continue
             t = clean_node(config, ctx, etym_data, node.args)
-            config.subsection = t
             config.section_counts[t] += 1
             pos = t.lower()
             # print("PROCESS_CHILDREN: T:", repr(t))
@@ -1738,20 +1753,20 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     parse_pronunciation(node)
             elif t.startswith("Etymology"):
                 push_etym()
-                config.pos = None
+                ctx.start_subsection(None)
                 # XXX parse etymology section, up to the next subtitle
             elif pos in part_of_speech_map:
                 push_pos()
                 dt = part_of_speech_map[pos]
                 pos = dt["pos"]
-                config.pos = pos
+                ctx.start_subsection(t)
                 if "warning" in dt:
-                    config.warning("{}: {}".format(t, dt["warning"]))
+                    ctx.warning("{}: {}".format(t, dt["warning"]))
                 if "error" in dt:
-                    config.error("{}: {}".format(t, dt["error"]))
+                    ctx.error("{}: {}".format(t, dt["error"]))
                 # Parse word senses for the part-of-speech
                 if "tags" in dt:
-                    data_extend(config, pos_data, "tags", dt["tags"])
+                    data_extend(ctx, pos_data, "tags", dt["tags"])
                 parse_part_of_speech(node, pos)
             elif t == "Translations":
                 if stack[-1].lower() in part_of_speech_map:
@@ -1831,14 +1846,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if "tags" in data:
             del data["tags"]
         for sense in data["senses"]:
-            data_extend(config, sense, "tags", tags)
+            data_extend(ctx, sense, "tags", tags)
             if "tags" in sense:
                 sense["tags"] = list(sorted(set(sense["tags"])))
         topics = data.get("topics", ())
         if "topics" in data:
             del data["topics"]
         for sense in data["senses"]:
-            data_extend(config, sense, "topics", topics)
+            data_extend(ctx, sense, "topics", topics)
             if "topics" in sense:
                 sense["topics"] = list(sorted(set(sense["topics"])))
 
@@ -1863,8 +1878,8 @@ def parse_top_template(config, ctx, node):
         if name == "character info":
             # XXX capture
             return ""
-        config.warning("UNIMPLEMENTED top-level template: {} {}"
-                       .format(name, ht))
+        ctx.warning("UNIMPLEMENTED top-level template: {} {}"
+                    .format(name, ht))
         return ""
 
     clean_node(config, ctx, None, [node], template_fn=template_fn)
@@ -1895,13 +1910,9 @@ def parse_page(ctx, word, text, config):
         if w in unsupported_title_map:
             word = unsupported_title_map[w]
         else:
-            config.debug("Unimplemented title: {}"
-                         "".format(word))
+            ctx.debug("Unimplemented title: {}".format(word))
 
     config.word = word
-    config.language = None
-    config.pos = None
-    config.subsection = None
 
     # Parse the page, pre-expanding those templates that are likely to
     # influence parsing
@@ -1919,18 +1930,18 @@ def parse_page(ctx, word, text, config):
             parse_top_template(config, ctx, langnode)
             continue
         if langnode.kind != NodeKind.LEVEL2:
-            config.error("unexpected top-level node: {}".format(langnode))
+            ctx.error("unexpected top-level node: {}".format(langnode))
             continue
         lang = clean_node(config, ctx, None, langnode.args)
         if lang not in languages_by_name:
-            config.error("unrecognized language name at top-level {!r}"
+            ctx.error("unrecognized language name at top-level {!r}"
                          .format(lang))
             continue
         if config.capture_languages and lang not in config.capture_languages:
             continue
         langdata = languages_by_name[lang]
         lang_code = langdata["code"]
-        config.language = lang
+        ctx.start_section(lang)
 
         # Collect all words from the page.
         datas = parse_language(ctx, config, langnode, lang, lang_code)
@@ -1939,7 +1950,7 @@ def parse_page(ctx, word, text, config):
         # conjugation information to all the words.
         for data in datas:
             if "lang" not in data:
-                config.debug("no lang in data: {}".format(data))
+                ctx.debug("no lang in data: {}".format(data))
                 continue
             by_lang[data["lang"]].append(data)
 
@@ -2017,9 +2028,9 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
     if category_data is not None:
         # Check for Lua execution error
         if v.find('<strong "error">Lua execution error') >= 0:
-            data_append(config, category_data, "tags", "error-lua-exec")
+            data_append(ctx, category_data, "tags", "error-lua-exec")
         if v.find('<strong "error">Lua timeout error') >= 0:
-            data_append(config, category_data, "tags", "error-lua-timeout")
+            data_append(ctx, category_data, "tags", "error-lua-timeout")
         # Capture Category tags
         for m in re.finditer(r"(?is)\[\[:?\s*Category\s*:([^]|]+)", v):
             cat = clean_value(config, m.group(1))
@@ -2033,11 +2044,13 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
             if re.match(ignored_cat_re, cat):
                 continue
             if cat.find(" female given names") >= 0:
-                data_append(config, category_data, "tags", "feminine")
+                data_append(ctx, category_data, "tags", "feminine")
             elif cat.find(" male given names") >= 0:
-                data_append(config, category_data, "tags", "masculine")
+                data_append(ctx, category_data, "tags", "masculine")
+            elif cat.startswith("Places "):
+                data_append(ctx, category_data, "tags", "place")
             if cat not in category_data.get("categories", ()):
-                data_append(config, category_data, "categories", cat)
+                data_append(ctx, category_data, "categories", cat)
 
     v = clean_value(config, v)
     # Strip any unhandled templates and other stuff.  This is mostly intended
@@ -2143,9 +2156,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # space-separated characters in same list item.
 
 # XXX extract Readings section (e.g., Kanji characters)
-
-# XXX should probably handle "Lua module not found" differently, perhaps
-# silently returning an error that can be handled using #iferror
 
 # XXX handle qualifiers starting with "of " specially.  They are quite common
 # for adjectives, describing what the adjective can characterize
@@ -2287,6 +2297,9 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX in parse_head_tags(), should create multiple forms if
 # node["$"].get("tags") contains multiple sets of tags (e.g., cut/English/Verb)
 
+# Force sense-disambiguation for at least those linkages where there is only
+# one sense.  (Otherwise use similar to translations)
+
 # Check te/Spanish/pron, See also section (warning, has unexpected format)
 
 # Check alt_of with "." remaining.  Find them all to a separate list
@@ -2301,4 +2314,7 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # "hacking" [present] (participle missing).  Add test for this (for
 # parse_word_head) and then debug.
 
-# XXX check ITALIC not properly closed, word "-a"
+# Check linkage sol/Norwegian Nynorsk/Noun (looks like unhandled item list)
+
+# qua/Latin/Adverb - Lua error "This module function does not require
+# any parameters"
