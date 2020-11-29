@@ -1047,6 +1047,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 cats = {}
                 outer_text = clean_node(config, ctx, cats, outer,
                                         template_fn=outer_template_fn)
+                strip_ends = [", particularly:"]
+                for x in strip_ends:
+                    if outer_text.endswith(x):
+                        outer_text = outer_text[:-len(x)]
+                        break
                 for sublist in sublists:
                     assert sublist.kind == NodeKind.LIST
                     for item in sublist.children:
@@ -2234,6 +2239,9 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX parse see also, create "related"?
 
 # XXX parse Han character, Kanji, etc into a word sense
+#  - at least Han character does not have separate bulleted sense, so it
+#    should be synthesized (or we should generate a word without a sense
+#    and change htmlgen to show such words anyway)
 
 # XXX handle "XXX/derived terms" pages
 
