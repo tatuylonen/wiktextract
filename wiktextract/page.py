@@ -167,7 +167,9 @@ panel_templates = set([
     "zh-forms",
 ])
 
-# Template name prefixes used for language-specific panel templates
+# Template name prefixes used for language-specific panel templates (i.e.,
+# templates that create side boxes or notice boxes or that should generally
+# be ignored).
 panel_prefixes = [
     "list:compass points/",
     "list:Latin script letters/",
@@ -184,17 +186,27 @@ ignored_category_patterns = [
     ".* adverbs$",
     ".* adjectives$",
     ".* abbreviations$",
+    ".* initialisms$",
+    ".* clippings$",
+    ".* acronyms$",
     ".* interjections$",
     ".* misspellings$",
     ".* suffixes$",
     ".* prefixes$",
+    ".* letters$",
+    ".* possessive suffixes$",
+    ".* infinitives$",
+    ".* participles$",
     ".* Han characters$",
     ".* syllables$",
     ".* forms$",
     ".* language$",
+    ".* phrases",
     ".* missing plurals$",
+    ".* eponyms$",
     ".*-syllable words$",
     ".* terms with IPA pronunciation",
+    ".* terms without .*IPA",
     ".* terms with audio pronunciation",
     ".* terms with .* senses$",
     ".* slang$",
@@ -213,28 +225,57 @@ ignored_category_patterns = [
     ".* terms derived from ",
     ".* terms coined by ",
     ".* terms calqued from ",
+    ".* terms partially calqued from ",
     ".* calques$",
-    ".* ortographic borrowings from ",
+    ".* coinages$",
+    ".* orthographic borrowings from ",
+    ".* unadapted borrowings from ",
+    ".* learned borrowings from ",
+    ".* semi-learned borrowings from ",
+    ".* semantic loans from ",
+    ".* phono-semantic matchings from ",
     ".* terms spelled with ",
     ".* words suffixed with ",
     ".* words prefixed with ",
-    ".* terms with unknown etymologies",
+    ".* etymologies$",
+    ".* etymologies with ",
+    ".* doublets$",
+    ".* (female|male) given names from ",
+    ".* surnames from ",
     ".* terms needing to be assigned to a sense",
-    ".* non-lemma forms",
+    ".* nouns with unknown or uncertain plurals",
+    ".* foreign words of the day",
+    ".* non-lemma forms$",
     ".* pinyin$",
+    ".* nocat$",
+    ".* with appendix$",
+    ".* without a main entry",
+    "Japanese kanji with ",
+    "Japanese terms historically spelled with ",
+    "Check ",
+    "Kenny's testing category 2",
+    "Sort key tracking/redundant",
+    "head tracking/unrecognized pos",
+    ".* with qual$",
+    ".* with nopl$",
+    ".* needing pronunciation attention",
+    "Template with ",
+    "Entries with deprecated labels",
     "Requests for ",
     "Terms with manual ",
     "Terms with redundant ",
     "Reference templates lacking",
     "Entries using missing taxonomic name",
     "Entries missing ",
-    "etyl cleanup/",
+    "etyl cleanup",
     "Translation table header lacks gloss",
     "Entries needing topical attention",
     "English words following the I before E except after C rule",
+    "English words containing Q not followed by U",
     "IPA for English using",
     " IPA pronunciation",
     "IPA pronunciations with invalid IPA characters",
+    "^[a-z]{2,3}-",
 ]
 ignored_cat_re = re.compile("|".join(ignored_category_patterns))
 
@@ -2232,6 +2273,8 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX handle (classifier XXX) at beginning of gloss; also (classifier: XXX)
 # and (classifiers: XXX, XXX, XXX)
+# E.g.: 煙囪
+# Also: 筷子 (this also seems to have synonym problems!)
 
 # XXX parse redirects, create alt_of
 
@@ -2244,7 +2287,13 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 #    should be synthesized (or we should generate a word without a sense
 #    and change htmlgen to show such words anyway)
 
+# In htmlgen, create links from gloss, at minimum when whole gloss matches
+# a word form in the same language (or maybe gloss as an alternative?)
+
 # XXX handle "XXX/derived terms" pages
+
+# Check Finnish Abbreviation snses - many of them parentheses which are parsed
+# incorrectly in alt_of
 
 # XXX parse {{zh-see|XXX}} - see 共青团
 
@@ -2269,7 +2318,16 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # Handle Japanese parentheses in linkage items.  It think this relates
 # to <ruby>.
 
+# Implement <hiero> ... </hiero>, e.g., lilja/Finnish/Etymology
+
+# Implement <chem> ... </chem>, e.g. felsic/English/Adjective
+
 # Check awake/English - strange unrecognized tags
+
+# XXX search for Template: from all glosses, search for &amp; from all glosses
+
+# Make sure categories coming from etymology are not sense-assigned to
+# only sense in pos when there is more than one pos
 
 # Why does eccentric/English/Adjective get tag "contraction" when that word
 # only occurs in its gloss???
@@ -2299,67 +2357,13 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # Check linkage sol/Norwegian Nynorsk/Noun (looks like unhandled item list)
 
-# слава/Belarusian/Noun: ERROR: LUA error in #invoke ('be-noun', 'show') parent ('Template:be-ndecl', {1: 'сла́ва<sg />'}) at ['слава', 'be-ndecl', '#invoke']
-# [string "be-noun"]:1147: Unrecognized indicator 'sg /': 'sg /'
-# stack traceback:
-# 	[C]: in function 'error'
-# 	[string "be-noun"]:1147: in field 'parse_indicator_spec'
-# 	[string "Module:inflection utilities"]:631: in upvalue 'parse_multiword_spec'
-# 	[string "Module:inflection utilities"]:730: in function 'Module:inflection utilities.parse_inflected_text'
-# 	(...tail calls...)
-# 	[string "be-noun"]:2512: in function 'be-noun.do_generate_forms'
-# 	[string "be-noun"]:2612: in function 'be-noun.show'
-# 	(...tail calls...)
-# 	[C]: in function 'xpcall'
-# 	[string "<python>"]:234: in function 'lua_invoke'
+# XXX htmlgen does not include non-sense-disambiguated information in JSON
+# - e.g., forms for 최
 
-# Մալթա/Armenian: ERROR: LUA error in #invoke ('hy-pronunciation', 'pronunciation', 'system=west', '\U0010206f') parent None at ['Մալթա', 'IPA', 'ARGVAL-2', '#invoke']
-# [string "hy-pronunciation"]:140: attempt to index a nil value
-# stack traceback:
-# 	[string "hy-pronunciation"]:140: in function 'hy-pronunciation.pronunciation'
-# 	(...tail calls...)
-# 	[C]: in function 'xpcall'
-# 	[string "<python>"]:234: in function 'lua_invoke'
+# XXX sotilasarvo/Finnish - need to improve implicit closing of <tr> and <td> and <th>
 
-# afon/Old English/Verb: ERROR: LUA error in #invoke ('ang-verb', 'show') parent ('Template:ang-conj', {1: 'āfōn<s7 />'}) at ['afon', 'ang-conj', '#invoke']
-# [string "ang-verb"]:1576: Unrecognized strong class: 7
-# stack traceback:
-# 	[C]: in function 'error'
-# 	[string "ang-verb"]:1576: in function 'ang-verb.show'
-# 	(...tail calls...)
-# 	[C]: in function 'xpcall'
-# 	[string "<python>"]:234: in function 'lua_invoke'
+# XXX check "natural logarithm" (uses math)
 
-# `/Welsh/Diacritical mark: ERROR: LUA error in #invoke ('ConvertNumeric', 'numeral_to_english\n', 'À\n', 'adj=\n', 'case=\n', 'ord=on\n', 'sp=\U001021dd\n', 'zero=\n') parent ('Template:ordinal to word', {1: 'À'}) at ['`', 'Latn-def', '#switch', '#switch', '#if', 'ordinal to word', '#invoke']
-# [string "ConvertNumeric"]:501: Invalid decimal numeral
-# stack traceback:
-# 	[C]: in function 'error'
-# 	[string "ConvertNumeric"]:501: in function 'ConvertNumeric.spell_number'
-# 	[string "ConvertNumeric"]:573: in function 'ConvertNumeric.numeral_to_english'
-# 	(...tail calls...)
-# 	[C]: in function 'xpcall'
-# 	[string "<python>"]:234: in function 'lua_invoke'
+# XXX probable italic parsing error in genetiivi/Finnish
 
-# muffle/English: ERROR: LUA error in #invoke ('redlink category', 'cat', '1=frk', '2=*vël', 'template=m') parent ('Template:redlink category', {1: 'frk', 2: '*vël', 'template': 'm'}) at ['muffle', 'm', 'redlink category', '#switch', '#switch', '#switch', '#ifeq', '#invoke']
-# [string "Module:links"]:62: attempt to index a nil value (local 'lang')
-# stack traceback:
-# 	[string "Module:links"]:62: in function 'Module:links.getLinkPage'
-# 	[string "redlink category"]:15: in function 'redlink category.cat'
-# 	(...tail calls...)
-# 	[C]: in function 'xpcall'
-# 	[string "<python>"]:234: in function 'lua_invoke'
-
-# акула/Ukrainian/Noun: ERROR: LUA error in #invoke ('uk-be-headword', 'show', 'nouns', 'lang=uk') parent ('Template:uk-noun', {1: 'аку́ла<anml />'}) at ['акула', 'uk-noun', '#invoke']
-# [string "Module:uk-noun"]:1321: Unrecognized indicator 'anml /': 'anml /'
-# stack traceback:
-# 	[C]: in function 'error'
-# 	[string "Module:uk-noun"]:1321: in field 'parse_indicator_spec'
-# 	[string "Module:inflection utilities"]:631: in upvalue 'parse_multiword_spec'
-# 	[string "Module:inflection utilities"]:730: in function 'Module:inflection utilities.parse_inflected_text'
-# 	(...tail calls...)
-# 	[string "Module:uk-noun"]:2556: in function 'Module:uk-noun.do_generate_forms'
-# 	[string "uk-be-headword"]:143: in field 'func'
-# 	[string "uk-be-headword"]:96: in function 'uk-be-headword.show'
-# 	(...tail calls...)
-# 	[C]: in function 'xpcall'
-# 	[string "<python>"]:234: in function 'lua_invoke'
+# XXX check rhizotonic <poem>
