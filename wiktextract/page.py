@@ -2065,6 +2065,7 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
         return ret
 
     v = recurse(value)
+    # print("clean_node:", repr(v))
 
     # Capture categories if category_data has been given.  We also track
     # Lua execution errors here.
@@ -2102,6 +2103,10 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
     # Some templates create <sup>(Category: ...)</sup>; remove
     v = re.sub(r"(?s)\s*\(Category:[^)]*\)", "", v)
     return v
+
+# XXX Add tests for generating italic from separate template arguments during
+# pre-expand, and then parse.  Make sure it is parsed correctly as italic,
+# and not escaped apostrophes.
 
 # XXX cf "word" translations under "watchword" and "proverb" - what kind of
 # link/ext is this?  {{trans-see|watchword}}
@@ -2359,11 +2364,3 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX htmlgen does not include non-sense-disambiguated information in JSON
 # - e.g., forms for 최
-
-# XXX sotilasarvo/Finnish - need to improve implicit closing of <tr> and <td> and <th>
-
-# XXX check "natural logarithm" (uses math)
-
-# XXX probable italic parsing error in genetiivi/Finnish
-
-# XXX check rhizotonic <poem>
