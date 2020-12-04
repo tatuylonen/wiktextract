@@ -47,10 +47,10 @@ def clean_value(config, title, no_strip=False):
     # Replace remaining HTML links by the URL.
     title = re.sub(r"\[https?:[^]\s]+\s+([^]]+?)\s*\]", r"\1", title)
     title = re.sub(r"\[(https?:[^]]+)\]", r"", title)
-    # Replace HTML entities
-    title = html.unescape(title)
     # Remove italic and bold
     title = re.sub(r"''+", r"", title)
+    # Replace HTML entities
+    title = html.unescape(title)
     title = re.sub("\xa0", " ", title)  # nbsp
     # This unicode quote seems to be used instead of apostrophe quite randomly
     # (about 4% of apostrophes in English entries, some in Finnish entries).

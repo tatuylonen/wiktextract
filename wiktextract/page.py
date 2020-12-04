@@ -51,6 +51,18 @@ langlink_re = re.compile(r"\s*\((" + "|".join(languages_by_code.keys()) +
 # Additional templates to be expanded in the pre-expand phase
 additional_expand_templates = set([
     "multitrans",
+    "col1",
+    "col2",
+    "col3",
+    "col4",
+    "col5",
+    "col1-u",
+    "col2-u",
+    "col3-u",
+    "col4-u",
+    "col5-u",
+    "check deprecated lang param usage",
+    "deprecated code",
 ])
 
 linkage_fields = [
@@ -250,15 +262,16 @@ ignored_category_patterns = [
     ".* nocat$",
     ".* with appendix$",
     ".* without a main entry",
+    ".* with qual$",
+    ".* with nopl$",
+    ".* needing pronunciation attention",
+    ".* link with missing target page",
     "Japanese kanji with ",
     "Japanese terms historically spelled with ",
     "Check ",
     "Kenny's testing category 2",
     "Sort key tracking/redundant",
     "head tracking/unrecognized pos",
-    ".* with qual$",
-    ".* with nopl$",
-    ".* needing pronunciation attention",
     "Template with ",
     "Entries with deprecated labels",
     "Requests for ",
@@ -268,6 +281,7 @@ ignored_category_patterns = [
     "Entries using missing taxonomic name",
     "Entries missing ",
     "etyl cleanup",
+    "attention lacking explanation",
     "Translation table header lacks gloss",
     "Entries needing topical attention",
     "English words following the I before E except after C rule",
@@ -1962,6 +1976,7 @@ def parse_page(ctx, word, text, config):
     ctx.start_page(word)
     tree = ctx.parse(text, pre_expand=True,
                      additional_expand=additional_expand_templates)
+    # print("PAGE PARSE", tree)
 
     # Iterate over top-level titles, which should be languages for normal
     # pages
@@ -2360,7 +2375,21 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # "hacking" [present] (participle missing).  Add test for this (for
 # parse_word_head) and then debug.
 
-# Check linkage sol/Norwegian Nynorsk/Noun (looks like unhandled item list)
-
 # XXX htmlgen does not include non-sense-disambiguated information in JSON
 # - e.g., forms for 최
+
+# XXX Some two-level glosses generate duplicated entries, e.g.: "throne room"
+
+# Check linkage sol/Norwegian Nynorsk/Noun (looks like unhandled item list)
+#  - This is a broader problem around col1 ... col5 and col1-u ... col5-u.
+#    They expand to <div> inside <div> that contains a list.  They are
+#    fairly widely used in at least linkages.
+
+# XXX continue fixing HTML code rendered non-HTML by node_expand
+#  - wikitextprocessor tests currently broken
+#  - really need more testing otherwise too
+
+# XXX "magic number"/English - why is tag included in gloss?  Perhaps
+# the tag has extra parentheses?
+#  - tags need to be processed from outer gloss
+#  - note also the duplication of some senses, FIX!
