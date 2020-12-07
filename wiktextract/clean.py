@@ -38,12 +38,12 @@ def clean_value(config, title, no_strip=False):
     title = re.sub(r"(?s)<\s*[^/][^>]*>\s*", "", title)
     title = re.sub(r"(?s)<\s*/\s*[^>]+>\n*", "", title)
     # Replace links by their text
-    title = re.sub(r"(?s)\[\[\s*Category:([^]]+)\]\]", r"", title)
-    title = re.sub(r"(?s)\[\[([^]|]+)\|([^]|]+)\]\]", r"\2", title)
-    title = re.sub(r"(?s)\[\[([a-zA-z0-9]+:)?([^]|]+)(\s*\([^])|]*\)\s*)?"
-                   r"\|\]\]",
+    title = re.sub(r"(?si)\[\[\s*Category\s*:\s*([^]]+?)\s*\]\]", r"", title)
+    title = re.sub(r"(?s)\[\[\s*([^]|]+?)\s*\|\s*([^]|]+?)\s*\]\]", r"\2", title)
+    title = re.sub(r"(?s)\[\[\s*([a-zA-z0-9]+\s*:)?\s*([^]|]+?)"
+                   r"(\s*\([^])|]*\)\s*)?\|\]\]",
                    r"\2", title)
-    title = re.sub(r"(?s)\[\[([^]|]+)\]\]", r"\1", title)
+    title = re.sub(r"(?s)\[\[\s*([^]|]+?)\s*\]\]", r"\1", title)
     # Replace remaining HTML links by the URL.
     title = re.sub(r"\[https?:[^]\s]+\s+([^]]+?)\s*\]", r"\1", title)
     title = re.sub(r"\[(https?:[^]]+)\]", r"", title)

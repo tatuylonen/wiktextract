@@ -2116,7 +2116,7 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
     # to clean up erroneous codings in the original text.
     v = re.sub(r"(?s)\{\{.*", "", v)
     # Some templates create <sup>(Category: ...)</sup>; remove
-    v = re.sub(r"(?s)\s*\(Category:[^)]*\)", "", v)
+    v = re.sub(r"(?si)\s*\(Category:[^)]*\)", "", v)
     return v
 
 # XXX Add tests for generating italic from separate template arguments during
