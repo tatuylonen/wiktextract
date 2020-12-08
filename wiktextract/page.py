@@ -2393,3 +2393,5 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # the tag has extra parentheses?
 #  - tags need to be processed from outer gloss
 #  - note also the duplication of some senses, FIX!
+
+# XXX handle inflection of with multiple forms; see aquamarine/German/Adjective
