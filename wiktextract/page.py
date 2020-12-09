@@ -191,6 +191,7 @@ panel_prefixes = [
 ignored_category_patterns = [
     ".* term requests",
     ".* redlinks",
+    ".* redlinks/m",
     ".* red links",
     ".* lemmas$",
     ".* nouns$",
@@ -889,10 +890,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     data_append(ctx, sense_base, "synonyms",
                                 {"word": w})
                 return ""
-            if name == "gloss":
-                gl = ht.get(1)
-                if gl:
-                    additional_glosses.append(gl)
+            # XXX These are causing problems, e.g., introducing HTML into
+            # glosses.  Options include using post_template_fn and assigning
+            # the expansion to gloss (with parentheses removed), or just
+            # treating these as part of gloss.
+            #
+            # if name == "gloss":
+            #     gl = ht.get(1)
+            #     if gl:
+            #         additional_glosses.append(gl)
+            #     return ""
             return None
 
         rawgloss = clean_node(config, ctx, sense_base, lst,
@@ -2086,9 +2093,9 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
     # Lua execution errors here.
     if category_data is not None:
         # Check for Lua execution error
-        if v.find('<strong "error">Lua execution error') >= 0:
+        if v.find('<strong class="error">Lua execution error') >= 0:
             data_append(ctx, category_data, "tags", "error-lua-exec")
-        if v.find('<strong "error">Lua timeout error') >= 0:
+        if v.find('<strong class="error">Lua timeout error') >= 0:
             data_append(ctx, category_data, "tags", "error-lua-timeout")
         # Capture Category tags
         for m in re.finditer(r"(?is)\[\[:?\s*Category\s*:([^]|]+)", v):
@@ -2112,6 +2119,8 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
                 data_append(ctx, category_data, "categories", cat)
 
     v = clean_value(config, v)
+    # print("After clean:", repr(v))
+
     # Strip any unhandled templates and other stuff.  This is mostly intended
     # to clean up erroneous codings in the original text.
     v = re.sub(r"(?s)\{\{.*", "", v)
@@ -2368,17 +2377,9 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX related terms, wikipedia, Wikispecies links.  See "permit"/English/Noun
 
-# XXX check "ice"/English/Noun - why "|en" at the end of gloss?  Also,
-# why only one noun sense and not 10?
-
-# XXX something wrong with parsing head: hack/English/Verb forms gets
-# "hacking" [present] (participle missing).  Add test for this (for
-# parse_word_head) and then debug.
-
-# XXX htmlgen does not include non-sense-disambiguated information in JSON
-# - e.g., forms for 최
-
-# XXX Some two-level glosses generate duplicated entries, e.g.: "throne room"
+# XXX check "ice"/English/Noun - Hyponyms and Derived terms attached to
+# a single sense, not the word non-disambiguated???
+#  - they are not shown in HTML at all!
 
 # Check linkage sol/Norwegian Nynorsk/Noun (looks like unhandled item list)
 #  - This is a broader problem around col1 ... col5 and col1-u ... col5-u.
@@ -2395,3 +2396,14 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 #  - note also the duplication of some senses, FIX!
 
 # XXX handle inflection of with multiple forms; see aquamarine/German/Adjective
+
+# XXX <3/English/Verb has Lua execution error (NOT IN pages/, need to change
+# name mungling to capture, gets overwritten by =3)
+
+# XXX " "/English has Lua execution error (I think the word is the
+# space character)
+
+# XXX decide what to do with {{gloss|...}} inside gloss.  Find out how
+# common they are.  Either use post_template_fn to capture their
+# expansion (with parentheses removed), or just treat them as normal
+# template.
