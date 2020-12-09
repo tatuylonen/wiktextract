@@ -19,6 +19,14 @@ def clean_value(config, title, no_strip=False):
     remove any Wikimedia formatting from it: HTML tags, templates, links,
     emphasis, etc.  This will also merge multiple whitespaces into one
     normal space and will remove any surrounding whitespace."""
+
+    def repl_1(m):
+        return clean_value(config, m.group(1), no_strip=True)
+    def repl_2(m):
+        return clean_value(config, m.group(2), no_strip=True)
+    def repl_1_caret(m):
+        return "^" + clean_value(config, m.group(1))
+
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(title, str)
     title = re.sub(r"\{\{[^}]+\}\}", "", title)
@@ -33,19 +41,20 @@ def clean_value(config, title, no_strip=False):
     title = re.sub(r"(?si)<\s*/?\s*div\b[^>]*>", "\n", title)
     # Change <sup> ... </sup> to ^
     title = re.sub(r"(?si)<\s*sup\b[^>]*>(.*?)<\s*/\s*sup\s*>",
-                   r"^\1", title)
+                   repl_1_caret, title)
     # Remove any remaining HTML tags.
-    title = re.sub(r"(?s)<\s*[^/][^>]*>\s*", "", title)
+    title = re.sub(r"(?s)<\s*[^/>][^>]*>\s*", "", title)
     title = re.sub(r"(?s)<\s*/\s*[^>]+>\n*", "", title)
     # Replace links by their text
     title = re.sub(r"(?si)\[\[\s*Category\s*:\s*([^]]+?)\s*\]\]", r"", title)
-    title = re.sub(r"(?s)\[\[\s*([^]|]+?)\s*\|\s*([^]|]+?)\s*\]\]", r"\2", title)
+    title = re.sub(r"(?s)\[\[\s*([^]|]+?)\s*\|\s*([^]|]+?)\s*\]\]",
+                   repl_2, title)
     title = re.sub(r"(?s)\[\[\s*([a-zA-z0-9]+\s*:)?\s*([^]|]+?)"
                    r"(\s*\([^])|]*\)\s*)?\|\]\]",
-                   r"\2", title)
-    title = re.sub(r"(?s)\[\[\s*([^]|]+?)\s*\]\]", r"\1", title)
+                   repl_2, title)
+    title = re.sub(r"(?s)\[\[\s*([^]|]+?)\s*\]\]", repl_1, title)
     # Replace remaining HTML links by the URL.
-    title = re.sub(r"\[https?:[^]\s]+\s+([^]]+?)\s*\]", r"\1", title)
+    title = re.sub(r"\[https?:[^]\s]+\s+([^]]+?)\s*\]", repl_1, title)
     title = re.sub(r"\[(https?:[^]]+)\]", r"", title)
     # Remove italic and bold
     title = re.sub(r"''+", r"", title)
@@ -62,7 +71,7 @@ def clean_value(config, title, no_strip=False):
     # Replace whitespace sequences by a single space.
     title = re.sub(r"\s+", " ", title)
     # Remove whitespace before periods and commas etc
-    title = re.sub(r" ([.,;:!?)])", r"\1", title)
+    title = re.sub(r" ([.,;:!?)])", repl_1, title)
     # Strip surrounding whitespace.
     if not no_strip:
         title = title.strip()
