@@ -2631,7 +2631,9 @@ def parse_alt_or_inflection_of(ctx, gloss):
                     add_new(valid_sequences[w.lower()], i)
                 last = i
         if not new_nodes:
-            add_new(valid_sequences, max_next_i)
+            break
+        # XXX remove:
+        #    add_new(valid_sequences, max_next_i)
         nodes = new_nodes
 
     if last == 0:
