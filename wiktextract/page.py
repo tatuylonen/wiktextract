@@ -918,7 +918,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if countability_tags:
                 if ("countable" not in sense_tags and
                     "uncountable" not in sense_tags):
-                    print("adding countability")
                     data_extend(ctx, sense_data, "tags", countability_tags)
 
             # If outer gloss specifies a form-of ("inflection of", see
