@@ -49,6 +49,11 @@ xlat_tags_map = {
     "diminutives": "diminutive",
     "†-tari": "-tari",
     "†-nari": "-nari",
+    "cangjie input": "cangjie-input",
+    "Jyutping": "jyutping",
+    "Yale": "yale",
+    "Pinyin": "pinyin",
+    "Wade-Giles": "wade-giles",
     "countable and uncountable": "countable uncountable",
     "masculine and feminine plural": "masculine feminine plural",
     "definite singular and plural": "definite singular plural",
@@ -1910,6 +1915,14 @@ valid_tags = set([
     "sequence",
     "topic",
     "deprecated-template",
+    "cangjie-input",
+    "composition",
+    "radical",
+    "radical+strokes",
+    "strokes",
+    "jyutping",
+    "yale",
+    "wade-giles",
 ])
 
 valid_topics = set([
@@ -2418,6 +2431,17 @@ def parse_word_head(ctx, pos, text, data):
         for desc in descriptors:
             new_desc.extend(map_with(xlat_tags_map, split_at_comma_semi(desc)))
         for desc in new_desc:
+            m = re.match(r"^(\d+) strokes?$", desc)
+            if m:
+                # Special case, used to give #strokes for Han characters
+                add_related(ctx, data, ["strokes"], [m.group(1)])
+                continue
+            m = re.match(r"^[\u2F00-\u2FDF\u2E80-\u2EFF\U00018800-\U00018AFF"
+                         r"\uA490-\uA4CF\u4E00-\u9FFF]\+\d+$", desc)
+            if m:
+                # Special case, used to give radical + strokes for Han characters
+                add_related(ctx, data, ["radical+strokes"], [desc])
+                continue
             parts = list(m.group(0) for m in re.finditer(word_re, desc))
             lst = []
             node = valid_sequences
