@@ -17,6 +17,7 @@ from .unsupported_titles import unsupported_title_map
 from .form_of import form_of_map
 from .head_map import head_pos_map
 from .datautils import (data_append, data_extend, split_at_comma_semi)
+from .disambiguate import disambiguate_clear_cases
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_tags, parse_pronunciation_tags,
     parse_alt_or_inflection_of,
@@ -767,63 +768,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
     page_datas = []
     stack = []
 
-    def clean_item_sense(text):
-        # Cleans up some aspects of a word sense or gloss before comparison
-        # (this is helper function for disambiguate_clear_cases())
-        text = text.lower()
-        if text.endswith("."):
-            text = text[:-1]
-        if text.startswith("slang: "):
-            text = text[7:]
-        return text.strip()
-
-    def disambiguate_clear_cases(data, field):
-        # After parsing a part-of-speech, move those data items in the
-        # given field fields for which there is no ambiguity to their
-        # respective senses.  Assumes the data items have a "sense" field.
-        if field not in data:
-            return
-        items = collections.defaultdict(list)
-        for item in data[field]:
-            sensetext = item.get("sense", "")
-            sensetext = clean_item_sense(sensetext)
-            items[sensetext].append(item)
-        del data[field]
-
-        senses_with_no_items = []
-        for sense in data.get("senses", ()):
-            for gloss in sense.get("glosses", ()):
-                gloss = clean_item_sense(gloss)
-                for k, v in items.items():
-                    if (gloss == k or
-                        gloss.startswith("a " + k) or
-                        gloss.startswith(k + ",") or
-                        gloss.startswith(k + ".") or
-                        gloss.startswith(k + " or ")):
-                        data_extend(ctx, sense, field, v)
-                        del items[k]
-                        break
-                else:
-                    continue
-                break
-            else:
-                senses_with_no_items.append(sense)
-
-        # Any remaining items go to those senses that did not have any
-        # items.  When there is ambiguity, the item is left at
-        # word-level.
-        if (len(senses_with_no_items) == 1 and
-            len(list(items)) == 1):
-            sense = senses_with_no_items[0]
-            for k, v in items.items():
-                data_extend(ctx, sense, field, v)
-            return
-
-        # Leave any items that we couldn't assign to the original data
-        if items:
-            for k, v in items.items():
-                data_extend(ctx, data, field, v)
-
     def merge_base(data, base):
         for k, v in base.items():
             if k not in data:
@@ -845,15 +789,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
         nonlocal pos_data
         nonlocal pos_datas
         push_sense()
-        if pos_datas:
-            data = {"senses": pos_datas}
-            merge_base(data, pos_data)
-            disambiguate_clear_cases(data, "translations")
-            for field in linkage_fields:
-                disambiguate_clear_cases(data, field)
-            etym_datas.append(data)
-        elif ctx.subsection:  # part-of-speech
-            ctx.warning("no senses found")
+        if not pos_datas and ctx.subsection:
+            pos_datas = [{"tags": "no-senses"}]
+        data = {"senses": pos_datas}
+        merge_base(data, pos_data)
+        etym_datas.append(data)
         pos_data = {}
         pos_datas = []
         ctx.start_subsection(None)
@@ -889,6 +829,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         break
                     data_append(ctx, sense_base, "synonyms",
                                 {"word": w})
+                return ""
+            if name in ("ux", "uxi", "usex", "afex", "zh-x", "prefixusex",
+                        "ko-usex", "ko-x", "hi-x", "ja-usex-inline", "ja-x",
+                        "quotei"):
+                # XXX capture usage example (check quotei!)
                 return ""
             # XXX These are causing problems, e.g., introducing HTML into
             # glosses.  Options include using post_template_fn and assigning
@@ -1116,8 +1061,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         return ""
                     return None
 
-                cats = {}
-                outer_text = clean_node(config, ctx, cats, outer,
+                common_data = {}
+                outer_text = clean_node(config, ctx, common_data, outer,
                                         template_fn=outer_template_fn)
                 strip_ends = [", particularly:"]
                 for x in strip_ends:
@@ -1132,8 +1077,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         if item.kind != NodeKind.LIST_ITEM:
                             continue
                         sense_base = {}
-                        data_extend(ctx, sense_base, "categories",
-                                    cats.get("categories", ()))
+                        for k in ("categories", "tags"):
+                            data_extend(ctx, sense_base, k,
+                                        common_data.get(k, ()))
                         # XXX is it always a gloss?  Maybe non-gloss?
                         tags = ()
                         if outer_text == "A pejorative:":
@@ -1446,7 +1392,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         continue
                     parse_linkage_item(node.children, field, sense=sense)
 
-
         def parse_linkage_ext(title, field):
             assert isinstance(title, str)
             assert isinstance(field, str)
@@ -1499,7 +1444,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 return None
 
             # Main body of parse_linkage_template()
-            text = ctx.node_to_html(node, template_fn=linkage_template_fn)
+            clean_node(config, ctx, data, [node],
+                       template_fn=linkage_template_fn)
             # XXX certain things can only be parsed from the output, e.g.,
             # zh-dial
 
@@ -1721,6 +1667,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 ctx.error("UNIMPLEMENTED: parse_translation_template: {} {}"
                           .format(name, ht))
                 return ""
+            # XXX if last heading, maybe categories should go to all
+            # languages
             clean_node(config, ctx, data, [node], template_fn=template_fn)
 
         def parse_translation_table(tablenode):
@@ -2062,6 +2010,12 @@ def parse_page(ctx, word, text, config):
                     data["topics"] = new_topics
         ret.extend(lang_datas)
 
+    # Disambiguate those items from word level that can be disambiguated
+    for data in ret:
+        disambiguate_clear_cases(ctx, data, "translations")
+        for field in linkage_fields:
+            disambiguate_clear_cases(ctx, data, field)
+
     # Return the resulting words
     return ret
 
@@ -2311,11 +2265,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX parse see also, create "related"?
 
-# XXX parse Han character, Kanji, etc into a word sense
-#  - at least Han character does not have separate bulleted sense, so it
-#    should be synthesized (or we should generate a word without a sense
-#    and change htmlgen to show such words anyway)
-
 # In htmlgen, create links from gloss, at minimum when whole gloss matches
 # a word form in the same language (or maybe gloss as an alternative?)
 
@@ -2407,3 +2356,8 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # common they are.  Either use post_template_fn to capture their
 # expansion (with parentheses removed), or just treat them as normal
 # template.
+
+# A8/English
+#  - have category Paper sizes in English, defined for translingual
+#    (Category links should perhaps be language-independent, or we should take
+#    the language from the link)
