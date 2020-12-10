@@ -344,8 +344,8 @@ xlat_tags_map = {
     "feminine/neuter": "feminine neuter",
     "present participle and present tense": ["present participle", "present"],
     "present participle and gerund": ["present participle", "gerund"],
-    "all-gender": [],
-    "all-case": [],
+    "all-gender": "",
+    "all-case": "",
     "accusative/dative": "accusative dative",
     "accusative-singular": "accusative singular",
     "accusative-genitive": "accusative genitive",
@@ -437,7 +437,7 @@ xlat_tags_map = {
     "(tu, sometimes used with você)": "with-tu with-você",
     "(ele and ela, also used with você and others)":
     "with-ele with-ela with-você with-others",
-    "former reform[s] only": [],
+    "former reform[s] only": "",
     "no construct forms": "no-construct-forms",
     "no nominative plural": "no-nominative-plural",
     "no supine": "no-supine",
@@ -786,6 +786,7 @@ xlat_tags_map = {
     "in certain phrases": "in-certain-phrases",
     "deprecated template usage": "deprecated-template",
     "diacritical mark": "diacritic",
+    "inflection of": "form-of",
 }
 
 # Translation map for topics.
@@ -2154,8 +2155,10 @@ def add_to_valid_tree1(tree, field, k, v, valid_values):
         add_to_valid_tree(valid_sequences, field, k, vv)
         add_to_valid_tree(valid_sequences, field, k.lower(), vv)
         vvs = vv.split(" ")
-        q.extend(vvs)
         for x in vvs:
+            if not x or x.isspace():
+                continue
+            q.append(x)
             if x not in valid_values and x[0].islower():
                 print("WARNING: {} in mapping {!r} but not in valid_values"
                       .format(x, k))
