@@ -269,7 +269,10 @@ ignored_category_patterns = [
     ".* needing pronunciation attention",
     ".* link with missing target page",
     "Japanese kanji with ",
+    "Han script characters",
+    "Han char without ",
     "Japanese terms historically spelled with ",
+    "Translingual symbols",
     "Check ",
     "Kenny's testing category 2",
     "Sort key tracking/redundant",
@@ -789,11 +792,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
         nonlocal pos_data
         nonlocal pos_datas
         push_sense()
-        if not pos_datas and ctx.subsection:
-            pos_datas = [{"tags": "no-senses"}]
-        data = {"senses": pos_datas}
-        merge_base(data, pos_data)
-        etym_datas.append(data)
+        if ctx.subsection:
+            if not pos_datas:
+                pos_datas = [{"tags": "no-senses"}]
+            data = {"senses": pos_datas}
+            merge_base(data, pos_data)
+            etym_datas.append(data)
         pos_data = {}
         pos_datas = []
         ctx.start_subsection(None)
@@ -860,7 +864,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             push_sense()
             # Copy data for all senses to this sense
             for k, v in sense_base.items():
-                data_extend(ctx, sense_data, k, v)
+                if k != "tags":
+                    data_extend(ctx, sense_data, k, v)
             # Parse the gloss for this particular sense
             m = re.match(r"^\((([^()]|\([^)]*\))*)\):?\s*", gloss)
             if m:
@@ -925,6 +930,26 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 data_append(ctx, sense_data, "glosses", gloss)
             for gl in additional_glosses:
                 data_append(ctx, sense_data, "glosses", gl)
+
+            # Copy tags from sense_base if any.  This will not copy
+            # countable/uncountable if either was specified in the sense,
+            # as sometimes both are specified in word head but only one
+            # in individual senses.
+            countability_tags = []
+            base_tags = sense_base.get("tags", ())
+            sense_tags = sense_data.get("tags", ())
+            for tag in base_tags:
+                if tag in ("countable", "uncountable"):
+                    if tag not in countability_tags:
+                        countability_tags.append(tag)
+                    continue
+                if tag not in sense_tags:
+                    data_append(ctx, sense_data, "tags", tag)
+            if countability_tags:
+                if ("countable" not in sense_tags and
+                    "uncountable" not in sense_tags):
+                    print("adding countability")
+                    data_extend(ctx, sense_data, "tags", countability_tags)
 
     def head_template_fn(name, ht):
         # print("HEAD_TEMPLATE_FN", name, ht)
@@ -1024,6 +1049,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
         text = clean_node(config, ctx, pos_data, pre,
                           template_fn=head_template_fn)
         parse_word_head(ctx, pos, text, pos_data)
+        if "tags" in pos_data:
+            common_tags = pos_data["tags"]
+            del pos_data["tags"]
+        else:
+            common_tags = []
         for node in lists:
             for node in node.children:
                 if node.kind != NodeKind.LIST_ITEM:
@@ -1062,6 +1092,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     return None
 
                 common_data = {}
+                common_data["tags"] = common_tags
                 outer_text = clean_node(config, ctx, common_data, outer,
                                         template_fn=outer_template_fn)
                 strip_ends = [", particularly:"]
@@ -1669,7 +1700,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 return ""
             # XXX if last heading, maybe categories should go to all
             # languages
-            clean_node(config, ctx, data, [node], template_fn=template_fn)
+            # clean_node(config, ctx, data, [node], template_fn=template_fn)
+            ctx.expand(ctx.node_to_wikitext(node), template_fn=template_fn)
 
         def parse_translation_table(tablenode):
             assert isinstance(tablenode, WikiNode)
@@ -1777,9 +1809,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if "error" in dt:
                     ctx.error("{}: {}".format(t, dt["error"]))
                 # Parse word senses for the part-of-speech
-                if "tags" in dt:
-                    data_extend(ctx, pos_data, "tags", dt["tags"])
                 parse_part_of_speech(node, pos)
+                if "tags" in dt:
+                    for pdata in pos_datas:
+                        data_extend(ctx, pdata, "tags", dt["tags"])
             elif t == "Translations":
                 if stack[-1].lower() in part_of_speech_map:
                     data = pos_data
@@ -1849,7 +1882,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # the page or from related pages
         ret.append(data)
 
-    # Copy all tags and topics to word senses and remove duplicate
+    # Copy all tags to word senses and remove duplicate
     # tags and topics
     for data in ret:
         if "senses" not in data:
@@ -1861,13 +1894,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
             data_extend(ctx, sense, "tags", tags)
             if "tags" in sense:
                 sense["tags"] = list(sorted(set(sense["tags"])))
-        topics = data.get("topics", ())
-        if "topics" in data:
-            del data["topics"]
-        for sense in data["senses"]:
-            data_extend(ctx, sense, "topics", topics)
-            if "topics" in sense:
-                sense["topics"] = list(sorted(set(sense["topics"])))
+        # XXX remove this code?:
+        # topics = data.get("topics", ())
+        # if "topics" in data:
+        #     del data["topics"]
+        # for sense in data["senses"]:
+        #     data_extend(ctx, sense, "topics", topics)
+        #     if "topics" in sense:
+        #         sense["topics"] = list(sorted(set(sense["topics"])))
 
     return ret
 
@@ -2326,18 +2360,10 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX related terms, wikipedia, Wikispecies links.  See "permit"/English/Noun
 
-# XXX check "ice"/English/Noun - Hyponyms and Derived terms attached to
-# a single sense, not the word non-disambiguated???
-#  - they are not shown in HTML at all!
-
 # Check linkage sol/Norwegian Nynorsk/Noun (looks like unhandled item list)
 #  - This is a broader problem around col1 ... col5 and col1-u ... col5-u.
 #    They expand to <div> inside <div> that contains a list.  They are
 #    fairly widely used in at least linkages.
-
-# XXX continue fixing HTML code rendered non-HTML by node_expand
-#  - wikitextprocessor tests currently broken
-#  - really need more testing otherwise too
 
 # XXX "magic number"/English - why is tag included in gloss?  Perhaps
 # the tag has extra parentheses?
@@ -2361,3 +2387,7 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 #  - have category Paper sizes in English, defined for translingual
 #    (Category links should perhaps be language-independent, or we should take
 #    the language from the link)
+
+# XXX check "ice"/English/Noun - Hyponyms and Derived terms attached to
+# a single sense, not the word non-disambiguated???
+#  - they are not shown in HTML at all!
