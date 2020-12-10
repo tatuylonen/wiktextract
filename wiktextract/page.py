@@ -2387,7 +2387,3 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 #  - have category Paper sizes in English, defined for translingual
 #    (Category links should perhaps be language-independent, or we should take
 #    the language from the link)
-
-# XXX check "ice"/English/Noun - Hyponyms and Derived terms attached to
-# a single sense, not the word non-disambiguated???
-#  - they are not shown in HTML at all!

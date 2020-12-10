@@ -42,8 +42,13 @@ def disambiguate_clear_cases(ctx, data, field):
         for gloss in sense.get("glosses", ()):
             gloss = clean_item_sense(gloss)
             for k, v in items.items():
+                if k == "":
+                    continue
                 if (gloss == k or
-                    gloss.startswith("a " + k) or
+                    gloss == "a " + k or
+                    gloss == "an " + k or
+                    gloss.startswith("a " + k + " ") or
+                    gloss.startswith("an " + k + " ") or
                     gloss.startswith(k + ",") or
                     gloss.startswith(k + ".") or
                     gloss.startswith(k + " or ")):
