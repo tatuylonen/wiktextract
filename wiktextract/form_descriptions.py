@@ -200,6 +200,7 @@ xlat_tags_map = {
     "plus dative": "with-dative",
     "with dative": "with-dative",
     "+ accusative": "with-accusative",
+    "+ accusative +, Genitive": "with-accusative with-genitive",
     "+ accusative case": "with-accusative",
     "+accusative": "with-accusative",
     "with accusative case": "with-accusative",
@@ -1058,7 +1059,7 @@ topic_generalize_map = {
     "mechanical-engineering": "engineering",
     "mechanics": "mechanical-engineering",
     "lubricants": "mechanical-engineering",
-    "measurement": "engineering",
+    "measurement": "property",
     "thermodynamics": "physics",
     "signal processing": "computing mathematics",
     "topology": "mathematics",
@@ -1408,6 +1409,11 @@ topic_generalize_map = {
     "buddhism": "religion",
     "hinduism": "religion",
     "Roman Catholicism": "Catholicism",
+    "position": "location",
+    "origin": "location",
+    "source": "location",
+    "cause": "property",
+    "state": "property",
 }
 
 blocked = set(["të", "a", "e", "al", "þou", "?", "lui", "auf", "op", "ein",
@@ -1952,6 +1958,7 @@ valid_topics = set([
     "card-games",
     "carpentry",
     "cartography",
+    "cause",
     "chemistry",
     "cities",
     "color",
@@ -2040,6 +2047,7 @@ valid_topics = set([
     "oceanography",
     "oenology",
     "organization",
+    "origin",
     "ornithology",
     "paleontology",
     "pathology",
@@ -2054,6 +2062,7 @@ valid_topics = set([
     "planets",
     "political-science",
     "politics",
+    "position",
     "publishing",
     "pulmonology",
     "prefectures",
@@ -2072,7 +2081,9 @@ valid_topics = set([
     "sexuality",
     "social-science",
     "socialism",
+    "source",
     "sports",
+    "state",
     "states",
     "statistics",
     "telecommunications",
@@ -2488,6 +2499,7 @@ def parse_word_head(ctx, pos, text, data):
                 lst.extend(node["$"].get("tags", ()))
                 last_valid = i
             related = parts[last_valid:]
+
             # XXX check if related contains valid tag sequences and warn if
             # so
             for tagspec in " ".join(lst).split(" or "):

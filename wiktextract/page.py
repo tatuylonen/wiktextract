@@ -931,8 +931,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     gloss = "-"
 
             if not gloss:
-                ctx.debug("{}: empty gloss at {}"
-                             .format(pos, "/".join(stack)))
+                #ctx.debug("{}: empty gloss at {}"
+                #             .format(pos, "/".join(stack)))
                 data_append(ctx, sense_data, "tags", "empty-gloss")
             elif gloss != "-":
                 # Add the gloss for the sense.
@@ -1051,9 +1051,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     pre.append(node)
             elif first_para:
                 pre.append(node)
-        if not lists:
-            ctx.warning("{}: no sense list found".format(pos))
-            return
         # XXX use template_fn in clean_node to check that the head macro
         # is compatible with the current part-of-speech and generate warning
         # if not.  Use template_allowed_pos_map.
@@ -1082,7 +1079,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             x.kind == NodeKind.LIST
                             and x.args == "##"]
                 if not sublists:
-                    parse_sense(pos, contents, {})
+                    sense_base = {"tags": common_tags}
+                    parse_sense(pos, contents, sense_base)
                     continue
                 # This entry has sublists of entries.  We should contain
                 # gloss information from both.  Sometimes the outer gloss
@@ -1905,6 +1903,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
             data_extend(ctx, sense, "tags", tags)
             if "tags" in sense:
                 sense["tags"] = list(sorted(set(sense["tags"])))
+            if "categories" in sense:
+                sense["categories"] = list(sorted(set(sense["categories"])))
+            if "topics" in sense:
+                sense["topics"] = list(sorted(set(sense["topics"])))
+        if "categories" in data:
+            data["categories"] = list(sorted(set(data["categories"])))
+        if "topics" in data:
+            data["topics"] = list(sorted(set(data["topics"])))
         # XXX remove this code?:
         # topics = data.get("topics", ())
         # if "topics" in data:
@@ -2060,6 +2066,23 @@ def parse_page(ctx, word, text, config):
         disambiguate_clear_cases(ctx, data, "translations")
         for field in linkage_fields:
             disambiguate_clear_cases(ctx, data, field)
+        # Categories are not otherwise disambiguated, but if there is only
+        # one sense and only one data in ret, move categories to the only sense.
+        # Note that categories are commonly specified for the page, and thus
+        # if we have multiple data in ret, we don't know which one they
+        # belong to.
+        if ("categories" in data and len(data.get("senses", ())) == 1 and
+            len(ret) == 1):
+            cats = data["categories"]
+            for sense in data["senses"]:
+                data_extend(ctx, sense, "categories", cats)
+                sense["categories"] = list(sorted(set(sense["categories"])))
+        if ("topics" in data and len(data.get("senses", ())) == 1 and
+            len(ret) == 1):
+            topics = data["topics"]
+            for sense in data["senses"]:
+                data_extend(ctx, sense, "topics", topics)
+                sense["topics"] = list(sorted(set(sense["topics"])))
 
     # Return the resulting words
     return ret
