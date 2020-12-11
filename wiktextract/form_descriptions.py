@@ -413,6 +413,8 @@ xlat_tags_map = {
     "third active infinitive": "third-infinitive active",
     "third passive infinitive": "third-infinitive passive",
     "British spelling": "UK",
+    "Urdu spelling": "urdu-spelling",
+    "Urdu spelling of": "urdu-spelling alt-of",
     "eye dialect": "pronunciation-spelling",
     "enclitic and proclitic": "enclitic proclitic",
     "(hence past tense)": "past",
@@ -643,6 +645,7 @@ xlat_tags_map = {
     "Jawi spelling of": "alt-of Jawi",
     "Hanja form of": "alt-of Hanja",
     "Hanja form? of": "alt-of Hanja",
+    "Hán tự form of": "alt-of han-tu",
     "Glagolitic spelling of": "alt-of Glagolitic",
     "front vowel variant of": "alt-of front-vowel",
     "front-vowel variant of": "alt-of front-vowel",
@@ -1771,6 +1774,7 @@ valid_tags = set([
     "misconstruction",
     "mutation",
     "pronunciation-spelling",
+    "urdu-spelling",
     "reconstruction",
     "alternative",
     "colloquial",
@@ -1930,6 +1934,7 @@ valid_tags = set([
     "jyutping",
     "yale",
     "wade-giles",
+    "han-tu",
 ])
 
 valid_topics = set([
@@ -2693,12 +2698,16 @@ def parse_alt_or_inflection_of(ctx, gloss):
     base = re.sub(r"(?s)(:|;| - ).*", "", base)
     base = re.sub(r"\s+(with an added emphasis on the person.)", "", base)
     base = re.sub(r"\s+with -ra/-re$", "", base)
-    base = re.sub(r"\s+\([^)]*\)", "", base)  # Remove all (...) groups
     # Note: base might still contain comma-separated values and values
     # separated by "and"
     base = base.strip()
     if base.endswith("."):
         base = base[:-1]
+    if base.endswith("(\u201cconjecture\")"):
+        base = base[:-14].strip()
+        tags.append("conjecture")
+    base = re.sub(r"\s+\([^)]*\)", "", base)  # Remove all (...) groups
+    base = base.strip()
     if base.find(".") >= 0:
         ctx.debug(". remains in alt_of/inflection_of: {}".format(base))
     return tags, base

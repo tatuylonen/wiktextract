@@ -199,6 +199,7 @@ ignored_category_patterns = [
     ".* verbs$",
     ".* adverbs$",
     ".* adjectives$",
+    ".* conjunctions$",
     ".* abbreviations$",
     ".* initialisms$",
     ".* clippings$",
@@ -268,6 +269,9 @@ ignored_category_patterns = [
     ".* with nopl$",
     ".* needing pronunciation attention",
     ".* link with missing target page",
+    ".* nouns in .* script$",
+    ".* verbs in .* script$",
+    "Advanced Mandarin",
     "Japanese kanji with ",
     "Han script characters",
     "Han char without ",
@@ -1205,7 +1209,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if origtext.find("IPA") >= 0:
                 field = "ipa"
             else:
-                field = "other"
+                # XXX When exactly would this happen?  What would end up in the
+                # "other" category?
+                # field = "other"
+                continue
             # Check if it contains Japanese "Tokyo" pronunciation with
             # special syntax
             m = re.search(r"\(Tokyo\) +([^ ]+) +\[", origtext)
@@ -2148,6 +2155,8 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
     v = re.sub(r"(?s)\{\{.*", "", v)
     # Some templates create <sup>(Category: ...)</sup>; remove
     v = re.sub(r"(?si)\s*\(Category:[^)]*\)", "", v)
+    # Some templates create question mark in <sup>, e.g., some Korean Hanja form
+    v = re.sub(r"\^\?", "", v)
     return v
 
 # XXX Add tests for generating italic from separate template arguments during
@@ -2168,6 +2177,8 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # work (relates to <ruby> handling)
 
 # XXX linkages may have senses, e.g. "singular" English "(being only one):"
+#  - also, linkage parenthesized parts may inappropriately end up in tags,
+#    e.g., 假設/Chinese/Verb/Synonyms
 
 # XXX check use of sense numbers in translations (check "eagle"/English)
 
@@ -2364,6 +2375,8 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # Handle Japanese parentheses in linkage items.  It think this relates
 # to <ruby>.
 
+# Parse gender in linkages, e.g., ξένος/Greek (m in linkages)
+
 # Implement <hiero> ... </hiero>, e.g., lilja/Finnish/Etymology
 
 # Implement <chem> ... </chem>, e.g. felsic/English/Adjective
@@ -2384,13 +2397,13 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX in parse_head_tags(), should create multiple forms if
 # node["$"].get("tags") contains multiple sets of tags (e.g., cut/English/Verb)
 
-# Force sense-disambiguation for at least those linkages where there is only
-# one sense.  (Otherwise use similar to translations)
-
 # Check te/Spanish/pron, See also section (warning, has unexpected format)
 
 # Check alt_of with "." remaining.  Find them all to a separate list
 # and analyze.
+
+# When alt-of has English translation (often in quotes), try to capture it
+# (helpful for disambiguation!).  E.g., 假設/Vietnamese
 
 # XXX related terms, wikipedia, Wikispecies links.  See "permit"/English/Noun
 
