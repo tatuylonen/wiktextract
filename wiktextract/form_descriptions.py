@@ -2117,6 +2117,7 @@ valid_topics = set([
 
 ignored_parens = set([
     "please verify",
+    "transliteration needed",
     "in words with back vowel harmony",
     "in words with front vowel harmony",
 ])
