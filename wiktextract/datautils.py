@@ -38,7 +38,11 @@ def data_extend(ctx, data, key, values):
     assert isinstance(key, str)
     assert isinstance(values, (list, tuple))
 
-    for x in values:
+    # Note: we copy values, just in case it would actually be the same as
+    # data[key].  This has happened, and leads to iterating for ever, running
+    # out of memory.  Other ways of avoiding the sharing may be more
+    # complex.
+    for x in tuple(values):
         data_append(ctx, data, key, x)
 
 

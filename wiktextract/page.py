@@ -2070,6 +2070,7 @@ def parse_page(ctx, word, text, config):
             # XXX if a language is specified for a category, we should only
             # add it to those datas that are in that language
             for data in ret[:-1]:
+                assert data is not last
                 data_extend(ctx, data, field, lst)
 
     # Disambiguate those items from word level that can be disambiguated
