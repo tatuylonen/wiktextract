@@ -66,10 +66,9 @@ def capture_page(model, orig_title, text, pages_dir):
         #     # XXX Capture some?
 
     if pages_dir is not None:
-        title = re.sub(r"[/.]", "_", title)
         title = re.sub(r":", "/", title)
         path = pages_dir + "/" + title + ".txt"
-        path = re.sub(r"/\.+", "/", path)
+        path = re.sub(r"/\.+", lambda m: re.sub(r"\.", "_", m.group(0)), path)
         path = re.sub(r"//+", "/", path)
         dirpath = os.path.dirname(path)
         os.makedirs(dirpath, exist_ok=True)
