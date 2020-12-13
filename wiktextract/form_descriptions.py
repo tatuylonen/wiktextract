@@ -1914,6 +1914,7 @@ valid_tags = set([
     "latin",
     "euphemistic",
     "traditional",
+    "simplified",
     "uncommon",
     "būdinys",
     "front-vowel",
