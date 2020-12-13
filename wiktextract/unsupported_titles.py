@@ -83,4 +83,5 @@ unsupported_title_map = {
     "Amp": "&amp;",
     "Colon lowercase thorn": ":þ",
     "Colon left curly bracket": ":{",
+    ":≠": ":≠",
 }
