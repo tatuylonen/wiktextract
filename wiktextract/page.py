@@ -81,14 +81,17 @@ linkage_fields = [
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
 panel_templates = set([
+    "Character info",
     "CJKV",
     "French personal pronouns",
     "French possessive adjectives",
     "French possessive pronouns",
+    "Han etym",
     "Japanese demonstratives",
     "Latn-script",
     "LDL",
     "MW1913Abbr",
+    "Number-encoding",
     "Nuttall",
     "Spanish possessive adjectives",
     "Spanish possessive pronouns",
@@ -100,6 +103,8 @@ panel_templates = set([
     "beer",
     "broken ref",
     "ca-compass",
+    "character info",
+    "character info/var",
     "checksense",
     "compass-fi",
     "copyvio suspected",
@@ -108,6 +113,8 @@ panel_templates = set([
     "examples",
     "hu-corr",
     "hu-suff-pron",
+    "interwiktionary",
+    "ja-kanjitab",
     "ko-hanja-search",
     "look",
     "mediagenic terms",
@@ -166,6 +173,7 @@ panel_templates = set([
     "rfv-pron",
     "rfv-quote",
     "rfv-sense",
+    "selfref",
     "split",
     "stroke order",  # XXX consider capturing this?
     "stub entry",
@@ -175,9 +183,11 @@ panel_templates = set([
     "tea room sense",
     "ttbc",
     "unblock",
+    "unsupportedpage",
     "video frames",
-    "wikipedia",
+    "wrongtitle",
     "zh-forms",
+    "zh-hanzi-box",
 ])
 
 # Template name prefixes used for language-specific panel templates (i.e.,
@@ -186,7 +196,18 @@ panel_templates = set([
 panel_prefixes = [
     "list:compass points/",
     "list:Latin script letters/",
+    "list:Gregorian calendar months/",
     "RQ:",
+]
+
+wikipedia_templates = [
+    "wikipedia",
+    "slim-wikipedia",
+    "w",
+    "W",
+    "swp",
+    "Wikipedia",
+    "wtorw",
 ]
 
 ignored_category_patterns = [
@@ -400,11 +421,6 @@ def parse_sense_XXXold_going_away(config, data, text, use_text):
                       "non gloss definition"):
             gloss = t_arg(config, t, 1)
             data_append(config, data, "nonglosses", gloss)
-        # The senseid template seems to have varied uses. Sometimes it contains
-        # a Wikidata id Q<numbers>; at other times it seems to be something
-        # else.  We collect them under "senseid".  XXX this needs more study
-        elif name == "senseid":
-            data_append(config, data, "wikidata", t_arg(config, t, 2))
         # The "sense" templates are treated as additional glosses.
         elif name in ("sense", "Sense"):
             data_append(config, data, "tags", t_arg(config, t, 1))
@@ -767,6 +783,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
     # print("parse_language", language)
 
     word = ctx.title
+    unsupported_prefix = "Unsupported titles/"
+    if word.startswith(unsupported_prefix):
+        w = word[len(unsupported_prefix):]
+        if w in unsupported_title_map:
+            word = unsupported_title_map[w]
+        else:
+            ctx.error("Unimplemented unsupported title: {}".format(word))
+            word = w
+
     base = {"word": word, "lang": language, "lang_code": lang_code}
     sense_data = {}
     pos_data = {}  # For a current part-of-speech
@@ -831,6 +856,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 return ""
             if name in ("defdate",):
                 return ""
+            if name == "senseid":
+                langid = clean_node(config, ctx, None, ht.get(1, ()))
+                arg = clean_node(config, ctx, sense_base, ht.get(2, ()))
+                if re.match(r"Q\d+$", arg):
+                    data_append(ctx, sense_base, "wikidata", arg)
+                data_append(ctx, sense_base, "senseid",
+                            langid + ":" + arg)
+
             if name in ("syn", "synonyms"):
                 for i in range(2, 20):
                     w = ht.get(i)
@@ -844,6 +877,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         "quotei"):
                 # XXX capture usage example (check quotei!)
                 return ""
+            if name in wikipedia_templates:
+                parse_wikipedia_template(config, ctx, sense_base, ht)
+                return None
             # XXX These are causing problems, e.g., introducing HTML into
             # glosses.  Options include using post_template_fn and assigning
             # the expansion to gloss (with parentheses removed), or just
@@ -971,6 +1007,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # print("HEAD_TEMPLATE_FN", name, ht)
         if is_panel_template(name):
             return ""
+        if name in wikipedia_templates:
+            parse_wikipedia_template(config, ctx, pos_data, ht)
+            return None
         if name == "number box":
             # XXX extract numeric value?
             return ""
@@ -1271,7 +1310,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             have_pronunciations = True
 
         if not have_pronunciations and not have_panel_templates:
-            ctx.warning("no pronunciations found from pronunciation section")
+            ctx.debug("no pronunciations found from pronunciation section")
 
     def parse_inflection(node):
         # print("parse_inflection:", node)
@@ -1407,14 +1446,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     item = item[:m.start()] + item[m.end():]
             # Certain linkage items have space-separated valus.  These are
             # generated by, e.g., certain templates
-            if qualifier in ("A paper sizes",):
+            if qualifier in ("A paper sizes",
+                             "Arabic digits"):
                 qualifier = None
                 item = ", ".join(item.split())
 
             item = re.sub(r"\s*\(\)", "", item)
-            if item.find("(") >= 0 and item.find(", though ") < 0:
-                ctx.debug("linkage item has remaining parentheses: {}"
-                          .format(item))
+            # XXX temporarily disabled.  These should be analyzed.
+            #if item.find("(") >= 0 and item.find(", though ") < 0:
+            #    ctx.debug("linkage item has remaining parentheses: {}"
+            #              .format(item))
 
             item = re.sub(r"\s*\(\s*\)", "", item)
             item = item.strip()
@@ -1698,6 +1739,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     return ""
                 if name == "see also":
                     # XXX capture
+                    # XXX for example, "/" has top-level list containing
+                    # see also items.  So also should parse those.
                     return ""
                 if name == "trans-see":
                     # XXX capture
@@ -1793,6 +1836,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
             """This is called for otherwise unprocessed parts of the page.
             We still expand them so that e.g. Category links get captured."""
             if is_panel_template(name):
+                return ""
+            if name in wikipedia_templates:
+                parse_wikipedia_template(config, ctx, etym_data, ht)
                 return ""
             return None
 
@@ -1918,17 +1964,35 @@ def parse_language(ctx, config, langnode, language, lang_code):
     return ret
 
 
-def parse_top_template(config, ctx, node):
+def parse_wikipedia_template(config, ctx, data, ht):
+    """Helper function for parsing {{wikipedia|...}} and related templates."""
+    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(ctx, Wtp)
+    assert isinstance(data, dict)
+    assert isinstance(ht, dict)
+    langid = clean_node(config, ctx, data, ht.get("lang", ()))
+    pagename = clean_node(config, ctx, data, ht.get(1, ())) or ctx.title
+    if langid:
+        data_append(ctx, data, "wikipedia", langid + ":" + pagename)
+    else:
+        data_append(ctx, data, "wikipedia", pagename)
+
+
+def parse_top_template(config, ctx, node, data):
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, Wtp)
     assert isinstance(node, WikiNode)
+    assert isinstance(data, dict)
 
-    def template_fn(name, ht):
+    def top_template_fn(name, ht):
         if is_panel_template(name):
             return ""
         if name == "also":
             # XXX shows related words that might really have been the intended
             # word, capture them
+            return ""
+        if name == "see also":
+            # XXX capture
             return ""
         if name == "cardinalbox":
             # XXX capture
@@ -1936,11 +2000,22 @@ def parse_top_template(config, ctx, node):
         if name == "character info":
             # XXX capture
             return ""
+        if name == "commonscat":
+            # XXX capture link to Wikimedia commons
+            return ""
+        if name == "wikidata":
+            arg = clean_node(config, ctx, data, ht.get(1, ()))
+            if arg.startswith("Q") or arg.startswith("Lexeme:L"):
+                data_append(ctx, data, "wikidata", arg)
+            return ""
+        if name in wikipedia_templates:
+            parse_wikipedia_template(config, ctx, data, ht)
+            return None
         ctx.warning("UNIMPLEMENTED top-level template: {} {}"
                     .format(name, ht))
         return ""
 
-    clean_node(config, ctx, None, [node], template_fn=template_fn)
+    clean_node(config, ctx, None, [node], template_fn=top_template_fn)
 
 
 def parse_page(ctx, word, text, config):
@@ -1962,14 +2037,6 @@ def parse_page(ctx, word, text, config):
     if config.verbose:
         print("Parsing page:", word)
 
-    unsupported_prefix = "Unsupported titles/"
-    if word.startswith(unsupported_prefix):
-        w = word[len(unsupported_prefix):]
-        if w in unsupported_title_map:
-            word = unsupported_title_map[w]
-        else:
-            ctx.debug("Unimplemented title: {}".format(word))
-
     config.word = word
 
     # Parse the page, pre-expanding those templates that are likely to
@@ -1979,6 +2046,8 @@ def parse_page(ctx, word, text, config):
                      additional_expand=additional_expand_templates)
     # print("PAGE PARSE", tree)
 
+    top_data = {}
+
     # Iterate over top-level titles, which should be languages for normal
     # pages
     by_lang = collections.defaultdict(list)
@@ -1986,7 +2055,10 @@ def parse_page(ctx, word, text, config):
         if not isinstance(langnode, WikiNode):
             continue
         if langnode.kind == NodeKind.TEMPLATE:
-            parse_top_template(config, ctx, langnode)
+            parse_top_template(config, ctx, langnode, top_data)
+            continue
+        if langnode.kind == NodeKind.LINK:
+            # Some pages have links at top level, e.g., "trees" in Wiktionary
             continue
         if langnode.kind != NodeKind.LEVEL2:
             ctx.error("unexpected top-level node: {}".format(langnode))
@@ -2011,6 +2083,9 @@ def parse_page(ctx, word, text, config):
             if "lang" not in data:
                 ctx.debug("no lang in data: {}".format(data))
                 continue
+            for k, v in top_data.items():
+                assert isinstance(v, (list, tuple))
+                data_extend(ctx, data, k, v)
             by_lang[data["lang"]].append(data)
 
     ret = []
@@ -2083,20 +2158,17 @@ def parse_page(ctx, word, text, config):
         # Note that categories are commonly specified for the page, and thus
         # if we have multiple data in ret, we don't know which one they
         # belong to.
-        if ("categories" in data and len(data.get("senses", ())) == 1 and
-            len(ret) == 1):
-            cats = data["categories"]
-            for sense in data["senses"]:
-                data_extend(ctx, sense, "categories", cats)
-        if ("topics" in data and len(data.get("senses", ())) == 1 and
-            len(ret) == 1):
-            topics = data["topics"]
-            for sense in data["senses"]:
-                data_extend(ctx, sense, "topics", topics)
+        for field in ("categories", "topics", "wikidata"):
+            if (field in data and len(data.get("senses", ())) == 1 and
+                len(ret) == 1):
+                v = data[field]
+                del data[field]
+                for sense in data["senses"]:
+                    data_extend(ctx, sense, field, v)
 
-    # Remove duplicates from tags, topics, and categories
+    # Remove duplicates from tags, topics, and categories, etc.
     for data in ret:
-        for field in ("topics", "categories", "tags"):
+        for field in ("topics", "categories", "tags", "wikidata"):
             if field in data:
                 data[field] = list(sorted(set(data[field])))
             for sense in data.get("senses", ()):
@@ -2171,7 +2243,7 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
     # to clean up erroneous codings in the original text.
     v = re.sub(r"(?s)\{\{.*", "", v)
     # Some templates create <sup>(Category: ...)</sup>; remove
-    v = re.sub(r"(?si)\s*\(Category:[^)]*\)", "", v)
+    v = re.sub(r"(?si)\s*(^\s*)?\(Category:[^)]*\)", "", v)
     # Some templates create question mark in <sup>, e.g., some Korean Hanja form
     v = re.sub(r"\^\?", "", v)
     return v
@@ -2186,12 +2258,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX add parsing chinese pronunciations, see 傻瓜 https://en.wiktionary.org/wiki/%E5%82%BB%E7%93%9C#Chinese
 
 # XXX implement parsing {{ja-see-kango|xxx}} specially, see むひ
-
-# XXX handle <ruby> specially in clean or perhaps already earler, see
-# e.g. 無比 (Japanese)
-
-# XXX test ISBN / Japanese - how does word entry work, how do synonyms
-# work (relates to <ruby> handling)
 
 # XXX linkages may have senses, e.g. "singular" English "(being only one):"
 #  - also, linkage parenthesized parts may inappropriately end up in tags,
@@ -2389,24 +2455,11 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # May be best to actually load these modules as Lua code or to even run a
 # specific Lua module to dump the data.
 
-# Handle Japanese parentheses in linkage items.  It think this relates
-# to <ruby>.
-
 # Parse gender in linkages, e.g., ξένος/Greek (m in linkages)
-
-# Implement <hiero> ... </hiero>, e.g., lilja/Finnish/Etymology
-
-# Implement <chem> ... </chem>, e.g. felsic/English/Adjective
 
 # Check awake/English - strange unrecognized tags
 
 # XXX search for Template: from all glosses, search for &amp; from all glosses
-
-# Make sure categories coming from etymology are not sense-assigned to
-# only sense in pos when there is more than one pos
-
-# Why does eccentric/English/Adjective get tag "contraction" when that word
-# only occurs in its gloss???
 
 # XXX implement parsing of tags from first-level gloss in two-level lists
 #    (see cut/English/Noun)
@@ -2442,8 +2495,53 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 #     HTML, then split there (at line start), and then clean.  Otherwise we
 #     risk breaking glosses that contain * or # (e.g., math formulas).
 
-# XXX <3/English/Verb has Lua execution error (NOT IN pages/, need to change
-# name mungling to capture, gets overwritten by =3)
+# Check that 1/Translingual/Alternative forms is parsed correctly
 
-# XXX " "/English has Lua execution error (I think the word is the
-# space character)
+# XXX analyze remaining parentheses in linkage.  Currently debug message
+# disabled.  There are still lots of these.
+
+# XXX Finland/English has strange topic in related
+#   - there is a {{topics|...}} tag in the linkage; however, I think we should
+#     really interpret it as "sense" for the linkage.
+
+# XXX comb/English - something wrong with parsing translations
+#  - could one of the templates get expanded???
+#  - this might just be an instance of the list not being found inside HTML
+#    (need to recurse instead of just iterating contents)
+
+# XXX handle <ruby> specially in clean or perhaps already earler, see
+# e.g. 無比 (Japanese)
+
+# XXX test ISBN / Japanese - how does word entry work, how do synonyms
+# work (relates to <ruby> handling)
+
+# Handle Japanese parentheses in linkage items.  It think this relates
+# to <ruby>.
+
+# XXX There are way too many <noinclude> not propersy closed warnings
+# forom Chinese, e.g., 內 - find out what causes these, and either fix or
+# ignore
+
+# XXX Lua error on 龜
+
+# Implement <hiero> ... </hiero>, e.g., lilja/Finnish/Etymology
+
+# Implement <chem> ... </chem>, e.g. felsic/English/Adjective
+
+# XXX again getting <gu> warnings on ü
+
+# XXX verify that head inflection class marking (<3> etc) works after the
+# changes in escaping < >.  Grep for <3> and then check that word.
+
+# DISPLAYTITLE apparently sets title, see: Borel σ-algebra
+#  - there might also be a parsing error here (italic inside parserfn?)
+
+# Try to find out what's causing invalid unicode in some cyrillic words
+# and translations, e.g., quail/English/Translations
+
+# Improve htmlgen lists
+#   - more even sizes of sublists (use intervals when appropriate)
+#   - group kanji etc by radical + strokes
+
+# Why do some alt_of/inflection_of retain "." at end of the word?
+#   E.g., NS/German/Noun (alt_of "Nebensatz.")
