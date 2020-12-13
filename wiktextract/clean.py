@@ -71,7 +71,9 @@ def clean_value(config, title, no_strip=False):
     # Replace whitespace sequences by a single space.
     title = re.sub(r"\s+", " ", title)
     # Remove whitespace before periods and commas etc
-    title = re.sub(r" ([.,;:!?)])", repl_1, title)
+    # XXX we might re-enable this, now trying without as it is removing some
+    # instances where we would want to leave the space
+    # title = re.sub(r" ([.,;:!?)])", repl_1, title)
     # Strip surrounding whitespace.
     if not no_strip:
         title = title.strip()
