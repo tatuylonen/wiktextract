@@ -245,7 +245,7 @@ ignored_category_patterns = [
     ".* missing plurals$",
     ".* eponyms$",
     ".*-syllable words$",
-    ".* terms with IPA pronunciation",
+    ".* terms with .*IPA pronunciation",
     ".* terms without .*IPA",
     ".* terms with audio pronunciation",
     ".* terms with .* senses$",
@@ -2538,11 +2538,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # Implement <hiero> ... </hiero>, e.g., lilja/Finnish/Etymology
 
 # Implement <chem> ... </chem>, e.g. felsic/English/Adjective
-
-# XXX again getting <gu> warnings on ü
-
-# XXX verify that head inflection class marking (<3> etc) works after the
-# changes in escaping < >.  Grep for <3> and then check that word.
 
 # Try to find out what's causing invalid unicode in some cyrillic words
 # and translations, e.g., quail/English/Translations

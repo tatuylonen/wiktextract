@@ -2703,7 +2703,6 @@ def parse_alt_or_inflection_of(ctx, gloss):
     # Note: base might still contain comma-separated values and values
     # separated by "and"
     base = base.strip()
-    print("initial base", repr(base))
     if base.endswith("."):
         base = base[:-1]
     if base.endswith("(\u201cconjecture\")"):
