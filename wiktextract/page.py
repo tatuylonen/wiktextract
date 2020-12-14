@@ -97,6 +97,8 @@ panel_templates = set([
     "Spanish possessive pronouns",
     "USRegionDisputed",
     "Webster 1913",
+    "W",
+    "Wikipedia",
     "ase-rfr",
     "attention",
     "attn",
@@ -185,6 +187,8 @@ panel_templates = set([
     "unblock",
     "unsupportedpage",
     "video frames",
+    "wikipedia",
+    "w",
     "wrongtitle",
     "zh-forms",
     "zh-hanzi-box",
@@ -852,6 +856,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
         additional_glosses = []
 
         def sense_template_fn(name, ht):
+            if name == "wtorw":
+                parse_wikipedia_template(config, ctx, sense_base, ht)
+                return None
+            if name in wikipedia_templates:
+                parse_wikipedia_template(config, ctx, sense_base, ht)
+                return ""
             if is_panel_template(name):
                 return ""
             if name in ("defdate",):
@@ -877,9 +887,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         "quotei"):
                 # XXX capture usage example (check quotei!)
                 return ""
-            if name in wikipedia_templates:
-                parse_wikipedia_template(config, ctx, sense_base, ht)
-                return None
             # XXX These are causing problems, e.g., introducing HTML into
             # glosses.  Options include using post_template_fn and assigning
             # the expansion to gloss (with parentheses removed), or just
@@ -1005,11 +1012,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
     def head_template_fn(name, ht):
         # print("HEAD_TEMPLATE_FN", name, ht)
-        if is_panel_template(name):
-            return ""
-        if name in wikipedia_templates:
+        if name == "wtorw":
             parse_wikipedia_template(config, ctx, pos_data, ht)
             return None
+        if name in wikipedia_templates:
+            parse_wikipedia_template(config, ctx, pos_data, ht)
+            return ""
+        if is_panel_template(name):
+            return ""
         if name == "number box":
             # XXX extract numeric value?
             return ""
@@ -1073,7 +1083,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if isinstance(node, str):
                 for m in re.finditer(r"\n+|[^\n]+", node):
                     p = m.group(0)
-                    if p.startswith("\n") and pre:
+                    if p.startswith("\n\n") and pre:
                         first_para = False
                         break
                     if p:
@@ -1835,10 +1845,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
         def skip_template_fn(name, ht):
             """This is called for otherwise unprocessed parts of the page.
             We still expand them so that e.g. Category links get captured."""
-            if is_panel_template(name):
-                return ""
             if name in wikipedia_templates:
                 parse_wikipedia_template(config, ctx, etym_data, ht)
+                return ""
+            if is_panel_template(name):
                 return ""
             return None
 
@@ -1891,7 +1901,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             elif t in ("Declension", "Conjugation", "Inflection", "Mutation"):
                 parse_inflection(node)
             elif pos in ("hypernyms", "hyponyms", "antonyms", "synonyms",
-                         "abbreviations", "proverbs"):
+                         "abbreviations", "proverbs", "meronyms",
+                         "holonyms", "troponyms"):
                 if stack[-1].lower() in part_of_speech_map:
                     data = pos_data
                 else:
@@ -1985,6 +1996,9 @@ def parse_top_template(config, ctx, node, data):
     assert isinstance(data, dict)
 
     def top_template_fn(name, ht):
+        if name in wikipedia_templates:
+            parse_wikipedia_template(config, ctx, data, ht)
+            return ""
         if is_panel_template(name):
             return ""
         if name == "also":
@@ -2008,9 +2022,6 @@ def parse_top_template(config, ctx, node, data):
             if arg.startswith("Q") or arg.startswith("Lexeme:L"):
                 data_append(ctx, data, "wikidata", arg)
             return ""
-        if name in wikipedia_templates:
-            parse_wikipedia_template(config, ctx, data, ht)
-            return None
         ctx.warning("UNIMPLEMENTED top-level template: {} {}"
                     .format(name, ht))
         return ""
@@ -2158,7 +2169,7 @@ def parse_page(ctx, word, text, config):
         # Note that categories are commonly specified for the page, and thus
         # if we have multiple data in ret, we don't know which one they
         # belong to.
-        for field in ("categories", "topics", "wikidata"):
+        for field in ("categories", "topics", "wikidata", "wikipedia"):
             if (field in data and len(data.get("senses", ())) == 1 and
                 len(ret) == 1):
                 v = data[field]
@@ -2168,7 +2179,7 @@ def parse_page(ctx, word, text, config):
 
     # Remove duplicates from tags, topics, and categories, etc.
     for data in ret:
-        for field in ("topics", "categories", "tags", "wikidata"):
+        for field in ("topics", "categories", "tags", "wikidata", "wikipedia"):
             if field in data:
                 data[field] = list(sorted(set(data[field])))
             for sense in data.get("senses", ()):
@@ -2532,9 +2543,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 
 # XXX verify that head inflection class marking (<3> etc) works after the
 # changes in escaping < >.  Grep for <3> and then check that word.
-
-# DISPLAYTITLE apparently sets title, see: Borel σ-algebra
-#  - there might also be a parsing error here (italic inside parserfn?)
 
 # Try to find out what's causing invalid unicode in some cyrillic words
 # and translations, e.g., quail/English/Translations
