@@ -2542,6 +2542,3 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # Improve htmlgen lists
 #   - more even sizes of sublists (use intervals when appropriate)
 #   - group kanji etc by radical + strokes
-
-# Why do some alt_of/inflection_of retain "." at end of the word?
-#   E.g., NS/German/Noun (alt_of "Nebensatz.")

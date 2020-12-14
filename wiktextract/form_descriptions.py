@@ -2703,12 +2703,17 @@ def parse_alt_or_inflection_of(ctx, gloss):
     # Note: base might still contain comma-separated values and values
     # separated by "and"
     base = base.strip()
+    print("initial base", repr(base))
     if base.endswith("."):
         base = base[:-1]
     if base.endswith("(\u201cconjecture\")"):
         base = base[:-14].strip()
         tags.append("conjecture")
+    # XXX the parenthesized groups often contain useful information, such as
+    # English version in quotes
     base = re.sub(r"\s+\([^)]*\)", "", base)  # Remove all (...) groups
+    if base.endswith("."):
+        base = base[:-1]
     base = base.strip()
     if base.find(".") >= 0:
         ctx.debug(". remains in alt_of/inflection_of: {}".format(base))
