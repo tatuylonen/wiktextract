@@ -111,6 +111,10 @@ part_of_speech_map = {
     "counter": {
         "pos": "counter",
     },
+    "definitions": {
+        # This is used under chinese characters
+        "pos": "character",
+    },
     "determiner": {
         "pos": "det",
     },

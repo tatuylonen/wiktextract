@@ -189,6 +189,7 @@ panel_templates = set([
     "video frames",
     "wikipedia",
     "w",
+    "was wotd",
     "wrongtitle",
     "zh-forms",
     "zh-hanzi-box",
@@ -301,6 +302,7 @@ ignored_category_patterns = [
     "Han script characters",
     "Han char without ",
     "Japanese terms historically spelled with ",
+    "Vietnamese Han character with unconfirmed readings",
     "Translingual symbols",
     "Check ",
     "Kenny's testing category 2",
@@ -614,30 +616,6 @@ def parse_sense_XXXold_going_away(config, data, text, use_text):
             # XXX check this
             data_append(config, data, "hypernyms",
                         {"word": t_arg(config, t, 1)})
-        elif name in ("ant", "antonym", "antonyms"):
-            for x in t_vec(config, t)[1:]:
-                data_append(config, data, "antonyms", {"word": x})
-        elif name in ("hypo", "hyponym", "hyponyms"):
-            for x in t_vec(config, t)[1:]:
-                data_append(config, data, "hyponyms", {"word": x})
-        elif name == "coordinate terms":
-            for x in t_vec(config, t)[1:]:
-                data_append(config, data, "coordinate_terms", {"word": x})
-        elif name in ("hyper", "hypernym", "hypernyms"):
-            for x in t_vec(config, t)[1:]:
-                data_append(config, data, "hypernyms", {"word": x})
-        elif name in ("mer", "meronym", "meronyms",):
-            for x in t_vec(config, t)[1:]:
-                data_append(config, data, "meronyms", {"word": x})
-        elif name in ("holonyms", "holonym"):
-            for x in t_vec(config, t)[1:]:
-                data_append(config, data, "holonyms", {"word": x})
-        elif name in ("troponyms", "troponym"):
-            for x in t_vec(config, t)[1:]:
-                data_append(config, data, "troponyms", {"word": x})
-        elif name in ("derived", "derived terms"):
-            for x in t_vec(config, t)[1:]:
-                data_append(config, data, "derived", {"word": x})
         elif name in ("†", "zh-obsolete"):
             data_extend(config, data, "tags", ["archaic", "obsolete"])
         # Various words are marked as place names.  Tag such words as a
@@ -828,7 +806,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         push_sense()
         if ctx.subsection:
             if not pos_datas:
-                pos_datas = [{"tags": "no-senses"}]
+                pos_datas = [{"tags": ["no-senses"]}]
             data = {"senses": pos_datas}
             merge_base(data, pos_data)
             etym_datas.append(data)
@@ -881,6 +859,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         break
                     data_append(ctx, sense_base, "synonyms",
                                 {"word": w})
+                return ""
+            if name == "†" or name == "zh-obsolete":
+                data_append(ctx, sense_base, "tags", "obsolete")
                 return ""
             if name in ("ux", "uxi", "usex", "afex", "zh-x", "prefixusex",
                         "ko-usex", "ko-x", "hi-x", "ja-usex-inline", "ja-x",
@@ -1503,10 +1484,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
             ctx.error("UNIMPLEMENTED: parse_linkage_ext: {} / {}"
                       .format(title, field))
 
-        def parse_dialectal_synonyms(name, ht):
-            ctx.error("UNIMPLEMENTED: parse_dialectal_synonyms: {} {}"
-                      .format(name, ht))
-
         def parse_linkage_template(node):
             # print("LINKAGE TEMPLATE:", node)
 
@@ -1527,7 +1504,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     parse_linkage_ext(ht.get(1, ""), "antonyms")
                     return ""
                 if name == "zh-dial":
-                    parse_dialectal_synonyms(name, ht)
+                    # XXX capture?
                     return ""
                 for prefix, t in template_linkage_mappings:
                     if re.search(r"(^|[-/\s]){}($|\b|[0-9])".format(prefix),
@@ -1871,9 +1848,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
             config.section_counts[t] += 1
             pos = t.lower()
             # print("PROCESS_CHILDREN: T:", repr(t))
-            if t == "Pronunciation":
+            if t.startswith("Pronunciation"):
                 if config.capture_pronunciation:
                     parse_pronunciation(node)
+                if t.startswith("Pronunciation "):
+                    # Pronunciation 1, etc, are used in Chinese Glyphs,
+                    # and each of them may have senses under Definition
+                    push_etym()
+                    ctx.start_subsection(None)
             elif t.startswith("Etymology"):
                 push_etym()
                 ctx.start_subsection(None)
@@ -1932,7 +1914,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     data = pos_data
                 else:
                     data = etym_data
-                parse_linkage(data, "coordinates", node)
+                parse_linkage(data, "coordinate_terms", node)
             elif t in ("Anagrams", "Further reading", "References",
                        "Quotations", "Descendants"):
                 # XXX does the Descendants section have something we'd like
@@ -2523,25 +2505,34 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX handle <ruby> specially in clean or perhaps already earler, see
 # e.g. 無比 (Japanese)
 
+# XXX There are way too many <noinclude> not propersy closed warnings
+# forom Chinese, e.g., 內 - find out what causes these, and either fix or
+# ignore
+
+# XXX Lua error on 龜 - test again after next Wiktionary dump, this might be
+# due to undefined language in Lua module
+
+# Parse readings subsection in Japanese kanji characters, see 內
+#  - these are apparently pronunciations, but not IPA
+#  - perhaps these might be parsed as forms with "reading" tag and tag
+#    for the type of reading?
+
+# Korean kanji seem to have Phonetic hangeul in pronunciation sections, see 內
+
 # XXX test ISBN / Japanese - how does word entry work, how do synonyms
 # work (relates to <ruby> handling)
 
 # Handle Japanese parentheses in linkage items.  It think this relates
 # to <ruby>.
 
-# XXX There are way too many <noinclude> not propersy closed warnings
-# forom Chinese, e.g., 內 - find out what causes these, and either fix or
-# ignore
-
-# XXX Lua error on 龜
-
 # Implement <hiero> ... </hiero>, e.g., lilja/Finnish/Etymology
 
 # Implement <chem> ... </chem>, e.g. felsic/English/Adjective
 
-# Try to find out what's causing invalid unicode in some cyrillic words
-# and translations, e.g., quail/English/Translations
-
 # Improve htmlgen lists
 #   - more even sizes of sublists (use intervals when appropriate)
 #   - group kanji etc by radical + strokes
+
+# XXX chinese glyphs, see 內
+#  - I'm getting dial-syn page does not exist in synonyms, but Wiktionary
+#    shows a big list of synonyms
