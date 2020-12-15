@@ -146,7 +146,7 @@ part_of_speech_map = {
     },
     "hanja": {
         "pos": "character",
-        "tags": ["hanja"],
+        "tags": ["Hanja"],
     },
     "hanzi": {
         "pos": "character",
