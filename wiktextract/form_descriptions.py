@@ -1928,6 +1928,7 @@ valid_tags = set([
     "topic",
     "deprecated-template",
     "cangjie-input",
+    "four-corner",
     "composition",
     "radical",
     "radical+strokes",
@@ -1936,6 +1937,7 @@ valid_tags = set([
     "yale",
     "wade-giles",
     "han-tu",
+    "eumhun",
 ])
 
 valid_topics = set([
