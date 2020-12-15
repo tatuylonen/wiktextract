@@ -1629,7 +1629,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if not have_linkages:
             parse_linkage_item(extras, field)
         if not have_linkages and not have_panel_template:
-            ctx.warning("no linkages found")
+            ctx.debug("no linkages found")
 
     def parse_translations(data, xlatnode):
         assert isinstance(data, dict)
