@@ -1212,7 +1212,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             data_append(ctx, sense_base, "glosses",
                                         outer_text)
                         parse_sense(pos, item.children, sense_base)
-                        print("sense_base:", sense_base)
 
     def parse_pronunciation(node):
         assert isinstance(node, WikiNode)
@@ -2590,3 +2589,14 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX chinese glyphs, see 內
 #  - I'm getting dial-syn page does not exist in synonyms, but Wiktionary
 #    shows a big list of synonyms
+
+# Analyze:
+# IOC/English/Proper noun: ERROR: LUA error in #invoke ('form of/templates', 'form_of_t', 'initialism of', 'cat=initialisms', 'withcap=1', 'withdot=1') parent ('Template:initialism of', {1: 'en', 2: ''}) at ['IOC', 'initialism of', 'check deprecated lang param usage', 'ARGVAL-1', '#invoke']
+# [string "form of/templates"]:197: No linked-to term specified; either specify term, alt, translit or transcription
+# stack traceback:
+# 	[C]: in function 'error'
+# 	[string "form of/templates"]:197: in upvalue 'get_terminfo_and_categories'
+# 	[string "form of/templates"]:263: in function <[string "form of/templates"]:262>
+# 	(...tail calls...)
+# 	[C]: in function 'xpcall'
+# 	[string "<python>"]:235: in function 'lua_invoke'
