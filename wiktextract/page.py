@@ -733,6 +733,13 @@ template_linkage_mappings = [
     ["col", 2],
 ]
 
+# Maps template name used in a word sense to a linkage field that it adds.
+sense_linkage_templates = {
+    "syn": "synonyms",
+    "synonyms": "synonyms",
+    "hyponyms": "hyponyms",
+}
+
 
 def decode_html_entities(v):
     if isinstance(v, int):
@@ -751,6 +758,19 @@ def is_panel_template(name):
         if name.startswith(prefix):
             return True
     return False
+
+
+def parse_sense_linkage(ctx, data, name, ht):
+    assert isinstance(ctx, Wtp)
+    assert isinstance(data, dict)
+    assert isinstance(name, str)
+    assert isinstance(ht, dict)
+    field = sense_linkage_templates[name]
+    for i in range(2, 20):
+        w = ht.get(i)
+        if not w:
+            break
+        data_append(ctx, data, field, {"word": w})
 
 
 def parse_language(ctx, config, langnode, language, lang_code):
@@ -851,14 +871,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     data_append(ctx, sense_base, "wikidata", arg)
                 data_append(ctx, sense_base, "senseid",
                             langid + ":" + arg)
-
-            if name in ("syn", "synonyms"):
-                for i in range(2, 20):
-                    w = ht.get(i)
-                    if not w:
-                        break
-                    data_append(ctx, sense_base, "synonyms",
-                                {"word": w})
+            if name in sense_linkage_templates:
+                parse_sense_linkage(ctx, sense_base, name, ht)
                 return ""
             if name == "†" or name == "zh-obsolete":
                 data_append(ctx, sense_base, "tags", "obsolete")
@@ -1111,12 +1125,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 contents = node.children
                 sublists = [x for x in contents
                             if isinstance(x, WikiNode) and
-                            x.kind == NodeKind.LIST
-                            and x.args == "##"]
-                if not sublists:
-                    sense_base = {"tags": common_tags}
-                    parse_sense(pos, contents, sense_base)
-                    continue
+                            x.kind == NodeKind.LIST and
+                            x.args == "##"]
+                others = [x for x in contents
+                          if isinstance(x, WikiNode) and
+                          x.kind == NodeKind.LIST and
+                          x.args != "##"]
+
                 # This entry has sublists of entries.  We should contain
                 # gloss information from both.  Sometimes the outer gloss
                 # is more non-gloss or tags, sometimes it is a coarse sense
@@ -1125,18 +1140,30 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 outer = [x for x in contents
                          if not isinstance(x, WikiNode) or
                          x.kind != NodeKind.LIST]
+                common_data = {}
+                common_data["tags"] = common_tags
 
                 def outer_template_fn(name, ht):
                     if is_panel_template(name):
                         return ""
                     if name in ("defdate",):
                         return ""
-                    if name in ("syn", "synonyms"):
+                    if name in sense_linkage_templates:
+                        parse_sense_linkage(ctx, common_data, name, ht)
                         return ""
                     return None
 
-                common_data = {}
-                common_data["tags"] = common_tags
+                # Process others, so that we capture any sense linkages from
+                # there
+                clean_node(config, ctx, common_data, others,
+                           template_fn=outer_template_fn)
+
+                # If there are no sublists of senses, parse it as just one
+                if not sublists:
+                    parse_sense(pos, contents, common_data)
+                    continue
+
+                # Clean the outer gloss
                 outer_text = clean_node(config, ctx, common_data, outer,
                                         template_fn=outer_template_fn)
                 strip_ends = [", particularly:"]
@@ -1144,6 +1171,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if outer_text.endswith(x):
                         outer_text = outer_text[:-len(x)]
                         break
+                # Process any inner glosses
                 for sublist in sublists:
                     assert sublist.kind == NodeKind.LIST
                     for item in sublist.children:
@@ -1152,9 +1180,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         if item.kind != NodeKind.LIST_ITEM:
                             continue
                         sense_base = {}
-                        for k in ("categories", "tags"):
-                            data_extend(ctx, sense_base, k,
-                                        common_data.get(k, ()))
+                        for k, v in common_data.items():
+                            if isinstance(v, (list, tuple)):
+                                data_extend(ctx, sense_base, k, v)
                         # XXX is it always a gloss?  Maybe non-gloss?
                         tags = ()
                         if outer_text == "A pejorative:":
@@ -1823,7 +1851,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             """This is called for otherwise unprocessed parts of the page.
             We still expand them so that e.g. Category links get captured."""
             if name in wikipedia_templates:
-                parse_wikipedia_template(config, ctx, etym_data, ht)
+                data = base if len(stack) <= 1 else etym_data
+                parse_wikipedia_template(config, ctx, data, ht)
                 return ""
             if is_panel_template(name):
                 return ""
@@ -1930,6 +1959,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             process_children(node)
             stack.pop()
 
+    # Main code of parse_language()
     # Process the section
     stack.append(language)
     process_children(langnode)
