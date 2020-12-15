@@ -302,6 +302,8 @@ xlat_tags_map = {
     "with inf.": "with-infinitive",
     # XXX re-enable "~ се": "with-ce",
     "strong/mixed": "strong mixed",
+    "strong/weak/mixed": "strong weak mixed",
+    "weak/mixed": "weak mixed",
     "auxiliary sein": "with-sein",
     "nominative/accusative": "nominative accusative",
     "masculine/feminine": "masculine feminine",
@@ -2683,6 +2685,13 @@ def parse_alt_or_inflection_of(ctx, gloss):
         # XXX remove:
         #    add_new(valid_sequences, max_next_i)
         nodes = new_nodes
+    else:
+        # We've reached the end of the gloss
+        for node, next_i in nodes:
+            if "$" in node:
+                for x in node["$"].get("tags", ()):
+                    tags.add(x)
+                last = len(lst)
 
     if last == 0:
         return [], gloss
@@ -2696,7 +2705,7 @@ def parse_alt_or_inflection_of(ctx, gloss):
             tags.extend(node["$"].get("tags", ()))
             lst = lst[:-2]
 
-    tags = list(sorted(tags))
+    tags = list(sorted(t for t in tags if t))
     base = " ".join(lst).strip()
     # Clean up some common additional stuff
     base = re.sub(r"(?s)(:|;| - ).*", "", base)

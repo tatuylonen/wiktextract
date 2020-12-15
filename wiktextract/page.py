@@ -900,6 +900,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # This happens commonly with, e.g., {{inflection of|...}}.  Split
         # to parts.
         subglosses = re.split(r"[#*]+\s*", rawgloss)
+        if len(subglosses) > 1 and "form_of" not in sense_base:
+            infl_tags, infl_base = parse_alt_or_inflection_of(ctx,
+                                                              subglosses[0])
+            if infl_base and "form-of" in infl_tags:
+                # Interpret others as a particular form under "inflection of"
+                data_extend(ctx, sense_base, "tags", infl_tags)
+                sense_base["form_of"] = infl_base
+                subglosses = subglosses[1:]
+        # Create senses for remaining subglosses
         for gloss in subglosses:
             if not gloss and len(subglosses) > 1:
                 continue
@@ -907,8 +916,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
             push_sense()
             # Copy data for all senses to this sense
             for k, v in sense_base.items():
-                if k != "tags":
-                    data_extend(ctx, sense_data, k, v)
+                if isinstance(v, (list, tuple)):
+                    if k != "tags":
+                        # Tags handled below (countable/uncountable special)
+                        data_extend(ctx, sense_data, k, v)
+                else:
+                    sense_data[k] = v
             # Parse the gloss for this particular sense
             m = re.match(r"^\((([^()]|\([^)]*\))*)\):?\s*", gloss)
             if m:
@@ -931,8 +944,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # Check to make sure we don't have unhandled list items in gloss
             ofs = max(gloss.find("#"), gloss.find("*"))
             if ofs > 10:
-                ctx.warning("gloss may contain unhandled list items: {}"
-                            .format(gloss))
+                ctx.debug("gloss may contain unhandled list items: {}"
+                          .format(gloss))
 
             # Kludge, some glosses have a comma after initial qualifiers in
             # parentheses
@@ -970,8 +983,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 infl_tags, infl_base = parse_alt_or_inflection_of(ctx, gloss)
                 if not infl_base and infl_tags:
                     # Interpret as a particular form under "inflection of"
-                    sense_data.extend(infl_tags)
-                    gloss = "-"
+                    data_extend(ctx, sense_data, "tags", infl_tags)
 
             if not gloss:
                 #ctx.debug("{}: empty gloss at {}"
@@ -1141,7 +1153,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                          if not isinstance(x, WikiNode) or
                          x.kind != NodeKind.LIST]
                 common_data = {}
-                common_data["tags"] = common_tags
+                common_data["tags"] = list(common_tags)
 
                 def outer_template_fn(name, ht):
                     if is_panel_template(name):
@@ -1183,6 +1195,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         for k, v in common_data.items():
                             if isinstance(v, (list, tuple)):
                                 data_extend(ctx, sense_base, k, v)
+                            else:
+                                sense_base[k] = v
                         # XXX is it always a gloss?  Maybe non-gloss?
                         tags = ()
                         if outer_text == "A pejorative:":
@@ -1198,6 +1212,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             data_append(ctx, sense_base, "glosses",
                                         outer_text)
                         parse_sense(pos, item.children, sense_base)
+                        print("sense_base:", sense_base)
 
     def parse_pronunciation(node):
         assert isinstance(node, WikiNode)
