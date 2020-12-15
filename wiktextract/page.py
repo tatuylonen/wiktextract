@@ -1485,13 +1485,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 qualifier = None
                 item = ", ".join(item.split())
 
-            item = re.sub(r"\s*\(\)", "", item)
             # XXX temporarily disabled.  These should be analyzed.
             #if item.find("(") >= 0 and item.find(", though ") < 0:
             #    ctx.debug("linkage item has remaining parentheses: {}"
             #              .format(item))
 
-            item = re.sub(r"\s*\(\s*\)", "", item)
+            item = re.sub(r"\s*\^?\s*\(\s*\)", "", item)
             item = item.strip()
             # XXX check for: stripped item text starts with "See also [[...]]"
             if item and not sublists:
@@ -1654,13 +1653,21 @@ def parse_language(ctx, config, langnode, language, lang_code):
             def translation_item_template_fn(name, ht):
                 nonlocal langcode
                 # print("TRANSLATION_ITEM_TEMPLATE_FN:", name, ht)
-                if name in ("t", "t+", "t-simple", "t", "t+check"):
+                if name in ("t", "t+", "t-simple", "t", "t+check", "t-check"):
                     code = ht.get(1)
                     if code:
                         if langcode and code != langcode:
                             ctx.warning("differing language codes {} vs "
                                         "{} in translation item: {!r} {}"
                                         .format(langcode, code, name, ht))
+                        langcode = code
+                    return None
+                if name == "t-egy":
+                    langcode = "egy"
+                    return None
+                if name == "ttbc":
+                    code = ht.get(1)
+                    if code:
                         langcode = code
                     return None
                 if name in ("t-needed", "checktrans-top"):
@@ -1688,6 +1695,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             item = clean_node(config, ctx, data, contents,
                               template_fn=translation_item_template_fn)
             # print("    TRANSLATION ITEM: {}  [{}]".format(item, sense))
+
+            item = re.sub(r"\^\(please verify\)\s*", "", item)
 
             if re.search(r"\(\d+\)|\[\d+\]", item):
                 if not item.find("numeral:"):
