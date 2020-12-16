@@ -1279,10 +1279,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if origtext.find("IPA") >= 0:
                 field = "ipa"
             else:
-                # XXX When exactly would this happen?  What would end up in the
-                # "other" category?
-                # field = "other"
-                continue
+                # This is used for Rhymes, Homophones, etc
+                field = "other"
             # Check if it contains Japanese "Tokyo" pronunciation with
             # special syntax
             m = re.search(r"\(Tokyo\) +([^ ]+) +\[", origtext)
@@ -1529,7 +1527,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # print("LINKAGE TEMPLATE:", node)
 
             def linkage_template_fn(name, ht):
-                print("LINKAGE_TEMPLATE_FN:", name, ht)
+                # print("LINKAGE_TEMPLATE_FN:", name, ht)
                 nonlocal field
                 nonlocal have_panel_template
                 if is_panel_template(name):
@@ -2018,7 +2016,6 @@ def parse_wikipedia_template(config, ctx, data, ht):
     assert isinstance(ht, dict)
     langid = clean_node(config, ctx, data, ht.get("lang", ()))
     pagename = clean_node(config, ctx, data, ht.get(1, ())) or ctx.title
-    print("wikipedia ht {} pagename {!r}".format(ht, pagename))
     if langid:
         data_append(ctx, data, "wikipedia", langid + ":" + pagename)
     else:
@@ -2590,14 +2587,3 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX chinese glyphs, see 內
 #  - I'm getting dial-syn page does not exist in synonyms, but Wiktionary
 #    shows a big list of synonyms
-
-# Analyze:
-# IOC/English/Proper noun: ERROR: LUA error in #invoke ('form of/templates', 'form_of_t', 'initialism of', 'cat=initialisms', 'withcap=1', 'withdot=1') parent ('Template:initialism of', {1: 'en', 2: ''}) at ['IOC', 'initialism of', 'check deprecated lang param usage', 'ARGVAL-1', '#invoke']
-# [string "form of/templates"]:197: No linked-to term specified; either specify term, alt, translit or transcription
-# stack traceback:
-# 	[C]: in function 'error'
-# 	[string "form of/templates"]:197: in upvalue 'get_terminfo_and_categories'
-# 	[string "form of/templates"]:263: in function <[string "form of/templates"]:262>
-# 	(...tail calls...)
-# 	[C]: in function 'xpcall'
-# 	[string "<python>"]:235: in function 'lua_invoke'

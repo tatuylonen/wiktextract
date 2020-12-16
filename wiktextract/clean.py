@@ -27,7 +27,6 @@ def clean_value(config, title, no_strip=False):
             return ""
         return clean_value(config, m.group(3) or "", no_strip=True)
     def repl_link_bars(m):
-        print("link_bars", repr(m.group(0)))
         lnk = m.group(1)
         if re.match(r"(?si)(File|Image)\s*:", lnk):
             return ""
