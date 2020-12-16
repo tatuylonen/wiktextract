@@ -22,8 +22,18 @@ def clean_value(config, title, no_strip=False):
 
     def repl_1(m):
         return clean_value(config, m.group(1), no_strip=True)
-    def repl_2(m):
-        return clean_value(config, m.group(2), no_strip=True)
+    def repl_link(m):
+        if m.group(2) in ("File", "Image"):
+            return ""
+        return clean_value(config, m.group(3) or "", no_strip=True)
+    def repl_link_bars(m):
+        print("link_bars", repr(m.group(0)))
+        lnk = m.group(1)
+        if re.match(r"(?si)(File|Image)\s*:", lnk):
+            return ""
+        return clean_value(config, m.group(4) or m.group(2) or "",
+                           no_strip=True)
+
     def repl_1_caret(m):
         return "^" + clean_value(config, m.group(1))
 
@@ -47,11 +57,12 @@ def clean_value(config, title, no_strip=False):
     title = re.sub(r"(?s)<\s*/\s*[^>]+>\n*", "", title)
     # Replace links by their text
     title = re.sub(r"(?si)\[\[\s*Category\s*:\s*([^]]+?)\s*\]\]", r"", title)
-    title = re.sub(r"(?s)\[\[\s*([^]|]+?)\s*\|\s*([^]|]+?)\s*\]\]",
-                   repl_2, title)
-    title = re.sub(r"(?s)\[\[\s*([a-zA-z0-9]+\s*:)?\s*([^]|]+?)"
+    title = re.sub(r"(?s)\[\[\s*([^]|]+?)\s*\|\s*([^]|]+?)"
+                   r"(\s*\|\s*([^]|]+?))?\s*\]\]",
+                   repl_link_bars, title)
+    title = re.sub(r"(?s)\[\[\s*(([a-zA-z0-9]+)\s*:)?\s*([^]|]+?)"
                    r"(\s*\([^])|]*\)\s*)?\|\]\]",
-                   repl_2, title)
+                   repl_link, title)
     title = re.sub(r"(?s)\[\[\s*([^]|]+?)\s*\]\]", repl_1, title)
     # Replace remaining HTML links by the URL.
     title = re.sub(r"\[https?:[^]\s]+\s+([^]]+?)\s*\]", repl_1, title)

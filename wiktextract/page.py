@@ -854,12 +854,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
         additional_glosses = []
 
         def sense_template_fn(name, ht):
-            if name == "wtorw":
-                parse_wikipedia_template(config, ctx, sense_base, ht)
-                return None
             if name in wikipedia_templates:
                 parse_wikipedia_template(config, ctx, sense_base, ht)
-                return ""
+                return None
             if is_panel_template(name):
                 return ""
             if name in ("defdate",):
@@ -1307,10 +1304,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # Check if it contains homophones
             m = re.search(r"\bHomophones?: ([^\s,]+(,\s*[^\s,]+)*)", text)
             if m:
-                for word in m.group(1).split(","):
-                    word = word.strip()
-                    if word:
-                        pron = {"homophone": word}
+                for w in m.group(1).split(","):
+                    w = word.strip()
+                    if w:
+                        pron = {"homophone": w}
                         parse_pronunciation_tags(ctx, tagstext, pron)
                         data_append(ctx, data, "sounds", pron)
                         have_pronunciations = True
@@ -1444,6 +1441,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 .format(name, ht))
                     return None
                 # XXX wikipedia, Wikipedia, w, wp, w2 link types
+                if name == "pedia":
+                    v = ht.get(1) or ""
+                    return clean_value(config, v)
                 return None
 
             item = clean_node(config, ctx, data, contents,
@@ -1529,7 +1529,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # print("LINKAGE TEMPLATE:", node)
 
             def linkage_template_fn(name, ht):
-                # print("LINKAGE_TEMPLATE_FN:", name, ht)
+                print("LINKAGE_TEMPLATE_FN:", name, ht)
                 nonlocal field
                 nonlocal have_panel_template
                 if is_panel_template(name):
@@ -2018,6 +2018,7 @@ def parse_wikipedia_template(config, ctx, data, ht):
     assert isinstance(ht, dict)
     langid = clean_node(config, ctx, data, ht.get("lang", ()))
     pagename = clean_node(config, ctx, data, ht.get(1, ())) or ctx.title
+    print("wikipedia ht {} pagename {!r}".format(ht, pagename))
     if langid:
         data_append(ctx, data, "wikipedia", langid + ":" + pagename)
     else:
