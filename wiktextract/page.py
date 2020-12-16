@@ -906,7 +906,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if infl_base and "form-of" in infl_tags:
                 # Interpret others as a particular form under "inflection of"
                 data_extend(ctx, sense_base, "tags", infl_tags)
-                sense_base["form_of"] = infl_base
+                data_append(ctx, sense_base, "form_of", infl_base)
                 subglosses = subglosses[1:]
         # Create senses for remaining subglosses
         for gloss in subglosses:
