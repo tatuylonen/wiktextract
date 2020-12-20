@@ -1,6 +1,5 @@
-wikitextparser>=0.22.0
 nose
-requests
 lupa
 dateparser
 python-Levenshtein
+wikitextprocessor
