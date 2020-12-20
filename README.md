@@ -30,8 +30,8 @@ run it yourself, be prepared to wait from several hours to a couple of
 days, depending on your computer.  Expanding Lua modules is not cheap,
 but it enables superior extraction quality and maintainability!
 
-**Documentation below needs to be updated; I plan to do that before
-  the 2.0.0 release.**
+**Documentation below is in the process of being updated; I plan to do
+  that before the 2.0.0 release.**
 
 ## Overview
 
@@ -41,9 +41,12 @@ Wiktionary contains extensive dictionaries and inflectional
 information for many languages, not just English.  Only its glosses
 and internal tagging are in English.
 
-This tool reads the ``enwiktionary-<date>-pages-articles.xml.bz2``
-file and outputs JSON-format dictionaries containing most of the
-information in Wiktionary.
+One thing that distinguishes this tool from any system I'm aware of is
+that this tool expands templates and Lua macros in Wiktionary.  That
+enables much more accurate rendering and extraction of glosses, word
+senses, inflected forms, and pronunciations.  It also makes the system
+much easier to maintain.  All this results in much higher extraction
+quality and accuracy.
 
 This tool extracts glosses, parts-of-speech, declension/conjugation
 information when available, translations for all languages when
@@ -57,20 +60,14 @@ information such as what word it is a form of, what is the RGB value
 of the color it represents, what is the numeric value of a number,
 what SI unit it represents, etc.
 
-The tool is capable of extracting information for any language.
-However, so far it has mostly been tested with English and Finnish,
-and to some extent German and Spanish.  Changes to extract information
-for any additional languages are likely to be small.  Basic
-information extraction most likely works out of the box for any
-language, but you may need to tweak the code to extract inflection or
-pronunciation information for other languages.
+This tool extracts information for all languages that have data in the
+English wiktionary.  It also extracts translingual data and
+information about characters (anything that has an entry in Wiktionary).
 
-There are currently no plans to support reading non-English
-wiktionaries, even though many other languages can also be extracted
-from ``enwiktionary``.  Adding support for other Wiktionaries would
-require extensive work and maintenance, as each Wiktionary uses a
-different tagging scheme.  Again, the English Wiktionary contains a
-good coverage of many languages.
+This tool reads the ``enwiktionary-<date>-pages-articles.xml.bz2``
+dump file and outputs JSON-format dictionaries containing most of the
+information in Wiktionary.  The dump files can be downloaded from
+https://dumps.wikimedia.org.
 
 This utility will be useful for many natural language processing,
 semantic parsing, machine translation, and language generation
@@ -90,28 +87,85 @@ extracts the information specified by command options for languages
 specified on the command line, and writes the extracted data to a file
 or standard output in JSON format for processing by other tools.
 
+While there are currently no active plans to support parsing
+non-English wiktionaries, I'm considering it.  Now that this builds on
+[wikitextprocessor](https://github.com/tatuylonen/wikitextprocessor/)
+and expands templates and Lua macros, it would be fairly
+straightforward to build support for other languages too - and even
+make the extraction configurable so that only a configuration file
+would need to be created for a processing a Wiktionary in a new
+language.
+
 As far as we know, this is the most comprehensive tool available for
-extracting information from Wiktionary as of November 2018.
+extracting information from Wiktionary as of December 2020.
+
+If you find this tool and/or the pre-extracted data helpful, please
+give this a star on github!
+
+## Pre-extracted data
+
+For most people, it may be easiest to just download pre-expanded data.
+Please see https://kaikki.org/dictionary/.  There is a download link
+at the bottom of every page.  You can download all data, data for a
+specific language, just a single word, or a list of related words
+(e.g., a particular part-of-speech or words relating to a particular
+topic or having a particular inflectional form).  All downloads are in
+JSON format (each line is a separate JSON object).  The bigger
+downloads are also available in compressed form.
+
+XXX I just noticed the download for all data is missing from the front
+page; that should get fixed in a couple of days.  Language-specific
+downloads are there.  You should still be able to find the full
+data under "All languages combined".
+
+Some people have asked for the data as a single JSON object.  I've
+decided to keep it as a JSON object per line, because loading all the
+data into Python requires 40-50 GB of memory.  It is much easier to
+process the data line-by-line, especially if you are only interested
+in part of the information.  You can easily read the files using the
+following code:
+```
+import json
+...
+with open("filename.json", "r") as f:
+    for line in f:
+        data = json.loads(line)
+        ... parse the data for this record
+```
+
+If you want to collect all the data into a list, you can read the file
+into a list with:
+```
+import json
+...
+lst = []
+with open("filename.json", "r") as f:
+    for line in f:
+        data = json.loads(line)
+        lst.append(data)
+```
 
 ## Getting started
 
 ### Installing
 
-To install ``wiktextract``, use ``pip`` (or ``pip3``, as appropriate),
-or clone the repository and install from the source:
+To install ``wiktextract``, use ``pip`` (or ``pip3``, as appropriate):
+```
+pip3 install wiktextract
+```
+**(Do not use pip quite yet - the release there is too old! It will be
+updated in a few days.)**
+
+Alternatively, you can get the latest development version from githup:
 
 ```
 git clone https://github.com/tatuylonen/wiktextract.git
-cd wiktextract
-python3 setup.py install
+cd wiktextract && pip3 install -r requirements.txt && pip3 install -e .
 ```
 
 This will install the ``wiktextract`` package and the ``wiktwords`` script.
 
-Note that this software has currently only been tested with Python 3.
-Back-porting to Python 2.7 should not be difficult; it just hasn't been
-tested yet.  Please report back if you test and make this work with
-Python 2.
+This software is only supported with Python 3.
 
 ### Running tests
 
@@ -124,6 +178,27 @@ To run the tests, just use the following command in the top-level directory:
 nosetests
 ```
 
+(Unfortunately the test suite for ``wiktextract`` is not yet very
+comprehensive.  The underlying lower-level toolkit,
+``wikitextprocessor``, has much more extensive test coverage.)
+
+### Expected performance
+
+Extracting all data for all languages from English Wiktionary takes
+about 7 hours on a modern (year 2020) 24-core desktop (AMD EPYC 7402)
+or three hours on a 128-core dual AMD EPYC 7702 system.  You may want
+to download the pre-extracted data rather than run it yourself unless
+you have special needs or want to modify the code.  If you run it
+yourself, be prepared to wait from several hours to a couple of days,
+depending on your computer.  While you can, you may not want to run
+this on a laptop.  Expanding Lua modules is not cheap, but it enables
+superior extraction quality and maintainability!  Also, the software
+needs 3-4 GB of memory per process.  You can control the number of
+parallel processes to use with the ``--num-threads`` option; the
+default on Linux is to use the number of available cores/hyperthreads.
+On Windows and MacOS, ``--num-threads`` should currently be set to 1
+(default on those systems).
+
 ## Using the command-line tool
 
 The ``wiktwords`` script is the easiest way to extract data from
@@ -132,38 +207,58 @@ Wiktionary.  Just download the data dump file from
 run the script.  The correct dump file the name
 ``enwiktionary-<date>-pages-articles.xml.bz2``.
 
-The command-line tool may be invoked as follows:
-
+An example of a typical invocation for extracting all data would be:
 ```
-wiktwords data/enwiktionary-latest-pages-articles.xml.bz2 --out wikt.words --language English --all
+wiktwords --all --all-languages --out data.json enwiktionary-20201201-pages-articles.xml.bz2
 ```
 
-The following command-line options are supported:
+If you wish to modify the code or test processing individual pages,
+the following may also be useful:
+
+1. To extract all pages from Wiktionary into separate files under
+``pages/`` and to create a cache file that you can use for quickly
+processing individual pages:
+```
+wiktwords --cache-file /tmp/wikt-cache --pages-dir pages enwiktionary-20201201-pages-articles.xml.bz2
+```
+
+2. To process a single page, processing a human-readable output file
+for debugging:
+```
+wiktwords --cache-file /tmp/wikt-cache --all --all-languages --out outfile --page pages/Words/di/dictionary.txt
+```
+
+The following command-line options can be used to control its operation:
 
 * --out FILE: specifies the name of the file to write (specifying "-" as the file writes to stdout)
+* --all-languages: extract words for all available languages
 * --language LANGUAGE: extracts the given language (this option may be specified multiple times; by default, English and Translingual words are extracted)
 * --list-languages: prints a list of supported language names
-* --all-languages: extract words for all available languages
 * --all: causes all data to be captured for the selected languages
 * --translations: causes translations to be captured
 * --pronunciation: causes pronunciation information to be captured
-* --linkages: causes linkages (hypernyms etc.) to be captured
-* --compounds: causes compound words using each word to be captured
+* --linkages: causes linkages (synonyms etc.) to be captured
 * --redirects: causes redirects to be extracted
-* --statistics: prints useful statistics at the end
 * --pages-dir DIR: save all wiktionary pages under this directory (mostly for debugging)
-* --help: displays help text
-
-Extracting all of English Wiktionary may take about an hour, depending
-on the speed of your system.
+* --cache CACHE: save/use cache file(s) from this path
+* --num-threads THREADS: use this many parallel processes (needs 4GB/process)
+* --human-readable: print human-readable JSON with indentation (no longer
+machine-readable)
+* --override PATH: override a page or Lua module by this file (first line should be TITLE: pagetitle)
+* --help: displays help text (with some more options than listed here)
 
 ## Calling the library
 
-The library can be called as follows:
+While this package has been mostly intended to be used using the ``wiktwords``
+program, it is also possible to call this as a library.  Underneath, this uses
+the ``wikitextprocessor`` module.
+
+This code can be called from an application as follows:
 
 ```
-from wiktextract import (WiktionaryConfig, parse_wiktionary,
-                         wiktionary_languages, PARTS_OF_SPEECH)
+from wiktextract import (WiktionaryConfig, parse_wiktionary, parse_page,
+                         PARTS_OF_SPEECH)
+from wikitextprocessor import Wtp, ALL_LANGUAGES
 
 config = WiktionaryConfig(
              capture_languages=["English", "Translingual"],
@@ -172,163 +267,232 @@ config = WiktionaryConfig(
              capture_linkages=True,
              capture_compounds=True,
              capture_redirects=True)
-parse_wiktionary(path, config, word_cb, capture_cb)
+ctx = Wtp()
+
+def word_cb(data):
+    # data is dictionary containing information for one word/redirect
+    ... do something with data
+
+parse_wiktionary(ctx, path, config, word_cb)
 ```
 
-The ``parse_wiktionary`` call will call ``word_cb(data)`` for words
-and redirects found in the Wiktionary dump.  ``data`` is information
-about a single word and part-of-speech as a dictionary (multiple
-senses of the same part-of-speech are combined into the same
-dictionary).  It may also be a redirect (indicated by presence of a
-"redirect" key in the dictionray).  It is in the same format as the
-JSON-formatted dictionaries returned by the ``wiktwords`` tool.  The
-format is described below.
+#### def parse_wiktionary(ctx, path, config, word_cb, capture_cb=None, phase1_only=False)
 
-``capture_cb(title, text)`` is called for every page before extracting any
-words from it.  It should return True if the page should be analyzed, and
-False if the page should be ignored.  It can also be used to write certain
-pages to disk or capture certain pages for different analyses (e.g., extracting
-hierarchies, classes, thesauri, or topic-specific word lists).  If this
-callback is None, all pages are analyzed.
+The ``parse_wiktionary`` function will call ``word_cb(data)`` for
+words and redirects found in the Wiktionary dump.  ``data`` is
+information about a single word and part-of-speech as a dictionary and
+may include several word senses.  It may also be a redirect (indicated
+by the presence of a "redirect" key in the dictionary).  It is in the same
+format as the JSON-formatted dictionaries returned by the
+``wiktwords`` tool.
 
-``capture_languages`` should be a list, tuple, or set of language names to
-capture.  It defaults to ``["English", "Translingual"]``.
+Its arguments are as follows:
+* ``ctx`` (Wtp) - a
+  [wikitextprocessor](https://github.com/tatuylonen/wikitextprocessor/)
+  processing context.  The number of parallel processes to use can be
+  given as the ``num_threads`` argument to the constructor, and a cache file
+  path can be provided as the ``cache_file`` argument.
+* ``path`` (str) - path to a Wiktionary dump file (*-pages-articles.xml.bz2)
+* ``config`` (WiktionaryConfig) - a configuration object describing what to
+  exctract (see below)
+* ``word_cb`` (function) - this function will be called for every word
+  extracted from Wiktionary.  The argument is a dictionary.  Typically it
+  will be called once for each word form and part-of-speech (each time there
+  may be more than one word sense under "senses").  See below for a description
+  of the dictionary.
+* ``capture_cb`` (function) - this can be ``None`` or a function to be
+  called as ``capture_cb(model, title, text)`` for every page before
+  extracting any words from it.  It can be used to extract raw pages
+  to disk.  The ``model`` argument is ``wikitext`` for normal pages,
+  ``Scribunto`` for Lua modules, and ``redirect`` for redirects (other
+  values are also possible).  ``title`` is page title and ``text`` is
+  page content or page title to redirect to.
+* ``phase1_only`` - if this is set to ``True``, then only a cache file will
+  be created but no extraction will take place.  In this case the ``Wtp``
+  constructor should probably be given the ``cache_file`` argument when
+  creating ``ctx``.
 
-``capture_translations`` can be set to True to capture translation
-information for words.  Translation information seems to be most
-widely available for the English language, which has translations into
-other languages.  The translation information increases the size and
-loading time of the captured data substantially, so this is disabled
-by default.
+This call gathers statistics in ``config``.  This function will automatically
+parallelize the extraction.  ``page_cb`` will be called in the parent process,
+however.
 
-``capture_pronunciations`` should be set to True to capture pronunciation
-information for words.  Typically, this includes IPA transcriptions
-and any audio files included in the word entries, along with other
-information.  However, the type and amount of pronunciation
-information varies widely between languages.  This is disabled by
-default since many applications won't need the information.
+#### def parse_page(ctx, title, text, config)
 
-``capture_linkages`` should be set to True to capture linkages between
-word, such as hypernyms, antonyms, synonyms, etc.
+This function parses ``text`` as if it was a Wiktionary page with the
+title ``title``.  The arguments are:
+* ``ctx`` (Wtp) - a ``wikitextprocessor`` context
+* ``title`` (str) - the title to use for the page
+* ``text`` (str) - contents of the page (wikitext)
+* ``config`` (WiktionaryConfig) - specifies what to capture and is also used
+  for collecting statistics
 
-``capture_compounds`` should be set to True to capture compound words
-containing the word.
+#### PARTS_OF_SPEECH
 
-``capture_redirects`` should be set to True to capture redirects.  Redirects
-are not associated with any specific language and thus requesting them
-returns them for words in all languages.
+This is a constant set of all part-of-speech values (``pos`` key) that
+may occur in the extracted data.  Note that the list is somewhat larger than
+what a conventional part-of-speech list would be.
+
+### class WiktionaryConfig(object)
+
+The ``WiktionaryConfig`` object is used for specifying what data to collect
+from Wiktionary and is also used for collecting statistics during
+extraction.
+
+The constructor is called as:
+```
+WiktionaryConfig(capture_languages=["English", "Translingual",
+                 capture_translations=False,
+                 capture_pronunciation=False,
+                 capture_linkages=False,
+                 capture_compounds=False,
+                 capture_redirects=False,
+                 capture_examples=False)
+```
+
+The arguments are as follows:
+* ``capture_languages`` (list/tuple/set of strings) - names of
+  languages for which to capture data.  It defaults to ``["English",
+  "Translingual"]``.  To capture all languages, one can use
+  ``set(x["name"] for x in ALL_LANGUAGES)`` (with ``ALL_LANGUAGES``
+  imported from wikitextprocessor).
+* ``capture_translations`` (boolean) - set to ``True`` to capture translation
+  information for words.  Translation information seems to be most
+  widely available for the English language, which has translations into
+  other languages.
+* ``capture_pronunciation`` (boolean) - set to ``True`` to capture pronunciation
+  information for words.  Typically, this includes IPA transcriptions
+  and any audio files included in the word entries, along with other
+  information.  The type and amount of pronunciation
+  information varies widely between languages.
+* ``capture_linkages`` (boolean) - set to ``True`` to capture linkages between
+  word, such as hypernyms, antonyms, synonyms, etc.
+* ``capture_compounds`` (boolean) - set to ``True`` to capture compound words
+  containing the word.
+* ``capture_redirects`` (boolean) - set to ``True`` to capture
+  redirects.  Redirects are not associated with any specific language
+  and thus requesting them returns them for all words in all languages.
+* ``capture_examples`` (boolean) - set to ``True`` to capture usage examples
+  (XXX currently not implemented).
 
 ## Format of extracted redirects
 
 Some pages in Wiktionary are redirects.  For these, ``word_cb`` will
 be called with data in a special format.  In this case, the dictionary
-will have the key ``redirect``, which will contain the name of the
-word the entry redirects to.  The key ``title`` contains the word/term
-that contains the redirect.  Redirect entries do not have ``pos`` or
-any of the other fields.  Redirects also are not associated with any
-language, so all redirects are always returned regardless of the captured
-languages (if extracting redirects has been requested).
+will have a ``redirect`` key, which will contain the page title that
+the entry redirects to.  The ``title`` key contains the word/term that
+contains the redirect.  Redirect entries do not have ``pos`` or any of
+the other fields.  Redirects also are not associated with any
+language, so all redirects are always returned regardless of the
+captured languages (if extracting redirects has been requested).
 
 ## Format of the extracted word entries
 
 Information returned for each word is a dictionary.  The dictionary has the
 following keys (others may also be present or added later):
 
-* ``word``: the word form
-* pos: part-of-speech, such as "noun", "verb", "adj", "adv", "pron", "determiner", "prep" (preposition), "postp" (postposition), and many others.  The complete list of possible values returned by the package can be found in ``wiktextract.PARTS_OF_SPEECH``.
-* ``senses``: word senses for this word/part-of-speech (see below)
-* ``conjugation``: conjugation and declension entries found for the word, as dictionaries
-* ``heads``: part-of-speech specific head tags for the word.  Useful for, e.g., obtaining comparatives, superlatives, and other inflection information for many languages.  Each value is a dictionary, basically containing the arguments of the corresponding template in Wiktionary, with the template name under "template_name".
-* ``hyphenation``: list of hyphenations for the word when available.  Each hyphenation is a sequence of syllables.
-* ``pinyin``: for Chinese words, the romanized transliteration, when available
-* ``synonyms``: synonym linkages for the word (see below)
-* ``antonyms``: antonym linkages for the word (see below)
-* ``hypernyms``: hypernym linkages for the word (see below)
-* ``holonyms``: linkages indicating being part of something (see below) (not systematically encoded)
-* ``meronyms``: linkages indicating having a part (see below) (fairly rare)
-* ``derived``: derived word linkages for the word (see below)
-* ``related``: related word linkages for the word (see below)
-* ``pronunciations``: contains pronunciation information when collected (see below)
-* ``translations``: contains translation information when collected (see below)
+* ``word`` - the word form
+* ``pos`` - part-of-speech, such as "noun", "verb", "adj", "adv", "pron", "determiner", "prep" (preposition), "postp" (postposition), and many others.  The complete list of possible values returned by the package can be found in ``wiktextract.PARTS_OF_SPEECH``.
+* ``lang`` - name of the language this word belongs to (e.g., ``English``)
+* ``lang_code`` - Wiktionary language code (e.g., ``en``)
+* ``senses`` - list of word senses (dictionaries) for this word/part-of-speech (see below)
+* ``forms`` - list of inflected or alternative forms specified for the word (e.g., plural, comparative, superlative, roman script version).  This is a list of dictionaries, where each dictionary has a ``word`` key and a ``tags`` key.  The ``tags`` identify what type of form it is.
+* ``sounds`` - list of dictionaries containing pronunciation, hyphenation, rhyming, and related information.  Each dictionary may have a ``tags`` key containing tags that clarify what kind of form that entry is.  Different types of information are stored in different fields: ``ipa`` is [IPA](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet) pronunciation, ``enPR`` is [enPR](https://en.wikipedia.org/wiki/Pronunciation_respelling_for_English) pronunciation, ``audio`` is name of sound file in Wikimedia commons.
+* ``translations`` - non-disambiguated translation entries (see below)
+* ``synonyms`` - non-disambiguated synonym linkages for the word (see below)
+* ``antonyms`` - non-disambiguated antonym linkages for the word (see below)
+* ``hypernyms`` - non-disambiguated hypernym linkages for the word (see below)
+* ``holonyms`` - non-disambiguated linkages indicating being part of something (see below) (not systematically encoded)
+* ``meronyms`` - non-disambiguated linkages indicating having a part (see below) (fairly rare)
+* ``derived`` - non-disambiguated derived word linkages for the word (see below)
+* ``related`` - non-disambiguated related word linkages for the word (see below)
+* ``wikidata`` - non-disambiguated Wikidata identifer
+* ``wiktionary`` - non-disambiguated page title in Wikipedia (possibly prefixed by language id)
+* ``categories`` - list of non-disambiguated categories for the word
+* ``topics`` - list of non-disambiguated topics for the word
+* ``inflection`` - conjugation and declension entries found for the word, as dictionaries.  These basically capture the language-specific inflection template
+for the word.
+* ``heads``: part-of-speech specific head tags for the word.  This basically just captures the templates (their name and arguments) as a list of dictionaries.  Most applications may want to ignore this.
 
-XXX update this, there are now some additional fields and some format changes
+There may also be other fields.
+
+Note that several of the field on the word entry level indicate
+information that has not been sense-disambiguated.  Such information
+may apply to one or more of the senses.  Currently only the most
+trivial cases are disambiguated; however, it is anticipated that more
+disambiguation may be performed in the future.  It is also possible
+for the same key to be provided in a sense and in the word entry; in
+that case, the data in the sense has been sense-disambiguated and the
+data in the word entry has not (and may not be apply to any particular
+sense, regardless of whether the sense has some related
+sense-disambiguated information).
 
 ### Word senses
 
-Each part-of-speech may have multiple glosses under the ``senses`` key.  Each
+Each word entry may have multiple glosses under the ``senses`` key.  Each
 sense is a dictionary that may contain the following keys (among others, and more may be added in the future):
 
-* ``glosses``: list of gloss strings for the word sense (usually only one).  This has been cleaned, and should be straightforward text with no tagging.
-* ``nonglosses``: list of gloss-like strings but that are not traditional glossary entries describing the word's meaning
-* ``tags``: list of qualifiers and tags for the gloss.  This is a list of strings, and may include words such as "archaic", "colloquial", "present", "plural", "person", "organism", "british", "chemistry", "given name", "surname", "female", and many others (new words may appear arbitrarily).  Some effort has been put into trying to canonicalize various sources and styles of annotation into a consistent set of tags, but it is impossible to do an exact job at this.
-* ``senseid``: list of identifiers collected for the sense.  Some entries have a Wikidata identifier (Q<numbers>) here; others may have other identifiers.  Currently sense ids are not very widely annotated in Wiktionary.
-* ``wikipedia``: link to Wikipedia page from the word sense/gloss
-* ``topics``: topic categories specified for the sense (these may also be in "tags")
-* ``taxon``: links to taxonomical data
-* ``categories``: Category links specified for the page
-* ``color``: specification of RGB color values (hex or CSS color name)
-* ``value``: value represented by the word (e.g., for numerals)
-* ``unit``: information about units of measurement, particularly SI units, tagged to the word
-* ``alt_of``: list of words of which this sense is an alternative form or abbreviation
-* ``inflection_of``: list of words that this sense is an inflection of
-* ``conjugation``: list of templates indicating conjugation/declension (list of dictionaries containing the arguments of the Wiktionary template, with template name under "template_name")
+* ``glosses`` - list of gloss strings for the word sense (usually only one).  This has been cleaned, and should be straightforward text with no tagging.
+* ``nonglosses`` - list of gloss-like strings but that are not traditional glossary entries describing the word's meaning
+* ``tags`` - list of qualifiers and tags for the gloss.  This is a list of strings, and may include words such as "archaic", "colloquial", "present", "participle", "plural", "feminine", and many others (new words may appear arbitrarily).  Some effort has been put into trying to canonicalize various sources and styles of annotation into a consistent set of tags, but it is impossible to do an exact job at this.
+* ``senseid`` - list of textual identifiers collected for the sense.  If there is a QID for the entry (e.g., Q123), those are stored in the ``wikidata`` field.
+* ``wikidata`` - list of QIDs (e.g., Q123) for the sense
+* ``wikipedia``- list of Wikipedia page titles (with optional language code prefix)
+* ``categories`` - list of category names extracted from (a subset) of the Category links on the page
+* ``topics`` - list of topic names (kind of similar to categories but determined differently)
+* ``alt_of`` - list of words that his sense is an alternative form of; for example, for an abbreviation, this would typically be set to the full form
+* ``form_of`` - list of words that this sense is an inflected form of; for example, a participle form would typically set this to be the base form
+* ``translations`` - sense-disambiguated translation entries (see below)
+* ``synonyms`` - sense-disambiguated synonym linkages for the word (see below)
+* ``antonyms`` - sense-disambiguated antonym linkages for the word (see below)
+* ``hypernyms`` - sense-disambiguated hypernym linkages for the word (see below)
+* ``holonyms`` - sense-disambiguated linkages indicating being part of something (see below) (not systematically encoded)
+* ``meronyms`` - sense-disambiguated linkages indicating having a part (see below) (fairly rare)
+* ``derived`` - sense-disambiguated derived word linkages for the word (see below)
+* ``related`` - sense-disambiguated related word linkages for the word (see below)
 
 ### Linkages to other words
 
 Linkages (``synonyms``, ``antonyms``, ``hypernyms``, ``derived words``, ``holonyms``, ``meronyms``, ``derived``, ``related``) are lists of dictionaries, where each dictionary can contain the following keys, among others:
 
-* ``word``: the word this links to (string).  If this starts with "Thesaurus:", then this entry is a link to a thesaurus page in Wiktionary.  If this starts with "Category:", then this refers to a category page in Wiktionary.
-* ``sense``: text identifying the word sense or context.  This may also be a title from a table where the links are shown (e.g., "Derived terms of name that are not hyponyms").
+* ``word`` - the word this links to (string).  If this starts with "Thesaurus:", then this entry is a link to a thesaurus page in Wiktionary.  If this starts with "Category:", then this refers to a category page in Wiktionary.
+* ``sense`` - text identifying the word sense or context (e.g., ``"to rain very heavily"``).
 * ``tags``: qualifiers specified for the sense (e.g., field of study, region, dialect, style).  This is a list of strings.
 
 ### Pronunciation
 
-Pronunciation information is stored under the ``pronunciations`` key.  It is a
+Pronunciation information is stored under the ``sounds`` key.  It is a
 list of dictionaries, each of which may contain the following keys,
 among others:
 
-* ``audios``: list of audio files referenced as a list of ``(languagecode, filename, description)``
-* ``ipa``: pronunciation specifications as IPA strings
-* ``special_ipa``: special IPA-like specifications (sometimes macros calling code in Wiktionary), as list of dictionaries
-* ``enpr``: pronunciations in English pronunciation format as list of strings
-* ``homophones``: list of homophones for the word
-* ``accent``: accent markers associated with the pronunciation specification, such as dialect, country, etc.  Common values for English include, e.g., "RP" (for Received Pronunciation), "US", "UK", "GA" (General American), etc.  A list (in the form of code) can be found [here](https://en.wiktionary.org/wiki/Module:accent_qualifier/data).
-* ``tags``: other labels or context information attached to the sense (free form)
-* ``sense``: optional sense specifier, e.g., "noun", "verb", "anatomy sense" (a string)
+* ``ipa`` - pronunciation specifications as IPA strings
+* ``enpr`` - pronunciation in English pronunciation
+* ``audio`` - name of a sound file in WikiMedia Commons
+* ``homophones`` - list of homophones for the word
+* ``hyphenation`` - list of hyphenations
+* ``tags`` - other labels or context information attached to the sense (e.g., regional variant)
 
 ### Translations
 
-Translations, when captured, are stored under the ``translations`` key
+Translations are stored under the ``translations`` key
 in the word's data.  They are stored in a list of dictionaries, where
 each dictionary has the following keys (and possibly others):
 
-* ``lang``: the language that the translation is for (Wiktionary's 2 or 3-letter language code)
-* ``word``: the translation in the specified language
-* ``sense``: optional sense for which the translation is (this is a free-text string, and may not match any gloss exactly)
-* ``alt``: an optional alternative form of the translation (used when the translation is not a lemma form/page name; in those cases, ``word`` is the page name and ``alt`` contains the actual translated form)
-* ``roman``: an optional romanization of the translation
-* ``script``: optional name of the script that the translation is in
-* ``tags``: optional list of [gender/number specifiers](https://en.wiktionary.org/wiki/Module:gender_and_number)
+* ``lang``  the language name that the translation is for
+* ``code`` - Wiktionary's 2 or 3-letter language code for the language the translation is for
+* ``word`` - the translation in the specified language
+* ``sense`` - optional sense for which the translation is (this is a free-text string, and may not match any gloss exactly)
+* ``tags`` - optional list of qualifiers for the translations, e.g., gender
 
 ## Related packages
+
+The
+[wikitextprocessor](https://github.com/tatuylonen/wikitextprocessor)
+is a generic module for extracting data from Wiktionary, Wikipedia, and
+other WikiMedia dump files.  ``wiktextract`` is built using this module.
 
 The [wiktfinnish](https://github.com/tatuylonen/wiktfinnish) package
 can be used to interpret Finnish noun declinations and verb
 conjugations and for generating Finnish inflected word forms.
-
-## Known issues
-
-* Some information that is global for a page, such as category links for the page, may only be included in the last part-of-speech defined on the page or even the last language defined on the page.  This should be fixed.
-
-This software is still quite new and should still be considered a beta
-version.
-
-## Dependencies
-
-This package depends on the following other packages:
-
-* [lxml](https://lxml.de)
-* [wikitextparser](https://pypi.org/project/WikiTextParser/)
 
 ## Related tools
 
@@ -337,15 +501,13 @@ A few other tools also exist for parsing Wiktionaries.  These include
 [Wikiparse](https://github.com/frankier/wikiparse), and [DKPro
 JWKTL](https://dkpro.github.io/dkpro-jwktl/).
 
-## Contributing
+## Contributing and reporting bugs
 
-The official repository of this project is on
-[github](https://github.com/tatuylonen/wiktextract).
+Please report bugs and other issues on github.  I also welcome
+suggestions for improvement.
 
-Please report bugs and other issues on github.
-
-Please email to ylo at clausal.com if you wish to contribute or have
-patches or suggestions.
+Please email to ``ylo`` at ``clausal.com`` if you wish to contribute
+or have patches or suggestions.
 
 ## License
 
@@ -353,7 +515,4 @@ Copyright (c) 2018-2020 [Tatu Ylonen](https://ylonen.org).  This
 package is free for both commercial and non-commercial use.  It is
 licensed under the MIT license.  See the file
 [LICENSE](https://github.com/tatuylonen/wiktextract/blob/master/LICENSE)
-for details.
-
-Credit and linking to the project's website and/or citing any future
-papers on the project would be highly appreciated.
+for details.  (Certain files have different open source licenses)
