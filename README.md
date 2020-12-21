@@ -4,7 +4,9 @@ This is a utility and Python package for for extracing data from Wiktionary.
 
 **I'm getting very close to releasing 2.0.0 (probably in a few days,
   finally).  I'm basically just fixing final bugs, doing final
-  testing, and updating documentation at this point.***
+  testing, and updating documentation at this point.  I just needed to
+  make a bit bigger change, so I'm delaying by a few days to get it a
+  bit better tested.  Current estimated release date around Dec 23.***
 
 The release won't address everything.  Especially linkages (hypernyms,
 hyponyms, etc.) and disambiguation have issues that I'm postponing to
@@ -143,6 +145,159 @@ with open("filename.json", "r") as f:
     for line in f:
         data = json.loads(line)
         lst.append(data)
+```
+
+You can also easily pretty-print the data into more human-readable form using:
+```
+print(json.dumps(data, indent=2, sort_keys=True))
+```
+
+Here is a pretty-printed example of an extracted word entry for the
+word ``thrill`` as an English verb:
+```
+{
+  "categories": [
+    "Emotions"
+  ],
+  "derived": [
+    {
+      "word": "enthrill"
+    }
+  ],
+  "forms": [
+    {
+      "form": "thrills",
+      "tags": [
+        "present",
+        "simple",
+        "singular",
+        "third-person"
+      ]
+    },
+    {
+      "form": "thrilling",
+      "tags": [
+        "present"
+      ]
+    },
+    {
+      "form": "thrilled",
+      "tags": [
+        "participle",
+        "past",
+        "simple"
+      ]
+    }
+  ],
+  "heads": [
+    {
+      "template_name": "en-verb"
+    }
+  ],
+  "lang": "English",
+  "lang_code": "en",
+  "pos": "verb",
+  "senses": [
+    {
+      "glosses": [
+        "To suddenly excite someone, or to give someone great pleasure; to electrify; to experience such a sensation."
+      ],
+      "tags": [
+        "ergative",
+        "figuratively"
+      ]
+    },
+    {
+      "glosses": [
+        "To (cause something to) tremble or quiver."
+      ],
+      "tags": [
+        "ergative"
+      ]
+    },
+    {
+      "glosses": [
+        "To perforate by a pointed instrument; to bore; to transfix; to drill."
+      ],
+      "tags": [
+        "obsolete"
+      ]
+    },
+    {
+      "glosses": [
+        "To hurl; to throw; to cast."
+      ],
+      "tags": [
+        "obsolete"
+      ]
+    }
+  ],
+  "sounds": [
+    {
+      "ipa": "/\u03b8\u0279\u026al/"
+    },
+    {
+      "ipa": "[\u03b8\u027e\u032a\u030a\u026a\u026b]",
+      "tags": [
+        "UK",
+        "US"
+      ]
+    },
+    {
+      "ipa": "[\u03b8\u027e\u032a\u030a\u026al]",
+      "tags": [
+        "Ireland"
+      ]
+    },
+    {
+      "ipa": "[t\u032a\u027e\u032a\u030a\u026al]",
+      "tags": [
+        "Ireland"
+      ]
+    },
+    {
+      "rhymes": "-\u026al"
+    },
+    {
+      "audio": "en-us-thrill.ogg",
+      "tags": [
+        "US"
+      ],
+      "text": "Audio (US)"
+    }
+  ],
+  "translations": [
+    {
+      "code": "nl",
+      "lang": "Dutch",
+      "sense": "suddenly excite someone, or to give someone great pleasure; to electrify",
+      "word": "opwinden"
+    },
+    {
+      "code": "fi",
+      "lang": "Finnish",
+      "sense": "suddenly excite someone, or to give someone great pleasure; to electrify",
+      "word": "syk\u00e4hdytt\u00e4\u00e4"
+    },
+    {
+      "code": "fi",
+      "lang": "Finnish",
+      "sense": "suddenly excite someone, or to give someone great pleasure; to electrify",
+      "word": "riemastuttaa"
+    },
+...
+    {
+      "code": "tr",
+      "lang": "Turkish",
+      "sense": "slight quivering of the heart that accompanies a cardiac murmur",
+      "word": "\u00e7arp\u0131nt\u0131"
+    }
+  ],
+  "wikipedia": [
+    "thrill"
+  ],
+  "word": "thrill"
+}
 ```
 
 ## Getting started
@@ -465,7 +620,7 @@ list of dictionaries, each of which may contain the following keys,
 among others:
 
 * ``ipa`` - pronunciation specifications as IPA strings
-* ``enpr`` - pronunciation in English pronunciation
+* ``enpr`` - pronunciation in English pronunciation respelling
 * ``audio`` - name of a sound file in WikiMedia Commons
 * ``homophones`` - list of homophones for the word
 * ``hyphenation`` - list of hyphenations

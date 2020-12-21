@@ -2587,3 +2587,7 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 # XXX chinese glyphs, see 內
 #  - I'm getting dial-syn page does not exist in synonyms, but Wiktionary
 #    shows a big list of synonyms
+
+# XXX "present participle" is missing "participle" tag.  I think the fix
+# requires using multi-node parsing similar to decode_tags in parse_word_head().
+# (Probably no need to call decode_tags then any more)
