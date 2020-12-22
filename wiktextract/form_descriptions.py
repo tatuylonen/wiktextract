@@ -552,8 +552,8 @@ xlat_tags_map = {
     "krama inggil": "krama-inggil",
     "McCune-Reischauer chŏn": "McCune-Reischauer-chŏn",
     "gender indeterminate": "gender-indeterminate",
-    "singular only": "singular-only",
-    "plural only": "plural-only",
+    "singular only": "singular singular-only",
+    "plural only": "plural plural-only",
     "imperative only": "imperative-only",
     "in general sense": "broadly",
     "by extension": "broadly",
@@ -2175,7 +2175,8 @@ def add_to_valid_tree1(tree, field, k, v, valid_values):
     for vv in v:
         assert isinstance(vv, str)
         add_to_valid_tree(valid_sequences, field, k, vv)
-        add_to_valid_tree(valid_sequences, field, k.lower(), vv)
+        if k != k.lower():
+            add_to_valid_tree(valid_sequences, field, k.lower(), vv)
         vvs = vv.split(" ")
         for x in vvs:
             if not x or x.isspace():
@@ -2188,15 +2189,17 @@ def add_to_valid_tree1(tree, field, k, v, valid_values):
 
 
 def add_to_valid_tree_mapping(tree, field, mapping, valid_values, recurse):
+    assert isinstance(tree, dict)
+    assert isinstance(field, str)
+    assert isinstance(mapping, dict)
+    assert isinstance(valid_values, set)
+    assert recurse in (True, False)
     for k, v in mapping.items():
         assert isinstance(k, str)
         assert isinstance(v, (list, str))
         if isinstance(v, str):
             v = [v]
-        q = []
-        for vv in v:
-            vv = vv.split(" ")
-            q.extend(add_to_valid_tree1(tree, field, k, vv, valid_values))
+        q = add_to_valid_tree1(tree, field, k, v, valid_values)
         if recurse:
             visited = set()
             while q:
@@ -2206,9 +2209,9 @@ def add_to_valid_tree_mapping(tree, field, mapping, valid_values, recurse):
                 visited.add(v)
                 if v not in mapping:
                     continue
-                for vv in mapping[v].split(" "):
-                    qq = add_to_valid_tree1(tree, field, k, vv, valid_values)
-                    q.extend(qq)
+                vv = mapping[v]
+                qq = add_to_valid_tree1(tree, field, k, vv, valid_values)
+                q.extend(qq)
 
 
 # Tree of sequences considered to be tags (includes sequences that are
@@ -2291,8 +2294,10 @@ def decode_tags(lst, allow_any=False):
                 if w in node:
                     add_new(node[w], next_i)
                 if "$" in node:
-                    tags.extend(node["$"].get("tags", ()))
-                    topics.extend(node["$"].get("topics", ()))
+                    for t in node["$"].get("tags", ()):
+                        tags.extend(t.split(" "))
+                    for t in node["$"].get("topics", ()):
+                        topics.extend(t.split(" "))
                     if w in valid_sequences:
                         add_new(valid_sequences[w], i)
                 if w not in node and "$" not in node:
@@ -2314,8 +2319,10 @@ def decode_tags(lst, allow_any=False):
         valid_end = False
         for node, next_i in nodes:
             if "$" in node:
-                tags.extend(node["$"].get("tags", ()))
-                topics.extend(node["$"].get("topics", ()))
+                for t in node["$"].get("tags", ()):
+                    tags.extend(t.split(" "))
+                for t in node["$"].get("topics", ()):
+                    topics.extend(t.split(" "))
                 valid_end = True
         max_next_i = max(x[1] for x in nodes)
         if not valid_end and any(lst[max_next_i:]):
@@ -2464,61 +2471,79 @@ def parse_word_head(ctx, pos, text, data):
             m = re.match(r"^[\u2F00-\u2FDF\u2E80-\u2EFF\U00018800-\U00018AFF"
                          r"\uA490-\uA4CF\u4E00-\u9FFF]\+\d+$", desc)
             if m:
-                # Special case, used to give radical + strokes for Han characters
+                # Special case, used to give radical + strokes for Han
+                # characters
                 add_related(ctx, data, ["radical+strokes"], [desc])
                 continue
             parts = list(m.group(0) for m in re.finditer(word_re, desc))
-            lst = []
-            node = valid_sequences
-            last_valid = 0
+            nodes = [(valid_sequences, 0, set())]
+            last_i = 0
+            last_tagsets = []
             i = 0
-            while i < len(parts):
+            while i < len(parts) and nodes:
                 part = parts[i]
-                w = distw(titleparts, part)  # 0=identical .. 1=very different
-                if (part != title and part not in titleparts and
-                    (w >= 0.6 or len(part) < 4) and
-                    (part in node or
-                     ("$" in node and part in valid_sequences))):
-                    # Consider it part of a descriptor
-                    if part in node:
-                        if "$" in node:
-                            lst.extend(node["$"].get("tags", ()))
-                            last_valid = i + 1
-                        node = node[part]
+                w = distw(titleparts, part) # 0=identical .. 1=very different
+                new_nodes = []
+
+                # Does "or" occur in these?  (I think it might)
+
+                def add_node(node, next_i, tags):
+                    assert isinstance(node, dict)
+                    assert isinstance(next_i, int)
+                    assert isinstance(tags, set)
+                    nonlocal last_i
+                    nonlocal last_tagsets
+                    for node2, next_i2, tags2 in new_nodes:
+                        if (node2 is node and next_i2 == next_i and
+                            tags2 == tags):
+                            break
                     else:
-                        assert "$" in node
-                        lst.extend(node["$"].get("tags", ()))
-                        last_valid = i
-                        node = valid_sequences[part]
-                elif w == "of" and lst and "of" not in node:
-                    lst.append("form-of")
-                    last_valid = i + 1
-                    node = valid_sequences
-                    break
-                else:
-                    # Consider the rest as a related term
-                    break
+                        new_nodes.append((node, next_i, tags))
+                        # See if we should record this in the best alternatives
+                        if node is valid_sequences:
+                            if next_i > last_i:
+                                last_i = next_i
+                                last_tagsets = [tags]
+                            elif next_i == last_i:
+                                last_tagsets.append(tags)
+
+                for node, next_i, tags in nodes:
+                    if part not in node:
+                        continue
+                    # XXX should stop iteration on these
+                    # if ("form-of" in tags or "alt-of" in tags or
+                    #     "compound-of" in tags):
+                    #     continue
+                    if (part != title and part not in titleparts and
+                        (w >= 0.6 or len(part) < 4)):
+                        node = node[part]
+                        if len(node) > 1 or "$" not in node:
+                            add_node(node, next_i, tags)
+                        if "$" in node:
+                            for t in node["$"].get("tags", ()):
+                                new_tags = tags | set(t.split(" "))
+                                add_node(valid_sequences, i + 1, new_tags)
+                nodes = new_nodes
                 i += 1
-                # Stop if we have completed parsing something that is always
-                # followed by a word form
-                if ("alt-of" in lst or
-                    "form-of" in lst or
-                    "compound-of" in lst or
-                    "synonym-of" in lst):
-                    break
-            if "$" in node:
-                lst.extend(node["$"].get("tags", ()))
-                last_valid = i
-            related = parts[last_valid:]
+
+            if (last_i > 0 and last_i < len(parts) - 1 and
+                parts[last_i] == "of" and
+                "alt-of" not in tags and "form-of" not in tags):
+                tags.add("form-of")
+                last_i = last_i + 1
+
+            # Get the sequence of tokens for the related term
+            related = parts[last_i:]
 
             # XXX check if related contains valid tag sequences and warn if
             # so
-            for tagspec in " ".join(lst).split(" or "):
-                lst = tagspec.split(" ")
+
+            for tags in last_tagsets:
+                tags = list(sorted(tags))
                 if related:
-                    add_related(ctx, data, lst, related)
+                    add_related(ctx, data, tags, related)
                 else:
-                    add_tags(ctx, data, lst)
+                    data_extend(ctx, data, "tags", tags)
 
 def parse_sense_tags(ctx, text, data):
     assert isinstance(ctx, Wtp)
@@ -2674,7 +2699,7 @@ def parse_alt_or_inflection_of(ctx, gloss):
                 add_new(node[w.lower()], next_i)
             if "$" in node:
                 for x in node["$"].get("tags", ()):
-                    tags.add(x)
+                    tags.update(x.split(" "))
                 if w in valid_sequences:
                     add_new(valid_sequences[w], i)
                 elif w.lower() in valid_sequences:
@@ -2690,7 +2715,7 @@ def parse_alt_or_inflection_of(ctx, gloss):
         for node, next_i in nodes:
             if "$" in node:
                 for x in node["$"].get("tags", ()):
-                    tags.add(x)
+                    tags.update(x.split(" "))
                 last = len(lst)
 
     if last == 0:
@@ -2702,7 +2727,8 @@ def parse_alt_or_inflection_of(ctx, gloss):
     if len(lst) >= 3 and lst[-1] == "case":
         node = valid_sequences.get(lst[-2])
         if node and "$" in node:
-            tags.extend(node["$"].get("tags", ()))
+            for t in node["$"].get("tags", ()):
+                tags.update(t.split(" "))
             lst = lst[:-2]
 
     tags = list(sorted(t for t in tags if t))

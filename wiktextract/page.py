@@ -2588,6 +2588,20 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
 #  - I'm getting dial-syn page does not exist in synonyms, but Wiktionary
 #    shows a big list of synonyms
 
-# XXX "present participle" is missing "participle" tag.  I think the fix
-# requires using multi-node parsing similar to decode_tags in parse_word_head().
-# (Probably no need to call decode_tags then any more)
+# XXX Some Chinese words have weird /wiki.local/ in sounds, see: 屋
+#  - also in pronunciations, several IPAs are captured, but they are not
+#    annotated with dialect information
+#  - this page also has dial-syn warning in synonyms (also noted elsewhere)
+#  - in Japanese compounds, roman transliterations incorrectly go into tags
+#  - in Japanese, does it make sense to have most senses annotated with "kanji"?
+
+# Check what is failing in these:
+# /Arabic/Noun: ERROR: LUA error in #invoke ('ar-nominals', 'show_noun') parent ('Template:ar-decl-noun', {1: 'كَلَب'}) at ['كلب', 'ar-decl-noun', '#invoke']
+# attempt to index a nil value
+# stack traceback:
+# 	[C]: in for iterator 'for iterator'
+# 	[string "ar-verb"]:3527: in global 'get_spans'
+# 	[string "ar-verb"]:3554: in function <[string "ar-verb"]:3547>
+# 	(...tail calls...)
+# 	[C]: in function 'xpcall'
+# 	[string "<python>"]:235: in function 'lua_invoke'
