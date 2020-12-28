@@ -8,7 +8,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 setup(name="wiktextract",
-      version="0.3.0",
+      version="1.99.0",
       description="Wiktionary dump file parser and multilingual data extractor",
       long_description=long_description,
       long_description_content_type="text/markdown",
@@ -19,7 +19,7 @@ setup(name="wiktextract",
       download_url="https://github.com/tatuylonen/wiktextract",
       scripts=["wiktwords"],
       packages=["wiktextract"],
-      install_requires=["wikitextprocessor"],
+      install_requires=["wikitextprocessor", "python-Levenshtein"],
       classifiers=[
           "Development Status :: 3 - Alpha",
           "Intended Audience :: Developers",
