@@ -295,7 +295,7 @@ word ``thrill`` as an English verb:
 
 Preparation: on Linux (example from Ubuntu 20.04), you may need to
 first install the ``build-essential`` and ``python3-dev`` packages
-with ``apt install build-essential python3-dev``.
+with ``apt update && apt install build-essential python3-dev``.
 
 To install ``wiktextract``, use ``pip`` (or ``pip3``, as appropriate):
 ```
