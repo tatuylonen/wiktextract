@@ -2,7 +2,7 @@
 
 This is a utility and Python package for for extracing data from Wiktionary.
 
-**Version 1.99.0 is now on pypi and available for installation using
+**Version 1.99.1 is now on pypi and available for installation using
   pip (Python3).  Think of it as a beta version for 2.0.0.**
 
 The release won't address everything.  Especially linkages (hypernyms,
