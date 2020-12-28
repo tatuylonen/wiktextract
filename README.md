@@ -109,11 +109,6 @@ topic or having a particular inflectional form).  All downloads are in
 JSON format (each line is a separate JSON object).  The bigger
 downloads are also available in compressed form.
 
-XXX I just noticed the download for all data is missing from the front
-page; that should get fixed in a couple of days.  Language-specific
-downloads are there.  You should still be able to find the full
-data under "All languages combined".
-
 Some people have asked for the data as a single JSON object.  I've
 decided to keep it as a JSON object per line, because loading all the
 data into Python requires 40-50 GB of memory.  It is much easier to
@@ -298,12 +293,14 @@ word ``thrill`` as an English verb:
 
 ### Installing
 
+Preparation: on Linux (example from Ubuntu 20.04), you may need to
+first install the ``build-essential`` and ``python3-dev`` packages
+with ``apt install build-essential python3-dev``.
+
 To install ``wiktextract``, use ``pip`` (or ``pip3``, as appropriate):
 ```
 pip3 install wiktextract
 ```
-**(Do not use pip quite yet - the release there is too old! It will be
-updated in a few days.)**
 
 Alternatively, you can get the latest development version from githup:
 
@@ -314,7 +311,7 @@ cd wiktextract && pip3 install -r requirements.txt && pip3 install -e .
 
 This will install the ``wiktextract`` package and the ``wiktwords`` script.
 
-This software is only supported with Python 3.
+This software requires Python 3.
 
 ### Running tests
 
