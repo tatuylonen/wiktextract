@@ -1,5 +1,3 @@
 nose
-lupa
-dateparser
 python-Levenshtein
 wikitextprocessor
