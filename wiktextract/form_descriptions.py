@@ -26,7 +26,7 @@ xlat_head_map = {
     "vir": "virile",
     "nvir": "nonvirile",
     "anml": "animal",
-    "impf": "imperfect",
+    "impf": "imperfective",
     "pf": "perfective",
     "?": "",
 }
@@ -107,6 +107,8 @@ xlat_tags_map = {
     "accusative plural and genitive plural": "accusative genitive plural",
     "first/second-declension adjective":
     "first-declension second-declension adjective",
+    "first/second-declension participle":
+    "first-declension second-declension participle",
     "class 9/10": "class-9 class-10",
     "class 5/6": "class-5 class-6",
     "class 3/4": "class-3 class-4",
