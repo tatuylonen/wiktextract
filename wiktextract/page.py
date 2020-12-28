@@ -6,7 +6,6 @@ import re
 import sys
 import html
 import collections
-import wikitextparser
 from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
 from .parts_of_speech import part_of_speech_map, PARTS_OF_SPEECH
 from .config import WiktionaryConfig
