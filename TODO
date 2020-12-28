@@ -1,0 +1,330 @@
+
+# XXX cf "word" translations under "watchword" and "proverb" - what kind of
+# link/ext is this?  {{trans-see|watchword}}
+
+# XXX add parsing chinese pronunciations, see 傻瓜 https://en.wiktionary.org/wiki/%E5%82%BB%E7%93%9C#Chinese
+
+# XXX implement parsing {{ja-see-kango|xxx}} specially, see むひ
+
+# XXX linkages may have senses, e.g. "singular" English "(being only one):"
+#  - also, linkage parenthesized parts may inappropriately end up in tags,
+#    e.g., 假設/Chinese/Verb/Synonyms
+
+# XXX check use of sense numbers in translations (check "eagle"/English)
+
+# XXX capture {{taxlink|...}} and {{verb|...}} in linkage and gloss.
+# Handle the parenthesized expression.  Note that sometimes it is not taxlink,
+# just an italicized link in parenthesis
+
+# XXX figure out:  (maybe string vs. ustring error in my lua code?)
+# duck: ERROR: invalid unicode returned by ('translations', 'show') parent ('Template:t', {1: 'xal', 2: 'нуһсн'}) at ['duck', 't', '#invoke', 'Lua:translations:show()']
+
+# XXX in Coordinate terms, handle bullet point titles like Previous:, Next:
+# (see "ten", both Coordinate terms and Synonyms)
+
+# XXX change pronunciation parsing to traverse LIST and then expand individual
+# items (warn about non-list content), similar to already done for linkage
+
+# XXX parse translations from referenced translation pages; "section link"
+# is one tag that is used for this
+
+# XXX parse translations from "see" pages.  Check "be"/English.
+
+# XXX parse synonyms and other linkages from (referenced) thesaurus pages
+
+# XXX parse etymology; take "compound", "affix", prefix" templates and save
+# as dictionaries under "compound"
+
+# XXX parse "alter" tags; see where they are used (they seem to be alternate
+# forms)
+
+# XXX parse "enum" tags (args: lang, prev, next, value)
+
+# XXX investigate linkage sections that do not contain a link. What are they
+# like and how to handle them?
+
+# XXX check use of ja-r and ja-r/args templates in linkage and capture
+# hira, kana
+
+# XXX parse <form> of ... glosses.  There are LOTS of these.
+
+# XXX make sure parenthesized parts in the middle of form-of descriptions
+# in gloss are handled properly.  Check "vise" (Swedish verb).
+
+# XXX check translation hub
+
+# XXX check allowed head templates, see template_allowed_pos_map
+
+# XXX test that config.capture_* options work
+
+# XXX distinguish non-gloss definition from gloss, see e.g. βούλομαι
+
+# XXX check "unsupported tag component 'E' warning / in "word"
+
+# XXX parse "id" field in {{trans-top|id=...}} (and overall parse wikidata ids)
+
+# XXX implement support for image files in {{mul-symbol|...}} head, e.g.,
+# Unsupported titles/Cifrão
+
+# XXX Some declination/conjugation template arguments contain templates, e.g.
+# mi/Serbo-Croatian (pronoun).  Should probably strip these templates, but
+# not strip as aggressively as normal clean_value() does.  HTML tags and links
+# should be stripped.
+
+# XXX review inserting error/warning tags in words that trigger errors/warnings
+
+# XXX clean up extra calls to map_with in form_descriptions.py; now handled
+# in decode_tags()
+
+# XXX parse "Derived characters" section.  It may contain multiple
+# space-separated characters in same list item.
+
+# XXX extract Readings section (e.g., Kanji characters)
+
+# XXX handle qualifiers starting with "of " specially.  They are quite common
+# for adjectives, describing what the adjective can characterize
+
+# XXX parse "object of a preposition", "indirect object of a verb",
+# "(direct object of a verb)", "(as the object of a preposition)",
+# "(as the direct object of a verbal noun)",
+# in parenthesis at the end of gloss
+
+# XXX parse [+infinitive = XXX], [+accusative = XXX], etc in gloss
+# see e.g. βούλομαι.  These come from {{+obj|...}}, might also just parse
+# the template.
+
+# XXX parse "construed with XXX" from sense qualifiers or capture "construed with" template
+
+# XXX add warnings about / in places where we try to parse tags
+
+# XXX how about gloss "The name of the letter X",
+# "The name of the Latin-script letter X"
+# "The name of the Latin-script digraph XY",
+# "The name of the Hebrew-script letter X"
+# "The name of the Greek-script letter X"
+# "The name of the Devanagari letter X"
+# "The name of the Cyrillic-script letter X"
+# "The name of the Assamese character X"
+# "The name of the Arabic-script letter X"
+# "The XXX letter of the YYY alphabet..."
+# the same without The
+# Letter of the X syllabary, transcribed as X
+# Letter of the Tagbanwa abugida, transcribed as syllable X
+# Letter of the X script, transcribed as X
+# Letter of the X alphabet ...
+# Letter of the X alphabet: ...
+
+# XXX how about gloss "Compound of XXX and YYY".  There are 100k of these.
+#   - sometimes followed by semicolon and notes or "-" and notes
+#   - sometimes Compound of gerund of XXX and YYY
+#   - sometimes Compound of imperative (noi form) of XXX and YYY
+#   - sometimes Compound of imperative (tu form) of XXX and YYY
+#   - sometimes Compound of imperative (vo form) of XXX and YYY
+#   - sometimes Compound of imperative (voi form) of XXX and YYY
+#   - sometimes Compound of imperative of XXX and YYY
+#   - sometimes Compound of indicative present of XXX and YYY
+#   - sometimes Compound of masculine plural past participle of XXX and YYY
+#   - sometimes Compound of past participle of XXX and YYY
+#   - sometimes Compound of present indicative of XXX and YYY
+#   - sometimes Compound of past participle of XXX and YYY
+#   - sometimes Compound of plural past participle of XXX and YYY
+#   - sometimes Compound of second-person singular imperative of XXX and YYY
+#   - sometimes Compound of in base a and YYY
+#   - sometimes Compound of in merito a and YYY
+#   - sometimes Compound of in mezzo a and YYY
+#   - sometimes Compound of in seguito a and YYY
+#   - sometimes Compound of nel bel mezzo di and YYY
+#   - sometimes Compound of per mezzo di and YYY
+#   - sometimes Compound of per opera di and YYY
+#   - sometimes Compound of XXX, YYY and ZZZ
+#   - sometimes Compound of XXX + YYY
+#   - sometimes Compound of the gerund of XXX and YYY
+#   - sometimes Compound of the imperfect XXX and the pronoun YYY
+#   - sometimes Compound of the infinitive XXX and the pronoun YYY
+
+# XXX occasionally Alternative form of ... followed by Alternative spelling of,
+#   see &c
+
+# XXX handle "Wiktionary appendix of terms relating to animals" ("animal")
+
+# XXX check "Kanji characters outside the ..."
+
+# XXX parenthized parts in linkages are often word senses.  Perhaps separate
+# to a sense field.  Need support in htmlgen too.
+
+# XXX recognize "See also X" from end of gloss and move to a "See also" section
+
+# XXX handle word class prefixes in linkages, see sade/Finnish,
+# "adjectives: sateeton, sateinen"
+
+# Look at "prenderle"/Italian - two heads under same part-of-speech.  Second
+# head ends up inside first gloss.
+
+# XXX make sure Alternative forms section is parsed (see, e.g., "& cetera")
+# Also add to htmlgen.
+
+# XXX handle (classifier XXX) at beginning of gloss; also (classifier: XXX)
+# and (classifiers: XXX, XXX, XXX)
+# E.g.: 煙囪
+# Also: 筷子 (this also seems to have synonym problems!)
+
+# XXX parse redirects, create alt_of
+
+# XXX Handle "; also YYY" syntax in initialisms (see AA/Proper name)
+
+# XXX parse see also, create "related"?
+
+# In htmlgen, create links from gloss, at minimum when whole gloss matches
+# a word form in the same language (or maybe gloss as an alternative?)
+
+# XXX handle "XXX/derived terms" pages
+
+# Check Finnish Abbreviation snses - many of them parentheses which are parsed
+# incorrectly in alt_of
+
+# XXX parse {{zh-see|XXX}} - see 共青团
+
+# XXX is the Usage notes section parseable in any useful way?  E.g., there
+# is a template {{cmn-toneless-note}}.  Are there other templates that would
+# be useful and common enough to parse, e.g., into tags?
+
+# XXX parse {{topics|lang|...|...}} - these seem to generate
+# topic-related Categories.  However they can only be associated with
+# the language, not sense or part-of-speech (unless inside sense).
+# These are cleaner than trying to capture Category links.
+
+# XXX capture topic hierarchy from Category pages in Wiktionary
+#   - Module:category tree/topic cat/data/* (except /documentation)
+#   - beware, at least .../Places contains real code besides data
+#   - Load place types from Module:place/data
+#   - also: Module:place/shared-data/tables
+#   - also: Module:place/shared-data
+# May be best to actually load these modules as Lua code or to even run a
+# specific Lua module to dump the data.
+
+# Parse gender in linkages, e.g., ξένος/Greek (m in linkages)
+
+# Check awake/English - strange unrecognized tags
+
+# XXX search for Template: from all glosses, search for &amp; from all glosses
+
+# XXX implement parsing of tags from first-level gloss in two-level lists
+#    (see cut/English/Noun)
+
+# XXX in parse_head_tags(), should create multiple forms if
+# node["$"].get("tags") contains multiple sets of tags (e.g., cut/English/Verb)
+
+# Check te/Spanish/pron, See also section (warning, has unexpected format)
+
+# Check alt_of with "." remaining.  Find them all to a separate list
+# and analyze.
+
+# When alt-of has English translation (often in quotes), try to capture it
+# (helpful for disambiguation!).  E.g., 假設/Vietnamese
+
+# XXX related terms, wikipedia, Wikispecies links.  See "permit"/English/Noun
+
+# Check linkage sol/Norwegian Nynorsk/Noun (looks like unhandled item list)
+#  - This is a broader problem around col1 ... col5 and col1-u ... col5-u.
+#    They expand to <div> inside <div> that contains a list.  They are
+#    fairly widely used in at least linkages.
+
+# XXX "magic number"/English - why is tag included in gloss?  Perhaps
+# the tag has extra parentheses?
+#  - tags need to be processed from outer gloss
+#  - note also the duplication of some senses, FIX!
+
+# XXX handle inflection of with multiple forms; see aquamarine/German/Adjective
+#   - This is tricky.  This case is generated by {{de-adj form of|...}} and there
+#     is no knowing how many such templates there are.  We may need to treat
+#     the sub-entries as either equal senses or sub-senses.
+#   - we should also fix treatment of *# etc; we need to just expand to
+#     HTML, then split there (at line start), and then clean.  Otherwise we
+#     risk breaking glosses that contain * or # (e.g., math formulas).
+
+# Check that 1/Translingual/Alternative forms is parsed correctly
+
+# XXX analyze remaining parentheses in linkage.  Currently debug message
+# disabled.  There are still lots of these.
+
+# XXX Finland/English has strange topic in related
+#   - there is a {{topics|...}} tag in the linkage; however, I think we should
+#     really interpret it as "sense" for the linkage.
+
+# XXX comb/English - something wrong with parsing translations
+#  - could one of the templates get expanded???
+#  - this might just be an instance of the list not being found inside HTML
+#    (need to recurse instead of just iterating contents)
+
+# XXX handle <ruby> specially in clean or perhaps already earler, see
+# e.g. 無比 (Japanese)
+
+# XXX There are way too many <noinclude> not propersy closed warnings
+# forom Chinese, e.g., 內 - find out what causes these, and either fix or
+# ignore
+
+# XXX Lua error on 龜 - test again after next Wiktionary dump, this might be
+# due to undefined language in Lua module
+
+# Parse readings subsection in Japanese kanji characters, see 內
+#  - these are apparently pronunciations, but not IPA
+#  - perhaps these might be parsed as forms with "reading" tag and tag
+#    for the type of reading?
+
+# Korean kanji seem to have Phonetic hangeul in pronunciation sections, see 內
+
+# XXX test ISBN / Japanese - how does word entry work, how do synonyms
+# work (relates to <ruby> handling)
+
+# Handle Japanese parentheses in linkage items.  It think this relates
+# to <ruby>.
+
+# Implement <hiero> ... </hiero>, e.g., lilja/Finnish/Etymology
+
+# Implement <chem> ... </chem>, e.g. felsic/English/Adjective
+
+# Improve htmlgen lists
+#   - more even sizes of sublists (use intervals when appropriate)
+#   - group kanji etc by radical + strokes
+
+# XXX chinese glyphs, see 內
+#  - I'm getting dial-syn page does not exist in synonyms, but Wiktionary
+#    shows a big list of synonyms
+
+# XXX Some Chinese words have weird /wiki.local/ in sounds, see: 屋
+#  - also in pronunciations, several IPAs are captured, but they are not
+#    annotated with dialect information
+#  - this page also has dial-syn warning in synonyms (also noted elsewhere)
+#  - in Japanese compounds, roman transliterations incorrectly go into tags
+#  - in Japanese, does it make sense to have most senses annotated with "kanji"?
+
+# Check what is failing in these:
+# /Arabic/Noun: ERROR: LUA error in #invoke ('ar-nominals', 'show_noun') parent ('Template:ar-decl-noun', {1: 'كَلَب'}) at ['كلب', 'ar-decl-noun', '#invoke']
+# attempt to index a nil value
+# stack traceback:
+# 	[C]: in for iterator 'for iterator'
+# 	[string "ar-verb"]:3527: in global 'get_spans'
+# 	[string "ar-verb"]:3554: in function <[string "ar-verb"]:3547>
+# 	(...tail calls...)
+# 	[C]: in function 'xpcall'
+# 	[string "<python>"]:235: in function 'lua_invoke'
+
+# canadensis/Latin "third-declension two-termination adjective" is not
+# parsed (it is not in parentheses).  This type of construction is very
+# common in Latin.
+
+# tear/English/Verb - "tore" in head has error-unknown tag for
+# "or (now colloquial and nonstandard)"
+
+# Form-of detection does not work for many Spanish forms, e.g.:
+# bachaquea/Spanish/Verb
+
+# compound-of field of sense not displayed in generated html
+
+# form-of (and alt-of) links in generated html should look at
+# canonical form in addition to word - now many items with accents are
+# not properly linked
+
+# 䆀手/Chinese - Synonyms has * The dial-syn page 「左手」 does not yet exist. Create the data page and the map!* The dial-syn page 「左撇子」 does not yet exist. Create the data page and the map!
+# Things like this seem very common with Chinese words.  Might be a problem
+# in Lua code where they are looked up (Wiktionary does have synonyms).
