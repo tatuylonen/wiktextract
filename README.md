@@ -598,7 +598,11 @@ sense is a dictionary that may contain the following keys (among others, and mor
 
 ### Linkages to other words
 
-Linkages (``synonyms``, ``antonyms``, ``hypernyms``, ``derived words``, ``holonyms``, ``meronyms``, ``derived``, ``related``) are lists of dictionaries, where each dictionary can contain the following keys, among others:
+Linkages (``synonyms``, ``antonyms``, ``hypernyms``, ``derived
+words``, ``holonyms``, ``meronyms``, ``derived``, ``related``) are
+stored in the word's data if not sense-disambiguated, and in the word
+sense if sense-disambiguated.  They are lists of dictionaries, where
+each dictionary can contain the following keys, among others:
 
 * ``word`` - the word this links to (string).  If this starts with "Thesaurus:", then this entry is a link to a thesaurus page in Wiktionary.  If this starts with "Category:", then this refers to a category page in Wiktionary.
 * ``sense`` - text identifying the word sense or context (e.g., ``"to rain very heavily"``).
@@ -619,9 +623,10 @@ among others:
 
 ### Translations
 
-Translations are stored under the ``translations`` key
-in the word's data.  They are stored in a list of dictionaries, where
-each dictionary has the following keys (and possibly others):
+Translations are stored under the ``translations`` key in the word's
+data (if not sense-disambiguated) or in the word sense (if
+sense-disambiguated).  They are stored in a list of dictionaries,
+where each dictionary has the following keys (and possibly others):
 
 * ``lang``  the language name that the translation is for
 * ``code`` - Wiktionary's 2 or 3-letter language code for the language the translation is for
