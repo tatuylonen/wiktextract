@@ -1,6 +1,6 @@
 # Code for parsing information from a single Wiktionary page.
 #
-# Copyright (c) 2018-2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2018-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
 import sys
@@ -1312,7 +1312,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
             #print("parse_pronunciation tagstext={} text={}"
             #      .format(tagstext, text))
             for m in re.finditer("/[^/,]+?/|\[[^]0-9,/][^],/]*?\]", text):
-                pron = {field: m.group(0)}
+                v = m.group(0)
+                # The regexp above can match file links.  Skip them.
+                if v.startswith("[[File:"):
+                    continue
+                pron = {field: v}
                 parse_pronunciation_tags(ctx, tagstext, pron)
                 data_append(ctx, data, "sounds", pron)
                 have_pronunciations = True
