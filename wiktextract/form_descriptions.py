@@ -2,7 +2,7 @@
 # (both the word entry head - initial part and parenthesized parts -
 # and tags at the beginning of word senses)
 #
-# Copyright (c) 2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2020-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
 import Levenshtein
@@ -428,6 +428,7 @@ xlat_tags_map = {
     "(eu)": "with-eu",
     "(vós)": "with-vós",
     "(tu)": "with-tu",
+    "(tú)": "with-tú",
     "(eles)": "with-eles",
     "(elas)": "with-elas",
     "(vocês)": "with-vocês",
@@ -1830,6 +1831,7 @@ valid_tags = set([
     "with-ele",
     "with-ela",
     "with-tu",
+    "with-tú",
     "with-eles",
     "with-elas",
     "with-vocês",
