@@ -12,7 +12,6 @@ from .config import WiktionaryConfig
 from .clean import clean_value
 from .places import place_prefixes  # XXX move processing to places.py
 from .unsupported_titles import unsupported_title_map
-from .head_map import head_pos_map
 from .datautils import (data_append, data_extend, split_at_comma_semi)
 from .disambiguate import disambiguate_clear_cases
 from wiktextract.form_descriptions import (
