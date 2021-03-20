@@ -9,7 +9,6 @@ import collections
 from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
 from .parts_of_speech import part_of_speech_map, PARTS_OF_SPEECH
 from .config import WiktionaryConfig
-from .sectitle_corrections import sectitle_corrections
 from .clean import clean_value
 from .places import place_prefixes  # XXX move processing to places.py
 from .unsupported_titles import unsupported_title_map
