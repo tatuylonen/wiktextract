@@ -4,7 +4,7 @@
 # mostly been used with enwiktionary, but should be usable with other
 # wiktionaries as well.
 #
-# Copyright (c) 2018-2020 Tatu Ylonen.  See LICENSE and https://ylonen.org
+# Copyright (c) 2018-2021 Tatu Ylonen.  See LICENSE and https://ylonen.org
 
 import os
 import re
@@ -289,9 +289,9 @@ if __name__ == "__main__":
     if args.errors:
         with open(args.errors, "w") as f:
             json.dump({
-                "errors": ctx.errors,
-                "warnings": ctx.warnings,
-                "debugs": ctx.debugs,
+                "errors": config.errors,
+                "warnings": config.warnings,
+                "debugs": config.debugs,
                 }, f)
 
     def dump_un(title, limit, counts, samples):

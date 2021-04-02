@@ -1,7 +1,7 @@
 # Definition of the configuration object for Wiktionary data extraction.
 # The same object is also used for collecting statistics.
 #
-# Copyright (c) 2018-2020 Tatu Ylonen.  See file LICENSE or https://ylonen.org
+# Copyright (c) 2018-2021 Tatu Ylonen.  See file LICENSE or https://ylonen.org
 
 import sys
 import collections
@@ -37,6 +37,9 @@ class WiktionaryConfig(object):
         "pos_counts",
         "section_counts",
         "word",
+        "errors",
+        "warnings",
+        "debugs",
     )
 
     def __init__(self,
@@ -75,6 +78,9 @@ class WiktionaryConfig(object):
         # Some fields related to errors
         # The word currently being processed.
         self.word = None
+        self.errors = []
+        self.warnings = []
+        self.debugs = []
 
     def to_kwargs(self):
         return {
@@ -105,3 +111,7 @@ class WiktionaryConfig(object):
             self.pos_counts[k] += v
         for k, v in ret["section_counts"].items():
             self.section_counts[k] += v
+        for k in ("errors", "warnings", "debugs"):
+            self.errors.extend(ret.get("errors", []))
+            self.warnings.extend(ret.get("warnings", []))
+            self.debugs.extend(ret.get("debugs", []))
