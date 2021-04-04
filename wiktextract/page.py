@@ -738,6 +738,8 @@ sense_linkage_templates = {
 
 
 def decode_html_entities(v):
+    """Decodes HTML entities from a value, converting them to the respective
+    Unicode characters/strings."""
     if isinstance(v, int):
         v = str(v)
     return html.unescape(v)
@@ -757,6 +759,7 @@ def is_panel_template(name):
 
 
 def parse_sense_linkage(ctx, data, name, ht):
+    """Parses a linkage (synonym, etc) specified in a word sense."""
     assert isinstance(ctx, Wtp)
     assert isinstance(data, dict)
     assert isinstance(name, str)
@@ -810,6 +813,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             .format(k, data[k], v))
 
     def push_sense():
+        """Starts collecting data for a new word sense."""
         nonlocal sense_data
         if not sense_data:
             return
@@ -817,6 +821,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         sense_data = {}
 
     def push_pos():
+        """Starts collecting data for a new part-of-speech."""
         nonlocal pos_data
         nonlocal pos_datas
         push_sense()
@@ -831,6 +836,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         ctx.start_subsection(None)
 
     def push_etym():
+        """Starts collecting data for a new etymology."""
         nonlocal etym_data
         nonlocal etym_datas
         push_pos()
@@ -841,6 +847,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
         etym_datas = []
 
     def parse_sense(pos, contents, sense_base):
+        """Parses a word sense (basically, a list item describing a word sense).
+        Sometimes there may be a second-level sublist that actually contains
+        word senses (in which case the higher-level entry is just a grouping).
+        This parses such sublists as separate senses (thus this can generate
+        multiple new senses)."""
         assert isinstance(pos, str)
         assert isinstance(contents, (list, tuple))
         assert isinstance(sense_base, dict)  # Added to every sense
@@ -1011,6 +1022,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 data_append(ctx, sense_data, "form_of", base)
 
     def head_template_fn(name, ht):
+        """Handles special templates in the head section of a word.  Head
+        section is the text after part-of-speech subtitle and before word
+        sense list. Typically it generates the bold line for the word, but
+        may also contain other useful information that often ends in
+        side boxes.  We want to capture some of that additional information."""
         # print("HEAD_TEMPLATE_FN", name, ht)
         if name == "wtorw":
             parse_wikipedia_template(config, ctx, pos_data, ht)
@@ -1071,6 +1087,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         return None
 
     def parse_part_of_speech(posnode, pos):
+        """Parses the subsection for a part-of-speech under a language on
+        a page."""
         assert isinstance(posnode, WikiNode)
         assert isinstance(pos, str)
         # print("parse_part_of_speech", pos)
@@ -1207,6 +1225,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         parse_sense(pos, item.children, sense_base)
 
     def parse_pronunciation(node):
+        """Parses the pronunciation section from a language section on a
+        page."""
         assert isinstance(node, WikiNode)
         if node.kind in LEVEL_KINDS:
             node = node.children
@@ -1341,6 +1361,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
             ctx.debug("no pronunciations found from pronunciation section")
 
     def parse_inflection(node):
+        """Parses inflection data (declension, conjugation) from the given
+        page.  This retrieves the actual inflection template
+        parameters, which are very useful for applications that need
+        to learn the inflection classes and generate inflected
+        forms."""
         # print("parse_inflection:", node)
         assert isinstance(node, WikiNode)
         captured = False
@@ -1377,6 +1402,55 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # XXX try to parse either a WikiText table or a HTML table that
         # contains the inflectional paradigm
         # XXX should we try to capture it even if we got the template?
+
+    def get_subpage_section(language, title, subtitle, pos, section):
+        """Loads a subpage of the given page, and finds the section
+        for the given language, part-of-speech, and section title.  This
+        is used for finding translations and other sections on subpages."""
+        assert isinstance(language, str)
+        assert isinstance(title, str)
+        assert isinstance(subtitle, str)
+        assert isinstance(pos, str)
+        assert isinstance(section, str)
+        subpage_title = word + "/" + subtitle
+        content = ctx.read_by_title(subpage_title)
+        if content is None:
+            ctx.error("/translations not found despite "
+                      "{{see translation subpage|...}}")
+        tree = ctx.parse(content, pre_expand=True,
+                         additional_expand=additional_expand_templates)
+        assert tree.kind == NodeKind.ROOT
+        # Find the language subtitle
+        for node1 in tree.children:
+            if not isinstance(node1, WikiNode):
+                continue
+            if node1.kind != NodeKind.LEVEL2:
+                continue
+            subtitle = clean_node(config, ctx, None, node1.args[0])
+            if subtitle != language:
+                continue
+            # Find the part-of-speech subtitle
+            for node2 in node1.children:
+                if not isinstance(node2, WikiNode):
+                    continue
+                if node2.kind != NodeKind.LEVEL3:
+                    continue
+                subtitle = clean_node(config, ctx, None, node2.args[0])
+                if subtitle != pos:
+                    continue
+                # Find the specified section under the part-of-speech
+                for node3 in node2.children:
+                    if not isinstance(node3, WikiNode):
+                        continue
+                    if node3.kind != NodeKind.LEVEL4:
+                        continue
+                    subtitle = clean_node(config, ctx, None, node3.args[0])
+                    if subtitle != section:
+                        continue
+                    return node3
+        ctx.warning("Failed to find subpage section {} {}/{} {} {}"
+                    .format(language, title, subtitle, pos, section))
+        return None
 
     def parse_linkage(data, field, linkagenode):
         assert isinstance(data, dict)
@@ -1629,6 +1703,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             ctx.debug("no linkages found")
 
     def parse_translations(data, xlatnode):
+        """Parses translations for a word.  This may also pull in translations
+        from separate translation subpages."""
         assert isinstance(data, dict)
         assert isinstance(xlatnode, WikiNode)
         #print("PARSE_TRANSLATIONS:", xlatnode)
@@ -1649,6 +1725,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             def translation_item_template_fn(name, ht):
                 nonlocal langcode
+                nonlocal sense_parts
+                nonlocal sense
                 # print("TRANSLATION_ITEM_TEMPLATE_FN:", name, ht)
                 if name in ("t", "t+", "t-simple", "t", "t+check", "t-check"):
                     code = ht.get(1)
@@ -1730,6 +1808,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     continue
                 # Strip language links
                 part = re.sub(langlink_re, "", part)
+                if langcode is None:
+                    if lang in languages_by_name:
+                        langcode = languages_by_name[lang]["code"]
                 tr = {"lang": lang, "code": langcode}
                 if tags:
                     tr["tags"] = list(tags)  # Copy so we don't modify others
@@ -1782,7 +1863,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # XXX capture
                     return ""
                 if name == "see translation subpage":
-                    # XXX capture
+                    pos = ht.get(1)
+                    if not isinstance(pos, str):
+                        ctx.error("no part-of-speech in "
+                                  "{{see translation subpage|...}}")
+                        return
+                    subnode = get_subpage_section(language, ctx.title,
+                                                  "translations", pos,
+                                                  "Translations")
+                    if subnode is not None:
+                        parse_translations(data, subnode)
                     return ""
                 if name in ("c", "C", "categorize", "cat", "catlangname",
                             "topics", "top", "qualifier",):
@@ -1864,7 +1954,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # to define at this level and recurse in parse_translation_recurse().
         parse_translation_recurse(xlatnode)
 
-    def process_children(langnode):
+    def process_children(treenode):
+        """This recurses into a subtree in the parse tree for a page."""
         nonlocal etym_data
         nonlocal pos_data
 
@@ -1879,7 +1970,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 return ""
             return None
 
-        for node in langnode.children:
+        for node in treenode.children:
             if not isinstance(node, WikiNode):
                 # print("  X{}".format(repr(node)[:40]))
                 continue
@@ -2023,6 +2114,8 @@ def parse_wikipedia_template(config, ctx, data, ht):
 
 
 def parse_top_template(config, ctx, node, data):
+    """Parses a template that occurs on the top-level in a page, before any
+    language subtitles."""
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, Wtp)
     assert isinstance(node, WikiNode)

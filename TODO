@@ -25,11 +25,6 @@
 # XXX change pronunciation parsing to traverse LIST and then expand individual
 # items (warn about non-list content), similar to already done for linkage
 
-# XXX parse translations from referenced translation pages; "section link"
-# is one tag that is used for this
-
-# XXX parse translations from "see" pages.  Check "be"/English.
-
 # XXX parse synonyms and other linkages from (referenced) thesaurus pages
 
 # XXX parse etymology; take "compound", "affix", prefix" templates and save
@@ -176,8 +171,6 @@
 
 # In htmlgen, create links from gloss, at minimum when whole gloss matches
 # a word form in the same language (or maybe gloss as an alternative?)
-
-# XXX handle "XXX/derived terms" pages
 
 # Check Finnish Abbreviation snses - many of them parentheses which are parsed
 # incorrectly in alt_of
@@ -328,3 +321,16 @@
 # 䆀手/Chinese - Synonyms has * The dial-syn page 「左手」 does not yet exist. Create the data page and the map!* The dial-syn page 「左撇子」 does not yet exist. Create the data page and the map!
 # Things like this seem very common with Chinese words.  Might be a problem
 # in Lua code where they are looked up (Wiktionary does have synonyms).
+
+# English/fire/Noun (oxidation reaction) - Egptian, "f" in roman versions seems
+# to go into "roman" field, even though it is apparently gender
+
+# XXX handle "XXX/derived terms" pages
+
+/derived terms (seem to be referenced with {{section link|...}}
+
+數/derived terms
+仔/derived terms
+人/derived terms
+龍/derived terms
+馬/derived terms
