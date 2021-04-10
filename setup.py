@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2018-2020 Tatu Ylonen.  See LICENSE and https://ylonen.org
+# Copyright (c) 2018-2021 Tatu Ylonen.  See LICENSE and https://ylonen.org
 
 from setuptools import setup
 
@@ -8,7 +8,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 setup(name="wiktextract",
-      version="1.99.3",
+      version="1.99.4",
       description="Wiktionary dump file parser and multilingual data extractor",
       long_description=long_description,
       long_description_content_type="text/markdown",
