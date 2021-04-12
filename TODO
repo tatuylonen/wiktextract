@@ -338,3 +338,7 @@
 htmlgen: strange Categories non-disambiguated in: https://kaikki.org/dictionary/English/meaning/v/vo/volva.html#volva-noun
 
 htmlgen: include word prefixes in breadcrumbs
+
+htmlgen: better list page generation
+
+XXX language hyponyms

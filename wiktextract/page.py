@@ -1722,6 +1722,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
             langcode = None
             if sense is None:
                 sense = clean_node(config, ctx, data, sense_parts).strip()
+                idx = sense.find("See also translations at ")
+                if idx > 0:
+                    sense = sense[:idx].strip()
 
             def translation_item_template_fn(name, ht):
                 nonlocal langcode
