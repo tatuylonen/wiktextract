@@ -772,6 +772,75 @@ def parse_sense_linkage(ctx, data, name, ht):
         data_append(ctx, data, field, {"word": w})
 
 
+def recursively_extract(contents, fn):
+    """Recursively extracts elements from contents for which ``fn`` returns
+    True.  This returns two lists, the extracted elements and the remaining
+    content (with the extracted elements removed at each level).  Only
+    WikiNode objects can be extracted."""
+    # If contents is a list, process each element separately
+    extracted = []
+    new_contents = []
+    if isinstance(contents, (list, tuple)):
+        for x in contents:
+            e1, c1 = recursively_extract(x, fn)
+            extracted.extend(e1)
+            new_contents.extend(c1)
+        return extracted, new_contents
+    # If content is not WikiNode, just return it as new contents.
+    if not isinstance(contents, WikiNode):
+        return [], [contents]
+    # Check if this content should be extracted
+    if fn(contents):
+        return [contents], []
+    # Otherwise content is WikiNode, and we must recurse into it.
+    kind = contents.kind
+    new_node = WikiNode(kind, contents.loc)
+    new_contents.append(new_node)
+    if kind in (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
+                NodeKind.LEVEL5, NodeKind.LEVEL6, NodeKind.LINK):
+        # Process args and children
+        assert isinstance(contents.args, (list, tuple))
+        e1, c1 = recursively_extract(contents.args, fn)
+        extracted.extend(e1)
+        new_node.args = c1
+        e1, c1 = recursively_extract(contents.children, fn)
+        extracted.extend(e1)
+        new_node.children = c1
+    elif kind in (NodeKind.ITALIC, NodeKind.BOLD, NodeKind.TABLE,
+                  NodeKind.TABLE_CAPTION, NodeKind.TABLE_ROW,
+                  NodeKind.TABLE_HEADER_CELL, NodeKind.TABLE_CELL,
+                  NodeKind.PRE, NodeKind.PREFORMATTED):
+        # Process only children
+        e1, c1 = recursively_extract(contents.children, fn)
+        extracted.extend(e1)
+        new_node.children = c1
+    elif kind in (NodeKind.HLINE,):
+        # No arguments or children
+        pass
+    elif kind in (NodeKind.LIST, NodeKind.LIST_ITEM):
+        # Keep args as-is, process children
+        new_node.args = contents.args
+        e1, c1 = recursively_extract(contents.children, fn)
+        extracted.extend(e1)
+        new_node.children = c1
+    elif kind in (NodeKind.TEMPLATE, NodeKind.TEMPLATE_ARG, NodeKind.PARSER_FN,
+                  NodeKind.URL):
+        # Process only args
+        e1, c1 = recursively_extract(contents.args, fn)
+        extracted.extend(e1)
+        new_node.args = c1
+    elif kind == NodeKind.HTML:
+        # Keep attrs and args as-is, process children
+        new_node.attrs = contents.attrs
+        new_node.args = contents.args
+        e1, c1 = recursively_extract(contents.children, fn)
+        extracted.extend(e1)
+        new_node.children = c1
+    else:
+        raise RuntimeError("recursively_extract: unhandled kind {}"
+                           .format(kind))
+    return extracted, new_contents
+
 def parse_language(ctx, config, langnode, language, lang_code):
     """Iterates over the text of the page, returning words (parts-of-speech)
     defined on the page one at a time.  (Individual word senses for the
@@ -1326,8 +1395,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         data_append(ctx, data, "sounds", pron)
                         have_pronunciations = True
 
-            #print("parse_pronunciation tagstext={} text={}"
-            #      .format(tagstext, text))
             for m in re.finditer("/[^/,]+?/|\[[^]0-9,/][^],/]*?\]", text):
                 v = m.group(0)
                 # The regexp above can match file links.  Skip them.
@@ -1466,6 +1533,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         def parse_linkage_item(contents, field, sense=None):
             assert isinstance(contents, (str, list, tuple))
             assert isinstance(field, str)
+            # print("PARSE_LINKAGE_ITEM:", contents)
             if not isinstance(contents, (list, tuple)):
                 contents = [contents]
             qualifier = None
@@ -1474,10 +1542,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # XXX recognize items that refer to thesaurus, e.g.:
             # "word" synonyms: "vocable; see also Thesaurus:word"
 
-            sublists = [x for x in contents if isinstance(x, WikiNode) and
-                        x.kind == NodeKind.LIST]
-            contents = [x for x in contents if not isinstance(x, WikiNode) or
-                        x.kind != NodeKind.LIST]
+            sublists, contents = recursively_extract(contents, lambda x:
+                                                     x.kind == NodeKind.LIST)
+            # print("PARSE_LINKAGE SUBLISTS:", sublists)
+            # print("PARSE_LINKAGE CONTENTS:", contents)
+            sys.stdout.flush()
 
             def linkage_item_template_fn(name, ht):
                 nonlocal sense
@@ -1650,12 +1719,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # pre-expanded into a table here
             # # print("PARSE_LINKAGE_TABLE:", tablenode)
             # for node in tablenode.children:
-            #     #print("TABLE NODE", node)
+            #     # print("TABLE NODE", node)
             #     if not isinstance(node, WikiNode):
             #         continue
             #     if node.kind == NodeKind.TABLE_ROW:
             #         for cell in node.children:
-            #             #print("TABLE CELL", cell)
+            #             # print("TABLE CELL", cell)
             #             if not isinstance(cell, WikiNode):
             #                 continue
             #             if cell.kind == NodeKind.TABLE_CELL:
@@ -1663,6 +1732,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         def parse_linkage_recurse(linkagenode):
             assert isinstance(linkagenode, WikiNode)
+            # print("PARSE_LINKAGE_RECURSE:", linkagenode)
             for node in linkagenode.children:
                 if isinstance(node, str):
                     extras.append(node)
@@ -1670,6 +1740,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     continue
                 assert isinstance(node, WikiNode)
                 kind = node.kind
+                # print("PARSE_LINKAGE_RECURSE CHILD", kind)
                 if kind == NodeKind.LIST:
                     for item in node.children:
                         if not isinstance(item, WikiNode):
@@ -1683,6 +1754,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 elif kind == NodeKind.TABLE:
                     parse_linkage_table(node)
                 elif kind == NodeKind.HTML:
+                    # print("PARSE_LINKAGE HTML:", node)
                     # Recurse to process inside the HTML for most tags
                     if node.args not in ("gallery", "ref", "cite", "caption"):
                         parse_linkage_recurse(node)
@@ -1707,7 +1779,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         from separate translation subpages."""
         assert isinstance(data, dict)
         assert isinstance(xlatnode, WikiNode)
-        #print("PARSE_TRANSLATIONS:", xlatnode)
+        # print("PARSE_TRANSLATIONS:", xlatnode)
         if not config.capture_translations:
             return
         sense_parts = []
@@ -1902,12 +1974,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
             assert isinstance(tablenode, WikiNode)
             # print("PARSE_TRANSLATION_TABLE:", tablenode)
             for node in tablenode.children:
-                #print("TABLE NODE", node)
+                # print("TABLE NODE", node)
                 if not isinstance(node, WikiNode):
                     continue
                 if node.kind == NodeKind.TABLE_ROW:
                     for cell in node.children:
-                        #print("TABLE CELL", cell)
+                        # print("TABLE CELL", cell)
                         if not isinstance(cell, WikiNode):
                             continue
                         if cell.kind == NodeKind.TABLE_CELL:
