@@ -5,6 +5,7 @@
 # Copyright (c) 2018-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
+import sys
 import collections
 from wikitextprocessor import Wtp
 from .page import parse_page, languages_by_name
