@@ -25,8 +25,6 @@
 # XXX change pronunciation parsing to traverse LIST and then expand individual
 # items (warn about non-list content), similar to already done for linkage
 
-# XXX parse synonyms and other linkages from (referenced) thesaurus pages
-
 # XXX parse etymology; take "compound", "affix", prefix" templates and save
 # as dictionaries under "compound"
 
@@ -312,8 +310,6 @@
 # Form-of detection does not work for many Spanish forms, e.g.:
 # bachaquea/Spanish/Verb
 
-# compound-of field of sense not displayed in generated html
-
 # form-of (and alt-of) links in generated html should look at
 # canonical form in addition to word - now many items with accents are
 # not properly linked
@@ -341,4 +337,11 @@ htmlgen: include word prefixes in breadcrumbs
 
 htmlgen: better list page generation
 
-XXX language hyponyms
+htmlgen: compound-of field of sense not displayed in generated html
+
+Apparently the following is not parsed correctly:
+{{ws sense|any of enclosing symbols "(", ")", "[", "]", "{", "}" etc.}}
+
+Word entires may be generated from entries like "Thesaurus:ar:make happy" that
+are in a wrong language.  Check if they are referenced from somewhere and
+maybe restrict generation to entries that are actually referenced.

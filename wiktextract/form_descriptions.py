@@ -292,6 +292,10 @@ xlat_tags_map = {
     "possibly obsolete": "archaic",
     "19th century": "archaic",
     "dated or regional": "archaic regional",
+    "dated or archaic": "archaic",
+    "common and polite term": "polite",
+    "most common but potentially demeaning term": "possibly derogatory",
+    "highly academic": "literary",
     "archaic ortography": "archaic",
     "in the plural": "plural-only",
     "derogative": "derogatory",
@@ -796,6 +800,7 @@ xlat_tags_map = {
     "deprecated template usage": "deprecated-template",
     "diacritical mark": "diacritic",
     "inflection of": "form-of",
+    "mainland China": "mainland-China",
 }
 
 # Translation map for topics.
@@ -1944,6 +1949,7 @@ valid_tags = set([
     "wade-giles",
     "han-tu",
     "eumhun",
+    "mainland-China",
 ])
 
 valid_topics = set([

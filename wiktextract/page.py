@@ -62,17 +62,67 @@ additional_expand_templates = set([
     "deprecated code",
 ])
 
-linkage_fields = [
-    "synonyms",
-    "hypernyms",
-    "hyponyms",
-    "holonyms",
-    "meronyms",
-    "derived",
-    "related",
-    "coordinate_terms",
-    "troponyms",
-]
+# Mapping from subtitle to linkage field
+linkage_map = {
+    "synonyms": "synonyms",
+    "ambiguous synonyms": "synonyms",
+    "near synonyms": "synonyms",
+    "pseudo-synonyms": "synonyms",
+    "idiomatic synonyms": "synonyms",
+    "hypernyms": "hypernyms",
+    "hypernym": "hypernyms",
+    "hyperonyms": "hypernyms",
+    "classes": "hypernyms",
+    "class": "hypernyms",
+    "hyponyms": "hyponyms",
+    "holonyms": "holonyms",
+    "meronyms": "meronyms",
+    "derived": "derived",
+    "related": "related",
+    "related terms": "related",
+    "related words": "related",
+    "related characters": "related",
+    "idioms": "related",
+    "idioms/phrases": "related",
+    "similes": "related",
+    "variance": "related",
+    "coordinate terms": "coordinate_terms",
+    "coordinate term": "coordinate_terms",
+    "troponyms": "troponyms",
+    "antonyms": "antonyms",
+    "near antonyms": "antonyms",
+    "instances": "instances",
+    "intances": "instances",
+    "archetypes": "instances",
+    "see also": "related",
+    "seealso": "related",
+    "various": "related",
+    "metonyms": "related",
+    "demonyms": "related",
+    "comeronyms": "related",
+    "cohyponyms": "related",
+    "proverbs": "proverbs",
+    "abbreviations": "abbreviations",
+    "derived terms": "derived",
+}
+
+# Inverse linkage for those that have them
+linkage_inverses = {
+    "synonyms": "synonyms",
+    "hypernyms": "hyponyms",
+    "hyponyms": "hypernyms",
+    "holonyms": "meronyms",
+    "meronyms": "holonyms",
+    "derived": "derived_from",
+    "coordinate_terms": "coordinate_terms",
+    "troponyms": "hypernyms",
+    "antonyms": "antonyms",
+    "instances": "instance_of",
+    "related": "related",
+}
+
+# List of all field names used for linkages
+linkage_fields = list(sorted(set(linkage_map.values())))
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -1533,14 +1583,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
         def parse_linkage_item(contents, field, sense=None):
             assert isinstance(contents, (str, list, tuple))
             assert isinstance(field, str)
+            nonlocal have_linkages
             # print("PARSE_LINKAGE_ITEM:", contents)
             if not isinstance(contents, (list, tuple)):
                 contents = [contents]
             qualifier = None
             english = None
-
-            # XXX recognize items that refer to thesaurus, e.g.:
-            # "word" synonyms: "vocable; see also Thesaurus:word"
 
             sublists, contents = recursively_extract(contents, lambda x:
                                                      x.kind == NodeKind.LIST)
@@ -1589,6 +1637,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             item = clean_node(config, ctx, data, contents,
                               template_fn=linkage_item_template_fn)
+            # If the item is a reference to the thesaurus, skip it.  We should
+            # be injecting data from the thesaurus in each word referenced
+            # from it.
+            if item.startswith("See also Thesaurus:"):
+                item = ""
+                have_linkages = True
 
             def english_repl(m):
                 nonlocal english
@@ -1646,7 +1700,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if sense:
                         dt["sense"] = sense
                     data_append(ctx, data, field, dt)
-                    nonlocal have_linkages
                     have_linkages = True
 
             # Some words have a word sense in a top-level list item and
@@ -2098,14 +2151,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 parse_translations(data, node)
             elif t in ("Declension", "Conjugation", "Inflection", "Mutation"):
                 parse_inflection(node)
-            elif pos in ("hypernyms", "hyponyms", "antonyms", "synonyms",
-                         "abbreviations", "proverbs", "meronyms",
-                         "holonyms", "troponyms"):
+            elif pos in linkage_map:
+                rel = linkage_map[pos]
                 if stack[-1].lower() in part_of_speech_map:
                     data = pos_data
                 else:
                     data = etym_data
-                parse_linkage(data, pos, node)
+                parse_linkage(data, rel, node)
             elif pos == "compounds":
                 if stack[-1].lower() in part_of_speech_map:
                     data = pos_data
@@ -2113,24 +2165,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     data = etym_data
                 if config.capture_compounds:
                     parse_linkage(data, "compounds", node)
-            elif pos == "derived terms":
-                if stack[-1].lower() in part_of_speech_map:
-                    data = pos_data
-                else:
-                    data = etym_data
-                parse_linkage(data, "derived", node)
-            elif pos in ("related terms", "related characters", "see also"):
-                if stack[-1].lower() in part_of_speech_map:
-                    data = pos_data
-                else:
-                    data = etym_data
-                parse_linkage(data, "related", node)
-            elif pos == "coordinate terms":
-                if stack[-1].lower() in part_of_speech_map:
-                    data = pos_data
-                else:
-                    data = etym_data
-                parse_linkage(data, "coordinate_terms", node)
             elif t in ("Anagrams", "Further reading", "References",
                        "Quotations", "Descendants"):
                 # XXX does the Descendants section have something we'd like
@@ -2359,6 +2393,26 @@ def parse_page(ctx, word, text, config):
             for data in ret[:-1]:
                 assert data is not last
                 data_extend(ctx, data, field, lst)
+
+    # Inject linkages from thesaurus entries
+    for data in ret:
+        word = data["word"]
+        lang = data["lang"]
+        pos = data["pos"]
+        for tpos, rel, w, sense, xlit, tags, topics, title in \
+            config.thesaurus_data.get((word, lang), ()):
+            if tpos is not None and pos != tpos:
+                continue
+            dt = {"word": w, "source": title}
+            if sense:
+                dt["sense"] = sense
+            if tags:
+                dt["tags"] = tags
+            if topics:
+                dt["topics"] = topics
+            if xlit:
+                dt["xlit"] = xlit
+            data_append(ctx, data, rel, dt)
 
     # Disambiguate those items from word level that can be disambiguated
     for data in ret:

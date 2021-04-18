@@ -2,12 +2,15 @@
 # from wiktionary.  This file contains code to uncompress the Wiktionary
 # dump file and to separate it into individual pages.
 #
-# Copyright (c) 2018-2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2018-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
+import collections
 from wikitextprocessor import Wtp
-from .page import parse_page
+from .page import parse_page, languages_by_name
 from .config import WiktionaryConfig
+from .thesaurus import extract_thesaurus_data
+from .datautils import data_append
 
 # Title prefixes that indicate that the page is not a normal page and
 # should not be used when searching for word forms
@@ -118,7 +121,8 @@ def capture_specials_fn(dt):
     return []
 
 
-def page_handler(ctx, model, title, text, capture_cb, config_kwargs):
+def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
+                 thesaurus_data):
     title = title.strip()
     if capture_cb is not None:
         capture_cb(model, title, text)
@@ -139,11 +143,11 @@ def page_handler(ctx, model, title, text, capture_cb, config_kwargs):
         for suffix in translation_suffixes:
             if title.endswith(suffix):
                 return None # XXX
-        # XXX translation suffixes?
         # XXX Thesaurus pages?
         # XXX Sign gloss pages?
         # XXX Reconstruction pages?
         config1 = WiktionaryConfig(**config_kwargs)
+        config1.thesaurus_data = thesaurus_data
         ret = parse_page(ctx, title, text, config1)
     stats = config1.to_return()
     for k, v in ctx.to_return().items():
@@ -172,13 +176,23 @@ def parse_wiktionary(ctx, path, config, word_cb, capture_cb=None,
 
     config_kwargs = config.to_kwargs()
 
+    if not ctx.quiet:
+        print("First phase - extracting templates, macros, and pages")
+        sys.stdout.flush()
+
     def page_cb(model, title, text):
         return page_handler(ctx, model, title, text, capture_cb, config_kwargs)
 
-    for ret, stats in ctx.process(path, page_cb, phase1_only=phase1_only):
-        config.merge_return(stats)
-        for w in ret:
-            word_cb(w)
+    list(ctx.process(path, page_cb, phase1_only=True))
+    if phase1_only:
+        return []
+
+    # Phase 2 - process the pages using the user-supplied callback
+    if not ctx.quiet:
+        print("Second phase - processing pages")
+        sys.stdout.flush()
+
+    return reprocess_wiktionary(ctx, config, word_cb, capture_cb)
 
 
 def reprocess_wiktionary(ctx, config, word_cb, capture_cb):
@@ -190,10 +204,67 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb):
 
     config_kwargs = config.to_kwargs()
 
-    def page_cb(model, title, text):
-        return page_handler(ctx, model, title, text, capture_cb, config_kwargs)
+    # Extract thesaurus data. This iterates over all pages in the cache file,
+    # but is very fast.
+    thesaurus_data = extract_thesaurus_data(ctx, config)
 
+    # Then perform the main parsing pass.
+    def page_cb(model, title, text):
+        return page_handler(ctx, model, title, text, capture_cb, config_kwargs,
+                            thesaurus_data)
+
+    emitted = set()
     for ret, stats in ctx.reprocess(page_cb):
         config.merge_return(stats)
-        for w in ret:
-            word_cb(w)
+        for dt in ret:
+            word_cb(dt)
+            word = dt.get("word")
+            lang = dt.get("lang")
+            pos = dt.get("pos")
+            if word and lang and pos:
+                emitted.add((word, lang, pos))
+        break  # XXX
+
+    # Emit words that occur in thesaurus as main words but for which
+    # Wiktionary has no word in the main namespace. This seems to happen
+    # sometimes.
+    for (word, lang), linkages in thesaurus_data.items():
+        pos_ht = collections.defaultdict(list)
+        for x in linkages:
+            if x[0] is not None:
+                pos_ht[x[0]].append(x)
+        for pos, linkages in pos_ht.items():
+            if (word, lang, pos) in emitted:
+                continue
+            if lang not in languages_by_name:
+                print("Linkage language {} not recognized".format(lang))
+                continue
+            lang_code = languages_by_name[lang]["code"]
+            print("Emitting thesaurus main entry for {}/{}/{} (not in main)"
+                  .format(word, lang, pos))
+            sense_ht = collections.defaultdict(list)
+            for tpos, rel, w, sense, xlit, tags, topics, source in linkages:
+                if not sense:
+                    continue
+                sense_ht[sense].append((rel, w, xlit, tags, topics, source))
+            senses = []
+            for sense, linkages in sense_ht.items():
+                sense_dt = {
+                    "glosses": [sense],
+                }
+                for rel, w, xlit, tags, topics, source in linkages:
+                    dt = {"word": w, "source": source}
+                    if tags:
+                        dt["tags"] = tags
+                    if topics:
+                        dt["topics"] = topics
+                    data_append(ctx, sense_dt, rel, dt)
+                senses.append(sense_dt)
+            data = {
+                "word": word,
+                "lang": lang,
+                "lang_code": lang_code,
+                "pos": pos,
+                "senses": senses,
+            }
+            word_cb(data)

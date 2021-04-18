@@ -17,6 +17,7 @@ import collections
 from wikitextprocessor import Wtp, ALL_LANGUAGES
 from wiktextract import (WiktionaryConfig, parse_wiktionary,
                          reprocess_wiktionary, parse_page)
+from wiktextract import extract_thesaurus_data
 
 # Compute set of all language names
 all_langs = set(x["name"] for x in ALL_LANGUAGES)
@@ -128,6 +129,8 @@ if __name__ == "__main__":
                         help="Write output in human-readable JSON")
     parser.add_argument("--override", type=str,
                         help="Override module by one in file (for debugging)")
+    parser.add_argument("--use-thesaurus", action="store_true", default=False,
+                        help="Include thesaurus in single page mode")
     args = parser.parse_args()
 
     # The --all option turns on capturing all data types
@@ -233,6 +236,7 @@ if __name__ == "__main__":
             if not args.cache:
                 print("NOTE: you probably want to use --cache with --page or "
                       "otherwise processing will be very slow.")
+            # Load the page wikitext from the given file
             with open(args.page, "r") as f:
                 text = f.read()
             m = re.match(r"(?s)^TITLE: ([^\n]*)\n", text)
@@ -241,6 +245,12 @@ if __name__ == "__main__":
                 text = text[m.end():]
             else:
                 title = "Test page"
+            # Extract Thesaurus data (this is a bit slow for a single page, but
+            # needed for debugging linkages with thesaurus extraction).  This
+            # is disabled by default to speed up single page testing.
+            if args.use_thesaurus:
+                config.thesaurus_data = extract_thesaurus_data(ctx, config)
+            # Parse the page
             ret = parse_page(ctx, title, text, config)
             for x in ret:
                 word_cb(x)

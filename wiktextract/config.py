@@ -36,6 +36,7 @@ class WiktionaryConfig(object):
         "language_counts",
         "pos_counts",
         "section_counts",
+        "thesaurus_data",
         "word",
         "errors",
         "warnings",
@@ -81,6 +82,7 @@ class WiktionaryConfig(object):
         self.errors = []
         self.warnings = []
         self.debugs = []
+        self.thesaurus_data = {}
 
     def to_kwargs(self):
         return {
