@@ -224,7 +224,6 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb):
             pos = dt.get("pos")
             if word and lang and pos:
                 emitted.add((word, lang, pos))
-        break  # XXX
 
     # Emit words that occur in thesaurus as main words but for which
     # Wiktionary has no word in the main namespace. This seems to happen
