@@ -1445,7 +1445,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         data_append(ctx, data, "sounds", pron)
                         have_pronunciations = True
 
-            for m in re.finditer("/[^/,]+?/|\[[^]0-9,/][^],/]*?\]", text):
+            # First remove some patterns that may introduce incorrect
+            # spurious IPAs.
+            text1 = re.sub(r"\bsee /æ/ raising\b", "", text)
+            for m in re.finditer("/[^/,]+?/|\[[^]0-9,/][^],/]*?\]", text1):
                 v = m.group(0)
                 # The regexp above can match file links.  Skip them.
                 if v.startswith("[[File:"):
