@@ -850,9 +850,12 @@ def recursively_extract(contents, fn):
                 NodeKind.LEVEL5, NodeKind.LEVEL6, NodeKind.LINK):
         # Process args and children
         assert isinstance(contents.args, (list, tuple))
-        e1, c1 = recursively_extract(contents.args, fn)
-        extracted.extend(e1)
-        new_node.args = c1
+        new_args = []
+        for arg in contents.args:
+            e1, c1 = recursively_extract(arg, fn)
+            new_args.append(c1)
+            extracted.extend(e1)
+        new_node.args = new_args
         e1, c1 = recursively_extract(contents.children, fn)
         extracted.extend(e1)
         new_node.children = c1
@@ -876,9 +879,12 @@ def recursively_extract(contents, fn):
     elif kind in (NodeKind.TEMPLATE, NodeKind.TEMPLATE_ARG, NodeKind.PARSER_FN,
                   NodeKind.URL):
         # Process only args
-        e1, c1 = recursively_extract(contents.args, fn)
-        extracted.extend(e1)
-        new_node.args = c1
+        new_args = []
+        for arg in contents.args:
+            e1, c1 = recursively_extract(arg, fn)
+            new_args.append(c1)
+            extracted.extend(e1)
+        new_node.args = new_args
     elif kind == NodeKind.HTML:
         # Keep attrs and args as-is, process children
         new_node.attrs = contents.attrs

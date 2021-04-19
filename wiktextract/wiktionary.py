@@ -266,5 +266,6 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb):
                 "lang_code": lang_code,
                 "pos": pos,
                 "senses": senses,
+                "source": "thesaurus",
             }
             word_cb(data)
