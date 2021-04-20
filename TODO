@@ -363,3 +363,6 @@ Check extraction of pronunciations and their romanizations in 공중/Korean
 
 In translations, should process {{trans-see|...}} (cf. "abound with",
 the only translations are with {{trans-see|...}})
+
+Review most common categories for any language, and add common
+uninteresting ones to the ignore list
