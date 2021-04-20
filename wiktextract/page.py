@@ -261,6 +261,10 @@ wikipedia_templates = [
     "wtorw",
 ]
 
+# Some category tags are so common that they would clutter the extracted data
+# and are not linguistically very interesting (e.g., the same information can
+# easily be seen from part-of-speech, tags, or other information).  Ignore such
+# categories.
 ignored_category_patterns = [
     ".* term requests",
     ".* redlinks",
@@ -2041,9 +2045,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 ctx.error("UNIMPLEMENTED: parse_translation_template: {} {}"
                           .format(name, ht))
                 return ""
-            # XXX if last heading, maybe categories should go to all
-            # languages
-            # clean_node(config, ctx, data, [node], template_fn=template_fn)
             ctx.expand(ctx.node_to_wikitext(node), template_fn=template_fn)
 
         def parse_translation_table(tablenode):
@@ -2410,12 +2411,27 @@ def parse_page(ctx, word, text, config):
             if field not in last:
                 continue
             lst = last[field]
-            # XXX we could try to disambiguate it
-            # XXX if a language is specified for a category, we should only
-            # add it to those datas that are in that language
             for data in ret[:-1]:
                 assert data is not last
                 data_extend(ctx, data, field, lst)
+
+    # Remove category links that start with a language name from entries for
+    # different languages
+    for data in ret:
+        lang = data.get("lang")
+        assert lang
+        cats = data.get("categories", ())
+        new_cats = []
+        for cat in cats:
+            parts = cat.split(" ")
+            if parts[0] in languages_by_name and parts[0] != lang:
+                continue  # Ignore categories for a different language
+            new_cats.append(cat)
+        if not new_cats:
+            if "categories" in data:
+                del data["categories"]
+        else:
+            data["categories"] = new_cats
 
     # Inject linkages from thesaurus entries
     for data in ret:
