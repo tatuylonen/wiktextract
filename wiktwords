@@ -127,7 +127,7 @@ if __name__ == "__main__":
                         help="Print verbose status messages (for debugging)")
     parser.add_argument("--human-readable", action="store_true", default=False,
                         help="Write output in human-readable JSON")
-    parser.add_argument("--override", type=str,
+    parser.add_argument("--override", type=str, action="append",
                         help="Override module by one in file (for debugging)")
     parser.add_argument("--use-thesaurus", action="store_true", default=False,
                         help="Include thesaurus in single page mode")
@@ -188,19 +188,21 @@ if __name__ == "__main__":
     # Create expansion context
     ctx = Wtp(cache_file=args.cache, num_threads=args.num_threads)
     if args.override:
-        with open(args.override, "r") as f:
-            text = f.read()
-        m = re.match(r"(?s)^TITLE: ([^\n]*)\n", text)
-        if m:
-            title = m.group(1)
-            text = text[m.end():]
-        else:
-            print("First line of file supplied with --override must be "
-                  "\"TITLE: <page title>\"")
-            print("(The page title for this would normally start with Module:")
-            sys.exit(1)
-        # Load it as a transient page, overriding the normal page
-        ctx.add_page("Scribunto", title, text, transient=True)
+        for path in args.override:
+            with open(path, "r") as f:
+                text = f.read()
+            m = re.match(r"(?s)^TITLE: ([^\n]*)\n", text)
+            if m:
+                title = m.group(1)
+                text = text[m.end():]
+            else:
+                print("First line of file supplied with --override must be "
+                      "\"TITLE: <page title>\"")
+                print("(The page title for this would normally start "
+                      "with Module:")
+                sys.exit(1)
+            # Load it as a transient page, overriding the normal page
+            ctx.add_page("Scribunto", title, text, transient=True)
 
     def word_cb(data):
         global word_count
