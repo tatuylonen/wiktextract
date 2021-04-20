@@ -1701,6 +1701,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     item1 = item1.strip()
                     if item1.startswith("see Thesaurus:"):
                         item1 = item1[14:]
+                    elif item1.startswith("see also Thesaurus:"):
+                        item1 = item1[19:]
                     if not item1:
                         continue
                     if item1 == word:
