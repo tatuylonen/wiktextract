@@ -1459,6 +1459,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # The regexp above can match file links.  Skip them.
                 if v.startswith("[[File:"):
                     continue
+                if v == "/wiki.local/":
+                    continue
                 pron = {field: v}
                 parse_pronunciation_tags(ctx, tagstext, pron)
                 data_append(ctx, data, "sounds", pron)
