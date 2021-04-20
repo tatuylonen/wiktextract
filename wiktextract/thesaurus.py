@@ -180,7 +180,7 @@ def extract_thesaurus_data(ctx, config):
                     # such as 眾人／众人 on Thesaurus:老百姓
 
                     # If the word is now empty or separator, skip
-                    if not w or w.startswith("---"):
+                    if not w or w.startswith("---") or w == "\u2014":
                         return
                     rel = linkage or "synonyms"
                     for w1 in w.split(","):
