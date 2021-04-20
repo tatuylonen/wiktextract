@@ -253,16 +253,17 @@ def extract_thesaurus_data(ctx, config):
             v = (pos, rel, w, sense, xlit, tuple(tags), tuple(topics), title)
             key = (word, lang)
             ret[key].append(v)
-            # Add inverse linkages where applicable
-            inv_rel = linkage_inverses.get(rel)
-            if inv_rel is not None:
-                if rel in ("derived", "related"):
-                    inv_pos = None
-                else:
-                    inv_pos = pos
-                inv_v = (inv_pos, inv_rel, word, sense, None, (), (), title)
-                key = (w, lang)
-                ret[key].append(inv_v)
+            if False:  # XXX don't add reverse releations here, disambig first
+                # Add inverse linkages where applicable
+                inv_rel = linkage_inverses.get(rel)
+                if inv_rel is not None:
+                    if rel in ("derived", "related"):
+                        inv_pos = None
+                    else:
+                        inv_pos = pos
+                    inv_v = (inv_pos, inv_rel, word, sense, None, (), (), title)
+                    key = (w, lang)
+                    ret[key].append(inv_v)
 
     total = sum(len(x) for x in ret.values())
     if not ctx.quiet:

@@ -1699,17 +1699,27 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if item and not sublists:
                 for item1 in split_at_comma_semi(item):
                     item1 = item1.strip()
+                    if item1.startswith("see Thesaurus:"):
+                        item1 = item1[14:]
                     if not item1:
                         continue
-                    dt = {"word": item1}
-                    if qualifier:
-                        parse_sense_tags(ctx, qualifier, dt)
-                        if english:
-                            dt["translation"] = english
-                    if sense:
-                        dt["sense"] = sense
-                    data_append(ctx, data, field, dt)
-                    have_linkages = True
+                    if item1 == word:
+                        continue
+                    for dt in data.get(field, ()):
+                        if dt.get("word") == item1:
+                            break
+                    else:
+                        dt = {"word": item1}
+                        if qualifier:
+                            parse_sense_tags(ctx, qualifier, dt)
+                        if sense:
+                            dt["sense"] = sense
+                            if english:
+                                dt["translation"] = english
+                        elif english:
+                            dt["sense"] = english
+                        data_append(ctx, data, field, dt)
+                        have_linkages = True
 
             # Some words have a word sense in a top-level list item and
             # use sublists for actual links
@@ -2412,16 +2422,23 @@ def parse_page(ctx, word, text, config):
             config.thesaurus_data.get((word, lang), ()):
             if tpos is not None and pos != tpos:
                 continue
-            dt = {"word": w, "source": title}
-            if sense:
-                dt["sense"] = sense
-            if tags:
-                dt["tags"] = tags
-            if topics:
-                dt["topics"] = topics
-            if xlit:
-                dt["xlit"] = xlit
-            data_append(ctx, data, rel, dt)
+            if w == word:
+                continue
+            for dt in data.get(rel, ()):
+                if dt.get("word") == w:
+                    if not sense or dt.get("sense") == sense:
+                        break
+            else:
+                dt = {"word": w, "source": title}
+                if sense:
+                    dt["sense"] = sense
+                if tags:
+                    dt["tags"] = tags
+                if topics:
+                    dt["topics"] = topics
+                if xlit:
+                    dt["xlit"] = xlit
+                data_append(ctx, data, rel, dt)
 
     # Disambiguate those items from word level that can be disambiguated
     for data in ret:

@@ -363,9 +363,3 @@ Check extraction of pronunciations and their romanizations in 공중/Korean
 
 In translations, should process {{trans-see|...}} (cf. "abound with",
 the only translations are with {{trans-see|...}})
-
-In linkage extraction:
-  - remove "Thesaurus:" from links extracted from main pages
-  - eliminate duplicate links
-  - eliminate self-links
-  - why does temp.txt not include sense description in linkage?
