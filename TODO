@@ -351,3 +351,6 @@ Speed up starting Lua
 
 house/English/Noun: WARNING: Failed to find subpage section English house/Noun Noun Translations at ['house', 'see translation subpage']
   - looks like the Translations section is has additional === signs
+
+wikitextprocessor tests fail seemingly randomly.  WHY????  wiktextract
+seems to work for short tests.  Does something get corrupted?
