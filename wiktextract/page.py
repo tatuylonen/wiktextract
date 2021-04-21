@@ -831,7 +831,10 @@ def parse_sense_linkage(ctx, data, name, ht):
     assert isinstance(ht, dict)
     field = sense_linkage_templates[name]
     for i in range(2, 20):
-        w = ht.get(i)
+        w = ht.get(i) or ""
+        w = w.strip()
+        if w.startswith("Thesaurus:"):
+            w = w[10:]
         if not w:
             break
         data_append(ctx, data, field, {"word": w})
@@ -1720,6 +1723,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         item1 = item1[14:]
                     elif item1.startswith("see also Thesaurus:"):
                         item1 = item1[19:]
+                    elif item1.startswith("Thesaurus:"):
+                        item1 = item1[10:]
                     if not item1:
                         continue
                     if item1 == word:
