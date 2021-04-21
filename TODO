@@ -307,6 +307,10 @@ template seems to know a ton about these so maybe look at it.
 # English/fire/Noun (oxidation reaction) - Egptian, "f" in roman versions seems
 # to go into "roman" field, even though it is apparently gender
 
+Collect usage examples
+
+Collect etymology information
+
 # XXX handle "XXX/derived terms" pages
 
 /derived terms (seem to be referenced with {{section link|...}}
@@ -347,6 +351,9 @@ Check extraction of pronunciations and their romanizations in 공중/Korean
 In translations, should process {{trans-see|...}} (cf. "abound with",
 the only translations are with {{trans-see|...}})
 
-Fix luaexec.py:get_page_info (page_exists especially)
-
 XXX still Lua error on 龜 - see what is causing the remaining one
+
+Speed up starting Lua
+
+house/English/Noun: WARNING: Failed to find subpage section English house/Noun Noun Translations at ['house', 'see translation subpage']
+  - looks like the Translations section is has additional === signs

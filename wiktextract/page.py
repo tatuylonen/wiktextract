@@ -463,6 +463,8 @@ def parse_sense_XXXold_going_away(config, data, text, use_text):
         # obtain some machine-readable linkages.
         gloss = clean_value(config, text)
         gloss = re.sub(r"\s*\[\d\d\d\d\]", "", gloss)  # Remove first years
+        # Remove parenthesized start (usually tags/topics) from the gloss
+        gloss = re.sub(r"^\([^)]*\)\s*", "", gloss)
         if gloss:
             # Got a gloss for this sense.
             data_append(config, data, "glosses", gloss)
@@ -1987,8 +1989,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     else:
                         tr["sense"] = sense
                 parse_translation_desc(ctx, part, tr)
-                if tr.get("word"):  # Set and not empty
-                    data_append(ctx, data, "translations", tr)
+                if not tr.get("word"):
+                    continue  # Not set or empty
+                if tr.get("word").startswith("Lua execution error"):
+                    continue
+                data_append(ctx, data, "translations", tr)
 
             m = re.match(r"\((([^()]|\([^)]*\))*)\) ", item)
             qualifier = None
@@ -2323,7 +2328,7 @@ def parse_page(ctx, word, text, config):
     ctx.start_page(word)
     tree = ctx.parse(text, pre_expand=True,
                      additional_expand=additional_expand_templates)
-    # print("PAGE PARSE", tree)
+    # print("PAGE PARSE:", tree)
 
     top_data = {}
 
