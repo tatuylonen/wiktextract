@@ -29,6 +29,23 @@ xlat_head_map = {
     "impf": "imperfective",
     "pf": "perfective",
     "?": "",
+    "1": "class-1",
+    "1a": "class-1a",
+    "2": "class-2",
+    "2a": "class-2a",
+    "3": "class-3",
+    "4": "class-4",
+    "5": "class-5",
+    "6": "class-6",
+    "7": "class-7",
+    "8": "class-8",
+    "9": "class-9",
+    "10": "class-10",
+    "11": "class-11",
+    "12": "class-12",
+    "13": "class-13",
+    "14": "class-14",
+    "15": "class-15",
 }
 
 # General mapping for linguistic tags.  Value is a string of space-separated
