@@ -290,12 +290,6 @@ template seems to know a ton about these so maybe look at it.
 # parsed (it is not in parentheses).  This type of construction is very
 # common in Latin.
 
-# tear/English/Verb - "tore" in head has error-unknown tag for
-# "or (now colloquial and nonstandard)"
-
-# Form-of detection does not work for many Spanish forms, e.g.:
-# bachaquea/Spanish/Verb
-
 # form-of (and alt-of) links in generated html should look at
 # canonical form in addition to word - now many items with accents are
 # not properly linked

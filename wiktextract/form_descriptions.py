@@ -762,6 +762,8 @@ xlat_tags_map = {
     "rarely used": "rare",
     "rarely": "rare",
     "now rare": "archaic",
+    "now colloquial": "colloquial",
+    "now colloquial and nonstandard": "colloquial nonstandard",
     "fossil word": "archaic",
     "brusque": "impolite",
     "verbs": "verb",
@@ -2431,7 +2433,7 @@ def add_related(ctx, data, lst, related):
         return
     for related in related.split(" or "):
         if related:
-            m = re.match(r"\(([^()]|\([^)]*\))*\)\s*", related)
+            m = re.match(r"\((([^()]|\([^)]*\))*)\)\s*", related)
             if m:
                 paren = m.group(1)
                 related = related[m.end():]
@@ -2600,9 +2602,6 @@ def parse_word_head(ctx, pos, text, data):
 
             # Get the sequence of tokens for the related term
             related = parts[last_i:]
-
-            # XXX check if related contains valid tag sequences and warn if
-            # so
 
             for tags in last_tagsets:
                 tags = list(sorted(tags))
