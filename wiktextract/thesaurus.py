@@ -214,6 +214,11 @@ def extract_thesaurus_data(ctx, config):
                 recurse(contents.children)
                 return
             subtitle = subtitle.lower()
+            if subtitle in ("further reading", "external links",
+                            "references", "translations", "notes", "usage",
+                            "work to be done", "quantification",
+                            "abbreviation", "symbol"):
+                return
             if subtitle in linkage_map:
                 linkage = linkage_map[subtitle]
                 recurse(contents.children)
@@ -230,10 +235,6 @@ def extract_thesaurus_data(ctx, config):
                 subtitle_tags = ignored_subtitle_tags_map[subtitle]
                 recurse(contents.children)
                 subtitle_tags = ()
-                return
-            if subtitle in ("further reading", "see also", "external links",
-                            "references", "translations", "notes", "usage",
-                            "work to be done", "quantification"):
                 return
             print(title, lang, pos, sense, "UNHANDLED SUBTITLE:", subtitle)
             print(contents.args)
