@@ -347,10 +347,9 @@ the only translations are with {{trans-see|...}})
 
 XXX still Lua error on 龜 - see what is causing the remaining one
 
-Speed up starting Lua
+Consider caching template expansions in an LRU cache.  Make sure
+template arguments that can be accessed from Lua are considered
+properly.
 
 house/English/Noun: WARNING: Failed to find subpage section English house/Noun Noun Translations at ['house', 'see translation subpage']
   - looks like the Translations section is has additional === signs
-
-wikitextprocessor tests fail seemingly randomly.  WHY????  wiktextract
-seems to work for short tests.  Does something get corrupted?
