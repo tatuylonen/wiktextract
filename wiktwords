@@ -60,11 +60,6 @@ def capture_page(model, orig_title, text, pages_dir):
             analyze = False
         elif prefix not in recognized_prefixes:
             print("UNRECOGNIZED PREFIX", title)
-        # if prefix == "Category":
-        #     m = re.match(r"^(Category:[^_ :]+)[_ :]*(.*)", title)
-        #     if m:
-        #         title = m.group(1) + ":" + m.group(2)
-        #     # XXX Capture some?
 
     if pages_dir is not None:
         title = re.sub(r":", "/", title)

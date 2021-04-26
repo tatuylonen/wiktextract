@@ -332,19 +332,20 @@ comprehensive.  The underlying lower-level toolkit,
 ### Expected performance
 
 Extracting all data for all languages from English Wiktionary takes
-about 7 hours on a modern (year 2020) 24-core desktop (AMD EPYC 7402)
+several hours on a modern (year 2020) 24-core desktop (AMD EPYC 7402)
 or three hours on a 128-core dual AMD EPYC 7702 system.  You may want
-to download the pre-extracted data rather than run it yourself unless
-you have special needs or want to modify the code.  If you run it
-yourself, be prepared to wait from several hours to a couple of days,
-depending on your computer.  While you can, you may not want to run
-this on a laptop.  Expanding Lua modules is not cheap, but it enables
-superior extraction quality and maintainability!  Also, the software
-needs 3-4 GB of memory per process.  You can control the number of
-parallel processes to use with the ``--num-threads`` option; the
-default on Linux is to use the number of available cores/hyperthreads.
-On Windows and MacOS, ``--num-threads`` should currently be set to 1
-(default on those systems).
+to download the pre-extracted data from
+[kaikki.org](https://kaikki.org/dictionary/) rather than run it
+yourself unless you have special needs or want to modify the code.  If
+you run it yourself, be prepared to wait from several hours to a
+couple of days, depending on your computer.  While you can, you may
+not want to run this on a laptop.  Expanding Lua modules is not cheap,
+but it enables superior extraction quality and maintainability!  Also,
+the software needs 3-4 GB of memory per process.  You can control the
+number of parallel processes to use with the ``--num-threads`` option;
+the default on Linux is to use the number of available
+cores/hyperthreads.  On Windows and MacOS, ``--num-threads`` should
+currently be set to 1 (default on those systems).
 
 ## Using the command-line tool
 

@@ -319,7 +319,9 @@ htmlgen: strange Categories non-disambiguated in: https://kaikki.org/dictionary/
 
 htmlgen: include word prefixes in breadcrumbs
 
-htmlgen: better list page generation
+htmlgen: Implement search functionality
+
+htmlgen: Implement better list page generation
 
 htmlgen: compound-of field of sense not displayed in generated html
 
@@ -353,3 +355,67 @@ properly.
 
 house/English/Noun: WARNING: Failed to find subpage section English house/Noun Noun Translations at ['house', 'see translation subpage']
   - looks like the Translations section is has additional === signs
+
+sierpiec/Polish/Noun: ERROR: LUA error in #invoke ('pl-noun', 'template_decl_pat
+tern', 'm-an') parent ('Template:pl-decl-noun-m-an', {}) at ['sierpiec', 'pl-dec
+l-noun-m-an', '#invoke']
+[string "pl-noun"]:412: Unsupported word ending: nil
+stack traceback:
+        [C]: in function 'error'
+        [string "pl-noun"]:412: in upvalue 'masc_common'
+        [string "pl-noun"]:609: in function <[string "pl-noun"]:598>
+        (...tail calls...)
+        [string "pl-noun"]:1648: in function 'pl-noun.template_decl_pattern'
+        (...tail calls...)
+        [C]: in function 'xpcall'
+        [string "_sandbox_phase2"]:174: in function <[string "_sandbox_phase2"]:
+129>
+
+testicle/English/Noun: ERROR: LUA error in #invoke ('translations/egy', 'show') parent ('Template:t-egy', {1: 'ẖrwj', 'h': 'T28:D21-G43-Z4&lt;/hiero&gt;<table class="mw-hiero-table mw-hiero-outer" dir="ltr"><tr><td><table class="mw-hiero-table"><tr><td height="40"><span style="margin: 1px;">[[File:Abydos-Bold-hieroglyph-D283.png&vert;D283&vert;x38px&vert;link=]]</span></td></tr></table></td></tr></table><hiero>', 2: 'm-d</hiero>'}) at ['testicle', 't-egy', '#invoke']
+[string "gender and number"]:123: The tag "d</hiero>" in the gender specification "m-d</hiero>" is not valid.
+stack traceback:
+	[C]: in function 'error'
+	[string "gender and number"]:123: in local 'do_gender_spec'
+	[string "gender and number"]:204: in function 'Module:gender and number.format_genders'
+	[string "gender and number"]:91: in function 'Module:gender and number.format_list'
+	[string "links"]:336: in function 'Module:links.format_link_annotations'
+	[string "links"]:524: in function 'Module:links.full_link'
+	[string "translations/egy"]:27: in function 'translations/egy.show'
+	(...tail calls...)
+	[C]: in function 'xpcall'
+	[string "_sandbox_phase2"]:174: in function <[string "_sandbox_phase2"]:129>
+
+Some forms of usage examples seem to end up in gloss.  Check
+body/English/Noun, e.g. sense "Physical Frame / A Person" ("What's a
+body got to do ..." ends up in gloss)
+
+Check * at the end of some derived forms in wort/English/Noun (e.g., dropwort*)
+
+he/English/Pronoun: LUA error, due to incorrect parsing of template
+arguments (URLs/links should not break arguments)
+file<a href="/wiki/File:en-uk-a_horse.ogg" title="File:en-uk-a horse.ogg">file</a>
+
+hermetischster/German/Adjective: ERROR: LUA error in #invoke ('de-inflections', 'show_adj_form') parent ('Template:de-adj form of', {1: 'hermetisch'}) at ['hermetischster', 'de-adj form of', '#invoke']
+[string "de-inflections"]:110: Unable to find adjective ending from page name 'dictionary' based on lemma 'hermetisch'
+stack traceback:
+	[C]: in function 'error'
+	[string "de-inflections"]:110: in function 'de-inflections.show_adj_form'
+	(...tail calls...)
+	[C]: in function 'xpcall'
+	[string "_sandbox_phase2"]:174: in function <[string "_sandbox_phase2"]:129>
+
+mazurzenie/Polish/Noun: ERROR: LUA error in #invoke ('pl-noun', 'template_decl_pattern', 'n') parent ('Template:pl-decl-noun-n', {'tantum': 's'}) at ['mazurzenie', 'pl-decl-noun-n', '#invoke']
+[string "pl-noun"]:1239: bad argument #1 to 'match' (string expected, got nil)
+stack traceback:
+	[C]: in function 'error'
+	[string "ustring:ustring"]:43: in upvalue 'checkString'
+	[string "ustring:ustring"]:864: in function 'ustring:ustring.match'
+	[string "pl-noun"]:1239: in function <[string "pl-noun"]:1209>
+	(...tail calls...)
+	[string "pl-noun"]:1648: in function 'pl-noun.template_decl_pattern'
+	(...tail calls...)
+	[C]: in function 'xpcall'
+	[string "_sandbox_phase2"]:174: in function <[string "_sandbox_phase2"]:129>
+
+Overall the number of LUA execution errors has increased by a factor of 10.
+Figure out why and fix.

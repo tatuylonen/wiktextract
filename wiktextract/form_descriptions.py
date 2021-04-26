@@ -2297,8 +2297,8 @@ for topic in valid_topics:
 for topic in topic_generalize_map:
     add_to_valid_tree(valid_sequences, "topics", topic, topic)
 # Add canonicalized/generalized topic values
-add_to_valid_tree_mapping(valid_sequences, "topics", topic_generalize_map,
-                          valid_topics, True)
+#add_to_valid_tree_mapping(valid_sequences, "topics", topic_generalize_map,
+#                          valid_topics, True)
 
 # Regexp used to find "words" from word heads and linguistic descriptions
 word_re = re.compile(r"[^ ,;()\u200e]+|\(([^()]|\([^)]*\))*\)")
