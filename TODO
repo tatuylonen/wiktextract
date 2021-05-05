@@ -351,8 +351,6 @@ Check extraction of pronunciations and their romanizations in 공중/Korean
 In translations, should process {{trans-see|...}} (cf. "abound with",
 the only translations are with {{trans-see|...}})
 
-XXX still Lua error on 龜 - see what is causing the remaining one
-
 Consider caching template expansions in an LRU cache.  Make sure
 template arguments that can be accessed from Lua are considered
 properly.
@@ -384,14 +382,6 @@ body got to do ..." ends up in gloss)
 
 Check * at the end of some derived forms in wort/English/Noun (e.g., dropwort*)
 
-he/English/Pronoun: LUA error, due to incorrect parsing of template
-arguments (URLs/links should not break arguments)
-file<a href="/wiki/File:en-uk-a_horse.ogg" title="File:en-uk-a horse.ogg">file</a>
-
-Overall the number of LUA execution errors has increased by a factor of 10.
-Figure out why and fix.  (I DON'T SEEM TO BE ABLE TO REPRODUCE THEM FOR
-INDIVIDUAL PAGES!)
-
 뱀/Korean - Derived terms parenthesized translitterations end up as tags
 
 なぜなら/Japanese - IPA/templates problems with IPA extraction, "lit."
@@ -409,3 +399,8 @@ stack traceback:
         (...tail calls...)
         [C]: in function 'xpcall'
         [string "_sandbox_phase2"]:174: in function <[string "_sandbox_phase2"]:129>
+
+Overall the number of LUA execution errors has increased by a factor of 10.
+Figure out why and fix.  (I DON'T SEEM TO BE ABLE TO REPRODUCE THEM FOR
+INDIVIDUAL PAGES!)
+  - SHOULD BE FIXED NOW, VERIFY AFTER RUN COMPLETES
