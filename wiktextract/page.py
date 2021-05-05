@@ -268,7 +268,6 @@ wikipedia_templates = [
 ignored_category_patterns = [
     ".* term requests",
     ".* redlinks",
-    ".* redlinks/m",
     ".* red links",
     ".* lemmas$",
     ".* nouns$",
