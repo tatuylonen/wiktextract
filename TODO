@@ -384,22 +384,6 @@ Check * at the end of some derived forms in wort/English/Noun (e.g., dropwort*)
 
 뱀/Korean - Derived terms parenthesized translitterations end up as tags
 
-なぜなら/Japanese - IPA/templates problems with IPA extraction, "lit."
-complain from LUA Debug, but this might also be an actual coding error
-in Wiktionary.  OR, this might be a bug in #switch, perhaps in how we split
-arguments or handle the seemingly multiple choices for first option.
-- perhaps I evaluate #switch values that should not be evaluated?
-なぜなら/Japanese/Conjunction: ERROR: LUA error in #invoke ('IPA/templates', 'IPA') parent ('Template:IPA', {1: 'lit.'}) at ['なぜなら', 'abbr', '#switch', 'IPA', 'check deprecated lang param usage', 'ARGVAL-1', '#invoke']
-[string "IPA/templates"]:25: Please specify a language code in the first parameter. The value "lit." is not valid.
-stack traceback:
-        [C]: in function 'error'
-        [string "languages"]:43: in local 'err'
-        [string "languages"]:77: in function 'Module:languages.err'
-        [string "IPA/templates"]:25: in function 'IPA/templates.IPA'
-        (...tail calls...)
-        [C]: in function 'xpcall'
-        [string "_sandbox_phase2"]:174: in function <[string "_sandbox_phase2"]:129>
-
 Overall the number of LUA execution errors has increased by a factor of 10.
 Figure out why and fix.  (I DON'T SEEM TO BE ABLE TO REPRODUCE THEM FOR
 INDIVIDUAL PAGES!)
