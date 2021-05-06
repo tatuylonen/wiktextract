@@ -383,8 +383,3 @@ body got to do ..." ends up in gloss)
 Check * at the end of some derived forms in wort/English/Noun (e.g., dropwort*)
 
 뱀/Korean - Derived terms parenthesized translitterations end up as tags
-
-Overall the number of LUA execution errors has increased by a factor of 10.
-Figure out why and fix.  (I DON'T SEEM TO BE ABLE TO REPRODUCE THEM FOR
-INDIVIDUAL PAGES!)
-  - SHOULD BE FIXED NOW, VERIFY AFTER RUN COMPLETES
