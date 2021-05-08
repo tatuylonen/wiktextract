@@ -1892,6 +1892,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 idx = sense.find("See also translations at ")
                 if idx > 0:
                     sense = sense[:idx].strip()
+            sense_detail = None
 
             def translation_item_template_fn(name, ht):
                 nonlocal langcode
@@ -1948,21 +1949,48 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     ctx.warning("POSSIBLE SENSE NUMBER IN ITEM: {}"
                                 .format(item))
 
-            # Translation items should start with a language name
-            m = re.match("\*?\s*([-' \w][-' \w]*):\s*", item)
-            if not m:
-                if not lang or item.find(":") >= 0:
-                    ctx.error("no recognized language name in translation "
-                              "item {!r}"
-                              .format(item))
-                return
-            sublang = m.group(1)
-            item = item[m.end():]
+            # Translation items should start with a language name (except
+            # some nested translation items don't and rely on the language
+            # name from the higher level, and some append a language variant
+            # name to a broader language name)
+            m = re.match(r"\*?\s*([-' \w][-' \w]*):\s*", item)
             tags = []
-            if lang is not None:
-                tags.append(sublang)
+            if m:
+                sublang = m.group(1)
+                if lang is None:
+                    lang = sublang
+                elif lang and lang + " " + sublang in languages_by_name:
+                    lang = lang + " " + sublang
+                elif lang and sublang + " " + lang in languages_by_name:
+                    lang = sublang + " " + lang  # E.g., Ancient Egyptian
+                elif sublang in languages_by_name:
+                    lang = sublang
+                elif sublang[0].isupper():
+                    # Interpret it as a tag
+                    tags.append(sublang)
+                else:
+                    # We don't recognize this prefix
+                    ctx.error("unrecognized prefix (language name?) in "
+                              "translation item: {}".format(item))
+                    return
+                # Strip the language name/tag from the item
+                item = item[m.end():]
+            elif lang is None:
+                # No mathing language prefix
+                ctx.error("no language name in translation item: {}"
+                          .format(item))
+                return
             else:
-                lang = sublang
+                # We have no prefix that looks like a language name but
+                # we already know the language.  Check if it might have
+                # a word sense prefix.
+                m = re.match(r"\*?\s*\(([^)]*)\):\s*", item)
+                if m:
+                    sense_detail = m.group(1)
+                    item = item[m.end():]
+                elif item.find(": ") >= 0:
+                    ctx.warning("suspicious prefix in translation should be "
+                                "checked: {}".format(item))
 
             # Certain values indicate it is not actually a translation
             for prefix in ("Use ", "use ", "suffix ", "prefix "):
@@ -1991,7 +2019,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                           "checked"):
                         pass
                     else:
-                        tr["sense"] = sense
+                        if sense_detail:
+                            tr["sense"] = "{} ({})".format(sense, sense_detail)
+                        else:
+                            tr["sense"] = sense
+                elif sense_detail:
+                    tr["sense"] = sense_detail
                 parse_translation_desc(ctx, part, tr)
                 if not tr.get("word"):
                     continue  # Not set or empty
@@ -2025,6 +2058,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             assert isinstance(node, WikiNode)
 
             def template_fn(name, ht):
+                nonlocal sense_parts
+                nonlocal sense
                 if is_panel_template(name):
                     return ""
                 if name == "see also":
@@ -2054,11 +2089,17 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if name in ("trans-top", "trans-bottom", "trans-mid"):
                     # XXX capture id from trans-top?  Capture sense here
                     # instead of trying to parse it from expanded content?
+                    sense_parts = []
+                    sense = None
                     return None
                 if name == "checktrans-top":
+                    sense_parts = []
+                    sense = None
                     return ""
                 if name == "trans-top-also":
                     # XXX capture?
+                    sense_parts = []
+                    sense = None
                     return ""
                 ctx.error("UNIMPLEMENTED: parse_translation_template: {} {}"
                           .format(name, ht))
@@ -2102,12 +2143,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     sense_parts = []
                     sense = None
                 elif kind == NodeKind.TEMPLATE:
-                    # XXX should these go into sense_parts?  What kind
-                    # of templates do we encounter here?
                     parse_translation_template(node)
                 elif kind == NodeKind.TABLE:
                     parse_translation_table(node)
                 elif kind == NodeKind.HTML:
+                    if node.attrs.get("class") == "NavFrame":
+                        # Reset ``sense_parts`` (and force recomputing
+                        # by clearing ``sense``) as each NavFrame specifies
+                        # its own sense.  This helps eliminate garbage coming
+                        # from text at the beginning at the translations
+                        # section.
+                        sense_parts = []
+                        sense = None
                     for item in node.children:
                         if not isinstance(item, WikiNode):
                             continue

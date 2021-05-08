@@ -354,6 +354,8 @@ Apparently the following is not parsed correctly:
 # in Lua code where they are looked up (Wiktionary does have synonyms).
 
 aunt/English/Translations: Explanation in first sense in translations
+aunt/English/Translations: Armenian "paternal" goes in roman
+aunt/English/Translations: Burmese - sense in parenthesis goes into "roman"
 aunt: various errors reported
 
 house/English/Noun: WARNING: Failed to find subpage section English house/Noun Noun Translations at ['house', 'see translation subpage']
