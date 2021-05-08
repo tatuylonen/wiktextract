@@ -1681,14 +1681,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 item = item[1:]
             item = item.strip()
 
-            # print("    LINKAGE ITEM:", item, field)
+            # print("    LINKAGE ITEM: {}: {}".format(field, item))
             m = re.match(r"\((([^()]|\([^)]*\))*)\):?\s*", item)
             if m:
                 qualifier = m.group(1)
                 item = item[m.end():]
             else:
                 m = re.search(" \((([^()]|\([^)]*\))*)\)$", item)
-                if m and item[:m.start()].find(",") < 0:
+                if m:
+                    print("Found final parenthesized group", m.groups())
                     qualifier = m.group(1)
                     item = item[:m.start()]
             m = re.search(r"\s*\((([^()]|\([^)]*\))*)\)", item)

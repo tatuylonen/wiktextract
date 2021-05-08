@@ -353,10 +353,8 @@ Apparently the following is not parsed correctly:
 # Things like this seem very common with Chinese words.  Might be a problem
 # in Lua code where they are looked up (Wiktionary does have synonyms).
 
-aunt/English/Synonyms: "(diminutive)" gets into the word
-aunt/English/Hyponyms: "(nonstandard)" gets into the word
-aunt/English/Translations: "4" in Breton, "2" in Guarani
 aunt/English/Translations: Explanation in first sense in translations
+aunt: various errors reported
 
 house/English/Noun: WARNING: Failed to find subpage section English house/Noun Noun Translations at ['house', 'see translation subpage']
   - looks like the Translations section is has additional === signs
