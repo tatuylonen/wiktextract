@@ -1689,7 +1689,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
             else:
                 m = re.search(" \((([^()]|\([^)]*\))*)\)$", item)
                 if m:
-                    print("Found final parenthesized group", m.groups())
                     qualifier = m.group(1)
                     item = item[:m.start()]
             m = re.search(r"\s*\((([^()]|\([^)]*\))*)\)", item)
