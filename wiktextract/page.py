@@ -1879,6 +1879,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             return
         sense_parts = []
         sense = None
+        sense_locked = False
 
         def parse_translation_item(contents, lang=None):
             nonlocal sense
@@ -2086,11 +2087,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             "topics", "top", "qualifier",):
                     # These are expanded in the default way
                     return None
-                if name in ("trans-top", "trans-bottom", "trans-mid"):
+                if name in ("trans-top",):
                     # XXX capture id from trans-top?  Capture sense here
                     # instead of trying to parse it from expanded content?
                     sense_parts = []
                     sense = None
+                    return None
+                if name in ("trans-bottom", "trans-mid"):
                     return None
                 if name == "checktrans-top":
                     sense_parts = []
@@ -2106,26 +2109,17 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 return ""
             ctx.expand(ctx.node_to_wikitext(node), template_fn=template_fn)
 
-        def parse_translation_table(tablenode):
-            assert isinstance(tablenode, WikiNode)
-            # print("PARSE_TRANSLATION_TABLE:", tablenode)
-            for node in tablenode.children:
-                # print("TABLE NODE", node)
-                if not isinstance(node, WikiNode):
-                    continue
-                if node.kind == NodeKind.TABLE_ROW:
-                    for cell in node.children:
-                        # print("TABLE CELL", cell)
-                        if not isinstance(cell, WikiNode):
-                            continue
-                        if cell.kind == NodeKind.TABLE_CELL:
-                            parse_translation_recurse(cell)
-
         def parse_translation_recurse(xlatnode):
             nonlocal sense
             nonlocal sense_parts
             for node in xlatnode.children:
                 if isinstance(node, str):
+                    if sense:
+                        if not node.isspace():
+                            ctx.debug("skipping string in the middle of "
+                                      "translations: {}".format(node))
+                        continue
+                    # Add a part to the sense
                     sense_parts.append(node)
                     sense = None
                     continue
@@ -2140,12 +2134,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         if item.args == ":":
                             continue
                         parse_translation_item(item.children)
-                    sense_parts = []
-                    sense = None
                 elif kind == NodeKind.TEMPLATE:
                     parse_translation_template(node)
-                elif kind == NodeKind.TABLE:
-                    parse_translation_table(node)
+                elif kind in (NodeKind.TABLE, NodeKind.TABLE_ROW,
+                              NodeKind.TABLE_CELL):
+                    parse_translation_recurse(node)
                 elif kind == NodeKind.HTML:
                     if node.attrs.get("class") == "NavFrame":
                         # Reset ``sense_parts`` (and force recomputing
@@ -2162,9 +2155,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 elif kind in LEVEL_KINDS:
                     # Sub-levels will be recursed elsewhere
                     break
-                else:
+                elif not sense:
                     sense_parts.append(node)
-                    sense = None
+                else:
+                    ctx.debug("skipping translations sense item when locked: {}"
+                              .format(node))
 
         # Main code of parse_translation().  We want ``sense`` to be assigned
         # regardless of recursion levels, and thus the code is structured
