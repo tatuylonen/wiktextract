@@ -2711,7 +2711,9 @@ def parse_translation_desc(ctx, text, data):
             continue
         descriptors = map_with(xlat_tags_map, [paren])
         for desc in descriptors:
-            for new_desc in map_with(xlat_tags_map, split_at_comma_semi(desc)):
+            for new_desc in \
+                map_with(xlat_head_map,
+                         map_with(xlat_tags_map, split_at_comma_semi(desc))):
                 new_desc = new_desc.strip()
                 if new_desc.startswith("e.g."):
                     continue

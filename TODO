@@ -215,11 +215,6 @@ template seems to know a ton about these so maybe look at it.
 
 # XXX related terms, wikipedia, Wikispecies links.  See "permit"/English/Noun
 
-# Check linkage sol/Norwegian Nynorsk/Noun (looks like unhandled item list)
-#  - This is a broader problem around col1 ... col5 and col1-u ... col5-u.
-#    They expand to <div> inside <div> that contains a list.  They are
-#    fairly widely used in at least linkages.
-
 # XXX "magic number"/English - why is tag included in gloss?  Perhaps
 # the tag has extra parentheses?
 #  - tags need to be processed from outer gloss
@@ -271,10 +266,6 @@ template seems to know a ton about these so maybe look at it.
 
 # Implement <chem> ... </chem>, e.g. felsic/English/Adjective
 
-# Improve htmlgen lists
-#   - more even sizes of sublists (use intervals when appropriate)
-#   - group kanji etc by radical + strokes
-
 # XXX chinese glyphs, see 內
 #  - I'm getting dial-syn page does not exist in synonyms, but Wiktionary
 #    shows a big list of synonyms
@@ -285,18 +276,6 @@ template seems to know a ton about these so maybe look at it.
 #  - this page also has dial-syn warning in synonyms (also noted elsewhere)
 #  - in Japanese compounds, roman transliterations incorrectly go into tags
 #  - in Japanese, does it make sense to have most senses annotated with "kanji"?
-
-# canadensis/Latin "third-declension two-termination adjective" is not
-# parsed (it is not in parentheses).  This type of construction is very
-# common in Latin.
-
-# form-of (and alt-of) links in generated html should look at
-# canonical form in addition to word - now many items with accents are
-# not properly linked
-
-# 䆀手/Chinese - Synonyms has * The dial-syn page 「左手」 does not yet exist. Create the data page and the map!* The dial-syn page 「左撇子」 does not yet exist. Create the data page and the map!
-# Things like this seem very common with Chinese words.  Might be a problem
-# in Lua code where they are looked up (Wiktionary does have synonyms).
 
 # English/fire/Noun (oxidation reaction) - Egptian, "f" in roman versions seems
 # to go into "roman" field, even though it is apparently gender
@@ -315,6 +294,14 @@ Collect etymology information
 龍/derived terms
 馬/derived terms
 
+htmlgen: Improve sense/word lists
+  - more even sizes of sublists (use intervals when appropriate)
+  - group kanji etc by radical + strokes
+
+htmlgen: form-of (and alt-of) links in generated html should look at
+canonical form in addition to word - now many items with accents are
+not properly linked
+
 htmlgen: strange Categories non-disambiguated in: https://kaikki.org/dictionary/English/meaning/v/vo/volva.html#volva-noun
 
 htmlgen: include word prefixes in breadcrumbs
@@ -325,12 +312,7 @@ htmlgen: Implement better list page generation
 
 htmlgen: compound-of field of sense not displayed in generated html
 
-htmlgen: make raw JSON file from wiktextract available
-
 htmlgen: implement support for redirects
-
-Apparently the following is not parsed correctly:
-{{ws sense|any of enclosing symbols "(", ")", "[", "]", "{", "}" etc.}}
 
 Word entires may be generated from entries like "Thesaurus:ar:make happy" that
 are in a wrong language.  Check if they are referenced from somewhere and
@@ -342,9 +324,10 @@ treat them as different words. ／ = fullwidth solidus
 If a Asian word has parenthesized sections, should they be treated as
 different versions (in Japanese they look like pronunciations).  cf. Ruby.
 
-XXX Apparently this gets processed incorrectly, with comma separating arguments:
-{{l|eo|flugarmeisto||[[airman]], [[flyboy]] (both senses limited to members of a national air force)}}
-This was in flugi/Esperanto/Verb
+Check linkage sol/Norwegian Nynorsk/Noun (looks like unhandled item list)
+ - This is a broader problem around col1 ... col5 and col1-u ... col5-u.
+   They expand to <div> inside <div> that contains a list.  They are
+   fairly widely used in at least linkages.
 
 Check extraction of pronunciations and their romanizations in 공중/Korean
 
@@ -355,12 +338,40 @@ Consider caching template expansions in an LRU cache.  Make sure
 template arguments that can be accessed from Lua are considered
 properly.
 
+Some forms of usage examples seem to end up in gloss.  Check
+body/English/Noun, e.g. sense "Physical Frame / A Person" ("What's a
+body got to do ..." ends up in gloss)
+
+Check * at the end of some derived forms in wort/English/Noun (e.g., dropwort*)
+
+뱀/Korean - Derived terms parenthesized translitterations end up as tags
+
+Apparently the following is not parsed correctly:
+{{ws sense|any of enclosing symbols "(", ")", "[", "]", "{", "}" etc.}}
+
+# 䆀手/Chinese - Synonyms has * The dial-syn page 「左手」 does not yet exist. Create the data page and the map!* The dial-syn page 「左撇子」 does not yet exist. Create the data page and the map!
+# Things like this seem very common with Chinese words.  Might be a problem
+# in Lua code where they are looked up (Wiktionary does have synonyms).
+
+aunt/English/Synonyms: "(diminutive)" gets into the word
+aunt/English/Hyponyms: "(nonstandard)" gets into the word
+aunt/English/Translations: "4" in Breton, "2" in Guarani
+aunt/English/Translations: Explanation in first sense in translations
+
 house/English/Noun: WARNING: Failed to find subpage section English house/Noun Noun Translations at ['house', 'see translation subpage']
   - looks like the Translations section is has additional === signs
+
+canadensis/Latin "third-declension two-termination adjective" is not
+parsed (it is not in parentheses).  This type of construction is very
+common in Latin.
 
 servus/Czech/Interjection: Synonyms contains "see ahoj", which should
 be just "ahoj".  There is no special template in the entry - "See " is
 just plain text.
+
+XXX Apparently this gets processed incorrectly, with comma separating arguments:
+{{l|eo|flugarmeisto||[[airman]], [[flyboy]] (both senses limited to members of a national air force)}}
+This was in flugi/Esperanto/Verb
 
 testicle/English/Noun: ERROR: LUA error in #invoke ('translations/egy', 'show') parent ('Template:t-egy', {1: 'ẖrwj', 'h': 'T28:D21-G43-Z4&lt;/hiero&gt;<table class="mw-hiero-table mw-hiero-outer" dir="ltr"><tr><td><table class="mw-hiero-table"><tr><td height="40"><span style="margin: 1px;">[[File:Abydos-Bold-hieroglyph-D283.png&vert;D283&vert;x38px&vert;link=]]</span></td></tr></table></td></tr></table><hiero>', 2: 'm-d</hiero>'}) at ['testicle', 't-egy', '#invoke']
 [string "gender and number"]:123: The tag "d</hiero>" in the gender specification "m-d</hiero>" is not valid.
@@ -376,10 +387,8 @@ stack traceback:
 	[C]: in function 'xpcall'
 	[string "_sandbox_phase2"]:174: in function <[string "_sandbox_phase2"]:129>
 
-Some forms of usage examples seem to end up in gloss.  Check
-body/English/Noun, e.g. sense "Physical Frame / A Person" ("What's a
-body got to do ..." ends up in gloss)
+wiki.local in Synonyms, see 死/Chinese/non-disambiguated
+https://kaikki.org/dictionary/Chinese/meaning/%E6%AD%BB/%E6%AD%BB/%E6%AD%BB.html
+- search for wiki.local from output
 
-Check * at the end of some derived forms in wort/English/Noun (e.g., dropwort*)
-
-뱀/Korean - Derived terms parenthesized translitterations end up as tags
+htmlgen: make raw JSON file from wiktextract available for download
