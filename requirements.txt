@@ -1,3 +1,4 @@
 nose
 python-Levenshtein
 wikitextprocessor
+nltk

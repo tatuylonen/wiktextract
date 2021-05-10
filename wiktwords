@@ -5,6 +5,8 @@
 # wiktionaries as well.
 #
 # Copyright (c) 2018-2021 Tatu Ylonen.  See LICENSE and https://ylonen.org
+#
+# For pre-extracted data files, see https://kaikki.org/dictionary/
 
 import os
 import re

@@ -5,10 +5,34 @@
 # Copyright (c) 2020-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
+import unicodedata
 import Levenshtein
+from nltk.corpus import brown
+from nltk import TweetTokenizer
 from wikitextprocessor import Wtp
 from .datautils import data_append, data_extend, split_at_comma_semi
+from .taxondata import known_species, known_firsts
 
+# Construct a set of (most) English words
+english_words = set(brown.words()) | set(
+    [
+        "Dr",
+        "Mr",
+        "Mrs",
+        "Ms",
+        "Prof",
+        "colour",
+        "etc",
+        "flavour",
+        "humour",
+        "labour",
+        "neighbour",
+        '"',
+        ",",
+    ])
+
+# Tokenizer for classify_desc()
+tokenizer = TweetTokenizer()
 
 # Mappings for tags in template head line ends outside parentheses
 xlat_head_map = {
@@ -204,6 +228,7 @@ xlat_tags_map = {
     "genitive -": "no-genitive",
     "nominative plural -": "no-nominative-plural",
     "rare/awkward": "rare",
+    "personified": "person",
     "found only in the imperfective tenses": "no-perfect",
     "third plural indicative": "third-person plural indicative",
     "defective verb": "defective",
@@ -843,6 +868,7 @@ xlat_tags_map = {
     "diacritical mark": "diacritic",
     "inflection of": "form-of",
     "mainland China": "mainland-China",
+    "rhyming slang": "slang",
 }
 
 # Translation map for topics.
@@ -2329,13 +2355,14 @@ def map_with(ht, lst):
     return ret
 
 
-def decode_tags(lst, allow_any=False):
+def decode_tags(lst, allow_any=False, allow_upper=False):
     """Decodes tags, doing some canonicalizations.  This returns a list of
     lists of tags and a list of topics."""
     assert isinstance(lst, (list, tuple))
     lsts = [[]]
     for x in lst:
         assert isinstance(x, str)
+        x = re.sub(r",\s*", " ", x)  # Replace commas by space if they get here
         for alt in map_with(xlat_tags_map, [x]):
             lsts = list(lst1 + [alt] for lst1 in lsts)
     lsts = map_with(xlat_tags_map, list(map(lambda x: " ".join(x), lsts)))
@@ -2369,8 +2396,9 @@ def decode_tags(lst, allow_any=False):
                     if w in valid_sequences:
                         add_new(valid_sequences[w], i)
                 if w not in node and "$" not in node:
-                    if allow_any:
+                    if allow_any or (allow_upper and lst[next_i][0].isupper()):
                         tag = " ".join(lst[next_i:i + 1])
+                        tags.append(tag)
                         next_i = i + 1
                         if w in valid_sequences:
                             add_new(valid_sequences[w], i)
@@ -2396,10 +2424,10 @@ def decode_tags(lst, allow_any=False):
         if not valid_end and any(lst[max_next_i:]):
             rest = lst[max_next_i:]
             tag = " ".join(rest)
-            if tag and allow_any:
+            if tag and allow_any or tag[0].isupper():
                 if tag not in tags:
                     tags.append(tag)
-            elif tag and not tag[0].isupper():
+            elif tag:
                 tags.append("error-unknown-tag")
         tagsets.add(tuple(sorted(set(tags))))
     ret = list(tagsets)
@@ -2635,11 +2663,6 @@ def parse_pronunciation_tags(ctx, text, data):
     # XXX should think how to handle distinct options better,
     # e.g., "singular and plural genitive"; that can't really be
     # done with changing the calling convention of this function.
-
-    # XXX remove this?
-    #tagsets = decode_tags(tags, allow_any=True)
-    #for tags in tagsets:
-    #    data_extend(ctx, data, "tags", tags)
     data_extend(ctx, data, "tags", tags)
 
 
@@ -2821,3 +2844,52 @@ def parse_alt_or_inflection_of(ctx, gloss):
     if base.find(".") >= 0:
         ctx.debug(". remains in alt_of/inflection_of: {}".format(base))
     return tags, base
+
+
+def classify_desc(desc):
+    """Determines whether the given description is most likely tags, english,
+    a romanization, or something else.  Returns one of: "tags", "english",
+    "romanization", or "other"."""
+    assert isinstance(desc, str)
+    # Empty and whitespace-only strings are treated as "other"
+    if not desc.strip():
+        return "other"
+    # Check if it looks like the taxonomic name of a species
+    if desc in known_species:
+        return "taxonomic"
+    lst = desc.split()
+    if lst[0] in known_firsts and len(lst) > 1 and len(lst) < 4:
+        have_non_english = lst[0].lower() not in english_words
+        for x in lst[1:]:
+            if x in ("A", "B", "C", "D", "E", "F", "I", "II", "III", "IV", "V"):
+                continue
+            if x[0].isupper():
+                break
+            if x not in english_words:
+                have_non_english = True
+        else:
+            # Starts with known taxonomic term, does not contain uppercase
+            # words (except allowed letters) and at least one word is not
+            # English
+            if have_non_english:
+                return "taxonomic"
+
+    # If it can be fully decoded as tags without errors, treat as tags
+    tagsets, topics = decode_tags([desc], allow_upper=True)
+    if not topics:
+        for tagset in tagsets:
+            assert isinstance(tagset, (list, tuple, set))
+            if tagset and "error-unknown-tag" not in tagset:
+                return "tags"
+    # If all words are in our English dictionary, interpret as English
+    if all(x in english_words for x in tokenizer.tokenize(desc)):
+        return "english"
+    # If all characters are in classes that could occur in romanizations,
+    # treat as romanization
+    classes = list(unicodedata.category(x) for x in
+                   unicodedata.normalize("NFKD", desc))
+    # print("classify_desc:", desc, classes)
+    if all(x in ("Ll", "Lu", "Lt", "Lm", "Mn", "Mc", "Zs") for x in classes):
+        return "romanization"
+    # Otherwise it is something else, such as hanji version of the word
+    return "other"

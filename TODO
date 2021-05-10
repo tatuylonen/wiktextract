@@ -16,6 +16,10 @@
 # Handle the parenthesized expression.  Note that sometimes it is not taxlink,
 # just an italicized link in parenthesis
 
+Handle {{taxon|...}} and {{vern|...}} or parse resulting glosses so that
+appropriate links are created between vernacular name and taxonomic name.
+cf. "Porphyrio martinicus" and "Purple gallinule"
+
 # XXX in Coordinate terms, handle bullet point titles like Previous:, Next:
 # (see "ten", both Coordinate terms and Synonyms)
 
@@ -36,7 +40,7 @@
 # XXX check use of ja-r and ja-r/args templates in linkage and capture
 # hira, kana
 
-# XXX parse <form> of ... glosses.  There are LOTS of these.
+Parse Phonetic hangeul in Pronunciation section (see 死/Korean)
 
 # XXX make sure parenthesized parts in the middle of form-of descriptions
 # in gloss are handled properly.  Check "vise" (Swedish verb).
@@ -390,3 +394,9 @@ https://kaikki.org/dictionary/Chinese/meaning/%E6%AD%BB/%E6%AD%BB/%E6%AD%BB.html
 - search for wiki.local from output
 
 htmlgen: make raw JSON file from wiktextract available for download
+
+Implement optimized mw.loadData(module) that caches the returned value
+
+Handle ruby in translations
+Use classify_desc in translations for parenthesized parts
+Support multiple parenthesized parts in translations, similar to linkage

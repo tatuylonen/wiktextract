@@ -17,7 +17,8 @@ from .disambiguate import disambiguate_clear_cases
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_tags, parse_pronunciation_tags,
     parse_alt_or_inflection_of,
-    parse_translation_desc, xlat_tags_map, valid_tags)
+    parse_translation_desc, xlat_tags_map, valid_tags,
+    classify_desc)
 
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
@@ -993,19 +994,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
         Sometimes there may be a second-level sublist that actually contains
         word senses (in which case the higher-level entry is just a grouping).
         This parses such sublists as separate senses (thus this can generate
-        multiple new senses)."""
+        multiple new senses), unless the sublist has only one element, in which
+        case it is assumed to be a wiktionary error and is interpreted as
+        a top-level item."""
         assert isinstance(pos, str)
         assert isinstance(contents, (list, tuple))
         assert isinstance(sense_base, dict)  # Added to every sense
+        # print("PARSE_SENSE ({}): {}".format(sense_base, contents))
         lst = [x for x in contents
                if not isinstance(x, WikiNode) or
                x.kind not in (NodeKind.LIST,)]
-        additional_glosses = []
 
         def sense_template_fn(name, ht):
-            if name in wikipedia_templates:
-                parse_wikipedia_template(config, ctx, sense_base, ht)
-                return None
             if is_panel_template(name):
                 return ""
             if name in ("defdate",):
@@ -1025,19 +1025,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 return ""
             if name in ("ux", "uxi", "usex", "afex", "zh-x", "prefixusex",
                         "ko-usex", "ko-x", "hi-x", "ja-usex-inline", "ja-x",
-                        "quotei"):
+                        "quotei", "zh-x", "he-x", "hi-x", "km-x", "ne-x",
+                        "shn-x", "th-x", "ur-x"):
                 # XXX capture usage example (check quotei!)
                 return ""
-            # XXX These are causing problems, e.g., introducing HTML into
-            # glosses.  Options include using post_template_fn and assigning
-            # the expansion to gloss (with parentheses removed), or just
-            # treating these as part of gloss.
-            #
-            # if name == "gloss":
-            #     gl = ht.get(1)
-            #     if gl:
-            #         additional_glosses.append(gl)
-            #     return ""
             return None
 
         rawgloss = clean_node(config, ctx, sense_base, lst,
@@ -1056,10 +1047,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 subglosses = subglosses[1:]
         # Create senses for remaining subglosses
         for gloss in subglosses:
+            gloss = gloss.strip()
             if not gloss and len(subglosses) > 1:
                 continue
             # Push a new sense (if the last one is not empty)
             push_sense()
+            # If the gloss starts with †, mark as obsolete
+            if gloss.startswith("^†"):
+                data_append(ctx, sense_data, "tags", "obsolete")
+                gloss = gloss[2:].strip()
             # Copy data for all senses to this sense
             for k, v in sense_base.items():
                 if isinstance(v, (list, tuple)):
@@ -1075,10 +1071,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 gloss = gloss[m.end():].strip()
 
             def sense_repl(m):
-                v = m.group(1)
-                if v not in valid_tags and v not in xlat_tags_map:
+                par = m.group(1)
+                cls = classify_desc(par)
+                if cls == "tags":
+                    parse_sense_tags(ctx, par, sense_data)
+                else:
                     return m.group(0)
-                parse_sense_tags(ctx, v, sense_data)
                 return ""
 
             # Replace parenthesized expressions commonly used for sense tags
@@ -1138,8 +1136,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
             elif gloss != "-":
                 # Add the gloss for the sense.
                 data_append(ctx, sense_data, "glosses", gloss)
-            for gl in additional_glosses:
-                data_append(ctx, sense_data, "glosses", gl)
 
             # Check if this gloss describes an alt-of or inflection-of
             tags, base = parse_alt_or_inflection_of(ctx, gloss)
@@ -1307,6 +1303,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                          x.kind != NodeKind.LIST]
                 common_data = {}
                 common_data["tags"] = list(common_tags)
+
+                # If we have one sublist with one element, treat it specially as
+                # it may be a Wiktionary error; raise that nested element
+                # to the same level.
+                if len(sublists) == 1:
+                    slc = sublists[0].children
+                    if len(slc) == 1:
+                        parse_sense(pos, outer, common_data)
+                        parse_sense(pos, slc[0].children, {})
+                        continue
 
                 def outer_template_fn(name, ht):
                     if is_panel_template(name):
@@ -1606,65 +1612,94 @@ def parse_language(ctx, config, langnode, language, lang_code):
             return
         have_linkages = False
         have_panel_template = False
-        extras = []
 
-        def parse_linkage_item(contents, field, sense=None):
-            assert isinstance(contents, (str, list, tuple))
+        def parse_linkage_item(contents, field, sense):
+            assert isinstance(contents, (list, tuple))
             assert isinstance(field, str)
+            assert sense is None or isinstance(sense, str)
             nonlocal have_linkages
-            # print("PARSE_LINKAGE_ITEM:", contents)
-            if not isinstance(contents, (list, tuple)):
-                contents = [contents]
+
+            #print("PARSE_LINKAGE_ITEM: {} ({}): {}"
+            #      .format(field, sense, contents))
+
             qualifier = None
-            english = None
+            parts = []
+            roman = None
+            ruby = ""
+            alt = None
+            taxonomic = None
 
-            sublists, contents = recursively_extract(contents, lambda x:
-                                                     x.kind == NodeKind.LIST)
-            # print("PARSE_LINKAGE SUBLISTS:", sublists)
-            # print("PARSE_LINKAGE CONTENTS:", contents)
-            sys.stdout.flush()
-
-            def linkage_item_template_fn(name, ht):
+            def item_recurse(contents, italic=False):
+                assert isinstance(contents, (list, tuple))
+                nonlocal have_linkages
                 nonlocal sense
-                nonlocal english
                 nonlocal qualifier
-                nonlocal have_panel_template
-                if is_panel_template(name):
-                    have_panel_template = True
-                    return ""
-                if name in ("sense", "s"):
-                    sense = clean_value(config, ht.get(1))
-                    return ""
-                if name == "qualifier":
-                    q = ht.get(1)
-                    if q and (q in valid_tags or q in xlat_tags_map
-                              or q[0].isupper()):
-                        qualifier = q
-                    elif not english:
-                        english = q
-                if name == "gloss":
-                    # This seems to be used for additional explanatory
-                    # information in some linkages, e.g., mi/Hungarian.
-                    # However, I've also seen it used same as qualifier,
-                    # e.g. mi/Scottish Gaelic.
-                    v = ht.get(1)
-                    if v in valid_tags or v in xlat_tags_map:
-                        qualifier = v
-                    return ""
-                if name in ("bullet list",):
-                    # XXX check how this is used in linkage
-                    ctx.warning("UNIMPLEMENTED - check linkage template: "
-                                "{} {}"
-                                .format(name, ht))
-                    return None
-                # XXX wikipedia, Wikipedia, w, wp, w2 link types
-                if name == "pedia":
-                    v = ht.get(1) or ""
-                    return clean_value(config, v)
-                return None
+                nonlocal roman
+                nonlocal ruby
+                nonlocal parts
+                nonlocal alt
+                nonlocal taxonomic
+                # print("ITEM_RECURSE:", contents)
+                for node in contents:
+                    if isinstance(node, str):
+                        # XXX remove:
+                        # if italic:
+                        #     if qualifier:
+                        #         qualifier += node
+                        #     else:
+                        #         qualifier = node
+                        parts.append(node)
+                        continue
+                    kind = node.kind
+                    # print("ITEM_RECURSE KIND:", kind, node.args)
+                    if kind == NodeKind.LIST:
+                        if parts:
+                            sense1 = "".join(parts).strip() or sense
+                            if sense1.startswith("(") and sense1.endswith("):"):
+                                sense1 = sense1[1:-2]
+                            # print("LIST sense1:", sense1)
+                            parse_linkage_recurse(node.children, field,
+                                                  sense=sense1)
+                            parts = []
+                        else:
+                            parse_linkage_recurse(node.children, field, sense)
+                    elif kind in (NodeKind.TABLE, NodeKind.TABLE_ROW,
+                                  NodeKind.TABLE_CELL):
+                        parse_linkage_recurse(node.children, field, sense)
+                    elif kind in (NodeKind.TABLE_HEADER_CELL,
+                                  NodeKind.TABLE_CAPTION):
+                        continue
+                    elif kind == NodeKind.HTML:
+                        if node.args in ("gallery", "ref", "cite", "caption"):
+                            continue
+                        elif node.args == "rp":
+                            continue  # Parentheses inside <ruby>
+                        elif node.args == "rt":
+                            ruby += clean_node(config, ctx, None, node)
+                            continue
+                        classes = (node.attrs.get("class") or "").split()
+                        if "NavFrame" in classes:
+                            parse_linkage_recurse(node.children, field, sense)
+                        else:
+                            item_recurse(node.children, italic=italic)
+                    elif kind == NodeKind.ITALIC:
+                        item_recurse(node.children, italic=True)
+                    elif kind == NodeKind.LINK:
+                        if (not isinstance(node.args[0][0], str) or
+                            node.args[0][0].find("Category:")):
+                            item_recurse(node.args[-1], italic=italic)
+                    else:
+                        ctx.debug("linkage item_recurse unhandled: {}"
+                                  .format(node))
 
-            item = clean_node(config, ctx, data, contents,
-                              template_fn=linkage_item_template_fn)
+            item_recurse(contents)
+            item = clean_node(config, ctx, None, parts)
+            # print("CLEANED ITEM: {!r}".format(item))
+            item = re.sub(r", \)", ")", item)
+            item = re.sub(r"\(\)", "", item)
+            item = re.sub(r"\s\s+", " ", item)
+            item = item.strip()
+
             # If the item is a reference to the thesaurus, skip it.  We should
             # be injecting data from the thesaurus in each word referenced
             # from it.
@@ -1672,34 +1707,33 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 item = ""
                 have_linkages = True
 
-            def english_repl(m):
-                nonlocal english
-                english = m.group(1).strip()
-
-            item = re.sub(r'[“"]([^"]+)[“"],?\s*', english_repl, item)
             if item.startswith(":"):
                 item = item[1:]
             item = item.strip()
 
-            # print("    LINKAGE ITEM: {}: {}".format(field, item))
+            #print("    LINKAGE ITEM: {}: {} (sense {})"
+            #      .format(field, item, sense))
+
+            base_qualifier = None
             m = re.match(r"\((([^()]|\([^)]*\))*)\):?\s*", item)
             if m:
-                qualifier = m.group(1)
-                item = item[m.end():]
-            else:
-                m = re.search(" \((([^()]|\([^)]*\))*)\)$", item)
-                if m:
-                    qualifier = m.group(1)
-                    item = item[:m.start()]
-            m = re.search(r"\s*\((([^()]|\([^)]*\))*)\)", item)
-            if m and item[:m.start()].find(",") < 0:
-                t = m.group(1)
-                if t in valid_tags or t in xlat_tags_map:
-                    if qualifier:
-                        qualifier = qualifier + ", " + t
+                par = m.group(1)
+                cls = classify_desc(par)
+                if cls == "tags":
+                    base_qualifier = par
+                    item = item[m.end():]
+                elif cls in ("english", "taxonomic"):
+                    if sense:
+                        sense = sense + "; " + par
                     else:
-                        qualifier = t
-                    item = item[:m.start()] + item[m.end():]
+                        sense = par
+                    item = item[m.end():]
+                else:
+                    # Otherwise we won't handle it here
+                    ctx.debug("unhandled parenthesized prefix: {}"
+                              .format(item))
+            base_sense = sense
+
             # Certain linkage items have space-separated valus.  These are
             # generated by, e.g., certain templates
             if qualifier in ("A paper sizes",
@@ -1715,53 +1749,129 @@ def parse_language(ctx, config, langnode, language, lang_code):
             item = re.sub(r"\s*\^?\s*\(\s*\)", "", item)
             item = item.strip()
             # XXX check for: stripped item text starts with "See also [[...]]"
-            if item and not sublists:
-                for item1 in split_at_comma_semi(item):
-                    item1 = item1.strip()
-                    if item1.startswith("see Thesaurus:"):
-                        item1 = item1[14:]
-                    elif item1.startswith("see also Thesaurus:"):
-                        item1 = item1[19:]
-                    elif item1.startswith("Thesaurus:"):
-                        item1 = item1[10:]
-                    if not item1:
-                        continue
-                    if item1 == word:
-                        continue
-                    for dt in data.get(field, ()):
-                        if dt.get("word") == item1:
-                            break
+            if not item:
+                return
+            # The item may contain multiple comma-separated linkages
+            subitems = split_at_comma_semi(item)
+            if len(subitems) > 1:  # Would be merged from multiple subitems
+                ruby = ""
+            for item1 in subitems:
+                item1 = item1.strip()
+                qualifier = base_qualifier
+                sense = base_sense
+                parts = []
+                roman = None
+                alt = None
+                taxonomic = None
+
+                # Extract quoted English translations (there are also other
+                # kinds of English translations)
+                def english_repl(m):
+                    nonlocal sense
+                    v = m.group(1).strip()
+                    if sense:
+                        sense += "; " + v
                     else:
-                        dt = {"word": item1}
+                        sense = v
+                    return ""
+
+                item = re.sub(r'[“"]([^"]+)[“"],?\s*', english_repl, item)
+                item = re.sub(r", \)", ")", item)
+
+                # There could be multiple parenthesized parts, and
+                # sometimes both at the beginning and at the end
+                while True:
+                    par = None
+                    if par is None:
+                        m = re.match(r"\((([^()]|\([^)]*\))*)\):?\s*", item1)
+                        if m:
+                            par = m.group(1)
+                            item1 = item1[m.end():]
+                        else:
+                            m = re.search(" \((([^()]|\([^)]*\))*)\)$", item1)
+                            if m:
+                                par = m.group(1)
+                                item1 = item1[:m.start()]
+                    if not par:
+                        break
+                    # Handle tags from beginning of par.  We also handle "other"
+                    # here as Korean entries often have Hanja form in the
+                    # beginning of paranthesis, before romanization.
+                    while par:
+                        idx = par.find(",")
+                        if idx < 0:
+                            break
+                        cls = classify_desc(par[:idx])
+                        if cls == "other" and not alt:
+                            alt = par[:idx]
+                        elif cls == "taxonomic":
+                            taxonomic = par[:idx]
+                        elif cls == "tags":
+                            if qualifier:
+                                qualifier += " " + par[:idx]
+                            else:
+                                qualifier = par[:idx]
+                        else:
+                            break
+                        par = par[idx + 1:].strip()
+                    # Handle remaining types
+                    if not par:
+                        continue
+                    cls = classify_desc(par)
+                    # print("classify_desc: {} -> {}".format(par, cls))
+                    if cls == "tags":
                         if qualifier:
-                            parse_sense_tags(ctx, qualifier, dt)
+                            qualifier += " " + par
+                        else:
+                            qualifier = par
+                    elif cls == "english":
                         if sense:
-                            dt["sense"] = sense
-                            if english:
-                                dt["translation"] = english
-                        elif english:
-                            dt["sense"] = english
-                        data_append(ctx, data, field, dt)
-                        have_linkages = True
+                            sense += "; " + par
+                        else:
+                            sense = par
+                    elif cls == "romanization":
+                        roman = par
+                    elif cls == "taxonomic":
+                        taxonomic = par
+                    else:
+                        if alt:
+                            alt += "; " + par
+                        else:
+                            alt = par
 
-            # Some words have a word sense in a top-level list item and
-            # use sublists for actual links
-            for listnode in sublists:
-                assert listnode.kind == NodeKind.LIST
-                for node in listnode.children:
-                    if not isinstance(node, WikiNode):
-                        continue
-                    if node.kind != NodeKind.LIST_ITEM:
-                        continue
-                    parse_linkage_item(node.children, field, sense=sense)
-
-        def parse_linkage_ext(title, field):
-            assert isinstance(title, str)
-            assert isinstance(field, str)
-            ctx.error("UNIMPLEMENTED: parse_linkage_ext: {} / {}"
-                      .format(title, field))
+                if item1.startswith("see Thesaurus:"):
+                    item1 = item1[14:]
+                elif item1.startswith("see also Thesaurus:"):
+                    item1 = item1[19:]
+                elif item1.startswith("Thesaurus:"):
+                    item1 = item1[10:]
+                if not item1:
+                    continue
+                if item1 == word:
+                    continue
+                dt = {"word": item1}
+                if qualifier:
+                    parse_sense_tags(ctx, qualifier, dt)
+                if sense:
+                    dt["sense"] = sense
+                if roman:
+                    dt["roman"] = roman
+                if ruby:
+                    dt["ruby"] = ruby
+                if alt:
+                    dt["alt"] = alt
+                if taxonomic:
+                    dt["taxonomic"] = taxonomic
+                for old in data.get(field, ()):
+                    if dt == old:
+                        break
+                else:
+                    data_append(ctx, data, field, dt)
+                    have_linkages = True
 
         def parse_linkage_template(node):
+            # XXX remove this function but check how to handle the
+            # template_linkage_mappings
             # print("LINKAGE TEMPLATE:", node)
 
             def linkage_template_fn(name, ht):
@@ -1770,18 +1880,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 nonlocal have_panel_template
                 if is_panel_template(name):
                     have_panel_template = True
-                    return ""
-                if name == "see also":
-                    parse_linkage_ext(ht.get(1, ""), field)
-                    return ""
-                if name.endswith("-syn-saurus"):
-                    parse_linkage_ext(ht.get(1, ""), "synonyms")
-                    return ""
-                if name.endswith("-ant-saurus"):
-                    parse_linkage_ext(ht.get(1, ""), "antonyms")
-                    return ""
-                if name == "zh-dial":
-                    # XXX capture?
                     return ""
                 for prefix, t in template_linkage_mappings:
                     if re.search(r"(^|[-/\s]){}($|\b|[0-9])".format(prefix),
@@ -1803,69 +1901,71 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 return None
 
             # Main body of parse_linkage_template()
-            clean_node(config, ctx, data, [node],
-                       template_fn=linkage_template_fn)
-            # XXX certain things can only be parsed from the output, e.g.,
-            # zh-dial
+            text = ctx.node_to_wikitext(node)
+            parsed = ctx.parse(text, expand_all=True,
+                               template_fn=linkage_template_fn)
+            parse_linkage_recurse(parsed.children, field, Node)
 
-        def parse_linkage_table(tablenode):
-            assert isinstance(tablenode, WikiNode)
-            # XXX e.g. etelä/Finnish uses compass-fi, which gets
-            # pre-expanded into a table here
-            # # print("PARSE_LINKAGE_TABLE:", tablenode)
-            # for node in tablenode.children:
-            #     # print("TABLE NODE", node)
-            #     if not isinstance(node, WikiNode):
-            #         continue
-            #     if node.kind == NodeKind.TABLE_ROW:
-            #         for cell in node.children:
-            #             # print("TABLE CELL", cell)
-            #             if not isinstance(cell, WikiNode):
-            #                 continue
-            #             if cell.kind == NodeKind.TABLE_CELL:
-            #                 parse_linkage_recurse(cell)
-
-        def parse_linkage_recurse(linkagenode):
-            assert isinstance(linkagenode, WikiNode)
-            # print("PARSE_LINKAGE_RECURSE:", linkagenode)
-            for node in linkagenode.children:
+        def parse_linkage_recurse(contents, field, sense):
+            assert isinstance(contents, (list, tuple))
+            assert sense is None or isinstance(sense, str)
+            # print("PARSE_LINKAGE_RECURSE: {}: {}".format(sense, contents))
+            for node in contents:
                 if isinstance(node, str):
-                    extras.append(node)
-                    node = node.strip()
+                    # Ignore top-level text, generally comments before the
+                    # linkages list
                     continue
                 assert isinstance(node, WikiNode)
                 kind = node.kind
                 # print("PARSE_LINKAGE_RECURSE CHILD", kind)
                 if kind == NodeKind.LIST:
-                    for item in node.children:
-                        if not isinstance(item, WikiNode):
-                            continue
-                        if item.kind != NodeKind.LIST_ITEM:
-                            continue
-                        parse_linkage_item(item.children, field)
-                elif kind == NodeKind.TEMPLATE:
-                    parse_linkage_template(node)
-                    extras.append(node)
-                elif kind == NodeKind.TABLE:
-                    parse_linkage_table(node)
+                    parse_linkage_recurse(node.children, field, sense)
+                elif kind == NodeKind.LIST_ITEM:
+                    parse_linkage_item(node.children, field, sense)
+                elif kind in (NodeKind.TABLE, NodeKind.TABLE_ROW):
+                    parse_linkage_recurse(node.children, field, sense)
+                elif kind == NodeKind.TABLE_CELL:
+                    parse_linkage_item(node.children, field, sense)
                 elif kind == NodeKind.HTML:
-                    # print("PARSE_LINKAGE HTML:", node)
                     # Recurse to process inside the HTML for most tags
-                    if node.args not in ("gallery", "ref", "cite", "caption"):
-                        parse_linkage_recurse(node)
+                    if node.args in ("gallery", "ref", "cite", "caption"):
+                        continue
+                    classes = (node.attrs.get("class") or "").split()
+                    if "qualifier-content" in classes:
+                        sense1 = clean_node(config, ctx, None, node.children)
+                        if sense and sense1:
+                            ctx.debug("linkage qualifier-content on multiple "
+                                      "levels: {!r} and {!r}"
+                                      .format(sense, sense1))
+                        parse_linkage_recurse(node.children, field, sense1)
+                    else:
+                        parse_linkage_recurse(node.children, field, sense)
                 elif kind in LEVEL_KINDS:
-                    break
+                    # Just recurse to any possible subsections
+                    parse_linkage_recurse(node.children, field, sense)
                 elif kind in (NodeKind.BOLD, NodeKind.ITALIC):
                     # Skip these on top level; at least sometimes bold is
-                    # used for indicating subtitle
+                    # used for indicating a subtitle
                     continue
+                elif kind == NodeKind.LINK:
+                    # Recurse into the last argument
+                    parse_linkage_recurse(node.args[-1], field, sense)
                 else:
-                    extras.append(node)
+                    ctx.debug("parse_linkage_recurse unhandled {}"
+                              .format(kind))
+
+        def linkage_template_fn1(name, ht):
+            nonlocal have_panel_template
+            if is_panel_template(name):
+                have_panel_template = True
+                return ""
+            return None
 
         # Main body of parse_linkage()
-        parse_linkage_recurse(linkagenode)
-        if not have_linkages:
-            parse_linkage_item(extras, field)
+        text = ctx.node_to_wikitext(linkagenode.children)
+        parsed = ctx.parse(text, expand_all=True,
+                           template_fn=linkage_template_fn1)
+        parse_linkage_recurse(parsed.children, field, None)
         if not have_linkages and not have_panel_template:
             ctx.debug("no linkages found")
 
@@ -1954,7 +2054,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # some nested translation items don't and rely on the language
             # name from the higher level, and some append a language variant
             # name to a broader language name)
-            m = re.match(r"\*?\s*([-' \w][-' \w]*):\s*", item)
+            m = re.match(r"\*?\s*([-' \w][-' \w()]*):\s*", item)
             tags = []
             if m:
                 sublang = m.group(1)
@@ -2134,6 +2234,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         if item.args == ":":
                             continue
                         parse_translation_item(item.children)
+                elif kind == NodeKind.LIST_ITEM and node.args == ":":
+                    # Silently skip list items that are just indented; these
+                    # are used for text between translations, such as indicating
+                    # translations that need to be checked.
+                    pass
                 elif kind == NodeKind.TEMPLATE:
                     parse_translation_template(node)
                 elif kind in (NodeKind.TABLE, NodeKind.TABLE_ROW,
@@ -2154,12 +2259,17 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         parse_translation_recurse(item)
                 elif kind in LEVEL_KINDS:
                     # Sub-levels will be recursed elsewhere
-                    break
+                    pass
+                elif kind == NodeKind.ITALIC:
+                    # Silently skip italicized text between translation items.
+                    # It is commonly used, e.g., for indicating translations
+                    # that need to be checked.
+                    pass
                 elif not sense:
                     sense_parts.append(node)
                 else:
-                    ctx.debug("skipping translations sense item when locked: {}"
-                              .format(node))
+                    ctx.debug("skipping text between translation items/senses: "
+                              "{}".format(node))
 
         # Main code of parse_translation().  We want ``sense`` to be assigned
         # regardless of recursion levels, and thus the code is structured

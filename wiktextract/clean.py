@@ -4,7 +4,7 @@
 #
 # This file also contains code for cleaning qualifiers for the "tags" field.
 #
-# Copyright (c) 2018-2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2018-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
 import html
@@ -22,6 +22,8 @@ def clean_value(config, title, no_strip=False):
 
     def repl_1(m):
         return clean_value(config, m.group(1), no_strip=True)
+    def repl_2(m):
+        return clean_value(config, m.group(2), no_strip=True)
     def repl_link(m):
         if m.group(2) in ("File", "Image"):
             return ""
@@ -64,8 +66,9 @@ def clean_value(config, title, no_strip=False):
                    repl_link, title)
     title = re.sub(r"(?s)\[\[\s*([^]|]+?)\s*\]\]", repl_1, title)
     # Replace remaining HTML links by the URL.
-    title = re.sub(r"\[https?:[^]\s]+\s+([^]]+?)\s*\]", repl_1, title)
-    title = re.sub(r"\[(https?:[^]]+)\]", r"", title)
+    title = re.sub(r"\[(https?:)//[^]\s]+\s+([^]]+?)\s*\]", repl_2, title)
+    # Remove any edit links to local pages
+    title = re.sub(r"\[//[^]\s]+\s+edit\s*\]", "", title)
     # Remove italic and bold
     title = re.sub(r"''+", r"", title)
     # Replace HTML entities
