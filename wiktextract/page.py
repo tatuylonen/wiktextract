@@ -1654,12 +1654,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # print("ITEM_RECURSE KIND:", kind, node.args)
                     if kind == NodeKind.LIST:
                         if parts:
-                            sense1 = "".join(parts).strip() or sense
+                            sense1 = "".join(parts).strip()
                             if sense1.startswith("(") and sense1.endswith("):"):
                                 sense1 = sense1[1:-2]
                             # print("LIST sense1:", sense1)
                             parse_linkage_recurse(node.children, field,
-                                                  sense=sense1)
+                                                  sense=sense1 or sense)
                             parts = []
                         else:
                             parse_linkage_recurse(node.children, field, sense)
