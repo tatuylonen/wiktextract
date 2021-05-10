@@ -7,6 +7,7 @@
 import re
 import unicodedata
 import Levenshtein
+import nltk
 from nltk.corpus import brown
 from nltk import TweetTokenizer
 from wikitextprocessor import Wtp
