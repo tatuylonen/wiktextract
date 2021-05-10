@@ -13,6 +13,9 @@ from wikitextprocessor import Wtp
 from .datautils import data_append, data_extend, split_at_comma_semi
 from .taxondata import known_species, known_firsts
 
+# Download Brown corpus if not already downloaded
+nltk.download("brown", quiet=True)
+
 # Construct a set of (most) English words
 english_words = set(brown.words()) | set(
     [

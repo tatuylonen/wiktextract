@@ -400,3 +400,7 @@ Implement optimized mw.loadData(module) that caches the returned value
 Handle ruby in translations
 Use classify_desc in translations for parenthesized parts
 Support multiple parenthesized parts in translations, similar to linkage
+
+Test parsing of paper size lists in linkage (no commas)
+Test parsing of related character lists in linkage (no commas)
+Test parsing of font characters and digits in linkage (no commas)
