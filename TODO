@@ -6,19 +6,7 @@
 
 # XXX implement parsing {{ja-see-kango|xxx}} specially, see むひ
 
-# XXX linkages may have senses, e.g. "singular" English "(being only one):"
-#  - also, linkage parenthesized parts may inappropriately end up in tags,
-#    e.g., 假設/Chinese/Verb/Synonyms
-
 # XXX check use of sense numbers in translations (check "eagle"/English)
-
-# XXX capture {{taxlink|...}} and {{verb|...}} in linkage and gloss.
-# Handle the parenthesized expression.  Note that sometimes it is not taxlink,
-# just an italicized link in parenthesis
-
-Handle {{taxon|...}} and {{vern|...}} or parse resulting glosses so that
-appropriate links are created between vernacular name and taxonomic name.
-cf. "Porphyrio martinicus" and "Purple gallinule"
 
 # XXX in Coordinate terms, handle bullet point titles like Previous:, Next:
 # (see "ten", both Coordinate terms and Synonyms)
@@ -33,9 +21,6 @@ cf. "Porphyrio martinicus" and "Purple gallinule"
 # forms)
 
 # XXX parse "enum" tags (args: lang, prev, next, value)
-
-# XXX investigate linkage sections that do not contain a link. What are they
-# like and how to handle them?
 
 # XXX check use of ja-r and ja-r/args templates in linkage and capture
 # hira, kana
@@ -146,9 +131,6 @@ template seems to know a ton about these so maybe look at it.
 
 # XXX check "Kanji characters outside the ..."
 
-# XXX parenthized parts in linkages are often word senses.  Perhaps separate
-# to a sense field.  Need support in htmlgen too.
-
 # XXX recognize "See also X" from end of gloss and move to a "See also" section
 
 # XXX handle word class prefixes in linkages, see sade/Finnish,
@@ -168,8 +150,6 @@ template seems to know a ton about these so maybe look at it.
 # XXX parse redirects, create alt_of
 
 # XXX Handle "; also YYY" syntax in initialisms (see AA/Proper name)
-
-# XXX parse see also, create "related"?
 
 # In htmlgen, create links from gloss, at minimum when whole gloss matches
 # a word form in the same language (or maybe gloss as an alternative?)
@@ -197,8 +177,6 @@ template seems to know a ton about these so maybe look at it.
 # May be best to actually load these modules as Lua code or to even run a
 # specific Lua module to dump the data.
 
-# Parse gender in linkages, e.g., ξένος/Greek (m in linkages)
-
 # Check awake/English - strange unrecognized tags
 
 # XXX search for Template: from all glosses, search for &amp; from all glosses
@@ -217,7 +195,7 @@ template seems to know a ton about these so maybe look at it.
 # When alt-of has English translation (often in quotes), try to capture it
 # (helpful for disambiguation!).  E.g., 假設/Vietnamese
 
-# XXX related terms, wikipedia, Wikispecies links.  See "permit"/English/Noun
+# XXX wikipedia, Wikispecies links.  See "permit"/English/Noun
 
 # XXX "magic number"/English - why is tag included in gloss?  Perhaps
 # the tag has extra parentheses?
@@ -234,20 +212,10 @@ template seems to know a ton about these so maybe look at it.
 
 # Check that 1/Translingual/Alternative forms is parsed correctly
 
-# XXX analyze remaining parentheses in linkage.  Currently debug message
-# disabled.  There are still lots of these.
-
-# XXX Finland/English has strange topic in related
-#   - there is a {{topics|...}} tag in the linkage; however, I think we should
-#     really interpret it as "sense" for the linkage.
-
-# XXX comb/English - something wrong with parsing translations
-#  - could one of the templates get expanded???
-#  - this might just be an instance of the list not being found inside HTML
-#    (need to recurse instead of just iterating contents)
-
 # XXX handle <ruby> specially in clean or perhaps already earler, see
 # e.g. 無比 (Japanese)
+  - should capture ruby
+  - should capture roman
 
 # XXX There are way too many <noinclude> not propersy closed warnings
 # forom Chinese, e.g., 內 - find out what causes these, and either fix or
@@ -260,11 +228,10 @@ template seems to know a ton about these so maybe look at it.
 
 # Korean kanji seem to have Phonetic hangeul in pronunciation sections, see 內
 
-# XXX test ISBN / Japanese - how does word entry work, how do synonyms
+# test ISBN / Japanese - how does word entry work, how do synonyms
 # work (relates to <ruby> handling)
-
-# Handle Japanese parentheses in linkage items.  It think this relates
-# to <ruby>.
+  - now seems to be handled reasonably, but could also capture the ruby
+    into a separate field under "forms"
 
 # Implement <hiero> ... </hiero>, e.g., lilja/Finnish/Etymology
 
@@ -281,8 +248,9 @@ template seems to know a ton about these so maybe look at it.
 #  - in Japanese compounds, roman transliterations incorrectly go into tags
 #  - in Japanese, does it make sense to have most senses annotated with "kanji"?
 
-# English/fire/Noun (oxidation reaction) - Egptian, "f" in roman versions seems
-# to go into "roman" field, even though it is apparently gender
+# English/fire/Noun/Translations (oxidation reaction) - Egyptian, "f"
+# in roman versions seems to go into "roman" field, even though it is
+# apparently gender
 
 Collect usage examples
 
@@ -334,6 +302,8 @@ different versions (in Japanese they look like pronunciations).  cf. Ruby.
 
 Check linkage sol/Norwegian Nynorsk/Noun
   Related terms: gender after linked word is not handled (gets into word)
+  also: ξένος/Greek (m in linkages)
+
 
 Check extraction of pronunciations and their romanizations in 공중/Korean
 
@@ -355,6 +325,7 @@ Check * at the end of some derived forms in wort/English/Noun (e.g., dropwort*)
   - check if there are other similar reference symbols and how common they are
 
 뱀/Korean - Derived terms parenthesized translitterations end up as tags
+  - still parsed incorrectly, check e.g. "gureong-i"
 
 Apparently the following is not parsed correctly:
 {{ws sense|any of enclosing symbols "(", ")", "[", "]", "{", "}" etc.}}

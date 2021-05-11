@@ -123,6 +123,7 @@ xlat_tags_map = {
     "accusative/illative": "accusative illative",
     "dative and accusative singular": "dative accusative singular",
     "simple past and past participle": ["simple past", "past participle"],
+    "literary or in compounds": ["literary", "in-compounds"],
     "simple past": "simple past",
     "simple present": "simple present",
     "genitive/dative": "genitive dative",
