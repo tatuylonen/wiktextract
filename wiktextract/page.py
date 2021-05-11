@@ -2625,6 +2625,8 @@ def parse_page(ctx, word, text, config):
 
     # Inject linkages from thesaurus entries
     for data in ret:
+        if "pos" not in data:
+            continue
         word = data["word"]
         lang = data["lang"]
         pos = data["pos"]
