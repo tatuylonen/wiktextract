@@ -235,7 +235,6 @@ panel_templates = set([
     "unsupportedpage",
     "video frames",
     "wikipedia",
-    "w",
     "was wotd",
     "wrongtitle",
     "zh-forms",
@@ -1785,8 +1784,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         sense = v
                     return ""
 
-                item = re.sub(r'[“"]([^"]+)[“"],?\s*', english_repl, item)
-                item = re.sub(r", \)", ")", item)
+                item1 = re.sub(r'[“"]([^"]+)[“"],?\s*', english_repl, item1)
+                item1 = re.sub(r", \)", ")", item1)
 
                 # There could be multiple parenthesized parts, and
                 # sometimes both at the beginning and at the end
