@@ -2369,7 +2369,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     data = pos_data
                 else:
                     data = etym_data
-                ctx.start_subsection(t)
                 parse_linkage(data, rel, node)
             elif pos == "compounds":
                 if stack[-1].lower() in part_of_speech_map:
@@ -2377,7 +2376,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 else:
                     data = etym_data
                 if config.capture_compounds:
-                    ctx.start_subsection(t)
                     parse_linkage(data, "compounds", node)
             elif t in ("Anagrams", "Further reading", "References",
                        "Quotations", "Descendants"):
