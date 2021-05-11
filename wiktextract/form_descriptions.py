@@ -2792,7 +2792,8 @@ def parse_translation_desc(ctx, text, data):
                     continue
                 if new_desc in valid_tags:
                     add_tags(ctx, data, [new_desc], allow_any=True)
-                elif new_desc[0].isupper() and not ctx.title[0].isupper():
+                elif (new_desc and new_desc[0].isupper() and
+                      not ctx.title[0].isupper()):
                     data_append(ctx, data, "tags", new_desc)
                 elif "alt" not in data:
                     data["roman"] = new_desc
