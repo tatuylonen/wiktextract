@@ -29,7 +29,7 @@ class WiktExtractTests(unittest.TestCase):
 
     def test_unknown(self):
         ret, topics = decode_tags(["unknowntag"])
-        self.assertEqual(ret, [("error-unknown-tag",)])
+        self.assertEqual(ret, [("error-unknown-tag", "unknowntag")])
 
     def test_plural_partitive(self):
         ret, topics = decode_tags(["partitive", "plural"])
@@ -43,7 +43,49 @@ class WiktExtractTests(unittest.TestCase):
     def test_combo_err(self):
         ret, topics = decode_tags(["class", "2a",
                                    "stress", "pattern", "xyz"])
-        self.assertEqual(ret, [("class-2a", "error-unknown-tag")])
+        self.assertEqual(ret, [("class-2a", "error-unknown-tag",
+                                "stress pattern xyz")])
+
+    def test_decode1(self):
+        ret, topics = decode_tags(["Cockney rhyming slang"], allow_upper=True)
+        self.assertEqual(ret, [("Cockney", "slang")])
+
+    def test_decode2(self):
+        ret, topics = decode_tags(["Cockney Test rhyming slang"],
+                                  allow_upper=True)
+        self.assertEqual(ret, [("Cockney Test", "slang")])
+
+    def test_decode3(self):
+        ret, topics = decode_tags(["colloquial slang sailing"],
+                                  allow_upper=True)
+        self.assertEqual(ret, [("colloquial", "slang")])
+        self.assertEqual(topics, ["sailing"])
+
+    def test_decode4(self):
+        ret, topics = decode_tags(["colloquial Cockney Test rhyming slang"],
+                                  allow_upper=True)
+        self.assertEqual(ret, [("Cockney Test", "colloquial", "slang")])
+
+    def test_decode5(self):
+        ret, topics = decode_tags(["colloquial Cockney Test rhyming slang"],
+                                  allow_upper=False)
+        self.assertEqual(ret, [("Cockney Test", "colloquial",
+                                "error-unknown-tag", "slang")])
+
+    def test_decode6(self):
+        ret, topics = decode_tags(["colloquial Cockney Test unknown1 "
+                                   "rhyming slang"],
+                                  allow_upper=True)
+        self.assertEqual(ret, [("Cockney Test unknown1", "colloquial",
+                                "error-unknown-tag", "slang")])
+
+    def test_decode7(self):
+        ret, topics = decode_tags(["colloquial Cockney Test unknown1 "
+                                   "rhyming slang"],
+                                  allow_upper=False, allow_any=True)
+        self.assertEqual(ret, [("Cockney Test unknown1", "colloquial",
+                                "slang")])
+
 
     def test_head1(self):
         data = {}

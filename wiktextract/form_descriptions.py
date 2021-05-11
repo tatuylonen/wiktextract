@@ -793,6 +793,7 @@ xlat_tags_map = {
     "now rare": "archaic",
     "now colloquial": "colloquial",
     "now colloquial and nonstandard": "colloquial nonstandard",
+    "colloquial or Min Nan": "colloquial",
     "fossil word": "archaic",
     "brusque": "impolite",
     "verbs": "verb",
@@ -2371,70 +2372,95 @@ def decode_tags(lst, allow_any=False, allow_upper=False):
             lsts = list(lst1 + [alt] for lst1 in lsts)
     lsts = map_with(xlat_tags_map, list(map(lambda x: " ".join(x), lsts)))
     lsts = list(map(lambda x: x.split(" "), lsts))
+
+    def check_unknown(start_i, last_i, i, tags):
+        # Adds unknown tag if needed.  Returns new last_i
+        # print("check_unknown start_i={} last_i={} i={}"
+        #       .format(start_i, last_i, i))
+        if last_i >= start_i:
+            return last_i
+        words = lst[last_i: start_i]
+        # print("unknown words:", words)
+        tag = " ".join(words)
+        if not tag:
+            return last_i
+        tags.append(tag)
+        if not (allow_any or
+                (allow_upper and
+                 all(x[0].isupper() for x in words))):
+            # print("ERR allow_any={} allow_upper={} words={}"
+            #       .format(allow_any, allow_upper, words))
+            tags.append("error-unknown-tag")
+        return i + 1
+
     topics = []
     tagsets = set()
     for lst in lsts:
         tags = []
-        nodes = [(valid_sequences, 0)]
+        nodes = []
+        max_last_i = 0
         for i, w in enumerate(lst):
             if not w:
                 continue
             new_nodes = []
 
-            def add_new(node, next_i):
-                for node2, next_i2 in new_nodes:
-                    if node2 is node and next_i2 == next_i:
+            def add_new(node, start_i, last_i):
+                # print("add_new: start_i={} last_i={}".format(start_i, last_i))
+                nonlocal max_last_i
+                max_last_i = max(max_last_i, last_i)
+                for node2, start_i2, last_i2 in new_nodes:
+                    if (node2 is node and start_i2 == start_i and
+                        last_i2 == last_i):
                         break
                 else:
-                    new_nodes.append((node, next_i))
+                    new_nodes.append((node, start_i, last_i))
 
-            max_next_i = max(x[1] for x in nodes)
-            for node, next_i in nodes:
+            # print("ITER", i, w)
+            for node, start_i, last_i in nodes:
                 if w in node:
-                    add_new(node[w], next_i)
+                    # print("INC", w)
+                    add_new(node[w], start_i, last_i)
                 if "$" in node:
+                    # print("$", w)
                     for t in node["$"].get("tags", ()):
                         tags.extend(t.split(" "))
                     for t in node["$"].get("topics", ()):
                         topics.extend(t.split(" "))
+                    max_last_i = max(max_last_i, i)
+                    check_unknown(start_i, last_i, i, tags)
                     if w in valid_sequences:
-                        add_new(valid_sequences[w], i)
+                        add_new(valid_sequences[w], i, i)
                 if w not in node and "$" not in node:
-                    if allow_any or (allow_upper and lst[next_i][0].isupper()):
-                        tag = " ".join(lst[next_i:i + 1])
-                        tags.append(tag)
-                        next_i = i + 1
-                        if w in valid_sequences:
-                            add_new(valid_sequences[w], i)
-                    else:
-                        rest = tags[max_next_i:]
-                        tag = " ".join(rest)
-                        tags.append("error-unknown-tag")
-                        if w in valid_sequences:
-                            add_new(valid_sequences[w], next_i)
+                    # print("NEW", w)
+                    if w in valid_sequences:
+                        add_new(valid_sequences[w], i, last_i)
             if not new_nodes:
-                add_new(valid_sequences, max_next_i)
+                # print("RECOVER", w, max_last_i)
+                if w in valid_sequences:
+                    add_new(valid_sequences[w], i, max_last_i)
             nodes = new_nodes
 
+        # print("END")
         valid_end = False
-        for node, next_i in nodes:
+        for node, start_i, last_i in nodes:
             if "$" in node:
+                # print("$ END")
                 for t in node["$"].get("tags", ()):
                     tags.extend(t.split(" "))
                 for t in node["$"].get("topics", ()):
                     topics.extend(t.split(" "))
+                check_unknown(start_i, last_i, len(lst), tags)
                 valid_end = True
-        max_next_i = max(x[1] for x in nodes)
-        if not valid_end and any(lst[max_next_i:]):
-            rest = lst[max_next_i:]
-            tag = " ".join(rest)
-            if tag and allow_any or tag[0].isupper():
-                if tag not in tags:
-                    tags.append(tag)
-            elif tag:
-                tags.append("error-unknown-tag")
+        if not valid_end:
+            # print("NOT VALID END")
+            if nodes:
+                for node, start_i, last_i in nodes:
+                    check_unknown(len(lst), last_i, len(lst), tags)
+            else:
+                check_unknown(len(lst), max_last_i, len(lst), tags)
+
         tagsets.add(tuple(sorted(set(tags))))
-    ret = list(tagsets)
+    ret = list(sorted(set(tagsets)))
     return ret, topics
 
 
