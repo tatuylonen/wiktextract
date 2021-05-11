@@ -875,6 +875,9 @@ xlat_tags_map = {
     "inflection of": "form-of",
     "mainland China": "mainland-China",
     "rhyming slang": "slang",
+    "one-termination adjective": "one-termination",
+    "two-termination adjective": "two-termination",
+    "three-termination adjective": "three-termination",
 }
 
 # Translation map for topics.
@@ -1764,6 +1767,7 @@ valid_tags = set([
     "seventh-conjugation",
     "one-termination",
     "two-termination",
+    "three-termination",
     "stress-pattern-1",
     "stress-pattern-2",
     "stress-pattern-3",
@@ -2558,7 +2562,10 @@ def parse_word_head(ctx, pos, text, data):
         desc = desc.strip()
         for alt in map_with(xlat_tags_map, desc.split(" or ")):
             baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
-            if " ".join(baseparts) in valid_tags and desc_i > 0:
+            tagsets_, topics_ = decode_tags([" ".join(baseparts)])
+            if (not any("error-unknown-tag" in x for x in tagsets_) and
+                not topics_ and
+                desc_i > 0):
                 lst = []  # Word form
                 rest = baseparts  # Tags
             else:

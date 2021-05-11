@@ -318,6 +318,8 @@ htmlgen: compound-of field of sense not displayed in generated html
 
 htmlgen: implement support for redirects
 
+htmlgen: make raw JSON file from wiktextract available for download
+
 Word entires may be generated from entries like "Thesaurus:ar:make happy" that
 are in a wrong language.  Check if they are referenced from somewhere and
 maybe restrict generation to entries that are actually referenced.
@@ -327,11 +329,11 @@ treat them as different words. ／ = fullwidth solidus
 
 If a Asian word has parenthesized sections, should they be treated as
 different versions (in Japanese they look like pronunciations).  cf. Ruby.
+  - partially implemented (for linkages), need also for translations and
+    perhaps also for headword
 
-Check linkage sol/Norwegian Nynorsk/Noun (looks like unhandled item list)
- - This is a broader problem around col1 ... col5 and col1-u ... col5-u.
-   They expand to <div> inside <div> that contains a list.  They are
-   fairly widely used in at least linkages.
+Check linkage sol/Norwegian Nynorsk/Noun
+  Related terms: gender after linked word is not handled (gets into word)
 
 Check extraction of pronunciations and their romanizations in 공중/Korean
 
@@ -340,22 +342,22 @@ the only translations are with {{trans-see|...}})
 
 Consider caching template expansions in an LRU cache.  Make sure
 template arguments that can be accessed from Lua are considered
-properly.
+properly.  Cache must be reset per-page.
 
 Some forms of usage examples seem to end up in gloss.  Check
 body/English/Noun, e.g. sense "Physical Frame / A Person" ("What's a
 body got to do ..." ends up in gloss)
 
 Check * at the end of some derived forms in wort/English/Noun (e.g., dropwort*)
+  - it actually is in the original wikitext and is used as a reference symbol,
+    with explanation at the end of the table
+  - should probably just remove the *
+  - check if there are other similar reference symbols and how common they are
 
 뱀/Korean - Derived terms parenthesized translitterations end up as tags
 
 Apparently the following is not parsed correctly:
 {{ws sense|any of enclosing symbols "(", ")", "[", "]", "{", "}" etc.}}
-
-# 䆀手/Chinese - Synonyms has * The dial-syn page 「左手」 does not yet exist. Create the data page and the map!* The dial-syn page 「左撇子」 does not yet exist. Create the data page and the map!
-# Things like this seem very common with Chinese words.  Might be a problem
-# in Lua code where they are looked up (Wiktionary does have synonyms).
 
 aunt/English/Translations: Armenian "paternal" goes in roman
 aunt/English/Translations: Burmese - sense in parenthesis goes into "roman"
@@ -363,39 +365,9 @@ aunt/English/Translations: Burmese - sense in parenthesis goes into "roman"
 house/English/Noun: WARNING: Failed to find subpage section English house/Noun Noun Translations at ['house', 'see translation subpage']
   - looks like the Translations section is has additional === signs
 
-canadensis/Latin "third-declension two-termination adjective" is not
-parsed (it is not in parentheses).  This type of construction is very
-common in Latin.
-
 servus/Czech/Interjection: Synonyms contains "see ahoj", which should
 be just "ahoj".  There is no special template in the entry - "See " is
 just plain text.
-
-XXX Apparently this gets processed incorrectly, with comma separating arguments:
-{{l|eo|flugarmeisto||[[airman]], [[flyboy]] (both senses limited to members of a national air force)}}
-This was in flugi/Esperanto/Verb
-
-testicle/English/Noun: ERROR: LUA error in #invoke ('translations/egy', 'show') parent ('Template:t-egy', {1: 'ẖrwj', 'h': 'T28:D21-G43-Z4&lt;/hiero&gt;<table class="mw-hiero-table mw-hiero-outer" dir="ltr"><tr><td><table class="mw-hiero-table"><tr><td height="40"><span style="margin: 1px;">[[File:Abydos-Bold-hieroglyph-D283.png&vert;D283&vert;x38px&vert;link=]]</span></td></tr></table></td></tr></table><hiero>', 2: 'm-d</hiero>'}) at ['testicle', 't-egy', '#invoke']
-[string "gender and number"]:123: The tag "d</hiero>" in the gender specification "m-d</hiero>" is not valid.
-stack traceback:
-	[C]: in function 'error'
-	[string "gender and number"]:123: in local 'do_gender_spec'
-	[string "gender and number"]:204: in function 'Module:gender and number.format_genders'
-	[string "gender and number"]:91: in function 'Module:gender and number.format_list'
-	[string "links"]:336: in function 'Module:links.format_link_annotations'
-	[string "links"]:524: in function 'Module:links.full_link'
-	[string "translations/egy"]:27: in function 'translations/egy.show'
-	(...tail calls...)
-	[C]: in function 'xpcall'
-	[string "_sandbox_phase2"]:174: in function <[string "_sandbox_phase2"]:129>
-
-wiki.local in Synonyms, see 死/Chinese/non-disambiguated
-https://kaikki.org/dictionary/Chinese/meaning/%E6%AD%BB/%E6%AD%BB/%E6%AD%BB.html
-- search for wiki.local from output
-
-htmlgen: make raw JSON file from wiktextract available for download
-
-Implement optimized mw.loadData(module) that caches the returned value
 
 Handle ruby in translations
 Use classify_desc in translations for parenthesized parts
