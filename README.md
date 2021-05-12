@@ -332,20 +332,24 @@ comprehensive.  The underlying lower-level toolkit,
 ### Expected performance
 
 Extracting all data for all languages from English Wiktionary takes
-several hours on a modern (year 2020) 24-core desktop (AMD EPYC 7402)
-or three hours on a 128-core dual AMD EPYC 7702 system.  You may want
-to download the pre-extracted data from
-[kaikki.org](https://kaikki.org/dictionary/) rather than run it
-yourself unless you have special needs or want to modify the code.  If
-you run it yourself, be prepared to wait from several hours to a
-couple of days, depending on your computer.  While you can, you may
-not want to run this on a laptop.  Expanding Lua modules is not cheap,
-but it enables superior extraction quality and maintainability!  Also,
-the software needs 3-4 GB of memory per process.  You can control the
-number of parallel processes to use with the ``--num-threads`` option;
-the default on Linux is to use the number of available
-cores/hyperthreads.  On Windows and MacOS, ``--num-threads`` should
-currently be set to 1 (default on those systems).
+about 1.5 hours on a 128-core dual AMD EPYC 7702 system.  The
+performance is expected to be approximately linear with the number of
+processor cores, provided you have enough memory (about 8GB/core or
+4GB/hyperthread recommended).
+
+You can control the number of parallel processes to use with the
+``--num-threads`` option; the default on Linux is to use the number of
+available cores/hyperthreads.  On Windows and MacOS, ``--num-threads``
+should currently be set to 1 (default on those systems). We don't
+really recommend using Windows or Mac for the extraction, because it
+will be slow.  Extracting only a few languages or a subset of the data
+will be faster.
+
+You can download the full pre-extracted data from
+[kaikki.org](https://kaikki.org/dictionary/). The pre-extraction is
+updated regularly with the latest Wiktionary dump.  Using the
+pre-extracted data may be the easiest option unless you have special
+needs or want to modify the code.
 
 ## Using the command-line tool
 

@@ -1410,6 +1410,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     audio["text"] = desc
                 audios.append(audio)
                 return ""
+            # XXX handle audio-IPA
             if name == "audio-pron":
                 filename = ht.get(2) or ""
                 ipa = ht.get("ipa")
@@ -1661,7 +1662,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         if parts:
                             sense1 = clean_node(config, ctx, None, parts)
                             if sense1.startswith("(") and sense1.endswith("):"):
-                                sense1 = sense1[1:-2]
+                                sense1 = sense1[1:-2].strip()
+                            if sense1 == "Translations":
+                                sense1 = None
                             # print("linkage item_recurse LIST sense1:", sense1)
                             parse_linkage_recurse(node.children, field,
                                                   sense=sense1 or sense)
