@@ -51,6 +51,7 @@ def clean_value(config, title, no_strip=False):
     # Change <div> and </div> to newlines
     title = re.sub(r"(?si)<\s*/?\s*div\b[^>]*>", "\n", title)
     # Change <sup> ... </sup> to ^
+    title = re.sub(r"(?si)<\s*sup\b[^>]*>\s*<\s*/\s*sup\s*>", "", title)
     title = re.sub(r"(?si)<\s*sup\b[^>]*>(.*?)<\s*/\s*sup\s*>",
                    repl_1_caret, title)
     # Remove any remaining HTML tags.

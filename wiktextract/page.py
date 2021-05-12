@@ -1028,6 +1028,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         "shn-x", "th-x", "ur-x"):
                 # XXX capture usage example (check quotei!)
                 return ""
+            if name == "w":
+                if ht.get(2) == "Wp":
+                    return ""
             return None
 
         rawgloss = clean_node(config, ctx, sense_base, lst,
