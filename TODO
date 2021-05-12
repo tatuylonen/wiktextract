@@ -364,3 +364,6 @@ Linkages don't always have a list, see dollar/English/Coordinate terms
 
 Fix having more than one alternative canonical form in a word, see e.g.
 ميويزج/Arabic/Noun  ("or" in head word)
+
+{{syn|...}} not properly handled in nested glosses, see frons/Latin
+sense "the forehead, brow, front", search for "vultus"

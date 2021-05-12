@@ -822,7 +822,7 @@ def is_panel_template(name):
     return False
 
 
-def parse_sense_linkage(ctx, data, name, ht):
+def parse_sense_linkage(config, ctx, data, name, ht):
     """Parses a linkage (synonym, etc) specified in a word sense."""
     assert isinstance(ctx, Wtp)
     assert isinstance(data, dict)
@@ -831,7 +831,7 @@ def parse_sense_linkage(ctx, data, name, ht):
     field = sense_linkage_templates[name]
     for i in range(2, 20):
         w = ht.get(i) or ""
-        w = w.strip()
+        w = clean_node(config, ctx, data, w)
         if w.startswith("Thesaurus:"):
             w = w[10:]
         if not w:
@@ -1017,7 +1017,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 data_append(ctx, sense_base, "senseid",
                             langid + ":" + arg)
             if name in sense_linkage_templates:
-                parse_sense_linkage(ctx, sense_base, name, ht)
+                parse_sense_linkage(config, ctx, sense_base, name, ht)
                 return ""
             if name == "†" or name == "zh-obsolete":
                 data_append(ctx, sense_base, "tags", "obsolete")
@@ -1325,7 +1325,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if name in ("defdate",):
                         return ""
                     if name in sense_linkage_templates:
-                        parse_sense_linkage(ctx, common_data, name, ht)
+                        parse_sense_linkage(config, ctx, common_data, name, ht)
                         return ""
                     return None
 
@@ -1907,6 +1907,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             v = ht.get(i, None)
                             if v is None:
                                 break
+                            v = clean_node(config, ctx, None, v)
                             parse_linkage_item(v, f)
                             i += 1
                         return ""
