@@ -33,7 +33,7 @@ languages_by_code = {x["code"]: x for x in ALL_LANGUAGES}
 # Matches head tag
 head_tag_re = re.compile(r"^(head|Han char)$|" +
                          r"^(" + "|".join(languages_by_code.keys()) + r")"
-                         r"-(plural-noun|plural noun|noun|verb|adj|adv|"
+                         r"-(plural-noun|plural noun|noun|verb|adj|num-adj|adv|"
                          r"name|proper-noun|proper noun|prop|pron|phrase|"
                          r"decl noun|decl-noun|prefix|clitic|number|ordinal|"
                          r"syllable|suffix|affix|pos|gerund|combining form|"
