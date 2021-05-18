@@ -1729,6 +1729,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if item.startswith("See also Thesaurus:"):
                 item = ""
                 have_linkages = True
+            elif item.startswith("See also Appendix:"):
+                item = ""
+                have_linkages = True
+            elif item.startswith("See also "):
+                item = item[9:]
             elif item.startswith("See "):
                 item = item[4:]
             elif item.startswith("Appendix:"):
@@ -1751,9 +1756,29 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 item = item[1:]
             item = item.strip()
 
-            #print("    LINKAGE ITEM: {}: {} (sense {})"
-            #      .format(field, item, sense))
+            # print("    LINKAGE ITEM: {}: {} (sense {})"
+            #       .format(field, item, sense))
 
+            # Some Korean words use "word (romanized): english" pattern
+            base_roman = None
+            base_alt = None
+            m = re.match(r"(.+?) \(([^)]+)\): ([-a-zA-Z0-9,. ]+)$", item)
+            if m:
+                # XXX check for commas in group 2
+                base_roman = m.group(2)
+                english = m.group(3)
+                item = m.group(1)
+                lst = base_roman.split(", ")
+                if len(lst) == 2:
+                    base_alt = lst[0]
+                    base_roman = lst[1]
+                if sense:
+                    sense = sense + "; " + english
+                else:
+                    sense = english
+
+            # Various words have a sense or tags in parenthesis (sometimes
+            # followed by a colon) at the start of the item
             base_qualifier = None
             m = re.match(r"\((([^()]|\([^)]*\))*)\):?\s*", item)
             if m:
@@ -1772,6 +1797,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # Otherwise we won't handle it here
                     ctx.debug("unhandled parenthesized prefix: {}"
                               .format(item))
+
             base_sense = sense
 
             # Certain linkage items have space-separated valus.  These are
@@ -1816,11 +1842,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             item = re.sub(r"\s*\^?\s*\(\s*\)", "", item)
             item = item.strip()
-            # XXX check for: stripped item text starts with "See also [[...]]"
             if not item:
                 return
             # The item may contain multiple comma-separated linkages
-            subitems = split_at_comma_semi(item)
+            if base_roman:
+                subitems = [item]
+            else:
+                subitems = split_at_comma_semi(item)
             if len(subitems) > 1:  # Would be merged from multiple subitems
                 ruby = ""
             for item1 in subitems:
@@ -1832,8 +1860,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 qualifier = base_qualifier
                 sense = base_sense
                 parts = []
-                roman = None
-                alt = None
+                roman = base_roman  # Usually None
+                alt = base_alt  # Usually None
                 taxonomic = None
 
                 # Extract quoted English translations (there are also other

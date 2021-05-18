@@ -2978,10 +2978,11 @@ def classify_desc(desc):
             return "english"
     # If all characters are in classes that could occur in romanizations,
     # treat as romanization
-    classes = list(unicodedata.category(x) for x in
-                   unicodedata.normalize("NFKD", desc))
+    classes = list(unicodedata.category(x) if x not in ("-",) else "OK"
+                   for x in unicodedata.normalize("NFKD", desc))
     # print("classify_desc:", desc, classes)
-    if all(x in ("Ll", "Lu", "Lt", "Lm", "Mn", "Mc", "Zs") for x in classes):
+    if all(x in ("Ll", "Lu", "Lt", "Lm", "Mn", "Mc", "Zs", "OK")
+           for x in classes):
         return "romanization"
     # Otherwise it is something else, such as hanji version of the word
     return "other"
