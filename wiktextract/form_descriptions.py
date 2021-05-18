@@ -2631,7 +2631,11 @@ def parse_word_head(ctx, pos, text, data):
             # lst is canonical form of the word
             # rest is additional tags (often gender m/f/n/c/...)
             if lst and title != " ".join(lst):
-                add_related(ctx, data, ["canonical"], lst)
+                if len(lst) == 3 and lst[1] == "or":
+                    add_related(ctx, data, ["canonical"], [lst[0]])
+                    add_related(ctx, data, ["canonical"], [lst[2]])
+                else:
+                    add_related(ctx, data, ["canonical"], lst)
             # XXX here we should only look at a subset of tags allowed
             # in the base
             add_tags(ctx, data, rest)

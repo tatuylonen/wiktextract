@@ -248,10 +248,6 @@ template seems to know a ton about these so maybe look at it.
 #  - in Japanese compounds, roman transliterations incorrectly go into tags
 #  - in Japanese, does it make sense to have most senses annotated with "kanji"?
 
-# English/fire/Noun/Translations (oxidation reaction) - Egyptian, "f"
-# in roman versions seems to go into "roman" field, even though it is
-# apparently gender
-
 Collect usage examples
 
 Collect etymology information
@@ -283,8 +279,6 @@ htmlgen: Implement better list page generation
 htmlgen: compound-of field of sense not displayed in generated html
 
 htmlgen: implement support for redirects
-
-htmlgen: make raw JSON file from wiktextract available for download
 
 Word entires may be generated from entries like "Thesaurus:ar:make happy" that
 are in a wrong language.  Check if they are referenced from somewhere and
@@ -336,8 +330,9 @@ Recognize and parse {{zh-dial|...}} in linkage, e.g., 鼎/Chinese
   - Words may have Notes references, which may need to be parsed as senses
     (not clear how common they are with other words)
 
-Fix having more than one alternative canonical form in a word, see e.g.
-ميويزج/Arabic/Noun  ("or" in head word)
+# English/fire/Noun/Translations (oxidation reaction) - Egyptian, "f"
+# in roman versions seems to go into "roman" field, even though it is
+# apparently gender
 
 {{syn|...}} not properly handled in nested glosses, see frons/Latin
 sense "the forehead, brow, front", search for "vultus"
