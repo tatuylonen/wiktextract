@@ -278,8 +278,6 @@ htmlgen: strange Categories non-disambiguated in: https://kaikki.org/dictionary/
 
 htmlgen: include word prefixes in breadcrumbs
 
-htmlgen: Implement search functionality
-
 htmlgen: Implement better list page generation
 
 htmlgen: compound-of field of sense not displayed in generated html
@@ -367,3 +365,5 @@ Fix having more than one alternative canonical form in a word, see e.g.
 
 {{syn|...}} not properly handled in nested glosses, see frons/Latin
 sense "the forehead, brow, front", search for "vultus"
+
+Looks like ribe/Serbo-Croatian glosses are missing
