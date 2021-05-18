@@ -354,8 +354,6 @@ Recognize and parse {{zh-dial|...}} in linkage, e.g., 鼎/Chinese
 
 Check: б/Belarusian/See also: DEBUG: unhandled parenthesized prefix: (Cyrillic-script letters) А а (A a), Б б (B b), В в (V v), Г г (H h), Д д (D d), Е е (Je je), Ё ё (Jo jo), Ж ж (Ž ž), З з (Z z), І і (I i), Й й (J j), К к (K k), Л л (L l), М м (M m), Н н (N n), О о (O o), П п (P p), Р р (R r), С с (S s), Т т (T t), У у (U u), Ў ў (Ŭ ŭ), Ф ф (F f), Х х (X x), Ц ц (C c), Ч ч (Č č), Ш ш (Š š), Ы ы (Y y), Ь ь (ʹ ʹ), Э э (E e), Ю ю (Ju ju), Я я (Ja ja) at ['б']
 
-prime number/English/Synonyms: DEBUG: unhandled parenthesized prefix: (natural number >1 divisible only by itself and 1): prime at ['prime number']
-
 Fix having more than one alternative canonical form in a word, see e.g.
 ميويزج/Arabic/Noun  ("or" in head word)
 
