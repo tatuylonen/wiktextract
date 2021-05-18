@@ -1050,15 +1050,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # to parts.
         subglosses = re.split(r"[#*]+\s*", rawgloss)
         if len(subglosses) > 1 and "form_of" not in sense_base:
-            infl_tags, infl_base = parse_alt_or_inflection_of(ctx,
-                                                              subglosses[0])
+            gl = subglosses[0]
+            infl_tags, infl_base = parse_alt_or_inflection_of(ctx, gl)
             if infl_base and "form-of" in infl_tags:
                 # Interpret others as a particular form under "inflection of"
                 data_extend(ctx, sense_base, "tags", infl_tags)
                 data_append(ctx, sense_base, "form_of", infl_base)
                 subglosses = subglosses[1:]
+
         # Create senses for remaining subglosses
-        for gloss in subglosses:
+        for gloss_i, gloss in enumerate(subglosses):
             gloss = gloss.strip()
             if not gloss and len(subglosses) > 1:
                 continue
@@ -1360,6 +1361,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if outer_text.endswith(x):
                         outer_text = outer_text[:-len(x)]
                         break
+                # Check if the outer gloss starts with parenthesized tags/topics
+                m = re.match(r"\(([^)]+)\)\s*", outer_text)
+                if m:
+                    q = m.group(1)
+                    outer_text = outer_text[m.end():].strip()
+                    parse_sense_tags(ctx, q, common_data)
+
                 # Process any inner glosses
                 for sublist in sublists:
                     assert sublist.kind == NodeKind.LIST
