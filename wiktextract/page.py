@@ -1729,6 +1729,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if item.startswith("See also Thesaurus:"):
                 item = ""
                 have_linkages = True
+            elif item.startswith("See "):
+                item = item[4:]
             elif item.startswith("Appendix:"):
                 item = ""
                 have_linkages = True

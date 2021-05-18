@@ -334,15 +334,9 @@ aunt/English/Translations: Burmese - sense in parenthesis goes into "roman"
 house/English/Noun: WARNING: Failed to find subpage section English house/Noun Noun Translations at ['house', 'see translation subpage']
   - looks like the Translations section is has additional === signs
 
-servus/Czech/Interjection: Synonyms contains "see ahoj", which should
-be just "ahoj".  There is no special template in the entry - "See " is
-just plain text.
-
 Handle ruby in translations
 Use classify_desc in translations for parenthesized parts
 Support multiple parenthesized parts in translations, similar to linkage
-
-Convert <sup> digits to Unicode superscript digits?  Ditto for subscript.
 
 Recognize and parse {{zh-dial|...}} in linkage, e.g., 鼎/Chinese
   - Variety = language (these are more like translation than synonyms)
