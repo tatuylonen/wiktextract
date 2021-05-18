@@ -141,6 +141,11 @@ def to_subscript(text):
         return "_" + text
     return "_({})".format(text)
 
+def to_chem(text):
+    """Converts text to chemical formula, making digits subscript."""
+    return "".join(to_subscript(x) if x.isdigit() else x
+                   for x in text)
+
 def clean_value(config, title, no_strip=False):
     """Cleans a title or value into a normal string.  This should basically
     remove any Wikimedia formatting from it: HTML tags, templates, links,
@@ -168,6 +173,9 @@ def clean_value(config, title, no_strip=False):
     def repl_1_sub(m):
         return to_subscript(clean_value(config, m.group(1)))
 
+    def repl_1_checm(m):
+        return to_chem(clean_value(config, m.group(1)))
+
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(title, str)
     title = re.sub(r"\{\{[^}]+\}\}", "", title)
@@ -188,6 +196,9 @@ def clean_value(config, title, no_strip=False):
     title = re.sub(r"(?si)<\s*sub\b[^>]*>\s*<\s*/\s*sup\s*>", "", title)
     title = re.sub(r"(?si)<\s*sub\b[^>]*>(.*?)<\s*/\s*sub\s*>",
                    repl_1_sub, title)
+    # Change <chem> ... </chem> using subscripts for digits
+    title = re.sub(r"(?si)<\s*chem\b[^>]*>(.*?)<\s*/\s*chem\s*>",
+                   repl_1_checm, title)
     # Remove any remaining HTML tags.
     title = re.sub(r"(?s)<\s*[^/>][^>]*>\s*", "", title)
     title = re.sub(r"(?s)<\s*/\s*[^>]+>\n*", "", title)

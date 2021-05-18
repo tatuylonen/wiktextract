@@ -235,8 +235,6 @@ template seems to know a ton about these so maybe look at it.
 
 # Implement <hiero> ... </hiero>, e.g., lilja/Finnish/Etymology
 
-# Implement <chem> ... </chem>, e.g. felsic/English/Adjective
-
 # XXX chinese glyphs, see 內
 #  - I'm getting dial-syn page does not exist in synonyms, but Wiktionary
 #    shows a big list of synonyms
