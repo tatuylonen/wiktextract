@@ -14,6 +14,133 @@ from .config import WiktionaryConfig
 # Cleaning values into plain text.
 ######################################################################
 
+superscript_ht = {
+    "1": "¹",
+    "2": "²",
+    "3": "³",
+    "4": "⁴",
+    "5": "⁵",
+    "6": "⁶",
+    "7": "⁷",
+    "8": "⁸",
+    "9": "⁹",
+    "+": "⁺",
+    "-": "⁻",
+    "=": "⁼",
+    "(": "⁽",
+    ")": "⁾",
+    "A": "ᴬ",
+    "B": "ᴮ",
+    "D": "ᴰ",
+    "E": "ᴱ",
+    "G": "ᴳ",
+    "H": "ᴴ",
+    "I": "ᴵ",
+    "J": "ᴶ",
+    "K": "ᴷ",
+    "L": "ᴸ",
+    "M": "ᴹ",
+    "N": "ᴺ",
+    "O": "ᴼ",
+    "P": "ᴾ",
+    "R": "ᴿ",
+    "T": "ᵀ",
+    "U": "ᵁ",
+    "V": "ⱽ",
+    "W": "ᵂ",
+    "a": "ᵃ",
+    "b": "ᵇ",
+    "c": "ᶜ",
+    "d": "ᵈ",
+    "e": "ᵉ",
+    "f": "ᶠ",
+    "g": "ᵍ",
+    "h": "ʰ",
+    "i": "ⁱ",
+    "j": "ʲ",
+    "k": "ᵏ",
+    "l": "ˡ",
+    "m": "ᵐ",
+    "n": "ⁿ",
+    "o": "ᵒ",
+    "p": "ᵖ",
+    "r": "ʳ",
+    "s": "ˢ",
+    "t": "ᵗ",
+    "u": "ᵘ",
+    "v": "ᵛ",
+    "w": "ʷ",
+    "x": "ˣ",
+    "y": "ʸ",
+    "z": "ᶻ",
+    "β": "ᵝ",
+    "γ": "ᵞ",
+    "δ": "ᵟ",
+    "θ": "ᶿ",
+    "ι": "ᶥ",
+    "φ": "ᵠ",
+    "χ": "ᵡ",
+}
+
+subscript_ht = {
+    "0": "₀",
+    "1": "₁",
+    "2": "₂",
+    "3": "₃",
+    "4": "₄",
+    "5": "₅",
+    "6": "₆",
+    "7": "₇",
+    "8": "₈",
+    "9": "₉",
+    "+": "₊",
+    "-": "₋",
+    "=": "₌",
+    "(": "₍",
+    ")": "₎",
+    "a": "ₐ",
+    "e": "ₑ",
+    "h": "ₕ",
+    "i": "ᵢ",
+    "j": "ⱼ",
+    "k": "ₖ",
+    "l": "ₗ",
+    "m": "ₘ",
+    "n": "ₙ",
+    "o": "ₒ",
+    "p": "ₚ",
+    "r": "ᵣ",
+    "s": "ₛ",
+    "t": "ₜ",
+    "u": "ᵤ",
+    "v": "ᵥ",
+    "x": "ₓ",
+    "ə": "ₔ",
+    "ρ": "ᵨ",
+    "φ": "ᵩ",
+    "χ": "ᵪ",
+}
+
+def to_superscript(text):
+    "Converts text to superscript."
+    if not text:
+        return ""
+    if all(x in superscript_ht for x in text):
+        return "".join(superscript_ht[x] for x in text)
+    if len(text) == 1:
+        return "^" + text
+    return "^({})".format(text)
+
+def to_subscript(text):
+    """Converts text to subscript."""
+    if not text:
+        return ""
+    if all(x in subscript_ht for x in text):
+        return "".join(subscript_ht[x] for x in text)
+    if len(text) == 1:
+        return "_" + text
+    return "_({})".format(text)
+
 def clean_value(config, title, no_strip=False):
     """Cleans a title or value into a normal string.  This should basically
     remove any Wikimedia formatting from it: HTML tags, templates, links,
@@ -35,8 +162,11 @@ def clean_value(config, title, no_strip=False):
         return clean_value(config, m.group(4) or m.group(2) or "",
                            no_strip=True)
 
-    def repl_1_caret(m):
-        return "^" + clean_value(config, m.group(1))
+    def repl_1_sup(m):
+        return to_superscript(clean_value(config, m.group(1)))
+
+    def repl_1_sub(m):
+        return to_subscript(clean_value(config, m.group(1)))
 
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(title, str)
@@ -53,7 +183,11 @@ def clean_value(config, title, no_strip=False):
     # Change <sup> ... </sup> to ^
     title = re.sub(r"(?si)<\s*sup\b[^>]*>\s*<\s*/\s*sup\s*>", "", title)
     title = re.sub(r"(?si)<\s*sup\b[^>]*>(.*?)<\s*/\s*sup\s*>",
-                   repl_1_caret, title)
+                   repl_1_sup, title)
+    # Change <sub> ... </sub> to _
+    title = re.sub(r"(?si)<\s*sub\b[^>]*>\s*<\s*/\s*sup\s*>", "", title)
+    title = re.sub(r"(?si)<\s*sub\b[^>]*>(.*?)<\s*/\s*sub\s*>",
+                   repl_1_sub, title)
     # Remove any remaining HTML tags.
     title = re.sub(r"(?s)<\s*[^/>][^>]*>\s*", "", title)
     title = re.sub(r"(?s)<\s*/\s*[^>]+>\n*", "", title)

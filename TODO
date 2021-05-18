@@ -342,8 +342,6 @@ Handle ruby in translations
 Use classify_desc in translations for parenthesized parts
 Support multiple parenthesized parts in translations, similar to linkage
 
-Test parsing of related character lists in linkage (no commas)
-Test parsing of font characters and digits in linkage (no commas)
 Convert <sup> digits to Unicode superscript digits?  Ditto for subscript.
 
 Recognize and parse {{zh-dial|...}} in linkage, e.g., 鼎/Chinese

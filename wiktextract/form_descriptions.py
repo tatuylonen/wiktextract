@@ -30,6 +30,7 @@ english_words = set(brown.words()) | set(
         "Mrs",
         "Ms",
         "Prof",
+        "aliphatic",
         "angstrom",
         "colour",
         "digits",
