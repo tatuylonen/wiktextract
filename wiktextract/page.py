@@ -1007,9 +1007,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
         assert isinstance(contents, (list, tuple))
         assert isinstance(sense_base, dict)  # Added to every sense
         # print("PARSE_SENSE ({}): {}".format(sense_base, contents))
-        lst = [x for x in contents
-               if not isinstance(x, WikiNode) or
-               x.kind not in (NodeKind.LIST,)]
+        lst = []
+        for i in range(len(contents)):
+            x = contents[i]
+            if isinstance(x, WikiNode) and x.kind == NodeKind.LIST:
+                break
+            lst.append(x)
 
         def sense_template_fn(name, ht):
             if is_panel_template(name):

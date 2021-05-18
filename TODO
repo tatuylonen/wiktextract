@@ -301,10 +301,6 @@ Consider caching template expansions in an LRU cache.  Make sure
 template arguments that can be accessed from Lua are considered
 properly.  Cache must be reset per-page.
 
-Some forms of usage examples seem to end up in gloss.  Check
-body/English/Noun, e.g. sense "Physical Frame / A Person" ("What's a
-body got to do ..." ends up in gloss)
-
 Check * at the end of some derived forms in wort/English/Noun (e.g., dropwort*)
   - it actually is in the original wikitext and is used as a reference symbol,
     with explanation at the end of the table
