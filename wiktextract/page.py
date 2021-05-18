@@ -1741,7 +1741,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             elif item.startswith("Wikipedia article "):
                 item = ""
                 have_linkages = True
-            elif item.endswith(" on Wikipedia"):
+            elif item.endswith(" Wikipedia"):
                 item = ""
                 have_linkages = True
 
@@ -1779,10 +1779,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                   "Arabic digits"):
                     base_qualifier = None
                     item = ", ".join(item.split())
-                elif (base_sense in ("Latin script",
-                                     "Latin-script letters",
-                                     "Latin script letters",
-                                     "Latvian letters") or
+                elif (base_sense in (
+                        "Arabic digits",
+                        "Latin script",
+                        "Latin script letters",
+                        "Latin-script letters",
+                        "Latvian letters") or
                       base_sense.startswith("Variations of letter ")):
                     base_qualifier = None
                     idx = item.find("; ")
@@ -1820,6 +1822,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if len(subitems) > 1:  # Would be merged from multiple subitems
                 ruby = ""
             for item1 in subitems:
+                if len(subitems) > 1 and item1 in ("...", "…"):
+                    # Some lists have ellipsis in the middle - don't generate
+                    # linkages for the ellipsis
+                    continue
                 item1 = item1.strip()
                 qualifier = base_qualifier
                 sense = base_sense

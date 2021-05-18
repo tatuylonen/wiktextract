@@ -21,6 +21,7 @@ nltk.download("brown", quiet=True)
 english_words = set(brown.words()) | set(
     [
         # These are additions to the brown corpus word list
+        "Arabic",
         "Cyrillic-script",
         "Dr",
         "Latin-script",
@@ -31,6 +32,7 @@ english_words = set(brown.words()) | set(
         "Prof",
         "angstrom",
         "colour",
+        "digits",
         "etc",
         "flavour",
         "humour",

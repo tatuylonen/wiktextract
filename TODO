@@ -357,3 +357,5 @@ Fix having more than one alternative canonical form in a word, see e.g.
 
 {{syn|...}} not properly handled in nested glosses, see frons/Latin
 sense "the forehead, brow, front", search for "vultus"
+
+Consider parsing Alternative forms subsection - see 1/Translingual
