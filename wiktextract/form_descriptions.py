@@ -23,10 +23,13 @@ english_words = set(brown.words()) | set(
         # These are additions to the brown corpus word list
         "Cyrillic-script",
         "Dr",
+        "Latin-script",
+        "Latvian",
         "Mr",
         "Mrs",
         "Ms",
         "Prof",
+        "angstrom",
         "colour",
         "etc",
         "flavour",
