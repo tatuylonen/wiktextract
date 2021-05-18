@@ -1621,6 +1621,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             return
         have_linkages = False
         have_panel_template = False
+        toplevel_text = []
 
         def parse_linkage_item(contents, field, sense):
             assert isinstance(contents, (list, tuple))
@@ -1930,7 +1931,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
             for node in contents:
                 if isinstance(node, str):
                     # Ignore top-level text, generally comments before the
-                    # linkages list
+                    # linkages list.  However, if no linkages are found, then
+                    # use this for linkages (not all words use bullet points
+                    # for linkages).
+                    toplevel_text.append(node)
                     continue
                 assert isinstance(node, WikiNode)
                 kind = node.kind
@@ -1988,7 +1992,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                            template_fn=linkage_template_fn1)
         parse_linkage_recurse(parsed.children, field, None)
         if not have_linkages and not have_panel_template:
-            ctx.debug("no linkages found")
+            text = "".join(toplevel_text).strip()
+            if (text.find("\n") < 0 and text.find(",") > 0 and
+                text.count(",") > 3 and not text.startswith("See ")):
+                parse_linkage_item([text], field, None)
+            if not have_linkages and not have_panel_template:
+                ctx.debug("no linkages found")
 
     def parse_translations(data, xlatnode):
         """Parses translations for a word.  This may also pull in translations
