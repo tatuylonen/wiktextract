@@ -1722,6 +1722,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if item.startswith("See also Thesaurus:"):
                 item = ""
                 have_linkages = True
+            elif item.startswith("Appendix:"):
+                item = ""
+                have_linkages = True
+            elif item.startswith("Entries in the "):
+                item = ""
+                have_linkages = True
+            elif item.startswith("Wikipedia article "):
+                item = ""
+                have_linkages = True
 
             if item.startswith(":"):
                 item = item[1:]
@@ -1865,25 +1874,42 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     continue
                 if item1 == word:
                     continue
-                dt = {"word": item1}
-                if qualifier:
-                    parse_sense_tags(ctx, qualifier, dt)
-                if sense:
-                    dt["sense"] = sense
-                if roman:
-                    dt["roman"] = roman
-                if ruby:
-                    dt["ruby"] = ruby
-                if alt:
-                    dt["alt"] = alt
-                if taxonomic:
-                    dt["taxonomic"] = taxonomic
-                for old in data.get(field, ()):
-                    if dt == old:
-                        break
-                else:
-                    data_append(ctx, data, field, dt)
-                    have_linkages = True
+
+                def add(w, r):
+                    nonlocal have_linkages
+                    dt = {"word": w}
+                    if qualifier:
+                        parse_sense_tags(ctx, qualifier, dt)
+                    if sense:
+                        dt["sense"] = sense
+                    if r:
+                        dt["roman"] = r
+                    if ruby:
+                        dt["ruby"] = ruby
+                    if alt:
+                        dt["alt"] = alt
+                    if taxonomic:
+                        dt["taxonomic"] = taxonomic
+                    for old in data.get(field, ()):
+                        if dt == old:
+                            break
+                    else:
+                        data_append(ctx, data, field, dt)
+                        have_linkages = True
+
+                if sense in ("Cyrillic-script letters",):
+                    ws = item1.split(" ")
+                    if roman:
+                        rs = roman.split(" ")
+                    elif len(ws) == 2 and ws[0].isupper() and ws[1].islower():
+                        rs = [None] * len(ws)
+                    else:
+                        rs = None
+                    if rs and len(ws) > 1 and len(ws) == len(rs):
+                        for w, r in zip(ws, rs):
+                            add(w, r)
+                        continue
+                add(item1, roman)
 
         def parse_linkage_template(node):
             nonlocal have_panel_template

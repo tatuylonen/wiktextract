@@ -20,6 +20,8 @@ nltk.download("brown", quiet=True)
 # Construct a set of (most) English words
 english_words = set(brown.words()) | set(
     [
+        # These are additions to the brown corpus word list
+        "Cyrillic-script",
         "Dr",
         "Mr",
         "Mrs",
@@ -34,7 +36,11 @@ english_words = set(brown.words()) | set(
         "overshoe",
         '"',
         ",",
-    ])
+    ]) - set([
+        # This is blacklist - these will not be treated as English words
+        # even though they are in brown.words()
+        "Ye",
+        ])
 
 # Tokenizer for classify_desc()
 tokenizer = TweetTokenizer()
@@ -2958,9 +2964,12 @@ def classify_desc(desc):
             if tagset and "error-unknown-tag" not in tagset:
                 return "tags"
     # If all words are in our English dictionary, interpret as English
-    lst = list(x in english_words for x in tokenizer.tokenize(desc))
-    if (len(lst) < 5 and all(lst)) or lst.count(True) / len(lst) >= 0.8:
-        return "english"
+    tokens = tokenizer.tokenize(desc)
+    lst = list(x in english_words for x in tokens)
+    maxlen = max(len(x) for x in tokens)
+    if maxlen > 1:  # Don't treat single characters as English
+        if (len(lst) < 5 and all(lst)) or lst.count(True) / len(lst) >= 0.8:
+            return "english"
     # If all characters are in classes that could occur in romanizations,
     # treat as romanization
     classes = list(unicodedata.category(x) for x in
