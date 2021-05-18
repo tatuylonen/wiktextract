@@ -40,6 +40,7 @@ english_words = set(brown.words()) | set(
         "labour",
         "neighbour",
         "overshoe",
+        "solfège",
         '"',
         ",",
     ]) - set([

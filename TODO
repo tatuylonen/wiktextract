@@ -298,11 +298,6 @@ different versions (in Japanese they look like pronunciations).  cf. Ruby.
   - partially implemented (for linkages), need also for translations and
     perhaps also for headword
 
-Check linkage sol/Norwegian Nynorsk/Noun
-  Related terms: gender after linked word is not handled (gets into word)
-  also: ξένος/Greek (m in linkages)
-
-
 Check extraction of pronunciations and their romanizations in 공중/Korean
 
 In translations, should process {{trans-see|...}} (cf. "abound with",
@@ -321,9 +316,6 @@ Check * at the end of some derived forms in wort/English/Noun (e.g., dropwort*)
     with explanation at the end of the table
   - should probably just remove the *
   - check if there are other similar reference symbols and how common they are
-
-뱀/Korean - Derived terms parenthesized translitterations end up as tags
-  - still parsed incorrectly, check e.g. "gureong-i"
 
 Apparently the following is not parsed correctly:
 {{ws sense|any of enclosing symbols "(", ")", "[", "]", "{", "}" etc.}}
