@@ -356,8 +356,6 @@ Check: б/Belarusian/See also: DEBUG: unhandled parenthesized prefix: (Cyrillic-
 
 prime number/English/Synonyms: DEBUG: unhandled parenthesized prefix: (natural number >1 divisible only by itself and 1): prime at ['prime number']
 
-claque/French/Synonyms: DEBUG: unhandled parenthesized prefix: (overshoe): shoe claque, chouclaque at ['claque']
-
 Fix having more than one alternative canonical form in a word, see e.g.
 ميويزج/Arabic/Noun  ("or" in head word)
 

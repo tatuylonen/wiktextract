@@ -31,6 +31,7 @@ english_words = set(brown.words()) | set(
         "humour",
         "labour",
         "neighbour",
+        "overshoe",
         '"',
         ",",
     ])
