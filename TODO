@@ -294,6 +294,21 @@ Check * at the end of some derived forms in wort/English/Noun (e.g., dropwort*)
 Apparently the following is not parsed correctly:
 {{ws sense|any of enclosing symbols "(", ")", "[", "]", "{", "}" etc.}}
 
+Recognize and parse {{zh-dial|...}} in linkage, e.g., 鼎/Chinese
+  - Variety = language (these are more like translation than synonyms)
+  - Location = tags, parenthesized part separate tag?
+  - Words may have Notes references, which may need to be parsed as senses
+    (not clear how common they are with other words)
+
+{{syn|...}} not properly handled in nested glosses, see frons/Latin
+sense "the forehead, brow, front", search for "vultus"
+
+Consider parsing Alternative forms subsection - see 1/Translingual
+
+English/fire/Noun/Translations (oxidation reaction) - Egyptian, "f"
+in roman versions seems to go into "roman" field, even though it is
+apparently gender
+
 aunt/English/Translations: Armenian "paternal" goes in roman
 aunt/English/Translations: Burmese - sense in parenthesis goes into "roman"
 
@@ -303,18 +318,3 @@ house/English/Noun: WARNING: Failed to find subpage section English house/Noun N
 Handle ruby in translations
 Use classify_desc in translations for parenthesized parts
 Support multiple parenthesized parts in translations, similar to linkage
-
-Recognize and parse {{zh-dial|...}} in linkage, e.g., 鼎/Chinese
-  - Variety = language (these are more like translation than synonyms)
-  - Location = tags, parenthesized part separate tag?
-  - Words may have Notes references, which may need to be parsed as senses
-    (not clear how common they are with other words)
-
-# English/fire/Noun/Translations (oxidation reaction) - Egyptian, "f"
-# in roman versions seems to go into "roman" field, even though it is
-# apparently gender
-
-{{syn|...}} not properly handled in nested glosses, see frons/Latin
-sense "the forehead, brow, front", search for "vultus"
-
-Consider parsing Alternative forms subsection - see 1/Translingual

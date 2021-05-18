@@ -2602,6 +2602,8 @@ def parse_word_head(ctx, pos, text, data):
 
     title = ctx.title
     titleparts = list(m.group(0) for m in re.finditer(word_re, title))
+    if not titleparts:
+        return
 
     # Handle the part of the head that is not in parentheses
     base = re.sub(r"\(([^()]|\([^(]*\))*\)", " ", text)
