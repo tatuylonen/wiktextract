@@ -1751,6 +1751,7 @@ topic_generalize_map = {
     "cause": "property",
     "state": "property",
     "naturism": "lifestyle",
+    "organic chemistry": "chemistry",
 }
 
 blocked = set(["të", "a", "e", "al", "þou", "?", "lui", "auf", "op", "ein",

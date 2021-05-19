@@ -328,3 +328,6 @@ Check glosses for "(link to non-kana entry)", we.g.,
 "kimera"/Romanization/Japanese
 
 Bogus related terms in harness/Verb/English, also harness/Noun/English
+
+Chemical formula in aubertite/English/Noun (and many others) is
+rendered only partially

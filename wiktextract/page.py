@@ -1084,16 +1084,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 gloss = gloss[m.end():].strip()
 
             def sense_repl(m):
-                par = m.group(1)
+                par = m.group(2)
                 cls = classify_desc(par)
                 if cls == "tags":
                     parse_sense_tags(ctx, par, sense_data)
-                else:
-                    return m.group(0)
-                return ""
+                    return ""
+                # Otherwise no substitution
+                return m.group(0)
 
             # Replace parenthesized expressions commonly used for sense tags
-            gloss = re.sub(r"\s*\(([^)]*)\)", sense_repl, gloss)
+            gloss = re.sub(r"(^|\s+)\(([^)]*)\)", sense_repl, gloss)
 
             # Remove common suffix "[from 14th c.]" and similar
             gloss = re.sub(r"\s\[[^]]*\]\s*$", "", gloss)
