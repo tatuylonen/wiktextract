@@ -3196,7 +3196,7 @@ def classify_desc(desc):
                x[0].isdigit() or
                x[0].isupper() or
                (x.endswith("s") and x[:-1] in english_words) or
-               (x.endswith("ing") and x[:-3] in englih_words) or
+               (x.endswith("ing") and x[:-3] in english_words) or
                x.endswith("'s") or
                (x.find("-") >= 0 and all(y in english_words or not y
                                          for y in x.split("-")))
