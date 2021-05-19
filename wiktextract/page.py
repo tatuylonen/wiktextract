@@ -173,6 +173,8 @@ panel_templates = set([
     "ja-kanjitab",
     "ko-hanja-search",
     "look",
+    "maintenance box",
+    "maintenance line",
     "mediagenic terms",
     "merge",
     "missing template",
@@ -1700,6 +1702,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                   NodeKind.TABLE_CAPTION):
                         continue
                     elif kind == NodeKind.HTML:
+                        classes = (node.attrs.get("class") or "").split()
                         if node.args in ("gallery", "ref", "cite", "caption"):
                             continue
                         elif node.args == "rp":
@@ -1707,10 +1710,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         elif node.args == "rt":
                             ruby += clean_node(config, ctx, None, node)
                             continue
-                        elif ("interProject" in
-                              node.attrs.get("class", "").split()):
+                        elif "interProject" in classes:
                             continue  # These do not seem to be displayed
-                        classes = (node.attrs.get("class") or "").split()
                         if "NavFrame" in classes:
                             parse_linkage_recurse(node.children, field, sense)
                         else:
@@ -2865,13 +2866,20 @@ def clean_node(config, ctx, category_data, value, template_fn=None):
     assert template_fn is None or callable(template_fn)
     # print("CLEAN_NODE:", repr(value))
 
+    def clean_template_fn(name, ht):
+        if name in panel_templates:
+            return ""
+        if template_fn is not None:
+            return template_fn(name, ht)
+        return None
+
     def recurse(value):
         if isinstance(value, str):
             ret = value
         elif isinstance(value, (list, tuple)):
             ret = "".join(map(recurse, value))
         elif isinstance(value, WikiNode):
-            ret = ctx.node_to_html(value, template_fn=template_fn)
+            ret = ctx.node_to_html(value, template_fn=clean_template_fn)
         else:
             ret = str(value)
         return ret
