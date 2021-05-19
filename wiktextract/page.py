@@ -2318,7 +2318,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     item = item[:m.start()]
 
             # Handle sublists.  They are frequently used for different scripts
-            # for the language and different variants of the langauge.  We will
+            # for the language and different variants of the language.  We will
             # include the lower-level header as a tag in those cases.
             for listnode in sublists:
                 assert listnode.kind == NodeKind.LIST
@@ -2326,7 +2326,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if not isinstance(node, WikiNode):
                         continue
                     if node.kind == NodeKind.LIST_ITEM:
-                        parse_translation_item(node.children, lang=sublang)
+                        parse_translation_item(node.children, lang=lang)
 
         def parse_translation_template(node):
             assert isinstance(node, WikiNode)
