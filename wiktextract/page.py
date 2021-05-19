@@ -1647,8 +1647,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             assert sense is None or isinstance(sense, str)
             nonlocal have_linkages
 
-            #print("PARSE_LINKAGE_ITEM: {} ({}): {}"
-            #      .format(field, sense, contents))
+            # print("PARSE_LINKAGE_ITEM: {} ({}): {}"
+            #       .format(field, sense, contents))
 
             qualifier = None
             parts = []
@@ -1707,6 +1707,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         elif node.args == "rt":
                             ruby += clean_node(config, ctx, None, node)
                             continue
+                        elif ("interProject" in
+                              node.attrs.get("class", "").split()):
+                            continue  # These do not seem to be displayed
                         classes = (node.attrs.get("class") or "").split()
                         if "NavFrame" in classes:
                             parse_linkage_recurse(node.children, field, sense)
@@ -1715,9 +1718,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     elif kind == NodeKind.ITALIC:
                         item_recurse(node.children, italic=True)
                     elif kind == NodeKind.LINK:
-                        if (not isinstance(node.args[0][0], str) or
-                            node.args[0][0].find("Category:")):
-                            item_recurse(node.args[-1], italic=italic)
+                        ignore = False
+                        if isinstance(node.args[0][0], str):
+                            v = node.args[0][0].strip().lower()
+                            if (v.startswith("category:") or
+                                v.startswith("image:") or
+                                v.startswith("file:")):
+                                ignore = True
+                            if not ignore:
+                                item_recurse(node.args[-1], italic=italic)
                     elif kind == NodeKind.URL:
                         item_recurse(node.args[-1], italic=italic)
                     elif kind in (NodeKind.PREFORMATTED, NodeKind.BOLD):
@@ -1737,6 +1746,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # If the item is a reference to the thesaurus, skip it.  We should
             # be injecting data from the thesaurus in each word referenced
             # from it.
+            lst = item.split(" ")
             if item.startswith("See also Thesaurus:"):
                 item = ""
                 have_linkages = True
@@ -1760,6 +1770,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 item = ""
                 have_linkages = True
             elif item.endswith(" Wikipedia"):
+                item = ""
+                have_linkages = True
+            elif item.endswith(" Wikipedia."):
+                item = ""
+                have_linkages = True
+            elif lst[0] in (word, word.capitalize()) and lst[1] in ("in", "on"):
+                # E.g., harness in the Encyclopaedia Britannica...
                 item = ""
                 have_linkages = True
 
