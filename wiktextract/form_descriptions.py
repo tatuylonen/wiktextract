@@ -29,6 +29,7 @@ english_words = set(brown.words()) | set(
         "Mrs",
         "Ms",
         "Prof",
+        "Roma",
         "SI",
         "Spanish-speaking",
         "abhor",
@@ -163,6 +164,7 @@ english_words = set(brown.words()) | set(
         "neighbour",
         "networking",
         "niobium",
+        "non-Roma",
         "nonessential",
         "notionally",
         "nuqta",
@@ -1030,6 +1032,7 @@ xlat_tags_map = {
     "jocular": "humorous",
     "northern dialects": "dialectal",
     "archaic or loosely": "archaic broadly",
+    "archaic or poetic": "archaic poetic",
     "used attributively": "attributive",
     "used predicatively": "predicative",
     "used substatively": "substantive",
@@ -1107,8 +1110,6 @@ xlat_tags_map = {
     "figurative": "figuratively",
     "reciprocal": "reflexive",
     "compound words": "compound",
-    "girl": "person feminine",
-    "woman": "person feminine",
     "form of address": "term-of-address",
     "term of address": "term-of-address",
     "as a term of address": "term-of-address",
@@ -2049,6 +2050,7 @@ valid_tags = set([
     "construct",
     "no-construct-forms",
     "reduplicated",
+    "suppletive",
     "pausal",
     "upper-case",
     "lower-case",
@@ -3142,11 +3144,26 @@ def parse_translation_desc(ctx, text, data):
                       "at end of roman: "
                       "{}".format(roman))
 
+    # If the word now has "english" field but no "roman" field, and
+    # the word would be classified "other" (generally non-latin
+    # characters), and the value in "english" is only one lowercase
+    # word, move it to "roman".  This happens semi-frequently when the
+    # translation is transliterated the same as some English word.
+    roman = data.get("roman")
+    english = data.get("english")
+    if english and not roman:
+        cls = classify_desc(data["word"])
+        if (cls == "other" and
+            english.find(" ") < 0 and
+            english[0].islower()):
+            del data["english"]
+            data["roman"] = english
+
     # import json
     # print("TR:", json.dumps(data, sort_keys=True))
 
     # Sanity check: try to detect certain suspicious patterns in translations
-    for suspicious in (", ", "; ", "* ", ": ", "(", ")", "[", "]", "{", "}",
+    for suspicious in (", ", "; ", "* ", ": ", "[", "]", "{", "}",
                        "^", "literally",
                        "also expressed with", "e.g.", "cf.", "used ",
                        "script needed",
@@ -3293,11 +3310,20 @@ def classify_desc(desc):
             return "english"
     # If all characters are in classes that could occur in romanizations,
     # treat as romanization
-    classes = list(unicodedata.category(x) if x not in ("-",) else "OK"
+    classes = list(unicodedata.category(x) if x not in ("-", ",", ":") else "OK"
                    for x in unicodedata.normalize("NFKD", desc))
-    # print("classify_desc:", desc, classes)
+    classes1 = []
+    for ch, cl in zip(desc, classes):
+        if cl not in ("Ll", "Lu"):
+            classes1.append(cl)
+            continue
+        name = unicodedata.name(ch)
+        if name.split()[0] in ("GREEK", "CYRILLIC"):
+            classes1.append("NO")
+        else:
+            classes1.append(cl)
     if all(x in ("Ll", "Lu", "Lt", "Lm", "Mn", "Mc", "Zs", "Nd", "OK")
-           for x in classes):
+           for x in classes1):
         return "romanization"
     # Otherwise it is something else, such as hanji version of the word
     return "other"
