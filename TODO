@@ -309,6 +309,7 @@ different versions (in Japanese they look like pronunciations).  cf. Ruby.
 
 Check after next wiktionary dump: LSB (has "lattice" in forms but old
 page does not have it, nor current Wiktionary)
+- this is probably a bug, as I've seen them elsewhere too
 
 Check:
 can/English/Verb: ERROR: no language name in translation item: : ... at ['can']
