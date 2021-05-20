@@ -2196,6 +2196,23 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
                 def add(w, r):
                     nonlocal have_linkages
+                    # Check if the word contains the Fullwith Solidus, and if
+                    # so, split by it and treat the the results as alternative
+                    # linkages.  (This is very commonly used for alternative
+                    # written forms in Chinese compounds and other linkages.)
+                    # However, if the word contains a comma, then we wont't
+                    # split as this is used when we have a different number
+                    # of romanizations than written forms, and don't know
+                    # which is which.
+                    if ((not w or w.find(",") < 0) and
+                        (not r or r.find(",") < 0)):
+                        lst = w.split("／")
+                        if len(lst) > 1:
+                            # Treat each alternative as separate linkage
+                            for w in lst:
+                                add(w, r)
+                            return
+                    # Add the linkage
                     dt = {"word": w}
                     if qualifier:
                         parse_sense_tags(ctx, qualifier, dt)
