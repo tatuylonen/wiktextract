@@ -124,6 +124,7 @@ english_words = set(brown.words()) | set(
         "hump",
         "illicitly",
         "impermeable",
+        "in-law",
         "incredulousness",
         "indentation",
         "infatuated",
@@ -166,12 +167,14 @@ english_words = set(brown.words()) | set(
         "notionally",
         "nuqta",
         "onerous",
+        "organisation",
         "overseeing",
         "overshoe",
         "overused",
         "ovum",
         "pancake",
         "pantherine",
+        "paternal",
         "pedant",
         "penis",
         "pentatonic",
@@ -292,6 +295,13 @@ xlat_head_map = {
     "14": "class-14",
     "15": "class-15",
 }
+
+# Tags that will be interpreted at the beginning of a parenthesized part even
+# if separated by a comma from English text
+paren_start_end_tags = set([
+    "transitive",
+    "intransitive",
+])
 
 # General mapping for linguistic tags.  Value is a string of space-separated
 # tags, or list of alternative sets of tags.  Alternative forms in the same
@@ -2486,14 +2496,23 @@ valid_topics = set([
     "zoology",
 ])
 
-
+# Parenthesized parts that are ignored in translations
 ignored_parens = set([
     "please verify",
+    "(please verify)",
     "transliteration needed",
+    "(transliteration needed)",
     "in words with back vowel harmony",
+    "(in words with back vowel harmony)",
     "in words with front vowel harmony",
+    "(in words with front vowel harmony)",
 ])
 
+# Translations that are ignored
+ignored_translations = set([
+    "[script needed]",
+    "please add this translation if you can",
+])
 
 # Words that can be part of form description
 valid_words = set(["or", "and"])
@@ -2980,96 +2999,162 @@ def parse_translation_desc(ctx, text, data):
     assert isinstance(data, dict)
     # print("parse_translation_desc:", text)
 
-    # Handle the part of the head that is not in parentheses
-    base = re.sub(r"\(([^()]|\([^)]*\))*\):?", "", text)
-    base = re.sub(r"\s+", " ", base).strip()
-    baseparts = list(m.group(0) for m in re.finditer(word_re, base))
-    rest = []  # Tags
-    i = len(baseparts) - 1
-    while i > 0:
-        word = baseparts[i]
-        if word == "•":
-            pass
-        elif word in xlat_head_map:
-            rest.append(xlat_head_map[word])
-        elif word in ("or", "and"):
-            rest.append(word)
+    # Process all parenthesized parts from the translation item
+    while True:
+        # See if we can find a parenthesized expression at the end
+        m = re.search(r" \((([^)]|\([^)]+\))+)\)$", text)
+        if m:
+            par = m.group(1)
+            text = text[:m.start()]
         else:
-            break
-        i -= 1
-    lst = baseparts[: i + 1]  # word form
-    rest = list(reversed(rest))
-    # lst is canonical form of the word
-    # rest is additional tags (often gender m/f/n/c/...)
-    data["word"] = " ".join(lst)
-    # XXX here we should only look at a subset of tags allowed
-    # in the translation
-    for tagdesc in map_with(xlat_tags_map, [" ".join(rest)]):
-        for tagpart in tagdesc.split(" or "):
-            lst = []
-            for part in tagpart.split(" "):
-                if not part or part == "or":
+            # See if we can find a parenthesized expression at the start
+            m = re.match(r"^\^?\((([^)]|\([^)]+\))+)\):?(\s+|$)", text)
+            if m:
+                par = m.group(1)
+                text = text[m.end():]
+                if re.match(r"^(\d|\s|,| or | and )+$", par):
+                    # Looks like this beginning parenthesized expression only
+                    # contains digits or their combinations.  We assume such
+                    # to be sense descriptions if no sense has been selected,
+                    # or otherwise just ignore them.
+                    if not data.get("sense"):
+                        data["sense"] = par
                     continue
-                if part in xlat_head_map:
-                    lst.append(xlat_head_map[part])
-                elif part in valid_tags:
-                    lst.append(part)
-                elif part.startswith("("):
-                    continue
-                elif part.startswith('"') or part.startswith('“'):
-                    continue
-                elif part not in valid_tags:
-                    ctx.warning("unexpected part in translation: {!r} in "
-                                "{!r}".format(part, text))
-            add_tags(ctx, data, lst)
+            else:
+                # No more parenthesized expressions - break out of the loop
+                break
 
-    # Handle parenthesized descriptors for the word form and links to
-    # related words
-    parens = list(m.group(1) for m in
-                  re.finditer(r"\((([^()]|\([^)]*\))*)\)", text))
-    for paren in parens:
-        paren = paren.strip()
-        if paren.endswith(":"):
-            paren = paren[:-1]  # Probably mistakes
-        if paren in ignored_parens:
+        # Some cleanup of artifacts that may result from skipping some templates
+        # in earlier stages
+        if par.startswith(": "):
+            par = par[2:]
+        if par.endswith(","):
+            par = par[:-1]
+        par = par.strip()
+
+        # Check for special script pronunciation followed by romanization,
+        # used in many Asian languages.
+        lst = par.split(", ")
+        if len(lst) == 2 and classify_desc(lst[0]) == "other":
+            if data.get("alt"):
+                ctx.warning("more than one value in \"alt\": {} vs. {}"
+                            .format(data["alt"], lst[0]))
+            data["alt"] = lst[0]
+            if data.get("roman"):
+                ctx.warning("more than one value in \"roman\": {} vs. {}"
+                            .format(data["roman"], lst[1]))
+            data["roman"] = lst[1]
             continue
-        if paren.startswith("(Can we clean up"):
+
+        # Check for certain comma-separated tags combined with English text
+        # at the beginning or end of a comma-separated parenthesized list
+        while len(lst) > 1:
+            if lst[0] in paren_start_end_tags:
+                data_append(ctx, data, "tags", lst[0])
+                lst = lst[1:]
+            elif lst[-1] in paren_start_end_tags:
+                data_append(ctx, data, "tags", lst[-1])
+                lst = lst[:-1]
+            else:
+                break
+        par = ", ".join(lst)
+
+        if not par:
             continue
-        if paren.startswith("(Can we verify"):
+        if par in ignored_parens:
             continue
-        if paren.startswith("numeral:"):
-            data["numeral"] = paren[8:].strip()
+        if par.startswith("Can we clean up"):
             continue
-        descriptors = map_with(xlat_tags_map, [paren])
-        for desc in descriptors:
-            for new_desc in \
-                map_with(xlat_head_map,
-                         map_with(xlat_tags_map, split_at_comma_semi(desc))):
-                new_desc = new_desc.strip()
-                if new_desc.startswith("e.g."):
-                    continue
-                if new_desc.startswith("cf."):
-                    continue
-                if new_desc.startswith("use with "):
-                    # See e.g., "ten", Finnish translation; the intention is
-                    # to ignore this and all later comma-separated components
-                    # of this parenthesized part.
-                    break
-                if new_desc.startswith("literally "):
-                    continue
-                if new_desc.startswith("also expressed with"):
-                    continue
-                if new_desc in valid_tags:
-                    add_tags(ctx, data, [new_desc], allow_any=True)
-                elif (new_desc and new_desc[0].isupper() and
-                      not ctx.title[0].isupper()):
-                    data_append(ctx, data, "tags", new_desc)
-                elif "alt" not in data:
-                    data["roman"] = new_desc
-                else:
-                    ctx.warning("maybe more than one romanization: {!r}"
-                                .format(text))
-                    data_append(ctx, data, "tags", "error-multiple-paren")
+        if par.startswith("Can we verify"):
+            continue
+        if par.startswith("numeral:"):
+            par = par[8:].strip()
+
+        # Classify the part in parenthesis and process accordingly
+        cls = classify_desc(par)
+        if cls == "tags":
+            tagsets, topics = decode_tags([par], allow_upper=True)
+            for tags in tagsets:
+                data_extend(ctx, data, "tags", tags)
+            data_extend(ctx, data, "topics", topics)
+        elif cls == "english":
+            # There can be more than one parenthesized english item, see
+            # e.g. Aunt/English/Translations/Tamil
+            if data.get("english"):
+                data["english"] += "; " + par
+            else:
+                data["english"] = par
+        elif cls == "romanization":
+            if data.get("roman"):
+                ctx.warning("more than one value in \"roman\": {} vs. {}"
+                            .format(data["roman"], par))
+            data["roman"] = par
+        elif cls == "taxonomic":
+            if data.get("taxonomic"):
+                ctx.warning("more than one value in \"taxonomic\": {} vs. {}"
+                            .format(data["taxonomic"], par))
+            data["taxonomic"] = par
+        elif cls == "other":
+            if data.get("alt"):
+                ctx.warning("more than one value in \"alt\": {} vs. {}"
+                            .format(data["alt"], par))
+            data["alt"] = par
+        else:
+            ctx.warning("parse_translation_desc: unimplemented cls: {}: {}"
+                        .format(par, cls))
+
+    # Check for gender indications in suffix
+    while True:
+        for suffix, tag in xlat_head_map.items():
+            suffix = " " + suffix
+            if text.endswith(suffix):
+                if tag:
+                    data_extend(ctx, data, "tags", tag.split())
+                text = text[:-len(suffix)]
+                break  # inner loop only
+        else:
+            # Sometimes we have something like "9 or 10" or "f or m"
+            # at the end of the translation to indicate alternative
+            # classes or genders
+            if text.endswith(" or"):
+                text = text[:-3]
+                continue
+            # If no suffix found, break out from outer loop
+            break
+
+    text = text.strip()
+    if not text or text in ignored_translations:
+        return
+    data["word"] = text
+
+    # Sometimes gender seems to be at the end of "roman" field, see e.g.
+    # fire/English/Noun/Translations/Egyptian (for "oxidation reaction")
+    roman = data.get("roman")
+    if roman:
+        if roman.endswith(" f"):
+            data_append(ctx, data, "tags", "feminine")
+            data["roman"] = roman[:-2]
+        elif roman.endswith(" m"):
+            data_append(ctx, data, "tags", "masculine")
+            data["roman"] = roman[:-2]
+        elif len(roman) >= 3 and roman[-2] == " ":
+            ctx.debug("suspicious: possible unhandled gender/class "
+                      "at end of roman: "
+                      "{}".format(roman))
+
+    # import json
+    # print("TR:", json.dumps(data, sort_keys=True))
+
+    # Sanity check: try to detect certain suspicious patterns in translations
+    for suspicious in (", ", "; ", "* ", ": ", "(", ")", "[", "]", "{", "}",
+                       "^", "literally",
+                       "also expressed with", "e.g.", "cf.", "used ",
+                       "script needed",
+                       "please add this translation",
+                       "usage "):
+        if text.find(suspicious) >= 0:
+            ctx.debug("suspicious {} in translation: {}"
+                      .format(suspicious, data))
 
 def parse_alt_or_inflection_of(ctx, gloss):
     """Tries to parse an inflection-of or alt-of description."""
@@ -3106,8 +3191,6 @@ def parse_alt_or_inflection_of(ctx, gloss):
                 last = i
         if not new_nodes:
             break
-        # XXX remove:
-        #    add_new(valid_sequences, max_next_i)
         nodes = new_nodes
     else:
         # We've reached the end of the gloss
@@ -3213,7 +3296,7 @@ def classify_desc(desc):
     classes = list(unicodedata.category(x) if x not in ("-",) else "OK"
                    for x in unicodedata.normalize("NFKD", desc))
     # print("classify_desc:", desc, classes)
-    if all(x in ("Ll", "Lu", "Lt", "Lm", "Mn", "Mc", "Zs", "OK")
+    if all(x in ("Ll", "Lu", "Lt", "Lm", "Mn", "Mc", "Zs", "Nd", "OK")
            for x in classes):
         return "romanization"
     # Otherwise it is something else, such as hanji version of the word

@@ -19,7 +19,7 @@ from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_tags, parse_pronunciation_tags,
     parse_alt_or_inflection_of,
     parse_translation_desc, xlat_tags_map, valid_tags,
-    classify_desc)
+    classify_desc, paren_start_end_tags)
 
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
@@ -1597,40 +1597,33 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if content is None:
             ctx.error("/translations not found despite "
                       "{{see translation subpage|...}}")
+
+        def recurse(node, seq):
+            if not seq:
+                return node
+            if not isinstance(node, WikiNode):
+                return None
+            if node.kind in LEVEL_KINDS:
+                t = clean_node(config, ctx, None, node.args[0])
+                if t == seq[0]:
+                    seq = seq[1:]
+                    if not seq:
+                        return node
+            for n in node.children:
+                ret = recurse(n, seq)
+                if ret is not None:
+                    return ret
+            return None
+
         tree = ctx.parse(content, pre_expand=True,
                          additional_expand=additional_expand_templates)
         assert tree.kind == NodeKind.ROOT
-        # Find the language subtitle
-        for node1 in tree.children:
-            if not isinstance(node1, WikiNode):
-                continue
-            if node1.kind != NodeKind.LEVEL2:
-                continue
-            subtitle = clean_node(config, ctx, None, node1.args[0])
-            if subtitle != language:
-                continue
-            # Find the part-of-speech subtitle
-            for node2 in node1.children:
-                if not isinstance(node2, WikiNode):
-                    continue
-                if node2.kind != NodeKind.LEVEL3:
-                    continue
-                subtitle = clean_node(config, ctx, None, node2.args[0])
-                if subtitle != pos:
-                    continue
-                # Find the specified section under the part-of-speech
-                for node3 in node2.children:
-                    if not isinstance(node3, WikiNode):
-                        continue
-                    if node3.kind != NodeKind.LEVEL4:
-                        continue
-                    subtitle = clean_node(config, ctx, None, node3.args[0])
-                    if subtitle != section:
-                        continue
-                    return node3
-        ctx.warning("Failed to find subpage section {} {}/{} {} {}"
-                    .format(language, title, subtitle, pos, section))
-        return None
+        seq = [language, pos, section]
+        ret = recurse(tree, seq)
+        if ret is None:
+            ctx.warning("Failed to find subpage section {} {}/{} {} {}"
+                        .format(language, title, subtitle, pos, section))
+        return ret
 
     def parse_linkage(data, field, linkagenode):
         assert isinstance(data, dict)
@@ -1793,12 +1786,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
             base_alt = None
             m = re.match(r"(.+?) \(([^)]+)\): ([-a-zA-Z0-9,. ]+)$", item)
             if m:
-                # XXX check for commas in group 2
                 base_roman = m.group(2)
                 english = m.group(3)
                 item = m.group(1)
                 lst = base_roman.split(", ")
-                if len(lst) == 2:
+                if len(lst) == 2 and classify_desc(lst[0]) == "other":
                     base_alt = lst[0]
                     base_roman = lst[1]
                 if sense:
@@ -1812,6 +1804,29 @@ def parse_language(ctx, config, langnode, language, lang_code):
             m = re.match(r"\((([^()]|\([^)]*\))*)\):?\s*", item)
             if m:
                 par = m.group(1)
+
+                # Check for certain comma-separated tags combined
+                # with English text at the beginning or end of a
+                # comma-separated parenthesized list
+                lst = par.split(", ")
+                while len(lst) > 1:
+                    if lst[0] in paren_start_end_tags:
+                        if base_qualifier:
+                            base_qualifier += " " + lst[0]
+                        else:
+                            base_qualifier = lst[0]
+                        lst = lst[1:]
+                    elif lst[-1] in paren_start_end_tags:
+                        if base_qualifier:
+                            base_qualifier += " " + lst[-1]
+                        else:
+                            base_qualifier = lst[-1]
+                        lst = lst[:-1]
+                    else:
+                        break
+                par = ", ".join(lst)
+
+                # Classify the item and handle it
                 cls = classify_desc(par)
                 if cls == "tags":
                     base_qualifier = par
@@ -1943,6 +1958,28 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         else:
                             break
                         par = par[idx + 1:].strip()
+
+                    # Check for certain comma-separated tags combined
+                    # with English text at the beginning or end of a
+                    # comma-separated parenthesized list
+                    lst = par.split(", ")
+                    while len(lst) > 1:
+                        if lst[0] in paren_start_end_tags:
+                            if qualifier:
+                                qualifier += " " + lst[0]
+                            else:
+                                qualifier = lst[0]
+                            lst = lst[1:]
+                        elif lst[-1] in paren_start_end_tags:
+                            if qualifier:
+                                qualifier += " " + lst[-1]
+                            else:
+                                qualifier = lst[-1]
+                            lst = lst[:-1]
+                        else:
+                            break
+                    par = ", ".join(lst)
+
                     # Handle remaining types
                     if not par:
                         continue
@@ -2191,6 +2228,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 nonlocal sense_parts
                 nonlocal sense
                 # print("TRANSLATION_ITEM_TEMPLATE_FN:", name, ht)
+                if name in ("t+check", "t-check"):
+                    # We ignore these templates.  They seem to have outright
+                    # garbage in some entries, and very varying formatting in
+                    # others.  These should be transitory and unreliable
+                    # anyway.
+                    return ""
                 if name in ("t", "t+", "t-simple", "t", "t+check", "t-check"):
                     code = ht.get(1)
                     if code:
@@ -2234,8 +2277,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                               template_fn=translation_item_template_fn)
             # print("    TRANSLATION ITEM: {}  [{}]".format(item, sense))
 
-            item = re.sub(r"\^\(please verify\)\s*", "", item)
-
             if re.search(r"\(\d+\)|\[\d+\]", item):
                 if not item.find("numeral:"):
                     ctx.warning("POSSIBLE SENSE NUMBER IN ITEM: {}"
@@ -2272,17 +2313,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 ctx.error("no language name in translation item: {}"
                           .format(item))
                 return
-            else:
-                # We have no prefix that looks like a language name but
-                # we already know the language.  Check if it might have
-                # a word sense prefix.
-                m = re.match(r"\*?\s*\(([^)]*)\):\s*", item)
-                if m:
-                    sense_detail = m.group(1)
-                    item = item[m.end():]
-                elif item.find(": ") >= 0:
-                    ctx.warning("suspicious prefix in translation should be "
-                                "checked: {}".format(item))
 
             # Certain values indicate it is not actually a translation
             for prefix in ("Use ", "use ", "suffix ", "prefix "):
@@ -2303,7 +2333,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         langcode = languages_by_name[lang]["code"]
                 tr = {"lang": lang, "code": langcode}
                 if tags:
-                    tr["tags"] = list(tags)  # Copy so we don't modify others
+                    tr["tags"] = list(sorted(set(tags)))
                 if sense:
                     if sense == "Translations to be checked":
                         pass
@@ -2311,29 +2341,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                           "checked"):
                         pass
                     else:
-                        if sense_detail:
-                            tr["sense"] = "{} ({})".format(sense, sense_detail)
-                        else:
-                            tr["sense"] = sense
-                elif sense_detail:
-                    tr["sense"] = sense_detail
+                        tr["sense"] = sense
                 parse_translation_desc(ctx, part, tr)
                 if not tr.get("word"):
                     continue  # Not set or empty
                 if tr.get("word").startswith("Lua execution error"):
                     continue
                 data_append(ctx, data, "translations", tr)
-
-            m = re.match(r"\((([^()]|\([^)]*\))*)\) ", item)
-            qualifier = None
-            if m:
-                qualifier = m.group(1)
-                item = item[m.end():]
-            else:
-                m = re.search(" \((([^()]|\([^)]*\))*)\)$", item)
-                if m:
-                    qualifier = m.group(1)
-                    item = item[:m.start()]
 
             # Handle sublists.  They are frequently used for different scripts
             # for the language and different variants of the language.  We will

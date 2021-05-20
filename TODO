@@ -271,15 +271,7 @@ maybe restrict generation to entries that are actually referenced.
 In linkages, if the destination has multiple words separated by the special /,
 treat them as different words. ／ = fullwidth solidus
 
-If a Asian word has parenthesized sections, should they be treated as
-different versions (in Japanese they look like pronunciations).  cf. Ruby.
-  - partially implemented (for linkages), need also for translations and
-    perhaps also for headword
-
 Check extraction of pronunciations and their romanizations in 공중/Korean
-
-In translations, should process {{trans-see|...}} (cf. "abound with",
-the only translations are with {{trans-see|...}})
 
 Consider caching template expansions in an LRU cache.  Make sure
 template arguments that can be accessed from Lua are considered
@@ -305,21 +297,18 @@ sense "the forehead, brow, front", search for "vultus"
 
 Consider parsing Alternative forms subsection - see 1/Translingual
 
-English/fire/Noun/Translations (oxidation reaction) - Egyptian, "f"
-in roman versions seems to go into "roman" field, even though it is
-apparently gender
-
-aunt/English/Translations: Armenian "paternal" goes in roman
-aunt/English/Translations: Burmese - sense in parenthesis goes into "roman"
-
-house/English/Noun: WARNING: Failed to find subpage section English house/Noun Noun Translations at ['house', 'see translation subpage']
-  - looks like the Translations section is has additional === signs
+In translations, should process {{trans-see|...}} (cf. "abound with",
+the only translations are with {{trans-see|...}})
 
 Handle ruby in translations
-Use classify_desc in translations for parenthesized parts
-Support multiple parenthesized parts in translations, similar to linkage
+If a Asian word has parenthesized sections, should they be treated as
+different versions (in Japanese they look like pronunciations).  cf. Ruby.
+  - partially implemented (for linkages), need also for translations and
+    perhaps also for headword
 
 ख/Translingual/Letter: DEBUG: unhandled parenthesized prefix: (Devanagari script letters) अ,‎ आ,‎ इ,‎ ई,‎ उ,‎ ऊ,‎ ऋ,‎ ए,‎ ऐ,‎ ओ,‎ औ,‎ अं,‎ अः,‎ अँ,‎ क,‎ ख,‎ ग,‎ घ,‎ ङ,‎ च,‎ छ,‎ ज,‎ झ,‎ ञ,‎ ट,‎ ठ,‎ ड,‎ ढ,‎ ण,‎ त,‎ थ,‎ द,‎ ध,‎ न,‎ प,‎ फ,‎ ब,‎ भ,‎ म,‎ य,‎ र,‎ ल,‎ व,‎ श,‎ ष,‎ स,‎ ह,‎ त्र,‎ ज्ञ,‎ क्ष,‎ क़,‎ ख़,‎ ग़,‎ ज़,‎ झ़,‎ ड़,‎ ढ़,‎ ष़ <nowiki>[</nowiki><nowiki>]</nowiki> at ['ख']
+  - is nowiki broken in templates?  Perhaps core.py:_template_to_body should
+    call preprocess_text for the template body?
 
 Check after next wiktionary dump: LSB (has "lattice" in forms but old
 page does not have it, nor current Wiktionary)
