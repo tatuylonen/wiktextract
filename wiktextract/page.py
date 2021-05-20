@@ -1557,7 +1557,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
         page."""
         assert isinstance(node, WikiNode)
         if node.kind in LEVEL_KINDS:
-            node = node.children
+            contents = node.children
+        else:
+            contents = [node]
+        # Remove subsections, such as Usage notes.  They may contain IPAchar
+        # templates in running text, and we do not want to extract IPAs from
+        # those.
+        contents = [x for x in contents
+                    if not isinstance(x, WikiNode) or x.kind not in LEVEL_KINDS]
+
         data = etym_data if etym_data else base
         enprs = []
         audios = []
@@ -1578,14 +1586,31 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 filename = ht.get(2) or ""
                 desc = ht.get(3) or ""
                 audio = {"audio": filename}
+                desc = clean_node(config, ctx, None, [desc])
                 m = re.search(r"\((([^()]|\([^()]*\))*)\)", desc)
                 if m:
                     parse_pronunciation_tags(ctx, m.group(1), audio)
                 if desc:
                     audio["text"] = desc
                 audios.append(audio)
-                return ""
-            # XXX handle audio-IPA
+                return "__AUDIO_IGNORE_THIS__" + str(len(audios) - 1) + "__"
+            if name == "audio-IPA":
+                filename = ht.get(2) or ""
+                ipa = ht.get(3) or ""
+                dial = ht.get("dial")
+                audio = {"audio": filename}
+                if dial:
+                    dial = clean_node(config, ctx, None, [dial])
+                    audio["text"] = dial
+                if ipa:
+                    audio["audio-ipa"] = ipa
+                audios.append(audio)
+                # The problem with these IPAs is that they often just describe
+                # what's in the sound file, rather than giving the pronunciation
+                # of the word alone.  It is common for audio files to contain
+                # multiple pronunciations or articles in the same file, and then
+                # this IPA often describes what is in the file.
+                return "__AUDIO_IGNORE_THIS__" + str(len(audios) - 1) + "__"
             if name == "audio-pron":
                 filename = ht.get(2) or ""
                 ipa = ht.get("ipa")
@@ -1593,18 +1618,25 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 country = ht.get("country")
                 audio = {"audio": filename}
                 if dial:
+                    dial = clean_node(config, ctx, None, [dial])
                     audio["text"] = dial
                     data_append(ctx, audio, "tags", dial)
                 if country:
                     data_append(ctx, audio, "tags", country.upper())
-                audios.append(audio)
                 if ipa:
-                    pron = {"ipa": ipa}
-                    if dial:
-                        data_append(ctx, pron, "tags", dial)
-                    if country:
-                        data_append(ctx, pron, "tags", country.upper())
-                    data_append(ctx, data, "sounds", pron)
+                    audio["audio-ipa"] = ipa
+                audios.append(audio)
+                # XXX do we really want to extract pronunciations from these?
+                # Or are they spurious / just describing what is in the
+                # audio file?
+                # if ipa:
+                #     pron = {"ipa": ipa}
+                #     if dial:
+                #         data_append(ctx, pron, "tags", dial)
+                #     if country:
+                #         data_append(ctx, pron, "tags", country.upper())
+                #     data_append(ctx, data, "sounds", pron)
+                return "__AUDIO_IGNORE_THIS__" + str(len(audios) - 1) + "__"
             return None
 
         def parse_pron_post_template_fn(name, ht, text):
@@ -1624,7 +1656,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # XXX change this code to iterate over node as a LIST, warning about
         # anything else.  Don't try to split by "*".
         # XXX fix enpr tags
-        text = clean_node(config, ctx, data, node,
+        text = clean_node(config, ctx, data, contents,
                           template_fn=parse_pronunciation_template_fn,
                           post_template_fn=parse_pron_post_template_fn)
         have_pronunciations = False
@@ -1663,7 +1695,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             m = re.search(r"\bHomophones?: ([^\s,]+(,\s*[^\s,]+)*)", text)
             if m:
                 for w in m.group(1).split(","):
-                    w = word.strip()
+                    w = w.strip()
                     if w:
                         pron = {"homophone": w}
                         parse_pronunciation_tags(ctx, tagstext, pron)
@@ -1680,9 +1712,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     continue
                 if v == "/wiki.local/":
                     continue
-                pron = {field: v}
-                parse_pronunciation_tags(ctx, tagstext, pron)
-                data_append(ctx, data, "sounds", pron)
+                if field == "ipa" and text.find("__AUDIO_IGNORE_THIS__") >= 0:
+                    m = re.search(r"__AUDIO_IGNORE_THIS__(\d+)__", text)
+                    assert m
+                    idx = int(m.group(1))
+                    if not audios[idx].get("audio-ipa"):
+                        audios[idx]["audio-ipa"] = v
+                else:
+                    pron = {field: v}
+                    parse_pronunciation_tags(ctx, tagstext, pron)
+                    data_append(ctx, data, "sounds", pron)
                 have_pronunciations = True
 
             # XXX what about {{hyphenation|...}}, {{hyph|...}}

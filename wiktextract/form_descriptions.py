@@ -145,6 +145,7 @@ english_words = set(brown.words()) | set(
         "ligature",
         "lighthouse",
         "litre",
+        "loanword",
         "loiter",
         "marsh",
         "matra",
