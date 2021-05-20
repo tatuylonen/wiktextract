@@ -316,3 +316,19 @@ page does not have it, nor current Wiktionary)
 Check:
 can/English/Verb: ERROR: no language name in translation item: : ... at ['can']
 can/English/Verb: ERROR: no language name in translation item: : -bil- (tr) (verbal infix) at ['can']
+
+smiley/Dutch/Noun: ERROR: LUA error in #invoke ('nl-headword', 'show', 'nouns') parent ('Template:nl-noun', {1: 'm', 2: '-s', 3: 'smileytje'}) at ['smiley', 'nl-noun', '#invoke']
+[string "Module:gender and number"]:170: attempt to index a nil value (field 'spec')
+stack traceback:
+        [string "Module:gender and number"]:170: in function 'Module:gender and number.format_genders'
+        [string "Module:headword"]:330: in upvalue 'format_genders'
+        [string "Module:headword"]:511: in upvalue 'show_headword_line'
+        [string "Module:headword"]:658: in function 'Module:headword.full_headword'
+        [string "Module:nl-headword"]:35: in function 'Module:nl-headword.show'
+        [C]: in function 'xpcall'
+        [string "_sandbox_phase2"]:214: in function <[string "_sandbox_phase2"]:136>
+
+
+linkage: move english from linkage to "english" (now merged with "sense")
+
+woman/English/Translations/Yakkha: english in quotes, must remove quotes

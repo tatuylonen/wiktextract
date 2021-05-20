@@ -2042,6 +2042,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
                 # Classify the item and handle it
                 cls = classify_desc(par)
+                # print("parenthesized prefix: {} -> {}".format(par, cls))
                 if cls == "tags":
                     base_qualifier = par
                     item = item[m.end():]

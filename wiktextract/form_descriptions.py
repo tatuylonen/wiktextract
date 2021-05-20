@@ -24,6 +24,7 @@ english_words = set(brown.words()) | set(
         "BDSM",
         "BS",
         "Dr",
+        "Internet",
         "LGBT",
         "Mr",
         "Mrs",
@@ -52,6 +53,7 @@ english_words = set(brown.words()) | set(
         "bereave",
         "boyfriend",
         "braking",
+        "cashier",
         "carucates",
         "cassia",
         "cauldron",
@@ -59,6 +61,7 @@ english_words = set(brown.words()) | set(
         "chrysantemum",
         "classifier",
         "clef",
+        "cobbled",
         "coddle",
         "codomain",
         "colour",
@@ -80,6 +83,7 @@ english_words = set(brown.words()) | set(
         "defecation",
         "dehusking",
         "demo",
+        "dipterous",
         "disallow",
         "dissipate"
         "dreadlock",
@@ -123,6 +127,7 @@ english_words = set(brown.words()) | set(
         "hulled",
         "humour",
         "hump",
+        "husked",
         "illicitly",
         "impermeable",
         "in-law",
@@ -131,6 +136,7 @@ english_words = set(brown.words()) | set(
         "infatuated",
         "infrakingdom",
         "inhabitant",
+        "islamic",
         "isotope",
         "kilo-",
         "kidskin",
@@ -141,6 +147,7 @@ english_words = set(brown.words()) | set(
         "larva",
         "lascivious",
         "legless",
+        "lesbian",
         "lifespan",
         "ligature",
         "lighthouse",
@@ -184,16 +191,19 @@ english_words = set(brown.words()) | set(
         "perceivable",
         "photocopier",
         "phylum",
+        "pistil",
         "plural",
         "pollute",
         "polygon",
         "polyiamond",
         "profanities",
         "promiscuous",
+        "prosthetic",
         "pubic",
         "reptile",
         "rhinarium",
         "rhombus",
+        "romanisation",
         "rout",
         "rugby",
         "samurai",
@@ -211,6 +221,7 @@ english_words = set(brown.words()) | set(
         "spasmodic",
         "sprite",
         "squint",
+        "stamen",
         "standalone",
         "storey",
         "stowaway",
@@ -229,9 +240,13 @@ english_words = set(brown.words()) | set(
         "telecommunication",
         "tera-",
         "trendy",
+        "tsardom",
+        "twig",
         "twine",
         "two-up",
+        "uncooked",
         "unfasten",
+        "unpeeled",
         "unraveling",
         "unravelling",
         "unspecialized",
@@ -246,6 +261,7 @@ english_words = set(brown.words()) | set(
         "weaverbird",
         "wildcat",
         "windward",
+        "womanlike",
         "workplace",
         "worldliness",
         "worshipper",
@@ -313,6 +329,12 @@ nested_translations_re = re.compile(
 paren_start_end_tags = set([
     "transitive",
     "intransitive",
+    "colloquial",
+    "formal",
+    "informal",
+    "polite",
+    "impolite",
+    "derogatory",
 ])
 
 # General mapping for linguistic tags.  Value is a string of space-separated
@@ -415,6 +437,7 @@ xlat_tags_map = {
     "with accusative or genitive": "with-accusative with-genitive",
     "with accusative or ablative": "with-accusative with-ablative",
     "genitive or accusative": ["genitive accusative"],
+    "genitive of personal pronoun": "genitive personal pronoun",
     "nominative and accusative definite singular":
     "nominative accusative definite singular",
     "+ genitive or possessive suffix": "with-genitive with-possessive-suffix",
@@ -461,18 +484,22 @@ xlat_tags_map = {
     "uppercase": "upper-case",
     "lowercase": "lower-case",
     "phonemic reduplicative": "reduplicated",
+    "neutrally formal": "somewhat formal",
     "objective case": "objective",
     "first person": "first-person",
     "second person": "second-person",
     "third person": "third-person",
     "genitive case": "genitive",
     "dative case": "dative",
+    "accusative case": "accusative",
     "ergative cases": "ergative",
     "absolutive case": "absolutive",
     "genitive unattested": "no-genitive",
     "genitive -": "no-genitive",
     "nominative plural -": "no-nominative-plural",
+    "colloquially also feminine": "colloquial feminine",
     "rare/awkward": "rare",
+    "rarefied": "rare",
     "personified": "person",
     "found only in the imperfective tenses": "no-perfect",
     "third plural indicative": "third-person plural indicative",
@@ -499,6 +526,7 @@ xlat_tags_map = {
     "+ dative case": "with-dative",
     "+ dative": "with-dative",
     "plus dative": "with-dative",
+    "plus dative case": "with-dative",
     "with dative": "with-dative",
     "+ accusative": "with-accusative",
     "+ accusative +, Genitive": "with-accusative with-genitive",
@@ -596,6 +624,7 @@ xlat_tags_map = {
     "kyūjitai form": "kyūjitai",
     "shinjitai kanji": "shinjitai",
     "dialectical": "dialectal",
+    "dialectal or archaic": "dialectal archaic",
     "dialect": "dialectal",
     "possibly obsolete": "archaic",
     "19th century": "archaic",
@@ -607,6 +636,7 @@ xlat_tags_map = {
     "archaic ortography": "archaic",
     "in the plural": "plural-only",
     "derogative": "derogatory",
+    "disparaging": "derogatory",
     "collective sense": "collective",
     "relatively rare": "rare",
     "very informal": "informal",
@@ -642,6 +672,7 @@ xlat_tags_map = {
     "nominative/vocative/dative/strong genitive":
     ["nominative vocative dative", "strong genitive"],
     "non-attributive": "not-attributive",
+    "attributive use": "attributive",
     "nominative/vocative/instrumental":
     "nominative vocative instrumental",
     "nominative/vocative/strong genitive/dative":
@@ -783,8 +814,8 @@ xlat_tags_map = {
     "no singular": "plural-only",
     "not comparable": "not-comparable",
     "plurale tantum": "plurale-tantum",
-    "possessive suffix": "possessive-suffix",
-    "possessive determiner": "possessive-determiner",
+    "possessive suffix": "possessive suffix",
+    "possessive determiner": "possessive determiner",
     "pronominal state": "pronominal-state",
     "nominal state": "nominal-state",
     "form i": "form-i",
@@ -1040,6 +1071,7 @@ xlat_tags_map = {
     "figuative": "figuratively",
     "humorously": "humorous",
     "jocular": "humorous",
+    "may sound impolite": "possibly impolite",
     "northern dialects": "dialectal",
     "archaic or loosely": "archaic broadly",
     "archaic or poetic": "archaic poetic",
@@ -1056,6 +1088,7 @@ xlat_tags_map = {
     "now colloquial": "colloquial",
     "now colloquial and nonstandard": "colloquial nonstandard",
     "colloquial or Min Nan": "colloquial",
+    "colloquially": "colloquial",
     "fossil word": "archaic",
     "brusque": "impolite",
     "verbs": "verb",
@@ -1130,6 +1163,7 @@ xlat_tags_map = {
     "elliptically": "ellipsis",
     "elegant": "formal",  # Elegant or Formal Thai
     "nonce word": "neologism",
+    "neologism or slang": "neologism slang",
     "attributively": "attributive",
     "poetic term": "poetic",
     "poetic meter": "poetic",
@@ -1821,15 +1855,17 @@ valid_tags = set([
     "physical",
     "material",
     "natural",
+    "distal",
+    "proximal",
     "demonstrative",
+    "infix",
     "subjective-pronoun",
     "subject",
     "nominative",
     "genitive",
     "no-genitive",
     "possessive",
-    "possessive-suffix",
-    "possessive-determiner",
+    "determiner",
     "single-possession",
     "multiple-possession",
     "accusative",
@@ -2287,6 +2323,7 @@ valid_tags = set([
     "capitalized",
     "onomatopoeia",
     "expressively",
+    "expletive",
     "ideophonic",
     "dated",
     "exaggerated",
@@ -3310,10 +3347,14 @@ def classify_desc(desc):
                (x.endswith("s") and x[:-1] in english_words) or
                (x.endswith("ing") and x[:-3] in english_words) or
                x.endswith("'s") or
+               (x.endswith("ise") and x[:-3] + "ize" in english_words) or
+               (x.endswith("ised") and x[:-4] + "ized" in english_words) or
+               (x.endswith("ising") and x[:-5] + "izing" in english_words) or
                (x.find("-") >= 0 and all(y in english_words or not y
                                          for y in x.split("-")))
                for x in tokens)
-    lst1 = list(x in english_words for x in tokens)
+    lst1 = list(m.group(0) in english_words
+                for m in re.finditer(r"[\w']+", desc))
     maxlen = max(len(x) for x in tokens)
     if maxlen > 1 and lst1.count(True) > 0:
         if ((len(lst) < 5 and all(lst)) or
@@ -3329,7 +3370,10 @@ def classify_desc(desc):
             classes1.append(cl)
             continue
         name = unicodedata.name(ch)
-        if name.split()[0] in ("GREEK", "CYRILLIC"):
+        if (name.split()[0] in ("GREEK", "CYRILLIC", "GUJARATI", "CJK",
+                                "BENGALI", "GURMUKHI", "LAO", "KHMER",
+                                "THAI") or
+            name.startswith("NEW TAI LUE ")):
             classes1.append("NO")
         else:
             classes1.append(cl)
