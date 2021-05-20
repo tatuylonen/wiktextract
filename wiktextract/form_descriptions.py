@@ -210,6 +210,7 @@ english_words = set(brown.words()) | set(
         "spasmodic",
         "sprite",
         "squint",
+        "standalone",
         "storey",
         "stowaway",
         "subalgebra",
@@ -3171,7 +3172,7 @@ def parse_translation_desc(ctx, text, data):
     # print("TR:", json.dumps(data, sort_keys=True))
 
     # Sanity check: try to detect certain suspicious patterns in translations
-    for suspicious in (", ", "; ", "* ", ": ", "[", "]", "{", "}",
+    for suspicious in (", ", "; ", "* ", ": ", "[", "]", "{", "}", "／"
                        "^", "literally",
                        "also expressed with", "e.g.", "cf.", "used ",
                        "script needed",
