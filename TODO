@@ -309,3 +309,7 @@ different versions (in Japanese they look like pronunciations).  cf. Ruby.
 
 Check after next wiktionary dump: LSB (has "lattice" in forms but old
 page does not have it, nor current Wiktionary)
+
+Check:
+can/English/Verb: ERROR: no language name in translation item: : ... at ['can']
+can/English/Verb: ERROR: no language name in translation item: : -bil- (tr) (verbal infix) at ['can']
