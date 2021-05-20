@@ -119,7 +119,7 @@ following code:
 ```
 import json
 ...
-with open("filename.json", "r") as f:
+with open("filename.json", "r", encoding="utf-8") as f:
     for line in f:
         data = json.loads(line)
         ... parse the data for this record
@@ -131,7 +131,7 @@ into a list with:
 import json
 ...
 lst = []
-with open("filename.json", "r") as f:
+with open("filename.json", "r", encoding="utf-8") as f:
     for line in f:
         data = json.loads(line)
         lst.append(data)
