@@ -70,7 +70,7 @@ def capture_page(model, orig_title, text, pages_dir):
         path = re.sub(r"//+", "/", path)
         dirpath = os.path.dirname(path)
         os.makedirs(dirpath, exist_ok=True)
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             f.write("TITLE: {}\n".format(orig_title))
             text = html.unescape(text)
             f.write(text)
@@ -186,7 +186,7 @@ if __name__ == "__main__":
     ctx = Wtp(cache_file=args.cache, num_threads=args.num_threads)
     if args.override:
         for path in args.override:
-            with open(path, "r") as f:
+            with open(path, "r", encoding="utf-8") as f:
                 text = f.read()
             m = re.match(r"(?s)^TITLE: ([^\n]*)\n", text)
             if m:
@@ -237,7 +237,7 @@ if __name__ == "__main__":
                 print("NOTE: you probably want to use --cache with --page or "
                       "otherwise processing will be very slow.")
             # Load the page wikitext from the given file
-            with open(args.page, "r") as f:
+            with open(args.page, "r", encoding="utf-8") as f:
                 text = f.read()
             m = re.match(r"(?s)^TITLE: ([^\n]*)\n", text)
             if m:
@@ -297,7 +297,7 @@ if __name__ == "__main__":
         print("{} WORDS CAPTURED".format(word_count))
 
     if args.errors:
-        with open(args.errors, "w") as f:
+        with open(args.errors, "w", encoding="utf-8") as f:
             json.dump({
                 "errors": config.errors,
                 "warnings": config.warnings,
