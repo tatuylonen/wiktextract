@@ -2664,6 +2664,7 @@ def decode_tags(lst, allow_any=False, allow_upper=False):
     """Decodes tags, doing some canonicalizations.  This returns a list of
     lists of tags and a list of topics."""
     assert isinstance(lst, (list, tuple))
+    lst = list(x for x in lst if x)
     lsts = [[]]
     for x in lst:
         assert isinstance(x, str)
@@ -2671,7 +2672,7 @@ def decode_tags(lst, allow_any=False, allow_upper=False):
         for alt in map_with(xlat_tags_map, [x]):
             lsts = list(lst1 + [alt] for lst1 in lsts)
     lsts = map_with(xlat_tags_map, list(map(lambda x: " ".join(x), lsts)))
-    lsts = list(map(lambda x: x.split(" "), lsts))
+    lsts = list(map(lambda x: x.split(), lsts))
 
     def check_unknown(start_i, last_i, i, tags):
         # Adds unknown tag if needed.  Returns new last_i
