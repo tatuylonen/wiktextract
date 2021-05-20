@@ -264,6 +264,8 @@ htmlgen: compound-of field of sense not displayed in generated html
 
 htmlgen: implement support for redirects
 
+htmlgen: render audio-ipa for audios
+
 Word entires may be generated from entries like "Thesaurus:ar:make happy" that
 are in a wrong language.  Check if they are referenced from somewhere and
 maybe restrict generation to entries that are actually referenced.
