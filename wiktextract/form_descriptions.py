@@ -298,6 +298,14 @@ xlat_head_map = {
     "15": "class-15",
 }
 
+# Regexp for finding nested translations from translation items (these are
+# used in, e.g., year/English/Translations/Arabic).  This is actually used
+# in page.py.
+nested_translations_re = re.compile(
+    r"\s+\((({}): ([^()]|\([^()]+\))+)\)"
+    .format("|".join(x for x in xlat_head_map.values()
+                     if x and not x.startswith("class-"))))
+
 # Tags that will be interpreted at the beginning of a parenthesized part even
 # if separated by a comma from English text
 paren_start_end_tags = set([
@@ -2622,7 +2630,7 @@ for topic in topic_generalize_map.keys():
 #                          valid_topics, True)
 
 # Regexp used to find "words" from word heads and linguistic descriptions
-word_re = re.compile(r"[^ ,;()\u200e]+|\(([^()]|\([^)]*\))*\)")
+word_re = re.compile(r"[^ ,;()\u200e]+|\(([^()]|\([^()]*\))*\)")
 
 
 def distw(titleparts, word):
@@ -2781,7 +2789,7 @@ def add_related(ctx, data, lst, related):
         return
     for related in related.split(" or "):
         if related:
-            m = re.match(r"\((([^()]|\([^)]*\))*)\)\s*", related)
+            m = re.match(r"\((([^()]|\([^()]*\))*)\)\s*", related)
             if m:
                 paren = m.group(1)
                 related = related[m.end():]
@@ -2880,7 +2888,7 @@ def parse_word_head(ctx, pos, text, data):
     # Handle parenthesized descriptors for the word form and links to
     # related words
     parens = list(m.group(1) for m in
-                  re.finditer(r"\((([^()]|\([^)]*\))*)\)", text))
+                  re.finditer(r"\((([^()]|\([^()]*\))*)\)", text))
     for paren in parens:
         paren = paren.strip()
         descriptors = map_with(xlat_tags_map, [paren])
@@ -3004,13 +3012,13 @@ def parse_translation_desc(ctx, text, data):
     # Process all parenthesized parts from the translation item
     while True:
         # See if we can find a parenthesized expression at the end
-        m = re.search(r" \((([^)]|\([^)]+\))+)\)$", text)
+        m = re.search(r" \((([^()]|\([^()]+\))+)\)$", text)
         if m:
             par = m.group(1)
             text = text[:m.start()]
         else:
             # See if we can find a parenthesized expression at the start
-            m = re.match(r"^\^?\((([^)]|\([^)]+\))+)\):?(\s+|$)", text)
+            m = re.match(r"^\^?\((([^()]|\([^()]+\))+)\):?(\s+|$)", text)
             if m:
                 par = m.group(1)
                 text = text[m.end():]
@@ -3246,7 +3254,7 @@ def parse_alt_or_inflection_of(ctx, gloss):
         tags.append("conjecture")
     # XXX the parenthesized groups often contain useful information, such as
     # English version in quotes
-    base = re.sub(r"\s+\([^)]*\)", "", base)  # Remove all (...) groups
+    base = re.sub(r"\s+\([^()]*\)", "", base)  # Remove all (...) groups
     if base.endswith("."):
         base = base[:-1]
     base = base.strip()
