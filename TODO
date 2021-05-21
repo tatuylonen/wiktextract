@@ -266,6 +266,8 @@ htmlgen: implement support for redirects
 
 htmlgen: render audio-ipa for audios
 
+htmlgen: make search faster on slow links (split to deeper prefixes if large)
+
 Word entires may be generated from entries like "Thesaurus:ar:make happy" that
 are in a wrong language.  Check if they are referenced from somewhere and
 maybe restrict generation to entries that are actually referenced.
@@ -332,3 +334,9 @@ stack traceback:
 linkage: move english from linkage to "english" (now merged with "sense")
 
 woman/English/Translations/Yakkha: english in quotes, must remove quotes
+
+eighty/English/Translations: several words like "Arabic numerals: 80"
+(should parse tags from the part before colon)
+
+orange/English/Translations/Mandarin: check "english", some have
+e.g. "alternative form:"

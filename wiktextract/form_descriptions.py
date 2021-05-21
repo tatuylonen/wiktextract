@@ -21,6 +21,7 @@ nltk.download("brown", quiet=True)
 english_words = set(brown.words()) | set(
     [
         # These are additions to the brown corpus word list
+        "...",
         "BDSM",
         "BS",
         "Dr",
@@ -241,6 +242,7 @@ english_words = set(brown.words()) | set(
         "tera-",
         "trendy",
         "tsardom",
+        "tyre",
         "twig",
         "twine",
         "two-up",
@@ -360,6 +362,7 @@ xlat_tags_map = {
     "Yale": "yale",
     "Pinyin": "pinyin",
     "Wade-Giles": "wade-giles",
+    "internet": "Internet",
     "countable and uncountable": "countable uncountable",
     "masculine and feminine plural": "masculine feminine plural",
     "definite singular and plural": "definite singular plural",
@@ -431,6 +434,7 @@ xlat_tags_map = {
     "possessive (without noun)": "possessive without-noun",
     "informal 1st possessive": "informal first-person possessive",
     "impolite 2nd possessive": "informal second-person possessive",
+    "casual": "informal",
     "strong personal": "strong personal pronoun",
     "weak personal": "weak personal pronoun",
     "with accusative or dative": "with-accusative with-dative",
@@ -2301,6 +2305,7 @@ valid_tags = set([
     "proper-noun",
     "surnames",
     "sometimes",
+    "only",
     "possibly",
     "somewhat",
     "especially",
@@ -2368,7 +2373,6 @@ valid_tags = set([
 valid_topics = set([
     "Catholicism",
     "Christianity",
-    "Internet",
     "Internet",
     "aeronautics",
     "agriculture",
@@ -3085,7 +3089,8 @@ def parse_translation_desc(ctx, text, data):
         # Check for special script pronunciation followed by romanization,
         # used in many Asian languages.
         lst = par.split(", ")
-        if len(lst) == 2 and classify_desc(lst[0]) == "other":
+        if (len(lst) == 2 and classify_desc(lst[0]) == "other" and
+            classify_desc(lst[1]) == "romanization"):
             if data.get("alt"):
                 ctx.warning("more than one value in \"alt\": {} vs. {}"
                             .format(data["alt"], lst[0]))
@@ -3362,7 +3367,8 @@ def classify_desc(desc):
             return "english"
     # If all characters are in classes that could occur in romanizations,
     # treat as romanization
-    classes = list(unicodedata.category(x) if x not in ("-", ",", ":") else "OK"
+    classes = list(unicodedata.category(x)
+                   if x not in ("-", ",", ":", "/", '"') else "OK"
                    for x in unicodedata.normalize("NFKD", desc))
     classes1 = []
     for ch, cl in zip(desc, classes):
