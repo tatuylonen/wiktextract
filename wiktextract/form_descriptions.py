@@ -806,6 +806,8 @@ xlat_tags_map = {
     "(vosotros or vosotras)": "with-vosotros with-vosotras",
     "(ele and ela, also used with você and others)":
     "with-ele with-ela with-você with-others",
+    "(ele, ela, also used with tu and você)":
+    "with-ele with-ela with-tu with-você",
     "former reform[s] only": "",
     "no construct forms": "no-construct-forms",
     "no nominative plural": "no-nominative-plural",
