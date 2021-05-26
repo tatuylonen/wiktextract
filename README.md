@@ -392,7 +392,8 @@ The following command-line options can be used to control its operation:
 * --linkages: causes linkages (synonyms etc.) to be captured
 * --redirects: causes redirects to be extracted
 * --pages-dir DIR: save all wiktionary pages under this directory (mostly for debugging)
-* --cache CACHE: save/use cache file(s) from this path
+* --cache CACHE: save/use cache file(s) from this path (for debugging)
+* --page FILE: read page from file (first line can be "TITLE: pagetitle"; file should use UTF-8 encoding)
 * --num-threads THREADS: use this many parallel processes (needs 4GB/process)
 * --human-readable: print human-readable JSON with indentation (no longer
 machine-readable)
