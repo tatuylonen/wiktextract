@@ -4,6 +4,7 @@
 
 import re
 import sys
+import copy
 import html
 import collections
 import unicodedata
@@ -2563,6 +2564,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 item = re.sub(r"\s*\^?\({}\)".format(langcode), "", item)
                 if langcode in ("cmn",):
                     item = re.sub(r"\s*\^?\(zh\)", "", item)
+                elif langcode in ("nn", "nb"):
+                    item = re.sub(r"\s*\^?\(no\)", "", item)
 
             # There may be multiple translations, separated by comma
             nested.append(item)
@@ -2574,6 +2577,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if item.startswith(prefix):
                         skip = True
                 if skip:
+                    continue
+                if item in ("[Term?]", "[Book Pahlavi needed]"):
                     continue
                 tagsets = []
                 topics = []
@@ -2603,13 +2608,35 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         else:
                             tr["sense"] = sense
                     parse_translation_desc(ctx, part, tr)
-                    if not tr.get("word"):
+                    w = tr.get("word")
+                    if not w:
                         continue  # Not set or empty
-                    if tr.get("word").startswith("Lua execution error"):
+                    if w.startswith("Lua execution error"):
                         continue
                     if "tags" in tr:
                         tr["tags"] = list(sorted(set(tr["tags"])))
-                    data_append(ctx, data, "translations", tr)
+
+                    # If the original word contains the separators or there
+                    # are no splitting separators in the translation, add it
+                    # as-is
+                    if word.find("/") >= 0:
+                        data_append(ctx, data, "translations", tr)
+                        continue
+                    # Split if it contains no spaces
+                    alts = [w]
+                    if w.find(" ") < 0:
+                        # If no spaces, split by separator
+                        alts = re.split(r"/|／", w)
+                    else:
+                        # Otherwise split only if spaces around separator
+                        alts = re.split(r" / | ／ ", w)
+                    # Note: there could be remaining slashes, but they are
+                    # sometimes used in ways we cannot resolve programmatically.
+                    # Create translations for each alternative.
+                    for alt in alts:
+                        tr1 = copy.deepcopy(tr)
+                        tr1["word"] = alt
+                        data_append(ctx, data, "translations", tr1)
 
             # Handle sublists.  They are frequently used for different scripts
             # for the language and different variants of the language.  We will
