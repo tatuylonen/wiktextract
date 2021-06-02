@@ -1586,13 +1586,21 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if name == "audio":
                 filename = ht.get(2) or ""
                 desc = ht.get(3) or ""
-                audio = {"audio": filename}
                 desc = clean_node(config, ctx, None, [desc])
-                m = re.search(r"\((([^()]|\([^()]*\))*)\)", desc)
-                if m:
-                    parse_pronunciation_tags(ctx, m.group(1), audio)
+                audio = {"audio": filename}
                 if desc:
                     audio["text"] = desc
+                m = re.search(r"\((([^()]|\([^()]*\))*)\)", desc)
+                skip = False
+                if m:
+                    par = m.group(1)
+                    cls = classify_desc(par)
+                    if cls == "tags":
+                        parse_pronunciation_tags(ctx, par, audio)
+                    else:
+                        skip = True
+                if skip:
+                    return ""
                 audios.append(audio)
                 return "__AUDIO_IGNORE_THIS__" + str(len(audios) - 1) + "__"
             if name == "audio-IPA":
@@ -1621,9 +1629,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if dial:
                     dial = clean_node(config, ctx, None, [dial])
                     audio["text"] = dial
-                    data_append(ctx, audio, "tags", dial)
+                    parse_pronunciation_tags(ctx, dial, audio)
                 if country:
-                    data_append(ctx, audio, "tags", country.upper())
+                    parse_pronunciation_tags(ctx, country, audio)
                 if ipa:
                     audio["audio-ipa"] = ipa
                 audios.append(audio)
@@ -1633,9 +1641,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # if ipa:
                 #     pron = {"ipa": ipa}
                 #     if dial:
-                #         data_append(ctx, pron, "tags", dial)
+                #         parse_pronunciation_tags(ctx, dial, pron)
                 #     if country:
-                #         data_append(ctx, pron, "tags", country.upper())
+                #         parse_pronunciation_tags(ctx, country, pron)
                 #     data_append(ctx, data, "sounds", pron)
                 return "__AUDIO_IGNORE_THIS__" + str(len(audios) - 1) + "__"
             return None
@@ -1660,7 +1668,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
         text = clean_node(config, ctx, data, contents,
                           template_fn=parse_pronunciation_template_fn)
         ipa_text = clean_node(config, ctx, data, contents,
-                              template_fn=parse_pronunciation_template_fn,
                               post_template_fn=parse_pron_post_template_fn)
         have_pronunciations = False
         text_splits = re.split(r"[*#]+", text)
@@ -2508,7 +2515,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             item = clean_node(config, ctx, data, contents,
                               template_fn=translation_item_template_fn)
-            # print("    TRANSLATION ITEM: {}  [{}]".format(item, sense))
+            # print("    TRANSLATION ITEM: {!r}  [{}]".format(item, sense))
 
             # Find and remove nested translations from the item
             nested = list(m.group(1)
@@ -2573,12 +2580,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # Certain values indicate it is not actually a translation
                 skip = False
                 for prefix in ("Use ", "use ", "suffix ", "prefix ",
+                               "not used in ",
+                               "[Book Pahlavi needed]",
                                "please add this translation if you can"):
                     if item.startswith(prefix):
                         skip = True
                 if skip:
                     continue
-                if item in ("[Term?]", "[Book Pahlavi needed]"):
+                if item in ("[Term?]", ":"):
                     continue
                 tagsets = []
                 topics = []
@@ -2678,7 +2687,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         parse_translations(data, subnode)
                     return ""
                 if name in ("c", "C", "categorize", "cat", "catlangname",
-                            "topics", "top", "qualifier",):
+                            "topics", "top", "qualifier", "cln"):
                     # These are expanded in the default way
                     return None
                 if name in ("trans-top",):
