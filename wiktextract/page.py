@@ -2476,7 +2476,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # others.  These should be transitory and unreliable
                     # anyway.
                     return ""
-                if name in ("t", "t+", "t-simple", "t", "t+check", "t-check"):
+                if name in ("t", "t+", "t-simple", "t"):
                     code = ht.get(1)
                     if code:
                         if langcode and code != langcode:
@@ -2625,9 +2625,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     skip = True
                 if item.isdigit() and not word.isdigit():
                     skip = True
-                if len(item) > 3 * len(word) + 20:
-                    # Likely descriptive text or example
-                    skip = True
                 if skip:
                     continue
                 tagsets = []
@@ -2662,6 +2659,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     w = tr.get("word")
                     if not w:
                         continue  # Not set or empty
+                    if len(w) > 3 * len(word) + 20:
+                        # Likely descriptive text or example
+                        continue
                     if w.startswith("*") or w.startswith(":"):
                         w = w[1:].strip()
                         if not w:
