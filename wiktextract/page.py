@@ -2468,6 +2468,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 nonlocal sense_parts
                 nonlocal sense
                 # print("TRANSLATION_ITEM_TEMPLATE_FN:", name, ht)
+                if is_panel_template(name):
+                    return ""
                 if name in ("t+check", "t-check"):
                     # We ignore these templates.  They seem to have outright
                     # garbage in some entries, and very varying formatting in
@@ -2589,15 +2591,42 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                "different structure used",
                                "normally ",
                                "usually ",
+                               "noun compound ",
+                               "+",
                                "please add this translation if you can"):
                     if lc.startswith(prefix):
                         skip = True
-                if item in ("[Term?]", ":", "/",
-                            "je + comp.",
-                            "genitive case",
-                            "adessive + 3rd person singular of olla"):
+                if item in ("[Term?]", ":", "/", "?"):
                     skip = True
-                if item.find("usually expressed with ") >= 0:
+                for expression in ("usually expressed with ",
+                                   " can be used ",
+                                   " construction used",
+                                   " + ",
+                                   "genitive case",
+                                   "dative case",
+                                   "nominative case",
+                                   "accusative case",
+                                   "absolute state",
+                                   "infinitive of ",
+                                   "participle of ",
+                                   "for this sense",
+                                   "depending on the circumstances",
+                                   " expression ",
+                                   " means ",
+                                   " is used",
+                                   " — ",  # Used to give example sentences
+                                   " translation",
+                                   "not attested",
+                                   "grammatical structure",
+                                   "construction is used"):
+                    if item.find(expression) >= 0:
+                        skip = True
+                if re.match(r"\[[\d,]+\]$", item):
+                    skip = True
+                if item.isdigit() and not word.isdigit():
+                    skip = True
+                if len(item) > 3 * len(word) + 20:
+                    # Likely descriptive text or example
                     skip = True
                 if skip:
                     continue
@@ -2608,11 +2637,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if classify_desc(m.group(1)) == "tags":
                         tagsets, topics = decode_tags([m.group(1)])
                         item = m.group(2)
-
-                # If it contains " + ", it is likely a description of some
-                # grammatical construction, not a translation
-                if item.find(" + ") >= 0:
-                    continue
 
                 for part in split_at_comma_semi(item):
                     part = part.strip()
@@ -2638,6 +2662,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     w = tr.get("word")
                     if not w:
                         continue  # Not set or empty
+                    if w.startswith("*") or w.startswith(":"):
+                        w = w[1:].strip()
+                        if not w:
+                            continue
+                        tr["word"] = w
                     if w.startswith("Lua execution error"):
                         continue
                     if "tags" in tr:
@@ -2661,7 +2690,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # sometimes used in ways we cannot resolve programmatically.
                     # Create translations for each alternative.
                     for alt in alts:
+                        alt = alt.strip()
                         tr1 = copy.deepcopy(tr)
+                        if alt.startswith("*") or alt.startswith(":"):
+                            alt = alt[1:].strip()
+                        if not alt:
+                            continue
                         tr1["word"] = alt
                         data_append(ctx, data, "translations", tr1)
 
@@ -3199,10 +3233,10 @@ def clean_node(config, ctx, category_data, value, template_fn=None,
     # print("CLEAN_NODE:", repr(value))
 
     def clean_template_fn(name, ht):
-        if name in panel_templates:
-            return ""
         if template_fn is not None:
             return template_fn(name, ht)
+        if name in panel_templates:
+            return ""
         return None
 
     def recurse(value):

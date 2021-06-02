@@ -50,11 +50,6 @@ class WiktExtractTests(unittest.TestCase):
         ret, topics = decode_tags(["Cockney rhyming slang"], allow_upper=True)
         self.assertEqual(ret, [("Cockney", "slang")])
 
-    def test_decode2(self):
-        ret, topics = decode_tags(["Cockney Test rhyming slang"],
-                                  allow_upper=True)
-        self.assertEqual(ret, [("Cockney Test", "slang")])
-
     def test_decode3(self):
         ret, topics = decode_tags(["colloquial slang sailing"],
                                   allow_upper=True)
@@ -62,28 +57,28 @@ class WiktExtractTests(unittest.TestCase):
         self.assertEqual(topics, ["sailing"])
 
     def test_decode4(self):
-        ret, topics = decode_tags(["colloquial Cockney Test rhyming slang"],
+        ret, topics = decode_tags(["colloquial Cockney rhyming slang"],
                                   allow_upper=True)
-        self.assertEqual(ret, [("Cockney Test", "colloquial", "slang")])
+        self.assertEqual(ret, [("Cockney", "colloquial", "slang")])
 
     def test_decode5(self):
         ret, topics = decode_tags(["colloquial Cockney Test rhyming slang"],
                                   allow_upper=False)
-        self.assertEqual(ret, [("Cockney Test", "colloquial",
+        self.assertEqual(ret, [("Cockney", "Test", "colloquial",
                                 "error-unknown-tag", "slang")])
 
     def test_decode6(self):
         ret, topics = decode_tags(["colloquial Cockney Test unknown1 "
                                    "rhyming slang"],
                                   allow_upper=True)
-        self.assertEqual(ret, [("Cockney Test unknown1", "colloquial",
+        self.assertEqual(ret, [("Cockney", "Test unknown1", "colloquial",
                                 "error-unknown-tag", "slang")])
 
     def test_decode7(self):
         ret, topics = decode_tags(["colloquial Cockney Test unknown1 "
                                    "rhyming slang"],
                                   allow_upper=False, allow_any=True)
-        self.assertEqual(ret, [("Cockney Test unknown1", "colloquial",
+        self.assertEqual(ret, [("Cockney", "Test unknown1", "colloquial",
                                 "slang")])
 
 
