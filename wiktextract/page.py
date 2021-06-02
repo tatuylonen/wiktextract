@@ -2579,15 +2579,27 @@ def parse_language(ctx, config, langnode, language, lang_code):
             for item in nested:
                 # Certain values indicate it is not actually a translation
                 skip = False
-                for prefix in ("Use ", "use ", "suffix ", "prefix ",
-                               "not used in ",
-                               "[Book Pahlavi needed]",
+                lc = item.lower()
+                for prefix in ("use ", "suffix ", "prefix ",
+                               "see: ",
+                               "use ",
+                               "not used",
+                               "no equivalent",
+                               "[book pahlavi needed]",
+                               "different structure used",
+                               "normally ",
+                               "usually ",
                                "please add this translation if you can"):
-                    if item.startswith(prefix):
+                    if lc.startswith(prefix):
                         skip = True
+                if item in ("[Term?]", ":", "/",
+                            "je + comp.",
+                            "genitive case",
+                            "adessive + 3rd person singular of olla"):
+                    skip = True
+                if item.find("usually expressed with ") >= 0:
+                    skip = True
                 if skip:
-                    continue
-                if item in ("[Term?]", ":"):
                     continue
                 tagsets = []
                 topics = []
@@ -2596,6 +2608,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if classify_desc(m.group(1)) == "tags":
                         tagsets, topics = decode_tags([m.group(1)])
                         item = m.group(2)
+
+                # If it contains " + ", it is likely a description of some
+                # grammatical construction, not a translation
+                if item.find(" + ") >= 0:
+                    continue
+
                 for part in split_at_comma_semi(item):
                     part = part.strip()
                     if not part:
@@ -2610,10 +2628,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         tr["topics"] = list(topics)
                     if sense:
                         if sense == "Translations to be checked":
-                            pass
+                            continue  # Skip such translations
                         elif sense.startswith(":The translations below need "
                                               "to be checked"):
-                            pass
+                            continue  # Skip such translations
                         else:
                             tr["sense"] = sense
                     parse_translation_desc(ctx, part, tr)
