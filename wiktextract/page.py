@@ -1219,7 +1219,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # after the gloss, but these sentences don't seem to be intended
         # as glosses.  Skip them.
         subglosses = list(gl for gl in subglosses
-                          if not re.match(r'\s*(\([^)]*\)\s*)?"[^"]*"\s*$', gl))
+                          if not re.match(r'\s*(\([^)]*\)\s*)?(:|"[^"]*"\s*$)',
+                                          gl))
 
         if len(subglosses) > 1 and "form_of" not in sense_base:
             gl = subglosses[0].strip()
@@ -1545,7 +1546,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         outer_text = outer_text[:-len(x)]
                         break
                 # Check if the outer gloss starts with parenthesized tags/topics
-                m = re.match(r"\(([^()]+)\)\s*", outer_text)
+                m = re.match(r"\(([^()]+)\):?\s*", outer_text)
                 if m:
                     q = m.group(1)
                     outer_text = outer_text[m.end():].strip()
