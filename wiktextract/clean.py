@@ -200,8 +200,8 @@ def clean_value(config, title, no_strip=False):
     title = re.sub(r"(?si)<\s*chem\b[^>]*>(.*?)<\s*/\s*chem\s*>",
                    repl_1_checm, title)
     # Remove any remaining HTML tags.
-    title = re.sub(r"(?s)<\s*[^/>][^>]*>\s*", "", title)
-    title = re.sub(r"(?s)<\s*/\s*[^>]+>\n*", "", title)
+    title = re.sub(r"(?s)<\s*[^/>][^>]*>", "", title)
+    title = re.sub(r"(?s)<\s*/\s*[^>]+>", "", title)
     # Replace links by their text
     title = re.sub(r"(?si)\[\[\s*Category\s*:\s*([^]]+?)\s*\]\]", r"", title)
     title = re.sub(r"(?s)\[\[\s*([^]|]+?)\s*\|\s*([^]|]+?)"

@@ -769,14 +769,17 @@ def parse_alt_or_inflection_of(ctx, gloss):
         return [], gloss
 
     # It is fairly common for form_of glosses to end with something like
-    # "ablative case".  Parse that ending.
+    # "ablative case" or "in instructive case".  Parse that ending.
+    # print("parse_alt_or_inflection_of: lst={}".format(lst))
     lst = lst[last:]
-    if len(lst) >= 3 and lst[-1] == "case":
+    if len(lst) >= 3 and lst[-1] in ("case", "case."):
         node = valid_sequences.get(lst[-2])
         if node and "$" in node:
             for t in node["$"].get("tags", ()):
                 tags.update(t.split(" "))
             lst = lst[:-2]
+            if lst[-1] == "in" and len(lst) > 1:
+                lst = lst[:-1]
 
     tags = list(sorted(t for t in tags if t))
     base = " ".join(lst).strip()
