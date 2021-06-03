@@ -2633,8 +2633,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                "please add this translation if you can"):
                     if lc.startswith(prefix):
                         skip = True
-                if item in ("[Term?]", ":", "/", "?"):
-                    skip = True
                 for expression in ("usually expressed with ",
                                    " can be used ",
                                    " construction used",
@@ -2696,16 +2694,31 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     w = tr.get("word")
                     if not w:
                         continue  # Not set or empty
-                    if len(w) > 3 * len(word) + 20:
-                        # Likely descriptive text or example
-                        continue
                     if w.startswith("*") or w.startswith(":"):
                         w = w[1:].strip()
                         if not w:
                             continue
                         tr["word"] = w
+                    if w in ("[Term?]", ":", "/", "?"):
+                        continue  # These are not valid linkage targets
+                    if len(w) > 3 * len(word) + 20:
+                        # Likely descriptive text or example
+                        continue
                     if w.startswith("Lua execution error"):
                         continue
+
+                    # Sanity check: try to detect certain suspicious
+                    # patterns in translations
+                    for suspicious in (", ", "; ", "* ", ": ", "[", "]",
+                                       "{", "}", "／", "^", "literally",
+                                       "also expressed with", "e.g.", "cf.",
+                                       "used ", "script needed",
+                                       "please add this translation",
+                                       "usage "):
+                        if w.find(suspicious) >= 0:
+                            ctx.debug("suspicious {} in translation: {}"
+                                      .format(suspicious, tr))
+
                     if "tags" in tr:
                         tr["tags"] = list(sorted(set(tr["tags"])))
 

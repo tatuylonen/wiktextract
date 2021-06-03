@@ -710,17 +710,6 @@ def parse_translation_desc(ctx, text, data):
     # import json
     # print("TR:", json.dumps(data, sort_keys=True))
 
-    # Sanity check: try to detect certain suspicious patterns in translations
-    for suspicious in (", ", "; ", "* ", ": ", "[", "]", "{", "}", "／"
-                       "^", "literally",
-                       "also expressed with", "e.g.", "cf.", "used ",
-                       "script needed",
-                       "please add this translation",
-                       "usage "):
-        if text.find(suspicious) >= 0:
-            ctx.debug("suspicious {} in translation: {}"
-                      .format(suspicious, data))
-
 def parse_alt_or_inflection_of(ctx, gloss):
     """Tries to parse an inflection-of or alt-of description."""
     tags = set()
