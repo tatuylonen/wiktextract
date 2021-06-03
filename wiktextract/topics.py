@@ -785,6 +785,7 @@ topic_generalize_map = {
     "video games": "games",
     "role-playing games": "games",
     "poker": "games",
+    "waterpolo": "games",
     "wrestling": "martial-arts",
     "professional wrestling": "wrestling",
     "sumo": "wrestling",
