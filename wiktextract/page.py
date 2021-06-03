@@ -3165,38 +3165,6 @@ def parse_page(ctx, word, text, config):
                     data["topics"] = new_topics
         ret.extend(lang_datas)
 
-    # If the last part-of-speech of the last language (i.e., last item in "ret")
-    # has categories or topics not bound to a sense, propagate those
-    # categories and topics to all datas on "ret".  It is common for categories
-    # to be specified at the end of an article.
-    if len(ret) > 1:
-        last = ret[-1]
-        for field in ("topics", "categories"):
-            if field not in last:
-                continue
-            lst = last[field]
-            for data in ret[:-1]:
-                assert data is not last
-                data_extend(ctx, data, field, lst)
-
-    # Remove category links that start with a language name from entries for
-    # different languages
-    for data in ret:
-        lang = data.get("lang")
-        assert lang
-        cats = data.get("categories", ())
-        new_cats = []
-        for cat in cats:
-            parts = cat.split(" ")
-            if parts[0] in languages_by_name and parts[0] != lang:
-                continue  # Ignore categories for a different language
-            new_cats.append(cat)
-        if not new_cats:
-            if "categories" in data:
-                del data["categories"]
-        else:
-            data["categories"] = new_cats
-
     # Inject linkages from thesaurus entries
     for data in ret:
         if "pos" not in data:
@@ -3231,18 +3199,79 @@ def parse_page(ctx, word, text, config):
         disambiguate_clear_cases(ctx, data, "translations")
         for field in linkage_fields:
             disambiguate_clear_cases(ctx, data, field)
-        # Categories are not otherwise disambiguated, but if there is only
-        # one sense and only one data in ret, move categories to the only sense.
-        # Note that categories are commonly specified for the page, and thus
-        # if we have multiple data in ret, we don't know which one they
-        # belong to.
+
+    # Categories are not otherwise disambiguated, but if there is only
+    # one sense and only one data in ret for the same language, move
+    # categories to the only sense.  Note that categories are commonly
+    # specified for the page, and thus if we have multiple data in
+    # ret, we don't know which one they belong to (not even which
+    # language necessarily?).
+    # XXX can Category links be specified globally (i.e., in a different
+    # language?)
+    by_lang = collections.defaultdict(list)
+    for data in ret:
+        by_lang[data["lang"]].append(data)
+    for la, lst in by_lang.items():
+        if len(lst) > 1:
+            # Propagate categories from the last entry for the language to
+            # its other entries.  It is common for them to only be specified
+            # in the last part-of-speech.
+            last = lst[-1]
+            for field in ("categories",):
+                if field not in last:
+                    continue
+                vals = last[field]
+                for data in lst[:-1]:
+                    if data.get("alt_of") or data.get("form_of"):
+                        continue  # Don't add to alt-of/form-of entries
+                    data_extend(ctx, data, field, vals)
+            continue
+        if len(lst) != 1:
+            continue
+        data = lst[0]
+        senses = data.get("senses") or []
+        if len(senses) != 1:
+            continue
+        # Only one sense for this language.  Move categories to sense.
         for field in ("categories", "topics", "wikidata", "wikipedia"):
-            if (field in data and len(data.get("senses", ())) == 1 and
-                len(ret) == 1):
+            if field in data:
                 v = data[field]
                 del data[field]
-                for sense in data["senses"]:
-                    data_extend(ctx, sense, field, v)
+                data_extend(ctx, senses[0], field, v)
+
+    # If the last part-of-speech of the last language (i.e., last item in "ret")
+    # has categories or topics not bound to a sense, propagate those
+    # categories and topics to all datas on "ret".  It is common for categories
+    # to be specified at the end of an article.  Apparently these can also
+    # apply to different languages.
+    if len(ret) > 1:
+        last = ret[-1]
+        for field in ("categories",):
+            if field not in last:
+                continue
+            lst = last[field]
+            for data in ret[:-1]:
+                if data.get("form_of") or data.get("alt_of"):
+                    continue  # Don't add to form_of or alt_of entries
+                data_extend(ctx, data, field, lst)
+
+    # Remove category links that start with a language name from entries for
+    # different languages
+    for data in ret:
+        lang = data.get("lang")
+        assert lang
+        cats = data.get("categories", ())
+        new_cats = []
+        for cat in cats:
+            parts = cat.split(" ")
+            if parts[0] in languages_by_name and parts[0] != lang:
+                continue  # Ignore categories for a different language
+            new_cats.append(cat)
+        if not new_cats:
+            if "categories" in data:
+                del data["categories"]
+        else:
+            data["categories"] = new_cats
 
     # Remove duplicates from tags, topics, and categories, etc.
     for data in ret:
