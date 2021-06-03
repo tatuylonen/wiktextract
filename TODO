@@ -342,3 +342,7 @@ orange/English/Translations/Mandarin: check "english", some have
 e.g. "alternative form:"
 
 gas/English - Translations - sense has parenthesized tags/topic at start
+
+Make sure rtl (right-to-left) and ltr markers are properly inserted
+and matched in words (including translations and linkages), even when
+splitting them.

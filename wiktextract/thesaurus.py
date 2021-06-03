@@ -54,6 +54,8 @@ ignored_subtitle_tags_map = {
     "obscure derivations": [],
     "plants": [],
     "animals": [],
+    "common": [],
+    "rare": ["rare"],
 }
 
 def contains_list(contents):

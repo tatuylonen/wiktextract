@@ -257,6 +257,7 @@ linkage_map = {
     "archetypes": "instances",
     "see also": "related",
     "seealso": "related",
+    "specific multiples": "related",
     "various": "related",
     "metonyms": "related",
     "demonyms": "related",
@@ -2268,6 +2269,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
                 def add(w, r):
                     nonlocal have_linkages
+                    # Filter out certain words that are used in linkages but
+                    # are generally not intended as a linked word.
+                    if w in ("etc.",):
+                        return
+
                     # Check if the word contains the Fullwith Solidus, and if
                     # so, split by it and treat the the results as alternative
                     # linkages.  (This is very commonly used for alternative
