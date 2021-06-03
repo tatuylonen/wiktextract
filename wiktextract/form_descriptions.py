@@ -202,6 +202,7 @@ english_words = (set(brown.words()) | set(
         "promiscuous",
         "prosthetic",
         "pubic",
+        "reinvigorated",
         "reptile",
         "rhinarium",
         "rhombus",
@@ -628,6 +629,7 @@ uppercase_tags = set([
     "Katharevousa",
     "Kautokeino",
     "Kaw Kyaik",
+    "Kazym",
     "Kedayan",
     "Kent",
     "Kentish",
@@ -3827,17 +3829,24 @@ def parse_translation_desc(ctx, text, data):
         # Check for special script pronunciation followed by romanization,
         # used in many Asian languages.
         lst = par.split(", ")
-        if (len(lst) == 2 and classify_desc(lst[0]) == "other" and
-            classify_desc(lst[1]) == "romanization"):
-            if data.get("alt"):
-                ctx.warning("more than one value in \"alt\": {} vs. {}"
-                            .format(data["alt"], lst[0]))
-            data["alt"] = lst[0]
-            if data.get("roman"):
-                ctx.warning("more than one value in \"roman\": {} vs. {}"
-                            .format(data["roman"], lst[1]))
-            data["roman"] = lst[1]
-            continue
+        if len(lst) == 2:
+            a, r = lst
+            if classify_desc(a) == "other":
+                cls = classify_desc(r)
+                # print("parse_translation_desc: r={} cls={}".format(r, cls))
+                if (cls == "romanization" or
+                    (cls == "english" and len(r.split()) == 1 and
+                     r[0].islower())):
+                    if data.get("alt"):
+                        ctx.warning("more than one value in \"alt\": {} vs. {}"
+                                    .format(data["alt"], a))
+                    data["alt"] = lst[0]
+                    if data.get("roman"):
+                        ctx.warning("more than one value in \"roman\": "
+                                    "{} vs. {}"
+                                    .format(data["roman"], r))
+                    data["roman"] = lst[1]
+                    continue
 
         # Check for certain comma-separated tags combined with English text
         # at the beginning or end of a comma-separated parenthesized list
@@ -4114,6 +4123,9 @@ def classify_desc(desc):
     num_latin = 0
     num_greek = 0
     for ch, cl in zip(desc, classes):
+        if ch in ("'",):
+            classes1.append("OK")
+            continue
         if cl not in ("Ll", "Lu"):
             classes1.append(cl)
             continue
@@ -4123,7 +4135,7 @@ def classify_desc(desc):
             num_latin += 1
         elif first == "GREEK":
             num_greek += 1
-        if (first in ("CYRILLIC", "GUJARATI", "CJK",
+        elif (first in ("CYRILLIC", "GUJARATI", "CJK",
                       "BENGALI", "GURMUKHI", "LAO", "KHMER",
                       "THAI", "GLAGOLITIC") or
             name.startswith("NEW TAI LUE ")):

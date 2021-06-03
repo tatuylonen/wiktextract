@@ -2163,7 +2163,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         break
                     # Handle tags from beginning of par.  We also handle "other"
                     # here as Korean entries often have Hanja form in the
-                    # beginning of paranthesis, before romanization.
+                    # beginning of parenthesis, before romanization.  Similar
+                    # for many Japanese entries.
                     while par:
                         idx = par.find(",")
                         if idx < 0:
