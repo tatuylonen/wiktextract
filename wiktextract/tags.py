@@ -6,6 +6,7 @@
 xlat_head_map = {
     "m": "masculine",
     "f": "feminine",
+    "m/f": "masculine feminine",
     "n": "neuter",
     "c": "common",  # common gender in at least West Frisian
     "sg": "singular",

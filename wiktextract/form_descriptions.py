@@ -542,7 +542,7 @@ def parse_translation_desc(ctx, text, data):
     # Process all parenthesized parts from the translation item
     while True:
         # See if we can find a parenthesized expression at the end
-        m = re.search(r" \((([^()]|\([^()]+\))+)\)$", text)
+        m = re.search(r" \((([^()]|\([^()]+\))+)\)\.?$", text)
         if m:
             par = m.group(1)
             text = text[:m.start()]
@@ -687,10 +687,6 @@ def parse_translation_desc(ctx, text, data):
         elif roman.endswith(" m"):
             data_append(ctx, data, "tags", "masculine")
             data["roman"] = roman[:-2]
-        elif len(roman) >= 3 and roman[-2] == " ":
-            ctx.debug("suspicious: possible unhandled gender/class "
-                      "at end of roman: "
-                      "{}".format(roman))
 
     # If the word now has "english" field but no "roman" field, and
     # the word would be classified "other" (generally non-latin
@@ -852,6 +848,11 @@ def classify_desc(desc):
         if ((len(lst) < 5 and all(lst)) or
             lst.count(True) / len(lst) >= 0.8):
             return "english"
+    # Some translations have apparent pronunciation descriptions in /.../
+    # which we'll put in the romanization field (even though they probably are
+    # not exactly romanizations).
+    if desc.startswith("/") and desc.endswith("/"):
+        return "romanization"
     # If all characters are in classes that could occur in romanizations,
     # treat as romanization
     classes = list(unicodedata.category(x)
@@ -861,7 +862,7 @@ def classify_desc(desc):
     num_latin = 0
     num_greek = 0
     for ch, cl in zip(desc, classes):
-        if ch in ("'",):
+        if ch in ("'",):  # ' in Arabic, / in IPA-like parenthesized forms
             classes1.append("OK")
             continue
         if cl not in ("Ll", "Lu"):

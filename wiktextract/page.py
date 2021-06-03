@@ -2186,7 +2186,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             par = m.group(1)
                             item1 = item1[m.end():]
                         else:
-                            m = re.search(" \((([^()]|\([^()]*\))*)\)$", item1)
+                            m = re.search(" \((([^()]|\([^()]*\))*)\)\.?$",
+                                          item1)
                             if m:
                                 par = m.group(1)
                                 item1 = item1[:m.start()]
@@ -2495,8 +2496,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
             langcode = None
             if sense is None:
                 sense = clean_node(config, ctx, data, sense_parts).strip()
-                idx = sense.find("See also translations at ")
+                idx = sense.find("See also translations at")
                 if idx > 0:
+                    ctx.debug("Skipping translation see also: {}".format(sense))
                     sense = sense[:idx].strip()
             sense_detail = None
 
@@ -2662,16 +2664,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     continue
                 tagsets = []
                 topics = []
-                m = re.match(r"([a-zA-Z ]+): (.*)$", item)
-                if m:
-                    if classify_desc(m.group(1)) == "tags":
-                        tagsets, topics = decode_tags([m.group(1)])
-                        item = m.group(2)
 
                 for part in split_at_comma_semi(item):
                     part = part.strip()
+                    if part.endswith(":"):  # E.g. "salt of the earth"/Korean
+                        part = part[:-1].strip()
                     if not part:
                         continue
+
                     # Strip language links
                     tr = {"lang": lang, "code": langcode}
                     if tags:
@@ -2688,15 +2688,33 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             continue  # Skip such translations
                         else:
                             tr["sense"] = sense
+
+                    # Check if this part starts with "<tags/english>: <rest>"
+                    m = re.match(r"([\w ]+): (.*)$", part)
+                    if m:
+                        par = m.group(1)
+                        rest = m.group(2)
+                        cls = classify_desc(par)
+                        # print("tr colon prefix: {!r} -> {}".format(par, cls))
+                        if cls == "tags":
+                            tagsets2, topics2 = decode_tags([m.group(1)])
+                            for t in tagsets2:
+                                data_extend(ctx, tr, "tags", t)
+                            data_extend(ctx, tr, "topics", topics2)
+                            part = rest
+                        elif cls == "english":
+                            if "sense" in tr:
+                                tr["sense"] += "; " + par
+                            else:
+                                tr["sense"] = par
+                            part = rest
+
                     parse_translation_desc(ctx, part, tr)
                     w = tr.get("word")
                     if not w:
                         continue  # Not set or empty
                     if w.startswith("*") or w.startswith(":"):
                         w = w[1:].strip()
-                        if not w:
-                            continue
-                        tr["word"] = w
                     if w in ("[Term?]", ":", "/", "?"):
                         continue  # These are not valid linkage targets
                     if w.find("__IGNORE__") >= 0:
@@ -2865,14 +2883,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 elif kind in LEVEL_KINDS:
                     # Sub-levels will be recursed elsewhere
                     pass
-                elif kind == NodeKind.ITALIC:
-                    # Silently skip italicized text between translation items.
-                    # It is commonly used, e.g., for indicating translations
-                    # that need to be checked.
-                    pass
+                elif kind in (NodeKind.ITALIC, NodeKind.BOLD):
+                    parse_translation_recurse(node)
                 elif kind == NodeKind.LINK:
-                    # At least category links can occur there
-                    pass
+                    arg0 = node.args[0]
+                    if (len(arg0) >= 1 and
+                        isinstance(arg0[0], str) and
+                        not arg0[0].lower().startswith("category:")):
+                        for x in node.args[-1]:
+                            if isinstance(x, str):
+                                sense_parts.append(x)
+                            else:
+                                parse_translation_recurse(x)
                 elif not sense:
                     sense_parts.append(node)
                 else:
