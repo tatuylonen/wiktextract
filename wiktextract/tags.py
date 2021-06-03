@@ -1049,6 +1049,7 @@ xlat_tags_map = {
     "ppp": "passive perfect participle",
     "not used in plural form": "no-plural",
     "not declined": "indeclinable",
+    "not often used": "rare",
     "interrogative adverb": "interrogative",
     "perfect tense": "perfect",
     "intensive": "emphatic",

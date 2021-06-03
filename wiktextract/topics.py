@@ -816,4 +816,5 @@ topic_generalize_map = {
     "state": "property",
     "naturism": "lifestyle",
     "organic chemistry": "chemistry",
+    "gaming": "games",
 }

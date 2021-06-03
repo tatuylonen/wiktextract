@@ -772,6 +772,7 @@ def parse_alt_or_inflection_of(ctx, gloss):
     base = re.sub(r"(?s)(:|;| - ).*", "", base)
     base = re.sub(r"\s+(with an added emphasis on the person.)", "", base)
     base = re.sub(r"\s+with -ra/-re$", "", base)
+    base = re.sub(r"\.\s+Used only as .*$", "", base)
     # Note: base might still contain comma-separated values and values
     # separated by "and"
     base = base.strip()
