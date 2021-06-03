@@ -7,8 +7,6 @@
 import re
 import unicodedata
 import Levenshtein
-import nltk
-from nltk.corpus import brown
 from nltk import TweetTokenizer
 from wikitextprocessor import Wtp
 from .datautils import data_append, data_extend, split_at_comma_semi
