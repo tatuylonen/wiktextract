@@ -547,6 +547,11 @@ ignored_category_patterns = [
     " IPA pronunciation",
     "IPA pronunciations with invalid IPA characters",
     "^[a-z]{2,3}-",
+    "Foreign word of the day",
+    "Foreign words of the day",
+    ".* two-letter words$",
+    ".* three-letter words$",
+    ".* four-letter words$",
 ]
 ignored_cat_re = re.compile(r"([a-z]{2,4})?" +
                             "|".join(ignored_category_patterns))
@@ -1404,7 +1409,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if name == "head":
             t = ht.get(2, "")
             if t == "pinyin":
-                data_append(ctx, pos_data, "tags", "pinyin")
+                data_append(ctx, pos_data, "tags", "Pinyin")
             elif t == "romanization":
                 data_append(ctx, pos_data, "tags", "romanization")
         m = re.search(head_tag_re, name)
