@@ -1952,7 +1952,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             item_recurse(contents)
             item = clean_node(config, ctx, None, parts)
-            print("CLEANED ITEM: {!r}".format(item))
+            # print("CLEANED ITEM: {!r}".format(item))
             item = re.sub(r", \)", ")", item)
             item = re.sub(r"\(\)", "", item)
             item = re.sub(r"\s\s+", " ", item)
