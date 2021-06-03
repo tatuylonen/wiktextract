@@ -305,6 +305,7 @@ def add_related(ctx, data, lst, related):
     for x in lst:
         assert isinstance(x, str)
     assert isinstance(related, (list, tuple))
+    # print("add_related: lst={} related={}".format(lst, related))
     related = " ".join(related)
     if related == "[please provide]":
         return
@@ -380,6 +381,8 @@ def parse_word_head(ctx, pos, text, data):
     descs = map_with(xlat_tags_map, split_at_comma_semi(base))
     for desc_i, desc in enumerate(descs):
         desc = desc.strip()
+        if desc_i > 0 and desc.startswith("also "):
+            break  # There seems to be exactly one of these, "Benen"
         for alt in map_with(xlat_tags_map, desc.split(" or ")):
             baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
             tagsets_, topics_ = decode_tags([" ".join(baseparts)])

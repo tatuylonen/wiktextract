@@ -1447,7 +1447,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
             elif kind == NodeKind.LINK:
                 # We might collect relevant links as they are often pictures
                 # relating to the word
-                continue
+                if (len(node.args[0]) >= 1 and
+                    isinstance(node.args[0][0], str) and
+                    (node.args[0][0].startswith("File:") or
+                     node.args[0][0].startswith("Image:"))):
+                    continue
+                pre.extend(node.args[-1])
             elif kind == NodeKind.HTML:
                 if node.args not in ("gallery", "ref", "cite", "caption"):
                     pre.append(node)
