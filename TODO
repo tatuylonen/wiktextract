@@ -268,6 +268,9 @@ htmlgen: render audio-ipa for audios
 
 htmlgen: make search faster on slow links (split to deeper prefixes if large)
 
+htmlgen: when looking for linkage references, also check canonical
+word form
+
 Word entires may be generated from entries like "Thesaurus:ar:make happy" that
 are in a wrong language.  Check if they are referenced from somewhere and
 maybe restrict generation to entries that are actually referenced.

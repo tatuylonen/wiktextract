@@ -1118,12 +1118,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             .format(k, data[k], v))
 
     def push_sense():
-        """Starts collecting data for a new word sense."""
+        """Starts collecting data for a new word sense.  This returns True
+        if a sense was added."""
         nonlocal sense_data
         if not sense_data:
-            return
+            return False
         pos_datas.append(sense_data)
         sense_data = {}
+        return True
 
     def push_pos():
         """Starts collecting data for a new part-of-speech."""
@@ -1158,7 +1160,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         This parses such sublists as separate senses (thus this can generate
         multiple new senses), unless the sublist has only one element, in which
         case it is assumed to be a wiktionary error and is interpreted as
-        a top-level item."""
+        a top-level item.  This returns True if this added one or more
+        senses."""
         assert isinstance(pos, str)
         assert isinstance(contents, (list, tuple))
         assert isinstance(sense_base, dict)  # Added to every sense
@@ -1201,12 +1204,20 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         rawgloss = clean_node(config, ctx, sense_base, lst,
                               template_fn=sense_template_fn)
+
         # The gloss could contain templates that produce more list items.
         # This happens commonly with, e.g., {{inflection of|...}}.  Split
         # to parts.
         subglosses = re.split(r"[#*]+\s*", rawgloss)
+
+        # Some entries, e.g., "iacebam", have weird sentences in quotes
+        # after the gloss, but these sentences don't seem to be intended
+        # as glosses.  Skip them.
+        subglosses = list(gl for gl in subglosses
+                          if not re.match(r'\s*(\([^)]*\)\s*)?"[^"]*"\s*$', gl))
+
         if len(subglosses) > 1 and "form_of" not in sense_base:
-            gl = subglosses[0]
+            gl = subglosses[0].strip()
             infl_tags, infl_base = parse_alt_or_inflection_of(ctx, gl)
             if infl_base and "form-of" in infl_tags:
                 # Interpret others as a particular form under "inflection of"
@@ -1215,12 +1226,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 subglosses = subglosses[1:]
 
         # Create senses for remaining subglosses
+        added = False
         for gloss_i, gloss in enumerate(subglosses):
             gloss = gloss.strip()
             if not gloss and len(subglosses) > 1:
                 continue
             # Push a new sense (if the last one is not empty)
-            push_sense()
+            if push_sense():
+                added = True
             # If the gloss starts with †, mark as obsolete
             if gloss.startswith("^†"):
                 data_append(ctx, sense_data, "tags", "obsolete")
@@ -1333,6 +1346,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
             elif "form-of" in tags:
                 data_extend(ctx, sense_data, "tags", tags)
                 data_append(ctx, sense_data, "form_of", base)
+
+        if push_sense():
+            added = True
+        return added
 
     def head_template_fn(name, ht):
         """Handles special templates in the head section of a word.  Head
@@ -1524,7 +1541,20 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     outer_text = outer_text[m.end():].strip()
                     parse_sense_tags(ctx, q, common_data)
 
+                if outer_text == "A pejorative:":
+                    data_append(ctx, common_data, "tags", "perjorative")
+                    outer_text = None
+                elif outer_text == "Short forms.":
+                    data_append(ctx, common_data, "tags", "abbreviation")
+                    outer_text = None
+                elif outer_text == "Technical or specialized senses.":
+                    outer_text = None
+                # XXX is it always a gloss?  Maybe non-gloss?
+                if outer_text:
+                    data_append(ctx, common_data, "glosses", outer_text)
+
                 # Process any inner glosses
+                added = False
                 for sublist in sublists:
                     assert sublist.kind == NodeKind.LIST
                     for item in sublist.children:
@@ -1532,27 +1562,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             continue
                         if item.kind != NodeKind.LIST_ITEM:
                             continue
-                        sense_base = {}
-                        for k, v in common_data.items():
-                            if isinstance(v, (list, tuple)):
-                                data_extend(ctx, sense_base, k, v)
-                            else:
-                                sense_base[k] = v
-                        # XXX is it always a gloss?  Maybe non-gloss?
-                        tags = ()
-                        if outer_text == "A pejorative:":
-                            tags = ["pejorative"]
-                            outer_text = None
-                        elif outer_text == "Short forms.":
-                            tags = ["abbreviation"]
-                            outer_text = None
-                        elif outer_text == "Technical or specialized senses.":
-                            outer_text = None
-                        data_extend(ctx, sense_base, "tags", tags)
-                        if outer_text:
-                            data_append(ctx, sense_base, "glosses",
-                                        outer_text)
-                        parse_sense(pos, item.children, sense_base)
+                        sense_base = copy.deepcopy(common_data)
+                        if parse_sense(pos, item.children, sense_base):
+                            added = True
+                # If the sublists resulted in no senses added, add
+                # common_data as a sense if it has a gloss
+                if not added and common_data.get("glosses"):
+                    gls = common_data.get("glosses") or [""]
+                    assert len(gls) == 1
+                    common_data["glosses"] = []
+                    parse_sense(pos, gls, common_data)
 
     def parse_pronunciation(node):
         """Parses the pronunciation section from a language section on a
