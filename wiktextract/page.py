@@ -2507,12 +2507,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # print("TRANSLATION_ITEM_TEMPLATE_FN:", name, ht)
                 if is_panel_template(name):
                     return ""
-                if name in ("t+check", "t-check"):
+                if name in ("t+check", "t-check", "t-needed"):
                     # We ignore these templates.  They seem to have outright
                     # garbage in some entries, and very varying formatting in
                     # others.  These should be transitory and unreliable
                     # anyway.
-                    return ""
+                    return "__IGNORE__"
                 if name in ("t", "t+", "t-simple", "t"):
                     code = ht.get(1)
                     if code:
@@ -2530,8 +2530,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if code:
                         langcode = code
                     return None
-                if name in ("t-needed", "checktrans-top"):
-                    return ""
                 if name == "trans-see":
                     ctx.error("UNIMPLEMENTED trans-see template")
                     return ""
@@ -2701,6 +2699,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         tr["word"] = w
                     if w in ("[Term?]", ":", "/", "?"):
                         continue  # These are not valid linkage targets
+                    if w.find("__IGNORE__") >= 0:
+                        continue  # Contains something we want to ignore
                     if len(w) > 3 * len(word) + 20:
                         # Likely descriptive text or example
                         continue
