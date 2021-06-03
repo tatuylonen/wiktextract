@@ -2271,7 +2271,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     nonlocal have_linkages
                     # Filter out certain words that are used in linkages but
                     # are generally not intended as a linked word.
-                    if w in ("etc.",):
+                    if w in ("etc.", "other derived terms:"):
                         return
 
                     # Check if the word contains the Fullwith Solidus, and if
@@ -2923,7 +2923,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 else:
                     data = etym_data
                 if config.capture_compounds:
-                    parse_linkage(data, "compounds", node)
+                    parse_linkage(data, "derived", node)
             elif t in ("Anagrams", "Further reading", "References",
                        "Quotations", "Descendants"):
                 # XXX does the Descendants section have something we'd like
