@@ -2681,7 +2681,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 tagsets = []
                 topics = []
 
-                for part in split_at_comma_semi(item):
+                for part in split_at_comma_semi(item, extra=[" / ", " ／ "]):
                     part = part.strip()
                     if part.endswith(":"):  # E.g. "salt of the earth"/Korean
                         part = part[:-1].strip()
@@ -2767,9 +2767,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if w.find(" ") < 0:
                         # If no spaces, split by separator
                         alts = re.split(r"/|／", w)
-                    else:
-                        # Otherwise split only if spaces around separator
-                        alts = re.split(r" / | ／ ", w)
                     # Note: there could be remaining slashes, but they are
                     # sometimes used in ways we cannot resolve programmatically.
                     # Create translations for each alternative.

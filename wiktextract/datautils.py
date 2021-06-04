@@ -46,15 +46,21 @@ def data_extend(ctx, data, key, values):
         data_append(ctx, data, key, x)
 
 
-def split_at_comma_semi(text):
+def split_at_comma_semi(text, extra=()):
     """Splits the text at commas and semicolons, unless they are inside
     parenthesis."""
+    assert isinstance(text, str)
+    assert isinstance(extra, (list, tuple))
     lst = []
     paren_cnt = 0
     bracket_cnt = 0
     ofs = 0
     parts = []
-    for m in re.finditer(r"[][(),;]", text):
+    split_re = r"[][(),;]"
+    if extra:
+        split_re = "({})|{}".format(split_re,
+                                    "|".join(re.escape(x) for x in extra))
+    for m in re.finditer(split_re, text):
         if ofs < m.start():
             parts.append(text[ofs:m.start()])
         ofs = m.end()
@@ -74,7 +80,7 @@ def split_at_comma_semi(text):
         elif paren_cnt > 0 or bracket_cnt > 0:
             parts.append(token)
         else:
-            assert token in ",;"
+            assert token in ",;" or token in extra
             if parts:
                 lst.append("".join(parts).strip())
                 parts = []
