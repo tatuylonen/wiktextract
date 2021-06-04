@@ -177,7 +177,6 @@ uppercase_tags = set([
     "Chile",
     "China",
     "Christian",
-    "Classic Persian",
     "Classical Attic",
     "Classical Edessan",
     "Classical Latin",
@@ -764,6 +763,7 @@ xlat_tags_map = {
     "U.S.": "US",
     "United States": "US",
     "Québec": "Quebec",
+    "Classic Persian": "Classical-Persian",
     "Zürich": "Zurich",
     "Uk": "UK",
     "US/UK": "US UK",  # XXX leave separate
