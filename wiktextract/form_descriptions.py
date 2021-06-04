@@ -542,10 +542,12 @@ def parse_translation_desc(ctx, text, data):
     # Process all parenthesized parts from the translation item
     while True:
         # See if we can find a parenthesized expression at the end
-        m = re.search(r" \((([^()]|\([^()]+\))+)\)\.?$", text)
+        m = re.search(r"\s*\((([^()]|\([^()]+\))+)\)\.?$", text)
         if m:
             par = m.group(1)
             text = text[:m.start()]
+            if par.startswith("literally "):
+                continue  # Not useful for disambiguation in many idioms
         else:
             # See if we can find a parenthesized expression at the start
             m = re.match(r"^\^?\((([^()]|\([^()]+\))+)\):?(\s+|$)", text)
@@ -863,7 +865,10 @@ def classify_desc(desc):
     num_latin = 0
     num_greek = 0
     for ch, cl in zip(desc, classes):
-        if ch in ("'",):  # ' in Arabic, / in IPA-like parenthesized forms
+        if ch in ("'",  # ' in Arabic, / in IPA-like parenthesized forms
+                  ".",  # e.g., "..." in translations
+                  "…",  # alternative to "..."
+                  "ʹ"):  # ʹ e.g. in understand/English/verb Russian transl
             classes1.append("OK")
             continue
         if cl not in ("Ll", "Lu"):
