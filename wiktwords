@@ -302,7 +302,7 @@ if __name__ == "__main__":
                 "errors": config.errors,
                 "warnings": config.warnings,
                 "debugs": config.debugs,
-                }, f)
+                }, f, sort_keys=True, indent=2)
 
     def dump_un(title, limit, counts, samples):
         items = []
