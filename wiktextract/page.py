@@ -605,6 +605,63 @@ for k, v in template_allowed_pos_map.items():
             assert False
 
 
+# Ignore translations that start with one of these (case-insensitive)
+tr_ignore_prefixes = [
+    "use ",
+    "suffix ",
+    "prefix ",
+    "see: ",
+    "use ",
+    "not used",
+    "no equivalent",
+    "[book pahlavi needed]",
+    "different structure used",
+    "normally ",
+    "usually ",
+    "noun compound ",
+    "+",
+    "please add this translation if you can",
+]
+
+# Ignore translations that contain one of these anywhere (case-sensitive)
+tr_ignore_contains = [
+    "usually expressed with ",
+    " can be used ",
+    " construction used",
+    " + ",
+    "genitive case",
+    "dative case",
+    "nominative case",
+    "accusative case",
+    "absolute state",
+    "infinitive of ",
+    "participle of ",
+    "for this sense",
+    "depending on the circumstances",
+    " expression ",
+    " means ",
+    " is used",
+    " — ",  # Used to give example sentences
+    " translation",
+    "not attested",
+    "grammatical structure",
+    "construction is used",
+]
+
+# Ignore translations that match one of these regular expressions
+tr_ignore_regexps = [
+    r"^\[[\d,]+\]$",
+    r"\?\?$",
+    r"^\s*$",
+]
+
+# Regular expression to be searched from translation (with re.search) to check
+# if it should be ignored.
+tr_ignore_re = re.compile(
+    "^(" + "|".join(re.escape(x) for x in tr_ignore_prefixes) + ")|" +
+    "|".join(re.escape(x) for x in tr_ignore_contains) + "|" +
+    "|".join(tr_ignore_regexps))  # These are not to be escaped
+
 
 def parse_sense_XXXold_going_away(config, data, text, use_text):
     """Parses a word sense from the text.  The text is usually a list item
@@ -2616,52 +2673,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # There may be multiple translations, separated by comma
             nested.append(item)
             for item in nested:
-                # Certain values indicate it is not actually a translation
-                skip = False
-                lc = item.lower()
-                for prefix in ("use ", "suffix ", "prefix ",
-                               "see: ",
-                               "use ",
-                               "not used",
-                               "no equivalent",
-                               "[book pahlavi needed]",
-                               "different structure used",
-                               "normally ",
-                               "usually ",
-                               "noun compound ",
-                               "+",
-                               "please add this translation if you can"):
-                    if lc.startswith(prefix):
-                        skip = True
-                for expression in ("usually expressed with ",
-                                   " can be used ",
-                                   " construction used",
-                                   " + ",
-                                   "genitive case",
-                                   "dative case",
-                                   "nominative case",
-                                   "accusative case",
-                                   "absolute state",
-                                   "infinitive of ",
-                                   "participle of ",
-                                   "for this sense",
-                                   "depending on the circumstances",
-                                   " expression ",
-                                   " means ",
-                                   " is used",
-                                   " — ",  # Used to give example sentences
-                                   " translation",
-                                   "not attested",
-                                   "grammatical structure",
-                                   "construction is used"):
-                    if item.find(expression) >= 0:
-                        skip = True
-                if re.match(r"\[[\d,]+\]$", item):
-                    skip = True
-                if item.isdigit() and not word.isdigit():
-                    skip = True
-                if skip:
+                # Certain values indicate it is not actually a translation.
+                # See definition of tr_ignore_re to adjust.
+                if re.search(tr_ignore_re, item):
                     continue
+
                 tagsets = []
                 topics = []
 
