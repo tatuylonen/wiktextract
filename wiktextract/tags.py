@@ -330,6 +330,7 @@ uppercase_tags = set([
     "Jicalapa",
     "Johannesburg",
     "Johor-Selangor",
+    "Johore",
     "Jyutping",
     "Kabul",
     "Kabuli",
@@ -716,6 +717,8 @@ uppercase_tags = set([
 # General mapping for linguistic tags.  Value is a string of space-separated
 # tags, or list of alternative sets of tags.  Alternative forms in the same
 # category can all be listed in the same string (e.g., multiple genders).
+# XXX should analyze imperfect vs. imperfective - are they just used in
+# different languages, or is there an actual difference in meaning?
 xlat_tags_map = {
     "m.": "masculine",
     "male": "masculine",
@@ -724,7 +727,9 @@ xlat_tags_map = {
     "female": "feminine",
     "indef.": "indefinite",
     "gen.": "genitive",
-    "impf.": "imperfect",
+    "impf.": "imperfective",
+    "pf.": "perfective",
+    "trans.": "transitive",
     "unc": "uncountable",
     "trans.": "transitive",
     "abbreviated": "abbreviation",
@@ -1560,6 +1565,8 @@ xlat_tags_map = {
     "loosely": "broadly",
     "broad sense": "broadly",
     "hypocoristic": "familiar",
+    "to a male": "addressee-masculine",
+    "to a female": "addressee-masculine",
     "hyperbolic": "excessive",
     "18th century": "obsolete",
     "9th century": "obsolete",
@@ -1640,6 +1647,7 @@ xlat_tags_map = {
     "one-termination adjective": "one-termination",
     "two-termination adjective": "two-termination",
     "three-termination adjective": "three-termination",
+    "semelefactive": "semelfactive",
 }
 
 valid_tags = set([
@@ -1657,6 +1665,8 @@ valid_tags = set([
     "accent/glottal",
     "accusative",
     "active",
+    "addressee-female",
+    "addressee-masculine",
     "adessive",
     "adjectival",
     "adjective",
@@ -1738,6 +1748,7 @@ valid_tags = set([
     "connegative",
     "construct",
     "contemplative",
+    "continuously",
     "contracted",
     "contracted-dem-form",
     "contraction",
@@ -2021,6 +2032,7 @@ valid_tags = set([
     "second-declension",
     "second-infinitive",
     "second-person",
+    "semelfactive",
     "sequence",
     "sequential",
     "seventh-conjugation",
