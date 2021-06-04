@@ -60,19 +60,6 @@ xlat_head_map = {
     "[uncountable]": "uncountable",
 }
 
-# Tags that will be interpreted at the beginning of a parenthesized part even
-# if separated by a comma from English text
-paren_start_end_tags = set([
-    "transitive",
-    "intransitive",
-    "colloquial",
-    "formal",
-    "informal",
-    "polite",
-    "impolite",
-    "derogatory",
-])
-
 # Accepted uppercase tag values.  As tags these are represented with words
 # connected by hyphens.
 uppercase_tags = set([
@@ -731,7 +718,6 @@ xlat_tags_map = {
     "pf.": "perfective",
     "trans.": "transitive",
     "unc": "uncountable",
-    "trans.": "transitive",
     "abbreviated": "abbreviation",
     "diminutives": "diminutive",
     "†-tari": "-tari",
@@ -1648,6 +1634,7 @@ xlat_tags_map = {
     "two-termination adjective": "two-termination",
     "three-termination adjective": "three-termination",
     "semelefactive": "semelfactive",
+    "invariant": "invariable",
 }
 
 valid_tags = set([
@@ -1888,7 +1875,6 @@ valid_tags = set([
     "interrogative",
     "intransitive",
     "invariable",
-    "invariant",  # XXX is this same as invariable?
     "ionic",
     "irregular",
     "jussive",

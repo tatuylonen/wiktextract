@@ -20,7 +20,7 @@ from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_tags, parse_pronunciation_tags,
     parse_alt_or_inflection_of,
     parse_translation_desc, xlat_tags_map, valid_tags,
-    classify_desc, paren_start_end_tags, nested_translations_re)
+    classify_desc, nested_translations_re)
 
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
@@ -2120,20 +2120,23 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # comma-separated parenthesized list
                 lst = par.split(", ")
                 while len(lst) > 1:
-                    if lst[0] in paren_start_end_tags:
+                    cls = classify_desc(lst[0])
+                    if cls == "tags":
                         if base_qualifier:
                             base_qualifier += " " + lst[0]
                         else:
                             base_qualifier = lst[0]
                         lst = lst[1:]
-                    elif lst[-1] in paren_start_end_tags:
+                        continue
+                    cls = classify_desc(lst[-1])
+                    if cls == "tags":
                         if base_qualifier:
                             base_qualifier += " " + lst[-1]
                         else:
                             base_qualifier = lst[-1]
                         lst = lst[:-1]
-                    else:
-                        break
+                        continue
+                    break
                 par = ", ".join(lst)
 
                 # Classify the item and handle it
@@ -2277,20 +2280,23 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # comma-separated parenthesized list
                     lst = par.split(", ")
                     while len(lst) > 1:
-                        if lst[0] in paren_start_end_tags:
+                        cls = classify_desc(lst[0])
+                        if cls == "tags":
                             if qualifier:
                                 qualifier += " " + lst[0]
                             else:
                                 qualifier = lst[0]
                             lst = lst[1:]
-                        elif lst[-1] in paren_start_end_tags:
+                            continue
+                        cls = classify_desc(lst[-1])
+                        if cls == "tags":
                             if qualifier:
                                 qualifier += " " + lst[-1]
                             else:
                                 qualifier = lst[-1]
                             lst = lst[:-1]
-                        else:
-                            break
+                            continue
+                        break
                     par = ", ".join(lst)
 
                     # Handle remaining types

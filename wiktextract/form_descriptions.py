@@ -12,7 +12,7 @@ from wikitextprocessor import Wtp
 from .datautils import data_append, data_extend, split_at_comma_semi
 from .taxondata import known_species, known_firsts
 from .topics import valid_topics, topic_generalize_map
-from .tags import (xlat_head_map, valid_tags, paren_start_end_tags,
+from .tags import (xlat_head_map, valid_tags,
                    uppercase_tags, xlat_tags_map)
 from .english_words import english_words
 
@@ -599,14 +599,23 @@ def parse_translation_desc(ctx, text, data):
         # Check for certain comma-separated tags combined with English text
         # at the beginning or end of a comma-separated parenthesized list
         while len(lst) > 1:
-            if lst[0] in paren_start_end_tags:
-                data_append(ctx, data, "tags", lst[0])
+            cls = classify_desc(lst[0])
+            if cls == "tags":
+                tagsets, topics = decode_tags([lst[0]])
+                for t in tagsets:
+                    data_extend(ctx, data, "tags", t)
+                data_extend(ctx, data, "topics", t)
                 lst = lst[1:]
-            elif lst[-1] in paren_start_end_tags:
-                data_append(ctx, data, "tags", lst[-1])
+                continue
+            cls = classify_desc(lst[-1])
+            if cls == "tags":
+                tagsets, topics = decode_tags([lst[-1]])
+                for t in tagsets:
+                    data_extend(ctx, data, "tags", t)
+                data_extend(ctx, data, "topics", t)
                 lst = lst[:-1]
-            else:
-                break
+                continue
+            break
         par = ", ".join(lst)
 
         if not par:
@@ -656,25 +665,23 @@ def parse_translation_desc(ctx, text, data):
                         .format(par, cls))
 
     # Check for gender indications in suffix
-    while True:
-        for suffix, tag in xlat_head_map.items():
-            suffix = " " + suffix
-            if text.endswith(suffix):
-                if tag:
-                    data_extend(ctx, data, "tags", tag.split())
-                text = text[:-len(suffix)]
-                break  # inner loop only
-        else:
-            # Sometimes we have something like "9 or 10" or "f or m"
-            # at the end of the translation to indicate alternative
-            # classes or genders
-            if text.endswith(" or"):
-                text = text[:-3]
-                continue
-            # If no suffix found, break out from outer loop
-            break
+    lst = text.strip().split(" ")
+    while len(lst) > 1:
+        if lst[-1] == "or":
+            lst = lst[:-1]
+            continue
+        node = valid_sequences.get(lst[-1])
+        if node is not None and "$" in node and "tags" in node["$"]:
+            data_extend(ctx, data, "tags", node["$"]["tags"])
+            lst = lst[:-1]
+            continue
+        if lst[-1] in xlat_head_map:
+            data_extend(ctx, data, "tags", xlat_head_map[lst[-1]].split())
+            lst = lst[:-1]
+            continue
+        break
+    text = " ".join(lst)
 
-    text = text.strip()
     if not text or text in ignored_translations:
         return
     data["word"] = text

@@ -17,6 +17,7 @@ english_words = (set(brown.words()) | set(
     [
         # These are additions to the brown corpus word list
         "...",
+        "ATP",
         "BDSM",
         "BS",
         "Dr",
@@ -51,6 +52,7 @@ english_words = (set(brown.words()) | set(
         "braking",
         "cashier",
         "carucates",
+        "cassette",
         "cassia",
         "cauldron",
         "cinnamon",
@@ -204,6 +206,7 @@ english_words = (set(brown.words()) | set(
         "rhombus",
         "romanisation",
         "rout",
+        "rudiments",
         "rugby",
         "samurai",
         "scold",
