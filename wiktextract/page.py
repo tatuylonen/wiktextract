@@ -628,6 +628,7 @@ tr_ignore_contains = [
     "usually expressed with ",
     " can be used ",
     " construction used",
+    " used with ",
     " + ",
     "genitive case",
     "dative case",

@@ -670,11 +670,6 @@ def parse_translation_desc(ctx, text, data):
         if lst[-1] == "or":
             lst = lst[:-1]
             continue
-        node = valid_sequences.get(lst[-1])
-        if node is not None and "$" in node and "tags" in node["$"]:
-            data_extend(ctx, data, "tags", node["$"]["tags"])
-            lst = lst[:-1]
-            continue
         if lst[-1] in xlat_head_map:
             data_extend(ctx, data, "tags", xlat_head_map[lst[-1]].split())
             lst = lst[:-1]
