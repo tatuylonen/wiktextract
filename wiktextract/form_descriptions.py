@@ -45,6 +45,24 @@ ignored_translations = set([
     "please add this translation if you can",
 ])
 
+# Put english text into the "note" field in a translation if it contains one
+# of these words
+tr_note_re = re.compile(
+    r"\b(article|definite|indefinite|superlative|comparative|pattern|"
+    "adjective|adjectives|clause|clauses|pronoun|pronouns|preposition|prep|"
+    "postposition|postp|action|actions|"
+    "adverb|adverbs|noun|nouns|verb|verbs|before|"
+    "after|placed|prefix|suffix|used with|"
+    "nominative|genitive|dative|infinitive|participle|past|perfect|imperfect|"
+    "perfective|imperfective|auxiliary|negative|future|present|tense|aspect|"
+    "conjugation|declension|class|category|plural|singular|positive|"
+    "seldom used|formal|informal|familiar|unspoken|spoken|written|"
+    "indicative|progressive|conditional|potential|"
+    "accusative|adessive|inessive|"
+    "dialect|dialects|object|subject|predicate|movies|recommended|language|"
+    "locative|continuous|simple|continuousness|gerund|subjunctive|"
+    "form|regular|irregular)($|\s)")  # \b does not work at the end???
+
 # Words that can be part of form description
 valid_words = set(["or", "and"])
 for x in valid_tags:
@@ -540,6 +558,7 @@ def parse_translation_desc(ctx, text, data):
     # print("parse_translation_desc:", text)
 
     # Process all parenthesized parts from the translation item
+    note = None
     while True:
         # See if we can find a parenthesized expression at the end
         m = re.search(r"\s*\((([^()]|\([^()]+\))+)\)\.?$", text)
@@ -604,7 +623,7 @@ def parse_translation_desc(ctx, text, data):
                 tagsets, topics = decode_tags([lst[0]])
                 for t in tagsets:
                     data_extend(ctx, data, "tags", t)
-                data_extend(ctx, data, "topics", t)
+                data_extend(ctx, data, "topics", topics)
                 lst = lst[1:]
                 continue
             cls = classify_desc(lst[-1])
@@ -612,7 +631,7 @@ def parse_translation_desc(ctx, text, data):
                 tagsets, topics = decode_tags([lst[-1]])
                 for t in tagsets:
                     data_extend(ctx, data, "tags", t)
-                data_extend(ctx, data, "topics", t)
+                data_extend(ctx, data, "topics", topics)
                 lst = lst[:-1]
                 continue
             break
@@ -639,12 +658,20 @@ def parse_translation_desc(ctx, text, data):
                 data_extend(ctx, data, "tags", tags)
             data_extend(ctx, data, "topics", topics)
         elif cls == "english":
-            # There can be more than one parenthesized english item, see
-            # e.g. Aunt/English/Translations/Tamil
-            if data.get("english"):
-                data["english"] += "; " + par
+            # If the text contains any of certain grammatical words, treat it
+            # as a "note" instead of "english"
+            if re.search(tr_note_re, par):
+                if note:
+                    note = note + ";" + par
+                else:
+                    note = par
             else:
-                data["english"] = par
+                # There can be more than one parenthesized english item, see
+                # e.g. Aunt/English/Translations/Tamil
+                if data.get("english"):
+                    data["english"] += "; " + par
+                else:
+                    data["english"] = par
         elif cls == "romanization":
             if data.get("roman"):
                 ctx.warning("more than one value in \"roman\": {} vs. {}"
@@ -677,9 +704,10 @@ def parse_translation_desc(ctx, text, data):
         break
     text = " ".join(lst)
 
-    if not text or text in ignored_translations:
-        return
-    data["word"] = text
+    if note:
+        data["note"] = note
+    if text and text not in ignored_translations:
+        data["word"] = text
 
     # Sometimes gender seems to be at the end of "roman" field, see e.g.
     # fire/English/Noun/Translations/Egyptian (for "oxidation reaction")
@@ -699,7 +727,7 @@ def parse_translation_desc(ctx, text, data):
     # translation is transliterated the same as some English word.
     roman = data.get("roman")
     english = data.get("english")
-    if english and not roman:
+    if english and not roman and "word" in data:
         cls = classify_desc(data["word"])
         if (cls == "other" and
             english.find(" ") < 0 and
@@ -777,6 +805,7 @@ def parse_alt_or_inflection_of(ctx, gloss):
     base = re.sub(r"\s+(with an added emphasis on the person.)", "", base)
     base = re.sub(r"\s+with -ra/-re$", "", base)
     base = re.sub(r"\.\s+Used only as .*$", "", base)
+    base = re.sub(r"\.\s+Also found in .*$", "", base)
     # Note: base might still contain comma-separated values and values
     # separated by "and"
     base = base.strip()
@@ -826,24 +855,27 @@ def classify_desc(desc):
 
     # If it can be fully decoded as tags without errors, treat as tags
     tagsets, topics = decode_tags([desc])
-    if not topics:
-        for tagset in tagsets:
-            assert isinstance(tagset, (list, tuple, set))
-            if tagset and "error-unknown-tag" not in tagset:
-                return "tags"
+    for tagset in tagsets:
+        assert isinstance(tagset, (list, tuple, set))
+        if (tagset or topics) and "error-unknown-tag" not in tagset:
+            return "tags"
     # If all words are in our English dictionary, interpret as English
     tokens = tokenizer.tokenize(desc)
     lst = list(x in english_words or x.lower() in english_words or
                x in known_firsts or
                x[0].isdigit() or
-               x[0].isupper() or
-               (x.endswith("s") and x[:-1] in english_words) or
-               (x.endswith("ing") and x[:-3] in english_words) or
+               (x[0].isupper() and x.find("-") < 0) or
+               (x.endswith("s") and len(x) >= 4 and x[:-1] in english_words) or
+               (x.endswith("ing") and len(x) >= 5 and
+                x[:-3] in english_words) or
                x.endswith("'s") or
-               (x.endswith("ise") and x[:-3] + "ize" in english_words) or
-               (x.endswith("ised") and x[:-4] + "ized" in english_words) or
-               (x.endswith("ising") and x[:-5] + "izing" in english_words) or
-               (x.find("-") >= 0 and all(y in english_words or not y
+               (x.endswith("ise") and len(x) >= 5 and
+                x[:-3] + "ize" in english_words) or
+               (x.endswith("ised") and len(x) >= 6 and
+                x[:-4] + "ized" in english_words) or
+               (x.endswith("ising") and len(x) >= 7 and
+                x[:-5] + "izing" in english_words) or
+               (x.find("-") >= 0 and all((y in english_words or not y)
                                          for y in x.split("-")))
                for x in tokens)
     lst1 = list(m.group(0) in english_words
@@ -869,6 +901,8 @@ def classify_desc(desc):
     for ch, cl in zip(desc, classes):
         if ch in ("'",  # ' in Arabic, / in IPA-like parenthesized forms
                   ".",  # e.g., "..." in translations
+                  ";",
+                  ":",
                   "…",  # alternative to "..."
                   "ʹ"):  # ʹ e.g. in understand/English/verb Russian transl
             classes1.append("OK")

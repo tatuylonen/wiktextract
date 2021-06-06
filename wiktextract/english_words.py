@@ -276,6 +276,8 @@ english_words = (set(brown.words()) | set(
         # This is blacklist - these will not be treated as English words
         # even though they are in brown.words()
         "Ye",
+        "al",
         "boo",
         "em",
+        "ma",
         ])
