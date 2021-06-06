@@ -2265,4 +2265,4 @@ valid_tags = set([
     "with-él",
     "without-noun",
     "zhuyin",
-])
+    "æ-tensing"])
