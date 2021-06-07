@@ -2167,6 +2167,7 @@ valid_tags = set([
     "unaugmented",
     "uncommon",
     "uncountable",
+    "unstressed",
     "upper-case",
     "urdu-spelling",
     "used-in-the-form",
