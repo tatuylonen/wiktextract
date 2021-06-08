@@ -447,6 +447,7 @@ ignored_category_patterns = [
     ".* suffixes$",
     ".* prefixes$",
     ".* letters$",
+    ".* palindromes$",
     ".* possessive suffixes$",
     ".* infinitives$",
     ".* participles$",
@@ -2763,12 +2764,17 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # Check if this part starts with "<tags/english>: <rest>"
                     m = re.match(r"([\w ]+): (.*)$", part)
                     if m:
-                        par = m.group(1)
-                        rest = m.group(2)
+                        par = m.group(1).strip()
+                        rest = m.group(2).strip()
+                        if par == "see":
+                            # Sometimes we have, e.g., "Different structure
+                            # used, see: <word>" (e.g., have/English sense
+                            # "To depict as being" Finnish tr)
+                            continue
                         cls = classify_desc(par)
                         # print("tr colon prefix: {!r} -> {}".format(par, cls))
                         if cls == "tags":
-                            tagsets2, topics2 = decode_tags([m.group(1)])
+                            tagsets2, topics2 = decode_tags([par])
                             for t in tagsets2:
                                 data_extend(ctx, tr, "tags", t)
                             data_extend(ctx, tr, "topics", topics2)

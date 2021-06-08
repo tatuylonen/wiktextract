@@ -1181,7 +1181,7 @@ xlat_tags_map = {
     "genitive of personal pronoun": "genitive personal pronoun",
     "nominative and accusative definite singular":
     "nominative accusative definite singular",
-    "+ genitive or possessive suffix": "with-genitive with-possessive-suffix",
+    "+ genitive": "with-genitive",
     "+ genitive possessive suffix or elative":
     "with-genitive with-possessive-suffix with-elative",
     "+ genitive-accusative": "with-genitive",
