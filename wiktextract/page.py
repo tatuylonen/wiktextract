@@ -607,22 +607,29 @@ for k, v in template_allowed_pos_map.items():
 
 # Ignore translations that start with one of these (case-insensitive)
 tr_ignore_prefixes = [
-    "use ",
-    "suffix ",
-    "prefix ",
-    "see: ",
-    "use ",
-    "not used",
-    "no equivalent",
+    "+",
+    "Different structure used",
+    "Literally",
+    "No equivalent",
+    "Not used",
+    "Please add this translation if you can",
+    "See: ",
+    "Use ",
+    "[Book Pahlavi needed]",
     "[book pahlavi needed]",
     "different structure used",
-    "normally ",
-    "usually ",
-    "noun compound ",
-    "+",
-    "please add this translation if you can",
-    "literally",
     "e.g.",
+    "literally",
+    "no equivalent",
+    "normally ",
+    "not used",
+    "noun compound ",
+    "please add this translation if you can",
+    "prefix ",
+    "see: ",
+    "suffix ",
+    "use ",
+    "usually ",
 ]
 
 # Ignore translations that contain one of these anywhere (case-sensitive).
@@ -652,6 +659,30 @@ tr_ignore_contains = [
     "construction is used",
     "tense used",
     " literally",
+    "dative",
+    "accusative",
+    "genitive",
+    "essive",
+    "partitive",
+    "translative",
+    "elative",
+    "inessive",
+    "illative",
+    "adessive",
+    "ablative",
+    "allative",
+    "abessive",
+    "comitative",
+    "instructive",
+    "particle",
+    "predicative",
+    "attributive",
+    "preposition",
+    "postposition",
+    "prepositional",
+    "postpositional",
+    "prefix",
+    "suffix",
 ]
 
 # Ignore translations that match one of these regular expressions
@@ -1333,7 +1364,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 gloss = gloss[m.end():].strip()
 
             def sense_repl(m):
-                par = m.group(2)
+                par = m.group(1)
                 cls = classify_desc(par)
                 if cls == "tags":
                     parse_sense_tags(ctx, par, sense_data)
@@ -1342,7 +1373,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 return m.group(0)
 
             # Replace parenthesized expressions commonly used for sense tags
-            gloss = re.sub(r"(^|\s+)\(([^()]*)\)", sense_repl, gloss)
+            gloss = re.sub(r"^\(([^()]*)\)", sense_repl, gloss)
+            gloss = re.sub(r"\s*\(([^()]*)\)$", sense_repl, gloss)
 
             # Remove common suffix "[from 14th c.]" and similar
             gloss = re.sub(r"\s\[[^]]*\]\s*$", "", gloss)
@@ -1471,16 +1503,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if name == "picdic" or name == "picdicimg" or name == "picdiclabel":
             # XXX extract?
             return ""
-        if name in ("tlb", "term-context", "term-label", "tcx"):
-            i = 2
-            while True:
-                v = ht.get(i)
-                if v is None:
-                    break
-                v = clean_value(config, v)
-                data_append(ctx, pos_data, "tags", v)
-                i += 1
-            return ""
+        # if name in ("tlb", "term-context", "term-label", "tcx"):
+        #     i = 2
+        #     while True:
+        #         v = ht.get(i)
+        #         if v is None:
+        #             break
+        #         v = clean_value(config, v)
+        #         data_append(ctx, pos_data, "tags", v)
+        #         i += 1
+        #     return ""
         if name == "head":
             t = ht.get(2, "")
             if t == "pinyin":
@@ -1541,6 +1573,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # XXX use template_fn in clean_node to check that the head macro
         # is compatible with the current part-of-speech and generate warning
         # if not.  Use template_allowed_pos_map.
+        # print("parse_part_of_speech: {}: {}: pre={}"
+        #       .format(ctx.section, ctx.subsection, pre))
         text = clean_node(config, ctx, pos_data, pre,
                           template_fn=head_template_fn)
         parse_word_head(ctx, pos, text, pos_data)
@@ -2759,12 +2793,28 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if part.startswith("Lua execution error"):
                         continue
 
+                    # Handle certain suffixes in translations that
+                    # we might put in "note" but that we can actually
+                    # parse into tags.
+                    for suffix, t in (
+                            (" with dative", "with-dative"),
+                            (" with genitive", "with-genitive"),
+                            (" with accusative", "with-accusative"),
+                    ):
+                        if part.endswith(suffix):
+                            part = part[:-len(suffix)]
+                            data_append(ctx, tr, "tags", t)
+                            break
+
                     # Certain values indicate it is not actually a translation.
                     # See definition of tr_ignore_re to adjust.
-                    if re.search(tr_ignore_re, part):
-                        # This translation will be because it seems to be
-                        # some kind of explanatory text.  However, let's put
-                        # it in the "note" field instead.
+                    m = re.search(tr_ignore_re, part)
+                    if (m and (m.start() != 0 or m.end() != len(part) or
+                               len(part.split()) > 1)):
+                        # This translation will be skipped because it
+                        # seems to be some kind of explanatory text.
+                        # However, let's put it in the "note" field
+                        # instead.
                         tr["note"] = part
                     else:
                         # Interpret it as an actual translation

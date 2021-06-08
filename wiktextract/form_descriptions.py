@@ -13,7 +13,7 @@ from .datautils import data_append, data_extend, split_at_comma_semi
 from .taxondata import known_species, known_firsts
 from .topics import valid_topics, topic_generalize_map
 from .tags import (xlat_head_map, valid_tags,
-                   uppercase_tags, xlat_tags_map)
+                   uppercase_tags, xlat_tags_map, xlat_descs_map)
 from .english_words import english_words
 
 # Tokenizer for classify_desc()
@@ -110,8 +110,6 @@ def add_to_valid_tree1(tree, field, k, v, valid_values):
     for vv in v:
         assert isinstance(vv, str)
         add_to_valid_tree(valid_sequences, field, k, vv)
-        if k != k.lower():
-            add_to_valid_tree(valid_sequences, field, k.lower(), vv)
         vvs = vv.split(" ")
         for x in vvs:
             if not x or x.isspace():
@@ -178,6 +176,8 @@ def distw(titleparts, word):
     """Computes how distinct ``word`` is from the most similar word in
     ``titleparts``.  Returns 1 if words completely distinct, 0 if
     identical, or otherwise something in between."""
+    assert isinstance(titleparts, (list, tuple))
+    assert isinstance(word, str)
     w = min(Levenshtein.distance(word, tw) / max(len(tw), len(word)) for
             tw in titleparts)
     return w
@@ -198,6 +198,43 @@ def map_with(ht, lst):
             raise RuntimeError("map_with unexpected value: {!r}".format(x))
     return ret
 
+
+# If an unknown sequence starts with one of these, it will continue as an
+# unknown sequence until the end, unless it turns out to have a replacement.
+allowed_unknown_starts = set([
+    "Relating",
+    "accompanied",
+    "added",
+    "after",
+    "as",
+    "based",
+    "before",
+    "conjunction",
+    "construed",
+    "e.g.",
+    "expression:",
+    "figurative:",
+    "followed",
+    "for",
+    "forms",
+    "from",
+    "governs",
+    "in",
+    "modifying",
+    "not",
+    "of",
+    "originally",
+    "preceding",
+    "prefixed",
+    "referring",
+    "relating",
+    "revived",
+    "said",
+    "since",
+    "takes",
+    "used",
+    "with",
+])
 
 def decode_tags(input_tags, allow_any=False, allow_upper=False):
     """Decodes tags, doing some canonicalizations.  This returns a list of
@@ -224,10 +261,12 @@ def decode_tags(input_tags, allow_any=False, allow_upper=False):
         tag = " ".join(words)
         if not tag:
             return last_i
+        if tag in ("and", "or"):
+            return last_i
         tags.append(tag)
-        if not (allow_any or
-                (allow_upper and
-                 all(x[0].isupper() for x in words))):
+        if (not allow_any and
+            (not allow_upper or not all(x[0].isupper() for x in words)) and
+            words[0] not in allowed_unknown_starts):
             # print("ERR allow_any={} allow_upper={} words={}"
             #       .format(allow_any, allow_upper, words))
             tags.append("error-unknown-tag")
@@ -275,6 +314,9 @@ def decode_tags(input_tags, allow_any=False, allow_upper=False):
                     if w in valid_sequences:
                         add_new(valid_sequences[w], i, last_i)
             if not new_nodes:
+                if lst[max_last_i] in allowed_unknown_starts:
+                    # These cause the rest to be interpreted as unknown
+                    break
                 # print("RECOVER", w, max_last_i)
                 if w in valid_sequences:
                     add_new(valid_sequences[w], i, max_last_i)
@@ -328,8 +370,6 @@ def add_related(ctx, data, lst, related):
     if related == "[please provide]":
         return
     if related == "-":
-        ctx.warning("add_related: unhandled {} related form {}"
-                    .format(lst, related))
         return
     for related in related.split(" or "):
         if related:
@@ -380,7 +420,7 @@ def parse_word_head(ctx, pos, text, data):
     assert isinstance(pos, str)
     assert isinstance(text, str)
     assert isinstance(data, dict)
-    # print("parse_word_head:", text)
+    # print("PARSE_WORD_HEAD: {}: {}".format(ctx.section, text))
 
     if text.find("Lua execution error") >= 0:
         return
@@ -396,41 +436,31 @@ def parse_word_head(ctx, pos, text, data):
     base = re.sub(r"\(([^()]|\([^(]*\))*\)", " ", text)
     base = re.sub(r"\?", " ", base)  # Removes uncertain articles etc
     base = re.sub(r"\s+", " ", base).strip()
-    descs = map_with(xlat_tags_map, split_at_comma_semi(base))
+    descs = split_at_comma_semi(base)
     for desc_i, desc in enumerate(descs):
         desc = desc.strip()
         if desc_i > 0 and desc.startswith("also "):
             break  # There seems to be exactly one of these, "Benen"
-        for alt in map_with(xlat_tags_map, desc.split(" or ")):
+        for alt in desc.split(" or "):
             baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
-            tagsets_, topics_ = decode_tags([" ".join(baseparts)])
-            if (not any("error-unknown-tag" in x for x in tagsets_) and
-                not topics_ and
-                desc_i > 0):
-                lst = []  # Word form
-                rest = baseparts  # Tags
-            else:
-                rest = []
-                lst = []
-                for i in range(len(baseparts) - 1, -1, -1):
-                    part = baseparts[i]
-                    if part not in xlat_head_map:
-                        lst = baseparts[:i + 1]
-                        break
-                    rest.append(xlat_head_map[part])
-                rest = list(reversed(rest))
-            # print("parse_word_head: lst={} rest={}".format(lst, rest))
-            # lst is canonical form of the word
-            # rest is additional tags (often gender m/f/n/c/...)
-            if lst and title != " ".join(lst):
-                if len(lst) == 3 and lst[1] == "or":
-                    add_related(ctx, data, ["canonical"], [lst[0]])
-                    add_related(ctx, data, ["canonical"], [lst[2]])
-                else:
-                    add_related(ctx, data, ["canonical"], lst)
-            # XXX here we should only look at a subset of tags allowed
-            # in the base
-            add_tags(ctx, data, rest)
+            # For non-first parts, see if it an be treated as tags-only
+            if desc_i > 0:
+                tagsets, topics = decode_tags([" ".join(baseparts)])
+                if (not any("error-unknown-tag" in x for x in tagsets) and
+                    not topics):
+                    for tags in tagsets:
+                        data_extend(ctx, data, "tags", tags)
+                    continue
+            # Treat it as the main canonical head
+            tags = []
+            while len(baseparts) > 1 and baseparts[-1] in xlat_head_map:
+                tags.append(xlat_head_map[baseparts[-1]])
+                baseparts = baseparts[:-1]
+            # print("parse_word_head: baseparts={} tags={}"
+            #       .format(baseparts, tags))
+            if title != " ".join(baseparts):
+                add_related(ctx, data, ["canonical"], baseparts)
+            data_extend(ctx, data, "tags", tags)
 
     # Handle parenthesized descriptors for the word form and links to
     # related words
@@ -438,7 +468,8 @@ def parse_word_head(ctx, pos, text, data):
                   re.finditer(r"\((([^()]|\([^()]*\))*)\)", text))
     for paren in parens:
         paren = paren.strip()
-        descriptors = map_with(xlat_tags_map, [paren])
+        # print("HEAD PAREN:", paren)
+        descriptors = map_with(xlat_descs_map, [paren])
         new_desc = []
         for desc in descriptors:
             new_desc.extend(map_with(xlat_tags_map, split_at_comma_semi(desc)))
@@ -456,68 +487,50 @@ def parse_word_head(ctx, pos, text, data):
                 add_related(ctx, data, ["radical+strokes"], [desc])
                 continue
             parts = list(m.group(0) for m in re.finditer(word_re, desc))
-            nodes = [(valid_sequences, 0, set())]
-            last_i = 0
-            last_tagsets = []
-            i = 0
-            while i < len(parts) and nodes:
-                part = parts[i]
-                w = distw(titleparts, part) # 0=identical .. 1=very different
-                new_nodes = []
+            if not parts:
+                continue
 
-                # Does "or" occur in these?  (I think it might)
-
-                def add_node(node, next_i, tags):
-                    assert isinstance(node, dict)
-                    assert isinstance(next_i, int)
-                    assert isinstance(tags, set)
-                    nonlocal last_i
-                    nonlocal last_tagsets
-                    for node2, next_i2, tags2 in new_nodes:
-                        if (node2 is node and next_i2 == next_i and
-                            tags2 == tags):
+            alt_related = None
+            alt_tagsets = None
+            for i in range(len(parts), 0, -1):
+                related = parts[i:]
+                tagparts = parts[:i]
+                # print("  i={} related={} tagparts={}"
+                #       .format(i, related, tagparts))
+                if tagparts:
+                    tagsets, topics = decode_tags([" ".join(tagparts)])
+                    if (topics or
+                        any("error-unknown-tag" in x for x in tagsets)):
+                        if alt_related is not None:
                             break
-                    else:
-                        new_nodes.append((node, next_i, tags))
-                        # See if we should record this in the best alternatives
-                        if node is valid_sequences:
-                            if next_i > last_i:
-                                last_i = next_i
-                                last_tagsets = [tags]
-                            elif next_i == last_i:
-                                last_tagsets.append(tags)
-
-                for node, next_i, tags in nodes:
-                    if part not in node:
                         continue
-                    # XXX should stop iteration on these
-                    # if ("form-of" in tags or "alt-of" in tags or
-                    #     "compound-of" in tags):
-                    #     continue
-                    if (part != title and part not in titleparts and
-                        (w >= 0.6 or len(part) < 4)):
-                        node = node[part]
-                        if len(node) > 1 or "$" not in node:
-                            add_node(node, next_i, tags)
-                        if "$" in node:
-                            for t in node["$"].get("tags", ()):
-                                new_tags = tags | set(t.split(" "))
-                                add_node(valid_sequences, i + 1, new_tags)
-                nodes = new_nodes
-                i += 1
+                else:
+                    tagsets = [["error-unrecognized-form"]]
+                    break
+                if (i > 1 and
+                    len(parts[i - 1]) >= 4 and
+                    distw(titleparts, parts[i - 1]) <= 0.4):
+                    alt_related = related
+                    alt_tagsets = tagsets
+                    continue
+                alt_related = None
+                alt_tagsets = None
+                break
+            if alt_related is not None:
+                related = alt_related
+                tagsets = alt_tagsets
 
-            if (last_i > 0 and last_i < len(parts) - 1 and
-                parts[last_i] == "of" and
-                "alt-of" not in tags and "form-of" not in tags):
-                tags.add("form-of")
-                last_i = last_i + 1
-
-            # Get the sequence of tokens for the related term
-            related = parts[last_i:]
-
-            for tags in last_tagsets:
-                tags = list(sorted(tags))
+            for tags in tagsets:
                 if related:
+                    # For certain kinds of forms, check if there are e.g. gender
+                    # tags at the end of the form (cf. roep/Dutch diminutive)
+                    for t in ["diminutive"]:
+                        if t in tags:
+                            while (len(related) > 1 and
+                                   related[-1] in xlat_head_map):
+                                tags = (list(tags) +
+                                        xlat_head_map[related[-1]].split())
+                                related = related[:-1]
                     add_related(ctx, data, tags, related)
                 else:
                     data_extend(ctx, data, "tags", tags)
@@ -527,18 +540,20 @@ def parse_sense_tags(ctx, text, data):
     assert isinstance(text, str)
     assert isinstance(data, dict)
     # print("parse_sense_tags:", text)
-    for semi in split_at_comma_semi(text):
-        if not semi:
-            continue
-        tags = map_with(xlat_tags_map, [semi])
-        tagsets, topics = decode_tags(tags, allow_any=True)
-        data_extend(ctx, data, "topics", topics)
-        # XXX should think how to handle distinct options better,
-        # e.g., "singular and plural genitive"; that can't really be
-        # done with changing the calling convention of this function.
-        # XXX should handle cases where it is actually form-of or alt-of
-        for tags in tagsets:
-            data_extend(ctx, data, "tags", tags)
+    lst = map_with(xlat_descs_map, [text])
+    for text in lst:
+        for semi in split_at_comma_semi(text):
+            if not semi:
+                continue
+            tags = map_with(xlat_tags_map, [semi])
+            tagsets, topics = decode_tags(tags, allow_any=True)
+            data_extend(ctx, data, "topics", topics)
+            # XXX should think how to handle distinct options better,
+            # e.g., "singular and plural genitive"; that can't really be
+            # done with changing the calling convention of this function.
+            # XXX should handle cases where it is actually form-of or alt-of
+            for tags in tagsets:
+                data_extend(ctx, data, "tags", tags)
 
 
 def parse_pronunciation_tags(ctx, text, data):
@@ -806,6 +821,7 @@ def parse_alt_or_inflection_of(ctx, gloss):
     base = re.sub(r"\s+with -ra/-re$", "", base)
     base = re.sub(r"\.\s+Used only as .*$", "", base)
     base = re.sub(r"\.\s+Also found in .*$", "", base)
+    base = re.sub(r", obsolete spelling of .*$", "", base)
     # Note: base might still contain comma-separated values and values
     # separated by "and"
     base = base.strip()
