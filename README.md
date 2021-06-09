@@ -550,6 +550,8 @@ following keys (others may also be present or added later):
 * ``senses`` - list of word senses (dictionaries) for this word/part-of-speech (see below)
 * ``forms`` - list of inflected or alternative forms specified for the word (e.g., plural, comparative, superlative, roman script version).  This is a list of dictionaries, where each dictionary has a ``word`` key and a ``tags`` key.  The ``tags`` identify what type of form it is.
 * ``sounds`` - list of dictionaries containing pronunciation, hyphenation, rhyming, and related information.  Each dictionary may have a ``tags`` key containing tags that clarify what kind of form that entry is.  Different types of information are stored in different fields: ``ipa`` is [IPA](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet) pronunciation, ``enPR`` is [enPR](https://en.wikipedia.org/wiki/Pronunciation_respelling_for_English) pronunciation, ``audio`` is name of sound file in Wikimedia commons.
+* ``categories`` - list of non-disambiguated categories for the word
+* ``topics`` - list of non-disambiguated topics for the word
 * ``translations`` - non-disambiguated translation entries (see below)
 * ``synonyms`` - non-disambiguated synonym linkages for the word (see below)
 * ``antonyms`` - non-disambiguated antonym linkages for the word (see below)
@@ -558,10 +560,9 @@ following keys (others may also be present or added later):
 * ``meronyms`` - non-disambiguated linkages indicating having a part (see below) (fairly rare)
 * ``derived`` - non-disambiguated derived word linkages for the word (see below)
 * ``related`` - non-disambiguated related word linkages for the word (see below)
+* ``coordinate_terms`` - non-disambiguated coordinate term linkages for the word (see below)
 * ``wikidata`` - non-disambiguated Wikidata identifer
 * ``wiktionary`` - non-disambiguated page title in Wikipedia (possibly prefixed by language id)
-* ``categories`` - list of non-disambiguated categories for the word
-* ``topics`` - list of non-disambiguated topics for the word
 * ``inflection`` - conjugation and declension entries found for the word, as dictionaries.  These basically capture the language-specific inflection template
 for the word.
 * ``heads``: part-of-speech specific head tags for the word.  This basically just captures the templates (their name and arguments) as a list of dictionaries.  Most applications may want to ignore this.
@@ -585,13 +586,9 @@ Each word entry may have multiple glosses under the ``senses`` key.  Each
 sense is a dictionary that may contain the following keys (among others, and more may be added in the future):
 
 * ``glosses`` - list of gloss strings for the word sense (usually only one).  This has been cleaned, and should be straightforward text with no tagging.
-* ``nonglosses`` - list of gloss-like strings but that are not traditional glossary entries describing the word's meaning
-* ``tags`` - list of qualifiers and tags for the gloss.  This is a list of strings, and may include words such as "archaic", "colloquial", "present", "participle", "plural", "feminine", and many others (new words may appear arbitrarily).  Some effort has been put into trying to canonicalize various sources and styles of annotation into a consistent set of tags, but it is impossible to do an exact job at this.
-* ``senseid`` - list of textual identifiers collected for the sense.  If there is a QID for the entry (e.g., Q123), those are stored in the ``wikidata`` field.
-* ``wikidata`` - list of QIDs (e.g., Q123) for the sense
-* ``wikipedia``- list of Wikipedia page titles (with optional language code prefix)
-* ``categories`` - list of category names extracted from (a subset) of the Category links on the page
-* ``topics`` - list of topic names (kind of similar to categories but determined differently)
+* ``tags`` - list of qualifiers and tags for the gloss.  This is a list of strings, and may include words such as "archaic", "colloquial", "present", "participle", "plural", "feminine", and many others (new words may appear arbitrarily).
+* ``categories`` - list of sense-disambiguated category names extracted from (a subset) of the Category links on the page
+* ``topics`` - list of sense-disambiguated topic names (kind of similar to categories but determined differently)
 * ``alt_of`` - list of words that his sense is an alternative form of; for example, for an abbreviation, this would typically be set to the full form
 * ``form_of`` - list of words that this sense is an inflected form of; for example, a participle form would typically set this to be the base form
 * ``translations`` - sense-disambiguated translation entries (see below)
@@ -600,20 +597,12 @@ sense is a dictionary that may contain the following keys (among others, and mor
 * ``hypernyms`` - sense-disambiguated hypernym linkages for the word (see below)
 * ``holonyms`` - sense-disambiguated linkages indicating being part of something (see below) (not systematically encoded)
 * ``meronyms`` - sense-disambiguated linkages indicating having a part (see below) (fairly rare)
+* ``coordianate_terms`` - sense-disambiguated coordinate_terms linkages (see below)
 * ``derived`` - sense-disambiguated derived word linkages for the word (see below)
 * ``related`` - sense-disambiguated related word linkages for the word (see below)
-
-### Linkages to other words
-
-Linkages (``synonyms``, ``antonyms``, ``hypernyms``, ``derived
-words``, ``holonyms``, ``meronyms``, ``derived``, ``related``) are
-stored in the word's data if not sense-disambiguated, and in the word
-sense if sense-disambiguated.  They are lists of dictionaries, where
-each dictionary can contain the following keys, among others:
-
-* ``word`` - the word this links to (string).  If this starts with "Thesaurus:", then this entry is a link to a thesaurus page in Wiktionary.  If this starts with "Category:", then this refers to a category page in Wiktionary.
-* ``sense`` - text identifying the word sense or context (e.g., ``"to rain very heavily"``).
-* ``tags``: qualifiers specified for the sense (e.g., field of study, region, dialect, style).  This is a list of strings.
+* ``senseid`` - list of textual identifiers collected for the sense.  If there is a QID for the entry (e.g., Q123), those are stored in the ``wikidata`` field.
+* ``wikidata`` - list of QIDs (e.g., Q123) for the sense
+* ``wikipedia``- list of Wikipedia page titles (with optional language code prefix)
 
 ### Pronunciation
 
@@ -621,12 +610,14 @@ Pronunciation information is stored under the ``sounds`` key.  It is a
 list of dictionaries, each of which may contain the following keys,
 among others:
 
-* ``ipa`` - pronunciation specifications as IPA strings
+* ``ipa`` - pronunciation specifications as an IPA string /.../ or [...]
 * ``enpr`` - pronunciation in English pronunciation respelling
 * ``audio`` - name of a sound file in WikiMedia Commons
+* ``audio-ipa`` - IPA string associated with the audio file, generally giving IPA transcription of what is in the sound file
 * ``homophones`` - list of homophones for the word
 * ``hyphenation`` - list of hyphenations
-* ``tags`` - other labels or context information attached to the sense (e.g., regional variant)
+* ``tags`` - other labels or context information attached to the pronunciation entry (e.g., might indicate regional variant or dialect)
+* ``text`` - text associated with an audio file (often not very useful)
 
 ### Translations
 
@@ -635,11 +626,34 @@ data (if not sense-disambiguated) or in the word sense (if
 sense-disambiguated).  They are stored in a list of dictionaries,
 where each dictionary has the following keys (and possibly others):
 
-* ``lang``  the language name that the translation is for
+* ``alt`` - optional alternative form of the translation (e.g., in a different script)
 * ``code`` - Wiktionary's 2 or 3-letter language code for the language the translation is for
-* ``word`` - the translation in the specified language
-* ``sense`` - optional sense for which the translation is (this is a free-text string, and may not match any gloss exactly)
+* ``english`` - English text, generally clarifying the target sense of the translation
+* ``lang``  the language name that the translation is for
+* ``note`` - optional text describing or commenting on the translation
+* ``roman`` - optional romanization of the translation (when in non-Latin characters)
+* ``sense`` - optional sense indicating the meaning for which this is a translation (this is a free-text string, and may not match any gloss exactly)
 * ``tags`` - optional list of qualifiers for the translations, e.g., gender
+* ``taxonomic`` - optional taxonomic name of an organism mentioned in the translation
+* ``word`` - the translation in the specified language (may be missing when ``note`` is present)
+
+### Linkages to other words
+
+Linkages (``synonyms``, ``antonyms``, ``hypernyms``, ``derived
+words``, ``holonyms``, ``meronyms``, ``derived``, ``related``,
+``coordinate_terms``) are stored in the word's data if not
+sense-disambiguated, and in the word sense if sense-disambiguated.
+They are lists of dictionaries, where each dictionary can contain the
+following keys, among others:
+
+* ``alt`` - optional alternative form of the target (e.g., in a different script)
+* ``english`` - optional English text associated with the sense, usually identifying the linked target sense
+* ``roman`` - optional romanization of a linked word in a non-Latin script
+* ``sense`` - text identifying the word sense or context (e.g., ``"to rain very heavily"``)
+* ``tags``: qualifiers specified for the sense (e.g., field of study, region, dialect, style)
+* ``taxonomic``: optional taxonomic name associated with the linkage
+* ``topics``: list of topic descriptors for the linkage (e.g., ``military``)
+* ``word`` - the word this links to (string)
 
 ## Related packages
 
