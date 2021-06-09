@@ -228,6 +228,8 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb):
     # Emit words that occur in thesaurus as main words but for which
     # Wiktionary has no word in the main namespace. This seems to happen
     # sometimes.
+    print("Emitting words that only occur in thesaurus")
+    sys.stdout.flush()
     for (word, lang), linkages in thesaurus_data.items():
         pos_ht = collections.defaultdict(list)
         for x in linkages:
@@ -269,3 +271,5 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb):
                 "source": "thesaurus",
             }
             word_cb(data)
+    print("Reprocessing wiktionary complete")
+    sys.stdout.flush()
