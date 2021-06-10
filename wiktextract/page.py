@@ -2147,13 +2147,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if item.startswith(":"):
                 item = item[1:]
             item = item.strip()
+            base_roman = None
+            base_alt = None
+            base_qualifier = None
 
             # print("    LINKAGE ITEM: {}: {} (sense {})"
             #       .format(field, item, sense))
 
             # Some Korean words use "word (romanized): english" pattern
-            base_roman = None
-            base_alt = None
             m = re.match(r"(.+?) \(([^()]+)\): ([-a-zA-Z0-9,. ]+)$", item)
             if m:
                 base_roman = m.group(2)
@@ -2164,13 +2165,35 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     base_alt = lst[0]
                     base_roman = lst[1]
                 if sense:
-                    sense = sense + "; " + english
+                    sense += "; " + english
                 else:
                     sense = english
 
+            # Many words have tags or similar descriptions in the beginning
+            # followed by a colon and one or more linkages (e.g.,
+            # panetella/Finnish)
+            m = re.match(r"^([a-zA-Z ]+): (.*)$", item)
+            if m:
+                desc, rest = m.groups()
+                cls = classify_desc(desc)
+                if cls == "tags":
+                    if base_qualifier:
+                        base_qualifier += " " + desc
+                    else:
+                        base_qualifier = desc
+                    item = rest
+                elif cls == "english":
+                    if sense:
+                        sense += ";" + english
+                    else:
+                        sense = english
+                    item = rest
+                else:
+                    ctx.debug("unrecognized linkage prefix: {}"
+                              .format(item))
+
             # Various words have a sense or tags in parenthesis (sometimes
             # followed by a colon) at the start of the item
-            base_qualifier = None
             m = re.match(r"\((([^()]|\([^()]*\))*)\):?\s*", item)
             if m:
                 par = m.group(1)
