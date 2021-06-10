@@ -243,6 +243,7 @@ uppercase_tags = set([
     "Connacht",
     "Connemara",
     "Contentin",
+    "Continent",
     "Copenhagen",
     "Cork",
     "Cornwall",

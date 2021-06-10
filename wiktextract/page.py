@@ -650,6 +650,7 @@ tr_ignore_contains = [
     "participle of ",
     "for this sense",
     "depending on the circumstances",
+    "expressed with ",
     " expression ",
     " means ",
     " is used",
@@ -1953,8 +1954,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         assert isinstance(pos, str)
         assert isinstance(section, str)
         subpage_title = word + "/" + subtitle
-        content = ctx.read_by_title(subpage_title)
-        if content is None:
+        subpage_content = ctx.read_by_title(subpage_title)
+        if subpage_content is None:
             ctx.error("/translations not found despite "
                       "{{see translation subpage|...}}")
 
@@ -1975,7 +1976,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     return ret
             return None
 
-        tree = ctx.parse(content, pre_expand=True,
+        tree = ctx.parse(subpage_content, pre_expand=True,
                          additional_expand=additional_expand_templates)
         assert tree.kind == NodeKind.ROOT
         seq = [language, pos, section]
@@ -2595,7 +2596,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         from separate translation subpages."""
         assert isinstance(data, dict)
         assert isinstance(xlatnode, WikiNode)
-        # print("PARSE_TRANSLATIONS:", xlatnode)
+        # print("===== PARSE_TRANSLATIONS {} {}".format(ctx.title, ctx.section))
         if not config.capture_translations:
             return
         sense_parts = []
@@ -2619,8 +2620,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             def translation_item_template_fn(name, ht):
                 nonlocal langcode
-                nonlocal sense_parts
-                nonlocal sense
                 # print("TRANSLATION_ITEM_TEMPLATE_FN:", name, ht)
                 if is_panel_template(name):
                     return ""
@@ -2897,6 +2896,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # XXX capture
                     return ""
                 if name == "see translation subpage":
+                    sense_parts = []
+                    sense = None
                     pos = ht.get(1)
                     if not isinstance(pos, str):
                         ctx.error("no part-of-speech in "
@@ -2978,10 +2979,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         # section.
                         sense_parts = []
                         sense = None
-                    for item in node.children:
-                        if not isinstance(item, WikiNode):
-                            continue
-                        parse_translation_recurse(item)
+                    # for item in node.children:
+                    #     if not isinstance(item, WikiNode):
+                    #         continue
+                    #     parse_translation_recurse(item)
+                    parse_translation_recurse(node)
                 elif kind in LEVEL_KINDS:
                     # Sub-levels will be recursed elsewhere
                     pass
@@ -3023,6 +3025,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if is_panel_template(name):
                 return ""
             return None
+
+        def select_data():
+            """Selects where to store data (pos or etym) based on whether we
+            are inside a pos (part-of-speech)."""
+            if any(x.lower() in part_of_speech_map for x in stack):
+                return pos_data
+            return etym_data
 
         for node in treenode.children:
             if not isinstance(node, WikiNode):
@@ -3070,25 +3079,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     for pdata in pos_datas:
                         data_extend(ctx, pdata, "tags", dt["tags"])
             elif t == "Translations":
-                if stack[-1].lower() in part_of_speech_map:
-                    data = pos_data
-                else:
-                    data = etym_data
+                data = select_data()
                 parse_translations(data, node)
             elif t in ("Declension", "Conjugation", "Inflection", "Mutation"):
                 parse_inflection(node)
             elif pos in linkage_map:
                 rel = linkage_map[pos]
-                if stack[-1].lower() in part_of_speech_map:
-                    data = pos_data
-                else:
-                    data = etym_data
+                data = select_data()
                 parse_linkage(data, rel, node)
             elif pos == "compounds":
-                if stack[-1].lower() in part_of_speech_map:
-                    data = pos_data
-                else:
-                    data = etym_data
+                data = select_data()
                 if config.capture_compounds:
                     parse_linkage(data, "derived", node)
             elif t in ("Anagrams", "Further reading", "References",
@@ -3249,8 +3249,8 @@ def parse_page(ctx, word, text, config):
         # Collect all words from the page.
         datas = parse_language(ctx, config, langnode, lang, lang_code)
 
-        # Do some post-processing on the words.  For example, we may distribute
-        # conjugation information to all the words.
+        # Propagate fields resulting from top-level templates to this
+        # part-of-speech.
         for data in datas:
             if "lang" not in data:
                 ctx.debug("no lang in data: {}".format(data))
@@ -3260,6 +3260,8 @@ def parse_page(ctx, word, text, config):
                 data_extend(ctx, data, k, v)
             by_lang[data["lang"]].append(data)
 
+    # Do some post-processing on the words.  For example, we may distribute
+    # conjugation information to all the words.
     ret = []
     for lang, lang_datas in by_lang.items():
         # If one of the words coming from this article does not have
@@ -3289,7 +3291,7 @@ def parse_page(ctx, word, text, config):
                         (pos == "adj" and cpos == "verb" and
                          any("participle" in s.get("tags", ())
                              for s in dt.get("senses", ())))):
-                        data["conjugation"] = conjs
+                        data["conjugation"] = list(conjs)  # Copy list!
                         break
         # Add topics from the last sense of a language to its other senses,
         # marking them inaccurate as they may apply to all or some sense
@@ -3300,7 +3302,7 @@ def parse_page(ctx, word, text, config):
             for data in lang_datas[:-1]:
                 new_topics = data.get("topics", []) + topics
                 if new_topics:
-                    data["topics"] = new_topics
+                    data["topics"] = list(new_topics)  # Copy list!
         ret.extend(lang_datas)
 
     # Inject linkages from thesaurus entries
