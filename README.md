@@ -589,8 +589,8 @@ sense is a dictionary that may contain the following keys (among others, and mor
 * ``tags`` - list of qualifiers and tags for the gloss.  This is a list of strings, and may include words such as "archaic", "colloquial", "present", "participle", "plural", "feminine", and many others (new words may appear arbitrarily).
 * ``categories`` - list of sense-disambiguated category names extracted from (a subset) of the Category links on the page
 * ``topics`` - list of sense-disambiguated topic names (kind of similar to categories but determined differently)
-* ``alt_of`` - list of words that his sense is an alternative form of; for example, for an abbreviation, this would typically be set to the full form
-* ``form_of`` - list of words that this sense is an inflected form of; for example, a participle form would typically set this to be the base form
+* ``alt_of`` - list of words that his sense is an alternative form of; this is a list of dictionaries, with field ``word`` containing the linked word and optionally ``extra`` containing additional text
+* ``form_of`` - list of words that this sense is an inflected form of; this is a list of dictionaries, with field ``word`` containing the linked word and optionally ``extra`` containing additional text
 * ``translations`` - sense-disambiguated translation entries (see below)
 * ``synonyms`` - sense-disambiguated synonym linkages for the word (see below)
 * ``antonyms`` - sense-disambiguated antonym linkages for the word (see below)

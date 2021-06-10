@@ -755,8 +755,29 @@ def parse_translation_desc(ctx, text, data):
     # import json
     # print("TR:", json.dumps(data, sort_keys=True))
 
+# Regular expression used to strip additional stuff from the end of alt_of and
+# form_of.
+alt_of_form_of_clean_re = re.compile(
+    r"(?s)(" +
+    "|".join([
+        r":",
+        r";",
+        r" - ",
+        r" \(with ",
+        r" with -ra/-re",
+        r"\. Used ",
+        r"\. Also ",
+        r", a ",
+        r", an ",
+        r", the ",
+        r", obsolete ",
+        ]) +
+    r").*$")
+
 def parse_alt_or_inflection_of(ctx, gloss):
-    """Tries to parse an inflection-of or alt-of description."""
+    """Tries to parse an inflection-of or alt-of description.  If successful,
+    this returns (tags, alt-of/inflection-of-dict).  If the description cannot
+    be parsed, this returns None."""
     tags = set()
     nodes = [(valid_sequences, 0)]
     gloss = re.sub(r"\s+", " ", gloss)
@@ -800,7 +821,7 @@ def parse_alt_or_inflection_of(ctx, gloss):
                 last = len(lst)
 
     if last == 0:
-        return [], gloss
+        return None
 
     # It is fairly common for form_of glosses to end with something like
     # "ablative case" or "in instructive case".  Parse that ending.
@@ -816,14 +837,12 @@ def parse_alt_or_inflection_of(ctx, gloss):
                 lst = lst[:-1]
 
     tags = list(sorted(t for t in tags if t))
-    base = " ".join(lst).strip()
-    # Clean up some common additional stuff
-    base = re.sub(r"(?s)(:|;| - ).*", "", base)
-    base = re.sub(r"\s+(with an added emphasis on the person.)", "", base)
-    base = re.sub(r"\s+with -ra/-re$", "", base)
-    base = re.sub(r"\.\s+Used only as .*$", "", base)
-    base = re.sub(r"\.\s+Also found in .*$", "", base)
-    base = re.sub(r", obsolete spelling of .*$", "", base)
+    orig_base = " ".join(lst).strip()
+    # Clean up some extra stuff from the linked word
+    base = re.sub(alt_of_form_of_clean_re, "", orig_base)
+    base = re.sub(r" \([^()]*\)", "", base)  # Remove all (...) groups
+    extra = orig_base[len(base):]
+    extra = re.sub(r"^[- :;,—]+", "", extra)
     # Note: base might still contain comma-separated values and values
     # separated by "and"
     base = base.strip()
@@ -832,15 +851,19 @@ def parse_alt_or_inflection_of(ctx, gloss):
     if base.endswith("(\u201cconjecture\")"):
         base = base[:-14].strip()
         tags.append("conjecture")
-    # XXX the parenthesized groups often contain useful information, such as
-    # English version in quotes
-    base = re.sub(r"\s+\([^()]*\)", "", base)  # Remove all (...) groups
     if base.endswith("."):
-        base = base[:-1]
+        base = base[:-1].strip()
+    if extra.endswith(".") and extra.count(".") == 1:
+        extra = extra[:-1].strip()
     base = base.strip()
     if base.find(".") >= 0:
         ctx.debug(". remains in alt_of/inflection_of: {}".format(base))
-    return tags, base
+    if not base:
+        return tags, None
+    dt = { "word": base }
+    if extra:
+        dt["extra"] = extra
+    return tags, dt
 
 
 def classify_desc(desc):

@@ -1331,12 +1331,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         if len(subglosses) > 1 and "form_of" not in sense_base:
             gl = subglosses[0].strip()
-            infl_tags, infl_base = parse_alt_or_inflection_of(ctx, gl)
-            if infl_base and "form-of" in infl_tags:
-                # Interpret others as a particular form under "inflection of"
-                data_extend(ctx, sense_base, "tags", infl_tags)
-                data_append(ctx, sense_base, "form_of", infl_base)
-                subglosses = subglosses[1:]
+            parsed = parse_alt_or_inflection_of(ctx, gl)
+            if parsed is not None:
+                infl_tags, infl_dt = parsed
+                if infl_dt and "form-of" in infl_tags:
+                    # Interpret others as a particular form under
+                    # "inflection of"
+                    data_extend(ctx, sense_base, "tags", infl_tags)
+                    data_append(ctx, sense_base, "form_of", infl_dt)
+                    subglosses = subglosses[1:]
 
         # Create senses for remaining subglosses
         added = False
@@ -1426,10 +1429,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # aquamarine/German), try to parse the inner glosses as
             # tags for an inflected form.
             if "form-of" in sense_base.get("tags", ()):
-                infl_tags, infl_base = parse_alt_or_inflection_of(ctx, gloss)
-                if not infl_base and infl_tags:
-                    # Interpret as a particular form under "inflection of"
-                    data_extend(ctx, sense_data, "tags", infl_tags)
+                parsed = parse_alt_or_inflection_of(ctx, gloss)
+                if parsed is not None:
+                    infl_tags, infl_dt = parsed
+                    if infl_dt is None and infl_tags:
+                        # Interpret as a particular form under "inflection of"
+                        data_extend(ctx, sense_data, "tags", infl_tags)
 
             if not gloss:
                 #ctx.debug("{}: empty gloss at {}"
@@ -1440,26 +1445,28 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 data_append(ctx, sense_data, "glosses", gloss)
 
             # Check if this gloss describes an alt-of or inflection-of
-            tags, base = parse_alt_or_inflection_of(ctx, gloss)
-            ftags = list(tag for tag in tags if tag != "form-of") # Spurious
-            if "alt-of" in tags:
-                data_extend(ctx, sense_data, "tags", ftags)
-                data_append(ctx, sense_data, "alt_of", base)
-            elif "compound-of" in tags:
-                data_extend(ctx, sense_data, "tags", ftags)
-                data_append(ctx, sense_data, "compound_of", base)
-            elif "synonym-of" in tags:
-                dt = { "word": base }
-                data_extend(ctx, dt, "tags", ftags)
-                data_append(ctx, sense_data, "synonyms", dt)
-            elif tags and base.startswith("of "):
-                base = base[3:]
-                data_append(ctx, sense_data, "tags", "form-of")
-                data_extend(ctx, sense_data, "tags", ftags)
-                data_append(ctx, sense_data, "form_of", base)
-            elif "form-of" in tags:
-                data_extend(ctx, sense_data, "tags", tags)
-                data_append(ctx, sense_data, "form_of", base)
+            parsed = parse_alt_or_inflection_of(ctx, gloss)
+            if parsed is not None:
+                tags, dt = parsed
+                if dt is not None:
+                    ftags = list(tag for tag in tags if tag != "form-of")
+                    if "alt-of" in tags:
+                        data_extend(ctx, sense_data, "tags", ftags)
+                        data_append(ctx, sense_data, "alt_of", dt)
+                    elif "compound-of" in tags:
+                        data_extend(ctx, sense_data, "tags", ftags)
+                        data_append(ctx, sense_data, "compound_of", dt)
+                    elif "synonym-of" in tags:
+                        data_extend(ctx, dt, "tags", ftags)
+                        data_append(ctx, sense_data, "synonyms", dt)
+                    elif tags and dt.get("word", "").startswith("of "):
+                        dt["word"] = dt["word"][3:]
+                        data_append(ctx, sense_data, "tags", "form-of")
+                        data_extend(ctx, sense_data, "tags", ftags)
+                        data_append(ctx, sense_data, "form_of", dt)
+                    elif "form-of" in tags:
+                        data_extend(ctx, sense_data, "tags", tags)
+                        data_append(ctx, sense_data, "form_of", dt)
 
         if push_sense():
             added = True

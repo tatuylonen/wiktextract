@@ -365,3 +365,7 @@ Eliminate Category: links from linkages (e.g., "pluralia tantum"/English)
 
 Handle " / " as a separator in linkages; see be/Faroese/related
 (Latin-script letter names)
+
+Implement better parsing of compound_of base.  There are over 135k
+compound_of entries in Wiktionary, so this is common enough to care
+about.
