@@ -1840,6 +1840,7 @@ xlat_tags_map = {
     "alternative verbal noun of": "alt-of verbal-noun",
     "alternative conjugation of": "alt-of alternative",
     "abbreviation of": "alt-of abbreviation",
+    "Short for": "alt-of abbreviation",
     "eclipsed form of": "alt-of abbreviation eclipsis",
     "apocopic form of": "alt-of abbreviation apocope",
     "h-prothesized form of": "alt-of prothesis",

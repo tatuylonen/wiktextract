@@ -850,6 +850,10 @@ def parse_alt_or_inflection_of(ctx, gloss):
     base = re.sub(r" \([^()]*\)", "", base)  # Remove all (...) groups
     extra = orig_base[len(base):]
     extra = re.sub(r"^[- :;,—]+", "", extra)
+    if extra.startswith("(") and extra.endswith(")"):
+        extra = extra[1:-1]
+    if extra.startswith('“') and extra.endswith('"'):
+        extra = extra[1:-1]
     # Note: base might still contain comma-separated values and values
     # separated by "and"
     base = base.strip()
