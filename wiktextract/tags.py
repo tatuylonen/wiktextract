@@ -1939,6 +1939,7 @@ xlat_tags_map = {
     "archaic or poetic": "archaic poetic",
     "archaic or dialectal": "archaic dialectal",
     "archaic or literary": "archaic literary",
+    "archaic or Britain": "archaic Britain",
     "most dialects": "dialectal",
     "most dialects of Ripuarian": "dialectal",
     "some dialects": "dialectal",
@@ -2265,6 +2266,7 @@ valid_tags = set([
     "dative",
     "debitive",
     "defective",
+    "deferential",
     "definite",
     "definition",
     "definitive",  # XXX is this used same as "definite", opposite indefinite?
@@ -2469,6 +2471,7 @@ valid_tags = set([
     "nominative",
     "non-past",
     "non-scientific",
+    "nondeferential",
     "nonstandard",
     "nonvirile",
     "not-attributive",
