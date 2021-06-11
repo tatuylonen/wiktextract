@@ -269,7 +269,7 @@ def decode_tags(input_tags, allow_any=False, allow_upper=False):
         if (not allow_any and
             (not allow_upper or not all(x[0].isupper() for x in words)) and
             not words[0].startswith("~") and
-            words[0] not in allowed_unknown_starts):
+            (words[0] not in allowed_unknown_starts or len(words) <= 1)):
             # print("ERR allow_any={} allow_upper={} words={}"
             #       .format(allow_any, allow_upper, words))
             tags.append("error-unknown-tag")

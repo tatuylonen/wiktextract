@@ -2100,6 +2100,14 @@ xlat_tags_map = {
     "+ past participle in translative or partitive":
     "with-past-participle-translative with-past-participle-partitive",
     "active past part. taitanut": "",
+    "+ passive past participle in translative":
+    "with-passive-past-participle-translative",
+    "+ passive past participle in partitive":
+    "with-passive-past-participle-partitive",
+    "+ active past participle in translative":
+    "with-past-participle-translative",
+    "+ adjective in ablative or allative":
+    "with-adjective with-ablative with-allative",
 }
 
 # This mapping is applied to full descriptions before splitting by comma
@@ -2120,6 +2128,9 @@ xlat_descs_map = {
     "with-infinitive with-indicative with-conditional",
     "transitive, auxiliary + first infinitive, active past part. taitanut or tainnut":
     "transitive, auxiliary, with-first-infinitive",
+    "elative + 3rd person singular + noun/adjective in nominative or partitive or personal + translative":
+    "with-elative with-third-person-singular",  # XXX very incomplete
+    "in negative sentences": "with-negation",
 }
 
 # Words that are interpreted as tags at the beginning of a linkage
@@ -2701,6 +2712,8 @@ valid_tags = set([
     "with-others",
     "with-partitive",
     "with-passive-present-participle",
+    "with-passive-past-participle-partitive",
+    "with-passive-past-participle-translative",
     "with-past-participle",
     "with-past-participle-translative",
     "with-past-participle-partitive",

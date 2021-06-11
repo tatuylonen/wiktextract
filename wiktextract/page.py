@@ -1377,6 +1377,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             def sense_repl(m):
                 par = m.group(1)
                 cls = classify_desc(par)
+                # print("sense_repl: {} -> {}".format(par, cls))
                 if cls == "tags":
                     parse_sense_tags(ctx, par, sense_data)
                     return ""
