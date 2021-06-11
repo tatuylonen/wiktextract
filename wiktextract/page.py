@@ -2458,6 +2458,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             english = eng
                             item1 = item1[idx + 3:]
 
+                # Parse linkages with "value - english" syntax (e.g.,
+                # man/Faroese)
+                idx = item1.find(" - ")
+                if idx >= 0:
+                    eng = item1[idx + 3:]
+                    if classify_desc(eng) == "english":
+                        english = eng
+                        item1 = item1[:idx]
+
                 if item1.startswith("see Thesaurus:"):
                     item1 = item1[14:]
                 elif item1.startswith("see also Thesaurus:"):

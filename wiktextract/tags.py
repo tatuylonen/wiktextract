@@ -1502,6 +1502,8 @@ xlat_tags_map = {
     "indicative/subjunctive": "indicative subjunctive",
     "second/third-person": "second-person third-person",
     "singular/plural": "singular plural",
+    "in the singular": "singular",
+    "in the plural": "plural",
     "dual/plural": "dual plural",
     "collective or in the plural": "collective in-plural",
     "in the plural": "in-plural",
