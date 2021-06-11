@@ -379,3 +379,5 @@ conditional mood" at the end of linkage)
 
 Check Swahili suffixes in translations (e.g., "m or wa" in
 man/English/Translations "adult male human")
+
+Handle man/Dutch forms "mannetje n" (gender suffixes inside "or")

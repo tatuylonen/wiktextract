@@ -2473,6 +2473,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     item1 = item1[19:]
                 elif item1.startswith("Thesaurus:"):
                     item1 = item1[10:]
+                elif item1.startswith("see more at Thesaurus:"):
+                    item1 = item1[22:]
 
                 while True:
                     if item1.endswith(" f"):
