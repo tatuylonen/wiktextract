@@ -2141,6 +2141,11 @@ linkage_beginning_tags = {
     "factitive": "factive",  # Not sure if same or different as factive
     "causative": "causative",
     "reflexive": "reflexive",
+    "frequentative": "frequentative",
+    "optative": "optative",
+    "affirmative": "affirmative",
+    "cohortative": "cohortative",
+    "optative": "optative",
 }
 
 valid_tags = set([

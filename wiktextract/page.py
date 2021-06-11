@@ -2319,6 +2319,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 roman = base_roman  # Usually None
                 alt = base_alt  # Usually None
                 taxonomic = None
+                english = None
 
                 words = item1.split(" ")
                 if len(words) > 1 and words[0] in linkage_beginning_tags:
@@ -2442,6 +2443,21 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         else:
                             alt = par
 
+                # Parse linkages with "value = english" syntax (e.g.,
+                # väittää/Finnish)
+                idx = item1.find(" = ")
+                if idx >= 0:
+                    eng = item1[idx + 3:]
+                    if classify_desc(eng) == "english":
+                        english = eng
+                        item1 = item1[:idx]
+                    else:
+                        # Some places seem to use it reversed "english = value"
+                        eng = item1[:idx]
+                        if classify_desc(eng) == "english":
+                            english = eng
+                            item1 = item1[idx + 3:]
+
                 if item1.startswith("see Thesaurus:"):
                     item1 = item1[14:]
                 elif item1.startswith("see also Thesaurus:"):
@@ -2514,6 +2530,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         dt["ruby"] = ruby
                     if alt:
                         dt["alt"] = alt
+                    if english:
+                        dt["english"] = english
                     if taxonomic:
                         dt["taxonomic"] = taxonomic
                     for old in data.get(field, ()):
