@@ -678,6 +678,7 @@ uppercase_tags = set([
     "Old Bohairic",
     "Old Chamorro",
     "Old Egyptian",
+    "Old English",
     "Old Northern French",
     "Old Tagalog",
     "Oliti",
