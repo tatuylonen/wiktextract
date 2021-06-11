@@ -2133,7 +2133,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             elif item.startswith("Appendix:"):
                 item = ""
                 have_linkages = True
-            elif item.startswith("Category:"):
+            elif item.startswith("Category:") or item.startswith(":Category:"):
                 item = ""
                 have_linkages = True
             elif item.startswith("Entries in the "):
