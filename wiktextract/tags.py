@@ -1402,6 +1402,7 @@ xlat_tags_map = {
     "plus absolutive": "with-absolutive",
     "+elative": "with-elative",
     "+ elative": "with-elative",
+    "elative +": "with-elative",
     "+ [elative]": "with-elative",
     "with elative case": "with-elative",
     "with elative": "with-elative",
