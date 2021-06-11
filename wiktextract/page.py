@@ -2465,54 +2465,73 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 elif item1.startswith("Thesaurus:"):
                     item1 = item1[10:]
 
-                if item1.endswith(" f"):
-                    item1 = item1[:-2]
-                    if qualifier:
-                        qualifier += " feminine"
+                while True:
+                    if item1.endswith(" f"):
+                        item1 = item1[:-2]
+                        if qualifier:
+                            qualifier += " feminine"
+                        else:
+                            qualifier = "feminine"
+                    elif item1.endswith(" m"):
+                        item1 = item1[:-2]
+                        if qualifier:
+                            qualifier += " masculine"
+                        else:
+                            qualifier = "masculine"
+                    elif item1.endswith(" n"):
+                        item1 = item1[:-2]
+                        if qualifier:
+                            qualifier += " neuter"
+                        else:
+                            qualifier = "neuter"
+                    elif item1.endswith(" c"):
+                        item1 = item1[:-2]
+                        if qualifier:
+                            qualifier += " common"
+                        else:
+                            qualifier = "common"
+                    elif item1.endswith(" pl"):
+                        item1 = item1[:-3]
+                        if qualifier:
+                            qualifier += " plural"
+                        else:
+                            qualifier = "plural"
+                    elif item1.endswith(" sg"):
+                        item1 = item1[:-3]
+                        if qualifier:
+                            qualifier += " singular"
+                        else:
+                            qualifier = "singular"
+                    elif item1.endswith(" - adj."):
+                        item1 = item1[:-7]
+                        if qualifier:
+                            qualifier += " adjective"
+                        else:
+                            qualifier = "adjective"
+                        break
+                    elif item1.endswith(" - n."):
+                        item1 = item1[:-5]
+                        if qualifier:
+                            qualifier += " noun"
+                        else:
+                            qualifier = "noun"
+                        break
+                    elif item1.endswith(" - adv."):
+                        item1 = item1[:-7]
+                        if qualifier:
+                            qualifier += " adverb"
+                        else:
+                            qualifier = "adverb"
+                        break
+                    elif item1.endswith(" - v."):
+                        item1 = item1[:-5]
+                        if qualifier:
+                            qualifier += " verb"
+                        else:
+                            qualifier = "verb"
+                        break
                     else:
-                        qualifier = "feminine"
-                elif item1.endswith(" m"):
-                    item1 = item1[:-2]
-                    if qualifier:
-                        qualifier += " masculine"
-                    else:
-                        qualifier = "masculine"
-                elif item1.endswith(" n"):
-                    item1 = item1[:-2]
-                    if qualifier:
-                        qualifier += " neuter"
-                    else:
-                        qualifier = "neuter"
-                elif item1.endswith(" c"):
-                    item1 = item1[:-2]
-                    if qualifier:
-                        qualifier += " common"
-                    else:
-                        qualifier = "common"
-                elif item1.endswith(" - adj."):
-                    item1 = item1[:-7]
-                    if qualifier:
-                        qualifier += " adjective"
-                    else:
-                        qualifier = "adjective"
-                elif item1.endswith(" - n."):
-                    item1 = item1[:-5]
-                    if qualifier:
-                        qualifier += " noun"
-                    else:
-                        qualifier = "noun"
-                elif item1.endswith(" - adv."):
-                    item1 = item1[:-7]
-                    if qualifier:
-                        qualifier += " adverb"
-                    else:
-                        qualifier = "adverb"
-                elif item1.endswith(" - v."):
-                    item1 = item1[:-5]
-                    if qualifier:
-                        qualifier += " verb"
-                    else:
-                        qualifier = "verb"
+                        break
 
                 if not item1:
                     continue
