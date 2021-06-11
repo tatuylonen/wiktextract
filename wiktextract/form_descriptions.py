@@ -569,10 +569,10 @@ def parse_pronunciation_tags(ctx, text, data):
     data_extend(ctx, data, "topics", topics)
 
 
-def parse_translation_desc(ctx, text, data):
+def parse_translation_desc(ctx, text, tr):
     assert isinstance(ctx, Wtp)
     assert isinstance(text, str)
-    assert isinstance(data, dict)
+    assert isinstance(tr, dict)
     # print("parse_translation_desc:", text)
 
     # Process all parenthesized parts from the translation item
@@ -596,8 +596,8 @@ def parse_translation_desc(ctx, text, data):
                     # contains digits or their combinations.  We assume such
                     # to be sense descriptions if no sense has been selected,
                     # or otherwise just ignore them.
-                    if not data.get("sense"):
-                        data["sense"] = par
+                    if not tr.get("sense"):
+                        tr["sense"] = par
                     continue
             else:
                 # No more parenthesized expressions - break out of the loop
@@ -622,15 +622,15 @@ def parse_translation_desc(ctx, text, data):
                 if (cls == "romanization" or
                     (cls == "english" and len(r.split()) == 1 and
                      r[0].islower())):
-                    if data.get("alt"):
+                    if tr.get("alt"):
                         ctx.warning("more than one value in \"alt\": {} vs. {}"
-                                    .format(data["alt"], a))
-                    data["alt"] = lst[0]
-                    if data.get("roman"):
+                                    .format(tr["alt"], a))
+                    tr["alt"] = lst[0]
+                    if tr.get("roman"):
                         ctx.warning("more than one value in \"roman\": "
                                     "{} vs. {}"
-                                    .format(data["roman"], r))
-                    data["roman"] = lst[1]
+                                    .format(tr["roman"], r))
+                    tr["roman"] = lst[1]
                     continue
 
         # Check for certain comma-separated tags combined with English text
@@ -640,16 +640,16 @@ def parse_translation_desc(ctx, text, data):
             if cls == "tags":
                 tagsets, topics = decode_tags([lst[0]])
                 for t in tagsets:
-                    data_extend(ctx, data, "tags", t)
-                data_extend(ctx, data, "topics", topics)
+                    data_extend(ctx, tr, "tags", t)
+                data_extend(ctx, tr, "topics", topics)
                 lst = lst[1:]
                 continue
             cls = classify_desc(lst[-1])
             if cls == "tags":
                 tagsets, topics = decode_tags([lst[-1]])
                 for t in tagsets:
-                    data_extend(ctx, data, "tags", t)
-                data_extend(ctx, data, "topics", topics)
+                    data_extend(ctx, tr, "tags", t)
+                data_extend(ctx, tr, "topics", topics)
                 lst = lst[:-1]
                 continue
             break
@@ -673,8 +673,8 @@ def parse_translation_desc(ctx, text, data):
         if cls == "tags":
             tagsets, topics = decode_tags([par])
             for tags in tagsets:
-                data_extend(ctx, data, "tags", tags)
-            data_extend(ctx, data, "topics", topics)
+                data_extend(ctx, tr, "tags", tags)
+            data_extend(ctx, tr, "topics", topics)
         elif cls == "english":
             # If the text contains any of certain grammatical words, treat it
             # as a "note" instead of "english"
@@ -686,25 +686,25 @@ def parse_translation_desc(ctx, text, data):
             else:
                 # There can be more than one parenthesized english item, see
                 # e.g. Aunt/English/Translations/Tamil
-                if data.get("english"):
-                    data["english"] += "; " + par
+                if tr.get("english"):
+                    tr["english"] += "; " + par
                 else:
-                    data["english"] = par
+                    tr["english"] = par
         elif cls == "romanization":
-            if data.get("roman"):
+            if tr.get("roman"):
                 ctx.warning("more than one value in \"roman\": {} vs. {}"
-                            .format(data["roman"], par))
-            data["roman"] = par
+                            .format(tr["roman"], par))
+            tr["roman"] = par
         elif cls == "taxonomic":
-            if data.get("taxonomic"):
+            if tr.get("taxonomic"):
                 ctx.warning("more than one value in \"taxonomic\": {} vs. {}"
-                            .format(data["taxonomic"], par))
-            data["taxonomic"] = par
+                            .format(tr["taxonomic"], par))
+            tr["taxonomic"] = par
         elif cls == "other":
-            if data.get("alt"):
+            if tr.get("alt"):
                 ctx.warning("more than one value in \"alt\": {} vs. {}"
-                            .format(data["alt"], par))
-            data["alt"] = par
+                            .format(tr["alt"], par))
+            tr["alt"] = par
         else:
             ctx.warning("parse_translation_desc: unimplemented cls: {}: {}"
                         .format(par, cls))
@@ -716,45 +716,51 @@ def parse_translation_desc(ctx, text, data):
             lst = lst[:-1]
             continue
         if lst[-1] in xlat_head_map:
-            data_extend(ctx, data, "tags", xlat_head_map[lst[-1]].split())
+            data_extend(ctx, tr, "tags", xlat_head_map[lst[-1]].split())
             lst = lst[:-1]
             continue
         break
     text = " ".join(lst)
 
     if note:
-        data["note"] = note
+        tr["note"] = note
     if text and text not in ignored_translations:
-        data["word"] = text
+        tr["word"] = text
 
     # Sometimes gender seems to be at the end of "roman" field, see e.g.
     # fire/English/Noun/Translations/Egyptian (for "oxidation reaction")
-    roman = data.get("roman")
+    roman = tr.get("roman")
     if roman:
         if roman.endswith(" f"):
-            data_append(ctx, data, "tags", "feminine")
-            data["roman"] = roman[:-2]
+            data_append(ctx, tr, "tags", "feminine")
+            tr["roman"] = roman[:-2]
         elif roman.endswith(" m"):
-            data_append(ctx, data, "tags", "masculine")
-            data["roman"] = roman[:-2]
+            data_append(ctx, tr, "tags", "masculine")
+            tr["roman"] = roman[:-2]
 
     # If the word now has "english" field but no "roman" field, and
     # the word would be classified "other" (generally non-latin
     # characters), and the value in "english" is only one lowercase
     # word, move it to "roman".  This happens semi-frequently when the
     # translation is transliterated the same as some English word.
-    roman = data.get("roman")
-    english = data.get("english")
-    if english and not roman and "word" in data:
-        cls = classify_desc(data["word"])
+    roman = tr.get("roman")
+    english = tr.get("english")
+    if english and not roman and "word" in tr:
+        cls = classify_desc(tr["word"])
         if (cls == "other" and
             english.find(" ") < 0 and
             english[0].islower()):
-            del data["english"]
-            data["roman"] = english
+            del tr["english"]
+            tr["roman"] = english
+
+    # If the entry now has both tr["roman"] and tr["word"] and they have
+    # the same value, delete tr["roman"] (e.g., man/English/Translations
+    # Evenki)
+    if tr.get("word") and tr.get("roman") == tr.get("word"):
+        del tr["roman"]
 
     # import json
-    # print("TR:", json.dumps(data, sort_keys=True))
+    # print("TR:", json.dumps(tr, sort_keys=True))
 
 # Regular expression used to strip additional stuff from the end of alt_of and
 # form_of.
