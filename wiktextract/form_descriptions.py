@@ -268,6 +268,7 @@ def decode_tags(input_tags, allow_any=False, allow_upper=False):
         tags.append(tag)
         if (not allow_any and
             (not allow_upper or not all(x[0].isupper() for x in words)) and
+            not words[0].startswith("~") and
             words[0] not in allowed_unknown_starts):
             # print("ERR allow_any={} allow_upper={} words={}"
             #       .format(allow_any, allow_upper, words))
@@ -898,7 +899,9 @@ def classify_desc(desc):
     tagsets, topics = decode_tags([desc])
     for tagset in tagsets:
         assert isinstance(tagset, (list, tuple, set))
-        if (tagset or topics) and "error-unknown-tag" not in tagset:
+        if ((tagset or topics) and
+            "error-unknown-tag" not in tagset and
+            any(x.find(" ") < 0 for x in tagset)):
             return "tags"
     # If all words are in our English dictionary, interpret as English
     tokens = tokenizer.tokenize(desc)

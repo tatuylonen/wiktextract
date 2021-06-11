@@ -369,3 +369,10 @@ Handle " / " as a separator in linkages; see be/Faroese/related
 Implement better parsing of compound_of base.  There are over 135k
 compound_of entries in Wiktionary, so this is common enough to care
 about.
+
+Use something similar to tr "note" detection in linkages (e.g.,
+pitää/Finnish search +).  Also, the parenthesized tags in Derived
+terms as subheadings are currently not handled.
+
+Check linkage "to deserve" in saada/Finnish ("in indicate or
+conditional mood" at the end of linkage)

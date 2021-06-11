@@ -1166,6 +1166,7 @@ xlat_tags_map = {
     "simple past": "simple past",
     "simple present": "simple present",
     "with verb in simple tense": "with-simple",
+    "in simple past tense": "simple past",
     "for most verbs": "usually",
     "genitive/dative": "genitive dative",
     "dative/locative": "dative locative",
@@ -1301,12 +1302,16 @@ xlat_tags_map = {
     "defective verb": "defective",
     "+ active 3rd infinitive in elative": "with-third-infinitive-elative",
     "+ active 3rd infinitive in illative": "with-third-infinitive-illative",
-    "+ illative, allative, (verbs) 3rd infinitive in illative":
-    "with-illative with-allative with-third-infinitive-illative",
+    "+ third infinitive in illative": "with-third-infinitive-illative",
+    "+ verb in 3rd infinitive abessive": "with-third-infinitive-abessive",
+    "+ verb in third infinitive illative or adverb":
+    "with-third-infinitive with-illative with-adverb",
     "+ partitive + 3rd person singular": "with-partitive",
     "3rd possessive": "third-person possessive",
     "active voice": "active",
     "+ infinitive": "with-infinitive",
+    "+ first infinitive": "with-first-infinitive",
+    "transitive + first infinitive": "transitive with-first-infinitive",
     "+ a + infinitive": "with-a with-infinitive",
     "+ indicative mood": "with-indicative",
     "+ conditional mood": "with-conditional",
@@ -1315,6 +1320,7 @@ xlat_tags_map = {
     "+genitive": "with-genitive",
     "+ genitive case": "with-genitive",
     "genitive +": "with-genitive",
+    "nominative +": "with-nominative",
     "genitive or possessive suffix +": "with-genitive with-possessive-suffix",
     "with genitive case": "with-genitive",
     "with genitive": "with-genitive",
@@ -1361,6 +1367,28 @@ xlat_tags_map = {
     "+ locative case": "with-locative",
     "with locative": "with-locative",
     "+ illative": "with-illative",
+    "intransitive + illative": "intransitive with-illative",
+    "intransitive + elative": "intransitive with-elative",
+    "intransitive + inessive or adessive":
+    "intransitive with-inessive with-adessive",
+    "intransitive + inessive": "intransitive with-inessive",
+    "intransitive + adessive": "intransitive with-adessive",
+    "intransitive + translative": "intransitive with-translative",
+    "intransitive + partitive or transitive + accusative":
+    "intransitive with-partitive transitive with-accusative",
+    "transitive + partitive": "transitive with-partitive",
+    "transitive + partitive + essive":
+    "transitive with-partitive with-essive",
+    "transitive + elative + kiinni":
+    "transitive with-elative",
+    "transitive (+ yllään) + partitive":
+    "transitive with-partitive",
+    "transitive + accusative": "transitive with-accusative",
+    "transitive + elative": "transitive with-elative",
+    "illative + 3rd-person singular":
+    "with-illative with-third-person-singular",
+    "partitive + 3rd-person singular":
+    "with-partitive with-third-person-singular",
     "+ translative": "with-translative",
     "+ negative adjective in translative": "with-translative",
     "with negation": "with-negation",
@@ -1378,6 +1406,7 @@ xlat_tags_map = {
     "with elative case": "with-elative",
     "with elative": "with-elative",
     "plus elative": "with-elative",
+    "+ essive": "with-essive",
     "+ comparative": "with-comparative",
     "+objective": "with-objective",
     "+ objective": "with-objective",
@@ -1982,6 +2011,7 @@ xlat_tags_map = {
     "collective or singulative": "collective singulative",
     "used formally in Spain": "Spain",
     "nouns": "noun",
+    "phrases": "phrase",
     "with the particle lai": "with-lai",
     "adjectives": "adjective",
     "adj": "adjective",
@@ -2053,16 +2083,53 @@ xlat_tags_map = {
     "ideophone": "ideophonic",
     "Alsatian (Low Alemannic German)": "Alsatian",
     "all sects": "",
+    "adessive + 3rd person singular + ~":
+    "with-adessive with-third-person-singular",
+    "inessive + 3rd person singular + ~":
+    "with-inessive with-third-person-singular",
+    "~ (olemassa)": "",
+    "3rd person singular": "third-person singular",
+    "+ genitive + 3rd person singular + passive present participle":
+    "with-genitive with-third-person-singular with-passive-present-participle",
+    "genitive + 3rd-pers. singular + 1st infinitive":
+    "with-genitive with-third-person-singular with-first-infinitive",
+    "+ direct object in accusative + 3rd infinitive in illative":
+    "transitive with-accusative with-third-infinitive-illative",
+    "+ direct object in accusative + past participle in translative or partitive":
+    "transitive with-accusative with-past-participle-translative with-past-participle-partitive",
+    "+ past participle in translative or partitive":
+    "with-past-participle-translative with-past-participle-partitive",
+    "active past part. taitanut": "",
 }
 
 # This mapping is applied to full descriptions before splitting by comma
 xlat_descs_map = {
     "with there, or dialectally it, as dummy subject": "with-dummy-subject",
-    "+ location in inessive, adessive + vehicle in elative":
+    "+ location in inessive, adessive + vehicle in elative, often with pois":
     "with-inessive with-adessive with-elative",
     "+ accusative +, Genitive": "with-accusative with-genitive",
     "with genitive, instrumental or dative case":
     "with-genitive with-instrumental with-dative",
+    "+ illative, allative, (verbs) 3rd infinitive in illative":
+    "with-illative with-allative with-third-infinitive-illative",
+    "(inessive or adessive) + 3rd-pers. sg. + an adverb":
+    "with-inessive with-adessive with-third-person-singular with-adverb",
+    "+ partitive for agent, + allative for target":
+    "with-partitive with-allative",
+    "+ infinitive; in indicative or conditional mood":
+    "with-infinitive with-indicative with-conditional",
+    "transitive, auxiliary + first infinitive, active past part. taitanut or tainnut":
+    "transitive, auxiliary, with-first-infinitive",
+}
+
+# Words that are interpreted as tags at the beginning of a linkage
+linkage_beginning_tags = {
+    "factitive/causative": "factitive causative",
+    "factive/causative": "factive causative",
+    "factive": "factive",
+    "factitive": "factive",  # Not sure if same or different as factive
+    "causative": "causative",
+    "reflexive": "reflexive",
 }
 
 valid_tags = set([
@@ -2120,7 +2187,6 @@ valid_tags = set([
     "cardinal",
     "catenative",
     "causal-final",
-    "causative",
     "causative",
     "chiefly",
     "childish",
@@ -2231,6 +2297,8 @@ valid_tags = set([
     "exclusive",
     "expletive",
     "expressively",
+    "factitive",  # Not sure if same or different as factive
+    "factive",
     "familiar",
     "feminine",
     "fifth-conjugation",
@@ -2348,6 +2416,7 @@ valid_tags = set([
     "mixed-case",
     "modal",
     "modern",
+    "monopersonal",
     "morpheme",
     "morse-code",
     "mostly",
@@ -2398,6 +2467,7 @@ valid_tags = set([
     "optative",
     "ordinal",
     "pa'el-construction",
+    "phrase",
     "participle",
     "particle",
     "partitive",
@@ -2412,6 +2482,7 @@ valid_tags = set([
     "person",
     "personal",
     "phoneme",
+    "phrasal",
     "physical",
     "pi'el-construction",
     "place",
@@ -2571,6 +2642,7 @@ valid_tags = set([
     "with-accusative",
     "with-adessive",
     "with-adjective",
+    "with-adverb",
     "with-allative",
     "with-an",
     "with-avec",
@@ -2593,7 +2665,9 @@ valid_tags = set([
     "with-ellas",
     "with-ellos",
     "with-en",
+    "with-essive",
     "with-eu",
+    "with-first-infinitive",
     "with-for",
     "with-genitive",
     "with-gij",
@@ -2612,6 +2686,7 @@ valid_tags = set([
     "with-locative",
     "with-meel",
     "with-negation",
+    "with-nominative",
     "with-nos",
     "with-nosotras",
     "with-nosotros",
@@ -2625,7 +2700,10 @@ valid_tags = set([
     "with-optative",
     "with-others",
     "with-partitive",
+    "with-passive-present-participle",
     "with-past-participle",
+    "with-past-participle-translative",
+    "with-past-participle-partitive",
     "with-per",
     "with-personal-pronoun",
     "with-por",
@@ -2641,6 +2719,9 @@ valid_tags = set([
     "with-sur",
     "with-dummy-subject",
     "with-third-person",
+    "with-third-person-singular",
+    "with-third-infinitive",
+    "with-third-infinitive-abessive",
     "with-third-infinitive-elative",
     "with-third-infinitive-illative",
     "with-to",

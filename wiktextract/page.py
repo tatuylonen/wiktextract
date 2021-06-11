@@ -21,6 +21,7 @@ from wiktextract.form_descriptions import (
     parse_alt_or_inflection_of,
     parse_translation_desc, xlat_tags_map, valid_tags,
     classify_desc, nested_translations_re, tr_note_re)
+from .tags import linkage_beginning_tags
 
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
@@ -1331,14 +1332,19 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         if len(subglosses) > 1 and "form_of" not in sense_base:
             gl = subglosses[0].strip()
+            if gl.endswith(":"):
+                gl = gl[:-1].strip()
             parsed = parse_alt_or_inflection_of(ctx, gl)
             if parsed is not None:
                 infl_tags, infl_dt = parsed
-                if infl_dt and "form-of" in infl_tags:
+                if infl_dt is not None and "form-of" in infl_tags:
                     # Interpret others as a particular form under
                     # "inflection of"
                     data_extend(ctx, sense_base, "tags", infl_tags)
                     data_append(ctx, sense_base, "form_of", infl_dt)
+                    subglosses = subglosses[1:]
+                elif infl_dt is not None:
+                    data_extend(ctx, sense_base, "tags", infl_tags)
                     subglosses = subglosses[1:]
 
         # Create senses for remaining subglosses
@@ -2013,23 +2019,25 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # print("PARSE_LINKAGE_ITEM: {} ({}): {}"
             #       .format(field, sense, contents))
 
-            qualifier = None
             parts = []
-            roman = None
             ruby = ""
-            alt = None
-            taxonomic = None
+            base_roman = None
+            base_alt = None
+            base_qualifier = None
+
+            # If ``sense`` can be parsed as tags, treat it as tags instead
+            if sense:
+                cls = classify_desc(sense)
+                if cls == "tags":
+                    base_qualifier = sense
+                    sense = None
 
             def item_recurse(contents, italic=False):
                 assert isinstance(contents, (list, tuple))
                 nonlocal have_linkages
                 nonlocal sense
-                nonlocal qualifier
-                nonlocal roman
                 nonlocal ruby
                 nonlocal parts
-                nonlocal alt
-                nonlocal taxonomic
                 # print("ITEM_RECURSE:", contents)
                 for node in contents:
                     if isinstance(node, str):
@@ -2046,7 +2054,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if kind == NodeKind.LIST:
                         if parts:
                             sense1 = clean_node(config, ctx, None, parts)
-                            if sense1.startswith("(") and sense1.endswith("):"):
+                            if sense1.endswith(":"):
+                                sense1 = sense1[:-1].strip()
+                            if sense1.startswith("(") and sense1.endswith(")"):
                                 sense1 = sense1[1:-2].strip()
                             if sense1 == "Translations":
                                 sense1 = None
@@ -2147,12 +2157,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if item.startswith(":"):
                 item = item[1:]
             item = item.strip()
-            base_roman = None
-            base_alt = None
-            base_qualifier = None
 
             # print("    LINKAGE ITEM: {}: {} (sense {})"
             #       .format(field, item, sense))
+
+            # Replace occurrences of ~ in the item by the page title
+            item = re.sub(r" ~ ", " " + ctx.title + " ", item)
+            item = re.sub(r"^~ ", ctx.title + " ", item)
+            item = re.sub(r" ~$", " " + ctx.title, item)
 
             # Some Korean words use "word (romanized): english" pattern
             m = re.match(r"(.+?) \(([^()]+)\): ([-a-zA-Z0-9,. ]+)$", item)
@@ -2172,9 +2184,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # Many words have tags or similar descriptions in the beginning
             # followed by a colon and one or more linkages (e.g.,
             # panetella/Finnish)
-            m = re.match(r"^([a-zA-Z ]+): (.*)$", item)
+            m = re.match(r"^\(?([a-zA-Z ]+)\)?: (.*)$", item)
             if m:
                 desc, rest = m.groups()
+                # print("linkage colon prefix desc={!r} rest={!r}"
+                #      .format(desc, rest))
                 cls = classify_desc(desc)
                 if cls == "tags":
                     if base_qualifier:
@@ -2184,9 +2198,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     item = rest
                 elif cls == "english":
                     if sense:
-                        sense += ";" + english
+                        sense += ";" + desc
                     else:
-                        sense = english
+                        sense = desc
                     item = rest
                 else:
                     ctx.debug("unrecognized linkage prefix: {}"
@@ -2305,11 +2319,31 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 alt = base_alt  # Usually None
                 taxonomic = None
 
+                words = item1.split(" ")
+                if len(words) > 1 and words[0] in linkage_beginning_tags:
+                    t = linkage_beginning_tags[words[0]]
+                    item1 = " ".join(words[1:])
+                    if qualifier:
+                        qualifier += " " + t
+                    else:
+                        qualifier = t
+
                 # Extract quoted English translations (there are also other
                 # kinds of English translations)
                 def english_repl(m):
                     nonlocal sense
+                    nonlocal qualifier
                     v = m.group(1).strip()
+                    # If v is "tags: sense", handle the tags
+                    m = re.match(r"^([a-zA-Z ]+): (.*)$", v)
+                    if m:
+                        desc, rest = m.groups()
+                        if classify_desc(desc) == "tags":
+                            if qualifier:
+                                qualifier += " " + desc
+                            else:
+                                qualifier = desc
+                            v = rest
                     if sense:
                         sense += "; " + v
                     else:
@@ -2575,6 +2609,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     classes = (node.attrs.get("class") or "").split()
                     if "qualifier-content" in classes:
                         sense1 = clean_node(config, ctx, None, node.children)
+                        if sense1.endswith(":"):
+                            sense1 = sense1[:-1].strip()
                         if sense and sense1:
                             ctx.debug("linkage qualifier-content on multiple "
                                       "levels: {!r} and {!r}"
@@ -2646,6 +2682,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if idx > 0:
                     ctx.debug("Skipping translation see also: {}".format(sense))
                     sense = sense[:idx].strip()
+                if sense.endswith(":"):
+                    sense = sense[:-1].strip()
             sense_detail = None
 
             def translation_item_template_fn(name, ht):
