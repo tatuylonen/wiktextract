@@ -2489,6 +2489,30 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         qualifier += " common"
                     else:
                         qualifier = "common"
+                elif item1.endswith(" - adj."):
+                    item1 = item1[:-7]
+                    if qualifier:
+                        qualifier += " adjective"
+                    else:
+                        qualifier = "adjective"
+                elif item1.endswith(" - n."):
+                    item1 = item1[:-5]
+                    if qualifier:
+                        qualifier += " noun"
+                    else:
+                        qualifier = "noun"
+                elif item1.endswith(" - adv."):
+                    item1 = item1[:-7]
+                    if qualifier:
+                        qualifier += " adverb"
+                    else:
+                        qualifier = "adverb"
+                elif item1.endswith(" - v."):
+                    item1 = item1[:-5]
+                    if qualifier:
+                        qualifier += " verb"
+                    else:
+                        qualifier = "verb"
 
                 if not item1:
                     continue
