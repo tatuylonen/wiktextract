@@ -971,7 +971,7 @@ def classify_desc(desc):
     desc1 = re.sub(r"^×([A-Z])", r"\1", desc)
     desc1 = re.sub(r"\s*×.*", "", desc1)
     lst = desc1.split()
-    if lst[0] in known_firsts and len(lst) > 1 and len(lst) < 4:
+    if len(lst) > 1 and len(lst) <= 5 and lst[0] in known_firsts:
         have_non_english = lst[0].lower() not in english_words
         for x in lst[1:]:
             if x in ("A", "B", "C", "D", "E", "F", "I", "II", "III", "IV", "V"):
