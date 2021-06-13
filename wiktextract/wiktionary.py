@@ -6,6 +6,7 @@
 
 import re
 import sys
+import time
 import collections
 from wikitextprocessor import Wtp
 from .page import parse_page, languages_by_name
@@ -47,6 +48,9 @@ translation_suffixes = [
 
 def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
                  thesaurus_data):
+    # Make sure there are no newlines or other strange characters in the
+    # title
+    title = re.sub(r"[\s\000-\037]+", " ", title)
     title = title.strip()
     if capture_cb is not None:
         capture_cb(model, title, text)
@@ -72,7 +76,12 @@ def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
         # XXX Reconstruction pages?
         config1 = WiktionaryConfig(**config_kwargs)
         config1.thesaurus_data = thesaurus_data
+        t = time.time()
         ret = parse_page(ctx, title, text, config1)
+        dur = time.time() - dur
+        if dur > 100:
+            print("====== WARNING: PROCESSING PAGE TOOK {.1f}s: {}"
+                  .format(dur, title))
     stats = config1.to_return()
     for k, v in ctx.to_return().items():
         stats[k] = v
