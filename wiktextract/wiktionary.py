@@ -76,9 +76,9 @@ def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
         # XXX Reconstruction pages?
         config1 = WiktionaryConfig(**config_kwargs)
         config1.thesaurus_data = thesaurus_data
-        t = time.time()
+        start_t = time.time()
         ret = parse_page(ctx, title, text, config1)
-        dur = time.time() - dur
+        dur = time.time() - start_t
         if dur > 100:
             print("====== WARNING: PROCESSING PAGE TOOK {.1f}s: {}"
                   .format(dur, title))
