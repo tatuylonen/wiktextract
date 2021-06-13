@@ -350,11 +350,6 @@ Make sure rtl (right-to-left) and ltr markers are properly inserted
 and matched in words (including translations and linkages), even when
 splitting them.
 
-Change parse_sense_tags to parse_sense_qualifier and all places where
-it is called.  Make it look for taxons and english senses (is sense in
-"english" or "sense", or does that vary?).  Use classify_desc() from
-it.
-
 Handle " / " as a separator in linkages; see be/Faroese/related
 (Latin-script letter names)
 

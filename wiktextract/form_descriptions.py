@@ -179,8 +179,8 @@ for topic in topic_generalize_map.keys():
     add_to_valid_tree(valid_sequences, "topics", topic,
                       re.sub(r" ", "-", topic))
 # Add canonicalized/generalized topic values
-#add_to_valid_tree_mapping(valid_sequences, "topics", topic_generalize_map,
-#                          valid_topics, True)
+add_to_valid_tree_mapping(valid_sequences, "topics", topic_generalize_map,
+                          valid_topics, True)
 
 # Regexp used to find "words" from word heads and linguistic descriptions
 word_re = re.compile(r"[^ ,;()\u200e]+|\(([^()]|\([^()]*\))*\)")
@@ -600,14 +600,21 @@ def parse_sense_qualifier(ctx, text, data):
         for semi in split_at_comma_semi(text):
             if not semi:
                 continue
-            tags = map_with(xlat_tags_map, [semi])
-            tagsets, topics = decode_tags(tags, allow_any=True)
-            data_extend(ctx, data, "topics", topics)
-            # XXX should think how to handle distinct options better,
-            # e.g., "singular and plural genitive"; that can't really be
-            # done with changing the calling convention of this function.
-            for tags in tagsets:
-                data_extend(ctx, data, "tags", tags)
+            cls = classify_desc(semi)
+            if cls == "tags":
+                tags = map_with(xlat_tags_map, [semi])
+                tagsets, topics = decode_tags(tags, allow_any=True)
+                data_extend(ctx, data, "topics", topics)
+                # XXX should think how to handle distinct options better,
+                # e.g., "singular and plural genitive"; that can't really be
+                # done with changing the calling convention of this function.
+                for tags in tagsets:
+                    data_extend(ctx, data, "tags", tags)
+            elif cls == "taxonomic":
+                data_extend(ctx, data, "taxonomic", semi)
+            else:
+                ctx.debug("parse_sense_qualifier: unrecognized qualifier: {}"
+                          .format(text))
 
 
 def parse_pronunciation_tags(ctx, text, data):
@@ -928,6 +935,7 @@ def classify_desc(desc):
     # Empty and whitespace-only strings are treated as "other"
     if not desc.strip():
         return "other"
+
     # Check if it looks like the taxonomic name of a species
     if desc in known_species:
         return "taxonomic"
@@ -952,10 +960,11 @@ def classify_desc(desc):
     tagsets, topics = decode_tags([desc])
     for tagset in tagsets:
         assert isinstance(tagset, (list, tuple, set))
-        if ((tagset or topics) and
-            "error-unknown-tag" not in tagset and
-            any(x.find(" ") < 0 for x in tagset)):
+        if ("error-unknown-tag" not in tagset and
+            (topics or
+             any(x.find(" ") < 0 for x in tagset))):
             return "tags"
+
     # If all words are in our English dictionary, interpret as English
     tokens = tokenizer.tokenize(desc)
     lst = list(x in english_words or x.lower() in english_words or
