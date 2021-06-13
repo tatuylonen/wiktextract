@@ -341,9 +341,6 @@ woman/English/Translations/Yakkha: english in quotes, must remove quotes
 eighty/English/Translations: several words like "Arabic numerals: 80"
 (should parse tags from the part before colon)
 
-orange/English/Translations/Mandarin: check "english", some have
-e.g. "alternative form:"
-
 Make sure rtl (right-to-left) and ltr markers are properly inserted
 and matched in words (including translations and linkages), even when
 splitting them.

@@ -84,7 +84,8 @@ tr_note_re = re.compile(
     "accusative|adessive|inessive|"
     "dialect|dialects|object|subject|predicate|movies|recommended|language|"
     "locative|continuous|simple|continuousness|gerund|subjunctive|"
-    "form|regular|irregular)($|\s)")  # \b does not work at the end???
+    "form|regular|irregular|alternative)($|\s)")
+# \b does not work at the end???
 
 # Words that can be part of form description
 valid_words = set(["or", "and"])
@@ -757,6 +758,8 @@ def parse_translation_desc(ctx, lang, text, tr):
             # If the text contains any of certain grammatical words, treat it
             # as a "note" instead of "english"
             if re.search(tr_note_re, par):
+                if par.endswith(":"):
+                    par = par[:-1]
                 if note:
                     note = note + ";" + par
                 else:
