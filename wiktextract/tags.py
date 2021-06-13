@@ -2360,6 +2360,7 @@ valid_tags = set([
     "exclusive",
     "expletive",
     "expressively",
+    "extinct",  # Uses for taxonomic entries, indicates species is extinct
     "factitive",  # Not sure if same or different as factive
     "factive",
     "familiar",

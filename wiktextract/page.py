@@ -2495,6 +2495,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
                 def add(w, r):
                     nonlocal alt
+                    nonlocal taxonomic
                     nonlocal have_linkages
                     # Filter out certain words that are used in linkages but
                     # are generally not intended as a linked word.
@@ -2518,9 +2519,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 add(w, r)
                             return
                     if re.match(r"×[A-Z]", w):
+                        data_append(ctx, dt, "tags", "extinct")
                         w = w[1:]  # Remove × before dead species names
                     if alt and re.match(r"×[A-Z]", alt):
+                        data_append(ctx, dt, "tags", "extinct")
                         alt = alt[1:]  # Remove × before dead species names
+                    # If we have roman but not alt and the word is ASCII,
+                    # move roman to alt.
+                    if r and not alt and w.isascii():
+                        alt = r
+                        r = None
                     # Add the linkage
                     dt = {"word": w}
                     if qualifier:
@@ -2536,6 +2544,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if english:
                         dt["english"] = english
                     if taxonomic:
+                        if re.match(r"×[A-Z]", taxonomic):
+                            data_append(ctx, dt, "tags", "extinct")
+                            taxonomic = taxonomic[1:]
                         dt["taxonomic"] = taxonomic
                     for old in data.get(field, ()):
                         if dt == old:

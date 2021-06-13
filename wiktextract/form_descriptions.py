@@ -20,6 +20,15 @@ from .english_words import english_words
 # Tokenizer for classify_desc()
 tokenizer = TweetTokenizer()
 
+# Add some additional known taxonomic species names.  Adding the family name
+# here may be the answer if a taxonomic name goes in "alt".
+known_firsts.update([
+    "Citriobatus",
+    "Citrofortunella",
+    "Poncirus",
+    "Tanagra",
+])
+
 # Regexp for finding nested translations from translation items (these are
 # used in, e.g., year/English/Translations/Arabic).  This is actually used
 # in page.py.
@@ -616,6 +625,9 @@ def parse_sense_qualifier(ctx, text, data):
                 for tags in tagsets:
                     data_extend(ctx, data, "tags", tags)
             elif cls == "taxonomic":
+                if re.match(r"×[A-Z]", semi):
+                    data_append(ctx, dt, "tags", "extinct")
+                    semi = semi[1:]
                 data_append(ctx, data, "taxonomic", semi)
             elif cls == "english":
                 data_append(ctx, data, "english", orig_semi)
@@ -765,6 +777,9 @@ def parse_translation_desc(ctx, lang, text, tr):
             if tr.get("taxonomic"):
                 ctx.warning("more than one value in \"taxonomic\": {} vs. {}"
                             .format(tr["taxonomic"], par))
+            if re.match(r"×[A-Z]", par):
+                data_append(ctx, dt, "tags", "extinct")
+                par = par[1:]
             tr["taxonomic"] = par
         elif cls == "other":
             if tr.get("alt"):
@@ -946,7 +961,9 @@ def classify_desc(desc):
     # Check if it looks like the taxonomic name of a species
     if desc in known_species:
         return "taxonomic"
-    lst = desc.split()
+    desc1 = re.sub(r"^×([A-Z])", r"\1", desc)
+    desc1 = re.sub(r"\s*×.*", "", desc1)
+    lst = desc1.split()
     if lst[0] in known_firsts and len(lst) > 1 and len(lst) < 4:
         have_non_english = lst[0].lower() not in english_words
         for x in lst[1:]:
