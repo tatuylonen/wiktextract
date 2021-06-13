@@ -688,6 +688,10 @@ def parse_translation_desc(ctx, lang, text, tr):
             par = par[2:]
         if par.endswith(","):
             par = par[:-1]
+        if par.startswith('"') and par.endswith('"'):
+            par = par[1:-1]
+        elif par.startswith('“') and par.endswith('"'):
+            par = par[1:-1]
         par = par.strip()
 
         # Check for special script pronunciation followed by romanization,

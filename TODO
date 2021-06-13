@@ -333,11 +333,6 @@ stack traceback:
         [C]: in function 'xpcall'
         [string "_sandbox_phase2"]:214: in function <[string "_sandbox_phase2"]:136>
 
-
-linkage: move english from linkage to "english" (now merged with "sense")
-
-woman/English/Translations/Yakkha: english in quotes, must remove quotes
-
 eighty/English/Translations: several words like "Arabic numerals: 80"
 (should parse tags from the part before colon)
 
