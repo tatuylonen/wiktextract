@@ -13,7 +13,8 @@ from .datautils import data_append, data_extend, split_at_comma_semi
 from .taxondata import known_species, known_firsts
 from .topics import valid_topics, topic_generalize_map
 from .tags import (xlat_head_map, valid_tags,
-                   uppercase_tags, xlat_tags_map, xlat_descs_map)
+                   uppercase_tags, xlat_tags_map, xlat_descs_map,
+                   head_final_extra_langs, head_final_extra_map)
 from .english_words import english_words
 
 # Tokenizer for classify_desc()
@@ -26,6 +27,19 @@ nested_translations_re = re.compile(
     r"\s+\((({}): ([^()]|\([^()]+\))+)\)"
     .format("|".join(x for x in xlat_head_map.values()
                      if x and not x.startswith("class-"))))
+
+# Regexp that matches head tag specifiers.  Used to match tags from end of
+# translations and linkages
+head_final_re = re.compile(
+    r"( -)?(( ({}))+( or ({}))*)$".format(
+        "|".join(re.escape(x) for x in xlat_head_map.keys()),
+        "|".join(re.escape(x) for x in xlat_head_map.keys())))
+
+# Regexp used to match head tag specifiers at end of a form for certain
+# languages (particularly Swahili and similar languages).
+head_final_extra_re = re.compile(
+    r" ({})$".format(
+        "|".join(re.escape(x) for x in head_final_extra_map.keys())))
 
 # Parenthesized parts that are ignored in translations
 ignored_parens = set([
@@ -362,7 +376,40 @@ def add_tags(ctx, data, lst, allow_any=False):
         data_extend(ctx, data, "tags", tags)
 
 
+def parse_head_final_tags(ctx, lang, form):
+    """Parses tags that are allowed at the end of a form head from the end
+    of the form.  This can also be used for parsing the final gender etc tags
+    from translations and linkages."""
+    assert isinstance(ctx, Wtp)
+    assert isinstance(lang, str)  # Should be language that "form" is for
+    assert isinstance(form, str)
+
+    tags = []
+
+    # If parsing for certain languages (e.g., Swahili), handle some extra
+    # head-final tags first
+    if lang in head_final_extra_langs:
+        m = re.search(head_final_extra_re, form)
+        if m is not None:
+            tagkeys = m.group(1)
+            form = form[:m.start()]
+            tags.extend(head_final_extra_map[tagkeys].split(" "))
+
+    # Handle normal head-final tags
+    m = re.search(head_final_re, form)
+    if m is not None:
+        tagkeys = m.group(2)
+        form = form[:m.start()]
+        for t in tagkeys.split():
+            if t == "or":
+                continue
+            tags.extend(xlat_head_map[t].split(" "))
+    return form, tags
+
+
 def add_related(ctx, data, lst, related):
+    """Internal helper function for some post-processing entries for related
+    forms (e.g., in word head)."""
     assert isinstance(ctx, Wtp)
     assert isinstance(lst, (list, tuple))
     for x in lst:
@@ -374,9 +421,19 @@ def add_related(ctx, data, lst, related):
         return
     if related == "-":
         return
-    for related in related.split(" or "):
+
+    # Split to altenratives by "or".  However, if the right side of the "or"
+    # is all words that are head tags, then merge with previous alternative.
+    related_alts = []
+    for x in related.split(" or "):
         if not related:
             continue
+        if related_alts and all(y in xlat_head_map for y in x.split(" ")):
+            related_alts[-1] += " or " + x
+        else:
+            related_alts.append(x)
+
+    for related in related_alts:
         m = re.match(r"\((([^()]|\([^()]*\))*)\)\s*", related)
         if m:
             paren = m.group(1)
@@ -409,19 +466,20 @@ def add_related(ctx, data, lst, related):
                     data_extend(ctx, data, "topics", topics2)
                     data_append(ctx, data, "compound", related)
                 else:
-                    tags = list(tags1) + list(tags2)
-                    # Parse trailing head tags from the alternative.  This
-                    # handles gender tags on the left side of "or" in forms.
-                    parts = related.split(" ")
-                    while len(parts) > 1 and parts[-1] in xlat_head_map:
-                        tags.extend(xlat_head_map[parts[-1]].split(" "))
-                        parts = parts[:-1]
-                    related = " ".join(parts)
+                    lang = ctx.section
+                    related, final_tags = parse_head_final_tags(ctx, lang,
+                                                                related)
+                    tags = list(tags1) + list(tags2) + list(final_tags)
                     form = {"form": related}
                     data_extend(ctx, form, "tags", list(sorted(set(tags))))
                     data_extend(ctx, form, "topics", topics1)
                     data_extend(ctx, form, "topics", topics2)
                     data_append(ctx, data, "forms", form)
+                    # Add tags from canonical form into the main entry
+                    if "canonical" in tags:
+                        for x in tags:
+                            if x != "canonical":
+                                data_append(ctx, data, "tags", x)
 
 
 def parse_word_head(ctx, pos, text, data):
@@ -438,6 +496,7 @@ def parse_word_head(ctx, pos, text, data):
     if text.find("Lua timeout error") >= 0:
         return
 
+    language = ctx.section
     title = ctx.title
     titleparts = list(m.group(0) for m in re.finditer(word_re, title))
     if not titleparts:
@@ -462,16 +521,8 @@ def parse_word_head(ctx, pos, text, data):
                     for tags in tagsets:
                         data_extend(ctx, data, "tags", tags)
                     continue
-            # Treat it as the main canonical head
-            tags = []
-            while len(baseparts) > 1 and baseparts[-1] in xlat_head_map:
-                tags.extend(xlat_head_map[baseparts[-1]].split(" "))
-                baseparts = baseparts[:-1]
-            # print("parse_word_head: baseparts={} tags={}"
-            #       .format(baseparts, tags))
             if title != " ".join(baseparts):
                 add_related(ctx, data, ["canonical"], baseparts)
-            data_extend(ctx, data, "tags", tags)
 
     # Handle parenthesized descriptors for the word form and links to
     # related words
@@ -568,8 +619,9 @@ def parse_pronunciation_tags(ctx, text, data):
     data_extend(ctx, data, "topics", topics)
 
 
-def parse_translation_desc(ctx, text, tr):
+def parse_translation_desc(ctx, lang, text, tr):
     assert isinstance(ctx, Wtp)
+    assert isinstance(lang, str)  # The language of ``text``
     assert isinstance(text, str)
     assert isinstance(tr, dict)
     # print("parse_translation_desc:", text)
@@ -709,17 +761,8 @@ def parse_translation_desc(ctx, text, tr):
                         .format(par, cls))
 
     # Check for gender indications in suffix
-    lst = text.strip().split(" ")
-    while len(lst) > 1:
-        if lst[-1] == "or":
-            lst = lst[:-1]
-            continue
-        if lst[-1] in xlat_head_map:
-            data_extend(ctx, tr, "tags", xlat_head_map[lst[-1]].split(" "))
-            lst = lst[:-1]
-            continue
-        break
-    text = " ".join(lst)
+    text, final_tags = parse_head_final_tags(ctx, lang, text)
+    data_extend(ctx, tr, "tags", final_tags)
 
     if note:
         tr["note"] = note

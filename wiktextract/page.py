@@ -18,7 +18,7 @@ from .datautils import (data_append, data_extend, split_at_comma_semi)
 from .disambiguate import disambiguate_clear_cases
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_tags, parse_pronunciation_tags,
-    parse_alt_or_inflection_of,
+    parse_alt_or_inflection_of, parse_head_final_tags,
     parse_translation_desc, xlat_tags_map, valid_tags,
     classify_desc, nested_translations_re, tr_note_re)
 from .tags import linkage_beginning_tags
@@ -2476,78 +2476,19 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 elif item1.startswith("see more at Thesaurus:"):
                     item1 = item1[22:]
 
-                while True:
-                    if item1.endswith(" f"):
-                        item1 = item1[:-2]
-                        if qualifier:
-                            qualifier += " feminine"
-                        else:
-                            qualifier = "feminine"
-                    elif item1.endswith(" m"):
-                        item1 = item1[:-2]
-                        if qualifier:
-                            qualifier += " masculine"
-                        else:
-                            qualifier = "masculine"
-                    elif item1.endswith(" n"):
-                        item1 = item1[:-2]
-                        if qualifier:
-                            qualifier += " neuter"
-                        else:
-                            qualifier = "neuter"
-                    elif item1.endswith(" c"):
-                        item1 = item1[:-2]
-                        if qualifier:
-                            qualifier += " common"
-                        else:
-                            qualifier = "common"
-                    elif item1.endswith(" pl"):
-                        item1 = item1[:-3]
-                        if qualifier:
-                            qualifier += " plural"
-                        else:
-                            qualifier = "plural"
-                    elif item1.endswith(" sg"):
-                        item1 = item1[:-3]
-                        if qualifier:
-                            qualifier += " singular"
-                        else:
-                            qualifier = "singular"
-                    elif item1.endswith(" - adj."):
-                        item1 = item1[:-7]
-                        if qualifier:
-                            qualifier += " adjective"
-                        else:
-                            qualifier = "adjective"
-                        break
-                    elif item1.endswith(" - n."):
-                        item1 = item1[:-5]
-                        if qualifier:
-                            qualifier += " noun"
-                        else:
-                            qualifier = "noun"
-                        break
-                    elif item1.endswith(" - adv."):
-                        item1 = item1[:-7]
-                        if qualifier:
-                            qualifier += " adverb"
-                        else:
-                            qualifier = "adverb"
-                        break
-                    elif item1.endswith(" - v."):
-                        item1 = item1[:-5]
-                        if qualifier:
-                            qualifier += " verb"
-                        else:
-                            qualifier = "verb"
-                        break
+                # Parse certain tags at the end of the linked term
+                lang = ctx.section
+                item1, q = parse_head_final_tags(ctx, lang, item1)
+                if q:
+                    if qualifier:
+                        qualifier += " " + " ".join(q)
                     else:
-                        break
+                        qualifier = " ".join(q)
 
                 if not item1:
-                    continue
+                    continue  # Ignore empty link targets
                 if item1 == word:
-                    continue
+                    continue  # Ignore self-links
 
                 def add(w, r):
                     nonlocal have_linkages
@@ -2964,7 +2905,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         tr["note"] = part
                     else:
                         # Interpret it as an actual translation
-                        parse_translation_desc(ctx, part, tr)
+                        parse_translation_desc(ctx, lang, part, tr)
                         w = tr.get("word")
                         if not w:
                             continue  # Not set or empty

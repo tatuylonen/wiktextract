@@ -24,6 +24,10 @@ xlat_head_map = {
     "pf": "perfective",
     "pf.": "perfective",
     "invariable": "invariable",
+    "n.": "noun",
+    "v.": "verb",
+    "adj.": "adjective",
+    "adv.": "adverb",
     "?": "",
     "1": "class-1",
     "1a": "class-1a",
@@ -46,6 +50,7 @@ xlat_head_map = {
     "15": "class-15",
     "16": "class-16",
     "17": "class-17",
+    "18": "class-18",
     "1/2": "class-1 class-2",
     "3/4": "class-3 class-4",
     "5/6": "class-5 class-6",
@@ -61,6 +66,25 @@ xlat_head_map = {
     "f5": "feminine fifth-declension",
     "m5": "masculine fifth-declension",
     "[uncountable]": "uncountable",
+}
+
+# Languages for which to consider head_final_extra_map
+head_final_extra_langs = set([
+    "Swahili",
+])
+
+head_final_extra_map = {
+    # These are only handled in parse_head_final_tags
+    # and will generally be ignored elsewhere.  These may contain spaces.
+    "m or wa": "class-1 class-2",
+    "m or mi": "class-3 class-4",
+    "ma": "class-5 class-6",
+    "ki or vi": "class-7 class-8",
+    "n": "class-9 class-10",
+    "u": "class-11 class-12 class-14",
+    "ku": "class-15",
+    "pa": "class-16",
+    "mu": "class-18",
 }
 
 # Accepted uppercase tag values.  As tags these are represented with words
@@ -1704,10 +1728,17 @@ xlat_tags_map = {
     "class 15": "class-15",
     "class 16": "class-16",
     "class 17": "class-17",
-    "m-wa class": "m-wa-class",
-    "m-mi class": "m-mi-class",
-    "u class": "u-class",
-    "ki-vi class": "ki-vi-class",
+    "class 18": "class-18",
+    "m-wa class": "class-1 class-2",
+    "m-mi class": "class-3 class-4",
+    "ma class": "class-5 class-6",
+    "ki-vi class": "class-7 class-8",
+    "n class": "class-9 class-10",
+    "u class": "class-11 class-12 class-14",
+    "ku class": "class-15",
+    "pa class": "class-16",
+    # "ku class": "class-17",  # XXX how to distinguish from class-15?
+    "mu class": "class-18",
     "first declension": "first-declension",
     "second declension": "second-declension",
     "third declension": "third-declension",
@@ -2226,6 +2257,7 @@ valid_tags = set([
     "class-15",
     "class-16",
     "class-17",
+    "class-18",
     "class-1a",
     "class-2",
     "class-2a",
@@ -2412,7 +2444,6 @@ valid_tags = set([
     "irregular",
     "jargon",
     "jussive",
-    "ki-vi-class",
     "krama",
     "krama-inggil",
     "krama-ngoko",
@@ -2425,8 +2456,6 @@ valid_tags = set([
     "literary",
     "locative",
     "lower-case",
-    "m-mi-class",
-    "m-wa-class",
     "mainly",
     "masculine",
     "material",
@@ -2643,7 +2672,6 @@ valid_tags = set([
     "type-u",
     "type-up",
     "typography",
-    "u-class",
     "unaugmented",
     "uncommon",
     "uncountable",
