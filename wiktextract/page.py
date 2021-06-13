@@ -2303,6 +2303,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # The item may contain multiple comma-separated linkages
             if base_roman:
                 subitems = [item]
+            elif ctx.title.find(" or ") < 0:
+                subitems = split_at_comma_semi(item, extra=[" or "])
             else:
                 subitems = split_at_comma_semi(item)
             if len(subitems) > 1:  # Would be merged from multiple subitems

@@ -361,8 +361,6 @@ indefinite/English sense (linguistics) designating an unspecified or unidentifie
 Fix linkage parsing for "or" and "Thesaurus:".  See
 indefinite/English, synonyms for sense "vague or unclear"
 
-Eliminate Category: links from linkages (e.g., "pluralia tantum"/English)
-
 Handle " / " as a separator in linkages; see be/Faroese/related
 (Latin-script letter names)
 
@@ -373,6 +371,3 @@ about.
 Use something similar to tr "note" detection in linkages (e.g.,
 pitää/Finnish search +).  Also, the parenthesized tags in Derived
 terms as subheadings are currently not handled.
-
-Check linkage "to deserve" in saada/Finnish ("in indicate or
-conditional mood" at the end of linkage)

@@ -1936,7 +1936,6 @@ xlat_tags_map = {
     "Chinese spelling of": "alt-of China",
     "Mongolian spelling of": "alt-of Mongolia",
     "Leet spelling of": "alt-of Leet",
-    "plural of": "form-of plural",
     "combining form of": "in-compounds form-of",
     "compound of": "compound-of",
     "compound of gerund of": "compound-of",
