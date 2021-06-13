@@ -375,45 +375,53 @@ def add_related(ctx, data, lst, related):
     if related == "-":
         return
     for related in related.split(" or "):
-        if related:
-            m = re.match(r"\((([^()]|\([^()]*\))*)\)\s*", related)
-            if m:
-                paren = m.group(1)
-                related = related[m.end():]
-                tagsets1, topics1 = decode_tags(split_at_comma_semi(paren))
-            else:
-                tagsets1 = [[]]
-                topics1 = []
-            tagsets2, topics2 = decode_tags(lst)
-            for tags1 in tagsets1:
+        if not related:
+            continue
+        m = re.match(r"\((([^()]|\([^()]*\))*)\)\s*", related)
+        if m:
+            paren = m.group(1)
+            related = related[m.end():]
+            tagsets1, topics1 = decode_tags(split_at_comma_semi(paren))
+        else:
+            tagsets1 = [[]]
+            topics1 = []
+        tagsets2, topics2 = decode_tags(lst)
+        for tags1 in tagsets1:
+            assert isinstance(tags1, (list, tuple))
+            for tags2 in tagsets2:
                 assert isinstance(tags1, (list, tuple))
-                for tags2 in tagsets2:
-                    assert isinstance(tags1, (list, tuple))
-                    if "alt-of" in tags2:
-                        data_extend(ctx, data, "tags", tags1)
-                        data_extend(ctx, data, "tags", tags2)
-                        data_extend(ctx, data, "topics", topics1)
-                        data_extend(ctx, data, "topics", topics2)
-                        data_append(ctx, data, "alt_of", related)
-                    elif "form-of" in tags2:
-                        data_extend(ctx, data, "tags", tags1)
-                        data_extend(ctx, data, "tags", tags2)
-                        data_extend(ctx, data, "topics", topics1)
-                        data_extend(ctx, data, "topics", topics2)
-                        data_append(ctx, data, "inflection_of", related)
-                    elif "compound-of" in tags2:
-                        data_extend(ctx, data, "tags", tags1)
-                        data_extend(ctx, data, "tags", tags2)
-                        data_extend(ctx, data, "topics", topics1)
-                        data_extend(ctx, data, "topics", topics2)
-                        data_append(ctx, data, "compound", related)
-                    else:
-                        form = {"form": related}
-                        data_extend(ctx, form, "tags", tags1)
-                        data_extend(ctx, form, "tags", tags2)
-                        data_extend(ctx, form, "topics", topics1)
-                        data_extend(ctx, form, "topics", topics2)
-                        data_append(ctx, data, "forms", form)
+                if "alt-of" in tags2:
+                    data_extend(ctx, data, "tags", tags1)
+                    data_extend(ctx, data, "tags", tags2)
+                    data_extend(ctx, data, "topics", topics1)
+                    data_extend(ctx, data, "topics", topics2)
+                    data_append(ctx, data, "alt_of", related)
+                elif "form-of" in tags2:
+                    data_extend(ctx, data, "tags", tags1)
+                    data_extend(ctx, data, "tags", tags2)
+                    data_extend(ctx, data, "topics", topics1)
+                    data_extend(ctx, data, "topics", topics2)
+                    data_append(ctx, data, "inflection_of", related)
+                elif "compound-of" in tags2:
+                    data_extend(ctx, data, "tags", tags1)
+                    data_extend(ctx, data, "tags", tags2)
+                    data_extend(ctx, data, "topics", topics1)
+                    data_extend(ctx, data, "topics", topics2)
+                    data_append(ctx, data, "compound", related)
+                else:
+                    tags = list(tags1) + list(tags2)
+                    # Parse trailing head tags from the alternative.  This
+                    # handles gender tags on the left side of "or" in forms.
+                    parts = related.split(" ")
+                    while len(parts) > 1 and parts[-1] in xlat_head_map:
+                        tags.extend(xlat_head_map[parts[-1]].split(" "))
+                        parts = parts[:-1]
+                    related = " ".join(parts)
+                    form = {"form": related}
+                    data_extend(ctx, form, "tags", list(sorted(set(tags))))
+                    data_extend(ctx, form, "topics", topics1)
+                    data_extend(ctx, form, "topics", topics2)
+                    data_append(ctx, data, "forms", form)
 
 
 def parse_word_head(ctx, pos, text, data):
@@ -457,7 +465,7 @@ def parse_word_head(ctx, pos, text, data):
             # Treat it as the main canonical head
             tags = []
             while len(baseparts) > 1 and baseparts[-1] in xlat_head_map:
-                tags.append(xlat_head_map[baseparts[-1]])
+                tags.extend(xlat_head_map[baseparts[-1]].split(" "))
                 baseparts = baseparts[:-1]
             # print("parse_word_head: baseparts={} tags={}"
             #       .format(baseparts, tags))
@@ -525,15 +533,6 @@ def parse_word_head(ctx, pos, text, data):
 
             for tags in tagsets:
                 if related:
-                    # For certain kinds of forms, check if there are e.g. gender
-                    # tags at the end of the form (cf. roep/Dutch diminutive)
-                    for t in ["diminutive"]:
-                        if t in tags:
-                            while (len(related) > 1 and
-                                   related[-1] in xlat_head_map):
-                                tags = (list(tags) +
-                                        xlat_head_map[related[-1]].split())
-                                related = related[:-1]
                     add_related(ctx, data, tags, related)
                 else:
                     data_extend(ctx, data, "tags", tags)
@@ -716,7 +715,7 @@ def parse_translation_desc(ctx, text, tr):
             lst = lst[:-1]
             continue
         if lst[-1] in xlat_head_map:
-            data_extend(ctx, tr, "tags", xlat_head_map[lst[-1]].split())
+            data_extend(ctx, tr, "tags", xlat_head_map[lst[-1]].split(" "))
             lst = lst[:-1]
             continue
         break
