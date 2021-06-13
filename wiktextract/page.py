@@ -17,7 +17,8 @@ from .unsupported_titles import unsupported_title_map
 from .datautils import (data_append, data_extend, split_at_comma_semi)
 from .disambiguate import disambiguate_clear_cases
 from wiktextract.form_descriptions import (
-    decode_tags, parse_word_head, parse_sense_tags, parse_pronunciation_tags,
+    decode_tags, parse_word_head, parse_sense_qualifier,
+    parse_pronunciation_tags,
     parse_alt_or_inflection_of, parse_head_final_tags,
     parse_translation_desc, xlat_tags_map, valid_tags,
     classify_desc, nested_translations_re, tr_note_re)
@@ -1371,7 +1372,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # Parse the gloss for this particular sense
             m = re.match(r"^\((([^()]|\([^()]*\))*)\):?\s*", gloss)
             if m:
-                parse_sense_tags(ctx, m.group(1), sense_data)
+                parse_sense_qualifier(ctx, m.group(1), sense_data)
                 gloss = gloss[m.end():].strip()
 
             def sense_repl(m):
@@ -1379,7 +1380,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 cls = classify_desc(par)
                 # print("sense_repl: {} -> {}".format(par, cls))
                 if cls == "tags":
-                    parse_sense_tags(ctx, par, sense_data)
+                    parse_sense_qualifier(ctx, par, sense_data)
                     return ""
                 # Otherwise no substitution
                 return m.group(0)
@@ -1674,7 +1675,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if m:
                     q = m.group(1)
                     outer_text = outer_text[m.end():].strip()
-                    parse_sense_tags(ctx, q, common_data)
+                    parse_sense_qualifier(ctx, q, common_data)
 
                 if outer_text == "A pejorative:":
                     data_append(ctx, common_data, "tags", "perjorative")
@@ -2518,7 +2519,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # Add the linkage
                     dt = {"word": w}
                     if qualifier:
-                        parse_sense_tags(ctx, qualifier, dt)
+                        parse_sense_qualifier(ctx, qualifier, dt)
                     if sense:
                         dt["sense"] = sense
                     if r:

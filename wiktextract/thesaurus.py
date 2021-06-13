@@ -10,7 +10,7 @@ from wikitextprocessor import Wtp, NodeKind, WikiNode, ALL_LANGUAGES
 from .parts_of_speech import part_of_speech_map
 from .page import (linkage_map, linkage_inverses, clean_node,
                    LEVEL_KINDS, languages_by_name, languages_by_code)
-from .form_descriptions import parse_sense_tags
+from .form_descriptions import parse_sense_qualifier
 from .config import WiktionaryConfig
 
 ignored_subtitle_tags_map = {
@@ -168,7 +168,7 @@ def extract_thesaurus_data(ctx, config):
                         if q == item_sense:
                             return ""
                         dt = {}
-                        parse_sense_tags(ctx, q, dt)
+                        parse_sense_qualifier(ctx, q, dt)
                         tags.extend(dt.get("tags", ()))
                         topics.extend(dt.get("topics", ()))
                         return ""

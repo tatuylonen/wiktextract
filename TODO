@@ -355,12 +355,6 @@ it is called.  Make it look for taxons and english senses (is sense in
 "english" or "sense", or does that vary?).  Use classify_desc() from
 it.
 
-Parse tags at beginning of sense in translations, e.g.:
-indefinite/English sense (linguistics) designating an unspecified or unidentified person or thing
-
-Fix linkage parsing for "or" and "Thesaurus:".  See
-indefinite/English, synonyms for sense "vague or unclear"
-
 Handle " / " as a separator in linkages; see be/Faroese/related
 (Latin-script letter names)
 

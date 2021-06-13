@@ -588,11 +588,13 @@ def parse_word_head(ctx, pos, text, data):
                 else:
                     data_extend(ctx, data, "tags", tags)
 
-def parse_sense_tags(ctx, text, data):
+def parse_sense_qualifier(ctx, text, data):
+    """Parses tags or topics for a sense or some other data.  The values are
+    added into the dictionary ``data``."""
     assert isinstance(ctx, Wtp)
     assert isinstance(text, str)
     assert isinstance(data, dict)
-    # print("parse_sense_tags:", text)
+    # print("parse_sense_qualifier:", text)
     lst = map_with(xlat_descs_map, [text])
     for text in lst:
         for semi in split_at_comma_semi(text):
@@ -604,7 +606,6 @@ def parse_sense_tags(ctx, text, data):
             # XXX should think how to handle distinct options better,
             # e.g., "singular and plural genitive"; that can't really be
             # done with changing the calling convention of this function.
-            # XXX should handle cases where it is actually form-of or alt-of
             for tags in tagsets:
                 data_extend(ctx, data, "tags", tags)
 
