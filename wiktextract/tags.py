@@ -71,6 +71,7 @@ xlat_head_map = {
 # Languages for which to consider head_final_extra_map
 head_final_extra_langs = set([
     "Swahili",
+    "Finnish",
 ])
 
 head_final_extra_map = {
@@ -85,6 +86,7 @@ head_final_extra_map = {
     "ku": "class-15",
     "pa": "class-16",
     "mu": "class-18",
+    "in indicative or conditional mood": "in-indicative in-conditional",
 }
 
 # Accepted uppercase tag values.  As tags these are represented with words
@@ -2149,9 +2151,13 @@ xlat_tags_map = {
     "with-past-participle-translative",
     "+ adjective in ablative or allative":
     "with-adjective with-ablative with-allative",
+    "in indicative or conditional mood": "in-indicative in-conditional",
+    "in negative sentences": "with-negation",
 }
 
-# This mapping is applied to full descriptions before splitting by comma
+# This mapping is applied to full descriptions before splitting by comma.
+# Note: these cannot match just part of a description (even when separated
+# by comma or semicolon), as these can contain commas and semicolons.
 xlat_descs_map = {
     "with there, or dialectally it, as dummy subject": "with-dummy-subject",
     "+ location in inessive, adessive + vehicle in elative, often with pois":
@@ -2171,7 +2177,6 @@ xlat_descs_map = {
     "transitive, auxiliary, with-first-infinitive",
     "elative + 3rd person singular + noun/adjective in nominative or partitive or personal + translative":
     "with-elative with-third-person-singular",  # XXX very incomplete
-    "in negative sentences": "with-negation",
 }
 
 # Words that are interpreted as tags at the beginning of a linkage
@@ -2423,6 +2428,8 @@ valid_tags = set([
     "in-certain-phrases",
     "in-compounds",
     "in-plural",
+    "in-indicative",
+    "in-conditional",
     "inalienable",
     "inanimate",
     "inclusive",
