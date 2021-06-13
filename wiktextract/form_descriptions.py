@@ -600,10 +600,15 @@ def parse_sense_qualifier(ctx, text, data):
         for semi in split_at_comma_semi(text):
             if not semi:
                 continue
+            orig_semi = semi
+            idx = semi.find(":")
+            if idx >= 0:
+                semi = semi[:idx]
             cls = classify_desc(semi)
+            # print("parse_sense_qualifier: classify_desc: {} -> {}"
+            #       .format(semi, cls))
             if cls == "tags":
-                tags = map_with(xlat_tags_map, [semi])
-                tagsets, topics = decode_tags(tags, allow_any=True)
+                tagsets, topics = decode_tags([semi])
                 data_extend(ctx, data, "topics", topics)
                 # XXX should think how to handle distinct options better,
                 # e.g., "singular and plural genitive"; that can't really be
@@ -611,7 +616,9 @@ def parse_sense_qualifier(ctx, text, data):
                 for tags in tagsets:
                     data_extend(ctx, data, "tags", tags)
             elif cls == "taxonomic":
-                data_extend(ctx, data, "taxonomic", semi)
+                data_append(ctx, data, "taxonomic", semi)
+            elif cls == "english":
+                data_append(ctx, data, "english", orig_semi)
             else:
                 ctx.debug("parse_sense_qualifier: unrecognized qualifier: {}"
                           .format(text))
