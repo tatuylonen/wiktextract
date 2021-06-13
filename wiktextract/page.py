@@ -2494,6 +2494,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     continue  # Ignore self-links
 
                 def add(w, r):
+                    nonlocal alt
                     nonlocal have_linkages
                     # Filter out certain words that are used in linkages but
                     # are generally not intended as a linked word.
@@ -2516,6 +2517,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             for w in lst:
                                 add(w, r)
                             return
+                    if re.match(r"×[A-Z]", w):
+                        w = w[1:]  # Remove × before dead species names
+                    if alt and re.match(r"×[A-Z]", alt):
+                        alt = alt[1:]  # Remove × before dead species names
                     # Add the linkage
                     dt = {"word": w}
                     if qualifier:
