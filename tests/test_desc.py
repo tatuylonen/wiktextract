@@ -13,6 +13,7 @@ class WiktExtractTests(unittest.TestCase):
         self.ctx = Wtp()
         self.config = WiktionaryConfig()
         self.ctx.start_page("testpage")
+        self.ctx.start_section("English")
 
     def test_empty(self):
         ret = decode_tags([])
@@ -54,7 +55,7 @@ class WiktExtractTests(unittest.TestCase):
         ret, topics = decode_tags(["colloquial slang sailing"],
                                   allow_upper=True)
         self.assertEqual(ret, [("colloquial", "slang")])
-        self.assertEqual(topics, ["sailing"])
+        self.assertEqual(topics, ["sailing", "nautical"])
 
     def test_decode4(self):
         ret, topics = decode_tags(["colloquial Cockney rhyming slang"],
@@ -140,7 +141,6 @@ class WiktExtractTests(unittest.TestCase):
         parse_word_head(self.ctx, "noun",
                         "testpage f (plurale tantum, stem testpag, inanimate)",
                         data)
-        print(data)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(data, {"tags": ["feminine", "plurale-tantum",
                                          "inanimate"],

@@ -481,15 +481,21 @@ def add_related(ctx, data, lst, related):
                                                                 related)
                     tags = list(tags1) + list(tags2) + list(final_tags)
                     form = {"form": related}
-                    data_extend(ctx, form, "tags", list(sorted(set(tags))))
-                    data_extend(ctx, form, "topics", topics1)
-                    data_extend(ctx, form, "topics", topics2)
-                    data_append(ctx, data, "forms", form)
                     # Add tags from canonical form into the main entry
                     if "canonical" in tags:
                         for x in tags:
                             if x != "canonical":
                                 data_append(ctx, data, "tags", x)
+                        data_append(ctx, form, "tags", "canonical")
+                        if ctx.title != related or topics1 or topics2:
+                            data_append(ctx, data, "forms", form)
+                    else:
+                        data_extend(ctx, form, "tags", list(sorted(set(tags))))
+                        data_append(ctx, data, "forms", form)
+                    data_extend(ctx, form, "topics", topics1)
+                    data_extend(ctx, form, "topics", topics2)
+                    if topics1 or topics2:
+                        ctx.debug("head form has topics: {}".format(form))
 
 
 def parse_word_head(ctx, pos, text, data):
@@ -531,8 +537,7 @@ def parse_word_head(ctx, pos, text, data):
                     for tags in tagsets:
                         data_extend(ctx, data, "tags", tags)
                     continue
-            if title != " ".join(baseparts):
-                add_related(ctx, data, ["canonical"], baseparts)
+            add_related(ctx, data, ["canonical"], baseparts)
 
     # Handle parenthesized descriptors for the word form and links to
     # related words
