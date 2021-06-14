@@ -1124,6 +1124,7 @@ xlat_tags_map = {
     "GenAm": "General American",
     "Greco-Bohairic Pronunciation": "Greco-Bohairic",
     "Greco-Bohairic pronunciation": "Greco-Bohairic",
+    "Vallader": "Vallander",
     "Conservative RP": "Received-Pronunciation",
     "Received Prononunciation": "Received-Pronunciation",
     "North American also": "North-American",

@@ -395,7 +395,7 @@ panel_templates = set([
     "tbot entry",
     "tea room",
     "tea room sense",
-    "ttbc",
+    # "ttbc", - XXX needed in at least on/Preposition/Translation page
     "unblock",
     "unsupportedpage",
     "video frames",

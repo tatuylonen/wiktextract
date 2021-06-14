@@ -73,7 +73,7 @@ ignored_translations = set([
 tr_note_re = re.compile(
     r"\b(article|definite|indefinite|superlative|comparative|pattern|"
     "adjective|adjectives|clause|clauses|pronoun|pronouns|preposition|prep|"
-    "postposition|postp|action|actions|"
+    "postposition|postp|action|actions|articles|"
     "adverb|adverbs|noun|nouns|verb|verbs|before|"
     "after|placed|prefix|suffix|used with|"
     "nominative|genitive|dative|infinitive|participle|past|perfect|imperfect|"
@@ -81,9 +81,11 @@ tr_note_re = re.compile(
     "conjugation|declension|class|category|plural|singular|positive|"
     "seldom used|formal|informal|familiar|unspoken|spoken|written|"
     "indicative|progressive|conditional|potential|"
-    "accusative|adessive|inessive|"
+    "accusative|adessive|inessive|superessive|elative|allative|"
     "dialect|dialects|object|subject|predicate|movies|recommended|language|"
     "locative|continuous|simple|continuousness|gerund|subjunctive|"
+    "periphrastically|no equivalent|not used|not always used|"
+    "used only with|not applicable|use the|"
     "form|regular|irregular|alternative)($|\s)")
 # \b does not work at the end???
 
@@ -462,13 +464,13 @@ def add_related(ctx, data, lst, related):
                     data_extend(ctx, data, "tags", tags2)
                     data_extend(ctx, data, "topics", topics1)
                     data_extend(ctx, data, "topics", topics2)
-                    data_append(ctx, data, "alt_of", related)
+                    data_append(ctx, data, "alt_of", {"word": related})
                 elif "form-of" in tags2:
                     data_extend(ctx, data, "tags", tags1)
                     data_extend(ctx, data, "tags", tags2)
                     data_extend(ctx, data, "topics", topics1)
                     data_extend(ctx, data, "topics", topics2)
-                    data_append(ctx, data, "inflection_of", related)
+                    data_append(ctx, data, "form_of", {"word": related})
                 elif "compound-of" in tags2:
                     data_extend(ctx, data, "tags", tags1)
                     data_extend(ctx, data, "tags", tags2)
