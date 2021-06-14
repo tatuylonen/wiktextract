@@ -13,7 +13,9 @@ import re
 import sys
 import html
 import json
+import pstats
 import hashlib
+import cProfile
 import argparse
 import collections
 from wikitextprocessor import Wtp, ALL_LANGUAGES
@@ -128,6 +130,8 @@ if __name__ == "__main__":
                         help="Override module by one in file (for debugging)")
     parser.add_argument("--use-thesaurus", action="store_true", default=False,
                         help="Include thesaurus in single page mode")
+    parser.add_argument("--profile", action="store_true", default=False,
+                        help="Enable CPU time profiling")
     args = parser.parse_args()
 
     # The --all option turns on capturing all data types
@@ -225,6 +229,10 @@ if __name__ == "__main__":
                               capture_examples=args.examples,
                               verbose=args.verbose)
 
+    if args.profile:
+        pr = cProfile.Profile()
+        pr.enable()
+
     try:
         if args.path:
             # Parse the normal full Wiktionary data dump
@@ -262,6 +270,11 @@ if __name__ == "__main__":
     finally:
         if out_path and out_path != "-":
             out_f.close()
+
+    if args.profile:
+        pr.disable()
+        ps = pstats.Stats(pr).sort_stats(pstats.SortKey.CUMULATIVE)
+        ps.print_stats()
 
     if out_path != out_tmp_path:
         try:

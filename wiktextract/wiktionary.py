@@ -80,7 +80,7 @@ def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
         ret = parse_page(ctx, title, text, config1)
         dur = time.time() - start_t
         if dur > 100:
-            print("====== WARNING: PROCESSING PAGE TOOK {.1f}s: {}"
+            print("====== WARNING: PARSING PAGE TOOK {:.1f}s: {}"
                   .format(dur, title))
     stats = config1.to_return()
     for k, v in ctx.to_return().items():

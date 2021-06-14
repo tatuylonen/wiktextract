@@ -1224,7 +1224,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
     def merge_base(data, base):
         for k, v in base.items():
             if k not in data:
-                data[k] = v
+                if isinstance(v, (list, tuple)):
+                    # Copy the list to ensure that we don't share lists between
+                    # structures.
+                    data[k] = list(v)
+                else:
+                    data[k] = v
             elif isinstance(data[k], list):
                 data[k].extend(v)
             elif data[k] != v:
@@ -1368,6 +1373,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         # Tags handled below (countable/uncountable special)
                         data_extend(ctx, sense_data, k, v)
                 else:
+                    assert k not in ("tags", "categories", "topics")
                     sense_data[k] = v
             # Parse the gloss for this particular sense
             m = re.match(r"^\((([^()]|\([^()]*\))*)\):?\s*", gloss)
@@ -3463,6 +3469,8 @@ def parse_page(ctx, word, text, config):
                     continue
                 vals = last[field]
                 for data in lst[:-1]:
+                    assert data is not last
+                    assert data.get(field) is not vals
                     if data.get("alt_of") or data.get("form_of"):
                         continue  # Don't add to alt-of/form-of entries
                     data_extend(ctx, data, field, vals)
@@ -3473,7 +3481,8 @@ def parse_page(ctx, word, text, config):
         senses = data.get("senses") or []
         if len(senses) != 1:
             continue
-        # Only one sense for this language.  Move categories to sense.
+        # Only one sense for this language.  Move categories and certain other
+        # data to sense.
         for field in ("categories", "topics", "wikidata", "wikipedia"):
             if field in data:
                 v = data[field]

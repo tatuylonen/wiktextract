@@ -1,6 +1,6 @@
 # Utilities for manipulating word data structures
 #
-# Copyright (c) 2018-2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2018-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
 from .config import WiktionaryConfig
@@ -9,8 +9,9 @@ from wikitextprocessor import ALL_LANGUAGES, Wtp
 # Keys in ``data`` that can only have string values (a list of them)
 str_keys = ("tags", "glosses")
 # Keys in ``data`` that can only have dict values (a list of them)
-dict_keys = ("pronunciations", "senses", "synonyms", "related",
-             "antonyms", "hypernyms", "holonyms", "forms")
+dict_keys = set(["pronunciations", "senses", "synonyms", "related",
+                 "antonyms", "hypernyms", "holonyms", "forms"])
+
 
 def data_append(ctx, data, key, value):
     """Appends ``value`` under ``key`` in the dictionary ``data``.  The key
@@ -26,9 +27,11 @@ def data_append(ctx, data, key, value):
     if key == "tags":
         if value == "":
             return
-    lst = data.get(key, [])
+    lst = data.get(key)
+    if lst is None:
+        lst = []
+        data[key] = lst
     lst.append(value)
-    data[key] = lst
 
 
 def data_extend(ctx, data, key, values):
