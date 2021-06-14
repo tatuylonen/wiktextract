@@ -23,12 +23,11 @@ I plan to maintain an automatically updating version of the data at
 this location.  For most people the preferred way to get the extracted
 Wiktionary data will be to just take it from the web site.
 
-Note: extracting all data for all languages from English Wiktionary
-takes about 7 hours on a modern 24-core desktop.  You may want to
-download the pre-extracted data rather than run it yourself.  If you
-run it yourself, be prepared to wait from several hours to a couple of
-days, depending on your computer.  Expanding Lua modules is not cheap,
-but it enables superior extraction quality and maintainability!
+Note: extracting all data for all languages from the English
+Wiktionary may take from a couple of hours to several days, depending
+on your computer.  Expanding Lua modules is not cheap, but it enables
+superior extraction quality and maintainability! You may want to look
+at the pre-expanded downloads.
 
 ## Overview
 
@@ -334,8 +333,8 @@ comprehensive.  The underlying lower-level toolkit,
 Extracting all data for all languages from English Wiktionary takes
 about 1.5 hours on a 128-core dual AMD EPYC 7702 system.  The
 performance is expected to be approximately linear with the number of
-processor cores, provided you have enough memory (about 8GB/core or
-4GB/hyperthread recommended).
+processor cores, provided you have enough memory (about 10GB/core or
+5GB/hyperthread recommended).
 
 You can control the number of parallel processes to use with the
 ``--num-threads`` option; the default on Linux is to use the number of
