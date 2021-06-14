@@ -634,9 +634,12 @@ def parse_sense_qualifier(ctx, text, data):
                 if re.match(r"×[A-Z]", semi):
                     data_append(ctx, dt, "tags", "extinct")
                     semi = semi[1:]
-                data_append(ctx, data, "taxonomic", semi)
+                data["taxonomic"] = semi
             elif cls == "english":
-                data_append(ctx, data, "english", orig_semi)
+                if "english" in data:
+                    data["english"] += "; " + orig_semi
+                else:
+                    data["english"] = orig_semi
             else:
                 ctx.debug("parse_sense_qualifier: unrecognized qualifier: {}"
                           .format(text))

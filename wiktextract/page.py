@@ -2170,9 +2170,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
             #       .format(field, item, sense))
 
             # Replace occurrences of ~ in the item by the page title
-            item = re.sub(r" ~ ", " " + ctx.title + " ", item)
-            item = re.sub(r"^~ ", ctx.title + " ", item)
-            item = re.sub(r" ~$", " " + ctx.title, item)
+            safetitle = ctx.title.replace("\\", "\\\\")
+            item = re.sub(r" ~ ", " " + safetitle + " ", item)
+            item = re.sub(r"^~ ", safetitle + " ", item)
+            item = re.sub(r" ~$", " " + safetitle, item)
 
             # Some Korean words use "word (romanized): english" pattern
             m = re.match(r"(.+?) \(([^()]+)\): ([-a-zA-Z0-9,. ]+)$", item)
@@ -2524,19 +2525,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             for w in lst:
                                 add(w, r)
                             return
-                    if re.match(r"×[A-Z]", w):
-                        data_append(ctx, dt, "tags", "extinct")
-                        w = w[1:]  # Remove × before dead species names
-                    if alt and re.match(r"×[A-Z]", alt):
-                        data_append(ctx, dt, "tags", "extinct")
-                        alt = alt[1:]  # Remove × before dead species names
                     # If we have roman but not alt and the word is ASCII,
                     # move roman to alt.
                     if r and not alt and w.isascii():
                         alt = r
                         r = None
                     # Add the linkage
-                    dt = {"word": w}
+                    dt = {}
                     if qualifier:
                         parse_sense_qualifier(ctx, qualifier, dt)
                     if sense:
@@ -2554,6 +2549,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             data_append(ctx, dt, "tags", "extinct")
                             taxonomic = taxonomic[1:]
                         dt["taxonomic"] = taxonomic
+                    if re.match(r"×[A-Z]", w):
+                        data_append(ctx, dt, "tags", "extinct")
+                        w = w[1:]  # Remove × before dead species names
+                    if alt and re.match(r"×[A-Z]", alt):
+                        data_append(ctx, dt, "tags", "extinct")
+                        alt = alt[1:]  # Remove × before dead species names
+                    dt["word"] = w
                     for old in data.get(field, ()):
                         if dt == old:
                             break
