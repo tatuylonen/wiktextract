@@ -124,23 +124,14 @@ template seems to know a ton about these so maybe look at it.
 #   - sometimes Compound of the imperfect XXX and the pronoun YYY
 #   - sometimes Compound of the infinitive XXX and the pronoun YYY
 
-# XXX occasionally Alternative form of ... followed by Alternative spelling of,
-#   see &c
-
 # XXX handle "Wiktionary appendix of terms relating to animals" ("animal")
 
 # XXX check "Kanji characters outside the ..."
 
 # XXX recognize "See also X" from end of gloss and move to a "See also" section
 
-# XXX handle word class prefixes in linkages, see sade/Finnish,
-# "adjectives: sateeton, sateinen"
-
 # Look at "prenderle"/Italian - two heads under same part-of-speech.  Second
 # head ends up inside first gloss.
-
-# XXX make sure Alternative forms section is parsed (see, e.g., "& cetera")
-# Also add to htmlgen.
 
 # XXX handle (classifier XXX) at beginning of gloss; also (classifier: XXX)
 # and (classifiers: XXX, XXX, XXX)
@@ -153,9 +144,6 @@ template seems to know a ton about these so maybe look at it.
 
 # In htmlgen, create links from gloss, at minimum when whole gloss matches
 # a word form in the same language (or maybe gloss as an alternative?)
-
-# Check Finnish Abbreviation snses - many of them parentheses which are parsed
-# incorrectly in alt_of
 
 # XXX parse {{zh-see|XXX}} - see 共青团
 
@@ -177,12 +165,7 @@ template seems to know a ton about these so maybe look at it.
 # May be best to actually load these modules as Lua code or to even run a
 # specific Lua module to dump the data.
 
-# Check awake/English - strange unrecognized tags
-
 # XXX search for Template: from all glosses, search for &amp; from all glosses
-
-# XXX implement parsing of tags from first-level gloss in two-level lists
-#    (see cut/English/Noun)
 
 # XXX in parse_head_tags(), should create multiple forms if
 # node["$"].get("tags") contains multiple sets of tags (e.g., cut/English/Verb)

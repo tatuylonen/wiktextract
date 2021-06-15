@@ -1338,8 +1338,9 @@ xlat_tags_map = {
     "plural inv": "plural invariable",
     "plural not attested": "no-plural",
     "no plural forms": "no-plural",
-    "used only predicatively": "not-attributive",
-    "only predicative": "not-attributive",
+    "used only predicatively": "not-attributive predicative",
+    "only predicative": "not-attributive predicative",
+    "predicative only": "not-attributive predicative",
     "predicatively": "predicative",
     "present tense": "present",
     "past tense": "past",
@@ -1589,7 +1590,7 @@ xlat_tags_map = {
     "oblique/nominative": "oblique nominative",
     "nominative/vocative/dative/strong genitive":
     ["nominative vocative dative", "strong genitive"],
-    "non-attributive": "not-attributive",
+    "non-attributive": "not-attributive predicative",
     "attributive use": "attributive",
     "nominative/vocative/instrumental":
     "nominative vocative instrumental",
