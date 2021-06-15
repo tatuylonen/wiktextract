@@ -2731,6 +2731,7 @@ valid_tags = set([
     "type-u",
     "type-up",
     "typography",
+    "unabbreviated",
     "unaugmented",
     "uncommon",
     "uncountable",

@@ -268,6 +268,7 @@ linkage_map = {
     "proverbs": "proverbs",
     "abbreviations": "abbreviations",
     "derived terms": "derived",
+    "alternative forms": "synonyms",
 }
 
 # Inverse linkage for those that have them
@@ -1214,7 +1215,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             ctx.error("Unimplemented unsupported title: {}".format(word))
             word = w
 
-    base = {"word": word, "lang": language, "lang_code": lang_code}
+    base_data = {"word": word, "lang": language, "lang_code": lang_code}
     sense_data = {}
     pos_data = {}  # For a current part-of-speech
     etym_data = {}  # For one etymology
@@ -1225,13 +1226,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
     def merge_base(data, base):
         for k, v in base.items():
+            # Copy the value to ensure that we don't share lists or
+            # dicts between structures (even nested ones).
+            v = copy.deepcopy(v)
             if k not in data:
-                if isinstance(v, (list, tuple)):
-                    # Copy the list to ensure that we don't share lists between
-                    # structures.
-                    data[k] = list(v)
-                else:
-                    data[k] = v
+                # Copy the list to ensure that we don't share lists between
+                # structures.
+                data[k] = v;
             elif isinstance(data[k], list):
                 data[k].extend(v)
             elif data[k] != v:
@@ -1273,6 +1274,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
             page_datas.append(data)
         etym_data = {}
         etym_datas = []
+
+    def select_data():
+        """Selects where to store data (pos or etym) based on whether we
+        are inside a pos (part-of-speech)."""
+        if any(x.lower() in part_of_speech_map for x in stack):
+            return pos_data
+        if stack[-1] == language:
+            return base_data
+        return etym_data
 
     def parse_sense(pos, contents, sense_base):
         """Parses a word sense (basically, a list item describing a word sense).
@@ -1731,7 +1741,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         contents = [x for x in contents
                     if not isinstance(x, WikiNode) or x.kind not in LEVEL_KINDS]
 
-        data = etym_data if etym_data else base
+        data = select_data()
         enprs = []
         audios = []
         rhymes = []
@@ -2345,7 +2355,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # Extract quoted English translations (there are also other
                 # kinds of English translations)
                 def english_repl(m):
-                    nonlocal sense
+                    nonlocal english
                     nonlocal qualifier
                     v = m.group(1).strip()
                     # If v is "tags: sense", handle the tags
@@ -2358,10 +2368,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             else:
                                 qualifier = desc
                             v = rest
-                    if sense:
-                        sense += "; " + v
+                    if english:
+                        english += "; " + v
                     else:
-                        sense = v
+                        english = v
                     return ""
 
                 item1 = re.sub(r'[“"]([^"]+)[“"],?\s*', english_repl, item1)
@@ -2371,6 +2381,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # sometimes both at the beginning and at the end
                 while True:
                     par = None
+                    final_par = False
                     if par is None:
                         m = re.match(r"\((([^()]|\([^()]*\))*)\):?\s*", item1)
                         if m:
@@ -2382,6 +2393,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             if m:
                                 par = m.group(1)
                                 item1 = item1[:m.start()]
+                                final_par = True
                     if not par:
                         break
                     # Handle tags from beginning of par.  We also handle "other"
@@ -2433,6 +2445,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # Handle remaining types
                     if not par:
                         continue
+                    if par.find(" usage notes") >= 0:
+                        continue  # Skip certain texts that are not useful
                     cls = classify_desc(par)
                     # print("classify_desc: {} -> {}".format(par, cls))
                     if cls == "tags":
@@ -2441,10 +2455,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         else:
                             qualifier = par
                     elif cls == "english":
-                        if sense:
-                            sense += "; " + par
+                        if final_par:
+                            if english:
+                                english += "; " + par
+                            else:
+                                english = par
                         else:
-                            sense = par
+                            if sense:
+                                sense += "; " + par
+                            else:
+                                sense = par
                     elif cls == "romanization":
                         roman = par
                     elif cls == "taxonomic":
@@ -2479,6 +2499,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         english = eng
                         item1 = item1[:idx]
 
+                # Filter out certain words that are used in linkages but
+                # are generally not intended as a linked word.
+                if item1 in ("etc.", "other derived terms:"):
+                    continue
+
+                # Remove certain prefixes from linkages
                 if item1.startswith("see Thesaurus:"):
                     item1 = item1[14:]
                 elif item1.startswith("see also Thesaurus:"):
@@ -2487,6 +2513,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     item1 = item1[10:]
                 elif item1.startswith("see more at Thesaurus:"):
                     item1 = item1[22:]
+                elif item1.startswith("See also "):
+                    item1 = item1[9:]
+                elif item1.startswith("see also "):
+                    item1 = item1[9:]
+                elif item1.startswith("See ") and len(item1.split(" ")) <= 3:
+                    item1 = item1[4:]
+                elif item1.startswith("see ") and len(item1.split(" ")) <= 3:
+                    item1 = item1[4:]
 
                 # Parse certain tags at the end of the linked term
                 lang = ctx.section
@@ -2506,10 +2540,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     nonlocal alt
                     nonlocal taxonomic
                     nonlocal have_linkages
-                    # Filter out certain words that are used in linkages but
-                    # are generally not intended as a linked word.
-                    if w in ("etc.", "other derived terms:"):
-                        return
 
                     # Check if the word contains the Fullwith Solidus, and if
                     # so, split by it and treat the the results as alternative
@@ -2520,7 +2550,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # of romanizations than written forms, and don't know
                     # which is which.
                     if ((not w or w.find(",") < 0) and
-                        (not r or r.find(",") < 0)):
+                        (not r or r.find(",") < 0) and
+                        not ctx.page_exists(w)):
                         lst = w.split("／")
                         if len(lst) > 1:
                             # Treat each alternative as separate linkage
@@ -2578,6 +2609,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             add(w, r)
                         continue
                 add(item1, roman)
+                if item1 == "...":
+                    add("…", roman)
+                elif item1 == "…":
+                    add("...", roman)
 
         def parse_linkage_template(node):
             nonlocal have_panel_template
@@ -2726,6 +2761,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     ctx.debug("Skipping translation see also: {}".format(sense))
                     sense = sense[:idx].strip()
                 if sense.endswith(":"):
+                    sense = sense[:-1].strip()
+                if sense.endswith("—"):
                     sense = sense[:-1].strip()
             sense_detail = None
 
@@ -3130,19 +3167,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
             """This is called for otherwise unprocessed parts of the page.
             We still expand them so that e.g. Category links get captured."""
             if name in wikipedia_templates:
-                data = base if len(stack) <= 1 else etym_data
+                data = select_data()
                 parse_wikipedia_template(config, ctx, data, ht)
                 return ""
             if is_panel_template(name):
                 return ""
             return None
-
-        def select_data():
-            """Selects where to store data (pos or etym) based on whether we
-            are inside a pos (part-of-speech)."""
-            if any(x.lower() in part_of_speech_map for x in stack):
-                return pos_data
-            return etym_data
 
         for node in treenode.children:
             if not isinstance(node, WikiNode):
@@ -3227,9 +3257,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
     push_etym()
     ret = []
     for data in page_datas:
-        merge_base(data, base)
-        # XXX merge any other data that should be merged from other parts of
-        # the page or from related pages
+        merge_base(data, base_data)
         ret.append(data)
 
     # Copy all tags to word senses

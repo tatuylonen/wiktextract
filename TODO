@@ -354,3 +354,5 @@ terms as subheadings are currently not handled.
 Check strange and incorrectly processed category link in
 अधिगच्छति/Sanskrit (I suspect this may be coding error in Wiktionary,
 looks like the category has a nested link)
+
+Fix etc/Swedish - two "Abbreviation of ..." in the same gloss.
