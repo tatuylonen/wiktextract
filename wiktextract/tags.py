@@ -1237,6 +1237,7 @@ xlat_tags_map = {
     "taking a past participle": "with-past-participle",
     "literary or in compounds": "literary in-compounds",
     "certain compounds": "in-compounds idiomatic",
+    "participial adjective": "participle adjective",
     "literary or archaic": "literary archaic",
     "literary or dialectal": "literary dialectal",
     "simple past": "simple past",

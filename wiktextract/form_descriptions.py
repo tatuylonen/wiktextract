@@ -377,18 +377,6 @@ def decode_tags(input_tags, allow_any=False, allow_upper=False):
     return ret, topics
 
 
-def add_tags(ctx, data, lst, allow_any=False):
-    assert isinstance(ctx, Wtp)
-    assert isinstance(data, dict)
-    assert isinstance(lst, (list, tuple))
-    for x in lst:
-        assert isinstance(x, str)
-    tagsets, topics = decode_tags(lst, allow_any=allow_any)
-    data_extend(ctx, data, "topics", topics)
-    for tags in tagsets:
-        data_extend(ctx, data, "tags", tags)
-
-
 def parse_head_final_tags(ctx, lang, form):
     """Parses tags that are allowed at the end of a form head from the end
     of the form.  This can also be used for parsing the final gender etc tags
@@ -423,15 +411,15 @@ def parse_head_final_tags(ctx, lang, form):
     return form, tags
 
 
-def add_related(ctx, data, lst, related):
+def add_related(ctx, data, tags_lst, related):
     """Internal helper function for some post-processing entries for related
     forms (e.g., in word head)."""
     assert isinstance(ctx, Wtp)
-    assert isinstance(lst, (list, tuple))
-    for x in lst:
+    assert isinstance(tags_lst, (list, tuple))
+    for x in tags_lst:
         assert isinstance(x, str)
     assert isinstance(related, (list, tuple))
-    # print("add_related: lst={} related={}".format(lst, related))
+    # print("add_related: tags_lst={} related={}".format(lst, related))
     related = " ".join(related)
     if related == "[please provide]":
         return
@@ -458,7 +446,7 @@ def add_related(ctx, data, lst, related):
         else:
             tagsets1 = [[]]
             topics1 = []
-        tagsets2, topics2 = decode_tags(lst)
+        tagsets2, topics2 = decode_tags(tags_lst)
         for tags1 in tagsets1:
             assert isinstance(tags1, (list, tuple))
             for tags2 in tagsets2:
@@ -603,6 +591,7 @@ def parse_word_head(ctx, pos, text, data):
                 related = alt_related
                 tagsets = alt_tagsets
 
+            # print("related={} tagsets={}".format(related, tagsets))
             for tags in tagsets:
                 if related:
                     add_related(ctx, data, tags, related)
