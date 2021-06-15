@@ -1278,7 +1278,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
     def select_data():
         """Selects where to store data (pos or etym) based on whether we
         are inside a pos (part-of-speech)."""
-        if any(x.lower() in part_of_speech_map for x in stack):
+        if ctx.subsection is not None:
             return pos_data
         if stack[-1] == language:
             return base_data
