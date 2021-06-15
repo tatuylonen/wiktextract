@@ -14,6 +14,7 @@ from .taxondata import known_species, known_firsts
 from .topics import valid_topics, topic_generalize_map
 from .tags import (xlat_head_map, valid_tags,
                    uppercase_tags, xlat_tags_map, xlat_descs_map,
+                   head_final_numeric_langs,
                    head_final_extra_langs, head_final_extra_map)
 from .english_words import english_words
 
@@ -404,18 +405,21 @@ def parse_head_final_tags(ctx, lang, form):
         m = re.search(head_final_extra_re, form)
         if m is not None:
             tagkeys = m.group(1)
-            form = form[:m.start()]
-            tags.extend(head_final_extra_map[tagkeys].split(" "))
+            if not ctx.title.endswith(tagkeys):
+                form = form[:m.start()]
+                tags.extend(head_final_extra_map[tagkeys].split(" "))
 
     # Handle normal head-final tags
     m = re.search(head_final_re, form)
     if m is not None:
         tagkeys = m.group(2)
-        form = form[:m.start()]
-        for t in tagkeys.split():
-            if t == "or":
-                continue
-            tags.extend(xlat_head_map[t].split(" "))
+        if not ctx.title.endswith(tagkeys):
+            if not tagkeys[0].isdigit() or lang in head_final_numeric_langs:
+                form = form[:m.start()]
+                for t in tagkeys.split():
+                    if t == "or":
+                        continue
+                    tags.extend(xlat_head_map[t].split(" "))
     return form, tags
 
 
@@ -672,7 +676,7 @@ def parse_translation_desc(ctx, lang, text, tr):
         if m:
             par = m.group(1)
             text = text[:m.start()]
-            if par.startswith("literally "):
+            if par.startswith("literally ") or par.startswith("lit."):
                 continue  # Not useful for disambiguation in many idioms
         else:
             # See if we can find a parenthesized expression at the start

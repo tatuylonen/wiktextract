@@ -608,7 +608,7 @@ for k, v in template_allowed_pos_map.items():
             assert False
 
 
-# Ignore translations that start with one of these (case-insensitive)
+# Ignore translations that start with one of these
 tr_ignore_prefixes = [
     "+",
     "Different structure used",
@@ -622,6 +622,7 @@ tr_ignore_prefixes = [
     "[book pahlavi needed]",
     "different structure used",
     "e.g.",
+    "lit.",
     "literally",
     "no equivalent",
     "normally ",
@@ -662,6 +663,7 @@ tr_ignore_contains = [
     "grammatical structure",
     "construction is used",
     "tense used",
+    " lit.",
     " literally",
     "dative",
     "accusative",
@@ -701,7 +703,7 @@ tr_ignore_regexps = [
 tr_suspicious_re = re.compile(
     "|".join(re.escape(x) for x in
              [", ", "; ", "* ", ": ", "[", "]",
-              "{", "}", "／", "^", "literally",
+              "{", "}", "／", "^", "literally", "lit.",
               "also expressed with", "e.g.", "cf.",
               "used ", "script needed",
               "please add this translation",

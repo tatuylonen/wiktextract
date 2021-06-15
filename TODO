@@ -350,3 +350,7 @@ about.
 Use something similar to tr "note" detection in linkages (e.g.,
 pitää/Finnish search +).  Also, the parenthesized tags in Derived
 terms as subheadings are currently not handled.
+
+Check strange and incorrectly processed category link in
+अधिगच्छति/Sanskrit (I suspect this may be coding error in Wiktionary,
+looks like the category has a nested link)

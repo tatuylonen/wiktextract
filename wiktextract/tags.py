@@ -68,15 +68,50 @@ xlat_head_map = {
     "[uncountable]": "uncountable",
 }
 
+# Languages that can have head-final numeric class indicators.  They are mostly
+# used in Bantu languages.  We do not want to interpret them at the ends of
+# words like "Number 11"/English.  Also, some languages have something like
+# "stress pattern 1" at the end of word head, which we also do not want to
+# interpret as class-1.
+head_final_numeric_langs = set([
+    "Bende",
+    "Chichewa",
+    "Chimwiini",
+    "Kamba",
+    "Kikuyu",
+    "Lingala",
+    "Maore Comorian",
+    "Masaba",
+    "Mwani",
+    "Ngazidja Comorian",
+    "Northern Ndebele",
+    "Phuthi",
+    "Rwanda-Rundi",
+    "Sotho",
+    "Shona",
+    "Southern Ndebele",
+    "Swahili",
+    "Swazi",
+    "Tsonga",
+    "Tswana",
+    "Tumbuka",
+    "Xhosa",
+    "Zulu",
+    "ǃXóõ",
+])
+
 # Languages for which to consider head_final_extra_map
 head_final_extra_langs = set([
     "Swahili",
     "Finnish",
+    "Lithuanian",
 ])
 
 head_final_extra_map = {
     # These are only handled in parse_head_final_tags
     # and will generally be ignored elsewhere.  These may contain spaces.
+
+    # Swahili class indications.
     "m or wa": "class-1 class-2",
     "m or mi": "class-3 class-4",
     "ma": "class-5 class-6",
@@ -86,7 +121,17 @@ head_final_extra_map = {
     "ku": "class-15",
     "pa": "class-16",
     "mu": "class-18",
+
+    # This is used in Finnish at the end of some word forms (in translations?)
     "in indicative or conditional mood": "in-indicative in-conditional",
+
+    # These stress pattern indicators occur in Lithuanian
+    "stress pattern 1": "stress-pattern-1",
+    "stress pattern 2": "stress-pattern-2",
+    "stress pattern 3": "stress-pattern-3",
+    "stress pattern 3a": "stress-pattern-3a",
+    "stress pattern 3b": "stress-pattern-3b",
+    "stress pattern 4": "stress-pattern-4",
 }
 
 # Accepted uppercase tag values.  As tags these are represented with words
@@ -1723,7 +1768,9 @@ xlat_tags_map = {
     "class 7": "class-7",
     "class 8": "class-8",
     "class 9": "class-9",
+    "class 9a": "class-9a",
     "class 10": "class-10",
+    "class 10a": "class-10",
     "class 11": "class-11",
     "class 12": "class-12",
     "class 13": "class-13",
@@ -1760,6 +1807,8 @@ xlat_tags_map = {
     "stress pattern 3a": "stress-pattern-3a",
     "stress pattern 3b": "stress-pattern-3b",
     "stress pattern 4": "stress-pattern-4",
+    "tone I": "tone-1",
+    "tone II": "tone-2",
     "type p": "type-p",
     "type u": "type-u",
     "type up": "type-up",
@@ -2665,6 +2714,8 @@ valid_tags = set([
     "third-infinitive",
     "third-person",
     "three-termination",
+    "tone-1",
+    "tone-2",
     "topic",
     "traditional",
     "transcription",
