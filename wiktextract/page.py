@@ -1977,15 +1977,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # contains the inflectional paradigm
         # XXX should we try to capture it even if we got the template?
 
-    def get_subpage_section(language, title, subtitle, pos, section):
+    def get_subpage_section(title, subtitle, seq):
         """Loads a subpage of the given page, and finds the section
         for the given language, part-of-speech, and section title.  This
         is used for finding translations and other sections on subpages."""
         assert isinstance(language, str)
         assert isinstance(title, str)
         assert isinstance(subtitle, str)
-        assert isinstance(pos, str)
-        assert isinstance(section, str)
+        assert isinstance(seq, (list, tuple))
+        for x in seq:
+            assert isinstance(x, str)
         subpage_title = word + "/" + subtitle
         subpage_content = ctx.read_by_title(subpage_title)
         if subpage_content is None:
@@ -2012,11 +2013,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
         tree = ctx.parse(subpage_content, pre_expand=True,
                          additional_expand=additional_expand_templates)
         assert tree.kind == NodeKind.ROOT
-        seq = [language, pos, section]
         ret = recurse(tree, seq)
         if ret is None:
-            ctx.warning("Failed to find subpage section {} {}/{} {} {}"
-                        .format(language, title, subtitle, pos, section))
+            ctx.warning("Failed to find subpage section {}/{} {}"
+                        .format(title, subtitle, seq))
         return ret
 
     def parse_linkage(data, field, linkagenode):
@@ -3046,14 +3046,20 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if name == "see translation subpage":
                     sense_parts = []
                     sense = None
-                    pos = ht.get(1)
-                    if not isinstance(pos, str):
+                    sub = ht.get(1)
+                    if not isinstance(sub, str):
                         ctx.error("no part-of-speech in "
                                   "{{see translation subpage|...}}")
                         return
-                    subnode = get_subpage_section(language, ctx.title,
-                                                  "translations", pos,
-                                                  "Translations")
+
+                    if sub in PARTS_OF_SPEECH:
+                        seq = [language, sub, "Translations"]
+                    else:
+                        pos = ctx.subsection
+                        assert pos.lower() in PARTS_OF_SPEECH
+                        seq = [language, sub, pos, "Translations"]
+                    subnode = get_subpage_section(ctx.title, "translations",
+                                                  seq)
                     if subnode is not None:
                         parse_translations(data, subnode)
                     return ""

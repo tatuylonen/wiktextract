@@ -1211,6 +1211,7 @@ xlat_tags_map = {
     "instant messaging": "Internet",
     "cot-caught merged": "cot-caught-merger",
     "cot-caught merger": "cot-caught-merger",
+    "pin-pen merger": "pin-pen-merger",
     "prefix before comparative forms": "prefix with-comparative",
     "countable and uncountable": "countable uncountable",
     "masculine and feminine plural": "masculine feminine plural",
@@ -2604,6 +2605,7 @@ valid_tags = set([
     "phrasal",
     "physical",
     "pi'el-construction",
+    "pin-pen-merger",
     "place",
     "pluperfect",
     "plural",     # depending on language, two or more / three or more
@@ -2722,6 +2724,7 @@ valid_tags = set([
     "tone-1",
     "tone-2",
     "topic",
+    "toponymic",
     "traditional",
     "transcription",
     "transgressive",
