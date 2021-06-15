@@ -2921,7 +2921,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         cls = classify_desc(par)
                         # print("tr colon prefix: {!r} -> {}".format(par, cls))
                         if cls == "tags":
-                            tagsets2, topics2 = decode_tags([par])
+                            tagsets2, topics2 = decode_tags(par)
                             for t in tagsets2:
                                 data_extend(ctx, tr, "tags", t)
                             data_extend(ctx, tr, "topics", topics2)
