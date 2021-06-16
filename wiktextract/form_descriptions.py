@@ -24,8 +24,20 @@ tokenizer = TweetTokenizer()
 # Add some additional known taxonomic species names.  Adding the family name
 # here may be the answer if a taxonomic name goes in "alt".
 known_firsts.update([
+    "Albulidae",
+    "Bubo",
+    "Caprobrotus",
+    "Chaetodontinae",
     "Citriobatus",
     "Citrofortunella",
+    "Coriandum",
+    "Lagerstomia",
+    "Maulisa",
+    "Mercenaria",
+    "Monetaria",
+    "Mugillidae",
+    "Onchorhynchus",
+    "Plebidonax",
     "Poncirus",
     "Tanagra",
 ])
@@ -223,7 +235,9 @@ valid_sequences = {}
 for tag in valid_tags:
     add_to_valid_tree(valid_sequences, "tags", tag, tag)
 for tag in uppercase_tags:
-    add_to_valid_tree(valid_sequences, "tags", tag, re.sub(r"\s+", "-", tag))
+    hyphenated = re.sub(r"\s+", "-", tag)
+    add_to_valid_tree(valid_sequences, "tags", tag, hyphenated)
+    add_to_valid_tree(valid_sequences, "tags", hyphenated, hyphenated)
 add_to_valid_tree_mapping(valid_sequences, "tags", xlat_tags_map,
                           valid_tags, False)
 # Add topics to the same table, with all generalized topics also added
@@ -310,9 +324,11 @@ def decode_tags(src, allow_any=False):
     # First split the tags at commas and semicolons.  Their significance is that
     # a multi-word sequence cannot continue across them.
     lst = []
-    for part in split_at_comma_semi(src):
+    for part in split_at_comma_semi(src, extra=[";", ":"]):
         max_last_i = len(lst)
         lst1 = part.split()
+        if not lst1:
+            continue
         lst.extend(lst1)
         nodes = []
         for w in lst1:
@@ -355,7 +371,8 @@ def decode_tags(src, allow_any=False):
                         add_new(valid_sequences[w], i, last_i, new_paths)
             if not new_nodes:
                 # Some initial words cause the rest to be interpreted as unknown
-                if lst[max_last_i] not in allowed_unknown_starts:
+                if (i == max_last_i or
+                    lst[max_last_i] not in allowed_unknown_starts):
                     # print("RECOVER", w, max_last_i)
                     if w in valid_sequences:
                         add_new(valid_sequences[w], i, max_last_i, new_paths)
@@ -928,6 +945,8 @@ def parse_alt_or_inflection_of(ctx, gloss):
     tags = set()
     nodes = [(valid_sequences, 0)]
     gloss = re.sub(r"\s+", " ", gloss)
+    if gloss and gloss[0].isupper():
+        gloss = gloss[0].lower() + gloss[1:]
     lst = gloss.strip().split(" ")
     last = 0
     for i, w in enumerate(lst):
@@ -1000,7 +1019,7 @@ def parse_alt_or_inflection_of(ctx, gloss):
         m = re.match(r"^⟨([^()]*)⟩$", extra)
         if m:
             extra = m.group(1)
-    m = re.match(r'^[“"]([^"]*)"$', extra)
+    m = re.match(r'^[“"]([^"“”]*)["”]$', extra)
     if m:
         extra = m.group(1)
     # Note: base might still contain comma-separated values and values
@@ -1067,6 +1086,8 @@ def classify_desc(desc, allow_unknown_tags=False):
             return "tags"
 
     # If all words are in our English dictionary, interpret as English
+    if desc in english_words and desc[0].isalpha():
+        return "english"   # Handles ones containing whitespace
     tokens = tokenizer.tokenize(desc)
     lst = list(x in english_words or x.lower() in english_words or
                x in known_firsts or
@@ -1134,8 +1155,9 @@ def classify_desc(desc, allow_unknown_tags=False):
     # print("classify_desc: {!r} classes1: {}".format(desc, classes1))
     if all(x in ("Ll", "Lu", "Lt", "Lm", "Mn", "Mc", "Zs", "Nd", "OK")
            for x in classes1):
-        if num_latin >= num_greek + 2 or num_greek == 0:
-            if classes1.count("OK") < len(classes1):
-                return "romanization"
+        if ((num_latin >= num_greek + 2 or num_greek == 0) and
+            classes1.count("OK") < len(classes1) and
+            classes1.count("Nd") < len(classes1)):
+            return "romanization"
     # Otherwise it is something else, such as hanji version of the word
     return "other"

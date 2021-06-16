@@ -642,6 +642,7 @@ topic_generalize_map = {
     "musical note": "music",
     "guitar": "music",
     "handbells": "music",
+    "handball": "sports",
     "musicology": "music human-sciences",
     "talking": "communications",
     "militaryu": "military",

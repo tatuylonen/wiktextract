@@ -2201,6 +2201,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # E.g., harness in the Encyclopaedia Britannica...
                 item = ""
                 have_linkages = True
+            m = re.search(r" on (Wikispecies|Wikimedia Commons|Wikipedia|"
+                          r"[A-Z]\w+ Wiktionary|[A-Z]\w+ Wikipedia)\.?$",
+                          item)
+            if m:
+                item = item[:m.start()]
 
             if item.startswith(":"):
                 item = item[1:]
@@ -2216,7 +2221,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             item = re.sub(r" ~$", " " + safetitle, item)
 
             # Some Korean words use "word (romanized): english" pattern
-            m = re.match(r"(.+?) \(([^()]+)\): ([-a-zA-Z0-9,. ]+)$", item)
+            m = re.match(r"(.+?) \(([^():]+)\): ([-a-zA-Z0-9,. ]+)$", item)
             if m:
                 base_roman = m.group(2)
                 english = m.group(3)
@@ -2233,75 +2238,87 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # Many words have tags or similar descriptions in the beginning
             # followed by a colon and one or more linkages (e.g.,
             # panetella/Finnish)
-            m = re.match(r"^\(?([a-zA-Z ]+)\)?: (.*)$", item)
+            m = (re.match(r"^\((([^():]|\([^()]*\))+)\): ([^:]*)$", item) or
+                 re.match(r"^([-a-zA-Z ]+): ([^:]*)$", item))
             if m:
-                desc, rest = m.groups()
-                if not re.search(linkage_paren_ignore_contains_re, desc):
-                    # print("linkage colon prefix desc={!r} rest={!r}"
-                    #      .format(desc, rest))
-                    cls = classify_desc(desc)
+                desc = m.group(1)
+                rest = m.group(len(m.groups()))
+                # Check for certain comma-separated tags combined
+                # with English text at the beginning or end of a
+                # comma-separated parenthesized list
+                lst = split_at_comma_semi(desc)
+                while len(lst) > 1:
+                    # Check for tags at the beginning
+                    cls = classify_desc(lst[0])
                     if cls == "tags":
                         if base_qualifier:
-                            base_qualifier += " " + desc
+                            base_qualifier += " " + lst[0]
                         else:
-                            base_qualifier = desc
-                        item = rest
-                    elif cls == "english":
-                        if sense:
-                            sense += ";" + desc
-                        else:
-                            sense = desc
-                        item = rest
-                    else:
-                        ctx.debug("unrecognized linkage prefix: {}"
-                                  .format(item))
-
-            # Various words have a sense or tags in parenthesis (sometimes
-            # followed by a colon) at the start of the item
-            m = re.match(r"\((([^()]|\([^()]*\))*)\):?\s*", item)
-            if m:
-                par = m.group(1)
-                if not re.search(linkage_paren_ignore_contains_re, par):
-                    # Check for certain comma-separated tags combined
-                    # with English text at the beginning or end of a
-                    # comma-separated parenthesized list
-                    lst = par.split(", ")
-                    while len(lst) > 1:
-                        cls = classify_desc(lst[0])
-                        if cls == "tags":
-                            if base_qualifier:
-                                base_qualifier += " " + lst[0]
-                            else:
-                                base_qualifier = lst[0]
-                            lst = lst[1:]
-                            continue
-                        cls = classify_desc(lst[-1])
-                        if cls == "tags":
-                            if base_qualifier:
-                                base_qualifier += " " + lst[-1]
-                            else:
-                                base_qualifier = lst[-1]
-                            lst = lst[:-1]
-                            continue
-                        break
-                    par = ", ".join(lst)
-
-                    # Classify the item and handle it
-                    cls = classify_desc(par)
-                    # print("parenthesized prefix: {} -> {}".format(par, cls))
+                            base_qualifier = lst[0]
+                        lst = lst[1:]
+                        continue
+                    # Check for tags at the end
+                    cls = classify_desc(lst[-1])
                     if cls == "tags":
-                        base_qualifier = par
-                        item = item[m.end():]
-                    elif cls in ("english", "taxonomic"):
-                        if sense:
-                            sense += "; " + par
+                        if base_qualifier:
+                            base_qualifier += " " + lst[-1]
                         else:
-                            sense = par
-                        item = item[m.end():]
+                            base_qualifier = lst[-1]
+                        lst = lst[:-1]
+                        continue
+                    break
+                desc = ", ".join(lst)
+
+                # Sometimes we have e.g. "chemistry (slang)" with are
+                # both tags (see "stink").  Handle that case by
+                # removing parentheses if the value is still tags.
+                if desc.find("(") >= 0:
+                    x = re.sub(r"[()]", ",", desc)
+                    if classify_desc(x) == "tags":
+                        desc = x
+                elif rest.find("(") >= 0:
+                    x = re.sub(r"[()]", ",", rest)
+                    if classify_desc(x) == "tags":
+                        rest = desc
+                        desc = x
+
+                # Try to determine which side is description and which is
+                # the linked term (both orders are widely used in Wiktionary)
+                cls = classify_desc(desc)
+                cls2 = classify_desc(rest)
+                e1 = ctx.page_exists(desc)
+                e2 = ctx.page_exists(rest)
+                if cls != "tags":
+                    if (cls2 == "tags" or
+                        (e1 and not e1) or
+                        (e1 and e2 and cls2 == "english" and
+                         cls in ("other", "romanization")) or
+                        (not e1 and not e2 and cls2 == "english" and
+                         cls in ("other", "romanization"))):
+                        desc, rest = rest, desc  # Looks like swapped syntax
+                        cls = cls2
+                if re.search(linkage_paren_ignore_contains_re, desc):
+                    desc = ""
+                # print("linkage colon prefix desc={!r} rest={!r} cls={}"
+                #      .format(desc, rest, cls))
+
+                # Handle the prefix according to its type
+                if cls == "tags":
+                    if base_qualifier:
+                        base_qualifier += " " + desc
                     else:
-                        # Otherwise we won't handle it here
-                        ctx.debug("unhandled parenthesized prefix: {}"
-                                  .format(item))
+                        base_qualifier = desc
+                    item = rest
+                elif cls in ("english", "taxonomic"):
+                    if sense:
+                        sense += ";" + desc
+                    else:
+                        sense = desc
+                    item = rest
+                else:
+                    ctx.debug("unrecognized linkage prefix: {} desc={} rest={} "
+                              "cls={} cls2={} e1={} e2={}"
+                              .format(item, desc, rest, cls, cls2, e1, e2))
 
             base_sense = sense
 
@@ -2374,7 +2391,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 english = None
 
                 words = item1.split(" ")
-                if len(words) > 1 and words[0] in linkage_beginning_tags:
+                if (len(words) > 1 and
+                    words[0] in linkage_beginning_tags and
+                    words[0] != ctx.title):
                     t = linkage_beginning_tags[words[0]]
                     item1 = " ".join(words[1:])
                     if qualifier:

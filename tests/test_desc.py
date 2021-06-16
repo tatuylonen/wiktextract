@@ -102,6 +102,10 @@ class WiktExtractTests(unittest.TestCase):
                                 "without predicate")])
 
     def test_decode12(self):
+        ret, topics = decode_tags("as a modifier in compound words")
+        self.assertEqual(ret, [("in-compounds",)])
+
+    def test_decode12(self):
         ret, topics = decode_tags("with a cardinal numeral")
         self.assertEqual(ret, [("with a cardinal numeral",)])
 
