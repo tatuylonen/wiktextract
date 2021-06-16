@@ -347,3 +347,5 @@ wind/English/Noun as File: links in forms
 Fix parsing Translations under a linkage section (e.g., "desert",
 "shark", "soul").  Probably should overall start treating the page as
 a linear sequence of sections rather than rely on the tree structure.
+
+Implement caching in decode_tags
