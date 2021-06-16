@@ -2289,6 +2289,7 @@ valid_tags = set([
     "archaic",
     "article",
     "aspirate",
+    "ateji",
     "attributive",
     "augmentative",
     "augmented",
