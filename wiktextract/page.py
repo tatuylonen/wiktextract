@@ -34,6 +34,16 @@ languages_by_name = {x["name"]: x for x in ALL_LANGUAGES}
 # Mapping from language code to language info
 languages_by_code = {x["code"]: x for x in ALL_LANGUAGES}
 
+# Subsections with these titles are ignored.
+ignored_section_titles = (
+    "Anagrams", "Further reading", "References",
+    "Quotations", "Descendants")
+
+# Subsections with these titles contain inflection (conjugation, declension)
+# information
+inflection_section_titles = (
+    "Declension", "Conjugation", "Inflection", "Mutation")
+
 # Matches head tag
 head_tag_re = re.compile(r"^(head|Han char|arabic-noun|arabic-noun-form|"
                          r"hangul-symbol|syllable-hangul)$|" +
@@ -716,6 +726,15 @@ tr_ignore_re = re.compile(
     "^(" + "|".join(re.escape(x) for x in tr_ignore_prefixes) + ")|" +
     "|".join(re.escape(x) for x in tr_ignore_contains) + "|" +
     "|".join(tr_ignore_regexps))  # These are not to be escaped
+
+
+# Ignore linkage parenthesized sections that contain one of these strings
+linkage_paren_ignore_contains_re = re.compile(
+    r"\b(" +
+    "|".join(re.escape(x) for x in [
+        "from Etymology",
+        ]) +
+    ")([, ]|$)")
 
 
 def parse_sense_XXXold_going_away(config, data, text, use_text):
@@ -2396,6 +2415,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 final_par = True
                     if not par:
                         break
+                    if re.search(linkage_paren_ignore_contains_re, par):
+                        continue  # Skip these linkage descriptors
                     # Handle tags from beginning of par.  We also handle "other"
                     # here as Korean entries often have Hanja form in the
                     # beginning of parenthesis, before romanization.  Similar
@@ -3052,11 +3073,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                   "{{see translation subpage|...}}")
                         return
 
-                    if sub in PARTS_OF_SPEECH:
+                    if sub.lower() in part_of_speech_map:
                         seq = [language, sub, "Translations"]
                     else:
                         pos = ctx.subsection
-                        assert pos.lower() in PARTS_OF_SPEECH
+                        if pos.lower() not in part_of_speech_map:
+                            ctx.warning("see translation subpage: unhandled: "
+                                        "language={} sub={} ctx.subsection={}"
+                                        .format(language, sub, ctx.subsection))
                         seq = [language, sub, pos, "Translations"]
                     subnode = get_subpage_section(ctx.title, "translations",
                                                   seq)
@@ -3228,7 +3252,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             elif t == "Translations":
                 data = select_data()
                 parse_translations(data, node)
-            elif t in ("Declension", "Conjugation", "Inflection", "Mutation"):
+            elif t in inflection_section_titles:
                 parse_inflection(node)
             elif pos in linkage_map:
                 rel = linkage_map[pos]
@@ -3238,8 +3262,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 data = select_data()
                 if config.capture_compounds:
                     parse_linkage(data, "derived", node)
-            elif t in ("Anagrams", "Further reading", "References",
-                       "Quotations", "Descendants"):
+            elif t in ignored_section_titles:
                 # XXX does the Descendants section have something we'd like
                 # to capture?
                 pass
