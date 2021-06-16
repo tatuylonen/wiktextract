@@ -210,7 +210,7 @@ def clean_value(config, title, no_strip=False):
     title = re.sub(r"(?s)\[\[\s*(([a-zA-z0-9]+)\s*:)?\s*([^]|]+?)"
                    r"(\s*\([^])|]*\)\s*)?\|\]\]",
                    repl_link, title)
-    title = re.sub(r"(?s)\[\[\s*([^]|]+?)\s*\]\]", repl_1, title)
+    title = re.sub(r"(?s)\[\[\s*:?([^]|]+?)\s*\]\]", repl_1, title)
     # Replace remaining HTML links by the URL.
     title = re.sub(r"\[(https?:)//[^]\s]+\s+([^]]+?)\s*\]", repl_2, title)
     # Remove any edit links to local pages
@@ -222,11 +222,11 @@ def clean_value(config, title, no_strip=False):
     title = re.sub("\xa0", " ", title)  # nbsp
     # This unicode quote seems to be used instead of apostrophe quite randomly
     # (about 4% of apostrophes in English entries, some in Finnish entries).
-    title = re.sub("\u2019", "'", title)  # Note: no r"..." here!
+    # title = re.sub("\u2019", "'", title)  # Note: no r"..." here!
     # Replace strange unicode quotes with normal quotes
-    title = re.sub(r"”", '"', title)
+    # title = re.sub(r"”", '"', title)
     # Replace unicode long dash by normal dash
-    title = re.sub(r"–", "-", title)
+    # title = re.sub(r"–", "-", title)
     # Replace whitespace sequences by a single space.
     title = re.sub(r"\s+", " ", title)
     # Remove whitespace before periods and commas etc

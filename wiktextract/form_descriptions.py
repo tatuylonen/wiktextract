@@ -278,6 +278,35 @@ def decode_tags(src, allow_any=False):
 
     pos_paths = [[[]]]
 
+    def check_unknown(to_i, from_i, i):
+        assert isinstance(to_i, int)
+        assert isinstance(from_i, int)
+        assert isinstance(i, int)
+        # Adds unknown tag if needed.  Returns new last_i
+        # print("check_unknown to_i={} from_i={} i={}"
+        #       .format(to_i, from_i, i))
+        if from_i >= to_i:
+            return []
+        words = lst[from_i: to_i]
+        # print("unknown words:", words)
+        tag = " ".join(words)
+        if not tag:
+            return from_i
+        if tag in ("and", "or"):
+            return []
+
+        if (not allow_any and
+            not words[0].startswith("~") and
+            (words[0] not in allowed_unknown_starts or
+             len(words) <= 1)):
+            # print("ERR allow_any={} words={}"
+            #       .format(allow_any, words))
+            return [(from_i, "UNKNOWN",
+                     ["error-unknown-tag", tag])]
+        else:
+            return [(from_i, "UNKNOWN", [tag])]
+        return i + 1
+
     # First split the tags at commas and semicolons.  Their significance is that
     # a multi-word sequence cannot continue across them.
     lst = []
@@ -310,35 +339,6 @@ def decode_tags(src, allow_any=False):
                                        node["$"].get("topics"))] + u + x
                                      for x in pos_paths[last_i])
                     max_last_i = i + 1
-
-            def check_unknown(to_i, from_i, i):
-                assert isinstance(to_i, int)
-                assert isinstance(from_i, int)
-                assert isinstance(i, int)
-                # Adds unknown tag if needed.  Returns new last_i
-                # print("check_unknown to_i={} from_i={} i={}"
-                #       .format(to_i, from_i, i))
-                if from_i >= to_i:
-                    return []
-                words = lst[from_i: to_i]
-                # print("unknown words:", words)
-                tag = " ".join(words)
-                if not tag:
-                    return from_i
-                if tag in ("and", "or"):
-                    return []
-
-                if (not allow_any and
-                    not words[0].startswith("~") and
-                    (words[0] not in allowed_unknown_starts or
-                     len(words) <= 1)):
-                    # print("ERR allow_any={} words={}"
-                    #       .format(allow_any, words))
-                    return [(from_i, "UNKNOWN",
-                             ["error-unknown-tag", tag])]
-                else:
-                    return [(from_i, "UNKNOWN", [tag])]
-                return i + 1
 
             new_paths = []
             # print("ITER", i, w)
@@ -769,12 +769,12 @@ def parse_translation_desc(ctx, lang, text, tr):
                     if tr.get("alt"):
                         ctx.warning("more than one value in \"alt\": {} vs. {}"
                                     .format(tr["alt"], a))
-                    tr["alt"] = lst[0]
+                    tr["alt"] = a
                     if tr.get("roman"):
                         ctx.warning("more than one value in \"roman\": "
                                     "{} vs. {}"
                                     .format(tr["roman"], r))
-                    tr["roman"] = lst[1]
+                    tr["roman"] = r
                     continue
 
         # Check for certain comma-separated tags combined with English text
@@ -863,9 +863,9 @@ def parse_translation_desc(ctx, lang, text, tr):
     data_extend(ctx, tr, "tags", final_tags)
 
     if note:
-        tr["note"] = note
+        tr["note"] = note.strip()
     if text and text not in ignored_translations:
-        tr["word"] = text
+        tr["word"] = text.strip()
 
     # Sometimes gender seems to be at the end of "roman" field, see e.g.
     # fire/English/Noun/Translations/Egyptian (for "oxidation reaction")
@@ -873,10 +873,10 @@ def parse_translation_desc(ctx, lang, text, tr):
     if roman:
         if roman.endswith(" f"):
             data_append(ctx, tr, "tags", "feminine")
-            tr["roman"] = roman[:-2]
+            tr["roman"] = roman[:-2].strip()
         elif roman.endswith(" m"):
             data_append(ctx, tr, "tags", "masculine")
-            tr["roman"] = roman[:-2]
+            tr["roman"] = roman[:-2].strip()
 
     # If the word now has "english" field but no "roman" field, and
     # the word would be classified "other" (generally non-latin
@@ -987,12 +987,19 @@ def parse_alt_or_inflection_of(ctx, gloss):
     orig_base = " ".join(lst).strip()
     # Clean up some extra stuff from the linked word
     base = re.sub(alt_of_form_of_clean_re, "", orig_base)
-    base = re.sub(r" \([^()]*\)", "", base)  # Remove all (...) groups
+    base = re.sub(r" [(⟨][^()]*[)⟩]", "", base)  # Remove all (...) groups
     extra = orig_base[len(base):]
     extra = re.sub(r"^[- :;,—]+", "", extra)
+    if extra.endswith(".") and extra.count(".") == 1:
+        extra = extra[:-1].strip()
     m = re.match(r"^\(([^()]*)\)$", extra)
     if m:
         extra = m.group(1)
+    else:
+        # These weird backets used in "slash mark"
+        m = re.match(r"^⟨([^()]*)⟩$", extra)
+        if m:
+            extra = m.group(1)
     m = re.match(r'^[“"]([^"]*)"$', extra)
     if m:
         extra = m.group(1)
@@ -1006,8 +1013,6 @@ def parse_alt_or_inflection_of(ctx, gloss):
         tags.append("conjecture")
     if base.endswith("."):
         base = base[:-1].strip()
-    if extra.endswith(".") and extra.count(".") == 1:
-        extra = extra[:-1].strip()
     base = base.strip()
     if base.find(".") >= 0:
         ctx.debug(". remains in alt_of/inflection_of: {}".format(base))
@@ -1083,7 +1088,9 @@ def classify_desc(desc, allow_unknown_tags=False):
     lst1 = list(m.group(0) in english_words
                 for m in re.finditer(r"[\w']+", desc))
     maxlen = max(len(x) for x in tokens)
-    if maxlen > 1 and lst1.count(True) > 0:
+    if (maxlen > 1
+        and lst1.count(True) > 0 and
+        len(list(re.finditer(r"\w+", desc))) > 0):
         if ((len(lst) < 5 and all(lst)) or
             lst.count(True) / len(lst) >= 0.8):
             return "english"
@@ -1128,6 +1135,7 @@ def classify_desc(desc, allow_unknown_tags=False):
     if all(x in ("Ll", "Lu", "Lt", "Lm", "Mn", "Mc", "Zs", "Nd", "OK")
            for x in classes1):
         if num_latin >= num_greek + 2 or num_greek == 0:
-            return "romanization"
+            if classes1.count("OK") < len(classes1):
+                return "romanization"
     # Otherwise it is something else, such as hanji version of the word
     return "other"

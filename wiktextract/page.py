@@ -733,6 +733,7 @@ linkage_paren_ignore_contains_re = re.compile(
     r"\b(" +
     "|".join(re.escape(x) for x in [
         "from Etymology",
+        "used as",
         ]) +
     ")([, ]|$)")
 
@@ -2137,7 +2138,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 v.startswith("file:")):
                                 ignore = True
                             if not ignore:
-                                item_recurse(node.args[-1], italic=italic)
+                                v = node.args[-1]
+                                if (len(node.args) == 1 and
+                                    len(v) > 0 and
+                                    isinstance(v[0], str) and
+                                    v[0][0] == ":"):
+                                    v = [v[0][1:]] + list(v[1:])
+                                item_recurse(v, italic=italic)
                     elif kind == NodeKind.URL:
                         item_recurse(node.args[-1], italic=italic)
                     elif kind in (NodeKind.PREFORMATTED, NodeKind.BOLD):
@@ -2148,8 +2155,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             item_recurse(contents)
             item = clean_node(config, ctx, None, parts)
+            # if item.find("stroke") >= 0:
+            #     print("LINKAGE ITEM CONTENTS:", parts)
             # print("CLEANED ITEM: {!r}".format(item))
-            item = re.sub(r", \)", ")", item)
+            # item = re.sub(r", \)", ")", item)  # XXX breaks hyphen / comma
             item = re.sub(r"\(\)", "", item)
             item = re.sub(r"\s\s+", " ", item)
             item = item.strip()
@@ -2227,71 +2236,72 @@ def parse_language(ctx, config, langnode, language, lang_code):
             m = re.match(r"^\(?([a-zA-Z ]+)\)?: (.*)$", item)
             if m:
                 desc, rest = m.groups()
-                # print("linkage colon prefix desc={!r} rest={!r}"
-                #      .format(desc, rest))
-                cls = classify_desc(desc)
-                if cls == "tags":
-                    if base_qualifier:
-                        base_qualifier += " " + desc
+                if not re.search(linkage_paren_ignore_contains_re, desc):
+                    # print("linkage colon prefix desc={!r} rest={!r}"
+                    #      .format(desc, rest))
+                    cls = classify_desc(desc)
+                    if cls == "tags":
+                        if base_qualifier:
+                            base_qualifier += " " + desc
+                        else:
+                            base_qualifier = desc
+                        item = rest
+                    elif cls == "english":
+                        if sense:
+                            sense += ";" + desc
+                        else:
+                            sense = desc
+                        item = rest
                     else:
-                        base_qualifier = desc
-                    item = rest
-                elif cls == "english":
-                    if sense:
-                        sense += ";" + desc
-                    else:
-                        sense = desc
-                    item = rest
-                else:
-                    ctx.debug("unrecognized linkage prefix: {}"
-                              .format(item))
+                        ctx.debug("unrecognized linkage prefix: {}"
+                                  .format(item))
 
             # Various words have a sense or tags in parenthesis (sometimes
             # followed by a colon) at the start of the item
             m = re.match(r"\((([^()]|\([^()]*\))*)\):?\s*", item)
             if m:
                 par = m.group(1)
+                if not re.search(linkage_paren_ignore_contains_re, par):
+                    # Check for certain comma-separated tags combined
+                    # with English text at the beginning or end of a
+                    # comma-separated parenthesized list
+                    lst = par.split(", ")
+                    while len(lst) > 1:
+                        cls = classify_desc(lst[0])
+                        if cls == "tags":
+                            if base_qualifier:
+                                base_qualifier += " " + lst[0]
+                            else:
+                                base_qualifier = lst[0]
+                            lst = lst[1:]
+                            continue
+                        cls = classify_desc(lst[-1])
+                        if cls == "tags":
+                            if base_qualifier:
+                                base_qualifier += " " + lst[-1]
+                            else:
+                                base_qualifier = lst[-1]
+                            lst = lst[:-1]
+                            continue
+                        break
+                    par = ", ".join(lst)
 
-                # Check for certain comma-separated tags combined
-                # with English text at the beginning or end of a
-                # comma-separated parenthesized list
-                lst = par.split(", ")
-                while len(lst) > 1:
-                    cls = classify_desc(lst[0])
+                    # Classify the item and handle it
+                    cls = classify_desc(par)
+                    # print("parenthesized prefix: {} -> {}".format(par, cls))
                     if cls == "tags":
-                        if base_qualifier:
-                            base_qualifier += " " + lst[0]
+                        base_qualifier = par
+                        item = item[m.end():]
+                    elif cls in ("english", "taxonomic"):
+                        if sense:
+                            sense += "; " + par
                         else:
-                            base_qualifier = lst[0]
-                        lst = lst[1:]
-                        continue
-                    cls = classify_desc(lst[-1])
-                    if cls == "tags":
-                        if base_qualifier:
-                            base_qualifier += " " + lst[-1]
-                        else:
-                            base_qualifier = lst[-1]
-                        lst = lst[:-1]
-                        continue
-                    break
-                par = ", ".join(lst)
-
-                # Classify the item and handle it
-                cls = classify_desc(par)
-                # print("parenthesized prefix: {} -> {}".format(par, cls))
-                if cls == "tags":
-                    base_qualifier = par
-                    item = item[m.end():]
-                elif cls in ("english", "taxonomic"):
-                    if sense:
-                        sense += "; " + par
+                            sense = par
+                        item = item[m.end():]
                     else:
-                        sense = par
-                    item = item[m.end():]
-                else:
-                    # Otherwise we won't handle it here
-                    ctx.debug("unhandled parenthesized prefix: {}"
-                              .format(item))
+                        # Otherwise we won't handle it here
+                        ctx.debug("unhandled parenthesized prefix: {}"
+                                  .format(item))
 
             base_sense = sense
 
@@ -2335,10 +2345,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
             #    ctx.debug("linkage item has remaining parentheses: {}"
             #              .format(item))
 
-            item = re.sub(r"\s*\^?\s*\(\s*\)", "", item)
+            item = re.sub(r"\s*\^\(\s*\)", "", item)  # Now empty superscript
             item = item.strip()
             if not item:
                 return
+
             # The item may contain multiple comma-separated linkages
             if base_roman:
                 subitems = [item]
@@ -2394,7 +2405,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     return ""
 
                 item1 = re.sub(r'[“"]([^"]+)[“"],?\s*', english_repl, item1)
-                item1 = re.sub(r", \)", ")", item1)
+                # item1 = re.sub(r", \)", ")", item1)  # XXX break hyphen/comma
 
                 # There could be multiple parenthesized parts, and
                 # sometimes both at the beginning and at the end
@@ -2417,13 +2428,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         break
                     if re.search(linkage_paren_ignore_contains_re, par):
                         continue  # Skip these linkage descriptors
+                    par = par.strip()
                     # Handle tags from beginning of par.  We also handle "other"
                     # here as Korean entries often have Hanja form in the
                     # beginning of parenthesis, before romanization.  Similar
                     # for many Japanese entries.
                     while par:
                         idx = par.find(",")
-                        if idx < 0:
+                        if idx <= 0:
                             break
                         cls = classify_desc(par[:idx])
                         if cls == "other" and not alt:
@@ -2442,7 +2454,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # Check for certain comma-separated tags combined
                     # with English text at the beginning or end of a
                     # comma-separated parenthesized list
-                    lst = par.split(", ")
+                    lst = par.split(",") if len(par) > 1 else [par]
+                    lst = list(x.strip() for x in lst if x.strip())
                     while len(lst) > 1:
                         cls = classify_desc(lst[0])
                         if cls == "tags":
@@ -2573,7 +2586,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if ((not w or w.find(",") < 0) and
                         (not r or r.find(",") < 0) and
                         not ctx.page_exists(w)):
-                        lst = w.split("／")
+                        lst = w.split("／") if len(w) > 1 else [w]
                         if len(lst) > 1:
                             # Treat each alternative as separate linkage
                             for w in lst:
@@ -2589,15 +2602,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if qualifier:
                         parse_sense_qualifier(ctx, qualifier, dt)
                     if sense:
-                        dt["sense"] = sense
+                        dt["sense"] = sense.strip()
                     if r:
-                        dt["roman"] = r
+                        dt["roman"] = r.strip()
                     if ruby:
-                        dt["ruby"] = ruby
+                        dt["ruby"] = ruby.strip()
                     if alt:
-                        dt["alt"] = alt
+                        dt["alt"] = alt.strip()
                     if english:
-                        dt["english"] = english
+                        dt["english"] = english.strip()
                     if taxonomic:
                         if re.match(r"×[A-Z]", taxonomic):
                             data_append(ctx, dt, "tags", "extinct")
@@ -2726,6 +2739,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     continue
                 elif kind == NodeKind.LINK:
                     # Recurse into the last argument
+                    # Apparently ":/" is used as a link to "/", so strip
+                    # initial value
                     parse_linkage_recurse(node.args[-1], field, sense)
                 else:
                     ctx.debug("parse_linkage_recurse unhandled {}"
@@ -3665,7 +3680,7 @@ def clean_node(config, ctx, category_data, value, template_fn=None,
                 data_append(ctx, category_data, "categories", cat)
 
     v = clean_value(config, v)
-    # print("After clean:", repr(v))
+    # print("After clean_value:", repr(v))
 
     # Strip any unhandled templates and other stuff.  This is mostly intended
     # to clean up erroneous codings in the original text.

@@ -66,6 +66,8 @@ def split_at_comma_semi(text, extra=()):
     for m in re.finditer(split_re, text):
         if ofs < m.start():
             parts.append(text[ofs:m.start()])
+        if m.start() == 0 and m.end() == len(text):
+            return [text]  # Don't split if it is the only content
         ofs = m.end()
         token = m.group(0)
         if token == "[":

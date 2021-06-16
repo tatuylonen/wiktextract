@@ -156,6 +156,7 @@ english_words = (set(brown.words()) | set(
         "litre",
         "loanword",
         "loiter",
+        "maqaf",  # Name of character: Hebrew maqaf
         "manna",
         "marsh",
         "matra",
