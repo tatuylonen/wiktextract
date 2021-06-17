@@ -1957,7 +1957,7 @@ xlat_tags_map = {
     "alternative verbal noun of": "alt-of verbal-noun",
     "alternative conjugation of": "alt-of alternative",
     "abbreviation of": "alt-of abbreviation",
-    "Short for": "alt-of abbreviation",
+    "short for": "alt-of abbreviation",
     "eclipsed form of": "alt-of abbreviation eclipsis",
     "apocopic form of": "alt-of abbreviation apocope",
     "h-prothesized form of": "alt-of prothesis",
@@ -1975,7 +1975,7 @@ xlat_tags_map = {
     "visual rendering of Morse code for":
     "alt-of visual-rendering morse-code",
     "soft mutation of": "alt-of soft",
-    "Non-Oxford British English standard spelling of":
+    "non-Oxford British English standard spelling of":
     "alt-of nonstandard UK",
     "Nil standard spelling of": "alt-of UK standard",
     "nasal mutation of": "alt-of nasal mutation",

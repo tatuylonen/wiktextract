@@ -942,11 +942,26 @@ def parse_alt_or_inflection_of(ctx, gloss):
     """Tries to parse an inflection-of or alt-of description.  If successful,
     this returns (tags, alt-of/inflection-of-dict).  If the description cannot
     be parsed, this returns None."""
+    # First try parsing it as-is
+    parsed = parse_alt_or_inflection_of1(ctx, gloss)
+    if parsed is not None:
+        return parsed
+    # Next try parsing it with the first character converted to lowercase if
+    # it was previously uppercase.
+    if gloss and gloss[0].isupper():
+        gloss = gloss[0].lower() + gloss[1:]
+        parsed = parse_alt_or_inflection_of1(ctx, gloss)
+        if parsed is not None:
+            return parsed
+    # Cannot parse it as an alt-of or form-of.
+    return None
+
+def parse_alt_or_inflection_of1(ctx, gloss):
+    """Helper function for parse_alt_or_inflection_of.  This handles a single
+    capitalization."""
     tags = set()
     nodes = [(valid_sequences, 0)]
     gloss = re.sub(r"\s+", " ", gloss)
-    if gloss and gloss[0].isupper():
-        gloss = gloss[0].lower() + gloss[1:]
     lst = gloss.strip().split(" ")
     last = 0
     for i, w in enumerate(lst):

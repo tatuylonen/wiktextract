@@ -349,3 +349,13 @@ Fix parsing Translations under a linkage section (e.g., "desert",
 a linear sequence of sections rather than rely on the tree structure.
 
 Implement caching in decode_tags
+Implement caching in classify_desc
+
+Some weird problem in hermaphrodeities/English - it gets canonical
+form "lekker belangrijk" that does not appear on the page.  The form
+is in extract.json so problem is in wiktextract.  The word does not
+have any forms in head.
+  - the form is stored in pos_data, but it looks impossible for the form
+    to get passed from another language into pos_data
+  - another possibility is that expanding the head template would sometimes
+    give wrong results.  Perhaps this should be investigated.
