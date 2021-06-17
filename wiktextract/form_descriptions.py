@@ -84,7 +84,7 @@ ignored_translations = set([
 # Put english text into the "note" field in a translation if it contains one
 # of these words
 tr_note_re = re.compile(
-    r"\b(article|definite|indefinite|superlative|comparative|pattern|"
+    r"(\b(article|definite|indefinite|superlative|comparative|pattern|"
     "adjective|adjectives|clause|clauses|pronoun|pronouns|preposition|prep|"
     "postposition|postp|action|actions|articles|"
     "adverb|adverbs|noun|nouns|verb|verbs|before|"
@@ -98,8 +98,31 @@ tr_note_re = re.compile(
     "dialect|dialects|object|subject|predicate|movies|recommended|language|"
     "locative|continuous|simple|continuousness|gerund|subjunctive|"
     "periphrastically|no equivalent|not used|not always used|"
-    "used only with|not applicable|use the|"
-    "form|regular|irregular|alternative)($|\s)")
+    "used only with|not applicable|use the|signifying|wordplay|pronounced|"
+    "preconsonantal|spelled|spelling|respelling|respellings|phonetic|"
+    "may be replaced|stricter sense|for nonhumans|"
+    "sense:|used:|in full:|informally used|followed by|"
+    "not restricted to|pertaining to|or optionally with|are optional|"
+    "in conjunction with|in compounds|depending on the relationship|"
+    "person addressed|one person|multiple persons|may be replaced with|"
+    "optionally completed with|in the phrase|in response to|"
+    "before a|before an|preceded by|verbs ending|very common|after a verb|"
+    "with verb|with uncountable|with the objects|with stative|"
+    "can be replaced by|often after|used before|used after|"
+    "used in|clipping of|spoken|somewhat|capitalized|"
+    "short form|shortening of|shortened form|initialism of|"
+    "said to|rare:|rarer also|is rarer|negatively connoted|"
+    "with predicative|with -|with imperfect|with a negated|"
+    "colloquial|misspelling|holophrastic|frequently|esp\.|especially|"
+    '"|'
+    "form|regular|irregular|alternative)"
+    ")($| )|^("
+    # Following are only matched at the beginning of the string
+    "pl|pl\.|see:|pl:|sg:|plurals:|e\.g\.|e\.g\.:|e\.g\.,|cf\.|compare|such as|"
+    "see|only|often|usually|used|usage:|of|not|in|compare|usu\.|"
+    "as|about|abbrv\.|abbreviation|abbr\.|that:|optionally|"
+    "mainly|from|for|also|also:|acronym|"
+    "with) ")
 # \b does not work at the end???
 
 # If an unknown sequence starts with one of these, it will continue as an
@@ -766,9 +789,7 @@ def parse_translation_desc(ctx, lang, text, tr):
             par = par[2:]
         if par.endswith(","):
             par = par[:-1]
-        if par.startswith('"') and par.endswith('"'):
-            par = par[1:-1]
-        elif par.startswith('“') and par.endswith('"'):
+        if re.match(r'^["“]([^"]*)"$', par):
             par = par[1:-1]
         par = par.strip()
 
