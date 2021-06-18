@@ -2560,22 +2560,20 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     continue
 
                 # Remove certain prefixes from linkages
-                if item1.startswith("see Thesaurus:"):
-                    item1 = item1[14:]
-                elif item1.startswith("see also Thesaurus:"):
-                    item1 = item1[19:]
-                elif item1.startswith("Thesaurus:"):
-                    item1 = item1[10:]
-                elif item1.startswith("see more at Thesaurus:"):
-                    item1 = item1[22:]
-                elif item1.startswith("See also "):
-                    item1 = item1[9:]
-                elif item1.startswith("see also "):
-                    item1 = item1[9:]
-                elif item1.startswith("See ") and len(item1.split(" ")) <= 3:
-                    item1 = item1[4:]
-                elif item1.startswith("see ") and len(item1.split(" ")) <= 3:
-                    item1 = item1[4:]
+                m = re.match(r"^(" +
+                             "|".join([
+                                 "see Thesaurus:",
+                                 "See Thesaurus:",
+                                 "see also Thesaurus:",
+                                 "See also Thesaurus:",
+                                 "see also ",
+                                 "See also ",
+                                 "see ",
+                                 "See ",
+                                 "Thesaurus:"]) +
+                             ")", item1)
+                if m:
+                    item1 = item1[m.end():]
 
                 # Parse certain tags at the end of the linked term
                 lang = ctx.section
