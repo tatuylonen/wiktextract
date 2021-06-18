@@ -567,6 +567,7 @@ ignored_category_patterns = [
     ".* three-letter words$",
     ".* four-letter words$",
 ]
+# XXX is this regexp correct?
 ignored_cat_re = re.compile(r"([a-z]{2,4})?" +
                             "|".join(ignored_category_patterns))
 
@@ -2137,6 +2138,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 v.startswith("image:") or
                                 v.startswith("file:")):
                                 ignore = True
+                                have_linkages = True
                             if not ignore:
                                 v = node.args[-1]
                                 if (len(node.args) == 1 and
@@ -2787,8 +2789,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     parse_linkage_item([text], field, None)
             elif text.startswith("See "):
                 have_linkages = True
-            if not have_linkages and not have_panel_template:
-                ctx.debug("no linkages found")
+            # if not have_linkages and not have_panel_template:
+            #     ctx.debug("no linkages found")
 
     def parse_translations(data, xlatnode):
         """Parses translations for a word.  This may also pull in translations
@@ -3392,6 +3394,69 @@ def parse_top_template(config, ctx, node, data):
     clean_node(config, ctx, None, [node], template_fn=top_template_fn)
 
 
+def fix_subtitle_hierarchy(ctx, text):
+    """Fix subtitle hierarchy to be strict Language -> Etymology ->
+    Part-of-Speech -> Translation/Linkage."""
+    assert isinstance(ctx, Wtp)
+    assert isinstance(text, str)
+
+    # Known language names are in languages_by_name
+    # Known lowercase PoS names are in part_of_speech_map
+    # Known lowercase linkage section names are in linkage_map
+
+    old = re.split(r"(?m)^(==+)[ \t]*([^= \t]([^=\n]|=[^=])*?)"
+                     r"[ \t]*(==+)[ \t]*$",
+                     text)
+
+    parts = []
+    npar = 4  # Number of parentheses in above expression
+    parts.append(old[0])
+    for i in range(1, len(old), npar + 1):
+        left = old[i]
+        right = old[i + npar - 1]
+        title = old[i + 1]
+        level = len(left)
+        part = old[i + npar]
+        if level != len(right):
+            ctx.debug("subtitle {!r} has {} on the left and {} on the right"
+                      .format(title, left, right))
+        lc = title.lower()
+        if title in languages_by_name:
+            if level > 2:
+                ctx.debug("language name {} at level {}"
+                          .format(title, level))
+            level = 2
+        elif lc.startswith("etymology"):
+            if level > 3:
+                ctx.debug("etymology section {} at level {}"
+                          .format(title, level))
+            level = 3
+        elif lc.startswith("pronunciation"):
+            level = 3
+        elif lc in part_of_speech_map:
+            level = 4
+        elif lc == "translations":
+            level = 5
+        elif lc in linkage_map or lc == "compounds":
+            level = 5
+        elif title in inflection_section_titles:
+            level = 5
+        elif title in ignored_section_titles:
+            level = 5
+        else:
+            level = 6
+        parts.append("{}{}{}".format("=" * level, title, "=" * level))
+        parts.append(part)
+        # print("=" * level, title)
+        # if level != len(left):
+        #     print("  FIXED LEVEL OF {} {} -> {}"
+        #           .format(title, len(left), level))
+
+    text = "".join(parts)
+    # print(text)
+    return text
+
+
 def parse_page(ctx, word, text, config):
     """Parses the text of a Wiktionary page and returns a list of
     dictionaries, one for each word/part-of-speech defined on the page
@@ -3412,10 +3477,16 @@ def parse_page(ctx, word, text, config):
         print("Parsing page:", word)
 
     config.word = word
+    ctx.start_page(word)
+
+    # Fix up the subtitle hierarchy.  There are hundreds if not thousands of
+    # pages that have, for example, Translations section under Linkage, or
+    # Translations section on the same level as Noun.  Enforce a proper
+    # hierarchy by manipulating the subtitle levels in certain cases.
+    text = fix_subtitle_hierarchy(ctx, text)
 
     # Parse the page, pre-expanding those templates that are likely to
     # influence parsing
-    ctx.start_page(word)
     tree = ctx.parse(text, pre_expand=True,
                      additional_expand=additional_expand_templates)
     # print("PAGE PARSE:", tree)
