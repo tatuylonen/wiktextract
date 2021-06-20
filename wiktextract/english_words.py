@@ -1593,6 +1593,8 @@ blacklist_words = set([
     "boo",
     "em",
     "ma",
+    "Voulí",
+    "Antiprosópon",
 ])
 
 # Construct a set of (most) English words.  Multi-word expressions where we

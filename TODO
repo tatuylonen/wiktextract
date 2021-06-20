@@ -232,16 +232,14 @@ Collect etymology information
 htmlgen: Improve sense/word lists
   - more even sizes of sublists (use intervals when appropriate)
   - group kanji etc by radical + strokes
+htmlgen: include word prefixes in breadcrumbs
+htmlgen: Implement better list page generation
 
 htmlgen: form-of (and alt-of) links in generated html should look at
 canonical form in addition to word - now many items with accents are
 not properly linked
 
 htmlgen: strange Categories non-disambiguated in: https://kaikki.org/dictionary/English/meaning/v/vo/volva.html#volva-noun
-
-htmlgen: include word prefixes in breadcrumbs
-
-htmlgen: Implement better list page generation
 
 htmlgen: compound-of field of sense not displayed in generated html
 

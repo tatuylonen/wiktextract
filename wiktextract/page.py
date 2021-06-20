@@ -1087,7 +1087,9 @@ template_linkage_mappings = [
     ["syn", "synonyms"],
     ["synonyms", "synonyms"],
     ["ant", "antonyms"],
+    ["antonyms", "antonyms"],
     ["hyp", "hyponyms"],
+    ["hyponyms", "hyponyms"],
     ["der", "derived"],
     ["derived terms", "derived"],
     ["rel", "related"],
@@ -1098,7 +1100,10 @@ template_linkage_mappings = [
 sense_linkage_templates = {
     "syn": "synonyms",
     "synonyms": "synonyms",
+    "hyp": "hyponyms",
     "hyponyms": "hyponyms",
+    "ant": "antonyms",
+    "antonyms": "antonyms",
 }
 
 

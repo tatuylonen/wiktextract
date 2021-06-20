@@ -112,6 +112,8 @@ tr_note_re = re.compile(
     "used in|clipping of|spoken|somewhat|capitalized|"
     "short form|shortening of|shortened form|initialism of|"
     "said to|rare:|rarer also|is rarer|negatively connoted|"
+    "previously mentioned|uncountable noun|countable noun|"
+    "countable nouns|uncountable nouns|"
     "with predicative|with -|with imperfect|with a negated|"
     "colloquial|misspelling|holophrastic|frequently|esp\.|especially|"
     '"|'
@@ -1146,10 +1148,13 @@ def classify_desc(desc, allow_unknown_tags=False):
                 for m in re.finditer(r"[\w']+", desc))
     maxlen = max(len(x) for x in tokens)
     if (maxlen > 1
-        and lst1.count(True) > 0 and
+        and lst1.count(True) >= len(lst1) / 2 and
         len(list(re.finditer(r"\w+", desc))) > 0):
         if ((len(lst) < 5 and all(lst)) or
             lst.count(True) / len(lst) >= 0.8):
+            print("{} -> english".format(desc))
+            print(lst)
+            print(lst1)
             return "english"
     # Some translations have apparent pronunciation descriptions in /.../
     # which we'll put in the romanization field (even though they probably are
