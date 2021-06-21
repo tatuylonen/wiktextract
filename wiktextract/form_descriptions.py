@@ -1152,9 +1152,6 @@ def classify_desc(desc, allow_unknown_tags=False):
         len(list(re.finditer(r"\w+", desc))) > 0):
         if ((len(lst) < 5 and all(lst)) or
             lst.count(True) / len(lst) >= 0.8):
-            print("{} -> english".format(desc))
-            print(lst)
-            print(lst1)
             return "english"
     # Some translations have apparent pronunciation descriptions in /.../
     # which we'll put in the romanization field (even though they probably are
