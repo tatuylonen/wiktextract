@@ -2917,8 +2917,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 item = item[m.end():]
             elif lang is None:
                 # No mathing language prefix
-                ctx.error("no language name in translation item: {}"
-                          .format(item))
+                if item.find("__IGNORE__") < 0:
+                    ctx.error("no language name in translation item: {}"
+                              .format(item))
                 return
             # If we didn't get language code from the template, look it up
             # based on language name
