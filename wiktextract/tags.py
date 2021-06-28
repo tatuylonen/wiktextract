@@ -258,6 +258,7 @@ uppercase_tags = set([
     "Bressan",
     "Brest",
     "Britain",
+    "British airforce",
     "British Army",
     "British Columbia",
     "British Isles",
@@ -381,6 +382,7 @@ uppercase_tags = set([
     "Doric",
     "Drents",
     "Dundee",
+    "Durham",
     "Dutch",
     "Dêgê",
     "Džáva",
@@ -510,6 +512,7 @@ uppercase_tags = set([
     "Heligolandic",
     "Hevaha",
     "Hianacoto",
+    "Hiberno-English",
     "Hijazi",
     "Hinduism",
     "Hokkien",
@@ -534,6 +537,7 @@ uppercase_tags = set([
     "In conjunct consonants",
     "India",
     "Indian English",
+    "Indo-Aryan linguistics",
     "Indonesia",
     "Inland Min",
     "Inland Northern American",
@@ -1237,6 +1241,7 @@ uppercase_tags = set([
     "Wardak",
     "Waterford",
     "Wazirwola",
+    "Wearside",
     "Weirate",
     "Welche",
     "Welsh English",
@@ -1503,6 +1508,8 @@ xlat_tags_map = {
     "literary or archaic": "literary archaic",
     "literaly or archaic": "literary archaic",
     "literary or dialectal": "literary dialectal",
+    "dialectal or colloquial": "dialectal colloquial",
+    "dialectal or obsolete": "dialectal obsolete",
     "simple past": "simple past",
     "simple present": "simple present",
     "with verb in simple tense": "with-simple",
@@ -1603,6 +1610,7 @@ xlat_tags_map = {
     "inf.": "informal",
     "unformal": "informal",
     "unpolite": "impolite",
+    "postnominal": "postpositional",
     "first/second declension": "first-declension second-declension",
     "first/second-declension suffix":
     "first-declension second-declension suffix",
@@ -1667,6 +1675,8 @@ xlat_tags_map = {
     "only predicative": "not-attributive predicative",
     "predicative only": "not-attributive predicative",
     "predicatively": "predicative",
+    "in attributive use": "attributive",
+    "only in attributive use": "attributive not-predicative",
     "present tense": "present",
     "past tense": "past",
     "feminine counterpart": "feminine",
@@ -2213,6 +2223,7 @@ xlat_tags_map = {
     "in general sense": "broadly",
     "by extension": "broadly",
     "by metonymy": "metonymically",
+    "by synecdoche": "synecdoche",
     "by semantic narrowing": "narrowly",
     "by semantic widening": "broadly",
     "strict sense": "strict-sense",
@@ -2353,7 +2364,9 @@ xlat_tags_map = {
     "linguistically informed spelling of": "alt-of literary",
     "Chinese spelling of": "alt-of China",
     "Mongolian spelling of": "alt-of Mongolia",
-    "Leet spelling of": "alt-of Leet",
+    "Leet spelling of": "alt-of Leet Internet",
+    "leetspeak": "Leet Internet",
+    "bulletin board system slang": "slang Internet",
     "combining form of": "in-compounds form-of",
     "compound of": "compound-of",
     "compound of gerund of": "compound-of",
@@ -2553,6 +2566,7 @@ xlat_tags_map = {
     "etc.": "usually",
     "regardless of gender": "gender-neutral",
     "ditransitive for the second object": "ditransitive",
+    "double transitive": "ditransitive",
     "number": "numeral",
     "+ 3rd-pers.": "with-third-person",
     "Historical": "historical",
@@ -2618,6 +2632,7 @@ xlat_tags_map = {
     "nonanimate": "inanimate",
     "nominalized verb": "nominalization",
     "nominalized": "nominalization",
+    "eulogistic": "poetic",  # XXX not really, implies praise
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -2642,6 +2657,7 @@ xlat_descs_map = {
     "transitive, auxiliary, with-first-infinitive",
     "elative + 3rd person singular + noun/adjective in nominative or partitive or personal + translative":
     "with-elative with-third-person-singular",  # XXX very incomplete
+    "group theory, of a group, semigroup, etc.": "group theory",
 }
 
 # Words that are interpreted as tags at the beginning of a linkage
@@ -3079,6 +3095,7 @@ valid_tags = set([
     "regional",
     "relational",
     "relative",
+    "retronym",
     "revised-jeon",
     "rhetoric",
     "romanization",
@@ -3140,6 +3157,7 @@ valid_tags = set([
     "syllable-final",
     "syllable-initial",
     "syncope",
+    "synecdoche",
     "synonym",
     "synonym-of",
     "taboo",
