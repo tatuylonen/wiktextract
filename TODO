@@ -357,3 +357,8 @@ have any forms in head.
     to get passed from another language into pos_data
   - another possibility is that expanding the head template would sometimes
     give wrong results.  Perhaps this should be investigated.
+
+grep "ginseng-harvesters cant" from extract.json - some very weird word included
+  - 모새/Korean
+  - Add support for Phonetic hangul
+  - Add support for multiple romanizations (produced by {{ko-IPA}})

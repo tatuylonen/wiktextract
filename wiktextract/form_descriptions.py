@@ -639,6 +639,10 @@ def parse_word_head(ctx, pos, text, data):
                   re.finditer(r"\((([^()]|\([^()]*\))*)\)", text))
     for paren in parens:
         paren = paren.strip()
+        if (len(paren.split()) == 1 and classify_desc(base) == "other" and
+            classify_desc(paren) == "romanization"):
+            add_related(ctx, data, ["romanization"], [paren])
+            continue
         # print("HEAD PAREN:", paren)
         descriptors = map_with(xlat_descs_map, [paren])
         new_desc = []
@@ -1136,6 +1140,7 @@ def classify_desc(desc, allow_unknown_tags=False):
                (x.endswith("ing") and len(x) >= 5 and
                 x[:-3] in english_words) or
                x.endswith("'s") or
+               x.endswith("s'") or
                (x.endswith("ise") and len(x) >= 5 and
                 x[:-3] + "ize" in english_words) or
                (x.endswith("ised") and len(x) >= 6 and

@@ -180,14 +180,16 @@ def clean_value(config, title, no_strip=False):
     assert isinstance(title, str)
     title = re.sub(r"\{\{[^}]+\}\}", "", title)
     # Remove tables
-    title = re.sub(r"(?s)\{\|.*?\|\}", " ", title)
+    title = re.sub(r"(?s)\{\|.*?\|\}", "\n", title)
     # Remove references (<ref>...</ref>).
     title = re.sub(r"(?is)<\s*ref\s*[^>]*?>\s*.*?<\s*/\s*ref\s*>\n*", "", title)
     # Replace <br/> by comma space (it is used to express alternatives in some
     # declensions)
     title = re.sub(r"(?si)<\s*br\s*/?>\n*", ", ", title)
-    # Change <div> and </div> to newlines
-    title = re.sub(r"(?si)<\s*/?\s*div\b[^>]*>", "\n", title)
+    # Change <div> and </div> to newlines.  Ditto for tr, li, table
+    title = re.sub(r"(?si)<\s*/?\s*(div|tr|li|table)\b[^>]*>", "\n", title)
+    # Change <td> </td> to spaces.  Ditto for th.
+    title = re.sub(r"(?si)<\s*/?\s*(td|th)\b[^>]*>", " ", title)
     # Change <sup> ... </sup> to ^
     title = re.sub(r"(?si)<\s*sup\b[^>]*>\s*<\s*/\s*sup\s*>", "", title)
     title = re.sub(r"(?si)<\s*sup\b[^>]*>(.*?)<\s*/\s*sup\s*>",
@@ -220,6 +222,9 @@ def clean_value(config, title, no_strip=False):
     # Replace HTML entities
     title = html.unescape(title)
     title = re.sub("\xa0", " ", title)  # nbsp
+    # Replace whitespace sequences by a single space.
+    title = re.sub(r"[ \t\r]+", " ", title)
+    title = re.sub(r" *\n+", "\n", title)
     # This unicode quote seems to be used instead of apostrophe quite randomly
     # (about 4% of apostrophes in English entries, some in Finnish entries).
     # title = re.sub("\u2019", "'", title)  # Note: no r"..." here!
@@ -227,8 +232,7 @@ def clean_value(config, title, no_strip=False):
     # title = re.sub(r"”", '"', title)
     # Replace unicode long dash by normal dash
     # title = re.sub(r"–", "-", title)
-    # Replace whitespace sequences by a single space.
-    title = re.sub(r"\s+", " ", title)
+
     # Remove whitespace before periods and commas etc
     # XXX we might re-enable this, now trying without as it is removing some
     # instances where we would want to leave the space

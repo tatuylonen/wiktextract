@@ -332,6 +332,7 @@ panel_templates = set([
     "compass-fi",
     "copyvio suspected",
     "delete",
+    "dial syn",  # We ignore these, even though they might be useful in Chinese/Korean
     "etystub",
     "examples",
     "hu-corr",
@@ -728,6 +729,13 @@ tr_ignore_re = re.compile(
     "|".join(re.escape(x) for x in tr_ignore_contains) + "|" +
     "|".join(tr_ignore_regexps))  # These are not to be escaped
 
+# Linkage will be ignored if it has one of these prefixes
+linkage_ignore_prefixes = [
+    "Historical and regional synonyms of ",
+    "edit data",
+]
+linkage_ignore_prefixes_re = re.compile(
+    "|".join(re.escape(x) for x in linkage_ignore_prefixes))
 
 # Ignore linkage parenthesized sections that contain one of these strings
 linkage_paren_ignore_contains_re = re.compile(
@@ -738,6 +746,22 @@ linkage_paren_ignore_contains_re = re.compile(
         ]) +
     ")([, ]|$)")
 
+# Prefixes, tags, and regexp for finding romanizations from the pronuncation
+# section
+pron_romanizations = {
+    " Revised Romanization ": "romanization revised",
+    " Revised Romanization (translit.) ":
+    "romanization revised transliteration",
+    " McCune-Reischauer ": "McCune-Reischauer romanization",
+    " McCune–Reischauer ": "McCune-Reischauer romanization",
+    " Yale Romanization ": "Yale romanization",
+}
+pron_romanization_re = re.compile(
+    "(?m)^(" +
+    "|".join(re.escape(x) for x in
+             sorted(pron_romanizations.keys(), key=lambda x: len(x),
+                    reverse=True)) +
+    ")([^\n]+)")
 
 def parse_sense_XXXold_going_away(config, data, text, use_text):
     """Parses a word sense from the text.  The text is usually a list item
@@ -1142,7 +1166,48 @@ def parse_sense_linkage(config, ctx, data, name, ht):
             w = w[10:]
         if not w:
             break
-        data_append(ctx, data, field, {"word": w})
+        tags = []
+        topics = []
+        english = None
+        # Try to find qualifiers for this synonym
+        q = ht.get("q{}".format(i - 1))
+        if q:
+            cls = classify_desc(q)
+            if cls == "tags":
+                tagsets1, topics1 = decode_tags(q)
+                for ts in tagsets1:
+                    tags.extend(ts)
+                topics.extend(topics1)
+            elif cls == "english":
+                if english:
+                    english += "; " + q
+                else:
+                    english = q
+        # Try to find English translation for this synonym
+        t = ht.get("t{}".format(i - 1))
+        if t:
+            if english:
+                english += "; " + t
+            else:
+                english = t
+
+        # See if the linkage contains a parenthesized alt
+        alt = None
+        m = re.search(r"\(([^)]+)\)$", w)
+        if m:
+            w = w[:m.start()].strip()
+            alt = m.group(1)
+
+        dt = {"word": w}
+        if tags:
+            data_extend(ctx, dt, "tags", tags)
+        if topics:
+            data_extend(ctx, dt, "topics", topics)
+        if english:
+            dt["english"] = english
+        if alt:
+            dt["alt"] = alt
+        data_append(ctx, data, field, dt)
 
 
 def recursively_extract(contents, fn):
@@ -1892,14 +1957,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 field = "other"
             # Check if it contains Japanese "Tokyo" pronunciation with
             # special syntax
-            m = re.search(r"\(Tokyo\) +([^ ]+) +\[", origtext)
+            m = re.search(r"(?m)\(Tokyo\) +([^ ]+) +\[", origtext)
             if m:
                 pron = {field: m.group(1)}
                 parse_pronunciation_tags(ctx, tagstext, pron)
                 data_append(ctx, data, "sounds", pron)
                 have_pronunciations = True
             # Check if it contains Rhymes
-            m = re.search(r"\bRhymes: ([^\s,]+(,\s*[^\s,]+)*)", text)
+            m = re.search(r"(?m)\bRhymes: ([^\s,]+(,\s*[^\s,]+)*)", text)
             if m:
                 for ending in m.group(1).split(","):
                     ending = ending.strip()
@@ -1909,7 +1974,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         data_append(ctx, data, "sounds", pron)
                         have_pronunciations = True
             # Check if it contains homophones
-            m = re.search(r"\bHomophones?: ([^\s,]+(,\s*[^\s,]+)*)", text)
+            m = re.search(r"(?m)\bHomophones?: ([^\s,]+(,\s*[^\s,]+)*)", text)
             if m:
                 for w in m.group(1).split(","):
                     w = w.strip()
@@ -1919,7 +1984,30 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         data_append(ctx, data, "sounds", pron)
                         have_pronunciations = True
 
-            for m in re.finditer(r"/[^/,]+?/|\[[^]0-9,/][^],/]*?\]", ipa_text):
+            # Check if it contains Phonetic hangeul
+            m = re.search(r"(?m)\bPhonetic hangeul: \[([^]]+)\]", text)
+            if m:
+                seen = set()
+                for w in m.group(1).split("/"):
+                    w = w.strip()
+                    if w and w not in seen:
+                        seen.add(w)
+                        pron = {"hangeul": w}
+                        data_append(ctx, data, "sounds", pron)
+                        have_pronunciations = True
+
+            # Find romanizations from the pronunciation section (routinely
+            # produced for Korean by {{ko-IPA}})
+            for m in re.finditer(pron_romanization_re, text):
+                prefix = m.group(1)
+                w = m.group(2).strip()
+                tag = pron_romanizations[prefix]
+                form = {"form": w,
+                        "tags": tag.split()}
+                data_append(ctx, data, "forms", form)
+
+            for m in re.finditer(r"(?m)/[^][/,]+?/|\[[^]0-9,/][^],/]*?\]",
+                                 ipa_text):
                 v = m.group(0)
                 # The regexp above can match file links.  Skip them.
                 if v.startswith("[[File:"):
@@ -2593,6 +2681,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     continue  # Ignore empty link targets
                 if item1 == word:
                     continue  # Ignore self-links
+                if re.match(linkage_ignore_prefixes_re, item1):
+                    continue  # Ignore certain prefixes
 
                 def add(w, r):
                     nonlocal alt
