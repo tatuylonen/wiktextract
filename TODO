@@ -340,12 +340,6 @@ Fix etc/Swedish - two "Abbreviation of ..." in the same gloss.
 
 Check cut/English/Translations/to intersect dividing into half/Finnish tr
 
-wind/English/Noun as File: links in forms
-
-Fix parsing Translations under a linkage section (e.g., "desert",
-"shark", "soul").  Probably should overall start treating the page as
-a linear sequence of sections rather than rely on the tree structure.
-
 Implement caching in decode_tags
 Implement caching in classify_desc
 
@@ -356,9 +350,4 @@ have any forms in head.
   - the form is stored in pos_data, but it looks impossible for the form
     to get passed from another language into pos_data
   - another possibility is that expanding the head template would sometimes
-    give wrong results.  Perhaps this should be investigated.
-
-grep "ginseng-harvesters cant" from extract.json - some very weird word included
-  - 모새/Korean
-  - Add support for Phonetic hangul
-  - Add support for multiple romanizations (produced by {{ko-IPA}})
+    give wrong results.

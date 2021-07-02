@@ -157,9 +157,10 @@ def clean_value(config, title, no_strip=False):
     def repl_2(m):
         return clean_value(config, m.group(2), no_strip=True)
     def repl_link(m):
-        if m.group(2) in ("File", "Image"):
+        if m.group(2) and m.group(2).lower() in ("file", "image"):
             return ""
-        return clean_value(config, m.group(3) or "", no_strip=True)
+        v = m.group(3).split("|")
+        return clean_value(config, v[0], no_strip=True)
     def repl_link_bars(m):
         lnk = m.group(1)
         if re.match(r"(?si)(File|Image)\s*:", lnk):
@@ -209,8 +210,7 @@ def clean_value(config, title, no_strip=False):
     title = re.sub(r"(?s)\[\[\s*([^]|]+?)\s*\|\s*([^]|]+?)"
                    r"(\s*\|\s*([^]|]+?))?\s*\]\]",
                    repl_link_bars, title)
-    title = re.sub(r"(?s)\[\[\s*(([a-zA-z0-9]+)\s*:)?\s*([^]|]+?)"
-                   r"(\s*\([^])|]*\)\s*)?\|\]\]",
+    title = re.sub(r"(?s)\[\[\s*(([a-zA-z0-9]+)\s*:)?\s*([^][]+?)\]\]",
                    repl_link, title)
     title = re.sub(r"(?s)\[\[\s*:?([^]|]+?)\s*\]\]", repl_1, title)
     # Replace remaining HTML links by the URL.

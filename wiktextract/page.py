@@ -434,6 +434,7 @@ wikipedia_templates = [
     "w",
     "W",
     "swp",
+    "wiki",
     "Wikipedia",
     "wtorw",
 ]
