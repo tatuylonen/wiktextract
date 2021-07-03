@@ -734,6 +734,7 @@ tr_ignore_re = re.compile(
 linkage_ignore_prefixes = [
     "Historical and regional synonyms of ",
     "edit data",
+    "or these other third-person pronouns",
 ]
 linkage_ignore_prefixes_re = re.compile(
     "|".join(re.escape(x) for x in linkage_ignore_prefixes))
@@ -1427,18 +1428,22 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         rawgloss = clean_node(config, ctx, sense_base, lst,
                               template_fn=sense_template_fn)
+        # print("parse_sense rawgloss:", repr(rawgloss))
 
         # The gloss could contain templates that produce more list items.
         # This happens commonly with, e.g., {{inflection of|...}}.  Split
-        # to parts.
-        subglosses = re.split(r"[#*]+\s*", rawgloss)
+        # to parts.  However, e.g. Interlingua generates multiple glosses
+        # in HTML directly without Wikitext markup, so we must also split
+        # by just newlines.
+        subglosses = re.split(r"(?m)^[#*]*\s*", rawgloss)
 
         # Some entries, e.g., "iacebam", have weird sentences in quotes
         # after the gloss, but these sentences don't seem to be intended
         # as glosses.  Skip them.
         subglosses = list(gl for gl in subglosses
-                          if not re.match(r'\s*(\([^)]*\)\s*)?(:|"[^"]*"\s*$)',
-                                          gl))
+                          if gl.strip() and
+                          not re.match(r'\s*(\([^)]*\)\s*)?(:|"[^"]*"\s*$)',
+                                       gl))
 
         if len(subglosses) > 1 and "form_of" not in sense_base:
             gl = subglosses[0].strip()
@@ -1447,13 +1452,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
             parsed = parse_alt_or_inflection_of(ctx, gl)
             if parsed is not None:
                 infl_tags, infl_dt = parsed
-                if infl_dt is not None and "form-of" in infl_tags:
+                if (infl_dt is not None and "form-of" in infl_tags and
+                    len(infl_tags) == 1):
                     # Interpret others as a particular form under
                     # "inflection of"
                     data_extend(ctx, sense_base, "tags", infl_tags)
                     data_append(ctx, sense_base, "form_of", infl_dt)
                     subglosses = subglosses[1:]
-                elif infl_dt is not None:
+                elif infl_dt is None:
                     data_extend(ctx, sense_base, "tags", infl_tags)
                     subglosses = subglosses[1:]
 
@@ -1469,6 +1475,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # If the gloss starts with †, mark as obsolete
             if gloss.startswith("^†"):
                 data_append(ctx, sense_data, "tags", "obsolete")
+                gloss = gloss[2:].strip()
+            elif gloss.startswith("^‡"):
+                data_extend(ctx, sense_data, "tags", ["obsolete", "historical"])
                 gloss = gloss[2:].strip()
             # Copy data for all senses to this sense
             for k, v in sense_base.items():
@@ -2466,7 +2475,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # The item may contain multiple comma-separated linkages
             if base_roman:
                 subitems = [item]
-            elif ctx.title.find(" or ") < 0:
+            elif (ctx.title.find(" or ") < 0 and
+                  all(ctx.title not in x.split(" or ")
+                      for x in split_at_comma_semi(item)
+                      if x.find(" or ") >= 0)):
                 subitems = split_at_comma_semi(item, extra=[" or "])
             else:
                 subitems = split_at_comma_semi(item)
@@ -3823,12 +3835,15 @@ def clean_node(config, ctx, category_data, value, template_fn=None,
         elif isinstance(value, WikiNode):
             ret = ctx.node_to_html(value, template_fn=clean_template_fn,
                                    post_template_fn=post_template_fn)
+            # print("clean_value recurse node_to_html value={!r} ret={!r}"
+            #      .format(value, ret))
         else:
             ret = str(value)
         return ret
 
+    # print("clean_node: value={!r}".format(value))
     v = recurse(value)
-    # print("clean_node:", repr(v))
+    # print("clean_node: v={!r}".format(v))
 
     # Capture categories if category_data has been given.  We also track
     # Lua execution errors here.

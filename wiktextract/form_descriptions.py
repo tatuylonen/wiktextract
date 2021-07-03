@@ -970,6 +970,10 @@ def parse_alt_or_inflection_of(ctx, gloss):
     """Tries to parse an inflection-of or alt-of description.  If successful,
     this returns (tags, alt-of/inflection-of-dict).  If the description cannot
     be parsed, this returns None."""
+    # Occasionally inflection_of/alt_of have "A(n) " at the beginning.
+    m = re.match(r"(A\(n\)|A|a|an|An) ", gloss)
+    if m:
+        gloss = gloss[m.end():]
     # First try parsing it as-is
     parsed = parse_alt_or_inflection_of1(ctx, gloss)
     if parsed is not None:
