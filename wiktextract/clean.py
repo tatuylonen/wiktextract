@@ -8,6 +8,7 @@
 
 import re
 import html
+import unicodedata
 from wikitextprocessor.common import MAGIC_FIRST, MAGIC_LAST
 from .config import WiktionaryConfig
 
@@ -490,4 +491,6 @@ def clean_value(config, title, no_strip=False):
     # Strip surrounding whitespace.
     if not no_strip:
         title = title.strip()
+    # Normalize different ways of writing accents into the NFC canonical form
+    title = unicodedata.normalize("NFC", title)
     return title

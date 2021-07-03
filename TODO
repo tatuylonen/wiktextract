@@ -295,10 +295,6 @@ different versions (in Japanese they look like pronunciations).  cf. Ruby.
 - is nowiki broken in templates?  Perhaps core.py:_template_to_body should
   call preprocess_text for the template body?
 
-Check after next wiktionary dump: LSB (has "lattice" in forms but old
-page does not have it, nor current Wiktionary)
-- this is probably a bug, as I've seen them elsewhere too
-
 Check:
 can/English/Verb: ERROR: no language name in translation item: : ... at ['can']
 can/English/Verb: ERROR: no language name in translation item: : -bil- (tr) (verbal infix) at ['can']
@@ -338,3 +334,5 @@ looks like the category has a nested link)
 
 Implement caching in decode_tags
 Implement caching in classify_desc
+
+Fix parsing linkages for letters in scripts, see P/English/Number

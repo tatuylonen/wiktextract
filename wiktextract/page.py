@@ -423,7 +423,6 @@ panel_templates = set([
 # be ignored).
 panel_prefixes = [
     "list:compass points/",
-    "list:Latin script letters/",
     "list:Gregorian calendar months/",
     "RQ:",
 ]
@@ -735,6 +734,8 @@ linkage_ignore_prefixes = [
     "Historical and regional synonyms of ",
     "edit data",
     "or these other third-person pronouns",
+    "Signal flag:",
+    "Semaphore:",
 ]
 linkage_ignore_prefixes_re = re.compile(
     "|".join(re.escape(x) for x in linkage_ignore_prefixes))
@@ -2427,7 +2428,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     item = rest
                 elif cls in ("english", "taxonomic"):
                     if sense:
-                        sense += ";" + desc
+                        sense += "; " + desc
                     else:
                         sense = desc
                     item = rest
@@ -2445,33 +2446,33 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                   "Arabic digits"):
                     base_qualifier = None
                     item = ", ".join(item.split())
-                elif (base_sense in (
-                        "Arabic digits",
-                        "Latin script",
-                        "Latin script letters",
-                        "Latin-script letters",
-                        "Latvian letters") or
-                      base_sense.startswith("Variations of letter ")):
-                    base_qualifier = None
-                    idx = item.find("; ")
-                    if idx >= 0:
-                        prefix = item[:idx]
-                        item = item[idx + 2:]
-                    else:
-                        prefix = None
-                    lst = item.split(", ")
-                    if len(lst) > 5:
-                        if lst[0].count(" ") == 1:
-                            item = ", ".join(x for x in re.split(r",| ", item)
-                                             if x not in (" ", ","))
-                        else:
-                            item = ", ".join(x for x in
-                                             list(m.group(0) for m in
-                                                  re.finditer(unicode_dc_re,
-                                                              item))
-                                             if x not in (" ", ","))
-                    if prefix:
-                        item = prefix + "; " + item
+                # elif (base_sense in (
+                #         "Arabic digits",
+                #         "Latin script",
+                #         "Latin script letters",
+                #         "Latin-script letters",
+                #         "Latvian letters") or
+                #       base_sense.startswith("Variations of letter ")):
+                #     base_qualifier = None
+                #     idx = item.find("; ")
+                #     if idx >= 0:
+                #         prefix = item[:idx]
+                #         item = item[idx + 2:]
+                #     else:
+                #         prefix = None
+                #     lst = item.split(", ")
+                #     if len(lst) > 5:
+                #         if lst[0].count(" ") == 1:
+                #             item = ", ".join(x for x in re.split(r",| ", item)
+                #                              if x not in (" ", ","))
+                #         else:
+                #             item = ", ".join(x for x in
+                #                              list(m.group(0) for m in
+                #                                   re.finditer(unicode_dc_re,
+                #                                               item))
+                #                              if x not in (" ", ","))
+                #     if prefix:
+                #         item = prefix + "; " + item
 
             # XXX temporarily disabled.  These should be analyzed.
             #if item.find("(") >= 0 and item.find(", though ") < 0:
@@ -2768,18 +2769,45 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         data_append(ctx, data, field, dt)
                         have_linkages = True
 
-                if sense in ("Cyrillic-script letters",):
-                    ws = item1.split(" ")
-                    if roman:
-                        rs = roman.split(" ")
-                    elif len(ws) == 2 and ws[0].isupper() and ws[1].islower():
-                        rs = [None] * len(ws)
-                    else:
-                        rs = None
-                    if rs and len(ws) > 1 and len(ws) == len(rs):
-                        for w, r in zip(ws, rs):
+                # Various templates for letters in scripts use spaces as
+                # separators and also have multiple characters without
+                # spaces consecutively.
+                v = sense or qualifier
+                if v and len(item1.split()) > 1:
+                    m = re.search(r"(script letters| script| letters|"
+                                  r"Dialectological|Puctuation|Symbols|"
+                                  r"Guillemets|Single guillemets|"
+                                  r"tetragrams|"
+                                  r"digits)(;|$)|"
+                                  r"(^|; )(Letters using |Letters of the |"
+                                  r"Variations of letter )", v)
+                    if m:
+                        if v == qualifier:
+                            if sense:
+                                sense += "; " + qualifier
+                            else:
+                                sense = qualifier
+                            qualifier = None
+                        if re.search(r" (letters|digits|script)$", v):
+                            qualifier = v  # Also parse as qualifier
+                        parts = list(m.group(0) for m in
+                                     re.finditer(r".[\u0300-\u036f]?", item1)
+                                     if not m.group(0).isspace())
+                        rparts = None
+                        if roman:
+                            rparts = list(m.group(0) for m in
+                                          re.finditer(r".[\u0300-\u036f]",
+                                                      roman)
+                                          if not m.group(0).isspace())
+                            if len(rparts) != len(parts):
+                                rparts = None
+                        if not rparts:
+                            rparts = [None] * len(parts)
+
+                        for w, r in zip(parts, rparts):
                             add(w, r)
                         continue
+
                 add(item1, roman)
                 if item1 == "...":
                     add("…", roman)

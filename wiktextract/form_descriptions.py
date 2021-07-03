@@ -25,20 +25,27 @@ tokenizer = TweetTokenizer()
 # here may be the answer if a taxonomic name goes in "alt".
 known_firsts.update([
     "Albulidae",
+    "Alphonsus",
     "Bubo",
+    "Callistosporium",
     "Caprobrotus",
     "Chaetodontinae",
+    "Chalchicuautla",
     "Citriobatus",
     "Citrofortunella",
     "Coriandum",
     "Lagerstomia",
+    "Lyssavirus",
     "Maulisa",
+    "Megamimivirinae",
     "Mercenaria",
     "Monetaria",
     "Mugillidae",
+    "Ogcocephalus",
     "Onchorhynchus",
     "Plebidonax",
     "Poncirus",
+    "Rugosomyces",
     "Tanagra",
 ])
 
@@ -464,7 +471,10 @@ def decode_tags(src, allow_any=False):
             new_tagsets = []
             for x in tagsets:
                 for t in tagspec:
-                    new_tagsets.append(x + t.split())
+                    if t:
+                        new_tagsets.append(x + t.split())
+                    else:
+                        new_tagsets.append(x)
             tagsets = new_tagsets
         if topicspec:
             for t in topicspec:
@@ -983,8 +993,8 @@ def parse_alt_or_inflection_of(ctx, gloss):
     """Tries to parse an inflection-of or alt-of description.  If successful,
     this returns (tags, alt-of/inflection-of-dict).  If the description cannot
     be parsed, this returns None."""
-    # Occasionally inflection_of/alt_of have "A(n) " at the beginning.
-    m = re.match(r"(A\(n\)|A|a|an|An) ", gloss)
+    # Occasionally inflection_of/alt_of have "A(n) " etc. at the beginning.
+    m = re.match(r"(A\(n\)|A|a|an|An|The|the) ", gloss)
     if m:
         gloss = gloss[m.end():]
     # First try parsing it as-is
@@ -1047,6 +1057,12 @@ def parse_alt_or_inflection_of1(ctx, gloss):
                 last = len(lst)
 
     if last == 0:
+        return None
+
+    # The parsing must result in alt-of/form-of/compound-of
+    if ("alt-of" not in tags and
+        "form-of" not in tags and
+        "compound-of" not in tags):
         return None
 
     # It is fairly common for form_of glosses to end with something like
@@ -1180,6 +1196,10 @@ def classify_desc(desc, allow_unknown_tags=False):
     # which we'll put in the romanization field (even though they probably are
     # not exactly romanizations).
     if desc.startswith("/") and desc.endswith("/"):
+        return "romanization"
+    # Kludge: treat sequence of all ten digits as a romanization
+    # (Frequently used in lists of digits for various scripts)
+    if desc == "0 1 2 3 4 5 6 7 8 9":
         return "romanization"
     # If all characters are in classes that could occur in romanizations,
     # treat as romanization
