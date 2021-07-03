@@ -862,6 +862,7 @@ topic_generalize_map = {
     "skateboarding": "sports",
     "weightlifting": "sports",
     "skiing": "sports",
+    "alpine skiing": "skiing",
     "aerial freestyle": "skiing",
     "mountaineering": "sports",
     "skating": "sports",
