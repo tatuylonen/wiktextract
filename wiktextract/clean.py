@@ -8,6 +8,7 @@
 
 import re
 import html
+from wikitextprocessor.common import MAGIC_FIRST, MAGIC_LAST
 from .config import WiktionaryConfig
 
 ######################################################################
@@ -146,6 +147,249 @@ def to_chem(text):
     return "".join(to_subscript(x) if x.isdigit() else x
                    for x in text)
 
+math_map = {
+    "ldots": "…",
+    "textbar": "|",
+    "textbullet": "•",
+    "textbackslash": "\\",
+    "S": "§",
+    "textless": "<",
+    "textgreater": ">",
+    "sim": "∼",
+    "tiny": "",
+    "scriptsize": "",
+    "footnotesize": "",
+    "small": "",
+    "normalsize": "",
+    "large": "",
+    "leq": "≤",
+    "geq": "≥",
+    "neq": "≠",
+    "doteq": "≐",
+    "approx": "≈",
+    "times": "⨯",
+    "div": "÷",
+    "pm": "±",
+    "mp": "∓",
+    "cdot": "·",
+    "circ": "∘",
+    "ast": "∗",
+    "smallsetminus": "∖",
+    "slash": "∕",
+    "prime": "′",
+    "second": "′′",
+    "third": "′′′",
+    "fourth": "′′′′",
+    "backprime": "‵",
+    "dagger": "†",
+    "ddagger": "‡",
+    "ldots": "...",
+    "cat": "⁀",
+    "cdots": "⋯",
+    "infty": "∞",
+    "neg": "¬",
+    "wedge": "∧",
+    "vee": "∨",
+    "forall": "∀",
+    "in": "∈",
+    "ni": "∋",
+    "nni": "∌",
+    "rightarrow": "→",
+    "leftarrow": "←",
+    "subset": "⊂",
+    "subseteq": "⊆",
+    "supset": "⊃",
+    "supseteq": "⊇",
+    "prec": "≺",
+    "succ": "≻",
+    "exists": "∃",
+    "nexists": "∄",
+    "notin": "∉",
+    "Rightarrow": "⇒",
+    "Leftarrow": "⇐",
+    "cup": "∪",
+    "cap": "∩",
+    "mid": "∣",
+    "nmid": "∤",
+    "parallel": "∥",
+    "nparallel": "∦",
+    "rightangle": "∟",
+    "angle": "∠",
+    "measuredangle": "∡",
+    "sphericalangle": "∢",
+    "propto": "∝",
+    "Leftrightarrow": "⇔",
+    "vdots": "⋮",
+    "diameter": "∅",
+    "lceil": "⌈",
+    "rceil": "⌉",
+    "lfloor": "⌊",
+    "rfloor": "⌋",
+    "varnothing": "∅",
+    "sptilde": "~",
+    "cent": "¢",
+    "pounds": "£",
+    "yen": "¥",
+    "lbrack": "[",
+    "backslash": "\\",
+    "rbrack": "]",
+    "sphat": "^",
+    "Micro": "μ",
+    "eth": "ð",
+    "imath": "ı",
+    "jmath": "ȷ",
+
+    "alpha": "𝛼",
+    "beta": "𝛽",
+    "varbeta": "β",
+    "gamma": "𝛾",
+    "delta": "𝛿",
+    "epsilon": "𝜀",
+    "varepsilon": "ε",
+    "zeta": "𝜁",
+    "eta": "𝜂",
+    "theta": "𝜃",
+    "vartheta": "θ",
+    "iota": "𝜄",
+    "kappa": "𝜅",
+    "lambda": "𝜆",
+    "mu": "𝜇",
+    "nu": "𝜈",
+    "xi": "𝜉",
+    "pi": "𝜋",
+    "rho": "𝜌",
+    "sigma": "𝜎",
+    "varsigma": "ς",
+    "tau": "𝜏",
+    "upsilon": "𝜐",
+    "phi": "𝜑",
+    "chi": "𝜒",
+    "psi": "𝜓",
+    "omega": "𝜔",
+    "Gamma": "𝛤",
+    "Delta": "𝛥",
+    "Theta": "𝛩",
+    "Lambda": "𝛬",
+    "Xi": "𝛯",
+    "Pi": "𝛱",
+    "Sigma": "𝛴",
+    "Upsilon": "𝛶",
+    "Phi": "𝛷",
+    "Psi": "𝛹",
+    "Omega": "𝛺",
+    "nabla": "∇",
+    "partial": "∂",
+    "int": "∫",
+    "iint": "∫∫",
+    "iint": "∫∫∫",
+    "oint": "∮",
+    "oiint": "∮∮",
+    "Euler": "Ɛ",
+    "Im": "ℑ",
+    "ell": "ℓ",
+    "wp": "℘",
+    "Re": "ℜ",
+    "tcohm": "Ω",
+    "mho": "℧",
+    "Angstroem": "Å",
+    "Finv": "Ⅎ",
+    "aleph": "א",
+    "beth": "ב",
+    "gimel": "ג",
+    "daleth": "ד",
+    "Yup": "⅄",
+    "complement": "∁",
+    "dotplus": "∔",
+
+    "grave": "̀",
+    "acute": "́",
+    "hat": "̂",
+    "tilde": "̃",
+    "bar": "̄",
+    "breve": "̆",
+    "dot": "̇",
+    "ddot": "̈",
+    "mathring": "̊",
+    "check": "̌",
+    "not": "̸",
+
+    "textstyle": "",
+    "mathcal": "MATHCAL",  # XXX
+    "mathfrak": "MATHFRAK",  # XXX
+    "mathbb": "MATHBB",  # XXX
+    "sqrt": "√",  # ∛ ∜
+    "frac": " / ",
+    "sum": "∑",
+    "prod": "∏",
+    "coprod": "∐",
+    "lvec": "⃐",
+    "vec": "⃑",
+}
+
+def to_math(text):
+    """Converts a mathematical formula to ASCII."""
+    magic_vec = []
+
+    def math_magic(text, left, right, fn):
+        regexp = r"{}([^{}{}]){}".format(
+            re.escape(left), re.escape(left),
+            re.escape(right), re.escape(right))
+        regexp = re.compile(regexp)
+
+        def repl(m):
+            magic = chr(MAGIC_FIRST + len(magic_vec))
+            t = fn(m.group(1))
+            magic_vec.append(t)
+            return magic
+
+        while True:
+            orig = text
+            text = re.sub(regexp, repl, text)
+            if text == orig:
+                break
+        return text
+
+    parts = []
+    text = math_magic(text, "{", "}", to_math)
+    text = math_magic(text, "(", ")", lambda x: "(" + to_math(x) + ")")
+    for m in re.finditer(r"\s+|[_^]?(\\[a-zA-Z0-9]+\s*|\\.|\w+|[{:c}-{:c}]|.)"
+                         .format(MAGIC_FIRST, MAGIC_LAST),
+                         text):
+        v = m.group(0)
+        fn = None
+        if v.startswith("_"):
+            fn = to_subscript
+            v = v[1:]
+        elif v.startswith("^"):
+            fn = to_superscript
+            v = v[1:]
+        if v.startswith("\\"):
+            mapped = math_map.get(v[1:].strip())
+            if mapped is None:
+                v = v[1:].strip()
+            else:
+                v = mapped
+        elif v.isspace():
+            v = ""
+        if fn is not None:
+            v = fn(v)
+        if (((parts and parts[-1][-1].isalpha() and v and v[0].isalpha()) or
+             (parts and parts[-1][-1].isdigit() and v and v[0].isdigit())) and
+            len(parts[-1]) > 1 and len(v) > 1):
+            v = " " + v
+        if v:
+            parts.append(v)
+
+    text = "".join(parts)
+    while True:
+        orig = text
+        text = re.sub(r"[{:c}-{:c}]".format(MAGIC_FIRST, MAGIC_LAST),
+                      lambda x: magic_vec[ord(x) - MAGIC_FIRST], text)
+        if text == orig:
+            break
+    return text.strip()
+
+
 def clean_value(config, title, no_strip=False):
     """Cleans a title or value into a normal string.  This should basically
     remove any Wikimedia formatting from it: HTML tags, templates, links,
@@ -177,6 +421,9 @@ def clean_value(config, title, no_strip=False):
     def repl_1_checm(m):
         return to_chem(clean_value(config, m.group(1)))
 
+    def repl_1_math(m):
+        return to_math(m.group(1))
+
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(title, str)
     title = re.sub(r"\{\{[^}]+\}\}", "", title)
@@ -202,6 +449,9 @@ def clean_value(config, title, no_strip=False):
     # Change <chem> ... </chem> using subscripts for digits
     title = re.sub(r"(?si)<\s*chem\b[^>]*>(.*?)<\s*/\s*chem\s*>",
                    repl_1_checm, title)
+    # Change <math> ... </math> using special formatting.
+    title = re.sub(r"(?si)<\s*math\b[^>]*>(.*?)<\s*/\s*math\s*>",
+                   repl_1_math, title)
     # Remove any remaining HTML tags.
     title = re.sub(r"(?s)<\s*[^/>][^>]*>", "", title)
     title = re.sub(r"(?s)<\s*/\s*[^>]+>", "", title)
