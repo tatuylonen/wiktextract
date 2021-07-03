@@ -2792,7 +2792,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             qualifier = v  # Also parse as qualifier
                         parts = list(m.group(0) for m in
                                      re.finditer(r".[\u0300-\u036f]?", item1)
-                                     if not m.group(0).isspace())
+                                     if not m.group(0).isspace() and
+                                     m.group(0) not in ("(", ")"))
+                        # XXX this is not correct - see P/Vietnamese
+                        # While some sequences have multiple consecutive
+                        # characters, others use pairs and some have
+                        # 2/3 character names, e.g., "Ng ng".
+
                         rparts = None
                         if roman:
                             rparts = list(m.group(0) for m in

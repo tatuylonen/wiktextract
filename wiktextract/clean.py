@@ -385,7 +385,7 @@ def to_math(text):
     while True:
         orig = text
         text = re.sub(r"[{:c}-{:c}]".format(MAGIC_FIRST, MAGIC_LAST),
-                      lambda x: magic_vec[ord(x) - MAGIC_FIRST], text)
+                      lambda m: magic_vec[ord(m.group(0)) - MAGIC_FIRST], text)
         if text == orig:
             break
     return text.strip()
