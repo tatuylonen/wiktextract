@@ -59,7 +59,7 @@ def split_at_comma_semi(text, extra=()):
     bracket_cnt = 0
     ofs = 0
     parts = []
-    split_re = r"[][(),;]"
+    split_re = r"[][(),;，]"  # Note: special unicode comma
     if extra:
         split_re = "({})|{}".format(split_re,
                                     "|".join(re.escape(x) for x in extra))
@@ -85,7 +85,6 @@ def split_at_comma_semi(text, extra=()):
         elif paren_cnt > 0 or bracket_cnt > 0:
             parts.append(token)
         else:
-            assert token in ",;" or token in extra
             if parts:
                 lst.append("".join(parts).strip())
                 parts = []
