@@ -764,7 +764,10 @@ def parse_translation_desc(ctx, lang, text, tr):
 
     # Process all parenthesized parts from the translation item
     note = None
+    restore_beginning = ""
+    restore_end = ""
     while True:
+        beginning = False
         # See if we can find a parenthesized expression at the end
         m = re.search(r"\s*\((([^()]|\([^()]+\))+)\)\.?$", text)
         if m:
@@ -778,6 +781,7 @@ def parse_translation_desc(ctx, lang, text, tr):
             if m:
                 par = m.group(1)
                 text = text[m.end():]
+                beginning = True
                 if re.match(r"^(\d|\s|,| or | and )+$", par):
                     # Looks like this beginning parenthesized expression only
                     # contains digits or their combinations.  We assume such
@@ -882,6 +886,11 @@ def parse_translation_desc(ctx, lang, text, tr):
                 else:
                     tr["english"] = par
         elif cls == "romanization":
+            if classify_desc(text) in ("english", "romanization"):
+                if beginning:
+                    restore_beginning += "({}) ".format(par)
+                else:
+                    restore_end = " ({})".format(par) + restore_end
             if tr.get("roman"):
                 ctx.warning("more than one value in \"roman\": {} vs. {}"
                             .format(tr["roman"], par))
@@ -906,6 +915,10 @@ def parse_translation_desc(ctx, lang, text, tr):
     # Check for gender indications in suffix
     text, final_tags = parse_head_final_tags(ctx, lang, text)
     data_extend(ctx, tr, "tags", final_tags)
+
+    # Restore those parts that we did not want to remove (they are often
+    # optional words or words that are always used with the given translation)
+    text = restore_beginning + text + restore_end
 
     if note:
         tr["note"] = note.strip()
