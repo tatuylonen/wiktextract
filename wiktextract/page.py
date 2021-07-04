@@ -633,6 +633,7 @@ tr_ignore_prefixes = [
     "Use ",
     "[Book Pahlavi needed]",
     "[book pahlavi needed]",
+    "[script needed]",
     "different structure used",
     "e.g.",
     "lit.",
@@ -3064,10 +3065,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # Strip the language name/tag from the item
                 item = item[m.end():]
             elif lang is None:
-                # No mathing language prefix
-                if item.find("__IGNORE__") < 0:
-                    ctx.error("no language name in translation item: {}"
-                              .format(item))
+                # No mathing language prefix.  Try if it is missing colon.
+                parts = item.split()
+                if len(parts) > 1 and parts[0] in languages_by_name:
+                    lang = parts[0]
+                    item = " ".join(parts[1:])
+                else:
+                    if item.find("__IGNORE__") < 0:
+                        ctx.error("no language name in translation item: {}"
+                                  .format(item))
                 return
             # If we didn't get language code from the template, look it up
             # based on language name

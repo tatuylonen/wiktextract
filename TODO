@@ -340,3 +340,7 @@ Fix parsing linkages for letters in scripts, see P/English/Number
   - parenthesized parts containing accented characters
   - multi-character names e.g. "Ng ng"
   - longer sequences of characters
+
+Parse reconstructed entries, but mark with "reconstruction" tag.  Remove *
+from beginning of word head & linkage & form-of/alt-of, if word otherwise
+looks like a word
