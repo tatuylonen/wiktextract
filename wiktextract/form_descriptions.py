@@ -825,11 +825,11 @@ def parse_translation_desc(ctx, lang, text, tr):
                 if (cls == "romanization" or
                     (cls == "english" and len(r.split()) == 1 and
                      r[0].islower())):
-                    if tr.get("alt"):
+                    if tr.get("alt") and tr.get("alt") != a:
                         ctx.warning("more than one value in \"alt\": {} vs. {}"
                                     .format(tr["alt"], a))
                     tr["alt"] = a
-                    if tr.get("roman"):
+                    if tr.get("roman") and tr.get("roman") != r:
                         ctx.warning("more than one value in \"roman\": "
                                     "{} vs. {}"
                                     .format(tr["roman"], r))
@@ -982,6 +982,7 @@ alt_of_form_of_clean_re = re.compile(
         r" with -ra/-re",
         r"\. Used ",
         r"\. Also ",
+        r"\. Since ",
         r", a ",
         r", an ",
         r", the ",
@@ -1084,7 +1085,7 @@ def parse_alt_or_inflection_of1(ctx, gloss):
     base = re.sub(alt_of_form_of_clean_re, "", orig_base)
     base = re.sub(r" [(⟨][^()]*[)⟩]", "", base)  # Remove all (...) groups
     extra = orig_base[len(base):]
-    extra = re.sub(r"^[- :;,—]+", "", extra)
+    extra = re.sub(r"^[- :;.,，—]+", "", extra)
     if extra.endswith(".") and extra.count(".") == 1:
         extra = extra[:-1].strip()
     m = re.match(r"^\(([^()]*)\)$", extra)
