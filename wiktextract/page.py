@@ -299,6 +299,13 @@ linkage_inverses = {
 # List of all field names used for linkages
 linkage_fields = list(sorted(set(linkage_map.values())))
 
+# Exceptional splits for linkages
+linkage_split_exceptions = {
+    "∛ ∜": ["∛", "∜"],
+    "...": ["...", "…"],
+    "…": ["...", "…"],
+}
+
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
 panel_templates = set([
@@ -2271,12 +2278,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         ctx.debug("linkage item_recurse unhandled: {}"
                                   .format(node))
 
+            # print("LINKAGE CONTENTS BEFORE ITEM_RECURSE: {!r}"
+            #       .format(contents))
             item_recurse(contents)
             item = clean_node(config, ctx, None, parts)
-            # if item.find("stroke") >= 0:
-            #     print("LINKAGE ITEM CONTENTS:", parts)
+            # print("LINKAGE ITEM CONTENTS:", parts)
             # print("CLEANED ITEM: {!r}".format(item))
-            # item = re.sub(r", \)", ")", item)  # XXX breaks hyphen / comma
             item = re.sub(r"\(\)", "", item)
             item = re.sub(r"\s\s+", " ", item)
             item = item.strip()
@@ -2770,6 +2777,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         data_append(ctx, data, field, dt)
                         have_linkages = True
 
+                # Handle exceptional linkage splits and other linkage
+                # conversions (including expanding to variant forms)
+                if item1 in linkage_split_exceptions:
+                    for item2 in linkage_split_exceptions[item1]:
+                        add(item2, roman)
+                    continue
+
                 # Various templates for letters in scripts use spaces as
                 # separators and also have multiple characters without
                 # spaces consecutively.
@@ -2816,10 +2830,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         continue
 
                 add(item1, roman)
-                if item1 == "...":
-                    add("…", roman)
-                elif item1 == "…":
-                    add("...", roman)
 
         def parse_linkage_template(node):
             nonlocal have_panel_template
