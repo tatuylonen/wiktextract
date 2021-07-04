@@ -315,7 +315,7 @@ math_map = {
     "not": "̸",
 
     "textstyle": "",
-    "mathcal": "MATHCAL",  # XXX
+    "mathcal": "MATHCAL",  # XXX especially O
     "mathfrak": "MATHFRAK",  # XXX
     "mathbb": "MATHBB",  # XXX
     "sqrt": "√",  # ∛ ∜

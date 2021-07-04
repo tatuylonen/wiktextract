@@ -111,6 +111,7 @@ head_tag_re = re.compile(r"^(head|Han char|arabic-noun|arabic-noun-form|"
                              "indef",
                              "infixed pronoun",
                              "infixed-pronoun",
+                             "infl",
                              "inflection",
                              "initialism",
                              "int",
@@ -305,6 +306,17 @@ linkage_split_exceptions = {
     "...": ["...", "…"],
     "…": ["...", "…"],
 }
+
+# Regexp for identifying special linkages containing lists of letters, digits,
+# or characters
+script_chars_re = re.compile(
+    r"(script letters| script| letters|"
+    r"Dialectological|Puctuation|Symbols|"
+    r"Guillemets|Single guillemets|"
+    r"tetragrams|"
+    r"digits)(;|$)|"
+    r"(^|; )(Letters using |Letters of the |"
+    r"Variations of letter )")
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -2556,7 +2568,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
                 # There could be multiple parenthesized parts, and
                 # sometimes both at the beginning and at the end
-                while True:
+                while not sense or not re.search(script_chars_re, sense):
                     par = None
                     final_par = False
                     if par is None:
@@ -2628,33 +2640,43 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         continue
                     if par.find(" usage notes") >= 0:
                         continue  # Skip certain texts that are not useful
-                    cls = classify_desc(par)
-                    # print("classify_desc: {} -> {}".format(par, cls))
-                    if cls == "tags":
-                        if qualifier:
-                            qualifier += " " + par
+                    if re.search(script_chars_re, par):
+                        if base_sense:
+                            base_sense += "; " + par
                         else:
-                            qualifier = par
-                    elif cls == "english":
-                        if final_par:
-                            if english:
-                                english += "; " + par
-                            else:
-                                english = par
+                            base_sense = par
+                        if sense:
+                            sense += "; " + par
                         else:
-                            if sense:
-                                sense += "; " + par
-                            else:
-                                sense = par
-                    elif cls == "romanization":
-                        roman = par
-                    elif cls == "taxonomic":
-                        taxonomic = par
+                            sense = par
                     else:
-                        if alt:
-                            alt += "; " + par
+                        cls = classify_desc(par)
+                        # print("classify_desc: {} -> {}".format(par, cls))
+                        if cls == "tags":
+                            if qualifier:
+                                qualifier += " " + par
+                            else:
+                                qualifier = par
+                        elif cls == "english":
+                            if final_par:
+                                if english:
+                                    english += "; " + par
+                                else:
+                                    english = par
+                            else:
+                                if sense:
+                                    sense += "; " + par
+                                else:
+                                    sense = par
+                        elif cls == "romanization":
+                            roman = par
+                        elif cls == "taxonomic":
+                            taxonomic = par
                         else:
-                            alt = par
+                            if alt:
+                                alt += "; " + par
+                            else:
+                                alt = par
 
                 # Parse linkages with "value = english" syntax (e.g.,
                 # väittää/Finnish)
@@ -2701,14 +2723,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if m:
                     item1 = item1[m.end():]
 
-                # Parse certain tags at the end of the linked term
-                lang = ctx.section
-                item1, q = parse_head_final_tags(ctx, lang, item1)
-                if q:
-                    if qualifier:
-                        qualifier += " " + " ".join(q)
-                    else:
-                        qualifier = " ".join(q)
+                # Parse certain tags at the end of the linked term (unless
+                # we are in a letters list)
+                if not sense or not re.search(script_chars_re, sense):
+                    lang = ctx.section
+                    item1, q = parse_head_final_tags(ctx, lang, item1)
+                    if q:
+                        if qualifier:
+                            qualifier += " " + " ".join(q)
+                        else:
+                            qualifier = " ".join(q)
 
                 if not item1:
                     continue  # Ignore empty link targets
@@ -2788,15 +2812,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # separators and also have multiple characters without
                 # spaces consecutively.
                 v = sense or qualifier
-                if v and len(item1.split()) > 1:
-                    m = re.search(r"(script letters| script| letters|"
-                                  r"Dialectological|Puctuation|Symbols|"
-                                  r"Guillemets|Single guillemets|"
-                                  r"tetragrams|"
-                                  r"digits)(;|$)|"
-                                  r"(^|; )(Letters using |Letters of the |"
-                                  r"Variations of letter )", v)
-                    if m:
+                if v and re.search(script_chars_re, v):
+                    if len(item1.split()) > 1 or len(item1) == 2:
                         if v == qualifier:
                             if sense:
                                 sense += "; " + qualifier
@@ -2805,10 +2822,38 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             qualifier = None
                         if re.search(r" (letters|digits|script)$", v):
                             qualifier = v  # Also parse as qualifier
-                        parts = list(m.group(0) for m in
-                                     re.finditer(r".[\u0300-\u036f]?", item1)
-                                     if not m.group(0).isspace() and
-                                     m.group(0) not in ("(", ")"))
+                        elif re.search(r"Variations of letter |"
+                                       r"Letters using |"
+                                       r"Letters of the ", v):
+                            qualifier = "letter"
+                        parts = item1.split(". ")
+                        extra = ()
+                        if len(parts) > 1:
+                            extra = parts[1:]
+                            item1 = parts[0]
+                        # Handle multi-character names for chars in language's
+                        # alphabet, e.g., "Ny ny" in P/Hungarian.
+                        if (len(subitems) > 20 and len(item1.split()) == 2 and
+                            all(len(x) <= 3 for x in item1.split())):
+                            parts = list(m.group(0) for m in
+                                         re.finditer(r"(\w[\u0300-\u036f]?)+|.",
+                                                     item1)
+                                         if not m.group(0).isspace() and
+                                         m.group(0) not in ("(", ")"))
+                        else:
+                            parts = list(m.group(0) for m in
+                                         re.finditer(r".[\u0300-\u036f]?",
+                                                     item1)
+                                         if not m.group(0).isspace() and
+                                         m.group(0) not in ("(", ")"))
+                        for e in extra:
+                            idx = e.find(":")
+                            if idx >= 0:
+                                e = e[idx + 1:].strip()
+                                if e.endswith("."):
+                                    e = e[:-1]
+                                parts.extend(e.split())
+
                         # XXX this is not correct - see P/Vietnamese
                         # While some sequences have multiple consecutive
                         # characters, others use pairs and some have
