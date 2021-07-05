@@ -150,7 +150,7 @@ uppercase_tags = set([
     "Abung/Kotabumi",
     "Abung/Sukadana",
     "Achterhooks",
-    "Adlam",
+    "Adlam",  # Script
     "Adyghe",
     "Aeolic",
     "Afi-Amanda",
@@ -287,6 +287,7 @@ uppercase_tags = set([
     "Bugurdži",
     "Busan",
     "Bushehr",
+    "Burmese",  # Script
     "Bygdeå",
     "Byzantine",
     "Bzyb",
@@ -384,7 +385,7 @@ uppercase_tags = set([
     "Cumbria",
     "Cusco",
     "Cypriot",
-    "Cyrillic",
+    "Cyrillic",  # Script
     "Czech",
     "Czech Republic",
     "Čakavian",
@@ -404,7 +405,7 @@ uppercase_tags = set([
     "Delhi",
     "Delhi Hindi",
     "Derbyshire",
-    "Devanagari",
+    "Devanagari",  # Script
     "Devon",
     "Digor",
     "Dingzhou",
@@ -509,7 +510,7 @@ uppercase_tags = set([
     "Gheg",
     "Gherdëina",
     "Gipuzkoan",
-    "Glagolitic",
+    "Glagolitic",  # Script
     "Goan Konkani",
     "Goeree-Overflakkee",
     "Goth",
@@ -552,7 +553,7 @@ uppercase_tags = set([
     "Harry Potter",
     "Hawaii",
     "Hawick",
-    "Hebrew script",
+    "Hebrew",  # also Script
     "Hejazi Arabic",
     "Hejazi",
     "Helgoland",
@@ -686,6 +687,7 @@ uppercase_tags = set([
     "Kernowek Standard",
     "Kerry",
     "Khesht",
+    "Khmer",  # Script
     "Khorasan",
     "Khoshar-Khota",
     "Khun villages",
@@ -725,7 +727,7 @@ uppercase_tags = set([
     "Late West Saxon",
     "Late",
     "Latin America",
-    "Latin",
+    "Latin",  # Script
     "Latinate",
     "Latinism",
     "Latvian",
@@ -861,7 +863,7 @@ uppercase_tags = set([
     "Molet Mur",
     "Monegasque",
     "Mongo-Turkic",
-    "Mongolian script",
+    "Mongolian",  # Also script
     "Montenegro",
     "Montreal",
     "Mooring",
@@ -1079,7 +1081,7 @@ uppercase_tags = set([
     "Ripuarian",
     "Ritsu",
     "Rogaland",
-    "Roman",
+    "Roman",  # Script
     "Roman Catholic",
     "Roman Empire",
     "Rouen",
@@ -1168,6 +1170,7 @@ uppercase_tags = set([
     "Singapore English",
     "Singapore",
     "Singlish",
+    "Sinhalese",  # Script
     "Sino-Korean",
     "Sino-Japanese",
     "Sisiame",
@@ -1285,6 +1288,7 @@ uppercase_tags = set([
     "Texcoco",
     "Textbibel",
     "Tgdaya",
+    "Thai",  # Script
     "Thailand",
     "Thanh Chương",
     "The Hague",
@@ -2236,6 +2240,8 @@ xlat_tags_map = {
     "Enclitic contractions": "enclitic contraction",
     "Proclitic contractions": "proclitic contraction",
     "Devanagari script form of": "alt-of Devanagari",
+    "Hebrew script": "Hebrew",
+    "Mongolian script": "Mongolian",
     "script": "character",
     "letters": "letter",
     "digits": "digit",

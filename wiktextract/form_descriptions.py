@@ -24,8 +24,10 @@ tokenizer = TweetTokenizer()
 # Add some additional known taxonomic species names.  Adding the family name
 # here may be the answer if a taxonomic name goes in "alt".
 known_firsts.update([
+    "Aglaope",
     "Albulidae",
     "Alphonsus",
+    "Artipus",
     "Bubo",
     "Callistosporium",
     "Caprobrotus",
@@ -34,6 +36,7 @@ known_firsts.update([
     "Citriobatus",
     "Citrofortunella",
     "Coriandum",
+    "Eriophyes",
     "Lagerstomia",
     "Lyssavirus",
     "Maulisa",

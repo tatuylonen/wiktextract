@@ -34,6 +34,23 @@ languages_by_name = {x["name"]: x for x in ALL_LANGUAGES}
 # Mapping from language code to language info
 languages_by_code = {x["code"]: x for x in ALL_LANGUAGES}
 
+# These names will be interpreted as script names when used as a second-level
+# name in translations.  Some script names are also valid language names, but
+# it looks likes the ones that are also script names aren't used on the second
+# level as language names.
+script_names = set([
+    "Adlam",
+    "Burmese",
+    "Cyrillic",
+    "Devanagari",
+    "Glagolitic",
+    "Khmer",
+    "Latin",
+    "Roman",
+    "Sinhalese",
+    "Thai",
+])
+
 # Subsections with these titles are ignored.
 ignored_section_titles = (
     "Anagrams", "Further reading", "References",
@@ -2298,7 +2315,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             item_recurse(contents)
             item = clean_node(config, ctx, None, parts)
             # print("LINKAGE ITEM CONTENTS:", parts)
-            print("CLEANED ITEM: {!r}".format(item))
+            # print("CLEANED ITEM: {!r}".format(item))
             item = re.sub(r"\(\)", "", item)
             item = re.sub(r"\s\s+", " ", item)
             item = item.strip()
@@ -3044,7 +3061,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # others.  These should be transitory and unreliable
                     # anyway.
                     return "__IGNORE__"
-                if name in ("t", "t+", "t-simple", "t"):
+                if name in ("t", "t+", "t-simple", "tt", "tt+"):
                     code = ht.get(1)
                     if code:
                         if langcode and code != langcode:
@@ -3106,13 +3123,20 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 sublang = m.group(1)
                 if lang is None:
                     lang = sublang
+                elif lang and sublang in script_names:
+                    # If the second-level name is a script name, add it as
+                    # tag and keep the top-level language.
+                    # This helps with languages that script names
+                    # on the same level; those scripts may also be valid
+                    # language names.  See leaf/English/Translastions/Pali.
+                    tags.append(sublang)
                 elif lang and lang + " " + sublang in languages_by_name:
                     lang = lang + " " + sublang
                 elif lang and sublang + " " + lang in languages_by_name:
                     lang = sublang + " " + lang  # E.g., Ancient Egyptian
                 elif sublang in languages_by_name:
                     lang = sublang
-                elif sublang[0].isupper():
+                elif sublang[0].isupper() and classify_desc(sublang) == "tags":
                     # Interpret it as a tag
                     tags.append(sublang)
                 else:
