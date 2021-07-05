@@ -358,3 +358,22 @@ similarly "- I have"
 
 language/English has weird IPAs coming from qualifier (see
 /ae/ raising)
+
+Add more sanity checks:
+  - number of words extracted for a few major languages (English, Korean, Zulu)
+  - number of extraction errors of various kinds
+  - number of translations extracted for major languages
+  - number of linkages extracted for major languages
+  - number of suspicious linkages
+  - number of suspicious alt-of/form-of
+  - number of alt-of
+  - number of form-of
+  - number of IPAs
+  - number of forms
+  - number of inflection templates
+  - number of non-disambiguated translations
+  - number of non-disambiguated linkages
+  - number of senses with tags
+  - number of senses with topics
+
+XXX tests fail, check why
