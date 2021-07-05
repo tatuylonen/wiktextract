@@ -354,3 +354,6 @@ Fix parsing linkages for letters in scripts, see P/English/Number
 Parse reconstructed entries, but mark with "reconstruction" tag.  Remove *
 from beginning of word head & linkage & form-of/alt-of, if word otherwise
 looks like a word
+
+have/English/Translations/"to possess"/Arabic: have "- you have" at end of tr;
+similarly "- I have"

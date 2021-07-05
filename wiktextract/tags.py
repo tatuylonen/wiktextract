@@ -160,7 +160,7 @@ uppercase_tags = set([
     "Al-Andalus",
     "Ala-Laukaa",
     "Alak",
-    "Alemannic",
+    "Alemannic",  # Variant of German
     "Algherese",
     "Alles",
     "Alliancelles",
@@ -442,7 +442,7 @@ uppercase_tags = set([
     "Ecuadorian Kichwa",
     "Egypt",
     "Egyptian",
-    "Egyptian Arabic",
+    "Egyptian Arabic",  # Variant of Arabic language
     "Egyptiot",
     "Ekagongo",
     "Ekavian",
@@ -533,7 +533,7 @@ uppercase_tags = set([
     "Guichicovi",
     "Guinea-Bissau",
     "Guinée Conakry",
-    "Gulf Arabic",
+    "Gulf Arabic",  # Variant of Arabic Language
     "Gurbet",
     "Gurmukhi",
     "Guyana",
@@ -554,7 +554,7 @@ uppercase_tags = set([
     "Hawaii",
     "Hawick",
     "Hebrew",  # also Script
-    "Hejazi Arabic",
+    "Hejazi Arabic",  # Variant of Arabic Language
     "Hejazi",
     "Helgoland",
     "Heligoland",
@@ -637,7 +637,7 @@ uppercase_tags = set([
     "Jewish",
     "Jianghuai Mandarin",
     "Jicalapa",
-    "Jicarilla",
+    "Jicarilla",  # Variant of the Apache Language?
     "Jilu Mandarin",
     "Jin",
     "Jin Mandarin",
@@ -708,7 +708,7 @@ uppercase_tags = set([
     "Krui",
     "Kulkalgau Ya",
     "Kuritiba",
-    "Kuwaiti Gulf Arabic",
+    "Kuwaiti Gulf Arabic",  # Variant of Arabic Language
     "Kuzarg",
     "Kyoto",
     "Kyūshū",
@@ -733,11 +733,11 @@ uppercase_tags = set([
     "Latvian",
     "Laval",
     "Lavarone",
-    "Lebanese Arabic",
+    "Lebanese Arabic",  # Variant of Arabic language
     "Legazpi",
     "Lengadocian",
     "Lesotho",
-    "Levantine Arabic",
+    "Levantine Arabic",  # Variant of Arabic language
     "Lewis",
     "Leyte",
     "Lhasa",
@@ -1402,6 +1402,7 @@ uppercase_tags = set([
     "Westpfälzisch",
     "Westwestphalian",
     "Wicca",
+    "Wiedingharde",
     "Windesi",
     "Witzapan",
     "Wood",
@@ -2121,6 +2122,8 @@ xlat_tags_map = {
     "superlative degree": "superlative",
     "comparative degree": "comparative",
     "positive degree": "positive",
+    "positive outcome": "positive",
+    "negative outcome": "negative",
     "equative degree": "equative",
     "indicative and subjunctive": "indicative subjunctive",
     "indicative/subjunctive": "indicative subjunctive",
@@ -2773,7 +2776,7 @@ xlat_tags_map = {
     "Historical": "historical",
     "antiquity": "historical",
     "ideophone": "ideophonic",
-    "Alsatian (Low Alemannic German)": "Alsatian",
+    "Alsatian (Low Alemannic German)": "Alsatian Alemannic",
     "all sects": "",
     "adessive + 3rd person singular + ~":
     "with-adessive with-third-person-singular",
@@ -3336,6 +3339,7 @@ valid_tags = set([
     "sometimes",
     "somewhat",
     "specifically",
+    "standalone",
     "standard",
     "stative",
     "stem",
