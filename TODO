@@ -335,8 +335,6 @@ looks like the category has a nested link)
 Implement caching in decode_tags
 Implement caching in classify_desc
 
-In clean.py, implement mathcal, mathfrak, mathbb
-
 Strange tag from head in P/Japanese "Initialism of ..."
 
 In form_description.py:add_to_valid_tree, remove field argument and determine
@@ -357,3 +355,6 @@ looks like a word
 
 have/English/Translations/"to possess"/Arabic: have "- you have" at end of tr;
 similarly "- I have"
+
+language/English has weird IPAs coming from qualifier (see
+/ae/ raising)
