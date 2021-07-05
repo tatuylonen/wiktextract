@@ -82,6 +82,7 @@ superscript_ht = {
     "ι": "ᶥ",
     "φ": "ᵠ",
     "χ": "ᵡ",
+    "∞": " ᪲"
 }
 
 subscript_ht = {
@@ -157,12 +158,17 @@ math_map = {
     "textless": "<",
     "textgreater": ">",
     "sim": "∼",
+    "backsim": "∽",
     "tiny": "",
     "scriptsize": "",
     "footnotesize": "",
     "small": "",
     "normalsize": "",
     "large": "",
+    "ge": ">",
+    "geq": ">",
+    "le": "<",
+    "leq": "<",
     "leq": "≤",
     "geq": "≥",
     "neq": "≠",
@@ -178,13 +184,16 @@ math_map = {
     "smallsetminus": "∖",
     "slash": "∕",
     "prime": "′",
+    "textprime": "′",
     "second": "′′",
     "third": "′′′",
     "fourth": "′′′′",
     "backprime": "‵",
     "dagger": "†",
     "ddagger": "‡",
+    "bullet": "•",
     "ldots": "...",
+    "dots": "…",
     "cat": "⁀",
     "cdots": "⋯",
     "infty": "∞",
@@ -197,6 +206,83 @@ math_map = {
     "nni": "∌",
     "rightarrow": "→",
     "leftarrow": "←",
+    "leftrightarrow": "↔",
+    "uparrow": "↑",
+    "downarrow": "↓",
+    "updownarrow": "↕",
+    "nwarrow": "↖",
+    "nearrow": "↗",
+    "searrow": "↘",
+    "swarrow": "↙",
+    "nleftarrow": "↚",
+    "nrightarrow": "↛",
+    "twoheadleftarrow": "↞",
+    "twoheadrightarrow": "↠",
+    "leftarrowtail": "↢",
+    "rightarrowtail": "↣",
+    "mapsfrom": "↤",
+    "MapsUp": "↥",
+    "mapsto": "↦",
+    "MapsDown": "↧",
+    "hookleftarrow": "↩",
+    "hookrightarrow": "↪",
+    "looparrowleft": "↫",
+    "looparrowright": "↬",
+    "leftrightsquigarrow": "↭",
+    "nleftrightarrow": "↮",
+    "lightning": "↯",
+    "Lsh": "↰",
+    "Rsh": "↱",
+    "dlsh": "↲",
+    "drsh": "↳",
+    "curvearrowleft": "↶",
+    "curvearrowright": "↷",
+    "circlearrowleft": "↺",
+    "circlearrowright": "↻",
+    "leftharpoonup": "↼",
+    "leftharpoondown": "↽",
+    "upharpoonright": "↾",
+    "upharpoonleft": "↿",
+    "rightharpoonup": "⇀",
+    "rightharpoondown": "⇁",
+    "downharpoonright": "⇂",
+    "downharpoonleft": "⇃",
+    "rightleftarrows": "⇄",
+    "updownarrows": "⇅",
+    "leftrightarrows": "⇆",
+    "leftleftarrows": "⇇",
+    "upuparrows": "⇈",
+    "rightrightarrows": "⇉",
+    "downdownarrows": "⇊",
+    "leftrightharpoons": "⇋",
+    "rightleftharpoons": "⇌",
+    "nLeftarrow": "⇍",
+    "nLeftrightarrow": "⇎",
+    "nRightarrow": "⇏",
+    "Leftarrow": "⇐",
+    "Uparrow": "⇑",
+    "Rightarrow": "⇒",
+    "Downarrow": "⇓",
+    "Leftrightarrow": "⇔",
+    "Updownarrow": "⇕",
+    "Nwarrow": "⇖",
+    "Nearrow": "⇗",
+    "Searrow": "⇘",
+    "Swarrow": "⇙",
+    "Lleftarrow": "⇚",
+    "Rrightarrow": "⇛",
+    "leftsquigarrow": "⇜",
+    "rightsquigarrow": "⇝",
+    "dashleftarrow": "⇠",
+    "dashrightarrow": "⇢",
+    "LeftArrowBar": "⇤",
+    "RightArrowBar": "⇥",
+    "downuparrows": "⇵",
+    "pfun": "⇸",
+    "ffun": "⇻",
+    "leftarrowtriangle": "⇽",
+    "rightarrowtriangle": "⇾",
+    "leftrightarrowtriangle": "⇿",
     "subset": "⊂",
     "subseteq": "⊆",
     "supset": "⊃",
@@ -219,7 +305,6 @@ math_map = {
     "measuredangle": "∡",
     "sphericalangle": "∢",
     "propto": "∝",
-    "Leftrightarrow": "⇔",
     "vdots": "⋮",
     "diameter": "∅",
     "lceil": "⌈",
@@ -231,14 +316,18 @@ math_map = {
     "cent": "¢",
     "pounds": "£",
     "yen": "¥",
-    "lbrack": "[",
     "backslash": "\\",
-    "rbrack": "]",
+    "spddot": "̈",
     "sphat": "^",
     "Micro": "μ",
     "eth": "ð",
     "imath": "ı",
     "jmath": "ȷ",
+    "circledR": "®",
+    "therefore": "∴",
+    "because": "∵",
+    "Proportion": "∷",
+    "eqcolon": "∹",
 
     "alpha": "𝛼",
     "beta": "𝛽",
@@ -247,23 +336,28 @@ math_map = {
     "delta": "𝛿",
     "epsilon": "𝜀",
     "varepsilon": "ε",
+    "backepsilon": "϶",
     "zeta": "𝜁",
     "eta": "𝜂",
     "theta": "𝜃",
     "vartheta": "θ",
     "iota": "𝜄",
     "kappa": "𝜅",
+    "varkappa": "𝜘",
     "lambda": "𝜆",
     "mu": "𝜇",
     "nu": "𝜈",
     "xi": "𝜉",
     "pi": "𝜋",
+    "varpi": "𝜛",
     "rho": "𝜌",
+    "varrho": "𝜚",
     "sigma": "𝜎",
     "varsigma": "ς",
     "tau": "𝜏",
     "upsilon": "𝜐",
-    "phi": "𝜑",
+    "phi": "𝜙",
+    "varphi": "𝜑",
     "chi": "𝜒",
     "psi": "𝜓",
     "omega": "𝜔",
@@ -301,6 +395,8 @@ math_map = {
     "Yup": "⅄",
     "complement": "∁",
     "dotplus": "∔",
+    "hslash": "ℏ",
+    "invamp": "⅋",
 
     "grave": "̀",
     "acute": "́",
@@ -310,14 +406,13 @@ math_map = {
     "breve": "̆",
     "dot": "̇",
     "ddot": "̈",
+    "dddot": "⃛",
+    "dddot": "⃜",
     "mathring": "̊",
     "check": "̌",
     "not": "̸",
 
     "textstyle": "",
-    "mathcal": "MATHCAL",  # XXX especially O
-    "mathfrak": "MATHFRAK",  # XXX
-    "mathbb": "MATHBB",  # XXX
     "sqrt": "√",  # ∛ ∜
     "frac": " / ",
     "sum": "∑",
@@ -325,70 +420,309 @@ math_map = {
     "coprod": "∐",
     "lvec": "⃐",
     "vec": "⃑",
+    "left": "",
+    "right": "",
+    "bigl": "",
+    "bigr": "",
+    "lbrace": "{",
+    "rbrace": "}",
+    "lbrack": "[",
+    "rbrack": "]",
+    "langle": "⟨",
+    "rangle": "⟩",
+    "vert": "|",
+    "Vert": "‖",
+    "CapitalDifferentialD": "ⅅ",
+    "DifferentialD": "ⅆ",
+    "ExponentialE": "ⅇ",
+    "ComplexI": "ⅈ",
+    "ComplexJ": "ⅉ",
+    "over": "/",
+
+    "style": "",
 }
+
+mathcal_map = {
+    "A": "𝒜",
+    "B": "ℬ",
+    "C": "𝒞",
+    "D": "𝒟",
+    "E": "ℰ",
+    "F": "ℱ",
+    "G": "𝒢",
+    "H": "ℋ",
+    "I": "ℐ",
+    "J": "𝒥",
+    "K": "𝒦",
+    "L": "ℒ",
+    "M": "ℳ",
+    "N": "𝒩",
+    "O": "𝒪",
+    "P": "𝒫",
+    "Q": "𝒬",
+    "R": "ℛ",
+    "S": "𝒮",
+    "T": "𝒯",
+    "U": "𝒰",
+    "V": "𝒱",
+    "W": "𝒲",
+    "X": "𝒳",
+    "Y": "𝒴",
+    "Z": "𝒵",
+    "a": "𝒶",
+    "b": "𝒷",
+    "c": "𝒸",
+    "d": "𝒹",
+    "e": "ℯ",
+    "f": "𝒻",
+    "g": "ℊ",
+    "h": "𝒽",
+    "i": "𝒾",
+    "j": "𝒿",
+    "k": "𝓀",
+    "l": "𝓁",
+    "m": "𝓂",
+    "n": "𝓃",
+    "o": "ℴ",
+    "p": "𝓅",
+    "q": "𝓆",
+    "r": "𝓇",
+    "s": "𝓈",
+    "t": "𝓉",
+    "u": "𝓊",
+    "v": "𝓋",
+    "w": "𝓌",
+    "x": "𝓍",
+    "y": "𝓎",
+    "z": "𝓏",
+}
+
+mathfrak_map = {
+    "A": "𝔄",
+    "B": "𝔅",
+    "C": "ℭ",
+    "D": "𝔇",
+    "E": "𝔈",
+    "F": "𝔉",
+    "G": "𝔊",
+    "H": "ℌ",
+    "J": "𝔍",
+    "K": "𝔎",
+    "L": "𝔏",
+    "M": "𝔐",
+    "N": "𝔑",
+    "O": "𝔒",
+    "P": "𝔓",
+    "Q": "𝔔",
+    "S": "𝔖",
+    "T": "𝔗",
+    "U": "𝔘",
+    "V": "𝔙",
+    "W": "𝔚",
+    "X": "𝔛",
+    "Y": "𝔜",
+    "Z": "ℨ",
+}
+
+mathbb_map = {
+    "A": "𝔸",
+    "B": "𝔹",
+    "C": "ℂ",
+    "D": "𝔻",
+    "E": "𝔼",
+    "F": "𝔽",
+    "G": "𝔾",
+    "H": "ℍ",
+    "I": "𝕀",
+    "J": "𝕁",
+    "K": "𝕂",
+    "L": "𝕃",
+    "M": "𝕄",
+    "N": "ℕ",
+    "O": "𝕆",
+    "P": "ℙ",
+    "Q": "ℚ",
+    "R": "ℝ",
+    "S": "𝕊",
+    "T": "𝕋",
+    "U": "𝕌",
+    "V": "𝕍",
+    "W": "𝕎",
+    "X": "𝕏",
+    "Y": "𝕐",
+    "Z": "ℤ",
+    "a": "𝕒",
+    "b": "𝕓",
+    "c": "𝕔",
+    "d": "𝕕",
+    "e": "𝕖",
+    "f": "𝕗",
+    "g": "𝕘",
+    "h": "𝕙",
+    "i": "𝕚",
+    "j": "𝕛",
+    "k": "𝕜",
+    "l": "𝕝",
+    "m": "𝕞",
+    "n": "𝕟",
+    "o": "𝕠",
+    "p": "𝕡",
+    "q": "𝕢",
+    "r": "𝕣",
+    "s": "𝕤",
+    "t": "𝕥",
+    "u": "𝕦",
+    "v": "𝕧",
+    "w": "𝕨",
+    "x": "𝕩",
+    "y": "𝕪",
+    "z": "𝕫",
+    "pi": "ℼ",
+    "gamma": "ℽ",
+    "Gamma": "ℾ",
+    "Pi": "ℿ",
+    "Sigma": "⅀",
+}
+
+def mathcal_fn(text):
+    return "".join(mathcal_map.get(x, x) for x in text)
+
+def mathfrak_fn(text):
+    return "".join(mathfrak_map.get(x, x) for x in text)
+
+def mathbb_fn(text):
+    return "".join(mathbb_map.get(x, x) for x in text)
 
 def to_math(text):
     """Converts a mathematical formula to ASCII."""
+    print("to_math: {!r}".format(text))
     magic_vec = []
 
-    def math_magic(text, left, right, fn):
-        regexp = r"{}([^{}{}]){}".format(
-            re.escape(left), re.escape(left),
-            re.escape(right), re.escape(right))
-        regexp = re.compile(regexp)
-
-        def repl(m):
-            magic = chr(MAGIC_FIRST + len(magic_vec))
-            t = fn(m.group(1))
-            magic_vec.append(t)
-            return magic
-
+    def expand(text):
         while True:
             orig = text
-            text = re.sub(regexp, repl, text)
+            text = re.sub(r"[{:c}-{:c}]".format(MAGIC_FIRST, MAGIC_LAST),
+                          lambda m: magic_vec[ord(m.group(0)) - MAGIC_FIRST],
+                          text)
             if text == orig:
                 break
+        return text.strip()
+
+    def recurse(text):
+        def math_magic(text, left, right, fn):
+            regexp = r"{}([^{}{}]+){}".format(
+                re.escape(left), re.escape(left),
+                re.escape(right), re.escape(right))
+            regexp = re.compile(regexp)
+
+            def repl(m):
+                magic = chr(MAGIC_FIRST + len(magic_vec))
+                t = fn(m.group(1))
+                magic_vec.append(t)
+                return magic
+
+            while True:
+                orig = text
+                text = re.sub(regexp, repl, text)
+                if text == orig:
+                    break
+            return text
+
+        def expand_group(v):
+            fn = None
+            if re.match(r"\\mathcal\b", v):
+                fn = mathcal_fn
+                v = v[8:].strip()
+            elif re.match(r"\\mathfrak\b", v):
+                fn = mathfrak_fn
+                v = v[9:].strip()
+            elif re.match(r"\\mathbb\b", v):
+                fn = mathbb_fn
+                v = v[7:]
+            elif re.match(r"\\(begin|end)\b", v):
+                v = ""  # Skip
+            elif re.match(r"\\text\b", v):
+                v = v[5:]
+            elif re.match(r"\\sqrt\[", v):
+                a = v[6:-1].strip()
+                if a == "2":
+                    v = "√"
+                elif a == "3":
+                    v = "∛",
+                elif a == "4":
+                    v = "∜"
+                else:
+                    v = to_superscript(a) + "√"
+            elif re.match(r"\\sqrt($|[0-9]|\b)", v):
+                v = "√"
+            elif re.match(r"\\frac($|[0-9]|\b)", v):
+                print("frac: {!r}".format(v))
+                m = re.match(r"\\frac\s*(\\[a-zA-Z]+|\\.|.)\s*"
+                             r"(\\[a-zA-Z]+|\\.|.)$", v)
+                if not m:
+                    print("MATH FRAC ERROR")
+                    return v
+                a, b = m.groups()
+                a = expand_group(a.strip())
+                b = expand_group(b.strip())
+                if len(a) > 1:
+                    a = "(" + a + ")"
+                if len(b) > 1:
+                    b = "(" + b + ")"
+                v = a + "/" + b
+            elif v.startswith("_"):
+                fn = to_subscript
+                v = v[1:]
+            elif v.startswith("^"):
+                fn = to_superscript
+                v = v[1:]
+            if v.startswith("\\"):
+                mapped = math_map.get(v[1:].strip())
+                if mapped is None:
+                    if v[1:].strip().isalnum():
+                        v = " " + v[1:].strip() + " "
+                    else:
+                        v = v[1:].strip()
+                else:
+                    v = mapped
+            elif v.isspace() or v in ("&",):  # Ignore certain special chars
+                v = ""
+            if fn is not None:
+                v = expand(v)
+                v = fn(v)
+            if (((parts and parts[-1][-1].isalpha() and v and v[0].isalpha()) or
+                 (parts and parts[-1][-1].isdigit() and v and
+                  v[0].isdigit())) and
+                len(parts[-1]) > 1 and len(v) > 1):
+                v = " " + v
+            v = expand(v)
+            return v
+
+        parts = []
+        while True:
+            orig = text
+            text = math_magic(text, "{", "}", recurse)
+            # text = math_magic(text, "(", ")", lambda x: "(" + recurse(x) + ")")
+            if text == orig:
+                break
+        print("BEFORE ITER: {!r}".format(text))
+        for m in re.finditer(r"\s+|"
+                             r"\\frac\s*(\\[a-zA-Z]+|\\.|.)\s*"
+                             r"(\\[a-zA-Z]+|\\.|.)|"
+                             r"(\\(mathcal|mathfrak|mathbb|text|begin|end)"
+                             r"\b\s*|"
+                             r"\\sqrt\b(\[\d+\])?)?"
+                             r"[_^]?(\\[a-zA-Z]+\s*|\\.|\w+|.)", text):
+            v = expand_group(m.group(0))
+            if v:
+                parts.append(v)
+
+        text = "".join(parts)
         return text
 
-    parts = []
-    text = math_magic(text, "{", "}", to_math)
-    text = math_magic(text, "(", ")", lambda x: "(" + to_math(x) + ")")
-    for m in re.finditer(r"\s+|[_^]?(\\[a-zA-Z0-9]+\s*|\\.|\w+|[{:c}-{:c}]|.)"
-                         .format(MAGIC_FIRST, MAGIC_LAST),
-                         text):
-        v = m.group(0)
-        fn = None
-        if v.startswith("_"):
-            fn = to_subscript
-            v = v[1:]
-        elif v.startswith("^"):
-            fn = to_superscript
-            v = v[1:]
-        if v.startswith("\\"):
-            mapped = math_map.get(v[1:].strip())
-            if mapped is None:
-                v = v[1:].strip()
-            else:
-                v = mapped
-        elif v.isspace():
-            v = ""
-        if fn is not None:
-            v = fn(v)
-        if (((parts and parts[-1][-1].isalpha() and v and v[0].isalpha()) or
-             (parts and parts[-1][-1].isdigit() and v and v[0].isdigit())) and
-            len(parts[-1]) > 1 and len(v) > 1):
-            v = " " + v
-        if v:
-            parts.append(v)
-
-    text = "".join(parts)
-    while True:
-        orig = text
-        text = re.sub(r"[{:c}-{:c}]".format(MAGIC_FIRST, MAGIC_LAST),
-                      lambda m: magic_vec[ord(m.group(0)) - MAGIC_FIRST], text)
-        if text == orig:
-            break
-    return text.strip()
+    text = recurse(text)
+    print("math text final: {!r}".format(text))
+    return text
 
 
 def clean_value(config, title, no_strip=False):
@@ -396,6 +730,8 @@ def clean_value(config, title, no_strip=False):
     remove any Wikimedia formatting from it: HTML tags, templates, links,
     emphasis, etc.  This will also merge multiple whitespaces into one
     normal space and will remove any surrounding whitespace."""
+    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(title, str)
 
     def repl_1(m):
         return clean_value(config, m.group(1), no_strip=True)
@@ -419,14 +755,12 @@ def clean_value(config, title, no_strip=False):
     def repl_1_sub(m):
         return to_subscript(clean_value(config, m.group(1)))
 
-    def repl_1_checm(m):
+    def repl_1_chem(m):
         return to_chem(clean_value(config, m.group(1)))
 
     def repl_1_math(m):
         return to_math(m.group(1))
 
-    assert isinstance(config, WiktionaryConfig)
-    assert isinstance(title, str)
     title = re.sub(r"\{\{[^}]+\}\}", "", title)
     # Remove tables
     title = re.sub(r"(?s)\{\|.*?\|\}", "\n", title)
@@ -449,7 +783,7 @@ def clean_value(config, title, no_strip=False):
                    repl_1_sub, title)
     # Change <chem> ... </chem> using subscripts for digits
     title = re.sub(r"(?si)<\s*chem\b[^>]*>(.*?)<\s*/\s*chem\s*>",
-                   repl_1_checm, title)
+                   repl_1_chem, title)
     # Change <math> ... </math> using special formatting.
     title = re.sub(r"(?si)<\s*math\b[^>]*>(.*?)<\s*/\s*math\s*>",
                    repl_1_math, title)

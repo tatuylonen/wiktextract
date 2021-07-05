@@ -2257,6 +2257,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         elif node.args == "rt":
                             ruby += clean_node(config, ctx, None, node)
                             continue
+                        elif node.args == "math":
+                            parts.append(clean_node(config, ctx, None, node))
+                            continue
                         elif "interProject" in classes:
                             continue  # These do not seem to be displayed
                         if "NavFrame" in classes:
@@ -2295,7 +2298,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             item_recurse(contents)
             item = clean_node(config, ctx, None, parts)
             # print("LINKAGE ITEM CONTENTS:", parts)
-            # print("CLEANED ITEM: {!r}".format(item))
+            print("CLEANED ITEM: {!r}".format(item))
             item = re.sub(r"\(\)", "", item)
             item = re.sub(r"\s\s+", " ", item)
             item = item.strip()
@@ -2778,7 +2781,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         dt["roman"] = r.strip()
                     if ruby:
                         dt["ruby"] = ruby.strip()
-                    if alt:
+                    if alt and alt != w:
                         dt["alt"] = alt.strip()
                     if english:
                         dt["english"] = english.strip()

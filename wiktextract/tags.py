@@ -3384,6 +3384,7 @@ valid_tags = set([
     "transitive",
     "transitive-with-of",
     "translative",
+    "translingual",
     "transliteration",
     "trial",
     "two-termination",

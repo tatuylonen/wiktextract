@@ -1128,7 +1128,8 @@ def classify_desc(desc, allow_unknown_tags=False):
     with a word in allowed_unknown_starts. """
     assert isinstance(desc, str)
     # Empty and whitespace-only strings are treated as "other"
-    if not desc.strip():
+    desc = desc.strip()
+    if not desc:
         return "other"
 
     # Check if it looks like the taxonomic name of a species
@@ -1166,6 +1167,8 @@ def classify_desc(desc, allow_unknown_tags=False):
     if desc in english_words and desc[0].isalpha():
         return "english"   # Handles ones containing whitespace
     tokens = tokenizer.tokenize(desc)
+    if not tokens:
+        return "other"
     lst = list(x in english_words or x.lower() in english_words or
                x in known_firsts or
                x[0].isdigit() or
@@ -1222,17 +1225,20 @@ def classify_desc(desc, allow_unknown_tags=False):
         if cl not in ("Ll", "Lu"):
             classes1.append(cl)
             continue
-        name = unicodedata.name(ch)
-        first = name.split()[0]
-        if first == "LATIN":
-            num_latin += 1
-        elif first == "GREEK":
-            num_greek += 1
-        elif (first in ("CYRILLIC", "GUJARATI", "CJK",
-                      "BENGALI", "GURMUKHI", "LAO", "KHMER",
-                      "THAI", "GLAGOLITIC") or
-            name.startswith("NEW TAI LUE ")):
-            cl = "NO"
+        try:
+            name = unicodedata.name(ch)
+            first = name.split()[0]
+            if first == "LATIN":
+                num_latin += 1
+            elif first == "GREEK":
+                num_greek += 1
+            elif (first in ("CYRILLIC", "GUJARATI", "CJK",
+                            "BENGALI", "GURMUKHI", "LAO", "KHMER",
+                            "THAI", "GLAGOLITIC", "DOUBLE-STRUCK") or
+                name.startswith("NEW TAI LUE ")):
+                cl = "NO"  # Not acceptable in romanizations
+        except ValueError:
+            cl = "NO"  # Not acceptable in romanizations
         classes1.append(cl)
     # print("classify_desc: {!r} classes1: {}".format(desc, classes1))
     if all(x in ("Ll", "Lu", "Lt", "Lm", "Mn", "Mc", "Zs", "Nd", "OK")
