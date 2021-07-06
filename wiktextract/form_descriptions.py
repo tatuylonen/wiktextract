@@ -683,7 +683,15 @@ def parse_word_head(ctx, pos, text, data):
         new_desc = []
         for desc in descriptors:
             new_desc.extend(map_with(xlat_tags_map, split_at_comma_semi(desc)))
+        prev_tags = None
         for desc in new_desc:
+            # If only one word, assume it is comma-separated alternative
+            # to the previous one
+            if (desc.find(" ") < 0 and prev_tags and
+                classify_desc(desc) != "tags"):
+                add_related(ctx, data, prev_tags, [desc])
+                continue
+
             m = re.match(r"^(\d+) strokes?$", desc)
             if m:
                 # Special case, used to give #strokes for Han characters
@@ -695,9 +703,11 @@ def parse_word_head(ctx, pos, text, data):
                 # Special case, used to give radical + strokes for Han
                 # characters
                 add_related(ctx, data, ["radical+strokes"], [desc])
+                prev_tags = None
                 continue
             parts = list(m.group(0) for m in re.finditer(word_re, desc))
             if not parts:
+                prev_tags = None
                 continue
 
             alt_related = None
@@ -713,6 +723,7 @@ def parse_word_head(ctx, pos, text, data):
                         any("error-unknown-tag" in x for x in tagsets)):
                         if alt_related is not None:
                             break
+                        prev_tags = None
                         continue
                 else:
                     tagsets = [["error-unrecognized-form"]]
@@ -734,6 +745,10 @@ def parse_word_head(ctx, pos, text, data):
             for tags in tagsets:
                 if related:
                     add_related(ctx, data, tags, related)
+                    if len(tagsets) == 1:
+                        prev_tags = tags
+                    else:
+                        prev_tags = None
                 else:
                     data_extend(ctx, data, "tags", tags)
 

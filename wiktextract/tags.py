@@ -1834,6 +1834,10 @@ xlat_tags_map = {
     "less common": "uncommon",
     "less frequently": "uncommon",
     "no perfect or supine stem": "no-perfect no-supine",
+    "no present participle": "no-present-participle",
+    "no past participle": "no-past-participle",
+    "past participle (obsolete except in adjectival use)":
+    "obsolete past participle",
     "adverbial locative noun in the pa, ku, or mu locative classes":
     "adverbial locative",
     "comparative -": "no-comparative",
@@ -3246,6 +3250,8 @@ valid_tags = set([
     "no-nominative-plural",
     "no-perfect",
     "no-plural",
+    "no-past-participle",
+    "no-present-participle",
     "no-senses",
     "no-superlative",
     "no-supine",

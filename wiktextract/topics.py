@@ -532,6 +532,7 @@ topic_generalize_map = {
     "medical terminology": "medicine",
     "opthalmology": "medicine",
     "homeopathy": "medicine",
+    "alternative medicine": "medicine",
     "mycology": "biology",
     "paganism": "religion",
     "Scientology": "religion",
