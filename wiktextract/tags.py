@@ -2488,6 +2488,7 @@ xlat_tags_map = {
     "rare spelling of": "alt-of rare",
     "superseded spelling of": "alt-of archaic",
     "pronunciation spelling of": "alt-of pronunciation-spelling",
+    "pronunciation spelling": "pronunciation-spelling",
     "eye dialect spelling of": "alt-of pronunciation-spelling",
     "alternative or obsolete spelling of":
     "alt-of obsolete alternative",

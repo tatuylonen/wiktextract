@@ -3296,6 +3296,21 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             data_extend(ctx, tr, "topics", topics2)
                             part = rest
 
+                    # Check if this part ends with (tags).  Note that
+                    # note-re will mess things up if we rely on this being
+                    # checked later.
+                    m = re.search(r" +\(([^)]+)\)$", part)
+                    if m:
+                        par = m.group(1)
+                        rest = part[:m.start()]
+                        cls = classify_desc(par)
+                        if cls == "tags":
+                            tagsets2, topics2 = decode_tags(par)
+                            for t in tagsets2:
+                                data_extend(ctx, tr, "tags", t)
+                            data_extend(ctx, tr, "topics", topics2)
+                            part = rest
+
                     # Check if this part starts with "<tags/english>: <rest>"
                     m = re.match(r"([\w ]+): ", part)
                     if m:
