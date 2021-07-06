@@ -1078,7 +1078,7 @@ def parse_alt_or_inflection_of1(ctx, gloss):
     # First try all formats ending with "of" (or other known last words that
     # can end a form description)
     for m in reversed(list(m for m in
-                           re.finditer(r" (of|for|by) ", gloss))):
+                           re.finditer(r" (of|for|by|as) ", gloss))):
         desc = gloss[:m.end()]
         base = gloss[m.end():]
         tagsets, topics = decode_tags(desc, no_unknown_starts=True)
