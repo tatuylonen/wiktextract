@@ -3091,7 +3091,6 @@ valid_tags = set([
     "duoplural",  # two or more in number
     "durative",
     "eclipsis",
-    "economics",
     "elative",
     "ellipsis",
     "emphatic",
