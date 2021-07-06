@@ -777,6 +777,7 @@ tr_ignore_contains = [
     "postpositional",
     "prefix",
     "suffix",
+    "translated",
 ]
 
 # Ignore translations that match one of these regular expressions
@@ -3288,7 +3289,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if m:
                         par = m.group(1)
                         rest = part[m.end():]
-                        cls = classify_desc(par)
+                        cls = classify_desc(par, no_unknown_starts=True)
                         if cls == "tags":
                             tagsets2, topics2 = decode_tags(par)
                             for t in tagsets2:
@@ -3303,7 +3304,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if m:
                         par = m.group(1)
                         rest = part[:m.start()]
-                        cls = classify_desc(par)
+                        cls = classify_desc(par, no_unknown_starts=True)
                         if cls == "tags":
                             tagsets2, topics2 = decode_tags(par)
                             for t in tagsets2:

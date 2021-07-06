@@ -118,7 +118,7 @@ tr_note_re = re.compile(
     "adjective|adjectives|clause|clauses|pronoun|pronouns|preposition|prep|"
     "postposition|postp|action|actions|articles|"
     "adverb|adverbs|noun|nouns|verb|verbs|before|"
-    "after|placed|prefix|suffix|used with|"
+    "after|placed|prefix|suffix|used with|translated|"
     "nominative|genitive|dative|infinitive|participle|past|perfect|imperfect|"
     "perfective|imperfective|auxiliary|negative|future|present|tense|aspect|"
     "conjugation|declension|class|category|plural|singular|positive|"
@@ -148,7 +148,7 @@ tr_note_re = re.compile(
     "colloquial|misspelling|holophrastic|frequently|esp\.|especially|"
     '"|'
     "form|regular|irregular|alternative)"
-    ")($| )|^("
+    ")($|[) ])|^("
     # Following are only matched at the beginning of the string
     "pl|pl\.|see:|pl:|sg:|plurals:|e\.g\.|e\.g\.:|e\.g\.,|cf\.|compare|such as|"
     "see|only|often|usually|used|usage:|of|not|in|compare|usu\.|"
@@ -926,7 +926,13 @@ def parse_translation_desc(ctx, lang, text, tr):
         cls = classify_desc(par)
         # print("parse_translation_desc classify: {!r} -> {}"
         #       .format(par, cls))
-        if cls == "tags":
+        if par == text:
+            pass
+        if par == "f":
+            data_append(ctx, tr, "tags", "feminine")
+        elif par == "m":
+            data_append(ctx, tr, "tags", "masculine")
+        elif cls == "tags":
             tagsets, topics = decode_tags(par)
             for tags in tagsets:
                 data_extend(ctx, tr, "tags", tags)
@@ -1175,7 +1181,7 @@ def parse_alt_or_inflection_of1(ctx, gloss):
     return tags, dt
 
 
-def classify_desc(desc, allow_unknown_tags=False):
+def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
     """Determines whether the given description is most likely tags, english,
     a romanization, or something else.  Returns one of: "tags", "english",
     "romanization", or "other".  If ``allow_unknown_tags`` is True, then
@@ -1210,7 +1216,7 @@ def classify_desc(desc, allow_unknown_tags=False):
                 return "taxonomic"
 
     # If it can be fully decoded as tags without errors, treat as tags
-    tagsets, topics = decode_tags(desc)
+    tagsets, topics = decode_tags(desc, no_unknown_starts=no_unknown_starts)
     for tagset in tagsets:
         assert isinstance(tagset, (list, tuple, set))
         if ("error-unknown-tag" not in tagset and
@@ -1245,8 +1251,10 @@ def classify_desc(desc, allow_unknown_tags=False):
     lst1 = list(m.group(0) in english_words
                 for m in re.finditer(r"[\w']+", desc))
     maxlen = max(len(x) for x in tokens)
-    if (maxlen > 1
-        and lst1.count(True) >= len(lst1) / 2 and
+    if (maxlen > 1 and
+        lst1.count(True) >= len(lst1) / 2 and
+        not desc.startswith("-") and
+        not desc.endswith("-") and
         len(list(re.finditer(r"\w+", desc))) > 0):
         if ((len(lst) < 5 and all(lst)) or
             lst.count(True) / len(lst) >= 0.8):
