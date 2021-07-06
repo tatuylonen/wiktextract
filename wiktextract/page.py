@@ -3056,6 +3056,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         assert isinstance(data, dict)
         assert isinstance(xlatnode, WikiNode)
         # print("===== PARSE_TRANSLATIONS {} {}".format(ctx.title, ctx.section))
+        # print("parse_translations xlatnode={}".format(xlatnode))
         if not config.capture_translations:
             return
         sense_parts = []
@@ -3501,6 +3502,28 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     parse_translation_recurse(node)
                 elif kind == NodeKind.LINK:
                     arg0 = node.args[0]
+                    # Kludge: I've seen occasional normal links to translation
+                    # subpages from main pages (e.g., language/English/Noun
+                    # in July 2021) instead of the normal
+                    # {{see translation subpage|...}} template.  This should
+                    # handle them.
+                    if (isinstance(arg0, (list, tuple)) and
+                        arg0 and
+                        isinstance(arg0[0], str) and
+                        arg0[0].endswith("/translations")):
+                        ctx.warning("/translations link on main page instead "
+                                    "of normal {{see translation subpage|...}}")
+                        sub = ctx.subsection
+                        if sub.lower() in part_of_speech_map:
+                            seq = [language, sub, "Translations"]
+                            subnode = get_subpage_section(ctx.title,
+                                                          "translations", seq)
+                            if subnode is not None:
+                                parse_translations(data, subnode)
+                        else:
+                            ctx.errors("/translations link outside "
+                                       "part-of-speech")
+
                     if (len(arg0) >= 1 and
                         isinstance(arg0[0], str) and
                         not arg0[0].lower().startswith("category:")):
