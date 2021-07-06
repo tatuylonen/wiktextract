@@ -3283,11 +3283,24 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         else:
                             tr["sense"] = sense
 
+                    # Check if this part starts with (tags)
+                    m = re.match(r"\(([^)]+)\) ", part)
+                    if m:
+                        par = m.group(1)
+                        rest = part[m.end():]
+                        cls = classify_desc(par)
+                        if cls == "tags":
+                            tagsets2, topics2 = decode_tags(par)
+                            for t in tagsets2:
+                                data_extend(ctx, tr, "tags", t)
+                            data_extend(ctx, tr, "topics", topics2)
+                            part = rest
+
                     # Check if this part starts with "<tags/english>: <rest>"
-                    m = re.match(r"([\w ]+): (.*)$", part)
+                    m = re.match(r"([\w ]+): ", part)
                     if m:
                         par = m.group(1).strip()
-                        rest = m.group(2).strip()
+                        rest = part[m.end():]
                         if par == "see":
                             # Sometimes we have, e.g., "Different structure
                             # used, see: <word>" (e.g., have/English sense
@@ -3328,6 +3341,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             (" with dative", "with-dative"),
                             (" with genitive", "with-genitive"),
                             (" with accusative", "with-accusative"),
+                            (" in subjunctive", "with-subjunctive"),
                     ):
                         if part.endswith(suffix):
                             part = part[:-len(suffix)]
