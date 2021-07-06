@@ -1135,7 +1135,7 @@ def parse_alt_or_inflection_of1(ctx, gloss):
         node = valid_sequences.get(lst[-2])
         if node and "$" in node:
             for t in node["$"].get("tags", ()):
-                tags.update(t.split(" "))
+                tags.extend(t.split(" "))
             lst = lst[:-2]
             if lst[-1] == "in" and len(lst) > 1:
                 lst = lst[:-1]
