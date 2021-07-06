@@ -1615,6 +1615,14 @@ xlat_tags_map = {
     "Egyptiot dialect": "Egyptiot dialectal",
     "Main dialectal variations": "dialectal",
     "Many eastern and northern dialects": "dialectal",
+    "many dialects": "dialectal",
+    "some dialects of": "dialectal",
+    "now sometimes by conflation with etymology 1 under standard German influence":
+    "sometimes",
+    "unstressed form": "unstressed",
+    "for some speakers": "uncommon",
+    'when "do" is unstressed and the next word starts with /j/':
+    "unstressed next-starts-j",
     "Mooring dialect": "Mooring dialectal",
     "the Eurozone": "Eurozone",
     "Phoneme": "phoneme",
@@ -3204,6 +3212,8 @@ valid_tags = set([
     "neologism",
     "neuter",
     "next",
+    "next-starts-j",
+    "next-starts-vowel",
     "ngoko",
     "nif'al-construction",
     "no-comparative",

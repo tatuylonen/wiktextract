@@ -1390,6 +1390,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
     pos_datas = []
     etym_datas = []
     page_datas = []
+    have_etym = False
     stack = []
 
     def merge_base(data, base):
@@ -1401,8 +1402,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # Copy the list to ensure that we don't share lists between
                 # structures.
                 data[k] = v;
-            elif isinstance(data[k], list):
-                data[k].extend(v)
+            elif isinstance(data[k], (list, tuple)):
+                for vv in v:
+                    # Eliminate duplicates for some fields
+                    if k in ("sounds",):
+                        if vv in data.get(k, ()):
+                            continue  # Skip this one - it is a duplicate
+                    # Add it
+                    data[k].append(vv)
             elif data[k] != v:
                 ctx.warning("conflicting values for {}: {} vs {}"
                             .format(k, data[k], v))
@@ -1436,6 +1443,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         """Starts collecting data for a new etymology."""
         nonlocal etym_data
         nonlocal etym_datas
+        nonlocal have_etym
+        have_etym = True
         push_pos()
         for data in etym_datas:
             merge_base(data, etym_data)
@@ -1929,6 +1938,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if not isinstance(x, WikiNode) or x.kind not in LEVEL_KINDS]
 
         data = select_data()
+        if have_etym and data is base_data:
+            data = etym_data
         enprs = []
         audios = []
         rhymes = []
@@ -2131,14 +2142,17 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         # Add data that was collected in template_fn
         if audios:
-            data_extend(ctx, data, "sounds", audios)
+            for audio in audios:
+                if audio not in data.get("sounds", ()):
+                    data_append(ctx, data, "sounds", audios)
             have_pronunciations = True
         for enpr in enprs:
             pron = {"enpr": enpr}
             # XXX need to parse enpr separately for each list item to get
             # tags correct!
             # parse_pronunciation_tags(ctx, tagstext, pron)
-            data_append(ctx, data, "sounds", pron)
+            if pron not in data.get("sounds", ()):
+                data_append(ctx, data, "sounds", pron)
             have_pronunciations = True
 
         if not have_pronunciations and not have_panel_templates:
@@ -3776,10 +3790,10 @@ def fix_subtitle_hierarchy(ctx, text):
             level = 6
         parts.append("{}{}{}".format("=" * level, title, "=" * level))
         parts.append(part)
-        # print("=" * level, title)
-        # if level != len(left):
-        #     print("  FIXED LEVEL OF {} {} -> {}"
-        #           .format(title, len(left), level))
+        print("=" * level, title)
+        if level != len(left):
+            print("  FIXED LEVEL OF {} {} -> {}"
+                  .format(title, len(left), level))
 
     text = "".join(parts)
     # print(text)
