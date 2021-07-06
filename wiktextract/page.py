@@ -3342,9 +3342,19 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             (" with genitive", "with-genitive"),
                             (" with accusative", "with-accusative"),
                             (" in subjunctive", "with-subjunctive"),
+                            (" and conditional mood", "with-conditional"),
                     ):
                         if part.endswith(suffix):
                             part = part[:-len(suffix)]
+                            data_append(ctx, tr, "tags", t)
+                            break
+
+                    # Handle certain prefixes in translations
+                    for prefix, t in (
+                            ("subjunctive of ", "with-subjunctive"),
+                    ):
+                        if part.startswith(prefix):
+                            part = part[len(prefix):]
                             data_append(ctx, tr, "tags", t)
                             break
 
