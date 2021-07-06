@@ -50,6 +50,7 @@ languages_by_code = {x["code"]: x for x in ALL_LANGUAGES}
 # level as language names.
 script_names = set([
     "Adlam",
+    "Bengali",
     "Burmese",
     "Cyrillic",
     "Devanagari",
@@ -2833,6 +2834,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         (not r or r.find(",") < 0) and
                         not ctx.page_exists(w)):
                         lst = w.split("／") if len(w) > 1 else [w]
+                        if len(lst) == 1:
+                            lst = w.split(" / ")
                         if len(lst) > 1:
                             # Treat each alternative as separate linkage
                             for w in lst:
@@ -3790,10 +3793,10 @@ def fix_subtitle_hierarchy(ctx, text):
             level = 6
         parts.append("{}{}{}".format("=" * level, title, "=" * level))
         parts.append(part)
-        print("=" * level, title)
-        if level != len(left):
-            print("  FIXED LEVEL OF {} {} -> {}"
-                  .format(title, len(left), level))
+        # print("=" * level, title)
+        # if level != len(left):
+        #     print("  FIXED LEVEL OF {} {} -> {}"
+        #           .format(title, len(left), level))
 
     text = "".join(parts)
     # print(text)

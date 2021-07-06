@@ -52,6 +52,26 @@ known_firsts.update([
     "Tanagra",
 ])
 
+# First words of unicodedata.name() that indicate scripts that cannot be
+# accepted in romanizations or english (i.e., should be considered "other"
+# in classify_desc()).
+non_latin_scripts = set([
+    "ARMENIAN",
+    "BENGALI",
+    "CHEROKEE",
+    "CJK",
+    "COPTIC",
+    "CYRILLIC",
+    "DOUBLE-STRUCK",
+    "GEORGIAN",
+    "GLAGOLITIC",
+    "GUJARATI",
+    "GURMUKHI",
+    "KHMER",
+    "LAO",
+    "THAI",
+])
+
 # Regexp for finding nested translations from translation items (these are
 # used in, e.g., year/English/Translations/Arabic).  This is actually used
 # in page.py.
@@ -319,7 +339,7 @@ def map_with(ht, lst):
     return ret
 
 
-def decode_tags(src, allow_any=False):
+def decode_tags(src, allow_any=False, no_unknown_starts=False):
     """Decodes tags, doing some canonicalizations.  This returns a list of
     lists of tags and a list of topics."""
     assert isinstance(src, str)
@@ -347,7 +367,8 @@ def decode_tags(src, allow_any=False):
 
         if (not allow_any and
             not words[0].startswith("~") and
-            (words[0] not in allowed_unknown_starts or
+            (no_unknown_starts or
+             words[0] not in allowed_unknown_starts or
              len(words) <= 1)):
             # print("ERR allow_any={} words={}"
             #       .format(allow_any, words))
@@ -408,6 +429,7 @@ def decode_tags(src, allow_any=False):
             if not new_nodes:
                 # Some initial words cause the rest to be interpreted as unknown
                 if (i == max_last_i or
+                    no_unknown_starts or
                     lst[max_last_i] not in allowed_unknown_starts):
                     # print("RECOVER", w, max_last_i)
                     if w in valid_sequences:
@@ -762,11 +784,24 @@ def parse_pronunciation_tags(ctx, text, data):
     assert isinstance(ctx, Wtp)
     assert isinstance(text, str)
     assert isinstance(data, dict)
-    tagsets, topics = decode_tags(text)
-    for tagset in tagsets:
-        data_extend(ctx, data, "tags", tagset)
-    data_extend(ctx, data, "topics", topics)
-
+    text = text.strip()
+    if not text:
+        return
+    cls = classify_desc(text)
+    notes = []
+    if cls == "tags":
+        tagsets, topics = decode_tags(text)
+        data_extend(ctx, data, "topics", topics)
+        for tagset in tagsets:
+            for t in tagset:
+                if t.find(" ") >= 0:
+                    notes.append(t)
+                else:
+                    data_append(ctx, data, "tags", t)
+    else:
+        notes.append(text)
+    if notes:
+        data["note"] = "; ".join(notes)
 
 def parse_translation_desc(ctx, lang, text, tr):
     assert isinstance(ctx, Wtp)
@@ -887,10 +922,11 @@ def parse_translation_desc(ctx, lang, text, tr):
             if re.search(tr_note_re, par):
                 if par.endswith(":"):
                     par = par[:-1]
-                if note:
-                    note = note + ";" + par
-                else:
-                    note = par
+                if par not in ("see entry for forms",):
+                    if note:
+                        note = note + ";" + par
+                    else:
+                        note = par
             else:
                 # There can be more than one parenthesized english item, see
                 # e.g. Aunt/English/Translations/Tamil
@@ -899,15 +935,17 @@ def parse_translation_desc(ctx, lang, text, tr):
                 else:
                     tr["english"] = par
         elif cls == "romanization":
-            if classify_desc(text) in ("english", "romanization"):
+            if (classify_desc(text) in ("english", "romanization") and
+                lang not in ("Egyptian",)):
                 if beginning:
                     restore_beginning += "({}) ".format(par)
                 else:
                     restore_end = " ({})".format(par) + restore_end
-            if tr.get("roman"):
-                ctx.warning("more than one value in \"roman\": {} vs. {}"
-                            .format(tr["roman"], par))
-            tr["roman"] = par
+            else:
+                if tr.get("roman"):
+                    ctx.warning("more than one value in \"roman\": {} vs. {}"
+                                .format(tr["roman"], par))
+                tr["roman"] = par
         elif cls == "taxonomic":
             if tr.get("taxonomic"):
                 ctx.warning("more than one value in \"taxonomic\": {} vs. {}"
@@ -1018,61 +1056,59 @@ def parse_alt_or_inflection_of(ctx, gloss):
 def parse_alt_or_inflection_of1(ctx, gloss):
     """Helper function for parse_alt_or_inflection_of.  This handles a single
     capitalization."""
-    tags = set()
-    nodes = [(valid_sequences, 0)]
-    gloss = re.sub(r"\s+", " ", gloss)
-    lst = gloss.strip().split(" ")
-    last = 0
-    for i, w in enumerate(lst):
-        if not w:
-            continue
-        new_nodes = []
+    if not gloss or not gloss.strip():
+        return None
 
-        def add_new(node, next_i):
-            for node2, next_i2 in new_nodes:
-                if node2 is node and next_i2 == next_i:
-                    break
-            else:
-                new_nodes.append((node, next_i))
+    # First try all formats ending with "of" (or other known last words that
+    # can end a form description)
+    for m in reversed(list(m for m in
+                           re.finditer(r" (of|for|by) ", gloss))):
+        desc = gloss[:m.end()]
+        base = gloss[m.end():]
+        tagsets, topics = decode_tags(desc, no_unknown_starts=True)
+        if not topics and any("error-unknown-tag" not in t for t in tagsets):
+            # Successfully parsed, including "of" etc.
+            tags = []
+            for t in tagsets:
+                if "error-unknown-tag" not in t:
+                    tags.extend(t)
+            if ("alt-of" in tags or
+                "form-of" in tags or
+                "compound-of" in tags):
+                break
+        elif m.group(0) == " of ":
+            # Try parsing without the final "of".  This is commonly used in
+            # various form-of expressions.
+            desc = gloss[:m.start()]
+            base = gloss[m.end():]
+            tagsets, topics = decode_tags(desc, no_unknown_starts=True)
+            if (not topics and
+                any("error-unknown-tag" not in t for t in tagsets)):
+                tags = ["form-of"]
+                for t in tagsets:
+                    if "error-unknown-tag" not in t:
+                        tags.extend(t)
+                break
 
-        max_next_i = max(x[1] for x in nodes)
-        for node, next_i in nodes:
-            if w in node:
-                add_new(node[w], next_i)
-            elif w.lower() in node:
-                add_new(node[w.lower()], next_i)
-            if "$" in node:
-                for x in node["$"].get("tags", ()):
-                    tags.update(x.split(" "))
-                if w in valid_sequences:
-                    add_new(valid_sequences[w], i)
-                elif w.lower() in valid_sequences:
-                    add_new(valid_sequences[w.lower()], i)
-                last = i
-        if not new_nodes:
-            break
-        nodes = new_nodes
     else:
-        # We've reached the end of the gloss
-        for node, next_i in nodes:
-            if "$" in node:
-                for x in node["$"].get("tags", ()):
-                    tags.update(x.split(" "))
-                last = len(lst)
-
-    if last == 0:
-        return None
-
-    # The parsing must result in alt-of/form-of/compound-of
-    if ("alt-of" not in tags and
-        "form-of" not in tags and
-        "compound-of" not in tags):
-        return None
+        # Did not find a form description based on last word; see if the
+        # whole description is tags
+        tagsets, topics = decode_tags(gloss, no_unknown_starts=True)
+        if (not topics and
+            any("error-unknown-tag" not in t for t in tagsets)):
+            tags = []
+            for t in tagsets:
+                if "error-unknown-tag" not in t:
+                    tags.extend(t)
+            base = ""
+        else:
+            return None
 
     # It is fairly common for form_of glosses to end with something like
     # "ablative case" or "in instructive case".  Parse that ending.
     # print("parse_alt_or_inflection_of: lst={}".format(lst))
-    lst = lst[last:]
+    base = base.strip()
+    lst = base.split()
     if len(lst) >= 3 and lst[-1] in ("case", "case."):
         node = valid_sequences.get(lst[-2])
         if node and "$" in node:
@@ -1082,9 +1118,9 @@ def parse_alt_or_inflection_of1(ctx, gloss):
             if lst[-1] == "in" and len(lst) > 1:
                 lst = lst[:-1]
 
-    tags = list(sorted(t for t in tags if t))
-    orig_base = " ".join(lst).strip()
+    tags = list(sorted(set(t for t in tags if t)))
     # Clean up some extra stuff from the linked word
+    orig_base = base
     base = re.sub(alt_of_form_of_clean_re, "", orig_base)
     base = re.sub(r" [(⟨][^()]*[)⟩]", "", base)  # Remove all (...) groups
     extra = orig_base[len(base):]
@@ -1235,10 +1271,8 @@ def classify_desc(desc, allow_unknown_tags=False):
                 num_latin += 1
             elif first == "GREEK":
                 num_greek += 1
-            elif (first in ("CYRILLIC", "GUJARATI", "CJK",
-                            "BENGALI", "GURMUKHI", "LAO", "KHMER",
-                            "THAI", "GLAGOLITIC", "DOUBLE-STRUCK") or
-                name.startswith("NEW TAI LUE ")):
+            elif (first in non_latin_scripts or
+                  name.startswith("NEW TAI LUE ")):
                 cl = "NO"  # Not acceptable in romanizations
         except ValueError:
             cl = "NO"  # Not acceptable in romanizations

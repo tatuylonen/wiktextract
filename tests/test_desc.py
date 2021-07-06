@@ -1,7 +1,8 @@
 import unittest
 import collections
 import wiktextract
-from wiktextract.form_descriptions import decode_tags, parse_word_head
+from wiktextract.form_descriptions import (
+    decode_tags, parse_word_head, classify_desc)
 from wiktextract import WiktionaryConfig
 from wikitextprocessor import Wtp
 from wiktextract.datautils import split_at_comma_semi
@@ -207,3 +208,7 @@ class WiktExtractTests(unittest.TestCase):
     def test_comma_semi5(self):
         self.assertEqual(split_at_comma_semi("a (foo, bar)[1; zappa], z"),
                          ["a (foo, bar)[1; zappa]", "z"])
+
+    def test_classify1(self):
+        cls = classify_desc("predicative particle")
+        self.assertEqual(cls, "tags")
