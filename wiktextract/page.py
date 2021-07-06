@@ -355,6 +355,12 @@ linkage_split_exceptions = {
     "…": ["...", "…"],
 }
 
+# Truncate linkage word if it matches any of these strings
+linkage_truncate_re = re.compile(
+    "|".join(re.escape(x) for x in [
+        " and its derived terms",
+        ]))
+
 # Regexp for identifying special linkages containing lists of letters, digits,
 # or characters
 script_chars_re = re.compile(
@@ -2785,12 +2791,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         else:
                             qualifier = " ".join(q)
 
+                if re.match(linkage_ignore_prefixes_re, item1):
+                    continue  # Ignore certain prefixes
+                m = re.search(linkage_truncate_re, item1)
+                if m:
+                    # suffix = item1[m.start():]  # Currently ignored
+                    item1 = item1[:m.start()]
                 if not item1:
                     continue  # Ignore empty link targets
                 if item1 == word:
                     continue  # Ignore self-links
-                if re.match(linkage_ignore_prefixes_re, item1):
-                    continue  # Ignore certain prefixes
 
                 def add(w, r):
                     nonlocal alt
