@@ -919,7 +919,7 @@ def clean_value(config, title, no_strip=False):
         title = re.sub(r"(?s)\[\[\s*:?([^]|#]+?)\s*(#[^][|]*?)?\]\]",
                        repl_1, title)
         title = re.sub(r"(?s)\[\[\s*(([a-zA-z0-9]+)\s*:)?\s*([^][#|]+?)"
-                       r"\s*(#[^][|]*?)?\]\]",
+                       r"\s*(#[^][|]*?)?\|?\]\]",
                        repl_link, title)
         title = re.sub(r"(?s)\[\[\s*([^][|]+?)\s*\|"
                        r"\s*([^][|]+?)(\s*\|\s*([^]|]+?))?\s*\]\]",
