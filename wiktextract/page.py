@@ -2146,7 +2146,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if audios:
             for audio in audios:
                 if audio not in data.get("sounds", ()):
-                    data_append(ctx, data, "sounds", audios)
+                    data_append(ctx, data, "sounds", audio)
             have_pronunciations = True
         for enpr in enprs:
             pron = {"enpr": enpr}
