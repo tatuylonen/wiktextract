@@ -1405,16 +1405,17 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # structures.
                 data[k] = v;
             elif isinstance(data[k], (list, tuple)):
-                for vv in v:
-                    # Eliminate duplicates for some fields
-                    if k in ("sounds",):
-                        if vv in data.get(k, ()):
-                            continue  # Skip this one - it is a duplicate
-                    # Add it
-                    data[k].append(vv)
+                data[k].extend(v)
             elif data[k] != v:
                 ctx.warning("conflicting values for {}: {} vs {}"
                             .format(k, data[k], v))
+        # If the result has sounds, eliminate sounds that have a prefix that
+        # does not match "word" or one of "forms"
+        if "sounds" in data and "word" in data:
+            accepted = [data["word"]]
+            accepted.extend(f["form"] for f in data.get("forms", ()))
+            data["sounds"] = list(s for s in data["sounds"]
+                                  if "form" not in s or s["form"] in accepted)
 
     def push_sense():
         """Starts collecting data for a new word sense.  This returns True
@@ -2044,54 +2045,51 @@ def parse_language(ctx, config, langnode, language, lang_code):
         ipa_text = clean_node(config, ctx, data, contents,
                               post_template_fn=parse_pron_post_template_fn)
         have_pronunciations = False
-        text_splits = re.split(r"[*#]+", text)
-        ipa_splits = re.split(r"[*#]+", ipa_text)
+        text_splits = re.split(r":*[*#\n]+:*", text)
+        ipa_splits = re.split(r":*[*#\n]+:*", ipa_text)
         if len(text_splits) != len(ipa_splits):
             ctx.warning("text_splits length differs from ipa_splits: "
                         "{!r} vs. {!r}"
                         .format(text, ipa_text))
             ipa_splits = text_splits
-        for origtext, ipa_text in zip(text_splits, ipa_splits):
-            text = origtext
-            m = re.match(r"^[*#\s]*\((([^()]|\([^()]*\))*?)\)", text)
-            if m:
-                tagstext = m.group(1)
-                text = text[m.end():]
-            else:
-                tagstext = ""
-            if origtext.find("IPA") >= 0:
+        prefix = None
+        for text, ipa_text in zip(text_splits, ipa_splits):
+            if text.find("IPA") >= 0:
                 field = "ipa"
             else:
                 # This is used for Rhymes, Homophones, etc
                 field = "other"
+
             # Check if it contains Japanese "Tokyo" pronunciation with
             # special syntax
-            m = re.search(r"(?m)\(Tokyo\) +([^ ]+) +\[", origtext)
+            m = re.search(r"(?m)\(Tokyo\) +([^ ]+) +\[", text)
             if m:
                 pron = {field: m.group(1)}
-                parse_pronunciation_tags(ctx, tagstext, pron)
                 data_append(ctx, data, "sounds", pron)
                 have_pronunciations = True
+                continue
+
             # Check if it contains Rhymes
-            m = re.search(r"(?m)\bRhymes: ([^\s,]+(,\s*[^\s,]+)*)", text)
+            m = re.match(r"\s*Rhymes: (.*)", text)
             if m:
-                for ending in m.group(1).split(","):
+                for ending in split_at_comma_semi(m.group(1)):
                     ending = ending.strip()
                     if ending:
                         pron = {"rhymes": ending}
-                        parse_pronunciation_tags(ctx, tagstext, pron)
                         data_append(ctx, data, "sounds", pron)
                         have_pronunciations = True
+                continue
+
             # Check if it contains homophones
-            m = re.search(r"(?m)\bHomophones?: ([^\s,]+(,\s*[^\s,]+)*)", text)
+            m = re.search(r"(?m)\bHomophones?: (.*)", text)
             if m:
-                for w in m.group(1).split(","):
+                for w in split_at_comma_semi(m.group(1)):
                     w = w.strip()
                     if w:
                         pron = {"homophone": w}
-                        parse_pronunciation_tags(ctx, tagstext, pron)
                         data_append(ctx, data, "sounds", pron)
                         have_pronunciations = True
+                continue
 
             # Check if it contains Phonetic hangeul
             m = re.search(r"(?m)\bPhonetic hangeul: \[([^]]+)\]", text)
@@ -2104,6 +2102,26 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         pron = {"hangeul": w}
                         data_append(ctx, data, "sounds", pron)
                         have_pronunciations = True
+
+            # See if it contains a word prefix restricting which forms the
+            # pronunciation applies to (see amica/Latin) and/or parenthesized
+            # tags.
+            m = re.match(r"^[*#\s]*(([-\w]+):\s+)?\((([^()]|\([^()]*\))*?)\)",
+                         text)
+            if m:
+                prefix = m.group(2) or ""
+                tagstext = m.group(3)
+                text = text[m.end():]
+            else:
+                m = re.match(r"^[*#\s]*([-\w]+):\s+", text)
+                if m:
+                    prefix = m.group(1)
+                    tagstext = ""
+                    text = text[m.end():]
+                else:
+                    # No prefix.  In this case, we inherit prefix from previous
+                    # entry.  This particularly applies for nested Audio files.
+                    tagstext = ""
 
             # Find romanizations from the pronunciation section (routinely
             # produced for Korean by {{ko-IPA}})
@@ -2129,8 +2147,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     idx = int(m.group(1))
                     if not audios[idx].get("audio-ipa"):
                         audios[idx]["audio-ipa"] = v
+                    if prefix:
+                        audios[idx]["form"] = prefix
                 else:
                     pron = {field: v}
+                    if prefix:
+                        pron["form"] = prefix
                     parse_pronunciation_tags(ctx, tagstext, pron)
                     data_append(ctx, data, "sounds", pron)
                 have_pronunciations = True
@@ -3649,7 +3671,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 continue
             t = clean_node(config, ctx, etym_data, node.args)
             config.section_counts[t] += 1
-            pos = t.lower()
             # print("PROCESS_CHILDREN: T:", repr(t))
             if t.startswith("Pronunciation"):
                 if config.capture_pronunciation:
@@ -3663,37 +3684,42 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 push_etym()
                 ctx.start_subsection(None)
                 # XXX parse etymology section, up to the next subtitle
-            elif pos in part_of_speech_map:
-                push_pos()
-                dt = part_of_speech_map[pos]
-                pos = dt["pos"]
-                ctx.start_subsection(t)
-                if "warning" in dt:
-                    ctx.warning("{}: {}".format(t, dt["warning"]))
-                if "error" in dt:
-                    ctx.error("{}: {}".format(t, dt["error"]))
-                # Parse word senses for the part-of-speech
-                parse_part_of_speech(node, pos)
-                if "tags" in dt:
-                    for pdata in pos_datas:
-                        data_extend(ctx, pdata, "tags", dt["tags"])
             elif t == "Translations":
                 data = select_data()
                 parse_translations(data, node)
-            elif t in inflection_section_titles:
-                parse_inflection(node)
-            elif pos in linkage_map:
-                rel = linkage_map[pos]
-                data = select_data()
-                parse_linkage(data, rel, node)
-            elif pos == "compounds":
-                data = select_data()
-                if config.capture_compounds:
-                    parse_linkage(data, "derived", node)
             elif t in ignored_section_titles:
                 # XXX does the Descendants section have something we'd like
                 # to capture?
                 pass
+            elif t in inflection_section_titles:
+                parse_inflection(node)
+            else:
+                lst = t.split()
+                while len(lst) > 1 and lst[-1].isdigit():
+                    lst = lst[:-1]
+                pos = " ".join(lst).lower()
+                if pos in part_of_speech_map:
+                    push_pos()
+                    dt = part_of_speech_map[pos]
+                    pos = dt["pos"]
+                    ctx.start_subsection(t)
+                    if "warning" in dt:
+                        ctx.warning("{}: {}".format(t, dt["warning"]))
+                    if "error" in dt:
+                        ctx.error("{}: {}".format(t, dt["error"]))
+                    # Parse word senses for the part-of-speech
+                    parse_part_of_speech(node, pos)
+                    if "tags" in dt:
+                        for pdata in pos_datas:
+                            data_extend(ctx, pdata, "tags", dt["tags"])
+                elif pos in linkage_map:
+                    rel = linkage_map[pos]
+                    data = select_data()
+                    parse_linkage(data, rel, node)
+                elif pos == "compounds":
+                    data = select_data()
+                    if config.capture_compounds:
+                        parse_linkage(data, "derived", node)
 
             # XXX parse interesting templates also from other sections.  E.g.,
             # {{Letter|...}} in ===See also===

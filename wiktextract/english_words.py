@@ -1544,6 +1544,7 @@ additional_words = set([
     'substance',
     'subtribe',
     'succinctness',
+    'sudoku',
     'sulk',
     'sumo',
     'sundial',
