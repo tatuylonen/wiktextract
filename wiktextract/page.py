@@ -3573,11 +3573,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # subpages from main pages (e.g., language/English/Noun
                     # in July 2021) instead of the normal
                     # {{see translation subpage|...}} template.  This should
-                    # handle them.
+                    # handle them.  Note: must be careful not to read other
+                    # links, particularly things like in "human being":
+                    # "a human being -- see [[man/translations]]" (group title)
                     if (isinstance(arg0, (list, tuple)) and
                         arg0 and
                         isinstance(arg0[0], str) and
-                        arg0[0].endswith("/translations")):
+                        arg0[0].endswith("/translations") and
+                        arg0[0][:-len("/translations")] == ctx.title):
                         ctx.warning("/translations link on main page instead "
                                     "of normal {{see translation subpage|...}}")
                         sub = ctx.subsection
