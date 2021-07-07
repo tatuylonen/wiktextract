@@ -1057,6 +1057,7 @@ alt_of_form_of_clean_re = re.compile(
     "|".join([
         r":",
         r";",
+        r" \(",
         r" - ",
         r" \(with ",
         r" with -ra/-re",

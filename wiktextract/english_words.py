@@ -737,6 +737,7 @@ additional_words = set([
     'firefighter',
     'fireside',
     'firmware',
+    'fishnet',
     'fishy',
     'fissure',
     'flatbed',
