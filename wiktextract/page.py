@@ -3246,8 +3246,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 extra_langcodes.add(langcode)
                 if langcode.find("-") >= 0:
                     extra_langcodes.add(langcode.split("-")[0])
-                if langcode == "nan":
-                    extra_langcodes.add("zh-min-nan")
+                if langcode in ("zh", "yue", "cdo", "cmn", "dng", "hak",
+                                "mnp", "nan", "wuu", "zh-min-nan"):
+                    extra_langcodes.update([
+                        "zh", "yue", "cdo", "cmn", "dng", "hak",
+                        "mnp", "nan", "wuu", "zh-min-nan"])
                 elif langcode in ("nn", "nb", "no"):
                     extra_langcodes.update(["no", "nn", "nb"])
                 for x in extra_langcodes:
