@@ -911,13 +911,21 @@ def clean_value(config, title, no_strip=False):
     title = re.sub(r"(?s)<\s*[^/>][^>]*>", "", title)
     title = re.sub(r"(?s)<\s*/\s*[^>]+>", "", title)
     # Replace links by their text
-    title = re.sub(r"(?si)\[\[\s*Category\s*:\s*([^]]+?)\s*\]\]", r"", title)
-    title = re.sub(r"(?s)\[\[\s*([^]|]+?)\s*\|\s*([^]|]+?)"
-                   r"(\s*\|\s*([^]|]+?))?\s*\]\]",
-                   repl_link_bars, title)
-    title = re.sub(r"(?s)\[\[\s*(([a-zA-z0-9]+)\s*:)?\s*([^][]+?)\]\]",
-                   repl_link, title)
-    title = re.sub(r"(?s)\[\[\s*:?([^]|]+?)\s*\]\]", repl_1, title)
+    while True:
+        # Links may be nested, so keep replacing until there is no more change.
+        orig = title
+        title = re.sub(r"(?si)\[\[\s*Category\s*:\s*([^]]+?)\s*\]\]",
+                       r"", title)
+        title = re.sub(r"(?s)\[\[\s*:?([^]|#]+?)\s*(#[^][|]*?)?\]\]",
+                       repl_1, title)
+        title = re.sub(r"(?s)\[\[\s*(([a-zA-z0-9]+)\s*:)?\s*([^][#|]+?)"
+                       r"\s*(#[^][|]*?)?\]\]",
+                       repl_link, title)
+        title = re.sub(r"(?s)\[\[\s*([^][|]+?)\s*\|"
+                       r"\s*([^][|]+?)(\s*\|\s*([^]|]+?))?\s*\]\]",
+                       repl_link_bars, title)
+        if title == orig:
+            break
     # Replace remaining HTML links by the URL.
     title = re.sub(r"\[(https?:)//[^]\s]+\s+([^]]+?)\s*\]", repl_2, title)
     # Remove any edit links to local pages

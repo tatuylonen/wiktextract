@@ -705,6 +705,8 @@ topic_generalize_map = {
     "guitar": "music",
     "handbells": "music",
     "handball": "ball-games",
+    "racquet sports": "ball-games",
+    "billiards": "ball-games",
     "musicology": "music human-sciences",
     "MIDI": "music",
     "talking": "communications",

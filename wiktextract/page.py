@@ -3301,7 +3301,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if topics:
                         tr["topics"] = list(topics)
                     if sense:
-                        if sense == "Translations to be checked":
+                        if sense.startswith("Translations to be checked"):
                             continue  # Skip such translations
                         elif sense.startswith(":The translations below need "
                                               "to be checked"):
