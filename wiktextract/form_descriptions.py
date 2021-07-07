@@ -209,15 +209,14 @@ for x in xlat_tags_map.keys():
     valid_words.update(x.split(" "))
 
 
-def add_to_valid_tree(tree, field, tag, v):
+def add_to_valid_tree(tree, desc, v):
     """Helper function for building trees of valid tags/sequences during
     initialization."""
     assert isinstance(tree, dict)
-    assert field in ("tags", "topics")
-    assert isinstance(tag, str)
+    assert isinstance(desc, str)
     assert v is None or isinstance(v, str)
     node = tree
-    for w in tag.split(" "):
+    for w in desc.split(" "):
         if w in node:
             node = node[w]
         else:
@@ -226,42 +225,54 @@ def add_to_valid_tree(tree, field, tag, v):
             node = new_node
     if "$" not in node:
         node["$"] = {}
+    if not v:
+        return
+
     node = node["$"]
-    if field not in node:
-        node[field] = ()
-    if v is not None and v not in node[field]:
-        node[field] += (v,)
+    tags = []
+    topics = []
+    for vv in v.split():
+        if vv in valid_tags:
+            tags.append(vv)
+        elif vv in valid_topics:
+            topics.append(vv)
+        else:
+            print("WARNING: tag/topic {!r} maps to unknown {!r}"
+                  .format(desc, vv))
+    topics = " ".join(topics)
+    tags = " ".join(tags)
+    if topics:
+        if "topics" not in node:
+            node["topics"] = ()
+        node["topics"] += (topics,)
+    if tags:
+        if "tags" not in node:
+            node["tags"] = ()
+        node["tags"] += (tags,)
 
 
-def add_to_valid_tree1(tree, field, k, v, valid_values):
+def add_to_valid_tree1(tree, k, v, valid_values):
     assert isinstance(tree, dict)
-    assert isinstance(field, str)
     assert isinstance(k, str)
     assert v is None or isinstance(v, (list, tuple, str))
     assert isinstance(valid_values, set)
     if not v:
-        add_to_valid_tree(valid_sequences, field, k, None)
+        add_to_valid_tree(valid_sequences, k, None)
         return
     elif isinstance(v, str):
         v = [v]
     q = []
     for vv in v:
         assert isinstance(vv, str)
-        add_to_valid_tree(valid_sequences, field, k, vv)
-        vvs = vv.split(" ")
+        add_to_valid_tree(valid_sequences, k, vv)
+        vvs = vv.split()
         for x in vvs:
-            if not x or x.isspace():
-                continue
             q.append(x)
-            if x not in valid_values and x[0].islower():
-                print("WARNING: {} in mapping {!r} but not in valid_values"
-                      .format(x, k))
     return q
 
 
-def add_to_valid_tree_mapping(tree, field, mapping, valid_values, recurse):
+def add_to_valid_tree_mapping(tree, mapping, valid_values, recurse):
     assert isinstance(tree, dict)
-    assert isinstance(field, str)
     assert isinstance(mapping, dict)
     assert isinstance(valid_values, set)
     assert recurse in (True, False)
@@ -270,7 +281,7 @@ def add_to_valid_tree_mapping(tree, field, mapping, valid_values, recurse):
         assert isinstance(v, (list, str))
         if isinstance(v, str):
             v = [v]
-        q = add_to_valid_tree1(tree, field, k, v, valid_values)
+        q = add_to_valid_tree1(tree, k, v, valid_values)
         if recurse:
             visited = set()
             while q:
@@ -281,7 +292,7 @@ def add_to_valid_tree_mapping(tree, field, mapping, valid_values, recurse):
                 if v not in mapping:
                     continue
                 vv = mapping[v]
-                qq = add_to_valid_tree1(tree, field, k, vv, valid_values)
+                qq = add_to_valid_tree1(tree, k, vv, valid_values)
                 q.extend(qq)
 
 
@@ -289,23 +300,27 @@ def add_to_valid_tree_mapping(tree, field, mapping, valid_values, recurse):
 # mapped to something that becomes one or more valid tags)
 valid_sequences = {}
 for tag in valid_tags:
-    add_to_valid_tree(valid_sequences, "tags", tag, tag)
+    add_to_valid_tree(valid_sequences, tag, tag)
 for tag in uppercase_tags:
     hyphenated = re.sub(r"\s+", "-", tag)
-    add_to_valid_tree(valid_sequences, "tags", tag, hyphenated)
-    add_to_valid_tree(valid_sequences, "tags", hyphenated, hyphenated)
-add_to_valid_tree_mapping(valid_sequences, "tags", xlat_tags_map,
-                          valid_tags, False)
+    valid_tags.add(hyphenated)
+    add_to_valid_tree(valid_sequences, hyphenated, hyphenated)
+for tag in uppercase_tags:
+    hyphenated = re.sub(r"\s+", "-", tag)
+    add_to_valid_tree(valid_sequences, tag, hyphenated)
+add_to_valid_tree_mapping(valid_sequences, xlat_tags_map, valid_tags, False)
 # Add topics to the same table, with all generalized topics also added
 for topic in valid_topics:
-    add_to_valid_tree(valid_sequences, "topics", topic, topic)
+    assert " " not in topic
+    add_to_valid_tree(valid_sequences, topic, topic)
 # Let each original topic value stand alone.  These are not generally on
 # valid_topics.  We add the original topics with spaces replaced by hyphens.
 for topic in topic_generalize_map.keys():
-    add_to_valid_tree(valid_sequences, "topics", topic,
-                      re.sub(r" ", "-", topic))
+    hyphenated = re.sub(r" ", "-", topic)
+    valid_topics.add(hyphenated)
+    add_to_valid_tree(valid_sequences, topic, hyphenated)
 # Add canonicalized/generalized topic values
-add_to_valid_tree_mapping(valid_sequences, "topics", topic_generalize_map,
+add_to_valid_tree_mapping(valid_sequences, topic_generalize_map,
                           valid_topics, True)
 
 # Regexp used to find "words" from word heads and linguistic descriptions
