@@ -95,15 +95,16 @@ class WiktExtractTests(unittest.TestCase):
         v = clean_value(self.config, v)
         self.assertEqual(v, "This is a <test>.")
 
-    def test_cv_gt(self):
+    def test_cv_unicode_apostrophe(self):
         v = "This is a t\u2019est."
         v = clean_value(self.config, v)
-        self.assertEqual(v, "This is a t'est.")
+        self.assertEqual(v, "This is a t\u2019est.")
 
     def test_cv_sp(self):
         v = "  This\nis \na\n   test.\t"
         v = clean_value(self.config, v)
-        self.assertEqual(v, "This is a test.")
+        # The code has been changed to keep newlines
+        self.assertEqual(v, "This\nis\na\n test.")
 
     def test_cv_presp(self):
         v = " This : is a test . "

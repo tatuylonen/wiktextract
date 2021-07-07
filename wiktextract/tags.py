@@ -2272,6 +2272,7 @@ xlat_tags_map = {
     "first-person second-person third-person singular present indicative",
     "first- and third-person": "first-person third-person",
     "female equivalent": "feminine",
+    "male equivalent": "masculine",
     "direct/oblique/vocative": "direct oblique vocative",
     "definite/plural": "definite plural",
     "singular definite and plural": ["singular definite", "plural"],

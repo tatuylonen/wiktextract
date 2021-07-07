@@ -376,7 +376,6 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
                      ["error-unknown-tag", tag])]
         else:
             return [(from_i, "UNKNOWN", [tag])]
-        return i + 1
 
     # First split the tags at commas and semicolons.  Their significance is that
     # a multi-word sequence cannot continue across them.
@@ -423,15 +422,19 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
                     if w in valid_sequences:
                         add_new(valid_sequences[w], i, i, new_paths)
                 if w not in node and "$" not in node:
-                    # print("NEW", w)
-                    if w in valid_sequences:
-                        add_new(valid_sequences[w], i, last_i, new_paths)
+                    if (i == max_last_i or
+                        no_unknown_starts or
+                        lst[max_last_i] not in allowed_unknown_starts):
+                        # print("NEW", w)
+                        if w in valid_sequences:
+                            add_new(valid_sequences[w], i, last_i, new_paths)
             if not new_nodes:
                 # Some initial words cause the rest to be interpreted as unknown
                 if (i == max_last_i or
                     no_unknown_starts or
                     lst[max_last_i] not in allowed_unknown_starts):
-                    # print("RECOVER", w, max_last_i)
+                    # print("RECOVER w={} i={} max_last_i={} lst={}"
+                    #       .format(w, i, max_last_i, lst))
                     if w in valid_sequences:
                         add_new(valid_sequences[w], i, max_last_i, new_paths)
             nodes = new_nodes

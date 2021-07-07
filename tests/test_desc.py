@@ -106,7 +106,7 @@ class WiktExtractTests(unittest.TestCase):
         ret, topics = decode_tags("as a modifier in compound words")
         self.assertEqual(ret, [("in-compounds",)])
 
-    def test_decode12(self):
+    def test_decode13(self):
         ret, topics = decode_tags("with a cardinal numeral")
         self.assertEqual(ret, [("with a cardinal numeral",)])
 
