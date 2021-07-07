@@ -151,11 +151,6 @@ template seems to know a ton about these so maybe look at it.
 # is a template {{cmn-toneless-note}}.  Are there other templates that would
 # be useful and common enough to parse, e.g., into tags?
 
-# XXX parse {{topics|lang|...|...}} - these seem to generate
-# topic-related Categories.  However they can only be associated with
-# the language, not sense or part-of-speech (unless inside sense).
-# These are cleaner than trying to capture Category links.
-
 # XXX capture topic hierarchy from Category pages in Wiktionary
 #   - Module:category tree/topic cat/data/* (except /documentation)
 #   - beware, at least .../Places contains real code besides data
@@ -337,21 +332,12 @@ Implement caching in classify_desc
 
 Strange tag from head in P/Japanese "Initialism of ..."
 
-In form_description.py:add_to_valid_tree, remove field argument and determine
-field for each tag based on whether it is on valid_topics.  This is needed to
-be able to map to topics.
-
 Fix parsing linkages for letters in scripts, see P/English/Number
   - longer sequences of characters
   - P/Latvian "burti:" prefix handled incorrectly (should be separate linkage)
   - P/Vietnamese first word incorrectly split
   - P/Vietnamese multi-char names inside parentheses handled incorrectly
     (replace parentheses by comma? colon by comma?)
-
-
-Parse reconstructed entries, but mark with "reconstruction" tag.  Remove *
-from beginning of word head & linkage & form-of/alt-of, if word otherwise
-looks like a word
 
 have/English/Translations/"to possess"/Arabic: have "- you have" at end of tr;
 similarly "- I have"
@@ -375,5 +361,3 @@ Add more sanity checks:
   - number of non-disambiguated linkages
   - number of senses with tags
   - number of senses with topics
-
-XXX tests fail, check why

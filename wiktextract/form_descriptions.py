@@ -690,13 +690,28 @@ def parse_word_head(ctx, pos, text, data):
     # related words
     parens = list(m.group(1) for m in
                   re.finditer(r"\((([^()]|\([^()]*\))*)\)", text))
+    have_ruby = False
     for paren in parens:
         paren = paren.strip()
-        if (len(paren.split()) == 1 and classify_desc(base) == "other" and
+        if not paren:
+            continue
+
+        # Check if the parenthesized part is a singl-word katakana
+        # (likely resulting from <ruby>)
+        lst = paren.split()
+        if (len(lst) == 1 and
+            unicodedata.name(lst[0][0]).split()[0] == "KATAKANA"):
+            add_related(ctx, data, ["katakana"], [paren])
+            have_ruby = True
+            continue
+
+        # Check if the parenthesized part is a single-word romanization
+        if (len(lst) == 1 and
+            (have_ruby or classify_desc(base) == "other") and
             classify_desc(paren) == "romanization"):
             add_related(ctx, data, ["romanization"], [paren])
             continue
-        # print("HEAD PAREN:", paren)
+
         descriptors = map_with(xlat_descs_map, [paren])
         new_desc = []
         for desc in descriptors:
@@ -730,13 +745,14 @@ def parse_word_head(ctx, pos, text, data):
 
             alt_related = None
             alt_tagsets = None
-            for i in range(len(parts), 0, -1):
+            for i in range(len(parts), -1, -1):
                 related = parts[i:]
                 tagparts = parts[:i]
                 # print("  i={} related={} tagparts={}"
                 #       .format(i, related, tagparts))
                 if tagparts:
-                    tagsets, topics = decode_tags(" ".join(tagparts))
+                    tagsets, topics = decode_tags(" ".join(tagparts),
+                                                  no_unknown_starts=True)
                     if (topics or
                         any("error-unknown-tag" in x for x in tagsets)):
                         if alt_related is not None:
@@ -745,6 +761,7 @@ def parse_word_head(ctx, pos, text, data):
                         continue
                 else:
                     tagsets = [["error-unrecognized-form"]]
+                    ctx.debug("unrecognized head form: {}".format(desc))
                     break
                 if (i > 1 and
                     len(parts[i - 1]) >= 4 and
