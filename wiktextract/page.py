@@ -371,7 +371,8 @@ script_chars_re = re.compile(
     r"tetragrams|"
     r"digits)(;|$)|"
     r"(^|; )(Letters using |Letters of the |"
-    r"Variations of letter )")
+    r"Variations of letter )|"
+    r"^(Hiragana|Katakana)$")
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -2048,9 +2049,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
         text_splits = re.split(r":*[*#\n]+:*", text)
         ipa_splits = re.split(r":*[*#\n]+:*", ipa_text)
         if len(text_splits) != len(ipa_splits):
-            ctx.warning("text_splits length differs from ipa_splits: "
-                        "{!r} vs. {!r}"
-                        .format(text, ipa_text))
+            #ctx.warning("text_splits length differs from ipa_splits: "
+            #            "{!r} vs. {!r}"
+            #            .format(text, ipa_text))
             ipa_splits = text_splits
         prefix = None
         for text, ipa_text in zip(text_splits, ipa_splits):
@@ -2672,7 +2673,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             par = m.group(1)
                             item1 = item1[m.end():]
                         else:
-                            m = re.search(" \((([^()]|\([^()]*\))*)\)\.?$",
+                            m = re.search("\s\((([^()]|\([^()]*\))*)\)\.?$",
                                           item1)
                             if m:
                                 par = m.group(1)
@@ -2914,7 +2915,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # spaces consecutively.
                 v = sense or qualifier
                 if v and re.search(script_chars_re, v):
-                    if len(item1.split()) > 1 or len(item1) == 2:
+                    if (len(item1.split()) > 1 or len(item1) == 2 or
+                        (len(subitems) > 10 and v in ("Hiragana", "Katakana"))):
                         if v == qualifier:
                             if sense:
                                 sense += "; " + qualifier
