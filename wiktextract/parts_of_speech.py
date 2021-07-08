@@ -1,7 +1,7 @@
 # Definitions of extracted parts of speech codes and a mapping from
 # Wiktionary section titles to parts of speech.
 #
-# Copyright (c) 2018-2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2018-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 # This dictionary maps section titles in articles to parts-of-speech.  There
 # is a lot of variety and misspellings, and this tries to deal with those.
@@ -159,7 +159,8 @@ part_of_speech_map = {
     "idiom": {
         "pos": "phrase",
         "tags": ["idiomatic"],
-        "warning": "Part-of-speech Idiom is proscribed",
+        # This is too common for now to give a warning about
+        # "warning": "Part-of-speech Idiom is proscribed",
     },
     "infix": {
         "pos": "infix",

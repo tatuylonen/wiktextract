@@ -62,6 +62,7 @@ script_names = set([
     "Roman",
     "Sinhalese",
     "Thai",
+    "Uyghurjin",
 ])
 
 # Maps language names in translations to actual language names.

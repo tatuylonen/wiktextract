@@ -361,3 +361,15 @@ Add more sanity checks:
   - number of non-disambiguated linkages
   - number of senses with tags
   - number of senses with topics
+
+お茶/Japanese/Verb:
+  - "ocha suru" as romanization, "suru" should not be there
+  - "intransitive suru" gets into end of canonical form
+  - stem and past are not correctly parsed
+  - related terms are not correctly parsed - English goes into alt
+
+制御室
+  - multiple hiragana/katagana must be combined (separate parens for each char)
+
+滿
+  - crash in decode_tags

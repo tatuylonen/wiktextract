@@ -359,7 +359,7 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
     lists of tags and a list of topics."""
     assert isinstance(src, str)
 
-    # print("decode_tags: src={!r}".format(src))
+    print("decode_tags: src={!r}".format(src))
 
     pos_paths = [[[]]]
 
@@ -428,7 +428,8 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
                     max_last_i = i + 1
 
             new_paths = []
-            # print("ITER", i, w)
+            print("ITER i={} w={} max_last_i={} lst={}"
+                  .format(i, w, max_last_i, lst))
             for node, start_i, last_i in nodes:
                 if w in node:
                     # print("INC", w)
@@ -437,6 +438,8 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
                     if w in valid_sequences:
                         add_new(valid_sequences[w], i, i, new_paths)
                 if w not in node and "$" not in node:
+                    print("w not in node and $: i={} max_last_i={} lst={}"
+                          .format(i, max_last_i, lst))
                     if (i == max_last_i or
                         no_unknown_starts or
                         lst[max_last_i] not in allowed_unknown_starts):
@@ -445,6 +448,8 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
                             add_new(valid_sequences[w], i, last_i, new_paths)
             if not new_nodes:
                 # Some initial words cause the rest to be interpreted as unknown
+                print("not new nodes: i={} max_last_i={} lst={}"
+                      .format(i, max_last_i, lst))
                 if (i == max_last_i or
                     no_unknown_starts or
                     lst[max_last_i] not in allowed_unknown_starts):
@@ -696,20 +701,15 @@ def parse_word_head(ctx, pos, text, data):
         if not paren:
             continue
 
-        # Check if the parenthesized part is a singl-word katakana
-        # (likely resulting from <ruby>)
-        lst = paren.split()
-        if (len(lst) == 1 and
-            unicodedata.name(lst[0][0]).split()[0] == "KATAKANA"):
+        # If it starts with hiragana or katakana, treat as such form
+        un = unicodedata.name(paren[0]).split()[0]
+        if (un == "KATAKANA"):
             add_related(ctx, data, ["katakana"], [paren])
             have_ruby = True
             continue
-
-        # Check if the parenthesized part is a single-word romanization
-        if (len(lst) == 1 and
-            (have_ruby or classify_desc(base) == "other") and
-            classify_desc(paren) == "romanization"):
-            add_related(ctx, data, ["romanization"], [paren])
+        if (un == "HIRAGANA"):
+            add_related(ctx, data, ["hiragana"], [paren])
+            have_ruby = True
             continue
 
         descriptors = map_with(xlat_descs_map, [paren])
@@ -745,24 +745,19 @@ def parse_word_head(ctx, pos, text, data):
 
             alt_related = None
             alt_tagsets = None
-            for i in range(len(parts), -1, -1):
+            for i in range(len(parts), 0, -1):
                 related = parts[i:]
                 tagparts = parts[:i]
                 # print("  i={} related={} tagparts={}"
                 #       .format(i, related, tagparts))
-                if tagparts:
-                    tagsets, topics = decode_tags(" ".join(tagparts),
-                                                  no_unknown_starts=True)
-                    if (topics or
-                        any("error-unknown-tag" in x for x in tagsets)):
-                        if alt_related is not None:
-                            break
-                        prev_tags = None
-                        continue
-                else:
-                    tagsets = [["error-unrecognized-form"]]
-                    ctx.debug("unrecognized head form: {}".format(desc))
-                    break
+                tagsets, topics = decode_tags(" ".join(tagparts),
+                                              no_unknown_starts=True)
+                if (topics or
+                    any("error-unknown-tag" in x for x in tagsets)):
+                    if alt_related is not None:
+                        break
+                    prev_tags = None
+                    continue
                 if (i > 1 and
                     len(parts[i - 1]) >= 4 and
                     distw(titleparts, parts[i - 1]) <= 0.4):
@@ -772,6 +767,17 @@ def parse_word_head(ctx, pos, text, data):
                 alt_related = None
                 alt_tagsets = None
                 break
+            else:
+                if alt_related is None:
+                    # Check if the parenthesized part is likely a romanization
+                    if ((have_ruby or classify_desc(base) == "other") and
+                        classify_desc(paren) == "romanization"):
+                        add_related(ctx, data, ["romanization"], [paren])
+                        continue
+                    tagsets = [["error-unrecognized-form"]]
+                    ctx.debug("unrecognized head form: {}".format(desc))
+                    continue
+
             if alt_related is not None:
                 related = alt_related
                 tagsets = alt_tagsets
@@ -1331,6 +1337,8 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
                 num_latin += 1
             elif first == "GREEK":
                 num_greek += 1
+            elif first == "COMBINING":  # Combining diacritic
+                cl = "OK"
             elif (first in non_latin_scripts or
                   name.startswith("NEW TAI LUE ")):
                 cl = "NO"  # Not acceptable in romanizations
