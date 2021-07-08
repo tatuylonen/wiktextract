@@ -721,7 +721,10 @@ def parse_word_head(ctx, pos, text, data):
             continue
 
         # If it starts with hiragana or katakana, treat as such form
-        un = unicodedata.name(paren[0]).split()[0]
+        try:
+            un = unicodedata.name(paren[0]).split()[0]
+        except ValueError:
+            un = "INVALID"
         if (un == "KATAKANA"):
             add_related(ctx, data, ["katakana"], [paren])
             have_ruby = True
