@@ -55,44 +55,76 @@ known_firsts.update([
 # First words of unicodedata.name() that indicate scripts that cannot be
 # accepted in romanizations or english (i.e., should be considered "other"
 # in classify_desc()).
-non_latin_scripts = set([
+non_latin_scripts = [
     "ADLAM",
     "ARABIC",
+    "ARABIC-INDIC",
     "ARMENIAN",
+    "BALINESE",
     "BENGALI",
+    "BRAHMI",
     "CANADIAN",
+    "CHAKMA",
+    "CHAM",
     "CHEROKEE",
     "CJK",
     "COPTIC",
+    "COUNTING ROD",
     "CUNEIFORM",
     "CYRILLIC",
     "DOUBLE-STRUCK",
+    "EGYPTIAN",
     "ETHIOPIC",
+    "EXTENDED ARABIC-INDIC",
     "GEORGIAN",
     "GLAGOLITIC",
+    "GOTHIC",
+    "GREEK",
     "GUJARATI",
     "GURMUKHI",
     "HANGUL",
+    "HANIFI ROHINGYA",
     "HEBREW",
     "HIRAGANA",
+    "JAVANESE",
     "KANNADA",
     "KATAKANA",
+    "KAYAH LI",
     "KHMER",
+    "KHUDAWADI",
     "LAO",
+    "LEPCHA",
+    "LIMBU",
     "MALAYALAM",
+    "MEETEI",
     "MYANMAR",
-    "OL",  # OL CHIKI
+    "NEW TAI LUE",
+    "NKO",
+    "OL CHIKI",
+    "OLD PERSIAN",
+    "OLD SOUTH ARABIAN",
     "ORIYA",
+    "OSMANYA",
     "PHOENICIAN",
+    "SAURASHTRA",
+    "SHARADA",
     "SINHALA",
+    "SUNDANESE",
     "SYLOTI",
+    "TAI THAM",
+    "TAKRI",
+    "TAMIL",
+    "TELUGU",
     "THAANA",
     "THAI",
     "TIBETAN",
     "TIFINAGH",
+    "TIRHUTA",
     "UGARITIC",
+    "WARANG CITI",
     "YI",
-])
+]
+non_latin_scripts_re = re.compile(r"(" + "|".join(non_latin_scripts) + ")\b")
 
 # Regexp for finding nested translations from translation items (these are
 # used in, e.g., year/English/Translations/Arabic).  This is actually used
@@ -1115,6 +1147,7 @@ alt_of_form_of_clean_re = re.compile(
         r", the ",
         r", obsolete ",
         r", possessed",  # 'd/English
+        r", imitating",  # 1/English
         ]) +
     r").*$")
 
@@ -1258,6 +1291,15 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
     if not desc:
         return "other"
 
+    # If it can be fully decoded as tags without errors, treat as tags
+    tagsets, topics = decode_tags(desc, no_unknown_starts=no_unknown_starts)
+    for tagset in tagsets:
+        assert isinstance(tagset, (list, tuple, set))
+        if ("error-unknown-tag" not in tagset and
+            (topics or allow_unknown_tags or
+             any(x.find(" ") < 0 for x in tagset))):
+            return "tags"
+
     # Check if it looks like the taxonomic name of a species
     if desc in known_species:
         return "taxonomic"
@@ -1279,15 +1321,6 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
             # English
             if have_non_english:
                 return "taxonomic"
-
-    # If it can be fully decoded as tags without errors, treat as tags
-    tagsets, topics = decode_tags(desc, no_unknown_starts=no_unknown_starts)
-    for tagset in tagsets:
-        assert isinstance(tagset, (list, tuple, set))
-        if ("error-unknown-tag" not in tagset and
-            (topics or allow_unknown_tags or
-             any(x.find(" ") < 0 for x in tagset))):
-            return "tags"
 
     # If all words are in our English dictionary, interpret as English
     if desc in english_words and desc[0].isalpha():
@@ -1329,10 +1362,6 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
     # not exactly romanizations).
     if desc.startswith("/") and desc.endswith("/"):
         return "romanization"
-    # Kludge: treat sequence of all ten digits as a romanization
-    # (Frequently used in lists of digits for various scripts)
-    if desc == "0 1 2 3 4 5 6 7 8 9":
-        return "romanization"
     # If all characters are in classes that could occur in romanizations,
     # treat as romanization
     classes = list(unicodedata.category(x)
@@ -1346,6 +1375,12 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
                   ".",  # e.g., "..." in translations
                   ";",
                   ":",
+                  "!",
+                  "‘",
+                  "’",
+                  '"',
+                  '“',
+                  '”',
                   "…",  # alternative to "..."
                   "ʹ"):  # ʹ e.g. in understand/English/verb Russian transl
             classes1.append("OK")
@@ -1362,9 +1397,7 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
                 num_greek += 1
             elif first == "COMBINING":  # Combining diacritic
                 cl = "OK"
-            elif (first in non_latin_scripts or
-                  name.startswith("NEW TAI LUE ") or
-                  name.startswith("OLD SOUTH ARABIAN ")):
+            elif re.match(non_latin_scripts_re, name):
                 cl = "NO"  # Not acceptable in romanizations
         except ValueError:
             cl = "NO"  # Not acceptable in romanizations

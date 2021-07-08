@@ -191,7 +191,8 @@ uppercase_tags = set([
     "Antilles",
     "Appalachia",
     "Appalachian",
-    "Arabic",
+    "Arabic",  # Also script
+    "Arabic-Indic",  # Also script
     "Aragon",
     "Aragón",
     "Aran",
@@ -200,11 +201,13 @@ uppercase_tags = set([
     "Arbëresh",
     "Ardennes",
     "Argentina",
+    "Armenian",  # Also script
     "Aruba",
     "Asalem",
     "Asalemi",
     "Asante",
     "Ashkenazi Hebrew",
+    "Assamese",  # Also script (India)
     "Asturias",
     "Atlantic Canada",
     "Atlapexco",
@@ -228,6 +231,7 @@ uppercase_tags = set([
     "Baku",
     "Balearic",
     "Balkar",
+    "Balinese",  # Also script
     "Baltic-Finnic",
     "Bamu",
     "Banatiski Gurbet",
@@ -243,7 +247,7 @@ uppercase_tags = set([
     "Belalau",
     "Belgium",
     "Belize",
-    "Bengali",
+    "Bengali",  # Also script (India)
     "Bentheim",
     "Berlin",
     "Berlin-Brandenburg",
@@ -278,6 +282,7 @@ uppercase_tags = set([
     "Boston",
     "Brabant",
     "Brabantian",
+    "Brahmi",  # Script (India, historic)
     "Brazil",
     "Brazilian",
     "Bressan",
@@ -302,6 +307,7 @@ uppercase_tags = set([
     "Bzyb",
     "Béarn",
     "cabo Verde",
+    "CJK tally marks",
     "Cabrales",
     "Caipira",
     "Caithness",
@@ -338,6 +344,8 @@ uppercase_tags = set([
     "Central and Southern Italy",
     "Central",
     "Chakavian",
+    "Chakma",  # Script (India/Burma?)
+    "Cham",  # Script (Austronesian - Vietnam/Cambodia)
     "Changuena",
     "Chanthaburi",
     "Chazal",  # Jewish historical sages
@@ -347,7 +355,7 @@ uppercase_tags = set([
     "Child US",
     "Chile",
     "China",
-    "Chinese",
+    "Chinese",  # Also script
     "Chinese Character classification",
     "Chongqing",
     "Christian",
@@ -384,6 +392,7 @@ uppercase_tags = set([
     "Copenhagen",
     "Cork",
     "Cornwall",
+    "Counting rod",
     "Costa Rica",
     "Cotentin",
     "Crimea",
@@ -451,7 +460,7 @@ uppercase_tags = set([
     "Ecuador",
     "Ecuadorian Kichwa",
     "Egypt",
-    "Egyptian",
+    "Egyptian",  # Also script (hieroglyph)
     "Egyptian Arabic",  # Variant of Arabic language
     "Egyptiot",
     "Ekagongo",
@@ -468,6 +477,7 @@ uppercase_tags = set([
     "Esham",
     "Esperantized",
     "Estuary English",
+    "Ethiopic",  # Script
     "Europe",
     "European",
     "European Union",
@@ -525,11 +535,12 @@ uppercase_tags = set([
     "Goeree-Overflakkee",
     "Goth",
     "Gothenburg",
+    "Gothic",  # Script
     "Gotland",
     "Goud Saraswat",
     "Grecian",
     "Greco-Bohairic",
-    "Greek",
+    "Greek",  # Also script
     "Greek Catholic",
     "Gressoney",
     "Grischun",
@@ -543,9 +554,10 @@ uppercase_tags = set([
     "Guichicovi",
     "Guinea-Bissau",
     "Guinée Conakry",
+    "Gujarati",  # Script (Indo-Arabic)
     "Gulf Arabic",  # Variant of Arabic Language
     "Gurbet",
-    "Gurmukhi",
+    "Gurmukhi",  # Script (Indo-Arabic)
     "Guyana",
     "Gwichya",
     "Gyeongsang",
@@ -558,6 +570,7 @@ uppercase_tags = set([
     "Hallig",
     "Hamburg",
     "Hangaza",
+    "Hanifi Rohingya",  # Script (Perso-Arabic)
     "Hanoi",
     "Hanyuan",
     "Harak",
@@ -637,6 +650,7 @@ uppercase_tags = set([
     "Jamaican creole",
     "Japan",
     "Japurá",
+    "Javanese",  # Also script (Indonesia)
     "Jazan",
     "Jáva",
     "Jawi",
@@ -677,6 +691,7 @@ uppercase_tags = set([
     "Kamrupi",
     "Kanchanaburi",
     "Kandahar",
+    "Kannada",  # Script (at least for numerals, Hindu-Arabic?)
     "Kansai",
     "Kanto",
     "Karabakh",
@@ -686,6 +701,7 @@ uppercase_tags = set([
     "Kasuweri",
     "Katharevousa",
     "Kautokeino",
+    "Kayah Li",  # Script (Sino-Tibetan)
     "Kayu Agung",
     "Kayu Agung Asli",
     "Kayu Agung Pendatang",
@@ -703,6 +719,7 @@ uppercase_tags = set([
     "Khmer",  # Script
     "Khorasan",
     "Khoshar-Khota",
+    "Khudawadi",  # Script (Sindhi language, India)
     "Khun villages",
     "Kiambu",
     "Kidero",
@@ -730,7 +747,9 @@ uppercase_tags = set([
     "LÚ",
     "La Up village",
     "Lamphun Province",
+    "Lanna",  # Script (Thailand)
     "Languedoc",
+    "Lao",  # Script (Lao langage in Laos)
     "Late Bohairic",
     "Late Egyptian",
     "Late Latin",
@@ -747,9 +766,10 @@ uppercase_tags = set([
     "Laval",
     "Lavarone",
     "Lebanese Arabic",  # Variant of Arabic language
-    "Leet",
+    "Leet",  # Leetspeak, an internet "slang"
     "Legazpi",
     "Lengadocian",
+    "Lepcha",  # Script (Himalayas?)
     "Lesotho",
     "Levantine Arabic",  # Variant of Arabic language
     "Lewis",
@@ -757,6 +777,7 @@ uppercase_tags = set([
     "Lhasa",
     "Liechtenstein",
     "Limba Sarda Comuna",
+    "Limbu",  # Script (Limbu language in Central Himalayas)
     "Limburg",
     "Limburgish",
     "Limousin",
@@ -802,6 +823,7 @@ uppercase_tags = set([
     "Mainland China",
     "Malacatepec",
     "Malak",
+    "Malayalam",
     "Malaysia",
     "Malaysian English",
     "Mallorca",
@@ -833,6 +855,7 @@ uppercase_tags = set([
     "Medieval Greek",
     "Medieval Latin",
     "Medio-Late Egyptian",
+    "Meitei",  # Script (used with Meitei language in India)
     "Melinting",
     "Menggala/Tulang Bawang",
     "Mercian",
@@ -900,8 +923,8 @@ uppercase_tags = set([
     "Muslim",
     "Münsterland",
     "Münsterländisch",
-    "Myanmar",
-    "Myanmar",
+    "Myanmar",  # Also script
+    "N'Ko",  # Script
     "Nahua",
     "Nahuatl",
     "Namibia",
@@ -994,21 +1017,25 @@ uppercase_tags = set([
     "Nyungkal",
     "Nürnbergisch",
     "Occitania",
+    "Ol Chiki",  # Script (Austroasiatic language in India)
     "Old Bohairic",
     "Old Chamorro",
     "Old Egyptian",
     "Old English",
-    "Old Northern French",
     "Old Lithuanian",
+    "Old Northern French",
+    "Old Persian",  # Script
     "Old Tagalog",
     "Oliti",
     "Olles",
     "Ontario",
     "Ooldea",
     "Orcadian",
+    "Oriya",  # Script (Hindu-Arabic?)
     "Orkney",
     "Ormulum",
     "Oslo",
+    "Osmanya",  # Script (Somalia)
     "Ottomans",
     "Pa Pae village",
     "Paderbornish",
@@ -1032,9 +1059,11 @@ uppercase_tags = set([
     "Peking",
     "Pembrokeshire",
     "Penang Hokkien",
+    "Peng'im",
     "Penghu Hokkien",
     "Pennsylvania",
     "Periphrastic conjugations",
+    "Persian",  # Also script
     "Persian Gulf",
     "Peru",
     "Peshawar",
@@ -1144,6 +1173,7 @@ uppercase_tags = set([
     "Sark",
     "Sauerland",
     "Sauerländisch",
+    "Saurashtra",  # Script (Surashtra language in Tamil Nadu)
     "Sauris",
     "Savoie",
     "Savoyard",
@@ -1165,6 +1195,7 @@ uppercase_tags = set([
     "Shahmukhi",
     "Shanghai",
     "Shapsug",
+    "Sharada",  # Script (India for Sanskrit and Kashmiri; historic)
     "Shavian",
     "Sheffield",
     "Sheng",
@@ -1191,7 +1222,7 @@ uppercase_tags = set([
     "Singapore English",
     "Singapore",
     "Singlish",
-    "Sinhalese",  # Script
+    "Sinhalese",  # Script (Sri Lanka)
     "Sino-Korean",
     "Sino-Japanese",
     "Sisiame",
@@ -1258,6 +1289,7 @@ uppercase_tags = set([
     "Suizhou",
     "Sukai",
     "Sukau",
+    "Sundanese",
     "Sungkai",
     "Sunni",
     "Surgut",
@@ -1279,6 +1311,7 @@ uppercase_tags = set([
     "TV",
     "Taberga",
     "Tabriz",
+    "Tai Tham",  # Script (Northern Thai?)
     "Tai Xuan Jing",
     "Taichung Hokkien",
     "Tainan",
@@ -1289,7 +1322,10 @@ uppercase_tags = set([
     "Taiwanese Mandarin",
     "Taixuanjing tetragram",
     "Tajik",
+    "Takri",  # Script (mostly historic, used in Himachal Pradesh)
     "Talang Padang",
+    "Tally-marks",
+    "Tamil",  # Also script
     "Tankarana",
     "Tantoyuca",
     "Tao",
@@ -1299,6 +1335,7 @@ uppercase_tags = set([
     "Tavastia",
     "Tehran",
     "Tehrani",
+    "Telugu",  # Also script (India)
     "Telugu-Kui",
     "Temapache",
     "Tendai or Kegon Buddhism",
@@ -1313,14 +1350,17 @@ uppercase_tags = set([
     "Tgdaya",
     "Thai",  # Script
     "Thailand",
+    "Tham",  # Buddhist religious script
     "Thanh Chương",
     "The Hague",
     "Thung Luang village",
     "Thung Luang",
     "Thuringian-Upper Saxon",
+    "Tibetan",  # Script
     "Tiberian Hebrew",
     "Timau",
     "Timor-Leste",
+    "Tirhuta",  # Script (historical: Maithili, Sanskrit)
     "Tlaxcala",
     "Tlyadal",
     "Toaripi",
@@ -1397,6 +1437,7 @@ uppercase_tags = set([
     "Wales",
     "Wallonia",
     "Wamwan",
+    "Warang Citi",  # Script (Ho language, East India)
     "Wardak",
     "Waterford",
     "Way Lima",
@@ -1612,6 +1653,7 @@ xlat_tags_map = {
     "slangy": "slang",
     "Archaic": "archaic",
     "nonstandard form": "nonstandard",
+    "nonstandard stylistic suffix": "nonstandard dialectal suffix",
     "honorific form": "honorific",
     "Dialectal": "dialectal",
     "dialectal form": "dialectal",
@@ -2559,7 +2601,8 @@ xlat_tags_map = {
     "American spelling": "US",
     "Canadian spelling": "Canada",
     "name of the": "alt-of name",  # E.g. .. letter | Latin-script letter
-    "alternative name of": "alt-of alternative",
+    "alternative name of": "alt-of alternative name",
+    "alternative name for": "alt-of alternative name",
     "nonstandard spelling of": "alt-of nonstandard",
     "US standard spelling of": "alt-of US standard",
     "US spelling of": "alt-of US",
@@ -2650,6 +2693,8 @@ xlat_tags_map = {
     "Britain and Canada spelling of": "alt-of Britain Canada",
     "Baybayin spelling of": "alt-of Baybayin",
     "Arabic spelling of": "alt-of Arabic",
+    "Arabic (Eastern)": "Arabic-Indic",
+    "Arabic (Western)": "Arabic",
     "Formerly standard spelling of": "alt-of archaic",
     "informal spelling of": "alt-of informal",
     "Yañalif spelling of": "alt-of Yañalif",
@@ -2875,6 +2920,8 @@ xlat_tags_map = {
     "ditransitive for the second object": "ditransitive",
     "double transitive": "ditransitive",
     "number": "numeral",
+    "numerals": "numeral",
+    "Tally marks": "Tally-marks numeral",
     "+ 3rd-pers.": "with-third-person",
     "Historical": "historical",
     "antiquity": "historical",
@@ -3437,6 +3484,7 @@ valid_tags = set([
     "second-declension",
     "second-infinitive",
     "second-person",
+    "secular",  # Contrast with Ecclesiastical, Tham, etc
     "semelfactive",
     "sequence",
     "sequential",

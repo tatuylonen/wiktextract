@@ -114,6 +114,10 @@ class WiktExtractTests(unittest.TestCase):
         ret, topics = decode_tags("usually in the negative")
         self.assertEqual(ret, [("usually", "with-negation")])
 
+    def test_decode15(self):
+        ret, topics = decode_tags("Lepcha numerals")
+        self.assertEqual(ret, [("Lepcha", "numeral")])
+
     def test_head1(self):
         data = {}
         parse_word_head(self.ctx, "noun", "", data)

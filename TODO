@@ -280,12 +280,6 @@ Consider parsing Alternative forms subsection - see 1/Translingual
 In translations, should process {{trans-see|...}} (cf. "abound with",
 the only translations are with {{trans-see|...}})
 
-Handle ruby in translations
-If a Asian word has parenthesized sections, should they be treated as
-different versions (in Japanese they look like pronunciations).  cf. Ruby.
-  - partially implemented (for linkages), need also for translations and
-    perhaps also for headword
-
 ख/Translingual/Letter: DEBUG: unhandled parenthesized prefix: (Devanagari script letters) अ,‎ आ,‎ इ,‎ ई,‎ उ,‎ ऊ,‎ ऋ,‎ ए,‎ ऐ,‎ ओ,‎ औ,‎ अं,‎ अः,‎ अँ,‎ क,‎ ख,‎ ग,‎ घ,‎ ङ,‎ च,‎ छ,‎ ज,‎ झ,‎ ञ,‎ ट,‎ ठ,‎ ड,‎ ढ,‎ ण,‎ त,‎ थ,‎ द,‎ ध,‎ न,‎ प,‎ फ,‎ ब,‎ भ,‎ म,‎ य,‎ र,‎ ल,‎ व,‎ श,‎ ष,‎ स,‎ ह,‎ त्र,‎ ज्ञ,‎ क्ष,‎ क़,‎ ख़,‎ ग़,‎ ज़,‎ झ़,‎ ड़,‎ ढ़,‎ ष़ <nowiki>[</nowiki><nowiki>]</nowiki> at ['ख']
 - is nowiki broken in templates?  Perhaps core.py:_template_to_body should
   call preprocess_text for the template body?
@@ -372,3 +366,6 @@ Add more sanity checks:
   - multiple hiragana/katagana must be combined (separate parens for each char)
 
 滿/Vietnamese: head not handled correctly, fix
+
+Should generate multiple alternatives in parse_alt_or_inflection_of() when
+alt_of contains / (any variant).  See 偽滿洲國/Chinese.

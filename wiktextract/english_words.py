@@ -17,8 +17,20 @@ nltk.download("brown", quiet=True)
 # expressions separated by spaces can also be added but must match the whole
 # text (they can be used when we don't want to add the components).
 additional_words = set([
+    "'",
+    "ʹ",
+    ".",
+    ";",
+    ":",
+    "!",
+    "‘",
+    "’",
+    '"',
+    '“',
+    '”',
     '"',
     ',',
+    "…",
     '...',
     'AIDS',
     'ATP',
@@ -1068,6 +1080,7 @@ additional_words = set([
     'miscarriage',
     'miserly',
     'mislead',
+    'misspelling',
     'misspelt',
     'mite',
     'mitral stenosis',
@@ -1129,6 +1142,7 @@ additional_words = set([
     'nonchalance',
     'nonessential',
     'nonfatal',
+    'nonstandard',
     'nontrivial',
     'nonzero',
     'noodles',
@@ -1797,7 +1811,6 @@ additional_words = set([
     'zealotry',
     'zoospores',
     'zygosperm',
-    '…',
 ])
 
 # List of words that will be removed from the Brown set

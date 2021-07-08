@@ -59,7 +59,7 @@ def split_at_comma_semi(text, extra=()):
     bracket_cnt = 0
     ofs = 0
     parts = []
-    split_re = r"[][(),;，]"  # Note: special unicode comma
+    split_re = r", |; |[][()，]"  # Note: special unicode comma
     if extra:
         split_re = "({})|{}".format(split_re,
                                     "|".join(re.escape(x) for x in extra))
