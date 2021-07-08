@@ -3316,7 +3316,7 @@ valid_tags = set([
     "negative",
     "neologism",
     "neuter",
-    "next",
+    "next",  # Next value in sequence (number, letter, etc.)
     "ngoko",
     "nif'al-construction",
     "no-comparative",
@@ -3400,7 +3400,7 @@ valid_tags = set([
     "present",
     "present-rare",  # Present tense is rare
     "preterite",
-    "previous",
+    "previous",  # Previous value in sequence (number, letter, etc.)
     "proclitic",
     "progressive",
     "prolative",

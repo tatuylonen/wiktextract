@@ -814,7 +814,6 @@ def parse_word_head(ctx, pos, text, data):
                         else:
                             prev_tags = None
                     else:
-                        print("ADDING TAGS:", tags)
                         data_extend(ctx, data, "tags", tags)
 
 
