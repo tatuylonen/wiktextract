@@ -275,8 +275,6 @@ Recognize and parse {{zh-dial|...}} in linkage, e.g., 鼎/Chinese
 {{syn|...}} not properly handled in nested glosses, see frons/Latin
 sense "the forehead, brow, front", search for "vultus"
 
-Consider parsing Alternative forms subsection - see 1/Translingual
-
 In translations, should process {{trans-see|...}} (cf. "abound with",
 the only translations are with {{trans-see|...}})
 
