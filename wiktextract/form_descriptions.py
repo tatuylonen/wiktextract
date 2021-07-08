@@ -56,20 +56,42 @@ known_firsts.update([
 # accepted in romanizations or english (i.e., should be considered "other"
 # in classify_desc()).
 non_latin_scripts = set([
+    "ADLAM",
+    "ARABIC",
     "ARMENIAN",
     "BENGALI",
+    "CANADIAN",
     "CHEROKEE",
     "CJK",
     "COPTIC",
+    "CUNEIFORM",
     "CYRILLIC",
     "DOUBLE-STRUCK",
+    "ETHIOPIC",
     "GEORGIAN",
     "GLAGOLITIC",
     "GUJARATI",
     "GURMUKHI",
+    "HANGUL",
+    "HEBREW",
+    "HIRAGANA",
+    "KANNADA",
+    "KATAKANA",
     "KHMER",
     "LAO",
+    "MALAYALAM",
+    "MYANMAR",
+    "OL",  # OL CHIKI
+    "ORIYA",
+    "PHOENICIAN",
+    "SINHALA",
+    "SYLOTI",
+    "THAANA",
     "THAI",
+    "TIBETAN",
+    "TIFINAGH",
+    "UGARITIC",
+    "YI",
 ])
 
 # Regexp for finding nested translations from translation items (these are
@@ -359,7 +381,7 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
     lists of tags and a list of topics."""
     assert isinstance(src, str)
 
-    print("decode_tags: src={!r}".format(src))
+    # print("decode_tags: src={!r}".format(src))
 
     pos_paths = [[[]]]
 
@@ -428,8 +450,8 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
                     max_last_i = i + 1
 
             new_paths = []
-            print("ITER i={} w={} max_last_i={} lst={}"
-                  .format(i, w, max_last_i, lst))
+            # print("ITER i={} w={} max_last_i={} lst={}"
+            #       .format(i, w, max_last_i, lst))
             for node, start_i, last_i in nodes:
                 if w in node:
                     # print("INC", w)
@@ -438,18 +460,18 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
                     if w in valid_sequences:
                         add_new(valid_sequences[w], i, i, new_paths)
                 if w not in node and "$" not in node:
-                    print("w not in node and $: i={} max_last_i={} lst={}"
-                          .format(i, max_last_i, lst))
-                    if (i == max_last_i or
+                    # print("w not in node and $: i={} last_i={} lst={}"
+                    #       .format(i, last_i, lst))
+                    if (i == last_i or
                         no_unknown_starts or
-                        lst[max_last_i] not in allowed_unknown_starts):
+                        lst[last_i] not in allowed_unknown_starts):
                         # print("NEW", w)
                         if w in valid_sequences:
                             add_new(valid_sequences[w], i, last_i, new_paths)
             if not new_nodes:
                 # Some initial words cause the rest to be interpreted as unknown
-                print("not new nodes: i={} max_last_i={} lst={}"
-                      .format(i, max_last_i, lst))
+                # print("not new nodes: i={} last_i={} lst={}"
+                #       .format(i, max_last_i, lst))
                 if (i == max_last_i or
                     no_unknown_starts or
                     lst[max_last_i] not in allowed_unknown_starts):
@@ -462,32 +484,29 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
 
         # print("END max_last_i={} len(lst)={} len(pos_paths)={}"
         #       .format(max_last_i, len(lst), len(pos_paths)))
-        # Check for a final unknown tag
-        paths = pos_paths[max_last_i] or [[]]
-        u = check_unknown(len(lst), max_last_i, len(lst))
-        if u:
-            # print("end max_last_i={}".format(max_last_i))
-            last_paths = pos_paths[-1]
-            for path in list(paths):  # Copy in case it is the last pos
-                pos_paths[-1].append(u + path)
 
-        # final_paths = []
-        # for node, start_i, last_i in nodes:
-        #     if "$" in node:
-        #         print("$ END")
-        #         final_paths.append([(last_i,
-        #                              node["$"].get("tags"),
-        #                              node["$"].get("topics"))] +
-        #                            pos_paths[start_i])
-        #         # check_unknown(start_i, last_i, len(lst), final_paths)
-        # if not final_paths:
-        #     # print("NOT VALID END")
-        #     if nodes:
-        #         for node, start_i, last_i in nodes:
-        #             check_unknown(len(lst), last_i, len(lst), final_paths)
-        #     else:
-        #         check_unknown(len(lst), max_last_i, len(lst), final_paths)
-        # pos_paths[-1].extend(final_paths)
+        if nodes:
+            for node, start_i, last_i in nodes:
+                if "$" in node:
+                    # print("$ END")
+                    for path in pos_paths[start_i]:
+                        pos_paths[-1].append([(last_i,
+                                               node["$"].get("tags"),
+                                               node["$"].get("topics"))] +
+                                             path)
+                else:
+                    u = check_unknown(start_i, last_i, len(lst))
+                    for path in pos_paths[start_i]:
+                        pos_paths[-1].append(u + path)
+        else:
+            # Check for a final unknown tag
+            paths = pos_paths[max_last_i] or [[]]
+            u = check_unknown(len(lst), max_last_i, len(lst))
+            if u:
+                # print("end max_last_i={}".format(max_last_i))
+                last_paths = pos_paths[-1]
+                for path in list(paths):  # Copy in case it is the last pos
+                    pos_paths[-1].append(u + path)
 
     # import json
     # print("POS_PATHS:", json.dumps(pos_paths, indent=2, sort_keys=True))
@@ -745,6 +764,7 @@ def parse_word_head(ctx, pos, text, data):
 
             alt_related = None
             alt_tagsets = None
+            tagsets = None
             for i in range(len(parts), 0, -1):
                 related = parts[i:]
                 tagparts = parts[:i]
@@ -782,16 +802,17 @@ def parse_word_head(ctx, pos, text, data):
                 related = alt_related
                 tagsets = alt_tagsets
 
-            # print("related={} tagsets={}".format(related, tagsets))
-            for tags in tagsets:
-                if related:
-                    add_related(ctx, data, tags, related)
-                    if len(tagsets) == 1:
-                        prev_tags = tags
+            if tagsets:
+                for tags in tagsets:
+                    if related:
+                        add_related(ctx, data, tags, related)
+                        if len(tagsets) == 1:
+                            prev_tags = tags
+                        else:
+                            prev_tags = None
                     else:
-                        prev_tags = None
-                else:
-                    data_extend(ctx, data, "tags", tags)
+                        print("ADDING TAGS:", tags)
+                        data_extend(ctx, data, "tags", tags)
 
 
 def parse_sense_qualifier(ctx, text, data):
@@ -904,7 +925,7 @@ def parse_translation_desc(ctx, lang, text, tr):
             par = par[2:]
         if par.endswith(","):
             par = par[:-1]
-        if re.match(r'^["“]([^"]*)"$', par):
+        if re.match(r'^[“"]([^“”"]*)[“”"]$', par):
             par = par[1:-1]
         par = par.strip()
 
@@ -1126,16 +1147,16 @@ def parse_alt_or_inflection_of1(ctx, gloss):
     # First try all formats ending with "of" (or other known last words that
     # can end a form description)
     for m in reversed(list(m for m in
-                           re.finditer(r" (of|for|by|as) ", gloss))):
+                           re.finditer(r" (of|for|by|as|letter) ", gloss))):
         desc = gloss[:m.end()]
         base = gloss[m.end():]
         tagsets, topics = decode_tags(desc, no_unknown_starts=True)
         if not topics and any("error-unknown-tag" not in t for t in tagsets):
             # Successfully parsed, including "of" etc.
             tags = []
-            for t in tagsets:
-                if "error-unknown-tag" not in t:
-                    tags.extend(t)
+            for ts in tagsets:
+                if "error-unknown-tag" not in ts:
+                    tags.extend(ts)
             if ("alt-of" in tags or
                 "form-of" in tags or
                 "compound-of" in tags):
@@ -1340,7 +1361,8 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
             elif first == "COMBINING":  # Combining diacritic
                 cl = "OK"
             elif (first in non_latin_scripts or
-                  name.startswith("NEW TAI LUE ")):
+                  name.startswith("NEW TAI LUE ") or
+                  name.startswith("OLD SOUTH ARABIAN ")):
                 cl = "NO"  # Not acceptable in romanizations
         except ValueError:
             cl = "NO"  # Not acceptable in romanizations

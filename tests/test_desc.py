@@ -110,6 +110,10 @@ class WiktExtractTests(unittest.TestCase):
         ret, topics = decode_tags("with a cardinal numeral")
         self.assertEqual(ret, [("with a cardinal numeral",)])
 
+    def test_decode14(self):
+        ret, topics = decode_tags("usually in the negative")
+        self.assertEqual(ret, [("usually", "with-negation")])
+
     def test_head1(self):
         data = {}
         parse_word_head(self.ctx, "noun", "", data)

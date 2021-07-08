@@ -1403,11 +1403,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # dicts between structures (even nested ones).
             v = copy.deepcopy(v)
             if k not in data:
-                # Copy the list to ensure that we don't share lists between
-                # structures.
-                data[k] = v;
-            elif isinstance(data[k], (list, tuple)):
-                data[k].extend(v)
+                # The list was copied above, so this will not create shared ref
+                data[k] = v
+                continue
+            if data[k] == v:
+                continue
+            if (isinstance(data[k], (list, tuple)) or
+                  isinstance(v, (list, tuple))):
+                data[k] = list(data[k]) + list(v)
             elif data[k] != v:
                 ctx.warning("conflicting values for {}: {} vs {}"
                             .format(k, data[k], v))
@@ -1435,8 +1438,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
         nonlocal pos_datas
         push_sense()
         if ctx.subsection:
-            if not pos_datas:
-                pos_datas = [{"tags": ["no-senses"]}]
             data = {"senses": pos_datas}
             merge_base(data, pos_data)
             etym_datas.append(data)
@@ -1727,15 +1728,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if name == "Han simplified forms":
             # XXX extract?
             return ""
-        if name == "ja-kanji forms":
-            # XXX extract?
-            return ""
-        if name == "vi-readings":
-            # XXX extract?
-            return ""
-        if name == "ja-kanji":
-            # XXX extract?
-            return ""
+        # if name == "ja-kanji forms":
+        #     # XXX extract?
+        #     return ""
+        # if name == "vi-readings":
+        #     # XXX extract?
+        #     return ""
+        # if name == "ja-kanji":
+        #     # XXX extract?
+        #     return ""
         if name == "picdic" or name == "picdicimg" or name == "picdiclabel":
             # XXX extract?
             return ""
@@ -1813,6 +1814,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         #       .format(ctx.section, ctx.subsection, pre))
         text = clean_node(config, ctx, pos_data, pre,
                           template_fn=head_template_fn)
+        text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
         parse_word_head(ctx, pos, text, pos_data)
         if "tags" in pos_data:
             common_tags = pos_data["tags"]
@@ -1848,8 +1850,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 outer = [x for x in contents
                          if not isinstance(x, WikiNode) or
                          x.kind != NodeKind.LIST]
-                common_data = {}
-                common_data["tags"] = list(common_tags)
+                common_data = {"tags": list(common_tags)}
 
                 # If we have one sublist with one element, treat it specially as
                 # it may be a Wiktionary error; raise that nested element
@@ -1927,6 +1928,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     assert len(gls) == 1
                     common_data["glosses"] = []
                     parse_sense(pos, gls, common_data)
+
+        # If there are no senses extracted, add a dummy sense.  We want to
+        # keep tags extracted from the head for the dummy sense.
+        push_sense()  # Make sure unfinished data pushed, and start clean sense
+        if not pos_datas:
+            data_extend(ctx, sense_data, "tags", common_tags)
+            data_append(ctx, sense_data, "tags", "no-senses")
+            push_sense()
 
     def parse_pronunciation(node):
         """Parses the pronunciation section from a language section on a
@@ -2279,6 +2288,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         have_linkages = False
         have_panel_template = False
         toplevel_text = []
+        next_navframe_sense = None  # Used for "(sense):" before NavFrame
 
         def parse_linkage_item(contents, field, sense):
             assert isinstance(contents, (list, tuple))
@@ -2396,6 +2406,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
             item = re.sub(r"\(\)", "", item)
             item = re.sub(r"\s\s+", " ", item)
             item = item.strip()
+
+            # Check if this item is a stand-alone sense (or tag) specifier
+            # for following items (e.g., commonly in a table, see 滿)
+            m = re.match(r"\(([-a-zA-Z0-9 ]+)\):$", item)
+            if m:
+                return m.group(1)
 
             # If the item is a reference to the thesaurus, skip it.  We should
             # be injecting data from the thesaurus in each word referenced
@@ -2563,6 +2579,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                   "Arabic digits"):
                     base_qualifier = None
                     item = ", ".join(item.split())
+
+                # XXX this code is pending removal:
                 # elif (base_sense in (
                 #         "Arabic digits",
                 #         "Latin script",
@@ -2599,7 +2617,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             item = re.sub(r"\s*\^\(\s*\)", "", item)  # Now empty superscript
             item = item.strip()
             if not item:
-                return
+                return None
 
             # The item may contain multiple comma-separated linkages
             if base_roman:
@@ -2626,6 +2644,17 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 alt = base_alt  # Usually None
                 taxonomic = None
                 english = None
+
+                # Some Korean words use "word (alt, oman, “english”) pattern
+                # See 滿/Korean
+                m = re.match(r'([^(),;:]+) \(([^(),;:]+), ([^(),;:]+), '
+                             r'[“”"]([^”“"]+)[“”"]\)$', item)
+                if (m and classify_desc(m.group(1)) == "other" and
+                    classify_desc(m.group(2)) == "other"):
+                    alt = m.group(2)
+                    roman = m.group(3)
+                    english = m.group(4)
+                    item1 = m.group(1)
 
                 words = item1.split(" ")
                 if (len(words) > 1 and
@@ -2660,7 +2689,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         english = v
                     return ""
 
-                item1 = re.sub(r'[“"]([^"]+)[“"],?\s*', english_repl, item1)
+                item1 = re.sub(r'[“"]([^“”"]+)[“”"],?\s*', english_repl, item1)
                 # item1 = re.sub(r", \)", ")", item1)  # XXX break hyphen/comma
 
                 # There could be multiple parenthesized parts, and
@@ -3022,6 +3051,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         def parse_linkage_recurse(contents, field, sense):
             assert isinstance(contents, (list, tuple))
             assert sense is None or isinstance(sense, str)
+            nonlocal next_navframe_sense
             # print("PARSE_LINKAGE_RECURSE: {}: {}".format(sense, contents))
             for node in contents:
                 if isinstance(node, str):
@@ -3037,7 +3067,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if kind == NodeKind.LIST:
                     parse_linkage_recurse(node.children, field, sense)
                 elif kind == NodeKind.LIST_ITEM:
-                    parse_linkage_item(node.children, field, sense)
+                    v = parse_linkage_item(node.children, field, sense)
+                    if v:
+                        # parse_linkage_item() can return a value that should
+                        # be used as the sense for the follow-on linkages,
+                        # which are typically provided in a table (see 滿)
+                        next_navframe_sense = v
                 elif kind in (NodeKind.TABLE, NodeKind.TABLE_ROW):
                     parse_linkage_recurse(node.children, field, sense)
                 elif kind == NodeKind.TABLE_CELL:
@@ -3060,6 +3095,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                       "levels: {!r} and {!r}"
                                       .format(sense, sense1))
                         parse_linkage_recurse(node.children, field, sense1)
+                    elif "NavFrame" in classes:
+                        # NavFrame uses previously assigned next_navframe_sense
+                        # (from a "(sense):" item) and clears it afterwards
+                        parse_linkage_recurse(node.children, field,
+                                              sense or next_navframe_sense)
+                        next_navframe_sense = None
                     else:
                         parse_linkage_recurse(node.children, field, sense)
                 elif kind in LEVEL_KINDS:
@@ -3212,7 +3253,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             m = re.match(r"\*?\s*([-' \w][-' \w()]*):\s*", item)
             tags = []
             if m:
-                sublang = m.group(1)
+                sublang = m.group(1).strip()
                 if lang is None:
                     lang = sublang
                 elif lang and sublang in script_names:

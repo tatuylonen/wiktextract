@@ -371,5 +371,4 @@ Add more sanity checks:
 制御室
   - multiple hiragana/katagana must be combined (separate parens for each char)
 
-滿
-  - crash in decode_tags
+滿/Vietnamese: head not handled correctly, fix
