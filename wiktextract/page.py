@@ -1541,15 +1541,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 gl = gl[:-1].strip()
             parsed = parse_alt_or_inflection_of(ctx, gl)
             if parsed is not None:
-                infl_tags, infl_dt = parsed
-                if (infl_dt is not None and "form-of" in infl_tags and
+                infl_tags, infl_dts = parsed
+                if (infl_dts and "form-of" in infl_tags and
                     len(infl_tags) == 1):
                     # Interpret others as a particular form under
                     # "inflection of"
                     data_extend(ctx, sense_base, "tags", infl_tags)
-                    data_append(ctx, sense_base, "form_of", infl_dt)
+                    data_extend(ctx, sense_base, "form_of", infl_dts)
                     subglosses = subglosses[1:]
-                elif infl_dt is None:
+                elif not infl_dts:
                     data_extend(ctx, sense_base, "tags", infl_tags)
                     subglosses = subglosses[1:]
 
@@ -1648,8 +1648,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if "form-of" in sense_base.get("tags", ()):
                 parsed = parse_alt_or_inflection_of(ctx, gloss)
                 if parsed is not None:
-                    infl_tags, infl_dt = parsed
-                    if infl_dt is None and infl_tags:
+                    infl_tags, infl_dts = parsed
+                    if not infl_dts and infl_tags:
                         # Interpret as a particular form under "inflection of"
                         data_extend(ctx, sense_data, "tags", infl_tags)
 
@@ -1675,8 +1675,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # Check if this gloss describes an alt-of or inflection-of
                 parsed = parse_alt_or_inflection_of(ctx, gloss)
                 if parsed is not None:
-                    tags, dt = parsed
-                    if dt is not None:
+                    tags, dts = parsed
+                    for dt in dts:
                         ftags = list(tag for tag in tags if tag != "form-of")
                         if "alt-of" in tags:
                             data_extend(ctx, sense_data, "tags", ftags)

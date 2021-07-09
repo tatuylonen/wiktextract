@@ -360,14 +360,12 @@ Add more sanity checks:
   - stem and past are not correctly parsed
   - related terms are not correctly parsed - English goes into alt
 
-制御室
-  - multiple hiragana/katagana must be combined (separate parens for each char)
-
 滿/Vietnamese: head not handled correctly, fix
-
-Should generate multiple alternatives in parse_alt_or_inflection_of() when
-alt_of contains / (any variant).  See 偽滿洲國/Chinese.
 
 Handle and remove right-to-left mark (and left-to-right mark) from titles,
 forms, translations, linkages.  Add tag "right-to-left" where they were
 present.  (Or should we keep the marks but still add tag?)
+
+Fix support for DISPLAYTITLE - sets page default display title, which
+would be useful.  Maybe extract too?  Note that this may prevent
+caching templates/Lua calls.

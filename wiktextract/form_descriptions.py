@@ -737,9 +737,10 @@ def parse_word_head(ctx, pos, text, data):
         return
 
     # Handle the part of the head that is not in parentheses
-    base = re.sub(r"\(([^()]|\([^(]*\))*\)", " ", text)
+    base = re.sub(r"(\s?)\(([^()]|\([^(]*\))*\)", r"\1", text)
     base = re.sub(r"\?", " ", base)  # Removes uncertain articles etc
     base = re.sub(r"\s+", " ", base).strip()
+    # print("parse_word_head: base={!r}".format(base))
     descs = split_at_comma_semi(base)
     for desc_i, desc in enumerate(descs):
         desc = desc.strip()
@@ -762,22 +763,26 @@ def parse_word_head(ctx, pos, text, data):
     parens = list(m.group(1) for m in
                   re.finditer(r"\((([^()]|\([^()]*\))*)\)", text))
     have_ruby = False
+    hiragana = ""
+    katakana = ""
     for paren in parens:
         paren = paren.strip()
         if not paren:
             continue
 
-        # If it starts with hiragana or katakana, treat as such form
+        # If it starts with hiragana or katakana, treat as such form.  Note
+        # that each hiragana/katakana character is in separate parentheses,
+        # so we must concatenate them.
         try:
             un = unicodedata.name(paren[0]).split()[0]
         except ValueError:
             un = "INVALID"
         if (un == "KATAKANA"):
-            add_related(ctx, data, ["katakana"], [paren])
+            katakana += paren
             have_ruby = True
             continue
         if (un == "HIRAGANA"):
-            add_related(ctx, data, ["hiragana"], [paren])
+            hiragana += paren
             have_ruby = True
             continue
 
@@ -869,6 +874,12 @@ def parse_word_head(ctx, pos, text, data):
                             prev_tags = None
                     else:
                         data_extend(ctx, data, "tags", tags)
+
+    # Finally, if we collected hirakana/katakana, add them now
+    if hiragana:
+        add_related(ctx, data, ["hiragana"], [hiragana])
+    if katakana:
+        add_related(ctx, data, ["katagana"], [katakana])
 
 
 def parse_sense_qualifier(ctx, text, data):
@@ -1295,10 +1306,20 @@ def parse_alt_or_inflection_of1(ctx, gloss):
         ctx.debug(". remains in alt_of/inflection_of: {}".format(base))
     if not base:
         return tags, None
-    dt = { "word": base }
-    if extra:
-        dt["extra"] = extra
-    return tags, dt
+    parts = split_at_comma_semi(base, extra=[" / ",  "／"])
+    if (len(parts) <= 1 or base.startswith("/") or
+        base.endswith("/") or
+        ctx.title.find("/") >= 0):
+        parts = [base]
+    lst = []
+    for p in parts:
+        dt = { "word": p }
+        if extra:
+            dt["extra"] = extra
+        lst.append(dt)
+    # print("alt_or_infl_of returning tags={} lst={} base={!r}"
+    #       .format(tags, lst, base))
+    return tags, lst
 
 
 def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
