@@ -301,9 +301,6 @@ Make sure rtl (right-to-left) and ltr markers are properly inserted
 and matched in words (including translations and linkages), even when
 splitting them.
 
-Handle " / " as a separator in linkages; see be/Faroese/related
-(Latin-script letter names)
-
 Implement better parsing of compound_of base.  There are over 135k
 compound_of entries in Wiktionary, so this is common enough to care
 about.
@@ -322,6 +319,8 @@ Fix parsing linkages for letters in scripts, see P/English/Number
   - P/Vietnamese first word incorrectly split (never split before semicolon)
   - P/Vietnamese multi-char names inside parentheses handled incorrectly
     (replace parentheses by comma? colon by comma?)
+Handle " / " as a separator in linkages; see be/Faroese/related
+(Latin-script letter names)
 
 have/English/Translations/"to possess"/Arabic: have "- you have" at end of tr;
 similarly "- I have"
