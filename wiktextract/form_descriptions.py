@@ -124,7 +124,10 @@ non_latin_scripts = [
     "WARANG CITI",
     "YI",
 ]
-non_latin_scripts_re = re.compile(r"(" + "|".join(non_latin_scripts) + ")\b")
+non_latin_scripts_re = re.compile(
+    r"(" +
+    r"|".join(re.escape(x) for x in non_latin_scripts) +
+    r")\b")
 
 # Regexp for finding nested translations from translation items (these are
 # used in, e.g., year/English/Translations/Arabic).  This is actually used
@@ -1085,6 +1088,8 @@ def parse_translation_desc(ctx, lang, text, tr):
                 else:
                     tr["english"] = par
         elif cls == "romanization":
+            # print("roman text={!r} text cls={}"
+            #       .format(text, classify_desc(text)))
             if (classify_desc(text) in ("english", "romanization") and
                 lang not in ("Egyptian",)):
                 if beginning:

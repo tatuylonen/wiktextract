@@ -171,6 +171,7 @@ uppercase_tags = set([
     "Alsatian",
     "Amecameca",
     "American continent",
+    "Amharic",  # Script (at least for numberals)
     "Amianan",
     "Amira",
     "Amrum",
@@ -588,6 +589,7 @@ uppercase_tags = set([
     "Hianacoto",
     "Hiberno-English",
     "Hijazi",
+    "Hindi",  # Script (at least for numberals, e.g. 80
     "Hinduism",
     "Hokkien",
     "Honduras",
@@ -1018,6 +1020,7 @@ uppercase_tags = set([
     "Nyungkal",
     "Nürnbergisch",
     "Occitania",
+    "Odia",  # Script (at least for numerals)
     "Ol Chiki",  # Script (Austroasiatic language in India)
     "Old Bohairic",
     "Old Chamorro",
@@ -2366,6 +2369,8 @@ xlat_tags_map = {
     "Cyrillic-script": "Cyrillic",
     "Latin-script": "Latin",
     "obsolete form of": "alt-of obsolete",
+    "former word": "obsolete",
+    "etymological spelling": "nonstandard",
     "(hence past tense)": "past",
     "(suffix conjugation)": "suffix",
     "(suffix conjugation)": "prefix",
@@ -2695,6 +2700,7 @@ xlat_tags_map = {
     "Baybayin spelling of": "alt-of Baybayin",
     "Arabic spelling of": "alt-of Arabic",
     "Arabic (Eastern)": "Arabic-Indic",
+    "Eastern Arabic": "Arabic-Indic",
     "Arabic (Western)": "Arabic",
     "Formerly standard spelling of": "alt-of archaic",
     "informal spelling of": "alt-of informal",

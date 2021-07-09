@@ -255,7 +255,7 @@ Check extraction of pronunciations and their romanizations in 공중/Korean
 
 Consider caching template expansions in an LRU cache.  Make sure
 template arguments that can be accessed from Lua are considered
-properly.  Cache must be reset per-page.
+properly.  Cache must be reset per-page.  (Does DISPLAYPAGE break this?)
 
 Check * at the end of some derived forms in wort/English/Noun (e.g., dropwort*)
   - it actually is in the original wikitext and is used as a reference symbol,
@@ -297,9 +297,6 @@ stack traceback:
         [C]: in function 'xpcall'
         [string "_sandbox_phase2"]:214: in function <[string "_sandbox_phase2"]:136>
 
-eighty/English/Translations: several words like "Arabic numerals: 80"
-(should parse tags from the part before colon)
-
 Make sure rtl (right-to-left) and ltr markers are properly inserted
 and matched in words (including translations and linkages), even when
 splitting them.
@@ -322,12 +319,10 @@ looks like the category has a nested link)
 Implement caching in decode_tags
 Implement caching in classify_desc
 
-Strange tag from head in P/Japanese "Initialism of ..."
-
 Fix parsing linkages for letters in scripts, see P/English/Number
   - longer sequences of characters
   - P/Latvian "burti:" prefix handled incorrectly (should be separate linkage)
-  - P/Vietnamese first word incorrectly split
+  - P/Vietnamese first word incorrectly split (never split before semicolon)
   - P/Vietnamese multi-char names inside parentheses handled incorrectly
     (replace parentheses by comma? colon by comma?)
 
