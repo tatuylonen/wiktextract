@@ -8,7 +8,7 @@ from wikitextprocessor import Wtp
 from wiktextract.datautils import split_at_comma_semi
 
 
-class WiktExtractTests(unittest.TestCase):
+class DescTests(unittest.TestCase):
 
     def setUp(self):
         self.ctx = Wtp()
@@ -117,6 +117,10 @@ class WiktExtractTests(unittest.TestCase):
     def test_decode15(self):
         ret, topics = decode_tags("Lepcha numerals")
         self.assertEqual(ret, [("Lepcha", "numeral")])
+
+    def test_decode16(self):
+        ret, topics = decode_tags("next 4")
+        self.assertEqual(ret, [("4", "error-unknown-tag", "next")])
 
     def test_head1(self):
         data = {}

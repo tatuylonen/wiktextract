@@ -518,20 +518,25 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
         #       .format(max_last_i, len(lst), len(pos_paths)))
 
         if nodes:
+            # print("END HAVE_NODES")
             for node, start_i, last_i in nodes:
                 if "$" in node:
-                    # print("$ END")
+                    # print("$ END start_i={} last_i={}"
+                    #       .format(start_i, last_i))
                     for path in pos_paths[start_i]:
                         pos_paths[-1].append([(last_i,
                                                node["$"].get("tags"),
                                                node["$"].get("topics"))] +
                                              path)
                 else:
-                    u = check_unknown(start_i, last_i, len(lst))
+                    # print("UNK END start_i={} last_i={} lst={}"
+                    #       .format(start_i, last_i, lst))
+                    u = check_unknown(len(lst), last_i, len(lst))
                     for path in pos_paths[start_i]:
                         pos_paths[-1].append(u + path)
         else:
             # Check for a final unknown tag
+            # print("NO END NODES max_last_i={}".format(max_last_i))
             paths = pos_paths[max_last_i] or [[]]
             u = check_unknown(len(lst), max_last_i, len(lst))
             if u:
@@ -594,6 +599,8 @@ def parse_head_final_tags(ctx, lang, form):
     assert isinstance(lang, str)  # Should be language that "form" is for
     assert isinstance(form, str)
 
+    # print("parse_head_final_tags: lang={} form={!r}".format(lang, form))
+
     tags = []
 
     # If parsing for certain languages (e.g., Swahili), handle some extra
@@ -609,8 +616,16 @@ def parse_head_final_tags(ctx, lang, form):
     # Handle normal head-final tags
     m = re.search(head_final_re, form)
     if m is not None:
-        tagkeys = m.group(2)
-        if not ctx.title.endswith(tagkeys):
+        tagkeys = m.group(2).strip()
+        # Only replace tags ending with numbers in languages that have
+        # head-final numeric tags (e.g., Bantu classes); also, don't replace
+        # tags if the main title ends with them (then presume they are part
+        # of the word)
+        # print("head_final_tags form={!r} tagkeys={!r} lang={}"
+        #       .format(form, tagkeys, lang))
+        if (not (tagkeys[-1].isdigit() and
+                 lang not in head_final_numeric_langs) and
+            not ctx.title.endswith(tagkeys)):
             if not tagkeys[0].isdigit() or lang in head_final_numeric_langs:
                 form = form[:m.start()]
                 for t in tagkeys.split():
@@ -628,7 +643,7 @@ def add_related(ctx, data, tags_lst, related):
     for x in tags_lst:
         assert isinstance(x, str)
     assert isinstance(related, (list, tuple))
-    # print("add_related: tags_lst={} related={}".format(lst, related))
+    # print("add_related: tags_lst={} related={}".format(tags_lst, related))
     related = " ".join(related)
     if related == "[please provide]":
         return
@@ -772,6 +787,8 @@ def parse_word_head(ctx, pos, text, data):
             new_desc.extend(map_with(xlat_tags_map, split_at_comma_semi(desc)))
         prev_tags = None
         for desc in new_desc:
+            # print("head desc: {!r}".format(desc))
+
             # If only one word, assume it is comma-separated alternative
             # to the previous one
             if (desc.find(" ") < 0 and prev_tags and
@@ -807,6 +824,10 @@ def parse_word_head(ctx, pos, text, data):
                 #       .format(i, related, tagparts))
                 tagsets, topics = decode_tags(" ".join(tagparts),
                                               no_unknown_starts=True)
+                # print("tagparts={!r} tagsets={} topics={} related={} "
+                #       "alt_related={}"
+                #       .format(tagparts, tagsets, topics, related,
+                #               alt_related))
                 if (topics or
                     any("error-unknown-tag" in x for x in tagsets)):
                     if alt_related is not None:
@@ -837,6 +858,7 @@ def parse_word_head(ctx, pos, text, data):
                 related = alt_related
                 tagsets = alt_tagsets
 
+            # print("FORM END: tagsets={} related={}".format(tagsets, related))
             if tagsets:
                 for tags in tagsets:
                     if related:

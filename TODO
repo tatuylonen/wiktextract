@@ -367,3 +367,7 @@ Add more sanity checks:
 
 Should generate multiple alternatives in parse_alt_or_inflection_of() when
 alt_of contains / (any variant).  See 偽滿洲國/Chinese.
+
+Handle and remove right-to-left mark (and left-to-right mark) from titles,
+forms, translations, linkages.  Add tag "right-to-left" where they were
+present.  (Or should we keep the marks but still add tag?)

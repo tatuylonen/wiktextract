@@ -2989,6 +2989,7 @@ xlat_tags_map = {
     "nominalized verb": "nominalization",
     "nominalized": "nominalization",
     "eulogistic": "poetic",  # XXX not really, implies praise
+    "prev": "previous",
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -3527,10 +3528,12 @@ valid_tags = set([
     "subjunctive-II",
     "sublative",
     "subordinating",
+    "subscript",  # Variant of certain characters
     "substantive",
     "suffix",
     "superessive",
     "superlative",
+    "superscript",  # Variant of certain characters
     "supine",
     "suppletive",
     "surname",
