@@ -361,6 +361,7 @@ linkage_split_exceptions = {
 linkage_truncate_re = re.compile(
     "|".join(re.escape(x) for x in [
         " and its derived terms",
+        " UTF-16 0x214C",
         ]))
 
 # Regexp for identifying special linkages containing lists of letters, digits,
@@ -814,6 +815,7 @@ linkage_ignore_prefixes = [
     "or these other third-person pronouns",
     "Signal flag:",
     "Semaphore:",
+    "introduced in Unicode ",
 ]
 linkage_ignore_prefixes_re = re.compile(
     "|".join(re.escape(x) for x in linkage_ignore_prefixes))
