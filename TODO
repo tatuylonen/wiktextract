@@ -316,9 +316,6 @@ Check strange and incorrectly processed category link in
 अधिगच्छति/Sanskrit (I suspect this may be coding error in Wiktionary,
 looks like the category has a nested link)
 
-Implement caching in decode_tags
-Implement caching in classify_desc
-
 Fix parsing linkages for letters in scripts, see P/English/Number
   - longer sequences of characters
   - P/Latvian "burti:" prefix handled incorrectly (should be separate linkage)

@@ -5,6 +5,7 @@
 # Copyright (c) 2020-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
+import functools
 import unicodedata
 import Levenshtein
 from nltk import TweetTokenizer
@@ -411,6 +412,7 @@ def map_with(ht, lst):
     return ret
 
 
+@functools.lru_cache(maxsize=65536)
 def decode_tags(src, allow_any=False, no_unknown_starts=False):
     """Decodes tags, doing some canonicalizations.  This returns a list of
     lists of tags and a list of topics."""
@@ -1327,6 +1329,7 @@ def parse_alt_or_inflection_of1(ctx, gloss):
     return tags, lst
 
 
+@functools.lru_cache(maxsize=65536)
 def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
     """Determines whether the given description is most likely tags, english,
     a romanization, or something else.  Returns one of: "tags", "english",
