@@ -1678,7 +1678,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 parsed = parse_alt_or_inflection_of(ctx, gloss)
                 if parsed is not None:
                     tags, dts = parsed
-                    for dt in dts:
+                    for dt in dts or ():
                         ftags = list(tag for tag in tags if tag != "form-of")
                         if "alt-of" in tags:
                             data_extend(ctx, sense_data, "tags", ftags)
