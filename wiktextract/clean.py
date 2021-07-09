@@ -930,10 +930,10 @@ def clean_value(config, title, no_strip=False):
                        repl_link_bars, title)
         if title == orig:
             break
-    # Replace remaining HTML links by the URL.
-    title = re.sub(r"\[(https?:)//[^]\s]+\s+([^]]+?)\s*\]", repl_2, title)
     # Remove any edit links to local pages
     title = re.sub(r"\[//[^]\s]+\s+edit\s*\]", "", title)
+    # Replace remaining HTML links by the URL.
+    title = re.sub(r"\[(https?:)?//[^]\s]+\s+([^][]+?)\s*\]", repl_2, title)
     # Remove italic and bold
     title = re.sub(r"''+", r"", title)
     # Replace HTML entities
