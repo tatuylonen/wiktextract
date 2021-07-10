@@ -30,10 +30,17 @@ class WiktExtractTests(unittest.TestCase):
         v = clean_value(self.config, v)
         self.assertEqual(v, "This is a test.")
 
-    def test_cv_unk(self):
+    def test_cv_unk1(self):
+        # We no longer clean unknown templates
         v = "This is a {{unknown-asdxfa}} test."
         v = clean_value(self.config, v)
-        self.assertEqual(v, "This is a test.")
+        self.assertEqual(v, "This is a {{unknown-asdxfa}} test.")
+
+    def test_cv_unk(self):
+        # We no longer clean unknown template arguments
+        v = "This is a {{{1}}} test."
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "This is a {{{1}}} test.")
 
     def test_cv_ref(self):
         v = "This <ref>junk\nmore junk</ref> is a test."
