@@ -141,7 +141,7 @@ nested_translations_re = re.compile(
 # Regexp that matches head tag specifiers.  Used to match tags from end of
 # translations and linkages
 head_final_re = re.compile(
-    r"( -)?(( ({}))+( or ({}))*)$".format(
+    r"( -)?(( ({}))+( or( ({}))+)*)$".format(
         "|".join(re.escape(x) for x in xlat_head_map.keys()),
         "|".join(re.escape(x) for x in xlat_head_map.keys())))
 
@@ -412,7 +412,9 @@ def map_with(ht, lst):
     return ret
 
 
-@functools.lru_cache(maxsize=65536)
+# XXX temporarily disabled for debugging to ensure we don't modify the returned
+# values
+# @functools.lru_cache(maxsize=65536)
 def decode_tags(src, allow_any=False, no_unknown_starts=False):
     """Decodes tags, doing some canonicalizations.  This returns a list of
     lists of tags and a list of topics."""
@@ -627,22 +629,25 @@ def parse_head_final_tags(ctx, lang, form):
     # Handle normal head-final tags
     m = re.search(head_final_re, form)
     if m is not None:
-        tagkeys = m.group(2).strip()
+        tagkeys = m.group(2)  # Note: intentionally not stripped
+        # print("tagkeys={}".format(tagkeys))
         # Only replace tags ending with numbers in languages that have
         # head-final numeric tags (e.g., Bantu classes); also, don't replace
         # tags if the main title ends with them (then presume they are part
         # of the word)
         # print("head_final_tags form={!r} tagkeys={!r} lang={}"
         #       .format(form, tagkeys, lang))
-        if (not (tagkeys[-1].isdigit() and
-                 lang not in head_final_numeric_langs) and
+        if ((not tagkeys[-1].isdigit() or
+             lang in head_final_numeric_langs) and
             not ctx.title.endswith(tagkeys)):
             if not tagkeys[0].isdigit() or lang in head_final_numeric_langs:
                 form = form[:m.start()]
-                for t in tagkeys.split():
+                for t in tagkeys.split():  # Note: effectively strips
                     if t == "or":
                         continue
                     tags.extend(xlat_head_map[t].split(" "))
+
+    # print("parse_head_final_tags: form={!r} tags={}".format(form, tags))
     return form, tags
 
 
