@@ -86,7 +86,7 @@ additional_words = set([
     'Judeo',
     'LGBT',
     'Lagerstomia',
-    "Latinized",
+    'Latinized',
     'Linux',
     'Lunar Module',
     'Lyman continuum photon',
@@ -1011,6 +1011,7 @@ additional_words = set([
     'lifespan',
     'ligature',
     'lighthouse',
+    'lily',
     'litre',
     'little sis',
     'lizard',
@@ -1813,17 +1814,26 @@ additional_words = set([
     'zygosperm',
 ])
 
-# List of words that will be removed from the Brown set
-blacklist_words = set([
+# These words will never be treated as English words (overriding other
+# considerations, not just membership in the set)
+not_english_words = set([
     # This is a blacklist - these will not be treated as English words
-    # even though they are in brown.words()
+    # even though they are in brown.words().  Adding a word on this list
+    # generally makes it likely to be treated as a romanization.
     "Ye",
     "al",
     "boo",
     "em",
     "ma",
-    "Voulí",
-    "Antiprosópon",
+    "de",
+    "Mihapjungguk",
+    "Mi",
+    "ANU",
+    "Franc",
+    "Frans",
+    "Germania",
+    "Germani",
+    "Kina",
 ])
 
 # Construct a set of (most) English words.  Multi-word expressions where we
@@ -1831,4 +1841,4 @@ blacklist_words = set([
 english_words = (set(brown.words()) |
                  known_firsts |
                  set(x for name in known_species for x in name.split()) |
-                 additional_words) - blacklist_words
+                 additional_words) - not_english_words

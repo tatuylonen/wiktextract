@@ -220,7 +220,3 @@ class DescTests(unittest.TestCase):
     def test_comma_semi5(self):
         self.assertEqual(split_at_comma_semi("a (foo, bar)[1; zappa], z"),
                          ["a (foo, bar)[1; zappa]", "z"])
-
-    def test_classify1(self):
-        cls = classify_desc("predicative particle")
-        self.assertEqual(cls, "tags")

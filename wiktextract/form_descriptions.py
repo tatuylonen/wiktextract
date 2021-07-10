@@ -17,7 +17,7 @@ from .tags import (xlat_head_map, valid_tags,
                    uppercase_tags, xlat_tags_map, xlat_descs_map,
                    head_final_numeric_langs,
                    head_final_extra_langs, head_final_extra_map)
-from .english_words import english_words
+from .english_words import english_words, not_english_words
 
 # Tokenizer for classify_desc()
 tokenizer = TweetTokenizer()
@@ -1380,35 +1380,46 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
     tokens = tokenizer.tokenize(desc)
     if not tokens:
         return "other"
-    lst = list(x in english_words or x.lower() in english_words or
-               x in known_firsts or
-               x[0].isdigit() or
-               (x[0].isupper() and x.find("-") < 0) or
-               (x.endswith("s") and len(x) >= 4 and x[:-1] in english_words) or
-               (x.endswith("ing") and len(x) >= 5 and
-                x[:-3] in english_words) or
-               x.endswith("'s") or
-               x.endswith("s'") or
-               (x.endswith("ise") and len(x) >= 5 and
-                x[:-3] + "ize" in english_words) or
-               (x.endswith("ised") and len(x) >= 6 and
-                x[:-4] + "ized" in english_words) or
-               (x.endswith("ising") and len(x) >= 7 and
-                x[:-5] + "izing" in english_words) or
-               (x.find("-") >= 0 and all((y in english_words or not y)
-                                         for y in x.split("-")))
+    lst = list(x not in not_english_words and
+               not x.isdigit() and
+               (x in english_words or x.lower() in english_words or
+                x in known_firsts or
+                x[0].isdigit() or
+                # (x[0].isupper() and x.find("-") < 0 and x.isascii()) or
+               (x.endswith("s") and len(x) >= 4 and
+                x[:-1] in english_words) or  # Plural
+                (x.endswith("ies") and len(x) >= 5 and
+                 x[:-3] + "y" in english_words) or  # E.g. lily - lilies
+                (x.endswith("ing") and len(x) >= 5 and
+                 x[:-3] in english_words) or  # E.g. bring - bringing
+                (x.endswith("ing") and len(x) >= 5 and
+                 x[:-3] + "e" in english_words) or  # E.g., tone - toning
+                (x.endswith("ed") and len(x) >= 5 and
+                 x[:-2] in english_words) or   # E.g. hang - hanged
+                (x.endswith("ed") and len(x) >= 5 and
+                 x[:-2] + "e" in english_words) or  # E.g. atone - atoned
+                (x.endswith("'s") and x[:-2] in english_words) or
+                (x.endswith("s'") and x[:-2] in english_words) or
+                (x.endswith("ise") and len(x) >= 5 and
+                 x[:-3] + "ize" in english_words) or
+                (x.endswith("ised") and len(x) >= 6 and
+                 x[:-4] + "ized" in english_words) or
+                (x.endswith("ising") and len(x) >= 7 and
+                 x[:-5] + "izing" in english_words) or
+                (x.find("-") >= 0 and all((y in english_words or not y)
+                                         for y in x.split("-"))))
                for x in tokens)
-    lst1 = list(m.group(0) in english_words
-                for m in re.finditer(r"[\w']+", desc))
-    maxlen = max(len(x) for x in tokens)
-    if (maxlen > 1 and
-        lst1.count(True) >= len(lst1) / 2 and
+    cnt = lst.count(True)
+    if (any(lst[i] and x[0].isalpha() and len(x) > 1
+            for i, x in enumerate(tokens)) and
         not desc.startswith("-") and
         not desc.endswith("-") and
-        len(list(re.finditer(r"\w+", desc))) > 0):
-        if ((len(lst) < 5 and all(lst)) or
-            lst.count(True) / len(lst) >= 0.8):
-            return "english"
+        re.search(r"\w+", desc) and
+        (cnt == len(lst) or
+         (any(lst[i] and len(x) > 3 for i, x in enumerate(tokens)) and
+          cnt >= len(lst) - 1) or
+         cnt / len(lst) >= 0.8)):
+        return "english"
     # Some translations have apparent pronunciation descriptions in /.../
     # which we'll put in the romanization field (even though they probably are
     # not exactly romanizations).

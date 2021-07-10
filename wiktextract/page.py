@@ -816,6 +816,10 @@ linkage_ignore_prefixes = [
     "Signal flag:",
     "Semaphore:",
     "introduced in Unicode ",
+    "Formal terms",
+    "informal and slang terms",
+    "Any of Thesaurus:",
+    "See contents of Category:",
 ]
 linkage_ignore_prefixes_re = re.compile(
     "|".join(re.escape(x) for x in linkage_ignore_prefixes))
