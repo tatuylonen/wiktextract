@@ -581,13 +581,19 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
             for x in tagsets:
                 for t in tagspec:
                     if t:
-                        new_tagsets.append(x + t.split())
+                        new_tags = list(x)
+                        for tag in t.split():
+                            if tag not in new_tags:
+                                new_tags.append(tag)
+                        new_tagsets.append(new_tags)
                     else:
                         new_tagsets.append(x)
             tagsets = new_tagsets
         if topicspec:
             for t in topicspec:
-                topics.extend(t.split())
+                for topic in t.split():
+                    if topic not in topics:
+                        topics.append(topic)
 
     # print("unsorted tagsets:", tagsets)
     tagsets = list(sorted(set(tuple(sorted(set(tags))) for tags in tagsets)))
@@ -675,6 +681,10 @@ def add_related(ctx, data, tags_lst, related):
         else:
             tagsets1 = [[]]
             topics1 = []
+        if related and related.startswith("{{"):
+            ctx.debug("{{ in word head form - possible Wiktionary error: {!r}"
+                      .format(related))
+            continue  # Likely Wiktionary coding error
         tagsets2, topics2 = decode_tags(" ".join(tags_lst))
         for tags1 in tagsets1:
             assert isinstance(tags1, (list, tuple))
