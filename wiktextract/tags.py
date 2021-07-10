@@ -1951,6 +1951,8 @@ xlat_tags_map = {
     "predicative only": "not-attributive predicative",
     "predicatively": "predicative",
     "in attributive use": "attributive",
+    "(attributive)": "attributive",
+    "(predicative)": "predicative",
     "only in attributive use": "attributive not-predicative",
     "present tense": "present",
     "past tense": "past",

@@ -265,8 +265,8 @@ class TagTests(unittest.TestCase):
 
     def test_tags55(self):
         ret, topics = decode_tags("plural and definite singular attributive")
-        self.assertEqual(ret, [("attributive", "definite", "plural",
-                                "singular")])
+        self.assertEqual(ret, [("attributive", "definite", "singular"),
+                               ("attributive", "plural",)])
 
     def test_tags56(self):
         ret, topics = decode_tags("comparative")
