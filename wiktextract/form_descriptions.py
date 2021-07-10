@@ -610,7 +610,7 @@ def parse_head_final_tags(ctx, lang, form):
     assert isinstance(lang, str)  # Should be language that "form" is for
     assert isinstance(form, str)
 
-    print("parse_head_final_tags: lang={} form={!r}".format(lang, form))
+    # print("parse_head_final_tags: lang={} form={!r}".format(lang, form))
 
     tags = []
 
@@ -645,7 +645,7 @@ def parse_head_final_tags(ctx, lang, form):
                         continue
                     tags.extend(xlat_head_map[t].split(" "))
 
-    print("parse_head_final_tags: form={!r} tags={}".format(form, tags))
+    # print("parse_head_final_tags: form={!r} tags={}".format(form, tags))
     return form, tags
 
 

@@ -360,3 +360,5 @@ present.  (Or should we keep the marks but still add tag?)
 Fix support for DISPLAYTITLE - sets page default display title, which
 would be useful.  Maybe extract too?  Note that this may prevent
 caching templates/Lua calls.
+
+Handle synonym-of; see "Number 11"
