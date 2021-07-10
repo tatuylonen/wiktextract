@@ -412,9 +412,7 @@ def map_with(ht, lst):
     return ret
 
 
-# XXX temporarily disabled for debugging to ensure we don't modify the returned
-# values
-# @functools.lru_cache(maxsize=65536)
+@functools.lru_cache(maxsize=65536)
 def decode_tags(src, allow_any=False, no_unknown_starts=False):
     """Decodes tags, doing some canonicalizations.  This returns a list of
     lists of tags and a list of topics."""
