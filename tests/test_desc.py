@@ -114,7 +114,3 @@ class DescTests(unittest.TestCase):
     def test_comma_semi5(self):
         self.assertEqual(split_at_comma_semi("a (foo, bar)[1; zappa], z"),
                          ["a (foo, bar)[1; zappa]", "z"])
-
-    def test_fail(self):
-        # XXX temporary, testing running tests before regenerating website
-        assert False
