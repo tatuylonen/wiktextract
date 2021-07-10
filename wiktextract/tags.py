@@ -2196,7 +2196,7 @@ xlat_tags_map = {
     "obsolescent": "possibly obsolete",
     "antiquated": "dated",
     "19th century": "archaic",
-    "dated or regional": "archaic regional",
+    "dated or regional": "dated regional",
     "dated or archaic": "archaic",
     "common and polite term": "polite",
     "most common but potentially demeaning term": "possibly derogatory",
@@ -2518,6 +2518,7 @@ xlat_tags_map = {
     "type u": "type-u",
     "type up": "type-up",
     "type a": "type-a",
+    "form of": "form-of",
     "ordinal form of": "ordinal form-of",
     "ordinal form of the number": "ordinal form-of",
     "ordinal form of": "ordinal form-of",
@@ -3141,7 +3142,7 @@ valid_tags = set([
     "collective",
     "colloquial",
     "comitative",
-    "common",
+    "common",   # XXX gender (Swedish, Danish), also meaning commonly occurring
     "comparable",
     "comparative",
     "complete",
@@ -3231,7 +3232,7 @@ valid_tags = set([
     "factitive",  # Not sure if same or different as factive
     "factive",
     "familiar",
-    "feminine",
+    "feminine",  # Gender
     "fifth-conjugation",
     "fifth-declension",
     "fifth-infinitive",
@@ -3342,7 +3343,7 @@ valid_tags = set([
     "locative",
     "lowercase",
     "mainly",
-    "masculine",
+    "masculine",  # Gender
     "material",
     "matronymic",
     "medial",
@@ -3372,7 +3373,7 @@ valid_tags = set([
     "natural",
     "negative",
     "neologism",
-    "neuter",
+    "neuter",  # Gender
     "next",  # Next value in sequence (number, letter, etc.)
     "ngoko",
     "nif'al-construction",

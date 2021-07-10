@@ -2576,6 +2576,24 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     else:
                         sense = desc
                     item = rest
+                elif desc.isdigit():
+                    idx = int(desc) - 1
+                    if idx >= 0 and idx < len(pos_datas):
+                        d = pos_datas[idx]
+                        gl = "; ".join(d.get("glosses", ()))
+                        if not gl:
+                            ctx.debug("parenthesized numeric linkage prefix, "
+                                      "but the referenced sense has no gloss: "
+                                      "{}".format(desc))
+                        elif sense:
+                            sense += "; " + gl
+                        else:
+                            sense = gl
+                        item = rest
+                    else:
+                        ctx.debug("parenthesized numeric linkage prefix, "
+                                  "but there is no sense with such index: {}"
+                                  .format(desc))
                 else:
                     ctx.debug("unrecognized linkage prefix: {} desc={} rest={} "
                               "cls={} cls2={} e1={} e2={}"
@@ -2779,6 +2797,23 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             roman = par
                         elif cls == "taxonomic":
                             taxonomic = par
+                        elif par.isdigit():
+                            idx = int(par) - 1
+                            if idx >= 0 and idx < len(pos_datas):
+                                d = pos_datas[idx]
+                                gl = "; ".join(d.get("glosses", ()))
+                                if not gl:
+                                    ctx.debug("parenthesized number "
+                                              "but the referenced sense has no "
+                                              "gloss: {}".format(par))
+                                elif sense:
+                                    sense += "; " + gl
+                                else:
+                                    sense = gl
+                            else:
+                                ctx.debug("parenthesized number but there is "
+                                          "no sense with such index: {}"
+                                          .format(par))
                         else:
                             if alt:
                                 alt += "; " + par
@@ -4220,7 +4255,7 @@ def clean_node(config, ctx, category_data, value, template_fn=None,
 
     # Strip any unhandled templates and other stuff.  This is mostly intended
     # to clean up erroneous codings in the original text.
-    v = re.sub(r"(?s)\{\{.*", "", v)
+    # v = re.sub(r"(?s)\{\{.*", "", v)
     # Some templates create <sup>(Category: ...)</sup>; remove
     v = re.sub(r"(?si)\s*(^\s*)?\(Category:[^)]*\)", "", v)
     # Some templates create question mark in <sup>, e.g., some Korean Hanja form

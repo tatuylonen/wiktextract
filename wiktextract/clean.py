@@ -881,7 +881,7 @@ def clean_value(config, title, no_strip=False):
         return to_math(m.group(1))
 
     # Remove any remaining templates
-    title = re.sub(r"\{\{[^}]+\}\}", "", title)
+    # title = re.sub(r"\{\{[^}]+\}\}", "", title)
     # Remove tables
     title = re.sub(r"(?s)\{\|.*?\|\}", "\n", title)
     # Remove references (<ref>...</ref>).

@@ -908,6 +908,7 @@ topic_generalize_map = {
     "sailing": "nautical",
     "maritime": "nautical",
     "ropemaking": "crafts nautical",
+    "nautical": "transport",
     "retail": "commerce",
     "commercial": "commerce",
     "retailing": "commerce",
