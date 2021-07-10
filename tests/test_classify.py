@@ -1,15 +1,13 @@
+# Tests for classify_desc()
+#
+# Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+
 import unittest
 from wiktextract.form_descriptions import classify_desc
 from wiktextract import WiktionaryConfig
 from wikitextprocessor import Wtp
 
 class ClassifyTests(unittest.TestCase):
-
-    def setUp(self):
-        self.ctx = Wtp()
-        self.config = WiktionaryConfig()
-        self.ctx.start_page("testpage")
-        self.ctx.start_section("English")
 
     def test_empty(self):
         ret = classify_desc("")
