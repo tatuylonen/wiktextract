@@ -72,9 +72,18 @@ class HeadTests(unittest.TestCase):
 
     def test_head8(self):
         data = {}
+        self.ctx.start_section("Zulu")
         parse_word_head(self.ctx, "noun", "testpage 1", data)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(data, {"tags": ["class-1"]})
+
+    def test_head8b(self):
+        # Trying to parse suffix 1 in English - should not get parsed
+        data = {}
+        parse_word_head(self.ctx, "noun", "testpage 1", data)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(data, {"forms": [{"form": "testpage 1",
+                                           "tags": ["canonical"]}]})
 
     def test_head9(self):
         data = {}
