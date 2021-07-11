@@ -287,3 +287,35 @@ class ClassifyTests(unittest.TestCase):
     def test_classify64(self):
         cls = classify_desc("-")
         self.assertEqual(cls, "other")
+
+    def test_classify65(self):
+        cls = classify_desc("nabórnyj disk")
+        self.assertEqual(cls, "romanization")
+
+    def test_classify66(self):
+        cls = classify_desc("choko chippu")
+        self.assertEqual(cls, "romanization")
+
+    def test_classify67(self):
+        cls = classify_desc("chika tankō")
+        self.assertEqual(cls, "romanization")
+
+    def test_classify68(self):
+        cls = classify_desc("Kongo")
+        self.assertEqual(cls, "romanization")
+
+    def test_classify69(self):
+        cls = classify_desc("band karnā")
+        self.assertEqual(cls, "romanization")
+
+    def test_classify70(self):
+        cls = classify_desc("hindu kuś")
+        self.assertEqual(cls, "romanization")
+
+    def test_classify71(self):
+        cls = classify_desc("film waṯāʾiqiyy")
+        self.assertEqual(cls, "romanization")
+
+    def test_classify72(self):
+        cls = classify_desc("bārid ad-dam")
+        self.assertEqual(cls, "romanization")

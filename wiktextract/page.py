@@ -3244,6 +3244,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                               template_fn=translation_item_template_fn)
             # print("    TRANSLATION ITEM: {!r}  [{}]".format(item, sense))
 
+            # Remove any trailing comma at the end of the translations.  This
+            # has been seen in Wiktionary, and even though error, removing it
+            # improves robustness of extraction.
+            if item.endswith(",") and len(item) > 3:
+                item = item[:-1]
+
             # Find and remove nested translations from the item
             nested = list(m.group(1)
                           for m in re.finditer(nested_translations_re, item))
@@ -3348,6 +3354,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 for part in split_at_comma_semi(item, extra=[
                         " / ", " ／ ", "| furthermore: "]):
                     if part.endswith(":"):  # E.g. "salt of the earth"/Korean
+                        part = part[:-1].strip()
+                    # There have been errors in Wiktionary with double comma,
+                    # and this should make the extractor more robust by
+                    # handling them.
+                    if part.endswith(",") and len(part) > 3:
                         part = part[:-1].strip()
                     if not part:
                         continue

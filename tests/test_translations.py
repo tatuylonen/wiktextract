@@ -43,3 +43,13 @@ class TrTests(unittest.TestCase):
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(tr, {"word": "m m m"})
+
+    def test_tr4(self):
+        tr = {}
+        self.ctx.start_page("assessment")
+        parse_translation_desc(self.ctx, "German", "Schätzung f", tr)
+        self.assertEqual(self.ctx.errors, [])
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        self.assertEqual(tr, {"word": "Schätzung",
+                              "tags": ["feminine"]})

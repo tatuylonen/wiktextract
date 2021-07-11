@@ -362,3 +362,5 @@ would be useful.  Maybe extract too?  Note that this may prevent
 caching templates/Lua calls.
 
 Handle synonym-of; see "Number 11"
+
+Review translations that contain comma

@@ -1840,5 +1840,7 @@ not_english_words = set([
 # do not want to include the components can also be put here space-separated.
 english_words = (set(brown.words()) |
                  known_firsts |
-                 set(x for name in known_species for x in name.split()) |
+                 # XXX the second words of species names add too much garbage
+                 # now that we accept "english" more loosely.
+                 # set(x for name in known_species for x in name.split()) |
                  additional_words) - not_english_words
