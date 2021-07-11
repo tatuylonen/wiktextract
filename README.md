@@ -302,7 +302,7 @@ To install ``wiktextract``, use ``pip`` (or ``pip3``, as appropriate):
 pip3 install wiktextract
 ```
 
-Alternatively, you can get the latest development version from githup:
+Alternatively, you can get the latest development version from github:
 
 ```
 git clone https://github.com/tatuylonen/wiktextract.git
