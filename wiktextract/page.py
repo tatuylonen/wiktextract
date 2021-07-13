@@ -795,7 +795,7 @@ tr_ignore_regexps = [
 # message
 tr_suspicious_re = re.compile(
     "|".join(re.escape(x) for x in
-             [", ", "; ", "* ", ": ", "[", "]",
+             ["; ", "* ", ": ", "[", "]",
               "{", "}", "／", "^", "literally", "lit.",
               "also expressed with", "e.g.", "cf.",
               "used ", "script needed",
@@ -3357,8 +3357,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 key=lambda x: len(x), reverse=True))
             tr_mappings = {}
             for i, trt in enumerate(translations_from_template):
+                if not trt:
+                    continue
                 ch = chr(MAGIC_FIRST + i)
-                item = re.sub(re.escape(trt), ch, item)
+                rex = re.escape(trt)
+                if trt[0].isalnum():
+                    rex = r"\b" + trt
+                if trt[-1].isalnum():
+                    rex = trt + r"\b"
+                item = re.sub(rex, ch, item)
                 tr_mappings[ch] = trt
 
             # There may be multiple translations, separated by comma
