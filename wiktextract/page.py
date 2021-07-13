@@ -3440,31 +3440,28 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if m:
                         par = m.group(1).strip()
                         rest = part[m.end():]
-                        if par == "see":
-                            # Sometimes we have, e.g., "Different structure
-                            # used, see: <word>" (e.g., have/English sense
-                            # "To depict as being" Finnish tr)
-                            continue
-                        cls = classify_desc(par)
-                        # print("tr colon prefix: {!r} -> {}".format(par, cls))
-                        if cls == "tags":
-                            tagsets2, topics2 = decode_tags(par)
-                            for t in tagsets2:
-                                data_extend(ctx, tr, "tags", t)
-                            data_extend(ctx, tr, "topics", topics2)
-                            part = rest
-                        elif cls == "english":
-                            if re.search(tr_note_re, par):
-                                if "note" in tr:
-                                    tr["note"] += "; " + par
+                        if par in ("", "see"):
+                            part = "rest"
+                        else:
+                            cls = classify_desc(par)
+                            if cls == "tags":
+                                tagsets2, topics2 = decode_tags(par)
+                                for t in tagsets2:
+                                    data_extend(ctx, tr, "tags", t)
+                                data_extend(ctx, tr, "topics", topics2)
+                                part = rest
+                            elif cls == "english":
+                                if re.search(tr_note_re, par):
+                                    if "note" in tr:
+                                        tr["note"] += "; " + par
+                                    else:
+                                        tr["note"] = par
                                 else:
-                                    tr["note"] = par
-                            else:
-                                if "english" in tr:
-                                    tr["english"] += "; " + par
-                                else:
-                                    tr["english"] = par
-                            part = rest
+                                    if "english" in tr:
+                                        tr["english"] += "; " + par
+                                    else:
+                                        tr["english"] = par
+                                part = rest
 
                     # Skip translations that our template_fn says to ignore
                     # and those that contain Lua execution errors.

@@ -367,3 +367,8 @@ Review translations that contain comma
 
 Check "class II noun" and similar "note" in translations, cf. form desc,
 define required tags/mappings
+
+Consider improving romanization recognition in translation by
+capturing strings inside <span class="tr [Latn]"> and never
+interpreting such strings as English.  This would would probably hook
+into clean_node().
