@@ -364,3 +364,6 @@ caching templates/Lua calls.
 Handle synonym-of; see "Number 11"
 
 Review translations that contain comma
+
+Check "class II noun" and similar "note" in translations, cf. form desc,
+define required tags/mappings

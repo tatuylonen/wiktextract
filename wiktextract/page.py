@@ -3459,6 +3459,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             data_append(ctx, tr, "tags", t)
                             break
 
+                    # Skip certain one-character translations entirely
+                    # (these could result from templates being ignored)
+                    if part in ",;.":
+                        continue
+
                     # Certain values indicate it is not actually a translation.
                     # See definition of tr_ignore_re to adjust.
                     m = re.search(tr_ignore_re, part)

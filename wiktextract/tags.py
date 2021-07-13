@@ -2,7 +2,8 @@
 #
 # Copyright (c) 2020-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-# Mappings for tags in template head line ends outside parentheses
+# Mappings for tags in template head line ends outside parentheses.  These are
+# also used to parse final tags from translations.
 xlat_head_map = {
     "m": "masculine",
     "f": "feminine",
@@ -15,6 +16,7 @@ xlat_head_map = {
     "pl": "plural",
     "du": "dual",
     "inan": "inanimate",
+    "Inanimate": "inanimate",  # e.g., "James Bay"/English/Tr/Northern East Cree
     "anim": "animate",
     "pers": "person",  # XXX check what this really is used for? personal?
     "npers": "impersonal",
