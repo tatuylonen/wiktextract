@@ -8,7 +8,8 @@ import copy
 import html
 import collections
 import unicodedata
-from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
+from wikitextprocessor import (Wtp, WikiNode, NodeKind, ALL_LANGUAGES,
+                               MAGIC_FIRST, MAGIC_LAST)
 from .parts_of_speech import part_of_speech_map, PARTS_OF_SPEECH
 from .config import WiktionaryConfig
 from .clean import clean_value
@@ -3191,6 +3192,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if sense.endswith("—"):
                     sense = sense[:-1].strip()
             sense_detail = None
+            translations_from_template = []
 
             def translation_item_template_fn(name, ht):
                 nonlocal langcode
@@ -3211,6 +3213,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                         "{} in translation item: {!r} {}"
                                         .format(langcode, code, name, ht))
                         langcode = code
+                    tr = ht.get(2)
+                    if tr:
+                        tr = clean_node(config, ctx, None, [tr])
+                        translations_from_template.append(tr)
                     return None
                 if name == "t-egy":
                     langcode = "egy"
@@ -3339,6 +3345,22 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     item = re.sub(r"\s*\^?\({}\)".format(re.escape(x)),
                                   "", item)
 
+            # Map translations obtained from templates into magic characters
+            # before splitting the translations list.  This way, if a comma
+            # (or semicolon etc) was used inside the template, it won't get
+            # split.  We restore the magic characters into the original
+            # translations after splitting.  This kludge improves robustness
+            # of collection translations for phrases whose translations
+            # may contain commas.
+            translations_from_template = list(sorted(
+                translations_from_template,
+                key=lambda x: len(x), reverse=True))
+            tr_mappings = {}
+            for i, trt in enumerate(translations_from_template):
+                ch = chr(MAGIC_FIRST + i)
+                item = re.sub(re.escape(trt), ch, item)
+                tr_mappings[ch] = trt
+
             # There may be multiple translations, separated by comma
             nested.append(item)
             for item in nested:
@@ -3347,6 +3369,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
                 for part in split_at_comma_semi(item, extra=[
                         " / ", " ／ ", "| furthermore: "]):
+                    # Substitute the magic characters back to original
+                    # translations (this is part of dealing with
+                    # phrasal translations containing commas).
+                    part = re.sub(r"[{:c}-{:c}]"
+                                  .format(MAGIC_FIRST, MAGIC_LAST),
+                                  lambda m: tr_mappings.get(m.group(0),
+                                                            m.group(0)),
+                                  part)
+
                     if part.endswith(":"):  # E.g. "salt of the earth"/Korean
                         part = part[:-1].strip()
                     if not part:
