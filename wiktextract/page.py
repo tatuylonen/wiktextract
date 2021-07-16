@@ -3362,9 +3362,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 ch = chr(MAGIC_FIRST + i)
                 rex = re.escape(trt)
                 if trt[0].isalnum():
-                    rex = r"\b" + trt
+                    rex = r"\b" + rex
                 if trt[-1].isalnum():
-                    rex = trt + r"\b"
+                    rex = rex + r"\b"
                 item = re.sub(rex, ch, item)
                 tr_mappings[ch] = trt
 
