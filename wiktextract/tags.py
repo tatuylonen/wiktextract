@@ -60,6 +60,11 @@ xlat_head_map = {
     "5/6": "class-5 class-6",
     "7/8": "class-7 class-8",
     "9/10": "class-9 class-10",
+    "1 or 2": "class-1 class-2",
+    "3 or 4": "class-3 class-4",
+    "5 or 6": "class-5 class-6",
+    "7 or 8": "class-7 class-8",
+    "9 or 10": "class-9 class-10",
     "m1": "masculine first-declension",
     "f2": "feminine second-declension",
     "m2": "masculine second-declension",
@@ -106,6 +111,8 @@ head_final_numeric_langs = set([
 
 # Languages for which to consider head_final_extra_map
 head_final_extra_langs = set([
+    # XXX should other Bantu languages be included here?  Which ones use
+    # suffixes such as "m or wa"?
     "Swahili",
     "Finnish",
     "French",
@@ -397,6 +404,7 @@ uppercase_tags = set([
     "Continent",
     "Copenhagen",
     "Cork",
+    "Cornish",
     "Cornwall",
     "Counting rod",
     "Costa Rica",
@@ -501,6 +509,7 @@ uppercase_tags = set([
     "Fluminense",
     "For transcription only",
     "Formazza",
+    "Fountain",
     "Fragoria vesca",
     "France Quebec",
     "France",
@@ -538,6 +547,7 @@ uppercase_tags = set([
     "Gipuzkoan",
     "Glagolitic",  # Script
     "Goan Konkani",
+    "Goerdie",
     "Goeree-Overflakkee",
     "Gope",
     "Gorj",
@@ -825,6 +835,7 @@ uppercase_tags = set([
     "Macedonia",
     "Macedonian Arli",
     "Macedonian Džambazi",
+    "Mackem",
     "Madeira",
     "Maharashtra",
     "Mahuizalco",
@@ -867,6 +878,8 @@ uppercase_tags = set([
     "Medio-Late Egyptian",
     "Mehedinți",
     "Meitei",  # Script (used with Meitei language in India)
+    "Meixian",
+    "Melanesian",
     "Melinting",
     "Menggala/Tulang Bawang",
     "Mercian",
@@ -895,6 +908,7 @@ uppercase_tags = set([
     "Min Bei",
     "Min Dong",
     "Min Nan",
+    "Minas Gerais",
     "Mineiro",
     "Mirandola",
     "Mirandolese",
@@ -924,6 +938,7 @@ uppercase_tags = set([
     "Moscow",
     "Moselle Franconian",
     "Mosetén",
+    "Mount Currie",
     "Mozambique",
     "Moçambique",
     "Mpakwithi",
@@ -1062,6 +1077,7 @@ uppercase_tags = set([
     "Palestinian",
     "Panama",
     "Pangin",
+    "Papua New Guinea",
     "Paraguay",
     "Paris",
     "Parisian",
@@ -1080,6 +1096,7 @@ uppercase_tags = set([
     "Periphrastic conjugations",
     "Persian",  # Also script
     "Persian Gulf",
+    "Persianized",
     "Peru",
     "Peshawar",
     "Philadelphia",
@@ -1125,6 +1142,7 @@ uppercase_tags = set([
     "Rai Kaili",
     "Ranau",
     "Rastafari",
+    "Rastafarian",
     "Ratak",
     "Received Pronunciation",
     "Recueil scientifique ou littéraire",
@@ -1182,6 +1200,7 @@ uppercase_tags = set([
     "Sami",
     "San Juan Quiahije",
     "Sanskrit",
+    "Sanskritized",
     "Santiago",
     "São Vicente",
     "Sappada",
@@ -1232,6 +1251,7 @@ uppercase_tags = set([
     "Siba",
     "Sibe",
     "Sichuanese",
+    "Sikh",
     "Sikhism",
     "Silesian",
     "Simplified",
@@ -1315,6 +1335,7 @@ uppercase_tags = set([
     "Sursilvan",
     "Suðuroy",
     "Sutsilvan",
+    "Suzhou",
     "Sweden",
     "Swiss German",
     "Swiss",
@@ -1341,6 +1362,7 @@ uppercase_tags = set([
     "Takri",  # Script (mostly historic, used in Himachal Pradesh)
     "Talang Padang",
     "Tally-marks",
+    "Talur",
     "Tamil",  # Also script
     "Tankarana",
     "Tantoyuca",
@@ -1534,6 +1556,7 @@ uppercase_tags = set([
     "Zen and Pure Land Buddhism",
     "Zezuru",
     "Zhangzhou",
+    "Zhangzhou Hokkien",
     "Zhuyin",  # Apparently some kind of phonetic script used with Mandarin
     "Zimbabwe",
     "Zinacantán",
@@ -1602,7 +1625,12 @@ xlat_tags_map = {
     "CAN": "Canada",
     "AU": "Australia",
     "AUS": "Australia",
+    "Austr.": "Australian",
     "AusE": "Australia",
+    "Aus": "Australia",
+    "LKA": "Sri-Lanka",
+    "RU": "Russia",
+    "SA": "South-Africa",
     "[AU]": "Australia",
     "NYC": "New-York-City",
     "CA": "Canada",
@@ -1617,6 +1645,7 @@ xlat_tags_map = {
     "PRC": "China",
     "BG": "Bulgaria",
     "DE": "Germany",
+    "IE": "Ireland",
     "NL": "Netherlands",
     "NZ": "New-Zealand",
     "PT": "Portugal",
@@ -1624,6 +1653,8 @@ xlat_tags_map = {
     "U.S.A.": "US",
     "U.S.": "US",
     "[US]": "US",
+    "UK & Aus": "UK Australia",
+    "Britian": "Britain",
     "Telugu-Kui language": "Telugu-Kui",
     "SK Standard/Seoul": "SK-Standard Seoul",
     "Devanagri": "Devanagari",
@@ -1661,6 +1692,7 @@ xlat_tags_map = {
     "LAm": "Latin-America",
     "Monégasque": "Monegasque",
     "Audio": "",
+    "orig. US": "",
     "Noun": "noun",
     "Adjective": "adjective",
     "Verb": "verb",
@@ -1673,7 +1705,10 @@ xlat_tags_map = {
     "Slang": "slang",
     "Slang-Latin America": "slang Latin-America",
     "slangy": "slang",
+    "backslang": "slang",
+    "butcher's slang": "slang jargon",
     "Archaic": "archaic",
+    "archiac": "archaic",
     "nonstandard form": "nonstandard",
     "nonstandard stylistic suffix": "nonstandard dialectal suffix",
     "honorific form": "honorific",
@@ -1719,6 +1754,7 @@ xlat_tags_map = {
     "now sometimes by conflation with etymology 1 under standard German influence":
     "sometimes",
     "unstressed form": "unstressed",
+    "mute of": "unstressed form-of",
     "for some speakers": "uncommon",
     'when "do" is unstressed and the next word starts with /j/':
     "unstressed before-j",
@@ -1868,6 +1904,7 @@ xlat_tags_map = {
     "more colloquial": "colloquial",
     "used colloquially and jokingly": "colloquial humorous",
     "used adverbially": "adverbial",
+    "adverbially": "adverbial",
     "intr.": "intransitive",
     "tr.": "transitive",
     "intransitive use": "intransitive",
@@ -2019,6 +2056,8 @@ xlat_tags_map = {
     "colloquially also feminine": "colloquial feminine",
     "colloquial or pejorative": "colloquial pejorative",
     "colloquial or dialectal": "colloquial dialectal",
+    "pejorative or racial slur": "pejorative slur",
+    "racial slur": "slur",
     "in some dialects": "dialectal",
     "in other dialects": "dialectal",
     "dialects": "dialectal",
@@ -2233,6 +2272,7 @@ xlat_tags_map = {
     "academic": "literary",
     "archaic ortography": "archaic",
     "in the plural": "plural-only",
+    "derog.": "derogatory",
     "derogative": "derogatory",
     "derogatively": "derogatory",
     "disparaging": "derogatory",
@@ -2403,6 +2443,7 @@ xlat_tags_map = {
     "Latin-script": "Latin",
     "obsolete form of": "alt-of obsolete",
     "former word": "obsolete",
+    "obs.": "obsolete",
     "etymological spelling": "nonstandard",
     "(hence past tense)": "past",
     "(ablative case)": "ablative",
@@ -2698,7 +2739,8 @@ xlat_tags_map = {
     "Rōmaji transcription of": "alt-of Rōmaji",
     "visual rendering of Morse code for":
     "alt-of visual-rendering morse-code",
-    "soft mutation of": "alt-of soft",
+    "soft mutation of": "alt-of soft-mutation",
+    "causes soft mutation": "triggers-soft-mutation",
     "non-Oxford British English standard spelling of":
     "alt-of nonstandard UK",
     "Nil standard spelling of": "alt-of UK standard",
@@ -2710,6 +2752,7 @@ xlat_tags_map = {
     "deliberate misspelling of": "alt-of misspelling deliberate",
     "common misspelling of": "alt-of misspelling",
     "misconstruction of": "alt-of misconstruction",
+    "misconstructed": "misconstruction",
     "Latin spelling of": "alt-of latin",
     "Latn": "latin",
     "Late Anglo-Norman spelling of": "alt-of Anglo-Norman",
@@ -2780,6 +2823,8 @@ xlat_tags_map = {
     "triggers lenition": "triggers-lenition",
     "triggers lenition of a following consonant-initial noun":
     "triggers-lenition",
+    "triggers eclipsis": "triggers-eclipsis",
+    "triggers h-prothesis": "triggers-h-prothesis",
     "humurous": "humorous",
     "humourous": "humorous",
     "sarcasm": "sarcastic",
@@ -2844,6 +2889,7 @@ xlat_tags_map = {
     "abbreviations": "abbreviation",
     "variants": "variant",
     "Ordinal": "ordinal",
+    "ordinals": "ordinal",
     "local use": "regional",
     "more generally": "broadly",
     "loosely": "broadly",
@@ -2971,6 +3017,7 @@ xlat_tags_map = {
     "Tally marks": "Tally-marks numeral",
     "+ 3rd-pers.": "with-third-person",
     "Historical": "historical",
+    "hist.": "historical",
     "antiquity": "historical",
     "ideophone": "ideophonic",
     "Alsatian (Low Alemannic German)": "Alsatian Alemannic",
@@ -3089,8 +3136,8 @@ valid_tags = set([
     "-nari",  # Japanese inflection type
     "-tari",  # Japanese inflection type
     "abbreviation",
-    "abessive",
-    "ablative",
+    "abessive",   # Case
+    "ablative",   # Case
     "absolute",   # XXX Swedish at least ???
     "absolutive",
     "abstract",
@@ -3150,7 +3197,7 @@ valid_tags = set([
     "character",
     "chiefly",
     "childish",
-    "class-1",
+    "class-1",    # Inflectional classes (e.g., Bantu languages), cf. gender
     "class-10",
     "class-10a",
     "class-11",
@@ -3232,7 +3279,7 @@ valid_tags = set([
     "disjunctive",
     "distal",
     "ditransitive",
-    "dual",       # two in number
+    "dual",       # two in number, cf. singular, trial, plural, duoplural(?)
     "duoplural",  # two or more in number
     "durative",
     "eclipsis",
@@ -3269,7 +3316,7 @@ valid_tags = set([
     "factitive",  # Not sure if same or different as factive
     "factive",
     "familiar",
-    "feminine",  # Gender
+    "feminine",  # Gender, cf. masculine, neuter, common, class-* etc.
     "fifth-conjugation",
     "fifth-declension",
     "fifth-infinitive",
@@ -3380,7 +3427,7 @@ valid_tags = set([
     "locative",
     "lowercase",
     "mainly",
-    "masculine",  # Gender
+    "masculine",  # Gender, cf. feminine, neuter, common, class-* etc.
     "material",
     "matronymic",
     "medial",
@@ -3390,7 +3437,7 @@ valid_tags = set([
     "middle",
     "middle-infinitive",
     "mildly",
-    "misconstruction",
+    "misconstruction",  # Used for e.g. incorrect Latin plurals
     "misspelling",
     "mixed",
     "mixedcase",
@@ -3410,21 +3457,21 @@ valid_tags = set([
     "natural",
     "negative",
     "neologism",
-    "neuter",  # Gender
+    "neuter",  # Gender, cf. masculine, feminine, common, class-* etc.
     "next",  # Next value in sequence (number, letter, etc.)
     "ngoko",
     "nif'al-construction",
-    "no-comparative",
-    "no-construct-forms",
-    "no-genitive",
-    "no-nominative-plural",
-    "no-perfect",
-    "no-plural",
-    "no-past-participle",
-    "no-present-participle",
-    "no-senses",
-    "no-superlative",
-    "no-supine",
+    "no-comparative",        # The word has no comparative form
+    "no-construct-forms",    # The word has no construct forms
+    "no-genitive",           # The word has no genitive form
+    "no-nominative-plural",  # The word has no nominative plural
+    "no-perfect",            # The word has no perfect aspect/form
+    "no-plural",             # The word has no plural form (= singular only)
+    "no-past-participle",    # The word has no past participle
+    "no-present-participle",  # The word has no present participle
+    "no-senses",             # Added synthesized sense when no senses extracted
+    "no-superlative",        # The word has no superlative form
+    "no-supine",             # The word has no supine form
     "nominal",
     "nominal-state",
     "nominalization",
@@ -3475,9 +3522,9 @@ valid_tags = set([
     "pin-pen-merger",
     "place",
     "pluperfect",
-    "plural",     # depending on language, two or more / three or more
-    "plural-only",
-    "plurale-tantum",
+    "plural",     # Number, cf. sigular, dual, trial, duoplural
+    "plural-only",  # Word only manifested in plural in this sense
+    "plurale-tantum",  # Word always in plural even if singular meaning
     "poetic",
     "polite",
     "polytonic",
@@ -3543,13 +3590,13 @@ valid_tags = set([
     "simple",
     "simplified",
     "single-possession",
-    "singular",
+    "singular",  # Number, cf. plural, dual, trial, duoplural
     "singular-only",
     "singulative",  # Individuation of a collective or mass noun
     "sixth-conjugation",
     "slang",
     "slur",
-    "soft",
+    "soft-mutation",  # At least Welsh
     "sometimes",
     "somewhat",
     "specifically",
@@ -3612,8 +3659,11 @@ valid_tags = set([
     "translative",
     "translingual",
     "transliteration",
-    "trial",
-    "triggers-lenition",
+    "trial",  # Number, cf. singular, dual, plural, duoplural
+    "triggers-eclipsis",      # Irish
+    "triggers-h-prothesis",   # Irish
+    "triggers-lenition",      # Irish
+    "triggers-soft-mutation",  # Welsh
     "two-termination",
     "type-a",
     "type-p",

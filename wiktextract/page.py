@@ -7,11 +7,11 @@ import sys
 import copy
 import html
 import collections
-import unicodedata
 from wikitextprocessor import (Wtp, WikiNode, NodeKind, ALL_LANGUAGES,
                                MAGIC_FIRST, MAGIC_LAST)
 from .parts_of_speech import part_of_speech_map, PARTS_OF_SPEECH
 from .config import WiktionaryConfig
+from .linkages import parse_linkage_item_text
 from .clean import clean_value
 from .places import place_prefixes  # XXX move processing to places.py
 from .unsupported_titles import unsupported_title_map
@@ -23,7 +23,6 @@ from wiktextract.form_descriptions import (
     parse_alt_or_inflection_of, parse_head_final_tags,
     parse_translation_desc, xlat_tags_map, valid_tags,
     classify_desc, nested_translations_re, tr_note_re)
-from .tags import linkage_beginning_tags
 
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
@@ -264,12 +263,6 @@ head_tag_re = re.compile(r"^(head|Han char|arabic-noun|arabic-noun-form|"
                              ]) +
                          r")(-|/|$)")
 
-# Matches an unicode character including any combining diacritics (even if
-# separate characters)
-unicode_dc_re = re.compile(r"\w[{}]|.".format(
-    "".join(chr(x) for x in range(0, 0x110000)
-            if unicodedata.category(chr(x)) == "Mn")))
-
 # Additional templates to be expanded in the pre-expand phase
 additional_expand_templates = set([
     "multitrans",
@@ -350,32 +343,6 @@ linkage_inverses = {
 
 # List of all field names used for linkages
 linkage_fields = list(sorted(set(linkage_map.values())))
-
-# Exceptional splits for linkages
-linkage_split_exceptions = {
-    "∛ ∜": ["∛", "∜"],
-    "...": ["...", "…"],
-    "…": ["...", "…"],
-}
-
-# Truncate linkage word if it matches any of these strings
-linkage_truncate_re = re.compile(
-    "|".join(re.escape(x) for x in [
-        " and its derived terms",
-        " UTF-16 0x214C",
-        ]))
-
-# Regexp for identifying special linkages containing lists of letters, digits,
-# or characters
-script_chars_re = re.compile(
-    r"(script letters| script| letters|"
-    r"Dialectological|Puctuation|Symbols|"
-    r"Guillemets|Single guillemets|"
-    r"tetragrams|"
-    r"digits)(;|$)|"
-    r"(^|; )(Letters using |Letters of the |"
-    r"Variations of letter )|"
-    r"^(Hiragana|Katakana)$")
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -808,31 +775,6 @@ tr_ignore_re = re.compile(
     "^(" + "|".join(re.escape(x) for x in tr_ignore_prefixes) + ")|" +
     "|".join(re.escape(x) for x in tr_ignore_contains) + "|" +
     "|".join(tr_ignore_regexps))  # These are not to be escaped
-
-# Linkage will be ignored if it has one of these prefixes
-linkage_ignore_prefixes = [
-    "Historical and regional synonyms of ",
-    "edit data",
-    "or these other third-person pronouns",
-    "Signal flag:",
-    "Semaphore:",
-    "introduced in Unicode ",
-    "Formal terms",
-    "informal and slang terms",
-    "Any of Thesaurus:",
-    "See contents of Category:",
-]
-linkage_ignore_prefixes_re = re.compile(
-    "|".join(re.escape(x) for x in linkage_ignore_prefixes))
-
-# Ignore linkage parenthesized sections that contain one of these strings
-linkage_paren_ignore_contains_re = re.compile(
-    r"\b(" +
-    "|".join(re.escape(x) for x in [
-        "from Etymology",
-        "used as",
-        ]) +
-    ")([, ]|$)")
 
 # Prefixes, tags, and regexp for finding romanizations from the pronuncation
 # section
@@ -2292,7 +2234,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # print("PARSE_LINKAGE:", linkagenode)
         if not config.capture_linkages:
             return
-        have_linkages = False
         have_panel_template = False
         toplevel_text = []
         next_navframe_sense = None  # Used for "(sense):" before NavFrame
@@ -2301,27 +2242,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
             assert isinstance(contents, (list, tuple))
             assert isinstance(field, str)
             assert sense is None or isinstance(sense, str)
-            nonlocal have_linkages
 
             # print("PARSE_LINKAGE_ITEM: {} ({}): {}"
             #       .format(field, sense, contents))
 
             parts = []
             ruby = ""
-            base_roman = None
-            base_alt = None
-            base_qualifier = None
-
-            # If ``sense`` can be parsed as tags, treat it as tags instead
-            if sense:
-                cls = classify_desc(sense)
-                if cls == "tags":
-                    base_qualifier = sense
-                    sense = None
 
             def item_recurse(contents, italic=False):
                 assert isinstance(contents, (list, tuple))
-                nonlocal have_linkages
                 nonlocal sense
                 nonlocal ruby
                 nonlocal parts
@@ -2387,7 +2316,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 v.startswith("image:") or
                                 v.startswith("file:")):
                                 ignore = True
-                                have_linkages = True
                             if not ignore:
                                 v = node.args[-1]
                                 if (len(node.args) == 1 and
@@ -2411,620 +2339,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
             item = clean_node(config, ctx, None, parts)
             # print("LINKAGE ITEM CONTENTS:", parts)
             # print("CLEANED ITEM: {!r}".format(item))
-            item = re.sub(r"\(\)", "", item)
-            item = re.sub(r"\s\s+", " ", item)
-            item = item.strip()
 
-            # Check if this item is a stand-alone sense (or tag) specifier
-            # for following items (e.g., commonly in a table, see 滿)
-            m = re.match(r"\(([-a-zA-Z0-9 ]+)\):$", item)
-            if m:
-                return m.group(1)
-
-            # If the item is a reference to the thesaurus, skip it.  We should
-            # be injecting data from the thesaurus in each word referenced
-            # from it.
-            lst = item.split(" ")
-            if item.startswith("See also Thesaurus:"):
-                item = ""
-                have_linkages = True
-            elif item.startswith("See also Appendix:"):
-                item = ""
-                have_linkages = True
-            elif item.startswith("See also "):
-                item = item[9:]
-            elif item.startswith("See "):
-                item = item[4:]
-            elif item.startswith("Appendix:"):
-                item = ""
-                have_linkages = True
-            elif item.startswith("Category:") or item.startswith(":Category:"):
-                item = ""
-                have_linkages = True
-            elif item.startswith("Entries in the "):
-                item = ""
-                have_linkages = True
-            elif item.startswith("Wikipedia article "):
-                item = ""
-                have_linkages = True
-            elif item.endswith(" Wikipedia"):
-                item = ""
-                have_linkages = True
-            elif item.endswith(" Wikipedia."):
-                item = ""
-                have_linkages = True
-            elif (len(lst) > 2 and
-                  lst[0] in (word, word.capitalize()) and
-                  lst[1] in ("in", "on")):
-                # E.g., harness in the Encyclopaedia Britannica...
-                item = ""
-                have_linkages = True
-            m = re.search(r" on (Wikispecies|Wikimedia Commons|Wikipedia|"
-                          r"[A-Z]\w+ Wiktionary|[A-Z]\w+ Wikipedia)\.?$",
-                          item)
-            if m:
-                item = item[:m.start()]
-
-            if item.startswith(":"):
-                item = item[1:]
-            item = item.strip()
-
-            # print("    LINKAGE ITEM: {}: {} (sense {})"
-            #       .format(field, item, sense))
-
-            # Replace occurrences of ~ in the item by the page title
-            safetitle = ctx.title.replace("\\", "\\\\")
-            item = re.sub(r" ~ ", " " + safetitle + " ", item)
-            item = re.sub(r"^~ ", safetitle + " ", item)
-            item = re.sub(r" ~$", " " + safetitle, item)
-
-            # Some Korean words use "word (romanized): english" pattern
-            m = re.match(r"(.+?) \(([^():]+)\): ([-a-zA-Z0-9,. ]+)$", item)
-            if m:
-                base_roman = m.group(2)
-                english = m.group(3)
-                item = m.group(1)
-                lst = base_roman.split(", ")
-                if len(lst) == 2 and classify_desc(lst[0]) == "other":
-                    base_alt = lst[0]
-                    base_roman = lst[1]
-                if sense:
-                    sense += "; " + english
-                else:
-                    sense = english
-
-            # Many words have tags or similar descriptions in the beginning
-            # followed by a colon and one or more linkages (e.g.,
-            # panetella/Finnish)
-            m = (re.match(r"^\((([^():]|\([^()]*\))+)\): ([^:]*)$", item) or
-                 re.match(r"^([a-zA-Z][-'a-zA-Z0-9 ]*"
-                          r"(\([^()]+\)[-'a-zA-Z0-9 ]*)*): ([^:]*)$", item))
-            if m:
-                desc = m.group(1)
-                rest = m.group(len(m.groups()))
-                # Check for certain comma-separated tags combined
-                # with English text at the beginning or end of a
-                # comma-separated parenthesized list
-                lst = split_at_comma_semi(desc)
-                while len(lst) > 1:
-                    # Check for tags at the beginning
-                    cls = classify_desc(lst[0])
-                    if cls == "tags":
-                        if base_qualifier:
-                            base_qualifier += " " + lst[0]
-                        else:
-                            base_qualifier = lst[0]
-                        lst = lst[1:]
-                        continue
-                    # Check for tags at the end
-                    cls = classify_desc(lst[-1])
-                    if cls == "tags":
-                        if base_qualifier:
-                            base_qualifier += " " + lst[-1]
-                        else:
-                            base_qualifier = lst[-1]
-                        lst = lst[:-1]
-                        continue
-                    break
-                desc = ", ".join(lst)
-
-                # Sometimes we have e.g. "chemistry (slang)" with are
-                # both tags (see "stink").  Handle that case by
-                # removing parentheses if the value is still tags.
-                if desc.find("(") >= 0:
-                    x = re.sub(r"[()]", ",", desc)
-                    if classify_desc(x) == "tags":
-                        desc = x
-                elif rest.find("(") >= 0:
-                    x = re.sub(r"[()]", ",", rest)
-                    if classify_desc(x) == "tags":
-                        rest = desc
-                        desc = x
-
-                # Try to determine which side is description and which is
-                # the linked term (both orders are widely used in Wiktionary)
-                cls = classify_desc(desc)
-                cls2 = classify_desc(rest)
-                # print("linkage prefix: desc={!r} cls={} rest={!r} cls2={}"
-                #       .format(desc, cls, rest, cls2))
-
-                e1 = ctx.page_exists(desc)
-                e2 = ctx.page_exists(rest)
-                if cls != "tags":
-                    if (cls2 == "tags" or
-                        (e1 and not e1) or
-                        (e1 and e2 and cls2 == "english" and
-                         cls in ("other", "romanization")) or
-                        (not e1 and not e2 and cls2 == "english" and
-                         cls in ("other", "romanization"))):
-                        desc, rest = rest, desc  # Looks like swapped syntax
-                        cls = cls2
-                if re.search(linkage_paren_ignore_contains_re, desc):
-                    desc = ""
-                # print("linkage colon prefix desc={!r} rest={!r} cls={}"
-                #      .format(desc, rest, cls))
-
-                # Handle the prefix according to its type
-                if cls == "tags":
-                    if base_qualifier:
-                        base_qualifier += " " + desc
-                    else:
-                        base_qualifier = desc
-                    item = rest
-                elif cls in ("english", "taxonomic"):
-                    if sense:
-                        sense += "; " + desc
-                    else:
-                        sense = desc
-                    item = rest
-                elif desc.isdigit():
-                    idx = int(desc) - 1
-                    if idx >= 0 and idx < len(pos_datas):
-                        d = pos_datas[idx]
-                        gl = "; ".join(d.get("glosses", ()))
-                        if not gl:
-                            ctx.debug("parenthesized numeric linkage prefix, "
-                                      "but the referenced sense has no gloss: "
-                                      "{}".format(desc))
-                        elif sense:
-                            sense += "; " + gl
-                        else:
-                            sense = gl
-                        item = rest
-                    else:
-                        ctx.debug("parenthesized numeric linkage prefix, "
-                                  "but there is no sense with such index: {}"
-                                  .format(desc))
-                else:
-                    ctx.debug("unrecognized linkage prefix: {} desc={} rest={} "
-                              "cls={} cls2={} e1={} e2={}"
-                              .format(item, desc, rest, cls, cls2, e1, e2))
-
-            base_sense = sense
-
-            # Certain linkage items have space-separated valus.  These are
-            # generated by, e.g., certain templates
-            if base_sense in ("A paper sizes",):
-                base_qualifier = None
-                item = ", ".join(item.split())
-            elif base_qualifier in ("Arabic digits",):
-                item = ", ".join(item.split())
-
-            # XXX temporarily disabled.  These should be analyzed.
-            #if item.find("(") >= 0 and item.find(", though ") < 0:
-            #    ctx.debug("linkage item has remaining parentheses: {}"
-            #              .format(item))
-
-            item = re.sub(r"\s*\^\(\s*\)", "", item)  # Now empty superscript
-            item = item.strip()
-            if not item:
-                return None
-
-            # The item may contain multiple comma-separated linkages
-            if base_roman:
-                subitems = [item]
-            elif (ctx.title.find(" or ") < 0 and
-                  all(ctx.title not in x.split(" or ")
-                      for x in split_at_comma_semi(item)
-                      if x.find(" or ") >= 0)):
-                subitems = split_at_comma_semi(item, extra=[" or "])
-            else:
-                subitems = split_at_comma_semi(item)
-            if len(subitems) > 1:  # Would be merged from multiple subitems
-                ruby = ""
-            for item1 in subitems:
-                if len(subitems) > 1 and item1 in ("...", "…"):
-                    # Some lists have ellipsis in the middle - don't generate
-                    # linkages for the ellipsis
-                    continue
-                item1 = item1.strip()
-                qualifier = base_qualifier
-                sense = base_sense
-                parts = []
-                roman = base_roman  # Usually None
-                alt = base_alt  # Usually None
-                taxonomic = None
-                english = None
-
-                # Some Korean words use "word (alt, oman, “english”) pattern
-                # See 滿/Korean
-                m = re.match(r'([^(),;:]+) \(([^(),;:]+), ([^(),;:]+), '
-                             r'[“”"]([^”“"]+)[“”"]\)$', item)
-                if (m and classify_desc(m.group(1)) == "other" and
-                    classify_desc(m.group(2)) == "other"):
-                    alt = m.group(2)
-                    roman = m.group(3)
-                    english = m.group(4)
-                    item1 = m.group(1)
-
-                words = item1.split(" ")
-                if (len(words) > 1 and
-                    words[0] in linkage_beginning_tags and
-                    words[0] != ctx.title):
-                    t = linkage_beginning_tags[words[0]]
-                    item1 = " ".join(words[1:])
-                    if qualifier:
-                        qualifier += " " + t
-                    else:
-                        qualifier = t
-
-                # Extract quoted English translations (there are also other
-                # kinds of English translations)
-                def english_repl(m):
-                    nonlocal english
-                    nonlocal qualifier
-                    v = m.group(1).strip()
-                    # If v is "tags: sense", handle the tags
-                    m = re.match(r"^([a-zA-Z ]+): (.*)$", v)
-                    if m:
-                        desc, rest = m.groups()
-                        if classify_desc(desc) == "tags":
-                            if qualifier:
-                                qualifier += " " + desc
-                            else:
-                                qualifier = desc
-                            v = rest
-                    if english:
-                        english += "; " + v
-                    else:
-                        english = v
-                    return ""
-
-                item1 = re.sub(r'[“"]([^“”"]+)[“”"],?\s*', english_repl, item1)
-
-                # There could be multiple parenthesized parts, and
-                # sometimes both at the beginning and at the end
-                while not sense or not re.search(script_chars_re, sense):
-                    par = None
-                    final_par = False
-                    if par is None:
-                        m = re.match(r"\((([^()]|\([^()]*\))*)\):?\s*", item1)
-                        if m:
-                            par = m.group(1)
-                            item1 = item1[m.end():]
-                        else:
-                            m = re.search("\s\((([^()]|\([^()]*\))*)\)\.?$",
-                                          item1)
-                            if m:
-                                par = m.group(1)
-                                item1 = item1[:m.start()]
-                                final_par = True
-                    if not par:
-                        break
-                    if re.search(linkage_paren_ignore_contains_re, par):
-                        continue  # Skip these linkage descriptors
-                    par = par.strip()
-                    # Handle tags from beginning of par.  We also handle "other"
-                    # here as Korean entries often have Hanja form in the
-                    # beginning of parenthesis, before romanization.  Similar
-                    # for many Japanese entries.
-                    while par:
-                        idx = par.find(",")
-                        if idx <= 0:
-                            break
-                        cls = classify_desc(par[:idx])
-                        if cls == "other" and not alt:
-                            alt = par[:idx]
-                        elif cls == "taxonomic":
-                            taxonomic = par[:idx]
-                        elif cls == "tags":
-                            if qualifier:
-                                qualifier += " " + par[:idx]
-                            else:
-                                qualifier = par[:idx]
-                        else:
-                            break
-                        par = par[idx + 1:].strip()
-
-                    # Check for certain comma-separated tags combined
-                    # with English text at the beginning or end of a
-                    # comma-separated parenthesized list
-                    lst = par.split(",") if len(par) > 1 else [par]
-                    lst = list(x.strip() for x in lst if x.strip())
-                    while len(lst) > 1:
-                        cls = classify_desc(lst[0])
-                        if cls == "tags":
-                            if qualifier:
-                                qualifier += " " + lst[0]
-                            else:
-                                qualifier = lst[0]
-                            lst = lst[1:]
-                            continue
-                        cls = classify_desc(lst[-1])
-                        if cls == "tags":
-                            if qualifier:
-                                qualifier += " " + lst[-1]
-                            else:
-                                qualifier = lst[-1]
-                            lst = lst[:-1]
-                            continue
-                        break
-                    par = ", ".join(lst)
-
-                    # Handle remaining types
-                    if not par:
-                        continue
-                    if par.find(" usage notes") >= 0:
-                        continue  # Skip certain texts that are not useful
-                    if re.search(script_chars_re, par):
-                        if base_sense:
-                            base_sense += "; " + par
-                        else:
-                            base_sense = par
-                        if sense:
-                            sense += "; " + par
-                        else:
-                            sense = par
-                    else:
-                        cls = classify_desc(par)
-                        # print("classify_desc: {} -> {}".format(par, cls))
-                        if cls == "tags":
-                            if qualifier:
-                                qualifier += " " + par
-                            else:
-                                qualifier = par
-                        elif cls == "english":
-                            if final_par:
-                                if english:
-                                    english += "; " + par
-                                else:
-                                    english = par
-                            else:
-                                if sense:
-                                    sense += "; " + par
-                                else:
-                                    sense = par
-                        elif cls == "romanization":
-                            roman = par
-                        elif cls == "taxonomic":
-                            taxonomic = par
-                        elif par.isdigit():
-                            idx = int(par) - 1
-                            if idx >= 0 and idx < len(pos_datas):
-                                d = pos_datas[idx]
-                                gl = "; ".join(d.get("glosses", ()))
-                                if not gl:
-                                    ctx.debug("parenthesized number "
-                                              "but the referenced sense has no "
-                                              "gloss: {}".format(par))
-                                elif sense:
-                                    sense += "; " + gl
-                                else:
-                                    sense = gl
-                            else:
-                                ctx.debug("parenthesized number but there is "
-                                          "no sense with such index: {}"
-                                          .format(par))
-                        else:
-                            if alt:
-                                alt += "; " + par
-                            else:
-                                alt = par
-
-                # Parse linkages with "value = english" syntax (e.g.,
-                # väittää/Finnish)
-                idx = item1.find(" = ")
-                if idx >= 0:
-                    eng = item1[idx + 3:]
-                    if classify_desc(eng) == "english":
-                        english = eng
-                        item1 = item1[:idx]
-                    else:
-                        # Some places seem to use it reversed "english = value"
-                        eng = item1[:idx]
-                        if classify_desc(eng) == "english":
-                            english = eng
-                            item1 = item1[idx + 3:]
-
-                # Parse linkages with "value - english" syntax (e.g.,
-                # man/Faroese)
-                idx = item1.find(" - ")
-                if idx >= 0:
-                    eng = item1[idx + 3:]
-                    if classify_desc(eng) == "english":
-                        english = eng
-                        item1 = item1[:idx]
-
-                # Filter out certain words that are used in linkages but
-                # are generally not intended as a linked word.
-                if item1 in ("etc.", "other derived terms:"):
-                    continue
-
-                # Remove certain prefixes from linkages
-                m = re.match(r"^(" +
-                             "|".join([
-                                 "see Thesaurus:",
-                                 "See Thesaurus:",
-                                 "see also Thesaurus:",
-                                 "See also Thesaurus:",
-                                 "see also ",
-                                 "See also ",
-                                 "see ",
-                                 "See ",
-                                 "Thesaurus:"]) +
-                             ")", item1)
-                if m:
-                    item1 = item1[m.end():]
-
-                # Parse certain tags at the end of the linked term (unless
-                # we are in a letters list)
-                if not sense or not re.search(script_chars_re, sense):
-                    lang = ctx.section
-                    item1, q = parse_head_final_tags(ctx, lang, item1)
-                    if q:
-                        if qualifier:
-                            qualifier += " " + " ".join(q)
-                        else:
-                            qualifier = " ".join(q)
-
-                if re.match(linkage_ignore_prefixes_re, item1):
-                    continue  # Ignore certain prefixes
-                m = re.search(linkage_truncate_re, item1)
-                if m:
-                    # suffix = item1[m.start():]  # Currently ignored
-                    item1 = item1[:m.start()]
-                if not item1:
-                    continue  # Ignore empty link targets
-                if item1 == word:
-                    continue  # Ignore self-links
-
-                def add(w, r):
-                    nonlocal alt
-                    nonlocal taxonomic
-                    nonlocal have_linkages
-
-                    # Check if the word contains the Fullwith Solidus, and if
-                    # so, split by it and treat the the results as alternative
-                    # linkages.  (This is very commonly used for alternative
-                    # written forms in Chinese compounds and other linkages.)
-                    # However, if the word contains a comma, then we wont't
-                    # split as this is used when we have a different number
-                    # of romanizations than written forms, and don't know
-                    # which is which.
-                    if ((not w or w.find(",") < 0) and
-                        (not r or r.find(",") < 0) and
-                        not ctx.page_exists(w)):
-                        lst = w.split("／") if len(w) > 1 else [w]
-                        if len(lst) == 1:
-                            lst = w.split(" / ")
-                        if len(lst) > 1:
-                            # Treat each alternative as separate linkage
-                            for w in lst:
-                                add(w, r)
-                            return
-                    # If we have roman but not alt and the word is ASCII,
-                    # move roman to alt.
-                    if r and not alt and w.isascii():
-                        alt = r
-                        r = None
-                    # Add the linkage
-                    dt = {}
-                    if qualifier:
-                        parse_sense_qualifier(ctx, qualifier, dt)
-                    if sense:
-                        dt["sense"] = sense.strip()
-                    if r:
-                        dt["roman"] = r.strip()
-                    if ruby:
-                        dt["ruby"] = ruby.strip()
-                    if alt and alt != w:
-                        dt["alt"] = alt.strip()
-                    if english:
-                        dt["english"] = english.strip()
-                    if taxonomic:
-                        if re.match(r"×[A-Z]", taxonomic):
-                            data_append(ctx, dt, "tags", "extinct")
-                            taxonomic = taxonomic[1:]
-                        dt["taxonomic"] = taxonomic
-                    if re.match(r"×[A-Z]", w):
-                        data_append(ctx, dt, "tags", "extinct")
-                        w = w[1:]  # Remove × before dead species names
-                    if alt and re.match(r"×[A-Z]", alt):
-                        data_append(ctx, dt, "tags", "extinct")
-                        alt = alt[1:]  # Remove × before dead species names
-                    dt["word"] = w
-                    for old in data.get(field, ()):
-                        if dt == old:
-                            break
-                    else:
-                        data_append(ctx, data, field, dt)
-                        have_linkages = True
-
-                # Handle exceptional linkage splits and other linkage
-                # conversions (including expanding to variant forms)
-                if item1 in linkage_split_exceptions:
-                    for item2 in linkage_split_exceptions[item1]:
-                        add(item2, roman)
-                    continue
-
-                # Various templates for letters in scripts use spaces as
-                # separators and also have multiple characters without
-                # spaces consecutively.
-                v = sense or qualifier
-                if v and re.search(script_chars_re, v):
-                    if (len(item1.split()) > 1 or len(item1) == 2 or
-                        (len(subitems) > 10 and v in ("Hiragana", "Katakana"))):
-                        if v == qualifier:
-                            if sense:
-                                sense += "; " + qualifier
-                            else:
-                                sense = qualifier
-                            qualifier = None
-                        if re.search(r" (letters|digits|script)$", v):
-                            qualifier = v  # Also parse as qualifier
-                        elif re.search(r"Variations of letter |"
-                                       r"Letters using |"
-                                       r"Letters of the ", v):
-                            qualifier = "letter"
-                        parts = item1.split(". ")
-                        extra = ()
-                        if len(parts) > 1:
-                            extra = parts[1:]
-                            item1 = parts[0]
-                        # Handle multi-character names for chars in language's
-                        # alphabet, e.g., "Ny ny" in P/Hungarian.
-                        if (len(subitems) > 20 and len(item1.split()) == 2 and
-                            all(len(x) <= 3 for x in item1.split())):
-                            parts = list(m.group(0) for m in
-                                         re.finditer(r"(\w[\u0300-\u036f]?)+|.",
-                                                     item1)
-                                         if not m.group(0).isspace() and
-                                         m.group(0) not in ("(", ")"))
-                        else:
-                            parts = list(m.group(0) for m in
-                                         re.finditer(r".[\u0300-\u036f]?",
-                                                     item1)
-                                         if not m.group(0).isspace() and
-                                         m.group(0) not in ("(", ")"))
-                        for e in extra:
-                            idx = e.find(":")
-                            if idx >= 0:
-                                e = e[idx + 1:].strip()
-                                if e.endswith("."):
-                                    e = e[:-1]
-                                parts.extend(e.split())
-
-                        # XXX this is not correct - see P/Vietnamese
-                        # While some sequences have multiple consecutive
-                        # characters, others use pairs and some have
-                        # 2/3 character names, e.g., "Ng ng".
-
-                        rparts = None
-                        if roman:
-                            rparts = list(m.group(0) for m in
-                                          re.finditer(r".[\u0300-\u036f]",
-                                                      roman)
-                                          if not m.group(0).isspace())
-                            if len(rparts) != len(parts):
-                                rparts = None
-                        if not rparts:
-                            rparts = [None] * len(parts)
-
-                        for w, r in zip(parts, rparts):
-                            add(w, r)
-                        continue
-
-                add(item1, roman)
+            return parse_linkage_item_text(ctx, word, data, field, item,
+                                           sense, ruby, pos_datas)
 
         def parse_linkage_template(node):
             nonlocal have_panel_template
@@ -3148,18 +2465,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
         parsed = ctx.parse(text, expand_all=True,
                            template_fn=linkage_template_fn1)
         parse_linkage_recurse(parsed.children, field, None)
-        if not have_linkages and not have_panel_template:
+        if not data.get(field) and not have_panel_template:
             text = "".join(toplevel_text).strip()
             if (text.find("\n") < 0 and text.find(",") > 0 and
                 text.count(",") > 3):
-                if text.startswith("See "):
-                    have_linkages = True
-                else:
+                if not text.startswith("See "):
                     parse_linkage_item([text], field, None)
-            elif text.startswith("See "):
-                have_linkages = True
-            # if not have_linkages and not have_panel_template:
-            #     ctx.debug("no linkages found")
 
     def parse_translations(data, xlatnode):
         """Parses translations for a word.  This may also pull in translations

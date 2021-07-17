@@ -167,6 +167,8 @@ def extract_thesaurus_data(ctx, config):
                         q = m.group(1)
                         if q == item_sense:
                             return ""
+                        if q.find("XLITS") >= 0:
+                            return q
                         dt = {}
                         parse_sense_qualifier(ctx, q, dt)
                         tags.extend(dt.get("tags", ()))

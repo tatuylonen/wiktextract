@@ -893,6 +893,10 @@ def clean_value(config, title, no_strip=False):
     title = re.sub(r'(?si)<\s*div\b[^>]*?\bclass="[^"]*?\bfloatright\b[^>]*?>'
                    r'((<div\b.*?</div>)|.)*?</div>',
                    "", title)
+    # Remove <sup> with previewonly class (generated e.g. by {{taxlink|...}})
+    title = re.sub(r'(?si)<\s*sup\b[^>]*?\bclass="[^"]*?\bpreviewonly\b[^>]*?>'
+                   r'((<.*?</.[^>]>)|.)*?</sup>',
+                   "", title)
     # Change <div> and </div> to newlines.  Ditto for tr, li, table
     title = re.sub(r"(?si)<\s*/?\s*(div|tr|li|table)\b[^>]*>", "\n", title)
     # Change <td> </td> to spaces.  Ditto for th.

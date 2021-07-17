@@ -64,6 +64,7 @@ non_latin_scripts = [
     "BALINESE",
     "BENGALI",
     "BRAHMI",
+    "BRAILLE",
     "CANADIAN",
     "CHAKMA",
     "CHAM",
@@ -141,9 +142,12 @@ nested_translations_re = re.compile(
 # Regexp that matches head tag specifiers.  Used to match tags from end of
 # translations and linkages
 head_final_re = re.compile(
-    r"( -)?(( ({}))+( or( ({}))+)*)$".format(
-        "|".join(re.escape(x) for x in xlat_head_map.keys()),
-        "|".join(re.escape(x) for x in xlat_head_map.keys())))
+    r"( -)?( ({}))+$".format(
+        "|".join(re.escape(x) for x in
+                 # The sort is to put longer ones first, preferring them in
+                 # the regexp match
+                 sorted(xlat_head_map.keys(), key=lambda x: len(x),
+                        reverse=True))))
 
 # Regexp used to match head tag specifiers at end of a form for certain
 # languages (particularly Swahili and similar languages).
@@ -638,7 +642,7 @@ def parse_head_final_tags(ctx, lang, form):
         if ((not tagkeys[-1].isdigit() or
              lang in head_final_numeric_langs) and
             not ctx.title.endswith(tagkeys)):
-            if not tagkeys[0].isdigit() or lang in head_final_numeric_langs:
+            if not tagkeys[-1].isdigit() or lang in head_final_numeric_langs:
                 form = form[:m.start()]
                 for t in tagkeys.split():  # Note: effectively strips
                     if t == "or":
@@ -814,10 +818,17 @@ def parse_word_head(ctx, pos, text, data):
 
             # If only one word, assume it is comma-separated alternative
             # to the previous one
-            if (desc.find(" ") < 0 and prev_tags and
+            if (desc.find(" ") < 0 and
                 classify_desc(desc) != "tags"):
-                add_related(ctx, data, prev_tags, [desc])
-                continue
+                if prev_tags:
+                    # Assume comma-separated alternative to previous one
+                    add_related(ctx, data, prev_tags, [desc])
+                    continue
+                elif distw(titleparts, desc) <= 0.5:
+                    # Similar to head word, assume a dialectal variation to
+                    # the base form.  Cf. go/Alemannic German/Verb
+                    add_related(ctx, data, ["alternative"], [desc])
+                    continue
 
             m = re.match(r"^(\d+) strokes?$", desc)
             if m:
@@ -1248,6 +1259,7 @@ def parse_alt_or_inflection_of1(ctx, gloss):
                     tags.extend(ts)
             if ("alt-of" in tags or
                 "form-of" in tags or
+                "synonym-of" in tags or
                 "compound-of" in tags):
                 break
         elif m.group(0) == " of ":
@@ -1388,12 +1400,12 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
                 return "taxonomic"
 
     # If all words are in our English dictionary, interpret as English
-    if desc in english_words and desc[0].isalpha():
-        return "english"   # Handles ones containing whitespace
-    tokens = tokenizer.tokenize(desc)
-    if not tokens:
-        return "other"
-    if desc.isascii():
+    if desc.isascii() and len(desc) > 1:
+        if desc in english_words and desc[0].isalpha():
+            return "english"   # Handles ones containing whitespace
+        tokens = tokenizer.tokenize(desc)
+        if not tokens:
+            return "other"
         lst = list(x not in not_english_words and
                    not x.isdigit() and
                    (x in english_words or x.lower() in english_words or
@@ -1458,7 +1470,9 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
                   '"',
                   '“',
                   '”',
+                  "/",
                   "…",  # alternative to "..."
+                  "⁻",  # superscript -, used in some Cantonese roman, e.g. "we"
                   "ʹ"):  # ʹ e.g. in understand/English/verb Russian transl
             classes1.append("OK")
             continue
