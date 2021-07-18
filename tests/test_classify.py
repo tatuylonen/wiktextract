@@ -322,10 +322,10 @@ class ClassifyTests(unittest.TestCase):
 
     def test_classify73(self):
         # This really tests that disabling unknown starts works in classify_desc
-        cls = classify_desc("symbol for boron")
+        cls = classify_desc("symbol, for boron")
         self.assertEqual(cls, "tags")
 
     def test_classify74(self):
         # This really tests that disabling unknown starts works in classify_desc
-        cls = classify_desc("symbol for boron", no_unknown_starts=True)
+        cls = classify_desc("symbol, for boron", no_unknown_starts=True)
         self.assertEqual(cls, "english")
