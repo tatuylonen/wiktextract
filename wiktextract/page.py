@@ -1625,25 +1625,29 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 parsed = parse_alt_or_inflection_of(ctx, gloss)
                 if parsed is not None:
                     tags, dts = parsed
-                    for dt in dts or ():
-                        ftags = list(tag for tag in tags if tag != "form-of")
-                        if "alt-of" in tags:
-                            data_extend(ctx, sense_data, "tags", ftags)
-                            data_append(ctx, sense_data, "alt_of", dt)
-                        elif "compound-of" in tags:
-                            data_extend(ctx, sense_data, "tags", ftags)
-                            data_append(ctx, sense_data, "compound_of", dt)
-                        elif "synonym-of" in tags:
-                            data_extend(ctx, dt, "tags", ftags)
-                            data_append(ctx, sense_data, "synonyms", dt)
-                        elif tags and dt.get("word", "").startswith("of "):
-                            dt["word"] = dt["word"][3:]
-                            data_append(ctx, sense_data, "tags", "form-of")
-                            data_extend(ctx, sense_data, "tags", ftags)
-                            data_append(ctx, sense_data, "form_of", dt)
-                        elif "form-of" in tags:
-                            data_extend(ctx, sense_data, "tags", tags)
-                            data_append(ctx, sense_data, "form_of", dt)
+                    if not dts and tags:
+                        data_extend(ctx, sense_data, "tags", tags)
+                    else:
+                        for dt in dts:
+                            ftags = list(tag for tag in tags
+                                         if tag != "form-of")
+                            if "alt-of" in tags:
+                                data_extend(ctx, sense_data, "tags", ftags)
+                                data_append(ctx, sense_data, "alt_of", dt)
+                            elif "compound-of" in tags:
+                                data_extend(ctx, sense_data, "tags", ftags)
+                                data_append(ctx, sense_data, "compound_of", dt)
+                            elif "synonym-of" in tags:
+                                data_extend(ctx, dt, "tags", ftags)
+                                data_append(ctx, sense_data, "synonyms", dt)
+                            elif tags and dt.get("word", "").startswith("of "):
+                                dt["word"] = dt["word"][3:]
+                                data_append(ctx, sense_data, "tags", "form-of")
+                                data_extend(ctx, sense_data, "tags", ftags)
+                                data_append(ctx, sense_data, "form_of", dt)
+                            elif "form-of" in tags:
+                                data_extend(ctx, sense_data, "tags", tags)
+                                data_append(ctx, sense_data, "form_of", dt)
 
         if push_sense():
             added = True
@@ -1857,6 +1861,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # XXX is it always a gloss?  Maybe non-gloss?
                 if outer_text:
                     data_append(ctx, common_data, "glosses", outer_text)
+                    if outer_text in ("A person:",):
+                        data_append(ctx, common_data, "tags", "g-person")
 
                 # Process any inner glosses
                 added = False

@@ -251,6 +251,7 @@ uppercase_tags = set([
     "Bangkok",
     "Bardez Catholic",
     "Barlavento",
+    "Bashkir",
     "Batang",
     "Batangas",
     "Bavarian",
@@ -726,6 +727,7 @@ uppercase_tags = set([
     "Kayu Agung Asli",
     "Kayu Agung Pendatang",
     "Kaw Kyaik",
+    "Kazakh",
     "Kazerun",
     "Kazym",
     "Kedayan",
@@ -761,6 +763,7 @@ uppercase_tags = set([
     "Kuwaiti Gulf Arabic",  # Variant of Arabic Language
     "Kuzarg",
     "Kyoto",
+    "Kyrgyz",
     "Kyūshū",
     "Kwantlada",
     "Kölsch",
@@ -1223,6 +1226,7 @@ uppercase_tags = set([
     "Sepoe",
     "Serbia",
     "Serbian",
+    "Serbo-Croatian",
     "Servia",
     "Sesivi",
     "Sette Comuni",
@@ -1947,6 +1951,7 @@ xlat_tags_map = {
     "with gendered nouns": "with-noun",
     "possessive (with noun)": "possessive with-noun",
     "possessive (without noun)": "possessive without-noun",
+    "without a main word": "without-noun",
     "informal 1st possessive": "informal first-person possessive",
     "informal augmentations": "informal augmented",
     "formal or literary": ["formal", "literary"],
@@ -2315,6 +2320,8 @@ xlat_tags_map = {
     "singular/plural": "singular plural",
     "in the singular": "singular",
     "in the plural": "plural",
+    "in singular": "singular",
+    "in plural": "plural",
     "dual/plural": "dual plural",
     "collective or in the plural": "collective in-plural",
     "in the plural": "in-plural",
@@ -2600,7 +2607,7 @@ xlat_tags_map = {
     "ordinal number corresponding to the cardinal number":
     "ordinal form-of",
     "ordinal form of the cardinal number": "ordinal form-of",
-    "ordinal number": "ordinal form-of",
+    "the ordinal number": "ordinal alt-of",
     "used in the form": "used-in-the-form",
     "upper case": "uppercase",
     "upper-case": "uppercase",
@@ -2664,7 +2671,10 @@ xlat_tags_map = {
     "contracted dem-form": "contracted-dem-form",
     "contractions": "contraction",
     "Yale cen": "Yale",
-    "subjective pronoun": "subjective-pronoun",
+    "subjective pronoun": "subjective pronoun",
+    "subject": "subjective",
+    "object": "objective",
+    "possessive pronoun": "possessive pronoun without-noun",
     "revised jeon": "revised-jeon",
     "form used before": "archaic",
     "front vowel harmony variant": "front-vowel",
@@ -2729,7 +2739,13 @@ xlat_tags_map = {
     "acronym": "abbreviation",
     "initialism of": "alt-of abbreviation initialism",
     "contraction of": "alt-of abbreviation contraction",
+    "IUPAC 3-letter abbreviation for": "alt-of abbreviation",
     "IUPAC 3-letter abbreviation of": "alt-of abbreviation",
+    "IUPAC 2-letter abbreviation of": "alt-of abbreviation",
+    "IUPAC 2-letter abbreviation for": "alt-of abbreviation",
+    "IUPAC 1-letter abbreviation of": "alt-of abbreviation",
+    "IUPAC 1-letter abbreviation for": "alt-of abbreviation",
+    "symbol for": "alt-of symbol",
     "praenominal abbreviation of": "alt-of abbreviation praenominal",
     "ellipsis of": "alt-of ellipsis abbreviation",
     "clipping of": "alt-of clipping abbreviation",
@@ -3316,7 +3332,7 @@ valid_tags = set([
     "factitive",  # Not sure if same or different as factive
     "factive",
     "familiar",
-    "feminine",  # Gender, cf. masculine, neuter, common, class-* etc.
+    "feminine",  # Grammatical gender, masculine, neuter, common, class-* etc.
     "fifth-conjugation",
     "fifth-declension",
     "fifth-infinitive",
@@ -3352,6 +3368,17 @@ valid_tags = set([
     "frequentative",
     "front-vowel",
     "future",
+    "g-action",   # The action of a verb
+    "g-activity",  # A verb that implies an action with some duration
+    "g-feminine",  # Semantic gender extracted from gloss
+    "g-masculine",  # Semantic gender extracted from gloss
+    "g-organism",  # Determined from gloss to be an organism
+    "g-person",    # Determined from gloss to be a person
+    "g-plural",    # Semantically plural based on gloss
+    "g-process",   # A verb that is a process (generally non-agentive)
+    "g-singular",  # Semantically singular based on gloss
+    "g-unit",      # Determined to be a unit of measurement based on gloss
+    "g-placeholder",  # Dummy pronoun / placeholder (based on gloss)
     "gender-neutral",
     "genitive",
     "gerund",
@@ -3427,7 +3454,7 @@ valid_tags = set([
     "locative",
     "lowercase",
     "mainly",
-    "masculine",  # Gender, cf. feminine, neuter, common, class-* etc.
+    "masculine",  # Grammatial gender see feminine, neuter, common, class-* etc.
     "material",
     "matronymic",
     "medial",
@@ -3488,7 +3515,7 @@ valid_tags = set([
     "noun",
     "now",
     "numeral",
-    "objective",
+    "objective",  # Used as an object
     "oblique",
     "obsolete",
     "offensive",
@@ -3600,7 +3627,7 @@ valid_tags = set([
     "sometimes",
     "somewhat",
     "specifically",
-    "standalone",
+    "standalone",  #  Without a main word (e.g., pronoun/determiner senses)
     "standard",
     "stative",
     "stem",
@@ -3614,9 +3641,7 @@ valid_tags = set([
     "strict-sense",
     "strokes",
     "strong",
-    "subject",
-    "subjective",
-    "subjective-pronoun",
+    "subjective",  # Used as a subject
     "subjunctive",
     "subjunctive-I",
     "subjunctive-II",

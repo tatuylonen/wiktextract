@@ -252,7 +252,6 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
         # comma-separated parenthesized list
         lst = split_at_comma_semi(desc)
         while len(lst) > 1:
-            print("LST:", lst)
             # Check for tags at the beginning
             cls = classify_desc(lst[0], no_unknown_starts=True)
             if cls == "tags":
@@ -698,6 +697,8 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
             continue  # Ignore self-links
 
         def add(w, r):
+            assert isinstance(w, str)
+            assert r is None or isinstance(r, str)
             nonlocal alt
             nonlocal taxonomic
 
@@ -720,6 +721,15 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                     for w in lst:
                         add(w, r)
                     return
+
+            # Heuristically remove "." at the end of most linkages
+            # (some linkage lists end in a period, but we also have
+            # abbreviations that end with a period that should be kept)
+            if (w.endswith(".") and not ctx.page_exists(w) and
+                (ctx.page_exists(w[:-1]) or
+                 (len(w) >= 5) and w[:-1].find(".") < 0)):
+                w = w[:-1]
+
             # If we have roman but not alt and the word is ASCII,
             # move roman to alt.
             if r and not alt and w.isascii():

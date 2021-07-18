@@ -14,6 +14,7 @@ from wikitextprocessor import Wtp
 class LinkageTests(unittest.TestCase):
 
     def setUp(self):
+        self.maxDiff = 20000
         self.ctx = Wtp()
         self.config = WiktionaryConfig()
         self.ctx.start_page("testpage")
@@ -579,6 +580,17 @@ class LinkageTests(unittest.TestCase):
             {"word": "foo"},
         ]})
 
+    def test_prefix33(self):
+        data = self.run_data('(any member of the suborder (sometimes superfamily) Feliformia or Feloidea): feliform ("cat-like" carnivoran), feloid (compare Caniformia, Canoidea)')
+        self.assertEqual(data, {"related": [
+            {"sense": "any member of the suborder (sometimes superfamily) Feliformia or Feloidea",
+             "word": "feliform",
+             "english": 'cat-like; carnivoran'},
+            {"sense": "any member of the suborder (sometimes superfamily) Feliformia or Feloidea",
+             "word": "feloid",
+             "english": "compare Caniformia, Canoidea"},
+        ]})
+
     def test_suffix1(self):
         data = self.run_data("pet (animal), companion")
         self.assertEqual(data, {"related": [
@@ -838,7 +850,6 @@ class LinkageTests(unittest.TestCase):
             {"tags": ["Arabic", "digit"], "word": "9"}]})
 
     def test_script2(self):
-        self.maxDiff = 10000
         data = self.run_data("(Latin script):  Aa  Bb  Cc  Dd  Ee  Ff  Gg  Hh  "
                              "Ii  Jj  Kk  Ll  Mm  Nn  Oo  Pp  Qq  Rr  Sſs  Tt  "
                              "Uu  Vv  Ww  Xx  Yy  Zz")
@@ -899,7 +910,6 @@ class LinkageTests(unittest.TestCase):
         ]})
 
     def test_script3(self):
-        self.maxDiff = 10000
         data = self.run_data("(Variations of letter B):  Ḃḃ  Ḅḅ  Ḇḇ  Ƀƀ  Ɓɓ  Ƃƃ  ᵬ  ᶀ  ʙ  Ｂｂ  ȸ  ℔  Ꞗꞗ")
         self.assertEqual(data, {"related": [
             {"sense": "Variations of letter B",
@@ -973,7 +983,6 @@ class LinkageTests(unittest.TestCase):
         self.assertEqual(data, {})
 
     def test_script5(self):
-        self.maxDiff = 10000
         data = self.run_data('(other scripts) Β (B, “Beta”), Б (B, “Be”), '
                              'В (V, “Ve”), ב‎ (b, “beth”)')
         self.assertEqual(data, {"related": [
@@ -986,7 +995,6 @@ class LinkageTests(unittest.TestCase):
         ]})
 
     def test_script6(self):
-        self.maxDiff = 20000
         data = self.run_data("(Latin-script letters) letter; A a, B b, C c, "
                              "D d, E e, F f, G g, H h, I i, J j, K k, L l, "
                              "M m, N n, O o, P p, Q q, R r, S s, T t, U u, "

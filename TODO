@@ -247,12 +247,6 @@ htmlgen: make search faster on slow links (split to deeper prefixes if large)
 htmlgen: when looking for linkage references, also check canonical
 word form
 
-htmlgen: heuristically remove "." at end of linkages when the "."
-version is not found, is preceded by a letter, and the version without
-"." is found (and length >= 4 with the .).  E.g.,
-autumn/English/Synonyms.  These are probably common and difficult to
-distinguish from abbreviation in wiktextract.
-
 Word entires may be generated from entries like "Thesaurus:ar:make happy" that
 are in a wrong language.  Check if they are referenced from somewhere and
 maybe restrict generation to entries that are actually referenced.
@@ -385,3 +379,8 @@ cf. test_script5 in test_linkages.py
 
 B/Portugues list of characters is broken
 Finish writing tests for character lists
+
+Synonyms are not collected from nested senses.  See cat/English/Noun
+sense 1/1 "A domesticated species..."
+
+See tree/English/Hyponyms: Category:en:Trees
