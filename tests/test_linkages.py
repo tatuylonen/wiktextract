@@ -736,6 +736,50 @@ class LinkageTests(unittest.TestCase):
             {"word": "2"},
         ]})
 
+    def test_gender14(self):
+        # pants/English/Translations
+        data = self.run_data("kelnės f or n", lang="Lithuanian")
+        self.assertEqual(data, {"related": [
+            {"word": "kelnės", "tags": ["feminine", "neuter"]},
+        ]})
+
+    def test_gender15(self):
+        # inclusive or/English/Translations
+        data = self.run_data("μη αποκλειστικό or n (mi apokleistikó or)",
+                             lang="Greek", word="inclusive or")
+        self.assertEqual(data, {"related": [
+            {"word": "μη αποκλειστικό or", "tags": ["neuter"],
+             "roman": "mi apokleistikó or"},
+        ]})
+
+    def test_gender16(self):
+        # simplified from wife/English/Translations
+        data = self.run_data("ווײַב‎ n or f, פֿרוי‎ f (froy)",
+                             lang="Yiddish")
+        print(json.dumps(data, indent=2, sort_keys=True))
+        self.assertEqual(data, {"related": [
+            {"word": "ווײַב‎", "tags": ["neuter", "feminine"]},
+            {"word": "פֿרוי‎", "tags": ["feminine"], "roman": "froy"},
+        ]})
+
+    def test_gender16orig(self):
+        # wife/English/Translations
+        data = self.run_data("ווײַב‎ n (vayb) or f, פֿרוי‎ f (froy)",
+                             lang="Yiddish")
+        self.assertEqual(data, {"related": [
+            {"word": "ווײַב‎", "tags": ["neuter", "feminine"],
+             "roman": "vayb"},
+            {"word": "פֿרוי‎", "tags": ["feminine"], "roman": "froy"},
+        ]})
+
+    def test_gender17(self):
+        # homonym/English/Translations/French
+        data = self.run_data("homonyme m or n",
+                             lang="French")
+        self.assertEqual(data, {"related": [
+            {"word": "homonyme", "tags": ["masculine", "neuter"]},
+        ]})
+
     def test_begining_tags1(self):
         data = self.run_data("frequentative juoksennella, cohortative juostaan",
                              lang="Finnish")

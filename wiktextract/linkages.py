@@ -8,7 +8,8 @@ from wikitextprocessor import Wtp
 from .datautils import split_at_comma_semi, data_append
 from .form_descriptions import (classify_desc, parse_head_final_tags,
                                 parse_sense_qualifier,
-                                head_final_extra_langs, head_final_extra_re,
+                                head_final_bantu_langs, head_final_bantu_re,
+                                head_final_other_langs, head_final_other_re,
                                 head_final_numeric_langs, head_final_re)
 from .tags import linkage_beginning_tags
 
@@ -308,7 +309,6 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                  cls in ("other", "romanization")) or
                 (not e1 and not e2 and cls2 == "english" and
                  cls in ("other", "romanization"))):
-                print("SWAPPED")
                 desc, rest = rest, desc  # Looks like swapped syntax
                 cls = cls2
         if re.search(linkage_paren_ignore_contains_re, desc):
@@ -398,17 +398,37 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
     # The item may contain multiple comma-separated linkages
     if base_roman:
         subitems = [item]
-    elif ((lang not in head_final_extra_langs or
-            not re.search(head_final_extra_re, item)) and
-          (not re.search(head_final_re, item) or
-           item[-1].isdigit() and lang not in head_final_numeric_langs) and
-          ctx.title.find(" or ") < 0 and
-          all(ctx.title not in x.split(" or ")
-              for x in split_at_comma_semi(item)
-              if x.find(" or ") >= 0)):
-        subitems = split_at_comma_semi(item, extra=[" or "])
     else:
-        subitems = split_at_comma_semi(item)
+        # Split at commas.  Also, in most cases split by " or ", but this
+        # is complicated - "or" may end certain words (e.g., "logical or")
+        # and it may separate head-final tags (e.g. "foo f or m").  Also,
+        # some words have parenthesizxed parts in between, e.g.,
+        # wife/English/Translations/Yiddish:
+        #   "ווײַב‎ n (vayb) or f, פֿרוי‎ f (froy)"
+        subitems = []
+        for item1 in split_at_comma_semi(item):
+            if item1.find(" or ") < 0:
+                subitems.append(item1)
+                continue
+            # Item1 contains " or "
+            item2 = re.sub(r"\s*\([^)]*\)", "", item1)
+            item2 = re.sub(r"\s+", " ", item2)
+            if ((lang not in head_final_bantu_langs or
+                 not re.search(head_final_bantu_re, item2)) and
+                (lang not in head_final_other_langs or
+                 not re.search(head_final_other_re, item2)) and
+                (not re.search(head_final_re, item2) or
+                 (item2[-1].isdigit() and
+                  lang not in head_final_numeric_langs)) and
+                not re.search(r"\bor\b", ctx.title) and
+                all(ctx.title not in x.split(" or ")
+                    for x in split_at_comma_semi(item2)
+                    if x.find(" or ") >= 0)):
+                # We can split this item.  Split the non-cleaned version
+                # that still has any intervening parenthesized parts.
+                subitems.extend(split_at_comma_semi(item1, extra=[" or "]))
+            else:
+                subitems.append(item1)
     if len(subitems) > 1:  # Would be merged from multiple subitems
         ruby = ""
     for item1 in subitems:
@@ -428,7 +448,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
         # Some Korean words use "word (alt, oman, “english”) pattern
         # See 滿/Korean
         m = re.match(r'([^(),;:]+) \(([^(),;:]+), ([^(),;:]+), '
-                     r'[“”"]([^”“"]+)[“”"]\)$', item)
+                     r'[“”"]([^”“"]+)[“”"]\)$', item1)
         if (m and
             classify_desc(m.group(1), no_unknown_starts=True) == "other" and
             classify_desc(m.group(2), no_unknown_starts=True) == "other"):
@@ -473,23 +493,28 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
         item1 = re.sub(r'[“"]([^“”"]+)[“”"],?\s*', english_repl, item1).strip()
 
         # There could be multiple parenthesized parts, and
-        # sometimes both at the beginning and at the end
+        # sometimes both at the beginning and at the end.
+        # And sometimes even in the middle, as in e.g.
+        # wife/English/Translations/Yiddish
         while (not script_chars and
                (not sense or not re.search(script_chars_re, sense))):
             par = None
-            final_par = False
+            nonfirst_par = False
             if par is None:
+                # Try to find a parenthesized part from the beginning.
                 m = re.match(r"\((([^()]|\([^()]*\))*)\):?\s*", item1)
                 if m:
                     par = m.group(1)
                     item1 = item1[m.end():]
                 else:
-                    m = re.search("\s\((([^()]|\([^()]*\))*)\)\.?$",
+                    # Try to find a parenthesized part at the end or from the
+                    # middle.
+                    m = re.search("\s+\((([^()]|\([^()]*\))*)\)(\.$)?",
                                   item1)
                     if m:
                         par = m.group(1)
-                        item1 = item1[:m.start()]
-                        final_par = True
+                        item1 = item1[:m.start()] + item1[m.end():]
+                        nonfirst_par = True
             if not par:
                 break
             if re.search(linkage_paren_ignore_contains_re, par):
@@ -583,7 +608,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                     else:
                         qualifier = par
                 elif cls == "english":
-                    if final_par:
+                    if nonfirst_par:
                         if english:
                             english += "; " + par
                         else:

@@ -9,11 +9,28 @@ xlat_head_map = {
     "f": "feminine",
     "m/f": "masculine feminine",
     "m./f.": "masculine feminine",
+    "m or f": "masculine feminine",
+    "f or m": "feminine masculine",
+    "f or n": "feminine neuter",
+    "n or f": "neuter feminine",
+    "m or n": "masculine neuter",
+    "n or m": "neuter masculine",
+    "c or n": "common neuter",  # ethylene/Eng/Tr/Danish
+    "pl or f": "plural singular feminine",  # grit/Eng/Tr(husked...)/German
     "topo.": "toponymic",  # E.g., p/Egyptian
     "n": "neuter",
     "c": "common",  # common gender in at least West Frisian
     "sg": "singular",
     "pl": "plural",
+    "pl or sg": "plural singular",
+    "sg or pl": "singular plural",
+    "m pl or f pl": "masculine plural feminine",  # comedian/English/Tr/Welsh
+    "m sg or f sg": "masculine singular feminine",  # your/Eng/Tr/Walloon
+    # copacetic/English/Tr/Hebrew:
+    "m or m pl or f or f pl": "masculine feminine singular plural",
+    # your/Eng/Tr/Norwegian:
+    "m pl or f pl or n pl": "masculine femininine neuter plural",
+    "m sg or f sg or n sg": "masculine femininine neuter singular",
     "du": "dual",
     "inan": "inanimate",
     "Inanimate": "inanimate",  # e.g., "James Bay"/English/Tr/Northern East Cree
@@ -27,6 +44,7 @@ xlat_head_map = {
     "impf.": "imperfective",
     "pf": "perfective",
     "pf.": "perfective",
+    "impf or pf": "imperfective perfective",  # ought/Eng/Tr/Serbo-Croatian
     "invariable": "invariable",
     "n.": "noun",
     "v.": "verb",
@@ -110,16 +128,13 @@ head_final_numeric_langs = set([
 ])
 
 # Languages for which to consider head_final_extra_map
-head_final_extra_langs = set([
+head_final_bantu_langs = set([
     # XXX should other Bantu languages be included here?  Which ones use
     # suffixes such as "m or wa"?
     "Swahili",
-    "Finnish",
-    "French",
-    "Lithuanian",
 ])
 
-head_final_extra_map = {
+head_final_bantu_map = {
     # These are only handled in parse_head_final_tags
     # and will generally be ignored elsewhere.  These may contain spaces.
 
@@ -133,7 +148,15 @@ head_final_extra_map = {
     "ku": "class-15",
     "pa": "class-16",
     "mu": "class-18",
+}
 
+head_final_other_langs = set([
+    "Finnish",
+    "French",
+    "Lithuanian",
+])
+
+head_final_other_map = {
     # This is used in Finnish at the end of some word forms (in translations?)
     "in indicative or conditional mood": "in-indicative in-conditional",
 

@@ -16,7 +16,8 @@ from .topics import valid_topics, topic_generalize_map
 from .tags import (xlat_head_map, valid_tags,
                    uppercase_tags, xlat_tags_map, xlat_descs_map,
                    head_final_numeric_langs,
-                   head_final_extra_langs, head_final_extra_map)
+                   head_final_bantu_langs, head_final_bantu_map,
+                   head_final_other_langs, head_final_other_map)
 from .english_words import english_words, not_english_words
 
 # Tokenizer for classify_desc()
@@ -150,10 +151,16 @@ head_final_re = re.compile(
                         reverse=True))))
 
 # Regexp used to match head tag specifiers at end of a form for certain
-# languages (particularly Swahili and similar languages).
-head_final_extra_re = re.compile(
+# Bantu languages (particularly Swahili and similar languages).
+head_final_bantu_re = re.compile(
     r" ({})$".format(
-        "|".join(re.escape(x) for x in head_final_extra_map.keys())))
+        "|".join(re.escape(x) for x in head_final_bantu_map.keys())))
+
+# Regexp used to match head tag specifiers at end of a form for certain
+# other languages (e.g., Lithuanian, Finnish, French).
+head_final_other_re = re.compile(
+    r" ({})$".format(
+        "|".join(re.escape(x) for x in head_final_other_map.keys())))
 
 # Parenthesized parts that are ignored in translations
 ignored_parens = set([
@@ -976,17 +983,31 @@ def parse_head_final_tags(ctx, lang, form):
 
     # print("parse_head_final_tags: lang={} form={!r}".format(lang, form))
 
+    # Make sure there are no double spaces in the form as this code does not
+    # handle them otherwise.
+    form = re.sub(r"\s+", " ", form.strip())
+
     tags = []
 
-    # If parsing for certain languages (e.g., Swahili), handle some extra
-    # head-final tags first
-    if lang in head_final_extra_langs:
-        m = re.search(head_final_extra_re, form)
+    # If parsing for certain Bantu languages (e.g., Swahili), handle
+    # some extra head-final tags first
+    if lang in head_final_bantu_langs:
+        m = re.search(head_final_bantu_re, form)
         if m is not None:
             tagkeys = m.group(1)
             if not ctx.title.endswith(tagkeys):
                 form = form[:m.start()]
-                tags.extend(head_final_extra_map[tagkeys].split(" "))
+                tags.extend(head_final_bantu_map[tagkeys].split(" "))
+
+    # If parsing for certain other languages (e.g., Lithuanian,
+    # French, Finnish), handle some extra head-final tags first
+    if lang in head_final_other_langs:
+        m = re.search(head_final_other_re, form)
+        if m is not None:
+            tagkeys = m.group(1)
+            if not ctx.title.endswith(tagkeys):
+                form = form[:m.start()]
+                tags.extend(head_final_other_map[tagkeys].split(" "))
 
     # Handle normal head-final tags
     m = re.search(head_final_re, form)
