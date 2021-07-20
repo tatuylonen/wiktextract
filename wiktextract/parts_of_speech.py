@@ -8,17 +8,17 @@
 part_of_speech_map = {
     "abbreviation": {
         "pos": "abbrev",
-        "warning": "Part-of-speech Abbreviation is proscribed",
+        "debug": "part-of-speech Abbreviation is proscribed",
         "tags": ["abbreviation"],
     },
     "acronym": {
         "pos": "abbrev",
-        "warning": "Part-of-speech Acronym is proscribed",
+        "debug": "part-of-speech Acronym is proscribed",
         "tags": ["abbreviation"],
     },
     "adjectival": {
         "pos": "adj_noun",
-        "warning": "Part-of-speech Adjectival is not valid",
+        "debug": "part-of-speech Adjectival is not valid",
     },
     "adjectival noun": {
         # Not listed as allowed, but common
@@ -33,29 +33,29 @@ part_of_speech_map = {
     },
     "adjectuve": {
         "pos": "adj",
-        "warning": "Misspelled subtitle",
+        "debug": "misspelled subtitle",
     },
     "adjectives": {
         "pos": "adj",
-        "warning": "Usually used in singular",
+        "debug": "usually used in singular",
     },
     "adverb": {
         "pos": "adv",
     },
     "adverbs": {
         "pos": "adv",
-        "warning": "Usually used in singular",
+        "debug": "usually used in singular",
     },
     "adverbial phrase": {
         "pos": "adv_phrase",
-        "warning": "Part-of-speech Adverbial phrase is proscribed",
+        "debug": "part-of-speech Adverbial phrase is proscribed",
     },
     "affix": {
         "pos": "affix",
     },
     "adjective suffix": {
         "pos": "suffix",
-        "warning": "Part-of-speech Adjective suffix is proscribed",
+        "debug": "part-of-speech Adjective suffix is proscribed",
     },
     "ambiposition": {
         "pos": "ambiposition",
@@ -78,12 +78,12 @@ part_of_speech_map = {
     },
     "clipping": {
         "pos": "abbrev",
-        "warning": "Part-of-speech Clipping is proscribed",
+        "debug": "part-of-speech Clipping is proscribed",
         "tags": ["abbreviation"],
     },
     "clitic": {
         "pos": "suffix",
-        "warning": "Part-of-speech Clitic is proscribed",
+        "debug": "part-of-speech Clitic is proscribed",
         "tags": ["clitic"],
     },
     "combining form": {
@@ -99,7 +99,7 @@ part_of_speech_map = {
     },
     "conjuntion": {
         "pos": "conj",
-        "error": "Misspelled subtitle",
+        "debug": "misspelled subtitle",
     },
     "contraction": {
         "pos": "abbrev",
@@ -132,7 +132,7 @@ part_of_speech_map = {
     },
     "gerund": {
         "pos": "verb",
-        "warning": "Part-of-speech Gerund is proscribed",
+        "debug": "part-of-speech Gerund is proscribed",
         "tags": ["participle", "gerund"],
     },
     "han character": {
@@ -142,7 +142,7 @@ part_of_speech_map = {
     "han characters": {
         "pos": "character",
         "tags": ["han"],
-        "warning": "Usually used in singular",
+        "debug": "psually used in singular",
     },
     "hanja": {
         "pos": "character",
@@ -159,8 +159,8 @@ part_of_speech_map = {
     "idiom": {
         "pos": "phrase",
         "tags": ["idiomatic"],
-        # This is too common for now to give a warning about
-        # "warning": "Part-of-speech Idiom is proscribed",
+        # This is too common for now to complain about
+        # "debug": "part-of-speech Idiom is proscribed",
     },
     "infix": {
         "pos": "infix",
@@ -168,12 +168,12 @@ part_of_speech_map = {
     },
     "infinitive": {
         "pos": "verb",
-        "warning": "Part-of-speech Infinitive is proscribed",
+        "debug": "part-of-speech Infinitive is proscribed",
         "tags": ["infinitive"],
     },
     "initialism": {
         "pos": "abbrev",
-        "warning": "Part-of-speech Initialism is proscribed",
+        "debug": "part-of-speech Initialism is proscribed",
         "tags": ["abbreviation"],
     },
     "interfix": {
@@ -189,13 +189,13 @@ part_of_speech_map = {
     },
     "intransitive verb": {
         "pos": "verb",
-        "warning": "Part-of-speech Intransitive verb is proscribed",
+        "debug": "part-of-speech Intransitive verb is proscribed",
         "tags": ["intransitive"],
     },
     "instransitive verb": {
         "pos": "verb",
         "tags": ["intransitive"],
-        "warning": "Misspelled subtitle",
+        "debug": "pisspelled subtitle",
     },
     "kanji": {
         "pos": "character",
@@ -211,30 +211,30 @@ part_of_speech_map = {
     },
     "nominal nuclear clause": {
         "pos": "clause",
-        "warning": "Part-of-speech Nominal nuclear clause is proscribed",
+        "debug": "part-of-speech Nominal nuclear clause is proscribed",
     },
     "νoun": {
         "pos": "noun",
-        "error": "Misspelled subtitle",
+        "debug": "misspelled subtitle",
     },
     "nouɲ": {
         "pos": "noun",
-        "error": "Misspelled subtitle",
+        "debug": "misspelled subtitle",
     },
     "noun": {
         "pos": "noun",
     },
     "noun form": {
         "pos": "noun",
-        "warning": "Part-of-speech Noun form is proscribed",
+        "debug": "part-of-speech Noun form is proscribed",
     },
     "nouns": {
         "pos": "noun",
-        "warning": "Usually in singular",
+        "debug": "usually in singular",
     },
     "noum": {
         "pos": "noun",
-        "error": "Misspelled subtitle",
+        "debug": "misspelled subtitle",
     },
     "number": {
         "pos": "num",
@@ -245,7 +245,7 @@ part_of_speech_map = {
     },
     "ordinal number": {
         "pos": "adj",
-        "warning": "Ordinal numbers should be adjectives",
+        "debug": "ordinal numbers should be adjectives",
         "tags": ["ordinal"],
     },
     "participle": {
@@ -279,7 +279,7 @@ part_of_speech_map = {
     },
     "phrases": {
         "pos": "phrase",
-        "warning": "Usually used in singular",
+        "debug": "usually used in singular",
     },
     "possessive determiner": {
         "pos": "det",
@@ -305,23 +305,23 @@ part_of_speech_map = {
     },
     "prepositions": {
         "pos": "prep",
-        "warning": "Usually used in singular",
+        "debug": "usually used in singular",
     },
     "prepositional expressions": {
         "pos": "prep",
-        "warning": "Part-of-speech Prepositional expressions is proscribed",
+        "debug": "part-of-speech Prepositional expressions is proscribed",
     },
     "prepositional phrase": {
         "pos": "prep_phrase",
     },
     "prepositional pronoun": {
         "pos": "pron",
-        "warning": "Part-of-speech Prepositional pronoun is proscribed",
+        "debug": "part-of-speech Prepositional pronoun is proscribed",
         "tags": ["prepositional"],
     },
     "present participle": {
         "pos": "verb",
-        "warning": "Part-of-speech Present participle is proscribed",
+        "debug": "part-of-speech Present participle is proscribed",
         "tags": ["participle", "present"],
     },
     "preverb": {
@@ -335,11 +335,11 @@ part_of_speech_map = {
     },
     "proper oun": {
         "pos": "name",
-        "error": "Misspelled subtitle",
+        "debug": "misspelled subtitle",
     },
     "proposition": {
         "pos": "prep",  # Appears to be a misspelling of preposition
-        "error": "Misspelled subtitle",
+        "debug": "misspelled subtitle",
     },
     "proverb": {
         "pos": "proverb",
@@ -350,7 +350,7 @@ part_of_speech_map = {
     },
     "punctuation": {
         "pos": "punct",
-        "warning": "Part-of-speech Punctuation should be Punctuation mark",
+        "debug": "part-of-speech Punctuation should be Punctuation mark",
         "tags": ["punctuation"],
     },
     "relative": {
@@ -370,7 +370,7 @@ part_of_speech_map = {
     },
     "suffix form": {
         "pos": "suffix",
-        "warning": "Part-of-speech Suffix form is proscribed",
+        "debug": "part-of-speech Suffix form is proscribed",
         "tags": ["morpheme"],
     },
     "syllable": {
@@ -388,7 +388,7 @@ part_of_speech_map = {
     },
     "verb form": {
         "pos": "verb",
-        "warning": "Part-of-speech Verb form is proscribed",
+        "debug": "part-of-speech Verb form is proscribed",
     },
     "verbal noun": {
         "pos": "noun",
@@ -396,7 +396,7 @@ part_of_speech_map = {
     },
     "verbs": {
         "pos": "verb",
-        "warning": "Usually in singular",
+        "debug": "usually in singular",
     },
 }
 for k, v in part_of_speech_map.items():

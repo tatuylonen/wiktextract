@@ -2660,7 +2660,8 @@ xlat_tags_map = {
     "usually in the negative": "usually with-negation",
     "non-scientific usage": "non-scientific",
     "krama inggil": "krama-inggil",
-    "McCune-Reischauer chŏn": "McCune-Reischauer",
+    # XXX I'm suspecting this is an error and should be removed
+    # "McCune-Reischauer chŏn": "McCune-Reischauer",
     "gender indeterminate": "gender-neutral",
     "singular only": "singular singular-only",
     "plural only": "plural plural-only",
@@ -3619,6 +3620,7 @@ valid_tags = set([
     "relational",
     "relative",
     "retronym",
+    "revised",  # Used in many Korean words, is this same as revised-jeon?
     "revised-jeon",
     "rhetoric",
     "romaji",

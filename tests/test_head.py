@@ -116,3 +116,14 @@ class HeadTests(unittest.TestCase):
                                          "inanimate", "with-dative"],
                                 "forms": [{"tags": ["stem"],
                                            "form": "testpag"}]})
+
+    def test_head12(self):
+        # McCune-Reischauer is used in Korean characters; we're really testing
+        # the hyphen in keyword names
+        data = {}
+        parse_word_head(self.ctx, "noun",
+                        "foo (McCune-Reischauer bar)", data)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(data, {"forms": [
+            {"form": "foo", "tags": ["canonical"]},
+            {"form": "bar", "tags": ["McCune-Reischauer"]}]})

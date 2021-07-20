@@ -1116,7 +1116,7 @@ def add_related(ctx, data, tags_lst, related):
                     data_extend(ctx, form, "topics", topics1)
                     data_extend(ctx, form, "topics", topics2)
                     if topics1 or topics2:
-                        ctx.debug("head form has topics: {}".format(form))
+                        ctx.debug("word head form has topics: {}".format(form))
 
 
 def parse_word_head(ctx, pos, text, data):
@@ -1330,7 +1330,7 @@ def parse_sense_qualifier(ctx, text, data):
                 else:
                     data["english"] = orig_semi
             else:
-                ctx.debug("parse_sense_qualifier: unrecognized qualifier: {}"
+                ctx.debug("parse_sense_qualifier unrecognized qualifier: {}"
                           .format(text))
 
 
@@ -1418,13 +1418,13 @@ def parse_translation_desc(ctx, lang, text, tr):
                     (cls == "english" and len(r.split()) == 1 and
                      r[0].islower())):
                     if tr.get("alt") and tr.get("alt") != a:
-                        ctx.warning("more than one value in \"alt\": {} vs. {}"
-                                    .format(tr["alt"], a))
+                        ctx.debug("more than one value in \"alt\": {} vs. {}"
+                                  .format(tr["alt"], a))
                     tr["alt"] = a
                     if tr.get("roman") and tr.get("roman") != r:
-                        ctx.warning("more than one value in \"roman\": "
-                                    "{} vs. {}"
-                                    .format(tr["roman"], r))
+                        ctx.debug("more than one value in \"roman\": "
+                                  "{} vs. {}"
+                                  .format(tr["roman"], r))
                     tr["roman"] = r
                     continue
 
@@ -1505,25 +1505,25 @@ def parse_translation_desc(ctx, lang, text, tr):
                     restore_end = " ({})".format(par) + restore_end
             else:
                 if tr.get("roman"):
-                    ctx.warning("more than one value in \"roman\": {} vs. {}"
-                                .format(tr["roman"], par))
+                    ctx.debug("more than one value in \"roman\": {} vs. {}"
+                              .format(tr["roman"], par))
                 tr["roman"] = par
         elif cls == "taxonomic":
             if tr.get("taxonomic"):
-                ctx.warning("more than one value in \"taxonomic\": {} vs. {}"
-                            .format(tr["taxonomic"], par))
+                ctx.debug("more than one value in \"taxonomic\": {} vs. {}"
+                          .format(tr["taxonomic"], par))
             if re.match(r"×[A-Z]", par):
                 data_append(ctx, dt, "tags", "extinct")
                 par = par[1:]
             tr["taxonomic"] = par
         elif cls == "other":
             if tr.get("alt"):
-                ctx.warning("more than one value in \"alt\": {} vs. {}"
-                            .format(tr["alt"], par))
+                ctx.debug("more than one value in \"alt\": {} vs. {}"
+                          .format(tr["alt"], par))
             tr["alt"] = par
         else:
-            ctx.warning("parse_translation_desc: unimplemented cls: {}: {}"
-                        .format(par, cls))
+            ctx.debug("parse_translation_desc unimplemented cls {}: {}"
+                        .format(cls, par))
 
     # Check for gender indications in suffix
     text, final_tags = parse_head_final_tags(ctx, lang, text)
@@ -1758,8 +1758,6 @@ def parse_alt_or_inflection_of1(ctx, gloss):
     if base.endswith("."):
         base = base[:-1].strip()
     base = base.strip()
-    if base.find(".") >= 0:
-        ctx.debug(". remains in alt_of/inflection_of: {}".format(base))
     if not base:
         return tags, None
     parts = split_at_comma_semi(base, extra=[" / ",  "／"])
@@ -1769,6 +1767,12 @@ def parse_alt_or_inflection_of1(ctx, gloss):
         parts = [base]
     lst = []
     for p in parts:
+        # Check for some suspicious base forms
+        m = re.find(r"[.,{}()]", p)
+        if m and not ctx.page_exists(p):
+            ctx.debug("suspicious alt_of/form_of with {!r}: {}"
+                      .format(m.group(0), p))
+
         dt = { "word": p }
         if extra:
             dt["extra"] = extra

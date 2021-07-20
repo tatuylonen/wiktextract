@@ -1361,7 +1361,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                   isinstance(v, (list, tuple))):
                 data[k] = list(data[k]) + list(v)
             elif data[k] != v:
-                ctx.warning("conflicting values for {}: {} vs {}"
+                ctx.warning("conflicting values for {} in merge_base: "
+                            "{!r} vs {!r}"
                             .format(k, data[k], v))
         # If the result has sounds, eliminate sounds that have a prefix that
         # does not match "word" or one of "forms"
@@ -1555,6 +1556,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if ofs > 10:
                 ctx.debug("gloss may contain unhandled list items: {}"
                           .format(gloss))
+            elif gloss.find("\n") >= 0:
+                ctx.debug("gloss contains newline: {}".format(gloss))
 
             # Kludge, some glosses have a comma after initial qualifiers in
             # parentheses
@@ -1777,7 +1780,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         for node in lists:
             for node in node.children:
                 if node.kind != NodeKind.LIST_ITEM:
-                    ctx.warning("{}: non-list-item inside list".format(pos))
+                    ctx.debug("{}: non-list-item inside list".format(pos))
                     continue
                 if node.args[-1] == ":":
                     # Sometimes there may be lists with indented examples
@@ -2145,8 +2148,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 data_append(ctx, data, "sounds", pron)
             have_pronunciations = True
 
-        if not have_pronunciations and not have_panel_templates:
-            ctx.debug("no pronunciations found from pronunciation section")
+        # if not have_pronunciations and not have_panel_templates:
+        #     ctx.debug("no pronunciations found from pronunciation section")
 
     def parse_inflection(node):
         """Parses inflection data (declension, conjugation) from the given
@@ -2229,8 +2232,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         assert tree.kind == NodeKind.ROOT
         ret = recurse(tree, seq)
         if ret is None:
-            ctx.warning("Failed to find subpage section {}/{} {}"
-                        .format(title, subtitle, seq))
+            ctx.debug("Failed to find subpage section {}/{} seq {}"
+                      .format(title, subtitle, seq))
         return ret
 
     def parse_linkage(data, field, linkagenode):
@@ -2336,8 +2339,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     elif kind in (NodeKind.PREFORMATTED, NodeKind.BOLD):
                         item_recurse(node.children, italic=italic)
                     else:
-                        ctx.debug("linkage item_recurse unhandled: {}"
-                                  .format(node))
+                        ctx.debug("linkage item_recurse unhandled {}: {}"
+                                  .format(node.kind, node))
 
             # print("LINKAGE CONTENTS BEFORE ITEM_RECURSE: {!r}"
             #       .format(contents))
@@ -2456,8 +2459,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # initial value
                     parse_linkage_recurse(node.args[-1], field, sense)
                 else:
-                    ctx.debug("parse_linkage_recurse unhandled {}"
-                              .format(kind))
+                    ctx.debug("parse_linkage_recurse unhandled {}: {}"
+                              .format(kind, node))
 
         def linkage_template_fn1(name, ht):
             nonlocal have_panel_template
@@ -2526,9 +2529,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     code = ht.get(1)
                     if code:
                         if langcode and code != langcode:
-                            ctx.warning("differing language codes {} vs "
-                                        "{} in translation item: {!r} {}"
-                                        .format(langcode, code, name, ht))
+                            ctx.debug("differing language codes {} vs "
+                                      "{} in translation item: {!r} {}"
+                                      .format(langcode, code, name, ht))
                         langcode = code
                     tr = ht.get(2)
                     if tr:
@@ -2575,8 +2578,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             if re.search(r"\(\d+\)|\[\d+\]", item):
                 if not item.find("numeral:"):
-                    ctx.warning("POSSIBLE SENSE NUMBER IN ITEM: {}"
-                                .format(item))
+                    ctx.debug("possible sense number in translation item: {}"
+                              .format(item))
 
             # Translation items should start with a language name (except
             # some nested translation items don't and rely on the language
@@ -2849,9 +2852,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
                     # Sanity check: try to detect certain suspicious
                     # patterns in translations
-                    if "word" in tr and re.search(tr_suspicious_re, tr["word"]):
-                        ctx.debug("suspicious translation: {}"
-                                  .format(tr))
+                    if "word" in tr:
+                        m = re.search(tr_suspicious_re, tr["word"])
+                        if m:
+                            ctx.debug("suspicious translation with {!r}: {}"
+                                      .format(m.group(0), tr))
 
                     if "tags" in tr:
                         tr["tags"] = list(sorted(set(tr["tags"])))
@@ -2920,9 +2925,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     else:
                         pos = ctx.subsection
                         if pos.lower() not in part_of_speech_map:
-                            ctx.warning("see translation subpage: unhandled: "
-                                        "language={} sub={} ctx.subsection={}"
-                                        .format(language, sub, ctx.subsection))
+                            ctx.debug("unhandled see translation subpage: "
+                                      "language={} sub={} ctx.subsection={}"
+                                      .format(language, sub, ctx.subsection))
                         seq = [language, sub, pos, "Translations"]
                     subnode = get_subpage_section(ctx.title, "translations",
                                                   seq)
@@ -3023,8 +3028,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         isinstance(arg0[0], str) and
                         arg0[0].endswith("/translations") and
                         arg0[0][:-len("/translations")] == ctx.title):
-                        ctx.warning("/translations link on main page instead "
-                                    "of normal {{see translation subpage|...}}")
+                        ctx.debug("translations subpage link found on main "
+                                  "page instead "
+                                  "of normal {{see translation subpage|...}}")
                         sub = ctx.subsection
                         if sub.lower() in part_of_speech_map:
                             seq = [language, sub, "Translations"]
@@ -3120,10 +3126,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     dt = part_of_speech_map[pos]
                     pos = dt["pos"]
                     ctx.start_subsection(t)
+                    if "debug" in dt:
+                        ctx.warning("{} in section {}"
+                                    .format(dt["warning"], t))
                     if "warning" in dt:
-                        ctx.warning("{}: {}".format(t, dt["warning"]))
+                        ctx.warning("{} in section {}"
+                                    .format(dt["warning"], t))
                     if "error" in dt:
-                        ctx.error("{}: {}".format(t, dt["error"]))
+                        ctx.error("{} in section {}"
+                                  .format(dt["error"], t))
                     # Parse word senses for the part-of-speech
                     parse_part_of_speech(node, pos)
                     if "tags" in dt:
@@ -3253,12 +3264,13 @@ def fix_subtitle_hierarchy(ctx, text):
         level = len(left)
         part = old[i + npar]
         if level != len(right):
-            ctx.debug("subtitle {!r} has {} on the left and {} on the right"
+            ctx.debug("subtitle has unbalanced levels: "
+                      "{!r} has {} on the left and {} on the right"
                       .format(title, left, right))
         lc = title.lower()
         if title in languages_by_name:
             if level > 2:
-                ctx.debug("language name {} at level {}"
+                ctx.debug("subtitle has language name {} at level {}"
                           .format(title, level))
             level = 2
         elif lc.startswith("etymology"):
@@ -3361,7 +3373,7 @@ def parse_page(ctx, word, text, config):
         # part-of-speech.
         for data in datas:
             if "lang" not in data:
-                ctx.debug("no lang in data: {}".format(data))
+                ctx.debug("internal error -- no lang in data: {}".format(data))
                 continue
             for k, v in top_data.items():
                 assert isinstance(v, (list, tuple))

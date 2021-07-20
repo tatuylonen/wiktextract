@@ -142,9 +142,6 @@ template seems to know a ton about these so maybe look at it.
 
 # XXX Handle "; also YYY" syntax in initialisms (see AA/Proper name)
 
-# In htmlgen, create links from gloss, at minimum when whole gloss matches
-# a word form in the same language (or maybe gloss as an alternative?)
-
 # XXX parse {{zh-see|XXX}} - see 共青团
 
 # XXX is the Usage notes section parseable in any useful way?  E.g., there
@@ -223,6 +220,9 @@ Collect etymology information
 人/derived terms
 龍/derived terms
 馬/derived terms
+
+# In htmlgen, create links from gloss, at minimum when whole gloss matches
+# a word form in English (or maybe gloss as an alternative?)
 
 htmlgen: Improve sense/word lists
   - more even sizes of sublists (use intervals when appropriate)
