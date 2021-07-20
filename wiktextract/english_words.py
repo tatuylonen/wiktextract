@@ -351,6 +351,7 @@ additional_words = set([
     'bogaraveo',
     'bollard',
     'bonsai',
+    'bobsledding',
     'bookmaker',
     'bootleg',
     'boozy',

@@ -2529,7 +2529,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     code = ht.get(1)
                     if code:
                         if langcode and code != langcode:
-                            ctx.debug("differing language codes {} vs "
+                            ctx.debug("inconsistent language codes {} vs "
                                       "{} in translation item: {!r} {}"
                                       .format(langcode, code, name, ht))
                         langcode = code

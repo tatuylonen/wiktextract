@@ -137,7 +137,7 @@ non_latin_scripts_re = re.compile(
 # in page.py.
 nested_translations_re = re.compile(
     r"\s+\((({}): ([^()]|\([^()]+\))+)\)"
-    .format("|".join(x for x in xlat_head_map.values()
+    .format("|".join(re.sub("^\?", "", x) for x in xlat_head_map.values()
                      if x and not x.startswith("class-"))))
 
 # Regexp that matches head tag specifiers.  Used to match tags from end of
@@ -395,366 +395,6 @@ add_to_valid_tree_mapping(valid_sequences, topic_generalize_map,
 # Regexp used to find "words" from word heads and linguistic descriptions
 word_re = re.compile(r"[^ ,;()\u200e]+|\(([^()]|\([^()]*\))*\)")
 
-# Maps from segments in gloss to tags that will be added.  These are matched
-# case-insensitive.
-gloss_tags = {
-    # Note: these are surrounded by \b in regexp
-    # XXX should really dividide this by part-of-speech
-    "of a": "",  # Intended to block various uses of words in irrelevant context
-    "of an": "",
-    "as a": "",
-    "as an": "",
-    "in a": "",
-    "in an": "",
-    "with a": "",
-    "with an": "",
-    "without a": "",
-    "without an": "",
-    "used substantively, with an implied noun.": "without-noun",
-    "used without a following noun": "without-noun",
-    "possessive case of": "possessive",
-    "that with belongs to": "possessive",
-    "Belonging to": "possessive",
-    "belonging to": "possessive",
-    "used predicatively": "predicative not-attributive",
-    "used attributively": "attributive not-predicative",
-    "usually attributive": "usually attributive",
-    "usually predicative": "usually predicative",
-    "attributive": "attributive",
-    "predicative": "predicative",
-    "attributively": "attributive",
-    "predicatively": "predicative",
-    "female": "g-feminine",
-    "feminine": "g-feminine",
-    "masculine": "g-masculine",
-    "male": "g-masculine",
-    "woman": "g-feminine g-person",
-    "women": "g-feminine g-person g-plural",
-    "man": "g-masculine g-person",
-    "men": "g-masculine g-person g-plural",
-    "captain": "g-person",
-    "officer": "g-person",
-    "person": "g-person",
-    "child": "g-person",
-    "a baby": "g-person",
-    "an infant": "g-person",
-    "attractive young": "g-person",
-    "young human": "g-person",
-    "people": "g-person g-plural",
-    "audience": "g-person",
-    "girl": "g-person g-feminine",
-    "boy": "g-person g-masculine",
-    "cavalry soldiers": "g-person",
-    "foot soldier": "g-person",
-    "male soldier": "g-person g-masculine",
-    "a soldier": "g-person",
-    "a private in": "g-person",
-    "a guardsman": "g-person",
-    "a low-rangking member of": "g-person",
-    "impersonal": "impersonal",
-    "personal pronoun": "g-person personal",
-    "first-person": "first-person g-person",
-    "second-person": "second-person g-person",
-    "group spoken to": "second-person g-person",
-    "individual or group spoken to": "second-person g-person",
-    "person being addressed": "second-person g-person",
-    "people spoken, or written to": "second-person g-person",
-    "third-person": "third-person",
-    "singular": "g-singular",
-    "plural": "g-plural",
-    "inanimate": "inanimate",
-    "animate": "animate",
-    "neither female nor male": "",
-    "who": "g-person",
-    "whom": "g-person",
-    "whoever": "g-person",
-    "whomever": "g-person",
-    "whose": "g-person",
-    "someone": "g-person",
-    "somebody": "g-person",
-    "anyone": "g-person",
-    "anybody": "g-person",
-    "nobody": "g-person",
-    "campaigner": "g-person",
-    "activist": "g-person",
-    "sales assistant": "g-person",
-    "an assistant": "g-person",
-    "a relief pitcher": "g-person",
-    "inspector": "g-person",
-    "sergeant": "g-person",
-    "captain": "g-person",
-    "lieutnant": "g-person",
-    "colonist": "g-person",
-    "settler": "g-person",
-    "pilgrim": "g-person",
-    "colonialist": "g-person",
-    "founder": "g-person",
-    "doer": "g-person",
-    "executioner": "g-person",
-    "facilitator": "g-person",
-    "maidservant": "g-person g-feminine",
-    "operator of": "g-person",
-    "dealer": "g-person",
-    "trader": "g-person",
-    "one given to": "g-person",
-    "layman": "g-person",
-    "cleric": "g-person",
-    "head coach": "g-person",
-    "head cook": "g-person",
-    "administrator": "g-person",
-    "clergyman": "g-person",
-    "scholar": "g-person",
-    "a pilot": "g-person",
-    "a guide or escort": "g-person",
-    "a follower of": "g-person",
-    "a senior member of": "g-person",
-    "student": "g-person",
-    "lover": "g-person",
-    "girlfriend": "g-person g-feminine",
-    "boyfriend": "g-person g-feminine",
-    "a partner": "g-person",
-    "an associate": "g-person",
-    "the head of a": "g-person",
-    "a managerial or leading position": "g-person",
-    "the head of state": "g-person",
-    "male monarch": "g-person g-masculine",
-    "female monarch": "g-person g-feminine",
-    "the monarch with": "g-person",
-    "Queen of England": "g-person g-feminine",
-    "a female member of": "g-person g-feminine",
-    "a male member of": "g-person g-masculine",
-    "a female ruler": "g-person g-feminine",
-    "a male ruler": "g-person g-masculine",
-    "wife": "g-person g-feminine",
-    "husband": "g-person g-masculine",
-    "sister": "g-person g-feminine",
-    "brother": "g-person g-masculine",
-    "procuress": "g-person g-feminine",
-    "artist": "g-person",
-    "singer": "g-person",
-    "cousin": "g-person",
-    "a relative": "g-person",
-    "the husband of": "g-person",
-    "mother of": "g-person g-feminine",
-    "father of": "g-person g-masculine",
-    "grandmother": "g-person g-feminine",
-    "grandfather": "g-person g-masculine",
-    "worker unit": "g-person",
-    "heir": "g-person",
-    "forefather": "g-person",
-    "pacifist": "g-person",
-    "prisoner": "g-person",
-    "coward": "g-person",
-    "shepherd": "g-person",
-    "a minister": "g-person",
-    "priest": "g-person",
-    "actor": "g-person",
-    "a virgin": "g-person",
-    "actress": "g-person",
-    "policeman": "g-person",
-    "politician": "g-person",
-    "gamer": "g-person",
-    "gambler": "g-person",
-    "prostitute": "g-person",
-    "prostitute's client": "g-person",
-    "rapist": "g-person",
-    "a thug": "g-person",
-    "henchman": "g-person",
-    "a fool": "g-person",
-    "enforcer": "g-person",
-    "a participant": "g-person",
-    "a German guard": "g-person",
-    "darling": "g-person",
-    "sweetheart": "g-person",
-    "one engaged in": "g-person",
-    "a hippie": "g-person",
-    "easy victim": "g-person",
-    "sibling": "g-person",
-    "a judge": "g-person",
-    "an attorney": "g-person",
-    "a lawyer": "g-person",
-    "that also appears as the subject": "reflexive",
-    "when that group also is the subject": "reflexive g-plural",
-    "dummy pronoun": "g-placeholder",
-    "used without referent": "g-placeholder",
-    "in various short idioms": "idiomatic",
-    "in idioms": "idiomatic",
-    "in various idioms": "idiomatic",
-    "reflexive": "reflexive",
-    "including the speaker": "inclusive",
-    "excluding the speaker": "exclusive",
-    "not including the speaker": "exclusive",
-    "speaker or writer": "first-person",
-    "intensifies": "emphatic",
-    "for emphasis": "emphatic",
-    "object of a verb or preposition": "objective",
-    "object of a verb": "objective",
-    "object of a preposition": "objective",
-    "delayed subject": "subjective",
-    "as an object": "objective",
-    "as a subject": "subjective",
-    "mark of respect": "formal deferential",
-    "as subject or object": "objective subjective",
-    "as the grammatical subject": "subjective",
-    "as the grammatical object": "objective",
-    "this letter": "",
-    "letter": "letter",
-    "digit": "digit",
-    "ordinal number": "ordinal",
-    "ordinal form": "ordinal",
-    "written in the Latin script": "Latin",
-    "written in the Cyrillic script": "Cyrillic",
-    "letter of several Cyrillic alphabets": "Cyrillic letter",
-    "letter of the Bashkir alphabet": "Bashkir letter",
-    "letter of the Kazakh alphabet": "Kazakh letter",
-    "letter of the Kyrgyz alphabet": "Kyrgyz letter",
-    "letter of the Mongolian alphabet": "Mongolian letter",
-    "letter of the Serbo-Croatian alphabet": "Serbo-Croatian letter",
-    "letter of the Tajik alphabet": "Tajik letter",
-    "SI unit of": "g-unit",
-    "the base unit of": "g-unit",
-    "in the International System of Units": "g-unit",
-    "unit of measurement": "g-unit",
-    "the unit of": "g-unit",
-    "a unit of": "g-unit",
-    "a measure of": "g-unit",
-    "the metric unit of": "g-unit",
-    "any of various units of": "g-unit",
-    "ounce, weighing": "g-unit",
-    "fluid ounce": "g-unit",
-    "a living being": "g-organism",
-    "one of the asexual": "g-organism",
-    "feline": "g-organism",
-    "canine": "g-organism",
-    "bovine": "g-organism",
-    "lemur": "g-organism",
-    "male sheep": "g-organism g-masculine",
-    "female sheep": "g-organism g-feminine",
-    "a sheep": "g-organism",
-    "ewe": "g-organism g-feminine",
-    "woody plant": "g-organism",
-    "any plant": "g-organism",
-    "plant itself": "g-organism",
-    "a shrub": "g-organism",
-    "monocot tree": "g-organism",
-    "coniferous tree": "g-organism",
-    "a tree": "g-organism",
-    "any tree": "g-organism",
-    "a yucca": "g-organism",
-    "domesticated species": "g-organism",
-    "ground-dwelling rodents": "g-organism",
-    "burrowing rodents": "g-organism",
-    "any small rodent": "g-organism",
-    "any of several": "g-organism",
-    "any of various": "g-organism",
-    "any of very many animals": "g-organism",
-    "any animal": "g-organism",
-    "young animal": "g-organism",
-    "unhatched vertebrate": "g-organism",
-    "unborn vertebrate": "g-organism",
-    "unborn young": "g-organism",
-    "a human embryo": "g-organism",
-    "vertebrate animal": "g-organism",
-    "invertebrate animal": "g-organism",
-    "an aquatic invertebrate": "g-organism",
-    "aquatic animal": "g-organism",
-    "a mammal": "g-organism",
-    "mammalian species": "g-organism",
-    "large mammal": "g-organism",
-    "young swine": "g-organism",
-    "adult swine": "g-organism",
-    "reptile": "g-organism",
-    "any bovines": "g-organism",
-    "any bird": "g-organism",
-    "weaverbird": "g-organism",
-    "a bird, the": "g-organism",
-    "any of the birds": "g-organism",
-    "one of several birds": "g-organism",
-    "domestic pigeon": "g-organism",
-    "owl pigeon": "g-organism",
-    "pet pig": "g-organism",
-    "a dog used in": "g-organism",
-    "a horse used in": "g-organism",
-    "a kind of spider": "g-organism",
-    "domestic fowl": "g-organism",
-    "young of any bird": "g-organism",
-    "surf scoter duck": "g-organism",
-    "an insect": "g-organism",
-    "social insect": "g-organism",
-    "female ant": "g-organism g-feminine",
-    "dragonfly": "g-organism",
-    "a flying insect": "g-organism",
-    "nocturnal insect": "g-organism",
-    "a worm": "g-organism",
-    "vertebrate": "g-organism",
-    "eukaryote": "g-organism",
-    "aquatic beetle": "g-organism",
-    "a fish, the": "g-organism",
-    "sea fish": "g-organism",
-    "certain fish": "g-organism",
-    "fesh-water fish": "g-organism",
-    "fruit bat": "g-organism",
-    "voracious fish": "g-organism",
-    "other unrelated fish": "g-organism",
-    "a species of": "g-organism",
-    "a parasite": "g-organism",
-    "large wasp": "g-organism",
-    "various plants not in family": "g-organism",
-    "any plant of": "g-organism",
-    "a flowering plant": "g-organism",
-    "fungus": "g-organism",
-    "single-celled fungus": "g-organism",
-    "bacterium": "g-organism",
-    "archaebacterium": "g-organism",
-    "algae": "g-organism",
-    "mushroom species": "g-organism",
-    "of the genus": "g-organism",
-    "in the genus": "g-organism",
-    "of the infraorder": "g-organism",
-    "of the family": "g-organism",
-    "of the suborder": "g-organism",
-    "organism": "g-organism",
-    "photosynthetic organisms": "g-organism",
-    "photosynthetic protist": "g-organism",
-    "photosynthetic protists": "g-organism",
-    "microorganism": "g-organism",
-    "any member of the family": "g-organism",
-    "the activity of": "g-activity",
-    "the action of": "g-action",
-    "the process of": "g-process",
-    "uppercase": "uppercase",
-    "lowercase": "lowercase",
-    "upper-case": "uppercase",
-    "lower-case": "lowercase",
-    "a building": "place",
-    "a place": "place",
-    "term of endearment": "endearing",
-    "familiar term of endearment": "endearing familiar",
-    "form of address": "term-of-address",
-    "metaphor for": "metaphoric",
-    "especially one who is male": "usually g-masculine",
-    "originally a man": "usually g-masculine",
-    "now female": "now g-feminine",
-}
-for k, v in gloss_tags.items():
-    for t in v.split():
-        if t not in valid_tags:
-            print("gloss_tags contains {!r} -> {!r} with unrecognized tag {!r}"
-                  .format(k, v, t))
-
-# Convert gloss-tags to lowercase keys (needed due to case-insensitive match)
-gloss_tags = {k.lower(): v for k, v in list(gloss_tags.items())}
-
-# Regexp for finding recognized mappings from a gloss.
-# Currently, key to gloss_tags is taken from m.groups(2)
-gloss_tags_re = re.compile(
-    r"(^|[ (])(" +
-    "|".join(re.escape(x) for x in
-             sorted(set(gloss_tags.keys()),
-                    key=lambda x: (len(x), x),
-                    reverse=True)) +
-    r")($|[ ,;:).])")
-
 
 def distw(titleparts, word):
     """Computes how distinct ``word`` is from the most similar word in
@@ -986,6 +626,10 @@ def parse_head_final_tags(ctx, lang, form):
     # Make sure there are no double spaces in the form as this code does not
     # handle them otherwise.
     form = re.sub(r"\s+", " ", form.strip())
+    if not form:
+        return form, []
+
+    origform = form
 
     tags = []
 
@@ -997,7 +641,12 @@ def parse_head_final_tags(ctx, lang, form):
             tagkeys = m.group(1)
             if not ctx.title.endswith(tagkeys):
                 form = form[:m.start()]
-                tags.extend(head_final_bantu_map[tagkeys].split(" "))
+                v = head_final_bantu_map[tagkeys]
+                if v.startswith("?"):
+                    v = v[1:]
+                    ctx.debug("suspicious suffix {!r} in language {}: {}"
+                              .format(v, lang, origform))
+                tags.extend(v.split())
 
     # If parsing for certain other languages (e.g., Lithuanian,
     # French, Finnish), handle some extra head-final tags first
@@ -1012,23 +661,32 @@ def parse_head_final_tags(ctx, lang, form):
     # Handle normal head-final tags
     m = re.search(head_final_re, form)
     if m is not None:
-        tagkeys = m.group(2)  # Note: intentionally not stripped
-        # print("tagkeys={}".format(tagkeys))
+        tagkeys = m.group(3)  # Note: intentionally not stripped
         # Only replace tags ending with numbers in languages that have
         # head-final numeric tags (e.g., Bantu classes); also, don't replace
         # tags if the main title ends with them (then presume they are part
         # of the word)
         # print("head_final_tags form={!r} tagkeys={!r} lang={}"
         #       .format(form, tagkeys, lang))
-        if ((not tagkeys[-1].isdigit() or
+        tagkeys_contains_digit = re.search(r"\d", tagkeys)
+        if ((not tagkeys_contains_digit or
              lang in head_final_numeric_langs) and
             not ctx.title.endswith(tagkeys)):
-            if not tagkeys[-1].isdigit() or lang in head_final_numeric_langs:
+            if not tagkeys_contains_digit or lang in head_final_numeric_langs:
                 form = form[:m.start()]
-                for t in tagkeys.split():  # Note: effectively strips
-                    if t == "or":
-                        continue
-                    tags.extend(xlat_head_map[t].split(" "))
+                v = xlat_head_map[tagkeys]
+                if v.startswith("?"):
+                    v = v[1:]
+                    ctx.debug("suspicious suffix {!r} in language {}: {}"
+                              .format(v, lang, origform))
+                tags.extend(v.split())
+
+    # Generate warnings about words ending in " or" after processing
+    if ((form.endswith(" or") and not origform.endswith(" or")) or
+        (form[-1].isdigit() and not form[0].isdigit()) or
+        form.endswith(" du")):
+        ctx.debug("suspicious unhandled suffix in {}: {}"
+                  .format(lang, origform))
 
     # print("parse_head_final_tags: form={!r} tags={}".format(form, tags))
     return form, tags
@@ -1611,10 +1269,12 @@ def parse_alt_or_inflection_of(ctx, gloss):
     m = re.match(r"(A\(n\)|A|a|an|An|The|the) ", gloss1)
     if m:
         gloss1 = gloss1[m.end():]
+
     # First try parsing it as-is
     parsed = parse_alt_or_inflection_of1(ctx, gloss1)
     if parsed is not None:
         return parsed
+
     # Next try parsing it with the first character converted to lowercase if
     # it was previously uppercase.
     if gloss1 != gloss:
@@ -1624,29 +1284,7 @@ def parse_alt_or_inflection_of(ctx, gloss):
         parsed = parse_alt_or_inflection_of1(ctx, gloss1)
         if parsed is not None:
             return parsed
-    # Cannot parse it as an alt-of/form-of/synonym-of.
-    # See if we can extract something else from the gloss.
-    tags = []
-    for m in re.finditer(gloss_tags_re, gloss.lower()):
-        k = m.group(2)
-        t = gloss_tags[k]
-        tags.extend(t.split())
-    # Search for species names.  Can't add to gloss_tags_re, because huge
-    # regexps become very slow in Python.  This does almost the same but
-    # way faster.
-    for m in re.finditer(r"(^|[ (])(([A-Z][a-z]+) [a-z]+)", gloss):
-        k = m.group(2)
-        first = m.group(3)
-        if first in known_firsts or k in known_species:
-            tags.append("g-organism")
-    # Search for taxonomic categories
-    for m in re.finditer(r"(subspecies|species|genus|genera|subfamily|"
-                         "family|suborder|infraorder|phylum|"
-                         r"order|clade|kingdom|taxonomic domain) [A-Z][a-z]+",
-                         gloss):
-        tags.append("g-organism")
-    if tags:
-        return tags, None
+
     return None
 
 # These tags are not allowed in alt-or-inflection-of parsing
@@ -1768,7 +1406,7 @@ def parse_alt_or_inflection_of1(ctx, gloss):
     lst = []
     for p in parts:
         # Check for some suspicious base forms
-        m = re.find(r"[.,{}()]", p)
+        m = re.search(r"[.,{}()]", p)
         if m and not ctx.page_exists(p):
             ctx.debug("suspicious alt_of/form_of with {!r}: {}"
                       .format(m.group(0), p))

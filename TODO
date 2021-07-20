@@ -385,12 +385,4 @@ sense 1/1 "A domesticated species..."
 
 See tree/English/Hyponyms: Category:en:Trees
 
-environment/English/Translations/Swahili has suffix "m or ma".  What
-does it mean, is it a typo?
-
-wife/English/Translations/Swahili has suffix "u or u".  What does it mean,
-is it a typo?
-
-Andromeda/English/Translations(spiral galaxy)/Swahili has suffix "n or
-n".  What does it mean, is it a typo?  Same with
-feijoa/English/Translations/Swahili.
+Move hieroglyph conversion to postprocessing

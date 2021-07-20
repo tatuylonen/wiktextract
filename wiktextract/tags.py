@@ -10,15 +10,31 @@ xlat_head_map = {
     "m/f": "masculine feminine",
     "m./f.": "masculine feminine",
     "m or f": "masculine feminine",
+    "m or f or n": "masculine feminine neuter",
     "f or m": "feminine masculine",
     "f or n": "feminine neuter",
     "n or f": "neuter feminine",
     "m or n": "masculine neuter",
     "n or m": "neuter masculine",
     "c or n": "common neuter",  # ethylene/Eng/Tr/Danish
-    "pl or f": "plural singular feminine",  # grit/Eng/Tr(husked...)/German
+    "c or f": "common feminine",  # picture book/Tr/Norwegian
+    "f or pl": "feminine singular plural",  # XXX information/Eng/Tr/Latgalian
+    "pl or f": "feminine singular plural",  # XXX grit/Eng/Tr(husked...)/German
+    "m or pl": "masculine singular plural",  # XXX information/Eng/Tr/Latgalian
+    "pl or m": "masculine singular plural",
+    "n or pl": "neuter singular plural",  # XXX table scrap/Tr/Greek
+    "c or n or n pl": "common neuter singular plural",  # XXX augmentation/Tr
+    "pl or m or f": "masculine feminine singular plural",  # XXX suc* my co*/Tr
+    # beginner/Eng/Tr/Polish
+    "m or m pl": "masculine singular plural",
+    # mass/Eng/Tr(phramacy:...)/Romanian
+    "f or f pl": "feminine singular plural",
+    "f or f pl": "feminine singular plural",
+    "f pl or n pl": "feminine neuter plural",  # diurnal/Eng/Tr/Polish
+    "f or f": "feminine",
     "topo.": "toponymic",  # E.g., p/Egyptian
     "n": "neuter",
+    "n or c": "neuter common",
     "c": "common",  # common gender in at least West Frisian
     "sg": "singular",
     "pl": "plural",
@@ -31,7 +47,6 @@ xlat_head_map = {
     # your/Eng/Tr/Norwegian:
     "m pl or f pl or n pl": "masculine femininine neuter plural",
     "m sg or f sg or n sg": "masculine femininine neuter singular",
-    "du": "dual",
     "inan": "inanimate",
     "Inanimate": "inanimate",  # e.g., "James Bay"/English/Tr/Northern East Cree
     "anim": "animate",
@@ -45,6 +60,7 @@ xlat_head_map = {
     "pf": "perfective",
     "pf.": "perfective",
     "impf or pf": "imperfective perfective",  # ought/Eng/Tr/Serbo-Croatian
+    "pf or impf": "perfective imperfective",  # start/Tr(of an activity)/Russian
     "invariable": "invariable",
     "n.": "noun",
     "v.": "verb",
@@ -78,11 +94,21 @@ xlat_head_map = {
     "5/6": "class-5 class-6",
     "7/8": "class-7 class-8",
     "9/10": "class-9 class-10",
+    "15/17": "class-15 class-17",
     "1 or 2": "class-1 class-2",
+    "1a or 2a": "class-1a class-2a",
     "3 or 4": "class-3 class-4",
     "5 or 6": "class-5 class-6",
     "7 or 8": "class-7 class-8",
     "9 or 10": "class-9 class-10",
+    "9a or 10a": "class-9a class-10a",
+    "15 or 17": "class-15 class-17",
+    "9/10 or 1/2": "class-9 class-10 class-1 class-2",
+    # two/Tr/Kikuyu
+    "2 or 4 or 6 or 13": "class-2 class-4 class-6 class-13",
+    "8 or 10": "class-8 class-10",  # two/Tr/Kikuyu
+    "11 or 10": "class-11 class-10",  # sea/Eng/Tr/Zulu
+    "10 or 11": "class-10 class-11",  # mushroom/Tr/Swahili
     "m1": "masculine first-declension",
     "f2": "feminine second-declension",
     "m2": "masculine second-declension",
@@ -93,6 +119,10 @@ xlat_head_map = {
     "f5": "feminine fifth-declension",
     "m5": "masculine fifth-declension",
     "[uncountable]": "uncountable",
+    "6 or 7": "?class-6 class-7",  # XXX spider/Eng/Tr/Lingala ???
+    "1 or 6": "?class-2 class-6",  # XXX Zulu/Tr/Zulu
+    "2 or 3": "?class-2 class-3",  # XXX branch/Tr/Swahili
+    "9 or 6": "?class-9 class-6",  # XXX birthday,carrot/Tr/Rwanda-Rundi
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly
@@ -148,12 +178,34 @@ head_final_bantu_map = {
     "ku": "class-15",
     "pa": "class-16",
     "mu": "class-18",
+
+    # XXX these are probably errors in Wiktionary, currently ignored
+    "n or n": "?",  # Andromeda/Eng/Tr/Swahili etc
+    "m or ma": "?",  # environment/Eng/Tr/Swahili etc
+    "u or u": "?",  # wife/Eng/Tr/Swahili
 }
 
 head_final_other_langs = set([
     "Finnish",
     "French",
     "Lithuanian",
+    "Arabic",
+    "Armenian",
+    "Zazaki",
+    "Hebrew",
+    "Nama",
+    "Old Church Slavonic",
+    "Gothic",
+    "Old Irish",
+    "Latin",
+    "Scottish Gaelic",
+    "Slovene",
+    "Sorbian",
+    "Kajkavian",
+    "Chakavian",
+    "Croatian",  # Kajkavian and Chakavian are forms of Croatian
+    "Sanskrit",
+    "Ancient Greek",
 ])
 
 head_final_other_map = {
@@ -170,6 +222,17 @@ head_final_other_map = {
     "stress pattern 3a": "stress-pattern-3a",
     "stress pattern 3b": "stress-pattern-3b",
     "stress pattern 4": "stress-pattern-4",
+
+    # These are specific to Arabic, Armenian, Zazaki, Hebrew, Nama,
+    # Old Church Slavonic, Gothic, Old Irish, Latin, Scotish Gaelic,
+    # Slovene, Sorbian, Kajkavian, Chakavian, (Croatian), Sanskrit,
+    # Ancient Greek
+    # (generally languages with a dual number)
+    "du": "dual",
+    "m du": "masculine dual",
+    "f du": "feminine dual",
+    "m du or f du": "masculine feminine dual",  # yellow/Tr/Zazaki
+    "f du or m du": "feminine masculine dual",
 }
 
 # Accepted uppercase tag values.  As tags these are represented with words
@@ -1799,6 +1862,7 @@ xlat_tags_map = {
     "proprietary name": "name",
     "Vulgar": "vulgar",
     "strong language": "vulgar",
+    "Very Strong Swear word": "vulgar",
     "Spoken": "colloquial",
     "spoken": "colloquial",
     "written": "literary",

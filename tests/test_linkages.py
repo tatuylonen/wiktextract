@@ -780,6 +780,25 @@ class LinkageTests(unittest.TestCase):
             {"word": "homonyme", "tags": ["masculine", "neuter"]},
         ]})
 
+    def test_gender18(self):
+        # dragonfly/Eng/Tr/Zulu
+        data = self.run_data("uzekamanzi 1a or 2a",
+                             lang="Zulu")
+        self.assertEqual(data, {"related": [
+            {"word": "uzekamanzi", "tags": ["class-1a", "class-2a"]},
+        ]})
+
+    def test_gender19(self):
+        # Spanish Netherlands/Tr/French
+        data = self.run_data("Pays-Bas espagnois pl or m",
+                             lang="French")
+        self.assertEqual(data, {"related": [
+            # Note: currently this maps to no tags as we currently have no
+            # good way to represent this tag combination.  Most importantly,
+            # it must NOT map to ["masculine", "plural"].
+            {"word": "Pays-Bas espagnois"},
+        ]})
+
     def test_begining_tags1(self):
         data = self.run_data("frequentative juoksennella, cohortative juostaan",
                              lang="Finnish")
