@@ -661,17 +661,17 @@ def parse_head_final_tags(ctx, lang, form):
     # Handle normal head-final tags
     m = re.search(head_final_re, form)
     if m is not None:
-        tagkeys = m.group(3)  # Note: intentionally not stripped
+        tagkeys = m.group(3)
         # Only replace tags ending with numbers in languages that have
         # head-final numeric tags (e.g., Bantu classes); also, don't replace
         # tags if the main title ends with them (then presume they are part
         # of the word)
-        # print("head_final_tags form={!r} tagkeys={!r} lang={}"
-        #       .format(form, tagkeys, lang))
+        print("head_final_tags form={!r} tagkeys={!r} lang={}"
+              .format(form, tagkeys, lang))
         tagkeys_contains_digit = re.search(r"\d", tagkeys)
         if ((not tagkeys_contains_digit or
              lang in head_final_numeric_langs) and
-            not ctx.title.endswith(tagkeys)):
+            not ctx.title.endswith(" " + tagkeys)):
             if not tagkeys_contains_digit or lang in head_final_numeric_langs:
                 form = form[:m.start()]
                 v = xlat_head_map[tagkeys]
@@ -683,7 +683,7 @@ def parse_head_final_tags(ctx, lang, form):
 
     # Generate warnings about words ending in " or" after processing
     if ((form.endswith(" or") and not origform.endswith(" or")) or
-        (form[-1].isdigit() and not form[0].isdigit()) or
+        re.match(r"^[^\d].*\b\d+a?(\b|$)", form) or
         form.endswith(" du")):
         ctx.debug("suspicious unhandled suffix in {}: {}"
                   .format(lang, origform))

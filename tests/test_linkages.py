@@ -681,7 +681,8 @@ class LinkageTests(unittest.TestCase):
     def test_gender5(self):
         # Numeric inflection classes should only be interpreted for certain
         # languages (e.g., Bantu languages)
-        data = self.run_data("foo 1", lang="Swedish")
+        ctx = Wtp()  # To allow debug messages
+        data = self.run_data("foo 1", lang="Swedish", ctx=ctx)
         self.assertEqual(data, {"related": [
             {"word": "foo 1"}]})
 
@@ -730,7 +731,8 @@ class LinkageTests(unittest.TestCase):
 
     def test_gender13(self):
         # They should not be interpreted for other languages
-        data = self.run_data("foo 1 or 2", lang="English")
+        ctx = Wtp()  # To allow debug messages
+        data = self.run_data("foo 1 or 2", lang="English", ctx=ctx)
         self.assertEqual(data, {"related": [
             {"word": "foo 1"},
             {"word": "2"},
@@ -745,8 +747,9 @@ class LinkageTests(unittest.TestCase):
 
     def test_gender15(self):
         # inclusive or/English/Translations
+        ctx = Wtp()  # To allow debug messages
         data = self.run_data("μη αποκλειστικό or n (mi apokleistikó or)",
-                             lang="Greek", word="inclusive or")
+                             lang="Greek", word="inclusive or", ctx=ctx)
         self.assertEqual(data, {"related": [
             {"word": "μη αποκλειστικό or", "tags": ["neuter"],
              "roman": "mi apokleistikó or"},
@@ -793,10 +796,8 @@ class LinkageTests(unittest.TestCase):
         data = self.run_data("Pays-Bas espagnois pl or m",
                              lang="French")
         self.assertEqual(data, {"related": [
-            # Note: currently this maps to no tags as we currently have no
-            # good way to represent this tag combination.  Most importantly,
-            # it must NOT map to ["masculine", "plural"].
-            {"word": "Pays-Bas espagnois"},
+            {"word": "Pays-Bas espagnois",
+             "tags": ["masculine", "singular", "plural"]},
         ]})
 
     def test_begining_tags1(self):
