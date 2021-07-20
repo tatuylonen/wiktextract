@@ -3456,17 +3456,6 @@ valid_tags = set([
     "frequentative",
     "front-vowel",
     "future",
-    "g-action",   # The action of a verb
-    "g-activity",  # A verb that implies an action with some duration
-    "g-feminine",  # Semantic gender extracted from gloss
-    "g-masculine",  # Semantic gender extracted from gloss
-    "g-organism",  # Determined from gloss to be an organism
-    "g-person",    # Determined from gloss to be a person
-    "g-plural",    # Semantically plural based on gloss
-    "g-process",   # A verb that is a process (generally non-agentive)
-    "g-singular",  # Semantically singular based on gloss
-    "g-unit",      # Determined to be a unit of measurement based on gloss
-    "g-placeholder",  # Dummy pronoun / placeholder (based on gloss)
     "gender-neutral",
     "genitive",
     "gerund",
