@@ -10,47 +10,90 @@ xlat_head_map = {
     "m/f": "masculine feminine",
     "m./f.": "masculine feminine",
     "m or f": "masculine feminine",
-    "m or f or n": "masculine feminine neuter",
+    "m or n": "masculine neuter",
+    "m or c": "masculine common",
     "f or m": "feminine masculine",
     "f or n": "feminine neuter",
+    "f or c": "feminine common",  # sustainability/Tr/Norwegian
     "n or f": "neuter feminine",
-    "m or n": "masculine neuter",
     "n or m": "neuter masculine",
-    "c or n": "common neuter",  # ethylene/Eng/Tr/Danish
+    "n or c": "neuter common",
+    "c or m": "common masculine",
     "c or f": "common feminine",  # picture book/Tr/Norwegian
+    "c or n": "common neuter",  # ethylene/Eng/Tr/Danish
+    "m or f or n": "masculine feminine neuter",
+    "f or m or n": "masculine feminine neuter",
+    "m or f or c": "masculine feminine common",
+    "f or m or c": "masculine feminine common",
+    "m or c or n": "masculine neuter common",
+    "f or c or n": "feminine neuter common",
+    "m or n or c": "masculine neuter common",
+    "f or n or c": "feminine neuter common",
+    "c or f or n": "feminine common neuter",
+    "c or m or n": "masculine common neuter",
+    "n or f or c": "feminine neuter common",
+    "n or m or c": "masculine neuter common",
+    "n or m or f": "masculine feminine neuter",
+    "n or f or m": "masculine feminine neuter",
+    "c or m or f": "masculine feminine common",
+    "c or f or m": "masculine feminine common",
+    "m or c or n": "masculine common neuter",
+    "f or n or m": "masculine feminine neuter",
+    "m or n or f": "masculine feminine neuter",
+    "f or c or m": "masculine feminine common",
+    "m or c or f": "masculine feminine common",
     "f or pl": "feminine singular plural",  # XXX information/Eng/Tr/Latgalian
-    "pl or f": "feminine singular plural",  # XXX grit/Eng/Tr(husked...)/German
     "m or pl": "masculine singular plural",  # XXX information/Eng/Tr/Latgalian
-    "pl or m": "masculine singular plural",
     "n or pl": "neuter singular plural",  # XXX table scrap/Tr/Greek
+    "c or pl": "common singular plural",
+    "pl or f": "feminine singular plural",  # XXX grit/Eng/Tr(husked...)/German
+    "pl or m": "masculine singular plural",
+    "pl or n": "neuter singular plural",  # ordnance/Tr/German
+    "pl or c": "common singular plural",  # "you don't say"/Tr/Romanian
+    "sg or f": "?singular feminine",
+    "sg or m": "?singular masculine",
+    "sg or n": "?singular neuter",
+    "sg or c": "?singular common",
     "c or n or n pl": "common neuter singular plural",  # XXX augmentation/Tr
     "pl or m or f": "masculine feminine singular plural",  # XXX suc* my co*/Tr
+    "m or f or sg or pl": "masculine feminine singular plural",  # Ainu/Russian
     # crush/Portuguese head
     "m or m f": "?masculine feminine",
     # beginner/Eng/Tr/Polish
     "m or m pl": "masculine singular plural",
-    # mass/Eng/Tr(phramacy:...)/Romanian
     "f or f pl": "feminine singular plural",
-    "f or f pl": "feminine singular plural",
+    "n or n pl": "neuter singular plural",
+    "c or c pl": "common singular plural",
     "f pl or n pl": "feminine neuter plural",  # diurnal/Eng/Tr/Polish
     "f or f": "feminine",
     "topo.": "toponymic",  # E.g., p/Egyptian
     "n": "neuter",
-    "n or c": "neuter common",
+    "m or n or f": "masculine neuter feminine",  # cataract/Tr/Dutch
     "c": "common",  # common gender in at least West Frisian
     "sg": "singular",
     "pl": "plural",
     "pl or sg": "plural singular",
     "sg or pl": "singular plural",
-    "m pl or f pl": "masculine plural feminine",  # comedian/English/Tr/Welsh
+    "m sg or m pl": "masculine singular plural",  # valenki/Tr/German
+    "f sg or f pl": "feminine singular plural",
+    "n sg or n pl": "neuter singular plural",
+    "c sg or c pl": "common singular plural",
+    "m pl or f pl": "masculine feminine plural",  # comedian/English/Tr/Welsh
+    "m pl or n pl": "masculine neuter plural",  # whose/Tr/Latin
+    "m pl or n": "?masculine neuter plural singular",  # pimpernel/Tr/Bulgarian
     "m sg or f sg": "masculine singular feminine",  # your/Eng/Tr/Walloon
+    "f sg or m sg": "masculine singular feminine",  # your/Eng/Tr/Walloon
+    "n sg or n sg": "masculine singular feminine",  # your/Eng/Tr/Walloon
     # copacetic/English/Tr/Hebrew:
     "m or m pl or f or f pl": "masculine feminine singular plural",
     # your/Eng/Tr/Norwegian:
     "m pl or f pl or n pl": "masculine femininine neuter plural",
     "m sg or f sg or n sg": "masculine femininine neuter singular",
+    "c or c pl": "common singular plural",
+    "c pl or n pl": "common neuter plural",  # which/Tr/Danish
     "inan": "inanimate",
     "Inanimate": "inanimate",  # e.g., "James Bay"/English/Tr/Northern East Cree
+    "m inan or m anim": "masculine inanimate animate",
     "anim": "animate",
     "pers": "person",  # XXX check what this really is used for? personal?
     "npers": "impersonal",
@@ -113,7 +156,14 @@ xlat_head_map = {
     "2 or 4 or 6 or 13": "class-2 class-4 class-6 class-13",
     "8 or 10": "class-8 class-10",  # two/Tr/Kikuyu
     "11 or 10": "class-11 class-10",  # sea/Eng/Tr/Zulu
+    "11 or 10a": "class-11 class-10a",  # half/Ngazidja Comorian
     "10 or 11": "class-10 class-11",  # mushroom/Tr/Swahili
+    "11 or 14": "class-11 class-14",  # country/Tr/Swahili
+    "11 or 12": "class-11 class-12",  # theater/Tr/Swahili
+    "9 or 6": "class-9 class-6",  # birthday,carrot/Tr/Rwanda-Rundi
+    "1 or 6": "class-2 class-6",  # Zulu/Tr/Zulu
+    "6 or 7": "class-6 class-7",  # spider/Eng/Tr/Lingala ???
+    "15 or 6": "class-15 class-6",  # leg/Tr/Rwanda-Rundi
     "m1": "masculine first-declension",
     "f2": "feminine second-declension",
     "m2": "masculine second-declension",
@@ -124,10 +174,16 @@ xlat_head_map = {
     "f5": "feminine fifth-declension",
     "m5": "masculine fifth-declension",
     "[uncountable]": "uncountable",
-    "6 or 7": "?class-6 class-7",  # XXX spider/Eng/Tr/Lingala ???
-    "1 or 6": "?class-2 class-6",  # XXX Zulu/Tr/Zulu
     "2 or 3": "?class-2 class-3",  # XXX branch/Tr/Swahili
-    "9 or 6": "?class-9 class-6",  # XXX birthday,carrot/Tr/Rwanda-Rundi
+    "m or impf": "?imperfective",  # pour/Tr/Ukrainian
+    "n or impf": "?imperfective",  # glom/Russian
+    "n or pf": "?perfective",  # meymaniye/Tr/Zazaki
+    "m or m": "?masculine",  # Paul/Tr(male given name)/Urdu
+    "sg or m": "?masculine singular",  # bewitching/Tr/Portuguese
+    "sg or n": "?neuter singular",  # piccolo/Tr/Polish
+    "sg or c": "?common singular",  # soy milk/Tr/Indonesian
+    "f or c pl": "?feminine common singular plural", # mulberry/Tr/Zazaki
+    "c pl or n": "?common neuter singular plural",  # mouthpiece/Tr/Swedish
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly
@@ -278,6 +334,12 @@ head_final_other_map = {
     "f du": "feminine dual",
     "m du or f du": "masculine feminine dual",  # yellow/Tr/Zazaki
     "f du or m du": "feminine masculine dual",
+    "n du or n pl": "neuter dual plural",
+    "f du or f pl": "feminine dual plural",
+    "m du or m pl": "masculine dual plural",
+    "?du or f du or n": "",  # XXX guest/Tr/Zazaki - how would this be expressed?
+    "?du or n or pf": "",  # XXX how would this be expressed?
+    "du or n du": "?neuter dual",  # bilberry/Tr/Zazaki
 }
 
 # Accepted uppercase tag values.  As tags these are represented with words
