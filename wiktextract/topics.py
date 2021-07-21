@@ -1019,4 +1019,6 @@ topic_generalize_map = {
     "gaming": "games",
     "SI units": "units-of-measure",
     "units of measure": "units-of-measure",
+    "Western Christianity": "Christianity",
+    "Abrahamic religions": "religion",
 }

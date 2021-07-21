@@ -386,3 +386,24 @@ sense 1/1 "A domesticated species..."
 See tree/English/Hyponyms: Category:en:Trees
 
 Move hieroglyph conversion to postprocessing
+
+婬/Japanese/Kanji/Definitions has a table that is not correctly handled,
+and is being parsed as head form.
+
+Handle (* Poetic.) and (** Antiquanted.) and */** at end of form, e.g.
+камень/Russian
+
+Check topics in word head, cf. अंगूठा/Hindi, which has (anatomy) in head
+Fix parsing "wait on hand, foot and finger"/English head parsing
+(comma splits related forms).  Maybe similar magic character kludge as we do
+for linkages? No, that won't work here... maybe just merge standalone
+parts that are comma-separated parts of the title to the previous entry
+with a comma (as a pre-processing step after splitting?).  Inflection though
+might be in any of the parts, but I think usually the first.
+Also: "wait on someone hand, foot and finger"/English.
+Ah, similar bug in alt-of/inflection-of parsing.
+
+Implement special case in parsing word head for paren desc:
+"на (na) accusative, by"; see помножать/Russian
+
+Something wrong in parsing آتي/Arabic "coming"

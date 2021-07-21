@@ -17,6 +17,7 @@ from .tags import (xlat_head_map, valid_tags,
                    uppercase_tags, xlat_tags_map, xlat_descs_map,
                    head_final_numeric_langs,
                    head_final_bantu_langs, head_final_bantu_map,
+                   head_final_semitic_langs, head_final_semitic_map,
                    head_final_other_langs, head_final_other_map)
 from .english_words import english_words, not_english_words
 
@@ -157,6 +158,12 @@ head_final_bantu_re = re.compile(
         "|".join(re.escape(x) for x in head_final_bantu_map.keys())))
 
 # Regexp used to match head tag specifiers at end of a form for certain
+# Semitic languages (particularly Arabic and similar languages).
+head_final_semitic_re = re.compile(
+    r" ({})$".format(
+        "|".join(re.escape(x) for x in head_final_semitic_map.keys())))
+
+# Regexp used to match head tag specifiers at end of a form for certain
 # other languages (e.g., Lithuanian, Finnish, French).
 head_final_other_re = re.compile(
     r" ({})$".format(
@@ -172,7 +179,14 @@ ignored_parens = set([
     "(in words with back vowel harmony)",
     "in words with front vowel harmony",
     "(in words with front vowel harmony)",
+    "see below",
+    "see usage notes below",
 ])
+ignored_parens_re = re.compile(
+    r"^(" + "|".join(re.escape(x) for x in ignored_parens) + ")$" +
+    r"|^(Can we clean up|Can we verify|for other meanings see "
+    r"lit\. )"
+    )
 
 # Translations that are ignored
 ignored_translations = set([
@@ -415,7 +429,8 @@ def map_with(ht, lst):
         x = x.strip()
         x = ht.get(x, x)
         if isinstance(x, str):
-            ret.append(x)
+            if x:
+                ret.append(x)
         elif isinstance(x, (list, tuple)):
             ret.extend(x)
         else:
@@ -648,6 +663,21 @@ def parse_head_final_tags(ctx, lang, form):
                               .format(v, lang, origform))
                 tags.extend(v.split())
 
+    # If parsing for certain Semitic languages (e.g., Arabic), handle
+    # some extra head-final tags first
+    if lang in head_final_semitic_langs:
+        m = re.search(head_final_semitic_re, form)
+        if m is not None:
+            tagkeys = m.group(1)
+            if not ctx.title.endswith(tagkeys):
+                form = form[:m.start()]
+                v = head_final_semitic_map[tagkeys]
+                if v.startswith("?"):
+                    v = v[1:]
+                    ctx.debug("suspicious suffix {!r} in language {}: {}"
+                              .format(v, lang, origform))
+                tags.extend(v.split())
+
     # If parsing for certain other languages (e.g., Lithuanian,
     # French, Finnish), handle some extra head-final tags first
     if lang in head_final_other_langs:
@@ -666,8 +696,8 @@ def parse_head_final_tags(ctx, lang, form):
         # head-final numeric tags (e.g., Bantu classes); also, don't replace
         # tags if the main title ends with them (then presume they are part
         # of the word)
-        print("head_final_tags form={!r} tagkeys={!r} lang={}"
-              .format(form, tagkeys, lang))
+        # print("head_final_tags form={!r} tagkeys={!r} lang={}"
+        #       .format(form, tagkeys, lang))
         tagkeys_contains_digit = re.search(r"\d", tagkeys)
         if ((not tagkeys_contains_digit or
              lang in head_final_numeric_langs) and
@@ -704,7 +734,7 @@ def add_related(ctx, data, tags_lst, related):
     related = " ".join(related)
     if related == "[please provide]":
         return
-    if related == "-":
+    if related in ("-", "(none)"):
         return
 
     # Split to altenratives by "or".  However, if the right side of the "or"
@@ -760,21 +790,26 @@ def add_related(ctx, data, tags_lst, related):
                                                                 related)
                     tags = list(tags1) + list(tags2) + list(final_tags)
                     form = {"form": related}
+                    data_extend(ctx, form, "topics", topics1)
+                    data_extend(ctx, form, "topics", topics2)
+                    if topics1 or topics2:
+                        ctx.debug("word head form has topics: {}".format(form))
                     # Add tags from canonical form into the main entry
                     if "canonical" in tags:
                         for x in tags:
                             if x != "canonical":
                                 data_append(ctx, data, "tags", x)
                         data_append(ctx, form, "tags", "canonical")
-                        if ctx.title != related or topics1 or topics2:
-                            data_append(ctx, data, "forms", form)
+                        if ctx.title == related and not topics1 and not topics2:
+                            continue
                     else:
                         data_extend(ctx, form, "tags", list(sorted(set(tags))))
+                    # Only insert if the form is not already there
+                    for old in data.get("forms", ()):
+                        if form == old:
+                            break
+                    else:
                         data_append(ctx, data, "forms", form)
-                    data_extend(ctx, form, "topics", topics1)
-                    data_extend(ctx, form, "topics", topics2)
-                    if topics1 or topics2:
-                        ctx.debug("word head form has topics: {}".format(form))
 
 
 def parse_word_head(ctx, pos, text, data):
@@ -823,6 +858,7 @@ def parse_word_head(ctx, pos, text, data):
     # related words
     parens = list(m.group(1) for m in
                   re.finditer(r"\((([^()]|\([^()]*\))*)\)", text))
+    have_romanization = False
     have_ruby = False
     hiragana = ""
     katakana = ""
@@ -857,31 +893,78 @@ def parse_word_head(ctx, pos, text, data):
 
             # If only one word, assume it is comma-separated alternative
             # to the previous one
-            if (desc.find(" ") < 0 and
-                classify_desc(desc) != "tags"):
-                if prev_tags:
-                    # Assume comma-separated alternative to previous one
-                    add_related(ctx, data, prev_tags, [desc])
-                    continue
-                elif distw(titleparts, desc) <= 0.5:
-                    # Similar to head word, assume a dialectal variation to
-                    # the base form.  Cf. go/Alemannic German/Verb
-                    add_related(ctx, data, ["alternative"], [desc])
-                    continue
+            if desc.find(" ") < 0:
+                cls = classify_desc(desc)
+                if cls != "tags":
+                    if prev_tags:
+                        # Assume comma-separated alternative to previous one
+                        add_related(ctx, data, prev_tags, [desc])
+                        continue
+                    elif distw(titleparts, desc) <= 0.5:
+                        # Similar to head word, assume a dialectal variation to
+                        # the base form.  Cf. go/Alemannic German/Verb
+                        add_related(ctx, data, ["alternative"], [desc])
+                        continue
+                    elif (cls in ("romanization", "english") and
+                          not have_romanization and
+                          classify_desc(title) == "other"):
+                        # Assume it to be a romanization
+                        add_related(ctx, data, ["romanization"], [desc])
+                        have_romanization = True
+                        continue
 
             m = re.match(r"^(\d+) strokes?$", desc)
             if m:
                 # Special case, used to give #strokes for Han characters
                 add_related(ctx, data, ["strokes"], [m.group(1)])
                 continue
-            m = re.match(r"^[\u2F00-\u2FDF\u2E80-\u2EFF\U00018800-\U00018AFF"
-                         r"\uA490-\uA4CF\u4E00-\u9FFF]\+\d+$", desc)
+
+            # See if it is radical+strokes
+            m = re.match(r"^([\u2F00-\u2FDF\u2E80-\u2EFF\U00018800-\U00018AFF"
+                         r"\uA490-\uA4CF\u4E00-\u9FFF]\+\d+)"
+                         r"( in (Japanese|Chinese))?$", desc)
             if m:
                 # Special case, used to give radical + strokes for Han
                 # characters
-                add_related(ctx, data, ["radical+strokes"], [desc])
+                radical_strokes = m.group(1)
+                lang = m.group(3)
+                t = ["radical+strokes"]
+                if lang:
+                    t.append(lang)
+                add_related(ctx, data, t, [radical_strokes])
                 prev_tags = None
                 continue
+
+            # See if it indicates historical Katakana ortography (←) or
+            # just otherwise katakana/hiragana form
+            m = re.match(r"←\s*|kana\s+", desc)
+            if m:
+                if desc.startswith("←"):
+                    t = "historical "
+                else:
+                    t = ""
+                x = desc[m.end():]
+                if x.endswith("?"):
+                    x = x[:-1]
+                    # XXX should we add a tag indicating uncertainty?
+                if x:
+                    name = unicodedata.name(x[0])
+                    if name.startswith("HIRAGANA "):
+                        desc = t + "hiragana " + x
+                    elif name.startswith("KATAKANA "):
+                        desc = t + "katakana " + x
+
+            # See if it is "n strokes in Chinese" or similar
+            m = re.match(r"(\d+) strokes in (Chinese|Japanese)$", desc)
+            if m:
+                # Special case, used to give just strokes for some Han chars
+                strokes = m.group(1)
+                lang = m.group(2)
+                t = ["strokes", lang]
+                add_related(ctx, data, t, strokes)
+                prev_tags = None
+                continue
+
             parts = list(m.group(0) for m in re.finditer(word_re, desc))
             if not parts:
                 prev_tags = None
@@ -922,6 +1005,7 @@ def parse_word_head(ctx, pos, text, data):
                     if ((have_ruby or classify_desc(base) == "other") and
                         classify_desc(paren) == "romanization"):
                         add_related(ctx, data, ["romanization"], [paren])
+                        have_romanization = True
                         continue
                     tagsets = [["error-unrecognized-form"]]
                     ctx.debug("unrecognized head form: {}".format(desc))
@@ -1110,11 +1194,7 @@ def parse_translation_desc(ctx, lang, text, tr):
 
         if not par:
             continue
-        if par in ignored_parens:
-            continue
-        if par.startswith("Can we clean up"):
-            continue
-        if par.startswith("Can we verify"):
+        if re.search(ignored_parens_re, par):
             continue
         if par.startswith("numeral:"):
             par = par[8:].strip()

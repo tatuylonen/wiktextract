@@ -77,6 +77,11 @@ class WiktExtractTests(unittest.TestCase):
         v = clean_value(self.config, v)
         self.assertEqual(v, "This is a bar.")
 
+    def test_cv_link5(self):
+        v = "([[w:Jurchen script|Jurchen script]]: , Image: [[FIle:Da (Jurchen script).png|25px]])"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "(Jurchen script: , Image: )")
+
     def test_cv_url1(self):
         v = "This is a [http://ylonen.org test]."
         v = clean_value(self.config, v)

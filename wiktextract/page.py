@@ -393,6 +393,7 @@ panel_templates = set([
     "missing template",
     "morse links",
     "move",
+    "multiple images",
     "no inline",
     "picdic",
     "picdicimg",
@@ -761,9 +762,16 @@ tr_ignore_regexps = [
 # If a translation matches this regexp (with re.search), we print a debug
 # message
 tr_suspicious_re = re.compile(
+    r" [mf][12345]$|" +
+    r" [mfnc]$|" +
+    r" (pf|impf|vir|nvir|anml|anim|inan|sg|pl)$|" +
     "|".join(re.escape(x) for x in
              ["; ", "* ", ": ", "[", "]",
               "{", "}", "／", "^", "literally", "lit.",
+              # XXX check occurrences of ⫽, seems to be used as verb-object
+              # separator but shouldn't really be part of the canonical form.
+              # See e.g. 打工/Chinese
+              "⫽",
               "also expressed with", "e.g.", "cf.",
               "used ", "script needed",
               "please add this translation",
@@ -2955,7 +2963,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     sense_parts = []
                     sense = None
                     return ""
-                ctx.error("UNIMPLEMENTED: parse_translation_template: {} {}"
+                ctx.error("UNIMPLEMENTED parse_translation_template: {} {}"
                           .format(name, ht))
                 return ""
             ctx.expand(ctx.node_to_wikitext(node), template_fn=template_fn)
