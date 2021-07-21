@@ -62,12 +62,14 @@ class HeadTests(unittest.TestCase):
         data = {}
         parse_word_head(self.ctx, "noun", "testpage n", data)
         self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["neuter"]})
 
     def test_head7(self):
         data = {}
         parse_word_head(self.ctx, "noun", "testpage c", data)
         self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["common"]})
 
     def test_head8(self):
@@ -75,13 +77,16 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_section("Zulu")
         parse_word_head(self.ctx, "noun", "testpage 1", data)
         self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["class-1"]})
 
     def test_head8b(self):
         # Trying to parse suffix 1 in English - should not get parsed
         data = {}
         parse_word_head(self.ctx, "noun", "testpage 1", data)
+        self.assertEqual(self.ctx.errors, [])
         self.assertEqual(self.ctx.warnings, [])
+        self.assertNotEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"forms": [{"form": "testpage 1",
                                            "tags": ["canonical"]}]})
 
@@ -90,6 +95,7 @@ class HeadTests(unittest.TestCase):
         parse_word_head(self.ctx, "noun",
                         "testpage f (plurale tantum, inanimate)", data)
         self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "plurale-tantum",
                                          "inanimate"]})
 
@@ -99,6 +105,7 @@ class HeadTests(unittest.TestCase):
                         "testpage f (plurale tantum, stem testpag, inanimate)",
                         data)
         self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "plurale-tantum",
                                          "inanimate"],
                                 "forms": [{"tags": ["stem"],
@@ -111,6 +118,7 @@ class HeadTests(unittest.TestCase):
                         "(+ dative)",
                         data)
         self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
         print(data)
         self.assertEqual(data, {"tags": ["feminine", "plurale-tantum",
                                          "inanimate", "with-dative"],
@@ -124,6 +132,39 @@ class HeadTests(unittest.TestCase):
         parse_word_head(self.ctx, "noun",
                         "foo (McCune-Reischauer bar)", data)
         self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"forms": [
             {"form": "foo", "tags": ["canonical"]},
             {"form": "bar", "tags": ["McCune-Reischauer"]}]})
+
+    def test_head13(self):
+        data = {}
+        parse_word_head(self.ctx, "noun",
+                        "testpage f or m",
+                        data)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        self.assertEqual(data, {"tags": ["feminine", "masculine"]})
+
+    def test_head14(self):
+        data = {}
+        parse_word_head(self.ctx, "noun",
+                        "testpage f, m",
+                        data)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        self.assertEqual(data, {"tags": ["feminine", "masculine"]})
+
+    # XXX code needs fixing for this
+    # def test_head15(self):
+    #     data = {}
+    #     parse_word_head(self.ctx, "noun",
+    #                     "testpage f or testpage2 m",
+    #                     data)
+    #     self.assertEqual(self.ctx.warnings, [])
+    #     self.assertEqual(self.ctx.debugs, [])
+    #     self.assertEqual(data, {"tags": ["feminine", "masculine"],
+    #                             "forms": [
+    #                             {"tags": ["canonical", "masculine"],
+    #                              "form": "testpage2"},
+    #                                 ]})

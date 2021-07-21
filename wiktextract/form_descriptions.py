@@ -143,31 +143,39 @@ nested_translations_re = re.compile(
 
 # Regexp that matches head tag specifiers.  Used to match tags from end of
 # translations and linkages
-head_final_re = re.compile(
-    r"( -)?( ({}))+$".format(
-        "|".join(re.escape(x) for x in
-                 # The sort is to put longer ones first, preferring them in
-                 # the regexp match
-                 sorted(xlat_head_map.keys(), key=lambda x: len(x),
-                        reverse=True))))
+head_final_re_text = r"( -)?( ({}))+".format(
+    "|".join(re.escape(x) for x in
+             # The sort is to put longer ones first, preferring them in
+             # the regexp match
+             sorted(xlat_head_map.keys(), key=lambda x: len(x),
+                    reverse=True)))
+head_final_re = re.compile(head_final_re_text + "$")
 
 # Regexp used to match head tag specifiers at end of a form for certain
 # Bantu languages (particularly Swahili and similar languages).
-head_final_bantu_re = re.compile(
-    r" ({})$".format(
-        "|".join(re.escape(x) for x in head_final_bantu_map.keys())))
+head_final_bantu_re_text = r" ({})".format(
+    "|".join(re.escape(x) for x in head_final_bantu_map.keys()))
+head_final_bantu_re = re.compile(head_final_bantu_re_text + "$")
 
 # Regexp used to match head tag specifiers at end of a form for certain
 # Semitic languages (particularly Arabic and similar languages).
-head_final_semitic_re = re.compile(
-    r" ({})$".format(
-        "|".join(re.escape(x) for x in head_final_semitic_map.keys())))
+head_final_semitic_re_text = r" ({})".format(
+    "|".join(re.escape(x) for x in head_final_semitic_map.keys()))
+head_final_semitic_re = re.compile(head_final_semitic_re_text + "$")
 
 # Regexp used to match head tag specifiers at end of a form for certain
 # other languages (e.g., Lithuanian, Finnish, French).
-head_final_other_re = re.compile(
-    r" ({})$".format(
-        "|".join(re.escape(x) for x in head_final_other_map.keys())))
+head_final_other_re_text = r" ({})".format(
+    "|".join(re.escape(x) for x in head_final_other_map.keys()))
+head_final_other_re = re.compile(head_final_other_re_text + "$")
+
+# Regexp for splitting heads.  See parse_word_head().
+head_split_re_text = ("(" + head_final_re_text +
+                      "|" + head_final_bantu_re_text +
+                      "|" + head_final_semitic_re_text +
+                      "|" + head_final_other_re_text + ")?( or |[,;])")
+head_split_re = re.compile(head_split_re_text)
+head_split_re_parens = head_split_re_text.count("(")
 
 # Parenthesized parts that are ignored in translations
 ignored_parens = set([
@@ -708,7 +716,7 @@ def parse_head_final_tags(ctx, lang, form):
                 if v.startswith("?"):
                     v = v[1:]
                     ctx.debug("suspicious suffix {!r} in language {}: {}"
-                              .format(v, lang, origform))
+                              .format(tagkeys, lang, origform))
                 tags.extend(v.split())
 
     # Generate warnings about words ending in " or" after processing
@@ -837,22 +845,44 @@ def parse_word_head(ctx, pos, text, data):
     base = re.sub(r"\?", " ", base)  # Removes uncertain articles etc
     base = re.sub(r"\s+", " ", base).strip()
     # print("parse_word_head: base={!r}".format(base))
-    descs = split_at_comma_semi(base)
-    for desc_i, desc in enumerate(descs):
-        desc = desc.strip()
-        if desc_i > 0 and desc.startswith("also "):
-            break  # There seems to be exactly one of these, "Benen"
-        for alt in desc.split(" or "):
-            baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
-            # For non-first parts, see if it an be treated as tags-only
-            if desc_i > 0:
-                tagsets, topics = decode_tags(" ".join(baseparts))
-                if (not any("error-unknown-tag" in x for x in tagsets) and
-                    not topics):
-                    for tags in tagsets:
-                        data_extend(ctx, data, "tags", tags)
-                    continue
-            add_related(ctx, data, ["canonical"], baseparts)
+
+    # Split the head into alternatives.  This is a complicated task, as
+    # we do not want so split on "or" or "," when immediately followed by more
+    # head-final tags, but otherwise do want to split by them.
+    splits = re.split(head_split_re, base)
+    alts = []
+    for i in range(0, len(splits) - head_split_re_parens + 1,
+                   head_split_re_parens):
+        v = splits[i]
+        ending = splits[i + 1] or ""
+        if alts and v == "" and ending:
+            assert ending[0] == " "
+            alts[-1] += " or" + ending  # endings starts with space
+        elif v or ending:
+            alts.append(v + ending)
+    last = splits[-1].strip()
+    if (alts and last and
+        (last in xlat_head_map or
+         last in head_final_bantu_map or
+         last in head_final_semitic_map or
+         last in head_final_other_map)):
+        alts[-1] += " or " + last
+    elif last:
+        alts.append(last)
+    # print("parse_word_head alts: {}".format(alts))
+
+    # Process the head alternatives
+    for alt_i, alt in enumerate(alts):
+        baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
+        # For non-first parts, see if it an be treated as tags-only
+        if alt_i > 0:
+            tagsets, topics = decode_tags(" ".join(baseparts))
+            if (not any("error-unknown-tag" in x for x in tagsets) and
+                not topics):
+                for tags in tagsets:
+                    data_extend(ctx, data, "tags", tags)
+                continue
+        add_related(ctx, data, ["canonical"], baseparts)
 
     # Handle parenthesized descriptors for the word form and links to
     # related words

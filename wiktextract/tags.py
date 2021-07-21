@@ -184,6 +184,7 @@ xlat_head_map = {
     "sg or c": "?common singular",  # soy milk/Tr/Indonesian
     "f or c pl": "?feminine common singular plural", # mulberry/Tr/Zazaki
     "c pl or n": "?common neuter singular plural",  # mouthpiece/Tr/Swedish
+    "impf or impf": "?imperfective",
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly
