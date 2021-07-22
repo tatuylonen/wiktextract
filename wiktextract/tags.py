@@ -1670,6 +1670,7 @@ uppercase_tags = set([
     "Umeå",
     "Unified",
     "Unix",
+    "Unquachog",  # Dialect of Quiripi
     "Upper RP Triphthong Smoothing",
     "Uri",
     "Urkers",
@@ -1696,6 +1697,8 @@ uppercase_tags = set([
     "Virginia",
     "Vivaro-Alpin",
     "Vivaro-Alpine",
+    "Volapük Nulik",
+    "Volapük Rigik",
     "Vosges",
     "Vulgata",
     "Västergötland",
@@ -3607,6 +3610,8 @@ xlat_tags_map = {
     "used only after prepositions": "after-preposition",
     "appended after imperfective form": "in-compounds with-imperfect",
     "universal or indefinite": "universal indefinite",
+    "el/ea": "third-person singular",  # o/Romanian/Verb
+    "ele/ei": "third-person plural",  # vor/Romanian/Verb
 }
 
 # This mapping is applied to full descriptions before splitting by comma.

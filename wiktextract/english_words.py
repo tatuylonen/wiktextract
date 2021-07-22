@@ -1517,6 +1517,7 @@ additional_words = set([
     'spool',
     'spore',
     'spotnape',
+    'spp',  # Commonly used abbreviation "spp." for subspecies in species names
     'sprinkles',
     'sprite',
     'spritsail',

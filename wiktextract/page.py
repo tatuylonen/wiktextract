@@ -3136,7 +3136,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     ctx.start_subsection(t)
                     if "debug" in dt:
                         ctx.warning("{} in section {}"
-                                    .format(dt["warning"], t))
+                                    .format(dt["debug"], t))
                     if "warning" in dt:
                         ctx.warning("{} in section {}"
                                     .format(dt["warning"], t))
