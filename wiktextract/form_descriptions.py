@@ -851,8 +851,8 @@ def parse_word_head(ctx, pos, text, data):
     # head-final tags, but otherwise do want to split by them.
     splits = re.split(head_split_re, base)
     alts = []
-    for i in range(0, len(splits) - head_split_re_parens + 1,
-                   head_split_re_parens):
+    for i in range(0, len(splits) - head_split_re_parens,
+                   head_split_re_parens + 1):
         v = splits[i]
         ending = splits[i + 1] or ""
         if alts and v == "" and ending:
@@ -991,7 +991,7 @@ def parse_word_head(ctx, pos, text, data):
                 strokes = m.group(1)
                 lang = m.group(2)
                 t = ["strokes", lang]
-                add_related(ctx, data, t, strokes)
+                add_related(ctx, data, t, [strokes])
                 prev_tags = None
                 continue
 

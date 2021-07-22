@@ -155,8 +155,26 @@ class HeadTests(unittest.TestCase):
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "masculine"]})
 
+    def test_head15(self):
+        data = {}
+        parse_word_head(self.ctx, "noun",
+                        "testpage f, m, n",
+                        data)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        self.assertEqual(data, {"tags": ["feminine", "masculine", "neuter"]})
+
+    def test_head16(self):
+        data = {}
+        parse_word_head(self.ctx, "noun",
+                        "testpage f or m or n",
+                        data)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        self.assertEqual(data, {"tags": ["feminine", "masculine", "neuter"]})
+
     # XXX code needs fixing for this
-    # def test_head15(self):
+    # def test_head17(self):
     #     data = {}
     #     parse_word_head(self.ctx, "noun",
     #                     "testpage f or testpage2 m",
