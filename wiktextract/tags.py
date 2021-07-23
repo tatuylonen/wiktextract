@@ -97,6 +97,7 @@ xlat_head_map = {
     "anim": "animate",
     "pers": "person",  # XXX check what this really is used for? personal?
     "npers": "impersonal",
+    "m pers or m anim": "masculine person animate",
     "vir": "virile",
     "nvir": "nonvirile",
     "anml": "animal",
@@ -492,6 +493,7 @@ uppercase_tags = set([
     "Bosnian Croatian",
     "Bosnian Serbian",
     "Boston",
+    "Botswana",
     "Brabant",
     "Brabantian",
     "Brahmi",  # Script (India, historic)
@@ -534,7 +536,7 @@ uppercase_tags = set([
     "Canado-American",
     "Canary Islands",
     "Cangas del Narcea",
-    "Cantonese",
+    "Cantonese",  # Chinese dialect/language
     "Cape Afrikaans",
     "Carakan",
     "Carcoforo",
@@ -612,6 +614,7 @@ uppercase_tags = set([
     "Crimea",
     "Croatia",
     "Croatian",
+    "Cu'up",  # Region in Indonesia (Rejang language)
     "Cuarto de los Valles",
     "Cuba",
     "Cuisnahuat",
@@ -641,6 +644,7 @@ uppercase_tags = set([
     "Derbyshire",
     "Devanagari",  # Script
     "Devon",
+    "Déné syllabary",  # Script for Canadian Indian languages?
     "Digor",
     "Dingzhou",
     "Dissenter",
@@ -649,6 +653,7 @@ uppercase_tags = set([
     "Dominican Republic",
     "Dongmen",
     "Doric",  # Ancient Greek
+    "Drasi",  # Region in India
     "Drents",
     "Dundee",
     "Dungan",
@@ -703,6 +708,7 @@ uppercase_tags = set([
     "Fars",
     "Fayyumic",
     "Fengkai",
+    "Finglish",  # Finnish word taken from English
     "Finland",
     "Fjolde",
     "Flanders",
@@ -726,6 +732,7 @@ uppercase_tags = set([
     "Galitzish",
     "Galway",
     "Gan",
+    "Gangwon",  # Dialect/region for Korean
     "Gascon",
     "Gascony",
     "Gaspésie",
@@ -786,7 +793,7 @@ uppercase_tags = set([
     "Ha",
     "Hachijō",
     "Hainanese",
-    "Hakka",
+    "Hakka",  # Chinese dialect/language
     "Halchighol",
     "Hallig",
     "Hamburg",
@@ -811,7 +818,7 @@ uppercase_tags = set([
     "Hijazi",
     "Hindi",  # Script (at least for numberals, e.g. 80
     "Hinduism",
-    "Hokkien",
+    "Hokkien",  # Chinese dialect/language
     "Honduras",
     "Hong Kong",
     "Hong'an",
@@ -819,11 +826,12 @@ uppercase_tags = set([
     "Hometwoli",
     "Hongfeng",
     "Hosso",
+    "Hsinchu Hokkien",  # Chinese dialect/language
     "Hua",
     "Huế",
     "Hyōgai",  # Uncommon type of Kanji character
-    "Hà Nội",
-    "Hà Tĩnh",
+    "Hà Nội",  # Vietnamese dialect
+    "Hà Tĩnh",  # Vietnamese dialect
     "Hössjö",
     "Hồ Chí Minh City",
     "I Ching hexagram",
@@ -889,12 +897,13 @@ uppercase_tags = set([
     "Jewish Babylonian Aramaic",
     "Jewish Palestinian Aramaic",
     "Jewish",
-    "Jianghuai Mandarin",
+    "Jianghuai Mandarin",  # Chinese dialect/language
     "Jicalapa",
     "Jicarilla",  # Variant of the Apache Language?
-    "Jilu Mandarin",
+    "Jilu Mandarin",  # Dialect/Language in Chinese
     "Jin",
-    "Jin Mandarin",
+    "Jin Mandarin",  # Chinese dialect/language
+    "Jinjiang Hokkien",  # Chinese dialect/language
     "Johannesburg",
     "Johor-Selangor",
     "Johore",
@@ -946,6 +955,7 @@ uppercase_tags = set([
     "Kernewek Kemmyn",
     "Kernowek Standard",
     "Kerry",
+    "Kfar Kama",  # Region in Israel
     "Khesht",
     "Khmer",  # Script
     "Khorasan",
@@ -970,6 +980,7 @@ uppercase_tags = set([
     "Krui",
     "Kulkalgau Ya",
     "Kuritiba",
+    "Kuwait",
     "Kuwaiti Gulf Arabic",  # Variant of Arabic Language
     "Kuzarg",
     "Kyoto",
@@ -999,8 +1010,10 @@ uppercase_tags = set([
     "Laval",
     "Lavarone",
     "Lebanese Arabic",  # Variant of Arabic language
+    "Lebong",  # Region in Indonesia/Sumatra?  (Rejang language)
     "Leet",  # Leetspeak, an internet "slang"
     "Legazpi",
+    "Leizhou Min",  # Chinese dialect/language
     "Lengadocian",
     "Lepcha",  # Script (Himalayas?)
     "Lesotho",
@@ -1065,7 +1078,7 @@ uppercase_tags = set([
     "Malta",
     "Malyangapa",
     "Mamluk-Kipchak",
-    "Mandarin",
+    "Mandarin",  # Dialect/Language in Chinese
     "Mandi",
     "Manglish",
     "Manichaean",
@@ -1110,6 +1123,7 @@ uppercase_tags = set([
     "Mid",
     "Mid-Atlantic",
     "Middle Ages",
+    "Middle Chinese",  # Historical variant of Chinese
     "Middle Cornish",
     "Middle Egyptian",
     "Middle",
@@ -1122,8 +1136,8 @@ uppercase_tags = set([
     "Milpa Alta",
     "Min",
     "Min Bei",
-    "Min Dong",
-    "Min Nan",
+    "Min Dong",  # Chinese dialect/language
+    "Min Nan",  # Chinese dialect/language
     "Minas Gerais",
     "Mineiro",
     "Mirandola",
@@ -1188,6 +1202,7 @@ uppercase_tags = set([
     "New England",
     "New Jersey",
     "New Latin",
+    "New Sanskrit",
     "New York City",
     "New York",
     "New Zealand",
@@ -1228,7 +1243,7 @@ uppercase_tags = set([
     "Northern Germany",
     "Northern Ireland",
     "Northern Italy",
-    "Northern Mandarin",
+    "Northern Mandarin",  # Chinese dialect/language
     "Northern Manx",
     "Northern Middle English",
     "Northern Scots",
@@ -1247,6 +1262,7 @@ uppercase_tags = set([
     "Ngan'gikurunggurr",
     "Ngie",
     "Ngoko",
+    "Nghệ An",  # Vietnamese dialect
     "Nkim",
     "Nkojo",
     "Nkum",
@@ -1265,6 +1281,8 @@ uppercase_tags = set([
     "Ol Chiki",  # Script (Austroasiatic language in India)
     "Old Bohairic",
     "Old Chamorro",
+    "Old Chinese",  # Historical variant of Chinese
+    "Old Coptic",
     "Old East Church Slavonic",
     "Old Egyptian",
     "Old English",
@@ -1305,6 +1323,7 @@ uppercase_tags = set([
     "Parres",
     "Parts of south Jeolla",
     "Paulistano",
+    "Payang",  # Region in Indonesia (Rejang language)
     "Pays de Bray",
     "Pays de Caux",
     "Paḷḷuezu",
@@ -1414,7 +1433,7 @@ uppercase_tags = set([
     "Saarve",
     "Sagada",
     "Sahidic",
-    "Saint Ouen",
+    "Saint Ouën",
     "Saint Petersburg",
     "Sakayamuni",
     "Sakhalin",
@@ -1426,6 +1445,7 @@ uppercase_tags = set([
     "Sanskrit",
     "Sanskritized",
     "Santiago",
+    "Sanxia Hokkien",
     "São Vicente",
     "Sappada",
     "Sapper-Ricke",
@@ -1437,6 +1457,7 @@ uppercase_tags = set([
     "Savoie",
     "Savoyard",
     "Sawndip",
+    "Sayisi",  # Variant of Chipewyan language?
     "Schleswig-Holstein",
     "Scientific Latin",
     "Scotland",
@@ -1531,7 +1552,7 @@ uppercase_tags = set([
     "Southern Zazaki",
     "Southern",
     "Southwestern",
-    "Southwestern Mandarin",
+    "Southwestern Mandarin",  # Chinese dialect/language
     "Spain",
     "Spanish",
     "Sremski Gurbet",
@@ -1556,6 +1577,7 @@ uppercase_tags = set([
     "Sunni",
     "Surgut",
     "Surigaonon",
+    "Surinam",
     "Suriname",
     "Surmiran",
     "Sursilvan",
@@ -1583,7 +1605,7 @@ uppercase_tags = set([
     "Taishanese",
     "Taiwan",
     "Taiwanese Hokkien",
-    "Taiwanese Mandarin",
+    "Taiwanese Mandarin",  # Chinese dialect/language
     "Taixuanjing tetragram",
     "Tajik",
     "Takri",  # Script (mostly historic, used in Himachal Pradesh)
@@ -1650,6 +1672,7 @@ uppercase_tags = set([
     "Tuscany",
     "Twente",
     "Twents",
+    "Twi",  # Dialect of the Akan language
     "Tyneside",
     "UK with /ʊ/",
     "UK",
@@ -1677,6 +1700,7 @@ uppercase_tags = set([
     "Ursari",
     "Urtijëi",
     "Uruguay",
+    "Utara",  # Region in Indonesia (Rejang language)
     "Uutände",
     "Uyghurjin",
     "Vaiśeṣika",
@@ -1718,7 +1742,8 @@ uppercase_tags = set([
     "Weirate",
     "Welche",
     "Welsh English",
-    "Wengzhou Wu",
+    "Wenzhou",  # Chinese dialect/language
+    "Wenzhou Wu",  # Chinese dialect/language
     "West Armenian",
     "West Bengal",
     "West Cork",
@@ -1747,7 +1772,7 @@ uppercase_tags = set([
     "World War I",
     "Wrangelsholm",
     "Written Form",
-    "Wu",
+    "Wu",  # Chinese dialect/language
     "Wuhan",
     "Wuvulu",
     "X-system",
@@ -1788,13 +1813,14 @@ uppercase_tags = set([
     "Zezuru",
     "Zhangzhou",
     "Zhangzhou Hokkien",
-    "Zhuyin",  # Apparently some kind of phonetic script used with Mandarin
+    "Zhuyin",  # Apparently a phonetic script used with Chinese/Mandarin
     "Zimbabwe",
     "Zinacantán",
     "Zoroastrianism",
     "Zurich",
     "Zêkog",
     "Överkalix",
+    "al-Andalus",  # historically Muslim ruled area of the Iberian Penisula
     "bureaucratese",
     "central and northeastern Switzerland",
     "coastal Min",
@@ -1802,12 +1828,13 @@ uppercase_tags = set([
     "feudal Britain",
     "parts of South Africa",
     "outside Northumbria",
-    "regionally African American Vernacular",
-    "southern Moselle Franconian",
-    "west Sweden",
     "post-Augustan",
     "post-Classical",
     "post-Homeric",
+    "pre-1989 IPA",
+    "regionally African American Vernacular",
+    "southern Moselle Franconian",
+    "west Sweden",
 ])
 
 
@@ -1886,6 +1913,7 @@ xlat_tags_map = {
     "U.S.A.": "US",
     "U.S.": "US",
     "[US]": "US",
+    "Saint Ouen": "Saint-Ouën",
     "UK & Aus": "UK Australia",
     "Britian": "Britain",
     "Telugu-Kui language": "Telugu-Kui",
@@ -2226,6 +2254,7 @@ xlat_tags_map = {
     "+ genitive possessive suffix or elative":
     "with-genitive with-possessive-suffix with-elative",
     "+ genitive-accusative": "with-genitive",
+    "genitive + ~": "with-genitive postpositional",
     "+ partitive or (less common) possessive suffix":
     "with-partitive with-possessive-suffix",
     "+ allative": "with-allative",
@@ -2377,6 +2406,7 @@ xlat_tags_map = {
     "+ infinitive": "with-infinitive",
     "+ first infinitive": "with-first-infinitive",
     "transitive + first infinitive": "transitive with-first-infinitive",
+    "transitive + kV": "transitive with-kV",  # gǀkxʻâã/ǃXóõ
     "+ a + infinitive": "with-a with-infinitive",
     "+ indicative mood": "with-indicative",
     "+ conditional mood": "with-conditional",
@@ -2590,6 +2620,7 @@ xlat_tags_map = {
     "derogative": "derogatory",
     "derogatively": "derogatory",
     "disparaging": "derogatory",
+    "deprecative": "derogatory",
     "collective sense": "collective",
     "relatively rare": "rare",
     "very rare": "rare",
@@ -3434,9 +3465,9 @@ xlat_tags_map = {
     "Alsatian (Low Alemannic German)": "Alsatian Alemannic",
     "all sects": "",
     "adessive + 3rd person singular + ~":
-    "with-adessive with-third-person-singular",
+    "with-adessive with-third-person-singular postpositional",
     "inessive + 3rd person singular + ~":
-    "with-inessive with-third-person-singular",
+    "with-inessive with-third-person-singular postpositional",
     "~ (olemassa)": "",
     "3rd person singular": "third-person singular",
     "+ genitive + 3rd person singular + passive present participle":
@@ -3612,6 +3643,8 @@ xlat_tags_map = {
     "universal or indefinite": "universal indefinite",
     "el/ea": "third-person singular",  # o/Romanian/Verb
     "ele/ei": "third-person plural",  # vor/Romanian/Verb
+    "vestre": "slang",  # type of backslang in Argentine and Uruguayan Spanish
+    "onomatopoeia": "onomatopoeic",
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -4042,7 +4075,7 @@ valid_tags = set([
     "mediopassive",
     "metaphoric",
     "metonymically",
-    "metrically",  # Used in Sanscrit word heads
+    "metrically",  # Used in Sanskrit word heads
     "middle",
     "middle-infinitive",
     "mildly",
@@ -4125,7 +4158,7 @@ valid_tags = set([
     "often",
     "one-termination",
     "only",
-    "onomatopoeia",
+    "onomatopoeic",
     "optative",
     "ordinal",
     "parasynonym",
@@ -4392,6 +4425,7 @@ valid_tags = set([
     "with-instrumental",
     "with-järgi",
     "with-kala",
+    "with-kV",  # gǀkxʻâã/ǃXóõ
     "with-lai",
     "with-locative",
     "with-meel",

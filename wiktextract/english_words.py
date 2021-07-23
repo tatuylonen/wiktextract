@@ -590,6 +590,7 @@ additional_words = set([
     'demonym',
     'denim',
     'denture',
+    'deponent',
     'depressed',
     'derisorily',
     'designator',

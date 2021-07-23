@@ -173,6 +173,37 @@ class HeadTests(unittest.TestCase):
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "masculine", "neuter"]})
 
+    def test_head17(self):
+        data = {}
+        self.ctx.start_page("index")
+        self.ctx.start_section("Noun")
+        parse_word_head(self.ctx, "noun",
+                        "index n",
+                        data)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        self.assertEqual(data, {"tags": ["neuter"]})
+
+    def test_head18(self):
+        data = {}
+        self.ctx.start_page("index")
+        self.ctx.start_section("Noun")
+        parse_word_head(self.ctx, "noun",
+                        "index m or f (genitive indicis); third declension",
+                        data)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        self.assertEqual(data, {"tags": ["masculine", "feminine",
+                                         "third-declension"],
+                                "forms": [
+                                    {"tags": ["genitive"],
+                                     "form": "indicis"},
+                                ]})
+
+
+
+
+
     # XXX code needs fixing for this
     # def test_head17(self):
     #     data = {}
