@@ -96,7 +96,7 @@ class HeadTests(unittest.TestCase):
                         "testpage f (plurale tantum, inanimate)", data)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
-        self.assertEqual(data, {"tags": ["feminine", "plurale-tantum",
+        self.assertEqual(data, {"tags": ["feminine", "plural-only",
                                          "inanimate"]})
 
     def test_head10(self):
@@ -106,7 +106,7 @@ class HeadTests(unittest.TestCase):
                         data)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
-        self.assertEqual(data, {"tags": ["feminine", "plurale-tantum",
+        self.assertEqual(data, {"tags": ["feminine", "plural-only",
                                          "inanimate"],
                                 "forms": [{"tags": ["stem"],
                                            "form": "testpag"}]})
@@ -120,7 +120,7 @@ class HeadTests(unittest.TestCase):
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         print(data)
-        self.assertEqual(data, {"tags": ["feminine", "plurale-tantum",
+        self.assertEqual(data, {"tags": ["feminine", "plural-only",
                                          "inanimate", "with-dative"],
                                 "forms": [{"tags": ["stem"],
                                            "form": "testpag"}]})

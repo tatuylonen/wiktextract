@@ -50,13 +50,23 @@ xlat_head_map = {
     "pl or m": "masculine singular plural",
     "pl or n": "neuter singular plural",  # ordnance/Tr/German
     "pl or c": "common singular plural",  # "you don't say"/Tr/Romanian
-    "sg or f": "?singular feminine",
-    "sg or m": "?singular masculine",
-    "sg or n": "?singular neuter",
-    "sg or c": "?singular common",
+    "sg or f": "singular feminine",
+    "sg or m": "singular masculine",
+    "sg or n": "singular neuter",
+    "sg or c": "singular common",
+    "m or sg": "masculine singular",
+    "f or sg": "feminine singular",
+    "m or sg": "neuter singular",
+    "c or sg": "common singular",
+    "m or pl": "masculine plural",
+    "f or pl": "feminine plural",
+    "n or pl": "neuter plural",
+    "c or pl": "common plural",
     "c or n or n pl": "common neuter singular plural",  # XXX augmentation/Tr
     "pl or m or f": "masculine feminine singular plural",  # XXX suc* my co*/Tr
     "m or f or sg or pl": "masculine feminine singular plural",  # Ainu/Russian
+    "m or f or pl": "masculine feminine singular plural",  # that/Tr/Dutch
+    "pl or f or m or n": "",  # Sindhi/Tr(language)/Spanish
     # crush/Portuguese head
     "m or m f": "?masculine feminine",
     # beginner/Eng/Tr/Polish
@@ -65,6 +75,9 @@ xlat_head_map = {
     "n or n pl": "neuter singular plural",
     "c or c pl": "common singular plural",
     "f pl or n pl": "feminine neuter plural",  # diurnal/Eng/Tr/Polish
+    "f pl or n or n pl": "feminine neuter singular plural",  # veneral/Tr/Polish
+    "m or m pl or f or f pl or n or n pl": "",  # "a lot"/Tr/Latin
+    "pl or n or n pl": "neuter singular plural",  # salt/Tr/Greek
     "f or f": "feminine",
     "topo.": "toponymic",  # E.g., p/Egyptian
     "n": "neuter",
@@ -89,6 +102,7 @@ xlat_head_map = {
     # your/Eng/Tr/Norwegian:
     "m pl or f pl or n pl": "masculine femininine neuter plural",
     "m sg or f sg or n sg": "masculine femininine neuter singular",
+    "m pl or f or f pl": "masculine feminine singular plural",
     "c or c pl": "common singular plural",
     "c pl or n pl": "common neuter plural",  # which/Tr/Danish
     "inan": "inanimate",
@@ -146,6 +160,7 @@ xlat_head_map = {
     "15/17": "class-15 class-17",
     "1 or 2": "class-1 class-2",
     "1a or 2a": "class-1a class-2a",
+    "1a or 2": "class-1a class-2",
     "3 or 4": "class-3 class-4",
     "5 or 6": "class-5 class-6",
     "7 or 8": "class-7 class-8",
@@ -161,10 +176,13 @@ xlat_head_map = {
     "10 or 11": "class-10 class-11",  # mushroom/Tr/Swahili
     "11 or 14": "class-11 class-14",  # country/Tr/Swahili
     "11 or 12": "class-11 class-12",  # theater/Tr/Swahili
+    "11 or 6": "class-11 class-6",   # leaf/'Maore Comorian
     "9 or 6": "class-9 class-6",  # birthday,carrot/Tr/Rwanda-Rundi
     "1 or 6": "class-2 class-6",  # Zulu/Tr/Zulu
     "6 or 7": "class-6 class-7",  # spider/Eng/Tr/Lingala ???
     "15 or 6": "class-15 class-6",  # leg/Tr/Rwanda-Rundi
+    "14 or 6": "class-14 class-6",  # rainbow/Tr/Chichewa
+    "9 or 9": "?class-9",  # XXX bedsheet/Tr/Sotho
     "m1": "masculine first-declension",
     "f2": "feminine second-declension",
     "m2": "masculine second-declension",
@@ -176,8 +194,12 @@ xlat_head_map = {
     "m5": "masculine fifth-declension",
     "[uncountable]": "uncountable",
     "2 or 3": "?class-2 class-3",  # XXX branch/Tr/Swahili
-    "m or impf": "?imperfective",  # pour/Tr/Ukrainian
-    "n or impf": "?imperfective",  # glom/Russian
+    "m or impf": "masculine imperfective",  # pour/Tr/Ukrainian
+    "f or impf": "feminine imperfective",  # fuc* around/Tr/(s with many)/Czech
+    "n or impf": "neuter imperfective",  # glom/Russian
+    "f or pf": "feminine perfective",
+    "m or pf": "masculine perfective",
+    "n or pf": "neuter perfective",
     "n or pf": "?perfective",  # meymaniye/Tr/Zazaki
     "m or m": "?masculine",  # Paul/Tr(male given name)/Urdu
     "sg or m": "?masculine singular",  # bewitching/Tr/Portuguese
@@ -186,6 +208,19 @@ xlat_head_map = {
     "f or c pl": "?feminine common singular plural", # mulberry/Tr/Zazaki
     "c pl or n": "?common neuter singular plural",  # mouthpiece/Tr/Swedish
     "impf or impf": "?imperfective",
+    "pf or pf": "?perfective",
+    "sg or sg": "?singular",
+    "pl or pl": "?plural",
+    "c or impf": "?common imperfective",
+    "m inan or n": "masculine inanimate neuter",
+    "m inan or f": "masculine inanimate feminine",
+    "m pl or pf": "masculine plural perfective",
+    "f pl or pf": "feminine plural perfective",
+    "n pl or pf": "neuter plural perfective",
+    "f pl or impf": "feminine plural imperfective",
+    "m pl or impf": "masculine plural imperfective",
+    "n pl or impf": "neuter plural imperfective",
+    "m or f or impf": "?masculine feminine imperfective",
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly
@@ -303,6 +338,8 @@ head_final_other_langs = set([
     "Croatian",  # Kajkavian and Chakavian are forms of Croatian
     "Sanskrit",
     "Ancient Greek",
+    # XXX For dual??? see e.g. route/Tr(course or way)/Polish
+    "Polish",
 ])
 
 head_final_other_map = {
@@ -332,6 +369,7 @@ head_final_other_map = {
     # Ancient Greek
     # (generally languages with a dual number)
     "du": "dual",
+    "du or pl": "dual plural",  # aka duoplural
     "m du": "masculine dual",
     "f du": "feminine dual",
     "m du or f du": "masculine feminine dual",  # yellow/Tr/Zazaki
@@ -339,9 +377,13 @@ head_final_other_map = {
     "n du or n pl": "neuter dual plural",
     "f du or f pl": "feminine dual plural",
     "m du or m pl": "masculine dual plural",
-    "?du or f du or n": "",  # XXX guest/Tr/Zazaki - how would this be expressed?
-    "?du or n or pf": "",  # XXX how would this be expressed?
-    "du or n du": "?neuter dual",  # bilberry/Tr/Zazaki
+    "du or f du or n": "?",  # XXX guest/Tr/Zazaki
+    "du or n or pf": "?",  # XXX how would this be expressed
+    "du or n du": "neuter dual",  # bilberry/Tr/Zazaki
+    "du or f du or n": "",  # XXX guest/Tr(patron)/Zazaki
+    "pl or pf": "?plural perfective",  # walk/Tr(to steal)/Russian
+    "m or pf": "?masculine perfective",  # boom/Tr(make book)/Russian
+    "n or n du": "neuter singular dual",
 }
 
 # Accepted uppercase tag values.  As tags these are represented with words
@@ -382,7 +424,11 @@ uppercase_tags = set([
     "Amur",
     "Anbarani",
     "Ancient",
+    "Ancient China",
+    "Ancient Egyptian",
+    "Ancient Greek",
     "Ancient Rome",
+    "Ancient Roman",
     "Andalucia",
     "Andalusia",
     "Andalusian",
@@ -509,7 +555,6 @@ uppercase_tags = set([
     "British Isles",
     "British Royal Navy",
     "Brunei",
-    "Buddhism",
     "Bugey",
     "Bugurdži",
     "Bulgaria",
@@ -805,6 +850,7 @@ uppercase_tags = set([
     "Harry Potter",
     "Hawaii",
     "Hawick",
+    "Hán tự",
     "Hebrew",  # also Script
     "Hejazi Arabic",  # Variant of Arabic Language
     "Hejazi",
@@ -1223,6 +1269,7 @@ uppercase_tags = set([
     "North American",
     "North Brazil",
     "North East England",
+    "North Eastern US",
     "North German",
     "North Korea",
     "North Levantine",
@@ -1488,7 +1535,6 @@ uppercase_tags = set([
     "Shidong",
     "Shikoku",
     "Shin",
-    "Shingon Buddhism",
     "Shiraz",
     "Shropshire",
     "Shubi",
@@ -1537,6 +1583,7 @@ uppercase_tags = set([
     "South Wales",
     "South",
     "Southeastern",
+    "Southern Africa",
     "Southern American English",
     "Southern Brazil",
     "Southern England",
@@ -1627,7 +1674,6 @@ uppercase_tags = set([
     "Telugu",  # Also script (India)
     "Telugu-Kui",
     "Temapache",
-    "Tendai or Kegon Buddhism",
     "Tenerife",
     "Teochew",
     "Teotepeque",
@@ -1639,7 +1685,6 @@ uppercase_tags = set([
     "Tgdaya",
     "Thai",  # Script
     "Thailand",
-    "Tham",  # Buddhist religious script
     "Thanh Chương",
     "The Hague",
     "Thung Luang village",
@@ -1764,7 +1809,6 @@ uppercase_tags = set([
     "Westphalian",
     "Westpfälzisch",
     "Westwestphalian",
-    "Wicca",
     "Wiedingharde",
     "Windesi",
     "Witzapan",
@@ -1809,14 +1853,12 @@ uppercase_tags = set([
     "Yulparija",
     "Zacatianguis",
     "Zamboanga",
-    "Zen and Pure Land Buddhism",
     "Zezuru",
     "Zhangzhou",
     "Zhangzhou Hokkien",
     "Zhuyin",  # Apparently a phonetic script used with Chinese/Mandarin
     "Zimbabwe",
     "Zinacantán",
-    "Zoroastrianism",
     "Zurich",
     "Zêkog",
     "Överkalix",
@@ -1918,7 +1960,7 @@ xlat_tags_map = {
     "Britian": "Britain",
     "Telugu-Kui language": "Telugu-Kui",
     "SK Standard/Seoul": "SK-Standard Seoul",
-    "Devanagri": "Devanagari",
+    "Devanagri": "Devanagari error-misspelling",
     "Standard Seoul": "SK-Standard Seoul",
     "Association canadienne de normalisation": "Canada",
     "esp.": "especially",
@@ -1977,7 +2019,7 @@ xlat_tags_map = {
     "slangy": "slang",
     "backslang": "slang",
     "butcher's slang": "slang jargon",
-    "archiac": "archaic",
+    "archiac": "archaic error-misspelling",
     "nonstandard form": "nonstandard",
     "nonstandard stylistic suffix": "nonstandard dialectal suffix",
     "honorific form": "honorific",
@@ -2031,7 +2073,7 @@ xlat_tags_map = {
     "mute of": "unstressed form-of",
     "for some speakers": "uncommon",
     'when "do" is unstressed and the next word starts with /j/':
-    "unstressed before-j",
+    "unstressed-before-j",
     "before a vowel": "before-vowel",
     "before vowel": "before-vowel",
     "before vowels": "before-vowel",
@@ -2057,6 +2099,7 @@ xlat_tags_map = {
     "internet": "Internet",
     "online": "Internet",
     "instant messaging": "Internet",
+    "text messaging": "Internet",
     "cot-caught merged": "cot-caught-merger",
     "cot–caught merged": "cot-caught-merger",
     "cot-caught merger": "cot-caught-merger",
@@ -2095,9 +2138,9 @@ xlat_tags_map = {
     "taking a past participle": "with-past-participle",
     "literary or in compounds": "literary in-compounds",
     "certain compounds": "in-compounds idiomatic",
-    "participial adjective": "participle adjective",
+    "participial adjective": "participle adjective error-misspelling",
     "literary or archaic": "literary archaic",
-    "literaly or archaic": "literary archaic",
+    "literaly or archaic": "literary archaic error-misspelling",
     "literary or dialectal": "literary dialectal",
     "dated or dialectal": "dated dialectal",
     "dialectal or colloquial": "dialectal colloquial",
@@ -2209,13 +2252,13 @@ xlat_tags_map = {
     "nominalized adjective": "noun nominalization",
     "adjectivized noun": "adjectival",
     "adv.": "adverb",
-    "infomal": "informal",
+    "infomal": "informal error-misspelling",
     "informally": "informal",
     "formally": "formal",
     "very formal": "formal",
     "unmarked form": "unstressed",
     "marked form": "stressed",
-    "inifnitive": "infinitive",
+    "inifnitive": "infinitive error-misspelling",
     "inf.": "informal",
     "unformal": "informal",
     "unpolite": "impolite",
@@ -2226,7 +2269,7 @@ xlat_tags_map = {
     "first-declension second-declension suffix",
     "first/second-declension numeral plural only":
     "first-declension second-declension numeral plural-only",
-    "with gendered nouns": "with-noun",
+    "with gendered nouns": "with-gendered-noun",
     "possessive (with noun)": "possessive with-noun",
     "possessive (without noun)": "possessive without-noun",
     "without a main word": "without-noun",
@@ -2319,7 +2362,8 @@ xlat_tags_map = {
     "not mutable": "not-mutable",
     "used only predicatively": "not-attributive predicative",
     "only predicative": "not-attributive predicative",
-    "predicate-only": "not-attributive predicative",  # eleng/Luxembourgish
+    "predicate-only":
+    "not-attributive predicative error-misspelling",  # eleng/Luxembourgish
     "predicative only": "not-attributive predicative",
     "predicatively": "predicative",
     "in attributive use": "attributive",
@@ -2372,8 +2416,8 @@ xlat_tags_map = {
     "in some dialects": "dialectal",
     "in other dialects": "dialectal",
     "dialects": "dialectal",
-    "pejorativ": "pejorative",
-    "idionomic": "idiomatic",
+    "pejorativ": "pejorative error-misspelling",
+    "idionomic": "idiomatic error-misspelling",
     "idiom": "idiomatic",
     "humorously self-deprecating": "humorous",
     "rare/awkward": "rare",
@@ -2386,7 +2430,7 @@ xlat_tags_map = {
     "personified": "person",
     "person or animal": "person animate",
     "found only in the imperfective tenses": "no-perfect",
-    "imperfekt": "imperfect",
+    "imperfekt": "imperfect error-misspelling",
     "imperf. aspect": "imperfect",
     "perfective 1": "perfect",
     "perfective 2": "perfect",
@@ -2414,7 +2458,7 @@ xlat_tags_map = {
     "+ nominative": "with-nominative",
     "plus genitive": "with-genitive",
     "+ genitive": "with-genitive",
-    "+ genetive": "with-genitive",
+    "+ genetive": "with-genitive error-misspelling",
     "+genitive": "with-genitive",
     "+ genitive case": "with-genitive",
     "genitive +": "with-genitive",
@@ -2554,7 +2598,7 @@ xlat_tags_map = {
     "uninflected": "indeclinable",
     "not declinable": "indeclinable",
     "undeclinable": "indeclinable",
-    "inconjugable": "indeclinable",
+    "inconjugable": "indeclinable error-misspelling",
     "indeclinable?": "indeclinable",
     "no inflections": "indeclinable",
     "not often used": "rare",
@@ -2650,7 +2694,7 @@ xlat_tags_map = {
     "masculine/neuter": "masculine neuter",
     "present/future": "present future",
     "future/present": "present future",
-    "present/aoriest": "present aorist",
+    "present/aoriest": "present aorist error-misspelling",
     "superlative degree": "superlative",
     "sup.": "superlative",
     "comparative degree": "comparative",
@@ -2751,7 +2795,8 @@ xlat_tags_map = {
     "locative/vocative": "locative vocative",
     "prospective/agentive": "prospective agentive",
     "genitive/accusative": "genitive accusative",
-    "singular/duoplural": "singular duoplural",
+    "singular/duoplural": "singular dual plural",
+    "duoplural": "dual plural",
     "1st/3rd": "first-person third-person",
     "first/second/third-person":
     "first-person second-person third-person",
@@ -2847,7 +2892,7 @@ xlat_tags_map = {
     "(ele, ela, also used with tu and você)":
     "with-ele with-ela with-tu with-você",
     "former reform[s] only": "",
-    "no conj.": "",  # XXXunclear conjunctive vs. conjugation? (cf. dot/Latvian)
+    "no conj.": "",  # XXX conjunctive/conjugation/indeclinable? dot/Latvian
     "no construct forms": "no-construct-forms",
     "no nominative plural": "no-nominative-plural",
     "no supine": "no-supine",
@@ -2864,10 +2909,10 @@ xlat_tags_map = {
     "not comparable": "not-comparable",
     "incomparable": "not-comparable",
     "not generally comparable": "usually not-comparable",
-    "plurale tantum": "plurale-tantum",
-    "plurare tantum": "plurale-tantum",
-    "pluralia tantum": "plurale-tantum",
-    "singulare tantum": "singulare-tantum",
+    "plurale tantum": "plural-only",
+    "plurare tantum": "plural-only",
+    "pluralia tantum": "plural-only",
+    "singulare tantum": "singular-only",
     "normally plural": "plural-normally",
     "used mostly in plural form": "plural-normally",
     "used mostly in the plural form": "plural-normally",
@@ -3030,7 +3075,10 @@ xlat_tags_map = {
     "usually in the": "usually",
     "usually in the negative": "usually with-negation",
     "non-scientific usage": "non-scientific",
-    "krama inggil": "krama-inggil",
+    "krama inggil": "honorific",
+    "krama andhap": "humble",
+    "krama-ngoko": "informal",
+    "ngoko": "informal",
     "McCune–Reischauer": "McCune-Reischauer",  # Dash type differs
     "gender indeterminate": "gender-neutral",
     "singular only": "singular singular-only",
@@ -3185,13 +3233,14 @@ xlat_tags_map = {
     "Hanja form of": "alt-of hanja",
     "Hanja form? of": "alt-of hanja",
     "Hanja": "hanja",
-    "Hán tự form of": "alt-of han-tu",
+    "Hán tự form of": "alt-of Hán-tự",
     "Newa Spelling": "Newa",
     "Glagolitic spelling of": "alt-of Glagolitic",
     "front vowel variant of": "alt-of front-vowel",
     "front-vowel variant of": "alt-of front-vowel",
     "euphemistic spelling of": "alt-of euphemistic",
     "euphemistic reading of": "alt-of euphemistic",
+    "euphemism": "euphemistic",
     "transliterated Russian pet forms": "transliteration Russian",
     "Transliteration": "transliteration",
     "Cyrillic spelling of": "alt-of Cyrillic",
@@ -3243,7 +3292,7 @@ xlat_tags_map = {
     "compound of the infinitive": "compound-of",
     "synonym of": "synonym synonym-of",
     "same as": "synonym synonym-of",
-    "topicalized form of": "topic form-of",
+    "topicalized form of": "topicalized form-of",
     "form of": "form-of",
     "inflected form of": "form-of",
     "lenited form of": "lenition form-of",
@@ -3256,8 +3305,8 @@ xlat_tags_map = {
     "triggers aspiration": "triggers-aspirate-mutation",
     "triggers mixed mutation": "triggers-mixed-mutation",
     # XXX Could be more accurate
-    "triggers mixed mutation exept of forms of bod": "triggers-mixed-mutation",
-    "humurous": "humorous",
+    "triggers mixed mutation except of forms of bod": "triggers-mixed-mutation",
+    "humurous": "humorous error-misspelling",
     "humourous": "humorous",
     "sarcasm": "sarcastic",
     "ecclesiastic or ironic": "Ecclesiastical ironic",
@@ -3310,7 +3359,7 @@ xlat_tags_map = {
     "several set phrases": "idiomatic",
     "now colloquial": "colloquial",
     "now colloquial and nonstandard": "colloquial nonstandard",
-    "colloquial or Min Nan": "colloquial",
+    "colloquial or Min Nan": "colloquial Min-Nan",
     "colloquial or jargon": "colloquial jargon",
     "Wiktionary and WMF jargon": "jargon Internet",
     "colloquially": "colloquial",
@@ -3390,6 +3439,7 @@ xlat_tags_map = {
     "adverbs": "adverb",
     "augmentatives": "augmentative",
     "pejoratives": "pejorative",
+    "perjorative": "pejorative error-misspelling",
     "pejorative or colloquial": "pejorative colloquial",
     "non-standard since 2012": "nonstandard",
     "colloquialism": "colloquial",
@@ -3407,13 +3457,13 @@ xlat_tags_map = {
     "endearingly": "endearing",
     "elliptically": "ellipsis",
     "elegant": "formal",  # Elegant or Formal Thai
-    "nonce word": "neologism",
+    "nonce word": "nonce-word",
     "neologism or slang": "neologism slang",
     "attributively": "attributive",
     "poetic term": "poetic",
     "poetic meter": "poetic",
     "in certain phrases": "in-certain-phrases",
-    "deprecated template usage": "deprecated-template",
+    "deprecated template usage": "",
     "deprecated": "proscribed",
     "diacritical mark": "diacritic",
     "inflection of": "form-of",
@@ -3422,18 +3472,18 @@ xlat_tags_map = {
     "rhyming slang": "slang",
     "prison slang": "slang",
     "criminal slang": "slang",
-    "fandom slang": "slang",
-    "furry fandom": "slang",
-    "manga fandom slang": "slang",
-    "real estate slang": "slang",
-    "gay slang": "slang",
-    "urban slang": "slang",
+    "fandom slang": "slang lifestyle",
+    "furry fandom": "slang lifestyle",
+    "manga fandom slang": "slang manga",
+    "real estate slang": "slang real-estate",
+    "gay slang": "slang LGBT",
+    "urban slang": "slang urbanism",
     "lolspeak": "humorous Internet",
     "Usenet": "Internet",
     "one-termination adjective": "one-termination",
     "two-termination adjective": "two-termination",
     "three-termination adjective": "three-termination",
-    "semelefactive": "semelfactive",
+    "semelefactive": "semelfactive error-misspelling",
     "invariant": "invariable",
     "followed by to": "with-to",
     "taking a to-infinitive": "with-to with-infinitive",
@@ -3468,7 +3518,7 @@ xlat_tags_map = {
     "with-adessive with-third-person-singular postpositional",
     "inessive + 3rd person singular + ~":
     "with-inessive with-third-person-singular postpositional",
-    "~ (olemassa)": "",
+    "~ (olemassa)": "with-olemassa",
     "3rd person singular": "third-person singular",
     "+ genitive + 3rd person singular + passive present participle":
     "with-genitive with-third-person-singular with-passive-present-participle",
@@ -3775,7 +3825,6 @@ valid_tags = set([
     "aux-sein",
     "auxiliary",
     "baby-talk",
-    "before-j",  # next word starts with /j/
     "before-lenited-fh",  # Next word starts with lenited fh (Irish)
     "before-past",  # Used before the past tense (Irish)
     "before-vowel",  # next words starts with vowel (in pronunciation)
@@ -3888,7 +3937,6 @@ valid_tags = set([
     "demonstrative",
     "demonym",
     "dependent",
-    "deprecated-template",
     "derogatory",
     "desiderative",
     "determinate",  # Polish verbs (similar to "concrete" in Russian?)
@@ -3907,8 +3955,7 @@ valid_tags = set([
     "disjunctive",
     "distal",
     "ditransitive",
-    "dual",       # two in number, cf. singular, trial, plural, duoplural(?)
-    "duoplural",  # two or more in number
+    "dual",       # two in number, cf. singular, trial, plural
     "durative",
     "eclipsis",
     "elative",
@@ -3933,7 +3980,6 @@ valid_tags = set([
     "essive-modal",
     "ethnic",
     "eumhun",
-    "euphemism",
     "euphemistic",
     "exaggerated",
     "excessive",
@@ -3991,7 +4037,6 @@ valid_tags = set([
     "grade-4-kanji",
     "grade-5-kanji",
     "grade-6-kanji",
-    "han-tu",
     "hangeul",
     "hanja",  # Han character script (Chinese characters) to write Korean
     "hellenism",
@@ -4055,7 +4100,6 @@ valid_tags = set([
     "kanji",  # Used in word head for some Japanese symbols
     "katakana",  # Japanese syllabic spelling for foreign words
     "krama",
-    "krama-inggil",
     "krama-ngoko",
     "kyūjitai",  # Traditional Japanese Kanji (before 1947)
     "lative",
@@ -4102,7 +4146,6 @@ valid_tags = set([
     "neologism",
     "neuter",  # Gender, cf. masculine, feminine, common, class-* etc.
     "next",  # Next value in sequence (number, letter, etc.)
-    "ngoko",
     "no-absolute",           # No aboslute form; femri/Icelandic
     "no-auxiliary",	     # No auxiliary needed for verb (?); lavarsi/Italian
     "no-comparative",        # The word has no comparative form
@@ -4138,6 +4181,7 @@ valid_tags = set([
     "nomino-accusative",  # 𒀀𒄿𒅖/Hittite XXX same as nominate/accusative???
     "non-past",
     "non-scientific",
+    "nonce-word",
     "nondeferential",
     "nonstandard",
     "nonvirile",
@@ -4166,7 +4210,6 @@ valid_tags = set([
     "participle",
     "particle",
     "partitive",
-    "partner",
     "passive",
     "past",
     "patronymic",
@@ -4184,10 +4227,9 @@ valid_tags = set([
     "pin-pen-merger",
     "place",
     "pluperfect",
-    "plural",     # Number, cf. sigular, dual, trial, duoplural
+    "plural",     # Number, cf. sigular, dual, trial
     "plural-of",  # Plural form of something
     "plural-only",  # Word only manifested in plural in this sense
-    "plurale-tantum",  # Word always in plural even if singular meaning
     "plural-normally",  # Usually plural, but singular may be possible
     "poetic",
     "polite",
@@ -4258,9 +4300,8 @@ valid_tags = set([
     "simple",
     "simplified",
     "single-possession",
-    "singular",  # Number, cf. plural, dual, trial, duoplural
+    "singular",  # Number, cf. plural, dual, trial
     "singular-only",
-    "singulare-tantum",  # Always in singular, even if plural meaning?
     "singulative",  # Individuation of a collective or mass noun
     "sixth-conjugation",
     "slang",
@@ -4318,7 +4359,7 @@ valid_tags = set([
     "three-termination",
     "tone-1",
     "tone-2",
-    "topic",
+    "topicalized",
     "toponymic",
     "traditional",
     "transcription",
@@ -4328,7 +4369,7 @@ valid_tags = set([
     "translative",
     "translingual",
     "transliteration",
-    "trial",  # Number, cf. singular, dual, plural, duoplural
+    "trial",  # Number, cf. singular, dual, plural
     "triggers-aspirate-mutation",  # Welsh
     "triggers-eclipsis",      # Irish
     "triggers-h-prothesis",   # Irish
@@ -4351,6 +4392,7 @@ valid_tags = set([
     "universal",  # universally known (καθεμία/Greek)
     "unpossessed",
     "unstressed",
+    "unstressed-before-j",  # unstressed when next word starts with /j/
     "uppercase",
     "used-in-the-form",
     "usually",
@@ -4410,6 +4452,7 @@ valid_tags = set([
     "with-first-infinitive",
     "with-future",
     "with-for",
+    "with-gendered-noun",
     "with-genitive",
     "with-gij",
     "with-hiri",
@@ -4441,6 +4484,7 @@ valid_tags = set([
     "with-objective",
     "with-odd-syllable-stems",
     "with-of",
+    "with-olemassa",  # Finnish
     "with-on",
     "with-optative",
     "with-others",

@@ -146,7 +146,7 @@ nested_translations_re = re.compile(
 # Regexp that matches head tag specifiers.  Used to match tags from end of
 # translations and linkages
 head_final_re_text = r"( -)?( ({}))+".format(
-    "|".join(re.escape(x) for x in
+    "|".join(re.escape(re.sub(r"\?", "", x)) for x in
              # The sort is to put longer ones first, preferring them in
              # the regexp match
              sorted(xlat_head_map.keys(), key=lambda x: len(x),
@@ -156,19 +156,22 @@ head_final_re = re.compile(head_final_re_text + "$")
 # Regexp used to match head tag specifiers at end of a form for certain
 # Bantu languages (particularly Swahili and similar languages).
 head_final_bantu_re_text = r" ({})".format(
-    "|".join(re.escape(x) for x in head_final_bantu_map.keys()))
+    "|".join(re.escape(re.sub(r"\?", "", x))
+             for x in head_final_bantu_map.keys()))
 head_final_bantu_re = re.compile(head_final_bantu_re_text + "$")
 
 # Regexp used to match head tag specifiers at end of a form for certain
 # Semitic languages (particularly Arabic and similar languages).
 head_final_semitic_re_text = r" ({})".format(
-    "|".join(re.escape(x) for x in head_final_semitic_map.keys()))
+    "|".join(re.escape(re.sub(r"\?", "", x))
+             for x in head_final_semitic_map.keys()))
 head_final_semitic_re = re.compile(head_final_semitic_re_text + "$")
 
 # Regexp used to match head tag specifiers at end of a form for certain
 # other languages (e.g., Lithuanian, Finnish, French).
 head_final_other_re_text = r" ({})".format(
-    "|".join(re.escape(x) for x in head_final_other_map.keys()))
+    "|".join(re.escape(re.sub(r"\?", "", x))
+             for x in head_final_other_map.keys()))
 head_final_other_re = re.compile(head_final_other_re_text + "$")
 
 # Regexp for splitting heads.  See parse_word_head().
@@ -297,6 +300,17 @@ allowed_unknown_starts = set([
     "with",
     "With",
     "without",
+])
+
+# Unknown tags starting with these words will be silently ignored.
+ignored_unknown_starts = set([
+    "originally",
+    "e.g.",
+    ])
+allowed_unknown_starts.update(ignored_unknown_starts)
+
+# Full unknown tags that will be ignored
+ignored_unknown_tags = set([
 ])
 
 # Words that can be part of form description
@@ -474,7 +488,11 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
             return []
         words = lst[from_i: to_i]
         # print("unknown words:", words)
+        if words[0] in ignored_unknown_starts:
+            return []  # Tags starting with this word are to be ignored
         tag = " ".join(words)
+        if tag in ignored_unknown_tags:
+            return []  # One of the tags listed as to be ignored
         if not tag:
             return from_i
         if tag in ("and", "or"):
