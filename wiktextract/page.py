@@ -3241,8 +3241,8 @@ def parse_top_template(config, ctx, node, data):
             if arg.startswith("Q") or arg.startswith("Lexeme:L"):
                 data_append(ctx, data, "wikidata", arg)
             return ""
-        ctx.warning("UNIMPLEMENTED top-level template: {} {}"
-                    .format(name, ht))
+        ctx.debug("UNIMPLEMENTED top-level template: {} {}"
+                  .format(name, ht))
         return ""
 
     clean_node(config, ctx, None, [node], template_fn=top_template_fn)
@@ -3361,12 +3361,12 @@ def parse_page(ctx, word, text, config):
             # Some pages have links at top level, e.g., "trees" in Wiktionary
             continue
         if langnode.kind != NodeKind.LEVEL2:
-            ctx.error("unexpected top-level node: {}".format(langnode))
+            ctx.debug("unexpected top-level node: {}".format(langnode))
             continue
         lang = clean_node(config, ctx, None, langnode.args)
         if lang not in languages_by_name:
-            ctx.error("unrecognized language name at top-level {!r}"
-                         .format(lang))
+            ctx.debug("unrecognized language name at top-level {!r}"
+                      .format(lang))
             continue
         if config.capture_languages and lang not in config.capture_languages:
             continue

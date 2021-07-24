@@ -407,3 +407,5 @@ Implement special case in parsing word head for paren desc:
 "на (na) accusative, by"; see помножать/Russian
 
 Something wrong in parsing آتي/Arabic "coming"
+
+Fix parsing "or" separated alternatives in canonical forms?  Or is it broken?

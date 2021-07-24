@@ -813,7 +813,6 @@ def to_math(text):
         while True:
             orig = text
             text = math_magic(text, "{", "}", recurse)
-            # text = math_magic(text, "(", ")", lambda x: "(" + recurse(x) + ")")
             if text == orig:
                 break
         for m in re.finditer(r"\s+|"

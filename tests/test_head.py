@@ -3,6 +3,7 @@
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
+import json
 from wikitextprocessor import Wtp
 from wiktextract import WiktionaryConfig
 from wiktextract.form_descriptions import parse_word_head
@@ -54,9 +55,9 @@ class HeadTests(unittest.TestCase):
         self.assertEqual(self.ctx.errors, [])
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
-        self.assertEqual(data, {"forms": [{"form": "testpAge",
-                                           "tags": ["canonical"]}],
-                                "tags": ["masculine"]})
+        self.assertEqual(data, {"forms": [
+            {"form": "testpAge", "tags": ["canonical", "masculine"]},
+        ]})
 
     def test_head6(self):
         data = {}
@@ -96,8 +97,8 @@ class HeadTests(unittest.TestCase):
                         "testpage f (plurale tantum, inanimate)", data)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
-        self.assertEqual(data, {"tags": ["feminine", "plural-only",
-                                         "inanimate"]})
+        self.assertEqual(data, {"tags": ["feminine", "inanimate",
+                                         "plural-only"]})
 
     def test_head10(self):
         data = {}
@@ -106,8 +107,8 @@ class HeadTests(unittest.TestCase):
                         data)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
-        self.assertEqual(data, {"tags": ["feminine", "plural-only",
-                                         "inanimate"],
+        self.assertEqual(data, {"tags": ["feminine", "inanimate",
+                                         "plural-only"],
                                 "forms": [{"tags": ["stem"],
                                            "form": "testpag"}]})
 
@@ -120,8 +121,8 @@ class HeadTests(unittest.TestCase):
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         print(data)
-        self.assertEqual(data, {"tags": ["feminine", "plural-only",
-                                         "inanimate", "with-dative"],
+        self.assertEqual(data, {"tags": ["feminine", "inanimate", "plural-only",
+                                         "with-dative"],
                                 "forms": [{"tags": ["stem"],
                                            "form": "testpag"}]})
 
@@ -193,16 +194,52 @@ class HeadTests(unittest.TestCase):
                         data)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
-        self.assertEqual(data, {"tags": ["masculine", "feminine",
+        print(json.dumps(data, indent=2))
+        self.assertEqual(data, {"tags": ["feminine", "masculine",
                                          "third-declension"],
                                 "forms": [
                                     {"tags": ["genitive"],
                                      "form": "indicis"},
                                 ]})
 
+    def test_head19(self):
+        data = {}
+        self.ctx.start_page("index")
+        self.ctx.start_section("Noun")
+        parse_word_head(self.ctx, "noun", "foo f or bar m", data)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        print(json.dumps(data, indent=2))
+        self.assertEqual(data, {"forms": [
+            {"form": "foo", "tags": ["canonical", "feminine"]},
+            {"form": "bar", "tags": ["canonical", "masculine"]},
+        ]})
 
+    def test_head20(self):
+        data = {}
+        self.ctx.start_page("index")
+        self.ctx.start_section("Noun")
+        parse_word_head(self.ctx, "noun", "foo or bar", data)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        print(json.dumps(data, indent=2))
+        self.assertEqual(data, {"forms": [
+            {"form": "foo", "tags": ["canonical"]},
+            {"form": "bar", "tags": ["canonical"]},
+        ]})
 
-
+    def test_head21(self):
+        data = {}
+        self.ctx.start_page("index")
+        self.ctx.start_section("Noun")
+        parse_word_head(self.ctx, "noun", "foo f or n or bar m or c", data)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        print(json.dumps(data, indent=2))
+        self.assertEqual(data, {"forms": [
+            {"form": "foo", "tags": ["canonical", "feminine", "neuter"]},
+            {"form": "bar", "tags": ["canonical", "common", "masculine"]},
+        ]})
 
     # XXX code needs fixing for this
     # def test_head17(self):

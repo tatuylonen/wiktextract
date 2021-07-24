@@ -62,10 +62,12 @@ xlat_head_map = {
     "f or pl": "feminine plural",
     "n or pl": "neuter plural",
     "c or pl": "common plural",
+    "m or f pl": "masculine feminine plural",
     "c or n or n pl": "common neuter singular plural",  # XXX augmentation/Tr
     "pl or m or f": "masculine feminine singular plural",  # XXX suc* my co*/Tr
     "m or f or sg or pl": "masculine feminine singular plural",  # Ainu/Russian
-    "m or f or pl": "masculine feminine singular plural",  # that/Tr/Dutch
+    "m or f or pl": "masculine feminine plural",  # that/Tr/Dutch
+    "m or f sg": "masculine feminine singular",
     "pl or f or m or n": "",  # Sindhi/Tr(language)/Spanish
     # crush/Portuguese head
     "m or m f": "?masculine feminine",
@@ -107,14 +109,30 @@ xlat_head_map = {
     "c pl or n pl": "common neuter plural",  # which/Tr/Danish
     "inan": "inanimate",
     "Inanimate": "inanimate",  # e.g., "James Bay"/English/Tr/Northern East Cree
-    "m inan or m anim": "masculine inanimate animate",
     "anim": "animate",
+    "f anim": "female animate",
+    "m anim": "masculine animate",
+    "f inan": "female inanimate",
+    "m inan": "masculine inanimate",
+    "n inan": "neuter inanimate",
+    "f anim or f inan": "female animate inanimate",
+    "f inan or f anim": "feminine inanimate animate",
+    "m anim or m inan": "masculine animate inanimate",
+    "m inan or m anim": "masculine inanimate animate",
+    "n anim": "neuter animate",
+    "n anim or n inan": "neuter animate inanimate",
     "pers": "person",  # XXX check what this really is used for? personal?
     "npers": "impersonal",
     "m pers or m anim": "masculine person animate",
+    "m pers or f": "masculine person feminine",
+    "m pers or m inan": "masculine person inanimate",
     "vir": "virile",
     "nvir": "nonvirile",
     "anml": "animal",
+    "f anml": "female animal",
+    "m anml": "masculine animal",
+    "f animal": "female animal",
+    "m animal": "masculine animal",
     "impf": "imperfective",
     "impf.": "imperfective",
     "pf": "perfective",
@@ -193,6 +211,9 @@ xlat_head_map = {
     "f5": "feminine fifth-declension",
     "m5": "masculine fifth-declension",
     "[uncountable]": "uncountable",
+    "is more colloquial": "colloquial",
+    "(plural f)": "singular plural feminine",  # XXX chromicas/Galician
+    "(plural m)": "singular plural masculine",  # XXX Genseric/Galician
     "2 or 3": "?class-2 class-3",  # XXX branch/Tr/Swahili
     "m or impf": "masculine imperfective",  # pour/Tr/Ukrainian
     "f or impf": "feminine imperfective",  # fuc* around/Tr/(s with many)/Czech
@@ -235,11 +256,14 @@ head_final_numeric_langs = set([
     "Kamba",
     "Kikuyu",
     "Lingala",
+    "Luganda",
     "Maore Comorian",
     "Masaba",
+    "Mwali Comorian",
     "Mwani",
     "Ngazidja Comorian",
     "Northern Ndebele",
+    "Nyankole",
     "Phuthi",
     "Rwanda-Rundi",
     "Sotho",
@@ -339,6 +363,8 @@ head_final_other_langs = set([
     "Sanskrit",
     "Ancient Greek",
     # XXX For dual??? see e.g. route/Tr(course or way)/Polish
+    "Maltese",
+    "Maori",
     "Polish",
 ])
 
@@ -397,6 +423,8 @@ uppercase_tags = set([
     "Absheron",
     "Abung/Kotabumi",
     "Abung/Sukadana",
+    "Abzakh",
+    "Achaemenid",
     "Achterhooks",
     "Adlam",  # Script
     "Adyghe",
@@ -406,6 +434,7 @@ uppercase_tags = set([
     "Africa",
     "African-American Vernacular English",
     "Akhmimic",
+    "Aknada",
     "Al-Andalus",
     "Ala-Laukaa",
     "Alak",
@@ -417,6 +446,8 @@ uppercase_tags = set([
     "Alsatian",
     "Amecameca",
     "American continent",
+    "Americanization",
+    "Amerindish",
     "Amharic",  # Script (at least for numberals)
     "Amianan",
     "Amira",
@@ -455,6 +486,7 @@ uppercase_tags = set([
     "Arbëresh",
     "Ardennes",
     "Argentina",
+    "Armenia",
     "Armenian",  # Also script
     "Aruba",
     "Asalem",
@@ -1402,6 +1434,7 @@ uppercase_tags = set([
     "Possesse",
     "Poylish",
     "Poznań",
+    "Praenominal",  # Type of abbreviation
     "Pre-Hebrew",
     "Prokem",
     "Protestant",
@@ -1955,6 +1988,7 @@ xlat_tags_map = {
     "U.S.A.": "US",
     "U.S.": "US",
     "[US]": "US",
+    "Americanisation": "Americanization",
     "Saint Ouen": "Saint-Ouën",
     "UK & Aus": "UK Australia",
     "Britian": "Britain",
@@ -2231,6 +2265,7 @@ xlat_tags_map = {
     "adverbially": "adverbial",
     "intr.": "intransitive",
     "tr.": "transitive",
+    "trans": "transitive",
     "intransitive use": "intransitive",
     "intransitive senses": "intransitive",
     "intr. impers.": "intransitive impersonal",
@@ -2789,6 +2824,7 @@ xlat_tags_map = {
     "neg. continuous": "continuous negative",
     "negative form": "negative",
     "negating particle": "negative particle",
+    "negation": "negative",
     "continuously": "continuous",
     "animate/inanimate": "animate inanimate",
     "animate or inanimate": "animate inanimate",
@@ -3726,6 +3762,8 @@ xlat_descs_map = {
     "‘his’ and ‘its’ trigger lenition; ‘her’ triggers /h/-prothesis; ‘their’ triggers eclipsis": "triggers-lenition triggers-h-prothesis triggers-eclipsis",
     "for = elative; for verbs action noun in elative":
     "with-action-noun-in-elative",
+    # de/Danish
+    "as a personal pronoun, it has the forms dem in the oblique case and deres in the genitive; as a determiner, it is uninflected": "",
     # spinifer/Latin
     "nominative masculine singular in -er; two different stems": "",
     "^(???) please indicate transitivity!": "",
@@ -4270,6 +4308,7 @@ valid_tags = set([
     "radical+strokes",
     "rare",
     "reconstruction",
+    "reduced",  # de/Central Franconian (XXX merge with e.g. clipping?)
     "reduplication",
     "reflexive",
     "reflexive-of",  # Reflexive form of something
@@ -4466,6 +4505,7 @@ valid_tags = set([
     "with-inessive",
     "with-infinitive",
     "with-instrumental",
+    "with-it-dialectally",
     "with-järgi",
     "with-kala",
     "with-kV",  # gǀkxʻâã/ǃXóõ
@@ -4510,6 +4550,7 @@ valid_tags = set([
     "with-subordinate-clause",
     "with-sur",
     "with-dummy-subject",
+    "with-there",
     "with-third-person",
     "with-third-person-singular",
     "with-third-infinitive",

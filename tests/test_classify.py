@@ -329,3 +329,18 @@ class ClassifyTests(unittest.TestCase):
         # This really tests that disabling unknown starts works in classify_desc
         cls = classify_desc("symbol, for boron", no_unknown_starts=True)
         self.assertEqual(cls, "english")
+
+    def test_classify75(self):
+        # This really tests that disabling unknown starts works in classify_desc
+        cls = classify_desc("7 a.m.", no_unknown_starts=True)
+        self.assertEqual(cls, "english")
+
+    def test_classify76(self):
+        # This really tests that disabling unknown starts works in classify_desc
+        cls = classify_desc("11 PM", no_unknown_starts=True)
+        self.assertEqual(cls, "english")
+
+    def test_classify77(self):
+        # This really tests that disabling unknown starts works in classify_desc
+        cls = classify_desc("11 to 19", no_unknown_starts=True)
+        self.assertEqual(cls, "english")
