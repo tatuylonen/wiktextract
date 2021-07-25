@@ -1553,8 +1553,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 return m.group(0)
 
             # Replace parenthesized expressions commonly used for sense tags
-            gloss = re.sub(r"^\(([^()]*)\)", sense_repl, gloss)
-            gloss = re.sub(r"\s*\(([^()]*)\)$", sense_repl, gloss)
+            # XXX disabled parsing parentheses from the end for now.
+            # How common are these and what do they really contain?
+            # gloss = re.sub(r"^\(([^()]*)\)", sense_repl, gloss)
+            # gloss = re.sub(r"\s*\(([^()]*)\)$", sense_repl, gloss)
 
             # Remove common suffix "[from 14th c.]" and similar
             gloss = re.sub(r"\s\[[^]]*\]\s*$", "", gloss)
@@ -2004,14 +2006,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if name in ("q", "qualifier", "sense", "a", "accent",
                         "l", "link", "lb", "lbl", "label"):
                 # Kludge: when these templates expand to /.../ or [...],
-                # replace the expansion by the empty string.  This is used
+                # replace the expansion by something safe.  This is used
                 # to filter spurious IPA-looking expansions that aren't really
                 # IPAs.  We probably don't care about these tempates in the
                 # contexts where they expand to something containing these.
                 v = re.sub(r'href="[^"]*"', "", text)  # Ignore URLs
                 v = re.sub(r'src="[^"]*"', "", v)
                 if re.search(r"/[^/,]+?/|\[[^]0-9,/][^],/]*?\]", v):
-                    return ""
+                    # Note: replacing by empty results in Lua errors that we
+                    # would rather not have.  For example, voi/Middle Vietnamese
+                    # uses {{a|{{l{{vi|...}}}}, and the {{a|...}} will fail
+                    # if {{l|...}} returns empty.
+                    return "stripped-by-parse_pron_post_template_fn"
             return text
 
         # XXX change this code to iterate over node as a LIST, warning about

@@ -1178,7 +1178,7 @@ def parse_sense_qualifier(ctx, text, data):
                 else:
                     data["english"] = orig_semi
             else:
-                ctx.debug("parse_sense_qualifier unrecognized qualifier: {}"
+                ctx.debug("unrecognized sense qualifier: {}"
                           .format(text))
 
 

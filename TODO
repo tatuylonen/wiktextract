@@ -409,3 +409,6 @@ Implement special case in parsing word head for paren desc:
 Something wrong in parsing آتي/Arabic "coming"
 
 Fix parsing "or" separated alternatives in canonical forms?  Or is it broken?
+
+Parse strokes in this one:
+薄 (radical 140, 艸+13, 16 (Japan, Mainland), 17 (Hong Kong, Taiwan) strokes, cangjie input 廿水戈戈 (TEII), four-corner 44146, composition ⿱艹溥)
