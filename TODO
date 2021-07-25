@@ -409,3 +409,7 @@ Implement special case in parsing word head for paren desc:
 Something wrong in parsing آتي/Arabic "coming"
 
 Fix parsing "or" separated alternatives in canonical forms?  Or is it broken?
+
+Finish datautils.py:split_slashes and use it for translations/linkages/heads
+  - warn when clearly ambigious
+  - add more tests in test_utils.py

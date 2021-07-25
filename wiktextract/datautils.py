@@ -3,6 +3,7 @@
 # Copyright (c) 2018-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
+import collections
 from .config import WiktionaryConfig
 from wikitextprocessor import ALL_LANGUAGES, Wtp
 
@@ -93,3 +94,80 @@ def split_at_comma_semi(text, extra=()):
     if parts:
         lst.append("".join(parts).strip())
     return lst
+
+def split_slashes(ctx, text):
+    """Splits the text at slashes.  This tries to use heuristics on how the
+    split is to be interpreted, trying to prefer longer forms that can be
+    found in the dictionary."""
+    text = text.strip()
+    if ctx.page_exists(text):
+        return [text]
+
+    text = re.sub(r"[／]", "/", text)
+    alts = text.split(" / ")  # Always full split at " / "
+    ret = []
+    for alt in alts:
+        alt = alt.strip()
+        if alt.find("/") < 0 or alt[0] == "/" or alt[-1] == "/":
+            # No slashes, no splitting; or starts/ends with a slash
+            ret.append(alt)
+            continue
+
+        # Split text into words.  If only one word, assume single-word splits
+        words = alt.split()
+        if len(words) == 1:
+            # Only one word
+            ret.extend(x.strip() for x in alt.split("/"))
+            continue
+
+        # More than one word
+        cands = [((), ())]
+        for word in alt.split():
+            new_cands = []
+            parts = word.split("/")
+            if len(parts) == 1:
+                for ws, divs in cands:
+                    ws = ws + tuple(parts)
+                    new_cands.append([ws, divs])
+            else:
+                # Otherwise we might either just add alternatives for this word
+                # or add alternatives for the whole phrase
+                for p in parts:
+                    for ws, divs in cands:
+                        ws = ws + (p,)
+                        new_cands.append(((), divs + (ws,)))
+                        new_cands.append((ws, divs))
+            cands = new_cands
+
+        # Finalize candidates
+        final_cands = set()
+        for ws, divs in cands:
+            if not ws:
+                final_cands.add(divs)
+                continue
+            final_cands.add(divs + (ws,))
+        print("final_cands", final_cands)
+
+        # XXX this does not work yet
+        ht = collections.defaultdict(list)
+        for divs in final_cands:
+            assert isinstance(divs, tuple) and isinstance(divs[0], tuple)
+            score = 0
+            words = []
+            for ws in divs:
+                assert isinstance(ws, tuple)
+                exists = ctx.page_exists(" ".join(ws))
+                words.extend(ws)
+                score += 100
+                score += 1 / len(ws)
+                #if not exists:
+                #    score += 1000 * len(ws)
+            key = tuple(words)
+            ht[key].append((score, divs))
+        for key, items in sorted(ht.items()):
+            print("key={} items={}".format(key, items))
+            score, divs = min(items)
+            for ws in divs:
+                ret.append(" ".join(ws))
+
+    return ret

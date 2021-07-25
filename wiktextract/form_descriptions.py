@@ -918,14 +918,11 @@ def parse_word_head(ctx, pos, text, data):
             alts.append(v + ending)
     last = splits[-1].strip()
     if (alts and last and
-        (last in xlat_head_map or
-         last in head_final_bantu_map or
-         last in head_final_semitic_map or
-         last in head_final_other_map)):
+        last.split()[0] in xlat_head_map):
         alts[-1] += " or " + last
     elif last:
         alts.append(last)
-    # print("parse_word_head alts: {}".format(alts))
+    print("parse_word_head alts: {}".format(alts))
 
     # Process the head alternatives
     canonicals = []
@@ -939,7 +936,10 @@ def parse_word_head(ctx, pos, text, data):
                 for tags in tagsets:
                     data_extend(ctx, data, "tags", tags)
                 continue
-        canonicals.append((["canonical"], baseparts))
+        alt, tags = parse_head_final_tags(ctx, language, alt)
+        tags = list(tags)  # Make sure we don't modify anything cached
+        tags.append("canonical")
+        canonicals.append((tags, baseparts))
 
     for tags, baseparts in canonicals:
         add_related(ctx, data, tags, baseparts, text, len(canonicals) > 1)
@@ -1163,6 +1163,10 @@ def parse_sense_qualifier(ctx, text, data):
     assert isinstance(text, str)
     assert isinstance(data, dict)
     # print("parse_sense_qualifier:", text)
+    if re.match(r"\([^()]+\)$", text):
+        text = text[1:-1]
+    if re.match(r'"[^"]+"$', text):
+        text = text[1:-1]
     lst = map_with(xlat_descs_map, [text])
     for text in lst:
         for semi in split_at_comma_semi(text):
