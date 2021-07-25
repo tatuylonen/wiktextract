@@ -973,6 +973,22 @@ def parse_word_head(ctx, pos, text, data):
             have_ruby = True
             continue
 
+        # Parse format ", 16 (Japan, Mainland), 17 (Hong Kong, Taiwan) strokes,"
+        # in the middle of the parenthesized expression, e.g. 薄
+        def strokes_repl(m):
+            strokes1, tags1, strokes2, tags2 = m.groups()
+            for strokes, tags in [[strokes1, tags1], [strokes2, tags2]]:
+                tags = tags.split(", ")
+                tags = list("Mainland China" if t == "Mainland" else t
+                            for t in tags)
+                tags.append("strokes")
+                print("TAGS:", tags)
+                add_related(ctx, data, tags, [strokes], text, True)
+            return ", "
+
+        paren = re.sub(r", (\d+) \(([^()]+)\), (\d+) \(([^()]+)\) strokes, ",
+                       strokes_repl, paren)
+
         descriptors = map_with(xlat_descs_map, [paren])
         new_desc = []
         for desc in descriptors:
