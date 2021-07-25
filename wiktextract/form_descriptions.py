@@ -911,7 +911,6 @@ def parse_word_head(ctx, pos, text, data):
                    head_split_re_parens + 1):
         v = splits[i]
         ending = splits[i + 1] or ""
-        print("v=", v, "ending=", ending)
         if alts and v == "" and ending:
             assert ending[0] == " "
             alts[-1] += " or" + ending  # endings starts with space
