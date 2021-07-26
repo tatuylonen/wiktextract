@@ -14,6 +14,7 @@ xlat_head_map = {
     "m or c": "masculine common",
     "f or m": "feminine masculine",
     "f or n": "feminine neuter",
+    "f or n.": "feminine neuter",  # fimmtíu/Icelandig
     "f or c": "feminine common",  # sustainability/Tr/Norwegian
     "n or f": "neuter feminine",
     "n or m": "neuter masculine",
@@ -42,6 +43,7 @@ xlat_head_map = {
     "m or n or f": "masculine neuter feminine",
     "f or c or m": "feminine common masculine",
     "m or c or f": "masculine common feminine",
+    "m or f or m": "?masculine feminine",  # fantasma,soldado/Portuguese
     "f or pl": "feminine singular plural",  # XXX information/Eng/Tr/Latgalian
     "m or pl": "masculine singular plural",  # XXX information/Eng/Tr/Latgalian
     "n or pl": "neuter singular plural",  # XXX table scrap/Tr/Greek
@@ -69,6 +71,7 @@ xlat_head_map = {
     "m or f or pl": "masculine feminine plural",  # that/Tr/Dutch
     "m or f sg": "masculine feminine singular",
     "pl or f or m or n": "",  # Sindhi/Tr(language)/Spanish
+    "pl or f or n": "masculine feminine neuter plural singular singular",  # XXX
     # crush/Portuguese head
     "m or m f": "?masculine feminine",
     # beginner/Eng/Tr/Polish
@@ -109,23 +112,91 @@ xlat_head_map = {
     "c pl or n pl": "common neuter plural",  # which/Tr/Danish
     "inan": "inanimate",
     "Inanimate": "inanimate",  # e.g., "James Bay"/English/Tr/Northern East Cree
+    "inan or anim": "inanimate animate",
+    "anim or inan": "animate inanimate",
     "anim": "animate",
     "f anim": "female animate",
     "m anim": "masculine animate",
+    "n anim": "neuter animate",
     "f inan": "female inanimate",
     "m inan": "masculine inanimate",
     "n inan": "neuter inanimate",
+    "f anim sg": "female animate singular",
+    "m anim sg": "masculine animate singular",
+    "n anim sg": "neuter animate singular",
+    "f inan sg": "female inanimate singular",
+    "m inan sg": "masculine inanimate singular",
+    "n inan sg": "neuter inanimate singular",
+    "f anim pl": "female animate plural",
+    "m anim pl": "masculine animate plural",
+    "n anim pl": "neuter animate plural",
+    "f inan pl": "female inanimate plural",
+    "m inan pl": "masculine inanimate plural",
+    "n inan pl": "neuter inanimate plural",
     "f anim or f inan": "female animate inanimate",
     "f inan or f anim": "feminine inanimate animate",
     "m anim or m inan": "masculine animate inanimate",
     "m inan or m anim": "masculine inanimate animate",
+    "m anim or f anim": "masculine animate feminine",
+    "f anim or m anum": "feminine animate masculine",
+    "f inan or f inan pl": "feminine inanimate singular plural",
+    "m inan or m inan pl": "masculine inanimate singular plural",
+    "n inan or n inan pl": "neuter inanimate singular plural",
+    "f anim or f anim pl": "feminine animate singular plural",
+    "m anim or m anim pl": "masculine animate singular plural",
+    "n anim or n anim pl": "neuter animate singular plural",
+    "f anim or m anim": "feminine animate masculine",
+    "m anim or f anim": "masculine animate feminine",
+    "f inan or n inan": "feminine inanimate neuter",
+    "f anim pl or f inan or f inan pl":
+    "feminine animate inanimate singular plural",  # XXX
+    "f inan pl or f anim or f anim pl":
+    "feminine inanimate animate singular plural",  # XXX
+    "m anim pl or f anim pl or f inan or f inan pl":
+    "male animate plural feminine inanimate",
+    "m anim pl or f anim pl or m anim or f anim":
+    "masculine animate plural feminine singular",
+    "m anim pl or f inan or f inan pl":
+    "masculine animate plural feminine inanimate singular",  # XXX
+    "m anim or n inan": "masculine animate neuter inanimate",  # XXX
+    "n inan pl or m inan or m inan pl":
+    "neuter inanimate plural masculine singular plural",  # XXX
+    "n inan pl or f inan or f inan pl":
+    "neuter inanimate plural feminine singular",  # XXX
+    "f inan pl or m anim or m anim pl":
+    "feminine inanimate plural masculine animate singular",  # XXX
+    "f inan pl or m inan or m inan pl":
+    "feminine inanimate plural masculine singular",  # XXX
     "n anim": "neuter animate",
+    "n anim pl or n inan or n inan pl":
+    "neuter animate plural inanimate singular",  # XXX
+    "n inan or n inan pl or f inan or f inan pl":
+    "neuter inanimate singular plural feminine",
+    "n inan pl or n anim or n anim pl":
+    "neuter inanimate plural animate singular",  # XXX
     "n anim or n inan": "neuter animate inanimate",
     "pers": "person",  # XXX check what this really is used for? personal?
     "npers": "impersonal",
+    "f pers": "feminine person",
+    "m pers": "masculine person",
+    "f pers or f pers pl": "feminine person singular plural",
+    "m pers or m pers pl": "masculine person singular plural",
+    "m pers or f pers": "masculine person feminine",
+    "f pers or m pers": "feminine person masculine",
+    "m pers or n pers": "masculine person neuter",
+    "f pers or n pers": "feminine person neuter",
     "m pers or m anim": "masculine person animate",
-    "m pers or f": "masculine person feminine",
     "m pers or m inan": "masculine person inanimate",
+    "f pers or f anim": "feminine person animate",
+    "f pers or f inan": "feminine person inanimate",
+    "m pers or f": "masculine person feminine",
+    "m inan or m pers": "masculine inanimate person",
+    "m or m pers or f": "masculine inanimate animate person feminine",  # XXX
+    "m anim or m pers": "masculine animate person",
+    "f anim or f pers": "feminine animate person",
+    "n anim or n pers": "neuter animate person",
+    "m pers or n": "masculine person neuter animate inanimate",  # XXX
+    "m pers or f": "masculine person feminine animate inanimate",  # XXX
     "vir": "virile",
     "nvir": "nonvirile",
     "anml": "animal",
@@ -133,6 +204,9 @@ xlat_head_map = {
     "m anml": "masculine animal",
     "f animal": "female animal",
     "m animal": "masculine animal",
+    "m animal or f animal": "masculine animal feminine",
+    "f animal or m animal": "feminine animal masculine",
+    "m anim or f": "masculine animate femine inanimate",
     "impf": "imperfective",
     "impf.": "imperfective",
     "pf": "perfective",
@@ -310,8 +384,11 @@ head_final_semitic_langs = set([
     "Aramaic",
     "Eblaite",
     "Hebrew",
+    "Hijazi Arabic",
     "Maltese",
+    "Moroccan Arabic",
     "Phoenician",
+    "South Levantine Arabic",
     "Tigre",
     "Tigrinya",
     "Ugaritic",
@@ -345,6 +422,8 @@ head_final_other_langs = set([
     "Armenian",
     "Zazaki",
     "Hebrew",
+    "Hijazi Arabic",
+    "Moroccan Arabic",
     "Nama",
     "Old Church Slavonic",
     "Gothic",
@@ -353,15 +432,21 @@ head_final_other_langs = set([
     "Scottish Gaelic",
     "Slovene",
     "Sorbian",
+    "South Levantine Arabic",
     "Kajkavian",
     "Chakavian",
     "Croatian",  # Kajkavian and Chakavian are forms of Croatian
     "Sanskrit",
     "Ancient Greek",
     # XXX For dual??? see e.g. route/Tr(course or way)/Polish
+    "Egyptian",
     "Maltese",
     "Maori",
     "Polish",
+    "Portuguese",
+    "Romanian",  # cache,acquaintance/Tr/Romanian
+    "Ukrainian",
+    "Ugaritic",
 ])
 
 head_final_other_map = {
@@ -394,6 +479,7 @@ head_final_other_map = {
     "du or pl": "dual plural",  # aka duoplural
     "m du": "masculine dual",
     "f du": "feminine dual",
+    "n du": "neuter dual",
     "m du or f du": "masculine feminine dual",  # yellow/Tr/Zazaki
     "f du or m du": "feminine masculine dual",
     "n du or n pl": "neuter dual plural",
@@ -406,6 +492,9 @@ head_final_other_map = {
     "pl or pf": "?plural perfective",  # walk/Tr(to steal)/Russian
     "m or pf": "?masculine perfective",  # boom/Tr(make book)/Russian
     "n or n du": "neuter singular dual",
+    # XXX clump/Tr/Portuguese
+    "sg or m du": "singular feminine neuter masculine dual",
+
 }
 
 # Accepted uppercase tag values.  As tags these are represented with words

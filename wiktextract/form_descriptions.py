@@ -922,7 +922,7 @@ def parse_word_head(ctx, pos, text, data):
         alts[-1] += " or " + last
     elif last:
         alts.append(last)
-    print("parse_word_head alts: {}".format(alts))
+    # print("parse_word_head alts: {}".format(alts))
 
     # Process the head alternatives
     canonicals = []
