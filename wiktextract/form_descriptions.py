@@ -260,7 +260,8 @@ tr_note_re = re.compile(
 # Related forms matching this regexp will be considered suspicious if the
 # page title does not also match one of these.
 suspicious_related_re = re.compile(
-    r" (f|m|n|c|or|pl|sg|inan|anim|pers|anml|impf|pf|vir|nvir|\d+)( |$)")
+    r"(^| )(f|m|n|c|or|pl|sg|inan|anim|pers|anml|impf|pf|vir|nvir|\d+)( |$)"
+    r"|[][:=()<>&#*|]")
 
 # Replacements to be done in classify_desc before tokenizing.  This is a
 # workaround for shortcomings in TweetTokenizer.

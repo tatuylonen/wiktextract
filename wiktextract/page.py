@@ -1673,12 +1673,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
         may also contain other useful information that often ends in
         side boxes.  We want to capture some of that additional information."""
         # print("HEAD_TEMPLATE_FN", name, ht)
-        if name == "wtorw":
+        if name in wikipedia_templates:
+            # Note: various places expect to have content from wikipedia
+            # templates
             parse_wikipedia_template(config, ctx, pos_data, ht)
             return None
-        if name in wikipedia_templates:
-            parse_wikipedia_template(config, ctx, pos_data, ht)
-            return ""
         if is_panel_template(name):
             return ""
         if name == "number box":
@@ -3086,7 +3085,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if name in wikipedia_templates:
                 data = select_data()
                 parse_wikipedia_template(config, ctx, data, ht)
-                return ""
+                return None
             if is_panel_template(name):
                 return ""
             return None
@@ -3223,7 +3222,7 @@ def parse_top_template(config, ctx, node, data):
     def top_template_fn(name, ht):
         if name in wikipedia_templates:
             parse_wikipedia_template(config, ctx, data, ht)
-            return ""
+            return None
         if is_panel_template(name):
             return ""
         if name == "also":
