@@ -1116,8 +1116,9 @@ def parse_word_head(ctx, pos, text, data):
                     # Check if the parenthesized part is likely a romanization
                     if ((have_ruby or classify_desc(base) == "other") and
                         classify_desc(paren) == "romanization"):
-                        add_related(ctx, data, ["romanization"], [paren],
-                                    text, True)
+                        for r in split_at_comma_semi(paren, extra=[" or "]):
+                            add_related(ctx, data, ["romanization"], [r],
+                                        text, True)
                         have_romanization = True
                         continue
                     tagsets = [["error-unrecognized-form"]]
