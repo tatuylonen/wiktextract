@@ -147,7 +147,7 @@ nested_translations_re = re.compile(
 # Regexp that matches head tag specifiers.  Used to match tags from end of
 # translations and linkages
 head_final_re_text = r"( -)?( ({}))+".format(
-    "|".join(re.escape(re.sub(r"\?", "", x)) for x in
+    "|".join(re.escape(x) for x in
              # The sort is to put longer ones first, preferring them in
              # the regexp match
              sorted(xlat_head_map.keys(), key=lambda x: len(x),
@@ -157,21 +157,21 @@ head_final_re = re.compile(head_final_re_text + "$")
 # Regexp used to match head tag specifiers at end of a form for certain
 # Bantu languages (particularly Swahili and similar languages).
 head_final_bantu_re_text = r" ({})".format(
-    "|".join(re.escape(re.sub(r"\?", "", x))
+    "|".join(re.escape(x)
              for x in head_final_bantu_map.keys()))
 head_final_bantu_re = re.compile(head_final_bantu_re_text + "$")
 
 # Regexp used to match head tag specifiers at end of a form for certain
 # Semitic languages (particularly Arabic and similar languages).
 head_final_semitic_re_text = r" ({})".format(
-    "|".join(re.escape(re.sub(r"\?", "", x))
+    "|".join(re.escape(x)
              for x in head_final_semitic_map.keys()))
 head_final_semitic_re = re.compile(head_final_semitic_re_text + "$")
 
 # Regexp used to match head tag specifiers at end of a form for certain
 # other languages (e.g., Lithuanian, Finnish, French).
 head_final_other_re_text = r" ({})".format(
-    "|".join(re.escape(re.sub(r"\?", "", x))
+    "|".join(re.escape(x)
              for x in head_final_other_map.keys()))
 head_final_other_re = re.compile(head_final_other_re_text + "$")
 
@@ -778,9 +778,9 @@ def parse_head_final_tags(ctx, lang, form):
 
     # Generate warnings about words ending in " or" after processing
     if ((form.endswith(" or") and not origform.endswith(" or")) or
-        re.match(r" (1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|"
-                 r"1a|2a|9a|10a|m1|f1|f2|m2|f3|m3|f4|m4|f5|m5|or)"
-                 r"a?($|/| (f|m|sg|pl|anim|inan))", form) or
+        re.search(r" (1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|"
+                  r"1a|2a|9a|10a|m1|f1|f2|m2|f3|m3|f4|m4|f5|m5|or|\?)"
+                  r"($|/| (f|m|sg|pl|anim|inan))", form) or
         form.endswith(" du")):
         if form not in ok_suspicious_forms:
             ctx.debug("suspicious unhandled suffix in {}: {!r}, originally {!r}"
