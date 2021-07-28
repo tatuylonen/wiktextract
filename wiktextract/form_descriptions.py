@@ -263,6 +263,21 @@ suspicious_related_re = re.compile(
     r"(^| )(f|m|n|c|or|pl|sg|inan|anim|pers|anml|impf|pf|vir|nvir|\d+)( |$)"
     r"|[][:=()<>&#*|]")
 
+# Word forms (head forms, translations, etc) that will be considered ok and
+# silently accepted even if they would otherwise trigger a suspicious
+# form warning.
+ok_suspicious_forms = set([
+    "but en or",  # "golden goal"/English/Tr/French
+    "cœur en or",  # "heart of gold"/Eng/Tr/French
+    "en or",  # golden/Eng/Tr/French
+    "parachute en or",  # "golden parachute"/Eng/Tr/French
+    "vieil or",  # "old gold"/Eng/Tr/French
+    # "all that glitters is not gold"/Eng/Tr/French
+    "tout ce qui brille n’est pas or",
+    "μη αποκλειστικό or",  # inclusive or/Eng/Tr/Greek
+])
+
+
 # Replacements to be done in classify_desc before tokenizing.  This is a
 # workaround for shortcomings in TweetTokenizer.
 tokenizer_fixup_map = {
@@ -767,8 +782,10 @@ def parse_head_final_tags(ctx, lang, form):
                  r"1a|2a|9a|10a|m1|f1|f2|m2|f3|m3|f4|m4|f5|m5|or)"
                  r"a?($|/| (f|m|sg|pl|anim|inan))", form) or
         form.endswith(" du")):
-        ctx.debug("suspicious unhandled suffix in {}: {}"
-                  .format(lang, origform))
+        if form not in ok_suspicious_forms:
+            ctx.debug("suspicious unhandled suffix in {}: {!r}, originally {!r}"
+                      .format(lang, form, origform))
+            assert False
 
     # print("parse_head_final_tags: form={!r} tags={}".format(form, tags))
     return form, tags
@@ -1263,8 +1280,16 @@ def parse_translation_desc(ctx, lang, text, tr):
                         tr["sense"] = par
                     continue
             else:
-                # No more parenthesized expressions - break out of the loop
-                break
+                # See if we can find a parenthesized expression in the middle.
+                # Romanizations are sometimes between word and gender marker,
+                # e.g. wife/English/Tr/Yiddish.
+                m = re.search(r"\s+\((([^()]|\([^()]+\))+)\)", text)
+                if m:
+                    par = m.group(1)
+                    text = text[:m.start()] + text[m.end():]
+                else:
+                    # No more parenthesized expressions - break out of the loop
+                    break
 
         # Some cleanup of artifacts that may result from skipping some templates
         # in earlier stages

@@ -305,6 +305,7 @@ xlat_head_map = {
     "c or impf": "?common imperfective",
     "m inan or n": "masculine inanimate neuter",
     "m inan or f": "masculine inanimate feminine",
+    "pl or pf": "?plural perfective",
     "m pl or pf": "masculine plural perfective",
     "f pl or pf": "feminine plural perfective",
     "n pl or pf": "neuter plural perfective",
@@ -312,6 +313,7 @@ xlat_head_map = {
     "m pl or impf": "masculine plural imperfective",
     "n pl or impf": "neuter plural imperfective",
     "m or f or impf": "?masculine feminine imperfective",
+    "pl or m or f or n": "?plural masculine feminine neuter",
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly
@@ -494,7 +496,8 @@ head_final_other_map = {
     "n or n du": "neuter singular dual",
     # XXX clump/Tr/Portuguese
     "sg or m du": "singular feminine neuter masculine dual",
-
+    "m du or f du or n du": "masculine dual feminine neuter",
+    "du or m": "?dual masculine",
 }
 
 # Accepted uppercase tag values.  As tags these are represented with words
