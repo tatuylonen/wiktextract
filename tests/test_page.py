@@ -157,7 +157,7 @@ foo
                     {"glosses": ["sense 1"]},
                     {"glosses": ["sense 2"]},
                     {"glosses": ["mushroom"],
-                     "topics": ["mycology", "biology", "natural-sciences"]},
+                     "topics": ["biology", "mycology","natural-sciences"]},
                     {"glosses": ["one who foos"], "tags": ["person"]},
                 ],
                 "translations": [
