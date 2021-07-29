@@ -9,10 +9,10 @@ import sys
 import time
 import collections
 from wikitextprocessor import Wtp
-from .page import parse_page, languages_by_name
+from .page import parse_page
 from .config import WiktionaryConfig
 from .thesaurus import extract_thesaurus_data
-from .datautils import data_append
+from .datautils import data_append, languages_by_name
 
 # Title prefixes that indicate that the page is not a normal page and
 # should not be used when searching for word forms

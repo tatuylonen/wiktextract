@@ -2102,7 +2102,6 @@ uppercase_tags = set([
     "al-Andalus",  # historically Muslim ruled area of the Iberian Penisula
     "bureaucratese",
     "central and northeastern Switzerland",
-    "coastal Min",
     "continental Normandy",
     "feudal Britain",
     "parts of South Africa",
@@ -2197,6 +2196,7 @@ xlat_tags_map = {
     "Saint Ouen": "Saint-Ouën",
     "UK & Aus": "UK Australia",
     "Britian": "Britain",
+    "coastal Min": "Coastal-Min",
     "Telugu-Kui language": "Telugu-Kui",
     "SK Standard/Seoul": "SK-Standard Seoul",
     "Devanagri": "Devanagari error-misspelling",

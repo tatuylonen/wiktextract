@@ -413,3 +413,7 @@ Fix parsing "or" separated alternatives in canonical forms?  Or is it broken?
 Finish datautils.py:split_slashes and use it for translations/linkages/heads
   - warn when clearly ambigious
   - add more tests in test_utils.py
+
+Which language should be used in translation when langcode and language in the
+entry differ?  This is particularly an issue for Chinese.  Or should we treat
+the second-level entries (e.g., Mandarin) as tags?
