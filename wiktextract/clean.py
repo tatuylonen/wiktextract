@@ -83,7 +83,7 @@ superscript_ht = {
     "ι": "ᶥ",
     "φ": "ᵠ",
     "χ": "ᵡ",
-    "∞": " ᪲"
+    "∞": "\u2002᪲"  # This is a KLUDGE
 }
 
 subscript_ht = {
@@ -177,7 +177,7 @@ math_map = {
     "Lsh": "↰",
     "MapsDown": "↧",
     "MapsUp": "↥",
-    "Micro": "μ",
+    "Micro": "µ",
     "Nearrow": "⇗",
     "Nwarrow": "⇖",
     "Omega": "𝛺",
@@ -710,7 +710,7 @@ def to_math(text):
                           text)
             if text == orig:
                 break
-        return text.strip()
+        return text
 
     def recurse(text):
         def math_magic(text, left, right, fn):
@@ -721,7 +721,7 @@ def to_math(text):
 
             def repl(m):
                 magic = chr(MAGIC_FIRST + len(magic_vec))
-                t = fn(m.group(1))
+                t = fn(m.group(1)).strip()
                 magic_vec.append(t)
                 return magic
 
@@ -769,8 +769,8 @@ def to_math(text):
                     print("MATH FRAC/BINOM ERROR: {!r}".format(v))
                     return v
                 op, a, b = m.groups()
-                a = expand_group(a.strip())
-                b = expand_group(b.strip())
+                a = expand_group(a).strip()
+                b = expand_group(b).strip()
                 if len(a) > 1:
                     a = "(" + a + ")"
                 if len(b) > 1:
@@ -802,11 +802,6 @@ def to_math(text):
             if fn is not None:
                 v = expand(v)
                 v = fn(v)
-            if (((parts and parts[-1][-1].isalpha() and v and v[0].isalpha()) or
-                 (parts and parts[-1][-1].isdigit() and v and
-                  v[0].isdigit())) and
-                len(parts[-1]) > 1 and len(v) > 1):
-                v = " " + v
             v = expand(v)
             return v
 
@@ -832,8 +827,16 @@ def to_math(text):
                              r"\b\s*|"
                              r"\\sqrt\b(\[\d+\])?)?"
                              r"[_^]?(\\[a-zA-Z]+\s*|\\.|\w+|.)", text):
-            v = expand_group(m.group(0))
+            v = m.group(0).strip()
+            if not v:
+                continue
+            v = expand_group(v)
             if v:
+                if ((parts and parts[-1][-1].isalpha() and
+                     v[0] in "0123456789") or
+                    (parts and parts[-1][-1] in "0123456789" and
+                     v[0] in "0123456789")):
+                    v = " " + v
                 parts.append(v)
 
         text = "".join(parts)
@@ -878,7 +881,9 @@ def clean_value(config, title, no_strip=False):
         return to_chem(clean_value(config, m.group(1)))
 
     def repl_1_math(m):
-        return to_math(m.group(1))
+        v = to_math(m.group(1))
+        print("to_math:", ascii(v))
+        return v
 
     def repl_1_syntaxhighlight(m):
         # Content is preformatted

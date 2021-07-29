@@ -173,6 +173,27 @@ class WiktExtractTests(unittest.TestCase):
         v = clean_value(self.config, v)
         self.assertEqual(v, "∑ᵢ₌₀¹⁰⁰1/i")
 
+    def test_cv_math7(self):
+        v = r"<math>x^\infty</math>"
+        v = clean_value(self.config, v)
+        print(ascii(v))
+        self.assertEqual(v, "x\u2002᪲")
+
+    def test_cv_math8(self):
+        v = r"<math>4 7</math>"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "4 7")
+
+    def test_cv_math9(self):
+        v = r"<math>a x + b</math>"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "ax+b")
+
+    def test_cv_math9(self):
+        v = r"<math>4^7</math>"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "4⁷")
+
     def test_cv_sup1(self):
         v = r"x<sup>3</sup>"
         v = clean_value(self.config, v)
