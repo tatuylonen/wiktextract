@@ -785,7 +785,6 @@ def parse_head_final_tags(ctx, lang, form):
         if form not in ok_suspicious_forms:
             ctx.debug("suspicious unhandled suffix in {}: {!r}, originally {!r}"
                       .format(lang, form, origform))
-            assert False
 
     # print("parse_head_final_tags: form={!r} tags={}".format(form, tags))
     return form, tags
