@@ -17,6 +17,7 @@ from .config import WiktionaryConfig
 ######################################################################
 
 superscript_ht = {
+    "0": "⁰",
     "1": "¹",
     "2": "²",
     "3": "³",
@@ -879,6 +880,10 @@ def clean_value(config, title, no_strip=False):
     def repl_1_math(m):
         return to_math(m.group(1))
 
+    def repl_1_syntaxhighlight(m):
+        # Content is preformatted
+        return "\n" + m.group(1).strip() + "\n"
+
     # Remove any remaining templates
     # title = re.sub(r"\{\{[^}]+\}\}", "", title)
     # Remove tables
@@ -914,6 +919,10 @@ def clean_value(config, title, no_strip=False):
     # Change <math> ... </math> using special formatting.
     title = re.sub(r"(?si)<\s*math\b[^>]*>(.*?)<\s*/\s*math\s*>",
                    repl_1_math, title)
+    # Change <syntaxhighlight> ... </syntaxhighlight> using special formatting.
+    title = re.sub(r"(?si)<\s*syntaxhighlight\b[^>]*>(.*?)"
+                   r"<\s*/\s*syntaxhighlight\s*>",
+                   repl_1_syntaxhighlight, title)
     # Remove any remaining HTML tags.
     title = re.sub(r"(?s)<\s*[^/>][^>]*>", "", title)
     title = re.sub(r"(?s)<\s*/\s*[^>]+>", "", title)

@@ -142,3 +142,48 @@ class WiktExtractTests(unittest.TestCase):
         v = " Run ?\n"
         v = clean_value(self.config, v)
         self.assertEqual(v, "Run ?")
+
+    def test_cv_math1(self):
+        v = r"foo <math>a \times \zeta = c</math> bar"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "foo a⨯𝜁=c bar")
+
+    def test_cv_math2(self):
+        v = r"<math>\frac{a}{b + c}</math>"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "a/(b+c)")
+
+    def test_cv_math3(self):
+        v = r"<math>\frac{a + 1}{b + c}</math>"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "(a+1)/(b+c)")
+
+    def test_cv_math4(self):
+        v = r"<math>\frac\alpha\beta</math>"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "𝛼/𝛽")
+
+    def test_cv_math5(self):
+        v = r"<math>{\mathfrak A} - {\mathbb B} \cup {\mathcal K}</math>"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "𝔄-𝔹∪𝒦")
+
+    def test_cv_math6(self):
+        v = r"<math>\sum_{i=0}^100 1/i</math>"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "∑ᵢ₌₀¹⁰⁰1/i")
+
+    def test_cv_sup1(self):
+        v = r"x<sup>3</sup>"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "x³")
+
+    def test_cv_sub1(self):
+        v = r"x<sub>3</sub>"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "x₃")
+
+    def test_cv_chem1(self):
+        v = r"<chem>H2O</chem>"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "H₂O")
