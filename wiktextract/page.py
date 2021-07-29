@@ -3070,9 +3070,10 @@ def parse_page(ctx, word, text, config):
         else:
             data["categories"] = new_cats
 
-    # Remove duplicates from tags, topics, and categories, etc.
+    # Remove duplicates from tags, categories, etc.
+    # We won't remove them from topics here as we want to maintain topic order.
     for data in ret:
-        for field in ("topics", "categories", "tags", "wikidata", "wikipedia"):
+        for field in ("categories", "tags", "wikidata", "wikipedia"):
             if field in data:
                 data[field] = list(sorted(set(data[field])))
             for sense in data.get("senses", ()):
