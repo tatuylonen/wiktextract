@@ -261,3 +261,17 @@ class HeadTests(unittest.TestCase):
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "masculine", "plural"]})
+
+    def test_head24(self):
+        data = {}
+        self.ctx.start_page("foo")
+        self.ctx.start_section("Noun")
+        parse_word_head(self.ctx, "noun",
+                        "foo (12 strokes)",
+                        data)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        self.assertEqual(data, {"forms": [
+            {"tags": ["strokes"],
+             "form": "12"},
+            ]})
