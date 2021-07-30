@@ -2113,6 +2113,7 @@ uppercase_tags = set([
     "pre-Classical",
     "regionally African American Vernacular",
     "southern Moselle Franconian",
+    "northernmost Moselle Franconian",
     "west Sweden",
 ])
 

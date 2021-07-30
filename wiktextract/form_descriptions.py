@@ -254,7 +254,7 @@ tr_note_re = re.compile(
     "see|only|often|usually|used|usage:|of|not|in|compare|usu\.|"
     "as|about|abbrv\.|abbreviation|abbr\.|that:|optionally|"
     "mainly|from|for|also|also:|acronym|"
-    "with) ")
+    "\+|with) ")
 # \b does not work at the end???
 
 # Related forms matching this regexp will be considered suspicious if the
@@ -276,6 +276,7 @@ ok_suspicious_forms = set([
     # "all that glitters is not gold"/Eng/Tr/French
     "tout ce qui brille n’est pas or",
     "μη αποκλειστικό or",  # inclusive or/Eng/Tr/Greek
+    "period or full stop",
 ])
 
 
@@ -1848,7 +1849,7 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
                 return "taxonomic"
 
     # If all words are in our English dictionary, interpret as English
-    if desc.isascii() and len(desc) > 1:
+    if re.match(r"^[ -~“”—…‘’ʹ€]+$", desc) and len(desc) > 1:
         if desc in english_words and desc[0].isalpha():
             return "english"   # Handles ones containing whitespace
         desc1 = re.sub(tokenizer_fixup_re,

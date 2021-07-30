@@ -425,6 +425,4 @@ clean_node in page.py?  Or maybe these two should be merged?)
 Why is extraction suddenly very slow?  Is it because topics are no
 longer copied?
 
-XXX re-enable substitutions in string.gsub in Lua?
-XXX select set in luaexec.py
-XXX re-enable test_wikiproc.py:test_gsub3
+FIX exponential regexp in core.py:_encode (in wikitextprocessor). jet/Czech
