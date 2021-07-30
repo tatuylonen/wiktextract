@@ -417,3 +417,10 @@ Finish datautils.py:split_slashes and use it for translations/linkages/heads
 Which language should be used in translation when langcode and language in the
 entry differ?  This is particularly an issue for Chinese.  Or should we treat
 the second-level entries (e.g., Mandarin) as tags?
+
+Why is extraction suddenly very slow?  Is it because topics are no
+longer copied?
+
+XXX re-enable substitutions in string.gsub in Lua?
+XXX select set in luaexec.py
+XXX re-enable test_wikiproc.py:test_gsub3

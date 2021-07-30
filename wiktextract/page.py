@@ -310,7 +310,6 @@ panel_templates = set([
     "Spanish possessive pronouns",
     "USRegionDisputed",
     "Webster 1913",
-    "W",
     "Wikipedia",
     "ase-rfr",
     "attention",
@@ -420,7 +419,8 @@ panel_prefixes = [
     "RQ:",
 ]
 
-wikipedia_templates = [
+# Templates used for wikipedia links.
+wikipedia_templates = set([
     "wikipedia",
     "slim-wikipedia",
     "w",
@@ -429,7 +429,7 @@ wikipedia_templates = [
     "wiki",
     "Wikipedia",
     "wtorw",
-]
+])
 
 # Some category tags are so common that they would clutter the extracted data
 # and are not linguistically very interesting (e.g., the same information can
@@ -1276,6 +1276,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
             lst.append(x)
 
         def sense_template_fn(name, ht):
+            if name in wikipedia_templates:
+                parse_wikipedia_template(config, ctx, pos_data, ht)
+                return None
             if is_panel_template(name):
                 return ""
             if name in ("defdate",):
