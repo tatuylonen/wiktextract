@@ -426,3 +426,8 @@ Why is extraction suddenly very slow?  Is it because topics are no
 longer copied?
 
 FIX exponential regexp in core.py:_encode (in wikitextprocessor). jet/Czech
+
+Check "Wikipedia" in "centennial" forms
+
+"dog" - gets Lua error, probable error in parsing (could be related to
+temporarily rolled back exponential regexp patch)

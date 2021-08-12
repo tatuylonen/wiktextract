@@ -113,7 +113,7 @@ if __name__ == "__main__":
     parser.add_argument("--redirects", action="store_true", default=False,
                         help="Capture redirects")
     parser.add_argument("--examples", action="store_true", default=False,
-                        help="Capture examples")
+                        help="Capture usage examples")
     parser.add_argument("--statistics", action="store_true", default=False,
                         help="Print statistics")
     parser.add_argument("--page", type=str,

@@ -389,6 +389,7 @@ The following command-line options can be used to control its operation:
 * --translations: causes translations to be captured
 * --pronunciation: causes pronunciation information to be captured
 * --linkages: causes linkages (synonyms etc.) to be captured
+* --examples: causes usage examples to be captured
 * --redirects: causes redirects to be extracted
 * --pages-dir DIR: save all wiktionary pages under this directory (mostly for debugging)
 * --cache CACHE: save/use cache file(s) from this path (for debugging)
@@ -601,7 +602,8 @@ sense is a dictionary that may contain the following keys (among others, and mor
 * ``related`` - sense-disambiguated related word linkages for the word (see below)
 * ``senseid`` - list of textual identifiers collected for the sense.  If there is a QID for the entry (e.g., Q123), those are stored in the ``wikidata`` field.
 * ``wikidata`` - list of QIDs (e.g., Q123) for the sense
-* ``wikipedia``- list of Wikipedia page titles (with optional language code prefix)
+* ``wikipedia`` - list of Wikipedia page titles (with optional language code prefix)
+* ``examples`` - list of usage examples, each example being a dictionary with ``text`` field containing the example text and optional ``ref`` field containing a source reference
 
 ### Pronunciation
 

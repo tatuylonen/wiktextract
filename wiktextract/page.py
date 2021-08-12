@@ -669,11 +669,6 @@ def parse_sense_XXXold_going_away(config, data, text, use_text):
     for t in p.templates:
         name = t.name.strip()
 
-        # Usage examples are collected under "examples"
-        if name in ("ux", "uxi", "usex", "afex", "zh-x", "prefixusex",
-                      "ko-usex", "ko-x", "hi-x", "ja-usex-inline", "ja-x",
-                      "quotei"):
-            data_append(config, data, "examples", t_dict(config, t))
         # Various words have non-gloss definitions; we collect them under
         # "nonglosses".  For many purposes they might be treated similar to
         # glosses, though.
@@ -723,8 +718,6 @@ def parse_sense_XXXold_going_away(config, data, text, use_text):
         elif name in ("w2",):
             if use_text:  # Skip wikipedia links in examples
                 data_append(config, data, "wikipedia", t_arg(config, t, 2))
-        elif name in ("translation hub", "translation only"):
-            data_append(config, data, "tags", "translation_hub")
 
 
 def parse_pronunciation_XXX_old_going_away(config, data, text, p):
@@ -1039,11 +1032,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
         assert isinstance(sense_base, dict)  # Added to every sense
         # print("PARSE_SENSE ({}): {}".format(sense_base, contents))
         lst = []
-        for i in range(len(contents)):
-            x = contents[i]
+        for x in contents:
             if isinstance(x, WikiNode) and x.kind == NodeKind.LIST:
                 break
             lst.append(x)
+        sublists = list(x for x in contents
+                        if isinstance(x, WikiNode) and x.kind == NodeKind.LIST)
 
         def sense_template_fn(name, ht):
             if name in wikipedia_templates:
@@ -1070,7 +1064,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         "ko-usex", "ko-x", "hi-x", "ja-usex-inline", "ja-x",
                         "quotei", "zh-x", "he-x", "hi-x", "km-x", "ne-x",
                         "shn-x", "th-x", "ur-x"):
-                # XXX capture usage example (check quotei!)
+                # Usage examples are captured separately below.  We don't
+                # want to expand them into glosses even when unusual coding
+                # is used in the entry.
                 return ""
             if name == "w":
                 if ht.get(2) == "Wp":
@@ -1080,6 +1076,32 @@ def parse_language(ctx, config, langnode, language, lang_code):
         rawgloss = clean_node(config, ctx, sense_base, lst,
                               template_fn=sense_template_fn)
         # print("parse_sense rawgloss:", repr(rawgloss))
+
+        # Extract examples that are in sublists
+        examples = []
+        if config.capture_examples:
+            for sub in sublists:
+                if not sub.args.endswith(":") and not sub.args.endswith("*"):
+                    continue
+                for item in sub.children:
+                    if not isinstance(item, WikiNode):
+                        continue
+                    if item.kind != NodeKind.LIST_ITEM:
+                        continue
+                    subtext = clean_node(config, ctx, None, item.children)
+                    ref = None
+                    lines = subtext.split("\n")
+                    if (len(lines) > 1 and
+                        (lines[0].endswith(":") or lines[1].startswith("#"))):
+                        ref = lines[0]
+                        subtext = " ".join(re.sub(r"^[#*:]+\s*", "", x)
+                                           for x in lines[1:])
+                    subtext = re.sub(r"^[#*:]+\s*", "", subtext)
+                    subtext = re.sub(r"\s+", " ", subtext).strip()
+                    dt = {"text": subtext}
+                    if ref:
+                        dt["ref"] = ref
+                    examples.append(dt)
 
         # Generate no gloss for translation hub pages, but add the
         # "translation-hub" tag for them
@@ -1129,6 +1151,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # Push a new sense (if the last one is not empty)
             if push_sense():
                 added = True
+            if gloss_i == 0 and examples:
+                data_extend(ctx, sense_data, "examples", examples)
             # If the gloss starts with †, mark as obsolete
             if gloss.startswith("^†"):
                 data_append(ctx, sense_data, "tags", "obsolete")

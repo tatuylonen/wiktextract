@@ -906,6 +906,10 @@ def clean_value(config, title, no_strip=False):
     title = re.sub(r'(?si)<\s*sup\b[^>]*?\bclass="[^"]*?\bpreviewonly\b[^>]*?>'
                    r'((<.*?</.[^>]>)|.)*?</sup>',
                    "", title)
+    # Remove <strong class="error">...</strong>
+    title = re.sub(r'(?si)<\s*strong\b[^>]*?\bclass="[^"]*?\berror\b[^>]*?>'
+                   r'((<.*?</.[^>]>)|.)*?</strong>',
+                   "", title)
     # Change <div> and </div> to newlines.  Ditto for tr, li, table
     title = re.sub(r"(?si)<\s*/?\s*(div|tr|li|table)\b[^>]*>", "\n", title)
     # Change <td> </td> to spaces.  Ditto for th.
@@ -953,6 +957,8 @@ def clean_value(config, title, no_strip=False):
     title = re.sub(r"\[(https?:)?//[^]\s]+\s+([^][]+?)\s*\]", repl_2, title)
     # Remove italic and bold
     title = re.sub(r"''+", r"", title)
+    # Remove http links in superscript
+    title = re.sub(r"\^\(https?://[^()]+\)", "", title)
     # Replace HTML entities
     title = html.unescape(title)
     title = re.sub("\xa0", " ", title)  # nbsp
