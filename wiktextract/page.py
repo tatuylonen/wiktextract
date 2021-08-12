@@ -672,7 +672,7 @@ def parse_sense_XXXold_going_away(config, data, text, use_text):
         # Various words have non-gloss definitions; we collect them under
         # "nonglosses".  For many purposes they might be treated similar to
         # glosses, though.
-        elif name in ("non-gloss definition", "n-g", "ngd", "non-gloss",
+        if name in ("non-gloss definition", "n-g", "ngd", "non-gloss",
                       "non gloss definition"):
             gloss = t_arg(config, t, 1)
             data_append(config, data, "nonglosses", gloss)
