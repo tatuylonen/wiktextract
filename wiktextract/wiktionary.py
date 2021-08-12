@@ -4,9 +4,11 @@
 #
 # Copyright (c) 2018-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
+import io
 import re
 import sys
 import time
+import tarfile
 import collections
 from wikitextprocessor import Wtp
 from .page import parse_page
@@ -205,3 +207,43 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb):
             word_cb(data)
     print("Reprocessing wiktionary complete")
     sys.stdout.flush()
+
+
+def extract_namespace(ctx, namespace, path):
+    """Extracts all pages in the given namespace and writes them to a .tar
+    file with the given path."""
+    assert isinstance(ctx, Wtp)
+    assert isinstance(namespace, str)
+    assert isinstance(path, str)
+
+    print("Extracting pages from namespace {} to tar file {}"
+          .format(namespace, path))
+
+    prefix = namespace + ":"
+    t = time.time()
+
+    def page_cb(model, title, text):
+        if not title.startswith(prefix):
+            return None
+        text = ctx.read_by_title(title)
+        title = title[len(prefix):]
+        title = re.sub(r"(^|/)\.($|/)", r"\1__dotdot__\2", title)
+        title = re.sub(r"(^|/)\.\.($|/)", r"\1__dotdot__\2", title)
+        title = re.sub(r"//", r"__slashslash__", title)
+        title = re.sub(r"^/", r"__slash__", title)
+        title = re.sub(r"/$", r"__slash__", title)
+        title = namespace + "/" + title
+        return (title, text)
+
+    with tarfile.open(path, mode="w", bufsize=16 * 1024 * 1024) as tarf:
+        for title, text in ctx.reprocess(page_cb, autoload=False):
+            text = text.encode("utf-8")
+            f = io.BytesIO(text)
+            title += ".txt"
+            ti = tarfile.TarInfo(name=title)
+            ti.size = len(text)
+            ti.mtime = t
+            ti.uid = 0
+            ti.gid = 0
+            ti.type = tarfile.REGTYPE
+            tarf.addfile(ti, f)

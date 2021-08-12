@@ -20,7 +20,8 @@ import argparse
 import collections
 from wikitextprocessor import Wtp, ALL_LANGUAGES
 from wiktextract import (WiktionaryConfig, parse_wiktionary,
-                         reprocess_wiktionary, parse_page)
+                         reprocess_wiktionary, parse_page,
+                         extract_namespace)
 from wiktextract import extract_thesaurus_data
 
 # Compute set of all language names
@@ -132,6 +133,10 @@ if __name__ == "__main__":
                         help="Include thesaurus in single page mode")
     parser.add_argument("--profile", action="store_true", default=False,
                         help="Enable CPU time profiling")
+    parser.add_argument("--modules-file", type=str,
+                        help="Extract all modules and save in this .tar file")
+    parser.add_argument("--templates-file", type=str,
+                        help="Extract all templates and save in this .tar file")
     args = parser.parse_args()
 
     # The --all option turns on capturing all data types
@@ -270,6 +275,11 @@ if __name__ == "__main__":
     finally:
         if out_path and out_path != "-":
             out_f.close()
+
+    if args.modules_file:
+        extract_namespace(ctx, "Module", args.modules_file)
+    if args.templates_file:
+        extract_namespace(ctx, "Template", args.templates_file)
 
     if args.profile:
         pr.disable()
