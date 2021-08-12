@@ -557,6 +557,7 @@ ignored_category_patterns = [
     "^[a-z]{2,3}-",
     "Foreign word of the day",
     "Foreign words of the day",
+    "English translation hubs",
     ".* two-letter words$",
     ".* three-letter words$",
     ".* four-letter words$",
@@ -686,60 +687,6 @@ def parse_sense_XXXold_going_away(config, data, text, use_text):
         # These weird templates seem to be used to indicate a literal sense.
         elif name in ("&lit", "&oth"):
             data_append(config, data, "tags", "literal")
-        # Many given names (first names) are tagged as such.  We tag them as
-        # such, and tag with gender when available.  We also tag the term
-        # as meaning an organism (though this might not be the case in rare
-        # cases) and "person" (if it has a gender).
-        elif name in ("given name",
-                      "forename",
-                      "historical given name"):
-            data_extend(config, data, "tags", ["person", "given_name"])
-            for k, v in t_dict(config, t).items():
-                if k in ("template_name", "usage", "f", "var", "var2",
-                         "from", "from2", "from3", "from4", "from5", "fron",
-                         "fromt", "meaning", "m", "mt", "f",
-                         "diminutive", "diminutive2",
-                         "dim", "dim2", "dim3", "dim4", "dim5",
-                         "dim6", "dim7", "dim8", "eq", "eq2", "eq3", "eq4",
-                         "eq5", "A", "3"):
-                    continue
-                if k == "sort":
-                    data_append(config, data, "sort", v)
-                    continue
-                if v == "en" or (k == "1" and len(v) <= 3):
-                    continue
-                if v in ("male_or_female", "unisex"):
-                    pass
-                elif v == "male":
-                    data_append(config, data, "tags", "masculine")
-                elif v == "female":
-                    data_append(config, data, "tags", "feminine")
-                else:
-                    config.unknown_value(t, v)
-        # Surnames are also often tagged as such, and we tag the sense
-        # with "surname" and "person".
-        elif name == "surname":
-            data_extend(config, data, "tags", ["surname", "person"])
-            from_ = t_arg(config, t, "from")
-            if from_:
-                data_append(config, data, "origin", from_)
-        # Many nouns that are species and other organism types have taxon
-        # links using various templates.  Store those links under
-        # "taxon" (try to extract the species name).
-        elif name in ("taxlink", "taxlinkwiki"):
-            x = t_arg(config, t, 1)
-            m = re.search(r"(.*) (subsp\.|f.)", x)
-            if m:
-                x = m.group(1)
-            data_append(config, data, "taxon", t_vec(config, t))
-            data_append(config, data, "tags", "organism")
-        elif name == "taxon":
-            data_append(config, data, "taxon", t_arg(config, t, 3))
-            data_append(config, data, "tags", "organism")
-        # Many organisms have vernacular names.
-        elif name == "vern":
-            data_append(config, data, "taxon", t_arg(config, t, 1))
-            data_append(config, data, "tags", "organism")
         # Many colors have a color panel that defines the RGB value of the
         # color.  This provides a physical reference for what the color means
         # and identifies the word as a color value.  Record the corresponding
@@ -763,13 +710,6 @@ def parse_sense_XXXold_going_away(config, data, text, use_text):
         elif name == "number box":
             data_append(config, data, "tags", "number_value")
             data_append(config, data, "value", t_arg(config, t, 2))
-        # SI units of measurement appear to have tags that identify them
-        # as such.  Add the information under "unit" and tag them as "unit".
-        elif name in ("SI-unit", "SI-unit-2",
-                      "SI-unit-np", "SI-unit-abb", "SI-unit-abbnp",
-                      "SI-unit-abb2"):
-            data_append(config, data, "unit", t_dict(config, t))
-            data_append(config, data, "tags", "unit-of-measurement")
         # There are various templates that links to other Wikimedia projects,
         # typically Wikipedia.  Record such links under "wikipedia".
         elif name in ("slim-wikipedia", "wikipedia", "wikispecies", "w", "W",
@@ -783,178 +723,8 @@ def parse_sense_XXXold_going_away(config, data, text, use_text):
         elif name in ("w2",):
             if use_text:  # Skip wikipedia links in examples
                 data_append(config, data, "wikipedia", t_arg(config, t, 2))
-        # There are even morse code sequences (and semaphore (flag)) positions
-        # defined in the Translingual portion of Wiktionary.  Collect
-        # morse code information under "morse_code".
-        elif name in ("morse code for", "morse code of",
-                      "morse code abbreviation",
-                      "morse code prosign"):
-            data_append(config, data, "morse_code", t_arg(config, t, 1))
         elif name in ("translation hub", "translation only"):
             data_append(config, data, "tags", "translation_hub")
-        elif name == "+preo":
-            data_append(config, data, "object_preposition", t_arg(config, t, 2))
-        elif name in ("+obj", "construed with"):
-            if t_arg(config, t, "lang"):
-                v = t_arg(config, t, 1)
-            else:
-                v = t_arg(config, t, 2)
-            if v in ("dat", "dative"):
-                data_append(config, data, "tags", "object_dative")
-            elif v in ("acc", "accusative"):
-                data_append(config, data, "tags", "object_accusative")
-            elif v in ("ela", "elative"):
-                data_append(config, data, "tags", "object_elative")
-            elif v in ("abl", "ablative"):
-                data_append(config, data, "tags", "object_ablative")
-            elif v in ("gen", "genitive"):
-                data_append(config, data, "tags", "object_genitive")
-            elif v in ("nom", "nominative"):
-                data_append(config, data, "tags", "object_nominative")
-            elif v in ("ins", "instructive"):
-                data_append(config, data, "tags", "object_instructive")
-            elif v in ("obl", "oblique"):
-                data_append(config, data, "tags", "object_oblique")
-            elif v in ("loc", "locative"):
-                data_append(config, data, "tags", "object_locative")
-            elif v in ("participial",):
-                data_append(config, data, "tags", "object_participial")
-            elif v in ("subj", "subjunctive"):
-                # (??? not really sure if subjunctive)
-                data_append(config, data, "tags", "object_subjunctive")
-            elif v == "with":
-                data_append(config, data, "object_preposition", "with")
-            elif v == "avec":
-                data_append(config, data, "object_preposition", "avec")
-            elif not v:
-                ctx.warning("empty/missing object construction argument "
-                            "in {}".format(t))
-            else:
-                config.unknown_value(t, v)
-        elif name == "es-demonstrative-accent-usage":
-            data_append(config, data, "tags", "demonstrative-accent")
-        # Handle some Japanese-specific tags
-        elif name in ("ja-kyujitai spelling of", "ja-kyu sp"):
-            data_append(config, data, "kyujitai_spelling", t_arg(config, t, 1))
-        # Handle some Chinese-specific tags
-        elif name in ("zh-old-name", "18th c."):
-            data_append(config, data, "tags", "archaic")
-        elif name in ("zh-alt-form", "zh-altname", "zh-alt-name",
-                      "zh-alt-term", "zh-altterm"):
-            data_append(config, data, "alt_of", t_arg(config, t, 1))
-        elif name in ("zh-short", "zh-abbrev", "zh-short-comp", "mfe-short of"):
-            data_append(config, data, "tags", "abbreviation")
-            for x in t_vec(config, t):
-                data_append(config, data, "alt_of", x)
-        elif name == "zh-misspelling":
-            data_append(config, data, "alt_of", t_arg(config, t, 1))
-            data_append(config, data, "tags", "misspelling")
-        elif name in ("zh-synonym", "zh-synonym of", "zh-syn-saurus"):
-            data_append(config, data, "tags", "synonym")
-            base = t_arg(config, t, 1)
-            if base != config:
-                data_append(config, data, "alt_of", base)
-        elif name in ("zh-dial", "zh-erhua form of"):
-            base = t_arg(config, t, 1)
-            if base != config:
-                data_append(config, data, "alt_of", base)
-                data_append(config, data, "tags", "dialectical")
-        elif name == "zh-mw":
-            data_extend(config, data, "classifier", t_vec(config, t))
-        elif name == "zh-classifier":
-            data_append(config, data, "tags", "classifier")
-        elif name == "zh-div":
-            # Seems to indicate type of a place (town, etc) in some entries
-            # but the value is in Chinese
-            # XXX check this
-            data_append(config, data, "hypernyms",
-                        {"word": t_arg(config, t, 1)})
-        elif name in ("†", "zh-obsolete"):
-            data_extend(config, data, "tags", ["archaic", "obsolete"])
-        # Various words are marked as place names.  Tag such words as a
-        # "place", by the place type, and add a link under "holonyms" if what
-        # the place is part of has been specified.
-        elif name == "place":
-            data_append(config, data, "tags", "place")
-            transl = t_arg(config, t, "t")
-            if transl:
-                data_append(config, data, "alt_of", transl)
-            vec = t_vec(config, t)
-            if len(vec) < 2:
-                config.unknown_value(t, "TOO FEW ARGS")
-                continue
-            for x in vec[1].split("/"):
-                data_append(config, data, "tags", x)
-                data_append(config, data, "hypernyms", {"word": x})
-            # XXX many templates have non-first arguments not containing /
-            # that are a definition/gloss, and some have def=
-            for x in vec[2:]:
-                if not x:
-                    continue
-                idx = x.find("/")
-                if idx >= 0:
-                    prefix = x[:idx]
-                    m = re.match(r"(?i)^(.+):(pref|suf|Suf)$", prefix)
-                    if m:
-                        prefix = m.group(1)
-                    if prefix in place_prefixes:
-                        kind = place_prefixes[prefix]
-                        v = x[idx + 1:]
-                        m = re.match(langtag_colon_re, v)
-                        if m:
-                            v = v[m.end():]
-                        if v.find(":") >= 0:
-                            config.unknown_value(t, x)
-                        data_append(config, data, "holonyms",
-                                    {"word": v,
-                                     "type": kind})
-                    else:
-                        config.unknown_value(t, x)
-                else:
-                    data_append(config, data, "holonyms", {"word": x})
-        # US state names seem to have a special tagging as such.  We tag them
-        # as places, indicate that they are a part of the Unites States, and
-        # are places of type "state".
-        elif name == "USstate":
-            data_append(config, data, "tags", "place")
-            data_append(config, data, "holonyms", "United States")
-            data_append(config, data, "place", {"type": "state",
-                                        "english": [word]})
-        # Brazilian states and state capitals seem to use their own tagging.
-        # Collect this information in tags and links.
-        elif name == "place:Brazil/state":
-            data_append(config, data, "tags", "place")
-            data_append(config, data, "tags", "province")
-            capital = t_arg(config, t, "capital")
-            if capital:
-                data_append(config, data, "meronyms", {"word": capital,
-                                               "type": "city"})
-            data_append(config, data, "holonyms", {"word": "Brazil",
-                                           "type": "country"})
-        elif name in ("place:Brazil/capital",):
-            data_append(config, data, "tags", "place")
-            data_append(config, data, "tags", "city")
-            data_append(config, data, "holonyms", {"word": "Brazil",
-                                           "type": "country"})
-        elif name in ("place:Brazil/state capital",
-                      "place:state capital of Brazil"):
-            data_append(config, data, "tags", "place")
-            data_append(config, data, "tags", "city")
-            state = t_arg(config, t, "state")
-            if state:
-                data_append(config, data, "holonyms", {"word": state,
-                                               "type": "province"})
-            data_append(config, data, "holonyms", {"word": "Brazil",
-                                           "type": "country"})
-        elif name in ("place:Brazil/municipality",
-                      "place:municipality of Brazil"):
-            data_append(config, data, "tags", "place")
-            data_append(config, data, "tags", "municipality")
-            if state:
-                data_append(config, data, "holonyms", {"word": state,
-                                               "type": "province"})
-            data_append(config, data, "holonyms", {"word": "Brazil",
-                                           "type": "country"})
 
 
 def parse_pronunciation_XXX_old_going_away(config, data, text, p):
@@ -1310,6 +1080,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
         rawgloss = clean_node(config, ctx, sense_base, lst,
                               template_fn=sense_template_fn)
         # print("parse_sense rawgloss:", repr(rawgloss))
+
+        # Generate no gloss for translation hub pages, but add the
+        # "translation-hub" tag for them
+        if rawgloss == "(This entry is a translation hub.)":
+            data_append(ctx, sense_data, "tags", "translation-hub")
+            return push_sense()
 
         # The gloss could contain templates that produce more list items.
         # This happens commonly with, e.g., {{inflection of|...}}.  Split

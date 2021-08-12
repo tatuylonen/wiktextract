@@ -4646,6 +4646,7 @@ valid_tags = set([
     "transgressive",
     "transitive",
     "transitive-with-of",
+    "translation-hub",  # Predictable compound term with translations, no gloss
     "translative",
     "translingual",
     "transliteration",
