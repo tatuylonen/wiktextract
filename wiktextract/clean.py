@@ -900,7 +900,8 @@ def clean_value(config, title, no_strip=False):
     title = re.sub(r"(?si)<\s*br\s*/?>\n*", ", ", title)
     # Remove divs with floatright class (generated e.g. by {{ja-kanji|...}})
     title = re.sub(r'(?si)<\s*div\b[^>]*?\bclass="[^"]*?\bfloatright\b[^>]*?>'
-                   r'((<div\b.*?</div>)|.)*?</div>',
+                   r'((<\s*div\b(<\s*div\b.*?<\s*/\s*div\s*>|.)*?</div>)|.)*?'
+                   r'</div>',
                    "", title)
     # Remove <sup> with previewonly class (generated e.g. by {{taxlink|...}})
     title = re.sub(r'(?si)<\s*sup\b[^>]*?\bclass="[^"]*?\bpreviewonly\b[^>]*?>'
