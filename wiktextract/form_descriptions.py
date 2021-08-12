@@ -1471,6 +1471,7 @@ alt_of_form_of_clean_re = re.compile(
     r"(?s)(" +
     "|".join([
         r":",
+        r'[“"]',
         r";",
         r" \(",
         r" - ",
