@@ -153,7 +153,17 @@ xlat_head_map = {
     "f inan pl or f anim or f anim pl":
     "feminine inanimate animate singular plural",  # XXX
     "m anim pl or f anim pl or f inan or f inan pl":
-    "male animate plural feminine inanimate",
+    "masculine animate plural feminine inanimate",
+    "m anim pl or f anim pl or f inan":
+    "masculine animate feminine plural inanimate singular",  # XXX
+    "m anim pl or f anim pl or f inan pl":
+    "masculine animate feminine plural inanimate",  # XXX
+    "f inan pl or m anim pl or f anim pl":
+    "masculine animate feminine plural inanimate",  # XXX
+    "m anim or f anim or m anim pl or f anim pl":
+    "masculine animate female singular plural",
+    "n inan or n anim or m inan or m anim":
+    "neuter inanimate animate masculine",
     "m anim pl or f anim pl or m anim or f anim":
     "masculine animate plural feminine singular",
     "m anim pl or f inan or f inan pl":
@@ -174,6 +184,8 @@ xlat_head_map = {
     "neuter inanimate singular plural feminine",
     "n inan pl or n anim or n anim pl":
     "neuter inanimate plural animate singular",  # XXX
+    "m anim or f anim or m anim pl or f anim pl":
+    "masculine animate feminine inanimate singular plural",
     "n anim or n inan": "neuter animate inanimate",
     "pers": "person",  # XXX check what this really is used for? personal?
     "npers": "impersonal",
@@ -3079,6 +3091,7 @@ xlat_tags_map = {
     "enclitic and proclitic": "enclitic proclitic",
     "Enclitic contractions": "enclitic contraction",
     "Proclitic contractions": "proclitic contraction",
+    "enclitic form": "enclitic",
     "Devanagari script form of": "alt-of Devanagari",
     "Hebrew script": "Hebrew",
     "Mongolian script": "Mongolian",
