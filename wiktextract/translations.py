@@ -221,6 +221,8 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
     for x in translations_from_template:
         assert isinstance(x, str)
 
+    # print("parse_translation_item_text: {!r} lang={}".format(item, lang))
+
     # Find and remove nested translations from the item
     nested = list(m.group(1)
                   for m in re.finditer(nested_translations_re, item))
@@ -249,22 +251,22 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
         sublang = m.group(1).strip()
         if lang is None:
             lang = sublang
-        elif lang and sublang in script_and_dialect_names:
+        elif sublang in script_and_dialect_names:
             # If the second-level name is a script name, add it as
             # tag and keep the top-level language.
             # This helps with languages that script names
             # on the same level; those scripts may also be valid
             # language names.  See leaf/English/Translations/Pali.
             tags.append(sublang)
-        elif lang and sublang in tr_second_tagmap:
+        elif sublang in tr_second_tagmap:
             # Certain second-level names are interpreted as tags
             # (mapped to tags).  Note that these may still have
             # separate language codes, so additional lancode
             # removal tricks may need to be played below.
             tags.extend(tr_second_tagmap[sublang].split())
-        elif lang and lang + " " + sublang in languages_by_name:
+        elif lang + " " + sublang in languages_by_name:
             lang = lang + " " + sublang
-        elif lang and sublang + " " + lang in languages_by_name:
+        elif sublang + " " + lang in languages_by_name:
             lang = sublang + " " + lang  # E.g., Ancient Egyptian
         elif sublang in languages_by_name:
             lang = sublang
@@ -275,7 +277,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             # We don't recognize this prefix
             ctx.error("unrecognized prefix (language name?) in "
                       "translation item: {}".format(item))
-            return
+            return None
         # Strip the language name/tag from the item
         item = item[m.end():]
     elif lang is None:
@@ -288,7 +290,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             if item.find("__IGNORE__") < 0:
                 ctx.error("no language name in translation item: {}"
                           .format(item))
-        return
+        return None
 
     # Map non-standard language names (e.g., "Apache" -> "Apachean")
     lang = tr_langname_map.get(lang, lang)
@@ -534,3 +536,6 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                     continue
                 tr1["word"] = alt
                 data_append(ctx, data, "translations", tr1)
+
+    # Return the language name, in case we have subitems
+    return lang

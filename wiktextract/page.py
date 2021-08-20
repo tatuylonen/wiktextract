@@ -2217,9 +2217,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # print("    TRANSLATION ITEM: {!r}  [{}]".format(item, sense))
 
             # Parse the translation item.
-            parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
-                                        lang, langcode,
-                                        translations_from_template)
+            lang = parse_translation_item_text(ctx, word, data, item, sense,
+                                               pos_datas, lang, langcode,
+                                               translations_from_template)
 
             # Handle sublists.  They are frequently used for different scripts
             # for the language and different variants of the language.  We will
