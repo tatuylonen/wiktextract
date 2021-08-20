@@ -31,18 +31,24 @@ tr_langname_map = {
 # (with spaces replaced by hyphens).
 script_and_dialect_names = set([
     # Scripts
+    "ALUPEC",
     "Adlam",
     "Bengali",
     "Burmese",
+    "Carakan",
+    "CJKV Characters",
     "Cyrillic",
     "Devanagari",
     "Glagolitic",
+    "Gurmukhi",
     "Jawi",
     "Khmer",
     "Latin",
     "Mongolian",
     "Roman",
+    "Shahmukhi",
     "Sinhalese",
+    "Taraškievica",
     "Thai",
     "Uyghurjin",
     # Dialects
@@ -74,6 +80,36 @@ script_and_dialect_names = set([
     "Jinjiang Hokkien",
     "Kaohsiung Hokkien",
     "Pinghua",
+    # Various countries/regions
+    "Alsace",
+    "Bavaria",
+    "Belgium",
+    "Canada",
+    "Central",
+    "Cologne",
+    "Fogo",
+    "Föhr",
+    "Föhr-Amrum",
+    "Hallig",
+    "Helgoland",
+    "Heligoland",
+    "Santiago",
+    "Sylt",
+    "Vancouver Island",
+    "Wiedingharde",
+    # Language varieties
+    "Ancient",
+    "Classical",
+    "Literary",
+    "Lower",
+    "Modern",
+    "Modified traditional",
+    "Northern",
+    "Northern and Southern",
+    "Simplified",
+    "Southern",
+    "Traditional",
+    "Western",
 ])
 
 # These names should be interpreted as tags (as listed in the value
@@ -81,12 +117,8 @@ script_and_dialect_names = set([
 tr_second_tagmap = {
     "Föhr-Amrum, Bökingharde" : "Föhr-Amrum Bökingharde",
     "Halligen, Goesharde, Karrhard": "Halligen Goesharde Karrhard",
-    "Heligoland": "Heligoland",
-    "Sylt": "Sylt",
     "Föhr-Amrum and Sylt dialect": "Föhr-Amrum Sylt",
     "Hallig and Mooring": "Hallig Mooring",
-    "Helgoland": "Helgoland",
-    "Wiedingharde": "Wiedingharde",
 }
 
 # Ignore translations that start with one of these
@@ -257,7 +289,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             # This helps with languages that script names
             # on the same level; those scripts may also be valid
             # language names.  See leaf/English/Translations/Pali.
-            tags.append(sublang)
+            tags.append(re.sub(r" ", "-", sublang))
         elif sublang in tr_second_tagmap:
             # Certain second-level names are interpreted as tags
             # (mapped to tags).  Note that these may still have

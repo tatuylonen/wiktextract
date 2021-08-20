@@ -269,8 +269,28 @@ class TrTests(unittest.TestCase):
              "roman": "list", "tags": ["masculine"]},
             ]})
 
+    def test_tr24(self):
+        data = self.runtr("Puxian Min: foo", lang="Chinese")
+        self.assertEqual(self.ctx.debugs, [])
+        self.assertEqual(data, {"translations": [
+            {"word": "foo", "lang": "Chinese", "code": "zh",
+             "tags": ["Puxian-Min"]}]})
 
+    def test_tr25(self):
+        data = self.runtr("Hallig and Mooring: foo", lang="Danish")
+        self.assertEqual(self.ctx.debugs, [])
+        # Special cases with Frisian, so test tr_second_tagmap handling
+        # with bogus Danish instead...
+        self.assertEqual(data, {"translations": [
+            {"word": "foo", "lang": "Danish", "code": "da",
+             "tags": ["Hallig", "Mooring"]}]})
 
+    def test_tr26(self):
+        data = self.runtr("  Ancient: foo", lang="Greek")
+        self.assertEqual(self.ctx.debugs, [])
+        self.assertEqual(data, {"translations": [
+            {"word": "foo", "lang": "Greek", "code": "el",
+             "tags": ["Ancient"]}]})
 
     # XXX for now this kind of or splitting is broken
     # def test_tr7(self):
