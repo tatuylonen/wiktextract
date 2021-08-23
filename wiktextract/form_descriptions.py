@@ -905,6 +905,10 @@ def parse_word_head(ctx, pos, text, data):
     if text.find("Lua timeout error") >= 0:
         return
 
+    # In Aug 2021, some words had spurious Template:en at the end of head forms
+    # due to a Wiktionary error.
+    text = re.sub(r"\s+Template:[-a-zA-Z]+\s*$", "", text)
+
     language = ctx.section
     title = ctx.title
     titleparts = list(m.group(0) for m in re.finditer(word_re, title))

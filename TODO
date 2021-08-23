@@ -427,3 +427,12 @@ FIX exponential regexp in core.py:_encode (in wikitextprocessor). jet/Czech
 
 "dog" - gets Lua error, probable error in parsing (could be related to
 temporarily rolled back exponential regexp patch)
+
+Handle Chinese usage examples better - separate Chinese (traditional,
+simplified), Pinyin, translation.
+
+Now in-gloss synonyms (and other related linkages) generate example
+lines.  These should be removed.
+
+Translations for Mandarin seem to have Chinese language but cmn code.
+What is correct?

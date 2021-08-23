@@ -58,6 +58,7 @@ script_and_dialect_names = set([
     "Hokkien",
     "Jin",
     "Mandarin",
+    "Min Bei",
     "Min Dong",
     "Min Nan",
     "Wu",
