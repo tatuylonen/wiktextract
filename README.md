@@ -113,7 +113,7 @@ Some people have asked for the data as a single JSON object.  I've
 decided to keep it as a JSON object per line, because loading all the
 data into Python requires 40-50 GB of memory.  It is much easier to
 process the data line-by-line, especially if you are only interested
-in part of the information.  You can easily read the files using the
+in a part of the information.  You can easily read the files using the
 following code:
 ```
 import json
