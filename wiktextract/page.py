@@ -1091,13 +1091,32 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     subtext = clean_node(config, ctx, None, item.children)
                     ref = None
                     lines = subtext.split("\n")
+                    if subtext.find("pestilence") >= 0:
+                        print("LINES", lines)
+                    lines = list(x for x in lines
+                                 if not re.match(
+                                         r"(Synonyms: |Antonyms: |Hyponyms: |"
+                                         r"Synonym: |Antonym: |Hyponym: |"
+                                         r"Hypernyms: |Derived terms: |"
+                                         r"Related terms: |"
+                                         r"Hypernym: |Derived term: |"
+                                         r"Related term: |"
+                                         r"For more quotations using )",
+                                         x))
                     if (len(lines) > 1 and
-                        (lines[0].endswith(":") or lines[1].startswith("#"))):
+                        (re.search(r"[]\d:)]$", lines[0]) or
+                         re.match(r"^[#*]*:", lines[1]))):
                         ref = lines[0]
-                        subtext = " ".join(re.sub(r"^[#*:]+\s*", "", x)
-                                           for x in lines[1:])
-                    subtext = re.sub(r"^[#*:]+\s*", "", subtext)
+                        lines = lines[1:]
+                    lines = list(re.sub(r"^[#*:]+\s*", "", x) for x in lines)
+                    subtext = " ".join(lines)
+                    subtext = re.sub(r'^[“"`]([^“"`”\']*)[”"\']$', r"\1",
+                                     subtext)
                     subtext = re.sub(r"\s+", " ", subtext).strip()
+                    if ref:
+                        ref = re.sub(r"\s*\(→ISBN\)", "", ref)
+                        if ref.endswith(":"):
+                            ref = ref[:-1].strip()
                     dt = {"text": subtext}
                     if ref:
                         dt["ref"] = ref
@@ -2792,10 +2811,14 @@ def parse_page(ctx, word, text, config):
                 data_append(ctx, data, rel, dt)
 
     # Disambiguate those items from word level that can be disambiguated
-    for data in ret:
-        disambiguate_clear_cases(ctx, data, "translations")
-        for field in linkage_fields:
-            disambiguate_clear_cases(ctx, data, field)
+    # XXX disambiguation intentionally disabled.  The plan is to move all
+    # disambiguation to post-processing; doing partial disambiguation here
+    # seems almost harmful as so much is left disambiguated, and the broader
+    # problem is too complex to do here.
+    # for data in ret:
+    #     disambiguate_clear_cases(ctx, data, "translations")
+    #     for field in linkage_fields:
+    #        disambiguate_clear_cases(ctx, data, field)
 
     # Categories are not otherwise disambiguated, but if there is only
     # one sense and only one data in ret for the same language, move
