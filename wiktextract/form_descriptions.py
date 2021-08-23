@@ -815,6 +815,10 @@ def add_related(ctx, data, tags_lst, related, origtext,
         m = re.search(suspicious_related_re, related)
         if ((m and ctx.title.find(m.group(0)) < 0) or
             (related in ("f", "m", "n", "c") and len(ctx.title) >= 3)):
+            if "eumhun" in tags_lst:
+                return
+            if "cangjie-input" in tags_lst:
+                return
             ctx.debug("suspicious related form tags {}: {!r} in {!r}"
                       .format(tags_lst, related, origtext))
 
@@ -922,6 +926,17 @@ def parse_word_head(ctx, pos, text, data):
     base = re.sub(r" ([,;])", r"\1", base)
     base = base.strip()
     # print("parse_word_head: base={!r}".format(base))
+
+    # Special case: handle Hán Nôm readings for Vietnamese characters
+    m = re.match(r"{}: (Hán Nôm) readings: (.*)".format(re.escape(ctx.title)),
+                 base)
+    if m:
+        tag, readings = m.groups()
+        tag = re.sub(r"\s+", "-", tag)
+        for reading in split_at_comma_semi(readings):
+            add_related(ctx, data, [tag], [reading], text, True)
+        return
+
 
     # Split the head into alternatives.  This is a complicated task, as
     # we do not want so split on "or" or "," when immediately followed by more

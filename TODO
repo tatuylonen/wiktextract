@@ -436,3 +436,6 @@ lines.  These should be removed.
 
 Translations for Mandarin seem to have Chinese language but cmn code.
 What is correct?
+
+Parse eumhun related forms (Korean) in more detail, particularly
+separate romanization and hanja forms, e.g. 度/Korean

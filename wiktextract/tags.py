@@ -1059,6 +1059,7 @@ uppercase_tags = set([
     "Hyōgai",  # Uncommon type of Kanji character
     "Hà Nội",  # Vietnamese dialect
     "Hà Tĩnh",  # Vietnamese dialect
+    "Hán Nôm",  # Vietnamese latin spelling with diacritics?
     "Hössjö",
     "Hồ Chí Minh City",
     "I Ching hexagram",
