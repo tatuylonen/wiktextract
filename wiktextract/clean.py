@@ -911,8 +911,9 @@ def clean_value(config, title, no_strip=False):
     title = re.sub(r'(?si)<\s*strong\b[^>]*?\bclass="[^"]*?\berror\b[^>]*?>'
                    r'((<.*?</.[^>]>)|.)*?</strong>',
                    "", title)
-    # Change <div> and </div> to newlines.  Ditto for tr, li, table
-    title = re.sub(r"(?si)<\s*/?\s*(div|tr|li|table)\b[^>]*>", "\n", title)
+    # Change <div> and </div> to newlines.  Ditto for tr, li, table, dl, ul, ol
+    title = re.sub(r"(?si)<\s*/?\s*(div|tr|li|table|dl|ul|ol)\b[^>]*>",
+                   "\n", title)
     # Change <td> </td> to spaces.  Ditto for th.
     title = re.sub(r"(?si)<\s*/?\s*(td|th)\b[^>]*>", " ", title)
     # Change <sup> ... </sup> to ^
