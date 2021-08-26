@@ -390,6 +390,7 @@ The following command-line options can be used to control its operation:
 * --pronunciation: causes pronunciation information to be captured
 * --linkages: causes linkages (synonyms etc.) to be captured
 * --examples: causes usage examples to be captured
+* --etymologies: causes etymology information to be captured
 * --redirects: causes redirects to be extracted
 * --pages-dir DIR: save all wiktionary pages under this directory (mostly for debugging)
 * --cache CACHE: save/use cache file(s) from this path (for debugging)
@@ -419,7 +420,9 @@ config = WiktionaryConfig(
              capture_pronunciation=True,
              capture_linkages=True,
              capture_compounds=True,
-             capture_redirects=True)
+             capture_redirects=True,
+             capture_examples=True,
+             capture_etymologies=True)
 ctx = Wtp()
 
 def word_cb(data):
@@ -428,6 +431,11 @@ def word_cb(data):
 
 parse_wiktionary(ctx, path, config, word_cb)
 ```
+
+The capture arguments default to ``True``, so they only need to be set if
+some values are not to be captured (note that the ``wiktwords``
+program sets them to ``False`` unless the ``--all`` or specific capture
+options are used).
 
 #### def parse_wiktionary(ctx, path, config, word_cb, capture_cb=None, phase1_only=False)
 
@@ -494,12 +502,13 @@ extraction.
 The constructor is called as:
 ```
 WiktionaryConfig(capture_languages=["English", "Translingual",
-                 capture_translations=False,
-                 capture_pronunciation=False,
-                 capture_linkages=False,
-                 capture_compounds=False,
-                 capture_redirects=False,
-                 capture_examples=False)
+                 capture_translations=True,
+                 capture_pronunciation=True,
+                 capture_linkages=True,
+                 capture_compounds=True,
+                 capture_redirects=True,
+                 capture_examples=True,
+                 capture_etymologies=True)
 ```
 
 The arguments are as follows:
@@ -508,24 +517,27 @@ The arguments are as follows:
   "Translingual"]``.  To capture all languages, one can use
   ``set(x["name"] for x in ALL_LANGUAGES)`` (with ``ALL_LANGUAGES``
   imported from wikitextprocessor).
-* ``capture_translations`` (boolean) - set to ``True`` to capture translation
-  information for words.  Translation information seems to be most
+* ``capture_translations`` (boolean) - set to ``False`` to disable capturing
+  translations.  Translation information seems to be most
   widely available for the English language, which has translations into
   other languages.
-* ``capture_pronunciation`` (boolean) - set to ``True`` to capture pronunciation
-  information for words.  Typically, this includes IPA transcriptions
-  and any audio files included in the word entries, along with other
-  information.  The type and amount of pronunciation
-  information varies widely between languages.
-* ``capture_linkages`` (boolean) - set to ``True`` to capture linkages between
-  word, such as hypernyms, antonyms, synonyms, etc.
-* ``capture_compounds`` (boolean) - set to ``True`` to capture compound words
-  containing the word.
-* ``capture_redirects`` (boolean) - set to ``True`` to capture
+* ``capture_pronunciation`` (boolean) - set to ``False`` to disable
+  capturing pronunciations.  Typically, pronunciations include
+  IPA transcriptions and any audio files included in the word entries, along
+  with other information (including dialectal tags).  The type and amount of
+  pronunciation information varies widely between languages.
+* ``capture_linkages`` (boolean) - set to ``False`` to disable capturing
+  linkages between word, such as hypernyms, antonyms, synonyms, etc.
+* ``capture_compounds`` (boolean) - set to ``False`` to disable capturing
+  compound words containing the word.  Compound word capturing is not currently
+  fully implemented.
+* ``capture_redirects`` (boolean) - set to ``False`` to disable capturing
   redirects.  Redirects are not associated with any specific language
   and thus requesting them returns them for all words in all languages.
-* ``capture_examples`` (boolean) - set to ``True`` to capture usage examples
-  (XXX currently not implemented).
+* ``capture_examples`` (boolean) - set to ``False`` to disable
+  capturing usage examples.
+* ``capture_etymologies`` (boolean) - set to ``False`` to
+  disable capturing etymologies.
 
 ## Format of extracted redirects
 
@@ -553,6 +565,11 @@ following keys (others may also be present or added later):
 * ``categories`` - list of non-disambiguated categories for the word
 * ``topics`` - list of non-disambiguated topics for the word
 * ``translations`` - non-disambiguated translation entries (see below)
+* ``etymology-text`` - etymology section as cleaned text
+* ``etymology-templates`` - templates and their arguments and expansions from
+  the etymology section.  These can be used to easily parse etymological
+  relations.  Certain common templates that do not signify etymological
+  relations are not included.
 * ``synonyms`` - non-disambiguated synonym linkages for the word (see below)
 * ``antonyms`` - non-disambiguated antonym linkages for the word (see below)
 * ``hypernyms`` - non-disambiguated hypernym linkages for the word (see below)
@@ -637,6 +654,28 @@ where each dictionary has the following keys (and possibly others):
 * ``tags`` - optional list of qualifiers for the translations, e.g., gender
 * ``taxonomic`` - optional taxonomic name of an organism mentioned in the translation
 * ``word`` - the translation in the specified language (may be missing when ``note`` is present)
+
+### Etymologies
+
+Etymological information is stored under the ``etymology-text`` and
+``etymology-templates`` keys in the word's data.  When multiple parts-of-speech
+are listed under the same etymology, the same data is copied to each
+part-of-speech entry under that etymology.
+
+The ``etymology-text`` field contains the contents of the whole etymology
+section cleaned into human-readable text (i.e., templates have been expanded
+and HTML tags removed, among other things).
+
+The ``etymology-templates`` field contains a list of templates from
+the etymology section.  Some common templates considered not relevant
+for etymological information have been removed (e.g., ``redlink
+category`` and ``isValidPageName``).  The list also includes nested
+templates referenced from templates directly used in the etymology
+description.  Each template in the list is a dictionary with the following
+keys:
+* ``name`` - name of the template
+* ``args`` - dictionary mapping argument names to their cleaned values.  Positional arguments have keys that are numeric strings, starting with "1".
+* ``expansion`` - the (cleaned) text the template expands to.
 
 ### Linkages to other words
 

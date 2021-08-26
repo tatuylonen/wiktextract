@@ -2,20 +2,12 @@
 # XXX cf "word" translations under "watchword" and "proverb" - what kind of
 # link/ext is this?  {{trans-see|watchword}}
 
-# XXX add parsing chinese pronunciations, see 傻瓜 https://en.wiktionary.org/wiki/%E5%82%BB%E7%93%9C#Chinese
-
 # XXX implement parsing {{ja-see-kango|xxx}} specially, see むひ
 
 # XXX check use of sense numbers in translations (check "eagle"/English)
 
 # XXX in Coordinate terms, handle bullet point titles like Previous:, Next:
 # (see "ten", both Coordinate terms and Synonyms)
-
-# XXX change pronunciation parsing to traverse LIST and then expand individual
-# items (warn about non-list content), similar to already done for linkage
-
-# XXX parse etymology; take "compound", "affix", prefix" templates and save
-# as dictionaries under "compound"
 
 # XXX parse "alter" tags; see where they are used (they seem to be alternate
 # forms)
@@ -24,8 +16,6 @@
 
 # XXX check use of ja-r and ja-r/args templates in linkage and capture
 # hira, kana
-
-Parse Phonetic hangeul in Pronunciation section (see 死/Korean)
 
 # XXX make sure parenthesized parts in the middle of form-of descriptions
 # in gloss are handled properly.  Check "vise" (Swedish verb).
@@ -189,26 +179,6 @@ template seems to know a ton about these so maybe look at it.
 # forom Chinese, e.g., 內 - find out what causes these, and either fix or
 # ignore
 
-# Parse readings subsection in Japanese kanji characters, see 內
-#  - these are apparently pronunciations, but not IPA
-#  - perhaps these might be parsed as forms with "reading" tag and tag
-#    for the type of reading?
-
-# Korean kanji seem to have Phonetic hangeul in pronunciation sections, see 內
-
-# XXX chinese glyphs, see 內
-#  - I'm getting dial-syn page does not exist in synonyms, but Wiktionary
-#    shows a big list of synonyms
-
-# XXX Some Chinese words have weird /wiki.local/ in sounds, see: 屋
-#  - also in pronunciations, several IPAs are captured, but they are not
-#    annotated with dialect information
-#  - this page also has dial-syn warning in synonyms (also noted elsewhere)
-#  - in Japanese compounds, roman transliterations incorrectly go into tags
-#  - in Japanese, does it make sense to have most senses annotated with "kanji"?
-
-Collect etymology information
-
 # XXX handle "XXX/derived terms" pages
 
 /derived terms (seem to be referenced with {{section link|...}}
@@ -248,8 +218,6 @@ word form
 Word entires may be generated from entries like "Thesaurus:ar:make happy" that
 are in a wrong language.  Check if they are referenced from somewhere and
 maybe restrict generation to entries that are actually referenced.
-
-Check extraction of pronunciations and their romanizations in 공중/Korean
 
 Consider caching template expansions in an LRU cache.  Make sure
 template arguments that can be accessed from Lua are considered
@@ -439,3 +407,30 @@ What is correct?
 
 Parse eumhun related forms (Korean) in more detail, particularly
 separate romanization and hanja forms, e.g. 度/Korean
+
+Parse declension/conjugation tables
+
+Collect RGB values and other similar data
+
+XXX chinese glyphs, see 內
+ - I'm getting dial-syn page does not exist in synonyms, but Wiktionary
+   shows a big list of synonyms
+
+Some Chinese words have weird /wiki.local/ in sounds, see: 屋
+ - also in pronunciations, several IPAs are captured, but they are not
+   annotated with dialect information
+ - this page also has dial-syn warning in synonyms (also noted elsewhere)
+ - in Japanese compounds, roman transliterations incorrectly go into tags
+ - in Japanese, does it make sense to have most senses annotated with "kanji"?
+
+Parse readings subsection in Japanese kanji characters, see 內
+ - these are apparently pronunciations, but not IPA
+ - perhaps these might be parsed as forms with "reading" tag and tag
+   for the type of reading?
+
+Korean kanji seem to have Phonetic hangeul in pronunciation sections, see 內
+Parse Phonetic hangeul in Pronunciation section (see 死/Korean)
+
+Check extraction of pronunciations and their romanizations in 공중/Korean
+
+# XXX add parsing chinese pronunciations, see 傻瓜 https://en.wiktionary.org/wiki/%E5%82%BB%E7%93%9C#Chinese

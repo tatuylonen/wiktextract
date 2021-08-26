@@ -13,7 +13,7 @@ from .parts_of_speech import part_of_speech_map, PARTS_OF_SPEECH
 from .config import WiktionaryConfig
 from .linkages import parse_linkage_item_text
 from .translations import parse_translation_item_text
-from .clean import clean_value
+from .clean import clean_value, clean_template_args
 from .places import place_prefixes  # XXX move processing to places.py
 from .unsupported_titles import unsupported_title_map
 from .datautils import (data_append, data_extend, split_at_comma_semi,
@@ -631,6 +631,23 @@ pron_romanization_re = re.compile(
              sorted(pron_romanizations.keys(), key=lambda x: len(x),
                     reverse=True)) +
     ")([^\n]+)")
+
+# Templates ignored during etymology extraction, i.e., these will not be listed
+# in the extracted etymology templates.
+ignored_etymology_templates = [
+    "...",
+    "IPAchar",
+    "ISBN",
+    "isValidPageName",
+    "redlink category",
+]
+# Regexp for matching ignored etymology template names.  This adds certain
+# prefixes to the names listed above.
+ignored_etymology_templates_re = re.compile(
+    r"^((cite-|R:).*|" +
+    r"|".join(re.escape(x) for x in ignored_etymology_templates) +
+    r")$")
+
 
 def parse_sense_XXXold_going_away(config, data, text, use_text):
     """Parses a word sense from the text.  The text is usually a list item
@@ -2417,6 +2434,26 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # to define at this level and recurse in parse_translation_recurse().
         parse_translation_recurse(xlatnode)
 
+    def parse_etymology(data, node):
+        """Parses an etymology section."""
+        assert isinstance(data, dict)
+        assert isinstance(node, WikiNode)
+
+        templates = []
+
+        def etym_post_template_fn(name, ht, expansion):
+            if re.match(ignored_etymology_templates_re, name):
+                return None
+            ht = clean_template_args(config, ht)
+            expansion = clean_node(config, ctx, None, expansion)
+            templates.append({"name": name, "args": ht, "expansion": expansion})
+            return None
+
+        text = clean_node(config, ctx, None, node.children,
+                          post_template_fn=etym_post_template_fn)
+        data["etymology-text"] = text
+        data["etymology-tempates"] = templates
+
     def process_children(treenode):
         """This recurses into a subtree in the parse tree for a page."""
         nonlocal etym_data
@@ -2462,7 +2499,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
             elif t.startswith("Etymology"):
                 push_etym()
                 ctx.start_subsection(None)
-                # XXX parse etymology section, up to the next subtitle
+                if config.capture_etymologies:
+                    data = select_data()
+                    parse_etymology(data, node)
             elif t == "Translations":
                 data = select_data()
                 parse_translations(data, node)

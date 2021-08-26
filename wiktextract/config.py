@@ -31,6 +31,7 @@ class WiktionaryConfig(object):
         "capture_compounds",
         "capture_redirects",
         "capture_examples",
+        "capture_etymologies",
         "verbose",
         "num_pages",
         "language_counts",
@@ -45,12 +46,13 @@ class WiktionaryConfig(object):
 
     def __init__(self,
                  capture_languages=["English", "Translingual"],
-                 capture_translations=False,
-                 capture_pronunciation=False,
-                 capture_linkages=False,
-                 capture_compounds=False,
-                 capture_redirects=False,
-                 capture_examples=False,
+                 capture_translations=True,
+                 capture_pronunciation=True,
+                 capture_linkages=True,
+                 capture_compounds=True,
+                 capture_redirects=True,
+                 capture_examples=True,
+                 capture_etymologies=True,
                  verbose=False):
         if capture_languages is not None:
             assert isinstance(capture_languages, (list, tuple, set))
@@ -63,6 +65,7 @@ class WiktionaryConfig(object):
         assert capture_linkages in (True, False)
         assert capture_compounds in (True, False)
         assert capture_redirects in (True, False)
+        assert capture_etymologies in (True, False)
         self.capture_languages = capture_languages
         self.capture_translations = capture_translations
         self.capture_pronunciation = capture_pronunciation
@@ -70,6 +73,7 @@ class WiktionaryConfig(object):
         self.capture_compounds = capture_compounds
         self.capture_redirects = capture_redirects
         self.capture_examples = capture_examples
+        self.capture_etymologies = capture_etymologies
         self.verbose = verbose
         # Some fields for statistics
         self.num_pages = 0

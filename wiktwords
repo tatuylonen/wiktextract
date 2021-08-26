@@ -101,7 +101,7 @@ if __name__ == "__main__":
     parser.add_argument("--pages-dir", type=str, default=None,
                         help="Directory under which to save all pages")
     parser.add_argument("--all", action="store_true", default=False,
-                        help="Capture all data for the selected languages")
+                        help="Capture everything for the selected languages")
     parser.add_argument("--translations", action="store_true", default=False,
                         help="Capture translations")
     parser.add_argument("--pronunciations", action="store_true", default=False,
@@ -114,6 +114,8 @@ if __name__ == "__main__":
                         help="Capture redirects")
     parser.add_argument("--examples", action="store_true", default=False,
                         help="Capture usage examples")
+    parser.add_argument("--etymologies", action="store_true", default=False,
+                        help="Capture etymologies")
     parser.add_argument("--statistics", action="store_true", default=False,
                         help="Print statistics")
     parser.add_argument("--page", type=str,
@@ -147,6 +149,7 @@ if __name__ == "__main__":
         args.compounds = True
         args.redirects = True
         args.examples = True
+        args.etymologies = True
 
     # If --list-languages has been specified, just print the list of supported
     # languages
@@ -232,6 +235,7 @@ if __name__ == "__main__":
                               capture_compounds=args.compounds,
                               capture_redirects=args.redirects,
                               capture_examples=args.examples,
+                              capture_etymologies=args.etymologies,
                               verbose=args.verbose)
 
     if args.profile:

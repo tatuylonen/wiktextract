@@ -985,3 +985,13 @@ def clean_value(config, title, no_strip=False):
     # Normalize different ways of writing accents into the NFC canonical form
     title = unicodedata.normalize("NFC", title)
     return title
+
+
+def clean_template_args(config, ht, no_strip=False):
+    """Cleans all values in a template argument dictionary and returns the
+    cleaned dictionary."""
+    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(ht, dict)
+    return {clean_value(config, str(k)):
+            clean_value(config, str(v), no_strip=no_strip)
+            for k, v in ht.items()}
