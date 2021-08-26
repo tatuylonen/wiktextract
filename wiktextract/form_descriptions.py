@@ -13,7 +13,7 @@ from wikitextprocessor import Wtp
 from .datautils import data_append, data_extend, split_at_comma_semi
 from .taxondata import known_species, known_firsts
 from .topics import valid_topics, topic_generalize_map
-from .tags import (xlat_head_map, valid_tags,
+from .tags import (xlat_head_map, valid_tags, form_of_tags, alt_of_tags,
                    uppercase_tags, xlat_tags_map, xlat_descs_map,
                    head_final_numeric_langs,
                    head_final_bantu_langs, head_final_bantu_map,
@@ -1668,9 +1668,13 @@ def parse_alt_or_inflection_of(ctx, gloss):
     there was no alt-of/form-of/synonym-of word."""
     # Occasionally inflection_of/alt_of have "A(n) " etc. at the beginning.
     gloss1 = gloss
-    m = re.match(r"(A\(n\)|A|a|an|An|The|the) ", gloss1)
-    if m:
-        gloss1 = gloss1[m.end():]
+    # XXX This was added to fix a bug and was incorrect fix at the time.
+    # However, there could now be some forms that depend on this. They should
+    # be fixed by adding the forms with "An", "A", or "The" in the tag
+    # mapping table.  This code should be removed.
+    # m = re.match(r"(A\(n\)|A|a|an|An|The|the) ", gloss1)
+    # if m:
+    #     gloss1 = gloss1[m.end():]
 
     # First try parsing it as-is
     parsed = parse_alt_or_inflection_of1(ctx, gloss1)
@@ -1733,11 +1737,19 @@ def parse_alt_or_inflection_of1(ctx, gloss):
             tagsets, topics = decode_tags(desc, no_unknown_starts=True)
             if (not topics and
                 any(not (alt_infl_disallowed & set(t)) for t in tagsets)):
-                tags = ["form-of"]
+                tags = []
                 for t in tagsets:
                     if not (alt_infl_disallowed & set(t)):
                         tags.extend(t)
-                break
+                # It must have at least one tag from form_of_tags
+                if set(tags) & form_of_tags:
+                    # Accept this as form-of
+                    tags.append("form-of")
+                    break
+                if set(tags) & alt_of_tags:
+                    # Accept this as alt-of
+                    tags.append("alt-of")
+                    break
 
     else:
         # Did not find a form description based on last word; see if the
