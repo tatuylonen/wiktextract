@@ -937,7 +937,6 @@ def parse_word_head(ctx, pos, text, data):
             add_related(ctx, data, [tag], [reading], text, True)
         return
 
-
     # Split the head into alternatives.  This is a complicated task, as
     # we do not want so split on "or" or "," when immediately followed by more
     # head-final tags, but otherwise do want to split by them.
@@ -1020,7 +1019,6 @@ def parse_word_head(ctx, pos, text, data):
                 tags = list("Mainland China" if t == "Mainland" else t
                             for t in tags)
                 tags.append("strokes")
-                print("TAGS:", tags)
                 add_related(ctx, data, tags, [strokes], text, True)
             return ", "
 
@@ -1130,10 +1128,11 @@ def parse_word_head(ctx, pos, text, data):
                 tagsets, topics = decode_tags(" ".join(tagparts),
                                               no_unknown_starts=True)
                 # print("tagparts={!r} tagsets={} topics={} related={} "
-                #       "alt_related={}"
+                #       "alt_related={} distw={:.2f}"
                 #       .format(tagparts, tagsets, topics, related,
-                #               alt_related))
-                if (topics or
+                #               alt_related,
+                #               distw(titleparts, parts[i - 1])))
+                if (topics or not tagsets or
                     any("error-unknown-tag" in x for x in tagsets)):
                     if alt_related is not None:
                         break

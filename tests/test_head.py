@@ -275,3 +275,20 @@ class HeadTests(unittest.TestCase):
             {"tags": ["strokes"],
              "form": "12"},
             ]})
+
+    def test_head25(self):
+        data = {}
+        self.ctx.start_page("smiley")
+        self.ctx.start_section("Noun")
+        parse_word_head(self.ctx, "noun",
+                        "smiley m (plural smileys, diminutive smileytje n)",
+                        data)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        self.assertEqual(data, {"tags": ["masculine"],
+                                "forms": [
+            {"tags": ["plural"],
+             "form": "smileys"},
+            {"tags": ["diminutive", "neuter"],
+             "form": "smileytje"},
+            ]})
