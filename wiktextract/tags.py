@@ -3089,6 +3089,7 @@ xlat_tags_map = {
     "British spelling": "UK",
     "Roman spelling": "Roman",
     "Perso-Arabic spelling": "Perso-Arabic",
+    "Arabic/Persian": "Arabic Persian",
     "Urdu spelling": "Urdu",
     "Urdu spelling of": "Urdu alt-of",
     "eye dialect": "pronunciation-spelling",

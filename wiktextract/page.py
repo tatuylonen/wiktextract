@@ -1137,10 +1137,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         ref = re.sub(r"\s*\(→ISBN\)", "", ref)
                         if ref.endswith(":"):
                             ref = ref[:-1].strip()
-                    dt = {"text": subtext}
-                    if ref:
-                        dt["ref"] = ref
-                    examples.append(dt)
+                    if ref and not subtext:
+                        subtext = ref
+                        ref = None
+                    if subtext:
+                        dt = {"text": subtext}
+                        if ref:
+                            dt["ref"] = ref
+                        examples.append(dt)
 
         # Generate no gloss for translation hub pages, but add the
         # "translation-hub" tag for them
