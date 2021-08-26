@@ -640,6 +640,9 @@ ignored_etymology_templates = [
     "ISBN",
     "isValidPageName",
     "redlink category",
+    "deprecated code",
+    "check deprecated lang param usage",
+    "para",
 ]
 # Regexp for matching ignored etymology template names.  This adds certain
 # prefixes to the names listed above.
@@ -1676,7 +1679,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # Kludge: when these templates expand to /.../ or [...],
                 # replace the expansion by something safe.  This is used
                 # to filter spurious IPA-looking expansions that aren't really
-                # IPAs.  We probably don't care about these tempates in the
+                # IPAs.  We probably don't care about these templates in the
                 # contexts where they expand to something containing these.
                 v = re.sub(r'href="[^"]*"', "", text)  # Ignore URLs
                 v = re.sub(r'src="[^"]*"', "", v)
@@ -2449,10 +2452,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
             templates.append({"name": name, "args": ht, "expansion": expansion})
             return None
 
-        text = clean_node(config, ctx, None, node.children,
+        # Remove any subsections
+        contents = list(x for x in node.children
+                        if not isinstance(x, WikiNode) or
+                        x.kind not in LEVEL_KINDS)
+        # Convert to text, also capturing templates using post_template_fn
+        text = clean_node(config, ctx, None, contents,
                           post_template_fn=etym_post_template_fn)
+        # Save the collected information.
         data["etymology-text"] = text
-        data["etymology-tempates"] = templates
+        data["etymology-templates"] = templates
 
     def process_children(treenode):
         """This recurses into a subtree in the parse tree for a page."""
