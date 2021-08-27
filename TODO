@@ -362,3 +362,7 @@ Check extraction of pronunciations and their romanizations in 공중/Korean
 # XXX add parsing chinese pronunciations, see 傻瓜 https://en.wiktionary.org/wiki/%E5%82%BB%E7%93%9C#Chinese
 
 Change head format to be similar to "etymology-templates" format.
+
+Check ignored_cat_re in page.py
+
+Is Rhymes collected and displayed correctly?  cf. environ/English

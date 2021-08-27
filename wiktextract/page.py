@@ -561,6 +561,7 @@ ignored_category_patterns = [
     ".* two-letter words$",
     ".* three-letter words$",
     ".* four-letter words$",
+    "Rhymes:",
 ]
 # XXX is this regexp correct?
 ignored_cat_re = re.compile(r"([a-z]{2,4})?" +
