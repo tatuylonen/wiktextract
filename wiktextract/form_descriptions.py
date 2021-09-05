@@ -1755,11 +1755,13 @@ def parse_alt_or_inflection_of1(ctx, gloss):
         # whole description is tags
         tagsets, topics = decode_tags(gloss, no_unknown_starts=True)
         if (not topics and
-            any("error-unknown-tag" not in t for t in tagsets)):
+            any(not (alt_infl_disallowed & set(ts)) and form_of_tags & set(ts)
+                for ts in tagsets)):
             tags = []
-            for t in tagsets:
-                if "error-unknown-tag" not in t:
-                    tags.extend(t)
+            for ts in tagsets:
+                if (not (alt_infl_disallowed & set(ts)) and
+                    form_of_tags & set(ts)):
+                    tags.extend(ts)
             base = ""
         else:
             return None
