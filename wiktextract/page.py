@@ -2514,8 +2514,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 push_etym()
                 ctx.start_subsection(None)
                 if config.capture_etymologies:
-                    data = select_data()
-                    parse_etymology(data, node)
+                    parse_etymology(etym_data, node)
             elif t == "Translations":
                 data = select_data()
                 parse_translations(data, node)
