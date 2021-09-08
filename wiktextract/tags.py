@@ -861,6 +861,7 @@ uppercase_tags = set([
     "Dongmen",
     "Doric",  # Ancient Greek
     "Drasi",  # Region in India
+    "Draweno-Polabian",
     "Drents",
     "Dundee",
     "Dungan",
@@ -1331,6 +1332,7 @@ uppercase_tags = set([
     "Manglish",
     "Manichaean",
     "Manicoré",
+    "Manitoba Saulteux",
     "Mantua",
     "Manyika",
     "Marathi",
@@ -1396,12 +1398,13 @@ uppercase_tags = set([
     "Mistralian",
     "Mizrahi Hebrew",
     "Modena",
+    "Modern",
     "Modern Armenian",
     "Modern Israeli Hebrew",
     "Modern Israeli",
     "Modern Latin",
+    "Modern Polabian",
     "Modern Turkish",
-    "Modern",
     "Modi",  # Variant/language based on Sanskrit
     "Moghamo",
     "Moldavia",
@@ -1551,6 +1554,7 @@ uppercase_tags = set([
     "Old Norse",
     "Old Northern French",
     "Old Persian",  # Script
+    "Old Polabian",
     "Old Tagalog",
     "Oliti",
     "Olles",
@@ -2290,6 +2294,8 @@ xlat_tags_map = {
     "dialectal term": "dialectal",
     "dialectal Mandarin": "dialectal Mandarin",
     "Dialect: Oslo": "dialectal Oslo",
+    "regiolectal": "dialectal",
+    "archaic or regiolectal": "archaic dialectal",
     "Canada: Ontario": "Ontario",
     "Canada: British Columbia": "British-Columbia",
     "GenAm": "General-American",
@@ -2618,6 +2624,7 @@ xlat_tags_map = {
     "not translated": "not-translated",
     "not mutable": "not-mutable",
     "used only predicatively": "not-attributive predicative",
+    "only in predicative position": "not-attributive predicative",
     "only predicative": "not-attributive predicative",
     "predicate-only":
     "not-attributive predicative error-misspelling",  # eleng/Luxembourgish
@@ -2853,7 +2860,6 @@ xlat_tags_map = {
     "indecl": "indeclinable",
     "all forms unconjugated": "indeclinable",
     "not declined": "indeclinable",
-    "uninflected": "indeclinable",
     "not declinable": "indeclinable",
     "undeclinable": "indeclinable",
     "inconjugable": "indeclinable error-misspelling",
@@ -3045,11 +3051,12 @@ xlat_tags_map = {
     "nominative/accusative": "nominative accusative",
     "perfective/imperfective": "perfective imperfective",
     "neg. perfective": "perfective negative",
-    "neg. continuous": "continuous negative",
+    "neg. continuous": "continuative negative",
     "negative form": "negative",
     "negating particle": "negative particle",
     "negation": "negative",
-    "continuously": "continuous",
+    "continuous": "continuative",
+    "continuously": "continuative",
     "animate/inanimate": "animate inanimate",
     "animate or inanimate": "animate inanimate",
     "locative/vocative": "locative vocative",
@@ -3361,6 +3368,8 @@ xlat_tags_map = {
     "baby talk": "baby-talk",
     "middle infinitive": "middle-infinitive",
     "first infinitive": "first-infinitive",
+    "third-person form of the long first infinitive of":
+    "third-person first-infinitive-long form-of",
     "second infinitive": "second-infinitive",
     "second active infinitive": "second-infinitive active",
     "second passive infinitive": "second-infinitive passive",
@@ -3369,8 +3378,8 @@ xlat_tags_map = {
     "third passive infinitive": "third-infinitive passive",
     "fourth infinitive": "fourth-infinitive",
     "fifth infinitive": "fifth-infinitive",
-    "subjunctive I": "subjunctive-I",
-    "subjunctive II": "subjunctive-II",
+    "subjunctive I": "subjunctive-i",
+    "subjunctive II": "subjunctive-ii",
     "morse code": "morse-code",
     "with odd-syllable stems": "with-odd-syllable-stems",
     "old orthography": "archaic",
@@ -3713,7 +3722,6 @@ xlat_tags_map = {
     "non-standard since 1917": "nonstandard",
     "conditional mood": "conditional",
     "figurative": "figuratively",
-    "reciprocal": "reflexive",
     "compound words": "compound",
     "form of address": "term-of-address",
     "term of address": "term-of-address",
@@ -3972,6 +3980,7 @@ xlat_tags_map = {
     "Cholula and Milpa Alta": "Cholula Milpa-Alta",
     "Surnames": "surname",
     "metaphorically": "metaphoric",
+    "hypothetic": "hypothetical",
     "Kinmen and Penghu Hokkien": "Kinmen-Hokkien Penghu-Hokkien",
 }
 
@@ -4069,6 +4078,8 @@ form_of_tags = set([
     "comitative",
     "comparative",
     "conditional",
+    "conditional-i",
+    "conditional-ii",
     "connegative",
     "construct",
     "contemplative",
@@ -4182,8 +4193,8 @@ form_of_tags = set([
     "stressed",
     "subjective",
     "subjunctive",
-    "subjunctive-I",
-    "subjunctive-II",
+    "subjunctive-i",
+    "subjunctive-ii",
     "sublative",
     "superessive",
     "superlative",
@@ -4194,8 +4205,9 @@ form_of_tags = set([
     "third-person",
     "transgressive",
     "translative",
+    "unspecified",  # for demonstrative pronouns, referent distance unspecified
     "unstressed",
-    "vocative",
+    "vocative",  # Case? used for addressee
     # 2084 objective - beware of "An object of ..." (e.g., song/English)
 ])
 
@@ -4221,6 +4233,46 @@ alt_of_tags = set([
     "uppercase",
 ])
 
+# Valid tag categories / attributes
+tag_categories = set([
+    "case",  # Grammatical case (also direct-object, indirect-object)
+    "gender",  # Semantic gender (often also implies class)
+    "class",  # Inflection class (Bantu languages, Japanese, etc)
+    "number",  # Singular, plural, dual, paucal, ...
+    "addressee",  # Something related to addressee
+    "possession",  # possessive, possessed, alienable, inalienable
+    "deictic",  # distal, proximal, inclusive, exclusive
+    "voice",  # active, passive, middle
+    "aspect",  # Aspect of verbs (perfective, imperfective, habitual, ...)
+    "mood",  # cohortiative, commissive, conditional, conjunctive,
+             # declarative, hortative, imperative, indicative, infinitive,
+             # interrogative, jussive, optative, potential, prohibitive,
+             # subjunctive
+             # Note that interrogative also used for, e.g., pronouns
+    "tense",  # present, past, imperfect, perfect, future, pluperfect
+    "transitivity",  # intransitive, transitive, ditransitive, ambitransitive
+    "participants",  # reflexive, reciprocal
+    "degree",  # positive, comparative, superlative
+    "trigger",  # Triggers something (e.g., mutation) in some context
+    "related",  # Indicates related term / word / classifier / counter / aux
+    "detail",  # Provides some detail
+    "mod",  # Provides a modified form (e.g., abbreviation, mutation)
+    "pos",  # Specifies part-of-speech
+    "derivation",  # Specifies derivation (nominalization, agent,
+                   # nominal-from-verb, ...)
+    "pragmatic",  # Specifies pragmatics (e.g., stressed/unstressed)
+    "phonetic",  # Describes some phonetic aspect
+    "lexical",  # Describes some lexical/typographic aspect
+    "category",  # person, personal, impersonal, animate, inanimate,
+                 # (virile, nonvirile?)
+    "register",  # dialectal, formal, informal, slang, vulgar
+    "misc",  # simple, compound
+    "gradation",  # gradation or qualifier
+    "with",  # Co-occurs with something
+    "order",  # Word position or order
+    "XXX",  # TBD, currently not clear
+])
+
 # Set of all valid tags
 valid_tags = set([
     "-i",   # Japanese inflection type
@@ -4230,8 +4282,8 @@ valid_tags = set([
     "abbreviation",
     "abessive",   # Case
     "ablative",   # Case
-    "absolute",   # XXX Swedish at least ???
-    "absolutive",  # How differs from absolutive?
+    "absolute",   # Case, Bashkir, Swedish [absolute reflexive]
+    "absolutive",  # Case (patient or experience of action)
     "abstract",
     "abstract-noun",
     "accent/glottal",
@@ -4257,10 +4309,11 @@ valid_tags = set([
     "adverbial",
     "adversative",
     "affirmative",
+    "affix",
     "after-preposition",  # Word used only after preposition nich/Lower Sorbian
     "agent",
     "agentive",
-    "alienable",
+    "alienable",  # Alienable possession; Choctaw, Ojibwe, Navajo, Tokelauan etc
     "allative",
     "alphabetic-tones",
     "also",
@@ -4270,12 +4323,15 @@ valid_tags = set([
     "analytic",
     "anaphorically",
     "animate",
-    "aorist",
+    "anterior",  # French seems to have "past anterior" tense
+    "aorist",  # Verb form (perfective past)  E.g., Latin, Macedonian
     "apocope",
     "applicative",
     "archaic",
     "article",
     "aspirate-mutation",
+    "assertive",  # Verb form (e.g., Korean)
+    "associative",  # Case (e.g., Quechua)
     "ateji",
     "attributive",
     "augmentative",
@@ -4288,7 +4344,7 @@ valid_tags = set([
     "before-lenited-fh",  # Next word starts with lenited fh (Irish)
     "before-past",  # Used before the past tense (Irish)
     "before-vowel",  # next words starts with vowel (in pronunciation)
-    "benefactive",
+    "benefactive",  # Case (beneficiary of an action)
     "broadly",
     "būdinys",
     "calque",
@@ -4299,7 +4355,7 @@ valid_tags = set([
     "cardinal",
     "catenative",
     "causal-final",
-    "causative",
+    "causative",  # Verb aspect (e.g., Japanese); Cause/Reason (Korean)
     "character",
     "chiefly",
     "childish",
@@ -4337,8 +4393,9 @@ valid_tags = set([
     "classifier",
     "clipping",
     "clitic",
-    "cohortative",
-    "collective",
+    "coactive",  # Verbs in Guaraní
+    "cohortative",  # Verb form: plea, imploring, wish, intent, command, purpose
+    "collective",  # Apparently like number
     "colloquial",
     "comitative",
     "common",   # XXX gender (Swedish, Danish), also meaning commonly occurring
@@ -4346,18 +4403,22 @@ valid_tags = set([
     "comparative",
     "complete",
     "composition",
-    "compound",
+    "compound",  # Can indicate verb forms formed with auxiliary
     "compound-of",
+    "conclusive",  # Verb form (e.g., Bulgarian)
     "concrete",  # Slavic verbs
-    "conditional",
+    "conditional",  # Verb mood
+    "conditional-i",  # Verb mood (German)
+    "conditional-ii",  # Verb mood (German)
     "conjugative-of",  # Korean
     "conjunct",
     "conjunct-incorporating",
     "conjunct-non-incorporating",
-    "conjunctive",
+    "conjunctive",  # Verb mood (doubt: wish, emotion, possibility, obligation)
     "conjunction",  # Used in Phalura conjunctions, relative pronouns
+    "connective",  # Group of verb forms in Korean
     "connegative",
-    "construct",
+    "construct",  # Apparently like definite/indefinite (e.g., Arabic)
     "construction-hif'il",
     "construction-hitpa'el",
     "construction-hitpu'al",
@@ -4369,22 +4430,25 @@ valid_tags = set([
     "construction-pi'el",
     "construction-pu'al",
     "contemplative",
-    "continuous",
+    "contemporary",
+    "continuative",  # Verb aspect (actions still happening; e.g., Japanese)
     "contracted",
     "contracted-dem-form",
     "contraction",
+    "contrastive",  # Apparently connective verb form in Korean
     "conversive",  # Verb form/type, at least in Swahili, reverse meaning?
     "coordinating",
     "copulative",
     "correlative-of",
     "cot-caught-merger",
+    "count-form",  # Nominal form in Belarusian
     "countable",
     "counter",
     "counterfactual",
     "da-infinitive",
     "dated",
     "dative",
-    "debitive",  # Expresses obligation
+    "debitive",  # need or obligation (XXX is this same as "obligational" ???)
     "declension-pattern-of",
     "declinable",
     "defective",
@@ -4400,23 +4464,28 @@ valid_tags = set([
     "dependent",
     "derogatory",
     "desiderative",
+    "destinative",  # Case, marks destination/something destined (e.g. Hindi)
     "determinate",  # Polish verbs (similar to "concrete" in Russian?)
     "determinative-of",  # Korean
-    "determiner",
+    "determiner",  # Indicates determiner; Korean determiner verb forms?
     "deuterotonic",
     "diacritic",
     "dialectal",
     "digit",
     "diminutive",
-    "direct",
+    "diptote",  # Noun having two cases (e.g., Arabic)
+    "direct",  # Apparently like case form (e.g., Hindi)
     "direct-object",
     "directional",
+    "directive",  # Case (locative/nearness), e.g. Basque, Sumerian, Turkic
     "disapproving",
     "discourse",  # At lest some Ancient Greek particles
     "disjunctive",
-    "distal",
+    "distal",  # For demonstrative pronouns, referent is far
+    "distributive",  # Case in Quechua? (is this case or e.g. determiner?)
     "ditransitive",
     "dual",       # two in number, cf. singular, trial, plural
+    "dubitative",  # Verb form (e.g., Bulgarian)
     "durative",
     "eclipsis",
     "elative",
@@ -4427,7 +4496,7 @@ valid_tags = set([
     "endearing",
     "epic",
     "epicene",
-    "equative",
+    "equative",  # Case (indicates something is like something else)
     "ergative",
     "error-fixme",
     "error-lua-exec",
@@ -4443,11 +4512,14 @@ valid_tags = set([
     "ethnic",
     "eumhun",
     "euphemistic",
+    "evidential",  # Verb form (e.g., Azerbaijani)
     "exaggerated",
     "excessive",
-    "exclusive",
+    "exclusive",  # inclusive vs. exclusive first-person; case in Quechua
+    "exessive",  # Case (transition away from state)
     "expletive",
     "expressively",
+    "extended",  # At least in some Bulgarian forms, e.g. -лив
     "extinct",  # Uses for taxonomic entries, indicates species is extinct
     "factitive",  # Not sure if same or different as factive
     "factive",
@@ -4458,9 +4530,11 @@ valid_tags = set([
     "fifth-declension",
     "fifth-infinitive",
     "figuratively",
+    "finite-form",  # General category for finite verb forms
     "first-conjugation",
     "first-declension",
     "first-infinitive",
+    "first-infinitive-long",
     "first-person",
     "form-i",
     "form-ii",
@@ -4489,7 +4563,9 @@ valid_tags = set([
     "frequentative",
     "front-vowel",
     "fusioning",  # Greenlandic suffixes
-    "future",
+    "future",  # Verb tense
+    "future-i",  # Verb tense (German, e.g., vertippen)
+    "future-ii",  # Verb tense (German)
     "gender-neutral",
     "genitive",
     "gerund",
@@ -4499,6 +4575,7 @@ valid_tags = set([
     "grade-4-kanji",
     "grade-5-kanji",
     "grade-6-kanji",
+    "habitual",  # Verbs
     "hangeul",
     "hanja",  # Han character script (Chinese characters) to write Korean
     "hellenism",
@@ -4507,20 +4584,20 @@ valid_tags = set([
     "historic",  # Grammatical tense/mood for retelling past events
     "historical",  # Relating to history
     "honorific",
-    "hortative",
+    "hortative",  # Verb mood
     "humble",
     "humorous",
     "hypernym",
     "hypercorrect",
     "hyponym",
-    "hypothetic",
+    "hypothetical",  # Verb mood (e.g., Japanese)
     "ideophonic",
     "idiomatic",
     "illative",
     "imperative",
     "imperative-only",
-    "imperfect",
-    "imperfective",
+    "imperfect",  # Past tense in various languages
+    "imperfective",  # Verb aspect (action not completed)
     "impersonal",
     "impolite",
     "in-certain-phrases",
@@ -4529,10 +4606,10 @@ valid_tags = set([
     "in-indicative",
     "in-conditional",
     "in-variation",  # E.g. crush,WiFi,lhama,tsunami/Portuguese,
-    "inalienable",
+    "inalienable",  # Inablienable possession: body parts etc; Choctaw, Ojibwe..
     "inanimate",
     "including",
-    "inclusive",
+    "inclusive",  # inclusive vs. exclusive first-person
     "indeclinable",
     "indefinite",
     "independent",
@@ -4540,8 +4617,10 @@ valid_tags = set([
     "indicative",
     "indirect-object",
     "inessive",
+    "inferential",  # Verb form (w/ aorist), e.g. -ekalmak/Turkish
     "infinitive",
     "infix",
+    "inflected",  # Marks inflected form, constrast to uninflected (e.g., Dutch)
     "inflected-like",  # seleen/Limburgish
     "informal",
     "initialism",
@@ -4553,13 +4632,14 @@ valid_tags = set([
     "interrogative",
     "intransitive",
     "invariable",
+    "invertive",  # Case? (e.g., Сотрэш/Adyghe)
     "ionic",  # XXX ???
     "ironic",
     "irregular",  # Generally of written word forms
     "irregular-pronunciation",  # Kanji or similar pronunciation irregular
     "italics",  # Used in head form to indicate italic character variant
     "jargon",
-    "jussive",
+    "jussive",  # Verb mood for orders, commanding, exhorting (subjunctively)
     "kanji",  # Used in word head for some Japanese symbols
     "katakana",  # Japanese syllabic spelling for foreign words
     "krama",
@@ -4574,6 +4654,7 @@ valid_tags = set([
     "locative",
     "lowercase",
     "mainly",
+    "majestic",
     "masculine",  # Grammatial gender see feminine, neuter, common, class-* etc.
     "masculine-usually",  # m/f, but usually masculine
     "material",
@@ -4584,7 +4665,7 @@ valid_tags = set([
     "metonymically",
     "metrically",  # Used in Sanskrit word heads
     "mi-form",  # Malagasy verbs
-    "middle",
+    "middle",  # At least middle voice (cf. active, passive)
     "middle-infinitive",
     "mildly",
     "misconstruction",  # Used for e.g. incorrect Latin plurals
@@ -4599,6 +4680,7 @@ valid_tags = set([
     "morpheme",
     "morse-code",
     "mostly",
+    "motive-form",  # Verb form for Korean (e.g., 조사하다)
     "multiple-possession",
     "mutated",
     "mutation",
@@ -4606,6 +4688,7 @@ valid_tags = set([
     "narrowly",
     "nasal-mutation",
     "natural",
+    "necessitative",  # Verb form in some languages
     "negative",
     "neologism",
     "neuter",  # Gender, cf. masculine, feminine, common, class-* etc.
@@ -4643,7 +4726,9 @@ valid_tags = set([
     "nominalization",
     "nominative",
     "nomino-accusative",  # 𒀀𒄿𒅖/Hittite XXX same as nominate/accusative???
-    "non-past",
+    "non-finite",  # General category of non-finite verb forms
+    "non-numeral",  # Assamese noun forms
+    "non-past",  # Verb tense (e.g., Korean)
     "non-scientific",
     "non-subject",    # ishno'/Chickasaw
     "nonce-word",
@@ -4658,10 +4743,11 @@ valid_tags = set([
     "not-translated",
     "noun",
     "now",
-    "numeral",
+    "numeral",  # Numeral part-of-speech; also Assamese noun forms
     "numeral-tones",
+    "obligational",  # Verb form (e.g., Azerbaijani)
     "objective",  # Used as an object
-    "oblique",
+    "oblique",  # Apparently like case form (e.g., Hindi)
     "obsolete",
     "offensive",
     "often",
@@ -4681,8 +4767,8 @@ valid_tags = set([
     "paucal",
     "pausal",
     "pejorative",
-    "perfect",
-    "perfective",
+    "perfect",  # Tense/verb form, e.g., in Finnish
+    "perfective",  # Verb aspect
     "person",
     "personal",
     "phoneme",
@@ -4691,7 +4777,7 @@ valid_tags = set([
     "physical",
     "pin-pen-merger",
     "place",
-    "pluperfect",
+    "pluperfect",  # Tense/verb form
     "plural",     # Number, cf. sigular, dual, trial
     "plural-of",  # Plural form of something
     "plural-only",  # Word only manifested in plural in this sense
@@ -4699,41 +4785,47 @@ valid_tags = set([
     "poetic",
     "polite",
     "polytonic",
-    "positive",
+    "positive",  # degree of comparison; opposite of negation for verb forms
     "possessed",
     "possessive",
+    "possessive-sg",  # Possessive with single object possessed
+    "possessive-pl",  # Possessive with multiple objects possessed
     "possibly",
     "postpositional",
-    "potential",
+    "potential",  # Verb mood
     "praenominal",
     "predicative",
     "prefix",
     "prepositional",
     "present",
     "present-rare",  # Present tense is rare
-    "preterite",
-    "preterite-present",  # Germanic languages; Icelandic
+    "preterite",  # Verb tense (action in the past, similar to simple past)
+    "preterite-present",  # word where present&preterite forms look opposite
     "pretonic",  # Precedes stressed syllable
     "previous",  # Previous value in sequence (number, letter, etc.)
     "proclitic",
-    "progressive",
+    "progressive",  # Verb aspect
+    "prohibitive",  # Verb form (negative imperative), e.g., Old Armenian
     "prolative",
     "pronominal",
     "pronominal-state",
     "pronoun",
+    "pronoun-included",
     "pronunciation-spelling",
     "proper-noun",
     "proscribed",
+    "prosecutive",  # Case (move along a surface or way); Greenlandic -nnguaq
     "prospective",
     "prothesis",
     "prototonic",
-    "proximal",
+    "proximal",  # for demonstrative pronouns, referent is near
     "quadral",
     "quantified",  # bat/Jamaican Creole (head form)
-    "quotative",
+    "quotative",  # Verb mood (marks quoted speech keeping orig person/tense)
     "radical",
     "radical+strokes",
     "rare",
+    "reciprocal",  # Mutual action (board sense reflexive)
     "reconstruction",
     "reduced",  # de/Central Franconian (XXX merge with e.g. clipping?)
     "reduplication",
@@ -4742,7 +4834,9 @@ valid_tags = set([
     "regional",
     "relational",
     "relative",
+    "renarrative",  # Verb form (e.g. Bulgarian)
     "replacive",  # Greenlandic suffixes
+    "reported",  # Verb forms for reported speech
     "retronym",
     "revised",  # Used in many Korean words, is this same as revised-jeon?
     "revised-jeon",
@@ -4757,6 +4851,7 @@ valid_tags = set([
     "secular",  # Contrast with Ecclesiastical, Tham, etc
     "semelfactive",
     "sentence-case",  # дь/Yakut
+    "sentence-final",  # Korean verb forms (broad category)
     "sequence",
     "sequential",
     "seventh-conjugation",
@@ -4768,7 +4863,7 @@ valid_tags = set([
     "single-possession",
     "singular",  # Number, cf. plural, dual, trial
     "singular-only",
-    "singulative",  # Individuation of a collective or mass noun
+    "singulative",  # Individuation of a collective or mass noun, like number
     "sixth-conjugation",
     "slang",
     "slur",
@@ -4779,26 +4874,27 @@ valid_tags = set([
     "standalone",  #  Without a main word (e.g., pronoun/determiner senses)
     "standard",
     "stative",
-    "stem",
+    "stem",  # Stem rather than full forms
     "stress-pattern-1",
     "stress-pattern-2",
     "stress-pattern-3",
     "stress-pattern-3a",
     "stress-pattern-3b",
     "stress-pattern-4",
-    "stressed",
+    "stressed",  # Marked/full form, cf. unstressed
     "stressed-preposition",
     "strict-sense",
     "strokes",
     "strong",
     "subjective",  # Used as a subject; subject form
     "subjunctive",
-    "subjunctive-I",
-    "subjunctive-II",
+    "subjunctive-i",
+    "subjunctive-ii",
     "sublative",
     "subordinating",
     "subscript",  # Variant of certain characters
     "substantive",
+    "subsuntive",  # Verbs in Guaraní
     "suffix",
     "superessive",
     "superlative",
@@ -4817,7 +4913,7 @@ valid_tags = set([
     "taboo",
     "tafa-form",  # Malagasy verbs
     "term-of-address",
-    "terminative",
+    "terminative",  # Verb mood (e.g., Japanese); also case in Quechua?
     "thematic",
     "third-conjugation",
     "third-declension",
@@ -4845,6 +4941,7 @@ valid_tags = set([
     "triggers-mixed-mutation",  # Welsh
     "triggers-nasal-mutation",  # Old Irish
     "triggers-soft-mutation",  # Welsh
+    "triptote",  # Noun having three cases (e.g., Arabic)
     "truncative",  # Greenlandic: suffix attaches to last vowel, removing stuff
     "two-termination",
     "type-a",
@@ -4857,9 +4954,11 @@ valid_tags = set([
     "uncommon",
     "uncountable",
     "unemphatic",
+    "uninflected",  # uninflected form (e.g., Dutch), cf. inflected
     "universal",  # universally known (καθεμία/Greek)
+    "unknown",  # Apparently verb form, e.g., जाँच्नु/Nepali
     "unpossessed",
-    "unstressed",
+    "unstressed",  # Unstressed (unmarked, weaker) form
     "unstressed-before-j",  # unstressed when next word starts with /j/
     "uppercase",
     "used-in-the-form",
@@ -4881,6 +4980,7 @@ valid_tags = set([
     "voa-form",  # Malagasy verbs
     "vocative",
     "volitive",
+    "volitional",  # Verb mood (e.g., Japanese: suggests, urges, initates act)
     "vulgar",
     "weak",
     "weak-verb",
@@ -5009,5 +5109,7 @@ valid_tags = set([
     "with-él",
     "without-noun",
     "zhuyin",
+    "zu-infinitive",
     "æ-tensing",
+    "има",  # Distinguishes certain verb forms in Macedonian
 ])
