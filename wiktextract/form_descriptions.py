@@ -271,6 +271,7 @@ ok_suspicious_forms = set([
     "but en or",  # "golden goal"/English/Tr/French
     "cœur en or",  # "heart of gold"/Eng/Tr/French
     "en or",  # golden/Eng/Tr/French
+    "men du",  # jet/Etym2/Noun/Tr/Cornish
     "parachute en or",  # "golden parachute"/Eng/Tr/French
     "vieil or",  # "old gold"/Eng/Tr/French
     # "all that glitters is not gold"/Eng/Tr/French

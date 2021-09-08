@@ -317,11 +317,6 @@ clean_node in page.py?  Or maybe these two should be merged?)
 Why is extraction suddenly very slow?  Is it because topics are no
 longer copied?
 
-FIX exponential regexp in core.py:_encode (in wikitextprocessor). jet/Czech
-
-"dog" - gets Lua error, probable error in parsing (could be related to
-temporarily rolled back exponential regexp patch)
-
 Handle Chinese usage examples better - separate Chinese (traditional,
 simplified), Pinyin, translation.
 
@@ -366,3 +361,14 @@ Change head format to be similar to "etymology-templates" format.
 Check ignored_cat_re in page.py
 
 Is Rhymes collected and displayed correctly?  cf. environ/English
+
+-abil/Romanian declension table produces wikitext that is parsed incorrectly.
+Looks like table cell tags (! at least) can be preceded by whitespace, here \t.
+
+Test Pali Alternative Scripts, see cakka/Pali
+
+Check if form-of imports tags from head (av/Swedish) - seems to be missing
+
+"dog" - clean up Danish & Westrobothnian examples with translations
+(Danish: translation gets merged with example - move to separate field;
+Westrobothnian: example becomes ref, translation example)

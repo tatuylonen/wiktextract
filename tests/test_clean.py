@@ -82,6 +82,21 @@ class WiktExtractTests(unittest.TestCase):
         v = clean_value(self.config, v)
         self.assertEqual(v, "(Jurchen script: , Image: )")
 
+    def test_cv_link6(self):
+        v = "[[:w:Foo|Foo]]"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "Foo")
+
+    def test_cv_link7(self):
+        v = "[[:w:Foo|Foo [...]]]"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "Foo …")
+
+    def test_cv_link8(self):
+        v = "[[File:MiG-17F Top View.JPG|thumb|right|A MiG-17 jet.]]\nBorrowed"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "Borrowed")
+
     def test_cv_url1(self):
         v = "This is a [http://ylonen.org test]."
         v = clean_value(self.config, v)
@@ -91,6 +106,26 @@ class WiktExtractTests(unittest.TestCase):
         v = "This is a [http://ylonen.org test1 test2]."
         v = clean_value(self.config, v)
         self.assertEqual(v, "This is a test1 test2.")
+
+    def test_cv_url3(self):
+        v = "foo^([http://ylonen.org])"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "foo")
+
+    def test_cv_url4(self):
+        v = "foo^(http://ylonen.org)"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "foo")
+
+    def test_cv_url5(self):
+        v = "foo [http://ylonen.org]"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "foo http://ylonen.org")
+
+    def test_cv_url6(self):
+        v = "[[http://ylonen.org] FOO]"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "FOO")
 
     def test_cv_q2(self):
         v = "This is a ''test''."
@@ -208,3 +243,23 @@ class WiktExtractTests(unittest.TestCase):
         v = r"<chem>H2O</chem>"
         v = clean_value(self.config, v)
         self.assertEqual(v, "H₂O")
+
+    def test_cv_ellipsis(self):
+        v = "[...]"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "…")
+
+    def test_cv_div1(self):
+        v = "foo<div>bar</div>"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "foo\nbar")
+
+    def test_cv_paragraph1(self):
+        v = "foo\n\nbar"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "foo\nbar")
+
+    def test_cv_misc1(self):
+        v = """<span style="font-style: normal;">[</span></span><span title="from Their First Rise and Settlement in the Island of Providence, to the Present Time. With the Remarkable Actions and Adventures of the Two Female Pyrates Mary Read and Anne Bonny; [...] To which is Added. A Short Abstract of the Statute and Civil Law, in Relation to Pyracy">  …\n      \n  </span><span class="q-hellip-b"><span style="font-style: normal;">]</span>"""
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "[…]")

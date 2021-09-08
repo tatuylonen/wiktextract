@@ -888,7 +888,7 @@ def clean_value(config, title, no_strip=False):
 
     def repl_1_math(m):
         v = to_math(m.group(1))
-        print("to_math:", ascii(v))
+        # print("to_math:", ascii(v))
         return v
 
     def repl_1_syntaxhighlight(m):
@@ -900,10 +900,14 @@ def clean_value(config, title, no_strip=False):
     # Remove tables
     title = re.sub(r"(?s)\{\|.*?\|\}", "\n", title)
     # Remove references (<ref>...</ref>).
-    title = re.sub(r"(?is)<\s*ref\s*[^>]*?>\s*.*?<\s*/\s*ref\s*>\n*", "", title)
+    title = re.sub(r"(?is)<\s*ref\b\s*[^>]*?>\s*.*?<\s*/\s*ref\s*>", "", title)
+    # Replace <span>...</span> by stripped content without newlines
+    title = re.sub(r"(?is)<\s*span\b\s*[^>]*?>\s*(.*?)\s*<\s*/\s*span\s*>",
+                   lambda m: re.sub(r"\s+", " ", m.group(1)),
+                   title)
     # Replace <br/> by comma space (it is used to express alternatives in some
     # declensions)
-    title = re.sub(r"(?si)<\s*br\s*/?>\n*", ", ", title)
+    title = re.sub(r"(?si)\s*<\s*br\s*/?>\n*", ", ", title)
     # Remove divs with floatright class (generated e.g. by {{ja-kanji|...}})
     title = re.sub(r'(?si)<\s*div\b[^>]*?\bclass="[^"]*?\bfloatright\b[^>]*?>'
                    r'((<\s*div\b(<\s*div\b.*?<\s*/\s*div\s*>|.)*?</div>)|.)*?'
@@ -943,30 +947,40 @@ def clean_value(config, title, no_strip=False):
     # Remove any remaining HTML tags.
     title = re.sub(r"(?s)<\s*[^/>][^>]*>", "", title)
     title = re.sub(r"(?s)<\s*/\s*[^>]+>", "", title)
+    # Replace [...]
+    title = re.sub(r"(?s)\[\s*\.\.\.\s*\]", "…", title)
+    # Remove http links in superscript
+    title = re.sub(r"\^\(\[?(https?:)?//[^]()]+\]?\)", "", title)
+    # Remove any edit links to local pages
+    title = re.sub(r"\[//[^]\s]+\s+edit\s*\]", "", title)
     # Replace links by their text
     while True:
         # Links may be nested, so keep replacing until there is no more change.
         orig = title
         title = re.sub(r"(?si)\[\[\s*Category\s*:\s*([^]]+?)\s*\]\]",
                        r"", title)
-        title = re.sub(r"(?s)\[\[\s*:?([^]|#]+?)\s*(#[^][|]*?)?\]\]",
+        title = re.sub(r"(?s)\[\[\s*:?([^]|#<>]+?)\s*(#[^][|<>]*?)?\]\]",
                        repl_1, title)
-        title = re.sub(r"(?s)\[\[\s*(([a-zA-z0-9]+)\s*:)?\s*([^][#|]+?)"
+        title = re.sub(r"(?s)\[\[\s*(([a-zA-z0-9]+)\s*:)?\s*([^][#|<>]+?)"
                        r"\s*(#[^][|]*?)?\|?\]\]",
                        repl_link, title)
-        title = re.sub(r"(?s)\[\[\s*([^][|]+?)\s*\|"
-                       r"\s*([^][|]+?)(\s*\|\s*([^]|]+?))?\s*\]\]",
+        title = re.sub(r"(?s)\[\[\s*([^][|<>]+?)\s*\|"
+                       r"\s*(([^][|]|\[[^]]*\])+?)"
+                       r"(\s*\|\s*(([^]|]|\[[^]]*\])+?))*\s*\]\]",
                        repl_link_bars, title)
         if title == orig:
             break
-    # Remove any edit links to local pages
-    title = re.sub(r"\[//[^]\s]+\s+edit\s*\]", "", title)
     # Replace remaining HTML links by the URL.
-    title = re.sub(r"\[(https?:)?//[^]\s]+\s+([^][]+?)\s*\]", repl_2, title)
+    while True:
+        orig = title
+        title = re.sub(r"\[\s*(https?:)?//[^]\s]+\s+([^][]+?)\s*\]", repl_2,
+                       title)
+        title = re.sub(r"\[\s*((https?:|mailto:)?//[^]\s]+)\s*\]", repl_1,
+                       title)
+        if title == orig:
+            break
     # Remove italic and bold
     title = re.sub(r"''+", r"", title)
-    # Remove http links in superscript
-    title = re.sub(r"\^\(https?://[^()]+\)", "", title)
     # Replace HTML entities
     title = html.unescape(title)
     title = re.sub("\xa0", " ", title)  # nbsp

@@ -1112,8 +1112,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     subtext = clean_node(config, ctx, None, item.children)
                     ref = None
                     lines = subtext.split("\n")
-                    if subtext.find("pestilence") >= 0:
-                        print("LINES", lines)
                     lines = list(x for x in lines
                                  if not re.match(
                                          r"(Synonyms: |Antonyms: |Hyponyms: |"
@@ -1125,7 +1123,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                          r"For more quotations using )",
                                          x))
                     if (len(lines) > 1 and
-                        (re.search(r"[]\d:)]$", lines[0]) or
+                        (re.search(r"[]\d:)]\s*$", lines[0]) or
                          re.match(r"^[#*]*:", lines[1]))):
                         ref = lines[0]
                         lines = lines[1:]
