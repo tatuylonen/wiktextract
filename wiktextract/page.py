@@ -2325,7 +2325,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     sense_parts = []
                     sense = None
                     return None
-                if name in ("trans-bottom", "trans-mid"):
+                if name in ("trans-bottom", "trans-mid",
+                            "checktrans-mid", "checktrans-bottom"):
                     return None
                 if name == "checktrans-top":
                     sense_parts = []
