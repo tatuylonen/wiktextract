@@ -2147,6 +2147,7 @@ xlat_tags_map = {
     "pl.": "plural",
     "sg. and pl.": "singular plural",
     "sg and pl": "singular plural",
+    "m/f": "masculine feminine",
     "no pl": "no-plural",
     "pl. only": "plural-only",
     "pl ordinaux": "usually plural",

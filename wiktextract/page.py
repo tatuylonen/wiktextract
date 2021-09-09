@@ -1262,7 +1262,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             # Check to make sure we don't have unhandled list items in gloss
             ofs = max(gloss.find("#"), gloss.find("*"))
-            if ofs > 10:
+            if ofs > 10 and gloss.find("(#)") < 0:
                 ctx.debug("gloss may contain unhandled list items: {}"
                           .format(gloss))
             elif gloss.find("\n") >= 0:
