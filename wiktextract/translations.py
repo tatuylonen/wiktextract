@@ -243,6 +243,13 @@ tr_ignore_re = re.compile(
     "|".join(re.escape(x) for x in tr_ignore_contains) + "|" +
     "|".join(tr_ignore_regexps))  # These are not to be escaped
 
+# These English texts get converted to tags in translations
+english_to_tags = {
+    "I have": "first-person singular",
+    "you have": "second-person singular",
+    "she has": "third-person singular feminine",
+    "he has": "third-person singular masculine",
+}
 
 def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                                 lang, langcode, translations_from_template):
@@ -489,6 +496,10 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                     (" with accusative", "with-accusative"),
                     (" in subjunctive", "with-subjunctive"),
                     (" and conditional mood", "with-conditional"),
+                    (" - I have - you have",
+                     "first-person second-person singular"),
+                    (" - I have", "first-person singular"),
+                    (" - you have", "second-person singular"),
             ):
                 if part.endswith(suffix):
                     part = part[:-len(suffix)]
@@ -508,6 +519,11 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             # (these could result from templates being ignored)
             if part in ",;.":
                 continue
+
+            if "english" in tr and tr["english"] in english_to_tags:
+                data_extend(ctx, tr, "tags",
+                            english_to_tags[tr["english"]].split())
+                del tr["english"]
 
             # Certain values indicate it is not actually a translation.
             # See definition of tr_ignore_re to adjust.
