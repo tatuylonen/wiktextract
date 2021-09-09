@@ -1122,7 +1122,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                          r"Related term: |"
                                          r"For more quotations using )",
                                          x))
-                    print("LINES", lines)
                     tr = None
                     if len(lines) > 1:
                         if re.search(r"[]\d:)]\s*$", lines[0]):
