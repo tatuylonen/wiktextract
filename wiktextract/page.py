@@ -1122,11 +1122,34 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                          r"Related term: |"
                                          r"For more quotations using )",
                                          x))
-                    if (len(lines) > 1 and
-                        (re.search(r"[]\d:)]\s*$", lines[0]) or
-                         re.match(r"^[#*]*:", lines[1]))):
-                        ref = lines[0]
-                        lines = lines[1:]
+                    print("LINES", lines)
+                    tr = None
+                    if len(lines) > 1:
+                        if re.search(r"[]\d:)]\s*$", lines[0]):
+                            ref = lines[0]
+                            lines = lines[1:]
+                            if (language != "English" and len(lines) == 2 and
+                                classify_desc(lines[1]) == "english"):
+                                tr = lines[1]
+                                lines = [lines[0]]
+                        elif (language == "English" and
+                              re.match(r"^[#*]*:", lines[1])):
+                            ref = lines[0]
+                            lines = lines[1:]
+                        elif language != "English" and len(lines) == 2:
+                            cls1 = classify_desc(lines[0])
+                            cls2 = classify_desc(lines[1])
+                            if cls2 == "english" and cls1 != "english":
+                                tr = lines[1]
+                                lines = [lines[0]]
+                            elif cls1 == "english" and cls2 != "english":
+                                tr = lines[0]
+                                lines = [lines[1]]
+                            elif re.match(r"^[#*]*:", lines[1]):
+                                line = re.sub(r"^[#*:]+\s*", "", lines[1])
+                                if classify_desc(line) == "english":
+                                    tr = line
+                                    lines = [lines[0]]
                     lines = list(re.sub(r"^[#*:]+\s*", "", x) for x in lines)
                     subtext = " ".join(lines)
                     subtext = re.sub(r'^[“"`]([^“"`”\']*)[”"\']$', r"\1",
@@ -1134,7 +1157,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     subtext = re.sub(r"\s+", " ", subtext).strip()
                     if ref:
                         ref = re.sub(r"\s*\(→ISBN\)", "", ref)
-                        if ref.endswith(":"):
+                        if ref.endswith(":") or ref.endswith(","):
                             ref = ref[:-1].strip()
                     if ref and not subtext:
                         subtext = ref
@@ -1143,6 +1166,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         dt = {"text": subtext}
                         if ref:
                             dt["ref"] = ref
+                        if tr:
+                            dt["english"] = tr
                         examples.append(dt)
 
         # Generate no gloss for translation hub pages, but add the

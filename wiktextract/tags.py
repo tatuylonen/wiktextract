@@ -2131,6 +2131,7 @@ uppercase_tags = set([
     "southern Moselle Franconian",
     "northernmost Moselle Franconian",
     "west Sweden",
+    "most of Moselle Franconian",
 ])
 
 

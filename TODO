@@ -369,6 +369,17 @@ Test Pali Alternative Scripts, see cakka/Pali
 
 Check if form-of imports tags from head (av/Swedish) - seems to be missing
 
-"dog" - clean up Danish & Westrobothnian examples with translations
-(Danish: translation gets merged with example - move to separate field;
-Westrobothnian: example becomes ref, translation example)
+LUA ERRORS:
+कट्नु/Nepali/Verb: ERROR: LUA error in #invoke ('ne-conj', 'show') parent ('Template:ne-conj', {'i': 'y', 'a': 'y'}) at ['कट्नु', 'ne-conj', '#invoke']
+
+ogun/Yoruba: ERROR: LUA error in #invoke ('number list', 'show_box') parent ('Template:number box', {1: 'yo', 2: '20'}) at ['ogun', 'number box', '#invoke']
+
+Heleb/Northern Kurdish: ERROR: LUA error in #invoke ('wikipedia', 'wikipedia_box') parent ('Template:wp', {'lang': 'ku'}) at ['Heleb', 'wp', '#invoke']
+
+তাহুন/Assamese/Pronoun: ERROR: LUA error in #invoke ('links/templates
+
+membrare/Italian/Verb: ERROR: LUA error in #invoke ('it-headword', 'show', 'verbs') parent ('Template:it-verb', {1: "a/é:è[traditional][ref:[http://www.dipionline.it/dizionario/ricerca?lemma=membro membro] in [[w:Luciano Canepari|Luciano Canepari]], ''Dizionario di Pronuncia Italiana (DiPI)''"}) at ['membrare', 'it-verb', '#invoke']
+
+metallacyclopentasilanes/English/Noun: DEBUG: LUA error but likely not bug -- in #invoke ('usex/templates', 'usex_t', 'quote=quote-meta') parent ('Template:quote-meta/quote', {1: 'en', 'The formation of these compounds occurs in a surprisingly facile way by reactions of LnI 2 (Ln': "Yb, Eu, Sm) either with a 1,4-oligosilanyl dianion [K-Si(SiMe 3 ) 2 SiMe 2 SiMe 2 Si(SiMe 3 ) 2 -K] ( 1 ) or with (Me 3 Si) 3 SiK ( 3 ) to give either the corresponding neutral '''metallacyclopentasilanes''' ({Me 2 Si(Me 3 Si) 2 Si} 2 )Ln·(THF) 4 (Ln = Yb ( 2a ), Eu ( 2b ), Sm ( 2c )) or the neutral disilylated complexes ({Me 3 Si} 3 Si) 2 Ln·(THF) 3 (Ln = Yb ( 4a ), Eu ( 4b ), Sm ( 4c )).", 2: '', 'tr': '', 'ts': '', 'brackets': '', 'subst': '', 'lit': '', 'nocat': '1', 'footer': ''}) at ['metallacyclopentasilanes', 'quote-journal', 'check deprecated lang param usage', 'ARGVAL-1', 'quote-meta', '#if', 'quote-meta/quote', '#invoke']
+
+hashtag/English: ERROR: LUA error in #invoke ('roman numerals', 'roman_to_arabic_t') parent ('Template:R2A', {'Hash Tags': 'Twitter Groupings', 'no_error': '1'}) at ['hashtag', 'cite-web', 'cite-meta', '#if', '#if', '#if', 'TEMPLATE_NAME', 'R2A', '#invoke']
