@@ -1639,7 +1639,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 filename = ht.get(2) or ""
                 desc = ht.get(3) or ""
                 desc = clean_node(config, ctx, None, [desc])
-                audio = {"audio": filename}
+                audio = {"audio": filename.strip()}
                 if desc:
                     audio["text"] = desc
                 m = re.search(r"\((([^()]|\([^()]*\))*)\)", desc)
@@ -1659,7 +1659,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 filename = ht.get(2) or ""
                 ipa = ht.get(3) or ""
                 dial = ht.get("dial")
-                audio = {"audio": filename}
+                audio = {"audio": filename.strip()}
                 if dial:
                     dial = clean_node(config, ctx, None, [dial])
                     audio["text"] = dial
@@ -1677,7 +1677,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 ipa = ht.get("ipa")
                 dial = ht.get("dial")
                 country = ht.get("country")
-                audio = {"audio": filename}
+                audio = {"audio": filename.strip()}
                 if dial:
                     dial = clean_node(config, ctx, None, [dial])
                     audio["text"] = dial
