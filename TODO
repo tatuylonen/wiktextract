@@ -326,10 +326,13 @@ lines.  These should be removed.
 Translations for Mandarin seem to have Chinese language but cmn code.
 What is correct?
 
+Improve audio file URL generation to handle redirects.  Options
+include using Commons API to query the actual location or parsing
+Commons dumps to extract redirects.  (Note that some files also seems
+to have missing transcoded versions - probably about 0.1-0.5% of them)
+
 Parse eumhun related forms (Korean) in more detail, particularly
 separate romanization and hanja forms, e.g. 度/Korean
-
-Parse declension/conjugation tables
 
 Collect RGB values and other similar data
 
@@ -377,3 +380,5 @@ ogun/Yoruba: ERROR: LUA error in #invoke ('number list', 'show_box') parent ('Te
 Heleb/Northern Kurdish: ERROR: LUA error in #invoke ('wikipedia', 'wikipedia_box') parent ('Template:wp', {'lang': 'ku'}) at ['Heleb', 'wp', '#invoke']
 
 তাহুন/Assamese/Pronoun: ERROR: LUA error in #invoke ('links/templates
+
+Parse declension/conjugation tables

@@ -1860,6 +1860,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # First character is usually uppercased
                     if re.match(r"^[a-z][a-z]+", fn):
                         fn = fn[0].upper() + fn[1:]
+                    # File extension is lowercased
+                    # XXX some words seem to need this, some don't seem to
+                    # have this??? what is the exact rule?
+                    # fn = re.sub(r"\.[^.]*$", lambda m: m.group(0).lower(), fn)
                     # Spaces are converted to underscores
                     fn = re.sub(r"\s+", "_", fn)
                     # Compute hash digest part
