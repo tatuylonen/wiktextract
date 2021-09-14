@@ -6,6 +6,8 @@ import re
 import sys
 import copy
 import html
+import urllib
+import hashlib
 import collections
 from wikitextprocessor import (Wtp, WikiNode, NodeKind, ALL_LANGUAGES,
                                MAGIC_FIRST, MAGIC_LAST)
@@ -1848,6 +1850,47 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # Add data that was collected in template_fn
         if audios:
             for audio in audios:
+                if "audio" in audio:
+                    # Compute audio file URLs
+                    fn = audio["audio"]
+                    # Strip certain characters, e.g., left-to-right mark
+                    fn = re.sub(r"[\u200f\u200e]", "", fn)
+                    fn = fn.strip()
+                    fn = urllib.parse.unquote(fn)
+                    # First character is usually uppercased
+                    if re.match(r"^[a-z][a-z][a-z]?-", fn):
+                        fn = fn[0].upper() + fn[1:]
+                    # Spaces are converted to underscores
+                    fn = re.sub(r"\s+", "_", fn)
+                    # Compute hash digest part
+                    h = hashlib.md5()
+                    hname = fn.encode("utf-8")
+                    h.update(hname)
+                    digest = h.hexdigest()
+                    # Quote filename for URL
+                    qfn = urllib.parse.quote(fn)
+                    # For safety when writing files
+                    qfn = re.sub(r"/", "__slash__", qfn)
+                    if re.search(r"(?i)\.(ogg|oga)$", fn):
+                        ogg = ("https://upload.wikimedia.org/wikipedia/"
+                               "commons/{}/{}/{}"
+                               .format(digest[:1], digest[:2], qfn))
+                    else:
+                        ogg = ("https://upload.wikimedia.org/wikipedia/"
+                               "commons/transcoded/"
+                               "{}/{}/{}/{}.ogg"
+                               .format(digest[:1], digest[:2], qfn, qfn))
+                    if re.search(r"(?i)\.(mp3)$", fn):
+                        mp3 = ("https://upload.wikimedia.org/wikipedia/"
+                               "commons/{}/{}/{}"
+                               .format(digest[:1], digest[:2], qfn))
+                    else:
+                        mp3 = ("https://upload.wikimedia.org/wikipedia/"
+                               "commons/transcoded/"
+                               "{}/{}/{}/{}.mp3"
+                               .format(digest[:1], digest[:2], qfn, qfn))
+                    audio["ogg_url"] = ogg
+                    audio["mp3_url"] = mp3
                 if audio not in data.get("sounds", ()):
                     data_append(ctx, data, "sounds", audio)
             have_pronunciations = True
