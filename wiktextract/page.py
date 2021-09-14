@@ -1858,7 +1858,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     fn = fn.strip()
                     fn = urllib.parse.unquote(fn)
                     # First character is usually uppercased
-                    if re.match(r"^[a-z][a-z][a-z]?-", fn):
+                    if re.match(r"^[a-z][a-z]+", fn):
                         fn = fn[0].upper() + fn[1:]
                     # Spaces are converted to underscores
                     fn = re.sub(r"\s+", "_", fn)
