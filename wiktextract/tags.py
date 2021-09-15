@@ -615,6 +615,7 @@ uppercase_tags = set([
     "Austria",
     "Austrian",
     "Auve",
+    "Auvernhàs",  # Dialect of Occitan
     "Avignon",
     "Ayer",
     "Ayt Ndhir",
@@ -952,7 +953,7 @@ uppercase_tags = set([
     "Galway",
     "Gan",
     "Gangwon",  # Dialect/region for Korean
-    "Gascon",
+    "Gascon",  # DIalect of Occitan
     "Gascony",
     "Gaspésie",
     "Gaúcho",
@@ -1256,7 +1257,8 @@ uppercase_tags = set([
     "Leet",  # Leetspeak, an internet "slang"
     "Legazpi",
     "Leizhou Min",  # Chinese dialect/language
-    "Lengadocian",
+    "Lemosin",  # Dialect of Occitan
+    "Lengadocian",  # Dialect of Occitan
     "Lepcha",  # Script (Himalayas?)
     "Lesotho",
     "Levantine Arabic",  # Variant of Arabic language
@@ -1633,6 +1635,7 @@ uppercase_tags = set([
     "Protestant",
     "Proto-Slavic",
     "Provençal",
+    "Provençau",  # Dialect of Occitan
     "Pskov",
     "Pu No",  # dialect
     "Pubian",
@@ -4309,6 +4312,7 @@ valid_tags = set([
     "adjectival",
     "adjective",
     "adjective-declension",
+    "admirative",  # Verb form in Albanian
     "adnominal",
     "adverb",
     "adverbial",
@@ -4332,8 +4336,9 @@ valid_tags = set([
     "animate",
     "anterior",  # French seems to have "past anterior" tense
     "aorist",  # Verb form (perfective past)  E.g., Latin, Macedonian
+    "aorist-ii",  # Albanian
     "apocope",
-    "applicative",
+    "applicative",  # Verb form
     "approximative",  # Noun form (case?), e.g., марксизм/Komi-Zyrian
     "archaic",
     "article",
@@ -4405,7 +4410,7 @@ valid_tags = set([
     "clitic",
     "coactive",  # Verbs in Guaraní
     "cohortative",  # Verb form: plea, imploring, wish, intent, command, purpose
-    "collective",  # Apparently like number
+    "collective",  # plural interpreted collectively
     "colloquial",
     "comitative",  # Case
     "common",   # XXX gender (Swedish, Danish), also meaning commonly occurring
@@ -4505,6 +4510,7 @@ valid_tags = set([
     "dubitative",  # Verb form (e.g., Bulgarian)
     "durative",  # Verb form
     "eclipsis",
+    "egressive",  # Case?  e.g., дворец/Komi-Zyrian
     "elative",  # Case
     "ellipsis",
     "emphatic",
@@ -4541,7 +4547,7 @@ valid_tags = set([
     "extinct",  # Uses for taxonomic entries, indicates species is extinct
     "factitive",  # Not sure if same or different as factive
     "factive",
-    "familiar",
+    "familiar",  # Formality/politeness degree of verbs etc
     "feminine",  # Grammatical gender, masculine, neuter, common, class-* etc.
     "feminine-usually",  # m/f, but usually feminine
     "fifth-conjugation",
@@ -4570,7 +4576,7 @@ valid_tags = set([
     "form-xi",
     "form-xii",
     "form-xiii",
-    "formal",
+    "formal",  # Formality/politeness degree of verbs etc
     "four-corner",
     "fourth-conjugation",
     "fourth-declension",
@@ -4601,7 +4607,7 @@ valid_tags = set([
     "hiragana",  # Japanese syllabic spelling for native words
     "historic",  # Grammatical tense/mood for retelling past events
     "historical",  # Relating to history
-    "honorific",
+    "honorific",  # Formality/politeness degree of verbs etc
     "hortative",  # Verb mood
     "humble",
     "humorous",
@@ -4616,8 +4622,8 @@ valid_tags = set([
     "imperative-only",
     "imperfect",  # Past tense in various languages
     "imperfective",  # Verb aspect (action not completed)
-    "impersonal",
-    "impolite",
+    "impersonal",  # Verb form, e.g., Portuguese impersonal infinitive
+    "impolite",  # Politeness degree of verbs etc
     "in-certain-phrases",
     "in-compounds",
     "in-plural",
@@ -4639,18 +4645,19 @@ valid_tags = set([
     "inessive",  # Case
     "inferential",  # Verb form (w/ aorist), e.g. -ekalmak/Turkish
     "infinitive",  # Verb form
-    "infinitive-da",
+    "infinitive-da",  # Estonian
     "infinitive-i",  # Finnish
     "infinitive-i-long",  # Finnish
     "infinitive-ii",  # Finnish
     "infinitive-iii",  # Finnish
     "infinitive-iv",  # Finnish
+    "infinitive-ma",  # Estonian
     "infinitive-v",  # Finnish
     "infinitive-zu",  # German
     "infix",
     "inflected",  # Marks inflected form, constrast to uninflected (e.g., Dutch)
     "inflected-like",  # seleen/Limburgish
-    "informal",
+    "informal",  # Formality/politeness degree of verbs etc
     "initialism",
     "injunctive",  # Verb form, e.g., पुस्नु/Nepali
     "instructive",
@@ -4667,6 +4674,7 @@ valid_tags = set([
     "involuntary",  # Verb form, e.g., khitan/Indonesian
     "ionic",  # XXX ???
     "ironic",
+    "irrealis",  # Verb form, e.g., たたかう/Japanese
     "irregular",  # Generally of written word forms
     "irregular-pronunciation",  # Kanji or similar pronunciation irregular
     "italics",  # Used in head form to indicate italic character variant
@@ -4724,7 +4732,8 @@ valid_tags = set([
     "nasal-mutation",
     "natural",
     "necessitative",  # Verb form in some languages
-    "negative",
+    "negated-with",  # Indicates how word is negated, e.g., ϣⲗⲏⲗ/Coptic
+    "negative",  # Indicates negation of meaning (nominal or verbal)
     "neologism",
     "neuter",  # Gender, cf. masculine, feminine, common, class-* etc.
     "next",  # Next value in sequence (number, letter, etc.)
@@ -4762,6 +4771,7 @@ valid_tags = set([
     "nominative",
     "nomino-accusative",  # 𒀀𒄿𒅖/Hittite XXX same as nominate/accusative???
     "non-aspectual",  # E.g., भूलना/Hindi
+    "non-durative",  # non-durative sentence, e.g., ϣⲗⲏⲗ/Coptic
     "non-finite",  # General category of non-finite verb forms
     "non-numeral",  # Assamese noun forms
     "non-past",  # Verb tense (e.g., Korean)
@@ -4809,7 +4819,7 @@ valid_tags = set([
     "perfect-ii",  # E.g., talamaq/Azerbaijani
     "perfective",  # Verb aspect
     "person",
-    "personal",
+    "personal",  # Verb form (e.g., Portuguese personal infinitive)
     "phoneme",
     "phrasal",
     "phrase",
@@ -4825,7 +4835,7 @@ valid_tags = set([
     "plural-only",  # Word only manifested in plural in this sense
     "plural-normally",  # Usually plural, but singular may be possible
     "poetic",
-    "polite",
+    "polite",  # Politeness degree of verbs etc
     "polytonic",
     "positive",  # degree of comparison; opposite of negation for verb forms
     "possessed",  # Marks object that is possessed, cf. possessed
@@ -4873,6 +4883,7 @@ valid_tags = set([
     "radical",
     "radical+strokes",
     "rare",
+    "realis",  # Verb form, e.g., たたかう/Japanese
     "reason",  # Verb form, e.g., উঘাল/Assamese
     "recently",  # Used in Recently complete, e.g., {ligpit,magbukid}/Tagalog
     "reciprocal",  # Mutual action (board sense reflexive)
@@ -4887,6 +4898,7 @@ valid_tags = set([
     "renarrative",  # Verb form (e.g. Bulgarian)
     "replacive",  # Greenlandic suffixes
     "reported",  # Verb forms for reported speech
+    "resultative",  # partciple in Armenian (state resulting from action)
     "retronym",
     "revised",  # Used in many Korean words, is this same as revised-jeon?
     "revised-jeon",
@@ -4922,6 +4934,7 @@ valid_tags = set([
     "soft-mutation",  # At least Welsh
     "sometimes",
     "somewhat",
+    "special",  # Adverbial verb form in Lithuanian
     "specific",  # In specific temporal participle, e.g., talamaq
     "specifically",
     "standalone",  #  Without a main word (e.g., pronoun/determiner senses)
@@ -4946,6 +4959,7 @@ valid_tags = set([
     "subjunctive-i",
     "subjunctive-ii",
     "sublative",
+    "subordinate-clause",  # e.g., ϣⲗⲏⲗ/Coptic
     "subordinating",
     "subscript",  # Variant of certain characters
     "substantive",
@@ -5034,6 +5048,8 @@ valid_tags = set([
     "vernacular",
     "verb",
     "verb-completement",  # Used in some Chinese words (merged verb+complement?)
+    "verb-form-da",  # Estonian da-form
+    "verb-form-des",  # Estonian des-form
     "verb-form-i",
     "verb-form-ii",
     "verb-from-nominal",  # Forms verbs from nominals
