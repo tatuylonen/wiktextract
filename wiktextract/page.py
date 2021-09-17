@@ -20,7 +20,6 @@ from .places import place_prefixes  # XXX move processing to places.py
 from .unsupported_titles import unsupported_title_map
 from .datautils import (data_append, data_extend, split_at_comma_semi,
                         languages_by_name, languages_by_code)
-from .disambiguate import disambiguate_clear_cases
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_qualifier,
     parse_pronunciation_tags,
@@ -2931,16 +2930,6 @@ def parse_page(ctx, word, text, config):
                 if xlit:
                     dt["xlit"] = xlit
                 data_append(ctx, data, rel, dt)
-
-    # Disambiguate those items from word level that can be disambiguated
-    # XXX disambiguation intentionally disabled.  The plan is to move all
-    # disambiguation to post-processing; doing partial disambiguation here
-    # seems almost harmful as so much is left disambiguated, and the broader
-    # problem is too complex to do here.
-    # for data in ret:
-    #     disambiguate_clear_cases(ctx, data, "translations")
-    #     for field in linkage_fields:
-    #        disambiguate_clear_cases(ctx, data, field)
 
     # Categories are not otherwise disambiguated, but if there is only
     # one sense and only one data in ret for the same language, move
