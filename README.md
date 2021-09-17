@@ -101,13 +101,16 @@ give this a star on github!
 ## Pre-extracted data
 
 For most people, it may be easiest to just download pre-expanded data.
-Please see https://kaikki.org/dictionary/.  There is a download link
-at the bottom of every page.  You can download all data, data for a
-specific language, just a single word, or a list of related words
-(e.g., a particular part-of-speech or words relating to a particular
-topic or having a particular inflectional form).  All downloads are in
-JSON format (each line is a separate JSON object).  The bigger
-downloads are also available in compressed form.
+Please see
+[https://kaikki.org/dictionary/rawdata.html](https://kaikki.org/dictionary/rawdata.html).
+
+There is a also download link at the bottom of every page and a button
+to view the JSON produced for each page.  You can download all data,
+data for a specific language, data just a single word, or data for a
+list of related words (e.g., a particular part-of-speech or words
+relating to a particular topic or having a particular inflectional
+form).  All downloads are in JSON format (each line is a separate JSON
+object).  The bigger downloads are also available in compressed form.
 
 Some people have asked for the data as a single JSON object.  I've
 decided to keep it as a JSON object per line, because loading all the
