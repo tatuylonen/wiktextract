@@ -432,142 +432,6 @@ wikipedia_templates = set([
     "wtorw",
 ])
 
-# Some category tags are so common that they would clutter the extracted data
-# and are not linguistically very interesting (e.g., the same information can
-# easily be seen from part-of-speech, tags, or other information).  Ignore such
-# categories.
-ignored_category_patterns = [
-    ".* term requests",
-    ".* redlinks",
-    ".* red links",
-    ".* lemmas$",
-    ".* nouns$",
-    ".* verbs$",
-    ".* adverbs$",
-    ".* adjectives$",
-    ".* conjunctions$",
-    ".* abbreviations$",
-    ".* initialisms$",
-    ".* clippings$",
-    ".* acronyms$",
-    ".* interjections$",
-    ".* misspellings$",
-    ".* suffixes$",
-    ".* prefixes$",
-    ".* letters$",
-    ".* palindromes$",
-    ".* possessive suffixes$",
-    ".* infinitives$",
-    ".* participles$",
-    ".* Han characters$",
-    ".* syllables$",
-    ".* forms$",
-    ".* language$",
-    ".* phrases",
-    ".* missing plurals$",
-    ".* eponyms$",
-    ".*-syllable words$",
-    ".* terms with .*IPA pronunciation",
-    ".* terms without .*IPA",
-    ".* terms with audio pronunciation",
-    ".* terms with .* senses$",
-    ".* slang$",
-    ".* terms with homophones",
-    ".* terms$",
-    ".* vulgarities$",
-    ".* terms with usage examples$",
-    ".* colloquialisms$",
-    ".* words without vowels$",
-    ".* contractions$",
-    ".* terms with audio links$",
-    ".* terms with quotations$",
-    ".* templates to be cleaned",
-    ".* terms inherited from ",
-    ".* terms borrowed from ",
-    ".* terms derived from ",
-    ".* terms coined by ",
-    ".* terms calqued from ",
-    ".* terms partially calqued from ",
-    ".* calques$",
-    ".* coinages$",
-    ".* orthographic borrowings from ",
-    ".* unadapted borrowings from ",
-    ".* learned borrowings from ",
-    ".* semi-learned borrowings from ",
-    ".* semantic loans from ",
-    ".* phono-semantic matchings from ",
-    ".* terms spelled with ",
-    ".* words suffixed with ",
-    ".* words prefixed with ",
-    ".* etymologies$",
-    ".* etymologies with ",
-    ".* doublets$",
-    ".* (female|male) given names from ",
-    ".* surnames from ",
-    ".* terms needing to be assigned to a sense",
-    ".* nouns with unknown or uncertain plurals",
-    ".* foreign words of the day",
-    ".* non-lemma forms$",
-    ".* pinyin$",
-    ".* nocat$",
-    ".* with appendix$",
-    ".* without a main entry",
-    ".* with qual$",
-    ".* with nopl$",
-    ".* needing pronunciation attention",
-    ".* link with missing target page",
-    ".* nouns in .* script$",
-    ".* verbs in .* script$",
-    ".* gerunds$",
-    "Japanese terms written with .* Han script characters",
-    "Japanese terms written with one Han script character",
-    "Vietnamese Han characters with unconfirmed readings",
-    "Vietnamese terms written with one Han script character",
-    "Vietnamese terms written with .* Han script characters",
-    "Spanish forms of verbs ending in ",
-    "Advanced Mandarin",
-    "Japanese kanji with ",
-    "Japanese katagana",
-    "Japanese hiragana",
-    "Han script characters",
-    "Han char without ",
-    "Japanese terms historically spelled with ",
-    "Vietnamese Han character with unconfirmed readings",
-    "Translingual symbols",
-    "Check ",
-    "Kenny's testing category 2",
-    "Sort key tracking/redundant",
-    "head tracking/",
-    "Template with ",
-    "Entries with deprecated labels",
-    "Requests for ",
-    "Terms with manual ",
-    "Terms with redundant ",
-    "Reference templates lacking",
-    "Entries using missing taxonomic name",
-    "Entries missing ",
-    "etyl cleanup",
-    "attention lacking explanation",
-    "Translation table header lacks gloss",
-    "Entries needing topical attention",
-    "English words following the I before E except after C rule",
-    "English words containing Q not followed by U",
-    "IPA for English using",
-    " IPA pronunciation",
-    "IPA pronunciations with invalid IPA characters",
-    "^[a-z]{2,3}-",
-    "Foreign word of the day",
-    "Foreign words of the day",
-    "English translation hubs",
-    ".* two-letter words$",
-    ".* three-letter words$",
-    ".* four-letter words$",
-    "Rhymes:",
-]
-# XXX is this regexp correct?
-ignored_cat_re = re.compile(r"([a-z]{2,4})?" +
-                            "|".join(ignored_category_patterns))
-
 # Mapping from a template name (without language prefix) for the main word
 # (e.g., fi-noun, fi-adj, en-verb) to permitted parts-of-speech in which
 # it could validly occur.  This is used as just a sanity check to give
@@ -3067,26 +2931,10 @@ def clean_node(config, ctx, category_data, value, template_fn=None,
         # Capture Category tags
         for m in re.finditer(r"(?is)\[\[:?\s*Category\s*:([^]|]+)", v):
             cat = clean_value(config, m.group(1))
-            m = re.match(r"[a-z]{2,4}:", cat)
-            if m:
-                # XXX these provide important information for disambiguating
-                # cat link at the end of the page (to at least the proper
-                # language).  However, the information is not always accurate -
-                # for example, "A8" has "en:Paper sizes" category even though
-                # the paper sizes are under Translingual.
-                cat = cat[m.end():]
             cat = re.sub(r"\s+", " ", cat)
             cat = cat.strip()
             if not cat:
                 continue
-            if re.match(ignored_cat_re, cat):
-                continue
-            if cat.find(" female given names") >= 0:
-                data_append(ctx, category_data, "tags", "feminine")
-            elif cat.find(" male given names") >= 0:
-                data_append(ctx, category_data, "tags", "masculine")
-            elif cat.startswith("Places "):
-                data_append(ctx, category_data, "tags", "place")
             if cat not in category_data.get("categories", ()):
                 data_append(ctx, category_data, "categories", cat)
 
