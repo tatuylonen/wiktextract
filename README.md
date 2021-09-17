@@ -399,6 +399,9 @@ The following command-line options can be used to control its operation:
 * --human-readable: print human-readable JSON with indentation (no longer
 machine-readable)
 * --override PATH: override a page or Lua module by this file (first line should be TITLE: pagetitle)
+* --templates-file: extract Template namespace to this tar file
+* --modules-file: extract Module namespace to this tar file
+* --categories-file: extract Wiktionary category tree into this file as JSON (see description below)
 * --help: displays help text (with some more options than listed here)
 
 ## Calling the library
@@ -694,6 +697,41 @@ following keys, among others:
 * ``taxonomic``: optional taxonomic name associated with the linkage
 * ``topics``: list of topic descriptors for the linkage (e.g., ``military``)
 * ``word`` - the word this links to (string)
+
+## Category tree data format
+
+The ``--categories-file`` option extracts the Wiktionary category tree
+as JSON into the specified file.  The data is extracted from the Wiktionary
+Lua modules by evaluating them.
+
+The data written to the JSON file is a dictionary, with the top-level
+keys ``roots`` and ``nodes``.
+
+Roots is a list of top-level nodes that are not children of other
+nodes.  ``Fundamental`` is the normal top-level node; other roots may
+reflect errors in the hierarchy in Wiktionary.  While not a root, the
+category ``all topics`` contains the subhierarchy of topical
+categories (e.g., ``food and drink``, ``nature``, ``sciences``, etc.).
+
+Nodes is a dictionary mapping lowercased category name to a dictionary
+containing data about the category.  For each category, the following
+fields may be present:
+
+* ``name`` (always present): non-lowercased name of the category (note, however,
+  that many categories are originally lowercase in the Wiktionary
+  hierarchy)
+* ``desc``: optional description of the category
+* ``clean_desc``: optional cleaned description of the category, with wikitext formatting cleaned to human-readable text, except {{{langname}}} (and possibly other similar tags) are left intact.
+* ``children``: optional list of child categories of the category
+* ``sort``: optional list of sorts (types of subcategories?).
+
+The categories are returned as they are in the original Wiktionary
+category data.  Language-specific categories are generally not
+included.  However, there is a category ``{{{langcat}}}`` that appears
+to contain a lot of the categories that have language-specific
+variants.  Also, the category tree data does not contain language
+prefixes (the tree is defined in Wiktionary without prefixes and then
+replicated for each language).
 
 ## Related packages
 
