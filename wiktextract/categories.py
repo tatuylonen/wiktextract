@@ -56,6 +56,7 @@ def extract_categories(ctx, config):
     assert isinstance(config, WiktionaryConfig)
     ctx.add_page("Scribunto", "Module:wiktextract cat tree", lua_code,
                  transient=True)
+    ctx.start_page("Wiktextract category tree extraction")
     rawdata = ctx.expand("{{#invoke:wiktextract cat tree|main}}")
     ht = {}
     for line in rawdata.split("\n"):
