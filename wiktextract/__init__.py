@@ -8,6 +8,7 @@ from .config import WiktionaryConfig
 from .page import clean_value, parse_page
 from .parts_of_speech import PARTS_OF_SPEECH
 from .thesaurus import extract_thesaurus_data
+from .categories import extract_categories
 
 __all__ = (
     "WiktionaryConfig",
@@ -17,4 +18,5 @@ __all__ = (
     "parse_page",
     "extract_thesaurus_data",
     "extract_namespace",
+    "extract_categories",
 )

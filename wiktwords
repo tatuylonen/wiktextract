@@ -23,6 +23,7 @@ from wiktextract import (WiktionaryConfig, parse_wiktionary,
                          reprocess_wiktionary, parse_page,
                          extract_namespace)
 from wiktextract import extract_thesaurus_data
+from wiktextract import extract_categories
 
 # Compute set of all language names
 all_langs = set(x["name"] for x in ALL_LANGUAGES)
@@ -137,6 +138,8 @@ if __name__ == "__main__":
                         help="Include thesaurus in single page mode")
     parser.add_argument("--profile", action="store_true", default=False,
                         help="Enable CPU time profiling")
+    parser.add_argument("--categories-file", type=str,
+                        help="Extract category tree as JSON in this file")
     parser.add_argument("--modules-file", type=str,
                         help="Extract all modules and save in this .tar file")
     parser.add_argument("--templates-file", type=str,
@@ -286,6 +289,12 @@ if __name__ == "__main__":
         extract_namespace(ctx, "Module", args.modules_file)
     if args.templates_file:
         extract_namespace(ctx, "Template", args.templates_file)
+    if args.categories_file:
+        tree = extract_categories(ctx, config)
+        print("Extracting category tree")
+        sys.stdout.flush()
+        with open(args.categories_file, "w") as f:
+            json.dump(tree, f, indent=2, sort_keys=True)
 
     if args.profile:
         pr.disable()
