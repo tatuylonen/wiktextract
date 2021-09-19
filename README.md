@@ -143,7 +143,7 @@ with open("filename.json", "r", encoding="utf-8") as f:
         lst.append(data)
 ```
 
-You can also easily pretty-print the data into more human-readable form using:
+You can also easily pretty-print the data into a more human-readable form using:
 ```
 print(json.dumps(data, indent=2, sort_keys=True))
 ```
