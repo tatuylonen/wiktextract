@@ -135,13 +135,24 @@ non_latin_scripts_re = re.compile(
     r"|".join(re.escape(x) for x in non_latin_scripts) +
     r")\b")
 
+# Sanity check xlat_head_map values
+for k, v in xlat_head_map.items():
+    if v.startswith("?"):
+        v = v[1:]
+    for tag in v.split():
+        if tag not in valid_tags:
+            print("WARNING: xlat_head_map[{}] contains unrecognized tag {}"
+                  .format(k, tag))
+
 # Regexp for finding nested translations from translation items (these are
 # used in, e.g., year/English/Translations/Arabic).  This is actually used
 # in page.py.
 nested_translations_re = re.compile(
     r"\s+\((({}): ([^()]|\([^()]+\))+)\)"
     .format("|".join(re.escape(re.sub("^\?", "", x))
-                     for x in xlat_head_map.values()
+                     for x in sorted(xlat_head_map.values(),
+                                     key=lambda x: len(x),
+                                     reverse=True)
                      if x and not x.startswith("class-"))))
 
 # Regexp that matches head tag specifiers.  Used to match tags from end of
@@ -877,6 +888,12 @@ def add_related(ctx, data, tags_lst, related, origtext,
                     ctx.debug("word head form has topics: {}".format(form))
                 # Add tags from canonical form into the main entry
                 if "canonical" in tags:
+                    if related in ("m", "f") and len(ctx.title) > 1:
+                        ctx.debug("probably incorrect canonical form "
+                                  "{!r} ignored (probably tag combination "
+                                  "missing from xlat_head_map)"
+                                  .format(related))
+                        continue
                     if (related != ctx.title or add_all_canonicals or
                         topics1 or topics2):
                         data_extend(ctx, form, "tags", list(sorted(set(tags))))

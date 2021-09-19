@@ -35,7 +35,7 @@ xlat_head_map = {
     "n or f or c": "neuter feminine common",
     "n or m or c": "neuter masculine common",
     "n or m or f": "neuter masculine feminine",
-    "n or f or m": "neutger feminine masculine",
+    "n or f or m": "neuter feminine masculine",
     "c or m or f": "common masculine feminine",
     "c or f or m": "common masculine feminine",
     "m or c or n": "masculine common neuter",
@@ -146,20 +146,38 @@ xlat_head_map = {
     "m anim or m anim pl": "masculine animate singular plural",
     "n anim or n anim pl": "neuter animate singular plural",
     "f anim or m anim": "feminine animate masculine",
-    "m anim or f anim": "masculine animate feminine",
     "f inan or n inan": "feminine inanimate neuter",
+    "m inan pl or m anim pl": "masculine inanimate animate plural",
+    "f inan or m inan": "feminine masculine inanimate",
+    "f inan or m inan or f inan pl":
+    "feminine masculine inanimate singular plural",
+    "f inan or m inan or f inan pl or m inan pl":
+    "feminine masculine inanimate singular plural",
+    "m inan pl or m anim pl or f anim pl":
+    "masculine feminine inanimate animate plural",
+    "f anim or f inan or f anim pl":
+    "feminine animate inanimate singular plural",
+    "f anim or f inan or f anim pl or f inan pl":
+    "feminine animate inanimate singular plural",
     "f anim pl or f inan or f inan pl":
     "feminine animate inanimate singular plural",  # XXX
     "f inan pl or f anim or f anim pl":
     "feminine inanimate animate singular plural",  # XXX
+    "m anim pl or f anim pl": "masculine feminine animate plural",
     "m anim pl or f anim pl or f inan or f inan pl":
     "masculine animate plural feminine inanimate",
     "m anim pl or f anim pl or f inan":
     "masculine animate feminine plural inanimate singular",  # XXX
+    "f anim pl or f inan pl": "feminine animate inanimate plural",
+    "f anim pl or f inan pl or m anim pl":
+    "feminine masculine animate inanimate plural",
     "m anim pl or f anim pl or f inan pl":
     "masculine animate feminine plural inanimate",  # XXX
+    "f inan pl or m anim pl": "feminine masculine animate inanimate plural",
     "f inan pl or m anim pl or f anim pl":
     "masculine animate feminine plural inanimate",  # XXX
+    "m anim or f anim or m anim pl":
+    "masculine animate feminine singular plural",
     "m anim or f anim or m anim pl or f anim pl":
     "masculine animate feminine singular plural",
     "n inan or n anim or m inan or m anim":
@@ -184,8 +202,6 @@ xlat_head_map = {
     "neuter inanimate singular plural feminine",
     "n inan pl or n anim or n anim pl":
     "neuter inanimate plural animate singular",  # XXX
-    "m anim or f anim or m anim pl or f anim pl":
-    "masculine animate feminine inanimate singular plural",
     "n anim or n inan": "neuter animate inanimate",
     "pers": "person",  # XXX check what this really is used for? personal?
     "npers": "impersonal",
@@ -218,7 +234,7 @@ xlat_head_map = {
     "m animal": "masculine animal",
     "m animal or f animal": "masculine animal feminine",
     "f animal or m animal": "feminine animal masculine",
-    "m anim or f": "masculine animate femine inanimate",
+    "m anim or f": "masculine animate feminine inanimate",
     "impf": "imperfective",
     "impf.": "imperfective",
     "pf": "perfective",
@@ -4357,6 +4373,7 @@ valid_tags = set([
     "ambitransitive",
     "analytic",
     "anaphorically",
+    "animal",  # Refers to animal
     "animate",
     "anterior",  # French seems to have "past anterior" tense
     "aorist",  # Verb form (perfective past)  E.g., Latin, Macedonian

@@ -23,8 +23,7 @@ from .datautils import (data_append, data_extend, split_at_comma_semi,
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_qualifier,
     parse_pronunciation_tags,
-    parse_alt_or_inflection_of, parse_head_final_tags,
-    classify_desc)
+    parse_alt_or_inflection_of, classify_desc)
 
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
