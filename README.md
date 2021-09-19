@@ -127,8 +127,8 @@ following code:
 import json
 ...
 with open("filename.json", "r", encoding="utf-8") as f:
-  for line in f: data = json.loads(line)
-    ... parse the data in this record
+    for line in f: data = json.loads(line)
+        ... parse the data in this record
 ```
 
 If you want to collect all the data into a list, you can read the file
