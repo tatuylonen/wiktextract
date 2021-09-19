@@ -227,13 +227,13 @@ xlat_head_map = {
     "m pers or f": "masculine person feminine animate inanimate",  # XXX
     "vir": "virile",
     "nvir": "nonvirile",
-    "anml": "animal",
-    "f anml": "feminine animal",
-    "m anml": "masculine animal",
-    "f animal": "feminine animal",
-    "m animal": "masculine animal",
-    "m animal or f animal": "masculine animal feminine",
-    "f animal or m animal": "feminine animal masculine",
+    "anml": "animal-not-person",
+    "f anml": "feminine animal-not-person",
+    "m anml": "masculine animal-not-person",
+    "f animal": "feminine animal-not-person",
+    "m animal": "masculine animal-not-person",
+    "m animal or f animal": "masculine animal-not-person feminine",
+    "f animal or m animal": "feminine animal-not-person masculine",
     "m anim or f": "masculine animate feminine inanimate",
     "impf": "imperfective",
     "impf.": "imperfective",
@@ -2738,7 +2738,7 @@ xlat_tags_map = {
     "rarer form": "rare",
     "relatively rare": "rare",
     "personified": "person",
-    "person or animal": "person animate",
+    "person or animal": "person animal-not-person",
     "found only in the imperfective tenses": "no-perfect",
     "imperfekt": "imperfect error-misspelling",
     "imperf. aspect": "imperfect",
@@ -4373,8 +4373,8 @@ valid_tags = set([
     "ambitransitive",
     "analytic",
     "anaphorically",
-    "animal",  # Refers to animal
     "animate",
+    "animal-not-person",  # Refers to animal (e.g., Russian anml suffix)
     "anterior",  # French seems to have "past anterior" tense
     "aorist",  # Verb form (perfective past)  E.g., Latin, Macedonian
     "aorist-ii",  # Albanian
