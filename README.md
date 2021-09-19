@@ -651,6 +651,12 @@ among others:
 * ``tags`` - other labels or context information attached to the pronunciation entry (e.g., might indicate regional variant or dialect)
 * ``text`` - text associated with an audio file (often not very useful)
 
+Note that Wiktionary audio files are available for bulk download at
+[https://kaikki.org/dictionary/rawdata.html](https://kaikki.org/dictionary/rawdata.html).
+Files in the download are named with the last component of the URL in
+``ogg_url`` and/or ``mp3_url``.  Downloading them individually takes
+serveral days and puts unnecessary load on Wikimedia servers.
+
 ### Translations
 
 Translations are stored under the ``translations`` key in the word's
