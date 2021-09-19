@@ -637,6 +637,8 @@ among others:
 * ``ipa`` - pronunciation specifications as an IPA string /.../ or [...]
 * ``enpr`` - pronunciation in English pronunciation respelling
 * ``audio`` - name of a sound file in WikiMedia Commons
+* ``ogg_url`` - URL for an OGG Vorbis format sound file
+* ``mp3_url`` - URL for an MP3 format sound file
 * ``audio-ipa`` - IPA string associated with the audio file, generally giving IPA transcription of what is in the sound file
 * ``homophones`` - list of homophones for the word
 * ``hyphenation`` - list of hyphenations
