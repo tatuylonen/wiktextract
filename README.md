@@ -103,6 +103,10 @@ give this a star on github!
 For most people, it may be easiest to just download pre-expanded data.
 Please see
 [https://kaikki.org/dictionary/rawdata.html](https://kaikki.org/dictionary/rawdata.html).
+The raw wiktextract data, extracted category tree, extracted templates
+and modules, as well as a bulk download of audio files for
+pronunciations in both <code>.ogg</code> and <code>.mp3</code> formats
+are available.
 
 There is a also download link at the bottom of every page and a button
 to view the JSON produced for each page.  You can download all data,
@@ -112,7 +116,8 @@ relating to a particular topic or having a particular inflectional
 form).  All downloads are in JSON format (each line is a separate JSON
 object).  The bigger downloads are also available in compressed form.
 
-Some people have asked for the data as a single JSON object.  I've
+Some people have asked for the full data as a single JSON object
+(instead of the current one JSON object per line format).  I've
 decided to keep it as a JSON object per line, because loading all the
 data into Python requires 40-50 GB of memory.  It is much easier to
 process the data line-by-line, especially if you are only interested
@@ -122,9 +127,8 @@ following code:
 import json
 ...
 with open("filename.json", "r", encoding="utf-8") as f:
-    for line in f:
-        data = json.loads(line)
-        ... parse the data in this record
+  for line in f: data = json.loads(line)
+    ... parse the data in this record
 ```
 
 If you want to collect all the data into a list, you can read the file
