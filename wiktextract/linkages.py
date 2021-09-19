@@ -666,6 +666,9 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                         qualifier += ", " + linkage_remove_prefixes_tags[prefix]
                     else:
                         qualifier = linkage_remove_prefixes_tags[prefix]
+                # Recheck ignored linkages
+                if re.search(linkage_ignore_re, item1):
+                    continue
 
             # Remove certain suffixes from linkages
             m = re.search(linkage_remove_suffixes_re, item1)

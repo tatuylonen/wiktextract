@@ -102,15 +102,6 @@
 # is a template {{cmn-toneless-note}}.  Are there other templates that would
 # be useful and common enough to parse, e.g., into tags?
 
-# XXX capture topic hierarchy from Category pages in Wiktionary
-#   - Module:category tree/topic cat/data/* (except /documentation)
-#   - beware, at least .../Places contains real code besides data
-#   - Load place types from Module:place/data
-#   - also: Module:place/shared-data/tables
-#   - also: Module:place/shared-data
-# May be best to actually load these modules as Lua code or to even run a
-# specific Lua module to dump the data.
-
 # Check te/Spanish/pron, See also section (warning, has unexpected format)
 
 # Check alt_of with "." remaining.  Find them all to a separate list
@@ -255,8 +246,6 @@ Fix support for DISPLAYTITLE - sets page default display title, which
 would be useful.  Maybe extract too?  Note that this may prevent
 caching templates/Lua calls.
 
-Review translations that contain comma
-
 Check "class II noun" and similar "note" in translations, cf. form desc,
 define required tags/mappings
 
@@ -275,8 +264,6 @@ Finish writing tests for character lists
 Synonyms are not collected from nested senses.  See cat/English/Noun
 sense 1/1 "A domesticated species..."
 
-See tree/English/Hyponyms: Category:en:Trees
-
 Move hieroglyph conversion to postprocessing
 
 婬/Japanese/Kanji/Definitions has a table that is not correctly handled,
@@ -294,6 +281,9 @@ with a comma (as a pre-processing step after splitting?).  Inflection though
 might be in any of the parts, but I think usually the first.
 Also: "wait on someone hand, foot and finger"/English.
 Ah, similar bug in alt-of/inflection-of parsing.
+
+Translation lists missing a comma between translations are handled incorrectly.
+See tree/English/Tr/Punjabi (both Gurmukhi and Shahmukhi).
 
 Implement special case in parsing word head for paren desc:
 "на (na) accusative, by"; see помножать/Russian
@@ -382,3 +372,7 @@ Heleb/Northern Kurdish: ERROR: LUA error in #invoke ('wikipedia', 'wikipedia_box
 তাহুন/Assamese/Pronoun: ERROR: LUA error in #invoke ('links/templates
 
 Parse declension/conjugation tables
+
+thrill/English:
+  - one example is not correctly split to ref/text
+  - head section syntax should be updated

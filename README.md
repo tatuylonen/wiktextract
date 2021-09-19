@@ -145,7 +145,7 @@ print(json.dumps(data, indent=2, sort_keys=True))
 ```
 
 Here is a pretty-printed example of an extracted word entry for the
-word ``thrill`` as an English verb:
+word ``thrill`` as an English verb (only one part-of-speech is shown here):
 ```
 {
   "categories": [
@@ -252,6 +252,8 @@ word ``thrill`` as an English verb:
     },
     {
       "audio": "en-us-thrill.ogg",
+      "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/d/db/En-us-thrill.ogg/En-us-thrill.ogg.mp3",
+      "ogg_url": "https://upload.wikimedia.org/wikipedia/commons/d/db/En-us-thrill.ogg",
       "tags": [
         "US"
       ],

@@ -337,6 +337,7 @@ head_final_numeric_langs = set([
     "Bende",
     "Chichewa",
     "Chimwiini",
+    "Dyirbal",  # Australian aboriginal, uses class-4 etc
     "Kamba",
     "Kikuyu",
     "Lingala",
@@ -453,6 +454,7 @@ head_final_other_langs = set([
     "Sanskrit",
     "Ancient Greek",
     # XXX For dual??? see e.g. route/Tr(course or way)/Polish
+    "Dyirbal",
     "Egyptian",
     "Maltese",
     "Maori",
@@ -546,11 +548,13 @@ uppercase_tags = set([
     "Ala-Laukaa",
     "Alak",
     "Alemannic",  # Variant of German
+    "Alemannic German",  # Variant of German
     "Algherese",
     "Alles",
     "Alliancelles",
     "Alsace",
     "Alsatian",
+    "Alviri",  # Variant of Alviri-Vidari
     "Amecameca",
     "American continent",
     "Americanization",
@@ -560,7 +564,7 @@ uppercase_tags = set([
     "Amira",
     "Amrum",
     "Amur",
-    "Anbarani",
+    "Anbarani",  # Variant of Talysh
     "Ancient",
     "Ancient China",
     "Ancient Egyptian",
@@ -578,6 +582,7 @@ uppercase_tags = set([
     "Anglo-Norman",
     "Angola",
     "Aniwa",
+    "Anpezan",  # Variant of Ladin
     "Antalya",
     "Antanosy",
     "Antilles",
@@ -601,7 +606,7 @@ uppercase_tags = set([
     "Aromanian",
     "Aruba",
     "Asalem",
-    "Asalemi",
+    "Asalemi",  # Variant of Talysh
     "Asante",
     "Ashkenazi Hebrew",
     "Assamese",  # Also script (India)
@@ -624,6 +629,7 @@ uppercase_tags = set([
     "Baan Nong Duu",
     "Babia",
     "Bacheve",
+    "Badiot",  # Variant of Ladin
     "Badiu",
     "Baghdad",
     "Bahamas",
@@ -678,7 +684,7 @@ uppercase_tags = set([
     "Bohairic",
     "Bohemia",
     "Boholano",
-    "Bokmål",
+    "Bokmål",  # Variant of Norwegian
     "Bolivia",
     "Bologna",
     "Bolognese",
@@ -728,7 +734,7 @@ uppercase_tags = set([
     "Caithness",
     "California",
     "Campello Monti",
-    "Campidanese",
+    "Campidanese",  # Variant of Sardinian
     "Canada",
     "Canadian",
     "Canadian English",
@@ -782,7 +788,7 @@ uppercase_tags = set([
     "Church of England",
     "Cieszyn Silesia",
     "Cincinnati",
-    "Classical",
+    "Classical",  # Variant of several languages, e.g., Greek, Nahuatl
     "Classical Attic",
     "Classical Chinese",
     "Classical Edessan",
@@ -791,6 +797,7 @@ uppercase_tags = set([
     "Classical Latin",
     "Classical Persian",
     "Classical Sanskrit",
+    "Classical Syriac",
     "Classical studies",
     "Clay",
     "Closed ultima",
@@ -852,7 +859,7 @@ uppercase_tags = set([
     "Devanagari",  # Script
     "Devon",
     "Déné syllabary",  # Script for Canadian Indian languages?
-    "Digor",
+    "Digor",  # Variant of Ossetian
     "Dingzhou",
     "Dissenter",
     "Dithmarsisch",
@@ -893,7 +900,7 @@ uppercase_tags = set([
     "Edirne",
     "Egypt",
     "Egyptian",  # Also script (hieroglyph)
-    "Egyptian Arabic",  # Variant of Arabic language
+    "Egyptian Arabic",  # Variant of Arabic
     "Egyptiot",
     "Ekagongo",
     "Ekavian",
@@ -921,6 +928,7 @@ uppercase_tags = set([
     "Fante",
     "Faroese",
     "Fars",
+    "Fascian",  # Variant of Ladin
     "Fayyumic",
     "Fengkai",
     "Finglish",  # Finnish word taken from English
@@ -930,6 +938,7 @@ uppercase_tags = set([
     "Flemish",
     "Florida",
     "Fluminense",
+    "Fodom",  # Variant of Ladin
     "For transcription only",
     "Formazza",
     "Fountain",
@@ -951,7 +960,7 @@ uppercase_tags = set([
     "Galician",
     "Galitzish",
     "Galway",
-    "Gan",
+    "Gan",  # Variant of Chinese
     "Gangwon",  # Dialect/region for Korean
     "Gascon",  # DIalect of Occitan
     "Gascony",
@@ -969,10 +978,11 @@ uppercase_tags = set([
     "Geordie",
     "Georgia",
     "German",
+    "German Low German",
     "Germanic",
     "Germany",
     "Gheg",
-    "Gherdëina",
+    "Gherdëina",  # Variant of Ladin
     "Gipuzkoan",
     "Glagolitic",  # Script
     "Glarus",
@@ -1033,17 +1043,18 @@ uppercase_tags = set([
     "Hawick",
     "Hán tự",
     "Hebei",  # China
-    "Hebrew",  # also Script
+    "Hebrew",  # also Script (for Aramaic)
     "Hejazi Arabic",  # Variant of Arabic Language
     "Hejazi",
-    "Helgoland",
+    "Helgoland",  # Variant of North Frisian
     "Heligoland",
     "Heligolandic",
     "Hellenizing School",
     "Hevaha",
     "Hianacoto",
     "Hiberno-English",
-    "Hijazi",
+    "Hijazi",  # Variant of Arabic
+    "Hijazi Arabic",  # Variant of Arabic
     "Hindi",  # Script (at least for numberals, e.g. 80
     "Hinduism",
     "Hokkien",  # Chinese dialect/language
@@ -1078,6 +1089,7 @@ uppercase_tags = set([
     "Ijekavian/Ekavian",
     "Ilir",
     "In conjunct consonants",
+    "Inari",  # Variant of Sami
     "India",
     "Indian English",
     "Indo-Aryan linguistics",
@@ -1098,7 +1110,7 @@ uppercase_tags = set([
     "Iraqi Hebrew",
     "Ireland",
     "Irish",
-    "Iron",
+    "Iron",  # Variant of Ossetian
     "Isfahan",
     "Isparta",
     "Israel",
@@ -1282,7 +1294,7 @@ uppercase_tags = set([
     "Litvish",
     "Liverpudlian",
     "Llanos",
-    "Logudorese",
+    "Logudorese",  # Variant of Sardinian
     "Lojban",
     "Loli",
     "Lombardy",
@@ -1292,6 +1304,7 @@ uppercase_tags = set([
     "Lovara",
     "Low Prussian",
     "Low Sorbian",
+    "Lower Sorbian",
     "Lubunyaca",
     "Lukang Hokkien",
     "Luleå",
@@ -1350,7 +1363,7 @@ uppercase_tags = set([
     "Mawakwa",
     "Mayo",
     "McCune-Reischauer",
-    "Mecayapan",
+    "Mecayapan",  # Variant of Nathuatl
     "Mecklenburg-Vorpommern",
     "Mecklenburgisch",
     "Mecklenburgisch-Vorpommersch",
@@ -1417,10 +1430,11 @@ uppercase_tags = set([
     "Mongolian",  # Also script
     "Montenegro",
     "Montreal",
-    "Mooring",
+    "Mooring",  # Variant of North Frisian
     "Moravia",
     "Mormonism",
-    "Moroccan",
+    "Moroccan",  # Variant of Arabic
+    "Moroccan Arabic",  # Variant of Arabic
     "Morocco",
     "Moscow",
     "Moselle Franconian",
@@ -1438,6 +1452,7 @@ uppercase_tags = set([
     "Münsterland",
     "Münsterländisch",
     "Myanmar",  # Also script
+    "Mycenaean",  # Variant of Greek
     "N'Ko",  # Script
     "Nahua",
     "Nahuatl",
@@ -1490,6 +1505,7 @@ uppercase_tags = set([
     "North German",
     "North Korea",
     "North Levantine",
+    "North Levantine Arabic",  # Variant of Arabic
     "North Northern Scots",
     "North Northern",
     "North Northern",
@@ -1510,6 +1526,7 @@ uppercase_tags = set([
     "Northern Mandarin",  # Chinese dialect/language
     "Northern Manx",
     "Northern Middle English",
+    "Northern Puebla",
     "Northern Scots",
     "Northern UK",
     "Northern US",
@@ -1538,7 +1555,7 @@ uppercase_tags = set([
     "Nuorese",
     "Nyeri",
     "Nynorak",
-    "Nynorsk",
+    "Nynorsk",  # Variant of Norwegian
     "Nyungkal",
     "Nürnbergisch",
     "Occitania",
@@ -1620,6 +1637,7 @@ uppercase_tags = set([
     "Pinghua",  # Chinese dialect/language
     "Pinyin",
     "Pirupiru",
+    "Pite",  # Variant of Sami
     "Piteå",
     "Plautdietsch",
     "Polari",
@@ -1675,6 +1693,7 @@ uppercase_tags = set([
     "Revived Late Cornish",
     "Revived Middle Cornish",
     "Revived",
+    "Rhine Franconian",  # Variant of German
     "Rhineland",
     "Rhodesia",
     "Riau",
@@ -1797,6 +1816,7 @@ uppercase_tags = set([
     "Sistani",
     "Skellefteå",
     "Skiri",
+    "Skolt",  # Variant of Sami
     "Slovak",
     "Slovene",
     "Slovincian",
@@ -1820,6 +1840,7 @@ uppercase_tags = set([
     "South German",
     "South Korea",
     "South Levantine",
+    "South Levantine Arabic",
     "South Northern Scots",
     "South Scots",
     "South Wales",
@@ -1879,8 +1900,8 @@ uppercase_tags = set([
     "Swiss",
     "Switzerland",
     "Syllabics",  # Used in word head with Plains Cree, e.g. tânisi/Plains Cree
-    "Sylt",
-    "Syriac",
+    "Sylt",  # Variant of North Frisian
+    "Syriac",  # Also script (for Aramaic)
     "Syrian Hebrew",
     "São Paulo",
     "São Vicente",
@@ -1908,6 +1929,7 @@ uppercase_tags = set([
     "Tantoyuca",
     "Tao",
     "Taraškievica",
+    "Tashelhit",  # Variant of Berber
     "Tasmania",
     "Tasmanian",
     "Tavastia",
@@ -1974,6 +1996,7 @@ uppercase_tags = set([
     "Ulu",
     "UPA",
     "Upper Silesia",
+    "Upper Sorbian",
     "Urama",
     "Urdu",
     "US with /u/",
@@ -2011,7 +2034,7 @@ uppercase_tags = set([
     "Veluws",
     "Venezuela",
     "Verona",
-    "Vidari",
+    "Vidari",  # Variant of Alviri-Vidari
     "Vietnam",
     "Vinh",
     "Vinza",
@@ -2237,6 +2260,7 @@ xlat_tags_map = {
     "west": "West",
     "Mecayapán": "Mecayapan",
     "Mooring and Föhr-Amrum": "Mooring Föhr-Amrum",
+    "Föhr-Amrum & Mooring": "Föhr-Amrum Mooring",
     "Nazi slur against Churchill": "Nazism slur",
     "religious slur": "slur",
     "euphemistic Nazi term": "Nazism euphemistic",

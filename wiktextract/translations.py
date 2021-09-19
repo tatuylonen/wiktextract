@@ -33,6 +33,7 @@ script_and_dialect_names = set([
     # Scripts
     "ALUPEC",
     "Adlam",
+    "Arabic",  # Script for Kashmiri
     "Bengali",
     "Burmese",
     "Carakan",
@@ -41,6 +42,7 @@ script_and_dialect_names = set([
     "Devanagari",
     "Glagolitic",
     "Gurmukhi",
+    "Hebrew",  # For Aramaic
     "Jawi",
     "Khmer",
     "Latin",
@@ -48,39 +50,42 @@ script_and_dialect_names = set([
     "Roman",
     "Shahmukhi",
     "Sinhalese",
+    "Syriac",  # For Aramaic
+    "Classical Syriac",  # For Aramaic
     "Taraškievica",
     "Thai",
     "Uyghurjin",
-    # Dialects
-    "Cantonese",
-    "Dungan",
-    "Hakka",
-    "Hokkien",
-    "Jin",
-    "Mandarin",
-    "Min Bei",
-    "Min Dong",
-    "Min Nan",
-    "Wu",
-    "Xiang",
-    "Jianghuai Mandarin",
-    "Jilu Mandarin",
-    "Jin Mandarin",
-    "Northern Mandarin",
-    "Southwestern Mandarin",
-    "Taiwanese Mandarin",
-    "Coastal Min",
-    "Inland Min",
-    "Leizhou Min",
-    "Min",
-    "Puxian Min",
-    "Shanghainese Wu",
-    "Wenzhou Wu",
-    "Wenzhou",
-    "Hsinchu Hokkien",
-    "Jinjiang Hokkien",
-    "Kaohsiung Hokkien",
-    "Pinghua",
+    # Chinese dialects/languages
+    "Cantonese",  # Variant of Chinese
+    "Dungan",  # Chinese
+    "Gan",  # Chinese
+    "Hakka",  # Chinese
+    "Hokkien",  # Chinese
+    "Jin",  # Chinese
+    "Mandarin",  # Chinese
+    "Min Bei",  # Chinese
+    "Min Dong",  # Chinese
+    "Min Nan",  # Chinsese
+    "Wu",  # Chinsese
+    "Xiang",  # Chinese
+    "Jianghuai Mandarin",  # Chinese
+    "Jilu Mandarin",  # Chinese
+    "Jin Mandarin",  # Chinese
+    "Northern Mandarin",  # Chinese
+    "Southwestern Mandarin",  # Chinese
+    "Taiwanese Mandarin",  # Chinese
+    "Coastal Min",  # Chinese
+    "Inland Min",  # Chinese
+    "Leizhou Min",  # Chinese
+    "Min",  # Chinese
+    "Puxian Min",  # Chinese
+    "Shanghainese Wu",  # Chinese
+    "Wenzhou Wu",  # Chinese
+    "Wenzhou",  # Chinese
+    "Hsinchu Hokkien",  # Chinese
+    "Jinjiang Hokkien",  # Chinese
+    "Kaohsiung Hokkien",  # Chinsese
+    "Pinghua",  # Chinese
     # Various countries/regions
     "Alsace",
     "Bavaria",
@@ -96,8 +101,46 @@ script_and_dialect_names = set([
     "Heligoland",
     "Santiago",
     "Sylt",
+    "Mooring",
+    "Föhr-Amrum",
     "Vancouver Island",
     "Wiedingharde",
+    "Anpezan",  # Variant of Ladin
+    "Badiot",  # Ladin
+    "Fascian",  # Ladin
+    "Fodom",  # Ladin
+    "Gherdëina",  # Ladin
+    "Central Kurdish",  # Variant of Kurdish
+    "Laki",  # Variant of Kurdish
+    "Northern Kurdish",  # Variant of Kurdish
+    "Anbarani",  # Variant of Talysh
+    "Asalemi",  # Variant of Talysh
+    "Upper Sorbian",  # Variant of Sorbian
+    "Lower Sorbian",  # Variant of Sorbian
+    "Alemannic German",  # Variant of German
+    "Rhine Franconian",  # Variant of German
+    "German Low German",  # Variant of Low German
+    "Campidanese",  # Variant of Sardinian
+    "Logudorese",  # Variant of Sardinian
+    "Digor",  # Variant of Ossetian
+    "Iron",  # Variant of Ossetian
+    "Northern Puebla",  # Variant of Nahuatl
+    "Mecayapan",  # Variant of Nathuatl
+    "Egyptian Arabic",  # Variant of Arabic
+    "Gulf Arabic",  # Variant of Arabic
+    "Hijazi Arabic",  # Variant of Arabic
+    "Moroccan Arabic",  # Variant of Arabic
+    "North Levantine Arabic",  # Variant of Arabic
+    "South Levantine Arabic",  # Variant of Arabic
+    "Alviri",  # Variant of Alviri-Vidari
+    "Vidari",  # Variant of Alviri-Vidari
+    "Tashelhit",  # Variant of Berber
+    "Bokmål",  # Variant of Norwegian
+    "Nynorsk",  # Variant of Norwegian
+    "Inari",  # Variant of Sami
+    "Pite",  # Variant of Sami
+    "Skolt",  # Variant of Sami
+    "Mycenaean",  # Variant of Greek
     # Language varieties
     "Ancient",
     "Classical",
@@ -124,6 +167,7 @@ tr_second_tagmap = {
     "Halligen, Goesharde, Karrhard": "Halligen Goesharde Karrhard",
     "Föhr-Amrum and Sylt dialect": "Föhr-Amrum Sylt",
     "Hallig and Mooring": "Hallig Mooring",
+    "Föhr-Amrum & Mooring": "Föhr-Amrum Mooring",
 }
 
 # Ignore translations that start with one of these
@@ -289,7 +333,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
         # alias or other_names)
         lang = languages_by_name[lang]["name"]
         assert lang
-    m = re.match(r"\*?\s*([-' \w][-' \w()]*):\s*", item)
+    m = re.match(r"\*?\s*([-' \w][-'&, \w()]*):\s*", item)
     tags = []
     if m:
         sublang = m.group(1).strip()
@@ -560,7 +604,9 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             # patterns in translations
             if "word" in tr:
                 m = re.search(tr_suspicious_re, tr["word"])
-                if m:
+                if m and lang not in (
+                        "Bats",  # ^ in tree/English/Tr/Bats
+                ):
                     ctx.debug("suspicious translation with {!r}: {}"
                               .format(m.group(0), tr))
 
