@@ -1121,6 +1121,7 @@ uppercase_tags = set([
     "Internet",
     "Inuvialuktun",
     "Iran",
+    "Iranian",
     "Iranian Persian",
     "Iraq",
     "Iraqi Hebrew",
