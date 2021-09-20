@@ -2,9 +2,9 @@
 
 This is a utility and Python package for for extracing data from Wiktionary.
 
-**Version 1.99.5 is now on pypi and available for installation using
+*2021-09-20: Version 1.99.6 is now on pypi and available for installation using
   pip (Python3).  Think of it as a beta version for 2.0.0.  There is
-  also a new version of wikitextprocessor.**
+  also a new version of wikitextprocessor.*
 
 The release won't address everything.  Especially linkages (hypernyms,
 hyponyms, etc.) and disambiguation have issues that I'm postponing to
