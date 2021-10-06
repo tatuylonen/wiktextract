@@ -2410,8 +2410,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         text = clean_node(config, ctx, None, contents,
                           post_template_fn=etym_post_template_fn)
         # Save the collected information.
-        data["etymology-text"] = text
-        data["etymology-templates"] = templates
+        data["etymology_text"] = text
+        data["etymology_templates"] = templates
 
     def process_children(treenode):
         """This recurses into a subtree in the parse tree for a page."""

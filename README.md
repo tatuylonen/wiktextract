@@ -571,8 +571,8 @@ following keys (others may also be present or added later):
 * ``categories`` - list of non-disambiguated categories for the word
 * ``topics`` - list of non-disambiguated topics for the word
 * ``translations`` - non-disambiguated translation entries (see below)
-* ``etymology-text`` - etymology section as cleaned text
-* ``etymology-templates`` - templates and their arguments and expansions from
+* ``etymology_text`` - etymology section as cleaned text
+* ``etymology_templates`` - templates and their arguments and expansions from
   the etymology section.  These can be used to easily parse etymological
   relations.  Certain common templates that do not signify etymological
   relations are not included.
@@ -671,16 +671,16 @@ where each dictionary has the following keys (and possibly others):
 
 ### Etymologies
 
-Etymological information is stored under the ``etymology-text`` and
-``etymology-templates`` keys in the word's data.  When multiple parts-of-speech
+Etymological information is stored under the ``etymology_text`` and
+``etymology_templates`` keys in the word's data.  When multiple parts-of-speech
 are listed under the same etymology, the same data is copied to each
 part-of-speech entry under that etymology.
 
-The ``etymology-text`` field contains the contents of the whole etymology
+The ``etymology_text`` field contains the contents of the whole etymology
 section cleaned into human-readable text (i.e., templates have been expanded
 and HTML tags removed, among other things).
 
-The ``etymology-templates`` field contains a list of templates from
+The ``etymology_templates`` field contains a list of templates from
 the etymology section.  Some common templates considered not relevant
 for etymological information have been removed (e.g., ``redlink
 category`` and ``isValidPageName``).  The list also includes nested
