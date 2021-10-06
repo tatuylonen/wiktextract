@@ -3823,6 +3823,7 @@ xlat_tags_map = {
     "with an indirect object": "with-indirect-object",
     "with comparatives": "with-comparative",
     "with definite article": "with-definite-article",
+    'with "the"': "with-definite-article",
     "etc.": "usually",
     "regardless of gender": "gender-neutral",
     "gender-neutral (or multigendered)": "gender-neutral",

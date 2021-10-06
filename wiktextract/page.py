@@ -517,6 +517,15 @@ ignored_etymology_templates_re = re.compile(
     r")$")
 
 
+# Regexp for matching category tags that start with a language name.
+# Group 2 will be the language name.  The category tag should be without
+# the namespace prefix.
+starts_lang_re = re.compile(
+    r"^(Rhymes:)?(" +
+    "|".join(re.escape(x["name"]) for x in ALL_LANGUAGES) +
+    ")[ /]")
+
+
 def parse_sense_XXXold_going_away(config, data, text, use_text):
     """Parses a word sense from the text.  The text is usually a list item
     from the beginning of the dictionary entry (i.e., before the first
@@ -1229,13 +1238,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
             added = True
         return added
 
-    def head_template_fn(name, ht):
+    def head_post_template_fn(name, ht, expansion):
         """Handles special templates in the head section of a word.  Head
         section is the text after part-of-speech subtitle and before word
         sense list. Typically it generates the bold line for the word, but
         may also contain other useful information that often ends in
         side boxes.  We want to capture some of that additional information."""
-        # print("HEAD_TEMPLATE_FN", name, ht)
+        # print("HEAD_POST_TEMPLATE_FN", name, ht)
         if name in wikipedia_templates:
             # Note: various places expect to have content from wikipedia
             # templates
@@ -1286,11 +1295,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 data_append(ctx, pos_data, "tags", "romanization")
         m = re.search(head_tag_re, name)
         if m:
-            new_ht = {}
-            for k, v in ht.items():
-                new_ht[decode_html_entities(k)] = decode_html_entities(v)
-            new_ht["template_name"] = name
-            data_append(ctx, pos_data, "heads", new_ht)
+            ht = clean_template_args(config, ht)
+            expansion = clean_node(config, ctx, None, expansion)
+            dt = {"name": name, "args": ht, "expansion": expansion}
+            data_append(ctx, pos_data, "head-templates", dt)
         return None
 
     def parse_part_of_speech(posnode, pos):
@@ -1341,7 +1349,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # print("parse_part_of_speech: {}: {}: pre={}"
         #       .format(ctx.section, ctx.subsection, pre))
         text = clean_node(config, ctx, pos_data, pre,
-                          template_fn=head_template_fn)
+                          post_template_fn=head_post_template_fn)
         text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
         parse_word_head(ctx, pos, text, pos_data)
         if "tags" in pos_data:
@@ -2860,9 +2868,12 @@ def parse_page(ctx, word, text, config):
         cats = data.get("categories", ())
         new_cats = []
         for cat in cats:
-            parts = cat.split(" ")
-            if parts[0] in languages_by_name and parts[0] != lang:
-                continue  # Ignore categories for a different language
+            m = re.match(starts_lang_re, cat)
+            if m:
+                catlang = m.group(2)
+                if (catlang != lang and
+                    not (catlang == "English" and lang == "Translingual")):
+                    continue  # Ignore categories for a different language
             new_cats.append(cat)
         if not new_cats:
             if "categories" in data:
