@@ -30,6 +30,8 @@ linkage_ignore_prefixes = [
     "introduced in Unicode ",
     "Entries in the ",
     "Wikipedia article ",
+    "Wiktionary's coverage of ",
+    "Ethnologue entry for ",
     "Any of Thesaurus:",
     "See contents of Category:",
     "See also Thesaurus:",
@@ -46,6 +48,7 @@ linkage_ignore_prefixes = [
 linkage_ignore_suffixes = [
     " Wikipedia",
     " Wikipedia.",
+    " edition of Wiktionary",
 ]
 
 # Linkage will be ignored if it is one of these (with full match)
@@ -79,6 +82,8 @@ linkage_remove_prefixes_re = re.compile(
         "See ",
         "from ",
         "abbreviation of ",
+        "ISO 639-1 code ",
+        "ISO 639-3 code ",
         "Thesaurus:"]) +
     ")")
 
