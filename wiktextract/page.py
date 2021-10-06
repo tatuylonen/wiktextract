@@ -310,7 +310,6 @@ panel_templates = set([
     "Spanish possessive pronouns",
     "USRegionDisputed",
     "Webster 1913",
-    "Wikipedia",
     "ase-rfr",
     "attention",
     "attn",
@@ -403,7 +402,6 @@ panel_templates = set([
     "unblock",
     "unsupportedpage",
     "video frames",
-    "wikipedia",
     "was wotd",
     "wrongtitle",
     "zh-forms",
@@ -430,6 +428,9 @@ wikipedia_templates = set([
     "Wikipedia",
     "wtorw",
 ])
+for x in panel_templates & wikipedia_templates:
+    print("WARNING: {!r} in both panel_templates and wikipedia_templates"
+          .format(x))
 
 # Mapping from a template name (without language prefix) for the main word
 # (e.g., fi-noun, fi-adj, en-verb) to permitted parts-of-speech in which
@@ -1245,13 +1246,34 @@ def parse_language(ctx, config, langnode, language, lang_code):
         may also contain other useful information that often ends in
         side boxes.  We want to capture some of that additional information."""
         # print("HEAD_POST_TEMPLATE_FN", name, ht)
+        if is_panel_template(name):
+            # Completely ignore these templates (not even recorded in
+            # head_templates)
+            return ""
+        if name == "head":
+            # XXX are these also captured in forms?  Should this special case
+            # be removed?
+            t = ht.get(2, "")
+            if t == "pinyin":
+                data_append(ctx, pos_data, "tags", "Pinyin")
+            elif t == "romanization":
+                data_append(ctx, pos_data, "tags", "romanization")
+        m = re.search(head_tag_re, name)
+        if m:
+            args_ht = clean_template_args(config, ht)
+            cleaned_expansion = clean_node(config, ctx, None, expansion)
+            dt = {"name": name, "args": args_ht, "expansion": cleaned_expansion}
+            data_append(ctx, pos_data, "head_templates", dt)
+
+        # The following are both captured in head_templates and parsed
+        # separately
+
         if name in wikipedia_templates:
             # Note: various places expect to have content from wikipedia
-            # templates
+            # templates, so cannot convert this to empty
             parse_wikipedia_template(config, ctx, pos_data, ht)
             return None
-        if is_panel_template(name):
-            return ""
+
         if name == "number box":
             # XXX extract numeric value?
             return ""
@@ -1277,28 +1299,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if name == "picdic" or name == "picdicimg" or name == "picdiclabel":
             # XXX extract?
             return ""
-        # if name in ("tlb", "term-context", "term-label", "tcx"):
-        #     i = 2
-        #     while True:
-        #         v = ht.get(i)
-        #         if v is None:
-        #             break
-        #         v = clean_value(config, v)
-        #         data_append(ctx, pos_data, "tags", v)
-        #         i += 1
-        #     return ""
-        if name == "head":
-            t = ht.get(2, "")
-            if t == "pinyin":
-                data_append(ctx, pos_data, "tags", "Pinyin")
-            elif t == "romanization":
-                data_append(ctx, pos_data, "tags", "romanization")
-        m = re.search(head_tag_re, name)
-        if m:
-            ht = clean_template_args(config, ht)
-            expansion = clean_node(config, ctx, None, expansion)
-            dt = {"name": name, "args": ht, "expansion": expansion}
-            data_append(ctx, pos_data, "head-templates", dt)
+
         return None
 
     def parse_part_of_speech(posnode, pos):
@@ -2390,6 +2391,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
         templates = []
 
         def etym_post_template_fn(name, ht, expansion):
+            if is_panel_template(name):
+                return ""
+            if name in wikipedia_templates:
+                parse_wikipedia_template(config, ctx, data, ht)
             if re.match(ignored_etymology_templates_re, name):
                 return None
             ht = clean_template_args(config, ht)

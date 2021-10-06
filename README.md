@@ -177,7 +177,7 @@ word ``thrill`` as an English verb (only one part-of-speech is shown here):
       ]
     }
   ],
-  "head-templates": [
+  "head_templates": [
     {
       "args": {},
       "expansion": "thrill (third-person singular simple present thrills, present participle thrilling, simple past and past participle thrilled)",
@@ -588,7 +588,7 @@ following keys (others may also be present or added later):
 * ``wiktionary`` - non-disambiguated page title in Wikipedia (possibly prefixed by language id)
 * ``inflection`` - conjugation and declension entries found for the word, as dictionaries.  These basically capture the language-specific inflection template
 for the word.
-* ``head-templates``: part-of-speech specific head tags for the word.  This basically just captures the templates (their name and arguments) as a list of dictionaries.  Most applications may want to ignore this.
+* ``head_templates``: part-of-speech specific head tags for the word.  This basically just captures the templates (their name and arguments) as a list of dictionaries.  Most applications may want to ignore this.
 
 There may also be other fields.
 
