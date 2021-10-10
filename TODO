@@ -374,3 +374,14 @@ Parse declension/conjugation tables
 thrill/English:
   - one example is not correctly split to ref/text
   - head section syntax should be updated
+
+Interpret "see also" sections.  This seems to be junk in some languages/words,
+but related words in others (e.g., tänään/Finnish)
+
+Implement support for "See also translations at" (e.g., god/translations)
+
+htmlgen: Change when htmlgen computes indexes - only do after disambiguation
+
+htmlgen: disambiguate translation & linkage targets
+
+htmlgen: change disambiguated links
