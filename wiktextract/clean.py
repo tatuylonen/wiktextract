@@ -913,6 +913,11 @@ def clean_value(config, title, no_strip=False):
                    r'((<\s*div\b(<\s*div\b.*?<\s*/\s*div\s*>|.)*?</div>)|.)*?'
                    r'</div>',
                    "", title)
+    # Remove divs with float: attribute
+    title = re.sub(r'(?si)<\s*div\b[^>]*?\bstyle="[^"]*?\bfloat:[^>]*?>'
+                   r'((<\s*div\b(<\s*div\b.*?<\s*/\s*div\s*>|.)*?</div>)|.)*?'
+                   r'</div>',
+                   "", title)
     # Remove <sup> with previewonly class (generated e.g. by {{taxlink|...}})
     title = re.sub(r'(?si)<\s*sup\b[^>]*?\bclass="[^"]*?\bpreviewonly\b[^>]*?>'
                    r'((<.*?</.[^>]>)|.)*?</sup>',

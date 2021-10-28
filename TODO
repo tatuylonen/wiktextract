@@ -385,3 +385,5 @@ htmlgen: Change when htmlgen computes indexes - only do after disambiguation
 htmlgen: disambiguate translation & linkage targets
 
 htmlgen: change disambiguated links
+
+check jakes/English - ]] at the beginning of second sense

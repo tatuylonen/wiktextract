@@ -3509,8 +3509,8 @@ xlat_tags_map = {
     "apocopated": "apocope abbreviation",
     "apocopate": "apocope abbreviation",
     "h-prothesized form of": "alt-of prothesis",
-    "acronym of": "alt-of abbreviation",
-    "acronym": "abbreviation",
+    "acronym of": "alt-of abbreviation acronym",
+    "acronym": "abbreviation acronym",
     "initialism of": "alt-of abbreviation initialism",
     "contraction of": "alt-of abbreviation contraction",
     "IUPAC 3-letter abbreviation for": "alt-of abbreviation",
@@ -4338,6 +4338,7 @@ valid_tags = set([
     "abstract-noun",
     "accent/glottal",
     "accusative",
+    "acronym",   # abbreviation formed by the initial letters of other words
     "active",
     "actor-focus",  # Tagalog
     "actor-indirect",  # Tagalog
