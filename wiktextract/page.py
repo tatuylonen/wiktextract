@@ -1912,7 +1912,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             if sense1.endswith(":"):
                                 sense1 = sense1[:-1].strip()
                             if sense1.startswith("(") and sense1.endswith(")"):
-                                sense1 = sense1[1:-2].strip()
+                                sense1 = sense1[1:-1].strip()
                             if sense1 == "Translations":
                                 sense1 = None
                             # print("linkage item_recurse LIST sense1:", sense1)
