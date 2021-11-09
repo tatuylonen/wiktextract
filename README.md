@@ -609,6 +609,7 @@ Each word entry may have multiple glosses under the ``senses`` key.  Each
 sense is a dictionary that may contain the following keys (among others, and more may be added in the future):
 
 * ``glosses`` - list of gloss strings for the word sense (usually only one).  This has been cleaned, and should be straightforward text with no tagging.
+* ``raw_glosses`` - list of gloss strings for the word sense, with less cleaning than ``glosses``.  In particular, parenthesized parts that have been parsed from the gloss into ``tags`` and ``topics`` are still present here.  This version may be easier for humans to interpret.
 * ``tags`` - list of qualifiers and tags for the gloss.  This is a list of strings, and may include words such as "archaic", "colloquial", "present", "participle", "plural", "feminine", and many others (new words may appear arbitrarily).
 * ``categories`` - list of sense-disambiguated category names extracted from (a subset) of the Category links on the page
 * ``topics`` - list of sense-disambiguated topic names (kind of similar to categories but determined differently)

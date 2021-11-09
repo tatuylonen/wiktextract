@@ -56,10 +56,16 @@ foo f
                     {
                         "glosses": [
                             "sense 1"
-                        ]
+                        ],
+                        "raw_glosses": [
+                            "sense 1"
+                        ],
                     },
                     {
                         "glosses": [
+                            "sense 2"
+                        ],
+                        "raw_glosses": [
                             "sense 2"
                         ]
                     }
@@ -85,6 +91,7 @@ testpage f
                 "senses": [
                     {
                         "glosses": ["sense 1"],
+                        "raw_glosses": ["sense 1"],
                         "tags": ["feminine"],
                     },
                 ],
@@ -113,6 +120,7 @@ foo
                 "senses": [
                     {
                         "glosses": ["sense 1"],
+                        "raw_glosses": ["sense 1"],
                     },
                 ],
                 "word": "C#"
@@ -154,11 +162,24 @@ foo
                     {"word": "zump", "tags": ["verb"]},
                 ] ,
                 "senses": [
-                    {"glosses": ["sense 1"]},
-                    {"glosses": ["sense 2"]},
-                    {"glosses": ["mushroom"],
-                     "topics": ["biology", "mycology","natural-sciences"]},
-                    {"glosses": ["one who foos"], "tags": ["person"]},
+                    {
+                        "glosses": ["sense 1"],
+                        "raw_glosses": ["sense 1"],
+                    },
+                    {
+                        "glosses": ["sense 2"],
+                        "raw_glosses": ["sense 2"],
+                    },
+                    {
+                        "glosses": ["mushroom"],
+                        "raw_glosses": ["(mycology) mushroom"],
+                        "topics": ["biology", "mycology","natural-sciences"],
+                    },
+                    {
+                        "glosses": ["one who foos"],
+                        "raw_glosses": ["(person) one who foos"],
+                        "tags": ["person"],
+                    },
                 ],
                 "translations": [
                     {"word": "fuu", "lang": "Finnish", "code": "fi"},

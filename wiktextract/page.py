@@ -1091,6 +1091,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # Push a new sense (if the last one is not empty)
             if push_sense():
                 added = True
+            data_append(ctx, sense_data, "raw_glosses", gloss)
             if gloss_i == 0 and examples:
                 data_extend(ctx, sense_data, "examples", examples)
             # If the gloss starts with †, mark as obsolete
