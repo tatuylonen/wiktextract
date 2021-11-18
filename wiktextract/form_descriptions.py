@@ -1060,14 +1060,27 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
         for desc in new_desc:
             # print("head desc: {!r}".format(desc))
 
-            # Handle the special case of second comparative after comma,
-            # followed by superlative without comma.  E.g. mal/Portuguese/Adv
+            # Handle some special cases
             splitdesc = desc.split()
             if (len(splitdesc) >= 3 and splitdesc[1] == "superlative" and
                 classify_desc(splitdesc[0]) != "tags" and prev_tags):
+                # Handle the special case of second comparative after comma,
+                # followed by superlative without comma.  E.g.
+                # mal/Portuguese/Adv
                 add_related(ctx, data, prev_tags, [splitdesc[0]], text, True,
                             is_reconstruction)
                 desc = " ".join(splitdesc[1:])
+            elif (len(splitdesc) == 2 and
+                  splitdesc[0] in ("also", "and") and prev_tags and
+                  classify_desc(splitdesc[1]) != "tags"):
+                # Sometimes alternative forms are prefixed with "also" or
+                # "and"
+                add_related(ctx, data, prev_tags, [splitdesc[1]], text, True,
+                            is_reconstruction)
+                continue
+            elif (len(splitdesc) >= 2 and
+                  splitdesc[0] in ("including",)):
+                continue
 
             # If only one word, assume it is comma-separated alternative
             # to the previous one

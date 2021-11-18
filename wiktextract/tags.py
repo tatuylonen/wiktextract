@@ -1,3 +1,5 @@
+# -*- fundamental -*-
+#
 # Lists of valid tags and mappings for tags canonicalization.
 #
 # Copyright (c) 2020-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
@@ -2330,6 +2332,7 @@ xlat_tags_map = {
     "archiac": "archaic error-misspelling",
     "nonstandard form": "nonstandard",
     "nonstandard form of": "nonstandard alt-of",
+    "main verb": "base-form",
     "standard form of": "standard alt-of",
     "nonstandard stylistic suffix": "nonstandard dialectal suffix",
     "honorific form": "honorific",
@@ -2382,6 +2385,7 @@ xlat_tags_map = {
     "some dialects of": "dialectal",
     "now sometimes by conflation with etymology 1 under standard German influence":
     "sometimes",
+    "see below": "",
     "unstressed form": "unstressed",
     "mute of": "unstressed form-of",
     "for some speakers": "uncommon",
@@ -2390,6 +2394,7 @@ xlat_tags_map = {
     "before a vowel": "before-vowel",
     "before vowel": "before-vowel",
     "before vowels": "before-vowel",
+    "pre-vocalic": "before-vowel",
     "used before vowels and lenited fh-": "before-vowel before-lenited-fh",
     "used before vowels": "before-vowel",
     "used before the past tense": "before-past",
@@ -2445,7 +2450,9 @@ xlat_tags_map = {
     "genitive and plural": "genitive plural",
     "dative and accusative": "dative accusative",
     "accusative/illative": "accusative illative",
+    "accusative and ablative": "accusative ablative",
     "dative and accusative singular": "dative accusative singular",
+    "no nominative": "no-nominative",
     "simple past and past participle": ["simple past", "past participle"],
     "simple past tense and past participle": ["simple past", "past participle"],
     "taking a past participle": "with-past-participle",
@@ -4407,6 +4414,7 @@ valid_tags = set([
     "aux-sein",
     "auxiliary",
     "baby-talk",
+    "base-form",  # Base form of the word (e.g., with misspellings of forms)
     "before-lenited-fh",  # Next word starts with lenited fh (Irish)
     "before-past",  # Used before the past tense (Irish)
     "before-vowel",  # next words starts with vowel (in pronunciation)
@@ -4803,6 +4811,7 @@ valid_tags = set([
     "no-genitive",           # The word has no genitive form
     "no-imperfective",       # No imperfective form (исходить/Russian)
     "no-infinitive",	     # No infinitive form (måste/Swedish)
+    "no-nominative",         # The word has no nominative form (from this base)
     "no-nominative-plural",  # The word has no nominative plural
     "no-perfect",            # The word has no perfect/perfective aspect/form
     "no-plural",             # The word has no plural form (= singular only)
