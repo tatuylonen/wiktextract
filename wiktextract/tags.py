@@ -3020,6 +3020,7 @@ xlat_tags_map = {
     "sup.": "superlative",
     "comparative degree": "comparative",
     "comp.": "comparative",
+    "comparatives": "comparative",
     "positive degree": "positive",
     "pos.": "positive",
     "positive outcome": "positive",
