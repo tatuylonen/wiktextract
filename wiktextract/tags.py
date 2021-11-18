@@ -2618,6 +2618,8 @@ xlat_tags_map = {
     "no past participle": "no-past-participle",
     "past participle (obsolete except in adjectival use)":
     "obsolete past participle",
+    "of the past participle": "past participle",
+    "of the present participle": "present participle",
     "adverbial locative noun in the pa, ku, or mu locative classes":
     "adverbial locative",
     "comparative -": "no-comparative",
@@ -3114,6 +3116,7 @@ xlat_tags_map = {
     "singular/duoplural": "singular dual plural",
     "duoplural": "dual plural",
     "1st/3rd": "first-person third-person",
+    "first/second-person": "first-person second-person",
     "first/second/third-person":
     "first-person second-person third-person",
     "first/third/third-person": "first-person third-person",
