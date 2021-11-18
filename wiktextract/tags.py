@@ -142,6 +142,7 @@ xlat_head_map = {
     "f inan or f inan pl": "feminine inanimate singular plural",
     "m inan or m inan pl": "masculine inanimate singular plural",
     "n inan or n inan pl": "neuter inanimate singular plural",
+    "n inan or m inan": "neuter masculine inanimate",
     "f anim or f anim pl": "feminine animate singular plural",
     "m anim or m anim pl": "masculine animate singular plural",
     "n anim or n anim pl": "neuter animate singular plural",
