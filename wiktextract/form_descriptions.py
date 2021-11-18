@@ -805,7 +805,7 @@ def parse_head_final_tags(ctx, lang, form):
 
 
 def add_related(ctx, data, tags_lst, related, origtext,
-                add_all_canonicals):
+                add_all_canonicals, is_reconstruction):
     """Internal helper function for some post-processing entries for related
     forms (e.g., in word head)."""
     assert isinstance(ctx, Wtp)
@@ -821,12 +821,17 @@ def add_related(ctx, data, tags_lst, related, origtext,
         return
     if related in ("-", "(none)"):
         return
+    if is_reconstruction and related.startswith("*") and len(related) > 1:
+        related = related[1:]
+
+    # Get title word, with any reconstruction prefix removed
+    titleword = re.sub(r"^Reconstruction:[^/]*/", "", ctx.title)
 
     def check_related(related):
         # Warn about some suspicious related forms
         m = re.search(suspicious_related_re, related)
-        if ((m and ctx.title.find(m.group(0)) < 0) or
-            (related in ("f", "m", "n", "c") and len(ctx.title) >= 3)):
+        if ((m and titleword.find(m.group(0)) < 0) or
+            (related in ("f", "m", "n", "c") and len(titleword) >= 3)):
             if "eumhun" in tags_lst:
                 return
             if "cangjie-input" in tags_lst:
@@ -888,13 +893,13 @@ def add_related(ctx, data, tags_lst, related, origtext,
                     ctx.debug("word head form has topics: {}".format(form))
                 # Add tags from canonical form into the main entry
                 if "canonical" in tags:
-                    if related in ("m", "f") and len(ctx.title) > 1:
+                    if related in ("m", "f") and len(titleword) > 1:
                         ctx.debug("probably incorrect canonical form "
                                   "{!r} ignored (probably tag combination "
                                   "missing from xlat_head_map)"
                                   .format(related))
                         continue
-                    if (related != ctx.title or add_all_canonicals or
+                    if (related != titleword or add_all_canonicals or
                         topics1 or topics2):
                         data_extend(ctx, form, "tags", list(sorted(set(tags))))
                     else:
@@ -913,13 +918,14 @@ def add_related(ctx, data, tags_lst, related, origtext,
                     data_append(ctx, data, "forms", form)
 
 
-def parse_word_head(ctx, pos, text, data):
+def parse_word_head(ctx, pos, text, data, is_reconstruction):
     """Parses the head line for a word for in a particular language and
     part-of-speech, extracting tags and related forms."""
     assert isinstance(ctx, Wtp)
     assert isinstance(pos, str)
     assert isinstance(text, str)
     assert isinstance(data, dict)
+    assert is_reconstruction in (True, False)
     # print("PARSE_WORD_HEAD: {}: {}".format(ctx.section, text))
 
     if text.find("Lua execution error") >= 0:
@@ -932,8 +938,8 @@ def parse_word_head(ctx, pos, text, data):
     text = re.sub(r"\s+Template:[-a-zA-Z]+\s*$", "", text)
 
     language = ctx.section
-    title = ctx.title
-    titleparts = list(m.group(0) for m in re.finditer(word_re, title))
+    titleword = re.sub(r"^Reconstruction:[^/]*/", "", ctx.title)
+    titleparts = list(m.group(0) for m in re.finditer(word_re, ctx.title))
     if not titleparts:
         return
 
@@ -946,13 +952,14 @@ def parse_word_head(ctx, pos, text, data):
     # print("parse_word_head: base={!r}".format(base))
 
     # Special case: handle Hán Nôm readings for Vietnamese characters
-    m = re.match(r"{}: (Hán Nôm) readings: (.*)".format(re.escape(ctx.title)),
+    m = re.match(r"{}: (Hán Nôm) readings: (.*)".format(re.escape(titleword)),
                  base)
     if m:
         tag, readings = m.groups()
         tag = re.sub(r"\s+", "-", tag)
         for reading in split_at_comma_semi(readings):
-            add_related(ctx, data, [tag], [reading], text, True)
+            add_related(ctx, data, [tag], [reading], text, True,
+                        is_reconstruction)
         return
 
     # Split the head into alternatives.  This is a complicated task, as
@@ -997,7 +1004,8 @@ def parse_word_head(ctx, pos, text, data):
         canonicals.append((tags, baseparts))
 
     for tags, baseparts in canonicals:
-        add_related(ctx, data, tags, baseparts, text, len(canonicals) > 1)
+        add_related(ctx, data, tags, baseparts, text, len(canonicals) > 1,
+                    is_reconstruction)
 
     # Handle parenthesized descriptors for the word form and links to
     # related words
@@ -1037,7 +1045,8 @@ def parse_word_head(ctx, pos, text, data):
                 tags = list("Mainland China" if t == "Mainland" else t
                             for t in tags)
                 tags.append("strokes")
-                add_related(ctx, data, tags, [strokes], text, True)
+                add_related(ctx, data, tags, [strokes], text, True,
+                            is_reconstruction)
             return ", "
 
         paren = re.sub(r", (\d+) \(([^()]+)\), (\d+) \(([^()]+)\) strokes, ",
@@ -1058,27 +1067,29 @@ def parse_word_head(ctx, pos, text, data):
                 if cls != "tags":
                     if prev_tags:
                         # Assume comma-separated alternative to previous one
-                        add_related(ctx, data, prev_tags, [desc], text, True)
+                        add_related(ctx, data, prev_tags, [desc], text, True,
+                                    is_reconstruction)
                         continue
                     elif distw(titleparts, desc) <= 0.5:
                         # Similar to head word, assume a dialectal variation to
                         # the base form.  Cf. go/Alemannic German/Verb
                         add_related(ctx, data, ["alternative"], [desc], text,
-                                    True)
+                                    True, is_reconstruction)
                         continue
                     elif (cls in ("romanization", "english") and
                           not have_romanization and
-                          classify_desc(title) == "other"):
+                          classify_desc(titleword) == "other"):
                         # Assume it to be a romanization
                         add_related(ctx, data, ["romanization"], [desc],
-                                    text, True)
+                                    text, True, is_reconstruction)
                         have_romanization = True
                         continue
 
             m = re.match(r"^(\d+) strokes?$", desc)
             if m:
                 # Special case, used to give #strokes for Han characters
-                add_related(ctx, data, ["strokes"], [m.group(1)], text, True)
+                add_related(ctx, data, ["strokes"], [m.group(1)], text, True,
+                            is_reconstruction)
                 continue
 
             # See if it is radical+strokes
@@ -1094,7 +1105,8 @@ def parse_word_head(ctx, pos, text, data):
                 t = ["radical+strokes"]
                 if lang:
                     t.extend(lang.split())
-                add_related(ctx, data, t, [radical_strokes], text, True)
+                add_related(ctx, data, t, [radical_strokes], text, True,
+                            is_reconstruction)
                 prev_tags = None
                 continue
 
@@ -1126,7 +1138,8 @@ def parse_word_head(ctx, pos, text, data):
                 lang = m.group(2)
                 t = ["strokes"]
                 t.extend(lang.split())
-                add_related(ctx, data, t, [strokes], text, True)
+                add_related(ctx, data, t, [strokes], text, True,
+                            is_reconstruction)
                 prev_tags = None
                 continue
 
@@ -1172,7 +1185,7 @@ def parse_word_head(ctx, pos, text, data):
                         classify_desc(paren) == "romanization"):
                         for r in split_at_comma_semi(paren, extra=[" or "]):
                             add_related(ctx, data, ["romanization"], [r],
-                                        text, True)
+                                        text, True, is_reconstruction)
                         have_romanization = True
                         continue
                     tagsets = [["error-unrecognized-form"]]
@@ -1195,7 +1208,8 @@ def parse_word_head(ctx, pos, text, data):
             for related in alts:
                 for tags in tagsets:
                     if related:
-                        add_related(ctx, data, tags, [related], text, True)
+                        add_related(ctx, data, tags, [related], text, True,
+                                    is_reconstruction)
                         if len(tagsets) == 1:
                             prev_tags = tags
                         else:
@@ -1205,9 +1219,11 @@ def parse_word_head(ctx, pos, text, data):
 
     # Finally, if we collected hirakana/katakana, add them now
     if hiragana:
-        add_related(ctx, data, ["hiragana"], [hiragana], text, True)
+        add_related(ctx, data, ["hiragana"], [hiragana], text, True,
+                    is_reconstruction)
     if katakana:
-        add_related(ctx, data, ["katagana"], [katakana], text, True)
+        add_related(ctx, data, ["katagana"], [katakana], text, True,
+                    is_reconstruction)
     if "tags" in data:
         data["tags"] = list(sorted(set(data["tags"])))
 
@@ -1834,9 +1850,10 @@ def parse_alt_or_inflection_of1(ctx, gloss):
     if not base:
         return tags, None
     parts = split_at_comma_semi(base, extra=[" / ",  "／"])
+    titleword = re.sub(r"^Reconstruction:[^/]*/", "", ctx.title)
     if (len(parts) <= 1 or base.startswith("/") or
         base.endswith("/") or
-        ctx.title.find("/") >= 0):
+        titleword.find("/") >= 0):
         parts = [base]
     lst = []
     for p in parts:

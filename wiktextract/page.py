@@ -346,6 +346,7 @@ panel_templates = set([
     "polyominoes",
     "predidential nomics",
     "punctuation",  # This actually gets pre-expanded
+    "reconstructed",
     "request box",
     "rf-sound example",
     "rfaccents",
@@ -822,6 +823,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
     assert isinstance(lang_code, str)
     # print("parse_language", language)
 
+    is_reconstruction = False
     word = ctx.title
     unsupported_prefix = "Unsupported titles/"
     if word.startswith(unsupported_prefix):
@@ -831,8 +833,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
         else:
             ctx.error("Unimplemented unsupported title: {}".format(word))
             word = w
+    elif word.startswith("Reconstruction:"):
+        word = re.sub(r"^Reconstruction:.*/", "", word)
+        is_reconstruction = True
 
     base_data = {"word": word, "lang": language, "lang_code": lang_code}
+    if is_reconstruction:
+        data_append(ctx, base_data, "tags", "reconstruction")
     sense_data = {}
     pos_data = {}  # For a current part-of-speech
     etym_data = {}  # For one etymology
@@ -1353,7 +1360,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         text = clean_node(config, ctx, pos_data, pre,
                           post_template_fn=head_post_template_fn)
         text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
-        parse_word_head(ctx, pos, text, pos_data)
+        parse_word_head(ctx, pos, text, pos_data, is_reconstruction)
         if "tags" in pos_data:
             common_tags = pos_data["tags"]
             del pos_data["tags"]
@@ -1981,7 +1988,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # print("CLEANED ITEM: {!r}".format(item))
 
             return parse_linkage_item_text(ctx, word, data, field, item,
-                                           sense, ruby, pos_datas)
+                                           sense, ruby, pos_datas,
+                                           is_reconstruction)
 
         def parse_linkage_template(node):
             nonlocal have_panel_template
@@ -2204,7 +2212,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # Parse the translation item.
             lang = parse_translation_item_text(ctx, word, data, item, sense,
                                                pos_datas, lang, langcode,
-                                               translations_from_template)
+                                               translations_from_template,
+                                               is_reconstruction)
 
             # Handle sublists.  They are frequently used for different scripts
             # for the language and different variants of the language.  We will

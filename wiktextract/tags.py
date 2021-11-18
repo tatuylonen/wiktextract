@@ -4934,7 +4934,7 @@ valid_tags = set([
     "reason",  # Verb form, e.g., উঘাল/Assamese
     "recently",  # Used in Recently complete, e.g., {ligpit,magbukid}/Tagalog
     "reciprocal",  # Mutual action (board sense reflexive)
-    "reconstruction",
+    "reconstruction",  # This word/sense is a reconstruction for a dead language
     "reduced",  # de/Central Franconian (XXX merge with e.g. clipping?)
     "reduplication",
     "reflexive",

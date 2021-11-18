@@ -296,7 +296,8 @@ english_to_tags = {
 }
 
 def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
-                                lang, langcode, translations_from_template):
+                                lang, langcode, translations_from_template,
+                                is_reconstruction):
     assert isinstance(ctx, Wtp)
     assert isinstance(word, str)
     assert isinstance(data, dict)
@@ -308,6 +309,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
     assert isinstance(translations_from_template, list)
     for x in translations_from_template:
         assert isinstance(x, str)
+    assert is_reconstruction in (True, False)
 
     # print("parse_translation_item_text: {!r} lang={}".format(item, lang))
 

@@ -18,12 +18,14 @@ class TrTests(unittest.TestCase):
         self.ctx.start_section("English")
 
     def runtr(self, item, sense=None, pos_datas=[],
-              lang=None, langcode=None, translations_from_template=[]):
+              lang=None, langcode=None, translations_from_template=[],
+              is_reconstruction=False):
         """Simple test runner.  Returns data."""
         data = {}
         parse_translation_item_text(self.ctx, self.ctx.title, data,
                                     item, sense, pos_datas, lang, langcode,
-                                    translations_from_template)
+                                    translations_from_template,
+                                    is_reconstruction)
         return data
 
     def test_trdesc1(self):
@@ -291,6 +293,13 @@ class TrTests(unittest.TestCase):
         self.assertEqual(data, {"translations": [
             {"word": "foo", "lang": "Greek", "code": "el",
              "tags": ["Ancient"]}]})
+
+    def test_tr27(self):
+        data = self.runtr("  Proto-Germanic: *foo", lang="Proto-Germanic",
+                          is_reconstruction=True)
+        self.assertEqual(self.ctx.debugs, [])
+        self.assertEqual(data, {"translations": [
+            {"word": "foo", "lang": "Proto-Germanic", "code": "gem-pro"}]})
 
     # XXX for now this kind of or splitting is broken
     # def test_tr7(self):

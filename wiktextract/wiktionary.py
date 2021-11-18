@@ -23,13 +23,12 @@ special_prefixes = set([
     "Module",
     "Template",
     "Citations",
-    "Reconstruction",  # XXX how about this one?
     "Appendix",
     "Rhymes",  # XXX check these out
     "Wiktionary",
     "Thread",
     "Index",
-    "Thesaurus",  # XXX some of these might be useful?
+    "Thesaurus",  # These are handled as a separate pass
     "MediaWiki",
     "Concordance",
     "Sign gloss",  # XXX would I like to capture these too?
@@ -73,9 +72,8 @@ def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
         for suffix in translation_suffixes:
             if title.endswith(suffix):
                 return None # XXX
-        # XXX Thesaurus pages?
+
         # XXX Sign gloss pages?
-        # XXX Reconstruction pages?
         config1 = WiktionaryConfig(**config_kwargs)
         config1.thesaurus_data = thesaurus_data
         start_t = time.time()

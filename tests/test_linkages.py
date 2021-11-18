@@ -22,7 +22,7 @@ class LinkageTests(unittest.TestCase):
 
     def run_data(self, item, word="testpage", lang="English",
                  field="related", ruby="", sense=None, senses=[],
-                 ctx=None):
+                 ctx=None, is_reconstruction=False):
         """Runs a test where we expect the parsing to return None.  This
         function returns ``data``."""
         assert isinstance(item, str)
@@ -40,7 +40,7 @@ class LinkageTests(unittest.TestCase):
         self.ctx.start_section(lang)
         data = {}
         ret = parse_linkage_item_text(self.ctx, word, data, field, item,
-                                      sense, ruby, senses)
+                                      sense, ruby, senses, is_reconstruction)
         self.assertIs(ret, None)
         if ctx is None:
             self.assertEqual(self.ctx.errors, [])
@@ -221,6 +221,14 @@ class LinkageTests(unittest.TestCase):
              "roman": "gānxīn"},
         ]})
 
+    def test_reconstruction1(self):
+        data = self.run_data("*foo", is_reconstruction=True)
+        self.assertEqual(data, {"related": [{"word": "foo"}]})
+
+    def test_reconstruction2(self):
+        data = self.run_data("*foo", is_reconstruction=False)
+        self.assertEqual(data, {"related": [{"word": "*foo"}]})
+
     def test_dup1(self):
         # Duplicates should get eliminated
         data = self.run_data("foo, bar, foo")
@@ -236,7 +244,7 @@ class LinkageTests(unittest.TestCase):
         self.ctx.start_section("Chinese")
         data = {}
         ret = parse_linkage_item_text(self.ctx, "滿", data, "synonyms",
-                                      "(arrogant):", None, "", [])
+                                      "(arrogant):", None, "", [], False)
         self.assertEqual(ret, "arrogant")
 
     def test_sensearg1(self):

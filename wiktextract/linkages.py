@@ -167,7 +167,7 @@ unicode_dc_re = re.compile(r"\w[{}]|.".format(
 
 
 def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
-                            pos_datas):
+                            pos_datas, is_reconstruction):
     """Parses a linkage item once it has been converted to a string.  This
     may add one or more linkages to ``data`` under ``field``.  This
     returns None or a string that contains thats that should be applied
@@ -180,6 +180,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
     assert sense is None or isinstance(sense, str)
     assert isinstance(ruby, str)   # Captured ruby (hiragana/katakana) or ""
     assert isinstance(pos_datas, list)  # List of senses (containing "glosses")
+    assert is_reconstruction in (True, False)
 
     item = re.sub(r"\(\)", "", item)
     item = re.sub(r"\s\s+", " ", item)
@@ -737,6 +738,12 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
             assert r is None or isinstance(r, str)
             nonlocal alt
             nonlocal taxonomic
+
+            # We remove "*" from the beginning of reconstruction linkages.
+            # Such linkages should only occur in reconstruction senses, so
+            # this should not cause ambiguity.
+            if is_reconstruction and w.startswith("*"):
+                w = w[1:]
 
             # Check if the word contains the Fullwith Solidus, and if
             # so, split by it and treat the the results as alternative
