@@ -4786,6 +4786,7 @@ valid_tags = set([
     "mostly",
     "motive-form",  # Verb form for Korean (e.g., 조사하다)
     "multiple-possession",
+    "multiplicative",  # adverbial case in Finnish
     "mutated",
     "mutation",
     "name",
@@ -4863,6 +4864,7 @@ valid_tags = set([
     "one-termination",
     "only",
     "onomatopoeic",
+    "oppositive",  # expresses contrariety
     "optative",
     "ordinal",
     "parasynonym",
@@ -4988,6 +4990,7 @@ valid_tags = set([
     "singular",  # Number, cf. plural, dual, trial
     "singular-only",
     "singulative",  # Individuation of a collective or mass noun, like number
+    "situative",  # expressing location of things in comparison with one another
     "sixth-conjugation",
     "slang",
     "slur",
@@ -5043,7 +5046,7 @@ valid_tags = set([
     "synonym-of",
     "taboo",
     "tafa-form",  # Malagasy verbs
-    "temporal",  # Used in generic/specific temporal participle, e.g., talamaq
+    "temporal",  # relating to time/tense, e.g., talamaq; Finnish adverbials
     "term-of-address",
     "terminative",  # Verb mood (e.g., Japanese); also case in Quechua?
     "thematic",

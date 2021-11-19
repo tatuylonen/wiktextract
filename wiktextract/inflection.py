@@ -1,3 +1,7 @@
+# Data for parsing inflection tables
+#
+# Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+
 from .tags import valid_tags, head_final_numeric_langs
 
 infl_map = {
@@ -605,7 +609,7 @@ infl_map = {
     "Attributive": "attributive",
     "Imperative": "imperative",
     "Key constructions": "",
-    "Volitional": "",
+    "Volitional": "volitional",
     "Imperfective": "imperfective",
     "Hypothetical": "hypothetical",
     "Negative continuative": "negative continuative",
@@ -1499,10 +1503,18 @@ infl_map = {
     "դուք": {"if": "second-person plural", "then": ""},
     "նրանք": {"if": "third-person plural", "then": ""},
     "nominative /, accusative": "nominative accusative",
+    "situative": "situative",
+    "oppositive": "oppositive",
+    "multiplicative": "multiplicative",
+    "temporal": "temporal",
 
     # XXX "3" is problematic - used in different meanings
     # (class-3, third-declension - must refer to language?)
     # XXX    21 3 ['udhi', 'матрас', 'ibuka']
+
+    # These are headers for columns that contain titles even if not header style
+    "noun case": "*",  # e.g., kolme/Finnish
+    "adverbial form": "*",  # e.g., kolme/Finnish
 }
 
 
@@ -1510,7 +1522,7 @@ def check_tags(k, v):
     assert isinstance(k, str)
     assert isinstance(v, str)
     for tag in v.split():
-        if tag not in valid_tags:
+        if tag not in valid_tags and tag not in ("*",):
             print("infl_map[{!r}] contains invalid tag {!r}"
                   .format(k, tag))
 
