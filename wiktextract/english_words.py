@@ -77,6 +77,7 @@ additional_words = set([
     'Coriandum',
     'Cryptodiran',
     'Czech',
+    'DNA',
     'Dirac',
     'Dr',
     'Epiprocta',
@@ -1101,6 +1102,7 @@ additional_words = set([
     'meningitis',
     'menorah',
     'menstrual',
+    'meow',
     'mercenaria',
     'mercenary',
     'meridiem',
@@ -1887,6 +1889,9 @@ not_english_words = set([
     "Germania",
     "Germani",
     "Kina",
+    "J'habitais",
+    "avec",
+    "lui",
 ])
 
 # Construct a set of (most) English words.  Multi-word expressions where we

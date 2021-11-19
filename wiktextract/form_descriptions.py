@@ -56,6 +56,9 @@ known_firsts.update([
     "Rugosomyces",
     "Tanagra",
 ])
+# Some starts are only recognized as exact known species due to too many false
+# positives
+known_firsts = known_firsts - set(["The"])
 
 # First words of unicodedata.name() that indicate scripts that cannot be
 # accepted in romanizations or english (i.e., should be considered "other"
@@ -1923,19 +1926,19 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
     desc1 = re.sub(r"\s*×.*", "", desc1)
     lst = desc1.split()
     if len(lst) > 1 and len(lst) <= 5 and lst[0] in known_firsts:
-        have_non_english = lst[0].lower() not in english_words
+        have_non_english = 1 if lst[0].lower() not in english_words else 0
         for x in lst[1:]:
             if x in ("A", "B", "C", "D", "E", "F", "I", "II", "III", "IV", "V"):
                 continue
             if x[0].isupper():
                 break
             if x not in english_words:
-                have_non_english = True
+                have_non_english += 1
         else:
             # Starts with known taxonomic term, does not contain uppercase
             # words (except allowed letters) and at least one word is not
             # English
-            if have_non_english:
+            if have_non_english >= len(lst) - 1 and have_non_english > 0:
                 return "taxonomic"
 
     # If all words are in our English dictionary, interpret as English

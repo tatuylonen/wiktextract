@@ -344,3 +344,23 @@ class ClassifyTests(unittest.TestCase):
         # This really tests that disabling unknown starts works in classify_desc
         cls = classify_desc("11 to 19", no_unknown_starts=True)
         self.assertEqual(cls, "english")
+
+    def test_classify78(self):
+        cls = classify_desc("The cat goes \"meow\".")
+        self.assertEqual(cls, "english")
+
+    def test_classify79(self):
+        cls = classify_desc('merely announcing that the elimination of news programming [on tv channel TQS] will allow it to focus on "the production of quality entertainment and cultural programming"')
+        self.assertEqual(cls, "english")
+
+    def test_classify80(self):
+        cls = classify_desc("I was living with him.")
+        self.assertEqual(cls, "english")
+
+    def test_classify81(self):
+        cls = classify_desc("J'habitais avec lui.")
+        self.assertEqual(cls, "romanization")
+
+    def test_classify82(self):
+        cls = classify_desc("Police resort to DNA analysis in order to identify criminals.")
+        self.assertEqual(cls, "english")
