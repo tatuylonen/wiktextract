@@ -1923,7 +1923,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
         forms."""
         # print("parse_inflection:", node)
         assert isinstance(node, WikiNode)
-        captured = False
 
         def inflection_template_fn(name, ht):
             # print("decl_conj_template_fn", name, ht)
@@ -1936,18 +1935,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
             m = re.search(r"-(conj|decl|ndecl|adecl|infl|conjugation|"
                           r"declension|inflection|mut|mutation)($|-)", name)
             if m:
-                new_ht = {}
-                # Convert html entities that may be used in the arguments
-                for k, v in ht.items():
-                    v = clean_value(config, v, no_strip=True)
-                    v = decode_html_entities(v)
-                    new_ht[decode_html_entities(k)] = v
-                new_ht["template_name"] = name
-                data_append(ctx, pos_data, "inflection", new_ht)
-                nonlocal captured
-                captured = True
+                args_ht = clean_template_args(config, ht)
+                dt = {"name": name, "args": args_ht}
+                data_append(ctx, pos_data, "inflection_templates", dt)
                 return ""
 
+            # Expand other templates, as they might expand to inflection
+            # templates
             return None
 
         # Clean the node.  This captures category links and calls the template

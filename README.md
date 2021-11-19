@@ -586,9 +586,8 @@ following keys (others may also be present or added later):
 * ``coordinate_terms`` - non-disambiguated coordinate term linkages for the word (see below)
 * ``wikidata`` - non-disambiguated Wikidata identifer
 * ``wiktionary`` - non-disambiguated page title in Wikipedia (possibly prefixed by language id)
-* ``inflection`` - conjugation and declension entries found for the word, as dictionaries.  These basically capture the language-specific inflection template
-for the word.
 * ``head_templates``: part-of-speech specific head tags for the word.  This basically just captures the templates (their name and arguments) as a list of dictionaries.  Most applications may want to ignore this.
+* ``inflection_templates`` - conjugation and declension templates found for the word, as dictionaries.  These basically capture the language-specific inflection template for the word.  Note that for some languages inflection information is also contained in ``head_templates``.  XXX in the very near future, we will start parsing inflections from the inflection tables into ``forms``, so there is usually no need to use the ``inflection_templates`` data.
 
 There may also be other fields.
 
