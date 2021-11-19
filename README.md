@@ -627,7 +627,7 @@ sense is a dictionary that may contain the following keys (among others, and mor
 * ``senseid`` - list of textual identifiers collected for the sense.  If there is a QID for the entry (e.g., Q123), those are stored in the ``wikidata`` field.
 * ``wikidata`` - list of QIDs (e.g., Q123) for the sense
 * ``wikipedia`` - list of Wikipedia page titles (with optional language code prefix)
-* ``examples`` - list of usage examples, each example being a dictionary with ``text`` field containing the example text and optional ``ref`` field containing a source reference
+* ``examples`` - list of usage examples, each example being a dictionary with ``text`` field containing the example text, optional ``ref`` field containing a source reference, optional ``english`` field containing English translation, and optional ``type`` field containing example type (currently ``example`` or ``quotation`` if present)
 
 ### Pronunciation
 

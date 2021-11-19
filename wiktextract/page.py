@@ -527,6 +527,77 @@ starts_lang_re = re.compile(
     "|".join(re.escape(x["name"]) for x in ALL_LANGUAGES) +
     ")[ /]")
 
+# Set of template names that are used to define usage examples.  If the usage
+# example contains one of these templates, then it its type is set to
+# "example"
+usex_templates = set([
+    "afex",
+    "affixusex",
+    "el-example",
+    "el-x",
+    "example",
+    "examples",
+    "he-usex",
+    "he-x",
+    "hi-usex",
+    "hi-x",
+    "ja-usex-inline",
+    "ja-usex",
+    "ja-x",
+    "jbo-example",
+    "jbo-x",
+    "km-usex",
+    "km-x",
+    "ko-usex",
+    "ko-x",
+    "lo-usex",
+    "lo-x",
+    "ne-x",
+    "ne-usex",
+    "prefixusex",
+    "ryu-usex",
+    "ryu-x",
+    "shn-usex",
+    "shn-x",
+    "suffixusex",
+    "th-usex",
+    "th-x",
+    "ur-usex",
+    "ur-x"
+    "usex",
+    "usex-suffix",
+    "ux",
+    "uxi",
+    "zh-usex",
+    "zh-x",
+])
+
+# Set of template names that are used to define quotation examples.  If the
+# usage example contains one of these templates, then its type is set to
+# "quotation".
+quotation_templates = set([
+    "collapse-quote",
+    "quote-av",
+    "quote-book",
+    "quote-GYLD",
+    "quote-hansard",
+    "quotei",
+    "quote-journal",
+    "quotelite",
+    "quote-mailing list",
+    "quote-meta",
+    "quote-newsgroup",
+    "quote-song",
+    "quote-text",
+    "quote",
+    "quote-us-patent",
+    "quote-video game",
+    "quote-web",
+    "quote-wikipedia",
+    "wikiquote",
+    "Wikiquote",
+])
+
 
 def parse_sense_XXXold_going_away(config, data, text, use_text):
     """Parses a word sense from the text.  The text is usually a list item
@@ -990,7 +1061,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         continue
                     if item.kind != NodeKind.LIST_ITEM:
                         continue
-                    subtext = clean_node(config, ctx, None, item.children)
+                    usex_type = None
+
+                    def usex_template_fn(name, ht):
+                        nonlocal usex_type
+                        if name in usex_templates:
+                            usex_type = "example"
+                        elif name in quotation_templates:
+                            usex_type = "quotation"
+                        return None
+
+                    subtext = clean_node(config, ctx, None, item.children,
+                                         template_fn=usex_template_fn)
                     lines = subtext.split("\n")
                     lines = list(x for x in lines
                                  if not re.match(
@@ -1078,6 +1160,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             dt["ref"] = ref
                         if tr:
                             dt["english"] = tr
+                        if usex_type:
+                            dt["type"] = usex_type
                         examples.append(dt)
 
         # Generate no gloss for translation hub pages, but add the
