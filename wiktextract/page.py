@@ -1106,6 +1106,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 classify_desc(lines[-1]) == "english"):
                                 tr = lines[-1]
                                 lines = lines[:-1]
+                        elif (usex_type == "quotation" and
+                              any(re.search(r"[]\d:)]\s*$", x)
+                                  for x in lines[:-1])):
+                            ref = []
+                            for i in range(len(lines)):
+                                ref.append(lines[i].strip())
+                                if re.search(r"[]\d:)]\s*$", lines[i]):
+                                    break
+                            ref = " ".join(ref)
+                            lines = lines[i + 1:]
                         elif (language == "English" and
                               re.match(r"^[#*]*:+", lines[1])):
                             ref = lines[0]
@@ -1147,10 +1157,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     subtext = re.sub(r'^[“"`]([^“"`”\']*)[”"\']$', r"\1",
                                      subtext)
                     subtext = re.sub(r"\s+", " ", subtext).strip()
-                    if ref:
-                        ref = re.sub(r"\s*\(→ISBN\)", "", ref)
-                        if ref.endswith(":") or ref.endswith(","):
-                            ref = ref[:-1].strip()
+                    ref = re.sub(r"\s*\(→ISBN\)", "", ref)
+                    ref = ref.strip()
+                    if ref.endswith(":") or ref.endswith(","):
+                        ref = ref[:-1].strip()
+                    ref = re.sub(r"\s+,\s+", ", ", ref)
+                    ref = re.sub(r"\s\s+", " ", ref)
                     if ref and not subtext:
                         subtext = ref
                         ref = ""

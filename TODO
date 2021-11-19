@@ -310,9 +310,6 @@ longer copied?
 Handle Chinese usage examples better - separate Chinese (traditional,
 simplified), Pinyin, translation.
 
-Now in-gloss synonyms (and other related linkages) generate example
-lines.  These should be removed.
-
 Translations for Mandarin seem to have Chinese language but cmn code.
 What is correct?
 
@@ -370,10 +367,6 @@ Heleb/Northern Kurdish: ERROR: LUA error in #invoke ('wikipedia', 'wikipedia_box
 তাহুন/Assamese/Pronoun: ERROR: LUA error in #invoke ('links/templates
 
 Parse declension/conjugation tables
-
-thrill/English:
-  - one example is not correctly split to ref/text
-  - head section syntax should be updated
 
 Interpret "see also" sections.  This seems to be junk in some languages/words,
 but related words in others (e.g., tänään/Finnish)
