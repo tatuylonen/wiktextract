@@ -373,13 +373,13 @@ the following may also be useful:
 ``pages/`` and to create a cache file that you can use for quickly
 processing individual pages:
 ```
-wiktwords --cache-file /tmp/wikt-cache --pages-dir pages enwiktionary-20201201-pages-articles.xml.bz2
+wiktwords --cache /tmp/wikt-cache --pages-dir pages enwiktionary-20201201-pages-articles.xml.bz2
 ```
 
 2. To process a single page, processing a human-readable output file
 for debugging:
 ```
-wiktwords --cache-file /tmp/wikt-cache --all --all-languages --out outfile --page pages/Words/di/dictionary.txt
+wiktwords --cache /tmp/wikt-cache --all --all-languages --out outfile --page pages/Words/di/dictionary.txt
 ```
 
 The following command-line options can be used to control its operation:
