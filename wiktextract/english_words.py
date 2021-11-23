@@ -894,6 +894,7 @@ additional_words = set([
     'hamster',
     'handball',
     'harbinger',
+    'hardcore',
     'harmonize',
     'harvester',
     'harvesters',

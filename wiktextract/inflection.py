@@ -88,10 +88,8 @@ infl_map = {
     "1st person plural": "first-person plural",
     "2nd person plural": "second-person plural",
     "3rd person plural": "third-person plural",
-    "single possession":
-    "possessive single-possession not-attributive predicative",
-    "multiple possessions":
-    "possessive multiple-possession not-attributive predicative",
+    "single possession": "possessive single-possession",
+    "multiple possessions": "possessive multiple-possession",
     "1st person sing.": "first-person singular",
     "2nd person sing.": "second-person singular",
     "3rd person sing.": "third-person singular",

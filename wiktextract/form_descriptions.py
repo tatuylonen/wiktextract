@@ -1286,7 +1286,7 @@ def parse_sense_qualifier(ctx, text, data):
                     data_extend(ctx, data, "tags", tags)
             elif cls == "taxonomic":
                 if re.match(r"×[A-Z]", semi):
-                    data_append(ctx, dt, "tags", "extinct")
+                    data_append(ctx, data, "tags", "extinct")
                     semi = semi[1:]
                 data["taxonomic"] = semi
             elif cls == "english":
@@ -1482,7 +1482,7 @@ def parse_translation_desc(ctx, lang, text, tr):
                 ctx.debug("more than one value in \"taxonomic\": {} vs. {}"
                           .format(tr["taxonomic"], par))
             if re.match(r"×[A-Z]", par):
-                data_append(ctx, dt, "tags", "extinct")
+                data_append(ctx, tr, "tags", "extinct")
                 par = par[1:]
             tr["taxonomic"] = par
         elif cls == "other":
@@ -1942,7 +1942,7 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
                 return "taxonomic"
 
     # If all words are in our English dictionary, interpret as English
-    if re.match(r"^[ -~“”—…‘’ʹ€]+$", desc) and len(desc) > 1:
+    if re.match(r"^[ -~―—“”…'‘’ʹ€]+$", desc) and len(desc) > 1:
         if desc in english_words and desc[0].isalpha():
             return "english"   # Handles ones containing whitespace
         desc1 = re.sub(tokenizer_fixup_re,
@@ -1976,8 +1976,10 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
                      x[:-4] + "ized" in english_words) or
                     (x.endswith("ising") and len(x) >= 7 and
                      x[:-5] + "izing" in english_words) or
-                    (x.find("-") >= 0 and all((y in english_words or not y)
-                                             for y in x.split("-"))))
+                    (re.search(r"[-/]", x) and
+                     all(((y in english_words and len(y) > 2)
+                          or not y)
+                         for y in re.split(r"[-/]", x))))
                    for x in tokens)
         cnt = lst.count(True)
         if (any(lst[i] and x[0].isalpha() and len(x) > 1

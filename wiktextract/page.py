@@ -714,6 +714,7 @@ template_linkage_mappings = [
     ["hyponyms", "hyponyms"],
     ["der", "derived"],
     ["derived terms", "derived"],
+    ["coordinate terms", "coordinate_terms"],
     ["rel", "related"],
     ["col", 2],
 ]
@@ -1065,10 +1066,29 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
                     def usex_template_fn(name, ht):
                         nonlocal usex_type
+                        if name in panel_templates:
+                            return ""
                         if name in usex_templates:
                             usex_type = "example"
                         elif name in quotation_templates:
                             usex_type = "quotation"
+                        for prefix, t in template_linkage_mappings:
+                            if re.search(r"(^|[-/\s]){}($|\b|[0-9])"
+                                         .format(prefix),
+                                         name):
+                                f = t if isinstance(t, str) else field
+                                i = t if isinstance(t, int) else 2
+                                while True:
+                                    v = ht.get(i, None)
+                                    if v is None:
+                                        break
+                                    v = clean_node(config, ctx, None, v)
+                                    parse_linkage_item_text(ctx, word,
+                                                            sense_data, f, v,
+                                                            None, "", [],
+                                                            is_reconstruction)
+                                    i += 1
+                                return ""
                         return None
 
                     subtext = clean_node(config, ctx, None, item.children,
@@ -1081,13 +1101,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                          r"Hypernyms: |Derived terms: |"
                                          r"Related terms: |"
                                          r"Hypernym: |Derived term: |"
+                                         r"Coordinate terms:|"
                                          r"Related term: |"
                                          r"For more quotations using )",
                                          x))
                     tr = ""
                     ref = ""
                     if len(lines) == 1 and language != "English":
-                        parts = re.split(r"\s*―\s*", lines[0])
+                        parts = re.split(r"\s*[―—]\s*", lines[0])
                         if (len(parts) == 2 and
                             classify_desc(parts[1]) == "english"):
                             lines = [parts[0].strip()]
@@ -1099,23 +1120,28 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 lines = [parts[0].strip()]
                                 tr = parts[1].strip()
                     elif len(lines) > 1:
-                        if re.search(r"[]\d:)]\s*$", lines[0]):
-                            ref = lines[0]
-                            lines = lines[1:]
-                            if (language != "English" and len(lines) >= 2 and
-                                classify_desc(lines[-1]) == "english"):
-                                tr = lines[-1]
-                                lines = lines[:-1]
-                        elif (usex_type == "quotation" and
+                        if (usex_type == "quotation" and
                               any(re.search(r"[]\d:)]\s*$", x)
                                   for x in lines[:-1])):
                             ref = []
                             for i in range(len(lines)):
+                                if re.match(r"^[#*]*:+\s*$", lines[i]):
+                                    break
                                 ref.append(lines[i].strip())
                                 if re.search(r"[]\d:)]\s*$", lines[i]):
                                     break
                             ref = " ".join(ref)
                             lines = lines[i + 1:]
+                            if (language != "English" and len(lines) >= 2 and
+                                classify_desc(lines[-1]) == "english"):
+                                i = len(lines) - 1
+                                while (i > 1 and
+                                       classify_desc(lines[i - 1])
+                                       == "english"):
+                                    i -= 1
+                                tr = "\n".join(lines[i:])
+                                lines = lines[:i]
+
                         elif (language == "English" and
                               re.match(r"^[#*]*:+", lines[1])):
                             ref = lines[0]
@@ -1129,26 +1155,49 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             elif cls1 == "english" and cls2 != "english":
                                 tr = lines[0]
                                 lines = [lines[1]]
-                            elif re.match(r"^[#*]*:+", lines[1]):
-                                line = re.sub(r"^[#*:]+\s*", "", lines[1])
-                                if classify_desc(line) == "english":
-                                    tr = line
-                                    lines = [lines[0]]
+                            elif (re.match(r"^[#*]*:+", lines[1]) and
+                                  classify_desc(re.sub(r"^[#*:]+\s*", "",
+                                                       lines[1])) == "english"):
+                                tr = re.sub(r"^[#*:]+\s*", "", lines[1])
+                                lines = [lines[0]]
+                            elif cls1 == "english" and cls2 == "english":
+                                # Both were classified as English, but
+                                # presumably one is not.  Assume first is
+                                # non-English, as that seems more common.
+                                tr = lines[1]
+                                lines = [lines[0]]
                         elif language != "English" and len(lines) > 2:
+                            for x in lines:
+                                print("  LINE: {}: {}"
+                                      .format(classify_desc(x), x))
+                            if re.match(r"^[#*]*:+\s*$", lines[1]):
+                                ref = lines[0]
+                                lines = lines[2:]
                             cls1 = classify_desc(lines[-1])
-                            if (cls1 == "english" and
-                                all(classify_desc(x) != "english"
-                                    for x in lines[:-1])):
-                                tr = lines[-1]
-                                lines = lines[:-1]
+                            if cls1 == "english":
+                                i = len(lines) - 1
+                                while (i > 1 and
+                                       classify_desc(lines[i - 1])
+                                       == "english"):
+                                    i -= 1
+                                tr = "\n".join(lines[i:])
+                                lines = lines[:i]
 
                     tr = re.sub(r"^[#*:]+\s*", "", tr)
-                    if tr == ("(please add an English translation of this "
-                              "usage example)"):
+                    tr = re.sub(r"[ \t\r]+", " ", tr).strip()
+                    tr = re.sub(r"\[\s*…\s*\]", "[…]", tr)
+                    if tr in ("(please add an English translation of this "
+                              "usage example)",
+                              "(please add an English translation of this "
+                              "quote)"):
                         tr = ""
                     ref = re.sub(r"^[#*:]+\s*", "", ref)
+                    ref = re.sub(r", (volume |number |page )?“?"
+                                 r"\(please specify ([^)]|\(s\))*\)”?",
+                                 "", ref)
+                    ref = re.sub(r"\[\s*…\s*\]", "[…]", ref)
                     lines = list(re.sub(r"^[#*:]+\s*", "", x) for x in lines)
-                    subtext = " ".join(lines)
+                    subtext = "\n".join(lines)
                     if not tr and language != "English":
                         m = re.search(r"([.!?])\s+\(([^)]+)\)\s*$", subtext)
                         if m and classify_desc(m.group(2)) == "english":
@@ -1156,13 +1205,25 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             subtext = subtext[:m.start()] + m.group(1)
                     subtext = re.sub(r'^[“"`]([^“"`”\']*)[”"\']$', r"\1",
                                      subtext)
-                    subtext = re.sub(r"\s+", " ", subtext).strip()
+                    subtext = re.sub(r"(please add an English translation of "
+                                     r"this (quote|usage example))",
+                                     "", subtext)
+                    subtext = re.sub(r"[ \t\r]+", " ", subtext).strip()
+                    subtext = re.sub(r"\[\s*…\s*\]", "[…]", subtext)
+                    note = None
+                    m = re.match(r"^\(([^)]*)\):\s+", subtext)
+                    if (m is not None and language != "English" and
+                        (m.group(1).startswith("with ") or
+                         classify_desc(m.group(1)) == "english")):
+                        note = m.group(1)
+                        subtext = subtext[m.end():]
                     ref = re.sub(r"\s*\(→ISBN\)", "", ref)
+                    ref = re.sub(r",\s*→ISBN", "", ref)
                     ref = ref.strip()
                     if ref.endswith(":") or ref.endswith(","):
                         ref = ref[:-1].strip()
                     ref = re.sub(r"\s+,\s+", ", ", ref)
-                    ref = re.sub(r"\s\s+", " ", ref)
+                    ref = re.sub(r"\s+", " ", ref)
                     if ref and not subtext:
                         subtext = ref
                         ref = ""
@@ -1174,6 +1235,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             dt["english"] = tr
                         if usex_type:
                             dt["type"] = usex_type
+                        if note:
+                            dt["note"] = note
                         examples.append(dt)
 
         # Generate no gloss for translation hub pages, but add the

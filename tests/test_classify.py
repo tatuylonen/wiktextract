@@ -364,3 +364,11 @@ class ClassifyTests(unittest.TestCase):
     def test_classify82(self):
         cls = classify_desc("Police resort to DNA analysis in order to identify criminals.")
         self.assertEqual(cls, "english")
+
+    def test_classify83(self):
+        cls = classify_desc('"She will not be there tomorrow." ―"Oh, too bad, it\'s not important, we\'ll go on without her."')
+        self.assertEqual(cls, "english")
+
+    def test_classify84(self):
+        cls = classify_desc('Hardcore pictures.')
+        self.assertEqual(cls, "english")

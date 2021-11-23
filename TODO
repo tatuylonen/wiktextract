@@ -380,3 +380,5 @@ htmlgen: disambiguate translation & linkage targets
 htmlgen: change disambiguated links
 
 check jakes/English - ]] at the beginning of second sense
+
+Improve #time date format parsing.  cf. hard/English.

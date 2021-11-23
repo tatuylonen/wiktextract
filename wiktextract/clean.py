@@ -863,8 +863,14 @@ def clean_value(config, title, no_strip=False):
 
     def repl_1(m):
         return clean_value(config, m.group(1), no_strip=True)
-    def repl_2(m):
-        return clean_value(config, m.group(2), no_strip=True)
+    def repl_exturl(m):
+        args = re.split(r"\s+", m.group(1))
+        i = 0
+        while i < len(args) - 1:
+            if not re.match(r"(https?|mailto)://", args[i]):
+                break
+            i += 1
+        return " ".join(args[i:])
     def repl_link(m):
         if m.group(2) and m.group(2).lower() in ("file", "image"):
             return ""
@@ -907,7 +913,7 @@ def clean_value(config, title, no_strip=False):
                    title)
     # Replace <br/> by comma space (it is used to express alternatives in some
     # declensions)
-    title = re.sub(r"(?si)\s*<\s*br\s*/?>\n*", ", ", title)
+    title = re.sub(r"(?si)\s*<\s*br\s*/?>\n*", "\n", title)
     # Remove divs with floatright class (generated e.g. by {{ja-kanji|...}})
     title = re.sub(r'(?si)<\s*div\b[^>]*?\bclass="[^"]*?\bfloatright\b[^>]*?>'
                    r'((<\s*div\b(<\s*div\b.*?<\s*/\s*div\s*>|.)*?</div>)|.)*?'
@@ -978,10 +984,8 @@ def clean_value(config, title, no_strip=False):
     # Replace remaining HTML links by the URL.
     while True:
         orig = title
-        title = re.sub(r"\[\s*(https?:)?//[^]\s]+\s+([^][]+?)\s*\]", repl_2,
-                       title)
-        title = re.sub(r"\[\s*((https?:|mailto:)?//[^]\s]+)\s*\]", repl_1,
-                       title)
+        title = re.sub(r"\[\s*((https?:|mailto:)?//([^][]+?))\s*\]",
+                       repl_exturl, title)
         if title == orig:
             break
     # Remove italic and bold

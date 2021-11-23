@@ -2330,6 +2330,7 @@ xlat_tags_map = {
     "backslang": "slang",
     "butcher's slang": "slang jargon",
     "archiac": "archaic error-misspelling",
+    "archaic except in fixed expressions": "archaic",
     "nonstandard form": "nonstandard",
     "nonstandard form of": "nonstandard alt-of",
     "main verb": "base-form",

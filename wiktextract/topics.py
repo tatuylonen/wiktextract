@@ -298,6 +298,8 @@ topic_generalize_map = {
     "biology": "natural-sciences",
     "physical-sciences": "natural-sciences",
     "engineering": "physical-sciences",
+    "drafting": "engineering",
+    "CAD": "engineering computing",
     "mathematics": "sciences",
     "computing": "engineering mathematics",
     "anthropodology": "anthropology",
