@@ -9,6 +9,7 @@ from .page import clean_value, parse_page
 from .parts_of_speech import PARTS_OF_SPEECH
 from .thesaurus import extract_thesaurus_data
 from .categories import extract_categories
+from .tags import sort_tags, valid_tags
 
 __all__ = (
     "WiktionaryConfig",
@@ -19,4 +20,6 @@ __all__ = (
     "extract_thesaurus_data",
     "extract_namespace",
     "extract_categories",
+    "sort_tags",
+    "valid_tags",
 )

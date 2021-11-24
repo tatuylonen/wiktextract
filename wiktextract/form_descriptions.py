@@ -416,7 +416,7 @@ def add_to_valid_tree1(tree, k, v, valid_values):
     assert isinstance(tree, dict)
     assert isinstance(k, str)
     assert v is None or isinstance(v, (list, tuple, str))
-    assert isinstance(valid_values, set)
+    assert isinstance(valid_values, (set, dict))
     if not v:
         add_to_valid_tree(valid_sequences, k, None)
         return
@@ -435,7 +435,7 @@ def add_to_valid_tree1(tree, k, v, valid_values):
 def add_to_valid_tree_mapping(tree, mapping, valid_values, recurse):
     assert isinstance(tree, dict)
     assert isinstance(mapping, dict)
-    assert isinstance(valid_values, set)
+    assert isinstance(valid_values, (set, dict))
     assert recurse in (True, False)
     for k, v in mapping.items():
         assert isinstance(k, str)
@@ -464,7 +464,11 @@ for tag in valid_tags:
     add_to_valid_tree(valid_sequences, tag, tag)
 for tag in uppercase_tags:
     hyphenated = re.sub(r"\s+", "-", tag)
-    valid_tags.add(hyphenated)
+    if hyphenated in valid_tags:
+        print("DUPLICATE TAG: {} (from uppercase tag {!r})"
+              .format(hyphenated, tag))
+    assert hyphenated not in valid_tags
+    valid_tags[hyphenated] = "dialect"
     add_to_valid_tree(valid_sequences, hyphenated, hyphenated)
 for tag in uppercase_tags:
     hyphenated = re.sub(r"\s+", "-", tag)

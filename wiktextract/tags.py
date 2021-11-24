@@ -13,61 +13,61 @@ xlat_head_map = {
     "m./f.": "masculine feminine",
     "m or f": "masculine feminine",
     "m or n": "masculine neuter",
-    "m or c": "masculine common",
+    "m or c": "masculine common-gender",
     "f or m": "feminine masculine",
     "f or n": "feminine neuter",
     "f or n.": "feminine neuter",  # fimmtíu/Icelandig
-    "f or c": "feminine common",  # sustainability/Tr/Norwegian
+    "f or c": "feminine common-gender",  # sustainability/Tr/Norwegian
     "n or f": "neuter feminine",
     "n or m": "neuter masculine",
-    "n or c": "neuter common",
-    "c or m": "common masculine",
-    "c or f": "common feminine",  # picture book/Tr/Norwegian
-    "c or n": "common neuter",  # ethylene/Eng/Tr/Danish
+    "n or c": "neuter common-gender",
+    "c or m": "common-gender masculine",
+    "c or f": "common-gender feminine",  # picture book/Tr/Norwegian
+    "c or n": "common-gender neuter",  # ethylene/Eng/Tr/Danish
     "m or f or n": "masculine feminine neuter",
     "f or m or n": "feminine masculine neuter",
-    "m or f or c": "masculine feminine common",
-    "f or m or c": "feminine masculine common",
-    "m or c or n": "masculine common neuter",
-    "f or c or n": "feminine common neuter",
-    "m or n or c": "masculine neuter common",
-    "f or n or c": "feminine neuter common",
-    "c or f or n": "common feminine neuter",
-    "c or m or n": "common masculine neuter",
-    "n or f or c": "neuter feminine common",
-    "n or m or c": "neuter masculine common",
+    "m or f or c": "masculine feminine common-gender",
+    "f or m or c": "feminine masculine common-gender",
+    "m or c or n": "masculine common-gender neuter",
+    "f or c or n": "feminine common-gender neuter",
+    "m or n or c": "masculine neuter common-gender",
+    "f or n or c": "feminine neuter common-gender",
+    "c or f or n": "common-gender feminine neuter",
+    "c or m or n": "common-gender masculine neuter",
+    "n or f or c": "neuter feminine common-gender",
+    "n or m or c": "neuter masculine common-gender",
     "n or m or f": "neuter masculine feminine",
     "n or f or m": "neuter feminine masculine",
-    "c or m or f": "common masculine feminine",
-    "c or f or m": "common masculine feminine",
-    "m or c or n": "masculine common neuter",
+    "c or m or f": "common-gender masculine feminine",
+    "c or f or m": "common-gender masculine feminine",
+    "m or c or n": "masculine common-gender neuter",
     "f or n or m": "feminine neuter masculine",
     "m or n or f": "masculine neuter feminine",
-    "f or c or m": "feminine common masculine",
-    "m or c or f": "masculine common feminine",
+    "f or c or m": "feminine common-gender masculine",
+    "m or c or f": "masculine common-gender feminine",
     "m or f or m": "?masculine feminine",  # fantasma,soldado/Portuguese
     "f or pl": "feminine singular plural",  # XXX information/Eng/Tr/Latgalian
     "m or pl": "masculine singular plural",  # XXX information/Eng/Tr/Latgalian
     "n or pl": "neuter singular plural",  # XXX table scrap/Tr/Greek
-    "c or pl": "common singular plural",
+    "c or pl": "common-gender singular plural",
     "pl or f": "feminine singular plural",  # XXX grit/Eng/Tr(husked...)/German
     "pl or m": "masculine singular plural",
     "pl or n": "neuter singular plural",  # ordnance/Tr/German
-    "pl or c": "common singular plural",  # "you don't say"/Tr/Romanian
+    "pl or c": "common-gender singular plural",  # "you don't say"/Tr/Romanian
     "sg or f": "singular feminine",
     "sg or m": "singular masculine",
     "sg or n": "singular neuter",
-    "sg or c": "singular common",
+    "sg or c": "singular common-gender",
     "m or sg": "masculine singular",
     "f or sg": "feminine singular",
     "m or sg": "neuter singular",
-    "c or sg": "common singular",
+    "c or sg": "common-gender singular",
     "m or pl": "masculine plural",
     "f or pl": "feminine plural",
     "n or pl": "neuter plural",
-    "c or pl": "common plural",
+    "c or pl": "common-gender plural",
     "m or f pl": "masculine feminine plural",
-    "c or n or n pl": "common neuter singular plural",  # XXX augmentation/Tr
+    "c or n or n pl": "common-gender neuter singular plural",  # XXX augmentation/Tr
     "pl or m or f": "masculine feminine singular plural",  # XXX suc* my co*/Tr
     "m or f or sg or pl": "masculine feminine singular plural",  # Ainu/Russian
     "m or f or pl": "masculine feminine plural",  # that/Tr/Dutch
@@ -80,7 +80,7 @@ xlat_head_map = {
     "m or m pl": "masculine singular plural",
     "f or f pl": "feminine singular plural",
     "n or n pl": "neuter singular plural",
-    "c or c pl": "common singular plural",
+    "c or c pl": "common-gender singular plural",
     "f pl or n pl": "feminine neuter plural",  # diurnal/Eng/Tr/Polish
     "f pl or n or n pl": "feminine neuter singular plural",  # veneral/Tr/Polish
     "m or m pl or f or f pl or n or n pl": "",  # "a lot"/Tr/Latin
@@ -89,7 +89,7 @@ xlat_head_map = {
     "topo.": "toponymic",  # E.g., p/Egyptian
     "n": "neuter",
     "m or n or f": "masculine neuter feminine",  # cataract/Tr/Dutch
-    "c": "common",  # common gender in at least West Frisian
+    "c": "common-gender",  # common gender in at least West Frisian
     "sg": "singular",
     "pl": "plural",
     "pl or sg": "plural singular",
@@ -97,7 +97,7 @@ xlat_head_map = {
     "m sg or m pl": "masculine singular plural",  # valenki/Tr/German
     "f sg or f pl": "feminine singular plural",
     "n sg or n pl": "neuter singular plural",
-    "c sg or c pl": "common singular plural",
+    "c sg or c pl": "common-gender singular plural",
     "m pl or f pl": "masculine feminine plural",  # comedian/English/Tr/Welsh
     "m pl or n pl": "masculine neuter plural",  # whose/Tr/Latin
     "m pl or n": "?masculine neuter plural singular",  # pimpernel/Tr/Bulgarian
@@ -110,8 +110,8 @@ xlat_head_map = {
     "m pl or f pl or n pl": "masculine feminine neuter plural",
     "m sg or f sg or n sg": "masculine feminine neuter singular",
     "m pl or f or f pl": "masculine feminine singular plural",
-    "c or c pl": "common singular plural",
-    "c pl or n pl": "common neuter plural",  # which/Tr/Danish
+    "c or c pl": "common-gender singular plural",
+    "c pl or n pl": "common-gender neuter plural",  # which/Tr/Danish
     "inan": "inanimate",
     "Inanimate": "inanimate",  # e.g., "James Bay"/English/Tr/Northern East Cree
     "inan or anim": "inanimate animate",
@@ -253,6 +253,7 @@ xlat_head_map = {
     "v.": "verb",
     "adj.": "adjective",
     "adv.": "adverb",
+    "adversative": "",
     "?": "",
     "1.": "first-person",
     "2.": "second-person",
@@ -331,13 +332,13 @@ xlat_head_map = {
     "m or pf": "masculine perfective",
     "n or pf": "neuter perfective",
     "m or m": "?masculine",  # Paul/Tr(male given name)/Urdu
-    "f or c pl": "?feminine common singular plural", # mulberry/Tr/Zazaki
-    "c pl or n": "?common neuter singular plural",  # mouthpiece/Tr/Swedish
+    "f or c pl": "?feminine common-gender singular plural", # mulberry/Tr/Zazaki
+    "c pl or n": "?common-gender neuter singular plural",  # mouthpiece/Tr/Swedish
     "impf or impf": "?imperfective",
     "pf or pf": "?perfective",
     "sg or sg": "?singular",
     "pl or pl": "?plural",
-    "c or impf": "?common imperfective",
+    "c or impf": "?common-gender imperfective",
     "m inan or n": "masculine inanimate neuter",
     "m inan or f": "masculine inanimate feminine",
     "pl or pf": "?plural perfective",
@@ -1755,7 +1756,6 @@ uppercase_tags = set([
     "Rōmaji",
     "SK Standard",
     "SW England",
-    "São-Paulo",
     "Saarve",
     "Sagada",
     "Sahidic",
@@ -2379,7 +2379,6 @@ xlat_tags_map = {
     "Argentina and Uruguay": "Argentina Uruguay",
     "Argentina Uruguay": "Argentina Uruguay",
     "Southern US folk speech": "Southern-US dialectal",
-    "dialect": "dialectal",
     "Main dialectal variations": "dialectal",
     "Many eastern and northern dialects": "dialectal",
     "many dialects": "dialectal",
@@ -2454,8 +2453,10 @@ xlat_tags_map = {
     "accusative and ablative": "accusative ablative",
     "dative and accusative singular": "dative accusative singular",
     "no nominative": "no-nominative",
-    "simple past and past participle": ["simple past", "past participle"],
-    "simple past tense and past participle": ["simple past", "past participle"],
+    "simple past": "past",
+    "simple present": "present",
+    "simple past and past participle": ["past", "past participle"],
+    "simple past tense and past participle": ["past", "past participle"],
     "taking a past participle": "with-past-participle",
     "literary or in compounds": "literary in-compounds",
     "certain compounds": "in-compounds idiomatic",
@@ -2466,10 +2467,8 @@ xlat_tags_map = {
     "dated or dialectal": "dated dialectal",
     "dialectal or colloquial": "dialectal colloquial",
     "dialectal or obsolete": "dialectal obsolete",
-    "simple past": "simple past",
-    "simple present": "simple present",
-    "with verb in simple tense": "with-simple",
-    "in simple past tense": "simple past",
+    # XXX what is this? "with verb in simple tense": "with-simple",
+    "in simple past tense": "past",
     "for most verbs": "usually",
     "in general": "usually",
     "in variation": "in-variation",
@@ -3981,11 +3980,11 @@ xlat_tags_map = {
     "no diminutive": "no-diminutive",
     "no second-person singular imperative":
     "no-second-person-singular-imperative",
-    "no simple past": "no-simple-past",
+    "no simple past": "no-past",
     "no feminine form": "no-feminine",
     "no infinitive": "no-infinitive",
     "no longer productive": "idiomatic",
-    "no past tense": "no-simple-past",
+    "no past tense": "no-past",
     "no third-person singular present": "no-third-person-singular-present",
     "nominalized adjective following adjective declension":
     "nominalization adjective-declension",
@@ -4020,7 +4019,7 @@ xlat_tags_map = {
     "never clause-initial": "not-clause-initial",
     "primarily": "mostly",
     "definite articulation": "definite",  # boatsi/Aromanian
-    "p-past": "passive simple past",
+    "p-past": "passive past",
     "ppp": "passive past participle",
     "plural:": "plural",
     "synonyms:": "synonym",
@@ -4300,967 +4299,1027 @@ alt_of_tags = set([
     "uppercase",
 ])
 
-# Valid tag categories / attributes
-tag_categories = set([
-    "case",  # Grammatical case (also direct-object, indirect-object)
-    "gender",  # Semantic gender (often also implies class)
-    "class",  # Inflection class (Bantu languages, Japanese, etc)
-    "number",  # Singular, plural, dual, paucal, ...
-    "addressee",  # Something related to addressee
-    "possession",  # possessive, possessed, alienable, inalienable
-    "deictic",  # distal, proximal, inclusive, exclusive
-    "voice",  # active, passive, middle
-    "aspect",  # Aspect of verbs (perfective, imperfective, habitual, ...)
-    "mood",  # cohortiative, commissive, conditional, conjunctive,
-             # declarative, hortative, imperative, indicative, infinitive,
+# Valid tag categories / attributes.  These map to sort precedence, with
+# larger values put first.
+tag_categories = {
+    "referent": 500,  # definite, indefinite, proximal, distal
+    "degree": 400,    # comparative, superlative
+    "gender": 390,    # Semantic gender (often also implies class)
+    "person": 380,    # first-person, second-person, third-person, impersonal,
+                      # fourth-person, inclusive, exclusive
+    "case": 370,      # Grammatical case (also direct-object, indirect-object)
+    "number": 360,    # Singular, plural, dual, paucal, ...
+    # "addressee",    # Something related to addressee
+    "possession": 350,  # possessive, possessed, unpossessed, alienable,
+                        # inalienable
+    "voice": 200,     # active, passive, middle
+    "tense": 190,     # present, past, imperfect, perfect, future, pluperfect
+    "aspect": 180,   # Aspect of verbs (perfective, imperfective, habitual, ...)
+    "mood": 170,  # cohortiative, commissive, conditional, conjunctive,
+             # declarative, hortative, imperative, indicative,
              # interrogative, jussive, optative, potential, prohibitive,
              # subjunctive
              # Note that interrogative also used for, e.g., pronouns
-    "tense",  # present, past, imperfect, perfect, future, pluperfect
-    "transitivity",  # intransitive, transitive, ditransitive, ambitransitive
-    "participants",  # reflexive, reciprocal
-    "degree",  # positive, comparative, superlative
-    "trigger",  # Triggers something (e.g., mutation) in some context
-    "related",  # Indicates related term / word / classifier / counter / aux
-    "detail",  # Provides some detail
-    "mod",  # Provides a modified form (e.g., abbreviation, mutation)
-    "pos",  # Specifies part-of-speech
-    "derivation",  # Specifies derivation (nominalization, agent,
+    "non-finite": 160,  # infinitive, participle, ...
+    "polarity": 150,  # positive, negative, connegative
+    "pos": 20,  # Specifies part-of-speech
+    "category": 11,  # person, animate, inanimate,
+                 # (virile, nonvirile?), countable, uncountable
+    "transitivity": 10,  # intransitive, transitive, ditransitive,
+                         # ambitransitive
+    # "participants",  # reflexive, reciprocal
+    "register": 7,  # dialectal, formal, informal, slang, vulgar
+    "dialect": 6,  # Typically uppercase tags specifying dialectal variations,
+                   # who standardized, or time period when used
+    "class": 5,  # Inflection class (Bantu languages, Japanese, etc)
+    "trigger": 4,  # Triggers something (e.g., mutation) in some context
+    "gradation": 4,  # gradation or qualifier
+    "derivation": 3,  # Specifies derivation (nominalization, agent,
                    # nominal-from-verb, ...)
-    "pragmatic",  # Specifies pragmatics (e.g., stressed/unstressed)
-    "phonetic",  # Describes some phonetic aspect
-    "lexical",  # Describes some lexical/typographic aspect
-    "category",  # person, personal, impersonal, animate, inanimate,
-                 # (virile, nonvirile?)
-    "register",  # dialectal, formal, informal, slang, vulgar
-    "misc",  # simple, compound
-    "gradation",  # gradation or qualifier
-    "with",  # Co-occurs with something
-    "order",  # Word position or order
-    "XXX",  # TBD, currently not clear
-])
+    "mod": 2,  # Provides a modified form (e.g., abbreviation, mutation)
+    "pragmatic": 2,  # Specifies pragmatics (e.g., stressed/unstressed)
+    "phonetic": 2,  # Describes some phonetic aspect
+    "lexical": 2,  # Describes some lexical/typographic aspect
+    "with": 2,  # Co-occurs with something
+    "order": 2,  # Word position or order
+    "detail": 1,  # Provides some detail
+    "misc": 0,  # lots of miscellaneous/uncategorized stuff
+    "unknown": -1,  # Only used internally
+}
 
 # Set of all valid tags
-valid_tags = set([
-    "-i",   # Japanese inflection type
-    "-na",  # Japanese inflection type
-    "-nari",  # Japanese inflection type
-    "-tari",  # Japanese inflection type
-    "abbreviation",
-    "abessive",   # Case
-    "ablative",   # Case
-    "absolute",   # Case, Bashkir, Swedish [absolute reflexive]
-    "absolutive",  # Case (patient or experience of action)
-    "abstract",
-    "abstract-noun",
-    "accent/glottal",
-    "accusative",
-    "acronym",   # abbreviation formed by the initial letters of other words
-    "active",
-    "actor-focus",  # Tagalog
-    "actor-indirect",  # Tagalog
-    "actor-i",  # Ilocano vebs
-    "actor-ii",
-    "actor-iii",
-    "actor-iv",
-    "additive",  # Greenlandic: adds suffix after last letter of stem
-    "addressee-feminine",
-    "addressee-masculine",
-    "addressee-plural",
-    "addressee-singular",
-    "adessive",  # Case
-    "adjectival",
-    "adjective",
-    "adjective-declension",
-    "admirative",  # Verb form in Albanian
-    "adnominal",
-    "adverb",
-    "adverbial",
-    "adversative",
-    "affirmative",
-    "affix",
-    "after-preposition",  # Word used only after preposition nich/Lower Sorbian
-    "agent",
-    "agentive",
-    "alienable",  # Alienable possession; Choctaw, Ojibwe, Navajo, Tokelauan etc
-    "allative",  # Case
-    "allative-i",
-    "allative-ii",
-    "alphabetic-tones",
-    "also",
-    "alt-of",
-    "alternative",
-    "ambitransitive",
-    "analytic",
-    "anaphorically",
-    "animate",
-    "animal-not-person",  # Refers to animal (e.g., Russian anml suffix)
-    "anterior",  # French seems to have "past anterior" tense
-    "aorist",  # Verb form (perfective past)  E.g., Latin, Macedonian
-    "aorist-ii",  # Albanian
-    "apocope",
-    "applicative",  # Verb form
-    "approximative",  # Noun form (case?), e.g., марксизм/Komi-Zyrian
-    "archaic",
-    "article",
-    "aspirate-mutation",
-    "assertive",  # Verb form (e.g., Korean)
-    "associative",  # Case (e.g., Quechua)
-    "ateji",
-    "attributive",
-    "augmentative",
-    "augmented",
-    "autonomous",
-    "aux-haben",
-    "aux-sein",
-    "auxiliary",
-    "baby-talk",
-    "base-form",  # Base form of the word (e.g., with misspellings of forms)
-    "before-lenited-fh",  # Next word starts with lenited fh (Irish)
-    "before-past",  # Used before the past tense (Irish)
-    "before-vowel",  # next words starts with vowel (in pronunciation)
-    "benefactive",  # Case (beneficiary of an action)
-    "broadly",
-    "būdinys",
-    "calque",
-    "cangjie-input",
-    "canonical",  # Used to mark the canonical word from from the head tag
-    "capitalized",
-    "capitalized",
-    "cardinal",
-    "caritive",  # Case (lack or absense of something), марксизм/Komi-Zyrian
-    "catenative",
-    "causal-final",
-    "causative",  # Verb aspect (e.g., Japanese); Cause/Reason (Korean)
-    "character",
-    "chiefly",
-    "childish",
-    "circumstantial",  # Verb form, e.g., patjaṉi
-    "class",  # Used as a head prefix in San Juan Quajihe Chatino (class 68 etc)
-    "class-1",    # Inflectional classes (e.g., Bantu languages), cf. gender
-    "class-10",
-    "class-10a",
-    "class-11",
-    "class-12",
-    "class-13",
-    "class-14",
-    "class-15",
-    "class-16",
-    "class-17",
-    "class-18",
-    "class-1a",
-    "class-2",
-    "class-2a",
-    "class-3",
-    "class-4",
-    "class-5",
-    "class-6",
-    "class-7",
-    "class-8",
-    "class-9",
-    "class-9a",
-    "class-A",  # e.g., Old Irish affixed pronoun classes
-    "class-B",
-    "class-C",
-    "class-i",  # Choctaw
-    "class-ii",
-    "class-iii",
-    "class-n",  # Chickasaw
-    "class-a-i",  # Akkadian
-    "classifier",
-    "clipping",
-    "clitic",
-    "coactive",  # Verbs in Guaraní
-    "cohortative",  # Verb form: plea, imploring, wish, intent, command, purpose
-    "collective",  # plural interpreted collectively
-    "colloquial",
-    "comitative",  # Case
-    "common",   # XXX gender (Swedish, Danish), also meaning commonly occurring
-    "comparable",
-    "comparative",
-    "completive",
-    "composition",
-    "compound",  # Can indicate verb forms formed with auxiliary
-    "compound-of",
-    "concessive",  # Verb form
-    "conclusive",  # Verb form (e.g., Bulgarian)
-    "concrete",  # Slavic verbs
-    "conditional",  # Verb mood
-    "conditional-i",  # Verb mood (German)
-    "conditional-ii",  # Verb mood (German)
-    "conjugation-type",  # Used to indicate form really is conjugation class
-    "conjugative",  # Verb form, e.g., উঘাল/Assamese
-    "conjugative-of",  # Korean
-    "conjunct",  # Verb form, e.g., gikaa/Ojibwe
-    "conjunct-incorporating",
-    "conjunct-non-incorporating",
-    "conjunctive",  # Verb mood (doubt: wish, emotion, possibility, obligation)
-    "conjunction",  # Used in Phalura conjunctions, relative pronouns
-    "connective",  # Group of verb forms in Korean
-    "connegative",
-    "consecutive",  # Verb form, e.g., થૂંકવું/Gujarati, noun form марксизм
-    "construct",  # Apparently like definite/indefinite (e.g., Arabic)
-    "construction-hif'il",
-    "construction-hitpa'el",
-    "construction-hitpu'al",
-    "construction-huf'al",
-    "construction-nif'al",
-    "construction-pa'al",
-    "construction-pa'el",
-    "construction-peal",  # Aramaic, Classical Syriac
-    "construction-pi'el",
-    "construction-pu'al",
-    "contemplative",
-    "contemporary",
-    "contingent",  # Verb form, উঘাল/Assamese
-    "continuative",  # Verb aspect (actions still happening; e.g., Japanese)
-    "contracted",
-    "contracted-dem-form",
-    "contraction",
-    "contrastive",  # Apparently connective verb form in Korean
-    "converb",  # Verb form or special converb word
-    "converb-i",  # e.g., խածնել/Armenian
-    "converb-ii",
-    "conversive",  # Verb form/type, at least in Swahili, reverse meaning?
-    "coordinating",
-    "copulative",
-    "correlative-of",
-    "cot-caught-merger",
-    "count-form",  # Nominal form in Belarusian
-    "countable",
-    "counter",
-    "counterfactual",
-    "dated",
-    "dative",
-    "debitive",  # need or obligation (XXX is this same as "obligational" ???)
-    "declension-pattern-of",
-    "declinable",
-    "defective",
-    "deferential",
-    "definite",
-    "definition",
-    "definitive",  # XXX is this used same as "definite", opposite indefinite?
-    "deictically",
-    "delative",  # Case
-    "deliberate",
-    "demonstrative",
-    "demonym",
-    "dependent",
-    "derogatory",
-    "desiderative",  # Verb mood
-    "destinative",  # Case, marks destination/something destined (e.g. Hindi)
-    "determinate",  # Polish verbs (similar to "concrete" in Russian?)
-    "determinative-of",  # Korean
-    "determiner",  # Indicates determiner; Korean determiner verb forms?
-    "deuterotonic",  # e.g., dofuissim/Old Irish
-    "diacritic",
-    "dialectal",
-    "digit",
-    "diminutive",
-    "diptote",  # Noun having two cases (e.g., Arabic)
-    "direct",  # Apparently like case form (e.g., Hindi, Punjabi)
-    "direct-object",
-    "directional",  # Case?, e.g., тэр/Mongolian
-    "directive",  # Case (locative/nearness), e.g. Basque, Sumerian, Turkic
-    "disapproving",
-    "discourse",  # At lest some Ancient Greek particles
-    "disjunctive",
-    "distal",  # Demonstrative referent is far, cf. proximal, obviative
-    "distributive",  # Case in Quechua? (is this case or e.g. determiner?)
-    "ditransitive",
-    "dual",       # two in number, cf. singular, trial, plural
-    "dubitative",  # Verb form (e.g., Bulgarian)
-    "durative",  # Verb form
-    "eclipsis",
-    "egressive",  # Case?  e.g., дворец/Komi-Zyrian
-    "elative",  # Case
-    "ellipsis",
-    "emphatic",
-    "empty-gloss",
-    "enclitic",
-    "endearing",
-    "epic",
-    "epicene",
-    "equative",  # Case (indicates something is like something else)
-    "ergative",
-    "error-fixme",
-    "error-lua-exec",
-    "error-lua-timeout",
-    "error-unknown-tag",
-    "error-misspelling",
-    "error-unrecognized-form",
-    "especially",
-    "essive",  # Case
-    "essive-formal",
-    "essive-instructive",
-    "essive-modal",
-    "ethnic",
-    "eumhun",
-    "euphemistic",
-    "evidential",  # Verb form (e.g., Azerbaijani)
-    "exaggerated",
-    "excessive",
-    "exclusive",  # inclusive vs. exclusive first-person; case in Quechua
-    "exessive",  # Case (transition away from state)
-    "expectative",  # Verb form, e.g., ϯϩⲉ/Coptic
-    "expletive",
-    "expressively",
-    "extended",  # At least in some Bulgarian forms, e.g. -лив
-    "extinct",  # Uses for taxonomic entries, indicates species is extinct
-    "factitive",  # Not sure if same or different as factive
-    "factive",
-    "familiar",  # Formality/politeness degree of verbs etc
-    "feminine",  # Grammatical gender, masculine, neuter, common, class-* etc.
-    "feminine-usually",  # m/f, but usually feminine
-    "fifth-conjugation",
-    "fifth-declension",
-    "figuratively",
-    "finite-form",  # General category for finite verb forms
-    "first-conjugation",
-    "first-declension",
-    "first-person",
-    "focalising",  # Verb form, e.g., ϯϩⲉ/Coptic
-    "form-i",
-    "form-ii",
-    "form-iii",
-    "form-iiiq",
-    "form-iiq",
-    "form-iq",
-    "form-iv",
-    "form-ivq",
-    "form-ix",
-    "form-of",
-    "form-v",
-    "form-vi",
-    "form-vii",
-    "form-viii",
-    "form-x",
-    "form-xi",
-    "form-xii",
-    "form-xiii",
-    "formal",  # Formality/politeness degree of verbs etc
-    "four-corner",
-    "fourth-conjugation",
-    "fourth-declension",
-    "fourth-person",
-    "frequentative",
-    "front-vowel",
-    "fusioning",  # Greenlandic suffixes
-    "future",  # Verb tense
-    "future-i",  # Verb tense (German, e.g., vertippen)
-    "future-ii",  # Verb tense (German)
-    "gender-neutral",
-    "general",  # In general temporal participle, e.g., talamaq/Azerbaijani
-    "genitive",
-    "gerund",
-    "goal",  # Verb form, e.g., উঘাল/Assamese
-    "grade-1-kanji",
-    "grade-2-kanji",
-    "grade-3-kanji",
-    "grade-4-kanji",
-    "grade-5-kanji",
-    "grade-6-kanji",
-    "habitual",  # Verb aspect
-    "hangeul",
-    "hanja",  # Han character script (Chinese characters) to write Korean
-    "hard",  # sladek/Slovene
-    "hellenism",
-    "hidden-n",   # Mongolian declension
-    "hiragana",  # Japanese syllabic spelling for native words
-    "historic",  # Grammatical tense/mood for retelling past events
-    "historical",  # Relating to history
-    "honorific",  # Formality/politeness degree of verbs etc
-    "hortative",  # Verb mood
-    "humble",
-    "humorous",
-    "hypernym",
-    "hypercorrect",
-    "hyponym",
-    "hypothetical",  # Verb mood (e.g., Japanese)
-    "ideophonic",
-    "idiomatic",
-    "illative",  # Case
-    "imperative",
-    "imperative-only",
-    "imperfect",  # Past tense in various languages
-    "imperfective",  # Verb aspect (action not completed)
-    "impersonal",  # Verb form, e.g., Portuguese impersonal infinitive
-    "impolite",  # Politeness degree of verbs etc
-    "in-certain-phrases",
-    "in-compounds",
-    "in-plural",
-    "in-indicative",
-    "in-conditional",
-    "in-variation",  # E.g. crush,WiFi,lhama,tsunami/Portuguese,
-    "inalienable",  # Inablienable possession: body parts etc; Choctaw, Ojibwe..
-    "inanimate",
-    "including",
-    "includes-article",  # Word form includes article
-    "inclusive",  # inclusive vs. exclusive first-person
-    "indeclinable",
-    "indefinite",
-    "independent",  # Verb form, e.g., gikaa/Ojibwe
-    "indeterminate",  # Polish verbs (similar to "abstract" in Russian)
-    "indicative",
-    "indirect",  # Verb form, e.g., بونا/
-    "indirect-object",
-    "inessive",  # Case
-    "inferential",  # Verb form (w/ aorist), e.g. -ekalmak/Turkish
-    "infinitive",  # Verb form
-    "infinitive-da",  # Estonian
-    "infinitive-i",  # Finnish
-    "infinitive-i-long",  # Finnish
-    "infinitive-ii",  # Finnish
-    "infinitive-iii",  # Finnish
-    "infinitive-iv",  # Finnish
-    "infinitive-ma",  # Estonian
-    "infinitive-v",  # Finnish
-    "infinitive-zu",  # German
-    "infix",
-    "inflected",  # Marks inflected form, constrast to uninflected (e.g., Dutch)
-    "inflected-like",  # seleen/Limburgish
-    "informal",  # Formality/politeness degree of verbs etc
-    "initialism",
-    "injunctive",  # Verb form, e.g., पुस्नु/Nepali
-    "instructive",
-    "instrumental",  # Case
-    "iterative",
-    "intensifier",  # In participle of intensification, e.g., talamaq
-    "intentive",  # Verb form, e.g., patjaṉi
-    "interfix-j",  # Greenlandic: adds -j- after long vowel
-    "interjection",
-    "interrogative",
-    "intransitive",
-    "invariable",
-    "invertive",  # Case? (e.g., Сотрэш/Adyghe)
-    "involuntary",  # Verb form, e.g., khitan/Indonesian
-    "ionic",  # XXX ???
-    "ironic",
-    "irrealis",  # Verb form, e.g., たたかう/Japanese
-    "irregular",  # Generally of written word forms
-    "irregular-pronunciation",  # Kanji or similar pronunciation irregular
-    "italics",  # Used in head form to indicate italic character variant
-    "jargon",
-    "jussive",  # Verb mood for orders, commanding, exhorting (subjunctively)
-    "kanji",  # Used in word head for some Japanese symbols
-    "katakana",  # Japanese syllabic spelling for foreign words
-    "krama",
-    "krama-ngoko",
-    "kyūjitai",  # Traditional Japanese Kanji (before 1947)
-    "lative",  # Case, e.g., тіл/Khakas
-    "lenition",
-    "letter",
-    "letter-name",
-    "limitative",  # Verb form, e.g., ϯϩⲉ/Coptic
-    "literally",
-    "literary",
-    "locative",
-    "long-form",  # Verb forms, отъпоустити/Old Church Slavonic
-    "lowercase",
-    "mainly",
-    "majestic",
-    "masculine",  # Grammatial gender see feminine, neuter, common, class-* etc.
-    "masculine-usually",  # m/f, but usually masculine
-    "material",
-    "matronymic",
-    "medial",
-    "mediopassive",
-    "metaphoric",
-    "metonymically",
-    "metrically",  # Used in Sanskrit word heads
-    "mi-form",  # Malagasy verbs
-    "middle",  # At least middle voice (cf. active, passive)
-    "middle-infinitive",
-    "mildly",
-    "misconstruction",  # Used for e.g. incorrect Latin plurals
-    "misspelling",
-    "mixed",
-    "mixed-mutation",
-    "mixedcase",
-    "mnemonic",
-    "modal",
-    "modern",
-    "modified",  # Noun form, e.g., dikko/Sidamo (similar to person?)
-    "monopersonal",
-    "morpheme",
-    "morse-code",
-    "mostly",
-    "motive-form",  # Verb form for Korean (e.g., 조사하다)
-    "multiple-possession",
-    "multiplicative",  # adverbial case in Finnish
-    "mutated",
-    "mutation",
-    "name",
-    "narrowly",
-    "nasal-mutation",
-    "natural",
-    "necessitative",  # Verb form in some languages
-    "negated-with",  # Indicates how word is negated, e.g., ϣⲗⲏⲗ/Coptic
-    "negative",  # Indicates negation of meaning (nominal or verbal)
-    "neologism",
-    "neuter",  # Gender, cf. masculine, feminine, common, class-* etc.
-    "next",  # Next value in sequence (number, letter, etc.)
-    "no-absolute",           # No aboslute form; femri/Icelandic
-    "no-auxiliary",	     # No auxiliary needed for verb (?); lavarsi/Italian
-    "no-comparative",        # The word has no comparative form
-    "no-construct-forms",    # The word has no construct forms
-    "no-definite",	     # Danish "no definite forms"
-    "no-diminutive",         # No diminutive form (goeste/West Flemish)
-    "no-feminine",	     # No feminine form (ácimo/Spanish)
-    "no-first-person-singular-past-historic",  # Italian
-    "no-first-person-singular-present",  # Spanish (only third person?)
-    "no-first-person-singular-preterite",  # Spanish (only third person?)
-    "no-genitive",           # The word has no genitive form
-    "no-imperfective",       # No imperfective form (исходить/Russian)
-    "no-infinitive",	     # No infinitive form (måste/Swedish)
-    "no-nominative",         # The word has no nominative form (from this base)
-    "no-nominative-plural",  # The word has no nominative plural
-    "no-perfect",            # The word has no perfect/perfective aspect/form
-    "no-plural",             # The word has no plural form (= singular only)
-    "no-past-participle",    # The word has no past participle
-    "no-present-participle",  # The word has no present participle
-    "no-second-person-singular-imperative",  # No imperative
-    "no-senses",             # Added synthesized sense when no senses extracted
-    "no-simple-past",	     # No simple past form"
-    "no-singulative",	     # no singulative form
-    "no-superlative",        # The word has no superlative form
-    "no-supine",             # The word has no supine form
-    "no-third-person-singular-past-historic",  # Italian
-    "no-third-person-singular-present",  # mittagessen/German
-    "nominal",
-    "nominal-from-nominal",  # Greenlandic: suffix derives nominal from nominal
-    "nominal-from-verb",  # Greenlandic: suffix derives nominal from verb
-    "nominal-state",
-    "nominalization",
-    "nominative",
-    "nomino-accusative",  # 𒀀𒄿𒅖/Hittite XXX same as nominate/accusative???
-    "non-aspectual",  # E.g., भूलना/Hindi
-    "non-durative",  # non-durative sentence, e.g., ϣⲗⲏⲗ/Coptic
-    "non-finite",  # General category of non-finite verb forms
-    "non-numeral",  # Assamese noun forms
-    "non-past",  # Verb tense (e.g., Korean)
-    "non-scientific",
-    "non-subject",    # ishno'/Chickasaw
-    "nonce-word",
-    "nondeferential",
-    "nonstandard",
-    "nonvirile",
-    "not-attributive",
-    "not-clause-initial",
-    "not-comparable",
-    "not-mutable",
-    "not-predicative",
-    "not-translated",
-    "noun",
-    "now",
-    "numeral",  # Numeral part-of-speech; also Assamese noun forms
-    "numeral-tones",
-    "obligational",  # Verb form (e.g., Azerbaijani)
-    "objective",  # Case, used as an object
-    "oblique",  # Apparently like case form (e.g., Hindi)
-    "obsolete",
-    "obviative",  # Referent is not the most salient one, cf. proximal, distal
-    "offensive",
-    "often",
-    "one-termination",
-    "only",
-    "onomatopoeic",
-    "oppositive",  # expresses contrariety
-    "optative",
-    "ordinal",
-    "parasynonym",
-    "parenthetic",
-    "participle",
-    "particle",
-    "partitive",  # Case
-    "passive",
-    "past",
-    "patronymic",
-    "paucal",
-    "pausal",
-    "pejorative",
-    "perfect",  # Tense/verb form, e.g., in Finnish
-    "perfect-i",  # E.g., talamaq/Azerbaijani
-    "perfect-ii",  # E.g., talamaq/Azerbaijani
-    "perfective",  # Verb aspect
-    "person",
-    "personal",  # Verb form (e.g., Portuguese personal infinitive)
-    "phoneme",
-    "phrasal",
-    "phrase",
-    "physical",
-    "pin-pen-merger",
-    "place",
-    "pluperfect",  # Tense/verb form
-    "pluperfect-i",  # воштыны'/Udmurt
-    "pluperfect-ii",
-    "plural",     # Number, cf. sigular, dual, trial
-    "plural-of",  # Plural form of something
-    "plural-of-variety",  # Plural indicating different kinds of things (Arabic)
-    "plural-only",  # Word only manifested in plural in this sense
-    "plural-normally",  # Usually plural, but singular may be possible
-    "poetic",
-    "polite",  # Politeness degree of verbs etc
-    "polytonic",
-    "positive",  # degree of comparison; opposite of negation for verb forms
-    "possessed",  # Marks object that is possessed, cf. possessed
-    "possessive",  # Possession (marks who possesses)
-    "possessive-sg",  # Possessive with single object possessed
-    "possessive-pl",  # Possessive with multiple objects possessed
-    "possibly",
-    "postpositional",
-    "potential",  # Verb mood
-    "praenominal",
-    "precursive",  # Verb form, e.g. ϯϩⲉ/Coptic
-    "predicative",
-    "prefix",
-    "preparative",  # Verb form, e.g., ᠵᡠᠸᡝᡩᡝᠮᠪᡳ/Manchu
-    "prepositional",
-    "present",
-    "present-rare",  # Present tense is rare
-    "presumptive",  # Verb mood, e.g., गरजना/Hindi
-    "preterite",  # Verb tense (action in the past, similar to simple past)
-    "preterite-present",  # word where present&preterite forms look opposite
-    "preterite-i",  # воштыны/Udmurt
-    "preterite-ii",
-    "pretonic",  # Precedes stressed syllable
-    "previous",  # Previous value in sequence (number, letter, etc.)
-    "proclitic",
-    "progressive",  # Verb form, e.g., પચવું/Gurajati
-    "prohibitive",  # Verb form (negative imperative), e.g., Old Armenian
-    "prolative",
-    "pronominal",
-    "pronominal-state",
-    "pronoun",
-    "pronoun-included",
-    "pronunciation-spelling",
-    "proper-noun",
-    "proscribed",
-    "prosecutive",  # Case (move along a surface or way); Greenlandic -nnguaq
-    "prospective",
-    "prothesis",
-    "prototonic",  # E.g., dofuissim/Old Irish
-    "proximal",  # Demonstrative referent is far, cf. distal, obviative
-    "purposive",  # Verb form, e.g., patjaṉi
-    "quadral",
-    "quantified",  # bat/Jamaican Creole (head form)
-    "quotative",  # Verb mood (marks quoted speech keeping orig person/tense)
-    "radical",
-    "radical+strokes",
-    "rare",
-    "realis",  # Verb form, e.g., たたかう/Japanese
-    "reason",  # Verb form, e.g., উঘাল/Assamese
-    "recently",  # Used in Recently complete, e.g., {ligpit,magbukid}/Tagalog
-    "reciprocal",  # Mutual action (board sense reflexive)
-    "reconstruction",  # This word/sense is a reconstruction for a dead language
-    "reduced",  # de/Central Franconian (XXX merge with e.g. clipping?)
-    "reduplication",
-    "reflexive",
-    "reflexive-of",  # Reflexive form of something
-    "regional",
-    "relational",
-    "relative",
-    "renarrative",  # Verb form (e.g. Bulgarian)
-    "replacive",  # Greenlandic suffixes
-    "reported",  # Verb forms for reported speech
-    "resultative",  # partciple in Armenian (state resulting from action)
-    "retronym",
-    "revised",  # Used in many Korean words, is this same as revised-jeon?
-    "revised-jeon",
-    "rhetoric",
-    "romanization",
-    "root",
-    "sarcastic",
-    "second-conjugation",
-    "second-declension",
-    "second-person",
-    "secular",  # Contrast with Ecclesiastical, Tham, etc
-    "semelfactive",
-    "sentence-case",  # дь/Yakut
-    "sentence-final",  # Korean verb forms (broad category)
-    "sequence",
-    "sequential",
-    "seventh-conjugation",
-    "shinjitai",  # Simplified Japanese Kanji (after 1947)
-    "short-form",  # Verb forms, отъпоустити/Old Church Slavonic
-    "si-perfective",
-    "simple",
-    "simplified",
-    "simultaneous",  # simultaneous converb, e.g. խածնել/Armenian
-    "single-possession",
-    "singular",  # Number, cf. plural, dual, trial
-    "singular-only",
-    "singulative",  # Individuation of a collective or mass noun, like number
-    "situative",  # expressing location of things in comparison with one another
-    "sixth-conjugation",
-    "slang",
-    "slur",
-    "sociative",  # Case?, e.g., மரம்/Tamil
-    "soft",  # najslajši/slovene
-    "soft-mutation",  # At least Welsh
-    "sometimes",
-    "somewhat",
-    "special",  # Adverbial verb form in Lithuanian
-    "specific",  # In specific temporal participle, e.g., talamaq
-    "specifically",
-    "standalone",  #  Without a main word (e.g., pronoun/determiner senses)
-    "standard",
-    "stative",
-    "stem",  # Stem rather than full forms
-    "stem-primary",  # Primary stem, e.g., दुनु/Nepali
-    "stem-secondary",  # Secondary stem, e.g., दुनु/Nepali
-    "stress-pattern-1",
-    "stress-pattern-2",
-    "stress-pattern-3",
-    "stress-pattern-3a",
-    "stress-pattern-3b",
-    "stress-pattern-4",
-    "stressed",  # Marked/full form, cf. unstressed
-    "stressed-preposition",
-    "strict-sense",
-    "strokes",
-    "strong",
-    "subjective",  # Case, used as a subject; subject form
-    "subjunctive",
-    "subjunctive-i",
-    "subjunctive-ii",
-    "sublative",
-    "subordinate-clause",  # e.g., ϣⲗⲏⲗ/Coptic
-    "subordinating",
-    "subscript",  # Variant of certain characters
-    "substantive",
-    "subsuntive",  # Verbs in Guaraní
-    "suffix",
-    "superessive",  # Case, e.g., Hungarian
-    "superlative",
-    "superscript",  # Variant of certain characters
-    "supine",
-    "suppletive",
-    "surname",
-    "suru",  # Japanese verb inflection type
-    "syllable-final",
-    "syllable-initial",
-    "symbol",
-    "syncope",
-    "synecdoche",
-    "synonym",
-    "synonym-of",
-    "taboo",
-    "tafa-form",  # Malagasy verbs
-    "temporal",  # relating to time/tense, e.g., talamaq; Finnish adverbials
-    "term-of-address",
-    "terminative",  # Verb mood (e.g., Japanese); also case in Quechua?
-    "thematic",
-    "third-conjugation",
-    "third-declension",
-    "third-person",
-    "three-termination",
-    "tone-1",
-    "tone-2",
-    "topicalized",
-    "toponymic",
-    "traditional",
-    "transcription",
-    "transgressive",  # Verb form
-    "transitive",
-    "transitive-with-of",
-    "translation-hub",  # Predictable compound term with translations, no gloss
-    "translative",
-    "translingual",
-    "transliteration",
-    "trial",  # Number, cf. singular, dual, plural
-    "trigger-actor",  # Actor trigger, e.g., magtinda/Tagalog
-    "trigger-benefactive",  # Benefactive trigger
-    "trigger-causative",  # Causative trigger
-    "trigger-instrument",  # Instrument trigger
-    "trigger-locative",  # Locative trigger
-    "trigger-measurement",  # Measurement trigger, e.g., rumupok/Tagalog
-    "trigger-object",  # Object trigger
-    "trigger-referential",   # Referential trigger
-    "triggers-aspirate-mutation",  # Welsh
-    "triggers-eclipsis",      # Irish
-    "triggers-h-prothesis",   # Irish
-    "triggers-lenition",      # Irish
-    "triggers-mixed-mutation",  # Welsh
-    "triggers-nasal-mutation",  # Old Irish
-    "triggers-soft-mutation",  # Welsh
-    "triptote",  # Noun having three cases (e.g., Arabic)
-    "truncative",  # Greenlandic: suffix attaches to last vowel, removing stuff
-    "two-termination",
-    "type-a",
-    "type-p",
-    "type-u",
-    "type-ua",
-    "type-up",
-    "unabbreviated",
-    "unaugmented",
-    "uncommon",
-    "uncountable",
-    "unemphatic",
-    "uninflected",  # uninflected form (e.g., Dutch), cf. inflected
-    "universal",  # universally known (καθεμία/Greek)
-    "unknown",  # Apparently verb form, e.g., जाँच्नु/Nepali
-    "unmodified",  # Noun form, e.g., dikko/Sidamo (similar to person?)
-    "unpossessed",  # Not possessed (often omitted); cf. possessed
-    "unspecified",  # Used in some conjugation/declension tables
-    "unstressed",  # Unstressed (unmarked, weaker) form
-    "unstressed-before-j",  # unstressed when next word starts with /j/
-    "uppercase",
-    "used-in-the-form",
-    "usually",
-    "utterance-medial",
-    "variant",
-    "vav-consecutive",
-    "vernacular",
-    "verb",
-    "verb-completement",  # Used in some Chinese words (merged verb+complement?)
-    "verb-form-da",  # Estonian da-form
-    "verb-form-des",  # Estonian des-form
-    "verb-form-i",
-    "verb-form-ii",
-    "verb-from-nominal",  # Forms verbs from nominals
-    "verb-object",  # Used in some Chinese words (verb+object in same entry?)
-    "verb-from-verb",  # Suffix modifies verbs producing verbs
-    "vigesimal",
-    "virile",
-    "visual-rendering",
-    "voa-form",  # Malagasy verbs
-    "vocative",  # Case? used for addressee
-    "volitive",
-    "volitional",  # Verb mood (e.g., Japanese: suggests, urges, initates act)
-    "vulgar",
-    "weak",
-    "weak-verb",
-    "with-a",
-    "with-ablative",
-    "with-absolute",
-    "with-absolutive",
-    "with-accusative",
-    "with-action-noun-in-elative",
-    "with-adessive",
-    "with-adjective",
-    "with-adverb",
-    "with-allative",
-    "with-an",
-    "with-avec",
-    "with-ce",
-    "with-che",
-    "with-comparative",
-    "with-con",
-    "with-conditional",
-    "with-da",
-    "with-dative",
-    "with-de",
-    "with-definite-article",
-    "with-di",
-    "with-down",
-    "with-ela",
-    "with-elas",
-    "with-elative",
-    "with-ele",
-    "with-eles",
-    "with-ella",
-    "with-ellas",
-    "with-ellos",
-    "with-en",
-    "with-essive",
-    "with-eu",
-    "with-infinitive-i",
-    "with-future",
-    "with-for",
-    "with-gendered-noun",
-    "with-genitive",
-    "with-gij",
-    "with-hiri",
-    "with-hura",
-    "with-illative",
-    "with-imperfect",
-    "with-in",
-    "with-indicative",
-    "with-indirect-object",
-    "with-indirect-relative",
-    "with-inessive",
-    "with-infinitive",
-    "with-instrumental",
-    "with-it-dialectally",
-    "with-järgi",
-    "with-kala",
-    "with-kV",  # gǀkxʻâã/ǃXóõ
-    "with-lai",
-    "with-locative",
-    "with-meel",
-    "with-negation",
-    "with-negative-adj",
-    "with-nominative",
-    "with-nos",
-    "with-nosotras",
-    "with-nosotros",
-    "with-noun",
-    "with-noun-phrase",
-    "with-number",
-    "with-objective",
-    "with-odd-syllable-stems",
-    "with-of",
-    "with-olemassa",  # Finnish
-    "with-on",
-    "with-optative",
-    "with-others",
-    "with-partitive",
-    "with-passive-present-participle",
-    "with-passive-past-participle-partitive",
-    "with-passive-past-participle-translative",
-    "with-past",
-    "with-past-participle",
-    "with-past-participle-translative",
-    "with-past-participle-partitive",
-    "with-per",
-    "with-personal-pronoun",
-    "with-por",
-    "with-possessive-suffix",
-    "with-pour",
-    "with-prepositional",
-    "with-present",
-    "with-savrtsobi",
-    "with-simple",
-    "with-su",
-    "with-subjunctive",
-    "with-subordinate-clause",
-    "with-sur",
-    "with-dummy-subject",
-    "with-there",
-    "with-third-person",
-    "with-third-person-singular",
-    "with-infinitive-iii",
-    "with-infinitive-iii-abessive",
-    "with-infinitive-iii-elative",
-    "with-infinitive-iii-illative",
-    "with-to",
-    "with-translative",
-    "with-tu",
-    "with-tú",
-    "with-up",
-    "with-usted",
-    "with-ustedes",
-    "with-você",
-    "with-vocês",
-    "with-von",
-    "with-vos",
-    "with-voseo",
-    "with-vosotras",
-    "with-vosotros",
-    "with-välja",
-    "with-vós",
-    "with-yo",
-    "with-zuek",
-    "with-à",
-    "with-él",
-    "without-article",  # E.g., grüun/Cimbrian
-    "without-noun",
-    "zhuyin",
-    "æ-tensing",
-    "има",  # Distinguishes certain verb forms in Macedonian
-])
+valid_tags = {
+    "-i": "class",   # Japanese inflection type
+    "-na": "class",  # Japanese inflection type
+    "-nari": "class",  # Japanese inflection type
+    "-tari": "class",  # Japanese inflection type
+    "abbreviation": "mod",
+    "abessive": "case",   # Case
+    "ablative": "case",   # Case
+    "absolute": "case",   # Case, Bashkir, Swedish [absolute reflexive]
+    "absolutive": "case",  # Case (patient or experience of action)
+    "abstract": "misc",
+    "abstract-noun": "misc",
+    "accent/glottal": "misc",
+    "accusative": "case",  # Case for object in many languages
+    "acronym": "mod",   # abbreviation formed by the initial letters of other words
+    "active": "voice",
+    "actor-focus": "misc",  # Tagalog
+    "actor-indirect": "misc",  # Tagalog
+    "actor-i": "misc",  # Ilocano verbs
+    "actor-ii": "misc",
+    "actor-iii": "misc",
+    "actor-iv": "misc",
+    "additive": "misc",  # Greenlandic: adds suffix after last letter of stem
+    "addressee-feminine": "misc",
+    "addressee-masculine": "misc",
+    "addressee-plural": "misc",
+    "addressee-singular": "misc",
+    "adessive": "case",  # Case
+    "adjectival": "misc",
+    "adjective": "pos",
+    "adjective-declension": "class",
+    "admirative": "mood",  # Verb form in Albanian
+    "adnominal": "misc",
+    "adverb": "pos",
+    "adverbial": "misc",  # XXX is this same as adverb?
+    "affirmative": "misc",  # Used for adjectives, interjections, pronouns
+    "affix": "pos",
+    "after-preposition": "misc",  # Word used only after preposition nich/Lower Sorbian
+    "agent": "misc",
+    "agentive": "case",  # Case indicating agent
+    "alienable": "possession",  # Alienable possession; Choctaw, Ojibwe, Navajo, Tokelauan etc
+    "allative": "case",  # Case
+    "allative-i": "case",
+    "allative-ii": "case",
+    "alphabetic-tones": "misc",
+    "also": "misc",
+    "alt-of": "misc",
+    "alternative": "misc",
+    "ambitransitive": "transitivity",
+    "analytic": "misc",
+    "anaphorically": "misc",
+    "animate": "category",
+    "animal-not-person": "misc",  # Refers to animal (e.g., Russian anml suffix)
+    "anterior": "tense",  # French seems to have "past anterior" tense
+    "aorist": "tense",  # Verb form (perfective past)  E.g., Latin, Macedonian
+    "aorist-ii": "tense",  # Albanian
+    "apocope": "misc",
+    "applicative": "mood",  # Verb form
+    "approximative": "case",  # Noun form (case?), e.g., марксизм/Komi-Zyrian
+    "archaic": "misc",
+    "article": "detail",
+    "aspirate-mutation": "misc",
+    "assertive": "mood",  # Verb form (e.g., Korean)
+    "associative": "case",  # Case (e.g., Quechua)
+    "ateji": "misc",
+    "attributive": "misc",
+    "augmentative": "misc",  # Indicates large size, intensity, seniority
+    "augmented": "misc",
+    "autonomous": "misc",
+    "aux-haben": "misc",
+    "aux-sein": "misc",
+    "auxiliary": "misc",
+    "baby-talk": "misc",
+    "base-form": "misc",  # Base form of the word (e.g., with misspellings of forms)
+    "before-lenited-fh": "misc",  # Next word starts with lenited fh (Irish)
+    "before-past": "misc",  # Used before the past tense (Irish)
+    "before-vowel": "misc",  # next words starts with vowel (in pronunciation)
+    "benefactive": "case",  # Case (beneficiary of an action)
+    "broadly": "misc",
+    "būdinys": "misc",
+    "calque": "misc",
+    "cangjie-input": "misc",
+    "canonical": "misc",  # Used to mark the canonical word from from the head tag
+    "capitalized": "misc",
+    "capitalized": "misc",
+    "cardinal": "misc",
+    "caritive": "case",  # Case (lack or absense of something), марксизм/Komi-Zyrian
+    "catenative": "misc",
+    "causal-final": "misc",
+    "causative": "aspect",  # Verb aspect (e.g., Japanese); Cause/Reason (Korean)
+    "character": "pos",
+    "chiefly": "misc",
+    "childish": "misc",
+    "circumstantial": "mood",  # Verb form, e.g., patjaṉi
+    "class": "detail",  # Used as a head prefix in San Juan Quajihe Chatino (class 68 etc)
+    "class-1": "class",    # Inflectional classes (e.g., Bantu languages), cf. gender
+    "class-10": "class",
+    "class-10a": "class",
+    "class-11": "class",
+    "class-12": "class",
+    "class-13": "class",
+    "class-14": "class",
+    "class-15": "class",
+    "class-16": "class",
+    "class-17": "class",
+    "class-18": "class",
+    "class-1a": "class",
+    "class-2": "class",
+    "class-2a": "class",
+    "class-3": "class",
+    "class-4": "class",
+    "class-5": "class",
+    "class-6": "class",
+    "class-7": "class",
+    "class-8": "class",
+    "class-9": "class",
+    "class-9a": "class",
+    "class-A": "class",  # e.g., Old Irish affixed pronoun classes
+    "class-B": "class",
+    "class-C": "class",
+    "class-i": "class",  # Choctaw
+    "class-ii": "class",
+    "class-iii": "class",
+    "class-n": "class",  # Chickasaw
+    "class-a-i": "class",  # Akkadian
+    "classifier": "detail",
+    "clipping": "misc",
+    "clitic": "misc",
+    "coactive": "mood",  # Verbs in Guaraní
+    "cohortative": "mood",  # Verb form: plea, imploring, wish, intent, command, purpose
+    "collective": "number",  # plural interpreted collectively
+    "colloquial": "register",
+    "combined-form": "misc",  # e.g. Spanish combining forms
+    "comitative": "case",  # Case
+    "common": "misc",
+    "common-gender": "gender",   # Gender in Swedish, Danish
+    "comparable": "category",
+    "comparative": "degree",  # Comparison of adjectives/adverbs
+    "completive": "aspect",
+    "composition": "misc",
+    "compound": "misc",  # Can indicate verb forms formed with auxiliary
+    "compound-of": "misc",
+    "concessive": "mood",  # Verb form
+    "conclusive": "mood",  # Verb form (e.g., Bulgarian)
+    "concrete": "misc",  # Slavic verbs
+    "conditional": "mood",  # Verb mood
+    "conditional-i": "mood",  # Verb mood (German)
+    "conditional-ii": "mood",  # Verb mood (German)
+    "conjugation-type": "detail",  # Used to indicate form really is conjugation class
+    "conjugative": "misc",  # Verb form, e.g., উঘাল/Assamese
+    "conjugative-of": "detail",  # Korean
+    "conjunct": "misc",  # Verb form, e.g., gikaa/Ojibwe
+    "conjunct-incorporating": "misc",
+    "conjunct-non-incorporating": "misc",
+    "conjunctive": "mood",  # Verb mood (doubt: wish, emotion, possibility, obligation)
+    "conjunction": "misc",  # Used in Phalura conjunctions, relative pronouns
+    "connective": "misc",  # Group of verb forms in Korean
+    "connegative": "polarity",  # Indicates verb form that goes with negative
+    "consecutive": "aspect",  # Verb form, e.g., થૂંકવું/Gujarati, noun form марксизм
+    "construct": "misc",  # Apparently like definite/indefinite (e.g., Arabic)
+    "construction-hif'il": "misc",  # Subject is cause; active voice
+    "construction-hitpa'el": "misc",  # middle voice?
+    "construction-hitpu'al": "misc",  # XXX Same as hitpa'el?
+    "construction-huf'al": "misc",  # Subject is cause; passive voice
+    "construction-nif'al": "misc",  # Neutral about subject's role; middle voice
+    "construction-pa'al": "misc",  # Neutral about subject's role; active voice
+    "construction-pa'el": "misc",
+    "construction-peal": "misc",  # Aramaic, Classical Syriac
+    "construction-pi'el": "misc",  # Subject is agent; active voice
+    "construction-pu'al": "misc",  # Subject is agent; passive voice
+    "contemplative": "mood",
+    "contemporary": "misc",
+    "contingent": "mood",  # Verb form, উঘাল/Assamese
+    "continuative": "aspect",  # Verb aspect (actions still happening; e.g., Japanese)
+    "contracted": "misc",  # XXX Is this the same as contraction?
+    "contracted-dem-form": "misc",
+    "contraction": "mod",
+    "contrastive": "mood",  # Apparently connective verb form in Korean
+    "converb": "misc",  # Verb form or special converb word
+    "converb-i": "misc",  # e.g., խածնել/Armenian
+    "converb-ii": "misc",
+    "conversive": "mood",  # Verb form/type, at least in Swahili, reverse meaning?
+    "coordinating": "misc",
+    "copulative": "misc",
+    "correlative-of": "detail",
+    "cot-caught-merger": "misc",
+    "count-form": "misc",  # Nominal form in Belarusian
+    "countable": "category",
+    "counter": "detail",
+    "counterfactual": "mood",  # XXX is this mood?  Where is this used?
+    "dated": "misc",
+    "dative": "case",  # Case in many languages
+    "debitive": "misc",  # need or obligation (XXX is this same as "obligational" ???)
+    "declension-pattern-of": "detail",
+    "declinable": "misc",
+    "defective": "misc",
+    "deferential": "register",
+    "definite": "referent",
+    "definition": "misc",
+    "definitive": "misc",  # XXX is this used same as "definite": "misc", opposite indefinite?
+    "deictically": "misc",
+    "delative": "case",  # Case
+    "deliberate": "misc",
+    "demonstrative": "misc",  # Type of pronoun
+    "demonym": "misc",
+    "dependent": "misc",
+    "derogatory": "misc",
+    "desiderative": "mood",  # Verb mood
+    "destinative": "case",  # Case, marks destination/something destined (e.g. Hindi)
+    "determinate": "misc",  # Polish verbs (similar to "concrete" in Russian?)
+    "determinative-of": "detail",  # Korean
+    "determiner": "misc",  # Indicates determiner; Korean determiner verb forms?
+    "deuterotonic": "misc",  # e.g., dofuissim/Old Irish
+    "diacritic": "misc",
+    "dialectal": "misc",
+    "digit": "misc",
+    "diminutive": "misc",
+    "diptote": "class",  # Noun having two cases (e.g., Arabic)
+    "direct": "aspect",  # Apparently verb form (e.g., Hindi, Punjabi)
+    "direct-object": "case",  # Case for direct object?
+    "directional": "case",  # Case?, e.g., тэр/Mongolian
+    "directive": "case",  # Case (locative/nearness), e.g. Basque, Sumerian, Turkic
+    "disapproving": "misc",
+    "discourse": "misc",  # At lest some Ancient Greek particles
+    "disjunctive": "misc",
+    "distal": "referent",  # Demonstrative referent is far, cf. proximal, obviative
+    "distributive": "number",  # Case in Quechua? (is this case or e.g. determiner?)
+    "ditransitive": "transitivity",
+    "dual": "number",       # two in number, cf. singular, trial, plural
+    "dubitative": "mood",  # Verb form (e.g., Bulgarian)
+    "durative": "aspect",  # Verb form  XXX same as continuative?
+    "eclipsis": "misc",
+    "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian
+    "elative": "case",  # Case
+    "ellipsis": "misc",
+    "emphatic": "misc",
+    "empty-gloss": "misc",
+    "enclitic": "misc",
+    "endearing": "misc",  # XXX Is this different from diminutive?
+    "epic": "misc",
+    "epicene": "misc",
+    "equative": "case",  # Case (indicates something is like something else)
+    "ergative": "misc",
+    "error-fixme": "misc",
+    "error-lua-exec": "misc",
+    "error-lua-timeout": "misc",
+    "error-unknown-tag": "misc",
+    "error-misspelling": "misc",
+    "error-unrecognized-form": "misc",
+    "especially": "misc",
+    "essive": "case",  # Case
+    "essive-formal": "case",  # Hungarian case
+    "essive-instructive": "case",  # Hungarian case
+    "essive-modal": "case",  # Hungarian case
+    "ethnic": "misc",
+    "eumhun": "misc",
+    "euphemistic": "misc",
+    "evidential": "mood",  # Verb form (e.g., Azerbaijani)
+    "exaggerated": "misc",
+    "excessive": "misc",
+    "exclusive": "person",  # inclusive vs. exclusive first-person; case in Quechua
+    "exessive": "case",  # Case (transition away from state)
+    "expectative": "mood",  # Verb form, e.g., ϯϩⲉ/Coptic
+    "expletive": "misc",
+    "expressively": "misc",
+    "extended": "misc",  # At least in some Bulgarian forms, e.g. -лив
+    "extinct": "misc",  # Uses for taxonomic entries, indicates species is extinct
+    "factitive": "misc",  # Not sure if same or different as factive
+    "factive": "mood",  # Verb mood, assumed to be true
+    "familiar": "register",  # Formality/politeness degree of verbs etc
+    "feminine": "gender",  # Grammatical gender, masculine, neuter, common, class-* etc.
+    "feminine-usually": "gender",  # m/f, but usually feminine
+    "fifth-conjugation": "class",
+    "fifth-declension": "class",
+    "figuratively": "misc",
+    "finite-form": "misc",  # General category for finite verb forms
+    "first-conjugation": "class",
+    "first-declension": "class",
+    "first-person": "person",
+    "focalising": "mood",  # Verb form, e.g., ϯϩⲉ/Coptic
+    "form-i": "misc",
+    "form-ii": "misc",
+    "form-iii": "misc",
+    "form-iiiq": "misc",
+    "form-iiq": "misc",
+    "form-iq": "misc",
+    "form-iv": "misc",
+    "form-ivq": "misc",
+    "form-ix": "misc",
+    "form-of": "misc",
+    "form-v": "misc",
+    "form-vi": "misc",
+    "form-vii": "misc",
+    "form-viii": "misc",
+    "form-x": "misc",
+    "form-xi": "misc",
+    "form-xii": "misc",
+    "form-xiii": "misc",
+    "formal": "register",  # Formality/politeness degree of verbs etc
+    "four-corner": "misc",
+    "fourth-conjugation": "class",
+    "fourth-declension": "class",
+    "fourth-person": "person",
+    "frequentative": "misc",
+    "front-vowel": "misc",
+    "fusioning": "misc",  # Greenlandic suffixes
+    "future": "tense",  # Verb tense
+    "future-i": "tense",  # Verb tense (German, e.g., vertippen)
+    "future-ii": "tense",  # Verb tense (German)
+    "gender-neutral": "gender",
+    "general": "misc",  # In general temporal participle, e.g., talamaq/Azerbaijani
+    "genitive": "case",
+    "gerund": "non-finite",
+    "gnomic": "mood",
+    "goal": "mood",  # Verb form, e.g., উঘাল/Assamese
+    "gradation-t-d": "gradation",  # Finnish
+    "gradation-tt-t": "gradation",
+    "gradation-kk-k": "gradation",
+    "gradation-nt-nn": "gradation",
+    "gradation-pp-p": "gradation",
+    "gradation-k-": "gradation",
+    "gradation-p-v": "gradation",
+    "gradation-mp-mm": "gradation",
+    "gradation-nk-ng": "gradation",
+    "gradation-lt-ll": "gradation",
+    "gradation-rt-rr": "gradation",
+    "gradation-ik-j": "gradation",
+    "gradation-k-v": "gradation",
+    "grade-1-kanji": "misc",
+    "grade-2-kanji": "misc",
+    "grade-3-kanji": "misc",
+    "grade-4-kanji": "misc",
+    "grade-5-kanji": "misc",
+    "grade-6-kanji": "misc",
+    "habitual": "aspect",  # Verb aspect
+    "hangeul": "misc",
+    "hanja": "misc",  # Han character script (Chinese characters) to write Korean
+    "hard": "misc",  # sladek/Slovene
+    "hellenism": "misc",
+    "hidden-n": "class",   # Mongolian declension
+    "hiragana": "misc",  # Japanese syllabic spelling for native words
+    "historic": "mood",  # Grammatical tense/mood for retelling past events
+    "historical": "misc",  # Relating to history
+    "honorific": "register",  # Formality/politeness degree of verbs etc
+    "hortative": "mood",  # Verb mood
+    "humble": "register",
+    "humorous": "register",
+    "hypernym": "misc",
+    "hypercorrect": "misc",
+    "hyponym": "misc",
+    "hypothetical": "mood",  # Verb mood (e.g., Japanese)
+    "ideophonic": "misc",
+    "idiomatic": "misc",
+    "illative": "case",  # Case
+    "imperative": "mood",  # Mood
+    "imperative-only": "misc",
+    "imperfect": "tense",  # Past tense in various languages
+    "imperfective": "aspect",  # Verb aspect (action not completed)
+    "impersonal": "person",  # Verb form, e.g., Portuguese impersonal infinitive
+    "impolite": "register",  # Politeness degree of verbs etc
+    "in-certain-phrases": "misc",
+    "in-compounds": "misc",
+    "in-plural": "misc",
+    "in-indicative": "misc",
+    "in-conditional": "misc",
+    "in-variation": "misc",  # E.g. crush,WiFi,lhama,tsunami/Portuguese,
+    "inalienable": "possession",  # Inablienable possession: body parts etc; Choctaw, Ojibwe..
+    "inanimate": "category",
+    "including": "misc",
+    "includes-article": "misc",  # Word form includes article
+    "inclusive": "person",  # inclusive vs. exclusive first-person
+    "indeclinable": "class",
+    "indefinite": "referent",
+    "independent": "misc",  # Verb form, e.g., gikaa/Ojibwe
+    "indeterminate": "misc",  # Polish verbs (similar to "abstract" in Russian)
+    "indicative": "mood",  # Indicative mood
+    "indirect": "aspect",  # Verb form, e.g., بونا/
+    "indirect-object": "case",  # Case for indirect object
+    "inessive": "case",  # Case
+    "inferential": "mood",  # Verb form (w/ aorist), e.g. -ekalmak/Turkish
+    "infinitive": "non-finite",  # Verb form
+    "infinitive-da": "non-finite",  # Estonian
+    "infinitive-i": "non-finite",  # Finnish
+    "infinitive-i-long": "non-finite",  # Finnish
+    "infinitive-ii": "non-finite",  # Finnish
+    "infinitive-iii": "non-finite",  # Finnish
+    "infinitive-iv": "non-finite",  # Finnish
+    "infinitive-ma": "non-finite",  # Estonian
+    "infinitive-v": "non-finite",  # Finnish
+    "infinitive-zu": "non-finite",  # German
+    "infix": "pos",
+    "inflected": "misc",  # Marks inflected form, constrast to uninflected (e.g., Dutch)
+    "inflected-like": "misc",  # seleen/Limburgish
+    "informal": "register",  # Formality/politeness degree of verbs etc
+    "initialism": "misc",
+    "injunctive": "mood",  # Verb form, e.g., पुस्नु/Nepali
+    "instructive": "case",  # Case
+    "instrumental": "case",  # Case
+    "iterative": "misc",
+    "intensifier": "misc",  # In participle of intensification, e.g., talamaq
+    "intentive": "mood",  # Verb form, e.g., patjaṉi
+    "interfix-j": "misc",  # Greenlandic: adds -j- after long vowel
+    "interjection": "misc",
+    "interrogative": "misc",
+    "intransitive": "transitivity",
+    "invariable": "misc",
+    "invertive": "case",  # Case? (e.g., Сотрэш/Adyghe)
+    "involuntary": "mood",  # Verb form, e.g., khitan/Indonesian
+    "ionic": "misc",  # XXX ???
+    "ironic": "misc",
+    "irrealis": "mood",  # Verb form, e.g., たたかう/Japanese
+    "irregular": "misc",  # Generally of written word forms
+    "irregular-pronunciation": "misc",  # Kanji or similar pronunciation irregular
+    "italics": "misc",  # Used in head form to indicate italic character variant
+    "jargon": "register",
+    "jussive": "mood",  # Verb mood for orders, commanding, exhorting (subjunctively)
+    "kanji": "misc",  # Used in word head for some Japanese symbols
+    "katakana": "misc",  # Japanese syllabic spelling for foreign words
+    "krama": "register",  # Javanese register (polite form)
+    "krama-ngoko": "register",  # Javanese register (neutral, without polite)
+    "kyūjitai": "misc",  # Traditional Japanese Kanji (before 1947)
+    "lative": "case",  # Case, e.g., тіл/Khakas
+    "lenition": "misc",
+    "letter": "misc",
+    "letter-name": "misc",
+    "limitative": "mood",  # Verb form, e.g., ϯϩⲉ/Coptic
+    "literally": "misc",
+    "literary": "misc",
+    "locative": "case",
+    "long-form": "misc",  # Verb forms, отъпоустити/Old Church Slavonic
+    "lowercase": "misc",
+    "mainly": "misc",
+    "majestic": "register",
+    "masculine": "gender",  # Grammatial gender see feminine, neuter, common, class-* etc.
+    "masculine-usually": "gender",  # m/f, but usually masculine
+    "material": "misc",
+    "matronymic": "misc",
+    "medial": "misc",
+    "mediopassive": "voice",
+    "metaphoric": "misc",
+    "metonymically": "misc",
+    "metrically": "misc",  # Used in Sanskrit word heads
+    "mi-form": "misc",  # Malagasy verbs
+    "middle": "voice",  # At least middle voice (cf. active, passive)
+    "middle-infinitive": "non-finite",
+    "mildly": "misc",
+    "misconstruction": "misc",  # Used for e.g. incorrect Latin plurals
+    "misspelling": "misc",
+    "mixed": "misc",
+    "mixed-mutation": "misc",
+    "mixedcase": "misc",
+    "mnemonic": "misc",
+    "modal": "misc",
+    "modern": "misc",
+    "modified": "misc",  # Noun form, e.g., dikko/Sidamo (similar to person?)
+    "monopersonal": "misc",
+    "morpheme": "misc",
+    "morse-code": "misc",
+    "mostly": "misc",
+    "motive-form": "mood",  # Verb form for Korean (e.g., 조사하다)
+    "multiple-possession": "misc",
+    "multiplicative": "case",  # adverbial case in Finnish
+    "mutated": "misc",
+    "mutation": "misc",
+    "name": "misc",
+    "narrowly": "misc",
+    "nasal-mutation": "misc",
+    "natural": "misc",
+    "necessitative": "mood",  # Verb form in some languages
+    "negated-with": "misc",  # Indicates how word is negated, e.g., ϣⲗⲏⲗ/Coptic
+    "negative": "polarity",  # Indicates negation of meaning (nominal or verbal)
+    "neologism": "misc",
+    "neuter": "gender",  # Gender, cf. masculine, feminine, common-gender etc.
+    "next": "misc",  # Next value in sequence (number, letter, etc.)
+    "no-absolute": "misc",           # No aboslute form; femri/Icelandic
+    "no-auxiliary": "misc",	     # No auxiliary needed for verb (?); lavarsi/Italian
+    "no-comparative": "misc",        # The word has no comparative form
+    "no-construct-forms": "misc",    # The word has no construct forms
+    "no-definite": "misc",	     # Danish "no definite forms"
+    "no-diminutive": "misc",         # No diminutive form (goeste/West Flemish)
+    "no-feminine": "misc",	     # No feminine form (ácimo/Spanish)
+    "no-first-person-singular-past-historic": "misc",  # Italian
+    "no-first-person-singular-present": "misc",  # Spanish (only third person?)
+    "no-first-person-singular-preterite": "misc",  # Spanish (only third person?)
+    "no-genitive": "misc",           # The word has no genitive form
+    "no-gradation": "gradation",     # No consonant gradation
+    "no-imperfective": "misc",       # No imperfective form (исходить/Russian)
+    "no-infinitive": "misc",	     # No infinitive form (måste/Swedish)
+    "no-nominative": "misc",         # The word has no nominative form (from this base)
+    "no-nominative-plural": "misc",  # The word has no nominative plural
+    "no-past": "misc",	 	     # No simple past form"
+    "no-perfect": "misc",            # The word has no perfect/perfective aspect/form
+    "no-plural": "misc",             # The word has no plural form (= singular only)
+    "no-past-participle": "misc",    # The word has no past participle
+    "no-present-participle": "misc",  # The word has no present participle
+    "no-second-person-singular-imperative": "misc",  # No imperative
+    "no-senses": "misc",             # Added synthesized sense when no senses extracted
+    "no-singulative": "misc",	     # no singulative form
+    "no-superlative": "misc",        # The word has no superlative form
+    "no-supine": "misc",             # The word has no supine form
+    "no-third-person-singular-past-historic": "misc",  # Italian
+    "no-third-person-singular-present": "misc",  # mittagessen/German
+    "nominal": "pos",
+    "nominal-from-nominal": "derivation",  # Greenlandic: suffix derives nominal from nominal
+    "nominal-from-verb": "derivation",  # Greenlandic: suffix derives nominal from verb
+    "nominal-state": "misc",
+    "nominalization": "derivation",
+    "nominative": "case",
+    "nomino-accusative": "misc",  # 𒀀𒄿𒅖/Hittite XXX same as nominate/accusative???
+    "non-aspectual": "aspect",  # E.g., भूलना/Hindi
+    "non-durative": "misc",  # non-durative sentence, e.g., ϣⲗⲏⲗ/Coptic
+    "non-finite": "misc",  # General category of non-finite verb forms
+    "non-numeral": "misc",  # Assamese noun forms
+    "non-past": "tense",  # Verb tense (e.g., Korean)
+    "non-scientific": "misc",
+    "non-subject": "misc",    # ishno'/Chickasaw
+    "nonce-word": "misc",
+    "nondeferential": "misc",
+    "nonstandard": "misc",
+    "nonvirile": "category",
+    "not-attributive": "misc",
+    "not-clause-initial": "misc",
+    "not-comparable": "category",
+    "not-mutable": "misc",
+    "not-predicative": "misc",
+    "not-translated": "misc",
+    "noun": "pos",
+    "now": "misc",
+    "numeral": "pos",  # Numeral part-of-speech; also Assamese noun forms
+    "numeral-tones": "misc",
+    "obligational": "mood",  # Verb form (e.g., Azerbaijani)
+    "object-concord": "misc",  # Verb form includes object-based inflection
+    "object-first-person": "misc",  # Swahili object concords, Spanish combined-form
+    "object-second-person": "misc",
+    "object-third-person": "misc",
+    "object-singular": "misc",
+    "object-plural": "misc",
+    "object-class-1": "misc",  # Swahili object class for object concord
+    "object-class-2": "misc",
+    "object-class-3": "misc",
+    "object-class-4": "misc",
+    "object-class-5": "misc",
+    "object-class-6": "misc",
+    "object-class-7": "misc",
+    "object-class-8": "misc",
+    "object-class-9": "misc",
+    "object-class-10": "misc",
+    "object-class-11": "misc",
+    "object-class-12": "misc",
+    "object-class-13": "misc",
+    "object-class-14": "misc",
+    "object-class-15": "misc",
+    "object-class-16": "misc",
+    "object-class-17": "misc",
+    "object-class-18": "misc",
+    "objective": "case",  # Case, used as an object
+    "oblique": "case",  # Apparently like case form (e.g., Hindi)
+    "obsolete": "misc",
+    "obviative": "referent",  # Referent is not the most salient one, cf. proximal, distal
+    "offensive": "misc",
+    "often": "misc",
+    "one-termination": "misc",
+    "only": "misc",
+    "onomatopoeic": "misc",
+    "oppositive": "misc",  # expresses contrariety
+    "optative": "misc",
+    "ordinal": "misc",
+    "parasynonym": "misc",
+    "parenthetic": "misc",
+    "participle": "non-finite",
+    "particle": "pos",
+    "partitive": "case",  # Case
+    "passive": "voice",
+    "past": "tense",
+    "patronymic": "misc",
+    "paucal": "number",  # cf. singular, plural, dual, trial
+    "pausal": "misc",  # Relates to prosody/pronunciation?
+    "pejorative": "misc",
+    "perfect": "tense",  # Tense/verb form, e.g., in Finnish
+    "perfect-i": "tense",  # E.g., talamaq/Azerbaijani
+    "perfect-ii": "tense",  # E.g., talamaq/Azerbaijani
+    "perfective": "aspect",  # Verb aspect
+    "person": "category",
+    "personal": "misc",  # Type of pronoun; Verb form (e.g., Portuguese personal infinitive)
+    "phoneme": "misc",
+    "phrasal": "misc",
+    "phrase": "misc",
+    "physical": "misc",
+    "pin-pen-merger": "misc",
+    "place": "misc",
+    "pluperfect": "tense",  # Tense/verb form
+    "pluperfect-i": "tense",  # воштыны'/Udmurt
+    "pluperfect-ii": "tense",
+    "plural": "number",     # Number, cf. sigular, dual, trial
+    "plural-of": "detail",  # Plural form of something
+    "plural-of-variety": "misc",  # Plural indicating different kinds of things (Arabic)
+    "plural-only": "misc",  # Word only manifested in plural in this sense
+    "plural-normally": "misc",  # Usually plural, but singular may be possible
+    "poetic": "misc",
+    "polite": "misc",  # Politeness degree of verbs etc
+    "polytonic": "misc",
+    "positive": "polarity",  # degree of comparison; opposite of negative for verb forms
+    "possessed": "misc",  # Marks object that is possessed, cf. possessed
+    "possessive": "possession",  # Possession (marks who possesses)
+    "possessive-sg": "possession",  # Possessive with single object possessed
+    "possessive-pl": "possession",  # Possessive with multiple objects possessed
+    "possibly": "misc",
+    "postpositional": "misc",
+    "potential": "mood",  # Verb mood
+    "praenominal": "misc",
+    "precursive": "mood",  # Verb form, e.g. ϯϩⲉ/Coptic
+    "predicative": "misc",
+    "prefix": "pos",
+    "preparative": "aspect",  # Verb form, e.g., ᠵᡠᠸᡝᡩᡝᠮᠪᡳ/Manchu
+    "prepositional": "misc",
+    "present": "tense",  # Verb tense
+    "present-rare": "misc",  # Present tense is rare
+    "presumptive": "mood",  # Verb mood, e.g., गरजना/Hindi
+    "preterite": "tense",  # Verb tense (action in the past, similar to simple past)
+    "preterite-present": "tense",  # word where present&preterite forms look opposite
+    "preterite-i": "tense",  # воштыны/Udmurt
+    "preterite-ii": "tense",
+    "pretonic": "misc",  # Precedes stressed syllable
+    "previous": "misc",  # Previous value in sequence (number, letter, etc.)
+    "proclitic": "misc",
+    "progressive": "aspect",  # Verb form, e.g., પચવું/Gurajati
+    "prohibitive": "mood",  # Verb form (negative imperative), e.g., Old Armenian
+    "prolative": "case",
+    "pronominal": "misc",
+    "pronominal-state": "misc",
+    "pronoun": "pos",
+    "pronoun-included": "misc",
+    "pronunciation-spelling": "misc",
+    "proper-noun": "pos",
+    "proscribed": "misc",
+    "prosecutive": "case",  # Case (move along a surface or way); Greenlandic -nnguaq
+    "prospective": "misc",
+    "prothesis": "misc",
+    "prototonic": "misc",  # E.g., dofuissim/Old Irish
+    "proximal": "referent",  # Demonstrative referent is far, cf. distal, obviative
+    "purposive": "mood",  # Verb form, e.g., patjaṉi
+    "quadral": "misc",
+    "quantified": "misc",  # bat/Jamaican Creole (head form)
+    "quotative": "mood",  # Verb mood (marks quoted speech keeping orig person/tense)
+    "radical": "detail",
+    "radical+strokes": "detail",
+    "rare": "misc",
+    "realis": "mood",  # Verb form, e.g., たたかう/Japanese
+    "reason": "mood",  # Verb form, e.g., উঘাল/Assamese
+    "recently": "misc",  # Used in Recently complete, e.g., {ligpit,magbukid}/Tagalog
+    "reciprocal": "misc",  # Mutual action (board sense reflexive)
+    "reconstruction": "misc",  # This word/sense is a reconstruction for a dead language
+    "reduced": "misc",  # de/Central Franconian (XXX merge with e.g. clipping?)
+    "reduplication": "misc",
+    "reflexive": "misc",
+    "reflexive-of": "detail",  # Reflexive form of something
+    "regional": "misc",
+    "relational": "misc",
+    "relative": "misc",
+    "renarrative": "mood",  # Verb form (e.g. Bulgarian)
+    "replacive": "misc",  # Greenlandic suffixes
+    "reported": "mood",  # Verb forms for reported speech
+    "resultative": "misc",  # partciple in Armenian (state resulting from action)
+    "retronym": "misc",
+    "revised": "misc",  # Used in many Korean words, is this same as revised-jeon?
+    "revised-jeon": "misc",
+    "rhetoric": "misc",
+    "romanization": "misc",
+    "root": "misc",
+    "sarcastic": "misc",
+    "second-conjugation": "class",
+    "second-declension": "class",
+    "second-person": "person",
+    "secular": "misc",  # Contrast with Ecclesiastical, Tham, etc
+    "semelfactive": "misc",
+    "sentence-case": "misc",  # дь/Yakut
+    "sentence-final": "misc",  # Korean verb forms (broad category)
+    "sequence": "misc",
+    "sequential": "misc",
+    "seventh-conjugation": "class",
+    "shinjitai": "misc",  # Simplified Japanese Kanji (after 1947)
+    "short-form": "misc",  # Verb forms, отъпоустити/Old Church Slavonic
+    "si-perfective": "misc",
+    "simplified": "misc",
+    "simultaneous": "misc",  # simultaneous converb, e.g. խածնել/Armenian
+    "single-possession": "misc",
+    "singular": "number",  # Number, cf. plural, dual, trial, paucal
+    "singular-only": "misc",
+    "singulative": "misc",  # Individuation of a collective or mass noun, like number
+    "situative": "misc",  # expressing location of things in comparison with one another
+    "sixth-conjugation": "class",
+    "slang": "register",
+    "slur": "misc",
+    "sociative": "case",  # Case?, e.g., மரம்/Tamil
+    "soft": "misc",  # najslajši/slovene
+    "soft-mutation": "misc",  # At least Welsh
+    "sometimes": "misc",
+    "somewhat": "misc",
+    "special": "misc",  # Adverbial verb form in Lithuanian
+    "specific": "misc",  # In specific temporal participle, e.g., talamaq
+    "specifically": "misc",
+    "standalone": "misc",  #  Without a main word (e.g., pronoun/determiner senses)
+    "standard": "misc",
+    "stative": "misc",
+    "stem": "misc",  # Stem rather than full forms
+    "stem-primary": "misc",  # Primary stem, e.g., दुनु/Nepali
+    "stem-secondary": "misc",  # Secondary stem, e.g., दुनु/Nepali
+    "stress-pattern-1": "misc",
+    "stress-pattern-2": "misc",
+    "stress-pattern-3": "misc",
+    "stress-pattern-3a": "misc",
+    "stress-pattern-3b": "misc",
+    "stress-pattern-4": "misc",
+    "stressed": "misc",  # Marked/full form, cf. unstressed
+    "stressed-preposition": "misc",
+    "strict-sense": "misc",
+    "strokes": "misc",
+    "strong": "misc",
+    "subjective": "case",  # Case, used as a subject; subject form
+    "subjunctive": "mood",  # Subjunctive mood
+    "subjunctive-i": "mood",  # Subjunctive i mood (German)
+    "subjunctive-ii": "mood",  # Subjunctive ii mood (German)
+    "sublative": "misc",
+    "subordinate-clause": "misc",  # e.g., ϣⲗⲏⲗ/Coptic
+    "subordinating": "misc",
+    "subscript": "misc",  # Variant of certain characters
+    "substantive": "misc",
+    "subsuntive": "misc",  # Verbs in Guaraní
+    "suffix": "pos",
+    "superessive": "case",  # Case, e.g., Hungarian
+    "superlative": "degree",  # Comparison of adjectives/adverbs
+    "superscript": "misc",  # Variant of certain characters
+    "supine": "misc",   # XXX is this term obsolete (= to-infinitive?)
+    "suppletive": "misc",
+    "surname": "misc",
+    "suru": "class",  # Japanese verb inflection type
+    "syllable-final": "misc",
+    "syllable-initial": "misc",
+    "symbol": "misc",
+    "syncope": "misc",
+    "synecdoche": "misc",
+    "synonym": "misc",
+    "synonym-of": "misc",
+    "taboo": "misc",
+    "tafa-form": "misc",  # Malagasy verbs
+    "temporal": "misc",  # relating to time/tense, e.g., talamaq; Finnish adverbials
+    "term-of-address": "misc",
+    "terminative": "aspect",  # Verb aspect/mood (e.g., Japanese); also case in Quechua?
+    "thematic": "misc",
+    "third-conjugation": "class",
+    "third-declension": "class",
+    "third-person": "person",
+    "three-termination": "misc",
+    "tone-1": "misc",
+    "tone-2": "misc",
+    "topicalized": "misc",
+    "toponymic": "misc",
+    "traditional": "misc",
+    "transcription": "misc",
+    "transgressive": "mood",  # Verb form
+    "transitive": "transitivity",
+    "transitive-with-of": "misc",
+    "translation-hub": "misc",  # Predictable compound term with translations, no gloss
+    "translative": "case",
+    "translingual": "misc",
+    "transliteration": "misc",
+    "trial": "number",  # Number, cf. singular, dual, plural
+    "trigger-actor": "trigger",  # Actor trigger, e.g., magtinda/Tagalog
+    "trigger-benefactive": "trigger",  # Benefactive trigger
+    "trigger-causative": "trigger",  # Causative trigger
+    "trigger-instrument": "trigger",  # Instrument trigger
+    "trigger-locative": "trigger",  # Locative trigger
+    "trigger-measurement": "trigger",  # Measurement trigger, e.g., rumupok/Tagalog
+    "trigger-object": "trigger",  # Object trigger
+    "trigger-referential": "trigger",   # Referential trigger
+    "triggers-aspirate-mutation": "trigger",  # Welsh
+    "triggers-eclipsis": "trigger",      # Irish
+    "triggers-h-prothesis": "trigger",   # Irish
+    "triggers-lenition": "trigger",      # Irish
+    "triggers-mixed-mutation": "trigger",  # Welsh
+    "triggers-nasal-mutation": "trigger",  # Old Irish
+    "triggers-soft-mutation": "trigger",  # Welsh
+    "triptote": "class",  # Noun having three cases (e.g., Arabic)
+    "truncative": "misc",  # Greenlandic: suffix attaches to last vowel, removing stuff
+    "two-termination": "misc",
+    "type-a": "class",
+    "type-p": "class",
+    "type-u": "class",
+    "type-ua": "class",
+    "type-up": "class",
+    "unabbreviated": "mod",
+    "unaugmented": "misc",
+    "uncommon": "misc",
+    "uncountable": "category",
+    "unemphatic": "misc",
+    "uninflected": "misc",  # uninflected form (e.g., Dutch), cf. inflected
+    "universal": "misc",  # universally known (καθεμία/Greek)
+    "unknown": "misc",  # Apparently verb form, e.g., जाँच्नु/Nepali
+    "unmodified": "misc",  # Noun form, e.g., dikko/Sidamo (similar to person?)
+    "unpossessed": "possession",  # Not possessed (often omitted); cf. possessed
+    "unspecified": "misc",  # Used in some conjugation/declension tables
+    "unstressed": "misc",  # Unstressed (unmarked, weaker) form
+    "unstressed-before-j": "misc",  # unstressed when next word starts with /j/
+    "uppercase": "misc",
+    "used-in-the-form": "misc",
+    "usually": "misc",
+    "utterance-medial": "misc",
+    "variant": "misc",
+    "vav-consecutive": "misc",
+    "vernacular": "register",
+    "verb": "pos",
+    "verb-completement": "misc",  # Used in some Chinese words (merged verb+complement?)
+    "verb-form-da": "misc",  # Estonian da-form
+    "verb-form-des": "misc",  # Estonian des-form
+    "verb-form-i": "misc",
+    "verb-form-ii": "misc",
+    "verb-from-nominal": "derivation",  # Forms verbs from nominals
+    "verb-object": "misc",  # Used in some Chinese words (verb+object in same entry?)
+    "verb-from-verb": "derivation",  # Suffix modifies verbs producing verbs
+    "vigesimal": "misc",
+    "virile": "category",
+    "visual-rendering": "misc",
+    "voa-form": "misc",  # Malagasy verbs
+    "vocative": "case",  # Case? used for addressee
+    "volitive": "mood",  # Verb form ?  XXX is this same as volitional?
+    "volitional": "mood",  # Verb mood (e.g., Japanese: suggests, urges, initates act)
+    "vulgar": "register",
+    "weak": "misc",
+    "weak-verb": "misc",
+    "with-a": "with",
+    "with-ablative": "with",
+    "with-absolute": "with",
+    "with-absolutive": "with",
+    "with-accusative": "with",
+    "with-action-noun-in-elative": "with",
+    "with-adessive": "with",
+    "with-adjective": "with",
+    "with-adverb": "with",
+    "with-allative": "with",
+    "with-an": "with",
+    "with-avec": "with",
+    "with-ce": "with",
+    "with-che": "with",
+    "with-comparative": "with",
+    "with-con": "with",
+    "with-conditional": "with",
+    "with-da": "with",
+    "with-dative": "with",
+    "with-de": "with",
+    "with-definite-article": "with",
+    "with-di": "with",
+    "with-down": "with",
+    "with-ela": "with",
+    "with-elas": "with",
+    "with-elative": "with",
+    "with-ele": "with",
+    "with-eles": "with",
+    "with-ella": "with",
+    "with-ellas": "with",
+    "with-ellos": "with",
+    "with-en": "with",
+    "with-essive": "with",
+    "with-eu": "with",
+    "with-infinitive-i": "with",
+    "with-future": "with",
+    "with-for": "with",
+    "with-gendered-noun": "with",
+    "with-genitive": "with",
+    "with-gij": "with",
+    "with-hiri": "with",
+    "with-hura": "with",
+    "with-illative": "with",
+    "with-imperfect": "with",
+    "with-in": "with",
+    "with-indicative": "with",
+    "with-indirect-object": "with",
+    "with-indirect-relative": "with",
+    "with-inessive": "with",
+    "with-infinitive": "with",
+    "with-instrumental": "with",
+    "with-it-dialectally": "with",
+    "with-järgi": "with",
+    "with-kala": "with",
+    "with-kV": "with",  # gǀkxʻâã/ǃXóõ
+    "with-lai": "with",
+    "with-locative": "with",
+    "with-meel": "with",
+    "with-negation": "with",
+    "with-negative-adj": "with",
+    "with-nominative": "with",
+    "with-nos": "with",
+    "with-nosotras": "with",
+    "with-nosotros": "with",
+    "with-noun": "with",
+    "with-noun-phrase": "with",
+    "with-number": "with",
+    "with-objective": "with",
+    "with-odd-syllable-stems": "with",
+    "with-of": "with",
+    "with-olemassa": "with",  # Finnish
+    "with-on": "with",
+    "with-optative": "with",
+    "with-others": "with",
+    "with-partitive": "with",
+    "with-passive-present-participle": "with",
+    "with-passive-past-participle-partitive": "with",
+    "with-passive-past-participle-translative": "with",
+    "with-past": "with",
+    "with-past-participle": "with",
+    "with-past-participle-translative": "with",
+    "with-past-participle-partitive": "with",
+    "with-per": "with",
+    "with-personal-pronoun": "with",
+    "with-por": "with",
+    "with-possessive-suffix": "with",
+    "with-pour": "with",
+    "with-prepositional": "with",
+    "with-present": "with",
+    "with-savrtsobi": "with",
+    "with-su": "with",
+    "with-subjunctive": "with",
+    "with-subordinate-clause": "with",
+    "with-sur": "with",
+    "with-dummy-subject": "with",
+    "with-there": "with",
+    "with-third-person": "with",
+    "with-third-person-singular": "with",
+    "with-infinitive-iii": "with",
+    "with-infinitive-iii-abessive": "with",
+    "with-infinitive-iii-elative": "with",
+    "with-infinitive-iii-illative": "with",
+    "with-to": "with",
+    "with-translative": "with",
+    "with-tu": "with",
+    "with-tú": "with",
+    "with-up": "with",
+    "with-usted": "with",
+    "with-ustedes": "with",
+    "with-você": "with",
+    "with-vocês": "with",
+    "with-von": "with",
+    "with-vos": "with",
+    "with-voseo": "with",
+    "with-vosotras": "with",
+    "with-vosotros": "with",
+    "with-välja": "with",
+    "with-vós": "with",
+    "with-yo": "with",
+    "with-zuek": "with",
+    "with-à": "with",
+    "with-él": "with",
+    "without-article": "misc",  # E.g., grüun/Cimbrian
+    "without-noun": "misc",
+    "word-tags": "detail",
+    "zhuyin": "misc",
+    "æ-tensing": "misc",
+    "има": "misc",  # Distinguishes certain verb forms in Macedonian
+}
+for k, v in valid_tags.items():
+    assert isinstance(k, str)
+    assert v in tag_categories
 
-for tag in form_of_tags - valid_tags:
+for tag in form_of_tags - set(valid_tags.keys()):
     print("tags.py:form_of_tags contains invalid tag {}"
           .format(tag))
+
+
+def sort_tags(tags):
+    """Sorts tags into presentation order and returns them as a tuple.
+    This also removes duplicates."""
+    assert isinstance(tags, (list, tuple, set))
+    return tuple(sorted(set(tags), key=lambda t:
+                        tag_categories.get(valid_tags.get(t, "unknown"), 0) -
+                        len(t) / 1000,
+                        reverse=True))
