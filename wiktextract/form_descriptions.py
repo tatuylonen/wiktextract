@@ -1070,10 +1070,13 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
             # If it all consists of CJK characters, add it with the
             # CJK tag.  This is used at least for some Vietnamese
             # words (e.g., ba/Vietnamese)
-            if all(unicodedata.name(x).startswith("CJK ") for x in desc):
-                add_related(ctx, data, ["CJK"], [desc], text, True,
-                            is_reconstruction)
-                continue
+            try:
+                if all(unicodedata.name(x).startswith("CJK ") for x in desc):
+                    add_related(ctx, data, ["CJK"], [desc], text, True,
+                                is_reconstruction)
+                    continue
+            except ValueError:
+                pass
 
             # Handle some special cases
             splitdesc = desc.split()
