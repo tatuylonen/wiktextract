@@ -30,6 +30,8 @@ title_contains_global_map = {
     "superlative": "superlative",
     "combined forms": "combined-form",
     "mutation": "mutation",
+    "definite article": "definite",
+    "indefinite article": "indefinite",
 }
 for k, v in title_contains_global_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -51,6 +53,9 @@ title_contains_wordtags_map = {
     "ditransitive": "ditransitive",
     "ambitransitive": "ambitransitive",
     "proper noun": "proper-noun",
+    "no plural": "no-plural",
+    "imperfective": "imperfective",
+    "perfective": "perfective",
 }
 for k, v in title_contains_wordtags_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -89,6 +94,7 @@ title_elements_map = {
     "3rd declension": "third-declension",
     "4th declension": "fourth-declension",
     "5th declension": "fifth-declension",
+    "second declension": "second-declension",
 }
 for k, v in title_elements_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -102,6 +108,7 @@ title_elemstart_map = {
     "Kotus type": "class",
     "class": "class",
     "type": "class",
+    "accent paradigm": "accent-paradigm",
 }
 for k, v in title_elemstart_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -180,6 +187,7 @@ def clean_header(word, col):
     if re.search(r"^(There are |"
                  r"\*|"
                  r"Use |"
+                 r"use the |"
                  r"Only used |"
                  r"The forms in |"
                  r"these are also written |"
@@ -319,7 +327,7 @@ def expand_header(word, lang, text, tags0):
         # alternatives must directly be strings.)
         if isinstance(v, (list, tuple)):
             lst = []
-            return list(tuple(sorted(x.split()) for x in v))
+            return list(tuple(sorted(x.split())) for x in v)
         # Otherwise the value should be a dictionary describing a conditional
         # expression.
         if not isinstance(v, dict):
@@ -396,7 +404,7 @@ def compute_coltags(hdrspans, start, colspan, mark_used):
             hdrspan.used = True
         # Merge into coltags
         if coltags is None:
-            coltags = hdrspan.tagsets
+            coltags = list(tuple(sorted(tt)) for tt in hdrspan.tagsets)
         else:
             new_coltags = set()
             for tags2 in hdrspan.tagsets:  # Earlier header
@@ -416,8 +424,8 @@ def compute_coltags(hdrspans, start, colspan, mark_used):
     if coltags is None:
         coltags = [()]
     #print("HDRSPANS:", list((x.start, x.colspan, x.tagsets) for x in hdrspans))
-    #print("COMPUTE_COLTAGS {} {} {}: {}"
-    #      .format(start, colspan, mark_used, coltags))
+    # print("COMPUTE_COLTAGS {} {} {}: {}"
+    #       .format(start, colspan, mark_used, coltags))
     return coltags
 
 
@@ -501,9 +509,6 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                 text, refs, defs = clean_header(word, col)
                 if not text:
                     continue
-                #if j < len(col_has_text) and col_has_text[j]:
-                #    print("  COL HAS TEXT BEFORE:", j, col)
-                #    return None  # Cannot have column hdrs after text
                 if text not in infl_map:
                     text1 = re.sub(r"\s*\([^)]*\)", "", text)
                     if text1 in infl_map:
@@ -597,27 +602,28 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                     for m in re.finditer(r"/[^/]*/", form):
                         ipas.append(m.group(0))
                     form = re.sub(r"/[^/]*/", "", form)
-                    form = re.sub(r"^\s*,\s*", "", form)
-                    form = re.sub(r"\s*,\s*$", "", form)
-                    form = re.sub(r"\s*(,\s*)+", ", ", form)
-                    form = re.sub(r"\s+", " ", form)
-                    form = form.strip()
+                form = re.sub(r"^\s*,\s*", "", form)
+                form = re.sub(r"\s*,\s*$", "", form)
+                form = re.sub(r"\s*(,\s*)+", ", ", form)
+                form = re.sub(r"(?i)^Main:", "", form)
+                form = re.sub(r"\s+", " ", form)
+                form = form.strip()
                 if form.endswith("ʳᵃʳᵉ"):
                     extra_tags.append("rare")
                     form = form[:-4].strip()
                 while form and is_superscript(form[-1]):
                     # XXX handle refences in form
                     form = form[:-1]
+                if form.startswith("*"):
+                    form = form[1:]
                 roman = None
                 m = re.search(r"\s*\(([^)]*)\)", form)
                 if m is not None:
                     # XXX besides roman, it can be tags, e.g., (archaic)
                     roman = m.group(1)
                     form = (form[:m.start()] + " " + form[m.end():]).strip()
-                if not form:
-                    continue
                 # Ignore certain forms that are not really forms
-                if form in ("not used",):
+                if form in ("", "not used", "not applicable"):
                     continue
                 # print("ROWTAGS:", rowtags)
                 # print("COLTAGS:", combined_coltags)
@@ -735,7 +741,8 @@ def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
     for x in titles:
         assert isinstance(x, str)
     # Imported here to avoid a circular import
-    from wiktextract.page import clean_node
+    from wiktextract.page import clean_node, recursively_extract
+    # print("HANDLE_WIKITEXT_TABLE", titles)
 
     cols_fill = []    # Filling for columns with rowspan > 1
     cols_filled = []  # Number of remaining rows for which to fill the column
@@ -778,7 +785,22 @@ def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
                     rowspan = 1
                     colspan = 1
                 # print("COL:", col)
-                celltext = clean_node(config, ctx, None, col.children)
+
+                # Process any nested tables recursively.  XXX this
+                # should also take prior text before nested tables as
+                # headers, e.g., see anglais/Irish/Declension ("Forms
+                # with the definite article" before the table)
+                tables, rest = recursively_extract(col, lambda x:
+                                                   isinstance(x, WikiNode) and
+                                                   x.kind == NodeKind.TABLE)
+                for tbl in tables:
+                    handle_wikitext_table(config, ctx, word, lang, data,
+                                          tbl, titles, source)
+                # print("REST:", rest)
+
+                celltext = clean_node(config, ctx, None, rest)
+                # print("CLEANED:", celltext)
+
                 # This magic value is used as part of header detection
                 cellstyle = (col.attrs.get("style", "") + "//" +
                              col.attrs.get("class", "") + "//" +
@@ -796,11 +818,14 @@ def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
                 elif (kind == NodeKind.TABLE_HEADER_CELL or
                       (celltext in infl_map and celltext != word) or
                       (style == cellstyle and
+                       celltext != word and
                        not style.startswith("////"))):
                     if celltext.find(" + ") < 0:
                         is_title = True
                 if (not is_title and len(row) < len(cols_headered) and
                     cols_headered[len(row)]):
+                    # Whole column has title suggesting they are headers
+                    # (e.g. "Case")
                     is_title = True
                 if is_title:
                     while len(cols_headered) <= len(row):
@@ -846,7 +871,7 @@ def handle_html_table(config, ctx, word, lang, data, tree, titles, source):
     assert isinstance(lang, str)
     assert isinstance(data, dict)
     assert isinstance(tree, WikiNode)
-    assert isinstance(tree.kind, NodeKind.HTML) and tree.args == "table"
+    assert tree.kind == NodeKind.HTML and tree.args == "table"
     assert isinstance(titles, list)
     for x in titles:
         assert isinstance(x, str)
@@ -939,3 +964,4 @@ def parse_inflection_section(config, ctx, data, word, lang, section, tree):
 
 # XXX change to use ctx.debug
 # XXX check interdecir/Spanish - singular/plural issues
+# XXX check anglais/Irish/Declension - should take titles/tags from outer table

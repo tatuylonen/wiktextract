@@ -3127,8 +3127,11 @@ def clean_node(config, ctx, category_data, value, template_fn=None,
         elif isinstance(value, (list, tuple)):
             ret = "".join(map(recurse, value))
         elif isinstance(value, WikiNode):
-            ret = ctx.node_to_html(value, template_fn=clean_template_fn,
-                                   post_template_fn=post_template_fn)
+            if value.kind in (NodeKind.TABLE_CELL, NodeKind.TABLE_HEADER_CELL):
+                ret = recurse(value.children)
+            else:
+                ret = ctx.node_to_html(value, template_fn=clean_template_fn,
+                                       post_template_fn=post_template_fn)
             # print("clean_value recurse node_to_html value={!r} ret={!r}"
             #      .format(value, ret))
         else:

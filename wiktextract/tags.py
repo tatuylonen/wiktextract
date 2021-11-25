@@ -4362,6 +4362,7 @@ valid_tags = {
     "abstract": "misc",
     "abstract-noun": "misc",
     "accent/glottal": "misc",
+    "accent-paradigm": "detail",
     "accusative": "case",  # Case for object in many languages
     "acronym": "mod",   # abbreviation formed by the initial letters of other words
     "active": "voice",
@@ -4443,6 +4444,7 @@ valid_tags = {
     "chiefly": "misc",
     "childish": "misc",
     "circumstantial": "mood",  # Verb form, e.g., patjaṉi
+    "circumposition": "misc",
     "class": "detail",  # Used as a head prefix in San Juan Quajihe Chatino (class 68 etc)
     "class-1": "class",    # Inflectional classes (e.g., Bantu languages), cf. gender
     "class-10": "class",
@@ -4770,6 +4772,7 @@ valid_tags = {
     "krama": "register",  # Javanese register (polite form)
     "krama-ngoko": "register",  # Javanese register (neutral, without polite)
     "kyūjitai": "misc",  # Traditional Japanese Kanji (before 1947)
+    "l-participle": "non-finite",  # dati/Proto-Slavic
     "lative": "case",  # Case, e.g., тіл/Khakas
     "lenition": "misc",
     "letter": "misc",
@@ -4778,6 +4781,7 @@ valid_tags = {
     "literally": "misc",
     "literary": "misc",
     "locative": "case",
+    "locative-qualitative": "case",
     "long-form": "misc",  # Verb forms, отъпоустити/Old Church Slavonic
     "lowercase": "misc",
     "mainly": "misc",
@@ -4987,6 +4991,8 @@ valid_tags = {
     "prosecutive": "case",  # Case (move along a surface or way); Greenlandic -nnguaq
     "prospective": "misc",
     "prothesis": "misc",
+    "prothesis-h": "misc",
+    "prothesis-t": "misc",
     "prototonic": "misc",  # E.g., dofuissim/Old Irish
     "proximal": "referent",  # Demonstrative referent is far, cf. distal, obviative
     "purposive": "mood",  # Verb form, e.g., patjaṉi
@@ -5007,7 +5013,7 @@ valid_tags = {
     "reflexive-of": "detail",  # Reflexive form of something
     "regional": "misc",
     "relational": "misc",
-    "relative": "misc",
+    "relative": "non-finite",  # At least gp/Egyptian verb forms; conjunctions
     "renarrative": "mood",  # Verb form (e.g. Bulgarian)
     "replacive": "misc",  # Greenlandic suffixes
     "reported": "mood",  # Verb forms for reported speech
