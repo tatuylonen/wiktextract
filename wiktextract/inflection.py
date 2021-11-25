@@ -1,1677 +1,942 @@
-# -*- fundamental -*-
+# Code for parsing inflection tables.
 #
-# Data for parsing inflection tables
-#
-# Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org.
 
 import re
-from .tags import valid_tags, head_final_numeric_langs
+import copy
+import enum
+import html
+import unicodedata
+from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
+from wiktextract.config import WiktionaryConfig
+from wiktextract.tags import valid_tags
+from wiktextract.inflectiondata import infl_map, infl_start_map, infl_start_re
+from wiktextract.datautils import data_extend
 
-infl_map = {
-    "plural": {
-        "if": "combined-form",
-        "then": "object-plural",
-        "else": {
-            "lang": ["Quechua", "Kumyk"],
-            "if": "possessive",
-            "then": "possessive-pl",
-            "else": "plural",
-        },
-    },
-    "singular": {
-        "if": "combined-form",
-        "then": "object-singular",
-        "else": {
-            "lang": ["Quechua", "Kumyk"],
-            "if": "possessive",
-            "then": "possessive-sg",
-            "else": "singular",
-        },
-    },
-    "accusative": "accusative",
-    "nominative": "nominative",
-    "genitive": "genitive",
-    "dative": "dative",
-    "instrumental": "instrumental",
-    "ablative": "ablative",
-    "inessive": "inessive",
-    "illative": "illative",
-    "elative": "elative",
-    "adessive": "adessive",
-    "translative": "translative",
-    "allative": "allative",
-    "possessor": "possessive",
-    "vocative": "vocative",
-    "abessive": "abessive",
-    "partitive": "partitive",
-    "Singular": "singular",
-    "essive": "essive",
-    "instructive": "instructive",
-    "Plural": "plural",
-    "comitative": "comitative",
-    "1st person": {
-        "if": "combined-form",
-        "then": "object-first-person",
-        "else": "first-person",
-    },
-    "2nd person": {
-        "if": "combined-form",
-        "then": "object-second-person",
-        "else": "second-person",
-    },
-    "3rd person": {
-        "if": "combined-form",
-        "then": "object-third-person",
-        "else": "third-person",
-    },
-    "1st infinitive": "infinitive infinitive-i",
-    "2nd infinitive": "infinitive infinitive-ii",
-    "3rd infinitive": "infinitive infinitive-iii",
-    "locative": "locative",
-    "nom.": "nominative",
-    "gen.": "genitive",
-    "Nominative": "nominative",
-    "Genitive": "genitive",
-    "Dative": "dative",
-    "Vocative": "vocative",
-    "Accusative": "accusative",
+# Column texts that are interpreted as an empty column.
+IGNORED_COLVALUES = set([
+    "-", "־", "᠆", "‐", "‑", "‒", "–", "—", "―", "−",
+    "⸺", "⸻", "﹘", "﹣", "－"])
+
+# Words in title that cause addition of tags in all entries
+title_contains_global_map = {
+    "possessive": "possessive",
+    "positive": "positive",
+    "negative": "negative",
+    "future": "future",
+    "pf": "perfective",
+    "impf": "imperfective",
+    "comparative": "comparative",
+    "superlative": "superlative",
+    "combined forms": "combined-form",
+    "mutation": "mutation",
+}
+for k, v in title_contains_global_map.items():
+    if any(t not in valid_tags for t in v.split()):
+        print("TITLE_CONTAINS_GLOBAL_MAP UNRECOGNIZED TAG: {}: {}"
+              .format(k, v))
+title_contains_global_re = re.compile(
+    r"(?i)(^|\b)({})($|\b)"
+    .format("|".join(re.escape(x)
+                     for x in title_contains_global_map.keys())))
+
+# Words in title that cause addition of tags to word-tags "form"
+title_contains_wordtags_map = {
+    "strong": "strong",
+    "weak": "weak",
+    "countable": "countable",
+    "uncountable": "uncountable",
+    "transitive": "transitive",
+    "intransitive": "intransitive",
+    "ditransitive": "ditransitive",
+    "ambitransitive": "ambitransitive",
+    "proper noun": "proper-noun",
+}
+for k, v in title_contains_wordtags_map.items():
+    if any(t not in valid_tags for t in v.split()):
+        print("TITLE_CONTAINS_WORDTAGS_MAP UNRECOGNIZED TAG: {}: {}"
+              .format(k, v))
+title_contains_wordtags_re = re.compile(
+    r"(?i)(^|\b)({})($|\b)"
+    .format("|".join(re.escape(x)
+                     for x in title_contains_wordtags_map.keys())))
+
+# Parenthesized elements in title that are converted to tags in "word-tags" form
+title_elements_map = {
+    "weak": "weak",
+    "strong": "strong",
+    "masculine": "masculine",
     "feminine": "feminine",
     "neuter": "neuter",
-    "terminative": "terminative",
-    "Ablative": "ablative",
-    "imperative": "imperative",
-    "causal-final": "causal-final",
-    "essive-formal": "essive-formal",
-    "essive-modal": "essive-modal",
-    "superessive": "superessive",
-    "sublative": "sublative",
-    "delative": "delative",
-    "non-attributive possessive - singular":
-    "not-attributive predicative possessive singular",
-    "non-attributive possessive - plural":
-    "not-attributive predicative possessive singular",
-    "infinitive": "infinitive",
-    "prepositional": "prepositional",
-    "masculine": "masculine",
-    "active": "active",
-    "passive": "passive",
-    "Case": "",
-    "participles": "participle",
-    "past tense": "past",
-    "Positive past": "past positive",
-    "Negative past": "past negative",
-    "Positive present": "present positive",
-    "Negative present": "present negative",
-    "Positive future": "future positive",
-    "Negative future": "future negative",
-    "Positive subjunctive": "subjunctive positive",
-    "Negative subjunctive": "subjunctive negative",
-    "Positive present conditional": "present conditional positive",
-    "Negative present conditional": "present conditional negative",
-    "Positive past conditional": "past conditional positive",
-    "Negative past conditional": "past conditional negative",
-    "1s": {"if": "object-concord",
-           "then": "object-first-person object-singular"},
-    "2s": {"if": "object-concord",
-           "then": "object-second-person object-singular"},
-    "3s": {"if": "object-concord",
-           "then": "object-third-person object-singular"},
-    "1p": {"if": "object-concord",
-           "then": "object-first-person object-plural"},
-    "2p": {"if": "object-concord",
-           "then": "object-second-person object-plural"},
-    "3p": {"if": "object-concord",
-           "then": "object-third-person object-plural"},
-    "c1": {"if": "object-concord", "then": "object-class-1"},
-    "c2": {"if": "object-concord", "then": "object-class-2"},
-    "c3": {"if": "object-concord", "then": "object-class-3"},
-    "c4": {"if": "object-concord", "then": "object-class-4"},
-    "c5": {"if": "object-concord", "then": "object-class-5"},
-    "c6": {"if": "object-concord", "then": "object-class-6"},
-    "c7": {"if": "object-concord", "then": "object-class-7"},
-    "c8": {"if": "object-concord", "then": "object-class-8"},
-    "c9": {"if": "object-concord", "then": "object-class-9"},
-    "c10": {"if": "object-concord", "then": "object-class-10"},
-    "c11": {"if": "object-concord", "then": "object-class-11"},
-    "c12": {"if": "object-concord", "then": "object-class-12"},
-    "c13": {"if": "object-concord", "then": "object-class-13"},
-    "c14": {"if": "object-concord", "then": "object-class-14"},
-    "c15": {"if": "object-concord", "then": "object-class-15"},
-    "c16": {"if": "object-concord", "then": "object-class-16"},
-    "c17": {"if": "object-concord", "then": "object-class-17"},
-    "c18": {"if": "object-concord", "then": "object-class-18"},
-    "2s/2p/15/17": ["object-second-person object-singular object-plural",
-                    "object-class-15 object-class-17"],
-    "2p/3p/c2": ["object-second-person object-third-person object-plural",
-                 "object-class-2"],
-    "c3/c11/c14": "object-class-3 object-class-11 object-class-14",
-    "c4/c9": "object-class-4 object-class-9",
-    "Forms with object concords": "object-concord",
-    "present tense": "present",
-    "future tense": "future",
-    "Neuter": "neuter",
-    "Masculine": "masculine",
-    "Feminine": "feminine",
-    "Number": "",
-    "adverbial": "adverbial",
-    "1st singular (я)": "first-person singular",
-    "2nd singular (ты)": "second-person singular",
-    "3rd singular (он/она́/оно́)": "third-person singular",
-    "1st plural (мы)": "first-person plural",
-    "2nd plural (вы)": "second-person plural",
-    "3rd plural (они́)": "third-person plural",
-    "plural (мы/вы/они́)": "plural",
-    "masculine (я/ты/он)": "masculine",
-    "feminine (я/ты/она́)": "feminine",
-    "neuter (оно́)": "neuter",
-    "1st person plural": "first-person plural",
-    "2nd person plural": "second-person plural",
-    "3rd person plural": "third-person plural",
-    "single possession": "possessive single-possession",
-    "multiple possessions": "possessive multiple-possession",
-    "1st person sing.": "first-person singular",
-    "2nd person sing.": "second-person singular",
-    "3rd person sing.": "third-person singular",
-    "Case / Gender": "",
-    "masculine inanimate": "masculine inanimate",
-    "Infinitive": "infinitive",
-    "Past": "past",
-    "Past participle": "past participle",
-    "Present participle": "present participle",
-    "1st person sg": "first-person singular",
-    "2nd person sg informal": "second-person singular informal",
-    "3rd person sg 2nd p. sg formal":
-    ["third-person singular",
-     "second-person singular formal"],
-    "1st person pl": "first-person plural",
-    "2nd person pl informal": "second-person plural informal",
-    "3rd person pl 2nd p. pl formal":
-    ["third-person plural", "second-person plural formal"],
-    "Indica­tive mood": "indicative",
-    "Pre­sent": "present",
-    "Indef.": "indefinite",
-    "Def.": "definite",
-    "2nd-p. o.": "second-person objective",
-    "Condi­tional mood": "conditional",
-    "Sub­junc­tive mood": "subjunctive",
-    "Other nonfinite verb forms": "non-finite",
-    "Verbal noun": "nominalization nominal-from-verb",
-    "Future part.": "future participle",
-    "Adverbial part.": "adverbial participle",
-    "Potential": "potential",
-    "potential": "potential",
-    "present": "present",
-    "virile": "virile",
-    "nonvirile": "nonvirile",
-    "case": "",
-    "nominative vocative": "nominative vocative",
-    "indefinite": "indefinite",
-    "masculine personal/animate": "masculine personal animate",
-    "perfective aspect": "perfective",
-    "definite": "definite",
-    "animate": "animate",
-    "inanimate": "inanimate",
-    "Dual": "dual",
-    "indicative": "indicative",
-    "subjunctive": "subjunctive",
-    "person": "",
-    "Forms with the definite article": "definite",
-    "Forms with the definite article:": "definite",
-    "indefinite articulation": "indefinite",
-    "definite articulation": "definite",
-    "nominative/accusative": "nominative accusative",
-    "genitive/dative": "genitive dative",
-    "imperfective aspect": "imperfective",
-    "future": "future",
-    "Comparative": "comparative",
-    "Superlative": "superlative",
-    "perfect": "perfect",
-    "gerund": "gerund",
-    "first": "first-person",
-    "second": "second-person",
-    "third": "third-person",
-    "imperfect": "imperfect",
-    "infinitives": "infinitive",
-    "conditional": "conditional",
-    "pluperfect": "pluperfect",
-    "Bare forms": "indefinite",
-    "Bare forms:": "indefinite",
-    "past": "past",
-    "1st": {
-        "lang": ["Finnish", "Ingrian", "Veps",
-                 "Northern Sami", "Proto-Samic", "Skolt Sami", "Lule Sami",
-                 "Inari Sami", "Pite Sami"],
-        "if": "infinitive",
-        "then": "infinitive-i",
-        "else": "first-person",
-    },
-    "2nd":  {
-        "lang": ["Finnish", "Ingrian", "Veps",
-                 "Northern Sami", "Proto-Samic", "Skolt Sami", "Lule Sami",
-                 "Inari Sami", "Pite Sami"],
-        "if": "infinitive",
-        "then": "infinitive-ii",
-        "else": "second-person",
-    },
-    "3rd":  {
-        "lang": ["Finnish", "Veps"],
-        "if": "infinitive",
-        "then": "infinitive-iii",
-        "else": "third-person",
-    },
-    "4th": {
-        "lang": ["Finnish", "Veps"],
-        "if": "infinitive",
-        "then": "infinitive-iv",
-        "else": "fourth-person",
-    },
-    "5th": "infinitive-v",
-    "Forms with the definite article": "definite",
-    "Case / #": "",
-    # XXX needs special handling ['-льник', '-овка', '-ник']
-    "accusative animate inanimate": "accusative animate inanimate",
-    "negative": "negative",
-    "past participle": "past participle",
-    "indicative mood": "indicative",
-    "nominative/ accusative": "nominative accusative",
-    "genitive/ dative": "genitive dative",
-    "Positive": "positive",
-    "short form": "short-form",
-    "positive": "positive",
-    "1st sing.": "first-person singular",
-    "2nd sing.": "second-person singular",
-    "3rd sing.": "third-person singular",
-    "1st plur.": "first-person plural",
-    "2nd plur.": "second-person plural",
-    "3rd plur.": "third-person plural",
-    "conditional mood": "conditional",
-    "imperative mood": "imperative",
-    "potential mood": "potential",
-    "Nominal forms": "!",  # Reset column inheritance
-    "long 1st": "infinitive-i-long",
-    "I": {"lang": "Finnish", "if": "infinitive", "then": "infinitive-i"},
-    "long I": {"lang": "Finnish", "if": "infinitive",
-               "then": "infinitive-i-long"},
-    "II": {"lang": "Finnish", "if": "infinitive", "then": "infinitive-ii"},
-    "III": {"lang": "Finnish", "if": "infinitive", "then": "infinitive-iii"},
-    "IV": {"lang": "Finnish", "if": "infinitive", "then": "infinitive-iv"},
-    "V": {"lang": "Finnish", "if": "infinitive", "then": "infinitive-v"},
-    "agent": "agent",
-    "Plural (m/f)": "plural masculine feminine",
-    "(strong noun)": "strong",
-    "(weak noun)": "weak",
-    "Masc./Fem.": "masculine feminine",
-    "masculine animate": "masculine animate",
-    "present participle": "present participle",
-    "number case / gender": "",
-    "Case/Gender": "",
-    "Derived forms": "",
-    "Adverb": "adverbial",
-    "singular (vienaskaita)": "singular",
-    "plural (daugiskaita)": "plural",
-    "nominative (vardininkas)": "nominative",
-    "genitive (kilmininkas)": "genitive",
-    "dative (naudininkas)": "dative",
-    "accusative (galininkas)": "accusative",
-    "instrumental (įnagininkas)": "instrumental",
-    "locative (vietininkas)": "locative",
-    "vocative (šauksmininkas)": "vocative",
-    "ie": {"if": "first-person singular", "then": ""},
-    "io": {"if": "first-person singular", "then": ""},
-    "tu": {"if": "second-person singular", "then": ""},
-    "lui/lei esso/essa": {"if": "third-person singular", "then": ""},
-    "noi": {"if": "first-person plural", "then": ""},
-    "voi": {"if": "second-person plural", "then": ""},
-    "loro essi/esse": {"if": "third-person plural", "then": ""},
-    "che io": {"if": "first-person singular", "then": ""},
-    "che tu": {"if": "second-person singular", "then": ""},
-    "che lui/che lei che esso/che essa":
-    {"if": "third-person singular", "then": ""},
-    "che noi": {"if": "first-person plural", "then": ""},
-    "che voi": {"if": "second-person plural", "then": ""},
-    "che loro che essi/che esse": {"if": "third-person plural", "then": ""},
-    "aš": {"if": "first-person singular", "then": ""},
-    "jis/ji": {"if": "third-person singular", "then": ""},
-    "mes": {"if": "first-person plural", "then": ""},
-    "jūs": {"if": "second-person plural", "then": ""},
-    "jie/jos": {"if": "third-person plural", "then": ""},
-    "non-finite forms": "!",  # Reset
-    "verbal nouns": "nominalization nominal-from-verb",
-    "supine": "supine",
-    "past historic": "past historic",
-    "future perfect": "future perfect",
-    "impersonal": "impersonal",
-    "verbal noun": "nominalization nominal-from-verb",
-    "auxiliary verb": "auxiliary",
-    "Lei": {"if": "third-person", "then": "formal"},
-    "Loro": {"if": "third-person", "then": "formal"},
-    "active adjectival participle": "active adjectival participle",
-    "contemporary adverbial participle": "contemporary adjectival participle",
-    "passive adjectival participle": "passive adjectival participle",
-    "Instrumental": "instrumental",
-    "exessive": "exessive",
-    "indef.": "indefinite",  # XXX see -heit, may need special handling
-    "def.": "definite",
-    "noun": "noun",  # XXX see ['-heit', '-schaft', '-tum']
-    "absolutive": "absolutive",
-    "definite accusative": "definite accusative",
-    "definite genitive": "definite genitive",
-    "possessive": "possessive",
-    "2nd person formal": "second-person formal",
-    "3rd person masculine": "third-person masculine",
-    "3rd person feminine": "third-person feminine",
-    "3rd person neuter": "third-person neuter",
-    "mənim (“my”)": "first-person singular possessive",
-    "sənin (“your”)": "second-person singular possessive",
-    "onun (“his/her/its”)": "third-person singular possessive",
-    "bizim (“our”)": "first-person plural possessive",
-    "sizin (“your”)": "second-person plural possessive",
-    "onların (“their”)": "third-person plural possessive",
-    "predicative": "predicative",
-    "subjective": "subjective",
-    "Present": "present",
-    "preterite": "preterite",
-    "strong/subject": "strong subjective",
-    "weak (direct object)": "weak objective direct-object",
-    "weak (indirect object)": "weak objective indirect-object",
-    "proclitic": "proclitic",
-    "enclitic": "enclitic",
-    "1st person majestic": "first-person majestic formal",
-    "2nd person very formal": "second-person formal",
-    "3rd person reflexive": "third-person reflexive",
-    "ablative/genitive": "ablative genitive",
-    "Masculine / Feminine": "masculine feminine",
-    "Future": "future",
-    "Imperative": "imperative",
-    "yo": {"if": "first-person singular", "then": ""},
-    "tú vos": {"if": "second-person singular", "then": ""},
-    "él/ella/ello usted": {"if": "third-person singular", "then": ""},
-    "nosotros nosotras": {"if": "first-person plural", "then": ""},
-    "vosotros vosotras": {"if": "second-person plural", "then": ""},
-    "ellos/ellas ustedes": {"if": "third-person plural", "then": ""},
-    "imperfect (ra)": "imperfect",  # XXX ra?
-    "imperfect (se)": "imperfect",  # XXX se?
-    "usted": {"if": "third-person singular", "then": ""},
-    "ustedes": {"if": "third-person plural", "then": ""},
-    "affirmative": "affirmative",
-    "participle": "participle",
-    "Bare forms (no plural for this noun):": "indefinite no-plural",
-    "old dative": "dative archaic",  # XXX archaic or dated?
-    "Bare forms (no plural of this noun)": "indefinite no-plural",
-    "Conditional": "conditional",
-    "Inflection": "",
-    "Definite accusative": "definite accusative",
-    "present perfect": "present perfect",
-    "optative": "optative",
-    "positive degree": "positive",
-    "comparative degree": "comparative",
-    "superlative degree": "superlative",
-    "prolative": "prolative",
-    "comparative": "comparative",
-    "causative": "causative",
-    "Indicative": "indicative",
-    "Subjunctive": "subjunctive",
-    "Class": "",
-    "11": "class-11",
-    "14": "class-14",
-    "15": "class-15",
-    "–": {
-        "lang": "Nepalese",
-        "then": "negative",
-        "else": ""},
-    "m": "masculine",
-    "f": "feminine",
-    "n": "neuter",
-    "compound": "compound",
-    "reflexive": "reflexive",
-    "Reflexive": "reflexive",
-    "unstr.": "unstressed",
-    "First-person (eu)": "first-person singular",
-    "Second-person (tu)": "second-person singular",
-    "Third-person (ele / ela / você)": "third-person singular",
-    "First-person (nós)": "first-person plural",
-    "Second-person (vós)": "second-person plural",
-    "Third-person (eles / elas / vocês)": "third-person plural",
-    "Impersonal": "impersonal",
-    "Personal": "personal",
-    "Gerund": "gerund",
-    "Imperfect": "imperfect",
-    "Preterite": "preterite",
-    "Pluperfect": "pluperfect",
-    "Affirmative": "affirmative",
-    "Affirmative (+)": "positive",
-    "Negative (-)": "negative",
-    "Negative (não)": "negative",
-    "definite (subject form)": "definite subjective",
-    "definite (object form)": "definite objective",
-    "extended (vocative form)": "extended vocative",
-    "number": "",
-    "dual": "dual",
-    "middle/ passive": "middle passive",
-    "Active": "active",
-    "Passive": "passive",
-    "first person singular": "first-person singular",
-    "second person singular": "second-person singular",
-    "third person singular": "third-person singular",
-    "1ˢᵗ person": "first-person",
-    "2ⁿᵈ person": "second-person",
-    "3ʳᵈ person": "third-person",
-    "middle/passive": "middle passive",
-    "present participle or gerund": "present participle gerund",
-    "je (j’)": {"if": "first-person singular", "then": ""},
-    "il elle": {"if": "third-person singular", "then": ""},
-    "nous": {"if": "first-person plural", "then": ""},
-    "vous": {"if": "second-person plural", "then": ""},
-    "ils elles": {"if": "third-person plural", "then": ""},
-    "(simple tenses)": "",
-    "(compound tenses)": "compound",
-    "past anterior": "past anterior",
-    "conditional perfect": "conditional perfect",
-    "que je (j’)": {"if": "first-person singular", "then": ""},
-    "que tu": {"if": "second-person singular", "then": ""},
-    "qu’il qu’elle": {"if": "third-person singular", "then": ""},
-    "que nous": {"if": "first-person plural", "then": ""},
-    "que vous": {"if": "second-person plural", "then": ""},
-    "qu’ils qu’elles": {"if": "third-person plural", "then": ""},
-    "middle": "middle",
-    "Indefinite": "indefinite",
-    "Definite": "definite",
-    "1st-person singular": "first-person singular",
-    "2nd-person singular": "second-person singular",
-    "3rd-person singular": "third-person singular",
-    "1st-person plural": "first-person plural",
-    "2nd-person plural": "second-person plural",
-    "3rd-person plural": "third-person plural",
-    "common gender": "common-gender",
-    "derivations": "",
-    "subject": "subjective",
-    "object": "objective",
-    "full": "stressed",
-    "pred.": "predicative",
-    "2nd person archaic or regiolectal": "second-person archaic dialectal",
-    "m-s1": "",  # Icelandic ['-lingur', '-hlaðningur']
-    "Tense \ Voice": "",
-    "Strong declension": "strong",
-    "gender": "",
-    "Weak declension": "weak",
-    "Bare forms (no plural form of this noun)": "indefinite no-plural",
-    "Positive declarative": "",
-    "imperfective participle": "imperfective participle",
-    "personal": "personal",
-    "future participle": "future participle",
-    "way of doing": "adverbial",
-    "ben": {"if": "first-person singular", "then": ""},
-    "sen": {"if": "second-person singular", "then": ""},
-    "o": {"if": "third-person singular", "then": ""},
-    "biz": {"if": "first-person plural", "then": ""},
-    "siz": {"if": "second-person plural", "then": ""},
-    "onlar": {"if": "third-person plural", "then": ""},
-    "aorist": "aorist",
-    "imperfective": "imperfective",
-    "perfective": "perfective",
-    "inferential": "inferential",
-    "progressive": "progressive",
-    "necessitative": "necessitative",
-    "Positive interrogative": "interrogative",
-    "Negative declarative": "negative",
-    "Negative interrogative": "negative interrogative",
-    "m6": "",  # Faroese ['-gustur', '-lingur']
-    "indefinite forms, (trajta të pashquara)": "indefinite",
-    "definite forms, (trajta të shquara)": "definite",
-    "singular (numri njëjës)": "singular",
-    "plural (numri shumës)": "plural",
-    "nominative (emërore)": "nominative",
-    "accusative (kallëzore)": "accusative",
-    "genitive (gjinore), (i/e/të/së)": "genitive",
-    "dative (dhanore)": "dative",
-    "ablative (rrjedhore)": "ablative",
-    "notes": "",
-    "m-w1": "",  # Icelandic ['-isti', '-ismi']
-    "masculine animate": "masculine animate",
-    "masculine inanimate": "masculine inanimate",
-    "Masculine singular": "masculine singular",
-    "Neuter singular": "neuter singular",
-    "n-s": "",  # Icelandic ['-leysi']
-    "singular (vienskaitlis)": "singular",
-    "plural (daudzskaitlis)": "plural",
-    "nominative (nominatīvs)": "nominative",
-    "accusative (akuzatīvs)": "accusative",
-    "genitive (ģenitīvs)": "genitive",
-    "dative (datīvs)": "dative",
-    "instrumental (instrumentālis)": "instrumental",
-    "locative (lokatīvs)": "locative",
-    "vocative (vokatīvs)": "vocative",
-    "iu": {"if": "first-person singular", "then": ""},
-    "iddu/idda": {"if": "third-person singular", "then": ""},
-    "nuàutri": {"if": "first-person plural", "then": ""},
-    "vuàutri": {"if": "second-person plural", "then": ""},
-    "iddi": {"if": "third-person plural", "then": ""},
-    "past perfect": "past perfect",
-    "vossìa": {"if": "third-person singular", "then": ""},
-    "plural only": "plural-only",
-    "m pers": "masculine personal",
-    "other": "",
-    "f-w1": "",  # Icelandic ['-ína']
-    "Supine": "supine",
-    "Imper. plural": "imperative plural",
-    "Ind. plural": "indicative plural",
-    "Participles": "participle",
-    "-skur a24": "",  # Faroese ['-skur']
-    "Singular (eintal)": "singular",
-    "Nominative (hvørfall)": "nominative",
-    "Accusative (hvønnfall)": "accusative",
-    "Dative (hvørjumfall)": "dative",
-    "Genitive (hvørsfall)": "genitive",
-    "Plural (fleirtal)": "plural",
-    "Original form": "",  # XXX Latin ['-bo']
-    "Derived form": "",  # XXX Latin ['-bo']
-    "1s": "first-person singular",
-    "2s": "second-person singular",
-    "3s": "third-person singular",
-    "1p": "first-person plural",
-    "2p": "second-person plural",
-    "3p": "third-person plural",
-    "Gnomic": "gnomic",
-    "Perfect": "perfect",
-    '"Already"': "completive",  # XXX ??? Swahili
-    '"Not yet"': "past present negative", # XXX ??? Swahili
-    '"If/When"': "conditional",
-    '"If not"': "conditional negative",
-    "General positive": "general positive",
-    "General negative": "general negative",
-    "Present conditional": "present conditional",
-    "Conditional contrary to fact": "conditional irrealis",
-    "Present active indicative (third conjugation)":
-    "present active indicative third-conjugation",
-    "Present active subjunctive": "present active subjunctive",
-    "Present passive indicative": "present passive indicative",
-    "Present passive subjunctive": "present passive subjunctive",
-    "f1": "",  # Faroese ['-isma']
-    "anterior adverbial participle": "anterior adverbial participle",
-    "Plural only": "plural-only",
-    "m1": "",  # Faroese ['-ari']
-    "f2": "",  # Faroese ['-d']
-    "m. plural": "masculine plural",
-    "n./f. plural": "neuter feminine plural",
-    "1ˢᵗ person inclusive": "first-person inclusive",
-    "1ˢᵗ person exclusive": "first-person exclusive",
-    "hortative": "hortative",
-    "reciprocal": "reciprocal",
-    "coactive": "coactive",
-    "objective": "objective",
-    "subsuntive": "subsuntive",
-    "relative": "relative",
-    "autonomous": "autonomous",
-    "past habitual": "past habitual",
-    "Habituals": "habitual",
-    "n gender": "neuter",
-    "Feminine singular": "feminine singular",
-    "Affix": "affix",
-    "Root word": "root",
-    "Trigger": "",  # XXX Tagalog ['-sagutan']
-    "Aspect": "",
-    "Complete": "completive",
-    "Progressive": "progressive",
-    "Contemplative": "contemplative",
-    "Masculine o-stem": "masculine stem",
-    "deo eo": {"if": "first-person singular", "then": ""},
-    "tue": {"if": "second-person singular", "then": ""},
-    "issu/issa/isse": {"if": "third-person singular", "then": ""},
-    "nois": {"if": "first-person plural", "then": ""},
-    "bois": {"if": "second-person plural", "then": ""},
-    "issos/issas": {"if": "third-person plural", "then": ""},
-    "(simple tenses)": "",
-    "(compound tenses)": "compound",
-    "chi deo chi eo": {"if": "first-person singular", "then": ""},
-    "chi tue": {"if": "second-person singular", "then": ""},
-    "chi issu/issa/isse": {"if": "third-person singular", "then": ""},
-    "chi nois": {"if": "first-person plural", "then": ""},
-    "chi bois": {"if": "second-person plural", "then": ""},
-    "chi issos/issas": {"if": "third-person plural", "then": ""},
-    "ergative": "ergative",
-    "prosecutive": "prosecutive",
-    "equative": "equative",
-    "Person": "person",
-    "Verbal forms": "",
-    "Conditional I": "conditional conditional-i",
-    "conditional I": "conditional conditional-i",
-    "Conditional II": "conditional conditional-ii",
-    "conditional II": "conditional conditional-ii",
-    "Active past participle": "active past participle",
-    "Objective": "objective",
-    "Objective Genitive": "objective genitive",
-    "often only in the singular": "often singular-only",
-    "dego deo": {"if": "first-person singular", "then": ""},
-    "issu/issa": {"if": "third-person singular", "then": ""},
-    "chi dego chi deo": {"if": "first-person singular", "then": ""},
-    "chi issu/issa": {"if": "third-person singular", "then": ""},
-    "Common singular": "common-gender singular",
-    "Masculine plural": "masculine plural",
-    "All": "",
-    "str.": "stressed",
-    "1st person singular": "first-person singular",
-    "2nd person singular (informal)": "second-person singular informal",
-    "2nd person singular (formal)": "second-person singular formal",
-    "3rd person singular": "third-person singular",
-    "Present verbal adverb": "present adverbial",
-    "Past verbal adverb": "past adverbial",
-    "disused": "",
-    "all genders": "",
-    "number & gender": "",
-    "strong declension (without article)": "strong without-article",
-    "weak declension (with definite article)":
-    "weak definite includes-article",
-    "mixed declension (with indefinite article)":
-    "mixed indefinite includes-article",
-    "inanimate animate": "animate inanimate",
-    "Informal": "informal",
-    "i": {"lang": ["German"],
-          "then": "subjunctive-i",
-          "else": {
-              "if": "subjunctive",
-              "then": "subjunctive-i",
-              "else": "error-unrecognized-form",
-          },
-    },
-    "ii": {"lang": ["German"],
-           "then": "subjunctive-ii",
-           "else": {
-               "if": "subjunctive",
-               "then": "subjunctive-ii",
-               "else": "error-unrecognized-form",
-           },
-    },
-    "definite forms": "definite",
-    "1ˢᵗ person possessive forms (my)": "possessive first-person",
-    "2ⁿᵈ person possessive forms (your)": "possessive second-person",
-    "oblique": "oblique",
-    "direct": "direct",
-    "Construct": "construct",
-    "Negative": "negative",
-    "auxiliary": "auxiliary",
-    "Conjunctive": "conjunctive",
-    "Perfective": "perfective",
-    "Causative": "causative",
-    "Stem forms": "stem",
-    "Continuative": "continuative",
-    "Continuative (連用形)": "continuative",
-    "Terminal (終止形)": "terminative",
-    "Attributive (連体形)": "attributive",
-    "Imperative (命令形)": "imperative",
-    "Imperfective (未然形)": "imperfective",
-    "Hypothetical (仮定形)": "hypothetical",
-    "Terminal": "terminative",
-    "Attributive": "attributive",
-    "Imperative": "imperative",
-    "Key constructions": "",
-    "Volitional": "volitional",
-    "Imperfective": "imperfective",
-    "Hypothetical": "hypothetical",
-    "Negative continuative": "negative continuative",
-    "Formal": "formal",
-    "Hypothetical conditional": "hypothetical conditional",
-    "1st singular": "first-person singular",
-    "2nd singular": "second-person singular",
-    "3rd singular": "third-person singular",
-    "1st plural": "first-person plural",
-    "2nd plural": "second-person plural",
-    "3rd plural": "third-person plural",
-    "benefactive": "benefactive",
-    "basic singular triptote": "singular triptote",
-    "future in the past": "past future",
-    "Passive past participle": "passive past participle",
-    "associative": "associative",
-    "distributive": "distributive",
-    "exclusive": "exclusive",
-    "future i": "future future-i",
-    "subjunctive i": "subjunctive subjunctive-i",
-    "subjunctive ii": "subjunctive subjunctive-ii",
-    "future ii": "future future-ii",
-    "л-participles": "participle",
-    "verbal adjective m.sg.": "masculine singular adjectival",
-    "verbal adverb": "adverbial",
-    "Compound tenses": "",
-    "има-perfect": "има perfect",
-    "има-pluperfect": "има pluperfect",
-    "има-perfect reported": "има perfect reported",
-    "има-future": "има future",
-    "има-future in the past": "има future past",
-    "future reported": "future reported",
-    "има-future reported": "има future reported",
-    "има-conditional": "има conditional",
-    "eu": {"if": "first-person singular", "then": ""},
-    "uninflected": "uninflected",
-    "inflected": "inflected",
-    "predicative/adverbial": "participle predicative adverbial",
-    "m./f. sing.": "masculine feminine singular",
-    "n. sing.": "neuter singular",
-    "masculine (vīriešu dzimte)": "masculine",
-    "feminine (sieviešu dzimte)": "feminine",
-    "singular (vienskaitlis)": "singular",
-    "plural (daudzskaitlis)": "plural",
-    "archaic plural": "archaic plural",
-    "singular triptote in ـَة (-a)": "singular triptote",
-    "Non-past": "non-past",
-    "Interrogative": "interrogative",
-    "Assertive": "assertive",
-    "Cause/Reason": "causative",
-    "Contrast": "contrastive",
-    "Conjunction": "conjunctive",
-    "Condition": "conditional",
-    "Verbal nouns": "nominalization nominal-from-verb",
-    "Past-tense verbal nouns": "past nominalization nominal-from-verb",
-    "Determiners": "determiner",
-    "el/ea": {"if": "third-person singular", "then": ""},
-    "ei/ele": {"if": "third-person plural", "then": ""},
-    "simple perfect": "perfect",
-    "Notes": "",
-    "postpositions taking a dative case": "postpositional with-dative",
-    "postpositions taking a genitive case": "postpositional with-genitive",
-    "postpositions taking an instrumental case":
-    "postpositional with-instrumental",
-    "postpositions taking an adverbial case": "postpositional with-adverb",
-    "Motive": "motive-form",
-    "zu-infinitive": "infinitive infinitive-zu",
-    "active participle": "active participle",
-    "active voice": "active",
-    "jo": {"if": "first-person singular", "then": ""},
-    "Habitual": "habitual",
-    "sound feminine plural": "feminine plural",
-    "passive participle": "passive participle",
-    "passive voice": "passive",
-    "singular (жекеше)": "singular",
-    "plural (көпше)": "plural",
-    "nominative (атау септік)": "nominative",
-    "genitive (ілік септік)": "genitive",
-    "dative (барыс септік)": "dative",
-    "accusative (табыс септік)": "accusative",
-    "locative (жатыс септік)": "locative",
-    "ablative (шығыс септік)": "ablative",
-    "instrumental (көмектес септік)": "instrumental",
-    "compound tenses": "compound",
-    "simple tenses": "",
-    "vos": {"if": "second-person plural", "then": ""},
-    "Sentence-final forms": "sentence-final",
-    "Connective forms": "connective",
-    "Noun and determiner forms": "",
-    "verbal noun": "nominalization nominal-from-verb",
-    "Verbal Noun": "nominalization nominal-from-verb",
-    "ell/ella vostè": {"if": "third-person singular", "then": ""},
-    "nosaltres nós": {"if": "first-person plural", "then": ""},
-    "vosaltres vós": {"if": "second-person plural", "then": ""},
-    "ells/elles vostès": {"if": "third-person plural", "then": ""},
-    "vostè": {"if": "third-person singular", "then": ""},
-    "nosaltres": {"if": "first-person plural", "then": ""},
-    "vostès": {"if": "third-person plural", "then": ""},
-    "count form": "count-form",
-    "infinitive (nafnháttur)": "infinitive",
-    "supine (sagnbót)": "supine",
-    "present participle (lýsingarháttur nútíðar)": "present participle",
-    "indicative (framsöguháttur)": "indicative",
-    "subjunctive (viðtengingarháttur)": "subjunctive",
-    "present (nútíð)": "present",
-    "past (þátíð)": "past",
-    "imperative (boðháttur)": "past",
-    "Forms with appended personal pronoun": "pronoun-included",
-    "Sentence-final forms with honorific": "sentence-final honorific",
-    "Connective forms with honorific": "connective honorific",
-    "Noun and determiner forms with honorific": "honorific",
-    "Hortative": "hortative",
-    "-": "",
-    "Form": "",
-    "singular (uncountable)": "singular uncountable",
-    "absolute": "absolute",
-    "singular (singulare tantum)": "singular singular-only",
-    "Nom. sg.": "nominative singular",
-    "Gen. sg.": "genitive singular",
-    "nom. sing.": "nominative singular",
-    "gen. sing.": "genitive singular",
-    "Non-finite forms": "non-finite",
-    "1st singular я": "first-person singular",
-    "second-person": "second-person",
-    "duoplural": "dual plural",
-    "4th person": "fourth-person",
-    "invertive": "invertive",
-    "Simple finite forms": "finite-form",
-    "Positive form": "positive",
-    "Complex finite forms": "!",  # Reset
-    "Polarity": "",
-    "Persons": "",
-    "Persons / Classes": "",
-    "Classes": "",
-    "3rd / M-wa": "third-person",
-    "M-mi": "",
-    "Ma": "",
-    "Ki-vi": "",
-    "N": "",
-    "U": "",
-    "Ku": "",
-    "Pa": "",
-    "Mu": "",
-    "Sg.": "singular",
-    "Pl.": "plural",
-    "Sg. / 1": "singular class-1",
-    "Pl. / 2": "plural class-2",
-    "4": "class-4",
-    "5": "class-5",
-    "6": "class-6",
-    "7": "class-7",
-    "8": "class-8",
-    "9": "class-9",
-    "10": "class-10",
-    "11 / 14": "class-11 class-14",
-    "15 / 17": "class-15 class-17",
-    "16": "class-16",
-    "18": "class-18",
-    "ieu": {"if": "first-person singular", "then": ""},
-    "el": {"if": "third-person singular", "then": ""},
-    "nosautres": {"if": "first-person plural", "then": ""},
-    "vosautres": {"if": "second-person plural", "then": ""},
-    "eles": {"if": "third-person plural", "then": ""},
-    "que ieu": {"if": "first-person singular", "then": ""},
-    "que el": {"if": "third-person singular", "then": ""},
-    "que nosautres": {"if": "first-person plural", "then": ""},
-    "que vosautres": {"if": "second-person plural", "then": ""},
-    "que eles": {"if": "third-person plural", "then": ""},
-    "sound masculine plural": "masculine plural",
-    "2nd singular ти": "second-person singular",
-    "3rd singular він / вона / воно": "third-person singular",
-    "1st plural ми": "first-person plural",
-    "2nd plural ви": "second-person plural",
-    "3rd plural вони": "third-person plural",
-    "first-person": "first-person",
-    "plural ми / ви / вони": "plural",
-    "masculine я / ти / він": "masculine",
-    "feminine я / ти / вона": "feminine",
-    "neuter воно": "neuter",
-    "vocative form": "vocative",
-    "Uncountable": "uncountable",
-    "definite unspecified": "definite unspecified",
-    "definite proximal": "definite proximal",
-    "definite distal": "definite distal",
-    "nos": {"if": "first-person plural", "then": ""},
-    "ես": {"if": "first-person singular", "then": ""},
-    "դու": {"if": "second-person singular", "then": ""},
-    "նա": {"if": "third-person singular", "then": ""},
-    "դուք": {"if": "second-person plural", "then": ""},
-    "(դու)": {"if": "second-person singular", "then": "rare"},
-    "(դուք)": {"if": "second-person plural", "then": "rare"},
-    "nós": {"if": "first-person plural", "then": ""},
-    "que vos": {"if": "second-person plural", "then": ""},
-    "informal": "informal",
-    "el/ela/Vde.": {"if": "third-person singular", "then": ""},
-    "eles/elas/Vdes.": {"if": "third-person plural", "then": ""},
-    "basic broken plural triptote": "irregular plural triptote",
-    "basic singular diptote; basic singular triptote":
-    "singular diptote triptote",
-    "f gender": "feminine",
-    "il": {"if": "third-person", "then": ""},
-    "simple tenses": "",
-    "que jo": {"if": "first-person singular", "then": ""},
-    "qu’il": {"if": "third-person", "then": ""},
-    "que nos": {"if": "first-person plural", "then": ""},
-    "present indicative": {"if": "present indicative", "then": ""},
-    "ñuqap (my)": "first-person singular",
-    "qampa (your)": "second-person singular",
-    "paypa (his/her/its)": "third-person singular",
-    "ñuqanchikpa (our(incl))": "first-person plural inclusive",
-    "ñuqaykup (our(excl))": "first-person plural exclusive",
-    "qamkunap (your(pl))": "second-person plural",
-    "paykunap (their)": "third-person plural",
-    "tense": "",
-    "m.": "masculine",
-    "f.": "feminine",
-    "Stem": "stem",
-    "aorist stem": "stem",
-    "аз": {"if": "first-person singular", "then": ""},
-    "ти": {"if": "second-person singular", "then": ""},
-    "той/тя/то": {"if": "third-person singular", "then": ""},
-    "ние": {"if": "first-person plural", "then": ""},
-    "вие": {"if": "second-person plural", "then": ""},
-    "те": {"if": "third-person plural", "then": ""},
-    "pos.": "positive",
-    "neg.": "negative",
-    "future perfect in the past": "future perfect past",
-    "renarrative": "renarrative",
-    "present and imperfect": ["present", "imperfect"],
-    "future and future in the past": ["future", "future past"],
-    "present and past perfect": ["present", "past perfect"],
-    "future perfect and future perfect in the past":
-    ["future perfect", "future past perfect"],
-    "dubitative": "dubitative",
-    "conclusive": "conclusive",
-    "jūs": {"if": "second-person plural", "then": ""},
-    "f-s2": "",  # Icelandic ['bölvun', 'létteind', 'dvöl']
-    "Indicative mood": "indicative",
-    "2,3 sg, 1,2,3 pl":
-    ["second-person third-person singular",
-     "first-person second-person third-person plural"],
-    "23 sg 123 pl":
-    ["second-person third-person singular",
-     "first-person second-person third-person plural"],
-    "Present perfect": "present perfect",
-    "Past perfect": "past perfect",
-    "Future perfect": "future perfect",
-    "Subjunctive mood": "subjunctive",
-    "Imperative mood": "imperative",
-    "Notes Appendix:Greek verbs": "",
-    "Inflected colloquial forms": "colloquial",
-    "adjective active participle": "adjective active participle",
-    "adverbial active participle": "adverbial active participle",
-    "nominal active participle": "nominal active participle",
-    "plural unknown": "plural unknown",
-    "Contrafactual": "counterfactual",
-    "finite forms": "finite-form",
-    "Indefinite forms": "indefinite",
-    "Definite forms": "definite",
-    "numeral": "numeral",
-    "non-numeral (plural)": "non-numeral plural",
-    "Strong (indefinite) inflection": "strong indefinite",
-    "Weak (definite) inflection": "weak definite",
-    "directive": "directive",
-    "destinative": "destinative",
-    "Regular": "",
-    "PERFECTIVE": "perfective",
-    "Present passive": "present passive",
-    "1st dual": "first-person dual",
-    "2nd dual": "second-person dual",
-    "Undeclined": "",
-    "Oblique Infinitive": "oblique infinitive",
-    "Prospective Agentive": "prospective agentive",
-    "Adjectival": "adjectival",
-    "մեք": "first-person plural",
-    "նոքա": "third-person plural",
-    "imperatives": "imperative",
-    "cohortative": "cohortative",
-    "prohibitive": "prohibitive",
-    "A-stem": "",
-    "continuous": "continuative",
-    "f-s1": "",  # Icelandic ['blæðing', 'Sigríður', 'líkamsræktarstöð']
-    "+": "positive",
-    "Unknown": "unknown",
-    "Simple": "",
-    "simple": "",
-    "basic broken plural diptote": "irregular",
-    "formal": "formal",
-    "INDICATIVE (īstenības izteiksme)": "indicative",
-    "IMPERATIVE (pavēles izteiksme)": "imperative",
-    "Present (tagadne)": "present",
-    "Past (pagātne)": "past",
-    "Future (nākotne)": "future",
-    "1st pers. sg.": "first-person singular",
-    "es": {"if": "first-person singular", "then": ""},
-    "2nd pers. sg.": "second-person singular",
-    "3rd pers. sg.": "third-person singular",
-    "viņš viņa": {"if": "third-person singular", "then": ""},
-    "1st pers. pl.": "first-person plural",
-    "mēs": {"if": "first-person plural", "then": ""},
-    "2nd pers. pl.": "second-person plural",
-    "3rd pers. pl.": "third-person plural",
-    "viņi viņas": {"if": "third-person plural", "then": ""},
-    "RENARRATIVE (atstāstījuma izteiksme)": "renarrative",
-    "PARTICIPLES (divdabji)": "participle",
-    "Present Active 1 (Adj.)": "participle present active adjectival",
-    "Present Active 2 (Adv.)": "participle present active gerund literary",
-    "Present Active 3 (Adv.)": "participle present active gerund",
-    "Present Active 4 (Obj.)": "participle present active agent",
-    "CONDITIONAL (vēlējuma izteiksme)": "conditional",
-    "Past Active": "past active",
-    "Present Passive": "present passive",
-    "Past Passive": "past passive",
-    "DEBITIVE (vajadzības izteiksme)": "debitive",
-    "NOMINAL FORMS": "non-finite",
-    "Infinitive (nenoteiksme)": "infinitive",
-    "Conjunctive 1": "conjunctive",  # XXX should these be distinguished?
-    "Conjunctive 2": "conjunctive",
-    "Nonfinite form": "non-finite",
-    "Perfect participle": "perfect participle",
-    "Recently Completive": "completive",
-    "subject non-past participle": "subjective non-past participle",
-    "subject past participle": "subjective past participle",
-    "subject future definite participle":
-    "subjective future definite participle",
-    "non-subject participle": "non-subject participle",
-    "general temporal participle": "general temporal participle",
-    "participle of intensification": "intensifier participle",
-    "specific temporal participle": "specific temporal participle",
-    "modal participle": "modal participle",
-    "perfect 1": "perfect perfect-i",
-    "perfect 2": "perfect perfect-ii",
-    "future-in-the-past": "future past",
-    "obligational": "obligational",
-    "evidential": "evidential",
-    "converb": "converb",
-    "negative potential": "negative potential",
-    "adjective passive participle": "adjectival passive participle",
-    "adverbial passive participle": "adverbial passive participle",
-    "nominal passive participle": "nominal passive participle",
-    "IMPERFECTIVE": "imperfective",
-    "Non-Aspectual": "non-aspectual",
-    "PERF": "perfect",
-    "FUT": "future",
-    "PST": "past",
-    "PRS": "present",
-    "Presumptive": "presumptive",
-    "PRS PST": "present past",
-    "PRS PST FUT": "present past future",
-    "agentive": "agentive",
-    "FUTURE": "future",
-    "Jussive": "jussive",
-    "Root": "root",
-    "Involuntary": "involuntary",  # Verb form, e.g., khitan/Indonesian
-    "part participle": "past participle",
-    "direct present": "direct present",
-    "indirect present": "indirect present",
-    "singular/plural": "singular plural",
-    "personal infinitive": "personal infinitive",
-    "Class 2 strong": "class-2 strong",
-    "Class 4 strong": "class-4 strong",
-    "Class 6 strong": "class-6 strong",
-    "Class 7 strong": "class-7 strong",
-    "el / ela / Vde.": {"if": "singular third-person", "then": ""},
-    "vós": {"if": "plural second-person", "then": ""},
-    "eles / elas / Vdes.": {"if": "plural third-person", "then": ""},
-    "Vde.": {"if": "singular third-person", "then": "formal"},
-    "Vdes.": {"if": "plural third-person", "then": "formal"},
-    "imperfect subjunctive": "imperfect subjunctive",
-    "present subjunctive": "present subjunctive",
-    "dative-locative": "dative locative",
-    "directional": "directional",
-    "possessive pronoun": "possessive pronoun",
-    "possessive determiner": "possessive determiner",
-    "Gen/Dat": "genitive dative",
-    "Nom/Acc": "nominative accusative",
-    "uncountable": "uncountable",
-    "gender f": "feminine",
-    "Present subjunctive": "present subjunctive",
-    "Future progressive,, presumptive": "future progressive presumptive",
-    "Past progressive": "past progressive",
-    "Negative past": "negative past",
-    "Negative present progressive": "negative present progressive",
-    "1.": "first-person",
-    "2.": "second-person",
-    "3. m": "third-person masculine",
-    "3. f": "third-person feminine",
-    "3. n": "third-person neuter",
-    "1st person plural inclusive": "first-person plural inclusive",
-    "1st person plural exclusive": "first-person plural exclusive",
-    "3rd person plural participle": "third-person plural participle",
-    "Indefinite subject (passive)": "passive",
-    "3rd person pl": "third-person plural",
-    "2nd person pl": "second-person plural",
-    "3rd person dual": "third-person dual",
-    "2nd person dual": "second-person dual",
-    "1st person dual": "first-person dual",
-    "2nd person sg": "second-person singular",
-    "3rd-person sg": "third-person singular",
-    "perfective aorist": "perfective aorist",
-    "f-w2": "",  # málfræði/Icelandic
-    "f-s3": "",  # kvaðratrót/Icelandic
-    "m-s2": "",
-    "m-s3": "",
-    "3rd person plural (3p) Wiinawaa": "third-person plural",
-    "2nd-person plural (2p) Giinawaa": "second-person plural",
-    "1st person plural inclusive (21) Giinawind":
-    "first-person plural inclusive",
-    "1st person plural exclusive (1p) Niinawind":
-    "first-person plural exclusive",
-    "Indefinite (X)": "indefinite",
-    "Obviative (3')": "third-person obviative",
-    "1st person (1s) Niin": "first-person singular",
-    "2nd person (2s) Giin": "second-person singular",
-    "3rd person (3s) Wiin": "third-person singular",
-    "1st sg": "first-person singular",
-    "2nd sg": "second-person singular",
-    "3rd sg": "third-person singular",
-    "1st pl": "first-person plural",
-    "2nd pl": "second-person plural",
-    "3rd pl": "third-person plural",
-    "2nd sg neuter": "second-person singular neuter",
-    "2nd sg for": "second-person singular formal",
-    "NORK (ergative)": "",  # XXX see irakatsi/Basque
-    "NOR (absolutive)": "",  # XXX see irakatsi/Basque
-    "Mood / Tense": "",
-    "hypothetic": "hypothetical",
-    "Indefinite feminine and masculine gender":
-    "indefinite feminine masculine",
-    "contrafactual": "counterfactual",
-    "presumptive": "presumptive",
-    "habitual": "habitual",
-    "2ⁿᵈ person*": "second-person",
-    "preterite": "preterite",
-    "мынем (“my”)": "first-person singular possessive",
-    "синең (“your”)": "second-person singular possessive",
-    "аның (“his/her/it”)": "third-person singular possessive",
-    "безнең (“our”)": "first-person plural possessive",
-    "сезнең (“your”)": "second-person plural possessive",
-    "аларның (“their”)": "third-person plural possessive",
-    "Primary stem": "stem stem-primary",
-    "Secondary stem": "stem stem-secondary",
-    "intentive": "intentive",
-    "serial": "habitual",
-    "characteristic": "adverbial",  # patjaṉi/Pitjantjatjara
-    "imperative continuous": "imperative continuative",
-    "precursive": "precursive",
-    "limitative": "limitative",
-    "circumstantial focalising": "circumstantial focalising",
-    "focalising precursive": "focalising precursive",
-    "focalising": "focalising",
-    "expectative": "expectative",
-    "ⲛ̄ⲧⲟⲕ": {"if": "second-person singular masculine", "then": ""},
-    "ⲛ̄ⲧⲟ": {"if": "second-person singular feminine", "then": ""},
-    "ⲛ̄ⲧⲟϥ": {"if": "third-person singular masculine", "then": ""},
-    "ⲛ̄ⲧⲟⲥ": {"if": "third-person singular feminine", "then": ""},
-    "ⲛ̄ⲧⲱⲧⲛ̄": {"if": "second-person plural", "then": ""},
-    "ⲛ̄ⲧⲟⲟⲩ": {"if": "third-person plural", "then": ""},
-    "nominative (ప్రథమా విభక్తి)": "nominative",
-    "genitive": "genitive",
-    "locative": "locative",
-    "vocative": "vocative",
-    "1st मैं": "first-person",
-    "basic": "",
-    "Preterite I": "preterite preterite-i",
-    "Preterite II": "preterite preterite-ii",
-    "Pluperfect I": "pluperfect pluperfect-i",
-    "Pluperfect II": "pluperfect pluperfect-ii",
-    "Durative preterite": "durative preterite",
-    "Frequentative preterite": "frequentative preterite",
-    "Auxiliary": "auxiliary",
-    "Nominative Accusative": "nominative accusative",
-    "obviative singular (0')": "obviative singular",
-    "singular (0')": "singular",
-    "Indefinite masculine gender": "indefinite masculine",
-    "Definite masculine gender": "definite masculine",
-    "SUBJECT": "subjective",
-    "Singular OBJECT": "singular objective",
-    "Plural OBJECT": "plural objective",
-    "indefinite forms": "indefinite",
-    "1ˢᵗ person singular": "first-person singular",
-    "1ˢᵗ person plural": "first-person plural",
-    "2ⁿᵈ person singular": "second-person singular",
-    "2ⁿᵈ person plural": "second-person plural",
-    "3ʳᵈ person [sing. and plural]": "third-person singular plural",
-    "Actor": {"lang": "Tagalog", "then": "trigger-actor"},
-    "Object": {"lang": "Tagalog", "then": "trigger-object"},
-    "Locative": {"lang": "Tagalog", "then": "trigger-locative",
-                 "else": "locative"},
-    "Instrument": {"lang": "Tagalog", "then": "trigger-instrument",
-                   "else": "instrumental"},
-    "Causative": {"lang": "Tagalog", "then": "trigger-causative",
-                  "else": "causative"},
-    "Referential": {"lang": "Tagalog", "then": "trigger-referential"},
-    "future perfect": "future perfect",
-    "past perfect": "past perfect",
-    "present perfect": "present perfect",
-    "1ˢᵗ person m": "first-person masculine",
-    "1ˢᵗ person f": "first-person feminine",
-    "2ⁿᵈ person m": "second-person masculine",
-    "2ⁿᵈ person f": "second-person feminine",
-    "Tense/Mood": "",
-    "masculine object": "masculine objective",
-    "feminine object": "feminine objective",
-    "neuter object": "neuter objective",
-    "singular subject": "singular subjective",
-    "plural subject": "plural subjective",
-    "Allative I": "allative allative-i",
-    "Allative II": "allative allative-ii",
-    "conditional active": "conditional active",
-    "subjunctive active": "subjunctive active",
-    "Concessive": "concessive",
-    "Preparative": "preparative",
-    "Durative": "durative",
-    "Subordinative (Past gerund)": "past gerund",
-    "Coordinative (Infinitive)": "infinitive",
-    "Converbs": "converb",
-    "Optative": "optative",
-    "Polite": "polite",
-    "Strong": "emphatic",
-    "Normal": "",
-    "Present-future": "future",
-    "habitual/conditional past": "habitual conditional past",
-    "simple past": "past",
-    "present continuous": "present continuative",
-    "simple present": "present",
-    "polite": "polite",
-    "familiar": "familiar",
-    "very familiar": "familiar",
-    "PAST TENSE": "past",
-    "3rd person m": "third-person masculine",
-    "3rd person f": "third-person feminine",
-    "👤 singular": "singular",
-    "👥 dual": "dual",
-    "👤👥👥 plural": "plural",
-    "Feminine i/ō-stem": "feminine stem",
-    "past indicative": "past indicative",
-    "Irregular with past tense": "irregular",
-    "Abs.": "absolute",
-    "Conj.": "conjunct",
-    "Rel.": "relative",
-    "Feminine/neuter": "feminine neuter",
-    "intentional": "intentive",
-    "oblig": "obligational",
-    "indef": "indefinite",
-    "def": "definite",
-    "perf": "perfective",
-    "cont": "continuative",
-    "comp": "completive",
-    "simpl": "",
-    "nominal non-finites": "nominal non-finite",
-    "Consecutive": "consecutive",
-    "comitative": "comitative",
-    "abessive": "abessive",
-    "essive": "essive",
-    "terminative": "terminative",
-    "translative": "translative",
-    "ablative": "ablative",
-    "adessive": "adessive",
-    "allative": "allative",
-    "elative": "elative",
-    "inessive": "inessive",
-    "illative": "illative",
-    "partitive": "partitive",
-    "genitive": "genitive",
-    "nominative": "nominative",
-    "singulare tantum": "singular-only",
-    "Absolutive": "absolutive",
-    "Infinitival": "infinitive",
-    "normal": "",
-    "1ˢᵗ Perfect": "perfect-i",
-    "2ⁿᵈ Perfect": "perfect-ii",
-    "m. sing.": "masculine singular",
-    "f. sing.": "feminine singular",
-    "pl.": "plural",
-    "high-resp.": "formal polite",
-    "Conjugation type": "conjugation-type",
-    "Injunctive": "injunctive",
-    "Habitual participle": "habitual participle",
-    "Future conditional": "future conditional",
-    "Past conditional": "past conditional",
-    "(♂)": "masculine",
-    "Contingent": "contingent",
-    "Reason": "reason",
-    "Goal": "goal",
-    "Agentive (emphatic)": "agentive emphatic",
-    "Genitive infinitive": "genitive infinitive",
-    "Conjugative": "conjugative",
-    "Gerund Past participle Agentive": "gerund past participle agentive",
-    "construct": "construct",
-    "State": "",
-    "Form": "",
-    "Isolated forms": "",
-    "With possessive pronouns": "possessive",
-    "Possessed": "possessed",
-    "Unpossessed": "unpossessed",
-    "past imperfective": "past imperfective",
-    "past perfective": "past perfective",
-    "Conjunct": "conjunct",
-    "dir m s": "direct masculine singular",
-    "m p obl m s": ["masculine plural", "oblique masculine singular"],
-    "f s": "feminine singular",
-    "f p": "feminine plural",
-    "gerunds": "gerund",
-    "perfect subjunctive": "perfect subjunctive",
-    "future subjunctive": "future subjunctive",
-    "screeves": "",  # კვეთს/Georgian
-    "მე": {"if": "first-person singular", "then": ""},
-    "შენ": {"if": "second-person singular", "then": ""},
-    "ის": {"if": "third-person singular", "then": ""},
-    "ჩვენ": {"if": "first-person plural", "then": ""},
-    "თქვენ": {"if": "second-person plural", "then": ""},
-    "ისინი": {"if": "third-person plural", "then": ""},
-    "second-person singular formal": "second-person singular formal",
-    "second-person singular informal": "second-person singular informal",
-    "first-person singular": "first-person singular",
-    "possessive forms": "possessive",
-    "Indirect": "indirect",
-    "Direct": "direct",
-    "Soft": "soft",
-    "Hard": "hard",
-    "lative": "lative",
-    "nom. sing.": "nominative singular",
-    "post./nom.": "postpositional nominal",
-    "Measurement": {"lang": "Tagalog", "then": "trigger-measurement"},
-    "past continuous": "past continuative",
-    "with definite article": "definite includes-article",
-    "with indefinite article": "indefinite includes-article",
-    "Completive": "completive",
-    "dative definite": "dative definite",
-    "nominative definite": "nominative definite",
-    "Past subjunctive": "past subjunctive",
-    "Present subjunctive": "present subjunctive",
-    "Prot.": "prototonic",
-    "Deut.": "deuterotonic",
-    "Perfect": "perfect",
-    "Imperfect": "imperfect",
-    "Present indicative": "present indicative",
-    "Passive pl.": "passive plural",
-    "Passive sg.": "passive singular",
-    "1st sg.": "first-person singular",
-    "2nd sg.": "second-person singular",
-    "3rd sg.": "third-person singular",
-    "1st pl.": "first-person plural",
-    "2nd pl.": "second-person plural",
-    "3rd pl.": "third-person plural",
-    "Indefinite feminine gender": "indefinite feminine",
-    "Definite feminine gender": "definite feminine",
-    "present participle¹ or gerund": "present participle gerund",
-    "short forms": "short-form",
-    "long forms": "long-form",
-    "Negative adjective (un-…-able)": "negative participle",
-    "Positive adjective (-able)": "participle",
-    "Infinitive (archaic)": "infinitive archaic",
-    "Subjunctive Mood": "subjunctive",
-    "Conditional Mood": "conditional",
-    "Indicative Mood": "indicative",
-    "3rd person pl 2nd person pl formal":
-    ["third-person plural", "second-person plural formal"],
-    "2nd person pl informal": "second-person plural informal",
-    "3rd person sg 2nd person sg formal":
-    ["third-person singular", "second-person singular formal"],
-    "2nd person sg informal": "second-person singular informal",
-    "Participle": "participle",
-    "Past tense": "past",
-    "Present tense": "present",
-    "oblique/vocative": "oblique vocative",
-    "3ʳᵈ person f": "third-person feminine",
-    "3ʳᵈ person m": "third-person masculine",
-    "Case/Form": "",
-    "Positive Infinitive": "positive infinitive",
-    "future converb I": "future converb converb-i",
-    "future converb II": "future converb converb-ii",
-    "perfective converb": "perfective converb",
-    "simultaneous converb": "simultaneous converb",
-    "imperfective converb": "imperfective converb",
-    "dative and adverbial": ["dative", "adverbial"],
-    "nominative genitive and instrumental": "nominative genitive instrumental",
-    "singular unknown": "singular",
-    "Plural of variety": "plural plural-of-variety",
-    "dir. pl.": "direct plural",
-    "dir. sg.": "direct singular",
-    "Terminative": "terminative",
-    "Desiderative": "desiderative",
-    "mediopassive voice": "mediopassive",
-    "past frequentative": "past frequentative",
-    "Infinitives": "infinitive",
-    "Pronon": "",
-    "म SING.": {"if": "first-person", "then": "singular"},
-    "हामी PL.": {"if": "first-person", "then": "plural"},
-    "तँ LOW-RESP. SING.": {"if": "second-person", "then": "singular impolite"},
-    "तिमी MID-RESP.": {"if": "second-person", "then": "polite"},
-    "ऊ LOW-RESP. SING.": {"if": "third-person", "then": "singular impolite"},
-    "उनी MID-RESP.": {"if": "third-person", "then": "polite"},
-    "तपाईं / ऊहाँ HIGH-RESP.": "polite formal",
-    "2ⁿᵈ & 3ʳᵈ": "second-person third-person",
-    "plural only (plurale tantum)": "plural-only",
-    "approximative": "approximative",
-    "consecutive": "consecutive",
-    "post-classical": "",
-    "Active present participle": "active present participle",
-    "Active perfect participle": "active perfect participle",
-    "Passive perfect participle": "passive perfect participle",
-    "active participle اِسْم الْفَاعِل": "active participle",
-    "active voice الْفِعْل الْمَعْلُوم": "active",
-    "singular الْمُفْرَد": "singular",
-    "dual الْمُثَنَّى": "dual",
-    "plural الْجَمْع": "plural",
-    "1ˢᵗ person الْمُتَكَلِّم": "first-person",
-    "2ⁿᵈ person الْمُخَاطَب": "second-person",
-    "3ʳᵈ person الْغَائِب": "third-person",
-    "past (perfect) indicative الْمَاضِي": "past perfective indicative",
-    "non-past (imperfect) indicative الْمُضَارِع":
-    "non-past imperfective indicative",
-    "subjunctive الْمُضَارِع الْمَنْصُوب": "subjunctive",
-    "jussive الْمُضَارِع الْمَجْزُوم": "jussive",
-    "imperative الْأَمْر": "imperative",
-    "passive participle اِسْم الْمَفْعُول": "passive participle",
-    "passive voice الْفِعْل الْمَجْهُول": "passive",
-    "verbal noun الْمَصْدَر": "nominalization nominal-from-verb",
-    "verbal nouns الْمَصَادِر": "nominalization nominal-from-verb",
-    "strong declension": "strong",
-    "weak declension": "weak",
-    "Recently Complete": "recently completive",
-    "first singular": "first-person singular",
-    "second singular": "second-person singular",
-    "third singular": "third-person singular",
-    "quotative": "quotative",
-    "ma-infinitive": "infinitive infinitive-ma",
-    "da-infinitive": "infinitive infinitive-da",
-    "da-form": "verb-form-da",
-    "des-form": "verb-form-des",
-    "m gender": "masculine",
-    "basic singular diptote": "singular diptote",
-    "long": "long-form",
-    "short": "short-form",
-    "1st pers.": "first-person",
-    "2nd pers.": "second-person",
-    "3rd pers.": "third-person",
-    "aorist (simple past)": "aorist",
-    "aorist II (past perfect II)": "aorist aorist-ii",
-    "admirative": "admirative",
-    "Adverbial": "adverbial",
-    "adjective": "adjectival",
-    "neuter gender": "neuter",
-    "number and gender": "",
-    "nominative/ accusative": "nominative accusative",
-    "attributive and/or after a declined word": "attributive",
-    "independent as first declined word": "",
-    "after a declined word": "attributive",
-    "as first declined word": "",
-    "singular only": "singular-only",
-    "absolute superlative": "absolute superlative",
-    "present subjunctive": "present subjunctive",
-    "my": "possessive singular first-person",
-    "your": "possessive singular plural second-person",
-    "her/his/its": "possessive singular third-person",
-    "our": "possessive plural first-person",
-    "their": "possessive plural third-person",
-    "singular invariable": "singular invariable",
-    "nominal": "nominalization",
-    "circumstantial": "circumstantial",
-    "jussive": "jussive",
-    "Singulative": "singulative",
-    "Collective": "collective",
-    "basic collective triptote": "collective triptote",
-    "Paucal": "paucal",
-    "sound feminine paucal": "feminine paucal",
-    "stem": "stem",
-    "resultative participle": "resultative participle",
-    "subject participle": "subjective participle",
-    "connegative converb": "connegative converb",
-    "subjunctive singular": "subjunctive singular",
-    "imperative singular": "imperative singular",
-    "imperative plural": "imperative plural",
-    "participle of necessity": "participle necessitative",
-    "special": "special",
-    "half-participle": "adverbial participle",
-    "manner of action": "adverbial",
-    "mixed declension": "mixed",
-    "Habitual Aspect": "habitual",
-    "Perfective Aspect": "perfective",
-    "Progressive Aspect": "progressive",
-    "1ˢᵗ": "first-person",
-    "2ⁿᵈ": "second-person",
-    "3ʳᵈ": "third-person",
-    "Negative Infinitive": "negative infinitive",
-    "2nd person singular": "second-person singular",
-    "present active participle": "present active participle",
-    "past active aorist participle": "past active aorist participle",
-    "past active imperfect participle": "past active imperfect participle",
-    "past passive participle": "past passive participle",
-    "adverbial participle": "adverbial participle",
-    "definite subject form": "definite subjective",
-    "definite object form": "definite objective",
-    "durative sentence": "durative",
-    "negated with": "negated-with",
-    "non-durative sentence": "non-durative",
-    "subordinate clause": "subordinate-clause",
-    "conjunctive": "conjunctive",
-    "future conjunctive": "future conjunctive",
-    "egressive": "egressive",
-    "first singular yo": "first-person singular",
-    "second singular tu": "second-person singular",
-    "third singular él/elli": "third-person singular",
-    "first plural nosotros/nós": "first-person plural",
-    "second plural vosotros/vós": "second-person plural",
-    "third plural ellos": "third-person plural",
-    "First person": "first-person",
-    "Second person": "second-person",
-    "Third person": "third-person",
-    "Very faml. & Inferior": "familiar impolite",
-    "Familiar": "familiar",
-    "Honorific": "honorific",
-    "Non honorific": "",
-    "Continuous": "continuative",
-    "Others": "",
-    "Oblique": "oblique",
-    "Demonstrative oblique": "demonstrative oblique",
-    "♀": "feminine",
-    "Class 1 weak": "class-1 weak",
-    "Benefactive": "benefactive",
-    "1sg": "first-person singular",
-    "1pl": "first-person plural",
-    "2sg": "second-person singular",
-    "2pl": "second-person plural",
-    "Irrealis": "irrealis",
-    "Realis": "realis",
-    "Contrasting conjunction": "contrastive",
-    "Causal conjunction": "causative",
-    "Conditional conjunction": "conditional",
-    "Perfect tense": "perfect",
-    "Perfect-continuative tense": "perfect continuative",
-    "present indicative/future": "present future indicative",
-    "imperfect (indicative/subjunctive)/ conditional":
-    ["imperfect indicative subjunctive", "conditional"],
-    "verbal adjectives": "participle",
-    "Passive perfect particple": "passive perfect participle",
-    "ⲛ̀ⲑⲟⲕ": {"if": "second-person singular masculine", "then": ""},
-    "ⲛ̀ⲑⲟ": {"if": "second-person singular feminine", "then": ""},
-    "ⲛ̀ⲑⲟϥ": {"if": "third-person singular masculine", "then": ""},
-    "ⲛ̀ⲑⲟⲥ": {"if": "third-person singular feminine", "then": ""},
-    "ⲛ̀ⲑⲱⲧⲉⲛ": {"if": "second-person plural", "then": ""},
-    "ⲛ̀ⲑⲱⲟⲩ": {"if": "third-person plural", "then": ""},
-    "caritive": "caritive",
-    "Pronoun": "",
-    "nominative genitive instrumental": "nominative genitive instrumental",
-    "dative adverbial": "dative adverbial",
-    "♂": "masculine",
-    "2nd singular ты": "second-person singular",
-    "3rd singular ён / яна́ / яно́": "third-person singular",
-    "1st plural мы": "first-person plural",
-    "2nd plural вы": "second-person plural",
-    "3rd plural яны́": "third-person plural",
-    "plural мы / вы / яны́": "plural",
-    "masculine я / ты / ён": "masculine",
-    "feminine я / ты / яна́": "feminine",
-    "neuter яно́": "neuter",
-    "Imperfect indicative": "imperfect indicative",
-    "Verbal of necessity": "necessitative",
-    "without article": "without-article",
-    "participle (a26)": "participle",
-    "participle (a6)": "participle",
-    "participle (a5)": "participle",
-    "participle (a39)": "participle",
-    "Definite feminine and masculine gender": "definite feminine masculine",
-    "Neuter s-stem": "neuter",
-    "2nd sg informal": "second-person singular informal",
-    "2nd person plural (2p) Giinawaa": "second-person plural",
-    "3rd person sg": "third-person singular",
-    "Causative / Applicative": "causative applicative",
-    "Lengadocian (Standard Occitan)": "Lengadocian",
-    "Auvernhàs": "Auvernhàs",  # Dialect of Occitan
-    "Gascon": "Gascon",  # Occitan
-    "Lemosin": "Lemosin",  # Occitan
-    "Provençau": "Provençau",  # Occitan
-    "Old Saxon personal pronouns": "personal pronoun",
-    "3": {"lang": head_final_numeric_langs, "then": "class-3",
-          "else": "third-person"},
-    "ñuqa": {"if": "first-person singular", "then": ""},
-    "qam": {"if": "second-person singular", "then": ""},
-    "pay": {"if": "third-person singular", "then": ""},
-    "ñuqanchik": {"if": "first-person plural inclusive", "then": ""},
-    "ñuqayku": {"if": "first-person plural exclusive", "then": ""},
-    "qamkuna": {"if": "second-person plural", "then": ""},
-    "paykuna": {"if": "third-person plural", "then": ""},
-    "unë": {"if": "first-person singular", "then": ""},
-    "ti": {"if": "second-person singular", "then": ""},
-    "ai/ajo": {"if": "third-person singular", "then": ""},
-    "ne": {"if": "first-person plural", "then": ""},
-    "ju": {"if": "second-person plural", "then": ""},
-    "ata/ato": {"if": "third-person plural", "then": ""},
-    "ես": {"if": "first-person singular", "then": ""},
-    "դու": {"if": "second-person singular", "then": ""},
-    "նա": {"if": "third-person singular", "then": ""},
-    "մենք": {"if": "first-person plural", "then": ""},
-    "դուք": {"if": "second-person plural", "then": ""},
-    "նրանք": {"if": "third-person plural", "then": ""},
-    "nominative / accusative": "nominative accusative",
-    "situative": "situative",
-    "oppositive": "oppositive",
-    "multiplicative": "multiplicative",
-    "temporal": "temporal",
-
-    # These are headers for columns that contain titles even if not header style
-    "noun case": "*",  # e.g., kolme/Finnish
-    "adverbial form": "*",  # e.g., kolme/Finnish
+    "singular": "singular",
+    "plural": "plural",
+    "no gradation": "no-gradation",
+    "t-d gradation": "gradation-t-d",
+    "tt-t gradation": "gradation-tt-t",
+    "kk-k gradation": "gradation-kk-k",
+    "nt-nn gradation": "gradation-nt-nn",
+    "pp-p gradation": "gradation-pp-p",
+    "k- gradation": "gradation-k-",
+    "p-v gradation": "gradation-p-v",
+    "mp-mm gradation": "gradation-mp-mm",
+    "nk-ng gradation": "gradation-nk-ng",
+    "lt-ll gradation": "gradation-lt-ll",
+    "rt-rr gradation": "gradation-rt-rr",
+    "ik-j gradation": "gradation-ik-j",
+    "k-v gradation": "gradation-k-v",
+    "1st declension": "first-declension",
+    "2nd declension": "second-declension",
+    "3rd declension": "third-declension",
+    "4th declension": "fourth-declension",
+    "5th declension": "fifth-declension",
 }
-
-
-def check_tags(k, v):
-    assert isinstance(k, str)
-    assert isinstance(v, str)
-    for tag in v.split():
-        if tag not in valid_tags and tag not in ("*",):
-            print("infl_map[{!r}] contains invalid tag {!r}"
-                  .format(k, tag))
-
-
-def check_v(k, v):
-    assert isinstance(k, str)
-    if v is None or v in ("!",):
-        return
-    if isinstance(v, str):
-        check_tags(k, v)
-    elif isinstance(v, list):
-        for item in v:
-            check_v(k, item)
-    elif isinstance(v, dict):
-        for kk in v.keys():
-            if kk in ("if", "then", "else"):
-                check_v(k, v[kk])
-            elif kk in ("lang",):
-                pass
-            else:
-                print("infl_map[{!r}] contains invalid key {!r}"
-                      .format(k, kk))
-    else:
-        print("infl_map[{!r}] contains invalid value {!r}"
+for k, v in title_elements_map.items():
+    if any(t not in valid_tags for t in v.split()):
+        print("TITLE_ELEMENTS_MAP UNRECOGNIZED TAG: {}: {}"
               .format(k, v))
 
-
-for k, v in infl_map.items():
-    check_v(k, v)
-
-
-# Mapping from start of header to tags for inflection tables.  The start must
-# be followed by a space (automatically added, do not enter here).
-infl_start_map = {
-    "with infinitive": "infinitive",
-    "with gerund": "gerund",
-    "with informal second-person singular imperative":
-    "informal second-person singular imperative",
-    "with formal second-person singular imperative":
-    "formal second-person singular imperative",
-    "with first-person plural imperative":
-    "first-person plural imperative",
-    "with informal second-person plural imperative":
-    "informal second-person plural imperative",
-    "with formal second-person plural imperative":
-    "formal second-person plural imperative",
+# Parenthized element starts to map them to tags for form for the rest of
+# the element
+title_elemstart_map = {
+    "auxiliary": "auxiliary",
+    "Kotus type": "class",
+    "class": "class",
+    "type": "class",
 }
-for k, v in infl_start_map.items():
-    check_v(k, v)
+for k, v in title_elemstart_map.items():
+    if any(t not in valid_tags for t in v.split()):
+        print("TITLE_ELEMSTART_MAP UNRECOGNIZED TAG: {}: {}"
+              .format(k, v))
+title_elemstart_re = re.compile(
+    r"^({}) "
+    .format("|".join(re.escape(x) for x in title_elemstart_map.keys())))
 
-infl_start_re = re.compile(
-    r"^({}) ".format("|".join(re.escape(x) for x in infl_start_map.keys())))
 
-# XXX check e.g. ligpit/Tagalog - verb conjugation has Trigger column that needs
-# special handling - not aspects but triggers?
+class InflCell(object):
+    """Cell in an inflection table."""
+    __slots__ = (
+        "text",
+        "is_title",
+        "start",
+        "colspan",
+        "rowspan",
+    )
+    def __init__(self, text, is_title, start, colspan, rowspan):
+        assert isinstance(text, str)
+        assert is_title in (True, False)
+        assert isinstance(start, int)
+        assert isinstance(colspan, int) and colspan >= 1
+        assert isinstance(rowspan, int) and rowspan >= 1
+        self.text = text.strip()
+        self.is_title = text and is_title
+        self.colspan = colspan
+        self.rowspan = rowspan
+    def __str__(self):
+        return "{}/{}/{}/{}".format(
+            self.text, self.is_title, self.colspan, self.rowspan)
+    def __repr__(self):
+        return str(self)
+
+
+class HdrSpan(object):
+    """Saved information about a header cell/span during the parsing
+    of a table."""
+    __slots__ = (
+        "start",
+        "colspan",
+        "tagsets",  # list of sets
+        "used",  # At least one text cell after this
+        "text",  # For debugging
+    )
+    def __init__(self, start, colspan, tagsets, text):
+        assert isinstance(start, int) and start >= 0
+        assert isinstance(colspan, int) and colspan >= 1
+        assert isinstance(tagsets, set)
+        for x in tagsets:
+            assert isinstance(x, tuple)
+        self.start = start
+        self.colspan = colspan
+        self.tagsets = list(set(tags) for tags in tagsets)
+        self.used = False
+        self.text = text
+
+
+def is_superscript(ch):
+    """Returns True if the argument is a superscript character."""
+    assert isinstance(ch, str) and len(ch) == 1
+    return unicodedata.name(ch).startswith("SUPERSCRIPT ")
+
+
+def clean_header(word, col):
+    """Cleans a row/column header for later processing."""
+    orig_col = col
+    col = re.sub(r"\s*\^\([^)]*\)", "", col)
+    col = re.sub(r"(?s)\s*➤\s*$", "", col)
+    col = re.sub(r"(?s)\s*,\s*$", "", col)
+    col = re.sub(r"(?s)\s*•\s*$", "", col)
+    if col not in infl_map:
+        col = re.sub(r",?\s*\([^)]*\)\s*$", "", col)
+    col = col.strip()
+    if re.search(r"^(There are |"
+                 r"\*|"
+                 r"Use |"
+                 r"Only used |"
+                 r"The forms in |"
+                 r"these are also written |"
+                 r"The genitive can be |"
+                 r"Genitive forms are rare or non-existant|"
+                 r"Accusative Note: |"
+                 r"Classifier Note: |"
+                 r"Noun: Assamese nouns are |"
+                 r"the active conjugation|"
+                 r"the instrumenal singular|"
+                 r"Note:|"
+                 r"\^* Note:|"
+                 r"Notes:)",
+                col):
+        return "", [], []
+    refs = []
+    ref_symbols = "*△†0123456789"
+    if len(col) > 2 and col[-2] == "^" and col[-1] in ref_symbols:
+        col = col[:-2]
+        refs.append("*")
+    while col and is_superscript(col[0]):
+        if len(col) > 1 and col[1] in ("⁾", " ", ":"):
+            # Note definition
+            return "", [], [[col[0], col[2:].strip()]]
+        refs.append(col[0])
+        col = col[1:]
+    while col and (is_superscript(col[-1]) or col[-1] in ("†",)):
+        # Numbers and H/L/N are useful information
+        refs.append(col[-1])
+        col = col[:-1]
+    if len(col) > 2 and col[1] in (")", " ", ":") and col[0].isdigit():
+        # Another form of note definition
+        return "", [], [[col[0], col[2:].strip()]]
+    col = col.strip()
+    if col.endswith("*"):
+        col = col[:-1].strip()
+        refs.append("*")
+    if col.endswith("(*)"):
+        col = col[:-3].strip()
+        refs.append("*")
+    #print("CLEAN_HEADER: orig_col={!r} col={!r} refs={!r}"
+    #      .format(orig_col, col, refs))
+    return col.strip(), refs, []
+
+
+def parse_title(title, source):
+    """Parses inflection table title.  This returns (global_tags, word_tags,
+    extra_forms), where ``global_tags`` is tags to be added to each inflection
+    entry, ``word_tags`` are tags for the word but not to be added to every
+    form, and ``extra_forms`` is dictionary describing additional forms to be
+    included in the part-of-speech entry)."""
+    assert isinstance(title, str)
+    assert isinstance(source, str)
+    title = html.unescape(title)
+    title = re.sub(r"(?i)<[^>]*>", "", title).strip()
+    title = re.sub(r"\s+", " ", title)
+    # print("PARSING TITLE:", title)
+    global_tags = []
+    word_tags = []
+    extra_forms = []
+    # Check for the case that the title is in infl_map
+    if title in infl_map:
+        return infl_map[title].split(), [], []
+    if title.lower() in infl_map:
+        return infl_map[title.lower()].split(), [], []
+    # Add certain global tags based on contained words
+    for m in re.finditer(title_contains_global_re, title):
+        global_tags.extend(title_contains_global_map[
+            m.group(0).lower()].split())
+    # Add certain tags to word-tags "form" based on contained words
+    for m in re.finditer(title_contains_wordtags_re, title):
+        word_tags.extend(title_contains_wordtags_map[
+            m.group(0).lower()].split())
+    # Parse parenthesized part from title
+    for m in re.finditer(r"\(([^)]*)\)", title):
+        for elem in m.group(1).split(","):
+            elem = elem.strip()
+            if elem in title_elements_map:
+                word_tags.extend(title_elements_map[elem].split())
+            else:
+                m = re.match(title_elemstart_re, elem)
+                if m:
+                    tags = title_elemstart_map[m.group(1)].split()
+                    dt = {"form": elem[m.end():],
+                          "source": source + " title",
+                          "tags": tags}
+                    extra_forms.append(dt)
+    # For titles that contains no parenthesized parts, do some special
+    # handling to still interpret parts from them
+    if title.find("(") < 0:
+        # No parenthesized parts
+        m = re.search(r"\b(Portuguese) (-.* verb) ", title)
+        if m is not None:
+            dt = {"form": m.group(2),
+                  "tags": ["class"],
+                  "source": source + " title"}
+            extra_forms.append(dt)
+        for elem in title.split(","):
+            elem = elem.strip()
+            if elem in title_elements_map:
+                word_tags.extend(title_elements_map[elem].split())
+            elif elem.endswith("-stem"):
+                dt = {"form": elem,
+                      "tags": ["class"],
+                      "source": source + " title"}
+                extra_forms.append(dt)
+    return global_tags, word_tags, extra_forms
+
+
+def expand_header(word, lang, text, tags0):
+    """Expands a cell header to tags, handling conditional expressions
+    in infl_map.  This returns list of tuples of tags, each list element
+    describing an alternative interpretation.  ``tags0`` is combined
+    column and row tags for the cell in which the text is being interpreted
+    (conditional expressions in inflection data may depend on it)."""
+    assert isinstance(word, str)
+    assert isinstance(lang, str)
+    assert isinstance(text, str)
+    assert isinstance(tags0, (list, tuple, set))
+    # print("EXPAND_HDR:", text)
+    # First map the text using the inflection map
+    if text in infl_map:
+        v = infl_map[text]
+    else:
+        m = re.match(infl_start_re, text)
+        assert m is not None
+        v = infl_start_map[m.group(1)]
+        # print("INFL_START {} -> {}".format(text, v))
+
+    # Then loop interpreting the value, until the value is a simple string.
+    # This may evaluate nested conditional expressions.
+    while True:
+        # If it is a string, we are done.
+        if isinstance(v, str):
+            return [tuple(sorted(v.split()))]
+        # For a list, just interpret it as alternatives.  (Currently the
+        # alternatives must directly be strings.)
+        if isinstance(v, (list, tuple)):
+            lst = []
+            return list(tuple(sorted(x.split()) for x in v))
+        # Otherwise the value should be a dictionary describing a conditional
+        # expression.
+        if not isinstance(v, dict):
+            print("UNIMPLEMENTED INFL_MAP VALUE: {}/{}/{}: {}"
+                  .format(word, lang, text, infl_map[text]))
+            return [()]
+        # Evaluate the conditional expression.
+        assert isinstance(v, dict)
+        cond = "default-true"
+        # Handle "lang" condition.  The value must be either a single language
+        # or a list of languages, and the condition evaluates to True if
+        # the table is in one of those languages.
+        if cond and "lang" in v:
+            c = v["lang"]
+            if isinstance(c, str):
+                cond = c == lang
+            else:
+                assert isinstance(c, (list, tuple, set))
+                cond = lang in c
+        # Handle "if" condition.  The value must be a string containing
+        # a space-separated list of tags.  The condition evaluates to True
+        # if ``tags0`` contains at least one of the listed tags.
+        if cond and "if" in v:
+            c = v["if"]
+            assert isinstance(c, str)
+            # "if" condition is true if any of the listed tags is present
+            cond = any(t in tags0 for t in c.split())
+        # Warning message about missing conditions for debugging.
+        if cond == "default-true":
+            print("IF MISSING COND: word={} lang={} text={} tags0={} "
+                  "c={} cond={}"
+                  .format(word, lang, text, tags0, c, cond))
+        # Based on the result of evaluating the condition, select either
+        # "then" part or "else" part.
+        if cond:
+            v = v.get("then", "")
+        else:
+            v = v.get("else")
+            if v is None:
+                print("IF WITHOUT ELSE EVALS False: {}/{} {!r} tags0={}"
+                      .format(word, lang, text, tags0))
+                v = ""
+
+
+def compute_coltags(hdrspans, start, colspan, mark_used):
+    """Computes column tags for a column of the given width based on the
+    current header spans."""
+    assert isinstance(hdrspans, list)
+    assert isinstance(start, int) and start >= 0
+    assert isinstance(colspan, int) and colspan >= 1
+    assert mark_used in (True, False)
+    used = set()
+    coltags = None
+    # XXX should look at tag classes and not take tags in the same class(es)
+    # from higher up
+    done = False
+    for hdrspan in reversed(hdrspans):
+        if done:
+            break
+        if (hdrspan.start > start or
+            hdrspan.start + hdrspan.colspan < start + colspan):
+            continue
+        # XXX this breaks persons in soutenir/French/Verb
+        # if any(hdrspan.start > x[0] or
+        #        hdrspan.start + hdrspan.colspan < x[0] + x[1]
+        #        for x in used):
+        #     continue
+        key = (hdrspan.start, hdrspan.colspan)
+        if key in used:
+            continue
+        # XXX if hdrspan.used:
+        used.add(key)
+        if mark_used:
+            hdrspan.used = True
+        # Merge into coltags
+        if coltags is None:
+            coltags = hdrspan.tagsets
+        else:
+            new_coltags = set()
+            for tags2 in hdrspan.tagsets:  # Earlier header
+                for tags1 in coltags:      # Tags found for current cell so far
+                    if (any(valid_tags[t] in ("mood", "tense", "person",
+                                              "number")
+                            for t in tags1) and
+                        any(valid_tags[t] in ("non-finite",)
+                            for t in tags2)):
+                        tags2 = set()
+                    elif (any(valid_tags[t] == "number" for t in tags1) and
+                          any(valid_tags[t] == "number" for t in tags2)):
+                        tags2 = set()
+                    tags = tuple(sorted(set(tags1) | tags2))
+                    new_coltags.add(tags)
+            coltags = list(new_coltags)
+    if coltags is None:
+        coltags = [()]
+    #print("HDRSPANS:", list((x.start, x.colspan, x.tagsets) for x in hdrspans))
+    #print("COMPUTE_COLTAGS {} {} {}: {}"
+    #      .format(start, colspan, mark_used, coltags))
+    return coltags
+
+
+def parse_simple_table(ctx, word, lang, rows, titles, source):
+    """This is the default table parser.  Despite its name, it can parse
+    complex tables.  This returns a list of forms to be added to the
+    part-of-speech, or None if the table could not be parsed."""
+    assert isinstance(ctx, Wtp)
+    assert isinstance(word, str)
+    assert isinstance(lang, str)
+    assert isinstance(rows, list)
+    assert isinstance(source, str)
+    for row in rows:
+        for col in row:
+            assert isinstance(col, InflCell)
+    assert isinstance(titles, list)
+    for x in titles:
+        assert isinstance(x, str)
+    # print("ROWS:")
+    # for row in rows:
+    #     print("  ", row)
+    ret = []
+    hdrspans = []
+    col_has_text = []
+    i = 0
+    title = None
+    global_tags = []
+    word_tags = []
+    for title in titles:
+        more_global_tags, more_word_tags, extra_forms = \
+            parse_title(title, source)
+        global_tags.extend(more_global_tags)
+        word_tags.extend(more_word_tags)
+        ret.extend(extra_forms)
+    for row in rows:
+        # print("ROW:", row)
+        if not row:
+            continue  # Skip empty rows without incrementing i
+        if (row[0].is_title and
+            row[0].text and
+            not is_superscript(row[0].text[0]) and
+            row[0].text not in infl_map and
+            not re.match(infl_start_re, row[0].text) and
+            all(x.is_title == row[0].is_title and
+                x.text == row[0].text
+                for x in row)):
+            if row[0].text and title is None:
+                title = row[0].text
+                if re.match(r"(Note:|Notes:)", title):
+                    continue
+                more_global_tags, more_word_tags, extra_forms = \
+                    parse_title(title, source)
+                global_tags.extend(more_global_tags)
+                word_tags.extend(more_word_tags)
+                ret.extend(extra_forms)
+            continue  # Skip title rows without incrementing i
+        rowtags = [()]
+        have_hdr = False
+        have_text = False
+        samecell_cnt = 0
+        col0_hdrspan = None
+        col0_followed_by_nonempty = False
+        for j, cell in enumerate(row):
+            colspan = cell.colspan
+            if samecell_cnt == 0:
+                # First column of a (possible multi-column) cell
+                samecell_cnt = colspan - 1
+            else:
+                assert samecell_cnt > 0
+                cell_initial = False
+                samecell_cnt -= 1
+                continue
+            # print("  COL:", col)
+            col = cell.text
+            if not col:
+                continue
+            # print(i, j, col)
+            if cell.is_title:
+                # It is a header cell
+                col = re.sub(r"\s+", " ", col)
+                text, refs, defs = clean_header(word, col)
+                if not text:
+                    continue
+                #if j < len(col_has_text) and col_has_text[j]:
+                #    print("  COL HAS TEXT BEFORE:", j, col)
+                #    return None  # Cannot have column hdrs after text
+                if text not in infl_map:
+                    text1 = re.sub(r"\s*\([^)]*\)", "", text)
+                    if text1 in infl_map:
+                        text = text1
+                    else:
+                        text1 = re.sub(r"\s*,+\s+", " ", text)
+                        text1 = re.sub(r"\s+", " ", text1)
+                        if text1 in infl_map:
+                            text = text1
+                        elif not re.match(infl_start_re, text):
+                            if text not in IGNORED_COLVALUES:
+                                print("  UNHANDLED HEADER: {!r}".format(col))
+                                return None
+                            continue
+                if infl_map.get(text, "") == "!":
+                    # Reset column headers
+                    hdrspans = []
+                    continue
+                if have_text:
+                    #print("  HAVE_TEXT BEFORE HDR:", col)
+                    # Reset rowtags if new title column after previous
+                    # text cells
+                    # XXX beware of header "—": "" - must not clear on that if
+                    # it expands to no tags
+                    rowtags = [()]
+                have_hdr = True
+                # print("HAVE_HDR:", col)
+                # Update rowtags and coltags
+                new_rowtags = set()
+                new_coltags = set()
+                all_hdr_tags = set()
+                for rt0 in rowtags:
+                    for ct0 in compute_coltags(hdrspans, j, colspan, False):
+                        tags0 = set(rt0) | set(ct0) | set(global_tags)
+                        alt_tags = expand_header(word, lang, text, tags0)
+                        all_hdr_tags.update(alt_tags)
+                        for tt in alt_tags:
+                            new_coltags.add(tt)
+                            # XXX which ones need to be removed?
+                            tags = tuple(sorted(set(tt) | set(rt0)))
+                            new_rowtags.add(tags)
+                rowtags = list(new_rowtags)
+                if any(new_coltags):
+                    hdrspan = HdrSpan(j, colspan, new_coltags, col)
+                    hdrspans.append(hdrspan)
+                    # Handle headers that are above left-side header
+                    # columns and are followed by personal pronouns in
+                    # remaining columns (basically headers that
+                    # evaluate to no tags).  In such cases widen the
+                    # left-side header to the full row.
+                    if j == 0:
+                        assert col0_hdrspan is None
+                        col0_hdrspan = hdrspan
+                    elif any(all_hdr_tags):
+                        # if col0_hdrspan is not None:
+                        #     print("COL0 FOLLOWED HDR: {!r} by {!r} TAGS {}"
+                        #           .format(col0_hdrspan.text, col,
+                        #                   all_hdr_tags))
+                        col0_followed_by_nonempty = True
+                continue
+
+            # It is a normal text cell
+            if col in IGNORED_COLVALUES:
+                continue
+
+            if j == 0 and (not col_has_text or not col_has_text[0]):
+                continue  # Skip text at top left, as in Icelandic, Faroese
+            # if col0_hdrspan is not None:
+            #     print("COL0 FOLLOWED NONHDR: {!r} by {!r}"
+            #           .format(col0_hdrspan.text, col))
+            col0_followed_by_nonempty = True
+            have_text = True
+            while len(col_has_text) <= j:
+                col_has_text.append(False)
+            col_has_text[j] = True
+            # Determine column tags for the multi-column cell
+            combined_coltags = compute_coltags(hdrspans, j, colspan, True)
+
+            # print("HAVE_TEXT:", repr(col))
+            col = re.sub(r"[ \t\r]+", " ", col)
+            text, refs, defs = clean_header(word, col)
+            if text.find(" + ") >= 0:
+                extra_split = ""
+            else:
+                extra_split = "," if text.endswith("/") else ",/"
+            for form in re.split(r"[;•\n{}]| or ".format(extra_split), text):
+                form = form.strip()
+                extra_tags = []
+                ipas = []
+                if form.find("/") >= 0:
+                    for m in re.finditer(r"/[^/]*/", form):
+                        ipas.append(m.group(0))
+                    form = re.sub(r"/[^/]*/", "", form)
+                    form = re.sub(r"^\s*,\s*", "", form)
+                    form = re.sub(r"\s*,\s*$", "", form)
+                    form = re.sub(r"\s*(,\s*)+", ", ", form)
+                    form = re.sub(r"\s+", " ", form)
+                    form = form.strip()
+                if form.endswith("ʳᵃʳᵉ"):
+                    extra_tags.append("rare")
+                    form = form[:-4].strip()
+                while form and is_superscript(form[-1]):
+                    # XXX handle refences in form
+                    form = form[:-1]
+                roman = None
+                m = re.search(r"\s*\(([^)]*)\)", form)
+                if m is not None:
+                    # XXX besides roman, it can be tags, e.g., (archaic)
+                    roman = m.group(1)
+                    form = (form[:m.start()] + " " + form[m.end():]).strip()
+                if not form:
+                    continue
+                # Ignore certain forms that are not really forms
+                if form in ("not used",):
+                    continue
+                # print("ROWTAGS:", rowtags)
+                # print("COLTAGS:", combined_coltags)
+                # print("TEXT:", repr(form))
+                for rt in rowtags:
+                    for ct in combined_coltags:
+                        tags = set(global_tags)
+                        tags.update(extra_tags)
+                        tags.update(rt)
+                        old_tags = set(tags)
+                        for t in ct:
+                            c = valid_tags[t]
+                            if (c in ("mood",) and
+                                any(valid_tags[tt] == c
+                                    for tt in old_tags)):
+                                continue
+                            tags.add(t)
+                        # Remove "personal" tag if have nth person; these
+                        # come up with e.g. reconhecer/Portuguese/Verb.
+                        if ("personal" in tags and
+                            any(x in tags for x in
+                               ["first-person", "second-person",
+                                "third-person"])):
+                            tags.remove("personal")
+                        tags = list(sorted(tags))
+                        dt = {"form": form, "tags": tags,
+                              "source": source}
+                        if roman:
+                            dt["roman"] = roman
+                        if ipas:
+                            dt["ipa"] = ", ".join(ipas)
+                        ret.append(dt)
+        # End of row
+        if col0_hdrspan is not None and not col0_followed_by_nonempty:
+            # If a column-0 header is only followed by headers that yield
+            # no tags, expand it to entire row
+            # print("EXPANDING COL0: {} from {} to {} cols"
+            #       .format(col0_hdrspan.text, col0_hdrspan.colspan,
+            #               len(row)))
+            col0_hdrspan.colspan = len(row)
+        i += 1
+    # XXX handle refs and defs
+    # for x in hdrspans:
+    #     print("  HDRSPAN {} {} {} {!r}"
+    #           .format(x.start, x.colspan, x.tagsets, x.text))
+
+    # Post-process German nouns with articles
+    if any("noun" in x["tags"] for x in ret):
+        if lang in ("Alemannic German", "Cimbrian", "German",
+                    "German Low German", "Hunsrik", "Luxembourish",
+                    "Pennsylvania German"):
+            new_ret = []
+            for dt in ret:
+                tags = dt["tags"]
+                if "noun" in tags:
+                    tags = list(t for t in tags if t != "noun")
+                elif "indefinite" in tags or "definite" in tags:
+                    tags = list(sorted(set(tags) | set(["article"])))
+                dt = dt.copy()
+                dt["tags"] = tags
+                new_ret.append(dt)
+            ret = new_ret
+        else:
+            print("UNHANDLED NOUN IN {}/{}".format(word, lang))
+
+    if word_tags:
+        word_tags = list(sorted(set(word_tags)))
+        dt = {"form": " ".join(word_tags),
+              "source": source + " title",
+              "tags": ["word-tags"]}
+        ret.append(dt)
+
+    return ret
+
+
+def handle_generic_table(ctx, word, lang, rows, titles, source):
+    assert isinstance(ctx, Wtp)
+    assert isinstance(word, str)
+    assert isinstance(lang, str)
+    assert isinstance(rows, list)
+    assert isinstance(source, str)
+    for row in rows:
+        assert isinstance(row, list)
+        for x in row:
+            assert isinstance(x, InflCell)
+    assert isinstance(titles, list)
+    for x in titles:
+        assert isinstance(x, str)
+
+    # Try to parse the table as a simple table
+    ret = parse_simple_table(ctx, word, lang, rows, titles, source)
+    if ret is not None:
+        return ret
+
+    # XXX handle other table formats
+
+    # We were not able to handle the table
+    print("UNHANDLED TABLE FORMAT in {}/{}".format(word, lang))
+    return []
+
+
+def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
+    """Parses a table from parsed Wikitext format into rows and columns of
+    InflCell objects and then calls handle_generic_table() to parse it into
+    forms.  This adds the forms into ``data``."""
+    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(ctx, Wtp)
+    assert isinstance(word, str)
+    assert isinstance(lang, str)
+    assert isinstance(data, dict)
+    assert isinstance(tree, WikiNode)
+    assert tree.kind == NodeKind.TABLE
+    assert isinstance(titles, list)
+    assert isinstance(source, str)
+    for x in titles:
+        assert isinstance(x, str)
+    # Imported here to avoid a circular import
+    from wiktextract.page import clean_node
+
+    cols_fill = []    # Filling for columns with rowspan > 1
+    cols_filled = []  # Number of remaining rows for which to fill the column
+    cols_headered = []  # True when column contains headers even if normal fmt
+    rows = []
+    assert tree.kind == NodeKind.TABLE
+    for node in tree.children:
+        if not isinstance(node, WikiNode):
+            continue
+        kind = node.kind
+        # print("  {}".format(node))
+        if kind == NodeKind.TABLE_CAPTION:
+            # print("  CAPTION:", node)
+            pass
+        elif kind == NodeKind.TABLE_ROW:
+            if "vsShow" in node.attrs.get("class", "").split():
+                # vsShow rows are those that are intially shown in tables that
+                # have more data.  The hidden data duplicates these rows, so
+                # we skip it and just process the hidden data.
+                continue
+
+            # Parse a table row.
+            row = []
+            style = None
+            for col in node.children:
+                if not isinstance(col, WikiNode):
+                    continue
+                kind = col.kind
+                if kind not in (NodeKind.TABLE_HEADER_CELL,
+                                NodeKind.TABLE_CELL):
+                    print("    UNEXPECTED ROW CONTENT: {}".format(col))
+                    continue
+                while len(row) < len(cols_filled) and cols_filled[len(row)] > 0:
+                    cols_filled[len(row)] -= 1
+                    row.append(cols_fill[len(row)])
+                try:
+                    rowspan = int(col.attrs.get("rowspan", "1"))
+                    colspan = int(col.attrs.get("colspan", "1"))
+                except ValueError:
+                    rowspan = 1
+                    colspan = 1
+                # print("COL:", col)
+                celltext = clean_node(config, ctx, None, col.children)
+                # This magic value is used as part of header detection
+                cellstyle = (col.attrs.get("style", "") + "//" +
+                             col.attrs.get("class", "") + "//" +
+                             str(kind))
+                if not row:
+                    style = cellstyle
+                target = None
+                idx = celltext.find(": ")
+                is_title = False
+                if idx >= 0 and celltext[:idx] in infl_map:
+                    target = celltext[idx + 2:].strip()
+                    # XXX add tags from target
+                    celltext = celltext[:idx]
+                    is_title = True
+                elif (kind == NodeKind.TABLE_HEADER_CELL or
+                      (celltext in infl_map and celltext != word) or
+                      (style == cellstyle and
+                       not style.startswith("////"))):
+                    if celltext.find(" + ") < 0:
+                        is_title = True
+                if (not is_title and len(row) < len(cols_headered) and
+                    cols_headered[len(row)]):
+                    is_title = True
+                if is_title:
+                    while len(cols_headered) <= len(row):
+                        cols_headered.append(False)
+                    cols_headered[len(row)] = \
+                        infl_map.get(celltext[1:].strip(), "") == "*"
+                # XXX extra tags, see "target" above
+                cell = InflCell(celltext, is_title, len(row), colspan, rowspan)
+                for i in range(0, colspan):
+                    if rowspan > 1:
+                        while len(cols_fill) <= len(row):
+                            cols_fill.append(None)
+                            cols_filled.append(0)
+                        cols_fill[len(row)] = cell
+                        cols_filled[len(row)] = rowspan - 1
+                    row.append(cell)
+            if not row:
+                continue
+            while len(row) < len(cols_fill) and cols_filled[len(row)] > 0:
+                cols_filled[len(row)] -= 1
+                row.append(cols_fill[len(row)])
+            # print("  ROW {!r}".format(row))
+            rows.append(row)
+        elif kind in (NodeKind.TABLE_HEADER_CELL, NodeKind.TABLE_CELL):
+            # print("  TOP-LEVEL CELL", node)
+            pass
+
+    # Now we have a table that has been parsed into rows and columns of
+    # InflCell objects.  Parse the inflection table from that format.
+    ret = handle_generic_table(ctx, word, lang, rows, titles, source)
+    if not ret:
+        print("UNABLE TO PARSE TABLE at {}/{}".format(word, lang))
+        return
+    data_extend(ctx, data, "forms", ret)
+
+
+def handle_html_table(config, ctx, word, lang, data, tree, titles, source):
+    """Parses a table from parsed HTML format into rows and columns of
+    InflCell objects and then calls handle_generic_table() to parse it into
+    forms.  This adds the forms into ``data``."""
+    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(ctx, Wtp)
+    assert isinstance(word, str)
+    assert isinstance(lang, str)
+    assert isinstance(data, dict)
+    assert isinstance(tree, WikiNode)
+    assert isinstance(tree.kind, NodeKind.HTML) and tree.args == "table"
+    assert isinstance(titles, list)
+    for x in titles:
+        assert isinstance(x, str)
+    assert isinstance(source, str)
+
+    print("HTML TABLES NOT YET IMPLEMENTED at {}/{}"
+          .format(word, lang))
+
+
+def parse_inflection_section(config, ctx, data, word, lang, section, tree):
+    """Parses an inflection section on a page.  ``data`` should be the
+    data for a part-of-speech, and inflections will be added to it."""
+    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(ctx, Wtp)
+    assert isinstance(data, dict)
+    assert isinstance(word, str)
+    assert isinstance(section, str)
+    assert isinstance(tree, WikiNode)
+    source = section
+
+    # print("PARSE_INFLECTION_SECTION {}/{}/{}".format(word, lang, section))
+
+    def recurse_navframe(node, titles):
+        titleparts = []
+
+        def recurse1(node, in_navhead):
+            if isinstance(node, (list, tuple)):
+                for x in node:
+                    recurse1(x, in_navhead)
+                return
+            if isinstance(node, str):
+                titleparts.append(node)
+                return
+            if not isinstance(node, WikiNode):
+                print("UNHANDLED IN NAVFRAME:", repr(node))
+                return
+            kind = node.kind
+            if kind == NodeKind.HTML:
+                classes = node.attrs.get("class", "").split()
+                if "NavToggle" in classes:
+                    return
+                if "NavHead" in classes:
+                    # print("NAVHEAD:", node)
+                    for x in node.children:
+                        recurse1(x, True)
+                    return
+                if "NavContent" in classes:
+                    title = "".join(titleparts).strip()
+                    title = html.unescape(title)
+                    title = title.strip()
+                    new_titles = list(titles)
+                    if not re.match(r"(Note:|Notes:)", title):
+                        new_titles.append(title)
+                    recurse(node, new_titles)
+                    return
+            elif kind == NodeKind.LINK:
+                if len(node.args) > 1:
+                    for x in node.args[1:]:
+                        recurse1(x, in_navhead)
+                else:
+                    recurse1(node.args[0], in_navhead)
+            for x in node.children:
+                recurse1(x, in_navhead)
+        recurse1(node, False)
+
+    def recurse(node, titles):
+        if not isinstance(node, WikiNode):
+            return
+        kind = node.kind
+        if kind == NodeKind.TABLE:
+            handle_wikitext_table(config, ctx, word, lang, data, node, titles,
+                                  source)
+            return
+        elif kind == NodeKind.HTML and node.args == "table":
+            handle_html_table(config, ctx, word, lang, data, node, titles,
+                              source)
+            return
+        elif kind in (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
+                      NodeKind.LEVEL5, NodeKind.LEVEL6):
+            return  # Skip subsections
+        if (kind == NodeKind.HTML and node.args == "div" and
+            "NavFrame" in node.attrs.get("class", "").split()):
+            recurse_navframe(node, titles)
+        for x in node.children:
+            recurse(x, titles)
+
+    assert tree.kind == NodeKind.ROOT
+    for x in tree.children:
+        recurse(x, [])
+
+# XXX change to use ctx.debug
+# XXX check interdecir/Spanish - singular/plural issues

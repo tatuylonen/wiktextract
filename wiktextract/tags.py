@@ -2096,6 +2096,7 @@ uppercase_tags = set([
     "West Midlands",
     "West Muskerry",
     "West Pomeranian",
+    "West Saxon",
     "West",
     "Western Armenian",
     "Western Quebec",

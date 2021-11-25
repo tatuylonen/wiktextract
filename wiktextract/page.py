@@ -24,6 +24,7 @@ from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_qualifier,
     parse_pronunciation_tags,
     parse_alt_or_inflection_of, classify_desc)
+from wiktextract.inflection import parse_inflection_section
 
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
@@ -1167,9 +1168,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 tr = lines[1]
                                 lines = [lines[0]]
                         elif language != "English" and len(lines) > 2:
-                            for x in lines:
-                                print("  LINE: {}: {}"
-                                      .format(classify_desc(x), x))
+                            # for x in lines:
+                            #     print("  LINE: {}: {}"
+                            #           .format(classify_desc(x), x))
                             if re.match(r"^[#*]*:+\s*$", lines[1]):
                                 ref = lines[0]
                                 lines = lines[2:]
@@ -1978,7 +1979,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # if not have_pronunciations and not have_panel_templates:
         #     ctx.debug("no pronunciations found from pronunciation section")
 
-    def parse_inflection(node):
+    def parse_inflection(node, section):
         """Parses inflection data (declension, conjugation) from the given
         page.  This retrieves the actual inflection template
         parameters, which are very useful for applications that need
@@ -1986,6 +1987,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         forms."""
         # print("parse_inflection:", node)
         assert isinstance(node, WikiNode)
+        assert isinstance(section, str)
 
         def inflection_template_fn(name, ht):
             # print("decl_conj_template_fn", name, ht)
@@ -2001,19 +2003,19 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 args_ht = clean_template_args(config, ht)
                 dt = {"name": name, "args": args_ht}
                 data_append(ctx, pos_data, "inflection_templates", dt)
-                return ""
 
-            # Expand other templates, as they might expand to inflection
-            # templates
             return None
 
-        # Clean the node.  This captures category links and calls the template
-        # function.
-        clean_node(config, ctx, etym_data, node,
-                   template_fn=inflection_template_fn)
-        # XXX try to parse either a WikiText table or a HTML table that
-        # contains the inflectional paradigm
-        # XXX should we try to capture it even if we got the template?
+        # Convert the subtree back to Wikitext, then expand all and parse,
+        # capturing templates in the process
+        text = ctx.node_to_wikitext(node.children)
+        tree = ctx.parse(text, expand_all=True,
+                         template_fn=inflection_template_fn)
+
+        # Parse inflection tables from the section.  The data is stored
+        # under "forms".
+        parse_inflection_section(config, ctx, pos_data,  word, language,
+                                 section, tree)
 
     def get_subpage_section(title, subtitle, seq):
         """Loads a subpage of the given page, and finds the section
@@ -2661,7 +2663,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # to capture?
                 pass
             elif t in inflection_section_titles:
-                parse_inflection(node)
+                parse_inflection(node, t)
             else:
                 lst = t.split()
                 while len(lst) > 1 and lst[-1].isdigit():
@@ -2933,6 +2935,8 @@ def parse_page(ctx, word, text, config):
                 data_extend(ctx, data, k, v)
             by_lang[data["lang"]].append(data)
 
+    # XXX this code is clearly out of date.  There is no longer a "conjugation"
+    # field.  FIX OR REMOVE.
     # Do some post-processing on the words.  For example, we may distribute
     # conjugation information to all the words.
     ret = []
