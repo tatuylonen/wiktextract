@@ -1067,6 +1067,14 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
         for desc in new_desc:
             # print("head desc: {!r}".format(desc))
 
+            # If it all consists of CJK characters, add it with the
+            # CJK tag.  This is used at least for some Vietnamese
+            # words (e.g., ba/Vietnamese)
+            if all(unicodedata.name(x).startswith("CJK ") for x in desc):
+                add_related(ctx, data, ["CJK"], [desc], text, True,
+                            is_reconstruction)
+                continue
+
             # Handle some special cases
             splitdesc = desc.split()
             if (len(splitdesc) >= 3 and splitdesc[1] == "superlative" and
@@ -1773,11 +1781,10 @@ def parse_alt_or_inflection_of1(ctx, gloss):
 
     # First try all formats ending with "of" (or other known last words that
     # can end a form description)
-    for m in reversed(list(m for m in
-                           re.finditer(r" (of|for|by|as|letter|number) ",
-                                       gloss))):
-        desc = gloss[:m.end()]
-        base = gloss[m.end():]
+    matches = list(re.finditer(r"\b(of|for|by|as|letter|number)\b", gloss))
+    for m in reversed(matches):
+        desc = gloss[:m.end()].strip()
+        base = gloss[m.end():].strip()
         tagsets, topics = decode_tags(desc, no_unknown_starts=True)
         if not topics and any(not (alt_infl_disallowed & set(ts))
                               for ts in tagsets):
@@ -1891,7 +1898,8 @@ def parse_alt_or_inflection_of1(ctx, gloss):
         if m and not ctx.page_exists(p):
             ctx.debug("suspicious alt_of/form_of with {!r}: {}"
                       .format(m.group(0), p))
-
+        if p.startswith("*") and len(p) >= 3 and p[1].isalpha():
+            p = p[1:]
         dt = { "word": p }
         if extra:
             dt["extra"] = extra

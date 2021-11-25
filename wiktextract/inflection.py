@@ -16,7 +16,7 @@ from wiktextract.datautils import data_extend
 # Column texts that are interpreted as an empty column.
 IGNORED_COLVALUES = set([
     "-", "־", "᠆", "‐", "‑", "‒", "–", "—", "―", "−",
-    "⸺", "⸻", "﹘", "﹣", "－"])
+    "⸺", "⸻", "﹘", "﹣", "－", "/"])
 
 # Words in title that cause addition of tags in all entries
 title_contains_global_map = {
@@ -89,12 +89,30 @@ title_elements_map = {
     "rt-rr gradation": "gradation-rt-rr",
     "ik-j gradation": "gradation-ik-j",
     "k-v gradation": "gradation-k-v",
-    "1st declension": "first-declension",
-    "2nd declension": "second-declension",
-    "3rd declension": "third-declension",
-    "4th declension": "fourth-declension",
-    "5th declension": "fifth-declension",
-    "second declension": "second-declension",
+    "1st declension": "declension-1",
+    "2nd declension": "declension-2",
+    "3rd declension": "declension-3",
+    "4th declension": "declension-4",
+    "5th declension": "declension-5",
+    "first declension": "declension-1",
+    "second declension": "declension-2",
+    "third declension": "declension-3",
+    "fourth declension": "declension-4",
+    "fifth declension": "declension-5",
+    "1st conjugation": "conjugation-1",
+    "2nd conjugation": "conjugation-2",
+    "3rd conjugation": "conjugation-3",
+    "4th conjugation": "conjugation-4",
+    "5th conjugation": "conjugation-5",
+    "6th conjugation": "conjugation-6",
+    "7th conjugation": "conjugation-7",
+    "first conjugation": "conjugation-1",
+    "second conjugation": "conjugation-2",
+    "third conjugation": "conjugation-3",
+    "fourth conjugation": "conjugation-4",
+    "fifth conjugation": "conjugation-5",
+    "sixth conjugation": "conjugation-6",
+    "seventh conjugation": "conjugation-7",
 }
 for k, v in title_elements_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -830,8 +848,10 @@ def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
                 if is_title:
                     while len(cols_headered) <= len(row):
                         cols_headered.append(False)
-                    cols_headered[len(row)] = \
-                        infl_map.get(celltext[1:].strip(), "") == "*"
+                    v = infl_map.get(celltext, "")
+                    if v == "*":
+                        cols_headered[len(row)] = True
+                        celltext = ""
                 # XXX extra tags, see "target" above
                 cell = InflCell(celltext, is_title, len(row), colspan, rowspan)
                 for i in range(0, colspan):

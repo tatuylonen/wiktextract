@@ -9,7 +9,8 @@ from .page import clean_value, parse_page
 from .parts_of_speech import PARTS_OF_SPEECH
 from .thesaurus import extract_thesaurus_data
 from .categories import extract_categories
-from .tags import sort_tags, valid_tags
+from .tags import sort_tags
+from .form_descriptions import valid_tags  # This file adds uppercase tags
 
 __all__ = (
     "WiktionaryConfig",

@@ -311,15 +311,15 @@ xlat_head_map = {
     "15 or 6": "class-15 class-6",  # leg/Tr/Rwanda-Rundi
     "14 or 6": "class-14 class-6",  # rainbow/Tr/Chichewa
     "9 or 9": "?class-9",  # XXX bedsheet/Tr/Sotho
-    "m1": "masculine first-declension",
-    "f2": "feminine second-declension",
-    "m2": "masculine second-declension",
-    "f3": "feminine third-declension",
-    "m3": "masculine third-declension",
-    "f4": "feminine fourth-declension",
-    "m4": "masculine fourth-declension",
-    "f5": "feminine fifth-declension",
-    "m5": "masculine fifth-declension",
+    "m1": "masculine declension-1",
+    "f2": "feminine declension-2",
+    "m2": "masculine declension-2",
+    "f3": "feminine declension-3",
+    "m3": "masculine declension-3",
+    "f4": "feminine declension-4",
+    "m4": "masculine declension-4",
+    "f5": "feminine declension-5",
+    "m5": "masculine declension-5",
     "[uncountable]": "uncountable",
     "is more colloquial": "colloquial",
     "(plural f)": "singular plural feminine",  # XXX chromicas/Galician
@@ -555,7 +555,6 @@ uppercase_tags = set([
     "Achaemenid",
     "Achterhooks",
     "Adana",
-    "Adlam",  # Script
     "Adyghe",
     "Aeolic",
     "Affectation",
@@ -583,7 +582,6 @@ uppercase_tags = set([
     "American continent",
     "Americanization",
     "Amerindish",
-    "Amharic",  # Script (at least for numberals)
     "Amianan",
     "Amira",
     "Amrum",
@@ -612,8 +610,6 @@ uppercase_tags = set([
     "Antilles",
     "Appalachia",
     "Appalachian",
-    "Arabic",  # Also script
-    "Arabic-Indic",  # Also script
     "Aragon",
     "Aragón",
     "Aramaic",
@@ -626,14 +622,12 @@ uppercase_tags = set([
     "Argentina",
     "Arkhangelsk",
     "Armenia",
-    "Armenian",  # Also script
     "Aromanian",
     "Aruba",
     "Asalem",
     "Asalemi",  # Variant of Talysh
     "Asante",
     "Ashkenazi Hebrew",
-    "Assamese",  # Also script (India)
     "Asturias",
     "Atlantic Canada",
     "Atlapexco",
@@ -661,7 +655,6 @@ uppercase_tags = set([
     "Baku",
     "Balearic",
     "Balkar",
-    "Balinese",  # Also script
     "Baltic-Finnic",
     "Bamu",
     "Banatiski Gurbet",
@@ -684,7 +677,6 @@ uppercase_tags = set([
     "Belarusian",
     "Belgium",
     "Belize",
-    "Bengali",  # Also script (India)
     "Bentheim",
     "Bering Straits",  # Inupiaq language
     "Berlin",
@@ -724,7 +716,6 @@ uppercase_tags = set([
     "Botswana",
     "Brabant",
     "Brabantian",
-    "Brahmi",  # Script (India, historic)
     "Brazil",
     "Brazilian",
     "Bressan",
@@ -746,7 +737,6 @@ uppercase_tags = set([
     "Bushehr",
     "Burdur",
     "Burgenland",
-    "Burmese",  # Script
     "Bygdeå",
     "Byzantine",
     "Bzyb",
@@ -790,8 +780,6 @@ uppercase_tags = set([
     "Central and Southern Italy",
     "Central",
     "Chakavian",
-    "Chakma",  # Script (India/Burma?)
-    "Cham",  # Script (Austronesian - Vietnam/Cambodia)
     "Changuena",
     "Chanthaburi",
     "Chazal",  # Jewish historical sages
@@ -801,7 +789,6 @@ uppercase_tags = set([
     "Child US",
     "Chile",
     "China",
-    "Chinese",  # Also script
     "Chinese Character classification",
     "Cholula",
     "Chongqing",
@@ -858,7 +845,6 @@ uppercase_tags = set([
     "Cusco",
     "Cypriot",
     "Cyprus",
-    "Cyrillic",  # Script
     "Czech",
     "Czech Republic",
     "Čakavian",
@@ -880,9 +866,7 @@ uppercase_tags = set([
     "Demotic",  # Greek/Ancient Greek
     "Denizli",
     "Derbyshire",
-    "Devanagari",  # Script
     "Devon",
-    "Déné syllabary",  # Script for Canadian Indian languages?
     "Digor",  # Variant of Ossetian
     "Dingzhou",
     "Dissenter",
@@ -923,7 +907,6 @@ uppercase_tags = set([
     "Ecuadorian Kichwa",
     "Edirne",
     "Egypt",
-    "Egyptian",  # Also script (hieroglyph)
     "Egyptian Arabic",  # Variant of Arabic
     "Egyptiot",
     "Ekagongo",
@@ -943,7 +926,6 @@ uppercase_tags = set([
     "Esperanto",
     "Estonian",
     "Estuary English",
-    "Ethiopic",  # Script
     "Europe",
     "European",
     "European Union",
@@ -1008,7 +990,6 @@ uppercase_tags = set([
     "Gheg",
     "Gherdëina",  # Variant of Ladin
     "Gipuzkoan",
-    "Glagolitic",  # Script
     "Glarus",
     "Goan Konkani",
     "Goerdie",
@@ -1017,12 +998,10 @@ uppercase_tags = set([
     "Gorj",
     "Goth",
     "Gothenburg",
-    "Gothic",  # Script
     "Gotland",
     "Goud Saraswat",
     "Grecian",
     "Greco-Bohairic",
-    "Greek",  # Also script
     "Greek Catholic",
     "Greek-type",  # Used to characterize some Latin words e.g. nematodes/Latin)
     "Gressoney",
@@ -1038,10 +1017,8 @@ uppercase_tags = set([
     "Guichicovi",
     "Guinea-Bissau",
     "Guinée Conakry",
-    "Gujarati",  # Script (Indo-Arabic)
     "Gulf Arabic",  # Variant of Arabic Language
     "Gurbet",
-    "Gurmukhi",  # Script (Indo-Arabic)
     "Gurvari",
     "Guyana",
     "Gwichya",
@@ -1057,7 +1034,6 @@ uppercase_tags = set([
     "Halligen",
     "Hamburg",
     "Hangaza",
-    "Hanifi Rohingya",  # Script (Perso-Arabic)
     "Hanoi",
     "Hanyuan",
     "Harak",
@@ -1067,7 +1043,6 @@ uppercase_tags = set([
     "Hawick",
     "Hán tự",
     "Hebei",  # China
-    "Hebrew",  # also Script (for Aramaic)
     "Hejazi Arabic",  # Variant of Arabic Language
     "Hejazi",
     "Helgoland",  # Variant of North Frisian
@@ -1079,7 +1054,6 @@ uppercase_tags = set([
     "Hiberno-English",
     "Hijazi",  # Variant of Arabic
     "Hijazi Arabic",  # Variant of Arabic
-    "Hindi",  # Script (at least for numberals, e.g. 80
     "Hinduism",
     "Hokkien",  # Chinese dialect/language
     "Honduras",
@@ -1158,7 +1132,6 @@ uppercase_tags = set([
     "Japan",
     "Japurá",
     "Jarawara",
-    "Javanese",  # Also script (Indonesia)
     "Jazan",
     "Jáva",
     "Jawi",
@@ -1181,7 +1154,6 @@ uppercase_tags = set([
     "Johore",
     "Judaism",
     "Judeo-French",
-    "Jurchen",  # Script?
     "Jyutping",
     "Kabul",
     "Kabuli",
@@ -1204,7 +1176,6 @@ uppercase_tags = set([
     "Kamviri",
     "Kanchanaburi",
     "Kandahar",
-    "Kannada",  # Script (at least for numerals, Hindu-Arabic?)
     "Kansai",
     "Kanto",
     "Kaohsiung Hokkien",  # Chinese dialect/language
@@ -1215,7 +1186,6 @@ uppercase_tags = set([
     "Kasuweri",
     "Katharevousa",
     "Kautokeino",
-    "Kayah Li",  # Script (Sino-Tibetan)
     "Kayseri",
     "Kayu Agung",
     "Kayu Agung Asli",
@@ -1233,11 +1203,9 @@ uppercase_tags = set([
     "Kerry",
     "Kfar Kama",  # Region in Israel
     "Khesht",
-    "Khmer",  # Script
     "Khojavend",
     "Khorasan",
     "Khoshar-Khota",
-    "Khudawadi",  # Script (Sindhi language, India)
     "Khun villages",
     "Kiambu",
     "Kidero",
@@ -1271,9 +1239,7 @@ uppercase_tags = set([
     "LÚ",
     "La Up village",
     "Lamphun Province",
-    "Lanna",  # Script (Thailand)
     "Languedoc",
-    "Lao",  # Script (Lao langage in Laos)
     "Late Bohairic",
     "Late Egyptian",
     "Late Latin",
@@ -1283,7 +1249,6 @@ uppercase_tags = set([
     "Late West Saxon",
     "Late",
     "Latin America",
-    "Latin",  # Script
     "Latinate",
     "Latinism",
     "Latvian",
@@ -1296,7 +1261,6 @@ uppercase_tags = set([
     "Leizhou Min",  # Chinese dialect/language
     "Lemosin",  # Dialect of Occitan
     "Lengadocian",  # Dialect of Occitan
-    "Lepcha",  # Script (Himalayas?)
     "Lesotho",
     "Levantine Arabic",  # Variant of Arabic language
     "Lewis",
@@ -1304,7 +1268,6 @@ uppercase_tags = set([
     "Lhasa",
     "Liechtenstein",
     "Limba Sarda Comuna",
-    "Limbu",  # Script (Limbu language in Central Himalayas)
     "Limburg",
     "Limburgish",
     "Limousin",
@@ -1399,7 +1362,6 @@ uppercase_tags = set([
     "Medieval Latin",
     "Medio-Late Egyptian",
     "Mehedinți",
-    "Meitei",  # Script (used with Meitei language in India)
     "Meixian",
     "Melanesian",
     "Melinting",
@@ -1452,7 +1414,6 @@ uppercase_tags = set([
     "Molet Mur",
     "Monegasque",
     "Mongo-Turkic",
-    "Mongolian",  # Also script
     "Montenegro",
     "Montreal",
     "Mooring",  # Variant of North Frisian
@@ -1476,9 +1437,7 @@ uppercase_tags = set([
     "Muslim",
     "Münsterland",
     "Münsterländisch",
-    "Myanmar",  # Also script
     "Mycenaean",  # Variant of Greek
-    "N'Ko",  # Script
     "Nahua",
     "Nahuatl",
     "Nakhchivan",
@@ -1505,7 +1464,6 @@ uppercase_tags = set([
     "New York City",
     "New York",
     "New Zealand",
-    "Newa",  # Script (Newa Spelling) ??? निर्वाचन/Newar/Noun
     "Newfoundland",
     "Nicaragua",
     "Niçard",
@@ -1584,8 +1542,6 @@ uppercase_tags = set([
     "Nyungkal",
     "Nürnbergisch",
     "Occitania",
-    "Odia",  # Script (at least for numerals)
-    "Ol Chiki",  # Script (Austroasiatic language in India)
     "Old Bohairic",
     "Old Chamorro",
     "Old Chinese",  # Historical variant of Chinese
@@ -1597,7 +1553,6 @@ uppercase_tags = set([
     "Old Lithuanian",
     "Old Norse",
     "Old Northern French",
-    "Old Persian",  # Script
     "Old Polabian",
     "Old Tagalog",
     "Oliti",
@@ -1607,15 +1562,12 @@ uppercase_tags = set([
     "Ooldea",
     "Orcadian",
     "Ordubad",
-    "Oriya",  # Script (Hindu-Arabic?)
     "Orkney",
     "Ormulum",
     "Oryol",
     "Oslo",
-    "Osmanya",  # Script (Somalia)
     "Ottomans",
     "Oxford",  # Variant of British English
-    "POJ",  # Latin alphabet based orthography for Min Nan (Chinese)
     "Pa Pae village",
     "Paderbornish",
     "Paderbornisch",
@@ -1647,7 +1599,6 @@ uppercase_tags = set([
     "Pennsylvania",
     "Periphrastic conjugations",
     "Perm",
-    "Persian",  # Also script
     "Persian Gulf",
     "Persianized",
     "Perso-Arabic",
@@ -1733,7 +1684,6 @@ uppercase_tags = set([
     "Ripuarian",
     "Ritsu",
     "Rogaland",
-    "Roman",  # Script
     "Roman Catholic",
     "Roman Empire",
     "Romanian",
@@ -1779,7 +1729,6 @@ uppercase_tags = set([
     "Sark",
     "Sauerland",
     "Sauerländisch",
-    "Saurashtra",  # Script (Surashtra language in Tamil Nadu)
     "Sauris",
     "Savoie",
     "Savoyard",
@@ -1806,7 +1755,6 @@ uppercase_tags = set([
     "Shanghai",
     "Shanghainese Wu",
     "Shapsug",
-    "Sharada",  # Script (India for Sanskrit and Kashmiri; historic)
     "Shavian",
     "Sheffield",
     "Sheng",
@@ -1833,7 +1781,6 @@ uppercase_tags = set([
     "Singapore English",
     "Singapore",
     "Singlish",
-    "Sinhalese",  # Script (Sri Lanka)
     "Sino-Korean",
     "Sino-Japanese",
     "Sisiame",
@@ -1925,14 +1872,12 @@ uppercase_tags = set([
     "Switzerland",
     "Syllabics",  # Used in word head with Plains Cree, e.g. tânisi/Plains Cree
     "Sylt",  # Variant of North Frisian
-    "Syriac",  # Also script (for Aramaic)
     "Syrian Hebrew",
     "São Paulo",
     "São Vicente",
     "TV",
     "Taberga",
     "Tabriz",
-    "Tai Tham",  # Script (Northern Thai?)
     "Tai Xuan Jing",
     "Taichung Hokkien",
     "Tainan",
@@ -1943,11 +1888,9 @@ uppercase_tags = set([
     "Taiwanese Mandarin",  # Chinese dialect/language
     "Taixuanjing tetragram",
     "Tajik",
-    "Takri",  # Script (mostly historic, used in Himachal Pradesh)
     "Talang Padang",
     "Tally-marks",
     "Talur",
-    "Tamil",  # Also script
     "Tang-e Eram",
     "Tankarana",
     "Tantoyuca",
@@ -1961,7 +1904,6 @@ uppercase_tags = set([
     "Teesside",
     "Tehran",
     "Tehrani",
-    "Telugu",  # Also script (India)
     "Telugu-Kui",
     "Temapache",
     "Tenerife",
@@ -1974,7 +1916,6 @@ uppercase_tags = set([
     "Texcoco",
     "Textbibel",
     "Tgdaya",
-    "Thai",  # Script
     "Thailand",
     "Thanh Chương",
     "The Hague",
@@ -1982,11 +1923,9 @@ uppercase_tags = set([
     "Thung Luang",
     "Thurgau",
     "Thuringian-Upper Saxon",
-    "Tibetan",  # Script
     "Tiberian Hebrew",
     "Timau",
     "Timor-Leste",
-    "Tirhuta",  # Script (historical: Maithili, Sanskrit)
     "Tlaxcala",
     "Tlyadal",
     "Toaripi",
@@ -2077,7 +2016,6 @@ uppercase_tags = set([
     "Wales",
     "Wallonia",
     "Wamwan",
-    "Warang Citi",  # Script (Ho language, East India)
     "Wardak",
     "Waterford",
     "Way Lima",
@@ -2160,7 +2098,6 @@ uppercase_tags = set([
     "Zezuru",
     "Zhangzhou",
     "Zhangzhou Hokkien",
-    "Zhuyin",  # Apparently a phonetic script used with Chinese/Mandarin
     "Zimbabwe",
     "Zinacantán",
     "Zurich",
@@ -2200,7 +2137,7 @@ xlat_tags_map = {
     "sg and pl": "singular plural",
     "m/f": "masculine feminine",
     "no pl": "no-plural",
-    "pl. only": "plural-only",
+    "pl. only": "plural-only plural",
     "pl ordinaux": "usually plural",
     "m.": "masculine",
     "male": "masculine",
@@ -2264,6 +2201,13 @@ xlat_tags_map = {
     "[US]": "US",
     "Americanisation": "Americanization",
     "Saint Ouen": "Saint-Ouën",
+    "Déné syllabary": "Déné-syllabary",
+    "Kayah Li": "Kayah-Li",
+    "Hanifi Rohingya": "Hanifi-Rohingya",
+    "Ol Chiki": "Ol-Chiki",
+    "Old Persian": "Old-Persian",
+    "Tai Tham": "Tai-Tham",
+    "Warang Citi": "Warang-Citi",
     "UK & Aus": "UK Australia",
     "Britian": "Britain",
     "coastal Min": "Coastal-Min",
@@ -2342,6 +2286,7 @@ xlat_tags_map = {
     "obligatorily possessed": "possessed",
     "obligatory possessive": "possessed",
     "obligatory possession": "possessed",
+    "obligational": "obligative",
     "indicated possession by preceding noun": "possessed",
     "unpossessed form": "unpossessed",
     "Dialectal": "dialectal",
@@ -2503,10 +2448,10 @@ xlat_tags_map = {
     "accusative plural and genitive plural": "accusative genitive plural",
     "hidden-n declension": "hidden-n",
     "declension pattern of": "declension-pattern-of",
-    "first/second-declension adjective":
-    "first-declension second-declension adjective",
-    "first/second-declension participle":
-    "first-declension second-declension participle",
+    "first/declension-2 adjective":
+    "declension-1 declension-2 adjective",
+    "first/declension-2 participle":
+    "declension-1 declension-2 participle",
     "class 9/10": "class-9 class-10",
     "class 5/6": "class-5 class-6",
     "class 3/4": "class-3 class-4",
@@ -2586,11 +2531,11 @@ xlat_tags_map = {
     "unpolite": "impolite",
     "fairly polite": "polite",
     "postnominal": "postpositional",
-    "first/second declension": "first-declension second-declension",
-    "first/second-declension suffix":
-    "first-declension second-declension suffix",
-    "first/second-declension numeral plural only":
-    "first-declension second-declension numeral plural-only",
+    "first/second declension": "declension-1 declension-2",
+    "first/declension-2 suffix":
+    "declension-1 declension-2 suffix",
+    "first/declension-2 numeral plural only":
+    "declension-1 declension-2 numeral plural-only plural",
     "with gendered nouns": "with-gendered-noun",
     "possessive (with noun)": "possessive with-noun",
     "possessive (without noun)": "possessive without-noun",
@@ -2615,6 +2560,7 @@ xlat_tags_map = {
     "genitive of personal pronoun": "genitive personal pronoun",
     "nominative and accusative definite singular":
     "nominative accusative definite singular",
+    "not generally used in the plural": "singular-normally",
     "+ genitive": "with-genitive",
     "+ genitive possessive suffix or elative":
     "with-genitive with-possessive-suffix with-elative",
@@ -2637,15 +2583,15 @@ xlat_tags_map = {
     "adverbial locative",
     "comparative -": "no-comparative",
     "superlative -": "no-superlative",
-    "1 declension": "first-declension",
-    "4 declension": "fourth-declension",
-    "5th declension": "fifth-declension",
+    "1 declension": "declension-1",
+    "4 declension": "declension-4",
+    "5th declension": "declension-5",
     "feminine ? declension": "feminine",
     "masculine ? declension": "masculine",
-    "1st declension": "first-declension",
-    "2nd declension": "second-declension",
-    "3rd declension": "third-declension",
-    "4th declension": "fourth-declension",
+    "1st declension": "declension-1",
+    "2nd declension": "declension-2",
+    "3rd declension": "declension-3",
+    "4th declension": "declension-4",
     "2nd-person": "second-person",
     "1st-person": "first-person",
     "3rd-person": "third-person",
@@ -2817,6 +2763,7 @@ xlat_tags_map = {
     "governs the dative": "with-dative",
     "takes dative": "with-dative",
     "takes dative case": "with-dative",
+    "zhuyin": "Zhuyin",
     "+ partitive": "with-partitive",
     "+ partitive + vastaan": "with-partitive",
     "+partitive": "with-partitive",
@@ -2985,7 +2932,7 @@ xlat_tags_map = {
     "learned": "literary",
     "archaic ortography": "archaic",
     "archaic elsewhere": "dialectal",
-    "in the plural": "plural-only",
+    "in the plural": "plural-only plural",
     "derog.": "derogatory",
     "derogative": "derogatory",
     "derogatively": "derogatory",
@@ -3163,6 +3110,7 @@ xlat_tags_map = {
     "Roman spelling": "Roman",
     "Perso-Arabic spelling": "Perso-Arabic",
     "Arabic/Persian": "Arabic Persian",
+    "Arabic spelling": "Arabic",
     "Urdu spelling": "Urdu",
     "Urdu spelling of": "Urdu alt-of",
     "eye dialect": "pronunciation-spelling",
@@ -3243,14 +3191,14 @@ xlat_tags_map = {
     "no comp.": "no-comparative",
     "no singulative": "no-singulative",
     "no plural": "no-plural",
-    "no singular": "plural-only",
+    "no singular": "plural-only plural",
     "not comparable": "not-comparable",
     "incomparable": "not-comparable",
     "not generally comparable": "usually not-comparable",
-    "plurale tantum": "plural-only",
-    "plurare tantum": "plural-only",
-    "pluralia tantum": "plural-only",
-    "singulare tantum": "singular-only",
+    "plurale tantum": "plural-only plural",
+    "plurare tantum": "plural-only plural",
+    "pluralia tantum": "plural-only plural",
+    "singulare tantum": "singular-only singular",
     "normally plural": "plural-normally",
     "used mostly in plural form": "plural-normally",
     "used mostly in the plural form": "plural-normally",
@@ -3340,18 +3288,18 @@ xlat_tags_map = {
     "pa class": "class-16",
     # "ku class": "class-17",  # XXX how to distinguish from class-15?
     "mu class": "class-18",
-    "first declension": "first-declension",
-    "second declension": "second-declension",
-    "third declension": "third-declension",
-    "fourth declension": "fourth-declension",
-    "fifth declension": "fifth-declension",
-    "first conjugation": "first-conjugation",
-    "second conjugation": "second-conjugation",
-    "third conjugation": "third-conjugation",
-    "fourth conjugation": "fourth-conjugation",
-    "fifth conjugation": "fifth-conjugation",
-    "sixth conjugation": "sixth-conjugation",
-    "seventh conjugation": "seventh-conjugation",
+    "first declension": "declension-1",
+    "second declension": "declension-2",
+    "third declension": "declension-3",
+    "fourth declension": "declension-4",
+    "fifth declension": "declension-5",
+    "first conjugation": "conjugation-1",
+    "second conjugation": "conjugation-2",
+    "third conjugation": "conjugation-3",
+    "fourth conjugation": "conjugation-4",
+    "fifth conjugation": "conjugation-5",
+    "sixth conjugation": "conjugation-6",
+    "seventh conjugation": "conjugation-7",
     "stress pattern 1": "stress-pattern-1",
     "stress pattern 2": "stress-pattern-2",
     "stress pattern 3": "stress-pattern-3",
@@ -3419,11 +3367,12 @@ xlat_tags_map = {
     "ngoko": "informal",
     "McCune–Reischauer": "McCune-Reischauer",  # Dash type differs
     "gender indeterminate": "gender-neutral",
-    "singular only": "singular singular-only",
+    "singular only": "singular singular-only singular",
     "not used in plural": "singular-only singular",
-    "singularonly": "singular-only",
+    "singularonly": "singular-only singular",
     "plural only": "plural plural-only",
     "imperative only": "imperative-only",
+    "Imperative form of of": "imperative form-of",  # ba/Middle English
     "in general sense": "broadly",
     "by extension": "broadly",
     "by metonymy": "metonymically",
@@ -4167,7 +4116,7 @@ form_of_tags = set([
     "ergative",
     "essive",
     "feminine",
-    "first-declension",
+    "declension-1",
     "first-person",
     "form-i",
     "form-ii",
@@ -4253,7 +4202,7 @@ form_of_tags = set([
     "quotative",
     "reflexive",
     "root",
-    "second-declension",
+    "declension-2",
     "second-person",
     "singular",
     "singulative",
@@ -4269,7 +4218,7 @@ form_of_tags = set([
     "superlative",
     "supine",
     "terminative",
-    "third-declension",
+    "declension-3",
     "third-person",
     "transgressive",
     "translative",
@@ -4331,7 +4280,8 @@ tag_categories = {
     # "participants",  # reflexive, reciprocal
     "register": 7,  # dialectal, formal, informal, slang, vulgar
     "dialect": 6,  # Typically uppercase tags specifying dialectal variations,
-                   # who standardized, or time period when used
+                   # region, language, who standardized, or time period
+                   # when used
     "class": 5,  # Inflection class (Bantu languages, Japanese, etc)
     "trigger": 4,  # Triggers something (e.g., mutation) in some context
     "gradation": 4,  # gradation or qualifier
@@ -4344,12 +4294,78 @@ tag_categories = {
     "with": 2,  # Co-occurs with something
     "order": 2,  # Word position or order
     "detail": 1,  # Provides some detail
+    "script": 1,  # Provides version of word in given script in forms;
+                  # sometimes also used as tag for language/country
     "misc": 0,  # lots of miscellaneous/uncategorized stuff
     "unknown": -1,  # Only used internally
 }
 
 # Set of all valid tags
 valid_tags = {
+    "Adlam": "script",  # Script
+    "Amharic": "script",  # Script (at least for numberals)
+    "Arabic": "script",  # Also script
+    "Arabic-Indic": "script",  # Also script
+    "Armenian": "script",  # Also script
+    "Assamese": "script",  # Also script (India)
+    "Balinese": "script",  # Also script
+    "Bengali": "script",  # Also script (India)
+    "Brahmi": "script",  # Script (India, historic)
+    "Burmese": "script",  # Script
+    "Chakma": "script",  # Script (India/Burma?)
+    "Cham": "script",  # Script (Austronesian - Vietnam/Cambodia)
+    "Chinese": "script",  # Also script
+    "CJK": "script",  # CJK variant, e.g., Vietnamese Chữ Hán / Chữ Nôm
+    "Cyrillic": "script",  # Script
+    "Devanagari": "script",  # Script
+    "Déné-syllabary": "script",  # Script for Canadian Indian languages?
+    "Egyptian": "script",  # Also script (hieroglyph)
+    "Ethiopic": "script",  # Script
+    "Glagolitic": "script",  # Script
+    "Gothic": "script",  # Script
+    "Greek": "script",  # Also script
+    "Gujarati": "script",  # Script (Indo-Arabic)
+    "Gurmukhi": "script",  # Script (Indo-Arabic)
+    "Hanifi-Rohingya": "script",  # Script (Perso-Arabic)
+    "Hebrew": "script",  # also Script (for Aramaic)
+    "Hindi": "script",  # Script (at least for numberals, e.g. 80
+    "Javanese": "script",  # Also script (Indonesia)
+    "Jurchen": "script",  # Script?
+    "Kannada": "script",  # Script (at least for numerals, Hindu-Arabic?)
+    "Kayah-Li": "script",  # Script (Sino-Tibetan)
+    "Khmer": "script",  # Script
+    "Khudawadi": "script",  # Script (Sindhi language, India)
+    "Lanna": "script",  # Script (Thailand)
+    "Lao": "script",  # Script (Lao langage in Laos)
+    "Latin": "script",  # Script
+    "Lepcha": "script",  # Script (Himalayas?)
+    "Limbu": "script",  # Script (Limbu language in Central Himalayas)
+    "Meitei": "script",  # Script (used with Meitei language in India)
+    "Mongolian": "script",  # Also script
+    "Myanmar": "script",  # Also script
+    "N'Ko": "script",  # Script
+    "Newa": "script",  # Script (Newa Spelling) ??? निर्वाचन/Newar/Noun
+    "Odia": "script",  # Script (at least for numerals)
+    "Ol-Chiki": "script",  # Script (Austroasiatic language in India)
+    "Old-Persian": "script",  # Script
+    "Oriya": "script",  # Script (Hindu-Arabic?)
+    "Osmanya": "script",  # Script (Somalia)
+    "POJ": "script",  # Latin alphabet based orthography for Min Nan (Chinese)
+    "Persian": "script",  # Also script
+    "Roman": "script",  # Script
+    "Saurashtra": "script",  # Script (Surashtra language in Tamil Nadu)
+    "Sharada": "script",  # Script (India for Sanskrit and Kashmiri; historic)
+    "Sinhalese": "script",  # Script (Sri Lanka)
+    "Syriac": "script",  # Also script (for Aramaic)
+    "Tai-Tham": "script",  # Script (Northern Thai?)
+    "Takri": "script",  # Script (mostly historic, used in Himachal Pradesh)
+    "Tamil": "script",  # Also script
+    "Telugu": "script",  # Also script (India)
+    "Thai": "script",  # Script
+    "Tibetan": "script",  # Script
+    "Tirhuta": "script",  # Script (historical: Maithili, Sanskrit)
+    "Warang-Citi": "script",  # Script (Ho language, East India)
+    "Zhuyin": "script",  # Mandarin phonetic symbols script
     "-i": "class",   # Japanese inflection type
     "-na": "class",  # Japanese inflection type
     "-nari": "class",  # Japanese inflection type
@@ -4500,6 +4516,13 @@ valid_tags = {
     "conditional-i": "mood",  # Verb mood (German)
     "conditional-ii": "mood",  # Verb mood (German)
     "conjugation-type": "detail",  # Used to indicate form really is conjugation class
+    "conjugation-1": "class",
+    "conjugation-2": "class",
+    "conjugation-3": "class",
+    "conjugation-4": "class",
+    "conjugation-5": "class",
+    "conjugation-6": "class",
+    "conjugation-7": "class",
     "conjugative": "misc",  # Verb form, e.g., উঘাল/Assamese
     "conjugative-of": "detail",  # Korean
     "conjunct": "misc",  # Verb form, e.g., gikaa/Ojibwe
@@ -4543,7 +4566,12 @@ valid_tags = {
     "counterfactual": "mood",  # XXX is this mood?  Where is this used?
     "dated": "misc",
     "dative": "case",  # Case in many languages
-    "debitive": "misc",  # need or obligation (XXX is this same as "obligational" ???)
+    "debitive": "misc",  # need or obligation (XXX is this same as "obligative" ???)
+    "declension-1": "class",
+    "declension-2": "class",
+    "declension-3": "class",
+    "declension-4": "class",
+    "declension-5": "class",
     "declension-pattern-of": "detail",
     "declinable": "misc",
     "defective": "misc",
@@ -4623,12 +4651,8 @@ valid_tags = {
     "familiar": "register",  # Formality/politeness degree of verbs etc
     "feminine": "gender",  # Grammatical gender, masculine, neuter, common, class-* etc.
     "feminine-usually": "gender",  # m/f, but usually feminine
-    "fifth-conjugation": "class",
-    "fifth-declension": "class",
     "figuratively": "misc",
     "finite-form": "misc",  # General category for finite verb forms
-    "first-conjugation": "class",
-    "first-declension": "class",
     "first-person": "person",
     "focalising": "mood",  # Verb form, e.g., ϯϩⲉ/Coptic
     "form-i": "misc",
@@ -4651,13 +4675,13 @@ valid_tags = {
     "form-xiii": "misc",
     "formal": "register",  # Formality/politeness degree of verbs etc
     "four-corner": "misc",
-    "fourth-conjugation": "class",
-    "fourth-declension": "class",
     "fourth-person": "person",
     "frequentative": "misc",
     "front-vowel": "misc",
     "fusioning": "misc",  # Greenlandic suffixes
     "future": "tense",  # Verb tense
+    "future-near": "tense",  # immediate future ba/Zulu
+    "future-remote": "tense",  # remote future ba/Zulu
     "future-i": "tense",  # Verb tense (German, e.g., vertippen)
     "future-ii": "tense",  # Verb tense (German)
     "gender-neutral": "gender",
@@ -4687,7 +4711,7 @@ valid_tags = {
     "grade-6-kanji": "misc",
     "habitual": "aspect",  # Verb aspect
     "hangeul": "misc",
-    "hanja": "misc",  # Han character script (Chinese characters) to write Korean
+    "hanja": "script",  # Han character script (Chinese characters) to write Korean
     "hard": "misc",  # sladek/Slovene
     "hellenism": "misc",
     "hidden-n": "class",   # Mongolian declension
@@ -4732,13 +4756,13 @@ valid_tags = {
     "inessive": "case",  # Case
     "inferential": "mood",  # Verb form (w/ aorist), e.g. -ekalmak/Turkish
     "infinitive": "non-finite",  # Verb form
-    "infinitive-da": "non-finite",  # Estonian
+    "infinitive-da": "non-finite",  # Estonian: indicative active negative imperfect / indicative active pluperfect / imperative active present (non-2sg) / active perfect (hypothetical action - general action)
     "infinitive-i": "non-finite",  # Finnish
     "infinitive-i-long": "non-finite",  # Finnish
     "infinitive-ii": "non-finite",  # Finnish
     "infinitive-iii": "non-finite",  # Finnish
     "infinitive-iv": "non-finite",  # Finnish
-    "infinitive-ma": "non-finite",  # Estonian
+    "infinitive-ma": "non-finite",  # Estonian: positive imperfect, quotative (has happened, is happening, or will happen)
     "infinitive-v": "non-finite",  # Finnish
     "infinitive-zu": "non-finite",  # German
     "infix": "pos",
@@ -4883,7 +4907,7 @@ valid_tags = {
     "now": "misc",
     "numeral": "pos",  # Numeral part-of-speech; also Assamese noun forms
     "numeral-tones": "misc",
-    "obligational": "mood",  # Verb form (e.g., Azerbaijani)
+    "obligative": "mood",  # Verb form (e.g., Azerbaijani)
     "object-concord": "misc",  # Verb form includes object-based inflection
     "object-first-person": "misc",  # Swahili object concords, Spanish combined-form
     "object-second-person": "misc",
@@ -4927,6 +4951,9 @@ valid_tags = {
     "partitive": "case",  # Case
     "passive": "voice",
     "past": "tense",
+    "past-future": "tense",  # Future in the past
+    "past-recent": "tense",
+    "past-remote": "tense",
     "patronymic": "misc",
     "paucal": "number",  # cf. singular, plural, dual, trial
     "pausal": "misc",  # Relates to prosody/pronunciation?
@@ -5025,8 +5052,6 @@ valid_tags = {
     "romanization": "misc",
     "root": "misc",
     "sarcastic": "misc",
-    "second-conjugation": "class",
-    "second-declension": "class",
     "second-person": "person",
     "secular": "misc",  # Contrast with Ecclesiastical, Tham, etc
     "semelfactive": "misc",
@@ -5034,7 +5059,6 @@ valid_tags = {
     "sentence-final": "misc",  # Korean verb forms (broad category)
     "sequence": "misc",
     "sequential": "misc",
-    "seventh-conjugation": "class",
     "shinjitai": "misc",  # Simplified Japanese Kanji (after 1947)
     "short-form": "misc",  # Verb forms, отъпоустити/Old Church Slavonic
     "si-perfective": "misc",
@@ -5043,10 +5067,10 @@ valid_tags = {
     "simultaneous": "misc",  # simultaneous converb, e.g. խածնել/Armenian
     "single-possession": "misc",
     "singular": "number",  # Number, cf. plural, dual, trial, paucal
+    "singular-normally": "misc",
     "singular-only": "misc",
     "singulative": "misc",  # Individuation of a collective or mass noun, like number
     "situative": "misc",  # expressing location of things in comparison with one another
-    "sixth-conjugation": "class",
     "slang": "register",
     "slur": "misc",
     "sociative": "case",  # Case?, e.g., மரம்/Tamil
@@ -5081,13 +5105,13 @@ valid_tags = {
     "sublative": "misc",
     "subordinate-clause": "misc",  # e.g., ϣⲗⲏⲗ/Coptic
     "subordinating": "misc",
-    "subscript": "misc",  # Variant of certain characters
+    "subscript": "script",  # Variant of certain characters
     "substantive": "misc",
     "subsuntive": "misc",  # Verbs in Guaraní
     "suffix": "pos",
     "superessive": "case",  # Case, e.g., Hungarian
     "superlative": "degree",  # Comparison of adjectives/adverbs
-    "superscript": "misc",  # Variant of certain characters
+    "superscript": "script",  # Variant of certain characters
     "supine": "misc",   # XXX is this term obsolete (= to-infinitive?)
     "suppletive": "misc",
     "surname": "misc",
@@ -5105,8 +5129,6 @@ valid_tags = {
     "term-of-address": "misc",
     "terminative": "aspect",  # Verb aspect/mood (e.g., Japanese); also case in Quechua?
     "thematic": "misc",
-    "third-conjugation": "class",
-    "third-declension": "class",
     "third-person": "person",
     "three-termination": "misc",
     "tone-1": "misc",
@@ -5168,7 +5190,7 @@ valid_tags = {
     "vernacular": "register",
     "verb": "pos",
     "verb-completement": "misc",  # Used in some Chinese words (merged verb+complement?)
-    "verb-form-da": "misc",  # Estonian da-form
+    "verb-form-da": "misc",  # Estonian da-form  XXX is this same as infinitive-da?
     "verb-form-des": "misc",  # Estonian des-form
     "verb-form-i": "misc",
     "verb-form-ii": "misc",
@@ -5310,7 +5332,6 @@ valid_tags = {
     "without-article": "misc",  # E.g., grüun/Cimbrian
     "without-noun": "misc",
     "word-tags": "detail",
-    "zhuyin": "misc",
     "æ-tensing": "misc",
     "има": "misc",  # Distinguishes certain verb forms in Macedonian
 }
