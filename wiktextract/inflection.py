@@ -832,7 +832,6 @@ def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
     # InflCell objects.  Parse the inflection table from that format.
     ret = handle_generic_table(ctx, word, lang, rows, titles, source)
     if not ret:
-        print("UNABLE TO PARSE TABLE at {}/{}".format(word, lang))
         return
     data_extend(ctx, data, "forms", ret)
 

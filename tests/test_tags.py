@@ -110,7 +110,7 @@ class TagTests(unittest.TestCase):
     def test_tags21(self):
         ret, topics = decode_tags("simple past and past participle")
         self.assertEqual(topics, [])
-        self.assertEqual(ret, [("participle", "past"), ("past", "simple")])
+        self.assertEqual(ret, [("participle", "past"), ("past",)])
 
     def test_tags22(self):
         ret, topics = decode_tags("colloquial Cockney Test, unknown1; "

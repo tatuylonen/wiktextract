@@ -98,7 +98,7 @@ class HeadTests(unittest.TestCase):
         parse_word_head(self.ctx, "noun", "testpage c", data, False)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
-        self.assertEqual(data, {"tags": ["common"]})
+        self.assertEqual(data, {"tags": ["common-gender"]})
 
     def test_head8(self):
         data = {}
@@ -262,7 +262,8 @@ class HeadTests(unittest.TestCase):
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"forms": [
             {"form": "foo", "tags": ["canonical", "feminine", "neuter"]},
-            {"form": "bar", "tags": ["canonical", "common", "masculine"]},
+            {"form": "bar", "tags": ["canonical", "common-gender",
+                                     "masculine"]},
         ]})
 
     def test_head22(self):

@@ -684,7 +684,7 @@ class LinkageTests(unittest.TestCase):
         # XXX "common" should distinguish gender vs. frequent meanings
         data = self.run_data("foo c", lang="Swedish")
         self.assertEqual(data, {"related": [
-            {"tags": ["common"], "word": "foo"}]})
+            {"tags": ["common-gender"], "word": "foo"}]})
 
     def test_gender5(self):
         # Numeric inflection classes should only be interpreted for certain

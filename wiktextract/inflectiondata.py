@@ -989,8 +989,8 @@ infl_map = {
     "f-s1": "",  # Icelandic ['blæðing', 'Sigríður', 'líkamsræktarstöð']
     "+": "positive",
     "Unknown": "unknown",
-    "Simple": "",
-    "simple": "",
+    "Simple": "simple",
+    "simple": "simple",
     "basic broken plural diptote": "irregular",
     "formal": "formal",
     "INDICATIVE (īstenības izteiksme)": "indicative",
@@ -1025,6 +1025,7 @@ infl_map = {
     "Conjunctive 2": "conjunctive",
     "Nonfinite form": "non-finite",
     "Perfect participle": "perfect participle",
+    "perfect progressive": "perfect progressive",
     "Recently Completive": "completive",
     "subject non-past participle": "subjective non-past participle",
     "subject past participle": "subjective past participle",

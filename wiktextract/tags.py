@@ -5032,6 +5032,7 @@ valid_tags = {
     "shinjitai": "misc",  # Simplified Japanese Kanji (after 1947)
     "short-form": "misc",  # Verb forms, отъпоустити/Old Church Slavonic
     "si-perfective": "misc",
+    "simple": "mood",  # XXX pending removal; test tell/English/Conjugation
     "simplified": "misc",
     "simultaneous": "misc",  # simultaneous converb, e.g. խածնել/Armenian
     "single-possession": "misc",
