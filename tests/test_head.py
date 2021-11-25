@@ -125,7 +125,7 @@ class HeadTests(unittest.TestCase):
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "inanimate",
-                                         "plural-only"]})
+                                         "plural", "plural-only"]})
 
     def test_head10(self):
         data = {}
@@ -135,7 +135,7 @@ class HeadTests(unittest.TestCase):
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "inanimate",
-                                         "plural-only"],
+                                         "plural", "plural-only"],
                                 "forms": [{"tags": ["stem"],
                                            "form": "testpag"}]})
 
@@ -148,7 +148,8 @@ class HeadTests(unittest.TestCase):
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         print(data)
-        self.assertEqual(data, {"tags": ["feminine", "inanimate", "plural-only",
+        self.assertEqual(data, {"tags": ["feminine", "inanimate",
+                                         "plural", "plural-only",
                                          "with-dative"],
                                 "forms": [{"tags": ["stem"],
                                            "form": "testpag"}]})
@@ -221,8 +222,8 @@ class HeadTests(unittest.TestCase):
                         data, False)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
-        self.assertEqual(data, {"tags": ["feminine", "masculine",
-                                         "third-declension"],
+        self.assertEqual(data, {"tags": ["declension-3", "feminine",
+                                         "masculine"],
                                 "forms": [
                                     {"tags": ["genitive"],
                                      "form": "indicis"},

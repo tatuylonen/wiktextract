@@ -1781,7 +1781,7 @@ def parse_alt_or_inflection_of1(ctx, gloss):
 
     # First try all formats ending with "of" (or other known last words that
     # can end a form description)
-    matches = list(re.finditer(r"\b(of|for|by|as|letter|number)\b", gloss))
+    matches = list(re.finditer(r"\b(of|for|by|as|letter|number) ", gloss))
     for m in reversed(matches):
         desc = gloss[:m.end()].strip()
         base = gloss[m.end():].strip()
