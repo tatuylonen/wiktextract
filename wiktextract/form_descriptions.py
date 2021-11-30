@@ -995,7 +995,16 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
 
     # Process the head alternatives
     canonicals = []
+    mode = None
     for alt_i, alt in enumerate(alts):
+        alt = alt.strip()
+        if alt.startswith("compound form:"):
+            mode = "compound-form"
+            alt = alt[14:].strip()
+        if mode == "compound-form":
+            add_related(ctx, data, ["in-compounds"], [alt], text,
+                        True, is_reconstruction)
+            continue
         baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
         # For non-first parts, see if it an be treated as tags-only
         if alt_i > 0:
@@ -1066,6 +1075,10 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
         prev_tags = None
         for desc in new_desc:
             # print("head desc: {!r}".format(desc))
+
+            if desc == "e.g.":
+                # Assume remaining values are examples cf. gaan/Navajo
+                break
 
             # If it all consists of CJK characters, add it with the
             # CJK tag.  This is used at least for some Vietnamese
