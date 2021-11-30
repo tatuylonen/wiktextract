@@ -671,7 +671,6 @@ uppercase_tags = set([
     "Batangas",
     "Bavaria",
     "Bavarian",
-    "Baybayin",
     "Beijing",
     "Belalau",
     "Belarusian",
@@ -1134,7 +1133,6 @@ uppercase_tags = set([
     "Jarawara",
     "Jazan",
     "Jáva",
-    "Jawi",
     "Jehovah's Witnesses",
     "Jèrriais",
     "Jersey",
@@ -1692,7 +1690,6 @@ uppercase_tags = set([
     "Rubī-Safaia",
     "Ruhrgebiet",
     "Rumantsch Grischun",
-    "Rumi",
     "Rumy",
     "Rundi",
     "Rungu",
@@ -1750,7 +1747,6 @@ uppercase_tags = set([
     "Sesivi",
     "Sette Comuni",
     "Seville",
-    "Shahmukhi",
     "Shandong",
     "Shanghai",
     "Shanghainese Wu",
@@ -3113,6 +3109,22 @@ xlat_tags_map = {
     "Arabic spelling": "Arabic",
     "Urdu spelling": "Urdu",
     "Urdu spelling of": "Urdu alt-of",
+    "Hindi spelling": "Hindi",
+    "Jawi spelling": "Jawi",
+    "Mongolian spelling": "Mongolian",
+    "Shahmukhi spelling": "Shahmukhi",
+    "Rumi spelling": "Rumi",
+    "Gurmukhi spelling": "Gurmukhi",
+    "Hebrew spelling": "Hebrew",
+    "Baybayin spelling": "Baybayin",
+    "Tai-Tham spelling": "Tai-Tham",
+    "Greek spelling": "Greek",
+    "Thai spelling": "Thai",
+    "Newa spelling": "Newa",
+    "Devanagari spelling": "Devanagari",
+    "Javanese spelling": "Javanese",
+    "Gujarati spelling": "Gujarati",
+    "Cham spelling": "Cham",
     "eye dialect": "pronunciation-spelling",
     "feminist or eye dialect": "pronunciation-spelling",
     "enclitic and proclitic": "enclitic proclitic",
@@ -3536,6 +3548,7 @@ xlat_tags_map = {
     "Transliteration": "transliteration",
     "Cyrillic spelling of": "alt-of Cyrillic",
     "Cyrillic spelling": "Cyrillic",
+    "Latin spelling": "Latin",
     "British standard spellingh of": "alt-of UK standard",
     "British and Canada standard spelling of":
     "alt-of UK Canada standard",
@@ -4309,6 +4322,7 @@ valid_tags = {
     "Armenian": "script",  # Also script
     "Assamese": "script",  # Also script (India)
     "Balinese": "script",  # Also script
+    "Baybayin": "script",  # Also script
     "Bengali": "script",  # Also script (India)
     "Brahmi": "script",  # Script (India, historic)
     "Burmese": "script",  # Script
@@ -4330,6 +4344,7 @@ valid_tags = {
     "Hebrew": "script",  # also Script (for Aramaic)
     "Hindi": "script",  # Script (at least for numberals, e.g. 80
     "Javanese": "script",  # Also script (Indonesia)
+    "Jawi": "script",  # Script (Malay and several other languages)
     "Jurchen": "script",  # Script?
     "Kannada": "script",  # Script (at least for numerals, Hindu-Arabic?)
     "Kayah-Li": "script",  # Script (Sino-Tibetan)
@@ -4353,7 +4368,9 @@ valid_tags = {
     "POJ": "script",  # Latin alphabet based orthography for Min Nan (Chinese)
     "Persian": "script",  # Also script
     "Roman": "script",  # Script
+    "Rumi": "script",  # Script (modern Malay/Indonesian)
     "Saurashtra": "script",  # Script (Surashtra language in Tamil Nadu)
+    "Shahmukhi": "script",  # Script (used by Punjabi Muslims for Punjabi lang)
     "Sharada": "script",  # Script (India for Sanskrit and Kashmiri; historic)
     "Sinhalese": "script",  # Script (Sri Lanka)
     "Syriac": "script",  # Also script (for Aramaic)
