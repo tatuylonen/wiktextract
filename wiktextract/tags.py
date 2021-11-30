@@ -1069,7 +1069,6 @@ uppercase_tags = set([
     "Hyōgai",  # Uncommon type of Kanji character
     "Hà Nội",  # Vietnamese dialect
     "Hà Tĩnh",  # Vietnamese dialect
-    "Hán Nôm",  # Vietnamese latin spelling with diacritics?
     "Hössjö",
     "Hồ Chí Minh City",
     "I Ching hexagram",
@@ -1152,7 +1151,6 @@ uppercase_tags = set([
     "Johore",
     "Judaism",
     "Judeo-French",
-    "Jyutping",
     "Kabul",
     "Kabuli",
     "Kadaru",
@@ -1348,7 +1346,6 @@ uppercase_tags = set([
     "Mauritania",
     "Mawakwa",
     "Mayo",
-    "McCune-Reischauer",
     "Mecayapan",  # Variant of Nathuatl
     "Mecklenburg-Vorpommern",
     "Mecklenburgisch",
@@ -1700,7 +1697,6 @@ uppercase_tags = set([
     "Rwanda-Rundi",
     "Rālik",
     "Rāṛha",
-    "Rōmaji",
     "SK Standard",
     "SW England",
     "Saarve",
@@ -2061,7 +2057,6 @@ uppercase_tags = set([
     "Yagaria",
     "Yahualica",
     "Yajurveda chanting",
-    "Yale",
     "Yaman",
     "Yanbian",
     "Yanhe",
@@ -3536,6 +3531,7 @@ xlat_tags_map = {
     "Hanja form of": "alt-of hanja",
     "Hanja form? of": "alt-of hanja",
     "Hanja": "hanja",
+    "Hán Nôm": "Hán-Nôm",
     "Hán tự form of": "alt-of Hán-tự",
     "Newa Spelling": "Newa",
     "Glagolitic spelling of": "alt-of Glagolitic",
@@ -4385,6 +4381,11 @@ valid_tags = {
     "Tirhuta": "script",  # Script (historical: Maithili, Sanskrit)
     "Warang-Citi": "script",  # Script (Ho language, East India)
     "Zhuyin": "script",  # Mandarin phonetic symbols script
+    "Hán-Nôm": "detail",  # Vietnamese latin spelling with diacritics?
+    "Jyutping": "detail",  # used in Cantonese
+    "McCune-Reischauer": "detail",  # Used in Korean
+    "Rōmaji": "detail",  # Used in Okinawan, Japanese? for Latin characters
+    "Yale": "detail",   # used in Cantonese
     "-i": "class",   # Japanese inflection type
     "-na": "class",  # Japanese inflection type
     "-nari": "class",  # Japanese inflection type
@@ -4466,7 +4467,7 @@ valid_tags = {
     "broadly": "misc",
     "būdinys": "misc",
     "calque": "misc",
-    "cangjie-input": "misc",
+    "cangjie-input": "detail",  # Used in Chinese characters
     "canonical": "misc",  # Used to mark the canonical word from from the head tag
     "capitalized": "misc",
     "capitalized": "misc",
@@ -4525,7 +4526,7 @@ valid_tags = {
     "comparable": "category",
     "comparative": "degree",  # Comparison of adjectives/adverbs
     "completive": "aspect",
-    "composition": "misc",
+    "composition": "detail",  # Used in Chinese characters
     "compound": "misc",  # Can indicate verb forms formed with auxiliary
     "compound-of": "misc",
     "concessive": "mood",  # Verb form
@@ -4693,7 +4694,7 @@ valid_tags = {
     "form-xii": "misc",
     "form-xiii": "misc",
     "formal": "register",  # Formality/politeness degree of verbs etc
-    "four-corner": "misc",
+    "four-corner": "detail",  # Used in Chinese characters
     "fourth-person": "person",
     "frequentative": "misc",
     "front-vowel": "misc",
@@ -4729,12 +4730,12 @@ valid_tags = {
     "grade-5-kanji": "misc",
     "grade-6-kanji": "misc",
     "habitual": "aspect",  # Verb aspect
-    "hangeul": "misc",
+    "hangeul": "script",  # Korean script
     "hanja": "script",  # Han character script (Chinese characters) to write Korean
     "hard": "misc",  # sladek/Slovene
     "hellenism": "misc",
     "hidden-n": "class",   # Mongolian declension
-    "hiragana": "misc",  # Japanese syllabic spelling for native words
+    "hiragana": "script",  # Japanese syllabic spelling for native words
     "historic": "mood",  # Grammatical tense/mood for retelling past events
     "historical": "misc",  # Relating to history
     "honorific": "register",  # Formality/politeness degree of verbs etc
@@ -4811,10 +4812,10 @@ valid_tags = {
     "jargon": "register",
     "jussive": "mood",  # Verb mood for orders, commanding, exhorting (subjunctively)
     "kanji": "misc",  # Used in word head for some Japanese symbols
-    "katakana": "misc",  # Japanese syllabic spelling for foreign words
+    "katakana": "script",  # Japanese syllabic spelling for foreign words
     "krama": "register",  # Javanese register (polite form)
     "krama-ngoko": "register",  # Javanese register (neutral, without polite)
-    "kyūjitai": "misc",  # Traditional Japanese Kanji (before 1947)
+    "kyūjitai": "detail",  # Traditional Japanese Kanji (before 1947)
     "l-participle": "non-finite",  # dati/Proto-Slavic
     "lative": "case",  # Case, e.g., тіл/Khakas
     "lenition": "misc",
@@ -5045,8 +5046,8 @@ valid_tags = {
     "quadral": "misc",
     "quantified": "misc",  # bat/Jamaican Creole (head form)
     "quotative": "mood",  # Verb mood (marks quoted speech keeping orig person/tense)
-    "radical": "detail",
-    "radical+strokes": "detail",
+    "radical": "detail",  # Used in Chinese characters
+    "radical+strokes": "detail",  # Used in Chinese characters
     "rare": "misc",
     "realis": "mood",  # Verb form, e.g., たたかう/Japanese
     "reason": "mood",  # Verb form, e.g., উঘাল/Assamese
@@ -5068,7 +5069,7 @@ valid_tags = {
     "revised": "misc",  # Used in many Korean words, is this same as revised-jeon?
     "revised-jeon": "misc",
     "rhetoric": "misc",
-    "romanization": "misc",
+    "romanization": "detail",  # Latin character version of other script
     "root": "misc",
     "sarcastic": "misc",
     "second-person": "person",

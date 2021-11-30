@@ -204,6 +204,7 @@ def clean_header(word, col):
     col = col.strip()
     if re.search(r"^(There are |"
                  r"\*|"
+                 r"see |"
                  r"Use |"
                  r"use the |"
                  r"Only used |"
@@ -592,6 +593,10 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
             if col in IGNORED_COLVALUES:
                 continue
 
+            # These values are ignored, at least form now
+            if col.startswith("# "):
+                continue
+
             if j == 0 and (not col_has_text or not col_has_text[0]):
                 continue  # Skip text at top left, as in Icelandic, Faroese
             # if col0_hdrspan is not None:
@@ -844,6 +849,8 @@ def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
                     cols_headered[len(row)]):
                     # Whole column has title suggesting they are headers
                     # (e.g. "Case")
+                    is_title = True
+                if re.match(r"Conjugation of |Declension of )", celltext):
                     is_title = True
                 if is_title:
                     while len(cols_headered) <= len(row):
