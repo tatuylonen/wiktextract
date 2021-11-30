@@ -111,7 +111,7 @@ object).  The bigger downloads are also available in compressed form.
 Some people have asked for the full data as a single JSON object
 (instead of the current one JSON object per line format).  I've
 decided to keep it as a JSON object per line, because loading all the
-data into Python requires 40-50 GB of memory.  It is much easier to
+data into Python requires about 120 GB of memory.  It is much easier to
 process the data line-by-line, especially if you are only interested
 in a part of the information.  You can easily read the files using the
 following code:
