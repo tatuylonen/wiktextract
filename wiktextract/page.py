@@ -952,7 +952,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
         """Starts collecting data for a new word sense.  This returns True
         if a sense was added."""
         nonlocal sense_data
-        if not sense_data:
+        tags = sense_data.get("tags", ())
+        if (not sense_data.get("glosses") and
+            "translation-hub" not in tags and
+            "no-senses" not in tags):
             return False
         pos_datas.append(sense_data)
         sense_data = {}
@@ -1030,6 +1033,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 data_append(ctx, sense_base, "senseid",
                             langid + ":" + arg)
             if name in sense_linkage_templates:
+                print("SENSE_TEMPLATE_FN")
                 parse_sense_linkage(config, ctx, sense_base, name, ht)
                 return ""
             if name == "†" or name == "zh-obsolete":
@@ -1050,7 +1054,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         rawgloss = clean_node(config, ctx, sense_base, lst,
                               template_fn=sense_template_fn)
-        # print("parse_sense rawgloss:", repr(rawgloss))
+        # print("PARSE_SENSE RAWGLOSS:", repr(rawgloss))
 
         # Extract examples that are in sublists
         examples = []
@@ -1077,18 +1081,22 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             if re.search(r"(^|[-/\s]){}($|\b|[0-9])"
                                          .format(prefix),
                                          name):
-                                f = t if isinstance(t, str) else field
-                                i = t if isinstance(t, int) else 2
-                                while True:
-                                    v = ht.get(i, None)
-                                    if v is None:
-                                        break
-                                    v = clean_node(config, ctx, None, v)
-                                    parse_linkage_item_text(ctx, word,
-                                                            sense_data, f, v,
-                                                            None, "", [],
-                                                            is_reconstruction)
-                                    i += 1
+                                # XXX This causes duplicate linkages in e.g.
+                                # ladata/Finnish.  What exactly was this for
+                                # in the first place?
+                                # f = t if isinstance(t, str) else field
+                                # i = t if isinstance(t, int) else 2
+                                # while True:
+                                #     v = ht.get(i, None)
+                                #     if v is None:
+                                #         break
+                                #     v = clean_node(config, ctx, None, v)
+                                #     print("EXAMPLE LINKAGE")
+                                #     parse_linkage_item_text(ctx, word,
+                                #                             sense_data, f, v,
+                                #                             None, "", [],
+                                #                             is_reconstruction)
+                                #     i += 1
                                 return ""
                         return None
 
@@ -1435,6 +1443,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         if push_sense():
             added = True
+            # print("PARSE_SENSE DONE:", pos_datas[-1])
         return added
 
     def head_post_template_fn(name, ht, expansion):
