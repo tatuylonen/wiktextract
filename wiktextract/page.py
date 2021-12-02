@@ -1116,12 +1116,20 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                          x))
                     tr = ""
                     ref = ""
+                    roman = ""
                     if len(lines) == 1 and language != "English":
                         parts = re.split(r"\s*[―—]\s*", lines[0])
                         if (len(parts) == 2 and
                             classify_desc(parts[1]) == "english"):
                             lines = [parts[0].strip()]
                             tr = parts[1].strip()
+                        elif (len(parts) == 3 and
+                              classify_desc(parts[1]) in ("romanization",
+                                                          "english") and
+                              classify_desc(parts[2]) == "english"):
+                            lines = [parts[0].strip()]
+                            roman = parts[1].strip()
+                            tr = parts[2].strip()
                         else:
                             parts = re.split(r"\s+-\s+", lines[0])
                             if (len(parts) == 2 and
@@ -1192,6 +1200,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 tr = "\n".join(lines[i:])
                                 lines = lines[:i]
 
+                    roman = re.sub(r"[ \t\r]+", " ", roman).strip()
+                    roman = re.sub(r"\[\s*…\s*\]", "[…]", roman)
                     tr = re.sub(r"^[#*:]+\s*", "", tr)
                     tr = re.sub(r"[ \t\r]+", " ", tr).strip()
                     tr = re.sub(r"\[\s*…\s*\]", "[…]", tr)
@@ -1246,6 +1256,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             dt["type"] = usex_type
                         if note:
                             dt["note"] = note
+                        if roman:
+                            dt["roman"] = roman
                         examples.append(dt)
 
         # Generate no gloss for translation hub pages, but add the
