@@ -187,3 +187,14 @@ def split_slashes(ctx, text):
                 ret.append(" ".join(ws))
 
     return ret
+
+
+def freeze(x):
+    if isinstance(x, dict):
+        return frozenset((k, freeze(v)) for k, v in x.items())
+    if isinstance(x, set):
+        return frozenset(x)
+    if isinstance(x, (list, tuple)):
+        return tuple(freeze(v) for v in x)
+    # XXX objects not current handled
+    return x

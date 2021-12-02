@@ -1409,6 +1409,7 @@ infl_map = {
     "Direct": "direct",
     "Soft": "soft",
     "Hard": "hard",
+    "Nasalization": "nasal-mutation",
     "soft": {
         "if": "mutation",
         "then": "soft-mutation",

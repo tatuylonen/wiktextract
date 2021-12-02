@@ -11,7 +11,8 @@ from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
 from wiktextract.config import WiktionaryConfig
 from wiktextract.tags import valid_tags
 from wiktextract.inflectiondata import infl_map, infl_start_map, infl_start_re
-from wiktextract.datautils import data_extend
+from wiktextract.datautils import data_append, data_extend, freeze
+from wiktextract.form_descriptions import classify_desc
 
 # Column texts that are interpreted as an empty column.
 IGNORED_COLVALUES = set([
@@ -32,6 +33,7 @@ title_contains_global_map = {
     "mutation": "mutation",
     "definite article": "definite",
     "indefinite article": "indefinite",
+    "pre-reform": "dated",
 }
 for k, v in title_contains_global_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -125,6 +127,7 @@ title_elemstart_map = {
     "auxiliary": "auxiliary",
     "Kotus type": "class",
     "class": "class",
+    "short class": "class",
     "type": "class",
     "accent paradigm": "accent-paradigm",
 }
@@ -135,6 +138,16 @@ for k, v in title_elemstart_map.items():
 title_elemstart_re = re.compile(
     r"^({}) "
     .format("|".join(re.escape(x) for x in title_elemstart_map.keys())))
+
+
+# List of [set(lang), set(genders)] for languages from which we may want
+# to remove gender tags from forms that list them all.
+lang_genders = [
+    [set([
+        "Russian",
+    ]),
+     set(["masculine", "feminine", "neuter"])],
+]
 
 
 class InflCell(object):
@@ -169,18 +182,21 @@ class HdrSpan(object):
     __slots__ = (
         "start",
         "colspan",
+        "rownum",      # Row number where this occurred
         "tagsets",  # list of sets
         "used",  # At least one text cell after this
         "text",  # For debugging
     )
-    def __init__(self, start, colspan, tagsets, text):
+    def __init__(self, start, colspan, rownum, tagsets, text):
         assert isinstance(start, int) and start >= 0
         assert isinstance(colspan, int) and colspan >= 1
+        assert isinstance(rownum, int)
         assert isinstance(tagsets, set)
         for x in tagsets:
             assert isinstance(x, tuple)
         self.start = start
         self.colspan = colspan
+        self.rownum = rownum
         self.tagsets = list(set(tags) for tags in tagsets)
         self.used = False
         self.text = text
@@ -263,7 +279,7 @@ def parse_title(title, source):
     title = html.unescape(title)
     title = re.sub(r"(?i)<[^>]*>", "", title).strip()
     title = re.sub(r"\s+", " ", title)
-    # print("PARSING TITLE:", title)
+    # print("PARSE_TITLE:", title)
     global_tags = []
     word_tags = []
     extra_forms = []
@@ -406,27 +422,67 @@ def compute_coltags(hdrspans, start, colspan, mark_used):
     for hdrspan in reversed(hdrspans):
         if done:
             break
+        tagsets = hdrspan.tagsets
         if (hdrspan.start > start or
             hdrspan.start + hdrspan.colspan < start + colspan):
-            continue
-        # XXX this breaks persons in soutenir/French/Verb
-        # if any(hdrspan.start > x[0] or
-        #        hdrspan.start + hdrspan.colspan < x[0] + x[1]
-        #        for x in used):
-        #     continue
+            # Special case: we sometimes have cells covering two out of
+            # three genders.  Also, sometimes we have multiple genders for
+            # plural and a form for several; we must then take the common tags.
+            if (hdrspan.start >= start and
+                hdrspan.start + hdrspan.colspan <= start + colspan and
+                any(x is not hdrspan and x.rownum == hdrspan.rownum and
+                    x.start >= start and
+                    x.start + x.colspan <= start + colspan
+                    for x in hdrspans) and
+                all(x.rownum != hdrspan.rownum or
+                    x.start < hdrspan.start or
+                    x.start + x.colspan > hdrspan.start + hdrspan.colspan or
+                    all(valid_tags[t] in ("number", "gender")
+                        for ts in x.tagsets
+                        for t in ts)
+                    for x in hdrspans)):
+                # Multiple columns apply to the current cell, only
+                # gender/number tags present
+                tagsets = hdrspan.tagsets
+                for x in hdrspans:
+                    if (x is hdrspan or x.rownum != hdrspan.rownum or
+                        x.start < start or
+                        x.start + x.colspan >= start + colspan):
+                        continue
+                    new_tagsets = []
+                    for tags1 in tagsets:
+                        for tags2 in x.tagsets:
+                            num_tags1 = set(t for t in tags1
+                                            if valid_tags[t] == "number")
+                            num_tags2 = set(t for t in tags2
+                                            if valid_tags[t] == "number")
+                            gender_tags1 = set(t for t in tags1
+                                               if valid_tags[t] == "gender")
+                            gender_tags2 = set(t for t in tags2
+                                               if valid_tags[t] == "gender")
+                            if ((num_tags1 == num_tags2) or
+                                (gender_tags1 == gender_tags2)):
+                                tags = set(tags1) | set(tags2)
+                                new_tagsets.append(tags)
+                            else:
+                                new_tagsets.append(tags1)
+                                new_tagsets.append(tags2)
+                    tagsets = new_tagsets
+            else:
+                # Ignore this hdrspan
+                continue
         key = (hdrspan.start, hdrspan.colspan)
         if key in used:
             continue
-        # XXX if hdrspan.used:
         used.add(key)
         if mark_used:
             hdrspan.used = True
         # Merge into coltags
         if coltags is None:
-            coltags = list(tuple(sorted(tt)) for tt in hdrspan.tagsets)
+            coltags = list(tuple(sorted(tt)) for tt in tagsets)
         else:
             new_coltags = set()
-            for tags2 in hdrspan.tagsets:  # Earlier header
+            for tags2 in tagsets:  # Earlier header
                 for tags1 in coltags:      # Tags found for current cell so far
                     if (any(valid_tags[t] in ("mood", "tense", "person",
                                               "number")
@@ -463,13 +519,14 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
     assert isinstance(titles, list)
     for x in titles:
         assert isinstance(x, str)
+    # print("PARSE_SIMPLE_TABLE: TITLES:", titles)
     # print("ROWS:")
     # for row in rows:
     #     print("  ", row)
     ret = []
     hdrspans = []
     col_has_text = []
-    i = 0
+    rownum = 0
     title = None
     global_tags = []
     word_tags = []
@@ -521,7 +578,7 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
             col = cell.text
             if not col:
                 continue
-            # print(i, j, col)
+            # print(rownum, j, col)
             if cell.is_title:
                 # It is a header cell
                 col = re.sub(r"\s+", " ", col)
@@ -571,7 +628,7 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                             new_rowtags.add(tags)
                 rowtags = list(new_rowtags)
                 if any(new_coltags):
-                    hdrspan = HdrSpan(j, colspan, new_coltags, col)
+                    hdrspan = HdrSpan(j, colspan, rownum, new_coltags, col)
                     hdrspans.append(hdrspan)
                     # Handle headers that are above left-side header
                     # columns and are followed by personal pronouns in
@@ -617,7 +674,24 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                 extra_split = ""
             else:
                 extra_split = "," if text.endswith("/") else ",/"
-            for form in re.split(r"[;•\n{}]| or ".format(extra_split), text):
+
+            # Split the cell text into alternatives
+            alts = re.split(r"[;•\n{}]| or ".format(extra_split), text)
+            # Handle the special case where romanization is given under
+            # normal form, e.g. in Russian.  There can be multiple
+            # comma-separated forms in each case.
+            if (len(alts) % 2 == 0 and
+                all(classify_desc(x) == "other" and
+                    not any(is_superscript(xx) for xx in x)
+                    for x in alts[:len(alts) // 2]) and
+                all(classify_desc(x) in ("romanization", "english")
+                    for x in alts[len(alts) // 2:])):
+                alts = list(zip(alts[:len(alts) // 2],
+                                alts[len(alts) // 2:]))
+            else:
+                alts = list((x, None) for x in alts)
+            # Generate forms from the alternatives
+            for form, base_roman in alts:
                 form = form.strip()
                 extra_tags = []
                 ipas = []
@@ -639,7 +713,7 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                     form = form[:-1]
                 if form.startswith("*"):
                     form = form[1:]
-                roman = None
+                roman = base_roman
                 m = re.search(r"\s*\(([^)]*)\)", form)
                 if m is not None:
                     # XXX besides roman, it can be tags, e.g., (archaic)
@@ -664,6 +738,24 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                                     for tt in old_tags)):
                                 continue
                             tags.add(t)
+                        # Many Russian (and other Slavic?) inflection tables
+                        # have animate/inanimate distinction that generates
+                        # separate entries for neuter/feminine, but the
+                        # distinction only applies to masculine.  Remove them
+                        # form neuter/feminine and eliminate duplicates.
+                        if lang in ["Russian"]:
+                            for t1 in ("animate", "inanimate"):
+                                for t2 in ("neuter", "feminine"):
+                                    if (t1 in tags and t2 in tags and
+                                        "masculine" not in tags and
+                                        "plural" not in tags):
+                                        tags.remove(t1)
+                        # We may have situations where all genders get listed.
+                        # Try to remove genders in those situations.
+                        for langs, genders in lang_genders:
+                            if (lang in langs and
+                                all(t in tags for t in genders)):
+                                tags = list(sorted(set(tags) - genders))
                         # Remove "personal" tag if have nth person; these
                         # come up with e.g. reconhecer/Portuguese/Verb.
                         if ("personal" in tags and
@@ -687,7 +779,7 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
             #       .format(col0_hdrspan.text, col0_hdrspan.colspan,
             #               len(row)))
             col0_hdrspan.colspan = len(row)
-        i += 1
+        rownum += 1
     # XXX handle refs and defs
     # for x in hdrspans:
     #     print("  HDRSPAN {} {} {} {!r}"
@@ -722,8 +814,9 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
     return ret
 
 
-def handle_generic_table(ctx, word, lang, rows, titles, source):
+def handle_generic_table(ctx, data, word, lang, rows, titles, source):
     assert isinstance(ctx, Wtp)
+    assert isinstance(data, dict)
     assert isinstance(word, str)
     assert isinstance(lang, str)
     assert isinstance(rows, list)
@@ -738,14 +831,34 @@ def handle_generic_table(ctx, word, lang, rows, titles, source):
 
     # Try to parse the table as a simple table
     ret = parse_simple_table(ctx, word, lang, rows, titles, source)
-    if ret is not None:
-        return ret
+    if ret is None:
+        # XXX handle other table formats
+        # We were not able to handle the table
+        print("UNHANDLED TABLE FORMAT in {}/{}".format(word, lang))
+        return
 
-    # XXX handle other table formats
-
-    # We were not able to handle the table
-    print("UNHANDLED TABLE FORMAT in {}/{}".format(word, lang))
-    return []
+    # Add the returned forms but eliminate duplicates.
+    have_forms = set()
+    for dt in data.get("forms", ()):
+        have_forms.add(freeze(dt))
+    for dt in ret:
+        fdt = freeze(dt)
+        if fdt in have_forms:
+            continue  # Don't add duplicates Some Russian words have
+        # Declension and Pre-reform declension partially duplicating
+        # same data.  Don't add "dated" tags variant if already have
+        # the same without "dated" from the modern declension table
+        tags = dt.get("tags", [])
+        for dated_tag in ("dated",):
+            if dated_tag in tags:
+                dt2 = dt.copy()
+                tags2 = list(x for x in tags if x != dated_tag)
+                dt2["tags"] = tags2
+                if tags2 and freeze(dt2) in have_forms:
+                    break  # Already have without archaic
+        else:
+            have_forms.add(fdt)
+            data_append(ctx, data, "forms", dt)
 
 
 def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
@@ -850,7 +963,7 @@ def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
                     # Whole column has title suggesting they are headers
                     # (e.g. "Case")
                     is_title = True
-                if re.match(r"Conjugation of |Declension of )", celltext):
+                if re.match(r"Conjugation of |Declension of ", celltext):
                     is_title = True
                 if is_title:
                     while len(cols_headered) <= len(row):
@@ -882,10 +995,7 @@ def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
 
     # Now we have a table that has been parsed into rows and columns of
     # InflCell objects.  Parse the inflection table from that format.
-    ret = handle_generic_table(ctx, word, lang, rows, titles, source)
-    if not ret:
-        return
-    data_extend(ctx, data, "forms", ret)
+    handle_generic_table(ctx, data, word, lang, rows, titles, source)
 
 
 def handle_html_table(config, ctx, word, lang, data, tree, titles, source):
@@ -982,6 +1092,7 @@ def parse_inflection_section(config, ctx, data, word, lang, section, tree):
         if (kind == NodeKind.HTML and node.args == "div" and
             "NavFrame" in node.attrs.get("class", "").split()):
             recurse_navframe(node, titles)
+            return
         for x in node.children:
             recurse(x, titles)
 

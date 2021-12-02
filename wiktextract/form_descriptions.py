@@ -275,7 +275,7 @@ tr_note_re = re.compile(
 # page title does not also match one of these.
 suspicious_related_re = re.compile(
     r"(^| )(f|m|n|c|or|pl|sg|inan|anim|pers|anml|impf|pf|vir|nvir)( |$)"
-    r"|[][:=()<>&#*|]"
+    r"|[][:=<>&#*|]"
     r"| \d+$")
 
 # Word forms (head forms, translations, etc) that will be considered ok and
@@ -489,7 +489,9 @@ add_to_valid_tree_mapping(valid_sequences, topic_generalize_map,
                           valid_topics, True)
 
 # Regexp used to find "words" from word heads and linguistic descriptions
-word_re = re.compile(r"[^ ,;()\u200e]+|\(([^()]|\([^()]*\))*\)")
+word_re = re.compile(r"[^ ,;()\u200e]+|"
+                     r"\([^ ,;()\u200e]+\)[^ ,;()\u200e]+|"
+                     r"\(([^()]|\([^()]*\))*\)")
 
 
 def distw(titleparts, word):
@@ -843,17 +845,25 @@ def add_related(ctx, data, tags_lst, related, origtext,
                 return
             if "cangjie-input" in tags_lst:
                 return
+            if "class" in tags_lst:
+                return
             ctx.debug("suspicious related form tags {}: {!r} in {!r}"
                       .format(tags_lst, related, origtext))
 
-    m = re.match(r"\((([^()]|\([^()]*\))*)\)\s*", related)
+    m = re.match(r"\((([^()]|\([^()]*\))*)\)\s+", related)
     if m:
         paren = m.group(1)
         related = related[m.end():]
         tagsets1, topics1 = decode_tags(paren)
     else:
-        tagsets1 = [[]]
-        topics1 = []
+        m = re.match(r"\s+\((([^()]|\([^()]*\))*)\)", related)
+        if m:
+            paren = m.group(1)
+            related = related[m.end():]
+            tagsets1, topics1 = decode_tags(paren)
+        else:
+            tagsets1 = [[]]
+            topics1 = []
     if related and related.startswith("{{"):
         ctx.debug("{{ in word head form - possible Wiktionary error: {!r}"
                   .format(related))
