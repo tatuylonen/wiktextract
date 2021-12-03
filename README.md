@@ -394,6 +394,7 @@ The following command-line options can be used to control its operation:
 * --linkages: causes linkages (synonyms etc.) to be captured
 * --examples: causes usage examples to be captured
 * --etymologies: causes etymology information to be captured
+* --inflections: causes inflection tables to be captured
 * --redirects: causes redirects to be extracted
 * --pages-dir DIR: save all wiktionary pages under this directory (mostly for debugging)
 * --cache CACHE: save/use cache file(s) from this path (for debugging)
@@ -428,7 +429,8 @@ config = WiktionaryConfig(
              capture_compounds=True,
              capture_redirects=True,
              capture_examples=True,
-             capture_etymologies=True)
+             capture_etymologies=True,
+             capture_inflections=True)
 ctx = Wtp()
 
 def word_cb(data):
@@ -514,7 +516,8 @@ WiktionaryConfig(capture_languages=["English", "Translingual",
                  capture_compounds=True,
                  capture_redirects=True,
                  capture_examples=True,
-                 capture_etymologies=True)
+                 capture_etymologies=True,
+                 capture_inflections=True)
 ```
 
 The arguments are as follows:
@@ -544,6 +547,8 @@ The arguments are as follows:
   capturing usage examples.
 * ``capture_etymologies`` (boolean) - set to ``False`` to
   disable capturing etymologies.
+* ``capture_inflections`` (boolean) - set to ``False`` to
+  disable capturing inflection tables.
 
 ## Format of extracted redirects
 

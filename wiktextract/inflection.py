@@ -674,7 +674,8 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                     if j == 0:
                         assert col0_hdrspan is None
                         col0_hdrspan = hdrspan
-                    elif (any(all_hdr_tags) and
+                    elif (col0_hdrspan is not None and
+                          any(all_hdr_tags) and
                           not (all(valid_tags[t] in ("person", "gender")
                                    for ts in all_hdr_tags
                                    for t in ts) and

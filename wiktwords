@@ -119,6 +119,8 @@ if __name__ == "__main__":
                         help="Capture usage examples")
     parser.add_argument("--etymologies", action="store_true", default=False,
                         help="Capture etymologies")
+    parser.add_argument("--inflections", action="store_true", default=False,
+                        help="Capture inflection tables")
     parser.add_argument("--statistics", action="store_true", default=False,
                         help="Print statistics")
     parser.add_argument("--page", type=str,
@@ -155,6 +157,7 @@ if __name__ == "__main__":
         args.redirects = True
         args.examples = True
         args.etymologies = True
+        args.inflections = True
 
     # If --list-languages has been specified, just print the list of supported
     # languages
@@ -241,6 +244,7 @@ if __name__ == "__main__":
                               capture_redirects=args.redirects,
                               capture_examples=args.examples,
                               capture_etymologies=args.etymologies,
+                              capture_inflections=args.inflections,
                               verbose=args.verbose)
 
     if args.profile:

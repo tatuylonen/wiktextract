@@ -2035,8 +2035,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         # Parse inflection tables from the section.  The data is stored
         # under "forms".
-        parse_inflection_section(config, ctx, pos_data,  word, language,
-                                 section, tree)
+        if config.capture_inflections:
+            parse_inflection_section(config, ctx, pos_data,  word, language,
+                                     section, tree)
 
     def get_subpage_section(title, subtitle, seq):
         """Loads a subpage of the given page, and finds the section
