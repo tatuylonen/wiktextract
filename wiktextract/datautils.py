@@ -190,7 +190,12 @@ def split_slashes(ctx, text):
 
 
 def freeze(x):
+    """Produces a read-only key for sets/dictionaries from the data.  This
+    ignores "source" field from dictionaries."""
     if isinstance(x, dict):
+        if "source" in x:
+            x = x.copy()
+            del x["source"]
         return frozenset((k, freeze(v)) for k, v in x.items())
     if isinstance(x, set):
         return frozenset(x)

@@ -200,7 +200,7 @@ for m in re.finditer(r"(^|[^\\])[(]+", head_split_re_text):
     head_split_re_parens += m.group(0).count("(")
 
 # Parenthesized parts that are ignored in translations
-ignored_parens = set([
+tr_ignored_parens = set([
     "please verify",
     "(please verify)",
     "transliteration needed",
@@ -212,8 +212,8 @@ ignored_parens = set([
     "see below",
     "see usage notes below",
 ])
-ignored_parens_re = re.compile(
-    r"^(" + "|".join(re.escape(x) for x in ignored_parens) + ")$" +
+tr_ignored_parens_re = re.compile(
+    r"^(" + "|".join(re.escape(x) for x in tr_ignored_parens) + ")$" +
     r"|^(Can we clean up|Can we verify|for other meanings see "
     r"lit\. )"
     )
@@ -358,7 +358,7 @@ ignored_unknown_starts = set([
     ])
 allowed_unknown_starts.update(ignored_unknown_starts)
 
-# Full unknown tags that will be ignored
+# Full unknown tags that will be ignored in decode_tags()
 ignored_unknown_tags = set([
 ])
 
@@ -519,10 +519,13 @@ def distw(titleparts, word):
 
 
 def map_with(ht, lst):
+    """Takes alternatives from ``lst``, maps them using ``ht`` to zero or
+    more alternatives each, and returns a combined list of alternatives."""
     assert isinstance(ht, dict)
     assert isinstance(lst, (list, tuple))
     ret = []
     for x in lst:
+        assert isinstance(x, str)
         x = x.strip()
         x = ht.get(x, x)
         if isinstance(x, str):
@@ -1015,21 +1018,29 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
     # we do not want so split on "or" or "," when immediately followed by more
     # head-final tags, but otherwise do want to split by them.
     splits = re.split(head_split_re, base)
+    # print("SPLITS:", splits)
     alts = []
     # print("parse_word_head: splits:", splits,
     #       "head_split_re_parens:", head_split_re_parens)
     for i in range(0, len(splits) - head_split_re_parens,
                    head_split_re_parens + 1):
         v = splits[i]
-        ending = splits[i + 1] or ""
-        if alts and v == "" and ending:
+        ending = splits[i + 1] or ""  # XXX is this correct???
+        # print("parswe_word_head alts v={!r} ending={!r} alts={}"
+        #       .format(v, ending, alts))
+        if alts and (v == "" and ending):
             assert ending[0] == " "
             alts[-1] += " or" + ending  # endings starts with space
         elif v or ending:
             alts.append(v + ending)
     last = splits[-1].strip()
+    conn = "" if len(splits) < 3 else splits[-2]
+    # print("parse_word_head alts last={!r} conn={!r} alts={}"
+    #       .format(last, conn, alts))
     if (alts and last and
-        last.split()[0] in xlat_head_map):
+        (last.split()[0] in xlat_head_map or
+         (conn == " or " and
+          (alts[-1] + " or " + last).strip() in xlat_head_map))):
         alts[-1] += " or " + last
     elif last:
         alts.append(last)
@@ -1047,19 +1058,25 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
             add_related(ctx, data, ["in-compounds"], [alt], text,
                         True, is_reconstruction)
             continue
-        baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
-        # For non-first parts, see if it an be treated as tags-only
-        if alt_i > 0:
-            tagsets, topics = decode_tags(" ".join(baseparts))
-            if not any("error-unknown-tag" in x for x in tagsets):
-                data_extend(ctx, data, "topics", topics)
-                for tags in tagsets:
-                    data_extend(ctx, data, "tags", tags)
-                continue
-        alt, tags = parse_head_final_tags(ctx, language, alt)
-        tags = list(tags)  # Make sure we don't modify anything cached
-        tags.append("canonical")
-        canonicals.append((tags, baseparts))
+        # For non-first parts, see if it can be treated as tags-only
+        if alt_i == 0:
+            expanded_alts = [alt]
+        else:
+            expanded_alts = map_with(xlat_descs_map, [alt])
+        # print("EXPANDED_ALTS:", expanded_alts)
+        for alt in expanded_alts:
+            baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
+            if alt_i > 0:
+                tagsets, topics = decode_tags(" ".join(baseparts))
+                if not any("error-unknown-tag" in x for x in tagsets):
+                    data_extend(ctx, data, "topics", topics)
+                    for tags in tagsets:
+                        data_extend(ctx, data, "tags", tags)
+                    continue
+            alt, tags = parse_head_final_tags(ctx, language, alt)
+            tags = list(tags)  # Make sure we don't modify anything cached
+            tags.append("canonical")
+            canonicals.append((tags, baseparts))
 
     for tags, baseparts in canonicals:
         add_related(ctx, data, tags, baseparts, text, len(canonicals) > 1,
@@ -1118,8 +1135,9 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
         for desc in new_desc:
             # print("head desc: {!r}".format(desc))
 
-            if desc == "e.g.":
-                # Assume remaining values are examples cf. gaan/Navajo
+            # Abort on certain descriptors (assume remaining values are
+            # examples or uninteresting, cf. gaan/Navajo, horior/Latin)
+            if re.match(r"^(per |e\.g\.$)", desc):
                 break
 
             # If it all consists of CJK characters, add it with the
@@ -1497,7 +1515,7 @@ def parse_translation_desc(ctx, lang, text, tr):
 
         if not par:
             continue
-        if re.search(ignored_parens_re, par):
+        if re.search(tr_ignored_parens_re, par):
             continue
         if par.startswith("numeral:"):
             par = par[8:].strip()

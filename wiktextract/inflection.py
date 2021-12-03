@@ -6,6 +6,7 @@ import re
 import copy
 import enum
 import html
+import collections
 import unicodedata
 from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
 from wiktextract.config import WiktionaryConfig
@@ -13,6 +14,7 @@ from wiktextract.tags import valid_tags
 from wiktextract.inflectiondata import infl_map, infl_start_map, infl_start_re
 from wiktextract.datautils import data_append, data_extend, freeze
 from wiktextract.form_descriptions import classify_desc, decode_tags
+from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 
 # Column texts that are interpreted as an empty column.
 IGNORED_COLVALUES = set([
@@ -34,6 +36,8 @@ title_contains_global_map = {
     "indefinite article": "indefinite",
     "pre-reform": "dated",
     "personal pronouns": "personal pronoun",
+    "composed forms of": "multiword-construction",
+    "subordinate-clause forms of": "subordinate-clause",
 }
 for k, v in title_contains_global_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -58,6 +62,34 @@ title_contains_wordtags_map = {
     "no plural": "no-plural",
     "imperfective": "imperfective",
     "perfective": "perfective",
+    "no supine stem": "no-supine",
+    "no perfect stem": "no-perfect",
+    "deponent": "deponent",
+    "iō-variant": "iō-variant",
+    "1st declension": "declension-1",
+    "2nd declension": "declension-2",
+    "3rd declension": "declension-3",
+    "4th declension": "declension-4",
+    "5th declension": "declension-5",
+    "first declension": "declension-1",
+    "second declension": "declension-2",
+    "third declension": "declension-3",
+    "fourth declension": "declension-4",
+    "fifth declension": "declension-5",
+    "1st conjugation": "conjugation-1",
+    "2nd conjugation": "conjugation-2",
+    "3rd conjugation": "conjugation-3",
+    "4th conjugation": "conjugation-4",
+    "5th conjugation": "conjugation-5",
+    "6th conjugation": "conjugation-6",
+    "7th conjugation": "conjugation-7",
+    "first conjugation": "conjugation-1",
+    "second conjugation": "conjugation-2",
+    "third conjugation": "conjugation-3",
+    "fourth conjugation": "conjugation-4",
+    "fifth conjugation": "conjugation-5",
+    "sixth conjugation": "conjugation-6",
+    "seventh conjugation": "conjugation-7",
 }
 for k, v in title_contains_wordtags_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -91,30 +123,6 @@ title_elements_map = {
     "rt-rr gradation": "gradation-rt-rr",
     "ik-j gradation": "gradation-ik-j",
     "k-v gradation": "gradation-k-v",
-    "1st declension": "declension-1",
-    "2nd declension": "declension-2",
-    "3rd declension": "declension-3",
-    "4th declension": "declension-4",
-    "5th declension": "declension-5",
-    "first declension": "declension-1",
-    "second declension": "declension-2",
-    "third declension": "declension-3",
-    "fourth declension": "declension-4",
-    "fifth declension": "declension-5",
-    "1st conjugation": "conjugation-1",
-    "2nd conjugation": "conjugation-2",
-    "3rd conjugation": "conjugation-3",
-    "4th conjugation": "conjugation-4",
-    "5th conjugation": "conjugation-5",
-    "6th conjugation": "conjugation-6",
-    "7th conjugation": "conjugation-7",
-    "first conjugation": "conjugation-1",
-    "second conjugation": "conjugation-2",
-    "third conjugation": "conjugation-3",
-    "fourth conjugation": "conjugation-4",
-    "fifth conjugation": "conjugation-5",
-    "sixth conjugation": "conjugation-6",
-    "seventh conjugation": "conjugation-7",
 }
 for k, v in title_elements_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -431,13 +439,14 @@ def expand_header(word, lang, text, tags0):
                 v = ""
 
 
-def compute_coltags(hdrspans, start, colspan, mark_used):
+def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
     """Computes column tags for a column of the given width based on the
     current header spans."""
     assert isinstance(hdrspans, list)
     assert isinstance(start, int) and start >= 0
     assert isinstance(colspan, int) and colspan >= 1
     assert mark_used in (True, False)
+    assert isinstance(celltext, str)  # For debugging only
     used = set()
     coltags = None
     # XXX should look at tag classes and not take tags in the same class(es)
@@ -474,8 +483,8 @@ def compute_coltags(hdrspans, start, colspan, mark_used):
                         x.start + x.colspan >= start + colspan):
                         continue
                     new_tagsets = []
-                    for tags1 in tagsets:
-                        for tags2 in x.tagsets:
+                    for tags1 in tagsets:  # current
+                        for tags2 in x.tagsets:  # earlier
                             num_tags1 = set(t for t in tags1
                                             if valid_tags[t] == "number")
                             num_tags2 = set(t for t in tags2
@@ -502,35 +511,55 @@ def compute_coltags(hdrspans, start, colspan, mark_used):
                     tagsets = new_tagsets
             else:
                 # Ignore this hdrspan
+                # if celltext == "ich steige aus":
+                #     print("Ignoring row={} start={} tagsets={}"
+                #           .format(hdrspan.rownum, hdrspan.start,
+                #                   hdrspan.tagsets))
                 continue
         key = (hdrspan.start, hdrspan.colspan)
         if key in used:
-            continue
+            break
         used.add(key)
         if mark_used:
             hdrspan.used = True
         # Merge into coltags
         if coltags is None:
             coltags = list(tuple(sorted(tt)) for tt in tagsets)
+            # if celltext == "ich steige aus":
+            #     print("initial row={} start={} coltags={}"
+            #           .format(hdrspan.rownum, hdrspan.start, coltags))
         else:
+            stop = False
             new_coltags = set()
             for tags2 in tagsets:  # Earlier header
                 for tags1 in coltags:      # Tags found for current cell so far
+                    # if celltext == "ich steige aus":
+                    #     print("rownum={} start={} earlier={} current={}"
+                    #           .format(hdrspan.rownum, hdrspan.start,
+                    #                   tags2, tags1))
+                    if any(valid_tags[t] == "detail" for t in tags2):
+                        tags2 = set()
+                        stop = True
                     if (any(valid_tags[t] in ("mood", "tense", "non-finite",
                                               "person", "number")
                             for t in tags1) and
                         any(valid_tags[t] in ("non-finite",)
                             for t in tags2)):
                         tags2 = set()
+                        stop = True
                     elif (any(valid_tags[t] == "number" for t in tags1) and
                           any(valid_tags[t] == "number" for t in tags2)):
                         tags2 = set()
+                        stop = True
                     elif (any(valid_tags[t] == "number" for t in tags1) and
                           any(valid_tags[t] == "gender" for t in tags2)):
                         tags2 = set()
+                        stop = True
                     tags = tuple(sorted(set(tags1) | tags2))
                     new_coltags.add(tags)
             coltags = list(new_coltags)
+            if stop:
+                break
     if coltags is None:
         coltags = [()]
     #print("HDRSPANS:", list((x.start, x.colspan, x.tagsets) for x in hdrspans))
@@ -539,13 +568,97 @@ def compute_coltags(hdrspans, start, colspan, mark_used):
     return coltags
 
 
-def parse_simple_table(ctx, word, lang, rows, titles, source):
+# Specification for language-specific processing.  Each entry starts
+# with a list of languages that it applies to (a language can be
+# specified in multiple entries) and then a list of parts-of-speech.
+# It is then followed by any number of pattern-tags pairs, where
+# pattern will be escaped, except ^ at the beginning is interpreted as
+# restricting it to the beginning.  The matched parts will be removed
+# from the word.
+lang_specific_data = [
+    [["German"], ["verb"],
+     ["^ich ", "first-person singular"],
+     ["^du ", "second-person singular"],
+     ["^er ", "third-person singular"],
+     ["^wir ", "first-person plural"],
+     ["^ihr ", "second-person plural"],
+     ["^sie ", "third-person plural"],
+     ["^dass ich ", "first-person singular subordinate-clause"],
+     ["^dass du ", "second-person singular subordinate-clause"],
+     ["^dass er ", "third-person singular subordinate-clause"],
+     ["^dass wir ", "first-person plural subordinate-clause"],
+     ["^dass ihr ", "second-person plural subordinate-clause"],
+     ["^dass sie ", "third-person plural subordinate-clause"],
+     [" (du)", "second-person singular subordinate-clause"],
+     [" (ihr)", "second-person plural subordinate-clause"],
+     ],
+]
+specific_by_lang = collections.defaultdict(list)
+for lst in lang_specific_data:
+    assert isinstance(lst, list)
+    assert len(lst) >= 3
+    for rule_lang in lst[0]:
+        assert isinstance(rule_lang, str)
+        for rule_pos in lst[1]:
+            assert isinstance(rule_pos, str)
+            for rule in lst[2:]:
+                assert isinstance(rule, list)
+                rule_pattern, rule_tags = rule
+                assert isinstance(rule_pattern, str)
+                assert isinstance(rule_tags, str)
+                for t in rule_tags.split():
+                    assert t in valid_tags
+                specific_by_lang[rule_lang, rule_pos].append(
+                    [rule_pattern, rule_tags])
+specific_by_lang_re = {}
+specific_by_lang_map = {}
+for (rule_lang, rule_pos), lst in specific_by_lang.items():
+    starts = list(x[0][1:] for x in lst if x[0].startswith("^"))
+    others = list(x[0] for x in lst if not x[0].startswith("^"))
+    rs = []
+    if starts:
+        rs.append(r"^(" + "|".join(re.escape(x) for x in starts) + ")")
+    if others:
+        rs.append(r"(" + "|".join(re.escape(x) for x in others) + ")")
+    specific_by_lang_re[rule_lang, rule_pos] = re.compile("|".join(rs))
+    ht = {}
+    specific_by_lang_map[rule_lang, rule_pos] = ht
+    for k, v in lst:
+        if k.startswith("^"):
+            k = k[1:]
+        assert k not in ht
+        ht[k] = v.split()
+
+
+def lang_specific_tags(lang, pos, form):
+    """Extracts tags from the word form itself in a language-specific way.
+    This may also adjust the word form.
+    For example, German inflected verb forms don't have person and number
+    specified in the table, but include a pronoun.  This returns adjusted
+    form and a list of tags."""
+    assert isinstance(lang, str)
+    assert isinstance(pos, str)
+    assert isinstance(form, str)
+    key = (lang, pos)
+    r = specific_by_lang_re.get(key)
+    if r is None:
+        return form, []
+    m = re.search(r, form)
+    if m is None:
+        return form, []
+    v = specific_by_lang_map[key][m.group(0)]
+    form = form[:m.start()] + form[m.end():]
+    return form, v
+
+
+def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
     """This is the default table parser.  Despite its name, it can parse
     complex tables.  This returns a list of forms to be added to the
     part-of-speech, or None if the table could not be parsed."""
     assert isinstance(ctx, Wtp)
     assert isinstance(word, str)
     assert isinstance(lang, str)
+    assert isinstance(pos, str)
     assert isinstance(rows, list)
     assert isinstance(source, str)
     for row in rows:
@@ -652,7 +765,8 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                 new_coltags = set()
                 all_hdr_tags = set()
                 for rt0 in rowtags:
-                    for ct0 in compute_coltags(hdrspans, j, colspan, False):
+                    for ct0 in compute_coltags(hdrspans, j, colspan, False,
+                                               col):
                         tags0 = set(rt0) | set(ct0) | set(global_tags)
                         alt_tags = expand_header(word, lang, text, tags0)
                         all_hdr_tags.update(alt_tags)
@@ -676,10 +790,14 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                         col0_hdrspan = hdrspan
                     elif (col0_hdrspan is not None and
                           any(all_hdr_tags) and
-                          not (all(valid_tags[t] in ("person", "gender")
+                          not (all(valid_tags[t] in ("person", "gender",
+                                                     "number")
                                    for ts in all_hdr_tags
                                    for t in ts) and
-                               all(valid_tags[t] == "number"
+                               all(valid_tags[t] in ("number", "mood",
+                                                     "aspect", "tense",
+                                                     "voice", "non-finite",
+                                                     "case", "possession")
                                    for ts in col0_hdrspan.tagsets
                                    for t in ts))):
                         # if col0_hdrspan is not None:
@@ -708,7 +826,7 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                 col_has_text.append(False)
             col_has_text[j] = True
             # Determine column tags for the multi-column cell
-            combined_coltags = compute_coltags(hdrspans, j, colspan, True)
+            combined_coltags = compute_coltags(hdrspans, j, colspan, True, col)
 
             # print("HAVE_TEXT:", repr(col))
             col = re.sub(r"[ \t\r]+", " ", col)
@@ -788,6 +906,10 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                         tags = set(global_tags)
                         tags.update(extra_tags)
                         tags.update(rt)
+                        # Extract language-specific tags from the
+                        # form.  This may also adjust the form.
+                        form, lang_tags = lang_specific_tags(lang, pos, form)
+                        tags.update(lang_tags)
                         old_tags = set(tags)
                         for t in ct:
                             c = valid_tags[t]
@@ -875,11 +997,12 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
     return ret
 
 
-def handle_generic_table(ctx, data, word, lang, rows, titles, source):
+def handle_generic_table(ctx, data, word, lang, pos, rows, titles, source):
     assert isinstance(ctx, Wtp)
     assert isinstance(data, dict)
     assert isinstance(word, str)
     assert isinstance(lang, str)
+    assert isinstance(pos, str)
     assert isinstance(rows, list)
     assert isinstance(source, str)
     for row in rows:
@@ -891,7 +1014,7 @@ def handle_generic_table(ctx, data, word, lang, rows, titles, source):
         assert isinstance(x, str)
 
     # Try to parse the table as a simple table
-    ret = parse_simple_table(ctx, word, lang, rows, titles, source)
+    ret = parse_simple_table(ctx, word, lang, pos, rows, titles, source)
     if ret is None:
         # XXX handle other table formats
         # We were not able to handle the table
@@ -922,7 +1045,8 @@ def handle_generic_table(ctx, data, word, lang, rows, titles, source):
             data_append(ctx, data, "forms", dt)
 
 
-def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
+def handle_wikitext_table(config, ctx, word, lang, pos,
+                          data, tree, titles, source):
     """Parses a table from parsed Wikitext format into rows and columns of
     InflCell objects and then calls handle_generic_table() to parse it into
     forms.  This adds the forms into ``data``."""
@@ -930,6 +1054,7 @@ def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
     assert isinstance(ctx, Wtp)
     assert isinstance(word, str)
     assert isinstance(lang, str)
+    assert isinstance(pos, str)
     assert isinstance(data, dict)
     assert isinstance(tree, WikiNode)
     assert tree.kind == NodeKind.TABLE
@@ -991,7 +1116,7 @@ def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
                                                    isinstance(x, WikiNode) and
                                                    x.kind == NodeKind.TABLE)
                 for tbl in tables:
-                    handle_wikitext_table(config, ctx, word, lang, data,
+                    handle_wikitext_table(config, ctx, word, lang, pos, data,
                                           tbl, titles, source)
                 # print("REST:", rest)
 
@@ -1058,10 +1183,10 @@ def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
 
     # Now we have a table that has been parsed into rows and columns of
     # InflCell objects.  Parse the inflection table from that format.
-    handle_generic_table(ctx, data, word, lang, rows, titles, source)
+    handle_generic_table(ctx, data, word, lang, pos, rows, titles, source)
 
 
-def handle_html_table(config, ctx, word, lang, data, tree, titles, source):
+def handle_html_table(config, ctx, word, lang, pos, data, tree, titles, source):
     """Parses a table from parsed HTML format into rows and columns of
     InflCell objects and then calls handle_generic_table() to parse it into
     forms.  This adds the forms into ``data``."""
@@ -1069,6 +1194,7 @@ def handle_html_table(config, ctx, word, lang, data, tree, titles, source):
     assert isinstance(ctx, Wtp)
     assert isinstance(word, str)
     assert isinstance(lang, str)
+    assert isinstance(pos, str)
     assert isinstance(data, dict)
     assert isinstance(tree, WikiNode)
     assert tree.kind == NodeKind.HTML and tree.args == "table"
@@ -1081,13 +1207,15 @@ def handle_html_table(config, ctx, word, lang, data, tree, titles, source):
           .format(word, lang))
 
 
-def parse_inflection_section(config, ctx, data, word, lang, section, tree):
+def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
     """Parses an inflection section on a page.  ``data`` should be the
     data for a part-of-speech, and inflections will be added to it."""
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, Wtp)
     assert isinstance(data, dict)
     assert isinstance(word, str)
+    assert isinstance(lang, str)
+    assert pos in PARTS_OF_SPEECH
     assert isinstance(section, str)
     assert isinstance(tree, WikiNode)
     source = section
@@ -1142,11 +1270,11 @@ def parse_inflection_section(config, ctx, data, word, lang, section, tree):
             return
         kind = node.kind
         if kind == NodeKind.TABLE:
-            handle_wikitext_table(config, ctx, word, lang, data, node, titles,
-                                  source)
+            handle_wikitext_table(config, ctx, word, lang, pos,
+                                  data, node, titles, source)
             return
         elif kind == NodeKind.HTML and node.args == "table":
-            handle_html_table(config, ctx, word, lang, data, node, titles,
+            handle_html_table(config, ctx, word, lang, pos, data, node, titles,
                               source)
             return
         elif kind in (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,

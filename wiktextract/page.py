@@ -1528,7 +1528,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         assert isinstance(pos, str)
         # print("parse_part_of_speech", pos)
         pos_data["pos"] = pos
-        pre = []
+        pre = [[]]  # list of lists
         have_subtitle = False
         lists = []
         first_para = True
@@ -1540,7 +1540,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         first_para = False
                         break
                     if p:
-                        pre.append(p)
+                        pre[-1].append(p)
                 continue
             assert isinstance(node, WikiNode)
             kind = node.kind
@@ -1557,21 +1557,26 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     (node.args[0][0].startswith("File:") or
                      node.args[0][0].startswith("Image:"))):
                     continue
-                pre.extend(node.args[-1])
+                pre[-1].extend(node.args[-1])
             elif kind == NodeKind.HTML:
-                if node.args not in ("gallery", "ref", "cite", "caption"):
-                    pre.append(node)
+                if node.args == "br":
+                    if pre[-1]:
+                        pre.append([])  # Switch to next head
+                elif node.args not in ("gallery", "ref", "cite", "caption"):
+                    pre[-1].append(node)
             elif first_para:
-                pre.append(node)
+                pre[-1].append(node)
         # XXX use template_fn in clean_node to check that the head macro
         # is compatible with the current part-of-speech and generate warning
         # if not.  Use template_allowed_pos_map.
-        # print("parse_part_of_speech: {}: {}: pre={}"
-        #       .format(ctx.section, ctx.subsection, pre))
-        text = clean_node(config, ctx, pos_data, pre,
-                          post_template_fn=head_post_template_fn)
-        text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
-        parse_word_head(ctx, pos, text, pos_data, is_reconstruction)
+        for pre1 in pre:
+            # print("parse_part_of_speech: {}: {}: pre={}"
+            #       .format(ctx.section, ctx.subsection, pre1))
+            text = clean_node(config, ctx, pos_data, pre1,
+                              post_template_fn=head_post_template_fn)
+            text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
+            parse_word_head(ctx, pos, text, pos_data, is_reconstruction)
+            text = None
         if "tags" in pos_data:
             common_tags = pos_data["tags"]
             del pos_data["tags"]
@@ -2000,15 +2005,20 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # if not have_pronunciations and not have_panel_templates:
         #     ctx.debug("no pronunciations found from pronunciation section")
 
-    def parse_inflection(node, section):
+    def parse_inflection(node, section, pos):
         """Parses inflection data (declension, conjugation) from the given
         page.  This retrieves the actual inflection template
         parameters, which are very useful for applications that need
         to learn the inflection classes and generate inflected
         forms."""
-        # print("parse_inflection:", node)
         assert isinstance(node, WikiNode)
         assert isinstance(section, str)
+        assert pos is None or isinstance(pos, str)
+        # print("parse_inflection:", node)
+
+        if pos is None:
+            ctx.debug("inflection table outside part-of-speech")
+            return
 
         def inflection_template_fn(name, ht):
             # print("decl_conj_template_fn", name, ht)
@@ -2036,8 +2046,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # Parse inflection tables from the section.  The data is stored
         # under "forms".
         if config.capture_inflections:
-            parse_inflection_section(config, ctx, pos_data,  word, language,
-                                     section, tree)
+            parse_inflection_section(config, ctx, pos_data, word, language,
+                                     pos, section, tree)
 
     def get_subpage_section(title, subtitle, seq):
         """Loads a subpage of the given page, and finds the section
@@ -2630,7 +2640,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         data["etymology_text"] = text
         data["etymology_templates"] = templates
 
-    def process_children(treenode):
+    def process_children(treenode, pos):
         """This recurses into a subtree in the parse tree for a page."""
         nonlocal etym_data
         nonlocal pos_data
@@ -2685,7 +2695,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # to capture?
                 pass
             elif t in inflection_section_titles:
-                parse_inflection(node, t)
+                parse_inflection(node, t, pos)
             else:
                 lst = t.split()
                 while len(lst) > 1 and lst[-1].isdigit():
@@ -2725,13 +2735,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             # Recurse to children of this node, processing subtitles therein
             stack.append(t)
-            process_children(node)
+            process_children(node, pos)
             stack.pop()
 
     # Main code of parse_language()
     # Process the section
     stack.append(language)
-    process_children(langnode)
+    process_children(langnode, None)
     stack.pop()
 
     # Finalize word entires

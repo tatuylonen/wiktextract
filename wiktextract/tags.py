@@ -350,6 +350,7 @@ xlat_head_map = {
     "n pl or impf": "neuter plural imperfective",
     "m or f or impf": "?masculine feminine imperfective",
     "pl or m or f or n": "?plural masculine feminine neuter",
+    "no perfect or supine stem": "no-perfect no-supine",
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly
@@ -2955,8 +2956,6 @@ xlat_tags_map = {
     "strong/weak/mixed": "strong weak mixed",
     "weak/mixed": "weak mixed",
     "weak verb": "weak-verb",
-    "auxiliary sein": "aux-sein",
-    "auxiliary haben": "aux-haben",
     "no auxiliary": "no-auxiliary",
     "nominative/accusative": "nominative accusative",
     "masculine/feminine": "masculine feminine",
@@ -3302,6 +3301,11 @@ xlat_tags_map = {
     "third declension": "declension-3",
     "fourth declension": "declension-4",
     "fifth declension": "declension-5",
+    "first-declension": "declension-1",
+    "second-declension": "declension-2",
+    "third-declension": "declension-3",
+    "fourth-declension": "declension-4",
+    "fifth-declension": "declension-5",
     "first conjugation": "conjugation-1",
     "second conjugation": "conjugation-2",
     "third conjugation": "conjugation-3",
@@ -3785,6 +3789,9 @@ xlat_tags_map = {
     "one-termination adjective": "one-termination",
     "two-termination adjective": "two-termination",
     "three-termination adjective": "three-termination",
+    "one-termination participle": "one-termination participle",
+    "two-termination participle": "two-termination participle",
+    "three-termination particple": "three-termination participle",
     "semelefactive": "semelfactive error-misspelling",
     "invariant": "invariable",
     "followed by to": "with-to",
@@ -4460,9 +4467,7 @@ valid_tags = {
     "augmentative": "misc",  # Indicates large size, intensity, seniority
     "augmented": "misc",
     "autonomous": "misc",
-    "aux-haben": "misc",
-    "aux-sein": "misc",
-    "auxiliary": "misc",
+    "auxiliary": "detail",
     "baby-talk": "misc",
     "base-form": "misc",  # Base form of the word (e.g., with misspellings of forms)
     "before-lenited-fh": "misc",  # Next word starts with lenited fh (Irish)
@@ -4610,6 +4615,7 @@ valid_tags = {
     "demonstrative": "misc",  # Type of pronoun
     "demonym": "misc",
     "dependent": "misc",
+    "deponent": "misc",  # Having passive form with active meaning
     "derogatory": "misc",
     "desiderative": "mood",  # Verb mood
     "destinative": "case",  # Case, marks destination/something destined (e.g. Hindi)
@@ -4816,6 +4822,7 @@ valid_tags = {
     "irregular": "misc",  # Generally of written word forms
     "irregular-pronunciation": "misc",  # Kanji or similar pronunciation irregular
     "italics": "misc",  # Used in head form to indicate italic character variant
+    "iō-variant": "misc",  # e.g. horior/Latin, interiicio/Latin
     "jargon": "register",
     "jussive": "mood",  # Verb mood for orders, commanding, exhorting (subjunctively)
     "kanji": "misc",  # Used in word head for some Japanese symbols
@@ -5126,7 +5133,7 @@ valid_tags = {
     "stressed-preposition": "misc",
     "strict-sense": "misc",
     "strokes": "misc",
-    "strong": "misc",
+    "strong": "misc",  # strong form / strong inflection class
     "subjective": "case",  # Case, used as a subject; subject form
     "subjunctive": "mood",  # Subjunctive mood
     "subjunctive-i": "mood",  # Subjunctive i mood (German)
@@ -5141,7 +5148,7 @@ valid_tags = {
     "superessive": "case",  # Case, e.g., Hungarian
     "superlative": "degree",  # Comparison of adjectives/adverbs
     "superscript": "script",  # Variant of certain characters
-    "supine": "misc",   # XXX is this term obsolete (= to-infinitive?)
+    "supine": "non-finite",   # Various non-finite forms in several languages
     "suppletive": "misc",
     "surname": "misc",
     "suru": "class",  # Japanese verb inflection type
