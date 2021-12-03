@@ -589,8 +589,8 @@ lang_specific_data = [
      ["^dass wir ", "first-person plural subordinate-clause"],
      ["^dass ihr ", "second-person plural subordinate-clause"],
      ["^dass sie ", "third-person plural subordinate-clause"],
-     [" (du)", "second-person singular subordinate-clause"],
-     [" (ihr)", "second-person plural subordinate-clause"],
+     [" (du)", "second-person singular"],
+     [" (ihr)", "second-person plural"],
      ],
 ]
 specific_by_lang = collections.defaultdict(list)
@@ -892,6 +892,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                             form = (form[:m.start()] + " " +
                                     form[m.end():]).strip()
                     elif (m.start() > 0 and not roman and
+                          classify_desc(form[:m.start()]) == "other" and
                           classify_desc(paren) in ("romanization", "english")):
                         roman = paren
                         form = (form[:m.start()] + " " + form[m.end():]).strip()
