@@ -957,6 +957,23 @@ def parse_language(ctx, config, langnode, language, lang_code):
             "translation-hub" not in tags and
             "no-senses" not in tags):
             return False
+
+        if (("participle" in sense_data.get("tags", ()) or
+             "infinitive" in sense_data.get("tags", ())) and
+            "alt_of" not in sense_data and
+            "form_of" not in sense_data and
+            "etymology_text" in etym_data):
+            etym = etym_data["etymology_text"]
+            etym = etym.split(". ")[0]
+            tags, dt = parse_alt_or_inflection_of(ctx, etym)
+            if dt is not None:
+                if "form-of" in tags:
+                    data_append(ctx, sense_data, "form_of", dt)
+                    data_extend(ctx, sense_data, "tags", tags)
+                elif "alt-of" in tags:
+                    data_append(ctx, sense_data, "alt_of", dt)
+                    data_extend(ctx, sense_data, "tags", tags)
+
         pos_datas.append(sense_data)
         sense_data = {}
         return True
