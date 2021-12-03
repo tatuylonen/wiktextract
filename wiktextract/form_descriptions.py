@@ -362,6 +362,19 @@ allowed_unknown_starts.update(ignored_unknown_starts)
 ignored_unknown_tags = set([
 ])
 
+# Head endings that are mapped to tags
+head_end_map = {
+    " 1st conj.": "conjugation-1",
+    " 2nd conj.": "conjugation-2",
+    " 3rd conj.": "conjugation-3",
+    " 4th conj.": "conjugation-4",
+    " 5th conj.": "conjugation-5",
+    " 6th conj.": "conjugation-6",
+    " 7th conj.": "conjugation-7",
+}
+head_end_re = re.compile(
+    r"(" + "|".join(re.escape(x) for x in head_end_map.keys()) + r")$")
+
 # Words that can be part of form description
 valid_words = set(["or", "and"])
 for x in valid_tags:
@@ -850,20 +863,26 @@ def add_related(ctx, data, tags_lst, related, origtext,
             ctx.debug("suspicious related form tags {}: {!r} in {!r}"
                       .format(tags_lst, related, origtext))
 
+    roman = None
+    tagsets1 = [[]]
+    topics1 = []
     m = re.match(r"\((([^()]|\([^()]*\))*)\)\s+", related)
     if m:
         paren = m.group(1)
         related = related[m.end():]
         tagsets1, topics1 = decode_tags(paren)
     else:
-        m = re.match(r"\s+\((([^()]|\([^()]*\))*)\)", related)
+        m = re.search(r"\s+\((([^()]|\([^()]*\))*)\)$", related)
         if m:
             paren = m.group(1)
-            related = related[m.end():]
-            tagsets1, topics1 = decode_tags(paren)
-        else:
-            tagsets1 = [[]]
-            topics1 = []
+            cls = classify_desc(paren)
+            if (cls in ("romanization", "english") and
+                classify_desc(related[:m.start()]) == "other"):
+                roman = paren
+                related = related[:m.start()]
+            else:
+                related = related[:m.start()]
+                tagsets1, topics1 = decode_tags(paren)
     if related and related.startswith("{{"):
         ctx.debug("{{ in word head form - possible Wiktionary error: {!r}"
                   .format(related))
@@ -873,20 +892,23 @@ def add_related(ctx, data, tags_lst, related, origtext,
         assert isinstance(tags1, (list, tuple))
         for tags2 in tagsets2:
             assert isinstance(tags1, (list, tuple))
+            dt = {"word": related}
+            if roman:
+                dt["roman"] = roman
             if "alt-of" in tags2:
                 check_related(related)
                 data_extend(ctx, data, "tags", tags1)
                 data_extend(ctx, data, "tags", tags2)
                 data_extend(ctx, data, "topics", topics1)
                 data_extend(ctx, data, "topics", topics2)
-                data_append(ctx, data, "alt_of", {"word": related})
+                data_append(ctx, data, "alt_of", dt)
             elif "form-of" in tags2:
                 check_related(related)
                 data_extend(ctx, data, "tags", tags1)
                 data_extend(ctx, data, "tags", tags2)
                 data_extend(ctx, data, "topics", topics1)
                 data_extend(ctx, data, "topics", topics2)
-                data_append(ctx, data, "form_of", {"word": related})
+                data_append(ctx, data, "form_of", dt)
             elif "compound-of" in tags2:
                 check_related(related)
                 data_extend(ctx, data, "tags", tags1)
@@ -904,6 +926,8 @@ def add_related(ctx, data, tags_lst, related, origtext,
                 tags = list(tags1) + list(tags2) + list(final_tags)
                 check_related(related)
                 form = {"form": related}
+                if roman:
+                    form["roman"] = roman
                 data_extend(ctx, form, "topics", topics1)
                 data_extend(ctx, form, "topics", topics2)
                 if topics1 or topics2:
@@ -943,7 +967,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
     assert isinstance(text, str)
     assert isinstance(data, dict)
     assert is_reconstruction in (True, False)
-    # print("PARSE_WORD_HEAD: {}: {}".format(ctx.section, text))
+    # print("PARSE_WORD_HEAD: {}: {!r}".format(ctx.section, text))
 
     if text.find("Lua execution error") >= 0:
         return
@@ -961,12 +985,20 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
         return
 
     # Handle the part of the head that is not in parentheses
-    base = re.sub(r"(\s?)\(([^()]|\([^(]*\))*\)", r"\1", text)
+    base = re.sub(r"(\s?)\^?\(([^()]|\([^(]*\))*\)", r"\1", text)
     base = re.sub(r"\?", " ", base)  # Removes uncertain articles etc
     base = re.sub(r"\s+", " ", base)
     base = re.sub(r" ([,;])", r"\1", base)
     base = base.strip()
     # print("parse_word_head: base={!r}".format(base))
+
+    # Check for certain endings in head (mostly for compatibility with weird
+    # heads, e.g. rata/Romanian "1st conj." at end)
+    m = re.search(head_end_re, base)
+    if m:
+        tags = head_end_map[m.group(1).lower()].split()
+        data_extend(ctx, data, "tags", tags)
+        base = base[:m.start()]
 
     # Special case: handle Hán Nôm readings for Vietnamese characters
     m = re.match(r"{}: (Hán Nôm) readings: (.*)".format(re.escape(titleword)),
@@ -1287,8 +1319,10 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
     if katakana:
         add_related(ctx, data, ["katagana"], [katakana], text, True,
                     is_reconstruction)
-    if "tags" in data:
-        data["tags"] = list(sorted(set(data["tags"])))
+
+    tags = data.get("tags", [])
+    if tags:
+        data["tags"] = list(sorted(set(tags)))
 
 
 def parse_sense_qualifier(ctx, text, data):
@@ -1772,6 +1806,12 @@ def parse_alt_or_inflection_of(ctx, gloss):
     # if m:
     #     gloss1 = gloss1[m.end():]
 
+    # Never interpret a gloss that is equal to the word itself as a tag
+    # (e.g., instrumental/Romanian, instrumental/Spanish).
+    if (gloss.lower() == ctx.title.lower() or
+        (len(gloss) >= 5 and distw([gloss.lower()], ctx.title.lower()) < 0.2)):
+        return None
+
     # First try parsing it as-is
     parsed = parse_alt_or_inflection_of1(ctx, gloss1)
     if parsed is not None:
@@ -1824,7 +1864,7 @@ def parse_alt_or_inflection_of1(ctx, gloss):
                 "synonym-of" in tags or
                 "compound-of" in tags):
                 break
-        elif m.group(1) == "of":
+        if m.group(1) == "of":
             # Try parsing without the final "of".  This is commonly used in
             # various form-of expressions.
             desc = gloss[:m.start()]

@@ -372,3 +372,11 @@ class ClassifyTests(unittest.TestCase):
     def test_classify84(self):
         cls = classify_desc('Hardcore pictures.')
         self.assertEqual(cls, "english")
+
+    def test_classify85(self):
+        cls = classify_desc('denʹgám')
+        self.assertEqual(cls, "romanization")
+
+    def test_classify86(self):
+        cls = classify_desc('dénʹgam')
+        self.assertEqual(cls, "romanization")

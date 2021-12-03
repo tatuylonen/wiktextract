@@ -382,3 +382,6 @@ htmlgen: change disambiguated links
 check jakes/English - ]] at the beginning of second sense
 
 Improve #time date format parsing.  cf. hard/English.
+
+Parse inflection-like tables from See also sections (e.g.,
+sie/Karelian, "Karelian personal pronouns" table)

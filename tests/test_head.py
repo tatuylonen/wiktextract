@@ -323,3 +323,17 @@ class HeadTests(unittest.TestCase):
             {"tags": ["diminutive", "neuter"],
              "form": "smileytje"},
             ]})
+
+    def test_head26(self):
+        data = {}
+        self.ctx.start_page("foos")
+        self.ctx.start_section("Noun")
+        parse_word_head(self.ctx, "noun",
+                        "foos (plural of foo)",
+                        data, False)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        self.assertEqual(data, {"forms": [
+            {"tags": ["plural-of"],
+             "form": "foo"},
+            ]})

@@ -2523,6 +2523,7 @@ xlat_tags_map = {
     "fairly polite": "polite",
     "postnominal": "postpositional",
     "first/second declension": "declension-1 declension-2",
+    "first/second-declension": "declension-1 declension-2",
     "first/declension-2 suffix":
     "declension-1 declension-2 suffix",
     "first/declension-2 numeral plural only":
@@ -3988,6 +3989,7 @@ xlat_tags_map = {
     "sentence case": "sentence-case",
     "set phrase from Classical Chinese": "idiomatic Classical-Chinese",
     "the plural of": "plural-of",
+    "plural of": "plural-of",
     "the reflexive case of": "reflexive-of",
     "the reflexive form of": "reflexive-of",
     "unipersonal": "",  # Too rare to track
@@ -4009,6 +4011,7 @@ xlat_tags_map = {
     "metaphorically": "metaphoric",
     "hypothetic": "hypothetical",
     "Kinmen and Penghu Hokkien": "Kinmen-Hokkien Penghu-Hokkien",
+    "“Jinmeiyō” kanji used for names": "Jinmeiyō",
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -4387,6 +4390,7 @@ valid_tags = {
     "McCune-Reischauer": "detail",  # Used in Korean
     "Rōmaji": "detail",  # Used in Okinawan, Japanese? for Latin characters
     "Yale": "detail",   # used in Cantonese
+    "Jinmeiyō": "misc",  # Type of Kanji used for names
     "-i": "class",   # Japanese inflection type
     "-na": "class",  # Japanese inflection type
     "-nari": "class",  # Japanese inflection type
@@ -4528,7 +4532,7 @@ valid_tags = {
     "comparative": "degree",  # Comparison of adjectives/adverbs
     "completive": "aspect",
     "composition": "detail",  # Used in Chinese characters
-    "compound": "misc",  # Can indicate verb forms formed with auxiliary
+    "compound": "misc",  # Compound words
     "compound-of": "misc",
     "concessive": "mood",  # Verb form
     "conclusive": "mood",  # Verb form (e.g., Bulgarian)
@@ -4630,6 +4634,7 @@ valid_tags = {
     "ditransitive": "transitivity",
     "dual": "number",       # two in number, cf. singular, trial, plural
     "dubitative": "mood",  # Verb form (e.g., Bulgarian)
+    "dummy-mood": "mood",  # Used in inflection table parsing, never in data
     "durative": "aspect",  # Verb form  XXX same as continuative?
     "eclipsis": "misc",
     "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian
@@ -4730,6 +4735,7 @@ valid_tags = {
     "grade-4-kanji": "misc",
     "grade-5-kanji": "misc",
     "grade-6-kanji": "misc",
+    "grammatical-3rd-person": "misc",  # 2nd person conjugated like 3rd
     "habitual": "aspect",  # Verb aspect
     "hangeul": "script",  # Korean script
     "hanja": "script",  # Han character script (Chinese characters) to write Korean
@@ -4737,7 +4743,7 @@ valid_tags = {
     "hellenism": "misc",
     "hidden-n": "class",   # Mongolian declension
     "hiragana": "script",  # Japanese syllabic spelling for native words
-    "historic": "mood",  # Grammatical tense/mood for retelling past events
+    "historic": "tense",  # Grammatical tense/mood for retelling past events
     "historical": "misc",  # Relating to history
     "honorific": "register",  # Formality/politeness degree of verbs etc
     "hortative": "mood",  # Verb mood
@@ -4858,8 +4864,8 @@ valid_tags = {
     "morse-code": "misc",
     "mostly": "misc",
     "motive-form": "mood",  # Verb form for Korean (e.g., 조사하다)
-    "multiple-possession": "misc",
     "multiplicative": "case",  # adverbial case in Finnish
+    "multiword-construction": "misc",  # complex tenses in French conjugation
     "mutated": "misc",
     "mutation": "misc",
     "name": "misc",
@@ -5000,13 +5006,17 @@ valid_tags = {
     "plural-only": "misc",  # Word only manifested in plural in this sense
     "plural-normally": "misc",  # Usually plural, but singular may be possible
     "poetic": "misc",
-    "polite": "misc",  # Politeness degree of verbs etc
+    "polite": "register",  # Politeness degree of verbs etc
     "polytonic": "misc",
-    "positive": "polarity",  # degree of comparison; opposite of negative for verb forms
+    "positive": "polarity",  # (degree of comparison); opposite of negative for verb forms
     "possessed": "misc",  # Marks object that is possessed, cf. possessed
     "possessive": "possession",  # Possession (marks who possesses)
-    "possessive-sg": "possession",  # Possessive with single object possessed
-    "possessive-pl": "possession",  # Possessive with multiple objects possessed
+    "possessive-singular": "possession",  # Possessive with single possessed
+    "possessive-plural": "possession",  # Possessive with multiple possessed
+    "possessive-masculine": "possession",  # Possessive with masculine possessed
+    "possessive-feminine": "possession",  # Possessive with feminine possessed
+    "possessive-common": "possession",  # Possessive with common-g possessed
+    "possessive-neuter": "possession",  # Possessive with neuter possessed
     "possibly": "misc",
     "postpositional": "misc",
     "potential": "mood",  # Verb mood
@@ -5083,10 +5093,8 @@ valid_tags = {
     "shinjitai": "misc",  # Simplified Japanese Kanji (after 1947)
     "short-form": "misc",  # Verb forms, отъпоустити/Old Church Slavonic
     "si-perfective": "misc",
-    "simple": "mood",  # XXX pending removal; test tell/English/Conjugation
     "simplified": "misc",
     "simultaneous": "misc",  # simultaneous converb, e.g. խածնել/Armenian
-    "single-possession": "misc",
     "singular": "number",  # Number, cf. plural, dual, trial, paucal
     "singular-normally": "misc",
     "singular-only": "misc",
@@ -5199,7 +5207,7 @@ valid_tags = {
     "unknown": "misc",  # Apparently verb form, e.g., जाँच्नु/Nepali
     "unmodified": "misc",  # Noun form, e.g., dikko/Sidamo (similar to person?)
     "unpossessed": "possession",  # Not possessed (often omitted); cf. possessed
-    "unspecified": "misc",  # Used in some conjugation/declension tables
+    "unspecified": "misc",  # селен/Macedonian uses this like proximal/distal
     "unstressed": "misc",  # Unstressed (unmarked, weaker) form
     "unstressed-before-j": "misc",  # unstressed when next word starts with /j/
     "uppercase": "misc",

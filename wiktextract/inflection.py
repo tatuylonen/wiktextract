@@ -12,7 +12,7 @@ from wiktextract.config import WiktionaryConfig
 from wiktextract.tags import valid_tags
 from wiktextract.inflectiondata import infl_map, infl_start_map, infl_start_re
 from wiktextract.datautils import data_append, data_extend, freeze
-from wiktextract.form_descriptions import classify_desc
+from wiktextract.form_descriptions import classify_desc, decode_tags
 
 # Column texts that are interpreted as an empty column.
 IGNORED_COLVALUES = set([
@@ -22,7 +22,6 @@ IGNORED_COLVALUES = set([
 # Words in title that cause addition of tags in all entries
 title_contains_global_map = {
     "possessive": "possessive",
-    "positive": "positive",
     "negative": "negative",
     "future": "future",
     "pf": "perfective",
@@ -34,6 +33,7 @@ title_contains_global_map = {
     "definite article": "definite",
     "indefinite article": "indefinite",
     "pre-reform": "dated",
+    "personal pronouns": "personal pronoun",
 }
 for k, v in title_contains_global_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -205,18 +205,19 @@ class HdrSpan(object):
 def is_superscript(ch):
     """Returns True if the argument is a superscript character."""
     assert isinstance(ch, str) and len(ch) == 1
-    return unicodedata.name(ch).startswith("SUPERSCRIPT ")
+    name = unicodedata.name(ch)
+    return re.match(r"SUPERSCRIPT |MODIFIER LETTER SMALL ", name) is not None
 
 
-def clean_header(word, col):
+def clean_header(word, col, skip_paren):
     """Cleans a row/column header for later processing."""
+    hdr_tags = []
     orig_col = col
-    col = re.sub(r"\s*\^\([^)]*\)", "", col)
     col = re.sub(r"(?s)\s*➤\s*$", "", col)
     col = re.sub(r"(?s)\s*,\s*$", "", col)
     col = re.sub(r"(?s)\s*•\s*$", "", col)
-    if col not in infl_map:
-        col = re.sub(r",?\s*\([^)]*\)\s*$", "", col)
+    if col not in infl_map and skip_paren:
+        col = re.sub(r"[,/]?\s+\([^)]*\)\s*$", "", col)
     col = col.strip()
     if re.search(r"^(There are |"
                  r"\*|"
@@ -237,16 +238,36 @@ def clean_header(word, col):
                  r"\^* Note:|"
                  r"Notes:)",
                 col):
-        return "", [], []
+        return "", [], [], []
     refs = []
     ref_symbols = "*△†0123456789"
-    if len(col) > 2 and col[-2] == "^" and col[-1] in ref_symbols:
-        col = col[:-2]
-        refs.append("*")
+    while True:
+        m = re.search(r"\^(.|\([^)]*\))$", col)
+        if not m:
+            break
+        r = m.group(1)
+        if r.startswith("(") and r.endswith(")"):
+            r = r[1:-1]
+        if r == "rare":
+            hdr_tags.append("rare")
+        elif r == "vos":
+            hdr_tags.append("formal")
+        elif r == "tú":
+            hdr_tags.append("informal")
+        else:
+            # XXX handle refs from m.group(1)
+            pass
+        col = col[:m.start()]
+    if col.endswith("ʳᵃʳᵉ"):
+        hdr_tags.append("rare")
+        col = col[:-4].strip()
+    if col.endswith("ᵛᵒˢ"):
+        hdr_tags.append("formal")
+        col = col[:-3].strip()
     while col and is_superscript(col[0]):
         if len(col) > 1 and col[1] in ("⁾", " ", ":"):
             # Note definition
-            return "", [], [[col[0], col[2:].strip()]]
+            return "", [], [[col[0], col[2:].strip()]], []
         refs.append(col[0])
         col = col[1:]
     while col and (is_superscript(col[-1]) or col[-1] in ("†",)):
@@ -255,7 +276,7 @@ def clean_header(word, col):
         col = col[:-1]
     if len(col) > 2 and col[1] in (")", " ", ":") and col[0].isdigit():
         # Another form of note definition
-        return "", [], [[col[0], col[2:].strip()]]
+        return "", [], [[col[0], col[2:].strip()]], []
     col = col.strip()
     if col.endswith("*"):
         col = col[:-1].strip()
@@ -263,9 +284,9 @@ def clean_header(word, col):
     if col.endswith("(*)"):
         col = col[:-3].strip()
         refs.append("*")
-    #print("CLEAN_HEADER: orig_col={!r} col={!r} refs={!r}"
-    #      .format(orig_col, col, refs))
-    return col.strip(), refs, []
+    # print("CLEAN_HEADER: orig_col={!r} col={!r} refs={!r} hdr_tags={}"
+    #       .format(orig_col, col, refs, hdr_tags))
+    return col.strip(), refs, [], hdr_tags
 
 
 def parse_title(title, source):
@@ -437,12 +458,12 @@ def compute_coltags(hdrspans, start, colspan, mark_used):
                 all(x.rownum != hdrspan.rownum or
                     x.start < hdrspan.start or
                     x.start + x.colspan > hdrspan.start + hdrspan.colspan or
-                    all(valid_tags[t] in ("number", "gender")
+                    all(valid_tags[t] in ("number", "gender", "case")
                         for ts in x.tagsets
                         for t in ts)
                     for x in hdrspans)):
                 # Multiple columns apply to the current cell, only
-                # gender/number tags present
+                # gender/number/case tags present
                 tagsets = hdrspan.tagsets
                 for x in hdrspans:
                     if (x is hdrspan or x.rownum != hdrspan.rownum or
@@ -460,8 +481,16 @@ def compute_coltags(hdrspans, start, colspan, mark_used):
                                                if valid_tags[t] == "gender")
                             gender_tags2 = set(t for t in tags2
                                                if valid_tags[t] == "gender")
-                            if ((num_tags1 == num_tags2) or
-                                (gender_tags1 == gender_tags2)):
+                            case_tags1 = set(t for t in tags1
+                                             if valid_tags[t] == "case")
+                            case_tags2 = set(t for t in tags2
+                                             if valid_tags[t] == "case")
+                            if ((num_tags1 == num_tags2 and
+                                 gender_tags1 == gender_tags2) or
+                                (num_tags1 == num_tags2 and
+                                 case_tags1 == case_tags2) or
+                                (gender_tags1 == gender_tags2 and
+                                 case_tags1 == case_tags2)):
                                 tags = set(tags1) | set(tags2)
                                 new_tagsets.append(tags)
                             else:
@@ -484,14 +513,17 @@ def compute_coltags(hdrspans, start, colspan, mark_used):
             new_coltags = set()
             for tags2 in tagsets:  # Earlier header
                 for tags1 in coltags:      # Tags found for current cell so far
-                    if (any(valid_tags[t] in ("mood", "tense", "person",
-                                              "number")
+                    if (any(valid_tags[t] in ("mood", "tense", "non-finite",
+                                              "person", "number")
                             for t in tags1) and
                         any(valid_tags[t] in ("non-finite",)
                             for t in tags2)):
                         tags2 = set()
                     elif (any(valid_tags[t] == "number" for t in tags1) and
                           any(valid_tags[t] == "number" for t in tags2)):
+                        tags2 = set()
+                    elif (any(valid_tags[t] == "number" for t in tags1) and
+                          any(valid_tags[t] == "gender" for t in tags2)):
                         tags2 = set()
                     tags = tuple(sorted(set(tags1) | tags2))
                     new_coltags.add(tags)
@@ -520,9 +552,9 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
     for x in titles:
         assert isinstance(x, str)
     # print("PARSE_SIMPLE_TABLE: TITLES:", titles)
-    # print("ROWS:")
-    # for row in rows:
-    #     print("  ", row)
+    print("ROWS:")
+    for row in rows:
+        print("  ", row)
     ret = []
     hdrspans = []
     col_has_text = []
@@ -582,7 +614,7 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
             if cell.is_title:
                 # It is a header cell
                 col = re.sub(r"\s+", " ", col)
-                text, refs, defs = clean_header(word, col)
+                text, refs, defs, hdr_tags = clean_header(word, col, True)
                 if not text:
                     continue
                 if text not in infl_map:
@@ -624,7 +656,8 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                         for tt in alt_tags:
                             new_coltags.add(tt)
                             # XXX which ones need to be removed?
-                            tags = tuple(sorted(set(tt) | set(rt0)))
+                            tags = tuple(sorted(set(tt) | set(rt0) |
+                                                set(hdr_tags)))
                             new_rowtags.add(tags)
                 rowtags = list(new_rowtags)
                 if any(new_coltags):
@@ -638,7 +671,13 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                     if j == 0:
                         assert col0_hdrspan is None
                         col0_hdrspan = hdrspan
-                    elif any(all_hdr_tags):
+                    elif (any(all_hdr_tags) and
+                          not (all(valid_tags[t] in ("person", "gender")
+                                   for ts in all_hdr_tags
+                                   for t in ts) and
+                               all(valid_tags[t] == "number"
+                                   for ts in col0_hdrspan.tagsets
+                                   for t in ts))):
                         # if col0_hdrspan is not None:
                         #     print("COL0 FOLLOWED HDR: {!r} by {!r} TAGS {}"
                         #           .format(col0_hdrspan.text, col,
@@ -669,31 +708,41 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
 
             # print("HAVE_TEXT:", repr(col))
             col = re.sub(r"[ \t\r]+", " ", col)
-            text, refs, defs = clean_header(word, col)
-            if text.find(" + ") >= 0:
+            if col.find(" + ") >= 0:
                 extra_split = ""
             else:
-                extra_split = "," if text.endswith("/") else ",/"
+                extra_split = "," if col.endswith("/") else ",/"
 
             # Split the cell text into alternatives
-            alts = re.split(r"[;•\n{}]| or ".format(extra_split), text)
+            alts = re.split(r"[;•\n{}]| or ".format(extra_split), col)
             # Handle the special case where romanization is given under
             # normal form, e.g. in Russian.  There can be multiple
             # comma-separated forms in each case.
             if (len(alts) % 2 == 0 and
-                all(classify_desc(x) == "other" and
-                    not any(is_superscript(xx) for xx in x)
+                all(classify_desc(re.sub(r"\^.*$", "",
+                                         "".join(xx for xx in x
+                                                 if not is_superscript(xx))))
+                    == "other"
                     for x in alts[:len(alts) // 2]) and
-                all(classify_desc(x) in ("romanization", "english")
+                all(classify_desc(re.sub(r"\^.*$", "",
+                                         "".join(xx for xx in x
+                                                 if not is_superscript(xx))))
+                    in ("romanization", "english")
                     for x in alts[len(alts) // 2:])):
                 alts = list(zip(alts[:len(alts) // 2],
                                 alts[len(alts) // 2:]))
             else:
-                alts = list((x, None) for x in alts)
+                alts = list((x, "") for x in alts)
             # Generate forms from the alternatives
             for form, base_roman in alts:
                 form = form.strip()
                 extra_tags = []
+                form, refs, defs, hdr_tags = clean_header(word, form, False)
+                extra_tags.extend(hdr_tags)
+                if base_roman:
+                    base_roman, _, _, hdr_tags = clean_header(word, base_roman,
+                                                              False)
+                    extra_tags.extend(hdr_tags)
                 ipas = []
                 if form.find("/") >= 0:
                     for m in re.finditer(r"/[^/]*/", form):
@@ -705,26 +754,31 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                 form = re.sub(r"(?i)^Main:", "", form)
                 form = re.sub(r"\s+", " ", form)
                 form = form.strip()
-                if form.endswith("ʳᵃʳᵉ"):
-                    extra_tags.append("rare")
-                    form = form[:-4].strip()
-                while form and is_superscript(form[-1]):
-                    # XXX handle refences in form
-                    form = form[:-1]
                 if form.startswith("*"):
                     form = form[1:]
                 roman = base_roman
+                # Handle parentheses in the table element.  We parse
+                # tags anywhere and romanizations anywhere but beginning.
                 m = re.search(r"\s*\(([^)]*)\)", form)
                 if m is not None:
-                    # XXX besides roman, it can be tags, e.g., (archaic)
-                    roman = m.group(1)
-                    form = (form[:m.start()] + " " + form[m.end():]).strip()
+                    paren = m.group(1)
+                    if classify_desc(paren) == "tags":
+                        tagsets1, topics1 = decode_tags(paren)
+                        if not topics1:
+                            for ts in tagsets1:
+                                extra_tags.extend(ts)
+                            form = (form[:m.start()] + " " +
+                                    form[m.end():]).strip()
+                    elif (m.start() > 0 and not roman and
+                          classify_desc(paren) in ("romanization", "english")):
+                        roman = paren
+                        form = (form[:m.start()] + " " + form[m.end():]).strip()
                 # Ignore certain forms that are not really forms
                 if form in ("", "not used", "not applicable"):
                     continue
                 # print("ROWTAGS:", rowtags)
                 # print("COLTAGS:", combined_coltags)
-                # print("TEXT:", repr(form))
+                # print("FORM:", repr(form))
                 for rt in rowtags:
                     for ct in combined_coltags:
                         tags = set(global_tags)
@@ -757,12 +811,15 @@ def parse_simple_table(ctx, word, lang, rows, titles, source):
                                 all(t in tags for t in genders)):
                                 tags = list(sorted(set(tags) - genders))
                         # Remove "personal" tag if have nth person; these
-                        # come up with e.g. reconhecer/Portuguese/Verb.
+                        # come up with e.g. reconhecer/Portuguese/Verb.  But
+                        # not if we also have "pronoun"
                         if ("personal" in tags and
+                            "pronoun" not in tags and
                             any(x in tags for x in
                                ["first-person", "second-person",
                                 "third-person"])):
                             tags.remove("personal")
+                        tags = tags - set(["dummy-mood"])
                         tags = list(sorted(tags))
                         dt = {"form": form, "tags": tags,
                               "source": source}
@@ -952,7 +1009,9 @@ def handle_wikitext_table(config, ctx, word, lang, data, tree, titles, source):
                     celltext = celltext[:idx]
                     is_title = True
                 elif (kind == NodeKind.TABLE_HEADER_CELL or
-                      (celltext in infl_map and celltext != word) or
+                      (re.sub(r"\s+", " ", celltext) in infl_map and
+                       celltext != word and
+                       celltext not in ("I", "es")) or
                       (style == cellstyle and
                        celltext != word and
                        not style.startswith("////"))):

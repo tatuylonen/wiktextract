@@ -69,3 +69,13 @@ class HeadTests(unittest.TestCase):
         self.assertEqual(self.ctx.debugs, [])
         print(ret)
         self.assertEqual(ret, (["form-of"], [{"word": "foo"}]))
+
+    def test_simple4(self):
+        data = {}
+        ret = parse_alt_or_inflection_of(self.ctx, "plural of instrumental")
+        self.assertEqual(self.ctx.errors, [])
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        print(ret)
+        self.assertEqual(ret, (["form-of", "plural"],
+                               [{"word": "instrumental"}]))
