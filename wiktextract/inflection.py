@@ -205,7 +205,10 @@ class HdrSpan(object):
 def is_superscript(ch):
     """Returns True if the argument is a superscript character."""
     assert isinstance(ch, str) and len(ch) == 1
-    name = unicodedata.name(ch)
+    try:
+        name = unicodedata.name(ch)
+    except ValueError:
+        return False
     return re.match(r"SUPERSCRIPT |MODIFIER LETTER SMALL ", name) is not None
 
 
