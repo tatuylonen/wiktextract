@@ -77,6 +77,7 @@ title_contains_wordtags_map = {
     "no supine stem": "no-supine",
     "no perfect stem": "no-perfect",
     "deponent": "deponent",
+    "no short forms": "no-short-form",
     "iō-variant": "iō-variant",
     "1st declension": "declension-1",
     "2nd declension": "declension-2",
@@ -543,7 +544,7 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
     assert isinstance(colspan, int) and colspan >= 1
     assert mark_used in (True, False)
     assert isinstance(celltext, str)  # For debugging only
-    debug_word = "2nd"  # None to disable
+    debug_word = None  # None to disable
     if celltext == debug_word:
         print("COMPUTE_COLTAGS CALLED start={} colspan={} celltext={!r}"
               .format(start, colspan, celltext))

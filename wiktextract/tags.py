@@ -4910,6 +4910,7 @@ valid_tags = {
     "no-second-person-singular-imperative": "misc",  # No imperative
     "no-senses": "misc",             # Added synthesized sense when no senses extracted
     "no-singulative": "misc",	     # no singulative form
+    "no-short-form": "misc",	     # no short forms (Russian)
     "no-superlative": "misc",        # The word has no superlative form
     "no-supine": "misc",             # The word has no supine form
     "no-third-person-singular-past-historic": "misc",  # Italian

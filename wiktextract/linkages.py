@@ -96,8 +96,10 @@ linkage_remove_prefixes_tags = {
 # These suffixes will be removed from linkages, leaving the rest.  This is
 # considered separately for each linkage in a list.
 linkage_remove_suffixes_re = re.compile(
-    r"\s+on (Wikispecies|Wikimedia Commons|"
-    r"[A-Z]\w+ Wiktionary|[A-Z]\w+ Wikipedia)\.?$")
+    r"(\s+on (Wikispecies|Wikimedia Commons|"
+    r"[A-Z]\w+ Wiktionary|[A-Z]\w+ Wikipedia)\.?|"
+    r"\s*[-–] Pre-reform orthography.*)"
+    r"$")
 
 # Ignore linkage parenthesized sections that contain one of these strings
 linkage_paren_ignore_contains_re = re.compile(
@@ -518,7 +520,8 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                 else:
                     # Try to find a parenthesized part at the end or from the
                     # middle.
-                    m = re.search("\s+\((([^()]|\([^()]*\))*)\)(\.$)?",
+                    m = re.search("\s+\((\d|\d\d|[^\d]([^()]|\([^()]*\))*)\)"
+                                  r"(\.$)?",
                                   item1)
                     if m:
                         par = m.group(1)
@@ -700,7 +703,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
             # Parse linkages with "value - english" syntax (e.g.,
             # man/Faroese)
             m = re.search(r" [-‐‑‒–—―] ", item1)
-            if m:
+            if m and item1.find("(") < 0:
                 suffix = item1[m.end():]
                 cls = classify_desc(suffix, no_unknown_starts=True)
                 if cls == "english":
