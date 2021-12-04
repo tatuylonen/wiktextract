@@ -457,7 +457,7 @@ def parse_title(title, source):
     return global_tags, word_tags, extra_forms
 
 
-def expand_header(word, lang, text, tags0):
+def expand_header(word, lang, text, tags0, silent=False):
     """Expands a cell header to tags, handling conditional expressions
     in infl_map.  This returns list of tuples of tags, each list element
     describing an alternative interpretation.  ``tags0`` is combined
@@ -467,13 +467,15 @@ def expand_header(word, lang, text, tags0):
     assert isinstance(lang, str)
     assert isinstance(text, str)
     assert isinstance(tags0, (list, tuple, set))
+    assert silent in (True, False)
     # print("EXPAND_HDR:", text)
     # First map the text using the inflection map
     if text in infl_map:
         v = infl_map[text]
     else:
         m = re.match(infl_start_re, text)
-        assert m is not None
+        if m is None:
+            return []  # Unrecognized header
         v = infl_start_map[m.group(1)]
         # print("INFL_START {} -> {}".format(text, v))
 
@@ -516,7 +518,7 @@ def expand_header(word, lang, text, tags0):
             # "if" condition is true if any of the listed tags is present
             cond = any(t in tags0 for t in c.split())
         # Warning message about missing conditions for debugging.
-        if cond == "default-true":
+        if cond == "default-true" and not silent:
             print("IF MISSING COND: word={} lang={} text={} tags0={} "
                   "c={} cond={}"
                   .format(word, lang, text, tags0, c, cond))
@@ -527,8 +529,9 @@ def expand_header(word, lang, text, tags0):
         else:
             v = v.get("else")
             if v is None:
-                print("IF WITHOUT ELSE EVALS False: {}/{} {!r} tags0={}"
-                      .format(word, lang, text, tags0))
+                if not silent:
+                    print("IF WITHOUT ELSE EVALS False: {}/{} {!r} tags0={}"
+                          .format(word, lang, text, tags0))
                 v = ""
 
 
@@ -725,6 +728,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
         global_tags.extend(more_global_tags)
         word_tags.extend(more_word_tags)
         ret.extend(extra_forms)
+    cell_rowcnt = collections.defaultdict(int)
     for row in rows:
         # print("ROW:", row)
         if not row:
@@ -763,6 +767,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 cell_initial = False
                 samecell_cnt -= 1
                 continue
+            first_row_of_cell = cell_rowcnt[id(cell)] == 0
+            cell_rowcnt[id(cell)] += 1
             # print("  COL:", col)
             col = cell.text
             if not col:
@@ -788,10 +794,12 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                 print("  UNHANDLED HEADER: {!r}".format(col))
                                 return None
                             continue
-                if infl_map.get(text, "") == "!":
-                    # Reset column headers
-                    # print("RESET HDRSPANS on: {}".format(text))
-                    hdrspans = []
+                v = expand_header(word, lang, text, [], silent=True)
+                if any("!" in tt for tt in v):
+                    # Reset column headers (only on first row of cell)
+                    if first_row_of_cell:
+                        # print("RESET HDRSPANS on: {}".format(text))
+                        hdrspans = []
                     continue
                 if have_text:
                     #print("  HAVE_TEXT BEFORE HDR:", col)
@@ -856,7 +864,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 continue
 
             # These values are ignored, at least form now
-            if col.startswith("# "):
+            if re.match(r"^(# |\(see )", col):
                 continue
 
             if j == 0 and (not col_has_text or not col_has_text[0]):
@@ -1218,8 +1226,8 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 if is_title:
                     while len(cols_headered) <= len(row):
                         cols_headered.append(False)
-                    v = infl_map.get(celltext, "")
-                    if v == "*":
+                    v = expand_header(word, lang, celltext, [], silent=True)
+                    if any("*" in tt for tt in v):
                         cols_headered[len(row)] = True
                         celltext = ""
                 # XXX extra tags, see "target" above

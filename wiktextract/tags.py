@@ -2914,6 +2914,7 @@ xlat_tags_map = {
     "dialectal or poetic": "dialectal poetic",
     "dialect": "dialectal",
     "obsolescent": "possibly obsolete",
+    "obsolete outside dialects": "obsolete dialectal",
     "antiquated": "dated",
     "19th century": "archaic",
     "dated or regional": "dated regional",

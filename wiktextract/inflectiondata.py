@@ -432,7 +432,11 @@ infl_map = {
     "mes": {"if": "first-person plural", "then": ""},
     "jūs": {"if": "second-person plural", "then": ""},
     "jie/jos": {"if": "third-person plural", "then": ""},
-    "non-finite forms": "",
+    "non-finite forms": {
+        "lang": ["Latin"],
+        "then": "!",  # Reset column inheritance
+        "else": "",
+    },
     "verbal nouns": "nominalization nominal-from-verb",
     "supine": "supine",
     "past historic": "past historic",
@@ -1212,6 +1216,10 @@ infl_map = {
     "directional": "directional",
     "possessive pronoun": "possessive pronoun",
     "possessive determiner": "possessive determiner",
+    "genderless, nonspecific (formal)": "gender-neutral formal",
+    "genderless": "gender-neutral",
+    "standard formal": "formal",
+    "archaic informal": "archaic informal",
     "Gen/Dat": "genitive dative",
     "Nom/Acc": "nominative accusative",
     "uncountable": "uncountable",
