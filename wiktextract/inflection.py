@@ -1369,13 +1369,14 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
     for x in tree.children:
         recurse(x, [])
 
-    with open("temp.XXX", "w") as f:
-        f.write(word + "\n")
-        f.write(lang + "\n")
-        f.write(pos + "\n")
-        f.write(section + "\n")
-        text = ctx.node_to_wikitext(tree)
-        f.write(text + "\n")
+    # # XXX this code is used for extracting tables for inflection tests
+    # with open("temp.XXX", "w") as f:
+    #     f.write(word + "\n")
+    #     f.write(lang + "\n")
+    #     f.write(pos + "\n")
+    #     f.write(section + "\n")
+    #     text = ctx.node_to_wikitext(tree)
+    #     f.write(text + "\n")
 
 # XXX change to use ctx.debug
 # XXX check interdecir/Spanish - singular/plural issues

@@ -10,6 +10,7 @@ from .tags import valid_tags, head_final_numeric_langs
 # Languages where possessive forms (e.g. pronouns) inflect according to the
 # gender/number of the possessed object(s)
 POSSESSIVE_POSSESSED_LANGS = set([
+    "Azerbaijani",
     "Danish",
     "Faroese",
     "Icelandic",
