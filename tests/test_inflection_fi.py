@@ -2796,3 +2796,623 @@ class HeadTests(unittest.TestCase):
             ],
         }
         self.assertEqual(ret, expected)
+
+    def test_Finnish_noun1(self):
+        ret = self.xinfl("aamupala", "Finnish", "noun", "Declension", """
+{| class="inflection-table+fi-decl+vsSwitcher" data-toggle-category="inflection"
+
+|-
+
+! class="vsToggleElement" colspan="4" | Inflection of <i class="Latn+mention" lang="fi">aamupala</i> ([[Kotus]] type 9/[[Appendix:Finnish nominal inflection/kala|kala]], no gradation)
+
+
+|- class="vsShow"
+
+! class="case-column" colspan="2" | nominative
+
+
+| class="number-column" | <span class="Latn" lang="fi">[[aamupala#Finnish|aamupala]]</span>
+
+
+| class="number-column" | <span class="Latn+form-of+lang-fi+nom%2F%2Facc%7Cp-form-of+++++++" lang="fi">[[aamupalat#Finnish|aamupalat]]</span>
+
+
+|- class="vsShow"
+
+! colspan="2" | genitive
+
+
+| <span class="Latn+form-of+lang-fi+gen%7Cs-form-of+++++++" lang="fi">[[aamupalan#Finnish|aamupalan]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+gen%7Cp-form-of+++++++" lang="fi">[[aamupalojen#Finnish|aamupalojen]]</span>
+
+
+|- class="vsShow"
+
+! colspan="2" | partitive
+
+
+| <span class="Latn+form-of+lang-fi+par%7Cs-form-of+++++++" lang="fi">[[aamupalaa#Finnish|aamupalaa]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+par%7Cp-form-of+++++++" lang="fi">[[aamupaloja#Finnish|aamupaloja]]</span>
+
+
+|- class="vsShow"
+
+! colspan="2" | illative
+
+
+| <span class="Latn+form-of+lang-fi+ill%7Cs-form-of+++++++" lang="fi">[[aamupalaan#Finnish|aamupalaan]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+ill%7Cp-form-of+++++++" lang="fi">[[aamupaloihin#Finnish|aamupaloihin]]</span>
+
+
+|- class="vsHide"
+
+! class="case-column" colspan="2" |
+
+
+! class="number-column" | singular
+
+
+! class="number-column" | plural
+
+
+|- class="vsHide"
+
+! colspan="2" | nominative
+
+
+| <span class="Latn" lang="fi">[[aamupala#Finnish|aamupala]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+nom%2F%2Facc%7Cp-form-of+++++++" lang="fi">[[aamupalat#Finnish|aamupalat]]</span>
+
+
+|- class="vsHide"
+
+! rowspan="2" | accusative
+
+
+! nom.<sup title="The+nominative+accusative+is+used%2C+for+example%2C+as+the+object+of+certain+passives+and+imperatives." />
+
+
+| <span class="Latn" lang="fi">[[aamupala#Finnish|aamupala]]</span>
+
+
+| rowspan="2" | <span class="Latn+form-of+lang-fi+nom%2F%2Facc%7Cp-form-of+++++++" lang="fi">[[aamupalat#Finnish|aamupalat]]</span>
+
+
+|- class="vsHide"
+
+! gen.
+
+
+| <span class="Latn+form-of+lang-fi+gen%7Cs-form-of+++++++" lang="fi">[[aamupalan#Finnish|aamupalan]]</span>
+
+
+|- class="vsHide"
+
+! colspan="2" | genitive
+
+
+| <span class="Latn+form-of+lang-fi+gen%7Cs-form-of+++++++" lang="fi">[[aamupalan#Finnish|aamupalan]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+gen%7Cp-form-of+++++++" lang="fi">[[aamupalojen#Finnish|aamupalojen]]</span><br><span class="Latn+form-of+lang-fi+rare-gen%7Cp-form-of+++++++" lang="fi">[[aamupalain#Finnish|aamupalain]]</span><sup>rare</sup>
+
+
+|- class="vsHide"
+
+! colspan="2" | partitive
+
+
+| <span class="Latn+form-of+lang-fi+par%7Cs-form-of+++++++" lang="fi">[[aamupalaa#Finnish|aamupalaa]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+par%7Cp-form-of+++++++" lang="fi">[[aamupaloja#Finnish|aamupaloja]]</span>
+
+
+|- class="vsHide"
+
+! colspan="2" | inessive
+
+
+| <span class="Latn+form-of+lang-fi+ine%7Cs-form-of+++++++" lang="fi">[[aamupalassa#Finnish|aamupalassa]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+ine%7Cp-form-of+++++++" lang="fi">[[aamupaloissa#Finnish|aamupaloissa]]</span>
+
+
+|- class="vsHide"
+
+! colspan="2" | elative
+
+
+| <span class="Latn+form-of+lang-fi+ela%7Cs-form-of+++++++" lang="fi">[[aamupalasta#Finnish|aamupalasta]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+ela%7Cp-form-of+++++++" lang="fi">[[aamupaloista#Finnish|aamupaloista]]</span>
+
+
+|- class="vsHide"
+
+! colspan="2" | illative
+
+
+| <span class="Latn+form-of+lang-fi+ill%7Cs-form-of+++++++" lang="fi">[[aamupalaan#Finnish|aamupalaan]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+ill%7Cp-form-of+++++++" lang="fi">[[aamupaloihin#Finnish|aamupaloihin]]</span>
+
+
+|- class="vsHide"
+
+! colspan="2" | adessive
+
+
+| <span class="Latn+form-of+lang-fi+ade%7Cs-form-of+++++++" lang="fi">[[aamupalalla#Finnish|aamupalalla]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+ade%7Cp-form-of+++++++" lang="fi">[[aamupaloilla#Finnish|aamupaloilla]]</span>
+
+
+|- class="vsHide"
+
+! colspan="2" | ablative
+
+
+| <span class="Latn+form-of+lang-fi+abl%7Cs-form-of+++++++" lang="fi">[[aamupalalta#Finnish|aamupalalta]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+abl%7Cp-form-of+++++++" lang="fi">[[aamupaloilta#Finnish|aamupaloilta]]</span>
+
+
+|- class="vsHide"
+
+! colspan="2" | allative
+
+
+| <span class="Latn+form-of+lang-fi+all%7Cs-form-of+++++++" lang="fi">[[aamupalalle#Finnish|aamupalalle]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+all%7Cp-form-of+++++++" lang="fi">[[aamupaloille#Finnish|aamupaloille]]</span>
+
+
+|- class="vsHide"
+
+! colspan="2" | essive
+
+
+| <span class="Latn+form-of+lang-fi+ess%7Cs-form-of+++++++" lang="fi">[[aamupalana#Finnish|aamupalana]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+ess%7Cp-form-of+++++++" lang="fi">[[aamupaloina#Finnish|aamupaloina]]</span>
+
+
+|- class="vsHide"
+
+! colspan="2" | translative
+
+
+| <span class="Latn+form-of+lang-fi+tra%7Cs-form-of+++++++" lang="fi">[[aamupalaksi#Finnish|aamupalaksi]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+tra%7Cp-form-of+++++++" lang="fi">[[aamupaloiksi#Finnish|aamupaloiksi]]</span>
+
+
+|- class="vsHide"
+
+! colspan="2" | instructive
+
+
+| &mdash;
+
+
+| <span class="Latn+form-of+lang-fi+ist%7Cp-form-of+++++++" lang="fi">[[aamupaloin#Finnish|aamupaloin]]</span>
+
+
+|- class="vsHide"
+
+! colspan="2" | abessive
+
+
+| <span class="Latn+form-of+lang-fi+abe%7Cs-form-of+++++++" lang="fi">[[aamupalatta#Finnish|aamupalatta]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+abe%7Cp-form-of+++++++" lang="fi">[[aamupaloitta#Finnish|aamupaloitta]]</span>
+
+
+|- class="vsHide"
+
+! colspan="2" | comitative
+
+
+| &mdash;
+
+
+| <span class="Latn+form-of+lang-fi+com-pl-a-form-of+++++++" lang="fi">[[aamupaloineen#Finnish|aamupaloineen]]</span>
+
+
+|}
+
+
+{| class="inflection-table+vsSwitcher" data-toggle-category="inflection" style="color%3A+rgb%280%25%2C0%25%2C30%25%29%3B+border%3A+solid+1px+rgb%2880%25%2C80%25%2C100%25%29%3B+text-align%3A+center%3B" cellspacing="1" cellpadding="2"
+
+|- style="background%3A+%23e2f6e2%3B"
+
+! class="vsToggleElement" style="min-width%3A+30em%3B+text-align%3A+left%3B" colspan="3" | [[Appendix:Finnish possessive suffixes|Possessive forms]] of <i class="Latn+mention" lang="fi">aamupala</i> (type ''kala'')
+
+
+|- class="vsHide"
+
+! style="min-width%3A+11em%3B+background%3A%23c0e4c0" | possessor
+
+
+! style="min-width%3A+10em%3B+background%3A%23c0e4c0" | singular
+
+
+! style="min-width%3A+10em%3B+background%3A%23c0e4c0" | plural
+
+
+|- class="vsHide" style="background%3Argb%2895%25%2C95%25%2C100%25%29"
+
+! style="background%3A%23e2f6e2" | 1st person
+
+
+| <span class="Latn+form-of+lang-fi+possessive%7C1s%7Ckala%7CYWFtdXBhbHx8fGE%3D-form-of+++++++" lang="fi">[[aamupalani#Finnish|aamupalani]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+possessive%7C1p%7Ckala%7CYWFtdXBhbHx8fGE%3D-form-of+++++++" lang="fi">[[aamupalamme#Finnish|aamupalamme]]</span>
+
+
+|- class="vsHide" style="background%3Argb%2895%25%2C95%25%2C100%25%29"
+
+! style="background%3A%23e2f6e2" | 2nd person
+
+
+| <span class="Latn+form-of+lang-fi+possessive%7C2s%7Ckala%7CYWFtdXBhbHx8fGE%3D-form-of+++++++" lang="fi">[[aamupalasi#Finnish|aamupalasi]]</span>
+
+
+| <span class="Latn+form-of+lang-fi+possessive%7C2p%7Ckala%7CYWFtdXBhbHx8fGE%3D-form-of+++++++" lang="fi">[[aamupalanne#Finnish|aamupalanne]]</span>
+
+
+|- class="vsHide" style="background%3Argb%2895%25%2C95%25%2C100%25%29"
+
+! style="background%3A%23e2f6e2" | 3rd person
+
+
+| colspan="2" | <span class="Latn+form-of+lang-fi+possessive%7C3s%7Ckala%7CYWFtdXBhbHx8fGE%3D-form-of+++++++" lang="fi">[[aamupalansa#Finnish|aamupalansa]]</span>
+
+
+|}
+[[Category:Finnish kala-type nominals|AAMUPALA]]<templatestyles src="Module%3Afi-nominals%2Fstyle.css">
+""")
+        expected = {
+            "forms": [
+              {
+                "form": "9/kala",
+                "source": "Declension title",
+                "tags": [
+                  "class"
+                ]
+              },
+              {
+                "form": "aamupala",
+                "source": "Declension",
+                "tags": [
+                  "nominative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupalat",
+                "source": "Declension",
+                "tags": [
+                  "nominative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "aamupala",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "nominative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupalat",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "nominative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "aamupalan",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "genitive",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupalat",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "genitive",
+                  "plural"
+                ]
+              },
+              {
+                "form": "aamupalan",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupalojen",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "plural"
+                ]
+              },
+              {
+                "form": "aamupalain",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "plural",
+                  "rare"
+                ]
+              },
+              {
+                "form": "aamupalaa",
+                "source": "Declension",
+                "tags": [
+                  "partitive",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupaloja",
+                "source": "Declension",
+                "tags": [
+                  "partitive",
+                  "plural"
+                ]
+              },
+              {
+                "form": "aamupalassa",
+                "source": "Declension",
+                "tags": [
+                  "inessive",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupaloissa",
+                "source": "Declension",
+                "tags": [
+                  "inessive",
+                  "plural"
+                ]
+              },
+              {
+                "form": "aamupalasta",
+                "source": "Declension",
+                "tags": [
+                  "elative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupaloista",
+                "source": "Declension",
+                "tags": [
+                  "elative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "aamupalaan",
+                "source": "Declension",
+                "tags": [
+                  "illative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupaloihin",
+                "source": "Declension",
+                "tags": [
+                  "illative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "aamupalalla",
+                "source": "Declension",
+                "tags": [
+                  "adessive",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupaloilla",
+                "source": "Declension",
+                "tags": [
+                  "adessive",
+                  "plural"
+                ]
+              },
+              {
+                "form": "aamupalalta",
+                "source": "Declension",
+                "tags": [
+                  "ablative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupaloilta",
+                "source": "Declension",
+                "tags": [
+                  "ablative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "aamupalalle",
+                "source": "Declension",
+                "tags": [
+                  "allative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupaloille",
+                "source": "Declension",
+                "tags": [
+                  "allative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "aamupalana",
+                "source": "Declension",
+                "tags": [
+                  "essive",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupaloina",
+                "source": "Declension",
+                "tags": [
+                  "essive",
+                  "plural"
+                ]
+              },
+              {
+                "form": "aamupalaksi",
+                "source": "Declension",
+                "tags": [
+                  "singular",
+                  "translative"
+                ]
+              },
+              {
+                "form": "aamupaloiksi",
+                "source": "Declension",
+                "tags": [
+                  "plural",
+                  "translative"
+                ]
+              },
+              {
+                "form": "aamupaloin",
+                "source": "Declension",
+                "tags": [
+                  "instructive",
+                  "plural"
+                ]
+              },
+              {
+                "form": "aamupalatta",
+                "source": "Declension",
+                "tags": [
+                  "abessive",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupaloitta",
+                "source": "Declension",
+                "tags": [
+                  "abessive",
+                  "plural"
+                ]
+              },
+              {
+                "form": "aamupaloineen",
+                "source": "Declension",
+                "tags": [
+                  "comitative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "no-gradation",
+                "source": "Declension title",
+                "tags": [
+                  "word-tags"
+                ]
+              },
+              {
+                "form": "kala",
+                "source": "Declension title",
+                "tags": [
+                  "class"
+                ]
+              },
+              {
+                "form": "aamupalani",
+                "source": "Declension",
+                "tags": [
+                  "first-person",
+                  "possessive",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupalamme",
+                "source": "Declension",
+                "tags": [
+                  "first-person",
+                  "plural",
+                  "possessive"
+                ]
+              },
+              {
+                "form": "aamupalasi",
+                "source": "Declension",
+                "tags": [
+                  "possessive",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "aamupalanne",
+                "source": "Declension",
+                "tags": [
+                  "plural",
+                  "possessive",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "aamupalansa",
+                "source": "Declension",
+                "tags": [
+                  "plural",
+                  "possessive",
+                  "singular",
+                  "third-person"
+                ]
+              }
+            ],
+        }
+        self.assertEqual(ret, expected)
