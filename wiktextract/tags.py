@@ -3099,7 +3099,7 @@ xlat_tags_map = {
     "third active infinitive": "infinitive-iii active",
     "third passive infinitive": "infinitive-iii passive",
     "British spelling": "UK",
-    "Roman spelling": "Roman",
+    "Roman spelling": "romanization",
     "Perso-Arabic spelling": "Perso-Arabic",
     "Arabic/Persian": "Arabic Persian",
     "Arabic spelling": "Arabic",
@@ -3530,7 +3530,7 @@ xlat_tags_map = {
     "misconstruction of": "alt-of misconstruction",
     "misconstructed": "misconstruction",
     "ungrammatical": "misconstruction",
-    "Latin spelling of": "alt-of Latin",
+    "Latin spelling of": "alt-of romanization",
     "Latn": "Latin",
     "Late Anglo-Norman spelling of": "alt-of Anglo-Norman",
     "Jawi spelling of": "alt-of Jawi",
@@ -3550,7 +3550,7 @@ xlat_tags_map = {
     "Transliteration": "transliteration",
     "Cyrillic spelling of": "alt-of Cyrillic",
     "Cyrillic spelling": "Cyrillic",
-    "Latin spelling": "Latin",
+    "Latin spelling": "romanization",
     "British standard spellingh of": "alt-of UK standard",
     "British and Canada standard spelling of":
     "alt-of UK Canada standard",
@@ -4392,7 +4392,7 @@ valid_tags = {
     "Tirhuta": "script",  # Script (historical: Maithili, Sanskrit)
     "Warang-Citi": "script",  # Script (Ho language, East India)
     "Zhuyin": "script",  # Mandarin phonetic symbols script
-    "Hán-Nôm": "detail",  # Vietnamese latin spelling with diacritics?
+    "Hán-Nôm": "detail",  # Vietnamese Latin spelling with diacritics?
     "Jyutping": "detail",  # used in Cantonese
     "McCune-Reischauer": "detail",  # Used in Korean
     "Rōmaji": "detail",  # Used in Okinawan, Japanese? for Latin characters
@@ -5018,8 +5018,8 @@ valid_tags = {
     "positive": "polarity",  # (degree of comparison); opposite of negative for verb forms
     "possessed": "misc",  # Marks object that is possessed, cf. possessed
     "possessive": "possession",  # Possession (marks who possesses)
-    "possessive-singular": "possession",  # Possessive with single possessed
-    "possessive-plural": "possession",  # Possessive with multiple possessed
+    "possessive-single": "possession",  # Possessive with single possessed
+    "possessive-many": "possession",  # Possessive with multiple possessed
     "possessive-masculine": "possession",  # Possessive with masculine possessed
     "possessive-feminine": "possession",  # Possessive with feminine possessed
     "possessive-common": "possession",  # Possessive with common-g possessed

@@ -21,6 +21,16 @@ IGNORED_COLVALUES = set([
     "-", "־", "᠆", "‐", "‑", "‒", "–", "—", "―", "−",
     "⸺", "⸻", "﹘", "﹣", "－", "/"])
 
+# These tags are never inherited from above
+noinherit_tags = set([
+    "infinitive-i",
+    "infinitive-i-long",
+    "infinitive-ii",
+    "infinitive-iii",
+    "infinitive-iv",
+    "infinitive-v",
+])
+
 # Words in title that cause addition of tags in all entries
 title_contains_global_map = {
     "possessive": "possessive",
@@ -54,6 +64,8 @@ title_contains_wordtags_map = {
     "weak": "weak",
     "countable": "countable",
     "uncountable": "uncountable",
+    "inanimate": "inanimate",
+    "animate": "animate",
     "transitive": "transitive",
     "intransitive": "intransitive",
     "ditransitive": "ditransitive",
@@ -155,6 +167,80 @@ lang_genders = [
         "Russian",
     ]),
      set(["masculine", "feminine", "neuter"])],
+]
+
+
+# Specification for language-specific processing.  Each entry starts
+# with a list of languages that it applies to (a language can be
+# specified in multiple entries) and then a list of parts-of-speech.
+# It is then followed by any number of pattern-tags pairs, where
+# pattern will be escaped, except ^ at the beginning is interpreted as
+# restricting it to the beginning.  The matched parts will be removed
+# from the word.
+lang_specific_data = [
+    [["German"], ["verb"],
+     ["^ich ", "first-person singular"],
+     ["^du ", "second-person singular"],
+     ["^er ", "third-person singular"],
+     ["^wir ", "first-person plural"],
+     ["^ihr ", "second-person plural"],
+     ["^sie ", "third-person plural"],
+     ["^dass ich ", "first-person singular subordinate-clause"],
+     ["^dass du ", "second-person singular subordinate-clause"],
+     ["^dass er ", "third-person singular subordinate-clause"],
+     ["^dass wir ", "first-person plural subordinate-clause"],
+     ["^dass ihr ", "second-person plural subordinate-clause"],
+     ["^dass sie ", "third-person plural subordinate-clause"],
+     [" (du)", "second-person singular"],
+     [" (ihr)", "second-person plural"],
+     ],
+]
+specific_by_lang = collections.defaultdict(list)
+for lst in lang_specific_data:
+    assert isinstance(lst, list)
+    assert len(lst) >= 3
+    for rule_lang in lst[0]:
+        assert isinstance(rule_lang, str)
+        for rule_pos in lst[1]:
+            assert isinstance(rule_pos, str)
+            for rule in lst[2:]:
+                assert isinstance(rule, list)
+                rule_pattern, rule_tags = rule
+                assert isinstance(rule_pattern, str)
+                assert isinstance(rule_tags, str)
+                for t in rule_tags.split():
+                    assert t in valid_tags
+                specific_by_lang[rule_lang, rule_pos].append(
+                    [rule_pattern, rule_tags])
+specific_by_lang_re = {}
+specific_by_lang_map = {}
+for (rule_lang, rule_pos), lst in specific_by_lang.items():
+    starts = list(x[0][1:] for x in lst if x[0].startswith("^"))
+    others = list(x[0] for x in lst if not x[0].startswith("^"))
+    rs = []
+    if starts:
+        rs.append(r"^(" + "|".join(re.escape(x) for x in starts) + ")")
+    if others:
+        rs.append(r"(" + "|".join(re.escape(x) for x in others) + ")")
+    specific_by_lang_re[rule_lang, rule_pos] = re.compile("|".join(rs))
+    ht = {}
+    specific_by_lang_map[rule_lang, rule_pos] = ht
+    for k, v in lst:
+        if k.startswith("^"):
+            k = k[1:]
+        assert k not in ht
+        ht[k] = v.split()
+
+
+# Tag combination mappings for specific languages/part-of-speech.  These are
+# used as a post-processing step for forms extracted from tables.  Each
+# element has list of languages, list of part-of-speech, and one or more
+# source set - replacement set pairs.
+lang_tag_mappings = [
+    [["Armenian"], ["noun"],
+     [["possessive", "singular"], ["possessive", "possessive-single"]],
+     [["possessive", "plural"], ["possessive", "possessive-many"]],
+    ],
 ]
 
 
@@ -328,6 +414,13 @@ def parse_title(title, source):
     for m in re.finditer(title_contains_wordtags_re, title):
         word_tags.extend(title_contains_wordtags_map[
             m.group(0).lower()].split())
+    # Check for <x>-type at the beginning of title (e.g., Armenian)
+    m = re.search(r"\b(\w+-type|accent-\w+|\w+-stem)\b", title)
+    if m:
+        dt = {"form": m.group(1),
+              "source": source + " title",
+              "tags": ["class"]}
+        extra_forms.append(dt)
     # Parse parenthesized part from title
     for m in re.finditer(r"\(([^)]*)\)", title):
         for elem in m.group(1).split(","):
@@ -447,14 +540,19 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
     assert isinstance(colspan, int) and colspan >= 1
     assert mark_used in (True, False)
     assert isinstance(celltext, str)  # For debugging only
+    debug_word = "2nd"  # None to disable
+    if celltext == debug_word:
+        print("COMPUTE_COLTAGS CALLED start={} colspan={} celltext={!r}"
+              .format(start, colspan, celltext))
+        for hdrspan in hdrspans:
+            print("  row={} start={} colspans={} tagsets={}"
+                  .format(hdrspan.rownum, hdrspan.start, hdrspan.colspan,
+                          hdrspan.tagsets))
     used = set()
     coltags = None
     # XXX should look at tag classes and not take tags in the same class(es)
     # from higher up
-    done = False
     for hdrspan in reversed(hdrspans):
-        if done:
-            break
         tagsets = hdrspan.tagsets
         if (hdrspan.start > start or
             hdrspan.start + hdrspan.colspan < start + colspan):
@@ -511,54 +609,59 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
                     tagsets = new_tagsets
             else:
                 # Ignore this hdrspan
-                # if celltext == "ich steige aus":
-                #     print("Ignoring row={} start={} tagsets={}"
-                #           .format(hdrspan.rownum, hdrspan.start,
-                #                   hdrspan.tagsets))
+                if celltext == debug_word:
+                    print("Ignoring row={} start={} tagsets={}"
+                          .format(hdrspan.rownum, hdrspan.start,
+                                  hdrspan.tagsets))
                 continue
         key = (hdrspan.start, hdrspan.colspan)
         if key in used:
-            break
+            if celltext == debug_word:
+                print("Cellspan already used: start={} key={} rownum={}"
+                      .format(hdrspan.start, hdrspan.colspan, hdrspan.rownum))
+            continue
         used.add(key)
         if mark_used:
             hdrspan.used = True
         # Merge into coltags
         if coltags is None:
             coltags = list(tuple(sorted(tt)) for tt in tagsets)
-            # if celltext == "ich steige aus":
-            #     print("initial row={} start={} coltags={}"
-            #           .format(hdrspan.rownum, hdrspan.start, coltags))
+            if celltext == debug_word:
+                print("initial row={} start={} coltags={}"
+                      .format(hdrspan.rownum, hdrspan.start, coltags))
         else:
             stop = False
             new_coltags = set()
             for tags2 in tagsets:  # Earlier header
                 for tags1 in coltags:      # Tags found for current cell so far
-                    # if celltext == "ich steige aus":
-                    #     print("rownum={} start={} earlier={} current={}"
-                    #           .format(hdrspan.rownum, hdrspan.start,
-                    #                   tags2, tags1))
+                    if celltext == debug_word:
+                        print("rownum={} start={} earlier={} current={}"
+                              .format(hdrspan.rownum, hdrspan.start,
+                                      tags2, tags1))
                     if any(valid_tags[t] == "detail" for t in tags2):
                         tags2 = set()
-                        stop = True
+                        stop = "encountered detail"
                     if (any(valid_tags[t] in ("mood", "tense", "non-finite",
                                               "person", "number")
                             for t in tags1) and
                         any(valid_tags[t] in ("non-finite",)
                             for t in tags2)):
                         tags2 = set()
-                        stop = True
+                        stop = "encountered non-finite"
                     elif (any(valid_tags[t] == "number" for t in tags1) and
                           any(valid_tags[t] == "number" for t in tags2)):
                         tags2 = set()
-                        stop = True
+                        stop = "number again"
                     elif (any(valid_tags[t] == "number" for t in tags1) and
                           any(valid_tags[t] == "gender" for t in tags2)):
                         tags2 = set()
-                        stop = True
+                        stop = "gender after number"
                     tags = tuple(sorted(set(tags1) | tags2))
                     new_coltags.add(tags)
             coltags = list(new_coltags)
             if stop:
+                if celltext == debug_word:
+                    print("stop reason: {}".format(stop))
                 break
     if coltags is None:
         coltags = [()]
@@ -566,68 +669,6 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
     # print("COMPUTE_COLTAGS {} {} {}: {}"
     #       .format(start, colspan, mark_used, coltags))
     return coltags
-
-
-# Specification for language-specific processing.  Each entry starts
-# with a list of languages that it applies to (a language can be
-# specified in multiple entries) and then a list of parts-of-speech.
-# It is then followed by any number of pattern-tags pairs, where
-# pattern will be escaped, except ^ at the beginning is interpreted as
-# restricting it to the beginning.  The matched parts will be removed
-# from the word.
-lang_specific_data = [
-    [["German"], ["verb"],
-     ["^ich ", "first-person singular"],
-     ["^du ", "second-person singular"],
-     ["^er ", "third-person singular"],
-     ["^wir ", "first-person plural"],
-     ["^ihr ", "second-person plural"],
-     ["^sie ", "third-person plural"],
-     ["^dass ich ", "first-person singular subordinate-clause"],
-     ["^dass du ", "second-person singular subordinate-clause"],
-     ["^dass er ", "third-person singular subordinate-clause"],
-     ["^dass wir ", "first-person plural subordinate-clause"],
-     ["^dass ihr ", "second-person plural subordinate-clause"],
-     ["^dass sie ", "third-person plural subordinate-clause"],
-     [" (du)", "second-person singular"],
-     [" (ihr)", "second-person plural"],
-     ],
-]
-specific_by_lang = collections.defaultdict(list)
-for lst in lang_specific_data:
-    assert isinstance(lst, list)
-    assert len(lst) >= 3
-    for rule_lang in lst[0]:
-        assert isinstance(rule_lang, str)
-        for rule_pos in lst[1]:
-            assert isinstance(rule_pos, str)
-            for rule in lst[2:]:
-                assert isinstance(rule, list)
-                rule_pattern, rule_tags = rule
-                assert isinstance(rule_pattern, str)
-                assert isinstance(rule_tags, str)
-                for t in rule_tags.split():
-                    assert t in valid_tags
-                specific_by_lang[rule_lang, rule_pos].append(
-                    [rule_pattern, rule_tags])
-specific_by_lang_re = {}
-specific_by_lang_map = {}
-for (rule_lang, rule_pos), lst in specific_by_lang.items():
-    starts = list(x[0][1:] for x in lst if x[0].startswith("^"))
-    others = list(x[0] for x in lst if not x[0].startswith("^"))
-    rs = []
-    if starts:
-        rs.append(r"^(" + "|".join(re.escape(x) for x in starts) + ")")
-    if others:
-        rs.append(r"(" + "|".join(re.escape(x) for x in others) + ")")
-    specific_by_lang_re[rule_lang, rule_pos] = re.compile("|".join(rs))
-    ht = {}
-    specific_by_lang_map[rule_lang, rule_pos] = ht
-    for k, v in lst:
-        if k.startswith("^"):
-            k = k[1:]
-        assert k not in ht
-        ht[k] = v.split()
 
 
 def lang_specific_tags(lang, pos, form):
@@ -749,6 +790,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                             continue
                 if infl_map.get(text, "") == "!":
                     # Reset column headers
+                    # print("RESET HDRSPANS on: {}".format(text))
                     hdrspans = []
                     continue
                 if have_text:
@@ -777,6 +819,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                                 set(hdr_tags)))
                             new_rowtags.add(tags)
                 rowtags = list(new_rowtags)
+                new_coltags = set(x for x in new_coltags
+                                  if not any(t in noinherit_tags for t in x))
                 if any(new_coltags):
                     hdrspan = HdrSpan(j, colspan, rownum, new_coltags, col)
                     hdrspans.append(hdrspan)
@@ -836,7 +880,10 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 extra_split = "," if col.endswith("/") else ",/"
 
             # Split the cell text into alternatives
-            alts = re.split(r"[;•\n{}]| or ".format(extra_split), col)
+            if col and is_superscript(col[0]):
+                alts = [col]
+            else:
+                alts = re.split(r"[;•\n{}]| or ".format(extra_split), col)
             # Handle the special case where romanization is given under
             # normal form, e.g. in Russian.  There can be multiple
             # comma-separated forms in each case.
@@ -936,7 +983,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         for langs, genders in lang_genders:
                             if (lang in langs and
                                 all(t in tags for t in genders)):
-                                tags = list(sorted(set(tags) - genders))
+                                tags = set(tags) - genders
                         # Remove "personal" tag if have nth person; these
                         # come up with e.g. reconhecer/Portuguese/Verb.  But
                         # not if we also have "pronoun"
@@ -947,6 +994,18 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                 "third-person"])):
                             tags.remove("personal")
                         tags = tags - set(["dummy-mood"])
+                        # Perform language-specific tag replacements
+                        for lst in lang_tag_mappings:
+                            assert isinstance(lst, (list, tuple))
+                            assert len(lst) >= 3
+                            if lang not in lst[0] or pos not in lst[1]:
+                                continue
+                            for src, dst in lst[2:]:
+                                assert isinstance(src, (list, tuple))
+                                assert isinstance(dst, (list, tuple))
+                                if all(t in tags for t in src):
+                                    tags = (tags - set(src)) | set(dst)
+                        # Add the form
                         tags = list(sorted(tags))
                         dt = {"form": form, "tags": tags,
                               "source": source}
@@ -980,7 +1039,9 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 if "noun" in tags:
                     tags = list(t for t in tags if t != "noun")
                 elif "indefinite" in tags or "definite" in tags:
-                    tags = list(sorted(set(tags) | set(["article"])))
+                    continue  # Skip the articles
+                # XXX remove: alternative code that adds "article" tag
+                #     tags = list(sorted(set(tags) | set(["article"])))
                 dt = dt.copy()
                 dt["tags"] = tags
                 new_ret.append(dt)
@@ -1291,6 +1352,14 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
     assert tree.kind == NodeKind.ROOT
     for x in tree.children:
         recurse(x, [])
+
+    with open("temp.XXX", "w") as f:
+        f.write(word + "\n")
+        f.write(lang + "\n")
+        f.write(pos + "\n")
+        f.write(section + "\n")
+        text = ctx.node_to_wikitext(tree)
+        f.write(text + "\n")
 
 # XXX change to use ctx.debug
 # XXX check interdecir/Spanish - singular/plural issues

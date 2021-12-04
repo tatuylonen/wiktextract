@@ -20,11 +20,24 @@ POSSESSIVE_POSSESSED_LANGS = set([
     "Swedish",
 ])
 
+# Languages that have numbered infinitives (infinitive-i etc)
+LANGS_WITH_NUMBERED_INFINITIVES = set([
+    "Finnish",
+    "Ingrian",
+    "Veps",
+    "Northern Sami",
+    "Proto-Samic",
+    "Skolt Sami",
+    "Lule Sami",
+    "Inari Sami",
+    "Pite Sami",
+])
+
 infl_map = {
     "plural": {
         "if": "possessive",
         "lang": POSSESSIVE_POSSESSED_LANGS,
-        "then": "possessive-plural",
+        "then": "possessive-many",
         "else": {
             "if": "combined-form",
             "then": "object-plural",
@@ -34,7 +47,7 @@ infl_map = {
     "singular": {
         "if": "possessive",
         "lang": POSSESSIVE_POSSESSED_LANGS,
-        "then": "possessive-singular",
+        "then": "possessive-single",
         "else": {
             "if": "combined-form",
             "then": "object-singular",
@@ -208,8 +221,8 @@ infl_map = {
     "1st person plural": "first-person plural",
     "2nd person plural": "second-person plural",
     "3rd person plural": "third-person plural",
-    "single possession": "possessive possessive-singular",
-    "multiple possessions": "possessive possessive-plural",
+    "single possession": "possessive possessive-single",
+    "multiple possessions": "possessive possessive-many",
     "1st person sing.": "first-person singular",
     "2nd person sing.": "second-person singular",
     "3rd person sing.": "third-person singular",
@@ -299,34 +312,34 @@ infl_map = {
     "Bare forms:": "indefinite",
     "past": "past",
     "1st": {
-        "lang": ["Finnish", "Ingrian", "Veps",
-                 "Northern Sami", "Proto-Samic", "Skolt Sami", "Lule Sami",
-                 "Inari Sami", "Pite Sami"],
+        "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-i",
         "else": "first-person",
     },
     "2nd":  {
-        "lang": ["Finnish", "Ingrian", "Veps",
-                 "Northern Sami", "Proto-Samic", "Skolt Sami", "Lule Sami",
-                 "Inari Sami", "Pite Sami"],
+        "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-ii",
         "else": "second-person",
     },
     "3rd":  {
-        "lang": ["Finnish", "Veps"],
+        "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-iii",
         "else": "third-person",
     },
     "4th": {
-        "lang": ["Finnish", "Veps"],
+        "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-iv",
         "else": "fourth-person",
     },
-    "5th": "infinitive-v",
+    "5th": {
+        "lang": LANGS_WITH_NUMBERED_INFINITIVES,
+        "if": "infinitive",
+        "then": "infinitive-v",
+    },
     "Forms with the definite article": "definite",
     "Case / #": "",
     # XXX needs special handling ['-льник', '-овка', '-ник']
@@ -350,13 +363,36 @@ infl_map = {
     "potential mood": "potential",
     "Nominal forms": "!",  # Reset column inheritance
     "long 1st": "infinitive-i-long",
-    "I": {"lang": "Finnish", "if": "infinitive", "then": "infinitive-i"},
-    "long I": {"lang": "Finnish", "if": "infinitive",
-               "then": "infinitive-i-long"},
-    "II": {"lang": "Finnish", "if": "infinitive", "then": "infinitive-ii"},
-    "III": {"lang": "Finnish", "if": "infinitive", "then": "infinitive-iii"},
-    "IV": {"lang": "Finnish", "if": "infinitive", "then": "infinitive-iv"},
-    "V": {"lang": "Finnish", "if": "infinitive", "then": "infinitive-v"},
+    "I": {
+         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
+         "if": "infinitive",
+          "then": "infinitive-i",
+    },
+    "long I": {
+        "lang": LANGS_WITH_NUMBERED_INFINITIVES,
+        "if": "infinitive",
+        "then": "infinitive-i-long",
+    },
+    "II": {
+        "lang": LANGS_WITH_NUMBERED_INFINITIVES,
+        "if": "infinitive",
+        "then": "infinitive-ii",
+    },
+    "III": {
+        "lang": LANGS_WITH_NUMBERED_INFINITIVES,
+        "if": "infinitive",
+        "then": "infinitive-iii",
+    },
+    "IV": {
+        "lang": LANGS_WITH_NUMBERED_INFINITIVES,
+        "if": "infinitive",
+        "then": "infinitive-iv",
+    },
+    "V": {
+        "lang": LANGS_WITH_NUMBERED_INFINITIVES,
+        "if": "infinitive",
+        "then": "infinitive-v",
+    },
     "agent": "agent",
     "Plural (m/f)": "plural masculine feminine",
     "(strong noun)": "strong",
@@ -1936,8 +1972,16 @@ infl_map = {
 
 
     # These are headers for columns that contain titles even if not header style
-    "noun case": "*",  # e.g., kolme/Finnish
-    "adverbial form": "*",  # e.g., kolme/Finnish
+    "noun case": {
+        "lang": "Finnish",
+        "then": "*",  # e.g., kolme/Finnish
+        "else": "",
+    },
+    "adverbial form": {
+        "lang": "Finnish",
+        "then": "*",  # e.g., kolme/Finnish
+        "else": "adverbial",
+    },
 }
 
 
