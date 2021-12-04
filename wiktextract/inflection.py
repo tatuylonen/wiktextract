@@ -12,14 +12,15 @@ from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
 from wiktextract.config import WiktionaryConfig
 from wiktextract.tags import valid_tags
 from wiktextract.inflectiondata import infl_map, infl_start_map, infl_start_re
-from wiktextract.datautils import data_append, data_extend, freeze
+from wiktextract.datautils import (data_append, data_extend, freeze,
+                                   split_at_comma_semi)
 from wiktextract.form_descriptions import classify_desc, decode_tags
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 
 # Column texts that are interpreted as an empty column.
 IGNORED_COLVALUES = set([
     "-", "־", "᠆", "‐", "‑", "‒", "–", "—", "―", "−",
-    "⸺", "⸻", "﹘", "﹣", "－", "/"])
+    "⸺", "⸻", "﹘", "﹣", "－", "/", "?"])
 
 # These tags are never inherited from above
 noinherit_tags = set([
@@ -48,6 +49,8 @@ title_contains_global_map = {
     "personal pronouns": "personal pronoun",
     "composed forms of": "multiword-construction",
     "subordinate-clause forms of": "subordinate-clause",
+    "western lombard": "Western-Lombard",
+    "eastern lombard": "Eastern-Lombard",
 }
 for k, v in title_contains_global_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -458,12 +461,13 @@ def parse_title(title, source):
     return global_tags, word_tags, extra_forms
 
 
-def expand_header(word, lang, text, tags0, silent=False):
+def expand_header(ctx, word, lang, text, tags0, silent=False):
     """Expands a cell header to tags, handling conditional expressions
     in infl_map.  This returns list of tuples of tags, each list element
     describing an alternative interpretation.  ``tags0`` is combined
     column and row tags for the cell in which the text is being interpreted
     (conditional expressions in inflection data may depend on it)."""
+    assert isinstance(ctx, Wtp)
     assert isinstance(word, str)
     assert isinstance(lang, str)
     assert isinstance(text, str)
@@ -494,8 +498,9 @@ def expand_header(word, lang, text, tags0, silent=False):
         # Otherwise the value should be a dictionary describing a conditional
         # expression.
         if not isinstance(v, dict):
-            print("UNIMPLEMENTED INFL_MAP VALUE: {}/{}/{}: {}"
-                  .format(word, lang, text, infl_map[text]))
+            ctx.debug("inflection table: internal: "
+                      "UNIMPLEMENTED INFL_MAP VALUE: {}"
+                      .format(infl_map[text]))
             return [()]
         # Evaluate the conditional expression.
         assert isinstance(v, dict)
@@ -512,12 +517,17 @@ def expand_header(word, lang, text, tags0, silent=False):
                 cond = lang in c
         # Handle "if" condition.  The value must be a string containing
         # a space-separated list of tags.  The condition evaluates to True
-        # if ``tags0`` contains at least one of the listed tags.
+        # if ``tags0`` contains all of the listed tags.  If the condition
+        # is of the form "any: ...tags...", then any of the tags will be
+        # enough.
         if cond and "if" in v:
             c = v["if"]
             assert isinstance(c, str)
             # "if" condition is true if any of the listed tags is present
-            cond = any(t in tags0 for t in c.split())
+            if c.startswith("any: "):
+                cond = any(t in tags0 for t in c[5:].split())
+            else:
+                cond = all(t in tags0 for t in c.split())
         # Warning message about missing conditions for debugging.
         if cond == "default-true" and not silent:
             print("IF MISSING COND: word={} lang={} text={} tags0={} "
@@ -792,15 +802,17 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                             text = text1
                         elif not re.match(infl_start_re, text):
                             if text not in IGNORED_COLVALUES:
-                                print("  UNHANDLED HEADER: {!r}".format(col))
-                                return None
+                                ctx.debug("inflection table: "
+                                          "unhandled header: {!r}"
+                                          .format(col))
+                                text = "error-unrecognized-form"
                             continue
                 # Mark that the column has text (we are not at top)
                 while len(col_has_text) <= j:
                     col_has_text.append(False)
                 col_has_text[j] = True
                 # Check if the header expands to reset hdrspans
-                v = expand_header(word, lang, text, [], silent=True)
+                v = expand_header(ctx, word, lang, text, [], silent=True)
                 if any("!" in tt for tt in v):
                     # Reset column headers (only on first row of cell)
                     if first_row_of_cell:
@@ -826,7 +838,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                     for ct0 in compute_coltags(hdrspans, j, colspan, False,
                                                col):
                         tags0 = set(rt0) | set(ct0) | set(global_tags)
-                        alt_tags = expand_header(word, lang, text, tags0)
+                        alt_tags = expand_header(ctx, word, lang, text, tags0)
                         all_hdr_tags.update(alt_tags)
                         for tt in alt_tags:
                             new_coltags.add(tt)
@@ -890,16 +902,16 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
 
             # print("HAVE_TEXT:", repr(col))
             col = re.sub(r"[ \t\r]+", " ", col)
-            if col.find(" + ") >= 0:
-                extra_split = ""
-            else:
-                extra_split = "," if col.endswith("/") else ",/"
-
             # Split the cell text into alternatives
             if col and is_superscript(col[0]):
                 alts = [col]
             else:
-                alts = re.split(r"[;•\n{}]| or ".format(extra_split), col)
+                separators = [";", "•", r"\n", " or "]
+                if col.find(" + ") < 0:
+                    separators.append(",")
+                    if not col.endswith("/"):
+                        separators.append("/")
+                alts = split_at_comma_semi(col, separators=separators)
             # Handle the special case where romanization is given under
             # normal form, e.g. in Russian.  There can be multiple
             # comma-separated forms in each case.
@@ -1062,8 +1074,6 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 dt["tags"] = tags
                 new_ret.append(dt)
             ret = new_ret
-        else:
-            print("UNHANDLED NOUN IN {}/{}".format(word, lang))
 
     if word_tags:
         word_tags = list(sorted(set(word_tags)))
@@ -1096,7 +1106,6 @@ def handle_generic_table(ctx, data, word, lang, pos, rows, titles, source):
     if ret is None:
         # XXX handle other table formats
         # We were not able to handle the table
-        print("UNHANDLED TABLE FORMAT in {}/{}".format(word, lang))
         return
 
     # Add the returned forms but eliminate duplicates.
@@ -1234,7 +1243,8 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 if is_title:
                     while len(cols_headered) <= len(row):
                         cols_headered.append(False)
-                    v = expand_header(word, lang, celltext, [], silent=True)
+                    v = expand_header(ctx, word, lang, celltext, [],
+                                      silent=True)
                     if any("*" in tt for tt in v):
                         cols_headered[len(row)] = True
                         celltext = ""
@@ -1288,6 +1298,9 @@ def handle_html_table(config, ctx, word, lang, pos, data, tree, titles, source):
 def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
     """Parses an inflection section on a page.  ``data`` should be the
     data for a part-of-speech, and inflections will be added to it."""
+
+    print("PARSE_INFLECTION_SECTION {}/{}/{}/{}"
+          .format(word, lang, pos, section))
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, Wtp)
     assert isinstance(data, dict)
@@ -1297,8 +1310,6 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
     assert isinstance(section, str)
     assert isinstance(tree, WikiNode)
     source = section
-
-    # print("PARSE_INFLECTION_SECTION {}/{}/{}".format(word, lang, section))
 
     def recurse_navframe(node, titles):
         titleparts = []
@@ -1312,7 +1323,8 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
                 titleparts.append(node)
                 return
             if not isinstance(node, WikiNode):
-                print("UNHANDLED IN NAVFRAME:", repr(node))
+                ctx.debug("inflection table: unhandled in NavFrame: {}"
+                          .format(node))
                 return
             kind = node.kind
             if kind == NodeKind.HTML:
@@ -1369,14 +1381,14 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
     for x in tree.children:
         recurse(x, [])
 
-    # # XXX this code is used for extracting tables for inflection tests
-    # with open("temp.XXX", "w") as f:
-    #     f.write(word + "\n")
-    #     f.write(lang + "\n")
-    #     f.write(pos + "\n")
-    #     f.write(section + "\n")
-    #     text = ctx.node_to_wikitext(tree)
-    #     f.write(text + "\n")
+    # XXX this code is used for extracting tables for inflection tests
+    with open("temp.XXX", "w") as f:
+        f.write(word + "\n")
+        f.write(lang + "\n")
+        f.write(pos + "\n")
+        f.write(section + "\n")
+        text = ctx.node_to_wikitext(tree)
+        f.write(text + "\n")
 
 # XXX change to use ctx.debug
 # XXX check interdecir/Spanish - singular/plural issues

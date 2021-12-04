@@ -432,7 +432,7 @@ class LinkageTests(unittest.TestCase):
         data = self.run_data("(intransitive, formal, to wander about) meander")
         self.assertEqual(data, {"related": [
             {"sense": "to wander about",
-             "tags": ["intransitive", "formal"],
+             "tags": ["formal", "intransitive"],
              "word": "meander"}]})
 
     def test_prefix11(self):
@@ -528,7 +528,7 @@ class LinkageTests(unittest.TestCase):
                              "foo")
         self.assertEqual(data, {"related": [
             {"word": "foo",
-             "tags": ["intransitive", "transitive", "verb", "frequentative"]}]})
+             "tags": ["frequentative", "intransitive", "transitive", "verb"]}]})
 
     def test_prefix24(self):
         data = self.run_data("foo: verb")
@@ -542,7 +542,7 @@ class LinkageTests(unittest.TestCase):
         self.assertEqual(data, {"related": [
             {"word": "foo",
              "sense": "to run",
-             "tags": ["intransitive", "ditransitive", "transitive"]}]})
+             "tags": ["ditransitive", "intransitive", "transitive"]}]})
 
     def test_prefix26(self):
         data = self.run_data("(to run, transitive): foo")
@@ -645,8 +645,8 @@ class LinkageTests(unittest.TestCase):
     def test_suffix8(self):
         data = self.run_data("(no superlative): foo, bar - adjectives")
         self.assertEqual(data, {"related": [
-            {"tags": ["no-superlative", "adjective"], "word": "foo"},
-            {"tags": ["no-superlative", "adjective"], "word": "bar"},
+            {"tags": ["adjective", "no-superlative"], "word": "foo"},
+            {"tags": ["adjective", "no-superlative"], "word": "bar"},
         ]})
 
     def test_eq1(self):
@@ -769,7 +769,7 @@ class LinkageTests(unittest.TestCase):
                              lang="Yiddish")
         print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(data, {"related": [
-            {"word": "ווײַב‎", "tags": ["neuter", "feminine"]},
+            {"word": "ווײַב‎", "tags": ["feminine", "neuter"]},
             {"word": "פֿרוי‎", "tags": ["feminine"], "roman": "froy"},
         ]})
 
@@ -778,7 +778,7 @@ class LinkageTests(unittest.TestCase):
         data = self.run_data("ווײַב‎ n (vayb) or f, פֿרוי‎ f (froy)",
                              lang="Yiddish")
         self.assertEqual(data, {"related": [
-            {"word": "ווײַב‎", "tags": ["neuter", "feminine"],
+            {"word": "ווײַב‎", "tags": ["feminine", "neuter"],
              "roman": "vayb"},
             {"word": "פֿרוי‎", "tags": ["feminine"], "roman": "froy"},
         ]})
@@ -805,7 +805,7 @@ class LinkageTests(unittest.TestCase):
                              lang="French")
         self.assertEqual(data, {"related": [
             {"word": "Pays-Bas espagnois",
-             "tags": ["masculine", "singular", "plural"]},
+             "tags": ["masculine", "plural", "singular"]},
         ]})
 
     def test_begining_tags1(self):

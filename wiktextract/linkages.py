@@ -406,6 +406,10 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
     if not item:
         return None
 
+    # Kludge: if the item contains ")/" (with possibly spaces in between),
+    # replace it by a comma so it gets split.
+    item = re.sub(r"\)\s*/", "), ", item)
+
     # The item may contain multiple comma-separated linkages
     if base_roman:
         subitems = [item]
@@ -455,6 +459,21 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
         alt = base_alt  # Usually None
         taxonomic = None
         english = base_english
+
+        # Some words have derived terms with parenthesized quoted English
+        # descriptions, which can sometimes essentially be tags
+        m = re.search(r"\s*\(“([^”)]*)”\)", item1)
+        if m:
+            t = m.group(1)
+            item1 = (item1[:m.start()] + item1[m.end():]).strip()
+            cls = classify_desc(t)
+            if cls == "tags":
+                if qualifier:
+                    qualifier += ", " + t
+                else:
+                    qualifier = t
+            else:
+                english = t
 
         # Some Korean words use "word (alt, oman, “english”) pattern
         # See 滿/Korean
@@ -762,6 +781,8 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                 lst = w.split("／") if len(w) > 1 else [w]
                 if len(lst) == 1:
                     lst = w.split(" / ")
+                if len(lst) == 1 and len(lst[0]) >= 6:
+                    lst = w.split("/")
                 if len(lst) > 1:
                     # Treat each alternative as separate linkage
                     for w in lst:

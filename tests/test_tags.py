@@ -14,7 +14,7 @@ class TagTests(unittest.TestCase):
 
     def test_unknown(self):
         ret, topics = decode_tags("unknowntag")
-        self.assertEqual(ret, [("error-unknown-tag", "unknowntag")])
+        self.assertEqual(ret, [("error-unknown-tag",)])
 
     def test_tags1(self):
         ret, topics = decode_tags("singular")
@@ -66,8 +66,7 @@ class TagTests(unittest.TestCase):
 
     def test_tags13(self):
         ret, topics = decode_tags("class 2a stress pattern xyz")
-        self.assertEqual(ret, [("class-2a", "error-unknown-tag",
-                                "stress pattern xyz")])
+        self.assertEqual(ret, [("class-2a", "error-unknown-tag",)])
 
     def test_tags14(self):
         ret, topics = decode_tags("Cockney rhyming slang")
@@ -84,13 +83,13 @@ class TagTests(unittest.TestCase):
 
     def test_tags17(self):
         ret, topics = decode_tags("colloquial Cockney Test rhyming slang")
-        self.assertEqual(ret, [("Cockney", "Test", "colloquial",
+        self.assertEqual(ret, [("Cockney", "colloquial",
                                 "error-unknown-tag", "slang")])
 
     def test_tags18(self):
         ret, topics = decode_tags("colloquial Cockney Test unknown1 "
                                   "rhyming slang")
-        self.assertEqual(ret, [("Cockney", "Test unknown1", "colloquial",
+        self.assertEqual(ret, [("Cockney", "colloquial",
                                 "error-unknown-tag", "slang")])
 
     def test_tags19(self):
@@ -143,7 +142,7 @@ class TagTests(unittest.TestCase):
 
     def test_tags28(self):
         ret, topics = decode_tags("next 4")
-        self.assertEqual(ret, [("4", "error-unknown-tag", "next")])
+        self.assertEqual(ret, [("error-unknown-tag", "next")])
 
     def test_tags29(self):
         ret, topics = decode_tags("Baan Nong Duu")
@@ -199,7 +198,7 @@ class TagTests(unittest.TestCase):
 
     def test_tags41(self):
         ret, topics = decode_tags("transitive of")
-        self.assertEqual(ret, [("error-unknown-tag", "of", "transitive")])
+        self.assertEqual(ret, [("error-unknown-tag", "transitive")])
 
     def test_tags42(self):
         ret, topics = decode_tags("first/third-person singular present "
@@ -295,6 +294,23 @@ class TagTests(unittest.TestCase):
     def test_tags62(self):
         ret, topics = decode_tags("definite singular and plural")
         self.assertEqual(ret, [("definite", "plural", "singular")])
+
+    def test_tags63(self):
+        ret, topics = decode_tags("first-person plural "
+                                  "reflexive/dative/accusative form")
+        self.assertEqual(ret, [("accusative", "dative", "first-person",
+                                "plural", "reflexive")])
+
+        self.assertEqual(topics, [])
+
+    def test_tags64(self):
+        # This has an ignored part
+        ret, topics = decode_tags("archaic, supplanted by stato")
+        self.assertEqual(ret, [("archaic",)])
+
+    def test_tags65(self):
+        ret, topics = decode_tags("archaic, totallyinvalidgarbage")
+        self.assertEqual(ret, [("archaic", "error-unknown-tag")])
 
     def test_topics1(self):
         ret, topics = decode_tags("nautical")

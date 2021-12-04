@@ -3,6 +3,7 @@
 # Copyright (c) 2018-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
+import functools
 import collections
 from .config import WiktionaryConfig
 from wikitextprocessor import ALL_LANGUAGES, Wtp
@@ -66,20 +67,28 @@ def data_extend(ctx, data, key, values):
         data_append(ctx, data, key, x)
 
 
-def split_at_comma_semi(text, extra=()):
+@functools.lru_cache(maxsize=20)
+def make_split_re(seps):
+    """Cached helper function for split_at_comma_semi."""
+
+
+def split_at_comma_semi(text, separators=(",", ";", "，"), extra=()):
     """Splits the text at commas and semicolons, unless they are inside
-    parenthesis."""
+    parenthesis.  ``separators`` is default separators (setting it eliminates
+    default separators).  ``extra`` is extra separators to be used in addition
+    to ``separators``.  The separators in ``separators`` and ``extra`` must
+    be valid regexp pieces (already escaped if needed)."""
     assert isinstance(text, str)
+    assert isinstance(separators, (list, tuple))
     assert isinstance(extra, (list, tuple))
     lst = []
     paren_cnt = 0
     bracket_cnt = 0
     ofs = 0
     parts = []
-    split_re = r"[][(),;，]"  # Note: special unicode comma
     if extra:
-        split_re = "({})|{}".format(split_re,
-                                    "|".join(re.escape(x) for x in extra))
+        separators = tuple(separators) + tuple(extra)
+    split_re = r"[][()]|" + "|".join(separators)
     for m in re.finditer(split_re, text):
         if ofs < m.start():
             parts.append(text[ofs:m.start()])
@@ -87,17 +96,11 @@ def split_at_comma_semi(text, extra=()):
             return [text]  # Don't split if it is the only content
         ofs = m.end()
         token = m.group(0)
-        if token == "[":
+        if token in "([":
             bracket_cnt += 1
             parts.append(token)
-        elif token == "]":
+        elif token in ")]":
             bracket_cnt -= 1
-            parts.append(token)
-        elif token == "(":
-            paren_cnt += 1
-            parts.append(token)
-        elif token == ")":
-            paren_cnt -= 1
             parts.append(token)
         elif paren_cnt > 0 or bracket_cnt > 0:
             parts.append(token)

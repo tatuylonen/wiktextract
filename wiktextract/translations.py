@@ -438,7 +438,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
         topics = []
 
         for part in split_at_comma_semi(item, extra=[
-                " / ", " ／ ", "| furthermore: "]):
+                " / ", " ／ ", r"\| furthermore: "]):
             # Substitute the magic characters back to original
             # translations (this is part of dealing with
             # phrasal translations containing commas).

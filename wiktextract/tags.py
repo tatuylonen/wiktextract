@@ -898,6 +898,7 @@ uppercase_tags = set([
     "East Slovakia",
     "East",
     "Eastern Armenian",
+    "Eastern Lombard",
     "Eastern New England",
     "Eastern Syriac",
     "Eastern",
@@ -2030,6 +2031,7 @@ uppercase_tags = set([
     "West Saxon",
     "West",
     "Western Armenian",
+    "Western Lombard",
     "Western Quebec",
     "Western Rumelia",
     "Western Syriac",
@@ -2289,6 +2291,7 @@ xlat_tags_map = {
     "Dialect: Oslo": "dialectal Oslo",
     "regiolectal": "dialectal",
     "archaic or regiolectal": "archaic dialectal",
+    "archaic or regional": "archaic dialectal",
     "Canada: Ontario": "Ontario",
     "Canada: British Columbia": "British-Columbia",
     "GenAm": "General-American",
@@ -2535,6 +2538,16 @@ xlat_tags_map = {
     "without a main word": "without-noun",
     "informal 1st possessive": "informal first-person possessive",
     "informal augmentations": "informal augmented",
+    "strumental/locative/lative form": "instrumental locative lative",
+    "instrumental/locative/lative form": "instrumental locative lative",
+    "reflexive/dative/accusative form": "reflexive dative accusative",
+    "reflexive/accusative/dative form": "reflexive accusative dative",
+    "third-person/impersonal": "third-person impersonal",
+    "impersonal/third-person": "impersonal third-person",
+    "lative form": "lative",
+    "reflexive form": "reflexive",
+    "dative form": "dative",
+    "accusative form": "accusative",
     "formal or literary": ["formal", "literary"],
     "formal or plural": ["formal", "plural"],
     "formal and written": "formal literary",
@@ -3485,10 +3498,12 @@ xlat_tags_map = {
     "short for": "alt-of abbreviation",
     "short form": "short-form",
     "eclipsed form of": "alt-of abbreviation eclipsis",
-    "apocopic form of": "alt-of abbreviation apocope",
-    "apocopic form": "apocope abbreviation",
-    "apocopated": "apocope abbreviation",
-    "apocopate": "apocope abbreviation",
+    "apocopic form of": "alt-of abbreviation apocopic",
+    "apocope": "apocopic",
+    "truncated apocopic form": "apocopic",
+    "apocopic form": "apocopic abbreviation",
+    "apocopated": "apocopic abbreviation",
+    "apocopate": "apocopic abbreviation",
     "h-prothesized form of": "alt-of prothesis-h",
     "acronym of": "alt-of abbreviation acronym",
     "acronym": "abbreviation acronym",
@@ -3645,6 +3660,8 @@ xlat_tags_map = {
     "used attributively": "attributive",
     "used predicatively": "predicative",
     "used substatively": "substantive",
+    "substantival use of the verbal voice": "nominal-from-verb",
+    "in ancient phrases": "idiomatic",
     "unofficial spelling": "nonstandard",
     "rare nonstandard spellings": "rare nonstandard",
     "as rare alternative form": "rare",
@@ -3658,6 +3675,8 @@ xlat_tags_map = {
     "old-fashioned": "dated",
     "rarely used": "rare",
     "rarely": "rare",
+    "partially supplied": "",
+    "partially supplanted": "",
     "present tense seldom used": "present-rare",
     "often in place of present tense": "present often",
     "conjugated non-suppletively in the present tense": "irregular",
@@ -4296,31 +4315,32 @@ tag_categories = {
              # Note that interrogative also used for, e.g., pronouns
     "non-finite": 160,  # infinitive, participle, ...
     "polarity": 150,  # positive, negative, connegative
-    "pos": 20,  # Specifies part-of-speech
-    "category": 11,  # person, animate, inanimate,
+    "pos": 50,  # Specifies part-of-speech
+    "category": 40,  # person, animate, inanimate,
                  # (virile, nonvirile?), countable, uncountable
-    "transitivity": 10,  # intransitive, transitive, ditransitive,
+    "transitivity": 35,  # intransitive, transitive, ditransitive,
                          # ambitransitive
     # "participants",  # reflexive, reciprocal
-    "register": 7,  # dialectal, formal, informal, slang, vulgar
-    "dialect": 6,  # Typically uppercase tags specifying dialectal variations,
+    "register": 30,  # dialectal, formal, informal, slang, vulgar
+    "dialect": 25,  # Typically uppercase tags specifying dialectal variations,
                    # region, language, who standardized, or time period
                    # when used
-    "class": 5,  # Inflection class (Bantu languages, Japanese, etc)
-    "trigger": 4,  # Triggers something (e.g., mutation) in some context
-    "gradation": 4,  # gradation or qualifier
-    "derivation": 3,  # Specifies derivation (nominalization, agent,
+    "class": 20,  # Inflection class (Bantu languages, Japanese, etc)
+    "trigger": 15,  # Triggers something (e.g., mutation) in some context
+    "gradation": 15,  # gradation or qualifier
+    "derivation": 13,  # Specifies derivation (nominalization, agent,
                    # nominal-from-verb, ...)
-    "mod": 2,  # Provides a modified form (e.g., abbreviation, mutation)
-    "pragmatic": 2,  # Specifies pragmatics (e.g., stressed/unstressed)
-    "phonetic": 2,  # Describes some phonetic aspect
-    "lexical": 2,  # Describes some lexical/typographic aspect
-    "with": 2,  # Co-occurs with something
-    "order": 2,  # Word position or order
-    "detail": 1,  # Provides some detail
-    "script": 1,  # Provides version of word in given script in forms;
+    "mod": 10,  # Provides a modified form (e.g., abbreviation, mutation)
+    "pragmatic": 10,  # Specifies pragmatics (e.g., stressed/unstressed)
+    "phonetic": 10,  # Describes some phonetic aspect
+    "lexical": 10,  # Describes some lexical/typographic aspect
+    "with": 10,  # Co-occurs with something
+    "order": 10,  # Word position or order
+    "detail": 5,  # Provides some detail
+    "script": 5,  # Provides version of word in given script in forms;
                   # sometimes also used as tag for language/country
-    "misc": 0,  # lots of miscellaneous/uncategorized stuff
+    "misc": 1,  # lots of miscellaneous/uncategorized stuff
+    "error": 0,  # error tags
     "unknown": -1,  # Only used internally
 }
 
@@ -4456,7 +4476,7 @@ valid_tags = {
     "anterior": "tense",  # French seems to have "past anterior" tense
     "aorist": "tense",  # Verb form (perfective past)  E.g., Latin, Macedonian
     "aorist-ii": "tense",  # Albanian
-    "apocope": "misc",
+    "apocopic": "misc",   # Omission of last vowel (+ following consonants)
     "applicative": "mood",  # Verb form
     "approximative": "case",  # Noun form (case?), e.g., марксизм/Komi-Zyrian
     "archaic": "misc",
@@ -4542,7 +4562,7 @@ valid_tags = {
     "compound-of": "misc",
     "concessive": "mood",  # Verb form
     "conclusive": "mood",  # Verb form (e.g., Bulgarian)
-    "concrete": "misc",  # Slavic verbs
+    "concrete": "misc",  # Slavic verbs; also used to describe nouns
     "conditional": "mood",  # Verb mood
     "conditional-i": "mood",  # Verb mood (German)
     "conditional-ii": "mood",  # Verb mood (German)
@@ -4655,12 +4675,12 @@ valid_tags = {
     "epicene": "misc",
     "equative": "case",  # Case (indicates something is like something else)
     "ergative": "misc",
-    "error-fixme": "misc",
-    "error-lua-exec": "misc",
-    "error-lua-timeout": "misc",
-    "error-unknown-tag": "misc",
-    "error-misspelling": "misc",
-    "error-unrecognized-form": "misc",
+    "error-fixme": "error",        # "(FIXME)" recognized in Wiktionary
+    "error-lua-exec": "error",     # Lua error occurred
+    "error-lua-timeout": "error",  # Lua code execution timed out
+    "error-unknown-tag": "error",  # Tag not recognized
+    "error-misspelling": "error",  # Misspelling was recognized in Wiktionary
+    "error-unrecognized-form": "error",  # Word head or table hdr unrecognized
     "especially": "misc",
     "essive": "case",  # Case
     "essive-formal": "case",  # Hungarian case
@@ -4851,6 +4871,7 @@ valid_tags = {
     "matronymic": "misc",
     "medial": "misc",
     "mediopassive": "voice",
+    "meliorative": "misc",  # XXX See essere/Italian/Noun word head
     "metaphoric": "misc",
     "metonymically": "misc",
     "metrically": "misc",  # Used in Sanskrit word heads

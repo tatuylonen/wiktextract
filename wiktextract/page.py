@@ -1119,6 +1119,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
                     subtext = clean_node(config, ctx, None, item.children,
                                          template_fn=usex_template_fn)
+                    subtext = re.sub(r"\s*\(please add an English "
+                                     r"translation of this "
+                                     "(usage example|quote)\)",
+                                     "", subtext).strip()
+
                     lines = subtext.split("\n")
                     lines = list(x for x in lines
                                  if not re.match(
@@ -1222,11 +1227,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     tr = re.sub(r"^[#*:]+\s*", "", tr)
                     tr = re.sub(r"[ \t\r]+", " ", tr).strip()
                     tr = re.sub(r"\[\s*…\s*\]", "[…]", tr)
-                    if tr in ("(please add an English translation of this "
-                              "usage example)",
-                              "(please add an English translation of this "
-                              "quote)"):
-                        tr = ""
                     ref = re.sub(r"^[#*:]+\s*", "", ref)
                     ref = re.sub(r", (volume |number |page )?“?"
                                  r"\(please specify ([^)]|\(s\))*\)”?",
@@ -2717,10 +2717,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 lst = t.split()
                 while len(lst) > 1 and lst[-1].isdigit():
                     lst = lst[:-1]
-                pos = " ".join(lst).lower()
-                if pos in part_of_speech_map:
+                t_no_number = " ".join(lst).lower()
+                if t_no_number in part_of_speech_map:
                     push_pos()
-                    dt = part_of_speech_map[pos]
+                    dt = part_of_speech_map[t_no_number]
                     pos = dt["pos"]
                     ctx.start_subsection(t)
                     if "debug" in dt:
@@ -2737,11 +2737,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if "tags" in dt:
                         for pdata in pos_datas:
                             data_extend(ctx, pdata, "tags", dt["tags"])
-                elif pos in linkage_map:
-                    rel = linkage_map[pos]
+                elif t_no_number in linkage_map:
+                    rel = linkage_map[t_no_number]
                     data = select_data()
                     parse_linkage(data, rel, node)
-                elif pos == "compounds":
+                elif t_no_number == "compounds":
                     data = select_data()
                     if config.capture_compounds:
                         parse_linkage(data, "derived", node)

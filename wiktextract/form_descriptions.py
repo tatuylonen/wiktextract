@@ -308,6 +308,20 @@ tokenizer_fixup_re = re.compile(
                     reverse=True)) +
     r")")
 
+# Unknown tags starting with these words will be silently ignored.
+ignored_unknown_starts = set([
+    "originally",
+    "e.g.",
+    "c.f.",
+    "supplanted by",
+    "supplied by",
+    ])
+ignored_unknown_starts_re = re.compile(
+    r"^(" + "|".join(re.escape(x) for x in
+                     sorted(ignored_unknown_starts,
+                            key=lambda x: -len(x))) +
+    ") ")
+
 # If an unknown sequence starts with one of these, it will continue as an
 # unknown sequence until the end, unless it turns out to have a replacement.
 allowed_unknown_starts = set([
@@ -349,13 +363,7 @@ allowed_unknown_starts = set([
     "With",
     "without",
 ])
-
-# Unknown tags starting with these words will be silently ignored.
-ignored_unknown_starts = set([
-    "originally",
-    "e.g.",
-    "c.f.",
-    ])
+# Allow the ignored unknown starts without complaining
 allowed_unknown_starts.update(ignored_unknown_starts)
 
 # Full unknown tags that will be ignored in decode_tags()
@@ -559,9 +567,10 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
             return []
         words = lst[from_i: to_i]
         # print("unknown words:", words)
-        if words[0] in ignored_unknown_starts:
-            return []  # Tags starting with this word are to be ignored
         tag = " ".join(words)
+        if re.match(ignored_unknown_starts_re, tag):
+            # Tags with this start are to be ignored
+            return [(from_i, "UNKNOWN", [])]
         if tag in ignored_unknown_tags:
             return []  # One of the tags listed as to be ignored
         if not tag:
@@ -577,7 +586,7 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
             # print("ERR allow_any={} words={}"
             #       .format(allow_any, words))
             return [(from_i, "UNKNOWN",
-                     ["error-unknown-tag", tag])]
+                     ["error-unknown-tag"])]  # Add ``tag`` here to include
         else:
             return [(from_i, "UNKNOWN", [tag])]
 
@@ -1301,7 +1310,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                                         text, True, is_reconstruction)
                         have_romanization = True
                         continue
-                    tagsets = [["error-unrecognized-form"]]
+                    tagsets = [["error-unrecognized-head-form"]]
                     ctx.debug("unrecognized head form: {}".format(desc))
                     continue
 
@@ -1355,6 +1364,7 @@ def parse_sense_qualifier(ctx, text, data):
     if re.match(r'"[^"]+"$', text):
         text = text[1:-1]
     lst = map_with(xlat_descs_map, [text])
+    sense_tags = []
     for text in lst:
         for semi in split_at_comma_semi(text):
             if not semi:
@@ -1372,11 +1382,12 @@ def parse_sense_qualifier(ctx, text, data):
                 # XXX should think how to handle distinct options better,
                 # e.g., "singular and plural genitive"; that can't really be
                 # done with changing the calling convention of this function.
+                # Should split sense if more than one category of tags differs.
                 for tags in tagsets:
-                    data_extend(ctx, data, "tags", tags)
+                    sense_tags.extend(tags)
             elif cls == "taxonomic":
                 if re.match(r"×[A-Z]", semi):
-                    data_append(ctx, data, "tags", "extinct")
+                    sense_tags.append("extinct")
                     semi = semi[1:]
                 data["taxonomic"] = semi
             elif cls == "english":
@@ -1387,6 +1398,8 @@ def parse_sense_qualifier(ctx, text, data):
             else:
                 ctx.debug("unrecognized sense qualifier: {}"
                           .format(text))
+    sense_tags = list(sorted(set(sense_tags)))
+    data_extend(ctx, data, "tags", sense_tags)
 
 
 def parse_pronunciation_tags(ctx, text, data):
