@@ -2757,7 +2757,8 @@ xlat_tags_map = {
     "governs the dative": "with-dative",
     "takes dative": "with-dative",
     "takes dative case": "with-dative",
-    "zhuyin": "Zhuyin",
+    "zhuyin": "bopomofo",
+    "Zhuyin": "bopomofo",
     "+ partitive": "with-partitive",
     "+ partitive + vastaan": "with-partitive",
     "+partitive": "with-partitive",
@@ -3511,19 +3512,19 @@ xlat_tags_map = {
     "rōmaji": "Rōmaji",
     "visual rendering of Morse code for":
     "alt-of visual-rendering morse-code",
-    "soft mutation of": "form-of soft-mutation",
-    "causes soft mutation": "triggers-soft-mutation",
+    "soft mutation of": "form-of mutation-soft",
+    "causes soft mutation": "triggers-mutation-soft",
     "non-Oxford British English standard spelling of":
     "alt-of nonstandard UK",
     "Nil standard spelling of": "alt-of UK standard",
-    "nasal mutation of": "form-of nasal-mutation",
-    "nasal mutation": "nasal-mutation",
-    "triggers nasalization": "triggers-nasal-mutation",
-    "triggers nasal mutation": "triggers-nasal-mutation",
-    "mixed mutation of": "form-of mixed-mutation",
-    "mixed mutation": "mixed-mutation",
-    "aspirate mutation of": "form-of aspirate-mutation",
-    "aspirate mutation": "aspirate-mutation",
+    "nasal mutation of": "form-of mutation-nasal",
+    "nasal mutation": "mutation-nasal",
+    "triggers nasalization": "triggers-mutation-nasal",
+    "triggers nasal mutation": "triggers-mutation-nasal",
+    "mixed mutation of": "form-of mutation-mixed",
+    "mixed mutation": "mutation-mixed",
+    "aspirate mutation of": "form-of mutation-aspirate",
+    "aspirate mutation": "mutation-aspirate",
     "British misspelling": "misspelling British",
     "misspelling of": "alt-of misspelling",
     "deliberate misspelling of": "alt-of misspelling deliberate",
@@ -3609,11 +3610,11 @@ xlat_tags_map = {
     "triggers-lenition",
     "triggers eclipsis": "triggers-eclipsis",
     "triggers h-prothesis": "triggers-h-prothesis",
-    "causes aspirate mutation": "triggers-aspirate-mutation",
-    "triggers aspiration": "triggers-aspirate-mutation",
-    "triggers mixed mutation": "triggers-mixed-mutation",
+    "causes aspirate mutation": "triggers-mutation-aspirate",
+    "triggers aspiration": "triggers-mutation-aspirate",
+    "triggers mixed mutation": "triggers-mutation-mixed",
     # XXX Could be more accurate
-    "triggers mixed mutation except of forms of bod": "triggers-mixed-mutation",
+    "triggers mixed mutation except of forms of bod": "triggers-mutation-mixed",
     "humurous": "humorous error-misspelling",
     "humourous": "humorous",
     "sarcasm": "sarcastic",
@@ -4105,7 +4106,6 @@ form_of_tags = set([
     "allative",
     "aorist",
     "applicative",
-    "aspirate-mutation",
     "attributive",
     "augmentative",
     "augmented",
@@ -4124,6 +4124,9 @@ form_of_tags = set([
     "counterfactual",
     "dative",
     "debitive",
+    "declension-1",
+    "declension-2",
+    "declension-3",
     "definite",
     "delative",
     "demonstrative",
@@ -4138,7 +4141,6 @@ form_of_tags = set([
     "ergative",
     "essive",
     "feminine",
-    "declension-1",
     "first-person",
     "form-i",
     "form-ii",
@@ -4190,8 +4192,10 @@ form_of_tags = set([
     "masculine",
     "mediopassive",
     "middle-infinitive",
-    "mixed-mutation",
-    "nasal-mutation",
+    "mutation-aspirate",
+    "mutation-mixed",
+    "mutation-nasal",
+    "mutation-soft",
     "negative",
     "neuter",
     "nominal",
@@ -4225,11 +4229,9 @@ form_of_tags = set([
     "quotative",
     "reflexive",
     "root",
-    "declension-2",
     "second-person",
     "singular",
     "singulative",
-    "soft-mutation",
     "stative",
     "stressed",
     "subjective",
@@ -4241,7 +4243,6 @@ form_of_tags = set([
     "superlative",
     "supine",
     "terminative",
-    "declension-3",
     "third-person",
     "transgressive",
     "translative",
@@ -4392,7 +4393,7 @@ valid_tags = {
     "Tibetan": "script",  # Script
     "Tirhuta": "script",  # Script (historical: Maithili, Sanskrit)
     "Warang-Citi": "script",  # Script (Ho language, East India)
-    "Zhuyin": "script",  # Mandarin phonetic symbols script
+    "bopomofo": "script",  # Mandarin phonetic symbols script
     "Hán-Nôm": "detail",  # Vietnamese Latin spelling with diacritics?
     "Jyutping": "detail",  # used in Cantonese
     "McCune-Reischauer": "detail",  # Used in Korean
@@ -4460,7 +4461,6 @@ valid_tags = {
     "approximative": "case",  # Noun form (case?), e.g., марксизм/Komi-Zyrian
     "archaic": "misc",
     "article": "detail",
-    "aspirate-mutation": "misc",
     "assertive": "mood",  # Verb form (e.g., Korean)
     "associative": "case",  # Case (e.g., Quechua)
     "ateji": "misc",
@@ -4861,7 +4861,6 @@ valid_tags = {
     "misconstruction": "misc",  # Used for e.g. incorrect Latin plurals
     "misspelling": "misc",
     "mixed": "misc",
-    "mixed-mutation": "misc",
     "mixedcase": "misc",
     "mnemonic": "misc",
     "modal": "misc",
@@ -4876,9 +4875,13 @@ valid_tags = {
     "multiword-construction": "misc",  # complex tenses in French conjugation
     "mutated": "misc",
     "mutation": "misc",
+    "mutation-aspirate": "misc",
+    "mutation-mixed": "misc",
+    "mutation-nasal": "misc",
+    "mutation-radical": "misc",  # "radical" in mutation tables, e.g. hun/Welsh
+    "mutation-soft": "misc",  # At least Welsh
     "name": "misc",
     "narrowly": "misc",
-    "nasal-mutation": "misc",
     "natural": "misc",
     "necessitative": "mood",  # Verb form in some languages
     "negated-with": "misc",  # Indicates how word is negated, e.g., ϣⲗⲏⲗ/Coptic
@@ -5113,7 +5116,6 @@ valid_tags = {
     "slur": "misc",
     "sociative": "case",  # Case?, e.g., மரம்/Tamil
     "soft": "misc",  # najslajši/slovene
-    "soft-mutation": "misc",  # At least Welsh
     "sometimes": "misc",
     "somewhat": "misc",
     "special": "misc",  # Adverbial verb form in Lithuanian
@@ -5191,13 +5193,13 @@ valid_tags = {
     "trigger-measurement": "trigger",  # Measurement trigger, e.g., rumupok/Tagalog
     "trigger-object": "trigger",  # Object trigger
     "trigger-referential": "trigger",   # Referential trigger
-    "triggers-aspirate-mutation": "trigger",  # Welsh
+    "triggers-mutation-aspirate": "trigger",  # Welsh
     "triggers-eclipsis": "trigger",      # Irish
     "triggers-h-prothesis": "trigger",   # Irish
     "triggers-lenition": "trigger",      # Irish
-    "triggers-mixed-mutation": "trigger",  # Welsh
-    "triggers-nasal-mutation": "trigger",  # Old Irish
-    "triggers-soft-mutation": "trigger",  # Welsh
+    "triggers-mutation-mixed": "trigger",  # Welsh
+    "triggers-mutation-nasal": "trigger",  # Old Irish
+    "triggers-mutation-soft": "trigger",  # Welsh
     "triptote": "class",  # Noun having three cases (e.g., Arabic)
     "truncative": "misc",  # Greenlandic: suffix attaches to last vowel, removing stuff
     "two-termination": "misc",

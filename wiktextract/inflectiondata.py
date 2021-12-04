@@ -1513,32 +1513,36 @@ infl_map = {
     "Direct": "direct",
     "Soft": "soft",
     "Hard": "hard",
-    "Nasalization": "nasal-mutation",
+    "Nasalization": "mutation-nasal",
     "soft": {
         "if": "mutation",
-        "then": "soft-mutation",
+        "then": "mutation-soft",
         "else": "soft",
     },
     "nasal": {
         "if": "mutation",
-        "then": "nasal-mutation",
+        "then": "mutation-nasal",
+    },
+    "h-prothesis": {
+        "if": "mutation",
+        "then": "prothesis-h",
     },
     "aspirate": {
         "if": "mutation",
-        "then": "aspirate-mutation",
+        "then": "mutation-aspirate",
     },
     "mixed": {
         "if": "mutation",
-        "then": "mixed-mutation",
+        "then": "mutation-mixed",
         "else": "mixed",
     },
     "radical": {
         "if": "mutation",
-        "then": "",
+        "then": "mutation-radical",
     },
     "Radical": {
         "if": "mutation",
-        "then": "",
+        "then": "mutation-radical",
     },
     "with h-prothesis": {
         "if": "mutation",

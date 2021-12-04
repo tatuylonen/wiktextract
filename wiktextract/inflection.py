@@ -795,6 +795,11 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                 print("  UNHANDLED HEADER: {!r}".format(col))
                                 return None
                             continue
+                # Mark that the column has text (we are not at top)
+                while len(col_has_text) <= j:
+                    col_has_text.append(False)
+                col_has_text[j] = True
+                # Check if the header expands to reset hdrspans
                 v = expand_header(word, lang, text, [], silent=True)
                 if any("!" in tt for tt in v):
                     # Reset column headers (only on first row of cell)
@@ -802,6 +807,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         # print("RESET HDRSPANS on: {}".format(text))
                         hdrspans = []
                     continue
+                # Text between headers on a row causes earlier headers to
+                # be reset
                 if have_text:
                     #print("  HAVE_TEXT BEFORE HDR:", col)
                     # Reset rowtags if new title column after previous
@@ -953,7 +960,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         roman = paren
                         form = (form[:m.start()] + " " + form[m.end():]).strip()
                 # Ignore certain forms that are not really forms
-                if form in ("", "not used", "not applicable"):
+                if form in ("", "not used", "not applicable", "unchanged"):
                     continue
                 # print("ROWTAGS:", rowtags)
                 # print("COLTAGS:", combined_coltags)
