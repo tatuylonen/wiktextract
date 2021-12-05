@@ -1095,76 +1095,83 @@ def add_related(ctx, data, tags_lst, related, origtext,
         ctx.debug("{{ in word head form - possible Wiktionary error: {!r}"
                   .format(related))
         return  # Likely Wiktionary coding error
-    tagsets2, topics2 = decode_tags(" ".join(tags_lst))
-    for tags1 in tagsets1:
-        assert isinstance(tags1, (list, tuple))
-        for tags2 in tagsets2:
+    # Split related by "/" (e.g., grande/Spanish) superlative in head
+    if len(related) > 5:
+        alts = split_at_comma_semi(related, separators=["/"])
+    else:
+        alts = [related]
+    for related in alts:
+        tagsets2, topics2 = decode_tags(" ".join(tags_lst))
+        for tags1 in tagsets1:
             assert isinstance(tags1, (list, tuple))
-            dt = {"word": related}
-            if roman:
-                dt["roman"] = roman
-            if "alt-of" in tags2:
-                check_related(related)
-                data_extend(ctx, data, "tags", tags1)
-                data_extend(ctx, data, "tags", tags2)
-                data_extend(ctx, data, "topics", topics1)
-                data_extend(ctx, data, "topics", topics2)
-                data_append(ctx, data, "alt_of", dt)
-            elif "form-of" in tags2:
-                check_related(related)
-                data_extend(ctx, data, "tags", tags1)
-                data_extend(ctx, data, "tags", tags2)
-                data_extend(ctx, data, "topics", topics1)
-                data_extend(ctx, data, "topics", topics2)
-                data_append(ctx, data, "form_of", dt)
-            elif "compound-of" in tags2:
-                check_related(related)
-                data_extend(ctx, data, "tags", tags1)
-                data_extend(ctx, data, "tags", tags2)
-                data_extend(ctx, data, "topics", topics1)
-                data_extend(ctx, data, "topics", topics2)
-                data_append(ctx, data, "compound", related)
-            else:
-                lang = ctx.section
-                related, final_tags = parse_head_final_tags(ctx, lang,
-                                                            related)
-                # print("add_related: related={!r} tags1={!r} tags2={!r} "
-                #       "final_tags={!r}"
-                #       .format(related, tags1, tags2, final_tags))
-                tags = list(tags1) + list(tags2) + list(final_tags)
-                check_related(related)
-                form = {"form": related}
+            for tags2 in tagsets2:
+                assert isinstance(tags1, (list, tuple))
+                dt = {"word": related}
                 if roman:
-                    form["roman"] = roman
-                data_extend(ctx, form, "topics", topics1)
-                data_extend(ctx, form, "topics", topics2)
-                if topics1 or topics2:
-                    ctx.debug("word head form has topics: {}".format(form))
-                # Add tags from canonical form into the main entry
-                if "canonical" in tags:
-                    if related in ("m", "f") and len(titleword) > 1:
-                        ctx.debug("probably incorrect canonical form "
-                                  "{!r} ignored (probably tag combination "
-                                  "missing from xlat_head_map)"
-                                  .format(related))
-                        continue
-                    if (related != titleword or add_all_canonicals or
-                        topics1 or topics2):
-                        data_extend(ctx, form, "tags", list(sorted(set(tags))))
+                    dt["roman"] = roman
+                if "alt-of" in tags2:
+                    check_related(related)
+                    data_extend(ctx, data, "tags", tags1)
+                    data_extend(ctx, data, "tags", tags2)
+                    data_extend(ctx, data, "topics", topics1)
+                    data_extend(ctx, data, "topics", topics2)
+                    data_append(ctx, data, "alt_of", dt)
+                elif "form-of" in tags2:
+                    check_related(related)
+                    data_extend(ctx, data, "tags", tags1)
+                    data_extend(ctx, data, "tags", tags2)
+                    data_extend(ctx, data, "topics", topics1)
+                    data_extend(ctx, data, "topics", topics2)
+                    data_append(ctx, data, "form_of", dt)
+                elif "compound-of" in tags2:
+                    check_related(related)
+                    data_extend(ctx, data, "tags", tags1)
+                    data_extend(ctx, data, "tags", tags2)
+                    data_extend(ctx, data, "topics", topics1)
+                    data_extend(ctx, data, "topics", topics2)
+                    data_append(ctx, data, "compound", related)
+                else:
+                    lang = ctx.section
+                    related, final_tags = parse_head_final_tags(ctx, lang,
+                                                                related)
+                    # print("add_related: related={!r} tags1={!r} tags2={!r} "
+                    #       "final_tags={!r}"
+                    #       .format(related, tags1, tags2, final_tags))
+                    tags = list(tags1) + list(tags2) + list(final_tags)
+                    check_related(related)
+                    form = {"form": related}
+                    if roman:
+                        form["roman"] = roman
+                    data_extend(ctx, form, "topics", topics1)
+                    data_extend(ctx, form, "topics", topics2)
+                    if topics1 or topics2:
+                        ctx.debug("word head form has topics: {}".format(form))
+                    # Add tags from canonical form into the main entry
+                    if "canonical" in tags:
+                        if related in ("m", "f") and len(titleword) > 1:
+                            ctx.debug("probably incorrect canonical form "
+                                      "{!r} ignored (probably tag combination "
+                                      "missing from xlat_head_map)"
+                                      .format(related))
+                            continue
+                        if (related != titleword or add_all_canonicals or
+                            topics1 or topics2):
+                            data_extend(ctx, form, "tags",
+                                        list(sorted(set(tags))))
+                        else:
+                            # We won't add canonical form here
+                            filtered_tags = list(x for x in tags
+                                                 if x != "canonical")
+                            data_extend(ctx, data, "tags", filtered_tags)
+                            continue
                     else:
-                        # We won't add canonical form here
-                        filtered_tags = list(x for x in tags
-                                             if x != "canonical")
-                        data_extend(ctx, data, "tags", filtered_tags)
-                        continue
-                else:
-                    data_extend(ctx, form, "tags", list(sorted(set(tags))))
-                # Only insert if the form is not already there
-                for old in data.get("forms", ()):
-                    if form == old:
-                        break
-                else:
-                    data_append(ctx, data, "forms", form)
+                        data_extend(ctx, form, "tags", list(sorted(set(tags))))
+                    # Only insert if the form is not already there
+                    for old in data.get("forms", ()):
+                        if form == old:
+                            break
+                    else:
+                        data_append(ctx, data, "forms", form)
 
 
 def parse_word_head(ctx, pos, text, data, is_reconstruction):
@@ -1185,6 +1192,11 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
     # In Aug 2021, some words had spurious Template:en at the end of head forms
     # due to a Wiktionary error.
     text = re.sub(r"\s+Template:[-a-zA-Z]+\s*$", "", text)
+
+    # Fix words with "superlative:" or "comparative:" at end of head
+    # e.g. grande/Spanish/Adj
+    text = re.sub(r" (superlative|comparative): (.*)",
+                  r" (\1 \2)", text)
 
     language = ctx.section
     titleword = re.sub(r"^Reconstruction:[^/]*/", "", ctx.title)
