@@ -22,7 +22,7 @@ from .datautils import (data_append, data_extend, split_at_comma_semi,
                         languages_by_name, languages_by_code)
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_qualifier,
-    parse_pronunciation_tags,
+    parse_pronunciation_tags, distw,
     parse_alt_or_inflection_of, classify_desc)
 from wiktextract.inflection import parse_inflection_section
 
@@ -1124,6 +1124,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                      r"translation of this "
                                      "(usage example|quote)\)",
                                      "", subtext).strip()
+                    subtext = re.sub(r"\^\([^)]*\)", "", subtext)
+                    subtext = re.sub(r"\s*[―—]+$", "", subtext)
+                    # print("subtext:", repr(subtext))
 
                     lines = subtext.split("\n")
                     lines = list(x for x in lines
@@ -1140,8 +1143,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     tr = ""
                     ref = ""
                     roman = ""
+                    # for line in lines:
+                    #     print("LINE:", repr(line))
                     if len(lines) == 1 and language != "English":
-                        parts = re.split(r"\s*[―—]\s*", lines[0])
+                        parts = re.split(r"\s*[―—]+\s*", lines[0])
                         if (len(parts) == 2 and
                             classify_desc(parts[1]) == "english"):
                             lines = [parts[0].strip()]
@@ -1160,12 +1165,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 lines = [parts[0].strip()]
                                 tr = parts[1].strip()
                     elif len(lines) > 1:
-                        if (usex_type == "quotation" and
-                              any(re.search(r"[]\d:)]\s*$", x)
-                                  for x in lines[:-1])):
+                        if any(re.search(r"[]\d:)]\s*$", x)
+                               for x in lines[:-1]):
                             ref = []
                             for i in range(len(lines)):
-                                if re.match(r"^[#*]*:+\s*$", lines[i]):
+                                if re.match(r"^[#*]*:+(\s*$|\s+)", lines[i]):
                                     break
                                 ref.append(lines[i].strip())
                                 if re.search(r"[]\d:)]\s*$", lines[i]):
@@ -1206,7 +1210,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 # non-English, as that seems more common.
                                 tr = lines[1]
                                 lines = [lines[0]]
-                        elif language != "English" and len(lines) > 2:
+                        elif (usex_type == "quotation" and
+                              language != "English" and len(lines) > 2):
                             # for x in lines:
                             #     print("  LINE: {}: {}"
                             #           .format(classify_desc(x), x))
@@ -1234,17 +1239,26 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                  "", ref)
                     ref = re.sub(r"\[\s*…\s*\]", "[…]", ref)
                     lines = list(re.sub(r"^[#*:]+\s*", "", x) for x in lines)
-                    subtext = "\n".join(lines)
+                    subtext = "\n".join(x for x in lines if x)
                     if not tr and language != "English":
                         m = re.search(r"([.!?])\s+\(([^)]+)\)\s*$", subtext)
                         if m and classify_desc(m.group(2)) == "english":
                             tr = m.group(2)
                             subtext = subtext[:m.start()] + m.group(1)
+                        else:
+                            parts = re.split(r"\s*[―—]+\s*", lines[0])
+                            if (len(parts) == 2 and
+                                classify_desc(parts[1]) == "english"):
+                                subtext = parts[0].strip()
+                                tr = parts[1].strip()
                     subtext = re.sub(r'^[“"`]([^“"`”\']*)[”"\']$', r"\1",
                                      subtext)
                     subtext = re.sub(r"(please add an English translation of "
                                      r"this (quote|usage example))",
                                      "", subtext)
+                    subtext = re.sub(r"\s*→New International Version "
+                                     "translation$",
+                                     "", subtext)  # e.g. pis/Tok Pisin (Bible)
                     subtext = re.sub(r"[ \t\r]+", " ", subtext).strip()
                     subtext = re.sub(r"\[\s*…\s*\]", "[…]", subtext)
                     note = None
@@ -1446,7 +1460,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # Check if this gloss describes an alt-of or inflection-of
                 if ("topics" in sense_data or
                     (language != "English" and gloss.find(" ") < 0 and
-                     distw(gloss, word) < 0.3)):
+                     distw([word], gloss) < 0.3)):
                     # Don't try to parse gloss if has topics or is one word
                     # that is close to the word itself for non-English words
                     # (probable translations of a tag/form name)
