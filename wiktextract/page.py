@@ -965,8 +965,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
             "etymology_text" in etym_data):
             etym = etym_data["etymology_text"]
             etym = etym.split(". ")[0]
-            tags, dt = parse_alt_or_inflection_of(ctx, etym)
-            if dt is not None:
+            ret = parse_alt_or_inflection_of(ctx, etym)
+            if ret is not None:
+                tags, dt = ret
                 if "form-of" in tags:
                     data_append(ctx, sense_data, "form_of", dt)
                     data_extend(ctx, sense_data, "tags", tags)
@@ -1443,32 +1444,39 @@ def parse_language(ctx, config, langnode, language, lang_code):
             split_glosses.append(gloss[pos:])
             for gloss in split_glosses:
                 # Check if this gloss describes an alt-of or inflection-of
+                if ("topics" in sense_data or
+                    (language != "English" and gloss.find(" ") < 0 and
+                     distw(gloss, word) < 0.3)):
+                    # Don't try to parse gloss if has topics or is one word
+                    # that is close to the word itself for non-English words
+                    # (probable translations of a tag/form name)
+                    continue
                 parsed = parse_alt_or_inflection_of(ctx, gloss)
-                if parsed is not None:
-                    tags, dts = parsed
-                    if not dts and tags:
+                if parsed is None:
+                    continue
+                tags, dts = parsed
+                if not dts and tags:
+                    data_extend(ctx, sense_data, "tags", tags)
+                    continue
+                for dt in dts:
+                    ftags = list(tag for tag in tags if tag != "form-of")
+                    if "alt-of" in tags:
+                        data_extend(ctx, sense_data, "tags", ftags)
+                        data_append(ctx, sense_data, "alt_of", dt)
+                    elif "compound-of" in tags:
+                        data_extend(ctx, sense_data, "tags", ftags)
+                        data_append(ctx, sense_data, "compound_of", dt)
+                    elif "synonym-of" in tags:
+                        data_extend(ctx, dt, "tags", ftags)
+                        data_append(ctx, sense_data, "synonyms", dt)
+                    elif tags and dt.get("word", "").startswith("of "):
+                        dt["word"] = dt["word"][3:]
+                        data_append(ctx, sense_data, "tags", "form-of")
+                        data_extend(ctx, sense_data, "tags", ftags)
+                        data_append(ctx, sense_data, "form_of", dt)
+                    elif "form-of" in tags:
                         data_extend(ctx, sense_data, "tags", tags)
-                    else:
-                        for dt in dts:
-                            ftags = list(tag for tag in tags
-                                         if tag != "form-of")
-                            if "alt-of" in tags:
-                                data_extend(ctx, sense_data, "tags", ftags)
-                                data_append(ctx, sense_data, "alt_of", dt)
-                            elif "compound-of" in tags:
-                                data_extend(ctx, sense_data, "tags", ftags)
-                                data_append(ctx, sense_data, "compound_of", dt)
-                            elif "synonym-of" in tags:
-                                data_extend(ctx, dt, "tags", ftags)
-                                data_append(ctx, sense_data, "synonyms", dt)
-                            elif tags and dt.get("word", "").startswith("of "):
-                                dt["word"] = dt["word"][3:]
-                                data_append(ctx, sense_data, "tags", "form-of")
-                                data_extend(ctx, sense_data, "tags", ftags)
-                                data_append(ctx, sense_data, "form_of", dt)
-                            elif "form-of" in tags:
-                                data_extend(ctx, sense_data, "tags", tags)
-                                data_append(ctx, sense_data, "form_of", dt)
+                        data_append(ctx, sense_data, "form_of", dt)
 
         if push_sense():
             added = True
