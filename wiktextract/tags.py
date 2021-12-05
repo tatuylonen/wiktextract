@@ -4773,6 +4773,7 @@ valid_tags = {
     "imperative": "mood",  # Mood
     "imperative-only": "misc",
     "imperfect": "tense",  # Past tense in various languages
+    "imperfect-se": "misc",  # Spanish se/ra distinction
     "imperfective": "aspect",  # Verb aspect (action not completed)
     "impersonal": "person",  # Verb form, e.g., Portuguese impersonal infinitive
     "impolite": "register",  # Politeness degree of verbs etc

@@ -6,6 +6,7 @@ import re
 import copy
 import enum
 import html
+import functools
 import collections
 import unicodedata
 from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
@@ -297,6 +298,7 @@ def is_superscript(ch):
     return re.match(r"SUPERSCRIPT |MODIFIER LETTER SMALL ", name) is not None
 
 
+@functools.lru_cache(65536)
 def clean_header(word, col, skip_paren):
     """Cleans a row/column header for later processing."""
     hdr_tags = []
@@ -377,6 +379,7 @@ def clean_header(word, col, skip_paren):
     return col.strip(), refs, [], hdr_tags
 
 
+@functools.lru_cache(10000)
 def parse_title(title, source):
     """Parses inflection table title.  This returns (global_tags, word_tags,
     extra_forms), where ``global_tags`` is tags to be added to each inflection

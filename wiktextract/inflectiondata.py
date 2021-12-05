@@ -506,8 +506,8 @@ infl_map = {
     "nosotros nosotras": {"if": "first-person plural", "then": ""},
     "vosotros vosotras": {"if": "second-person plural", "then": ""},
     "ellos/ellas ustedes": {"if": "third-person plural", "then": ""},
-    "imperfect (ra)": "imperfect",  # XXX ra?
-    "imperfect (se)": "imperfect",  # XXX se?
+    "imperfect (ra)": "imperfect",
+    "imperfect (se)": "imperfect imperfect-se",
     "usted": {"if": "third-person singular", "then": ""},
     "ustedes": {"if": "third-person plural", "then": ""},
     "affirmative": {
