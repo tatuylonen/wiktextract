@@ -5028,7 +5028,7 @@ valid_tags = {
     "poetic": "misc",
     "polite": "register",  # Politeness degree of verbs etc
     "polytonic": "misc",
-    "positive": "polarity",  # (degree of comparison); opposite of negative for verb forms
+    "positive": "polarity",  # opposite of negative (usually unattested); degree
     "possessed": "misc",  # Marks object that is possessed, cf. possessed
     "possessive": "possession",  # Possession (marks who possesses)
     "possessive-single": "possession",  # Possessive with single possessed
