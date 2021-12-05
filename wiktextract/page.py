@@ -1122,7 +1122,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                          template_fn=usex_template_fn)
                     subtext = re.sub(r"\s*\(please add an English "
                                      r"translation of this "
-                                     "(usage example|quote)\)",
+                                     "(example|usage example|quote)\)",
                                      "", subtext).strip()
                     subtext = re.sub(r"\^\([^)]*\)", "", subtext)
                     subtext = re.sub(r"\s*[―—]+$", "", subtext)
@@ -1235,7 +1235,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     tr = re.sub(r"\[\s*…\s*\]", "[…]", tr)
                     ref = re.sub(r"^[#*:]+\s*", "", ref)
                     ref = re.sub(r", (volume |number |page )?“?"
-                                 r"\(please specify ([^)]|\(s\))*\)”?",
+                                 r"\(please specify ([^)]|\(s\))*\)”?|"
+                                 ", text here$",
                                  "", ref)
                     ref = re.sub(r"\[\s*…\s*\]", "[…]", ref)
                     lines = list(re.sub(r"^[#*:]+\s*", "", x) for x in lines)
@@ -1245,7 +1246,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         if m and classify_desc(m.group(2)) == "english":
                             tr = m.group(2)
                             subtext = subtext[:m.start()] + m.group(1)
-                        else:
+                        elif lines:
                             parts = re.split(r"\s*[―—]+\s*", lines[0])
                             if (len(parts) == 2 and
                                 classify_desc(parts[1]) == "english"):
