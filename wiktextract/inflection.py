@@ -940,24 +940,32 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         for x in alts)
             # Handle the special case where romanization is given under
             # normal form, e.g. in Russian.  There can be multiple
-            # comma-separated forms in each case.
+            # comma-separated forms in each case.  We also handle the case
+            # where instead of romanization we have IPA pronunciation
+            # (e.g., avoir/French/verb).
+            len2 = len(alts) // 2
             if (len(alts) % 2 == 0 and
+                all(re.match(r"^\s*/.*/\s*$", x)
+                    for x in alts[len2:])):
+                alts = list((alts[i], "", alts[i + len2])
+                            for i in range(len2))
+            elif (len(alts) % 2 == 0 and
                 all(classify_desc(re.sub(r"\^.*$", "",
                                          "".join(xx for xx in x
                                                  if not is_superscript(xx))))
                     == "other"
-                    for x in alts[:len(alts) // 2]) and
+                    for x in alts[:len2]) and
                 all(classify_desc(re.sub(r"\^.*$", "",
                                          "".join(xx for xx in x
                                                  if not is_superscript(xx))))
                     in ("romanization", "english")
-                    for x in alts[len(alts) // 2:])):
-                alts = list(zip(alts[:len(alts) // 2],
-                                alts[len(alts) // 2:]))
+                    for x in alts[len2:])):
+                alts = list((alts[i], alts[i + len2], "")
+                            for i in range(len2))
             else:
-                alts = list((x, "") for x in alts)
+                alts = list((x, "", "") for x in alts)
             # Generate forms from the alternatives
-            for form, base_roman in alts:
+            for form, base_roman, ipa in alts:
                 form = form.strip()
                 extra_tags = []
                 form, refs, defs, hdr_tags = clean_header(word, form, False)
@@ -966,22 +974,16 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                     base_roman, _, _, hdr_tags = clean_header(word, base_roman,
                                                               False)
                     extra_tags.extend(hdr_tags)
-                ipas = []
-                if form.find("/") >= 0:
-                    for m in re.finditer(r"/[^/]*/", form):
-                        ipas.append(m.group(0))
-                    form = re.sub(r"/[^/]*/", "", form)
+                # Do some additional clenanup on the cell.
                 form = re.sub(r"^\s*,\s*", "", form)
                 form = re.sub(r"\s*,\s*$", "", form)
                 form = re.sub(r"\s*(,\s*)+", ", ", form)
                 form = re.sub(r"(?i)^Main:", "", form)
                 form = re.sub(r"\s+", " ", form)
                 form = form.strip()
-                if form.startswith("*"):
-                    form = form[1:]
-                roman = base_roman
                 # Handle parentheses in the table element.  We parse
                 # tags anywhere and romanizations anywhere but beginning.
+                roman = base_roman
                 m = re.search(r"\s*\(([^)]*)\)", form)
                 if m is not None:
                     paren = m.group(1)
@@ -1097,8 +1099,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                               "source": source}
                         if roman:
                             dt["roman"] = roman
-                        if ipas:
-                            dt["ipa"] = ", ".join(ipas)
+                        if ipa:
+                            dt["ipa"] = ipa
                         ret.append(dt)
         # End of row
         if (col0_hdrspan is not None and not col0_followed_by_nonempty and
