@@ -967,12 +967,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
             etym = etym.split(". ")[0]
             ret = parse_alt_or_inflection_of(ctx, etym)
             if ret is not None:
-                tags, dt = ret
+                tags, lst = ret
+                assert isinstance(lst, (list, tuple))
                 if "form-of" in tags:
-                    data_append(ctx, sense_data, "form_of", dt)
+                    data_extend(ctx, sense_data, "form_of", lst)
                     data_extend(ctx, sense_data, "tags", tags)
                 elif "alt-of" in tags:
-                    data_append(ctx, sense_data, "alt_of", dt)
+                    data_extend(ctx, sense_data, "alt_of", lst)
                     data_extend(ctx, sense_data, "tags", tags)
 
         pos_datas.append(sense_data)
