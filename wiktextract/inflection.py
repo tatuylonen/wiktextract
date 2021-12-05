@@ -83,6 +83,7 @@ title_contains_wordtags_map = {
     "no supine stem": "no-supine",
     "no perfect stem": "no-perfect",
     "deponent": "deponent",
+    "irregular": "irregular",
     "no short forms": "no-short-form",
     "iō-variant": "iō-variant",
     "1st declension": "declension-1",
@@ -409,7 +410,8 @@ def parse_title(title, source):
         word_tags.extend(title_contains_wordtags_map[
             m.group(0).lower()].split())
     # Check for <x>-type at the beginning of title (e.g., Armenian)
-    m = re.search(r"\b(\w+-type|accent-\w+|\w+-stem|[^ ]+ gradation)\b", title)
+    m = re.search(r"\b(\w+-type|accent-\w+|\w+-stem|[^ ]+ gradation|"
+                  r"[^ ]+ alternation)\b", title)
     if m:
         dt = {"form": m.group(1),
               "source": source + " title",
@@ -664,7 +666,12 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
                   cur_cats & set(("mood", "tense", "non-finite", "person",
                                   "number"))):
                 if celltext == debug_word:
-                    print("stopping on non-finite")
+                    print("stopping on non-finite new")
+                break
+            elif ("non-finite" in cur_cats and
+                  "mood" in new_cats):
+                if celltext == debug_word:
+                    print("stopping on non-finite cur")
                 break
             elif ("mood" in new_cats and
                   "mood" in cur_cats):
@@ -873,10 +880,12 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                     elif (col0_hdrspan is not None and
                           any(all_hdr_tags) and
                           not (all(valid_tags[t] in ("person", "gender",
-                                                     "number")
+                                                     "number", "degree",
+                                                     "polarity")
                                    for ts in all_hdr_tags
                                    for t in ts) and
                                all(valid_tags[t] in ("number", "mood",
+                                                     "referent",
                                                      "aspect", "tense",
                                                      "voice", "non-finite",
                                                      "case", "possession")
@@ -1085,7 +1094,10 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                             dt["ipa"] = ", ".join(ipas)
                         ret.append(dt)
         # End of row
-        if col0_hdrspan is not None and not col0_followed_by_nonempty:
+        if (col0_hdrspan is not None and not col0_followed_by_nonempty and
+            len(set(valid_tags[t]
+                    for tt in col0_hdrspan.tagsets
+                    for t in tt)) == 1):  # Only one cat of tags: kunna/Swedish
             # If a column-0 header is only followed by headers that yield
             # no tags, expand it to entire row
             # print("EXPANDING COL0: {} from {} to {} cols"

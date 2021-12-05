@@ -492,6 +492,11 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                  "form": "e-i alternation",
+                  "source": "Conjugation title",
+                  "tags": ["class"],
+              },
+              {
                 "form": "interdecir",
                 "source": "Conjugation",
                 "tags": [
@@ -1219,7 +1224,12 @@ class InflTests(unittest.TestCase):
                   "plural",
                   "third-person"
                 ]
-              }
+              },
+              {
+                  "form": "irregular",
+                  "source": "Conjugation title",
+                  "tags": ["word-tags"],
+              },
             ],
         }
         self.assertEqual(expected, ret)

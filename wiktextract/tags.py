@@ -4828,7 +4828,7 @@ valid_tags = {
     "ionic": "misc",  # XXX ???
     "ironic": "misc",
     "irrealis": "mood",  # Verb form, e.g., たたかう/Japanese
-    "irregular": "misc",  # Generally of written word forms
+    "irregular": "misc",  # Word has irregular inflection
     "irregular-pronunciation": "misc",  # Kanji or similar pronunciation irregular
     "italics": "misc",  # Used in head form to indicate italic character variant
     "iō-variant": "misc",  # e.g. horior/Latin, interiicio/Latin
