@@ -30,7 +30,7 @@ class InflTests(unittest.TestCase):
                                  section, tree)
         return data
 
-    def test_Finnish_verb1(self):
+    def test_Spanish_verb1(self):
         ret = self.xinfl("interdecir", "Spanish", "verb", "Conjugation", """
 <div class="NavFrame">
 <div class="NavHead" align="center">&nbsp; &nbsp; Conjugation of <i class="Latn+mention" lang="es">[[interdecir#Spanish|interdecir]]</i> (irregular; e-i alternation) (See [[Appendix:Spanish verbs]])</div>

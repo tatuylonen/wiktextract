@@ -406,6 +406,8 @@ infl_map = {
     "Case/Gender": "",
     "Derived forms": "",
     "Adverb": "adverbial",
+    "augmentative": "augmentative",
+    "diminutive": "diminutive",
     "singular (vienaskaita)": "singular",
     "plural (daugiskaita)": "plural",
     "nominative (vardininkas)": "nominative",
