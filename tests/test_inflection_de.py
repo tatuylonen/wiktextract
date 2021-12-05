@@ -10,7 +10,7 @@ from wikitextprocessor import Wtp
 from wiktextract import WiktionaryConfig
 from wiktextract.inflection import parse_inflection_section
 
-class HeadTests(unittest.TestCase):
+class InflTests(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = 100000
@@ -642,7 +642,7 @@ class HeadTests(unittest.TestCase):
 |}
 </div></div>[[Category:German verbs with red links in their inflection tables|AUSSTEIGEN]]
 """)
-        expect = {
+        expected = {
             "forms": [
                 {
                     "form": "1 strong",
@@ -2039,7 +2039,7 @@ class HeadTests(unittest.TestCase):
                 }
             ],
         }
-        self.assertEqual(ret, expect)
+        self.assertEqual(expected, ret)
 
     def test_German_noun1(self):
         ret = self.xinfl("Bahnhof", "German", "noun", "Declension", """
@@ -2247,4 +2247,4 @@ class HeadTests(unittest.TestCase):
               }
             ],
         }
-        self.assertEqual(ret, expected)
+        self.assertEqual(expected, ret)

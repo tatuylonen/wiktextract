@@ -741,6 +741,25 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
     return tagsets, topics
 
 
+def merge_tagsets(tagsets1, tagsets2):
+    """Merges two tagsets (the new tagset just merges the tags from both, in
+    all combinations).  If they contain simple alternatives (differ in
+    only one category), they are simply merged; otherwise they are split to
+    more alternatives.  The tagsets are assumed be sets of sorted tuples."""
+    assert isinstance(tagsets1, set)
+    assert all(isinstance(x, tuple) for x in tagsets1)
+    assert isinstance(tagsets2, set)
+    assert all(isinstance(x, tuple) for x in tagsets1)
+    new_tagsets = set()
+    for tags1 in tagsets1:
+        for tags2 in tagsets2:
+            tags = tuple(sorted(set(tags1) | set(tags2)))
+            new_tagsets.add(tags)
+    # print("merge_tagsets: {} + {} -> {}"
+    #       .format(tagsets1, tagsets2, new_tagsets))
+    return new_tagsets
+
+
 def parse_head_final_tags(ctx, lang, form):
     """Parses tags that are allowed at the end of a form head from the end
     of the form.  This can also be used for parsing the final gender etc tags

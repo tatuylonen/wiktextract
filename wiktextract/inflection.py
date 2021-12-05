@@ -14,7 +14,9 @@ from wiktextract.tags import valid_tags
 from wiktextract.inflectiondata import infl_map, infl_start_map, infl_start_re
 from wiktextract.datautils import (data_append, data_extend, freeze,
                                    split_at_comma_semi)
-from wiktextract.form_descriptions import classify_desc, decode_tags
+from wiktextract.form_descriptions import (classify_desc, decode_tags,
+                                           parse_head_final_tags,
+                                           merge_tagsets)
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 
 # Column texts that are interpreted as an empty column.
@@ -125,20 +127,6 @@ title_elements_map = {
     "neuter": "neuter",
     "singular": "singular",
     "plural": "plural",
-    "no gradation": "no-gradation",
-    "t-d gradation": "gradation-t-d",
-    "tt-t gradation": "gradation-tt-t",
-    "kk-k gradation": "gradation-kk-k",
-    "nt-nn gradation": "gradation-nt-nn",
-    "pp-p gradation": "gradation-pp-p",
-    "k- gradation": "gradation-k-",
-    "p-v gradation": "gradation-p-v",
-    "mp-mm gradation": "gradation-mp-mm",
-    "nk-ng gradation": "gradation-nk-ng",
-    "lt-ll gradation": "gradation-lt-ll",
-    "rt-rr gradation": "gradation-rt-rr",
-    "ik-j gradation": "gradation-ik-j",
-    "k-v gradation": "gradation-k-v",
 }
 for k, v in title_elements_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -153,6 +141,8 @@ title_elemstart_map = {
     "class": "class",
     "short class": "class",
     "type": "class",
+    "strong class": "class",
+    "weak class": "class",
     "accent paradigm": "accent-paradigm",
 }
 for k, v in title_elemstart_map.items():
@@ -162,16 +152,6 @@ for k, v in title_elemstart_map.items():
 title_elemstart_re = re.compile(
     r"^({}) "
     .format("|".join(re.escape(x) for x in title_elemstart_map.keys())))
-
-
-# List of [set(lang), set(genders)] for languages from which we may want
-# to remove gender tags from forms that list them all.
-lang_genders = [
-    [set([
-        "Russian",
-    ]),
-     set(["masculine", "feminine", "neuter"])],
-]
 
 
 # Specification for language-specific processing.  Each entry starts
@@ -246,6 +226,13 @@ lang_tag_mappings = [
      [["possessive", "plural"], ["possessive", "possessive-many"]],
     ],
 ]
+for lst in lang_tag_mappings:
+    assert len(lst) >= 3
+    assert all(isinstance(x, str) for x in lst[0])  # languages
+    assert all(x in PARTS_OF_SPEECH for x in lst[1])  # parts of speech
+    for src, dst in lst[2:]:
+        assert all(t in valid_tags for t in src)
+        assert all(t in valid_tags for t in dst)
 
 
 class InflCell(object):
@@ -281,7 +268,7 @@ class HdrSpan(object):
         "start",
         "colspan",
         "rownum",      # Row number where this occurred
-        "tagsets",  # list of sets
+        "tagsets",  # set of tuples
         "used",  # At least one text cell after this
         "text",  # For debugging
     )
@@ -295,7 +282,7 @@ class HdrSpan(object):
         self.start = start
         self.colspan = colspan
         self.rownum = rownum
-        self.tagsets = list(set(tags) for tags in tagsets)
+        self.tagsets = set(tuple(sorted(set(tags))) for tags in tagsets)
         self.used = False
         self.text = text
 
@@ -419,7 +406,7 @@ def parse_title(title, source):
         word_tags.extend(title_contains_wordtags_map[
             m.group(0).lower()].split())
     # Check for <x>-type at the beginning of title (e.g., Armenian)
-    m = re.search(r"\b(\w+-type|accent-\w+|\w+-stem)\b", title)
+    m = re.search(r"\b(\w+-type|accent-\w+|\w+-stem|[^ ]+ gradation)\b", title)
     if m:
         dt = {"form": m.group(1),
               "source": source + " title",
@@ -554,6 +541,7 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
     assert isinstance(colspan, int) and colspan >= 1
     assert mark_used in (True, False)
     assert isinstance(celltext, str)  # For debugging only
+    # For debugging, set this to the form for whose cell you want debug prints
     debug_word = None  # None to disable
     if celltext == debug_word:
         print("COMPUTE_COLTAGS CALLED start={} colspan={} celltext={!r}"
@@ -564,8 +552,8 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
                           hdrspan.tagsets))
     used = set()
     coltags = None
-    # XXX should look at tag classes and not take tags in the same class(es)
-    # from higher up
+    # Iterate through the headers in reverse order, i.e., headers lower in the
+    # table (closer to the cell) first.
     for hdrspan in reversed(hdrspans):
         tagsets = hdrspan.tagsets
         if (hdrspan.start > start or
@@ -588,39 +576,47 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
                     for x in hdrspans)):
                 # Multiple columns apply to the current cell, only
                 # gender/number/case tags present
-                tagsets = hdrspan.tagsets
-                for x in hdrspans:
-                    if (x is hdrspan or x.rownum != hdrspan.rownum or
-                        x.start < start or
-                        x.start + x.colspan >= start + colspan):
-                        continue
-                    new_tagsets = []
-                    for tags1 in tagsets:  # current
-                        for tags2 in x.tagsets:  # earlier
-                            num_tags1 = set(t for t in tags1
-                                            if valid_tags[t] == "number")
-                            num_tags2 = set(t for t in tags2
-                                            if valid_tags[t] == "number")
-                            gender_tags1 = set(t for t in tags1
-                                               if valid_tags[t] == "gender")
-                            gender_tags2 = set(t for t in tags2
-                                               if valid_tags[t] == "gender")
-                            case_tags1 = set(t for t in tags1
-                                             if valid_tags[t] == "case")
-                            case_tags2 = set(t for t in tags2
-                                             if valid_tags[t] == "case")
-                            if ((num_tags1 == num_tags2 and
-                                 gender_tags1 == gender_tags2) or
-                                (num_tags1 == num_tags2 and
-                                 case_tags1 == case_tags2) or
-                                (gender_tags1 == gender_tags2 and
-                                 case_tags1 == case_tags2)):
-                                tags = set(tags1) | set(tags2)
-                                new_tagsets.append(tags)
-                            else:
-                                new_tagsets.append(tags1)
-                                new_tagsets.append(tags2)
-                    tagsets = new_tagsets
+                # If there are no tags outside the range in any of the
+                # categories included in these cells, don't add anything
+                # (assume all choices valid in the language are possible).
+                in_cats = set(valid_tags[t]
+                              for x in hdrspans
+                              if x.rownum == hdrspan.rownum and
+                              x.start >= start and
+                              x.start + x.colspan <= start + colspan
+                              for tt in x.tagsets
+                              for t in tt)
+                # For limited categories, if the category doesn't appear
+                # outside, we won't include the category
+                if not in_cats - set(("gender", "number", "person", "case")):
+                    # Sometimes we have masc, fem, neut and plural, so treat
+                    # number and gender as the same here (if one given, look for
+                    # the other too)
+                    if "number" in in_cats or "gender" in in_cats:
+                        in_cats.update(("number", "gender"))
+                        # Determine which categories occur outside on
+                        # the same row
+                        out_cats = set(valid_tags[t]
+                                       for x in hdrspans
+                                       if x.rownum == hdrspan.rownum and
+                                       (x.start < start or
+                                        x.start + x.colspan > start + colspan)
+                                       for tt in x.tagsets
+                                       for t in tt)
+                        # print("in_cats={} out_cats={}"
+                        #       .format(in_cats, out_cats))
+                        if not (out_cats & in_cats):
+                            tagsets = set([()])
+                # # Merge the tagsets into existing tagsets.  This merges
+                # # alternatives into the same tagset if there is only one
+                # # category different; otherwise this splits the tagset into
+                # # more alternatives.
+                # for x in hdrspans:
+                #     if (x is hdrspan or x.rownum != hdrspan.rownum or
+                #         x.start < start or
+                #         x.start + x.colspan >= start + colspan):
+                #         continue
+                #     tagsets = merge_tagsets(tagsets, x.tagsets)
             else:
                 # Ignore this hdrspan
                 if celltext == debug_word:
@@ -639,49 +635,60 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
             hdrspan.used = True
         # Merge into coltags
         if coltags is None:
-            coltags = list(tuple(sorted(tt)) for tt in tagsets)
+            coltags = tagsets
             if celltext == debug_word:
                 print("initial row={} start={} coltags={}"
                       .format(hdrspan.rownum, hdrspan.start, coltags))
         else:
-            stop = False
-            new_coltags = set()
-            for tags2 in tagsets:  # Earlier header
-                for tags1 in coltags:      # Tags found for current cell so far
-                    if celltext == debug_word:
-                        print("rownum={} start={} earlier={} current={}"
-                              .format(hdrspan.rownum, hdrspan.start,
-                                      tags2, tags1))
-                    if any(valid_tags[t] == "detail" for t in tags2):
-                        tags2 = set()
-                        stop = "encountered detail"
-                    if (any(valid_tags[t] in ("mood", "tense", "non-finite",
-                                              "person", "number")
-                            for t in tags1) and
-                        any(valid_tags[t] in ("non-finite",)
-                            for t in tags2)):
-                        tags2 = set()
-                        stop = "encountered non-finite"
-                    elif (any(valid_tags[t] == "number" for t in tags1) and
-                          any(valid_tags[t] == "number" for t in tags2)):
-                        tags2 = set()
-                        stop = "number again"
-                    elif (any(valid_tags[t] == "number" for t in tags1) and
-                          any(valid_tags[t] == "gender" for t in tags2)):
-                        tags2 = set()
-                        stop = "gender after number"
-                    tags = tuple(sorted(set(tags1) | tags2))
-                    new_coltags.add(tags)
-            coltags = list(new_coltags)
-            if stop:
+            # new_cats is for the new tags (higher up in the table)
+            new_cats = set(valid_tags[t]
+                          for tt in tagsets
+                          for t in tt)
+            # cur_cats is for the tags already collected (lower in the table)
+            cur_cats = set(valid_tags[t]
+                           for tt in coltags
+                           for t in tt)
+            if celltext == debug_word:
+                print("tagsets={} coltags={} new_cats={} cur_cats={}"
+                      .format(tagsets, coltags, new_cats, cur_cats))
+            if "detail" in new_cats:
+                if not any(coltags):  # Only if no tags so far
+                    coltags = merge_tagsets(coltags, tagsets)
                 if celltext == debug_word:
-                    print("stop reason: {}".format(stop))
+                    print("stopping on detail after merge")
                 break
+            elif ("non-finite" in new_cats and
+                  cur_cats & set(("mood", "tense", "non-finite", "person",
+                                  "number"))):
+                if celltext == debug_word:
+                    print("stopping on non-finite")
+                break
+            elif ("mood" in new_cats and
+                  "mood" in cur_cats):
+                if celltext == debug_word:
+                    print("stopping on mood-mood")
+                break
+            elif "number" in cur_cats and "number" in new_cats:
+                if celltext == debug_word:
+                    print("stopping on number-number")
+                break
+            elif "number" in cur_cats and "gender" in new_cats:
+                if celltext == debug_word:
+                    print("stopping on number-gender")
+                break
+            else:
+                # Merge tags and continue to next header up/left in the table
+                coltags = merge_tagsets(coltags, tagsets)
+                if celltext == debug_word:
+                    print("merged: {}".format(coltags))
     if coltags is None:
-        coltags = [()]
+        coltags = set([()])
     #print("HDRSPANS:", list((x.start, x.colspan, x.tagsets) for x in hdrspans))
-    # print("COMPUTE_COLTAGS {} {} {}: {}"
-    #       .format(start, colspan, mark_used, coltags))
+    if celltext == debug_word:
+        print("COMPUTE_COLTAGS {} {} {}: {}"
+              .format(start, colspan, mark_used, coltags))
+    assert isinstance(coltags, set)
+    assert all(isinstance(x, tuple) for x in coltags)
     return coltags
 
 
@@ -762,7 +769,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 word_tags.extend(more_word_tags)
                 ret.extend(extra_forms)
             continue  # Skip title rows without incrementing i
-        rowtags = [()]
+        rowtags = set([()])
         have_hdr = False
         have_text = False
         samecell_cnt = 0
@@ -827,7 +834,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                     # text cells
                     # XXX beware of header "—": "" - must not clear on that if
                     # it expands to no tags
-                    rowtags = [()]
+                    rowtags = set([()])
                 have_hdr = True
                 # print("HAVE_HDR:", col)
                 # Update rowtags and coltags
@@ -846,7 +853,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                             tags = tuple(sorted(set(tt) | set(rt0) |
                                                 set(hdr_tags)))
                             new_rowtags.add(tags)
-                rowtags = list(new_rowtags)
+                rowtags = new_rowtags
                 new_coltags = set(x for x in new_coltags
                                   if not any(t in noinherit_tags for t in x))
                 if any(new_coltags):
@@ -899,8 +906,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
             col_has_text[j] = True
             # Determine column tags for the multi-column cell
             combined_coltags = compute_coltags(hdrspans, j, colspan, True, col)
-
             # print("HAVE_TEXT:", repr(col))
+            # Split the text into separate forms
             col = re.sub(r"[ \t\r]+", " ", col)
             # Split the cell text into alternatives
             if col and is_superscript(col[0]):
@@ -977,15 +984,16 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 # print("ROWTAGS:", rowtags)
                 # print("COLTAGS:", combined_coltags)
                 # print("FORM:", repr(form))
+                # Merge column tags and row tags.  We give preference
+                # to moods etc coming from rowtags (cf. austteigen/German/Verb
+                # imperative forms).
                 for rt in rowtags:
                     for ct in combined_coltags:
                         tags = set(global_tags)
                         tags.update(extra_tags)
                         tags.update(rt)
-                        # Extract language-specific tags from the
-                        # form.  This may also adjust the form.
-                        form, lang_tags = lang_specific_tags(lang, pos, form)
-                        tags.update(lang_tags)
+                        # Merge tags from column.  For certain kinds of tags,
+                        # those coming from row take precedence.
                         old_tags = set(tags)
                         for t in ct:
                             c = valid_tags[t]
@@ -994,6 +1002,18 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                     for tt in old_tags)):
                                 continue
                             tags.add(t)
+
+                        # Extract language-specific tags from the
+                        # form.  This may also adjust the form.
+                        form, lang_tags = lang_specific_tags(lang, pos, form)
+                        tags.update(lang_tags)
+                        # For non-finite verb forms, see if they would have
+                        # a gender/class suffix
+                        if pos == "verb" and any(valid_tags[t] == "non-finite"
+                               for t in tags):
+                            form, tt = parse_head_final_tags(ctx, lang, form)
+                            tags.update(tt)
+
                         # Many Russian (and other Slavic?) inflection tables
                         # have animate/inanimate distinction that generates
                         # separate entries for neuter/feminine, but the
@@ -1006,12 +1026,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                         "masculine" not in tags and
                                         "plural" not in tags):
                                         tags.remove(t1)
-                        # We may have situations where all genders get listed.
-                        # Try to remove genders in those situations.
-                        for langs, genders in lang_genders:
-                            if (lang in langs and
-                                all(t in tags for t in genders)):
-                                tags = set(tags) - genders
+
                         # Remove "personal" tag if have nth person; these
                         # come up with e.g. reconhecer/Portuguese/Verb.  But
                         # not if we also have "pronoun"
@@ -1021,18 +1036,42 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                ["first-person", "second-person",
                                 "third-person"])):
                             tags.remove("personal")
+
+                        # If we have impersonal, remove person and number.
+                        # This happens with e.g. viajar/Portuguese/Verb
+                        if "impersonal" in tags:
+                            tags = tags - set(["first-person", "second-person",
+                                               "third-person",
+                                               "singular", "plural"])
+
+                        # Remove unnecessary "positive" tag from verb forms
+                        if pos == "verb" and "positive" in tags:
+                            if "negative" in tags:
+                                tags.remove("negative")
+                            tags.remove("positive")
+
+                        # Remove the dummy mood tag that we sometimes
+                        # use to block adding other mood and related
+                        # tags
                         tags = tags - set(["dummy-mood"])
-                        # Perform language-specific tag replacements
-                        for lst in lang_tag_mappings:
-                            assert isinstance(lst, (list, tuple))
-                            assert len(lst) >= 3
-                            if lang not in lst[0] or pos not in lst[1]:
-                                continue
-                            for src, dst in lst[2:]:
-                                assert isinstance(src, (list, tuple))
-                                assert isinstance(dst, (list, tuple))
-                                if all(t in tags for t in src):
-                                    tags = (tags - set(src)) | set(dst)
+
+                        # Perform language-specific tag replacements according
+                        # to rules in a table.
+                        changed = True
+                        while changed:
+                            changed = False
+                            for lst in lang_tag_mappings:
+                                assert isinstance(lst, (list, tuple))
+                                assert len(lst) >= 3
+                                if lang not in lst[0] or pos not in lst[1]:
+                                    continue
+                                for src, dst in lst[2:]:
+                                    assert isinstance(src, (list, tuple))
+                                    assert isinstance(dst, (list, tuple))
+                                    if all(t in tags for t in src):
+                                        tags = (tags - set(src)) | set(dst)
+                                        changed = True
+
                         # Add the form
                         tags = list(sorted(tags))
                         dt = {"form": form, "tags": tags,
@@ -1238,7 +1277,9 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     # Whole column has title suggesting they are headers
                     # (e.g. "Case")
                     is_title = True
-                if re.match(r"Conjugation of |Declension of ", celltext):
+                if re.match(r"Conjugation of |Declension of |Inflection of|"
+                            r"Mutation of",
+                            celltext):
                     is_title = True
                 if is_title:
                     while len(cols_headered) <= len(row):
@@ -1299,8 +1340,8 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
     """Parses an inflection section on a page.  ``data`` should be the
     data for a part-of-speech, and inflections will be added to it."""
 
-    print("PARSE_INFLECTION_SECTION {}/{}/{}/{}"
-          .format(word, lang, pos, section))
+    # print("PARSE_INFLECTION_SECTION {}/{}/{}/{}"
+    #       .format(word, lang, pos, section))
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, Wtp)
     assert isinstance(data, dict)
@@ -1390,6 +1431,7 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
         text = ctx.node_to_wikitext(tree)
         f.write(text + "\n")
 
-# XXX change to use ctx.debug
 # XXX check interdecir/Spanish - singular/plural issues
-# XXX check anglais/Irish/Declension - should take titles/tags from outer table
+
+# XXX viajar/Portuguese: gerund has singular+plural - check if all columns
+# containing same tag category are included, and then don't include anything

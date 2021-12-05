@@ -10,7 +10,7 @@ from wikitextprocessor import Wtp
 from wiktextract import WiktionaryConfig
 from wiktextract.inflection import parse_inflection_section
 
-class HeadTests(unittest.TestCase):
+class InflTests(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = 100000
@@ -1110,6 +1110,13 @@ class HeadTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "t-d gradation",
+                "source": "Conjugation title",
+                "tags": [
+                  "class"
+                ]
+              },
+              {
                 "form": "53/muistaa",
                 "source": "Conjugation title",
                 "tags": [
@@ -1122,7 +1129,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "first-person",
                   "indicative",
-                  "positive",
                   "present",
                   "singular"
                 ]
@@ -1145,7 +1151,6 @@ class HeadTests(unittest.TestCase):
                   "first-person",
                   "indicative",
                   "perfect",
-                  "positive",
                   "singular"
                 ]
               },
@@ -1165,7 +1170,6 @@ class HeadTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "indicative",
-                  "positive",
                   "present",
                   "second-person",
                   "singular"
@@ -1188,7 +1192,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "indicative",
                   "perfect",
-                  "positive",
                   "second-person",
                   "singular"
                 ]
@@ -1209,7 +1212,6 @@ class HeadTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "indicative",
-                  "positive",
                   "present",
                   "singular",
                   "third-person"
@@ -1232,7 +1234,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "indicative",
                   "perfect",
-                  "positive",
                   "singular",
                   "third-person"
                 ]
@@ -1255,7 +1256,6 @@ class HeadTests(unittest.TestCase):
                   "first-person",
                   "indicative",
                   "plural",
-                  "positive",
                   "present"
                 ]
               },
@@ -1278,7 +1278,6 @@ class HeadTests(unittest.TestCase):
                   "indicative",
                   "perfect",
                   "plural",
-                  "positive"
                 ]
               },
               {
@@ -1298,7 +1297,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "indicative",
                   "plural",
-                  "positive",
                   "present",
                   "second-person"
                 ]
@@ -1321,7 +1319,6 @@ class HeadTests(unittest.TestCase):
                   "indicative",
                   "perfect",
                   "plural",
-                  "positive",
                   "second-person"
                 ]
               },
@@ -1342,7 +1339,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "indicative",
                   "plural",
-                  "positive",
                   "present",
                   "third-person"
                 ]
@@ -1365,7 +1361,6 @@ class HeadTests(unittest.TestCase):
                   "indicative",
                   "perfect",
                   "plural",
-                  "positive",
                   "third-person"
                 ]
               },
@@ -1386,7 +1381,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "indicative",
                   "passive",
-                  "positive",
                   "present"
                 ]
               },
@@ -1407,7 +1401,6 @@ class HeadTests(unittest.TestCase):
                   "indicative",
                   "passive",
                   "perfect",
-                  "positive"
                 ]
               },
               {
@@ -1427,7 +1420,6 @@ class HeadTests(unittest.TestCase):
                   "first-person",
                   "indicative",
                   "past",
-                  "positive",
                   "singular"
                 ]
               },
@@ -1449,7 +1441,6 @@ class HeadTests(unittest.TestCase):
                   "first-person",
                   "indicative",
                   "pluperfect",
-                  "positive",
                   "singular"
                 ]
               },
@@ -1470,7 +1461,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "indicative",
                   "past",
-                  "positive",
                   "second-person",
                   "singular"
                 ]
@@ -1492,7 +1482,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "indicative",
                   "pluperfect",
-                  "positive",
                   "second-person",
                   "singular"
                 ]
@@ -1514,7 +1503,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "indicative",
                   "past",
-                  "positive",
                   "singular",
                   "third-person"
                 ]
@@ -1536,7 +1524,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "indicative",
                   "pluperfect",
-                  "positive",
                   "singular",
                   "third-person"
                 ]
@@ -1560,7 +1547,6 @@ class HeadTests(unittest.TestCase):
                   "indicative",
                   "past",
                   "plural",
-                  "positive"
                 ]
               },
               {
@@ -1582,7 +1568,6 @@ class HeadTests(unittest.TestCase):
                   "indicative",
                   "pluperfect",
                   "plural",
-                  "positive"
                 ]
               },
               {
@@ -1603,7 +1588,6 @@ class HeadTests(unittest.TestCase):
                   "indicative",
                   "past",
                   "plural",
-                  "positive",
                   "second-person"
                 ]
               },
@@ -1625,7 +1609,6 @@ class HeadTests(unittest.TestCase):
                   "indicative",
                   "pluperfect",
                   "plural",
-                  "positive",
                   "second-person"
                 ]
               },
@@ -1647,7 +1630,6 @@ class HeadTests(unittest.TestCase):
                   "indicative",
                   "past",
                   "plural",
-                  "positive",
                   "third-person"
                 ]
               },
@@ -1669,7 +1651,6 @@ class HeadTests(unittest.TestCase):
                   "indicative",
                   "pluperfect",
                   "plural",
-                  "positive",
                   "third-person"
                 ]
               },
@@ -1691,7 +1672,6 @@ class HeadTests(unittest.TestCase):
                   "indicative",
                   "passive",
                   "past",
-                  "positive"
                 ]
               },
               {
@@ -1711,7 +1691,6 @@ class HeadTests(unittest.TestCase):
                   "indicative",
                   "passive",
                   "pluperfect",
-                  "positive"
                 ]
               },
               {
@@ -1730,7 +1709,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "conditional",
                   "first-person",
-                  "positive",
                   "present",
                   "singular"
                 ]
@@ -1753,7 +1731,6 @@ class HeadTests(unittest.TestCase):
                   "conditional",
                   "first-person",
                   "perfect",
-                  "positive",
                   "singular"
                 ]
               },
@@ -1773,7 +1750,6 @@ class HeadTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "conditional",
-                  "positive",
                   "present",
                   "second-person",
                   "singular"
@@ -1796,7 +1772,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "conditional",
                   "perfect",
-                  "positive",
                   "second-person",
                   "singular"
                 ]
@@ -1817,7 +1792,6 @@ class HeadTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "conditional",
-                  "positive",
                   "present",
                   "singular",
                   "third-person"
@@ -1840,7 +1814,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "conditional",
                   "perfect",
-                  "positive",
                   "singular",
                   "third-person"
                 ]
@@ -1863,7 +1836,6 @@ class HeadTests(unittest.TestCase):
                   "conditional",
                   "first-person",
                   "plural",
-                  "positive",
                   "present"
                 ]
               },
@@ -1886,7 +1858,6 @@ class HeadTests(unittest.TestCase):
                   "first-person",
                   "perfect",
                   "plural",
-                  "positive"
                 ]
               },
               {
@@ -1906,7 +1877,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "conditional",
                   "plural",
-                  "positive",
                   "present",
                   "second-person"
                 ]
@@ -1929,7 +1899,6 @@ class HeadTests(unittest.TestCase):
                   "conditional",
                   "perfect",
                   "plural",
-                  "positive",
                   "second-person"
                 ]
               },
@@ -1950,7 +1919,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "conditional",
                   "plural",
-                  "positive",
                   "present",
                   "third-person"
                 ]
@@ -1973,7 +1941,6 @@ class HeadTests(unittest.TestCase):
                   "conditional",
                   "perfect",
                   "plural",
-                  "positive",
                   "third-person"
                 ]
               },
@@ -1994,7 +1961,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "conditional",
                   "passive",
-                  "positive",
                   "present"
                 ]
               },
@@ -2015,7 +1981,6 @@ class HeadTests(unittest.TestCase):
                   "conditional",
                   "passive",
                   "perfect",
-                  "positive"
                 ]
               },
               {
@@ -2033,7 +1998,6 @@ class HeadTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "imperative",
-                  "positive",
                   "present",
                   "second-person",
                   "singular"
@@ -2056,7 +2020,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "imperative",
                   "perfect",
-                  "positive",
                   "second-person",
                   "singular"
                 ]
@@ -2077,7 +2040,6 @@ class HeadTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "imperative",
-                  "positive",
                   "present",
                   "singular",
                   "third-person"
@@ -2100,7 +2062,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "imperative",
                   "perfect",
-                  "positive",
                   "singular",
                   "third-person"
                 ]
@@ -2123,7 +2084,6 @@ class HeadTests(unittest.TestCase):
                   "first-person",
                   "imperative",
                   "plural",
-                  "positive",
                   "present"
                 ]
               },
@@ -2146,7 +2106,6 @@ class HeadTests(unittest.TestCase):
                   "imperative",
                   "perfect",
                   "plural",
-                  "positive"
                 ]
               },
               {
@@ -2166,7 +2125,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "imperative",
                   "plural",
-                  "positive",
                   "present",
                   "second-person"
                 ]
@@ -2189,7 +2147,6 @@ class HeadTests(unittest.TestCase):
                   "imperative",
                   "perfect",
                   "plural",
-                  "positive",
                   "second-person"
                 ]
               },
@@ -2210,7 +2167,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "imperative",
                   "plural",
-                  "positive",
                   "present",
                   "third-person"
                 ]
@@ -2233,7 +2189,6 @@ class HeadTests(unittest.TestCase):
                   "imperative",
                   "perfect",
                   "plural",
-                  "positive",
                   "third-person"
                 ]
               },
@@ -2254,7 +2209,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "imperative",
                   "passive",
-                  "positive",
                   "present"
                 ]
               },
@@ -2275,7 +2229,6 @@ class HeadTests(unittest.TestCase):
                   "imperative",
                   "passive",
                   "perfect",
-                  "positive"
                 ]
               },
               {
@@ -2293,7 +2246,6 @@ class HeadTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "first-person",
-                  "positive",
                   "potential",
                   "present",
                   "singular"
@@ -2316,7 +2268,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "first-person",
                   "perfect",
-                  "positive",
                   "potential",
                   "singular"
                 ]
@@ -2336,7 +2287,6 @@ class HeadTests(unittest.TestCase):
                 "form": "armahtanet",
                 "source": "Conjugation",
                 "tags": [
-                  "positive",
                   "potential",
                   "present",
                   "second-person",
@@ -2359,7 +2309,6 @@ class HeadTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "perfect",
-                  "positive",
                   "potential",
                   "second-person",
                   "singular"
@@ -2380,7 +2329,6 @@ class HeadTests(unittest.TestCase):
                 "form": "armahtanee",
                 "source": "Conjugation",
                 "tags": [
-                  "positive",
                   "potential",
                   "present",
                   "singular",
@@ -2403,7 +2351,6 @@ class HeadTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "perfect",
-                  "positive",
                   "potential",
                   "singular",
                   "third-person"
@@ -2426,7 +2373,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "first-person",
                   "plural",
-                  "positive",
                   "potential",
                   "present"
                 ]
@@ -2449,7 +2395,6 @@ class HeadTests(unittest.TestCase):
                   "first-person",
                   "perfect",
                   "plural",
-                  "positive",
                   "potential"
                 ]
               },
@@ -2469,7 +2414,6 @@ class HeadTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "plural",
-                  "positive",
                   "potential",
                   "present",
                   "second-person"
@@ -2492,7 +2436,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "perfect",
                   "plural",
-                  "positive",
                   "potential",
                   "second-person"
                 ]
@@ -2513,7 +2456,6 @@ class HeadTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "plural",
-                  "positive",
                   "potential",
                   "present",
                   "third-person"
@@ -2536,7 +2478,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "perfect",
                   "plural",
-                  "positive",
                   "potential",
                   "third-person"
                 ]
@@ -2557,7 +2498,6 @@ class HeadTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "passive",
-                  "positive",
                   "potential",
                   "present"
                 ]
@@ -2578,7 +2518,6 @@ class HeadTests(unittest.TestCase):
                 "tags": [
                   "passive",
                   "perfect",
-                  "positive",
                   "potential"
                 ]
               },
@@ -2785,17 +2724,10 @@ class HeadTests(unittest.TestCase):
                   "infinitive",
                   "infinitive-v"
                 ]
-              },
-              {
-                "form": "gradation-t-d",
-                "source": "Conjugation title",
-                "tags": [
-                  "word-tags"
-                ]
               }
             ],
         }
-        self.assertEqual(ret, expected)
+        self.assertEqual(expected, ret)
 
     def test_Finnish_noun1(self):
         ret = self.xinfl("aamupala", "Finnish", "noun", "Declension", """
@@ -3094,6 +3026,13 @@ class HeadTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "no gradation",
+                "source": "Declension title",
+                "tags": [
+                  "class"
+                ]
+              },
+              {
                 "form": "9/kala",
                 "source": "Declension title",
                 "tags": [
@@ -3354,13 +3293,6 @@ class HeadTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "no-gradation",
-                "source": "Declension title",
-                "tags": [
-                  "word-tags"
-                ]
-              },
-              {
                 "form": "kala",
                 "source": "Declension title",
                 "tags": [
@@ -3407,12 +3339,10 @@ class HeadTests(unittest.TestCase):
                 "form": "aamupalansa",
                 "source": "Declension",
                 "tags": [
-                  "plural",
                   "possessive",
-                  "singular",
                   "third-person"
                 ]
               }
             ],
         }
-        self.assertEqual(ret, expected)
+        self.assertEqual(expected, ret)

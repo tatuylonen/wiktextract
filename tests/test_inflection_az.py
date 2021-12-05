@@ -10,7 +10,7 @@ from wikitextprocessor import Wtp
 from wiktextract import WiktionaryConfig
 from wiktextract.inflection import parse_inflection_section
 
-class HeadTests(unittest.TestCase):
+class InflTests(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = 100000
@@ -1647,4 +1647,4 @@ class HeadTests(unittest.TestCase):
               }
             ],
         }
-        self.assertEqual(ret, expected)
+        self.assertEqual(expected, ret)

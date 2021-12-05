@@ -4743,19 +4743,6 @@ valid_tags = {
     "gerund": "non-finite",
     "gnomic": "mood",
     "goal": "mood",  # Verb form, e.g., উঘাল/Assamese
-    "gradation-t-d": "gradation",  # Finnish
-    "gradation-tt-t": "gradation",
-    "gradation-kk-k": "gradation",
-    "gradation-nt-nn": "gradation",
-    "gradation-pp-p": "gradation",
-    "gradation-k-": "gradation",
-    "gradation-p-v": "gradation",
-    "gradation-mp-mm": "gradation",
-    "gradation-nk-ng": "gradation",
-    "gradation-lt-ll": "gradation",
-    "gradation-rt-rr": "gradation",
-    "gradation-ik-j": "gradation",
-    "gradation-k-v": "gradation",
     "grade-1-kanji": "misc",
     "grade-2-kanji": "misc",
     "grade-3-kanji": "misc",
@@ -4832,7 +4819,7 @@ valid_tags = {
     "intentive": "mood",  # Verb form, e.g., patjaṉi
     "interfix-j": "misc",  # Greenlandic: adds -j- after long vowel
     "interjection": "misc",
-    "interrogative": "misc",
+    "interrogative": "mood",
     "intransitive": "transitivity",
     "invariable": "misc",
     "invertive": "case",  # Case? (e.g., Сотрэш/Adyghe)

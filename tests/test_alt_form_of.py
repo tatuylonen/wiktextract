@@ -8,7 +8,7 @@ from wikitextprocessor import Wtp
 from wiktextract import WiktionaryConfig
 from wiktextract.form_descriptions import parse_alt_or_inflection_of
 
-class HeadTests(unittest.TestCase):
+class FormOfTests(unittest.TestCase):
 
     def setUp(self):
         self.ctx = Wtp()

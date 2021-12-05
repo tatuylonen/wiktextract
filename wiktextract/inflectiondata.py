@@ -510,7 +510,21 @@ infl_map = {
     "imperfect (se)": "imperfect",  # XXX se?
     "usted": {"if": "third-person singular", "then": ""},
     "ustedes": {"if": "third-person plural", "then": ""},
-    "affirmative": "affirmative",
+    "affirmative": {
+        "if": "imperative",
+        "then": "positive",
+        "else": "affirmative",
+    },
+    "Affirmative": {
+        "if": "imperative",
+        "then": "positive",
+        "else": "affirmative",
+    },
+    "Affirmative (+)": {
+        "if": "imperative",
+        "then": "positive",
+        "else": "affirmative",
+    },
     "participle": "participle",
     "Bare forms (no plural for this noun):": "indefinite no-plural",
     "old dative": "dative archaic",  # XXX archaic or dated?
@@ -555,8 +569,6 @@ infl_map = {
     "Imperfect": "imperfect",
     "Preterite": "preterite",
     "Pluperfect": "pluperfect",
-    "Affirmative": "affirmative",
-    "Affirmative (+)": "positive",
     "Negative (-)": "negative",
     "Negative (não)": "negative",
     "definite (subject form)": "definite subjective",
@@ -649,7 +661,7 @@ infl_map = {
     "gender": "",
     "Weak declension": "weak",
     "Bare forms (no plural form of this noun)": "indefinite no-plural",
-    "Positive declarative": "",
+    "Positive declarative": "positive indicative",
     "imperfective participle": "imperfective participle",
     "personal": "personal",
     "future participle": "future participle",

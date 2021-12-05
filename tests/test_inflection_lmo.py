@@ -10,7 +10,7 @@ from wikitextprocessor import Wtp
 from wiktextract import WiktionaryConfig
 from wiktextract.inflection import parse_inflection_section
 
-class HeadTests(unittest.TestCase):
+class InflTests(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = 100000
@@ -30,7 +30,7 @@ class HeadTests(unittest.TestCase):
                                  section, tree)
         return data
 
-    def test_Finnish_verb1(self):
+    def test_Lombard_verb1(self):
         # The main point is to test global annotations from table header
         # going into the forms
         ret = self.xinfl("baià", "Lombard", "verb", "Conjugation", """
@@ -1747,4 +1747,4 @@ class HeadTests(unittest.TestCase):
               }
             ],
         }
-        self.assertEqual(ret, expected)
+        self.assertEqual(expected, ret)
