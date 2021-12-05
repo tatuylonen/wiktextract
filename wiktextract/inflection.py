@@ -311,7 +311,7 @@ def clean_header(word, col, skip_paren):
         col = re.sub(r"[,/]?\s+\([^)]*\)\s*$", "", col)
     col = col.strip()
     if re.search(r"^(There are |"
-                 r"\*|"
+                 r"\* |"
                  r"see |"
                  r"Use |"
                  r"use the |"
@@ -801,6 +801,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
             col = cell.text
             if not col:
                 continue
+
             # print(rownum, j, col)
             if cell.is_title:
                 # It is a header cell
@@ -919,7 +920,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
             # Determine column tags for the multi-column cell
             combined_coltags = compute_coltags(hdrspans, j, colspan, True, col)
             # print("HAVE_TEXT:", repr(col))
-            # Split the text into separate forms
+            # Split the text into separate forms.  First simplify spaces except
+            # newline.
             col = re.sub(r"[ \t\r]+", " ", col)
             # Split the cell text into alternatives
             if col and is_superscript(col[0]):
@@ -931,6 +933,11 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                     if not col.endswith("/"):
                         separators.append("/")
                 alts = split_at_comma_semi(col, separators=separators)
+            # Remove "*" from beginning of forms, as in non-attested
+            # or reconstructed forms.  Otherwise it might confuse romanization
+            # detection.
+            alts = list(x[1:] if re.match(r"\*[^ ]", x) else x
+                        for x in alts)
             # Handle the special case where romanization is given under
             # normal form, e.g. in Russian.  There can be multiple
             # comma-separated forms in each case.

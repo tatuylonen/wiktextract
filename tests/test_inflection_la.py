@@ -2263,3 +2263,682 @@ class InflTests(unittest.TestCase):
             ],
         }
         self.assertEqual(expected, ret)
+
+    def test_Latin_noun1(self):
+        # This also tests handling of a form starting with "*" (non-attested)
+        ret = self.xinfl("mare", "Latin", "noun", "Declension", """
+[[Appendix:Latin third declension|Third-declension]] noun (neuter, “pure” i-stem).<templatestyles src="Template%3Ala-decl-1st%2Fstyle.css">
+
+{| class="prettytable+inflection-table+inflection-table-la"
+
+|-
+
+! class="corner-header" | Case
+
+
+! class="number-header" | Singular
+
+
+! class="number-header" | Plural
+
+
+|-
+
+! class="case-header" | [[nominative case|Nominative]]
+
+
+| class="form-cell" | <span class="Latn+form-of+lang-la+nom%7Cs-form-of++++origin-mare+++" lang="la">[[mare#Latin|mare]]</span>
+
+
+| class="form-cell" | <span class="Latn+form-of+lang-la+nom%7Cp-form-of++++origin-mare+++" lang="la">[[maria#Latin|maria]]</span>
+
+
+|-
+
+! class="case-header" | [[genitive case|Genitive]]
+
+
+| class="form-cell" | <span class="Latn+form-of+lang-la+gen%7Cs-form-of++++origin-mare+++" lang="la">[[maris#Latin|maris]]</span>
+
+
+| class="form-cell" | <span class="Latn+form-of+lang-la+gen%7Cp-form-of++++origin-mare+++" lang="la">[[Reconstruction&#x3a;Latin/marium|*marium]]</span><br><span class="Latn+form-of+lang-la+gen%7Cp-form-of++++origin-mare+++" lang="la">[[marum#Latin|marum]]</span>
+
+
+|-
+
+! class="case-header" | [[dative case|Dative]]
+
+
+| class="form-cell" | <span class="Latn+form-of+lang-la+dat%7Cs-form-of++++origin-mare+++" lang="la">[[mari#Latin|marī]]</span>
+
+
+| class="form-cell" | <span class="Latn+form-of+lang-la+dat%7Cp-form-of++++origin-mare+++" lang="la">[[maribus#Latin|maribus]]</span>
+
+
+|-
+
+! class="case-header" | [[accusative case|Accusative]]
+
+
+| class="form-cell" | <span class="Latn+form-of+lang-la+acc%7Cs-form-of++++origin-mare+++" lang="la">[[mare#Latin|mare]]</span>
+
+
+| class="form-cell" | <span class="Latn+form-of+lang-la+acc%7Cp-form-of++++origin-mare+++" lang="la">[[maria#Latin|maria]]</span>
+
+
+|-
+
+! class="case-header" | [[ablative case|Ablative]]
+
+
+| class="form-cell" | <span class="Latn+form-of+lang-la+abl%7Cs-form-of++++origin-mare+++" lang="la">[[mari#Latin|marī]]</span><br><span class="Latn+form-of+lang-la+abl%7Cs-form-of++++origin-mare+++" lang="la">[[mare#Latin|mare]]</span>
+
+
+| class="form-cell" | <span class="Latn+form-of+lang-la+abl%7Cp-form-of++++origin-mare+++" lang="la">[[maribus#Latin|maribus]]</span>
+
+
+|-
+
+! class="case-header" | [[vocative case|Vocative]]
+
+
+| class="form-cell" | <span class="Latn+form-of+lang-la+voc%7Cs-form-of++++origin-mare+++" lang="la">[[mare#Latin|mare]]</span>
+
+
+| class="form-cell" | <span class="Latn+form-of+lang-la+voc%7Cp-form-of++++origin-mare+++" lang="la">[[maria#Latin|maria]]</span>
+
+
+|-
+
+|}
+
+*The ablative singular can be ''marī'' or ''mare''.
+*The genitive plural form *''marium'', although regularly formed for an i-stem noun, is not attested in the corpus of classical texts. ''Marum'' is found only once, in a line from Gnaeus Naevius.
+*The 5th/6th-century grammarian [[w:Priscian|Priscian]] (''Institutiones'' 7) says it is rarely used in the genitive plural, noting Caesar's use of ''maribus'' too. Similarly, the 4th-century grammarian [[w:Flavius Sosipater Charisius|Charisius]] claims it lacks both a genitive plural *''marium'' and a *''maribus'' form (but see the quotation from Julius Caesar above): <blockquote>''"maria" tamen quamvis dicantur pluraliter, attamen nec "marium" nec "maribus" dicemus'' <br>— although ''maria'' can be said in the plural, nevertheless we won't say ''marium'' nor ''maribus'' (''Ars'' 1.11).</blockquote>
+""")
+        expected = {
+            "forms": [
+              {
+                "form": "mare",
+                "source": "Declension",
+                "tags": [
+                  "nominative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "maria",
+                "source": "Declension",
+                "tags": [
+                  "nominative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "maris",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "singular"
+                ]
+              },
+              {
+                "form": "marium",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "plural"
+                ]
+              },
+              {
+                "form": "marum",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "plural"
+                ]
+              },
+              {
+                "form": "marī",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "maribus",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "mare",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "maria",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "marī",
+                "source": "Declension",
+                "tags": [
+                  "ablative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "mare",
+                "source": "Declension",
+                "tags": [
+                  "ablative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "maribus",
+                "source": "Declension",
+                "tags": [
+                  "ablative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "mare",
+                "source": "Declension",
+                "tags": [
+                  "singular",
+                  "vocative"
+                ]
+              },
+              {
+                "form": "maria",
+                "source": "Declension",
+                "tags": [
+                  "plural",
+                  "vocative"
+                ]
+              }
+            ],
+        }
+        self.assertEqual(expected, ret)
+
+    def test_Latin_adj1(self):
+        ret = self.xinfl("magnificus", "Latin", "adj", "Declension", """
+[[Appendix:Latin first declension|First]]/[[Appendix:Latin second declension|second-declension]] adjective.
+
+{| class="prettytable+inflection-table+inflection-table-la"
+
+|-
+
+! style="background%3A%23549EA0%3B+font-style%3Aitalic%3B" | Number
+
+
+! style="background%3A%23549EA0%3B+font-style%3Aitalic%3B" colspan="3" | Singular
+
+
+| rowspan="2" |
+
+
+! style="background%3A%23549EA0%3B+font-style%3Aitalic%3B" colspan="3" | Plural
+
+
+|-
+
+! style="background%3A%2340E0D0%3B+font-style%3Aitalic%3B" | Case / Gender
+
+
+! style="background%3A%2340E0D0%3B" | Masculine
+
+
+! style="background%3A%2340E0D0%3B" | Feminine
+
+
+! style="background%3A%2340E0D0%3B" | Neuter
+
+
+! style="background%3A%2340E0D0%3B" | Masculine
+
+
+! style="background%3A%2340E0D0%3B" | Feminine
+
+
+! style="background%3A%2340E0D0%3B" | Neuter
+
+
+|-
+
+! style="background%3A%2340E0D0%3B+font-style%3Aitalic%3B" | [[nominative case|Nominative]]
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+nom%7Cm%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnificus#Latin|magnificus]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+nom%7Cf%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnifica#Latin|magnifica]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+nom%7Cn%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnificum#Latin|magnificum]]</span>
+
+
+| rowspan="6" |
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+nom%7Cm%7Cp-form-of++++origin-magnificus+++" lang="la">[[magnifici#Latin|magnificī]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+nom%7Cf%7Cp-form-of++++origin-magnificus+++" lang="la">[[magnificae#Latin|magnificae]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+nom%7Cn%7Cp-form-of++++origin-magnificus+++" lang="la">[[magnifica#Latin|magnifica]]</span>
+
+
+|-
+
+! style="background%3A%2340E0D0%3B+font-style%3Aitalic%3B" | [[genitive case|Genitive]]
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+gen%7Cm%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnifici#Latin|magnificī]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" rowspan="2" | <span class="Latn+form-of+lang-la+gen%7Cf%7Cs%7C%3B%7Cdat%7Cf%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnificae#Latin|magnificae]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+gen%7Cn%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnifici#Latin|magnificī]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+gen%7Cm%7Cp-form-of++++origin-magnificus+++" lang="la">[[magnificorum#Latin|magnificōrum]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+gen%7Cf%7Cp-form-of++++origin-magnificus+++" lang="la">[[magnificarum#Latin|magnificārum]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+gen%7Cn%7Cp-form-of++++origin-magnificus+++" lang="la">[[magnificorum#Latin|magnificōrum]]</span>
+
+
+|-
+
+! style="background%3A%2340E0D0%3B+font-style%3Aitalic%3B" | [[dative case|Dative]]
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+dat%7Cm%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnifico#Latin|magnificō]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+dat%7Cn%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnifico#Latin|magnificō]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" colspan="3" | <span class="Latn+form-of+lang-la+dat%7Cm%7Cp%7C%3B%7Cdat%7Cf%7Cp%7C%3B%7Cdat%7Cn%7Cp-form-of++++origin-magnificus+++" lang="la">[[magnificis#Latin|magnificīs]]</span>
+
+
+|-
+
+! style="background%3A%2340E0D0%3B+font-style%3Aitalic%3B" | [[accusative case|Accusative]]
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+acc%7Cm%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnificum#Latin|magnificum]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+acc%7Cf%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnificam#Latin|magnificam]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+acc%7Cn%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnificum#Latin|magnificum]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+acc%7Cm%7Cp-form-of++++origin-magnificus+++" lang="la">[[magnificos#Latin|magnificōs]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+acc%7Cf%7Cp-form-of++++origin-magnificus+++" lang="la">[[magnificas#Latin|magnificās]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+acc%7Cn%7Cp-form-of++++origin-magnificus+++" lang="la">[[magnifica#Latin|magnifica]]</span>
+
+
+|-
+
+! style="background%3A%2340E0D0%3B+font-style%3Aitalic%3B" | [[ablative case|Ablative]]
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+abl%7Cm%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnifico#Latin|magnificō]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+abl%7Cf%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnifica#Latin|magnificā]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+abl%7Cn%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnifico#Latin|magnificō]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" colspan="3" | <span class="Latn+form-of+lang-la+abl%7Cm%7Cp%7C%3B%7Cabl%7Cf%7Cp%7C%3B%7Cabl%7Cn%7Cp-form-of++++origin-magnificus+++" lang="la">[[magnificis#Latin|magnificīs]]</span>
+
+
+|-
+
+! style="background%3A%2340E0D0%3B+font-style%3Aitalic%3B" | [[vocative case|Vocative]]
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+voc%7Cm%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnifice#Latin|magnifice]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+voc%7Cf%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnifica#Latin|magnifica]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+voc%7Cn%7Cs-form-of++++origin-magnificus+++" lang="la">[[magnificum#Latin|magnificum]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+voc%7Cm%7Cp-form-of++++origin-magnificus+++" lang="la">[[magnifici#Latin|magnificī]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+voc%7Cf%7Cp-form-of++++origin-magnificus+++" lang="la">[[magnificae#Latin|magnificae]]</span>
+
+
+| style="background%3A%23F8F8FF%3B" align="center" | <span class="Latn+form-of+lang-la+voc%7Cn%7Cp-form-of++++origin-magnificus+++" lang="la">[[magnifica#Latin|magnifica]]</span>
+
+
+|}
+""")
+        expected = {
+            "forms": [
+              {
+                "form": "magnificus",
+                "source": "Declension",
+                "tags": [
+                  "masculine",
+                  "nominative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnifica",
+                "source": "Declension",
+                "tags": [
+                  "feminine",
+                  "nominative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnificum",
+                "source": "Declension",
+                "tags": [
+                  "neuter",
+                  "nominative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnificī",
+                "source": "Declension",
+                "tags": [
+                  "masculine",
+                  "nominative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "magnificae",
+                "source": "Declension",
+                "tags": [
+                  "feminine",
+                  "nominative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "magnifica",
+                "source": "Declension",
+                "tags": [
+                  "neuter",
+                  "nominative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "magnificī",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "masculine",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnificae",
+                "source": "Declension",
+                "tags": [
+                  "feminine",
+                  "genitive",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnificī",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "neuter",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnificōrum",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "masculine",
+                  "plural"
+                ]
+              },
+              {
+                "form": "magnificārum",
+                "source": "Declension",
+                "tags": [
+                  "feminine",
+                  "genitive",
+                  "plural"
+                ]
+              },
+              {
+                "form": "magnificōrum",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "neuter",
+                  "plural"
+                ]
+              },
+              {
+                "form": "magnificō",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "masculine",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnificae",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "feminine",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnificō",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "neuter",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnificīs",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "feminine",
+                  "masculine",
+                  "neuter",
+                  "plural"
+                ]
+              },
+              {
+                "form": "magnificum",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "masculine",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnificam",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "feminine",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnificum",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "neuter",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnificōs",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "masculine",
+                  "plural"
+                ]
+              },
+              {
+                "form": "magnificās",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "feminine",
+                  "plural"
+                ]
+              },
+              {
+                "form": "magnifica",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "neuter",
+                  "plural"
+                ]
+              },
+              {
+                "form": "magnificō",
+                "source": "Declension",
+                "tags": [
+                  "ablative",
+                  "masculine",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnificā",
+                "source": "Declension",
+                "tags": [
+                  "ablative",
+                  "feminine",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnificō",
+                "source": "Declension",
+                "tags": [
+                  "ablative",
+                  "neuter",
+                  "singular"
+                ]
+              },
+              {
+                "form": "magnificīs",
+                "source": "Declension",
+                "tags": [
+                  "ablative",
+                  "feminine",
+                  "masculine",
+                  "neuter",
+                  "plural"
+                ]
+              },
+              {
+                "form": "magnifice",
+                "source": "Declension",
+                "tags": [
+                  "masculine",
+                  "singular",
+                  "vocative"
+                ]
+              },
+              {
+                "form": "magnifica",
+                "source": "Declension",
+                "tags": [
+                  "feminine",
+                  "singular",
+                  "vocative"
+                ]
+              },
+              {
+                "form": "magnificum",
+                "source": "Declension",
+                "tags": [
+                  "neuter",
+                  "singular",
+                  "vocative"
+                ]
+              },
+              {
+                "form": "magnificī",
+                "source": "Declension",
+                "tags": [
+                  "masculine",
+                  "plural",
+                  "vocative"
+                ]
+              },
+              {
+                "form": "magnificae",
+                "source": "Declension",
+                "tags": [
+                  "feminine",
+                  "plural",
+                  "vocative"
+                ]
+              },
+              {
+                "form": "magnifica",
+                "source": "Declension",
+                "tags": [
+                  "neuter",
+                  "plural",
+                  "vocative"
+                ]
+              }
+            ],
+        }
+        self.assertEqual(expected, ret)
