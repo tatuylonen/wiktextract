@@ -1073,7 +1073,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         rawgloss = clean_node(config, ctx, sense_base, lst,
                               template_fn=sense_template_fn)
-        # print("PARSE_SENSE RAWGLOSS:", repr(rawgloss))
 
         # Extract examples that are in sublists
         examples = []
@@ -3211,8 +3210,17 @@ def clean_node(config, ctx, category_data, value, template_fn=None,
             ret = str(value)
         return ret
 
+    def clean_node_handler_fn(node):
+        assert isinstance(node, WikiNode)
+        kind = node.kind
+        print("CLEAN_NODE_HANDLER", kind)
+        if kind in (NodeKind.TABLE_CELL, NodeKind.TABLE_HEADER_CELL,
+                    NodeKind.BOLD, NodeKind.ITALIC):
+            return node.children
+        return None
+
     # print("clean_node: value={!r}".format(value))
-    v = recurse(value)
+    v = ctx.node_to_html(value, node_handler_fn=clean_node_handler_fn)
     # print("clean_node: v={!r}".format(v))
 
     # Capture categories if category_data has been given.  We also track

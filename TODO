@@ -388,3 +388,10 @@ sie/Karelian, "Karelian personal pronouns" table)
 
 wikitextprocessor error: '''c''''est is parsed incorrectly (should leave quote).
 This needs to be fixed.
+  - must change example extraction to use node_to_html and then parse from there
+  - this is a major change that needs proper testing!  It is likely to break
+    a lot of existing cases.
+  - compare current extraction to extraction after the change, checking all
+    examples that change.
+
+Polish/wysoki: first cell of Declension table is wrong
