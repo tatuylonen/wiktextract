@@ -218,6 +218,18 @@ for (rule_lang, rule_pos), lst in specific_by_lang.items():
         ht[k] = v.split()
 
 
+# Maps language to allowed categories for col0 expansion when there are
+# other headers on the same row. First value is allowed col0 tag categories
+# in such cases, and second value is allowed later header tag categories.
+col0_expand_allowed = {
+    "default": [("number", "mood", "referent", "aspect", "tense",
+                 "voice", "non-finite", "case", "possession"),
+                ("person", "gender", "number", "degree", "polarity")],
+    "German Low German": [("mood", "non-finite"),
+                          ("tense")],
+}
+
+
 # Tag combination mappings for specific languages/part-of-speech.  These are
 # used as a post-processing step for forms extracted from tables.  Each
 # element has list of languages, list of part-of-speech, and one or more
@@ -663,7 +675,7 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
                     print("stopping on detail after merge")
                 break
             elif ("non-finite" in new_cats and
-                  cur_cats & set(("mood", "tense", "non-finite", "person",
+                  cur_cats & set(("mood", "non-finite", "person",
                                   "number"))):
                 if celltext == debug_word:
                     print("stopping on non-finite new")
@@ -879,24 +891,23 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         assert col0_hdrspan is None
                         col0_hdrspan = hdrspan
                     elif (col0_hdrspan is not None and
-                          any(all_hdr_tags) and
-                          not (all(valid_tags[t] in ("person", "gender",
-                                                     "number", "degree",
-                                                     "polarity")
-                                   for ts in all_hdr_tags
-                                   for t in ts) and
-                               all(valid_tags[t] in ("number", "mood",
-                                                     "referent",
-                                                     "aspect", "tense",
-                                                     "voice", "non-finite",
-                                                     "case", "possession")
-                                   for ts in col0_hdrspan.tagsets
-                                   for t in ts))):
-                        # if col0_hdrspan is not None:
-                        #     print("COL0 FOLLOWED HDR: {!r} by {!r} TAGS {}"
-                        #           .format(col0_hdrspan.text, col,
-                        #                   all_hdr_tags))
-                        col0_followed_by_nonempty = True
+                          any(all_hdr_tags)):
+                        if lang in col0_expand_allowed:
+                            col0_cats, later_cats = col0_expand_allowed[lang]
+                        else:
+                            col0_cats, later_cats = \
+                                col0_expand_allowed["default"]
+                        if not (all(valid_tags[t] in later_cats
+                                    for ts in all_hdr_tags
+                                    for t in ts) and
+                                all(valid_tags[t] in col0_cats
+                                    for ts in col0_hdrspan.tagsets
+                                    for t in ts)):
+                            # if col0_hdrspan is not None:
+                            #     print("COL0 FOLLOWED: {!r} by {!r} TAGS {}"
+                            #           .format(col0_hdrspan.text, col,
+                            #                   all_hdr_tags))
+                            col0_followed_by_nonempty = True
                 continue
 
             # It is a normal text cell
@@ -943,6 +954,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
             # comma-separated forms in each case.  We also handle the case
             # where instead of romanization we have IPA pronunciation
             # (e.g., avoir/French/verb).
+            print("RAW ALTS:", alts)
             len2 = len(alts) // 2
             if (len(alts) % 2 == 0 and
                 all(re.match(r"^\s*/.*/\s*$", x)
@@ -950,20 +962,39 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 alts = list((alts[i], "", alts[i + len2])
                             for i in range(len2))
             elif (len(alts) % 2 == 0 and
-                all(classify_desc(re.sub(r"\^.*$", "",
-                                         "".join(xx for xx in x
-                                                 if not is_superscript(xx))))
-                    == "other"
-                    for x in alts[:len2]) and
-                all(classify_desc(re.sub(r"\^.*$", "",
-                                         "".join(xx for xx in x
-                                                 if not is_superscript(xx))))
-                    in ("romanization", "english")
-                    for x in alts[len2:])):
+                  not any(x.find("(") >= 0 for x in alts) and
+                  all(classify_desc(re.sub(r"\^.*$", "",
+                                           "".join(xx for xx in x
+                                                   if not is_superscript(xx))))
+                      == "other"
+                      for x in alts[:len2]) and
+                  all(classify_desc(re.sub(r"\^.*$", "",
+                                           "".join(xx for xx in x
+                                                   if not is_superscript(xx))))
+                      in ("romanization", "english")
+                      for x in alts[len2:])):
                 alts = list((alts[i], alts[i + len2], "")
                             for i in range(len2))
             else:
-                alts = list((x, "", "") for x in alts)
+                new_alts = []
+                for alt in alts:
+                    if alt.find(" ") >= 0:
+                        new_alts.append(alt)
+                    else:
+                        lst = [""]
+                        idx = 0
+                        for m in re.finditer(r"(^|\w)\((\w(\w\w?)?)\)",
+                                             alt):
+                            new_lst = []
+                            for x in lst:
+                                x += alt[idx: m.start()] + m.group(1)
+                                idx = m.end()
+                                new_lst.append(x)
+                                new_lst.append(x + m.group(2))
+                            lst = new_lst
+                        for x in lst:
+                            new_alts.append(x + alt[idx:])
+                alts = list((x, "", "") for x in new_alts)
             # Generate forms from the alternatives
             for form, base_roman, ipa in alts:
                 form = form.strip()

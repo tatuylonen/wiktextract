@@ -1111,4 +1111,4 @@ class InflTests(unittest.TestCase):
               }
             ],
         }
-        # XXX self.assertEqual(expected, ret)
+        self.assertEqual(expected, ret)
