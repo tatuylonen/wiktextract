@@ -417,3 +417,335 @@ class InflTests(unittest.TestCase):
             ],
         }
         self.assertEqual(expected, ret)
+
+    def test_Dutch_adj1(self):
+        ret = self.xinfl("mooi", "Dutch", "adj", "Inflection", """
+{| style="border%3A+1px+solid+%23CCCCFF%3B+text-align%3A+center%3B+line-height%3A+125%25%3B" class="inflection-table+vsSwitcher" data-toggle-category="inflection" cellspacing="1" cellpadding="3"
+
+|- style="background%3A+%23CCCCFF%3B"
+
+! colspan="5" class="vsToggleElement" style="text-align%3A+left" | Inflection of <i class="Latn+mention" lang="nl">mooi</i>
+
+
+|- class="vsShow" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23CCCCFF%3B" | uninflected
+
+
+| style="min-width%3A+12em%3B" | <span class="Latn+form-of+lang-nl+indef%7Cn%7Cs-form-of++++++form-of-nostore+" lang="nl">[[mooi#Dutch|mooi]]</span>
+
+
+|- class="vsShow" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23CCCCFF%3B" | inflected
+
+
+| <span class="Latn+form-of+lang-nl+indef%7Cm%7Cand%7Cf%7Cs-form-of++++++form-of-nostore+" lang="nl">[[mooie#Dutch|mooie]]</span>
+
+
+|- class="vsShow" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23CCCCFF%3B" | comparative
+
+
+| <span class="Latn+form-of+lang-nl+indef%7Cn%7Cs%7Ccomd-form-of++++++form-of-nostore+" lang="nl">[[mooier#Dutch|mooier]]</span>
+
+
+|- class="vsHide" style="background%3A+%23CCCCFF%3B"
+
+| colspan="2" style="background%3A+%23E6E6FF%3B" |
+
+
+! style="min-width%3A+12em%3B" | [[positive degree|positive]]
+
+
+! style="min-width%3A+12em%3B" | [[comparative degree|comparative]]
+
+
+! style="min-width%3A+12em%3B" | [[superlative degree|superlative]]
+
+
+|- class="vsHide" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23CCCCFF%3B" colspan="2" | [[predicative]]/[[adverbial]]
+
+
+| <span class="Latn+form-of+lang-nl+pred-form-of+++++++" lang="nl">[[mooi#Dutch|mooi]]</span>
+
+| <span class="Latn+form-of+lang-nl+pred%7Ccomd-form-of+++++++" lang="nl">[[mooier#Dutch|mooier]]</span>
+
+| <span class="Latn+form-of+lang-nl+pred%7Csupd-form-of+++++++" lang="nl">het [[mooist#Dutch|mooist]]</span><br><span class="Latn+form-of+lang-nl+pred%7Csupd-form-of+++++++" lang="nl">het [[mooiste#Dutch|mooiste]]</span>
+
+
+|- class="vsHide" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23CCCCFF%3B" rowspan="3" | [[indefinite]]
+
+
+! style="background%3A+%23CCCCFF%3B" | [[masculine|m.]]/[[feminine|f.]]&nbsp;[[singular|sing.]]
+
+
+| <span class="Latn+form-of+lang-nl+indef%7Cm%7Cand%7Cf%7Cs-form-of+++++++" lang="nl">[[mooie#Dutch|mooie]]</span>
+
+| <span class="Latn+form-of+lang-nl+indef%7Cm%7Cand%7Cf%7Cs%7Ccomd-form-of+++++++" lang="nl">[[mooiere#Dutch|mooiere]]</span>
+
+| <span class="Latn+form-of+lang-nl+indef%7Cm%7Cand%7Cf%7Cs%7Csupd-form-of+++++++" lang="nl">[[mooiste#Dutch|mooiste]]</span>
+
+
+|- class="vsHide" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23CCCCFF%3B" | [[neuter|n.]]&nbsp;[[singular|sing.]]
+
+
+| <span class="Latn+form-of+lang-nl+indef%7Cn%7Cs-form-of+++++++" lang="nl">[[mooi#Dutch|mooi]]</span>
+
+| <span class="Latn+form-of+lang-nl+indef%7Cn%7Cs%7Ccomd-form-of+++++++" lang="nl">[[mooier#Dutch|mooier]]</span>
+
+| <span class="Latn+form-of+lang-nl+indef%7Cn%7Cs%7Csupd-form-of+++++++" lang="nl">[[mooiste#Dutch|mooiste]]</span>
+
+
+|- class="vsHide" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A%23CCCCFF%3B" | [[plural]]
+
+
+| <span class="Latn+form-of+lang-nl+indef%7Cp-form-of+++++++" lang="nl">[[mooie#Dutch|mooie]]</span>
+
+| <span class="Latn+form-of+lang-nl+indef%7Cp%7Ccomd-form-of+++++++" lang="nl">[[mooiere#Dutch|mooiere]]</span>
+
+| <span class="Latn+form-of+lang-nl+indef%7Cp%7Csupd-form-of+++++++" lang="nl">[[mooiste#Dutch|mooiste]]</span>
+
+
+|- class="vsHide" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23CCCCFF%3B" colspan="2" | [[definite]]
+
+
+| <span class="Latn+form-of+lang-nl+def-form-of+++++++" lang="nl">[[mooie#Dutch|mooie]]</span>
+
+| <span class="Latn+form-of+lang-nl+def%7Ccomd-form-of+++++++" lang="nl">[[mooiere#Dutch|mooiere]]</span>
+
+| <span class="Latn+form-of+lang-nl+def%7Csupd-form-of+++++++" lang="nl">[[mooiste#Dutch|mooiste]]</span>
+
+
+|- class="vsHide" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23CCCCFF%3B" colspan="2" | [[partitive]]
+
+
+| <span class="Latn+form-of+lang-nl+par-form-of+++++++" lang="nl">[[moois#Dutch|moois]]</span>
+
+| <span class="Latn+form-of+lang-nl+par%7Ccomd-form-of+++++++" lang="nl">[[mooiers#Dutch|mooiers]]</span>
+
+| &mdash;
+
+
+|}
+""")
+        expected = {
+            "forms": [
+              {
+                "form": "mooi",
+                "source": "Inflection",
+                "tags": [
+                  "adverbial",
+                  "participle",
+                  "positive"
+                ]
+              },
+              {
+                "form": "mooi",
+                "source": "Inflection",
+                "tags": [
+                  "participle",
+                  "positive",
+                  "predicative"
+                ]
+              },
+              {
+                "form": "mooier",
+                "source": "Inflection",
+                "tags": [
+                  "adverbial",
+                  "comparative",
+                  "participle"
+                ]
+              },
+              {
+                "form": "mooier",
+                "source": "Inflection",
+                "tags": [
+                  "comparative",
+                  "participle",
+                  "predicative"
+                ]
+              },
+              {
+                "form": "het mooist",
+                "source": "Inflection",
+                "tags": [
+                  "adverbial",
+                  "participle",
+                  "superlative"
+                ]
+              },
+              {
+                "form": "het mooist",
+                "source": "Inflection",
+                "tags": [
+                  "participle",
+                  "predicative",
+                  "superlative"
+                ]
+              },
+              {
+                "form": "het mooiste",
+                "source": "Inflection",
+                "tags": [
+                  "adverbial",
+                  "participle",
+                  "superlative"
+                ]
+              },
+              {
+                "form": "het mooiste",
+                "source": "Inflection",
+                "tags": [
+                  "participle",
+                  "predicative",
+                  "superlative"
+                ]
+              },
+              {
+                "form": "mooie",
+                "source": "Inflection",
+                "tags": [
+                  "feminine",
+                  "indefinite",
+                  "masculine",
+                  "positive",
+                  "singular"
+                ]
+              },
+              {
+                "form": "mooiere",
+                "source": "Inflection",
+                "tags": [
+                  "comparative",
+                  "feminine",
+                  "indefinite",
+                  "masculine",
+                  "singular"
+                ]
+              },
+              {
+                "form": "mooiste",
+                "source": "Inflection",
+                "tags": [
+                  "feminine",
+                  "indefinite",
+                  "masculine",
+                  "singular",
+                  "superlative"
+                ]
+              },
+              {
+                "form": "mooi",
+                "source": "Inflection",
+                "tags": [
+                  "indefinite",
+                  "neuter",
+                  "positive",
+                  "singular"
+                ]
+              },
+              {
+                "form": "mooier",
+                "source": "Inflection",
+                "tags": [
+                  "comparative",
+                  "indefinite",
+                  "neuter",
+                  "singular"
+                ]
+              },
+              {
+                "form": "mooiste",
+                "source": "Inflection",
+                "tags": [
+                  "indefinite",
+                  "neuter",
+                  "singular",
+                  "superlative"
+                ]
+              },
+              {
+                "form": "mooie",
+                "source": "Inflection",
+                "tags": [
+                  "indefinite",
+                  "plural",
+                  "positive"
+                ]
+              },
+              {
+                "form": "mooiere",
+                "source": "Inflection",
+                "tags": [
+                  "comparative",
+                  "indefinite",
+                  "plural"
+                ]
+              },
+              {
+                "form": "mooiste",
+                "source": "Inflection",
+                "tags": [
+                  "indefinite",
+                  "plural",
+                  "superlative"
+                ]
+              },
+              {
+                "form": "mooie",
+                "source": "Inflection",
+                "tags": [
+                  "definite",
+                  "positive"
+                ]
+              },
+              {
+                "form": "mooiere",
+                "source": "Inflection",
+                "tags": [
+                  "comparative",
+                  "definite"
+                ]
+              },
+              {
+                "form": "mooiste",
+                "source": "Inflection",
+                "tags": [
+                  "definite",
+                  "superlative"
+                ]
+              },
+              {
+                "form": "moois",
+                "source": "Inflection",
+                "tags": [
+                  "partitive",
+                  "positive"
+                ]
+              },
+              {
+                "form": "mooiers",
+                "source": "Inflection",
+                "tags": [
+                  "comparative",
+                  "partitive"
+                ]
+              }
+            ],
+        }
+        self.assertEqual(expected, ret)

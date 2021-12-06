@@ -1039,8 +1039,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 # Merge column tags and row tags.  We give preference
                 # to moods etc coming from rowtags (cf. austteigen/German/Verb
                 # imperative forms).
-                for rt in rowtags:
-                    for ct in combined_coltags:
+                for rt in sorted(rowtags):
+                    for ct in sorted(combined_coltags):
                         tags = set(global_tags)
                         tags.update(extra_tags)
                         tags.update(rt)

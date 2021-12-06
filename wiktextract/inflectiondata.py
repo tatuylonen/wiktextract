@@ -913,7 +913,10 @@ infl_map = {
     "eu": {"if": "first-person singular", "then": ""},
     "uninflected": "uninflected",
     "inflected": "inflected",
-    "predicative/adverbial": "participle predicative adverbial",
+    "predicative/adverbial": {
+        "lang": "Dutch",
+        "then": ["participle predicative", "participle adverbial"],
+    },
     "m./f. sing.": "masculine feminine singular",
     "n. sing.": "neuter singular",
     "masculine (vīriešu dzimte)": "masculine",
