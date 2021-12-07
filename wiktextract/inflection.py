@@ -45,6 +45,8 @@ title_contains_global_map = {
     "mutation": "mutation",
     "definite article": "definite",
     "indefinite article": "indefinite",
+    "indefinite declension": "indefinite",
+    "definite declension": "definite",
     "pre-reform": "dated",
     "personal pronouns": "personal pronoun",
     "composed forms of": "multiword-construction",
@@ -90,11 +92,13 @@ title_contains_wordtags_map = {
     "3rd declension": "declension-3",
     "4th declension": "declension-4",
     "5th declension": "declension-5",
+    "6th declension": "declension-6",
     "first declension": "declension-1",
     "second declension": "declension-2",
     "third declension": "declension-3",
     "fourth declension": "declension-4",
     "fifth declension": "declension-5",
+    "sixth declension": "declension-6",
     "1st conjugation": "conjugation-1",
     "2nd conjugation": "conjugation-2",
     "3rd conjugation": "conjugation-3",
@@ -316,20 +320,23 @@ class HdrSpan(object):
         "tagsets",  # set of tuples
         "used",  # At least one text cell after this
         "text",  # For debugging
+        "all_headers_row",
     )
-    def __init__(self, start, colspan, rownum, tagsets, text):
+    def __init__(self, start, colspan, rownum, tagsets, text, all_headers_row):
         assert isinstance(start, int) and start >= 0
         assert isinstance(colspan, int) and colspan >= 1
         assert isinstance(rownum, int)
         assert isinstance(tagsets, set)
         for x in tagsets:
             assert isinstance(x, tuple)
+        assert all_headers_row in (True, False)
         self.start = start
         self.colspan = colspan
         self.rownum = rownum
         self.tagsets = set(tuple(sorted(set(tags))) for tags in tagsets)
         self.used = False
         self.text = text
+        self.all_headers_row = all_headers_row
 
 
 def is_superscript(ch):
@@ -456,7 +463,8 @@ def parse_title(title, source):
     # Check for <x>-type at the beginning of title (e.g., Armenian)
     m = re.search(r"\b(\w+-type|accent-\w+|\w+-stem|[^ ]+ gradation|"
                   r"[^ ]+ alternation|(First|Second|Third|Fourth|Fifth|"
-                  r"Sixth|Seventh) Conjugation)\b", title)
+                  r"Sixth|Seventh) Conjugation|"
+                  r"(1st|2nd|3rd|4th|5th|6th) declension)\b", title)
     if m:
         dt = {"form": m.group(1),
               "source": source + " title",
@@ -602,6 +610,7 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
                           hdrspan.tagsets))
     used = set()
     coltags = None
+    last_header_row = 1000000
     # Iterate through the headers in reverse order, i.e., headers lower in the
     # table (closer to the cell) first.
     for hdrspan in reversed(hdrspans):
@@ -714,6 +723,12 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
             if celltext == debug_word:
                 print("initial row={} start={} coltags={}"
                       .format(hdrspan.rownum, hdrspan.start, coltags))
+        elif hdrspan.all_headers_row and hdrspan.rownum + 1 == last_header_row:
+            # If this row is all headers and immediately preceeds the last
+            # header we accepted, take any header from there.
+            coltags = merge_tagsets(coltags, tagsets)
+            if celltext == debug_word:
+                print("merged (next header row): {}".format(coltags))
         else:
             # new_cats is for the new tags (higher up in the table)
             new_cats = set(valid_tags[t]
@@ -748,10 +763,10 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
             elif ("mood" in new_cats and
                   "mood" in cur_cats and
                   # Allow if all new tags are already in current set
-                  not all(t in ts1
-                          for ts1 in cur_cats
-                          for ts2 in new_cats
-                          for t in ts2)):
+                  any(t not in ts1
+                      for ts1 in coltags  # current
+                      for ts2 in tagsets  # new (from above)
+                      for t in ts2)):
                 if celltext == debug_word:
                     print("stopping on mood-mood")
                 break
@@ -768,6 +783,8 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
                 coltags = merge_tagsets(coltags, tagsets)
                 if celltext == debug_word:
                     print("merged: {}".format(coltags))
+        # Update the row number from which we have last taken headers
+        last_header_row = hdrspan.rownum
     if coltags is None:
         coltags = set([()])
     #print("HDRSPANS:", list((x.start, x.colspan, x.tagsets) for x in hdrspans))
@@ -839,6 +856,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
         # print("ROW:", row)
         if not row:
             continue  # Skip empty rows without incrementing i
+        all_headers = all(x.is_title or not x.text.strip()
+                          for x in row)
         if (row[0].is_title and
             row[0].text and
             not is_superscript(row[0].text[0]) and
@@ -940,15 +959,21 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         all_hdr_tags.update(alt_tags)
                         for tt in alt_tags:
                             new_coltags.add(tt)
-                            # XXX which ones need to be removed?
-                            tags = tuple(sorted(set(tt) | set(rt0) |
-                                                set(hdr_tags)))
+                            # Kludge (saprast/Latvian/Verb): reset row tags
+                            # if trying to add a non-finite after mood.
+                            if (any(valid_tags[t] == "mood" for t in rt0) and
+                                any(valid_tags[t] == "non-finite" for t in tt)):
+                                tags = tuple(sorted(set(tt) | set(hdr_tags)))
+                            else:
+                                tags = tuple(sorted(set(tt) | set(rt0) |
+                                                    set(hdr_tags)))
                             new_rowtags.add(tags)
                 rowtags = new_rowtags
                 new_coltags = set(x for x in new_coltags
                                   if not any(t in noinherit_tags for t in x))
                 if any(new_coltags):
-                    hdrspan = HdrSpan(j, colspan, rownum, new_coltags, col)
+                    hdrspan = HdrSpan(j, colspan, rownum, new_coltags, col,
+                                      all_headers)
                     hdrspans.append(hdrspan)
                     # Handle headers that are above left-side header
                     # columns and are followed by personal pronouns in

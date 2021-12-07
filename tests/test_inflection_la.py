@@ -2194,8 +2194,7 @@ class InflTests(unittest.TestCase):
                   "active",
                   "genitive",
                   "gerund",
-                  "nominal-from-verb",
-                  "nominalization"
+                  "noun-from-verb",
                 ]
               },
               {
@@ -2205,8 +2204,7 @@ class InflTests(unittest.TestCase):
                   "active",
                   "dative",
                   "gerund",
-                  "nominal-from-verb",
-                  "nominalization"
+                  "noun-from-verb",
                 ]
               },
               {
@@ -2216,8 +2214,7 @@ class InflTests(unittest.TestCase):
                   "accusative",
                   "active",
                   "gerund",
-                  "nominal-from-verb",
-                  "nominalization"
+                  "noun-from-verb",
                 ]
               },
               {
@@ -2226,8 +2223,7 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "ablative",
                   "gerund",
-                  "nominal-from-verb",
-                  "nominalization",
+                  "noun-from-verb",
                   "passive"
                 ]
               },
@@ -2236,8 +2232,7 @@ class InflTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "accusative",
-                  "nominal-from-verb",
-                  "nominalization",
+                  "noun-from-verb",
                   "passive",
                   "supine"
                 ]
@@ -2247,8 +2242,7 @@ class InflTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "ablative",
-                  "nominal-from-verb",
-                  "nominalization",
+                  "noun-from-verb",
                   "passive",
                   "supine"
                 ]

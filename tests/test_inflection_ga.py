@@ -1264,8 +1264,7 @@ class InflTests(unittest.TestCase):
                 "form": "ní",
                 "source": "Conjugation",
                 "tags": [
-                  "nominal-from-verb",
-                  "nominalization",
+                  "noun-from-verb",
                 ]
               },
               {

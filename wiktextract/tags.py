@@ -2511,7 +2511,7 @@ xlat_tags_map = {
     "intransitively": "intransitive",
     "transitiv": "transitive",
     "intransitiv": "intransitive",
-    "nominalized adjective": "noun nominalization",
+    "nominalized adjective": "noun-from-adj",
     "adjectivized noun": "adjectival",
     "adv.": "adverb",
     "infomal": "informal error-misspelling",
@@ -2592,13 +2592,14 @@ xlat_tags_map = {
     "superlative -": "no-superlative",
     "1 declension": "declension-1",
     "4 declension": "declension-4",
-    "5th declension": "declension-5",
     "feminine ? declension": "feminine",
     "masculine ? declension": "masculine",
     "1st declension": "declension-1",
     "2nd declension": "declension-2",
     "3rd declension": "declension-3",
     "4th declension": "declension-4",
+    "5th declension": "declension-5",
+    "6th declension": "declension-6",
     "2nd-person": "second-person",
     "1st-person": "first-person",
     "3rd-person": "third-person",
@@ -3111,7 +3112,7 @@ xlat_tags_map = {
     "singular definite and plural": ["singular definite", "plural"],
     "agent noun": "agent",
     "agent noun of": "agent form-of",
-    "Principle verb suffix": "agent suffix nominal-from-verb nominalization",
+    "Principle verb suffix": "agent suffix noun-from-verb",
     "third active infinitive": "infinitive-iii active",
     "third passive infinitive": "infinitive-iii passive",
     "British spelling": "UK",
@@ -3322,6 +3323,13 @@ xlat_tags_map = {
     "third-declension": "declension-3",
     "fourth-declension": "declension-4",
     "fifth-declension": "declension-5",
+    "1st conj.": "conjugation-1",
+    "2nd conj.": "conjugation-2",
+    "3rd conj.": "conjugation-3",
+    "4th conj.": "conjugation-4",
+    "5th conj.": "conjugation-5",
+    "6th conj.": "conjugation-6",
+    "7th conj.": "conjugation-7",
     "first conjugation": "conjugation-1",
     "second conjugation": "conjugation-2",
     "third conjugation": "conjugation-3",
@@ -3377,7 +3385,7 @@ xlat_tags_map = {
     "nif'al construction": "construction-nif'al",
     "huf'al construction": "construction-huf'al",
     "peal construction": "construction-peal",
-    "verbal noun": "nominal-from-verb nominalization",
+    "verbal noun": "noun-from-verb",
     "Verbal derivations": "verb",
     "abstract noun": "abstract-noun",
     "concrete verb": "concrete",
@@ -3491,9 +3499,9 @@ xlat_tags_map = {
     "excessive spelling of": "alt-of excessive",
     "exaggerated degree of": "alt-of exaggerated",
     "defective spelling of": "alt-of misspelling",
-    "verbal noun of": "nominal-from-verb nominalization form-of",
+    "verbal noun of": "noun-from-verb form-of",
     "alternative verbal noun of":
-    "form-of alternative nominal-from-verb nominalization",
+    "form-of alternative noun-from-verb",
     "alternative conjugation of": "alt-of alternative",
     "abbreviation of": "alt-of abbreviation",
     "short for": "alt-of abbreviation",
@@ -3662,7 +3670,7 @@ xlat_tags_map = {
     "used attributively": "attributive",
     "used predicatively": "predicative",
     "used substatively": "substantive",
-    "substantival use of the verbal voice": "nominal-from-verb",
+    "substantival use of the verbal voice": "noun-from-verb",
     "in ancient phrases": "idiomatic",
     "unofficial spelling": "nonstandard",
     "rare nonstandard spellings": "rare nonstandard",
@@ -3911,11 +3919,11 @@ xlat_tags_map = {
     "non-standard": "nonstandard",
     "non-standard form of": "nonstandard alt-of",
     "nonanimate": "inanimate",
-    "nominalized verb": "nominalization",
-    "nominalized": "nominalization",
-    "n-v": "verb-from-nominal",
-    "v-n": "nominal-from-verb nominalization",
-    "n-n": "nominal-from-nominal nominalization",
+    "nominalized verb": "noun-from-verb",
+    "nominalized": "noun-from-verb",  # XXX could this be from noun/adj
+    "n-v": "verb-from-noun",
+    "v-n": "noun-from-verb",
+    "n-n": "noun-from-noun",
     "v-v": "verb-from-verb",
     "uses -j- as interfix": "interfix-j",
     "eulogistic": "poetic",  # XXX not really, implies praise
@@ -3978,8 +3986,7 @@ xlat_tags_map = {
     "no longer productive": "idiomatic",
     "no past tense": "no-past",
     "no third-person singular present": "no-third-person-singular-present",
-    "nominalized adjective following adjective declension":
-    "nominalization adjective-declension",
+    "nominalized adjective following adjective declension": "noun-from-adj",
     # XXX this could be more accurate
     "truncative except after q and r": "truncative",  # Greenlandic
     "of masculine singular": "masculine singular nominative",
@@ -4330,8 +4337,8 @@ tag_categories = {
     "class": 20,  # Inflection class (Bantu languages, Japanese, etc)
     "trigger": 15,  # Triggers something (e.g., mutation) in some context
     "gradation": 15,  # gradation or qualifier
-    "derivation": 13,  # Specifies derivation (nominalization, agent,
-                   # nominal-from-verb, ...)
+    "derivation": 13,  # Specifies derivation (agent, noun-from-verb,
+                   # noun-from-and, noun-from-noun, verb-from-noun, ...)
     "mod": 10,  # Provides a modified form (e.g., abbreviation, mutation)
     "pragmatic": 10,  # Specifies pragmatics (e.g., stressed/unstressed)
     "phonetic": 10,  # Describes some phonetic aspect
@@ -4582,6 +4589,8 @@ valid_tags = {
     "conjunct-incorporating": "misc",
     "conjunct-non-incorporating": "misc",
     "conjunctive": "mood",  # Verb mood (doubt: wish, emotion, possibility, obligation)
+    "conjunctive-1": "mood",  # e.g. saprast/Latvian
+    "conjunctive-2": "mood",
     "conjunction": "misc",  # Used in Phalura conjunctions, relative pronouns
     "connective": "misc",  # Group of verb forms in Korean
     "connegative": "polarity",  # Indicates verb form that goes with negative
@@ -4625,6 +4634,7 @@ valid_tags = {
     "declension-3": "class",
     "declension-4": "class",
     "declension-5": "class",
+    "declension-6": "class",
     "declension-pattern-of": "detail",
     "declinable": "misc",
     "defective": "misc",
@@ -4930,15 +4940,11 @@ valid_tags = {
     "no-third-person-singular-past-historic": "misc",  # Italian
     "no-third-person-singular-present": "misc",  # mittagessen/German
     "nominal": "pos",
-    "nominal-from-nominal": "derivation",  # Greenlandic: suffix derives nominal from nominal
-    "nominal-from-verb": "derivation",  # Greenlandic: suffix derives nominal from verb
     "nominal-state": "misc",
-    "nominalization": "derivation",
     "nominative": "case",
     "nomino-accusative": "misc",  # 𒀀𒄿𒅖/Hittite XXX same as nominate/accusative???
     "non-aspectual": "aspect",  # E.g., भूलना/Hindi
     "non-durative": "misc",  # non-durative sentence, e.g., ϣⲗⲏⲗ/Coptic
-    "non-finite": "misc",  # General category of non-finite verb forms
     "non-numeral": "misc",  # Assamese noun forms
     "non-past": "tense",  # Verb tense (e.g., Korean)
     "non-scientific": "misc",
@@ -4954,6 +4960,9 @@ valid_tags = {
     "not-predicative": "misc",
     "not-translated": "misc",
     "noun": "pos",
+    "noun-from-adj": "derivation",
+    "noun-from-noun": "derivation",  # Greenlandic: suffix derives nominal from nominal
+    "noun-from-verb": "derivation",  # Greenlandic: suffix derives nominal from verb
     "now": "misc",
     "numeral": "pos",  # Numeral part-of-speech; also Assamese noun forms
     "numeral-tones": "misc",
@@ -4997,6 +5006,10 @@ valid_tags = {
     "parasynonym": "misc",
     "parenthetic": "misc",
     "participle": "non-finite",
+    "participle-1": "non-finite",  # e.g. saprast/Latvian/Verb
+    "participle-2": "non-finite",
+    "participle-3": "non-finite",
+    "participle-4": "non-finite",
     "particle": "pos",
     "partitive": "case",  # Case
     "passive": "voice",
@@ -5247,7 +5260,7 @@ valid_tags = {
     "verb-form-des": "misc",  # Estonian des-form
     "verb-form-i": "misc",
     "verb-form-ii": "misc",
-    "verb-from-nominal": "derivation",  # Forms verbs from nominals
+    "verb-from-noun": "derivation",  # Forms verbs from nominals
     "verb-object": "misc",  # Used in some Chinese words (verb+object in same entry?)
     "verb-from-verb": "derivation",  # Suffix modifies verbs producing verbs
     "vigesimal": "misc",

@@ -1226,8 +1226,7 @@ class InflTests(unittest.TestCase):
                 "form": "mówienie",
                 "source": "Conjugation",
                 "tags": [
-                  "nominal-from-verb",
-                  "nominalization"
+                  "noun-from-verb",
                 ]
               },
               {
