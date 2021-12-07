@@ -3213,7 +3213,6 @@ def clean_node(config, ctx, category_data, value, template_fn=None,
     def clean_node_handler_fn(node):
         assert isinstance(node, WikiNode)
         kind = node.kind
-        print("CLEAN_NODE_HANDLER", kind)
         if kind in (NodeKind.TABLE_CELL, NodeKind.TABLE_HEADER_CELL,
                     NodeKind.BOLD, NodeKind.ITALIC):
             return node.children

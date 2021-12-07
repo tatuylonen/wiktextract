@@ -288,7 +288,7 @@ infl_map = {
     "Dual": "dual",
     "indicative": "indicative",
     "subjunctive": "subjunctive",
-    "person": "",
+    "person": "",  # Needs to be empty for mówić/Polish
     "Forms with the definite article": "definite",
     "Forms with the definite article:": "definite",
     "indefinite articulation": "indefinite",
@@ -566,6 +566,7 @@ infl_map = {
     "Second-person (vós)": "second-person plural",
     "Third-person (eles / elas / vocês)": "third-person plural",
     "Impersonal": "impersonal",
+    "masculine personal/animate": "masculine animate",
     "Personal": "personal",
     "Gerund": "gerund",
     "Imperfect": "imperfect",

@@ -39,9 +39,6 @@ noinherit_tags = set([
 title_contains_global_map = {
     "possessive": "possessive",
     "negative": "negative",
-    "future": "future",
-    "pf": "perfective",
-    "impf": "imperfective",
     "comparative": "comparative",
     "superlative": "superlative",
     "combined forms": "combined-form",
@@ -66,6 +63,8 @@ title_contains_global_re = re.compile(
 
 # Words in title that cause addition of tags to word-tags "form"
 title_contains_wordtags_map = {
+    "pf": "perfective",
+    "impf": "imperfective",
     "strong": "strong",
     "weak": "weak",
     "countable": "countable",
@@ -154,6 +153,36 @@ for k, v in title_elemstart_map.items():
 title_elemstart_re = re.compile(
     r"^({}) "
     .format("|".join(re.escape(x) for x in title_elemstart_map.keys())))
+
+
+# Languages with three genders masculine, feminine, neuter (and impersonal
+# not used)
+MFN_LANGUAGES = set([
+    "German",
+    "German Low German",
+    "French",
+    "Spanish",
+])
+
+# Languages with just two genders masculine and feminine (neuter and
+# impersonal not used)
+MF_LANGUAGES = set([
+    "Portuguese",
+])
+
+# Languages with virile-nonvirile distinction in the plural
+# (generally Slavic)
+PL_VIRILE_LANGS = set([
+    "Polish",
+    "Russian",
+])
+
+# Languages with animate/inanimate distinction in the masculine singular
+# (generally Slavic)
+MASC_ANIMATE_LANGS = set([
+    "Polish",
+    "Russian",
+])
 
 
 # Specification for language-specific processing.  Each entry starts
@@ -339,6 +368,7 @@ def clean_header(word, col, skip_paren):
                  r"the instrumenal singular|"
                  r"Note:|"
                  r"\^* Note:|"
+                 r"possible mutated form |"
                  r"Notes:)",
                 col):
         return "", [], [], []
@@ -423,7 +453,8 @@ def parse_title(title, source):
             m.group(0).lower()].split())
     # Check for <x>-type at the beginning of title (e.g., Armenian)
     m = re.search(r"\b(\w+-type|accent-\w+|\w+-stem|[^ ]+ gradation|"
-                  r"[^ ]+ alternation)\b", title)
+                  r"[^ ]+ alternation|(First|Second|Third|Fourth|Fifth|"
+                  r"Sixth|Seventh) Conjugation)\b", title)
     if m:
         dt = {"form": m.group(1),
               "source": source + " title",
@@ -578,19 +609,34 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
             # Special case: we sometimes have cells covering two out of
             # three genders.  Also, sometimes we have multiple genders for
             # plural and a form for several; we must then take the common tags.
-            if (hdrspan.start >= start and
+            if celltext == debug_word:
+                print("row_catss: {}"
+                      .format(list(sorted(set(valid_tags[t]
+                                              for x in hdrspans
+                                              if x.rownum == hdrspan.rownum
+                                              for ts in x.tagsets
+                                              for t in ts)))))
+                print("hdrspan.start={} hdrspan.colspan={} start={} colspan={}"
+                      .format(hdrspan.start, hdrspan.colspan, start, colspan))
+            if (# hdrspan covers target cell, at least partially
+                hdrspan.start >= start and
                 hdrspan.start + hdrspan.colspan <= start + colspan and
-                any(x is not hdrspan and x.rownum == hdrspan.rownum and
-                    x.start >= start and
+                # there must be at least one other cell partially covered on the
+                # same row
+                any(x.start >= start and
                     x.start + x.colspan <= start + colspan
-                    for x in hdrspans) and
-                all(x.rownum != hdrspan.rownum or
-                    x.start < hdrspan.start or
-                    x.start + x.colspan > hdrspan.start + hdrspan.colspan or
-                    all(valid_tags[t] in ("number", "gender", "case")
+                    for x in hdrspans
+                    if x.rownum == hdrspan.rownum and x is not hdrspan) and
+                # all cells fully inside the target cell on
+                # the same row must be in these categories
+                all(x.start < start or
+                    x.start + x.colspan > start + colspan or
+                    all(valid_tags[t] in ("number", "gender", "case",
+                                          "category")
                         for ts in x.tagsets
                         for t in ts)
-                    for x in hdrspans)):
+                    for x in hdrspans
+                    if x.rownum == hdrspan.rownum)):
                 # Multiple columns apply to the current cell, only
                 # gender/number/case tags present
                 # If there are no tags outside the range in any of the
@@ -603,27 +649,31 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
                               x.start + x.colspan <= start + colspan
                               for tt in x.tagsets
                               for t in tt)
+                if celltext == debug_word:
+                    print("in_cats={}".format(in_cats))
                 # For limited categories, if the category doesn't appear
                 # outside, we won't include the category
-                if not in_cats - set(("gender", "number", "person", "case")):
+                if not in_cats - set(("gender", "number", "person", "case",
+                                      "category")):
                     # Sometimes we have masc, fem, neut and plural, so treat
                     # number and gender as the same here (if one given, look for
                     # the other too)
                     if "number" in in_cats or "gender" in in_cats:
                         in_cats.update(("number", "gender"))
-                        # Determine which categories occur outside on
-                        # the same row
-                        out_cats = set(valid_tags[t]
-                                       for x in hdrspans
-                                       if x.rownum == hdrspan.rownum and
-                                       (x.start < start or
-                                        x.start + x.colspan > start + colspan)
-                                       for tt in x.tagsets
-                                       for t in tt)
-                        # print("in_cats={} out_cats={}"
-                        #       .format(in_cats, out_cats))
-                        if not (out_cats & in_cats):
-                            tagsets = set([()])
+                    # Determine which categories occur outside on
+                    # the same row
+                    out_cats = set(valid_tags[t]
+                                   for x in hdrspans
+                                   if x.rownum == hdrspan.rownum and
+                                   (x.start < start or
+                                    x.start + x.colspan > start + colspan)
+                                   for tt in x.tagsets
+                                   for t in tt)
+                    if celltext == debug_word:
+                        print("in_cats={} out_cats={}"
+                              .format(in_cats, out_cats))
+                    if not (out_cats & in_cats):
+                        tagsets = set([()])
                 # # Merge the tagsets into existing tagsets.  This merges
                 # # alternatives into the same tagset if there is only one
                 # # category different; otherwise this splits the tagset into
@@ -949,12 +999,13 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
             # detection.
             alts = list(x[1:] if re.match(r"\*[^ ]", x) else x
                         for x in alts)
+            alts = list(x for x in alts
+                        if not re.match(r"pronounced with |\(with ", x))
             # Handle the special case where romanization is given under
             # normal form, e.g. in Russian.  There can be multiple
             # comma-separated forms in each case.  We also handle the case
             # where instead of romanization we have IPA pronunciation
             # (e.g., avoir/French/verb).
-            print("RAW ALTS:", alts)
             len2 = len(alts) // 2
             if (len(alts) % 2 == 0 and
                 all(re.match(r"^\s*/.*/\s*$", x)
@@ -1022,16 +1073,23 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         tagsets1, topics1 = decode_tags(paren)
                         if not topics1:
                             for ts in tagsets1:
+                                ts = list(x for x in ts
+                                          if x.find(" ") < 0)
                                 extra_tags.extend(ts)
                             form = (form[:m.start()] + " " +
                                     form[m.end():]).strip()
                     elif (m.start() > 0 and not roman and
                           classify_desc(form[:m.start()]) == "other" and
-                          classify_desc(paren) in ("romanization", "english")):
+                          classify_desc(paren) in ("romanization", "english")
+                          and not re.search(r"^with |-form$", paren)):
                         roman = paren
                         form = (form[:m.start()] + " " + form[m.end():]).strip()
+                    elif re.search(r"^with |-form", paren):
+                        form = (form[:m.start()] + " " + form[m.end():]).strip()
                 # Ignore certain forms that are not really forms
-                if form in ("", "not used", "not applicable", "unchanged"):
+                if form in ("", "not used", "not applicable", "unchanged",
+                            "after an",  # in sona/Irish/Adj/Mutation
+                ):
                     continue
                 # print("ROWTAGS:", rowtags)
                 # print("COLTAGS:", combined_coltags)
@@ -1095,6 +1153,33 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                             tags = tags - set(["first-person", "second-person",
                                                "third-person",
                                                "singular", "plural"])
+
+                        # This applies to Slavic languages with virile/nonvirile
+                        # distinction in the masculine
+                        if ("virile" in tags and "nonvirile" in tags and
+                            "plural" in tags and
+                            lang in PL_VIRILE_LANGS):
+                            tags.remove("virile")
+                            tags.remove("nonvirile")
+
+                        if ("animate" in tags and "inanimate" in tags and
+                            "masculine" in tags and "singular" in tags and
+                            lang in MASC_ANIMATE_LANGS):
+                            tags.remove("animate")
+                            tags.remove("inanimate")
+
+                        # This applies to many Info-European languages with
+                        # three genders
+                        if ("masculine" in tags and
+                            "feminine" in tags):
+                            if ("neuter" in tags and
+                                lang in MFN_LANGUAGES):
+                                tags.remove("masculine")
+                                tags.remove("feminine")
+                                tags.remove("neuter")
+                            elif lang in MF_LANGUAGES:
+                                tags.remove("masculine")
+                                tags.remove("feminine")
 
                         # Remove unnecessary "positive" tag from verb forms
                         if pos == "verb" and "positive" in tags:
@@ -1296,13 +1381,23 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 tables, rest = recursively_extract(col, lambda x:
                                                    isinstance(x, WikiNode) and
                                                    x.kind == NodeKind.TABLE)
-                for tbl in tables:
-                    handle_wikitext_table(config, ctx, word, lang, pos, data,
-                                          tbl, titles, source)
-                # print("REST:", rest)
 
+                # Clean the rest of the cell.
                 celltext = clean_node(config, ctx, None, rest)
                 # print("CLEANED:", celltext)
+
+                # Handle nested tables.
+                for tbl in tables:
+                    # Some nested tables (e.g., croí/Irish) have subtitles
+                    # as normal paragraphs in the same cell under a descriptive
+                    # test that should be treated as a title (e.g.,
+                    # "Forms with the definite article", with "definite" not
+                    # mentioned elsewhere).
+                    new_titles = list(titles)
+                    if celltext:
+                        new_titles.append(celltext)
+                    handle_wikitext_table(config, ctx, word, lang, pos, data,
+                                          tbl, new_titles, source)
 
                 # This magic value is used as part of header detection
                 cellstyle = (col.attrs.get("style", "") + "//" +
@@ -1478,13 +1573,14 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
         recurse(x, [])
 
     # XXX this code is used for extracting tables for inflection tests
-    with open("temp.XXX", "w") as f:
-        f.write(word + "\n")
-        f.write(lang + "\n")
-        f.write(pos + "\n")
-        f.write(section + "\n")
-        text = ctx.node_to_wikitext(tree)
-        f.write(text + "\n")
+    if section != "Mutation":
+        with open("temp.XXX", "w") as f:
+            f.write(word + "\n")
+            f.write(lang + "\n")
+            f.write(pos + "\n")
+            f.write(section + "\n")
+            text = ctx.node_to_wikitext(tree)
+            f.write(text + "\n")
 
 # XXX check interdecir/Spanish - singular/plural issues
 

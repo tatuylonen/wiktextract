@@ -2655,6 +2655,7 @@ xlat_tags_map = {
     "masculine counterpart": "masculine",
     "passive counterpart": "passive",
     "active counterpart": "active",
+    "attested mostly in the passive": "passive-mostly",
     "basic stem form": "stem",
     "no supine stem": "no-supine",
     "no perfect stem": "no-perfect",
@@ -3536,6 +3537,7 @@ xlat_tags_map = {
     "nasal mutation": "mutation-nasal",
     "triggers nasalization": "triggers-mutation-nasal",
     "triggers nasal mutation": "triggers-mutation-nasal",
+    "triggers no mutation": "triggers-no-mutation",
     "mixed mutation of": "form-of mutation-mixed",
     "mixed mutation": "mutation-mixed",
     "aspirate mutation of": "form-of mutation-aspirate",
@@ -4998,6 +5000,7 @@ valid_tags = {
     "particle": "pos",
     "partitive": "case",  # Case
     "passive": "voice",
+    "passive-mostly": "misc",  # Attested mostly in the passive
     "past": "tense",
     "past-future": "tense",  # Future in the past
     "past-recent": "tense",
@@ -5202,13 +5205,14 @@ valid_tags = {
     "trigger-measurement": "trigger",  # Measurement trigger, e.g., rumupok/Tagalog
     "trigger-object": "trigger",  # Object trigger
     "trigger-referential": "trigger",   # Referential trigger
-    "triggers-mutation-aspirate": "trigger",  # Welsh
     "triggers-eclipsis": "trigger",      # Irish
     "triggers-h-prothesis": "trigger",   # Irish
     "triggers-lenition": "trigger",      # Irish
+    "triggers-mutation-aspirate": "trigger",  # Welsh
     "triggers-mutation-mixed": "trigger",  # Welsh
     "triggers-mutation-nasal": "trigger",  # Old Irish
     "triggers-mutation-soft": "trigger",  # Welsh
+    "triggers-no-mutation": "trigger",  # Irish
     "triptote": "class",  # Noun having three cases (e.g., Arabic)
     "truncative": "misc",  # Greenlandic: suffix attaches to last vowel, removing stuff
     "two-termination": "misc",
