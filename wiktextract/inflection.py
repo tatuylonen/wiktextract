@@ -53,6 +53,7 @@ title_contains_global_map = {
     "subordinate-clause forms of": "subordinate-clause",
     "western lombard": "Western-Lombard",
     "eastern lombard": "Eastern-Lombard",
+    "participles of": "participle",
 }
 for k, v in title_contains_global_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -862,6 +863,9 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
             row[0].text and
             not is_superscript(row[0].text[0]) and
             row[0].text not in infl_map and
+            re.sub(r"\s+", " ",
+                   re.sub(r"\s*\([^)]*\)", "",
+                          row[0].text)).strip() not in infl_map and
             not re.match(infl_start_re, row[0].text) and
             all(x.is_title == row[0].is_title and
                 x.text == row[0].text

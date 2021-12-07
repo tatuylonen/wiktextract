@@ -4464,6 +4464,7 @@ valid_tags = {
     "adnominal": "misc",
     "adverb": "pos",
     "adverbial": "misc",  # XXX is this same as adverb?
+    "adverbial-manner": "misc",  # Manner of action adverbial
     "affirmative": "misc",  # Used for adjectives, interjections, pronouns
     "affix": "pos",
     "after-preposition": "misc",  # Word used only after preposition nich/Lower Sorbian
@@ -4763,6 +4764,7 @@ valid_tags = {
     "grade-6-kanji": "misc",
     "grammatical-3rd-person": "misc",  # 2nd person conjugated like 3rd
     "habitual": "aspect",  # Verb aspect
+    "half-participle": "non-finite",  # e.g. važiuoti/Lithuanian/Verb
     "hangeul": "script",  # Korean script
     "hanja": "script",  # Han character script (Chinese characters) to write Korean
     "hard": "misc",  # sladek/Slovene
