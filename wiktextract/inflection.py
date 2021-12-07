@@ -139,6 +139,7 @@ for k, v in title_elements_map.items():
 title_elemstart_map = {
     "auxiliary": "auxiliary",
     "Kotus type": "class",
+    "ÕS type": "class",
     "class": "class",
     "short class": "class",
     "type": "class",
@@ -253,7 +254,8 @@ for (rule_lang, rule_pos), lst in specific_by_lang.items():
 col0_expand_allowed = {
     "default": [("number", "mood", "referent", "aspect", "tense",
                  "voice", "non-finite", "case", "possession"),
-                ("person", "gender", "number", "degree", "polarity")],
+                ("person", "gender", "number", "degree", "polarity",
+                 "voice", "register")],
     "German Low German": [("mood", "non-finite"),
                           ("tense")],
 }
@@ -609,15 +611,16 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
             # Special case: we sometimes have cells covering two out of
             # three genders.  Also, sometimes we have multiple genders for
             # plural and a form for several; we must then take the common tags.
-            if celltext == debug_word:
-                print("row_catss: {}"
-                      .format(list(sorted(set(valid_tags[t]
-                                              for x in hdrspans
-                                              if x.rownum == hdrspan.rownum
-                                              for ts in x.tagsets
-                                              for t in ts)))))
-                print("hdrspan.start={} hdrspan.colspan={} start={} colspan={}"
-                      .format(hdrspan.start, hdrspan.colspan, start, colspan))
+            # if celltext == debug_word:
+            #     print("row_catss: {}"
+            #           .format(list(sorted(set(valid_tags[t]
+            #                                   for x in hdrspans
+            #                                   if x.rownum == hdrspan.rownum
+            #                                   for ts in x.tagsets
+            #                                   for t in ts)))))
+            #     print("hdrspan.start={} hdrspan.colspan={} start={} "
+            #           "colspan={}"
+            #           .format(hdrspan.start, hdrspan.colspan, start, colspan))
             if (# hdrspan covers target cell, at least partially
                 hdrspan.start >= start and
                 hdrspan.start + hdrspan.colspan <= start + colspan and
@@ -687,9 +690,9 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
             else:
                 # Ignore this hdrspan
                 if celltext == debug_word:
-                    print("Ignoring row={} start={} tagsets={}"
+                    print("Ignoring row={} start={} colspan={} tagsets={}"
                           .format(hdrspan.rownum, hdrspan.start,
-                                  hdrspan.tagsets))
+                                  hdrspan.colspan, hdrspan.tagsets))
                 continue
         key = (hdrspan.start, hdrspan.colspan)
         if key in used:
@@ -697,8 +700,13 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
                 print("Cellspan already used: start={} key={} rownum={}"
                       .format(hdrspan.start, hdrspan.colspan, hdrspan.rownum))
             continue
+        # XXX this was experimental, remove:
+        # if any(valid_tags[t] != "register"
+        #        for ts in tagsets
+        #        for t in ts):
         used.add(key)
         if mark_used:
+            # XXX I don't think this case is used any more, check!
             hdrspan.used = True
         # Merge into coltags
         if coltags is None:
@@ -716,8 +724,10 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
                            for tt in coltags
                            for t in tt)
             if celltext == debug_word:
-                print("tagsets={} coltags={} new_cats={} cur_cats={}"
-                      .format(tagsets, coltags, new_cats, cur_cats))
+                print("row={} start={} colspan={} tagsets={} coltags={} "
+                      "new_cats={} cur_cats={}"
+                      .format(hdrspan.rownum, hdrspan.start, hdrspan.colspan,
+                              tagsets, coltags, new_cats, cur_cats))
             if "detail" in new_cats:
                 if not any(coltags):  # Only if no tags so far
                     coltags = merge_tagsets(coltags, tagsets)
@@ -736,7 +746,12 @@ def compute_coltags(hdrspans, start, colspan, mark_used, celltext):
                     print("stopping on non-finite cur")
                 break
             elif ("mood" in new_cats and
-                  "mood" in cur_cats):
+                  "mood" in cur_cats and
+                  # Allow if all new tags are already in current set
+                  not all(t in ts1
+                          for ts1 in cur_cats
+                          for ts2 in new_cats
+                          for t in ts2)):
                 if celltext == debug_word:
                     print("stopping on mood-mood")
                 break
@@ -819,6 +834,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
         word_tags.extend(more_word_tags)
         ret.extend(extra_forms)
     cell_rowcnt = collections.defaultdict(int)
+    seen_cells = set()
     for row in rows:
         # print("ROW:", row)
         if not row:
@@ -845,10 +861,12 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
         have_hdr = False
         have_text = False
         samecell_cnt = 0
-        col0_hdrspan = None
+        col0_hdrspan = None  # col0 or later header (despite its name)
         col0_followed_by_nonempty = False
         for j, cell in enumerate(row):
             colspan = cell.colspan
+            previously_seen = id(cell) in seen_cells
+            seen_cells.add(id(cell))
             if samecell_cnt == 0:
                 # First column of a (possible multi-column) cell
                 samecell_cnt = colspan - 1
@@ -937,7 +955,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                     # remaining columns (basically headers that
                     # evaluate to no tags).  In such cases widen the
                     # left-side header to the full row.
-                    if j == 0:
+                    if j == 0 and not previously_seen:
                         assert col0_hdrspan is None
                         col0_hdrspan = hdrspan
                     elif (col0_hdrspan is not None and
@@ -957,7 +975,27 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                             #     print("COL0 FOLLOWED: {!r} by {!r} TAGS {}"
                             #           .format(col0_hdrspan.text, col,
                             #                   all_hdr_tags))
-                            col0_followed_by_nonempty = True
+                            if (col0_hdrspan is not None and
+                                j > col0_hdrspan.start +
+                                col0_hdrspan.colspan and
+                                not col0_followed_by_nonempty and
+                                len(set(valid_tags[t]
+                                        for tt in col0_hdrspan.tagsets
+                                        # Only one cat of tags: kunna/Swedish
+                                        for t in tt)) == 1):
+                                # If an earlier header is only followed by
+                                # headers that yield no tags, expand it to
+                                # until here
+                                print("EXPANDING COL0: {} from {} to {} cols"
+                                      .format(col0_hdrspan.text,
+                                              col0_hdrspan.colspan,
+                                              j - col0_hdrspan.start))
+                                col0_hdrspan.colspan = j - col0_hdrspan.start
+                            # Set col0_hdrspan to the current header cell
+                            col0_hdrspan = None
+                            if not previously_seen:
+                                col0_hdrspan = hdrspan
+                                col0_followed_by_nonempty = False
                 continue
 
             # It is a normal text cell
@@ -1220,15 +1258,16 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         ret.append(dt)
         # End of row
         if (col0_hdrspan is not None and not col0_followed_by_nonempty and
+            j > col0_hdrspan.start + col0_hdrspan.colspan and
             len(set(valid_tags[t]
                     for tt in col0_hdrspan.tagsets
                     for t in tt)) == 1):  # Only one cat of tags: kunna/Swedish
-            # If a column-0 header is only followed by headers that yield
+            # If an earlier header is only followed by headers that yield
             # no tags, expand it to entire row
-            # print("EXPANDING COL0: {} from {} to {} cols"
-            #       .format(col0_hdrspan.text, col0_hdrspan.colspan,
-            #               len(row)))
-            col0_hdrspan.colspan = len(row)
+            print("EXPANDING COL0: {} from {} to {} cols"
+                  .format(col0_hdrspan.text, col0_hdrspan.colspan,
+                          len(row) - col0_hdrspan.start))
+            col0_hdrspan.colspan = len(row) - col0_hdrspan.start
         rownum += 1
     # XXX handle refs and defs
     # for x in hdrspans:
