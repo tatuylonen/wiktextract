@@ -133,9 +133,9 @@ infl_map = {
     "sublative": "sublative",
     "delative": "delative",
     "non-attributive possessive - singular":
-    "not-attributive predicative possessive singular",
+    "predicative possessive possessive-single",  # XXX check hűtő/Hungarian/Noun
     "non-attributive possessive - plural":
-    "not-attributive predicative possessive singular",
+    "predicative possessive possessive-single",
     "infinitive": "infinitive",
     "prepositional": "prepositional",
     "masculine": {
@@ -256,9 +256,17 @@ infl_map = {
     ["third-person plural", "second-person plural formal"],
     "Indica­tive mood": "indicative",
     "Pre­sent": "present",
-    "Indef.": "indefinite",
-    "Def.": "definite",
-    "2nd-p. o.": "second-person objective",
+    "Indef.": {
+        "lang": "Hungarian",
+        "then": "object-indefinite",
+        "else": "indefinite",
+    },
+    "Def.": {
+        "lang": "Hungarian",
+        "then": "object-definite",
+        "else": "definite",
+    },
+    "2nd-p. o.": "object-second-person",
     "m verbs conjugated according to 3rd person sg. er":
     "second-person grammatical-3rd-person",
     "m verbs conjugated according to 3nd person sg. er":
@@ -273,7 +281,11 @@ infl_map = {
     "second-person singular plural polite archaic",
     "Condi­tional mood": "conditional",
     "Sub­junc­tive mood": "subjunctive",
-    "Other nonfinite verb forms": "dummy-mood",
+    "Other nonfinite verb forms": {
+        "lang": "Hungarian",
+        "then": "",
+        "else": "dummy-mood",
+    },
     "Verbal noun": "noun-from-verb",
     "Future part.": "future participle",
     "Adverbial part.": "adverbial participle",

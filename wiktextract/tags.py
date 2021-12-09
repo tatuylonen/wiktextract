@@ -2638,18 +2638,18 @@ xlat_tags_map = {
     "no plural forms": "no-plural",
     "not translated": "not-translated",
     "not mutable": "not-mutable",
-    "used only predicatively": "not-attributive predicative",
-    "only in predicative position": "not-attributive predicative",
-    "only predicative": "not-attributive predicative",
+    "used only predicatively": "predicative",
+    "only in predicative position": "predicative",
+    "only predicative": "predicative",
     "predicate-only":
-    "not-attributive predicative error-misspelling",  # eleng/Luxembourgish
-    "predicative only": "not-attributive predicative",
+    "predicative error-misspelling",  # eleng/Luxembourgish
+    "predicative only": "predicative",
     "predicatively": "predicative",
     "in attributive use": "attributive",
     "(attributive)": "attributive",
     "(predicative)": "predicative",
     "(uncountable)": "uncountable",
-    "only in attributive use": "attributive not-predicative",
+    "only in attributive use": "attributive",
     "present tense": "present",
     "past tense": "past",
     "feminine counterpart": "feminine",
@@ -3008,8 +3008,8 @@ xlat_tags_map = {
     "oblique/nominative": "oblique nominative",
     "nominative/vocative/dative/strong genitive":
     ["nominative vocative dative", "strong genitive"],
-    "non-attributive": "not-attributive predicative",
-    "not predicative": "not-predicative attributive",
+    "non-attributive": "predicative",
+    "not predicative": "attributive",
     "attributive use": "attributive",
     "nominative/vocative/instrumental":
     "nominative vocative instrumental",
@@ -4309,6 +4309,7 @@ tag_categories = {
     "gender": 390,    # Semantic gender (often also implies class)
     "person": 380,    # first-person, second-person, third-person, impersonal,
                       # fourth-person, inclusive, exclusive
+    "object": 375,    # Object number/gender/class/definiteness/person
     "case": 370,      # Grammatical case (also direct-object, indirect-object)
     "number": 360,    # Singular, plural, dual, paucal, ...
     # "addressee",    # Something related to addressee
@@ -4494,7 +4495,7 @@ valid_tags = {
     "assertive": "mood",  # Verb form (e.g., Korean)
     "associative": "case",  # Case (e.g., Quechua)
     "ateji": "misc",
-    "attributive": "misc",
+    "attributive": "case",  # Adjective attributive-only form/use
     "augmentative": "misc",  # Indicates large size, intensity, seniority
     "augmented": "misc",
     "autonomous": "person",  # nigh/Irish; verb form for subjectless clauses
@@ -4955,11 +4956,9 @@ valid_tags = {
     "nondeferential": "misc",
     "nonstandard": "misc",
     "nonvirile": "category",
-    "not-attributive": "misc",
     "not-clause-initial": "misc",
     "not-comparable": "category",
     "not-mutable": "misc",
-    "not-predicative": "misc",
     "not-translated": "misc",
     "noun": "pos",
     "noun-from-adj": "derivation",
@@ -4970,29 +4969,31 @@ valid_tags = {
     "numeral-tones": "misc",
     "obligative": "mood",  # Verb form (e.g., Azerbaijani)
     "object-concord": "misc",  # Verb form includes object-based inflection
-    "object-first-person": "misc",  # Swahili object concords, Spanish combined-form
-    "object-second-person": "misc",
-    "object-third-person": "misc",
-    "object-singular": "misc",
-    "object-plural": "misc",
-    "object-class-1": "misc",  # Swahili object class for object concord
-    "object-class-2": "misc",
-    "object-class-3": "misc",
-    "object-class-4": "misc",
-    "object-class-5": "misc",
-    "object-class-6": "misc",
-    "object-class-7": "misc",
-    "object-class-8": "misc",
-    "object-class-9": "misc",
-    "object-class-10": "misc",
-    "object-class-11": "misc",
-    "object-class-12": "misc",
-    "object-class-13": "misc",
-    "object-class-14": "misc",
-    "object-class-15": "misc",
-    "object-class-16": "misc",
-    "object-class-17": "misc",
-    "object-class-18": "misc",
+    "object-first-person": "object",  # Swahili object concords, Spanish combined-form
+    "object-second-person": "object",
+    "object-third-person": "object",
+    "object-singular": "object",
+    "object-plural": "object",
+    "object-definite": "object",  # Object is definite, e.g. fut/Hungarian
+    "object-indefinite": "object",  # Object is indefinite
+    "object-class-1": "object",  # Swahili object class for object concord
+    "object-class-2": "object",
+    "object-class-3": "object",
+    "object-class-4": "object",
+    "object-class-5": "object",
+    "object-class-6": "object",
+    "object-class-7": "object",
+    "object-class-8": "object",
+    "object-class-9": "object",
+    "object-class-10": "object",
+    "object-class-11": "object",
+    "object-class-12": "object",
+    "object-class-13": "object",
+    "object-class-14": "object",
+    "object-class-15": "object",
+    "object-class-16": "object",
+    "object-class-17": "object",
+    "object-class-18": "object",
     "objective": "case",  # Case, used as an object
     "oblique": "case",  # Apparently like case form (e.g., Hindi)
     "obsolete": "misc",
@@ -5061,7 +5062,7 @@ valid_tags = {
     "potential": "mood",  # Verb mood
     "praenominal": "misc",
     "precursive": "mood",  # Verb form, e.g. ϯϩⲉ/Coptic
-    "predicative": "misc",
+    "predicative": "case",  # Adjective predicate-only form/use
     "prefix": "pos",
     "preparative": "aspect",  # Verb form, e.g., ᠵᡠᠸᡝᡩᡝᠮᠪᡳ/Manchu
     "prepositional": "misc",

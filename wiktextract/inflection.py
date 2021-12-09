@@ -155,6 +155,7 @@ title_elemstart_map = {
     "strong class": "class",
     "weak class": "class",
     "accent paradigm": "accent-paradigm",
+    "stem in": "class",
 }
 for k, v in title_elemstart_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -637,7 +638,8 @@ def parse_title(title, source):
     m = re.search(r"\b(\w+-type|accent-\w+|\w+-stem|[^ ]+ gradation|"
                   r"[^ ]+ alternation|(First|Second|Third|Fourth|Fifth|"
                   r"Sixth|Seventh) Conjugation|"
-                  r"(1st|2nd|3rd|4th|5th|6th) declension)\b", title)
+                  r"(1st|2nd|3rd|4th|5th|6th) declension|"
+                  r"\w[\w ]* harmony)\b", title)
     if m:
         dt = {"form": m.group(1),
               "source": source + " title",
@@ -879,7 +881,10 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                 tagsets = or_tagsets(lang, pos, tagsets, x.tagsets)
             # If all headers on the row were included, ignore them.
             # See e.g. kunna/Swedish/Verb.
-            if includes_all_on_row:
+            ts_cats = tagset_cats(tagsets)
+            if (includes_all_on_row or
+                # Kludge, see fut/Hungarian/Verb
+                ("tense" in ts_cats and "object" in ts_cats)):
                 tagsets = set([()])
             # For limited categories, if the category doesn't appear
             # outside, we won't include the category
@@ -969,7 +974,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                     print("stopping on non-finite new")
                 break
             elif ("non-finite" in cur_cats and
-                  "mood" in new_cats):
+                  new_cats & set(("mood",))):
                 if celltext == debug_word:
                     print("stopping on non-finite cur")
                 break
@@ -1071,19 +1076,21 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
             continue  # Skip empty rows without incrementing i
         all_headers = all(x.is_title or not x.text.strip()
                           for x in row)
+        text = row[0].text
         if (row[0].is_title and
-            row[0].text and
-            not is_superscript(row[0].text[0]) and
-            row[0].text not in infl_map and
-            re.sub(r"\s+", " ",
-                   re.sub(r"\s*\([^)]*\)", "",
-                          row[0].text)).strip() not in infl_map and
-            not re.match(infl_start_re, row[0].text) and
+            text and
+            not is_superscript(text[0]) and
+            text not in infl_map and
+            (re.match(r"Inflection ", text) or
+             re.sub(r"\s+", " ",
+                    re.sub(r"\s*\([^)]*\)", "",
+                           text)).strip() not in infl_map) and
+            not re.match(infl_start_re, text) and
             all(x.is_title == row[0].is_title and
-                x.text == row[0].text
+                x.text == text
                 for x in row)):
-            if row[0].text and title is None:
-                title = row[0].text
+            if text and title is None:
+                title = text
                 if re.match(r"(Note:|Notes:)", title):
                     continue
                 more_global_tags, more_word_tags, extra_forms = \
@@ -1179,7 +1186,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         all_hdr_tags.update(alt_tags)
                         for tt in alt_tags:
                             new_coltags.add(tt)
-                            # Kludge (saprast/Latvian/Verb): reset row tags
+                            # Kludge (saprast/Latvian/Verb): ignore row tags
                             # if trying to add a non-finite after mood.
                             if (any(valid_tags[t] == "mood" for t in rt0) and
                                 any(valid_tags[t] == "non-finite" for t in tt)):
@@ -1417,7 +1424,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         old_tags = set(tags)
                         for t in ct:
                             c = valid_tags[t]
-                            if (c in ("mood",) and
+                            if (c in ("mood", "case", "number") and
                                 any(valid_tags[tt] == c
                                     for tt in old_tags)):
                                 continue
