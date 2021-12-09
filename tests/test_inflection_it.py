@@ -1424,7 +1424,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "formal",
                   "imperative",
-                  "singular"
+                  "singular",
+                  "third-person"
                 ]
               },
               {
@@ -1461,7 +1462,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "formal",
                   "imperative",
-                  "plural"
+                  "plural",
+                  "third-person"
                 ]
               },
               {
@@ -1471,7 +1473,8 @@ class InflTests(unittest.TestCase):
                   "apocopic",
                   "formal",
                   "imperative",
-                  "plural"
+                  "plural",
+                  "third-person"
                 ]
               }
             ],
@@ -2320,7 +2323,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "formal",
                   "imperative",
-                  "singular"
+                  "singular",
+                  "third-person",
                 ]
               },
               {
@@ -2347,7 +2351,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "formal",
                   "imperative",
-                  "plural"
+                  "plural",
+                  "third-person",
                 ]
               }
             ],

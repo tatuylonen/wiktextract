@@ -1764,8 +1764,6 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
                 "form": "sona",
                 "source": "Declension",
                 "tags": [
-                  "feminine",
-                  "masculine",
                   "nominative",
                   "plural"
                 ]
@@ -1774,8 +1772,6 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
                 "form": "shona",
                 "source": "Declension",
                 "tags": [
-                  "feminine",
-                  "masculine",
                   "nominative",
                   "plural"
                 ]
@@ -1802,8 +1798,6 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
                 "form": "sona",
                 "source": "Declension",
                 "tags": [
-                  "feminine",
-                  "masculine",
                   "plural",
                   "vocative"
                 ]
@@ -1830,9 +1824,7 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
                 "form": "sona",
                 "source": "Declension",
                 "tags": [
-                  "feminine",
                   "genitive",
-                  "masculine",
                   "plural",
                   "strong"
                 ]
@@ -1841,9 +1833,7 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
                 "form": "sona",
                 "source": "Declension",
                 "tags": [
-                  "feminine",
                   "genitive",
-                  "masculine",
                   "plural",
                   "weak"
                 ]
@@ -1880,8 +1870,6 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
                 "source": "Declension",
                 "tags": [
                   "dative",
-                  "feminine",
-                  "masculine",
                   "plural"
                 ]
               },
@@ -1890,8 +1878,6 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
                 "source": "Declension",
                 "tags": [
                   "dative",
-                  "feminine",
-                  "masculine",
                   "plural"
                 ]
               },

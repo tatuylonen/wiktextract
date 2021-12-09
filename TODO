@@ -393,3 +393,7 @@ This needs to be fixed.
     a lot of existing cases.
   - compare current extraction to extraction after the change, checking all
     examples that change.
+
+Working on changes to compute_coltags
+  - changed how column headers are merged
+  - still something wrong, look at aamupala/Finnish 3rd pers possessive

@@ -4497,7 +4497,7 @@ valid_tags = {
     "attributive": "misc",
     "augmentative": "misc",  # Indicates large size, intensity, seniority
     "augmented": "misc",
-    "autonomous": "misc",
+    "autonomous": "person",  # nigh/Irish; verb form for subjectless clauses
     "auxiliary": "detail",
     "baby-talk": "misc",
     "base-form": "misc",  # Base form of the word (e.g., with misspellings of forms)
@@ -5110,7 +5110,7 @@ valid_tags = {
     "reflexive-of": "detail",  # Reflexive form of something
     "regional": "misc",
     "relational": "misc",
-    "relative": "non-finite",  # At least gp/Egyptian verb forms; conjunctions
+    "relative": "person",  # At least gp/Egyptian, nigh/Irish verb forms; conjunctions
     "renarrative": "mood",  # Verb form (e.g. Bulgarian)
     "replacive": "misc",  # Greenlandic suffixes
     "reported": "mood",  # Verb forms for reported speech
@@ -5204,7 +5204,7 @@ valid_tags = {
     "toponymic": "misc",
     "traditional": "misc",
     "transcription": "misc",
-    "transgressive": "mood",  # Verb form
+    "transgressive": "non-finite",  # Verb form  XXX non-finite/mood/tense?
     "transitive": "transitivity",
     "transitive-with-of": "misc",
     "translation-hub": "misc",  # Predictable compound term with translations, no gloss
