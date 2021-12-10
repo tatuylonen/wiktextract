@@ -78,10 +78,6 @@ class TagsetTests(unittest.TestCase):
 
     def test_or10(self):
         self.xop(or_tagsets, [["virile"]], [["nonvirile"]],
-                 [["virile", "nonvirile"]])
-
-    def test_or11(self):
-        self.xop(or_tagsets, [["virile"]], [["nonvirile"]],
                  [[]], lang="Russian")
 
     def test_or12(self):
@@ -109,4 +105,4 @@ class TagsetTests(unittest.TestCase):
 
     def test_and6(self):
         self.xop(and_tagsets, [["singular", "plural"]], [["third-person"]],
-                 [["third-person"]])
+                 [["third-person"]], lang="Finnish")

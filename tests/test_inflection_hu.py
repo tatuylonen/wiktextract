@@ -1875,7 +1875,6 @@ class InflTests(unittest.TestCase):
                 "form": "hűtőre",
                 "source": "Declension",
                 "tags": [
-                  "essive-modal",
                   "singular",
                   "sublative"
                 ]
@@ -1884,7 +1883,6 @@ class InflTests(unittest.TestCase):
                 "form": "hűtőkre",
                 "source": "Declension",
                 "tags": [
-                  "essive-modal",
                   "plural",
                   "sublative"
                 ]
@@ -2571,7 +2569,6 @@ class InflTests(unittest.TestCase):
                 "form": "rövidre",
                 "source": "Declension",
                 "tags": [
-                  "essive-modal",
                   "singular",
                   "sublative"
                 ]
@@ -2580,7 +2577,6 @@ class InflTests(unittest.TestCase):
                 "form": "rövidekre",
                 "source": "Declension",
                 "tags": [
-                  "essive-modal",
                   "plural",
                   "sublative"
                 ]

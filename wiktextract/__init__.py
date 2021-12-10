@@ -9,7 +9,7 @@ from .page import clean_value, parse_page
 from .parts_of_speech import PARTS_OF_SPEECH
 from .thesaurus import extract_thesaurus_data
 from .categories import extract_categories
-from .tags import sort_tags
+from .tags import sort_tags, tag_categories
 from .form_descriptions import valid_tags  # This file adds uppercase tags
 
 __all__ = (
@@ -22,5 +22,6 @@ __all__ = (
     "extract_namespace",
     "extract_categories",
     "sort_tags",
+    "tag_categories",
     "valid_tags",
 )

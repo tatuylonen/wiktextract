@@ -9,19 +9,20 @@ import html
 import functools
 import collections
 import unicodedata
-from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
+from wikitextprocessor import Wtp, WikiNode, NodeKind
 from wiktextract.config import WiktionaryConfig
-from wiktextract.tags import valid_tags
+from wiktextract.tags import valid_tags, tag_categories
 from wiktextract.inflectiondata import infl_map, infl_start_map, infl_start_re
 from wiktextract.datautils import (data_append, data_extend, freeze,
-                                   split_at_comma_semi)
+                                   split_at_comma_semi, languages_by_name)
 from wiktextract.form_descriptions import (classify_desc, decode_tags,
                                            parse_head_final_tags)
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 
 
 # Set this to a word form to debug how that is analyzed, or None to disable
-debug_word = None  # None to disable
+debug_word = None
+# debug_word = "να είσαι, {[έσο]}³"  # None to disable
 
 
 # Column texts that are interpreted as an empty column.
@@ -30,6 +31,7 @@ IGNORED_COLVALUES = set([
     "⸺", "⸻", "﹘", "﹣", "－", "/", "?"])
 
 # These tags are never inherited from above
+# XXX merge with lang_specific
 noinherit_tags = set([
     "infinitive-i",
     "infinitive-i-long",
@@ -166,146 +168,485 @@ title_elemstart_re = re.compile(
     .format("|".join(re.escape(x) for x in title_elemstart_map.keys())))
 
 
-# Languages with three genders masculine, feminine, neuter (and impersonal
-# not used)
-MFN_LANGUAGES = set([
-    "Czech",
-    "French",
-    "German Low German",
-    "German",
-    "Polish",
-    "Russian",
-    "Spanish",
-])
-
-# Languages with just two genders masculine and feminine (neuter and
-# impersonal not used)
-MF_LANGUAGES = set([
-    "Portuguese",
-    "Irish",
-])
-
-# Languages with virile-nonvirile distinction in the plural
-# (generally Slavic)
-PL_VIRILE_LANGS = set([
-    "Polish",
-    "Russian",
-])
-
-# Languages with animate/inanimate distinction in the masculine singular
-# (generally Slavic)
-MASC_ANIMATE_LANGS = set([
-    "Polish",
-    "Russian",
-    "Czech",
-])
-
-# Languages with only singular and plural for number (i.e., no dual, paucal etc)
-# (listing the language here only matters if simplications are needed in
-# inflection table parsing).
-SINGULAR_PLURAL_LANGS = set([
-    "Dutch",
-    "English",
-    "Finnish",
-    "French",
-    "Irish",
-    "Portuguese",
-    "Spanish",
-    "Swedish",
-])
-
-# Languages that have other voice forms in inflection tables besides
-# just active and passive
-NON_ACTIVE_PASSIVE_LANGS = set([
-])
-
-# Languages that have "strong" and "weak" tags and where they should be
-# eliminated if both are present.
-STRONG_WEAK_LANGS = set([
-    "Irish",
-])
-
 # For tables in these languages, an empty row resets hdrspans
 EMPTY_ROW_RESETS_LANGS = set([
     "Latvian",
 ])
 
-# Specification for language-specific processing.  Each entry starts
-# with a list of languages that it applies to (a language can be
-# specified in multiple entries) and then a list of parts-of-speech.
-# It is then followed by any number of pattern-tags pairs, where
-# pattern will be escaped, except ^ at the beginning is interpreted as
-# restricting it to the beginning.  The matched parts will be removed
-# from the word.
-lang_specific_data = [
-    [["German"], ["verb"],
-     ["^ich ", "first-person singular"],
-     ["^du ", "second-person singular"],
-     ["^er ", "third-person singular"],
-     ["^wir ", "first-person plural"],
-     ["^ihr ", "second-person plural"],
-     ["^sie ", "third-person plural"],
-     ["^dass ich ", "first-person singular subordinate-clause"],
-     ["^dass du ", "second-person singular subordinate-clause"],
-     ["^dass er ", "third-person singular subordinate-clause"],
-     ["^dass wir ", "first-person plural subordinate-clause"],
-     ["^dass ihr ", "second-person plural subordinate-clause"],
-     ["^dass sie ", "third-person plural subordinate-clause"],
-     [" (du)", "second-person singular"],
-     [" (ihr)", "second-person plural"],
-     ],
-]
-specific_by_lang = collections.defaultdict(list)
-for lst in lang_specific_data:
-    assert isinstance(lst, list)
-    assert len(lst) >= 3
-    for rule_lang in lst[0]:
-        assert isinstance(rule_lang, str)
-        for rule_pos in lst[1]:
-            assert isinstance(rule_pos, str)
-            for rule in lst[2:]:
-                assert isinstance(rule, list)
-                rule_pattern, rule_tags = rule
-                assert isinstance(rule_pattern, str)
-                assert isinstance(rule_tags, str)
-                for t in rule_tags.split():
-                    assert t in valid_tags
-                specific_by_lang[rule_lang, rule_pos].append(
-                    [rule_pattern, rule_tags])
-specific_by_lang_re = {}
-specific_by_lang_map = {}
-for (rule_lang, rule_pos), lst in specific_by_lang.items():
-    starts = list(x[0][1:] for x in lst if x[0].startswith("^"))
-    others = list(x[0] for x in lst if not x[0].startswith("^"))
-    rs = []
-    if starts:
-        rs.append(r"^(" + "|".join(re.escape(x) for x in starts) + ")")
-    if others:
-        rs.append(r"(" + "|".join(re.escape(x) for x in others) + ")")
-    specific_by_lang_re[rule_lang, rule_pos] = re.compile("|".join(rs))
-    ht = {}
-    specific_by_lang_map[rule_lang, rule_pos] = ht
-    for k, v in lst:
-        if k.startswith("^"):
-            k = k[1:]
-        assert k not in ht
-        ht[k] = v.split()
-
-
-# Maps language to allowed categories for col0 expansion when there are
-# other headers on the same row. First value is allowed col0 tag categories
-# in such cases, and second value is allowed later header tag categories.
-col0_expand_allowed = {
-    "default": [set(["number", "mood", "referent", "aspect", "tense",
-                     "voice", "non-finite", "case", "possession"]),
-                set(["person", "gender", "number", "degree", "polarity",
-                     "voice", "register"])],
-    "German Low German": [set(["mood", "non-finite"]),
-                          set(["tense"])],
-    "Czech": [set(["tense", "mood", "non-finite"]),
-              set(["tense", "mood", "voice"])],
-    "Estonian": [set(["non-finite"]), set(["voice"])],
+# Language-specific configuration for various aspects of inflection table
+# parsing.
+lang_specific = {
+    "default": {
+        "hdr_expand_first": set(["number", "mood", "referent", "aspect",
+                                 "tense", "voice", "non-finite", "case",
+                                 "possession"]),
+        "hdr_expand_cont": set(["person", "gender", "number", "degree",
+                                "polarity", "voice"]),
+        "both_active_passive_remove": True,
+        "both_strong_weak_remove": True,
+        "form_transformations": [],
+        "genders": None,
+        "animate_inanimate_remove": True,
+        "virile_nonvirile_remove": True,
+        "masc_only_animate": False,  # Slavic special
+        "numbers": ["singular", "plural"],
+        "persons": ["first-person", "second-person", "third-person"],
+        "pl_virile_nonvirile": False,
+        "skip_mood_mood": False,
+        "strengths": ["strong", "weak"],
+        "voices": ["active", "passive"],
+    },
+    "austronesian-group": {
+        "numbers": ["singular", "dual", "plural"],
+    },
+    "bantu-group": {
+        "genders": None,
+    },
+    "indo-european-group": {
+        "genders": ["masculine", "feminine", "neuter"],
+        "numbers": ["singular", "plural"],
+    },
+    "romance-group": {
+    },
+    "slavic-group": {
+        "numbers": ["singular", "plural", "dual"],
+        "masc_only_animate": True,
+    },
+    "samojedic-group": {
+        "next": "uralic-group",
+    },
+    "semitic-group": {
+        "numbers": ["singular", "dual", "plural"],
+    },
+    "uralic-group": {
+        "numbers": ["singular", "dual", "plural"],
+    },
+    "Ancient Greek": {
+        "next": "Proto-Indo-European",  # Has dual
+    },
+    # "Anejom̃": {
+    #     "numbers": ["singular", "dual", "trial", "plural"],
+    # },
+    "Arabic": {
+        "next": "semitic-group",
+        "numbers": ["singular", "dual", "paucal", "plural"],
+    },
+    "Aragonese": {
+        "next": "romance-group",
+    },
+    "Aromanian": {
+        "next": "romance-group",
+    },
+    "Avestan": {
+        "next": "Proto-Indo-European",
+    },
+    "Baiso": {
+        "numbers": ["singular", "paucal", "plural"],
+    },
+    "Belarusian": {
+        "next": "slavic-group",
+    },
+    "Bende": {
+        "next": "bantu-group",
+    },
+    "Catalan": {
+        "next": "romance-group",
+    },
+    "Chichewa": {
+        "next": "bantu-group",
+    },
+    "Chimwiini": {
+        "next": "bantu-group",
+    },
+    "Corsican": {
+        "next": "romance-group",
+    },
+    "Czech": {
+        "next": "slavic-group",
+        "hdr_expand_first": set(["tense", "mood", "non-finite"]),
+        "hdr_expand_cont": set(["tense", "mood", "voice"]),
+    },
+    "Dalmatian": {
+        "next": "romance-group",
+    },
+    "Danish": {
+        "genders": ["common-gender", "feminine", "masculine", "neuter"],
+    },
+    "Emilian": {
+        "next": "romance-group",
+    },
+    "Estonian": {
+        "hdr_expand_first": set(["non-finite"]),
+        "hdr_expand_cont": set(["voice"]),
+    },
+    "Fijian": {
+        "numbers": ["singular", "paucal", "plural"],
+    },
+    "Finnish": {
+        "hdr_expand_first": set([]),
+    },
+    "French": {
+        "next": "romance-group",
+    },
+    "Friulian": {
+        "next": "romance-group",
+    },
+    "Galician": {
+        "next": "romance-group",
+    },
+    "German": {
+        "next": "Proto-Germanic",
+        "form_transformations": [
+             ["verb", "^ich ", "first-person singular"],
+             ["verb", "^du ", "second-person singular"],
+             ["verb", "^er ", "third-person singular"],
+             ["verb", "^wir ", "first-person plural"],
+             ["verb", "^ihr ", "second-person plural"],
+             ["verb", "^sie ", "third-person plural"],
+             ["verb", "^dass ich ", "first-person singular subordinate-clause"],
+             ["verb", "^dass du ", "second-person singular subordinate-clause"],
+             ["verb", "^dass er ", "third-person singular subordinate-clause"],
+             ["verb", "^dass wir ", "first-person plural subordinate-clause"],
+             ["verb", "^dass ihr ", "second-person plural subordinate-clause"],
+             ["verb", "^dass sie ", "third-person plural subordinate-clause"],
+             ["verb", " \(du\)$", "second-person singular"],
+             ["verb", " \(ihr\)$", "second-person plural"],
+         ],
+    },
+    "German Low German": {
+        "next": "German",
+        "hdr_expand_first": set(["mood", "non-finite"]),
+        "hdr_expand_cont": set(["tense"]),
+    },
+    "Gothic": {
+        "next": "Proto-Indo-European",  # Has dual
+    },
+    "Greek": {
+        "next": "indo-european-group",
+        "hdr_expand_first": set(["mood", "tense", "aspect"]),
+        "hdr_expand_cont": set(["tense", "person", "number"]),
+    },
+    "Hawaiian": {
+        "next": "austronesian-group",
+    },
+    "Hebrew": {
+        "next": "semitic-group",
+    },
+    "Hopi": {
+        "numbers": ["singular", "paucal", "plural"],
+    },
+    "Hungarian": {
+        "hdr_expand_first": set([]),
+        "hdr_expand_cont": set([]),
+    },
+    "Ilokano": {
+        "next": "austronesian-group",
+    },
+    "Inari Sami": {
+        "next": "samojedic-group",
+    },
+    "Inuktitut": {
+        "numbers": ["singular", "dual", "plural"],
+    },
+    "Italian": {
+        "next": "romance-group",
+        "hdr_expand_first": set(["mood", "tense"]),
+        "hdr_expand_cont": set(["person", "register", "number"]),
+    },
+    "Irish": {
+        "next": "Old Irish",
+        "genders": ["masculine", "feminine"],
+    },
+    "Kamba": {
+        "next": "bantu-group",
+    },
+    "Kapampangan": {
+        "next": "austronesian-group",
+    },
+    # "Khoe": {
+    #     "numbers": ["singular", "dual", "plural"],
+    # },
+    "Kikuyu": {
+        "next": "bantu-group",
+    },
+    "Ladin": {
+        "next": "romance-group",
+    },
+    # "Larike": {
+    #     "numbers": ["singular", "dual", "trial", "plural"],
+    # },
+    "Ligurian": {
+        "next": "romance-group",
+    },
+    "Lihir": {
+       "numbers": ["singular", "dual", "trial", "paucal", "plural"],
+    },
+    "Lingala": {
+        "next": "bantu-group",
+    },
+    "Lombard": {
+        "next": "romance-group",
+    },
+    "Lower Sorbian": {
+        "next": "slavic-group",
+    },
+    "Luganda": {
+        "next": "bantu-group",
+    },
+    "Lule Sami": {
+        "next": "samojedic-group",
+    },
+    "Maore Comorian": {
+        "next": "bantu-group",
+    },
+    "Masaba": {
+        "next": "bantu-group",
+    },
+    "Mirandese": {
+        "next": "romance-group",
+    },
+    # "Motuna": {
+    #     "numbers": ["singular", "paucal", "plural"],
+    # },
+    "Mwali Comorian": {
+        "next": "bantu-group",
+    },
+    "Mwani": {
+        "next": "bantu-group",
+    },
+    "Neapolitan": {
+        "next": "romance-group",
+    },
+    "Nenets": {
+        "next": "uralic-group",
+    },
+    "Ngazidja Comorian": {
+        "next": "bantu-group",
+    },
+    "Niuean": {
+        "next": "austronesian-group",
+    },
+    "Northern Kurdish": {
+        "numbers": ["singular", "paucal", "plural"],
+    },
+    "Northern Ndebele": {
+        "next": "bantu-group",
+    },
+    "Northern Sami": {
+        "next": "samojedic-group",
+    },
+    # "Mussau": {
+    #     "numbers": ["singular", "dual", "trial", "plural"],
+    # },
+    "Nyankole": {
+        "next": "bantu-group",
+    },
+    "Occitan": {
+        "next": "romance-group",
+    },
+    "Old Church Slavonic": {
+        "next": "Proto-Indo-European",  # Has dual
+    },
+    "Old English": {
+        "next": "Proto-Indo-European",  # Had dual in pronouns
+    },
+    "Old Norse": {
+        "next": "Proto-Indo-European",  # Had dual in pronouns
+    },
+    "Old Irish": {
+        "next": "Proto-Indo-European",  # Has dual
+    },
+    "Phuthi": {
+        "next": "bantu-group",
+    },
+    "Pite Sami": {
+        "next": "samojedic-group",
+    },
+    "Polish": {
+        "next": "slavic-group",
+    },
+    "Portuguese": {
+        "next": "romance-group",
+        "genders": ["masculine", "feminine"],
+    },
+    "Proto-Germanic": {
+        "next": "Proto-Indo-European",  # Has dual
+    },
+    "Proto-Indo-European": {
+        "numbers": ["singular", "dual", "plural"],
+    },
+    "Proto-Samic": {
+        "next": "samojedic-group",
+    },
+    "Proto-Uralic": {
+        "next": "uralic-group",
+    },
+    "Raga": {
+        "numbers": ["singular", "dual", "trial", "plural"],
+    },
+    "Romagnol": {
+        "next": "romance-group",
+    },
+    "Romanian": {
+        "next": "romance-group",
+    },
+    "Romansch": {
+        "next": "romance-group",
+    },
+    "Russian": {
+        "next": "slavic-group",
+    },
+    "Rwanda-Rundi": {
+        "next": "bantu-group",
+    },
+    "Sanskrit": {
+        "next": "Proto-Indo-European",
+    },
+    "Sardinian": {
+        "next": "romance-group",
+    },
+    "Sassarese": {
+        "next": "romance-group",
+    },
+    "Scottish Gaelic": {
+        "numbers": ["singular", "dual", "plural"],
+    },
+    "Serbo-Croatian": {
+        "next": "slavic-group",
+        "numbers": ["singular", "dual", "paucal", "plural"],
+    },
+    "Sicilian": {
+        "next": "romance-group",
+    },
+    "Skolt Sami": {
+        "next": "samojedic-group",
+    },
+    "Slovene": {
+        "next": "slavic-group",
+    },
+    "Sotho": {
+        "next": "bantu-group",
+    },
+    "Shona": {
+        "next": "bantu-group",
+    },
+    "Southern Ndebele": {
+        "next": "bantu-group",
+    },
+    "Spanish": {
+        "next": "romance-group",
+    },
+    "Swahili": {
+        "next": "bantu-group",
+    },
+    "Swedish": {
+        "hdr_expand_first": set(["referent"]),
+        "hdr_expand_cont": set(["degree", "polarity"]),
+        "genders": ["common-gender", "feminine", "masculine", "neuter"],
+    },
+    "Swazi": {
+        "next": "bantu-group",
+    },
+    "Tagalog": {
+        "next": "austronesian-group",
+    },
+    "Tausug": {
+        "next": "austronesian-group",
+    },
+    "Tongan": {
+        "next": "austronesian-group",
+    },
+    "Tsonga": {
+        "next": "bantu-group",
+    },
+    "Tswana": {
+        "next": "bantu-group",
+    },
+    "Tumbuka": {
+        "next": "bantu-group",
+    },
+    # "Tuscan": {
+    #     "next": "romance-group",
+    # },
+    "Ukrainian": {
+        "next": "slavic-group",
+    },
+    "Upper Sorbian": {
+        "next": "slavic-group",
+    },
+    # "Valencian": {
+    #     "next": "romance-group",
+    # },
+    "Venetian": {
+        "next": "romance-group",
+    },
+    "Warlpiri": {
+        "numbers": ["singular", "paucal", "plural"],
+    },
+    "Xhosa": {
+        "next": "bantu-group",
+    },
+    "Zulu": {
+        "next": "bantu-group",
+    },
+    "ǃXóõ": {
+        "next": "bantu-group",
+    },
 }
+# Sanity check lang_specific
+def_ls_keys = lang_specific["default"].keys()
+for k, v in lang_specific.items():
+    if k[0].isupper() and k not in languages_by_name:
+        raise AssertionError("key {!r} in lang_specific is not a valid language"
+                             .format(k))
+    assert isinstance(v, dict)
+    for kk, vv in v.items():
+        if kk not in def_ls_keys and kk != "next":
+            raise AssertionError("{} key {!r} not in default entry"
+                                 .format(k, kk))
+        if kk in ("hdr_expand_first", "hdr_expand_cont"):
+            if not isinstance(vv, set):
+                raise AssertionError("{} key {!r} must be set"
+                                     .format(lang, kk))
+            for t in vv:
+                if t not in tag_categories:
+                    raise AssertionError("{} key {!r} invalid tag category {}"
+                                         .format(k, kk, t))
+        elif kk in ("genders", "numbers", "persons", "strengths", "voices"):
+            if not vv:
+                continue
+            if not isinstance(vv, (list, tuple, set)):
+                raise AssertionError("{} key {!r} must be list/tuple/set"
+                                     .format(k, kk))
+            for t in vv:
+                if t not in valid_tags:
+                    raise AssertionError("{} key {!r} invalid tag {!r}"
+                                         .format(k, kk, t))
+        elif kk == "next":
+            if vv not in lang_specific:
+                raise AssertionError("{} key {!r} value {!r} is not defined"
+                                     .format(k, kk, vv))
+
+def get_lang_specific(lang, field):
+    """Returns the given field from language-specific data or "default"
+    if the language is not listed or does not have the field."""
+    assert isinstance(lang, str)
+    assert isinstance(field, str)
+    while True:
+        dt = lang_specific.get(lang)
+        if dt is None:
+            if lang == "default":
+                raise RuntimeError("Invalid lang_specific field {!r}"
+                                   .format(field))
+            lang = "default"
+        else:
+            if field in dt:
+                return dt[field]
+            lang = dt.get("next", "default")
+    if dt is None or field not in dt:
+        dt = lang_specific.get("default")
+    assert field in dt
+    return dt[field]
 
 
 # Tag combination mappings for specific languages/part-of-speech.  These are
@@ -403,38 +744,39 @@ def remove_useless_tags(lang, pos, tags):
     assert isinstance(lang, str)
     assert isinstance(pos, str)
     assert isinstance(tags, set)
-    if lang in MASC_ANIMATE_LANGS:
-        if "animate" in tags and "inanimate" in tags:
-            tags.remove("animate")
-            tags.remove("inanimate")
-        if "virile" in tags and "nonvirile" in tags:
-            tags.remove("virile")
-            tags.remove("nonvirile")
-    if lang in SINGULAR_PLURAL_LANGS:
-        if "singular" in tags and "plural" in tags:
-            tags.remove("singular")
-            tags.remove("plural")
-    if lang in MFN_LANGUAGES:
-        if "masculine" in tags and "feminine" in tags and "neuter" in tags:
-            tags.remove("masculine")
-            tags.remove("feminine")
-            tags.remove("neuter")
-    if lang in MF_LANGUAGES:
-        if "masculine" in tags and "feminine" in tags:
-            tags.remove("masculine")
-            tags.remove("feminine")
-    if lang not in NON_ACTIVE_PASSIVE_LANGS:
-        if "active" in tags and "passive" in tags:
-            tags.remove("active")
-            tags.remove("passive")
-    if lang in STRONG_WEAK_LANGS and "strong" in tags and "weak" in tags:
-        tags.remove("strong")
-        tags.remove("weak")
-    if ("first-person" in tags and "second-person" in tags and
-        "third-person" in tags):
-        tags.remove("first-person")
-        tags.remove("second-person")
-        tags.remove("third-person")
+    if ("animate" in tags and "inanimate" in tags and
+        get_lang_specific(lang, "animate_inanimate_remove")):
+        tags.remove("animate")
+        tags.remove("inanimate")
+    if ("virile" in tags and "nonvirile" in tags and
+        get_lang_specific(lang, "virile_nonvirile_remove")):
+        tags.remove("virile")
+        tags.remove("nonvirile")
+    # If all numbers in the language are listed, remove them all
+    numbers = get_lang_specific(lang, "numbers")
+    if numbers and all(x in tags for x in numbers):
+        for x in numbers:
+            tags.remove(x)
+    # If all genders in the language are listed, remove them all
+    genders = get_lang_specific(lang, "genders")
+    if genders and all(x in tags for x in genders):
+        for x in genders:
+            tags.remove(x)
+    # If all voices in the language are listed, remove them all
+    voices = get_lang_specific(lang, "voices")
+    if voices and all(x in tags for x in voices):
+        for x in voices:
+            tags.remove(x)
+    # If all strengths of the language are listed, remove them all
+    strengths = get_lang_specific(lang, "strengths")
+    if strengths and all(x in tags for x in strengths):
+        for x in strengths:
+            tags.remove(x)
+    # If all persons of the language are listed, remove them all
+    persons = get_lang_specific(lang, "persons")
+    if persons and all(x in tags for x in persons):
+        for x in persons:
+            tags.remove(x)
 
 
 def tagset_cats(tagset):
@@ -524,16 +866,19 @@ def and_tagsets(lang, pos, tagsets1, tagsets2):
 
 @functools.lru_cache(65536)
 def clean_header(word, col, skip_paren):
-    """Cleans a row/column header for later processing."""
+    """Cleans a row/column header for later processing.  This returns
+    (cleaned, refs, defs, tags)."""
     hdr_tags = []
     orig_col = col
-    col = re.sub(r"(?s)\s*➤\s*$", "", col)
+    # XXX this is used in Greek, but perhaps better to use separate infl_map
+    # entries
+    # XXX col = re.sub(r"(?s)\s*➤\s*$", "", col)
     col = re.sub(r"(?s)\s*,\s*$", "", col)
     col = re.sub(r"(?s)\s*•\s*$", "", col)
     if col not in infl_map and skip_paren:
         col = re.sub(r"[,/]?\s+\([^)]*\)\s*$", "", col)
     col = col.strip()
-    if re.search(r"^(There are |"
+    if re.search(r"^\s*(There are |"
                  r"\* |"
                  r"see |"
                  r"Use |"
@@ -551,8 +896,7 @@ def clean_header(word, col, skip_paren):
                  r"Note:|"
                  r"\^* Note:|"
                  r"possible mutated form |"
-                 r"The future tense: |"
-                 r"Notes:)",
+                 r"The future tense: )",
                 col):
         return "", [], [], []
     refs = []
@@ -590,7 +934,8 @@ def clean_header(word, col, skip_paren):
         # Numbers and H/L/N are useful information
         refs.append(col[-1])
         col = col[:-1]
-    if len(col) > 2 and col[1] in (")", " ", ":") and col[0].isdigit():
+    if (len(col) > 2 and col[1] in (")", " ", ":") and col[0].isdigit() and
+        not re.match(r"^(1|2|3) (sg|pl)$", col)):
         # Another form of note definition
         return "", [], [[col[0], col[2:].strip()]], []
     col = col.strip()
@@ -682,7 +1027,7 @@ def parse_title(title, source):
 
 
 def expand_header(ctx, word, lang, pos, text, tags0, silent=False):
-    """Expands a cell header to tags, handling conditional expressions
+    """Expands a cell header to tagset, handling conditional expressions
     in infl_map.  This returns list of tuples of tags, each list element
     describing an alternative interpretation.  ``tags0`` is combined
     column and row tags for the cell in which the text is being interpreted
@@ -694,16 +1039,29 @@ def expand_header(ctx, word, lang, pos, text, tags0, silent=False):
     assert isinstance(text, str)
     assert isinstance(tags0, (list, tuple, set))
     assert silent in (True, False)
-    # print("EXPAND_HDR:", text)
+    # print("EXPAND_HDR: text={!r} tags0={!r}".format(text, tags0))
     # First map the text using the inflection map
+    text = text.strip()
+    if not text:
+        return [()]
     if text in infl_map:
         v = infl_map[text]
     else:
         m = re.match(infl_start_re, text)
+        if m is not None:
+            v = infl_start_map[m.group(1)]
+            print("INFL_START {} -> {}".format(text, v))
+        elif re.match(r"Notes", text):
+            # Ignored header
+            print("IGNORING NOTES")
+            return [("dummy-skip-this",)]
+        elif text in IGNORED_COLVALUES:
+            return [()]
         if m is None:
-            return []  # Unrecognized header
-        v = infl_start_map[m.group(1)]
-        # print("INFL_START {} -> {}".format(text, v))
+            if not silent:
+                ctx.debug("inflection table: unrecognized header: {}"
+                          .format(text))
+            return [("error-unrecognized-form",)]  # Unrecognized header
 
     # Then loop interpreting the value, until the value is a simple string.
     # This may evaluate nested conditional expressions.
@@ -783,7 +1141,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
     assert isinstance(colspan, int) and colspan >= 1
     assert mark_used in (True, False)
     assert isinstance(celltext, str)  # For debugging only
-    # print("COMPUTE_COLTAGS CALLED start={} colspan={} celltext={}"
+    # print("COMPUTE_COLTAGS CALLED start={} colspan={} celltext={!r}"
     #       .format(start, colspan, celltext))
     # For debugging, set this to the form for whose cell you want debug prints
     if celltext == debug_word:
@@ -985,9 +1343,15 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                       for ts1 in coltags  # current
                       for ts2 in tagsets  # new (from above)
                       for t in ts2)):
-                if celltext == debug_word:
-                    print("stopping on mood-mood")
-                pass  # Skip this header
+                skip = get_lang_specific(lang, "skip_mood_mood")
+                if skip:
+                    if celltext == debug_word:
+                        print("skipping on mood-mood")
+                        # we continue to next header
+                else:
+                    if celltext == debug_word:
+                        print("stopping on mood-mood")
+                        break
             elif "number" in cur_cats and "number" in new_cats:
                 if celltext == debug_word:
                     print("stopping on number-number")
@@ -995,6 +1359,10 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
             elif "number" in cur_cats and "gender" in new_cats:
                 if celltext == debug_word:
                     print("stopping on number-gender")
+                break
+            elif "person" in cur_cats and "person" in new_cats:
+                if celltext == debug_word:
+                    print("stopping on person-person")
                 break
             else:
                 # Merge tags and continue to next header up/left in the table.
@@ -1023,16 +1391,18 @@ def lang_specific_tags(lang, pos, form):
     assert isinstance(lang, str)
     assert isinstance(pos, str)
     assert isinstance(form, str)
-    key = (lang, pos)
-    r = specific_by_lang_re.get(key)
-    if r is None:
-        return form, []
-    m = re.search(r, form)
-    if m is None:
-        return form, []
-    v = specific_by_lang_map[key][m.group(0)]
-    form = form[:m.start()] + form[m.end():]
-    return form, v
+    rules = get_lang_specific(lang, "form_transformations")
+    for pos, pattern, tags in rules:
+        assert pos in PARTS_OF_SPEECH
+        m = re.search(pattern, form)
+        if not m:
+            continue
+        form = form[:m.start()] + form[m.end():]
+        tags = tags.split()
+        for t in tags:
+            assert t in valid_tags
+        return form, tags
+    return form, []
 
 
 def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
@@ -1134,28 +1504,15 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 text, refs, defs, hdr_tags = clean_header(word, col, True)
                 if not text:
                     continue
-                if text not in infl_map:
-                    text1 = re.sub(r"\s*\([^)]*\)", "", text)
-                    if text1 in infl_map:
-                        text = text1
-                    else:
-                        text1 = re.sub(r"\s*,+\s+", " ", text)
-                        text1 = re.sub(r"\s+", " ", text1)
-                        if text1 in infl_map:
-                            text = text1
-                        elif not re.match(infl_start_re, text):
-                            if text not in IGNORED_COLVALUES:
-                                ctx.debug("inflection table: "
-                                          "unhandled header: {!r}"
-                                          .format(col))
-                                text = "error-unrecognized-form"
-                            continue
+
+                # Expand header to tags
+                v = expand_header(ctx, word, lang, pos, text, [], silent=True)
+                # print("EXPANDED {!r} to {}".format(text, v))
                 # Mark that the column has text (we are not at top)
                 while len(col_has_text) <= j:
                     col_has_text.append(False)
                 col_has_text[j] = True
                 # Check if the header expands to reset hdrspans
-                v = expand_header(ctx, word, lang, pos, text, [], silent=True)
                 if any("!" in tt for tt in v):
                     # Reset column headers (only on first row of cell)
                     if first_row_of_cell:
@@ -1172,7 +1529,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                     # it expands to no tags
                     rowtags = set([()])
                 have_hdr = True
-                # print("HAVE_HDR:", col)
+                # print("HAVE_HDR: {} rowtags={}".format(col, rowtags))
                 # Update rowtags and coltags
                 new_rowtags = set()
                 new_coltags = set()
@@ -1196,6 +1553,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                                     set(hdr_tags)))
                             new_rowtags.add(tags)
                 rowtags = new_rowtags
+                if any("dummy-skip-this" in ts for ts in rowtags):
+                    break  # Skip this row
                 new_coltags = set(x for x in new_coltags
                                   if not any(t in noinherit_tags for t in x))
                 # print("new_coltags={} previously_seen={} all_hdr_tags={}"
@@ -1218,12 +1577,10 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                     elif any(all_hdr_tags):
                         col0_cats = tagset_cats(col0_hdrspan.tagsets)
                         later_cats = tagset_cats(all_hdr_tags)
-                        if lang in col0_expand_allowed:
-                            col0_allowed, later_allowed = \
-                                col0_expand_allowed[lang]
-                        else:
-                            col0_allowed, later_allowed = \
-                                col0_expand_allowed["default"]
+                        col0_allowed = get_lang_specific(lang,
+                                                         "hdr_expand_first")
+                        later_allowed = get_lang_specific(lang,
+                                                          "hdr_expand_cont")
                         # print("col0_cats={} later_cats={} "
                         #       "fol_by_nonempty={} j={} end={} "
                         #       "tagsets={}"
@@ -1243,8 +1600,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         #   - col0_hdrspan set, expand, start new
                         #   - col0_hdrspan set, no expand, start new
                         if (not col0_followed_by_nonempty and
-                            # Only one cat of tags: kunna/Swedish
-                            len(col0_cats) == 1 and
+                            # XXX Only one cat of tags: kunna/Swedish
+                            # XXX len(col0_cats) == 1 and
                             col0_hdrspan.rowspan >= rowspan and
                             not (col0_cats - col0_allowed) and
                             not (later_cats - later_allowed) and
@@ -1255,7 +1612,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         # We are going to start new col0_hdrspan.  Check if
                         # we should expand.
                         if (not col0_followed_by_nonempty and
-                            len(col0_cats) == 1 and
+                            # XXX len(col0_cats) == 1 and
                             j > col0_hdrspan.start + col0_hdrspan.colspan):
                             # Expand current col0_hdrspan
                             print("EXPANDING COL0 MID: {} from {} to {} "
@@ -1278,6 +1635,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
 
             # It is a normal text cell
             if col in IGNORED_COLVALUES:
+                col0_followed_by_nonempty = True
                 continue
 
             # These values are ignored, at least form now
@@ -1380,6 +1738,17 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 form = re.sub(r"(?i)^Main:", "", form)
                 form = re.sub(r"\s+", " ", form)
                 form = form.strip()
+                if re.match(r"\([^][(){}]*\)$", form):
+                    forms = form[1:-1]
+                elif re.match(r"\{\[[^][(){}]*\]\}$", form):
+                    # είμαι/Greek/Verb
+                    form = form[2:-2]
+                elif re.match(r"\{[^][(){}]*\}$", form):
+                    # είμαι/Greek/Verb
+                    form = form[1:-1]
+                elif re.match(r"\[[^][(){}]*\]$", form):
+                    # είμαι/Greek/Verb
+                    form = form[1:-1]
                 # Handle parentheses in the table element.  We parse
                 # tags anywhere and romanizations anywhere but beginning.
                 roman = base_roman
@@ -1434,7 +1803,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         # form.  This may also adjust the form.
                         form, lang_tags = lang_specific_tags(lang, pos, form)
                         tags.update(lang_tags)
-                        # For non-finite verb forms, see if they would have
+
+                        # For non-finite verb forms, see if they have
                         # a gender/class suffix
                         if pos == "verb" and any(valid_tags[t] == "non-finite"
                                for t in tags):
@@ -1464,12 +1834,12 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                 tags.remove("negative")
                             tags.remove("positive")
 
-                        # Many Russian (and other Slavic?) inflection tables
+                        # Many Russian (and other Slavic) inflection tables
                         # have animate/inanimate distinction that generates
                         # separate entries for neuter/feminine, but the
                         # distinction only applies to masculine.  Remove them
                         # form neuter/feminine and eliminate duplicates.
-                        if lang in MASC_ANIMATE_LANGS:
+                        if get_lang_specific(lang, "masc_only_animate"):
                             for t1 in ("animate", "inanimate"):
                                 for t2 in ("neuter", "feminine"):
                                     if (t1 in tags and t2 in tags and
@@ -1480,7 +1850,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         # Remove the dummy mood tag that we sometimes
                         # use to block adding other mood and related
                         # tags
-                        tags = tags - set(["dummy-mood"])
+                        tags = tags - set(["dummy-mood", "dummy-tense"])
 
                         # Perform language-specific tag replacements according
                         # to rules in a table.
@@ -1499,6 +1869,15 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                         tags = (tags - set(src)) | set(dst)
                                         changed = True
 
+                        # Final check for ignored forms
+                        if form in IGNORED_COLVALUES:
+                            continue
+
+                        # Warn if there are entries with empty tags
+                        if not tags:
+                            ctx.debug("inflection table: empty tags for {}"
+                                      .format(form))
+
                         # Add the form
                         tags = list(sorted(tags))
                         dt = {"form": form, "tags": tags, "source": source}
@@ -1515,20 +1894,15 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
             hdrspans = []
         # Check if we should expand col0_hdrspan.
         if col0_hdrspan is not None:
-            if lang in col0_expand_allowed:
-                col0_allowed, later_allowed = \
-                    col0_expand_allowed[lang]
-            else:
-                col0_allowed, later_allowed = \
-                    col0_expand_allowed["default"]
+            col0_allowed = get_lang_specific(lang, "hdr_expand_first")
             col0_cats = tagset_cats(col0_hdrspan.tagsets)
             # Only expand if col0_cats and later_cats are allowed
             # and don't overlap and col0 has tags, and there have
             # been no disallowed cells in between.
             if (not col0_followed_by_nonempty and
                 not (col0_cats - col0_allowed) and
-                j > col0_hdrspan.start + col0_hdrspan.colspan and
-                len(col0_cats) == 1):
+                # len(col0_cats) == 1 and
+                j > col0_hdrspan.start + col0_hdrspan.colspan):
                 # If an earlier header is only followed by headers that yield
                 # no tags, expand it to entire row
                 # print("EXPANDING COL0: {} from {} to {} cols {}"
@@ -1738,13 +2112,15 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     # (e.g. "Case")
                     is_title = True
                 if re.match(r"Conjugation of |Declension of |Inflection of|"
-                            r"Mutation of",
+                            r"Mutation of|Notes\b",
                             celltext):
                     is_title = True
                 if is_title:
                     while len(cols_headered) <= len(row):
                         cols_headered.append(False)
-                    v = expand_header(ctx, word, lang, pos, celltext, [],
+                    cleaned, _, _, _ = clean_header(word, celltext, False)
+                    cleaned = re.sub(r"\s+", " ", cleaned)
+                    v = expand_header(ctx, word, lang, pos, cleaned, [],
                                       silent=True)
                     if any("*" in tt for tt in v):
                         cols_headered[len(row)] = True
@@ -1865,6 +2241,9 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
                                   data, node, titles, source)
             return
         elif kind == NodeKind.HTML and node.args == "table":
+            classes = node.attrs.get("class", ())
+            if "audiotable" in classes:
+                return
             handle_html_table(config, ctx, word, lang, pos, data, node, titles,
                               source)
             return

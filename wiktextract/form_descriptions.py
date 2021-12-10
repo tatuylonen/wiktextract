@@ -24,6 +24,12 @@ from .english_words import english_words, not_english_words
 # Tokenizer for classify_desc()
 tokenizer = TweetTokenizer()
 
+# These are ignored as the value of a related form in form head.
+IGNORED_RELATED = set([
+    "-", "־", "᠆", "‐", "‑", "‒", "–", "—", "―", "−",
+    "⸺", "⸻", "﹘", "﹣", "－", "?",
+    "(none)"])
+
 # Add some additional known taxonomic species names.  Adding the family name
 # here may be the answer if a taxonomic name goes in "alt".
 known_firsts.update([
@@ -1030,7 +1036,7 @@ def add_related(ctx, data, tags_lst, related, origtext,
     related = " ".join(related)
     if related == "[please provide]":
         return
-    if related in ("-", "(none)"):
+    if related in IGNORED_RELATED:
         return
     if is_reconstruction and related.startswith("*") and len(related) > 1:
         related = related[1:]

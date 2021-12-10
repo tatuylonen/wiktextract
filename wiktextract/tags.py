@@ -2395,6 +2395,7 @@ xlat_tags_map = {
     "dative and accusative singular": "dative accusative singular",
     "no nominative": "no-nominative",
     "simple past": "past",
+    "past —": "no-past",
     "simple present": "present",
     "simple past and past participle": ["past", "past participle"],
     "simple past tense and past participle": ["past", "past participle"],
@@ -4676,6 +4677,8 @@ valid_tags = {
     "dual": "number",       # two in number, cf. singular, trial, plural
     "dubitative": "mood",  # Verb form (e.g., Bulgarian)
     "dummy-mood": "mood",  # Used in inflection table parsing, never in data
+    "dummy-skip-this": "misc",  # Kludge in parsing, form skipped
+    "dummy-tense": "tense",  # Used in inflection table parsing, never in data
     "durative": "aspect",  # Verb form  XXX same as continuative?
     "eclipsis": "misc",
     "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian
@@ -5170,7 +5173,7 @@ valid_tags = {
     "subjunctive": "mood",  # Subjunctive mood
     "subjunctive-i": "mood",  # Subjunctive i mood (German)
     "subjunctive-ii": "mood",  # Subjunctive ii mood (German)
-    "sublative": "misc",
+    "sublative": "case",
     "subordinate-clause": "misc",  # e.g., ϣⲗⲏⲗ/Coptic
     "subordinating": "misc",
     "subscript": "script",  # Variant of certain characters
@@ -5179,6 +5182,7 @@ valid_tags = {
     "suffix": "pos",
     "superessive": "case",  # Case, e.g., Hungarian
     "superlative": "degree",  # Comparison of adjectives/adverbs
+    "superplural": "number",  # Very many (rare, e.g. Barngarla (Australian))
     "superscript": "script",  # Variant of certain characters
     "supine": "non-finite",   # Various non-finite forms in several languages
     "suppletive": "misc",
