@@ -44,6 +44,8 @@ noinherit_tags = set([
 # Words in title that cause addition of tags in all entries
 title_contains_global_map = {
     "possessive": "possessive",
+    "possessed forms of": "possessive",
+    "predicative forms of": "predicative",
     "negative": "negative",
     "comparative": "comparative",
     "superlative": "superlative",
@@ -1537,7 +1539,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 for rt0 in rowtags:
                     for ct0 in compute_coltags(lang, pos, hdrspans, j,
                                                colspan, False, col):
-                        tags0 = set(rt0) | set(ct0) | set(global_tags)
+                        tags0 = (set(rt0) | set(ct0) | set(global_tags) |
+                                 set(word_tags))
                         alt_tags = expand_header(ctx, word, lang, pos,
                                                  text, tags0)
                         all_hdr_tags.update(alt_tags)
