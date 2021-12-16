@@ -2076,6 +2076,7 @@ infl_map = {
     "→○": "",  # e.g. sikkaralla/Finnish
     "○": "",  # e.g. sikkaralla/Finnish
     "○→": "",  # e.g. sikkaralla/Finnish
+    "with positive imperatives": "with-positive-imperative",
     # "+ object concord": XXX,
     # "state": XXX,
     # "free state": XXX,

@@ -28,7 +28,8 @@ debug_word = None
 # Column texts that are interpreted as an empty column.
 IGNORED_COLVALUES = set([
     "-", "־", "᠆", "‐", "‑", "‒", "–", "—", "―", "−",
-    "⸺", "⸻", "﹘", "﹣", "－", "/", "?"])
+    "⸺", "⸻", "﹘", "﹣", "－", "/", "?",
+    "not used", "not applicable"])
 
 # These tags are never inherited from above
 # XXX merge with lang_specific
@@ -921,12 +922,6 @@ def clean_header(word, col, skip_paren):
             # XXX handle refs from m.group(1)
             pass
         col = col[:m.start()]
-    if col.endswith("ʳᵃʳᵉ"):
-        hdr_tags.append("rare")
-        col = col[:-4].strip()
-    if col.endswith("ᵛᵒˢ"):
-        hdr_tags.append("formal")
-        col = col[:-3].strip()
     while col and is_superscript(col[0]):
         if len(col) > 1 and col[1] in ("⁾", " ", ":"):
             # Note definition
@@ -934,6 +929,14 @@ def clean_header(word, col, skip_paren):
         refs.append(col[0])
         col = col[1:]
     while col and (is_superscript(col[-1]) or col[-1] in ("†",)):
+        if col.endswith("ʳᵃʳᵉ"):
+            hdr_tags.append("rare")
+            col = col[:-4].strip()
+            continue
+        if col.endswith("ᵛᵒˢ"):
+            hdr_tags.append("formal")
+            col = col[:-3].strip()
+            continue
         # Numbers and H/L/N are useful information
         refs.append(col[-1])
         col = col[:-1]
@@ -1425,9 +1428,9 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
     for x in titles:
         assert isinstance(x, str)
     # print("PARSE_SIMPLE_TABLE: TITLES:", titles)
-    # print("ROWS:")
-    # for row in rows:
-    #     print("  ", row)
+    print("ROWS:")
+    for row in rows:
+        print("  ", row)
     ret = []
     hdrspans = []
     col_has_text = []
@@ -1773,7 +1776,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                     elif re.search(r"^with |-form", paren):
                         form = (form[:m.start()] + " " + form[m.end():]).strip()
                 # Ignore certain forms that are not really forms
-                if form in ("", "not used", "not applicable", "unchanged",
+                if form in ("", "unchanged",
                             "after an",  # in sona/Irish/Adj/Mutation
                 ):
                     continue

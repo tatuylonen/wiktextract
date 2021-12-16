@@ -5369,6 +5369,7 @@ valid_tags = {
     "with-per": "with",
     "with-personal-pronoun": "with",
     "with-por": "with",
+    "with-positive-imperative": "with",
     "with-possessive-suffix": "with",
     "with-pour": "with",
     "with-prepositional": "with",
