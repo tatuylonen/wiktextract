@@ -251,6 +251,9 @@ class InflTests(unittest.TestCase):
                   "present"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person', 'imperative', 'present', 'singular']},
               {
                 "form": "mysleme",
                 "source": "Conjugation",
@@ -331,6 +334,12 @@ class InflTests(unittest.TestCase):
                   "third-person"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['imperative', 'present', 'singular', 'third-person']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['imperative', 'plural', 'present', 'third-person']},
               {
                 "form": "myslel",
                 "source": "Conjugation",
@@ -603,6 +612,9 @@ class InflTests(unittest.TestCase):
                   "transgressive"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['masculine', 'past', 'singular', 'transgressive']},
               {
                 "form": "myslíc",
                 "source": "Conjugation",
@@ -625,6 +637,13 @@ class InflTests(unittest.TestCase):
                   "transgressive"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['feminine',
+                        'neuter',
+                        'past',
+                        'singular',
+                        'transgressive']},
               {
                 "form": "myslíce",
                 "source": "Conjugation",
@@ -642,7 +661,10 @@ class InflTests(unittest.TestCase):
                   "present",
                   "transgressive"
                 ]
-              }
+              },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['past', 'plural', 'transgressive']}
             ],
         }
         self.assertEqual(expected, ret)

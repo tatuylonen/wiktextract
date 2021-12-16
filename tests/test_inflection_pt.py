@@ -1093,6 +1093,9 @@ class InflTests(unittest.TestCase):
                   "third-person"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person', 'imperative', 'singular']},
               {
                 "form": "viaja",
                 "source": "Conjugation",
@@ -1138,6 +1141,9 @@ class InflTests(unittest.TestCase):
                   "third-person"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person', 'imperative', 'negative', 'singular']},
               {
                 "form": "viajes",
                 "source": "Conjugation",

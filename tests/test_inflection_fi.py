@@ -1994,6 +1994,48 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperative",
+                  "present",
+                  "singular"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperative",
+                  "negative",
+                  "present",
+                  "singular"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperative",
+                  "perfect",
+                  "singular"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperative",
+                  "negative",
+                  "perfect",
+                  "singular"
+                ]
+              },
+              {
                 "form": "armahda",
                 "source": "Conjugation",
                 "tags": [
@@ -2622,6 +2664,16 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "infinitive",
+                  "infinitive-ii",
+                  "instructive",
+                  "passive"
+                ]
+              },
+              {
                 "form": "armahtamaton",
                 "source": "Conjugation",
                 "tags": [
@@ -2640,6 +2692,16 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "inessive",
+                  "infinitive",
+                  "infinitive-iii",
+                  "passive"
+                ]
+              },
+              {
                 "form": "armahtamasta",
                 "source": "Conjugation",
                 "tags": [
@@ -2647,6 +2709,16 @@ class InflTests(unittest.TestCase):
                   "elative",
                   "infinitive",
                   "infinitive-iii"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "elative",
+                  "infinitive",
+                  "infinitive-iii",
+                  "passive"
                 ]
               },
               {
@@ -2660,6 +2732,16 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "illative",
+                  "infinitive",
+                  "infinitive-iii",
+                  "passive"
+                ]
+              },
+              {
                 "form": "armahtamalla",
                 "source": "Conjugation",
                 "tags": [
@@ -2670,6 +2752,16 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "adessive",
+                  "infinitive",
+                  "infinitive-iii",
+                  "passive"
+                ]
+              },
+              {
                 "form": "armahtamatta",
                 "source": "Conjugation",
                 "tags": [
@@ -2677,6 +2769,16 @@ class InflTests(unittest.TestCase):
                   "active",
                   "infinitive",
                   "infinitive-iii"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "abessive",
+                  "infinitive",
+                  "infinitive-iii",
+                  "passive"
                 ]
               },
               {
@@ -3261,6 +3363,14 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
+                "form": "-",
+                "source": "Declension",
+                "tags": [
+                  "instructive",
+                  "singular"
+                ]
+              },
+              {
                 "form": "aamupaloin",
                 "source": "Declension",
                 "tags": [
@@ -3282,6 +3392,14 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "abessive",
                   "plural"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Declension",
+                "tags": [
+                  "comitative",
+                  "singular"
                 ]
               },
               {

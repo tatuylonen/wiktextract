@@ -380,6 +380,9 @@ class InflTests(unittest.TestCase):
                   "singular"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person', 'imperative', 'singular']},
               {
                 "form": "saproti",
                 "source": "Conjugation",
@@ -1390,7 +1393,19 @@ class InflTests(unittest.TestCase):
                   "locative",
                   "plural"
                 ]
-              }
-            ],
+              },
+              {'form': '-',
+               'source': 'Declension',
+               'tags': ['indefinite', 'masculine', 'singular', 'vocative']},
+              {'form': '-',
+               'source': 'Declension',
+               'tags': ['indefinite', 'masculine', 'plural', 'vocative']},
+              {'form': '-',
+               'source': 'Declension',
+               'tags': ['feminine', 'indefinite', 'singular', 'vocative']},
+              {'form': '-',
+               'source': 'Declension',
+               'tags': ['feminine', 'indefinite', 'plural', 'vocative']}
+              ],
         }
         self.assertEqual(expected, ret)

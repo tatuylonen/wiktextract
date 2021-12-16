@@ -136,6 +136,7 @@ title_contains_wordtags_re = re.compile(
 title_elements_map = {
     "weak": "weak",
     "strong": "strong",
+    "separable": "separable",
     "masculine": "masculine",
     "feminine": "feminine",
     "neuter": "neuter",
@@ -1058,7 +1059,7 @@ def expand_header(ctx, word, lang, pos, text, tags0, silent=False):
             print("IGNORING NOTES")
             return [("dummy-skip-this",)]
         elif text in IGNORED_COLVALUES:
-            return [()]
+            return [("dummy-ignore-skipped",)]
         if m is None:
             if not silent:
                 ctx.debug("inflection table: unrecognized header: {}"
@@ -1584,6 +1585,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                                          "hdr_expand_first")
                         later_allowed = get_lang_specific(lang,
                                                           "hdr_expand_cont")
+                        later_allowed = later_allowed | set(["dummy"])
                         # print("col0_cats={} later_cats={} "
                         #       "fol_by_nonempty={} j={} end={} "
                         #       "tagsets={}"
@@ -1610,7 +1612,6 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                             not (later_cats - later_allowed) and
                             not (col0_cats & later_cats)):
                             # First case: col0 set, continue
-                            print("CONT")
                             continue
                         # We are going to start new col0_hdrspan.  Check if
                         # we should expand.
@@ -1618,12 +1619,12 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                             # XXX len(col0_cats) == 1 and
                             j > col0_hdrspan.start + col0_hdrspan.colspan):
                             # Expand current col0_hdrspan
-                            print("EXPANDING COL0 MID: {} from {} to {} "
-                                  "cols {}"
-                                  .format(col0_hdrspan.text,
-                                          col0_hdrspan.colspan,
-                                          j - col0_hdrspan.start,
-                                          col0_hdrspan.tagsets))
+                            # print("EXPANDING COL0 MID: {} from {} to {} "
+                            #       "cols {}"
+                            #       .format(col0_hdrspan.text,
+                            #               col0_hdrspan.colspan,
+                            #               j - col0_hdrspan.start,
+                            #               col0_hdrspan.tagsets))
                             col0_hdrspan.colspan = j - col0_hdrspan.start
                             col0_hdrspan.expanded = True
                         # Clear old col0_hdrspan
@@ -1634,11 +1635,6 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         if not previously_seen:
                             col0_hdrspan = hdrspan
                             col0_followed_by_nonempty = False
-                continue
-
-            # It is a normal text cell
-            if col in IGNORED_COLVALUES:
-                col0_followed_by_nonempty = True
                 continue
 
             # These values are ignored, at least form now
@@ -1658,6 +1654,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
             # Determine column tags for the multi-column cell
             combined_coltags = compute_coltags(lang, pos, hdrspans, j,
                                                colspan, True, col)
+
             # print("HAVE_TEXT:", repr(col))
             # Split the text into separate forms.  First simplify spaces except
             # newline.
@@ -1850,10 +1847,22 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                         "plural" not in tags):
                                         tags.remove(t1)
 
+                        # Handle ignored forms.  We mark that the form was
+                        # provided.  This is important information; some words
+                        # just do not have a certain form.  However, there also
+                        # many cases where no word in a language has a
+                        # particular form.  Post-processing could detect and
+                        # remove such cases.
+                        if form in IGNORED_COLVALUES:
+                            if "dummy-ignore-skipped" in tags:
+                                continue
+                            form = "-"
+
                         # Remove the dummy mood tag that we sometimes
                         # use to block adding other mood and related
                         # tags
-                        tags = tags - set(["dummy-mood", "dummy-tense"])
+                        tags = tags - set(["dummy-mood", "dummy-tense",
+                                           "dummy-ignore-skipped"])
 
                         # Perform language-specific tag replacements according
                         # to rules in a table.
@@ -1871,10 +1880,6 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                     if all(t in tags for t in src):
                                         tags = (tags - set(src)) | set(dst)
                                         changed = True
-
-                        # Final check for ignored forms
-                        if form in IGNORED_COLVALUES:
-                            continue
 
                         # Warn if there are entries with empty tags
                         if not tags:

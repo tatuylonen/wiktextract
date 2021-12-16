@@ -4353,6 +4353,7 @@ tag_categories = {
     "misc": 1,  # lots of miscellaneous/uncategorized stuff
     "error": 0,  # error tags
     "unknown": -1,  # Only used internally
+    "dummy": -2,  # Only used internally
 }
 
 # Set of all valid tags
@@ -4641,7 +4642,7 @@ valid_tags = {
     "declension-pattern-of": "detail",
     "declinable": "misc",
     "defective": "misc",
-    "deferential": "register",
+    "deferential": "register",  # Addressing someone of higher status
     "definite": "referent",
     "definition": "misc",
     "definitive": "misc",  # XXX is this used same as "definite": "misc", opposite indefinite?
@@ -4676,9 +4677,10 @@ valid_tags = {
     "ditransitive": "transitivity",
     "dual": "number",       # two in number, cf. singular, trial, plural
     "dubitative": "mood",  # Verb form (e.g., Bulgarian)
-    "dummy-mood": "mood",  # Used in inflection table parsing, never in data
-    "dummy-skip-this": "misc",  # Kludge in parsing, form skipped
-    "dummy-tense": "tense",  # Used in inflection table parsing, never in data
+    "dummy-ignore-skipped": "dummy",  # Causes "-" entries to be ignored
+    "dummy-mood": "dummy",  # Used in inflection table parsing, never in data
+    "dummy-skip-this": "dummy",  # Kludge in parsing, form skipped
+    "dummy-tense": "dummy",  # Used in inflection table parsing, never in data
     "durative": "aspect",  # Verb form  XXX same as continuative?
     "eclipsis": "misc",
     "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian
@@ -4869,6 +4871,7 @@ valid_tags = {
     "locative-qualitative": "case",
     "long-form": "misc",  # Verb forms, отъпоустити/Old Church Slavonic
     "lowercase": "misc",
+    "main-clause": "misc",  # e.g., omzagen/Dutch
     "mainly": "misc",
     "majestic": "register",
     "masculine": "gender",  # Grammatial gender see feminine, neuter, common, class-* etc.
@@ -5131,6 +5134,7 @@ valid_tags = {
     "semelfactive": "misc",
     "sentence-case": "misc",  # дь/Yakut
     "sentence-final": "misc",  # Korean verb forms (broad category)
+    "separable": "misc",  # Used for separable verbs, e.g. omzagen/Dutch
     "sequence": "misc",
     "sequential": "misc",
     "shinjitai": "misc",  # Simplified Japanese Kanji (after 1947)

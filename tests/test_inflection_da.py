@@ -334,6 +334,7 @@ class InflTests(unittest.TestCase):
                  "present"
                ]
              },
+             {'form': '-', 'source': 'Inflection', 'tags': ['passive', 'past']},
              {
                "form": "pattende",
                "source": "Inflection",
@@ -358,6 +359,9 @@ class InflTests(unittest.TestCase):
                  "present"
                ]
              },
+             {'form': '-',
+              'source': 'Inflection',
+              'tags': ['imperative', 'past']},
              {
                "form": "patte",
                "source": "Inflection",
@@ -366,6 +370,9 @@ class InflTests(unittest.TestCase):
                  "present"
                ]
              },
+             {'form': '-',
+              'source': 'Inflection',
+              'tags': ['infinitive', 'past']},
              {
                "form": "have",
                "source": "Inflection",
@@ -374,6 +381,7 @@ class InflTests(unittest.TestCase):
                  "present"
                ]
              },
+             {'form': '-', 'source': 'Inflection', 'tags': ['auxiliary', 'past']},
              {
                "form": "patten",
                "source": "Inflection",
@@ -381,7 +389,8 @@ class InflTests(unittest.TestCase):
                  "gerund",
                  "present"
                ]
-             }
+             },
+             {'form': '-', 'source': 'Inflection', 'tags': ['gerund', 'past']}
            ],
         }
         self.assertEqual(expected, ret)

@@ -295,9 +295,66 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
+                "form": "slaapt",
+                "source": "Inflection",
+                "tags": [
+                  "formal",
+                  "present",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "sliep",
+                "source": "Inflection",
+                "tags": [
+                  "formal",
+                  "past",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "slaapt",
+                "source": "Inflection",
+                "tags": [
+                  "Flanders",
+                  "colloquial",
+                  "present",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "slaapt",
+                "source": "Inflection",
+                "tags": [
+                  "archaic",
+                  "deferential",
+                  "formal",
+                  "present",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
                 "form": "sliept",
                 "source": "Inflection",
                 "tags": [
+                  "Flanders",
+                  "colloquial",
+                  "past",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "sliept",
+                "source": "Inflection",
+                "tags": [
+                  "archaic",
+                  "deferential",
+                  "formal",
                   "past",
                   "second-person",
                   "singular"
@@ -744,6 +801,14 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "comparative",
                   "partitive"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Inflection",
+                "tags": [
+                  "partitive",
+                  "superlative"
                 ]
               }
             ],

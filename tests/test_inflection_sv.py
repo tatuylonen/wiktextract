@@ -351,6 +351,9 @@ class InflTests(unittest.TestCase):
                   "infinitive"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['infinitive', 'passive']},
               {
                 "form": "kunnat",
                 "source": "Conjugation",
@@ -359,6 +362,21 @@ class InflTests(unittest.TestCase):
                   "supine"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['passive', 'supine']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['active', 'imperative']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['imperative', 'passive']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['active', 'imperative', 'plural']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['imperative', 'passive', 'plural']},
               {
                 "form": "kan",
                 "source": "Conjugation",
@@ -377,6 +395,12 @@ class InflTests(unittest.TestCase):
                   "past"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['indicative', 'passive', 'present']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['indicative', 'passive', 'past']},
               {
                 "form": "kunna",
                 "source": "Conjugation",
@@ -397,6 +421,12 @@ class InflTests(unittest.TestCase):
                   "plural"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['indicative', 'passive', 'plural', 'present']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['indicative', 'passive', 'past', 'plural']},
               {
                 "form": "kunne",
                 "source": "Conjugation",
@@ -415,6 +445,12 @@ class InflTests(unittest.TestCase):
                   "subjunctive"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['passive', 'present', 'subjunctive']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['passive', 'past', 'subjunctive']},
               {
                 "form": "kunnande",
                 "source": "Conjugation",
@@ -423,6 +459,9 @@ class InflTests(unittest.TestCase):
                   "present"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['participle', 'past']},
               {
                 "form": "irregular",
                 "source": "Conjugation title",
@@ -799,6 +838,9 @@ class InflTests(unittest.TestCase):
                   "imperative"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['imperative', 'passive']},
               {
                 "form": "simmen",
                 "source": "Conjugation",
@@ -808,6 +850,9 @@ class InflTests(unittest.TestCase):
                   "plural"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['imperative', 'passive', 'plural']},
               {
                 "form": "simmar",
                 "source": "Conjugation",

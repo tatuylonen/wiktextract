@@ -2394,6 +2394,30 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
+                  'form': '-',
+                  'source': 'Conjugation',
+                  'tags': ['first-person', 'imperative', 'present', 'singular']
+              },
+              {
+                  'form': '-',
+                  'source': 'Conjugation',
+                  'tags': ['first-person',
+                           'imperative',
+                           'negative',
+                           'present',
+                           'singular']
+              },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person', 'imperative', 'perfect', 'singular']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person',
+                        'imperative',
+                        'negative',
+                        'perfect',
+                        'singular']},
+              {
                 "form": "tule",
                 "source": "Conjugation",
                 "tags": [
@@ -2414,6 +2438,16 @@ class InflTests(unittest.TestCase):
                   "singular"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['imperative', 'perfect', 'second-person', 'singular']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['imperative',
+                        'negative',
+                        'perfect',
+                        'second-person',
+                        'singular']},
               {
                 "form": "tulgu",
                 "source": "Conjugation",
@@ -2477,6 +2511,16 @@ class InflTests(unittest.TestCase):
                   "present"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person', 'imperative', 'perfect', 'plural']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person',
+                        'imperative',
+                        'negative',
+                        'perfect',
+                        'plural']},
               {
                 "form": "tulge",
                 "source": "Conjugation",
@@ -2498,6 +2542,16 @@ class InflTests(unittest.TestCase):
                   "second-person"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['imperative', 'perfect', 'plural', 'second-person']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['imperative',
+                        'negative',
+                        'perfect',
+                        'plural',
+                        'second-person']},
               {
                 "form": "tulgu",
                 "source": "Conjugation",
@@ -2705,6 +2759,16 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "infinitive",
+                  "infinitive-da",
+                  "passive",
+                  "verb-form-da"
+                ]
+              },
+              {
                 "form": "tulemas",
                 "source": "Conjugation",
                 "tags": [
@@ -2715,12 +2779,32 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "inessive",
+                  "infinitive",
+                  "infinitive-ma",
+                  "passive"
+                ]
+              },
+              {
                 "form": "tulles",
                 "source": "Conjugation",
                 "tags": [
                   "active",
                   "infinitive",
                   "infinitive-da",
+                  "verb-form-des"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "infinitive",
+                  "infinitive-da",
+                  "passive",
                   "verb-form-des"
                 ]
               },
@@ -2735,12 +2819,32 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "elative",
+                  "infinitive",
+                  "infinitive-ma",
+                  "passive"
+                ]
+              },
+              {
                 "form": "tulemaks",
                 "source": "Conjugation",
                 "tags": [
                   "active",
                   "infinitive",
                   "infinitive-ma",
+                  "translative"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "infinitive",
+                  "infinitive-ma",
+                  "passive",
                   "translative"
                 ]
               },
@@ -2770,6 +2874,16 @@ class InflTests(unittest.TestCase):
                   "active",
                   "infinitive",
                   "infinitive-ma"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "abessive",
+                  "infinitive",
+                  "infinitive-ma",
+                  "passive"
                 ]
               },
               {

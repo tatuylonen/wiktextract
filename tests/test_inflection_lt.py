@@ -816,6 +816,9 @@ class InflTests(unittest.TestCase):
                   "third-person"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person', 'imperative', 'singular']},
               {
                 "form": "važiuok",
                 "source": "Conjugation",
@@ -967,6 +970,13 @@ class InflTests(unittest.TestCase):
                   "past"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['adjectival',
+                        'frequentative',
+                        'participle',
+                        'passive',
+                        'past']},
               {
                 "form": "važiuosiąs",
                 "source": "Conjugation",
@@ -997,6 +1007,9 @@ class InflTests(unittest.TestCase):
                   "passive"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['active', 'adjectival', 'necessitative', 'participle']},
               {
                 "form": "važiuotinas",
                 "source": "Conjugation",

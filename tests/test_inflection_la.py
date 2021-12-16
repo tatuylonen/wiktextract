@@ -1967,6 +1967,13 @@ class InflTests(unittest.TestCase):
                   "subjunctive"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['active',
+                        'first-person',
+                        'imperative',
+                        'present',
+                        'singular']},
               {
                 "form": "accūsā",
                 "source": "Conjugation",
@@ -1978,6 +1985,20 @@ class InflTests(unittest.TestCase):
                   "singular"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['active',
+                        'imperative',
+                        'present',
+                        'singular',
+                        'third-person']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['active',
+                        'first-person',
+                        'imperative',
+                        'plural',
+                        'present']},
               {
                 "form": "accūsāte",
                 "source": "Conjugation",
@@ -1989,6 +2010,20 @@ class InflTests(unittest.TestCase):
                   "second-person"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['active',
+                        'imperative',
+                        'plural',
+                        'present',
+                        'third-person']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['active',
+                        'first-person',
+                        'future',
+                        'imperative',
+                        'singular']},
               {
                 "form": "accūsātō",
                 "source": "Conjugation",
@@ -2011,6 +2046,13 @@ class InflTests(unittest.TestCase):
                   "third-person"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['active',
+                        'first-person',
+                        'future',
+                        'imperative',
+                        'plural']},
               {
                 "form": "accūsātōte",
                 "source": "Conjugation",
@@ -2033,6 +2075,13 @@ class InflTests(unittest.TestCase):
                   "third-person"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person',
+                        'imperative',
+                        'passive',
+                        'present',
+                        'singular']},
               {
                 "form": "accūsāre",
                 "source": "Conjugation",
@@ -2044,6 +2093,20 @@ class InflTests(unittest.TestCase):
                   "singular"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['imperative',
+                        'passive',
+                        'present',
+                        'singular',
+                        'third-person']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person',
+                        'imperative',
+                        'passive',
+                        'plural',
+                        'present']},
               {
                 "form": "accūsāminī",
                 "source": "Conjugation",
@@ -2055,6 +2118,20 @@ class InflTests(unittest.TestCase):
                   "second-person"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['imperative',
+                        'passive',
+                        'plural',
+                        'present',
+                        'third-person']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person',
+                        'future',
+                        'imperative',
+                        'passive',
+                        'singular']},
               {
                 "form": "accūsātor",
                 "source": "Conjugation",
@@ -2077,6 +2154,20 @@ class InflTests(unittest.TestCase):
                   "third-person"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person',
+                        'future',
+                        'imperative',
+                        'passive',
+                        'plural']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['future',
+                        'imperative',
+                        'passive',
+                        'plural',
+                        'second-person']},
               {
                 "form": "accūsantor",
                 "source": "Conjugation",
@@ -2160,6 +2251,9 @@ class InflTests(unittest.TestCase):
                   "present"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['active', 'participle', 'perfect']},
               {
                 "form": "accūsātūrus",
                 "source": "Conjugation",
@@ -2169,6 +2263,9 @@ class InflTests(unittest.TestCase):
                   "participle"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['participle', 'passive', 'present']},
               {
                 "form": "accūsātus",
                 "source": "Conjugation",

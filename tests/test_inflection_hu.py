@@ -593,6 +593,27 @@ class InflTests(unittest.TestCase):
                   "singular"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person',
+                        'indicative',
+                        'object-second-person',
+                        'plural',
+                        'present']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['formal',
+                        'indicative',
+                        'informal',
+                        'object-second-person',
+                        'present',
+                        'second-person']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['indicative',
+                        'object-second-person',
+                        'present',
+                        'third-person']},
               {
                 "form": "futottam",
                 "source": "Conjugation",
@@ -788,6 +809,27 @@ class InflTests(unittest.TestCase):
                   "singular"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person',
+                        'indicative',
+                        'object-second-person',
+                        'past',
+                        'plural']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['formal',
+                        'indicative',
+                        'informal',
+                        'object-second-person',
+                        'past',
+                        'second-person']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['indicative',
+                        'object-second-person',
+                        'past',
+                        'third-person']},
               {
                 "form": "futnék",
                 "source": "Conjugation",
@@ -983,6 +1025,27 @@ class InflTests(unittest.TestCase):
                   "singular"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['conditional',
+                        'first-person',
+                        'object-second-person',
+                        'plural',
+                        'present']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['conditional',
+                        'formal',
+                        'informal',
+                        'object-second-person',
+                        'present',
+                        'second-person']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['conditional',
+                        'object-second-person',
+                        'present',
+                        'third-person']},
               {
                 "form": "fussak",
                 "source": "Conjugation",
@@ -1202,6 +1265,27 @@ class InflTests(unittest.TestCase):
                   "subjunctive"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['first-person',
+                        'object-second-person',
+                        'plural',
+                        'present',
+                        'subjunctive']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['formal',
+                        'informal',
+                        'object-second-person',
+                        'present',
+                        'second-person',
+                        'subjunctive']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['object-second-person',
+                        'present',
+                        'subjunctive',
+                        'third-person']},
               {
                 "form": "futni",
                 "source": "Conjugation",
@@ -1804,6 +1888,22 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "essive-formal",
+                  "plural"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Declension",
+                "tags": [
+                  "essive-modal",
+                  "singular"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Declension",
+                "tags": [
+                  "essive-modal",
                   "plural"
                 ]
               },
@@ -2498,6 +2598,22 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "essive-formal",
+                  "plural"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Declension",
+                "tags": [
+                  "essive-modal",
+                  "singular"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Declension",
+                "tags": [
+                  "essive-modal",
                   "plural"
                 ]
               },

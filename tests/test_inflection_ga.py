@@ -1072,6 +1072,9 @@ class InflTests(unittest.TestCase):
                   "third-person"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['present', 'relative', 'subjunctive']},
               {
                 "form": "go nitear",
                 "source": "Conjugation",
@@ -1171,6 +1174,9 @@ class InflTests(unittest.TestCase):
                   "third-person"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['past', 'relative', 'subjunctive']},
               {
                 "form": "dá nití",
                 "source": "Conjugation",
@@ -1252,6 +1258,9 @@ class InflTests(unittest.TestCase):
                   "third-person"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['imperative', 'relative']},
               {
                 "form": "nitear",
                 "source": "Conjugation",
