@@ -1428,9 +1428,9 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
     for x in titles:
         assert isinstance(x, str)
     # print("PARSE_SIMPLE_TABLE: TITLES:", titles)
-    print("ROWS:")
-    for row in rows:
-        print("  ", row)
+    # print("ROWS:")
+    # for row in rows:
+    #     print("  ", row)
     ret = []
     hdrspans = []
     col_has_text = []

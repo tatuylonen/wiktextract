@@ -1999,7 +1999,7 @@ def parse_alt_or_inflection_of1(ctx, gloss):
     base = base.strip()
     if not base:
         return tags, None
-    parts = split_at_comma_semi(base, extra=[" / ",  "／"])
+    parts = split_at_comma_semi(base, extra=[" / ",  "／", r" \+ "])
     titleword = re.sub(r"^Reconstruction:[^/]*/", "", ctx.title)
     if (len(parts) <= 1 or base.startswith("/") or
         base.endswith("/") or
