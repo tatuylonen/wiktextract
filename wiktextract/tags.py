@@ -4936,9 +4936,10 @@ valid_tags = {
     "no-nominative": "misc",         # The word has no nominative form (from this base)
     "no-nominative-plural": "misc",  # The word has no nominative plural
     "no-past": "misc",	 	     # No simple past form"
+    "no-past-participle": "misc",    # The word has no past participle
     "no-perfect": "misc",            # The word has no perfect/perfective aspect/form
     "no-plural": "misc",             # The word has no plural form (= singular only)
-    "no-past-participle": "misc",    # The word has no past participle
+    "no-possessor": "misc",	     # No possessor in possessive hajallan/Finnish
     "no-present-participle": "misc",  # The word has no present participle
     "no-second-person-singular-imperative": "misc",  # No imperative
     "no-senses": "misc",             # Added synthesized sense when no senses extracted
@@ -5135,6 +5136,7 @@ valid_tags = {
     "sentence-case": "misc",  # дь/Yakut
     "sentence-final": "misc",  # Korean verb forms (broad category)
     "separable": "misc",  # Used for separable verbs, e.g. omzagen/Dutch
+    "separative": "case",  # e.g. keulemmaksi/Finnish
     "sequence": "misc",
     "sequential": "misc",
     "shinjitai": "misc",  # Simplified Japanese Kanji (after 1947)

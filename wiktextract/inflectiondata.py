@@ -2014,6 +2014,7 @@ infl_map = {
     "indefinite singular": "indefinite singular",
     "indirect": "indirect",
     "locative-qualitative": "locative-qualitative",
+    "separative": "separative",
     "Imperfective aspect": "imperfective",
     "paucal": "paucal",
     "Tense": "",
@@ -2064,6 +2065,7 @@ infl_map = {
     "Type": "",
     "type": "",
     "gender-neutral": "gender-neutral",
+    "gender-neutral (person)": "gender-neutral",
     "sing. conneg.": "singular connegative",
     "plur. conneg.": "plural connegative",
     "Definite attributive": "definite attributive",
@@ -2077,6 +2079,7 @@ infl_map = {
     "○": "",  # e.g. sikkaralla/Finnish
     "○→": "",  # e.g. sikkaralla/Finnish
     "with positive imperatives": "with-positive-imperative",
+    "no possessor": "no-possessor",
     # "+ object concord": XXX,
     # "state": XXX,
     # "free state": XXX,
@@ -2100,7 +2103,6 @@ infl_map = {
     # "Declarative": XXX,
     # "substantive genitive": XXX,
     # "substantive": XXX,
-    # "no possessor": XXX,
     # "Modifier": XXX,
     # "preposition": XXX,
     # "sound": XXX,
