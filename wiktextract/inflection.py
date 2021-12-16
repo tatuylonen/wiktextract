@@ -2107,6 +2107,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                       (re.sub(r"\s+", " ",
                               re.sub(r"\s*\([^)]*\)", "",
                                      celltext)).strip() in infl_map and
+                       celltext not in IGNORED_COLVALUES and
                        celltext != word and
                        celltext not in ("I", "es")) or
                       (style == cellstyle and

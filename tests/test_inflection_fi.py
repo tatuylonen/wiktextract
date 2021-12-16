@@ -3464,3 +3464,69 @@ class InflTests(unittest.TestCase):
             ],
         }
         self.assertEqual(expected, ret)
+
+    def test_Finnish_adv1(self):
+        ret = self.xinfl("sikkaralla", "Finnish", "adv", "Inflection", """
+{| class="wikitable"
+
+|-
+
+! →○
+
+
+! allative
+
+
+| <span class="Latn" lang="fi">[[sikkaralle#Finnish|sikkaralle]]</span>
+
+
+|-
+
+! ○
+
+
+! adessive
+
+
+| <span class="Latn" lang="fi">[[sikkaralla#Finnish|sikkaralla]]</span>
+
+
+|-
+
+! ○→
+
+
+! ablative
+
+
+| –
+
+
+|}
+""")
+        expected = {
+            "forms": [
+              {
+                "form": "sikkaralle",
+                "source": "Inflection",
+                "tags": [
+                  "allative"
+                ]
+              },
+              {
+                "form": "sikkaralla",
+                "source": "Inflection",
+                "tags": [
+                  "adessive"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Inflection",
+                "tags": [
+                  "ablative"
+                ]
+              }
+            ],
+        }
+        self.assertEqual(expected, ret)

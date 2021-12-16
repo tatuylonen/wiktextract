@@ -2073,6 +2073,9 @@ infl_map = {
     "present active": "present active",
     "past active": "past active",
     "past passive": "past passive",
+    "→○": "",  # e.g. sikkaralla/Finnish
+    "○": "",  # e.g. sikkaralla/Finnish
+    "○→": "",  # e.g. sikkaralla/Finnish
     # "+ object concord": XXX,
     # "state": XXX,
     # "free state": XXX,
