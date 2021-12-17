@@ -380,3 +380,11 @@ class ClassifyTests(unittest.TestCase):
     def test_classify86(self):
         cls = classify_desc('dénʹgam')
         self.assertEqual(cls, "romanization")
+
+    def test_classify87(self):
+        cls = classify_desc('proiznosív')
+        self.assertEqual(cls, "romanization")
+
+    def test_classify88(self):
+        cls = classify_desc('proiznosívši')
+        self.assertEqual(cls, "romanization")

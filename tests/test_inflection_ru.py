@@ -385,3 +385,498 @@ class InflTests(unittest.TestCase):
             ],
         }
         self.assertEqual(expected, ret)
+
+    def test_Russian_verb1(self):
+        ret = self.xinfl("произносить", "Russian", "verb", "Conjugation", """
+<templatestyles src="Module%3Aru-verb%2Fstyle.css"><div class="NavFrame" style="width%3A49.6em%3B">
+<div class="NavHead" style="text-align%3Aleft%3B+background%3A%23e0e0ff%3B">Conjugation of <span lang="ru" class="Cyrl">''произноси́ть''</span> (class 4c imperfective transitive)</div>
+<div class="NavContent">
+
+{| class="inflection+inflection-ru+inflection-verb+inflection-table"
+
+|+
+ Note: For declension of participles, see their entries. Adverbial participles are indeclinable.
+
+|- class="rowgroup"
+
+! colspan="3" | [[несовершенный вид|imperfective aspect]]
+
+
+|-
+
+! [[неопределённая форма|infinitive]]
+
+
+| colspan="2" | <span class="Cyrl+form-of+lang-ru+inf-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносить#Russian|произноси́ть]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznosítʹ</span>
+
+
+|- class="rowgroup"
+
+! style="width%3A15em" | [[причастие|participles]]
+
+
+! [[настоящее время|present tense]]
+
+
+! [[прошедшее время|past tense]]
+
+
+|-
+
+! [[действительный залог|active]]
+
+
+| <span class="Cyrl+form-of+lang-ru+pres%7Cact%7Cpart-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносящий#Russian|произнося́щий]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznosjáščij</span>
+
+| <span class="Cyrl+form-of+lang-ru+past%7Cact%7Cpart-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносивший#Russian|произноси́вший]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznosívšij</span>
+
+
+|-
+
+! [[страдательный залог|passive]]
+
+
+| <span class="Cyrl+form-of+lang-ru+pres%7Cpass%7Cpart-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносимый#Russian|произноси́мый]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznosímyj</span>
+
+| &mdash;
+
+
+|-
+
+! [[деепричастие|adverbial]]
+
+
+| <span class="Cyrl+form-of+lang-ru+pres%7Cadv%7Cpart-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произнося#Russian|произнося́]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznosjá</span>
+
+| <span class="Cyrl+form-of+lang-ru+past%7Cadv%7Cpart-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносив#Russian|произноси́в]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznosív</span>,<br><span class="Cyrl+form-of+lang-ru+past%7Cadv%7Cpart-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносивши#Russian|произноси́вши]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznosívši</span>
+
+
+|- class="rowgroup"
+
+!
+
+
+! [[настоящее время|present tense]]
+
+
+! [[будущее время|future tense]]
+
+
+|-
+
+! [[первое лицо|1st]] [[единственное число|singular]] (<span lang="ru" class="Cyrl">я</span>)
+
+
+| <span class="Cyrl+form-of+lang-ru+1%7Cs%7Cpres%7Cind-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произношу#Russian|произношу́]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznošú</span>
+
+| <span class="Cyrl" lang="ru">[[буду#Russian|бу́ду]]</span><span lang="ru" class="Cyrl"> произноси́ть</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">búdu proiznosítʹ</span>
+
+
+|-
+
+! [[второе лицо|2nd]] [[единственное число|singular]] (<span lang="ru" class="Cyrl">ты</span>)
+
+
+| <span class="Cyrl+form-of+lang-ru+2%7Cs%7Cpres%7Cind-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносишь#Russian|произно́сишь]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznósišʹ</span>
+
+| <span class="Cyrl" lang="ru">[[будешь#Russian|бу́дешь]]</span><span lang="ru" class="Cyrl"> произноси́ть</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">búdešʹ proiznosítʹ</span>
+
+
+|-
+
+! [[третье лицо|3rd]] [[единственное число|singular]] (<span lang="ru" class="Cyrl">он/она́/оно́</span>)
+
+
+| <span class="Cyrl+form-of+lang-ru+3%7Cs%7Cpres%7Cind-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносит#Russian|произно́сит]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznósit</span>
+
+| <span class="Cyrl" lang="ru">[[будет#Russian|бу́дет]]</span><span lang="ru" class="Cyrl"> произноси́ть</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">búdet proiznosítʹ</span>
+
+
+|-
+
+! [[первое лицо|1st]] [[множественное число|plural]] (<span lang="ru" class="Cyrl">мы</span>)
+
+
+| <span class="Cyrl+form-of+lang-ru+1%7Cp%7Cpres%7Cind-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносим#Russian|произно́сим]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznósim</span>
+
+| <span class="Cyrl" lang="ru">[[будем#Russian|бу́дем]]</span><span lang="ru" class="Cyrl"> произноси́ть</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">búdem proiznosítʹ</span>
+
+
+|-
+
+! [[второе лицо|2nd]] [[множественное число|plural]] (<span lang="ru" class="Cyrl">вы</span>)
+
+
+| <span class="Cyrl+form-of+lang-ru+2%7Cp%7Cpres%7Cind-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносите#Russian|произно́сите]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznósite</span>
+
+| <span class="Cyrl" lang="ru">[[будете#Russian|бу́дете]]</span><span lang="ru" class="Cyrl"> произноси́ть</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">búdete proiznosítʹ</span>
+
+
+|-
+
+! [[третье лицо|3rd]] [[множественное число|plural]] (<span lang="ru" class="Cyrl">они́</span>)
+
+
+| <span class="Cyrl+form-of+lang-ru+3%7Cp%7Cpres%7Cind-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносят#Russian|произно́сят]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznósjat</span>
+
+| <span class="Cyrl" lang="ru">[[будут#Russian|бу́дут]]</span><span lang="ru" class="Cyrl"> произноси́ть</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">búdut proiznosítʹ</span>
+
+
+|- class="rowgroup"
+
+! [[повелительное наклонение|imperative]]
+
+
+! [[единственное число|singular]]
+
+
+! [[множественное число|plural]]
+
+
+|-
+
+!
+
+
+| <span class="Cyrl+form-of+lang-ru+2%7Cs%7Cimp-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произноси#Russian|произноси́]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznosí</span>
+
+| <span class="Cyrl+form-of+lang-ru+2%7Cp%7Cimp-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносите#Russian|произноси́те]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznosíte</span>
+
+
+|- class="rowgroup"
+
+! [[прошедшее время|past tense]]
+
+
+! [[единственное число|singular]]
+
+
+! [[множественное число|plural]]<br>(<span lang="ru" class="Cyrl">мы/вы/они́</span>)
+
+
+|-
+
+! [[мужской род|masculine]] (<span lang="ru" class="Cyrl">я/ты/он</span>)
+
+
+| <span class="Cyrl+form-of+lang-ru+m%7Cs%7Cpast%7Cind-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносил#Russian|произноси́л]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznosíl</span>
+
+| rowspan="3" | <span class="Cyrl+form-of+lang-ru+p%7Cpast%7Cind-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносили#Russian|произноси́ли]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznosíli</span>
+
+
+|-
+
+! [[женский род|feminine]] (<span lang="ru" class="Cyrl">я/ты/она́</span>)
+
+
+| <span class="Cyrl+form-of+lang-ru+f%7Cs%7Cpast%7Cind-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносила#Russian|произноси́ла]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznosíla</span>
+
+
+|-
+
+! style="background-color%3A+%23ffffe0%3B" | [[средний род|neuter]] (<span lang="ru" class="Cyrl">оно́</span>)
+
+
+| <span class="Cyrl+form-of+lang-ru+n%7Cs%7Cpast%7Cind-form-of++++origin-%D0%BF%D1%80%D0%BE%D0%B8%D0%B7%D0%BD%D0%BE%D1%81%D0%B8%CC%81%D1%82%D1%8C+++" lang="ru">[[произносило#Russian|произноси́ло]]</span><br><span lang="ru-Latn" class="tr+Latn" style="color%3A+%23888">proiznosílo</span>
+
+
+|}
+
+</div>
+</div>[[Category:Russian class 4 verbs|ПРОИЗНОСИТЬ]][[Category:Russian class 4c verbs|ПРОИЗНОСИТЬ]][[Category:Russian imperfective verbs|ПРОИЗНОСИТЬ]][[Category:Russian transitive verbs|ПРОИЗНОСИТЬ]]
+""")
+        expected = {
+            "forms": [
+              {
+                "form": "4c imperfective transitive",
+                "source": "Conjugation title",
+                "tags": [
+                  "class"
+                ]
+              },
+              {
+                "form": "произноси́ть",
+                "roman": "proiznosítʹ",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfective",
+                  "infinitive"
+                ]
+              },
+              {
+                "form": "произнося́щий",
+                "roman": "proiznosjáščij",
+                "source": "Conjugation",
+                "tags": [
+                  "active",
+                  "participle",
+                  "present"
+                ]
+              },
+              {
+                "form": "произноси́вший",
+                "roman": "proiznosívšij",
+                "source": "Conjugation",
+                "tags": [
+                  "active",
+                  "participle",
+                  "past"
+                ]
+              },
+              {
+                "form": "произноси́мый",
+                "roman": "proiznosímyj",
+                "source": "Conjugation",
+                "tags": [
+                  "participle",
+                  "passive",
+                  "present"
+                ]
+              },
+              {
+                "form": "-",
+                "source": "Conjugation",
+                "tags": [
+                  "participle",
+                  "passive",
+                  "past"
+                ]
+              },
+              {
+                "form": "произнося́",
+                "roman": "proiznosjá",
+                "source": "Conjugation",
+                "tags": [
+                  "adverbial",
+                  "participle",
+                  "present"
+                ]
+              },
+              {
+                "form": "произноси́в",
+                "roman": "proiznosív",
+                "source": "Conjugation",
+                "tags": [
+                  "adverbial",
+                  "participle",
+                  "past"
+                ]
+              },
+              {
+                "form": "произноси́вши",
+                "roman": "proiznosívši",
+                "source": "Conjugation",
+                "tags": [
+                  "adverbial",
+                  "participle",
+                  "past"
+                ]
+              },
+              {
+                "form": "произношу́",
+                "roman": "proiznošú",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "present",
+                  "singular"
+                ]
+              },
+              {
+                "form": "бу́дупроизноси́ть",
+                "roman": "búdu proiznosítʹ",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "future",
+                  "singular"
+                ]
+              },
+              {
+                "form": "произно́сишь",
+                "roman": "proiznósišʹ",
+                "source": "Conjugation",
+                "tags": [
+                  "present",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "бу́дешьпроизноси́ть",
+                "roman": "búdešʹ proiznosítʹ",
+                "source": "Conjugation",
+                "tags": [
+                  "future",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "произно́сит",
+                "roman": "proiznósit",
+                "source": "Conjugation",
+                "tags": [
+                  "present",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "бу́детпроизноси́ть",
+                "roman": "búdet proiznosítʹ",
+                "source": "Conjugation",
+                "tags": [
+                  "future",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "произно́сим",
+                "roman": "proiznósim",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "plural",
+                  "present"
+                ]
+              },
+              {
+                "form": "бу́демпроизноси́ть",
+                "roman": "búdem proiznosítʹ",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "future",
+                  "plural"
+                ]
+              },
+              {
+                "form": "произно́сите",
+                "roman": "proiznósite",
+                "source": "Conjugation",
+                "tags": [
+                  "plural",
+                  "present",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "бу́детепроизноси́ть",
+                "roman": "búdete proiznosítʹ",
+                "source": "Conjugation",
+                "tags": [
+                  "future",
+                  "plural",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "произно́сят",
+                "roman": "proiznósjat",
+                "source": "Conjugation",
+                "tags": [
+                  "plural",
+                  "present",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "бу́дутпроизноси́ть",
+                "roman": "búdut proiznosítʹ",
+                "source": "Conjugation",
+                "tags": [
+                  "future",
+                  "plural",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "произноси́",
+                "roman": "proiznosí",
+                "source": "Conjugation",
+                "tags": [
+                  "imperative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "произноси́те",
+                "roman": "proiznosíte",
+                "source": "Conjugation",
+                "tags": [
+                  "imperative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "произноси́л",
+                "roman": "proiznosíl",
+                "source": "Conjugation",
+                "tags": [
+                  "masculine",
+                  "past",
+                  "singular"
+                ]
+              },
+              {
+                "form": "произноси́ли",
+                "roman": "proiznosíli",
+                "source": "Conjugation",
+                "tags": [
+                  "masculine",
+                  "past",
+                  "plural"
+                ]
+              },
+              {
+                "form": "произноси́ла",
+                "roman": "proiznosíla",
+                "source": "Conjugation",
+                "tags": [
+                  "feminine",
+                  "past",
+                  "singular"
+                ]
+              },
+              {
+                "form": "произноси́ли",
+                "roman": "proiznosíli",
+                "source": "Conjugation",
+                "tags": [
+                  "feminine",
+                  "past",
+                  "plural"
+                ]
+              },
+              {
+                "form": "произноси́ло",
+                "roman": "proiznosílo",
+                "source": "Conjugation",
+                "tags": [
+                  "neuter",
+                  "past",
+                  "singular"
+                ]
+              },
+              {
+                "form": "произноси́ли",
+                "roman": "proiznosíli",
+                "source": "Conjugation",
+                "tags": [
+                  "neuter",
+                  "past",
+                  "plural"
+                ]
+              },
+              {
+                "form": "imperfective transitive",
+                "source": "Conjugation title",
+                "tags": [
+                  "word-tags"
+                ]
+              }
+            ],
+        }
+        self.assertEqual(expected, ret)

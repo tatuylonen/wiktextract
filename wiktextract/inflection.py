@@ -197,6 +197,8 @@ lang_specific = {
         "persons": ["first-person", "second-person", "third-person"],
         "pl_virile_nonvirile": False,
         "skip_mood_mood": False,
+        "skip_tense_tense": False,
+        "stop_on_cellspan_already_used": False,
         "strengths": ["strong", "weak"],
         "voices": ["active", "passive"],
     },
@@ -506,6 +508,9 @@ lang_specific = {
     },
     "Russian": {
         "next": "slavic-group",
+        "hdr_expand_first": set(["non-finite", "mood", "tense"]),
+        "hdr_expand_cont": set(["tense", "number"]),
+        "stop_on_cellspan_already_used": True,
     },
     "Rwanda-Rundi": {
         "next": "bantu-group",
@@ -1306,6 +1311,9 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                 print("Cellspan already used: start={} colspan={} rownum={} {}"
                       .format(hdrspan.start, hdrspan.colspan, hdrspan.rownum,
                               hdrspan.tagsets))
+            stop = get_lang_specific(lang, "stop_on_cellspan_already_used")
+            if stop:
+                break
             continue
         tcats = tagset_cats(tagsets)
         # Most headers block using the same column position above.  However,
@@ -1374,6 +1382,17 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                 else:
                     if celltext == debug_word:
                         print("stopping on mood-mood")
+                        break
+            elif ("tense" in new_cats and
+                  "tense" in cur_cats):
+                skip = get_lang_specific(lang, "skip_tense_tense")
+                if skip:
+                    if celltext == debug_word:
+                        print("skipping on tense-tense")
+                        # we continue to next header
+                else:
+                    if celltext == debug_word:
+                        print("stopping on tense-tense")
                         break
             elif "number" in cur_cats and "number" in new_cats:
                 if celltext == debug_word:
@@ -1704,11 +1723,13 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
             # where instead of romanization we have IPA pronunciation
             # (e.g., avoir/French/verb).
             len2 = len(alts) // 2
+            # Check for IPAs (forms first, IPAs under)
             if (len(alts) % 2 == 0 and
                 all(re.match(r"^\s*/.*/\s*$", x)
                     for x in alts[len2:])):
                 alts = list((alts[i], "", alts[i + len2])
                             for i in range(len2))
+            # Check for romanizations, forms first, romanizations under
             elif (len(alts) % 2 == 0 and
                   not any(x.find("(") >= 0 for x in alts) and
                   all(classify_desc(re.sub(r"\^.*$", "",
@@ -1723,6 +1744,21 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                       for x in alts[len2:])):
                 alts = list((alts[i], alts[i + len2], "")
                             for i in range(len2))
+            # Check for romanizations, forms and romanizations alternating
+            elif (len(alts) % 2 == 0 and
+                  not any(x.find("(") >= 0 for x in alts) and
+                  all(classify_desc(re.sub(r"\^.*$", "",
+                                           "".join(xx for xx in alts[i]
+                                                   if not is_superscript(xx))))
+                      == "other"
+                      for i in range(0, len(alts), 2)) and
+                  all(classify_desc(re.sub(r"\^.*$", "",
+                                           "".join(xx for xx in alts[i]
+                                                   if not is_superscript(xx))))
+                      in ("romanization", "english")
+                      for i in range(1, len(alts), 2))):
+                alts = list((alts[i], alts[i + 1], "")
+                            for i in range(0, len(alts), 2))
             else:
                 new_alts = []
                 for alt in alts:

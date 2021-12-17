@@ -606,15 +606,6 @@ class InflTests(unittest.TestCase):
                 "source": "Inflection",
                 "tags": [
                   "adverbial",
-                  "participle",
-                  "positive"
-                ]
-              },
-              {
-                "form": "mooi",
-                "source": "Inflection",
-                "tags": [
-                  "participle",
                   "positive",
                   "predicative"
                 ]
@@ -625,15 +616,6 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "adverbial",
                   "comparative",
-                  "participle"
-                ]
-              },
-              {
-                "form": "mooier",
-                "source": "Inflection",
-                "tags": [
-                  "comparative",
-                  "participle",
                   "predicative"
                 ]
               },
@@ -642,15 +624,6 @@ class InflTests(unittest.TestCase):
                 "source": "Inflection",
                 "tags": [
                   "adverbial",
-                  "participle",
-                  "superlative"
-                ]
-              },
-              {
-                "form": "het mooist",
-                "source": "Inflection",
-                "tags": [
-                  "participle",
                   "predicative",
                   "superlative"
                 ]
@@ -660,15 +633,6 @@ class InflTests(unittest.TestCase):
                 "source": "Inflection",
                 "tags": [
                   "adverbial",
-                  "participle",
-                  "superlative"
-                ]
-              },
-              {
-                "form": "het mooiste",
-                "source": "Inflection",
-                "tags": [
-                  "participle",
                   "predicative",
                   "superlative"
                 ]
