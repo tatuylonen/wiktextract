@@ -340,7 +340,7 @@ infl_map = {
     "conditional": "conditional",
     "pluperfect": "pluperfect",
     "Bare forms": "indefinite",
-    "Bare forms:": "indefinite",
+    "Bare forms:": "",
     "past": "past",
     "1st": {
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
