@@ -199,6 +199,8 @@ lang_specific = {
         "skip_mood_mood": False,
         "skip_tense_tense": False,
         "stop_on_cellspan_already_used": False,
+        "stop_non_finite_non_finite": True,
+        "stop_non_finite_voice": False,
         "strengths": ["strong", "weak"],
         "voices": ["active", "passive"],
     },
@@ -388,6 +390,10 @@ lang_specific = {
     # "Larike": {
     #     "numbers": ["singular", "dual", "trial", "plural"],
     # },
+    "Latin": {
+        "next": "romance-group",
+        "stop_non_finite_voice": True,
+    },
     "Ligurian": {
         "next": "romance-group",
     },
@@ -1356,9 +1362,22 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                 if celltext == debug_word:
                     print("stopping on detail after merge")
                 break
+            elif ("non-finite" in cur_cats and
+                  "non-finite" in new_cats):
+                stop = get_lang_specific(lang, "stop_non_finite_non_finite")
+                if stop:
+                    if celltext == debug_word:
+                        print("stopping on non-finite-non-finite")
+                    break
+            elif ("non-finite" in cur_cats and
+                  "voice" in new_cats):
+                stop = get_lang_specific(lang, "stop_non_finite_voice")
+                if stop:
+                    if celltext == debug_word:
+                        print("stopping on non-finite-voice")
+                    break
             elif ("non-finite" in new_cats and
-                  cur_cats & set(("mood", "non-finite", "person",
-                                  "number"))):
+                  cur_cats & set(("mood", "person", "number"))):
                 if celltext == debug_word:
                     print("stopping on non-finite new")
                 break

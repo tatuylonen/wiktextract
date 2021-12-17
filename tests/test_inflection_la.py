@@ -2288,7 +2288,6 @@ class InflTests(unittest.TestCase):
                 "form": "accūsandī",
                 "source": "Conjugation",
                 "tags": [
-                  "active",
                   "genitive",
                   "gerund",
                   "noun-from-verb",
@@ -2298,7 +2297,6 @@ class InflTests(unittest.TestCase):
                 "form": "accūsandō",
                 "source": "Conjugation",
                 "tags": [
-                  "active",
                   "dative",
                   "gerund",
                   "noun-from-verb",
@@ -2309,7 +2307,6 @@ class InflTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "accusative",
-                  "active",
                   "gerund",
                   "noun-from-verb",
                 ]
@@ -2320,8 +2317,7 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "ablative",
                   "gerund",
-                  "noun-from-verb",
-                  "passive"
+                  "noun-from-verb"
                 ]
               },
               {
@@ -2330,7 +2326,6 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "accusative",
                   "noun-from-verb",
-                  "passive",
                   "supine"
                 ]
               },
@@ -2340,7 +2335,6 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "ablative",
                   "noun-from-verb",
-                  "passive",
                   "supine"
                 ]
               },
