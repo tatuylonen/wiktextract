@@ -1113,6 +1113,16 @@ def expand_header(ctx, word, lang, pos, text, tags0, silent=False):
             else:
                 assert isinstance(c, (list, tuple, set))
                 cond = lang in c
+        # Handle "pos" condition.  The value must be either a single
+        # part-of-speech or a list of them, and the condition evaluates to
+        # True if the part-of-speech is any of those listed.
+        if cond and "pos" in v:
+            c = v["pos"]
+            if isinstance(c, str):
+                cond = c == pos
+            else:
+                assert isinstance(c, (list, tuple, set))
+                cond = pos in c
         # Handle "if" condition.  The value must be a string containing
         # a space-separated list of tags.  The condition evaluates to True
         # if ``tags0`` contains all of the listed tags.  If the condition

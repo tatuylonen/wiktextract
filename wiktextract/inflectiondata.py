@@ -6,6 +6,7 @@
 
 import re
 from .tags import valid_tags, head_final_numeric_langs
+from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 
 # Languages where possessive forms (e.g. pronouns) inflect according to the
 # gender/number of the possessed object(s)
@@ -953,7 +954,9 @@ infl_map = {
     "inflected": "inflected",
     "predicative/adverbial": {
         "lang": "Dutch",
+        "pos": "verb",
         "then": ["participle predicative", "participle adverbial"],
+        "else": "predicative adverbial",
     },
     "m./f. sing.": "masculine feminine singular",
     "n. sing.": "neuter singular",
@@ -2171,6 +2174,14 @@ def check_v(k, v):
         for kk in v.keys():
             if kk in ("if", "then", "else"):
                 check_v(k, v[kk])
+            elif kk == "pos":
+                vv = v[kk]
+                if isinstance(vv, str):
+                    vv = [vv]
+                for vvv in vv:
+                    if vvv not in PARTS_OF_SPEECH:
+                        print("infl_map[{!r}] contains invalid part-of-speech "
+                              "{!r}".format(k, kk, v[kk]))
             elif kk in ("lang",):
                 pass
             else:
