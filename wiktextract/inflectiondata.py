@@ -566,9 +566,9 @@ infl_map = {
         "else": "affirmative",
     },
     "participle": "participle",
-    "Bare forms (no plural for this noun):": "indefinite no-plural",
+    "Bare forms (no plural for this noun):": "no-plural",
     "old dative": "dative archaic",  # XXX archaic or dated?
-    "Bare forms (no plural of this noun)": "indefinite no-plural",
+    "Bare forms (no plural of this noun)": "no-plural",
     "Conditional": "conditional",
     "Inflection": "",
     "Definite accusative": "definite accusative",
@@ -952,12 +952,14 @@ infl_map = {
     "eu": {"if": "first-person singular", "then": ""},
     "uninflected": "uninflected",
     "inflected": "inflected",
-    "predicative/adverbial": {
-        "lang": "Dutch",
-        "pos": "verb",
-        "then": ["participle predicative", "participle adverbial"],
-        "else": "predicative adverbial",
-    },
+    # XXX pending removal; the participle marking is in sense
+    # "predicative/adverbial": {
+    #     "lang": "Dutch",
+    #     "pos": "verb",
+    #     "then": ["participle predicative", "participle adverbial"],
+    #     "else": "predicative adverbial",
+    # },
+    "predicative/adverbial": "predicative adverbial",
     "m./f. sing.": "masculine feminine singular",
     "n. sing.": "neuter singular",
     "masculine (vīriešu dzimte)": "masculine",

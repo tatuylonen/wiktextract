@@ -2179,18 +2179,25 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     # XXX add tags from target
                     celltext = celltext[:idx]
                     is_title = True
-                elif ((kind == NodeKind.TABLE_HEADER_CELL and
-                       celltext.find(" + ") < 0) or
-                      (re.sub(r"\s+", " ",
-                              re.sub(r"\s*\([^)]*\)", "",
-                                     celltext)).strip() in infl_map and
-                       celltext not in IGNORED_COLVALUES and
-                       celltext != word and
-                       celltext not in ("I", "es")) or
-                      (style == cellstyle and
-                       celltext != word and
-                       not style.startswith("////") and
-                       celltext.find(" + ") < 0)):
+                elif (kind == NodeKind.TABLE_HEADER_CELL and
+                      celltext.find(" + ") < 0 and
+                      not any(isinstance(x, WikiNode) and
+                              x.kind == NodeKind.HTML and
+                              x.args == "span" and
+                              x.attrs.get("lang") in ("az",)
+                              for x in col.children)):
+                    is_title = True
+                elif (re.sub(r"\s+", " ",
+                             re.sub(r"\s*\([^)]*\)", "",
+                                    celltext)).strip() in infl_map and
+                      celltext not in IGNORED_COLVALUES and
+                      celltext != word and
+                      celltext not in ("I", "es")):
+                    is_title = True
+                elif (style == cellstyle and
+                      celltext != word and
+                      not style.startswith("////") and
+                      celltext.find(" + ") < 0):
                     is_title = True
                 if (not is_title and len(row) < len(cols_headered) and
                     cols_headered[len(row)]):
