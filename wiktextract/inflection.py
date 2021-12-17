@@ -185,7 +185,7 @@ lang_specific = {
                                  "tense", "voice", "non-finite", "case",
                                  "possession"]),
         "hdr_expand_cont": set(["person", "gender", "number", "degree",
-                                "polarity", "voice"]),
+                                "polarity", "voice", "misc"]),
         "both_active_passive_remove": True,
         "both_strong_weak_remove": True,
         "form_transformations": [],
@@ -359,7 +359,10 @@ lang_specific = {
     "Italian": {
         "next": "romance-group",
         "hdr_expand_first": set(["mood", "tense"]),
-        "hdr_expand_cont": set(["person", "register", "number"]),
+        "hdr_expand_cont": set(["person", "register", "number", "misc"]),
+        "form_transformations": [
+            ["verb", "^non ", "negative"],
+        ],
     },
     "Irish": {
         "next": "Old Irish",
@@ -1617,7 +1620,6 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                             # XXX Only one cat of tags: kunna/Swedish
                             # XXX len(col0_cats) == 1 and
                             col0_hdrspan.rowspan >= rowspan and
-                            not (col0_cats - col0_allowed) and
                             not (later_cats - later_allowed) and
                             not (col0_cats & later_cats)):
                             # First case: col0 set, continue
@@ -1625,6 +1627,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         # We are going to start new col0_hdrspan.  Check if
                         # we should expand.
                         if (not col0_followed_by_nonempty and
+                            not (col0_cats - col0_allowed) and
                             # XXX len(col0_cats) == 1 and
                             j > col0_hdrspan.start + col0_hdrspan.colspan):
                             # Expand current col0_hdrspan

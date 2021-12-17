@@ -429,8 +429,9 @@ class InflTests(unittest.TestCase):
                   "indicative",
                   "object-indefinite",
                   "present",
-                  "second-person",
-                  "singular"
+                  "second-person-semantically",
+                  "singular",
+                  "third-person"
                 ]
               },
               {
@@ -476,7 +477,8 @@ class InflTests(unittest.TestCase):
                   "object-indefinite",
                   "plural",
                   "present",
-                  "second-person"
+                  "second-person-semantically",
+                  "third-person"
                 ]
               },
               {
@@ -521,8 +523,9 @@ class InflTests(unittest.TestCase):
                   "indicative",
                   "object-definite",
                   "present",
-                  "second-person",
-                  "singular"
+                  "second-person-semantically",
+                  "singular",
+                  "third-person"
                 ]
               },
               {
@@ -568,7 +571,8 @@ class InflTests(unittest.TestCase):
                   "object-definite",
                   "plural",
                   "present",
-                  "second-person"
+                  "second-person-semantically",
+                  "third-person"
                 ]
               },
               {
@@ -604,6 +608,13 @@ class InflTests(unittest.TestCase):
                'source': 'Conjugation',
                'tags': ['formal',
                         'indicative',
+                        'object-second-person',
+                        'present',
+                        'second-person-semantically',
+                        'third-person']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['indicative',
                         'informal',
                         'object-second-person',
                         'present',
@@ -645,8 +656,9 @@ class InflTests(unittest.TestCase):
                   "indicative",
                   "object-indefinite",
                   "past",
-                  "second-person",
-                  "singular"
+                  "second-person-semantically",
+                  "singular",
+                  "third-person"
                 ]
               },
               {
@@ -692,7 +704,8 @@ class InflTests(unittest.TestCase):
                   "object-indefinite",
                   "past",
                   "plural",
-                  "second-person"
+                  "second-person-semantically",
+                  "third-person"
                 ]
               },
               {
@@ -737,8 +750,9 @@ class InflTests(unittest.TestCase):
                   "indicative",
                   "object-definite",
                   "past",
-                  "second-person",
-                  "singular"
+                  "second-person-semantically",
+                  "singular",
+                  "third-person"
                 ]
               },
               {
@@ -784,7 +798,8 @@ class InflTests(unittest.TestCase):
                   "object-definite",
                   "past",
                   "plural",
-                  "second-person"
+                  "second-person-semantically",
+                  "third-person"
                 ]
               },
               {
@@ -820,6 +835,13 @@ class InflTests(unittest.TestCase):
                'source': 'Conjugation',
                'tags': ['formal',
                         'indicative',
+                        'object-second-person',
+                        'past',
+                        'second-person-semantically',
+                        'third-person']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['indicative',
                         'informal',
                         'object-second-person',
                         'past',
@@ -861,8 +883,9 @@ class InflTests(unittest.TestCase):
                   "formal",
                   "object-indefinite",
                   "present",
-                  "second-person",
-                  "singular"
+                  "second-person-semantically",
+                  "singular",
+                  "third-person"
                 ]
               },
               {
@@ -908,7 +931,8 @@ class InflTests(unittest.TestCase):
                   "object-indefinite",
                   "plural",
                   "present",
-                  "second-person"
+                  "second-person-semantically",
+                  "third-person"
                 ]
               },
               {
@@ -953,8 +977,9 @@ class InflTests(unittest.TestCase):
                   "formal",
                   "object-definite",
                   "present",
-                  "second-person",
-                  "singular"
+                  "second-person-semantically",
+                  "singular",
+                  "third-person"
                 ]
               },
               {
@@ -1000,7 +1025,8 @@ class InflTests(unittest.TestCase):
                   "object-definite",
                   "plural",
                   "present",
-                  "second-person"
+                  "second-person-semantically",
+                  "third-person"
                 ]
               },
               {
@@ -1036,6 +1062,13 @@ class InflTests(unittest.TestCase):
                'source': 'Conjugation',
                'tags': ['conditional',
                         'formal',
+                        'object-second-person',
+                        'present',
+                        'second-person-semantically',
+                        'third-person']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['conditional',
                         'informal',
                         'object-second-person',
                         'present',
@@ -1088,9 +1121,10 @@ class InflTests(unittest.TestCase):
                   "formal",
                   "object-indefinite",
                   "present",
-                  "second-person",
+                  "second-person-semantically",
                   "singular",
-                  "subjunctive"
+                  "subjunctive",
+                  "third-person"
                 ]
               },
               {
@@ -1135,8 +1169,9 @@ class InflTests(unittest.TestCase):
                   "object-indefinite",
                   "plural",
                   "present",
-                  "second-person",
-                  "subjunctive"
+                  "second-person-semantically",
+                  "subjunctive",
+                  "third-person"
                 ]
               },
               {
@@ -1192,9 +1227,10 @@ class InflTests(unittest.TestCase):
                   "formal",
                   "object-definite",
                   "present",
-                  "second-person",
+                  "second-person-semantically",
                   "singular",
-                  "subjunctive"
+                  "subjunctive",
+                  "third-person"
                 ]
               },
               {
@@ -1239,8 +1275,9 @@ class InflTests(unittest.TestCase):
                   "object-definite",
                   "plural",
                   "present",
-                  "second-person",
-                  "subjunctive"
+                  "second-person-semantically",
+                  "subjunctive",
+                  "third-person"
                 ]
               },
               {
@@ -1275,7 +1312,14 @@ class InflTests(unittest.TestCase):
               {'form': '-',
                'source': 'Conjugation',
                'tags': ['formal',
-                        'informal',
+                        'object-second-person',
+                        'present',
+                        'second-person-semantically',
+                        'subjunctive',
+                        'third-person']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['informal',
                         'object-second-person',
                         'present',
                         'second-person',
@@ -1318,8 +1362,9 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "formal",
                   "infinitive",
-                  "second-person",
-                  "singular"
+                  "second-person-semantically",
+                  "singular",
+                  "third-person"
                 ]
               },
               {
@@ -1357,7 +1402,8 @@ class InflTests(unittest.TestCase):
                   "formal",
                   "infinitive",
                   "plural",
-                  "second-person"
+                  "second-person-semantically",
+                  "third-person"
                 ]
               },
               {

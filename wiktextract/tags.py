@@ -4768,7 +4768,6 @@ valid_tags = {
     "grade-4-kanji": "misc",
     "grade-5-kanji": "misc",
     "grade-6-kanji": "misc",
-    "grammatical-3rd-person": "misc",  # 2nd person conjugated like 3rd
     "habitual": "aspect",  # Verb aspect
     "half-participle": "non-finite",  # e.g. važiuoti/Lithuanian/Verb
     "hangeul": "script",  # Korean script
@@ -4873,7 +4872,7 @@ valid_tags = {
     "lowercase": "misc",
     "main-clause": "misc",  # e.g., omzagen/Dutch
     "mainly": "misc",
-    "majestic": "register",
+    "majestic": "register",  # Referring to kings, queens, presidents, God
     "masculine": "gender",  # Grammatial gender see feminine, neuter, common, class-* etc.
     "masculine-usually": "gender",  # m/f, but usually masculine
     "material": "misc",
@@ -5131,6 +5130,7 @@ valid_tags = {
     "root": "misc",
     "sarcastic": "misc",
     "second-person": "person",
+    "second-person-semantically": "person",  # semantically second person
     "secular": "misc",  # Contrast with Ecclesiastical, Tham, etc
     "semelfactive": "misc",
     "sentence-case": "misc",  # дь/Yakut

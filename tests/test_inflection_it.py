@@ -1401,10 +1401,11 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "non essere",
+                "form": "essere",
                 "source": "Conjugation",
                 "tags": [
                   "imperative",
+                  "negative",
                   "second-person",
                   "singular"
                 ]
@@ -1424,6 +1425,7 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "formal",
                   "imperative",
+                  "second-person-semantically",
                   "singular",
                   "third-person"
                 ]
@@ -1463,6 +1465,7 @@ class InflTests(unittest.TestCase):
                   "formal",
                   "imperative",
                   "plural",
+                  "second-person-semantically",
                   "third-person"
                 ]
               },
@@ -1474,6 +1477,7 @@ class InflTests(unittest.TestCase):
                   "formal",
                   "imperative",
                   "plural",
+                  "second-person-semantically",
                   "third-person"
                 ]
               }
@@ -2309,10 +2313,11 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "non torneare",
+                "form": "torneare",
                 "source": "Conjugation",
                 "tags": [
                   "imperative",
+                  "negative",
                   "second-person",
                   "singular"
                 ]
@@ -2323,6 +2328,7 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "formal",
                   "imperative",
+                  "second-person-semantically",
                   "singular",
                   "third-person",
                 ]
@@ -2352,6 +2358,7 @@ class InflTests(unittest.TestCase):
                   "formal",
                   "imperative",
                   "plural",
+                  "second-person-semantically",
                   "third-person",
                 ]
               }

@@ -238,7 +238,7 @@ infl_map = {
     "2nd person sing.": "second-person singular",
     "2nd person sing. (u)": "second-person singular formal",
     "2nd person sing. (gij)": ["second-person singular archaic "
-                               "formal deferential",
+                               "formal majestic",
                                "second-person singular colloquial Flanders"],
     "3rd person sing.": "third-person singular",
     "2d person sing.": "second-person singular",
@@ -259,11 +259,12 @@ infl_map = {
     "2nd person sg informal": "second-person singular informal",
     "3rd person sg 2nd p. sg formal":
     ["third-person singular",
-     "second-person singular formal"],
+     "third-person singular formal second-person-semantically"],
     "1st person pl": "first-person plural",
     "2nd person pl informal": "second-person plural informal",
     "3rd person pl 2nd p. pl formal":
-    ["third-person plural", "second-person plural formal"],
+    ["third-person plural",
+     "third-person plural formal second-person-semantically"],
     "Indica­tive mood": "indicative",
     "Pre­sent": "present",
     "Indef.": {
@@ -277,14 +278,14 @@ infl_map = {
         "else": "definite",
     },
     "2nd-p. o.": "object-second-person",
-    "m verbs conjugated according to 3rd person sg. er":
-    "second-person grammatical-3rd-person",
+    "m verbs conjugated according to third person sg. er":
+    "third-person singular",
     "m verbs conjugated according to 3nd person sg. er":
-    "second-person grammatical-3rd-person",
+    "third-person singular",
     "verbs conjugated according to 2nd person pl. ihr":
-    "second-person",
+    "second-person plural",
     "verbs conjugated according to 3rd person pl. sie":
-    "second-person grammatical-3rd-person",
+    "second-person plural",
     "2nd person plural (familiar)": "second-person plural familiar",
     "2nd person sg. or pl. (polite)": "second-person singular plural polite",
     "2nd person sg. or pl. (elevated²)":
@@ -486,8 +487,14 @@ infl_map = {
     "impersonal": "impersonal",
     "verbal noun": "noun-from-verb",
     "auxiliary verb": "auxiliary",
-    "Lei": {"if": "third-person", "then": "formal"},
-    "Loro": {"if": "third-person", "then": "formal"},
+    "Lei": {
+        "if": "third-person",
+        "then": "third-person formal second-person-semantically",
+    },
+    "Loro": {
+        "if": "third-person",
+        "then": "third-person formal second-person-semantically",
+    },
     "active adjectival participle": "active adjectival participle",
     "contemporary adverbial participle": "contemporary adjectival participle",
     "passive adjectival participle": "passive adjectival participle",
@@ -1600,7 +1607,7 @@ infl_map = {
     "f. sing.": "feminine singular",
     "c. sing.": "common-gender singular",
     "pl.": "plural",
-    "high-resp.": "formal polite",
+    "high-resp.": "formal deferential",
     "Conjugation type": "conjugation-type",
     "Injunctive": "injunctive",
     "Habitual participle": "habitual participle",
@@ -1726,10 +1733,12 @@ infl_map = {
     "Conditional Mood": "conditional",
     "Indicative Mood": "indicative",
     "3rd person pl, 2nd p. pl formal":
-    ["third-person plural", "second-person plural formal"],
+    ["third-person plural",
+     "third-person plural formal second-person-semantically"],
     "2nd person pl informal": "second-person plural informal",
     "3rd person sg, 2nd p. sg formal":
-    ["third-person singular", "second-person singular formal"],
+     ["third-person singular",
+      "third-person singular formal second-person-semantically"],
     "2nd person sg informal": "second-person singular informal",
     "Participle": "participle",
     "Past tense": "past",
@@ -1762,7 +1771,7 @@ infl_map = {
     "तिमी MID-RESP.": {"if": "second-person", "then": "polite"},
     "ऊ LOW-RESP. SING.": {"if": "third-person", "then": "singular impolite"},
     "उनी MID-RESP.": {"if": "third-person", "then": "polite"},
-    "तपाईं / ऊहाँ HIGH-RESP.": "polite formal",
+    "तपाईं / ऊहाँ HIGH-RESP.": "formal deferential",
     "2ⁿᵈ & 3ʳᵈ": "second-person third-person",
     "plural only (plurale tantum)": "plural-only",
     "approximative": "approximative",

@@ -330,8 +330,8 @@ class InflTests(unittest.TestCase):
                 "source": "Inflection",
                 "tags": [
                   "archaic",
-                  "deferential",
                   "formal",
+                  "majestic",
                   "present",
                   "second-person",
                   "singular"
@@ -353,8 +353,8 @@ class InflTests(unittest.TestCase):
                 "source": "Inflection",
                 "tags": [
                   "archaic",
-                  "deferential",
                   "formal",
+                  "majestic",
                   "past",
                   "second-person",
                   "singular"
