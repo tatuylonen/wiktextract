@@ -2248,3 +2248,858 @@ class InflTests(unittest.TestCase):
             ],
         }
         self.assertEqual(expected, ret)
+
+    def test_German_adj1(self):
+        ret = self.xinfl("eiskalt", "German", "adj", "Declension", """
+<div class="NavFrame">
+<div class="NavHead" style="text-align%3A+left">Declension of <i class="Latn+mention" lang="de">eiskalt</i></div>
+<div class="NavContent">
+
+{| border="1px+solid+%23cdcdcd" style="border-collapse%3Acollapse%3B+background%3A%23FEFEFE%3B+width%3A100%25" class="inflection-table"
+
+|-
+
+! colspan="2" rowspan="2" style="background%3A%23C0C0C0" | number & gender
+
+
+! colspan="3" style="background%3A%23C0C0C0" | singular
+
+
+! style="background%3A%23C0C0C0" | plural
+
+
+|-
+
+! style="background%3A%23C0C0C0" | masculine
+
+
+! style="background%3A%23C0C0C0" | feminine
+
+
+! style="background%3A%23C0C0C0" | neuter
+
+
+! style="background%3A%23C0C0C0" | all genders
+
+
+|-
+
+! colspan="2" style="background%3A%23EEEEB0" | predicative
+
+
+| <span class="Latn" lang="de">er ist [[eiskalt#German|eiskalt]]</span>
+
+
+| <span class="Latn" lang="de">sie ist [[eiskalt#German|eiskalt]]</span>
+
+
+| <span class="Latn" lang="de">es ist [[eiskalt#German|eiskalt]]</span>
+
+
+| <span class="Latn" lang="de">sie sind [[eiskalt#German|eiskalt]]</span>
+
+
+|-
+
+! rowspan="4" style="background%3A%23c0cfe4" | strong declension <br> (without article)
+
+
+! style="background%3A%23c0cfe4" | nominative
+
+
+| <span class="Latn" lang="de">[[eiskalter#German|eiskalter]]</span>
+
+
+| <span class="Latn" lang="de">[[eiskalte#German|eiskalte]]</span>
+
+
+| <span class="Latn" lang="de">[[eiskaltes#German|eiskaltes]]</span>
+
+
+| <span class="Latn" lang="de">[[eiskalte#German|eiskalte]]</span>
+
+
+|-
+
+! style="background%3A%23c0cfe4" | genitive
+
+
+| <span class="Latn" lang="de">[[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">[[eiskalter#German|eiskalter]]</span>
+
+
+| <span class="Latn" lang="de">[[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">[[eiskalter#German|eiskalter]]</span>
+
+
+|-
+
+! style="background%3A%23c0cfe4" | dative
+
+
+| <span class="Latn" lang="de">[[eiskaltem#German|eiskaltem]]</span>
+
+
+| <span class="Latn" lang="de">[[eiskalter#German|eiskalter]]</span>
+
+
+| <span class="Latn" lang="de">[[eiskaltem#German|eiskaltem]]</span>
+
+
+| <span class="Latn" lang="de">[[eiskalten#German|eiskalten]]</span>
+
+
+|-
+
+! style="background%3A%23c0cfe4" | accusative
+
+
+| <span class="Latn" lang="de">[[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">[[eiskalte#German|eiskalte]]</span>
+
+
+| <span class="Latn" lang="de">[[eiskaltes#German|eiskaltes]]</span>
+
+
+| <span class="Latn" lang="de">[[eiskalte#German|eiskalte]]</span>
+
+
+|-
+
+! rowspan="4" style="background%3A%23c0e4c0" | weak declension <br> (with definite article)
+
+
+! style="background%3A%23c0e4c0" | nominative
+
+
+| <span class="Latn" lang="de">der [[eiskalte#German|eiskalte]]</span>
+
+
+| <span class="Latn" lang="de">die [[eiskalte#German|eiskalte]]</span>
+
+
+| <span class="Latn" lang="de">das [[eiskalte#German|eiskalte]]</span>
+
+
+| <span class="Latn" lang="de">die [[eiskalten#German|eiskalten]]</span>
+
+
+|-
+
+! style="background%3A%23c0e4c0" | genitive
+
+
+| <span class="Latn" lang="de">des [[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">der [[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">des [[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">der [[eiskalten#German|eiskalten]]</span>
+
+
+|-
+
+! style="background%3A%23c0e4c0" | dative
+
+
+| <span class="Latn" lang="de">dem [[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">der [[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">dem [[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">den [[eiskalten#German|eiskalten]]</span>
+
+
+|-
+
+! style="background%3A%23c0e4c0" | accusative
+
+
+| <span class="Latn" lang="de">den [[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">die [[eiskalte#German|eiskalte]]</span>
+
+
+| <span class="Latn" lang="de">das [[eiskalte#German|eiskalte]]</span>
+
+
+| <span class="Latn" lang="de">die [[eiskalten#German|eiskalten]]</span>
+
+
+|-
+
+! rowspan="4" style="background%3A%23e4d4c0" | mixed declension <br> (with indefinite article)
+
+
+! style="background%3A%23e4d4c0" | nominative
+
+
+| <span class="Latn" lang="de">ein [[eiskalter#German|eiskalter]]</span>
+
+
+| <span class="Latn" lang="de">eine [[eiskalte#German|eiskalte]]</span>
+
+
+| <span class="Latn" lang="de">ein [[eiskaltes#German|eiskaltes]]</span>
+
+
+| <span class="Latn" lang="de">(keine) [[eiskalten#German|eiskalten]]</span>
+
+
+|-
+
+! style="background%3A%23e4d4c0" | genitive
+
+
+| <span class="Latn" lang="de">eines [[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">einer [[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">eines [[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">(keiner) [[eiskalten#German|eiskalten]]</span>
+
+
+|-
+
+! style="background%3A%23e4d4c0" | dative
+
+
+| <span class="Latn" lang="de">einem [[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">einer [[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">einem [[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">(keinen) [[eiskalten#German|eiskalten]]</span>
+
+
+|-
+
+! style="background%3A%23e4d4c0" | accusative
+
+
+| <span class="Latn" lang="de">einen [[eiskalten#German|eiskalten]]</span>
+
+
+| <span class="Latn" lang="de">eine [[eiskalte#German|eiskalte]]</span>
+
+
+| <span class="Latn" lang="de">ein [[eiskaltes#German|eiskaltes]]</span>
+
+
+| <span class="Latn" lang="de">(keine) [[eiskalten#German|eiskalten]]</span>
+
+
+|}
+</div></div>
+""")
+        expected = {
+            "forms": [
+              {
+                "form": "eiskalt",
+                "source": "Declension",
+                "tags": [
+                  "masculine",
+                  "predicative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "eiskalt",
+                "source": "Declension",
+                "tags": [
+                  "feminine",
+                  "predicative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "eiskalt",
+                "source": "Declension",
+                "tags": [
+                  "neuter",
+                  "predicative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "eiskalt",
+                "source": "Declension",
+                "tags": [
+                  "plural",
+                  "predicative"
+                ]
+              },
+              {
+                "form": "eiskalter",
+                "source": "Declension",
+                "tags": [
+                  "masculine",
+                  "nominative",
+                  "singular",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskalte",
+                "source": "Declension",
+                "tags": [
+                  "feminine",
+                  "nominative",
+                  "singular",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskaltes",
+                "source": "Declension",
+                "tags": [
+                  "neuter",
+                  "nominative",
+                  "singular",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskalte",
+                "source": "Declension",
+                "tags": [
+                  "nominative",
+                  "plural",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "masculine",
+                  "singular",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskalter",
+                "source": "Declension",
+                "tags": [
+                  "feminine",
+                  "genitive",
+                  "singular",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "neuter",
+                  "singular",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskalter",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "plural",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskaltem",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "masculine",
+                  "singular",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskalter",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "feminine",
+                  "singular",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskaltem",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "neuter",
+                  "singular",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "plural",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "masculine",
+                  "singular",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskalte",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "feminine",
+                  "singular",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskaltes",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "neuter",
+                  "singular",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "eiskalte",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "plural",
+                  "strong",
+                  "without-article"
+                ]
+              },
+              {
+                "form": "der eiskalte",
+                "source": "Declension",
+                "tags": [
+                  "definite",
+                  "includes-article",
+                  "masculine",
+                  "nominative",
+                  "singular",
+                  "weak"
+                ]
+              },
+              {
+                "form": "die eiskalte",
+                "source": "Declension",
+                "tags": [
+                  "definite",
+                  "feminine",
+                  "includes-article",
+                  "nominative",
+                  "singular",
+                  "weak"
+                ]
+              },
+              {
+                "form": "das eiskalte",
+                "source": "Declension",
+                "tags": [
+                  "definite",
+                  "includes-article",
+                  "neuter",
+                  "nominative",
+                  "singular",
+                  "weak"
+                ]
+              },
+              {
+                "form": "die eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "definite",
+                  "includes-article",
+                  "nominative",
+                  "plural",
+                  "weak"
+                ]
+              },
+              {
+                "form": "des eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "definite",
+                  "genitive",
+                  "includes-article",
+                  "masculine",
+                  "singular",
+                  "weak"
+                ]
+              },
+              {
+                "form": "der eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "definite",
+                  "feminine",
+                  "genitive",
+                  "includes-article",
+                  "singular",
+                  "weak"
+                ]
+              },
+              {
+                "form": "des eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "definite",
+                  "genitive",
+                  "includes-article",
+                  "neuter",
+                  "singular",
+                  "weak"
+                ]
+              },
+              {
+                "form": "der eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "definite",
+                  "genitive",
+                  "includes-article",
+                  "plural",
+                  "weak"
+                ]
+              },
+              {
+                "form": "dem eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "definite",
+                  "includes-article",
+                  "masculine",
+                  "singular",
+                  "weak"
+                ]
+              },
+              {
+                "form": "der eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "definite",
+                  "feminine",
+                  "includes-article",
+                  "singular",
+                  "weak"
+                ]
+              },
+              {
+                "form": "dem eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "definite",
+                  "includes-article",
+                  "neuter",
+                  "singular",
+                  "weak"
+                ]
+              },
+              {
+                "form": "den eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "definite",
+                  "includes-article",
+                  "plural",
+                  "weak"
+                ]
+              },
+              {
+                "form": "den eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "definite",
+                  "includes-article",
+                  "masculine",
+                  "singular",
+                  "weak"
+                ]
+              },
+              {
+                "form": "die eiskalte",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "definite",
+                  "feminine",
+                  "includes-article",
+                  "singular",
+                  "weak"
+                ]
+              },
+              {
+                "form": "das eiskalte",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "definite",
+                  "includes-article",
+                  "neuter",
+                  "singular",
+                  "weak"
+                ]
+              },
+              {
+                "form": "die eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "definite",
+                  "includes-article",
+                  "plural",
+                  "weak"
+                ]
+              },
+              {
+                "form": "ein eiskalter",
+                "source": "Declension",
+                "tags": [
+                  "includes-article",
+                  "indefinite",
+                  "masculine",
+                  "mixed",
+                  "nominative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "eine eiskalte",
+                "source": "Declension",
+                "tags": [
+                  "feminine",
+                  "includes-article",
+                  "indefinite",
+                  "mixed",
+                  "nominative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "ein eiskaltes",
+                "source": "Declension",
+                "tags": [
+                  "includes-article",
+                  "indefinite",
+                  "mixed",
+                  "neuter",
+                  "nominative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "(keine) eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "includes-article",
+                  "indefinite",
+                  "mixed",
+                  "nominative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "eines eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "includes-article",
+                  "indefinite",
+                  "masculine",
+                  "mixed",
+                  "singular"
+                ]
+              },
+              {
+                "form": "einer eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "feminine",
+                  "genitive",
+                  "includes-article",
+                  "indefinite",
+                  "mixed",
+                  "singular"
+                ]
+              },
+              {
+                "form": "eines eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "includes-article",
+                  "indefinite",
+                  "mixed",
+                  "neuter",
+                  "singular"
+                ]
+              },
+              {
+                "form": "(keiner) eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "includes-article",
+                  "indefinite",
+                  "mixed",
+                  "plural"
+                ]
+              },
+              {
+                "form": "einem eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "includes-article",
+                  "indefinite",
+                  "masculine",
+                  "mixed",
+                  "singular"
+                ]
+              },
+              {
+                "form": "einer eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "feminine",
+                  "includes-article",
+                  "indefinite",
+                  "mixed",
+                  "singular"
+                ]
+              },
+              {
+                "form": "einem eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "includes-article",
+                  "indefinite",
+                  "mixed",
+                  "neuter",
+                  "singular"
+                ]
+              },
+              {
+                "form": "(keinen) eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "includes-article",
+                  "indefinite",
+                  "mixed",
+                  "plural"
+                ]
+              },
+              {
+                "form": "einen eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "includes-article",
+                  "indefinite",
+                  "masculine",
+                  "mixed",
+                  "singular"
+                ]
+              },
+              {
+                "form": "eine eiskalte",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "feminine",
+                  "includes-article",
+                  "indefinite",
+                  "mixed",
+                  "singular"
+                ]
+              },
+              {
+                "form": "ein eiskaltes",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "includes-article",
+                  "indefinite",
+                  "mixed",
+                  "neuter",
+                  "singular"
+                ]
+              },
+              {
+                "form": "(keine) eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "includes-article",
+                  "indefinite",
+                  "mixed",
+                  "plural"
+                ]
+              }
+            ],
+        }
+        self.assertEqual(expected, ret)

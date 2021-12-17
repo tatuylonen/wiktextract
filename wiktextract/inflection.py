@@ -315,6 +315,10 @@ lang_specific = {
              ["verb", "^dass sie ", "third-person plural subordinate-clause"],
              ["verb", " \(du\)$", "second-person singular"],
              ["verb", " \(ihr\)$", "second-person plural"],
+             ["adj", "^er ist ", "masculine singular"],
+             ["adj", "^sie ist ", "feminine singular"],
+             ["adj", "^es ist ", "neuter singular"],
+             ["adj", "^sie sind ", "plural"],
          ],
     },
     "German Low German": {
@@ -1398,8 +1402,10 @@ def lang_specific_tags(lang, pos, form):
     assert isinstance(pos, str)
     assert isinstance(form, str)
     rules = get_lang_specific(lang, "form_transformations")
-    for pos, pattern, tags in rules:
-        assert pos in PARTS_OF_SPEECH
+    for patpos, pattern, tags in rules:
+        assert patpos in PARTS_OF_SPEECH
+        if pos != patpos:
+            continue
         m = re.search(pattern, form)
         if not m:
             continue
