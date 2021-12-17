@@ -1003,13 +1003,13 @@ def parse_title(title, source):
     for m in re.finditer(title_contains_wordtags_re, title):
         word_tags.extend(title_contains_wordtags_map[
             m.group(0).lower()].split())
-    # Check for <x>-type at the beginning of title (e.g., Armenian)
-    m = re.search(r"\b(\w+-type|accent-\w+|\w+-stem|[^ ]+ gradation|"
-                  r"[^ ]+ alternation|(First|Second|Third|Fourth|Fifth|"
-                  r"Sixth|Seventh) Conjugation|"
-                  r"(1st|2nd|3rd|4th|5th|6th) declension|"
-                  r"\w[\w ]* harmony)\b", title)
-    if m:
+    # Check for <x>-type at the beginning of title (e.g., Armenian) and various
+    # other ways of specifying an inflection class.
+    for m in re.finditer(r"\b(\w+-type|accent-\w+|\w+-stem|[^ ]+ gradation|"
+                         r"[^ ]+ alternation|(First|Second|Third|Fourth|Fifth|"
+                         r"Sixth|Seventh) Conjugation|"
+                         r"(1st|2nd|3rd|4th|5th|6th) declension|"
+                         r"\w[\w ]* harmony)\b", title):
         dt = {"form": m.group(1),
               "source": source + " title",
               "tags": ["class"]}
@@ -1074,10 +1074,10 @@ def expand_header(ctx, word, lang, pos, text, tags0, silent=False):
         m = re.match(infl_start_re, text)
         if m is not None:
             v = infl_start_map[m.group(1)]
-            print("INFL_START {} -> {}".format(text, v))
+            # print("INFL_START {} -> {}".format(text, v))
         elif re.match(r"Notes", text):
             # Ignored header
-            print("IGNORING NOTES")
+            # print("IGNORING NOTES")
             return [("dummy-skip-this",)]
         elif text in IGNORED_COLVALUES:
             return [("dummy-ignore-skipped",)]
