@@ -382,6 +382,8 @@ infl_map = {
     "genitive/ dative": "genitive dative",
     "Positive": "positive",
     "short form": "short-form",
+    "Short past participle": "past participle short-form",
+    "Long past participle": "past participle long-form",
     "positive": "positive",
     "1st sing.": "first-person singular",
     "2nd sing.": "second-person singular",

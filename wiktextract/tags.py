@@ -2591,6 +2591,8 @@ xlat_tags_map = {
     "no past participle": "no-past-participle",
     "past participle (obsolete except in adjectival use)":
     "obsolete past participle",
+    "short past participle": "past participle short-form",
+    "long past participle": "past participle long-form",
     "of the past participle": "past participle",
     "of the present participle": "present participle",
     "adverbial locative noun in the pa, ku, or mu locative classes":
@@ -3194,6 +3196,8 @@ xlat_tags_map = {
     "with-ele with-ela with-tu with-você",
     "(eles and elas, also used with vocês and others)":
     "with-eles with-elas with-vocês with-others",
+    "(eles, elas, also used with vocês)":
+    "with-eles with-elas with-vocês",
     "(você)": "with-você",
     "(hiri)": "with-hiri",
     "(hura)": "with-hura",
@@ -4877,7 +4881,7 @@ valid_tags = {
     "literary": "misc",
     "locative": "case",
     "locative-qualitative": "case",
-    "long-form": "misc",  # Verb forms, отъпоустити/Old Church Slavonic
+    "long-form": "misc",  # Verb forms, отъпоустити/Old Church Slavonic; long past participle e.g. anexar/Portuguese
     "lowercase": "misc",
     "main-clause": "misc",  # e.g., omzagen/Dutch
     "mainly": "misc",
@@ -5149,7 +5153,7 @@ valid_tags = {
     "sequence": "misc",
     "sequential": "misc",
     "shinjitai": "misc",  # Simplified Japanese Kanji (after 1947)
-    "short-form": "misc",  # Verb forms, отъпоустити/Old Church Slavonic
+    "short-form": "misc",  # Verb forms, отъпоустити/Old Church Slavonic; Portuguese short past participle e.g. anexar/Portuguese
     "si-perfective": "misc",
     "simplified": "misc",
     "simultaneous": "misc",  # simultaneous converb, e.g. խածնել/Armenian
