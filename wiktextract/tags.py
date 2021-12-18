@@ -46,6 +46,12 @@ xlat_head_map = {
     "f or c or m": "feminine common-gender masculine",
     "m or c or f": "masculine common-gender feminine",
     "m or f or m": "?masculine feminine",  # fantasma,soldado/Portuguese
+    "m pl": "masculine plural",
+    "f pl": "feminine plural",
+    "n pl": "neuter plural",
+    "m sg": "masculine singular",
+    "f sg": "feminine singular",
+    "n sg": "neuter singular",
     "f or pl": "feminine singular plural",  # XXX information/Eng/Tr/Latgalian
     "m or pl": "masculine singular plural",  # XXX information/Eng/Tr/Latgalian
     "n or pl": "neuter singular plural",  # XXX table scrap/Tr/Greek
