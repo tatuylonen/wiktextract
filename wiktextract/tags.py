@@ -2402,6 +2402,7 @@ xlat_tags_map = {
     "no nominative": "no-nominative",
     "simple past": "past",
     "past —": "no-past",
+    "simple future": "future",
     "simple present": "present",
     "simple past and past participle": ["past", "past participle"],
     "simple past tense and past participle": ["past", "past participle"],
