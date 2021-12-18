@@ -1338,6 +1338,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             gloss = gloss.strip()
             if not gloss and len(subglosses) > 1:
                 continue
+            if gloss.startswith("; ") and gloss_i > 0:
+                gloss = gloss[1:].strip()
             # Push a new sense (if the last one is not empty)
             if push_sense():
                 added = True
