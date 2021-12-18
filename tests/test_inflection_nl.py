@@ -398,6 +398,7 @@ class InflTests(unittest.TestCase):
                 "form": "slape",
                 "source": "Inflection",
                 "tags": [
+                  "archaic",
                   "present",
                   "singular",
                   "subjunctive"
@@ -407,6 +408,7 @@ class InflTests(unittest.TestCase):
                 "form": "sliepe",
                 "source": "Inflection",
                 "tags": [
+                  "archaic",
                   "past",
                   "singular",
                   "subjunctive"
@@ -416,6 +418,7 @@ class InflTests(unittest.TestCase):
                 "form": "slapen",
                 "source": "Inflection",
                 "tags": [
+                  "archaic",
                   "plural",
                   "present",
                   "subjunctive"
@@ -425,6 +428,7 @@ class InflTests(unittest.TestCase):
                 "form": "sliepen",
                 "source": "Inflection",
                 "tags": [
+                  "archaic",
                   "past",
                   "plural",
                   "subjunctive"
@@ -443,6 +447,7 @@ class InflTests(unittest.TestCase):
                 "form": "slaapt",
                 "source": "Inflection",
                 "tags": [
+                  "archaic",
                   "imperative",
                   "plural",
                   "present"

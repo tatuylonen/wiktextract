@@ -922,7 +922,7 @@ def clean_header(word, col, skip_paren):
                 col):
         return "", [], [], []
     refs = []
-    ref_symbols = "*△†0123456789"
+    def_re = re.compile(r"(^|\s)([*△†0123456789⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([⁾):]|\s)")
     while True:
         m = re.search(r"\^(.|\([^)]*\))$", col)
         if not m:
@@ -940,12 +940,21 @@ def clean_header(word, col, skip_paren):
             # XXX handle refs from m.group(1)
             pass
         col = col[:m.start()]
-    while col and is_superscript(col[0]):
-        if len(col) > 1 and col[1] in ("⁾", " ", ":"):
-            # Note definition
-            return "", [], [[col[0], col[2:].strip()]], []
-        refs.append(col[0])
-        col = col[1:]
+    # See if it is a ref definition
+    m = re.match(def_re, col)
+    if m:
+        ofs = 0
+        ref = None
+        deflst = []
+        for m in re.finditer(def_re, col):
+            if ref:
+                deflst.append((ref, col[ofs:m.start()].strip()))
+            ref = m.group(2)
+            ofs = m.end()
+        if ref:
+            deflst.append((ref, col[ofs:].strip()))
+        return "", [], deflst, []
+    # See if it references a definition
     while col and (is_superscript(col[-1]) or col[-1] in ("†",)):
         if col.endswith("ʳᵃʳᵉ"):
             hdr_tags.append("rare")
@@ -1488,6 +1497,37 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
     # print("ROWS:")
     # for row in rows:
     #     print("  ", row)
+    # First extract definitions for subscripted references
+    def_ht = {}
+    for row in rows:
+        for cell in row:
+            text, refs, defs, hdr_tags = clean_header(word, cell.text, True)
+            if not defs:
+                continue
+            for ref, d in defs:
+                # print("DEF:", ref, d)
+                d = d.strip()
+                d = d.split(". ")[0].strip()
+                if not d:
+                    continue
+                if d.endswith("."):
+                    d = d[:-1]
+                tags, topics = decode_tags(d, no_unknown_starts=True)
+                if topics or any("error-unknown-tag" in ts for ts in tags):
+                    d = d[0].lower() + d[1:]
+                    tags, topics = decode_tags(d, no_unknown_starts=True)
+                    if topics or any("error-unknown-tag" in ts for ts in tags):
+                        # Failed to parse as tags
+                        print("Failed: topics={} tags={}".format(topics, tags))
+                        continue
+                tags1 = set()
+                for ts in tags:
+                    tags1.update(ts)
+                tags1 = tuple(sorted(tags1))
+                # print("DEFINED: {} -> {}".format(ref, tags1))
+                def_ht[ref] = tags1
+
+    # Then extract the actual forms
     ret = []
     hdrspans = []
     col_has_text = []
@@ -1567,6 +1607,11 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 text, refs, defs, hdr_tags = clean_header(word, col, True)
                 if not text:
                     continue
+                # Extract tags from referenced footnotes
+                refs_tags = set()
+                for ref in refs:
+                    if ref in def_ht:
+                        refs_tags.update(def_ht[ref])
 
                 # Expand header to tags
                 v = expand_header(ctx, word, lang, pos, text, [], silent=True)
@@ -1606,6 +1651,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                                  text, tags0)
                         all_hdr_tags.update(alt_tags)
                         for tt in alt_tags:
+                            if refs_tags:
+                                tt = tuple(sorted(set(tt) | refs_tags))
                             new_coltags.add(tt)
                             # Kludge (saprast/Latvian/Verb): ignore row tags
                             # if trying to add a non-finite after mood.
@@ -1804,6 +1851,12 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 extra_tags = []
                 form, refs, defs, hdr_tags = clean_header(word, form, False)
                 extra_tags.extend(hdr_tags)
+                # Extract tags from referenced footnotes
+                refs_tags = set()
+                for ref in refs:
+                    if ref in def_ht:
+                        refs_tags.update(def_ht[ref])
+
                 if base_roman:
                     base_roman, _, _, hdr_tags = clean_header(word, base_roman,
                                                               False)
@@ -1865,6 +1918,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                         tags = set(global_tags)
                         tags.update(extra_tags)
                         tags.update(rt)
+                        tags.update(refs_tags)
                         # Merge tags from column.  For certain kinds of tags,
                         # those coming from row take precedence.
                         old_tags = set(tags)

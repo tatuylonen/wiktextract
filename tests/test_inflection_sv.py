@@ -373,10 +373,10 @@ class InflTests(unittest.TestCase):
                'tags': ['imperative', 'passive']},
               {'form': '-',
                'source': 'Conjugation',
-               'tags': ['active', 'imperative', 'plural']},
+               'tags': ['active', 'archaic', 'imperative', 'plural']},
               {'form': '-',
                'source': 'Conjugation',
-               'tags': ['imperative', 'passive', 'plural']},
+               'tags': ['archaic', 'imperative', 'passive', 'plural']},
               {
                 "form": "kan",
                 "source": "Conjugation",
@@ -406,6 +406,7 @@ class InflTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "active",
+                  "archaic",
                   "indicative",
                   "plural",
                   "present"
@@ -416,6 +417,7 @@ class InflTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "active",
+                  "archaic",
                   "indicative",
                   "past",
                   "plural"
@@ -423,15 +425,16 @@ class InflTests(unittest.TestCase):
               },
               {'form': '-',
                'source': 'Conjugation',
-               'tags': ['indicative', 'passive', 'plural', 'present']},
+               'tags': ['archaic', 'indicative', 'passive', 'plural', 'present']},
               {'form': '-',
                'source': 'Conjugation',
-               'tags': ['indicative', 'passive', 'past', 'plural']},
+               'tags': ['archaic', 'indicative', 'passive', 'past', 'plural']},
               {
                 "form": "kunne",
                 "source": "Conjugation",
                 "tags": [
                   "active",
+                  "dated",
                   "present",
                   "subjunctive"
                 ]
@@ -441,16 +444,17 @@ class InflTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "active",
+                  "dated",
                   "past",
                   "subjunctive"
                 ]
               },
               {'form': '-',
                'source': 'Conjugation',
-               'tags': ['passive', 'present', 'subjunctive']},
+               'tags': ['dated', 'passive', 'present', 'subjunctive']},
               {'form': '-',
                'source': 'Conjugation',
-               'tags': ['passive', 'past', 'subjunctive']},
+               'tags': ['dated', 'passive', 'past', 'subjunctive']},
               {
                 "form": "kunnande",
                 "source": "Conjugation",
@@ -846,13 +850,14 @@ class InflTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "active",
+                  "archaic",
                   "imperative",
                   "plural"
                 ]
               },
               {'form': '-',
                'source': 'Conjugation',
-               'tags': ['imperative', 'passive', 'plural']},
+               'tags': ['archaic', 'imperative', 'passive', 'plural']},
               {
                 "form": "simmar",
                 "source": "Conjugation",
@@ -894,6 +899,7 @@ class InflTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "active",
+                  "archaic",
                   "indicative",
                   "plural",
                   "present"
@@ -904,6 +910,7 @@ class InflTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "active",
+                  "archaic",
                   "indicative",
                   "past",
                   "plural"
@@ -913,6 +920,7 @@ class InflTests(unittest.TestCase):
                 "form": "simmas",
                 "source": "Conjugation",
                 "tags": [
+                  "archaic",
                   "indicative",
                   "passive",
                   "plural",
@@ -923,6 +931,7 @@ class InflTests(unittest.TestCase):
                 "form": "simmades",
                 "source": "Conjugation",
                 "tags": [
+                  "archaic",
                   "indicative",
                   "passive",
                   "past",
@@ -934,6 +943,7 @@ class InflTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "active",
+                  "dated",
                   "present",
                   "subjunctive"
                 ]
@@ -943,6 +953,7 @@ class InflTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "active",
+                  "dated",
                   "past",
                   "subjunctive"
                 ]
@@ -951,6 +962,7 @@ class InflTests(unittest.TestCase):
                 "form": "simmes",
                 "source": "Conjugation",
                 "tags": [
+                  "dated",
                   "passive",
                   "present",
                   "subjunctive"
@@ -960,6 +972,7 @@ class InflTests(unittest.TestCase):
                 "form": "simmades",
                 "source": "Conjugation",
                 "tags": [
+                  "dated",
                   "passive",
                   "past",
                   "subjunctive"
@@ -1069,6 +1082,7 @@ class InflTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "active",
+                  "archaic",
                   "indicative",
                   "past",
                   "plural"
@@ -1078,6 +1092,7 @@ class InflTests(unittest.TestCase):
                 "form": "summos",
                 "source": "Conjugation",
                 "tags": [
+                  "archaic",
                   "indicative",
                   "passive",
                   "past",
@@ -1089,6 +1104,7 @@ class InflTests(unittest.TestCase):
                 "source": "Conjugation",
                 "tags": [
                   "active",
+                  "dated",
                   "past",
                   "subjunctive"
                 ]
@@ -1097,6 +1113,7 @@ class InflTests(unittest.TestCase):
                 "form": "summes",
                 "source": "Conjugation",
                 "tags": [
+                  "dated",
                   "passive",
                   "past",
                   "subjunctive"
