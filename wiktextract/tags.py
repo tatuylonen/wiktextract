@@ -4523,6 +4523,7 @@ valid_tags = {
     "before-vowel": "misc",  # next words starts with vowel (in pronunciation)
     "benefactive": "case",  # Case (beneficiary of an action)
     "broadly": "misc",
+    "broken-plural": "misc",  # e.g. جاذب/Arabic/Adj
     "būdinys": "misc",
     "calque": "misc",
     "cangjie-input": "detail",  # Used in Chinese characters
@@ -5042,6 +5043,7 @@ valid_tags = {
     "past-recent": "tense",
     "past-remote": "tense",
     "patronymic": "misc",
+    "pattern": "detail",  # E.g., חברה/Hebrew
     "paucal": "number",  # cf. singular, plural, dual, trial
     "pausal": "misc",  # Relates to prosody/pronunciation?
     "pejorative": "misc",
@@ -5169,6 +5171,9 @@ valid_tags = {
     "soft": "misc",  # najslajši/slovene
     "sometimes": "misc",
     "somewhat": "misc",
+    "sound-feminine-plural": "misc",  # e.g. Arabic جاذب/Arabic/Adj
+    "sound-feminine-paucal": "misc",
+    "sound-masculine-plural": "misc",
     "special": "misc",  # Adverbial verb form in Lithuanian
     "specific": "misc",  # In specific temporal participle, e.g., talamaq
     "specifically": "misc",
@@ -5254,6 +5259,7 @@ valid_tags = {
     "triggers-mutation-soft": "trigger",  # Welsh
     "triggers-no-mutation": "trigger",  # Irish
     "triptote": "class",  # Noun having three cases (e.g., Arabic)
+    "triptote-a": "class",  # "singular triptote in ـَة (-a)" جاذب/Arabic/Adj
     "truncative": "misc",  # Greenlandic: suffix attaches to last vowel, removing stuff
     "two-termination": "misc",
     "type-a": "class",
@@ -5297,6 +5303,7 @@ valid_tags = {
     "vocative": "case",  # Case? used for addressee
     "volitive": "mood",  # Verb form ?  XXX is this same as volitional?
     "volitional": "mood",  # Verb mood (e.g., Japanese: suggests, urges, initates act)
+    "vos-form": "register",  # Spanish verb forms used with "vos"
     "vulgar": "register",
     "weak": "misc",
     "weak-verb": "misc",

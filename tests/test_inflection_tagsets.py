@@ -27,9 +27,9 @@ class TagsetTests(unittest.TestCase):
         assert all(isinstance(x, (list, tuple)) for x in ts1)
         assert all(isinstance(x, (list, tuple)) for x in ts2)
         assert all(isinstance(x, (list, tuple)) for x in expected)
-        ts1 = set(tuple(sorted(x)) for x in ts1)
-        ts2 = set(tuple(sorted(x)) for x in ts2)
-        expected = set(tuple(sorted(x)) for x in expected)
+        ts1 = list(tuple(sorted(x)) for x in ts1)
+        ts2 = list(tuple(sorted(x)) for x in ts2)
+        expected = list(tuple(sorted(x)) for x in expected)
         ret = op(lang, pos, ts1, ts2)
         print("ts1={} ts2={} ret={} expected={}"
               .format(ts1, ts2, ret, expected))

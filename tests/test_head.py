@@ -205,7 +205,8 @@ class HeadTests(unittest.TestCase):
     def test_head17(self):
         data = {}
         self.ctx.start_page("index")
-        self.ctx.start_section("Noun")
+        self.ctx.start_section("English")
+        self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "index n",
                         data, False)
@@ -216,7 +217,8 @@ class HeadTests(unittest.TestCase):
     def test_head18(self):
         data = {}
         self.ctx.start_page("index")
-        self.ctx.start_section("Noun")
+        self.ctx.start_section("English")
+        self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "index m or f (genitive indicis); third declension",
                         data, False)
@@ -232,7 +234,8 @@ class HeadTests(unittest.TestCase):
     def test_head19(self):
         data = {}
         self.ctx.start_page("index")
-        self.ctx.start_section("Noun")
+        self.ctx.start_section("English")
+        self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun", "foo f or bar m", data, False)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
@@ -244,7 +247,8 @@ class HeadTests(unittest.TestCase):
     def test_head20(self):
         data = {}
         self.ctx.start_page("index")
-        self.ctx.start_section("Noun")
+        self.ctx.start_section("English")
+        self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun", "foo or bar", data, False)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
@@ -256,7 +260,8 @@ class HeadTests(unittest.TestCase):
     def test_head21(self):
         data = {}
         self.ctx.start_page("index")
-        self.ctx.start_section("Noun")
+        self.ctx.start_section("English")
+        self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun", "foo f or n or bar m or c", data,
                         False)
         self.assertEqual(self.ctx.warnings, [])
@@ -285,7 +290,8 @@ class HeadTests(unittest.TestCase):
     def test_head23(self):
         data = {}
         self.ctx.start_page("indubitables")
-        self.ctx.start_section("Adjective")
+        self.ctx.start_section("English")
+        self.ctx.start_subsection("Adjective")
         parse_word_head(self.ctx, "adj", "indubitables m pl or f pl", data,
                         False)
         # print(json.dumps(data, indent=2))
@@ -296,7 +302,8 @@ class HeadTests(unittest.TestCase):
     def test_head24(self):
         data = {}
         self.ctx.start_page("foo")
-        self.ctx.start_section("Noun")
+        self.ctx.start_section("Japanese")
+        self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "foo (12 strokes)",
                         data, False)
@@ -310,7 +317,8 @@ class HeadTests(unittest.TestCase):
     def test_head25(self):
         data = {}
         self.ctx.start_page("smiley")
-        self.ctx.start_section("Noun")
+        self.ctx.start_section("English")
+        self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "smiley m (plural smileys, diminutive smileytje n)",
                         data, False)
@@ -327,7 +335,8 @@ class HeadTests(unittest.TestCase):
     def test_head26(self):
         data = {}
         self.ctx.start_page("foos")
-        self.ctx.start_section("Noun")
+        self.ctx.start_section("English")
+        self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "foos (plural of foo)",
                         data, False)
@@ -337,3 +346,32 @@ class HeadTests(unittest.TestCase):
             {"tags": ["plural-of"],
              "form": "foo"},
             ]})
+
+    def test_head27(self):
+        data = {}
+        self.ctx.start_page("أَبْلَعَ")
+        self.ctx.start_section("Arabic")
+        self.ctx.start_subsection("Verb")
+        parse_word_head(self.ctx, "verb",
+                        "أَبْلَعَ (ʾablaʿa) IV, non-past يُبْلِعُ‎‎ (yubliʿu)",
+                        data, False)
+        self.assertEqual(self.ctx.warnings, [])
+        self.assertEqual(self.ctx.debugs, [])
+        self.assertEqual(data, {
+            "forms": [
+                {
+                  "form": "يُبْلِعُ‎‎",
+                  "roman": "yubliʿu",
+                  "tags": [
+                    "non-past"
+                  ]
+                },
+                {
+                  "form": "ʾablaʿa",
+                  "tags": [
+                    "romanization"
+                  ]
+                },
+            ],
+            "tags": ["form-iv"]
+            })

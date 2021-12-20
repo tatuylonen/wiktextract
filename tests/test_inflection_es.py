@@ -575,11 +575,12 @@ class InflTests(unittest.TestCase):
                 "form": "interdecís",
                 "source": "Conjugation",
                 "tags": [
-                  "formal",
                   "indicative",
+                  "informal",
                   "present",
                   "second-person",
-                  "singular"
+                  "singular",
+                  "vos-form"
                 ]
               },
               {
@@ -887,11 +888,12 @@ class InflTests(unittest.TestCase):
                 "form": "interdigás",
                 "source": "Conjugation",
                 "tags": [
-                  "formal",
+                  "informal",
                   "present",
                   "second-person",
                   "singular",
-                  "subjunctive"
+                  "subjunctive",
+                  "vos-form"
                 ]
               },
               {
@@ -1134,10 +1136,11 @@ class InflTests(unittest.TestCase):
                 "form": "interdecí",
                 "source": "Conjugation",
                 "tags": [
-                  "formal",
                   "imperative",
+                  "informal",
                   "second-person",
-                  "singular"
+                  "singular",
+                  "vos-form"
                 ]
               },
               {
@@ -1916,11 +1919,12 @@ class InflTests(unittest.TestCase):
                 "form": "te apoltronás",
                 "source": "Conjugation",
                 "tags": [
-                  "formal",
                   "indicative",
+                  "informal",
                   "present",
                   "second-person",
-                  "singular"
+                  "singular",
+                  "vos-form"
                 ]
               },
               {
@@ -2228,11 +2232,12 @@ class InflTests(unittest.TestCase):
                 "form": "te apoltronés",
                 "source": "Conjugation",
                 "tags": [
-                  "formal",
+                  "informal",
                   "present",
                   "second-person",
                   "singular",
-                  "subjunctive"
+                  "subjunctive",
+                  "vos-form"
                 ]
               },
               {
@@ -2475,10 +2480,11 @@ class InflTests(unittest.TestCase):
                 "form": "apoltronate",
                 "source": "Conjugation",
                 "tags": [
-                  "formal",
                   "imperative",
+                  "informal",
                   "second-person",
-                  "singular"
+                  "singular",
+                  "vos-form"
                 ]
               },
               {

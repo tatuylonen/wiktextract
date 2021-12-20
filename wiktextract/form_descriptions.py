@@ -1185,6 +1185,13 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
     text = re.sub(r" (superlative|comparative): (.*)",
                   r" (\1 \2)", text)
 
+    # Parse Arabic non-past forms, e.g. أبلع/Arabic/Verb
+    m = re.search(r", non-past ([^)]+ \([^)]+\))", text)
+    if m:
+        add_related(ctx, data, ["non-past"], [m.group(1)], text, True,
+                    is_reconstruction)
+        text = text[:m.start()] + text[m.end():]
+
     language = ctx.section
     titleword = re.sub(r"^Reconstruction:[^/]*/", "", ctx.title)
     titleparts = list(m.group(0) for m in re.finditer(word_re, ctx.title))
@@ -1217,6 +1224,13 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
             add_related(ctx, data, [tag], [reading], text, True,
                         is_reconstruction)
         return
+
+    # Special case: Hebrew " [pattern: nnn]" ending
+    m = re.search(r"\s+\[pattern: ([^]]+)\]", base)
+    if m:
+        add_related(ctx, data, ["pattern"], [m.group(1)], text, True,
+                    is_reconstruction)
+        base = base[:m.start()] + base[m.end():]
 
     # Split the head into alternatives.  This is a complicated task, as
     # we do not want so split on "or" or "," when immediately followed by more
