@@ -142,6 +142,8 @@ title_elements_map = {
     "neuter": "neuter",
     "singular": "singular",
     "plural": "plural",
+    "Attic": "Attic",  # e.g. καλός/Greek/Adj
+    "Epic": "Epic",    # e.g. καλός/Greek/Adj
 }
 for k, v in title_elements_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -1094,7 +1096,8 @@ def parse_title(title, source):
     # other ways of specifying an inflection class.
     for m in re.finditer(r"\b(\w+-type|accent-\w+|\w+-stem|[^ ]+ gradation|"
                          r"[^ ]+ alternation|(First|Second|Third|Fourth|Fifth|"
-                         r"Sixth|Seventh) Conjugation|"
+                         r"Sixth|Seventh) (Conjugation|declension)|"
+                         r"First and second declension|"
                          r"(1st|2nd|3rd|4th|5th|6th) declension|"
                          r"\w[\w ]* harmony)\b", title):
         dt = {"form": m.group(1),
