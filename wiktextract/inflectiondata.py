@@ -995,7 +995,42 @@ infl_map = {
     "active voice": "active",
     "Active voice ➤ — Imperfective aspect": "active imperfective",
     "Active voice ➤ — Imperfective aspect ➤": "active imperfective",
+    "Active voice ➤": "active",
+    "Passive voice ➤": "passive",
+    "Active voice": "active",
+    "Passive voice": "passive",
+    "Imperfective aspect ➤": "imperfective",
+    "Perfective aspect ➤": "perfective",
+    "Imperfective aspect": "imperfective",
+    "Perfective aspect": "perfective",
+    "Perfect aspect ➤": "perfective",
+    "Perfect aspect": "perfective",
+    "Present perfect ➤": {
+        "lang": "Greek",
+        "then": "dummy-skip-this",  # e.g περπατάω/Greek
+    },
+    "Past perfect ➤": {
+        "lang": "Greek",
+        "then": "dummy-skip-this",  # e.g περπατάω/Greek
+    },
+    "Future perfect ➤": {
+        "lang": "Greek",
+        "then": "dummy-skip-this",  # e.g περπατάω/Greek
+    },
     "Indicative mood ➤": "indicative",
+    "Past tenses ➤": {
+        "lang": "Greek",
+        "then": "",  # tense column follows
+    },
+    "Non-past tenses ➤": "",
+    "Dependent ➤": "dependent",
+    "Dependent": "dependent",
+    "Present participle➤": "present participle",
+    "Perfect participle➤": "past participle",
+    "Nonfinite form➤": {
+        "lang": "Greek",
+        "then": "infinitive-aorist",
+    },
     "Subjunctive mood ➤": {
         "lang": "Greek",
         "then": "subjunctive dummy-tense",
@@ -1019,8 +1054,13 @@ infl_map = {
     "Subjunctive mood": "subjunctive",
     "Present ➤": "present",
     "Imperfect ➤": "imperfect",
+    "Simple past ➤": "past",
     "Future ➤": "future",
+    "Future tenses ➤": "future",
+    "Continuous ➤": "progressive",
+    "Simple ➤": "",
     "Present participle ➤": "present participle",
+    "Simple past": "past",
     "jo": {"if": "first-person singular", "then": ""},
     "Habitual": "habitual",
     "sound feminine plural": "sound-feminine-plural",
@@ -1195,12 +1235,10 @@ infl_map = {
     "jūs": {"if": "second-person plural", "then": ""},
     "f-s2": "",  # Icelandic ['bölvun', 'létteind', 'dvöl']
     "Indicative mood": "indicative",
-    "2,3 sg, 1,2,3 pl":
-    ["second-person third-person singular",
-     "first-person second-person third-person plural"],
-    "23 sg 123 pl":
-    ["second-person third-person singular",
-     "first-person second-person third-person plural"],
+    "2,3 sg, 1,2,3 pl": {
+        "lang": "Greek",
+        "then": "dummy-skip-this",  # used in περπατάω/Greek
+    },
     "Present perfect": "present perfect",
     "Past perfect": "past perfect",
     "Future perfect": "future perfect",
@@ -2035,7 +2073,6 @@ infl_map = {
     "indirect": "indirect",
     "locative-qualitative": "locative-qualitative",
     "separative": "separative",
-    "Imperfective aspect": "imperfective",
     "paucal": "paucal",
     "Tense": "",
     "Voice": "",

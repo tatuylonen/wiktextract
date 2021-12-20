@@ -21,9 +21,7 @@ from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 
 
 # Set this to a word form to debug how that is analyzed, or None to disable
-debug_word = 'جَاذِبَاتٌ\u200e\u200e; جَوَاذِبُ\u200e\njāḏibātun\u200e; jawāḏibu'
-# 'الْجَاذِبَاتُ\u200e\u200e; الْجَوَاذِبُ\u200e\nal-jāḏibātu\u200e; al-jawāḏibu'
-# debug_word = "να είσαι, {[έσο]}³"  # None to disable
+debug_word = None
 
 
 # Column texts that are interpreted as an empty column.
@@ -193,14 +191,14 @@ lang_specific = {
                                  "possession"]),
         "hdr_expand_cont": set(["person", "gender", "number", "degree",
                                 "polarity", "voice", "misc"]),
+        "animate_inanimate_remove": True,
         "both_active_passive_remove": True,
         "both_strong_weak_remove": True,
         "definitenesses": ["indefinite", "definite"],
         "empty_row_resets": False,
         "form_transformations": [],
         "genders": None,
-        "animate_inanimate_remove": True,
-        "virile_nonvirile_remove": True,
+        "imperative_no_tense": False,
         "masc_only_animate": False,  # Slavic special
         "numbers": ["singular", "plural"],
         "persons": ["first-person", "second-person", "third-person"],
@@ -211,6 +209,7 @@ lang_specific = {
         "stop_non_finite_non_finite": True,
         "stop_non_finite_voice": False,
         "strengths": ["strong", "weak"],
+        "virile_nonvirile_remove": True,
         "voices": ["active", "passive"],
     },
     "austronesian-group": {
@@ -367,8 +366,12 @@ lang_specific = {
     },
     "Greek": {
         "next": "indo-european-group",
-        "hdr_expand_first": set(["mood", "tense", "aspect"]),
-        "hdr_expand_cont": set(["tense", "person", "number"]),
+        "hdr_expand_first": set(["mood", "tense", "aspect", "dummy"]),
+        "hdr_expand_cont": set(["tense", "person", "number", "aspect"]),
+        "imperative_no_tense": True,
+        "reuse_cellspan": "reuse",
+        "skip_mood_mood": True,
+        "skip_tense_tense": True,
     },
     "Hawaiian": {
         "next": "austronesian-group",
@@ -958,13 +961,15 @@ def and_tagsets(lang, pos, tagsets1, tagsets2):
 def clean_header(word, col, skip_paren):
     """Cleans a row/column header for later processing.  This returns
     (cleaned, refs, defs, tags)."""
+    # print("CLEAN_HEADER {!r}".format(col))
     hdr_tags = []
     orig_col = col
     # XXX this is used in Greek, but perhaps better to use separate infl_map
-    # entries
+    # entries.  Pending removal:
     # XXX col = re.sub(r"(?s)\s*➤\s*$", "", col)
     col = re.sub(r"(?s)\s*,\s*$", "", col)
     col = re.sub(r"(?s)\s*•\s*$", "", col)
+    col = re.sub(r"\s+", " ", col)
     if col not in infl_map and skip_paren:
         col = re.sub(r"[,/]?\s+\([^)]*\)\s*$", "", col)
     col = col.strip()
@@ -990,7 +995,8 @@ def clean_header(word, col, skip_paren):
                 col):
         return "", [], [], []
     refs = []
-    def_re = re.compile(r"(^|\s)([*△†0123456789⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([⁾):]|\s)")
+    def_re = re.compile(r"(^|\s*•?\s+)([*△†0123456789⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([⁾):]|\s)")
+    nondef_re = re.compile(r"^\s*(1|2|3)\s+(sg|pl)\s*$")
     while True:
         m = re.search(r"\^(.|\([^)]*\))$", col)
         if not m:
@@ -1010,8 +1016,9 @@ def clean_header(word, col, skip_paren):
             pass
         col = col[:m.start()]
     # See if it is a ref definition
+    # print("BEFORE REF CHECK: {!r}".format(col))
     m = re.match(def_re, col)
-    if m:
+    if m and not re.match(nondef_re, col):
         ofs = 0
         ref = None
         deflst = []
@@ -1037,8 +1044,9 @@ def clean_header(word, col, skip_paren):
         # Numbers and H/L/N are useful information
         refs.append(col[-1])
         col = col[:-1]
-    if (len(col) > 2 and col[1] in (")", " ", ":") and col[0].isdigit() and
-        not re.match(r"^(1|2|3) (sg|pl)$", col)):
+    if (len(col) > 2 and col[1] in (")", " ", ":") and
+        col[0].isdigit() and
+        not re.match(nondef_re, col)):
         # Another form of note definition
         return "", [], [[col[0], col[2:].strip()]], []
     col = col.strip()
@@ -1470,6 +1478,12 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                 if celltext == debug_word:
                     print("stopping on non-finite cur")
                 break
+            if ("tense" in new_cats and
+                any("imperative" in x for x in coltags) and
+                get_lang_specific(lang, "imperative_no_tense")):
+                if celltext == debug_word:
+                    print("skipping tense in imperative")
+                continue
             elif ("mood" in new_cats and
                   "mood" in cur_cats and
                   # Allow if all new tags are already in current set
@@ -1497,6 +1511,11 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                     if celltext == debug_word:
                         print("stopping on tense-tense")
                     break
+            elif ("aspect" in new_cats and
+                  "aspect" in cur_cats):
+                if celltext == debug_word:
+                    print("skipping on aspect-aspect")
+                continue
             elif "number" in cur_cats and "number" in new_cats:
                 if celltext == debug_word:
                     print("stopping on number-number")
@@ -1593,7 +1612,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                     tags, topics = decode_tags(d, no_unknown_starts=True)
                     if topics or any("error-unknown-tag" in ts for ts in tags):
                         # Failed to parse as tags
-                        print("Failed: topics={} tags={}".format(topics, tags))
+                        # print("Failed: topics={} tags={}"
+                        #       .format(topics, tags))
                         continue
                 tags1 = set()
                 for ts in tags:
@@ -1751,7 +1771,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                                 new_rowtags.append(tags)
                 rowtags = new_rowtags
                 if any("dummy-skip-this" in ts for ts in rowtags):
-                    break  # Skip this row
+                    continue  # Skip this cell
                 new_coltags = list(x for x in new_coltags
                                    if not any(t in noinherit_tags for t in x))
                 # print("new_coltags={} previously_seen={} all_hdr_tags={}"
@@ -1833,6 +1853,11 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
             # These values are ignored, at least form now
             if re.match(r"^(# |\(see )", col):
                 continue
+            if any("dummy-skip-this" in ts for ts in rowtags):
+                continue  # Skip this cell
+
+            # Minor cleanup.  See e.g. είμαι/Greek/Verb present participle.
+            col = re.sub(r"\s+➤\s*$", "", col)
 
             if j == 0 and (not col_has_text or not col_has_text[0]):
                 continue  # Skip text at top left, as in Icelandic, Faroese
@@ -1968,16 +1993,20 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 form = re.sub(r"\s+", " ", form)
                 form = form.strip()
                 if re.match(r"\([^][(){}]*\)$", form):
-                    forms = form[1:-1]
+                    form = form[1:-1]
+                    extra_tags.append("informal")
                 elif re.match(r"\{\[[^][(){}]*\]\}$", form):
                     # είμαι/Greek/Verb
                     form = form[2:-2]
+                    extra_tags.extend(["rare", "archaic"])
                 elif re.match(r"\{[^][(){}]*\}$", form):
                     # είμαι/Greek/Verb
                     form = form[1:-1]
+                    extra_tags.extend(["archaic"])
                 elif re.match(r"\[[^][(){}]*\]$", form):
                     # είμαι/Greek/Verb
                     form = form[1:-1]
+                    extra_tags.append("rare")
                 # Handle parentheses in the table element.  We parse
                 # tags anywhere and romanizations anywhere but beginning.
                 roman = base_roman

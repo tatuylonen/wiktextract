@@ -2258,6 +2258,7 @@ xlat_tags_map = {
     "Poetic": "poetic",
     "Poetic.": "poetic",
     "Informal.": "informal",
+    "slightly more formal": "somewhat formal",
     "Colloquial.": "colloquial",
     "Antiquated.": "dated",
     "Archaic": "archaic",
@@ -2546,6 +2547,7 @@ xlat_tags_map = {
     "without a main word": "without-noun",
     "informal 1st possessive": "informal first-person possessive",
     "informal augmentations": "informal augmented",
+    "informal alternatives": "informal",
     "strumental/locative/lative form": "instrumental locative lative",
     "instrumental/locative/lative form": "instrumental locative lative",
     "reflexive/dative/accusative form": "reflexive dative accusative",
@@ -2885,8 +2887,6 @@ xlat_tags_map = {
     "+ number": "with-number",
     "with number": "with-number",
     "optative mood +": "with-optative",
-    "p-past": "passive past",
-    "ppp": "passive perfect participle",
     "not used in plural form": "no-plural",
     "indecl": "indeclinable",
     "all forms unconjugated": "indeclinable",
@@ -4034,7 +4034,8 @@ xlat_tags_map = {
     "primarily": "mostly",
     "definite articulation": "definite",  # boatsi/Aromanian
     "p-past": "passive past",
-    "ppp": "passive past participle",
+    "p‑past": "passive past",  # Fancy unicode dash περπατάω/Greek
+    "ppp": "passive perfect participle",
     "plural:": "plural",
     "synonyms:": "synonym",
     "quantified:": "quantified",
@@ -4666,7 +4667,7 @@ valid_tags = {
     "deliberate": "misc",
     "demonstrative": "misc",  # Type of pronoun
     "demonym": "misc",
-    "dependent": "misc",
+    "dependent": "tense",  # περπατάω/Gree/Verb (tense?); Egyptian
     "deponent": "misc",  # Having passive form with active meaning
     "derogatory": "misc",
     "desiderative": "mood",  # Verb mood
@@ -4832,6 +4833,7 @@ valid_tags = {
     "inessive": "case",  # Case
     "inferential": "mood",  # Verb form (w/ aorist), e.g. -ekalmak/Turkish
     "infinitive": "non-finite",  # Verb form
+    "infinitive-aorist": "non-finite",  # e.g. περπατάω/Greek non-finite form
     "infinitive-da": "non-finite",  # Estonian: indicative active negative imperfect / indicative active pluperfect / imperative active present (non-2sg) / active perfect (hypothetical action - general action)
     "infinitive-i": "non-finite",  # Finnish
     "infinitive-i-long": "non-finite",  # Finnish
