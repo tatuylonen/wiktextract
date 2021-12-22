@@ -47,6 +47,8 @@ title_contains_global_map = {
     "possessed forms of": "possessive",
     "predicative forms of": "predicative",
     "negative": "negative",
+    "positive definite forms": "positive definite",
+    "positive indefinite forms": "positive indefinite",
     "comparative": "comparative",
     "superlative": "superlative",
     "combined forms": "combined-form",
@@ -1241,9 +1243,9 @@ def expand_header(ctx, word, lang, pos, text, tags0, silent=False):
                 cond = all(t in tags0 for t in c.split())
         # Warning message about missing conditions for debugging.
         if cond == "default-true" and not silent:
-            print("IF MISSING COND: word={} lang={} text={} tags0={} "
-                  "c={} cond={}"
-                  .format(word, lang, text, tags0, c, cond))
+            ctx.debug("inflection table: IF MISSING COND: word={} "
+                      "lang={} text={} tags0={} c={} cond={}"
+                      .format(word, lang, text, tags0, c, cond))
         # Based on the result of evaluating the condition, select either
         # "then" part or "else" part.
         if cond:
@@ -1252,9 +1254,10 @@ def expand_header(ctx, word, lang, pos, text, tags0, silent=False):
             v = v.get("else")
             if v is None:
                 if not silent:
-                    print("IF WITHOUT ELSE EVALS False: {}/{} {!r} tags0={}"
-                          .format(word, lang, text, tags0))
-                v = ""
+                    ctx.debug("inflection table: IF WITHOUT ELSE EVALS False: "
+                              "{}/{} {!r} tags0={}"
+                              .format(word, lang, text, tags0))
+                v = "error-unknown-form"
 
 
 def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):

@@ -4493,6 +4493,7 @@ valid_tags = {
     "allative-i": "case",
     "allative-ii": "case",
     "alphabetic-tones": "misc",
+    "already-tense": "tense",  # e.g. hojiwa/Swahili
     "also": "misc",
     "alt-of": "misc",
     "alternative": "misc",
@@ -4645,7 +4646,7 @@ valid_tags = {
     "count-form": "misc",  # Nominal form in Belarusian
     "countable": "category",
     "counter": "detail",
-    "counterfactual": "mood",  # XXX is this mood?  Where is this used?
+    "counterfactual": "mood",
     "dated": "misc",
     "dative": "case",  # Case in many languages
     "debitive": "misc",  # need or obligation (XXX is this same as "obligative" ???)
@@ -4774,9 +4775,10 @@ valid_tags = {
     "future-ii": "tense",  # Verb tense (German)
     "gender-neutral": "gender",
     "general": "misc",  # In general temporal participle, e.g., talamaq/Azerbaijani
+    "general-mood": "mood",  # e.g. hojiwa/Swahili
     "genitive": "case",
     "gerund": "non-finite",
-    "gnomic": "mood",
+    "gnomic": "mood",  # e.g. hojiwa/Swahili
     "goal": "mood",  # Verb form, e.g., উঘাল/Assamese
     "grade-1-kanji": "misc",
     "grade-2-kanji": "misc",
@@ -4804,6 +4806,8 @@ valid_tags = {
     "hypothetical": "mood",  # Verb mood (e.g., Japanese)
     "ideophonic": "misc",
     "idiomatic": "misc",
+    "if-not-mood": "mood",  # e.g. hojiwa/Swahili
+    "if-when-mood": "mood",  # e.g. hojiwa/Swahili
     "illative": "case",  # Case
     "imperative": "mood",  # Mood
     "imperative-only": "misc",
@@ -4983,6 +4987,7 @@ valid_tags = {
     "not-comparable": "category",
     "not-mutable": "misc",
     "not-translated": "misc",
+    "not-yet-tense": "tense",  # e.g. hojiwa/Swahili
     "noun": "pos",
     "noun-from-adj": "derivation",
     "noun-from-noun": "derivation",  # Greenlandic: suffix derives nominal from nominal
@@ -5072,7 +5077,7 @@ valid_tags = {
     "poetic": "misc",
     "polite": "register",  # Politeness degree of verbs etc
     "polytonic": "misc",
-    "positive": "polarity",  # opposite of negative (usually unattested); degree
+    "positive": "degree",  # opposite of negative (usually unattested); degree
     "possessed": "misc",  # Marks object that is possessed, cf. possessed
     "possessive": "possession",  # Possession (marks who possesses)
     "possessive-single": "possession",  # Possessive with single possessed
@@ -5166,7 +5171,7 @@ valid_tags = {
     "singular-normally": "misc",
     "singular-only": "misc",
     "singulative": "misc",  # Individuation of a collective or mass noun, like number
-    "situative": "misc",  # expressing location of things in comparison with one another
+    "situative": "case",  # expressing location of things in comparison with one another
     "slang": "register",
     "slur": "misc",
     "sociative": "case",  # Case?, e.g., மரம்/Tamil
