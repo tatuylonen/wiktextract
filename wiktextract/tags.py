@@ -4493,7 +4493,7 @@ valid_tags = {
     "allative-i": "case",
     "allative-ii": "case",
     "alphabetic-tones": "misc",
-    "already-tense": "tense",  # e.g. hojiwa/Swahili
+    "already-form": "tense",  # e.g. hojiwa/Swahili
     "also": "misc",
     "alt-of": "misc",
     "alternative": "misc",
@@ -4806,8 +4806,8 @@ valid_tags = {
     "hypothetical": "mood",  # Verb mood (e.g., Japanese)
     "ideophonic": "misc",
     "idiomatic": "misc",
-    "if-not-mood": "mood",  # e.g. hojiwa/Swahili
-    "if-when-mood": "mood",  # e.g. hojiwa/Swahili
+    "if-not-form": "mood",  # e.g. hojiwa/Swahili
+    "if-when-form": "mood",  # e.g. hojiwa/Swahili
     "illative": "case",  # Case
     "imperative": "mood",  # Mood
     "imperative-only": "misc",
@@ -4987,7 +4987,7 @@ valid_tags = {
     "not-comparable": "category",
     "not-mutable": "misc",
     "not-translated": "misc",
-    "not-yet-tense": "tense",  # e.g. hojiwa/Swahili
+    "not-yet-form": "tense",  # e.g. hojiwa/Swahili
     "noun": "pos",
     "noun-from-adj": "derivation",
     "noun-from-noun": "derivation",  # Greenlandic: suffix derives nominal from nominal
