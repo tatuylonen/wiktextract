@@ -1656,7 +1656,6 @@ uppercase_tags = set([
     "Quetta",
     "Quirós",
     "Quốc ngữ",
-    "Radical",  # Used to mark Japanese Kanji that are radical forms
     "Raguileo Alphabet",
     "Ragusan",
     "Rai Kaili",
@@ -2439,6 +2438,7 @@ xlat_tags_map = {
     "+ prepositional case": "with-prepositional",
     "+prepositional": "with-prepositional",
     "+ por": "with-por",
+    "Radical": "radical",
     "accusative/instrumental": "accusative instrumental",
     "dative/adverbial case": "dative adverbial",
     "dative/genitive": "dative genitive",
