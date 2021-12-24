@@ -301,6 +301,7 @@ topic_generalize_map = {
     "drafting": "engineering",
     "CAD": "engineering computing",
     "mathematics": "sciences",
+    "maths": "mathematics",
     "computing": "engineering mathematics",
     "anthropodology": "anthropology",
     "ornithology": "biology",

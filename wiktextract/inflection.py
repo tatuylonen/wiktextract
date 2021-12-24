@@ -1257,7 +1257,7 @@ def expand_header(ctx, word, lang, pos, text, tags0, silent=False):
                     ctx.debug("inflection table: IF WITHOUT ELSE EVALS False: "
                               "{}/{} {!r} tags0={}"
                               .format(word, lang, text, tags0))
-                v = "error-unknown-form"
+                v = "error-unrecognized-form"
 
 
 def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
