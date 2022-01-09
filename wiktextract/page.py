@@ -1,6 +1,6 @@
 # Code for parsing information from a single Wiktionary page.
 #
-# Copyright (c) 2018-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
 import sys
@@ -3221,7 +3221,9 @@ def clean_node(config, ctx, category_data, value, template_fn=None,
         return None
 
     # print("clean_node: value={!r}".format(value))
-    v = ctx.node_to_html(value, node_handler_fn=clean_node_handler_fn)
+    v = ctx.node_to_html(value, node_handler_fn=clean_node_handler_fn,
+                         template_fn=template_fn,
+                         post_template_fn=post_template_fn)
     # print("clean_node: v={!r}".format(v))
 
     # Capture categories if category_data has been given.  We also track
