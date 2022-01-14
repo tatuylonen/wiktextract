@@ -263,8 +263,10 @@ infl_map = {
     "Past": "past",
     "Past participle": "past participle",
     "Past participles": "past participle",
+    "past participle plural": "past participle plural",
     "Passive participles": "passive participle",
     "Present participle": "present participle",
+    "present participle/gerund": "present participle",
     "1st person sg": "first-person singular",
     "2nd person sg informal": "second-person singular informal",
     "3rd person sg 2nd p. sg formal":

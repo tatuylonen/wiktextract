@@ -399,3 +399,6 @@ Working on changes to compute_coltags
   - still something wrong, look at aamupala/Finnish 3rd pers possessive
 
 Add tests to ensure that etymology templates and audio URLs are properly extracted.
+
+Fix parsing tell/English/Verb word head "(dialectal or nonstandard)"
+(appears very new, not yet in my test environment)
