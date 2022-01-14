@@ -1760,6 +1760,7 @@ infl_map = {
     "past continuous": "past continuative",
     "with definite article": "definite includes-article",
     "with indefinite article": "indefinite includes-article",
+    "(usually without article)": "usually-without-article",
     "Completive": "completive",
     "dative definite": "dative definite",
     "nominative definite": "nominative definite",

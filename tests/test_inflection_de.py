@@ -2177,6 +2177,7 @@ class InflTests(unittest.TestCase):
                 "form": "Bahnhöfe",
                 "source": "Declension",
                 "tags": [
+                  "definite",
                   "nominative",
                   "plural"
                 ]
@@ -2201,6 +2202,7 @@ class InflTests(unittest.TestCase):
                 "form": "Bahnhöfe",
                 "source": "Declension",
                 "tags": [
+                  "definite",
                   "genitive",
                   "plural"
                 ]
@@ -2226,6 +2228,7 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "dative",
+                  "definite",
                   "plural"
                 ]
               },
@@ -2242,6 +2245,7 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "accusative",
+                  "definite",
                   "plural"
                 ]
               }
@@ -3101,5 +3105,197 @@ class InflTests(unittest.TestCase):
                 ]
               }
             ],
+        }
+        self.assertEqual(expected, ret)
+
+    def test_German_noun2(self):
+        # Language name inflection tables are slightly different
+        ret = self.xinfl("Tatarisch", "German", "noun", "Declension", """
+<div class="NavFrame" style="width%3A100%25">
+<div class="NavHead">Declension of <span class="Latn" lang="de">[[Tatarisch#German|Tatarisch]]</span> (''language name'')</div>
+<div class="NavContent">
+
+{| border="1px+solid+%23505050" style="border-collapse%3Acollapse%3B+background%3A%23FAFAFA%3B+text-align%3Acenter%3B+width%3A100%25" class="inflection-table"
+
+|-
+
+! style="background%3A%23AAB8C0%3Bwidth%3A15%25" |
+
+
+! colspan="5" style="background%3A%23AAB8C0%3Bwidth%3A85%25" | singular &nbsp; ''([[Wiktionary:About German#Declension of language names|explanation of the use and meaning of the forms]])''
+
+
+|-
+
+! style="background%3A%23BBC9D0" |
+
+
+! style="background%3A%23BBC9D0%3Bwidth%3A14%25" | (usually without article)
+
+
+! style="background%3A%23BBC9D0%3Bwidth%3A32%25" | noun
+
+
+! style="background%3A%23BBC9D0%3Bwidth%3A7%25" | [[definite article|def.]]
+
+
+! style="background%3A%23BBC9D0%3Bwidth%3A32%25" | noun
+
+
+|-
+
+! style="background%3A%23BBC9D0" | nominative
+
+
+| style="background%3A%23EEEEEE" | (<span class="Latn" lang="de">das</span>)
+
+
+| <span class="Latn" lang="de">[[Tatarisch#German|Tatarisch]]</span>
+
+
+| style="background%3A%23EEEEEE" | <span class="Latn" lang="de">das</span>
+
+
+| <span class="Latn+form-of+lang-de+alternative-form-of+++++++" lang="de">[[Tatarische#German|Tatarische]]</span>
+
+
+|-
+
+! style="background%3A%23BBC9D0" | genitive
+
+
+| style="background%3A%23EEEEEE" | (<span class="Latn" lang="de">des</span>)
+
+
+| <span class="Latn" lang="de">[[Tatarisch#German|Tatarisch]]</span>, <span class="Latn+form-of+lang-de+gen%7Cs-form-of+++++++" lang="de">[[Tatarischs#German|Tatarischs]]</span>
+
+
+| style="background%3A%23EEEEEE" | <span class="Latn" lang="de">des</span>
+
+
+| <span class="Latn+form-of+lang-de+gen%7Cs-form-of+++++++" lang="de">[[Tatarischen#German|Tatarischen]]</span>
+
+
+|-
+
+! style="background%3A%23BBC9D0" | dative
+
+
+| style="background%3A%23EEEEEE" | (<span class="Latn" lang="de">dem</span>)
+
+
+| <span class="Latn" lang="de">[[Tatarisch#German|Tatarisch]]</span>
+
+
+| style="background%3A%23EEEEEE" | <span class="Latn" lang="de">dem</span>
+
+
+| <span class="Latn+form-of+lang-de+dat%7Cs-form-of+++++++" lang="de">[[Tatarischen#German|Tatarischen]]</span>
+
+
+|-
+
+! style="background%3A%23BBC9D0" | accusative
+
+
+| style="background%3A%23EEEEEE" | (<span class="Latn" lang="de">das</span>)
+
+
+| <span class="Latn" lang="de">[[Tatarisch#German|Tatarisch]]</span>
+
+
+| style="background%3A%23EEEEEE" | <span class="Latn" lang="de">das</span>
+
+
+| <span class="Latn+form-of+lang-de+acc%7Cs-form-of+++++++" lang="de">[[Tatarische#German|Tatarische]]</span>
+
+
+|}
+</div></div>
+""")
+        expected = {
+          "forms": [
+            {
+              "form": "Tatarisch",
+              "source": "Declension",
+              "tags": [
+                "nominative",
+                "singular",
+                "usually-without-article"
+              ]
+            },
+            {
+              "form": "Tatarische",
+              "source": "Declension",
+              "tags": [
+                "definite",
+                "nominative",
+                "singular"
+              ]
+            },
+            {
+              "form": "Tatarisch",
+              "source": "Declension",
+              "tags": [
+                "genitive",
+                "singular",
+                "usually-without-article"
+              ]
+            },
+            {
+              "form": "Tatarischs",
+              "source": "Declension",
+              "tags": [
+                "genitive",
+                "singular",
+                "usually-without-article"
+              ]
+            },
+            {
+              "form": "Tatarischen",
+              "source": "Declension",
+              "tags": [
+                "definite",
+                "genitive",
+                "singular"
+              ]
+            },
+            {
+              "form": "Tatarisch",
+              "source": "Declension",
+              "tags": [
+                "dative",
+                "singular",
+                "usually-without-article"
+              ]
+            },
+            {
+              "form": "Tatarischen",
+              "source": "Declension",
+              "tags": [
+                "dative",
+                "definite",
+                "singular"
+              ]
+            },
+            {
+              "form": "Tatarisch",
+              "source": "Declension",
+              "tags": [
+                "accusative",
+                "singular",
+                "usually-without-article"
+              ]
+            },
+            {
+              "form": "Tatarische",
+              "source": "Declension",
+              "tags": [
+                "accusative",
+                "definite",
+                "singular"
+              ]
+            }
+          ],
         }
         self.assertEqual(expected, ret)

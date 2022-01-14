@@ -2,7 +2,7 @@
 #
 # Lists of valid tags and mappings for tags canonicalization.
 #
-# Copyright (c) 2020-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2020-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 # Mappings for tags in template head line ends outside parentheses.  These are
 # also used to parse final tags from translations.
@@ -2261,6 +2261,7 @@ xlat_tags_map = {
     "Colloquial.": "colloquial",
     "Antiquated.": "dated",
     "Archaic": "archaic",
+    "religious/archaic": "archaic",
     "Causative": "causative",
     "Passive": "passive",
     "Stative": "stative",
@@ -2298,6 +2299,7 @@ xlat_tags_map = {
     "regiolectal": "dialectal",
     "archaic or regiolectal": "archaic dialectal",
     "archaic or regional": "archaic dialectal",
+    "Archaic or obsolete": "archaic",
     "Canada: Ontario": "Ontario",
     "Canada: British Columbia": "British-Columbia",
     "GenAm": "General-American",
@@ -5290,6 +5292,7 @@ valid_tags = {
     "uppercase": "misc",
     "used-in-the-form": "misc",
     "usually": "misc",
+    "usually-without-article": "misc",
     "utterance-medial": "misc",
     "variant": "misc",
     "vav-consecutive": "misc",

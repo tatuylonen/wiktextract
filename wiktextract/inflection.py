@@ -1,6 +1,6 @@
 # Code for parsing inflection tables.
 #
-# Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org.
+# Copyright (c) 2021, 2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org.
 
 import re
 import copy
@@ -18,6 +18,7 @@ from wiktextract.datautils import (data_append, data_extend, freeze,
 from wiktextract.form_descriptions import (classify_desc, decode_tags,
                                            parse_head_final_tags)
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
+from wiktextract.clean import clean_value
 
 
 # Set this to a word form to debug how that is analyzed, or None to disable
@@ -999,7 +1000,9 @@ def clean_header(word, col, skip_paren):
                 col):
         return "", [], [], []
     refs = []
-    def_re = re.compile(r"(^|\s*•?\s+)([*△†0123456789⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([⁾):]|\s)")
+    def_re = re.compile(r"(^|\s*•?\s+)"
+                        r"(([*△†0123456789⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([⁾):]|\s)|"
+                        r"\^([*△†]))")
     nondef_re = re.compile(r"^\s*(1|2|3)\s+(sg|pl)\s*$")
     while True:
         m = re.search(r"\^(.|\([^)]*\))$", col)
@@ -1016,8 +1019,10 @@ def clean_header(word, col, skip_paren):
         elif r == "tú":
             hdr_tags.append("informal")
         else:
-            # XXX handle refs from m.group(1)
-            pass
+            v = m.group(1)
+            if v.startswith("(") and v.endswith(")"):
+                v = v[1:-1]
+            refs.append(v)
         col = col[:m.start()]
     # See if it is a ref definition
     # print("BEFORE REF CHECK: {!r}".format(col))
@@ -1029,25 +1034,28 @@ def clean_header(word, col, skip_paren):
         for m in re.finditer(def_re, col):
             if ref:
                 deflst.append((ref, col[ofs:m.start()].strip()))
-            ref = m.group(2)
+            ref = m.group(3) or m.group(5)
             ofs = m.end()
         if ref:
             deflst.append((ref, col[ofs:].strip()))
         return "", [], deflst, []
     # See if it references a definition
-    while col and (is_superscript(col[-1]) or col[-1] in ("†",)):
-        if col.endswith("ʳᵃʳᵉ"):
-            hdr_tags.append("rare")
-            col = col[:-4].strip()
-            continue
-        if col.endswith("ᵛᵒˢ"):
-            hdr_tags.append("informal")
-            hdr_tags.append("vos-form")
-            col = col[:-3].strip()
-            continue
-        # Numbers and H/L/N are useful information
-        refs.append(col[-1])
-        col = col[:-1]
+    while col:
+        if (is_superscript(col[-1]) or col[-1] in ("†",)):
+            if col.endswith("ʳᵃʳᵉ"):
+                hdr_tags.append("rare")
+                col = col[:-4].strip()
+                continue
+            if col.endswith("ᵛᵒˢ"):
+                hdr_tags.append("informal")
+                hdr_tags.append("vos-form")
+                col = col[:-3].strip()
+                continue
+            # Numbers and H/L/N are useful information
+            refs.append(col[-1])
+            col = col[:-1]
+        else:
+            break
     if (len(col) > 2 and col[1] in (")", " ", ":") and
         col[0].isdigit() and
         not re.match(nondef_re, col)):
@@ -1577,7 +1585,7 @@ def lang_specific_tags(lang, pos, form):
     return form, []
 
 
-def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
+def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
     """This is the default table parser.  Despite its name, it can parse
     complex tables.  This returns a list of forms to be added to the
     part-of-speech, or None if the table could not be parsed."""
@@ -1587,6 +1595,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
     assert isinstance(pos, str)
     assert isinstance(rows, list)
     assert isinstance(source, str)
+    assert isinstance(after, str)
     for row in rows:
         for col in row:
             assert isinstance(col, InflCell)
@@ -1597,36 +1606,44 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
     # print("ROWS:")
     # for row in rows:
     #     print("  ", row)
-    # First extract definitions for subscripted references
+
+    # Parse definitions for references (from table itself and from text
+    # after it)
     def_ht = {}
+
+    def add_defs(defs):
+        for ref, d in defs:
+            # print("DEF: ref={} d={}".format(ref, d))
+            d = d.strip()
+            d = d.split(". ")[0].strip()
+            if not d:
+                continue
+            if d.endswith("."):
+                d = d[:-1]
+            tags, topics = decode_tags(d, no_unknown_starts=True)
+            if topics or any("error-unknown-tag" in ts for ts in tags):
+                d = d[0].lower() + d[1:]
+                tags, topics = decode_tags(d, no_unknown_starts=True)
+                if topics or any("error-unknown-tag" in ts for ts in tags):
+                    # Failed to parse as tags
+                    # print("Failed: topics={} tags={}"
+                    #       .format(topics, tags))
+                    continue
+            tags1 = set()
+            for ts in tags:
+                tags1.update(ts)
+            tags1 = tuple(sorted(tags1))
+            # print("DEFINED: {} -> {}".format(ref, tags1))
+            def_ht[ref] = tags1
+
+    # First extract definitions from cells
     for row in rows:
         for cell in row:
             text, refs, defs, hdr_tags = clean_header(word, cell.text, True)
-            if not defs:
-                continue
-            for ref, d in defs:
-                # print("DEF:", ref, d)
-                d = d.strip()
-                d = d.split(". ")[0].strip()
-                if not d:
-                    continue
-                if d.endswith("."):
-                    d = d[:-1]
-                tags, topics = decode_tags(d, no_unknown_starts=True)
-                if topics or any("error-unknown-tag" in ts for ts in tags):
-                    d = d[0].lower() + d[1:]
-                    tags, topics = decode_tags(d, no_unknown_starts=True)
-                    if topics or any("error-unknown-tag" in ts for ts in tags):
-                        # Failed to parse as tags
-                        # print("Failed: topics={} tags={}"
-                        #       .format(topics, tags))
-                        continue
-                tags1 = set()
-                for ts in tags:
-                    tags1.update(ts)
-                tags1 = tuple(sorted(tags1))
-                # print("DEFINED: {} -> {}".format(ref, tags1))
-                def_ht[ref] = tags1
+            add_defs(defs)
+    # Extract definitions from text after table
+    text, refs, defs, hdr_tags = clean_header(word, after, True)
+    add_defs(defs)
 
     # Then extract the actual forms
     ret = []
@@ -1980,6 +1997,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
                 form = form.strip()
                 extra_tags = []
                 form, refs, defs, hdr_tags = clean_header(word, form, False)
+                # if refs:
+                #     print("REFS:", refs)
                 extra_tags.extend(hdr_tags)
                 # Extract tags from referenced footnotes
                 refs_tags = set()
@@ -2190,17 +2209,31 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
     #     print("  HDRSPAN {} {} {} {!r}"
     #           .format(x.start, x.colspan, x.tagsets, x.text))
 
-    # Post-process German nouns with articles
+    # Post-process German nouns with articles in separate columns.  We move the
+    # definite/indefinite/usually-without-article markers into the noun and
+    # remove the article entries.
     if any("noun" in x["tags"] for x in ret):
-        if lang in ("Alemannic German", "Cimbrian", "German",
+        if lang in ("Alemannic German", "Bavarian", "Cimbrian", "German",
                     "German Low German", "Hunsrik", "Luxembourish",
                     "Pennsylvania German"):
             new_ret = []
+            saved_tags = set()
+            had_noun = False
             for dt in ret:
                 tags = dt["tags"]
                 if "noun" in tags:
-                    tags = list(t for t in tags if t != "noun")
-                elif "indefinite" in tags or "definite" in tags:
+                    tags = list(sorted(set(t for t in tags if t != "noun") |
+                                           saved_tags))
+                    had_noun = True
+                elif ("indefinite" in tags or "definite" in tags or
+                      "usually-without-article" in tags or
+                      "without-article" in tags):
+                    if had_noun:
+                        saved_tags = set(tags)
+                    else:
+                        saved_tags = saved_tags | set(tags)  # E.g. Haus/German
+                        remove_useless_tags(lang, pos, saved_tags)
+                    had_noun = False
                     continue  # Skip the articles
                 # XXX remove: alternative code that adds "article" tag
                 #     tags = list(sorted(set(tags) | set(["article"])))
@@ -2219,7 +2252,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source):
     return ret
 
 
-def handle_generic_table(ctx, data, word, lang, pos, rows, titles, source):
+def handle_generic_table(ctx, data, word, lang, pos, rows, titles, source,
+                         after):
     assert isinstance(ctx, Wtp)
     assert isinstance(data, dict)
     assert isinstance(word, str)
@@ -2227,6 +2261,7 @@ def handle_generic_table(ctx, data, word, lang, pos, rows, titles, source):
     assert isinstance(pos, str)
     assert isinstance(rows, list)
     assert isinstance(source, str)
+    assert isinstance(after, str)
     for row in rows:
         assert isinstance(row, list)
         for x in row:
@@ -2236,7 +2271,7 @@ def handle_generic_table(ctx, data, word, lang, pos, rows, titles, source):
         assert isinstance(x, str)
 
     # Try to parse the table as a simple table
-    ret = parse_simple_table(ctx, word, lang, pos, rows, titles, source)
+    ret = parse_simple_table(ctx, word, lang, pos, rows, titles, source, after)
     if ret is None:
         # XXX handle other table formats
         # We were not able to handle the table
@@ -2267,7 +2302,7 @@ def handle_generic_table(ctx, data, word, lang, pos, rows, titles, source):
 
 
 def handle_wikitext_table(config, ctx, word, lang, pos,
-                          data, tree, titles, source):
+                          data, tree, titles, source, after):
     """Parses a table from parsed Wikitext format into rows and columns of
     InflCell objects and then calls handle_generic_table() to parse it into
     forms.  This adds the forms into ``data``."""
@@ -2283,6 +2318,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
     assert isinstance(source, str)
     for x in titles:
         assert isinstance(x, str)
+    assert isinstance(after, str)
     # Imported here to avoid a circular import
     from wiktextract.page import clean_node, recursively_extract
     # print("HANDLE_WIKITEXT_TABLE", titles)
@@ -2352,7 +2388,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     if celltext:
                         new_titles.append(celltext)
                     handle_wikitext_table(config, ctx, word, lang, pos, data,
-                                          tbl, new_titles, source)
+                                          tbl, new_titles, source, "")
 
                 # This magic value is used as part of header detection
                 cellstyle = (col.attrs.get("style", "") + "//" +
@@ -2419,9 +2455,13 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     row.append(cell)
             if not row:
                 continue
-            while len(row) < len(cols_fill) and cols_filled[len(row)] > 0:
-                cols_filled[len(row)] -= 1
-                row.append(cols_fill[len(row)])
+            for i in range(len(row), len(cols_filled)):
+                if cols_filled[i] <= 0:
+                    continue
+                cols_filled[i] -= 1
+                while len(row) < i:
+                    row.append(InflCell("", False, len(row), 1, 1))
+                row.append(cols_fill[i])
             # print("  ROW {!r}".format(row))
             rows.append(row)
         elif kind in (NodeKind.TABLE_HEADER_CELL, NodeKind.TABLE_CELL):
@@ -2430,10 +2470,12 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
 
     # Now we have a table that has been parsed into rows and columns of
     # InflCell objects.  Parse the inflection table from that format.
-    handle_generic_table(ctx, data, word, lang, pos, rows, titles, source)
+    handle_generic_table(ctx, data, word, lang, pos, rows, titles, source,
+                         after)
 
 
-def handle_html_table(config, ctx, word, lang, pos, data, tree, titles, source):
+def handle_html_table(config, ctx, word, lang, pos, data, tree, titles, source,
+                      after):
     """Parses a table from parsed HTML format into rows and columns of
     InflCell objects and then calls handle_generic_table() to parse it into
     forms.  This adds the forms into ``data``."""
@@ -2449,6 +2491,7 @@ def handle_html_table(config, ctx, word, lang, pos, data, tree, titles, source):
     for x in titles:
         assert isinstance(x, str)
     assert isinstance(source, str)
+    assert isinstance(after, str)
 
     ctx.debug("HTML TABLES NOT YET IMPLEMENTED at {}/{}"
               .format(word, lang))
@@ -2469,17 +2512,39 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
     assert isinstance(section, str)
     assert isinstance(tree, WikiNode)
     source = section
+    tables = []
+
+    def process_tables():
+        for kind, node, titles, after in tables:
+            after = "".join(after).strip()
+            after = clean_value(config, after)
+            if kind == "wikitext":
+                handle_wikitext_table(config, ctx, word, lang, pos,
+                                      data, node, titles, source, after)
+            elif kind == "html":
+                handle_html_table(config, ctx, word, lang, pos, data, node,
+                                  titles, source, after)
+            else:
+                raise RuntimeError("{}: unimplemented table kind {}"
+                                   .format(word, kind))
 
     def recurse_navframe(node, titles):
+        nonlocal tables
         titleparts = []
+        old_tables = tables
+        tables = []
 
-        def recurse1(node, in_navhead):
+        def recurse1(node):
+            nonlocal tables
             if isinstance(node, (list, tuple)):
                 for x in node:
-                    recurse1(x, in_navhead)
+                    recurse1(x)
                 return
             if isinstance(node, str):
-                titleparts.append(node)
+                if tables:
+                    tables[-1][-1].append(node)
+                else:
+                    titleparts.append(node)
                 return
             if not isinstance(node, WikiNode):
                 ctx.debug("inflection table: unhandled in NavFrame: {}"
@@ -2492,10 +2557,10 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
                     return
                 if "NavHead" in classes:
                     # print("NAVHEAD:", node)
-                    for x in node.children:
-                        recurse1(x, True)
+                    recurse1(node.children)
                     return
                 if "NavContent" in classes:
+                    # print("NAVCONTENT:", node)
                     title = "".join(titleparts).strip()
                     title = html.unescape(title)
                     title = title.strip()
@@ -2506,28 +2571,36 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
                     return
             elif kind == NodeKind.LINK:
                 if len(node.args) > 1:
-                    for x in node.args[1:]:
-                        recurse1(x, in_navhead)
+                    recurse1(node.args[1:])
                 else:
-                    recurse1(node.args[0], in_navhead)
-            for x in node.children:
-                recurse1(x, in_navhead)
-        recurse1(node, False)
+                    recurse1(node.args[0])
+            recurse1(node.children)
+        recurse1(node)
+
+        process_tables()
+        tables = old_tables
 
     def recurse(node, titles):
+        # XXX could this function be merged with recurse1 above?
+        nonlocal tables
+        if isinstance(node, (list, tuple)):
+            for x in node:
+                recurse(x, titles)
+            return
+        if tables and isinstance(node, str):
+            tables[-1][-1].append(node)
+            return
         if not isinstance(node, WikiNode):
             return
         kind = node.kind
         if kind == NodeKind.TABLE:
-            handle_wikitext_table(config, ctx, word, lang, pos,
-                                  data, node, titles, source)
+            tables.append(["wikitext", node, titles, []])
             return
         elif kind == NodeKind.HTML and node.args == "table":
             classes = node.attrs.get("class", ())
             if "audiotable" in classes:
                 return
-            handle_html_table(config, ctx, word, lang, pos, data, node, titles,
-                              source)
+            tables.append(["html", node, titles, []])
             return
         elif kind in (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
                       NodeKind.LEVEL5, NodeKind.LEVEL6):
@@ -2536,6 +2609,12 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
             "NavFrame" in node.attrs.get("class", "").split()):
             recurse_navframe(node, titles)
             return
+        if kind == NodeKind.LINK:
+            if len(node.args) > 1:
+                recurse(node.args[1:], titles)
+            else:
+                recurse(node.args[0], titles)
+            return
         for x in node.children:
             recurse(x, titles)
 
@@ -2543,15 +2622,19 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
     for x in tree.children:
         recurse(x, [])
 
+    # Process the tables we found
+    process_tables()
+
     # XXX this code is used for extracting tables for inflection tests
-    if section != "Mutation":
-        with open("temp.XXX", "w") as f:
-            f.write(word + "\n")
-            f.write(lang + "\n")
-            f.write(pos + "\n")
-            f.write(section + "\n")
-            text = ctx.node_to_wikitext(tree)
-            f.write(text + "\n")
+    if True:
+        if section != "Mutation":
+            with open("temp.XXX", "w") as f:
+                f.write(word + "\n")
+                f.write(lang + "\n")
+                f.write(pos + "\n")
+                f.write(section + "\n")
+                text = ctx.node_to_wikitext(tree)
+                f.write(text + "\n")
 
 # XXX check interdecir/Spanish - singular/plural issues
 
