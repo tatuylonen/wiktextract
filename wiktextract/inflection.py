@@ -1115,6 +1115,8 @@ def parse_title(title, source):
     for m in re.finditer(title_contains_wordtags_re, title):
         word_tags.extend(title_contains_wordtags_map[
             m.group(0).lower()].split())
+    if re.search(r"Conjugation of (s’|se ).*French verbs", title):
+        global_tags.append("reflexive")
     # Check for <x>-type at the beginning of title (e.g., Armenian) and various
     # other ways of specifying an inflection class.
     for m in re.finditer(r"\b(\w+-type|accent-\w+|\w+-stem|[^ ]+ gradation|"
