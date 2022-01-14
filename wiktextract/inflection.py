@@ -319,6 +319,11 @@ lang_specific = {
     "Emilian": {
         "next": "romance-group",
     },
+    "English": {
+        "form_transformations": [
+            ["verb", "^\(to\) ", ""],
+        ],
+    },
     "Estonian": {
         "hdr_expand_first": set(["non-finite"]),
         "hdr_expand_cont": set(["voice"]),
@@ -2346,6 +2351,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
             # Parse a table row.
             row = []
             style = None
+            have_nonempty = False  # Have nonempty cell not from rowspan
             for col in node.children:
                 if not isinstance(col, WikiNode):
                     continue
@@ -2444,6 +2450,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                         cols_headered[len(row)] = True
                         celltext = ""
                 # XXX extra tags, see "target" above
+                have_nonempty |= is_title or celltext != ""
                 cell = InflCell(celltext, is_title, len(row), colspan, rowspan)
                 for i in range(0, colspan):
                     if rowspan > 1:
@@ -2463,7 +2470,8 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     row.append(InflCell("", False, len(row), 1, 1))
                 row.append(cols_fill[i])
             # print("  ROW {!r}".format(row))
-            rows.append(row)
+            if have_nonempty:
+                rows.append(row)
         elif kind in (NodeKind.TABLE_HEADER_CELL, NodeKind.TABLE_CELL):
             # print("  TOP-LEVEL CELL", node)
             pass
