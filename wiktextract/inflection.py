@@ -213,6 +213,7 @@ lang_specific = {
         "skip_tense_tense": False,
         "stop_non_finite_non_finite": True,
         "stop_non_finite_voice": False,
+        "stop_non_finite_tense": False,
         "strengths": ["strong", "weak"],
         "virile_nonvirile_remove": True,
         "voices": ["active", "passive"],
@@ -320,8 +321,15 @@ lang_specific = {
         "next": "romance-group",
     },
     "English": {
+        "stop_non_finite_tense": True,  # affect/English/Verb
         "form_transformations": [
             ["verb", "^\(to\) ", ""],
+            ["verb", "^I ", "first-person singular"],
+            ["verb", "^you ", "second-person"],
+            ["verb", "^he ", "third-person singular"],
+            ["verb", "^we ", "first-person plural"],
+            ["verb", "^you ", "second-person plural"],
+            ["verb", "^they ", "third-person plural"],
         ],
     },
     "Estonian": {
@@ -1488,10 +1496,17 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                         print("stopping on non-finite-voice")
                     break
             elif ("non-finite" in new_cats and
-                  cur_cats & set(("mood", "person", "number"))):
+                  cur_cats & set(("person", "number"))):
                 if celltext == debug_word:
                     print("stopping on non-finite new")
                 break
+            elif ("non-finite" in new_cats and
+                  "tense" in new_cats):
+                stop = get_lang_specific(lang, "stop_non_finite_tense")
+                if stop:
+                    if celltext == debug_word:
+                        print("stopping on non-finite new")
+                    break
             elif ("non-finite" in cur_cats and
                   new_cats & set(("mood",))):
                 if celltext == debug_word:
@@ -2246,6 +2261,20 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                 dt["tags"] = tags
                 new_ret.append(dt)
             ret = new_ret
+
+    # Post-process English inflection tables, addding "multiword-construction"
+    # when the number of words has increased.
+    if lang == "English" and pos == "verb":
+        word_words = len(word.split())
+        new_ret = []
+        for dt in ret:
+            form = dt.get("form", "")
+            if len(form.split()) > word_words:
+                dt = dt.copy()
+                dt["tags"] = list(dt.get("tags", []))
+                data_append(ctx, dt, "tags", "multiword-construction")
+            new_ret.append(dt)
+        ret = new_ret
 
     if word_tags:
         word_tags = list(sorted(set(word_tags)))

@@ -4924,7 +4924,7 @@ valid_tags = {
     "mostly": "misc",
     "motive-form": "mood",  # Verb form for Korean (e.g., 조사하다)
     "multiplicative": "case",  # adverbial case in Finnish
-    "multiword-construction": "misc",  # complex tenses in French conjugation
+    "multiword-construction": "misc",  # complex tenses in French/English conjugation
     "mutated": "misc",
     "mutation": "misc",
     "mutation-aspirate": "misc",
