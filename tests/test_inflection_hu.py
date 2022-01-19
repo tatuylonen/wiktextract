@@ -399,6 +399,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "futok",
                 "source": "Conjugation",
                 "tags": [
@@ -1796,15 +1803,22 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "front rounded harmony",
-                "source": "Declension title",
+                "source": "Declension",
                 "tags": [
                   "class"
                 ]
               },
               {
                 "form": "long/high vowel",
-                "source": "Declension title",
+                "source": "Declension",
                 "tags": [
                   "class"
                 ]
@@ -2135,6 +2149,13 @@ class InflTests(unittest.TestCase):
                   "possessive",
                   "possessive-single",
                   "predicative"
+                ]
+              },
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
                 ]
               },
               {
@@ -2506,15 +2527,22 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "front unrounded harmony",
-                "source": "Declension title",
+                "source": "Declension",
                 "tags": [
                   "class"
                 ]
               },
               {
                 "form": "-e-",
-                "source": "Declension title",
+                "source": "Declension",
                 "tags": [
                   "class"
                 ]

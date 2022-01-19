@@ -351,6 +351,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "saprotu",
                 "source": "Conjugation",
                 "tags": [
@@ -859,8 +866,15 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "declension-6",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "6th declension",
-                "source": "Declension title",
+                "source": "Declension",
                 "tags": [
                   "class"
                 ]
@@ -975,13 +989,6 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "plural",
                   "vocative"
-                ]
-              },
-              {
-                "form": "declension-6",
-                "source": "Declension title",
-                "tags": [
-                  "word-tags"
                 ]
               }
             ],
@@ -1154,6 +1161,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "zils",
                 "source": "Declension",

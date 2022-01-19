@@ -153,6 +153,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "wander",
                 "source": "Conjugation",
                 "tags": [
@@ -765,6 +772,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "affect",
                 "source": "Conjugation",

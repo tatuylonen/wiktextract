@@ -1133,7 +1133,7 @@ def parse_title(title, source):
                          r"(1st|2nd|3rd|4th|5th|6th) declension|"
                          r"\w[\w ]* harmony)\b", title):
         dt = {"form": m.group(1),
-              "source": source + " title",
+              "source": source,
               "tags": ["class"]}
         extra_forms.append(dt)
     # Parse parenthesized part from title
@@ -1147,7 +1147,7 @@ def parse_title(title, source):
                 if m:
                     tags = title_elemstart_map[m.group(1)].split()
                     dt = {"form": elem[m.end():],
-                          "source": source + " title",
+                          "source": source,
                           "tags": tags}
                     extra_forms.append(dt)
     # For titles that contains no parenthesized parts, do some special
@@ -1158,7 +1158,7 @@ def parse_title(title, source):
         if m is not None:
             dt = {"form": m.group(2),
                   "tags": ["class"],
-                  "source": source + " title"}
+                  "source": source}
             extra_forms.append(dt)
         for elem in title.split(","):
             elem = elem.strip()
@@ -1167,7 +1167,7 @@ def parse_title(title, source):
             elif elem.endswith("-stem"):
                 dt = {"form": elem,
                       "tags": ["class"],
-                      "source": source + " title"}
+                      "source": source}
                 extra_forms.append(dt)
     return global_tags, table_tags, extra_forms
 
@@ -2361,11 +2361,12 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
     # Always insert "table-tags" detail as the first entry in any inflection
     # table.  This way we can reliably detect where a new table starts.
     # Table-tags applies until the next table-tags entry.
-    table_tags = list(sorted(set(table_tags)))
-    dt = {"form": " ".join(table_tags),
-          "source": source + " title",
-          "tags": ["table-tags"]}
-    ret = [dt] + ret
+    if ret or table_tags:
+        table_tags = list(sorted(set(table_tags)))
+        dt = {"form": " ".join(table_tags),
+              "source": source,
+              "tags": ["table-tags"]}
+        ret = [dt] + ret
     return ret
 
 

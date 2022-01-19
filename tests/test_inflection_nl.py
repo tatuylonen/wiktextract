@@ -2,7 +2,7 @@
 #
 # Tests for parsing inflection tables
 #
-# Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2021-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
 import json
@@ -237,8 +237,15 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "strong",
+                "source": "Inflection",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "7",
-                "source": "Inflection title",
+                "source": "Inflection",
                 "tags": [
                   "class"
                 ]
@@ -468,13 +475,6 @@ class InflTests(unittest.TestCase):
                   "participle",
                   "past"
                 ]
-              },
-              {
-                "form": "strong",
-                "source": "Inflection title",
-                "tags": [
-                  "word-tags"
-                ]
               }
             ],
         }
@@ -606,6 +606,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Inflection",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "mooi",
                 "source": "Inflection",

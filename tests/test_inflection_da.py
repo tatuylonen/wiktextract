@@ -104,6 +104,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Inflection",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "motorsav",
                 "source": "Inflection",
                 "tags": [
@@ -296,6 +303,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
            "forms": [
+              {
+                "form": "",
+                "source": "Inflection",
+                "tags": [
+                  "table-tags"
+                ]
+              },
              {
                "form": "patter",
                "source": "Inflection",
@@ -483,6 +497,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Inflection",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "kedelig",
                 "source": "Inflection",

@@ -492,8 +492,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                  "form": "irregular",
+                  "source": "Conjugation",
+                  "tags": ["table-tags"],
+              },
+              {
                   "form": "e-i alternation",
-                  "source": "Conjugation title",
+                  "source": "Conjugation",
                   "tags": ["class"],
               },
               {
@@ -1228,12 +1233,7 @@ class InflTests(unittest.TestCase):
                   "plural",
                   "third-person"
                 ]
-              },
-              {
-                  "form": "irregular",
-                  "source": "Conjugation title",
-                  "tags": ["word-tags"],
-              },
+              }
             ],
         }
         self.assertEqual(expected, ret)
@@ -1840,6 +1840,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "apoltronarse",
                 "source": "Conjugation",
@@ -2571,6 +2578,13 @@ class InflTests(unittest.TestCase):
                   "negative",
                   "plural",
                   "third-person"
+                ]
+              },
+              {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
                 ]
               },
               {

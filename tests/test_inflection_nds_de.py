@@ -30,7 +30,7 @@ class InflTests(unittest.TestCase):
                                  section, tree)
         return data
 
-    def test_Finnish_verb1(self):
+    def test_GermanLowGerman_verb1(self):
         ret = self.xinfl("kriegen", "German Low German", "verb",
                          "Conjugation", """
 <div class="NavFrame" style="width%3A+42em">
@@ -171,8 +171,15 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "strong",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "1 strong verb",
-                "source": "Conjugation title",
+                "source": "Conjugation",
                 "tags": [
                   "class"
                 ]
@@ -346,13 +353,6 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "participle",
                   "past"
-                ]
-              },
-              {
-                "form": "strong",
-                "source": "Conjugation title",
-                "tags": [
-                  "word-tags"
                 ]
               }
             ],

@@ -437,6 +437,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                  "form": "imperfective",
+                  "source": "Conjugation",
+                  "tags": [
+                      "table-tags"
+                  ]
+              },
+              {
                 "form": "mówić",
                 "source": "Conjugation",
                 "tags": [
@@ -1228,13 +1235,6 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "noun-from-verb",
                 ]
-              },
-              {
-                "form": "imperfective",
-                "source": "Conjugation title",
-                "tags": [
-                  "word-tags"
-                ]
               }
             ],
         }
@@ -1341,6 +1341,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                  "form": "",
+                  "source": "Declension",
+                  "tags": [
+                      "table-tags"
+                  ]
+              },
               {
                 "form": "dziecko",
                 "source": "Declension",
@@ -1593,6 +1600,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                  "form": "",
+                  "source": "Declension",
+                  "tags": [
+                      "table-tags"
+                  ]
+              },
               {
                 "form": "wysoki",
                 "source": "Declension",

@@ -103,6 +103,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "berg",
                 "source": "Declension",
                 "tags": [
@@ -344,6 +351,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "irregular",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "kunna",
                 "source": "Conjugation",
                 "tags": [
@@ -465,14 +479,7 @@ class InflTests(unittest.TestCase):
               },
               {'form': '-',
                'source': 'Conjugation',
-               'tags': ['participle', 'past']},
-              {
-                "form": "irregular",
-                "source": "Conjugation title",
-                "tags": [
-                  "word-tags"
-                ]
-              }
+               'tags': ['participle', 'past']}
             ],
         }
         self.assertEqual(expected, ret)
@@ -803,6 +810,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "weak",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "simma",
                 "source": "Conjugation",
                 "tags": [
@@ -995,17 +1009,33 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "weak",
-                "source": "Conjugation title",
+                "form": "strong",
+                "source": "Conjugation",
                 "tags": [
-                  "word-tags"
+                  "table-tags"
                 ]
               },
               {
                 "form": "3 strong",
-                "source": "Conjugation title",
+                "source": "Conjugation",
                 "tags": [
                   "class"
+                ]
+              },
+              {
+                "form": "simma",
+                "source": "Conjugation",
+                "tags": [
+                  "active",
+                  "infinitive"
+                ]
+              },
+              {
+                "form": "simmas",
+                "source": "Conjugation",
+                "tags": [
+                  "infinitive",
+                  "passive"
                 ]
               },
               {
@@ -1032,6 +1062,15 @@ class InflTests(unittest.TestCase):
                   "imperative"
                 ]
               },
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['imperative', 'passive']},
+              {'form': 'simmen',
+               'source': 'Conjugation',
+               'tags': ['active', 'archaic', 'imperative', 'plural']},
+              {'form': '-',
+               'source': 'Conjugation',
+               'tags': ['archaic', 'imperative', 'passive', 'plural']},
               {
                 "form": "simmer",
                 "source": "Conjugation",
@@ -1077,6 +1116,9 @@ class InflTests(unittest.TestCase):
                   "past"
                 ]
               },
+              {'form': 'simma',
+               'source': 'Conjugation',
+               'tags': ['active', 'archaic', 'indicative', 'plural', 'present']},
               {
                 "form": "summo",
                 "source": "Conjugation",
@@ -1088,7 +1130,10 @@ class InflTests(unittest.TestCase):
                   "plural"
                 ]
               },
-              {
+              {'form': 'simmas',
+               'source': 'Conjugation',
+               'tags': ['archaic', 'indicative', 'passive', 'plural', 'present']},
+             {
                 "form": "summos",
                 "source": "Conjugation",
                 "tags": [
@@ -1099,6 +1144,9 @@ class InflTests(unittest.TestCase):
                   "plural"
                 ]
               },
+              {'form': 'simme',
+               'source': 'Conjugation',
+               'tags': ['active', 'dated', 'present', 'subjunctive']},
               {
                 "form": "summe",
                 "source": "Conjugation",
@@ -1109,6 +1157,9 @@ class InflTests(unittest.TestCase):
                   "subjunctive"
                 ]
               },
+              {'form': 'simmes',
+               'source': 'Conjugation',
+               'tags': ['dated', 'passive', 'present', 'subjunctive']},
               {
                 "form": "summes",
                 "source": "Conjugation",
@@ -1119,19 +1170,15 @@ class InflTests(unittest.TestCase):
                   "subjunctive"
                 ]
               },
+              {'form': 'simmande',
+               'source': 'Conjugation',
+               'tags': ['participle', 'present']},
               {
                 "form": "summen",
                 "source": "Conjugation",
                 "tags": [
                   "participle",
                   "past"
-                ]
-              },
-              {
-                "form": "strong",
-                "source": "Conjugation title",
-                "tags": [
-                  "word-tags"
                 ]
               }
             ],
@@ -1268,6 +1315,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "vacker",
                 "source": "Declension",
@@ -1516,6 +1570,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "mos",
                 "source": "Declension",

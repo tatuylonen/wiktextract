@@ -688,6 +688,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "yardım",
                 "source": "Declension",
                 "tags": [
@@ -785,6 +792,13 @@ class InflTests(unittest.TestCase):
                   "definite",
                   "genitive",
                   "plural"
+                ]
+              },
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
                 ]
               },
               {

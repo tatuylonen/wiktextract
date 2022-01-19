@@ -772,6 +772,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "conjugation-1",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "accūsō",
                 "source": "Conjugation",
                 "tags": [
@@ -2337,13 +2344,6 @@ class InflTests(unittest.TestCase):
                   "noun-from-verb",
                   "supine"
                 ]
-              },
-              {
-                "form": "conjugation-1",
-                "source": "Conjugation title",
-                "tags": [
-                  "word-tags"
-                ]
               }
             ],
         }
@@ -2443,6 +2443,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "mare",
                 "source": "Declension",
@@ -2732,6 +2739,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "magnificus",
                 "source": "Declension",

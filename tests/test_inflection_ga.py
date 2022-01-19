@@ -339,8 +339,15 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "conjugation-1",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "First Conjugation",
-                "source": "Conjugation title",
+                "source": "Conjugation",
                 "tags": [
                   "class"
                 ]
@@ -1283,13 +1290,6 @@ class InflTests(unittest.TestCase):
                   "participle",
                   "past",
                 ]
-              },
-              {
-                "form": "conjugation-1",
-                "source": "Conjugation title",
-                "tags": [
-                  "word-tags"
-                ]
               }
             ],
         }
@@ -1335,6 +1335,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Mutation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "cois",
                 "source": "Mutation",
@@ -1499,6 +1506,13 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "cois",
                 "source": "Declension",
                 "tags": [
@@ -1568,6 +1582,13 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
                   "dative",
                   "indefinite",
                   "plural"
+                ]
+              },
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
                 ]
               },
               {
@@ -1751,6 +1772,13 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "sona",
                 "source": "Declension",

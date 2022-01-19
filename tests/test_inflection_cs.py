@@ -232,6 +232,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "myslím",
                 "source": "Conjugation",
                 "tags": [
@@ -340,6 +347,13 @@ class InflTests(unittest.TestCase):
               {'form': '-',
                'source': 'Conjugation',
                'tags': ['imperative', 'plural', 'present', 'third-person']},
+              {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "myslel",
                 "source": "Conjugation",
@@ -593,6 +607,13 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "mysle",
                 "source": "Conjugation",
                 "tags": [
@@ -771,6 +792,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "týden",
                 "source": "Declension",
@@ -1140,6 +1168,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "dobrý",
                 "source": "Declension",

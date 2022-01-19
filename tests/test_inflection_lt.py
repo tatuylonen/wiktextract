@@ -399,6 +399,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "važiuoju",
                 "source": "Conjugation",
                 "tags": [
@@ -910,6 +917,13 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "važiuojąs",
                 "source": "Conjugation",
                 "tags": [
@@ -1201,6 +1215,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "akìs",
                 "source": "Declension",

@@ -645,15 +645,22 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
                 {
+                    "form": "strong",
+                    "source": "Conjugation",
+                    "tags": [
+                        "table-tags"
+                    ]
+                },
+                {
                     "form": "1 strong",
-                    "source": "Conjugation title",
+                    "source": "Conjugation",
                     "tags": [
                         "class"
                     ]
                 },
                 {
                     "form": "sein",
-                    "source": "Conjugation title",
+                    "source": "Conjugation",
                     "tags": ["auxiliary"],
                 },
                 {
@@ -973,9 +980,23 @@ class InflTests(unittest.TestCase):
                 },
                 {
                     "form": "strong",
-                    "source": "Conjugation title",
+                    "source": "Conjugation",
                     "tags": [
-                        "word-tags"
+                        "table-tags"
+                    ]
+                },
+                {
+                    "form": "1 strong",
+                    "source": "Conjugation",
+                    "tags": [
+                        "class"
+                    ]
+                },
+                {
+                    "form": "sein",
+                    "source": "Conjugation",
+                    "tags": [
+                        "auxiliary"
                     ]
                 },
                 {
@@ -1262,6 +1283,27 @@ class InflTests(unittest.TestCase):
                         "subjunctive-ii",
                         "subordinate-clause",
                         "third-person"
+                    ]
+                },
+                {
+                    "form": "strong",
+                    "source": "Conjugation",
+                    "tags": [
+                        "table-tags"
+                    ]
+                },
+                {
+                    "form": "1 strong",
+                    "source": "Conjugation",
+                    "tags": [
+                        "class"
+                    ]
+                },
+                {
+                    "form": "sein",
+                    "source": "Conjugation",
+                    "tags": [
+                        "auxiliary"
                     ]
                 },
                 {
@@ -2166,6 +2208,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "Bahnhof",
                 "source": "Declension",
                 "tags": [
@@ -2521,6 +2570,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "eiskalt",
                 "source": "Declension",
@@ -3215,6 +3271,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
           "forms": [
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
             {
               "form": "Tatarisch",
               "source": "Declension",

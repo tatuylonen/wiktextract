@@ -1110,15 +1110,22 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "t-d gradation",
-                "source": "Conjugation title",
+                "source": "Conjugation",
                 "tags": [
                   "class"
                 ]
               },
               {
                 "form": "53/muistaa",
-                "source": "Conjugation title",
+                "source": "Conjugation",
                 "tags": [
                   "class"
                 ]
@@ -3128,15 +3135,22 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "no gradation",
-                "source": "Declension title",
+                "source": "Declension",
                 "tags": [
                   "class"
                 ]
               },
               {
                 "form": "9/kala",
-                "source": "Declension title",
+                "source": "Declension",
                 "tags": [
                   "class"
                 ]
@@ -3411,8 +3425,15 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "kala",
-                "source": "Declension title",
+                "source": "Declension",
                 "tags": [
                   "class"
                 ]
@@ -3506,6 +3527,13 @@ class InflTests(unittest.TestCase):
 """)
         expected = {
             "forms": [
+              {
+                "form": "",
+                "source": "Inflection",
+                "tags": [
+                  "table-tags"
+                ]
+              },
               {
                 "form": "sikkaralle",
                 "source": "Inflection",

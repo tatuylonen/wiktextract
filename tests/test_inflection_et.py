@@ -230,6 +230,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "kodu",
                 "source": "Declension",
                 "tags": [
@@ -1282,15 +1289,22 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "no gradation",
-                "source": "Conjugation title",
+                "source": "Conjugation",
                 "tags": [
                   "class"
                 ]
               },
               {
                 "form": "36/tulema",
-                "source": "Conjugation title",
+                "source": "Conjugation",
                 "tags": [
                   "class"
                 ]

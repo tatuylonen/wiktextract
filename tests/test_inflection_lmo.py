@@ -691,6 +691,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "transitive",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "baià",
                 "source": "Conjugation",
                 "tags": [
@@ -1289,9 +1296,9 @@ class InflTests(unittest.TestCase):
               },
               {
                 "form": "transitive",
-                "source": "Conjugation title",
+                "source": "Conjugation",
                 "tags": [
-                  "word-tags"
+                  "table-tags"
                 ]
               },
               {

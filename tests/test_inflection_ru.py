@@ -168,6 +168,13 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "сле́дующий",
                 "roman": "slédujuščij",
                 "source": "Declension",
@@ -588,8 +595,15 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
+                "form": "imperfective transitive",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
                 "form": "4c imperfective transitive",
-                "source": "Conjugation title",
+                "source": "Conjugation",
                 "tags": [
                   "class"
                 ]
@@ -868,13 +882,6 @@ class InflTests(unittest.TestCase):
                   "neuter",
                   "past",
                   "plural"
-                ]
-              },
-              {
-                "form": "imperfective transitive",
-                "source": "Conjugation title",
-                "tags": [
-                  "word-tags"
                 ]
               }
             ],
