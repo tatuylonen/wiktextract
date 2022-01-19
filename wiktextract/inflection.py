@@ -22,7 +22,7 @@ from wiktextract.clean import clean_value
 
 
 # Set this to a word form to debug how that is analyzed, or None to disable
-debug_word = None
+debug_word = "—"
 
 
 # Column texts that are interpreted as an empty column.
@@ -1683,6 +1683,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
         ret.extend(extra_forms)
     cell_rowcnt = collections.defaultdict(int)
     seen_cells = set()
+    has_covering_hdr = set()
+    some_has_covered_text = False
     for row in rows:
         # print("ROW:", row)
         if not row:
@@ -1779,6 +1781,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                 have_hdr = True
                 # print("HAVE_HDR: {} rowtags={}".format(col, rowtags))
                 # Update rowtags and coltags
+                has_covering_hdr.add(j)
                 new_rowtags = []
                 new_coltags = []
                 all_hdr_tags = []
@@ -2163,7 +2166,12 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                         if form in IGNORED_COLVALUES:
                             if "dummy-ignore-skipped" in tags:
                                 continue
+                            if (j not in has_covering_hdr and
+                                some_has_covered_text):
+                                continue
                             form = "-"
+                        elif j in has_covering_hdr:
+                            some_has_covered_text = True
 
                         # Remove the dummy mood tag that we sometimes
                         # use to block adding other mood and related

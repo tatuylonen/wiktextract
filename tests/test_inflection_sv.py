@@ -2,7 +2,7 @@
 #
 # Tests for parsing inflection tables
 #
-# Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2021-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
 import json
@@ -1437,6 +1437,119 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "definite",
                   "superlative"
+                ]
+              }
+            ],
+        }
+        self.assertEqual(expected, ret)
+
+    def test_Swedish_noun2(self):
+        ret = self.xinfl("mos", "Swedish", "noun", "Declension", """
+{| class="inflection-table+vsSwitcher" data-toggle-category="inflection" style="border%3A+solid+1px+%23CCCCFF%3B+text-align%3Aleft%3B" cellspacing="1" cellpadding="2"
+
+|- style="background%3A+%23CCCCFF%3B+vertical-align%3Atop%3B"
+
+! class="vsToggleElement" colspan="5" | Declension of <i class="Latn+mention" lang="sv">[[mos#Swedish|mos]]</i>&nbsp;
+
+
+|- class="vsHide" style="background%3A+%23CCCCFF%3B"
+
+! rowspan="2" style="min-width%3A+12em%3B" |
+
+
+! colspan="2" | Uncountable
+
+
+! colspan="2" |
+
+
+|- class="vsHide" style="background%3A+%23CCCCFF%3B"
+
+! style="min-width%3A+12em%3B" | Indefinite
+
+
+! style="min-width%3A+12em%3B" | Definite
+
+
+! style="min-width%3A+12em%3B" |
+
+
+! style="min-width%3A+12em%3B" |
+
+
+|- class="vsHide" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23E6E6FF%3B" | Nominative
+
+
+| <span class="Latn+form-of+lang-sv+indef%7Cnom%7Cs-form-of+++++++" lang="sv">[[mos#Swedish|mos]]</span>
+
+
+| <span class="Latn+form-of+lang-sv+def%7Cnom%7Cs-form-of+++++++" lang="sv">[[moset#Swedish|moset]]</span>
+
+
+| &mdash;
+
+
+| &mdash;
+
+
+|- class="vsHide" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23E6E6FF%3B" | Genitive
+
+
+| <span class="Latn+form-of+lang-sv+indef%7Cgen%7Cs-form-of+++++++" lang="sv">[[mos#Swedish|mos]]</span>
+
+
+| <span class="Latn+form-of+lang-sv+def%7Cgen%7Cs-form-of+++++++" lang="sv">[[mosets#Swedish|mosets]]</span>
+
+
+| &mdash;
+
+
+| &mdash;
+
+
+|}
+[[Category:Swedish nouns]]
+""")
+        expected = {
+            "forms": [
+              {
+                "form": "mos",
+                "source": "Declension",
+                "tags": [
+                  "indefinite",
+                  "nominative",
+                  "uncountable"
+                ]
+              },
+              {
+                "form": "moset",
+                "source": "Declension",
+                "tags": [
+                  "definite",
+                  "nominative",
+                  "uncountable"
+                ]
+              },
+              {
+                "form": "mos",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "indefinite",
+                  "uncountable"
+                ]
+              },
+              {
+                "form": "mosets",
+                "source": "Declension",
+                "tags": [
+                  "definite",
+                  "genitive",
+                  "uncountable"
                 ]
               }
             ],
