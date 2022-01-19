@@ -781,20 +781,26 @@ class InflCell(object):
         "start",
         "colspan",
         "rowspan",
+        "target",
     )
-    def __init__(self, text, is_title, start, colspan, rowspan):
+    def __init__(self, text, is_title, start, colspan, rowspan, target):
         assert isinstance(text, str)
         assert is_title in (True, False)
         assert isinstance(start, int)
         assert isinstance(colspan, int) and colspan >= 1
         assert isinstance(rowspan, int) and rowspan >= 1
+        assert target is None or isinstance(target, str)
         self.text = text.strip()
         self.is_title = text and is_title
         self.colspan = colspan
         self.rowspan = rowspan
+        self.target = target
     def __str__(self):
-        return "{}/{}/{}/{}".format(
-            self.text, self.is_title, self.colspan, self.rowspan)
+        v = "{}/{}/{}/{!r}".format(
+                self.text, self.is_title, self.colspan, self.rowspan)
+        if self.target:
+            v += ": {!r}".format(self.target)
+        return v
     def __repr__(self):
         return str(self)
 
@@ -1781,11 +1787,29 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
             if not col:
                 continue
             row_empty = False
+            is_title = cell.is_title
+
+            # If the cell has a target, i.e., text after colon, interpret
+            # it as simply specifying a value for that value and ignore
+            # it otherwise.
+            if cell.target:
+                text, refs, defs, hdr_tags = clean_header(word, col, True)
+                if not text:
+                    continue
+                refs_tags = set()
+                for ref in refs:
+                    if ref in def_ht:
+                        refs_tags.update(def_ht[ref])
+                rowtags = expand_header(ctx, word, lang, pos, text, [],
+                                        silent=True)
+                rowtags = list(set(tuple(sorted(set(x) | refs_tags))
+                                   for x in rowtags))
+                is_title = False
+                col = cell.target
 
             # print(rownum, j, col)
-            if cell.is_title:
+            if is_title:
                 # It is a header cell
-                col = re.sub(r"\s+", " ", col)
                 text, refs, defs, hdr_tags = clean_header(word, col, True)
                 if not text:
                     continue
@@ -1798,6 +1822,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                 # Expand header to tags
                 v = expand_header(ctx, word, lang, pos, text, [], silent=True)
                 # print("EXPANDED {!r} to {}".format(text, v))
+
                 # Mark that the column has text (we are not at top)
                 while len(col_has_text) <= j:
                     col_has_text.append(False)
@@ -2495,7 +2520,6 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 is_title = False
                 if idx >= 0 and titletext[:idx] in infl_map:
                     target = titletext[idx + 2:].strip()
-                    # XXX add tags from target
                     celltext = celltext[:idx]
                     is_title = True
                 elif (kind == NodeKind.TABLE_HEADER_CELL and
@@ -2537,9 +2561,9 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     if any("*" in tt for tt in v):
                         cols_headered[len(row)] = True
                         celltext = ""
-                # XXX extra tags, see "target" above
                 have_nonempty |= is_title or celltext != ""
-                cell = InflCell(celltext, is_title, len(row), colspan, rowspan)
+                cell = InflCell(celltext, is_title, len(row), colspan, rowspan,
+                                target)
                 for i in range(0, colspan):
                     if rowspan > 1:
                         while len(cols_fill) <= len(row):
@@ -2555,7 +2579,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     continue
                 cols_filled[i] -= 1
                 while len(row) < i:
-                    row.append(InflCell("", False, len(row), 1, 1))
+                    row.append(InflCell("", False, len(row), 1, 1, None))
                 row.append(cols_fill[i])
             # print("  ROW {!r}".format(row))
             if have_nonempty:
