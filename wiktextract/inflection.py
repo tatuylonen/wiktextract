@@ -75,7 +75,7 @@ title_contains_global_re = re.compile(
     .format("|".join(re.escape(x)
                      for x in title_contains_global_map.keys())))
 
-# Words in title that cause addition of tags to word-tags "form"
+# Words in title that cause addition of tags to table-tags "form"
 title_contains_wordtags_map = {
     "pf": "perfective",
     "impf": "imperfective",
@@ -135,7 +135,8 @@ title_contains_wordtags_re = re.compile(
     .format("|".join(re.escape(x)
                      for x in title_contains_wordtags_map.keys())))
 
-# Parenthesized elements in title that are converted to tags in "word-tags" form
+# Parenthesized elements in title that are converted to tags in
+# "table-tags" form
 title_elements_map = {
     "weak": "weak",
     "strong": "strong",
@@ -1094,9 +1095,9 @@ def clean_header(word, col, skip_paren):
 
 @functools.lru_cache(10000)
 def parse_title(title, source):
-    """Parses inflection table title.  This returns (global_tags, word_tags,
+    """Parses inflection table title.  This returns (global_tags, table_tags,
     extra_forms), where ``global_tags`` is tags to be added to each inflection
-    entry, ``word_tags`` are tags for the word but not to be added to every
+    entry, ``table_tags`` are tags for the word but not to be added to every
     form, and ``extra_forms`` is dictionary describing additional forms to be
     included in the part-of-speech entry)."""
     assert isinstance(title, str)
@@ -1106,7 +1107,7 @@ def parse_title(title, source):
     title = re.sub(r"\s+", " ", title)
     # print("PARSE_TITLE:", title)
     global_tags = []
-    word_tags = []
+    table_tags = []
     extra_forms = []
     # Check for the case that the title is in infl_map
     if title in infl_map:
@@ -1117,9 +1118,9 @@ def parse_title(title, source):
     for m in re.finditer(title_contains_global_re, title):
         global_tags.extend(title_contains_global_map[
             m.group(0).lower()].split())
-    # Add certain tags to word-tags "form" based on contained words
+    # Add certain tags to table-tags "form" based on contained words
     for m in re.finditer(title_contains_wordtags_re, title):
-        word_tags.extend(title_contains_wordtags_map[
+        table_tags.extend(title_contains_wordtags_map[
             m.group(0).lower()].split())
     if re.search(r"Conjugation of (s’|se ).*French verbs", title):
         global_tags.append("reflexive")
@@ -1140,7 +1141,7 @@ def parse_title(title, source):
         for elem in m.group(1).split(","):
             elem = elem.strip()
             if elem in title_elements_map:
-                word_tags.extend(title_elements_map[elem].split())
+                table_tags.extend(title_elements_map[elem].split())
             else:
                 m = re.match(title_elemstart_re, elem)
                 if m:
@@ -1162,13 +1163,13 @@ def parse_title(title, source):
         for elem in title.split(","):
             elem = elem.strip()
             if elem in title_elements_map:
-                word_tags.extend(title_elements_map[elem].split())
+                table_tags.extend(title_elements_map[elem].split())
             elif elem.endswith("-stem"):
                 dt = {"form": elem,
                       "tags": ["class"],
                       "source": source + " title"}
                 extra_forms.append(dt)
-    return global_tags, word_tags, extra_forms
+    return global_tags, table_tags, extra_forms
 
 
 def expand_header(ctx, word, lang, pos, text, tags0, silent=False):
@@ -1720,12 +1721,12 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
     rownum = 0
     title = None
     global_tags = []
-    word_tags = []
+    table_tags = []
     for title in titles:
-        more_global_tags, more_word_tags, extra_forms = \
+        more_global_tags, more_table_tags, extra_forms = \
             parse_title(title, source)
         global_tags.extend(more_global_tags)
-        word_tags.extend(more_word_tags)
+        table_tags.extend(more_table_tags)
         ret.extend(extra_forms)
     cell_rowcnt = collections.defaultdict(int)
     seen_cells = set()
@@ -1754,10 +1755,10 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                 title = text
                 if re.match(r"(Note:|Notes:)", title):
                     continue
-                more_global_tags, more_word_tags, extra_forms = \
+                more_global_tags, more_table_tags, extra_forms = \
                     parse_title(title, source)
                 global_tags.extend(more_global_tags)
-                word_tags.extend(more_word_tags)
+                table_tags.extend(more_table_tags)
                 ret.extend(extra_forms)
             continue  # Skip title rows without incrementing i
         rowtags = [()]
@@ -1854,7 +1855,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                     for ct0 in compute_coltags(lang, pos, hdrspans, j,
                                                colspan, False, col):
                         tags0 = (set(rt0) | set(ct0) | set(global_tags) |
-                                 set(word_tags))
+                                 set(table_tags))
                         alt_tags = expand_header(ctx, word, lang, pos,
                                                  text, tags0)
                         for tt in alt_tags:
@@ -1863,7 +1864,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                             tt = set(tt)
                             # Certain tags are always moved to word-level tags
                             if tt & TAGS_FORCED_WORDTAGS:
-                                word_tags.extend(tt & TAGS_FORCED_WORDTAGS)
+                                table_tags.extend(tt & TAGS_FORCED_WORDTAGS)
                                 tt = tt - TAGS_FORCED_WORDTAGS
                             # Add tags from referenced footnotes
                             tt.update(refs_tags)
@@ -2357,13 +2358,14 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
             new_ret.append(dt)
         ret = new_ret
 
-    if word_tags:
-        word_tags = list(sorted(set(word_tags)))
-        dt = {"form": " ".join(word_tags),
-              "source": source + " title",
-              "tags": ["word-tags"]}
-        ret.append(dt)
-
+    # Always insert "table-tags" detail as the first entry in any inflection
+    # table.  This way we can reliably detect where a new table starts.
+    # Table-tags applies until the next table-tags entry.
+    table_tags = list(sorted(set(table_tags)))
+    dt = {"form": " ".join(table_tags),
+          "source": source + " title",
+          "tags": ["table-tags"]}
+    ret = [dt] + ret
     return ret
 
 
@@ -2394,8 +2396,13 @@ def handle_generic_table(ctx, data, word, lang, pos, rows, titles, source,
 
     # Add the returned forms but eliminate duplicates.
     have_forms = set()
-    for dt in data.get("forms", ()):
-        have_forms.add(freeze(dt))
+    # XXX Pending removal - we now include all forms from tables, even if
+    # they might duplicate those in word head, as that gives a more accurate
+    # picture of what is extracted from inflection tables.
+    # for dt in data.get("forms", ()):
+    #     tags = dt.get("tags", ())
+    #     if "table-tags" not in tags:
+    #         have_forms.add(freeze(dt))
     for dt in ret:
         fdt = freeze(dt)
         if fdt in have_forms:
@@ -2412,7 +2419,8 @@ def handle_generic_table(ctx, data, word, lang, pos, rows, titles, source,
                 if tags2 and freeze(dt2) in have_forms:
                     break  # Already have without archaic
         else:
-            have_forms.add(fdt)
+            if "table-tags" not in tags:
+                have_forms.add(fdt)
             data_append(ctx, data, "forms", dt)
 
 

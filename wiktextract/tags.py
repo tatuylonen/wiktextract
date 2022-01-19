@@ -5229,6 +5229,7 @@ valid_tags = {
     "synecdoche": "misc",
     "synonym": "misc",
     "synonym-of": "misc",
+    "table-tags": "detail",  # Tags from inflection table, for all entries
     "taboo": "misc",
     "tafa-form": "misc",  # Malagasy verbs
     "temporal": "misc",  # relating to time/tense, e.g., talamaq; Finnish adverbials
@@ -5442,7 +5443,6 @@ valid_tags = {
     "with-él": "with",
     "without-article": "misc",  # E.g., grüun/Cimbrian
     "without-noun": "misc",
-    "word-tags": "detail",
     "æ-tensing": "misc",
     "има": "misc",  # Distinguishes certain verb forms in Macedonian
 }
