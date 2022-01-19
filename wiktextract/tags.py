@@ -4979,6 +4979,7 @@ valid_tags = {
     "non-durative": "misc",  # non-durative sentence, e.g., ϣⲗⲏⲗ/Coptic
     "non-numeral": "misc",  # Assamese noun forms
     "non-past": "tense",  # Verb tense (e.g., Korean)
+    "non-prospective": "misc",  # e.g. götürmek/Turkish
     "non-scientific": "misc",
     "non-subject": "misc",    # ishno'/Chickasaw
     "nonce-word": "misc",
@@ -5118,7 +5119,7 @@ valid_tags = {
     "proper-noun": "pos",
     "proscribed": "misc",
     "prosecutive": "case",  # Case (move along a surface or way); Greenlandic -nnguaq
-    "prospective": "misc",
+    "prospective": "misc",  # E.g., götürmek/Turkish
     "prothesis": "misc",
     "prothesis-h": "misc",
     "prothesis-t": "misc",
