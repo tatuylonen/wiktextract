@@ -1302,8 +1302,10 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
 
     # Handle parenthesized descriptors for the word form and links to
     # related words
-    parens = list(m.group(1) for m in
-                  re.finditer(r"\((([^()]|\([^()]*\))*)\)", text))
+    parens = list(m.group(2) for m in
+                  re.finditer(r"(^|\s)\((([^()]|\([^()]*\))*)\)", text))
+    parens.extend(m.group(1) for m in
+                  re.finditer(r"[^\s]\((([^()]|\([^()]*\))*)\)($|\s)", text))
     have_romanization = False
     have_ruby = False
     hiragana = ""
