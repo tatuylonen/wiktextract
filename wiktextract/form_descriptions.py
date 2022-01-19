@@ -1199,7 +1199,11 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
         return
 
     # Handle the part of the head that is not in parentheses
-    base = re.sub(r"(\s?)\^?\(([^()]|\([^(]*\))*\)", r"\1", text)
+    base = text
+    base = re.sub(r"\(([^()]|\([^(]*\))*\)($|\s)", r"\2", base)
+    base = re.sub(r"(^|\s)\(([^()]|\([^(]*\))*\)", r"\1", base)
+    base = re.sub(r"(\s?)\^\(([^()]|\([^(]*\))*\)", r"\1", base)
+    print("CLEANED BASE:", base)
     base = re.sub(r"\?", " ", base)  # Removes uncertain articles etc
     base = re.sub(r"\s+", " ", base)
     base = re.sub(r" ([,;])", r"\1", base)
