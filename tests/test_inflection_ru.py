@@ -683,7 +683,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "бу́дупроизноси́ть",
+                "form": "бу́ду произноси́ть",
                 "roman": "búdu proiznosítʹ",
                 "source": "Conjugation",
                 "tags": [
@@ -703,7 +703,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "бу́дешьпроизноси́ть",
+                "form": "бу́дешь произноси́ть",
                 "roman": "búdešʹ proiznosítʹ",
                 "source": "Conjugation",
                 "tags": [
@@ -723,7 +723,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "бу́детпроизноси́ть",
+                "form": "бу́дет произноси́ть",
                 "roman": "búdet proiznosítʹ",
                 "source": "Conjugation",
                 "tags": [
@@ -743,7 +743,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "бу́демпроизноси́ть",
+                "form": "бу́дем произноси́ть",
                 "roman": "búdem proiznosítʹ",
                 "source": "Conjugation",
                 "tags": [
@@ -763,7 +763,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "бу́детепроизноси́ть",
+                "form": "бу́дете произноси́ть",
                 "roman": "búdete proiznosítʹ",
                 "source": "Conjugation",
                 "tags": [
@@ -783,7 +783,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "бу́дутпроизноси́ть",
+                "form": "бу́дут произноси́ть",
                 "roman": "búdut proiznosítʹ",
                 "source": "Conjugation",
                 "tags": [

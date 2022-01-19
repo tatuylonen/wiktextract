@@ -908,7 +908,7 @@ def clean_value(config, title, no_strip=False):
     # Remove references (<ref>...</ref>).
     title = re.sub(r"(?is)<\s*ref\b\s*[^>]*?>\s*.*?<\s*/\s*ref\s*>", "", title)
     # Replace <span>...</span> by stripped content without newlines
-    title = re.sub(r"(?is)<\s*span\b\s*[^>]*?>\s*(.*?)\s*<\s*/\s*span\s*>",
+    title = re.sub(r"(?is)<\s*span\b\s*[^>]*?>(.*?)\s*<\s*/\s*span\s*>",
                    lambda m: re.sub(r"\s+", " ", m.group(1)),
                    title)
     # Replace <br/> by comma space (it is used to express alternatives in some
@@ -996,6 +996,9 @@ def clean_value(config, title, no_strip=False):
     # Replace whitespace sequences by a single space.
     title = re.sub(r"[ \t\r]+", " ", title)
     title = re.sub(r" *\n+", "\n", title)
+    # Eliminate spaces around ellipsis in brackets
+    title = re.sub(r"\[\s*…\s*\]", "[…]", title)
+
     # This unicode quote seems to be used instead of apostrophe quite randomly
     # (about 4% of apostrophes in English entries, some in Finnish entries).
     # title = re.sub("\u2019", "'", title)  # Note: no r"..." here!
