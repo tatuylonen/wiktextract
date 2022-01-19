@@ -311,6 +311,8 @@ infl_map = {
     },
     "Verbal noun": "noun-from-verb",
     "Future part.": "future participle",
+    "Future I": "future future-i",
+    "Future II": "future future-ii",
     "Adverbial part.": "adverbial participle",
     "Potential": "potential",
     "potential": "potential",
@@ -489,6 +491,14 @@ infl_map = {
     "cu nuje": {"if": "first-person plural", "then": ""},
     "cu vuje": {"if": "second-person plural", "then": ""},
     "cu lóre": {"if": "third-person plural", "then": ""},
+
+    # Serbo-Croatian
+    "ja": {"if": "first-person singular", "then": ""},
+    "ti": {"if": "second-person singular", "then": ""},
+    "on / ona / ono": {"if": "third-person singular", "then": ""},
+    "mi": {"if": "first-person plural", "then": ""},
+    "vi": {"if": "second-person plural", "then": ""},
+    "oni / one / ona": {"if": "third-person plural", "then": ""},
     "non-finite forms": {
         "lang": ["Latin"],
         "then": "!",  # Reset column inheritance

@@ -2488,15 +2488,18 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 if not row:
                     style = cellstyle
                 target = None
+                titletext = celltext.strip()
+                while titletext and is_superscript(titletext[-1]):
+                    titletext = titletext[:-1]
                 idx = celltext.find(": ")
                 is_title = False
-                if idx >= 0 and celltext[:idx] in infl_map:
-                    target = celltext[idx + 2:].strip()
+                if idx >= 0 and titletext[:idx] in infl_map:
+                    target = titletext[idx + 2:].strip()
                     # XXX add tags from target
                     celltext = celltext[:idx]
                     is_title = True
                 elif (kind == NodeKind.TABLE_HEADER_CELL and
-                      celltext.find(" + ") < 0 and
+                      titletext.find(" + ") < 0 and
                       not any(isinstance(x, WikiNode) and
                               x.kind == NodeKind.HTML and
                               x.args == "span" and
@@ -2505,15 +2508,15 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     is_title = True
                 elif (re.sub(r"\s+", " ",
                              re.sub(r"\s*\([^)]*\)", "",
-                                    celltext)).strip() in infl_map and
-                      celltext not in IGNORED_COLVALUES and
-                      celltext != word and
-                      celltext not in ("I", "es")):
+                                    titletext)).strip() in infl_map and
+                      titletext not in IGNORED_COLVALUES and
+                      titletext != word and
+                      titletext not in ("I", "es")):
                     is_title = True
                 elif (style == cellstyle and
-                      celltext != word and
+                      titletext != word and
                       not style.startswith("////") and
-                      celltext.find(" + ") < 0):
+                      titletext.find(" + ") < 0):
                     is_title = True
                 if (not is_title and len(row) < len(cols_headered) and
                     cols_headered[len(row)]):
@@ -2522,7 +2525,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     is_title = True
                 if re.match(r"Conjugation of |Declension of |Inflection of|"
                             r"Mutation of|Notes\b",
-                            celltext):
+                            titletext):
                     is_title = True
                 if is_title:
                     while len(cols_headered) <= len(row):
