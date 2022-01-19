@@ -22,7 +22,7 @@ from wiktextract.clean import clean_value
 
 
 # Set this to a word form to debug how that is analyzed, or None to disable
-debug_word = "—"
+debug_word = None
 
 
 # Column texts that are interpreted as an empty column.
@@ -1629,6 +1629,46 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
     # for row in rows:
     #     print("  ", row)
 
+    # Check for forced rowspan kludge.  See e.g.
+    # maorski/Serbo-Croatian.  These are essentially multi-row
+    # cells implemented using <br> rather than separate cell.  We fix this
+    # by identifying rows where this happens, and splitting the current row
+    # to multiple rows by synthesizing additional cells.
+    new_rows = []
+    for row in rows:
+        split_row = (any(x.is_title and
+                         x.text in ("inanimate\nanimate",)
+                         for x in row) and
+                     all(x.rowspan == 1
+                         for x in row))
+        if not split_row:
+            new_rows.append(row)
+            continue
+        row1 = []
+        row2 = []
+        for cell in row:
+            cell1 = copy.deepcopy(cell)
+            if cell.text.find("\n") >= 0:
+                # Has more than one line - split this cell
+                parts = cell.text.strip().split("\n")
+                if len(parts) != 2:
+                    ctx.debug("forced rowspan kludge got {} parts: {!r}"
+                              .format(len(parts), cell.text))
+                cell2 = copy.deepcopy(cell)
+                cell1.text = parts[0]
+                cell2.text = parts[1]
+            else:
+                cell1.rowspan = 2
+                cell2 = cell1
+            row1.append(cell1)
+            row2.append(cell2)
+        new_rows.append(row1)
+        new_rows.append(row2)
+    rows = new_rows
+    # print("ROWS AFTER FORCED ROWSPAN KLUDGE:")
+    # for row in rows:
+    #     print("  ", row)
+
     # Parse definitions for references (from table itself and from text
     # after it)
     def_ht = {}
@@ -1992,14 +2032,20 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                     else:
                         lst = [""]
                         idx = 0
-                        for m in re.finditer(r"(^|\w)\((\w(\w\w?)?)\)",
+                        for m in re.finditer(r"(^|\w)\((\w(\w\w?)?"
+                                             r"(/\w(\w\w?)?)*)\)",
                                              alt):
                             new_lst = []
                             for x in lst:
                                 x += alt[idx: m.start()] + m.group(1)
                                 idx = m.end()
-                                new_lst.append(x)
-                                new_lst.append(x + m.group(2))
+                                v = m.group(2).split("/")
+                                if len(v) == 1:
+                                    new_lst.append(x)
+                                    new_lst.append(x + m.group(2))
+                                else:
+                                    for vv in v:
+                                        new_lst.append(x + vv)
                             lst = new_lst
                         for x in lst:
                             new_alts.append(x + alt[idx:])
