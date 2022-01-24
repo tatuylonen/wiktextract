@@ -402,3 +402,7 @@ Add tests to ensure that etymology templates and audio URLs are properly extract
 
 Fix parsing tell/English/Verb word head "(dialectal or nonstandard)"
 (appears very new, not yet in my test environment)
+
+götürmek/Turkish - inflection table "interrogative" not properly inherited
+to cells below (possibly other subtitles to).
+  - there are also participles per person, before persons are defined???

@@ -1126,12 +1126,13 @@ def parse_title(title, source):
         global_tags.append("reflexive")
     # Check for <x>-type at the beginning of title (e.g., Armenian) and various
     # other ways of specifying an inflection class.
-    for m in re.finditer(r"\b(\w+-type|accent-\w+|\w+-stem|[^ ]+ gradation|"
+    for m in re.finditer(r"\b([\w/]+-type|accent-\w+|"
+                         r"[\w/]+-stem|[^ ]+ gradation|"
                          r"[^ ]+ alternation|(First|Second|Third|Fourth|Fifth|"
                          r"Sixth|Seventh) (Conjugation|declension)|"
                          r"First and second declension|"
                          r"(1st|2nd|3rd|4th|5th|6th) declension|"
-                         r"\w[\w ]* harmony)\b", title):
+                         r"\w[\w/ ]* harmony)\b", title):
         dt = {"form": m.group(1),
               "source": source,
               "tags": ["class"]}
@@ -2004,8 +2005,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
             # Remove "*" from beginning of forms, as in non-attested
             # or reconstructed forms.  Otherwise it might confuse romanization
             # detection.
-            alts = list(x[1:] if re.match(r"\*[^ ]", x) else x
-                        for x in alts)
+            alts = list(re.sub(r"^\*\*?([^ ])", r"\1", x)
+                               for x in alts)
             alts = list(x for x in alts
                         if not re.match(r"pronounced with |\(with ", x))
             # Handle the special case where romanization is given under
@@ -2058,7 +2059,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                     else:
                         lst = [""]
                         idx = 0
-                        for m in re.finditer(r"(^|\w)\((\w(\w\w?)?"
+                        for m in re.finditer(r"(^|\w|\*)\((\w(\w\w?)?"
                                              r"(/\w(\w\w?)?)*)\)",
                                              alt):
                             new_lst = []
@@ -2132,9 +2133,15 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                 # Handle parentheses in the table element.  We parse
                 # tags anywhere and romanizations anywhere but beginning.
                 roman = base_roman
-                m = re.search(r"\s*\(([^)]*)\)", form)
+                paren = None
+                m = re.search(r"(\s+|^)\(([^)]*)\)", form)
                 if m is not None:
-                    paren = m.group(1)
+                    paren = m.group(2)
+                else:
+                    m = re.search(r"\(([^)]*)\)(\s+|$)", form)
+                    if m is not None:
+                        paren = m.group(1)
+                if paren is not None:
                     if classify_desc(paren) == "tags":
                         tagsets1, topics1 = decode_tags(paren)
                         if not topics1:
