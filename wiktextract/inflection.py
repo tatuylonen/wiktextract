@@ -2021,6 +2021,12 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                     for x in alts[len2:])):
                 alts = list((alts[i], "", alts[i + len2])
                             for i in range(len2))
+            elif (len(alts) > 2 and re.match(r"^\s*/.*/\s*$", alts[-1]) and
+                  all(not x.startswith("/") for x in alts[:-1])):
+                alts = list((alts[i], "", alts[-1])
+                            for i in range(len(alts) - 1))
+            # Check for IPAs where only the last entry is IPA and it applies
+            # to all preceding
             # Check for romanizations, forms first, romanizations under
             elif (len(alts) % 2 == 0 and
                   not any(x.find("(") >= 0 for x in alts) and
