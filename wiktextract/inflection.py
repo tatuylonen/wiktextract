@@ -2025,6 +2025,12 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                   all(not x.startswith("/") for x in alts[:-1])):
                 alts = list((alts[i], "", alts[-1])
                             for i in range(len(alts) - 1))
+            elif (len(alts) > 2 and
+                  not alts[0].startswith("/") and
+                  all(re.match(r"^\s*/.*/\s*$", alts[i])
+                      for i in range(1, len(alts)))):
+                alts = list((alts[0], "", alts[i])
+                            for i in range(1, len(alts)))
             # Check for IPAs where only the last entry is IPA and it applies
             # to all preceding
             # Check for romanizations, forms first, romanizations under
@@ -2285,6 +2291,12 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                         if not tags:
                             ctx.debug("inflection table: empty tags for {}"
                                       .format(form))
+
+                        # Warn if form looks like IPA
+                        if re.match(r"\s*/.*/\s*$", form):
+                            ctx.debug("inflection table form looks like IPA: "
+                                      "form={} tags={}"
+                                      .format(form, tags))
 
                         # Add the form
                         tags = list(sorted(tags))

@@ -2337,3 +2337,1605 @@ One special case is the future stem, used in the future and the conditional. Bef
             ],
         }
         self.assertEqual(expected, ret)
+
+    def test_French_verb3(self):
+        ret = self.xinfl("saurir", "French", "verb", "Conjugation", """
+This is a regular verb of the second conjugation, like finir, choisir, and most other verbs with infinitives ending in <i class="Latn+mention" lang="fr">[[-ir#French|-ir]]</i>. One salient feature of this conjugation is the repeated appearance of the infix <i class="Latn+mention" lang="fr">[[-iss-#French|-iss-]]</i>.
+<div class="NavFrame" style="clear%3Aboth">
+<div class="NavHead" align="left">Conjugation of ''saurir'' <span style="font-size%3A90%25%3B">(see also [[Appendix:French verbs]])</span></div>
+<div class="NavContent" align="center">
+
+{| style="background%3A%23F0F0F0%3Bwidth%3A100%25%3Bborder-collapse%3Aseparate%3Bborder-spacing%3A2px" class="inflection-table"
+
+|-
+
+! colspan="1" rowspan="2" style="background%3A%23e2e4c0" | <span title="infinitif">infinitive</span>
+
+
+! colspan="1" style="height%3A3em%3Bbackground%3A%23e2e4c0" | <small>simple</small>
+
+
+| saurir
+
+
+|-
+
+! colspan="1" style="height%3A3em%3Bbackground%3A%23e2e4c0" | <small>compound</small>
+
+
+! colspan="6" style="background%3A%23DEDEDE" | <i>[[avoir]]</i> + past participle
+
+
+|-
+
+! colspan="1" rowspan="2" style="background%3A%23e2e4c0" | <span title="participe+pr%C3%A9sent">present participle</span> or <span title>gerund</span><sup>1</sup>
+
+
+! colspan="1" style="height%3A3em%3Bbackground%3A%23e2e4c0" | <small>simple</small>
+
+
+| <span class="Latn+form-of+lang-fr+ppr-form-of+++++++" lang="fr">[[saurissant#French|saurissant]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.sɑ̃/</span> or <span class="IPA">/so.ʁi.sɑ̃/</span></span>
+
+
+|-
+
+! colspan="1" style="height%3A3em%3Bbackground%3A%23e2e4c0" | <small>compound</small>
+
+
+! colspan="6" style="background%3A%23DEDEDE" | <i>[[ayant]]</i> + past participle
+
+
+|-
+
+! colspan="2" style="background%3A%23e2e4c0" | <span title="participe+pass%C3%A9">past participle</span>
+
+
+| <span class="Latn+form-of+lang-fr+pp-form-of+++++++" lang="fr">[[sauri#French|sauri]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi/</span> or <span class="IPA">/so.ʁi/</span></span>
+
+
+|-
+
+! colspan="2" rowspan="2" |
+
+
+! colspan="3" style="background%3A%23C0C0C0" | singular
+
+
+! colspan="3" style="background%3A%23C0C0C0" | plural
+
+
+|-
+
+! style="background%3A%23C0C0C0%3Bwidth%3A12.5%25" | first
+
+
+! style="background%3A%23C0C0C0%3Bwidth%3A12.5%25" | second
+
+
+! style="background%3A%23C0C0C0%3Bwidth%3A12.5%25" | third
+
+
+! style="background%3A%23C0C0C0%3Bwidth%3A12.5%25" | first
+
+
+! style="background%3A%23C0C0C0%3Bwidth%3A12.5%25" | second
+
+
+! style="background%3A%23C0C0C0%3Bwidth%3A12.5%25" | third
+
+
+|-
+
+! style="background%3A%23c0cfe4" colspan="2" | <span title="indicatif">indicative</span>
+
+
+! style="background%3A%23c0cfe4" | je (j’)
+
+
+! style="background%3A%23c0cfe4" | tu
+
+
+! style="background%3A%23c0cfe4" | il, elle
+
+
+! style="background%3A%23c0cfe4" | nous
+
+
+! style="background%3A%23c0cfe4" | vous
+
+
+! style="background%3A%23c0cfe4" | ils, elles
+
+
+|-
+
+! rowspan="5" style="background%3A%23c0cfe4" | <small>(simple<br>tenses)</small>
+
+
+! style="height%3A3em%3Bbackground%3A%23c0cfe4" | <span title="pr%C3%A9sent">present</span>
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cs%7Cpres%7Cindc-form-of+++++++" lang="fr">[[sauris#French|sauris]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi/</span> or <span class="IPA">/so.ʁi/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cs%7Cpres%7Cindc-form-of+++++++" lang="fr">[[sauris#French|sauris]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi/</span> or <span class="IPA">/so.ʁi/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+3%7Cs%7Cpres%7Cindc-form-of+++++++" lang="fr">[[saurit#French|saurit]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi/</span> or <span class="IPA">/so.ʁi/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cp%7Cpres%7Cindc-form-of+++++++" lang="fr">[[saurissons#French|saurissons]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.sɔ̃/</span> or <span class="IPA">/so.ʁi.sɔ̃/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cp%7Cpres%7Cindc-form-of+++++++" lang="fr">[[saurissez#French|saurissez]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.se/</span> or <span class="IPA">/so.ʁi.se/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+3%7Cp%7Cpres%7Cindc-form-of+++++++" lang="fr">[[saurissent#French|saurissent]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁis/</span> or <span class="IPA">/so.ʁis/</span></span>
+
+
+|-
+
+! style="height%3A3em%3Bbackground%3A%23c0cfe4" | <span title="imparfait">imperfect</span>
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cs%7Cimpf%7Cindc-form-of+++++++" lang="fr">[[saurissais#French|saurissais]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.sɛ/</span> or <span class="IPA">/so.ʁi.sɛ/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cs%7Cimpf%7Cindc-form-of+++++++" lang="fr">[[saurissais#French|saurissais]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.sɛ/</span> or <span class="IPA">/so.ʁi.sɛ/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+3%7Cs%7Cimpf%7Cindc-form-of+++++++" lang="fr">[[saurissait#French|saurissait]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.sɛ/</span> or <span class="IPA">/so.ʁi.sɛ/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cp%7Cimpf%7Cindc-form-of+++++++" lang="fr">[[saurissions#French|saurissions]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.sjɔ̃/</span> or <span class="IPA">/so.ʁi.sjɔ̃/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cp%7Cimpf%7Cindc-form-of+++++++" lang="fr">[[saurissiez#French|saurissiez]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.sje/</span> or <span class="IPA">/so.ʁi.sje/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+3%7Cp%7Cimpf%7Cindc-form-of+++++++" lang="fr">[[saurissaient#French|saurissaient]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.sɛ/</span> or <span class="IPA">/so.ʁi.sɛ/</span></span>
+
+
+|-
+
+! style="height%3A3em%3Bbackground%3A%23c0cfe4" | <span title="pass%C3%A9+simple">past historic</span><sup>2</sup>
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cs%7Cphis-form-of+++++++" lang="fr">[[sauris#French|sauris]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi/</span> or <span class="IPA">/so.ʁi/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cs%7Cphis-form-of+++++++" lang="fr">[[sauris#French|sauris]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi/</span> or <span class="IPA">/so.ʁi/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+3%7Cs%7Cphis-form-of+++++++" lang="fr">[[saurit#French|saurit]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi/</span> or <span class="IPA">/so.ʁi/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cp%7Cphis-form-of+++++++" lang="fr">[[saurîmes#French|saurîmes]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁim/</span> or <span class="IPA">/so.ʁim/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cp%7Cphis-form-of+++++++" lang="fr">[[saurîtes#French|saurîtes]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁit/</span> or <span class="IPA">/so.ʁit/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+3%7Cp%7Cphis-form-of+++++++" lang="fr">[[saurirent#French|saurirent]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁiʁ/</span> or <span class="IPA">/so.ʁiʁ/</span></span>
+
+
+|-
+
+! style="height%3A3em%3Bbackground%3A%23c0cfe4" | <span title="futur+simple">future</span>
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cs%7Cfutr-form-of+++++++" lang="fr">[[saurirai#French|saurirai]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.ʁe/</span> or <span class="IPA">/so.ʁi.ʁe/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cs%7Cfutr-form-of+++++++" lang="fr">[[sauriras#French|sauriras]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.ʁa/</span> or <span class="IPA">/so.ʁi.ʁa/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+3%7Cs%7Cfutr-form-of+++++++" lang="fr">[[saurira#French|saurira]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.ʁa/</span> or <span class="IPA">/so.ʁi.ʁa/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cp%7Cfutr-form-of+++++++" lang="fr">[[saurirons#French|saurirons]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.ʁɔ̃/</span> or <span class="IPA">/so.ʁi.ʁɔ̃/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cp%7Cfutr-form-of+++++++" lang="fr">[[saurirez#French|saurirez]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.ʁe/</span> or <span class="IPA">/so.ʁi.ʁe/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+3%7Cp%7Cfutr-form-of+++++++" lang="fr">[[sauriront#French|sauriront]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.ʁɔ̃/</span> or <span class="IPA">/so.ʁi.ʁɔ̃/</span></span>
+
+
+|-
+
+! style="height%3A3em%3Bbackground%3A%23c0cfe4" | <span title="conditionnel+pr%C3%A9sent">conditional</span>
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cs%7Ccond-form-of+++++++" lang="fr">[[saurirais#French|saurirais]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.ʁɛ/</span> or <span class="IPA">/so.ʁi.ʁɛ/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cs%7Ccond-form-of+++++++" lang="fr">[[saurirais#French|saurirais]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.ʁɛ/</span> or <span class="IPA">/so.ʁi.ʁɛ/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+3%7Cs%7Ccond-form-of+++++++" lang="fr">[[saurirait#French|saurirait]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.ʁɛ/</span> or <span class="IPA">/so.ʁi.ʁɛ/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cp%7Ccond-form-of+++++++" lang="fr">[[sauririons#French|sauririons]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.ʁjɔ̃/</span> or <span class="IPA">/so.ʁi.ʁjɔ̃/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cp%7Ccond-form-of+++++++" lang="fr">[[sauririez#French|sauririez]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.ʁje/</span> or <span class="IPA">/so.ʁi.ʁje/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+3%7Cp%7Ccond-form-of+++++++" lang="fr">[[sauriraient#French|sauriraient]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.ʁɛ/</span> or <span class="IPA">/so.ʁi.ʁɛ/</span></span>
+
+
+|-
+
+! rowspan="5" style="background%3A%23c0cfe4" | <small>(compound<br>tenses)</small>
+
+
+! style="height%3A3em%3Bbackground%3A%23c0cfe4" | <span title="pass%C3%A9+compos%C3%A9">present perfect</span>
+
+
+! colspan="6" style="background%3A%23DEDEDE" | present indicative of <i>[[avoir]]</i> + past participle
+
+
+|-
+
+! style="height%3A3em%3Bbackground%3A%23c0cfe4" | <span title="plus-que-parfait">pluperfect</span>
+
+
+! colspan="6" style="background%3A%23DEDEDE" | imperfect indicative of <i>[[avoir]]</i> + past participle
+
+
+|-
+
+! style="height%3A3em%3Bbackground%3A%23c0cfe4" | <span title="pass%C3%A9+ant%C3%A9rieur">past anterior</span><sup>2</sup>
+
+
+! colspan="6" style="background%3A%23DEDEDE" | past historic of <i>[[avoir]]</i> + past participle
+
+
+|-
+
+! style="height%3A3em%3Bbackground%3A%23c0cfe4" | <span title="futur+ant%C3%A9rieur">future perfect</span>
+
+
+! colspan="6" style="background%3A%23DEDEDE" | future of <i>[[avoir]]</i> + past participle
+
+
+|-
+
+! style="height%3A3em%3Bbackground%3A%23c0cfe4" | <span title="conditionnel+pass%C3%A9">conditional perfect</span>
+
+
+! colspan="6" style="background%3A%23DEDEDE" | conditional of <i>[[avoir]]</i> + past participle
+
+
+|-
+
+! style="background%3A%23c0e4c0" colspan="2" | <span title="subjonctif">subjunctive</span>
+
+
+! style="background%3A%23c0e4c0" | que je (j’)
+
+
+! style="background%3A%23c0e4c0" | que tu
+
+
+! style="background%3A%23c0e4c0" | qu’il, qu’elle
+
+
+! style="background%3A%23c0e4c0" | que nous
+
+
+! style="background%3A%23c0e4c0" | que vous
+
+
+! style="background%3A%23c0e4c0" | qu’ils, qu’elles
+
+
+|-
+
+! rowspan="2" style="background%3A%23c0e4c0" | <small>(simple<br>tenses)</small>
+
+
+! style="height%3A3em%3Bbackground%3A%23c0e4c0" | <span title="subjonctif+pr%C3%A9sent">present</span>
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cs%7Cpres%7Csubj-form-of+++++++" lang="fr">[[saurisse#French|saurisse]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁis/</span> or <span class="IPA">/so.ʁis/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cs%7Cpres%7Csubj-form-of+++++++" lang="fr">[[saurisses#French|saurisses]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁis/</span> or <span class="IPA">/so.ʁis/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+3%7Cs%7Cpres%7Csubj-form-of+++++++" lang="fr">[[saurisse#French|saurisse]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁis/</span> or <span class="IPA">/so.ʁis/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cp%7Cpres%7Csubj-form-of+++++++" lang="fr">[[saurissions#French|saurissions]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.sjɔ̃/</span> or <span class="IPA">/so.ʁi.sjɔ̃/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cp%7Cpres%7Csubj-form-of+++++++" lang="fr">[[saurissiez#French|saurissiez]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.sje/</span> or <span class="IPA">/so.ʁi.sje/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+3%7Cp%7Cpres%7Csubj-form-of+++++++" lang="fr">[[saurissent#French|saurissent]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁis/</span> or <span class="IPA">/so.ʁis/</span></span>
+
+
+|-
+
+! style="height%3A3em%3Bbackground%3A%23c0e4c0" rowspan="1" | <span title="subjonctif+imparfait">imperfect</span><sup>2</sup>
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cs%7Cimpf%7Csubj-form-of+++++++" lang="fr">[[saurisse#French|saurisse]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁis/</span> or <span class="IPA">/so.ʁis/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cs%7Cimpf%7Csubj-form-of+++++++" lang="fr">[[saurisses#French|saurisses]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁis/</span> or <span class="IPA">/so.ʁis/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+3%7Cs%7Cimpf%7Csubj-form-of+++++++" lang="fr">[[saurît#French|saurît]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi/</span> or <span class="IPA">/so.ʁi/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cp%7Cimpf%7Csubj-form-of+++++++" lang="fr">[[saurissions#French|saurissions]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.sjɔ̃/</span> or <span class="IPA">/so.ʁi.sjɔ̃/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cp%7Cimpf%7Csubj-form-of+++++++" lang="fr">[[saurissiez#French|saurissiez]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.sje/</span> or <span class="IPA">/so.ʁi.sje/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+3%7Cp%7Cimpf%7Csubj-form-of+++++++" lang="fr">[[saurissent#French|saurissent]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁis/</span> or <span class="IPA">/so.ʁis/</span></span>
+
+
+|-
+
+! rowspan="2" style="background%3A%23c0e4c0" | <small>(compound<br>tenses)</small>
+
+
+! style="height%3A3em%3Bbackground%3A%23c0e4c0" | <span title="subjonctif+pass%C3%A9">past</span>
+
+
+! colspan="6" style="background%3A%23DEDEDE" | present subjunctive of <i>[[avoir]]</i> + past participle
+
+
+|-
+
+! style="height%3A3em%3Bbackground%3A%23c0e4c0" | <span title="subjonctif+plus-que-parfait">pluperfect</span><sup>2</sup>
+
+
+! colspan="6" style="background%3A%23DEDEDE" | imperfect subjunctive of <i>[[avoir]]</i> + past participle
+
+
+|-
+
+! colspan="2" style="background%3A%23e4d4c0" | <span title="imp%C3%A9ratif">imperative</span>
+
+
+! style="background%3A%23e4d4c0" | –
+
+
+! style="background%3A%23e4d4c0" | <s>tu</s>
+
+
+! style="background%3A%23e4d4c0" | –
+
+
+! style="background%3A%23e4d4c0" | <s>nous</s>
+
+
+! style="background%3A%23e4d4c0" | <s>vous</s>
+
+
+! style="background%3A%23e4d4c0" | –
+
+
+|-
+
+! style="height%3A3em%3Bbackground%3A%23e4d4c0" colspan="2" | <span title>simple</span>
+
+
+| —
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cs%7Cimpr-form-of+++++++" lang="fr">[[sauris#French|sauris]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi/</span> or <span class="IPA">/so.ʁi/</span></span>
+
+
+| —
+
+
+| <span class="Latn+form-of+lang-fr+1%7Cp%7Cimpr-form-of+++++++" lang="fr">[[saurissons#French|saurissons]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.sɔ̃/</span> or <span class="IPA">/so.ʁi.sɔ̃/</span></span>
+
+
+| <span class="Latn+form-of+lang-fr+2%7Cp%7Cimpr-form-of+++++++" lang="fr">[[saurissez#French|saurissez]]</span><br><span style="color%3A%237F7F7F"><span class="IPA">/sɔ.ʁi.se/</span> or <span class="IPA">/so.ʁi.se/</span></span>
+
+
+| —
+
+
+|-
+
+! style="height%3A3em%3Bbackground%3A%23e4d4c0" colspan="2" | <span title>compound</span>
+
+
+| —
+
+
+! style="background%3A%23DEDEDE" | simple imperative of <i>[[avoir]]</i> + past participle
+
+
+| —
+
+
+! style="background%3A%23DEDEDE" | simple imperative of <i>[[avoir]]</i> + past participle
+
+
+! style="background%3A%23DEDEDE" | simple imperative of <i>[[avoir]]</i> + past participle
+
+
+| —
+
+
+|-
+
+| colspan="8" |<sup>1</sup> The French gerund is only usable with the preposition <i>[[en]]</i>.
+
+
+|-
+
+| colspan="8" |<sup>2</sup> In less formal writing or speech, the past historic, past anterior, imperfect subjunctive and pluperfect subjunctive tenses may be found to have been replaced with the indicative present perfect, indicative pluperfect, present subjunctive and past subjunctive tenses respectively (Christopher Kendris [1995], <i>Master the Basics: French</i>, pp. [https://books.google.fr/books?id=g4G4jg5GWMwC&pg=PA77 77], [https://books.google.fr/books?id=g4G4jg5GWMwC&pg=PA78 78], [https://books.google.fr/books?id=g4G4jg5GWMwC&pg=PA79 79], [https://books.google.fr/books?id=g4G4jg5GWMwC&pg=PA81 81]).
+
+
+|}
+
+</div>
+</div>
+[[Category:French verbs with conjugation -ir|SAURIR]][[Category:French second group verbs|SAURIR]]
+""")
+        expected = {
+            "forms": [
+              {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
+                "form": "saurir",
+                "source": "Conjugation",
+                "tags": [
+                  "infinitive"
+                ]
+              },
+              {
+                "form": "avoir + past participle",
+                "source": "Conjugation",
+                "tags": [
+                  "infinitive",
+                  "multiword-construction"
+                ]
+              },
+              {
+                "form": "saurissant",
+                "ipa": "/sɔ.ʁi.sɑ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "gerund",
+                  "participle",
+                  "present"
+                ]
+              },
+              {
+                "form": "saurissant",
+                "ipa": "/so.ʁi.sɑ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "gerund",
+                  "participle",
+                  "present"
+                ]
+              },
+              {
+                "form": "ayant + past participle",
+                "source": "Conjugation",
+                "tags": [
+                  "gerund",
+                  "multiword-construction",
+                  "participle",
+                  "present"
+                ]
+              },
+              {
+                "form": "sauri",
+                "ipa": "/sɔ.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "participle",
+                  "past"
+                ]
+              },
+              {
+                "form": "sauri",
+                "ipa": "/so.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "participle",
+                  "past"
+                ]
+              },
+              {
+                "form": "sauris",
+                "ipa": "/sɔ.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "indicative",
+                  "present",
+                  "singular"
+                ]
+              },
+              {
+                "form": "sauris",
+                "ipa": "/so.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "indicative",
+                  "present",
+                  "singular"
+                ]
+              },
+              {
+                "form": "sauris",
+                "ipa": "/sɔ.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "present",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "sauris",
+                "ipa": "/so.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "present",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "saurit",
+                "ipa": "/sɔ.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "present",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurit",
+                "ipa": "/so.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "present",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurissons",
+                "ipa": "/sɔ.ʁi.sɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "indicative",
+                  "plural",
+                  "present"
+                ]
+              },
+              {
+                "form": "saurissons",
+                "ipa": "/so.ʁi.sɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "indicative",
+                  "plural",
+                  "present"
+                ]
+              },
+              {
+                "form": "saurissez",
+                "ipa": "/sɔ.ʁi.se/",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "plural",
+                  "present",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "saurissez",
+                "ipa": "/so.ʁi.se/",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "plural",
+                  "present",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "saurissent",
+                "ipa": "/sɔ.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "plural",
+                  "present",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurissent",
+                "ipa": "/so.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "plural",
+                  "present",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurissais",
+                "ipa": "/sɔ.ʁi.sɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperfect",
+                  "indicative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "saurissais",
+                "ipa": "/so.ʁi.sɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperfect",
+                  "indicative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "saurissais",
+                "ipa": "/sɔ.ʁi.sɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "indicative",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "saurissais",
+                "ipa": "/so.ʁi.sɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "indicative",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "saurissait",
+                "ipa": "/sɔ.ʁi.sɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "indicative",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurissait",
+                "ipa": "/so.ʁi.sɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "indicative",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurissions",
+                "ipa": "/sɔ.ʁi.sjɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperfect",
+                  "indicative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "saurissions",
+                "ipa": "/so.ʁi.sjɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperfect",
+                  "indicative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "saurissiez",
+                "ipa": "/sɔ.ʁi.sje/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "indicative",
+                  "plural",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "saurissiez",
+                "ipa": "/so.ʁi.sje/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "indicative",
+                  "plural",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "saurissaient",
+                "ipa": "/sɔ.ʁi.sɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "indicative",
+                  "plural",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurissaient",
+                "ipa": "/so.ʁi.sɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "indicative",
+                  "plural",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "sauris",
+                "ipa": "/sɔ.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "historic",
+                  "indicative",
+                  "past",
+                  "singular"
+                ]
+              },
+              {
+                "form": "sauris",
+                "ipa": "/so.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "historic",
+                  "indicative",
+                  "past",
+                  "singular"
+                ]
+              },
+              {
+                "form": "sauris",
+                "ipa": "/sɔ.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "historic",
+                  "indicative",
+                  "past",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "sauris",
+                "ipa": "/so.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "historic",
+                  "indicative",
+                  "past",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "saurit",
+                "ipa": "/sɔ.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "historic",
+                  "indicative",
+                  "past",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurit",
+                "ipa": "/so.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "historic",
+                  "indicative",
+                  "past",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurîmes",
+                "ipa": "/sɔ.ʁim/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "historic",
+                  "indicative",
+                  "past",
+                  "plural"
+                ]
+              },
+              {
+                "form": "saurîmes",
+                "ipa": "/so.ʁim/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "historic",
+                  "indicative",
+                  "past",
+                  "plural"
+                ]
+              },
+              {
+                "form": "saurîtes",
+                "ipa": "/sɔ.ʁit/",
+                "source": "Conjugation",
+                "tags": [
+                  "historic",
+                  "indicative",
+                  "past",
+                  "plural",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "saurîtes",
+                "ipa": "/so.ʁit/",
+                "source": "Conjugation",
+                "tags": [
+                  "historic",
+                  "indicative",
+                  "past",
+                  "plural",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "saurirent",
+                "ipa": "/sɔ.ʁiʁ/",
+                "source": "Conjugation",
+                "tags": [
+                  "historic",
+                  "indicative",
+                  "past",
+                  "plural",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurirent",
+                "ipa": "/so.ʁiʁ/",
+                "source": "Conjugation",
+                "tags": [
+                  "historic",
+                  "indicative",
+                  "past",
+                  "plural",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurirai",
+                "ipa": "/sɔ.ʁi.ʁe/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "future",
+                  "indicative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "saurirai",
+                "ipa": "/so.ʁi.ʁe/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "future",
+                  "indicative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "sauriras",
+                "ipa": "/sɔ.ʁi.ʁa/",
+                "source": "Conjugation",
+                "tags": [
+                  "future",
+                  "indicative",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "sauriras",
+                "ipa": "/so.ʁi.ʁa/",
+                "source": "Conjugation",
+                "tags": [
+                  "future",
+                  "indicative",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "saurira",
+                "ipa": "/sɔ.ʁi.ʁa/",
+                "source": "Conjugation",
+                "tags": [
+                  "future",
+                  "indicative",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurira",
+                "ipa": "/so.ʁi.ʁa/",
+                "source": "Conjugation",
+                "tags": [
+                  "future",
+                  "indicative",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurirons",
+                "ipa": "/sɔ.ʁi.ʁɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "future",
+                  "indicative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "saurirons",
+                "ipa": "/so.ʁi.ʁɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "future",
+                  "indicative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "saurirez",
+                "ipa": "/sɔ.ʁi.ʁe/",
+                "source": "Conjugation",
+                "tags": [
+                  "future",
+                  "indicative",
+                  "plural",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "saurirez",
+                "ipa": "/so.ʁi.ʁe/",
+                "source": "Conjugation",
+                "tags": [
+                  "future",
+                  "indicative",
+                  "plural",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "sauriront",
+                "ipa": "/sɔ.ʁi.ʁɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "future",
+                  "indicative",
+                  "plural",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "sauriront",
+                "ipa": "/so.ʁi.ʁɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "future",
+                  "indicative",
+                  "plural",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurirais",
+                "ipa": "/sɔ.ʁi.ʁɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "conditional",
+                  "first-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "saurirais",
+                "ipa": "/so.ʁi.ʁɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "conditional",
+                  "first-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "saurirais",
+                "ipa": "/sɔ.ʁi.ʁɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "conditional",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "saurirais",
+                "ipa": "/so.ʁi.ʁɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "conditional",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "saurirait",
+                "ipa": "/sɔ.ʁi.ʁɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "conditional",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurirait",
+                "ipa": "/so.ʁi.ʁɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "conditional",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "sauririons",
+                "ipa": "/sɔ.ʁi.ʁjɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "conditional",
+                  "first-person",
+                  "plural"
+                ]
+              },
+              {
+                "form": "sauririons",
+                "ipa": "/so.ʁi.ʁjɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "conditional",
+                  "first-person",
+                  "plural"
+                ]
+              },
+              {
+                "form": "sauririez",
+                "ipa": "/sɔ.ʁi.ʁje/",
+                "source": "Conjugation",
+                "tags": [
+                  "conditional",
+                  "plural",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "sauririez",
+                "ipa": "/so.ʁi.ʁje/",
+                "source": "Conjugation",
+                "tags": [
+                  "conditional",
+                  "plural",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "sauriraient",
+                "ipa": "/sɔ.ʁi.ʁɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "conditional",
+                  "plural",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "sauriraient",
+                "ipa": "/so.ʁi.ʁɛ/",
+                "source": "Conjugation",
+                "tags": [
+                  "conditional",
+                  "plural",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "present indicative of avoir + past participle",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "multiword-construction",
+                  "perfect",
+                  "present"
+                ]
+              },
+              {
+                "form": "imperfect indicative of avoir + past participle",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "multiword-construction",
+                  "pluperfect"
+                ]
+              },
+              {
+                "form": "past historic of avoir + past participle",
+                "source": "Conjugation",
+                "tags": [
+                  "anterior",
+                  "indicative",
+                  "multiword-construction",
+                  "past"
+                ]
+              },
+              {
+                "form": "future of avoir + past participle",
+                "source": "Conjugation",
+                "tags": [
+                  "future",
+                  "indicative",
+                  "multiword-construction",
+                  "perfect"
+                ]
+              },
+              {
+                "form": "conditional of avoir + past participle",
+                "source": "Conjugation",
+                "tags": [
+                  "conditional",
+                  "multiword-construction",
+                  "perfect"
+                ]
+              },
+              {
+                "form": "saurisse",
+                "ipa": "/sɔ.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "present",
+                  "singular",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurisse",
+                "ipa": "/so.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "present",
+                  "singular",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurisses",
+                "ipa": "/sɔ.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "present",
+                  "second-person",
+                  "singular",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurisses",
+                "ipa": "/so.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "present",
+                  "second-person",
+                  "singular",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurisse",
+                "ipa": "/sɔ.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "present",
+                  "singular",
+                  "subjunctive",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurisse",
+                "ipa": "/so.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "present",
+                  "singular",
+                  "subjunctive",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurissions",
+                "ipa": "/sɔ.ʁi.sjɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "plural",
+                  "present",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurissions",
+                "ipa": "/so.ʁi.sjɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "plural",
+                  "present",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurissiez",
+                "ipa": "/sɔ.ʁi.sje/",
+                "source": "Conjugation",
+                "tags": [
+                  "plural",
+                  "present",
+                  "second-person",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurissiez",
+                "ipa": "/so.ʁi.sje/",
+                "source": "Conjugation",
+                "tags": [
+                  "plural",
+                  "present",
+                  "second-person",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurissent",
+                "ipa": "/sɔ.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "plural",
+                  "present",
+                  "subjunctive",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurissent",
+                "ipa": "/so.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "plural",
+                  "present",
+                  "subjunctive",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurisse",
+                "ipa": "/sɔ.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperfect",
+                  "singular",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurisse",
+                "ipa": "/so.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperfect",
+                  "singular",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurisses",
+                "ipa": "/sɔ.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "second-person",
+                  "singular",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurisses",
+                "ipa": "/so.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "second-person",
+                  "singular",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurît",
+                "ipa": "/sɔ.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "singular",
+                  "subjunctive",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurît",
+                "ipa": "/so.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "singular",
+                  "subjunctive",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurissions",
+                "ipa": "/sɔ.ʁi.sjɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperfect",
+                  "plural",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurissions",
+                "ipa": "/so.ʁi.sjɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperfect",
+                  "plural",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurissiez",
+                "ipa": "/sɔ.ʁi.sje/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "plural",
+                  "second-person",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurissiez",
+                "ipa": "/so.ʁi.sje/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "plural",
+                  "second-person",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "saurissent",
+                "ipa": "/sɔ.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "plural",
+                  "subjunctive",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "saurissent",
+                "ipa": "/so.ʁis/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperfect",
+                  "plural",
+                  "subjunctive",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "present subjunctive of avoir + past participle",
+                "source": "Conjugation",
+                "tags": [
+                  "multiword-construction",
+                  "past",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "imperfect subjunctive of avoir + past participle",
+                "source": "Conjugation",
+                "tags": [
+                  "multiword-construction",
+                  "pluperfect",
+                  "subjunctive"
+                ]
+              },
+              {
+                "form": "sauris",
+                "ipa": "/sɔ.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperative",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "sauris",
+                "ipa": "/so.ʁi/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperative",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "saurissons",
+                "ipa": "/sɔ.ʁi.sɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "saurissons",
+                "ipa": "/so.ʁi.sɔ̃/",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "saurissez",
+                "ipa": "/sɔ.ʁi.se/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperative",
+                  "plural",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "saurissez",
+                "ipa": "/so.ʁi.se/",
+                "source": "Conjugation",
+                "tags": [
+                  "imperative",
+                  "plural",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "simple imperative of avoir + past participle",
+                "source": "Conjugation",
+                "tags": [
+                  "imperative",
+                  "multiword-construction",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "simple imperative of avoir + past participle",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "imperative",
+                  "multiword-construction",
+                  "plural"
+                ]
+              },
+              {
+                "form": "simple imperative of avoir + past participle",
+                "source": "Conjugation",
+                "tags": [
+                  "imperative",
+                  "multiword-construction",
+                  "plural",
+                  "second-person"
+                ]
+              }
+            ],
+        }
+        self.assertEqual(expected, ret)
