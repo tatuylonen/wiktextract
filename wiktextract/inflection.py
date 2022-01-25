@@ -89,6 +89,7 @@ title_contains_wordtags_map = {
     "intransitive": "intransitive",
     "ditransitive": "ditransitive",
     "ambitransitive": "ambitransitive",
+    "archaic": "archaic",
     "proper noun": "proper-noun",
     "no plural": "no-plural",
     "imperfective": "imperfective",
@@ -325,12 +326,18 @@ lang_specific = {
         "stop_non_finite_tense": True,  # affect/English/Verb
         "form_transformations": [
             ["verb", "^\(to\) ", ""],
+            ["verb", "^to ", ""],
             ["verb", "^I ", "first-person singular"],
             ["verb", "^you ", "second-person"],
             ["verb", "^he ", "third-person singular"],
             ["verb", "^we ", "first-person plural"],
             ["verb", "^you ", "second-person plural"],
             ["verb", "^they ", "third-person plural"],
+            ["verb", "^it ", "third-person singular"],
+            ["verb", "^thou ", "first-person singular"],
+            ["verb", "^ye ", "second-person plural"],
+            ["verb", " \(thou\)$", "second-person singular"],
+            ["verb", " \(ye\)$", "second-person plural"],
         ],
     },
     "Estonian": {
@@ -1019,10 +1026,19 @@ def clean_header(word, col, skip_paren):
                  r"The future tense: )",
                 col):
         return "", [], [], []
+    # Temporarily remove final parenthesized part (if separated by whitespace),
+    # so that we can extract reference markers before it.
+    final_paren = ""
+    m = re.search(r"\s+\([^)]*\)$", col)
+    if m is not None:
+        final_paren = m.group(0)
+        col = col[:m.start()]
+
+    # Extract references and tag markers
     refs = []
     def_re = re.compile(r"(^|\s*•?\s+)"
-                        r"(([*△†0123456789⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([⁾):]|\s)|"
-                        r"\^([*△†]))")
+                        r"((\*+|[△†0123456789⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([⁾):]|\s)|"
+                        r"\^(\*+|[△†]))")
     nondef_re = re.compile(r"^\s*(1|2|3)\s+(sg|pl)\s*$")
     while True:
         m = re.search(r"\^(.|\([^)]*\))$", col)
@@ -1044,6 +1060,7 @@ def clean_header(word, col, skip_paren):
                 v = v[1:-1]
             refs.append(v)
         col = col[:m.start()]
+
     # See if it is a ref definition
     # print("BEFORE REF CHECK: {!r}".format(col))
     m = re.match(def_re, col)
@@ -1059,6 +1076,7 @@ def clean_header(word, col, skip_paren):
         if ref:
             deflst.append((ref, col[ofs:].strip()))
         return "", [], deflst, []
+
     # See if it references a definition
     while col:
         if (is_superscript(col[-1]) or col[-1] in ("†",)):
@@ -1076,18 +1094,26 @@ def clean_header(word, col, skip_paren):
             col = col[:-1]
         else:
             break
+
+    # Check for another form of note definition
     if (len(col) > 2 and col[1] in (")", " ", ":") and
         col[0].isdigit() and
         not re.match(nondef_re, col)):
-        # Another form of note definition
         return "", [], [[col[0], col[2:].strip()]], []
     col = col.strip()
-    if col.endswith("*"):
-        col = col[:-1].strip()
-        refs.append("*")
+
+    # Extract final "*" reference symbols.  Sometimes there are multiple.
+    m = re.search(r"\*+$", col)
+    if m is not None:
+        col = col[:m.start()]
+        refs.append(m.group(0))
     if col.endswith("(*)"):
         col = col[:-3].strip()
         refs.append("*")
+
+    # Put back the final parenthesized part
+    col = col.strip() + final_paren
+
     # print("CLEAN_HEADER: orig_col={!r} col={!r} refs={!r} hdr_tags={}"
     #       .format(orig_col, col, refs, hdr_tags))
     return col.strip(), refs, [], hdr_tags
@@ -2146,31 +2172,40 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                 # tags anywhere and romanizations anywhere but beginning.
                 roman = base_roman
                 paren = None
+                clitic = None
                 m = re.search(r"(\s+|^)\(([^)]*)\)", form)
                 if m is not None:
+                    subst = m.group(1)
                     paren = m.group(2)
                 else:
                     m = re.search(r"\(([^)]*)\)(\s+|$)", form)
                     if m is not None:
                         paren = m.group(1)
+                        subst = m.group(2)
                 if paren is not None:
-                    if classify_desc(paren) == "tags":
+                    if re.match(r"[’'][a-z]([a-z][a-z]?)?$", paren):
+                        clitic = paren
+                        form = (form[:m.start()] + subst +
+                                form[m.end():]).strip()
+                    elif classify_desc(paren) == "tags":
                         tagsets1, topics1 = decode_tags(paren)
                         if not topics1:
                             for ts in tagsets1:
                                 ts = list(x for x in ts
                                           if x.find(" ") < 0)
                                 extra_tags.extend(ts)
-                            form = (form[:m.start()] + " " +
+                            form = (form[:m.start()] + subst +
                                     form[m.end():]).strip()
                     elif (m.start() > 0 and not roman and
                           classify_desc(form[:m.start()]) == "other" and
                           classify_desc(paren) in ("romanization", "english")
                           and not re.search(r"^with |-form$", paren)):
                         roman = paren
-                        form = (form[:m.start()] + " " + form[m.end():]).strip()
+                        form = (form[:m.start()] + subst +
+                                form[m.end():]).strip()
                     elif re.search(r"^with |-form", paren):
-                        form = (form[:m.start()] + " " + form[m.end():]).strip()
+                        form = (form[:m.start()] + subst +
+                                form[m.end():]).strip()
                 # Ignore certain forms that are not really forms
                 if form in ("", "unchanged",
                             "after an",  # in sona/Irish/Adj/Mutation
@@ -2306,6 +2341,11 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                         if ipa:
                             dt["ipa"] = ipa
                         ret.append(dt)
+                        # If we got separate clitic form, add it
+                        if clitic:
+                            dt = {"form": clitic, "tags": tags + ["clitic"],
+                                  "source": source}
+                            ret.append(dt)
         # End of row.
         rownum += 1
         # For certain languages, if the row was empty, reset
