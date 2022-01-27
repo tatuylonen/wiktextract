@@ -2377,6 +2377,7 @@ xlat_tags_map = {
     "countable and uncountable": "countable uncountable",
     "masculine and feminine plural": "masculine feminine plural",
     "definite singular and plural": "definite singular plural",
+    "definite or plural": ["definite", "plural"],
     "plural and definite singular attributive":
     ["plural attributive", "definite singular attributive"],
     "oblique and nominative feminine singular":
@@ -2600,6 +2601,11 @@ xlat_tags_map = {
     "short past participle": "past participle short-form",
     "long past participle": "past participle long-form",
     "of the past participle": "past participle",
+    "past participle n": "past participle neuter",
+    "past participle c": "past participle common-gender",
+    "past participle f": "past participle feminine",
+    "past participle m": "past participle masculine",
+    "past participle pl": "past participle plural",
     "of the present participle": "present participle",
     "adverbial locative noun in the pa, ku, or mu locative classes":
     "adverbial locative",

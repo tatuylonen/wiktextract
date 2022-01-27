@@ -2,7 +2,7 @@
 # (both the word entry head - initial part and parenthesized parts -
 # and tags at the beginning of word senses)
 #
-# Copyright (c) 2020-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2020-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
 import functools
@@ -395,6 +395,23 @@ for x in valid_tags:
     valid_words.update(x.split(" "))
 for x in xlat_tags_map.keys():
     valid_words.update(x.split(" "))
+
+
+# Dictionary of language-specific parenthesized head part starts that
+# either introduce new tags or modify previous tags.  The value for each
+# language is a dictionary that maps the first word of the head part to
+# (rem_tags, add_tags), where ``rem_tags`` can be True to remove all previous
+# tags or a space-separated string of tags to remove, and ``add_tags`` should
+# be a string of tags to add.
+lang_specific_head_map = {
+    "Danish": {
+       # prefix: (rem_tags, add_tags)
+       "c": ("neuter", "common-gender"),
+       "n": ("common-gender", "neuter"),
+       "pl": ("singular neuter common-gender", "plural"),
+       "sg": ("plural neuter common-gender", "singular"),
+    },
+}
 
 
 # Regular expression used to strip additional stuff from the end of alt_of and
@@ -1355,7 +1372,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
         for desc in descriptors:
             new_desc.extend(map_with(xlat_tags_map, split_at_comma_semi(desc)))
         prev_tags = None
-        for desc in new_desc:
+        for desc_i, desc in enumerate(new_desc):
             # print("head desc: {!r}".format(desc))
 
             # Abort on certain descriptors (assume remaining values are
@@ -1407,17 +1424,17 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                                     is_reconstruction)
                         continue
                     elif distw(titleparts, desc) <= 0.5:
-                        # Similar to head word, assume a dialectal variation to
-                        # the base form.  Cf. go/Alemannic German/Verb
-                        add_related(ctx, data, ["alternative"], [desc], text,
-                                    True, is_reconstruction)
-                        continue
+                       # Similar to head word, assume a dialectal variation to
+                       # the base form.  Cf. go/Alemannic German/Verb
+                       add_related(ctx, data, ["alternative"], [desc], text,
+                                   True, is_reconstruction)
+                       continue
                     elif (cls in ("romanization", "english") and
-                          not have_romanization and
-                          classify_desc(titleword) == "other"):
+                        not have_romanization and
+                        classify_desc(titleword) == "other"):
                         # Assume it to be a romanization
                         add_related(ctx, data, ["romanization"], [desc],
-                                    text, True, is_reconstruction)
+                                   text, True, is_reconstruction)
                         have_romanization = True
                         continue
 
@@ -1483,6 +1500,24 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
             if not parts:
                 prev_tags = None
                 continue
+
+            # Check for certain language-specific header part starts that
+            # modify
+            if len(parts) == 2 and language in lang_specific_head_map:
+                ht = lang_specific_head_map[language]
+                if parts[0] in ht:
+                    rem_tags, add_tags = ht[parts[0]]
+                    tags = set(prev_tags or ())
+                    if rem_tags is True:  # Remove all old tags
+                        tags = set()
+                    else:
+                        tags = tags - set(rem_tags.split())
+                    tags = tags | set(add_tags.split())
+                    tags = list(sorted(tags))
+                    add_related(ctx, data, tags, [parts[1]], text, True,
+                                is_reconstruction)
+                    prev_tags = tags
+                    continue
 
             alt_related = None
             alt_tagsets = None
@@ -1551,6 +1586,17 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                         else:
                             prev_tags = None
                     else:
+                        if (desc_i < len(new_desc) - 1 and
+                            all("participle" in ts or "infinitive" in ts
+                                for ts in tagsets)):
+                            # Interpret it as a standalone form description
+                            # in the middle, probably followed by forms or
+                            # language-specific descriptors. cf. drikke/Danish
+                            prev_tags = set(prev_tags or ())
+                            for ts in tagsets:
+                                prev_tags.update(ts)
+                            prev_tags = list(sorted(prev_tags))
+                            continue
                         data_extend(ctx, data, "tags", tags)
 
     # Finally, if we collected hirakana/katakana, add them now
