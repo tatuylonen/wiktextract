@@ -1370,7 +1370,9 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
         descriptors = map_with(xlat_descs_map, [paren])
         new_desc = []
         for desc in descriptors:
-            new_desc.extend(map_with(xlat_tags_map, split_at_comma_semi(desc)))
+            new_desc.extend(map_with(xlat_tags_map,
+                                     split_at_comma_semi(desc,
+                                                         extra=[", or "])))
         prev_tags = None
         for desc_i, desc in enumerate(new_desc):
             # print("head desc: {!r}".format(desc))
@@ -1538,7 +1540,8 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                     any("error-unknown-tag" in x for x in tagsets)):
                     if alt_related is not None:
                         break
-                    prev_tags = None
+                    # print("clearing prev_tags decode")
+                    # prev_tags = None
                     continue
                 if (i > 1 and
                     len(parts[i - 1]) >= 4 and
@@ -1579,6 +1582,9 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
             for related in alts:
                 for tags in tagsets:
                     if related:
+                        if not tags and prev_tags:
+                            # Can happen if we skip parenthesized stuff as tags
+                            tags = prev_tags
                         add_related(ctx, data, tags, [related], text, True,
                                     is_reconstruction)
                         if len(tagsets) == 1:

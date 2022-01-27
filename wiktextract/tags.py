@@ -2670,6 +2670,7 @@ xlat_tags_map = {
     "(attributive)": "attributive",
     "(predicative)": "predicative",
     "(uncountable)": "uncountable",
+    "(as a measure)": "",
     "only in attributive use": "attributive",
     "present tense": "present",
     "past tense": "past",

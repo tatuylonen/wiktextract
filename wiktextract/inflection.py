@@ -316,6 +316,9 @@ lang_specific = {
     },
     "Danish": {
         "genders": ["common-gender", "feminine", "masculine", "neuter"],
+        "form_transformations": [
+            ["noun", "^\(as a measure\) ", ""],
+        ],
     },
     "Eblaite": {
         "next": "semitic-group",

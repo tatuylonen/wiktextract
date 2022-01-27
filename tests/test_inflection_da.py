@@ -612,3 +612,208 @@ class InflTests(unittest.TestCase):
             ],
         }
         self.assertEqual(expected, ret)
+
+    def test_Danish_adj2(self):
+        # This also tests having forms identical to a tag/header in the table
+        ret = self.xinfl("negativ", "Danish", "adj", "Inflection", """
+{| class="inflection-table+vsSwitcher" data-toggle-category="inflection" style="border%3A+solid+1px+%23CCCCFF%3B+text-align%3Aleft%3B" cellspacing="1" cellpadding="2"
+
+|- style="background%3A+%23CCCCFF%3B+vertical-align%3A+top%3B"
+
+! class="vsToggleElement" colspan="4" | Inflection of <i class="Latn+mention" lang="da">negativ</i>
+
+
+|- class="vsHide" style="background%3A+%23CCCCFF%3B"
+
+! style="min-width%3A+12em%3B" |
+
+
+! style="min-width%3A+12em%3B" | Positive
+
+
+! style="min-width%3A+12em%3B" | Comparative
+
+
+! style="min-width%3A+12em%3B" | Superlative
+
+
+|- class="vsHide" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23E6E6FF%3B" | Common singular
+
+
+| <span class="Latn" lang="da">[[negativ#Danish|negativ]]</span>
+
+
+| <span class="Latn" lang="da">[[mere#Danish|mere]] [[negativ#Danish|negativ]]</span>
+
+
+| <span class="Latn" lang="da">[[mest#Danish|mest]] [[negativ#Danish|negativ]]</span><sup>2</sup>
+
+
+|- class="vsHide" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23E6E6FF%3B" | Neuter singular
+
+
+| <span class="Latn" lang="da">[[negativt#Danish|negativt]]</span>
+
+
+| <span class="Latn" lang="da">[[mere#Danish|mere]] [[negativ#Danish|negativ]]</span>
+
+
+| <span class="Latn" lang="da">[[mest#Danish|mest]] [[negativ#Danish|negativ]]</span><sup>2</sup>
+
+
+|- class="vsHide" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23E6E6FF%3B" | Plural
+
+
+| <span class="Latn" lang="da">[[negative#Danish|negative]]</span>
+
+
+| <span class="Latn" lang="da">[[mere#Danish|mere]] [[negativ#Danish|negativ]]</span>
+
+
+| <span class="Latn" lang="da">[[mest#Danish|mest]] [[negativ#Danish|negativ]]</span><sup>2</sup>
+
+
+|- class="vsHide" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23E6E6FF%3B" | Definite attributive<sup>1</sup>
+
+
+| <span class="Latn" lang="da">[[negative#Danish|negative]]</span>
+
+
+| <span class="Latn" lang="da">[[mere#Danish|mere]] [[negativ#Danish|negativ]]</span>
+
+
+| <span class="Latn" lang="da">[[mest#Danish|mest]] [[negative#Danish|negative]]</span>
+
+
+|- class="vsHide" style="background%3A+%23E6E6FF%3B"
+
+| style="font-size%3A+smaller%3B" colspan="4" | 1) When an adjective is applied predicatively to something definite, the corresponding "indefinite" form is used.<br> 2) The "indefinite" superlatives may not be used attributively.
+
+
+|}
+""")
+        expected = {
+            "forms": [
+              {
+                "form": "",
+                "source": "Inflection",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
+                "form": "negativ",
+                "source": "Inflection",
+                "tags": [
+                  "common-gender",
+                  "positive",
+                  "singular"
+                ]
+              },
+              {
+                "form": "mere negativ",
+                "source": "Inflection",
+                "tags": [
+                  "common-gender",
+                  "comparative",
+                  "singular"
+                ]
+              },
+              {
+                "form": "mest negativ",
+                "source": "Inflection",
+                "tags": [
+                  "common-gender",
+                  "singular",
+                  "superlative"
+                ]
+              },
+              {
+                "form": "negativt",
+                "source": "Inflection",
+                "tags": [
+                  "neuter",
+                  "positive",
+                  "singular"
+                ]
+              },
+              {
+                "form": "mere negativ",
+                "source": "Inflection",
+                "tags": [
+                  "comparative",
+                  "neuter",
+                  "singular"
+                ]
+              },
+              {
+                "form": "mest negativ",
+                "source": "Inflection",
+                "tags": [
+                  "neuter",
+                  "singular",
+                  "superlative"
+                ]
+              },
+              {
+                "form": "negative",
+                "source": "Inflection",
+                "tags": [
+                  "plural",
+                  "positive"
+                ]
+              },
+              {
+                "form": "mere negativ",
+                "source": "Inflection",
+                "tags": [
+                  "comparative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "mest negativ",
+                "source": "Inflection",
+                "tags": [
+                  "plural",
+                  "superlative"
+                ]
+              },
+              {
+                "form": "negative",
+                "source": "Inflection",
+                "tags": [
+                  "attributive",
+                  "definite",
+                  "positive"
+                ]
+              },
+              {
+                "form": "mere negativ",
+                "source": "Inflection",
+                "tags": [
+                  "attributive",
+                  "comparative",
+                  "definite"
+                ]
+              },
+              {
+                "form": "mest negative",
+                "source": "Inflection",
+                "tags": [
+                  "attributive",
+                  "definite",
+                  "superlative"
+                ]
+              }
+            ],
+        }
+        self.assertEqual(expected, ret)

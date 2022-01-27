@@ -88,7 +88,7 @@ def split_at_comma_semi(text, separators=(",", ";", "，"), extra=()):
     parts = []
     if extra:
         separators = tuple(separators) + tuple(extra)
-    split_re = r"[][()]|" + "|".join(separators)
+    split_re = r"[][()]|" + "|".join(sorted(separators, key=lambda x: -len(x)))
     for m in re.finditer(split_re, text):
         if ofs < m.start():
             parts.append(text[ofs:m.start()])
