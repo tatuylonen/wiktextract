@@ -2514,6 +2514,7 @@ xlat_tags_map = {
     "synon. but common": "synonym common",
     "common hyperhyms": "common hypernym",
     "much more common": "common",
+    "common gender": "common-gender",
     "incorrectly": "proscribed",
     "incorrect": "proscribed",
     "a hyponymic term": "hyponym",

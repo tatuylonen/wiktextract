@@ -16,7 +16,7 @@ from wiktextract.inflectiondata import infl_map, infl_start_map, infl_start_re
 from wiktextract.datautils import (data_append, data_extend, freeze,
                                    split_at_comma_semi, languages_by_name)
 from wiktextract.form_descriptions import (classify_desc, decode_tags,
-                                           parse_head_final_tags)
+                                           parse_head_final_tags, distw)
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.clean import clean_value
 
@@ -70,9 +70,12 @@ for k, v in title_contains_global_map.items():
     if any(t not in valid_tags for t in v.split()):
         print("TITLE_CONTAINS_GLOBAL_MAP UNRECOGNIZED TAG: {}: {}"
               .format(k, v))
+table_hdr_ign_part = r"(Inflection|Conjugation|Declension|Mutation) of \w+"
+table_hdr_ign_part_re = re.compile(r"(?i)(" + table_hdr_ign_part + ")$")
 title_contains_global_re = re.compile(
-    r"(?i)(^|\b)({})($|\b)"
-    .format("|".join(re.escape(x)
+    r"(?i)(^|\b)({}|{})($|\b)"
+    .format(table_hdr_ign_part,
+            "|".join(re.escape(x)
                      for x in title_contains_global_map.keys())))
 
 # Words in title that cause addition of tags to table-tags "form"
@@ -132,8 +135,9 @@ for k, v in title_contains_wordtags_map.items():
         print("TITLE_CONTAINS_WORDTAGS_MAP UNRECOGNIZED TAG: {}: {}"
               .format(k, v))
 title_contains_wordtags_re = re.compile(
-    r"(?i)(^|\b)({})($|\b)"
-    .format("|".join(re.escape(x)
+    r"(?i)(^|\b)({}|{})($|\b)"
+    .format(table_hdr_ign_part,
+            "|".join(re.escape(x)
                      for x in title_contains_wordtags_map.keys())))
 
 # Parenthesized elements in title that are converted to tags in
@@ -1142,12 +1146,16 @@ def parse_title(title, source):
         return infl_map[title.lower()].split(), [], []
     # Add certain global tags based on contained words
     for m in re.finditer(title_contains_global_re, title):
-        global_tags.extend(title_contains_global_map[
-            m.group(0).lower()].split())
+        v = m.group(0).lower()
+        if re.match(table_hdr_ign_part_re, v):
+            continue
+        global_tags.extend(title_contains_global_map[v].split())
     # Add certain tags to table-tags "form" based on contained words
     for m in re.finditer(title_contains_wordtags_re, title):
-        table_tags.extend(title_contains_wordtags_map[
-            m.group(0).lower()].split())
+        v = m.group(0).lower()
+        if re.match(table_hdr_ign_part_re, v):
+            continue
+        table_tags.extend(title_contains_wordtags_map[v].split())
     if re.search(r"Conjugation of (s’|se ).*French verbs", title):
         global_tags.append("reflexive")
     # Check for <x>-type at the beginning of title (e.g., Armenian) and various
@@ -2608,7 +2616,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                              re.sub(r"\s*\([^)]*\)", "",
                                     titletext)).strip() in infl_map and
                       titletext not in IGNORED_COLVALUES and
-                      titletext != word and
+                      distw([titletext], word) > 0.3 and
                       titletext not in ("I", "es")):
                     is_title = True
                 elif (style == cellstyle and
