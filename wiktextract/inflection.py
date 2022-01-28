@@ -70,8 +70,8 @@ for k, v in title_contains_global_map.items():
     if any(t not in valid_tags for t in v.split()):
         print("TITLE_CONTAINS_GLOBAL_MAP UNRECOGNIZED TAG: {}: {}"
               .format(k, v))
-table_hdr_ign_part = r"(Inflection|Conjugation|Declension|Mutation) of \w+"
-table_hdr_ign_part_re = re.compile(r"(?i)(" + table_hdr_ign_part + ")$")
+table_hdr_ign_part = r"(Inflection|Conjugation|Declension|Mutation) of [^\s]"
+table_hdr_ign_part_re = re.compile(r"(?i)(" + table_hdr_ign_part + ")")
 title_contains_global_re = re.compile(
     r"(?i)(^|\b)({}|{})($|\b)"
     .format(table_hdr_ign_part,
@@ -1789,6 +1789,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
     title = None
     global_tags = []
     table_tags = []
+    special_splits = get_lang_specific(lang, "special_splits")
     for title in titles:
         more_global_tags, more_table_tags, extra_forms = \
             parse_title(title, source)
@@ -2068,7 +2069,6 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                     separators.append(",")
                     if not col.endswith("/"):
                         separators.append("/")
-                special_splits = get_lang_specific(lang, "special_splits")
                 if col in special_splits:
                     # Use language-specific special splits
                     alts, tags = special_splits[col]
