@@ -1334,6 +1334,8 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
         paren = paren.strip()
         if not paren:
             continue
+        if paren.startswith("see "):
+            continue
 
         # If it starts with hiragana or katakana, treat as such form.  Note
         # that each hiragana/katakana character is in separate parentheses,

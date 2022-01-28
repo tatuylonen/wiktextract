@@ -406,3 +406,17 @@ Fix parsing tell/English/Verb word head "(dialectal or nonstandard)"
 götürmek/Turkish - inflection table "interrogative" not properly inherited
 to cells below (possibly other subtitles to).
   - there are also participles per person, before persons are defined???
+
+burn/English
+  - pronoun before / (e.g., burn past first-person singular) is not
+    handled correctly - second alternative does not get the person tags
+
+grind/English
+  - implement handling of lead-in text before table (here "Weak conjugation",
+    "Strong conjugation")
+  - check tables, they are unusual
+
+wit/English
+  - parenthesized optional parts are not handled as expected
+      - some are four characters, which I think was not currently allowed
+      - but why are the one-character ones not handled either?

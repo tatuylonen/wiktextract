@@ -2996,7 +2996,9 @@ xlat_tags_map = {
     "strong/mixed": "strong mixed",
     "strong/weak/mixed": "strong weak mixed",
     "weak/mixed": "weak mixed",
-    "weak verb": "weak-verb",
+    "weak verb": "weak",
+    "Weak conjugation": "weak",
+    "Strong conjugation": "strong",
     "no auxiliary": "no-auxiliary",
     "nominative/accusative": "nominative accusative",
     "masculine/feminine": "masculine feminine",
@@ -4043,7 +4045,10 @@ xlat_tags_map = {
     "negated": "past participle negative",  # fera/Westrobothnian
     "neutral": "gender-neutral",  # countryman/English
     "never clause-initial": "not-clause-initial",
-    "primarily": "mostly",
+    "primarily": "",
+    "mostly": "",
+    "now": "",
+    "chiefly": "",
     "definite articulation": "definite",  # boatsi/Aromanian
     "p-past": "passive past",
     "p‑past": "passive past",  # Fancy unicode dash περπατάω/Greek
@@ -4550,7 +4555,6 @@ valid_tags = {
     "causal-final": "misc",
     "causative": "aspect",  # Verb aspect (e.g., Japanese); Cause/Reason (Korean)
     "character": "pos",
-    "chiefly": "misc",
     "childish": "misc",
     "circumstantial": "mood",  # Verb form, e.g., patjaṉi
     "circumposition": "misc",
@@ -4931,7 +4935,6 @@ valid_tags = {
     "monopersonal": "misc",
     "morpheme": "misc",
     "morse-code": "misc",
-    "mostly": "misc",
     "motive-form": "mood",  # Verb form for Korean (e.g., 조사하다)
     "multiplicative": "case",  # adverbial case in Finnish
     "multiword-construction": "misc",  # complex tenses in French/English conjugation
@@ -5005,7 +5008,6 @@ valid_tags = {
     "noun-from-adj": "derivation",
     "noun-from-noun": "derivation",  # Greenlandic: suffix derives nominal from nominal
     "noun-from-verb": "derivation",  # Greenlandic: suffix derives nominal from verb
-    "now": "misc",
     "numeral": "pos",  # Numeral part-of-speech; also Assamese noun forms
     "numeral-tones": "misc",
     "obligative": "mood",  # Verb form (e.g., Azerbaijani)
@@ -5328,7 +5330,6 @@ valid_tags = {
     "vos-form": "register",  # Spanish verb forms used with "vos"
     "vulgar": "register",
     "weak": "misc",
-    "weak-verb": "misc",
     "with-a": "with",
     "with-ablative": "with",
     "with-absolute": "with",
