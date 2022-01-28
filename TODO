@@ -420,3 +420,8 @@ wit/English
   - parenthesized optional parts are not handled as expected
       - some are four characters, which I think was not currently allowed
       - but why are the one-character ones not handled either?
+  - add a test for this, because of the parenthesized parts
+
+inflection_check.py:
+  - handle each table separately, entries from word head separately
+    when merging

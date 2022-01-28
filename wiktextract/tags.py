@@ -2258,7 +2258,7 @@ xlat_tags_map = {
     "Poetic": "poetic",
     "Poetic.": "poetic",
     "Informal.": "informal",
-    "slightly more formal": "somewhat formal",
+    "slightly more formal": "formal",
     "Colloquial.": "colloquial",
     "Antiquated.": "dated",
     "Archaic": "archaic",
@@ -2279,6 +2279,8 @@ xlat_tags_map = {
     "archiac": "archaic error-misspelling",
     "archaic except in fixed expressions": "archaic",
     "nonstandard form": "nonstandard",
+    "singular form": "singular",
+    "plural form": "plural",
     "nonstandard form of": "nonstandard alt-of",
     "main verb": "base-form",
     "standard form of": "standard alt-of",
@@ -2288,6 +2290,7 @@ xlat_tags_map = {
     "obligatorily possessed": "possessed",
     "obligatory possessive": "possessed",
     "obligatory possession": "possessed",
+    "possessive only": "possessive",
     "obligational": "obligative",
     "indicated possession by preceding noun": "possessed",
     "unpossessed form": "unpossessed",
@@ -2663,6 +2666,7 @@ xlat_tags_map = {
     "used only predicatively": "predicative",
     "only in predicative position": "predicative",
     "only predicative": "predicative",
+    "only among women": "",
     "predicate-only":
     "predicative error-misspelling",  # eleng/Luxembourgish
     "predicative only": "predicative",
@@ -2690,7 +2694,7 @@ xlat_tags_map = {
     "construct form": "construct",
     "phonemic reduplicative": "reduplication",
     "reduplicated": "reduplication",
-    "neutrally formal": "somewhat formal",
+    "neutrally formal": "polite",
     "objective case": "objective",
     "first person": "first-person",
     "second person": "second-person",
@@ -2899,6 +2903,7 @@ xlat_tags_map = {
     "with number": "with-number",
     "optative mood +": "with-optative",
     "not used in plural form": "no-plural",
+    "in plural the singular form is used": "singular-only",
     "indecl": "indeclinable",
     "all forms unconjugated": "indeclinable",
     "not declined": "indeclinable",
@@ -2977,7 +2982,7 @@ xlat_tags_map = {
     "relatively rare": "rare",
     "very rare": "rare",
     "very informal": "informal",
-    "less formal": "somewhat formal",
+    "less formal": "informal",
     "very archaic": "archaic",
     "outdated": "archaic",
     "historiographic": "historical",
@@ -4049,6 +4054,8 @@ xlat_tags_map = {
     "mostly": "",
     "now": "",
     "chiefly": "",
+    "only": "",
+    "somewhat": "",
     "definite articulation": "definite",  # boatsi/Aromanian
     "p-past": "passive past",
     "p‑past": "passive past",  # Fancy unicode dash περπατάω/Greek
@@ -5044,7 +5051,6 @@ valid_tags = {
     "offensive": "misc",
     "often": "misc",
     "one-termination": "misc",
-    "only": "misc",
     "onomatopoeic": "misc",
     "oppositive": "misc",  # expresses contrariety
     "optative": "misc",
@@ -5192,7 +5198,6 @@ valid_tags = {
     "sociative": "case",  # Case?, e.g., மரம்/Tamil
     "soft": "misc",  # najslajši/slovene
     "sometimes": "misc",
-    "somewhat": "misc",
     "sound-feminine-plural": "misc",  # e.g. Arabic جاذب/Arabic/Adj
     "sound-feminine-paucal": "misc",
     "sound-masculine-plural": "misc",

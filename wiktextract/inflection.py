@@ -93,6 +93,7 @@ title_contains_wordtags_map = {
     "ditransitive": "ditransitive",
     "ambitransitive": "ambitransitive",
     "archaic": "archaic",
+    "dated": "dated",
     "proper noun": "proper-noun",
     "no plural": "no-plural",
     "imperfective": "imperfective",
@@ -151,6 +152,8 @@ title_elements_map = {
     "neuter": "neuter",
     "singular": "singular",
     "plural": "plural",
+    "archaic": "archaic",
+    "dated": "dated",
     "Attic": "Attic",  # e.g. καλός/Greek/Adj
     "Epic": "Epic",    # e.g. καλός/Greek/Adj
 }
