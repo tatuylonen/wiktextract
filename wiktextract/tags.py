@@ -252,6 +252,7 @@ xlat_head_map = {
     "impf.": "imperfective",
     "pf": "perfective",
     "pf.": "perfective",
+    "impf or impf": "imperfective",
     "impf or pf": "imperfective perfective",  # ought/Eng/Tr/Serbo-Croatian
     "pf or impf": "perfective imperfective",  # start/Tr(of an activity)/Russian
     "invariable": "invariable",
@@ -340,7 +341,7 @@ xlat_head_map = {
     "m or m": "?masculine",  # Paul/Tr(male given name)/Urdu
     "f or c pl": "?feminine common-gender singular plural", # mulberry/Tr/Zazaki
     "c pl or n": "?common-gender neuter singular plural",  # mouthpiece/Tr/Swedish
-    "impf or impf": "?imperfective",
+    "impf or impf": "imperfective",
     "pf or pf": "?perfective",
     "sg or sg": "?singular",
     "pl or pl": "?plural",
@@ -3654,6 +3655,7 @@ xlat_tags_map = {
     "topicalized form of": "topicalized form-of",
     "form of": "form-of",
     "inflected form of": "form-of",
+    "inflected forms": "inflected",
     "lenited form of": "lenition form-of",
     "triggers lenition": "triggers-lenition",
     "triggers lenition of a following consonant-initial noun":

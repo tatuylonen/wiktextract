@@ -9,7 +9,7 @@ import html
 import functools
 import collections
 import unicodedata
-from wikitextprocessor import Wtp, WikiNode, NodeKind
+from wikitextprocessor import Wtp, WikiNode, NodeKind, MAGIC_FIRST
 from wiktextract.config import WiktionaryConfig
 from wiktextract.tags import valid_tags, tag_categories
 from wiktextract.inflectiondata import infl_map, infl_start_map, infl_start_re
@@ -223,6 +223,7 @@ lang_specific = {
         "strengths": ["strong", "weak"],
         "virile_nonvirile_remove": True,
         "voices": ["active", "passive"],
+        "special_splits": {},  # value: (splits, tags)
     },
     "austronesian-group": {
         "numbers": ["singular", "dual", "plural"],
@@ -332,20 +333,45 @@ lang_specific = {
     "English": {
         "stop_non_finite_tense": True,  # affect/English/Verb
         "form_transformations": [
-            ["verb", "^\(to\) ", ""],
+            ["verb", r"^\(to\) ", ""],
             ["verb", "^to ", ""],
-            ["verb", "^I ", "first-person singular"],
-            ["verb", "^you ", "second-person"],
-            ["verb", "^he ", "third-person singular"],
-            ["verb", "^we ", "first-person plural"],
-            ["verb", "^you ", "second-person plural"],
-            ["verb", "^they ", "third-person plural"],
-            ["verb", "^it ", "third-person singular"],
-            ["verb", "^thou ", "first-person singular"],
-            ["verb", "^ye ", "second-person plural"],
-            ["verb", " \(thou\)$", "second-person singular"],
-            ["verb", " \(ye\)$", "second-person plural"],
+            ["verb", r"^I ", "first-person singular"],
+            ["verb", r"^you ", "second-person"],
+            ["verb", r"^he ", "third-person singular"],
+            ["verb", r"^we ", "first-person plural"],
+            ["verb", r"^you ", "second-person plural"],
+            ["verb", r"^they ", "third-person plural"],
+            ["verb", r"^it ", "third-person singular"],
+            ["verb", r"^thou ", "first-person singular"],
+            ["verb", r"^ye ", "second-person plural"],
+            ["verb", r" \(thou\)$", "second-person singular"],
+            ["verb", r" \(ye\)$", "second-person plural"],
+            ["verb", r"^he/she/it ", "third-person singular"],
+            ["verb", r"^he/she/it/they ", "third-person singular"],
+            ["verb", r"\bhim/her/it/them ", "third-person singular"],
+            ["verb", r"\bthem ", "third-person plural"],
+            ["verb", r"\bus ", "first-person plural"],
+            ["verb", r"\bme ", "first-person singular"],
         ],
+        "special_splits": {
+            "let’s be": [["let's be"], "first-person plural pronoun-included"],
+            "I am (’m)/be": [["am (’m)", "be"], "first-person singular"],
+            "we are (’re)/be/been": [["are (’re)", "be", "been"],
+                                     "first-person plural"],
+            "thou art (’rt)/beest": [["art (’rt)", "beest"],
+                                     "second-person singular"],
+            "ye are (’re)/be/been": [["are (’re)", "be", "been"],
+                                     "second-person plural"],
+            "thou be/beest": [["be", "beest"], "second-person singular"],
+            "he/she/it is (’s)/beeth/bes": [["is (’s)", "beeth", "bes"],
+                                            "third-person singular"],
+            "they are (’re)/be/been": [["are (’re)", "be", "been"],
+                                       "third-person plural"],
+            "thou wert/wast": [["wert", "wast"],
+                               "second-person singular"],
+            "thou were/wert": [["were", "wert"],
+                               "second-person singular"],
+        },
     },
     "Estonian": {
         "hdr_expand_first": set(["non-finite"]),
@@ -2028,6 +2054,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
             # print("HAVE_TEXT:", repr(col))
             # Split the text into separate forms.  First simplify spaces except
             # newline.
+            split_extra_tags = []
             col = re.sub(r"[ \t\r]+", " ", col)
             # Split the cell text into alternatives
             if col and is_superscript(col[0]):
@@ -2038,7 +2065,37 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                     separators.append(",")
                     if not col.endswith("/"):
                         separators.append("/")
-                alts = split_at_comma_semi(col, separators=separators)
+                special_splits = get_lang_specific(lang, "special_splits")
+                if col in special_splits:
+                    # Use language-specific special splits
+                    alts, tags = special_splits[col]
+                    split_extra_tags = tags.split()
+                    for x in split_extra_tags:
+                        assert x in valid_tags
+                    assert isinstance(alts, (list, tuple))
+                    assert isinstance(tags, str)
+                else:
+                    # Use default splitting.  However, recognize
+                    # language-specific replacements and change them to magic
+                    # characters before splitting.  This way we won't split
+                    # them.  This is important for, e.g., recognizing
+                    # alternative pronouns.
+                    repls = {}
+                    magic_ch = MAGIC_FIRST
+                    trs = get_lang_specific(lang, "form_transformations")
+                    for _, v, _ in trs:
+                        m = re.search(v, col)
+                        if m is not None:
+                            magic = chr(magic_ch)
+                            magic_ch += 1
+                            col = re.sub(v, magic, col)
+                            repls[magic] = m.group(0)
+                    alts0 = split_at_comma_semi(col, separators=separators)
+                    alts = []
+                    for alt in alts0:
+                        for k, v in repls.items():
+                            alt = re.sub(k, v, alt)
+                        alts.append(alt)
             # Remove "*" from beginning of forms, as in non-attested
             # or reconstructed forms.  Otherwise it might confuse romanization
             # detection.
@@ -2143,6 +2200,20 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
             for (form, base_roman, ipa), coltags in alts:
                 form = form.strip()
                 extra_tags = []
+                extra_tags.extend(split_extra_tags)
+                # Handle special splits again here, so that we can have custom
+                # mappings from form to form and tags.
+                if form in special_splits:
+                    alts1, tags = special_splits[form]
+                    for x in split_extra_tags:
+                        assert x in valid_tags
+                    assert isinstance(alts1, (list, tuple))
+                    print("alts1", alts1)
+                    assert len(alts1) == 1
+                    assert isinstance(tags, str)
+                    form = alts1[0]
+                    extra_tags.extend(tags.split())
+                # Clean the value, extracting reference symbols
                 form, refs, defs, hdr_tags = clean_header(word, form, False)
                 # if refs:
                 #     print("REFS:", refs)
