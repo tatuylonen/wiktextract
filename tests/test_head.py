@@ -454,3 +454,76 @@ class HeadTests(unittest.TestCase):
               },
             ],
         })
+
+    def test_head30(self):
+        data = {}
+        self.maxDiff = 10000
+        self.ctx.start_page("burn")
+        self.ctx.start_section("English")
+        self.ctx.start_subsection("Noun")
+        parse_word_head(self.ctx, "noun",
+                        "burn (third-person singular simple present burns, present participle burning, simple past and past participle burned or (mostly Commonwealth) burnt or (obsolete) brent)",
+                        data, False)
+        print(json.dumps(data, indent=2, sort_keys=True))
+        self.assertEqual(data, {
+            "forms": [
+                {
+                  "form": "burns",
+                  "tags": [
+                    "present",
+                    "singular",
+                    "third-person"
+                  ]
+                },
+                {
+                  "form": "burning",
+                  "tags": [
+                    "participle",
+                    "present"
+                  ]
+                },
+                {
+                  "form": "burned",
+                  "tags": [
+                    "participle",
+                    "past"
+                  ]
+                },
+                {
+                  "form": "burned",
+                  "tags": [
+                    "past"
+                  ]
+                },
+                {
+                  "form": "burnt",
+                  "tags": [
+                    "Commonwealth",
+                    "participle",
+                    "past"
+                  ]
+                },
+                {
+                  "form": "burnt",
+                  "tags": [
+                    "Commonwealth",
+                    "past"
+                  ]
+                },
+                {
+                  "form": "brent",
+                  "tags": [
+                    "obsolete",
+                    "participle",
+                    "past"
+                  ]
+                },
+                {
+                  "form": "brent",
+                  "tags": [
+                    "obsolete",
+                    "past"
+                  ]
+                },
+            ],
+        })

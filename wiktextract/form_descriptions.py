@@ -1610,14 +1610,17 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                             not all(t in ["nonstandard", "dialectal"] or
                                     valid_tags[t] == "dialect"
                                     for t in tags)):
+                            # Not merged with previous tags
                             add_related(ctx, data, tags, [related], text, True,
                                         is_reconstruction)
+                            prev_tags = tagsets
                         else:
+                            # Merged with previous tags.  Don't update previous
+                            # tags here; cf. burn/English/Verb
                             for ts in prev_tags:
                                 tags1 = list(sorted(set(tags) | set(ts)))
                                 add_related(ctx, data, tags1, [related],
                                             text, True, is_reconstruction)
-                    prev_tags = tagsets
                 else:
                     if (desc_i < len(new_desc) - 1 and
                         all("participle" in ts or "infinitive" in ts

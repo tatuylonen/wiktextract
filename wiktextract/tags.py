@@ -4697,7 +4697,7 @@ valid_tags = {
     "demonym": "misc",
     "dependent": "tense",  # περπατάω/Gree/Verb (tense?); Egyptian
     "deponent": "misc",  # Having passive form with active meaning
-    "derogatory": "misc",
+    "derogatory": "register",
     "desiderative": "mood",  # Verb mood
     "destinative": "case",  # Case, marks destination/something destined (e.g. Hindi)
     "determinate": "misc",  # Polish verbs (similar to "concrete" in Russian?)
@@ -5052,7 +5052,7 @@ valid_tags = {
     "oblique": "case",  # Apparently like case form (e.g., Hindi)
     "obsolete": "dialect",
     "obviative": "referent",  # Referent is not the most salient one, cf. proximal, distal
-    "offensive": "misc",
+    "offensive": "register",
     "often": "misc",
     "one-termination": "misc",
     "onomatopoeic": "misc",

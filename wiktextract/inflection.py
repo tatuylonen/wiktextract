@@ -374,6 +374,12 @@ lang_specific = {
                                "second-person singular"],
             "thou were/wert": [["were", "wert"],
                                "second-person singular"],
+            "there has been": [["there has been"], "singular"],
+            "there have been": [["there have been"], "plural"],
+            "there is ('s)": [["there is", "there's"], "singular"],
+            "there are ('re)": [["there are", "there're"], "plural"],
+            "there was": [["there was"], "singular"],
+            "there were": [["there were"], "plural"],
         },
     },
     "Estonian": {
@@ -2211,7 +2217,6 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                     for x in split_extra_tags:
                         assert x in valid_tags
                     assert isinstance(alts1, (list, tuple))
-                    print("alts1", alts1)
                     assert len(alts1) == 1
                     assert isinstance(tags, str)
                     form = alts1[0]
