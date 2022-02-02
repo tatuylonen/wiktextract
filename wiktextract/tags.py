@@ -2383,6 +2383,8 @@ xlat_tags_map = {
     "masculine and feminine plural": "masculine feminine plural",
     "definite singular and plural": "definite singular plural",
     "definite or plural": ["definite", "plural"],
+    "plural or definite attributive":
+    ["plural attributive", "definite singular attributive"],
     "plural and definite singular attributive":
     ["plural attributive", "definite singular attributive"],
     "oblique and nominative feminine singular":

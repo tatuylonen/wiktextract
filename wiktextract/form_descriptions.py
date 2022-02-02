@@ -1374,8 +1374,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
         for desc in descriptors:
             new_desc.extend(map_with(xlat_tags_map,
                                      split_at_comma_semi(desc,
-                                                         extra=[", or ",
-                                                                " or "])))
+                                                         extra=[", or "])))
         prev_tags = None
         for desc_i, desc in enumerate(new_desc):
             # print("head desc: {!r}".format(desc))
@@ -1605,22 +1604,28 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                     alts = [""]
             for related in alts:
                 if related:
-                    for tags in tagsets:
-                        if (not prev_tags or
-                            not all(t in ["nonstandard", "dialectal"] or
-                                    valid_tags[t] == "dialect"
-                                    for t in tags)):
-                            # Not merged with previous tags
-                            add_related(ctx, data, tags, [related], text, True,
-                                        is_reconstruction)
-                            prev_tags = tagsets
-                        else:
-                            # Merged with previous tags.  Don't update previous
-                            # tags here; cf. burn/English/Verb
+                    if (prev_tags and
+                        (all(all(t in ["nonstandard", "dialectal"] or
+                                 valid_tags[t] == "dialect"
+                                 for t in tags)
+                             for ts in tagsets) or
+                         (any("participle" in ts for ts in prev_tags) and
+                          all("attributive" in ts or
+                              any(valid_tags[t] == "gender" for t in ts)
+                              for ts in tagsets)))):
+                        # Merged with previous tags.  Don't update previous
+                        # tags here; cf. burn/English/Verb
+                        for tags in tagsets:
                             for ts in prev_tags:
                                 tags1 = list(sorted(set(tags) | set(ts)))
                                 add_related(ctx, data, tags1, [related],
                                             text, True, is_reconstruction)
+                    else:
+                        # Not merged with previous tags
+                        for tags in tagsets:
+                            add_related(ctx, data, tags, [related], text, True,
+                                        is_reconstruction)
+                        prev_tags = tagsets
                 else:
                     if (desc_i < len(new_desc) - 1 and
                         all("participle" in ts or "infinitive" in ts

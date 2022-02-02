@@ -583,3 +583,59 @@ class HeadTests(unittest.TestCase):
                 },
             ],
         })
+
+    def test_head32(self):
+        data = {}
+        self.maxDiff = 10000
+        self.ctx.start_page("rive")
+        self.ctx.start_section("Danish")
+        self.ctx.start_subsection("Noun")
+        parse_word_head(self.ctx, "noun",
+                        "rive (past tense rev, past participle revet, common gender attributive reven, plural or definite attributive revne)",
+                        data, False)
+        print(json.dumps(data, indent=2, sort_keys=True))
+        self.assertEqual(data, {
+            "forms": [
+                {
+                  "form": "rev",
+                  "tags": [
+                    "past"
+                  ]
+                },
+                {
+                  "form": "revet",
+                  "tags": [
+                    "participle",
+                    "past"
+                  ]
+                },
+                {
+                  "form": "reven",
+                  "tags": [
+                    "attributive",
+                    "common-gender",
+                    "participle",
+                    "past"
+                  ]
+                },
+                {
+                  "form": "revne",
+                  "tags": [
+                    "attributive",
+                    "definite",
+                    "participle",
+                    "past",
+                    "singular"
+                  ]
+                },
+                {
+                  "form": "revne",
+                  "tags": [
+                    "attributive",
+                    "participle",
+                    "past",
+                    "plural"
+                  ]
+                },
+            ],
+        })
