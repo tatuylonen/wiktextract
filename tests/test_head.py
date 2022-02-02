@@ -1,6 +1,6 @@
 # Tests for parse_word_head()
 #
-# Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2021-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
 import json
@@ -522,6 +522,62 @@ class HeadTests(unittest.TestCase):
                   "form": "brent",
                   "tags": [
                     "obsolete",
+                    "past"
+                  ]
+                },
+            ],
+        })
+
+    def test_head31(self):
+        data = {}
+        self.maxDiff = 10000
+        self.ctx.start_page("grind")
+        self.ctx.start_section("English")
+        self.ctx.start_subsection("Noun")
+        parse_word_head(self.ctx, "noun",
+                        "grind (third-person singular simple present grinds, present participle grinding, simple past and past participle ground or grinded) (see usage notes below)",
+                        data, False)
+        print(json.dumps(data, indent=2, sort_keys=True))
+        self.assertEqual(data, {
+            "forms": [
+                {
+                  "form": "grinds",
+                  "tags": [
+                    "present",
+                    "singular",
+                    "third-person"
+                  ]
+                },
+                {
+                  "form": "grinding",
+                  "tags": [
+                    "participle",
+                    "present"
+                  ]
+                },
+                {
+                  "form": "ground",
+                  "tags": [
+                    "participle",
+                    "past"
+                  ]
+                },
+                {
+                  "form": "ground",
+                  "tags": [
+                    "past"
+                  ]
+                },
+                {
+                  "form": "grinded",
+                  "tags": [
+                    "participle",
+                    "past"
+                  ]
+                },
+                {
+                  "form": "grinded",
+                  "tags": [
                     "past"
                   ]
                 },

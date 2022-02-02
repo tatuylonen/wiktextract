@@ -713,7 +713,15 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "(būt) jāsaprot",
+                "form": "jāsaprot",
+                "source": "Conjugation",
+                "tags": [
+                  "debitive",
+                  "indicative"
+                ]
+              },
+              {
+                "form": "būt jāsaprot",
                 "source": "Conjugation",
                 "tags": [
                   "debitive",

@@ -2,7 +2,7 @@
 #
 # Tests for parsing inflection tables
 #
-# Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2021-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
 import json
@@ -3009,12 +3009,23 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "(keine) eiskalten",
+                "form": "eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "indefinite",
+                  "mixed",
+                  "nominative",
+                  "plural"
+                ]
+              },
+              {
+                "form": "keine eiskalten",
                 "source": "Declension",
                 "tags": [
                   "includes-article",
                   "indefinite",
                   "mixed",
+                  "negative",
                   "nominative",
                   "plural"
                 ]
@@ -3056,13 +3067,24 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "(keiner) eiskalten",
+                "form": "eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "genitive",
+                  "indefinite",
+                  "mixed",
+                  "plural"
+                ]
+              },
+              {
+                "form": "keiner eiskalten",
                 "source": "Declension",
                 "tags": [
                   "genitive",
                   "includes-article",
                   "indefinite",
                   "mixed",
+                  "negative",
                   "plural"
                 ]
               },
@@ -3103,13 +3125,24 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "(keinen) eiskalten",
+                "form": "eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "dative",
+                  "indefinite",
+                  "mixed",
+                  "plural"
+                ]
+              },
+              {
+                "form": "keinen eiskalten",
                 "source": "Declension",
                 "tags": [
                   "dative",
                   "includes-article",
                   "indefinite",
                   "mixed",
+                  "negative",
                   "plural"
                 ]
               },
@@ -3150,13 +3183,24 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "(keine) eiskalten",
+                "form": "eiskalten",
+                "source": "Declension",
+                "tags": [
+                  "accusative",
+                  "indefinite",
+                  "mixed",
+                  "plural"
+                ]
+              },
+              {
+                "form": "keine eiskalten",
                 "source": "Declension",
                 "tags": [
                   "accusative",
                   "includes-article",
                   "indefinite",
                   "mixed",
+                  "negative",
                   "plural"
                 ]
               }

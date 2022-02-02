@@ -321,7 +321,7 @@ lang_specific = {
     "Danish": {
         "genders": ["common-gender", "feminine", "masculine", "neuter"],
         "form_transformations": [
-            ["noun", "^\(as a measure\) ", ""],
+            ["noun", "^\(as a measure\) ", "", ""],
         ],
     },
     "Eblaite": {
@@ -336,25 +336,25 @@ lang_specific = {
     "English": {
         "stop_non_finite_tense": True,  # affect/English/Verb
         "form_transformations": [
-            ["verb", r"^\(to\) ", ""],
-            ["verb", "^to ", ""],
-            ["verb", r"^I ", "first-person singular"],
-            ["verb", r"^you ", "second-person"],
-            ["verb", r"^he ", "third-person singular"],
-            ["verb", r"^we ", "first-person plural"],
-            ["verb", r"^you ", "second-person plural"],
-            ["verb", r"^they ", "third-person plural"],
-            ["verb", r"^it ", "third-person singular"],
-            ["verb", r"^thou ", "first-person singular"],
-            ["verb", r"^ye ", "second-person plural"],
-            ["verb", r" \(thou\)$", "second-person singular"],
-            ["verb", r" \(ye\)$", "second-person plural"],
-            ["verb", r"^he/she/it ", "third-person singular"],
-            ["verb", r"^he/she/it/they ", "third-person singular"],
-            ["verb", r"\bhim/her/it/them ", "third-person singular"],
-            ["verb", r"\bthem ", "third-person plural"],
-            ["verb", r"\bus ", "first-person plural"],
-            ["verb", r"\bme ", "first-person singular"],
+            ["verb", r"^\(to\) ", "", ""],
+            ["verb", "^to ", "", ""],
+            ["verb", r"^I ", "", "first-person singular"],
+            ["verb", r"^you ", "", "second-person"],
+            ["verb", r"^he ", "", "third-person singular"],
+            ["verb", r"^we ", "", "first-person plural"],
+            ["verb", r"^you ", "", "second-person plural"],
+            ["verb", r"^they ", "", "third-person plural"],
+            ["verb", r"^it ", "", "third-person singular"],
+            ["verb", r"^thou ", "", "second-person singular"],
+            ["verb", r"^ye ", "", "second-person plural"],
+            ["verb", r" \(thou\)$", "", "second-person singular"],
+            ["verb", r" \(ye\)$", "", "second-person plural"],
+            ["verb", r"^he/she/it ", "", "third-person singular"],
+            ["verb", r"^he/she/it/they ", "", "third-person singular"],
+            ["verb", r"\bhim/her/it/them ", "", "third-person singular"],
+            ["verb", r"\bthem ", "", "third-person plural"],
+            ["verb", r"\bus ", "", "first-person plural"],
+            ["verb", r"\bme ", "", "first-person singular"],
         ],
         "special_splits": {
             "let’s be": [["let's be"], "first-person plural pronoun-included"],
@@ -404,24 +404,33 @@ lang_specific = {
     "German": {
         "next": "Proto-Germanic",
         "form_transformations": [
-             ["verb", "^ich ", "first-person singular"],
-             ["verb", "^du ", "second-person singular"],
-             ["verb", "^er ", "third-person singular"],
-             ["verb", "^wir ", "first-person plural"],
-             ["verb", "^ihr ", "second-person plural"],
-             ["verb", "^sie ", "third-person plural"],
-             ["verb", "^dass ich ", "first-person singular subordinate-clause"],
-             ["verb", "^dass du ", "second-person singular subordinate-clause"],
-             ["verb", "^dass er ", "third-person singular subordinate-clause"],
-             ["verb", "^dass wir ", "first-person plural subordinate-clause"],
-             ["verb", "^dass ihr ", "second-person plural subordinate-clause"],
-             ["verb", "^dass sie ", "third-person plural subordinate-clause"],
-             ["verb", " \(du\)$", "second-person singular"],
-             ["verb", " \(ihr\)$", "second-person plural"],
-             ["adj", "^er ist ", "masculine singular"],
-             ["adj", "^sie ist ", "feminine singular"],
-             ["adj", "^es ist ", "neuter singular"],
-             ["adj", "^sie sind ", "plural"],
+            ["verb", "^ich ", "", "first-person singular"],
+            ["verb", "^du ", "", "second-person singular"],
+            ["verb", "^er ", "", "third-person singular"],
+            ["verb", "^wir ", "", "first-person plural"],
+            ["verb", "^ihr ", "", "second-person plural"],
+            ["verb", "^sie ", "", "third-person plural"],
+            ["verb", "^dass ich ", "",
+             "first-person singular subordinate-clause"],
+            ["verb", "^dass du ", "",
+             "second-person singular subordinate-clause"],
+            ["verb", "^dass er ", "",
+             "third-person singular subordinate-clause"],
+            ["verb", "^dass wir ", "",
+             "first-person plural subordinate-clause"],
+            ["verb", "^dass ihr ", "",
+             "second-person plural subordinate-clause"],
+            ["verb", "^dass sie ", "",
+             "third-person plural subordinate-clause"],
+            ["verb", " \(du\)$", "", "second-person singular"],
+            ["verb", " \(ihr\)$", "", "second-person plural"],
+            ["adj", "^er ist ", "", "masculine singular"],
+            ["adj", "^sie ist ", "", "feminine singular"],
+            ["adj", "^es ist ", "", "neuter singular"],
+            ["adj", "^sie sind ", "", "plural"],
+            ["adj", "^keine ", "keine ", "negative"],
+            ["adj", "^keiner ", "keiner ", "negative"],
+            ["adj", "^keinen ", "keinen ", "negative"],
          ],
     },
     "German Low German": {
@@ -471,7 +480,7 @@ lang_specific = {
         "hdr_expand_first": set(["mood", "tense"]),
         "hdr_expand_cont": set(["person", "register", "number", "misc"]),
         "form_transformations": [
-            ["verb", "^non ", "negative"],
+            ["verb", "^non ", "", "negative"],
         ],
     },
     "Irish": {
@@ -1672,14 +1681,14 @@ def lang_specific_tags(lang, pos, form):
     assert isinstance(pos, str)
     assert isinstance(form, str)
     rules = get_lang_specific(lang, "form_transformations")
-    for patpos, pattern, tags in rules:
+    for patpos, pattern, dst, tags in rules:
         assert patpos in PARTS_OF_SPEECH
         if pos != patpos:
             continue
         m = re.search(pattern, form)
         if not m:
             continue
-        form = form[:m.start()] + form[m.end():]
+        form = form[:m.start()] + dst + form[m.end():]
         tags = tags.split()
         for t in tags:
             assert t in valid_tags
@@ -2092,7 +2101,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                     repls = {}
                     magic_ch = MAGIC_FIRST
                     trs = get_lang_specific(lang, "form_transformations")
-                    for _, v, _ in trs:
+                    for _, v, _, _ in trs:
                         m = re.search(v, col)
                         if m is not None:
                             magic = chr(magic_ch)
@@ -2169,28 +2178,29 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
             else:
                 new_alts = []
                 for alt in alts:
-                    if alt.find(" ") >= 0:
-                        new_alts.append(alt)
-                    else:
-                        lst = [""]
-                        idx = 0
-                        for m in re.finditer(r"(^|\w|\*)\((\w(\w\w?)?"
-                                             r"(/\w(\w\w?)?)*)\)",
-                                             alt):
-                            new_lst = []
-                            for x in lst:
-                                x += alt[idx: m.start()] + m.group(1)
-                                idx = m.end()
-                                v = m.group(2).split("/")
-                                if len(v) == 1:
-                                    new_lst.append(x)
-                                    new_lst.append(x + m.group(2))
-                                else:
-                                    for vv in v:
-                                        new_lst.append(x + vv)
-                            lst = new_lst
+                    lst = [""]
+                    idx = 0
+                    for m in re.finditer(r"(^|\w|\*)\((\w+"
+                                         r"(/\w+)*)\)",
+                                         alt):
+                        v = m.group(2)
+                        if (classify_desc(v) == "tags" or  # Tags inside parens
+                            m.group(0) == alt):  # All in parens
+                            continue
+                        new_lst = []
                         for x in lst:
-                            new_alts.append(x + alt[idx:])
+                            x += alt[idx: m.start()] + m.group(1)
+                            idx = m.end()
+                            vparts = v.split("/")
+                            if len(vparts) == 1:
+                                new_lst.append(x)
+                                new_lst.append(x + v)
+                            else:
+                                for vv in vparts:
+                                    new_lst.append(x + vv)
+                        lst = new_lst
+                    for x in lst:
+                        new_alts.append(x + alt[idx:])
                 alts = list((x, "", "") for x in new_alts)
             # Some Arabic adjectives have both sound feminine plural and
             # broken plural diptote (e.g., جاذب/Arabic/Adj).  Handle these
@@ -2373,6 +2383,13 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                                         "plural" not in tags):
                                         tags.remove(t1)
 
+                        # German adjective tables contain "(keiner)" etc
+                        # for mixed declension plural.  When the adjective
+                        # disappears and it becomes just one word, remove
+                        # the "includes-article" tag.  e.g. eiskalt/German
+                        if "includes-article" in tags and form.find(" ") < 0:
+                            tags.remove("includes-article")
+
                         # Handle ignored forms.  We mark that the form was
                         # provided.  This is important information; some words
                         # just do not have a certain form.  However, there also
@@ -2490,10 +2507,15 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                     else:
                         saved_tags = saved_tags | set(tags)  # E.g. Haus/German
                         remove_useless_tags(lang, pos, saved_tags)
+                    saved_tags = saved_tags & set(["masculine", "feminine",
+                                                   "neuter", "singular",
+                                                   "plural",
+                                                   "indefinite",
+                                                   "definite",
+                                                   "usually-without-article",
+                                                   "without-article"])
                     had_noun = False
                     continue  # Skip the articles
-                # XXX remove: alternative code that adds "article" tag
-                #     tags = list(sorted(set(tags) | set(["article"])))
                 dt = dt.copy()
                 dt["tags"] = tags
                 new_ret.append(dt)
