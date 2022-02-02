@@ -1374,7 +1374,8 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
         for desc in descriptors:
             new_desc.extend(map_with(xlat_tags_map,
                                      split_at_comma_semi(desc,
-                                                         extra=[", or "])))
+                                                         extra=[", or ",
+                                                                " or "])))
         prev_tags = None
         for desc_i, desc in enumerate(new_desc):
             # print("head desc: {!r}".format(desc))
@@ -1402,16 +1403,18 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                 # Handle the special case of second comparative after comma,
                 # followed by superlative without comma.  E.g.
                 # mal/Portuguese/Adv
-                add_related(ctx, data, prev_tags, [splitdesc[0]], text, True,
-                            is_reconstruction)
+                for ts in prev_tags:
+                    add_related(ctx, data, ts, [splitdesc[0]], text, True,
+                                is_reconstruction)
                 desc = " ".join(splitdesc[1:])
             elif (len(splitdesc) == 2 and
                   splitdesc[0] in ("also", "and") and prev_tags and
                   classify_desc(splitdesc[1]) != "tags"):
                 # Sometimes alternative forms are prefixed with "also" or
                 # "and"
-                add_related(ctx, data, prev_tags, [splitdesc[1]], text, True,
-                            is_reconstruction)
+                for ts in prev_tags:
+                    add_related(ctx, data, ts, [splitdesc[1]], text, True,
+                                is_reconstruction)
                 continue
             elif (len(splitdesc) >= 2 and
                   splitdesc[0] in ("including",)):
@@ -1424,8 +1427,9 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                 if cls != "tags":
                     if prev_tags:
                         # Assume comma-separated alternative to previous one
-                        add_related(ctx, data, prev_tags, [desc], text, True,
-                                    is_reconstruction)
+                        for ts in prev_tags:
+                            add_related(ctx, data, ts, [desc], text, True,
+                                        is_reconstruction)
                         continue
                     elif distw(titleparts, desc) <= 0.5:
                        # Similar to head word, assume a dialectal variation to
@@ -1511,16 +1515,18 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                 ht = lang_specific_head_map[language]
                 if parts[0] in ht:
                     rem_tags, add_tags = ht[parts[0]]
-                    tags = set(prev_tags or ())
-                    if rem_tags is True:  # Remove all old tags
-                        tags = set()
-                    else:
-                        tags = tags - set(rem_tags.split())
-                    tags = tags | set(add_tags.split())
-                    tags = list(sorted(tags))
-                    add_related(ctx, data, tags, [parts[1]], text, True,
-                                is_reconstruction)
-                    prev_tags = tags
+                    new_prev_tags = []
+                    for tags in (prev_tags or [()]):
+                        if rem_tags is True:  # Remove all old tags
+                            tags = set()
+                        else:
+                            tags = tags - set(rem_tags.split())
+                        tags = tags | set(add_tags.split())
+                        tags = list(sorted(tags))
+                        add_related(ctx, data, tags, [parts[1]], text, True,
+                                    is_reconstruction)
+                        new_prev_tags.append(tags)
+                    prev_tags = new_prev_tags
                     continue
 
             alt_related = None
@@ -1580,32 +1586,39 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
             if "or" in titleparts:
                 alts = [related]
             else:
-                alts = related.split(" or ")
+                alts = split_at_comma_semi(related, separators=[" or "])
+                if not alts:
+                    alts = [""]
             for related in alts:
-                for tags in tagsets:
-                    if related:
-                        if not tags and prev_tags:
-                            # Can happen if we skip parenthesized stuff as tags
-                            tags = prev_tags
-                        add_related(ctx, data, tags, [related], text, True,
-                                    is_reconstruction)
-                        if len(tagsets) == 1:
-                            prev_tags = tags
+                if related:
+                    for tags in tagsets:
+                        if (not prev_tags or
+                            set(tags) - set(["nonstandard", "dialectal"])):
+                            add_related(ctx, data, tags, [related], text, True,
+                                        is_reconstruction)
                         else:
-                            prev_tags = None
-                    else:
-                        if (desc_i < len(new_desc) - 1 and
-                            all("participle" in ts or "infinitive" in ts
-                                for ts in tagsets)):
-                            # Interpret it as a standalone form description
-                            # in the middle, probably followed by forms or
-                            # language-specific descriptors. cf. drikke/Danish
-                            prev_tags = set(prev_tags or ())
-                            for ts in tagsets:
-                                prev_tags.update(ts)
-                            prev_tags = list(sorted(prev_tags))
-                            continue
+                            for ts in prev_tags:
+                                tags1 = list(sorted(set(tags) | set(ts)))
+                                add_related(ctx, data, tags1, [related],
+                                            text, True, is_reconstruction)
+                    prev_tags = tagsets
+                else:
+                    if (desc_i < len(new_desc) - 1 and
+                        all("participle" in ts or "infinitive" in ts
+                            for ts in tagsets)):
+                        # Interpret it as a standalone form description
+                        # in the middle, probably followed by forms or
+                        # language-specific descriptors. cf. drikke/Danish
+                        new_prev_tags = []
+                        for ts1 in (prev_tags or [()]):
+                            for ts2 in tagsets:
+                                ts = tuple(sorted(set(ts1) | set(ts2)))
+                                new_prev_tags.append(ts)
+                        prev_tags = new_prev_tags
+                        continue
+                    for tags in tagsets:
                         data_extend(ctx, data, "tags", tags)
+                    prev_tags = tagsets
 
     # Finally, if we collected hirakana/katakana, add them now
     if hiragana:

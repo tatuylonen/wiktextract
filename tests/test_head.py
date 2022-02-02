@@ -375,3 +375,30 @@ class HeadTests(unittest.TestCase):
             ],
             "tags": ["form-iv"]
             })
+
+    def test_head28(self):
+        data = {}
+        self.maxDiff = 10000
+        self.ctx.start_page("tell")
+        self.ctx.start_section("English")
+        self.ctx.start_subsection("Noun")
+        parse_word_head(self.ctx, "noun",
+                        "tell (third-person singular simple present tells, present participle telling, simple past and past participle told or (dialectal or nonstandard) telled)",
+                        data, False)
+        print(json.dumps(data, indent=2, sort_keys=True))
+        self.assertEqual(data, {
+            "forms": [
+                {"form": "tells",
+                 "tags": ["present", "singular", "third-person"]},
+                {"form": "telling",
+                 "tags": ["participle", "present"]},
+                {"form": "told",
+                 "tags": ["participle", "past"]},
+                {"form": "told",
+                 "tags": ["past"]},
+                {"form": "telled",
+                 "tags": ["dialectal", "participle", "past"]},
+                {"form": "telled",
+                 "tags": ["dialectal", "past"]},
+                ],
+            })

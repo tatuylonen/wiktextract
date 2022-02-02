@@ -3193,6 +3193,7 @@ xlat_tags_map = {
     "obs.": "obsolete",
     "etymological spelling": "nonstandard",
     "(Dialectological)": "dialectal",
+    "(dialectal or nonstandard)": "dialectal",
     "(hence past tense)": "past",
     "(ablative case)": "ablative",
     "(genitive case)": "genitive",
