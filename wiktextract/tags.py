@@ -547,7 +547,8 @@ head_final_other_map = {
 }
 
 # Accepted uppercase tag values.  As tags these are represented with words
-# connected by hyphens.
+# connected by hyphens.  These are classified as dialect tags; if an uppercase
+# is not a dialect tag, then it should be listed separately in valid_tags.
 uppercase_tags = set([
     "A Estierna",
     "AF",  # ??? what does this mean
@@ -2732,6 +2733,8 @@ xlat_tags_map = {
     "idiom": "idiomatic",
     "humorously self-deprecating": "humorous",
     "rare/awkward": "rare",
+    "rare/archaic": "archaic",
+    "archaic or Scotland": "archaic Scotland",
     "extremely rare": "rare",
     "now quite rare": "rare",
     "rarefied": "rare",
@@ -3193,7 +3196,7 @@ xlat_tags_map = {
     "obs.": "obsolete",
     "etymological spelling": "nonstandard",
     "(Dialectological)": "dialectal",
-    "(dialectal or nonstandard)": "dialectal",
+    "dialectal or nonstandard": "dialectal",
     "(hence past tense)": "past",
     "(ablative case)": "ablative",
     "(genitive case)": "genitive",
@@ -4533,7 +4536,7 @@ valid_tags = {
     "apocopic": "misc",   # Omission of last vowel (+ following consonants)
     "applicative": "mood",  # Verb form
     "approximative": "case",  # Noun form (case?), e.g., марксизм/Komi-Zyrian
-    "archaic": "misc",
+    "archaic": "dialect",
     "article": "detail",
     "assertive": "mood",  # Verb form (e.g., Korean)
     "associative": "case",  # Case (e.g., Quechua)
@@ -4671,7 +4674,7 @@ valid_tags = {
     "countable": "category",
     "counter": "detail",
     "counterfactual": "mood",
-    "dated": "misc",
+    "dated": "dialect",
     "dative": "case",  # Case in many languages
     "debitive": "misc",  # need or obligation (XXX is this same as "obligative" ???)
     "declension-1": "class",
@@ -5005,7 +5008,7 @@ valid_tags = {
     "non-subject": "misc",    # ishno'/Chickasaw
     "nonce-word": "misc",
     "nondeferential": "misc",
-    "nonstandard": "misc",
+    "nonstandard": "dialect",
     "nonvirile": "category",
     "not-clause-initial": "misc",
     "not-comparable": "category",
@@ -5047,7 +5050,7 @@ valid_tags = {
     "object-class-18": "object",
     "objective": "case",  # Case, used as an object
     "oblique": "case",  # Apparently like case form (e.g., Hindi)
-    "obsolete": "misc",
+    "obsolete": "dialect",
     "obviative": "referent",  # Referent is not the most salient one, cf. proximal, distal
     "offensive": "misc",
     "often": "misc",
@@ -5466,7 +5469,10 @@ valid_tags = {
 }
 for k, v in valid_tags.items():
     assert isinstance(k, str)
-    assert v in tag_categories
+    if v not in tag_categories:
+        print("valid_tags[{!r}]={!r} - {!r} not in tag_categories!"
+              .format(k, v, v))
+        assert v in tag_categories
 
 for tag in form_of_tags - set(valid_tags.keys()):
     print("tags.py:form_of_tags contains invalid tag {}"

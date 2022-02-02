@@ -1529,59 +1529,73 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                     prev_tags = new_prev_tags
                     continue
 
-            alt_related = None
-            alt_tagsets = None
-            tagsets = None
-            for i in range(len(parts), 0, -1):
-                related = parts[i:]
-                tagparts = parts[:i]
-                # print("  i={} related={} tagparts={}"
-                #       .format(i, related, tagparts))
-                tagsets, topics = decode_tags(" ".join(tagparts),
-                                              no_unknown_starts=True)
-                # print("tagparts={!r} tagsets={} topics={} related={} "
-                #       "alt_related={} distw={:.2f}"
-                #       .format(tagparts, tagsets, topics, related,
-                #               alt_related,
-                #               distw(titleparts, parts[i - 1])))
-                if (topics or not tagsets or
-                    any("error-unknown-tag" in x for x in tagsets)):
-                    if alt_related is not None:
-                        break
-                    # print("clearing prev_tags decode")
-                    # prev_tags = None
-                    continue
-                if (i > 1 and
-                    len(parts[i - 1]) >= 4 and
-                    distw(titleparts, parts[i - 1]) <= 0.4):
-                    alt_related = related
-                    alt_tagsets = tagsets
-                    continue
+            # Handle the special case of descriptors that are parenthesized,
+            # e.g., (archaic or Scotland)
+            m = re.match(r"\(([^)]+)\)\s+(.*)$", desc)
+            if m and classify_desc(m.group(1)) == "tags":
+                tagpart = m.group(1)
+                related = [m.group(2)]
+                tagsets, topics = decode_tags(tagpart, no_unknown_starts=True)
+                if topics:
+                    ctx.debug("parenthized head part {!r} contains topics: {}"
+                              .format(tagpart, topics))
+            else:
+                # Normal parsing of the descriptor
                 alt_related = None
                 alt_tagsets = None
-                break
-            else:
-                if alt_related is None:
-                    # Check if the parenthesized part is likely a romanization
-                    if ((have_ruby or classify_desc(base) == "other") and
-                        classify_desc(paren) == "romanization"):
-                        for r in split_at_comma_semi(paren, extra=[" or "]):
-                            add_related(ctx, data, ["romanization"], [r],
-                                        text, True, is_reconstruction)
-                        have_romanization = True
+                tagsets = None
+                for i in range(len(parts), 0, -1):
+                    related = parts[i:]
+                    tagparts = parts[:i]
+                    # print("  i={} related={} tagparts={}"
+                    #       .format(i, related, tagparts))
+                    tagsets, topics = decode_tags(" ".join(tagparts),
+                                                  no_unknown_starts=True)
+                    # print("tagparts={!r} tagsets={} topics={} related={} "
+                    #       "alt_related={} distw={:.2f}"
+                    #       .format(tagparts, tagsets, topics, related,
+                    #               alt_related,
+                    #               distw(titleparts, parts[i - 1])))
+                    if (topics or not tagsets or
+                        any("error-unknown-tag" in x for x in tagsets)):
+                        if alt_related is not None:
+                            break
+                        # print("clearing prev_tags decode")
+                        # prev_tags = None
                         continue
-                    tagsets = [["error-unrecognized-head-form"]]
-                    ctx.debug("unrecognized head form: {}".format(desc))
-                    continue
+                    if (i > 1 and
+                        len(parts[i - 1]) >= 4 and
+                        distw(titleparts, parts[i - 1]) <= 0.4):
+                        alt_related = related
+                        alt_tagsets = tagsets
+                        continue
+                    alt_related = None
+                    alt_tagsets = None
+                    break
+                else:
+                    if alt_related is None:
+                        # Check if the parenthesized part is likely a
+                        # romanization
+                        if ((have_ruby or classify_desc(base) == "other") and
+                            classify_desc(paren) == "romanization"):
+                            for r in split_at_comma_semi(paren, extra=[" or "]):
+                                add_related(ctx, data, ["romanization"], [r],
+                                            text, True, is_reconstruction)
+                            have_romanization = True
+                            continue
+                        tagsets = [["error-unrecognized-head-form"]]
+                        ctx.debug("unrecognized head form: {}".format(desc))
+                        continue
 
-            if alt_related is not None:
-                related = alt_related
-                tagsets = alt_tagsets
+                if alt_related is not None:
+                    related = alt_related
+                    tagsets = alt_tagsets
 
             # print("FORM END: tagsets={} related={}".format(tagsets, related))
             if not tagsets:
                 continue
 
+            assert isinstance(related, (list, tuple))
             related = " ".join(related)
             if "or" in titleparts:
                 alts = [related]
@@ -1593,7 +1607,9 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                 if related:
                     for tags in tagsets:
                         if (not prev_tags or
-                            set(tags) - set(["nonstandard", "dialectal"])):
+                            not all(t in ["nonstandard", "dialectal"] or
+                                    valid_tags[t] == "dialect"
+                                    for t in tags)):
                             add_related(ctx, data, tags, [related], text, True,
                                         is_reconstruction)
                         else:

@@ -402,3 +402,55 @@ class HeadTests(unittest.TestCase):
                  "tags": ["dialectal", "past"]},
                 ],
             })
+
+    def test_head29(self):
+        data = {}
+        self.maxDiff = 10000
+        self.ctx.start_page("take")
+        self.ctx.start_section("English")
+        self.ctx.start_subsection("Noun")
+        parse_word_head(self.ctx, "noun",
+                        "take (third-person singular simple present takes, present participle taking, simple past took, past participle taken or (archaic or Scotland) tane)",
+                        data, False)
+        print(json.dumps(data, indent=2, sort_keys=True))
+        self.assertEqual(data, {
+            "forms": [
+              {
+                "form": "takes",
+                "tags": [
+                  "present",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "taking",
+                "tags": [
+                  "participle",
+                  "present"
+                ]
+              },
+              {
+                "form": "took",
+                "tags": [
+                  "past"
+                ]
+              },
+              {
+                "form": "taken",
+                "tags": [
+                  "participle",
+                  "past"
+                ]
+              },
+              {
+                "form": "tane",
+                "tags": [
+                  "Scotland",
+                  "archaic",
+                  "participle",
+                  "past"
+                ]
+              },
+            ],
+        })
