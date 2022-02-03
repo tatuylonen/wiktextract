@@ -1939,9 +1939,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     tagstext = ""
                     text = text[m.end():]
                 else:
-                    # No prefix.  In this case, we inherit prefix from previous
-                    # entry.  This particularly applies for nested Audio files.
-                    tagstext = ""
+                    # Spanish has tags before pronunciations, eg. aceite/Spanish
+                    m = re.match(r".*:\s+\(([^)]*)\)\s+(.*)", text)
+                    if m:
+                        tagstext = m.group(1)
+                        text = m.group(2)
+                    else:
+                        # No prefix.  In this case, we inherit prefix
+                        # from previous entry.  This particularly
+                        # applies for nested Audio files.
+                        tagstext = ""
 
             # Find romanizations from the pronunciation section (routinely
             # produced for Korean by {{ko-IPA}})
@@ -1953,6 +1960,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         "tags": tag.split()}
                 data_append(ctx, data, "forms", form)
 
+            # Find IPA pronunciations
             for m in re.finditer(r"(?m)/[^][/,]+?/|\[[^]0-9,/][^],/]*?\]",
                                  ipa_text):
                 v = m.group(0)
