@@ -2606,6 +2606,8 @@ xlat_tags_map = {
     "past participle (obsolete except in adjectival use)":
     "obsolete past participle",
     "short past participle": "past participle short-form",
+    "short past adverbial perfective participle":
+    "past adverbial perfective participle short-form",
     "long past participle": "past participle long-form",
     "of the past participle": "past participle",
     "past participle n": "past participle neuter",
@@ -4611,7 +4613,7 @@ valid_tags = {
     "colloquial": "register",
     "combined-form": "misc",  # e.g. Spanish combining forms
     "comitative": "case",  # Case
-    "common": "misc",
+    "common": "misc",  # XXX where is this used, shuould this be removed?
     "common-gender": "gender",   # Gender in Swedish, Danish
     "comparable": "category",
     "comparative": "degree",  # Comparison of adjectives/adverbs
@@ -5077,7 +5079,6 @@ valid_tags = {
     "past-recent": "tense",
     "past-remote": "tense",
     "patronymic": "misc",
-    "pattern": "detail",  # E.g., חברה/Hebrew
     "paucal": "number",  # cf. singular, plural, dual, trial
     "pausal": "misc",  # Relates to prosody/pronunciation?
     "pejorative": "misc",
@@ -5308,6 +5309,7 @@ valid_tags = {
     "unemphatic": "misc",
     "uninflected": "misc",  # uninflected form (e.g., Dutch), cf. inflected
     "universal": "misc",  # universally known (καθεμία/Greek)
+    # Arabic seems to use "unknown" for theoretical forms not attested
     "unknown": "misc",  # Apparently verb form, e.g., जाँच्नु/Nepali
     "unmodified": "misc",  # Noun form, e.g., dikko/Sidamo (similar to person?)
     "unpossessed": "possession",  # Not possessed (often omitted); cf. possessed

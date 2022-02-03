@@ -1248,7 +1248,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
     # Special case: Hebrew " [pattern: nnn]" ending
     m = re.search(r"\s+\[pattern: ([^]]+)\]", base)
     if m:
-        add_related(ctx, data, ["pattern"], [m.group(1)], text, True,
+        add_related(ctx, data, ["class"], [m.group(1)], text, True,
                     is_reconstruction)
         base = base[:m.start()] + base[m.end():]
 
@@ -2033,6 +2033,8 @@ def parse_alt_or_inflection_of1(ctx, gloss):
             desc = gloss[:m.start()]
             base = gloss[m.end():]
             tagsets, topics = decode_tags(desc, no_unknown_starts=True)
+            # print("ALT_OR_INFL: desc={!r} base={!r} tagsets={} topics={}"
+            #       .format(desc, base, tagsets, topics))
             if (not topics and
                 any(not (alt_infl_disallowed & set(t)) for t in tagsets)):
                 tags = []
