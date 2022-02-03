@@ -2081,8 +2081,12 @@ def parse_alt_or_inflection_of1(ctx, gloss):
             if lst[-1] == "in" and len(lst) > 1:
                 lst = lst[:-1]
 
+    # Eliminate empty and duplicate tags
     tags = list(sorted(set(t for t in tags if t)))
-    # Clean up some extra stuff from the linked word
+
+    # Clean up some extra stuff from the linked word, separating the text
+    # into ``base`` (the linked word) and ``extra`` (additional information,
+    # such as English translation or clarifying word sense information).
     orig_base = base
     base = re.sub(alt_of_form_of_clean_re, "", orig_base)
     base = re.sub(r" [(⟨][^()]*[)⟩]", "", base)  # Remove all (...) groups
@@ -2116,12 +2120,25 @@ def parse_alt_or_inflection_of1(ctx, gloss):
     base = base.strip()
     if not base:
         return tags, None
+
+    # Kludge: Spanish verb forms seem to have a dot added at the end.
+    # Remove it; we know of no Spanish verbs ending with a dot.
+    language = ctx.section
+    pos = ctx.subsection
+    print("language={} pos={} base={}".format(language, pos, base))
+    if (base.endswith(".") and len(base) > 1 and base[-2].isalpha() and
+        (language == "Spanish" and pos == "Verb")):
+        base = base[:-1]
+
+    # Split base to alternatives when multiple alternatives provided
     parts = split_at_comma_semi(base, extra=[" / ",  "／", r" \+ "])
     titleword = re.sub(r"^Reconstruction:[^/]*/", "", ctx.title)
     if (len(parts) <= 1 or base.startswith("/") or
         base.endswith("/") or
         titleword.find("/") >= 0):
         parts = [base]
+
+    # Create form-of/alt-of entries based on the extracted data
     lst = []
     for p in parts:
         # Check for some suspicious base forms
