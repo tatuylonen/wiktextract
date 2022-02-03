@@ -1519,7 +1519,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                         if rem_tags is True:  # Remove all old tags
                             tags = set()
                         else:
-                            tags = tags - set(rem_tags.split())
+                            tags = set(tags) - set(rem_tags.split())
                         tags = tags | set(add_tags.split())
                         tags = list(sorted(tags))
                         add_related(ctx, data, tags, [parts[1]], text, True,
@@ -1531,13 +1531,18 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
             # Handle the special case of descriptors that are parenthesized,
             # e.g., (archaic or Scotland)
             m = re.match(r"\(([^)]+)\)\s+(.*)$", desc)
-            if m and classify_desc(m.group(1)) == "tags":
+            if m is not None and classify_desc(m.group(1)) == "tags":
                 tagpart = m.group(1)
                 related = [m.group(2)]
                 tagsets, topics = decode_tags(tagpart, no_unknown_starts=True)
                 if topics:
                     ctx.debug("parenthized head part {!r} contains topics: {}"
                               .format(tagpart, topics))
+            elif m is not None and re.match(r"in the sense ", m.group(1)):
+                # Handle certain ignored cases
+                # e.g. bord/Danish: in the sense "plank"
+                related = [m.group(2)]
+                tagsets = [()]
             else:
                 # Normal parsing of the descriptor
                 alt_related = None
