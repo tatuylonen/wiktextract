@@ -2531,6 +2531,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                                   seq)
                     if subnode is not None:
                         parse_translations(data, subnode)
+                    else:
+                        # Failed to find the normal subpage section
+                        seq = ["Translations"]
+                        subnode = get_subpage_section(ctx.title, "translations",
+                                                      seq)
+                        if subnode is not None:
+                            parse_translations(data, subnode)
                     return ""
                 if name in ("c", "C", "categorize", "cat", "catlangname",
                             "topics", "top", "qualifier", "cln"):
