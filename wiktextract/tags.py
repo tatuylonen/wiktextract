@@ -2608,6 +2608,13 @@ xlat_tags_map = {
     "short past participle": "past participle short-form",
     "short past adverbial perfective participle":
     "past adverbial perfective participle short-form",
+    "short past adverbial imperfective participle":
+    "past adverbial imperfective participle short-form",
+    "short masculine": "masculine short-form",
+    "short feminine": "feminine short-form",
+    "short neuter": "neuter short-form",
+    "short plural": "plural short-form",
+    "short singular": "singular short-form",
     "long past participle": "past participle long-form",
     "of the past participle": "past participle",
     "past participle n": "past participle neuter",

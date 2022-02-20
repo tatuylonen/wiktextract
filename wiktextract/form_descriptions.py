@@ -2125,7 +2125,7 @@ def parse_alt_or_inflection_of1(ctx, gloss):
     # Remove it; we know of no Spanish verbs ending with a dot.
     language = ctx.section
     pos = ctx.subsection
-    print("language={} pos={} base={}".format(language, pos, base))
+    # print("language={} pos={} base={}".format(language, pos, base))
     if (base.endswith(".") and len(base) > 1 and base[-2].isalpha() and
         (language == "Spanish" and pos == "Verb")):
         base = base[:-1]
