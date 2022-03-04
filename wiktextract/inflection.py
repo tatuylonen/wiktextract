@@ -1,6 +1,6 @@
 # Code for parsing inflection tables.
 #
-# Copyright (c) 2021, 2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org.
+# Copyright (c) 2021-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org.
 
 import re
 import copy
@@ -22,7 +22,7 @@ from wiktextract.clean import clean_value
 
 
 # Set this to a word form to debug how that is analyzed, or None to disable
-debug_word = None
+debug_word = "nametao m / nametala f / nametalo n"
 
 
 # Column texts that are interpreted as an empty column.
@@ -62,8 +62,6 @@ title_contains_global_map = {
     "personal pronouns": "personal pronoun",
     "composed forms of": "multiword-construction",
     "subordinate-clause forms of": "subordinate-clause",
-    "western lombard": "Western-Lombard",
-    "eastern lombard": "Eastern-Lombard",
     "participles of": "participle",
 }
 for k, v in title_contains_global_map.items():
@@ -94,6 +92,11 @@ title_contains_wordtags_map = {
     "ambitransitive": "ambitransitive",
     "archaic": "archaic",
     "dated": "dated",
+    "affirmative": "affirmative",
+    "negative": "negative",
+    "subject pronouns": "subjective",
+    "object pronouns": "objective",
+    "emphatic": "emphatic",
     "proper noun": "proper-noun",
     "no plural": "no-plural",
     "imperfective": "imperfective",
@@ -130,6 +133,11 @@ title_contains_wordtags_map = {
     "fifth conjugation": "conjugation-5",
     "sixth conjugation": "conjugation-6",
     "seventh conjugation": "conjugation-7",
+    # Corsican regional tags in table header
+    "cismontane": "Cismontane",
+    "ultramontane": "Ultramontane",
+    "western lombard": "Western-Lombard",
+    "eastern lombard": "Eastern-Lombard",
 }
 for k, v in title_contains_wordtags_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -687,6 +695,9 @@ lang_specific = {
     },
     "Spanish": {
         "next": "romance-group",
+        "form_transformations": [
+            ["verb", "^no ", "", "negative"],
+        ],
     },
     "Swahili": {
         "next": "bantu-group",
@@ -1103,8 +1114,12 @@ def clean_header(word, col, skip_paren):
         elif r == "vos":
             hdr_tags.append("informal")
             hdr_tags.append("vos-form")
+            hdr_tags.append("second-person")
+            hdr_tags.append("singular")
         elif r == "tú":
             hdr_tags.append("informal")
+            hdr_tags.append("second-person")
+            hdr_tags.append("singular")
         else:
             v = m.group(1)
             if v.startswith("(") and v.endswith(")"):
@@ -1138,6 +1153,8 @@ def clean_header(word, col, skip_paren):
             if col.endswith("ᵛᵒˢ"):
                 hdr_tags.append("informal")
                 hdr_tags.append("vos-form")
+                hdr_tags.append("second-person")
+                hdr_tags.append("singular")
                 col = col[:-3].strip()
                 continue
             # Numbers and H/L/N are useful information
@@ -1450,13 +1467,14 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                           for tt in x.tagsets
                           for t in tt)
             if celltext == debug_word:
-                print("in_cats={}".format(in_cats))
+                print("in_cats={} tagsets={}".format(in_cats, tagsets))
             # Merge the tagsets into existing tagsets.  This merges
             # alternatives into the same tagset if there is only one
             # category different; otherwise this splits the tagset into
             # more alternatives.
             includes_all_on_row = True
             for x in hdrspans:
+                print("X: x.rownum={} x.start={}".format(x.rownum, x.start))
                 if x.rownum != hdrspan.rownum:
                     continue
                 if (x.start < start or
@@ -1475,8 +1493,9 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                 if celltext == debug_word:
                     print("Merging into wide col: x.rownum={} "
                           "x.start={} x.colspan={} "
-                          "start={} colspan={}"
-                          .format(x.rownum, x.start, x.colspan, start, colspan))
+                          "start={} colspan={} tagsets={} x.tagsets={}"
+                          .format(x.rownum, x.start, x.colspan, start, colspan,
+                                  tagsets, x.tagsets))
                 tagsets = or_tagsets(lang, pos, tagsets, x.tagsets)
             # If all headers on the row were included, ignore them.
             # See e.g. kunna/Swedish/Verb.
@@ -1714,9 +1733,9 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
     for x in titles:
         assert isinstance(x, str)
     # print("PARSE_SIMPLE_TABLE: TITLES:", titles)
-    # print("ROWS:")
-    # for row in rows:
-    #     print("  ", row)
+    print("ROWS:")
+    for row in rows:
+        print("  ", row)
 
     # Check for forced rowspan kludge.  See e.g.
     # maorski/Serbo-Croatian.  These are essentially multi-row
@@ -2047,7 +2066,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                             col0_followed_by_nonempty = False
                 continue
 
-            # These values are ignored, at least form now
+            # These values are ignored, at least for now
             if re.match(r"^(# |\(see )", col):
                 continue
             if any("dummy-skip-this" in ts for ts in rowtags):
@@ -2121,6 +2140,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                                for x in alts)
             alts = list(x for x in alts
                         if not re.match(r"pronounced with |\(with ", x))
+            alts = list(re.sub(r"^\((in the sense [^)]*)\)\s+", "", x)
+                        for x in alts)
             # Handle the special case where romanization is given under
             # normal form, e.g. in Russian.  There can be multiple
             # comma-separated forms in each case.  We also handle the case

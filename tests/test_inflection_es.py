@@ -2,7 +2,7 @@
 #
 # Tests for parsing inflection tables
 #
-# Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2021, 2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
 import json
@@ -1152,6 +1152,17 @@ class InflTests(unittest.TestCase):
                 "form": "interdiga",
                 "source": "Conjugation",
                 "tags": [
+                  "formal",
+                  "imperative",
+                  "second-person-semantically",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "interdiga",
+                "source": "Conjugation",
+                "tags": [
                   "imperative",
                   "singular",
                   "third-person"
@@ -1179,13 +1190,24 @@ class InflTests(unittest.TestCase):
                 "form": "interdigan",
                 "source": "Conjugation",
                 "tags": [
+                  "formal",
+                  "imperative",
+                  "plural",
+                  "second-person-semantically",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "interdigan",
+                "source": "Conjugation",
+                "tags": [
                   "imperative",
                   "plural",
                   "third-person"
                 ]
               },
               {
-                "form": "no interdigas",
+                "form": "interdigas",
                 "source": "Conjugation",
                 "tags": [
                   "imperative",
@@ -1195,7 +1217,19 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "no interdiga",
+                "form": "interdiga",
+                "source": "Conjugation",
+                "tags": [
+                  "formal",
+                  "imperative",
+                  "negative",
+                  "second-person-semantically",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "interdiga",
                 "source": "Conjugation",
                 "tags": [
                   "imperative",
@@ -1205,7 +1239,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "no interdigamos",
+                "form": "interdigamos",
                 "source": "Conjugation",
                 "tags": [
                   "first-person",
@@ -1215,7 +1249,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "no interdigáis",
+                "form": "interdigáis",
                 "source": "Conjugation",
                 "tags": [
                   "imperative",
@@ -1225,7 +1259,19 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "no interdigan",
+                "form": "interdigan",
+                "source": "Conjugation",
+                "tags": [
+                  "formal",
+                  "imperative",
+                  "negative",
+                  "plural",
+                  "second-person-semantically",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "interdigan",
                 "source": "Conjugation",
                 "tags": [
                   "imperative",
@@ -2498,6 +2544,17 @@ class InflTests(unittest.TestCase):
                 "form": "apoltrónese",
                 "source": "Conjugation",
                 "tags": [
+                  "formal",
+                  "imperative",
+                  "second-person-semantically",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "apoltrónese",
+                "source": "Conjugation",
+                "tags": [
                   "imperative",
                   "singular",
                   "third-person"
@@ -2525,13 +2582,24 @@ class InflTests(unittest.TestCase):
                 "form": "apoltrónense",
                 "source": "Conjugation",
                 "tags": [
+                  "formal",
+                  "imperative",
+                  "plural",
+                  "second-person-semantically",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "apoltrónense",
+                "source": "Conjugation",
+                "tags": [
                   "imperative",
                   "plural",
                   "third-person"
                 ]
               },
               {
-                "form": "no te apoltrones",
+                "form": "te apoltrones",
                 "source": "Conjugation",
                 "tags": [
                   "imperative",
@@ -2541,7 +2609,19 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "no se apoltrone",
+                "form": "se apoltrone",
+                "source": "Conjugation",
+                "tags": [
+                  "formal",
+                  "imperative",
+                  "negative",
+                  "second-person-semantically",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "se apoltrone",
                 "source": "Conjugation",
                 "tags": [
                   "imperative",
@@ -2551,7 +2631,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "no nos apoltronemos",
+                "form": "nos apoltronemos",
                 "source": "Conjugation",
                 "tags": [
                   "first-person",
@@ -2561,7 +2641,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "no os apoltronéis",
+                "form": "os apoltronéis",
                 "source": "Conjugation",
                 "tags": [
                   "imperative",
@@ -2571,7 +2651,19 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "no se apoltronen",
+                "form": "se apoltronen",
+                "source": "Conjugation",
+                "tags": [
+                  "formal",
+                  "imperative",
+                  "negative",
+                  "plural",
+                  "second-person-semantically",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "se apoltronen",
                 "source": "Conjugation",
                 "tags": [
                   "imperative",

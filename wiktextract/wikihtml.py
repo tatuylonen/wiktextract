@@ -2,7 +2,7 @@
 # they can occur in, whether they need ends tags, and whether they are
 # implicitly closed by some other tags.
 #
-# Copyright (c) 2020, 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2020-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 
 # HTML tags that are allowed in input.  These are generated as HTML nodes

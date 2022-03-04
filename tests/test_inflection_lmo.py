@@ -691,7 +691,7 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
-                "form": "transitive",
+                "form": "Western-Lombard transitive",
                 "source": "Conjugation",
                 "tags": [
                   "table-tags"
@@ -701,7 +701,6 @@ class InflTests(unittest.TestCase):
                 "form": "baià",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "infinitive"
                 ]
               },
@@ -709,7 +708,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiànd",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "gerund"
                 ]
               },
@@ -717,7 +715,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàndo",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "gerund"
                 ]
               },
@@ -725,7 +722,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàa",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "participle",
                   "past"
                 ]
@@ -734,7 +730,6 @@ class InflTests(unittest.TestCase):
                 "form": "avè",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "auxiliary"
                 ]
               },
@@ -742,7 +737,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàii",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "first-person",
                   "indicative",
                   "present",
@@ -753,7 +747,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàiet",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "indicative",
                   "present",
                   "second-person",
@@ -764,7 +757,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàia",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "indicative",
                   "present",
                   "singular",
@@ -775,7 +767,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàiom",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "first-person",
                   "indicative",
                   "plural",
@@ -786,7 +777,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàiov",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "indicative",
                   "plural",
                   "present",
@@ -797,7 +787,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiee",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "indicative",
                   "plural",
                   "present",
@@ -808,7 +797,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàien",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "indicative",
                   "plural",
                   "present",
@@ -819,7 +807,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàvi",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "first-person",
                   "imperfect",
                   "indicative",
@@ -830,7 +817,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàvet",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "imperfect",
                   "indicative",
                   "second-person",
@@ -841,7 +827,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàva",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "imperfect",
                   "indicative",
                   "singular",
@@ -852,7 +837,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàvom",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "first-person",
                   "imperfect",
                   "indicative",
@@ -863,7 +847,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàvov",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "imperfect",
                   "indicative",
                   "plural",
@@ -874,7 +857,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàven",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "imperfect",
                   "indicative",
                   "plural",
@@ -885,7 +867,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiaróo",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "first-person",
                   "future",
                   "indicative",
@@ -896,7 +877,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiaré",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "future",
                   "indicative",
                   "second-person",
@@ -907,7 +887,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarét",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "future",
                   "indicative",
                   "second-person",
@@ -918,7 +897,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarà",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "future",
                   "indicative",
                   "singular",
@@ -929,7 +907,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarèmm",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "first-person",
                   "future",
                   "indicative",
@@ -940,7 +917,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarii",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "future",
                   "indicative",
                   "plural",
@@ -951,7 +927,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarànn",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "future",
                   "indicative",
                   "plural",
@@ -962,7 +937,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarìa",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "conditional",
                   "first-person",
                   "present",
@@ -973,7 +947,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarìss",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "conditional",
                   "first-person",
                   "present",
@@ -984,7 +957,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarìssi",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "conditional",
                   "first-person",
                   "present",
@@ -995,7 +967,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarìet",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "conditional",
                   "present",
                   "second-person",
@@ -1006,7 +977,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarìsset",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "conditional",
                   "present",
                   "second-person",
@@ -1017,7 +987,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarìa",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "conditional",
                   "present",
                   "singular",
@@ -1028,7 +997,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarìss",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "conditional",
                   "present",
                   "singular",
@@ -1039,7 +1007,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarìom",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "conditional",
                   "first-person",
                   "plural",
@@ -1050,7 +1017,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarìssom",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "conditional",
                   "first-person",
                   "plural",
@@ -1061,7 +1027,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarìov",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "conditional",
                   "plural",
                   "present",
@@ -1072,7 +1037,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarìssov",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "conditional",
                   "plural",
                   "present",
@@ -1083,7 +1047,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarìen",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "conditional",
                   "plural",
                   "present",
@@ -1094,7 +1057,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarìssen",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "conditional",
                   "plural",
                   "present",
@@ -1105,7 +1067,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàii",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "first-person",
                   "present",
                   "singular",
@@ -1116,7 +1077,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàiet",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "present",
                   "second-person",
                   "singular",
@@ -1127,7 +1087,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàia",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "present",
                   "singular",
                   "subjunctive",
@@ -1138,7 +1097,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàiom",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "first-person",
                   "plural",
                   "present",
@@ -1149,7 +1107,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàiov",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "plural",
                   "present",
                   "second-person",
@@ -1160,7 +1117,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiii",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "plural",
                   "present",
                   "second-person",
@@ -1171,7 +1127,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàien",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "plural",
                   "present",
                   "subjunctive",
@@ -1182,7 +1137,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàssi",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "first-person",
                   "past",
                   "singular",
@@ -1193,7 +1147,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàsset",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "past",
                   "second-person",
                   "singular",
@@ -1204,7 +1157,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàss",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "past",
                   "singular",
                   "subjunctive",
@@ -1215,7 +1167,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàssom",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "first-person",
                   "past",
                   "plural",
@@ -1226,7 +1177,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàssov",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "past",
                   "plural",
                   "second-person",
@@ -1237,7 +1187,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàssen",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "past",
                   "plural",
                   "subjunctive",
@@ -1248,7 +1197,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàia",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "imperative",
                   "second-person",
                   "singular"
@@ -1258,7 +1206,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàia",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "imperative",
                   "singular",
                   "third-person"
@@ -1268,7 +1215,6 @@ class InflTests(unittest.TestCase):
                 "form": "baièmm",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "first-person",
                   "imperative",
                   "plural"
@@ -1278,7 +1224,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiee",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "imperative",
                   "plural",
                   "second-person"
@@ -1288,14 +1233,13 @@ class InflTests(unittest.TestCase):
                 "form": "bàien",
                 "source": "Conjugation",
                 "tags": [
-                  "Western-Lombard",
                   "imperative",
                   "plural",
                   "third-person"
                 ]
               },
               {
-                "form": "transitive",
+                "form": "Eastern-Lombard transitive",
                 "source": "Conjugation",
                 "tags": [
                   "table-tags"
@@ -1305,7 +1249,6 @@ class InflTests(unittest.TestCase):
                 "form": "baià",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "infinitive"
                 ]
               },
@@ -1313,7 +1256,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàt",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "participle",
                   "past"
                 ]
@@ -1322,7 +1264,6 @@ class InflTests(unittest.TestCase):
                 "form": "ìga",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "auxiliary"
                 ]
               },
@@ -1330,7 +1271,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàie",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "first-person",
                   "indicative",
                   "present",
@@ -1341,7 +1281,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàiet",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "indicative",
                   "present",
                   "second-person",
@@ -1352,7 +1291,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàia",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "indicative",
                   "present",
                   "singular",
@@ -1363,7 +1301,6 @@ class InflTests(unittest.TestCase):
                 "form": "baióm",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "first-person",
                   "indicative",
                   "plural",
@@ -1374,7 +1311,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiìf",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "indicative",
                   "plural",
                   "present",
@@ -1385,7 +1321,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàia",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "indicative",
                   "plural",
                   "present",
@@ -1396,7 +1331,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàe",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "first-person",
                   "imperfect",
                   "indicative",
@@ -1407,7 +1341,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàet",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "imperfect",
                   "indicative",
                   "second-person",
@@ -1418,7 +1351,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàa",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "imperfect",
                   "indicative",
                   "singular",
@@ -1429,7 +1361,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàem",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "first-person",
                   "imperfect",
                   "indicative",
@@ -1440,7 +1371,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàef",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "imperfect",
                   "indicative",
                   "plural",
@@ -1451,7 +1381,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiàa",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "imperfect",
                   "indicative",
                   "plural",
@@ -1462,7 +1391,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiaró",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "first-person",
                   "future",
                   "indicative",
@@ -1473,7 +1401,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarét",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "future",
                   "indicative",
                   "second-person",
@@ -1484,7 +1411,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarà",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "future",
                   "indicative",
                   "singular",
@@ -1495,7 +1421,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiaróm",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "first-person",
                   "future",
                   "indicative",
@@ -1506,7 +1431,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarìf",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "future",
                   "indicative",
                   "plural",
@@ -1517,7 +1441,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarà",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "future",
                   "indicative",
                   "plural",
@@ -1528,7 +1451,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarèse",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "conditional",
                   "first-person",
                   "present",
@@ -1539,7 +1461,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarèset",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "conditional",
                   "present",
                   "second-person",
@@ -1550,7 +1471,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarès",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "conditional",
                   "present",
                   "singular",
@@ -1561,7 +1481,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarèsem",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "conditional",
                   "first-person",
                   "plural",
@@ -1572,7 +1491,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarèsef",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "conditional",
                   "plural",
                   "present",
@@ -1583,7 +1501,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiarès",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "conditional",
                   "plural",
                   "present",
@@ -1594,7 +1511,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàies",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "first-person",
                   "present",
                   "singular",
@@ -1605,7 +1521,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàies",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "present",
                   "second-person",
                   "singular",
@@ -1616,7 +1531,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàie",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "present",
                   "singular",
                   "subjunctive",
@@ -1627,7 +1541,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiómes",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "first-person",
                   "plural",
                   "present",
@@ -1638,7 +1551,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiìghes",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "plural",
                   "present",
                   "second-person",
@@ -1649,7 +1561,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàie",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "plural",
                   "present",
                   "subjunctive",
@@ -1660,7 +1571,6 @@ class InflTests(unittest.TestCase):
                 "form": "baièse",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "first-person",
                   "past",
                   "singular",
@@ -1671,7 +1581,6 @@ class InflTests(unittest.TestCase):
                 "form": "baièset",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "past",
                   "second-person",
                   "singular",
@@ -1682,7 +1591,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiès",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "past",
                   "singular",
                   "subjunctive",
@@ -1693,7 +1601,6 @@ class InflTests(unittest.TestCase):
                 "form": "baièsem",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "first-person",
                   "past",
                   "plural",
@@ -1704,7 +1611,6 @@ class InflTests(unittest.TestCase):
                 "form": "baièsef",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "past",
                   "plural",
                   "second-person",
@@ -1715,7 +1621,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiès",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "past",
                   "plural",
                   "subjunctive",
@@ -1726,7 +1631,6 @@ class InflTests(unittest.TestCase):
                 "form": "bàia",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "imperative",
                   "second-person",
                   "singular"
@@ -1736,7 +1640,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiómm",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "first-person",
                   "imperative",
                   "plural"
@@ -1746,7 +1649,6 @@ class InflTests(unittest.TestCase):
                 "form": "baiì",
                 "source": "Conjugation",
                 "tags": [
-                  "Eastern-Lombard",
                   "imperative",
                   "plural",
                   "second-person"

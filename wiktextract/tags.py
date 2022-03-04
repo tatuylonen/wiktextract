@@ -807,6 +807,7 @@ uppercase_tags = set([
     "Church of England",
     "Cieszyn Silesia",
     "Cincinnati",
+    "Cismontane",  # Corsican dialect
     "Classical",  # Variant of several languages, e.g., Greek, Nahuatl
     "Classical Attic",
     "Classical Chinese",
@@ -1973,6 +1974,7 @@ uppercase_tags = set([
     "Ulaanbaatar",
     "Ulster Scots",
     "Ulster",
+    "Ultramontane",  # Corsican dialect
     "Umeå",
     "Unified",
     "Unix",
@@ -2154,6 +2156,7 @@ xlat_tags_map = {
     "trans.": "transitive",
     "unc": "uncountable",
     "abbreviated": "abbreviation",
+    "abbreviation as": "abbreviation",
     "diminutives": "diminutive",
     "Diminutive": "diminutive",
     "Diminutives": "diminutive",
@@ -2296,11 +2299,11 @@ xlat_tags_map = {
     "indicated possession by preceding noun": "possessed",
     "unpossessed form": "unpossessed",
     "Dialectal": "dialectal",
-    "Dialect": "dialectal",
+    "Dialect": "",
     "dialectal form": "dialectal",
     "dialectal term": "dialectal",
     "dialectal Mandarin": "dialectal Mandarin",
-    "Dialect: Oslo": "dialectal Oslo",
+    "Dialect:": "",
     "regiolectal": "dialectal",
     "archaic or regiolectal": "archaic dialectal",
     "archaic or regional": "archaic dialectal",
@@ -2620,6 +2623,7 @@ xlat_tags_map = {
     "adverbial locative",
     "comparative -": "no-comparative",
     "superlative -": "no-superlative",
+    "comparative form only": "comparative-only",
     "1 declension": "declension-1",
     "4 declension": "declension-4",
     "feminine ? declension": "feminine",
@@ -3616,6 +3620,7 @@ xlat_tags_map = {
     "euphemism": "euphemistic",
     "transliterated Russian pet forms": "transliteration Russian",
     "Transliteration": "transliteration",
+    "transliteration needed": "",
     "Cyrillic spelling of": "alt-of Cyrillic",
     "Cyrillic spelling": "Cyrillic",
     "Latin spelling": "romanization",
@@ -4617,6 +4622,7 @@ valid_tags = {
     "common-gender": "gender",   # Gender in Swedish, Danish
     "comparable": "category",
     "comparative": "degree",  # Comparison of adjectives/adverbs
+    "comparative-only": "misc",  # Only comparative used
     "completive": "aspect",
     "composition": "detail",  # Used in Chinese characters
     "compound": "misc",  # Compound words
