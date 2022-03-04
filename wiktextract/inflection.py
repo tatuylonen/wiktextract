@@ -22,7 +22,7 @@ from wiktextract.clean import clean_value
 
 
 # Set this to a word form to debug how that is analyzed, or None to disable
-debug_word = "nametao m / nametala f / nametalo n"
+debug_word = None
 
 
 # Column texts that are interpreted as an empty column.
