@@ -50,7 +50,8 @@ translation_suffixes = [
 def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
                  thesaurus_data):
     # Make sure there are no newlines or other strange characters in the
-    # title
+    # title.  They could cause security problems at several post-processing
+    # steps.
     title = re.sub(r"[\s\000-\037]+", " ", title)
     title = title.strip()
     if capture_cb is not None:

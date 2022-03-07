@@ -1474,7 +1474,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
             # more alternatives.
             includes_all_on_row = True
             for x in hdrspans:
-                print("X: x.rownum={} x.start={}".format(x.rownum, x.start))
+                # print("X: x.rownum={} x.start={}".format(x.rownum, x.start))
                 if x.rownum != hdrspan.rownum:
                     continue
                 if (x.start < start or
@@ -1733,9 +1733,10 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
     for x in titles:
         assert isinstance(x, str)
     # print("PARSE_SIMPLE_TABLE: TITLES:", titles)
-    print("ROWS:")
-    for row in rows:
-        print("  ", row)
+    if debug_word:
+        print("ROWS:")
+        for row in rows:
+            print("  ", row)
 
     # Check for forced rowspan kludge.  See e.g.
     # maorski/Serbo-Croatian.  These are essentially multi-row

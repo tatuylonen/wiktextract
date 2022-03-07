@@ -86,6 +86,8 @@ script_and_dialect_names = set([
     "Jinjiang Hokkien",  # Chinese
     "Kaohsiung Hokkien",  # Chinsese
     "Pinghua",  # Chinese
+    "Eastern Punjabi",
+    "Western Punjabi",
     # Various countries/regions
     "Alsace",
     "Bavaria",
