@@ -2,7 +2,7 @@
 # from wiktionary.  This file contains code to uncompress the Wiktionary
 # dump file and to separate it into individual pages.
 #
-# Copyright (c) 2018-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import io
 import re
@@ -73,6 +73,11 @@ def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
         for suffix in translation_suffixes:
             if title.endswith(suffix):
                 return None # XXX
+
+        # XXX old testing code, remove:
+        # if title == "drag":
+        #     print("XXX SKIPPING `drag' - THIS IS TEST CODE ONLY - REMOVE")
+        #     return None
 
         # XXX Sign gloss pages?
         config1 = WiktionaryConfig(**config_kwargs)

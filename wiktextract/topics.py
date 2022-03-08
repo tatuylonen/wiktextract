@@ -1,7 +1,7 @@
 # List of valid topics and canonicalization & generalization mappings
 # for topics
 #
-# Copyright (c) 2020-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2020-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 # Set of valid topic tags.  (Other tags may be canonicalized to these)
 valid_topics = set([
@@ -536,7 +536,7 @@ topic_generalize_map = {
     "mathematical analysis": "mathematics",
     "ethics": "philosophy",
     "existentialism": "philosophy",
-    "religion": "philosophy lifestyle",
+    "religion": "lifestyle",
     "philosophy": "human-sciences",
     "shipping": "transport economics",
     "railways": "transport",
@@ -909,6 +909,7 @@ topic_generalize_map = {
     "Zoroastrianism": "religion",
     "Wicca": "religion",
     "Buddhism": "religion",
+    "Buddhist": "Buddhism",
     "Shingon Buddhism": "Buddhism",
     "Tendai or Kegon Buddhism": "Buddhism",
     "Zen and Pure Land Buddhism": "Buddhism",

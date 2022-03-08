@@ -712,6 +712,7 @@ add_to_valid_tree_mapping(valid_sequences, topic_generalize_map,
 # Regexp used to find "words" from word heads and linguistic descriptions
 word_re = re.compile(r"[^ ,;()\u200e]+|"
                      r"\([^ ,;()\u200e]+\)[^ ,;()\u200e]+|"
+                     r"[\u2800-\u28ff]|"  # Braille characters
                      r"\(([^()]|\([^()]*\))*\)")
 
 

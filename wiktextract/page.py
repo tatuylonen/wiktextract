@@ -2849,6 +2849,8 @@ def parse_top_template(config, ctx, node, data):
             return None
         if is_panel_template(name):
             return ""
+        if name in ("reconstruction",):
+            return ""
         if name == "also":
             # XXX shows related words that might really have been the intended
             # word, capture them
@@ -2864,6 +2866,10 @@ def parse_top_template(config, ctx, node, data):
             return ""
         if name == "commonscat":
             # XXX capture link to Wikimedia commons
+            return ""
+        if name == "wrongtitle":
+            # XXX this should be captured to replace page title with the
+            # correct title.  E.g. ⿰亻革家
             return ""
         if name == "wikidata":
             arg = clean_node(config, ctx, data, ht.get(1, ()))

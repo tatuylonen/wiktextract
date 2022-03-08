@@ -130,8 +130,8 @@ class TrTests(unittest.TestCase):
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"translations": [
             {"word": "寺", "roman": "sì", "lang": "Mandarin", "code": "zh",
-             "english": "Buddhist"},
-            ]})
+             "topics": ["Buddhist", "Buddhism", "religion", "lifestyle"]},
+        ]})
 
     def test_tr10(self):
         data = self.runtr("Arabic: مَعْبَد‎ m (maʿbad), هَيْكَل‎ m (haykal)",
