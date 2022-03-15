@@ -1840,6 +1840,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             return None
 
         def parse_pron_post_template_fn(name, ht, text):
+            if is_panel_template(name):
+                return ""
             if name in ("q", "qualifier", "sense", "a", "accent",
                         "l", "link", "lb", "lbl", "label"):
                 # Kludge: when these templates expand to /.../ or [...],
