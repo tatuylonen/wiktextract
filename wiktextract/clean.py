@@ -956,7 +956,7 @@ def clean_value(config, title, no_strip=False):
                    r"<\s*/\s*syntaxhighlight\s*>",
                    repl_1_syntaxhighlight, title)
     # Remove any remaining HTML tags.
-    title = re.sub(r"(?s)<\s*[^/>][^>]*>", "", title)
+    title = re.sub(r"(?s)<\s*[/a-zA-Z][^>]*>", "", title)
     title = re.sub(r"(?s)<\s*/\s*[^>]+>", "", title)
     # Replace [...]
     title = re.sub(r"(?s)\[\s*\.\.\.\s*\]", "…", title)
