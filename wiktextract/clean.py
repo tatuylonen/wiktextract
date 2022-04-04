@@ -4,7 +4,7 @@
 #
 # This file also contains code for cleaning qualifiers for the "tags" field.
 #
-# Copyright (c) 2018-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
 import html
@@ -917,20 +917,20 @@ def clean_value(config, title, no_strip=False):
     # Remove divs with floatright class (generated e.g. by {{ja-kanji|...}})
     title = re.sub(r'(?si)<\s*div\b[^>]*?\bclass="[^"]*?\bfloatright\b[^>]*?>'
                    r'((<\s*div\b(<\s*div\b.*?<\s*/\s*div\s*>|.)*?</div>)|.)*?'
-                   r'</div>',
+                   r'<\s*/\s*div\s*>',
                    "", title)
     # Remove divs with float: attribute
     title = re.sub(r'(?si)<\s*div\b[^>]*?\bstyle="[^"]*?\bfloat:[^>]*?>'
                    r'((<\s*div\b(<\s*div\b.*?<\s*/\s*div\s*>|.)*?</div>)|.)*?'
-                   r'</div>',
+                   r'<\s*/\s*div\s*>',
                    "", title)
     # Remove <sup> with previewonly class (generated e.g. by {{taxlink|...}})
     title = re.sub(r'(?si)<\s*sup\b[^>]*?\bclass="[^"]*?\bpreviewonly\b[^>]*?>'
-                   r'((<.*?</.[^>]>)|.)*?</sup>',
+                   r'((<.*?</[^>]*>)|.)*?<\s*/\s*sup\s*>',
                    "", title)
     # Remove <strong class="error">...</strong>
     title = re.sub(r'(?si)<\s*strong\b[^>]*?\bclass="[^"]*?\berror\b[^>]*?>'
-                   r'((<.*?</.[^>]>)|.)*?</strong>',
+                   r'((<.*?</.[^>]>)|.)*?<\s*/\s*strong\s*>',
                    "", title)
     # Change <div> and </div> to newlines.  Ditto for tr, li, table, dl, ul, ol
     title = re.sub(r"(?si)<\s*/?\s*(div|tr|li|table|dl|ul|ol)\b[^>]*>",
