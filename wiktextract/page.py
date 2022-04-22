@@ -1078,9 +1078,39 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if ht.get(2) == "Wp":
                     return ""
             for k, v in ht.items():
-                gloss_template_args.add(v.strip())
+                v = v.strip()
+                if v and v.find("<") < 0:
+                    gloss_template_args.add(v)
             return None
 
+        def extract_link_texts(item):
+            """Recursively extracts link texts from the gloss source.  This
+            information is used to select whether to remove final "." from
+            form_of/alt_of (e.g., ihm/Hunsrik)."""
+            if isinstance(item, (list, tuple)):
+                for x in item:
+                    extract_link_texts(x)
+                return
+            if isinstance(item, str):
+                # There seem to be HTML sections that may futher contain
+                # unparsed links.
+                for m in re.finditer(r"\[\[([^]]*)\]\]", item):
+                    print("ITER:", m.group(0))
+                    v = m.group(1).split("|")[-1].strip()
+                    if v:
+                        gloss_template_args.add(v)
+                return
+            if not isinstance(item, WikiNode):
+                return
+            if item.kind == NodeKind.LINK:
+                v = item.args[-1]
+                if (isinstance(v, list) and len(v) == 1 and
+                    isinstance(v[0], str)):
+                    gloss_template_args.add(v[0].strip())
+            for x in item.children:
+                extract_link_texts(x)
+
+        extract_link_texts(lst)
         rawgloss = clean_node(config, ctx, sense_base, lst,
                               template_fn=sense_template_fn)
 
