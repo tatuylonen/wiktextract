@@ -853,7 +853,7 @@ def to_math(text):
     return text
 
 
-def clean_value(config, title, no_strip=False):
+def clean_value(config, title, no_strip=False, no_html_strip=False):
     """Cleans a title or value into a normal string.  This should basically
     remove any Wikimedia formatting from it: HTML tags, templates, links,
     emphasis, etc.  This will also merge multiple whitespaces into one
@@ -956,8 +956,9 @@ def clean_value(config, title, no_strip=False):
                    r"<\s*/\s*syntaxhighlight\s*>",
                    repl_1_syntaxhighlight, title)
     # Remove any remaining HTML tags.
-    title = re.sub(r"(?s)<\s*[/!a-zA-Z][^>]*>", "", title)
-    title = re.sub(r"(?s)<\s*/\s*[^>]+>", "", title)
+    if not no_html_strip:
+        title = re.sub(r"(?s)<\s*[/!a-zA-Z][^>]*>", "", title)
+        title = re.sub(r"(?s)<\s*/\s*[^>]+>", "", title)
     # Replace [...]
     title = re.sub(r"(?s)\[\s*\.\.\.\s*\]", "…", title)
     # Remove http links in superscript
@@ -1024,6 +1025,6 @@ def clean_template_args(config, ht, no_strip=False):
     cleaned dictionary."""
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(ht, dict)
-    return {clean_value(config, str(k)):
-            clean_value(config, str(v), no_strip=no_strip)
+    return {clean_value(config, str(k), no_html_strip=True):
+            clean_value(config, str(v), no_strip=no_strip, no_html_strip=True)
             for k, v in ht.items()}
