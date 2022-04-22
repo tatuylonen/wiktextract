@@ -2,7 +2,7 @@
 #
 # Data for parsing inflection tables
 #
-# Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2021, 2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
 from .tags import valid_tags, head_final_numeric_langs
@@ -2744,8 +2744,8 @@ infl_map = {
     "Form": "",
     "Isolated forms": "",
     "With possessive pronouns": "possessive",
-    "Possessed": "possessed",
-    "Unpossessed": "unpossessed",
+    "Possessed": "possessed-form",
+    "Unpossessed": "unpossessed-form",
     "past imperfective": "past imperfective",
     "past perfective": "past perfective",
     "Conjunct": "conjunct",

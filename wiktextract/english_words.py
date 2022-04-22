@@ -4,7 +4,7 @@
 # and exclude some words.  These will likely need to be tweaked semi-frequently
 # to add support for unrecognized sense descriptions.
 #
-# Copyright (c) 2020-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2020-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import nltk
 from nltk.corpus import brown
@@ -704,6 +704,7 @@ additional_words = set([
     'encephalomyelitis',
     'enclitic',
     'enclose',
+    'endocrine',
     'enforcer',
     'engrave',
     'engross',
@@ -1844,6 +1845,7 @@ additional_words = set([
     'wimp',
     'windlass',
     'windpipe',
+    'windscreen',
     'windward',
     'winemaking',
     'winterberry',
@@ -1876,23 +1878,30 @@ not_english_words = set([
     # This is a blacklist - these will not be treated as English words
     # even though they are in brown.words().  Adding a word on this list
     # generally makes it likely to be treated as a romanization.
-    "Ye",
-    "al",
-    "boo",
-    "em",
-    "ma",
-    "de",
-    "Mihapjungguk",
-    "Mi",
     "ANU",
     "Franc",
     "Frans",
-    "Germania",
     "Germani",
-    "Kina",
+    "Germania",
+    "He",
     "J'habitais",
+    "Kina",
+    "Mal",
+    "Mi",
+    "Mihapjungguk",
+    "Ye",
+    "al",
     "avec",
+    "boo",
+    "de",
+    "du",
+    "em",
     "lui",
+    "ma",
+    "mana",
+    "novo",
+    "pronto",
+    "que",
 ])
 
 # Construct a set of (most) English words.  Multi-word expressions where we

@@ -2301,14 +2301,14 @@ xlat_tags_map = {
     "standard form of": "standard alt-of",
     "nonstandard stylistic suffix": "nonstandard dialectal suffix",
     "honorific form": "honorific",
-    "possessed form": "possessed",
-    "obligatorily possessed": "possessed",
-    "obligatory possessive": "possessed",
-    "obligatory possession": "possessed",
+    "possessed form": "possessed-form",
+    "obligatorily possessed": "possessed-form",
+    "obligatory possessive": "possessed-form",
+    "obligatory possession": "possessed-form",
     "possessive only": "possessive",
     "obligational": "obligative",
-    "indicated possession by preceding noun": "possessed",
-    "unpossessed form": "unpossessed",
+    "indicated possession by preceding noun": "possessed-form",
+    "unpossessed form": "unpossessed-form",
     "Dialectal": "dialectal",
     "Dialect": "",
     "dialectal form": "dialectal",
@@ -4290,7 +4290,6 @@ form_of_tags = set([
     "in-compounds",
     "inclusive",
     "indefinite",
-    "indicative",
     "inessive",
     "infinitive",
     "infinitive-i",
@@ -4331,7 +4330,6 @@ form_of_tags = set([
     "pluperfect",
     "plural",
     "polite",
-    "possessed",
     "possessive",
     "potential",
     "predicative",
@@ -4344,7 +4342,6 @@ form_of_tags = set([
     "proximal",
     "quotative",
     "reflexive",
-    "root",
     "second-person",
     "singular",
     "singulative",
@@ -4401,8 +4398,8 @@ tag_categories = {
     "case": 370,      # Grammatical case (also direct-object, indirect-object)
     "number": 360,    # Singular, plural, dual, paucal, ...
     # "addressee",    # Something related to addressee
-    "possession": 350,  # possessive, possessed, unpossessed, alienable,
-                        # inalienable
+    "possession": 350,  # possessive, possessed-form, unpossessed-form,
+                        # alienable, inalienable
     "voice": 200,     # active, passive, middle
     "tense": 190,     # present, past, imperfect, perfect, future, pluperfect
     "aspect": 180,   # Aspect of verbs (perfective, imperfective, habitual, ...)
@@ -5147,7 +5144,7 @@ valid_tags = {
     "polite": "register",  # Politeness degree of verbs etc
     "polytonic": "misc",
     "positive": "degree",  # opposite of negative (usually unattested); degree
-    "possessed": "misc",  # Marks object that is possessed, cf. possessed
+    "possessed-form": "misc",  # Marks object that is possessed, cf. possessed
     "possessive": "possession",  # Possession (marks who possesses)
     "possessive-single": "possession",  # Possessive with single possessed
     "possessive-many": "possession",  # Possessive with multiple possessed
@@ -5353,7 +5350,7 @@ valid_tags = {
     # Arabic seems to use "unknown" for theoretical forms not attested
     "unknown": "misc",  # Apparently verb form, e.g., जाँच्नु/Nepali
     "unmodified": "misc",  # Noun form, e.g., dikko/Sidamo (similar to person?)
-    "unpossessed": "possession",  # Not possessed (often omitted); cf. possessed
+    "unpossessed-form": "possession",  # Not possessed (often omitted)
     "unspecified": "misc",  # селен/Macedonian uses this like proximal/distal
     "unstressed": "misc",  # Unstressed (unmarked, weaker) form
     "unstressed-before-j": "misc",  # unstressed when next word starts with /j/
