@@ -1857,6 +1857,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # uses {{a|{{l{{vi|...}}}}, and the {{a|...}} will fail
                     # if {{l|...}} returns empty.
                     return "stripped-by-parse_pron_post_template_fn"
+            if name in ("enPR",):
+                # Some enPR pronunciations include slashes.  Strip them so
+                # they don't incorrectly get taken as IPA.
+                return "stripped-by-parse_pron_post_template_fn"
             return text
 
         # XXX change this code to iterate over node as a LIST, warning about
