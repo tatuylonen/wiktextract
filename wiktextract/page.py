@@ -225,6 +225,11 @@ additional_expand_templates = set([
     "col5-u",
     "check deprecated lang param usage",
     "deprecated code",
+    "ru-verb-alt-ё",
+    "ru-noun-alt-ё",
+    "ru-adj-alt-ё",
+    "ru-proper noun-alt-ё",
+    "ru-pos-alt-ё",
 ])
 
 # Mapping from subtitle to linkage field
