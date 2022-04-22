@@ -2050,6 +2050,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     data_append(ctx, data, "sounds", audio)
             have_pronunciations = True
         for enpr in enprs:
+            if re.match(r"/[^/]+/$", enpr):
+                enpr = enpr[1: -1]
             pron = {"enpr": enpr}
             # XXX need to parse enpr separately for each list item to get
             # tags correct!
