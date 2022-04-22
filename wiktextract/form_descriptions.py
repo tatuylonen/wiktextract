@@ -1973,7 +1973,7 @@ def parse_translation_desc(ctx, lang, text, tr):
         del tr["roman"]
 
 
-def parse_alt_or_inflection_of(ctx, gloss):
+def parse_alt_or_inflection_of(ctx, gloss, gloss_template_args):
     """Tries to parse an inflection-of or alt-of description.  If successful,
     this returns (tags, alt-of/inflection-of-dict).  If the description cannot
     be parsed, this returns None.  This may also return (tags, None) when the
@@ -1996,7 +1996,7 @@ def parse_alt_or_inflection_of(ctx, gloss):
         return None
 
     # First try parsing it as-is
-    parsed = parse_alt_or_inflection_of1(ctx, gloss1)
+    parsed = parse_alt_or_inflection_of1(ctx, gloss1, gloss_template_args)
     if parsed is not None:
         return parsed
 
@@ -2006,7 +2006,7 @@ def parse_alt_or_inflection_of(ctx, gloss):
         gloss1 = gloss
     if gloss1 and gloss1[0].isupper():
         gloss1 = gloss1[0].lower() + gloss1[1:]
-        parsed = parse_alt_or_inflection_of1(ctx, gloss1)
+        parsed = parse_alt_or_inflection_of1(ctx, gloss1, gloss_template_args)
         if parsed is not None:
             return parsed
 
@@ -2018,7 +2018,7 @@ alt_infl_disallowed = set([
     "place",  # Not in inflected forms and causes problems e.g. house/English
 ])
 
-def parse_alt_or_inflection_of1(ctx, gloss):
+def parse_alt_or_inflection_of1(ctx, gloss, gloss_template_args):
     """Helper function for parse_alt_or_inflection_of.  This handles a single
     capitalization."""
     if not gloss or not gloss.strip():
@@ -2130,13 +2130,18 @@ def parse_alt_or_inflection_of1(ctx, gloss):
     base = base.strip()
     if base.endswith(",") and len(base) > 2:
         base = base[:-1].strip()
-    while base.endswith(".") and not ctx.page_exists(base):
+    while (base.endswith(".") and not ctx.page_exists(base) and
+           base not in gloss_template_args):
         base = base[:-1].strip()
     if base.endswith("(\u201cconjecture\")"):
         base = base[:-14].strip()
         tags.append("conjecture")
-    while base.endswith(".") and not ctx.page_exists(base):
+    while (base.endswith(".") and not ctx.page_exists(base) and
+           base not in gloss_template_args):
         base = base[:-1].strip()
+    if (base.endswith(".") and base not in gloss_template_args and
+        base[:-1] in gloss_template_args):
+        base = base[:-1]
     base = base.strip()
     if not base:
         return tags, None
