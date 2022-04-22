@@ -213,6 +213,7 @@ head_tag_re = re.compile(r"^(head|Han char|arabic-noun|arabic-noun-form|"
 # Additional templates to be expanded in the pre-expand phase
 additional_expand_templates = set([
     "multitrans",
+    "multitrans-nowiki",
     "col1",
     "col2",
     "col3",
@@ -1471,10 +1472,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
             split_glosses.append(gloss[pos:])
             for gloss in split_glosses:
                 # Check if this gloss describes an alt-of or inflection-of
-                if ("topics" in sense_data or
-                    (language != "English" and gloss.find(" ") < 0 and
+                if ((language != "English" and gloss.find(" ") < 0 and
                      distw([word], gloss) < 0.3)):
-                    # Don't try to parse gloss if has topics or is one word
+                    # Don't try to parse gloss it is one word
                     # that is close to the word itself for non-English words
                     # (probable translations of a tag/form name)
                     continue
@@ -2637,8 +2637,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 elif kind in LEVEL_KINDS:
                     # Sub-levels will be recursed elsewhere
                     pass
-                elif kind in (NodeKind.ITALIC, NodeKind.BOLD):
+                elif kind in (NodeKind.ITALIC,
+                              NodeKind.BOLD):
                     parse_translation_recurse(node)
+                elif kind == NodeKind.PREFORMATTED:
+                    print("PREFORMATTED:", node)
                 elif kind == NodeKind.LINK:
                     arg0 = node.args[0]
                     # Kludge: I've seen occasional normal links to translation

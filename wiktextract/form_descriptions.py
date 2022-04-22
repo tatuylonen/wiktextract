@@ -1979,15 +1979,8 @@ def parse_alt_or_inflection_of(ctx, gloss, gloss_template_args):
     be parsed, this returns None.  This may also return (tags, None) when the
     gloss describes a form (or some other tags were extracted from it), but
     there was no alt-of/form-of/synonym-of word."""
+    # print("parse_alt_or_inflection_of: {!r}".format(gloss))
     # Occasionally inflection_of/alt_of have "A(n) " etc. at the beginning.
-    gloss1 = gloss
-    # XXX This was added to fix a bug and was incorrect fix at the time.
-    # However, there could now be some forms that depend on this. They should
-    # be fixed by adding the forms with "An", "A", or "The" in the tag
-    # mapping table.  This code should be removed.
-    # m = re.match(r"(A\(n\)|A|a|an|An|The|the) ", gloss1)
-    # if m:
-    #     gloss1 = gloss1[m.end():]
 
     # Never interpret a gloss that is equal to the word itself as a tag
     # (e.g., instrumental/Romanian, instrumental/Spanish).
@@ -1996,17 +1989,15 @@ def parse_alt_or_inflection_of(ctx, gloss, gloss_template_args):
         return None
 
     # First try parsing it as-is
-    parsed = parse_alt_or_inflection_of1(ctx, gloss1, gloss_template_args)
+    parsed = parse_alt_or_inflection_of1(ctx, gloss, gloss_template_args)
     if parsed is not None:
         return parsed
 
     # Next try parsing it with the first character converted to lowercase if
     # it was previously uppercase.
-    if gloss1 != gloss:
-        gloss1 = gloss
-    if gloss1 and gloss1[0].isupper():
-        gloss1 = gloss1[0].lower() + gloss1[1:]
-        parsed = parse_alt_or_inflection_of1(ctx, gloss1, gloss_template_args)
+    if gloss and gloss[0].isupper():
+        gloss = gloss[0].lower() + gloss[1:]
+        parsed = parse_alt_or_inflection_of1(ctx, gloss, gloss_template_args)
         if parsed is not None:
             return parsed
 
