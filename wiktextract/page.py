@@ -970,7 +970,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             "etymology_text" in etym_data):
             etym = etym_data["etymology_text"]
             etym = etym.split(". ")[0]
-            ret = parse_alt_or_inflection_of(ctx, etym)
+            ret = parse_alt_or_inflection_of(ctx, etym, set())
             if ret is not None:
                 tags, lst = ret
                 assert isinstance(lst, (list, tuple))
@@ -1041,6 +1041,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         sublists = list(x for x in contents
                         if isinstance(x, WikiNode) and x.kind == NodeKind.LIST)
 
+        gloss_template_args = set()
+
         def sense_template_fn(name, ht):
             if name in wikipedia_templates:
                 parse_wikipedia_template(config, ctx, pos_data, ht)
@@ -1074,6 +1076,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if name == "w":
                 if ht.get(2) == "Wp":
                     return ""
+            for k, v in ht.items():
+                gloss_template_args.add(v.strip())
             return None
 
         rawgloss = clean_node(config, ctx, sense_base, lst,
@@ -1323,7 +1327,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             gl = subglosses[0].strip()
             if gl.endswith(":"):
                 gl = gl[:-1].strip()
-            parsed = parse_alt_or_inflection_of(ctx, gl)
+            parsed = parse_alt_or_inflection_of(ctx, gl, gloss_template_args)
             if parsed is not None:
                 infl_tags, infl_dts = parsed
                 if (infl_dts and "form-of" in infl_tags and
@@ -1439,7 +1443,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # aquamarine/German), try to parse the inner glosses as
             # tags for an inflected form.
             if "form-of" in sense_base.get("tags", ()):
-                parsed = parse_alt_or_inflection_of(ctx, gloss)
+                parsed = parse_alt_or_inflection_of(ctx, gloss,
+                                                    gloss_template_args)
                 if parsed is not None:
                     infl_tags, infl_dts = parsed
                     if not infl_dts and infl_tags:
@@ -1473,7 +1478,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # that is close to the word itself for non-English words
                     # (probable translations of a tag/form name)
                     continue
-                parsed = parse_alt_or_inflection_of(ctx, gloss)
+                parsed = parse_alt_or_inflection_of(ctx, gloss,
+                                                    gloss_template_args)
                 if parsed is None:
                     continue
                 tags, dts = parsed
