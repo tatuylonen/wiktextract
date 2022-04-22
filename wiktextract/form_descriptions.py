@@ -438,6 +438,7 @@ alt_of_form_of_clean_re = re.compile(
         r" ﹘ ",
         r" ﹣ ",
         r" － ",
+        r" \+ ",
         r" \(with ",
         r" with -ra/-re",
         r"\. Used ",
@@ -568,6 +569,7 @@ alt_of_form_of_clean_re = re.compile(
         r"\. measuring ",
         r"\. used in ",
         r"\. cutely ",
+        r"\. Protects",
         r'\. "',
         r'\.^',
         r'\. \+ ',
@@ -587,6 +589,7 @@ alt_of_form_of_clean_re = re.compile(
         r" equivalent to ",
         r" popularized by ",
         r" denoting ",
+        r" in its various senses\.",
         r" used by ",
         r" but not for ",
         r" since ",
@@ -601,6 +604,8 @@ alt_of_form_of_clean_re = re.compile(
         r" by J\. R\. Allen ",
         r" by S\. Ferguson ",
         r" by G\. Donaldson ",
+        r" May refer to ",
+        r" An area or region ",
         ]) +
     r").*$")
 
@@ -2020,7 +2025,7 @@ def parse_alt_or_inflection_of1(ctx, gloss):
         return None
 
     # Prevent some common errors where we would parse something we shouldn't
-    if re.match(r"(?i)form of address ", gloss):
+    if re.search(r"(?i)form of address ", gloss):
         return None
 
     # First try all formats ending with "of" (or other known last words that
@@ -2152,6 +2157,12 @@ def parse_alt_or_inflection_of1(ctx, gloss):
         base.endswith("/") or
         titleword.find("/") >= 0):
         parts = [base]
+    # Split base to alternatives when of form "a or b" and "a" and "b" are
+    # similar (generally spelling variants of the same word or similar words)
+    if len(parts) == 1:
+        pp = base.split()
+        if len(pp) == 3 and pp[1] == "or" and distw([pp[0]], pp[2]) < 0.4:
+            parts = [pp[0], pp[2]]
 
     # Create form-of/alt-of entries based on the extracted data
     lst = []
