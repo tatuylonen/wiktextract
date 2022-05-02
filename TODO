@@ -124,12 +124,6 @@
 # In htmlgen, create links from gloss, at minimum when whole gloss matches
 # a word form in English (or maybe gloss as an alternative?)
 
-htmlgen: Improve sense/word lists
-  - more even sizes of sublists (use intervals when appropriate)
-  - group kanji etc by radical + strokes
-htmlgen: include word prefixes in breadcrumbs
-htmlgen: Implement better list page generation
-
 htmlgen: form-of (and alt-of) links in generated html should look at
 canonical form in addition to word - now many items with accents are
 not properly linked
@@ -141,8 +135,6 @@ htmlgen: compound-of field of sense not displayed in generated html
 htmlgen: implement support for redirects
 
 htmlgen: render audio-ipa for audios
-
-htmlgen: make search faster on slow links (split to deeper prefixes if large)
 
 htmlgen: when looking for linkage references, also check canonical
 word form
@@ -290,8 +282,6 @@ Implement special case in parsing word head for paren desc:
 
 Something wrong in parsing آتي/Arabic "coming"
 
-Fix parsing "or" separated alternatives in canonical forms?  Or is it broken?
-
 Finish datautils.py:split_slashes and use it for translations/linkages/heads
   - warn when clearly ambigious
   - add more tests in test_utils.py
@@ -304,19 +294,11 @@ Change clean_value in clean.py to receive ctx.  Add "hieroglyphs" tag
 if the string contains <hiero> tag.  (Or maybe this needs to go in
 clean_node in page.py?  Or maybe these two should be merged?)
 
-Why is extraction suddenly very slow?  Is it because topics are no
-longer copied?
-
 Handle Chinese usage examples better - separate Chinese (traditional,
 simplified), Pinyin, translation.
 
 Translations for Mandarin seem to have Chinese language but cmn code.
 What is correct?
-
-Improve audio file URL generation to handle redirects.  Options
-include using Commons API to query the actual location or parsing
-Commons dumps to extract redirects.  (Note that some files also seems
-to have missing transcoded versions - probably about 0.1-0.5% of them)
 
 Parse eumhun related forms (Korean) in more detail, particularly
 separate romanization and hanja forms, e.g. 度/Korean
@@ -422,6 +404,43 @@ wit/English
       - but why are the one-character ones not handled either?
   - add a test for this, because of the parenthesized parts
 
-inflection_check.py:
-  - handle each table separately, entries from word head separately
-    when merging
+htmlgen: make search faster on slow links (split to deeper prefixes if large)
+  - when generating search files (htmlgen.py:generate_caller), if the
+    two-character prefix contains more than 1000 words, split further to
+    three-character prefix.  In each prefix file, include list of those prefixes
+    that have a search file with a longer prefix (or include the flag in each
+    entry in the file).
+  - change the Javascript for search accordingly (search_fill)
+
+Improve audio file URL generation in wiktextract to handle redirects
+in Wikimedia Commons.  Options include using Commons API to query the
+actual location or parsing Commons dumps to extract redirects.  (Note
+that some files also seems to have missing transcoded versions -
+probably about 0.1-0.5% of them)
+  - See download at https://kaikki.org/dictionary/rawdata.html, audio
+    file bulk download.  We would like to make this download automatically
+    updated and to support redirect.
+  - Modify wiktextract (git@github.com:tatuylonen/wiktextract) to take
+    wikimedia commons redirect list as a command line option
+    (--commons-redirect=FILE) and change parse_pronunciation() in
+    wiktextract/page.py to use this information when computing mp3_url
+    and ogg_url, so that URLs for redirected media files point to
+    the correct media file in Wikimedia commons.
+  - Take sound-file-downloader.py (under kaikki/webgen/wiktextract) and
+    turn it into a proper downloader that only downloads those files that
+    it does not yet have.  Add support for argparse, with
+      --datadir=DIR
+      --rawdata=PATH  (extract.json)
+  - The general idea is to be able to run the downloader after extraction
+    (should be fast as there are usually only a small number of new files),
+    recreate the wiktionary-audios.tar file, and copy it to the website.
+    This way we can update the audio files daily.  This does not handle
+    modified existing files, so additionally we may want to re-download
+    everything every few months.  (Maybe we could have --check-updates option
+    that uses HTTP HEAD command to get file size and checks if it has changed;
+    it could also check if the date is newer than the existing file
+    modification date.  Alternative is to periodically re-download everything,
+    which takes 1-2 weeks.)
+  - As an alternative, we could perhaps use the existing Wikimedia commons
+    download and first attempt to fetch the files from there?  Perhaps
+    a --wikimedia-commons-archive=DIR option?
