@@ -2593,6 +2593,8 @@ xlat_tags_map = {
     "impersonal/third-person": "impersonal third-person",
     "lative form": "lative",
     "reflexive form": "reflexive",
+    "reflexive for": "reflexive form-of",
+    "passive for": "passive form-of",
     "dative form": "dative",
     "accusative form": "accusative",
     "formal or literary": ["formal", "literary"],
