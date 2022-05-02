@@ -517,6 +517,7 @@ ignored_etymology_templates = [
     "deprecated code",
     "check deprecated lang param usage",
     "para",
+    "cite",
 ]
 # Regexp for matching ignored etymology template names.  This adds certain
 # prefixes to the names listed above.
@@ -3155,7 +3156,7 @@ def parse_page(ctx, word, text, config):
                 if topics:
                     dt["topics"] = topics
                 if xlit:
-                    dt["xlit"] = xlit
+                    dt["roman"] = xlit
                 data_append(ctx, data, rel, dt)
 
     # Categories are not otherwise disambiguated, but if there is only
