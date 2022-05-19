@@ -4152,7 +4152,7 @@ xlat_tags_map = {
     "all": "", # XXX same as "both", "all" should extend tags the following forms
     "less commonly": "uncommon", # avid/English
     "muscle": "anatomy", # depressor/English
-    
+
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -4454,6 +4454,7 @@ tag_categories = {
     "error": 0,  # error tags
     "unknown": -1,  # Only used internally
     "dummy": -2,  # Only used internally
+    "dummy2": -3,  # Only used internally (this category never expands cell)
 }
 
 # Set of all valid tags
@@ -4780,6 +4781,7 @@ valid_tags = {
     "dual": "number",       # two in number, cf. singular, trial, plural
     "dubitative": "mood",  # Verb form (e.g., Bulgarian)
     "dummy-ignore-skipped": "dummy",  # Causes "-" entries to be ignored
+    "dummy-ignored-text-cell": "dummy2",  # Cell has text but ignored
     "dummy-mood": "dummy",  # Used in inflection table parsing, never in data
     "dummy-skip-this": "dummy",  # Kludge in parsing, form skipped
     "dummy-tense": "dummy",  # Used in inflection table parsing, never in data
@@ -4856,6 +4858,7 @@ valid_tags = {
     "future": "tense",  # Verb tense
     "future-near": "tense",  # immediate future ba/Zulu
     "future-remote": "tense",  # remote future ba/Zulu
+    "future-perfect": "tense",  # future anteriore ripromettersi/Italian
     "future-i": "tense",  # Verb tense (German, e.g., vertippen)
     "future-ii": "tense",  # Verb tense (German)
     "gender-neutral": "gender",
@@ -5182,6 +5185,7 @@ valid_tags = {
     "presumptive": "mood",  # Verb mood, e.g., गरजना/Hindi
     "preterite": "tense",  # Verb tense (action in the past, similar to simple past)
     "preterite-present": "tense",  # word where present&preterite forms look opposite
+    "preterite-perfect": "tense",  # trapassato remoto ripromettersi/Italian
     "preterite-i": "tense",  # воштыны/Udmurt
     "preterite-ii": "tense",
     "pretonic": "misc",  # Precedes stressed syllable

@@ -2755,6 +2755,11 @@ infl_map = {
     "Habitual participle": "habitual participle",
     "Future conditional": "future conditional",
     "Past conditional": "past conditional",
+    "condizionale passato": "past conditional",  # ripromettersi/Italian
+    "futuro anteriore": "future perfect",  # ripromettersi/Italian
+    "passato prossimo": "perfect",  # ripromettersi/Italian
+    "trapassato remoto": "preterite-perfect",  # ripromettersi/Italian
+    "trapassato prossimo": "past perfect",  # ripromettersi/Italian
     "(♂)": "masculine",
     "Contingent": "contingent",
     "Reason": "reason",
@@ -3256,6 +3261,7 @@ infl_map = {
         "then": "*",  # e.g., kolme/Finnish
         "else": "adverbial",
     },
+    "dummy-ignored-text-cell": "dummy-ignored-text-cell",  # Kludge
 }
 
 
