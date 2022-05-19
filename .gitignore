@@ -9,3 +9,5 @@ temp-*
 temp
 pages
 .coverage*
+kj-wiktwords.sh
+

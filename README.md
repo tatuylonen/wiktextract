@@ -65,7 +65,7 @@ The tool can be used to extract machine translation dictionaries,
 language understanding dictionaries, semantically annotated
 dictionaries, and morphological dictionaries with
 declension/conjugation information (where this information is
-gavailable for the target language).  Dozens of languages have
+available for the target language).  Dozens of languages have
 extensive vocabulary in ``enwiktionary``, and several thousand
 languages have partial coverage.
 
@@ -81,7 +81,7 @@ non-English wiktionaries, I'm considering it.  Now that this builds on
 and expands templates and Lua macros, it would be fairly
 straightforward to build support for other languages too - and even
 make the extraction configurable so that only a configuration file
-would need to be created for a processing a Wiktionary in a new
+would need to be created for processing a Wiktionary in a new
 language.
 
 As far as we know, this is the most comprehensive tool available for

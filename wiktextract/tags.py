@@ -4139,6 +4139,20 @@ xlat_tags_map = {
     "hypothetic": "hypothetical",
     "Kinmen and Penghu Hokkien": "Kinmen-Hokkien Penghu-Hokkien",
     "“Jinmeiyō” kanji used for names": "Jinmeiyō",
+    "by suppletion": "suppletive",
+    "only some senses": "", # Could use a tag; "limited-senses"? hero/English
+    "nautical sense": "nautical", # Without this, there's error-unknown and
+                                 # the topic tags include "transportation". pay out/English
+    "otherwise nonstandard": "nonstandard", # weep/English
+    "nonhuman": "non-human", # himself/English, talking about "it"
+    "both": "", # XXX "both" should trigger the tag to the next two forms! walrus/English
+    "pseudo-Latin": "hypercorrect", # platypus/English
+    "archaic or informal": "archaic informal", # while/English
+    "more common in": "common", # tread water/English
+    "all": "", # XXX same as "both", "all" should extend tags the following forms
+    "less commonly": "uncommon", # avid/English
+    "muscle": "anatomy", # depressor/English
+    
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -5510,6 +5524,7 @@ valid_tags = {
     "without-noun": "misc",
     "æ-tensing": "misc",
     "има": "misc",  # Distinguishes certain verb forms in Macedonian
+    "non-human": "misc", # XXX is there already a tag for this? KJ
 }
 for k, v in valid_tags.items():
     assert isinstance(k, str)
