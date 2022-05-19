@@ -380,8 +380,6 @@ Working on changes to compute_coltags
   - changed how column headers are merged
   - still something wrong, look at aamupala/Finnish 3rd pers possessive
 
-Add tests to ensure that etymology templates and audio URLs are properly extracted.
-
 Fix parsing tell/English/Verb word head "(dialectal or nonstandard)"
 (appears very new, not yet in my test environment)
 
@@ -403,14 +401,6 @@ wit/English
       - some are four characters, which I think was not currently allowed
       - but why are the one-character ones not handled either?
   - add a test for this, because of the parenthesized parts
-
-htmlgen: make search faster on slow links (split to deeper prefixes if large)
-  - when generating search files (htmlgen.py:generate_caller), if the
-    two-character prefix contains more than 1000 words, split further to
-    three-character prefix.  In each prefix file, include list of those prefixes
-    that have a search file with a longer prefix (or include the flag in each
-    entry in the file).
-  - change the Javascript for search accordingly (search_fill)
 
 Improve audio file URL generation in wiktextract to handle redirects
 in Wikimedia Commons.  Options include using Commons API to query the
@@ -444,3 +434,12 @@ probably about 0.1-0.5% of them)
   - As an alternative, we could perhaps use the existing Wikimedia commons
     download and first attempt to fetch the files from there?  Perhaps
     a --wikimedia-commons-archive=DIR option?
+
+
+Add tests to ensure that etymology templates and audio URLs are properly extracted.
+  - add a new unittest file under tests
+  - take some sample articles, pass them to parse_page() (wiktextract/page.py),
+    and check that the results are as expected (i..e, etymology templates
+    correctly extracted, audio URLs properly extracted)
+  - NOTE: you cannot expect templates to be expanded, let's discuss if there
+    are major problems
