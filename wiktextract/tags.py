@@ -4150,6 +4150,20 @@ xlat_tags_map = {
     "hypothetic": "hypothetical",
     "Kinmen and Penghu Hokkien": "Kinmen-Hokkien Penghu-Hokkien",
     "“Jinmeiyō” kanji used for names": "Jinmeiyō",
+    "by suppletion": "suppletive",
+    "only some senses": "", # Could use a tag; "limited-senses"? hero/English
+    "nautical sense": "nautical", # Without this, there's error-unknown and
+                                 # the topic tags include "transportation". pay out/English
+    "otherwise nonstandard": "nonstandard", # weep/English
+    "nonhuman": "non-human", # himself/English, talking about "it"
+    "both": "", # XXX "both" should trigger the tag to the next two forms! walrus/English
+    "pseudo-Latin": "hypercorrect", # platypus/English
+    "archaic or informal": "archaic informal", # while/English
+    "more common in": "common", # tread water/English
+    "all": "", # XXX same as "both", "all" should extend tags the following forms
+    "less commonly": "uncommon", # avid/English
+    "muscle": "anatomy", # depressor/English
+
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -4451,6 +4465,7 @@ tag_categories = {
     "error": 0,  # error tags
     "unknown": -1,  # Only used internally
     "dummy": -2,  # Only used internally
+    "dummy2": -3,  # Only used internally (this category never expands cell)
 }
 
 # Set of all valid tags
@@ -4786,6 +4801,7 @@ valid_tags = {
     "dual": "number",       # two in number, cf. singular, trial, plural
     "dubitative": "mood",  # Verb form (e.g., Bulgarian)
     "dummy-ignore-skipped": "dummy",  # Causes "-" entries to be ignored
+    "dummy-ignored-text-cell": "dummy2",  # Cell has text but ignored
     "dummy-mood": "dummy",  # Used in inflection table parsing, never in data
     "dummy-skip-this": "dummy",  # Kludge in parsing, form skipped
     "dummy-tense": "dummy",  # Used in inflection table parsing, never in data
@@ -4862,6 +4878,7 @@ valid_tags = {
     "future": "tense",  # Verb tense
     "future-near": "tense",  # immediate future ba/Zulu
     "future-remote": "tense",  # remote future ba/Zulu
+    "future-perfect": "tense",  # future anteriore ripromettersi/Italian
     "future-i": "tense",  # Verb tense (German, e.g., vertippen)
     "future-ii": "tense",  # Verb tense (German)
     "gender-neutral": "gender",
@@ -5188,6 +5205,7 @@ valid_tags = {
     "presumptive": "mood",  # Verb mood, e.g., गरजना/Hindi
     "preterite": "tense",  # Verb tense (action in the past, similar to simple past)
     "preterite-present": "tense",  # word where present&preterite forms look opposite
+    "preterite-perfect": "tense",  # trapassato remoto ripromettersi/Italian
     "preterite-i": "tense",  # воштыны/Udmurt
     "preterite-ii": "tense",
     "pretonic": "misc",  # Precedes stressed syllable
@@ -5530,6 +5548,7 @@ valid_tags = {
     "without-noun": "misc",
     "æ-tensing": "misc",
     "има": "misc",  # Distinguishes certain verb forms in Macedonian
+    "non-human": "misc", # XXX is there already a tag for this? KJ
 }
 for k, v in valid_tags.items():
     assert isinstance(k, str)

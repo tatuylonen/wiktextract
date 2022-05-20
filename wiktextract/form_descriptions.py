@@ -1058,10 +1058,26 @@ def parse_head_final_tags(ctx, lang, form):
     return form, tags
 
 
+def quote_kept_parens(s):
+    """Changes certain parenthesized expressions so that they won't be
+    interpreted as parentheses.  This is used for parts that are kept as
+    part of the word, such as "read admiral (upper half)"."""
+    return re.sub(r"\((lower half|upper half|k|s|n|II|III|A|C|G|U|Y|"
+                  r"vinyl|p-phenylene vinylene|\(\(\s*\)\))\)",
+                  r"__lpar__\1__rpar__", s)
+
+
+def unquote_kept_parens(s):
+    """Conerts the quoted parentheses back to normal parentheses."""
+    return re.sub(r"__lpar__(.*?)__rpar__", r"(\1)", s)
+
+
 def add_related(ctx, data, tags_lst, related, origtext,
                 add_all_canonicals, is_reconstruction):
     """Internal helper function for some post-processing entries for related
-    forms (e.g., in word head)."""
+    forms (e.g., in word head).  This returns a list of list of tags to be
+    added to following related forms or None (cf. walrus/English word head,
+    parenthesized part starting with "both")."""
     assert isinstance(ctx, Wtp)
     assert isinstance(tags_lst, (list, tuple))
     for x in tags_lst:
@@ -1095,6 +1111,7 @@ def add_related(ctx, data, tags_lst, related, origtext,
             ctx.debug("suspicious related form tags {}: {!r} in {!r}"
                       .format(tags_lst, related, origtext))
 
+    following_tagsets = None  # Tagsets to add to following related forms
     roman = None
     tagsets1 = [[]]
     topics1 = []
@@ -1102,7 +1119,12 @@ def add_related(ctx, data, tags_lst, related, origtext,
     if m:
         paren = m.group(1)
         related = related[m.end():]
-        tagsets1, topics1 = decode_tags(paren)
+        m = re.match(r"^(all|both) (.*)", paren)
+        if m:
+            tagsets1, topics1 = decode_tags(m.group(2))
+            following_tagsets = tagsets1
+        else:
+            tagsets1, topics1 = decode_tags(paren)
     else:
         m = re.search(r"\s+\((([^()]|\([^()]*\))*)\)$", related)
         if m:
@@ -1119,6 +1141,7 @@ def add_related(ctx, data, tags_lst, related, origtext,
         ctx.debug("{{ in word head form - possible Wiktionary error: {!r}"
                   .format(related))
         return  # Likely Wiktionary coding error
+    related = unquote_kept_parens(related)
     # Split related by "/" (e.g., grande/Spanish) superlative in head
     if len(related) > 5:
         alts = split_at_comma_semi(related, separators=["/"])
@@ -1197,6 +1220,11 @@ def add_related(ctx, data, tags_lst, related, origtext,
                     else:
                         data_append(ctx, data, "forms", form)
 
+    # If this form had pre-tags that started with "both" or "all", add those
+    # tags also to following related forms that don't have their own tags
+    # specified.
+    return following_tagsets
+
 
 def parse_word_head(ctx, pos, text, data, is_reconstruction):
     """Parses the head line for a word for in a particular language and
@@ -1235,8 +1263,11 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
     if not titleparts:
         return
 
-    # Handle the part of the head that is not in parentheses
+    # Handle the part of the head that is not in parentheses.  However, certain
+    # parenthesized parts are part of word, and those must be handled
+    # specially here.
     base = text
+    base = quote_kept_parens(base)
     base = re.sub(r"\(([^()]|\([^(]*\))*\)($|\s)", r"\2", base)
     base = re.sub(r"(^|\s)\(([^()]|\([^(]*\))*\)", r"\1", base)
     base = re.sub(r"(\s?)\^\(([^()]|\([^(]*\))*\)", r"\1", base)
@@ -1342,6 +1373,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
 
     # Handle parenthesized descriptors for the word form and links to
     # related words
+    text = quote_kept_parens(text)
     parens = list(m.group(2) for m in
                   re.finditer(r"(^|\s)\((([^()]|\([^()]*\))*)\)", text))
     parens.extend(m.group(1) for m in
@@ -1356,6 +1388,9 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
             continue
         if paren.startswith("see "):
             continue
+        # In some rare cases, strip word that inflects form the form
+        # description, e.g. "look through rose-tinted glasses"/English.
+        paren = re.sub(r"\s*\(\[[^])]*\]\)", "", paren)
 
         # If it starts with hiragana or katakana, treat as such form.  Note
         # that each hiragana/katakana character is in separate parentheses,
@@ -1396,8 +1431,11 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                                      split_at_comma_semi(desc,
                                                          extra=[", or "])))
         prev_tags = None
+        following_tags = None  # Added to prev_tags from previous parenthesized
+                               # part, e.g. walrus/English
+                               # "(both nonstandard, proscribed, uncommon)"
         for desc_i, desc in enumerate(new_desc):
-            # print("head desc: {!r}".format(desc))
+            # print("HEAD DESC: {!r}".format(desc))
 
             # Abort on certain descriptors (assume remaining values are
             # examples or uninteresting, cf. gaan/Navajo, horior/Latin)
@@ -1488,6 +1526,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                 add_related(ctx, data, t, [radical_strokes], text, True,
                             is_reconstruction)
                 prev_tags = None
+                following_tags = None
                 continue
 
             # See if it indicates historical Katakana ortography (←) or
@@ -1521,11 +1560,13 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                 add_related(ctx, data, t, [strokes], text, True,
                             is_reconstruction)
                 prev_tags = None
+                following_tags = None
                 continue
 
             parts = list(m.group(0) for m in re.finditer(word_re, desc))
             if not parts:
                 prev_tags = None
+                following_tags = None
                 continue
 
             # Check for certain language-specific header part starts that
@@ -1546,6 +1587,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                                     is_reconstruction)
                         new_prev_tags.append(tags)
                     prev_tags = new_prev_tags
+                    following_tags = None
                     continue
 
             # Handle the special case of descriptors that are parenthesized,
@@ -1584,8 +1626,6 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                         any("error-unknown-tag" in x for x in tagsets)):
                         if alt_related is not None:
                             break
-                        # print("clearing prev_tags decode")
-                        # prev_tags = None
                         continue
                     if (i > 1 and
                         len(parts[i - 1]) >= 4 and
@@ -1648,8 +1688,17 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                     else:
                         # Not merged with previous tags
                         for tags in tagsets:
-                            add_related(ctx, data, tags, [related], text, True,
-                                        is_reconstruction)
+                            if following_tags is not None:
+                                for ts in following_tags:
+                                    tags1 = list(sorted(set(tags) |
+                                                        set(ts)))
+                                    add_related(ctx, data, tags1, [related],
+                                                text, True, is_reconstruction)
+                            else:
+                                ret = add_related(ctx, data, tags, [related],
+                                                  text, True, is_reconstruction)
+                                if ret is not None:
+                                    following_tags = ret
                         prev_tags = tagsets
                 else:
                     if (desc_i < len(new_desc) - 1 and
@@ -1668,6 +1717,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                     for tags in tagsets:
                         data_extend(ctx, data, "tags", tags)
                     prev_tags = tagsets
+                    following_tags = None
 
     # Finally, if we collected hirakana/katakana, add them now
     if hiragana:

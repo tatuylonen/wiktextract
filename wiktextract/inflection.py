@@ -1043,6 +1043,8 @@ def and_tagsets(lang, pos, tagsets1, tagsets2):
         for tags2 in tagsets2:
             tags = set(tags1) | set(tags2)
             remove_useless_tags(lang, pos, tags)
+            if "dummy-ignored-text-cell" in tags:
+                tags.remove("dummy-ignored-text-cell")
             tags = tuple(sorted(tags))
             if tags not in new_tagsets:
                 new_tagsets.append(tags)
@@ -1087,7 +1089,7 @@ def clean_header(word, col, skip_paren):
                  r"possible mutated form |"
                  r"The future tense: )",
                 col):
-        return "", [], [], []
+        return "dummy-ignored-text-cell", [], [], []
     # Temporarily remove final parenthesized part (if separated by whitespace),
     # so that we can extract reference markers before it.
     final_paren = ""
@@ -2089,6 +2091,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
             # Determine column tags for the multi-column cell
             combined_coltags = compute_coltags(lang, pos, hdrspans, j,
                                                colspan, True, col)
+            if any("dummy-ignored-text-cell" in ts for ts in combined_coltags):
+                continue
 
             # print("HAVE_TEXT:", repr(col))
             # Split the text into separate forms.  First simplify spaces except
@@ -2143,6 +2147,20 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                         if not re.match(r"pronounced with |\(with ", x))
             alts = list(re.sub(r"^\((in the sense [^)]*)\)\s+", "", x)
                         for x in alts)
+            # Check for parenthesized alternatives, e.g. ripromettersi/Italian
+            if all(re.match(r"\w+( \w+)* \(\w+( \w+)*(, \w+( \w+)*)*\)$", alt)
+                     and
+                     all(distw([re.sub(r" \(.*", "", alt)], x) < 0.5
+                         for x in re.sub(r".*\((.*)\)", r"\1", alt).split(", "))
+                     for alt in alts):
+                new_alts = []
+                for alt in alts:
+                    alt = re.sub(r" \(", ", ", alt)
+                    alt = re.sub(r"\)", "", alt)
+                    for new_alt in alt.split(", "):
+                        new_alts.append(new_alt)
+                alts = new_alts
+
             # Handle the special case where romanization is given under
             # normal form, e.g. in Russian.  There can be multiple
             # comma-separated forms in each case.  We also handle the case
@@ -2461,6 +2479,9 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                             ctx.debug("inflection table form looks like IPA: "
                                       "form={} tags={}"
                                       .format(form, tags))
+
+                        if form == "dummy-ignored-text-cell":
+                            continue
 
                         # Add the form
                         tags = list(sorted(tags))
