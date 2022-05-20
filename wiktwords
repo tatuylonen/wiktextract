@@ -89,7 +89,7 @@ if __name__ == "__main__":
         description="Multilingual Wiktionary data extractor")
     parser.add_argument("path", type=str, nargs="?", default=None,
                         help="Input file (.../enwiktionary-<date>-"
-                        "pages-articles.xml[.bz2])")
+                        "pages-articles.xml.bz2)")
     parser.add_argument("--out", type=str, default=None,
                         help="Path where to write output (- for stdout)")
     parser.add_argument("--errors", type=str,
@@ -146,6 +146,9 @@ if __name__ == "__main__":
                         help="Extract all modules and save in this .tar file")
     parser.add_argument("--templates-file", type=str,
                         help="Extract all templates and save in this .tar file")
+    parser.add_argument("--redirects-file", type=str,
+                        help="Optional file containing redirect names and what "
+                        "they point to")
     args = parser.parse_args()
 
     # The --all option turns on capturing all data types
@@ -210,6 +213,7 @@ if __name__ == "__main__":
     # to be empty.
     ctx.add_page("Scribunto", "Module:no globals", "", transient=True)
 
+
     if args.override:
         for path in args.override:
             with open(path, "r", encoding="utf-8") as f:
@@ -252,6 +256,10 @@ if __name__ == "__main__":
                               capture_etymologies=args.etymologies,
                               capture_inflections=args.inflections,
                               verbose=args.verbose)
+    # load redirects to ctx if given
+    if args.redirects_file:
+        with open(args.redirects_file) as f:
+            config.redirects = json.load(f)
 
     if args.profile:
         pr = cProfile.Profile()

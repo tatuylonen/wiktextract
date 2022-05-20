@@ -43,6 +43,7 @@ class WiktionaryConfig(object):
         "errors",
         "warnings",
         "debugs",
+        "redirects",
     )
 
     def __init__(self,
@@ -90,6 +91,7 @@ class WiktionaryConfig(object):
         self.warnings = []
         self.debugs = []
         self.thesaurus_data = {}
+        self.redirects = {}
 
     def to_kwargs(self):
         return {
