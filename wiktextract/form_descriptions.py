@@ -1058,6 +1058,19 @@ def parse_head_final_tags(ctx, lang, form):
     return form, tags
 
 
+def quote_kept_parens(s):
+    """Changes certain parenthesized expressions so that they won't be
+    interpreted as parentheses.  This is used for parts that are kept as
+    part of the word, such as "read admiral (upper half)"."""
+    return re.sub(r"\((lower half|upper half)\)",
+                  r"__lpar__\1__rpar__", s)
+
+
+def unquote_kept_parens(s):
+    """Conerts the quoted parentheses back to normal parentheses."""
+    return re.sub(r"__lpar__(.*?)__rpar__", r"(\1)", s)
+
+
 def add_related(ctx, data, tags_lst, related, origtext,
                 add_all_canonicals, is_reconstruction):
     """Internal helper function for some post-processing entries for related
@@ -1127,6 +1140,7 @@ def add_related(ctx, data, tags_lst, related, origtext,
         ctx.debug("{{ in word head form - possible Wiktionary error: {!r}"
                   .format(related))
         return  # Likely Wiktionary coding error
+    related = unquote_kept_parens(related)
     # Split related by "/" (e.g., grande/Spanish) superlative in head
     if len(related) > 5:
         alts = split_at_comma_semi(related, separators=["/"])
@@ -1248,8 +1262,11 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
     if not titleparts:
         return
 
-    # Handle the part of the head that is not in parentheses
+    # Handle the part of the head that is not in parentheses.  However, certain
+    # parenthesized parts are part of word, and those must be handled
+    # specially here.
     base = text
+    base = quote_kept_parens(base)
     base = re.sub(r"\(([^()]|\([^(]*\))*\)($|\s)", r"\2", base)
     base = re.sub(r"(^|\s)\(([^()]|\([^(]*\))*\)", r"\1", base)
     base = re.sub(r"(\s?)\^\(([^()]|\([^(]*\))*\)", r"\1", base)
@@ -1355,6 +1372,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
 
     # Handle parenthesized descriptors for the word form and links to
     # related words
+    text = quote_kept_parens(text)
     parens = list(m.group(2) for m in
                   re.finditer(r"(^|\s)\((([^()]|\([^()]*\))*)\)", text))
     parens.extend(m.group(1) for m in
