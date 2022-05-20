@@ -1062,7 +1062,8 @@ def quote_kept_parens(s):
     """Changes certain parenthesized expressions so that they won't be
     interpreted as parentheses.  This is used for parts that are kept as
     part of the word, such as "read admiral (upper half)"."""
-    return re.sub(r"\((lower half|upper half)\)",
+    return re.sub(r"\((lower half|upper half|k|s|n|II|III|A|C|G|U|Y|"
+                  r"vinyl|p-phenylene vinylene|\(\(\s*\)\))\)",
                   r"__lpar__\1__rpar__", s)
 
 
