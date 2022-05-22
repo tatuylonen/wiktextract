@@ -66,10 +66,12 @@ zh_pron_tags = {
     "Tâi-lô": ["Tai-lo"],
     "Hakka": ["Hakka"],
     "Zhuyin": ["Zhuyin"],
+    "(Zhuyin)": ["Zhuyin"],
     "Mandarin": ["Mandarin"],
     "Min Dong (BUC)": ["Min Dong", "Foochow-Romanized"],
     "(Meixian, Guangdong)": ["Meixian", "Guangdong"],
     "(Standard Cantonese, Guangzhou)": ["Cantonese", "Guangzhou"],
+    "(Standard Chinese)": ["standard"],
     "Yale": ["Yale"],
     "Guangdong": ["Guangdong"],
     "Peh-ōe-jī": ["POJ"],
@@ -203,16 +205,16 @@ def parse_pronunciation(ctx, config, node, data, sense_data, pos_data, etym_data
             return "stripped-by-parse_pron_post_template_fn"
         return text
 
-    def parse_expanded_zh_pron(node, parent_tags, ut):
+    def parse_expanded_zh_pron(node, parent_hdrs, ut):
         if isinstance(node, list):
             for item in node:
-                parse_expanded_zh_pron(item, parent_tags, ut)
+                parse_expanded_zh_pron(item, parent_hdrs, ut)
             return
         if not isinstance(node, WikiNode):
             return
         if node.kind != NodeKind.LIST:
             for item in node.children:
-                parse_expanded_zh_pron(item, parent_tags, ut)
+                parse_expanded_zh_pron(item, parent_hdrs, ut)
             return
         for item in node.children:
             assert isinstance(item, WikiNode)
@@ -221,29 +223,32 @@ def parse_pronunciation(ctx, config, node, data, sense_data, pos_data, etym_data
                              if not isinstance(x, WikiNode) or
                                 x.kind != NodeKind.LIST)
             text = clean_node(config, ctx, None, base_item)
-            new_parent_tags = list(parent_tags)
-            # XXX parse text, possibly updating new_parent_tags
-            if ":" in text:
+            new_parent_hdrs = list(parent_hdrs)
+            if text.find(": ") >= 0:
                 pron = {}
                 pron["tags"] = []
-                extra_tags, v = text.split(":")
+                parts = text.split(": ")
+                extra_tags = parts[0]
+                v = ": ".join(parts[1:])
                 pron["zh-pron"] = v
-                new_parent_tags.append(extra_tags)
-                for tag in new_parent_tags:
-                    if tag in zh_pron_tags:
-                        pron["tags"] += zh_pron_tags[tag]
+                new_parent_hdrs.append(extra_tags)
+                for hdr in new_parent_hdrs:
+                    if hdr in zh_pron_tags:
+                        for tag in zh_pron_tags[hdr]:
+                            if tag not in pron["tags"]:
+                                pron["tags"].append(tag)
                     else:
-                        #print(f"zh-pron tag {tag} is not in the lookup table!")
-                        ut.add(tag)
-                data_append(ctx, data, "sounds", pron)
+                        #print(f"zh-pron hdr {hdr} is not in the lookup table!")
+                        ut.add(hdr)
+                pron["tags"] = list(sorted(pron["tags"]))
+                if pron not in data.get("sounds", ()):
+                    data_append(ctx, data, "sounds", pron)
             else:
-                new_parent_tags.append(text)
-
-            
+                new_parent_hdrs.append(text)
 
             for x in item.children:
                 if isinstance(x, WikiNode) and x.kind == NodeKind.LIST:
-                    parse_expanded_zh_pron(x, new_parent_tags, ut)
+                    parse_expanded_zh_pron(x, new_parent_hdrs, ut)
 
     def parse_chinese_pron(contents, ut):
         if isinstance(contents, list):
@@ -271,8 +276,8 @@ def parse_pronunciation(ctx, config, node, data, sense_data, pos_data, etym_data
     if language == "Chinese":
         ut = set()
         parse_chinese_pron(contents, ut)
-        for tag in ut:
-            print("MISSING ZH-PRON TAG:", tag)
+        for hdr in ut:
+            print("MISSING ZH-PRON HDR:", hdr)
 
 
     # XXX change this code to iterate over node as a LIST, warning about
