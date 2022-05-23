@@ -2134,6 +2134,9 @@ uppercase_tags = set([
     "northernmost Moselle Franconian",
     "west Sweden",
     "most of Moselle Franconian",
+    "Southern Germany",
+    "southern Germany",
+    "Northwest German", # anfangen/German
 ])
 
 
@@ -4147,11 +4150,33 @@ xlat_tags_map = {
     "nonhuman": "non-human", # himself/English, talking about "it"
     "both": "", # XXX "both" should trigger the tag to the next two forms! walrus/English
     "pseudo-Latin": "hypercorrect", # platypus/English
+    "pseudo-Latinate": "hypercorrect", # Simplex/German
     "archaic or informal": "archaic informal", # while/English
     "more common in": "common", # tread water/English
     "all": "", # XXX same as "both", "all" should extend tags the following forms
     "less commonly": "uncommon", # avid/English
     "muscle": "anatomy", # depressor/English
+    "optionally with an article": "with-article", # Mosambik/German
+    "genitive (des)": "genitive", #ordentlicher Professor/German, Lieber/German
+    "prenominally without an article": "without-article before-noun", # Mama/German
+    "usually in": "regional", # Vergnügungspark/German
+    "older ending": "archaic", # Fritz/German
+    "only in some regional vernaculars": "regional", # umhauen/German
+    "mostly only when written": "literary", # Magnet/German
+    "rarer": "rare", # verbleichen/German
+    "southern Germany": "Southern-Germany", # Holzscheit/German
+    "alternatively in": "regional", # Holzscheit/German
+    "nonstandard but common": "nonstandard common", # Gedanke/German
+    "colloquial or archaic": ["colloquial", "archaic"], # Undorn/German
+    "predominant when spoken": "colloquial", # Gnom/German
+    "with a numeral": "with-numeral", # Radlermaß/German
+    "not with a numeral": "without-numeral", # Radlermaß/German
+    "alternatively when": "", # Radlermaß/German,
+    "traditional/standard": "archaic standard", # flecthen/German
+    "only in some senses": "uncommon", # hero/English
+    "prescribed, more frequent": "", # offenbaren/German These distinctions are minor
+    "less frequent but not uncommon": "", #offenbaren/German
+    "predominant": "", # März/German: "normal"
     
 }
 
@@ -5524,7 +5549,12 @@ valid_tags = {
     "without-noun": "misc",
     "æ-tensing": "misc",
     "има": "misc",  # Distinguishes certain verb forms in Macedonian
-    "non-human": "misc", # XXX is there already a tag for this? KJ
+    "non-human": "misc", # XXX is there already a tag for this? himself/English - KJ
+    "with-article": "misc", # Mosambik/German
+    "before-noun": "misc", # Mama/German
+    "with-numeral": "with", # Radlermaß/German
+    "without-numeral": "misc", # Radlermaß/German
+  
 }
 for k, v in valid_tags.items():
     assert isinstance(k, str)

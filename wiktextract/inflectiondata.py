@@ -3232,6 +3232,50 @@ infl_map = {
         "then": "*",  # e.g., kolme/Finnish
         "else": "adverbial",
     },
+    "m verbs conjugated according to 3rd person sg. er": {
+        "lang": "German",
+        "if": "polite", # du/German
+        "then": "masculine third-person second-person-semantically"
+    },
+    # This didn't work to replace "second-person": -KJ
+    # ~ "2nd person": {
+        # ~ "lang": "German",
+        # ~ "if": "second-person-semantically", # du/German
+        # ~ "then": ""
+    # ~ },
+    "(without article)": {
+        "lang": "German",  # jeglicher/German
+        "then": "without-article",
+    }, 
+    "(with indefinite article)": {
+        "lang": "German",  # jeglicher/German
+        "then": "indefinite with-article",
+    },
+    "Strong plural": {
+        "lang": "German", # mehrere/German
+        "then": "strong plural",
+    },
+    "Weak and mixed plural": {
+        "lang": "German",
+        "then": "weak mixed plural", # mehrere/German
+    },
+    "Second-person formal": { # Ihr/German
+        "lang": "German",
+        "then": "second-person formal",
+    },
+    "Singular (neuter, pronoun only)": {
+        "lang": "German",
+        "then": "singular neuter pronoun",
+    },
+    "Plural, strong forms": {
+        "lang": "German",
+        "then": "plural strong",
+    },
+    "Plural, weak and mixed forms (e.g. with definite article)": {
+        "lang": "German",
+        "then": "plural weak mixed with-article",
+    },
+    
 }
 
 
