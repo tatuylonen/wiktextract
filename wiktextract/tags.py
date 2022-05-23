@@ -949,7 +949,7 @@ uppercase_tags = set([
     "Fascian",  # Variant of Ladin
     "Fayyumic",
     "Fengkai",
-    "Finglish",  # Finnish word taken from English
+    "Finglish",  # Finnish word taken from English / American Finnish dialect
     "Finland",
     "Fjolde",
     "Flanders",
@@ -971,6 +971,7 @@ uppercase_tags = set([
     "From Old Northern French",
     "Föhr",
     "Föhr-Amrum",
+    "Fuzhou",
     "Gadabay",
     "Gaellic",
     "Galgolitic",
@@ -1025,6 +1026,8 @@ uppercase_tags = set([
     "Guadeloupean",
     "Gualaca",
     "Guatemala",
+    "Guangdong",
+    "Guangzhou",
     "Guernsey",
     "Gufin",
     "Guichicovi",
@@ -1155,6 +1158,7 @@ uppercase_tags = set([
     "Jewish Palestinian Aramaic",
     "Jewish",
     "Jianghuai Mandarin",  # Chinese dialect/language
+    "Jian'ou",  # Chinese dialect
     "Jicalapa",
     "Jicarilla",  # Variant of the Apache Language?
     "Jilu Mandarin",  # Dialect/Language in Chinese
@@ -1189,6 +1193,7 @@ uppercase_tags = set([
     "Kandahar",
     "Kansai",
     "Kanto",
+    "Kaohsiung",
     "Kaohsiung Hokkien",  # Chinese dialect/language
     "Karabakh",
     "Karachay",
@@ -1374,6 +1379,7 @@ uppercase_tags = set([
     "Medieval Latin",
     "Medio-Late Egyptian",
     "Mehedinți",
+    "Meinong",
     "Meixian",
     "Melanesian",
     "Melinting",
@@ -1384,6 +1390,7 @@ uppercase_tags = set([
     "Mexica",
     "Mexico",
     "Mfom",
+    "Miaoli",
     "Microsoft Azure",
     "Mid Northern Scots",
     "Mid Northern",
@@ -1794,8 +1801,10 @@ uppercase_tags = set([
     "Singlish",
     "Sino-Korean",
     "Sino-Japanese",
+    "Sinological IPA",
     "Sisiame",
     "Sistani",
+    "Sixian",
     "Skellefteå",
     "Skiri",
     "Skolt",  # Variant of Sami
@@ -1899,6 +1908,7 @@ uppercase_tags = set([
     "Taiwanese Hokkien",
     "Taiwanese Mandarin",  # Chinese dialect/language
     "Taixuanjing tetragram",
+    "Taiyuan",
     "Tajik",
     "Talang Padang",
     "Tally-marks",
@@ -1943,6 +1953,7 @@ uppercase_tags = set([
     "Toaripi",
     "Tokat",
     "Tokyo",
+    "Tongyang",
     "Tongzi",
     "Torlakian",
     "Tosk",
@@ -4479,6 +4490,7 @@ tag_categories = {
     "error": 0,  # error tags
     "unknown": -1,  # Only used internally
     "dummy": -2,  # Only used internally
+    "dummy2": -3,  # Only used internally (this category never expands cell)
 }
 
 # Set of all valid tags
@@ -4508,6 +4520,7 @@ valid_tags = {
     "Greek": "script",  # Also script
     "Gujarati": "script",  # Script (Indo-Arabic)
     "Gurmukhi": "script",  # Script (Indo-Arabic)
+    "Gwoyeu-Romatsyh": "script",  # latin alphabet for Chinese from the 1920s
     "Hanifi-Rohingya": "script",  # Script (Perso-Arabic)
     "Hebrew": "script",  # also Script (for Aramaic)
     "Hindi": "script",  # Script (at least for numberals, e.g. 80
@@ -4535,6 +4548,7 @@ valid_tags = {
     "Osmanya": "script",  # Script (Somalia)
     "POJ": "script",  # Latin alphabet based orthography for Min Nan (Chinese)
     "Persian": "script",  # Also script
+    "Phofsit-Daibuun": "script",  # A way of writing latin alphabet Taiwanese
     "Roman": "script",  # Script
     "Rumi": "script",  # Script (modern Malay/Indonesian)
     "Saurashtra": "script",  # Script (Surashtra language in Tamil Nadu)
@@ -4552,10 +4566,17 @@ valid_tags = {
     "Warang-Citi": "script",  # Script (Ho language, East India)
     "bopomofo": "script",  # Mandarin phonetic symbols script
     "Hán-Nôm": "detail",  # Vietnamese Latin spelling with diacritics?
+    "Foochow-Romanized": "detail",  # latin script for Fuzhou Eastern Min
+    "Phak-fa-su": "detail",  # latin alphabet used by missionaries for Hakka
+    "Hakka-Romanization-System": "detail",  # Taiwanese Hakka Romanization System
+    "Tai-lo": "detail",  # romanization system for Taiwanese Hokkien
     "Jyutping": "detail",  # used in Cantonese
     "McCune-Reischauer": "detail",  # Used in Korean
+    "Hagfa-Pinyim": "detail",
     "Rōmaji": "detail",  # Used in Okinawan, Japanese? for Latin characters
     "Yale": "detail",   # used in Cantonese
+    "Guangdong-Romanization": "detail", # way of romanizing Cantonese, Teochew, Hakka and Hainanese
+    "Wiktionary-Wu": "detail",  # Wictionary specific romanization system of Wu Chinese
     "Jinmeiyō": "misc",  # Type of Kanji used for names
     "-i": "class",   # Japanese inflection type
     "-na": "class",  # Japanese inflection type
@@ -4805,6 +4826,7 @@ valid_tags = {
     "dual": "number",       # two in number, cf. singular, trial, plural
     "dubitative": "mood",  # Verb form (e.g., Bulgarian)
     "dummy-ignore-skipped": "dummy",  # Causes "-" entries to be ignored
+    "dummy-ignored-text-cell": "dummy2",  # Cell has text but ignored
     "dummy-mood": "dummy",  # Used in inflection table parsing, never in data
     "dummy-skip-this": "dummy",  # Kludge in parsing, form skipped
     "dummy-tense": "dummy",  # Used in inflection table parsing, never in data
@@ -4881,6 +4903,7 @@ valid_tags = {
     "future": "tense",  # Verb tense
     "future-near": "tense",  # immediate future ba/Zulu
     "future-remote": "tense",  # remote future ba/Zulu
+    "future-perfect": "tense",  # future anteriore ripromettersi/Italian
     "future-i": "tense",  # Verb tense (German, e.g., vertippen)
     "future-ii": "tense",  # Verb tense (German)
     "gender-neutral": "gender",
@@ -5207,6 +5230,7 @@ valid_tags = {
     "presumptive": "mood",  # Verb mood, e.g., गरजना/Hindi
     "preterite": "tense",  # Verb tense (action in the past, similar to simple past)
     "preterite-present": "tense",  # word where present&preterite forms look opposite
+    "preterite-perfect": "tense",  # trapassato remoto ripromettersi/Italian
     "preterite-i": "tense",  # воштыны/Udmurt
     "preterite-ii": "tense",
     "pretonic": "misc",  # Precedes stressed syllable

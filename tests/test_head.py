@@ -639,3 +639,23 @@ class HeadTests(unittest.TestCase):
                 },
             ],
         })
+
+    def test_head33(self):
+        data = {}
+        self.maxDiff = 10000
+        self.ctx.start_page("rear admiral (lower half)")
+        self.ctx.start_section("English")
+        self.ctx.start_subsection("Noun")
+        parse_word_head(self.ctx, "noun",
+                        "rear admiral (lower half) (plural rear admirals "
+                        "(lower half))",
+                        data, False)
+        print(json.dumps(data, indent=2, sort_keys=True))
+        self.assertEqual(data, {
+            "forms": [
+                {
+                  "form": "rear admirals (lower half)",
+                  "tags": [
+                    "plural"
+                  ]
+                }]})

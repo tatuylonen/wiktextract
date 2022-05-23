@@ -509,6 +509,12 @@ infl_map = {
         "if": "third-person singular",
         "then": "third-person singular",
     },
+    "lui/lei": {  # calere/Italian
+        "lang": "Italian",
+        "pos": "verb",
+        "if": "third-person singular",
+        "then": "third-person singular",
+    },
     "noi": {
         "lang": ["Aromanian", "Corsican", "Gallurese",
                  "Italian", "Piedmontese", "Romanian", "Sassarese"],
@@ -524,6 +530,12 @@ infl_map = {
         "then": "second-person plural",
     },
     "loro, essi/esse": {
+        "lang": "Italian",
+        "pos": "verb",
+        "if": "third-person plural",
+        "then": "third-person plural",
+    },
+    "loro": {  # calere/Italian
         "lang": "Italian",
         "pos": "verb",
         "if": "third-person plural",
@@ -547,6 +559,12 @@ infl_map = {
         "if": "third-person singular",
         "then": "third-person singular",
     },
+    "che lui/che lei": {  # calere/Italian
+        "lang": "Italian",
+        "pos": "verb",
+        "if": "third-person singular",
+        "then": "third-person singular",
+    },
     "che noi": {
         "lang": "Italian",
         "pos": "verb",
@@ -560,6 +578,12 @@ infl_map = {
         "then": "second-person plural",
     },
     "che loro, che essi/che esse": {
+        "lang": "Italian",
+        "pos": "verb",
+        "if": "third-person plural",
+        "then": "third-person plural",
+    },
+    "che loro": {  # calere/Italian
         "lang": "Italian",
         "pos": "verb",
         "if": "third-person plural",
@@ -1685,10 +1709,10 @@ infl_map = {
     "մենք": {"if": "first-person plural", "then": ""},
     "դուք": {"if": "second-person plural", "then": ""},
     "նրանք": {"if": "third-person plural", "then": ""},
-
     "verbal nouns": "noun-from-verb",
     "supine": "supine",
     "past historic": "past historic",
+    "passato remoto": "past historic",
     "future perfect": "future perfect",
     "impersonal": "impersonal",
     "verbal noun": "noun-from-verb",
@@ -2731,6 +2755,11 @@ infl_map = {
     "Habitual participle": "habitual participle",
     "Future conditional": "future conditional",
     "Past conditional": "past conditional",
+    "condizionale passato": "past conditional",  # ripromettersi/Italian
+    "futuro anteriore": "future perfect",  # ripromettersi/Italian
+    "passato prossimo": "perfect",  # ripromettersi/Italian
+    "trapassato remoto": "preterite-perfect",  # ripromettersi/Italian
+    "trapassato prossimo": "past perfect",  # ripromettersi/Italian
     "(♂)": "masculine",
     "Contingent": "contingent",
     "Reason": "reason",
@@ -3276,6 +3305,7 @@ infl_map = {
         "then": "plural weak mixed with-article",
     },
     
+    "dummy-ignored-text-cell": "dummy-ignored-text-cell",  # Kludge
 }
 
 
