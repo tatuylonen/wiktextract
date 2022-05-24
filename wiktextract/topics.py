@@ -1075,4 +1075,5 @@ topic_generalize_map = {
     "Western Christianity": "Christianity",
     "Eastern Christianity": "Christianity",
     "Abrahamic religions": "religion",
+
 }

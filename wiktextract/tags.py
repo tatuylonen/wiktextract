@@ -2148,6 +2148,11 @@ uppercase_tags = set([
     "Southern Germany",
     "southern Germany",
     "Northwest German", # anfangen/German
+    "Ruhrdeutsch", # Haus/German
+    "Berlinisch", # Haus/German
+    "18th ct.", # Haus/German
+    "south-western German", # Maus/German
+    "Upper German", # schneien/German
 ])
 
 
@@ -4188,7 +4193,22 @@ xlat_tags_map = {
     "prescribed, more frequent": "", # offenbaren/German These distinctions are minor
     "less frequent but not uncommon": "", #offenbaren/German
     "predominant": "", # März/German: "normal"
-    
+    "common but sometimes considered nonstandard": "common", # gebären/German
+    "more standard": "standard", # Lump/German
+    "more common in general usage": "common", # Lump/German
+    "rare outside": "regional", # Park/German
+    "nonstandard, rather rare": "nonstandard rare", # Lexikon/German
+    "prescribed": "literary", # brauchen/German
+    "always used in speech": "common", # brauchen/German
+    "common in writing": "common", # brauchen/German
+    "when issues of different sorts are involved": "different-sort", # Wahnsinnsding/German
+    "when issues of the same sort are involved": "same-sort", #Wahnsinnsding/German
+    "elevated": "honorific", # Land/German
+    "mostly only when written": "literary", # Steinmetz/German
+    "original but now less common": "archaic", # winken/German
+    "standard but rare in the vernacular": "literary", # fechten/German
+    "mostly found in": "regional", # Ehrenschutz/German
+
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -5578,8 +5598,13 @@ valid_tags = {
     "before-noun": "misc", # Mama/German
     "with-numeral": "with", # Radlermaß/German
     "without-numeral": "misc", # Radlermaß/German
-  
+    "same-sort": "number", # Wahnsinnsding/German
+    "different-sort": "number", # Wahnsinnsding/German
+    "sigmatic": "mood", # adiuvo/Latin
+    "dummy-column": "dummy", # in חֲתוּלָתִי‎/Hebrew, Isolated forms
+    "be-prefix": "misc", # laikytis/Lithuanian, multi-use prefix...
 }
+
 for k, v in valid_tags.items():
     assert isinstance(k, str)
     if v not in tag_categories:

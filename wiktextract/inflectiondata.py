@@ -704,7 +704,7 @@ infl_map = {
         "lang": ["Latvian", "Lithuanian", "Old Prussian"],
         "pos": "verb",
         "if": "second-person singular",
-        "then": "second-person singluar",
+        "then": "second-person singular",
         "else": {
             "lang": ["Latvian", "Lithuanian", "Old Prussian"],
             "pos": "verb",
@@ -3128,6 +3128,7 @@ infl_map = {
     "3rd singular m": "third-person singular masculine",
     "3rd dual": "third-person dual",
     "First-person": "first-person",
+    "Second-person": "second-person", # sibi/Latin
     "Simple present / conditional": "present conditional",
     "Future progressive, presumptive": "future progressive presumptive",
     "Prolative I": "prolative",
@@ -3304,6 +3305,209 @@ infl_map = {
         "lang": "German",
         "then": "plural weak mixed with-article",
     },
+    "strong (without article)": { # selber/German
+        "lang": "German",
+        "then": "strong without-article",
+    },
+    "weak (with definite article)": { # selber/German
+        "lang": "German",
+        "then": "weak definite with-article",
+    },
+    "m./n. plural": { # оба/Russian
+        "lang": "Russian",
+        "then": "masculine neuter plural",
+    },
+    "f. plural": { # оба/Russian
+        "lang": "Russian",
+        "then": "feminine plural"
+    },
+    "sigmatic future": "sigmatic future", # adiuvo/Latin
+    "sigmatic aorist": "sigmatic aorist", # adiuvo/Latin
+    "Key constructions": {
+        "lang": "Japanese",
+        "then": "!", # Break column inheritance, 伶俐/Japanese
+    },
+    "Informal past": { # 伶俐/Japanese
+        "lang": "Japanese",
+        "then": "informal past",
+    },
+    
+    "Informal negative past": { # 伶俐/Japanese
+        "lang": "Japanese",
+        "then": "informal negative past",
+    },
+    
+    "Formal negative": { # 伶俐/Japanese
+        "lang": "Japanese",
+        "then": "formal negative",
+    },
+    
+    "Formal past": { # 伶俐/Japanese
+        "lang": "Japanese",
+        "then": "formal past",
+    },
+    "Formal negative past": { # 伶俐/Japanese
+        "lang": "Japanese",
+        "then": "formal negative past",
+    },
+    "Provisional": { # 伶俐/Japanese
+        "lang": "Japanese",
+        "then": "past conditional",
+    },
+    "Degree": { # 伶俐/Japanese
+        "lang": "Japanese",
+        "then": "noun-from-adj", # equivalent to English -ness, needs more
+    },
+    # in חתול/Hebrew:
+    "With possessive pronouns": {
+        "lang": "Hebrew",
+        "then": "possessed-form",
+    },
+
+    "Number": {
+        "lang": "Hebrew",
+        "then": "*",
+    },
+    "State": {
+        "lang": "Hebrew",
+        "then": "*",
+    },
+    "Person": {
+        "lang": "Hebrew",
+        "then": "*",
+    },
+    "masculine singular": {
+        "lang": "Hebrew",
+        "if": "possessed-form",
+        "then": "possessive-masculine possessive-single", # doesn't work
+        "else": "masculine singular",
+    },
+    # could there be a third control character besides "*" and "!"
+    # that lets you override bleeding rules for a column so that it
+    # takes over the whole row, like here?
+    "masculine plural": {
+        "lang": "Hebrew",
+        "if": "possessed-form",
+        "then": "possessive-masculine possessive-many",
+        "else": "masculine plural",
+    },
+    "feminine singular": {
+        "lang": "Hebrew",
+        "if": "possessed-form",
+        "then": "possessive-feminine possessive-single",
+        "else": "masculine singular",
+    },
+    "feminine plural": {
+        "lang": "Hebrew",
+        "if": "possessed-form",
+        "then": "possessive-feminine possessive-many",
+        "else": "feminine plural",
+    },
+
+    "masculine and neuter": "masculine neuter", # hannars/Westrobothnian
+    "singular masculine": "masculine singular",
+    "plural masculine": "masculine plural",
+    "singular feminine": "feminine singular",
+    "plural feminine": "feminine plural",
+    "singular neuter": "neuter singular",
+    "plural neuter": "neuter plural",
+
+    "quantitative": { # vienas/Lithuanian
+        "lang": "Lithuanian",
+        "pos": "num",
+        "then": "cardinal",
+    },
+    "collective": {
+        "lang": "Lithuanian",
+        "pos": "num",
+        "then": "collective",
+    },
+    "ordinal": {
+        "lang": "Lithuanian",
+        "pos": "num",
+        "then": "ordinal",
+    },
+    "plain": {
+        "lang": "Lithuanian",
+        "then": "",
+    },
+    "prefixed with be-": {
+        "lang": "Lithuanian",
+        "then": "be-prefix",
+    },
+    "special adverbial participle": {
+        "lang": "Lithuanian",
+        "then": "adverbial participle",
+    },
+    "present adverbial": {
+        "lang": "Lithuanian",
+        "then": "present adverbial",
+    },
+    "past adverbial": {
+        "lang": "Lithuanian",
+        "then": "past adverbial",
+    },
+    "past frequentative adverbial": {
+        "lang": "Lithuanian",
+        "then": "past frequentative adverbial",
+    },
+    "future adverbial": {
+        "lang": "Lithuanian",
+        "then": "future adverbial",
+    },
+
+    
+    "1st person (pirmasis asmuo)" : { # -uoti/Lithuanian
+        "lang": "Lithuanian",
+        "then": "first-person",
+    },
+    
+    "2nd person(antrasis asmuo)" : {
+        "lang": "Lithuanian",
+        "then": "second-person",
+    },
+    
+    "3rd person(trečiasis asmuo)" : {
+        "lang": "Lithuanian",
+        "then": "third-person",
+    },
+    "aš" : {
+        "lang": "Lithuanian",
+        "if": "first-person",
+        "then": "first-person",
+        "else": "",
+    },
+    "tu" : {
+        "lang": "Lithuanian",
+        "if": "second-person",
+        "then": "second-person",
+        "else": "",
+    },
+    "jis/ji" : {
+        "lang": "Lithuanian",
+        "if": "third-person",
+        "then": "third-person",
+        "else": "",
+    },
+    "mes" : {
+        "lang": "Lithuanian",
+        "if": "first-person",
+        "then": "first-person",
+        "else": "",
+    },
+    "jūs" : {
+        "lang": "Lithuanian",
+        "if": "second-person",
+        "then": "second-person",
+        "else": "",
+    },
+    "jie/jos" : {
+        "lang": "Lithuanian",
+        "if": "third-person",
+        "then": "third-person",
+        "else": "",
+    },
+
     
     "dummy-ignored-text-cell": "dummy-ignored-text-cell",  # Kludge
 }
