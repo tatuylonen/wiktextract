@@ -1,4 +1,5 @@
 import re
+import sys
 import urllib
 import hashlib
 from .page import clean_node, is_panel_template
@@ -8,6 +9,13 @@ from .datautils import (split_at_comma_semi, data_append, data_extend,
 from .form_descriptions import parse_pronunciation_tags, classify_desc
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
                NodeKind.LEVEL5, NodeKind.LEVEL6)
+from .zh_pron_tags import zh_pron_tags
+from .tags import valid_tags
+
+for k, lst in zh_pron_tags.items():
+    for tag in lst:
+        if tag not in valid_tags:
+            print("UNDEFINED TAG IN zh_pron_tags", k, tag)
 
 # Prefixes, tags, and regexp for finding romanizations from the pronuncation
 # section
@@ -25,63 +33,6 @@ pron_romanization_re = re.compile(
              sorted(pron_romanizations.keys(), key=lambda x: len(x),
                     reverse=True)) +
     ")([^\n]+)")
-
-zh_pron_tags = {
-    "(Teochew, Peng'im)": ["Twochew", "Peng'im"],
-    "Peh-ōe-jī-like": ["POJ"],
-    "Jyutping": ["Jyutping"],
-    "Tongyong Pinyin": ["Tongyong", "Pinyin"],
-    "Phofsit Daibuun": ["Phofsit-Daibuun"],
-    "(Teochew)": ["Teochew"],
-    "(Sixian, incl. Miaoli and Meinong)": ["Sixian", "Miaoli", "Meinong"],
-    "Hagfa Pinyim": ["Hagfa-Pinyim"],
-    "Min Dong": ["Min Dong"],
-    "(Hokkien, POJ)": ["Hokkien", "POJ"],
-    "(Taiyuan)⁺": ["Taiyuan"],
-    "Peng'im": ["Peng'im"],
-    "Cantonese": ["Cantonese"],
-    "Guangdong Romanization": ["Guangdong-Romanization"],
-    "IPA (Zhangzhou)": ["Zhangzhou", "IPA"],
-    "Gwoyeu Romatzyh": ["Gwoyeu-Romatsyh"],
-    "(Jian'ou)": ["Jian'ou"],
-    "Wu (Wiktionary)": ["Wictionary-Wu"],
-    "(Meixian)": ["Meixian"],
-    "Bàng-uâ-cê": ["Foochaw-Romanized"],
-    "(Shanghainese)": ["Shanghainese Wu"],
-    "Wu": ["Wu"],
-    "Middle Chinese": ["Middle Chinese"],
-    "Sinological IPA (old-style)": ["Sinological IPA"],
-    "Cantonese (Jyutping)": ["Cantonese", "Jyutping"],
-    "Cantonese Pinyin": ["Cantonese", "Pinyin"],
-    "Wade–Giles": ["Wade-Giles"],
-    "(Fuzhou)": ["Fuzhou"],
-    "IPA (Xiamen)": ["IPA", "Xiamen"],
-    "IPA (Taipei)": ["Taipei"],
-    "(Baxter–Sagart)": [],
-    "(Pinyin)": ["Pinyin"],
-    "Pinyin": ["Pinyin"],
-    "Phak-fa-sṳ": ["Phak-fa-su"],
-    "(Sixian, PFS)": ["Sixian", "Phak-fa-su"],
-    "(Hokkien)": ["Hokkien"],
-    "Tâi-lô": ["Tai-lo"],
-    "Hakka": ["Hakka"],
-    "Zhuyin": ["Zhuyin"],
-    "(Zhuyin)": ["Zhuyin"],
-    "Mandarin": ["Mandarin"],
-    "Min Dong (BUC)": ["Min Dong", "Foochow-Romanized"],
-    "(Meixian, Guangdong)": ["Meixian", "Guangdong"],
-    "(Standard Cantonese, Guangzhou)": ["Cantonese", "Guangzhou"],
-    "(Standard Chinese)": ["standard"],
-    "Yale": ["Yale"],
-    "Guangdong": ["Guangdong"],
-    "Peh-ōe-jī": ["POJ"],
-    "IPA (Kaohsiung)": ["IPA", "Kaohsiung"],
-    "Min Bei": ["Min Bei"],
-    "Sinological IPA": ["Sinological IPA"],
-    "Hakka Romanization System": ["Hakka-Romanization-System"],
-    "Sinological IPA ⁽ᵏᵉʸ⁾": ["Sinological IPA"],
-    "IPA (Quanzhou)": ["IPA", "Quanzhou"],
-}
 
 def parse_pronunciation(ctx, config, node, data, sense_data, pos_data, etym_data,
                         pos_datas, etym_datas, page_datas, have_etym, stack,
@@ -238,8 +189,22 @@ def parse_pronunciation(ctx, config, node, data, sense_data, pos_data, etym_data
                             if tag not in pron["tags"]:
                                 pron["tags"].append(tag)
                     else:
-                        #print(f"zh-pron hdr {hdr} is not in the lookup table!")
-                        ut.add(hdr)
+                        # erhua cludge
+                        if text.find("(Standard Chinese, erhua-ed)") >= 0:
+                            pron["tags"].append("Standard Chinese")
+                            pron["tags"].append("Erhua")
+                        else:
+                            ut.add(hdr)
+                # convert into normal IPA format if has the IPA flag
+                if "IPA" in pron["tags"]:
+                    pron["ipa"] = v
+                    del pron["zh-pron"]
+                    pron["tags"].remove("IPA")
+                # convert into IPA but retain the Sinological-IPA tag
+                elif "Sinological-IPA" in pron["tags"]:
+                    pron["ipa"] = v
+                    del pron["zh-pron"]
+
                 pron["tags"] = list(sorted(pron["tags"]))
                 if pron not in data.get("sounds", ()):
                     data_append(ctx, data, "sounds", pron)
@@ -277,8 +242,8 @@ def parse_pronunciation(ctx, config, node, data, sense_data, pos_data, etym_data
         ut = set()
         parse_chinese_pron(contents, ut)
         for hdr in ut:
-            print("MISSING ZH-PRON HDR:", hdr)
-
+            print("MISSING ZH-PRON HDR:", repr(hdr))
+            sys.stdout.flush()
 
     # XXX change this code to iterate over node as a LIST, warning about
     # anything else.  Don't try to split by "*".

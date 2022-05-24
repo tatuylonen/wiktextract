@@ -680,6 +680,7 @@ uppercase_tags = set([
     "Batangas",
     "Bavaria",
     "Bavarian",
+    "Baxter Sagart",  # a reconstruction of Old Chinese pronunciation
     "Beijing",
     "Belalau",
     "Belarusian",
@@ -790,6 +791,8 @@ uppercase_tags = set([
     "Central",
     "Chakavian",
     "Changuena",
+    "Changsha",
+    "Changtai",
     "Chanthaburi",
     "Chazal",  # Jewish historical sages
     "Chengdu",
@@ -860,6 +863,7 @@ uppercase_tags = set([
     "Čakavian",
     "DR Congo",
     "Dalmatia",
+    "Dalinpu",
     "Dananshan Miao",
     "Dankyira",
     "Dari",
@@ -932,6 +936,7 @@ uppercase_tags = set([
     "Eonavian",
     "Epic",
     "Epigraphic Gandhari",
+    "Erhua",  # Northern Chinese dialectal feature
     "Erzgebirgisch",
     "Esham",
     "Esperantized",
@@ -1074,6 +1079,7 @@ uppercase_tags = set([
     "Hokkien",  # Chinese dialect/language
     "Honduras",
     "Hong Kong",
+    "Hongmaogang",
     "Hong'an",
     "Hoanya",
     "Hometwoli",
@@ -1082,6 +1088,7 @@ uppercase_tags = set([
     "Hsinchu Hokkien",  # Chinese dialect/language
     "Hua",
     "Huizhou",
+    "Hui'an",
     "Hungarian Vend",
     "Huế",
     "Hyōgai",  # Uncommon type of Kanji character
@@ -1092,7 +1099,6 @@ uppercase_tags = set([
     "I Ching hexagram",
     "I-I",  # Used in some Dungan nouns; I have no idea what this means
     "Ionic",  # Ancient Greek
-    "IPA",
     "IUPAC name",
     "Iberian",
     "Ibero-Romance",
@@ -1165,6 +1171,7 @@ uppercase_tags = set([
     "Jin",
     "Jin Mandarin",  # Chinese dialect/language
     "Jinjiang Hokkien",  # Chinese dialect/language
+    "Jinjiang",
     "Johannesburg",
     "Johor-Selangor",
     "Johore",
@@ -1226,9 +1233,11 @@ uppercase_tags = set([
     "Kiambu",
     "Kidero",
     "Kinmen Hokkien",
+    "Kinmen",
     "Kinshasa",
     "Kinyarwanda",
     "Kirundi",
+    "Klang",
     "Kobuk",  # Inupiaq
     "Koine",  # Ancient Greek
     "Konartakhteh",
@@ -1311,6 +1320,7 @@ uppercase_tags = set([
     "Lower Sorbian",
     "Lubunyaca",
     "Lukang Hokkien",
+    "Lukang",
     "Luleå",
     "Lunfardo",
     "Luserna",
@@ -1463,6 +1473,8 @@ uppercase_tags = set([
     "Nakhchivan",
     "Namibia",
     "Nanchuan",
+    "Nanchang",
+    "Nan'an",
     "Nao Klao",  # dialect
     "Naples",
     "Navajo",
@@ -1615,6 +1627,7 @@ uppercase_tags = set([
     "Peking",
     "Pembrokeshire",
     "Penang Hokkien",
+    "Penang",
     "Peng'im",
     "Penghu Hokkien",
     "Pennsylvania",
@@ -1801,7 +1814,6 @@ uppercase_tags = set([
     "Singlish",
     "Sino-Korean",
     "Sino-Japanese",
-    "Sinological IPA",
     "Sisiame",
     "Sistani",
     "Sixian",
@@ -1861,6 +1873,7 @@ uppercase_tags = set([
     "Sri Lanka",
     "St. Gallen",
     "Standard Cornish",
+    "Standard Chinese",  # Standard spoken Chinese, Standard Northern Mandarin in linguistics
     "Standard East Norwegian",
     "Standard German of Switzerland",
     "Standard German",
@@ -1898,11 +1911,13 @@ uppercase_tags = set([
     "TV",
     "Taberga",
     "Tabriz",
+    "Taicheng",
     "Tai Xuan Jing",
     "Taichung Hokkien",
     "Tainan",
     "Taipei",
     "Taishanese",
+    "Taishan",
     "Taiwan",
     "Taiwanese Min Nan",
     "Taiwanese Hokkien",
@@ -1945,6 +1960,7 @@ uppercase_tags = set([
     "Thung Luang",
     "Thurgau",
     "Thuringian-Upper Saxon",
+    "Tianjin",
     "Tiberian Hebrew",
     "Timau",
     "Timor-Leste",
@@ -2105,6 +2121,7 @@ uppercase_tags = set([
     "Yemenite Hebrew",
     "Yichang",
     "Yiddish-influenced",
+    "Yilan",
     "Yilan Hokkien",
     "Yindjilandji",
     "Yintyingka",
@@ -2121,8 +2138,10 @@ uppercase_tags = set([
     "Zangilan",
     "Zaqatala",
     "Zezuru",
+    "Zhengzhang",
     "Zhangzhou",
     "Zhangzhou Hokkien",
+    "Zhangpu",
     "Zimbabwe",
     "Zinacantán",
     "Zurich",
@@ -2138,7 +2157,6 @@ uppercase_tags = set([
     "post-Augustan",
     "post-Classical",
     "post-Homeric",
-    "pre-1989 IPA",
     "pre-Classical",
     "regionally African American Vernacular",
     "southern Moselle Franconian",
@@ -2991,6 +3009,7 @@ xlat_tags_map = {
     "augmented form": "augmented",
     "active form": "active",
     "passive form": "passive",
+    "pre-1989 IPA": "pre-1989-IPA",
     "mutated form": "mutated",
     "auxiliary verb": "auxiliary",
     "modal auxiliary verb": "auxiliary modal",
@@ -4566,7 +4585,7 @@ valid_tags = {
     "Old-Persian": "script",  # Script
     "Oriya": "script",  # Script (Hindu-Arabic?)
     "Osmanya": "script",  # Script (Somalia)
-    "POJ": "script",  # Latin alphabet based orthography for Min Nan (Chinese)
+    "POJ": "script",  # Latin alphabet based orthography for Min Nan (Peh-ōe-jī)
     "Persian": "script",  # Also script
     "Phofsit-Daibuun": "script",  # A way of writing latin alphabet Taiwanese
     "Roman": "script",  # Script
@@ -4586,17 +4605,23 @@ valid_tags = {
     "Warang-Citi": "script",  # Script (Ho language, East India)
     "bopomofo": "script",  # Mandarin phonetic symbols script
     "Hán-Nôm": "detail",  # Vietnamese Latin spelling with diacritics?
+    "IPA": "detail",
+    "pre-1989-IPA": "detail",
+    "Sinological-IPA": "detail",
     "Foochow-Romanized": "detail",  # latin script for Fuzhou Eastern Min
-    "Phak-fa-su": "detail",  # latin alphabet used by missionaries for Hakka
+    "Phak-fa-su": "detail",  # latin alphabet used by missionaries for Hakka (PFS)
     "Hakka-Romanization-System": "detail",  # Taiwanese Hakka Romanization System
+    "Kienning-Colloqial-Romanized": "detail",  # missionary romanization system for the Kienning Dialect of Northern Min
+    "Latinxua-Sin-Wenz": "detail",
     "Tai-lo": "detail",  # romanization system for Taiwanese Hokkien
+    "Tongyong-Pinyin": "detail",  # Taiwanese romanization from 2002 to 2008
     "Jyutping": "detail",  # used in Cantonese
     "McCune-Reischauer": "detail",  # Used in Korean
     "Hagfa-Pinyim": "detail",
     "Rōmaji": "detail",  # Used in Okinawan, Japanese? for Latin characters
     "Yale": "detail",   # used in Cantonese
     "Guangdong-Romanization": "detail", # way of romanizing Cantonese, Teochew, Hakka and Hainanese
-    "Wiktionary-Wu": "detail",  # Wictionary specific romanization system of Wu Chinese
+    "Wiktionary-specific": "detail",  # denotes the use of Wiktionary specific conventions in spelling etc.
     "Jinmeiyō": "misc",  # Type of Kanji used for names
     "-i": "class",   # Japanese inflection type
     "-na": "class",  # Japanese inflection type
@@ -4969,6 +4994,7 @@ valid_tags = {
     "imperfective": "aspect",  # Verb aspect (action not completed)
     "impersonal": "person",  # Verb form, e.g., Portuguese impersonal infinitive
     "impolite": "register",  # Politeness degree of verbs etc
+    "imitating": "misc",  # imitating X
     "in-certain-phrases": "misc",
     "in-compounds": "misc",
     "in-plural": "misc",
@@ -5001,6 +5027,7 @@ valid_tags = {
     "infinitive-v": "non-finite",  # Finnish
     "infinitive-zu": "non-finite",  # German
     "infix": "pos",
+    "inferred": "mood",
     "inflected": "misc",  # Marks inflected form, constrast to uninflected (e.g., Dutch)
     "inflected-like": "misc",  # seleen/Limburgish
     "informal": "register",  # Formality/politeness degree of verbs etc
