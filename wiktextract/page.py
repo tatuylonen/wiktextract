@@ -2124,12 +2124,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 hdr = hdr.replace("N.", "Northern,")
                                 hdr = hdr.replace("S.", "Southern,")
                                 new = hdr.split(",")
-                                for tag in new:
+                                for tag in sorted(new):
                                     tag = tag.strip()
                                     tag = tag.replace(" ", "-")
                                     if tag in valid_tags:
                                         tags.append(tag)
                                     else:
+                                        if tag in zh_tag_lookup:
+                                            tags.append(zh_tag_lookup[tag])
                                         print("MISSING ZH SYNONYM TAG:", tag)
                                         sys.stdout.flush()
                                 
