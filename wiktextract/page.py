@@ -8,6 +8,7 @@ import copy
 import html
 import urllib
 import hashlib
+import json
 import collections
 from wikitextprocessor import (Wtp, WikiNode, NodeKind, ALL_LANGUAGES,
                                MAGIC_FIRST, MAGIC_LAST)
@@ -20,6 +21,7 @@ from .places import place_prefixes  # XXX move processing to places.py
 from .unsupported_titles import unsupported_title_map
 from .datautils import (data_append, data_extend, split_at_comma_semi,
                         languages_by_name, languages_by_code)
+from .tags import valid_tags
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_qualifier,
     parse_pronunciation_tags, distw,
@@ -415,6 +417,11 @@ panel_templates = set([
     "zh-forms",
     "zh-hanzi-box",
 ])
+
+zh_tag_lookup = {
+    "Formal": "formal",
+    "Written-Standard-Chinese": "Standard-Chinese",
+}
 
 # Template name prefixes used for language-specific panel templates (i.e.,
 # templates that create side boxes or notice boxes or that should generally
@@ -1859,7 +1866,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
         assert isinstance(data, dict)
         assert isinstance(field, str)
         assert isinstance(linkagenode, WikiNode)
-        # print("PARSE_LINKAGE:", linkagenode)
+        if field == "synonyms" and True == False:
+            print("field", field)
+            print("data", data)
+            print("children:")
+            print(linkagenode.children)
         if not config.capture_linkages:
             return
         have_panel_template = False
@@ -1871,8 +1882,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             assert isinstance(field, str)
             assert sense is None or isinstance(sense, str)
 
-            # print("PARSE_LINKAGE_ITEM: {} ({}): {}"
-            #       .format(field, sense, contents))
+            #print("PARSE_LINKAGE_ITEM: {} ({}): {}"
+            #      .format(field, sense, contents))
 
             parts = []
             ruby = ""
@@ -2089,10 +2100,56 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 return ""
             return None
 
+        def parse_zh_synonyms(parsed, data, hdrs):
+            """Parses Chinese dialectal synonyms tables"""
+            for item in parsed:
+                if isinstance(item, WikiNode):
+                    if item.kind == NodeKind.TABLE_ROW:
+                        cleaned = clean_node(config, ctx, None, item.children)
+                        if any(["Variety" in cleaned, 
+                               "Location" in cleaned,
+                               "Words" in cleaned]):
+                            pass
+                        else:
+                            split = cleaned.split("\n")
+                            new_hdrs = split[:-1]
+                            if len(new_hdrs) == 2:
+                                hdrs = [new_hdrs[0]]
+                                new_hdrs.pop(0)
+                            combined_hdrs = [x.strip() for x in hdrs + new_hdrs]
+                            tags = []
+                            for hdr in combined_hdrs:
+                                hdr = hdr.replace("(", ",")
+                                hdr = hdr.replace(")", "")
+                                hdr = hdr.replace("N.", "Northern,")
+                                hdr = hdr.replace("S.", "Southern,")
+                                new = hdr.split(",")
+                                for tag in new:
+                                    tag = tag.strip()
+                                    tag = tag.replace(" ", "-")
+                                    if tag in valid_tags:
+                                        tags.append(tag)
+                                    else:
+                                        print("MISSING ZH SYNONYM TAG:", tag)
+                                        sys.stdout.flush()
+                                
+                            words = split[-1].split(",")
+                            for word in words:
+                                data.append({"word": word.strip(), "tags": tags})
+                                
+                            #print(new_hdrs, ":", words.split(", "))
+                    else:
+                        parse_zh_synonyms(item.children, data, hdrs)
+
         # Main body of parse_linkage()
         text = ctx.node_to_wikitext(linkagenode.children)
         parsed = ctx.parse(text, expand_all=True,
                            template_fn=linkage_template_fn1)
+        if field == "synonyms" and language == "Chinese":
+            synonyms = []
+            parse_zh_synonyms(parsed.children, synonyms, [])
+            #print(json.dumps(synonyms, indent=4, ensure_ascii=False))
+            data_extend(ctx, data, "synonyms", synonyms)
         parse_linkage_recurse(parsed.children, field, None)
         if not data.get(field) and not have_panel_template:
             text = "".join(toplevel_text).strip()
