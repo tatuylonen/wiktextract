@@ -4436,7 +4436,6 @@ xlat_tags_map = {
     "high-style": "formal", # riesumare/Italian
     "more common": "common", # compiersi/Italian
     "Latinate pronunciation": "hypercorrect", # perorare/Italian
-    
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
