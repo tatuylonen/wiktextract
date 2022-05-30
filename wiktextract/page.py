@@ -418,9 +418,12 @@ panel_templates = set([
     "zh-hanzi-box",
 ])
 
+# lookup table for the tags of Chinese dialectal synonyms
 zh_tag_lookup = {
-    "Formal": "formal",
-    "Written-Standard-Chinese": "Standard-Chinese",
+    "Formal": ["formal"],
+    "Written-Standard-Chinese": ["Standard-Chinese"],
+    "historical or Internet slang": ["historical", "internet-slang"],
+    "now usually derogatory or offensive": ["offensive", "derogatory"],
 }
 
 # Template name prefixes used for language-specific panel templates (i.e.,
@@ -2100,12 +2103,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 return ""
             return None
 
-        def parse_zh_synonyms(parsed, data, hdrs):
+        def parse_zh_synonyms(parsed, data, hdrs, root_word):
             """Parses Chinese dialectal synonyms tables"""
             for item in parsed:
                 if isinstance(item, WikiNode):
                     if item.kind == NodeKind.TABLE_ROW:
                         cleaned = clean_node(config, ctx, None, item.children)
+                        #print("cleaned:", repr(cleaned))
                         if any(["Variety" in cleaned, 
                                "Location" in cleaned,
                                "Words" in cleaned]):
@@ -2118,6 +2122,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 new_hdrs.pop(0)
                             combined_hdrs = [x.strip() for x in hdrs + new_hdrs]
                             tags = []
+                            words = split[-1].split(",")
                             for hdr in combined_hdrs:
                                 hdr = hdr.replace("(", ",")
                                 hdr = hdr.replace(")", "")
@@ -2131,17 +2136,63 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                         tags.append(tag)
                                     else:
                                         if tag in zh_tag_lookup:
-                                            tags.append(zh_tag_lookup[tag])
-                                        print("MISSING ZH SYNONYM TAG:", tag)
-                                        sys.stdout.flush()
+                                            tags.extend(zh_tag_lookup[tag])
+                                        else:
+                                            print(f"MISSING ZH SYNONYM TAG for root {root_word}, word {words}: {tag}")
+                                            sys.stdout.flush()
                                 
-                            words = split[-1].split(",")
                             for word in words:
                                 data.append({"word": word.strip(), "tags": tags})
-                                
-                            #print(new_hdrs, ":", words.split(", "))
+                    elif item.kind == NodeKind.HTML:
+                        cleaned = clean_node(config, ctx, None, item.children)
+                        if cleaned.find("Synonyms of") >= 0:
+                            cleaned = cleaned.replace("Synonyms of ", "")
+                            root_word = cleaned
+                        parse_zh_synonyms(item.children, data, hdrs, root_word)
                     else:
-                        parse_zh_synonyms(item.children, data, hdrs)
+                        parse_zh_synonyms(item.children, data, hdrs, root_word)
+
+        def parse_zh_synonyms_list(parsed, data, hdrs, root_word):
+            """Parses Chinese dialectal synonyms tables (list format)"""
+            for item in parsed:
+                if isinstance(item, WikiNode):
+                    if item.kind == NodeKind.LIST_ITEM:
+                        cleaned = clean_node(config, ctx, None, item.children)
+                        #print("cleaned:", repr(cleaned))
+                        if any(["Variety" in cleaned, 
+                               "Location" in cleaned,
+                               "Words" in cleaned]):
+                            pass
+                        else:
+                            cleaned = cleaned.replace("(", ",")
+                            cleaned = cleaned.replace(")", "")
+                            split = cleaned.split(",")
+                            # skip empty words / titles
+                            if split[0] == "":
+                                continue
+                            words = split[0].split("/")
+                            new_hdrs = [x.strip() for x in split[1:]]
+                            tags = []
+                            for tag in sorted(new_hdrs):
+                                if tag in valid_tags:
+                                    tags.append(tag)
+                                else:
+                                    if tag in zh_tag_lookup:
+                                        tags.extend(zh_tag_lookup[tag])
+                                    else:
+                                        print(f"MISSING ZH SYNONYM TAG (possibly pinyin) - root {root_word}, word {words}: {tag}")
+                                        sys.stdout.flush()
+
+                            for word in words:
+                                data.append({"word": word.strip(), "tags": tags})
+                    elif item.kind == NodeKind.HTML:
+                        cleaned = clean_node(config, ctx, None, item.children)
+                        if cleaned.find("Synonyms of") >= 0:
+                            cleaned = cleaned.replace("Synonyms of ", "")
+                            root_word = cleaned
+                        parse_zh_synonyms_list(item.children, data, hdrs, root_word)
+                    else:
+                        parse_zh_synonyms_list(item.children, data, hdrs, root_word)
 
         # Main body of parse_linkage()
         text = ctx.node_to_wikitext(linkagenode.children)
@@ -2149,7 +2200,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                            template_fn=linkage_template_fn1)
         if field == "synonyms" and language == "Chinese":
             synonyms = []
-            parse_zh_synonyms(parsed.children, synonyms, [])
+            if str(parsed).find("LIST") >= 0:
+                parse_zh_synonyms_list(parsed.children, synonyms, [], "")
+            else:
+                parse_zh_synonyms(parsed.children, synonyms, [], "")
             #print(json.dumps(synonyms, indent=4, ensure_ascii=False))
             data_extend(ctx, data, "synonyms", synonyms)
         parse_linkage_recurse(parsed.children, field, None)
