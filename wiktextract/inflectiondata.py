@@ -3128,7 +3128,7 @@ infl_map = {
     "3rd singular m": "third-person singular masculine",
     "3rd dual": "third-person dual",
     "First-person": "first-person",
-    "Second-person": "second-person", # sibi/Latin
+    "Second-person": "second-person",  # sibi/Latin
     "Simple present / conditional": "present conditional",
     "Future progressive, presumptive": "future progressive presumptive",
     "Prolative I": "prolative",
@@ -3264,13 +3264,13 @@ infl_map = {
     },
     "m verbs conjugated according to 3rd person sg. er": {
         "lang": "German",
-        "if": "polite", # du/German
+        "if": "polite",  # du/German
         "then": "masculine third-person second-person-semantically"
     },
     # This didn't work to replace "second-person": -KJ
     # ~ "2nd person": {
         # ~ "lang": "German",
-        # ~ "if": "second-person-semantically", # du/German
+        # ~ "if": "second-person-semantically",  # du/German
         # ~ "then": ""
     # ~ },
     "(without article)": {
@@ -3282,12 +3282,12 @@ infl_map = {
         "then": "indefinite with-article",
     },
     "Strong plural": {
-        "lang": "German", # mehrere/German
+        "lang": "German",  # mehrere/German
         "then": "strong plural",
     },
     "Weak and mixed plural": {
         "lang": "German",
-        "then": "weak mixed plural", # mehrere/German
+        "then": "weak mixed plural",  # mehrere/German
     },
     "Second-person formal": { # Ihr/German
         "lang": "German",
@@ -3321,11 +3321,11 @@ infl_map = {
         "lang": "Russian",
         "then": "feminine plural"
     },
-    "sigmatic future": "sigmatic future", # adiuvo/Latin
-    "sigmatic aorist": "sigmatic aorist", # adiuvo/Latin
+    "sigmatic future": "sigmatic future",  # adiuvo/Latin
+    "sigmatic aorist": "sigmatic aorist",  # adiuvo/Latin
     "Key constructions": {
         "lang": "Japanese",
-        "then": "!", # Break column inheritance, 伶俐/Japanese
+        "then": "!",  # Break column inheritance, 伶俐/Japanese
     },
     "Informal past": { # 伶俐/Japanese
         "lang": "Japanese",
@@ -3356,7 +3356,7 @@ infl_map = {
     },
     "Degree": { # 伶俐/Japanese
         "lang": "Japanese",
-        "then": "noun-from-adj", # equivalent to English -ness, needs more
+        "then": "noun-from-adj",  # equivalent to English -ness, needs more
     },
     # in חתול/Hebrew:
     "With possessive pronouns": {
@@ -3379,7 +3379,7 @@ infl_map = {
     "masculine singular": {
         "lang": "Hebrew",
         "if": "possessed-form",
-        "then": "possessive-masculine possessive-single", # doesn't work
+        "then": "possessive-masculine possessive-single",  # doesn't work
         "else": "masculine singular",
     },
     # could there be a third control character besides "*" and "!"
@@ -3404,7 +3404,7 @@ infl_map = {
         "else": "feminine plural",
     },
 
-    "masculine and neuter": "masculine neuter", # hannars/Westrobothnian
+    "masculine and neuter": "masculine neuter",  # hannars/Westrobothnian
     "singular masculine": "masculine singular",
     "plural masculine": "masculine plural",
     "singular feminine": "feminine singular",
@@ -3549,7 +3549,7 @@ infl_map = {
         "then": "past habitual independent",
     },
 
-    "1st singular (я (ja))": "first-person singular", # быць/Belarusian
+    "1st singular (я (ja))": "first-person singular",  # быць/Belarusian
     "2nd singular (ты (ty))": "second-person singular",
     "3rd singular (ён (jon)/яна́ (janá)/яно́ (janó))": "third-person singular",
     "1st plural (мы (my))": "first-person plural",
@@ -3581,14 +3581,14 @@ infl_map = {
         "then": "",
     },
 
-    "masc." : "masculine", # ща/Bulgarian
+    "masc." : "masculine",  # ща/Bulgarian
     "fem.": "feminine",
     "neut.": "neuter",
 
-    "genitive form": "genitive", # глава/Bulgarian
-    "feminine/ neuter": "feminine neuter", # два/Bulgarian
+    "genitive form": "genitive",  # глава/Bulgarian
+    "feminine/ neuter": "feminine neuter",  # два/Bulgarian
 
-    "future indicative": "future indicative", # mdlić/Polish
+    "future indicative": "future indicative",  # mdlić/Polish
     
     "dummy-ignored-text-cell": "dummy-ignored-text-cell",  # Kludge
 
@@ -3597,16 +3597,16 @@ infl_map = {
         "then": "singular",
     },
     "pl": {
-        "lang": "Finnish", # erata/Finnish
+        "lang": "Finnish",  # erata/Finnish
         "then": "plural",
     },
-    "pos": "positive", # erata/Finnish
+    "pos": "positive",  # erata/Finnish
     "neg": "negative",  # erata/Finnish
 
-    "evidential participle": "evidential participle", # տալ/Armenian
-    "future converb 1": "future converb converb-i", # տալ/Armenian
-    "future converb 2": "future converb converb-ii", # տալ/Armenian
-    "past imperfect": "past imperfect", # տալ/Armenian
+    "evidential participle": "evidential participle",  # տալ/Armenian
+    "future converb 1": "future converb converb-i",  # տալ/Armenian
+    "future converb 2": "future converb converb-ii",  # տալ/Armenian
+    "past imperfect": "past imperfect",  # տալ/Armenian
     "դուն": {  # տալ/Armenian
         "lang": "Armenian",
         "then": "second-person singular",
@@ -3624,15 +3624,15 @@ infl_map = {
         "then": "second-person singular",
     },
 
-    "1 sg." : "first-person singular", # féin/Old Irish
-    "2 sg." : "second-person singular", # féin/Old Irish
-    "3 sg." : "third-person singular", # féin/Old Irish
-    "1 pl." : "first-person plural", # féin/Old Irish
-    "2 pl." : "second-person plural", # féin/Old Irish
-    "3 pl." : "third-person plural", # féin/Old Irish
-    "m./n." : "masculine neuter", # féin/Old Irish
-    "Stressed": "stressed", # suide/Old irish
-    "Unstressed": "unstressed", # suide/Old Irish
+    "1 sg." : "first-person singular",  # féin/Old Irish
+    "2 sg." : "second-person singular",  # féin/Old Irish
+    "3 sg." : "third-person singular",  # féin/Old Irish
+    "1 pl." : "first-person plural",  # féin/Old Irish
+    "2 pl." : "second-person plural",  # féin/Old Irish
+    "3 pl." : "third-person plural",  # féin/Old Irish
+    "m./n." : "masculine neuter",  # féin/Old Irish
+    "Stressed": "stressed",  # suide/Old irish
+    "Unstressed": "unstressed",  # suide/Old Irish
     # ~ "Masculine": { # suide/Old Irish
         # ~ "lang": "Old Irish",
         # ~ "then": "!",
@@ -3641,21 +3641,21 @@ infl_map = {
         # ~ "lang": "Old Irish",
         # ~ "then": "!",
     # ~ },
-    "2d sing.": "second-person singular", # attá/Old Irish
-    "3d sing.": "third-person singular", # attá/Old Irish
-    "3d sg. masc.": "third-person singular masculine", # attá/Old Irish
-    "3d sg. fem.": "third-person singular feminine", # attá/Old Irish
-    "2d sg.": "second-person singular", # attá/Old Irish BOTH OF THESE in the same template!
-    "3d sg.": "third-person singular", # attá/Old Irish
-    "2d pl.": "second-person plural", # attá/Old Irish
-    "3d pl.": "third-person plural", # attá/Old Irish
-    "Pres.​indic.​prog.": "present indicative progressive", # attá/Old Irish
-    "Pres.​indic.​hab.": "present indicative habitual", # attá/Old Irish
-    # ~ "Pres.ind.": "present indicative", # attá/Old Irish
+    "2d sing.": "second-person singular",  # attá/Old Irish
+    "3d sing.": "third-person singular",  # attá/Old Irish
+    "3d sg. masc.": "third-person singular masculine",  # attá/Old Irish
+    "3d sg. fem.": "third-person singular feminine",  # attá/Old Irish
+    "2d sg.": "second-person singular",  # attá/Old Irish BOTH OF THESE in the same template!
+    "3d sg.": "third-person singular",  # attá/Old Irish
+    "2d pl.": "second-person plural",  # attá/Old Irish
+    "3d pl.": "third-person plural",  # attá/Old Irish
+    "Pres.​indic.​prog.": "present indicative progressive",  # attá/Old Irish
+    "Pres.​indic.​hab.": "present indicative habitual",  # attá/Old Irish
+    # ~ "Pres.ind.": "present indicative",  # attá/Old Irish
     # Original data has a zero-width space, causing problems
-    "Pres.​subj.": "present subjunctive", # attá/Old Irish
+    "Pres.​subj.": "present subjunctive",  # attá/Old Irish
 
-    "Active present participle ➤": { # στρατοπεδεύω/Greek (modern)
+    "Active present participle ➤": {  # στρατοπεδεύω/Greek (modern)
         "lang": "Greek",
         "then": "active present participle indeclinable",
     },
@@ -3667,7 +3667,7 @@ infl_map = {
         "lang": "Greek",
         "then": "passive perfect participle indeclinable",
     },
-    "Perfect participle ➤   ": { # χαίρομαι/Greek
+    "Perfect participle ➤   ": {  # χαίρομαι/Greek
         "lang": "Greek",
         "then": "perfect participle indeclinable",
     },
@@ -3677,12 +3677,32 @@ infl_map = {
         "then": "indeclinable aorist infinitive",
     },
 
-    "m·s": "masculine singular", # καθείς/Greek
+    "m·s": "masculine singular",  # καθείς/Greek
     "f·s": "feminine singular",
     "n·s": "neuter singular",
     
-    "Masc./Fem./Neut.": "masculine feminine neuter", # mille/Latin
-    "Reflexive third": "third-person reflexive", # se/Latin
+    "Masc./Fem./Neut.": "masculine feminine neuter",  # mille/Latin
+    "Reflexive third": "third-person reflexive",  # se/Latin
+
+    "masculine dual": "masculine dual",  #a סוס/Hebrew
+
+    "Nynorsk f": {
+        "lang": "Norwegian Nynorsk",
+        "then": "feminine",
+    },
+    
+    "Nynorsk m": {
+        "lang": "Norwegian Nynorsk",
+        "then": "masculine",
+    },
+    
+    "Nynorsk n": {
+        "lang": "Norwegian Nynorsk",
+        "then": "neuter",
+    },
+
+    
+    
 }
 
 def check_tags(k, v):
