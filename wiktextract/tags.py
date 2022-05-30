@@ -3058,6 +3058,7 @@ xlat_tags_map = {
     "derogative": "derogatory",
     "derogatively": "derogatory",
     "disparaging": "derogatory",
+    "disparagingly": "derogatory", # feic/Irish
     "deprecative": "derogatory",
     "collective sense": "collective",
     "relatively rare": "rare",
@@ -4200,6 +4201,8 @@ xlat_tags_map = {
     "mostly only when written": "literary", # Magnet/German
     "rarer": "rare", # verbleichen/German
     "southern Germany": "Southern-Germany", # Holzscheit/German
+    "alternatively in the meaning of": "uncommon", # abbondare/Italian
+    #XXX "for-subsense" or similar needs a tag or parsing    
     "alternatively in": "regional", # Holzscheit/German
     "nonstandard but common": "nonstandard common", # Gedanke/German
     "colloquial or archaic": ["colloquial", "archaic"], # Undorn/German
@@ -4227,7 +4230,16 @@ xlat_tags_map = {
     "original but now less common": "archaic", # winken/German
     "standard but rare in the vernacular": "literary", # fechten/German
     "mostly found in": "regional", # Ehrenschutz/German
-
+    "unofficial": "colloquial", # kørsel/Danish, although fixed, one user did a lot of this in Danish.
+    "common in": "regional", # tread water/English
+    "careful style": "formal", # valutarsi/Italian
+    "less popular": "uncommon", # rivedere/Italian
+    "also when intransitive": "intransitive", # risuonare/Italian
+    "popular": "common", # sciogliere/Italian
+    "high-style": "formal", # riesumare/Italian
+    "more common": "common", # compiersi/Italian
+    "Latinate pronunciation": "hypercorrect", # perorare/Italian
+    
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -4273,6 +4285,7 @@ xlat_descs_map = {
     "m": "masculine",
     "f": "feminine",
     "classic": "",
+    
 }
 
 # Words that are interpreted as tags at the beginning of a linkage

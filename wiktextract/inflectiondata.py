@@ -482,7 +482,7 @@ infl_map = {
     "io": {
         "lang": ["Aromanian", "Interlingua", "Istro-Romanian",
                  "Italian", "Neapolitan"],
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],  # -urre/Italian; Added Italian entries 
         "if": "first-person singular",
         "then": "first-person singular",
     },
@@ -499,93 +499,93 @@ infl_map = {
                  "Sassarese", "Savi",
                  "Scottish Gaelic", "Sicilian", "Sinte Romani",
                  "Sudovian", "Tarantino", "Tocharian A", "Welsh Romani"],
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "second-person singular",
         "then": "second-person singular",
     },
     "lui/lei, esso/essa": {
         "lang": "Italian",
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "third-person singular",
         "then": "third-person singular",
     },
     "lui/lei": {  # calere/Italian
         "lang": "Italian",
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "third-person singular",
         "then": "third-person singular",
     },
     "noi": {
         "lang": ["Aromanian", "Corsican", "Gallurese",
                  "Italian", "Piedmontese", "Romanian", "Sassarese"],
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "first-person plural",
         "then": "first-person plural",
     },
     "voi": {
         "lang": ["Aromanian", "Corsican", "Gallurese",
                  "Italian", "Piedmontese", "Romanian", "Sassarese"],
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "second-person plural",
         "then": "second-person plural",
     },
     "loro, essi/esse": {
         "lang": "Italian",
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "third-person plural",
         "then": "third-person plural",
     },
     "loro": {  # calere/Italian
         "lang": "Italian",
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "third-person plural",
         "then": "third-person plural",
     },
     "che io": {
         "lang": "Italian",
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "first-person singular",
         "then": "first-person singular",
     },
     "che tu": {
         "lang": "Italian",
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "second-person singular",
         "then": "second-person singular",
     },
     "che lui/che lei, che esso/che essa": {
         "lang": "Italian",
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "third-person singular",
         "then": "third-person singular",
     },
     "che lui/che lei": {  # calere/Italian
         "lang": "Italian",
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "third-person singular",
         "then": "third-person singular",
     },
     "che noi": {
         "lang": "Italian",
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "first-person plural",
         "then": "first-person plural",
     },
     "che voi": {
         "lang": "Italian",
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "second-person plural",
         "then": "second-person plural",
     },
     "che loro, che essi/che esse": {
         "lang": "Italian",
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "third-person plural",
         "then": "third-person plural",
     },
     "che loro": {  # calere/Italian
         "lang": "Italian",
-        "pos": "verb",
+        "pos":  ["verb", "suffix"],
         "if": "third-person plural",
         "then": "third-person plural",
     },
@@ -3508,10 +3508,182 @@ infl_map = {
         "else": "",
     },
 
+    "present dependent": { # abair/Irish, table for archaic verb paradigm
+        "lang": "Irish",
+        "then": "present dependent",
+    },
+    "past habitual dependent": { # abair/Irish, table for archaic verb paradigm
+        "lang": "Irish",
+        "then": "past habitual dependent",
+    },
+    "future dependent": { # abair/Irish, table for archaic verb paradigm
+        "lang": "Irish",
+        "then": "future dependent",
+    },
+    "conditional dependent": { # abair/Irish, table for archaic verb paradigm
+        "lang": "Irish",
+        "then": "conditional dependent",
+    },
+    "conditional independent": { # abair/Irish, table for archaic verb paradigm
+        "lang": "Irish",
+        "then": "conditional independent",
+    },
+    "future independent": { # faigh/Irish, table for archaic verb paradigm
+        "lang": "Irish",
+        "then": "future independent",
+    },
+    "past independent": { # faigh/Irish, table for archaic verb paradigm
+        "lang": "Irish",
+        "then": "past independent",
+    },
+    "past dependent": { # faigh/Irish, table for archaic verb paradigm
+        "lang": "Irish",
+        "then": "past dependent",
+    },
+    "present independent": { # faigh/Irish, table for archaic verb paradigm
+        "lang": "Irish",
+        "then": "present independent",
+    },
+    "past habitual independent": { # faigh/Irish, table for archaic verb paradigm
+        "lang": "Irish",
+        "then": "past habitual independent",
+    },
+
+    "1st singular (я (ja))": "first-person singular", # быць/Belarusian
+    "2nd singular (ты (ty))": "second-person singular",
+    "3rd singular (ён (jon)/яна́ (janá)/яно́ (janó))": "third-person singular",
+    "1st plural (мы (my))": "first-person plural",
+    "2nd plural (вы (vy))": "second-person plural",
+    "3rd plural (яны́ (janý))": "third-person plural",
+    "plural (мы (my), вы (vy), яны́ (janý))": "plural",
+    "masculine (я (ja), ты (ty), ён (jon))": "masculine",
+    "feminine (я (ja), ты (ty), яна́ (janá))": "feminine",
+    "neuter (яно́ (janó))": "neuter",
+
+    "definite singular": "definite singular",
+    "indefinite plural": "indefinite plural",
+    "definite plural": "definite plural",
+
+    "Bokmål m": {
+        "lang": "Norwegian Bokmål",
+        "then": "masculine",
+    },
+    "Bokmål f": {
+        "lang": "Norwegian Bokmål",
+        "then": "feminine",
+    },
+    "Bokmål c": {
+        "lang": "Norwegian Bokmål",
+        "then": "common-gender",
+    },
+    "Bokmål": {
+        "lang": "Norwegian Bokmål",
+        "then": "",
+    },
+
+    "masc." : "masculine", # ща/Bulgarian
+    "fem.": "feminine",
+    "neut.": "neuter",
+
+    "genitive form": "genitive", # глава/Bulgarian
+    "feminine/ neuter": "feminine neuter", # два/Bulgarian
+
+    "future indicative": "future indicative", # mdlić/Polish
     
     "dummy-ignored-text-cell": "dummy-ignored-text-cell",  # Kludge
-}
 
+    "s": {
+        "lang": "Finnish",  # erata/Finnish
+        "then": "singular",
+    },
+    "pl": {
+        "lang": "Finnish", # erata/Finnish
+        "then": "plural",
+    },
+    "pos": "positive", # erata/Finnish
+    "neg": "negative",  # erata/Finnish
+
+    "evidential participle": "evidential participle", # տալ/Armenian
+    "future converb 1": "future converb converb-i", # տալ/Armenian
+    "future converb 2": "future converb converb-ii", # տալ/Armenian
+    "past imperfect": "past imperfect", # տալ/Armenian
+    "դուն": {  # տալ/Armenian
+        "lang": "Armenian",
+        "then": "second-person singular",
+    },
+    "ան": {  # տալ/Armenian
+        "lang": "Armenian",
+        "then": "third-person singular",
+    },
+    "անանք": { # տալ/Armenian
+        "lang": "Armenian",
+        "then": "third-person plural",
+    },
+    "(դուն)": { # տալ/Armenian
+        "lang": "Armenian",
+        "then": "second-person singular",
+    },
+
+    "1 sg." : "first-person singular", # féin/Old Irish
+    "2 sg." : "second-person singular", # féin/Old Irish
+    "3 sg." : "third-person singular", # féin/Old Irish
+    "1 pl." : "first-person plural", # féin/Old Irish
+    "2 pl." : "second-person plural", # féin/Old Irish
+    "3 pl." : "third-person plural", # féin/Old Irish
+    "m./n." : "masculine neuter", # féin/Old Irish
+    "Stressed": "stressed", # suide/Old irish
+    "Unstressed": "unstressed", # suide/Old Irish
+    # ~ "Masculine": { # suide/Old Irish
+        # ~ "lang": "Old Irish",
+        # ~ "then": "!",
+    # ~ },
+    # ~ "Feminine/neuter": {
+        # ~ "lang": "Old Irish",
+        # ~ "then": "!",
+    # ~ },
+    "2d sing.": "second-person singular", # attá/Old Irish
+    "3d sing.": "third-person singular", # attá/Old Irish
+    "3d sg. masc.": "third-person singular masculine", # attá/Old Irish
+    "3d sg. fem.": "third-person singular feminine", # attá/Old Irish
+    "2d sg.": "second-person singular", # attá/Old Irish BOTH OF THESE in the same template!
+    "3d sg.": "third-person singular", # attá/Old Irish
+    "2d pl.": "second-person plural", # attá/Old Irish
+    "3d pl.": "third-person plural", # attá/Old Irish
+    "Pres.​indic.​prog.": "present indicative progressive", # attá/Old Irish
+    "Pres.​indic.​hab.": "present indicative habitual", # attá/Old Irish
+    # ~ "Pres.ind.": "present indicative", # attá/Old Irish
+    # Original data has a zero-width space, causing problems
+    "Pres.​subj.": "present subjunctive", # attá/Old Irish
+
+    "Active present participle ➤": { # στρατοπεδεύω/Greek (modern)
+        "lang": "Greek",
+        "then": "active present participle indeclinable",
+    },
+    "Active perfect participle ➤": {
+        "lang": "Greek",
+        "then": "active perfect participle indeclinable",
+    },
+    "Passive perfect participle ➤": {
+        "lang": "Greek",
+        "then": "passive perfect participle indeclinable",
+    },
+    "Perfect participle ➤   ": { # χαίρομαι/Greek
+        "lang": "Greek",
+        "then": "perfect participle indeclinable",
+    },
+    #https://en.wikipedia.org/wiki/Nonfinite_verb#Modern_Greek
+    "Nonfinite form ➤": {
+        "lang": "Greek",
+        "then": "indeclinable aorist infinitive",
+    },
+
+    "m·s": "masculine singular", # καθείς/Greek
+    "f·s": "feminine singular",
+    "n·s": "neuter singular",
+    
+    "Masc./Fem./Neut.": "masculine feminine neuter", # mille/Latin
+    "Reflexive third": "third-person reflexive", # se/Latin
+}
 
 def check_tags(k, v):
     assert isinstance(k, str)
