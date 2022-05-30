@@ -424,6 +424,7 @@ zh_tag_lookup = {
     "Written-Standard-Chinese": ["Standard-Chinese"],
     "historical or Internet slang": ["historical", "internet-slang"],
     "now usually derogatory or offensive": ["offensive", "derogatory"],
+    "lofty": [],
 }
 
 # Template name prefixes used for language-specific panel templates (i.e.,
@@ -2173,18 +2174,26 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             words = split[0].split("/")
                             new_hdrs = [x.strip() for x in split[1:]]
                             tags = []
+                            roman = None
                             for tag in sorted(new_hdrs):
                                 if tag in valid_tags:
                                     tags.append(tag)
+                                elif tag in zh_tag_lookup:
+                                    tags.extend(zh_tag_lookup[tag])
+                                elif classify_desc(tag) == "romanization" \
+                                        and roman is None:
+                                    roman = tag
                                 else:
-                                    if tag in zh_tag_lookup:
-                                        tags.extend(zh_tag_lookup[tag])
-                                    else:
-                                        print(f"MISSING ZH SYNONYM TAG (possibly pinyin) - root {root_word}, word {words}: {tag}")
-                                        sys.stdout.flush()
+                                    print(f"MISSING ZH SYNONYM TAG (possibly pinyin) - root {root_word}, word {words}: {tag}")
+                                    sys.stdout.flush()
 
                             for word in words:
-                                data.append({"word": word.strip(), "tags": tags})
+                                dt = {"word": word.strip()}
+                                if tags:
+                                    dt["tags"] = tags
+                                if roman is not None:
+                                    dt["roman"] = roman
+                                data.append(dt)
                     elif item.kind == NodeKind.HTML:
                         cleaned = clean_node(config, ctx, None, item.children)
                         if cleaned.find("Synonyms of") >= 0:
@@ -2194,13 +2203,24 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     else:
                         parse_zh_synonyms_list(item.children, data, hdrs, root_word)
 
+        def contains_kind(children, nodekind):
+            assert isinstance(children, list)
+            for item in children:
+                if not isinstance(item, WikiNode):
+                    continue
+                if item.kind == nodekind:
+                    return True
+                elif contains_kind(item.children, nodekind):
+                    return True
+            return False
+
         # Main body of parse_linkage()
         text = ctx.node_to_wikitext(linkagenode.children)
         parsed = ctx.parse(text, expand_all=True,
                            template_fn=linkage_template_fn1)
         if field == "synonyms" and language == "Chinese":
             synonyms = []
-            if str(parsed).find("LIST") >= 0:
+            if contains_kind(parsed.children, NodeKind.LIST):
                 parse_zh_synonyms_list(parsed.children, synonyms, [], "")
             else:
                 parse_zh_synonyms(parsed.children, synonyms, [], "")

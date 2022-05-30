@@ -174,6 +174,7 @@ def parse_pronunciation(ctx, config, node, data, sense_data, pos_data, etym_data
                              if not isinstance(x, WikiNode) or
                                 x.kind != NodeKind.LIST)
             text = clean_node(config, ctx, None, base_item)
+            text = re.sub(r"(?s)\(Note:.*?\)", "", text)
             new_parent_hdrs = list(parent_hdrs)
             if text.find(": ") >= 0:
                 pron = {}
@@ -184,6 +185,7 @@ def parse_pronunciation(ctx, config, node, data, sense_data, pos_data, etym_data
                 pron["zh-pron"] = v
                 new_parent_hdrs.append(extra_tags)
                 for hdr in new_parent_hdrs:
+                    hdr = hdr.strip()
                     if hdr in zh_pron_tags:
                         for tag in zh_pron_tags[hdr]:
                             if tag not in pron["tags"]:

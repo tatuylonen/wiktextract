@@ -4436,6 +4436,7 @@ xlat_tags_map = {
     "high-style": "formal", # riesumare/Italian
     "more common": "common", # compiersi/Italian
     "Latinate pronunciation": "hypercorrect", # perorare/Italian
+    
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -4831,6 +4832,7 @@ valid_tags = {
     "Yale": "detail",   # used in Cantonese
     "Guangdong-Romanization": "detail", # way of romanizing Cantonese, Teochew, Hakka and Hainanese
     "Wiktionary-specific": "detail",  # denotes the use of Wiktionary specific conventions in spelling etc.
+    "internet-slang": "misc",
     "Jinmeiyō": "misc",  # Type of Kanji used for names
     "-i": "class",   # Japanese inflection type
     "-na": "class",  # Japanese inflection type
