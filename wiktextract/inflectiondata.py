@@ -847,7 +847,7 @@ infl_map = {
     "ja": {
         "lang": ["Assan", "Guerrero Amuzgo", "Gutnish", "Lower Sorbian",
                  "Polish", "Serbo-Croatian", "Slovak", "Upper Sorbian"],
-        "pos": "verb",
+        "pos": ["verb", "suffix"],
         "if": "first-person singular",
         "then": "first-person singular",
         "else": {
@@ -860,7 +860,7 @@ infl_map = {
     "ti": {
         "lang": ["Albanian", "Galician", "Istriot", "Ligurian", "Piedmontese",
                  "Romansch", "Serbo-Croatian", "Slovene", "Welsh"],
-        "pos": "verb",
+        "pos": ["verb", "suffix"],
         "if": "second-person singular",
         "then": "second-person singular",
         "else": {
@@ -879,7 +879,7 @@ infl_map = {
     "on / ona / ono": {
         "lang": ["Czech", "Old Czech", "Polish", "Serbo-Croatian", "Slovak",
                  "Slovene"],
-        "pos": "verb",
+        "pos": ["verb", "suffix"],
         "if": "third-person singular",
         "then": "third-person singular",
     },
@@ -895,7 +895,7 @@ infl_map = {
         "then": "first-person singular",
         "else": {
             "lang": ["Hungarian", "Serbo-Croatian", "Slovene"],
-            "pos": "verb",
+            "pos": ["verb", "suffix"],
             "if": "first-person plural",
             "then": "first-person plural",
             "else": {
@@ -926,7 +926,7 @@ infl_map = {
         "then": "first-person plural",
         "else": {
             "lang": ["Esperanto", "Ido", "Serbo-Croatian"],
-            "pos": "verb",
+            "pos": ["verb", "suffix"],
             "if": "second-person plural",
             "then": "second-person plural",
             "else": {
@@ -940,7 +940,7 @@ infl_map = {
     "oni / one / ona": {
         "lang": ["Czech", "Old Czech", "Polish", "Serbo-Croatian", "Slovak",
                  "Slovene"],
-        "pos": "verb",
+        "pos": ["verb", "suffix"],
         "if": "third-person plural",
         "then": "third-person plural",
     },
@@ -987,7 +987,7 @@ infl_map = {
     "yo": {
         "lang": ["Afar", "Aragonese", "Asturian", "Chavacano", "Kristang",
                  "Ladino", "Spanish"],
-        "pos": "verb",
+        "pos": ["verb", "suffix"],
         "if": "first-person singular",
         "then": "first-person singular",
         "else": {
@@ -1070,38 +1070,38 @@ infl_map = {
     },
     "él/ella/ello usted": {
         "lang": "Spanish",
-        "pos": "verb",
+        "pos": ["verb", "suffix"],
         "if": "third-person singular",
         "then": "third-person singular",
     },
     "nosotros nosotras": {
         "lang": ["Asturian", "Spanish"],
-        "pos": "verb",
+        "pos": ["verb", "suffix"],
         "if": "first-person plural",
         "then": "first-person plural",
     },
     "vosotros vosotras": {
         "lang": ["Spanish"],
-        "pos": "verb",
+        "pos": ["verb", "suffix"],
         "if": "second-person plural",
         "then": "second-person plural",
     },
     "ellos/ellas ustedes": {
         "lang": "Spanish",
-        "pos": "verb",
+        "pos": ["verb", "suffix"],
         "if": "third-person plural",
         "then": "third-person plural",
     },
     "usted": {
         "lang": "Spanish",
-        "pos": "verb",
+        "pos": ["verb", "suffix"],
         "if": "imperative",
         "then": ["third-person singular formal second-person-semantically",
                  "third-person singular"],
     },
     "ustedes": {
         "lang": "Spanish",
-        "pos": "verb",
+        "pos": ["verb", "suffix"],
         "if": "imperative",
         "then": ["third-person plural formal second-person-semantically",
                  "third-person plural"],
@@ -1571,7 +1571,7 @@ infl_map = {
         "then": "third-person plural",
     },
     "non-finite forms": {
-        "lang": ["Latin"],
+        "lang": "Latin",
         "pos": "verb",
         "then": "!",  # Reset column inheritance
         "else": "",
@@ -3701,8 +3701,85 @@ infl_map = {
         "then": "neuter",
     },
 
+    "common, neuter": "common-gender neuter",  # kdo/Serbo-Croatian
+    "his": "third-person singular masculine possessive",  # moj/Serbo-Croatian
+    "her": "third-person singular feminine possessive",  # moj/Serbo-Croatian
+
+    "1st singular (я (ja))": "first-person singular",  # быць/Serbo-Croatian
+    "2nd singular (ты (ty))": "second-person singular",
+    "3rd singular (ён (jon)/яна́ (janá)/яно́ (janó))": "third-person singular",
+    "1st plural (мы (my))": "first-person plural",
+    "2nd plural (вы (vy))": "second-person plural",
+    "3rd plural (яны́ (janý))": "third-person plural",
+    "plural (мы (my), вы (vy), яны́ (janý))": "plural",
+    "masculine (я (ja), ты (ty), ён (jon))": "masculine",
+    "feminine (я (ja), ты (ty), яна́ (janá))": "feminine",
+    "neuter (яно́ (janó))": "neuter",
+
+    "adjectival partc.": "adjectival participle",  # доврне/Macedonian
+    "adverbial partc.": "adverbial participle",
+    # ~ "non-finite forms": {  # доврне/Macedonian  didn't work out
+        # ~ "lang": "Macedonian",
+        # ~ "then": "",
+    # ~ },
+    # ~ "l-participle": "l-participle",
+    # ~ "Compound tenses": {
+        # ~ "lang": "Macedonian",
+        # ~ "pos": "verb",
+        # ~ "then": "!",
+    # ~ },
+
+    "collective": {  # ремен/Macedonian
+        "lang": "Macedonian",
+        "pos": "noun",
+        "then": "collective",
+    },
+
+    "Nominative/Accusative (Unarticulated)": "nominative accusative indefinite",  # acid caboxilic/Romanian
+    "Nominative/Accusative (Definite articulation)": "nominative accusative definite",  
+    "Genitive/Dative (Definite articulation)": "genitive dative definite",
     
-    
+    "present infinitive": "present infinitive",  # фи/Romanian
+    "past infinitive": "past infinitive",
+
+    # ~ This doesn't want to work - why?
+    # ~ "rare but acceptable": "standard",  # soler/Spanish
+
+    "genitive (gjinore) (i/e/të/së)": "genitive",  # mjez/Albanian
+
+    "participle — present": "present participle",  # afrohet/Albanian
+    "participle — perfect": "perfect participle",
+    "gerund — present": "present gerund", 
+    "gerund — perfect": "perfect gerund",
+    "infinitive — present": "present infinitive",
+    "infinitive — perfect": "perfect infinitive",
+    "privative": "privative",
+    "absolutive — perfect": "perfect absolutive",
+    "continuous present": "present progressive",
+    "continuous imperfect": "imperfect progressive",
+    "2nd future": "future future-ii",
+    "2nd future perfect": "future future-ii perfect",
+    "imperative — negatory": "negative imperative",
+    "genitive/dative/ablative": "genitive dative ablative",  # tij/Albanian
+    "male forms": "masculine",  # Dit/Albanian
+    "female forms": "feminine",
+    "Base form": {
+        "lang": ["Arabic", "Moroccan Arabic",],
+        "pos": "prep",
+        "then": "stem",
+    },
+    "Personal-pronoun- including forms": {
+        "lang": ["Arabic", "Moroccan Arabic",],
+        "pos": "prep",
+        "then": "",
+    },
+    # ~ "singular": {
+        # ~ "lang": ["Arabic", "Moroccan Arabic",],
+        # ~ "pos": "prep",
+        # ~ "if": "stem",
+        # ~ "then": "!",
+    # ~ },
+
 }
 
 def check_tags(k, v):

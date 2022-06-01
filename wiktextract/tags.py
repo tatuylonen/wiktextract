@@ -339,7 +339,7 @@ xlat_head_map = {
     "m or pf": "masculine perfective",
     "n or pf": "neuter perfective",
     "m or m": "?masculine",  # Paul/Tr(male given name)/Urdu
-    "f or c pl": "?feminine common-gender singular plural", # mulberry/Tr/Zazaki
+    "f or c pl": "?feminine common-gender singular plural",  # mulberry/Tr/Zazaki
     "c pl or n": "?common-gender neuter singular plural",  # mouthpiece/Tr/Swedish
     "impf or impf": "imperfective",
     "pf or pf": "?perfective",
@@ -2165,12 +2165,12 @@ uppercase_tags = set([
     "most of Moselle Franconian",
     "Southern Germany",
     "southern Germany",
-    "Northwest German", # anfangen/German
-    "Ruhrdeutsch", # Haus/German
-    "Berlinisch", # Haus/German
-    "18th ct.", # Haus/German
-    "south-western German", # Maus/German
-    "Upper German", # schneien/German
+    "Northwest German",  # anfangen/German
+    "Ruhrdeutsch",  # Haus/German
+    "Berlinisch",  # Haus/German
+    "18th ct.",  # Haus/German
+    "south-western German",  # Maus/German
+    "Upper German",  # schneien/German
     # paste from placenames relating to Chinese dialectal synonyms
     "Tianmen",
     "Gaoming",
@@ -3141,7 +3141,7 @@ xlat_tags_map = {
     "usu. in negative": "usually with-negation",
     "predicate of copula": "copulative",
     "copular verb": "copulative",
-    "copula": "copulative", # náina/Phalura
+    "copula": "copulative",  # náina/Phalura
     "+ adessive": "with-adessive",
     "+ adessive or illative": "with-adessive with-illative",
     "+absolutive": "with-absolutive",
@@ -3255,7 +3255,7 @@ xlat_tags_map = {
     "derogative": "derogatory",
     "derogatively": "derogatory",
     "disparaging": "derogatory",
-    "disparagingly": "derogatory", # feic/Irish
+    "disparagingly": "derogatory",  # feic/Irish
     "deprecative": "derogatory",
     "collective sense": "collective",
     "relatively rare": "rare",
@@ -4376,67 +4376,67 @@ xlat_tags_map = {
     "Kinmen and Penghu Hokkien": "Kinmen-Hokkien Penghu-Hokkien",
     "“Jinmeiyō” kanji used for names": "Jinmeiyō",
     "by suppletion": "suppletive",
-    "only some senses": "", # Could use a tag; "limited-senses"? hero/English
-    "nautical sense": "nautical", # Without this, there's error-unknown and
+    "only some senses": "",  # Could use a tag; "limited-senses"? hero/English
+    "nautical sense": "nautical",  # Without this, there's error-unknown and
                                  # the topic tags include "transportation". pay out/English
-    "otherwise nonstandard": "nonstandard", # weep/English
-    "nonhuman": "non-human", # himself/English, talking about "it"
-    "both": "", # XXX "both" should trigger the tag to the next two forms! walrus/English
-    "pseudo-Latin": "hypercorrect", # platypus/English
-    "pseudo-Latinate": "hypercorrect", # Simplex/German
-    "archaic or informal": "archaic informal", # while/English
-    "more common in": "common", # tread water/English
-    "all": "", # XXX same as "both", "all" should extend tags the following forms
-    "less commonly": "uncommon", # avid/English
-    "muscle": "anatomy", # depressor/English
-    "optionally with an article": "with-article", # Mosambik/German
-    "genitive (des)": "genitive", #ordentlicher Professor/German, Lieber/German
-    "prenominally without an article": "without-article before-noun", # Mama/German
-    "usually in": "regional", # Vergnügungspark/German
-    "older ending": "archaic", # Fritz/German
-    "only in some regional vernaculars": "regional", # umhauen/German
-    "mostly only when written": "literary", # Magnet/German
-    "rarer": "rare", # verbleichen/German
-    "southern Germany": "Southern-Germany", # Holzscheit/German
-    "alternatively in the meaning of": "uncommon", # abbondare/Italian
+    "otherwise nonstandard": "nonstandard",  # weep/English
+    "nonhuman": "non-human",  # himself/English, talking about "it"
+    "both": "",  # XXX "both" should trigger the tag to the next two forms! walrus/English
+    "pseudo-Latin": "hypercorrect",  # platypus/English
+    "pseudo-Latinate": "hypercorrect",  # Simplex/German
+    "archaic or informal": "archaic informal",  # while/English
+    "more common in": "common",  # tread water/English
+    "all": "",  # XXX same as "both", "all" should extend tags the following forms
+    "less commonly": "uncommon",  # avid/English
+    "muscle": "anatomy",  # depressor/English
+    "optionally with an article": "with-article",  # Mosambik/German
+    "genitive (des)": "genitive",  #ordentlicher Professor/German, Lieber/German
+    "prenominally without an article": "without-article before-noun",  # Mama/German
+    "usually in": "regional",  # Vergnügungspark/German
+    "older ending": "archaic",  # Fritz/German
+    "only in some regional vernaculars": "regional",  # umhauen/German
+    "mostly only when written": "literary",  # Magnet/German
+    "rarer": "rare",  # verbleichen/German
+    "southern Germany": "Southern-Germany",  # Holzscheit/German
+    "alternatively in the meaning of": "uncommon",  # abbondare/Italian
     #XXX "for-subsense" or similar needs a tag or parsing    
-    "alternatively in": "regional", # Holzscheit/German
-    "nonstandard but common": "nonstandard common", # Gedanke/German
-    "colloquial or archaic": ["colloquial", "archaic"], # Undorn/German
-    "predominant when spoken": "colloquial", # Gnom/German
-    "with a numeral": "with-numeral", # Radlermaß/German
-    "not with a numeral": "without-numeral", # Radlermaß/German
-    "alternatively when": "", # Radlermaß/German,
-    "traditional/standard": "archaic standard", # flecthen/German
-    "only in some senses": "uncommon", # hero/English
-    "prescribed, more frequent": "", # offenbaren/German These distinctions are minor
-    "less frequent but not uncommon": "", #offenbaren/German
-    "predominant": "", # März/German: "normal"
-    "common but sometimes considered nonstandard": "common", # gebären/German
-    "more standard": "standard", # Lump/German
-    "more common in general usage": "common", # Lump/German
-    "rare outside": "regional", # Park/German
-    "nonstandard, rather rare": "nonstandard rare", # Lexikon/German
-    "prescribed": "literary", # brauchen/German
-    "always used in speech": "common", # brauchen/German
-    "common in writing": "common", # brauchen/German
-    "when issues of different sorts are involved": "different-sort", # Wahnsinnsding/German
-    "when issues of the same sort are involved": "same-sort", #Wahnsinnsding/German
-    "elevated": "honorific", # Land/German
-    "mostly only when written": "literary", # Steinmetz/German
-    "original but now less common": "archaic", # winken/German
-    "standard but rare in the vernacular": "literary", # fechten/German
-    "mostly found in": "regional", # Ehrenschutz/German
-    "unofficial": "colloquial", # kørsel/Danish, although fixed, one user did a lot of this in Danish.
-    "common in": "regional", # tread water/English
-    "careful style": "formal", # valutarsi/Italian
-    "less popular": "uncommon", # rivedere/Italian
-    "also when intransitive": "intransitive", # risuonare/Italian
-    "popular": "common", # sciogliere/Italian
-    "high-style": "formal", # riesumare/Italian
-    "more common": "common", # compiersi/Italian
-    "Latinate pronunciation": "hypercorrect", # perorare/Italian
-    
+    "alternatively in": "regional",  # Holzscheit/German
+    "nonstandard but common": "nonstandard common",  # Gedanke/German
+    "colloquial or archaic": ["colloquial", "archaic"],  # Undorn/German
+    "predominant when spoken": "colloquial",  # Gnom/German
+    "with a numeral": "with-numeral",  # Radlermaß/German
+    "not with a numeral": "without-numeral",  # Radlermaß/German
+    "alternatively when": "",  # Radlermaß/German,
+    "traditional/standard": "archaic standard",  # flecthen/German
+    "only in some senses": "uncommon",  # hero/English
+    "prescribed, more frequent": "",  # offenbaren/German These distinctions are minor
+    "less frequent but not uncommon": "",  #offenbaren/German
+    "predominant": "",  # März/German: "normal"
+    "common but sometimes considered nonstandard": "common",  # gebären/German
+    "more standard": "standard",  # Lump/German
+    "more common in general usage": "common",  # Lump/German
+    "rare outside": "regional",  # Park/German
+    "nonstandard, rather rare": "nonstandard rare",  # Lexikon/German
+    "prescribed": "literary",  # brauchen/German
+    "always used in speech": "common",  # brauchen/German
+    "common in writing": "common",  # brauchen/German
+    "when issues of different sorts are involved": "different-sort",  # Wahnsinnsding/German
+    "when issues of the same sort are involved": "same-sort",  #Wahnsinnsding/German
+    "elevated": "honorific",  # Land/German
+    "mostly only when written": "literary",  # Steinmetz/German
+    "original but now less common": "archaic",  # winken/German
+    "standard but rare in the vernacular": "literary",  # fechten/German
+    "mostly found in": "regional",  # Ehrenschutz/German
+    "unofficial": "colloquial",  # kørsel/Danish, although fixed, one user did a lot of this in Danish.
+    "common in": "regional",  # tread water/English
+    "careful style": "formal",  # valutarsi/Italian
+    "less popular": "uncommon",  # rivedere/Italian
+    "also when intransitive": "intransitive",  # risuonare/Italian
+    "popular": "common",  # sciogliere/Italian
+    "high-style": "formal",  # riesumare/Italian
+    "more common": "common",  # compiersi/Italian
+    "Latinate pronunciation": "hypercorrect",  # perorare/Italian
+    "medio-passive voice": "mediopassive",  # afrohet/Albanian
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -4830,7 +4830,7 @@ valid_tags = {
     "Hagfa-Pinyim": "detail",
     "Rōmaji": "detail",  # Used in Okinawan, Japanese? for Latin characters
     "Yale": "detail",   # used in Cantonese
-    "Guangdong-Romanization": "detail", # way of romanizing Cantonese, Teochew, Hakka and Hainanese
+    "Guangdong-Romanization": "detail",  # way of romanizing Cantonese, Teochew, Hakka and Hainanese
     "Wiktionary-specific": "detail",  # denotes the use of Wiktionary specific conventions in spelling etc.
     "internet-slang": "misc",
     "Jinmeiyō": "misc",  # Type of Kanji used for names
@@ -5831,16 +5831,20 @@ valid_tags = {
     "without-noun": "misc",
     "æ-tensing": "misc",
     "има": "misc",  # Distinguishes certain verb forms in Macedonian
-    "non-human": "misc", # XXX is there already a tag for this? himself/English - KJ
-    "with-article": "misc", # Mosambik/German
-    "before-noun": "misc", # Mama/German
-    "with-numeral": "with", # Radlermaß/German
-    "without-numeral": "misc", # Radlermaß/German
-    "same-sort": "number", # Wahnsinnsding/German
-    "different-sort": "number", # Wahnsinnsding/German
-    "sigmatic": "mood", # adiuvo/Latin
-    "dummy-column": "dummy", # in חֲתוּלָתִי‎/Hebrew, Isolated forms
-    "be-prefix": "misc", # laikytis/Lithuanian, multi-use prefix...
+    "non-human": "misc",  # XXX is there already a tag for this? himself/English - KJ
+    "with-article": "misc",  # Mosambik/German
+    "before-noun": "misc",  # Mama/German
+    "with-numeral": "with",  # Radlermaß/German
+    "without-numeral": "misc",  # Radlermaß/German
+    "same-sort": "number",  # Wahnsinnsding/German
+    "different-sort": "number",  # Wahnsinnsding/German
+    "sigmatic": "mood",  # adiuvo/Latin
+    "dummy-column": "dummy",  # in חֲתוּלָתִי‎/Hebrew, Isolated forms
+    "be-prefix": "misc",  # laikytis/Lithuanian, multi-use prefix...
+    "Japanese": "script",  # also script, 弧/translingual, stroke count stuff
+    "l-participle": "non-finite",  # доврне/Macedonian
+    "privative": "mood",  # afrohet/Albanian
+
 }
 
 for k, v in valid_tags.items():
