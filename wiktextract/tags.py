@@ -4437,6 +4437,7 @@ xlat_tags_map = {
     "more common": "common",  # compiersi/Italian
     "Latinate pronunciation": "hypercorrect",  # perorare/Italian
     "medio-passive voice": "mediopassive",  # afrohet/Albanian
+    # ~ "comparative of": "comparative-of"  # miður/Icelandic
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -5844,7 +5845,9 @@ valid_tags = {
     "Japanese": "script",  # also script, 弧/translingual, stroke count stuff
     "l-participle": "non-finite",  # доврне/Macedonian
     "privative": "mood",  # afrohet/Albanian
-
+    # ~ "comparative-of": "degree",  # miður/Icelandic
+    "xemxin-assimilation": "misc",  # lil/Maltese
+    "qamrin-unassimilation": "misc",
 }
 
 for k, v in valid_tags.items():

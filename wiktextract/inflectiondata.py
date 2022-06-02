@@ -2931,7 +2931,10 @@ infl_map = {
     "2ⁿᵈ person الْمُخَاطَب": "second-person",
     "3ʳᵈ person الْغَائِب": "third-person",
     "past (perfect) indicative الْمَاضِي": "past perfective indicative",
-    "non-past (imperfect) indicative الْمُضَارِع":
+    "non-past (imperfect) indicative الْمُضَارِع": # XXX remove me to check if I'm relevant
+    "non-past imperfective indicative",
+    # ^ This might have been changed in the wiktionary template:
+    "non-past (imperfect) indicative الْمُضَارِع الْمَرْفُوع": #x تراجع/Arabic
     "non-past imperfective indicative",
     "subjunctive الْمُضَارِع الْمَنْصُوب": "subjunctive",
     "jussive الْمُضَارِع الْمَجْزُوم": "jussive",
@@ -3667,7 +3670,7 @@ infl_map = {
         "lang": "Greek",
         "then": "passive perfect participle indeclinable",
     },
-    "Perfect participle ➤   ": {  # χαίρομαι/Greek
+    "Perfect participle ➤": {  # χαίρομαι/Greek
         "lang": "Greek",
         "then": "perfect participle indeclinable",
     },
@@ -3680,7 +3683,10 @@ infl_map = {
     "m·s": "masculine singular",  # καθείς/Greek
     "f·s": "feminine singular",
     "n·s": "neuter singular",
-    
+    "m·p": "masculine plural",  # αυτός/Greek
+    "f·p": "feminine plural",
+    "n·p": "neuter plural",
+        
     "Masc./Fem./Neut.": "masculine feminine neuter",  # mille/Latin
     "Reflexive third": "third-person reflexive",  # se/Latin
 
@@ -3764,12 +3770,12 @@ infl_map = {
     "male forms": "masculine",  # Dit/Albanian
     "female forms": "feminine",
     "Base form": {
-        "lang": ["Arabic", "Moroccan Arabic",],
+        "lang": ["Arabic", "Moroccan Arabic","Maltese",],
         "pos": "prep",
         "then": "stem",
     },
     "Personal-pronoun- including forms": {
-        "lang": ["Arabic", "Moroccan Arabic",],
+        "lang": ["Arabic", "Moroccan Arabic","Maltese",],
         "pos": "prep",
         "then": "",
     },
@@ -3780,6 +3786,55 @@ infl_map = {
         # ~ "then": "!",
     # ~ },
 
+    "common, neuter": {  # kaj/Serbo-Croatian
+        "lang": "Serbo-Croatian",
+        "then": "neuter",
+    },
+
+    "pres.​indep.​aff.": "present independent affirmative",  # bí/Irish
+    "pres.​dep.": "present dependent",
+    "pres.​neg.‡": "present negative",  # after ‡ starts working as a footnote
+                                       # character, remove it from here.
+    "pres.​hab.": "present habitual", 
+    "past hab.": "past habitual",
+    "past ind.": "past independent",
+    "past dep.": "past dependent",
+
+    "accusative form": "accusative",  # отец/Bulgarian
+    "basic suffix": "suffix",
+    "direct object suffix": "direct-object suffix",
+    "indirect object suffix": "indirect-object suffix",
+
+    "Xemxin": "xemxin-assimilation",  # lil/Maltese
+    "Qamrin": "qamrin-unassimilation",
+
+    "State": {
+        "lang": "Aramaic",
+        "pos": "noun",
+        "then": "*",
+    },
+
+    "Absolute": {  #x חקלא/Aramaic 
+        "lang": "Aramaic",
+        "pos": "noun",
+        "then": "absolute",
+    },
+    "Determined": {
+        "lang": "Aramaic",
+        "pos": "noun",
+        "then": "emphatic",
+    },
+    "emphatic": "emphatic",  #v דלתא/Aramaic
+
+    "3rd f": "third-person feminine",  #umpa/Scottish Gaelic
+    "Number": {  #umpa/Scottish Gaelic
+        "lang": "Scottish Gaelic",
+        "then": "*",
+    },
+    "Person": {  #umpa/Scottish Gaelic
+        "lang": "Scottish Gaelic",
+        "then": "*",
+    },
 }
 
 def check_tags(k, v):

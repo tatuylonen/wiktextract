@@ -63,6 +63,7 @@ title_contains_global_map = {
     "composed forms of": "multiword-construction",
     "subordinate-clause forms of": "subordinate-clause",
     "participles of": "participle",
+    "variation of": "dummy-skip-this",  #a'/Scottish Gaelic
 }
 for k, v in title_contains_global_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -1866,6 +1867,8 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                 table_tags.extend(more_table_tags)
                 ret.extend(extra_forms)
             continue  # Skip title rows without incrementing i
+        if "dummy-skip-this" in global_tags:
+            return []
         rowtags = [()]
         have_hdr = False
         have_text = False
