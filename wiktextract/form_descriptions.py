@@ -2351,6 +2351,9 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
                   "/",
                   "…",  # alternative to "..."
                   "⁻",  # superscript -, used in some Cantonese roman, e.g. "we"
+                  "ʔ",
+                  "ʼ",
+                  "ʾ",
                   "ʹ"):  # ʹ e.g. in understand/English/verb Russian transl
             classes1.append("OK")
             continue

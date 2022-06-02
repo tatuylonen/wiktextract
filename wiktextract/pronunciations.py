@@ -385,6 +385,7 @@ def parse_pronunciation(ctx, config, node, data, sense_data, pos_data, etym_data
     # Add data that was collected in template_fn
     if audios:
         for audio in audios:
+            print(audio)
             if "audio" in audio:
                 # Compute audio file URLs
                 fn = audio["audio"]
