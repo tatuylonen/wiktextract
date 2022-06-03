@@ -4686,6 +4686,7 @@ alt_of_tags = set([
     "proscribed",
     "standard",
     "uppercase",
+    "unabbreviation",  # jku/Finnish
 ])
 
 # Valid tag categories / attributes.  These map to sort precedence, with
@@ -5848,6 +5849,10 @@ valid_tags = {
     # ~ "comparative-of": "degree",  # miður/Icelandic
     "xemxin-assimilation": "misc",  # lil/Maltese
     "qamrin-unassimilation": "misc",
+    "with-conjunction": "with",  # thathar/Scottish Gaelic
+    "with-pronoun": "with",  # thathar/Scottish Gaelic
+    "unabbreviation": "mod",  # jku/Finnish
+    
 }
 
 for k, v in valid_tags.items():

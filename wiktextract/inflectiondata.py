@@ -595,7 +595,19 @@ infl_map = {
         "if": "first-person singular",
         "then": "first-person singular",
     },
+    "mini / mine": {  # escu/Aromanian
+        "lang": "Aromanian",
+        "pos": "verb",
+        "if": "first-person singular",
+        "then": "first-person singular",
+    },
     "tu/tini/tine": {
+        "lang": "Aromanian",
+        "pos": "verb",
+        "if": "second-person singular",
+        "then": "second-person singular",
+    },
+    "tini / tine": {  # escu/Aromanian
         "lang": "Aromanian",
         "pos": "verb",
         "if": "second-person singular",
@@ -606,6 +618,18 @@ infl_map = {
         "pos": "verb",
         "if": "third-person plural",
         "then": "third-person plural",
+    },
+    "nãsh, nãse / nãsi, elj, eali": {
+        "lang": "Aromanian",
+        "pos": "verb",
+        "if": "third-person plural",
+        "then": "third-person plural",
+    },
+    "nãs, nãsã / nãsa, el, ea": {
+        "lang": "Aromanian",
+        "pos": "verb",
+        "if": "third-person singular",
+        "then": "third-person singular",
     },
     "eiu": {
         "lang": "Corsican",
@@ -3398,7 +3422,7 @@ infl_map = {
         "lang": "Hebrew",
         "if": "possessed-form",
         "then": "possessive-feminine possessive-single",
-        "else": "masculine singular",
+        "else": "feminine singular"
     },
     "feminine plural": {
         "lang": "Hebrew",
@@ -3770,14 +3794,14 @@ infl_map = {
     "male forms": "masculine",  # Dit/Albanian
     "female forms": "feminine",
     "Base form": {
-        "lang": ["Arabic", "Moroccan Arabic","Maltese",],
+        "lang": ["Arabic", "Moroccan Arabic","Maltese","Gulf Arabic",],
         "pos": "prep",
         "then": "stem",
     },
     "Personal-pronoun- including forms": {
-        "lang": ["Arabic", "Moroccan Arabic","Maltese",],
+        "lang": ["Arabic", "Moroccan Arabic","Maltese","Gulf Arabic",],
         "pos": "prep",
-        "then": "",
+        "then": "!",
     },
     # ~ "singular": {
         # ~ "lang": ["Arabic", "Moroccan Arabic",],
@@ -3835,6 +3859,43 @@ infl_map = {
         "lang": "Scottish Gaelic",
         "then": "*",
     },
+
+    "Third person f": "third-person feminine",  # an/Scottish Gaelic
+    "First sg": "first-person singular",  # an/Scottish Gaelic
+    "Second sg": "second-person singular",
+    "Third sg m": "third-person singular masculine",
+    "Third sg f": "third-person singular feminine",
+    "First pl": "first-person plural",
+    "Second pl": "second-person plural",
+    "Third pl": "third-person plural",
+    "Independent": "independent",
+    "Affirmative Interrogative": "affirmative interrogative",
+    "Negative Interrogative": "negative interrogative",
+    
+    "Affirmative interrogative": "affirmative interrogative",  # thathar/Scottish Gaelic
+    "Relative future": ["with-pronoun future", "with-conjunction future",],
+
+    "agent1, 3": "agent participle",  # puhkaa/Finnish
+
+    "Unabbreviated form": "unabbreviation alt-of",  # jku/Finnish
+    "Abbreviation": "abbreviation",
+
+    "nãs/nãsu, nãsã/nãsa, el/elu, ea": {
+        "lang": "Aromanian",
+        "if": "third-person singular",
+        "then": "third-person singular",
+    },
+
+    "Masculine,Feminine, Neuter": "masculine feminine neuter",
+    # tři/Czech, copy-pasted manual table without template...
+    "Present Sg": "present singular",  # skrýt/Czech
+    "Present Pl": "present plural",
+    "Future Sg": "future singular",
+    "Future Pl": "future plural",
+    "Past Sg": "past singular",
+    "Past Pl": "past plural",
+
+    "neuter singular": "neuter singular",  # ony/Czech
 }
 
 def check_tags(k, v):
