@@ -2750,6 +2750,9 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     titletext = titletext[:-1]
                 idx = celltext.find(": ")
                 is_title = False
+                cleaned_titletext = re.sub(r"\s+", " ",
+                                           re.sub(r"\s*\([^)]*\)", "",
+                                                  titletext)).strip()
                 if idx >= 0 and titletext[:idx] in infl_map:
                     target = titletext[idx + 2:].strip()
                     celltext = celltext[:idx]
@@ -2762,12 +2765,10 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                               x.attrs.get("lang") in ("az",)
                               for x in col.children)):
                     is_title = True
-                elif (re.sub(r"\s+", " ",
-                             re.sub(r"\s*\([^)]*\)", "",
-                                    titletext)).strip() in infl_map and
-                      titletext not in IGNORED_COLVALUES and
-                      distw([titletext], word) > 0.3 and
-                      titletext not in ("I", "es")):
+                elif (cleaned_titletext in infl_map and
+                      cleaned_titletext not in IGNORED_COLVALUES and
+                      distw([cleaned_titletext], word) > 0.3 and
+                      cleaned_titletext not in ("I", "es")):
                     is_title = True
                 elif (style == cellstyle and
                       titletext != word and
