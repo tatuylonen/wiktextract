@@ -22,7 +22,7 @@ from wiktextract.clean import clean_value
 
 
 # Set this to a word form to debug how that is analyzed, or None to disable
-debug_word = None
+debug_word = "ono"
 
 
 # Column texts that are interpreted as an empty column.
@@ -1848,7 +1848,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
         if (row[0].is_title and
             text and
             not is_superscript(text[0]) and
-            text not in infl_map and
+            text not in infl_map and  # zealous inflation map?
             (re.match(r"Inflection ", text) or
              re.sub(r"\s+", " ",
                     re.sub(r"\s*\([^)]*\)", "",
@@ -1930,7 +1930,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
 
                 # Expand header to tags
                 v = expand_header(ctx, word, lang, pos, text, [], silent=True)
-                # print("EXPANDED {!r} to {}".format(text, v))
+                print("EXPANDED {!r} to {}".format(text, v))
 
                 # Mark that the column has text (we are not at top)
                 while len(col_has_text) <= j:

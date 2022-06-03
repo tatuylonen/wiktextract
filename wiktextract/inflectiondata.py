@@ -3701,7 +3701,7 @@ infl_map = {
     #https://en.wikipedia.org/wiki/Nonfinite_verb#Modern_Greek
     "Nonfinite form ➤": {
         "lang": "Greek",
-        "then": "indeclinable aorist infinitive",
+        "then": "infinitive-aorist",
     },
 
     "m·s": "masculine singular",  # καθείς/Greek
