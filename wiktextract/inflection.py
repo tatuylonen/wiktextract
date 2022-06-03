@@ -1274,12 +1274,17 @@ def parse_title(title, source):
     return global_tags, table_tags, extra_forms
 
 
-def expand_header(ctx, word, lang, pos, text, tags0, silent=False):
+def expand_header(ctx, word, lang, pos, text, tags0, silent=False,
+                  ignore_tags=False):
     """Expands a cell header to tagset, handling conditional expressions
     in infl_map.  This returns list of tuples of tags, each list element
     describing an alternative interpretation.  ``tags0`` is combined
     column and row tags for the cell in which the text is being interpreted
-    (conditional expressions in inflection data may depend on it)."""
+    (conditional expressions in inflection data may depend on it).
+    If ``silent`` is True, then no warnings will be printed.  If ``ignore_tags``
+    is True, then tags listed in "if" will be ignored in the test (this is
+    used when trying to heuristically detect whether a non-<th> cell is anyway
+    a header)."""
     assert isinstance(ctx, Wtp)
     assert isinstance(word, str)
     assert isinstance(lang, str)
@@ -1365,10 +1370,11 @@ def expand_header(ctx, word, lang, pos, text, tags0, silent=False):
         # if ``tags0`` contains all of the listed tags.  If the condition
         # is of the form "any: ...tags...", then any of the tags will be
         # enough.
-        if cond and "if" in v:
+        if cond and "if" in v and not ignore_tags:
             c = v["if"]
             assert isinstance(c, str)
-            # "if" condition is true if any of the listed tags is present
+            # "if" condition is true if any of the listed tags is present if
+            # it starts with "any:", otherwise all must be present
             if c.startswith("any: "):
                 cond = any(t in tags0 for t in c[5:].split())
             else:
@@ -2078,6 +2084,12 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
             if any("dummy-skip-this" in ts for ts in rowtags):
                 continue  # Skip this cell
 
+            # If the word has no rowtags and is a multi-row cell, then
+            # ignore this.  This happens with empty separator rows
+            # within a rowspan>1 cell.  cf. wander/English/Conjugation.
+            if rowtags == [()] and rowspan > 1:
+                continue
+
             # Minor cleanup.  See e.g. είμαι/Greek/Verb present participle.
             col = re.sub(r"\s+➤\s*$", "", col)
 
@@ -2753,6 +2765,16 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 cleaned_titletext = re.sub(r"\s+", " ",
                                            re.sub(r"\s*\([^)]*\)", "",
                                                   titletext)).strip()
+                cleaned, _, _, _ = clean_header(word, celltext, False)
+                cleaned = re.sub(r"\s+", " ", cleaned)
+                hdr_expansion = expand_header(ctx, word, lang, pos, cleaned, [],
+                                              silent=True, ignore_tags=True)
+                candidate_hdr = (not any(any(t.startswith("error-") for t in ts)
+                                         for ts in hdr_expansion))
+                #print("titletext={!r} hdr_expansion={!r} candidate_hdr={!r} "
+                #      "lang={} pos={}"
+                #      .format(titletext, hdr_expansion, candidate_hdr,
+                #              lang, pos))
                 if idx >= 0 and titletext[:idx] in infl_map:
                     target = titletext[idx + 2:].strip()
                     celltext = celltext[:idx]
@@ -2765,7 +2787,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                               x.attrs.get("lang") in ("az",)
                               for x in col.children)):
                     is_title = True
-                elif (cleaned_titletext in infl_map and
+                elif (candidate_hdr and
                       cleaned_titletext not in IGNORED_COLVALUES and
                       distw([cleaned_titletext], word) > 0.3 and
                       cleaned_titletext not in ("I", "es")):
@@ -2787,11 +2809,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 if is_title:
                     while len(cols_headered) <= len(row):
                         cols_headered.append(False)
-                    cleaned, _, _, _ = clean_header(word, celltext, False)
-                    cleaned = re.sub(r"\s+", " ", cleaned)
-                    v = expand_header(ctx, word, lang, pos, cleaned, [],
-                                      silent=True)
-                    if any("*" in tt for tt in v):
+                    if any("*" in tt for tt in hdr_expansion):
                         cols_headered[len(row)] = True
                         celltext = ""
                 have_nonempty |= is_title or celltext != ""
