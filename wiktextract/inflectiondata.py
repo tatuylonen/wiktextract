@@ -1655,84 +1655,325 @@ infl_map = {
         "if": "third-person plural",
         "then": "third-person plural",
     },
-    # XXX clean up the following
-    "vossìa": {"if": "third-person singular", "then": ""},
-    "deo eo": {"if": "first-person singular", "then": ""},
-    "tue": {"if": "second-person singular", "then": ""},
-    "issu/issa/isse": {"if": "third-person singular", "then": ""},
-    "nois": {"if": "first-person plural", "then": ""},
-    "bois": {"if": "second-person plural", "then": ""},
-    "issos/issas": {"if": "third-person plural", "then": ""},
-    "chi deo chi eo": {"if": "first-person singular", "then": ""},
-    "chi tue": {"if": "second-person singular", "then": ""},
-    "chi issu/issa/isse": {"if": "third-person singular", "then": ""},
-    "chi nois": {"if": "first-person plural", "then": ""},
-    "chi bois": {"if": "second-person plural", "then": ""},
-    "chi issos/issas": {"if": "third-person plural", "then": ""},
-    "dego deo": {"if": "first-person singular", "then": ""},
-    "issu/issa": {"if": "third-person singular", "then": ""},
-    "chi dego chi deo": {"if": "first-person singular", "then": ""},
-    "chi issu/issa": {"if": "third-person singular", "then": ""},
-    "ieu": {"if": "first-person singular", "then": ""},
-    "el": {"if": "third-person singular", "then": ""},
-    "nosautres": {"if": "first-person plural", "then": ""},
-    "vosautres": {"if": "second-person plural", "then": ""},
-    "eles": {"if": "third-person plural", "then": ""},
-    "que ieu": {"if": "first-person singular", "then": ""},
-    "que el": {"if": "third-person singular", "then": ""},
-    "que nosautres": {"if": "first-person plural", "then": ""},
-    "que vosautres": {"if": "second-person plural", "then": ""},
-    "que eles": {"if": "third-person plural", "then": ""},
-    "аз": {"if": "first-person singular", "then": ""},
-    "ти": {"if": "second-person singular", "then": ""},
-    "той/тя/то": {"if": "third-person singular", "then": ""},
-    "ние": {"if": "first-person plural", "then": ""},
-    "вие": {"if": "second-person plural", "then": ""},
-    "те": {"if": "third-person plural", "then": ""},
-    "jūs": {"if": "second-person plural", "then": ""},
-    "viņš, viņa": {"if": "third-person singular", "then": ""},
-    "viņi, viņas": {"if": "third-person plural", "then": ""},
-    "el / ela / Vde.": {"if": "singular third-person", "then": ""},
-    "vós": {"if": "plural second-person", "then": ""},
-    "eles / elas / Vdes.": {"if": "plural third-person", "then": ""},
-    "Vde.": {"if": "singular third-person", "then": "formal"},
-    "Vdes.": {"if": "plural third-person", "then": "formal"},
-    "ⲛ̄ⲧⲟⲕ": {"if": "second-person singular masculine", "then": ""},
-    "ⲛ̄ⲧⲟ": {"if": "second-person singular feminine", "then": ""},
-    "ⲛ̄ⲧⲟϥ": {"if": "third-person singular masculine", "then": ""},
-    "ⲛ̄ⲧⲟⲥ": {"if": "third-person singular feminine", "then": ""},
-    "ⲛ̄ⲧⲱⲧⲛ̄": {"if": "second-person plural", "then": ""},
-    "ⲛ̄ⲧⲟⲟⲩ": {"if": "third-person plural", "then": ""},
-    "მე": {"if": "first-person singular", "then": ""},
-    "შენ": {"if": "second-person singular", "then": ""},
-    "ის": {"if": "third-person singular", "then": ""},
-    "ჩვენ": {"if": "first-person plural", "then": ""},
-    "თქვენ": {"if": "second-person plural", "then": ""},
-    "ისინი": {"if": "third-person plural", "then": ""},
-    "ⲛ̀ⲑⲟⲕ": {"if": "second-person singular masculine", "then": ""},
-    "ⲛ̀ⲑⲟ": {"if": "second-person singular feminine", "then": ""},
-    "ⲛ̀ⲑⲟϥ": {"if": "third-person singular masculine", "then": ""},
-    "ⲛ̀ⲑⲟⲥ": {"if": "third-person singular feminine", "then": ""},
-    "ⲛ̀ⲑⲱⲧⲉⲛ": {"if": "second-person plural", "then": ""},
-    "ⲛ̀ⲑⲱⲟⲩ": {"if": "third-person plural", "then": ""},
-    "ñuqa": {"if": "first-person singular", "then": ""},
-    "qam": {"if": "second-person singular", "then": ""},
-    "pay": {"if": "third-person singular", "then": ""},
-    "ñuqanchik": {"if": "first-person plural inclusive", "then": ""},
-    "ñuqayku": {"if": "first-person plural exclusive", "then": ""},
-    "qamkuna": {"if": "second-person plural", "then": ""},
-    "paykuna": {"if": "third-person plural", "then": ""},
-    "unë": {"if": "first-person singular", "then": ""},
-    "ai/ajo": {"if": "third-person singular", "then": ""},
-    "ne": {"if": "first-person plural", "then": ""},
-    "ju": {"if": "second-person plural", "then": ""},
-    "ata/ato": {"if": "third-person plural", "then": ""},
-    "ես": {"if": "first-person singular", "then": ""},
-    "դու": {"if": "second-person singular", "then": ""},
-    "նա": {"if": "third-person singular", "then": ""},
-    "մենք": {"if": "first-person plural", "then": ""},
-    "դուք": {"if": "second-person plural", "then": ""},
-    "նրանք": {"if": "third-person plural", "then": ""},
+    "vossìa": {
+        "lang": "Sicilian",
+        "if": "third-person singular",
+        "then": ""},
+
+    "deo eo": {
+        "lang": "Sardinian",
+        "if": "first-person singular",
+        "then": ""},
+    "tue": {
+        "lang": "Sardinian",
+        "if": "second-person singular",
+        "then": ""},
+    "issu/issa/isse": {
+        "lang": "Sardinian",
+        "if": "third-person singular",
+        "then": ""},
+    "nois": {
+        "lang": "Sardinian",
+        "if": "first-person plural",
+        "then": ""},
+    "bois": {
+        "lang": "Sardinian",
+        "if": "second-person plural",
+        "then": ""},
+    "issos/issas": {
+        "lang": "Sardinian",
+        "if": "third-person plural",
+        "then": ""},
+    "chi deo chi eo": {
+        "lang": "Sardinian",
+        "if": "first-person singular",
+        "then": ""},
+    "chi tue": {
+        "lang": "Sardinian",
+        "if": "second-person singular",
+        "then": ""},
+    "chi issu/issa/isse": {
+        "lang": "Sardinian",
+        "if": "third-person singular",
+        "then": ""},
+    "chi nois": {
+        "lang": "Sardinian",
+        "if": "first-person plural",
+        "then": ""},
+    "chi bois": {
+        "lang": "Sardinian",
+        "if": "second-person plural",
+        "then": ""},
+    "chi issos/issas": {
+        "lang": "Sardinian",
+        "if": "third-person plural",
+        "then": ""},
+    "dego deo": {
+        "lang": "Sardinian",
+        "if": "first-person singular",
+        "then": ""},
+    "issu/issa": {
+        "lang": "Sardinian",
+        "if": "third-person singular",
+        "then": ""},
+    "chi dego chi deo": {
+        "lang": "Sardinian",
+        "if": "first-person singular",
+        "then": ""},
+    "chi issu/issa": {
+        "lang": "Sardinian",
+        "if": "third-person singular",
+        "then": ""},
+
+    "ieu": {
+        "lang": "Occitan",
+        "if": "first-person singular",
+        "then": ""},
+    "el": {
+        "lang": "Occitan",
+        "if": "third-person singular",
+        "then": ""},
+    "nosautres": {
+        "lang": "Occitan",
+        "if": "first-person plural",
+        "then": ""},
+    "vosautres": {
+        "lang": "Occitan",
+        "if": "second-person plural",
+        "then": ""},
+    "eles": {
+        "lang": "Occitan",
+        "if": "third-person plural",
+        "then": ""},
+    "que ieu": {
+        "lang": "Occitan",
+        "if": "first-person singular",
+        "then": ""},
+    "que el": {
+        "lang": "Occitan",
+        "if": "third-person singular",
+        "then": ""},
+    "que nosautres": {
+        "lang": "Occitan",
+        "if": "first-person plural",
+        "then": ""},
+    "que vosautres": {
+        "lang": "Occitan",
+        "if": "second-person plural",
+        "then": ""},
+    "que eles": {
+        "lang": "Occitan",
+        "if": "third-person plural",
+        "then": ""},
+    
+    "аз": {
+        "lang": "Bulgarian",
+        "if": "first-person singular",
+        "then": ""},
+    "ти": {
+        "lang": "Bulgarian",
+        "if": "second-person singular",
+        "then": ""},
+    "той/тя/то": {
+        "lang": "Bulgarian",
+        "if": "third-person singular",
+        "then": ""},
+    "ние": {
+        "lang": "Bulgarian",
+        "if": "first-person plural",
+        "then": ""},
+    "вие": {
+        "lang": "Bulgarian",
+        "if": "second-person plural",
+        "then": ""},
+    "те": {
+        "lang": "Bulgarian",
+        "if": "third-person plural",
+        "then": ""},
+
+    "jūs": {
+        "lang": ["Lithuanian", "Latvian",],
+        "if": "second-person plural",
+        "then": ""},
+    "viņš, viņa": {
+        "lang": "Latvian",
+        "if": "third-person singular",
+        "then": ""},
+    "viņi, viņas": {
+        "lang": "Latvian",
+        "if": "third-person plural",
+        "then": ""},
+
+    "el / ela / Vde.": {
+        "lang": "Galician",
+        "if": "singular third-person",
+        "then": ""},
+    "vós": {
+        "lang": "Galician",
+        "if": "plural second-person",
+        "then": ""},
+    "eles / elas / Vdes.": {
+        "lang": "Galician",
+        "if": "plural third-person",
+        "then": ""},
+    "Vde.": {
+        "lang": "Galician",
+        "if": "singular third-person",
+        "then": "formal"},
+    "Vdes.": {
+        "lang": "Galician",
+        "if": "plural third-person",
+        "then": "formal"},
+
+    "ⲛ̄ⲧⲟⲕ": {
+        "lang": "Coptic",
+        "if": "second-person singular masculine",
+        "then": ""},
+    "ⲛ̄ⲧⲟ": {
+        "lang": "Coptic",
+        "if": "second-person singular feminine",
+        "then": ""},
+    "ⲛ̄ⲧⲟϥ": {
+    "lang": "Coptic",
+        "if": "third-person singular masculine", 
+        "then": ""},
+    "ⲛ̄ⲧⲟⲥ": {
+        "lang": "Coptic", 
+        "if": "third-person singular feminine", 
+        "then": ""},
+    "ⲛ̄ⲧⲱⲧⲛ̄": {
+        "lang": "Coptic", 
+        "if": "second-person plural", 
+        "then": ""},
+    "ⲛ̄ⲧⲟⲟⲩ": {
+        "lang": "Coptic", 
+        "if": "third-person plural", 
+        "then": ""},
+    "ⲛ̀ⲑⲟⲕ": {
+        "lang": "Coptic", 
+        "if": "second-person singular masculine", 
+        "then": ""},
+    "ⲛ̀ⲑⲟ": {
+        "lang": "Coptic", 
+        "if": "second-person singular feminine", 
+        "then": ""},
+    "ⲛ̀ⲑⲟϥ": {
+        "lang": "Coptic", 
+        "if": "third-person singular masculine", 
+        "then": ""},
+    "ⲛ̀ⲑⲟⲥ": {
+        "lang": "Coptic", 
+        "if": "third-person singular feminine", 
+        "then": ""},
+    "ⲛ̀ⲑⲱⲧⲉⲛ": {
+        "lang": "Coptic", 
+        "if": "second-person plural", 
+        "then": ""},
+    "ⲛ̀ⲑⲱⲟⲩ": {
+        "lang": "Coptic", 
+        "if": "third-person plural", 
+        "then": ""},
+
+    "მე": {
+        "lang": "Georgian", 
+        "if": "first-person singular", 
+        "then": ""},
+    "შენ": {
+        "lang": "Georgian", 
+        "if": "second-person singular", 
+        "then": ""},
+    "ის": {
+        "lang": "Georgian", 
+        "if": "third-person singular", 
+        "then": ""},
+    "ჩვენ": {
+        "lang": "Georgian", 
+        "if": "first-person plural", 
+        "then": ""},
+    "თქვენ": {
+        "lang": "Georgian", 
+        "if": "second-person plural", 
+        "then": ""},
+    "ისინი": {
+        "lang": "Georgian", 
+        "if": "third-person plural", 
+        "then": ""},
+
+    "ñuqa": {
+        "lang": "Quechua", 
+        "if": "first-person singular", 
+        "then": ""},
+    "qam": {
+        "lang": "Quechua", 
+        "if": "second-person singular", 
+        "then": ""},
+    "pay": {
+        "lang": "Quechua", 
+        "if": "third-person singular", 
+        "then": ""},
+    "ñuqanchik": {
+        "lang": "Quechua", 
+        "if": "first-person plural inclusive", 
+        "then": ""},
+    "ñuqayku": {
+        "lang": "Quechua", 
+        "if": "first-person plural exclusive", 
+        "then": ""},
+    "qamkuna": {
+        "lang": "Quechua", 
+        "if": "second-person plural", 
+        "then": ""},
+    "paykuna": {
+        "lang": "Quechua", 
+        "if": "third-person plural", 
+        "then": ""},
+
+    "unë": {
+        "lang": "Albanian", 
+        "if": "first-person singular", 
+        "then": ""},
+    "ai/ajo": {
+        "lang": "Albanian", 
+        "if": "third-person singular", 
+        "then": ""},
+    "ne": {
+        "lang": "Albanian", 
+        "if": "first-person plural", 
+        "then": ""},
+    "ju": {
+        "lang": "Albanian", 
+        "if": "second-person plural", 
+        "then": ""},
+    "ata/ato": {
+        "lang": "Albanian", 
+        "if": "third-person plural", 
+        "then": ""},
+
+    "ես": {
+        "lang": "Armenian", 
+        "if": "first-person singular", 
+        "then": ""},
+    "դու": {
+        "lang": "Armenian", 
+        "if": "second-person singular", 
+        "then": ""},
+    "նա": {
+        "lang": "Armenian", 
+        "if": "third-person singular", 
+        "then": ""},
+    "մենք": {
+        "lang": "Armenian", 
+        "if": "first-person plural", 
+        "then": ""},
+    "դուք": {
+        "lang": "Armenian", 
+        "if": "second-person plural", 
+        "then": ""},
+    "նրանք": {
+        "lang": "Armenian", 
+        "if": "third-person plural", 
+        "then": ""},
+    
     "verbal nouns": "noun-from-verb",
     "supine": "supine",
     "past historic": "past historic",
