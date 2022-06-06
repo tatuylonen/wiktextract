@@ -10,4 +10,4 @@ temp
 pages
 .coverage*
 kj-wiktwords.sh
-
+tmp/

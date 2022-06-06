@@ -4398,7 +4398,7 @@ xlat_tags_map = {
     "mostly only when written": "literary",  # Magnet/German
     "rarer": "rare",  # verbleichen/German
     "southern Germany": "Southern-Germany",  # Holzscheit/German
-    "alternatively in the meaning of": "uncommon",  # abbondare/Italian
+    "alternatively in the meaning": "uncommon",  # abbondare/Italian
     #XXX "for-subsense" or similar needs a tag or parsing    
     "alternatively in": "regional",  # Holzscheit/German
     "nonstandard but common": "nonstandard common",  # Gedanke/German

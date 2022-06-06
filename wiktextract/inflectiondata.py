@@ -3400,7 +3400,8 @@ infl_map = {
         "then": "*",
     },
     "Person": {
-        "lang": "Hebrew",
+        "lang": ["Hebrew", "Scottish Gaelic", "Old Irish",],
+        # umpa/Scottish Gaelic, la/Old Irish
         "then": "*",
     },
     "masculine singular": {
@@ -3855,10 +3856,6 @@ infl_map = {
         "lang": "Scottish Gaelic",
         "then": "*",
     },
-    "Person": {  #umpa/Scottish Gaelic
-        "lang": "Scottish Gaelic",
-        "then": "*",
-    },
 
     "Third person f": "third-person feminine",  # an/Scottish Gaelic
     "First sg": "first-person singular",  # an/Scottish Gaelic
@@ -3896,6 +3893,21 @@ infl_map = {
     "Past Pl": "past plural",
 
     "neuter singular": "neuter singular",  # ony/Czech
+
+    # dar éisi/Old Irish, la/Old Irish
+    "3d sing. masc./neut., accusative":
+        "third-person singular masculine neuter accusative",
+    "3d sing. masc./neut., dative":
+        "third-person singular masculine neuter dative",
+    "3d sing. fem., accusative":
+        "third-person singular feminine accusative",
+    "3d sing. fem., dative":
+        "third-person singular feminine dative",
+    "3d person pl., dative":
+        "third-person plural dative",
+    "3d person pl., accusative":
+        "third-person plural accusative",
+    
 }
 
 def check_tags(k, v):
