@@ -4437,7 +4437,9 @@ xlat_tags_map = {
     "more common": "common",  # compiersi/Italian
     "Latinate pronunciation": "hypercorrect",  # perorare/Italian
     "medio-passive voice": "mediopassive",  # afrohet/Albanian
-    # ~ "comparative of": "comparative-of"  # miður/Icelandic
+    # ~ "comparative of": "comparative-of",  # miður/Icelandic
+    "subst.": "noun",
+    
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -5852,7 +5854,7 @@ valid_tags = {
     "with-conjunction": "with",  # thathar/Scottish Gaelic
     "with-pronoun": "with",  # thathar/Scottish Gaelic
     "unabbreviation": "mod",  # jku/Finnish
-    
+    "long-construct": "misc",  #a ذو الحجة/Arabic
 }
 
 for k, v in valid_tags.items():

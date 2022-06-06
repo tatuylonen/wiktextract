@@ -334,7 +334,10 @@ infl_map = {
     "Dual": "dual",
     "indicative": "indicative",
     "subjunctive": "subjunctive",
-    "person": "",  # Needs to be empty for mówić/Polish
+    "person": {
+        "lang": "Polish",
+        "then": "",  # Needs to be empty for mówić/Polish
+    },
     "Forms with the definite article": "definite",
     "Forms with the definite article:": "definite",
     "indefinite articulation": "indefinite",
@@ -356,8 +359,12 @@ infl_map = {
     "infinitives": "infinitive",
     "conditional": "conditional",
     "pluperfect": "pluperfect",
+
+    # XXX These need to be better structured, but I don't know where these
+    # are from
     "Bare forms": "indefinite",
     "Bare forms:": "",
+
     "past": "past",
     "1st": {
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
@@ -4148,7 +4155,37 @@ infl_map = {
         "third-person plural dative",
     "3d person pl., accusative":
         "third-person plural accusative",
-    
+
+    "nominative-accusative": "nominative accusative", #stand/Nynorsk
+    "compound-genitive": "in-compounds genitive",
+
+    "broken plural triptote in ـَة (-a)": {  #a رصيد/Arabic
+        "lang": "Arabic",
+        "then": "broken-plural triptote-a",
+    },
+    "sound feminine plural‎; basic broken plural triptote": {  #a حجرة/Arabic
+        "lang": "Arabic",
+        "then": ["sound-feminine-plural",
+                 "broken-plural triptote",],
+    },
+
+    "singular long construct": {  #a ذو الحجة/Arabic
+        "lang": "Arabic",
+        "then": "long-construct singular",
+    },
+    "singulative triptote in ـَة (-a)": {  #a مرخ/Arabic
+        "lang": "Arabic",
+        "then": "singulative triptote-a",
+    },
+    #a ميت/Arabic
+    "sound masculine plural‎; basic broken plural triptote‎; broken plural invariable": {
+        "lang": "Arabic",
+        "then": ["sound-masculine-plural",
+                 "broken-plural triptote",
+                 "broken-plural invariable",
+                ],
+    },
+                
 }
 
 def check_tags(k, v):
