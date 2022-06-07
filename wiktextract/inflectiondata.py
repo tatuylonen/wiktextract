@@ -423,7 +423,11 @@ infl_map = {
     "I": {
          "lang": LANGS_WITH_NUMBERED_INFINITIVES,
          "if": "infinitive",
-          "then": "infinitive-i",
+         "then": "infinitive-i",
+         "else": {
+            "lang": "Czech",  # podnikat/Czech
+            "then": "first-person singular",
+          },
     },
     "long I": {
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
@@ -1140,67 +1144,67 @@ infl_map = {
 
     "je (j’)": {
         "lang": "French",
-        "pos": "verb",
+        "pos": ["verb", "suffix",],
         "if": "first-person singular",
         "then": "first-person singular",
     },
     "il, elle": {
         "lang": ["French", "Middle French"],
-        "pos": "verb",
+        "pos": ["verb", "suffix",],
         "if": "third-person singular",
         "then": "third-person singular",
     },
     "nous": {
         "lang": ["French", "Middle French"],
-        "pos": "verb",
+        "pos": ["verb", "suffix",],
         "if": "first-person plural",
         "then": "first-person plural",
     },
     "vous": {
         "lang": ["French", "Middle French"],
-        "pos": "verb",
+        "pos": ["verb", "suffix",],
         "if": "second-person plural",
         "then": "second-person plural",
     },
     "ils, elles": {
         "lang": "French",
-        "pos": "verb",
+        "pos": ["verb", "suffix",],
         "if": "third-person plural",
         "then": "third-person plural",
     },
     "que je (j’)": {
         "lang": "French",
-        "pos": "verb",
+        "pos": ["verb", "suffix",],
         "if": "first-person singular",
         "then": "first-person singular",
     },
     "que tu": {
         "lang": ["French", "Middle French", "Old French"],
-        "pos": "verb",
+        "pos": ["verb", "suffix",],
         "if": "second-person singular",
         "then": "second-person singular",
     },
     "qu’il, qu’elle": {
         "lang": ["French", "Middle French"],
-        "pos": "verb",
+        "pos": ["verb", "suffix",],
         "if": "third-person singular",
         "then": "third-person singular",
     },
     "que nous": {
         "lang": ["French", "Middle French"],
-        "pos": "verb",
+        "pos": ["verb", "suffix",],
         "if": "first-person plural",
         "then": "first-person plural",
     },
     "que vous": {
         "lang": ["French", "Middle French"],
-        "pos": "verb",
+        "pos": ["verb", "suffix",],
         "if": "second-person plural",
         "then": "second-person plural",
     },
     "qu’ils, qu’elles": {
         "lang": ["French", "Middle French"],
-        "pos": "verb",
+        "pos": ["verb", "suffix",],
         "if": "third-person plural",
         "then": "third-person plural",
     },
@@ -2248,7 +2252,6 @@ infl_map = {
     "Habituals": "habitual",
     "n gender": "neuter",
     "Feminine singular": "feminine singular",
-    "Affix": "affix",
     "Root word": "root",
     "Trigger": "",  # XXX Tagalog ['-sagutan']
     "Aspect": "",
@@ -4185,7 +4188,137 @@ infl_map = {
                  "broken-plural invariable",
                 ],
     },
-                
+    "basic broken plural diptote‎; sound feminine plural": {  #a منام/Arabic
+        "lang": "Arabic",
+        "then": ["sound-feminine-plural",
+                 "broken-plural diptote",],
+    },
+    "basic broken plural triptote‎; sound feminine plural": {  #a ترعة/Arabic
+        "lang": "Arabic",
+        "then": ["sound-feminine-plural",
+                 "broken-plural triptote",],
+    },
+    "singular in ـًى (-an)": "singular",  #a مدى/Arabic
+    "singulative triptote in ـَة (-a)": "singulative triptote-a",  #a جثجاث/Arabic
+    "singular triptote in ـَة (-a)": "singular triptote-a",  #a حاجة/Arabic
+    #a بين/Arabic
+    "sound masculine plural‎; basic broken plural diptote‎; basic broken plural triptote":
+        ["sound-masculine-plural",
+         "broken-plural diptote",
+         "broken-plural triptote",],
+    
+    
+    "Common": {
+        "lang": "Arabic",
+        "then": "common-gender",
+    },
+    
+    # ~ "Affix": {
+        # ~ "lang": "Tagalog",
+        # ~ "then": "$",
+        # ~ "else": "affix",
+    # ~ },
+    "Affix": "affix",
+
+    # podnikat/Czech
+    "you (singular)": "second-person singular",
+    "you (polite)": "second-person singular formal",
+    "he/she/it": "third-person singular",
+    "we": {
+        "lang": "Czech",
+        "then": "first-person plural",
+    },
+    "you (plural)": "second-person plural",
+    "they": {
+        "lang": "Czech",
+        "then": "third-person plural",
+    },
+    "Active (Perfect)": "active participle",
+    "Masculine, feminine, neuter": "masculine feminine neuter",  # čtyři/Czech
+    
+    "participle (a7)": "participle",  # hylja/Faroese
+    "participle (a8)": "participle",  # lagt/Faroese
+    "participle (a34)": "participle",  # falla/Faroese
+    "participle (a27)": "participle",  # kvøða/Faroese
+    "participle (a18/a6)": "participle",  # skreiða/Faroese
+    "participle (a18)": "participle",  # ýa/Faroese
+
+    # síggjast/Faroese
+    "eg": {
+        "lang": "Faroese",
+        "then": "first-person singular",
+    },
+    "hann/hon/tað": "third-person singular",
+    "vit, tit, teir/tær/tey": "plural",
+    "mediopassive": "mediopassive",
+
+    "imperfect (indicative/subjunctive)/conditional": {  #de-glicio/Welsh
+        "lang": "Welsh",
+        "then": ["imperfect indicative", "conditional"],
+    },
+    "imperfect indicative/conditional": {  #gwneud/Welsh
+        "lang": "Welsh",
+        "then": ["imperfect indicative", "conditional"],
+    },
+    "present/future": {  # darganfod/Welsh
+        "lang": "Welsh",
+        "then": ["present indicative", "future indicative"],
+    },
+    "imperfect/conditional": {  # darganfod/Welsh
+        "lang": "Welsh",
+        "then": ["imperfect indicative", "conditional"],
+    },
+    "future/present habitual": {  # adnabod/Welsh
+        "lang": "Welsh",
+        "then": ["future habitual", "present habitual"],
+    },
+
+    # ϧⲉⲣϧⲉⲣ/Coptic
+    # Bohairic
+    "ⲁⲛⲟⲕ": "first-person singular",
+    "ⲛ̀ⲑⲟⲕ": "second-person singular masculine",
+    "ⲛ̀ⲑⲟ": "second-person singular feminine",
+    "ⲛ̀ⲑⲟϥ": "third-person singular masculine",
+    "ⲛ̀ⲑⲟⲥ": "third-person singular feminine",
+    "ⲁⲛⲟⲛ": "first-person plural",
+    "ⲛ̀ⲑⲱⲧⲉⲛ": "second-person plural",
+    "ⲛ̀ⲑⲱⲟⲩ": "third-person plural",
+    "-": {
+        "lang": "Coptic",
+        "then": "nominal",
+    },
+    "focalising, precursive": "focalising",
+
+    # ⲃⲱⲗ/Coptic, different pronouns in different dialects
+    # Sahidic
+    "ⲛ̄ⲧⲟⲕ": "second-person singular masculine",
+    "ⲛ̄ⲧⲟ": "second-person singular feminine",
+    "ⲛ̄ⲧⲟϥ": "third-person singular masculine",
+    "ⲛ̄ⲧⲟⲥ": "third-person singular feminine",
+    "ⲛ̄ⲧⲱⲧⲛ̄": "second-person plural",
+    "ⲛ̄ⲧⲟⲟⲩ": "third-person plural",
+    # Akhmimic
+    "ⲁⲛⲁⲕ": "first-person singular",
+    "ⲛ̄ⲧⲁⲕ": "second-person singular masculine",
+    "ⲛ̄ⲧⲁϥ": "third-person singular masculine",
+    "ⲛ̄ⲧⲁⲥ": "third-person singular feminine",
+    "ⲁⲛⲁⲛ": "first-person plural",
+    "ⲛ̄ⲧⲱⲧⲛⲉ": "second-person plural",
+    "ⲛ̄ⲧⲁⲩ": "third-person plural",
+    # Lycopolitan has a mixture of different forms
+    # Fayyumic
+    "ⲛⲧⲁⲕ": "second-person singular masculine",
+    "ⲛⲧⲁ": "second-person singular feminine",
+    "ⲛⲧⲁϥ": "third-person singular masculine",
+    "ⲛⲧⲁⲥ": "third-person singular feminine",
+    "ⲛⲧⲁⲧⲉⲛ": "second-person plural",
+    "ⲛⲧⲁⲩ": "third-person plural",
+    "circumstantial, focalising": "focalising",
+     
+    
+    
+    
+    
 }
 
 def check_tags(k, v):
