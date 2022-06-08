@@ -4198,7 +4198,7 @@ infl_map = {
         "then": ["sound-feminine-plural",
                  "broken-plural triptote",],
     },
-    "singular in ـًى (-an)": "singular",  #a مدى/Arabic
+    "singular in ـًى (-an)": "singular-an",  #a مدى/Arabic
     "singulative triptote in ـَة (-a)": "singulative triptote-a",  #a جثجاث/Arabic
     "singular triptote in ـَة (-a)": "singular triptote-a",  #a حاجة/Arabic
     #a بين/Arabic
@@ -4424,6 +4424,39 @@ infl_map = {
     "past indicative I": "past indicative indicative-i",
     "past indicative II": "past indicative indicative-ii",
     "present potential": "present potential",
+
+    # Arabic *tote-lines again باطل/Arabic
+    "basic broken plural diptote‎; basic broken plural triptote":
+        ["broken-plural diptote",
+         "broken-plural triptote",
+        ],
+    "singular diptote in ـَة (-a)": "singular diptote-a",  #a أرمية/Arabic
+    #a كرة#Arabic
+    "sound feminine plural‎; broken plural in ـًى (-an)‎; sound masculine plural":
+        ["sound-feminine-plural",
+         "broken-plural-an",
+         "sound-masculine-plural",
+         ],
+    "basic broken plural diptote‎; basic broken plural triptote‎; broken plural triptote in ـَة (-a)":
+        ["broken-plural diptote",   #a وديد/Arabic
+         "broken-plural triptote",
+         "broken-plural triptote-a",
+        ],
+    "sound masculine plural‎; basic broken plural triptote":
+        ["sound-masculine-plural",  #a قبطي/Arabic
+         "broken-plural triptote",
+        ],
+    #a قاعد/Arabic
+    "sound masculine plural‎; basic broken plural triptote‎; broken plural triptote in ـَة (-a)":
+        ["sound-masculine-plural",
+         "broken-plural triptote",
+         "broken-plural triptote-a",
+        ],
+    "sound feminine plural‎; basic broken plural diptote‎; basic broken plural triptote":
+        ["sound-feminine-plural",
+         "broken-plural diptote",
+         "broken-plural triptote",
+        ],
     
 }
 

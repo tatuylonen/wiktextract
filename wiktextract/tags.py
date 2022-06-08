@@ -5883,6 +5883,9 @@ valid_tags = {
     # qunxa/Afar
     "indicative-i": "mood",
     "indicative-ii": "mood",
+    "diptote-a": "class",  #a أرمية/Arabic
+    "broken-plural-an": "class",  #a كرة#Arabic
+    "singular-an": "class",  #a مدى/Arabic
     
     
 }
