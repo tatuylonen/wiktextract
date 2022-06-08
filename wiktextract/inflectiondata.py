@@ -4379,9 +4379,51 @@ infl_map = {
     "superiority": {"lang": "Tagalog", "then": "superior",},
     "inferiority": {"lang": "Tagalog", "then": "inferior",},
     "equality": {"lang": "Tagalog", "then": "equal",},
+
+    "resultative": "resultative",  # sloniti/Proto-Slavic
+    "imperfective aorist": "aorist imperfective",  # byti/Proto-Slavic
+
+    "Masculine and feminine": "masculine feminine",  # hwa/Old English
     
-    
-    
+    # ufuy/Afar
+    "Postpositioned forms": {
+        "lang": "Afar",
+        "then": "with-postposition",
+    },
+    "l-case": "l-case",
+    "k-case": "k-case",
+    "t-case": "t-case",
+    "h-case": "h-case",
+    # icfide/Afar
+    "present progressive": "present progressive",
+    "future progressive": "future progressive",
+    "immediate future": "immediate-future",
+    "imperfect potential I": "imperfect potential potential-i",
+    "imperfect potential II": "imperfect potential potential-ii",
+    "perfect potential": "perfect potential",
+    "present conditional II": "present conditional conditional-ii",
+    "present conditional I": "present conditional conditional-i",
+    "irrealis": "irrealis",
+    "perfect conditional": "perfect conditional",
+    "V-affirmative": "v-affirmative",
+    "N-affirmative": "n-affirmative",
+    "conjunctive I": "conjunctive conjunctive-i",
+    "conjunctive II": "conjunctive conjunctive-ii",
+    "consultative": "consultative",
+    "-h converb": "h-converb converb",
+    "-i form": "i-form converb",
+    "-k converb": "k-converb converb",
+    "-in(n)uh converb": "innuh-converb converb",
+    "-innuk converb": "innuk-converb converb",
+    "V-focus": "v-focus participle indefinite",
+    "N-focus": "n-focus participle indefinite",
+    "indefinite participle": "indefinite participle",
+    # qunxa/Afar
+    "present indicative I": "present indicative indicative-i",
+    "present indicative II": "present indicative indicative-ii",
+    "past indicative I": "past indicative indicative-i",
+    "past indicative II": "past indicative indicative-ii",
+    "present potential": "present potential",
     
 }
 

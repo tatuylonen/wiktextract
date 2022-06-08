@@ -5859,6 +5859,32 @@ valid_tags = {
     "inferior": "degree",  #madali/Tagalog
     "superior": "degree",
     "equal": "degree",
+    "l-case": "case",  #ufuy/Afar
+    "k-case": "case",  #ufuy/Afar
+    "t-case": "case",  #ufuy/Afar
+    "h-case": "case",  #ufuy/Afar
+    "with-postposition": "with",  #ufuy/Afar
+    #icfide/Afar
+    "immediate-future": "tense",
+    "potential-i": "mood",
+    "potential-ii": "mood",
+    "n-affirmative": "misc",
+    "v-affirmative": "misc",
+    "conjunctive-i": "mood",
+    "conjunctive-ii": "mood",
+    "consultative": "mood",
+    "h-converb":  "non-finite",
+    "i-form":  "non-finite",
+    "k-converb":  "non-finite",
+    "innuh-converb": "non-finite",
+    "innuk-converb": "non-finite",
+    "v-focus": "non-finite",
+    "n-focus": "non-finite",
+    # qunxa/Afar
+    "indicative-i": "mood",
+    "indicative-ii": "mood",
+    
+    
 }
 
 for k, v in valid_tags.items():
