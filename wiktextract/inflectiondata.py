@@ -4213,11 +4213,6 @@ infl_map = {
         "then": "common-gender",
     },
     
-    # ~ "Affix": {
-        # ~ "lang": "Tagalog",
-        # ~ "then": "$",
-        # ~ "else": "affix",
-    # ~ },
     "Affix": "affix",
 
     # podnikat/Czech
@@ -4314,7 +4309,76 @@ infl_map = {
     "ⲛⲧⲁⲧⲉⲛ": "second-person plural",
     "ⲛⲧⲁⲩ": "third-person plural",
     "circumstantial, focalising": "focalising",
-     
+
+    # ignore Tagalog Affix column affixes
+    # manghalik/Tagalog
+    "Actor-secondary": "actor-secondary",
+    "mang-": {"lang": "Tagalog", "then": "",},
+    "-an": {"lang": "Tagalog", "then": "",},
+    "pang- -an": {"lang": "Tagalog", "then": "",},
+    "ipang-": {"lang": "Tagalog", "then": "",},
+    "ikapang-": {"lang": "Tagalog", "then": "",},
+    "magpa-": {"lang": "Tagalog", "then": "",},
+    "papang- -in": {"lang": "Tagalog", "then": "",},
+    "⁠ pa- -an": {"lang": "Tagalog", "then": "",},
+    "ipagpa-": {"lang": "Tagalog", "then": "",},
+    "ipapang-": {"lang": "Tagalog", "then": "",},
+    "ikapagpapang-": {"lang": "Tagalog", "then": "",},
+    "papang- -an": {"lang": "Tagalog", "then": "",},
+    "makapang-": {"lang": "Tagalog", "then": "",},
+    "ma -an": {"lang": "Tagalog", "then": "",},
+    "maipang-": {"lang": "Tagalog", "then": "",},
+    "maikapang-": {"lang": "Tagalog", "then": "",},
+    "mapang- -an": {"lang": "Tagalog", "then": "",},
+    "makapagpa-": {"lang": "Tagalog", "then": "",},
+    "mapapang-": {"lang": "Tagalog", "then": "",},
+    "mapa- -an": {"lang": "Tagalog", "then": "",},
+    "maipagpa-": {"lang": "Tagalog", "then": "",},
+    "maipapang-": {"lang": "Tagalog", "then": "",},
+    "maikapagpapang-": {"lang": "Tagalog", "then": "",},
+    "mapapang- -an": {"lang": "Tagalog", "then": "",},
+    "makipang-": {"lang": "Tagalog", "then": "",},
+    "makipagpa-": {"lang": "Tagalog", "then": "",},
+    # ipalinis/Tagalog
+    "mag-": {"lang": "Tagalog", "then": "",},
+    "-in": {"lang": "Tagalog", "then": "",},
+    "\u2060pag- -an": {"lang": "Tagalog", "then": "",},
+    "ipag-": {"lang": "Tagalog", "then": "",},
+    "ipang-": {"lang": "Tagalog", "then": "",},
+    "ikapag-": {"lang": "Tagalog", "then": "",},
+    "pag- -an": {"lang": "Tagalog", "then": "",},
+    "papag- -in": {"lang": "Tagalog", "then": "",},
+    "ipa-": {"lang": "Tagalog", "then": "",},
+    "ikapagpa-": {"lang": "Tagalog", "then": "",},
+    "\u2060pagpa- -an": {"lang": "Tagalog", "then": "",},
+    "\u2060papag- -an": {"lang": "Tagalog", "then": "",},
+    "makapag-": {"lang": "Tagalog", "then": "",},
+    "ma-": {"lang": "Tagalog", "then": "",},
+    "maipag-": {"lang": "Tagalog", "then": "",},
+    "maikapag-": {"lang": "Tagalog", "then": "",},
+    "maipag-": {"lang": "Tagalog", "then": "",},
+    "mapag- -an": {"lang": "Tagalog", "then": "",},
+    "mapapag-": {"lang": "Tagalog", "then": "",},
+    "maipa-": {"lang": "Tagalog", "then": "",},
+    "maikapagpa-": {"lang": "Tagalog", "then": "",},
+    "mapagpa- -an": {"lang": "Tagalog", "then": "",},
+    "mapapag- -an": {"lang": "Tagalog", "then": "",},
+    "makipag-": {"lang": "Tagalog", "then": "",},
+    "maki-": {"lang": "Tagalog", "then": "",},
+    # batikusin/Tagalog
+    "-um-": {"lang": "Tagalog", "then": "",},
+    "i-": {"lang": "Tagalog", "then": "",},
+    "ika-": {"lang": "Tagalog", "then": "",},
+    "pa- -in": {"lang": "Tagalog", "then": "",},
+    # umagnas/Tagalog
+    "um-": {"lang": "Tagalog", "then": "",},
+    # baybayin/Tagalog
+    "Directional": "directional",
+    # madali/Tagalog
+    "root": "root",
+    "superiority": {"lang": "Tagalog", "then": "superior",},
+    "inferiority": {"lang": "Tagalog", "then": "inferior",},
+    "equality": {"lang": "Tagalog", "then": "equal",},
     
     
     

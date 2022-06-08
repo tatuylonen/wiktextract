@@ -5855,6 +5855,10 @@ valid_tags = {
     "with-pronoun": "with",  # thathar/Scottish Gaelic
     "unabbreviation": "mod",  # jku/Finnish
     "long-construct": "misc",  #a ذو الحجة/Arabic
+    "actor-secondary": "aspect",  # Tagalog thing
+    "inferior": "degree",  #madali/Tagalog
+    "superior": "degree",
+    "equal": "degree",
 }
 
 for k, v in valid_tags.items():
