@@ -1884,32 +1884,6 @@ infl_map = {
         "lang": "Coptic", 
         "if": "third-person plural", 
         "then": ""},
-
-    "მე": {
-        "lang": "Georgian", 
-        "if": "first-person singular", 
-        "then": ""},
-    "შენ": {
-        "lang": "Georgian", 
-        "if": "second-person singular", 
-        "then": ""},
-    "ის": {
-        "lang": "Georgian", 
-        "if": "third-person singular", 
-        "then": ""},
-    "ჩვენ": {
-        "lang": "Georgian", 
-        "if": "first-person plural", 
-        "then": ""},
-    "თქვენ": {
-        "lang": "Georgian", 
-        "if": "second-person plural", 
-        "then": ""},
-    "ისინი": {
-        "lang": "Georgian", 
-        "if": "third-person plural", 
-        "then": ""},
-
     "ñuqa": {
         "lang": "Quechua", 
         "if": "first-person singular", 
@@ -2535,7 +2509,6 @@ infl_map = {
     "Non-finite forms": "dummy-mood",
     "1st singular я": "first-person singular",
     "second-person": "second-person",
-    "duoplural": "dual plural",
     "4th person": "fourth-person",
     "invertive": "invertive",
     "Simple finite forms": "finite-form",
@@ -4457,8 +4430,124 @@ infl_map = {
          "broken-plural diptote",
          "broken-plural triptote",
         ],
+    "dist. plural": "distributive plural",  # nástro/Navajo
+    "duoplural": "duoplural",
+    # this separate duoplural number can't simply be broken into dual and plural
+    # because of tag-merging issues, like here: if Navajo has the default numbers
+    # ["singular", "plural"], then singular + duoplural has "dual" left over,
+    # if it has ["singular", "plural", "dual",] then all of them are merged BUT
+    # that implies that the non-duoplural "plural" could also be part of the merge.
+    "Unspecified": {
+        "lang": "Navajo",
+        "then": "indefinite-person",
+    },
+    "Unspecified person": {
+        "lang": "Navajo",
+        "then": "indefinite-person",
+    },
+    "Passive A": {
+        "lang": "Navajo",
+        "then": "passive",
+    },
     
+    "Passive B": {
+        "lang": "Navajo",
+        "then": "passive agentive",
+    },
+    "Spatial": {
+        "lang": "Navajo",
+        "then": "spatial-person",
+    },
+    "Spatial person": {
+        "lang": "Navajo",
+        "then": "spatial-person",
+    },
+    "ITERATIVE": "iterative",  # náhádleeh/Navajo
+    "early": "archaic",  #soule/Middle English
+    "nominative, accusative": "nominative accusative",  #dale/Middle English
+    "subjunctive plural": "subjunctive plural",  #been/Middle English
+    "Middle": {
+        "lang": "Sanskrit",
+        "then": "middle-voice",  # अवति/Sanskrit
+    },
+    "Active Voice": "active",
+    "Passive Voice": "passive",
+    "Middle Voice": "middle-voice",  #शृणोति/Sanskrit
+    "Number": {
+        "lang": "Sanskrit",
+        "then": "",
+    },
+    "Person": {
+        "lang": "Sanskrit",
+        "then": "",
+    },
+    "Potential mood / Optative mood": "potential",
+    # ვენეციური/Georgian
+    "nominative, genitive, instrumental": "nominative genitive instrumental",
+    "dative, adverbial": "dative adverbial",
+    "negative imperative": "negative imperative",  # აბეზღებს/Georgian
+    #მათ/Georgian
+    "third-person": "third-person",
+    "personal pronouns": {
+        "lang": "Georgian",
+        "then": "",
+    },
+    "relative pronouns": {
+        "lang": "Georgian",
+        "then": "",
+    },
+    "this": "proximal pronoun singular",
+    "that": "distal pronoun singular",
+    "these": "proximal pronoun plural",
+    "those": "distal pronoun plural",
+    # დაწერს/Georgian
+    "masdar": "noun-from-verb",  #also in Arabic
+    "transitive screeves": "transitive",
+    "intransitive screeves": "intransitive",
+    "privative participle": "privative participle",
+    "მე": {
+        "lang": "Georgian", 
+        "then": "first-person singular", 
+        },
+    "შენ": {
+        "lang": "Georgian", 
+        "then": "second-person singular", 
+        },
+    "ის": {
+        "lang": "Georgian", 
+        "then": "third-person singular", 
+        },
+    "ჩვენ": {
+        "lang": "Georgian", 
+        "then": "first-person plural", 
+        },
+    "თქვენ": {
+        "lang": "Georgian", 
+        "then": "second-person plural", 
+        },
+    "ისინი": {
+        "lang": "Georgian", 
+        "then": "third-person plural", 
+        },
+    "მან": {
+        "lang": "Georgian", 
+        "then": "third-person singular", 
+        },
+    "მათ": {
+        "lang": "Georgian", 
+        "then": "third-person plural", 
+        },
+    "მას": {
+        "lang": "Georgian", 
+        "then": "third-person singular", 
+        },
+    # ~ "": {
+        # ~ "lang": "Georgian", 
+        # ~ "then": "", 
+        # ~ },
+    "inversion": "inversion",
 }
+
 
 def check_tags(k, v):
     assert isinstance(k, str)

@@ -5886,8 +5886,11 @@ valid_tags = {
     "diptote-a": "class",  #a أرمية/Arabic
     "broken-plural-an": "class",  #a كرة#Arabic
     "singular-an": "class",  #a مدى/Arabic
-    
-    
+    "duoplural": "number",  # niteel/Navajo
+    "indefinite-person": "person",
+    "spatial-person": "person",
+    "middle-voice": "voice", # अवति/Sanskrit
+    "inversion": "case",  # დაწერს/Sanskrit
 }
 
 for k, v in valid_tags.items():

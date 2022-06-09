@@ -565,6 +565,9 @@ lang_specific = {
     "Mwani": {
         "next": "bantu-group",
     },
+    "Navajo": {
+        "numbers": ["singular", "plural", "dual", "duoplural",],
+    },
     "Neapolitan": {
         "next": "romance-group",
     },
