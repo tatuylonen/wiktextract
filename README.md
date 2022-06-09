@@ -757,6 +757,11 @@ The
 is a generic module for extracting data from Wiktionary, Wikipedia, and
 other WikiMedia dump files.  ``wiktextract`` is built using this module.
 
+*When using a version of wiktextract from github, please also setup
+wikitextprocessor so that they have rough parity. The pypi versions of these
+packages are usually out-of-date, and mixing a newer version with an older
+one will lead to bugs. These packages are being developed in parallel.*
+
 The [wiktfinnish](https://github.com/tatuylonen/wiktfinnish) package
 can be used to interpret Finnish noun declinations and verb
 conjugations and for generating Finnish inflected word forms.
