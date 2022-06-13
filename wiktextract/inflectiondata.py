@@ -2279,14 +2279,14 @@ infl_map = {
     "inanimate animate": "animate inanimate",
     "Informal": "informal",
     "modern / informal": "informal",
-    "i": {"lang": ["German"],
+    "i": {"lang": ["German", "Cimbrian",],
           "then": "subjunctive subjunctive-i",
           "else": {
               "if": "subjunctive",
               "then": "subjunctive-i",
           },
     },
-    "ii": {"lang": ["German"],
+    "ii": {"lang": ["German", "Cimbrian",],
            "then": "subjunctive subjunctive-ii",
            "else": {
                "if": "subjunctive",
@@ -3669,11 +3669,6 @@ infl_map = {
         "pos": "num",
         "then": "cardinal",
     },
-    "collective": {
-        "lang": "Lithuanian",
-        "pos": "num",
-        "then": "collective",
-    },
     "ordinal": {
         "lang": "Lithuanian",
         "pos": "num",
@@ -3985,8 +3980,8 @@ infl_map = {
     # ~ },
 
     "collective": {  # ремен/Macedonian
-        "lang": "Macedonian",
-        "pos": "noun",
+        "lang": ["Lithuanian", "Macedonian", "Proto-Indo-European",],
+        "pos": ["num", "noun"],
         "then": "collective",
     },
 
@@ -4546,8 +4541,105 @@ infl_map = {
         # ~ "then": "", 
         # ~ },
     "inversion": "inversion",
-}
 
+    # maanaadad/Ojibwe
+    "singular (0s)": "singular inanimate",
+    "obviative singular (0's)": "obviative inanimate singular",
+    "plural (0p)": "plural inanimate",
+    "obviative plural (0'p)": "obviative plural inanimate",
+    "singular or plural (0)": "singular plural inanimate",
+    "obviative singular or plural (0')": "obviative singular plural inanimate",
+
+    #a ܒܢܓܐ/Classical_Syriac
+    "1st c. sg. (my)": "first-person singular common-gender possessive",
+    "2nd m. sg. (your)": "second-person singular masculine possessive",
+    "2nd f. sg. (your)": "second-person singular feminine possessive",
+    "3rd m. sg. (his)": "third-person singular masculine possessive",
+    "3rd f. sg. (her)": "third-person singular feminine possessive",
+    "1st c. pl. (our)": "first-person common-gender plural possessive",
+    "2nd m. pl. (your)": "second-person plural masculine possessive",
+    "2nd f. pl. (your)": "second-person plural feminine possessive",
+    "3rd m. pl. (their)": "third-person plural masculine possessive",
+    "3rd f. pl. (their)": "third-person plural feminine possessive",
+    
+    # vágyhat/Hungarian
+    "3rd person sg, 2nd person sg formal":
+        ["third-person singular",
+         "second-person singular formal",],
+    "3rd person pl, 2nd person pl formal":
+        ["third-person plural",
+         "second-person plural formal",],
+    # ichwane/Zulu
+    "Possessive forms": "possessive",
+    "Full form": "full-form",
+    "Simple form": "basic-form",
+    "Substantive": {
+        "lang": "Zulu",
+        "if": "possessive",
+        "then": "possessive-substantive",
+    },
+    "Modifier": {
+        "lang": "Zulu",
+        "if": "possessive",
+        "then": "",
+    },
+    "Copulative": "copulative",
+
+    "present negative": "present negative",  # hoteti/Slovene
+
+    "Construct state": "construct",  # ziqqurratum/Akkadian
+    # marāṣum/Akkadian
+    "Adjective": "adjective",
+    "1.sg":"first-person singular",
+    "2.sg": "second-person singular",
+    "3.sg": "third-person singular",
+    "1.pl": "first-person plural",
+    "2.pl": "second-person plural",
+    "3.pl": "third-person plural",
+
+    # pats/Latvian
+    "Masculine Singular": "masculine singular",
+    "Feminine Singular": "feminine singular",
+    "Masculine Plural": "masculine plural",
+    "Feminine Plural": "feminine plural",
+    
+    "sound masculine plural‎; broken plural triptote in ـَة (-a)":
+        ["sound-masculine-plural",  #a صليبي/Arabic
+         "broken-plural triptote-a",
+        ],
+    "basic broken plural triptote‎; broken plural triptote in ـَة (-a)":
+        ["broken-plural triptote",  #a دب/Arabic
+         "broken-plural triptote-a",
+        ],
+    "basic broken plural triptote‎; basic broken plural diptote":
+        ["broken-plural triptote",
+         "broken-plural diptote",
+        ],
+    "broken plural triptote in ـَة (-a)‎; sound feminine plural":
+        ["broken-plural triptote-a",
+         "sound-feminine-plural",
+        ],
+    "sound masculine plural‎; broken plural triptote in ـَة (-a)‎; basic broken plural diptote":
+        ["sound-masculine-plural",
+         "broken-plural triptote-a",
+         "broken-plural diptote",
+        ],
+    "sound masculine plural‎; basic broken plural diptote":
+        ["sound-masculine plural",
+         "broken-plural diptote",
+        ],
+    "basic broken plural diptote‎; broken plural triptote in ـَة (-a)":
+        ["broken-plural diptote",
+         "broken-plural triptote-a",
+        ],
+    "basic broken plural triptote‎; broken plural triptote in ـَة (-a)‎; basic broken plural diptote":
+        ["broken-plural triptote",
+         "broken-plural triptote-a",
+         "broken-plural diptote",
+        ],
+    
+    
+}
 
 def check_tags(k, v):
     assert isinstance(k, str)

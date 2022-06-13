@@ -5891,6 +5891,9 @@ valid_tags = {
     "spatial-person": "person",
     "middle-voice": "voice", # अवति/Sanskrit
     "inversion": "case",  # დაწერს/Sanskrit
+    "full-form": "misc",  # ichwane/Zulu, "full" and "basic" forms
+    "basic-form": "misc",
+    "possessive-substantive": "possession",  # explicit possessives without possessed: father's computer -> that's father's
 }
 
 for k, v in valid_tags.items():
