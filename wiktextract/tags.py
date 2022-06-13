@@ -5894,6 +5894,10 @@ valid_tags = {
     "full-form": "misc",  # ichwane/Zulu, "full" and "basic" forms
     "basic-form": "misc",
     "possessive-substantive": "possession",  # explicit possessives without possessed: father's computer -> that's father's
+    "unmutated": "misc",  #glad/Breton
+    "mutation-hard": "misc",
+    "confirmative": "tense",  # сэрээх/Mongolian, past tense + evidentiality
+                              # also 'resultative', but that's already used
 }
 
 for k, v in valid_tags.items():

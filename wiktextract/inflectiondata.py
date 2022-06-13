@@ -226,7 +226,6 @@ infl_map = {
     "Neuter": "neuter",
     "Masculine": "masculine",
     "Feminine": "feminine",
-    "Number": "",
     "adverbial": "adverbial",
     "1st singular (я)": "first-person singular",
     "2nd singular (ты)": "second-person singular",
@@ -1613,7 +1612,7 @@ infl_map = {
     },
     "ben": {
         "lang": "Turkish",
-        "pos": "verb",
+        "pos": ["verb", "adj"],
         "if": "first-person singular",
         "then": "first-person singular",
     },
@@ -2284,6 +2283,10 @@ infl_map = {
           "else": {
               "if": "subjunctive",
               "then": "subjunctive-i",
+              "else": {
+                "lang": ["Tagalog", "Assamese"],
+                "then": "",
+              },
           },
     },
     "ii": {"lang": ["German", "Cimbrian",],
@@ -2422,6 +2425,7 @@ infl_map = {
     "Non-past tenses ➤": "",
     "Dependent ➤": "dependent",
     "Dependent": "dependent",
+    "dependent": "dependent",  # immee/Manx
     "Present participle➤": "present participle",
     "Perfect participle➤": "past participle",
     "Nonfinite form➤": {
@@ -2907,6 +2911,7 @@ infl_map = {
     "3rd person m": "third-person masculine",
     "3rd person f": "third-person feminine",
     "3rd m": "third-person masculine",
+    "3rd m.": "third-person masculine",  # hug/Manx
     "gender m": "masculine",
     "dative form": "dative",
     "continuative": "continuative",
@@ -3046,7 +3051,11 @@ infl_map = {
     "soft": {
         "if": "mutation",
         "then": "mutation-soft",
-        "else": "soft",
+        "else": {
+            "lang": "Breton",
+            "then": "mutation-soft",
+            "else": "soft",
+        },
     },
     "nasal": {
         "if": "mutation",
@@ -3059,6 +3068,10 @@ infl_map = {
     "aspirate": {
         "if": "mutation",
         "then": "mutation-aspirate",
+        "else": {
+            "lang": "Breton",
+            "then": "mutation-aspirate",
+        },
     },
     "mixed": {
         "if": "mutation",
@@ -3476,7 +3489,6 @@ infl_map = {
     # "il/elli": XXX,
     # "el / ela / Vde": XXX,
     # "benim (my)": XXX,
-    # "positive, declarative": XXX,
     # "Declarative": XXX,
     # "substantive genitive": XXX,
     # "substantive": XXX,
@@ -3615,10 +3627,6 @@ infl_map = {
         "then": "possessed-form",
     },
 
-    "Number": {
-        "lang": "Hebrew",
-        "then": "*",
-    },
     "State": {
         "lang": "Hebrew",
         "then": "*",
@@ -4071,9 +4079,13 @@ infl_map = {
     "emphatic": "emphatic",  #v דלתא/Aramaic
 
     "3rd f": "third-person feminine",  #umpa/Scottish Gaelic
-    "Number": {  #umpa/Scottish Gaelic
-        "lang": "Scottish Gaelic",
-        "then": "*",
+    "Number": {
+        "lang": "Sanskrit",
+        "then": "",
+        "else": {    #umpa/Scottish Gaelic
+            "lang": ["Hebrew", "Scottish Gaelic",],
+            "then": "*",
+        },
     },
 
     "Third person f": "third-person feminine",  # an/Scottish Gaelic
@@ -4085,6 +4097,7 @@ infl_map = {
     "Second pl": "second-person plural",
     "Third pl": "third-person plural",
     "Independent": "independent",
+    "independent": "independent",  # immee/Manx
     "Affirmative Interrogative": "affirmative interrogative",
     "Negative Interrogative": "negative interrogative",
     
@@ -4249,6 +4262,11 @@ infl_map = {
     "-": {
         "lang": "Coptic",
         "then": "nominal",
+        "else": {
+            "lang": "Assamese",
+            "pos": "verb",
+            "then": "negative",
+        },
     },
     "focalising, precursive": "focalising",
 
@@ -4468,10 +4486,6 @@ infl_map = {
     "Active Voice": "active",
     "Passive Voice": "passive",
     "Middle Voice": "middle-voice",  #शृणोति/Sanskrit
-    "Number": {
-        "lang": "Sanskrit",
-        "then": "",
-    },
     "Person": {
         "lang": "Sanskrit",
         "then": "",
@@ -4625,7 +4639,7 @@ infl_map = {
          "broken-plural diptote",
         ],
     "sound masculine plural‎; basic broken plural diptote":
-        ["sound-masculine plural",
+        ["sound-masculine-plural",
          "broken-plural diptote",
         ],
     "basic broken plural diptote‎; broken plural triptote in ـَة (-a)":
@@ -4637,6 +4651,184 @@ infl_map = {
          "broken-plural triptote-a",
          "broken-plural diptote",
         ],
+    
+    "⁠ ka- -an": {"lang": "Tagalog", "then": "",},  # maligaw/Tagalog
+
+    # AFAICT the following is just the idiosyncracy of a singular editor.
+    # No real idea of what "analytical" means in this context. It's not
+    # standard terminology for specific forms, but I guess it could
+    # stand for some kind of free-standing form...
+    "analytical": {  # immee/Manx
+        "lang": "Manx",
+        "then": "analytic",
+    },
+
+    # alcun/Old French
+    "Subject": "subjective",
+
+    # styri/Lower Sorbian
+    "Masculine inanimate/ feminine/neuter":
+        ["masculine inanimate",
+         "feminine neuter",
+        ],
+    "Masculine animate": "masculine animate",
+
+    # glab/Breton
+    "unmutated": "unmutated",
+    "hard": {
+        "lang": "Breton",
+        "then": "mutation-hard",
+    },
+    "0": {  # gwildronañ/Breton
+        "lang": "Breton",
+        "pos": "verb",
+        "then": "impersonal",
+    }, 
+    "Impersonal forms": {
+        "lang": "Breton",
+        "pos": "verb",
+        "then": "*",
+    },
+    "Mutated forms": {
+        "lang": "Breton",
+        "pos": "verb",
+        "then": "*",
+    },
+
+    # дөрвөл/Mongolian
+    "substantive genitive":
+        "possessive-substantive genitive",
+    "attributive locative":
+        "attributive locative",
+        
+    # сэрээх/Mongolian
+    "Future participle": "future participle",
+    "Confirmative": "confirmative",
+    "Resultative": "resultative",
+    "Imperfective converb": "imperfective converb",
+    "possessive particle": "possessive particle",  #чи/Mongolian
+
+    # কোবোৱা/Assamese
+    "Gerund, Past participle, Agentive":
+        ["gerund",
+         "past participle",
+         "agentive",
+        ],
+    "Progressive participle": "progressive participle",
+    "t": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "",
+    },
+    "মই moi": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "first-person",
+        },
+    "তই toi": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "familiar impolite second-person",
+        },
+    "তুমি tumi": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "familiar second-person",
+        },
+    "আপুনি apuni": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "honorific second-person",
+        },
+    "তেওঁ etc teü͂": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "honorific third-person",
+        },
+    "সি ♂, তাই ♀ etc xi ♂, tai ♀": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "third-person",
+        },
+    "আমি ami": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "first-person",
+        },
+    "তহঁত tohõt": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "familiar impolite second-person",
+        },
+    "তোমালোক tümalük": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "familiar second-person",
+        },
+    "আপোনালোক apünalük": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "honorific second-person",
+        },
+    "তেওঁলোক teü͂lük": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "honorific third-person",
+        },
+    "সিহঁত etc xihõt": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "third-person",
+        },
+    "তহঁতে tohõte": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "familiar impolite second-person",
+        },
+    "তোমালোকে tümalüke": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "familiar second-person",
+        },
+    "আপোনালোকে apünalüke": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "honorific second-person",
+        },
+    "তেওঁলোকে teü͂lüke": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "honorific third-person",
+        },
+    "সিহঁতে etc xihõte": {
+        "lang": "Assamese",
+        "pos": "verb",
+        "then": "third-person",
+        },
+
+    # gözde/Turkish predicative adjective table
+    "ben (I am)": "first-person singular",
+    "sen (you are)": "second-person singular",
+    "o (he/she/it is)": "third-person singular",
+    "biz (we are)": "first-person plural",
+    "siz (you are)": "second-person plural",
+    "onlar (they are)": "third-person plural",
+    "ben (I was)": "first-person singular",
+    "sen (you were)": "second-person singular",
+    "o (he/she/it was)": "third-person singular",
+    "biz (we were)": "first-person plural",
+    "siz (you were)": "second-person plural",
+    "onlar (they were)": "third-person plural",
+    "ben (if I)": "first-person singular",
+    "sen (if you)": "second-person singular",
+    "o (if he/she/it)": "third-person singular",
+    "biz (if we)": "first-person plural",
+    "siz (if you)": "second-person plural",
+    "onlar (if they)": "third-person plural",
+    "positive, declarative": "",
+    "positive, interrogative": "interrogative",
+    "negative, declarative": "negative",
+    "negative, interrogative": "negative interrogative",
     
     
 }
