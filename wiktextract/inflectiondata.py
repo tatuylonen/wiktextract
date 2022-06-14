@@ -895,7 +895,7 @@ infl_map = {
         "lang": ["Albanian", "Galician", "Istriot", "Ligurian", "Piedmontese",
                  "Romansch", "Serbo-Croatian", "Slovene", "Welsh"],
         "pos": ["verb", "suffix"],
-        "if": "second-person singular",
+        # ~ "if": "second-person singular",
         "then": "second-person singular",
         "else": {
             "lang": "Czech",
@@ -1914,24 +1914,24 @@ infl_map = {
 
     "unë": {
         "lang": "Albanian", 
-        "if": "first-person singular", 
-        "then": ""},
+        "then": "first-person singular", 
+        },
     "ai/ajo": {
         "lang": "Albanian", 
-        "if": "third-person singular", 
-        "then": ""},
+        "then": "third-person singular", 
+        },
     "ne": {
         "lang": "Albanian", 
-        "if": "first-person plural", 
-        "then": ""},
+        "then": "first-person plural", 
+        },
     "ju": {
         "lang": "Albanian", 
-        "if": "second-person plural", 
-        "then": ""},
+        "then": "second-person plural", 
+        },
     "ata/ato": {
         "lang": "Albanian", 
-        "if": "third-person plural", 
-        "then": ""},
+        "then": "third-person plural", 
+        },
 
     "ես": {
         "lang": "Armenian", 
@@ -4978,7 +4978,16 @@ infl_map = {
     "Nominative/Accusative": "nominative accusative",
     # ik/German Low German
     "(Genitive)": "genitive rare",
-    
+    "m f": "masculine feminine",  # etwer/German
+# ~ EXPANDED 'еу' to [('error-unrecognized-form',)]
+# ~ EXPANDED 'ту' to [('error-unrecognized-form',)]
+# ~ EXPANDED 'ел/я' to [('error-unrecognized-form',)]
+# ~ EXPANDED 'нои' to [('error-unrecognized-form',)]
+# ~ EXPANDED 'вои' to [('error-unrecognized-form',)]
+# ~ EXPANDED 'еи/еле' to [('error-unrecognized-form',)]
+# xxxx фи/Romanian
+
+
 }
 
 def check_tags(k, v):
