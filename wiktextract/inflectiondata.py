@@ -4946,6 +4946,38 @@ infl_map = {
         "then": "third-person plural",
     },
 
+    # চাওয়া/Bengali
+    "progressive participle": "progressive participle",
+    "habitual participle": "habitual participle",
+    "conditional participle": "conditional participle",
+    "আমি (ami)": "first-person",
+    "আমরা (amra)": "first-person",
+    "তুই (tui)": "second-person impolite",
+    "তোরা (tora)": "second-person impolite",
+    "তুমি (tumi)": "second-person",
+    "তোমরা (tomra)": "second-person",
+    "এ (e), ও (o), সে (she)": "third-person",
+    "এরা (era), ওরা (ora), তারা (tara)": "third-person",
+    "আপনি (apni)": "second-person formal",
+    "আপনারা (apnara)": "second-person formal",
+    "ইনি (ini), উনি (uni), তিনি (tini)":
+        "third-person formal",
+    "এঁরা (ẽra), ওঁরা (õra), তাঁরা (tãra)":
+        "third-person formal",
+
+    # schlaa/Alemannic German
+    "1ˢᵗ person ich, i": "first-person singular",
+    "2ⁿᵈ person du": "second-person singular",
+    "3ʳᵈ person er/si/es": "third-person singular",
+    "1ˢᵗ person mir": "first-person plural",
+    "2ⁿᵈ person ir": "second-person plural",
+    "3ʳᵈ person si": "third-person plural",
+    # natüürlic/Alemannic German
+    "Strong inflection": "strong",
+    # d/Alemannic German
+    "Nominative/Accusative": "nominative accusative",
+    # ik/German Low German
+    "(Genitive)": "genitive rare",
     
 }
 
