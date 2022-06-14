@@ -64,6 +64,7 @@ title_contains_global_map = {
     "participles of": "participle",
     "variation of": "dummy-skip-this",  #a'/Scottish Gaelic
     "command form of": "imperative",  #a راتلل/Pashto
+
 }
 for k, v in title_contains_global_map.items():
     if any(t not in valid_tags for t in v.split()):

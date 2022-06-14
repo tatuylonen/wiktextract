@@ -4266,6 +4266,11 @@ infl_map = {
             "lang": "Assamese",
             "pos": "verb",
             "then": "negative",
+            "else": {
+                "lang": "Old Saxon",
+                "pos": "pron",
+                "then": ""
+                },
         },
     },
     "focalising, precursive": "focalising",
@@ -4480,7 +4485,7 @@ infl_map = {
     "nominative, accusative": "nominative accusative",  #dale/Middle English
     "subjunctive plural": "subjunctive plural",  #been/Middle English
     "Middle": {
-        "lang": "Sanskrit",
+        "lang": ["Hittite", "Sanskrit",],
         "then": "middle-voice",  # अवति/Sanskrit
     },
     "Active Voice": "active",
@@ -4891,7 +4896,56 @@ infl_map = {
     "Conditional past perfect": "past perfect conditional",
     # XXX return to Kashmiri after next wiktionary dump
     
+    # дрьзнѫти/Old Church Slavonic
+    "азъ (azŭ)": "first-person singular",
+    "тꙑ (ty)": "second-person singular",
+    "тъ (tŭ)": "third-person singular",
+    "вѣ (vě)": "first-person dual",
+    "ва (va)": "second-person dual",
+    "та (ta)": "third-person dual",
+    "мꙑ (my)": "first-person plural",
+    "вꙑ (vy)": "second-person plural",
+    "ти (ti)": "third-person plural",
+
+    # əhli-həsəd/Azerbaijani
+    "broken plural": "broken-plural",
+    # bədən/Azerbaijani
+    "broken": {
+        "lang": "Azerbaijani",
+        # ~ "if": "plural",  # doesn't work
+        "then": "broken-plural",
+        },
+    "sound": "",
     
+    # 𒉿𒀠𒄴𒍣/Hittite
+    "Noun": {
+        "lang": "Hittite",
+        "pos": "verb",
+        "then": "noun-from-verb",
+    },
+    
+    # ampesar/Ladino
+    "io / yo": {
+        "lang": "Ladino",
+        "then": "first-person singular",
+    },
+    "él / ella": {
+        "lang": "Ladino",
+        "then": "third-person singular",
+    },
+    "mosotros mosós": {
+        "lang": "Ladino",
+        "then": "first-person plural",
+    },
+    "vosotros vosós / vós": {
+        "lang": "Ladino",
+        "then": "second-person plural",
+    },
+    "ellos / ellas": {
+        "lang": "Ladino",
+        "then": "third-person plural",
+    },
+
     
 }
 
