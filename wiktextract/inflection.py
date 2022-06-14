@@ -63,6 +63,7 @@ title_contains_global_map = {
     "subordinate-clause forms of": "subordinate-clause",
     "participles of": "participle",
     "variation of": "dummy-skip-this",  #a'/Scottish Gaelic
+    "command form of": "imperative",  #a راتلل/Pashto
 }
 for k, v in title_contains_global_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -1101,6 +1102,7 @@ def clean_header(word, col, skip_paren):
         final_paren = m.group(0)
         col = col[:m.start()]
 
+    # ᴺᴸᴴ persin/Old Irish <- where does this go?? -KJ
     # Extract references and tag markers
     refs = []
     def_re = re.compile(r"(^|\s*•?\s+)"

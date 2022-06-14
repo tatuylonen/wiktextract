@@ -5898,6 +5898,7 @@ valid_tags = {
     "mutation-hard": "misc",
     "confirmative": "tense",  # сэрээх/Mongolian, past tense + evidentiality
                               # also 'resultative', but that's already used
+    "with-ergative": "with",  #a ہاوُن/Kashmiri
 }
 
 for k, v in valid_tags.items():

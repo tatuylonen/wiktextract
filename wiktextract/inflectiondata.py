@@ -4830,6 +4830,68 @@ infl_map = {
     "negative, declarative": "negative",
     "negative, interrogative": "negative interrogative",
     
+    #a راتلل/Pashto
+    "زۀ": "first-person singular",
+    "تۀ": {
+        "if": "second-person singular masculine",
+        "then": "second-person singular masculine",
+        "else": {
+            "if": "second-person singular feminine",
+            "then": "second-person singular feminine",
+            "else": "second-person singular",
+            },
+        },
+        
+    "دی / هغه": "third-person singular masculine",
+    "دا / هغه": "third-person singular feminine",
+    "موږ": "first-person plural",
+    "تاسې": "second-person plural",
+    "دوی / هغوی": "third-person plural",
+    "present imperfective": "present imperfective",
+    "present perfective": "present perfective",
+    "Postive": "",  # XXX remove me soon, fixed table on wiktionary
+    "Postive (Imperfective)": "imperfective",
+    "Postive (Perfective)": "perfective",
+    "تاسو": "second-person plural",
+    # This specific form seems like the addition of someone later in a
+    # new part of the table, it's a Northern Pashto variant, so someone
+    # might change it later, unless تاسو is part of the "command"
+    # paradigm in general.
+
+    #a ہاوُن/Kashmiri
+    "Feminine plural": "feminine plural",
+    "Completed": "completive",
+    "بہٕ": "first-person singular",
+    'ژٕ': "second-person singular",
+    "سُہ, سۄ": "third-person singular",
+    'أسؠ': "first-person plural",
+    "تۄہؠ, تۆہؠ": "second-person plural",
+    "تِم, تِمہٕ": "third-person plural",
+    "Nominative subject": "with-nominative",
+    "Ergative subject": "with-ergative",
+    "Simple present": "present",
+    "Past continuous": "past continuative",
+    "Future continuous": "future continuative",
+    "m or f": "masculine feminine",
+    "Simple future": "future",
+    # Ergatives
+    'مےٚ': "first-person singular",
+    'ژےٚ': "second-person singular",
+    'تٔمؠ, تَمہِ': "third-person singular",
+    'اَسہِ': "first-person plural",
+    'تۄہہِ': "second-person plural",
+    'تِمَو': "third-person plural",
+    "m sg": "masculine singular",
+    "m pl": "masculine plural",
+    "f sg": "feminine singular",
+    "f pl": "feminine plural",
+    "Obligatory": "obligative",
+    "Simple Conditional": "conditional",
+    "Conditional past continuous": "past continuative conditional",
+    "Conditional past perfect": "past perfect conditional",
+    # XXX return to Kashmiri after next wiktionary dump
+    
+    
     
 }
 
