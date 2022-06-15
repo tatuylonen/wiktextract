@@ -3492,7 +3492,6 @@ infl_map = {
     # "Declarative": XXX,
     # "substantive genitive": XXX,
     # "substantive": XXX,
-    # "Modifier": XXX,
     # "preposition": XXX,
     # "specific": XXX,
     # "adverb": XXX,
@@ -3819,22 +3818,7 @@ infl_map = {
     "indefinite plural": "indefinite plural",
     "definite plural": "definite plural",
 
-    "Bokmål m": {
-        "lang": "Norwegian Bokmål",
-        "then": "masculine",
-    },
-    "Bokmål f": {
-        "lang": "Norwegian Bokmål",
-        "then": "feminine",
-    },
-    "Bokmål c": {
-        "lang": "Norwegian Bokmål",
-        "then": "common-gender",
-    },
-    "Bokmål": {
-        "lang": "Norwegian Bokmål",
-        "then": "",
-    },
+
 
     "masc." : "masculine",  # ща/Bulgarian
     "fem.": "feminine",
@@ -3943,21 +3927,6 @@ infl_map = {
     "Reflexive third": "third-person reflexive",  # se/Latin
 
     "masculine dual": "masculine dual",  #a סוס/Hebrew
-
-    "Nynorsk f": {
-        "lang": "Norwegian Nynorsk",
-        "then": "feminine",
-    },
-    
-    "Nynorsk m": {
-        "lang": "Norwegian Nynorsk",
-        "then": "masculine",
-    },
-    
-    "Nynorsk n": {
-        "lang": "Norwegian Nynorsk",
-        "then": "neuter",
-    },
 
     "common, neuter": "common-gender neuter",  # kdo/Serbo-Croatian
     "his": "third-person singular masculine possessive",  # moj/Serbo-Croatian
@@ -4169,6 +4138,7 @@ infl_map = {
                  "broken-plural invariable",
                 ],
     },
+    "broken plural invariable": "broken-plural invariable",  #a ضحية/Arabic
     "basic broken plural diptote‎; sound feminine plural": {  #a منام/Arabic
         "lang": "Arabic",
         "then": ["sound-feminine-plural",
@@ -4428,6 +4398,12 @@ infl_map = {
          "broken-plural-an",
          "sound-masculine-plural",
          ],
+    #a مرية/Arabic
+    "sound feminine plural‎; broken plural in ـًى (-an)":
+        ["sound-feminine-plural",
+         "broken-plural-an",
+         ],
+    "broken plural in ـًى (-an)": "broken-plural-an",  #a بلوة/Arabic
     "basic broken plural diptote‎; basic broken plural triptote‎; broken plural triptote in ـَة (-a)":
         ["broken-plural diptote",   #a وديد/Arabic
          "broken-plural triptote",
@@ -4601,6 +4577,10 @@ infl_map = {
         "lang": "Zulu",
         "if": "possessive",
         "then": "",
+        "else": {
+            "lang": "Xhosa",  #magqagala
+            "then": "attributive",
+        },
     },
     "Copulative": "copulative",
 
@@ -4979,13 +4959,190 @@ infl_map = {
     # ik/German Low German
     "(Genitive)": "genitive rare",
     "m f": "masculine feminine",  # etwer/German
-# ~ EXPANDED 'еу' to [('error-unrecognized-form',)]
-# ~ EXPANDED 'ту' to [('error-unrecognized-form',)]
-# ~ EXPANDED 'ел/я' to [('error-unrecognized-form',)]
-# ~ EXPANDED 'нои' to [('error-unrecognized-form',)]
-# ~ EXPANDED 'вои' to [('error-unrecognized-form',)]
-# ~ EXPANDED 'еи/еле' to [('error-unrecognized-form',)]
-# xxxx фи/Romanian
+    # фи/Romanian
+    "еу": {
+        "lang": "Romanian",
+        "pos": "verb",
+        "then": "first-person singular",
+    },
+    "ту": {
+        "lang": "Romanian",
+        "pos": "verb",
+        "then":  "second-person singular",
+    },
+    "ел/я": {
+        "lang": "Romanian",
+        "pos": "verb",
+        "then": "third-person singular",
+    },
+    "нои": {
+        "lang": "Romanian",
+        "pos": "verb",
+        "then": "first-person plural",
+    },
+    "вои": {
+        "lang": "Romanian",
+        "pos": "verb",
+        "then": "second-person plural",
+    },
+    "еи/еле":  {
+        "lang": "Romanian",
+        "pos": "verb",
+        "then": "third-person plural",
+    },
+    "compound perfect": {  # has mostly replaced the simple perfect
+        "lang": "Romanian",
+        "then": "perfect",
+    },
+
+    # idealistesch/Luxembourgish
+    "attributive and/or after determiner": "attributive with-determiner",
+    "independent without determiner": "without-determiner",
+    "after any declined word": "with-head",
+    # hunn/Luxembourgish
+    "1ˢᵗ person ech": "first-person singular",
+    "2ⁿᵈ person du": "second-person singular",
+    "3ʳᵈ person hien/si/hatt": "third-person singular",
+    "1ˢᵗ person mir": "first-person plural",
+    "2ⁿᵈ person dir": "second-person plural",
+    "3ʳᵈ person si": "third-person plural",
+    "present simple": "present",
+    "future simple": "future",
+
+    # чӧсмасьны/Komi-Zyrian
+    "Direct past tense": "direct past",
+    "Reported past tense": "reported past",
+    "Imperfect participle": "imperfect participle",
+    "Caritive participle": "caritive participle",
+    # ~ "^(*)) The impersonal reported past is"\
+     # ~ "expressed using the third singular form."\
+     # ~ " ^(**)) The first person imperative is"\
+     # ~ " expressed using the first person future"\
+     # ~ " form. ^(***)) Any form ending in -ӧй"\
+     # ~ " has an alternative form ending in -ӧ."\
+     # ~ " ^(****)) The imperfect and perfect"\
+     # ~ " participles have alternative forms"\
+     # ~ " with a paragogic -а.":
+    "^(*)) The impersonal reported past is expressed using the third singular form. ^(**)) The first person imperative is expressed using the first person future form. ^(***)) Any form ending in -ӧй has an alternative form ending in -ӧ. ^(****)) The imperfect and perfect participles have alternative forms with a paragogic -а.":
+        "",  #<th> with footnotes that don't refer to anything?
+    # ми/Komi-Zyrian
+    "long dative": "dative",
+    "short dative": "dative",
+    # сы/Komi-zyrian
+    "short nominative": "nominative",
+    # ehun/Basque
+    "anim.": "animate",
+    "inanim.": "inanimate",
+
+    # erakutsi/Basque
+    "NORK": {"lang": "Basque", "then": "ergative",},
+    "NOR": {"lang": "Basque", "then": "absolutive",},
+    "NORI": {"lang": "Basque", "then": "dative",},
+    "nik": {"lang": "Basque", "then": "first-person singular",},
+    "hik": {"lang": "Basque", "then": "second-person singular informal",},
+    "hark": {"lang": "Basque", "then": "third-person singular",},
+    "guk": {"lang": "Basque", "then": "first-person plural",},
+    "zuk": {"lang": "Basque", "then": "second-person singular",},
+    "zuek": {"lang": "Basque", "then": "second-person plural",},
+    "haiek": {"lang": "Basque", "then": "third-person plural",},
+    "hura": {"lang": "Basque", "then": "third-person singular",},
+    "niri": {"lang": "Basque", "then": "first-person singular",},
+    "hiri": {"lang": "Basque", "then": "second-person singular informal",},
+    "hari": {"lang": "Basque", "then": "third-person singular",},
+    "guri": {"lang": "Basque", "then": "first-person plural",},
+    "zuri": {"lang": "Basque", "then": "second-person singular",},
+    "zuei": {"lang": "Basque", "then": "second-person plural",},
+    "haiei": {"lang": "Basque", "then": "third-person plural",},
+    "future cons.": "future consequential",
+    "past cons.": "past consequential",
+    "2nd sg inf": "second-person singular informal",
+    # ISP/Norwegian
+    "Bokmål m": {
+        "lang": "Norwegian Bokmål",
+        "then": "masculine",
+        "else": "masculine Bokmål",
+    },
+    "Bokmål f": {
+        "lang": "Norwegian Bokmål",
+        "then": "feminine",
+        "else": "feminine Bokmål",
+    },
+    "Bokmål c": {
+        "lang": "Norwegian Bokmål",
+        "then": "common-gender",
+        "else": "common-gender Bokmål",
+    },
+    "Bokmål n": {
+        "lang": "Norwegian Bokmål",
+        "then": "neuter",
+        "else": "neuter Bokmål",
+    },
+    "Bokmål": {
+        "lang": "Norwegian Bokmål",
+        "then": "",
+        "else": "Bokmål",
+    },
+    
+    "Nynorsk f": {
+        "lang": "Norwegian Nynorsk",
+        "then": "feminine",
+        "else": "feminine Nynorsk",
+    },
+    
+    "Nynorsk m": {
+        "lang": "Norwegian Nynorsk",
+        "then": "masculine",
+        "else": "masculine Nynorsk",
+    },
+    
+    "Nynorsk n": {
+        "lang": "Norwegian Nynorsk",
+        "then": "neuter",
+        "else": "neuter Nynorsk",
+    },
+    "Nynorsk c": {
+        "lang": "Norwegian Nynorsk",
+        "then": "common-gender",
+        "else": "common-gender Nynorsk",
+    },
+    "Nynorsk": {
+        "lang": "Norwegian Nynorsk",
+        "then": "",
+        "else": "Nynorsk",
+    },
+
+    "sound feminine plural‎; broken plural in ـًى (-an)‎; basic broken plural triptote":
+        ["sound-feminine-plural",
+         "broken-plural-an",
+         "broken-plural triptote",
+        ],
+
+    "sound feminine plural‎; sound masculine plural":
+        ["sound-feminine-plural",
+         "sound-masculine-plural",
+        ],
+    "broken plural diptote in ـٍ (-in)":  #a سحلية/Arabic
+        "broken-plural diptote-in",
+    "sound feminine plural‎; broken plural invariable":
+        ["sound-feminine-plural",
+         "broken-plural invariable",
+        ],
+    "sound feminine plural‎; broken plural diptote in ـٍ (-in)":
+        ["sound-feminine-plural",
+         "broken-plural diptote-in",
+        ],
+    "broken plural diptote in ـٍ (-in)‎; sound feminine plural":
+        ["broken-plural diptote-in",
+         "sound-feminine-plural",
+        ],
+    "basic broken plural triptote‎; broken plural diptote in ـٍ (-in)":
+        ["broken-plural triptote",
+         "broken-plural diptote-in",
+        ],
+    "singular triptote in ـَاة (-āh)": "singular triptote-ah", #a قناة السويس/Arabic
+    "singular triptote in ـٍ (-in)": "singular triptote-in",
+    
+    
 
 
 }

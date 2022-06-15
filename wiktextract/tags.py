@@ -5899,6 +5899,14 @@ valid_tags = {
     "confirmative": "tense",  # сэрээх/Mongolian, past tense + evidentiality
                               # also 'resultative', but that's already used
     "with-ergative": "with",  #a ہاوُن/Kashmiri
+    "with-determiner": "with",  # idealistesch/Luxembourgish
+    "without-determiner": "misc",
+    "with-head": "with",
+    "consequential": "mood",  # erakutsi/Basque
+    "diptote-in": "class",  #a سحلية/Arabic
+    "triptote-ah": "class",  #a قناة السويس/Arabic
+    "triptote-in": "class",  #a تحو/Arabic
+    
 }
 
 for k, v in valid_tags.items():
