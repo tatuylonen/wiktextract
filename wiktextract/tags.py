@@ -5908,6 +5908,7 @@ valid_tags = {
     "triptote-in": "class",  #a تحو/Arabic
     "past-i": "tense",  #eh/Albanian
     "past-ii": "tense",
+    "focus": "detail",  #magwahil/Tagalog, trigger-focus
 }
 
 for k, v in valid_tags.items():

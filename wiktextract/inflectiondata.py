@@ -2226,7 +2226,6 @@ infl_map = {
     "n gender": "neuter",
     "Feminine singular": "feminine singular",
     "Root word": "root",
-    "Trigger": "",  # XXX Tagalog ['-sagutan']
     "Aspect": "",
     "Complete": "completive",
     "Progressive": "progressive",
@@ -5195,7 +5194,20 @@ infl_map = {
     "ata (3rd person masculine plural)": "third-person masculine plural",  #ata
     "ajo (3rd person feminine singular)":" third-person feminine singular",  #ajo
     
-    
+    # Tagalog small verb tables, like magwahil/Tagalog
+    # need something to tag a td-cell with stuff like
+    # "actor" or "object" in it, or else it'll cause
+    # NO-TAGS. Unfortunately, only "actor" is tagged
+    # because "object" and others are parsed as headers.
+    # At least this way, there is no error message, but
+    # it is inconsistently applied.
+    # Using "focus": "detail", in valid_tags seems to
+    # do the trick and stop 'focus' from bleeding as it
+    # does it it's "misc".
+    "Trigger": {
+        "lang": "Tagalog",
+        "then": "focus",
+    },
 }
 
 def check_tags(k, v):
