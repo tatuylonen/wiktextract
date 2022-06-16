@@ -5141,8 +5141,43 @@ infl_map = {
         ],
     "singular triptote in ـَاة (-āh)": "singular triptote-ah", #a قناة السويس/Arabic
     "singular triptote in ـٍ (-in)": "singular triptote-in",
+    "sound feminine plural‎; basic broken plural triptote‎; basic broken plural diptote":
+        ["sound-feminine-plural",
+         "broken-plural triptote",
+         "broken-plural diptote",
+        ],
+    "broken plural invariable": "broken-plural invariable",
+    "sound feminine plural‎; broken plural invariable‎; basic broken plural triptote":
+        ["sound-feminine-plural",
+         "broken-plural invariable",
+         "broken-plural triptote",
+        ],
+    "broken plural in ـًى (-an)‎; sound masculine plural":
+        ["broken-plural-an",
+         "sound-masculine-plural"],
+    "broken plural in ـًى (-an)‎; basic broken plural triptote":
+        ["broken-plural-an",
+         "broken-plural triptote",
+        ],
+    "broken plural in ـًى (-an)‎; sound feminine plural":
+        ["broken-plural-an",
+         "sound-feminine-plural",
+        ],
+    "basic broken plural triptote‎; sound feminine plural‎; basic broken plural diptote":
+        ["broken-plural triptote",
+         "sound-feminine-plural",
+         "broken-plural diptote",
+        ],
+    "broken plural invariable‎; basic broken plural triptote":
+        ["broken-plural invariable",
+         "broken-plural triptote",
+        ],
+    "basic broken plural diptote‎; broken plural diptote in ـٍ (-in)":
+        ["broken-plural diptote",
+         "broken-plural diptote-in",
+        ],
     
-    
+        
 
 
 }
