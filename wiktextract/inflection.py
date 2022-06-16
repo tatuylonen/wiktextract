@@ -64,6 +64,7 @@ title_contains_global_map = {
     "participles of": "participle",
     "variation of": "dummy-skip-this",  #a'/Scottish Gaelic
     "command form of": "imperative",  #a راتلل/Pashto
+    "historical inflection of": "dummy-skip-this",  #kork/Norwegian Nynorsk
 
 }
 for k, v in title_contains_global_map.items():

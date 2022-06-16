@@ -5906,7 +5906,8 @@ valid_tags = {
     "diptote-in": "class",  #a سحلية/Arabic
     "triptote-ah": "class",  #a قناة السويس/Arabic
     "triptote-in": "class",  #a تحو/Arabic
-    
+    "past-i": "tense",  #eh/Albanian
+    "past-ii": "tense",
 }
 
 for k, v in valid_tags.items():

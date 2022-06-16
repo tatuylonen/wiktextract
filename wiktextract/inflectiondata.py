@@ -5177,9 +5177,25 @@ infl_map = {
          "broken-plural diptote-in",
         ],
     
-        
+    # του/Greek
+    "weak": "weak",
+    "strong": "strong",
 
-
+    "infinitive — present)": "present infinitive",  #eh/Albanian
+    "infinitive — perfect)": "perfect infinitive",
+    "past perfect I": "past-i perfect",
+    "past perfect II": "past-ii perfect",
+    "future I": "future-i",
+    "future II": "future-ii",
+    "future perfect I": "future-i perfect",
+    "future perfect II": "future-ii perfect",
+    "ato (3rd person feminine plural)": "third-person feminine plural",  #ato/Albanian
+    "ai (3rd person masculine singular)": "third-person masculine singular",  #ai
+    "ti (2nd person singular)": "second-person singular",  #ti
+    "ata (3rd person masculine plural)": "third-person masculine plural",  #ata
+    "ajo (3rd person feminine singular)":" third-person feminine singular",  #ajo
+    
+    
 }
 
 def check_tags(k, v):
