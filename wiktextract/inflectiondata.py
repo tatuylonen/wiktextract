@@ -2331,7 +2331,6 @@ infl_map = {
     "2nd plural": "second-person plural",
     "3rd plural": "third-person plural",
     "benefactive": "benefactive",
-    "basic singular triptote": "triptote",
     "future in the past": "past-future",
     "Passive past participle": "passive past participle",
     "associative": "associative",
@@ -2370,7 +2369,6 @@ infl_map = {
     "singular (vienskaitlis)": "singular",
     "plural (daudzskaitlis)": "plural",
     "archaic plural": "archaic plural",
-    "singular triptote in ـَة (-a)": "singular triptote-a",
     "Non-past": "non-past",
     "Interrogative": "interrogative",
     "Assertive": "assertive",
@@ -2462,11 +2460,6 @@ infl_map = {
     "Present participle ➤": "present participle",
     "Simple past": "past",
     "Habitual": "habitual",
-    "sound feminine plural": "sound-feminine-plural",
-    "sound feminine plural; basic broken plural diptote":
-    ["sound-feminine-plural", "broken-plural diptote"],
-    "sound feminine plural; basic broken plural diptote":  # Note invisible ch
-    ["sound-feminine-plural", "broken-plural diptote"],
     "passive participle": "passive participle",
     "passive voice": "passive",
     "singular (жекеше)": "singular",
@@ -2545,7 +2538,6 @@ infl_map = {
     "15 / 17": "class-15 class-17",
     "16": "class-16",
     "18": "class-18",
-    "sound masculine plural": "sound-masculine-plural",
     "2nd singular ти": "second-person singular",
     "3rd singular він / вона / воно": "third-person singular",
     "1st plural ми": "first-person plural",
@@ -2562,9 +2554,6 @@ infl_map = {
     "definite proximal": "definite proximal",
     "definite distal": "definite distal",
     "informal": "informal",
-    "basic broken plural triptote": "broken-plural triptote",
-    "basic singular diptote; basic singular triptote":
-    "diptote triptote",
     "f gender": "feminine",
     "simple tenses": "",
     "present indicative": "present indicative",
@@ -2642,7 +2631,6 @@ infl_map = {
         "then": "dummy-mood",
         "else": "",
     },
-    "basic broken plural diptote": "broken-plural diptote",
     "formal": "formal",
     "INDICATIVE (īstenības izteiksme)": "indicative",
     "IMPERATIVE (pavēles izteiksme)": "imperative",
@@ -2928,7 +2916,6 @@ infl_map = {
     "Possessive determiner": "possessive determiner",
     "Proximal": "proximal",
     "ergative-instrumental": "ergative instrumental",
-    "collective invariable": "collective invariable",
     "Plural/Distributive": "plural distributive",
     "stressed": "stressed",
     "vir pl": "virile plural",
@@ -3219,7 +3206,6 @@ infl_map = {
     "da-form": "verb-form-da",
     "des-form": "verb-form-des",
     "m gender": "masculine",
-    "basic singular diptote": "diptote",
     "long": "long-form",
     "short": "short-form",
     "1st pers.": "first-person",
@@ -3245,16 +3231,13 @@ infl_map = {
     "her/his/its": "possessive singular third-person",
     "our": "possessive plural first-person",
     "their": "possessive plural third-person",
-    "singular invariable": "singular invariable",
     "nominal": "noun",  # XXX or noun-from-something?
     "circumstantial": "circumstantial",
     "jussive": "jussive",
     "Singulative": "singulative",
     "singulative": "singulative",
     "Collective": "collective",
-    "basic collective triptote": "collective triptote",
     "Paucal": "paucal",
-    "sound feminine paucal": "sound-feminine-paucal",
     "stem": "stem",
     "resultative participle": "resultative participle",
     "subject participle": "subjective participle",
@@ -3506,7 +3489,6 @@ infl_map = {
     # "past particle": XXX,
     # "class I": XXX,
     # "adelative": XXX,
-    # "basic singulative diptote": XXX,
     # "oblique I": XXX,
     # "NORK (ergative)": "",  # XXX see irakatsi/Basque
     # "NOR (absolutive)": "",  # XXX see irakatsi/Basque
@@ -4111,55 +4093,6 @@ infl_map = {
     "nominative-accusative": "nominative accusative", #stand/Nynorsk
     "compound-genitive": "in-compounds genitive",
 
-    "broken plural triptote in ـَة (-a)": {  #a رصيد/Arabic
-        "lang": "Arabic",
-        "then": "broken-plural triptote-a",
-    },
-    "sound feminine plural; basic broken plural triptote": {  #a حجرة/Arabic
-        "lang": "Arabic",
-        "then": ["sound-feminine-plural",
-                 "broken-plural triptote",],
-    },
-
-    "singular long construct": {  #a ذو الحجة/Arabic
-        "lang": "Arabic",
-        "then": "long-construct singular",
-    },
-    "singulative triptote in ـَة (-a)": {  #a مرخ/Arabic
-        "lang": "Arabic",
-        "then": "singulative triptote-a",
-    },
-    #a ميت/Arabic
-    "sound masculine plural; basic broken plural triptote; broken plural invariable": {
-        "lang": "Arabic",
-        "then": ["sound-masculine-plural",
-                 "broken-plural triptote",
-                 "broken-plural invariable",
-                ],
-    },
-    "broken plural invariable": "broken-plural invariable",  #a ضحية/Arabic
-    "basic broken plural diptote; sound feminine plural": {  #a منام/Arabic
-        "lang": "Arabic",
-        "then": ["sound-feminine-plural",
-                 "broken-plural diptote",],
-    },
-    "basic broken plural triptote; sound feminine plural": {  #a ترعة/Arabic
-        "lang": "Arabic",
-        "then": ["sound-feminine-plural",
-                 "broken-plural triptote",],
-    },
-    "singular in ـًى (-an)": "singular-an-maksura",  #a مدى/Arabic
-    # Unicode code-point alef maksura, in contrast with
-    # singular-an-alef
-    "singulative triptote in ـَة (-a)": "singulative triptote-a",  #a جثجاث/Arabic
-    "singular triptote in ـَة (-a)": "singular triptote-a",  #a حاجة/Arabic
-    #a بين/Arabic
-    "sound masculine plural; basic broken plural diptote; basic broken plural triptote":
-        ["sound-masculine-plural",
-         "broken-plural diptote",
-         "broken-plural triptote",],
-
-
     "Common": {
         "lang": "Arabic",
         "then": "common-gender",
@@ -4387,44 +4320,6 @@ infl_map = {
     "past indicative II": "past indicative indicative-ii",
     "present potential": "present potential",
 
-    # Arabic *tote-lines again باطل/Arabic
-    "basic broken plural diptote; basic broken plural triptote":
-        ["broken-plural diptote",
-         "broken-plural triptote",
-        ],
-    "singular diptote in ـَة (-a)": "singular diptote-a",  #a أرمية/Arabic
-    #a كرة#Arabic
-    "sound feminine plural; broken plural in ـًى (-an); sound masculine plural":
-        ["sound-feminine-plural",
-         "broken-plural-an",
-         "sound-masculine-plural",
-         ],
-    #a مرية/Arabic
-    "sound feminine plural; broken plural in ـًى (-an)":
-        ["sound-feminine-plural",
-         "broken-plural-an",
-         ],
-    "broken plural in ـًى (-an)": "broken-plural-an",  #a بلوة/Arabic
-    "basic broken plural diptote; basic broken plural triptote; broken plural triptote in ـَة (-a)":
-        ["broken-plural diptote",   #a وديد/Arabic
-         "broken-plural triptote",
-         "broken-plural triptote-a",
-        ],
-    "sound masculine plural; basic broken plural triptote":
-        ["sound-masculine-plural",  #a قبطي/Arabic
-         "broken-plural triptote",
-        ],
-    #a قاعد/Arabic
-    "sound masculine plural; basic broken plural triptote; broken plural triptote in ـَة (-a)":
-        ["sound-masculine-plural",
-         "broken-plural triptote",
-         "broken-plural triptote-a",
-        ],
-    "sound feminine plural; basic broken plural diptote; basic broken plural triptote":
-        ["sound-feminine-plural",
-         "broken-plural diptote",
-         "broken-plural triptote",
-        ],
     "dist. plural": "distributive plural",  # nástro/Navajo
     "duoplural": "duoplural",
     # this separate duoplural number can't simply be broken into dual and plural
@@ -4602,41 +4497,6 @@ infl_map = {
     "Feminine Singular": "feminine singular",
     "Masculine Plural": "masculine plural",
     "Feminine Plural": "feminine plural",
-
-    "sound masculine plural; broken plural triptote in ـَة (-a)":
-        ["sound-masculine-plural",  #a صليبي/Arabic
-         "broken-plural triptote-a",
-        ],
-    "basic broken plural triptote; broken plural triptote in ـَة (-a)":
-        ["broken-plural triptote",  #a دب/Arabic
-         "broken-plural triptote-a",
-        ],
-    "basic broken plural triptote; basic broken plural diptote":
-        ["broken-plural triptote",
-         "broken-plural diptote",
-        ],
-    "broken plural triptote in ـَة (-a); sound feminine plural":
-        ["broken-plural triptote-a",
-         "sound-feminine-plural",
-        ],
-    "sound masculine plural; broken plural triptote in ـَة (-a); basic broken plural diptote":
-        ["sound-masculine-plural",
-         "broken-plural triptote-a",
-         "broken-plural diptote",
-        ],
-    "sound masculine plural; basic broken plural diptote":
-        ["sound-masculine-plural",
-         "broken-plural diptote",
-        ],
-    "basic broken plural diptote; broken plural triptote in ـَة (-a)":
-        ["broken-plural diptote",
-         "broken-plural triptote-a",
-        ],
-    "basic broken plural triptote; broken plural triptote in ـَة (-a); basic broken plural diptote":
-        ["broken-plural triptote",
-         "broken-plural triptote-a",
-         "broken-plural diptote",
-        ],
 
     "⁠ ka- -an": {"lang": "Tagalog", "then": "",},  # maligaw/Tagalog
 
@@ -4835,9 +4695,9 @@ infl_map = {
     "دوی / هغوی": "third-person plural",
     "present imperfective": "present imperfective",
     "present perfective": "present perfective",
-    "Postive": "",  # XXX remove me soon, fixed table on wiktionary
-    "Postive (Imperfective)": "imperfective",
-    "Postive (Perfective)": "perfective",
+    "Postive": "",  # XXX remove these soon, fixed table on wiktionary
+    "Postive (Imperfective)": "imperfective",  #XXX
+    "Postive (Perfective)": "perfective",  #XXX
     "تاسو": "second-person plural",
     # This specific form seems like the addition of someone later in a
     # new part of the table, it's a Northern Pashto variant, so someone
@@ -5112,71 +4972,6 @@ infl_map = {
         "else": "Nynorsk",
     },
 
-    "sound feminine plural; broken plural in ـًى (-an); basic broken plural triptote":
-        ["sound-feminine-plural",
-         "broken-plural-an",
-         "broken-plural triptote",
-        ],
-
-    "sound feminine plural; sound masculine plural":
-        ["sound-feminine-plural",
-         "sound-masculine-plural",
-        ],
-    "broken plural diptote in ـٍ (-in)":  #a سحلية/Arabic
-        "broken-plural diptote-in",
-    "sound feminine plural; broken plural invariable":
-        ["sound-feminine-plural",
-         "broken-plural invariable",
-        ],
-    "sound feminine plural; broken plural diptote in ـٍ (-in)":
-        ["sound-feminine-plural",
-         "broken-plural diptote-in",
-        ],
-    "broken plural diptote in ـٍ (-in); sound feminine plural":
-        ["broken-plural diptote-in",
-         "sound-feminine-plural",
-        ],
-    "basic broken plural triptote; broken plural diptote in ـٍ (-in)":
-        ["broken-plural triptote",
-         "broken-plural diptote-in",
-        ],
-    "singular triptote in ـَاة (-āh)": "singular triptote-ah", #a قناة السويس/Arabic
-    "singular triptote in ـٍ (-in)": "singular triptote-in",
-    "sound feminine plural; basic broken plural triptote; basic broken plural diptote":
-        ["sound-feminine-plural",
-         "broken-plural triptote",
-         "broken-plural diptote",
-        ],
-    "broken plural invariable": "broken-plural invariable",
-    "sound feminine plural; broken plural invariable; basic broken plural triptote":
-        ["sound-feminine-plural",
-         "broken-plural invariable",
-         "broken-plural triptote",
-        ],
-    "broken plural in ـًى (-an); sound masculine plural":
-        ["broken-plural-an",
-         "sound-masculine-plural"],
-    "broken plural in ـًى (-an); basic broken plural triptote":
-        ["broken-plural-an",
-         "broken-plural triptote",
-        ],
-    "broken plural in ـًى (-an); sound feminine plural":
-        ["broken-plural-an",
-         "sound-feminine-plural",
-        ],
-    "basic broken plural triptote; sound feminine plural; basic broken plural diptote":
-        ["broken-plural triptote",
-         "sound-feminine-plural",
-         "broken-plural diptote",
-        ],
-    "broken plural invariable; basic broken plural triptote":
-        ["broken-plural invariable",
-         "broken-plural triptote",
-        ],
-    "basic broken plural diptote; broken plural diptote in ـٍ (-in)":
-        ["broken-plural diptote",
-         "broken-plural diptote-in",
-        ],
 
     # του/Greek
     "weak": "weak",
@@ -5211,82 +5006,34 @@ infl_map = {
         "then": "focus",
     },
 
-    "broken plural triptote in ـَة (-a); basic broken plural diptote":
-        ["broken-plural triptote-a",
-         "broken-plural diptote",
-        ],
-    "broken plural triptote in ـَة (-a); basic broken plural triptote":
-        ["broken-plural triptote-a",
-         "broken-plural triptote",
-        ],
-    "broken plural invariable; sound masculine plural":
-        ["broken-plural invariable",
-         "sound-masculine-plural",
-        ],
-    "basic broken plural triptote; broken plural in ـًى (-an); broken plural diptote in ـٍ (-in)":
-        ["broken-plural triptote",
-         "broken-plural-an",
-         "broken-plural diptote-in",
-        ],
-    "broken plural triptote in ـَة (-a); basic broken plural triptote; basic broken plural diptote":
-        ["broken-plural triptote-a",
-         "broken-plural triptote",
-         "broken-plural diptote",
-        ],
-    "sound feminine plural; broken plural triptote in ـَة (-a); basic broken plural triptote":
-        ["sound-feminine-plural",
-         "broken-plural triptote-a",
-         "broken-plural triptote",
-        ],
-    "basic broken plural triptote; sound masculine plural; sound feminine plural":
-        ["broken-plural triptote",
-         "sound-masculine-plural",
-         "sound-feminine-plural",
-        ],
-    "sound masculine plural; basic broken plural diptote; broken plural triptote in ـَة (-a)":
-        ["sound-masculine-plural",
-         "broken-plural diptote",
-         "broken-plural triptote-a",
-        ],
-    "basic broken plural diptote; broken plural invariable":
-        ["broken-plural diptote",
-         "broken-plural invariable",
-        ],
-    "sound feminine plural; broken plural triptote in ـَة (-a)":
-        ["sound-feminine-plural",
-         "broken-plural triptote-a",
-        ],
-    "basic singular diptote; basic singular triptote":
-        ["singular diptote",
-         "singular triptote",
-        ],
-    "basic singular triptote; basic singular diptote":
-        ["singular diptote",
-         "singular triptote",
-        ],
-    "singular in ـًا (-an)":
-        "singular-an-alef",
-    "singular triptote in ـَة (-a); singular of irregular noun":
-        ["singular triptote-a",
-         "singular irregular",
-        ],
-    "basic singular triptote; singular of irregular noun":
-        ["singular triptote",
-         "singular irregular",
-        ],
-    "singular diptote in ـَاة (-āh)":  #a حماة/Arabic
-        "singular diptote-ah",
-    "singular in ـًى (-an); singular invariable":
-        ["singular-an-maksura", "singular invariable",],
-    "singular diptote in ـَة (-a); singular triptote in ـَة (-a)":
-        ["singular diptote-a",
-         "singular triptote-a",
-        ],
-    "singular triptote in ـٍ (-in); singular diptote in ـٍ (-in); singular of irregular noun":
-        ["singular triptote-in",
-         "singular diptote-in",
-         "singular irregular",
-        ],
+    # Arabic number paradigm markers decomposed after changes in the parser:
+    "basic broken plural diptote": "broken-plural diptote",
+    "basic broken plural triptote": "broken-plural triptote",  #a حجرة/Arabic
+    "basic collective triptote": "collective triptote",
+    "basic singular diptote": "singular diptote",
+    "basic singular triptote": "singular triptote",
+    "broken plural diptote in ـٍ (-in)":  "broken-plural diptote-in",  #a سحلية/Arabic
+    "broken plural in ـًى (-an)": "broken-plural-an",  #a بلوة/Arabic
+    "broken plural invariable": "broken-plural invariable",  #a ضحية/Arabic
+    "broken plural triptote in ـَة (-a)": "broken-plural triptote-a",  #a رصيد/Arabic
+    "collective invariable": "collective invariable",
+    "diptote triptote": ["diptote", "triptote",],
+    "singular diptote in ـٍ (-in)": "singular diptote-in",
+    "singular diptote in ـَاة (-āh)": "singular diptote-ah",  #a حماة/Arabic
+    "singular diptote in ـَة (-a)": "singular diptote-a",  #a أرمية/Arabic
+    "singular in ـًا (-an)": "singular-an-alef",  
+    "singular in ـًى (-an)": "singular-an-maksura",  #a مدى/Arabic
+    "singular invariable": "singular invariable",
+    "singular long construct": "singular long-construct",  #a ذو الحجة/Arabic
+    "singular of irregular noun": "singular irregular",
+    "singular triptote in ـٍ (-in)": "singular triptote-in",
+    "singular triptote in ـَاة (-āh)": "singular triptote-ah", #a قناة السويس/Arabic
+    "singular triptote in ـَة (-a)": "singular triptote-a",  #a حاجة/Arabic
+    "singulative triptote in ـَة (-a)": "singulative triptote-a",  #a جثجاث/Arabic
+    "sound feminine paucal": "sound-feminine-paucal",
+    "sound feminine plural": "sound-feminine-plural",
+    "sound masculine plural": "sound-masculine-plural",
+
 }
 
 def check_tags(k, v):
