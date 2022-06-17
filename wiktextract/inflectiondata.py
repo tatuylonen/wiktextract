@@ -4148,7 +4148,9 @@ infl_map = {
         "then": ["sound-feminine-plural",
                  "broken-plural triptote",],
     },
-    "singular in ـًى (-an)": "singular-an",  #a مدى/Arabic
+    "singular in ـًى (-an)": "singular-an-maksura",  #a مدى/Arabic
+    # Unicode code-point alef maksura, in contrast with
+    # singular-an-alef 
     "singulative triptote in ـَة (-a)": "singulative triptote-a",  #a جثجاث/Arabic
     "singular triptote in ـَة (-a)": "singular triptote-a",  #a حاجة/Arabic
     #a بين/Arabic
@@ -5208,6 +5210,83 @@ infl_map = {
         "lang": "Tagalog",
         "then": "focus",
     },
+
+    "broken plural triptote in ـَة (-a)‎; basic broken plural diptote":
+        ["broken-plural triptote-a",
+         "broken-plural diptote",
+        ],
+    "broken plural triptote in ـَة (-a)‎; basic broken plural triptote":
+        ["broken-plural triptote-a",
+         "broken-plural triptote",
+        ],
+    "broken plural invariable‎; sound masculine plural":
+        ["broken-plural invariable",
+         "sound-masculine-plural",
+        ],
+    "basic broken plural triptote‎; broken plural in ـًى (-an)‎; broken plural diptote in ـٍ (-in)":
+        ["broken-plural triptote",
+         "broken-plural-an",
+         "broken-plural diptote-in",
+        ],
+    "broken plural triptote in ـَة (-a)‎; basic broken plural triptote‎; basic broken plural diptote":
+        ["broken-plural triptote-a",
+         "broken-plural triptote",
+         "broken-plural diptote",
+        ],
+    "sound feminine plural‎; broken plural triptote in ـَة (-a)‎; basic broken plural triptote":
+        ["sound-feminine-plural",
+         "broken-plural triptote-a",
+         "broken-plural triptote",
+        ],
+    "basic broken plural triptote‎; sound masculine plural‎; sound feminine plural":
+        ["broken-plural triptote",
+         "sound-masculine-plural",
+         "sound-feminine-plural",
+        ],
+    "sound masculine plural‎; basic broken plural diptote‎; broken plural triptote in ـَة (-a)":
+        ["sound-masculine-plural",
+         "broken-plural diptote",
+         "broken-plural triptote-a",
+        ],
+    "basic broken plural diptote‎; broken plural invariable":
+        ["broken-plural diptote",
+         "broken-plural invariable",
+        ],
+    "sound feminine plural‎; broken plural triptote in ـَة (-a)":
+        ["sound-feminine-plural",
+         "broken-plural triptote-a",
+        ],
+    "basic singular diptote‎; basic singular triptote":
+        ["singular diptote",
+         "singular triptote",
+        ],
+    "basic singular triptote‎; basic singular diptote":
+        ["singular diptote",
+         "singular triptote",
+        ],
+    "singular in ـًا (-an)":
+        "singular-an-alef",
+    "singular triptote in ـَة (-a)‎; singular of irregular noun":
+        ["singular triptote-a",
+         "singular irregular",
+        ],
+    "basic singular triptote‎; singular of irregular noun":
+        ["singular triptote",
+         "singular irregular",
+        ],
+    "singular diptote in ـَاة (-āh)":  #a حماة/Arabic
+        "singular diptote-ah",
+    "singular in ـًى (-an)‎; singular invariable":
+        ["singular-an-maksura", "singular invariable",],
+    "singular diptote in ـَة (-a)‎; singular triptote in ـَة (-a)":
+        ["singular diptote-a",
+         "singular triptote-a",
+        ],
+    "singular triptote in ـٍ (-in)‎; singular diptote in ـٍ (-in)‎; singular of irregular noun":
+        ["singular triptote-in",
+         "singular diptote-in",
+         "singular irregular",
+        ],
 }
 
 def check_tags(k, v):
@@ -5275,6 +5354,3 @@ for k, v in infl_start_map.items():
 
 infl_start_re = re.compile(
     r"^({}) ".format("|".join(re.escape(x) for x in infl_start_map.keys())))
-
-# XXX check e.g. ligpit/Tagalog - verb conjugation has Trigger column that needs
-# special handling - not aspects but triggers?
