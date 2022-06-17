@@ -5885,7 +5885,6 @@ valid_tags = {
     "indicative-ii": "mood",
     "diptote-a": "class",  #a أرمية/Arabic
     "broken-plural-an": "class",  #a كرة#Arabic
-    "singular-an": "class",  #a مدى/Arabic
     "duoplural": "number",  # niteel/Navajo
     "indefinite-person": "person",
     "spatial-person": "person",
@@ -5908,6 +5907,12 @@ valid_tags = {
     "triptote-in": "class",  #a تحو/Arabic
     "past-i": "tense",  #eh/Albanian
     "past-ii": "tense",
+    "focus": "detail",  #magwahil/Tagalog, trigger-focus
+    #  singular in ـًى (-an) 
+    "singular-an-maksura": "class",  #a مدى/Arabic
+    #  singular in ـًا (-an) 
+    "singular-an-alef": "class",  #a سنا/Arabic
+    "diptote-ah": "class",  #a حماة/Arabic
 }
 
 for k, v in valid_tags.items():

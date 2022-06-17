@@ -2226,7 +2226,6 @@ infl_map = {
     "n gender": "neuter",
     "Feminine singular": "feminine singular",
     "Root word": "root",
-    "Trigger": "",  # XXX Tagalog ['-sagutan']
     "Aspect": "",
     "Complete": "completive",
     "Progressive": "progressive",
@@ -4149,7 +4148,9 @@ infl_map = {
         "then": ["sound-feminine-plural",
                  "broken-plural triptote",],
     },
-    "singular in ـًى (-an)": "singular-an",  #a مدى/Arabic
+    "singular in ـًى (-an)": "singular-an-maksura",  #a مدى/Arabic
+    # Unicode code-point alef maksura, in contrast with
+    # singular-an-alef 
     "singulative triptote in ـَة (-a)": "singulative triptote-a",  #a جثجاث/Arabic
     "singular triptote in ـَة (-a)": "singular triptote-a",  #a حاجة/Arabic
     #a بين/Arabic
@@ -5195,7 +5196,97 @@ infl_map = {
     "ata (3rd person masculine plural)": "third-person masculine plural",  #ata
     "ajo (3rd person feminine singular)":" third-person feminine singular",  #ajo
     
-    
+    # Tagalog small verb tables, like magwahil/Tagalog
+    # need something to tag a td-cell with stuff like
+    # "actor" or "object" in it, or else it'll cause
+    # NO-TAGS. Unfortunately, only "actor" is tagged
+    # because "object" and others are parsed as headers.
+    # At least this way, there is no error message, but
+    # it is inconsistently applied.
+    # Using "focus": "detail", in valid_tags seems to
+    # do the trick and stop 'focus' from bleeding as it
+    # does it it's "misc".
+    "Trigger": {
+        "lang": "Tagalog",
+        "then": "focus",
+    },
+
+    "broken plural triptote in ـَة (-a)‎; basic broken plural diptote":
+        ["broken-plural triptote-a",
+         "broken-plural diptote",
+        ],
+    "broken plural triptote in ـَة (-a)‎; basic broken plural triptote":
+        ["broken-plural triptote-a",
+         "broken-plural triptote",
+        ],
+    "broken plural invariable‎; sound masculine plural":
+        ["broken-plural invariable",
+         "sound-masculine-plural",
+        ],
+    "basic broken plural triptote‎; broken plural in ـًى (-an)‎; broken plural diptote in ـٍ (-in)":
+        ["broken-plural triptote",
+         "broken-plural-an",
+         "broken-plural diptote-in",
+        ],
+    "broken plural triptote in ـَة (-a)‎; basic broken plural triptote‎; basic broken plural diptote":
+        ["broken-plural triptote-a",
+         "broken-plural triptote",
+         "broken-plural diptote",
+        ],
+    "sound feminine plural‎; broken plural triptote in ـَة (-a)‎; basic broken plural triptote":
+        ["sound-feminine-plural",
+         "broken-plural triptote-a",
+         "broken-plural triptote",
+        ],
+    "basic broken plural triptote‎; sound masculine plural‎; sound feminine plural":
+        ["broken-plural triptote",
+         "sound-masculine-plural",
+         "sound-feminine-plural",
+        ],
+    "sound masculine plural‎; basic broken plural diptote‎; broken plural triptote in ـَة (-a)":
+        ["sound-masculine-plural",
+         "broken-plural diptote",
+         "broken-plural triptote-a",
+        ],
+    "basic broken plural diptote‎; broken plural invariable":
+        ["broken-plural diptote",
+         "broken-plural invariable",
+        ],
+    "sound feminine plural‎; broken plural triptote in ـَة (-a)":
+        ["sound-feminine-plural",
+         "broken-plural triptote-a",
+        ],
+    "basic singular diptote‎; basic singular triptote":
+        ["singular diptote",
+         "singular triptote",
+        ],
+    "basic singular triptote‎; basic singular diptote":
+        ["singular diptote",
+         "singular triptote",
+        ],
+    "singular in ـًا (-an)":
+        "singular-an-alef",
+    "singular triptote in ـَة (-a)‎; singular of irregular noun":
+        ["singular triptote-a",
+         "singular irregular",
+        ],
+    "basic singular triptote‎; singular of irregular noun":
+        ["singular triptote",
+         "singular irregular",
+        ],
+    "singular diptote in ـَاة (-āh)":  #a حماة/Arabic
+        "singular diptote-ah",
+    "singular in ـًى (-an)‎; singular invariable":
+        ["singular-an-maksura", "singular invariable",],
+    "singular diptote in ـَة (-a)‎; singular triptote in ـَة (-a)":
+        ["singular diptote-a",
+         "singular triptote-a",
+        ],
+    "singular triptote in ـٍ (-in)‎; singular diptote in ـٍ (-in)‎; singular of irregular noun":
+        ["singular triptote-in",
+         "singular diptote-in",
+         "singular irregular",
+        ],
 }
 
 def check_tags(k, v):
@@ -5263,6 +5354,3 @@ for k, v in infl_start_map.items():
 
 infl_start_re = re.compile(
     r"^({}) ".format("|".join(re.escape(x) for x in infl_start_map.keys())))
-
-# XXX check e.g. ligpit/Tagalog - verb conjugation has Trigger column that needs
-# special handling - not aspects but triggers?
