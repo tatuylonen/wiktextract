@@ -984,9 +984,9 @@ def or_tagsets(lang, pos, tagsets1, tagsets2):
     all combinations).  If they contain simple alternatives (differ in
     only one category), they are simply merged; otherwise they are split to
     more alternatives.  The tagsets are assumed be sets of sorted tuples."""
-    assert isinstance(tagsets1, list) and len(tagsets1) >= 1
+    assert isinstance(tagsets1, list)
     assert all(isinstance(x, tuple) for x in tagsets1)
-    assert isinstance(tagsets2, list) and len(tagsets2) >= 1
+    assert isinstance(tagsets2, list)
     assert all(isinstance(x, tuple) for x in tagsets1)
     tagsets = []  # This will be the result
 
@@ -1280,7 +1280,7 @@ def parse_title(title, source):
     return global_tags, table_tags, extra_forms
 
 
-def expand_header(ctx, word, lang, pos, text, tags0, silent=False,
+def expand_header(config, ctx, word, lang, pos, text, tags0, silent=False,
                   ignore_tags=False):
     """Expands a cell header to tagset, handling conditional expressions
     in infl_map.  This returns list of tuples of tags, each list element
@@ -1291,6 +1291,7 @@ def expand_header(ctx, word, lang, pos, text, tags0, silent=False,
     is True, then tags listed in "if" will be ignored in the test (this is
     used when trying to heuristically detect whether a non-<th> cell is anyway
     a header)."""
+    assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, Wtp)
     assert isinstance(word, str)
     assert isinstance(lang, str)
@@ -1300,108 +1301,131 @@ def expand_header(ctx, word, lang, pos, text, tags0, silent=False,
     assert silent in (True, False)
     # print("EXPAND_HDR: text={!r} tags0={!r}".format(text, tags0))
     # First map the text using the inflection map
-    text = text.strip()
-    if not text:
-        return [()]
-    if text in infl_map:
-        v = infl_map[text]
-    else:
-        m = re.match(infl_start_re, text)
-        if m is not None:
-            v = infl_start_map[m.group(1)]
-            # print("INFL_START {} -> {}".format(text, v))
-        elif re.match(r"Notes", text):
-            # Ignored header
-            # print("IGNORING NOTES")
-            return [("dummy-skip-this",)]
-        elif text in IGNORED_COLVALUES:
-            return [("dummy-ignore-skipped",)]
-        if m is None:
-            if not silent:
-                ctx.debug("inflection table: unrecognized header: {}"
-                          .format(text))
-            return [("error-unrecognized-form",)]  # Unrecognized header
-
-    # Then loop interpreting the value, until the value is a simple string.
-    # This may evaluate nested conditional expressions.
-    while True:
-        # If it is a string, we are done.
-        if isinstance(v, str):
-            tags = set(v.split())
-            remove_useless_tags(lang, pos, tags)
-            return [tuple(sorted(tags))]
-        # For a list, just interpret it as alternatives.  (Currently the
-        # alternatives must directly be strings.)
-        if isinstance(v, (list, tuple)):
-            ret = []
-            for x in v:
-                tags = set(x.split())
-                remove_useless_tags(lang, pos, tags)
-                tags = tuple(sorted(tags))
-                if tags not in ret:
-                    ret.append(tags)
-            return ret
-        # Otherwise the value should be a dictionary describing a conditional
-        # expression.
-        if not isinstance(v, dict):
-            ctx.debug("inflection table: internal: "
-                      "UNIMPLEMENTED INFL_MAP VALUE: {}"
-                      .format(infl_map[text]))
-            return [()]
-        # Evaluate the conditional expression.
-        assert isinstance(v, dict)
-        cond = "default-true"
-        # Handle "lang" condition.  The value must be either a single language
-        # or a list of languages, and the condition evaluates to True if
-        # the table is in one of those languages.
-        if cond and "lang" in v:
-            c = v["lang"]
-            if isinstance(c, str):
-                cond = c == lang
-            else:
-                assert isinstance(c, (list, tuple, set))
-                cond = lang in c
-        # Handle "pos" condition.  The value must be either a single
-        # part-of-speech or a list of them, and the condition evaluates to
-        # True if the part-of-speech is any of those listed.
-        if cond and "pos" in v:
-            c = v["pos"]
-            if isinstance(c, str):
-                cond = c == pos
-            else:
-                assert isinstance(c, (list, tuple, set))
-                cond = pos in c
-        # Handle "if" condition.  The value must be a string containing
-        # a space-separated list of tags.  The condition evaluates to True
-        # if ``tags0`` contains all of the listed tags.  If the condition
-        # is of the form "any: ...tags...", then any of the tags will be
-        # enough.
-        if cond and "if" in v and not ignore_tags:
-            c = v["if"]
-            assert isinstance(c, str)
-            # "if" condition is true if any of the listed tags is present if
-            # it starts with "any:", otherwise all must be present
-            if c.startswith("any: "):
-                cond = any(t in tags0 for t in c[5:].split())
-            else:
-                cond = all(t in tags0 for t in c.split())
-        # Warning message about missing conditions for debugging.
-        if cond == "default-true" and not silent:
-            ctx.debug("inflection table: IF MISSING COND: word={} "
-                      "lang={} text={} tags0={} c={} cond={}"
-                      .format(word, lang, text, tags0, c, cond))
-        # Based on the result of evaluating the condition, select either
-        # "then" part or "else" part.
-        if cond:
-            v = v.get("then", "")
+    text = clean_value(config, text)
+    combined_return = []
+    parts = split_at_comma_semi(text, separators=[";"])
+    for text in parts:
+        if not text:
+            continue
+        if text in infl_map:
+            v = infl_map[text]
         else:
-            v = v.get("else")
-            if v is None:
+            m = re.match(infl_start_re, text)
+            if m is not None:
+                v = infl_start_map[m.group(1)]
+                # print("INFL_START {} -> {}".format(text, v))
+            elif re.match(r"Notes", text):
+                # Ignored header
+                # print("IGNORING NOTES")
+                combined_return = or_tagsets(lang, pos, combined_return,
+                                             [("dummy-skip-this",)])
+                continue
+            elif text in IGNORED_COLVALUES:
+                combined_return = or_tagsets(lang, pos, combined_return,
+                                             [("dummy-ignore-skipped",)])
+                continue
+            if m is None:
                 if not silent:
-                    ctx.debug("inflection table: IF WITHOUT ELSE EVALS False: "
-                              "{}/{} {!r} tags0={}"
-                              .format(word, lang, text, tags0))
-                v = "error-unrecognized-form"
+                    ctx.debug("inflection table: unrecognized header: {}"
+                              .format(text))
+                # Unrecognized header
+                combined_return = or_tagsets(lang, pos, combined_return,
+                                             [("error-unrecognized-form",)])
+                continue
+
+        # Then loop interpreting the value, until the value is a simple string.
+        # This may evaluate nested conditional expressions.
+        while True:
+            # If it is a string, we are done.
+            if isinstance(v, str):
+                tags = set(v.split())
+                remove_useless_tags(lang, pos, tags)
+                tagset = [tuple(sorted(tags))]
+                break
+            # For a list, just interpret it as alternatives.  (Currently the
+            # alternatives must directly be strings.)
+            if isinstance(v, (list, tuple)):
+                tagset = []
+                for x in v:
+                    tags = set(x.split())
+                    remove_useless_tags(lang, pos, tags)
+                    tags = tuple(sorted(tags))
+                    if tags not in tagset:
+                        tagset.append(tags)
+                break
+            # Otherwise the value should be a dictionary describing a
+            # conditional expression.
+            if not isinstance(v, dict):
+                ctx.debug("inflection table: internal: "
+                          "UNIMPLEMENTED INFL_MAP VALUE: {}"
+                          .format(infl_map[text]))
+                tagset = [()]
+                break
+            # Evaluate the conditional expression.
+            assert isinstance(v, dict)
+            cond = "default-true"
+            # Handle "lang" condition.  The value must be either a
+            # single language or a list of languages, and the
+            # condition evaluates to True if the table is in one of
+            # those languages.
+            if cond and "lang" in v:
+                c = v["lang"]
+                if isinstance(c, str):
+                    cond = c == lang
+                else:
+                    assert isinstance(c, (list, tuple, set))
+                    cond = lang in c
+            # Handle "pos" condition.  The value must be either a single
+            # part-of-speech or a list of them, and the condition evaluates to
+            # True if the part-of-speech is any of those listed.
+            if cond and "pos" in v:
+                c = v["pos"]
+                if isinstance(c, str):
+                    cond = c == pos
+                else:
+                    assert isinstance(c, (list, tuple, set))
+                    cond = pos in c
+            # Handle "if" condition.  The value must be a string containing
+            # a space-separated list of tags.  The condition evaluates to True
+            # if ``tags0`` contains all of the listed tags.  If the condition
+            # is of the form "any: ...tags...", then any of the tags will be
+            # enough.
+            if cond and "if" in v and not ignore_tags:
+                c = v["if"]
+                assert isinstance(c, str)
+                # "if" condition is true if any of the listed tags is present if
+                # it starts with "any:", otherwise all must be present
+                if c.startswith("any: "):
+                    cond = any(t in tags0 for t in c[5:].split())
+                else:
+                    cond = all(t in tags0 for t in c.split())
+            # Warning message about missing conditions for debugging.
+            if cond == "default-true" and not silent:
+                ctx.debug("inflection table: IF MISSING COND: word={} "
+                          "lang={} text={} tags0={} c={} cond={}"
+                          .format(word, lang, text, tags0, c, cond))
+            # Based on the result of evaluating the condition, select either
+            # "then" part or "else" part.
+            if cond:
+                v = v.get("then", "")
+            else:
+                v = v.get("else")
+                if v is None:
+                    if not silent:
+                        ctx.debug("inflection table: IF WITHOUT ELSE EVALS "
+                                  "False: "
+                                  "{}/{} {!r} tags0={}"
+                                  .format(word, lang, text, tags0))
+                    v = "error-unrecognized-form"
+
+        # Merge the resulting tagset from this header part with the other
+        # tagsets from the whole header
+        combined_return = or_tagsets(lang, pos, combined_return, tagset)
+
+    # Return the combined tagsets, or empty tagset if we got no tagsets
+    if not combined_return:
+        combined_return = [()]
+    return combined_return
 
 
 def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
@@ -1730,10 +1754,12 @@ def lang_specific_tags(lang, pos, form):
     return form, []
 
 
-def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
+def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
+                       after):
     """This is the default table parser.  Despite its name, it can parse
     complex tables.  This returns a list of forms to be added to the
     part-of-speech, or None if the table could not be parsed."""
+    assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, Wtp)
     assert isinstance(word, str)
     assert isinstance(lang, str)
@@ -1921,7 +1947,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                 for ref in refs:
                     if ref in def_ht:
                         refs_tags.update(def_ht[ref])
-                rowtags = expand_header(ctx, word, lang, pos, text, [],
+                rowtags = expand_header(config, ctx, word, lang, pos, text, [],
                                         silent=True)
                 rowtags = list(set(tuple(sorted(set(x) | refs_tags))
                                    for x in rowtags))
@@ -1941,8 +1967,9 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                         refs_tags.update(def_ht[ref])
 
                 # Expand header to tags
-                v = expand_header(ctx, word, lang, pos, text, [], silent=True)
-                print("EXPANDED {!r} to {}".format(text, v))
+                v = expand_header(config, ctx, word, lang, pos, text, [],
+                                  silent=True)
+                # print("EXPANDED {!r} to {}".format(text, v))
 
                 # Mark that the column has text (we are not at top)
                 while len(col_has_text) <= j:
@@ -1976,7 +2003,7 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
                                                colspan, False, col):
                         tags0 = (set(rt0) | set(ct0) | set(global_tags) |
                                  set(table_tags))
-                        alt_tags = expand_header(ctx, word, lang, pos,
+                        alt_tags = expand_header(config, ctx, word, lang, pos,
                                                  text, tags0)
                         for tt in alt_tags:
                             if tt not in all_hdr_tags:
@@ -2611,8 +2638,9 @@ def parse_simple_table(ctx, word, lang, pos, rows, titles, source, after):
     return ret
 
 
-def handle_generic_table(ctx, data, word, lang, pos, rows, titles, source,
-                         after):
+def handle_generic_table(config, ctx, data, word, lang, pos, rows, titles,
+                         source, after):
+    assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, Wtp)
     assert isinstance(data, dict)
     assert isinstance(word, str)
@@ -2630,7 +2658,8 @@ def handle_generic_table(ctx, data, word, lang, pos, rows, titles, source,
         assert isinstance(x, str)
 
     # Try to parse the table as a simple table
-    ret = parse_simple_table(ctx, word, lang, pos, rows, titles, source, after)
+    ret = parse_simple_table(config, ctx, word, lang, pos, rows, titles,
+                             source, after)
     if ret is None:
         # XXX handle other table formats
         # We were not able to handle the table
@@ -2773,7 +2802,8 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                                                   titletext)).strip()
                 cleaned, _, _, _ = clean_header(word, celltext, False)
                 cleaned = re.sub(r"\s+", " ", cleaned)
-                hdr_expansion = expand_header(ctx, word, lang, pos, cleaned, [],
+                hdr_expansion = expand_header(config, ctx, word, lang, pos,
+                                              cleaned, [],
                                               silent=True, ignore_tags=True)
                 candidate_hdr = (not any(any(t.startswith("error-") for t in ts)
                                          for ts in hdr_expansion))
@@ -2847,8 +2877,8 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
 
     # Now we have a table that has been parsed into rows and columns of
     # InflCell objects.  Parse the inflection table from that format.
-    handle_generic_table(ctx, data, word, lang, pos, rows, titles, source,
-                         after)
+    handle_generic_table(config, ctx, data, word, lang, pos, rows, titles,
+                         source, after)
 
 
 def handle_html_table(config, ctx, word, lang, pos, data, tree, titles, source,

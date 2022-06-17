@@ -994,6 +994,8 @@ def clean_value(config, title, no_strip=False, no_html_strip=False):
     # Replace HTML entities
     title = html.unescape(title)
     title = re.sub("\xa0", " ", title)  # nbsp
+    # Remove left-to-right and right-to-left, zero-with characters
+    title = re.sub(r"[\u200e\u200f\u200b\u200d\u200c\ufeff]", "", title)
     # Replace whitespace sequences by a single space.
     title = re.sub(r"[ \t\r]+", " ", title)
     title = re.sub(r" *\n+", "\n", title)

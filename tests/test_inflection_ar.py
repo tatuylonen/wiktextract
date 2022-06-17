@@ -2,7 +2,7 @@
 #
 # Tests for parsing inflection tables
 #
-# Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2021, 2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
 import json
@@ -128,7 +128,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "دِمَقْس‎",
+                "form": "دِمَقْس",
                 "roman": "dimaqs",
                 "source": "Declension",
                 "tags": [
@@ -139,7 +139,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الدِّمَقْس‎",
+                "form": "الدِّمَقْس",
                 "roman": "ad-dimaqs",
                 "source": "Declension",
                 "tags": [
@@ -150,7 +150,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "دِمَقْس‎",
+                "form": "دِمَقْس",
                 "roman": "dimaqs",
                 "source": "Declension",
                 "tags": [
@@ -161,7 +161,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "دِمَقْسٌ‎",
+                "form": "دِمَقْسٌ",
                 "roman": "dimaqsun",
                 "source": "Declension",
                 "tags": [
@@ -172,7 +172,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الدِّمَقْسُ‎",
+                "form": "الدِّمَقْسُ",
                 "roman": "ad-dimaqsu",
                 "source": "Declension",
                 "tags": [
@@ -183,7 +183,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "دِمَقْسُ‎",
+                "form": "دِمَقْسُ",
                 "roman": "dimaqsu",
                 "source": "Declension",
                 "tags": [
@@ -194,7 +194,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "دِمَقْسًا‎",
+                "form": "دِمَقْسًا",
                 "roman": "dimaqsan",
                 "source": "Declension",
                 "tags": [
@@ -205,7 +205,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الدِّمَقْسَ‎",
+                "form": "الدِّمَقْسَ",
                 "roman": "ad-dimaqsa",
                 "source": "Declension",
                 "tags": [
@@ -216,7 +216,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "دِمَقْسَ‎",
+                "form": "دِمَقْسَ",
                 "roman": "dimaqsa",
                 "source": "Declension",
                 "tags": [
@@ -227,7 +227,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "دِمَقْسٍ‎",
+                "form": "دِمَقْسٍ",
                 "roman": "dimaqsin",
                 "source": "Declension",
                 "tags": [
@@ -238,7 +238,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الدِّمَقْسِ‎",
+                "form": "الدِّمَقْسِ",
                 "roman": "ad-dimaqsi",
                 "source": "Declension",
                 "tags": [
@@ -249,7 +249,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "دِمَقْسِ‎",
+                "form": "دِمَقْسِ",
                 "roman": "dimaqsi",
                 "source": "Declension",
                 "tags": [
@@ -878,7 +878,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "إِبْلَاع‎",
+                "form": "إِبْلَاع",
                 "roman": "ʾiblāʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -886,7 +886,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "مُبْلِع‎",
+                "form": "مُبْلِع",
                 "roman": "mubliʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -895,7 +895,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "مُبْلَع‎",
+                "form": "مُبْلَع",
                 "roman": "mublaʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -904,7 +904,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعْتُ‎",
+                "form": "أَبْلَعْتُ",
                 "roman": "ʾablaʿtu",
                 "source": "Conjugation",
                 "tags": [
@@ -918,7 +918,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعْتَ‎",
+                "form": "أَبْلَعْتَ",
                 "roman": "ʾablaʿta",
                 "source": "Conjugation",
                 "tags": [
@@ -932,7 +932,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعَ‎",
+                "form": "أَبْلَعَ",
                 "roman": "ʾablaʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -946,7 +946,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعْتُمَا‎",
+                "form": "أَبْلَعْتُمَا",
                 "roman": "ʾablaʿtumā",
                 "source": "Conjugation",
                 "tags": [
@@ -960,7 +960,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعَا‎",
+                "form": "أَبْلَعَا",
                 "roman": "ʾablaʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -974,7 +974,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعْنَا‎",
+                "form": "أَبْلَعْنَا",
                 "roman": "ʾablaʿnā",
                 "source": "Conjugation",
                 "tags": [
@@ -988,7 +988,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعْتُمْ‎",
+                "form": "أَبْلَعْتُمْ",
                 "roman": "ʾablaʿtum",
                 "source": "Conjugation",
                 "tags": [
@@ -1002,7 +1002,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعُوا‎",
+                "form": "أَبْلَعُوا",
                 "roman": "ʾablaʿū",
                 "source": "Conjugation",
                 "tags": [
@@ -1016,7 +1016,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعْتُ‎",
+                "form": "أَبْلَعْتُ",
                 "roman": "ʾablaʿtu",
                 "source": "Conjugation",
                 "tags": [
@@ -1030,7 +1030,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعْتِ‎",
+                "form": "أَبْلَعْتِ",
                 "roman": "ʾablaʿti",
                 "source": "Conjugation",
                 "tags": [
@@ -1044,7 +1044,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعَتْ‎",
+                "form": "أَبْلَعَتْ",
                 "roman": "ʾablaʿat",
                 "source": "Conjugation",
                 "tags": [
@@ -1058,7 +1058,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعْتُمَا‎",
+                "form": "أَبْلَعْتُمَا",
                 "roman": "ʾablaʿtumā",
                 "source": "Conjugation",
                 "tags": [
@@ -1072,7 +1072,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعَتَا‎",
+                "form": "أَبْلَعَتَا",
                 "roman": "ʾablaʿatā",
                 "source": "Conjugation",
                 "tags": [
@@ -1086,7 +1086,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعْنَا‎",
+                "form": "أَبْلَعْنَا",
                 "roman": "ʾablaʿnā",
                 "source": "Conjugation",
                 "tags": [
@@ -1100,7 +1100,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعْتُنَّ‎",
+                "form": "أَبْلَعْتُنَّ",
                 "roman": "ʾablaʿtunna",
                 "source": "Conjugation",
                 "tags": [
@@ -1114,7 +1114,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلَعْنَ‎",
+                "form": "أَبْلَعْنَ",
                 "roman": "ʾablaʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -1128,7 +1128,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعُ‎",
+                "form": "أُبْلِعُ",
                 "roman": "ʾubliʿu",
                 "source": "Conjugation",
                 "tags": [
@@ -1142,7 +1142,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعُ‎",
+                "form": "تُبْلِعُ",
                 "roman": "tubliʿu",
                 "source": "Conjugation",
                 "tags": [
@@ -1156,7 +1156,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلِعُ‎",
+                "form": "يُبْلِعُ",
                 "roman": "yubliʿu",
                 "source": "Conjugation",
                 "tags": [
@@ -1170,7 +1170,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعَانِ‎",
+                "form": "تُبْلِعَانِ",
                 "roman": "tubliʿāni",
                 "source": "Conjugation",
                 "tags": [
@@ -1184,7 +1184,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلِعَانِ‎",
+                "form": "يُبْلِعَانِ",
                 "roman": "yubliʿāni",
                 "source": "Conjugation",
                 "tags": [
@@ -1198,7 +1198,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "نُبْلِعُ‎",
+                "form": "نُبْلِعُ",
                 "roman": "nubliʿu",
                 "source": "Conjugation",
                 "tags": [
@@ -1212,7 +1212,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعُونَ‎",
+                "form": "تُبْلِعُونَ",
                 "roman": "tubliʿūna",
                 "source": "Conjugation",
                 "tags": [
@@ -1226,7 +1226,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلِعُونَ‎",
+                "form": "يُبْلِعُونَ",
                 "roman": "yubliʿūna",
                 "source": "Conjugation",
                 "tags": [
@@ -1240,7 +1240,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعُ‎",
+                "form": "أُبْلِعُ",
                 "roman": "ʾubliʿu",
                 "source": "Conjugation",
                 "tags": [
@@ -1254,7 +1254,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعِينَ‎",
+                "form": "تُبْلِعِينَ",
                 "roman": "tubliʿīna",
                 "source": "Conjugation",
                 "tags": [
@@ -1268,7 +1268,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعُ‎",
+                "form": "تُبْلِعُ",
                 "roman": "tubliʿu",
                 "source": "Conjugation",
                 "tags": [
@@ -1282,7 +1282,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعَانِ‎",
+                "form": "تُبْلِعَانِ",
                 "roman": "tubliʿāni",
                 "source": "Conjugation",
                 "tags": [
@@ -1296,7 +1296,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعَانِ‎",
+                "form": "تُبْلِعَانِ",
                 "roman": "tubliʿāni",
                 "source": "Conjugation",
                 "tags": [
@@ -1310,7 +1310,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "نُبْلِعُ‎",
+                "form": "نُبْلِعُ",
                 "roman": "nubliʿu",
                 "source": "Conjugation",
                 "tags": [
@@ -1324,7 +1324,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعْنَ‎",
+                "form": "تُبْلِعْنَ",
                 "roman": "tubliʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -1338,7 +1338,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلِعْنَ‎",
+                "form": "يُبْلِعْنَ",
                 "roman": "yubliʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -1352,7 +1352,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعَ‎",
+                "form": "أُبْلِعَ",
                 "roman": "ʾubliʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -1364,7 +1364,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعَ‎",
+                "form": "تُبْلِعَ",
                 "roman": "tubliʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -1376,7 +1376,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلِعَ‎",
+                "form": "يُبْلِعَ",
                 "roman": "yubliʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -1388,7 +1388,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعَا‎",
+                "form": "تُبْلِعَا",
                 "roman": "tubliʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -1400,7 +1400,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلِعَا‎",
+                "form": "يُبْلِعَا",
                 "roman": "yubliʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -1412,7 +1412,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "نُبْلِعَ‎",
+                "form": "نُبْلِعَ",
                 "roman": "nubliʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -1424,7 +1424,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعُوا‎",
+                "form": "تُبْلِعُوا",
                 "roman": "tubliʿū",
                 "source": "Conjugation",
                 "tags": [
@@ -1436,7 +1436,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلِعُوا‎",
+                "form": "يُبْلِعُوا",
                 "roman": "yubliʿū",
                 "source": "Conjugation",
                 "tags": [
@@ -1448,7 +1448,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعَ‎",
+                "form": "أُبْلِعَ",
                 "roman": "ʾubliʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -1460,7 +1460,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعِي‎",
+                "form": "تُبْلِعِي",
                 "roman": "tubliʿī",
                 "source": "Conjugation",
                 "tags": [
@@ -1472,7 +1472,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعَ‎",
+                "form": "تُبْلِعَ",
                 "roman": "tubliʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -1484,7 +1484,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعَا‎",
+                "form": "تُبْلِعَا",
                 "roman": "tubliʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -1496,7 +1496,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعَا‎",
+                "form": "تُبْلِعَا",
                 "roman": "tubliʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -1508,7 +1508,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "نُبْلِعَ‎",
+                "form": "نُبْلِعَ",
                 "roman": "nubliʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -1520,7 +1520,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعْنَ‎",
+                "form": "تُبْلِعْنَ",
                 "roman": "tubliʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -1532,7 +1532,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلِعْنَ‎",
+                "form": "يُبْلِعْنَ",
                 "roman": "yubliʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -1544,7 +1544,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعْ‎",
+                "form": "أُبْلِعْ",
                 "roman": "ʾubliʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -1556,7 +1556,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعْ‎",
+                "form": "تُبْلِعْ",
                 "roman": "tubliʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -1568,7 +1568,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلِعْ‎",
+                "form": "يُبْلِعْ",
                 "roman": "yubliʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -1580,7 +1580,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعَا‎",
+                "form": "تُبْلِعَا",
                 "roman": "tubliʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -1592,7 +1592,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلِعَا‎",
+                "form": "يُبْلِعَا",
                 "roman": "yubliʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -1604,7 +1604,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "نُبْلِعْ‎",
+                "form": "نُبْلِعْ",
                 "roman": "nubliʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -1616,7 +1616,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعُوا‎",
+                "form": "تُبْلِعُوا",
                 "roman": "tubliʿū",
                 "source": "Conjugation",
                 "tags": [
@@ -1628,7 +1628,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلِعُوا‎",
+                "form": "يُبْلِعُوا",
                 "roman": "yubliʿū",
                 "source": "Conjugation",
                 "tags": [
@@ -1640,7 +1640,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعْ‎",
+                "form": "أُبْلِعْ",
                 "roman": "ʾubliʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -1652,7 +1652,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعِي‎",
+                "form": "تُبْلِعِي",
                 "roman": "tubliʿī",
                 "source": "Conjugation",
                 "tags": [
@@ -1664,7 +1664,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعْ‎",
+                "form": "تُبْلِعْ",
                 "roman": "tubliʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -1676,7 +1676,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعَا‎",
+                "form": "تُبْلِعَا",
                 "roman": "tubliʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -1688,7 +1688,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعَا‎",
+                "form": "تُبْلِعَا",
                 "roman": "tubliʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -1700,7 +1700,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "نُبْلِعْ‎",
+                "form": "نُبْلِعْ",
                 "roman": "nubliʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -1712,7 +1712,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلِعْنَ‎",
+                "form": "تُبْلِعْنَ",
                 "roman": "tubliʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -1724,7 +1724,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلِعْنَ‎",
+                "form": "يُبْلِعْنَ",
                 "roman": "yubliʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -1736,7 +1736,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلِعْ‎",
+                "form": "أَبْلِعْ",
                 "roman": "ʾabliʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -1748,7 +1748,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلِعَا‎",
+                "form": "أَبْلِعَا",
                 "roman": "ʾabliʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -1760,7 +1760,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلِعُوا‎",
+                "form": "أَبْلِعُوا",
                 "roman": "ʾabliʿū",
                 "source": "Conjugation",
                 "tags": [
@@ -1772,7 +1772,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلِعِي‎",
+                "form": "أَبْلِعِي",
                 "roman": "ʾabliʿī",
                 "source": "Conjugation",
                 "tags": [
@@ -1784,7 +1784,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلِعَا‎",
+                "form": "أَبْلِعَا",
                 "roman": "ʾabliʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -1796,7 +1796,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أَبْلِعْنَ‎",
+                "form": "أَبْلِعْنَ",
                 "roman": "ʾabliʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -1808,7 +1808,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعْتُ‎",
+                "form": "أُبْلِعْتُ",
                 "roman": "ʾubliʿtu",
                 "source": "Conjugation",
                 "tags": [
@@ -1822,7 +1822,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعْتَ‎",
+                "form": "أُبْلِعْتَ",
                 "roman": "ʾubliʿta",
                 "source": "Conjugation",
                 "tags": [
@@ -1836,7 +1836,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعَ‎",
+                "form": "أُبْلِعَ",
                 "roman": "ʾubliʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -1850,7 +1850,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعْتُمَا‎",
+                "form": "أُبْلِعْتُمَا",
                 "roman": "ʾubliʿtumā",
                 "source": "Conjugation",
                 "tags": [
@@ -1864,7 +1864,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعَا‎",
+                "form": "أُبْلِعَا",
                 "roman": "ʾubliʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -1878,7 +1878,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعْنَا‎",
+                "form": "أُبْلِعْنَا",
                 "roman": "ʾubliʿnā",
                 "source": "Conjugation",
                 "tags": [
@@ -1892,7 +1892,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعْتُمْ‎",
+                "form": "أُبْلِعْتُمْ",
                 "roman": "ʾubliʿtum",
                 "source": "Conjugation",
                 "tags": [
@@ -1906,7 +1906,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعُوا‎",
+                "form": "أُبْلِعُوا",
                 "roman": "ʾubliʿū",
                 "source": "Conjugation",
                 "tags": [
@@ -1920,7 +1920,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعْتُ‎",
+                "form": "أُبْلِعْتُ",
                 "roman": "ʾubliʿtu",
                 "source": "Conjugation",
                 "tags": [
@@ -1934,7 +1934,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعْتِ‎",
+                "form": "أُبْلِعْتِ",
                 "roman": "ʾubliʿti",
                 "source": "Conjugation",
                 "tags": [
@@ -1948,7 +1948,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعَتْ‎",
+                "form": "أُبْلِعَتْ",
                 "roman": "ʾubliʿat",
                 "source": "Conjugation",
                 "tags": [
@@ -1962,7 +1962,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعْتُمَا‎",
+                "form": "أُبْلِعْتُمَا",
                 "roman": "ʾubliʿtumā",
                 "source": "Conjugation",
                 "tags": [
@@ -1976,7 +1976,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعَتَا‎",
+                "form": "أُبْلِعَتَا",
                 "roman": "ʾubliʿatā",
                 "source": "Conjugation",
                 "tags": [
@@ -1990,7 +1990,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعْنَا‎",
+                "form": "أُبْلِعْنَا",
                 "roman": "ʾubliʿnā",
                 "source": "Conjugation",
                 "tags": [
@@ -2004,7 +2004,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعْتُنَّ‎",
+                "form": "أُبْلِعْتُنَّ",
                 "roman": "ʾubliʿtunna",
                 "source": "Conjugation",
                 "tags": [
@@ -2018,7 +2018,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلِعْنَ‎",
+                "form": "أُبْلِعْنَ",
                 "roman": "ʾubliʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -2032,7 +2032,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلَعُ‎",
+                "form": "أُبْلَعُ",
                 "roman": "ʾublaʿu",
                 "source": "Conjugation",
                 "tags": [
@@ -2046,7 +2046,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعُ‎",
+                "form": "تُبْلَعُ",
                 "roman": "tublaʿu",
                 "source": "Conjugation",
                 "tags": [
@@ -2060,7 +2060,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلَعُ‎",
+                "form": "يُبْلَعُ",
                 "roman": "yublaʿu",
                 "source": "Conjugation",
                 "tags": [
@@ -2074,7 +2074,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعَانِ‎",
+                "form": "تُبْلَعَانِ",
                 "roman": "tublaʿāni",
                 "source": "Conjugation",
                 "tags": [
@@ -2088,7 +2088,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلَعَانِ‎",
+                "form": "يُبْلَعَانِ",
                 "roman": "yublaʿāni",
                 "source": "Conjugation",
                 "tags": [
@@ -2102,7 +2102,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "نُبْلَعُ‎",
+                "form": "نُبْلَعُ",
                 "roman": "nublaʿu",
                 "source": "Conjugation",
                 "tags": [
@@ -2116,7 +2116,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعُونَ‎",
+                "form": "تُبْلَعُونَ",
                 "roman": "tublaʿūna",
                 "source": "Conjugation",
                 "tags": [
@@ -2130,7 +2130,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلَعُونَ‎",
+                "form": "يُبْلَعُونَ",
                 "roman": "yublaʿūna",
                 "source": "Conjugation",
                 "tags": [
@@ -2144,7 +2144,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلَعُ‎",
+                "form": "أُبْلَعُ",
                 "roman": "ʾublaʿu",
                 "source": "Conjugation",
                 "tags": [
@@ -2158,7 +2158,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعِينَ‎",
+                "form": "تُبْلَعِينَ",
                 "roman": "tublaʿīna",
                 "source": "Conjugation",
                 "tags": [
@@ -2172,7 +2172,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعُ‎",
+                "form": "تُبْلَعُ",
                 "roman": "tublaʿu",
                 "source": "Conjugation",
                 "tags": [
@@ -2186,7 +2186,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعَانِ‎",
+                "form": "تُبْلَعَانِ",
                 "roman": "tublaʿāni",
                 "source": "Conjugation",
                 "tags": [
@@ -2200,7 +2200,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعَانِ‎",
+                "form": "تُبْلَعَانِ",
                 "roman": "tublaʿāni",
                 "source": "Conjugation",
                 "tags": [
@@ -2214,7 +2214,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "نُبْلَعُ‎",
+                "form": "نُبْلَعُ",
                 "roman": "nublaʿu",
                 "source": "Conjugation",
                 "tags": [
@@ -2228,7 +2228,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعْنَ‎",
+                "form": "تُبْلَعْنَ",
                 "roman": "tublaʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -2242,7 +2242,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلَعْنَ‎",
+                "form": "يُبْلَعْنَ",
                 "roman": "yublaʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -2256,7 +2256,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلَعَ‎",
+                "form": "أُبْلَعَ",
                 "roman": "ʾublaʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -2268,7 +2268,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعَ‎",
+                "form": "تُبْلَعَ",
                 "roman": "tublaʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -2280,7 +2280,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلَعَ‎",
+                "form": "يُبْلَعَ",
                 "roman": "yublaʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -2292,7 +2292,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعَا‎",
+                "form": "تُبْلَعَا",
                 "roman": "tublaʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -2304,7 +2304,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلَعَا‎",
+                "form": "يُبْلَعَا",
                 "roman": "yublaʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -2316,7 +2316,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "نُبْلَعَ‎",
+                "form": "نُبْلَعَ",
                 "roman": "nublaʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -2328,7 +2328,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعُوا‎",
+                "form": "تُبْلَعُوا",
                 "roman": "tublaʿū",
                 "source": "Conjugation",
                 "tags": [
@@ -2340,7 +2340,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلَعُوا‎",
+                "form": "يُبْلَعُوا",
                 "roman": "yublaʿū",
                 "source": "Conjugation",
                 "tags": [
@@ -2352,7 +2352,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلَعَ‎",
+                "form": "أُبْلَعَ",
                 "roman": "ʾublaʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -2364,7 +2364,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعِي‎",
+                "form": "تُبْلَعِي",
                 "roman": "tublaʿī",
                 "source": "Conjugation",
                 "tags": [
@@ -2376,7 +2376,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعَ‎",
+                "form": "تُبْلَعَ",
                 "roman": "tublaʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -2388,7 +2388,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعَا‎",
+                "form": "تُبْلَعَا",
                 "roman": "tublaʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -2400,7 +2400,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعَا‎",
+                "form": "تُبْلَعَا",
                 "roman": "tublaʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -2412,7 +2412,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "نُبْلَعَ‎",
+                "form": "نُبْلَعَ",
                 "roman": "nublaʿa",
                 "source": "Conjugation",
                 "tags": [
@@ -2424,7 +2424,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعْنَ‎",
+                "form": "تُبْلَعْنَ",
                 "roman": "tublaʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -2436,7 +2436,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلَعْنَ‎",
+                "form": "يُبْلَعْنَ",
                 "roman": "yublaʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -2448,7 +2448,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلَعْ‎",
+                "form": "أُبْلَعْ",
                 "roman": "ʾublaʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -2460,7 +2460,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعْ‎",
+                "form": "تُبْلَعْ",
                 "roman": "tublaʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -2472,7 +2472,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلَعْ‎",
+                "form": "يُبْلَعْ",
                 "roman": "yublaʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -2484,7 +2484,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعَا‎",
+                "form": "تُبْلَعَا",
                 "roman": "tublaʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -2496,7 +2496,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلَعَا‎",
+                "form": "يُبْلَعَا",
                 "roman": "yublaʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -2508,7 +2508,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "نُبْلَعْ‎",
+                "form": "نُبْلَعْ",
                 "roman": "nublaʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -2520,7 +2520,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعُوا‎",
+                "form": "تُبْلَعُوا",
                 "roman": "tublaʿū",
                 "source": "Conjugation",
                 "tags": [
@@ -2532,7 +2532,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلَعُوا‎",
+                "form": "يُبْلَعُوا",
                 "roman": "yublaʿū",
                 "source": "Conjugation",
                 "tags": [
@@ -2544,7 +2544,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "أُبْلَعْ‎",
+                "form": "أُبْلَعْ",
                 "roman": "ʾublaʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -2556,7 +2556,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعِي‎",
+                "form": "تُبْلَعِي",
                 "roman": "tublaʿī",
                 "source": "Conjugation",
                 "tags": [
@@ -2568,7 +2568,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعْ‎",
+                "form": "تُبْلَعْ",
                 "roman": "tublaʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -2580,7 +2580,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعَا‎",
+                "form": "تُبْلَعَا",
                 "roman": "tublaʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -2592,7 +2592,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعَا‎",
+                "form": "تُبْلَعَا",
                 "roman": "tublaʿā",
                 "source": "Conjugation",
                 "tags": [
@@ -2604,7 +2604,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "نُبْلَعْ‎",
+                "form": "نُبْلَعْ",
                 "roman": "nublaʿ",
                 "source": "Conjugation",
                 "tags": [
@@ -2616,7 +2616,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "تُبْلَعْنَ‎",
+                "form": "تُبْلَعْنَ",
                 "roman": "tublaʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -2628,7 +2628,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "يُبْلَعْنَ‎",
+                "form": "يُبْلَعْنَ",
                 "roman": "yublaʿna",
                 "source": "Conjugation",
                 "tags": [
@@ -2961,7 +2961,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِب‎",
+                "form": "جَاذِب",
                 "roman": "jāḏib",
                 "source": "Declension",
                 "tags": [
@@ -2973,7 +2973,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِب‎",
+                "form": "الْجَاذِب",
                 "roman": "al-jāḏib",
                 "source": "Declension",
                 "tags": [
@@ -2985,7 +2985,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَة‎",
+                "form": "جَاذِبَة",
                 "roman": "jāḏiba",
                 "source": "Declension",
                 "tags": [
@@ -2997,7 +2997,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَة‎",
+                "form": "الْجَاذِبَة",
                 "roman": "al-jāḏiba",
                 "source": "Declension",
                 "tags": [
@@ -3009,7 +3009,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبٌ‎",
+                "form": "جَاذِبٌ",
                 "roman": "jāḏibun",
                 "source": "Declension",
                 "tags": [
@@ -3021,7 +3021,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبُ‎",
+                "form": "الْجَاذِبُ",
                 "roman": "al-jāḏibu",
                 "source": "Declension",
                 "tags": [
@@ -3033,7 +3033,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَةٌ‎",
+                "form": "جَاذِبَةٌ",
                 "roman": "jāḏibatun",
                 "source": "Declension",
                 "tags": [
@@ -3045,7 +3045,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَةُ‎",
+                "form": "الْجَاذِبَةُ",
                 "roman": "al-jāḏibatu",
                 "source": "Declension",
                 "tags": [
@@ -3057,7 +3057,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبًا‎",
+                "form": "جَاذِبًا",
                 "roman": "jāḏiban",
                 "source": "Declension",
                 "tags": [
@@ -3069,7 +3069,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَ‎",
+                "form": "الْجَاذِبَ",
                 "roman": "al-jāḏiba",
                 "source": "Declension",
                 "tags": [
@@ -3081,7 +3081,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَةً‎",
+                "form": "جَاذِبَةً",
                 "roman": "jāḏibatan",
                 "source": "Declension",
                 "tags": [
@@ -3093,7 +3093,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَةَ‎",
+                "form": "الْجَاذِبَةَ",
                 "roman": "al-jāḏibata",
                 "source": "Declension",
                 "tags": [
@@ -3105,7 +3105,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبٍ‎",
+                "form": "جَاذِبٍ",
                 "roman": "jāḏibin",
                 "source": "Declension",
                 "tags": [
@@ -3117,7 +3117,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبِ‎",
+                "form": "الْجَاذِبِ",
                 "roman": "al-jāḏibi",
                 "source": "Declension",
                 "tags": [
@@ -3129,7 +3129,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَةٍ‎",
+                "form": "جَاذِبَةٍ",
                 "roman": "jāḏibatin",
                 "source": "Declension",
                 "tags": [
@@ -3141,7 +3141,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَةِ‎",
+                "form": "الْجَاذِبَةِ",
                 "roman": "al-jāḏibati",
                 "source": "Declension",
                 "tags": [
@@ -3153,7 +3153,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَيْن‎",
+                "form": "جَاذِبَيْن",
                 "roman": "jāḏibayn",
                 "source": "Declension",
                 "tags": [
@@ -3165,7 +3165,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَيْن‎",
+                "form": "الْجَاذِبَيْن",
                 "roman": "al-jāḏibayn",
                 "source": "Declension",
                 "tags": [
@@ -3177,7 +3177,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَتَيْن‎",
+                "form": "جَاذِبَتَيْن",
                 "roman": "jāḏibatayn",
                 "source": "Declension",
                 "tags": [
@@ -3190,7 +3190,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَتَيْن‎",
+                "form": "الْجَاذِبَتَيْن",
                 "roman": "al-jāḏibatayn",
                 "source": "Declension",
                 "tags": [
@@ -3203,7 +3203,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَانِ‎",
+                "form": "جَاذِبَانِ",
                 "roman": "jāḏibāni",
                 "source": "Declension",
                 "tags": [
@@ -3215,7 +3215,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَانِ‎",
+                "form": "الْجَاذِبَانِ",
                 "roman": "al-jāḏibāni",
                 "source": "Declension",
                 "tags": [
@@ -3227,7 +3227,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَتَانِ‎",
+                "form": "جَاذِبَتَانِ",
                 "roman": "jāḏibatāni",
                 "source": "Declension",
                 "tags": [
@@ -3240,7 +3240,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَتَانِ‎",
+                "form": "الْجَاذِبَتَانِ",
                 "roman": "al-jāḏibatāni",
                 "source": "Declension",
                 "tags": [
@@ -3253,7 +3253,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَيْنِ‎",
+                "form": "جَاذِبَيْنِ",
                 "roman": "jāḏibayni",
                 "source": "Declension",
                 "tags": [
@@ -3265,7 +3265,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَيْنِ‎",
+                "form": "الْجَاذِبَيْنِ",
                 "roman": "al-jāḏibayni",
                 "source": "Declension",
                 "tags": [
@@ -3277,7 +3277,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَتَيْنِ‎",
+                "form": "جَاذِبَتَيْنِ",
                 "roman": "jāḏibatayni",
                 "source": "Declension",
                 "tags": [
@@ -3290,7 +3290,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَتَيْنِ‎",
+                "form": "الْجَاذِبَتَيْنِ",
                 "roman": "al-jāḏibatayni",
                 "source": "Declension",
                 "tags": [
@@ -3303,7 +3303,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَيْنِ‎",
+                "form": "جَاذِبَيْنِ",
                 "roman": "jāḏibayni",
                 "source": "Declension",
                 "tags": [
@@ -3315,7 +3315,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَيْنِ‎",
+                "form": "الْجَاذِبَيْنِ",
                 "roman": "al-jāḏibayni",
                 "source": "Declension",
                 "tags": [
@@ -3327,7 +3327,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَتَيْنِ‎",
+                "form": "جَاذِبَتَيْنِ",
                 "roman": "jāḏibatayni",
                 "source": "Declension",
                 "tags": [
@@ -3340,7 +3340,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَتَيْنِ‎",
+                "form": "الْجَاذِبَتَيْنِ",
                 "roman": "al-jāḏibatayni",
                 "source": "Declension",
                 "tags": [
@@ -3353,7 +3353,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبِين‎",
+                "form": "جَاذِبِين",
                 "roman": "jāḏibīn",
                 "source": "Declension",
                 "tags": [
@@ -3365,7 +3365,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبِين‎",
+                "form": "الْجَاذِبِين",
                 "roman": "al-jāḏibīn",
                 "source": "Declension",
                 "tags": [
@@ -3377,8 +3377,8 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَات‎‎",
-                "roman": "jāḏibāt‎",
+                "form": "جَاذِبَات",
+                "roman": "jāḏibāt",
                 "source": "Declension",
                 "tags": [
                   "feminine",
@@ -3389,7 +3389,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَوَاذِب‎",
+                "form": "جَوَاذِب",
                 "roman": "jawāḏib",
                 "source": "Declension",
                 "tags": [
@@ -3402,8 +3402,8 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَات‎‎",
-                "roman": "al-jāḏibāt‎",
+                "form": "الْجَاذِبَات",
+                "roman": "al-jāḏibāt",
                 "source": "Declension",
                 "tags": [
                   "definite",
@@ -3414,7 +3414,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَوَاذِب‎",
+                "form": "الْجَوَاذِب",
                 "roman": "al-jawāḏib",
                 "source": "Declension",
                 "tags": [
@@ -3427,7 +3427,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبُونَ‎",
+                "form": "جَاذِبُونَ",
                 "roman": "jāḏibūna",
                 "source": "Declension",
                 "tags": [
@@ -3439,7 +3439,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبُونَ‎",
+                "form": "الْجَاذِبُونَ",
                 "roman": "al-jāḏibūna",
                 "source": "Declension",
                 "tags": [
@@ -3451,8 +3451,8 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَاتٌ‎‎",
-                "roman": "jāḏibātun‎",
+                "form": "جَاذِبَاتٌ",
+                "roman": "jāḏibātun",
                 "source": "Declension",
                 "tags": [
                   "feminine",
@@ -3463,7 +3463,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَوَاذِبُ‎",
+                "form": "جَوَاذِبُ",
                 "roman": "jawāḏibu",
                 "source": "Declension",
                 "tags": [
@@ -3476,8 +3476,8 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَاتُ‎‎",
-                "roman": "al-jāḏibātu‎",
+                "form": "الْجَاذِبَاتُ",
+                "roman": "al-jāḏibātu",
                 "source": "Declension",
                 "tags": [
                   "definite",
@@ -3488,7 +3488,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَوَاذِبُ‎",
+                "form": "الْجَوَاذِبُ",
                 "roman": "al-jawāḏibu",
                 "source": "Declension",
                 "tags": [
@@ -3501,7 +3501,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبِينَ‎",
+                "form": "جَاذِبِينَ",
                 "roman": "jāḏibīna",
                 "source": "Declension",
                 "tags": [
@@ -3513,7 +3513,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبِينَ‎",
+                "form": "الْجَاذِبِينَ",
                 "roman": "al-jāḏibīna",
                 "source": "Declension",
                 "tags": [
@@ -3525,8 +3525,8 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَاتٍ‎‎",
-                "roman": "jāḏibātin‎",
+                "form": "جَاذِبَاتٍ",
+                "roman": "jāḏibātin",
                 "source": "Declension",
                 "tags": [
                   "accusative",
@@ -3537,7 +3537,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَوَاذِبَ‎",
+                "form": "جَوَاذِبَ",
                 "roman": "jawāḏiba",
                 "source": "Declension",
                 "tags": [
@@ -3550,8 +3550,8 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَاتِ‎‎",
-                "roman": "al-jāḏibāti‎",
+                "form": "الْجَاذِبَاتِ",
+                "roman": "al-jāḏibāti",
                 "source": "Declension",
                 "tags": [
                   "accusative",
@@ -3562,7 +3562,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَوَاذِبَ‎",
+                "form": "الْجَوَاذِبَ",
                 "roman": "al-jawāḏiba",
                 "source": "Declension",
                 "tags": [
@@ -3575,7 +3575,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبِينَ‎",
+                "form": "جَاذِبِينَ",
                 "roman": "jāḏibīna",
                 "source": "Declension",
                 "tags": [
@@ -3587,7 +3587,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبِينَ‎",
+                "form": "الْجَاذِبِينَ",
                 "roman": "al-jāḏibīna",
                 "source": "Declension",
                 "tags": [
@@ -3599,8 +3599,8 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَاذِبَاتٍ‎‎",
-                "roman": "jāḏibātin‎",
+                "form": "جَاذِبَاتٍ",
+                "roman": "jāḏibātin",
                 "source": "Declension",
                 "tags": [
                   "feminine",
@@ -3611,7 +3611,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "جَوَاذِبَ‎",
+                "form": "جَوَاذِبَ",
                 "roman": "jawāḏiba",
                 "source": "Declension",
                 "tags": [
@@ -3624,8 +3624,8 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَاذِبَاتِ‎‎",
-                "roman": "al-jāḏibāti‎",
+                "form": "الْجَاذِبَاتِ",
+                "roman": "al-jāḏibāti",
                 "source": "Declension",
                 "tags": [
                   "definite",
@@ -3636,7 +3636,7 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "الْجَوَاذِبِ‎",
+                "form": "الْجَوَاذِبِ",
                 "roman": "al-jawāḏibi",
                 "source": "Declension",
                 "tags": [

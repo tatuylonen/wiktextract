@@ -268,3 +268,8 @@ class WiktExtractTests(unittest.TestCase):
         v = """<span style="font-style: normal;">[</span></span><span title="from Their First Rise and Settlement in the Island of Providence, to the Present Time. With the Remarkable Actions and Adventures of the Two Female Pyrates Mary Read and Anne Bonny; [...] To which is Added. A Short Abstract of the Statute and Civil Law, in Relation to Pyracy">  …\n      \n  </span><span class="q-hellip-b"><span style="font-style: normal;">]</span>"""
         v = clean_value(self.config, v)
         self.assertEqual(v, "[…]")
+
+    def test_ltr(self):
+        v = "a\u200eb"
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "ab")
