@@ -2643,7 +2643,7 @@ class InflTests(unittest.TestCase):
         }
         self.assertEqual(expected, ret)
 
-    def TEMPORARILY_DISABLED_20220619_ylo_test_arabic_adj1(self):
+    def XXX_TEMPORARILY_DISABLED_20220619_ylo_test_arabic_adj1(self):
         ret = self.xinfl("جاذب", "Arabic", "adj", "Declension", """
 <div class="NavFrame">
 <div class="NavHead">Declension of adjective <span class="Arab" lang="ar">[[جاذب#Arabic|جَاذِب]]</span>&lrm; (<span lang="ar-Latn" class="tr+Latn" style="color%3A+%23888%3B">jāḏib</span>)</div>
