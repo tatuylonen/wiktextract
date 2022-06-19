@@ -210,7 +210,7 @@ head_tag_re = re.compile(r"^(head|Han char|arabic-noun|arabic-noun-form|"
                              "verbnec",
                              "vform",
                              ]) +
-                         r")(-|/|$)")
+                         r")(-|/|\+|$)")
 
 # Additional templates to be expanded in the pre-expand phase
 additional_expand_templates = set([
@@ -2111,7 +2111,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if item.kind == NodeKind.TABLE_ROW:
                         cleaned = clean_node(config, ctx, None, item.children)
                         #print("cleaned:", repr(cleaned))
-                        if any(["Variety" in cleaned, 
+                        if any(["Variety" in cleaned,
                                "Location" in cleaned,
                                "Words" in cleaned]):
                             pass
@@ -2141,7 +2141,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                         else:
                                             print(f"MISSING ZH SYNONYM TAG for root {root_word}, word {words}: {tag}")
                                             sys.stdout.flush()
-                                
+
                             for word in words:
                                 data.append({"word": word.strip(), "tags": tags})
                     elif item.kind == NodeKind.HTML:
@@ -2160,7 +2160,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if item.kind == NodeKind.LIST_ITEM:
                         cleaned = clean_node(config, ctx, None, item.children)
                         #print("cleaned:", repr(cleaned))
-                        if any(["Variety" in cleaned, 
+                        if any(["Variety" in cleaned,
                                "Location" in cleaned,
                                "Words" in cleaned]):
                             pass
@@ -2584,10 +2584,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if t.startswith("Pronunciation"):
                 if config.capture_pronunciation:
                     data = select_data()
-                    parse_pronunciation(ctx, 
+                    parse_pronunciation(ctx,
                                         config,
-                                        node, 
-                                        data, 
+                                        node,
+                                        data,
                                         sense_data,
                                         pos_data,
                                         etym_data,
