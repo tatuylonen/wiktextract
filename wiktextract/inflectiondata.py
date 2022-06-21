@@ -5033,6 +5033,11 @@ infl_map = {
     "sound feminine paucal": "sound-feminine-paucal",
     "sound feminine plural": "sound-feminine-plural",
     "sound masculine plural": "sound-masculine-plural",
+    "sound masculine paucal": "sound-masculine-paucal",
+    "basic broken paucal triptote": "broken-paucal triptote",
+    "sound plural in ـَوْنَ (-awna)": "sound-plural-awna",
+    "broken plural triptote in ـَاة (-āh)": "broken-plural triptote-ah",
+    
 
 }
 

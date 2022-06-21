@@ -5570,9 +5570,10 @@ valid_tags = {
     "sociative": "case",  # Case?, e.g., மரம்/Tamil
     "soft": "misc",  # najslajši/slovene
     "sometimes": "misc",
-    "sound-feminine-plural": "misc",  # e.g. Arabic جاذب/Arabic/Adj
-    "sound-feminine-paucal": "misc",
-    "sound-masculine-plural": "misc",
+    "sound-feminine-plural": "class",  # e.g. Arabic جاذب/Arabic/Adj
+    "sound-feminine-paucal": "class",
+    "sound-masculine-plural": "class",
+    "sound-masculine-paucal": "class",
     "special": "misc",  # Adverbial verb form in Lithuanian
     "specific": "misc",  # In specific temporal participle, e.g., talamaq
     "specifically": "misc",
@@ -5913,6 +5914,8 @@ valid_tags = {
     #  singular in ـًا (-an) 
     "singular-an-alef": "class",  #a سنا/Arabic
     "diptote-ah": "class",  #a حماة/Arabic
+    "broken-paucal": "class",
+    "sound-plural-awna": "class",
 }
 
 for k, v in valid_tags.items():
