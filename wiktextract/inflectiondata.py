@@ -5037,8 +5037,24 @@ infl_map = {
     "basic broken paucal triptote": "broken-paucal triptote",
     "sound plural in ـَوْنَ (-awna)": "sound-plural-awna",
     "broken plural triptote in ـَاة (-āh)": "broken-plural triptote-ah",
-    
+    "basic collective diptote": "collective diptote",
 
+    # teie/Estonian
+    "Partitive": "partitive",
+    "Inessive": "inessive",
+    "Elative": "elative",
+    "Allative": "allative",
+    "Adessive": "adessive",
+    "Translative": "translative",
+    "Essive": "essive",
+    "Abessive": "abessive",
+    "Comitative": "comitative",
+
+    # ащема/Moksha
+    "one possession": "possessive possessive-single",
+    "one or multiple possessions": "possessive possessive-single possessive-many",
+    # XXX the big headers don't express
+    
 }
 
 def check_tags(k, v):
