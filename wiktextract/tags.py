@@ -3547,6 +3547,8 @@ xlat_tags_map = {
     "used mostly in the plural form": "plural-normally",
     "most often in the plural": "plural-normally",
     "used especially in the plural form": "plural-normally",
+    "usually in the plural": "plural-normally",
+    "now usually in the plural": "plural-normally",
     "suffixed pronoun": "suffix pronoun",
     "possessive suffix": "possessive suffix",
     "possessive determiner": "possessive determiner",
@@ -4399,7 +4401,7 @@ xlat_tags_map = {
     "rarer": "rare",  # verbleichen/German
     "southern Germany": "Southern-Germany",  # Holzscheit/German
     "alternatively in the meaning": "uncommon",  # abbondare/Italian
-    #XXX "for-subsense" or similar needs a tag or parsing    
+    #XXX "for-subsense" or similar needs a tag or parsing
     "alternatively in": "regional",  # Holzscheit/German
     "nonstandard but common": "nonstandard common",  # Gedanke/German
     "colloquial or archaic": ["colloquial", "archaic"],  # Undorn/German
@@ -4439,7 +4441,7 @@ xlat_tags_map = {
     "medio-passive voice": "mediopassive",  # afrohet/Albanian
     # ~ "comparative of": "comparative-of",  # miður/Icelandic
     "subst.": "noun",
-    
+
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -4485,7 +4487,7 @@ xlat_descs_map = {
     "m": "masculine",
     "f": "feminine",
     "classic": "",
-    
+
 }
 
 # Words that are interpreted as tags at the beginning of a linkage
@@ -5909,9 +5911,9 @@ valid_tags = {
     "past-i": "tense",  #eh/Albanian
     "past-ii": "tense",
     "focus": "detail",  #magwahil/Tagalog, trigger-focus
-    #  singular in ـًى (-an) 
+    #  singular in ـًى (-an)
     # ~ "singular-an-maksura": "class",  #a مدى/Arabic
-    #  singular in ـًا (-an) 
+    #  singular in ـًا (-an)
     # ~ "singular-an-alef": "class",  #a سنا/Arabic
     # ~ "diptote-ah": "class",  #a حماة/Arabic
     "broken-paucal": "class",
@@ -5924,8 +5926,8 @@ valid_tags = {
     "ar-infl-awna": "class",
     "ar-infl-a": "class",  #a رمية/Arabic # "singular triptote in ـَة (-a)" جاذب/Arabic/Adj
     # ~ "ar-infl-an": "class",  #a كرة#Arabic
-    
-    
+
+
 }
 
 for k, v in valid_tags.items():

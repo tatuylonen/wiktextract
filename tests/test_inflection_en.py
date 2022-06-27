@@ -318,7 +318,7 @@ class InflTests(unittest.TestCase):
         }
         self.assertEqual(expected, ret)
 
-    def test_Finnish_verb2(self):
+    def test_English_verb2(self):
         ret = self.xinfl("affect", "English", "verb", "Conjugation", """
 <div class="NavFrame" style>
 <div class="NavHead" style>conjugation of ''affect''</div>
@@ -1667,7 +1667,7 @@ class InflTests(unittest.TestCase):
         }
         self.assertEqual(expected, ret)
 
-    def test_Finnish_verb3(self):
+    def test_English_verb3(self):
         ret = self.xinfl("be", "English", "verb", "Conjugation", """
 {| class="wikitable%2Bcollapsible%2Bcollapsed" style="text-align%253Acenter"
 
@@ -3245,4 +3245,440 @@ class InflTests(unittest.TestCase):
               }
             ],
         }
+        self.assertEqual(expected, ret)
+
+    def test_English_verb4(self):
+        ret = self.xinfl("wit", "English", "verb", "Conjugation", """
+{|
+
+|-
+
+| valign="top" |
+
+
+{| class="wikitable"
+
+|-
+
+! Infinitive
+
+
+
+
+| to wit
+
+
+
+
+|-
+
+! Imperative
+
+
+
+
+| wit
+
+
+
+
+|-
+
+! Present participle
+
+
+
+
+| [[witting]]
+
+
+
+
+|-
+
+! Past participle
+
+
+
+
+| [[wist]]
+
+
+
+
+|}
+
+
+
+
+
+
+| valign="top" |
+
+
+{| class="wikitable"
+
+|-
+
+!
+
+
+
+
+! Present indicative
+
+
+
+
+! Past indicative
+
+
+
+
+|-
+
+! First-person singular
+
+
+
+
+| I [[wot]]
+
+
+
+
+| I wist
+
+
+
+
+|-
+
+! Second-person singular
+
+
+
+
+| thou [[wost]], [[wottest|wot(test)]] <span class="ib-brac+qualifier-brac">(</span><span class="ib-content+qualifier-content">archaic</span><span class="ib-brac+qualifier-brac">)</span>
+
+
+
+
+| thou [[wistest|wist(est)]] <span class="ib-brac+qualifier-brac">(</span><span class="ib-content+qualifier-content">archaic</span><span class="ib-brac+qualifier-brac">)</span>
+
+
+
+
+|-
+
+! Third-person singular
+
+
+
+
+| he/she/it wot
+
+
+
+
+| he/she/it wist
+
+
+
+
+|-
+
+! First-person plural
+
+
+
+
+| we wit(e)
+
+
+
+
+| we wist
+
+
+
+
+|-
+
+! Second-person plural
+
+
+
+
+| ye wit(e) <span class="ib-brac+qualifier-brac">(</span><span class="ib-content+qualifier-content">archaic</span><span class="ib-brac+qualifier-brac">)</span>
+
+
+
+
+| ye wist <span class="ib-brac+qualifier-brac">(</span><span class="ib-content+qualifier-content">archaic</span><span class="ib-brac+qualifier-brac">)</span>
+
+
+
+
+|-
+
+! Third-person plural
+
+
+
+
+| they wit(e)
+
+
+
+
+| they wist
+
+
+
+
+|}
+
+
+
+
+
+
+|}
+""")
+        expected = {
+            "forms": [
+              {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
+                "form": "wit",
+                "source": "Conjugation",
+                "tags": [
+                  "infinitive"
+                ]
+              },
+              {
+                "form": "wit",
+                "source": "Conjugation",
+                "tags": [
+                  "imperative"
+                ]
+              },
+              {
+                "form": "witting",
+                "source": "Conjugation",
+                "tags": [
+                  "participle",
+                  "present"
+                ]
+              },
+              {
+                "form": "wist",
+                "source": "Conjugation",
+                "tags": [
+                  "participle",
+                  "past"
+                ]
+              },
+              {
+                "form": "",
+                "source": "Conjugation",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
+                "form": "wot",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "indicative",
+                  "present",
+                  "singular"
+                ]
+              },
+              {
+                "form": "wist",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "indicative",
+                  "past",
+                  "singular"
+                ]
+              },
+              {
+                "form": "wost",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "present",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "wot",
+                "source": "Conjugation",
+                "tags": [
+                  "archaic",
+                  "indicative",
+                  "present",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "wottest",
+                "source": "Conjugation",
+                "tags": [
+                  "archaic",
+                  "indicative",
+                  "present",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "wist",
+                "source": "Conjugation",
+                "tags": [
+                  "archaic",
+                  "indicative",
+                  "past",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "wistest",
+                "source": "Conjugation",
+                "tags": [
+                  "archaic",
+                  "indicative",
+                  "past",
+                  "second-person",
+                  "singular"
+                ]
+              },
+              {
+                "form": "wot",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "present",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "wist",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "past",
+                  "singular",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "wit",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "indicative",
+                  "plural",
+                  "present"
+                ]
+              },
+              {
+                "form": "wite",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "indicative",
+                  "plural",
+                  "present"
+                ]
+              },
+              {
+                "form": "wist",
+                "source": "Conjugation",
+                "tags": [
+                  "first-person",
+                  "indicative",
+                  "past",
+                  "plural"
+                ]
+              },
+              {
+                "form": "wit",
+                "source": "Conjugation",
+                "tags": [
+                  "archaic",
+                  "indicative",
+                  "plural",
+                  "present",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "wite",
+                "source": "Conjugation",
+                "tags": [
+                  "archaic",
+                  "indicative",
+                  "plural",
+                  "present",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "wist",
+                "source": "Conjugation",
+                "tags": [
+                  "archaic",
+                  "indicative",
+                  "past",
+                  "plural",
+                  "second-person"
+                ]
+              },
+              {
+                "form": "wit",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "plural",
+                  "present",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "wite",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "plural",
+                  "present",
+                  "third-person"
+                ]
+              },
+              {
+                "form": "wist",
+                "source": "Conjugation",
+                "tags": [
+                  "indicative",
+                  "past",
+                  "plural",
+                  "third-person"
+                ]
+              }
+            ],
+}
         self.assertEqual(expected, ret)
