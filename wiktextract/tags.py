@@ -5660,7 +5660,7 @@ valid_tags = {
     "triggers-mutation-soft": "trigger",  # Welsh
     "triggers-no-mutation": "trigger",  # Irish
     "triptote": "class",  # Noun having three cases (e.g., Arabic)
-    "triptote-a": "class",  # "singular triptote in ـَة (-a)" جاذب/Arabic/Adj
+    # ~ "triptote-a": "class",  # "singular triptote in ـَة (-a)" جاذب/Arabic/Adj
     "truncative": "misc",  # Greenlandic: suffix attaches to last vowel, removing stuff
     "two-termination": "misc",
     "type-a": "class",
@@ -5884,8 +5884,8 @@ valid_tags = {
     # qunxa/Afar
     "indicative-i": "mood",
     "indicative-ii": "mood",
-    "diptote-a": "class",  #a أرمية/Arabic
-    "broken-plural-an": "class",  #a كرة#Arabic
+    # ~ "diptote-a": "class",  #a أرمية/Arabic
+    # ~ "broken-plural-an": "class",  #a كرة#Arabic
     "duoplural": "number",  # niteel/Navajo
     "indefinite-person": "person",
     "spatial-person": "person",
@@ -5903,19 +5903,29 @@ valid_tags = {
     "without-determiner": "misc",
     "with-head": "with",
     "consequential": "mood",  # erakutsi/Basque
-    "diptote-in": "class",  #a سحلية/Arabic
-    "triptote-ah": "class",  #a قناة السويس/Arabic
-    "triptote-in": "class",  #a تحو/Arabic
+    # ~ "diptote-in": "class",  #a سحلية/Arabic
+    # ~ "triptote-ah": "class",  #a قناة السويس/Arabic
+    # ~ "triptote-in": "class",  #a تحو/Arabic
     "past-i": "tense",  #eh/Albanian
     "past-ii": "tense",
     "focus": "detail",  #magwahil/Tagalog, trigger-focus
     #  singular in ـًى (-an) 
-    "singular-an-maksura": "class",  #a مدى/Arabic
+    # ~ "singular-an-maksura": "class",  #a مدى/Arabic
     #  singular in ـًا (-an) 
-    "singular-an-alef": "class",  #a سنا/Arabic
-    "diptote-ah": "class",  #a حماة/Arabic
+    # ~ "singular-an-alef": "class",  #a سنا/Arabic
+    # ~ "diptote-ah": "class",  #a حماة/Arabic
     "broken-paucal": "class",
-    "sound-plural-awna": "class",
+    # ~ "sound-plural-awna": "class",
+    "sound-plural": "class",
+    "ar-infl-in": "class",  # Decomposing Arabic inflectional paradigms, سحلية/Arabic,تحو/Arabic
+    "ar-infl-ah": "class",  #a قناة السويس/Arabic حماة/Arabic
+    "ar-infl-an-maksura": "class",  #a مدى/Arabic
+    "ar-infl-an-alef": "class",   #a سنا/Arabic
+    "ar-infl-awna": "class",
+    "ar-infl-a": "class",  #a رمية/Arabic # "singular triptote in ـَة (-a)" جاذب/Arabic/Adj
+    # ~ "ar-infl-an": "class",  #a كرة#Arabic
+    
+    
 }
 
 for k, v in valid_tags.items():

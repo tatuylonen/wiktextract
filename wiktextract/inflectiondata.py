@@ -5007,37 +5007,44 @@ infl_map = {
     },
 
     # Arabic number paradigm markers decomposed after changes in the parser:
+    #a  ـًى (-an) => ar-infl-an-maksura
+    #a  ـًا (-an) => ar-infl-an-alef
     "basic broken plural diptote": "broken-plural diptote",
     "basic broken plural triptote": "broken-plural triptote",  #a حجرة/Arabic
     "basic collective triptote": "collective triptote",
     "basic singular diptote": "singular diptote",
     "basic singular triptote": "singular triptote",
-    "broken plural diptote in ـٍ (-in)":  "broken-plural diptote-in",  #a سحلية/Arabic
-    "broken plural in ـًى (-an)": "broken-plural-an",  #a بلوة/Arabic
+    "broken plural diptote in ـٍ (-in)":  "broken-plural diptote ar-infl-in",  #a سحلية/Arabic
+    "broken plural in ـًى (-an)": "broken-plural ar-infl-an-maksura",  #a بلوة/Arabic
     "broken plural invariable": "broken-plural invariable",  #a ضحية/Arabic
-    "broken plural triptote in ـَة (-a)": "broken-plural triptote-a",  #a رصيد/Arabic
+    "broken plural triptote in ـَة (-a)": "broken-plural triptote ar-infl-a",  #a رصيد/Arabic
     "collective invariable": "collective invariable",
     "diptote triptote": ["diptote", "triptote",],
-    "singular diptote in ـٍ (-in)": "singular diptote-in",
-    "singular diptote in ـَاة (-āh)": "singular diptote-ah",  #a حماة/Arabic
-    "singular diptote in ـَة (-a)": "singular diptote-a",  #a أرمية/Arabic
-    "singular in ـًا (-an)": "singular-an-alef",  
-    "singular in ـًى (-an)": "singular-an-maksura",  #a مدى/Arabic
+    "singular diptote in ـٍ (-in)": "singular diptote ar-infl-in",
+    "singular diptote in ـَاة (-āh)": "singular diptote ar-infl-ah",  #a حماة/Arabic
+    "singular diptote in ـَة (-a)": "singular diptote ar-infl-a",  #a أرمية/Arabic
+    "singular in ـًا (-an)": "singular ar-infl-an-alef",  
+    "singular in ـًى (-an)": "singular ar-infl-an-maksura",  #a مدى/Arabic
     "singular invariable": "singular invariable",
     "singular long construct": "singular long-construct",  #a ذو الحجة/Arabic
     "singular of irregular noun": "singular irregular",
-    "singular triptote in ـٍ (-in)": "singular triptote-in",
-    "singular triptote in ـَاة (-āh)": "singular triptote-ah", #a قناة السويس/Arabic
-    "singular triptote in ـَة (-a)": "singular triptote-a",  #a حاجة/Arabic
-    "singulative triptote in ـَة (-a)": "singulative triptote-a",  #a جثجاث/Arabic
+    "singular triptote in ـٍ (-in)": "singular triptote ar-infl-in",
+    "singular triptote in ـَاة (-āh)": "singular triptote ar-infl-ah", #a قناة السويس/Arabic
+    "singular triptote in ـَة (-a)": "singular triptote ar-infl-a",  #a حاجة/Arabic
+    "singulative triptote in ـَة (-a)": "singulative triptote ar-infl-a",  #a جثجاث/Arabic
     "sound feminine paucal": "sound-feminine-paucal",
     "sound feminine plural": "sound-feminine-plural",
     "sound masculine plural": "sound-masculine-plural",
     "sound masculine paucal": "sound-masculine-paucal",
     "basic broken paucal triptote": "broken-paucal triptote",
-    "sound plural in ـَوْنَ (-awna)": "sound-plural-awna",
-    "broken plural triptote in ـَاة (-āh)": "broken-plural triptote-ah",
+    "sound plural in ـَوْنَ (-awna)": "sound-plural ar-infl-awna",
+    "broken plural triptote in ـَاة (-āh)": "broken-plural triptote ar-infl-ah",
     "basic collective diptote": "collective diptote",
+    "basic singulative triptote": "singulative triptote",
+    "singulative triptote in ـَاة (-āh)": "singulative triptote ar-infl-ah",
+    "collective triptote in ـَة (-a)": "collective triptote ar-infl-a",
+    "collective in ـًا (-an)": "collective ar-infl-an-alef",
+    
 
     # teie/Estonian
     "Partitive": "partitive",
