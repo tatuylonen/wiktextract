@@ -4992,7 +4992,7 @@ infl_map = {
     # it is inconsistently applied.
     # Using "focus": "detail", in valid_tags seems to
     # do the trick and stop 'focus' from bleeding as it
-    # does it it's "misc".
+    # doesn't with "misc".
     "Trigger": {
         "lang": "Tagalog",
         "then": "focus",
@@ -5053,6 +5053,19 @@ infl_map = {
     "one possession": "possessive possessive-single",
     "one or multiple possessions": "possessive possessive-single possessive-many",
     # XXX the big headers don't express
+
+    "Participles➤": "participle",  # άρχω/Greek
+    "Active Present ➤": "present",
+    "Passive Present ➤": "passive present",
+
+    # 알리다/Korean
+    "Formal non-polite": "formal",
+    "Informal non-polite": "informal",
+    "Informal polite": "informal polite",
+    "Formal polite": "formal polite",
+    
+    
+    
 
 }
 
