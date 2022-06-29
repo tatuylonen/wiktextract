@@ -1,4 +1,5 @@
 import re
+import json
 import sys
 import urllib
 import hashlib
@@ -231,6 +232,7 @@ def parse_pronunciation(ctx, config, node, data, sense_data, pos_data, etym_data
         if (len(contents.args[0]) == 1 and
             isinstance(contents.args[0][0], str) and
             contents.args[0][0].strip() == "zh-pron"):
+
             src = ctx.node_to_wikitext(contents)
             expanded = ctx.expand(src, templates_to_expand=set(["zh-pron"]))
             parsed = ctx.parse(expanded)
