@@ -1144,97 +1144,86 @@ infl_map = {
     "je (j’)": {
         "lang": "French",
         "pos": ["verb", "suffix",],
-        "if": "first-person singular",
         "then": "first-person singular",
+    },
+    "il, elle, on": {
+        "lang": ["French", "Middle French"],
+        "pos": ["verb", "suffix",],
+        "then": "third-person singular",
     },
     "il, elle": {
         "lang": ["French", "Middle French"],
         "pos": ["verb", "suffix",],
-        "if": "third-person singular",
         "then": "third-person singular",
     },
     "nous": {
         "lang": ["French", "Middle French"],
         "pos": ["verb", "suffix",],
-        "if": "first-person plural",
         "then": "first-person plural",
     },
     "vous": {
         "lang": ["French", "Middle French"],
         "pos": ["verb", "suffix",],
-        "if": "second-person plural",
         "then": "second-person plural",
     },
     "ils, elles": {
         "lang": "French",
         "pos": ["verb", "suffix",],
-        "if": "third-person plural",
         "then": "third-person plural",
     },
     "que je (j’)": {
         "lang": "French",
         "pos": ["verb", "suffix",],
-        "if": "first-person singular",
         "then": "first-person singular",
     },
     "que tu": {
         "lang": ["French", "Middle French", "Old French"],
         "pos": ["verb", "suffix",],
-        "if": "second-person singular",
         "then": "second-person singular",
     },
     "qu’il, qu’elle": {
         "lang": ["French", "Middle French"],
         "pos": ["verb", "suffix",],
-        "if": "third-person singular",
         "then": "third-person singular",
     },
     "que nous": {
         "lang": ["French", "Middle French"],
         "pos": ["verb", "suffix",],
-        "if": "first-person plural",
         "then": "first-person plural",
     },
     "que vous": {
         "lang": ["French", "Middle French"],
         "pos": ["verb", "suffix",],
-        "if": "second-person plural",
         "then": "second-person plural",
     },
     "qu’ils, qu’elles": {
         "lang": ["French", "Middle French"],
         "pos": ["verb", "suffix",],
-        "if": "third-person plural",
         "then": "third-person plural",
     },
     "ie (i’)": {
         "lang": "Middle French",
         "pos": "verb",
-        "if" : "first-person singular",
         "then": "first-person singular",
     },
     "ilz, elles": {
         "lang": "Middle French",
         "pos": "verb",
-        "if": "third-person plural",
         "then": "third-person plural",
     },
     "que ie (i’)": {
        "lang": "Middle French",
        "pos": "verb",
-       "if": "first-person singular",
        "then": "first-person singular",
     },
     "qu’ilz, qu’elles": {
         "lang": "Middle French",
         "pos": "verb",
-        "if": "third-person plural",
         "then": "third-person plural",
     },
     "il": {
         "lang": ["Old French"],
         "pos": "verb",
-        "if": "third-person",
         "then": "third-person",
     },
     "nos": {
@@ -4749,14 +4738,17 @@ infl_map = {
     "ти (ti)": "third-person plural",
 
     # əhli-həsəd/Azerbaijani
-    "broken plural": "broken-plural",
+    "broken plural": "broken-form plural",
     # bədən/Azerbaijani
     "broken": {
         "lang": "Azerbaijani",
         # ~ "if": "plural",  # doesn't work
-        "then": "broken-plural",
+        "then": "broken-form plural",
         },
-    "sound": "",
+    "sound": {
+        "lang": "Azerbaijani",
+        "then": "",
+    },
 
     # 𒉿𒀠𒄴𒍣/Hittite
     "Noun": {
@@ -5000,39 +4992,80 @@ infl_map = {
     # it is inconsistently applied.
     # Using "focus": "detail", in valid_tags seems to
     # do the trick and stop 'focus' from bleeding as it
-    # does it it's "misc".
+    # doesn't with "misc".
     "Trigger": {
         "lang": "Tagalog",
         "then": "focus",
     },
 
     # Arabic number paradigm markers decomposed after changes in the parser:
-    "basic broken plural diptote": "broken-plural diptote",
-    "basic broken plural triptote": "broken-plural triptote",  #a حجرة/Arabic
+    #a  ـًى (-an) => ar-infl-an-maksura
+    #a  ـًا (-an) => ar-infl-an-alef
+    "basic broken plural diptote": "broken-form plural diptote",
+    "basic broken plural triptote": "broken-form plural triptote",  #a حجرة/Arabic
     "basic collective triptote": "collective triptote",
     "basic singular diptote": "singular diptote",
     "basic singular triptote": "singular triptote",
-    "broken plural diptote in ـٍ (-in)":  "broken-plural diptote-in",  #a سحلية/Arabic
-    "broken plural in ـًى (-an)": "broken-plural-an",  #a بلوة/Arabic
-    "broken plural invariable": "broken-plural invariable",  #a ضحية/Arabic
-    "broken plural triptote in ـَة (-a)": "broken-plural triptote-a",  #a رصيد/Arabic
+    "broken plural diptote in ـٍ (-in)":  "broken-form plural diptote ar-infl-in",  #a سحلية/Arabic
+    "broken plural in ـًى (-an)": "broken-form plural ar-infl-an-maksura",  #a بلوة/Arabic
+    "broken plural invariable": "broken-form plural invariable",  #a ضحية/Arabic
+    "broken plural triptote in ـَة (-a)": "broken-form plural triptote ar-infl-a",  #a رصيد/Arabic
     "collective invariable": "collective invariable",
     "diptote triptote": ["diptote", "triptote",],
-    "singular diptote in ـٍ (-in)": "singular diptote-in",
-    "singular diptote in ـَاة (-āh)": "singular diptote-ah",  #a حماة/Arabic
-    "singular diptote in ـَة (-a)": "singular diptote-a",  #a أرمية/Arabic
-    "singular in ـًا (-an)": "singular-an-alef",  
-    "singular in ـًى (-an)": "singular-an-maksura",  #a مدى/Arabic
+    "singular diptote in ـٍ (-in)": "singular diptote ar-infl-in",
+    "singular diptote in ـَاة (-āh)": "singular diptote ar-infl-ah",  #a حماة/Arabic
+    "singular diptote in ـَة (-a)": "singular diptote ar-infl-a",  #a أرمية/Arabic
+    "singular in ـًا (-an)": "singular ar-infl-an-alef",  
+    "singular in ـًى (-an)": "singular ar-infl-an-maksura",  #a مدى/Arabic
     "singular invariable": "singular invariable",
     "singular long construct": "singular long-construct",  #a ذو الحجة/Arabic
     "singular of irregular noun": "singular irregular",
-    "singular triptote in ـٍ (-in)": "singular triptote-in",
-    "singular triptote in ـَاة (-āh)": "singular triptote-ah", #a قناة السويس/Arabic
-    "singular triptote in ـَة (-a)": "singular triptote-a",  #a حاجة/Arabic
-    "singulative triptote in ـَة (-a)": "singulative triptote-a",  #a جثجاث/Arabic
-    "sound feminine paucal": "sound-feminine-paucal",
-    "sound feminine plural": "sound-feminine-plural",
-    "sound masculine plural": "sound-masculine-plural",
+    "singular triptote in ـٍ (-in)": "singular triptote ar-infl-in",
+    "singular triptote in ـَاة (-āh)": "singular triptote ar-infl-ah", #a قناة السويس/Arabic
+    "singular triptote in ـَة (-a)": "singular triptote ar-infl-a",  #a حاجة/Arabic
+    "singulative triptote in ـَة (-a)": "singulative triptote ar-infl-a",  #a جثجاث/Arabic
+    "sound feminine paucal": "sound-form feminine paucal",
+    "sound feminine plural": "sound-form feminine plural",
+    "sound masculine plural": "sound-form masculine plural",
+    "sound masculine paucal": "sound-form masculine paucal",
+    "basic broken paucal triptote": "broken-form paucal triptote",
+    "sound plural in ـَوْنَ (-awna)": "sound-form plural ar-infl-awna",
+    "broken plural triptote in ـَاة (-āh)": "broken-form plural triptote ar-infl-ah",
+    "basic collective diptote": "collective diptote",
+    "basic singulative triptote": "singulative triptote",
+    "singulative triptote in ـَاة (-āh)": "singulative triptote ar-infl-ah",
+    "collective triptote in ـَة (-a)": "collective triptote ar-infl-a",
+    "collective in ـًا (-an)": "collective ar-infl-an-alef",
+    
+
+    # teie/Estonian
+    "Partitive": "partitive",
+    "Inessive": "inessive",
+    "Elative": "elative",
+    "Allative": "allative",
+    "Adessive": "adessive",
+    "Translative": "translative",
+    "Essive": "essive",
+    "Abessive": "abessive",
+    "Comitative": "comitative",
+
+    # ащема/Moksha
+    "one possession": "possessive possessive-single",
+    "one or multiple possessions": "possessive possessive-single possessive-many",
+    # XXX the big headers don't express
+
+    "Participles➤": "participle",  # άρχω/Greek
+    "Active Present ➤": "present",
+    "Passive Present ➤": "passive present",
+
+    # 알리다/Korean
+    "Formal non-polite": "formal",
+    "Informal non-polite": "informal",
+    "Informal polite": "informal polite",
+    "Formal polite": "formal polite",
+    
+    
+    
 
 }
 

@@ -395,11 +395,6 @@ grind/English
   - implement handling of lead-in text before table (here "Weak conjugation",
     "Strong conjugation")
   - check tables, they are unusual
-
-wit/English
-  - parenthesized optional parts are not handled as expected
-      - some are four characters, which I think was not currently allowed
-      - but why are the one-character ones not handled either?
   - add a test for this, because of the parenthesized parts
 
 Improve audio file URL generation in wiktextract to handle redirects
@@ -443,3 +438,12 @@ Add tests to ensure that etymology templates and audio URLs are properly extract
     correctly extracted, audio URLs properly extracted)
   - NOTE: you cannot expect templates to be expanded, let's discuss if there
     are major problems
+
+PLAN for 7/2022:
+  - continue bug fixing
+  - converting tags to UniMorph and Universal Dependencies tags (as additional
+    fields, leave existing tags field as-is)
+  - start moving constant tables to separate files in preparation for
+    parsing non-English Wiktionaries
+  - encode links to other sections from translations (e.g.,
+    "intelligence -- see intelligence" in wit/English/Translations)

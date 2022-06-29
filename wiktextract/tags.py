@@ -3547,6 +3547,8 @@ xlat_tags_map = {
     "used mostly in the plural form": "plural-normally",
     "most often in the plural": "plural-normally",
     "used especially in the plural form": "plural-normally",
+    "usually in the plural": "plural-normally",
+    "now usually in the plural": "plural-normally",
     "suffixed pronoun": "suffix pronoun",
     "possessive suffix": "possessive suffix",
     "possessive determiner": "possessive determiner",
@@ -4399,7 +4401,7 @@ xlat_tags_map = {
     "rarer": "rare",  # verbleichen/German
     "southern Germany": "Southern-Germany",  # Holzscheit/German
     "alternatively in the meaning": "uncommon",  # abbondare/Italian
-    #XXX "for-subsense" or similar needs a tag or parsing    
+    #XXX "for-subsense" or similar needs a tag or parsing
     "alternatively in": "regional",  # Holzscheit/German
     "nonstandard but common": "nonstandard common",  # Gedanke/German
     "colloquial or archaic": ["colloquial", "archaic"],  # Undorn/German
@@ -4439,7 +4441,7 @@ xlat_tags_map = {
     "medio-passive voice": "mediopassive",  # afrohet/Albanian
     # ~ "comparative of": "comparative-of",  # miður/Icelandic
     "subst.": "noun",
-    
+
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -4485,7 +4487,7 @@ xlat_descs_map = {
     "m": "masculine",
     "f": "feminine",
     "classic": "",
-    
+
 }
 
 # Words that are interpreted as tags at the beginning of a linkage
@@ -4916,7 +4918,6 @@ valid_tags = {
     "before-vowel": "misc",  # next words starts with vowel (in pronunciation)
     "benefactive": "case",  # Case (beneficiary of an action)
     "broadly": "misc",
-    "broken-plural": "misc",  # e.g. جاذب/Arabic/Adj
     "būdinys": "misc",
     "calque": "misc",
     "cangjie-input": "detail",  # Used in Chinese characters
@@ -5570,9 +5571,6 @@ valid_tags = {
     "sociative": "case",  # Case?, e.g., மரம்/Tamil
     "soft": "misc",  # najslajši/slovene
     "sometimes": "misc",
-    "sound-feminine-plural": "misc",  # e.g. Arabic جاذب/Arabic/Adj
-    "sound-feminine-paucal": "misc",
-    "sound-masculine-plural": "misc",
     "special": "misc",  # Adverbial verb form in Lithuanian
     "specific": "misc",  # In specific temporal participle, e.g., talamaq
     "specifically": "misc",
@@ -5659,7 +5657,7 @@ valid_tags = {
     "triggers-mutation-soft": "trigger",  # Welsh
     "triggers-no-mutation": "trigger",  # Irish
     "triptote": "class",  # Noun having three cases (e.g., Arabic)
-    "triptote-a": "class",  # "singular triptote in ـَة (-a)" جاذب/Arabic/Adj
+    # ~ "triptote-a": "class",  # "singular triptote in ـَة (-a)" جاذب/Arabic/Adj
     "truncative": "misc",  # Greenlandic: suffix attaches to last vowel, removing stuff
     "two-termination": "misc",
     "type-a": "class",
@@ -5883,8 +5881,6 @@ valid_tags = {
     # qunxa/Afar
     "indicative-i": "mood",
     "indicative-ii": "mood",
-    "diptote-a": "class",  #a أرمية/Arabic
-    "broken-plural-an": "class",  #a كرة#Arabic
     "duoplural": "number",  # niteel/Navajo
     "indefinite-person": "person",
     "spatial-person": "person",
@@ -5902,17 +5898,19 @@ valid_tags = {
     "without-determiner": "misc",
     "with-head": "with",
     "consequential": "mood",  # erakutsi/Basque
-    "diptote-in": "class",  #a سحلية/Arabic
-    "triptote-ah": "class",  #a قناة السويس/Arabic
-    "triptote-in": "class",  #a تحو/Arabic
     "past-i": "tense",  #eh/Albanian
     "past-ii": "tense",
     "focus": "detail",  #magwahil/Tagalog, trigger-focus
-    #  singular in ـًى (-an) 
-    "singular-an-maksura": "class",  #a مدى/Arabic
-    #  singular in ـًا (-an) 
-    "singular-an-alef": "class",  #a سنا/Arabic
-    "diptote-ah": "class",  #a حماة/Arabic
+    "sound-plural": "class",
+    "ar-infl-in": "class",  # Decomposing Arabic inflectional paradigms, سحلية/Arabic,تحو/Arabic
+    "ar-infl-ah": "class",  #a قناة السويس/Arabic حماة/Arabic
+    "ar-infl-an-maksura": "class",  #a مدى/Arabic
+    "ar-infl-an-alef": "class",   #a سنا/Arabic
+    "ar-infl-awna": "class",
+    "ar-infl-a": "class",  #a رمية/Arabic # "singular triptote in ـَة (-a)" جاذب/Arabic/Adj
+    "broken-form": "class",  # Arabic broken-plural and broken-paucal
+    "sound-form": "class",  # Arabic sound-feminine-plural sound-masculine-paucal etc.
+    
 }
 
 for k, v in valid_tags.items():

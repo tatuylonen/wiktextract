@@ -766,6 +766,19 @@ The [wiktfinnish](https://github.com/tatuylonen/wiktfinnish) package
 can be used to interpret Finnish noun declinations and verb
 conjugations and for generating Finnish inflected word forms.
 
+## Publications
+
+If you use Wiktextract or the extracted data in academic work, please
+cite the following article:
+
+Tatu Ylonen: [Wiktextract: Wiktionary as Machine-Readable Structured
+data](http://www.lrec-conf.org/proceedings/lrec2022/pdf/2022.lrec-1.140.pdf),
+Proceedings of the 13th Conference on Language Resources and
+Evaluation (LREC), pp. 1317-1325, Marseille, 20-25 June 2022.
+
+Linking to [https://kaikki.org](https://kaikki.org) or the relevant
+sub-pages would also be greatly appreciated.
+
 ## Related tools
 
 A few other tools also exist for parsing Wiktionaries.  These include
