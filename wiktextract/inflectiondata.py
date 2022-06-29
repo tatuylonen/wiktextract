@@ -5036,6 +5036,12 @@ infl_map = {
     "singulative triptote in ـَاة (-āh)": "singulative triptote ar-infl-ah",
     "collective triptote in ـَة (-a)": "collective triptote ar-infl-a",
     "collective in ـًا (-an)": "collective ar-infl-an-alef",
+    "broken plural triptote in ـٍ (-in)": "broken-form plural triptote ar-infl-in",
+    "broken plural in ـًا (-an)": "broken-form plural ar-infl-an-alef",
+    "broken plural in ـًى (-an)‎": "broken-form plural ar-infl-an-maksura",
+    "plural of irregular noun": "plural irregular",
+    
+    
     
 
     # teie/Estonian
