@@ -5910,7 +5910,10 @@ valid_tags = {
     "ar-infl-a": "class",  #a رمية/Arabic # "singular triptote in ـَة (-a)" جاذب/Arabic/Adj
     "broken-form": "class",  # Arabic broken-plural and broken-paucal
     "sound-form": "class",  # Arabic sound-feminine-plural sound-masculine-paucal etc.
-    
+    "substantive-case": "case",  # ананас/Chechen
+    "comparative-case": "case",  # ананас/Chechen
+    "representative": "case",  # a ئانا/Uyghur
+    "similitude": "case",  # Uyghur
 }
 
 for k, v in valid_tags.items():
