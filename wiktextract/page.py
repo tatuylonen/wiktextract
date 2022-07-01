@@ -2582,6 +2582,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
             config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
             if t.startswith("Pronunciation"):
+                if t.startswith("Pronunciation "):
+                    # Pronunciation 1, etc, are used in Chinese Glyphs,
+                    # and each of them may have senses under Definition
+                    push_etym()
+                    ctx.start_subsection(None)
                 if config.capture_pronunciation:
                     data = select_data()
                     parse_pronunciation(ctx,
@@ -2599,11 +2604,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                         base_data,
                                         language,
                                         )
-                if t.startswith("Pronunciation "):
-                    # Pronunciation 1, etc, are used in Chinese Glyphs,
-                    # and each of them may have senses under Definition
-                    push_etym()
-                    ctx.start_subsection(None)
             elif t.startswith("Etymology"):
                 push_etym()
                 ctx.start_subsection(None)
