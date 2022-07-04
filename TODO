@@ -447,3 +447,5 @@ PLAN for 7/2022:
     parsing non-English Wiktionaries
   - encode links to other sections from translations (e.g.,
     "intelligence -- see intelligence" in wit/English/Translations)
+  - make it easier to control tag bleed in inflection tables
+  - code refactoring to make maintenance easier (especially page.py)

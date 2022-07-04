@@ -5346,6 +5346,7 @@ valid_tags = {
     "no-first-person-singular-present": "misc",  # Spanish (only third person?)
     "no-first-person-singular-preterite": "misc",  # Spanish (only third person?)
     "no-genitive": "misc",           # The word has no genitive form
+    "no-gloss": "misc",		     # This sense has no glosses
     "no-gradation": "gradation",     # No consonant gradation
     "no-imperfective": "misc",       # No imperfective form (исходить/Russian)
     "no-infinitive": "misc",	     # No infinitive form (måste/Swedish)

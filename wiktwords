@@ -4,7 +4,7 @@
 # mostly been used with enwiktionary, but should be usable with other
 # wiktionaries as well.
 #
-# Copyright (c) 2018-2021 Tatu Ylonen.  See LICENSE and https://ylonen.org
+# Copyright (c) 2018-2022 Tatu Ylonen.  See LICENSE and https://ylonen.org
 #
 # For pre-extracted data files, see https://kaikki.org/dictionary/
 
@@ -147,7 +147,8 @@ if __name__ == "__main__":
     parser.add_argument("--templates-file", type=str,
                         help="Extract all templates and save in this .tar file")
     parser.add_argument("--redirects-file", type=str,
-                        help="Optional file containing redirect names and what "
+                        help="Optional file containing sound file redirect "
+                        "names from Wikimedia Commons and what "
                         "they point to")
     args = parser.parse_args()
 
