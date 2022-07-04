@@ -958,7 +958,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         tags = sense_data.get("tags", ())
         if (not sense_data.get("glosses") and
             "translation-hub" not in tags and
-            "no-senses" not in tags):
+            "no-gloss" not in tags):
             return False
 
         if (("participle" in sense_data.get("tags", ()) or
@@ -978,6 +978,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 elif "alt-of" in tags:
                     data_extend(ctx, sense_data, "alt_of", lst)
                     data_extend(ctx, sense_data, "tags", tags)
+
+        if (not sense_data.get("glosses") and
+            "no-gloss" not in sense_data.get("tags", ())):
+            data_append(ctx, sense_data, "tags", "no-gloss")
 
         pos_datas.append(sense_data)
         sense_data = {}
@@ -1777,7 +1781,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         push_sense()  # Make sure unfinished data pushed, and start clean sense
         if not pos_datas:
             data_extend(ctx, sense_data, "tags", common_tags)
-            data_append(ctx, sense_data, "tags", "no-senses")
+            data_append(ctx, sense_data, "tags", "no-gloss")
             push_sense()
 
     def parse_inflection(node, section, pos):

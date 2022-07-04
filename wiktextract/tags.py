@@ -602,9 +602,7 @@ uppercase_tags = set([
     "Ancient Greek",
     "Ancient Rome",
     "Ancient Roman",
-    "Andalucia",
     "Andalusia",
-    "Andalusian",
     "Anglian",
     "Anglicised",
     "Anglicism",
@@ -619,6 +617,7 @@ uppercase_tags = set([
     "Antilles",
     "Appalachia",
     "Appalachian",
+    "Arabicized",
     "Aragon",
     "Aragón",
     "Aramaic",
@@ -661,6 +660,7 @@ uppercase_tags = set([
     "Baghdad",
     "Bahamas",
     "Bahasa Baku",
+    "Bahia",
     "Baku",
     "Balearic",
     "Balkar",
@@ -669,6 +669,8 @@ uppercase_tags = set([
     "Banatiski Gurbet",
     "Banawá",
     "Bangkok",
+    "Banten",
+    "Banyamasan",
     "Barbados",
     "Barda",
     "Bardez Catholic",
@@ -726,6 +728,7 @@ uppercase_tags = set([
     "Botswana",
     "Brabant",
     "Brabantian",
+    "Braintree",  # Place in UK?
     "Brazil",
     "Brazilian",
     "Bressan",
@@ -908,7 +911,7 @@ uppercase_tags = set([
     "East Bengal",
     "East Coast",
     "East Frisian",
-    "East Midland",
+    "East Midlands",
     "East Slovakia",
     "East",
     "Eastern Armenian",
@@ -941,6 +944,7 @@ uppercase_tags = set([
     "Esham",
     "Esperantized",
     "Esperanto",
+    "Essex",  # Region in UK
     "Estonian",
     "Estuary English",
     "Europe",
@@ -997,6 +1001,7 @@ uppercase_tags = set([
     "General Cebuano",
     "General New Zealand",
     "General South African",
+    "Genoa",
     "Genoese",
     "Genovese",
     "Geordie",
@@ -1043,7 +1048,7 @@ uppercase_tags = set([
     "Gurvari",
     "Guyana",
     "Gwichya",
-    "Gyeongsang",
+    "Gyeongsang",  # Province in South Korea
     "H-system",
     "Ha",
     "Hachijō",
@@ -1054,6 +1059,7 @@ uppercase_tags = set([
     "Hallig",
     "Halligen",
     "Hamburg",
+    "Hamgyong",  # Region and former province in Korea
     "Hangaza",
     "Hanoi",
     "Hanyuan",
@@ -1099,7 +1105,7 @@ uppercase_tags = set([
     "I Ching hexagram",
     "I-I",  # Used in some Dungan nouns; I have no idea what this means
     "Ionic",  # Ancient Greek
-    "IUPAC name",
+    "IUPAC",
     "Iberian",
     "Ibero-Romance",
     "Iceland",
@@ -1158,6 +1164,7 @@ uppercase_tags = set([
     "Jáva",
     "Jehovah's Witnesses",
     "Jèrriais",
+    "Jeolla",  # Province in South Korea
     "Jersey",
     "Jewish Aramaic",
     "Jewish Babylonian Aramaic",
@@ -1276,6 +1283,7 @@ uppercase_tags = set([
     "Latin America",
     "Latinate",
     "Latinism",
+    "Latium",
     "Latvian",
     "Laval",
     "Lavarone",
@@ -1312,6 +1320,7 @@ uppercase_tags = set([
     "Loli",
     "Lombardy",
     "London",
+    "Longyan Min",  # Variant of Chinese
     "Lorraine",
     "Louisiana",
     "Lovara",
@@ -1422,6 +1431,7 @@ uppercase_tags = set([
     "Min Bei",
     "Min Dong",  # Chinese dialect/language
     "Min Nan",  # Chinese dialect/language
+    "Minangkabauat",
     "Minas Gerais",
     "Mineiro",
     "Mirandola",
@@ -1493,6 +1503,7 @@ uppercase_tags = set([
     "New Jersey",
     "New Latin",
     "New Sanskrit",
+    "New South Wales",  # State of Australia
     "New York City",
     "New York",
     "New Zealand",
@@ -1551,6 +1562,7 @@ uppercase_tags = set([
     "Northamptonshire",
     "Northumbria",
     "Northwestern",
+    "Northwestern Argentina",
     "Novgorod",
     "Nde",
     "Nembe",
@@ -1613,8 +1625,11 @@ uppercase_tags = set([
     "Pali",  # Sanskrit
     "Panama",
     "Pangin",
+    "Papua",
     "Papua New Guinea",
+    "Papuanese",
     "Paraguay",
+    "Paraná",  # State in Brazil
     "Paris",
     "Parisian",
     "Parres",
@@ -1713,6 +1728,7 @@ uppercase_tags = set([
     "Ring",
     "Rio Grande De Sul",
     "Rio de Janeiro",
+    "Río de la Plata",
     "Rioplatense",
     "Ripuarian",
     "Ritsu",
@@ -1900,6 +1916,7 @@ uppercase_tags = set([
     "Sutsilvan",
     "Suzhou",
     "Sweden",
+    "Swindon",  # Place in UK?
     "Swiss German",
     "Swiss",
     "Switzerland",
@@ -1908,6 +1925,7 @@ uppercase_tags = set([
     "Syrian Hebrew",
     "São Paulo",
     "São Vicente",
+    "Traditional Chinese Medicine",
     "TV",
     "Taberga",
     "Tabriz",
@@ -2022,6 +2040,7 @@ uppercase_tags = set([
     "Ursari",
     "Urtijëi",
     "Uruguay",
+    "Urumqi",
     "Utara",  # Region in Indonesia (Rejang language)
     "Uutände",
     "Uyghurjin",
@@ -2059,6 +2078,7 @@ uppercase_tags = set([
     "Wardak",
     "Waterford",
     "Way Lima",
+    "Waxiang",  # Variant of Chinese?
     "Wazirwola",
     "Wearside",
     "Weirate",
@@ -2070,11 +2090,13 @@ uppercase_tags = set([
     "West Bengal",
     "West Cork",
     "West Country",
+    "West Java",
     "West Kerry",
     "West Midlands",
     "West Muskerry",
     "West Pomeranian",
     "West Saxon",
+    "West Sumatra",
     "West",
     "Western Armenian",
     "Western Lombard",
@@ -2092,6 +2114,7 @@ uppercase_tags = set([
     "Wiedingharde",
     "Windesi",
     "Witzapan",
+    "Wolverhampton",  # Place in UK?
     "Wood",
     "World War I",
     "Wrangelsholm",
@@ -2101,6 +2124,7 @@ uppercase_tags = set([
     "Wuvulu",
     "X-system",
     "Xiamen",
+    "Xiamen-Hokkien",
     "Xiang",
     "Xilitla",
     "YIVO",
@@ -2419,10 +2443,12 @@ xlat_tags_map = {
     "IT": "Italy",
     "CAN": "Canada",
     "AU": "Australia",
+    "AU&NZ": "Australia New-Zealand",
     "AUS": "Australia",
     "Austr.": "Australian",
     "AusE": "Australia",
     "Aus": "Australia",
+    "NSW": "New-South-Wales",
     "LKA": "Sri-Lanka",
     "RU": "Russia",
     "SA": "South-Africa",
@@ -2458,6 +2484,7 @@ xlat_tags_map = {
     "Tai Tham": "Tai-Tham",
     "Warang Citi": "Warang-Citi",
     "UK & Aus": "UK Australia",
+    "US & HK": "US Hong-Kong",
     "Britian": "Britain",
     "coastal Min": "Coastal-Min",
     "Telugu-Kui language": "Telugu-Kui",
@@ -2477,6 +2504,9 @@ xlat_tags_map = {
     "westernmost": "Western",
     "west": "West",
     "Mecayapán": "Mecayapan",
+    "Andalucia": "Andalusia",
+    "Andalusian": "Andalusia",
+    "Andalucía": "Andalusia",
     "Mooring and Föhr-Amrum": "Mooring Föhr-Amrum",
     "Föhr-Amrum & Mooring": "Föhr-Amrum Mooring",
     "Nazi slur against Churchill": "Nazism slur",
@@ -2522,6 +2552,7 @@ xlat_tags_map = {
     "Nonstandard but common": "nonstandard common",
     "Slang": "slang",
     "Slang-Latin America": "slang Latin-America",
+    "TCM": "Traditional-Chinese-Medicine",
     "slangy": "slang",
     "backslang": "slang",
     "butcher's slang": "slang jargon",
@@ -2581,6 +2612,8 @@ xlat_tags_map = {
     "irreg. adv.": "irregular adverbial",
     "Argentina and Uruguay": "Argentina Uruguay",
     "Argentina Uruguay": "Argentina Uruguay",
+    "Quanzhou & Xiamen Hokkien": "Quanzhou Xiamen-Hokkien",
+    "Xiamen & Zhangzhou Hokkien": "Xiamen-Hokkien Zhangzhou-Hokkien",
     "Southern US folk speech": "Southern-US dialectal",
     "Main dialectal variations": "dialectal",
     "Many eastern and northern dialects": "dialectal",
@@ -2998,6 +3031,7 @@ xlat_tags_map = {
     "colloquial or dialectal": "colloquial dialectal",
     "pejorative or racial slur": "pejorative slur",
     "pejoratively": "pejorative",
+    "pej.": "pejorative",
     "racial slur": "slur",
     "in some dialects": "dialectal",
     "in other dialects": "dialectal",
@@ -3005,7 +3039,8 @@ xlat_tags_map = {
     "pejorativ": "pejorative error-misspelling",
     "idionomic": "idiomatic error-misspelling",
     "idiom": "idiomatic",
-    "humorously self-deprecating": "humorous",
+    "humorously self-deprecating": "humorous self-depreciating",
+    "self-depeciatory": "self-depreciating",
     "rare/awkward": "rare",
     "rare/archaic": "archaic",
     "archaic or Scotland": "archaic Scotland",
@@ -3081,6 +3116,8 @@ xlat_tags_map = {
     "takes dative case": "with-dative",
     "zhuyin": "bopomofo",
     "Zhuyin": "bopomofo",
+    "East Midland": "East Midlands",
+    "Yorkshire & East Midlands": "Yorkshire East-Midlands",
     "+ partitive": "with-partitive",
     "+ partitive + vastaan": "with-partitive",
     "+partitive": "with-partitive",
@@ -3838,12 +3875,13 @@ xlat_tags_map = {
     "acronym": "abbreviation acronym",
     "initialism of": "alt-of abbreviation initialism",
     "contraction of": "alt-of abbreviation contraction",
-    "IUPAC 3-letter abbreviation for": "alt-of abbreviation",
-    "IUPAC 3-letter abbreviation of": "alt-of abbreviation",
-    "IUPAC 2-letter abbreviation of": "alt-of abbreviation",
-    "IUPAC 2-letter abbreviation for": "alt-of abbreviation",
-    "IUPAC 1-letter abbreviation of": "alt-of abbreviation",
-    "IUPAC 1-letter abbreviation for": "alt-of abbreviation",
+    "IUPAC 3-letter abbreviation for": "alt-of abbreviation IUPAC",
+    "IUPAC 3-letter abbreviation of": "alt-of abbreviation IUPAC",
+    "IUPAC 2-letter abbreviation of": "alt-of abbreviation IUPAC",
+    "IUPAC 2-letter abbreviation for": "alt-of abbreviation IUPAC",
+    "IUPAC 1-letter abbreviation of": "alt-of abbreviation IUPAC",
+    "IUPAC 1-letter abbreviation for": "alt-of abbreviation IUPAC",
+    "IUPAC name": "IUPAC",
     "symbol for": "alt-of symbol",
     "praenominal abbreviation of": "alt-of abbreviation praenominal",
     "ellipsis of": "alt-of ellipsis abbreviation",
@@ -4088,6 +4126,11 @@ xlat_tags_map = {
     "collectively": "collective",
     "collective or singulative": "collective singulative",
     "used formally in Spain": "Spain",
+    "Spain's Canary Islands": "Canary-Islands",
+    "Sanskritised": "Sanskritized",
+    "Arabicised": "Arabicized",
+    "Perú": "Peru",
+    "Singapore/Malaysia": "Singapore Malaysia",
     "nouns": "noun",
     "phrases": "phrase",
     "with the particle lai": "with-lai",
@@ -5097,7 +5140,7 @@ valid_tags = {
     "elative": "case",  # Case
     "ellipsis": "misc",
     "emphatic": "misc",
-    "empty-gloss": "misc",
+    "empty-gloss": "misc",  # Gloss was present but is empty after cleanup
     "enclitic": "misc",
     "endearing": "misc",  # XXX Is this different from diminutive?
     "epic": "misc",
@@ -5358,7 +5401,6 @@ valid_tags = {
     "no-possessor": "misc",	     # No possessor in possessive hajallan/Finnish
     "no-present-participle": "misc",  # The word has no present participle
     "no-second-person-singular-imperative": "misc",  # No imperative
-    "no-senses": "misc",             # Added synthesized sense when no senses extracted
     "no-singulative": "misc",	     # no singulative form
     "no-short-form": "misc",	     # no short forms (Russian)
     "no-superlative": "misc",        # The word has no superlative form
@@ -5550,6 +5592,7 @@ valid_tags = {
     "second-person": "person",
     "second-person-semantically": "person",  # semantically second person
     "secular": "misc",  # Contrast with Ecclesiastical, Tham, etc
+    "self-depreciating": "misc",  # Expression is self-depreciating
     "semelfactive": "misc",
     "sentence-case": "misc",  # дь/Yakut
     "sentence-final": "misc",  # Korean verb forms (broad category)

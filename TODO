@@ -449,3 +449,15 @@ PLAN for 7/2022:
     "intelligence -- see intelligence" in wit/English/Translations)
   - make it easier to control tag bleed in inflection tables
   - code refactoring to make maintenance easier (especially page.py)
+
+Moving tags to external files:
+  - create directory wiktextract/wiktextract/data
+  - language-specific data would go under
+    wiktextract/wiktextract/data/<editioncode> (e.g., "en" is an <editioncode>)
+  - non-language-specific data (e.g., tags) would go under
+    wiktextract/wiktextract/data/shared
+  - above directories need to be included in pypi distributions and
+    must be installed; when used, code must properly search for them
+    using pkg_resources package (see luaexec.py in wiktextract for an example)
+
+  -
