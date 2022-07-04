@@ -4918,7 +4918,6 @@ valid_tags = {
     "before-vowel": "misc",  # next words starts with vowel (in pronunciation)
     "benefactive": "case",  # Case (beneficiary of an action)
     "broadly": "misc",
-    "broken-plural": "misc",  # e.g. جاذب/Arabic/Adj
     "būdinys": "misc",
     "calque": "misc",
     "cangjie-input": "detail",  # Used in Chinese characters
@@ -5573,10 +5572,6 @@ valid_tags = {
     "sociative": "case",  # Case?, e.g., மரம்/Tamil
     "soft": "misc",  # najslajši/slovene
     "sometimes": "misc",
-    "sound-feminine-plural": "class",  # e.g. Arabic جاذب/Arabic/Adj
-    "sound-feminine-paucal": "class",
-    "sound-masculine-plural": "class",
-    "sound-masculine-paucal": "class",
     "special": "misc",  # Adverbial verb form in Lithuanian
     "specific": "misc",  # In specific temporal participle, e.g., talamaq
     "specifically": "misc",
@@ -5887,8 +5882,6 @@ valid_tags = {
     # qunxa/Afar
     "indicative-i": "mood",
     "indicative-ii": "mood",
-    # ~ "diptote-a": "class",  #a أرمية/Arabic
-    # ~ "broken-plural-an": "class",  #a كرة#Arabic
     "duoplural": "number",  # niteel/Navajo
     "indefinite-person": "person",
     "spatial-person": "person",
@@ -5906,19 +5899,9 @@ valid_tags = {
     "without-determiner": "misc",
     "with-head": "with",
     "consequential": "mood",  # erakutsi/Basque
-    # ~ "diptote-in": "class",  #a سحلية/Arabic
-    # ~ "triptote-ah": "class",  #a قناة السويس/Arabic
-    # ~ "triptote-in": "class",  #a تحو/Arabic
     "past-i": "tense",  #eh/Albanian
     "past-ii": "tense",
     "focus": "detail",  #magwahil/Tagalog, trigger-focus
-    #  singular in ـًى (-an)
-    # ~ "singular-an-maksura": "class",  #a مدى/Arabic
-    #  singular in ـًا (-an)
-    # ~ "singular-an-alef": "class",  #a سنا/Arabic
-    # ~ "diptote-ah": "class",  #a حماة/Arabic
-    "broken-paucal": "class",
-    # ~ "sound-plural-awna": "class",
     "sound-plural": "class",
     "ar-infl-in": "class",  # Decomposing Arabic inflectional paradigms, سحلية/Arabic,تحو/Arabic
     "ar-infl-ah": "class",  #a قناة السويس/Arabic حماة/Arabic
@@ -5926,9 +5909,12 @@ valid_tags = {
     "ar-infl-an-alef": "class",   #a سنا/Arabic
     "ar-infl-awna": "class",
     "ar-infl-a": "class",  #a رمية/Arabic # "singular triptote in ـَة (-a)" جاذب/Arabic/Adj
-    # ~ "ar-infl-an": "class",  #a كرة#Arabic
-
-
+    "broken-form": "class",  # Arabic broken-plural and broken-paucal
+    "sound-form": "class",  # Arabic sound-feminine-plural sound-masculine-paucal etc.
+    "substantive-case": "case",  # ананас/Chechen
+    "comparative-case": "case",  # ананас/Chechen
+    "representative": "case",  # a ئانا/Uyghur
+    "similitude": "case",  # Uyghur
 }
 
 for k, v in valid_tags.items():
