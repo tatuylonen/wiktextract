@@ -5142,8 +5142,65 @@ infl_map = {
         "pos": "noun",
         "then": "first-person singular possessive",
     },
-    
 
+    # -raihu/Kikuyu
+    # Class [singular class], Class [plural class]
+    "Class 1, Class 2": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-1",
+        "else": "class-2",
+    },
+    "Class 3, Class 4": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-3",
+        "else": "class-4",
+    },
+    "Class 5, Class 6": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-5",
+        "else": "class-6",
+    },
+    "Class 7, Class 8": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-7",
+        "else": "class-8",
+    },
+    "Class 9, Class 10": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-9",
+        "else": "class-10",
+    },
+    "Class 11, Class 10": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-11",
+        "else": "class-10",
+    },
+    "Class 12, Class 13": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-12",
+        "else": "class-13",
+    },
+    "Class 14, Class 6": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-14",
+        "else": "class-6",
+    },
+    "Class 15, Class 6": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-15",
+        "else": "class-6",
+    },
+
+    
     
     
 }
