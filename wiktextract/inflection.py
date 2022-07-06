@@ -56,6 +56,7 @@ title_contains_global_map = {
     "definite article": "definite",
     "indefinite article": "indefinite",
     "indefinite declension": "indefinite",
+    "bare forms": "indefinite",  # e.g., cois/Irish
     "definite declension": "definite",
     "pre-reform": "dated",
     "personal pronouns": "personal pronoun",
@@ -1210,11 +1211,17 @@ def parse_title(title, source):
     global_tags = []
     table_tags = []
     extra_forms = []
+    # XXX This code section causes crashes, e.g. "i" 2022-07-05.
+    # (infl_map can contain conditional expressions, which are dicts,
+    # and this code assumes it contains strings.  Also, this does not
+    # appear necessary.  Any tags coming from full titles should be handled
+    # by separate tables/regexps if needed.)
+    # XXX this code is pending removal after testing
     # Check for the case that the title is in infl_map
-    if title in infl_map:
-        return infl_map[title].split(), [], []
-    if title.lower() in infl_map:
-        return infl_map[title.lower()].split(), [], []
+    #if title in infl_map:
+    #    return infl_map[title].split(), [], []
+    #if title.lower() in infl_map:
+    #    return infl_map[title.lower()].split(), [], []
     # Add certain global tags based on contained words
     for m in re.finditer(title_contains_global_re, title):
         v = m.group(0).lower()
@@ -1233,6 +1240,7 @@ def parse_title(title, source):
     # other ways of specifying an inflection class.
     for m in re.finditer(r"\b([\w/]+-type|accent-\w+|"
                          r"[\w/]+-stem|[^ ]+ gradation|"
+                         r"\b(stem in [\w/ ]+)|"
                          r"[^ ]+ alternation|(First|Second|Third|Fourth|Fifth|"
                          r"Sixth|Seventh) (Conjugation|declension)|"
                          r"First and second declension|"

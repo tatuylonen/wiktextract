@@ -361,7 +361,7 @@ infl_map = {
     "pluperfect": "pluperfect",
 
     # XXX These need to be better structured, but I don't know where these
-    # are from
+    # are from (see e.g. cois/Irish)
     "Bare forms": "indefinite",
     "Bare forms:": "",
 
@@ -4117,7 +4117,7 @@ infl_map = {
     "participle (a18/a6)": "participle",  # skreiða/Faroese
     "participle (a18)": "participle",  # ýa/Faroese
     "participle (a5 (a39))": "participle",  # skráseta/Faroese
-    
+
 
     # síggjast/Faroese
     "eg": {
@@ -5022,7 +5022,7 @@ infl_map = {
     "singular diptote in ـٍ (-in)": "singular diptote ar-infl-in",
     "singular diptote in ـَاة (-āh)": "singular diptote ar-infl-ah",  #a حماة/Arabic
     "singular diptote in ـَة (-a)": "singular diptote ar-infl-a",  #a أرمية/Arabic
-    "singular in ـًا (-an)": "singular ar-infl-an-alef",  
+    "singular in ـًا (-an)": "singular ar-infl-an-alef",
     "singular in ـًى (-an)": "singular ar-infl-an-maksura",  #a مدى/Arabic
     "singular invariable": "singular invariable",
     "singular long construct": "singular long-construct",  #a ذو الحجة/Arabic
@@ -5047,9 +5047,9 @@ infl_map = {
     "broken plural in ـًا (-an)": "broken-form plural ar-infl-an-alef",
     "broken plural in ـًى (-an)‎": "broken-form plural ar-infl-an-maksura",
     "plural of irregular noun": "plural irregular",
-    
-    
-    
+
+
+
 
     # teie/Estonian
     "Partitive": "partitive",
@@ -5076,7 +5076,7 @@ infl_map = {
     "Informal non-polite": "informal",
     "Informal polite": "informal polite",
     "Formal polite": "formal polite",
-    
+
     "Middle/Passive": "middle-voice passive",  # पिबति/Sanskrit
 
     "Singular base form": "singular base-form",  #a ܒܪܘܢܐ/Assyrian Neo-Aramaic
@@ -5101,7 +5101,7 @@ infl_map = {
     # get automatically translated into those in clean.py, and
     # these entries have to match them. If copy-pasting from
     # error messages in the shell, you get the 'correct' characters.
-    
+
     "2ⁿᵈperson singular ordinary": {
         "lang": "Uyghur",
         "pos": "noun",
@@ -5200,9 +5200,9 @@ infl_map = {
         "else": "class-6",
     },
 
-    
-    
-    
+
+
+
 }
 
 def check_tags(k, v):
