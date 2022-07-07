@@ -30,6 +30,21 @@ IGNORED_COLVALUES = set([
     "⸺", "⸻", "﹘", "﹣", "－", "/", "?",
     "not used", "not applicable"])
 
+# Languages with known badly-formatted tables, specifically where <td>-elements
+# are used for cells that should be <th>. If the languages has these bad <td>s,
+# then they have to be parsed heuristically to find out whether a cell is a
+# header or not.
+# If a language is not in this set and a cell is heuristically made a header
+# or given header candidate status, there is a debug message telling of this;
+# at that point, determine if the language has well or badly formatted tables,
+# and if it's too much work to fix them on Wiktionary, add the language to this
+# list. XXX At some point, this list will be used to block cells-as-headers
+# parsing in languages not in the list. See XXX CELLS-AS-HEADERS
+LANGUAGES_WITH_CELLS_AS_HEADERS = set([
+    "Greek",
+    ])
+
+
 # These tags are never inherited from above
 # XXX merge with lang_specific
 noinherit_tags = set([
@@ -2790,7 +2805,8 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 cellstyle = (col.attrs.get("style", "") + "//" +
                              col.attrs.get("class", "") + "//" +
                              str(kind))
-                if not row:
+                             
+                if not row:  # if first column in row
                     style = cellstyle
                 target = None
                 titletext = celltext.strip()
@@ -2798,6 +2814,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     titletext = titletext[:-1]
                 idx = celltext.find(": ")
                 is_title = False
+                # remove anything in parentheses, compress whitespace, .strip()
                 cleaned_titletext = re.sub(r"\s+", " ",
                                            re.sub(r"\s*\([^)]*\)", "",
                                                   titletext)).strip()
@@ -2808,6 +2825,24 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                                               silent=True, ignore_tags=True)
                 candidate_hdr = (not any(any(t.startswith("error-") for t in ts)
                                          for ts in hdr_expansion))
+                # KJ candidate_hdr says that a specific cell is a candidate
+                # for being a header because it passed through expand_header
+                # without getting any "error-" tags; that is, the contents
+                # is "valid" for being a header; these are the false positives
+                # we want to catch
+                if (candidate_hdr and
+                   kind != NodeKind.TABLE_HEADER_CELL and
+                   lang not in LANGUAGES_WITH_CELLS_AS_HEADERS):
+                    ctx.debug("table cell given header candidate status, " \
+                              "but {} is not in " \
+                              "LANGUAGES_WITH_CELLS_AS_HEADERS; " \
+                              "cleaned text: {}" \
+                              .format(lang, cleaned))
+                    # KJ the simplest way to implement LANGUAGES_WITH...
+                    # is to stop candidate_hdr with = False here if LWCAH == True
+                    # XXX ENABLE ME CELLS-AS-HEADERS when LANGUAGES_WITH... is populated!
+                    # ~ candidate_hdr = False
+                    
                 #print("titletext={!r} hdr_expansion={!r} candidate_hdr={!r} "
                 #      "lang={} pos={}"
                 #      .format(titletext, hdr_expansion, candidate_hdr,
@@ -2817,7 +2852,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     celltext = celltext[:idx]
                     is_title = True
                 elif (kind == NodeKind.TABLE_HEADER_CELL and
-                      titletext.find(" + ") < 0 and
+                      titletext.find(" + ") < 0 and  # For "avoir + blah blah"?
                       not any(isinstance(x, WikiNode) and
                               x.kind == NodeKind.HTML and
                               x.args == "span" and
@@ -2829,18 +2864,29 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                       distw([cleaned_titletext], word) > 0.3 and
                       cleaned_titletext not in ("I", "es")):
                     is_title = True
+                #  if first column or same style as first column
                 elif (style == cellstyle and
+                      # and title is not identical to word name
                       titletext != word and
+                      #  the style composite string is not broken
                       not style.startswith("////") and
+                      # allow is_title = True if
+                      # XXX ENABLE ME CELLS-AS-HEADERS when LANGUAGES_WITH... is populated!
+                      # ~ lang in LANGUAGES_WITH_CELLS_AS_HEADERS and
                       titletext.find(" + ") < 0):
                     is_title = True
+                    ctx.debug("table cell determined to be header based " \
+                              "on style, but {} is not in " \
+                              "LANGUAGES_WITH_CELLS_AS_HEADERS; " \
+                              "cleaned text: {}, style: {}" \
+                              .format(lang, cleaned, style))
                 if (not is_title and len(row) < len(cols_headered) and
                     cols_headered[len(row)]):
                     # Whole column has title suggesting they are headers
                     # (e.g. "Case")
                     is_title = True
                 if re.match(r"Conjugation of |Declension of |Inflection of|"
-                            r"Mutation of|Notes\b",
+                            r"Mutation of|Notes\b", # \b is word-boundary
                             titletext):
                     is_title = True
                 if is_title:
