@@ -2122,7 +2122,6 @@ uppercase_tags = set([
     "Wu",  # Chinese dialect/language
     "Wuhan",
     "Wuvulu",
-    "X-system",
     "Xiamen",
     "Xiamen-Hokkien",
     "Xiang",
@@ -4867,6 +4866,7 @@ valid_tags = {
     "IPA": "detail",
     "pre-1989-IPA": "detail",
     "Sinological-IPA": "detail",
+    "X-system": "detail",  # Esperanto circumflex accent encoding method
     "Foochow-Romanized": "detail",  # latin script for Fuzhou Eastern Min
     "Phak-fa-su": "detail",  # latin alphabet used by missionaries for Hakka (PFS)
     "Hakka-Romanization-System": "detail",  # Taiwanese Hakka Romanization System

@@ -2473,7 +2473,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                               NodeKind.BOLD):
                     parse_translation_recurse(node)
                 elif kind == NodeKind.PREFORMATTED:
-                    print("PREFORMATTED:", node)
+                    print("parse_translation_recurse: PREFORMATTED:", node)
                 elif kind == NodeKind.LINK:
                     arg0 = node.args[0]
                     # Kludge: I've seen occasional normal links to translation
