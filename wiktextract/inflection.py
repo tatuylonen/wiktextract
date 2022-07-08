@@ -2840,7 +2840,8 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 # we want to catch
                 if (candidate_hdr and
                    kind != NodeKind.TABLE_HEADER_CELL and
-                   lang not in LANGUAGES_WITH_CELLS_AS_HEADERS):
+                   lang not in LANGUAGES_WITH_CELLS_AS_HEADERS
+                   and cleaned not in IGNORED_COLVALUES):
                     ctx.debug("table cell identified as header and given "\
                               "candidate status, but {} is not in " \
                               "LANGUAGES_WITH_CELLS_AS_HEADERS; " \
@@ -2883,11 +2884,12 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                       # ~ lang in LANGUAGES_WITH_CELLS_AS_HEADERS and
                       titletext.find(" + ") < 0):
                     is_title = True
-                    ctx.debug("table cell identified as header based " \
-                              "on style, but {} is not in " \
-                              "LANGUAGES_WITH_CELLS_AS_HEADERS; " \
-                              "cleaned text: {}, style: {}" \
-                              .format(lang, cleaned, style))
+                    if cleaned not in IGNORED_COLVALUES:
+                        ctx.debug("table cell identified as header based " \
+                                  "on style, but {} is not in " \
+                                  "LANGUAGES_WITH_CELLS_AS_HEADERS; " \
+                                  "cleaned text: {}, style: {}" \
+                                  .format(lang, cleaned, style))
                 if (not is_title and len(row) < len(cols_headered) and
                     cols_headered[len(row)]):
                     # Whole column has title suggesting they are headers
