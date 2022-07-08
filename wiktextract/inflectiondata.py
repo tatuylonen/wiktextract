@@ -5040,6 +5040,7 @@ infl_map = {
     "broken plural triptote in ـَاة (-āh)": "broken-form plural triptote ar-infl-ah",
     "basic collective diptote": "collective diptote",
     "basic singulative triptote": "singulative triptote",
+    "basic singulative diptote": "singulative diptote",
     "singulative triptote in ـَاة (-āh)": "singulative triptote ar-infl-ah",
     "collective triptote in ـَة (-a)": "collective triptote ar-infl-a",
     "collective in ـًا (-an)": "collective ar-infl-an-alef",
@@ -5047,10 +5048,13 @@ infl_map = {
     "broken plural in ـًا (-an)": "broken-form plural ar-infl-an-alef",
     "broken plural in ـًى (-an)‎": "broken-form plural ar-infl-an-maksura",
     "plural of irregular noun": "plural irregular",
-
-
-
-
+    "collective in ـًى (-an)": "collective ar-infl-an-maksura",
+    "broken paucal triptote in ـَة (-a)": "broken-form paucal triptote ar-infl-a",
+    "singular of irregular pronoun": "singular irregular pronoun",
+    "basic broken paucal diptote": "broken-form paucal diptote",
+    
+    
+    
     # teie/Estonian
     "Partitive": "partitive",
     "Inessive": "inessive",
@@ -5200,7 +5204,8 @@ infl_map = {
         "else": "class-6",
     },
 
-
+    "2nd person f": "second-person feminine",
+    
 
 
 }

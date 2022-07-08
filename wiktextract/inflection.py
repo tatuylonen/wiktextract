@@ -295,7 +295,7 @@ lang_specific = {
     # },
     "Arabic": {
         "next": "semitic-group",
-        "numbers": ["singular", "dual", "paucal", "plural"],
+        "numbers": ["singular", "dual", "paucal", "plural", "collective", "singulative"],
         "reuse_cellspan": "reuse",
         "hdr_expand_first": set(["number"]),
         "hdr_expand_cont": set(["gender", "referent", "misc", "number",
@@ -2841,8 +2841,8 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 if (candidate_hdr and
                    kind != NodeKind.TABLE_HEADER_CELL and
                    lang not in LANGUAGES_WITH_CELLS_AS_HEADERS):
-                    ctx.debug("table cell given header candidate status, " \
-                              "but {} is not in " \
+                    ctx.debug("table cell identified as header and given "\
+                              "candidate status, but {} is not in " \
                               "LANGUAGES_WITH_CELLS_AS_HEADERS; " \
                               "cleaned text: {}" \
                               .format(lang, cleaned))
@@ -2883,7 +2883,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                       # ~ lang in LANGUAGES_WITH_CELLS_AS_HEADERS and
                       titletext.find(" + ") < 0):
                     is_title = True
-                    ctx.debug("table cell determined to be header based " \
+                    ctx.debug("table cell identified as header based " \
                               "on style, but {} is not in " \
                               "LANGUAGES_WITH_CELLS_AS_HEADERS; " \
                               "cleaned text: {}, style: {}" \
