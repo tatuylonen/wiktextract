@@ -2841,7 +2841,9 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 if (candidate_hdr and
                    kind != NodeKind.TABLE_HEADER_CELL and
                    lang not in LANGUAGES_WITH_CELLS_AS_HEADERS
-                   and cleaned not in IGNORED_COLVALUES):
+                   and cleaned != ""
+                   and cleaned not in IGNORED_COLVALUES
+                   and not cleaned.startswith("dummy-")):
                     ctx.debug("table cell identified as header and given "\
                               "candidate status, but {} is not in " \
                               "LANGUAGES_WITH_CELLS_AS_HEADERS; " \
