@@ -35,9 +35,8 @@ pron_romanization_re = re.compile(
                     reverse=True)) +
     ")([^\n]+)")
 
-def parse_pronunciation(ctx, config, node, data, sense_data, pos_data, etym_data,
-                        pos_datas, etym_datas, page_datas, have_etym, stack,
-                        base_data, language):
+def parse_pronunciation(ctx, config, node, data, etym_data,
+                        have_etym, base_data, language):
     """Parses the pronunciation section from a language section on a
     page."""
     assert isinstance(node, WikiNode)
