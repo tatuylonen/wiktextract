@@ -2,7 +2,7 @@
 #
 # Tests for parsing inflection tables
 #
-# Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2021, 2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
 import json
@@ -1808,6 +1808,11 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "table-tags"
                 ]
+              },
+              {
+                "form": "stem in long/high vowel",
+                "source": "Declension",
+                "tags": ["class"]
               },
               {
                 "form": "front rounded harmony",

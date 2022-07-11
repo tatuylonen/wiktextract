@@ -20,6 +20,7 @@ POSSESSIVE_POSSESSED_LANGS = set([
     "Norwegian Nynorsk",
     "Quechua",
     "Swedish",
+    "Uyghur",
 ])
 
 # Languages that have numbered infinitives (infinitive-i etc)
@@ -360,7 +361,7 @@ infl_map = {
     "pluperfect": "pluperfect",
 
     # XXX These need to be better structured, but I don't know where these
-    # are from
+    # are from (see e.g. cois/Irish)
     "Bare forms": "indefinite",
     "Bare forms:": "",
 
@@ -2029,7 +2030,12 @@ infl_map = {
     "comparative degree": "comparative",
     "superlative degree": "superlative",
     "prolative": "prolative",
-    "comparative": "comparative",
+    "comparative": {
+        "lang": ["Chechen","Mari", "Nivkh",],
+        "pos": "noun",
+        "then": "comparative-case",
+        "else": "comparative",
+    },
     "causative": "causative",
     "Indicative": "indicative",
     "Subjunctive": "subjunctive",
@@ -3462,7 +3468,6 @@ infl_map = {
     # "benim (my)": XXX,
     # "Declarative": XXX,
     # "substantive genitive": XXX,
-    # "substantive": XXX,
     # "preposition": XXX,
     # "specific": XXX,
     # "adverb": XXX,
@@ -4111,6 +4116,8 @@ infl_map = {
     "participle (a27)": "participle",  # kvøða/Faroese
     "participle (a18/a6)": "participle",  # skreiða/Faroese
     "participle (a18)": "participle",  # ýa/Faroese
+    "participle (a5 (a39))": "participle",  # skráseta/Faroese
+
 
     # síggjast/Faroese
     "eg": {
@@ -5015,7 +5022,7 @@ infl_map = {
     "singular diptote in ـٍ (-in)": "singular diptote ar-infl-in",
     "singular diptote in ـَاة (-āh)": "singular diptote ar-infl-ah",  #a حماة/Arabic
     "singular diptote in ـَة (-a)": "singular diptote ar-infl-a",  #a أرمية/Arabic
-    "singular in ـًا (-an)": "singular ar-infl-an-alef",  
+    "singular in ـًا (-an)": "singular ar-infl-an-alef",
     "singular in ـًى (-an)": "singular ar-infl-an-maksura",  #a مدى/Arabic
     "singular invariable": "singular invariable",
     "singular long construct": "singular long-construct",  #a ذو الحجة/Arabic
@@ -5033,11 +5040,21 @@ infl_map = {
     "broken plural triptote in ـَاة (-āh)": "broken-form plural triptote ar-infl-ah",
     "basic collective diptote": "collective diptote",
     "basic singulative triptote": "singulative triptote",
+    "basic singulative diptote": "singulative diptote",
     "singulative triptote in ـَاة (-āh)": "singulative triptote ar-infl-ah",
     "collective triptote in ـَة (-a)": "collective triptote ar-infl-a",
     "collective in ـًا (-an)": "collective ar-infl-an-alef",
+    "broken plural triptote in ـٍ (-in)": "broken-form plural triptote ar-infl-in",
+    "broken plural in ـًا (-an)": "broken-form plural ar-infl-an-alef",
+    "broken plural in ـًى (-an)‎": "broken-form plural ar-infl-an-maksura",
+    "plural of irregular noun": "plural irregular",
+    "collective in ـًى (-an)": "collective ar-infl-an-maksura",
+    "broken paucal triptote in ـَة (-a)": "broken-form paucal triptote ar-infl-a",
+    "singular of irregular pronoun": "singular irregular pronoun",
+    "basic broken paucal diptote": "broken-form paucal diptote",
     
-
+    
+    
     # teie/Estonian
     "Partitive": "partitive",
     "Inessive": "inessive",
@@ -5063,9 +5080,133 @@ infl_map = {
     "Informal non-polite": "informal",
     "Informal polite": "informal polite",
     "Formal polite": "formal polite",
+
+    "Middle/Passive": "middle-voice passive",  # पिबति/Sanskrit
+
+    "Singular base form": "singular base-form",  #a ܒܪܘܢܐ/Assyrian Neo-Aramaic
+    "Plural base form": "plural base-form",
+
+    "substantive": {
+        "lang": ["Chechen", "Ingush",],
+        "pos": "noun",
+        "then": "substantive-case",
+    },
+
+    "similitude": "similitude",  # a ئانا/Uyghur
+    "equivalence": "equal",
+    "Declension of locative-qualitative form": "locative-qualitative",
+    "representative": "representative",
+    "Declension of representative form": "representative",
+
+    # When copy-pasting headers from Wiktionary with a browser,
+    # remember to replace the "downgraded"-superscripts into
+    # unicode superscript characters here, if the copy-pasted
+    # content doesn't have super-scripts. Things with <sup></sup>
+    # get automatically translated into those in clean.py, and
+    # these entries have to match them. If copy-pasting from
+    # error messages in the shell, you get the 'correct' characters.
+
+    "2ⁿᵈperson singular ordinary": {
+        "lang": "Uyghur",
+        "pos": "noun",
+        "then": "second-person singular possessive",
+    },
+    "2ⁿᵈperson plural ordinary": {
+        "lang": "Uyghur",
+        "pos": "noun",
+        "then": "second-person plural possessive",
+    },
+    "2ⁿᵈperson singular refined": {
+        "lang": "Uyghur",
+        "pos": "noun",
+        "then": "second-person singular formal possessive",
+    },
+    "2ⁿᵈperson plural refined": {
+        "lang": "Uyghur",
+        "pos": "noun",
+        "then": "second-person plural formal possessive",
+    },
+    "2ⁿᵈperson singular & plural respectful (your)": {
+        "lang": "Uyghur",
+        "pos": "noun",
+        "then": "second-person polite possessive",
+    },
+    "1ˢᵗ person plural": {
+        "lang": "Uyghur",
+        "pos": "noun",
+        "then": "first-person plural possessive",
+    },
+    "3ʳᵈ person (his, her, its, their)": {
+        "lang": "Uyghur",
+        "pos": "noun",
+        "then": "third-person singular possessive",
+    },
+    "1ˢᵗ person singular": {
+        "lang": "Uyghur",
+        "pos": "noun",
+        "then": "first-person singular possessive",
+    },
+
+    # -raihu/Kikuyu
+    # Class [singular class], Class [plural class]
+    "Class 1, Class 2": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-1",
+        "else": "class-2",
+    },
+    "Class 3, Class 4": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-3",
+        "else": "class-4",
+    },
+    "Class 5, Class 6": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-5",
+        "else": "class-6",
+    },
+    "Class 7, Class 8": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-7",
+        "else": "class-8",
+    },
+    "Class 9, Class 10": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-9",
+        "else": "class-10",
+    },
+    "Class 11, Class 10": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-11",
+        "else": "class-10",
+    },
+    "Class 12, Class 13": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-12",
+        "else": "class-13",
+    },
+    "Class 14, Class 6": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-14",
+        "else": "class-6",
+    },
+    "Class 15, Class 6": {
+        "lang": "Kikuyu",
+        "if": "singular",
+        "then": "class-15",
+        "else": "class-6",
+    },
+
+    "2nd person f": "second-person feminine",
     
-    
-    
+
 
 }
 

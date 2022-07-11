@@ -200,6 +200,8 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb):
                         dt["topics"] = topics
                     data_append(ctx, sense_dt, rel, dt)
                 senses.append(sense_dt)
+            if not senses:
+                senses.append({"tags": ["no-gloss"]})
             data = {
                 "word": word,
                 "lang": lang,

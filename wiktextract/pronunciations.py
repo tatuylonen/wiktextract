@@ -182,14 +182,21 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 pron["tags"] = []
                 parts = text.split(": ")
                 # cludge for weird synax i.e. (Hokkien: Xiamen, ...)
-                if parts[1].find(",") >= 0 or \
-                        parts[1].replace(")", "").replace("(", "").strip() in valid_tags:
+                if (parts[1].find(",") >= 0 or
+                    parts[1].replace(")", "").replace("(", "").strip()
+                    in valid_tags):
                     new_text = text
                     new_text = new_text.replace(" (", ",")
                     new_text = new_text.replace("(", "")
                     new_text = new_text.replace(")", "")
                     new_text = new_text.replace(":", ",")
-                    new_parent_hdrs = [new_parent_hdrs[0]]
+                    # XXX this needs more attention.  It looks like this
+                    # only considers the first and last subtitle, but e.g.
+                    # in/Chinese has three valid levels.  @yoskari says this
+                    # was a kludge to avoid too many tags in some other cases.
+                    # The correct resolution is still unclear.
+                    #if len(new_parent_hdrs) > 1:
+                    #    new_parent_hdrs = [new_parent_hdrs[0]]
                     for hdr in new_text.split(","):
                         new_parent_hdrs.append(hdr.strip())
                 else:
