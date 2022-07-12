@@ -425,10 +425,9 @@ head_final_bantu_map = {
     "pa": "class-16",
     "mu": "class-18",
 
-    # XXX these are probably errors in Wiktionary, currently ignored
-    "n or n": "?",  # Andromeda/Eng/Tr/Swahili etc
-    "m or ma": "?",  # environment/Eng/Tr/Swahili etc
-    "u or u": "?",  # wife/Eng/Tr/Swahili
+    "n or n": "class-9 class-10",  # Andromeda/Eng/Tr/Swahili etc
+    "u or u": "class-11 class-14",  # wife/Eng/Tr/Swahili
+    
 }
 
 head_final_semitic_langs = set([
@@ -2443,7 +2442,6 @@ uppercase_tags = set([
     "Franconian",
     "Galilean Aramaic",
     "Gallurese Sardinian",
-    "Glagolithic",
     "Goesharde",
     "Mooring",
     "Grenadian",
@@ -4632,7 +4630,6 @@ xlat_tags_map = {
     # ~ "comparative of": "comparative-of",  # miður/Icelandic
     "subst.": "noun",
     "Persic": "Persian",
-        
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
