@@ -2809,7 +2809,8 @@ def fix_subtitle_hierarchy(ctx, text):
     # print(text)
     return text
 
-
+# TODO: this is hacked in and hardcoded for Simple English wiktionary
+SIMPLE_ENGLISH = True
 def parse_page(ctx, word, text, config):
     """Parses the text of a Wiktionary page and returns a list of
     dictionaries, one for each word/part-of-speech defined on the page
@@ -2866,9 +2867,14 @@ def parse_page(ctx, word, text, config):
             # Some pages have links at top level, e.g., "trees" in Wiktionary
             continue
         if langnode.kind != NodeKind.LEVEL2:
-            ctx.debug("unexpected top-level node: {}".format(langnode))
-            continue
-        lang = clean_node(config, ctx, None, langnode.args)
+            if SIMPLE_ENGLISH:
+                # Simple English wiki doesn't have language subheaders
+                lang = "English"
+            else:
+                ctx.debug("unexpected top-level node: {}".format(langnode))
+                continue
+        if not SIMPLE_ENGLISH:
+            lang = clean_node(config, ctx, None, langnode.args)
         if lang not in languages_by_name:
             ctx.debug("unrecognized language name at top-level {!r}"
                       .format(lang))
