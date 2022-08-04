@@ -1,4 +1,4 @@
 nose
 python-Levenshtein
-git+https://github.com/tatuylonen/wikitextprocessor.git@refs/pull/9/head
+git+https://github.com/tatuylonen/wikitextprocessor.git@refs/pull/10/head
 nltk

@@ -2885,37 +2885,8 @@ def parse_page(ctx, word, text, config):
     # Iterate over top-level titles, which should be languages for normal
     # pages
     by_lang = collections.defaultdict(list)
-    for langnode in tree.children:
-        if not isinstance(langnode, WikiNode):
-            continue
-        if langnode.kind == NodeKind.TEMPLATE:
-            parse_top_template(config, ctx, langnode, top_data)
-            continue
-        if langnode.kind == NodeKind.LINK:
-            # Some pages have links at top level, e.g., "trees" in Wiktionary
-            continue
-        if langnode.kind != NodeKind.LEVEL2:
-            if SIMPLE_ENGLISH:
-                # Simple English wiki doesn't have language subheaders
-                lang = "English"
-            else:
-                ctx.debug("unexpected top-level node: {}".format(langnode))
-                continue
-        if not SIMPLE_ENGLISH:
-            lang = clean_node(config, ctx, None, langnode.args)
-        if lang not in languages_by_name:
-            ctx.debug("unrecognized language name at top-level {!r}"
-                      .format(lang))
-            continue
-        if config.capture_languages and lang not in config.capture_languages:
-            continue
-        langdata = languages_by_name[lang]
-        lang_code = langdata["code"]
-        ctx.start_section(lang)
 
-        # Collect all words from the page.
-        datas = parse_language(ctx, config, langnode, lang, lang_code)
-
+    def propagate_to_top_data(ctx, datas):
         # Propagate fields resulting from top-level templates to this
         # part-of-speech.
         for data in datas:
@@ -2926,6 +2897,43 @@ def parse_page(ctx, word, text, config):
                 assert isinstance(v, (list, tuple))
                 data_extend(ctx, data, k, v)
             by_lang[data["lang"]].append(data)
+
+    if not SIMPLE_ENGLISH:
+        for langnode in tree.children:
+            if not isinstance(langnode, WikiNode):
+                continue
+            if langnode.kind == NodeKind.TEMPLATE:
+                parse_top_template(config, ctx, langnode, top_data)
+                continue
+            if langnode.kind == NodeKind.LINK:
+                # Some pages have links at top level, e.g., "trees" in Wiktionary
+                continue
+            if langnode.kind != NodeKind.LEVEL2:
+                ctx.debug("unexpected top-level node: {}".format(langnode))
+                continue
+            lang = clean_node(config, ctx, None, langnode.args)
+            if lang not in languages_by_name:
+                ctx.debug("unrecognized language name at top-level {!r}"
+                        .format(lang))
+                continue
+            if config.capture_languages and lang not in config.capture_languages:
+                continue
+            langdata = languages_by_name[lang]
+            lang_code = langdata["code"]
+            ctx.start_section(lang)
+
+            # Collect all words from the page.
+            datas = parse_language(ctx, config, langnode, lang, lang_code)
+            propagate_to_top_data(ctx, datas)
+    else:
+        # for Simple English, the whole page is the language entry
+        lang = "English"
+        langdata = languages_by_name[lang]
+        lang_code = langdata["code"]
+        langnode = tree
+        ctx.start_section(lang)
+        datas = parse_language(ctx, config, tree, lang, lang_code)
+        propagate_to_top_data(ctx, datas)
 
     # XXX this code is clearly out of date.  There is no longer a "conjugation"
     # field.  FIX OR REMOVE.
