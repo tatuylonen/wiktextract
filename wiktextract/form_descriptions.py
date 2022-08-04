@@ -1746,7 +1746,7 @@ def parse_sense_qualifier(ctx, text, data):
     lst = map_with(xlat_descs_map, [text])
     sense_tags = []
     for text in lst:
-        for semi in split_at_comma_semi(text):
+        for semi in split_at_comma_semi(text, extra=[" & "]):
             if not semi:
                 continue
             orig_semi = semi
