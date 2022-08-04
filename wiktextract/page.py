@@ -439,6 +439,7 @@ panel_prefixes = [
 # Templates used for wikipedia links.
 wikipedia_templates = set([
     "wikipedia",
+    "wik",
     "slim-wikipedia",
     "w",
     "W",
@@ -2732,7 +2733,7 @@ def parse_top_template(config, ctx, node, data):
         if name == "character info":
             # XXX capture
             return ""
-        if name == "commonscat":
+        if name in ["commonscat", "Commons category"]:
             # XXX capture link to Wikimedia commons
             return ""
         if name == "wrongtitle":
