@@ -42,6 +42,7 @@ IGNORED_COLVALUES = set([
 # parsing in languages not in the list. See XXX CELLS-AS-HEADERS
 LANGUAGES_WITH_CELLS_AS_HEADERS = set([
     "Greek",
+    "Irish",
     ])
 
 

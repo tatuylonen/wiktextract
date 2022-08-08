@@ -1352,7 +1352,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # as glosses.  Skip them.
         subglosses = list(gl for gl in subglosses
                           if gl.strip() and
-                          not re.match(r'\s*(\([^)]*\)\s*)?(:|"[^"]*"\s*$)',
+                          not re.match(r'\s*(\([^)]*\)\s*)?"[^"]*"\s*$',
                                        gl))
 
         if len(subglosses) > 1 and "form_of" not in sense_base:
