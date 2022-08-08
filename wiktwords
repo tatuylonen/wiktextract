@@ -84,7 +84,7 @@ def capture_page(model, orig_title, text, pages_dir):
         except OSError as err:
             print("OSError: {}, "
                   "when writing file name {!r}, for "
-                  "title: {!r}".format(err, path, orig_title)
+                  "title: {!r}".format(err, path, orig_title))
 
     return analyze
 
