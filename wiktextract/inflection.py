@@ -2853,8 +2853,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 candidate_hdr = not any(any(t.startswith("error-")
                                              for t in ts)
                                          for ts in hdr_expansion)
-                ignored_cell = any(any(t.startswith("dummy-skip") or
-                                        t.startswith("dummy-ign")
+                ignored_cell = any(any(t.startswith("dummy-")
                                         for t in ts)
                                     for ts in hdr_expansion)
                 # KJ candidate_hdr says that a specific cell is a candidate
