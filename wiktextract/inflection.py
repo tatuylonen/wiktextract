@@ -43,6 +43,13 @@ IGNORED_COLVALUES = set([
 LANGUAGES_WITH_CELLS_AS_HEADERS = set([
     "Greek",
     "Irish",
+    "Faroese",
+    "Persian",
+    "Serbo-Croatian",
+    "Icelandic",
+    "Old Church Slavonic",
+    # "Egyptian", has many debug messages but ok tables
+    
     ])
 
 

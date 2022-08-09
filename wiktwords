@@ -75,8 +75,8 @@ def capture_page(model, orig_title, text, pages_dir):
                       path)
         path = re.sub(r"//+", "/", path)
         dirpath = os.path.dirname(path)
-        os.makedirs(dirpath, exist_ok=True)
         try:
+            os.makedirs(dirpath, exist_ok=True)
             with open(path, "w", encoding="utf-8") as f:
                 f.write("TITLE: {}\n".format(orig_title))
                 text = html.unescape(text)
