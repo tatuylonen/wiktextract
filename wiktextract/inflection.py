@@ -38,8 +38,10 @@ IGNORED_COLVALUES = set([
 # or given header candidate status, there is a debug message telling of this;
 # at that point, determine if the language has well or badly formatted tables,
 # and if it's too much work to fix them on Wiktionary, add the language to this
-# list. XXX At some point, this list will be used to block cells-as-headers
-# parsing in languages not in the list. See XXX CELLS-AS-HEADERS
+# list.
+# Currently, this set is used to allow heuristic declaration of a cell as
+# header; languages not in the set ignore two heuristic tests (but allow
+# certain gimmes)
 LANGUAGES_WITH_CELLS_AS_HEADERS = set([
     "Greek",
     "Irish",
@@ -48,9 +50,18 @@ LANGUAGES_WITH_CELLS_AS_HEADERS = set([
     "Serbo-Croatian",
     "Icelandic",
     "Old Church Slavonic",
-    # "Egyptian", has many debug messages but ok tables
-    
+    # not Egyptian, has many debug messages but ok tables
+    "Sanskrit",
+    "Romanian",
+        
     ])
+# XXX The above could be made even more specific by filtering each language with
+# specific words found in Templates. If Romanian tables have consistenly
+# "n gender" as a header, just check against that.
+# Doing this would involve changing LANGUAGES_WITH_CELLS_AS_HEADERS into a
+# dict containing lists; the keys would be language names (and would function
+# the same with "x in y" syntax), and then just do further checking against
+# the list.
 
 
 # These tags are never inherited from above
@@ -2839,8 +2850,13 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 hdr_expansion = expand_header(config, ctx, word, lang, pos,
                                               cleaned, [],
                                               silent=True, ignore_tags=True)
-                candidate_hdr = (not any(any(t.startswith("error-") for t in ts)
-                                         for ts in hdr_expansion))
+                candidate_hdr = not any(any(t.startswith("error-")
+                                             for t in ts)
+                                         for ts in hdr_expansion)
+                ignored_cell = any(any(t.startswith("dummy-skip") or
+                                        t.startswith("dummy-ign")
+                                        for t in ts)
+                                    for ts in hdr_expansion)
                 # KJ candidate_hdr says that a specific cell is a candidate
                 # for being a header because it passed through expand_header
                 # without getting any "error-" tags; that is, the contents
@@ -2850,18 +2866,27 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                    kind != NodeKind.TABLE_HEADER_CELL and
                    lang not in LANGUAGES_WITH_CELLS_AS_HEADERS
                    and cleaned != ""
-                   and cleaned not in IGNORED_COLVALUES
-                   and not cleaned.startswith("dummy-")):
-                    ctx.debug("table cell identified as header and given "\
-                              "candidate status, but {} is not in " \
-                              "LANGUAGES_WITH_CELLS_AS_HEADERS; " \
-                              "cleaned text: {}" \
-                              .format(lang, cleaned))
+                   and cleaned not in IGNORED_COLVALUES):
+                    if (lang not in LANGUAGES_WITH_CELLS_AS_HEADERS and
+                        not ignored_cell):
+                        ctx.debug("suspicious heuristic header: "
+                                  "table cell identified as header and given "
+                                  "candidate status, BUT {} is not in "
+                                  "LANGUAGES_WITH_CELLS_AS_HEADERS; "
+                                  "cleaned text: {}"
+                                  .format(lang, cleaned))
+                    elif lang in LANGUAGES_WITH_CELLS_AS_HEADERS:
+                        ctx.debug("expected heuristic header: "
+                                  "table cell identified as header and given "
+                                  "candidate status, AND {} is in "
+                                  "LANGUAGES_WITH_CELLS_AS_HEADERS; "
+                                  "cleaned text: {}"
+                                  .format(lang, cleaned))
+                        candidate_hdr = False
                     # KJ the simplest way to implement LANGUAGES_WITH...
-                    # is to stop candidate_hdr with = False here if LWCAH == True
-                    # XXX ENABLE ME CELLS-AS-HEADERS when LANGUAGES_WITH... is populated!
-                    # ~ candidate_hdr = False
-                    
+                    # is to stop candidate_hdr with = False here
+                    # if "not in LWCAH" is True
+                                        
                 #print("titletext={!r} hdr_expansion={!r} candidate_hdr={!r} "
                 #      "lang={} pos={}"
                 #      .format(titletext, hdr_expansion, candidate_hdr,
@@ -2889,16 +2914,24 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                       titletext != word and
                       #  the style composite string is not broken
                       not style.startswith("////") and
-                      # allow is_title = True if
-                      # XXX ENABLE ME CELLS-AS-HEADERS when LANGUAGES_WITH... is populated!
-                      # ~ lang in LANGUAGES_WITH_CELLS_AS_HEADERS and
                       titletext.find(" + ") < 0):
-                    is_title = True
-                    if cleaned not in IGNORED_COLVALUES:
-                        ctx.debug("table cell identified as header based " \
-                                  "on style, but {} is not in " \
-                                  "LANGUAGES_WITH_CELLS_AS_HEADERS; " \
-                                  "cleaned text: {}, style: {}" \
+                    if (cleaned not in IGNORED_COLVALUES and
+                       lang in LANGUAGES_WITH_CELLS_AS_HEADERS):
+                        ctx.debug("suspicious heuristic header: "
+                                  "table cell identified as header based "
+                                  "on style, BUT {} is not in "
+                                  "LANGUAGES_WITH_CELLS_AS_HEADERS; "
+                                  "cleaned text: {}, style: {}"
+                                  .format(lang, cleaned, style))
+                        is_title = True
+                    elif (cleaned not in IGNORED_COLVALUES and
+                          lang not in LANGUAGES_WITH_CELLS_AS_HEADERS and
+                          not ignored_cell):
+                        ctx.debug("expected heuristic header: "
+                                  "table cell identified as header based "
+                                  "on style, AND {} is not in "
+                                  "LANGUAGES_WITH_CELLS_AS_HEADERS; "
+                                  "cleaned text: {}, style: {}"
                                   .format(lang, cleaned, style))
                 if (not is_title and len(row) < len(cols_headered) and
                     cols_headered[len(row)]):
