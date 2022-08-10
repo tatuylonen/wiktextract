@@ -53,7 +53,10 @@ LANGUAGES_WITH_CELLS_AS_HEADERS = set([
     # not Egyptian, has many debug messages but ok tables
     "Sanskrit",
     "Romanian",
-        
+    "Assamese",
+    "Old Swedish",
+    "Adyghe",
+    
     ])
 # XXX The above could be made even more specific by filtering each language with
 # specific words found in Templates. If Romanian tables have consistenly
@@ -2853,19 +2856,26 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 candidate_hdr = not any(any(t.startswith("error-")
                                              for t in ts)
                                          for ts in hdr_expansion)
-                ignored_cell = any(any(t.startswith("dummy-")
-                                        for t in ts)
-                                    for ts in hdr_expansion)
                 # KJ candidate_hdr says that a specific cell is a candidate
                 # for being a header because it passed through expand_header
                 # without getting any "error-" tags; that is, the contents
                 # is "valid" for being a header; these are the false positives
                 # we want to catch
+                ignored_cell = any(any(t.startswith("dummy-")
+                                        for t in ts)
+                                    for ts in hdr_expansion)
+                # ignored_cell should NOT be used to filter for headers, like
+                # candidate_hdr is used, but only to filter for related *debug
+                # messages*: some dummy-tags are actually half-way to headers,
+                # like ones with "Notes", so they MUST be headers, but later
+                # on they're ignored *as* headers so they don't need to print
+                # out any cells-as-headers debug messages.
                 if (candidate_hdr and
                    kind != NodeKind.TABLE_HEADER_CELL and
-                   lang not in LANGUAGES_WITH_CELLS_AS_HEADERS
-                   and cleaned != ""
-                   and cleaned not in IGNORED_COLVALUES):
+                   lang not in LANGUAGES_WITH_CELLS_AS_HEADERS and
+                   cleaned != "" and
+                   cleaned not in IGNORED_COLVALUES):
+                    print("col: {}".format(col))
                     if (lang not in LANGUAGES_WITH_CELLS_AS_HEADERS and
                         not ignored_cell):
                         ctx.debug("suspicious heuristic header: "
