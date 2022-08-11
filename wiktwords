@@ -197,6 +197,12 @@ if __name__ == "__main__":
     else:
         print("Capturing words for:", ", ".join(args.language))
 
+    if args.num_threads and args.num_threads > 1:
+        import multiprocessing
+        if multiprocessing.get_start_method() == "spawn":
+            print("--num-threads not supported on this OS (no stable implementation of fork() available)")
+            sys.exit(1)
+
     # Open output file.
     out_path = args.out
     if out_path and out_path != "-":
