@@ -19,7 +19,7 @@ from wiktextract.form_descriptions import (classify_desc, decode_tags,
                                            parse_head_final_tags, distw)
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.clean import clean_value
-
+from wiktextract.table_headers_heuristics_data import LANGUAGES_WITH_CELLS_AS_HEADERS
 
 # Set this to a word form to debug how that is analyzed, or None to disable
 debug_word = None
@@ -29,43 +29,6 @@ IGNORED_COLVALUES = set([
     "-", "־", "᠆", "‐", "‑", "‒", "–", "—", "―", "−",
     "⸺", "⸻", "﹘", "﹣", "－", "/", "?",
     "not used", "not applicable"])
-
-# Languages with known badly-formatted tables, specifically where <td>-elements
-# are used for cells that should be <th>. If the languages has these bad <td>s,
-# then they have to be parsed heuristically to find out whether a cell is a
-# header or not.
-# If a language is not in this set and a cell is heuristically made a header
-# or given header candidate status, there is a debug message telling of this;
-# at that point, determine if the language has well or badly formatted tables,
-# and if it's too much work to fix them on Wiktionary, add the language to this
-# list.
-# Currently, this set is used to allow heuristic declaration of a cell as
-# header; languages not in the set ignore two heuristic tests (but allow
-# certain gimmes)
-LANGUAGES_WITH_CELLS_AS_HEADERS = set([
-    "Greek",
-    "Irish",
-    "Faroese",
-    "Persian",
-    "Serbo-Croatian",
-    "Icelandic",
-    "Old Church Slavonic",
-    # not Egyptian, has many debug messages but ok tables
-    "Sanskrit",
-    "Romanian",
-    "Assamese",
-    "Old Swedish",
-    "Adyghe",
-    
-    ])
-# XXX The above could be made even more specific by filtering each language with
-# specific words found in Templates. If Romanian tables have consistenly
-# "n gender" as a header, just check against that.
-# Doing this would involve changing LANGUAGES_WITH_CELLS_AS_HEADERS into a
-# dict containing lists; the keys would be language names (and would function
-# the same with "x in y" syntax), and then just do further checking against
-# the list.
-
 
 # These tags are never inherited from above
 # XXX merge with lang_specific
@@ -2877,14 +2840,16 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                    cleaned not in IGNORED_COLVALUES):
                     print("col: {}".format(col))
                     if (lang not in LANGUAGES_WITH_CELLS_AS_HEADERS and
-                        not ignored_cell):
+                        not ignored_cell):  # do not print debug for dummy-cells
                         ctx.debug("suspicious heuristic header: "
                                   "table cell identified as header and given "
                                   "candidate status, BUT {} is not in "
                                   "LANGUAGES_WITH_CELLS_AS_HEADERS; "
                                   "cleaned text: {}"
                                   .format(lang, cleaned))
-                    elif lang in LANGUAGES_WITH_CELLS_AS_HEADERS:
+                    elif (lang in LANGUAGES_WITH_CELLS_AS_HEADERS and
+                          cleaned in LANGUAGES_WITH_CELLS_AS_HEADERS[lang] and
+                          not ignored_cell):  # let dummy-tagged cells through
                         ctx.debug("expected heuristic header: "
                                   "table cell identified as header and given "
                                   "candidate status, AND {} is in "
@@ -2925,7 +2890,9 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                       not style.startswith("////") and
                       titletext.find(" + ") < 0):
                     if (cleaned not in IGNORED_COLVALUES and
-                       lang in LANGUAGES_WITH_CELLS_AS_HEADERS):
+                       ((lang in LANGUAGES_WITH_CELLS_AS_HEADERS and
+                       cleaned in LANGUAGES_WITH_CELLS_AS_HEADERS[lang]) or
+                       ignored_cell)):  # let dummy-tagged cells through
                         ctx.debug("suspicious heuristic header: "
                                   "table cell identified as header based "
                                   "on style, BUT {} is not in "
