@@ -105,7 +105,7 @@ to view the JSON produced for each page.  You can download all data,
 data for a specific language, data just a single word, or data for a
 list of related words (e.g., a particular part-of-speech or words
 relating to a particular topic or having a particular inflectional
-form).  All downloads are in JSON format (each line is a separate JSON
+form).  All downloads are in [JSON Lines](https://jsonlines.org/) format (each line is a separate JSON
 object).  The bigger downloads are also available in compressed form.
 
 Some people have asked for the full data as a single JSON object
