@@ -520,6 +520,27 @@ ignored_etymology_templates_re = re.compile(
     r"|".join(re.escape(x) for x in ignored_etymology_templates) +
     r")$")
 
+# Regexp for matching ignored descendants template names.
+ignored_descendants_templates = [
+    "...",
+    "IPAchar",
+    "ISBN",
+    "isValidPageName",
+    "redlink category",
+    "deprecated code",
+    "check deprecated lang param usage",
+    "para",
+    "cite",
+    "archivedotorg",
+    "lang",
+]
+# Regexp for matching ignored descendants template names.  This adds certain
+# prefixes to the names listed above.
+ignored_descendants_templates_re = re.compile(
+    r"^((cite-|R:).*|" +
+    r"|".join(re.escape(x) for x in ignored_descendants_templates) +
+    r")$")
+
 
 # Regexp for matching category tags that start with a language name.
 # Group 2 will be the language name.  The category tag should be without
@@ -2551,6 +2572,96 @@ def parse_language(ctx, config, langnode, language, lang_code):
         data["etymology_text"] = text
         data["etymology_templates"] = templates
 
+    def parse_descendants(data, node, is_proto_root_derived_section=False):
+        """Parses a descendants section. Also used on derived terms sections
+        when we are dealing with a root of a reconstructed language (ie.
+        is_proto_root_derived == True), as they use the same structure. In the
+        latter case, The wiktionary convention is not to title the section as
+        descendants since the immediate offspring of the roots are
+        morphologically derived terms within the same proto-language. Still,
+        since the rest of the section lists true descendants, we use the same
+        function. Entries in the descendants list that are technically derived
+        terms will have a field "tags": ["derived"].
+        """
+        assert isinstance(data, dict)
+        assert isinstance(node, WikiNode)
+        assert isinstance(is_proto_root_derived_section, bool)
+
+        descendants = []
+
+        def process_list_item_children(args, children):
+            item_data = {"depth": 0 if args == ";" else len(args)}
+            templates = []
+            is_derived = False
+
+            def desc_template_fn(name, _):
+                if re.match(ignored_descendants_templates_re, name):
+                    return ""
+                return None
+
+            def desc_post_template_fn(name, ht, expansion):
+                if is_panel_template(name):
+                    return ""
+                if name in wikipedia_templates:
+                    parse_wikipedia_template(config, ctx, data, ht)
+                    return None
+                if re.match(ignored_descendants_templates_re, name):
+                    return None
+                ht = clean_template_args(config, ht)
+                nonlocal is_derived
+                # If we're in a proto-root derived terms section, and the
+                # current list item has a link template to a term in the same
+                # proto-language, then we tag this descendant entry with
+                # "derived"
+                is_derived = (
+                    is_proto_root_derived_section and
+                    (name == "l" or name == "link") and
+                    ("1" in ht and ht["1"] == lang_code)
+                )
+                expansion = clean_node(config, ctx, None, expansion)
+                templates.append({
+                    "name": name, "args": ht, "expansion": expansion
+                })
+                return None
+
+            text = clean_node(config, ctx, None, children,
+                post_template_fn=desc_post_template_fn)
+            item_data["templates"] = templates
+            item_data["text"] = text
+            if is_derived: item_data["tags"] = ["derived"]
+            descendants.append(item_data)
+        
+        def is_list(c):
+            return isinstance(c, WikiNode) and c.kind == NodeKind.LIST
+        def is_list_item(c):
+            return isinstance(c, WikiNode) and c.kind == NodeKind.LIST_ITEM
+        def get_sublist_index(list_item):
+            for i, child in enumerate(list_item.children):
+                if is_list(child): return i
+            return None
+
+        def get_descendants(node):
+            """Appends the data for every list item in every list in node
+             to descendants."""
+            for c in node.children:
+                if is_list(c): 
+                    get_descendants(c)
+                elif is_list_item(c):
+                    # If a LIST_ITEM has subitems in a sublist, usually its 
+                    # last child is a LIST. However, sometimes after the LIST
+                    # there is one or more trailing LIST_ITEMs, like "\n" or
+                    # a reference template. If there is a sublist, we discard
+                    # everything after it. 
+                    i = get_sublist_index(c)
+                    if i is not None:
+                        process_list_item_children(c.args, c.children[:i])
+                        get_descendants(c.children[i])
+                    else:
+                        process_list_item_children(c.args, c.children)
+
+        get_descendants(node)
+        data["descendants"] = descendants
+
     def process_children(treenode, pos):
         """This recurses into a subtree in the parse tree for a page."""
         nonlocal etym_data
@@ -2607,12 +2718,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 ctx.start_subsection(None)
                 if config.capture_etymologies:
                     parse_etymology(etym_data, node)
+            elif t == "Descendants":
+                if config.capture_descendants:
+                    data = select_data()
+                    parse_descendants(data, node)
+            elif t == "Derived terms" and pos == "root" and is_reconstruction:
+                if config.capture_descendants:
+                    data = select_data()
+                    parse_descendants(data, node, True)
             elif t == "Translations":
                 data = select_data()
                 parse_translations(data, node)
             elif t in ignored_section_titles:
-                # XXX does the Descendants section have something we'd like
-                # to capture?
                 pass
             elif t in inflection_section_titles:
                 parse_inflection(node, t, pos)

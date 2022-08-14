@@ -33,6 +33,7 @@ class WiktionaryConfig(object):
         "capture_examples",
         "capture_etymologies",
         "capture_inflections",
+        "capture_descendants",
         "verbose",
         "num_pages",
         "language_counts",
@@ -56,6 +57,7 @@ class WiktionaryConfig(object):
                  capture_examples=True,
                  capture_etymologies=True,
                  capture_inflections=True,
+                 capture_descendants=True,
                  verbose=False):
         if capture_languages is not None:
             assert isinstance(capture_languages, (list, tuple, set))
@@ -78,6 +80,7 @@ class WiktionaryConfig(object):
         self.capture_examples = capture_examples
         self.capture_etymologies = capture_etymologies
         self.capture_inflections = capture_inflections
+        self.capture_descendants = capture_descendants
         self.verbose = verbose
         # Some fields for statistics
         self.num_pages = 0
@@ -104,6 +107,7 @@ class WiktionaryConfig(object):
             "capture_examples": self.capture_examples,
             "capture_etymologies": self.capture_etymologies,
             "capture_inflections": self.capture_inflections,
+            "capture_descendants": self.capture_descendants,
             "verbose": self.verbose,
         }
 
