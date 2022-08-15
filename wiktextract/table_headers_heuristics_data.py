@@ -423,7 +423,7 @@ LANGUAGES_WITH_CELLS_AS_HEADERS = {
         "Imperative",  # 41, in "oersette; sykje; bestean; sjen"
         "Auxiliary",  # 41, in "oersette; sykje; bestean; sjen"
         "Past participle",  # 41, in "oersette; sykje; bestean; sjen"
-        "my",  # 10, in "ik; it; sy; sy"
+        # ~ "my",  # 10, in "ik; it; sy; sy"
         # ~ "weak",  # 2, in "weak; weak"
     ],
     # ~ "Welsh": [

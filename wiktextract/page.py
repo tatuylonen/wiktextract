@@ -2535,16 +2535,30 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         templates = []
 
-        def etym_post_template_fn(name, ht, expansion):
+        # Counter for preventing the capture of etymology templates
+        # when we are inside templates that we want to ignore (i.e.,
+        # not capture).
+        ignore_count = 0
+
+        def etym_template_fn(name, ht):
+            nonlocal ignore_count
             if is_panel_template(name):
                 return ""
+            if re.match(ignored_etymology_templates_re, name):
+                ignore_count += 1                
+            
+        def etym_post_template_fn(name, ht, expansion):
+            nonlocal ignore_count
             if name in wikipedia_templates:
                 parse_wikipedia_template(config, ctx, data, ht)
-            if re.match(ignored_etymology_templates_re, name):
                 return None
-            ht = clean_template_args(config, ht)
-            expansion = clean_node(config, ctx, None, expansion)
-            templates.append({"name": name, "args": ht, "expansion": expansion})
+            if re.match(ignored_etymology_templates_re, name):
+                ignore_count -= 1
+                return None
+            if ignore_count == 0:
+                ht = clean_template_args(config, ht)
+                expansion = clean_node(config, ctx, None, expansion)
+                templates.append({"name": name, "args": ht, "expansion": expansion})
             return None
 
         # Remove any subsections
@@ -2553,6 +2567,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         x.kind not in LEVEL_KINDS)
         # Convert to text, also capturing templates using post_template_fn
         text = clean_node(config, ctx, None, contents,
+                          template_fn=etym_template_fn,
                           post_template_fn=etym_post_template_fn)
         # Save the collected information.
         data["etymology_text"] = text

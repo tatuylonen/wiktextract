@@ -54,8 +54,8 @@ def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
     # steps.
     title = re.sub(r"[\s\000-\037]+", " ", title)
     title = title.strip()
-    if capture_cb is not None:
-        capture_cb(model, title, text)
+    if capture_cb and not capture_cb(model, title, text):
+        return None
     if model == "redirect":
         config1 = WiktionaryConfig()
         ret = [{"title": title, "redirect": text}]
