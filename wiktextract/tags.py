@@ -3670,6 +3670,7 @@ xlat_tags_map = {
     "(vós)": "with-vós",
     "(vos)": "with-vos",
     "(voseo)": "with-voseo",
+    "voseo": "with-voseo",
     "(tu)": "with-tu",
     "(tú)": "with-tú",
     "(eles)": "with-eles",
