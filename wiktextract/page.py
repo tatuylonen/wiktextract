@@ -2528,40 +2528,30 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         templates = []
 
-        # Used for recursive flagging to ignore certain templates.
-        # If depth <= ignore_below_this, capture template
-        # and descendant templates instead of handling them as
-        # etymology templates
-        depth = 0
-        ignore_below_this = 100000
+        # Counter for preventing the capture of etymology templates
+        # when we are inside templates that we want to ignore (i.e.,
+        # not capture).
+        ignore_count = 0
 
         def etym_template_fn(name, ht):
-            nonlocal depth
-            nonlocal ignore_below_this
-            depth += 1
+            nonlocal ignore_count
             if is_panel_template(name):
-                if (ignore_below_this and
-                   ignore_below_this > depth):
-                    ignore_below_this = depth
                 return ""
             if re.match(ignored_etymology_templates_re, name):
-                if (ignore_below_this and
-                   ignore_below_this > depth):
-                    ignore_below_this = depth
-                
+                ignore_count += 1                
             
         def etym_post_template_fn(name, ht, expansion):
-            nonlocal depth
-            nonlocal ignore_below_this
+            nonlocal ignore_count
             if name in wikipedia_templates:
                 parse_wikipedia_template(config, ctx, data, ht)
-            if ignore_below_this and depth >= ignore_below_this:
-                depth -= 1
                 return None
-            ht = clean_template_args(config, ht)
-            expansion = clean_node(config, ctx, None, expansion)
-            templates.append({"name": name, "args": ht, "expansion": expansion})
-            depth -= 1
+            if re.match(ignored_etymology_templates_re, name):
+                ignore_count -= 1
+                return None
+            if ignore_count == 0:
+                ht = clean_template_args(config, ht)
+                expansion = clean_node(config, ctx, None, expansion)
+                templates.append({"name": name, "args": ht, "expansion": expansion})
             return None
 
         # Remove any subsections
