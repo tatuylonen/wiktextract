@@ -33,6 +33,7 @@ ignore_prefixes = set(["Index", "Help", "MediaWiki", "Citations",
                        "Concordance", "Rhymes", "Thread",
                        "Summary", "File",
                        "Transwiki",
+                       "Wikcionario",
 ])
 
 # Pages with these prefixes are captured.
