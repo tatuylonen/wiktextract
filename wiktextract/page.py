@@ -2528,16 +2528,40 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         templates = []
 
-        def etym_post_template_fn(name, ht, expansion):
+        # Used for recursive flagging to ignore certain templates.
+        # If depth <= ignore_below_this, capture template
+        # and descendant templates instead of handling them as
+        # etymology templates
+        depth = 0
+        ignore_below_this = 100000
+
+        def etym_template_fn(name, ht):
+            nonlocal depth
+            nonlocal ignore_below_this
+            depth += 1
             if is_panel_template(name):
+                if (ignore_below_this and
+                   ignore_below_this > depth):
+                    ignore_below_this = depth
                 return ""
+            if re.match(ignored_etymology_templates_re, name):
+                if (ignore_below_this and
+                   ignore_below_this > depth):
+                    ignore_below_this = depth
+                
+            
+        def etym_post_template_fn(name, ht, expansion):
+            nonlocal depth
+            nonlocal ignore_below_this
             if name in wikipedia_templates:
                 parse_wikipedia_template(config, ctx, data, ht)
-            if re.match(ignored_etymology_templates_re, name):
+            if ignore_below_this and depth >= ignore_below_this:
+                depth -= 1
                 return None
             ht = clean_template_args(config, ht)
             expansion = clean_node(config, ctx, None, expansion)
             templates.append({"name": name, "args": ht, "expansion": expansion})
+            depth -= 1
             return None
 
         # Remove any subsections
@@ -2546,6 +2570,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         x.kind not in LEVEL_KINDS)
         # Convert to text, also capturing templates using post_template_fn
         text = clean_node(config, ctx, None, contents,
+                          template_fn=etym_template_fn,
                           post_template_fn=etym_post_template_fn)
         # Save the collected information.
         data["etymology_text"] = text
