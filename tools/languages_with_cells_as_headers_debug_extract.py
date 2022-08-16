@@ -27,9 +27,8 @@ with open("wiktextract-error-data.json") as f:
     # ~ print("iterating...")
     for entry in dt:
         msg = entry.get("msg")
-        # ~ if (msg.startswith("suspicious heuristic header") or
-           # ~ msg.startswith("expected heuristic header")):
-        if msg.startswith("table cell identified as header"):
+        if (msg.startswith("suspicious heuristic header") or
+           msg.startswith("expected heuristic header")):
             isnotinindex = msg.find(ISNOTIN)
             styleindex = msg.find(STYLE)
 
