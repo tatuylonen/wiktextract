@@ -2833,12 +2833,13 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 # like ones with "Notes", so they MUST be headers, but later
                 # on they're ignored *as* headers so they don't need to print
                 # out any cells-as-headers debug messages.
-                if (not ignored_cell and candidate_hdr and
+                if (candidate_hdr and
                    kind != NodeKind.TABLE_HEADER_CELL and
                    cleaned != "" and
                    cleaned not in IGNORED_COLVALUES):
                     print("col: {}".format(col))
-                    if (lang not in LANGUAGES_WITH_CELLS_AS_HEADERS):
+                    if (not ignored_cell and
+                        lang not in LANGUAGES_WITH_CELLS_AS_HEADERS):
                         ctx.debug("rejected heuristic header: "
                                   "table cell identified as header and given "
                                   "candidate status, BUT {} is not in "
