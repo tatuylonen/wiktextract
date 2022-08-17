@@ -156,10 +156,12 @@ if __name__ == "__main__":
                         help="Optional file containing sound file redirect "
                         "names from Wikimedia Commons and what "
                         "they point to")
+    parser.add_argument("--inflection-tables-file", type=str, default=None,
+                        help="Extract expanded tables in this file (for test data)")
     args = parser.parse_args()
 
     # The --all option turns on capturing all data types
-    if args.all:
+    if args.all and not args.pages_dir:
         args.translations = True
         args.pronunciations = True
         args.linkages = True
@@ -268,7 +270,8 @@ if __name__ == "__main__":
                               capture_examples=args.examples,
                               capture_etymologies=args.etymologies,
                               capture_inflections=args.inflections,
-                              verbose=args.verbose)
+                              verbose=args.verbose,
+                              expand_tables=args.inflection_tables_file,)
     # load redirects to ctx if given
     if args.redirects_file:
         with open(args.redirects_file) as f:

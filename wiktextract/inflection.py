@@ -2847,7 +2847,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                                   "cleaned text: {}"
                                   .format(lang, cleaned))
                         candidate_hdr = False
-                    # Enable me when tests are fixed and LWCAH is populated properly
+                    # ~ # Enable me when tests are fixed and LWCAH is populated properly
                     # ~ elif (cleaned not in LANGUAGES_WITH_CELLS_AS_HEADERS[lang]):
                         # ~ ctx.debug("rejected heuristic header: "
                                   # ~ "table cell identified as header and given "
@@ -3118,9 +3118,9 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
     process_tables()
 
     # XXX this code is used for extracting tables for inflection tests
-    if True:
+    if config.expand_tables:
         if section != "Mutation":
-            with open("temp.XXX", "w") as f:
+            with open(config.expand_tables, "w") as f:
                 f.write(word + "\n")
                 f.write(lang + "\n")
                 f.write(pos + "\n")

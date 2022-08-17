@@ -406,6 +406,7 @@ machine-readable)
 * --templates-file: extract Template namespace to this tar file
 * --modules-file: extract Module namespace to this tar file
 * --categories-file: extract Wiktionary category tree into this file as JSON (see description below)
+* --inflection_tables_file: extract and expand tables into this file as wikitext; use this to create tests
 * --help: displays help text (with some more options than listed here)
 
 ## Calling the library
