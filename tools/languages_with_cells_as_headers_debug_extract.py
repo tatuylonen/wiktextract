@@ -77,7 +77,15 @@ print("LANGUAGES_WITH_CELLS_AS_HEADERS = {")
 
 for lang, dd in sorted(messages.items()):
     print('    "{}": ['.format(lang))
-    for cleaned, vals in sorted(dd.items(), key=lambda dd: dd[1]["count"], reverse=True):
+    for cleaned, vals in sorted(dd.items(),
+                                # short by count first (padded), then by
+                                # cleaned (= x[0] < x-tuple from dd.items())
+                                key=lambda x:
+                                "{:010d}{}".format(
+                                        x[1]["count"],
+                                        x[0],
+                                        ),
+                                reverse=True):
         clquotes = cleaned.replace('"', '\\"')
         print('        "{}",  # {}, {} in "{}"'
                 .format(clquotes,
