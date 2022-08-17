@@ -40,6 +40,9 @@ ignore_prefixes = set(["Index", "Help", "MediaWiki", "Citations",
 recognized_prefixes = set(["Category", "Appendix", "Wiktionary",
                            "Thesaurus", "Module", "Template"])
 
+# List of all editions can be found here: https://en.wikipedia.org/wiki/List_of_Wiktionaries
+supported_editions = set(['en', 'simple'])
+
 
 def capture_page(model, orig_title, text, pages_dir):
     """Checks if the page needs special handling (and maybe saving).
@@ -100,8 +103,11 @@ if __name__ == "__main__":
     parser.add_argument("--errors", type=str,
                         help="File in which to save error information")
     parser.add_argument("--language", type=str, action="append", default=[],
-                        help="Language to capture (can specify multiple tiems, "
+                        help="Language to capture (can specify multiple items, "
                         "defaults to English and Translingual)")
+    parser.add_argument("--edition", type=str, default="en",
+                        help="Language code of the Wiktionary edition being processed, "
+                        "defaults to 'en' (English)")
     parser.add_argument("--all-languages", action="store_true", default=False,
                         help="Extract words for all languages")
     parser.add_argument("--list-languages", action="store_true", default=False,
@@ -197,6 +203,10 @@ if __name__ == "__main__":
     else:
         print("Capturing words for:", ", ".join(args.language))
 
+    if args.edition not in supported_editions:
+        print("Invalid edition: ", args.edition)
+        sys.exit(1)
+
     # Open output file.
     out_path = args.out
     if out_path and out_path != "-":
@@ -261,6 +271,7 @@ if __name__ == "__main__":
                               capture_examples=args.examples,
                               capture_etymologies=args.etymologies,
                               capture_inflections=args.inflections,
+                              edition=args.edition,
                               verbose=args.verbose)
     # load redirects to ctx if given
     if args.redirects_file:

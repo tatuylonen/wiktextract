@@ -2746,22 +2746,21 @@ def parse_top_template(config, ctx, node, data):
                 data_append(ctx, data, "wikidata", arg)
             return ""
 
-        ### Simple English wiktionary templates ###
-
-        # top 1000 headwords in British National Corpus
-        if name in ["BNC1000HW", "BNC1HW"]:
-            add_to_list(data, "bnc_top_1000")
-            return ""
-        # part of Charles Kay Ogden's Basic English 850 word list
-        if name == "BE850":
-            add_to_list(data, "basic_english_850")
-            return ""
-        # part of the academic vocab list
-        if name in ["AVL", "AWL"]:
-            add_to_list(data, "academic")
-            return ""
-        if name == "element":
-            return "" # XXX links to previous and next elements on period table
+        if config.edition == "simple":
+            # top 1000 headwords in British National Corpus
+            if name in ["BNC1000HW", "BNC1HW"]:
+                add_to_list(data, "bnc_top_1000")
+                return ""
+            # part of Charles Kay Ogden's Basic English 850 word list
+            if name == "BE850":
+                add_to_list(data, "basic_english_850")
+                return ""
+            # part of the academic vocab list
+            if name in ["AVL", "AWL"]:
+                add_to_list(data, "academic")
+                return ""
+            if name == "element":
+                return "" # XXX links to previous and next elements on periodic table
 
         # just a line break on the rendered page
         if name == "-":
@@ -2837,8 +2836,6 @@ def fix_subtitle_hierarchy(ctx, text):
     # print(text)
     return text
 
-# TODO: this is hacked in and hardcoded for Simple English wiktionary
-SIMPLE_ENGLISH = True
 def parse_page(ctx, word, text, config):
     """Parses the text of a Wiktionary page and returns a list of
     dictionaries, one for each word/part-of-speech defined on the page
@@ -2898,7 +2895,7 @@ def parse_page(ctx, word, text, config):
                 data_extend(ctx, data, k, v)
             by_lang[data["lang"]].append(data)
 
-    if not SIMPLE_ENGLISH:
+    if config.edition != "simple":
         for langnode in tree.children:
             if not isinstance(langnode, WikiNode):
                 continue
