@@ -2835,7 +2835,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 # out any cells-as-headers debug messages.
                 if (candidate_hdr and
                    kind != NodeKind.TABLE_HEADER_CELL and
-                   cleaned != "" and
+                   cleaned != "" and cleaned != "dummy-ignored-text-cell" and
                    cleaned not in IGNORED_COLVALUES):
                     print("col: {}".format(col))
                     if (not ignored_cell and
@@ -2889,6 +2889,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 elif (style == cellstyle and
                       # and title is not identical to word name
                       titletext != word and cleaned not in IGNORED_COLVALUES and
+                       cleaned != "dummy-ignored-text-cell" and
                       #  the style composite string is not broken
                       not style.startswith("////") and
                       titletext.find(" + ") < 0):
