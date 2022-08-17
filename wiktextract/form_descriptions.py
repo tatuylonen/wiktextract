@@ -1746,7 +1746,7 @@ def parse_sense_qualifier(ctx, text, data):
     lst = map_with(xlat_descs_map, [text])
     sense_tags = []
     for text in lst:
-        for semi in split_at_comma_semi(text):
+        for semi in split_at_comma_semi(text, extra=[" & "]):
             if not semi:
                 continue
             orig_semi = semi
@@ -2046,8 +2046,15 @@ def parse_alt_or_inflection_of(ctx, gloss, gloss_template_args):
     # Next try parsing it with the first character converted to lowercase if
     # it was previously uppercase.
     if gloss and gloss[0].isupper():
-        gloss = gloss[0].lower() + gloss[1:]
-        parsed = parse_alt_or_inflection_of1(ctx, gloss, gloss_template_args)
+        new_gloss = gloss[0].lower() + gloss[1:]
+        parsed = parse_alt_or_inflection_of1(ctx, new_gloss, gloss_template_args)
+        if parsed is not None:
+            return parsed
+
+    # Simple EN Wiki starts form tags with "The"
+    if gloss and gloss.startswith("The "):
+        new_gloss = gloss[4:]
+        parsed = parse_alt_or_inflection_of1(ctx, new_gloss, gloss_template_args)
         if parsed is not None:
             return parsed
 

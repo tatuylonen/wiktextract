@@ -439,6 +439,7 @@ panel_prefixes = [
 # Templates used for wikipedia links.
 wikipedia_templates = set([
     "wikipedia",
+    "wik",
     "slim-wikipedia",
     "w",
     "W",
@@ -1061,7 +1062,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 data_append(ctx, sense_base, "senseid",
                             langid + ":" + arg)
             if name in sense_linkage_templates:
-                print("SENSE_TEMPLATE_FN")
                 parse_sense_linkage(config, ctx, sense_base, name, ht)
                 return ""
             if name == "†" or name == "zh-obsolete":
@@ -2721,6 +2721,12 @@ def parse_top_template(config, ctx, node, data):
     assert isinstance(node, WikiNode)
     assert isinstance(data, dict)
 
+    def add_to_list(data, list_name):
+        key = "lists"
+        if key not in data:
+            data[key] = []
+        data[key].append(list_name)
+
     def top_template_fn(name, ht):
         if name in wikipedia_templates:
             parse_wikipedia_template(config, ctx, data, ht)
@@ -2742,7 +2748,7 @@ def parse_top_template(config, ctx, node, data):
         if name == "character info":
             # XXX capture
             return ""
-        if name == "commonscat":
+        if name in ["commonscat", "Commons category"]:
             # XXX capture link to Wikimedia commons
             return ""
         if name == "wrongtitle":
@@ -2754,6 +2760,28 @@ def parse_top_template(config, ctx, node, data):
             if arg.startswith("Q") or arg.startswith("Lexeme:L"):
                 data_append(ctx, data, "wikidata", arg)
             return ""
+
+        ### Simple English wiktionary templates ###
+
+        # top 1000 headwords in British National Corpus
+        if name in ["BNC1000HW", "BNC1HW"]:
+            add_to_list(data, "bnc_top_1000")
+            return ""
+        # part of Charles Kay Ogden's Basic English 850 word list
+        if name == "BE850":
+            add_to_list(data, "basic_english_850")
+            return ""
+        # part of the academic vocab list
+        if name in ["AVL", "AWL"]:
+            add_to_list(data, "academic")
+            return ""
+        if name == "element":
+            return "" # XXX links to previous and next elements on period table
+
+        # just a line break on the rendered page
+        if name == "-":
+            return ""
+
         ctx.debug("UNIMPLEMENTED top-level template: {} {}"
                   .format(name, ht))
         return ""
@@ -2824,7 +2852,8 @@ def fix_subtitle_hierarchy(ctx, text):
     # print(text)
     return text
 
-
+# TODO: this is hacked in and hardcoded for Simple English wiktionary
+SIMPLE_ENGLISH = True
 def parse_page(ctx, word, text, config):
     """Parses the text of a Wiktionary page and returns a list of
     dictionaries, one for each word/part-of-speech defined on the page
@@ -2871,32 +2900,8 @@ def parse_page(ctx, word, text, config):
     # Iterate over top-level titles, which should be languages for normal
     # pages
     by_lang = collections.defaultdict(list)
-    for langnode in tree.children:
-        if not isinstance(langnode, WikiNode):
-            continue
-        if langnode.kind == NodeKind.TEMPLATE:
-            parse_top_template(config, ctx, langnode, top_data)
-            continue
-        if langnode.kind == NodeKind.LINK:
-            # Some pages have links at top level, e.g., "trees" in Wiktionary
-            continue
-        if langnode.kind != NodeKind.LEVEL2:
-            ctx.debug("unexpected top-level node: {}".format(langnode))
-            continue
-        lang = clean_node(config, ctx, None, langnode.args)
-        if lang not in languages_by_name:
-            ctx.debug("unrecognized language name at top-level {!r}"
-                      .format(lang))
-            continue
-        if config.capture_languages and lang not in config.capture_languages:
-            continue
-        langdata = languages_by_name[lang]
-        lang_code = langdata["code"]
-        ctx.start_section(lang)
 
-        # Collect all words from the page.
-        datas = parse_language(ctx, config, langnode, lang, lang_code)
-
+    def propagate_to_top_data(ctx, datas):
         # Propagate fields resulting from top-level templates to this
         # part-of-speech.
         for data in datas:
@@ -2907,6 +2912,43 @@ def parse_page(ctx, word, text, config):
                 assert isinstance(v, (list, tuple))
                 data_extend(ctx, data, k, v)
             by_lang[data["lang"]].append(data)
+
+    if not SIMPLE_ENGLISH:
+        for langnode in tree.children:
+            if not isinstance(langnode, WikiNode):
+                continue
+            if langnode.kind == NodeKind.TEMPLATE:
+                parse_top_template(config, ctx, langnode, top_data)
+                continue
+            if langnode.kind == NodeKind.LINK:
+                # Some pages have links at top level, e.g., "trees" in Wiktionary
+                continue
+            if langnode.kind != NodeKind.LEVEL2:
+                ctx.debug("unexpected top-level node: {}".format(langnode))
+                continue
+            lang = clean_node(config, ctx, None, langnode.args)
+            if lang not in languages_by_name:
+                ctx.debug("unrecognized language name at top-level {!r}"
+                        .format(lang))
+                continue
+            if config.capture_languages and lang not in config.capture_languages:
+                continue
+            langdata = languages_by_name[lang]
+            lang_code = langdata["code"]
+            ctx.start_section(lang)
+
+            # Collect all words from the page.
+            datas = parse_language(ctx, config, langnode, lang, lang_code)
+            propagate_to_top_data(ctx, datas)
+    else:
+        # for Simple English, the whole page is the language entry
+        lang = "English"
+        langdata = languages_by_name[lang]
+        lang_code = langdata["code"]
+        langnode = tree
+        ctx.start_section(lang)
+        datas = parse_language(ctx, config, tree, lang, lang_code)
+        propagate_to_top_data(ctx, datas)
 
     # XXX this code is clearly out of date.  There is no longer a "conjugation"
     # field.  FIX OR REMOVE.
