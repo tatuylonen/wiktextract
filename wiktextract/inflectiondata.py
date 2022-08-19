@@ -1771,7 +1771,7 @@ infl_map = {
         "if": "first-person singular",
         "then": ""},
     "ти": {
-        "lang": "Bulgarian",
+        "lang": ["Bulgarian", "Serbo-Croatian"],
         "if": "second-person singular",
         "then": ""},
     "той/тя/то": {
@@ -5206,8 +5206,34 @@ infl_map = {
 
     "2nd person f": "second-person feminine",
     
-
-
+    "ја": {  # THIS IS CYRILLIC!! Not Latin! подразумевати/Serbo-Croatian
+        "lang": "Serbo-Croatian",
+        "then": "first-person singular",
+    },
+    "он / она / оно": {
+        "lang": "Serbo-Croatian",
+        "then": "third-person singular",
+    },
+    "ми": {
+        "lang": "Serbo-Croatian",
+        "then": "first-person plural",
+    },
+    "ви": {
+        "lang": "Serbo-Croatian",
+        "then": "second-person plural",
+    },
+    "они / оне / она": {
+        "lang": "Serbo-Croatian",
+        "then": "third-person plural",
+    },
+    "conditional¹^, (kushtore)": {  # kushtoj/Albanian
+        "lang": "Albanian",
+        "then": "conditional",
+    },
+    "personal non-finite": {  # prosternarse/Spanish
+        "lang": "Spanish",
+        "then": "",
+    },
 }
 
 def check_tags(k, v):
@@ -5261,6 +5287,10 @@ infl_start_map = {
     "with gerund": "gerund",
     "with informal second-person singular imperative":
     "informal second-person singular imperative",
+    "with informal second-person singular tú imperative":  # cedular/Spanish
+    "informal second-person singular imperative with-tú",
+    "with informal second-person singular vos imperative":
+    "informal second-person singular imperative with-vos",
     "with formal second-person singular imperative":
     "formal second-person singular imperative",
     "with first-person plural imperative":
