@@ -538,7 +538,7 @@ ignored_etymology_templates = [
 # Regexp for matching ignored etymology template names.  This adds certain
 # prefixes to the names listed above.
 ignored_etymology_templates_re = re.compile(
-    r"^((cite-|R:).*|" +
+    r"^((cite-|R:|RQ:).*|" +
     r"|".join(re.escape(x) for x in ignored_etymology_templates) +
     r")$")
 
