@@ -2,12 +2,19 @@
 #
 # This script extracts debug messages related to
 # LANGUAGES_WITH_CELLS_AS_HEADERS, which is a dictionary of
-# languages with lists of table cell text that should not be
+# languages with lists of table cell texts that should not be
 # ignored by certain heuristics in inflection.py.
 # Download error message data from https://kaikki.org/dictionary/rawdata.html
 # and put the wiktextract-error-data.json in the same directory as this
-# script. The output is printed into stdout as a python syntax dict,
-# which can be copy-pasted and pruned to get a good LWCAH whitelist.
+# script. The output is printed into stdout as the content of
+# table_headers_heuristics_data.py,  which can be copy-pasted and pruned to get
+# a good LWCAH whitelist.
+# The script automatically comments out lines that are received from rejected
+# debug messages, and also comments out the whole language block if all of the
+# cell texts have previously been rejected. Because of this, you can trust
+# uncommented lines to contain no new data (except on Wiktionary's side), and
+# you have to scan commented lines to see, if anything has appeared and then
+# been rejected by default.
 #
 # Copyright (c) 2020-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
@@ -70,13 +77,27 @@ print(
 # and need repetitive checking each time this file is regenerated and repruned,
 # put the line in a comment for future pruners.
 #
+# Commented entry => rejected
+# Deleted => rejected
+# Uncommented => accepted
+# If all entries in a language are commented, comment the whole language to
+# prevent possible future false positives.
+#
+# When languages_with_cells_as_headers_debug_extract.py is used to regenerate
+# this script, everything that is new or rejected will be commented (and
+# rejected) unless explicitly uncommented.
+#
 # Copyright (c) 2021, 2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 """)
 print("LANGUAGES_WITH_CELLS_AS_HEADERS = {")
 
 for lang, dd in sorted(messages.items()):
-    print('    "{}": ['.format(lang))
+    some_accepted = any([acc == True for acc in [dd[cl]["accepted"] for cl in dd]])
+    if some_accepted:
+        print('    "{}": ['.format(lang))
+    else:
+        print('    # "{}": ['.format(lang))
     for cleaned, vals in sorted(dd.items(),
                                 # short by count first (padded), then by
                                 # cleaned (= x[0] < x-tuple from dd.items())
@@ -87,11 +108,14 @@ for lang, dd in sorted(messages.items()):
                                         ),
                                 reverse=True):
         clquotes = cleaned.replace('"', '\\"')
-        print('        "{}",  # {}, {} in "{}"'
-                .format(clquotes,
-                        ("rejected", "accepted")[vals["accepted"]],
+        print('        {}"{}",  # {} in "{}"'
+                .format(("# ", "")[vals["accepted"]],
+                        clquotes,
                         vals["count"],
                         vals["title"]))
-    print('    ],')
+    if some_accepted:
+        print('    ],')
+    else:
+        print('    # ],')
 
 print("}")
