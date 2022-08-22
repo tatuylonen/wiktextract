@@ -5234,6 +5234,12 @@ infl_map = {
         "lang": "Spanish",
         "then": "",
     },
+    "1ˢᵗ person singular (“my”)": "first-person singular possessive",  #a احساس/Persian
+    "3ʳᵈ person singular (“his, her, its”)": "third-person singular possessive",
+    "1ˢᵗ plural (“our”)": "first-person plural possessive",
+    "2ⁿᵈ plural (“your”)": "second-person plural possessive",
+    "3ʳᵈ plural (“their”)": "third-person plural possessive",
+    
 }
 
 def check_tags(k, v):

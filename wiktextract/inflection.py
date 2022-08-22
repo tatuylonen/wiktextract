@@ -2847,7 +2847,6 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                                   "cleaned text: {}"
                                   .format(lang, cleaned))
                         candidate_hdr = False
-                    # ~ # Enable me when tests are fixed and LWCAH is populated properly
                     elif (cleaned not in LANGUAGES_WITH_CELLS_AS_HEADERS[lang]):
                         ctx.debug("rejected heuristic header: "
                                   "table cell identified as header and given "

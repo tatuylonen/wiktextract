@@ -72,7 +72,7 @@ def make_split_re(seps):
     """Cached helper function for split_at_comma_semi."""
 
 
-def split_at_comma_semi(text, separators=(",", ";", "，"), extra=()):
+def split_at_comma_semi(text, separators=(",", ";", "，", "،"), extra=()):
     """Splits the text at commas and semicolons, unless they are inside
     parenthesis.  ``separators`` is default separators (setting it eliminates
     default separators).  ``extra`` is extra separators to be used in addition
