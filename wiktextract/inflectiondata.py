@@ -671,7 +671,7 @@ infl_map = {
                  "Old Occitan", "Old Portuguese", "Portuguese",
                  "Romanian", "Romansch"],
         "pos": "verb",
-        "if": "first-person singular",
+        # ~ "if": "first-person singular",
         "then": "first-person singular",
     },
     "el/ea": {
@@ -901,12 +901,12 @@ infl_map = {
         "else": {
             "lang": "Czech",
             "pos": "verb",
-            "if": "third-person plural",
+            # ~ "if": "third-person plural",
             "then": "third-person plural",
             "else": {
                 "lang": "Hungarian",
                 "pos": "verb",
-                "if": "second-person plural",
+                # ~ "if": "second-person plural",
                 "then": "second-person plural",
             },
         },
@@ -1321,19 +1321,19 @@ infl_map = {
         "lang": ["Asturian", "Galician", "Indo-Portuguese", "Mirandese",
                  "Portuguese"],
         "pos": "verb",
-        "if": "first-person plural",
+        # ~ "if": "first-person plural",
         "then": "first-person plural",
     },
     "el/ela/Vde.": {
         "lang": "Galician",
         "pos": "verb",
-        "if": "third-person singular",
+        # ~ "if": "third-person singular",
         "then": "third-person singular",
     },
     "eles/elas/Vdes.": {
         "lang": "Galician",
         "pos": "verb",
-        "if": "third-person plural",
+        # ~ "if": "third-person plural",
         "then": "third-person plural",
     },
     "mì": {
@@ -1806,24 +1806,28 @@ infl_map = {
 
     "el / ela / Vde.": {
         "lang": "Galician",
-        "if": "singular third-person",
-        "then": ""},
+        # ~ "if": "singular third-person",
+        "then": "third-person singular",
+        },
     "vós": {
         "lang": "Galician",
-        "if": "plural second-person",
-        "then": ""},
+        # ~ "if": "plural second-person",
+        "then": "second-person plural",
+        },
     "eles / elas / Vdes.": {
         "lang": "Galician",
-        "if": "plural third-person",
-        "then": ""},
+        # ~ "if": "plural third-person",
+        "then": "third-person plural",
+        },
     "Vde.": {
         "lang": "Galician",
-        "if": "singular third-person",
-        "then": "formal"},
+        # ~ "if": "singular third-person",
+        "then": "third-person singular formal"
+        },
     "Vdes.": {
         "lang": "Galician",
-        "if": "plural third-person",
-        "then": "formal"},
+        # ~ "if": "plural third-person",
+        "then": "third-person plural formal"},
 
     "ⲛ̄ⲧⲟⲕ": {
         "lang": "Coptic",
@@ -2487,7 +2491,6 @@ infl_map = {
     "Connective forms with honorific": "connective honorific",
     "Noun and determiner forms with honorific": "honorific",
     "Hortative": "hortative",
-    "Form": "",
     "singular (uncountable)": "singular uncountable",
     "absolute": "absolute",
     "Positive absolute": "positive absolute",
@@ -3003,10 +3006,10 @@ infl_map = {
     "Conjugative": "conjugative",
     "Gerund Past participle Agentive": "gerund past participle agentive",
     "construct": "construct",
-    "State": "",
     "Form": "",
+    "form": "",
     "Isolated forms": "",
-    "With possessive pronouns": "possessive",
+    "isolated forms": "",  #a ܡܘܙܐ/Assyrian Neo-Aramaic
     "Possessed": "possessed-form",
     "Unpossessed": "unpossessed-form",
     "past imperfective": "past imperfective",
@@ -3596,15 +3599,8 @@ infl_map = {
         "then": "noun-from-adj",  # equivalent to English -ness, needs more
     },
     # in חתול/Hebrew:
-    "With possessive pronouns": {
-        "lang": "Hebrew",
-        "then": "possessed-form",
-    },
+    "With possessive pronouns": "possessed-form",
 
-    "State": {
-        "lang": "Hebrew",
-        "then": "*",
-    },
     "Person": {
         "lang": ["Hebrew", "Scottish Gaelic", "Old Irish",],
         # umpa/Scottish Gaelic, la/Old Irish
@@ -4005,9 +4001,16 @@ infl_map = {
     "Qamrin": "qamrin-unassimilation",
 
     "State": {
-        "lang": "Aramaic",
+        "lang": ["Aramaic", "Hebrew", "Assyrian Neo-Aramaic",], 
         "pos": "noun",
         "then": "*",
+        "else": "",
+    },
+    "state": {
+        "lang": "Assyrian Neo-Aramaic", 
+        "pos": "noun",
+        "then": "*",
+        "else": "",
     },
 
     "Absolute": {  #x חקלא/Aramaic
@@ -5239,6 +5242,8 @@ infl_map = {
     "1ˢᵗ plural (“our”)": "first-person plural possessive",
     "2ⁿᵈ plural (“your”)": "second-person plural possessive",
     "3ʳᵈ plural (“their”)": "third-person plural possessive",
+
+    "with possessive pronouns": "possessed-form",  #a ܡܘܙܐ/Assyrian Neo-Aramaic
     
 }
 
