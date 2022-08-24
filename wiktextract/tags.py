@@ -5429,7 +5429,8 @@ valid_tags = {
     "infinitive-ii": "non-finite",  # Finnish
     "infinitive-iii": "non-finite",  # Finnish
     "infinitive-iv": "non-finite",  # Finnish
-    "infinitive-ma": "non-finite",  # Estonian: positive imperfect, quotative (has happened, is happening, or will happen)
+    "infinitive-ma": "non-finite",  # Estonian: positive imperfect, quotative (has happened, is happening, or will happen) / Moksha
+    "infinitive-mda": "non-finite", # Moksha
     "infinitive-v": "non-finite",  # Finnish
     "infinitive-zu": "non-finite",  # German
     "infix": "pos",
@@ -6025,7 +6026,7 @@ valid_tags = {
     "æ-tensing": "misc",
     "има": "misc",  # Distinguishes certain verb forms in Macedonian
     "non-human": "misc",  # XXX is there already a tag for this? himself/English - KJ
-    "with-article": "misc",  # Mosambik/German
+    "with-article": "with",  # Mosambik/German
     "before-noun": "misc",  # Mama/German
     "with-numeral": "with",  # Radlermaß/German
     "without-numeral": "misc",  # Radlermaß/German
@@ -6105,6 +6106,16 @@ valid_tags = {
     "comparative-case": "case",  # ананас/Chechen
     "representative": "case",  # a ئانا/Uyghur
     "similitude": "case",  # Uyghur
+    "v1": "misc",  # verb-first, verb-second: these have a common term V1 and V2
+    "v2": "misc",  # tèlle/Limburgish
+    "v3": "misc",
+    "intimate": "register",  # ਪਾਉਣਾ/Punjabi
+    "accusative-i": "case",  # ань/Komi-Zyrian
+    "accusative-ii": "case",  # ань/Komi-Zyrian
+    "prolative-i": "case",  # ань/Komi-Zyrian
+    "prolative-ii": "case",  # ань/Komi-Zyrian
+    
+
 }
 
 for k, v in valid_tags.items():

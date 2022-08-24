@@ -21,6 +21,7 @@ POSSESSIVE_POSSESSED_LANGS = set([
     "Quechua",
     "Swedish",
     "Uyghur",
+    "Turkish",
 ])
 
 # Languages that have numbered infinitives (infinitive-i etc)
@@ -427,6 +428,17 @@ infl_map = {
          "else": {
             "lang": "Czech",  # podnikat/Czech
             "then": "first-person singular",
+            "else": {
+                "lang": "Komi-Zyrian",  # ань/Komi-Zyrian
+                "if": "accusative",
+                "then": "accusative-i",
+                "else": {
+                    "lang": "Komi-Zyrian",
+                    "if": "prolative",
+                    "then": "prolative-i",
+                },
+            },
+                
           },
     },
     "long I": {
@@ -438,6 +450,16 @@ infl_map = {
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-ii",
+        "else": {
+            "lang": "Komi-Zyrian",  # ань/Komi-Zyrian
+            "if": "accusative",
+            "then": "accusative-ii",
+            "else": {
+                "lang": "Komi-Zyrian",
+                "if": "prolative",
+                "then": "prolative-ii",
+            },
+        },
     },
     "III": {
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
@@ -2380,6 +2402,7 @@ infl_map = {
     "Determiners": "determiner",
     "simple perfect": "perfect",
     "Notes": "dummy-skip-this",
+    # ~ "Notes": "dummy-ignore-skipped",
     "postpositions taking a dative case": "postpositional with-dative",
     "postpositions taking a genitive case": "postpositional with-genitive",
     "postpositions taking an instrumental case":
@@ -2706,7 +2729,11 @@ infl_map = {
     "agentive": "agentive",
     "FUTURE": "future",
     "Jussive": "jussive",
-    "Root": "root",
+    "Root": {
+        "lang": "Limburgish",  # beer/Limburgish
+        "then": "",
+        "else": "root",
+    },
     "Involuntary": "involuntary",  # Verb form, e.g., khitan/Indonesian
     "part participle": "past participle",
     "direct present": "direct present",
@@ -4469,8 +4496,8 @@ infl_map = {
         "then": "possessive-substantive",
     },
     "Modifier": {
-        "lang": "Zulu",
-        "if": "possessive",
+        "lang": ["Zulu", "Swazi",],
+        # ~ "if": "possessive",
         "then": "",
         "else": {
             "lang": "Xhosa",  #magqagala
@@ -4537,7 +4564,7 @@ infl_map = {
     "Mutated forms": {
         "lang": "Breton",
         "pos": "verb",
-        "then": "*",
+        "then": "!",
     },
 
     # дөрвөл/Mongolian
@@ -5244,7 +5271,115 @@ infl_map = {
     "3ʳᵈ plural (“their”)": "third-person plural possessive",
 
     "with possessive pronouns": "possessed-form",  #a ܡܘܙܐ/Assyrian Neo-Aramaic
+
+    # Talat/Turkish, possessive tables for names
+    "benim (my)": "first-person singular",
+    "senin (your)": "second-person singular",
+    "onun (his/her/its)": "third-person singular",
+    "bizim (our)": "first-person plural",
+    "sizin (your)": "second-person plural",
+    "onların (their)": "third-person plural",
+
+    # Alpler/Turkish
+    "singular, uncountable (tekil, sayılamaz)": "singular uncountable",
+
+    # अकड़ना/Hindi
+    "1ˢᵗ मैं": "first-person singular",
+    "2ⁿᵈ तू": "second-person singular",
+    "3ʳᵈ यह/वह, ये/वो": "third-person singular",
+    "2ⁿᵈ तुम": "second-person plural",
+    "1ˢᵗ हम": "first-person plural",
+    "3ʳᵈ, 2ⁿᵈ ये/वो/वे, आप":
+        ["third-person plural",
+         "second-person formal"],
     
+    # -ra/Basque
+    "proximal plural": "proximal plural",
+
+    #a שלאָפֿן/Yiddish
+    # These tables are unparseable due to lack of headers, really
+    # ~ "Composed forms": "",
+
+    # kalium/Limburgish
+    "Root singular": "singular",
+    "Root plural": "plural",
+    "Diminutive singular": "diminutive singular",
+    "Diminutive plural": "diminutive plural",
+
+    # tèlle/Limburgish
+    "adverb": "adverb",
+    "number & tense": "*",
+    "verb-second order": "v2",
+    "verb-first order": "v1",
+    "first person plural": "first-person plural",
+    "second person plural": "second-person plural",
+    "third person plural": "third-person plural",
+    "other forms": "",
+    "imperative singular impolite": "imperative singular impolite",
+    "imperative singular polite": "imperative singular polite",
+    "imperative dual": "imperative dual",
+
+    # beer/Limburgish
+    "Diminutive": "diminutive",
+    "Mutation": "mutation",
+    "Diminutive Mutation": "diminutive mutation",
+
+    # сядоце/Moksha
+    "мон (mon)": "first-person singular",
+    "минь (minʹ)": "first-person plural",
+    "тон (ton)": "second-person singular",
+    "тинь (tinʹ)": "second-person plural",
+    "сон (son)": "third-person singular",
+    "синь (sinʹ)": "third-person plural",
+
+    # улемс/Moksha
+    "1ˢᵗ singular — мон (mon)": "first-person singular",
+    "2ⁿᵈ singular — тон (ton)": "second-person singular",
+    "3ʳᵈ singular — сон (son)": "third-person singular",
+    "1ˢᵗ plural — минь (minʹ)": "first-person plural",
+    "2ⁿᵈ plural — тинь (tinʹ)": "second-person plural",
+    "3ʳᵈ plural — синь (sinʹ)": "third-person plural",
+    "Past I": "past-i",
+    "Compound future": "multiword-construction future",
+    "agentive / pres. act. part.": "present active participle agentive",
+    "present passive participle": "present passive participle",
+
+    # содамс/Moksha
+    "Past II / subjunctive": "past-ii subjunctive",
+    "Subjunctive of conditional": "subjunctive conditional",
+    "ma-infinitive / verbal noun": "noun-from-verb infinitive-ma",
+    "mda-infinitive": "infinitive-mda",
+    "gerund negative": "negative gerund",
+    "1ˢᵗ person singular object — монь (monʹ)":
+        "object-first-person object-singular",
+    "2ⁿᵈ person singular object — тонь (tonʹ)":
+        "object-second-person object-singular",
+    "3ʳᵈ person singular object — сонь (sonʹ)":
+        "object-third-person object-singular",
+    "1ˢᵗ person plural object — минь (minʹ)":
+        "object-first-person object-plural",
+    "2ⁿᵈ person plural object — тинь (tinʹ)":
+        "object-second-person object-plural",
+    "3ʳᵈ person plural object — синь (sinʹ)":
+        "object-third-person object-plural",
+
+    # ਪਾਉਣਾ/(Punjabi
+    "Singular/Plural": "singular plural",
+    "Plural/Formal": "",
+    "1ˢᵗ ਮੈਂ": "first-person singular",
+    "2ⁿᵈ intimate ਤੂੰ": "second-person singular intimate",
+    "3ʳᵈ ਇਹ/ਉਹ": "third-person singular",
+    "2ⁿᵈ familiar ਤੁਸੀਂ": "second-person familiar",
+    "1ˢᵗ ਅਸੀਂ": "third-person plural",
+    "2ⁿᵈ formal, 3ʳᵈ ਇਹ/ਉਹ/ਆਪ":
+        ["second-person formal",
+         "third-person plural",
+         ],
+    "REG": "",
+    "POL": "polite",
+
+    # оз/Komi-Zyrian
+    "Non-Past tense": "non-past",
 }
 
 def check_tags(k, v):
@@ -5310,6 +5445,9 @@ infl_start_map = {
     "informal second-person plural imperative",
     "with formal second-person plural imperative":
     "formal second-person plural imperative",
+    # kaozeal/Breton
+    "Soft mutation after": "mutation-soft",
+    "Mixed mutation after": "mutation-mixed",
 }
 for k, v in infl_start_map.items():
     check_v(k, v)
