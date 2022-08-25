@@ -1056,7 +1056,7 @@ infl_map = {
     },
     "vos": {
         "lang": ["Interlingua", "Ladino", "Latin", "Old French",
-                 "Old Occitan", "Sardinian", "Walloon"],
+                 "Old Occitan", "Sardinian", "Walloon", "Lorrain",],
         "pos": "verb",
         "if": "second-person",
         "then": "second-person",
@@ -1200,7 +1200,8 @@ infl_map = {
         "then": "first-person singular",
     },
     "que tu": {
-        "lang": ["French", "Middle French", "Old French"],
+        "lang": ["French", "Middle French", "Old French",
+                 "Lorrain",],
         "pos": ["verb", "suffix",],
         "then": "second-person singular",
     },
@@ -1250,9 +1251,8 @@ infl_map = {
         "then": "third-person",
     },
     "nos": {
-        "lang": "Old French",
+        "lang": ["Lorrain", "Old French",],
         "pos": "verb",
-        "if": "first-person plural",
         "then": "first-person plural",
     },
     "que jo": {
@@ -1274,7 +1274,7 @@ infl_map = {
         "then": "first-person plural",
     },
     "que vos": {
-        "lang": "Old French",
+        "lang": ["Old French", "Lorrain",],
         "pos": "verb",
         "if": "second-person plural",
         "then": "second-person plural",
@@ -1939,6 +1939,10 @@ infl_map = {
     "ne": {
         "lang": "Albanian",
         "then": "first-person plural",
+        "else": {
+            "lang": "Livonian",
+            "then": "third-person plural",
+            },
         },
     "ju": {
         "lang": "Albanian",
@@ -5380,7 +5384,213 @@ infl_map = {
 
     # оз/Komi-Zyrian
     "Non-Past tense": "non-past",
+
+    # hāi7Namuyi
+    "Habitual/Future": "habitual future",
+    "Prospective": "prospective",
+    "Ingressive": "ingressive",
+    "Experiential": "experiential",
+    "Premeditated": "premeditated",
+
+    # nyanyi/Warlpiri
+    "andative": "andative",
+    "nomic": "nomic",
+
+    # être/Lorrain
+    "je (j')": {
+        "lang": "Lorrain",
+        "then": "first-person singular",
+    },
+    "el, elle": {
+        "lang": "Lorrain",
+        "then": "third-person singular",
+    },
+    "el, elles": {
+        "lang": "Lorrain",
+        "then": "third-person plural",
+    },
+    "distant imperfect (from Latin er-)": "distant-imperfect-er",
+    "distant imperfect (from Latin stab-)": "distant-imperfect-stab",
+    "near imperfect": "near-imperfect",
+    "que je / qu'i": "first-person singular",
+    "qu'â (al), qu'ale": "third-person singular",
+    "qu'âs, qu'ales": "third-person plural",
+
+    
+    "ham": {
+        "lang": "Fiji Hindi",
+        "then": "first-person singular",
+    },
+    "ham log": {
+        "lang": "Fiji Hindi",
+        "then": "first-person plural",
+    },
+    "tum": {
+        "lang": "Fiji Hindi",
+        "then": "second-person singular",
+    },
+    "tum log": {
+        "lang": "Fiji Hindi",
+        "then": "second-person plural",
+    },
+    "uu": {
+        "lang": "Fiji Hindi",
+        "then": "third-person singular",
+    },
+    "uu log": {
+        "lang": "Fiji Hindi",
+        "then": "third-person plural",
+    },
+
+    # ndu/South Slavey
+    "areal": {
+        "lang": "South Slavey",
+        "then": "locative",
+    },
+
+    # ave/Tolai
+    "1st person exclusive": "first-person exclusive",
+    "1st person inclusive": "first-person inclusive",
+
+    # mahkwa/Fox
+    "Singular Noun": "singular",
+    "Plural Noun": "plural",
+    "Proximate": "proximative",
+    "Obviative": "obviative",
+    "Local": "locative",
+    "Singular Possessive": "possessive-single",
+    "Plural Possessive": "possessive-many",
+    "First and second person": "first-person second-person",
+
+    "perlative": "perlative",  # arnaq/Yup'ik
+
+    
+    # tōku/Maori
+    "singular object": {
+        "lang": "Maori",
+        "then": "possessive-single",
+    },
+    "dual/plural object": {
+        "lang": "Maori",
+        "then": "possessive-many",
+    },
+    "A category":  {
+        "lang": "Maori",
+        "then": "alienable",
+    },
+    "O category":  {
+        "lang": "Maori",
+        "then": "inalienable",
+    },
+    "Neutral":  {
+        "lang": "Maori",
+        "then": "",
+    },
+    "dual subject": "dual",
+    "1st person, inclusive": "first-person inclusive",
+    "1st person, exclusive": "first-person exclusive",
+
+    "comitative-instrumental": "comitative instrumental",  #тан/Mansi
+    # пыг/Mansi
+    "double possession": "possessive-two",
+    "multiple possession": "possessive-many",
+    "3d person dual": "third-person dual",
+    "3d person plural": "third-person plural",
+
+    # Tibetan romanizations
+    "Wylie": "romanization",
+
+    "Basic": {
+        "lang": "Udmurt",
+        "then": "",
+    },
+    "Temporal": {
+        "lang": "Udmurt",
+        "then":"gerund-temporal",
+    },
+    "Fourth": {
+        "lang":"Udmurt",
+        "then": "gerund-iv",
+    },
+    "Deverbal": {
+        "lang":"Udmurt",
+        "then": "noun-from-verb",
+    },
+
+    # тос/Mariupol Greek
+    "3rd n": "third-person neuter",
+    "clitic": "clitic",
+
+    # likkõ/Livonian
+    "ma": "first-person singular",
+    "sa": "second-person singular",
+    "ta": "third-person singular",
+    "mēg": "first-person plural",
+    "tēg": "second-person plural",
+    "indicative negative": "negative indicative",
+    "(sa)": "second-person singular",
+    "(mēg)": "first-person plural",
+    "(tēg)": "second-person plural",
+    "imperative negative": "negative imperative",
+    "conditional negative": "negative conditional",
+    "jussive negative": "negative jussive",
+    "debitive": "debitive",
+    "minnõn": "first-person singular",
+    "sinnõn": "second-person singular",
+    "tämmõn": "third-person singular",
+    "mäddõn": "first-person plural",
+    "täddõn": "second-person plural",
+    "näntõn": "third-person plural",
+    "supine abessive": "supine abessive",
+
+    # நத்தை/Tamil
+    "Genitive 1": "genitive-i",
+    "Genitive 2": "genitive-ii",
+    "Locative 1": "locative-i",
+    "Locative 2": "locative-ii",
+    "Sociative 1": "sociative-i",
+    "Sociative 2": "sociative-ii",
+
+    # பிடி/Tamil
+    "singular affective": "affective singular",
+    "third masculine": "third-person masculine",
+    "third feminine": "third-person feminine",
+    "third honorific": "third-person honorific",
+    "third neuter": "third-person neuter",
+    "நான்": "first-person singular",
+    "நீ": "second-person singular",
+    "அவன்": "third-person singular masculine",
+    "அவள்": "third-person singular feminine",
+    "அவர்": "third-person singular honorific",
+    "அது": "third-person singular neuter",
+    "future negative": "negative future",
+    "plural affective": "affective plural",
+    "third epicene": "third-person epicene",
+    "நாம் (inclusive) நாங்கள் (exclusive)":
+                ["first-person plural inclusive",
+                 "first-person plural exclusive",],
+    "நீங்கள்": "second-person plural",
+    "அவர்கள்": "third-person plural epicene",
+    "அவை": "third-person plural neuter",
+    "effective": "effective",
+    "casual conditional": "conditional informal",
+    "honorific": "honorific",
+    "epicene": "epicene",
+    "Form I": {
+        "lang": "Tamil",
+        "then": "gerund-i",
+        },
+    "Form II": {
+        "lang": "Tamil",
+        "then": "gerund-ii",
+        },
+    "Form III": {
+        "lang": "Tamil",
+        "then": "gerund-iii",
+        },
+
 }
+
 
 def check_tags(k, v):
     assert isinstance(k, str)

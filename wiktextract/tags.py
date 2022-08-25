@@ -5666,6 +5666,7 @@ valid_tags = {
     "possessive": "possession",  # Possession (marks who possesses)
     "possessive-single": "possession",  # Possessive with single possessed
     "possessive-many": "possession",  # Possessive with multiple possessed
+    "possessive-two": "possession",  # Two possessed, Mansi
     "possessive-masculine": "possession",  # Possessive with masculine possessed
     "possessive-feminine": "possession",  # Possessive with feminine possessed
     "possessive-common": "possession",  # Possessive with common-g possessed
@@ -6114,8 +6115,30 @@ valid_tags = {
     "accusative-ii": "case",  # ань/Komi-Zyrian
     "prolative-i": "case",  # ань/Komi-Zyrian
     "prolative-ii": "case",  # ань/Komi-Zyrian
+    "ingressive": "aspect", # hāi/Namuyi
+    "experiential": "mood", # hāi/Namuyi
+    "premeditated": "mood", # hāi/Namuyi
+    "andative": "case",  # motion away from something, nyanyi/Warlpiri
+    "nomic": "misc", # Warlpiri, no idea what it means.
+    "distant-imperfect-er": "tense",  # être/Lorrain
+    "distant-imperfect-stab": "tense",  # être/Lorrain
+    "near-imperfect": "tense",
+    "proximative": "case",  # mahkwa/Fox, contrasted with obviative
+    "perlative": "case",  #arnaq/Yup'ik
+    "gerund-temporal": "non-finite",  #тодыны/Udmurt
+    "genitive-i": "case",  #நத்தை/tamil
+    "genitive-ii": "case",
+    "locative-i": "case",
+    "locative-ii": "case",
+    "sociative-i": "case",
+    "sociative-ii": "case",
+    "gerund-i": "non-finite",  # பிடி/Tamil
+    "gerund-ii": "non-finite",
+    "gerund-iii": "non-finite",
+    "effective": "aspect",
+    "affective": "voice",
+    "gerund-iv": "non-finite",  # тодыны/Udmurt
     
-
 }
 
 for k, v in valid_tags.items():

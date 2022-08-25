@@ -7053,6 +7053,11 @@ LANGUAGES_WITH_CELLS_AS_HEADERS = {
     # ],
     "Namuyi": [
         "Progressive",  # 6 in "lǜ; hāi; hǟ; mŭ; mwĭ; lǜe"
+        "Habitual/Future",
+        "Ingressive",
+        "Experiential",
+        "Premeditated",
+        "Prospective",
     ],
     # ~ "Navajo": [
         #  "[Term?]",  # 5 in "yeʼelééh; yeʼelééh; yeʼelééh; yeʼelééh; yeʼelééh"
