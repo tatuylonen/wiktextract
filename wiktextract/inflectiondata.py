@@ -1631,7 +1631,7 @@ infl_map = {
     "sen": {
         "lang": ["Crimean Tatar", "Turkish", "Turkmen"],
         "pos": "verb",
-        "if": "second-person singular",
+        # ~ "if": "second-person singular",
         "then": "second-person singular",
     },
     "o": {
@@ -5589,6 +5589,47 @@ infl_map = {
         "then": "gerund-iii",
         },
 
+    # bolmak/Turkmen
+    "men": "first-person singular",
+    "ol": "third-person singular",
+    "olar": "third-person plural",
+    "proximal": "proximal",
+    "distal": "distal",
+    "unwitnessed": "unwitnessed",
+    "obligatory": "obligative",
+
+    # kanákta/Mohawk
+    "Sing.": "singular",
+    "Plur.": "plural",
+
+    # እግር/Amharic
+    "Definite subject": "definite nominative",
+    "Definite object": "definite accusative",
+    "General object": "accusative",
+
+    # sugu/Veps
+    "approximative I": "approximative-i",
+    "approximative II": "approximative-ii",
+    "terminative I": "terminative-i",
+    "terminative II": "terminative-ii",
+    "terminative III": "terminative-iii",
+    "additive I": "additive-i",
+    "additive II": "additive-ii",
+
+        # duhtadit/Northern Sami
+    "action inessive": "noun-from-verb inessive",
+    "action elative": "noun-from-verb elative",
+    "agent participle": "agent participle",
+    "action comitative": "noun-from-verb comitative",
+    "conditional 1": "conditional-i",
+    "conditional 2": "conditional-ii",
+
+    # 능숙하다/Korean
+    "Plain": {
+        "lang": "Korean",
+        "then": "",
+    },
+    
 }
 
 

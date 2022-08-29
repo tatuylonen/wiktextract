@@ -6138,7 +6138,16 @@ valid_tags = {
     "effective": "aspect",
     "affective": "voice",
     "gerund-iv": "non-finite",  # тодыны/Udmurt
-    
+    "unwitnessed": "mood",  # bolmak/Turkmen
+    "approximative-i": "case",  #sugu/Veps
+    "approximative-ii": "case",  #sugu/Veps
+    "terminative-i": "case",  #sugu/Veps
+    "terminative-ii": "case",  #sugu/Veps
+    "terminative-iii": "case",  #sugu/Veps
+    "additive-i": "case",  #sugu/Veps
+    "additive-ii": "case",  #sugu/Veps
+
+   
 }
 
 for k, v in valid_tags.items():
