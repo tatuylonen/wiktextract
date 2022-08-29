@@ -30,6 +30,15 @@
 
 
 LANGUAGES_WITH_CELLS_AS_HEADERS = {
+    "Interlingua": [
+        "Present:",
+        "Past:",
+        "Future:",
+        "Conditional:",
+        "Present participle:",
+        "Past participle:",
+        "Imperative:",
+    ],
     "Adyghe": [
         "singular",  # 1988 in "ко; ты; тас; абрикос; ананас; уае; бы; корт; шъоущыгъу; цэ"
         "plural",  # 1988 in "ко; ты; тас; абрикос; ананас; уае; бы; корт; шъоущыгъу; цэ"

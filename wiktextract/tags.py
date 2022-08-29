@@ -6146,7 +6146,21 @@ valid_tags = {
     "terminative-iii": "case",  #sugu/Veps
     "additive-i": "case",  #sugu/Veps
     "additive-ii": "case",  #sugu/Veps
-
+    "suihortative": "mood",  # ಹುಟ್ಟು/Kannada
+    "cohortative-i": "mood",  # ಹುಟ್ಟು/Kannada
+    "cohortative-ii": "mood",  # ಹುಟ್ಟು/Kannada
+    # цӏехуьл/Lezgi
+    "adelative": "case",
+    "addirective": "case",
+    "postessive": "case",
+    "postelative": "case",
+    "postdirective": "case",
+    "subessive": "case",
+    "subelative": "case",
+    "subdirective": "case",
+    "inelative": "case",
+    "superelative": "case",
+    "superdirective": "case",
    
 }
 

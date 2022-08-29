@@ -5629,8 +5629,82 @@ infl_map = {
         "lang": "Korean",
         "then": "",
     },
+
+    # stupid Interlingua hand-crafted minimal tables, deber/Interlingua
+    "Present:": "present",
+    "Past:": "past",
+    "Future:": "future",
+    "Conditional:": "conditional",
+    "Present participle:": "present participle",
+    "Past participle:": "past participle",
+    "Imperative:": "imperative",
+
+    # уө/Southern Yukaghir
+    "short plural": "plural short-form",
+    "long plural": "plural long-form",
+
+    # aganchaka/Garo
+    "Declarative": "",
+    '"not yet"': "not-yet-form",
+    '"probably"': "potential",
+    "Intentional": "intentive",
+    "Change of state": "perfect",
+    "Formal imperative": "imperative formal",
+
+    # ಹುಟ್ಟು/Kannada
+    "adverbial participles": "adverbial participle",
+    "adjectival participles": "adjectival participle",
+    "other nonfinite forms": "",
+    "volitive forms": "volitive",
+    "present adverbial participle": "present adverbial participle",
+    "nonpast adjectival participle": "non-past adjectival participle",
+    "suihortative form": "suihortative",
+    "past adverbial participle": "past adverbial participle",
+    "past adjectival participle": "past adjectival participle",
+    "dative infinitive": "infinitive dative",
+    "cohortative form I": "cohortative-i",
+    "negative adverbial participle": "negative adverbial participle",
+    "negative adjectival participle": "negative adjectival participle",
+    "conditional form": "conditional",
+    "cohortative form II": "cohortative-ii",
+    "tense/modality": "",
+    "ನಾನು": "first-person singular",
+    "ನೀನು": "second-person singular",
+    "ಅವನು": "third-person masculine singular",
+    "ಅವಳು": "third-person feminine singular",
+    "ಅದು": "third-person neuter singular",
+    "ನಾವು": "first-person plural",
+    "ನೀವು": "second-person plural",
+    "ಅವರು": "third-person epicene plural",
+    "ಅವು": "third-person neuter plural",
+    # ಅದು/Kannada
+    '"Objective Singular"': "singular objective",
+    "Epicene Plural": "epicene plural",
+
+    # цӏехуьл/Lezgi
+    "adelative": "adelative",
+    "addirective": "addirective",
+    "postessive": "postessive",
+    "postelative": "postelative",
+    "postdirective": "postdirective",
+    "subessive": "subessive",
+    "subelative": "subelative",
+    "subdirective": "subdirective",
+    "inelative": "inelative",
+    "superelative": "superelative",
+    "superdirective": "superdirective",
+
+    # देर/Konkani
+    "accusative/dative": "accusative dative",
+    # भेड्डो/Konkani
+    "masc. singular": "masculine singular",
+    "fem. singular": "feminine singular",
+    "masc. plural": "masculine plural",
+    "fem. plural": "feminine plural",
+
     
 }
+
 
 
 def check_tags(k, v):
