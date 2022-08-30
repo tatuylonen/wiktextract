@@ -1,0 +1,8 @@
+{
+  "compounds": "compounds"
+  "etymology": "etymology",
+  "ignored_sections": ["Anagrams", "Further reading", "References", "Quotations", "Descendants"],
+  "inflection_section": ["Declension", "Conjugation", "Inflection", "Mutation"],
+  "pronunciation": "pronunciation",
+  "translations": "translations"
+}
