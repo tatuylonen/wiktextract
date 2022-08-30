@@ -22,6 +22,7 @@ from .unsupported_titles import unsupported_title_map
 from .datautils import (data_append, data_extend, split_at_comma_semi,
                         languages_by_name, languages_by_code)
 from .tags import valid_tags
+from .subtitles import LANGUAGE_SUBTITLES, LINKAGE_SUBTITLES, POS_SUBTITLES, OTHER_SUBTITLES
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_qualifier,
     parse_pronunciation_tags, distw,
@@ -31,6 +32,30 @@ from wiktextract.inflection import parse_inflection_section
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
                NodeKind.LEVEL5, NodeKind.LEVEL6)
+
+LANGUAGE_SUBTITLES = None
+LINKAGE_SUBTITLES = None
+POS_SUBTITLES = None
+OTHER_SUBTITLES = None
+
+
+def init_subtitles(language_code: str) -> None:
+    global LANGUAGE_SUBTITLES
+    global LINKAGE_SUBTITLES
+    global POS_SUBTITLES
+    global OTHER_SUBTITLES
+
+    with open(f"data/{language_code}/language_subtitles.json", encoding="utf-8") as f:
+        LANGUAGE_SUBTITLES = json.load(f)
+
+    with open(f"data/{language_code}/linkage_subtitles.json", encoding="utf-8") as f:
+        LINKAGE_SUBTITLES = json.load(f)
+
+    with open(f"data/{language_code}/pos_subtitles.json", encoding="utf-8") as f:
+        POS_SUBTITLES = json.load(f)
+
+    with open(f"data/{language_code}/other_subtitles.json", encoding="utf-8") as f:
+        OTHER_SUBTITLES = json.load(f)
 
 
 # Subsections with these titles are ignored.
@@ -2620,10 +2645,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                            template_fn=skip_template_fn)
                 continue
             t = clean_node(config, ctx, etym_data, node.args)
+            t = t.lower()
             config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
-            if t.startswith("Pronunciation"):
-                if t.startswith("Pronunciation "):
+            if t.startswith(OTHER_SUBTITLES["pronunciation"]):
+                if t.startswith(OTHER_SUBTITLES["pronunciation"] + " "):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
                     push_etym()
@@ -2639,12 +2665,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                         base_data,
                                         language,
                                         )
-            elif t.startswith("Etymology"):
+            elif t.startswith(OTHER_SUBTITLES["etymology"]):
                 push_etym()
                 ctx.start_subsection(None)
                 if config.capture_etymologies:
                     parse_etymology(etym_data, node)
-            elif t == "Translations":
+            elif t == OTHER_SUBTITLES["translations"]:
                 data = select_data()
                 parse_translations(data, node)
             elif t in ignored_section_titles:
@@ -2658,9 +2684,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 while len(lst) > 1 and lst[-1].isdigit():
                     lst = lst[:-1]
                 t_no_number = " ".join(lst).lower()
-                if t_no_number in part_of_speech_map:
+                if t_no_number in POS_SUBTITLES:
                     push_pos()
-                    dt = part_of_speech_map[t_no_number]
+                    dt = POS_SUBTITLES[t_no_number]
                     pos = dt["pos"]
                     ctx.start_subsection(t)
                     if "debug" in dt:
@@ -2677,11 +2703,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if "tags" in dt:
                         for pdata in pos_datas:
                             data_extend(ctx, pdata, "tags", dt["tags"])
-                elif t_no_number in linkage_map:
-                    rel = linkage_map[t_no_number]
+                elif t_no_number in LINKAGE_SUBTITLES:
+                    rel = LINKAGE_SUBTITLES[t_no_number]
                     data = select_data()
                     parse_linkage(data, rel, node)
-                elif t_no_number == "compounds":
+                elif t_no_number == OTHER_SUBTITLES["compounds"]:
                     data = select_data()
                     if config.capture_compounds:
                         parse_linkage(data, "derived", node)
@@ -2811,23 +2837,23 @@ def fix_subtitle_hierarchy(ctx, text):
                       "{!r} has {} on the left and {} on the right"
                       .format(title, left, right))
         lc = title.lower()
-        if title in languages_by_name:
+        if title in LANGUAGE_SUBTITLES:
             if level > 2:
                 ctx.debug("subtitle has language name {} at level {}"
                           .format(title, level))
             level = 2
-        elif lc.startswith("etymology"):
+        elif lc.startswith(OTHER_SUBTITLES["etymology"]):
             if level > 3:
                 ctx.debug("etymology section {} at level {}"
                           .format(title, level))
             level = 3
-        elif lc.startswith("pronunciation"):
+        elif lc.startswith(OTHER_SUBTITLES["pronunciation"]):
             level = 3
-        elif lc in part_of_speech_map:
+        elif lc in POS_SUBTITLES:
             level = 4
-        elif lc == "translations":
+        elif lc == OTHER_SUBTITLES["translations"]:
             level = 5
-        elif lc in linkage_map or lc == "compounds":
+        elif lc in LINKAGE_SUBTITLES or lc == OTHER_SUBTITLES["compounds"]:
             level = 5
         elif title in inflection_section_titles:
             level = 5
@@ -2906,14 +2932,13 @@ def parse_page(ctx, word, text, config):
             ctx.debug("unexpected top-level node: {}".format(langnode))
             continue
         lang = clean_node(config, ctx, None, langnode.args)
-        if lang not in languages_by_name:
+        if lang not in LANGUAGE_SUBTITLES:
             ctx.debug("unrecognized language name at top-level {!r}"
                       .format(lang))
             continue
         if config.capture_languages and lang not in config.capture_languages:
             continue
-        langdata = languages_by_name[lang]
-        lang_code = langdata["code"]
+        lang_code = LANGUAGE_SUBTITLES[lang]
         ctx.start_section(lang)
 
         # Collect all words from the page.
