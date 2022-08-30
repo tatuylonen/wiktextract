@@ -364,7 +364,7 @@ xlat_head_map = {
         "feminine inanimate plural animate",  #XXX
     "m anim or f anim or m anim pl or f anim pl or f inan or f inan pl":
         "masculine animate feminine plural singular inanimate",  #XXX
-    
+
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly
@@ -427,7 +427,7 @@ head_final_bantu_map = {
 
     "n or n": "class-9 class-10",  # Andromeda/Eng/Tr/Swahili etc
     "u or u": "class-11 class-14",  # wife/Eng/Tr/Swahili
-    
+
 }
 
 head_final_semitic_langs = set([
@@ -2531,9 +2531,9 @@ uppercase_tags = set([
     "Waiwaş Quechua",
     "Wanka Quechua",
     "Zuberoan",
-    
 
-    
+
+
 ])
 
 
@@ -2881,6 +2881,7 @@ xlat_tags_map = {
     "+prepositional": "with-prepositional",
     "+ por": "with-por",
     "Radical": "radical",
+    "Kangxi radical": "radical",
     "accusative/instrumental": "accusative instrumental",
     "dative/adverbial case": "dative adverbial",
     "dative/genitive": "dative genitive",
