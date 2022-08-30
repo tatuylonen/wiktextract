@@ -1441,7 +1441,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
                                # part, e.g. walrus/English
                                # "(both nonstandard, proscribed, uncommon)"
         for desc_i, desc in enumerate(new_desc):
-            print("HEAD DESC: {!r}".format(desc))
+            # print("HEAD DESC: {!r}".format(desc))
 
             # Abort on certain descriptors (assume remaining values are
             # examples or uninteresting, cf. gaan/Navajo, horior/Latin)
