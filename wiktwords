@@ -18,15 +18,18 @@ import hashlib
 import cProfile
 import argparse
 import collections
+from pathlib import Path
 from wikitextprocessor import Wtp, ALL_LANGUAGES
 from wiktextract import (WiktionaryConfig, parse_wiktionary,
                          reprocess_wiktionary, parse_page,
                          extract_namespace)
 from wiktextract import extract_thesaurus_data
 from wiktextract import extract_categories
+from wiktextract import init_subtitles
+import wiktextract.page
 
 # Compute set of all language names
-all_langs = set(x["name"] for x in ALL_LANGUAGES)
+all_langs = set()
 
 # Pages whose titles have any of these prefixes are ignored.
 ignore_prefixes = set(["Index", "Help", "MediaWiki", "Citations",
@@ -158,7 +161,15 @@ if __name__ == "__main__":
                         "they point to")
     parser.add_argument("--inflection-tables-file", type=str, default=None,
                         help="Extract expanded tables in this file (for test data)")
+    parser.add_argument("--language-code", type=str, help="Language code of the dump file")
     args = parser.parse_args()
+
+    if args.language_code:
+        language_code = args.language_code
+    else:
+        language_code = Path(args.path).name[:2]
+    init_subtitles(language_code)
+    all_langs = set(wiktextract.page.LANGUAGE_SUBTITLES.keys())
 
     # The --all option turns on capturing all data types
     if args.all and (not args.pages_dir or args.out):

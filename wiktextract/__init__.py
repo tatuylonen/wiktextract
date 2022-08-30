@@ -5,7 +5,7 @@
 from .wiktionary import (parse_wiktionary, reprocess_wiktionary,
                          extract_namespace)
 from .config import WiktionaryConfig
-from .page import clean_value, parse_page
+from .page import clean_value, parse_page, init_subtitles
 from .parts_of_speech import PARTS_OF_SPEECH
 from .thesaurus import extract_thesaurus_data
 from .categories import extract_categories
@@ -24,4 +24,5 @@ __all__ = (
     "sort_tags",
     "tag_categories",
     "valid_tags",
+    "init_subtitles"
 )
