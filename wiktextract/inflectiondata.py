@@ -5343,13 +5343,13 @@ infl_map = {
     "1ˢᵗ plural — минь (minʹ)": "first-person plural",
     "2ⁿᵈ plural — тинь (tinʹ)": "second-person plural",
     "3ʳᵈ plural — синь (sinʹ)": "third-person plural",
-    "Past I": "past-i",
+    "Past I": "past-i past",
     "Compound future": "multiword-construction future",
     "agentive / pres. act. part.": "present active participle agentive",
     "present passive participle": "present passive participle",
 
     # содамс/Moksha
-    "Past II / subjunctive": "past-ii subjunctive",
+    "Past II / subjunctive": "past-ii past subjunctive",
     "Subjunctive of conditional": "subjunctive conditional",
     "ma-infinitive / verbal noun": "noun-from-verb infinitive-ma",
     "mda-infinitive": "infinitive-mda",
@@ -5506,11 +5506,11 @@ infl_map = {
     },
     "Temporal": {
         "lang": "Udmurt",
-        "then":"gerund-temporal",
+        "then":"gerund-temporal gerund",
     },
     "Fourth": {
         "lang":"Udmurt",
-        "then": "gerund-iv",
+        "then": "gerund-iv gerund",
     },
     "Deverbal": {
         "lang":"Udmurt",
@@ -5544,12 +5544,12 @@ infl_map = {
     "supine abessive": "supine abessive",
 
     # நத்தை/Tamil
-    "Genitive 1": "genitive-i",
-    "Genitive 2": "genitive-ii",
-    "Locative 1": "locative-i",
-    "Locative 2": "locative-ii",
-    "Sociative 1": "sociative-i",
-    "Sociative 2": "sociative-ii",
+    "Genitive 1": "genitive-i genitive",
+    "Genitive 2": "genitive-ii genitive",
+    "Locative 1": "locative-i locative",
+    "Locative 2": "locative-ii locative",
+    "Sociative 1": "sociative-i sociative",
+    "Sociative 2": "sociative-ii sociative",
 
     # பிடி/Tamil
     "singular affective": "affective singular",
@@ -5578,15 +5578,15 @@ infl_map = {
     "epicene": "epicene",
     "Form I": {
         "lang": "Tamil",
-        "then": "gerund-i",
+        "then": "gerund-i gerund",
         },
     "Form II": {
         "lang": "Tamil",
-        "then": "gerund-ii",
+        "then": "gerund-ii gerund",
         },
     "Form III": {
         "lang": "Tamil",
-        "then": "gerund-iii",
+        "then": "gerund-iii gerund",
         },
 
     # bolmak/Turkmen
@@ -5608,21 +5608,21 @@ infl_map = {
     "General object": "accusative",
 
     # sugu/Veps
-    "approximative I": "approximative-i",
-    "approximative II": "approximative-ii",
-    "terminative I": "terminative-i",
-    "terminative II": "terminative-ii",
-    "terminative III": "terminative-iii",
-    "additive I": "additive-i",
-    "additive II": "additive-ii",
+    "approximative I": "approximative-i approximative",
+    "approximative II": "approximative-ii approximative",
+    "terminative I": "terminative-i terminative",
+    "terminative II": "terminative-ii terminative",
+    "terminative III": "terminative-iii terminative",
+    "additive I": "additive-i additive",
+    "additive II": "additive-ii additive",
 
         # duhtadit/Northern Sami
     "action inessive": "noun-from-verb inessive",
     "action elative": "noun-from-verb elative",
     "agent participle": "agent participle",
     "action comitative": "noun-from-verb comitative",
-    "conditional 1": "conditional-i",
-    "conditional 2": "conditional-ii",
+    "conditional 1": "conditional-i conditional",
+    "conditional 2": "conditional-ii conditional",
 
     # 능숙하다/Korean
     "Plain": {
@@ -5662,11 +5662,11 @@ infl_map = {
     "past adverbial participle": "past adverbial participle",
     "past adjectival participle": "past adjectival participle",
     "dative infinitive": "infinitive dative",
-    "cohortative form I": "cohortative-i",
+    "cohortative form I": "cohortative-i cohortative",
     "negative adverbial participle": "negative adverbial participle",
     "negative adjectival participle": "negative adjectival participle",
     "conditional form": "conditional",
-    "cohortative form II": "cohortative-ii",
+    "cohortative form II": "cohortative-ii cohortative",
     "tense/modality": "",
     "ನಾನು": "first-person singular",
     "ನೀನು": "second-person singular",
@@ -5702,6 +5702,27 @@ infl_map = {
     "masc. plural": "masculine plural",
     "fem. plural": "feminine plural",
 
+    # zeuen burua/Basque
+    "elkar": "reciprocal",
+    "noren burua": "reflexive",
+    # ezer/Basque
+    "nor": "interrogative pronoun personal",
+    "zer": "interrogative pronoun",
+    "zein": "interrogative pronoun",
+    "zenbat": "interrogative quantitative",
+    # batzuk/Basque
+    "bat": "pronoun",
+    "bakoitz": "pronoun",
+
+    # veda/Scanian
+    "jağ": "first-person singular",
+    "dú": "second-person singular",
+    "hanð": "third-person singular",
+    "ví": "first-person plural",
+    "í": "second-person plural",
+    "dé":  "third-person plural",
+    "present imperative": "imperative",
+    
     
 }
 

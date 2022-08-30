@@ -6161,7 +6161,7 @@ valid_tags = {
     "inelative": "case",
     "superelative": "case",
     "superdirective": "case",
-   
+    "quantitative": "misc",  # "how much" interrogative zenbat/Basque
 }
 
 for k, v in valid_tags.items():
