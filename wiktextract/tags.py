@@ -962,7 +962,7 @@ uppercase_tags = set([
     "Faroese",
     "Fars",
     "Fascian",  # Variant of Ladin
-    "Fayyumic",
+    "Fayyumic",  # Variant of Coptic
     "Fengkai",
     "Finglish",  # Finnish word taken from English / American Finnish dialect
     "Finland",
