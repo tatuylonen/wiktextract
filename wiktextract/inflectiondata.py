@@ -5723,7 +5723,14 @@ infl_map = {
     "dé":  "third-person plural",
     "present imperative": "imperative",
     
-    
+    #a ګړندی/Pashto
+    "oblique I": "oblique oblique-i",
+    "oblique II (dialectal)": "oblique oblique-ii dialectal",
+    #a پخول/Pashto
+    "Present Imperfective Subject Agreement": "present imperfective",
+    "Past Imperfective Object Agreement": "past imperfective",
+    "OBJECT": "",
+    "Past Perfective": "past perfective",
 }
 
 

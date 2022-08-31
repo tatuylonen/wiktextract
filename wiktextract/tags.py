@@ -6162,6 +6162,9 @@ valid_tags = {
     "superelative": "case",
     "superdirective": "case",
     "quantitative": "misc",  # "how much" interrogative zenbat/Basque
+    #a ګړندی/Pashto
+    "oblique-i": "case",
+    "oblique-ii": "case",
 }
 
 for k, v in valid_tags.items():
