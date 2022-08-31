@@ -48,13 +48,15 @@ translation_suffixes = [
 
 
 def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
-                 thesaurus_data):
+                 thesaurus_data, dont_parse):
     # Make sure there are no newlines or other strange characters in the
     # title.  They could cause security problems at several post-processing
     # steps.
     title = re.sub(r"[\s\000-\037]+", " ", title)
     title = title.strip()
     if capture_cb and not capture_cb(model, title, text):
+        return None
+    if dont_parse:
         return None
     if model == "redirect":
         config1 = WiktionaryConfig()
@@ -94,8 +96,8 @@ def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
     return (ret, stats)
 
 
-def parse_wiktionary(ctx, path, config, word_cb, capture_cb=None,
-                     phase1_only=False):
+def parse_wiktionary(ctx, path, config, word_cb, capture_cb,
+                     phase1_only, dont_parse):
     """Parses Wiktionary from the dump file ``path`` (which should point
     to a "enwiktionary-<date>-pages-articles.xml.bz2" file.  This
     calls ``capture_cb(title)`` for each raw page (if provided), and
@@ -122,7 +124,7 @@ def parse_wiktionary(ctx, path, config, word_cb, capture_cb=None,
     def page_cb(model, title, text):
         return page_handler(ctx, model, title, text, capture_cb, config_kwargs)
 
-    list(ctx.process(path, page_cb, phase1_only=True))
+    list(ctx.process(path, None, phase1_only=True))
     if phase1_only:
         return []
 
@@ -131,15 +133,16 @@ def parse_wiktionary(ctx, path, config, word_cb, capture_cb=None,
         print("Second phase - processing pages")
         sys.stdout.flush()
 
-    return reprocess_wiktionary(ctx, config, word_cb, capture_cb)
+    return reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse)
 
 
-def reprocess_wiktionary(ctx, config, word_cb, capture_cb):
+def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
     """Reprocesses the Wiktionary from the cache file."""
     assert isinstance(ctx, Wtp)
     assert isinstance(config, WiktionaryConfig)
     assert callable(word_cb)
     assert capture_cb is None or callable(capture_cb)
+    assert dont_parse in (True, False)
 
     config_kwargs = config.to_kwargs()
 
@@ -150,7 +153,7 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb):
     # Then perform the main parsing pass.
     def page_cb(model, title, text):
         return page_handler(ctx, model, title, text, capture_cb, config_kwargs,
-                            thesaurus_data)
+                            thesaurus_data, dont_parse)
 
     emitted = set()
     for ret, stats in ctx.reprocess(page_cb):

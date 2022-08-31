@@ -161,7 +161,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # The --all option turns on capturing all data types
-    if args.all and not args.pages_dir:
+    if args.all and (not args.pages_dir or args.out):
         args.translations = True
         args.pronunciations = True
         args.linkages = True
@@ -208,7 +208,9 @@ if __name__ == "__main__":
 
     # Open output file.
     out_path = args.out
-    if out_path and out_path != "-":
+    if not out_path and args.pages_dir:
+        out_f = None
+    elif out_path and out_path != "-":
         if out_path.startswith("/dev/"):
             out_tmp_path = out_path
         else:
@@ -249,14 +251,15 @@ if __name__ == "__main__":
     def word_cb(data):
         global word_count
         word_count += 1
-        if args.human_readable:
-            out_f.write(json.dumps(data, indent=2, sort_keys=True,
-                                   ensure_ascii=False))
-        else:
-            out_f.write(json.dumps(data, ensure_ascii=False))
-        out_f.write("\n")
-        if not out_path or out_path == "-" or word_count % 1000 == 0:
-            out_f.flush()
+        if out_f is not None:
+            if args.human_readable:
+                out_f.write(json.dumps(data, indent=2, sort_keys=True,
+                                       ensure_ascii=False))
+            else:
+                out_f.write(json.dumps(data, ensure_ascii=False))
+            out_f.write("\n")
+            if not out_path or out_path == "-" or word_count % 1000 == 0:
+                out_f.flush()
 
     def capture_cb(model, title, text):
         return capture_page(model, title, text, args.pages_dir)
@@ -285,7 +288,8 @@ if __name__ == "__main__":
         if args.path:
             # Parse the normal full Wiktionary data dump
             parse_wiktionary(ctx, args.path, config, word_cb, capture_cb,
-                             phase1_only=(args.page is not None))
+                             (args.page is not None),  # phase1_only
+                             (args.pages_dir and not args.out))  # dont_parse
 
         if args.page:
             # Parse a single Wiktionary page (extracted using --pages-dir)
@@ -313,10 +317,11 @@ if __name__ == "__main__":
 
         if not args.path and not args.page:
             # Parse again from the cache file
-            reprocess_wiktionary(ctx, config, word_cb, capture_cb)
+            reprocess_wiktionary(ctx, config, word_cb, capture_cb,
+                                 dont_parse=(args.pages_dir and not args.out))
 
     finally:
-        if out_path and out_path != "-":
+        if out_path and out_path != "-" and out_f is not None:
             out_f.close()
 
     if args.modules_file:
@@ -335,7 +340,7 @@ if __name__ == "__main__":
         ps = pstats.Stats(pr).sort_stats(pstats.SortKey.CUMULATIVE)
         ps.print_stats()
 
-    if out_path != out_tmp_path:
+    if out_f is not None and out_path != out_tmp_path:
         try:
             os.remove(out_path)
         except FileNotFoundError:
