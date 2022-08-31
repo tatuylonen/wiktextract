@@ -322,7 +322,7 @@ ignored_unknown_starts = set([
     "supplanted by",
     "supplied by",
     ])
-    
+
 ignored_unknown_starts_re = re.compile(
     r"^(" + "|".join(re.escape(x) for x in
                      sorted(ignored_unknown_starts,
@@ -1130,14 +1130,17 @@ def add_related(ctx, data, tags_lst, related, origtext,
         m = re.search(r"\s+\((([^()]|\([^()]*\))*)\)$", related)
         if m:
             paren = m.group(1)
-            cls = classify_desc(paren)
-            if (cls in ("romanization", "english") and
-                classify_desc(related[:m.start()]) == "other"):
-                roman = paren
+            if paren.startswith("U+"):
                 related = related[:m.start()]
             else:
-                related = related[:m.start()]
-                tagsets1, topics1 = decode_tags(paren)
+                cls = classify_desc(paren)
+                if (cls in ("romanization", "english") and
+                    classify_desc(related[:m.start()]) == "other"):
+                    roman = paren
+                    related = related[:m.start()]
+                else:
+                    related = related[:m.start()]
+                    tagsets1, topics1 = decode_tags(paren)
     if related and related.startswith("{{"):
         ctx.debug("{{ in word head form - possible Wiktionary error: {!r}"
                   .format(related))
@@ -1388,6 +1391,8 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
         if not paren:
             continue
         if paren.startswith("see "):
+            continue
+        if paren.startswith("U+"):
             continue
         # In some rare cases, strip word that inflects form the form
         # description, e.g. "look through rose-tinted glasses"/English.
