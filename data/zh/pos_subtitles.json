@@ -45,7 +45,7 @@
       "pos": "adv_phrase",
       "debug": "part-of-speech Adverbial phrase is proscribed"
     },
-    "affix": {
+    "前缀": {
       "pos": "affix"
     },
     "adjective suffix": {
@@ -55,13 +55,13 @@
     "ambiposition": {
       "pos": "ambiposition"
     },
-    "article": {
+    "冠词": {
       "pos": "article"
     },
     "character": {
       "pos": "character"
     },
-    "circumfix": {
+    "環綴": {
       "pos": "circumfix",
       "tags": [
         "morpheme"
@@ -70,7 +70,7 @@
     "circumposition": {
       "pos": "circumpos"
     },
-    "classifier": {
+    "量词‎": {
       "pos": "classifier"
     },
     "clipping": {
@@ -99,7 +99,7 @@
         "comparative"
       ]
     },
-    "conjunction": {
+    "連詞": {
       "pos": "conj"
     },
     "conjuntion": {
@@ -207,7 +207,7 @@
         "abbreviation"
       ]
     },
-    "interfix": {
+    "間綴": {
       "pos": "interfix",
       "tags": [
         "morpheme"
@@ -287,7 +287,7 @@
         "number"
       ]
     },
-    "numeral": {
+    "數詞": {
       "pos": "num"
     },
     "ordinal number": {
@@ -303,7 +303,7 @@
         "participle"
       ]
     },
-    "particle": {
+    "助詞": {
       "pos": "particle"
     },
     "past participle": {
@@ -335,7 +335,7 @@
     "片語": {
       "pos": "phrase"
     },
-    "phrases": {
+    "短語": {
       "pos": "phrase",
       "debug": "usually used in singular"
     },
@@ -351,7 +351,7 @@
         "possessive"
       ]
     },
-    "postposition": {
+    "後置詞": {
       "pos": "postp"
     },
     "predicative": {
@@ -360,7 +360,7 @@
         "predicative"
       ]
     },
-    "prefix": {
+    "前綴": {
       "pos": "prefix",
       "tags": [
         "morpheme"
@@ -398,7 +398,7 @@
     "preverb": {
       "pos": "preverb"
     },
-    "pronoun": {
+    "代詞": {
       "pos": "pron"
     },
     "專有名詞": {
@@ -408,11 +408,20 @@
       "pos": "name",
       "debug": "misspelled subtitle"
     },
-    "proposition": {
+    "介詞": {
       "pos": "prep",
       "debug": "misspelled subtitle"
     },
-    "proverb": {
+    "成語": {
+      "pos": "proverb"
+    },
+    "諺語": {
+      "pos": "proverb"
+    },
+    "谚语": {
+      "pos": "proverb"
+    },
+    "成句": {
       "pos": "proverb"
     },
     "punctuation mark": {
@@ -443,7 +452,7 @@
         "morpheme"
       ]
     },
-    "suffix": {
+    "後綴": {
       "pos": "suffix",
       "tags": [
         "morpheme"
@@ -462,7 +471,7 @@
     "symbol": {
       "pos": "symbol"
     },
-    "transitive verb": {
+    "及物动词": {
       "pos": "verb",
       "tags": [
         "transitive"
