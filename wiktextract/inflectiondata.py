@@ -2871,11 +2871,17 @@ infl_map = {
     "Indefinite masculine gender": "indefinite masculine",
     "Definite masculine gender": "definite masculine",
     "SUBJECT": "subjective",
-    "Singular OBJECT": "singular objective",
-    "Plural OBJECT": "plural objective",
+    "Singular OBJECT": {
+        "lang": "Pashto",
+        "then": "object-singular object-concord",
+        "else": "singular objective",
+    },
+    "Plural OBJECT": {
+        "lang": "Pashto",
+        "then": "object-plural object-concord",
+        "else": "plural objective",
+    },
     "indefinite forms": "indefinite",
-    "1ˢᵗ person singular": "first-person singular",
-    "1ˢᵗ person plural": "first-person plural",
     "2ⁿᵈ person singular": "second-person singular",
     "2ⁿᵈ person plural": "second-person plural",
     "3ʳᵈ person [sing. and plural]": "third-person singular plural",
@@ -5169,6 +5175,7 @@ infl_map = {
         "lang": "Uyghur",
         "pos": "noun",
         "then": "first-person plural possessive",
+        "else": "first-person plural",
     },
     "3ʳᵈ person (his, her, its, their)": {
         "lang": "Uyghur",
@@ -5179,6 +5186,7 @@ infl_map = {
         "lang": "Uyghur",
         "pos": "noun",
         "then": "first-person singular possessive",
+        "else": "first-person singular",
     },
 
     # -raihu/Kikuyu
@@ -5728,9 +5736,14 @@ infl_map = {
     "oblique II (dialectal)": "oblique oblique-ii dialectal",
     #a پخول/Pashto
     "Present Imperfective Subject Agreement": "present imperfective",
-    "Past Imperfective Object Agreement": "past imperfective",
+    "Past Imperfective Object Agreement":
+        "past imperfective object-concord dummy-object-concord",
     "OBJECT": "",
-    "Past Perfective": "past perfective",
+    "Past Perfective": {
+        "lang": "Pashto",
+        "then": "object-concord dummy-object-concord",
+        "else": "past perfective",
+    },
 }
 
 

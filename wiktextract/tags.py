@@ -5282,6 +5282,8 @@ valid_tags = {
     "dummy-mood": "dummy",  # Used in inflection table parsing, never in data
     "dummy-skip-this": "dummy",  # Kludge in parsing, form skipped
     "dummy-tense": "dummy",  # Used in inflection table parsing, never in data
+    "dummy-object-concord": "dummy",  # Used to transform personal pronouns, numbers and
+                             # gender tags into object- form.
     "durative": "aspect",  # Verb form  XXX same as continuative?
     "eclipsis": "misc",
     "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian
@@ -5609,6 +5611,8 @@ valid_tags = {
     "object-class-16": "object",
     "object-class-17": "object",
     "object-class-18": "object",
+    "object-masculine": "object",  # Pashto verbs
+    "object-feminine": "object",
     "objective": "case",  # Case, used as an object
     "oblique": "case",  # Apparently like case form (e.g., Hindi)
     "obsolete": "dialect",

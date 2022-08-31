@@ -41,6 +41,38 @@ noinherit_tags = set([
     "infinitive-v",
 ])
 
+# Subject->object transformation mapping, when using dummy-object-concord
+# to replace subject concord tags with object concord tags
+object_concord_replacements = {
+    "first-person": "object-first-person", 
+    "second-person": "object-second-person",
+    "third-person": "object-third-person",
+    "singular": "object-singular",
+    "plural": "object-plural",
+    "definite": "object-definite",
+    "indefinite": "object-indefinite",
+    "class-1": "object-class-1",
+    "class-2": "object-class-2",
+    "class-3": "object-class-3",
+    "class-4": "object-class-4",
+    "class-5": "object-class-5",
+    "class-6": "object-class-6",
+    "class-7": "object-class-7",
+    "class-8": "object-class-8",
+    "class-9": "object-class-9",
+    "class-10": "object-class-10",
+    "class-11": "object-class-11",
+    "class-12": "object-class-12",
+    "class-13": "object-class-13",
+    "class-14": "object-class-14",
+    "class-15": "object-class-15",
+    "class-16": "object-class-16",
+    "class-17": "object-class-17",
+    "class-18": "object-class-18",
+    "masculine": "object-masculine",
+    "feminine": "object-feminine",
+}
+
 # Words in title that cause addition of tags in all entries
 title_contains_global_map = {
     "possessive": "possessive",
@@ -775,6 +807,8 @@ lang_specific = {
         "next": "bantu-group",
     },
 }
+
+
 # Sanity check lang_specific
 def_ls_keys = lang_specific["default"].keys()
 for k, v in lang_specific.items():
@@ -2503,11 +2537,26 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         elif j in has_covering_hdr:
                             some_has_covered_text = True
 
+                        # Handle ambiguous object concord. If a header
+                        # gives the "dummy-object-concord"-tag to a word,
+                        # replace person, number and gender tags with
+                        # their "object-" counterparts so that the verb
+                        # agrees with the object instead.
+                        # Use only when the verb has ONLY object agreement!
+                        #a پخول/Pashto
+                        if "dummy-object-concord" in tags:
+                            for subtag, objtag in (object_concord_replacements
+                                                .items()):
+                                if subtag in tags:
+                                    tags.remove(subtag)
+                                    tags.add(objtag)
+
                         # Remove the dummy mood tag that we sometimes
                         # use to block adding other mood and related
                         # tags
                         tags = tags - set(["dummy-mood", "dummy-tense",
-                                           "dummy-ignore-skipped"])
+                                           "dummy-ignore-skipped",
+                                           "dummy-object-concord",])
 
                         # Perform language-specific tag replacements according
                         # to rules in a table.
