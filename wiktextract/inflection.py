@@ -44,7 +44,7 @@ noinherit_tags = set([
 # Subject->object transformation mapping, when using dummy-object-concord
 # to replace subject concord tags with object concord tags
 object_concord_replacements = {
-    "first-person": "object-first-person", 
+    "first-person": "object-first-person",
     "second-person": "object-second-person",
     "third-person": "object-third-person",
     "singular": "object-singular",
@@ -228,6 +228,16 @@ title_elemstart_re = re.compile(
     r"^({}) "
     .format("|".join(re.escape(x) for x in title_elemstart_map.keys())))
 
+# Regexp for cell starts that are likely definitions of reference symbols.
+# See also nondef_re.
+def_re = re.compile(r"(\s*•?\s+)?"
+                    r"((\*+|[△†0123456789⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([⁾):]|\s)|"
+                    r"\^(\*+|[△†])|"
+                    r"([¹²³⁴⁵⁶⁷⁸⁹]))")
+
+# Regexp for cell starts that are exceptions to def_re and do not actually
+# start a definition.
+nondef_re = re.compile(r"^\s*(1|2|3)\s+(sg|pl)\s*$")
 
 # Certain tags are moved from headers in tables into word tags, as they always
 # apply to the whole word.
@@ -1129,6 +1139,7 @@ def clean_header(word, col):
                  r"The future tense: )",
                 col):
         return "dummy-ignored-text-cell", [], [], []
+
     # Temporarily remove final parenthesized part (if separated by whitespace),
     # so that we can extract reference markers before it.
     final_paren = ""
@@ -1140,10 +1151,6 @@ def clean_header(word, col):
     # ᴺᴸᴴ persin/Old Irish <- where does this go?? -KJ
     # Extract references and tag markers
     refs = []
-    def_re = re.compile(r"(^|\s*•?\s+)"
-                        r"((\*+|[△†0123456789⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([⁾):]|\s)|"
-                        r"\^(\*+|[△†]))")
-    nondef_re = re.compile(r"^\s*(1|2|3)\s+(sg|pl)\s*$")
     while True:
         m = re.search(r"\^(.|\([^)]*\))$", col)
         if not m:
@@ -1179,10 +1186,11 @@ def clean_header(word, col):
         for m in re.finditer(def_re, col):
             if ref:
                 deflst.append((ref, col[ofs:m.start()].strip()))
-            ref = m.group(3) or m.group(5)
+            ref = m.group(3) or m.group(5) or m.group(6)
             ofs = m.end()
         if ref:
             deflst.append((ref, col[ofs:].strip()))
+        # print("deflst:", deflst)
         return "", [], deflst, []
 
     # See if it references a definition
@@ -2847,7 +2855,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 cellstyle = (col.attrs.get("style", "") + "//" +
                              col.attrs.get("class", "") + "//" +
                              str(kind))
-                             
+
                 if not row:  # if first column in row
                     style = cellstyle
                 target = None
@@ -2912,7 +2920,14 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                                   "in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
                                   "cleaned text: {}"
                                   .format(lang, cleaned))
-                                        
+
+                # If the cell starts with something that could start a
+                # definition (typically a reference symbol), make it a candidate
+                # regardless of whether the language is listed.
+                if (re.match(def_re, cleaned) and
+                    not re.match(nondef_re, cleaned)):
+                    candidate_hdr = True
+
                 #print("titletext={!r} hdr_expansion={!r} candidate_hdr={!r} "
                 #      "lang={} pos={}"
                 #      .format(titletext, hdr_expansion, candidate_hdr,
