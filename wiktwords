@@ -289,7 +289,8 @@ if __name__ == "__main__":
             # Parse the normal full Wiktionary data dump
             parse_wiktionary(ctx, args.path, config, word_cb, capture_cb,
                              (args.page is not None),  # phase1_only
-                             (args.pages_dir and not args.out))  # dont_parse
+                             (args.pages_dir is not None and
+                              not args.out))  # dont_parse
 
         if args.page:
             # Parse a single Wiktionary page (extracted using --pages-dir)
