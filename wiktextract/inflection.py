@@ -859,20 +859,20 @@ def get_lang_specific(lang, field):
     assert isinstance(lang, str)
     assert isinstance(field, str)
     while True:
-        dt = lang_specific.get(lang)
-        if dt is None:
-            if lang == "default":
-                raise RuntimeError("Invalid lang_specific field {!r}"
-                                   .format(field))
+        lconfigs = lang_specific.get(lang)
+        if lconfigs is None:
             lang = "default"
+        elif lang == "default" and field not in lconfigs:
+            raise RuntimeError("Invalid lang_specific field {!r}"
+                               .format(field))
         else:
-            if field in dt:
-                return dt[field]
-            lang = dt.get("next", "default")
-    if dt is None or field not in dt:
-        dt = lang_specific.get("default")
-    assert field in dt
-    return dt[field]
+            if field in lconfigs:
+                return lconfigs[field]
+            lang = lconfigs.get("next", "default")
+    if lconfigs is None or field not in lconfigs:
+        lconfigs = lang_specific.get("default")
+    assert field in lconfigs
+    return lconfigs[field]
 
 
 # Tag combination mappings for specific languages/part-of-speech.  These are
