@@ -2405,7 +2405,11 @@ infl_map = {
     "Past-tense verbal nouns": "past noun-from-verb",
     "Determiners": "determiner",
     "simple perfect": "perfect",
-    "Notes": "dummy-skip-this",
+    "Notes": {
+        "lang": "Assamese",
+        "then": "dummy-remove-this-cell",
+        "else": "dummy-skip-this",
+    },
     # ~ "Notes": "dummy-ignore-skipped",
     "postpositions taking a dative case": "postpositional with-dative",
     "postpositions taking a genitive case": "postpositional with-genitive",

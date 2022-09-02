@@ -5288,6 +5288,7 @@ valid_tags = {
     "dummy-tense": "dummy",  # Used in inflection table parsing, never in data
     "dummy-object-concord": "dummy",  # Used to transform personal pronouns, numbers and
                              # gender tags into object- form.
+    "dummy-remove-this-cell": "dummy2",  # পো/Assamese attempt to make this work
     "durative": "aspect",  # Verb form  XXX same as continuative?
     "eclipsis": "misc",
     "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian

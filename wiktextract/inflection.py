@@ -2616,6 +2616,9 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         if form == "dummy-ignored-text-cell":
                             continue
 
+                        if "dummy-remove-this-cell" in tags:
+                            continue
+
                         # Add the form
                         tags = list(sorted(tags))
                         dt = {"form": form, "tags": tags, "source": source}
