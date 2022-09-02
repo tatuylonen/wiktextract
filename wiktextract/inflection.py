@@ -878,10 +878,6 @@ def get_lang_specific(lang, field):
             if field in lconfigs:
                 return lconfigs[field]
             lang = lconfigs.get("next", "default")
-    if lconfigs is None or field not in lconfigs:
-        lconfigs = lang_specific.get("default")
-    assert field in lconfigs
-    return lconfigs[field]
 
 
 # Tag combination mappings for specific languages/part-of-speech.  These are
