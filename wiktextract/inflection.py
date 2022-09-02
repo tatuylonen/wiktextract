@@ -281,6 +281,10 @@ lang_specific = {
         "virile_nonvirile_remove": True,
         "voices": ["active", "passive"],
         "special_splits": {},  # value: (splits, tags)
+        # Greek-style bracket semantics
+        "parentheses_for_informal": False,
+        "square_brackets_for_rare": False,
+        "curly_brackets_for_archaic": False,
     },
     "austronesian-group": {
         "numbers": ["singular", "dual", "plural"],
@@ -503,6 +507,11 @@ lang_specific = {
         "reuse_cellspan": "reuse",
         "skip_mood_mood": True,
         "skip_tense_tense": True,
+        # είμαι/Greek
+        "parentheses_for_informal": True,
+        "square_brackets_for_rare": True,
+        "curly_brackets_for_archaic": True,
+        
     },
     "Hawaiian": {
         "next": "austronesian-group",
@@ -2392,21 +2401,35 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 form = re.sub(r"(?i)^Main:", "", form)
                 form = re.sub(r"\s+", " ", form)
                 form = form.strip()
+
                 if re.match(r"\([^][(){}]*\)$", form):
-                    form = form[1:-1]
-                    extra_tags.append("informal")
+                    if get_lang_specific(lang, "parentheses_for_informal"):
+                        form = form[1:-1]
+                        extra_tags.append("informal")
+                    else:
+                        form = form[1:-1]
                 elif re.match(r"\{\[[^][(){}]*\]\}$", form):
-                    # είμαι/Greek/Verb
-                    form = form[2:-2]
-                    extra_tags.extend(["rare", "archaic"])
+                    if (get_lang_specific(lang, "square_brackets_for_rare") and
+                        get_lang_specific(lang, "curly_brackets_for_archaic")):
+                        # είμαι/Greek/Verb
+                        form = form[2:-2]
+                        extra_tags.extend(["rare", "archaic"])
+                    else:
+                        form = form[2:-2]
                 elif re.match(r"\{[^][(){}]*\}$", form):
-                    # είμαι/Greek/Verb
-                    form = form[1:-1]
-                    extra_tags.extend(["archaic"])
+                    if get_lang_specific(lang, "curly_brackets_for_archaic"):
+                        # είμαι/Greek/Verb
+                        form = form[1:-1]
+                        extra_tags.extend(["archaic"])
+                    else:
+                        form = form[1:-1]
                 elif re.match(r"\[[^][(){}]*\]$", form):
-                    # είμαι/Greek/Verb
-                    form = form[1:-1]
-                    extra_tags.append("rare")
+                    if get_lang_specific(lang, "square_brackets_for_rare"):
+                        # είμαι/Greek/Verb
+                        form = form[1:-1]
+                        extra_tags.append("rare")
+                    else:
+                        form = form[1:-1]
                 # Handle parentheses in the table element.  We parse
                 # tags anywhere and romanizations anywhere but beginning.
                 roman = base_roman
