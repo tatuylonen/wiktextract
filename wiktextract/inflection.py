@@ -19,7 +19,11 @@ from wiktextract.form_descriptions import (classify_desc, decode_tags,
                                            parse_head_final_tags, distw)
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.clean import clean_value
-from wiktextract.table_headers_heuristics_data import LANGUAGES_WITH_CELLS_AS_HEADERS
+from wiktextract.table_headers_heuristics_data import (
+                                    LANGUAGES_WITH_CELLS_AS_HEADERS)
+from wiktextract.row_and_column_tags import (rowtag_replacements,
+                                             coltag_replacements,)
+
 
 # Set this to a word form to debug how that is analyzed, or None to disable
 debug_word = None
@@ -1905,6 +1909,15 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             # print("DEFINED: {} -> {}".format(ref, tags1))
             def_ht[ref] = tags1
 
+    def replace_directional_tags(tags, replacement_map):
+        newtags = set()
+        for t in tags:
+            if t in replacement_map:
+                newtags.add(replacement_map[t])
+            else:
+                newtags.add(t)
+        return newtags
+
     # First extract definitions from cells
     for row in rows:
         for cell in row:
@@ -2473,11 +2486,31 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 #       "FORM={!r} ROMAN={!r}"
                 #       .format(rowtags, coltags, refs_tags,
                 #               form, roman))
+
                 # Merge column tags and row tags.  We give preference
                 # to moods etc coming from rowtags (cf. austteigen/German/Verb
                 # imperative forms).
+                
+                # In certain cases, what a tag means depends on whether
+                # it is a row or column header. Depending on the language,
+                # we replace certain tags with others if they're in
+                # a column or row
+                rtagreplacs = None
+                ctagreplacs = None
+                if lang in (rowtag_replacements):
+                    rtagreplacs = rowtag_replacements[lang]
+                if lang in (coltag_replacements):
+                    ctagreplacs = coltag_replacements[lang]
+                
                 for rt in sorted(rowtags):
+                    # if lang was in rowtag_replacements)
+                    if not rtagreplacs == None:
+                        rt = replace_directional_tags(rt, rtagreplacs)
                     for ct in sorted(coltags):
+                        # if lang was in coltag_replacements
+                        if not ctagreplacs == None:
+                            ct = replace_directional_tags(ct,
+                                                      ctagreplacs)
                         tags = set(global_tags)
                         tags.update(extra_tags)
                         tags.update(rt)
@@ -2613,6 +2646,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                                       "form={} tags={}"
                                       .format(form, tags))
 
+                        # Note that this checks `form`, not `in tags`
                         if form == "dummy-ignored-text-cell":
                             continue
 

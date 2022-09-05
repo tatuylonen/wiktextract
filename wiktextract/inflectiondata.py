@@ -190,24 +190,78 @@ infl_map = {
            "then": "object-second-person object-plural"},
     "3p": {"if": "object-concord",
            "then": "object-third-person object-plural"},
-    "c1": {"if": "object-concord", "then": "object-class-1"},
-    "c2": {"if": "object-concord", "then": "object-class-2"},
-    "c3": {"if": "object-concord", "then": "object-class-3"},
-    "c4": {"if": "object-concord", "then": "object-class-4"},
-    "c5": {"if": "object-concord", "then": "object-class-5"},
-    "c6": {"if": "object-concord", "then": "object-class-6"},
-    "c7": {"if": "object-concord", "then": "object-class-7"},
-    "c8": {"if": "object-concord", "then": "object-class-8"},
-    "c9": {"if": "object-concord", "then": "object-class-9"},
-    "c10": {"if": "object-concord", "then": "object-class-10"},
-    "c11": {"if": "object-concord", "then": "object-class-11"},
-    "c12": {"if": "object-concord", "then": "object-class-12"},
-    "c13": {"if": "object-concord", "then": "object-class-13"},
-    "c14": {"if": "object-concord", "then": "object-class-14"},
-    "c15": {"if": "object-concord", "then": "object-class-15"},
-    "c16": {"if": "object-concord", "then": "object-class-16"},
-    "c17": {"if": "object-concord", "then": "object-class-17"},
-    "c18": {"if": "object-concord", "then": "object-class-18"},
+    "c1": {
+        "if": "object-concord",
+        "then": "object-class-1",
+        "else": "class-1",},
+    "c2": {
+        "if": "object-concord",
+        "then": "object-class-2",
+        "else": "class-2",},
+    "c3": {
+        "if": "object-concord",
+        "then": "object-class-3",
+        "else": "class-3",},
+    "c4": {
+        "if": "object-concord",
+        "then": "object-class-4",
+        "else": "class-4",},
+    "c5": {
+        "if": "object-concord",
+        "then": "object-class-5",
+        "else": "class-5",},
+    "c6": {
+        "if": "object-concord",
+        "then": "object-class-6",
+        "else": "class-6",},
+    "c7": {
+        "if": "object-concord",
+        "then": "object-class-7",
+        "else": "class-7",},
+    "c8": {
+        "if": "object-concord",
+        "then": "object-class-8",
+        "else": "class-8",},
+    "c9": {
+        "if": "object-concord",
+        "then": "object-class-9",
+        "else": "class-9",},
+    "c10": {
+        "if": "object-concord",
+        "then": "object-class-10",
+        "else": "class-10",},
+    "c11": {
+        "if": "object-concord",
+        "then": "object-class-11",
+        "else": "class-11",},
+    "c12": {
+        "if": "object-concord",
+        "then": "object-class-12",
+        "else": "class-12",},
+    "c13": {
+        "if": "object-concord",
+        "then": "object-class-13",
+        "else": "class-13",},
+    "c14": {
+        "if": "object-concord",
+        "then": "object-class-14",
+        "else": "class-14",},
+    "c15": {
+        "if": "object-concord",
+        "then": "object-class-15",
+        "else": "class-15",},
+    "c16": {
+        "if": "object-concord",
+        "then": "object-class-16",
+        "else": "class-16",},
+    "c17": {
+        "if": "object-concord",
+        "then": "object-class-17",
+        "else": "class-17",},
+    "c18": {
+        "if": "object-concord",
+        "then": "object-class-18",
+        "else": "class-18",},
     "1s/2s/3s/c1": ["object-first-person object-second-person "
                     "object-third-person object-singular",
                     "object-class-1"],

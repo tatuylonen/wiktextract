@@ -5286,9 +5286,16 @@ valid_tags = {
     "dummy-mood": "dummy",  # Used in inflection table parsing, never in data
     "dummy-skip-this": "dummy",  # Kludge in parsing, form skipped
     "dummy-tense": "dummy",  # Used in inflection table parsing, never in data
-    "dummy-object-concord": "dummy",  # Used to transform personal pronouns, numbers and
-                             # gender tags into object- form.
+    "dummy-object-concord": "dummy",  # Used to transform personal pronouns,
+                            # numbers and gender tags into object- form.
+        # This must only be used in the case where the verb has ONLY object
+        # concord present in it, because it changes all (listed) subject
+        # concord tags (like "first-person" or "plural") into object concord
+        # tags (like "object-first-person" and "object-plural".
     "dummy-remove-this-cell": "dummy2",  # পো/Assamese attempt to make this work
+        # Use this to get rid of unnecessary cells by propagating: for example
+        # if there's a "Notes" header and a text cell beneath it, using the
+        # header to give the text cell this tag will nuke it.
     "durative": "aspect",  # Verb form  XXX same as continuative?
     "eclipsis": "misc",
     "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian
