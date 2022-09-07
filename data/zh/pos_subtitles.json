@@ -37,10 +37,6 @@
     "副詞": {
       "pos": "adv"
     },
-    "adverbs": {
-      "pos": "adv",
-      "debug": "usually used in singular"
-    },
     "adverbial phrase": {
       "pos": "adv_phrase",
       "debug": "part-of-speech Adverbial phrase is proscribed"
@@ -102,10 +98,6 @@
     "連詞": {
       "pos": "conj"
     },
-    "conjuntion": {
-      "pos": "conj",
-      "debug": "misspelled subtitle"
-    },
     "contraction": {
       "pos": "abbrev",
       "tags": [
@@ -121,7 +113,7 @@
     "definitions": {
       "pos": "character"
     },
-    "determiner": {
+    "限定詞": {
       "pos": "det"
     },
     "diacritical mark": {
@@ -181,13 +173,13 @@
         "ideophone"
       ]
     },
-    "idiom": {
+    "俗語": {
       "pos": "phrase",
       "tags": [
         "idiomatic"
       ]
     },
-    "infix": {
+    "間綴": {
       "pos": "infix",
       "tags": [
         "morpheme"
@@ -366,12 +358,8 @@
         "morpheme"
       ]
     },
-    "preposition": {
+    "介詞": {
       "pos": "prep"
-    },
-    "prepositions": {
-      "pos": "prep",
-      "debug": "usually used in singular"
     },
     "prepositional expressions": {
       "pos": "prep",
@@ -465,7 +453,7 @@
         "morpheme"
       ]
     },
-    "syllable": {
+    "音節": {
       "pos": "syllable"
     },
     "symbol": {
