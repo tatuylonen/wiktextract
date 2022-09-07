@@ -1166,7 +1166,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         examples = []
         if config.capture_examples:
             for sub in sublists:
-                if not sub.args.endswith(":") and not sub.args.endswith("*"):
+                if not sub.args.endswith((":", "*")):
                     continue
                 for item in sub.children:
                     if not isinstance(item, WikiNode):
@@ -1216,7 +1216,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     subtext = re.sub(r"\s*[―—]+$", "", subtext)
                     # print("subtext:", repr(subtext))
 
-                    lines = subtext.split("\n")
+                    lines = subtext.splitlines()
                     lines = list(x for x in lines
                                  if not re.match(
                                          r"(Synonyms: |Antonyms: |Hyponyms: |"
@@ -1485,7 +1485,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             # Kludge, some glosses have a comma after initial qualifiers in
             # parentheses
-            if gloss.startswith(",") or gloss.startswith(":"):
+            if gloss.startswith((",", ":")):
                 gloss = gloss[1:]
             gloss = gloss.strip()
             if gloss.endswith(":"):
@@ -2663,7 +2663,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                         etym_data,
                                         have_etym,
                                         base_data,
-                                        language,
+                                        lang_code,
                                         )
             elif t.startswith(OTHER_SUBTITLES["etymology"]):
                 push_etym()

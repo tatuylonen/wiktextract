@@ -44,7 +44,7 @@ def init_zh_pron_tags(lang_code: str) -> None:
 
 
 def parse_pronunciation(ctx, config, node, data, etym_data,
-                        have_etym, base_data, language):
+                        have_etym, base_data, lang_code):
     """Parses the pronunciation section from a language section on a
     page."""
     assert isinstance(node, WikiNode)
@@ -185,12 +185,12 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             text = re.sub(r"(?s)\(Note:.*?\)", "", text)
             new_parent_hdrs = list(parent_hdrs)
             # look no further, here be dragons...
-            if text.find(": ") >= 0:
+            if ": " in text or "：" in text:
                 pron = {}
                 pron["tags"] = []
-                parts = text.split(": ")
+                parts = re.split(r": |：", text)
                 # cludge for weird synax i.e. (Hokkien: Xiamen, ...)
-                if (parts[1].find(",") >= 0 or
+                if ("," in parts[1] or
                     parts[1].replace(")", "").replace("(", "").strip()
                     in valid_tags):
                     new_text = text
@@ -208,17 +208,17 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     for hdr in new_text.split(","):
                         new_parent_hdrs.append(hdr.strip())
                 else:
-                    if text.find("Zhangzhou)") >= 0:
-                        print("\nFOUND IN:", text, "\n")
-                        print("PARTS: ", repr(parts))
+                    # if "Zhangzhou" in text:
+                    #     print("\nFOUND IN:", text, "\n")
+                    #     print("PARTS: ", repr(parts))
                     extra_tags = parts[0]
                     v = ":".join(parts[1:])
                     pron["zh-pron"] = v
                     new_parent_hdrs.append(extra_tags)
                     for hdr in new_parent_hdrs:
                         hdr = hdr.strip()
-                        if hdr in zh_pron_tags:
-                            for tag in zh_pron_tags[hdr]:
+                        if hdr in ZH_PRON_TAGS:
+                            for tag in ZH_PRON_TAGS[hdr]:
                                 if tag not in pron["tags"]:
                                     pron["tags"].append(tag)
                         elif hdr in valid_tags:
@@ -226,7 +226,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                                 pron["tags"].append(hdr)
                         else:
                             # erhua cludge
-                            if text.find("(Standard Chinese, erhua-ed)") >= 0:
+                            if "(Standard Chinese, erhua-ed)" in text:
                                 pron["tags"].append("Standard Chinese")
                                 pron["tags"].append("Erhua")
                             else:
@@ -275,7 +275,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 parse_chinese_pron(item, ut)
             return
 
-    if language == "Chinese":
+    if lang_code == "zh":
         ut = set()
         parse_chinese_pron(contents, ut)
         for hdr in ut:
