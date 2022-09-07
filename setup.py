@@ -19,6 +19,7 @@ setup(name="wiktextract",
       download_url="https://github.com/tatuylonen/wiktextract",
       scripts=["wiktwords"],
       packages=["wiktextract"],
+      include_package_data=True,
       install_requires=["wikitextprocessor", "python-Levenshtein", "nltk"],
       classifiers=[
           "Development Status :: 3 - Alpha",

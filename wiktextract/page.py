@@ -10,6 +10,8 @@ import urllib
 import hashlib
 import json
 import collections
+from pathlib import Path
+
 from wikitextprocessor import (Wtp, WikiNode, NodeKind, ALL_LANGUAGES,
                                MAGIC_FIRST, MAGIC_LAST)
 from .parts_of_speech import part_of_speech_map, PARTS_OF_SPEECH
@@ -45,16 +47,18 @@ def init_subtitles(language_code: str) -> None:
     global POS_SUBTITLES
     global OTHER_SUBTITLES
 
-    with open(f"data/{language_code}/language_subtitles.json", encoding="utf-8") as f:
+    data_folder = Path(__file__).parent.joinpath(f"data/{language_code}")
+
+    with data_folder.joinpath("language_subtitles.json").open(encoding="utf-8") as f:
         LANGUAGE_SUBTITLES = json.load(f)
 
-    with open(f"data/{language_code}/linkage_subtitles.json", encoding="utf-8") as f:
+    with data_folder.joinpath("linkage_subtitles.json").open(encoding="utf-8") as f:
         LINKAGE_SUBTITLES = json.load(f)
 
-    with open(f"data/{language_code}/pos_subtitles.json", encoding="utf-8") as f:
+    with data_folder.joinpath("pos_subtitles.json").open(encoding="utf-8") as f:
         POS_SUBTITLES = json.load(f)
 
-    with open(f"data/{language_code}/other_subtitles.json", encoding="utf-8") as f:
+    with data_folder.joinpath("other_subtitles.json").open(encoding="utf-8") as f:
         OTHER_SUBTITLES = json.load(f)
 
 

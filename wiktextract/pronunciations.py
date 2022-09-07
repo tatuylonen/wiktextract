@@ -3,6 +3,8 @@ import json
 import sys
 import urllib
 import hashlib
+from pathlib import Path
+
 from .page import clean_node, is_panel_template
 from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
 from .datautils import (split_at_comma_semi, data_append, data_extend,
@@ -37,9 +39,12 @@ pron_romanization_re = re.compile(
 
 ZH_PRON_TAGS = None
 
+
 def init_zh_pron_tags(lang_code: str) -> None:
     global ZH_PRON_TAGS
-    with open(f"data/{lang_code}/zh_pron_tags.json", encoding="utf-8") as f:
+
+    data_folder = Path(__file__).parent.joinpath(f"data/{lang_code}")
+    with data_folder.joinpath("zh_pron_tags.json").open(encoding="utf-8") as f:
         ZH_PRON_TAGS = json.load(f)
 
 
