@@ -25,7 +25,7 @@ from wiktextract import (WiktionaryConfig, parse_wiktionary,
                          extract_namespace)
 from wiktextract import extract_thesaurus_data
 from wiktextract import extract_categories
-from wiktextract import init_subtitles
+from wiktextract import init_subtitles, init_zh_pron_tags
 import wiktextract.page
 
 # Compute set of all language names
@@ -169,6 +169,7 @@ if __name__ == "__main__":
     else:
         language_code = Path(args.path).name[:2]
     init_subtitles(language_code)
+    init_zh_pron_tags(language_code)
     all_langs = set(wiktextract.page.LANGUAGE_SUBTITLES.keys())
 
     # The --all option turns on capturing all data types

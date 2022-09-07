@@ -11,6 +11,7 @@ from .thesaurus import extract_thesaurus_data
 from .categories import extract_categories
 from .tags import sort_tags, tag_categories
 from .form_descriptions import valid_tags  # This file adds uppercase tags
+from .pronunciations import init_zh_pron_tags
 
 __all__ = (
     "WiktionaryConfig",
@@ -24,5 +25,6 @@ __all__ = (
     "sort_tags",
     "tag_categories",
     "valid_tags",
-    "init_subtitles"
+    "init_subtitles",
+    "init_zh_pron_tags"
 )

@@ -35,6 +35,14 @@ pron_romanization_re = re.compile(
                     reverse=True)) +
     ")([^\n]+)")
 
+ZH_PRON_TAGS = None
+
+def init_zh_pron_tags(lang_code: str) -> None:
+    global ZH_PRON_TAGS
+    with open(f"data/{lang_code}/zh_pron_tags.json", encoding="utf-8") as f:
+        ZH_PRON_TAGS = json.load(f)
+
+
 def parse_pronunciation(ctx, config, node, data, etym_data,
                         have_etym, base_data, language):
     """Parses the pronunciation section from a language section on a
