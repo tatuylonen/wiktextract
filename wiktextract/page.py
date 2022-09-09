@@ -41,7 +41,7 @@ POS_SUBTITLES = None
 OTHER_SUBTITLES = None
 
 
-def init_subtitles(language_code: str) -> None:
+def init_subtitles(language_code: str) -> dict[str, str]:
     global LANGUAGE_SUBTITLES
     global LINKAGE_SUBTITLES
     global POS_SUBTITLES
@@ -60,6 +60,8 @@ def init_subtitles(language_code: str) -> None:
 
     with data_folder.joinpath("other_subtitles.json").open(encoding="utf-8") as f:
         OTHER_SUBTITLES = json.load(f)
+
+    return LANGUAGE_SUBTITLES
 
 
 # Subsections with these titles are ignored.
@@ -2880,7 +2882,7 @@ def fix_subtitle_hierarchy(ctx, text):
 def parse_page(ctx, word, text, config):
     """Parses the text of a Wiktionary page and returns a list of
     dictionaries, one for each word/part-of-speech defined on the page
-    for the languages specified by ``capture_languages`` (None means
+    for the languages specified by ``capture_language_codes`` (None means
     all available languages).  ``word`` is page title, and ``text`` is
     page text in Wikimedia format.  Other arguments indicate what is
     captured."""
@@ -2940,9 +2942,9 @@ def parse_page(ctx, word, text, config):
             ctx.debug("unrecognized language name at top-level {!r}"
                       .format(lang))
             continue
-        if config.capture_languages and lang not in config.capture_languages:
-            continue
         lang_code = LANGUAGE_SUBTITLES[lang]
+        if config.capture_language_codes and lang_code not in config.capture_language_codes:
+            continue
         ctx.start_section(lang)
 
         # Collect all words from the page.

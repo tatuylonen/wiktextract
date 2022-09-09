@@ -24,7 +24,7 @@ class WiktionaryConfig(object):
     """This class holds configuration data for Wiktionary parsing."""
 
     __slots__ = (
-        "capture_languages",
+        "capture_language_codes",
         "capture_translations",
         "capture_pronunciation",
         "capture_linkages",
@@ -48,7 +48,7 @@ class WiktionaryConfig(object):
     )
 
     def __init__(self,
-                 capture_languages=["English", "Translingual"],
+                 capture_language_codes=["en", "mul"],
                  capture_translations=True,
                  capture_pronunciation=True,
                  capture_linkages=True,
@@ -59,19 +59,19 @@ class WiktionaryConfig(object):
                  capture_inflections=True,
                  verbose=False,
                  expand_tables=False):
-        if capture_languages is not None:
-            assert isinstance(capture_languages, (list, tuple, set))
-            for x in capture_languages:
+        if capture_language_codes is not None:
+            assert isinstance(capture_language_codes, (list, tuple, set))
+            for x in capture_language_codes:
                 assert isinstance(x, str)
-        assert (capture_languages is None or
-                isinstance(capture_languages, (list, tuple, set)))
+        assert (capture_language_codes is None or
+                isinstance(capture_language_codes, (list, tuple, set)))
         assert capture_translations in (True, False)
         assert capture_pronunciation in (True, False)
         assert capture_linkages in (True, False)
         assert capture_compounds in (True, False)
         assert capture_redirects in (True, False)
         assert capture_etymologies in (True, False)
-        self.capture_languages = capture_languages
+        self.capture_language_codes = capture_language_codes
         self.capture_translations = capture_translations
         self.capture_pronunciation = capture_pronunciation
         self.capture_linkages = capture_linkages
@@ -98,7 +98,7 @@ class WiktionaryConfig(object):
 
     def to_kwargs(self):
         return {
-            "capture_languages": self.capture_languages,
+            "capture_language_codes": self.capture_language_codes,
             "capture_translations": self.capture_translations,
             "capture_pronunciation": self.capture_pronunciation,
             "capture_linkages": self.capture_linkages,

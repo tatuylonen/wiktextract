@@ -16,7 +16,7 @@ class PageTests(unittest.TestCase):
         self.ctx = Wtp()
         self.ctx.analyze_templates()
         self.ctx.start_page("testpage")
-        self.config = WiktionaryConfig(capture_languages=None,
+        self.config = WiktionaryConfig(capture_language_codes=None,
                                        capture_translations=True,
                                        capture_pronunciation=True,
                                        capture_linkages=True,

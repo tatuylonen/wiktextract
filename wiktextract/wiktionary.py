@@ -109,10 +109,10 @@ def parse_wiktionary(ctx, path, config, word_cb, capture_cb,
     assert callable(word_cb)
     assert capture_cb is None or callable(capture_cb)
     assert phase1_only in (True, False)
-    languages = config.capture_languages
-    if languages is not None:
-        assert isinstance(languages, (list, tuple, set))
-        for x in languages:
+    capture_language_codes = config.capture_language_codes
+    if capture_language_codes is not None:
+        assert isinstance(capture_language_codes, (list, tuple, set))
+        for x in capture_language_codes:
             assert isinstance(x, str)
 
     config_kwargs = config.to_kwargs()

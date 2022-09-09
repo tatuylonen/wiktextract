@@ -42,11 +42,9 @@ class LongTests(unittest.TestCase):
         path = "tests/test-pages-articles.xml.bz2"
         print("Parsing test data")
         ctx = Wtp()
-        config = WiktionaryConfig(capture_languages=["English", "Finnish",
-                                                     "Spanish", "German",
-                                                     "Chinese", "Japanese",
-                                                     "Italian", "Portuguese",
-                                                     "Translingual"],
+        config = WiktionaryConfig(capture_language_codes=["en", "fi", "es",
+                                                          "de", "zh", "ja",
+                                                          "it", "pt", "mul"],
                                   capture_translations=True,
                                   capture_pronunciation=True,
                                   capture_linkages=True,

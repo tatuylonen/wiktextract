@@ -115,7 +115,8 @@ data into Python requires about 120 GB of memory.  It is much easier to
 process the data line-by-line, especially if you are only interested
 in a part of the information.  You can easily read the files using the
 following code:
-```
+
+```python
 import json
 ...
 with open("filename.json", "r", encoding="utf-8") as f:
@@ -125,7 +126,8 @@ with open("filename.json", "r", encoding="utf-8") as f:
 
 If you want to collect all the data into a list, you can read the file
 into a list with:
-```
+
+```python
 import json
 ...
 lst = []
@@ -136,13 +138,15 @@ with open("filename.json", "r", encoding="utf-8") as f:
 ```
 
 You can also easily pretty-print the data into a more human-readable form using:
-```
+
+```python
 print(json.dumps(data, indent=2, sort_keys=True))
 ```
 
 Here is a pretty-printed example of an extracted word entry for the
 word ``thrill`` as an English verb (only one part-of-speech is shown here):
-```
+
+```python
 {
   "categories": [
     "Emotions"
@@ -417,13 +421,13 @@ the ``wikitextprocessor`` module.
 
 This code can be called from an application as follows:
 
-```
+```python
 from wiktextract import (WiktionaryConfig, parse_wiktionary, parse_page,
                          PARTS_OF_SPEECH)
 from wikitextprocessor import Wtp, ALL_LANGUAGES
 
 config = WiktionaryConfig(
-             capture_languages=["English", "Translingual"],
+             capture_language_codes=["en", "mul"],
              capture_translations=True,
              capture_pronunciation=True,
              capture_linkages=True,
@@ -509,8 +513,9 @@ from Wiktionary and is also used for collecting statistics during
 extraction.
 
 The constructor is called as:
-```
-WiktionaryConfig(capture_languages=["English", "Translingual",
+
+```python
+WiktionaryConfig(capture_language_codes=["en", "mul",
                  capture_translations=True,
                  capture_pronunciation=True,
                  capture_linkages=True,
@@ -522,11 +527,9 @@ WiktionaryConfig(capture_languages=["English", "Translingual",
 ```
 
 The arguments are as follows:
-* ``capture_languages`` (list/tuple/set of strings) - names of
-  languages for which to capture data.  It defaults to ``["English",
-  "Translingual"]``.  To capture all languages, one can use
-  ``set(x["name"] for x in ALL_LANGUAGES)`` (with ``ALL_LANGUAGES``
-  imported from wikitextprocessor).
+* ``capture_language_codes`` (list/tuple/set of strings) - codes of
+  languages for which to capture data.  It defaults to ``["en",
+  "mul"]``. To capture all languages, set it to `None`.
 * ``capture_translations`` (boolean) - set to ``False`` to disable capturing
   translations.  Translation information seems to be most
   widely available for the English language, which has translations into
