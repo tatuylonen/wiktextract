@@ -21,8 +21,6 @@ from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.clean import clean_value
 from wiktextract.table_headers_heuristics_data import (
                                     LANGUAGES_WITH_CELLS_AS_HEADERS)
-from wiktextract.row_and_column_tags import (rowtag_replacements,
-                                             coltag_replacements,)
 
 
 # Set this to a word form to debug how that is analyzed, or None to disable
@@ -289,6 +287,9 @@ lang_specific = {
         "parentheses_for_informal": False,
         "square_brackets_for_rare": False,
         "curly_brackets_for_archaic": False,
+        # See Swahili; replace tags with others when in a row or column
+        "rowtag_replacements": None,
+        "coltag_replacements": None,
     },
     "austronesian-group": {
         "numbers": ["singular", "dual", "plural"],
@@ -763,6 +764,40 @@ lang_specific = {
     },
     "Swahili": {
         "next": "bantu-group",
+        
+    # In certain cases, what 'direction' a header is pointing changes its
+    # meaning, like with Swahili: there, "c5" means subject concord
+    # (subject is class five) when the header is in a column, and object concord
+    # (OBJECT is class five) when the header is at the start of a row, in the
+    # same table. The only way to distinguish these is by direction, which we do
+    # using the tables here to make explicit replacements of tags in certain
+    # languages when they're the row or column header, in
+    # inflection.py/replace_directional_tags() and rows after around 2490.
+        "rowtag_replacements": {
+            "class-1": "object-class-1",
+            "class-2": "object-class-2",
+            "class-3": "object-class-3",
+            "class-4": "object-class-4",
+            "class-5": "object-class-5",
+            "class-6": "object-class-6",
+            "class-7": "object-class-7",
+            "class-8": "object-class-8",
+            "class-9": "object-class-9",
+            "class-10": "object-class-10",
+            "class-11": "object-class-11",
+            "class-12": "object-class-12",
+            "class-13": "object-class-13",
+            "class-14": "object-class-14",
+            "class-15": "object-class-15",
+            "class-16": "object-class-16",
+            "class-17": "object-class-17",
+            "class-18": "object-class-18",
+            "first-person": "object-first-person",
+            "second-person": "object-second-person",
+            "third-person": "object-third-person",
+            "singular": "object-singular",
+            "plural": "object-plural",
+            },
     },
     "Swedish": {
         "hdr_expand_first": set(["referent"]),
@@ -2495,13 +2530,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 # it is a row or column header. Depending on the language,
                 # we replace certain tags with others if they're in
                 # a column or row
-                rtagreplacs = None
-                ctagreplacs = None
-                if lang in (rowtag_replacements):
-                    rtagreplacs = rowtag_replacements[lang]
-                if lang in (coltag_replacements):
-                    ctagreplacs = coltag_replacements[lang]
-                
+                rtagreplacs = get_lang_specific(lang, "rowtag_replacements")
+                ctagreplacs = get_lang_specific(lang, "coltag_replacements")
                 for rt in sorted(rowtags):
                     # if lang was in rowtag_replacements)
                     if not rtagreplacs == None:
