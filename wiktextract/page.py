@@ -24,7 +24,7 @@ from .unsupported_titles import unsupported_title_map
 from .datautils import (data_append, data_extend, split_at_comma_semi,
                         languages_by_name, languages_by_code)
 from .tags import valid_tags
-from .subtitles import LANGUAGE_SUBTITLES, LINKAGE_SUBTITLES, POS_SUBTITLES, OTHER_SUBTITLES
+
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_qualifier,
     parse_pronunciation_tags, distw,
@@ -63,16 +63,6 @@ def init_subtitles(language_code: str) -> dict[str, str]:
 
     return LANGUAGE_SUBTITLES
 
-
-# Subsections with these titles are ignored.
-ignored_section_titles = (
-    "Anagrams", "Further reading", "References",
-    "Quotations", "Descendants")
-
-# Subsections with these titles contain inflection (conjugation, declension)
-# information
-inflection_section_titles = (
-    "Declension", "Conjugation", "Inflection", "Mutation")
 
 # Matches head tag
 head_tag_re = re.compile(r"^(head|Han char|arabic-noun|arabic-noun-form|"
@@ -2679,11 +2669,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
             elif t == OTHER_SUBTITLES["translations"]:
                 data = select_data()
                 parse_translations(data, node)
-            elif t in ignored_section_titles:
+            elif t in OTHER_SUBTITLES["ignored_sections"]:
                 # XXX does the Descendants section have something we'd like
                 # to capture?
                 pass
-            elif t in inflection_section_titles:
+            elif t in OTHER_SUBTITLES["inflection_sections"]:
                 parse_inflection(node, t, pos)
             else:
                 lst = t.split()
@@ -2861,9 +2851,9 @@ def fix_subtitle_hierarchy(ctx, text):
             level = 5
         elif lc in LINKAGE_SUBTITLES or lc == OTHER_SUBTITLES["compounds"]:
             level = 5
-        elif title in inflection_section_titles:
+        elif title in OTHER_SUBTITLES["inflection_sections"]:
             level = 5
-        elif title in ignored_section_titles:
+        elif title in OTHER_SUBTITLES["ignored_sections"]:
             level = 5
         else:
             level = 6
