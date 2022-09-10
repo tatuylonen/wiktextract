@@ -2654,8 +2654,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             t = t.lower()
             config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
-            if t.startswith(OTHER_SUBTITLES["pronunciation"]):
-                if t.startswith(OTHER_SUBTITLES["pronunciation"] + " "):
+            if t.startswith(tuple(OTHER_SUBTITLES["pronunciation"])):
+                if t.startswith(tuple(pron_title + " " for pron_title in OTHER_SUBTITLES["pronunciation"])):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
                     push_etym()
@@ -2671,7 +2671,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                         base_data,
                                         lang_code,
                                         )
-            elif t.startswith(OTHER_SUBTITLES["etymology"]):
+            elif t.startswith(tuple(OTHER_SUBTITLES["etymology"])):
                 push_etym()
                 ctx.start_subsection(None)
                 if config.capture_etymologies:
@@ -2848,12 +2848,12 @@ def fix_subtitle_hierarchy(ctx, text):
                 ctx.debug("subtitle has language name {} at level {}"
                           .format(title, level))
             level = 2
-        elif lc.startswith(OTHER_SUBTITLES["etymology"]):
+        elif lc.startswith(tuple(OTHER_SUBTITLES["etymology"])):
             if level > 3:
                 ctx.debug("etymology section {} at level {}"
                           .format(title, level))
             level = 3
-        elif lc.startswith(OTHER_SUBTITLES["pronunciation"]):
+        elif lc.startswith(tuple(OTHER_SUBTITLES["pronunciation"])):
             level = 3
         elif lc in POS_SUBTITLES:
             level = 4

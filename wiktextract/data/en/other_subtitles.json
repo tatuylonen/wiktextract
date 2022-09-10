@@ -1,8 +1,8 @@
 {
   "compounds": "compounds"
-  "etymology": "etymology",
+  "etymology": ["etymology"],
   "ignored_sections": ["Anagrams", "Further reading", "References", "Quotations", "Descendants"],
   "inflection_section": ["Declension", "Conjugation", "Inflection", "Mutation"],
-  "pronunciation": "pronunciation",
+  "pronunciation": ["pronunciation"],
   "translations": "translations"
 }

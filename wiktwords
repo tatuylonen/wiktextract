@@ -194,7 +194,7 @@ if __name__ == "__main__":
         args.language = ["en", "mul"]
     else:
         for x in args.language:
-            if x not in all_langs:
+            if x not in all_langs.values():
                 print("Invalid language:", x)
                 sys.exit(1)
 

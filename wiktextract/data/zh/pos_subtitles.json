@@ -26,15 +26,13 @@
     "形容詞": {
       "pos": "adj"
     },
-    "adjectuve": {
-      "pos": "adj",
-      "debug": "misspelled subtitle"
-    },
-    "adjectives": {
-      "pos": "adj",
-      "debug": "usually used in singular"
+    "形容词": {
+      "pos": "adj"
     },
     "副詞": {
+      "pos": "adv"
+    },
+    "副词": {
       "pos": "adv"
     },
     "adverbial phrase": {
@@ -142,18 +140,11 @@
         "gerund"
       ]
     },
-    "han character": {
+    "漢字": {
       "pos": "character",
       "tags": [
         "han"
       ]
-    },
-    "han characters": {
-      "pos": "character",
-      "tags": [
-        "han"
-      ],
-      "debug": "psually used in singular"
     },
     "hanja": {
       "pos": "character",
@@ -250,37 +241,17 @@
       "pos": "clause",
       "debug": "part-of-speech Nominal nuclear clause is proscribed"
     },
-    "νoun": {
-      "pos": "noun",
-      "debug": "misspelled subtitle"
-    },
-    "nouɲ": {
-      "pos": "noun",
-      "debug": "misspelled subtitle"
-    },
     "名詞": {
       "pos": "noun"
     },
-    "noun form": {
-      "pos": "noun",
-      "debug": "part-of-speech Noun form is proscribed"
+    "名词": {
+      "pos": "noun"
     },
-    "nouns": {
-      "pos": "noun",
-      "debug": "usually in singular"
-    },
-    "noum": {
-      "pos": "noun",
-      "debug": "misspelled subtitle"
-    },
-    "number": {
+    "數詞": {
       "pos": "num",
       "tags": [
         "number"
       ]
-    },
-    "數詞": {
-      "pos": "num"
     },
     "ordinal number": {
       "pos": "adj",
@@ -392,14 +363,6 @@
     "專有名詞": {
       "pos": "name"
     },
-    "proper oun": {
-      "pos": "name",
-      "debug": "misspelled subtitle"
-    },
-    "介詞": {
-      "pos": "prep",
-      "debug": "misspelled subtitle"
-    },
     "成語": {
       "pos": "proverb"
     },
@@ -456,7 +419,7 @@
     "音節": {
       "pos": "syllable"
     },
-    "symbol": {
+    "符號": {
       "pos": "symbol"
     },
     "及物动词": {
@@ -466,6 +429,9 @@
       ]
     },
     "動詞": {
+      "pos": "verb"
+    },
+    "动词": {
       "pos": "verb"
     },
     "verb form": {
