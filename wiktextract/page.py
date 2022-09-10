@@ -6,29 +6,23 @@ import re
 import sys
 import copy
 import html
-import urllib
-import hashlib
 import json
 import collections
 from pathlib import Path
 
-from wikitextprocessor import (Wtp, WikiNode, NodeKind, ALL_LANGUAGES,
-                               MAGIC_FIRST, MAGIC_LAST)
+from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
 from .parts_of_speech import part_of_speech_map, PARTS_OF_SPEECH
 from .config import WiktionaryConfig
 from .linkages import parse_linkage_item_text
 from .translations import parse_translation_item_text
 from .clean import clean_value, clean_template_args
-from .places import place_prefixes  # XXX move processing to places.py
 from .unsupported_titles import unsupported_title_map
-from .datautils import (data_append, data_extend, split_at_comma_semi,
-                        languages_by_name, languages_by_code)
+from .datautils import data_append, data_extend, languages_by_code
 from .tags import valid_tags
 
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_qualifier,
-    parse_pronunciation_tags, distw,
-    parse_alt_or_inflection_of, classify_desc)
+    distw, parse_alt_or_inflection_of, classify_desc)
 from wiktextract.inflection import parse_inflection_section
 
 # NodeKind values for subtitles

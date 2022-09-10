@@ -6,7 +6,7 @@
 import re
 import time
 import collections
-from wikitextprocessor import Wtp, NodeKind, WikiNode, ALL_LANGUAGES
+from wikitextprocessor import Wtp, NodeKind, WikiNode
 from .parts_of_speech import part_of_speech_map
 from .page import (linkage_map, linkage_inverses, clean_node,
                    LEVEL_KINDS)

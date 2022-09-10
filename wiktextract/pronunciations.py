@@ -6,19 +6,11 @@ import hashlib
 from pathlib import Path
 
 from .page import clean_node, is_panel_template
-from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
-from .datautils import (split_at_comma_semi, data_append, data_extend,
-                        languages_by_name, languages_by_code)
+from wikitextprocessor import WikiNode, NodeKind
+from .datautils import split_at_comma_semi, data_append
 from .form_descriptions import parse_pronunciation_tags, classify_desc
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
                NodeKind.LEVEL5, NodeKind.LEVEL6)
-from .zh_pron_tags import zh_pron_tags
-from .tags import valid_tags
-
-for k, lst in zh_pron_tags.items():
-    for tag in lst:
-        if tag not in valid_tags:
-            print("UNDEFINED TAG IN zh_pron_tags", k, tag)
 
 # Prefixes, tags, and regexp for finding romanizations from the pronuncation
 # section
