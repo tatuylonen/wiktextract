@@ -1223,7 +1223,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     roman = ""
                     # for line in lines:
                     #     print("LINE:", repr(line))
-                    if len(lines) == 1 and language != "English":
+                    if len(lines) == 1 and lang_code != "en":
                         parts = re.split(r"\s*[―—]+\s*", lines[0])
                         if (len(parts) == 2 and
                             classify_desc(parts[1]) == "english"):
@@ -1254,7 +1254,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                     break
                             ref = " ".join(ref)
                             lines = lines[i + 1:]
-                            if (language != "English" and len(lines) >= 2 and
+                            if (lang_code != "en" and len(lines) >= 2 and
                                 classify_desc(lines[-1]) == "english"):
                                 i = len(lines) - 1
                                 while (i > 1 and
@@ -1264,11 +1264,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 tr = "\n".join(lines[i:])
                                 lines = lines[:i]
 
-                        elif (language == "English" and
+                        elif (lang_code == "en" and
                               re.match(r"^[#*]*:+", lines[1])):
                             ref = lines[0]
                             lines = lines[1:]
-                        elif language != "English" and len(lines) == 2:
+                        elif lang_code != "en" and len(lines) == 2:
                             cls1 = classify_desc(lines[0])
                             cls2 = classify_desc(lines[1])
                             if cls2 == "english" and cls1 != "english":
@@ -1289,7 +1289,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 tr = lines[1]
                                 lines = [lines[0]]
                         elif (usex_type == "quotation" and
-                              language != "English" and len(lines) > 2):
+                              lang_code != "en" and len(lines) > 2):
                             # for x in lines:
                             #     print("  LINE: {}: {}"
                             #           .format(classify_desc(x), x))
@@ -1319,7 +1319,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     ref = re.sub(r"\[\s*…\s*\]", "[…]", ref)
                     lines = list(re.sub(r"^[#*:]+\s*", "", x) for x in lines)
                     subtext = "\n".join(x for x in lines if x)
-                    if not tr and language != "English":
+                    if not tr and lang_code != "en":
                         m = re.search(r"([.!?])\s+\(([^)]+)\)\s*$", subtext)
                         if m and classify_desc(m.group(2)) == "english":
                             tr = m.group(2)
@@ -1342,7 +1342,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     subtext = re.sub(r"\[\s*…\s*\]", "[…]", subtext)
                     note = None
                     m = re.match(r"^\(([^)]*)\):\s+", subtext)
-                    if (m is not None and language != "English" and
+                    if (m is not None and lang_code != "en" and
                         (m.group(1).startswith("with ") or
                          classify_desc(m.group(1)) == "english")):
                         note = m.group(1)
@@ -1540,8 +1540,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             split_glosses.append(gloss[pos:])
             for gloss in split_glosses:
                 # Check if this gloss describes an alt-of or inflection-of
-                if ((language != "English" and gloss.find(" ") < 0 and
-                     distw([word], gloss) < 0.3)):
+                if (lang_code != "en" and " " not in gloss and distw([word], gloss) < 0.3):
                     # Don't try to parse gloss it is one word
                     # that is close to the word itself for non-English words
                     # (probable translations of a tag/form name)
