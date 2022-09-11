@@ -25,19 +25,18 @@ from wiktextract import (WiktionaryConfig, parse_wiktionary,
                          extract_namespace)
 from wiktextract import extract_thesaurus_data
 from wiktextract import extract_categories
-from wiktextract import init_subtitles, init_zh_pron_tags
 
 # Pages whose titles have any of these prefixes are ignored.
-ignore_prefixes = set(["Index", "Help", "MediaWiki", "Citations",
-                       "Concordance", "Rhymes", "Thread",
-                       "Summary", "File",
-                       "Transwiki",
-                       "Wikcionario",
-])
+ignore_prefixes = {"Index", "Help", "MediaWiki", "Citations",
+                   "Concordance", "Rhymes", "Thread",
+                   "Summary", "File",
+                   "Transwiki",
+                   "Wikcionario",
+}
 
 # Pages with these prefixes are captured.
-recognized_prefixes = set(["Category", "Appendix", "Wiktionary",
-                           "Thesaurus", "Module", "Template"])
+recognized_prefixes = {"Category", "Appendix", "Wiktionary",
+                       "Thesaurus", "Module", "Template"}
 
 
 def capture_page(model, orig_title, text, pages_dir):
@@ -161,9 +160,6 @@ if __name__ == "__main__":
                         help="Extract expanded tables in this file (for test data)")
     args = parser.parse_args()
 
-    all_langs = init_subtitles(args.dump_file_language_code)
-    init_zh_pron_tags(args.dump_file_language_code)
-
     # The --all option turns on capturing all data types
     if args.all and (not args.pages_dir or args.out):
         args.translations = True
@@ -175,28 +171,9 @@ if __name__ == "__main__":
         args.etymologies = True
         args.inflections = True
 
-    # If --list-languages has been specified, just print the list of supported
-    # languages
-    if args.list_languages:
-        print("Supported languages:")
-        for lang_name, lang_code in all_langs:
-            print(f"    {lang_name}: {lang_code}")
-        sys.exit(0)
-
-    if not args.path and not args.cache:
-        print("The PATH argument for wiktionary dump file is normally "
-              "mandatory.")
-        print("Alternatively, --cache with --page can be used.")
-        sys.exit(1)
-
     # Default to English and Translingual if language not specified.
     if not args.language:
         args.language = ["en", "mul"]
-    else:
-        for x in args.language:
-            if x not in all_langs.values():
-                print("Invalid language:", x)
-                sys.exit(1)
 
     if args.all_languages:
         args.language = None
@@ -209,6 +186,39 @@ if __name__ == "__main__":
         if multiprocessing.get_start_method() == "spawn":
             print("--num-threads not supported on this OS (no stable implementation of fork() available)")
             sys.exit(1)
+
+    config = WiktionaryConfig(dump_file_lang_code=args.dump_file_language_code,
+                              capture_language_codes=args.language,
+                              capture_translations=args.translations,
+                              capture_pronunciation=args.pronunciations,
+                              capture_linkages=args.linkages,
+                              capture_compounds=args.compounds,
+                              capture_redirects=args.redirects,
+                              capture_examples=args.examples,
+                              capture_etymologies=args.etymologies,
+                              capture_inflections=args.inflections,
+                              verbose=args.verbose,
+                              expand_tables=args.inflection_tables_file,)
+
+    # If --list-languages has been specified, just print the list of supported
+    # languages
+    if args.list_languages:
+        print("Supported languages:")
+        for lang_name, lang_code in config.LANGUAGE_SUBTITLES.items():
+            print(f"    {lang_name}: {lang_code}")
+        sys.exit(0)
+
+    if args.language:
+        for x in args.language:
+            if x not in config.LANGUAGE_CODES:
+                print("Invalid language:", x)
+                sys.exit(1)
+
+    if not args.path and not args.cache:
+        print("The PATH argument for wiktionary dump file is normally "
+              "mandatory.")
+        print("Alternatively, --cache with --page can be used.")
+        sys.exit(1)
 
     # Open output file.
     out_path = args.out
@@ -233,7 +243,6 @@ if __name__ == "__main__":
     # problem that it is not properly reset).  Override that debugging module
     # to be empty.
     ctx.add_page("Scribunto", "Module:no globals", "", transient=True)
-
 
     if args.override:
         for path in args.override:
@@ -268,17 +277,6 @@ if __name__ == "__main__":
     def capture_cb(model, title, text):
         return capture_page(model, title, text, args.pages_dir)
 
-    config = WiktionaryConfig(capture_language_codes=args.language,
-                              capture_translations=args.translations,
-                              capture_pronunciation=args.pronunciations,
-                              capture_linkages=args.linkages,
-                              capture_compounds=args.compounds,
-                              capture_redirects=args.redirects,
-                              capture_examples=args.examples,
-                              capture_etymologies=args.etymologies,
-                              capture_inflections=args.inflections,
-                              verbose=args.verbose,
-                              expand_tables=args.inflection_tables_file,)
     # load redirects to ctx if given
     if args.redirects_file:
         with open(args.redirects_file) as f:
@@ -387,9 +385,7 @@ if __name__ == "__main__":
                 }, f, sort_keys=True, indent=2)
 
     def dump_un(title, limit, counts, samples):
-        items = []
         counts_ht = {}
-        samples_ht = {}
         for k, v in counts.items():
             counts_ht[k] = v
         lst = list(sorted(counts_ht.items(), reverse=True,
@@ -403,7 +399,6 @@ if __name__ == "__main__":
                         print("        {}".format(sample))
 
     def dump_val(title, limit, counts):
-        items = []
         counts_ht = collections.defaultdict(int)
         for la, la_val in counts.items():
             for name, name_val in la_val.items():

@@ -6,12 +6,10 @@ import re
 import sys
 import copy
 import html
-import json
 import collections
-from pathlib import Path
 
 from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
-from .parts_of_speech import part_of_speech_map, PARTS_OF_SPEECH
+from .parts_of_speech import PARTS_OF_SPEECH
 from .config import WiktionaryConfig
 from .linkages import parse_linkage_item_text
 from .translations import parse_translation_item_text
@@ -28,35 +26,6 @@ from wiktextract.inflection import parse_inflection_section
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
                NodeKind.LEVEL5, NodeKind.LEVEL6)
-
-LANGUAGE_SUBTITLES = None
-LINKAGE_SUBTITLES = None
-POS_SUBTITLES = None
-OTHER_SUBTITLES = None
-
-
-def init_subtitles(language_code: str) -> dict[str, str]:
-    global LANGUAGE_SUBTITLES
-    global LINKAGE_SUBTITLES
-    global POS_SUBTITLES
-    global OTHER_SUBTITLES
-
-    data_folder = Path(__file__).parent.joinpath(f"data/{language_code}")
-
-    with data_folder.joinpath("language_subtitles.json").open(encoding="utf-8") as f:
-        LANGUAGE_SUBTITLES = json.load(f)
-
-    with data_folder.joinpath("linkage_subtitles.json").open(encoding="utf-8") as f:
-        LINKAGE_SUBTITLES = json.load(f)
-
-    with data_folder.joinpath("pos_subtitles.json").open(encoding="utf-8") as f:
-        POS_SUBTITLES = json.load(f)
-
-    with data_folder.joinpath("other_subtitles.json").open(encoding="utf-8") as f:
-        OTHER_SUBTITLES = json.load(f)
-
-    return LANGUAGE_SUBTITLES
-
 
 # Matches head tag
 head_tag_re = re.compile(r"^(head|Han char|arabic-noun|arabic-noun-form|"
@@ -228,7 +197,7 @@ head_tag_re = re.compile(r"^(head|Han char|arabic-noun|arabic-noun-form|"
                          r")(-|/|\+|$)")
 
 # Additional templates to be expanded in the pre-expand phase
-additional_expand_templates = set([
+additional_expand_templates = {
     "multitrans",
     "multitrans-nowiki",
     "col1",
@@ -248,7 +217,7 @@ additional_expand_templates = set([
     "ru-adj-alt-ё",
     "ru-proper noun-alt-ё",
     "ru-pos-alt-ё",
-])
+}
 
 # Mapping from subtitle to linkage field
 linkage_map = {
@@ -317,7 +286,7 @@ linkage_fields = list(sorted(set(linkage_map.values())))
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
-panel_templates = set([
+panel_templates = {
     "Character info",
     "CJKV",
     "French personal pronouns",
@@ -431,7 +400,7 @@ panel_templates = set([
     "wrongtitle",
     "zh-forms",
     "zh-hanzi-box",
-])
+}
 
 # lookup table for the tags of Chinese dialectal synonyms
 zh_tag_lookup = {
@@ -452,7 +421,7 @@ panel_prefixes = [
 ]
 
 # Templates used for wikipedia links.
-wikipedia_templates = set([
+wikipedia_templates = {
     "wikipedia",
     "slim-wikipedia",
     "w",
@@ -461,7 +430,7 @@ wikipedia_templates = set([
     "wiki",
     "Wikipedia",
     "wtorw",
-])
+}
 for x in panel_templates & wikipedia_templates:
     print("WARNING: {!r} in both panel_templates and wikipedia_templates"
           .format(x))
@@ -472,7 +441,6 @@ for x in panel_templates & wikipedia_templates:
 # warnings about probably incorrect coding in Wiktionary.
 template_allowed_pos_map = {
     "abbr": ["abbrev"],
-    "abbr": ["abbrev"],
     "noun": ["noun", "abbrev", "pron", "name", "num", "adj_noun"],
     "plural noun": ["noun", "name"],
     "plural-noun": ["noun", "name"],
@@ -481,9 +449,7 @@ template_allowed_pos_map = {
     "prop": ["name", "noun"],
     "verb": ["verb", "phrase"],
     "gerund": ["verb"],
-    "adv": ["adv"],
     "particle": ["adv", "particle"],
-    "part-form": ["adv", "particle"],
     "adj": ["adj", "adj_noun"],
     "pron": ["pron", "noun"],
     "name": ["name", "noun"],
@@ -501,7 +467,6 @@ template_allowed_pos_map = {
     "interj": ["intj"],
     "con": ["conj"],
     "part": ["particle"],
-    "part-form": ["participle"],
     "prep": ["prep", "postp"],
     "postp": ["postp"],
     "misspelling": ["noun", "adj", "verb", "adv"],
@@ -569,7 +534,7 @@ starts_lang_re = re.compile(
 # Set of template names that are used to define usage examples.  If the usage
 # example contains one of these templates, then it its type is set to
 # "example"
-usex_templates = set([
+usex_templates = {
     "afex",
     "affixusex",
     "el-example",
@@ -609,12 +574,12 @@ usex_templates = set([
     "uxi",
     "zh-usex",
     "zh-x",
-])
+}
 
 # Set of template names that are used to define quotation examples.  If the
 # usage example contains one of these templates, then its type is set to
 # "quotation".
-quotation_templates = set([
+quotation_templates = {
     "collapse-quote",
     "quote-av",
     "quote-book",
@@ -635,7 +600,7 @@ quotation_templates = set([
     "quote-wikipedia",
     "wikiquote",
     "Wikiquote",
-])
+}
 
 
 def parse_sense_XXXold_going_away(config, data, text, use_text):
@@ -2064,7 +2029,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             text = ctx.node_to_wikitext(node)
             parsed = ctx.parse(text, expand_all=True,
                                template_fn=linkage_template_fn)
-            parse_linkage_recurse(parsed.children, field, Node)
+            parse_linkage_recurse(parsed.children, field, None)
 
         def parse_linkage_recurse(contents, field, sense):
             assert isinstance(contents, (list, tuple))
@@ -2258,7 +2223,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         text = ctx.node_to_wikitext(linkagenode.children)
         parsed = ctx.parse(text, expand_all=True,
                            template_fn=linkage_template_fn1)
-        if field == "synonyms" and language == "Chinese":
+        if field == "synonyms" and lang_code == "zh":
             synonyms = []
             if contains_kind(parsed.children, NodeKind.LIST):
                 parse_zh_synonyms_list(parsed.children, synonyms, [], "")
@@ -2405,11 +2370,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                   "{{see translation subpage|...}}")
                         return
 
-                    if sub.lower() in part_of_speech_map:
+                    if sub.lower() in config.POS_SUBTITLES:
                         seq = [language, sub, "Translations"]
                     else:
                         pos = ctx.subsection
-                        if pos.lower() not in part_of_speech_map:
+                        if pos.lower() not in config.POS_SUBTITLES:
                             ctx.debug("unhandled see translation subpage: "
                                       "language={} sub={} ctx.subsection={}"
                                       .format(language, sub, ctx.subsection))
@@ -2528,7 +2493,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                   "page instead "
                                   "of normal {{see translation subpage|...}}")
                         sub = ctx.subsection
-                        if sub.lower() in part_of_speech_map:
+                        if sub.lower() in config.POS_SUBTITLES:
                             seq = [language, sub, "Translations"]
                             subnode = get_subpage_section(ctx.title,
                                                           "translations", seq)
@@ -2637,8 +2602,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             t = t.lower()
             config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
-            if t.startswith(tuple(OTHER_SUBTITLES["pronunciation"])):
-                if t.startswith(tuple(pron_title + " " for pron_title in OTHER_SUBTITLES["pronunciation"])):
+            if t.startswith(tuple(config.OTHER_SUBTITLES["pronunciation"])):
+                if t.startswith(tuple(pron_title + " " for pron_title in config.OTHER_SUBTITLES["pronunciation"])):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
                     push_etym()
@@ -2654,28 +2619,28 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                         base_data,
                                         lang_code,
                                         )
-            elif t.startswith(tuple(OTHER_SUBTITLES["etymology"])):
+            elif t.startswith(tuple(config.OTHER_SUBTITLES["etymology"])):
                 push_etym()
                 ctx.start_subsection(None)
                 if config.capture_etymologies:
                     parse_etymology(etym_data, node)
-            elif t == OTHER_SUBTITLES["translations"]:
+            elif t == config.OTHER_SUBTITLES["translations"]:
                 data = select_data()
                 parse_translations(data, node)
-            elif t in OTHER_SUBTITLES["ignored_sections"]:
+            elif t in config.OTHER_SUBTITLES["ignored_sections"]:
                 # XXX does the Descendants section have something we'd like
                 # to capture?
                 pass
-            elif t in OTHER_SUBTITLES["inflection_sections"]:
+            elif t in config.OTHER_SUBTITLES["inflection_sections"]:
                 parse_inflection(node, t, pos)
             else:
                 lst = t.split()
                 while len(lst) > 1 and lst[-1].isdigit():
                     lst = lst[:-1]
                 t_no_number = " ".join(lst).lower()
-                if t_no_number in POS_SUBTITLES:
+                if t_no_number in config.POS_SUBTITLES:
                     push_pos()
-                    dt = POS_SUBTITLES[t_no_number]
+                    dt = config.POS_SUBTITLES[t_no_number]
                     pos = dt["pos"]
                     ctx.start_subsection(t)
                     if "debug" in dt:
@@ -2692,11 +2657,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if "tags" in dt:
                         for pdata in pos_datas:
                             data_extend(ctx, pdata, "tags", dt["tags"])
-                elif t_no_number in LINKAGE_SUBTITLES:
-                    rel = LINKAGE_SUBTITLES[t_no_number]
+                elif t_no_number in config.LINKAGE_SUBTITLES:
+                    rel = config.LINKAGE_SUBTITLES[t_no_number]
                     data = select_data()
                     parse_linkage(data, rel, node)
-                elif t_no_number == OTHER_SUBTITLES["compounds"]:
+                elif t_no_number == config.OTHER_SUBTITLES["compounds"]:
                     data = select_data()
                     if config.capture_compounds:
                         parse_linkage(data, "derived", node)
@@ -2798,7 +2763,7 @@ def parse_top_template(config, ctx, node, data):
     clean_node(config, ctx, None, [node], template_fn=top_template_fn)
 
 
-def fix_subtitle_hierarchy(ctx, text):
+def fix_subtitle_hierarchy(ctx: Wtp, config: WiktionaryConfig, text: str) -> str:
     """Fix subtitle hierarchy to be strict Language -> Etymology ->
     Part-of-Speech -> Translation/Linkage."""
     assert isinstance(ctx, Wtp)
@@ -2826,27 +2791,27 @@ def fix_subtitle_hierarchy(ctx, text):
                       "{!r} has {} on the left and {} on the right"
                       .format(title, left, right))
         lc = title.lower()
-        if title in LANGUAGE_SUBTITLES:
+        if title in config.LANGUAGE_SUBTITLES:
             if level > 2:
                 ctx.debug("subtitle has language name {} at level {}"
                           .format(title, level))
             level = 2
-        elif lc.startswith(tuple(OTHER_SUBTITLES["etymology"])):
+        elif lc.startswith(tuple(config.OTHER_SUBTITLES["etymology"])):
             if level > 3:
                 ctx.debug("etymology section {} at level {}"
                           .format(title, level))
             level = 3
-        elif lc.startswith(tuple(OTHER_SUBTITLES["pronunciation"])):
+        elif lc.startswith(tuple(config.OTHER_SUBTITLES["pronunciation"])):
             level = 3
-        elif lc in POS_SUBTITLES:
+        elif lc in config.POS_SUBTITLES:
             level = 4
-        elif lc == OTHER_SUBTITLES["translations"]:
+        elif lc == config.OTHER_SUBTITLES["translations"]:
             level = 5
-        elif lc in LINKAGE_SUBTITLES or lc == OTHER_SUBTITLES["compounds"]:
+        elif lc in config.LINKAGE_SUBTITLES or lc == config.OTHER_SUBTITLES["compounds"]:
             level = 5
-        elif title in OTHER_SUBTITLES["inflection_sections"]:
+        elif title in config.OTHER_SUBTITLES["inflection_sections"]:
             level = 5
-        elif title in OTHER_SUBTITLES["ignored_sections"]:
+        elif title in config.OTHER_SUBTITLES["ignored_sections"]:
             level = 5
         else:
             level = 6
@@ -2862,7 +2827,7 @@ def fix_subtitle_hierarchy(ctx, text):
     return text
 
 
-def parse_page(ctx, word, text, config):
+def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list[dict[str, str]]:
     """Parses the text of a Wiktionary page and returns a list of
     dictionaries, one for each word/part-of-speech defined on the page
     for the languages specified by ``capture_language_codes`` (None means
@@ -2895,7 +2860,7 @@ def parse_page(ctx, word, text, config):
     # pages that have, for example, Translations section under Linkage, or
     # Translations section on the same level as Noun.  Enforce a proper
     # hierarchy by manipulating the subtitle levels in certain cases.
-    text = fix_subtitle_hierarchy(ctx, text)
+    text = fix_subtitle_hierarchy(ctx, config, text)
 
     # Parse the page, pre-expanding those templates that are likely to
     # influence parsing
@@ -2921,11 +2886,11 @@ def parse_page(ctx, word, text, config):
             ctx.debug("unexpected top-level node: {}".format(langnode))
             continue
         lang = clean_node(config, ctx, None, langnode.args)
-        if lang not in LANGUAGE_SUBTITLES:
+        if lang not in config.LANGUAGE_SUBTITLES:
             ctx.debug("unrecognized language name at top-level {!r}"
                       .format(lang))
             continue
-        lang_code = LANGUAGE_SUBTITLES[lang]
+        lang_code = config.LANGUAGE_SUBTITLES.get(lang)
         if config.capture_language_codes and lang_code not in config.capture_language_codes:
             continue
         ctx.start_section(lang)
@@ -3089,8 +3054,9 @@ def parse_page(ctx, word, text, config):
             m = re.match(starts_lang_re, cat)
             if m:
                 catlang = m.group(2)
-                if (catlang != lang and
-                    not (catlang == "English" and lang == "Translingual")):
+                catlang_code = config.LANGUAGE_SUBTITLES.get(catlang)
+                if (catlang != lang and not (catlang_code == "en" and
+                                             data.get("lang_code") == "mul")):
                     continue  # Ignore categories for a different language
             new_cats.append(cat)
         if not new_cats:

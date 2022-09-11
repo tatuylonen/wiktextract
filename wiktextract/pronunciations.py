@@ -1,14 +1,14 @@
 import re
-import json
 import sys
 import urllib
 import hashlib
-from pathlib import Path
 
 from .page import clean_node, is_panel_template
 from wikitextprocessor import WikiNode, NodeKind
 from .datautils import split_at_comma_semi, data_append
 from .form_descriptions import parse_pronunciation_tags, classify_desc
+from .tags import valid_tags
+
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
                NodeKind.LEVEL5, NodeKind.LEVEL6)
 
@@ -28,16 +28,6 @@ pron_romanization_re = re.compile(
              sorted(pron_romanizations.keys(), key=lambda x: len(x),
                     reverse=True)) +
     ")([^\n]+)")
-
-ZH_PRON_TAGS = None
-
-
-def init_zh_pron_tags(lang_code: str) -> None:
-    global ZH_PRON_TAGS
-
-    data_folder = Path(__file__).parent.joinpath(f"data/{lang_code}")
-    with data_folder.joinpath("zh_pron_tags.json").open(encoding="utf-8") as f:
-        ZH_PRON_TAGS = json.load(f)
 
 
 def parse_pronunciation(ctx, config, node, data, etym_data,
@@ -59,7 +49,6 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
         data = etym_data
     enprs = []
     audios = []
-    rhymes = []
     have_panel_templates = False
 
     def parse_pronunciation_template_fn(name, ht):
@@ -214,8 +203,8 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     new_parent_hdrs.append(extra_tags)
                     for hdr in new_parent_hdrs:
                         hdr = hdr.strip()
-                        if hdr in ZH_PRON_TAGS:
-                            for tag in ZH_PRON_TAGS[hdr]:
+                        if hdr in config.ZH_PRON_TAGS:
+                            for tag in config.ZH_PRON_TAGS[hdr]:
                                 if tag not in pron["tags"]:
                                     pron["tags"].append(tag)
                         elif hdr in valid_tags:
@@ -264,7 +253,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             contents.args[0][0].strip() == "zh-pron"):
 
             src = ctx.node_to_wikitext(contents)
-            expanded = ctx.expand(src, templates_to_expand=set(["zh-pron"]))
+            expanded = ctx.expand(src, templates_to_expand={"zh-pron"})
             parsed = ctx.parse(expanded)
             parse_expanded_zh_pron(parsed, [], ut)
         else:

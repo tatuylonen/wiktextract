@@ -5,13 +5,12 @@
 from .wiktionary import (parse_wiktionary, reprocess_wiktionary,
                          extract_namespace)
 from .config import WiktionaryConfig
-from .page import clean_value, parse_page, init_subtitles
+from .page import parse_page
 from .parts_of_speech import PARTS_OF_SPEECH
 from .thesaurus import extract_thesaurus_data
 from .categories import extract_categories
 from .tags import sort_tags, tag_categories
 from .form_descriptions import valid_tags  # This file adds uppercase tags
-from .pronunciations import init_zh_pron_tags
 
 __all__ = (
     "WiktionaryConfig",
@@ -25,6 +24,4 @@ __all__ = (
     "sort_tags",
     "tag_categories",
     "valid_tags",
-    "init_subtitles",
-    "init_zh_pron_tags"
 )

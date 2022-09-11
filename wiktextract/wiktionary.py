@@ -18,7 +18,7 @@ from .datautils import data_append, languages_by_name
 
 # Title prefixes that indicate that the page is not a normal page and
 # should not be used when searching for word forms
-special_prefixes = set([
+special_prefixes = {
     "Category",
     "Module",
     "Template",
@@ -34,7 +34,7 @@ special_prefixes = set([
     "Sign gloss",  # XXX would I like to capture these too?
     "Help",
     "File",
-])
+}
 
 # Title suffixes that indicate that the page should be ignored
 ignore_suffixes = [

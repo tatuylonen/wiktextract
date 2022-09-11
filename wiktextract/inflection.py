@@ -4,7 +4,6 @@
 
 import re
 import copy
-import enum
 import html
 import functools
 import collections
@@ -13,7 +12,7 @@ from wikitextprocessor import Wtp, WikiNode, NodeKind, MAGIC_FIRST
 from wiktextract.config import WiktionaryConfig
 from wiktextract.tags import valid_tags, tag_categories
 from wiktextract.inflectiondata import infl_map, infl_start_map, infl_start_re
-from wiktextract.datautils import (data_append, data_extend, freeze,
+from wiktextract.datautils import (data_append, freeze,
                                    split_at_comma_semi, languages_by_name)
 from wiktextract.form_descriptions import (classify_desc, decode_tags,
                                            parse_head_final_tags, distw)
@@ -28,20 +27,21 @@ from wiktextract.table_headers_heuristics_data import (
 debug_cell_text = None
 
 # Column texts that are interpreted as an empty column.
-IGNORED_COLVALUES = set([
+IGNORED_COLVALUES = {
     "-", "־", "᠆", "‐", "‑", "‒", "–", "—", "―", "−",
     "⸺", "⸻", "﹘", "﹣", "－", "/", "?",
-    "not used", "not applicable"])
+    "not used", "not applicable"}
 
 # These tags are never inherited from above
-noinherit_tags = set([
+# XXX merge with lang_specific
+noinherit_tags = {
     "infinitive-i",
     "infinitive-i-long",
     "infinitive-ii",
     "infinitive-iii",
     "infinitive-iv",
     "infinitive-v",
-])
+}
 
 # Subject->object transformation mapping, when using dummy-object-concord
 # to replace subject concord tags with object concord tags
@@ -907,7 +907,7 @@ for k, v in lang_specific.items():
         if kk in ("hdr_expand_first", "hdr_expand_cont"):
             if not isinstance(vv, set):
                 raise AssertionError("{} key {!r} must be set"
-                                     .format(lang, kk))
+                                     .format(k, kk))
             for t in vv:
                 if t not in tag_categories:
                     raise AssertionError("{} key {!r} invalid tag category {}"
@@ -1856,7 +1856,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
     return coltags
 
 
-def lang_specific_tags(lang, pos, form):
+def lang_specific_tags(lang: str, pos:str, form: str, config: WiktionaryConfig) -> tuple[str, list[str]]:
     """Extracts tags from the word form itself in a language-specific way.
     This may also adjust the word form.
     For example, German inflected verb forms don't have person and number
@@ -1868,7 +1868,7 @@ def lang_specific_tags(lang, pos, form):
     rules = get_lang_specific(lang, "form_transformations")
     for patpos, pattern, dst, tags in rules:
     #   PoS, regex, replacement, tags; pattern -> dst :: "^ich " > ""
-        assert patpos in PARTS_OF_SPEECH
+        assert patpos in config.POS_TYPES
         if pos != patpos:
             continue
         m = re.search(pattern, form)
@@ -2720,7 +2720,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
 
                         # Extract language-specific tags from the
                         # form.  This may also adjust the form.
-                        form, lang_tags = lang_specific_tags(lang, pos, form)
+                        form, lang_tags = lang_specific_tags(lang, pos, form, config)
                         tags.update(lang_tags)
 
                         # For non-finite verb forms, see if they have
@@ -3407,7 +3407,7 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
     assert isinstance(data, dict)
     assert isinstance(word, str)
     assert isinstance(lang, str)
-    assert pos in PARTS_OF_SPEECH
+    assert pos in config.POS_TYPES
     assert isinstance(section, str)
     assert isinstance(tree, WikiNode)
     source = section

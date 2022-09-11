@@ -367,7 +367,7 @@ run the script.  The correct dump file the name
 
 An example of a typical invocation for extracting all data would be:
 ```
-wiktwords --all --all-languages --out data.json enwiktionary-20201201-pages-articles.xml.bz2
+wiktwords --all --all-languages --out data.json en enwiktionary-20201201-pages-articles.xml.bz2
 ```
 
 If you wish to modify the code or test processing individual pages,
@@ -377,13 +377,13 @@ the following may also be useful:
 ``pages/`` and to create a cache file that you can use for quickly
 processing individual pages:
 ```
-wiktwords --cache /tmp/wikt-cache --pages-dir pages enwiktionary-20201201-pages-articles.xml.bz2
+wiktwords --cache /tmp/wikt-cache --pages-dir pages en enwiktionary-20201201-pages-articles.xml.bz2
 ```
 
 2. To process a single page, processing a human-readable output file
 for debugging:
 ```
-wiktwords --cache /tmp/wikt-cache --all --all-languages --out outfile --page pages/Words/di/dictionary.txt
+wiktwords --cache /tmp/wikt-cache --all --all-languages --out outfile --page pages/Words/di/dictionary.txt en
 ```
 
 The following command-line options can be used to control its operation:
@@ -427,6 +427,7 @@ from wiktextract import (WiktionaryConfig, parse_wiktionary, parse_page,
 from wikitextprocessor import Wtp, ALL_LANGUAGES
 
 config = WiktionaryConfig(
+             dump_file_lang_code="en",
              capture_language_codes=["en", "mul"],
              capture_translations=True,
              capture_pronunciation=True,
@@ -515,7 +516,8 @@ extraction.
 The constructor is called as:
 
 ```python
-WiktionaryConfig(capture_language_codes=["en", "mul",
+WiktionaryConfig(dump_file_lang_code="en",
+                 capture_language_codes=["en", "mul",
                  capture_translations=True,
                  capture_pronunciation=True,
                  capture_linkages=True,

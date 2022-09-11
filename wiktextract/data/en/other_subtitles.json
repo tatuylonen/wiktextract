@@ -10,7 +10,7 @@
     "Quotations",
     "Descendants"
   ],
-  "inflection_section": [
+  "inflection_sections": [
     "Declension",
     "Conjugation",
     "Inflection",
@@ -19,5 +19,7 @@
   "pronunciation": [
     "pronunciation"
   ],
-  "translations": "translations"
+  "translations": "translations",
+  "thesaurus": "Thesaurus",
+  "sense": "Sense: "
 }
