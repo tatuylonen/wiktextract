@@ -1,451 +1,229 @@
 {
   "缩写": {
-      "pos": "abbrev",
-      "debug": "part-of-speech Abbreviation is proscribed",
-      "tags": [
-        "abbreviation"
-      ]
-    },
-    "acronym": {
-      "pos": "abbrev",
-      "debug": "part-of-speech Acronym is proscribed",
-      "tags": [
-        "abbreviation"
-      ]
-    },
-    "adjectival": {
-      "pos": "adj_noun",
-      "debug": "part-of-speech Adjectival is not valid"
-    },
-    "adjectival noun": {
-      "pos": "adj_noun"
-    },
-    "adjectival verb": {
-      "pos": "adj_verb"
-    },
-    "形容詞": {
-      "pos": "adj"
-    },
-    "形容词": {
-      "pos": "adj"
-    },
-    "副詞": {
-      "pos": "adv"
-    },
-    "副词": {
-      "pos": "adv"
-    },
-    "adverbial phrase": {
-      "pos": "adv_phrase",
-      "debug": "part-of-speech Adverbial phrase is proscribed"
-    },
-    "前缀": {
-      "pos": "affix"
-    },
-    "adjective suffix": {
-      "pos": "suffix",
-      "debug": "part-of-speech Adjective suffix is proscribed"
-    },
-    "ambiposition": {
-      "pos": "ambiposition"
-    },
-    "冠词": {
-      "pos": "article"
-    },
-    "character": {
-      "pos": "character"
-    },
-    "環綴": {
-      "pos": "circumfix",
-      "tags": [
-        "morpheme"
-      ]
-    },
-    "circumposition": {
-      "pos": "circumpos"
-    },
-    "量词‎": {
-      "pos": "classifier"
-    },
-    "clipping": {
-      "pos": "abbrev",
-      "debug": "part-of-speech Clipping is proscribed",
-      "tags": [
-        "abbreviation"
-      ]
-    },
-    "clitic": {
-      "pos": "suffix",
-      "debug": "part-of-speech Clitic is proscribed",
-      "tags": [
-        "clitic"
-      ]
-    },
-    "combining form": {
-      "pos": "combining_form",
-      "tags": [
-        "morpheme"
-      ]
-    },
-    "comparative": {
-      "pos": "adj",
-      "tags": [
-        "comparative"
-      ]
-    },
-    "連詞": {
-      "pos": "conj"
-    },
-    "contraction": {
-      "pos": "abbrev",
-      "tags": [
-        "abbreviation"
-      ]
-    },
-    "converb": {
-      "pos": "converb"
-    },
-    "counter": {
-      "pos": "counter"
-    },
-    "definitions": {
-      "pos": "character"
-    },
-    "限定詞": {
-      "pos": "det"
-    },
-    "diacritical mark": {
-      "pos": "character",
-      "tags": [
-        "diacritic"
-      ]
-    },
-    "enclitic": {
-      "pos": "suffix",
-      "tags": [
-        "clitic"
-      ]
-    },
-    "enclitic particle": {
-      "pos": "suffix",
-      "tags": [
-        "clitic"
-      ]
-    },
-    "gerund": {
-      "pos": "verb",
-      "debug": "part-of-speech Gerund is proscribed",
-      "tags": [
-        "participle",
-        "gerund"
-      ]
-    },
-    "漢字": {
-      "pos": "character",
-      "tags": [
-        "han"
-      ]
-    },
-    "hanja": {
-      "pos": "character",
-      "tags": [
-        "Hanja"
-      ]
-    },
-    "hanzi": {
-      "pos": "character",
-      "tags": [
-        "hanzi"
-      ]
-    },
-    "ideophone": {
-      "pos": "noun",
-      "tags": [
-        "ideophone"
-      ]
-    },
-    "俗語": {
-      "pos": "phrase",
-      "tags": [
-        "idiomatic"
-      ]
-    },
-    "間綴": {
-      "pos": "infix",
-      "tags": [
-        "morpheme"
-      ]
-    },
-    "infinitive": {
-      "pos": "verb",
-      "debug": "part-of-speech Infinitive is proscribed",
-      "tags": [
-        "infinitive"
-      ]
-    },
-    "initialism": {
-      "pos": "abbrev",
-      "debug": "part-of-speech Initialism is proscribed",
-      "tags": [
-        "abbreviation"
-      ]
-    },
-    "間綴": {
-      "pos": "interfix",
-      "tags": [
-        "morpheme"
-      ]
-    },
-    "感嘆詞": {
-      "pos": "intj"
-    },
-    "interrogative pronoun": {
-      "pos": "pron",
-      "tags": [
-        "interrogative"
-      ]
-    },
-    "intransitive verb": {
-      "pos": "verb",
-      "debug": "part-of-speech Intransitive verb is proscribed",
-      "tags": [
-        "intransitive"
-      ]
-    },
-    "instransitive verb": {
-      "pos": "verb",
-      "tags": [
-        "intransitive"
-      ],
-      "debug": "pisspelled subtitle"
-    },
-    "kanji": {
-      "pos": "character",
-      "tags": [
-        "kanji"
-      ]
-    },
-    "letter": {
-      "pos": "character",
-      "tags": [
-        "letter"
-      ]
-    },
-    "ligature": {
-      "pos": "character",
-      "tags": [
-        "ligature"
-      ]
-    },
-    "nominal nuclear clause": {
-      "pos": "clause",
-      "debug": "part-of-speech Nominal nuclear clause is proscribed"
-    },
-    "名詞": {
-      "pos": "noun"
-    },
-    "名词": {
-      "pos": "noun"
-    },
-    "數詞": {
-      "pos": "num",
-      "tags": [
-        "number"
-      ]
-    },
-    "ordinal number": {
-      "pos": "adj",
-      "debug": "ordinal numbers should be adjectives",
-      "tags": [
-        "ordinal"
-      ]
-    },
-    "participle": {
-      "pos": "verb",
-      "tags": [
-        "participle"
-      ]
-    },
-    "助詞": {
-      "pos": "particle"
-    },
-    "past participle": {
-      "pos": "verb",
-      "tags": [
-        "participle",
-        "past"
-      ]
-    },
-    "perfect expression": {
-      "pos": "verb"
-    },
-    "perfection expression": {
-      "pos": "verb"
-    },
-    "perfect participle": {
-      "pos": "verb",
-      "tags": [
-        "participle",
-        "perfect"
-      ]
-    },
-    "personal pronoun": {
-      "pos": "pron",
-      "tags": [
-        "person"
-      ]
-    },
-    "片語": {
-      "pos": "phrase"
-    },
-    "短語": {
-      "pos": "phrase",
-      "debug": "usually used in singular"
-    },
-    "possessive determiner": {
-      "pos": "det",
-      "tags": [
-        "possessive"
-      ]
-    },
-    "possessive pronoun": {
-      "pos": "det",
-      "tags": [
-        "possessive"
-      ]
-    },
-    "後置詞": {
-      "pos": "postp"
-    },
-    "predicative": {
-      "pos": "adj",
-      "tags": [
-        "predicative"
-      ]
-    },
-    "前綴": {
-      "pos": "prefix",
-      "tags": [
-        "morpheme"
-      ]
-    },
-    "介詞": {
-      "pos": "prep"
-    },
-    "prepositional expressions": {
-      "pos": "prep",
-      "debug": "part-of-speech Prepositional expressions is proscribed"
-    },
-    "prepositional phrase": {
-      "pos": "prep_phrase"
-    },
-    "prepositional pronoun": {
-      "pos": "pron",
-      "debug": "part-of-speech Prepositional pronoun is proscribed",
-      "tags": [
-        "prepositional"
-      ]
-    },
-    "present participle": {
-      "pos": "verb",
-      "debug": "part-of-speech Present participle is proscribed",
-      "tags": [
-        "participle",
-        "present"
-      ]
-    },
-    "preverb": {
-      "pos": "preverb"
-    },
-    "代詞": {
-      "pos": "pron"
-    },
-    "專有名詞": {
-      "pos": "name"
-    },
-    "成語": {
-      "pos": "proverb"
-    },
-    "諺語": {
-      "pos": "proverb"
-    },
-    "谚语": {
-      "pos": "proverb"
-    },
-    "成句": {
-      "pos": "proverb"
-    },
-    "punctuation mark": {
-      "pos": "punct",
-      "tags": [
-        "punctuation"
-      ]
-    },
-    "punctuation": {
-      "pos": "punct",
-      "debug": "part-of-speech Punctuation should be Punctuation mark",
-      "tags": [
-        "punctuation"
-      ]
-    },
-    "relative": {
-      "pos": "conj",
-      "tags": [
-        "relative"
-      ]
-    },
-    "romanization": {
-      "pos": "romanization"
-    },
-    "root": {
-      "pos": "root",
-      "tags": [
-        "morpheme"
-      ]
-    },
-    "後綴": {
-      "pos": "suffix",
-      "tags": [
-        "morpheme"
-      ]
-    },
-    "suffix form": {
-      "pos": "suffix",
-      "debug": "part-of-speech Suffix form is proscribed",
-      "tags": [
-        "morpheme"
-      ]
-    },
-    "音節": {
-      "pos": "syllable"
-    },
-    "符號": {
-      "pos": "symbol"
-    },
-    "及物动词": {
-      "pos": "verb",
-      "tags": [
-        "transitive"
-      ]
-    },
-    "動詞": {
-      "pos": "verb"
-    },
-    "动词": {
-      "pos": "verb"
-    },
-    "verb form": {
-      "pos": "verb",
-      "debug": "part-of-speech Verb form is proscribed"
-    },
-    "verbal noun": {
-      "pos": "noun",
-      "tags": [
-        "verbal"
-      ]
-    },
-    "verbs": {
-      "pos": "verb",
-      "debug": "usually in singular"
-    }
+    "pos": "abbrev",
+    "debug": "part-of-speech Abbreviation is proscribed",
+    "tags": [
+      "abbreviation"
+    ]
+  },
+  "形容詞": {
+    "pos": "adj"
+  },
+  "形容词": {
+    "pos": "adj"
+  },
+  "副詞": {
+    "pos": "adv"
+  },
+  "副词": {
+    "pos": "adv"
+  },
+  "前缀": {
+    "pos": "affix"
+  },
+  "冠词": {
+    "pos": "article"
+  },
+  "環綴": {
+    "pos": "circumfix",
+    "tags": [
+      "morpheme"
+    ]
+  },
+  "量词‎": {
+    "pos": "classifier"
+  },
+  "連詞": {
+    "pos": "conj"
+  },
+  "连词": {
+    "pos": "conj"
+  },
+  "限定詞": {
+    "pos": "det"
+  },
+  "附加符號": {
+    "pos": "character",
+    "tags": [
+      "diacritic"
+    ]
+  },
+  "後附語素": {
+    "pos": "suffix",
+    "tags": [
+      "clitic"
+    ]
+  },
+  "動名詞": {
+    "pos": "verb",
+    "debug": "part-of-speech Gerund is proscribed",
+    "tags": [
+      "participle",
+      "gerund"
+    ]
+  },
+  "漢字": {
+    "pos": "character",
+    "tags": [
+      "han"
+    ]
+  },
+  "俗語": {
+    "pos": "phrase",
+    "tags": [
+      "idiomatic"
+    ]
+  },
+  "間綴": {
+    "pos": "interfix",
+    "tags": [
+      "morpheme"
+    ]
+  },
+  "首字母縮略字": {
+    "pos": "abbrev",
+    "debug": "part-of-speech Initialism is proscribed",
+    "tags": [
+      "abbreviation"
+    ]
+  },
+  "感嘆詞": {
+    "pos": "intj"
+  },
+  "不及物動詞": {
+    "pos": "verb",
+    "debug": "part-of-speech Intransitive verb is proscribed",
+    "tags": [
+      "intransitive"
+    ]
+  },
+  "字母": {
+    "pos": "character",
+    "tags": [
+      "letter"
+    ]
+  },
+  "名詞": {
+    "pos": "noun"
+  },
+  "名词": {
+    "pos": "noun"
+  },
+  "數詞": {
+    "pos": "num",
+    "tags": [
+      "number"
+    ]
+  },
+  "序數": {
+    "pos": "adj",
+    "debug": "ordinal numbers should be adjectives",
+    "tags": [
+      "ordinal"
+    ]
+  },
+  "分词": {
+    "pos": "verb",
+    "tags": [
+      "participle"
+    ]
+  },
+  "助詞": {
+    "pos": "particle"
+  },
+  "人称代词": {
+    "pos": "pron",
+    "tags": [
+      "person"
+    ]
+  },
+  "片語": {
+    "pos": "phrase"
+  },
+  "短語": {
+    "pos": "phrase",
+    "debug": "usually used in singular"
+  },
+  "後置詞": {
+    "pos": "postp"
+  },
+  "前綴": {
+    "pos": "prefix",
+    "tags": [
+      "morpheme"
+    ]
+  },
+  "前置詞": {
+    "pos": "prep"
+  },
+  "前置词": {
+    "pos": "prep"
+  },
+  "介詞": {
+    "pos": "prep"
+  },
+  "代詞": {
+    "pos": "pron"
+  },
+  "代词": {
+    "pos": "pron"
+  },
+  "專有名詞": {
+    "pos": "name"
+  },
+  "成語": {
+    "pos": "proverb"
+  },
+  "諺語": {
+    "pos": "proverb"
+  },
+  "谚语": {
+    "pos": "proverb"
+  },
+  "成句": {
+    "pos": "proverb"
+  },
+  "标点符号": {
+    "pos": "punct",
+    "tags": [
+      "punctuation"
+    ]
+  },
+  "標點符號": {
+    "pos": "punct",
+    "debug": "part-of-speech Punctuation should be Punctuation mark",
+    "tags": [
+      "punctuation"
+    ]
+  },
+  "羅馬化": {
+    "pos": "romanization"
+  },
+  "罗马化": {
+    "pos": "romanization"
+  },
+  "後綴": {
+    "pos": "suffix",
+    "tags": [
+      "morpheme"
+    ]
+  },
+  "音節": {
+    "pos": "syllable"
+  },
+  "符號": {
+    "pos": "symbol"
+  },
+  "及物动词": {
+    "pos": "verb",
+    "tags": [
+      "transitive"
+    ]
+  },
+  "動詞": {
+    "pos": "verb"
+  },
+  "动词": {
+    "pos": "verb"
+  }
 }
