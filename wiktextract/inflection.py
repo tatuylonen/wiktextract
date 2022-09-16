@@ -2731,7 +2731,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     # remove the article entries.
     if any("noun" in x["tags"] for x in ret):
         if lang in ("Alemannic German", "Bavarian", "Cimbrian", "German",
-                    "German Low German", "Hunsrik", "Luxembourish",
+                    "German Low German", "Hunsrik", "Luxembourgish",
                     "Pennsylvania German"):
             new_ret = []
             saved_tags = set()
