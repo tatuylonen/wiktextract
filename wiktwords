@@ -27,16 +27,36 @@ from wiktextract import extract_thesaurus_data
 from wiktextract import extract_categories
 
 # Pages whose titles have any of these prefixes are ignored.
-ignore_prefixes = {"Index", "Help", "MediaWiki", "Citations",
-                   "Concordance", "Rhymes", "Thread",
-                   "Summary", "File",
-                   "Transwiki",
-                   "Wikcionario",
-}
+IGNORE_PREFIEXES = None
 
 # Pages with these prefixes are captured.
-recognized_prefixes = {"Category", "Appendix", "Wiktionary",
-                       "Thesaurus", "Module", "Template"}
+RECOGNIZED_PREFIXES = None
+
+
+def init_prefixes(ctx: Wtp) -> None:
+    global IGNORE_PREFIEXES, RECOGNIZED_PREFIXES
+    if IGNORE_PREFIEXES is None:
+        IGNORE_PREFIEXES = {
+            ctx.NAMESPACE_DATA.get("Index", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Help", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("MediaWiki", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Citations", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Concordance", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Rhymes", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Thread", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Summary", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("File", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Transwiki", {}).get("name"),
+        }
+    if RECOGNIZED_PREFIXES is None:
+        RECOGNIZED_PREFIXES = {
+            ctx.NAMESPACE_DATA.get("Category", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Appendix", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Project", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Thesaurus", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Module", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Template", {}).get("name"),
+        }
 
 
 def capture_page(model, orig_title, text, pages_dir):
@@ -60,9 +80,9 @@ def capture_page(model, orig_title, text, pages_dir):
         analyze = True
     else:
         prefix, tail = m.groups()
-        if prefix in ignore_prefixes:
+        if prefix in IGNORE_PREFIEXES:
             analyze = False
-        elif prefix not in recognized_prefixes:
+        elif prefix not in RECOGNIZED_PREFIXES:
             print("UNRECOGNIZED PREFIX", title)
             analyze = False
 
@@ -215,7 +235,7 @@ if __name__ == "__main__":
     # languages
     if args.list_languages:
         print("Supported languages:")
-        for lang_name, lang_code in ctx.LANGUAGES_BY_NAME:
+        for lang_name, lang_code in ctx.LANGUAGES_BY_NAME.items():
             print(f"    {lang_name}: {lang_code}")
         sys.exit(0)
 
@@ -285,6 +305,8 @@ if __name__ == "__main__":
     if args.profile:
         pr = cProfile.Profile()
         pr.enable()
+
+    init_prefixes(ctx)
 
     try:
         if args.path:

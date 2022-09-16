@@ -247,13 +247,13 @@ nondef_re = re.compile(r"^\s*(1|2|3)\s+(sg|pl)\s*$")
 
 # Certain tags are moved from headers in tables into word tags, as they always
 # apply to the whole word.
-TAGS_FORCED_WORDTAGS = {
+TAGS_FORCED_WORDTAGS = set(
     # XXX diptote/triptote do not seem to always be global.  See
     # https://en.wiktionary.org/wiki/%D8%AC%D8%A7%D8%B0%D8%A8
     # (جاذب/Arabic/Verb)
     # "diptote",
     # "triptote",
-}
+)
 
 
 # Language-specific configuration for various aspects of inflection table

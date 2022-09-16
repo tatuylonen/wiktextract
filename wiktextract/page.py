@@ -2848,7 +2848,7 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
     global starts_lang_re
     if starts_lang_re is None:
         starts_lang_re = re.compile(
-            r"^(" + ctx.NAMESPACE_TEXTS["Rhymes"] + ":)?(" +
+            r"^(" + ctx.NAMESPACE_DATA.get("Rhymes", {}).get("name", "") + ":)?(" +
             "|".join(re.escape(x) for x in ctx.LANGUAGES_BY_NAME) +
             ")[ /]")
 
