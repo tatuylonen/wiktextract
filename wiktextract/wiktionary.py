@@ -14,7 +14,7 @@ from wikitextprocessor import Wtp
 from .page import parse_page
 from .config import WiktionaryConfig
 from .thesaurus import extract_thesaurus_data
-from .datautils import data_append, languages_by_name
+from .datautils import data_append
 
 # Title prefixes that indicate that the page is not a normal page and
 # should not be used when searching for word forms
@@ -179,10 +179,10 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
         for pos, linkages in pos_ht.items():
             if (word, lang, pos) in emitted:
                 continue
-            if lang not in languages_by_name:
+            if lang not in ctx.LANGUAGES_BY_NAME:
                 print("Linkage language {} not recognized".format(lang))
                 continue
-            lang_code = languages_by_name[lang]["code"]
+            lang_code = ctx.LANGUAGES_BY_NAME[lang]
             print("Emitting thesaurus main entry for {}/{}/{} (not in main)"
                   .format(word, lang, pos))
             sense_ht = collections.defaultdict(list)

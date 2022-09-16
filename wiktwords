@@ -187,39 +187,6 @@ if __name__ == "__main__":
             print("--num-threads not supported on this OS (no stable implementation of fork() available)")
             sys.exit(1)
 
-    config = WiktionaryConfig(dump_file_lang_code=args.dump_file_language_code,
-                              capture_language_codes=args.language,
-                              capture_translations=args.translations,
-                              capture_pronunciation=args.pronunciations,
-                              capture_linkages=args.linkages,
-                              capture_compounds=args.compounds,
-                              capture_redirects=args.redirects,
-                              capture_examples=args.examples,
-                              capture_etymologies=args.etymologies,
-                              capture_inflections=args.inflections,
-                              verbose=args.verbose,
-                              expand_tables=args.inflection_tables_file,)
-
-    # If --list-languages has been specified, just print the list of supported
-    # languages
-    if args.list_languages:
-        print("Supported languages:")
-        for lang_name, lang_code in config.LANGUAGE_SUBTITLES.items():
-            print(f"    {lang_name}: {lang_code}")
-        sys.exit(0)
-
-    if args.language:
-        for x in args.language:
-            if x not in config.LANGUAGE_CODES:
-                print("Invalid language:", x)
-                sys.exit(1)
-
-    if not args.path and not args.cache:
-        print("The PATH argument for wiktionary dump file is normally "
-              "mandatory.")
-        print("Alternatively, --cache with --page can be used.")
-        sys.exit(1)
-
     # Open output file.
     out_path = args.out
     if not out_path and args.pages_dir:
@@ -237,12 +204,32 @@ if __name__ == "__main__":
     word_count = 0
 
     # Create expansion context
-    ctx = Wtp(cache_file=args.cache, num_threads=args.num_threads)
+    ctx = Wtp(cache_file=args.cache, num_threads=args.num_threads, lang_code=args.dump_file_language_code)
     # We are now having problems with "Module:no globals", which causes
     # infinite Python recursion on a number of pages (it may be a sandbox
     # problem that it is not properly reset).  Override that debugging module
     # to be empty.
     ctx.add_page("Scribunto", "Module:no globals", "", transient=True)
+
+    # If --list-languages has been specified, just print the list of supported
+    # languages
+    if args.list_languages:
+        print("Supported languages:")
+        for lang_name, lang_code in ctx.LANGUAGES_BY_NAME:
+            print(f"    {lang_name}: {lang_code}")
+        sys.exit(0)
+
+    if args.language:
+        for x in args.language:
+            if x not in ctx.LANGUAGES_BY_CODE:
+                print("Invalid language:", x)
+                sys.exit(1)
+
+    if not args.path and not args.cache:
+        print("The PATH argument for wiktionary dump file is normally "
+              "mandatory.")
+        print("Alternatively, --cache with --page can be used.")
+        sys.exit(1)
 
     if args.override:
         for path in args.override:
@@ -276,6 +263,19 @@ if __name__ == "__main__":
 
     def capture_cb(model, title, text):
         return capture_page(model, title, text, args.pages_dir)
+
+    config = WiktionaryConfig(dump_file_lang_code=args.dump_file_language_code,
+                              capture_language_codes=args.language,
+                              capture_translations=args.translations,
+                              capture_pronunciation=args.pronunciations,
+                              capture_linkages=args.linkages,
+                              capture_compounds=args.compounds,
+                              capture_redirects=args.redirects,
+                              capture_examples=args.examples,
+                              capture_etymologies=args.etymologies,
+                              capture_inflections=args.inflections,
+                              verbose=args.verbose,
+                              expand_tables=args.inflection_tables_file,)
 
     # load redirects to ctx if given
     if args.redirects_file:

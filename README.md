@@ -424,7 +424,7 @@ This code can be called from an application as follows:
 ```python
 from wiktextract import (WiktionaryConfig, parse_wiktionary, parse_page,
                          PARTS_OF_SPEECH)
-from wikitextprocessor import Wtp, ALL_LANGUAGES
+from wikitextprocessor import Wtp
 
 config = WiktionaryConfig(
              dump_file_lang_code="en",
@@ -517,7 +517,7 @@ The constructor is called as:
 
 ```python
 WiktionaryConfig(dump_file_lang_code="en",
-                 capture_language_codes=["en", "mul",
+                 capture_language_codes=["en", "mul"],
                  capture_translations=True,
                  capture_pronunciation=True,
                  capture_linkages=True,

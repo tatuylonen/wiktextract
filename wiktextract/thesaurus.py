@@ -11,7 +11,6 @@ from .page import (linkage_map, linkage_inverses, clean_node,
                    LEVEL_KINDS)
 from .form_descriptions import parse_sense_qualifier
 from .config import WiktionaryConfig
-from .datautils import languages_by_code
 
 ignored_subtitle_tags_map = {
     "by reason": [],
@@ -108,7 +107,7 @@ def extract_thesaurus_data(ctx, config):
         # {{ws header|lang=xx}}
         m = re.search(r'(?s)\{\{ws header\|[^}]*lang=([^}|]*)', text)
         if m:
-            lang = languages_by_code.get(m.group(1), {}).get("name")
+            lang = ctx.LANGUAGES_BY_CODE.get(m.group(1), [None])[0]
 
         def recurse(contents):
             nonlocal lang
@@ -207,7 +206,7 @@ def extract_thesaurus_data(ctx, config):
                 recurse(contents.children)
                 return
             subtitle = ctx.node_to_text(contents.args)
-            if subtitle in config.LANGUAGE_SUBTITLES:
+            if subtitle in ctx.LANGUAGES_BY_NAME:
                 lang = subtitle
                 pos = None
                 sense = None

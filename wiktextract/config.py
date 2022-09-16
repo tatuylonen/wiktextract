@@ -47,8 +47,6 @@ class WiktionaryConfig(object):
         "debugs",
         "redirects",
         "data_folder",
-        "LANGUAGE_SUBTITLES",
-        "LANGUAGE_CODES",
         "LINKAGE_SUBTITLES",
         "POS_SUBTITLES",
         "POS_TYPES",
@@ -149,10 +147,6 @@ class WiktionaryConfig(object):
         self.debugs.extend(ret.get("debugs", []))
 
     def init_subtitles(self) -> None:
-        with self.data_folder.joinpath("language_subtitles.json").open(encoding="utf-8") as f:
-            self.LANGUAGE_SUBTITLES = json.load(f)
-            self.LANGUAGE_CODES = set(self.LANGUAGE_SUBTITLES.values())
-
         with self.data_folder.joinpath("linkage_subtitles.json").open(encoding="utf-8") as f:
             self.LINKAGE_SUBTITLES = json.load(f)
 

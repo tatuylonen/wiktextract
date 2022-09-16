@@ -12,8 +12,7 @@ from wikitextprocessor import Wtp, WikiNode, NodeKind, MAGIC_FIRST
 from wiktextract.config import WiktionaryConfig
 from wiktextract.tags import valid_tags, tag_categories
 from wiktextract.inflectiondata import infl_map, infl_start_map, infl_start_re
-from wiktextract.datautils import (data_append, freeze,
-                                   split_at_comma_semi, languages_by_name)
+from wiktextract.datautils import data_append, freeze, split_at_comma_semi
 from wiktextract.form_descriptions import (classify_desc, decode_tags,
                                            parse_head_final_tags, distw)
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
@@ -248,13 +247,13 @@ nondef_re = re.compile(r"^\s*(1|2|3)\s+(sg|pl)\s*$")
 
 # Certain tags are moved from headers in tables into word tags, as they always
 # apply to the whole word.
-TAGS_FORCED_WORDTAGS = set([
+TAGS_FORCED_WORDTAGS = {
     # XXX diptote/triptote do not seem to always be global.  See
     # https://en.wiktionary.org/wiki/%D8%AC%D8%A7%D8%B0%D8%A8
     # (جاذب/Arabic/Verb)
     # "diptote",
     # "triptote",
-])
+}
 
 
 # Language-specific configuration for various aspects of inflection table
@@ -262,11 +261,11 @@ TAGS_FORCED_WORDTAGS = set([
 
 lang_specific = {
     "default": {
-        "hdr_expand_first": set(["number", "mood", "referent", "aspect",
-                                 "tense", "voice", "non-finite", "case",
-                                 "possession"]),
-        "hdr_expand_cont": set(["person", "gender", "number", "degree",
-                                "polarity", "voice", "misc"]),
+        "hdr_expand_first": {"number", "mood", "referent", "aspect",
+                             "tense", "voice", "non-finite", "case",
+                             "possession"},
+        "hdr_expand_cont": {"person", "gender", "number", "degree",
+                            "polarity", "voice", "misc"},
         "animate_inanimate_remove": True,
         "both_active_passive_remove": True,
         "both_strong_weak_remove": True,
@@ -346,9 +345,8 @@ lang_specific = {
         "next": "semitic-group",
         "numbers": ["singular", "dual", "paucal", "plural", "collective", "singulative"],
         "reuse_cellspan": "reuse",
-        "hdr_expand_first": set(["number"]),
-        "hdr_expand_cont": set(["gender", "referent", "misc", "number",
-                                "class"]),
+        "hdr_expand_first": {"number"},
+        "hdr_expand_cont": {"gender", "referent", "misc", "number", "class"},
     },
     "Aragonese": {
         "next": "romance-group",
@@ -396,8 +394,8 @@ lang_specific = {
     },
     "Czech": {
         "next": "slavic-group",
-        "hdr_expand_first": set(["tense", "mood", "non-finite"]),
-        "hdr_expand_cont": set(["tense", "mood", "voice"]),
+        "hdr_expand_first": {"tense", "mood", "non-finite"},
+        "hdr_expand_cont": {"tense", "mood", "voice"},
     },
     "Dalmatian": {
         "next": "romance-group",
@@ -896,9 +894,9 @@ lang_specific = {
 # Sanity check lang_specific
 def_ls_keys = lang_specific["default"].keys()
 for k, v in lang_specific.items():
-    if k[0].isupper() and k not in languages_by_name:
-        raise AssertionError("key {!r} in lang_specific is not a valid language"
-                             .format(k))
+    # if k[0].isupper() and k not in languages_by_name:
+    #     raise AssertionError("key {!r} in lang_specific is not a valid language"
+    #                          .format(k))
     assert isinstance(v, dict)
     for kk, vv in v.items():
         if kk not in def_ls_keys and kk != "next":

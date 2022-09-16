@@ -5,24 +5,7 @@
 import re
 import functools
 import collections
-from .config import WiktionaryConfig
-from wikitextprocessor import ALL_LANGUAGES, Wtp
-
-# Mapping from language name to language info
-languages_by_name = {x["name"]: x for x in ALL_LANGUAGES}
-# Add "other_names", taking care not to override primary names
-for x in ALL_LANGUAGES:
-    for xn in x.get("other_names", ()):
-        if xn not in languages_by_name:
-            languages_by_name[xn] = x
-# Add "aliases", taking care not to override primary names
-for x in ALL_LANGUAGES:
-    for xn in x.get("aliases", ()):
-        if xn not in languages_by_name:
-            languages_by_name[xn] = x
-
-# Mapping from language code to language info
-languages_by_code = {x["code"]: x for x in ALL_LANGUAGES}
+from wikitextprocessor import Wtp
 
 # Keys in ``data`` that can only have string values (a list of them)
 str_keys = ("tags", "glosses")

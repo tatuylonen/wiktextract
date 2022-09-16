@@ -8,14 +8,14 @@ import copy
 import html
 import collections
 
-from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
+from wikitextprocessor import Wtp, WikiNode, NodeKind
 from .parts_of_speech import PARTS_OF_SPEECH
 from .config import WiktionaryConfig
 from .linkages import parse_linkage_item_text
 from .translations import parse_translation_item_text
 from .clean import clean_value, clean_template_args
 from .unsupported_titles import unsupported_title_map
-from .datautils import data_append, data_extend, languages_by_code
+from .datautils import data_append, data_extend
 from .tags import valid_tags
 
 from wiktextract.form_descriptions import (
@@ -28,173 +28,7 @@ LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
                NodeKind.LEVEL5, NodeKind.LEVEL6)
 
 # Matches head tag
-head_tag_re = re.compile(r"^(head|Han char|arabic-noun|arabic-noun-form|"
-                         r"hangul-symbol|syllable-hangul)$|" +
-                         r"^(latin|" +
-                         "|".join(languages_by_code.keys()) + r")-(" +
-                         "|".join([
-                             "abbr",
-                             "adj",
-                             "adjective",
-                             "adjective form",
-                             "adjective-form",
-                             "adv",
-                             "adverb",
-                             "affix",
-                             "animal command",
-                             "art",
-                             "article",
-                             "aux",
-                             "bound pronoun",
-                             "bound-pronoun",
-                             "Buyla",
-                             "card num",
-                             "card-num",
-                             "cardinal",
-                             "chunom",
-                             "classifier",
-                             "clitic",
-                             "cls",
-                             "cmene",
-                             "cmavo",
-                             "colloq-verb",
-                             "colverbform",
-                             "combining form",
-                             "combining-form",
-                             "comparative",
-                             "con",
-                             "concord",
-                             "conj",
-                             "conjunction",
-                             "conjug",
-                             "cont",
-                             "contr",
-                             "converb",
-                             "daybox",
-                             "decl",
-                             "decl noun",
-                             "def",
-                             "dem",
-                             "det",
-                             "determ",
-                             "Deva",
-                             "ending",
-                             "entry",
-                             "form",
-                             "fuhivla",
-                             "gerund",
-                             "gismu",
-                             "hanja",
-                             "hantu",
-                             "hanzi",
-                             "head",
-                             "ideophone",
-                             "idiom",
-                             "inf",
-                             "indef",
-                             "infixed pronoun",
-                             "infixed-pronoun",
-                             "infl",
-                             "inflection",
-                             "initialism",
-                             "int",
-                             "interfix",
-                             "interj",
-                             "interjection",
-                             "jyut",
-                             "latin",
-                             "letter",
-                             "locative",
-                             "lujvo",
-                             "monthbox",
-                             "mutverb",
-                             "name",
-                             "nisba",
-                             "nom",
-                             "noun",
-                             "noun form",
-                             "noun-form",
-                             "noun plural",
-                             "noun-plural",
-                             "nounprefix",
-                             "num",
-                             "number",
-                             "numeral",
-                             "ord",
-                             "ordinal",
-                             "par",
-                             "part",
-                             "part form",
-                             "part-form",
-                             "participle",
-                             "particle",
-                             "past",
-                             "past neg",
-                             "past-neg",
-                             "past participle",
-                             "past-participle",
-                             "perfect participle",
-                             "perfect-participle",
-                             "personal pronoun",
-                             "personal-pronoun",
-                             "pref",
-                             "prefix",
-                             "phrase",
-                             "pinyin",
-                             "plural noun",
-                             "plural-noun",
-                             "pos",
-                             "poss-noun",
-                             "post",
-                             "postp",
-                             "postposition",
-                             "PP",
-                             "pp",
-                             "ppron",
-                             "pred",
-                             "predicative",
-                             "prep",
-                             "prep phrase",
-                             "prep-phrase",
-                             "preposition",
-                             "present participle",
-                             "present-participle",
-                             "pron",
-                             "prondem",
-                             "pronindef",
-                             "pronoun",
-                             "prop",
-                             "proper noun",
-                             "proper-noun",
-                             "proper noun form",
-                             "proper-noun form",
-                             "proper noun-form",
-                             "proper-noun-form",
-                             "prov",
-                             "proverb",
-                             "prpn",
-                             "prpr",
-                             "punctuation mark",
-                             "punctuation-mark",
-                             "regnoun",
-                             "rel",
-                             "rom",
-                             "romanji",
-                             "root",
-                             "sign",
-                             "suff",
-                             "suffix",
-                             "syllable",
-                             "symbol",
-                             "verb",
-                             "verb form",
-                             "verb-form",
-                             "verbal noun",
-                             "verbal-noun",
-                             "verbnec",
-                             "vform",
-                             ]) +
-                         r")(-|/|\+|$)")
+head_tag_re = None
 
 # Additional templates to be expanded in the pre-expand phase
 additional_expand_templates = {
@@ -526,10 +360,7 @@ ignored_etymology_templates_re = re.compile(
 # Regexp for matching category tags that start with a language name.
 # Group 2 will be the language name.  The category tag should be without
 # the namespace prefix.
-starts_lang_re = re.compile(
-    r"^(Rhymes:)?(" +
-    "|".join(re.escape(x["name"]) for x in ALL_LANGUAGES) +
-    ")[ /]")
+starts_lang_re = None
 
 # Set of template names that are used to define usage examples.  If the usage
 # example contains one of these templates, then it its type is set to
@@ -888,6 +719,180 @@ def recursively_extract(contents, fn):
                            .format(kind))
     return extracted, new_contents
 
+
+def init_head_tag_re(ctx):
+    global head_tag_re
+    if head_tag_re is None:
+        head_tag_re = re.compile(
+            r"^(head|Han char|arabic-noun|arabic-noun-form|"
+            r"hangul-symbol|syllable-hangul)$|" +
+            r"^(latin|" +
+            "|".join(ctx.LANGUAGES_BY_CODE) + r")-(" +
+            "|".join([
+                "abbr",
+                "adj",
+                "adjective",
+                "adjective form",
+                "adjective-form",
+                "adv",
+                "adverb",
+                "affix",
+                "animal command",
+                "art",
+                "article",
+                "aux",
+                "bound pronoun",
+                "bound-pronoun",
+                "Buyla",
+                "card num",
+                "card-num",
+                "cardinal",
+                "chunom",
+                "classifier",
+                "clitic",
+                "cls",
+                "cmene",
+                "cmavo",
+                "colloq-verb",
+                "colverbform",
+                "combining form",
+                "combining-form",
+                "comparative",
+                "con",
+                "concord",
+                "conj",
+                "conjunction",
+                "conjug",
+                "cont",
+                "contr",
+                "converb",
+                "daybox",
+                "decl",
+                "decl noun",
+                "def",
+                "dem",
+                "det",
+                "determ",
+                "Deva",
+                "ending",
+                "entry",
+                "form",
+                "fuhivla",
+                "gerund",
+                "gismu",
+                "hanja",
+                "hantu",
+                "hanzi",
+                "head",
+                "ideophone",
+                "idiom",
+                "inf",
+                "indef",
+                "infixed pronoun",
+                "infixed-pronoun",
+                "infl",
+                "inflection",
+                "initialism",
+                "int",
+                "interfix",
+                "interj",
+                "interjection",
+                "jyut",
+                "latin",
+                "letter",
+                "locative",
+                "lujvo",
+                "monthbox",
+                "mutverb",
+                "name",
+                "nisba",
+                "nom",
+                "noun",
+                "noun form",
+                "noun-form",
+                "noun plural",
+                "noun-plural",
+                "nounprefix",
+                "num",
+                "number",
+                "numeral",
+                "ord",
+                "ordinal",
+                "par",
+                "part",
+                "part form",
+                "part-form",
+                "participle",
+                "particle",
+                "past",
+                "past neg",
+                "past-neg",
+                "past participle",
+                "past-participle",
+                "perfect participle",
+                "perfect-participle",
+                "personal pronoun",
+                "personal-pronoun",
+                "pref",
+                "prefix",
+                "phrase",
+                "pinyin",
+                "plural noun",
+                "plural-noun",
+                "pos",
+                "poss-noun",
+                "post",
+                "postp",
+                "postposition",
+                "PP",
+                "pp",
+                "ppron",
+                "pred",
+                "predicative",
+                "prep",
+                "prep phrase",
+                "prep-phrase",
+                "preposition",
+                "present participle",
+                "present-participle",
+                "pron",
+                "prondem",
+                "pronindef",
+                "pronoun",
+                "prop",
+                "proper noun",
+                "proper-noun",
+                "proper noun form",
+                "proper-noun form",
+                "proper noun-form",
+                "proper-noun-form",
+                "prov",
+                "proverb",
+                "prpn",
+                "prpr",
+                "punctuation mark",
+                "punctuation-mark",
+                "regnoun",
+                "rel",
+                "rom",
+                "romanji",
+                "root",
+                "sign",
+                "suff",
+                "suffix",
+                "syllable",
+                "symbol",
+                "verb",
+                "verb form",
+                "verb-form",
+                "verbal noun",
+                "verbal-noun",
+                "verbnec",
+                "vform",
+            ]) +
+            r")(-|/|\+|$)")
+
+
 def parse_language(ctx, config, langnode, language, lang_code):
     """Iterates over the text of the page, returning words (parts-of-speech)
     defined on the page one at a time.  (Individual word senses for the
@@ -901,6 +906,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
     assert isinstance(lang_code, str)
     # print("parse_language", language)
 
+    init_head_tag_re(ctx)
     is_reconstruction = False
     word = ctx.title
     unsupported_prefix = "Unsupported titles/"
@@ -2791,7 +2797,7 @@ def fix_subtitle_hierarchy(ctx: Wtp, config: WiktionaryConfig, text: str) -> str
                       "{!r} has {} on the left and {} on the right"
                       .format(title, left, right))
         lc = title.lower()
-        if title in config.LANGUAGE_SUBTITLES:
+        if title in ctx.LANGUAGES_BY_NAME:
             if level > 2:
                 ctx.debug("subtitle has language name {} at level {}"
                           .format(title, level))
@@ -2838,6 +2844,13 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
     assert isinstance(word, str)
     assert isinstance(text, str)
     assert isinstance(config, WiktionaryConfig)
+
+    global starts_lang_re
+    if starts_lang_re is None:
+        starts_lang_re = re.compile(
+            r"^(" + ctx.NAMESPACE_TEXTS["Rhymes"] + ":)?(" +
+            "|".join(re.escape(x) for x in ctx.LANGUAGES_BY_NAME) +
+            ")[ /]")
 
     # Skip words that have been moved to the Attic
     if word.startswith("/(Attic) "):
@@ -2886,11 +2899,11 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
             ctx.debug("unexpected top-level node: {}".format(langnode))
             continue
         lang = clean_node(config, ctx, None, langnode.args)
-        if lang not in config.LANGUAGE_SUBTITLES:
+        if lang not in ctx.LANGUAGES_BY_NAME:
             ctx.debug("unrecognized language name at top-level {!r}"
                       .format(lang))
             continue
-        lang_code = config.LANGUAGE_SUBTITLES.get(lang)
+        lang_code = ctx.LANGUAGES_BY_NAME.get(lang)
         if config.capture_language_codes and lang_code not in config.capture_language_codes:
             continue
         ctx.start_section(lang)
@@ -3054,7 +3067,7 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
             m = re.match(starts_lang_re, cat)
             if m:
                 catlang = m.group(2)
-                catlang_code = config.LANGUAGE_SUBTITLES.get(catlang)
+                catlang_code = ctx.LANGUAGES_BY_NAME.get(catlang)
                 if (catlang != lang and not (catlang_code == "en" and
                                              data.get("lang_code") == "mul")):
                     continue  # Ignore categories for a different language
