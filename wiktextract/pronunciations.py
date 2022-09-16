@@ -340,6 +340,11 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     data_append(ctx, data, "sounds", pron)
                     have_pronunciations = True
 
+        m = re.search(r"\b(Syllabification|Hyphenation): ([^\s,]*)", text)
+        if m:
+            data_append(ctx, data, "hyphenation", m.group(2))
+            have_pronunciations = True
+
         # See if it contains a word prefix restricting which forms the
         # pronunciation applies to (see amica/Latin) and/or parenthesized
         # tags.
@@ -404,10 +409,6 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
 
         # XXX what about {{hyphenation|...}}, {{hyph|...}}
         # and those used to be stored under "hyphenation"
-        m = re.search(r"\b(Syllabification|Hyphenation): ([^\s,]*)", text)
-        if m:
-            data_append(ctx, data, "hyphenation", m.group(2))
-            have_pronunciations = True
 
     # Add data that was collected in template_fn
     if audios:
