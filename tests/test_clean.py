@@ -159,7 +159,12 @@ class WiktExtractTests(unittest.TestCase):
     def test_cv_presp(self):
         v = " This : is a test . "
         v = clean_value(self.config, v)
-        self.assertEqual(v, "This: is a test.")
+        self.assertEqual(v, "This : is a test .")
+
+    def test_cv_presp2(self):
+        v = " This ; is a test , "
+        v = clean_value(self.config, v)
+        self.assertEqual(v, "This ; is a test ,")
 
     def test_cv_excl(self):
         v = " Run !\n"
