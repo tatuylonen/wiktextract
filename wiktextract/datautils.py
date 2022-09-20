@@ -190,3 +190,11 @@ def freeze(x):
         return tuple(freeze(v) for v in x)
     # XXX objects not current handled
     return x
+
+
+def ns_title_prefix_tuple(ctx: Wtp, namespace: str, lower: bool = False) -> tuple[str]:
+    if namespace in ctx.NAMESPACE_DATA:
+        return tuple(map(lambda x: x.lower() + ":" if lower else x + ":",
+                         [ctx.NAMESPACE_DATA[namespace]["name"]] + ctx.NAMESPACE_DATA[namespace]["aliases"]))
+    else:
+        return ()

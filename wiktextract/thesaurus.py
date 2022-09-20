@@ -7,6 +7,8 @@ import re
 import time
 import collections
 from wikitextprocessor import Wtp, NodeKind, WikiNode
+
+from .datautils import ns_title_prefix_tuple
 from .page import (linkage_map, linkage_inverses, clean_node,
                    LEVEL_KINDS)
 from .form_descriptions import parse_sense_qualifier
@@ -79,7 +81,7 @@ def extract_thesaurus_data(ctx, config):
         print("Extracting thesaurus data")
 
     def page_handler(model, title, text):
-        if not title.startswith(config.OTHER_SUBTITLES["thesaurus"] + ":"):
+        if not title.startswith(ns_title_prefix_tuple(ctx, "Thesaurus")):
             return None
         if title.startswith("Thesaurus:Requested entries "):
             return None
@@ -195,7 +197,7 @@ def extract_thesaurus_data(ctx, config):
                         else:
                             xlit = None
                         w1 = w1.strip()
-                        if w1.startswith(config.OTHER_SUBTITLES["thesaurus"] + ":"):
+                        if w1.startswith(ns_title_prefix_tuple(ctx, "Thesaurus")):
                             w1 = w1[10:]
                         if w1:
                             ret.append((lang, pos, rel, w1, item_sense,

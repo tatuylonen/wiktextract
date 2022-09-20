@@ -129,8 +129,8 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
     def parse_pron_post_template_fn(name, ht, text):
         if is_panel_template(name):
             return ""
-        if name in ("q", "qualifier", "sense", "a", "accent",
-                    "l", "link", "lb", "lbl", "label"):
+        if name in {"q", "qualifier", "sense", "a", "accent",
+                    "l", "link", "lb", "lbl", "label"}:
             # Kludge: when these templates expand to /.../ or [...],
             # replace the expansion by something safe.  This is used
             # to filter spurious IPA-looking expansions that aren't really

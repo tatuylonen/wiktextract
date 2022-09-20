@@ -15,7 +15,7 @@ from .linkages import parse_linkage_item_text
 from .translations import parse_translation_item_text
 from .clean import clean_value, clean_template_args
 from .unsupported_titles import unsupported_title_map
-from .datautils import data_append, data_extend
+from .datautils import data_append, data_extend, ns_title_prefix_tuple
 from .tags import valid_tags
 
 from wiktextract.form_descriptions import (
@@ -596,7 +596,7 @@ def parse_sense_linkage(config, ctx, data, name, ht):
     for i in range(2, 20):
         w = ht.get(i) or ""
         w = clean_node(config, ctx, data, w)
-        if w.startswith("Thesaurus:"):
+        if w.startswith(ns_title_prefix_tuple(ctx, "Thesaurus")):
             w = w[10:]
         if not w:
             break
@@ -1645,8 +1645,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # relating to the word
                 if (len(node.args[0]) >= 1 and
                     isinstance(node.args[0][0], str) and
-                    (node.args[0][0].startswith("File:") or
-                     node.args[0][0].startswith("Image:"))):
+                    node.args[0][0].startswith(ns_title_prefix_tuple(ctx, "File"))):
                     continue
                 pre[-1].extend(node.args[-1])
             elif kind == NodeKind.HTML:
@@ -1881,11 +1880,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
         assert isinstance(data, dict)
         assert isinstance(field, str)
         assert isinstance(linkagenode, WikiNode)
-        if field == "synonyms" and True == False:
-            print("field", field)
-            print("data", data)
-            print("children:")
-            print(linkagenode.children)
+        # if field == "synonyms" and True == False:
+        #     print("field", field)
+        #     print("data", data)
+        #     print("children:")
+        #     print(linkagenode.children)
         if not config.capture_linkages:
             return
         have_panel_template = False
@@ -1928,7 +1927,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 sense1 = sense1[:-1].strip()
                             if sense1.startswith("(") and sense1.endswith(")"):
                                 sense1 = sense1[1:-1].strip()
-                            if sense1 == "Translations":
+                            if sense1.lower() == config.OTHER_SUBTITLES["translations"]:
                                 sense1 = None
                             # print("linkage item_recurse LIST sense1:", sense1)
                             parse_linkage_recurse(node.children, field,
@@ -1966,9 +1965,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         ignore = False
                         if isinstance(node.args[0][0], str):
                             v = node.args[0][0].strip().lower()
-                            if (v.startswith("category:") or
-                                v.startswith("image:") or
-                                v.startswith("file:")):
+                            if v.startswith(ns_title_prefix_tuple(ctx, "Category", True) + ns_title_prefix_tuple(ctx, "File", True)):
                                 ignore = True
                             if not ignore:
                                 v = node.args[-1]
