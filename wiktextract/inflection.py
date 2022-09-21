@@ -2284,6 +2284,9 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             # These values are ignored, at least for now
             if re.match(r"^(# |\(see )", col):
                 continue
+                
+            if any("dummy-skip-this" in ts for ts in rowtags):
+                continue  # Skip this cell
 
             # If the word has no rowtags and is a multi-row cell, then
             # ignore this.  This happens with empty separator rows
@@ -2480,6 +2483,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                                     #\\___________group 1_______/ \    \_g3_///
                                     # \                            \__gr. 2_//
                                     #  \_____________group 0________________/
+                            ###### REVIEW ########
+                            # But why the escaped asterisk?
                                          alt):
                         v = m.group(2)  # (word/word/word...)
                         if (classify_desc(v) == "tags" or  # Tags inside parens
@@ -2488,21 +2493,32 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         new_lst = []
                         for x in lst:
                             x += alt[idx: m.start()] + m.group(1)
+                                 # alt until letter or asterisk
                             idx = m.end()
                             vparts = v.split("/")
+                                     # group(2) = ["word", "wörd"...]
                             if len(vparts) == 1:
                                 new_lst.append(x)
                                 new_lst.append(x + v)
+                                # "kind(er)" -> ["kind", "kinder"]
                             else:
                                 for vv in vparts:
                                     new_lst.append(x + vv)
+                                # "lampai(tten/den)" ->
+                                # ["lampaitten", "lampaiden"]
                         lst = new_lst
                     for x in lst:
                         new_alts.append(x + alt[idx:])
+                        # add the end of alt
                 alts = list((x, "", "") for x in new_alts)
+                            # [form, no romz, no ipa]
             # Some Arabic adjectives have both sound feminine plural and
             # broken plural diptote (e.g., جاذب/Arabic/Adj).  Handle these
             # specially.
+            ###### REVIEW ######
+            # This should probably be generalized; there are a lot more
+            # "double"-entries like this just in Arabic number stuff.
+            # In fact, is this currently handled somewhere else?
             if (len(combined_coltags) == 2 and
                 len(alts) == 2 and
                 all(set(x) & set(["sound-feminine-plural",
@@ -2511,9 +2527,16 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                     for x in combined_coltags)):
                 alts = list((x, set([ts]))
                              for x, ts in zip(alts, combined_coltags))
+                            # +----------------+
+                            # |      a, b      |
+                            # +----------------+
+                            # |      A, B      |
+                            # +----------------+
+                            #  a => A; b => B
             else:
                 alts = list((x, combined_coltags) for x in alts)
             # Generate forms from the alternatives
+            # alts is a list of (tuple of forms, tuple of tags)
             for (form, base_roman, ipa), coltags in alts:
                 form = form.strip()
                 extra_tags = []
@@ -2526,6 +2549,9 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         assert x in valid_tags
                     assert isinstance(alts1, (list, tuple))
                     assert len(alts1) == 1
+                    ###### REVIEW ########
+                    # asserting that a list or tuple is len 1
+                    # seems weird. Was this supposed to be expanded?
                     assert isinstance(tags, str)
                     form = alts1[0]
                     extra_tags.extend(tags.split())
@@ -2543,6 +2569,11 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 if base_roman:
                     base_roman, _, _, hdr_tags = clean_header(word, base_roman)
                     extra_tags.extend(hdr_tags)
+                    ######## REVIEW ##########
+                    # `clean_header` is a bit unclear as a function name
+                    # as it is used here. It is used on a text cell to
+                    # do some cleanup and tag extraction.
+                    
                 # Do some additional clenanup on the cell.
                 form = re.sub(r"^\s*,\s*", "", form)
                 form = re.sub(r"\s*,\s*$", "", form)
@@ -2551,6 +2582,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 form = re.sub(r"\s+", " ", form)
                 form = form.strip()
 
+                # "Some languages" (=Greek) use brackets to mark things that
+                # require tags, like (informality), [rarity] and {archaicity}.
                 if re.match(r"\([^][(){}]*\)$", form):
                     if get_lang_specific(lang, "parentheses_for_informal"):
                         form = form[1:-1]
@@ -2579,23 +2612,29 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         extra_tags.append("rare")
                     else:
                         form = form[1:-1]
+                        
                 # Handle parentheses in the table element.  We parse
                 # tags anywhere and romanizations anywhere but beginning.
                 roman = base_roman
                 paren = None
                 clitic = None
                 m = re.search(r"(\s+|^)\(([^)]*)\)", form)
+                                # start|spaces + (anything)
                 if m is not None:
                     subst = m.group(1)
                     paren = m.group(2)
                 else:
                     m = re.search(r"\(([^)]*)\)(\s+|$)", form)
+                                    # (anything) + spaces|end
                     if m is not None:
                         paren = m.group(1)
                         subst = m.group(2)
                 if paren is not None:
                     if re.match(r"[’'][a-z]([a-z][a-z]?)?$", paren):
+                    # is there a clitic starting with apostrophe?
                         clitic = paren
+                        # assume the whole paren is a clitic
+                        # then remove paren from form
                         form = (form[:m.start()] + subst +
                                 form[m.end():]).strip()
                     elif classify_desc(paren) == "tags":
@@ -2604,20 +2643,36 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                             for ts in tagsets1:
                                 ts = list(x for x in ts
                                           if x.find(" ") < 0)
+                            ##### REVIEW ######
+                            # Is the "no tags with spaces" test
+                            # above just in case something slips
+                            # through?
                                 extra_tags.extend(ts)
                             form = (form[:m.start()] + subst +
                                     form[m.end():]).strip()
+                    # brackets contain romanization
                     elif (m.start() > 0 and not roman and
                           classify_desc(form[:m.start()]) == "other" and
+                          # "other" ~ text
                           classify_desc(paren) in ("romanization", "english")
                           and not re.search(r"^with |-form$", paren)):
                         roman = paren
                         form = (form[:m.start()] + subst +
                                 form[m.end():]).strip()
                     elif re.search(r"^with |-form", paren):
+                    ######## REVIEW ########
+                    # This regex is subtly different from the equivalent
+                    # above: -form vs. -form$
                         form = (form[:m.start()] + subst +
                                 form[m.end():]).strip()
                 # Ignore certain forms that are not really forms
+                ####### REVIEW #########
+                # Separete the data into its own list.
+                # Possibility of bugs with false positives if
+                # someone makes a table where "unchanged" really is
+                # content, but unlikely. Checking something like
+                # Levenshtein is probably too costly for something
+                # so unlikely.
                 if form in ("", "unchanged",
                             "after an",  # in sona/Irish/Adj/Mutation
                 ):
@@ -2722,6 +2777,17 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         # many cases where no word in a language has a
                         # particular form.  Post-processing could detect and
                         # remove such cases.
+                        ######## REVIEW #########
+                        # I don't get how this works. has_covering_hdr is a set
+                        # of column ids that have some sort of header above.
+                        # It is never reset, so it quickly populates. But
+                        # here, col_idx not in has_covering_hdr means the cell
+                        # we're in has no header above, and as long as
+                        # any column we've seen before in this table has
+                        # its id in has_covering_hdr before...
+                        # Both of these are never resetted inside the table
+                        # for-loop! They only accumulate positive and True
+                        # values.
                         if form in IGNORED_COLVALUES:
                             if "dummy-ignore-skipped" in tags:
                                 continue
@@ -2768,6 +2834,13 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                                       .format(form))
 
                         # Warn if form looks like IPA
+                        ########## REVIEW #########
+                        # Because IPA is its own unicode block, we could also
+                        # technically do a Unicode name check to see if a string
+                        # contains IPA. Not all valid IPA characters are in the
+                        # IPA extension block, so you can technically have false
+                        # negatives if it's something like /toki/, but it
+                        # shouldn't give false positives.
                         if re.match(r"\s*/.*/\s*$", form):
                             ctx.debug("inflection table form looks like IPA: "
                                       "form={} tags={}"
@@ -2827,6 +2900,11 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     # definite/indefinite/usually-without-article markers into the noun and
     # remove the article entries.
     if any("noun" in x["tags"] for x in ret):
+        ######## REVIEW #########
+        # How to determine which one of these "ifs" is more costly?
+        # This second if could also be transformed into a lang_specific
+        # toggle. In fact, this could all be one line, I think;
+        # was this meant to be expanded?
         if lang in ("Alemannic German", "Bavarian", "Cimbrian", "German",
                     "German Low German", "Hunsrik", "Luxembourgish",
                     "Pennsylvania German"):
@@ -2871,6 +2949,13 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             if len(form.split()) > word_words:
                 dt = dt.copy()
                 dt["tags"] = list(dt.get("tags", []))
+                ####### REVIEW #######
+                # dt is already a copy of the original dt,
+                # here it's just getting what is in "tags"
+                # and putting it into the same place? Is
+                # this some kind of deepcopy-emulation,
+                # does .get make copies instead of returning
+                # references?
                 data_append(ctx, dt, "tags", "multiword-construction")
             new_ret.append(dt)
         ret = new_ret
@@ -2885,6 +2970,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
               "tags": ["table-tags"]}
         ret = [dt] + ret
     return ret
+    # end of parse_simple_table()
 
 
 def handle_generic_table(config, ctx, data, word, lang, pos, rows, titles,
@@ -2912,6 +2998,9 @@ def handle_generic_table(config, ctx, data, word, lang, pos, rows, titles,
     if ret is None:
         # XXX handle other table formats
         # We were not able to handle the table
+        ########## REVIEW ########
+        # Could maybe use a debug or error message here,
+        # but I wouldn't want to add any more into the system...
         return
 
     # Add the returned forms but eliminate duplicates.
@@ -2926,10 +3015,11 @@ def handle_generic_table(config, ctx, data, word, lang, pos, rows, titles,
     for dt in ret:
         fdt = freeze(dt)
         if fdt in have_forms:
-            continue  # Don't add duplicates Some Russian words have
-        # Declension and Pre-reform declension partially duplicating
-        # same data.  Don't add "dated" tags variant if already have
-        # the same without "dated" from the modern declension table
+            continue  # Don't add duplicates
+         # Some Russian words have Declension and Pre-reform declension partially
+         # duplicating same data.  Don't add "dated" tags variant if already have
+         # the same without "dated" from the modern declension table
+
         tags = dt.get("tags", [])
         for dated_tag in ("dated",):
             if dated_tag in tags:
@@ -2957,6 +3047,11 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
     assert isinstance(data, dict)
     assert isinstance(tree, WikiNode)
     assert tree.kind == NodeKind.TABLE
+    ######## REVIEW #########
+    # Are the two asserts above both necessary? assert tree.kind ==
+    # NodeKind.TABLE would also assert whether it's a WikiNode, unless there's
+    # something else that has .kind attributes. Or is this because error messages
+    # will be missing? There's a third identical assert below, too.
     assert isinstance(titles, list)
     assert isinstance(source, str)
     for x in titles:
@@ -2968,13 +3063,19 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
 
     cols_fill = []    # Filling for columns with rowspan > 1
     cols_filled = []  # Number of remaining rows for which to fill the column
-    cols_headered = []  # True when column contains headers even if normal fmt
+    cols_headered = []  # True when the whole column contains headers, event
+                        # when the cell is not considered a header; triggered
+                        # by the "*" inflmap meta-tag.
     rows = []
     assert tree.kind == NodeKind.TABLE
     for node in tree.children:
         if not isinstance(node, WikiNode):
             continue
         kind = node.kind
+        ###### REVIEW ########
+        # there's a lot of kind = node.kind in this section of the code, is it
+        # style or some kind of optimization?
+        
         # print("  {}".format(node))
         if kind == NodeKind.TABLE_CAPTION:
             # print("  CAPTION:", node)
@@ -2989,7 +3090,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
             # Parse a table row.
             row = []
             style = None
-            have_nonempty = False  # Have nonempty cell not from rowspan
+            row_has_nonempty_cells = False  # Have nonempty cell not from rowspan
             for col in node.children:
                 if not isinstance(col, WikiNode):
                     continue
@@ -2999,6 +3100,9 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     print("    UNEXPECTED ROW CONTENT: {}".format(col))
                     continue
                 while len(row) < len(cols_filled) and cols_filled[len(row)] > 0:
+                    ####### REVIEW ########
+                    # Here it took me a while to see that cols_filled and
+                    # cols_fill weren't the same name.
                     cols_filled[len(row)] -= 1
                     row.append(cols_fill[len(row)])
                 try:
@@ -3148,7 +3252,6 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                                   "LANGUAGES_WITH_CELLS_AS_HEADERS; "
                                   "cleaned text: {}, style: {}"
                                   .format(lang, cleaned, style))
-                    # Enable me when tests are fixed and LWCAH is populated properly
                     elif (not ignored_cell and
                           cleaned not in LANGUAGES_WITH_CELLS_AS_HEADERS
                                                 .get(lang, "")):
@@ -3175,13 +3278,22 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                             r"Mutation of|Notes\b", # \b is word-boundary
                             titletext):
                     is_title = True
+                    
                 if is_title:
+                # If this cell gets a "*" tag, make the whole column
+                # below it (toggling it in cols_headered = [F, F, T...])
+                # into headers.
                     while len(cols_headered) <= len(row):
                         cols_headered.append(False)
                     if any("*" in tt for tt in hdr_expansion):
                         cols_headered[len(row)] = True
                         celltext = ""
-                have_nonempty |= is_title or celltext != ""
+                # if row_has_nonempty_cells has been True at some point, it
+                # keeps on being True.
+                # if row_has_nonempty_cells or is_title or celltext != "":
+                #   row_has_nonempty_cells = True
+                #   ⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓
+                row_has_nonempty_cells |= is_title or celltext != ""
                 cell = InflCell(celltext, is_title, colspan, rowspan,
                                 target)
                 for i in range(0, colspan):
@@ -3202,7 +3314,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     row.append(InflCell("", False, 1, 1, None))
                 row.append(cols_fill[i])
             # print("  ROW {!r}".format(row))
-            if have_nonempty:
+            if row_has_nonempty_cells:
                 rows.append(row)
         elif kind in (NodeKind.TABLE_HEADER_CELL, NodeKind.TABLE_CELL):
             # print("  TOP-LEVEL CELL", node)
