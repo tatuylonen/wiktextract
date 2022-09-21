@@ -24,7 +24,8 @@ from wiktextract.table_headers_heuristics_data import (
 
 
 # Set this to a word form to debug how that is analyzed, or None to disable
-debug_word = None
+# XXX Make this a command-line parameter
+debug_cell_text = None
 
 # Column texts that are interpreted as an empty column.
 IGNORED_COLVALUES = set([
@@ -107,7 +108,9 @@ for k, v in title_contains_global_map.items():
         print("TITLE_CONTAINS_GLOBAL_MAP UNRECOGNIZED TAG: {}: {}"
               .format(k, v))
 table_hdr_ign_part = r"(Inflection|Conjugation|Declension|Mutation) of [^\s]"
+
 table_hdr_ign_part_re = re.compile(r"(?i)(" + table_hdr_ign_part + ")")
+                                     # (?i) python regex extension, ignore case
 title_contains_global_re = re.compile(
     r"(?i)(^|\b)({}|{})($|\b)"
     .format(table_hdr_ign_part,
@@ -236,6 +239,10 @@ def_re = re.compile(r"(\s*•?\s+)?"
                     r"((\*+|[△†0123456789⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([⁾):]|\s)|"
                     r"\^(\*+|[△†])|"
                     r"([¹²³⁴⁵⁶⁷⁸⁹]))")
+                    # XXX add ᴺᴸᴴ persin/Old Irish
+
+
+                    
 
 # Regexp for cell starts that are exceptions to def_re and do not actually
 # start a definition.
@@ -254,6 +261,7 @@ TAGS_FORCED_WORDTAGS = set([
 
 # Language-specific configuration for various aspects of inflection table
 # parsing.
+
 lang_specific = {
     "default": {
         "hdr_expand_first": set(["number", "mood", "referent", "aspect",
@@ -266,7 +274,7 @@ lang_specific = {
         "both_strong_weak_remove": True,
         "definitenesses": ["indefinite", "definite"],
         "empty_row_resets": False,
-        "form_transformations": [],
+        "form_transformations": [],  # tag extraction, lang_specific_tags()
         "genders": None,
         "imperative_no_tense": False,
         "masc_only_animate": False,  # Slavic special
@@ -282,7 +290,7 @@ lang_specific = {
         "strengths": ["strong", "weak"],
         "virile_nonvirile_remove": True,
         "voices": ["active", "passive"],
-        "special_splits": {},  # value: (splits, tags)
+        "special_phrase_splits": {},  # value: (split phrase, tags)
         # Greek-style bracket semantics
         "parentheses_for_informal": False,
         "square_brackets_for_rare": False,
@@ -290,6 +298,8 @@ lang_specific = {
         # See Swahili; replace tags with others when in a row or column
         "rowtag_replacements": None,
         "coltag_replacements": None,
+        # Armenian; migrated old data here
+        "lang_tag_mappings": None,
     },
     "austronesian-group": {
         "numbers": ["singular", "dual", "plural"],
@@ -339,6 +349,14 @@ lang_specific = {
     },
     "Aragonese": {
         "next": "romance-group",
+    },
+    "Armenian": {
+        "lang_tag_mappings": {
+            "noun": {
+                ("possessive", "singular"): ["possessive", "possessive-single"],
+                ("possessive", "plural"): ["possessive", "possessive-single"],
+            },
+        },
     },
     "Aromanian": {
         "next": "romance-group",
@@ -419,7 +437,7 @@ lang_specific = {
             ["verb", r"\bus ", "", "first-person plural"],
             ["verb", r"\bme ", "", "first-person singular"],
         ],
-        "special_splits": {
+        "special_phrase_splits": {
             "let’s be": [["let's be"], "first-person plural pronoun-included"],
             "I am (’m)/be": [["am (’m)", "be"], "first-person singular"],
             "we are (’re)/be/been": [["are (’re)", "be", "been"],
@@ -896,6 +914,15 @@ for k, v in lang_specific.items():
                 if t not in valid_tags:
                     raise AssertionError("{} key {!r} invalid tag {!r}"
                                          .format(k, kk, t))
+        elif kk == "lang_tag_mappings" and vv is not None:
+            for pos, transf in vv.items():
+                assert pos in PARTS_OF_SPEECH
+                assert isinstance(transf, dict)
+                for pre, post in transf.items():
+                    assert isinstance(pre, tuple)
+                    assert all(t in valid_tags for t in pre)
+                    assert isinstance(post, list)
+                    assert all(t in valid_tags for t in post)
         elif kk == "next":
             if vv not in lang_specific:
                 raise AssertionError("{} key {!r} value {!r} is not defined"
@@ -919,39 +946,18 @@ def get_lang_specific(lang, field):
             lang = lconfigs.get("next", "default")
 
 
-# Tag combination mappings for specific languages/part-of-speech.  These are
-# used as a post-processing step for forms extracted from tables.  Each
-# element has list of languages, list of part-of-speech, and one or more
-# source set - replacement set pairs.
-lang_tag_mappings = [
-    [["Armenian"], ["noun"],
-     [["possessive", "singular"], ["possessive", "possessive-single"]],
-     [["possessive", "plural"], ["possessive", "possessive-many"]],
-    ],
-]
-for lst in lang_tag_mappings:
-    assert len(lst) >= 3
-    assert all(isinstance(x, str) for x in lst[0])  # languages
-    assert all(x in PARTS_OF_SPEECH for x in lst[1])  # parts of speech
-    for src, dst in lst[2:]:
-        assert all(t in valid_tags for t in src)
-        assert all(t in valid_tags for t in dst)
-
-
 class InflCell(object):
     """Cell in an inflection table."""
     __slots__ = (
         "text",
         "is_title",
-        "start",
         "colspan",
         "rowspan",
         "target",
     )
-    def __init__(self, text, is_title, start, colspan, rowspan, target):
+    def __init__(self, text, is_title, colspan, rowspan, target):
         assert isinstance(text, str)
         assert is_title in (True, False)
-        assert isinstance(start, int)
         assert isinstance(colspan, int) and colspan >= 1
         assert isinstance(rowspan, int) and rowspan >= 1
         assert target is None or isinstance(target, str)
@@ -1192,7 +1198,6 @@ def clean_header(word, col):
         final_paren = m.group(0)
         col = col[:m.start()]
 
-    # ᴺᴸᴴ persin/Old Irish <- where does this go?? -KJ
     # Extract references and tag markers
     refs = []
     while True:
@@ -1202,6 +1207,9 @@ def clean_header(word, col):
         r = m.group(1)
         if r.startswith("(") and r.endswith(")"):
             r = r[1:-1]
+        ############# XXX ###############
+        # The stuff below should be part of lang_specific.
+        # lang_specific > language > special_references
         if r == "rare":
             hdr_tags.append("rare")
         elif r == "vos":
@@ -1240,6 +1248,8 @@ def clean_header(word, col):
     # See if it references a definition
     while col:
         if (is_superscript(col[-1]) or col[-1] in ("†",)):
+            ########### XXX ################
+            # These should be part of lang_specific, see above
             if col.endswith("ʳᵃʳᵉ"):
                 hdr_tags.append("rare")
                 col = col[:-4].strip()
@@ -1324,14 +1334,20 @@ def parse_title(title, source):
         global_tags.append("reflexive")
     # Check for <x>-type at the beginning of title (e.g., Armenian) and various
     # other ways of specifying an inflection class.
-    for m in re.finditer(r"\b([\w/]+-type|accent-\w+|"
-                         r"[\w/]+-stem|[^ ]+ gradation|"
-                         r"\b(stem in [\w/ ]+)|"
-                         r"[^ ]+ alternation|(First|Second|Third|Fourth|Fifth|"
-                         r"Sixth|Seventh) (Conjugation|declension)|"
-                         r"First and second declension|"
-                         r"(1st|2nd|3rd|4th|5th|6th) declension|"
-                         r"\w[\w/ ]* harmony)\b", title):
+    for m in re.finditer(
+            r"\b("
+                r"[\w/]+-type|"
+                r"accent-\w+|"
+                r"[\w/]+-stem|"
+                r"[^ ]+ gradation|"
+                r"\b(stem in [\w/ ]+)|"
+                r"[^ ]+ alternation|"
+                r"(First|Second|Third|Fourth|Fifth|Sixth|Seventh) "
+                  r"(Conjugation|declension)|"
+                r"First and second declension|"
+                r"(1st|2nd|3rd|4th|5th|6th) declension|"
+                r"\w[\w/ ]* harmony"
+            r")\b", title):
         dt = {"form": m.group(1),
               "source": source,
               "tags": ["class"]}
@@ -1339,6 +1355,7 @@ def parse_title(title, source):
     # Parse parenthesized part from title
     for m in re.finditer(r"\(([^)]*)\)", title):
         for elem in m.group(1).split(","):
+            # group(0) is the whole string, group(1) first parens
             elem = elem.strip()
             if elem in title_elements_map:
                 table_tags.extend(title_elements_map[elem].split())
@@ -1372,11 +1389,11 @@ def parse_title(title, source):
     return global_tags, table_tags, extra_forms
 
 
-def expand_header(config, ctx, word, lang, pos, text, tags0, silent=False,
+def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
                   ignore_tags=False):
     """Expands a cell header to tagset, handling conditional expressions
     in infl_map.  This returns list of tuples of tags, each list element
-    describing an alternative interpretation.  ``tags0`` is combined
+    describing an alternative interpretation.  ``base_tags`` is combined
     column and row tags for the cell in which the text is being interpreted
     (conditional expressions in inflection data may depend on it).
     If ``silent`` is True, then no warnings will be printed.  If ``ignore_tags``
@@ -1389,9 +1406,9 @@ def expand_header(config, ctx, word, lang, pos, text, tags0, silent=False,
     assert isinstance(lang, str)
     assert isinstance(pos, str)
     assert isinstance(text, str)
-    assert isinstance(tags0, (list, tuple, set))
+    assert isinstance(base_tags, (list, tuple, set))
     assert silent in (True, False)
-    # print("EXPAND_HDR: text={!r} tags0={!r}".format(text, tags0))
+    # print("EXPAND_HDR: text={!r} base_tags={!r}".format(text, base_tags))
     # First map the text using the inflection map
     text = clean_value(config, text)
     combined_return = []
@@ -1400,7 +1417,7 @@ def expand_header(config, ctx, word, lang, pos, text, tags0, silent=False,
         if not text:
             continue
         if text in infl_map:
-            v = infl_map[text]
+            v = infl_map[text]  # list or string
         else:
             m = re.match(infl_start_re, text)
             if m is not None:
@@ -1411,6 +1428,7 @@ def expand_header(config, ctx, word, lang, pos, text, tags0, silent=False,
                 # print("IGNORING NOTES")
                 combined_return = or_tagsets(lang, pos, combined_return,
                                              [("dummy-skip-this",)])
+                                             # this just adds dummy-skip-this
                 continue
             elif text in IGNORED_COLVALUES:
                 combined_return = or_tagsets(lang, pos, combined_return,
@@ -1464,7 +1482,7 @@ def expand_header(config, ctx, word, lang, pos, text, tags0, silent=False,
             # single language or a list of languages, and the
             # condition evaluates to True if the table is in one of
             # those languages.
-            if cond and "lang" in v:
+            if "lang" in v:
                 c = v["lang"]
                 if isinstance(c, str):
                     cond = c == lang
@@ -1483,7 +1501,7 @@ def expand_header(config, ctx, word, lang, pos, text, tags0, silent=False,
                     cond = pos in c
             # Handle "if" condition.  The value must be a string containing
             # a space-separated list of tags.  The condition evaluates to True
-            # if ``tags0`` contains all of the listed tags.  If the condition
+            # if ``base_tags`` contains all of the listed tags.  If the condition
             # is of the form "any: ...tags...", then any of the tags will be
             # enough.
             if cond and "if" in v and not ignore_tags:
@@ -1492,14 +1510,21 @@ def expand_header(config, ctx, word, lang, pos, text, tags0, silent=False,
                 # "if" condition is true if any of the listed tags is present if
                 # it starts with "any:", otherwise all must be present
                 if c.startswith("any: "):
-                    cond = any(t in tags0 for t in c[5:].split())
+                    cond = any(t in base_tags for t in c[5:].split())
                 else:
-                    cond = all(t in tags0 for t in c.split())
+                    cond = all(t in base_tags for t in c.split())
             # Warning message about missing conditions for debugging.
+
+            ######## XXX ##########
+            # Having a "default" field in infl_map, alongside "lang",
+            # "if", "pos", "then" and "else" could be marginally useful.
+            # It would be a field that is inherited by lower nodes of the
+            # decision tree, and which gives a default result if the cursor
+            # falls off like below.
             if cond == "default-true" and not silent:
                 ctx.debug("inflection table: IF MISSING COND: word={} "
-                          "lang={} text={} tags0={} c={} cond={}"
-                          .format(word, lang, text, tags0, c, cond))
+                          "lang={} text={} base_tags={} c={} cond={}"
+                          .format(word, lang, text, base_tags, c, cond))
             # Based on the result of evaluating the condition, select either
             # "then" part or "else" part.
             if cond:
@@ -1510,8 +1535,8 @@ def expand_header(config, ctx, word, lang, pos, text, tags0, silent=False,
                     if not silent:
                         ctx.debug("inflection table: IF WITHOUT ELSE EVALS "
                                   "False: "
-                                  "{}/{} {!r} tags0={}"
-                                  .format(word, lang, text, tags0))
+                                  "{}/{} {!r} base_tags={}"
+                                  .format(word, lang, text, base_tags))
                     v = "error-unrecognized-form"
 
         # Merge the resulting tagset from this header part with the other
@@ -1537,7 +1562,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
     # print("COMPUTE_COLTAGS CALLED start={} colspan={} celltext={!r}"
     #       .format(start, colspan, celltext))
     # For debugging, set this to the form for whose cell you want debug prints
-    if celltext == debug_word:
+    if celltext == debug_cell_text:
         print("COMPUTE_COLTAGS CALLED start={} colspan={} celltext={!r}"
               .format(start, colspan, celltext))
         for hdrspan in hdrspans:
@@ -1556,7 +1581,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
         if (hdrspan.start + hdrspan.colspan <= start or
             hdrspan.start >= start + colspan):
             # Does not horizontally overlap current cell. Ignore this hdrspan.
-            if celltext == debug_word:
+            if celltext == debug_cell_text:
                 print("Ignoring row={} start={} colspan={} tagsets={}"
                       .format(hdrspan.rownum, hdrspan.start,
                               hdrspan.colspan, hdrspan.tagsets))
@@ -1566,7 +1591,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
         if (hdrspan.start < start and
             hdrspan.start + hdrspan.colspan > start and
             hdrspan.start + hdrspan.colspan < start + colspan):
-            if celltext == debug_word:
+            if celltext == debug_cell_text:
                 print("break on partial overlap at start {} {} {}"
                       .format(hdrspan.start, hdrspan.colspan, hdrspan.tagsets))
             break
@@ -1574,7 +1599,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
             hdrspan.start > start and
             hdrspan.start + hdrspan.colspan > start + colspan and
             not hdrspan.expanded):
-            if celltext == debug_word:
+            if celltext == debug_cell_text:
                 print("break on partial overlap at end {} {} {}"
                       .format(hdrspan.start, hdrspan.colspan, hdrspan.tagsets))
             break
@@ -1601,7 +1626,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                           x.start + x.colspan <= start + colspan
                           for tt in x.tagsets
                           for t in tt)
-            if celltext == debug_word:
+            if celltext == debug_cell_text:
                 print("in_cats={} tagsets={}".format(in_cats, tagsets))
             # Merge the tagsets into existing tagsets.  This merges
             # alternatives into the same tagset if there is only one
@@ -1614,18 +1639,18 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                     continue
                 if (x.start < start or
                     x.start + x.colspan > start + colspan):
-                    if celltext == debug_word:
+                    if celltext == debug_cell_text:
                         print("NOT IN RANGE: {} {} {}"
                               .format(x.start, x.colspan, x.tagsets))
                     includes_all_on_row = False
                     continue
                 if id(x) in used_hdrspans:
-                    if celltext == debug_word:
+                    if celltext == debug_cell_text:
                         print("ALREADY USED: {} {} {}"
                               .format(x.start, x.colspan, x.tagsets))
                     continue
                 used_hdrspans.add(id(x))
-                if celltext == debug_word:
+                if celltext == debug_cell_text:
                     print("Merging into wide col: x.rownum={} "
                           "x.start={} x.colspan={} "
                           "start={} colspan={} tagsets={} x.tagsets={}"
@@ -1659,27 +1684,29 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                                 x.start + x.colspan > start + colspan)
                                for tt in x.tagsets
                                for t in tt)
-                if celltext == debug_word:
+                if celltext == debug_cell_text:
                     print("in_cats={} out_cats={}"
                           .format(in_cats, out_cats))
                 # Remove all inside categories that do not appear outside
+
                 new_tagsets = []
                 for ts in tagsets:
                     tags = tuple(sorted(t for t in ts
                                         if valid_tags[t] in out_cats))
                     if tags not in new_tagsets:
                         new_tagsets.append(tags)
-                if celltext == debug_word and new_tagsets != tagsets:
+                if celltext == debug_cell_text and new_tagsets != tagsets:
                     print("Removed tags that do not appear outside {} -> {}"
                           .format(tagsets, new_tagsets))
                 tagsets = new_tagsets
         key = (hdrspan.start, hdrspan.colspan)
         if key in used:
-            if celltext == debug_word:
+            if celltext == debug_cell_text:
                 print("Cellspan already used: start={} colspan={} rownum={} {}"
                       .format(hdrspan.start, hdrspan.colspan, hdrspan.rownum,
                               hdrspan.tagsets))
             action = get_lang_specific(lang, "reuse_cellspan")
+                        # can be "stop", "skip" or "reuse"
             if action == "stop":
                 break
             if action == "skip":
@@ -1696,8 +1723,9 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
         # If we have moved to a different row, merge into column tagsets
         # (we use different and_tagsets within the row)
         if row_tagsets_rownum != hdrspan.rownum:
+           # row_tagsets_rownum was initialized as 10000000
             ret = and_tagsets(lang, pos, coltags, row_tagsets)
-            if celltext == debug_word:
+            if celltext == debug_cell_text:
                 print("merging rows: {} {} -> {}"
                       .format(coltags, row_tagsets, ret))
             coltags = ret
@@ -1708,14 +1736,14 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
             # If this row is all headers and immediately preceeds the last
             # header we accepted, take any header from there.
             row_tagsets = and_tagsets(lang, pos, row_tagsets, tagsets)
-            if celltext == debug_word:
+            if celltext == debug_cell_text:
                 print("merged (next header row): {}".format(row_tagsets))
         else:
             # new_cats is for the new tags (higher up in the table)
             new_cats = tagset_cats(tagsets)
             # cur_cats is for the tags already collected (lower in the table)
             cur_cats = tagset_cats(coltags)
-            if celltext == debug_word:
+            if celltext == debug_cell_text:
                 print("row={} start={} colspan={} tagsets={} coltags={} "
                       "new_cats={} cur_cats={}"
                       .format(hdrspan.rownum, hdrspan.start, hdrspan.colspan,
@@ -1723,44 +1751,45 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
             if "detail" in new_cats:
                 if not any(coltags):  # Only if no tags so far
                     coltags = or_tagsets(lang, pos, coltags, tagsets)
-                if celltext == debug_word:
+                if celltext == debug_cell_text:
                     print("stopping on detail after merge")
                 break
+            # Here, we block bleeding of categories from above
             elif ("non-finite" in cur_cats and
                   "non-finite" in new_cats):
                 stop = get_lang_specific(lang, "stop_non_finite_non_finite")
                 if stop:
-                    if celltext == debug_word:
+                    if celltext == debug_cell_text:
                         print("stopping on non-finite-non-finite")
                     break
             elif ("non-finite" in cur_cats and
                   "voice" in new_cats):
                 stop = get_lang_specific(lang, "stop_non_finite_voice")
                 if stop:
-                    if celltext == debug_word:
+                    if celltext == debug_cell_text:
                         print("stopping on non-finite-voice")
                     break
             elif ("non-finite" in new_cats and
                   cur_cats & set(("person", "number"))):
-                if celltext == debug_word:
+                if celltext == debug_cell_text:
                     print("stopping on non-finite new")
                 break
             elif ("non-finite" in new_cats and
                   "tense" in new_cats):
                 stop = get_lang_specific(lang, "stop_non_finite_tense")
                 if stop:
-                    if celltext == debug_word:
+                    if celltext == debug_cell_text:
                         print("stopping on non-finite new")
                     break
             elif ("non-finite" in cur_cats and
                   new_cats & set(("mood",))):
-                if celltext == debug_word:
+                if celltext == debug_cell_text:
                     print("stopping on non-finite cur")
                 break
             if ("tense" in new_cats and
                 any("imperative" in x for x in coltags) and
                 get_lang_specific(lang, "imperative_no_tense")):
-                if celltext == debug_word:
+                if celltext == debug_cell_text:
                     print("skipping tense in imperative")
                 continue
             elif ("mood" in new_cats and
@@ -1772,52 +1801,52 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
                       for t in ts2)):
                 skip = get_lang_specific(lang, "skip_mood_mood")
                 if skip:
-                    if celltext == debug_word:
+                    if celltext == debug_cell_text:
                         print("skipping on mood-mood")
                         # we continue to next header
                 else:
-                    if celltext == debug_word:
+                    if celltext == debug_cell_text:
                         print("stopping on mood-mood")
                     break
             elif ("tense" in new_cats and
                   "tense" in cur_cats):
                 skip = get_lang_specific(lang, "skip_tense_tense")
                 if skip:
-                    if celltext == debug_word:
+                    if celltext == debug_cell_text:
                         print("skipping on tense-tense")
                         # we continue to next header
                 else:
-                    if celltext == debug_word:
+                    if celltext == debug_cell_text:
                         print("stopping on tense-tense")
                     break
             elif ("aspect" in new_cats and
                   "aspect" in cur_cats):
-                if celltext == debug_word:
+                if celltext == debug_cell_text:
                     print("skipping on aspect-aspect")
                 continue
             elif "number" in cur_cats and "number" in new_cats:
-                if celltext == debug_word:
+                if celltext == debug_cell_text:
                     print("stopping on number-number")
                 break
             elif "number" in cur_cats and "gender" in new_cats:
-                if celltext == debug_word:
+                if celltext == debug_cell_text:
                     print("stopping on number-gender")
                 break
             elif "person" in cur_cats and "person" in new_cats:
-                if celltext == debug_word:
+                if celltext == debug_cell_text:
                     print("stopping on person-person")
                 break
             else:
                 # Merge tags and continue to next header up/left in the table.
                 row_tagsets = and_tagsets(lang, pos, row_tagsets, tagsets)
-                if celltext == debug_word:
+                if celltext == debug_cell_text:
                     print("merged: {}".format(coltags))
         # Update the row number from which we have last taken headers
         last_header_row = hdrspan.rownum
     # Merge the final row tagset into coltags
     coltags = and_tagsets(lang, pos, coltags, row_tagsets)
     #print("HDRSPANS:", list((x.start, x.colspan, x.tagsets) for x in hdrspans))
-    if celltext == debug_word:
+    if celltext == debug_cell_text:
         print("COMPUTE_COLTAGS {} {} {}: {}"
               .format(start, colspan, mark_used, coltags))
     assert isinstance(coltags, list)
@@ -1836,6 +1865,7 @@ def lang_specific_tags(lang, pos, form):
     assert isinstance(form, str)
     rules = get_lang_specific(lang, "form_transformations")
     for patpos, pattern, dst, tags in rules:
+    #   PoS, regex, replacement, tags; pattern -> dst :: "^ich " > ""
         assert patpos in PARTS_OF_SPEECH
         if pos != patpos:
             continue
@@ -1870,7 +1900,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     for x in titles:
         assert isinstance(x, str)
     # print("PARSE_SIMPLE_TABLE: TITLES:", titles)
-    if debug_word:
+    if debug_cell_text:
         print("ROWS:")
         for row in rows:
             print("  ", row)
@@ -1885,6 +1915,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
         split_row = (any(x.is_title and
                          x.text in ("inanimate\nanimate",)
                          for x in row) and
+                         # x is an InflCell
                      all(x.rowspan == 1
                          for x in row))
         if not split_row:
@@ -1905,7 +1936,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 cell2.text = parts[1]
             else:
                 cell1.rowspan = 2
-                cell2 = cell1
+                cell2 = cell1  # ref, not a copy
             row1.append(cell1)
             row2.append(cell2)
         new_rows.append(row1)
@@ -1923,10 +1954,10 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
         for ref, d in defs:
             # print("DEF: ref={} d={}".format(ref, d))
             d = d.strip()
-            d = d.split(". ")[0].strip()
+            d = d.split(". ")[0].strip()  # text before ". "
             if not d:
                 continue
-            if d.endswith("."):
+            if d.endswith("."):  # catc ".."??
                 d = d[:-1]
             tags, topics = decode_tags(d, no_unknown_starts=True)
             if topics or any("error-unknown-tag" in ts for ts in tags):
@@ -1944,6 +1975,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             # print("DEFINED: {} -> {}".format(ref, tags1))
             def_ht[ref] = tags1
 
+    # XXX KJ move this somewhere more appropriate nearby
     def replace_directional_tags(tags, replacement_map):
         newtags = set()
         for t in tags:
@@ -1954,9 +1986,11 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
         return newtags
 
     # First extract definitions from cells
+    # See defs_ht for footnote defs stuff
     for row in rows:
         for cell in row:
             text, refs, defs, hdr_tags = clean_header(word, cell.text)
+            # refs, defs = footnote stuff, defs -> (ref, def)
             add_defs(defs)
     # Extract definitions from text after table
     text, refs, defs, hdr_tags = clean_header(word, after)
@@ -1970,7 +2004,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     title = None
     global_tags = []
     table_tags = []
-    special_splits = get_lang_specific(lang, "special_splits")
+    special_phrase_splits = get_lang_specific(lang, "special_phrase_splits")
     for title in titles:
         more_global_tags, more_table_tags, extra_forms = \
             parse_title(title, source)
@@ -1984,7 +2018,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     for row in rows:
         # print("ROW:", row)
         if not row:
-            continue  # Skip empty rows without incrementing i
+            continue  # Skip empty rows
         all_headers = all(x.is_title or not x.text.strip()
                           for x in row)
         text = row[0].text
@@ -1993,17 +2027,21 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             not is_superscript(text[0]) and
             text not in infl_map and  # zealous inflation map?
             (re.match(r"Inflection ", text) or
-             re.sub(r"\s+", " ",
+             re.sub(r"\s+", " ",  # flatten whitespace
                     re.sub(r"\s*\([^)]*\)", "",
+                    # Remove whitespace+parens
                            text)).strip() not in infl_map) and
             not re.match(infl_start_re, text) and
             all(x.is_title == row[0].is_title and
                 x.text == text
+            # all InflCells in `row` have the same is_title and text
                 for x in row)):
             if text and title is None:
+            # Only if there were no titles previously make the first
+            # text that is found the title
                 title = text
                 if re.match(r"(Note:|Notes:)", title):
-                    continue
+                    continue  # not a title
                 more_global_tags, more_table_tags, extra_forms = \
                     parse_title(title, source)
                 global_tags.extend(more_global_tags)
@@ -2019,22 +2057,25 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
         col0_hdrspan = None  # col0 or later header (despite its name)
         col0_followed_by_nonempty = False
         row_empty = True
-        for j, cell in enumerate(row):
-            colspan = cell.colspan
-            rowspan = cell.rowspan
+        for col_idx, cell in enumerate(row):
+        ####### XXX #######
+        # This for loop is almost 700 lines long
+            colspan = cell.colspan  # >= 1
+            rowspan = cell.rowspan  # >= 1
             previously_seen = id(cell) in seen_cells
+                # checks to see if this cell was in the previous ROW
             seen_cells.add(id(cell))
             if samecell_cnt == 0:
                 # First column of a (possible multi-column) cell
                 samecell_cnt = colspan - 1
             else:
                 assert samecell_cnt > 0
-                cell_initial = False
                 samecell_cnt -= 1
                 continue
-            first_row_of_cell = cell_rowcnt[id(cell)] == 0
+            is_first_row_of_cell = cell_rowcnt[id(cell)] == 0
+                                # defaultdict(int) around line 1900
             cell_rowcnt[id(cell)] += 1
-            # print("  COL:", col)
+            # => how many cols this spans
             col = cell.text
             if not col:
                 continue
@@ -2049,7 +2090,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 if not text:
                     continue
                 refs_tags = set()
-                for ref in refs:
+                for ref in refs:  # gets tags from footnotes
                     if ref in def_ht:
                         refs_tags.update(def_ht[ref])
                 rowtags = expand_header(config, ctx, word, lang, pos, text, [],
@@ -2059,7 +2100,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 is_title = False
                 col = cell.target
 
-            # print(rownum, j, col)
+            # print(rownum, col_idx, col)
             if is_title:
                 # It is a header cell
                 text, refs, defs, hdr_tags = clean_header(word, col)
@@ -2077,15 +2118,23 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 # print("EXPANDED {!r} to {}".format(text, v))
 
                 # Mark that the column has text (we are not at top)
-                while len(col_has_text) <= j:
+                # col_has_text row ~ "[F,F,F,F,F,F,F,T,F,F,F,T,T]"
+                # This fills up to where we are with false
+                while len(col_has_text) <= col_idx:
                     col_has_text.append(False)
-                col_has_text[j] = True
+                col_has_text[col_idx] = True
                 # Check if the header expands to reset hdrspans
                 if any("!" in tt for tt in v):
+                ####### XXX #########
+                # "!" should be some sort of dummy-tag
                     # Reset column headers (only on first row of cell)
-                    if first_row_of_cell:
+                    if is_first_row_of_cell:
                         # print("RESET HDRSPANS on: {}".format(text))
                         hdrspans = []
+                        ###### XXX ########
+                        # Instead of resetting headers, if ! was replaced by
+                        # a dummy-tag you could populate the headers with stuff
+                        # right here, I think.
                     continue
                 # Text between headers on a row causes earlier headers to
                 # be reset
@@ -2095,21 +2144,32 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                     # text cells
                     # XXX beware of header "—": "" - must not clear on that if
                     # it expands to no tags
+                    #  +-----+-----+-----+-----+
+                    #  |hdr-a|txt-a|hdr-B|txt-B|
+                    #  +-----+-----+-----+-----+
+                    #               ^reset rowtags=>
                     rowtags = [()]
                 have_hdr = True
                 # print("HAVE_HDR: {} rowtags={}".format(col, rowtags))
                 # Update rowtags and coltags
-                has_covering_hdr.add(j)
+                has_covering_hdr.add(col_idx)  # col_idx == current column
+                # has_covering_hdr is a set that has the col_idx-ids of columns
+                # that have previously had some kind of header. It is never
+                # resetted inside the col_idx-loops OR the bigger rows-loop, so
+                # applies to the whole table.
                 new_rowtags = []
                 new_coltags = []
-                all_hdr_tags = []
+                all_hdr_tags = []  # list of tuples
                 for rt0 in rowtags:
-                    for ct0 in compute_coltags(lang, pos, hdrspans, j,
+                    for ct0 in compute_coltags(lang, pos, hdrspans, col_idx,
+                                                                #col_idx=>start
                                                colspan, False, col):
-                        tags0 = (set(rt0) | set(ct0) | set(global_tags) |
-                                 set(table_tags))
+                                                        # mark_used, cell_text
+                        base_tags = (set(rt0) | set(ct0) | set(global_tags) |
+                                 set(table_tags))  # Union.
                         alt_tags = expand_header(config, ctx, word, lang, pos,
-                                                 text, tags0)
+                                                 text, base_tags)
+                                        # base_tags are used in infl_map "if"-conds.
                         for tt in alt_tags:
                             if tt not in all_hdr_tags:
                                 all_hdr_tags.append(tt)
@@ -2143,7 +2203,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 # print("new_coltags={} previously_seen={} all_hdr_tags={}"
                 #       .format(new_coltags, previously_seen, all_hdr_tags))
                 if any(new_coltags):
-                    hdrspan = HdrSpan(j, colspan, rowspan, rownum,
+                    hdrspan = HdrSpan(col_idx, colspan, rowspan, rownum,
                                       new_coltags, col, all_headers)
                     hdrspans.append(hdrspan)
                     # Handle headers that are above left-side header
@@ -2151,11 +2211,10 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                     # remaining columns (basically headers that
                     # evaluate to no tags).  In such cases widen the
                     # left-side header to the full row.
-                    if previously_seen:
+                    if previously_seen:  # id(cell) in seen_cells previously
                         col0_followed_by_nonempty = True
                         continue
                     elif col0_hdrspan is None:
-                        assert col0_hdrspan is None
                         col0_hdrspan = hdrspan
                     elif any(all_hdr_tags):
                         col0_cats = tagset_cats(col0_hdrspan.tagsets)
@@ -2165,19 +2224,22 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         later_allowed = get_lang_specific(lang,
                                                           "hdr_expand_cont")
                         later_allowed = later_allowed | set(["dummy"])
+                        # dummy2 has different behavior than plain dummy
+                        # and does not belong here.
+                        
                         # print("col0_cats={} later_cats={} "
-                        #       "fol_by_nonempty={} j={} end={} "
+                        #       "fol_by_nonempty={} col_idx={} end={} "
                         #       "tagsets={}"
                         #       .format(col0_cats, later_cats,
-                        #               col0_followed_by_nonempty, j,
+                        #               col0_followed_by_nonempty, col_idx,
                         #               col0_hdrspan.start +
                         #               col0_hdrspan.colspan,
                         #               col0_hdrspan.tagsets))
                         # print("col0.rowspan={} rowspan={}"
                         #       .format(col0_hdrspan.rowspan, rowspan))
-                        # Only expand if col0_cats and later_cats are allowed
-                        # and don't overlap and col0 has tags, and there have
-                        # been no disallowed cells in between.
+                        # Only expand if [col0_cats and later_cats are allowed
+                        # and don't overlap] and [col0 has tags], and there have
+                        # been [no disallowed cells in between].
                         #
                         # There are three cases here:
                         #   - col0_hdrspan set, continue with allowed current
@@ -2187,6 +2249,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                             # XXX Only one cat of tags: kunna/Swedish
                             # XXX len(col0_cats) == 1 and
                             col0_hdrspan.rowspan >= rowspan and
+                            # from hdrspan
                             not (later_cats - later_allowed) and
                             not (col0_cats & later_cats)):
                             # First case: col0 set, continue
@@ -2195,19 +2258,21 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         # we should expand.
                         if (not col0_followed_by_nonempty and
                             not (col0_cats - col0_allowed) and
+                                # Only "allowed" allowed
                             # XXX len(col0_cats) == 1 and
-                            j > col0_hdrspan.start + col0_hdrspan.colspan):
-                            # Expand current col0_hdrspan
+                            col_idx >col0_hdrspan.start + col0_hdrspan.colspan):
+                                # col_idx is beyond current colspan
+                            # *Expand* current col0_hdrspan
                             # print("EXPANDING COL0 MID: {} from {} to {} "
                             #       "cols {}"
                             #       .format(col0_hdrspan.text,
                             #               col0_hdrspan.colspan,
-                            #               j - col0_hdrspan.start,
+                            #               col_idx - col0_hdrspan.start,
                             #               col0_hdrspan.tagsets))
-                            col0_hdrspan.colspan = j - col0_hdrspan.start
+                            col0_hdrspan.colspan = col_idx - col0_hdrspan.start
                             col0_hdrspan.expanded = True
                         # Clear old col0_hdrspan
-                        if col == debug_word:
+                        if col == debug_cell_text:
                             print("START NEW {}".format(hdrspan.tagsets))
                         col0_hdrspan = None
                         # Now start new, unless it comes from previous row
@@ -2219,8 +2284,6 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             # These values are ignored, at least for now
             if re.match(r"^(# |\(see )", col):
                 continue
-            if any("dummy-skip-this" in ts for ts in rowtags):
-                continue  # Skip this cell
 
             # If the word has no rowtags and is a multi-row cell, then
             # ignore this.  This happens with empty separator rows
@@ -2230,19 +2293,24 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
 
             # Minor cleanup.  See e.g. είμαι/Greek/Verb present participle.
             col = re.sub(r"\s+➤\s*$", "", col)
+            ########## XXX ###########
+            # Could be generalized and data added to lang_specific
 
-            if j == 0 and (not col_has_text or not col_has_text[0]):
+            if col_idx == 0 and (not col_has_text or not col_has_text[0]):
                 continue  # Skip text at top left, as in Icelandic, Faroese
+                ######## XXX #########
+                # Simplify col_has_text; it is currently only used here, and
+                # only to filter out the upper left cell.
             # if col0_hdrspan is not None:
             #     print("COL0 FOLLOWED NONHDR: {!r} by {!r}"
             #           .format(col0_hdrspan.text, col))
             col0_followed_by_nonempty = True
             have_text = True
-            while len(col_has_text) <= j:
+            while len(col_has_text) <= col_idx:
                 col_has_text.append(False)
-            col_has_text[j] = True
+            col_has_text[col_idx] = True
             # Determine column tags for the multi-column cell
-            combined_coltags = compute_coltags(lang, pos, hdrspans, j,
+            combined_coltags = compute_coltags(lang, pos, hdrspans, col_idx,
                                                colspan, True, col)
             if any("dummy-ignored-text-cell" in ts for ts in combined_coltags):
                 continue
@@ -2261,9 +2329,12 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                     separators.append(",")
                     if not col.endswith("/"):
                         separators.append("/")
-                if col in special_splits:
-                    # Use language-specific special splits
-                    alts, tags = special_splits[col]
+                if col in special_phrase_splits:
+                    # Use language-specific special splits.
+                    # These are phrases and constructions that have
+                    # unique ways of splitting, not specific characters
+                    # to split on like with the default splitting.
+                    alts, tags = special_phrase_splits[col]
                     split_extra_tags = tags.split()
                     for x in split_extra_tags:
                         assert x in valid_tags
@@ -2275,19 +2346,33 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                     # characters before splitting.  This way we won't split
                     # them.  This is important for, e.g., recognizing
                     # alternative pronouns.
+                    # The magic characters are characters out of Unicode scope
+                    # that are given a simple incremental value, int > unicode.
                     repls = {}
                     magic_ch = MAGIC_FIRST
                     trs = get_lang_specific(lang, "form_transformations")
+                    # trs is a list of lists of strings
                     for _, v, _, _ in trs:
+                    # v is a pattern string, like "^ich"
+                    # form_transformations data is doing double-duty here,
+                    # because the pattern strings are already known to us and
+                    # not meant to be split.
                         m = re.search(v, col)
                         if m is not None:
+                        # if pattern found in text
                             magic = chr(magic_ch)
-                            magic_ch += 1
-                            col = re.sub(v, magic, col)
+                            magic_ch += 1  # next magic character value
+                            col = re.sub(v, magic, col)  # replace with magic ch
                             repls[magic] = m.group(0)
+                            # remember what regex match string each magic char
+                            # replaces. .group(0) is the whole match.
                     alts0 = split_at_comma_semi(col, separators=separators)
+                    # with magic characters in place, split the text so that
+                    # pre-transformation text is out of the way.
                     alts = []
                     for alt in alts0:
+                        # create a new list with the separated items and
+                        # the magic characters replaced with the original texts.
                         for k, v in repls.items():
                             alt = re.sub(k, v, alt)
                         alts.append(alt)
@@ -2302,12 +2387,16 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         for x in alts)
             # Check for parenthesized alternatives, e.g. ripromettersi/Italian
             if all(re.match(r"\w+( \w+)* \(\w+( \w+)*(, \w+( \w+)*)*\)$", alt)
+                            # word word* \(word word*(, word word*)*\)
                      and
                      all(distw([re.sub(r" \(.*", "", alt)], x) < 0.5
+                     # Levenshtein distance
                          for x in re.sub(r".*\((.*)\)", r"\1", alt).split(", "))
+                         # Extract from parentheses for testin
                      for alt in alts):
                 new_alts = []
                 for alt in alts:
+                    # Replace parentheses before splitting
                     alt = re.sub(r" \(", ", ", alt)
                     alt = re.sub(r"\)", "", alt)
                     for new_alt in alt.split(", "):
@@ -2321,27 +2410,37 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             # (e.g., avoir/French/verb).
             len2 = len(alts) // 2
             # Check for IPAs (forms first, IPAs under)
-            if (len(alts) % 2 == 0 and
-                all(re.match(r"^\s*/.*/\s*$", x)
-                    for x in alts[len2:])):
+            # base, base, IPA, IPA
+            if (len(alts) % 2 == 0 and  # Divisibly by two
+                all(re.match(r"^\s*/.*/\s*$", x)  # Inside slashes = IPA
+                    for x in alts[len2:])):  # In the second half of alts
                 alts = list((alts[i], "", alts[i + len2])
+                        # List of tuples: (base, "", ipa)
                             for i in range(len2))
+            # base, base, base, IPA
             elif (len(alts) > 2 and re.match(r"^\s*/.*/\s*$", alts[-1]) and
                   all(not x.startswith("/") for x in alts[:-1])):
+                  # Only if the last alt is IPA
                 alts = list((alts[i], "", alts[-1])
                             for i in range(len(alts) - 1))
+            # base, IPA, IPA, IPA
             elif (len(alts) > 2 and
                   not alts[0].startswith("/") and
                   all(re.match(r"^\s*/.*/\s*$", alts[i])
                       for i in range(1, len(alts)))):
+                  # First is base and the rest is IPA alternatives
                 alts = list((alts[0], "", alts[i])
                             for i in range(1, len(alts)))
-            # Check for IPAs where only the last entry is IPA and it applies
-            # to all preceding
+
             # Check for romanizations, forms first, romanizations under
             elif (len(alts) % 2 == 0 and
                   not any(x.find("(") >= 0 for x in alts) and
                   all(classify_desc(re.sub(r"\^.*$", "",
+                                    # Remove ends of strings starting from ^.
+                                    # Supescripts have been already removed
+                                    # from the string, while ^xyz needs to be
+                                    # removed separately, though it's usually
+                                    # something with a single letter?
                                            "".join(xx for xx in x
                                                    if not is_superscript(xx))))
                       == "other"
@@ -2366,8 +2465,10 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                                                    if not is_superscript(xx))))
                       in ("romanization", "english")
                       for i in range(1, len(alts), 2))):
+                                    # odds
                 alts = list((alts[i], alts[i + 1], "")
                             for i in range(0, len(alts), 2))
+                                          # evens
             else:
                 new_alts = []
                 for alt in alts:
@@ -2375,8 +2476,12 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                     idx = 0
                     for m in re.finditer(r"(^|\w|\*)\((\w+"
                                          r"(/\w+)*)\)",
+                                    # start OR letter OR asterisk (word/word*)
+                                    #\\___________group 1_______/ \    \_g3_///
+                                    # \                            \__gr. 2_//
+                                    #  \_____________group 0________________/
                                          alt):
-                        v = m.group(2)
+                        v = m.group(2)  # (word/word/word...)
                         if (classify_desc(v) == "tags" or  # Tags inside parens
                             m.group(0) == alt):  # All in parens
                             continue
@@ -2415,8 +2520,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 extra_tags.extend(split_extra_tags)
                 # Handle special splits again here, so that we can have custom
                 # mappings from form to form and tags.
-                if form in special_splits:
-                    alts1, tags = special_splits[form]
+                if form in special_phrase_splits:
+                    alts1, tags = special_phrase_splits[form]
                     for x in split_extra_tags:
                         assert x in valid_tags
                     assert isinstance(alts1, (list, tuple))
@@ -2620,11 +2725,11 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         if form in IGNORED_COLVALUES:
                             if "dummy-ignore-skipped" in tags:
                                 continue
-                            if (j not in has_covering_hdr and
+                            if (col_idx not in has_covering_hdr and
                                 some_has_covered_text):
                                 continue
                             form = "-"
-                        elif j in has_covering_hdr:
+                        elif col_idx in has_covering_hdr:
                             some_has_covered_text = True
 
                         # Handle ambiguous object concord. If a header
@@ -2650,21 +2755,13 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
 
                         # Perform language-specific tag replacements according
                         # to rules in a table.
-                        changed = True
-                        while changed:
-                            changed = False
-                            for lst in lang_tag_mappings:
-                                assert isinstance(lst, (list, tuple))
-                                assert len(lst) >= 3
-                                if lang not in lst[0] or pos not in lst[1]:
-                                    continue
-                                for src, dst in lst[2:]:
-                                    assert isinstance(src, (list, tuple))
-                                    assert isinstance(dst, (list, tuple))
-                                    if all(t in tags for t in src):
-                                        tags = (tags - set(src)) | set(dst)
-                                        changed = True
-
+                        lang_tag_mappings = get_lang_specific(lang,
+                                                            "lang_tag_mappings")
+                        if lang_tag_mappings is not None:
+                            for pre, post in lang_tag_mappings.items():
+                                if all(t in tags for t in pre):
+                                    tags = (tags - set(src)) | set(post)
+                                    
                         # Warn if there are entries with empty tags
                         if not tags:
                             ctx.debug("inflection table: empty tags for {}"
@@ -2712,7 +2809,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             if (not col0_followed_by_nonempty and
                 not (col0_cats - col0_allowed) and
                 # len(col0_cats) == 1 and
-                j > col0_hdrspan.start + col0_hdrspan.colspan):
+                col_idx > col0_hdrspan.start + col0_hdrspan.colspan):
                 # If an earlier header is only followed by headers that yield
                 # no tags, expand it to entire row
                 # print("EXPANDING COL0: {} from {} to {} cols {}"
@@ -3085,7 +3182,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                         cols_headered[len(row)] = True
                         celltext = ""
                 have_nonempty |= is_title or celltext != ""
-                cell = InflCell(celltext, is_title, len(row), colspan, rowspan,
+                cell = InflCell(celltext, is_title, colspan, rowspan,
                                 target)
                 for i in range(0, colspan):
                     if rowspan > 1:
@@ -3102,7 +3199,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     continue
                 cols_filled[i] -= 1
                 while len(row) < i:
-                    row.append(InflCell("", False, len(row), 1, 1, None))
+                    row.append(InflCell("", False, 1, 1, None))
                 row.append(cols_fill[i])
             # print("  ROW {!r}".format(row))
             if have_nonempty:
