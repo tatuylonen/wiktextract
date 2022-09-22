@@ -53,52 +53,6 @@ additional_expand_templates = {
     "ru-pos-alt-ё",
 }
 
-# Mapping from subtitle to linkage field
-linkage_map = {
-    "synonyms": "synonyms",
-    "ambiguous synonyms": "synonyms",
-    "near synonyms": "synonyms",
-    "pseudo-synonyms": "synonyms",
-    "idiomatic synonyms": "synonyms",
-    "hypernyms": "hypernyms",
-    "hypernym": "hypernyms",
-    "hyperonyms": "hypernyms",
-    "classes": "hypernyms",
-    "class": "hypernyms",
-    "hyponyms": "hyponyms",
-    "holonyms": "holonyms",
-    "meronyms": "meronyms",
-    "derived": "derived",
-    "related": "related",
-    "related terms": "related",
-    "related words": "related",
-    "related characters": "related",
-    "idioms": "related",
-    "idioms/phrases": "related",
-    "similes": "related",
-    "variance": "related",
-    "coordinate terms": "coordinate_terms",
-    "coordinate term": "coordinate_terms",
-    "troponyms": "troponyms",
-    "antonyms": "antonyms",
-    "near antonyms": "antonyms",
-    "instances": "instances",
-    "intances": "instances",
-    "archetypes": "instances",
-    "see also": "related",
-    "seealso": "related",
-    "specific multiples": "related",
-    "various": "related",
-    "metonyms": "related",
-    "demonyms": "related",
-    "comeronyms": "related",
-    "cohyponyms": "related",
-    "proverbs": "proverbs",
-    "abbreviations": "abbreviations",
-    "derived terms": "derived",
-    "alternative forms": "synonyms",
-}
-
 # Inverse linkage for those that have them
 linkage_inverses = {
     # XXX this is not currently used, move to post-processing
@@ -114,9 +68,6 @@ linkage_inverses = {
     "instances": "instance_of",
     "related": "related",
 }
-
-# List of all field names used for linkages
-linkage_fields = list(sorted(set(linkage_map.values())))
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions

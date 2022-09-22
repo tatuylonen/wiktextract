@@ -9,8 +9,7 @@ import collections
 from wikitextprocessor import Wtp, NodeKind, WikiNode
 
 from .datautils import ns_title_prefix_tuple
-from .page import (linkage_map, linkage_inverses, clean_node,
-                   LEVEL_KINDS)
+from .page import linkage_inverses, clean_node, LEVEL_KINDS
 from .form_descriptions import parse_sense_qualifier
 from .config import WiktionaryConfig
 
@@ -216,7 +215,7 @@ def extract_thesaurus_data(ctx, config):
                 recurse(contents.children)
                 return
             if subtitle.lower().startswith(config.OTHER_SUBTITLES["sense"].lower()):
-                sense = subtitle[7:]
+                sense = subtitle[len(config.OTHER_SUBTITLES["sense"]):]
                 linkage = None
                 recurse(contents.children)
                 return
@@ -227,7 +226,7 @@ def extract_thesaurus_data(ctx, config):
                             "abbreviation", "symbol"):
                 return
             if subtitle in config.LINKAGE_SUBTITLES:
-                linkage = linkage_map[subtitle]
+                linkage = config.LINKAGE_SUBTITLES[subtitle]
                 recurse(contents.children)
                 return
             if subtitle in config.POS_SUBTITLES:
