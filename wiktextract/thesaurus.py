@@ -235,7 +235,7 @@ def extract_thesaurus_data(ctx, config):
                 linkage = None
                 recurse(contents.children)
                 return
-            if subtitle in config.OTHER_SUBTITLES["ignored_sections"]:
+            if subtitle in ignored_subtitle_tags_map:
                 # These subtitles are ignored but children are processed and
                 # possibly given additional tags
                 subtitle_tags = ignored_subtitle_tags_map[subtitle]
