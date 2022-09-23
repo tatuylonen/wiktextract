@@ -298,6 +298,11 @@ lang_specific = {
         "coltag_replacements": None,
         # Armenian; migrated old data here
         "lang_tag_mappings": None,
+        # Spanish has a lot of "vos" and "tú" in its tables that look like
+        # references, and they give their form certain tags.
+        # Dict of references ("vos") that point to tag strings "first-person
+        # singular" that *extend* tags.
+        "special_references": None,
     },
     "austronesian-group": {
         "numbers": ["singular", "dual", "plural"],
@@ -777,6 +782,11 @@ lang_specific = {
         "form_transformations": [
             ["verb", "^no ", "", "negative"],
         ],
+        "special_references": {
+            "vos": "informal vos-form second-person singular",
+            "ᵛᵒˢ": "informal vos-form second-person singular",
+            "tú": "informal second-person singular",
+        },
     },
     "Swahili": {
         "next": "bantu-group",
@@ -1155,7 +1165,7 @@ def and_tagsets(lang, pos, tagsets1, tagsets2):
 
 
 @functools.lru_cache(65536)
-def clean_header(word, col):
+def clean_header(lang, word, col):
     """Cleans a row/column header for later processing.  This returns
     (cleaned, refs, defs, tags)."""
     # print("CLEAN_HEADER {!r}".format(col))
@@ -1200,6 +1210,7 @@ def clean_header(word, col):
 
     # Extract references and tag markers
     refs = []
+    special_references = get_lang_specific(lang, "special_references")
     while True:
         m = re.search(r"\^(.|\([^)]*\))$", col)
         if not m:
@@ -1212,15 +1223,8 @@ def clean_header(word, col):
         # lang_specific > language > special_references
         if r == "rare":
             hdr_tags.append("rare")
-        elif r == "vos":
-            hdr_tags.append("informal")
-            hdr_tags.append("vos-form")
-            hdr_tags.append("second-person")
-            hdr_tags.append("singular")
-        elif r == "tú":
-            hdr_tags.append("informal")
-            hdr_tags.append("second-person")
-            hdr_tags.append("singular")
+        elif special_references and r in special_references:
+            hdr_tags.extend(special_references[r].split())
         else:
             v = m.group(1)
             if v.startswith("(") and v.endswith(")"):
@@ -1245,7 +1249,7 @@ def clean_header(word, col):
         # print("deflst:", deflst)
         return "", [], deflst, []
 
-    # See if it references a definition
+    # See if it *looks* like a reference to a definition
     while col:
         if (is_superscript(col[-1]) or col[-1] in ("†",)):
             ########### XXX ################
@@ -1254,13 +1258,16 @@ def clean_header(word, col):
                 hdr_tags.append("rare")
                 col = col[:-4].strip()
                 continue
-            if col.endswith("ᵛᵒˢ"):
-                hdr_tags.append("informal")
-                hdr_tags.append("vos-form")
-                hdr_tags.append("second-person")
-                hdr_tags.append("singular")
-                col = col[:-3].strip()
-                continue
+            if special_references:
+                stop_flag = False
+                for r in special_references:
+                    if col.endswith(r):
+                        hdr_tags.extend(special_references[r].split())
+                        col = col[:-len(r)].strip()
+                        stop_flag = True
+                        continue
+                if stop_flag:
+                    continue
             # Numbers and H/L/N are useful information
             refs.append(col[-1])
             col = col[:-1]
@@ -1989,11 +1996,11 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     # See defs_ht for footnote defs stuff
     for row in rows:
         for cell in row:
-            text, refs, defs, hdr_tags = clean_header(word, cell.text)
+            text, refs, defs, hdr_tags = clean_header(lang, word, cell.text)
             # refs, defs = footnote stuff, defs -> (ref, def)
             add_defs(defs)
     # Extract definitions from text after table
-    text, refs, defs, hdr_tags = clean_header(word, after)
+    text, refs, defs, hdr_tags = clean_header(lang, word, after)
     add_defs(defs)
 
     # Then extract the actual forms
@@ -2086,7 +2093,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             # it as simply specifying a value for that value and ignore
             # it otherwise.
             if cell.target:
-                text, refs, defs, hdr_tags = clean_header(word, col)
+                text, refs, defs, hdr_tags = clean_header(lang, word, col)
                 if not text:
                     continue
                 refs_tags = set()
@@ -2103,7 +2110,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             # print(rownum, col_idx, col)
             if is_title:
                 # It is a header cell
-                text, refs, defs, hdr_tags = clean_header(word, col)
+                text, refs, defs, hdr_tags = clean_header(lang, word, col)
                 if not text:
                     continue
                 # Extract tags from referenced footnotes
@@ -2556,7 +2563,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                     form = alts1[0]
                     extra_tags.extend(tags.split())
                 # Clean the value, extracting reference symbols
-                form, refs, defs, hdr_tags = clean_header(word, form)
+                form, refs, defs, hdr_tags = clean_header(lang, word, form)
                 # if refs:
                 #     print("REFS:", refs)
                 extra_tags.extend(hdr_tags)
@@ -2567,7 +2574,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         refs_tags.update(def_ht[ref])
 
                 if base_roman:
-                    base_roman, _, _, hdr_tags = clean_header(word, base_roman)
+                    base_roman, _, _, hdr_tags = clean_header(lang, word, base_roman)
                     extra_tags.extend(hdr_tags)
                     ######## REVIEW ##########
                     # `clean_header` is a bit unclear as a function name
@@ -3177,7 +3184,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 cleaned_titletext = re.sub(r"\s+", " ",
                                            re.sub(r"\s*\([^)]*\)", "",
                                                   titletext)).strip()
-                cleaned, _, _, _ = clean_header(word, celltext)
+                cleaned, _, _, _ = clean_header(lang, word, celltext)
                 cleaned = re.sub(r"\s+", " ", cleaned)
                 hdr_expansion = expand_header(config, ctx, word, lang, pos,
                                               cleaned, [],
