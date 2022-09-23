@@ -18,7 +18,7 @@ from wiktextract.datautils import (data_append, data_extend, freeze,
 from wiktextract.form_descriptions import (classify_desc, decode_tags,
                                            parse_head_final_tags, distw)
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
-from wiktextract.clean import clean_value
+from wiktextract.clean import (clean_value, )
 from wiktextract.table_headers_heuristics_data import (
                                     LANGUAGES_WITH_CELLS_AS_HEADERS)
 
@@ -232,16 +232,15 @@ title_elemstart_re = re.compile(
     r"^({}) "
     .format("|".join(re.escape(x) for x in title_elemstart_map.keys())))
 
+
 # Regexp for cell starts that are likely definitions of reference symbols.
 # See also nondef_re.
 def_re = re.compile(r"(\s*•?\s+)?"
                     r"((\*+|[△†0123456789⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([⁾):]|\s)|"
                     r"\^(\*+|[△†])|"
-                    r"([¹²³⁴⁵⁶⁷⁸⁹ᴺᴸᴴ]))")
-                    # XXX add ᴺᴸᴴ persan/Old Irish
-
-
-                    
+                    r"([¹²³⁴⁵⁶⁷⁸⁹])|"
+                    r"([ᴬᴮᴰᴱᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᴿᵀᵁⱽᵂᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖʳˢᵗᵘᵛʷˣʸᶻᵝᵞᵟᶿᶥᵠᵡ]))")
+                    # ᴺᴸᴴ persan/Old Irish
 
 # Regexp for cell starts that are exceptions to def_re and do not actually
 # start a definition.
@@ -1017,8 +1016,8 @@ def is_superscript(ch):
     except ValueError:
         return False
     return re.match(r"SUPERSCRIPT |"
-                     "MODIFIER LETTER SMALL |"
-                     "MODIFIER LETTER CAPITAL ", name) is not None
+                    r"MODIFIER LETTER SMALL |"
+                    r"MODIFIER LETTER CAPITAL ", name) is not None
 
 
 def remove_useless_tags(lang, pos, tags):
