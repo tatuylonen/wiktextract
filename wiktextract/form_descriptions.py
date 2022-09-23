@@ -729,6 +729,7 @@ for topic in topic_generalize_map.keys():
 add_to_valid_tree_mapping(valid_sequences, topic_generalize_map,
                           valid_topics, True)
 
+
 # Regexp used to find "words" from word heads and linguistic descriptions
 word_re = re.compile(r"[^ ,;()\u200e]+|"
                      r"\([^ ,;()\u200e]+\)[^ ,;()\u200e]+|"
@@ -811,10 +812,42 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
         else:
             return [(from_i, "UNKNOWN", [tag])]
 
+    lst = []
+
     # First split the tags at commas and semicolons.  Their significance is that
     # a multi-word sequence cannot continue across them.
-    lst = []
-    for part in split_at_comma_semi(src, extra=[";", ":"]):
+    parts = split_at_comma_semi(src, extra=[";", ":"])
+
+    # Kludge to a wide-spread problem with Latin, where a lot of
+    # "indicative/imperative" style combinations aren't in
+    # xlat_tags_map. Instead of adding every possible combination
+    # manually, we look if there are any slashes in the string,
+    # then check for valid stuff in xlat_tags_map (like
+    # "first/third-person"), and if not, split on "/"
+    # and append on the string; will definitely give errors,
+    # but less of them.
+    new_parts = []
+    for part in parts:
+        new_seg = ""
+        if part.find("/") >= 0:
+            for w in part.split():
+                if w in xlat_tags_map:
+                    new_seg += w + " "
+                elif w.find("/") >= 0:
+                    for ww in w.split("/"):
+                        new_seg += ww + " "
+                else:
+                    new_seg += w + " "
+        else:
+            new_parts.append(part)
+            continue
+        new_parts.append(new_seg.strip())
+    print("Old parts: ", parts)
+    parts = new_parts
+    print("New parts: ", parts)
+                    
+    
+    for part in parts:
         max_last_i = len(lst)
         lst1 = part.split()
         if not lst1:

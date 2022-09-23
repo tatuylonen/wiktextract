@@ -3061,9 +3061,12 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
     from wiktextract.page import clean_node, recursively_extract
     # print("HANDLE_WIKITEXT_TABLE", titles)
 
-    cols_fill = []    # Filling for columns with rowspan > 1
-    cols_filled = []  # Number of remaining rows for which to fill the column
-    cols_headered = []  # True when the whole column contains headers, event
+    col_gap_data = []   # Filling for columns with rowspan > 1
+                        # col_gap_data contains None or InflCell
+    vertical_still_left = []  # Number of remaining rows for which to fill
+                              # the column; vertical_still_left contains int
+    cols_headered = []  # [F, T, F, F...]
+                        # True when the whole column contains headers, even
                         # when the cell is not considered a header; triggered
                         # by the "*" inflmap meta-tag.
     rows = []
@@ -3090,24 +3093,43 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
             # Parse a table row.
             row = []
             style = None
-            row_has_nonempty_cells = False  # Have nonempty cell not from rowspan
+            row_has_nonempty_cells = False  #Have nonempty cell not from rowspan
             for col in node.children:
+            # loop through each cell in the ROW
                 if not isinstance(col, WikiNode):
+                    # This skip is not used for counting, "None" is not used in
+                    # indexing or counting or looping.
                     continue
                 kind = col.kind
                 if kind not in (NodeKind.TABLE_HEADER_CELL,
                                 NodeKind.TABLE_CELL):
                     print("    UNEXPECTED ROW CONTENT: {}".format(col))
                     continue
-                while len(row) < len(cols_filled) and cols_filled[len(row)] > 0:
-                    ####### REVIEW ########
-                    # Here it took me a while to see that cols_filled and
-                    # cols_fill weren't the same name.
-                    cols_filled[len(row)] -= 1
-                    row.append(cols_fill[len(row)])
+                    
+                while (len(row) < len(vertical_still_left) and
+                       vertical_still_left[len(row)] > 0):
+                    # vertical_still_left is [...0, 0, 2...] for each column.
+                    # It is populated at the end of the loop, at the same time
+                    # as col_gap_data.
+                    # This needs to be looped and filled this way because each
+                    # `for col`-looping jumps straight to the next meaningful
+                    # cell; there is no "None" cells, only emptiness between,
+                    # and rowspan and colspan are just to generate the "fill-
+                    # map" that fills in the gaps.
+                    vertical_still_left[len(row)] -= 1
+                    row.append(col_gap_data[len(row)])
+                    # appending row is how "indexing" is done here; some-
+                    # thing is appended, like a filler-cell here or a "start"
+                    # cell at the end of the row-loop, which increased len(row)
+                    # which is then used as the target-index to check for gaps.
+                    # vertical_still_left is the countdown to when to stop
+                    # filling in gaps, and goes down to 0, and col_gap_data
+                    # is not touched except when a new rowspan is needed, at
+                    # the same time that vertical_still_left gets reassigned.
+
                 try:
-                    rowspan = int(col.attrs.get("rowspan", "1"))
-                    colspan = int(col.attrs.get("colspan", "1"))
+                    rowspan = int(col.attrs.get("rowspan", "1"))  # 🡙
+                    colspan = int(col.attrs.get("colspan", "1"))  # 🡘
                 except ValueError:
                     rowspan = 1
                     colspan = 1
@@ -3129,7 +3151,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 for tbl in tables:
                     # Some nested tables (e.g., croí/Irish) have subtitles
                     # as normal paragraphs in the same cell under a descriptive
-                    # test that should be treated as a title (e.g.,
+                    # text that should be treated as a title (e.g.,
                     # "Forms with the definite article", with "definite" not
                     # mentioned elsewhere).
                     new_titles = list(titles)
@@ -3274,8 +3296,8 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     # Whole column has title suggesting they are headers
                     # (e.g. "Case")
                     is_title = True
-                if re.match(r"Conjugation of |Declension of |Inflection of|"
-                            r"Mutation of|Notes\b", # \b is word-boundary
+                if re.match(r"Conjugation of |Declension of |Inflection of |"
+                            r"Mutation of |Notes\b", # \b is word-boundary
                             titletext):
                     is_title = True
                     
@@ -3296,23 +3318,46 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 row_has_nonempty_cells |= is_title or celltext != ""
                 cell = InflCell(celltext, is_title, colspan, rowspan,
                                 target)
-                for i in range(0, colspan):
-                    if rowspan > 1:
-                        while len(cols_fill) <= len(row):
-                            cols_fill.append(None)
-                            cols_filled.append(0)
-                        cols_fill[len(row)] = cell
-                        cols_filled[len(row)] = rowspan - 1
+                for _ in range(0, colspan):  # colspan🡘 current loop (col) or 1
+                # All the data-filling for colspan is done simply in this loop,
+                # while rowspan needs to use vertical_still_left to count gaps
+                # and col_gap_data to fill in those gaps with InflCell data.
+                    if rowspan > 1:  # rowspan🡙 current loop (col) or 1
+                        while len(col_gap_data) <= len(row):
+                            # Initialize col_gap_data/ed if it is lacking slots
+                            # for each column; col_gap_data and
+                            # vertical_still_left are never reset to [], during
+                            # the whole table function.
+                            col_gap_data.append(None)
+                            vertical_still_left.append(0)
+                        # Below is where the "rectangle" block of rowspan
+                        # and colspan is filled for the future.
+                        col_gap_data[len(row)] = cell
+                        # col_gap_data contains cells that will be used in the
+                        # future, or None
+                        vertical_still_left[len(row)] = rowspan - 1
+                        # A counter for how many gaps🡙 are still left to be
+                        # filled (row.append or row[col_gap_data[len(row)] =>
+                        # rows), it is not reset to [], but decremented to 0
+                        # each time a row gets something from col_gap_data.
+                    # Append this cell 1+ times for colspan🡘
                     row.append(cell)
             if not row:
                 continue
-            for i in range(len(row), len(cols_filled)):
-                if cols_filled[i] <= 0:
+            # After looping the original row-nodes above, fill
+            # in the rest of the row if the final cell has colspan
+            # (inherited from above, so a cell with rowspan and colspan)
+            for i in range(len(row), len(vertical_still_left)):
+                if vertical_still_left[i] <= 0:
                     continue
-                cols_filled[i] -= 1
+                vertical_still_left[i] -= 1
                 while len(row) < i:
+                ######## REVIEW #######
+                # len(row) < i inside a for-loop with range(len(row)...)
+                # seems impossible when i is not changed. Can this happen?
+                # Is this empty append meant to be in the above if?
                     row.append(InflCell("", False, 1, 1, None))
-                row.append(cols_fill[i])
+                row.append(col_gap_data[i])
             # print("  ROW {!r}".format(row))
             if row_has_nonempty_cells:
                 rows.append(row)
@@ -3389,12 +3434,15 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
         def recurse1(node):
             nonlocal tables
             if isinstance(node, (list, tuple)):
+                # node is node.children
                 for x in node:
                     recurse1(x)
                 return
             if isinstance(node, str):
                 if tables:
                     tables[-1][-1].append(node)
+                    # insert string at the end of the last row
+                    # in the last table (newest row in newest table)
                 else:
                     titleparts.append(node)
                 return
@@ -3422,6 +3470,8 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
                     recurse(node, new_titles)
                     return
             elif kind == NodeKind.LINK:
+            ###### REVIEW #######
+            # What is NodeKind.LINK exactly? No documentation.
                 if len(node.args) > 1:
                     recurse1(node.args[1:])
                 else:
