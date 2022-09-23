@@ -842,9 +842,7 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
             new_parts.append(part)
             continue
         new_parts.append(new_seg.strip())
-    print("Old parts: ", parts)
     parts = new_parts
-    print("New parts: ", parts)
                     
     
     for part in parts:
