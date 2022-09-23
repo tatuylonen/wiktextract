@@ -34,7 +34,6 @@ IGNORED_COLVALUES = set([
     "not used", "not applicable"])
 
 # These tags are never inherited from above
-# XXX merge with lang_specific
 noinherit_tags = set([
     "infinitive-i",
     "infinitive-i-long",
@@ -238,8 +237,8 @@ title_elemstart_re = re.compile(
 def_re = re.compile(r"(\s*•?\s+)?"
                     r"((\*+|[△†0123456789⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([⁾):]|\s)|"
                     r"\^(\*+|[△†])|"
-                    r"([¹²³⁴⁵⁶⁷⁸⁹]))")
-                    # XXX add ᴺᴸᴴ persin/Old Irish
+                    r"([¹²³⁴⁵⁶⁷⁸⁹ᴺᴸᴴ]))")
+                    # XXX add ᴺᴸᴴ persan/Old Irish
 
 
                     
@@ -1017,7 +1016,9 @@ def is_superscript(ch):
         name = unicodedata.name(ch)
     except ValueError:
         return False
-    return re.match(r"SUPERSCRIPT |MODIFIER LETTER SMALL ", name) is not None
+    return re.match(r"SUPERSCRIPT |"
+                     "MODIFIER LETTER SMALL |"
+                     "MODIFIER LETTER CAPITAL ", name) is not None
 
 
 def remove_useless_tags(lang, pos, tags):
