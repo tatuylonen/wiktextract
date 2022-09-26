@@ -5841,8 +5841,12 @@ def check_v(k, v):
             check_v(k, item)
     elif isinstance(v, dict):
         for kk in v.keys():
-            if kk in ("if", "then", "else", "default",):
+            if kk in ("if", "then", "else",):
                 check_v(k, v[kk])
+            elif kk == "default":
+                if not isinstance(v[kk], (str, list, tuple)):
+                    print("infl_map[{!r}] contains invalid default value "
+                                  "{!r}".format(k, v[kk]))
             elif kk == "pos":
                 vv = v[kk]
                 if isinstance(vv, str):
