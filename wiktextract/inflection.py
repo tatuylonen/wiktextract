@@ -1309,17 +1309,6 @@ def parse_title(title, source):
     global_tags = []
     table_tags = []
     extra_forms = []
-    # XXX This code section causes crashes, e.g. "i" 2022-07-05.
-    # (infl_map can contain conditional expressions, which are dicts,
-    # and this code assumes it contains strings.  Also, this does not
-    # appear necessary.  Any tags coming from full titles should be handled
-    # by separate tables/regexps if needed.)
-    # XXX this code is pending removal after testing
-    # Check for the case that the title is in infl_map
-    #if title in infl_map:
-    #    return infl_map[title].split(), [], []
-    #if title.lower() in infl_map:
-    #    return infl_map[title.lower()].split(), [], []
     # Add certain global tags based on contained words
     for m in re.finditer(title_contains_global_re, title):
         v = m.group(0).lower()
@@ -1451,6 +1440,7 @@ def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
 
         # Then loop interpreting the value, until the value is a simple string.
         # This may evaluate nested conditional expressions.
+        default_then = None
         while True:
             # If it is a string, we are done.
             if isinstance(v, str):
@@ -1491,6 +1481,9 @@ def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
                 else:
                     assert isinstance(c, (list, tuple, set))
                     cond = lang in c
+            if "default" in v:
+                assert isinstance(v["default"], str)
+                default_then = v["default"]
             # Handle "pos" condition.  The value must be either a single
             # part-of-speech or a list of them, and the condition evaluates to
             # True if the part-of-speech is any of those listed.
@@ -1534,12 +1527,15 @@ def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
             else:
                 v = v.get("else")
                 if v is None:
-                    if not silent:
-                        ctx.debug("inflection table: IF WITHOUT ELSE EVALS "
-                                  "False: "
-                                  "{}/{} {!r} base_tags={}"
-                                  .format(word, lang, text, base_tags))
-                    v = "error-unrecognized-form"
+                    if default_then:
+                        v = default_then
+                    else:
+                        if not silent:
+                            ctx.debug("inflection table: IF WITHOUT ELSE EVALS "
+                                      "False: "
+                                      "{}/{} {!r} base_tags={}"
+                                      .format(word, lang, text, base_tags))
+                        v = "error-unrecognized-form"
 
         # Merge the resulting tagset from this header part with the other
         # tagsets from the whole header

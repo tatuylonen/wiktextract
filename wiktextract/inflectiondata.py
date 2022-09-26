@@ -37,18 +37,33 @@ LANGS_WITH_NUMBERED_INFINITIVES = set([
     "Pite Sami",
 ])
 
+
+# Inflection map for parsing headers in tables.
+
+# When the parser encounters a header in a table, it checks here for a key, like
+# "plural". Then if that key leads to a string, or a list or tuple of strings,
+# it uses those tag strings as the tags for that header. If it encounters a
+# dict, it recursively uses entries in the dict to perform simple if-then-else
+# control flow.
+# "default": default tag string or list; propagates to lower levels
+# "then": follow this if "if", "lang" and "pos" are all true
+# "if": if the current header already has some tags, check if it has these ones
+# "lang": is the current language equal to string or in a list of strings
+# "pos": is the current PART OF SPEECH equal to string or in a list of strings
+ 
 infl_map = {
     "plural": {
+        "default": "plural",
         "if": "possessive",
         "lang": POSSESSIVE_POSSESSED_LANGS,
         "then": "possessive-many",
         "else": {
             "if": "combined-form",
             "then": "object-plural",
-            "else": "plural",
         },
     },
     "singular": {
+        "default": "singular",
         "if": "possessive",
         "lang": POSSESSIVE_POSSESSED_LANGS,
         "then": "possessive-single",
@@ -5787,7 +5802,7 @@ infl_map = {
     "ví": "first-person plural",
     "í": "second-person plural",
     "dé":  "third-person plural",
-    "present imperative": "imperative",
+    "present imperative": "present imperative",
     
     #a ګړندی/Pashto
     "oblique I": "oblique oblique-i",
@@ -5798,9 +5813,9 @@ infl_map = {
         "past imperfective object-concord dummy-object-concord",
     "OBJECT": "",
     "Past Perfective": {
+        "default": "past perfective",
         "lang": "Pashto",
-        "then": "object-concord dummy-object-concord",
-        "else": "past perfective",
+        "then": "past perfective object-concord dummy-object-concord",
     },
 }
 
@@ -5826,7 +5841,7 @@ def check_v(k, v):
             check_v(k, item)
     elif isinstance(v, dict):
         for kk in v.keys():
-            if kk in ("if", "then", "else"):
+            if kk in ("if", "then", "else", "default",):
                 check_v(k, v[kk])
             elif kk == "pos":
                 vv = v[kk]
