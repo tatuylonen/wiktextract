@@ -1218,9 +1218,6 @@ def clean_header(lang, word, col):
         r = m.group(1)
         if r.startswith("(") and r.endswith(")"):
             r = r[1:-1]
-        ############# XXX ###############
-        # The stuff below should be part of lang_specific.
-        # lang_specific > language > special_references
         if r == "rare":
             hdr_tags.append("rare")
         elif special_references and r in special_references:
@@ -1252,8 +1249,6 @@ def clean_header(lang, word, col):
     # See if it *looks* like a reference to a definition
     while col:
         if (is_superscript(col[-1]) or col[-1] in ("†",)):
-            ########### XXX ################
-            # These should be part of lang_specific, see above
             if col.endswith("ʳᵃʳᵉ"):
                 hdr_tags.append("rare")
                 col = col[:-4].strip()
@@ -1265,9 +1260,9 @@ def clean_header(lang, word, col):
                         hdr_tags.extend(special_references[r].split())
                         col = col[:-len(r)].strip()
                         stop_flag = True
-                        continue
+                        break # this for loop
                 if stop_flag:
-                    continue
+                    continue # this while loop
             # Numbers and H/L/N are useful information
             refs.append(col[-1])
             col = col[:-1]
