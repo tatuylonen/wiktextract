@@ -437,28 +437,28 @@ infl_map = {
 
     "past": "past",
     "1st": {
+        "default": "first-person",
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-i",
-        "else": "first-person",
     },
     "2nd":  {
+        "default": "second-person",
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-ii",
-        "else": "second-person",
     },
     "3rd":  {
+        "default": "third-person",
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-iii",
-        "else": "third-person",
     },
     "4th": {
+        "default": "fourth-person",
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-iv",
-        "else": "fourth-person",
     },
     "5th": {
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,

@@ -993,7 +993,6 @@ class HdrSpan(object):
         "rowspan",
         "rownum",      # Row number where this occurred
         "tagsets",  # list of tuples
-        "used",  # At least one text cell after this
         "text",  # For debugging
         "all_headers_row",
         "expanded",  # The header has been expanded to cover whole row/part
@@ -1012,7 +1011,6 @@ class HdrSpan(object):
         self.rowspan = rowspan
         self.rownum = rownum
         self.tagsets = list(tuple(sorted(set(tags))) for tags in tagsets)
-        self.used = False
         self.text = text
         self.all_headers_row = all_headers_row
         self.expanded = False
@@ -1510,13 +1508,7 @@ def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
                     cond = all(t in base_tags for t in c.split())
             # Warning message about missing conditions for debugging.
 
-            ######## XXX ##########
-            # Having a "default" field in infl_map, alongside "lang",
-            # "if", "pos", "then" and "else" could be marginally useful.
-            # It would be a field that is inherited by lower nodes of the
-            # decision tree, and which gives a default result if the cursor
-            # falls off like below.
-            if cond == "default-true" and not silent:
+            if cond == "default-true" and not default_then and not silent:
                 ctx.debug("inflection table: IF MISSING COND: word={} "
                           "lang={} text={} base_tags={} c={} cond={}"
                           .format(word, lang, text, base_tags, c, cond))
@@ -1547,7 +1539,7 @@ def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
     return combined_return
 
 
-def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
+def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
     """Computes column tags for a column of the given width based on the
     current header spans."""
     assert isinstance(lang, str)
@@ -1555,7 +1547,6 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
     assert isinstance(hdrspans, list)
     assert isinstance(start, int) and start >= 0
     assert isinstance(colspan, int) and colspan >= 1
-    assert mark_used in (True, False)
     assert isinstance(celltext, str)  # For debugging only
     # print("COMPUTE_COLTAGS CALLED start={} colspan={} celltext={!r}"
     #       .format(start, colspan, celltext))
@@ -1715,9 +1706,6 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
         # "register" tags don't do this (cf. essere/Italian/verb: "formal")
         if len(tcats) != 1 or "register" not in tcats:
             used.add(key)
-        if mark_used:
-            # XXX I don't think this case is used any more, check!
-            hdrspan.used = True
         # If we have moved to a different row, merge into column tagsets
         # (we use different and_tagsets within the row)
         if row_tagsets_rownum != hdrspan.rownum:
@@ -1845,8 +1833,8 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, mark_used, celltext):
     coltags = and_tagsets(lang, pos, coltags, row_tagsets)
     #print("HDRSPANS:", list((x.start, x.colspan, x.tagsets) for x in hdrspans))
     if celltext == debug_cell_text:
-        print("COMPUTE_COLTAGS {} {} {}: {}"
-              .format(start, colspan, mark_used, coltags))
+        print("COMPUTE_COLTAGS {} {}: {}"
+              .format(start, colspan, coltags))
     assert isinstance(coltags, list)
     assert all(isinstance(x, tuple) for x in coltags)
     return coltags
@@ -2161,8 +2149,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 for rt0 in rowtags:
                     for ct0 in compute_coltags(lang, pos, hdrspans, col_idx,
                                                                 #col_idx=>start
-                                               colspan, False, col):
-                                                        # mark_used, cell_text
+                                               colspan, col):
+                                                        # cell_text
                         base_tags = (set(rt0) | set(ct0) | set(global_tags) |
                                  set(table_tags))  # Union.
                         alt_tags = expand_header(config, ctx, word, lang, pos,
@@ -2312,7 +2300,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             col_has_text[col_idx] = True
             # Determine column tags for the multi-column cell
             combined_coltags = compute_coltags(lang, pos, hdrspans, col_idx,
-                                               colspan, True, col)
+                                               colspan, col)
             if any("dummy-ignored-text-cell" in ts for ts in combined_coltags):
                 continue
 
