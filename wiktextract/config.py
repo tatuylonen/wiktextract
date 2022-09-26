@@ -51,7 +51,9 @@ class WiktionaryConfig(object):
         "POS_SUBTITLES",
         "POS_TYPES",
         "OTHER_SUBTITLES",
-        "ZH_PRON_TAGS"
+        "ZH_PRON_TAGS",
+        "LANGUAGES_BY_NAME",
+        "LANGUAGES_BY_CODE"
     )
 
     def __init__(self,
@@ -108,6 +110,7 @@ class WiktionaryConfig(object):
         self.data_folder = Path(__file__).parent.joinpath(f"data/{dump_file_lang_code}")
         self.init_subtitles()
         self.init_zh_pron_tags()
+        self.init_languages()
 
     def to_kwargs(self):
         return {
@@ -160,3 +163,11 @@ class WiktionaryConfig(object):
     def init_zh_pron_tags(self) -> None:
         with self.data_folder.joinpath("zh_pron_tags.json").open(encoding="utf-8") as f:
             self.ZH_PRON_TAGS = json.load(f)
+
+    def init_languages(self):
+        with self.data_folder.joinpath("languages.json").open(encoding="utf-8") as f:
+            self.LANGUAGES_BY_CODE = json.load(f)
+        self.LANGUAGES_BY_NAME = {}
+        for lang_code, lang_names in self.LANGUAGES_BY_CODE.items():
+            for lang_name in lang_names:
+                self.LANGUAGES_BY_NAME[lang_name] = lang_code

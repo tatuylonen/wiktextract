@@ -108,7 +108,7 @@ def extract_thesaurus_data(ctx, config):
         # {{ws header|lang=xx}}
         m = re.search(r'(?s)\{\{ws header\|[^}]*lang=([^}|]*)', text)
         if m:
-            lang = ctx.LANGUAGES_BY_CODE.get(m.group(1), [None])[0]
+            lang = config.LANGUAGES_BY_CODE.get(m.group(1), [None])[0]
 
         def recurse(contents):
             nonlocal lang
@@ -207,7 +207,7 @@ def extract_thesaurus_data(ctx, config):
                 recurse(contents.children)
                 return
             subtitle = ctx.node_to_text(contents.args)
-            if subtitle in ctx.LANGUAGES_BY_NAME:
+            if subtitle in config.LANGUAGES_BY_NAME:
                 lang = subtitle
                 pos = None
                 sense = None

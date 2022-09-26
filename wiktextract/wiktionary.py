@@ -186,10 +186,10 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
         for pos, linkages in pos_ht.items():
             if (word, lang, pos) in emitted:
                 continue
-            if lang not in ctx.LANGUAGES_BY_NAME:
+            if lang not in config.LANGUAGES_BY_NAME:
                 print("Linkage language {} not recognized".format(lang))
                 continue
-            lang_code = ctx.LANGUAGES_BY_NAME[lang]
+            lang_code = config.LANGUAGES_BY_NAME[lang]
             print("Emitting thesaurus main entry for {}/{}/{} (not in main)"
                   .format(word, lang, pos))
             sense_ht = collections.defaultdict(list)

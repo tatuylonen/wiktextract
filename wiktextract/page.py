@@ -2286,7 +2286,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             lang = parse_translation_item_text(ctx, word, data, item, sense,
                                                pos_datas, lang, langcode,
                                                translations_from_template,
-                                               is_reconstruction)
+                                               is_reconstruction, config)
 
             # Handle sublists.  They are frequently used for different scripts
             # for the language and different variants of the language.  We will
@@ -2745,7 +2745,7 @@ def fix_subtitle_hierarchy(ctx: Wtp, config: WiktionaryConfig, text: str) -> str
                       "{!r} has {} on the left and {} on the right"
                       .format(title, left, right))
         lc = title.lower()
-        if title in ctx.LANGUAGES_BY_NAME:
+        if title in config.LANGUAGES_BY_NAME:
             if level > 2:
                 ctx.debug("subtitle has language name {} at level {}"
                           .format(title, level))
@@ -2797,7 +2797,7 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
     if starts_lang_re is None:
         starts_lang_re = re.compile(
             r"^(" + ctx.NAMESPACE_DATA.get("Rhymes", {}).get("name", "") + ":)?(" +
-            "|".join(re.escape(x) for x in ctx.LANGUAGES_BY_NAME) +
+            "|".join(re.escape(x) for x in config.LANGUAGES_BY_NAME) +
             ")[ /]")
 
     # Skip words that have been moved to the Attic
@@ -2847,11 +2847,11 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
             ctx.debug("unexpected top-level node: {}".format(langnode))
             continue
         lang = clean_node(config, ctx, None, langnode.args)
-        if lang not in ctx.LANGUAGES_BY_NAME:
+        if lang not in config.LANGUAGES_BY_NAME:
             ctx.debug("unrecognized language name at top-level {!r}"
                       .format(lang))
             continue
-        lang_code = ctx.LANGUAGES_BY_NAME.get(lang)
+        lang_code = config.LANGUAGES_BY_NAME.get(lang)
         if config.capture_language_codes and lang_code not in config.capture_language_codes:
             continue
         ctx.start_section(lang)
@@ -3015,7 +3015,7 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
             m = re.match(starts_lang_re, cat)
             if m:
                 catlang = m.group(2)
-                catlang_code = ctx.LANGUAGES_BY_NAME.get(catlang)
+                catlang_code = config.LANGUAGES_BY_NAME.get(catlang)
                 if (catlang != lang and not (catlang_code == "en" and
                                              data.get("lang_code") == "mul")):
                     continue  # Ignore categories for a different language
