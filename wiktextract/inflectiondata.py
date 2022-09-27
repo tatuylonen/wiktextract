@@ -295,7 +295,7 @@ infl_map = {
     "present tense": "present",
     "future tense": "future",
     "Neuter": "neuter",
-    "Masculine": "masculine",
+    # "Masculine": "masculine",
     "Feminine": "feminine",
     "adverbial": "adverbial",
     "1st singular (я)": "first-person singular",
@@ -488,7 +488,7 @@ infl_map = {
     "conditional mood": "conditional",
     "imperative mood": "imperative",
     "potential mood": "potential",
-    "Nominal forms": "!",  # Reset column inheritance
+    "Nominal forms": "dummy-reset-headers",  # Reset column inheritance
     "long 1st": "infinitive-i-long",
     "I": {
          "lang": LANGS_WITH_NUMBERED_INFINITIVES,
@@ -1688,7 +1688,7 @@ infl_map = {
     "non-finite forms": {
         "lang": "Latin",
         "pos": "verb",
-        "then": "!",  # Reset column inheritance
+        "then": "dummy-reset-headers",  # Reset column inheritance
         "else": "",
     },
     "ben": {
@@ -2607,7 +2607,7 @@ infl_map = {
     "invertive": "invertive",
     "Simple finite forms": "finite-form",
     "Positive form": "positive",
-    "Complex finite forms": "!",  # Reset
+    "Complex finite forms": "dummy-reset-headers",  # Reset
     "Polarity": "",
     "Persons": "",
     "Persons / Classes": "",
@@ -3400,7 +3400,7 @@ infl_map = {
     "Non honorific": "",
     "Continuous": "continuative",
     "Others": "",
-    "Other forms": "!",  # Reset (είμαι/Greek/Verb)
+    "Other forms": "dummy-reset-headers",  # Reset (είμαι/Greek/Verb)
     "Oblique": "oblique",
     "Demonstrative oblique": "demonstrative oblique",
     "♀": "feminine",
@@ -3675,7 +3675,7 @@ infl_map = {
     "sigmatic aorist": "sigmatic aorist",  # adiuvo/Latin
     "Key constructions": {
         "lang": "Japanese",
-        "then": "!",  # Break column inheritance, 伶俐/Japanese
+        "then": "dummy-reset-headers",  # Break column inheritance, 伶俐/Japanese
     },
     "Informal past": { # 伶俐/Japanese
         "lang": "Japanese",
@@ -3723,7 +3723,7 @@ infl_map = {
         "then": "possessive-masculine possessive-single",  # doesn't work
         "else": "masculine singular",
     },
-    # could there be a third control character besides "*" and "!"
+    # could there be a third control character besides "*" and "dummy-reset-headers"
     # that lets you override bleeding rules for a column so that it
     # takes over the whole row, like here?
     "masculine plural": {
@@ -3954,14 +3954,16 @@ infl_map = {
     "m./n." : "masculine neuter",  # féin/Old Irish
     "Stressed": "stressed",  # suide/Old irish
     "Unstressed": "unstressed",  # suide/Old Irish
-    # ~ "Masculine": { # suide/Old Irish
-        # ~ "lang": "Old Irish",
-        # ~ "then": "!",
-    # ~ },
-    # ~ "Feminine/neuter": {
-        # ~ "lang": "Old Irish",
-        # ~ "then": "!",
-    # ~ },
+    "Masculine": { # suide/Old Irish
+        "default": "masculine",
+        "lang": "Old Irish",
+        "then": "dummy-reset-headers masculine",
+    },
+    "Feminine/neuter": {
+        "default": "feminine neuter",
+        "lang": "Old Irish",
+        "then": "dummy-reset-headers feminine neuter",
+    },
     "2d sing.": "second-person singular",  # attá/Old Irish
     "3d sing.": "third-person singular",  # attá/Old Irish
     "3d sg. masc.": "third-person singular masculine",  # attá/Old Irish
@@ -4035,7 +4037,7 @@ infl_map = {
     # ~ "Compound tenses": {
         # ~ "lang": "Macedonian",
         # ~ "pos": "verb",
-        # ~ "then": "!",
+        # ~ "then": "dummy-reset-headers",
     # ~ },
 
     "collective": {  # ремен/Macedonian
@@ -4080,13 +4082,13 @@ infl_map = {
     "Personal-pronoun- including forms": {
         "lang": ["Arabic", "Moroccan Arabic","Maltese","Gulf Arabic",],
         "pos": "prep",
-        "then": "!",
+        "then": "dummy-reset-headers",
     },
     # ~ "singular": {
         # ~ "lang": ["Arabic", "Moroccan Arabic",],
         # ~ "pos": "prep",
         # ~ "if": "stem",
-        # ~ "then": "!",
+        # ~ "then": "dummy-reset-headers",
     # ~ },
 
     "common, neuter": {  # kaj/Serbo-Croatian
@@ -4643,7 +4645,7 @@ infl_map = {
     "Mutated forms": {
         "lang": "Breton",
         "pos": "verb",
-        "then": "!",
+        "then": "dummy-reset-headers",
     },
 
     # дөрвөл/Mongolian
@@ -5828,7 +5830,7 @@ def check_tags(k, v):
 
 def check_v(k, v):
     assert isinstance(k, str)
-    if v is None or v in ("!",):
+    if v is None: # or v in ("dummy-reset-headers",):
         return
     if isinstance(v, str):
         check_tags(k, v)

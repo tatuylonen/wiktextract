@@ -764,7 +764,6 @@ lang_specific = {
     "Serbo-Croatian": {
         "next": "slavic-group",
         "numbers": ["singular", "dual", "paucal", "plural"],
-        # "ignore_top_left_text_cell": True,
     },
     "Sicilian": {
         "next": "romance-group",
@@ -1179,9 +1178,6 @@ def clean_header(lang, word, col):
     # print("CLEAN_HEADER {!r}".format(col))
     hdr_tags = []
     orig_col = col
-    # XXX this is used in Greek, but perhaps better to use separate infl_map
-    # entries.  Pending removal:
-    # XXX col = re.sub(r"(?s)\s*➤\s*$", "", col)
     col = re.sub(r"(?s)\s*,\s*$", "", col)
     col = re.sub(r"(?s)\s*•\s*$", "", col)
     col = re.sub(r"\s+", " ", col)
@@ -2121,18 +2117,21 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                     # header info
                     first_col_has_text = True
                 # Check if the header expands to reset hdrspans
-                if any("!" in tt for tt in v):
-                ####### XXX #########
-                # "!" should be some sort of dummy-tag
-                    # Reset column headers (only on first row of cell)
-                    if is_first_row_of_cell:
-                        # print("RESET HDRSPANS on: {}".format(text))
-                        hdrspans = []
-                        ###### XXX ########
-                        # Instead of resetting headers, if ! was replaced by
-                        # a dummy-tag you could populate the headers with stuff
-                        # right here, I think.
-                    continue
+                if any("dummy-reset-headers" in tt for tt in v):
+                    new_hdrspans = []
+                    for hdrspan in hdrspans:
+                        # if there are HdrSpan objects (abstract headers with
+                        # row- and column-spans) that are to the left or at the
+                        # same row or below, KEEP those; things above and to
+                        # the right of the hdrspan with dummy-reset-headers
+                        # are discarded. Tags from the header together with
+                        # dummy-reset-headers are kept as normal.
+                        if (hdrspan.start + hdrspan.colspan < col_idx or
+                            hdrspan.rownum > rownum - cell.rowspan
+                            ):
+                            new_hdrspans.append(hdrspan)
+                    hdrspans = new_hdrspans
+                        
                 # Text between headers on a row causes earlier headers to
                 # be reset
                 if have_text:
@@ -2813,7 +2812,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         # tags
                         tags = tags - set(["dummy-mood", "dummy-tense",
                                            "dummy-ignore-skipped",
-                                           "dummy-object-concord",])
+                                           "dummy-object-concord",
+                                           "dummy-reset-headers",])
 
                         # Perform language-specific tag replacements according
                         # to rules in a table.
