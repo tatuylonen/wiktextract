@@ -1468,6 +1468,7 @@ def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
             # Evaluate the conditional expression.
             assert isinstance(v, dict)
             cond = "default-true"
+            c = ""
             # Handle "lang" condition.  The value must be either a
             # single language or a list of languages, and the
             # condition evaluates to True if the table is in one of
