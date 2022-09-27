@@ -25,9 +25,6 @@ class InflTests(unittest.TestCase):
                                 pos, "foo", base_tags)
         return ret
 
-# def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
-                  # ignore_tags=False):
-                  
     def test_basic(self):
             ret = self.xexpand_header("foo", { "foo": "counterfactual" })
             expected = [("counterfactual",)]

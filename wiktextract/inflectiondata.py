@@ -3712,6 +3712,7 @@ infl_map = {
     "With possessive pronouns": "possessed-form",
 
     "Person": {
+        "default": "",
         "lang": ["Hebrew", "Scottish Gaelic", "Old Irish",],
         # umpa/Scottish Gaelic, la/Old Irish
         "then": "*",
@@ -4137,12 +4138,10 @@ infl_map = {
 
     "3rd f": "third-person feminine",  #umpa/Scottish Gaelic
     "Number": {
-        "lang": "Sanskrit",
-        "then": "",
-        "else": {    #umpa/Scottish Gaelic
-            "lang": ["Hebrew", "Scottish Gaelic",],
-            "then": "*",
-        },
+        "default": "",
+        #umpa/Scottish Gaelic
+        "lang": ["Hebrew", "Scottish Gaelic",],
+        "then": "*",
     },
 
     "Third person f": "third-person feminine",  # an/Scottish Gaelic
@@ -4472,10 +4471,7 @@ infl_map = {
     "Active Voice": "active",
     "Passive Voice": "passive",
     "Middle Voice": "middle-voice",  #शृणोति/Sanskrit
-    "Person": {
-        "lang": "Sanskrit",
-        "then": "",
-    },
+
     "Potential mood / Optative mood": "potential",
     # ვენეციური/Georgian
     "nominative, genitive, instrumental": "nominative genitive instrumental",

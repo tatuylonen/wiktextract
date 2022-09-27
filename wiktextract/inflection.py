@@ -303,6 +303,9 @@ lang_specific = {
         # Dict of references ("vos") that point to tag strings "first-person
         # singular" that *extend* tags.
         "special_references": None,
+        # Some languages like Icelandic and Faroese have text cells in the
+        # upper left that we'd like to ignore.
+        "ignore_top_left_text_cell": False,
     },
     "austronesian-group": {
         "numbers": ["singular", "dual", "plural"],
@@ -470,6 +473,9 @@ lang_specific = {
         "hdr_expand_first": set(["non-finite"]),
         "hdr_expand_cont": set(["voice"]),
     },
+    "Faroese": {
+        "ignore_top_left_text_cell": True,
+    },
     "Fijian": {
         "numbers": ["singular", "paucal", "plural"],
     },
@@ -554,6 +560,9 @@ lang_specific = {
     "Hungarian": {
         "hdr_expand_first": set([]),
         "hdr_expand_cont": set([]),
+    },
+    "Icelandic": {
+        "ignore_top_left_text_cell": True,
     },
     "Ilokano": {
         "next": "austronesian-group",
@@ -755,6 +764,7 @@ lang_specific = {
     "Serbo-Croatian": {
         "next": "slavic-group",
         "numbers": ["singular", "dual", "paucal", "plural"],
+        # "ignore_top_left_text_cell": True,
     },
     "Sicilian": {
         "next": "romance-group",
@@ -1471,7 +1481,7 @@ def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
             c = ""
             # Handle "lang" condition.  The value must be either a
             # single language or a list of languages, and the
-            # condition evaluates to True if the table is in one of
+            # condition evaluates to True if the table is one of
             # those languages.
             if "lang" in v:
                 c = v["lang"]
@@ -1933,6 +1943,15 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     # for row in rows:
     #     print("  ", row)
 
+    def replace_directional_tags(tags, replacement_map):
+        newtags = set()
+        for t in tags:
+            if t in replacement_map:
+                newtags.add(replacement_map[t])
+            else:
+                newtags.add(t)
+        return newtags
+        
     # Parse definitions for references (from table itself and from text
     # after it)
     def_ht = {}
@@ -1962,15 +1981,6 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             # print("DEFINED: {} -> {}".format(ref, tags1))
             def_ht[ref] = tags1
 
-    # XXX KJ move this somewhere more appropriate nearby
-    def replace_directional_tags(tags, replacement_map):
-        newtags = set()
-        for t in tags:
-            if t in replacement_map:
-                newtags.add(replacement_map[t])
-            else:
-                newtags.add(t)
-        return newtags
 
     # First extract definitions from cells
     # See defs_ht for footnote defs stuff
@@ -1986,7 +1996,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     # Then extract the actual forms
     ret = []
     hdrspans = []
-    col_has_text = []
+    first_col_has_text = False
     rownum = 0
     title = None
     global_tags = []
@@ -2104,12 +2114,12 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                                   silent=True)
                 # print("EXPANDED {!r} to {}".format(text, v))
 
-                # Mark that the column has text (we are not at top)
-                # col_has_text row ~ "[F,F,F,F,F,F,F,T,F,F,F,T,T]"
-                # This fills up to where we are with false
-                while len(col_has_text) <= col_idx:
-                    col_has_text.append(False)
-                col_has_text[col_idx] = True
+                
+                if col_idx == 0:
+                    # first_col_has_text is used for a test to ignore
+                    # upper-left cells that are just text without
+                    # header info
+                    first_col_has_text = True
                 # Check if the header expands to reset hdrspans
                 if any("!" in tt for tt in v):
                 ####### XXX #########
@@ -2286,19 +2296,18 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             ########## XXX ###########
             # Could be generalized and data added to lang_specific
 
-            if col_idx == 0 and (not col_has_text or not col_has_text[0]):
+            if (col_idx == 0 and
+                not first_col_has_text and
+                get_lang_specific(lang, "ignore_top_left_text_cell") == True
+                ):
                 continue  # Skip text at top left, as in Icelandic, Faroese
-                ######## XXX #########
-                # Simplify col_has_text; it is currently only used here, and
-                # only to filter out the upper left cell.
+                
             # if col0_hdrspan is not None:
             #     print("COL0 FOLLOWED NONHDR: {!r} by {!r}"
             #           .format(col0_hdrspan.text, col))
             col0_followed_by_nonempty = True
             have_text = True
-            while len(col_has_text) <= col_idx:
-                col_has_text.append(False)
-            col_has_text[col_idx] = True
+
             # Determine column tags for the multi-column cell
             combined_coltags = compute_coltags(lang, pos, hdrspans, col_idx,
                                                colspan, col)
