@@ -1333,6 +1333,592 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             def_ht[ref] = tags1
 
 
+
+
+
+
+
+
+
+
+
+    def generate_tags():
+        base_tags = (set(rt0) | set(ct0) | set(global_tags) |
+                 set(table_tags))  # Union.
+        alt_tags = expand_header(config, ctx, word, lang, pos,
+                                 text, base_tags)
+                        # base_tags are used in infl_map "if"-conds.
+        for tt in alt_tags:
+            if tt not in all_hdr_tags:
+                all_hdr_tags.append(tt)
+            tt = set(tt)
+            # Certain tags are always moved to word-level tags
+            if tt & TAGS_FORCED_WORDTAGS:
+                table_tags.extend(tt & TAGS_FORCED_WORDTAGS)
+                tt = tt - TAGS_FORCED_WORDTAGS
+            # Add tags from referenced footnotes
+            tt.update(refs_tags)
+            # Sort, convert to tuple, and add to set of
+            # alternatives.
+            tt = tuple(sorted(tt))
+            if tt not in new_coltags:
+                new_coltags.append(tt)
+            # Kludge (saprast/Latvian/Verb): ignore row tags
+            # if trying to add a non-finite after mood.
+            if (any(valid_tags[t] == "mood" for t in rt0) and
+                any(valid_tags[t] == "non-finite" for t in tt)):
+                tags = tuple(sorted(set(tt) | set(hdr_tags)))
+            else:
+                tags = tuple(sorted(set(tt) | set(rt0) |
+                                    set(hdr_tags)))
+            if tags not in new_rowtags:
+                new_rowtags.append(tags)
+
+    def add_new_hdrspan():
+        nonlocal col
+        nonlocal col0_followed_by_nonempty
+        nonlocal col0_hdrspan
+        nonlocal col0_cats
+        nonlocal col0_allowed
+        
+        hdrspan = HdrSpan(col_idx, colspan, rowspan, rownum,
+                          new_coltags, col, all_headers)
+        hdrspans.append(hdrspan)
+        # Handle headers that are above left-side header
+        # columns and are followed by personal pronouns in
+        # remaining columns (basically headers that
+        # evaluate to no tags).  In such cases widen the
+        # left-side header to the full row.
+        if previously_seen:  # id(cell) in seen_cells previously
+            col0_followed_by_nonempty = True
+            return True # continue
+        elif col0_hdrspan is None:
+            col0_hdrspan = hdrspan
+        elif any(all_hdr_tags):
+            col0_cats = tagset_cats(col0_hdrspan.tagsets)
+            later_cats = tagset_cats(all_hdr_tags)
+            col0_allowed = get_lang_specific(lang,
+                                             "hdr_expand_first")
+            later_allowed = get_lang_specific(lang,
+                                              "hdr_expand_cont")
+            later_allowed = later_allowed | set(["dummy"])
+            # dummy2 has different behavior than plain dummy
+            # and does not belong here.
+            
+            # print("col0_cats={} later_cats={} "
+            #       "fol_by_nonempty={} col_idx={} end={} "
+            #       "tagsets={}"
+            #       .format(col0_cats, later_cats,
+            #               col0_followed_by_nonempty, col_idx,
+            #               col0_hdrspan.start +
+            #               col0_hdrspan.colspan,
+            #               col0_hdrspan.tagsets))
+            # print("col0.rowspan={} rowspan={}"
+            #       .format(col0_hdrspan.rowspan, rowspan))
+            # Only expand if [col0_cats and later_cats are allowed
+            # and don't overlap] and [col0 has tags], and there have
+            # been [no disallowed cells in between].
+            #
+            # There are three cases here:
+            #   - col0_hdrspan set, continue with allowed current
+            #   - col0_hdrspan set, expand, start new
+            #   - col0_hdrspan set, no expand, start new
+            if (not col0_followed_by_nonempty and
+                # XXX Only one cat of tags: kunna/Swedish
+                # XXX len(col0_cats) == 1 and
+                col0_hdrspan.rowspan >= rowspan and
+                # from hdrspan
+                not (later_cats - later_allowed) and
+                not (col0_cats & later_cats)):
+                # First case: col0 set, continue
+                return True # continue
+            # We are going to start new col0_hdrspan.  Check if
+            # we should expand.
+            if (not col0_followed_by_nonempty and
+                not (col0_cats - col0_allowed) and
+                    # Only "allowed" allowed
+                # XXX len(col0_cats) == 1 and
+                col_idx > col0_hdrspan.start + col0_hdrspan.colspan):
+                    # col_idx is beyond current colspan
+                # *Expand* current col0_hdrspan
+                # print("EXPANDING COL0 MID: {} from {} to {} "
+                #       "cols {}"
+                #       .format(col0_hdrspan.text,
+                #               col0_hdrspan.colspan,
+                #               col_idx - col0_hdrspan.start,
+                #               col0_hdrspan.tagsets))
+                col0_hdrspan.colspan = col_idx - col0_hdrspan.start
+                col0_hdrspan.expanded = True
+            # Clear old col0_hdrspan
+            if col == debug_cell_text:
+                print("START NEW {}".format(hdrspan.tagsets))
+            col0_hdrspan = None
+            # Now start new, unless it comes from previous row
+            if not previously_seen:
+                col0_hdrspan = hdrspan
+                col0_followed_by_nonempty = False
+        return False
+
+    def split_text_into_alts():
+    # Split the cell text into alternatives
+        nonlocal alts
+        nonlocal col
+        nonlocal tags
+        nonlocal split_extra_tags
+        if col and is_superscript(col[0]):
+            alts = [col]
+        else:
+            separators = [";", "•", r"\n", " or "]
+            if col.find(" + ") < 0:
+                separators.append(",")
+                if not col.endswith("/"):
+                    separators.append("/")
+            if col in special_phrase_splits:
+                # Use language-specific special splits.
+                # These are phrases and constructions that have
+                # unique ways of splitting, not specific characters
+                # to split on like with the default splitting.
+                alts, tags = special_phrase_splits[col]
+                split_extra_tags = tags.split()
+                for x in split_extra_tags:
+                    assert x in valid_tags
+                assert isinstance(alts, (list, tuple))
+                assert isinstance(tags, str)
+            else:
+                # Use default splitting.  However, recognize
+                # language-specific replacements and change them to magic
+                # characters before splitting.  This way we won't split
+                # them.  This is important for, e.g., recognizing
+                # alternative pronouns.
+                # The magic characters are characters out of Unicode scope
+                # that are given a simple incremental value, int > unicode.
+                repls = {}
+                magic_ch = MAGIC_FIRST
+                trs = get_lang_specific(lang, "form_transformations")
+                # trs is a list of lists of strings
+                for _, v, _, _ in trs:
+                # v is a pattern string, like "^ich"
+                # form_transformations data is doing double-duty here,
+                # because the pattern strings are already known to us and
+                # not meant to be split.
+                    m = re.search(v, col)
+                    if m is not None:
+                    # if pattern found in text
+                        magic = chr(magic_ch)
+                        magic_ch += 1  # next magic character value
+                        col = re.sub(v, magic, col)  # replace with magic ch
+                        repls[magic] = m.group(0)
+                        # remember what regex match string each magic char
+                        # replaces. .group(0) is the whole match.
+                alts0 = split_at_comma_semi(col, separators=separators)
+                # with magic characters in place, split the text so that
+                # pre-transformation text is out of the way.
+                alts = []
+                for alt in alts0:
+                    # create a new list with the separated items and
+                    # the magic characters replaced with the original texts.
+                    for k, v in repls.items():
+                        alt = re.sub(k, v, alt)
+                    alts.append(alt)
+        # Remove "*" from beginning of forms, as in non-attested
+        # or reconstructed forms.  Otherwise it might confuse romanization
+        # detection.
+        alts = list(re.sub(r"^\*\*?([^ ])", r"\1", x)
+                           for x in alts)
+        alts = list(x for x in alts
+                    if not re.match(r"pronounced with |\(with ", x))
+        alts = list(re.sub(r"^\((in the sense [^)]*)\)\s+", "", x)
+                    for x in alts)
+        # Check for parenthesized alternatives, e.g. ripromettersi/Italian
+        if all(re.match(r"\w+( \w+)* \(\w+( \w+)*(, \w+( \w+)*)*\)$", alt)
+                        # word word* \(word word*(, word word*)*\)
+                 and
+                 all(distw([re.sub(r" \(.*", "", alt)], x) < 0.5
+                 # Levenshtein distance
+                     for x in re.sub(r".*\((.*)\)", r"\1", alt).split(", "))
+                     # Extract from parentheses for testin
+                 for alt in alts):
+            new_alts = []
+            for alt in alts:
+                # Replace parentheses before splitting
+                alt = re.sub(r" \(", ", ", alt)
+                alt = re.sub(r"\)", "", alt)
+                for new_alt in alt.split(", "):
+                    new_alts.append(new_alt)
+            alts = new_alts
+
+    def handle_mixed_lines():
+        nonlocal alts
+        # Handle the special case where romanization is given under
+        # normal form, e.g. in Russian.  There can be multiple
+        # comma-separated forms in each case.  We also handle the case
+        # where instead of romanization we have IPA pronunciation
+        # (e.g., avoir/French/verb).
+        len2 = len(alts) // 2
+        # Check for IPAs (forms first, IPAs under)
+        # base, base, IPA, IPA
+        if (len(alts) % 2 == 0 and  # Divisibly by two
+            all(re.match(r"^\s*/.*/\s*$", x)  # Inside slashes = IPA
+                for x in alts[len2:])):  # In the second half of alts
+            alts = list((alts[i], "", alts[i + len2])
+                    # List of tuples: (base, "", ipa)
+                        for i in range(len2))
+        # base, base, base, IPA
+        elif (len(alts) > 2 and re.match(r"^\s*/.*/\s*$", alts[-1]) and
+              all(not x.startswith("/") for x in alts[:-1])):
+              # Only if the last alt is IPA
+            alts = list((alts[i], "", alts[-1])
+                        for i in range(len(alts) - 1))
+        # base, IPA, IPA, IPA
+        elif (len(alts) > 2 and
+              not alts[0].startswith("/") and
+              all(re.match(r"^\s*/.*/\s*$", alts[i])
+                  for i in range(1, len(alts)))):
+              # First is base and the rest is IPA alternatives
+            alts = list((alts[0], "", alts[i])
+                        for i in range(1, len(alts)))
+    
+        # Check for romanizations, forms first, romanizations under
+        elif (len(alts) % 2 == 0 and
+              not any(x.find("(") >= 0 for x in alts) and
+              all(classify_desc(re.sub(r"\^.*$", "",
+                                # Remove ends of strings starting from ^.
+                                # Supescripts have been already removed
+                                # from the string, while ^xyz needs to be
+                                # removed separately, though it's usually
+                                # something with a single letter?
+                                       "".join(xx for xx in x
+                                               if not is_superscript(xx))))
+                  == "other"
+                  for x in alts[:len2]) and
+              all(classify_desc(re.sub(r"\^.*$", "",
+                                       "".join(xx for xx in x
+                                               if not is_superscript(xx))))
+                  in ("romanization", "english")
+                  for x in alts[len2:])):
+            alts = list((alts[i], alts[i + len2], "")
+                        for i in range(len2))
+        # Check for romanizations, forms and romanizations alternating
+        elif (len(alts) % 2 == 0 and
+              not any(x.find("(") >= 0 for x in alts) and
+              all(classify_desc(re.sub(r"\^.*$", "",
+                                       "".join(xx for xx in alts[i]
+                                               if not is_superscript(xx))))
+                  == "other"
+                  for i in range(0, len(alts), 2)) and
+              all(classify_desc(re.sub(r"\^.*$", "",
+                                       "".join(xx for xx in alts[i]
+                                               if not is_superscript(xx))))
+                  in ("romanization", "english")
+                  for i in range(1, len(alts), 2))):
+                                # odds
+            alts = list((alts[i], alts[i + 1], "")
+                        for i in range(0, len(alts), 2))
+                                      # evens
+        else:
+            new_alts = []
+            for alt in alts:
+                lst = [""]
+                idx = 0
+                for m in re.finditer(r"(^|\w|\*)\((\w+"
+                                     r"(/\w+)*)\)",
+                                # start OR letter OR asterisk (word/word*)
+                                #\\___________group 1_______/ \    \_g3_///
+                                # \                            \__gr. 2_//
+                                #  \_____________group 0________________/
+                        ###### REVIEW ########
+                        # But why the escaped asterisk?
+                                     alt):
+                    v = m.group(2)  # (word/word/word...)
+                    if (classify_desc(v) == "tags" or  # Tags inside parens
+                        m.group(0) == alt):  # All in parens
+                        continue
+                    new_lst = []
+                    for x in lst:
+                        x += alt[idx: m.start()] + m.group(1)
+                             # alt until letter or asterisk
+                        idx = m.end()
+                        vparts = v.split("/")
+                                 # group(2) = ["word", "wörd"...]
+                        if len(vparts) == 1:
+                            new_lst.append(x)
+                            new_lst.append(x + v)
+                            # "kind(er)" -> ["kind", "kinder"]
+                        else:
+                            for vv in vparts:
+                                new_lst.append(x + vv)
+                            # "lampai(tten/den)" ->
+                            # ["lampaitten", "lampaiden"]
+                    lst = new_lst
+                for x in lst:
+                    new_alts.append(x + alt[idx:])
+                    # add the end of alt
+            alts = list((x, "", "") for x in new_alts)
+                        # [form, no romz, no ipa]
+
+    def find_semantic_parens():
+        nonlocal form
+        # "Some languages" (=Greek) use brackets to mark things that
+        # require tags, like (informality), [rarity] and {archaicity}.
+        if re.match(r"\([^][(){}]*\)$", form):
+            if get_lang_specific(lang, "parentheses_for_informal"):
+                form = form[1:-1]
+                extra_tags.append("informal")
+            else:
+                form = form[1:-1]
+        elif re.match(r"\{\[[^][(){}]*\]\}$", form):
+            if (get_lang_specific(lang, "square_brackets_for_rare") and
+                get_lang_specific(lang, "curly_brackets_for_archaic")):
+                # είμαι/Greek/Verb
+                form = form[2:-2]
+                extra_tags.extend(["rare", "archaic"])
+            else:
+                form = form[2:-2]
+        elif re.match(r"\{[^][(){}]*\}$", form):
+            if get_lang_specific(lang, "curly_brackets_for_archaic"):
+                # είμαι/Greek/Verb
+                form = form[1:-1]
+                extra_tags.extend(["archaic"])
+            else:
+                form = form[1:-1]
+        elif re.match(r"\[[^][(){}]*\]$", form):
+            if get_lang_specific(lang, "square_brackets_for_rare"):
+                # είμαι/Greek/Verb
+                form = form[1:-1]
+                extra_tags.append("rare")
+            else:
+                form = form[1:-1]
+
+    def handle_parens():
+        nonlocal roman
+        nonlocal form
+        nonlocal clitic
+        if re.match(r"[’'][a-z]([a-z][a-z]?)?$", paren):
+        # is there a clitic starting with apostrophe?
+            clitic = paren
+            # assume the whole paren is a clitic
+            # then remove paren from form
+            form = (form[:m.start()] + subst +
+                    form[m.end():]).strip()
+        elif classify_desc(paren) == "tags":
+            tagsets1, topics1 = decode_tags(paren)
+            if not topics1:
+                for ts in tagsets1:
+                    ts = list(x for x in ts
+                              if x.find(" ") < 0)
+                ##### REVIEW ######
+                # Is the "no tags with spaces" test
+                # above just in case something slips
+                # through?
+                    extra_tags.extend(ts)
+                form = (form[:m.start()] + subst +
+                        form[m.end():]).strip()
+        # brackets contain romanization
+        elif (m.start() > 0 and not roman and
+              classify_desc(form[:m.start()]) == "other" and
+              # "other" ~ text
+              classify_desc(paren) in ("romanization", "english")
+              and not re.search(r"^with |-form$", paren)):
+            roman = paren
+            form = (form[:m.start()] + subst +
+                    form[m.end():]).strip()
+        elif re.search(r"^with |-form", paren):
+        ######## REVIEW ########
+        # This regex is subtly different from the equivalent
+        # above: -form vs. -form$
+            form = (form[:m.start()] + subst +
+                    form[m.end():]).strip()
+
+    def merge_row_and_column_tags():
+        # Merge column tags and row tags.  We give preference
+        # to moods etc coming from rowtags (cf. austteigen/German/Verb
+        # imperative forms).
+        
+        # In certain cases, what a tag means depends on whether
+        # it is a row or column header. Depending on the language,
+        # we replace certain tags with others if they're in
+        # a column or row
+        nonlocal form
+        nonlocal some_has_covered_text
+        rtagreplacs = get_lang_specific(lang, "rowtag_replacements")
+        ctagreplacs = get_lang_specific(lang, "coltag_replacements")
+        for rt in sorted(rowtags):
+            # if lang was in rowtag_replacements)
+            if not rtagreplacs == None:
+                rt = replace_directional_tags(rt, rtagreplacs)
+            for ct in sorted(coltags):
+                # if lang was in coltag_replacements
+                if not ctagreplacs == None:
+                    ct = replace_directional_tags(ct,
+                                              ctagreplacs)
+                tags = set(global_tags)
+                tags.update(extra_tags)
+                tags.update(rt)
+                tags.update(refs_tags)
+                # Merge tags from column.  For certain kinds of tags,
+                # those coming from row take precedence.
+                old_tags = set(tags)
+                for t in ct:
+                    c = valid_tags[t]
+                    if (c in ("mood", "case", "number") and
+                        any(valid_tags[tt] == c
+                            for tt in old_tags)):
+                        continue
+                    tags.add(t)
+    
+                # Extract language-specific tags from the
+                # form.  This may also adjust the form.
+                form, lang_tags = lang_specific_tags(lang, pos, form)
+                tags.update(lang_tags)
+    
+                # For non-finite verb forms, see if they have
+                # a gender/class suffix
+                if pos == "verb" and any(valid_tags[t] == "non-finite"
+                       for t in tags):
+                    form, tt = parse_head_final_tags(ctx, lang, form)
+                    tags.update(tt)
+    
+                # Remove "personal" tag if have nth person; these
+                # come up with e.g. reconhecer/Portuguese/Verb.  But
+                # not if we also have "pronoun"
+                if ("personal" in tags and
+                    "pronoun" not in tags and
+                    any(x in tags for x in
+                       ["first-person", "second-person",
+                        "third-person"])):
+                    tags.remove("personal")
+    
+                # If we have impersonal, remove person and number.
+                # This happens with e.g. viajar/Portuguese/Verb
+                if "impersonal" in tags:
+                    tags = tags - set(["first-person", "second-person",
+                                       "third-person",
+                                       "singular", "plural"])
+    
+                # Remove unnecessary "positive" tag from verb forms
+                if pos == "verb" and "positive" in tags:
+                    if "negative" in tags:
+                        tags.remove("negative")
+                    tags.remove("positive")
+    
+                # Many Russian (and other Slavic) inflection tables
+                # have animate/inanimate distinction that generates
+                # separate entries for neuter/feminine, but the
+                # distinction only applies to masculine.  Remove them
+                # form neuter/feminine and eliminate duplicates.
+                if get_lang_specific(lang, "masc_only_animate"):
+                    for t1 in ("animate", "inanimate"):
+                        for t2 in ("neuter", "feminine"):
+                            if (t1 in tags and t2 in tags and
+                                "masculine" not in tags and
+                                "plural" not in tags):
+                                tags.remove(t1)
+    
+                # German adjective tables contain "(keiner)" etc
+                # for mixed declension plural.  When the adjective
+                # disappears and it becomes just one word, remove
+                # the "includes-article" tag.  e.g. eiskalt/German
+                if "includes-article" in tags and form.find(" ") < 0:
+                    tags.remove("includes-article")
+    
+                # Handle ignored forms.  We mark that the form was
+                # provided.  This is important information; some words
+                # just do not have a certain form.  However, there also
+                # many cases where no word in a language has a
+                # particular form.  Post-processing could detect and
+                # remove such cases.
+                ######## REVIEW #########
+                # I don't get how this works. has_covering_hdr is a set
+                # of column idxs that have some sort of header above.
+                # It is never reset, so it quickly populates. But
+                # here, col_idx not in has_covering_hdr means the cell
+                # we're in has no header above, and as long as
+                # any column we've seen before in this table has
+                # its idx in has_covering_hdr before...
+                # Both of these are never resetted inside the table
+                # for-loop! They only accumulate positive and True
+                # values.
+                if form in IGNORED_COLVALUES:
+                    if "dummy-ignore-skipped" in tags:
+                        continue
+                    if (col_idx not in has_covering_hdr and
+                        some_has_covered_text):
+                        continue
+                    form = "-"
+                elif col_idx in has_covering_hdr:
+                    some_has_covered_text = True
+    
+                # Handle ambiguous object concord. If a header
+                # gives the "dummy-object-concord"-tag to a word,
+                # replace person, number and gender tags with
+                # their "object-" counterparts so that the verb
+                # agrees with the object instead.
+                # Use only when the verb has ONLY object agreement!
+                #a پخول/Pashto
+                if "dummy-object-concord" in tags:
+                    for subtag, objtag in (object_concord_replacements
+                                        .items()):
+                        if subtag in tags:
+                            tags.remove(subtag)
+                            tags.add(objtag)
+    
+                # Remove the dummy mood tag that we sometimes
+                # use to block adding other mood and related
+                # tags
+                tags = tags - set(["dummy-mood", "dummy-tense",
+                                   "dummy-ignore-skipped",
+                                   "dummy-object-concord",
+                                   "dummy-reset-headers",])
+    
+                # Perform language-specific tag replacements according
+                # to rules in a table.
+                lang_tag_mappings = get_lang_specific(lang,
+                                                    "lang_tag_mappings")
+                if lang_tag_mappings is not None:
+                    for pre, post in lang_tag_mappings.items():
+                        if all(t in tags for t in pre):
+                            tags = (tags - set(src)) | set(post)
+                            
+                # Warn if there are entries with empty tags
+                if not tags:
+                    ctx.debug("inflection table: empty tags for {}"
+                              .format(form))
+    
+                # Warn if form looks like IPA
+                ########## REVIEW #########
+                # Because IPA is its own unicode block, we could also
+                # technically do a Unicode name check to see if a string
+                # contains IPA. Not all valid IPA characters are in the
+                # IPA extension block, so you can technically have false
+                # negatives if it's something like /toki/, but it
+                # shouldn't give false positives.
+                # Alternatively, you could make a list of IPA-admissible
+                # characters and reject non-IPA stuff with that.
+                if re.match(r"\s*/.*/\s*$", form):
+                    ctx.debug("inflection table form looks like IPA: "
+                              "form={} tags={}"
+                              .format(form, tags))
+    
+                # Note that this checks `form`, not `in tags`
+                if form == "dummy-ignored-text-cell":
+                    continue
+    
+                if "dummy-remove-this-cell" in tags:
+                    continue
+    
+                # Add the form
+                tags = list(sorted(tags))
+                dt = {"form": form, "tags": tags, "source": source}
+                if roman:
+                    dt["roman"] = roman
+                if ipa:
+                    dt["ipa"] = ipa
+                ret.append(dt)
+                # If we got separate clitic form, add it
+                if clitic:
+                    dt = {"form": clitic, "tags": tags + ["clitic"],
+                          "source": source}
+                    ret.append(dt)
     # First extract definitions from cells
     # See defs_ht for footnote defs stuff
     for row in rows:
@@ -1406,8 +1992,6 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
         col0_followed_by_nonempty = False
         row_empty = True
         for col_idx, cell in enumerate(row):
-        ####### XXX #######
-        # This for loop is almost 700 lines long
             colspan = cell.colspan  # >= 1
             rowspan = cell.rowspan  # >= 1
             previously_seen = id(cell) in seen_cells
@@ -1512,40 +2096,12 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 new_coltags = []
                 all_hdr_tags = []  # list of tuples
                 for rt0 in rowtags:
-                    for ct0 in compute_coltags(lang, pos, hdrspans, col_idx,
-                                                                #col_idx=>start
-                                               colspan, col):
-                                                        # cell_text
-                        base_tags = (set(rt0) | set(ct0) | set(global_tags) |
-                                 set(table_tags))  # Union.
-                        alt_tags = expand_header(config, ctx, word, lang, pos,
-                                                 text, base_tags)
-                                        # base_tags are used in infl_map "if"-conds.
-                        for tt in alt_tags:
-                            if tt not in all_hdr_tags:
-                                all_hdr_tags.append(tt)
-                            tt = set(tt)
-                            # Certain tags are always moved to word-level tags
-                            if tt & TAGS_FORCED_WORDTAGS:
-                                table_tags.extend(tt & TAGS_FORCED_WORDTAGS)
-                                tt = tt - TAGS_FORCED_WORDTAGS
-                            # Add tags from referenced footnotes
-                            tt.update(refs_tags)
-                            # Sort, convert to tuple, and add to set of
-                            # alternatives.
-                            tt = tuple(sorted(tt))
-                            if tt not in new_coltags:
-                                new_coltags.append(tt)
-                            # Kludge (saprast/Latvian/Verb): ignore row tags
-                            # if trying to add a non-finite after mood.
-                            if (any(valid_tags[t] == "mood" for t in rt0) and
-                                any(valid_tags[t] == "non-finite" for t in tt)):
-                                tags = tuple(sorted(set(tt) | set(hdr_tags)))
-                            else:
-                                tags = tuple(sorted(set(tt) | set(rt0) |
-                                                    set(hdr_tags)))
-                            if tags not in new_rowtags:
-                                new_rowtags.append(tags)
+                    for ct0 in compute_coltags(lang, pos, hdrspans,
+                                               col_idx, #col_idx=>start
+                                               colspan,
+                                               col, # cell_text
+                                               ):
+                        generate_tags()
                 rowtags = new_rowtags
                 if any("dummy-skip-this" in ts for ts in rowtags):
                     continue  # Skip this cell
@@ -1554,82 +2110,10 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 # print("new_coltags={} previously_seen={} all_hdr_tags={}"
                 #       .format(new_coltags, previously_seen, all_hdr_tags))
                 if any(new_coltags):
-                    hdrspan = HdrSpan(col_idx, colspan, rowspan, rownum,
-                                      new_coltags, col, all_headers)
-                    hdrspans.append(hdrspan)
-                    # Handle headers that are above left-side header
-                    # columns and are followed by personal pronouns in
-                    # remaining columns (basically headers that
-                    # evaluate to no tags).  In such cases widen the
-                    # left-side header to the full row.
-                    if previously_seen:  # id(cell) in seen_cells previously
-                        col0_followed_by_nonempty = True
+                    cont = add_new_hdrspan()
+                    if cont:
                         continue
-                    elif col0_hdrspan is None:
-                        col0_hdrspan = hdrspan
-                    elif any(all_hdr_tags):
-                        col0_cats = tagset_cats(col0_hdrspan.tagsets)
-                        later_cats = tagset_cats(all_hdr_tags)
-                        col0_allowed = get_lang_specific(lang,
-                                                         "hdr_expand_first")
-                        later_allowed = get_lang_specific(lang,
-                                                          "hdr_expand_cont")
-                        later_allowed = later_allowed | set(["dummy"])
-                        # dummy2 has different behavior than plain dummy
-                        # and does not belong here.
-                        
-                        # print("col0_cats={} later_cats={} "
-                        #       "fol_by_nonempty={} col_idx={} end={} "
-                        #       "tagsets={}"
-                        #       .format(col0_cats, later_cats,
-                        #               col0_followed_by_nonempty, col_idx,
-                        #               col0_hdrspan.start +
-                        #               col0_hdrspan.colspan,
-                        #               col0_hdrspan.tagsets))
-                        # print("col0.rowspan={} rowspan={}"
-                        #       .format(col0_hdrspan.rowspan, rowspan))
-                        # Only expand if [col0_cats and later_cats are allowed
-                        # and don't overlap] and [col0 has tags], and there have
-                        # been [no disallowed cells in between].
-                        #
-                        # There are three cases here:
-                        #   - col0_hdrspan set, continue with allowed current
-                        #   - col0_hdrspan set, expand, start new
-                        #   - col0_hdrspan set, no expand, start new
-                        if (not col0_followed_by_nonempty and
-                            # XXX Only one cat of tags: kunna/Swedish
-                            # XXX len(col0_cats) == 1 and
-                            col0_hdrspan.rowspan >= rowspan and
-                            # from hdrspan
-                            not (later_cats - later_allowed) and
-                            not (col0_cats & later_cats)):
-                            # First case: col0 set, continue
-                            continue
-                        # We are going to start new col0_hdrspan.  Check if
-                        # we should expand.
-                        if (not col0_followed_by_nonempty and
-                            not (col0_cats - col0_allowed) and
-                                # Only "allowed" allowed
-                            # XXX len(col0_cats) == 1 and
-                            col_idx >col0_hdrspan.start + col0_hdrspan.colspan):
-                                # col_idx is beyond current colspan
-                            # *Expand* current col0_hdrspan
-                            # print("EXPANDING COL0 MID: {} from {} to {} "
-                            #       "cols {}"
-                            #       .format(col0_hdrspan.text,
-                            #               col0_hdrspan.colspan,
-                            #               col_idx - col0_hdrspan.start,
-                            #               col0_hdrspan.tagsets))
-                            col0_hdrspan.colspan = col_idx - col0_hdrspan.start
-                            col0_hdrspan.expanded = True
-                        # Clear old col0_hdrspan
-                        if col == debug_cell_text:
-                            print("START NEW {}".format(hdrspan.tagsets))
-                        col0_hdrspan = None
-                        # Now start new, unless it comes from previous row
-                        if not previously_seen:
-                            col0_hdrspan = hdrspan
-                            col0_followed_by_nonempty = False
+
                 continue
 
             # These values are ignored, at least for now
@@ -1674,194 +2158,12 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             split_extra_tags = []
             col = re.sub(r"[ \t\r]+", " ", col)
             # Split the cell text into alternatives
-            if col and is_superscript(col[0]):
-                alts = [col]
-            else:
-                separators = [";", "•", r"\n", " or "]
-                if col.find(" + ") < 0:
-                    separators.append(",")
-                    if not col.endswith("/"):
-                        separators.append("/")
-                if col in special_phrase_splits:
-                    # Use language-specific special splits.
-                    # These are phrases and constructions that have
-                    # unique ways of splitting, not specific characters
-                    # to split on like with the default splitting.
-                    alts, tags = special_phrase_splits[col]
-                    split_extra_tags = tags.split()
-                    for x in split_extra_tags:
-                        assert x in valid_tags
-                    assert isinstance(alts, (list, tuple))
-                    assert isinstance(tags, str)
-                else:
-                    # Use default splitting.  However, recognize
-                    # language-specific replacements and change them to magic
-                    # characters before splitting.  This way we won't split
-                    # them.  This is important for, e.g., recognizing
-                    # alternative pronouns.
-                    # The magic characters are characters out of Unicode scope
-                    # that are given a simple incremental value, int > unicode.
-                    repls = {}
-                    magic_ch = MAGIC_FIRST
-                    trs = get_lang_specific(lang, "form_transformations")
-                    # trs is a list of lists of strings
-                    for _, v, _, _ in trs:
-                    # v is a pattern string, like "^ich"
-                    # form_transformations data is doing double-duty here,
-                    # because the pattern strings are already known to us and
-                    # not meant to be split.
-                        m = re.search(v, col)
-                        if m is not None:
-                        # if pattern found in text
-                            magic = chr(magic_ch)
-                            magic_ch += 1  # next magic character value
-                            col = re.sub(v, magic, col)  # replace with magic ch
-                            repls[magic] = m.group(0)
-                            # remember what regex match string each magic char
-                            # replaces. .group(0) is the whole match.
-                    alts0 = split_at_comma_semi(col, separators=separators)
-                    # with magic characters in place, split the text so that
-                    # pre-transformation text is out of the way.
-                    alts = []
-                    for alt in alts0:
-                        # create a new list with the separated items and
-                        # the magic characters replaced with the original texts.
-                        for k, v in repls.items():
-                            alt = re.sub(k, v, alt)
-                        alts.append(alt)
-            # Remove "*" from beginning of forms, as in non-attested
-            # or reconstructed forms.  Otherwise it might confuse romanization
-            # detection.
-            alts = list(re.sub(r"^\*\*?([^ ])", r"\1", x)
-                               for x in alts)
-            alts = list(x for x in alts
-                        if not re.match(r"pronounced with |\(with ", x))
-            alts = list(re.sub(r"^\((in the sense [^)]*)\)\s+", "", x)
-                        for x in alts)
-            # Check for parenthesized alternatives, e.g. ripromettersi/Italian
-            if all(re.match(r"\w+( \w+)* \(\w+( \w+)*(, \w+( \w+)*)*\)$", alt)
-                            # word word* \(word word*(, word word*)*\)
-                     and
-                     all(distw([re.sub(r" \(.*", "", alt)], x) < 0.5
-                     # Levenshtein distance
-                         for x in re.sub(r".*\((.*)\)", r"\1", alt).split(", "))
-                         # Extract from parentheses for testin
-                     for alt in alts):
-                new_alts = []
-                for alt in alts:
-                    # Replace parentheses before splitting
-                    alt = re.sub(r" \(", ", ", alt)
-                    alt = re.sub(r"\)", "", alt)
-                    for new_alt in alt.split(", "):
-                        new_alts.append(new_alt)
-                alts = new_alts
+            split_text_into_alts()
 
-            # Handle the special case where romanization is given under
-            # normal form, e.g. in Russian.  There can be multiple
-            # comma-separated forms in each case.  We also handle the case
-            # where instead of romanization we have IPA pronunciation
-            # (e.g., avoir/French/verb).
-            len2 = len(alts) // 2
-            # Check for IPAs (forms first, IPAs under)
-            # base, base, IPA, IPA
-            if (len(alts) % 2 == 0 and  # Divisibly by two
-                all(re.match(r"^\s*/.*/\s*$", x)  # Inside slashes = IPA
-                    for x in alts[len2:])):  # In the second half of alts
-                alts = list((alts[i], "", alts[i + len2])
-                        # List of tuples: (base, "", ipa)
-                            for i in range(len2))
-            # base, base, base, IPA
-            elif (len(alts) > 2 and re.match(r"^\s*/.*/\s*$", alts[-1]) and
-                  all(not x.startswith("/") for x in alts[:-1])):
-                  # Only if the last alt is IPA
-                alts = list((alts[i], "", alts[-1])
-                            for i in range(len(alts) - 1))
-            # base, IPA, IPA, IPA
-            elif (len(alts) > 2 and
-                  not alts[0].startswith("/") and
-                  all(re.match(r"^\s*/.*/\s*$", alts[i])
-                      for i in range(1, len(alts)))):
-                  # First is base and the rest is IPA alternatives
-                alts = list((alts[0], "", alts[i])
-                            for i in range(1, len(alts)))
-
-            # Check for romanizations, forms first, romanizations under
-            elif (len(alts) % 2 == 0 and
-                  not any(x.find("(") >= 0 for x in alts) and
-                  all(classify_desc(re.sub(r"\^.*$", "",
-                                    # Remove ends of strings starting from ^.
-                                    # Supescripts have been already removed
-                                    # from the string, while ^xyz needs to be
-                                    # removed separately, though it's usually
-                                    # something with a single letter?
-                                           "".join(xx for xx in x
-                                                   if not is_superscript(xx))))
-                      == "other"
-                      for x in alts[:len2]) and
-                  all(classify_desc(re.sub(r"\^.*$", "",
-                                           "".join(xx for xx in x
-                                                   if not is_superscript(xx))))
-                      in ("romanization", "english")
-                      for x in alts[len2:])):
-                alts = list((alts[i], alts[i + len2], "")
-                            for i in range(len2))
-            # Check for romanizations, forms and romanizations alternating
-            elif (len(alts) % 2 == 0 and
-                  not any(x.find("(") >= 0 for x in alts) and
-                  all(classify_desc(re.sub(r"\^.*$", "",
-                                           "".join(xx for xx in alts[i]
-                                                   if not is_superscript(xx))))
-                      == "other"
-                      for i in range(0, len(alts), 2)) and
-                  all(classify_desc(re.sub(r"\^.*$", "",
-                                           "".join(xx for xx in alts[i]
-                                                   if not is_superscript(xx))))
-                      in ("romanization", "english")
-                      for i in range(1, len(alts), 2))):
-                                    # odds
-                alts = list((alts[i], alts[i + 1], "")
-                            for i in range(0, len(alts), 2))
-                                          # evens
-            else:
-                new_alts = []
-                for alt in alts:
-                    lst = [""]
-                    idx = 0
-                    for m in re.finditer(r"(^|\w|\*)\((\w+"
-                                         r"(/\w+)*)\)",
-                                    # start OR letter OR asterisk (word/word*)
-                                    #\\___________group 1_______/ \    \_g3_///
-                                    # \                            \__gr. 2_//
-                                    #  \_____________group 0________________/
-                            ###### REVIEW ########
-                            # But why the escaped asterisk?
-                                         alt):
-                        v = m.group(2)  # (word/word/word...)
-                        if (classify_desc(v) == "tags" or  # Tags inside parens
-                            m.group(0) == alt):  # All in parens
-                            continue
-                        new_lst = []
-                        for x in lst:
-                            x += alt[idx: m.start()] + m.group(1)
-                                 # alt until letter or asterisk
-                            idx = m.end()
-                            vparts = v.split("/")
-                                     # group(2) = ["word", "wörd"...]
-                            if len(vparts) == 1:
-                                new_lst.append(x)
-                                new_lst.append(x + v)
-                                # "kind(er)" -> ["kind", "kinder"]
-                            else:
-                                for vv in vparts:
-                                    new_lst.append(x + vv)
-                                # "lampai(tten/den)" ->
-                                # ["lampaitten", "lampaiden"]
-                        lst = new_lst
-                    for x in lst:
-                        new_alts.append(x + alt[idx:])
-                        # add the end of alt
-                alts = list((x, "", "") for x in new_alts)
-                            # [form, no romz, no ipa]
+            # Some cells have mixed form content, like text and romanization,
+            # or text and IPA. Handle these.
+            handle_mixed_lines()
+            
             # Some Arabic adjectives have both sound feminine plural and
             # broken plural diptote (e.g., جاذب/Arabic/Adj).  Handle these
             # specially.
@@ -1917,14 +2219,15 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         refs_tags.update(def_ht[ref])
 
                 if base_roman:
-                    base_roman, _, _, hdr_tags = clean_header(lang, word, base_roman)
+                    base_roman, _, _, hdr_tags = clean_header(lang, word,
+                                                              base_roman)
                     extra_tags.extend(hdr_tags)
                     ######## REVIEW ##########
                     # `clean_header` is a bit unclear as a function name
                     # as it is used here. It is used on a text cell to
                     # do some cleanup and tag extraction.
                     
-                # Do some additional clenanup on the cell.
+                # Do some additional cleanup on the cell.
                 form = re.sub(r"^\s*,\s*", "", form)
                 form = re.sub(r"\s*,\s*$", "", form)
                 form = re.sub(r"\s*(,\s*)+", ", ", form)
@@ -1932,36 +2235,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 form = re.sub(r"\s+", " ", form)
                 form = form.strip()
 
-                # "Some languages" (=Greek) use brackets to mark things that
-                # require tags, like (informality), [rarity] and {archaicity}.
-                if re.match(r"\([^][(){}]*\)$", form):
-                    if get_lang_specific(lang, "parentheses_for_informal"):
-                        form = form[1:-1]
-                        extra_tags.append("informal")
-                    else:
-                        form = form[1:-1]
-                elif re.match(r"\{\[[^][(){}]*\]\}$", form):
-                    if (get_lang_specific(lang, "square_brackets_for_rare") and
-                        get_lang_specific(lang, "curly_brackets_for_archaic")):
-                        # είμαι/Greek/Verb
-                        form = form[2:-2]
-                        extra_tags.extend(["rare", "archaic"])
-                    else:
-                        form = form[2:-2]
-                elif re.match(r"\{[^][(){}]*\}$", form):
-                    if get_lang_specific(lang, "curly_brackets_for_archaic"):
-                        # είμαι/Greek/Verb
-                        form = form[1:-1]
-                        extra_tags.extend(["archaic"])
-                    else:
-                        form = form[1:-1]
-                elif re.match(r"\[[^][(){}]*\]$", form):
-                    if get_lang_specific(lang, "square_brackets_for_rare"):
-                        # είμαι/Greek/Verb
-                        form = form[1:-1]
-                        extra_tags.append("rare")
-                    else:
-                        form = form[1:-1]
+                # Look for parentheses that have semantic meaning
+                find_semantic_parens()
                         
                 # Handle parentheses in the table element.  We parse
                 # tags anywhere and romanizations anywhere but beginning.
@@ -1980,44 +2255,11 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         paren = m.group(1)
                         subst = m.group(2)
                 if paren is not None:
-                    if re.match(r"[’'][a-z]([a-z][a-z]?)?$", paren):
-                    # is there a clitic starting with apostrophe?
-                        clitic = paren
-                        # assume the whole paren is a clitic
-                        # then remove paren from form
-                        form = (form[:m.start()] + subst +
-                                form[m.end():]).strip()
-                    elif classify_desc(paren) == "tags":
-                        tagsets1, topics1 = decode_tags(paren)
-                        if not topics1:
-                            for ts in tagsets1:
-                                ts = list(x for x in ts
-                                          if x.find(" ") < 0)
-                            ##### REVIEW ######
-                            # Is the "no tags with spaces" test
-                            # above just in case something slips
-                            # through?
-                                extra_tags.extend(ts)
-                            form = (form[:m.start()] + subst +
-                                    form[m.end():]).strip()
-                    # brackets contain romanization
-                    elif (m.start() > 0 and not roman and
-                          classify_desc(form[:m.start()]) == "other" and
-                          # "other" ~ text
-                          classify_desc(paren) in ("romanization", "english")
-                          and not re.search(r"^with |-form$", paren)):
-                        roman = paren
-                        form = (form[:m.start()] + subst +
-                                form[m.end():]).strip()
-                    elif re.search(r"^with |-form", paren):
-                    ######## REVIEW ########
-                    # This regex is subtly different from the equivalent
-                    # above: -form vs. -form$
-                        form = (form[:m.start()] + subst +
-                                form[m.end():]).strip()
+                    handle_parens()
+                    
                 # Ignore certain forms that are not really forms
                 ####### REVIEW #########
-                # Separete the data into its own list.
+                # Separate the data into its own list.
                 # Possibility of bugs with false positives if
                 # someone makes a table where "unchanged" really is
                 # content, but unlikely. Checking something like
@@ -2032,191 +2274,11 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 #       .format(rowtags, coltags, refs_tags,
                 #               form, roman))
 
-                # Merge column tags and row tags.  We give preference
-                # to moods etc coming from rowtags (cf. austteigen/German/Verb
-                # imperative forms).
+                # Merge tags from row and column and do miscellaneous
+                # tag-related handling.
+                merge_row_and_column_tags()
                 
-                # In certain cases, what a tag means depends on whether
-                # it is a row or column header. Depending on the language,
-                # we replace certain tags with others if they're in
-                # a column or row
-                rtagreplacs = get_lang_specific(lang, "rowtag_replacements")
-                ctagreplacs = get_lang_specific(lang, "coltag_replacements")
-                for rt in sorted(rowtags):
-                    # if lang was in rowtag_replacements)
-                    if not rtagreplacs == None:
-                        rt = replace_directional_tags(rt, rtagreplacs)
-                    for ct in sorted(coltags):
-                        # if lang was in coltag_replacements
-                        if not ctagreplacs == None:
-                            ct = replace_directional_tags(ct,
-                                                      ctagreplacs)
-                        tags = set(global_tags)
-                        tags.update(extra_tags)
-                        tags.update(rt)
-                        tags.update(refs_tags)
-                        # Merge tags from column.  For certain kinds of tags,
-                        # those coming from row take precedence.
-                        old_tags = set(tags)
-                        for t in ct:
-                            c = valid_tags[t]
-                            if (c in ("mood", "case", "number") and
-                                any(valid_tags[tt] == c
-                                    for tt in old_tags)):
-                                continue
-                            tags.add(t)
-
-                        # Extract language-specific tags from the
-                        # form.  This may also adjust the form.
-                        form, lang_tags = lang_specific_tags(lang, pos, form)
-                        tags.update(lang_tags)
-
-                        # For non-finite verb forms, see if they have
-                        # a gender/class suffix
-                        if pos == "verb" and any(valid_tags[t] == "non-finite"
-                               for t in tags):
-                            form, tt = parse_head_final_tags(ctx, lang, form)
-                            tags.update(tt)
-
-                        # Remove "personal" tag if have nth person; these
-                        # come up with e.g. reconhecer/Portuguese/Verb.  But
-                        # not if we also have "pronoun"
-                        if ("personal" in tags and
-                            "pronoun" not in tags and
-                            any(x in tags for x in
-                               ["first-person", "second-person",
-                                "third-person"])):
-                            tags.remove("personal")
-
-                        # If we have impersonal, remove person and number.
-                        # This happens with e.g. viajar/Portuguese/Verb
-                        if "impersonal" in tags:
-                            tags = tags - set(["first-person", "second-person",
-                                               "third-person",
-                                               "singular", "plural"])
-
-                        # Remove unnecessary "positive" tag from verb forms
-                        if pos == "verb" and "positive" in tags:
-                            if "negative" in tags:
-                                tags.remove("negative")
-                            tags.remove("positive")
-
-                        # Many Russian (and other Slavic) inflection tables
-                        # have animate/inanimate distinction that generates
-                        # separate entries for neuter/feminine, but the
-                        # distinction only applies to masculine.  Remove them
-                        # form neuter/feminine and eliminate duplicates.
-                        if get_lang_specific(lang, "masc_only_animate"):
-                            for t1 in ("animate", "inanimate"):
-                                for t2 in ("neuter", "feminine"):
-                                    if (t1 in tags and t2 in tags and
-                                        "masculine" not in tags and
-                                        "plural" not in tags):
-                                        tags.remove(t1)
-
-                        # German adjective tables contain "(keiner)" etc
-                        # for mixed declension plural.  When the adjective
-                        # disappears and it becomes just one word, remove
-                        # the "includes-article" tag.  e.g. eiskalt/German
-                        if "includes-article" in tags and form.find(" ") < 0:
-                            tags.remove("includes-article")
-
-                        # Handle ignored forms.  We mark that the form was
-                        # provided.  This is important information; some words
-                        # just do not have a certain form.  However, there also
-                        # many cases where no word in a language has a
-                        # particular form.  Post-processing could detect and
-                        # remove such cases.
-                        ######## REVIEW #########
-                        # I don't get how this works. has_covering_hdr is a set
-                        # of column ids that have some sort of header above.
-                        # It is never reset, so it quickly populates. But
-                        # here, col_idx not in has_covering_hdr means the cell
-                        # we're in has no header above, and as long as
-                        # any column we've seen before in this table has
-                        # its id in has_covering_hdr before...
-                        # Both of these are never resetted inside the table
-                        # for-loop! They only accumulate positive and True
-                        # values.
-                        if form in IGNORED_COLVALUES:
-                            if "dummy-ignore-skipped" in tags:
-                                continue
-                            if (col_idx not in has_covering_hdr and
-                                some_has_covered_text):
-                                continue
-                            form = "-"
-                        elif col_idx in has_covering_hdr:
-                            some_has_covered_text = True
-
-                        # Handle ambiguous object concord. If a header
-                        # gives the "dummy-object-concord"-tag to a word,
-                        # replace person, number and gender tags with
-                        # their "object-" counterparts so that the verb
-                        # agrees with the object instead.
-                        # Use only when the verb has ONLY object agreement!
-                        #a پخول/Pashto
-                        if "dummy-object-concord" in tags:
-                            for subtag, objtag in (object_concord_replacements
-                                                .items()):
-                                if subtag in tags:
-                                    tags.remove(subtag)
-                                    tags.add(objtag)
-
-                        # Remove the dummy mood tag that we sometimes
-                        # use to block adding other mood and related
-                        # tags
-                        tags = tags - set(["dummy-mood", "dummy-tense",
-                                           "dummy-ignore-skipped",
-                                           "dummy-object-concord",
-                                           "dummy-reset-headers",])
-
-                        # Perform language-specific tag replacements according
-                        # to rules in a table.
-                        lang_tag_mappings = get_lang_specific(lang,
-                                                            "lang_tag_mappings")
-                        if lang_tag_mappings is not None:
-                            for pre, post in lang_tag_mappings.items():
-                                if all(t in tags for t in pre):
-                                    tags = (tags - set(src)) | set(post)
-                                    
-                        # Warn if there are entries with empty tags
-                        if not tags:
-                            ctx.debug("inflection table: empty tags for {}"
-                                      .format(form))
-
-                        # Warn if form looks like IPA
-                        ########## REVIEW #########
-                        # Because IPA is its own unicode block, we could also
-                        # technically do a Unicode name check to see if a string
-                        # contains IPA. Not all valid IPA characters are in the
-                        # IPA extension block, so you can technically have false
-                        # negatives if it's something like /toki/, but it
-                        # shouldn't give false positives.
-                        if re.match(r"\s*/.*/\s*$", form):
-                            ctx.debug("inflection table form looks like IPA: "
-                                      "form={} tags={}"
-                                      .format(form, tags))
-
-                        # Note that this checks `form`, not `in tags`
-                        if form == "dummy-ignored-text-cell":
-                            continue
-
-                        if "dummy-remove-this-cell" in tags:
-                            continue
-
-                        # Add the form
-                        tags = list(sorted(tags))
-                        dt = {"form": form, "tags": tags, "source": source}
-                        if roman:
-                            dt["roman"] = roman
-                        if ipa:
-                            dt["ipa"] = ipa
-                        ret.append(dt)
-                        # If we got separate clitic form, add it
-                        if clitic:
-                            dt = {"form": clitic, "tags": tags + ["clitic"],
-                                  "source": source}
-                            ret.append(dt)
+        
         # End of row.
         rownum += 1
         # For certain languages, if the row was empty, reset
@@ -2322,6 +2384,9 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
         ret = [dt] + ret
     return ret
     # end of parse_simple_table()
+    ############################################################################
+    ############################################################################
+    ############################################################################
 
 
 def handle_generic_table(config, ctx, data, word, lang, pos, rows, titles,
