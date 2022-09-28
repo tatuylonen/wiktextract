@@ -2130,9 +2130,10 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 continue
 
             # Minor cleanup.  See e.g. είμαι/Greek/Verb present participle.
-            col = re.sub(r"\s+➤\s*$", "", col)
-            ########## XXX ###########
-            # Could be generalized and data added to lang_specific
+            cleanup_rules = get_lang_specific(lang, "minor_text_cleanups")
+            if cleanup_rules:
+                for regx, substitution in cleanup_rules.items():
+                    col = re.sub(regx, substitution, col)
 
             if (col_idx == 0 and
                 not first_col_has_text and
