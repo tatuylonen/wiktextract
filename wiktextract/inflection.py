@@ -1332,16 +1332,6 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             # print("DEFINED: {} -> {}".format(ref, tags1))
             def_ht[ref] = tags1
 
-
-
-
-
-
-
-
-
-
-
     def generate_tags():
         base_tags = (set(rt0) | set(ct0) | set(global_tags) |
                  set(table_tags))  # Union.
@@ -2077,12 +2067,12 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                     #print("  HAVE_TEXT BEFORE HDR:", col)
                     # Reset rowtags if new title column after previous
                     # text cells
-                    # XXX beware of header "—": "" - must not clear on that if
-                    # it expands to no tags
                     #  +-----+-----+-----+-----+
                     #  |hdr-a|txt-a|hdr-B|txt-B|
                     #  +-----+-----+-----+-----+
                     #               ^reset rowtags=>
+                    # XXX beware of header "—": "" - must not clear on that if
+                    # it expands to no tags
                     rowtags = [()]
                 have_hdr = True
                 # print("HAVE_HDR: {} rowtags={}".format(col, rowtags))
@@ -2820,6 +2810,7 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
     assert isinstance(tree, WikiNode)
     source = section
     tables = []
+    titleparts = []
 
     def process_tables():
         for kind, node, titles, after in tables:
@@ -2837,37 +2828,42 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
 
     def recurse_navframe(node, titles):
         nonlocal tables
+        nonlocal titleparts
         titleparts = []
         old_tables = tables
         tables = []
 
-        def recurse1(node):
-            nonlocal tables
-            if isinstance(node, (list, tuple)):
-                # node is node.children
-                for x in node:
-                    recurse1(x)
-                return
-            if isinstance(node, str):
-                if tables:
-                    tables[-1][-1].append(node)
-                    # insert string at the end of the last row
-                    # in the last table (newest row in newest table)
-                else:
-                    titleparts.append(node)
-                return
-            if not isinstance(node, WikiNode):
+        recurse(node, [], navframe=True)
+
+        process_tables()
+        tables = old_tables
+
+    def recurse(node, titles, navframe=False):
+        nonlocal tables
+        if isinstance(node, (list, tuple)):
+            for x in node:
+                recurse(x, titles, navframe)
+            return
+        if isinstance(node, str):
+            if tables:
+                tables[-1][-1].append(node)
+            elif navframe:
+                titleparts.append(node)
+            return
+        if not isinstance(node, WikiNode):
+            if navframe:
                 ctx.debug("inflection table: unhandled in NavFrame: {}"
-                          .format(node))
-                return
-            kind = node.kind
+                                    .format(node))
+            return
+        kind = node.kind
+        if navframe:
             if kind == NodeKind.HTML:
                 classes = node.attrs.get("class", "").split()
                 if "NavToggle" in classes:
                     return
                 if "NavHead" in classes:
                     # print("NAVHEAD:", node)
-                    recurse1(node.children)
+                    recurse(node.children, titles, navframe)
                     return
                 if "NavContent" in classes:
                     # print("NAVCONTENT:", node)
@@ -2877,58 +2873,34 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
                     new_titles = list(titles)
                     if not re.match(r"(Note:|Notes:)", title):
                         new_titles.append(title)
-                    recurse(node, new_titles)
+                    recurse(node, new_titles, navframe=False)
                     return
-            elif kind == NodeKind.LINK:
-            ###### REVIEW #######
-            # What is NodeKind.LINK exactly? No documentation.
-                if len(node.args) > 1:
-                    recurse1(node.args[1:])
-                else:
-                    recurse1(node.args[0])
-            recurse1(node.children)
-        recurse1(node)
-
-        process_tables()
-        tables = old_tables
-
-    def recurse(node, titles):
-        # XXX could this function be merged with recurse1 above?
-        nonlocal tables
-        if isinstance(node, (list, tuple)):
-            for x in node:
-                recurse(x, titles)
-            return
-        if tables and isinstance(node, str):
-            tables[-1][-1].append(node)
-            return
-        if not isinstance(node, WikiNode):
-            return
-        kind = node.kind
-        if kind == NodeKind.TABLE:
-            tables.append(["wikitext", node, titles, []])
-            return
-        elif kind == NodeKind.HTML and node.args == "table":
-            classes = node.attrs.get("class", ())
-            if "audiotable" in classes:
+        else:
+            if kind == NodeKind.TABLE:
+                tables.append(["wikitext", node, titles, []])
                 return
-            tables.append(["html", node, titles, []])
-            return
-        elif kind in (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
-                      NodeKind.LEVEL5, NodeKind.LEVEL6):
-            return  # Skip subsections
-        if (kind == NodeKind.HTML and node.args == "div" and
-            "NavFrame" in node.attrs.get("class", "").split()):
-            recurse_navframe(node, titles)
-            return
+            elif kind == NodeKind.HTML and node.args == "table":
+                classes = node.attrs.get("class", ())
+                if "audiotable" in classes:
+                    return
+                tables.append(["html", node, titles, []])
+                return
+            elif kind in (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
+                          NodeKind.LEVEL5, NodeKind.LEVEL6):
+                return  # Skip subsections
+            if (kind == NodeKind.HTML and node.args == "div" and
+                "NavFrame" in node.attrs.get("class", "").split()):
+                recurse_navframe(node, titles)
+                return
         if kind == NodeKind.LINK:
             if len(node.args) > 1:
-                recurse(node.args[1:], titles)
+                recurse(node.args[1:], titles, navframe)
             else:
-                recurse(node.args[0], titles)
+                recurse(node.args[0], titles, navframe)
             return
         for x in node.children:
-            recurse(x, titles)
+            recurse(x, titles, navframe)
+
 
     assert tree.kind == NodeKind.ROOT
     for x in tree.children:
