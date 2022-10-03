@@ -25,9 +25,19 @@ from wiktextract.lang_specific_inflection_configs import lang_specific
 
 
 # Set this to a word form to debug how that is analyzed, or None to disable
-# XXX Make this a command-line parameter
+# XXX Make this a command-line parameter:
+    # Tried to make this into a command-line parameter, but that means putting
+    # putting the parameter in config, and not all functions in inflection.py
+    # have access to config. What is the appropriate way to get
+    # debug_cell_text = config.debug_cell_text at this point of the code so that
+    # debug_cell_text can be handled as usual as a global value?
 debug_cell_text = None
 
+def set_debug_cell_text(text):
+    global debug_cell_text
+    debug_cell_text = text
+
+    
 # Column texts that are interpreted as an empty column.
 IGNORED_COLVALUES = set([
     "-", "־", "᠆", "‐", "‑", "‒", "–", "—", "―", "−",
@@ -250,11 +260,8 @@ nondef_re = re.compile(r"^\s*(1|2|3)\s+(sg|pl)\s*$")
 # Certain tags are moved from headers in tables into word tags, as they always
 # apply to the whole word.
 TAGS_FORCED_WORDTAGS = set([
-    # XXX diptote/triptote do not seem to always be global.  See
-    # https://en.wiktionary.org/wiki/%D8%AC%D8%A7%D8%B0%D8%A8
-    # (جاذب/Arabic/Verb)
-    # "diptote",
-    # "triptote",
+    # This was originally created for a issue with number paradigms in
+    # Arabic, but that is being handled elsewhere now.
 ])
 
 # Sanity check lang_specific

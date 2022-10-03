@@ -19,6 +19,7 @@ import cProfile
 import argparse
 import collections
 from wikitextprocessor import Wtp, ALL_LANGUAGES
+from wiktextract.inflection import set_debug_cell_text
 from wiktextract import (WiktionaryConfig, parse_wiktionary,
                          reprocess_wiktionary, parse_page,
                          extract_namespace)
@@ -157,9 +158,21 @@ if __name__ == "__main__":
                         "names from Wikimedia Commons and what "
                         "they point to")
     parser.add_argument("--inflection-tables-file", type=str, default=None,
-                        help="Extract expanded tables in this file (for test data)")
+                    help="Extract expanded tables in this file (for test data)")
+    parser.add_argument("--debug-cell-text", type=str, default=None,
+                    help="Print out debug messages when encountering this text")
     args = parser.parse_args()
 
+    if args.debug_cell_text:
+        # importing debug_cell_text from wiktextract.inflection
+        # does not work because the debug_cell_text here would be
+        # only a reference, and assigning to it just changes the
+        # thing it is pointing at. Instead of just importing the
+        # whole inflection module and doing wiktextract.inflection
+        # .debug_cell_text =, a simple setter function does
+        # the same thing.
+        set_debug_cell_text(args.debug_cell_text)
+        
     # The --all option turns on capturing all data types
     if args.all and (not args.pages_dir or args.out):
         args.translations = True

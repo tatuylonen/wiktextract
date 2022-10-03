@@ -5889,6 +5889,8 @@ infl_start_map = {
     # kaozeal/Breton
     "Soft mutation after": "mutation-soft",
     "Mixed mutation after": "mutation-mixed",
+    # gláedach/Old Irish
+    "Initial mutations of a following adjective:": "dummy-skip-this",
 }
 for k, v in infl_start_map.items():
     check_v(k, v)
