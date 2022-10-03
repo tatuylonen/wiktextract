@@ -1916,6 +1916,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     global_tags = []
     table_tags = []
     special_phrase_splits = get_lang_specific(lang, "special_phrase_splits")
+    form_replacements = get_lang_specific(lang, "form_replacements")
     for title in titles:
         more_global_tags, more_table_tags, extra_forms = \
             parse_title(title, source)
@@ -2152,15 +2153,13 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 extra_tags.extend(split_extra_tags)
                 # Handle special splits again here, so that we can have custom
                 # mappings from form to form and tags.
-                if form in special_phrase_splits:
-                    alts1, tags = special_phrase_splits[form]
-                    for x in split_extra_tags:
+                if form in form_replacements:
+                    replacement, tags = form_replacements[form]
+                    for x in tags.split():
                         assert x in valid_tags
-                    assert isinstance(alts1, (list, tuple))
-                    assert len(alts1) == 1
-                    # XXX expand this to handle cases where len(alts1) > 1
+                    assert isinstance(replacement, str)
                     assert isinstance(tags, str)
-                    form = alts1[0]
+                    form = replacement
                     extra_tags.extend(tags.split())
                 # Clean the value, extracting reference symbols
                 form, refs, defs, hdr_tags = clean_header(lang, word, form)

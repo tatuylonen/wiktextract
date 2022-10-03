@@ -31,6 +31,7 @@ lang_specific = {
         "virile_nonvirile_remove": True,
         "voices": ["active", "passive"],
         "special_phrase_splits": {},  # value: (split phrase, tags)
+        "form_replacements": {},  # value: [replacement, tags]
         # Greek-style bracket semantics
         "parentheses_for_informal": False,
         "square_brackets_for_rare": False,
@@ -204,8 +205,10 @@ lang_specific = {
             ["verb", r"\bus ", "", "first-person plural"],
             ["verb", r"\bme ", "", "first-person singular"],
         ],
+        "form_replacements": {
+            "let’s be": ["let's be", "first-person plural pronoun-included"],
+        },
         "special_phrase_splits": {
-            "let’s be": [["let's be"], "first-person plural pronoun-included"],
             "I am (’m)/be": [["am (’m)", "be"], "first-person singular"],
             "we are (’re)/be/been": [["are (’re)", "be", "been"],
                                      "first-person plural"],
