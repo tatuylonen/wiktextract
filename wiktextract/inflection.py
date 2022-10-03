@@ -1623,8 +1623,6 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                                 #\\___________group 1_______/ \    \_g3_///
                                 # \                            \__gr. 2_//
                                 #  \_____________group 0________________/
-                        ###### REVIEW ########
-                        # But why the escaped asterisk?
                                      alt):
                     v = m.group(2)  # (word/word/word...)
                     if (classify_desc(v) == "tags" or  # Tags inside parens
@@ -1703,10 +1701,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 for ts in tagsets1:
                     ts = list(x for x in ts
                               if x.find(" ") < 0)
-                ##### REVIEW ######
-                # Is the "no tags with spaces" test
-                # above just in case something slips
-                # through?
+                    # There are some generated tags containing
+                    # spaces; do not let them through here.
                     extra_tags.extend(ts)
                 form = (form[:m.start()] + subst +
                         form[m.end():]).strip()
@@ -1720,9 +1716,6 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             form = (form[:m.start()] + subst +
                     form[m.end():]).strip()
         elif re.search(r"^with |-form", paren):
-        ######## REVIEW ########
-        # This regex is subtly different from the equivalent
-        # above: -form vs. -form$
             form = (form[:m.start()] + subst +
                     form[m.end():]).strip()
 
@@ -1824,23 +1817,15 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 # many cases where no word in a language has a
                 # particular form.  Post-processing could detect and
                 # remove such cases.
-                ######## REVIEW #########
-                # I don't get how this works. has_covering_hdr is a set
-                # of column idxs that have some sort of header above.
-                # It is never reset, so it quickly populates. But
-                # here, col_idx not in has_covering_hdr means the cell
-                # we're in has no header above, and as long as
-                # any column we've seen before in this table has
-                # its idx in has_covering_hdr before...
-                # Both of these are never resetted inside the table
-                # for-loop! They only accumulate positive and True
-                # values.
                 if form in IGNORED_COLVALUES:
+                    # if cell text seems to be ignorable
                     if "dummy-ignore-skipped" in tags:
                         continue
                     if (col_idx not in has_covering_hdr and
                         some_has_covered_text):
                         continue
+                    # don't ignore this cell if there's been a header
+                    # above it
                     form = "-"
                 elif col_idx in has_covering_hdr:
                     some_has_covered_text = True
@@ -2162,29 +2147,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             # or text and IPA. Handle these.
             handle_mixed_lines()
             
-            # Some Arabic adjectives have both sound feminine plural and
-            # broken plural diptote (e.g., جاذب/Arabic/Adj).  Handle these
-            # specially.
-            ###### REVIEW ######
-            # This should probably be generalized; there are a lot more
-            # "double"-entries like this just in Arabic number stuff.
-            # In fact, is this currently handled somewhere else?
-            if (len(combined_coltags) == 2 and
-                len(alts) == 2 and
-                all(set(x) & set(["sound-feminine-plural",
-                                  "sound-masculine-plural",
-                                  "broken-plural"])
-                    for x in combined_coltags)):
-                alts = list((x, set([ts]))
-                             for x, ts in zip(alts, combined_coltags))
-                            # +----------------+
-                            # |      a, b      |
-                            # +----------------+
-                            # |      A, B      |
-                            # +----------------+
-                            #  a => A; b => B
-            else:
-                alts = list((x, combined_coltags) for x in alts)
+            alts = list((x, combined_coltags) for x in alts)
+            
             # Generate forms from the alternatives
             # alts is a list of (tuple of forms, tuple of tags)
             for (form, base_roman, ipa), coltags in alts:
@@ -2199,9 +2163,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         assert x in valid_tags
                     assert isinstance(alts1, (list, tuple))
                     assert len(alts1) == 1
-                    ###### REVIEW ########
-                    # asserting that a list or tuple is len 1
-                    # seems weird. Was this supposed to be expanded?
+                    # XXX expand this to handle cases where len(alts1) > 1
                     assert isinstance(tags, str)
                     form = alts1[0]
                     extra_tags.extend(tags.split())
@@ -2256,15 +2218,11 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                     handle_parens()
                     
                 # Ignore certain forms that are not really forms
-                ####### REVIEW #########
-                # Separate the data into its own list.
-                # Possibility of bugs with false positives if
-                # someone makes a table where "unchanged" really is
-                # content, but unlikely. Checking something like
-                # Levenshtein is probably too costly for something
-                # so unlikely.
-                if form in ("", "unchanged",
+                if (form in ("", "unchanged",
                             "after an",  # in sona/Irish/Adj/Mutation
+                            )
+                    # XXX and Levenshtein distance (distw()) doesn't indicate
+                    # that the form belongs there
                 ):
                     continue
                 # print("ROWTAGS={} COLTAGS={} REFS_TAGS={} "
@@ -2311,11 +2269,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     # definite/indefinite/usually-without-article markers into the noun and
     # remove the article entries.
     if any("noun" in x["tags"] for x in ret):
-        ######## REVIEW #########
-        # How to determine which one of these "ifs" is more costly?
-        # This second if could also be transformed into a lang_specific
-        # toggle. In fact, this could all be one line, I think;
-        # was this meant to be expanded?
+        # XXX combine into one if, swap the order and convert to lang_specific
         if lang in ("Alemannic German", "Bavarian", "Cimbrian", "German",
                     "German Low German", "Hunsrik", "Luxembourgish",
                     "Pennsylvania German"):
@@ -2360,13 +2314,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             if len(form.split()) > word_words:
                 dt = dt.copy()
                 dt["tags"] = list(dt.get("tags", []))
-                ####### REVIEW #######
-                # dt is already a copy of the original dt,
-                # here it's just getting what is in "tags"
-                # and putting it into the same place? Is
-                # this some kind of deepcopy-emulation,
-                # does .get make copies instead of returning
-                # references?
+                # This strange copy-assigning shuffle is preventative black
+                # magic; do not touch lest you invoke deep bugs.
                 data_append(ctx, dt, "tags", "multiword-construction")
             new_ret.append(dt)
         ret = new_ret
@@ -2412,9 +2361,7 @@ def handle_generic_table(config, ctx, data, word, lang, pos, rows, titles,
     if ret is None:
         # XXX handle other table formats
         # We were not able to handle the table
-        ########## REVIEW ########
-        # Could maybe use a debug or error message here,
-        # but I wouldn't want to add any more into the system...
+        # XXX add a debug message here.
         return
 
     # Add the returned forms but eliminate duplicates.
@@ -2454,11 +2401,6 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
     assert isinstance(data, dict)
     assert isinstance(tree, WikiNode)
     assert tree.kind == NodeKind.TABLE
-    ######## REVIEW #########
-    # Are the two asserts above both necessary? assert tree.kind ==
-    # NodeKind.TABLE would also assert whether it's a WikiNode, unless there's
-    # something else that has .kind attributes. Or is this because error messages
-    # will be missing? There's a third identical assert below, too.
     assert isinstance(titles, list)
     assert isinstance(source, str)
     for x in titles:
@@ -2477,14 +2419,10 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                         # when the cell is not considered a header; triggered
                         # by the "*" inflmap meta-tag.
     rows = []
-    assert tree.kind == NodeKind.TABLE
     for node in tree.children:
         if not isinstance(node, WikiNode):
             continue
         kind = node.kind
-        ###### REVIEW ########
-        # there's a lot of kind = node.kind in this section of the code, is it
-        # style or some kind of optimization?
         
         # print("  {}".format(node))
         if kind == NodeKind.TABLE_CAPTION:
@@ -2759,10 +2697,6 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     continue
                 vertical_still_left[i] -= 1
                 while len(row) < i:
-                ######## REVIEW #######
-                # len(row) < i inside a for-loop with range(len(row)...)
-                # seems impossible when i is not changed. Can this happen?
-                # Is this empty append meant to be in the above if?
                     row.append(InflCell("", False, 1, 1, None))
                 row.append(col_gap_data[i])
             # print("  ROW {!r}".format(row))
