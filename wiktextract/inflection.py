@@ -23,14 +23,9 @@ from wiktextract.table_headers_heuristics_data import (
                                     LANGUAGES_WITH_CELLS_AS_HEADERS)
 from wiktextract.lang_specific_inflection_configs import lang_specific
 
-
-# Set this to a word form to debug how that is analyzed, or None to disable
-# XXX Make this a command-line parameter:
-    # Tried to make this into a command-line parameter, but that means putting
-    # putting the parameter in config, and not all functions in inflection.py
-    # have access to config. What is the appropriate way to get
-    # debug_cell_text = config.debug_cell_text at this point of the code so that
-    # debug_cell_text can be handled as usual as a global value?
+# --debug-text-cell WORD
+# Command-line parameter for debugging. When parsing inflection tables,
+# print out debug messages when encountering this text.
 debug_cell_text = None
 
 def set_debug_cell_text(text):
@@ -2217,14 +2212,23 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 if paren is not None:
                     handle_parens()
                     
-                # Ignore certain forms that are not really forms
-                if (form in ("", "unchanged",
+                # Ignore certain forms that are not really forms,
+                # unless they're really, really close to the article title
+                if form in ("", "unchanged",
                             "after an",  # in sona/Irish/Adj/Mutation
-                            )
-                    # XXX and Levenshtein distance (distw()) doesn't indicate
-                    # that the form belongs there
-                ):
-                    continue
+                            ):
+                    Lev = distw([form], word)
+                    if form and Lev > 0.9:
+                        ctx.debug("accepted possible false positive '{}' with"
+                                  "> 0.9 Levenshtein distance in {}/{}"
+                                  .format(form, word, lang))
+                    elif form and Lev > 0.7:
+                        ctx.debug("skipped possible match '{}' with > 0.7"
+                                  "Levenshtein distance in {}/{}"
+                                  .format(form, word, lang))
+                        continue
+                    else:
+                        continue
                 # print("ROWTAGS={} COLTAGS={} REFS_TAGS={} "
                 #       "FORM={!r} ROMAN={!r}"
                 #       .format(rowtags, coltags, refs_tags,
@@ -2358,7 +2362,8 @@ def handle_generic_table(config, ctx, data, word, lang, pos, rows, titles,
     if ret is None:
         # XXX handle other table formats
         # We were not able to handle the table
-        # XXX add a debug message here.
+        ctx.debug("unhandled inflection table format, {}/{}"
+                                  .format(word, lang))
         return
 
     # Add the returned forms but eliminate duplicates.
