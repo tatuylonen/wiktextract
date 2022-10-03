@@ -2268,41 +2268,38 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     # Post-process German nouns with articles in separate columns.  We move the
     # definite/indefinite/usually-without-article markers into the noun and
     # remove the article entries.
-    if any("noun" in x["tags"] for x in ret):
-        # XXX combine into one if, swap the order and convert to lang_specific
-        if lang in ("Alemannic German", "Bavarian", "Cimbrian", "German",
-                    "German Low German", "Hunsrik", "Luxembourgish",
-                    "Pennsylvania German"):
-            new_ret = []
-            saved_tags = set()
-            had_noun = False
-            for dt in ret:
-                tags = dt["tags"]
-                if "noun" in tags:
-                    tags = list(sorted(set(t for t in tags if t != "noun") |
-                                           saved_tags))
-                    had_noun = True
-                elif ("indefinite" in tags or "definite" in tags or
-                      "usually-without-article" in tags or
-                      "without-article" in tags):
-                    if had_noun:
-                        saved_tags = set(tags)
-                    else:
-                        saved_tags = saved_tags | set(tags)  # E.g. Haus/German
-                        remove_useless_tags(lang, pos, saved_tags)
-                    saved_tags = saved_tags & set(["masculine", "feminine",
-                                                   "neuter", "singular",
-                                                   "plural",
-                                                   "indefinite",
-                                                   "definite",
-                                                   "usually-without-article",
-                                                   "without-article"])
-                    had_noun = False
-                    continue  # Skip the articles
-                dt = dt.copy()
-                dt["tags"] = tags
-                new_ret.append(dt)
-            ret = new_ret
+    if (get_lang_specific(lang, "articles_in_separate_columns")
+        and any("noun" in x["tags"] for x in ret)):
+        new_ret = []
+        saved_tags = set()
+        had_noun = False
+        for dt in ret:
+            tags = dt["tags"]
+            if "noun" in tags:
+                tags = list(sorted(set(t for t in tags if t != "noun") |
+                                       saved_tags))
+                had_noun = True
+            elif ("indefinite" in tags or "definite" in tags or
+                  "usually-without-article" in tags or
+                  "without-article" in tags):
+                if had_noun:
+                    saved_tags = set(tags)
+                else:
+                    saved_tags = saved_tags | set(tags)  # E.g. Haus/German
+                    remove_useless_tags(lang, pos, saved_tags)
+                saved_tags = saved_tags & set(["masculine", "feminine",
+                                               "neuter", "singular",
+                                               "plural",
+                                               "indefinite",
+                                               "definite",
+                                               "usually-without-article",
+                                               "without-article"])
+                had_noun = False
+                continue  # Skip the articles
+            dt = dt.copy()
+            dt["tags"] = tags
+            new_ret.append(dt)
+        ret = new_ret
 
     # Post-process English inflection tables, addding "multiword-construction"
     # when the number of words has increased.

@@ -50,6 +50,7 @@ lang_specific = {
         "ignore_top_left_text_cell": False,
         # Minor regex replacements for cleanup in parse_simple_table()
         "minor_text_cleanups": None, # dict of {regex: substitution}
+        "articles_in_separate_columns": False,
     },
     "austronesian-group": {
         "numbers": ["singular", "dual", "plural"],
@@ -77,8 +78,18 @@ lang_specific = {
     "uralic-group": {
         "numbers": ["singular", "dual", "plural"],
     },
+    "german-group": {  # languages closely related to or offshot from German
+        "next": "germanic-group",
+        "articles_in_separate_columns": True,
+    },
+    "germanic-group": { # Germanic languages as a whole
+        "next": "indo-european-group",
+    },
     "Akkadian": {
         "next": "semitic-group",
+    },
+    "Alemannic German": {
+        "next": "German",
     },
     "Amharic": {
         "next": "semitic-group",
@@ -117,6 +128,9 @@ lang_specific = {
     "Avestan": {
         "next": "Proto-Indo-European",
     },
+    "Bavarian": {
+        "next": "German",
+    },
     "Baiso": {
         "numbers": ["singular", "paucal", "plural"],
     },
@@ -137,6 +151,9 @@ lang_specific = {
     },
     "Chimwiini": {
         "next": "bantu-group",
+    },
+    "Cimbrian": {
+        "next": "German",
     },
     "Corsican": {
         "next": "romance-group",
@@ -236,7 +253,7 @@ lang_specific = {
         "next": "romance-group",
     },
     "German": {
-        "next": "Proto-Germanic",
+        "next": "german-group",
         "form_transformations": [
             ["verb", "^ich ", "", "first-person singular"],
             ["verb", "^du ", "", "second-person singular"],
@@ -308,6 +325,9 @@ lang_specific = {
         "hdr_expand_first": set([]),
         "hdr_expand_cont": set([]),
     },
+    "Hunsrik": {
+        "next": "German",
+    },
     "Icelandic": {
         "ignore_top_left_text_cell": True,
     },
@@ -378,6 +398,9 @@ lang_specific = {
     "Lule Sami": {
         "next": "samojedic-group",
     },
+    "Luxembourgish": {
+        "next": "German",
+    },
     "Maltese": {
         "next": "semitic-group",
     },
@@ -446,6 +469,9 @@ lang_specific = {
     },
     "Old Irish": {
         "next": "Proto-Indo-European",  # Has dual
+    },
+    "Pennsylvania German": {
+        "next": "German",
     },
     "Phoenician": {
         "next": "semitic-group",
