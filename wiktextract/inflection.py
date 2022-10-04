@@ -529,10 +529,10 @@ def and_tagsets(lang, pos, tagsets1, tagsets2):
 
 
 @functools.lru_cache(65536)
-def clean_header(lang, word, col):
+def extract_cell_content(lang, word, col):
     """Cleans a row/column header for later processing.  This returns
     (cleaned, refs, defs, tags)."""
-    # print("CLEAN_HEADER {!r}".format(col))
+    # print("EXTRACT_CELL_CONTENT {!r}".format(col))
     hdr_tags = []
     orig_col = col
     col = re.sub(r"(?s)\s*,\s*$", "", col)
@@ -649,7 +649,7 @@ def clean_header(lang, word, col):
     # Put back the final parenthesized part
     col = col.strip() + final_paren
 
-    # print("CLEAN_HEADER: orig_col={!r} col={!r} refs={!r} hdr_tags={}"
+    # print("EXTRACT_CELL_CONTENT: orig_col={!r} col={!r} refs={!r} hdr_tags={}"
     #       .format(orig_col, col, refs, hdr_tags))
     return col.strip(), refs, [], hdr_tags
 
@@ -1900,11 +1900,13 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     # See defs_ht for footnote defs stuff
     for row in rows:
         for cell in row:
-            text, refs, defs, hdr_tags = clean_header(lang, word, cell.text)
+            text, refs, defs, hdr_tags = extract_cell_content(lang,
+                                                              word,
+                                                              cell.text)
             # refs, defs = footnote stuff, defs -> (ref, def)
             add_defs(defs)
     # Extract definitions from text after table
-    text, refs, defs, hdr_tags = clean_header(lang, word, after)
+    text, refs, defs, hdr_tags = extract_cell_content(lang, word, after)
     add_defs(defs)
 
     # Then extract the actual forms
@@ -1996,7 +1998,9 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             # it as simply specifying a value for that value and ignore
             # it otherwise.
             if cell.target:
-                text, refs, defs, hdr_tags = clean_header(lang, word, col)
+                text, refs, defs, hdr_tags = extract_cell_content(lang,
+                                                                  word,
+                                                                  col)
                 if not text:
                     continue
                 refs_tags = set()
@@ -2013,7 +2017,9 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             # print(rownum, col_idx, col)
             if is_title:
                 # It is a header cell
-                text, refs, defs, hdr_tags = clean_header(lang, word, col)
+                text, refs, defs, hdr_tags = extract_cell_content(lang,
+                                                                  word,
+                                                                  col)
                 if not text:
                     continue
                 # Extract tags from referenced footnotes
@@ -2162,7 +2168,9 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                     form = replacement
                     extra_tags.extend(tags.split())
                 # Clean the value, extracting reference symbols
-                form, refs, defs, hdr_tags = clean_header(lang, word, form)
+                form, refs, defs, hdr_tags = extract_cell_content(lang,
+                                                                  word,
+                                                                  form)
                 # if refs:
                 #     print("REFS:", refs)
                 extra_tags.extend(hdr_tags)
@@ -2173,14 +2181,11 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         refs_tags.update(def_ht[ref])
 
                 if base_roman:
-                    base_roman, _, _, hdr_tags = clean_header(lang, word,
+                    base_roman, _, _, hdr_tags = extract_cell_content(lang,
+                                                              word,
                                                               base_roman)
                     extra_tags.extend(hdr_tags)
-                    ######## REVIEW ##########
-                    # `clean_header` is a bit unclear as a function name
-                    # as it is used here. It is used on a text cell to
-                    # do some cleanup and tag extraction.
-                    
+                                        
                 # Do some additional cleanup on the cell.
                 form = re.sub(r"^\s*,\s*", "", form)
                 form = re.sub(r"\s*,\s*$", "", form)
@@ -2481,10 +2486,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     colspan = 1
                 # print("COL:", col)
 
-                # Process any nested tables recursively.  XXX this
-                # should also take prior text before nested tables as
-                # headers, e.g., see anglais/Irish/Declension ("Forms
-                # with the definite article" before the table)
+                # Process any nested tables recursively.
                 tables, rest = recursively_extract(col, lambda x:
                                                    isinstance(x, WikiNode) and
                                                    x.kind == NodeKind.TABLE)
@@ -2523,7 +2525,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 cleaned_titletext = re.sub(r"\s+", " ",
                                            re.sub(r"\s*\([^)]*\)", "",
                                                   titletext)).strip()
-                cleaned, _, _, _ = clean_header(lang, word, celltext)
+                cleaned, _, _, _ = extract_cell_content(lang, word, celltext)
                 cleaned = re.sub(r"\s+", " ", cleaned)
                 hdr_expansion = expand_header(config, ctx, word, lang, pos,
                                               cleaned, [],
