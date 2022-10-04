@@ -2217,12 +2217,12 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                             "after an",  # in sona/Irish/Adj/Mutation
                             ):
                     Lev = distw([form], word)
-                    if form and Lev > 0.9:
+                    if form and Lev < 0.1:
                         ctx.debug("accepted possible false positive '{}' with"
-                                  "> 0.9 Levenshtein distance in {}/{}"
+                                  "> 0.1 Levenshtein distance in {}/{}"
                                   .format(form, word, lang))
-                    elif form and Lev > 0.7:
-                        ctx.debug("skipped possible match '{}' with > 0.7"
+                    elif form and Lev < 0.3:
+                        ctx.debug("skipped possible match '{}' with > 0.3"
                                   "Levenshtein distance in {}/{}"
                                   .format(form, word, lang))
                         continue
