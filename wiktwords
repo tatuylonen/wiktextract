@@ -18,28 +18,46 @@ import hashlib
 import cProfile
 import argparse
 import collections
-from wikitextprocessor import Wtp, ALL_LANGUAGES
+from wikitextprocessor import Wtp
 from wiktextract.inflection import set_debug_cell_text
+
 from wiktextract import (WiktionaryConfig, parse_wiktionary,
                          reprocess_wiktionary, parse_page,
                          extract_namespace)
 from wiktextract import extract_thesaurus_data
 from wiktextract import extract_categories
 
-# Compute set of all language names
-all_langs = set(x["name"] for x in ALL_LANGUAGES)
-
 # Pages whose titles have any of these prefixes are ignored.
-ignore_prefixes = set(["Index", "Help", "MediaWiki", "Citations",
-                       "Concordance", "Rhymes", "Thread",
-                       "Summary", "File",
-                       "Transwiki",
-                       "Wikcionario",
-])
+IGNORE_PREFIEXES = None
 
 # Pages with these prefixes are captured.
-recognized_prefixes = set(["Category", "Appendix", "Wiktionary",
-                           "Thesaurus", "Module", "Template"])
+RECOGNIZED_PREFIXES = None
+
+
+def init_prefixes(ctx: Wtp) -> None:
+    global IGNORE_PREFIEXES, RECOGNIZED_PREFIXES
+    if IGNORE_PREFIEXES is None:
+        IGNORE_PREFIEXES = {
+            ctx.NAMESPACE_DATA.get("Index", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Help", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("MediaWiki", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Citations", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Concordance", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Rhymes", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Thread", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Summary", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("File", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Transwiki", {}).get("name"),
+        }
+    if RECOGNIZED_PREFIXES is None:
+        RECOGNIZED_PREFIXES = {
+            ctx.NAMESPACE_DATA.get("Category", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Appendix", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Project", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Thesaurus", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Module", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Template", {}).get("name"),
+        }
 
 
 def capture_page(model, orig_title, text, pages_dir):
@@ -63,9 +81,9 @@ def capture_page(model, orig_title, text, pages_dir):
         analyze = True
     else:
         prefix, tail = m.groups()
-        if prefix in ignore_prefixes:
+        if prefix in IGNORE_PREFIEXES:
             analyze = False
-        elif prefix not in recognized_prefixes:
+        elif prefix not in RECOGNIZED_PREFIXES:
             print("UNRECOGNIZED PREFIX", title)
             analyze = False
 
@@ -94,6 +112,8 @@ def capture_page(model, orig_title, text, pages_dir):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Multilingual Wiktionary data extractor")
+    parser.add_argument("dump_file_language_code", type=str,
+                        help="Language code of the dump file.")
     parser.add_argument("path", type=str, nargs="?", default=None,
                         help="Input file (.../enwiktionary-<date>-"
                         "pages-articles.xml.bz2)")
@@ -102,8 +122,8 @@ if __name__ == "__main__":
     parser.add_argument("--errors", type=str,
                         help="File in which to save error information")
     parser.add_argument("--language", type=str, action="append", default=[],
-                        help="Language to capture (can specify multiple tiems, "
-                        "defaults to English and Translingual)")
+                        help="Language code to capture (can specify multiple "
+                        "times, defaults to English and Translingual)")
     parser.add_argument("--all-languages", action="store_true", default=False,
                         help="Extract words for all languages")
     parser.add_argument("--list-languages", action="store_true", default=False,
@@ -184,28 +204,9 @@ if __name__ == "__main__":
         args.etymologies = True
         args.inflections = True
 
-    # If --list-languages has been specified, just print the list of supported
-    # languages
-    if args.list_languages:
-        print("Supported languages:")
-        for lang in sorted(all_langs):
-            print("    {}".format(lang))
-        sys.exit(0)
-
-    if not args.path and not args.cache:
-        print("The PATH argument for wiktionary dump file is normally "
-              "mandatory.")
-        print("Alternatively, --cache with --page can be used.")
-        sys.exit(1)
-
     # Default to English and Translingual if language not specified.
     if not args.language:
-        args.language = ["English", "Translingual"]
-    else:
-        for x in args.language:
-            if x not in all_langs:
-                print("Invalid language:", x)
-                sys.exit(1)
+        args.language = ["en", "mul"]
 
     if args.all_languages:
         args.language = None
@@ -235,14 +236,46 @@ if __name__ == "__main__":
 
     word_count = 0
 
+    config = WiktionaryConfig(dump_file_lang_code=args.dump_file_language_code,
+                              capture_language_codes=args.language,
+                              capture_translations=args.translations,
+                              capture_pronunciation=args.pronunciations,
+                              capture_linkages=args.linkages,
+                              capture_compounds=args.compounds,
+                              capture_redirects=args.redirects,
+                              capture_examples=args.examples,
+                              capture_etymologies=args.etymologies,
+                              capture_inflections=args.inflections,
+                              verbose=args.verbose,
+                              expand_tables=args.inflection_tables_file,)
+
     # Create expansion context
-    ctx = Wtp(cache_file=args.cache, num_threads=args.num_threads)
+    ctx = Wtp(cache_file=args.cache, num_threads=args.num_threads, lang_code=args.dump_file_language_code, languages_by_code=config.LANGUAGES_BY_CODE)
     # We are now having problems with "Module:no globals", which causes
     # infinite Python recursion on a number of pages (it may be a sandbox
     # problem that it is not properly reset).  Override that debugging module
     # to be empty.
     ctx.add_page("Scribunto", "Module:no globals", "", transient=True)
 
+    # If --list-languages has been specified, just print the list of supported
+    # languages
+    if args.list_languages:
+        print("Supported languages:")
+        for lang_name, lang_code in config.LANGUAGES_BY_NAME.items():
+            print(f"    {lang_name}: {lang_code}")
+        sys.exit(0)
+
+    if args.language:
+        for x in args.language:
+            if x not in config.LANGUAGES_BY_CODE:
+                print("Invalid language:", x)
+                sys.exit(1)
+
+    if not args.path and not args.cache:
+        print("The PATH argument for wiktionary dump file is normally "
+              "mandatory.")
+        print("Alternatively, --cache with --page can be used.")
+        sys.exit(1)
 
     if args.override:
         for path in args.override:
@@ -277,17 +310,6 @@ if __name__ == "__main__":
     def capture_cb(model, title, text):
         return capture_page(model, title, text, args.pages_dir)
 
-    config = WiktionaryConfig(capture_languages=args.language,
-                              capture_translations=args.translations,
-                              capture_pronunciation=args.pronunciations,
-                              capture_linkages=args.linkages,
-                              capture_compounds=args.compounds,
-                              capture_redirects=args.redirects,
-                              capture_examples=args.examples,
-                              capture_etymologies=args.etymologies,
-                              capture_inflections=args.inflections,
-                              verbose=args.verbose,
-                              expand_tables=args.inflection_tables_file,)
     # load redirects to ctx if given
     if args.redirects_file:
         with open(args.redirects_file) as f:
@@ -296,6 +318,8 @@ if __name__ == "__main__":
     if args.profile:
         pr = cProfile.Profile()
         pr.enable()
+
+    init_prefixes(ctx)
 
     try:
         if args.path:
@@ -396,9 +420,7 @@ if __name__ == "__main__":
                 }, f, sort_keys=True, indent=2)
 
     def dump_un(title, limit, counts, samples):
-        items = []
         counts_ht = {}
-        samples_ht = {}
         for k, v in counts.items():
             counts_ht[k] = v
         lst = list(sorted(counts_ht.items(), reverse=True,
@@ -412,7 +434,6 @@ if __name__ == "__main__":
                         print("        {}".format(sample))
 
     def dump_val(title, limit, counts):
-        items = []
         counts_ht = collections.defaultdict(int)
         for la, la_val in counts.items():
             for name, name_val in la_val.items():

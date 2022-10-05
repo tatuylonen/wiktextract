@@ -8,6 +8,7 @@ from wiktextract import WiktionaryConfig
 from wiktextract.form_descriptions import parse_translation_desc
 from wiktextract.translations import parse_translation_item_text
 
+
 class TrTests(unittest.TestCase):
 
     def setUp(self):
@@ -25,7 +26,7 @@ class TrTests(unittest.TestCase):
         parse_translation_item_text(self.ctx, self.ctx.title, data,
                                     item, sense, pos_datas, lang, langcode,
                                     translations_from_template,
-                                    is_reconstruction)
+                                    is_reconstruction, self.config)
         return data
 
     def test_trdesc1(self):

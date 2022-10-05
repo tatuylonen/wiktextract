@@ -3,9 +3,9 @@
 #
 # Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE or https://ylonen.org
 
-import sys
+import json
 import collections
-
+from pathlib import Path
 
 
 def int_dict():
@@ -24,7 +24,8 @@ class WiktionaryConfig(object):
     """This class holds configuration data for Wiktionary parsing."""
 
     __slots__ = (
-        "capture_languages",
+        "dump_file_lang_code",
+        "capture_language_codes",
         "capture_translations",
         "capture_pronunciation",
         "capture_linkages",
@@ -45,10 +46,19 @@ class WiktionaryConfig(object):
         "warnings",
         "debugs",
         "redirects",
+        "data_folder",
+        "LINKAGE_SUBTITLES",
+        "POS_SUBTITLES",
+        "POS_TYPES",
+        "OTHER_SUBTITLES",
+        "ZH_PRON_TAGS",
+        "LANGUAGES_BY_NAME",
+        "LANGUAGES_BY_CODE"
     )
 
     def __init__(self,
-                 capture_languages=["English", "Translingual"],
+                 dump_file_lang_code="en",
+                 capture_language_codes=["en", "mul"],
                  capture_translations=True,
                  capture_pronunciation=True,
                  capture_linkages=True,
@@ -59,19 +69,20 @@ class WiktionaryConfig(object):
                  capture_inflections=True,
                  verbose=False,
                  expand_tables=False):
-        if capture_languages is not None:
-            assert isinstance(capture_languages, (list, tuple, set))
-            for x in capture_languages:
+        if capture_language_codes is not None:
+            assert isinstance(capture_language_codes, (list, tuple, set))
+            for x in capture_language_codes:
                 assert isinstance(x, str)
-        assert (capture_languages is None or
-                isinstance(capture_languages, (list, tuple, set)))
+        assert (capture_language_codes is None or
+                isinstance(capture_language_codes, (list, tuple, set)))
         assert capture_translations in (True, False)
         assert capture_pronunciation in (True, False)
         assert capture_linkages in (True, False)
         assert capture_compounds in (True, False)
         assert capture_redirects in (True, False)
         assert capture_etymologies in (True, False)
-        self.capture_languages = capture_languages
+        self.dump_file_lang_code = dump_file_lang_code
+        self.capture_language_codes = capture_language_codes
         self.capture_translations = capture_translations
         self.capture_pronunciation = capture_pronunciation
         self.capture_linkages = capture_linkages
@@ -96,9 +107,15 @@ class WiktionaryConfig(object):
         self.thesaurus_data = {}
         self.redirects = {}
 
+        self.data_folder = Path(__file__).parent.joinpath(f"data/{dump_file_lang_code}")
+        self.init_subtitles()
+        self.init_zh_pron_tags()
+        self.init_languages()
+
     def to_kwargs(self):
         return {
-            "capture_languages": self.capture_languages,
+            "dump_file_lang_code": self.dump_file_lang_code,
+            "capture_language_codes": self.capture_language_codes,
             "capture_translations": self.capture_translations,
             "capture_pronunciation": self.capture_pronunciation,
             "capture_linkages": self.capture_linkages,
@@ -131,3 +148,26 @@ class WiktionaryConfig(object):
         self.errors.extend(ret.get("errors", []))
         self.warnings.extend(ret.get("warnings", []))
         self.debugs.extend(ret.get("debugs", []))
+
+    def init_subtitles(self) -> None:
+        with self.data_folder.joinpath("linkage_subtitles.json").open(encoding="utf-8") as f:
+            self.LINKAGE_SUBTITLES = json.load(f)
+
+        with self.data_folder.joinpath("pos_subtitles.json").open(encoding="utf-8") as f:
+            self.POS_SUBTITLES = json.load(f)
+            self.POS_TYPES = set(x["pos"] for x in self.POS_SUBTITLES.values())
+
+        with self.data_folder.joinpath("other_subtitles.json").open(encoding="utf-8") as f:
+            self.OTHER_SUBTITLES = json.load(f)
+
+    def init_zh_pron_tags(self) -> None:
+        with self.data_folder.joinpath("zh_pron_tags.json").open(encoding="utf-8") as f:
+            self.ZH_PRON_TAGS = json.load(f)
+
+    def init_languages(self):
+        with self.data_folder.joinpath("languages.json").open(encoding="utf-8") as f:
+            self.LANGUAGES_BY_CODE = json.load(f)
+        self.LANGUAGES_BY_NAME = {}
+        for lang_code, lang_names in self.LANGUAGES_BY_CODE.items():
+            for lang_name in lang_names:
+                self.LANGUAGES_BY_NAME[lang_name] = lang_code

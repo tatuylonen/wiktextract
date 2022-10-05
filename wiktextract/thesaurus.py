@@ -6,13 +6,12 @@
 import re
 import time
 import collections
-from wikitextprocessor import Wtp, NodeKind, WikiNode, ALL_LANGUAGES
-from .parts_of_speech import part_of_speech_map
-from .page import (linkage_map, linkage_inverses, clean_node,
-                   LEVEL_KINDS)
+from wikitextprocessor import Wtp, NodeKind, WikiNode
+
+from .datautils import ns_title_prefix_tuple
+from .page import linkage_inverses, clean_node, LEVEL_KINDS
 from .form_descriptions import parse_sense_qualifier
 from .config import WiktionaryConfig
-from .datautils import languages_by_name, languages_by_code
 
 ignored_subtitle_tags_map = {
     "by reason": [],
@@ -59,6 +58,7 @@ ignored_subtitle_tags_map = {
     "rare": ["rare"],
 }
 
+
 def contains_list(contents):
     """Returns True if there is a list somewhere nested in contents."""
     if isinstance(contents, (list, tuple)):
@@ -70,6 +70,7 @@ def contains_list(contents):
         return True
     return contains_list(contents.children) or contains_list(contents.args)
 
+
 def extract_thesaurus_data(ctx, config):
     """Extracts linkages from the thesaurus pages in Wiktionary."""
     assert isinstance(ctx, Wtp)
@@ -79,11 +80,11 @@ def extract_thesaurus_data(ctx, config):
         print("Extracting thesaurus data")
 
     def page_handler(model, title, text):
-        if not title.startswith("Thesaurus:"):
+        if not title.startswith(ns_title_prefix_tuple(ctx, "Thesaurus")):
             return None
         if title.startswith("Thesaurus:Requested entries "):
             return None
-        if title.find("/") >= 0:
+        if "/" in title:
             #print("STRANGE TITLE:", title)
             return None
         text = ctx.read_by_title(title)
@@ -107,7 +108,7 @@ def extract_thesaurus_data(ctx, config):
         # {{ws header|lang=xx}}
         m = re.search(r'(?s)\{\{ws header\|[^}]*lang=([^}|]*)', text)
         if m:
-            lang = languages_by_code.get(m.group(1), {}).get("name")
+            lang = config.LANGUAGES_BY_CODE.get(m.group(1), [None])[0]
 
         def recurse(contents):
             nonlocal lang
@@ -168,7 +169,7 @@ def extract_thesaurus_data(ctx, config):
                         q = m.group(1)
                         if q == item_sense:
                             return ""
-                        if q.find("XLITS") >= 0:
+                        if "XLITS" in q:
                             return q
                         dt = {}
                         parse_sense_qualifier(ctx, q, dt)
@@ -195,7 +196,7 @@ def extract_thesaurus_data(ctx, config):
                         else:
                             xlit = None
                         w1 = w1.strip()
-                        if w1.startswith("Thesaurus:"):
+                        if w1.startswith(ns_title_prefix_tuple(ctx, "Thesaurus")):
                             w1 = w1[10:]
                         if w1:
                             ret.append((lang, pos, rel, w1, item_sense,
@@ -206,15 +207,15 @@ def extract_thesaurus_data(ctx, config):
                 recurse(contents.children)
                 return
             subtitle = ctx.node_to_text(contents.args)
-            if subtitle in languages_by_name:
+            if subtitle in config.LANGUAGES_BY_NAME:
                 lang = subtitle
                 pos = None
                 sense = None
                 linkage = None
                 recurse(contents.children)
                 return
-            if subtitle.startswith("Sense: ") or subtitle.startswith("sense: "):
-                sense = subtitle[7:]
+            if subtitle.lower().startswith(config.OTHER_SUBTITLES["sense"].lower()):
+                sense = subtitle[len(config.OTHER_SUBTITLES["sense"]):]
                 linkage = None
                 recurse(contents.children)
                 return
@@ -224,12 +225,12 @@ def extract_thesaurus_data(ctx, config):
                             "work to be done", "quantification",
                             "abbreviation", "symbol"):
                 return
-            if subtitle in linkage_map:
-                linkage = linkage_map[subtitle]
+            if subtitle in config.LINKAGE_SUBTITLES:
+                linkage = config.LINKAGE_SUBTITLES[subtitle]
                 recurse(contents.children)
                 return
-            if subtitle in part_of_speech_map:
-                pos = part_of_speech_map[subtitle]["pos"]
+            if subtitle in config.POS_SUBTITLES:
+                pos = config.POS_SUBTITLES[subtitle]["pos"]
                 sense = None
                 linkage = None
                 recurse(contents.children)
