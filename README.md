@@ -367,7 +367,7 @@ run the script.  The correct dump file the name
 
 An example of a typical invocation for extracting all data would be:
 ```
-wiktwords --all --all-languages --out data.json en enwiktionary-20201201-pages-articles.xml.bz2
+wiktwords --all --all-languages --out data.json enwiktionary-20201201-pages-articles.xml.bz2
 ```
 
 If you wish to modify the code or test processing individual pages,
@@ -377,21 +377,22 @@ the following may also be useful:
 ``pages/`` and to create a cache file that you can use for quickly
 processing individual pages:
 ```
-wiktwords --cache /tmp/wikt-cache --pages-dir pages en enwiktionary-20201201-pages-articles.xml.bz2
+wiktwords --cache /tmp/wikt-cache --pages-dir pages enwiktionary-20201201-pages-articles.xml.bz2
 ```
 
 2. To process a single page, processing a human-readable output file
 for debugging:
 ```
-wiktwords --cache /tmp/wikt-cache --all --all-languages --out outfile --page pages/Words/di/dictionary.txt en
+wiktwords --cache /tmp/wikt-cache --all --all-languages --out outfile --page pages/Words/di/dictionary.txt
 ```
 
 The following command-line options can be used to control its operation:
 
 * --out FILE: specifies the name of the file to write (specifying "-" as the file writes to stdout)
 * --all-languages: extract words for all available languages
-* --language LANGUAGE: extracts the given language (this option may be specified multiple times; by default, English and Translingual words are extracted)
+* --language LANGUAGE_CODE: extracts the given language (this option may be specified multiple times; by default, English [en] and Translingual [mul] words are extracted)
 * --list-languages: prints a list of supported language names
+* --dump-file-language-code LANGUAGE_CODE: specifies the language code for the Wiktionary edition that the dump file is for (defaults to "en"; "zh" is supported and others are being added)
 * --all: causes all data to be captured for the selected languages
 * --translations: causes translations to be captured
 * --pronunciation: causes pronunciation information to be captured
