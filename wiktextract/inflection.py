@@ -21,7 +21,10 @@ from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.clean import (clean_value, )
 from wiktextract.table_headers_heuristics_data import (
                                     LANGUAGES_WITH_CELLS_AS_HEADERS)
-from wiktextract.lang_specific_inflection_configs import lang_specific
+from wiktextract.lang_specific_inflection_configs import (
+                                                get_lang_specific,
+                                                lang_specific_tags
+                                                )
 
 # --debug-text-cell WORD
 # Command-line parameter for debugging. When parsing inflection tables,
@@ -258,67 +261,6 @@ TAGS_FORCED_WORDTAGS = set([
     # This was originally created for a issue with number paradigms in
     # Arabic, but that is being handled elsewhere now.
 ])
-
-# Sanity check lang_specific
-def_ls_keys = lang_specific["default"].keys()
-for k, v in lang_specific.items():
-    if k[0].isupper() and k not in languages_by_name:
-        raise AssertionError("key {!r} in lang_specific is not a valid language"
-                             .format(k))
-    assert isinstance(v, dict)
-    for kk, vv in v.items():
-        if kk not in def_ls_keys and kk != "next":
-            raise AssertionError("{} key {!r} not in default entry"
-                                 .format(k, kk))
-        if kk in ("hdr_expand_first", "hdr_expand_cont"):
-            if not isinstance(vv, set):
-                raise AssertionError("{} key {!r} must be set"
-                                     .format(lang, kk))
-            for t in vv:
-                if t not in tag_categories:
-                    raise AssertionError("{} key {!r} invalid tag category {}"
-                                         .format(k, kk, t))
-        elif kk in ("genders", "numbers", "persons", "strengths", "voices"):
-            if not vv:
-                continue
-            if not isinstance(vv, (list, tuple, set)):
-                raise AssertionError("{} key {!r} must be list/tuple/set"
-                                     .format(k, kk))
-            for t in vv:
-                if t not in valid_tags:
-                    raise AssertionError("{} key {!r} invalid tag {!r}"
-                                         .format(k, kk, t))
-        elif kk == "lang_tag_mappings" and vv is not None:
-            for pos, transf in vv.items():
-                assert pos in PARTS_OF_SPEECH
-                assert isinstance(transf, dict)
-                for pre, post in transf.items():
-                    assert isinstance(pre, tuple)
-                    assert all(t in valid_tags for t in pre)
-                    assert isinstance(post, list)
-                    assert all(t in valid_tags for t in post)
-        elif kk == "next":
-            if vv not in lang_specific:
-                raise AssertionError("{} key {!r} value {!r} is not defined"
-                                     .format(k, kk, vv))
-
-def get_lang_specific(lang, field):
-    """Returns the given field from language-specific data or "default"
-    if the language is not listed or does not have the field."""
-    assert isinstance(lang, str)
-    assert isinstance(field, str)
-    while True:
-        lconfigs = lang_specific.get(lang)
-        if lconfigs is None:
-            lang = "default"
-        elif lang == "default" and field not in lconfigs:
-            raise RuntimeError("Invalid lang_specific field {!r}"
-                               .format(field))
-        else:
-            if field in lconfigs:
-                return lconfigs[field]
-            lang = lconfigs.get("next", "default")
-
 
 class InflCell(object):
     """Cell in an inflection table."""
@@ -1203,33 +1145,6 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
     assert all(isinstance(x, tuple) for x in coltags)
     return coltags
 
-
-def lang_specific_tags(lang, pos, form):
-    """Extracts tags from the word form itself in a language-specific way.
-    This may also adjust the word form.
-    For example, German inflected verb forms don't have person and number
-    specified in the table, but include a pronoun.  This returns adjusted
-    form and a list of tags."""
-    assert isinstance(lang, str)
-    assert isinstance(pos, str)
-    assert isinstance(form, str)
-    rules = get_lang_specific(lang, "form_transformations")
-    for patpos, pattern, dst, tags in rules:
-    #   PoS, regex, replacement, tags; pattern -> dst :: "^ich " > ""
-        assert patpos in PARTS_OF_SPEECH
-        if pos != patpos:
-            continue
-        m = re.search(pattern, form)
-        if not m:
-            continue
-        form = form[:m.start()] + dst + form[m.end():]
-        tags = tags.split()
-        for t in tags:
-            assert t in valid_tags
-        return form, tags
-    return form, []
-
-
 def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                        after):
     """This is the default table parser.  Despite its name, it can parse
@@ -1862,7 +1777,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                               .format(form))
     
                 # Warn if form looks like IPA
-                ########## REVIEW #########
+                ########## XXX ########
                 # Because IPA is its own unicode block, we could also
                 # technically do a Unicode name check to see if a string
                 # contains IPA. Not all valid IPA characters are in the
