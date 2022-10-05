@@ -37,18 +37,33 @@ LANGS_WITH_NUMBERED_INFINITIVES = set([
     "Pite Sami",
 ])
 
+
+# Inflection map for parsing headers in tables.
+
+# When the parser encounters a header in a table, it checks here for a key, like
+# "plural". Then if that key leads to a string, or a list or tuple of strings,
+# it uses those tag strings as the tags for that header. If it encounters a
+# dict, it recursively uses entries in the dict to perform simple if-then-else
+# control flow.
+# "default": default tag string or list; propagates to lower levels
+# "then": follow this if "if", "lang" and "pos" are all true
+# "if": if the current header already has some tags, check if it has these ones
+# "lang": is the current language equal to string or in a list of strings
+# "pos": is the current PART OF SPEECH equal to string or in a list of strings
+ 
 infl_map = {
     "plural": {
+        "default": "plural",
         "if": "possessive",
         "lang": POSSESSIVE_POSSESSED_LANGS,
         "then": "possessive-many",
         "else": {
             "if": "combined-form",
             "then": "object-plural",
-            "else": "plural",
         },
     },
     "singular": {
+        "default": "singular",
         "if": "possessive",
         "lang": POSSESSIVE_POSSESSED_LANGS,
         "then": "possessive-single",
@@ -280,7 +295,7 @@ infl_map = {
     "present tense": "present",
     "future tense": "future",
     "Neuter": "neuter",
-    "Masculine": "masculine",
+    # "Masculine": "masculine",
     "Feminine": "feminine",
     "adverbial": "adverbial",
     "1st singular (я)": "first-person singular",
@@ -422,28 +437,28 @@ infl_map = {
 
     "past": "past",
     "1st": {
+        "default": "first-person",
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-i",
-        "else": "first-person",
     },
     "2nd":  {
+        "default": "second-person",
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-ii",
-        "else": "second-person",
     },
     "3rd":  {
+        "default": "third-person",
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-iii",
-        "else": "third-person",
     },
     "4th": {
+        "default": "fourth-person",
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-iv",
-        "else": "fourth-person",
     },
     "5th": {
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
@@ -473,7 +488,7 @@ infl_map = {
     "conditional mood": "conditional",
     "imperative mood": "imperative",
     "potential mood": "potential",
-    "Nominal forms": "!",  # Reset column inheritance
+    "Nominal forms": "dummy-reset-headers",  # Reset column inheritance
     "long 1st": "infinitive-i-long",
     "I": {
          "lang": LANGS_WITH_NUMBERED_INFINITIVES,
@@ -1673,7 +1688,7 @@ infl_map = {
     "non-finite forms": {
         "lang": "Latin",
         "pos": "verb",
-        "then": "!",  # Reset column inheritance
+        "then": "dummy-reset-headers",  # Reset column inheritance
         "else": "",
     },
     "ben": {
@@ -2592,7 +2607,7 @@ infl_map = {
     "invertive": "invertive",
     "Simple finite forms": "finite-form",
     "Positive form": "positive",
-    "Complex finite forms": "!",  # Reset
+    "Complex finite forms": "dummy-reset-headers",  # Reset
     "Polarity": "",
     "Persons": "",
     "Persons / Classes": "",
@@ -3385,7 +3400,7 @@ infl_map = {
     "Non honorific": "",
     "Continuous": "continuative",
     "Others": "",
-    "Other forms": "!",  # Reset (είμαι/Greek/Verb)
+    "Other forms": "dummy-reset-headers",  # Reset (είμαι/Greek/Verb)
     "Oblique": "oblique",
     "Demonstrative oblique": "demonstrative oblique",
     "♀": "feminine",
@@ -3660,7 +3675,7 @@ infl_map = {
     "sigmatic aorist": "sigmatic aorist",  # adiuvo/Latin
     "Key constructions": {
         "lang": "Japanese",
-        "then": "!",  # Break column inheritance, 伶俐/Japanese
+        "then": "dummy-reset-headers",  # Break column inheritance, 伶俐/Japanese
     },
     "Informal past": { # 伶俐/Japanese
         "lang": "Japanese",
@@ -3697,6 +3712,7 @@ infl_map = {
     "With possessive pronouns": "possessed-form",
 
     "Person": {
+        "default": "",
         "lang": ["Hebrew", "Scottish Gaelic", "Old Irish",],
         # umpa/Scottish Gaelic, la/Old Irish
         "then": "*",
@@ -3707,7 +3723,7 @@ infl_map = {
         "then": "possessive-masculine possessive-single",  # doesn't work
         "else": "masculine singular",
     },
-    # could there be a third control character besides "*" and "!"
+    # could there be a third control character besides "*" and "dummy-reset-headers"
     # that lets you override bleeding rules for a column so that it
     # takes over the whole row, like here?
     "masculine plural": {
@@ -3938,14 +3954,16 @@ infl_map = {
     "m./n." : "masculine neuter",  # féin/Old Irish
     "Stressed": "stressed",  # suide/Old irish
     "Unstressed": "unstressed",  # suide/Old Irish
-    # ~ "Masculine": { # suide/Old Irish
-        # ~ "lang": "Old Irish",
-        # ~ "then": "!",
-    # ~ },
-    # ~ "Feminine/neuter": {
-        # ~ "lang": "Old Irish",
-        # ~ "then": "!",
-    # ~ },
+    "Masculine": { # suide/Old Irish
+        "default": "masculine",
+        "lang": "Old Irish",
+        "then": "dummy-reset-headers masculine",
+    },
+    "Feminine/neuter": {
+        "default": "feminine neuter",
+        "lang": "Old Irish",
+        "then": "dummy-reset-headers feminine neuter",
+    },
     "2d sing.": "second-person singular",  # attá/Old Irish
     "3d sing.": "third-person singular",  # attá/Old Irish
     "3d sg. masc.": "third-person singular masculine",  # attá/Old Irish
@@ -4019,7 +4037,7 @@ infl_map = {
     # ~ "Compound tenses": {
         # ~ "lang": "Macedonian",
         # ~ "pos": "verb",
-        # ~ "then": "!",
+        # ~ "then": "dummy-reset-headers",
     # ~ },
 
     "collective": {  # ремен/Macedonian
@@ -4064,13 +4082,13 @@ infl_map = {
     "Personal-pronoun- including forms": {
         "lang": ["Arabic", "Moroccan Arabic","Maltese","Gulf Arabic",],
         "pos": "prep",
-        "then": "!",
+        "then": "dummy-reset-headers",
     },
     # ~ "singular": {
         # ~ "lang": ["Arabic", "Moroccan Arabic",],
         # ~ "pos": "prep",
         # ~ "if": "stem",
-        # ~ "then": "!",
+        # ~ "then": "dummy-reset-headers",
     # ~ },
 
     "common, neuter": {  # kaj/Serbo-Croatian
@@ -4122,12 +4140,10 @@ infl_map = {
 
     "3rd f": "third-person feminine",  #umpa/Scottish Gaelic
     "Number": {
-        "lang": "Sanskrit",
-        "then": "",
-        "else": {    #umpa/Scottish Gaelic
-            "lang": ["Hebrew", "Scottish Gaelic",],
-            "then": "*",
-        },
+        "default": "",
+        #umpa/Scottish Gaelic
+        "lang": ["Hebrew", "Scottish Gaelic",],
+        "then": "*",
     },
 
     "Third person f": "third-person feminine",  # an/Scottish Gaelic
@@ -4457,10 +4473,7 @@ infl_map = {
     "Active Voice": "active",
     "Passive Voice": "passive",
     "Middle Voice": "middle-voice",  #शृणोति/Sanskrit
-    "Person": {
-        "lang": "Sanskrit",
-        "then": "",
-    },
+
     "Potential mood / Optative mood": "potential",
     # ვენეციური/Georgian
     "nominative, genitive, instrumental": "nominative genitive instrumental",
@@ -4632,7 +4645,7 @@ infl_map = {
     "Mutated forms": {
         "lang": "Breton",
         "pos": "verb",
-        "then": "!",
+        "then": "dummy-reset-headers",
     },
 
     # дөрвөл/Mongolian
@@ -5787,7 +5800,7 @@ infl_map = {
     "ví": "first-person plural",
     "í": "second-person plural",
     "dé":  "third-person plural",
-    "present imperative": "imperative",
+    "present imperative": "present imperative",
     
     #a ګړندی/Pashto
     "oblique I": "oblique oblique-i",
@@ -5798,9 +5811,9 @@ infl_map = {
         "past imperfective object-concord dummy-object-concord",
     "OBJECT": "",
     "Past Perfective": {
+        "default": "past perfective",
         "lang": "Pashto",
-        "then": "object-concord dummy-object-concord",
-        "else": "past perfective",
+        "then": "past perfective object-concord dummy-object-concord",
     },
 }
 
@@ -5817,7 +5830,7 @@ def check_tags(k, v):
 
 def check_v(k, v):
     assert isinstance(k, str)
-    if v is None or v in ("!",):
+    if v is None: # or v in ("dummy-reset-headers",):
         return
     if isinstance(v, str):
         check_tags(k, v)
@@ -5826,8 +5839,12 @@ def check_v(k, v):
             check_v(k, item)
     elif isinstance(v, dict):
         for kk in v.keys():
-            if kk in ("if", "then", "else"):
+            if kk in ("if", "then", "else",):
                 check_v(k, v[kk])
+            elif kk == "default":
+                if not isinstance(v[kk], (str, list, tuple)):
+                    print("infl_map[{!r}] contains invalid default value "
+                                  "{!r}".format(k, v[kk]))
             elif kk == "pos":
                 vv = v[kk]
                 if isinstance(vv, str):
@@ -5872,6 +5889,8 @@ infl_start_map = {
     # kaozeal/Breton
     "Soft mutation after": "mutation-soft",
     "Mixed mutation after": "mutation-mixed",
+    # gláedach/Old Irish
+    "Initial mutations of a following adjective:": "dummy-skip-this",
 }
 for k, v in infl_start_map.items():
     check_v(k, v)

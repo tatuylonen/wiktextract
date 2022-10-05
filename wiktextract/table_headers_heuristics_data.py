@@ -7766,6 +7766,7 @@ LANGUAGES_WITH_CELLS_AS_HEADERS = {
         # "tu",  # 1 in "tu"
         # "form",  # 1 in "for"
         "Nominative Accusative",  # 1 in "dá"
+        "Initial mutations of a following adjective: *ᴴ = triggers aspiration *ᴸ = triggers lenition *ᴺ = triggers nasalization",
     ],
     "Old Japanese": [
         "^([1])Without auxiliary verb. ^([2])With auxiliary verb.",  # 8 in "のど; 同じ; 同じ; 新たし; 戀し; 戀し; 戀し; 戀し"

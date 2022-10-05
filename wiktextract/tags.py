@@ -5296,6 +5296,7 @@ valid_tags = {
         # Use this to get rid of unnecessary cells by propagating: for example
         # if there's a "Notes" header and a text cell beneath it, using the
         # header to give the text cell this tag will nuke it.
+    "dummy-reset-headers": "dummy",
     "durative": "aspect",  # Verb form  XXX same as continuative?
     "eclipsis": "misc",
     "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian
