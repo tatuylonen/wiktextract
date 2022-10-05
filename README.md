@@ -570,7 +570,7 @@ following keys (others may also be present or added later):
 * ``word`` - the word form
 * ``pos`` - part-of-speech, such as "noun", "verb", "adj", "adv", "pron", "determiner", "prep" (preposition), "postp" (postposition), and many others.  The complete list of possible values returned by the package can be found in ``wiktextract.PARTS_OF_SPEECH``.
 * ``lang`` - name of the language this word belongs to (e.g., ``English``)
-* ``lang_code`` - Wiktionary language code (e.g., ``en``)
+* ``lang_code`` - Wiktionary language code corresponding to ``lang`` key (e.g., ``en``)
 * ``senses`` - list of word senses (dictionaries) for this word/part-of-speech (see below)
 * ``forms`` - list of inflected or alternative forms specified for the word (e.g., plural, comparative, superlative, roman script version).  This is a list of dictionaries, where each dictionary has a ``form`` key and a ``tags`` key.  The ``tags`` identify what type of form it is.  It may also contain "ipa", "roman", and "source" fields.  The form can be "-" when the word is marked as not having that form (some of those will be word-specific, while others are language-specific; post-processing can drop such forms when no word has a value for that tag combination).
 * ``sounds`` - list of dictionaries containing pronunciation, hyphenation, rhyming, and related information.  Each dictionary may have a ``tags`` key containing tags that clarify what kind of form that entry is.  Different types of information are stored in different fields: ``ipa`` is [IPA](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet) pronunciation, ``enPR`` is [enPR](https://en.wikipedia.org/wiki/Pronunciation_respelling_for_English) pronunciation, ``audio`` is name of sound file in Wikimedia commons.
