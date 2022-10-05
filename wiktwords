@@ -112,8 +112,6 @@ def capture_page(model, orig_title, text, pages_dir):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Multilingual Wiktionary data extractor")
-    parser.add_argument("dump_file_language_code", type=str,
-                        help="Language code of the dump file.")
     parser.add_argument("path", type=str, nargs="?", default=None,
                         help="Input file (.../enwiktionary-<date>-"
                         "pages-articles.xml.bz2)")
@@ -121,9 +119,12 @@ if __name__ == "__main__":
                         help="Path where to write output (- for stdout)")
     parser.add_argument("--errors", type=str,
                         help="File in which to save error information")
+    parser.add_argument("--dump-file-language-code", type=str, default="en",
+                        help="Language code of the dump file.")
     parser.add_argument("--language", type=str, action="append", default=[],
                         help="Language code to capture (can specify multiple "
-                        "times, defaults to English and Translingual)")
+                        "times, defaults to English [en] and "
+                        "Translingual [mul])")
     parser.add_argument("--all-languages", action="store_true", default=False,
                         help="Extract words for all languages")
     parser.add_argument("--list-languages", action="store_true", default=False,
@@ -192,7 +193,7 @@ if __name__ == "__main__":
         # .debug_cell_text =, a simple setter function does
         # the same thing.
         set_debug_cell_text(args.debug_cell_text)
-        
+
     # The --all option turns on capturing all data types
     if args.all and (not args.pages_dir or args.out):
         args.translations = True
