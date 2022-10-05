@@ -2493,8 +2493,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if is_panel_template(name):
                 return ""
             if re.match(ignored_etymology_templates_re, name):
-                ignore_count += 1                
-            
+                ignore_count += 1
+
         def etym_post_template_fn(name, ht, expansion):
             nonlocal ignore_count
             if name in wikipedia_templates:
@@ -2781,7 +2781,7 @@ def fix_subtitle_hierarchy(ctx: Wtp, config: WiktionaryConfig, text: str) -> str
     return text
 
 
-def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list[dict[str, str]]:
+def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list:  # list[dict[str, str]]
     """Parses the text of a Wiktionary page and returns a list of
     dictionaries, one for each word/part-of-speech defined on the page
     for the languages specified by ``capture_language_codes`` (None means

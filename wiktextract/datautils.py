@@ -1,6 +1,6 @@
 # Utilities for manipulating word data structures
 #
-# Copyright (c) 2018-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
 import functools
@@ -192,7 +192,7 @@ def freeze(x):
     return x
 
 
-def ns_title_prefix_tuple(ctx: Wtp, namespace: str, lower: bool = False) -> tuple[str]:
+def ns_title_prefix_tuple(ctx, namespace: str, lower: bool = False) -> tuple:  # tuple[str]
     if namespace in ctx.NAMESPACE_DATA:
         return tuple(map(lambda x: x.lower() + ":" if lower else x + ":",
                          [ctx.NAMESPACE_DATA[namespace]["name"]] + ctx.NAMESPACE_DATA[namespace]["aliases"]))

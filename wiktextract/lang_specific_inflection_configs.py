@@ -3,7 +3,7 @@
 # parsing.
 
 import re
-from wiktextract.datautils import (languages_by_name)
+# from wiktextract.datautils import languages_by_name
 from wiktextract.tags import valid_tags, tag_categories
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 
@@ -581,7 +581,7 @@ lang_specific = {
     },
     "Swahili": {
         "next": "bantu-group",
-        
+
     # In certain cases, what 'direction' a header is pointing changes its
     # meaning, like with Swahili: there, "c5" means subject concord
     # (subject is class five) when the header is in a column, and object concord
@@ -685,47 +685,47 @@ lang_specific = {
 
 
 # Sanity check lang_specific
-def_ls_keys = lang_specific["default"].keys()
-for k, v in lang_specific.items():
-    if k[0].isupper() and k not in languages_by_name:
-        raise AssertionError("key {!r} in lang_specific is not a valid language"
-                             .format(k))
-    assert isinstance(v, dict)
-    for kk, vv in v.items():
-        if kk not in def_ls_keys and kk != "next":
-            raise AssertionError("{} key {!r} not in default entry"
-                                 .format(k, kk))
-        if kk in ("hdr_expand_first", "hdr_expand_cont"):
-            if not isinstance(vv, set):
-                raise AssertionError("{} key {!r} must be set"
-                                     .format(lang, kk))
-            for t in vv:
-                if t not in tag_categories:
-                    raise AssertionError("{} key {!r} invalid tag category {}"
-                                         .format(k, kk, t))
-        elif kk in ("genders", "numbers", "persons", "strengths", "voices"):
-            if not vv:
-                continue
-            if not isinstance(vv, (list, tuple, set)):
-                raise AssertionError("{} key {!r} must be list/tuple/set"
-                                     .format(k, kk))
-            for t in vv:
-                if t not in valid_tags:
-                    raise AssertionError("{} key {!r} invalid tag {!r}"
-                                         .format(k, kk, t))
-        elif kk == "lang_tag_mappings" and vv is not None:
-            for pos, transf in vv.items():
-                assert pos in PARTS_OF_SPEECH
-                assert isinstance(transf, dict)
-                for pre, post in transf.items():
-                    assert isinstance(pre, tuple)
-                    assert all(t in valid_tags for t in pre)
-                    assert isinstance(post, list)
-                    assert all(t in valid_tags for t in post)
-        elif kk == "next":
-            if vv not in lang_specific:
-                raise AssertionError("{} key {!r} value {!r} is not defined"
-                                     .format(k, kk, vv))
+# def_ls_keys = lang_specific["default"].keys()
+# for k, v in lang_specific.items():
+#     if k[0].isupper() and k not in languages_by_name:
+#         raise AssertionError("key {!r} in lang_specific is not a valid language"
+#                              .format(k))
+#     assert isinstance(v, dict)
+#     for kk, vv in v.items():
+#         if kk not in def_ls_keys and kk != "next":
+#             raise AssertionError("{} key {!r} not in default entry"
+#                                  .format(k, kk))
+#         if kk in ("hdr_expand_first", "hdr_expand_cont"):
+#             if not isinstance(vv, set):
+#                 raise AssertionError("{} key {!r} must be set"
+#                                      .format(lang, kk))
+#             for t in vv:
+#                 if t not in tag_categories:
+#                     raise AssertionError("{} key {!r} invalid tag category {}"
+#                                          .format(k, kk, t))
+#         elif kk in ("genders", "numbers", "persons", "strengths", "voices"):
+#             if not vv:
+#                 continue
+#             if not isinstance(vv, (list, tuple, set)):
+#                 raise AssertionError("{} key {!r} must be list/tuple/set"
+#                                      .format(k, kk))
+#             for t in vv:
+#                 if t not in valid_tags:
+#                     raise AssertionError("{} key {!r} invalid tag {!r}"
+#                                          .format(k, kk, t))
+#         elif kk == "lang_tag_mappings" and vv is not None:
+#             for pos, transf in vv.items():
+#                 assert pos in PARTS_OF_SPEECH
+#                 assert isinstance(transf, dict)
+#                 for pre, post in transf.items():
+#                     assert isinstance(pre, tuple)
+#                     assert all(t in valid_tags for t in pre)
+#                     assert isinstance(post, list)
+#                     assert all(t in valid_tags for t in post)
+#         elif kk == "next":
+#             if vv not in lang_specific:
+#                 raise AssertionError("{} key {!r} value {!r} is not defined"
+#                                      .format(k, kk, vv))
 
 def get_lang_specific(lang, field):
     """Returns the given field from language-specific data or "default"
