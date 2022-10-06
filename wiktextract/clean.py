@@ -959,6 +959,9 @@ def clean_value(config, title, no_strip=False, no_html_strip=False):
     if not no_html_strip:
         title = re.sub(r"(?s)<\s*[/!a-zA-Z][^>]*>", "", title)
         title = re.sub(r"(?s)<\s*/\s*[^>]+>", "", title)
+    else:
+        # Strip <noinclude/> anyway
+        title = re.sub(r"(?si)<\s*noinclude\s*/\s*>", "", title)
     # Replace [...]
     title = re.sub(r"(?s)\[\s*\.\.\.\s*\]", "…", title)
     # Remove http links in superscript
