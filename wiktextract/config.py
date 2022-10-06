@@ -5,6 +5,7 @@
 
 import json
 import collections
+import pkg_resources
 from pathlib import Path
 
 
@@ -107,7 +108,7 @@ class WiktionaryConfig(object):
         self.thesaurus_data = {}
         self.redirects = {}
 
-        self.data_folder = Path(__file__).parent.joinpath(f"data/{dump_file_lang_code}")
+        self.data_folder = Path(pkg_resources.resource_filename("wiktextract", "data/")).joinpath(dump_file_lang_code)
         self.init_subtitles()
         self.init_zh_pron_tags()
         self.init_languages()
