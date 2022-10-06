@@ -7,11 +7,13 @@ from pathlib import Path
 import requests
 
 
-def save_json_file(data: dict[str, list[str]], lang_code: str) -> None:
+def save_json_file(data: dict[str, list[str]],
+                   lang_code: str,
+                   file_name: str = "languages.json") -> None:
     data_folder = Path(f"wiktextract/data/{lang_code}")
     if not data_folder.exists():
         data_folder.mkdir()
-    with data_folder.joinpath("languages.json").open("w", encoding="utf-8") as f:
+    with data_folder.joinpath(file_name).open("w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False, sort_keys=True)
 
 
@@ -24,7 +26,8 @@ def expand_template(sub_domain: str, text: str) -> str:
         "prop": "wikitext",
         "formatversion": "2",
     }
-    r = requests.get(f"https://{sub_domain}.wiktionary.org/w/api.php", params=params)
+    r = requests.get(f"https://{sub_domain}.wiktionary.org/w/api.php",
+                     params=params)
     data = r.json()
     return data["expandtemplates"]["wikitext"]
 
@@ -47,6 +50,15 @@ def parse_csv(sub_domain: str, wiki_lang_code: str) -> dict[str, list[str]]:
 
     save_json_file(lang_data, wiki_lang_code)
 
+    lang_name_to_code_index = {}
+    for kcode, vlangs in lang_data.items():
+        for v in vlangs:
+            if v in lang_name_to_code_index:
+                print(f"{kcode}: {v}")
+            lang_name_to_code_index[v] = kcode
+    save_json_file(lang_name_to_code_index, wiki_lang_code,
+                            "language_names_to_codes.json")
+
 
 def get_fr_languages():
     # https://fr.wiktionary.org/wiki/Module:langues/analyse
@@ -61,6 +73,16 @@ def get_fr_languages():
         lang_data[lang_code] = [lang_name[0].upper() + lang_name[1:]]
 
     save_json_file(lang_data, "fr")
+
+    lang_name_to_code_index = {}
+    for kcode, vlangs in lang_data.items():
+        for v in vlangs:
+            if v in lang_name_to_code_index:
+                print(f"{kcode}: {v}")
+            lang_name_to_code_index[v] = kcode
+    save_json_file(lang_name_to_code_index, "fr",
+                   "language_names_to_codes.json")
+                
 
 
 def main():
