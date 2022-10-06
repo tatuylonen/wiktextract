@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2018-2021 Tatu Ylonen.  See LICENSE and https://ylonen.org
+# Copyright (c) 2018-2022 Tatu Ylonen.  See LICENSE and https://ylonen.org
 
 from setuptools import setup
 
@@ -19,7 +19,7 @@ setup(name="wiktextract",
       download_url="https://github.com/tatuylonen/wiktextract",
       scripts=["wiktwords"],
       packages=["wiktextract"],
-      include_package_data=True,
+      package_data={"wiktextract": ["data/*/*"]},
       install_requires=["wikitextprocessor", "python-Levenshtein", "nltk"],
       classifiers=[
           "Development Status :: 3 - Alpha",
@@ -30,10 +30,9 @@ setup(name="wiktextract",
           "Operating System :: OS Independent",
           "Operating System :: POSIX :: Linux",
           "Programming Language :: Python",
-          "Programming Language :: Python :: 3.6",
-          "Programming Language :: Python :: 3.7",
           "Programming Language :: Python :: 3.8",
           "Programming Language :: Python :: 3.9",
+          "Programming Language :: Python :: 3.10",
           "Programming Language :: Python :: 3 :: Only",
           "Topic :: Text Processing",
           "Topic :: Text Processing :: Linguistic",
