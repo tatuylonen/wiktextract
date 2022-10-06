@@ -1769,7 +1769,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 if lang_tag_mappings is not None:
                     for pre, post in lang_tag_mappings.items():
                         if all(t in tags for t in pre):
-                            tags = (tags - set(src)) | set(post)
+                            tags = (tags - set(pre)) | set(post)
                             
                 # Warn if there are entries with empty tags
                 if not tags:
