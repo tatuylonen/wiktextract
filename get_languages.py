@@ -48,7 +48,7 @@ def parse_csv(sub_domain: str, wiki_lang_code: str) -> dict[str, list[str]]:
     save_json_file(lang_data, wiki_lang_code)
 
 
-def get_fr_lanuages():
+def get_fr_languages():
     # https://fr.wiktionary.org/wiki/Module:langues/analyse
     json_text = expand_template(
         "fr", "{{#invoke:langues/analyse|affiche_langues_python}}"
@@ -73,7 +73,7 @@ def main():
         case "en" | "zh":
             parse_csv(args.sub_domain, args.lang_code)
         case "fr":
-            get_fr_lanuages()
+            get_fr_languages()
 
 
 if __name__ == "__main__":
