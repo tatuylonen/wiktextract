@@ -1,6 +1,6 @@
 # Code related to parsing translations
 #
-# Copyright (c) 2019-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+# Copyright (c) 2019-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
 import copy
@@ -507,7 +507,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                     part = "rest"
                 else:
                     cls = classify_desc(par)
-                    print("par={!r} cls={!r}".format(par, cls))
+                    # print("par={!r} cls={!r}".format(par, cls))
                     if cls == "tags":
                         tagsets2, topics2 = decode_tags(par)
                         for t in tagsets2:

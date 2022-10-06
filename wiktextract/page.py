@@ -1927,7 +1927,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                     v = [v[0][1:]] + list(v[1:])
                                 item_recurse(v, italic=italic)
                     elif kind == NodeKind.URL:
-                        print("linkage recurse URL {}".format(node))
+                        # print("linkage recurse URL {}".format(node))
                         item_recurse(node.args[-1], italic=italic)
                     elif kind in (NodeKind.PREFORMATTED, NodeKind.BOLD):
                         item_recurse(node.children, italic=italic)
