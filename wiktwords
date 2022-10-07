@@ -353,6 +353,9 @@ if __name__ == "__main__":
             ret = parse_page(ctx, title, text, config)
             for x in ret:
                 word_cb(x)
+            # Merge errors from ctx to config, so that we can also use
+            # --errors with single page extraction
+            config.merge_return(ctx.to_return())
 
         if not args.path and not args.page:
             # Parse again from the cache file

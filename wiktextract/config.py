@@ -139,16 +139,18 @@ class WiktionaryConfig(object):
 
     def merge_return(self, ret):
         assert isinstance(ret, dict)
-        self.num_pages += ret["num_pages"]
-        for k, v in ret["language_counts"].items():
-            self.language_counts[k] += v
-        for k, v in ret["pos_counts"].items():
-            self.pos_counts[k] += v
-        for k, v in ret["section_counts"].items():
-            self.section_counts[k] += v
-        self.errors.extend(ret.get("errors", []))
-        self.warnings.extend(ret.get("warnings", []))
-        self.debugs.extend(ret.get("debugs", []))
+        if "num_pages" in ret:
+            self.num_pages += ret["num_pages"]
+            for k, v in ret["language_counts"].items():
+                self.language_counts[k] += v
+            for k, v in ret["pos_counts"].items():
+                self.pos_counts[k] += v
+            for k, v in ret["section_counts"].items():
+                self.section_counts[k] += v
+        if "errors" in ret:
+            self.errors.extend(ret.get("errors", []))
+            self.warnings.extend(ret.get("warnings", []))
+            self.debugs.extend(ret.get("debugs", []))
 
     def init_subtitles(self) -> None:
         with self.data_folder.joinpath("linkage_subtitles.json").open(encoding="utf-8") as f:
