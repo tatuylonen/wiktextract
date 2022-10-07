@@ -360,7 +360,8 @@ if __name__ == "__main__":
         if not args.path and not args.page:
             # Parse again from the cache file
             reprocess_wiktionary(ctx, config, word_cb, capture_cb,
-                                 dont_parse=(args.pages_dir and not args.out))
+                                 dont_parse=(bool(args.pages_dir) and
+                                                 not bool(args.out)))
 
     finally:
         if out_path and out_path != "-" and out_f is not None:
