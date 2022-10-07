@@ -2766,9 +2766,9 @@ def fix_subtitle_hierarchy(ctx: Wtp, config: WiktionaryConfig, text: str) -> str
             level = 5
         elif lc in config.LINKAGE_SUBTITLES or lc == config.OTHER_SUBTITLES["compounds"]:
             level = 5
-        elif title in config.OTHER_SUBTITLES["inflection_sections"]:
+        elif lc in config.OTHER_SUBTITLES["inflection_sections"]:
             level = 5
-        elif title in config.OTHER_SUBTITLES["ignored_sections"]:
+        elif lc in config.OTHER_SUBTITLES["ignored_sections"]:
             level = 5
         else:
             level = 6
