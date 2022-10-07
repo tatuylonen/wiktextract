@@ -50,14 +50,6 @@ def parse_csv(sub_domain: str, wiki_lang_code: str) -> dict[str, list[str]]:
 
     save_json_file(lang_data, wiki_lang_code)
 
-    lang_name_to_code_index = {}
-    for kcode, vlangs in lang_data.items():
-        for v in vlangs:
-            if v in lang_name_to_code_index:
-                print(f"{kcode}: {v}")
-            lang_name_to_code_index[v] = kcode
-    save_json_file(lang_name_to_code_index, wiki_lang_code,
-                            "language_names_to_codes.json")
 
 
 def get_fr_languages():
@@ -73,17 +65,6 @@ def get_fr_languages():
         lang_data[lang_code] = [lang_name[0].upper() + lang_name[1:]]
 
     save_json_file(lang_data, "fr")
-
-    lang_name_to_code_index = {}
-    for kcode, vlangs in lang_data.items():
-        for v in vlangs:
-            if v in lang_name_to_code_index:
-                print(f"{kcode}: {v}")
-            lang_name_to_code_index[v] = kcode
-    save_json_file(lang_name_to_code_index, "fr",
-                   "language_names_to_codes.json")
-                
-
 
 def main():
     parser = argparse.ArgumentParser()
