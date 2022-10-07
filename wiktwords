@@ -250,6 +250,21 @@ if __name__ == "__main__":
                               verbose=args.verbose,
                               expand_tables=args.inflection_tables_file,)
 
+    if args.language:
+        new_lang_codes = []
+        for x in args.language:
+            if x not in config.LANGUAGES_BY_CODE:
+                if x in config.LANGUAGES_BY_NAME:
+                    new_lang_codes.append(config.LANGUAGES_BY_NAME[x])
+                else:
+                    print("Invalid language:", x)
+                    sys.exit(1)
+            else:
+                new_lang_codes.append(x)
+        print(args.language)
+        config.capture_language_codes = new_lang_codes
+        print(args.language)
+        
     # Create expansion context
     ctx = Wtp(cache_file=args.cache, num_threads=args.num_threads, lang_code=args.dump_file_language_code, languages_by_code=config.LANGUAGES_BY_CODE)
     # We are now having problems with "Module:no globals", which causes
@@ -265,12 +280,6 @@ if __name__ == "__main__":
         for lang_name, lang_code in config.LANGUAGES_BY_NAME.items():
             print(f"    {lang_name}: {lang_code}")
         sys.exit(0)
-
-    if args.language:
-        for x in args.language:
-            if x not in config.LANGUAGES_BY_CODE:
-                print("Invalid language:", x)
-                sys.exit(1)
 
     if not args.path and not args.cache:
         print("The PATH argument for wiktionary dump file is normally "
