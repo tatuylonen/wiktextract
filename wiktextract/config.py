@@ -171,16 +171,12 @@ class WiktionaryConfig(object):
         with self.data_folder.joinpath("languages.json").open(encoding="utf-8") as f:
             self.LANGUAGES_BY_CODE = json.load(f)
         self.LANGUAGES_BY_NAME = {}
-        code_and_priority = {}
-        # This is necessary to avoid overlapping and mixing up lang_codes.
-        # In the data there are several language codes that share a language
-        # value in their lists of language names; we assume that if a
-        # language name is the first one in a list, it is the primary language
-        # name of that specific language code.
         for lang_code, lang_names in self.LANGUAGES_BY_CODE.items():
-            for i, lang_name in enumerate(lang_names):
-                if lang_name in code_and_priority:
-                    if code_and_priority[lang_name][1] >= i:
-                        continue
-                code_and_priority[lang_name] = (lang_code, i)
-                self.LANGUAGES_BY_NAME[lang_name] = lang_code
+            for lang_name in lang_names:
+                # some languages have the same name but different language codes
+                # only overwrite the language names of three-letter codes with
+                # the name of two-letter codes
+                if lang_name not in self.LANGUAGES_BY_NAME or len(lang_code) < len(
+                        self.LANGUAGES_BY_NAME[lang_name]
+                ):
+                    self.LANGUAGES_BY_NAME[lang_name] = lang_code
