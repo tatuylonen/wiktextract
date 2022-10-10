@@ -4,8 +4,6 @@ import json
 import sys
 from pathlib import Path
 
-import requests
-
 
 def save_json_file(data: dict[str, list[str]],
                    lang_code: str,
@@ -18,6 +16,8 @@ def save_json_file(data: dict[str, list[str]],
 
 
 def expand_template(sub_domain: str, text: str) -> str:
+    import requests
+
     # https://www.mediawiki.org/wiki/API:Expandtemplates
     params = {
         "action": "expandtemplates",
@@ -32,6 +32,14 @@ def expand_template(sub_domain: str, text: str) -> str:
     return data["expandtemplates"]["wikitext"]
 
 
+def add_simplified_chinese_names(lang_names, converter):
+    # The API only returns language names in Traditional Chinese characters
+    for name in lang_names.copy():
+        simplified_name = converter.convert(name)
+        if simplified_name not in lang_names:
+            lang_names.append(simplified_name)
+
+
 def parse_csv(sub_domain: str, wiki_lang_code: str) -> dict[str, list[str]]:
     # https://en.wiktionary.org/wiki/Module:list_of_languages,_csv_format
     csv_text = expand_template(
@@ -39,6 +47,10 @@ def parse_csv(sub_domain: str, wiki_lang_code: str) -> dict[str, list[str]]:
     )
     csv_text = csv_text.removeprefix("<pre>\n").removesuffix("</pre>")
 
+    if wiki_lang_code == "zh":
+        import opencc
+
+        converter = opencc.OpenCC("t2s.json")
     lang_data = {}
     csv_iter = iter(csv_text.splitlines())
     next(csv_iter)  # skip header line
@@ -46,7 +58,10 @@ def parse_csv(sub_domain: str, wiki_lang_code: str) -> dict[str, list[str]]:
         lang_code = row[1]
         canonical_name = row[2]
         other_names = list(filter(None, row[-2].split(","))) if row[-2] else []
-        lang_data[lang_code] = [canonical_name] + other_names
+        all_names = [canonical_name] + other_names
+        if wiki_lang_code == "zh":
+            add_simplified_chinese_names(all_names, converter)
+        lang_data[lang_code] = all_names
 
     save_json_file(lang_data, wiki_lang_code)
 
