@@ -266,7 +266,9 @@ if __name__ == "__main__":
         print(args.language)
         
     # Create expansion context
-    ctx = Wtp(cache_file=args.cache, num_threads=args.num_threads, lang_code=args.dump_file_language_code, languages_by_code=config.LANGUAGES_BY_CODE)
+    ctx = Wtp(cache_file=args.cache, num_threads=args.num_threads,
+              lang_code=args.dump_file_language_code,
+              languages_by_code=config.LANGUAGES_BY_CODE)
     # We are now having problems with "Module:no globals", which causes
     # infinite Python recursion on a number of pages (it may be a sandbox
     # problem that it is not properly reset).  Override that debugging module
