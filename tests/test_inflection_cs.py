@@ -39,63 +39,66 @@ class InflTests(unittest.TestCase):
 
 {| class="wikitable" style="width%3A+43em%3B"
 
-|-
+|- 
 
-| '''Present forms'''
+! '''Present forms'''
 
-| colspan="2" |indicative
+! colspan="2" |indicative 
 
-| colspan="2" |imperative
-
-
-|-
-
-|
-
-|singular
-
-|plural
-
-|singular
-
-|plural
+! colspan="2" |imperative
 
 
-|-
+|- 
 
-| style="width%3A+10em%3B" |1st person
+! 
+
+!singular
+
+!plural
+
+!singular
+
+!plural
+
+
+|- 
+
+! style="width%3A+10em%3B" |1st person
+
 
 | style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myslím#Czech|myslím]]</span>
 
-| style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myslíme#Czech|myslíme]]</span>
+| style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myslíme#Czech|myslíme]]</span> 
 
-| style="width%3A+7em%3B" | &mdash;
+| style="width%3A+7em%3B" | &mdash; 
 
 | style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[mysleme#Czech|mysleme]]</span>
 
 
-|-
+|- 
 
-|2nd person
+!2nd person 
 
-| <span class="Latn" lang="cs">[[myslíš#Czech|myslíš]]</span>
 
-| <span class="Latn" lang="cs">[[myslíte#Czech|myslíte]]</span>
+| <span class="Latn" lang="cs">[[myslíš#Czech|myslíš]]</span> 
 
-| <span class="Latn" lang="cs">[[mysli#Czech|mysli]]</span>
+| <span class="Latn" lang="cs">[[myslíte#Czech|myslíte]]</span> 
+
+| <span class="Latn" lang="cs">[[mysli#Czech|mysli]]</span> 
 
 | <span class="Latn" lang="cs">[[myslete#Czech|myslete]]</span>
 
 
-|-
+|- 
 
-|3rd person
+!3rd person 
 
-| <span class="Latn" lang="cs">[[myslí#Czech|myslí]]</span>
 
-| <span class="Latn" lang="cs">[[myslí#Czech|myslí]]</span>, <span class="Latn" lang="cs">[[myslejí#Czech|myslejí]]</span>
+| <span class="Latn" lang="cs">[[myslí#Czech|myslí]]</span> 
 
-| &mdash;
+| <span class="Latn" lang="cs">[[myslí#Czech|myslí]]</span>, <span class="Latn" lang="cs">[[myslejí#Czech|myslejí]]</span> 
+
+| &mdash; 
 
 | &mdash;
 
@@ -104,12 +107,9 @@ class InflTests(unittest.TestCase):
 
 
 
-{| class="wikitable"
-
-|-
-
-|The future tense: a combination of a future form of <i class="Latn+mention" lang="cs">[[být#Czech|být]]</i> + infinitive ''myslet''.
-
+{| 
+ class="wikitable"
+<td>The future tense: a combination of a future form of <i class="Latn+mention" lang="cs">[[být#Czech|být]]</i> + infinitive ''myslet''.</td>
 
 |}
 
@@ -117,68 +117,72 @@ class InflTests(unittest.TestCase):
 
 {| class="wikitable" style="width%3A+43em%3B"
 
-|-
+|- 
 
-| '''Participles'''
+! '''Participles'''
 
-| colspan="2" |Past participles
+! colspan="2" |Past participles
 
-| colspan="2" |Passive participles
-
-
-|-
-
-|
-
-|singular
-
-|plural
-
-|singular
-
-|plural
+! colspan="2" |Passive participles
 
 
-|-
+|- 
 
-| style="width%3A+10em%3B" |masculine animate
+! 
 
-| rowspan="2" style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myslel#Czech|myslel]]</span>, <span class="Latn" lang="cs">[[myslil#Czech|myslil]]</span>
+!singular 
+
+!plural 
+
+!singular 
+
+!plural
+
+
+|- 
+
+! style="width%3A+10em%3B" |masculine animate 
+
+
+| rowspan="2" style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myslel#Czech|myslel]]</span>, <span class="Latn" lang="cs">[[myslil#Czech|myslil]]</span> 
 
 | style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[mysleli#Czech|mysleli]]</span>, <span class="Latn" lang="cs">[[myslili#Czech|myslili]]</span>
 
-| rowspan="2" style="width%3A+7em%3B" |  <span class="Latn" lang="cs">[[myšlen#Czech|myšlen]]</span>
+| rowspan="2" style="width%3A+7em%3B" |  <span class="Latn" lang="cs">[[myšlen#Czech|myšlen]]</span>  
 
 | style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myšleni#Czech|myšleni]]</span>
 
 
-|-
+|- 
 
-|masculine inanimate
+!masculine inanimate 
 
-| rowspan="2" style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myslely#Czech|myslely]]</span>, <span class="Latn" lang="cs">[[myslily#Czech|myslily]]</span>
+
+| rowspan="2" style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myslely#Czech|myslely]]</span>, <span class="Latn" lang="cs">[[myslily#Czech|myslily]]</span> 
 
 | rowspan="2" style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myšleny#Czech|myšleny]]</span>
 
 
-|-
+|- 
 
-|feminine
+!feminine
 
-|<span class="Latn" lang="cs">[[myslela#Czech|myslela]]</span>, <span class="Latn" lang="cs">[[myslila#Czech|myslila]]</span>
+
+|<span class="Latn" lang="cs">[[myslela#Czech|myslela]]</span>, <span class="Latn" lang="cs">[[myslila#Czech|myslila]]</span> 
 
 |<span class="Latn" lang="cs">[[myšlena#Czech|myšlena]]</span>
 
 
-|-
+|- 
 
-|neuter
+!neuter
 
-|<span class="Latn" lang="cs">[[myslelo#Czech|myslelo]]</span>, <span class="Latn" lang="cs">[[myslilo#Czech|myslilo]]</span>
 
-| <span class="Latn" lang="cs">[[myslela#Czech|myslela]]</span>, <span class="Latn" lang="cs">[[myslila#Czech|myslila]]</span>
+|<span class="Latn" lang="cs">[[myslelo#Czech|myslelo]]</span>, <span class="Latn" lang="cs">[[myslilo#Czech|myslilo]]</span> 
 
-| <span class="Latn" lang="cs">[[myšleno#Czech|myšleno]]</span>
+| <span class="Latn" lang="cs">[[myslela#Czech|myslela]]</span>, <span class="Latn" lang="cs">[[myslila#Czech|myslila]]</span> 
+
+| <span class="Latn" lang="cs">[[myšleno#Czech|myšleno]]</span> 
 
 |<span class="Latn" lang="cs">[[myšlena#Czech|myšlena]]</span>
 
@@ -189,38 +193,41 @@ class InflTests(unittest.TestCase):
 
 {| class="wikitable"
 
-|-
+|- 
 
-| '''Transgressives'''
+! '''Transgressives'''
 
-|present
+!present 
 
-|past
-
-
-|-
-
-| masculine singular
-
-| style="width%3A+7em%3B" | <span class="Latn" lang="cs">[[mysle#Czech|mysle]]</span>, <span class="Latn" lang="cs">[[mysleje#Czech|mysleje]]</span>
-
-| style="width%3A+7em%3B" | &mdash;
+!past
 
 
-|-
+|- 
 
-| feminine + neuter singular
+! masculine singular
 
-|<span class="Latn" lang="cs">[[myslíc#Czech|myslíc]]</span>, <span class="Latn" lang="cs">[[myslejíc#Czech|myslejíc]]</span>
+
+| style="width%3A+7em%3B" | <span class="Latn" lang="cs">[[mysle#Czech|mysle]]</span>, <span class="Latn" lang="cs">[[mysleje#Czech|mysleje]]</span>  
+
+| style="width%3A+7em%3B" | &mdash; 
+
+
+|- 
+
+!feminine + neuter singular
+
+
+|<span class="Latn" lang="cs">[[myslíc#Czech|myslíc]]</span>, <span class="Latn" lang="cs">[[myslejíc#Czech|myslejíc]]</span>  
 
 | &mdash;
 
 
-|-
+|- 
 
-| plural
+!plural
 
-| <span class="Latn" lang="cs">[[myslíce#Czech|myslíce]]</span>, <span class="Latn" lang="cs">[[myslejíce#Czech|myslejíce]]</span>
+
+| <span class="Latn" lang="cs">[[myslíce#Czech|myslíce]]</span>, <span class="Latn" lang="cs">[[myslejíce#Czech|myslejíce]]</span>  
 
 | &mdash;
 
@@ -230,463 +237,501 @@ class InflTests(unittest.TestCase):
 </div></div></div>
 """)
         expected = {
-            "forms": [
-              {
-                "form": "",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "myslím",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "myslíme",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['first-person', 'imperative', 'present', 'singular']},
-              {
-                "form": "mysleme",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "myslíš",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "myslíte",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "mysli",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "myslete",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "myslí",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "myslí",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "myslejí",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['imperative', 'present', 'singular', 'third-person']},
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['imperative', 'plural', 'present', 'third-person']},
-              {
-                "form": "",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "myslel",
-                "source": "Conjugation",
-                "tags": [
-                  "animate",
-                  "masculine",
-                  "participle",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "myslil",
-                "source": "Conjugation",
-                "tags": [
-                  "animate",
-                  "masculine",
-                  "participle",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "mysleli",
-                "source": "Conjugation",
-                "tags": [
-                  "animate",
-                  "masculine",
-                  "participle",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "myslili",
-                "source": "Conjugation",
-                "tags": [
-                  "animate",
-                  "masculine",
-                  "participle",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "myšlen",
-                "source": "Conjugation",
-                "tags": [
-                  "animate",
-                  "masculine",
-                  "participle",
-                  "passive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "myšleni",
-                "source": "Conjugation",
-                "tags": [
-                  "animate",
-                  "masculine",
-                  "participle",
-                  "passive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "myslel",
-                "source": "Conjugation",
-                "tags": [
-                  "inanimate",
-                  "masculine",
-                  "participle",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "myslil",
-                "source": "Conjugation",
-                "tags": [
-                  "inanimate",
-                  "masculine",
-                  "participle",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "myslely",
-                "source": "Conjugation",
-                "tags": [
-                  "inanimate",
-                  "masculine",
-                  "participle",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "myslily",
-                "source": "Conjugation",
-                "tags": [
-                  "inanimate",
-                  "masculine",
-                  "participle",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "myšlen",
-                "source": "Conjugation",
-                "tags": [
-                  "inanimate",
-                  "masculine",
-                  "participle",
-                  "passive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "myšleny",
-                "source": "Conjugation",
-                "tags": [
-                  "inanimate",
-                  "masculine",
-                  "participle",
-                  "passive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "myslela",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "participle",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "myslila",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "participle",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "myslely",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "participle",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "myslily",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "participle",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "myšlena",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "participle",
-                  "passive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "myšleny",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "participle",
-                  "passive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "myslelo",
-                "source": "Conjugation",
-                "tags": [
-                  "neuter",
-                  "participle",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "myslilo",
-                "source": "Conjugation",
-                "tags": [
-                  "neuter",
-                  "participle",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "myslela",
-                "source": "Conjugation",
-                "tags": [
-                  "neuter",
-                  "participle",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "myslila",
-                "source": "Conjugation",
-                "tags": [
-                  "neuter",
-                  "participle",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "myšleno",
-                "source": "Conjugation",
-                "tags": [
-                  "neuter",
-                  "participle",
-                  "passive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "myšlena",
-                "source": "Conjugation",
-                "tags": [
-                  "neuter",
-                  "participle",
-                  "passive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "mysle",
-                "source": "Conjugation",
-                "tags": [
-                  "masculine",
-                  "present",
-                  "singular",
-                  "transgressive"
-                ]
-              },
-              {
-                "form": "mysleje",
-                "source": "Conjugation",
-                "tags": [
-                  "masculine",
-                  "present",
-                  "singular",
-                  "transgressive"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['masculine', 'past', 'singular', 'transgressive']},
-              {
-                "form": "myslíc",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "neuter",
-                  "present",
-                  "singular",
-                  "transgressive"
-                ]
-              },
-              {
-                "form": "myslejíc",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "neuter",
-                  "present",
-                  "singular",
-                  "transgressive"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['feminine',
-                        'neuter',
-                        'past',
-                        'singular',
-                        'transgressive']},
-              {
-                "form": "myslíce",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "present",
-                  "transgressive"
-                ]
-              },
-              {
-                "form": "myslejíce",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "present",
-                  "transgressive"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['past', 'plural', 'transgressive']}
-            ],
+          "forms": [
+            {
+              "form": "",
+              "source": "Conjugation",
+              "tags": [
+                "table-tags"
+              ]
+            },
+            {
+              "form": "myslím",
+              "source": "Conjugation",
+              "tags": [
+                "first-person",
+                "indicative",
+                "present",
+                "singular"
+              ]
+            },
+            {
+              "form": "myslíme",
+              "source": "Conjugation",
+              "tags": [
+                "first-person",
+                "indicative",
+                "plural",
+                "present"
+              ]
+            },
+            {
+              "form": "-",
+              "source": "Conjugation",
+              "tags": [
+                "first-person",
+                "imperative",
+                "present",
+                "singular"
+              ]
+            },
+            {
+              "form": "mysleme",
+              "source": "Conjugation",
+              "tags": [
+                "first-person",
+                "imperative",
+                "plural",
+                "present"
+              ]
+            },
+            {
+              "form": "myslíš",
+              "source": "Conjugation",
+              "tags": [
+                "indicative",
+                "present",
+                "second-person",
+                "singular"
+              ]
+            },
+            {
+              "form": "myslíte",
+              "source": "Conjugation",
+              "tags": [
+                "indicative",
+                "plural",
+                "present",
+                "second-person"
+              ]
+            },
+            {
+              "form": "mysli",
+              "source": "Conjugation",
+              "tags": [
+                "imperative",
+                "present",
+                "second-person",
+                "singular"
+              ]
+            },
+            {
+              "form": "myslete",
+              "source": "Conjugation",
+              "tags": [
+                "imperative",
+                "plural",
+                "present",
+                "second-person"
+              ]
+            },
+            {
+              "form": "myslí",
+              "source": "Conjugation",
+              "tags": [
+                "indicative",
+                "present",
+                "singular",
+                "third-person"
+              ]
+            },
+            {
+              "form": "myslí",
+              "source": "Conjugation",
+              "tags": [
+                "indicative",
+                "plural",
+                "present",
+                "third-person"
+              ]
+            },
+            {
+              "form": "myslejí",
+              "source": "Conjugation",
+              "tags": [
+                "indicative",
+                "plural",
+                "present",
+                "third-person"
+              ]
+            },
+            {
+              "form": "-",
+              "source": "Conjugation",
+              "tags": [
+                "imperative",
+                "present",
+                "singular",
+                "third-person"
+              ]
+            },
+            {
+              "form": "-",
+              "source": "Conjugation",
+              "tags": [
+                "imperative",
+                "plural",
+                "present",
+                "third-person"
+              ]
+            },
+            {
+              "form": "",
+              "source": "Conjugation",
+              "tags": [
+                "table-tags"
+              ]
+            },
+            {
+              "form": "myslel",
+              "source": "Conjugation",
+              "tags": [
+                "animate",
+                "masculine",
+                "participle",
+                "past",
+                "singular"
+              ]
+            },
+            {
+              "form": "myslil",
+              "source": "Conjugation",
+              "tags": [
+                "animate",
+                "masculine",
+                "participle",
+                "past",
+                "singular"
+              ]
+            },
+            {
+              "form": "mysleli",
+              "source": "Conjugation",
+              "tags": [
+                "animate",
+                "masculine",
+                "participle",
+                "past",
+                "plural"
+              ]
+            },
+            {
+              "form": "myslili",
+              "source": "Conjugation",
+              "tags": [
+                "animate",
+                "masculine",
+                "participle",
+                "past",
+                "plural"
+              ]
+            },
+            {
+              "form": "myšlen",
+              "source": "Conjugation",
+              "tags": [
+                "animate",
+                "masculine",
+                "participle",
+                "passive",
+                "singular"
+              ]
+            },
+            {
+              "form": "myšleni",
+              "source": "Conjugation",
+              "tags": [
+                "animate",
+                "masculine",
+                "participle",
+                "passive",
+                "plural"
+              ]
+            },
+            {
+              "form": "myslel",
+              "source": "Conjugation",
+              "tags": [
+                "inanimate",
+                "masculine",
+                "participle",
+                "past",
+                "singular"
+              ]
+            },
+            {
+              "form": "myslil",
+              "source": "Conjugation",
+              "tags": [
+                "inanimate",
+                "masculine",
+                "participle",
+                "past",
+                "singular"
+              ]
+            },
+            {
+              "form": "myslely",
+              "source": "Conjugation",
+              "tags": [
+                "inanimate",
+                "masculine",
+                "participle",
+                "past",
+                "plural"
+              ]
+            },
+            {
+              "form": "myslily",
+              "source": "Conjugation",
+              "tags": [
+                "inanimate",
+                "masculine",
+                "participle",
+                "past",
+                "plural"
+              ]
+            },
+            {
+              "form": "myšlen",
+              "source": "Conjugation",
+              "tags": [
+                "inanimate",
+                "masculine",
+                "participle",
+                "passive",
+                "singular"
+              ]
+            },
+            {
+              "form": "myšleny",
+              "source": "Conjugation",
+              "tags": [
+                "inanimate",
+                "masculine",
+                "participle",
+                "passive",
+                "plural"
+              ]
+            },
+            {
+              "form": "myslela",
+              "source": "Conjugation",
+              "tags": [
+                "feminine",
+                "participle",
+                "past",
+                "singular"
+              ]
+            },
+            {
+              "form": "myslila",
+              "source": "Conjugation",
+              "tags": [
+                "feminine",
+                "participle",
+                "past",
+                "singular"
+              ]
+            },
+            {
+              "form": "myslely",
+              "source": "Conjugation",
+              "tags": [
+                "feminine",
+                "participle",
+                "past",
+                "plural"
+              ]
+            },
+            {
+              "form": "myslily",
+              "source": "Conjugation",
+              "tags": [
+                "feminine",
+                "participle",
+                "past",
+                "plural"
+              ]
+            },
+            {
+              "form": "myšlena",
+              "source": "Conjugation",
+              "tags": [
+                "feminine",
+                "participle",
+                "passive",
+                "singular"
+              ]
+            },
+            {
+              "form": "myšleny",
+              "source": "Conjugation",
+              "tags": [
+                "feminine",
+                "participle",
+                "passive",
+                "plural"
+              ]
+            },
+            {
+              "form": "myslelo",
+              "source": "Conjugation",
+              "tags": [
+                "neuter",
+                "participle",
+                "past",
+                "singular"
+              ]
+            },
+            {
+              "form": "myslilo",
+              "source": "Conjugation",
+              "tags": [
+                "neuter",
+                "participle",
+                "past",
+                "singular"
+              ]
+            },
+            {
+              "form": "myslela",
+              "source": "Conjugation",
+              "tags": [
+                "neuter",
+                "participle",
+                "past",
+                "plural"
+              ]
+            },
+            {
+              "form": "myslila",
+              "source": "Conjugation",
+              "tags": [
+                "neuter",
+                "participle",
+                "past",
+                "plural"
+              ]
+            },
+            {
+              "form": "myšleno",
+              "source": "Conjugation",
+              "tags": [
+                "neuter",
+                "participle",
+                "passive",
+                "singular"
+              ]
+            },
+            {
+              "form": "myšlena",
+              "source": "Conjugation",
+              "tags": [
+                "neuter",
+                "participle",
+                "passive",
+                "plural"
+              ]
+            },
+            {
+              "form": "",
+              "source": "Conjugation",
+              "tags": [
+                "table-tags"
+              ]
+            },
+            {
+              "form": "mysle",
+              "source": "Conjugation",
+              "tags": [
+                "masculine",
+                "present",
+                "singular",
+                "transgressive"
+              ]
+            },
+            {
+              "form": "mysleje",
+              "source": "Conjugation",
+              "tags": [
+                "masculine",
+                "present",
+                "singular",
+                "transgressive"
+              ]
+            },
+            {
+              "form": "-",
+              "source": "Conjugation",
+              "tags": [
+                "masculine",
+                "past",
+                "singular",
+                "transgressive"
+              ]
+            },
+            {
+              "form": "myslíc",
+              "source": "Conjugation",
+              "tags": [
+                "feminine",
+                "neuter",
+                "present",
+                "singular",
+                "transgressive"
+              ]
+            },
+            {
+              "form": "myslejíc",
+              "source": "Conjugation",
+              "tags": [
+                "feminine",
+                "neuter",
+                "present",
+                "singular",
+                "transgressive"
+              ]
+            },
+            {
+              "form": "-",
+              "source": "Conjugation",
+              "tags": [
+                "feminine",
+                "neuter",
+                "past",
+                "singular",
+                "transgressive"
+              ]
+            },
+            {
+              "form": "myslíce",
+              "source": "Conjugation",
+              "tags": [
+                "plural",
+                "present",
+                "transgressive"
+              ]
+            },
+            {
+              "form": "myslejíce",
+              "source": "Conjugation",
+              "tags": [
+                "plural",
+                "present",
+                "transgressive"
+              ]
+            },
+            {
+              "form": "-",
+              "source": "Conjugation",
+              "tags": [
+                "past",
+                "plural",
+                "transgressive"
+              ],
+            },
+          ],
         }
         self.assertEqual(expected, ret)
 

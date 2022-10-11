@@ -1,8 +1,8 @@
 import unittest
 import collections
-import wiktextract
 from wiktextract.wiktionary import WiktionaryConfig, parse_wiktionary
 from wikitextprocessor import Wtp
+
 
 class LongTests(unittest.TestCase):
 
@@ -42,17 +42,16 @@ class LongTests(unittest.TestCase):
         path = "tests/test-pages-articles.xml.bz2"
         print("Parsing test data")
         ctx = Wtp()
-        config = WiktionaryConfig(capture_languages=["English", "Finnish",
-                                                     "Spanish", "German",
-                                                     "Chinese", "Japanese",
-                                                     "Italian", "Portuguese",
-                                                     "Translingual"],
+        config = WiktionaryConfig(dump_file_lang_code="en",
+                                  capture_language_codes=["en", "fi", "es",
+                                                          "de", "zh", "ja",
+                                                          "it", "pt", "mul"],
                                   capture_translations=True,
                                   capture_pronunciation=True,
                                   capture_linkages=True,
                                   capture_compounds=True,
                                   capture_redirects=True)
-        parse_wiktionary(ctx, path, config, word_cb, None)
+        parse_wiktionary(ctx, path, config, word_cb, None, False, False)
         print("Test data parsing complete")
         assert num_redirects > 0
         assert len(words) > 100
@@ -61,7 +60,7 @@ class LongTests(unittest.TestCase):
         assert langs["Finnish"] > 0
         assert langs["Translingual"] > 0
         assert len(langs.keys()) == 9
-        assert len(poses.keys()) <= len(wiktextract.PARTS_OF_SPEECH)
+        assert len(poses.keys()) <= len(config.POS_TYPES)
         assert sum(poses.values()) == sum(langs.values())
         assert sum(words.values()) == sum(poses.values()) + num_redirects
         assert num_transl > 0

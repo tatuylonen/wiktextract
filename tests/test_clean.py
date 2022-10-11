@@ -1,6 +1,4 @@
 import unittest
-import collections
-import wiktextract
 from wiktextract.clean import clean_value
 from wiktextract import WiktionaryConfig
 
@@ -10,7 +8,7 @@ class WiktExtractTests(unittest.TestCase):
     config = WiktionaryConfig()
 
     def test_pos(self):
-        poses = wiktextract.PARTS_OF_SPEECH
+        poses = self.config.POS_TYPES
         assert isinstance(poses, set)
         assert "noun" in poses
         assert "verb" in poses
@@ -161,9 +159,9 @@ class WiktExtractTests(unittest.TestCase):
     def test_cv_presp(self):
         v = " This : is a test . "
         v = clean_value(self.config, v)
-        self.assertEqual(v, "This: is a test.")
+        self.assertEqual(v, "This : is a test .")
 
-    def test_cv_presp(self):
+    def test_cv_presp2(self):
         v = " This ; is a test , "
         v = clean_value(self.config, v)
         self.assertEqual(v, "This ; is a test ,")
@@ -224,7 +222,7 @@ class WiktExtractTests(unittest.TestCase):
         v = clean_value(self.config, v)
         self.assertEqual(v, "ax+b")
 
-    def test_cv_math9(self):
+    def test_cv_math10(self):
         v = r"<math>4^7</math>"
         v = clean_value(self.config, v)
         self.assertEqual(v, "4⁷")

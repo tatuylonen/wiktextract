@@ -5,7 +5,7 @@ import sys
 import json
 import collections
 
-known_data_keys = set([
+known_data_keys = {
     "abbreviations",
     "alternate",
     "antonyms",
@@ -30,9 +30,9 @@ known_data_keys = set([
     "topics",
     "translations",
     "word",
-])
+}
 
-known_sense_keys = set([
+known_sense_keys = {
     "agent_of",
     "alt_of",
     "classifier",
@@ -61,9 +61,9 @@ known_sense_keys = set([
     "unit",
     "wikidata",
     "wikipedia",
-])
+}
 
-lingform_tags = set([
+lingform_tags = {
     "1",
     "2",
     "3",
@@ -404,7 +404,7 @@ lingform_tags = set([
     "prothesis",
     "singulative",
     "relational",
-])
+}
 
 lingform_end_re = re.compile(r" (" + "|".join(lingform_tags) + ")$")
 

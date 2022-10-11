@@ -6,218 +6,32 @@ import re
 import sys
 import copy
 import html
-import urllib
-import hashlib
-import json
 import collections
-from wikitextprocessor import (Wtp, WikiNode, NodeKind, ALL_LANGUAGES,
-                               MAGIC_FIRST, MAGIC_LAST)
-from .parts_of_speech import part_of_speech_map, PARTS_OF_SPEECH
+
+from wikitextprocessor import Wtp, WikiNode, NodeKind
+from .parts_of_speech import PARTS_OF_SPEECH
 from .config import WiktionaryConfig
 from .linkages import parse_linkage_item_text
 from .translations import parse_translation_item_text
 from .clean import clean_value, clean_template_args
-from .places import place_prefixes  # XXX move processing to places.py
 from .unsupported_titles import unsupported_title_map
-from .datautils import (data_append, data_extend, split_at_comma_semi,
-                        languages_by_name, languages_by_code)
+from .datautils import data_append, data_extend, ns_title_prefix_tuple
 from .tags import valid_tags
+
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_qualifier,
-    parse_pronunciation_tags, distw,
-    parse_alt_or_inflection_of, classify_desc)
+    distw, parse_alt_or_inflection_of, classify_desc)
 from wiktextract.inflection import parse_inflection_section
 
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
                NodeKind.LEVEL5, NodeKind.LEVEL6)
 
-
-# Subsections with these titles are ignored.
-ignored_section_titles = (
-    "Anagrams", "Further reading", "References",
-    "Quotations")
-
-# Subsections with these titles contain inflection (conjugation, declension)
-# information
-inflection_section_titles = (
-    "Declension", "Conjugation", "Inflection", "Mutation")
-
-# Subsections on reconstruction root pages that list trees of descendants.
-# They are handled by parse_descendants().
-proto_root_derived_sections = ("Derived terms", "Extensions")
-
 # Matches head tag
-head_tag_re = re.compile(r"^(head|Han char|arabic-noun|arabic-noun-form|"
-                         r"hangul-symbol|syllable-hangul)$|" +
-                         r"^(latin|" +
-                         "|".join(languages_by_code.keys()) + r")-(" +
-                         "|".join([
-                             "abbr",
-                             "adj",
-                             "adjective",
-                             "adjective form",
-                             "adjective-form",
-                             "adv",
-                             "adverb",
-                             "affix",
-                             "animal command",
-                             "art",
-                             "article",
-                             "aux",
-                             "bound pronoun",
-                             "bound-pronoun",
-                             "Buyla",
-                             "card num",
-                             "card-num",
-                             "cardinal",
-                             "chunom",
-                             "classifier",
-                             "clitic",
-                             "cls",
-                             "cmene",
-                             "cmavo",
-                             "colloq-verb",
-                             "colverbform",
-                             "combining form",
-                             "combining-form",
-                             "comparative",
-                             "con",
-                             "concord",
-                             "conj",
-                             "conjunction",
-                             "conjug",
-                             "cont",
-                             "contr",
-                             "converb",
-                             "daybox",
-                             "decl",
-                             "decl noun",
-                             "def",
-                             "dem",
-                             "det",
-                             "determ",
-                             "Deva",
-                             "ending",
-                             "entry",
-                             "form",
-                             "fuhivla",
-                             "gerund",
-                             "gismu",
-                             "hanja",
-                             "hantu",
-                             "hanzi",
-                             "head",
-                             "ideophone",
-                             "idiom",
-                             "inf",
-                             "indef",
-                             "infixed pronoun",
-                             "infixed-pronoun",
-                             "infl",
-                             "inflection",
-                             "initialism",
-                             "int",
-                             "interfix",
-                             "interj",
-                             "interjection",
-                             "jyut",
-                             "latin",
-                             "letter",
-                             "locative",
-                             "lujvo",
-                             "monthbox",
-                             "mutverb",
-                             "name",
-                             "nisba",
-                             "nom",
-                             "noun",
-                             "noun form",
-                             "noun-form",
-                             "noun plural",
-                             "noun-plural",
-                             "nounprefix",
-                             "num",
-                             "number",
-                             "numeral",
-                             "ord",
-                             "ordinal",
-                             "par",
-                             "part",
-                             "part form",
-                             "part-form",
-                             "participle",
-                             "particle",
-                             "past",
-                             "past neg",
-                             "past-neg",
-                             "past participle",
-                             "past-participle",
-                             "perfect participle",
-                             "perfect-participle",
-                             "personal pronoun",
-                             "personal-pronoun",
-                             "pref",
-                             "prefix",
-                             "phrase",
-                             "pinyin",
-                             "plural noun",
-                             "plural-noun",
-                             "pos",
-                             "poss-noun",
-                             "post",
-                             "postp",
-                             "postposition",
-                             "PP",
-                             "pp",
-                             "ppron",
-                             "pred",
-                             "predicative",
-                             "prep",
-                             "prep phrase",
-                             "prep-phrase",
-                             "preposition",
-                             "present participle",
-                             "present-participle",
-                             "pron",
-                             "prondem",
-                             "pronindef",
-                             "pronoun",
-                             "prop",
-                             "proper noun",
-                             "proper-noun",
-                             "proper noun form",
-                             "proper-noun form",
-                             "proper noun-form",
-                             "proper-noun-form",
-                             "prov",
-                             "proverb",
-                             "prpn",
-                             "prpr",
-                             "punctuation mark",
-                             "punctuation-mark",
-                             "regnoun",
-                             "rel",
-                             "rom",
-                             "romanji",
-                             "root",
-                             "sign",
-                             "suff",
-                             "suffix",
-                             "syllable",
-                             "symbol",
-                             "verb",
-                             "verb form",
-                             "verb-form",
-                             "verbal noun",
-                             "verbal-noun",
-                             "verbnec",
-                             "vform",
-                             ]) +
-                         r")(-|/|\+|$)")
+head_tag_re = None
 
 # Additional templates to be expanded in the pre-expand phase
-additional_expand_templates = set([
+additional_expand_templates = {
     "multitrans",
     "multitrans-nowiki",
     "col1",
@@ -237,52 +51,6 @@ additional_expand_templates = set([
     "ru-adj-alt-ё",
     "ru-proper noun-alt-ё",
     "ru-pos-alt-ё",
-])
-
-# Mapping from subtitle to linkage field
-linkage_map = {
-    "synonyms": "synonyms",
-    "ambiguous synonyms": "synonyms",
-    "near synonyms": "synonyms",
-    "pseudo-synonyms": "synonyms",
-    "idiomatic synonyms": "synonyms",
-    "hypernyms": "hypernyms",
-    "hypernym": "hypernyms",
-    "hyperonyms": "hypernyms",
-    "classes": "hypernyms",
-    "class": "hypernyms",
-    "hyponyms": "hyponyms",
-    "holonyms": "holonyms",
-    "meronyms": "meronyms",
-    "derived": "derived",
-    "related": "related",
-    "related terms": "related",
-    "related words": "related",
-    "related characters": "related",
-    "idioms": "related",
-    "idioms/phrases": "related",
-    "similes": "related",
-    "variance": "related",
-    "coordinate terms": "coordinate_terms",
-    "coordinate term": "coordinate_terms",
-    "troponyms": "troponyms",
-    "antonyms": "antonyms",
-    "near antonyms": "antonyms",
-    "instances": "instances",
-    "intances": "instances",
-    "archetypes": "instances",
-    "see also": "related",
-    "seealso": "related",
-    "specific multiples": "related",
-    "various": "related",
-    "metonyms": "related",
-    "demonyms": "related",
-    "comeronyms": "related",
-    "cohyponyms": "related",
-    "proverbs": "proverbs",
-    "abbreviations": "abbreviations",
-    "derived terms": "derived",
-    "alternative forms": "synonyms",
 }
 
 # Inverse linkage for those that have them
@@ -301,12 +69,9 @@ linkage_inverses = {
     "related": "related",
 }
 
-# List of all field names used for linkages
-linkage_fields = list(sorted(set(linkage_map.values())))
-
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
-panel_templates = set([
+panel_templates = {
     "Character info",
     "CJKV",
     "French personal pronouns",
@@ -420,7 +185,7 @@ panel_templates = set([
     "wrongtitle",
     "zh-forms",
     "zh-hanzi-box",
-])
+}
 
 # lookup table for the tags of Chinese dialectal synonyms
 zh_tag_lookup = {
@@ -441,7 +206,7 @@ panel_prefixes = [
 ]
 
 # Templates used for wikipedia links.
-wikipedia_templates = set([
+wikipedia_templates = {
     "wikipedia",
     "slim-wikipedia",
     "w",
@@ -450,7 +215,7 @@ wikipedia_templates = set([
     "wiki",
     "Wikipedia",
     "wtorw",
-])
+}
 for x in panel_templates & wikipedia_templates:
     print("WARNING: {!r} in both panel_templates and wikipedia_templates"
           .format(x))
@@ -461,7 +226,6 @@ for x in panel_templates & wikipedia_templates:
 # warnings about probably incorrect coding in Wiktionary.
 template_allowed_pos_map = {
     "abbr": ["abbrev"],
-    "abbr": ["abbrev"],
     "noun": ["noun", "abbrev", "pron", "name", "num", "adj_noun"],
     "plural noun": ["noun", "name"],
     "plural-noun": ["noun", "name"],
@@ -470,9 +234,7 @@ template_allowed_pos_map = {
     "prop": ["name", "noun"],
     "verb": ["verb", "phrase"],
     "gerund": ["verb"],
-    "adv": ["adv"],
     "particle": ["adv", "particle"],
-    "part-form": ["adv", "particle"],
     "adj": ["adj", "adj_noun"],
     "pron": ["pron", "noun"],
     "name": ["name", "noun"],
@@ -490,7 +252,6 @@ template_allowed_pos_map = {
     "interj": ["intj"],
     "con": ["conj"],
     "part": ["particle"],
-    "part-form": ["participle"],
     "prep": ["prep", "postp"],
     "postp": ["postp"],
     "misspelling": ["noun", "adj", "verb", "adv"],
@@ -509,18 +270,40 @@ for k, v in template_allowed_pos_map.items():
 ignored_etymology_templates = [
     "...",
     "IPAchar",
+    "ipachar",
     "ISBN",
     "isValidPageName",
     "redlink category",
     "deprecated code",
     "check deprecated lang param usage",
     "para",
+    "p",
     "cite",
+    "Cite news",
+    "Cite newsgroup",
+    "cite paper",
+    "cite MLLM 1976",
+    "cite journal",
+    "cite news/documentation",
+    "cite paper/documentation",
+    "cite video game",
+    "cite video game/documentation",
+    "cite newsgroup",
+    "cite newsgroup/documentation",
+    "cite web/documentation",
+    "cite news",
+    "Cite book",
+    "Cite-book",
+    "cite book",
+    "cite web",
+    "cite-usenet",
+    "cite-video/documentation",
+    "Cite-journal",
 ]
 # Regexp for matching ignored etymology template names.  This adds certain
 # prefixes to the names listed above.
 ignored_etymology_templates_re = re.compile(
-    r"^((cite-|R:).*|" +
+    r"^((cite-|R:|RQ:).*|" +
     r"|".join(re.escape(x) for x in ignored_etymology_templates) +
     r")$")
 
@@ -531,15 +314,12 @@ ignored_descendants_templates_re = ignored_etymology_templates_re
 # Regexp for matching category tags that start with a language name.
 # Group 2 will be the language name.  The category tag should be without
 # the namespace prefix.
-starts_lang_re = re.compile(
-    r"^(Rhymes:)?(" +
-    "|".join(re.escape(x["name"]) for x in ALL_LANGUAGES) +
-    ")[ /]")
+starts_lang_re = None
 
 # Set of template names that are used to define usage examples.  If the usage
 # example contains one of these templates, then it its type is set to
 # "example"
-usex_templates = set([
+usex_templates = {
     "afex",
     "affixusex",
     "el-example",
@@ -579,12 +359,12 @@ usex_templates = set([
     "uxi",
     "zh-usex",
     "zh-x",
-])
+}
 
 # Set of template names that are used to define quotation examples.  If the
 # usage example contains one of these templates, then its type is set to
 # "quotation".
-quotation_templates = set([
+quotation_templates = {
     "collapse-quote",
     "quote-av",
     "quote-book",
@@ -605,7 +385,7 @@ quotation_templates = set([
     "quote-wikipedia",
     "wikiquote",
     "Wikiquote",
-])
+}
 
 
 def parse_sense_XXXold_going_away(config, data, text, use_text):
@@ -770,7 +550,7 @@ def parse_sense_linkage(config, ctx, data, name, ht):
     for i in range(2, 20):
         w = ht.get(i) or ""
         w = clean_node(config, ctx, data, w)
-        if w.startswith("Thesaurus:"):
+        if w.startswith(ns_title_prefix_tuple(ctx, "Thesaurus")):
             w = w[10:]
         if not w:
             break
@@ -893,6 +673,180 @@ def recursively_extract(contents, fn):
                            .format(kind))
     return extracted, new_contents
 
+
+def init_head_tag_re(ctx):
+    global head_tag_re
+    if head_tag_re is None:
+        head_tag_re = re.compile(
+            r"^(head|Han char|arabic-noun|arabic-noun-form|"
+            r"hangul-symbol|syllable-hangul)$|" +
+            r"^(latin|" +
+            "|".join(ctx.LANGUAGES_BY_CODE) + r")-(" +
+            "|".join([
+                "abbr",
+                "adj",
+                "adjective",
+                "adjective form",
+                "adjective-form",
+                "adv",
+                "adverb",
+                "affix",
+                "animal command",
+                "art",
+                "article",
+                "aux",
+                "bound pronoun",
+                "bound-pronoun",
+                "Buyla",
+                "card num",
+                "card-num",
+                "cardinal",
+                "chunom",
+                "classifier",
+                "clitic",
+                "cls",
+                "cmene",
+                "cmavo",
+                "colloq-verb",
+                "colverbform",
+                "combining form",
+                "combining-form",
+                "comparative",
+                "con",
+                "concord",
+                "conj",
+                "conjunction",
+                "conjug",
+                "cont",
+                "contr",
+                "converb",
+                "daybox",
+                "decl",
+                "decl noun",
+                "def",
+                "dem",
+                "det",
+                "determ",
+                "Deva",
+                "ending",
+                "entry",
+                "form",
+                "fuhivla",
+                "gerund",
+                "gismu",
+                "hanja",
+                "hantu",
+                "hanzi",
+                "head",
+                "ideophone",
+                "idiom",
+                "inf",
+                "indef",
+                "infixed pronoun",
+                "infixed-pronoun",
+                "infl",
+                "inflection",
+                "initialism",
+                "int",
+                "interfix",
+                "interj",
+                "interjection",
+                "jyut",
+                "latin",
+                "letter",
+                "locative",
+                "lujvo",
+                "monthbox",
+                "mutverb",
+                "name",
+                "nisba",
+                "nom",
+                "noun",
+                "noun form",
+                "noun-form",
+                "noun plural",
+                "noun-plural",
+                "nounprefix",
+                "num",
+                "number",
+                "numeral",
+                "ord",
+                "ordinal",
+                "par",
+                "part",
+                "part form",
+                "part-form",
+                "participle",
+                "particle",
+                "past",
+                "past neg",
+                "past-neg",
+                "past participle",
+                "past-participle",
+                "perfect participle",
+                "perfect-participle",
+                "personal pronoun",
+                "personal-pronoun",
+                "pref",
+                "prefix",
+                "phrase",
+                "pinyin",
+                "plural noun",
+                "plural-noun",
+                "pos",
+                "poss-noun",
+                "post",
+                "postp",
+                "postposition",
+                "PP",
+                "pp",
+                "ppron",
+                "pred",
+                "predicative",
+                "prep",
+                "prep phrase",
+                "prep-phrase",
+                "preposition",
+                "present participle",
+                "present-participle",
+                "pron",
+                "prondem",
+                "pronindef",
+                "pronoun",
+                "prop",
+                "proper noun",
+                "proper-noun",
+                "proper noun form",
+                "proper-noun form",
+                "proper noun-form",
+                "proper-noun-form",
+                "prov",
+                "proverb",
+                "prpn",
+                "prpr",
+                "punctuation mark",
+                "punctuation-mark",
+                "regnoun",
+                "rel",
+                "rom",
+                "romanji",
+                "root",
+                "sign",
+                "suff",
+                "suffix",
+                "syllable",
+                "symbol",
+                "verb",
+                "verb form",
+                "verb-form",
+                "verbal noun",
+                "verbal-noun",
+                "verbnec",
+                "vform",
+            ]) +
+            r")(-|/|\+|$)")
+
+
 def parse_language(ctx, config, langnode, language, lang_code):
     """Iterates over the text of the page, returning words (parts-of-speech)
     defined on the page one at a time.  (Individual word senses for the
@@ -906,6 +860,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
     assert isinstance(lang_code, str)
     # print("parse_language", language)
 
+    init_head_tag_re(ctx)
     is_reconstruction = False
     word = ctx.title
     unsupported_prefix = "Unsupported titles/"
@@ -1126,7 +1081,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         examples = []
         if config.capture_examples:
             for sub in sublists:
-                if not sub.args.endswith(":") and not sub.args.endswith("*"):
+                if not sub.args.endswith((":", "*")):
                     continue
                 for item in sub.children:
                     if not isinstance(item, WikiNode):
@@ -1176,7 +1131,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     subtext = re.sub(r"\s*[―—]+$", "", subtext)
                     # print("subtext:", repr(subtext))
 
-                    lines = subtext.split("\n")
+                    lines = subtext.splitlines()
                     lines = list(x for x in lines
                                  if not re.match(
                                          r"(Synonyms: |Antonyms: |Hyponyms: |"
@@ -1193,7 +1148,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     roman = ""
                     # for line in lines:
                     #     print("LINE:", repr(line))
-                    if len(lines) == 1 and language != "English":
+                    if len(lines) == 1 and lang_code != "en":
                         parts = re.split(r"\s*[―—]+\s*", lines[0])
                         if (len(parts) == 2 and
                             classify_desc(parts[1]) == "english"):
@@ -1224,7 +1179,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                     break
                             ref = " ".join(ref)
                             lines = lines[i + 1:]
-                            if (language != "English" and len(lines) >= 2 and
+                            if (lang_code != "en" and len(lines) >= 2 and
                                 classify_desc(lines[-1]) == "english"):
                                 i = len(lines) - 1
                                 while (i > 1 and
@@ -1234,11 +1189,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 tr = "\n".join(lines[i:])
                                 lines = lines[:i]
 
-                        elif (language == "English" and
+                        elif (lang_code == "en" and
                               re.match(r"^[#*]*:+", lines[1])):
                             ref = lines[0]
                             lines = lines[1:]
-                        elif language != "English" and len(lines) == 2:
+                        elif lang_code != "en" and len(lines) == 2:
                             cls1 = classify_desc(lines[0])
                             cls2 = classify_desc(lines[1])
                             if cls2 == "english" and cls1 != "english":
@@ -1259,7 +1214,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 tr = lines[1]
                                 lines = [lines[0]]
                         elif (usex_type == "quotation" and
-                              language != "English" and len(lines) > 2):
+                              lang_code != "en" and len(lines) > 2):
                             # for x in lines:
                             #     print("  LINE: {}: {}"
                             #           .format(classify_desc(x), x))
@@ -1289,7 +1244,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     ref = re.sub(r"\[\s*…\s*\]", "[…]", ref)
                     lines = list(re.sub(r"^[#*:]+\s*", "", x) for x in lines)
                     subtext = "\n".join(x for x in lines if x)
-                    if not tr and language != "English":
+                    if not tr and lang_code != "en":
                         m = re.search(r"([.!?])\s+\(([^)]+)\)\s*$", subtext)
                         if m and classify_desc(m.group(2)) == "english":
                             tr = m.group(2)
@@ -1312,7 +1267,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     subtext = re.sub(r"\[\s*…\s*\]", "[…]", subtext)
                     note = None
                     m = re.match(r"^\(([^)]*)\):\s+", subtext)
-                    if (m is not None and language != "English" and
+                    if (m is not None and lang_code != "en" and
                         (m.group(1).startswith("with ") or
                          classify_desc(m.group(1)) == "english")):
                         note = m.group(1)
@@ -1445,7 +1400,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             # Kludge, some glosses have a comma after initial qualifiers in
             # parentheses
-            if gloss.startswith(",") or gloss.startswith(":"):
+            if gloss.startswith((",", ":")):
                 gloss = gloss[1:]
             gloss = gloss.strip()
             if gloss.endswith(":"):
@@ -1510,8 +1465,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             split_glosses.append(gloss[pos:])
             for gloss in split_glosses:
                 # Check if this gloss describes an alt-of or inflection-of
-                if ((language != "English" and gloss.find(" ") < 0 and
-                     distw([word], gloss) < 0.3)):
+                if (lang_code != "en" and " " not in gloss and distw([word], gloss) < 0.3):
                     # Don't try to parse gloss it is one word
                     # that is close to the word itself for non-English words
                     # (probable translations of a tag/form name)
@@ -1645,8 +1599,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # relating to the word
                 if (len(node.args[0]) >= 1 and
                     isinstance(node.args[0][0], str) and
-                    (node.args[0][0].startswith("File:") or
-                     node.args[0][0].startswith("Image:"))):
+                    node.args[0][0].startswith(ns_title_prefix_tuple(ctx, "File"))):
                     continue
                 pre[-1].extend(node.args[-1])
             elif kind == NodeKind.HTML:
@@ -1881,11 +1834,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
         assert isinstance(data, dict)
         assert isinstance(field, str)
         assert isinstance(linkagenode, WikiNode)
-        if field == "synonyms" and True == False:
-            print("field", field)
-            print("data", data)
-            print("children:")
-            print(linkagenode.children)
+        # if field == "synonyms" and True == False:
+        #     print("field", field)
+        #     print("data", data)
+        #     print("children:")
+        #     print(linkagenode.children)
         if not config.capture_linkages:
             return
         have_panel_template = False
@@ -1928,7 +1881,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 sense1 = sense1[:-1].strip()
                             if sense1.startswith("(") and sense1.endswith(")"):
                                 sense1 = sense1[1:-1].strip()
-                            if sense1 == "Translations":
+                            if sense1.lower() == config.OTHER_SUBTITLES["translations"]:
                                 sense1 = None
                             # print("linkage item_recurse LIST sense1:", sense1)
                             parse_linkage_recurse(node.children, field,
@@ -1966,9 +1919,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         ignore = False
                         if isinstance(node.args[0][0], str):
                             v = node.args[0][0].strip().lower()
-                            if (v.startswith("category:") or
-                                v.startswith("image:") or
-                                v.startswith("file:")):
+                            if v.startswith(ns_title_prefix_tuple(ctx, "Category", True) + ns_title_prefix_tuple(ctx, "File", True)):
                                 ignore = True
                             if not ignore:
                                 v = node.args[-1]
@@ -1979,7 +1930,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                     v = [v[0][1:]] + list(v[1:])
                                 item_recurse(v, italic=italic)
                     elif kind == NodeKind.URL:
-                        print("linkage recurse URL {}".format(node))
+                        # print("linkage recurse URL {}".format(node))
                         item_recurse(node.args[-1], italic=italic)
                     elif kind in (NodeKind.PREFORMATTED, NodeKind.BOLD):
                         item_recurse(node.children, italic=italic)
@@ -2035,7 +1986,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             text = ctx.node_to_wikitext(node)
             parsed = ctx.parse(text, expand_all=True,
                                template_fn=linkage_template_fn)
-            parse_linkage_recurse(parsed.children, field, Node)
+            parse_linkage_recurse(parsed.children, field, None)
 
         def parse_linkage_recurse(contents, field, sense):
             assert isinstance(contents, (list, tuple))
@@ -2229,7 +2180,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         text = ctx.node_to_wikitext(linkagenode.children)
         parsed = ctx.parse(text, expand_all=True,
                            template_fn=linkage_template_fn1)
-        if field == "synonyms" and language == "Chinese":
+        if field == "synonyms" and lang_code == "zh":
             synonyms = []
             if contains_kind(parsed.children, NodeKind.LIST):
                 parse_zh_synonyms_list(parsed.children, synonyms, [], "")
@@ -2338,7 +2289,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             lang = parse_translation_item_text(ctx, word, data, item, sense,
                                                pos_datas, lang, langcode,
                                                translations_from_template,
-                                               is_reconstruction)
+                                               is_reconstruction, config)
 
             # Handle sublists.  They are frequently used for different scripts
             # for the language and different variants of the language.  We will
@@ -2376,11 +2327,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                   "{{see translation subpage|...}}")
                         return
 
-                    if sub.lower() in part_of_speech_map:
+                    if sub.lower() in config.POS_SUBTITLES:
                         seq = [language, sub, "Translations"]
                     else:
                         pos = ctx.subsection
-                        if pos.lower() not in part_of_speech_map:
+                        if pos.lower() not in config.POS_SUBTITLES:
                             ctx.debug("unhandled see translation subpage: "
                                       "language={} sub={} ctx.subsection={}"
                                       .format(language, sub, ctx.subsection))
@@ -2499,7 +2450,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                   "page instead "
                                   "of normal {{see translation subpage|...}}")
                         sub = ctx.subsection
-                        if sub.lower() in part_of_speech_map:
+                        if sub.lower() in config.POS_SUBTITLES:
                             seq = [language, sub, "Translations"]
                             subnode = get_subpage_section(ctx.title,
                                                           "translations", seq)
@@ -2545,8 +2496,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if is_panel_template(name):
                 return ""
             if re.match(ignored_etymology_templates_re, name):
-                ignore_count += 1                
-            
+                ignore_count += 1
+
         def etym_post_template_fn(name, ht, expansion):
             nonlocal ignore_count
             if name in wikipedia_templates:
@@ -2711,10 +2662,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                            template_fn=skip_template_fn)
                 continue
             t = clean_node(config, ctx, etym_data, node.args)
+            t = t.lower()
             config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
-            if t.startswith("Pronunciation"):
-                if t.startswith("Pronunciation "):
+            if t.startswith(tuple(config.OTHER_SUBTITLES["pronunciation"])):
+                if t.startswith(tuple(pron_title + " " for pron_title in config.OTHER_SUBTITLES["pronunciation"])):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
                     push_etym()
@@ -2728,37 +2680,42 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                         etym_data,
                                         have_etym,
                                         base_data,
-                                        language,
+                                        lang_code,
                                         )
-            elif t.startswith("Etymology"):
+            elif t.startswith(tuple(config.OTHER_SUBTITLES["etymology"])):
                 push_etym()
                 ctx.start_subsection(None)
                 if config.capture_etymologies:
+                    m = re.search(r"\s(\d+)$", t)
+                    if m:
+                        etym_data["etymology_number"] = int(m.group(1))
                     parse_etymology(etym_data, node)
-            elif t == "Descendants" and config.capture_descendants:
+            elif t == config.OTHER_SUBTITLES["descendants"] and config.capture_descendants:
                 data = select_data()
                 parse_descendants(data, node)
-            elif (t in proto_root_derived_sections and 
+            elif (t in config.OTHER_SUBTITLES["proto_root_derived_sections"] and 
                 pos == "root" and is_reconstruction and 
                 config.capture_descendants
             ):
                 data = select_data()
                 parse_descendants(data, node, True)
-            elif t == "Translations":
+            elif t == config.OTHER_SUBTITLES["translations"]:
                 data = select_data()
                 parse_translations(data, node)
-            elif t in ignored_section_titles:
+            elif t in config.OTHER_SUBTITLES["ignored_sections"]:
+                # XXX does the Descendants section have something we'd like
+                # to capture?
                 pass
-            elif t in inflection_section_titles:
+            elif t in config.OTHER_SUBTITLES["inflection_sections"]:
                 parse_inflection(node, t, pos)
             else:
                 lst = t.split()
                 while len(lst) > 1 and lst[-1].isdigit():
                     lst = lst[:-1]
                 t_no_number = " ".join(lst).lower()
-                if t_no_number in part_of_speech_map:
+                if t_no_number in config.POS_SUBTITLES:
                     push_pos()
-                    dt = part_of_speech_map[t_no_number]
+                    dt = config.POS_SUBTITLES[t_no_number]
                     pos = dt["pos"]
                     ctx.start_subsection(t)
                     if "debug" in dt:
@@ -2775,11 +2732,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if "tags" in dt:
                         for pdata in pos_datas:
                             data_extend(ctx, pdata, "tags", dt["tags"])
-                elif t_no_number in linkage_map:
-                    rel = linkage_map[t_no_number]
+                elif t_no_number in config.LINKAGE_SUBTITLES:
+                    rel = config.LINKAGE_SUBTITLES[t_no_number]
                     data = select_data()
                     parse_linkage(data, rel, node)
-                elif t_no_number == "compounds":
+                elif t_no_number == config.OTHER_SUBTITLES["compounds"]:
                     data = select_data()
                     if config.capture_compounds:
                         parse_linkage(data, "derived", node)
@@ -2881,7 +2838,7 @@ def parse_top_template(config, ctx, node, data):
     clean_node(config, ctx, None, [node], template_fn=top_template_fn)
 
 
-def fix_subtitle_hierarchy(ctx, text):
+def fix_subtitle_hierarchy(ctx: Wtp, config: WiktionaryConfig, text: str) -> str:
     """Fix subtitle hierarchy to be strict Language -> Etymology ->
     Part-of-Speech -> Translation/Linkage."""
     assert isinstance(ctx, Wtp)
@@ -2909,31 +2866,31 @@ def fix_subtitle_hierarchy(ctx, text):
                       "{!r} has {} on the left and {} on the right"
                       .format(title, left, right))
         lc = title.lower()
-        if title in languages_by_name:
+        if title in config.LANGUAGES_BY_NAME:
             if level > 2:
                 ctx.debug("subtitle has language name {} at level {}"
                           .format(title, level))
             level = 2
-        elif lc.startswith("etymology"):
+        elif lc.startswith(tuple(config.OTHER_SUBTITLES["etymology"])):
             if level > 3:
                 ctx.debug("etymology section {} at level {}"
                           .format(title, level))
             level = 3
-        elif lc.startswith("pronunciation"):
+        elif lc.startswith(tuple(config.OTHER_SUBTITLES["pronunciation"])):
             level = 3
-        elif lc in part_of_speech_map:
+        elif lc in config.POS_SUBTITLES:
             level = 4
-        elif lc == "translations":
+        elif lc == config.OTHER_SUBTITLES["translations"]:
             level = 5
-        elif lc in linkage_map or lc == "compounds":
+        elif lc in config.LINKAGE_SUBTITLES or lc == config.OTHER_SUBTITLES["compounds"]:
             level = 5
-        elif title in inflection_section_titles:
+        elif lc in config.OTHER_SUBTITLES["inflection_sections"]:
             level = 5
-        elif lc == "descendants":
+        elif lc == config.OTHER_SUBTITLES["descendants"]:
             level = 5
-        elif title in proto_root_derived_sections:
+        elif title in  config.OTHER_SUBTITLES["proto_root_derived_sections"]:
             level = 5
-        elif title in ignored_section_titles:
+        elif lc in config.OTHER_SUBTITLES["ignored_sections"]:
             level = 5
         else:
             level = 6
@@ -2949,10 +2906,10 @@ def fix_subtitle_hierarchy(ctx, text):
     return text
 
 
-def parse_page(ctx, word, text, config):
+def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list:  # list[dict[str, str]]
     """Parses the text of a Wiktionary page and returns a list of
     dictionaries, one for each word/part-of-speech defined on the page
-    for the languages specified by ``capture_languages`` (None means
+    for the languages specified by ``capture_language_codes`` (None means
     all available languages).  ``word`` is page title, and ``text`` is
     page text in Wikimedia format.  Other arguments indicate what is
     captured."""
@@ -2960,6 +2917,13 @@ def parse_page(ctx, word, text, config):
     assert isinstance(word, str)
     assert isinstance(text, str)
     assert isinstance(config, WiktionaryConfig)
+
+    global starts_lang_re
+    if starts_lang_re is None:
+        starts_lang_re = re.compile(
+            r"^(" + ctx.NAMESPACE_DATA.get("Rhymes", {}).get("name", "") + ":)?(" +
+            "|".join(re.escape(x) for x in config.LANGUAGES_BY_NAME) +
+            ")[ /]")
 
     # Skip words that have been moved to the Attic
     if word.startswith("/(Attic) "):
@@ -2982,7 +2946,7 @@ def parse_page(ctx, word, text, config):
     # pages that have, for example, Translations section under Linkage, or
     # Translations section on the same level as Noun.  Enforce a proper
     # hierarchy by manipulating the subtitle levels in certain cases.
-    text = fix_subtitle_hierarchy(ctx, text)
+    text = fix_subtitle_hierarchy(ctx, config, text)
 
     # Parse the page, pre-expanding those templates that are likely to
     # influence parsing
@@ -3008,14 +2972,13 @@ def parse_page(ctx, word, text, config):
             ctx.debug("unexpected top-level node: {}".format(langnode))
             continue
         lang = clean_node(config, ctx, None, langnode.args)
-        if lang not in languages_by_name:
+        if lang not in config.LANGUAGES_BY_NAME:
             ctx.debug("unrecognized language name at top-level {!r}"
                       .format(lang))
             continue
-        if config.capture_languages and lang not in config.capture_languages:
+        lang_code = config.LANGUAGES_BY_NAME.get(lang)
+        if config.capture_language_codes and lang_code not in config.capture_language_codes:
             continue
-        langdata = languages_by_name[lang]
-        lang_code = langdata["code"]
         ctx.start_section(lang)
 
         # Collect all words from the page.
@@ -3177,8 +3140,9 @@ def parse_page(ctx, word, text, config):
             m = re.match(starts_lang_re, cat)
             if m:
                 catlang = m.group(2)
-                if (catlang != lang and
-                    not (catlang == "English" and lang == "Translingual")):
+                catlang_code = config.LANGUAGES_BY_NAME.get(catlang)
+                if (catlang != lang and not (catlang_code == "en" and
+                                             data.get("lang_code") == "mul")):
                     continue  # Ignore categories for a different language
             new_cats.append(cat)
         if not new_cats:

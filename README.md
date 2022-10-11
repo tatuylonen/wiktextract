@@ -115,7 +115,8 @@ data into Python requires about 120 GB of memory.  It is much easier to
 process the data line-by-line, especially if you are only interested
 in a part of the information.  You can easily read the files using the
 following code:
-```
+
+```python
 import json
 ...
 with open("filename.json", "r", encoding="utf-8") as f:
@@ -125,7 +126,8 @@ with open("filename.json", "r", encoding="utf-8") as f:
 
 If you want to collect all the data into a list, you can read the file
 into a list with:
-```
+
+```python
 import json
 ...
 lst = []
@@ -136,13 +138,15 @@ with open("filename.json", "r", encoding="utf-8") as f:
 ```
 
 You can also easily pretty-print the data into a more human-readable form using:
-```
+
+```python
 print(json.dumps(data, indent=2, sort_keys=True))
 ```
 
 Here is a pretty-printed example of an extracted word entry for the
 word ``thrill`` as an English verb (only one part-of-speech is shown here):
-```
+
+```python
 {
   "categories": [
     "Emotions"
@@ -386,8 +390,9 @@ The following command-line options can be used to control its operation:
 
 * --out FILE: specifies the name of the file to write (specifying "-" as the file writes to stdout)
 * --all-languages: extract words for all available languages
-* --language LANGUAGE: extracts the given language (this option may be specified multiple times; by default, English and Translingual words are extracted)
+* --language LANGUAGE_CODE: extracts the given language (this option may be specified multiple times; by default, English [en] and Translingual [mul] words are extracted)
 * --list-languages: prints a list of supported language names
+* --dump-file-language-code LANGUAGE_CODE: specifies the language code for the Wiktionary edition that the dump file is for (defaults to "en"; "zh" is supported and others are being added)
 * --all: causes all data to be captured for the selected languages
 * --translations: causes translations to be captured
 * --pronunciation: causes pronunciation information to be captured
@@ -406,6 +411,7 @@ machine-readable)
 * --templates-file: extract Template namespace to this tar file
 * --modules-file: extract Module namespace to this tar file
 * --categories-file: extract Wiktionary category tree into this file as JSON (see description below)
+* --inflection_tables_file: extract and expand tables into this file as wikitext; use this to create tests
 * --help: displays help text (with some more options than listed here)
 
 ## Calling the library
@@ -416,13 +422,14 @@ the ``wikitextprocessor`` module.
 
 This code can be called from an application as follows:
 
-```
+```python
 from wiktextract import (WiktionaryConfig, parse_wiktionary, parse_page,
                          PARTS_OF_SPEECH)
-from wikitextprocessor import Wtp, ALL_LANGUAGES
+from wikitextprocessor import Wtp
 
 config = WiktionaryConfig(
-             capture_languages=["English", "Translingual"],
+             dump_file_lang_code="en",
+             capture_language_codes=["en", "mul"],
              capture_translations=True,
              capture_pronunciation=True,
              capture_linkages=True,
@@ -508,8 +515,10 @@ from Wiktionary and is also used for collecting statistics during
 extraction.
 
 The constructor is called as:
-```
-WiktionaryConfig(capture_languages=["English", "Translingual",
+
+```python
+WiktionaryConfig(dump_file_lang_code="en",
+                 capture_language_codes=["en", "mul"],
                  capture_translations=True,
                  capture_pronunciation=True,
                  capture_linkages=True,
@@ -521,11 +530,9 @@ WiktionaryConfig(capture_languages=["English", "Translingual",
 ```
 
 The arguments are as follows:
-* ``capture_languages`` (list/tuple/set of strings) - names of
-  languages for which to capture data.  It defaults to ``["English",
-  "Translingual"]``.  To capture all languages, one can use
-  ``set(x["name"] for x in ALL_LANGUAGES)`` (with ``ALL_LANGUAGES``
-  imported from wikitextprocessor).
+* ``capture_language_codes`` (list/tuple/set of strings) - codes of
+  languages for which to capture data.  It defaults to ``["en",
+  "mul"]``. To capture all languages, set it to `None`.
 * ``capture_translations`` (boolean) - set to ``False`` to disable capturing
   translations.  Translation information seems to be most
   widely available for the English language, which has translations into
@@ -569,7 +576,7 @@ following keys (others may also be present or added later):
 * ``word`` - the word form
 * ``pos`` - part-of-speech, such as "noun", "verb", "adj", "adv", "pron", "determiner", "prep" (preposition), "postp" (postposition), and many others.  The complete list of possible values returned by the package can be found in ``wiktextract.PARTS_OF_SPEECH``.
 * ``lang`` - name of the language this word belongs to (e.g., ``English``)
-* ``lang_code`` - Wiktionary language code (e.g., ``en``)
+* ``lang_code`` - Wiktionary language code corresponding to ``lang`` key (e.g., ``en``)
 * ``senses`` - list of word senses (dictionaries) for this word/part-of-speech (see below)
 * ``forms`` - list of inflected or alternative forms specified for the word (e.g., plural, comparative, superlative, roman script version).  This is a list of dictionaries, where each dictionary has a ``form`` key and a ``tags`` key.  The ``tags`` identify what type of form it is.  It may also contain "ipa", "roman", and "source" fields.  The form can be "-" when the word is marked as not having that form (some of those will be word-specific, while others are language-specific; post-processing can drop such forms when no word has a value for that tag combination).
 * ``sounds`` - list of dictionaries containing pronunciation, hyphenation, rhyming, and related information.  Each dictionary may have a ``tags`` key containing tags that clarify what kind of form that entry is.  Different types of information are stored in different fields: ``ipa`` is [IPA](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet) pronunciation, ``enPR`` is [enPR](https://en.wikipedia.org/wiki/Pronunciation_respelling_for_English) pronunciation, ``audio`` is name of sound file in Wikimedia commons.
@@ -581,6 +588,7 @@ following keys (others may also be present or added later):
   the etymology section.  These can be used to easily parse etymological
   relations.  Certain common templates that do not signify etymological
   relations are not included.
+* ``etymology_number`` - for words with multiple numbered etymologies, this contains the number of the etymology under which this entry appeared
 * ``synonyms`` - non-disambiguated synonym linkages for the word (see below)
 * ``antonyms`` - non-disambiguated antonym linkages for the word (see below)
 * ``hypernyms`` - non-disambiguated hypernym linkages for the word (see below)

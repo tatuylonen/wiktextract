@@ -1,22 +1,16 @@
 import re
-import json
 import sys
 import urllib
 import hashlib
+
 from .page import clean_node, is_panel_template
-from wikitextprocessor import Wtp, WikiNode, NodeKind, ALL_LANGUAGES
-from .datautils import (split_at_comma_semi, data_append, data_extend,
-                        languages_by_name, languages_by_code)
+from wikitextprocessor import WikiNode, NodeKind
+from .datautils import split_at_comma_semi, data_append
 from .form_descriptions import parse_pronunciation_tags, classify_desc
-LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
-               NodeKind.LEVEL5, NodeKind.LEVEL6)
-from .zh_pron_tags import zh_pron_tags
 from .tags import valid_tags
 
-for k, lst in zh_pron_tags.items():
-    for tag in lst:
-        if tag not in valid_tags:
-            print("UNDEFINED TAG IN zh_pron_tags", k, tag)
+LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
+               NodeKind.LEVEL5, NodeKind.LEVEL6)
 
 # Prefixes, tags, and regexp for finding romanizations from the pronuncation
 # section
@@ -35,8 +29,9 @@ pron_romanization_re = re.compile(
                     reverse=True)) +
     ")([^\n]+)")
 
+
 def parse_pronunciation(ctx, config, node, data, etym_data,
-                        have_etym, base_data, language):
+                        have_etym, base_data, lang_code):
     """Parses the pronunciation section from a language section on a
     page."""
     assert isinstance(node, WikiNode)
@@ -54,7 +49,6 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
         data = etym_data
     enprs = []
     audios = []
-    rhymes = []
     have_panel_templates = False
 
     def parse_pronunciation_template_fn(name, ht):
@@ -135,8 +129,8 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
     def parse_pron_post_template_fn(name, ht, text):
         if is_panel_template(name):
             return ""
-        if name in ("q", "qualifier", "sense", "a", "accent",
-                    "l", "link", "lb", "lbl", "label"):
+        if name in {"q", "qualifier", "sense", "a", "accent",
+                    "l", "link", "lb", "lbl", "label"}:
             # Kludge: when these templates expand to /.../ or [...],
             # replace the expansion by something safe.  This is used
             # to filter spurious IPA-looking expansions that aren't really
@@ -177,12 +171,12 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             text = re.sub(r"(?s)\(Note:.*?\)", "", text)
             new_parent_hdrs = list(parent_hdrs)
             # look no further, here be dragons...
-            if text.find(": ") >= 0:
+            if ": " in text or "：" in text:
                 pron = {}
                 pron["tags"] = []
-                parts = text.split(": ")
+                parts = re.split(r": |：", text)
                 # cludge for weird synax i.e. (Hokkien: Xiamen, ...)
-                if (parts[1].find(",") >= 0 or
+                if ("," in parts[1] or
                     parts[1].replace(")", "").replace("(", "").strip()
                     in valid_tags):
                     new_text = text
@@ -200,17 +194,17 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     for hdr in new_text.split(","):
                         new_parent_hdrs.append(hdr.strip())
                 else:
-                    if text.find("Zhangzhou)") >= 0:
-                        print("\nFOUND IN:", text, "\n")
-                        print("PARTS: ", repr(parts))
+                    # if "Zhangzhou" in text:
+                    #     print("\nFOUND IN:", text, "\n")
+                    #     print("PARTS: ", repr(parts))
                     extra_tags = parts[0]
                     v = ":".join(parts[1:])
                     pron["zh-pron"] = v
                     new_parent_hdrs.append(extra_tags)
                     for hdr in new_parent_hdrs:
                         hdr = hdr.strip()
-                        if hdr in zh_pron_tags:
-                            for tag in zh_pron_tags[hdr]:
+                        if hdr in config.ZH_PRON_TAGS:
+                            for tag in config.ZH_PRON_TAGS[hdr]:
                                 if tag not in pron["tags"]:
                                     pron["tags"].append(tag)
                         elif hdr in valid_tags:
@@ -218,7 +212,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                                 pron["tags"].append(hdr)
                         else:
                             # erhua cludge
-                            if text.find("(Standard Chinese, erhua-ed)") >= 0:
+                            if "(Standard Chinese, erhua-ed)" in text:
                                 pron["tags"].append("Standard Chinese")
                                 pron["tags"].append("Erhua")
                             else:
@@ -259,7 +253,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             contents.args[0][0].strip() == "zh-pron"):
 
             src = ctx.node_to_wikitext(contents)
-            expanded = ctx.expand(src, templates_to_expand=set(["zh-pron"]))
+            expanded = ctx.expand(src, templates_to_expand={"zh-pron"})
             parsed = ctx.parse(expanded)
             parse_expanded_zh_pron(parsed, [], ut)
         else:
@@ -267,7 +261,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 parse_chinese_pron(item, ut)
             return
 
-    if language == "Chinese":
+    if lang_code == "zh":
         ut = set()
         parse_chinese_pron(contents, ut)
         for hdr in ut:
@@ -340,6 +334,11 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     data_append(ctx, data, "sounds", pron)
                     have_pronunciations = True
 
+        m = re.search(r"\b(Syllabification|Hyphenation): ([^\s,]*)", text)
+        if m:
+            data_append(ctx, data, "hyphenation", m.group(2))
+            have_pronunciations = True
+
         # See if it contains a word prefix restricting which forms the
         # pronunciation applies to (see amica/Latin) and/or parenthesized
         # tags.
@@ -404,10 +403,6 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
 
         # XXX what about {{hyphenation|...}}, {{hyph|...}}
         # and those used to be stored under "hyphenation"
-        m = re.search(r"\b(Syllabification|Hyphenation): ([^\s,]*)", text)
-        if m:
-            data_append(ctx, data, "hyphenation", m.group(2))
-            have_pronunciations = True
 
     # Add data that was collected in template_fn
     if audios:

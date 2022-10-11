@@ -364,7 +364,7 @@ xlat_head_map = {
         "feminine inanimate plural animate",  #XXX
     "m anim or f anim or m anim pl or f anim pl or f inan or f inan pl":
         "masculine animate feminine plural singular inanimate",  #XXX
-    
+
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly
@@ -427,7 +427,7 @@ head_final_bantu_map = {
 
     "n or n": "class-9 class-10",  # Andromeda/Eng/Tr/Swahili etc
     "u or u": "class-11 class-14",  # wife/Eng/Tr/Swahili
-    
+
 }
 
 head_final_semitic_langs = set([
@@ -962,7 +962,7 @@ uppercase_tags = set([
     "Faroese",
     "Fars",
     "Fascian",  # Variant of Ladin
-    "Fayyumic",
+    "Fayyumic",  # Variant of Coptic
     "Fengkai",
     "Finglish",  # Finnish word taken from English / American Finnish dialect
     "Finland",
@@ -2531,9 +2531,9 @@ uppercase_tags = set([
     "Waiwaş Quechua",
     "Wanka Quechua",
     "Zuberoan",
-    
 
-    
+
+
 ])
 
 
@@ -2680,6 +2680,9 @@ xlat_tags_map = {
     "Poetic.": "poetic",
     "Informal.": "informal",
     "slightly more formal": "formal",
+    "Used in formal contexts": "formal",
+    "Dialectal use only": "dialectal",
+    "Generally avoided unless the cause is emphasized": "rare emphatic",
     "Colloquial.": "colloquial",
     "Antiquated.": "dated",
     "Archaic": "archaic",
@@ -2881,6 +2884,7 @@ xlat_tags_map = {
     "+prepositional": "with-prepositional",
     "+ por": "with-por",
     "Radical": "radical",
+    "Kangxi radical": "radical",
     "accusative/instrumental": "accusative instrumental",
     "dative/adverbial case": "dative adverbial",
     "dative/genitive": "dative genitive",
@@ -3197,6 +3201,7 @@ xlat_tags_map = {
     "found only in the imperfective tenses": "no-perfect",
     "imperfekt": "imperfect error-misspelling",
     "imperf. aspect": "imperfect",
+    "complete": "completive",
     "perfective 1": "perfect",
     "perfective 2": "perfect",
     "in counterfactual conditionals": "conditional counterfactual",
@@ -5281,6 +5286,17 @@ valid_tags = {
     "dummy-mood": "dummy",  # Used in inflection table parsing, never in data
     "dummy-skip-this": "dummy",  # Kludge in parsing, form skipped
     "dummy-tense": "dummy",  # Used in inflection table parsing, never in data
+    "dummy-object-concord": "dummy",  # Used to transform personal pronouns,
+                            # numbers and gender tags into object- form.
+        # This must only be used in the case where the verb has ONLY object
+        # concord present in it, because it changes all (listed) subject
+        # concord tags (like "first-person" or "plural") into object concord
+        # tags (like "object-first-person" and "object-plural".
+    "dummy-remove-this-cell": "dummy2",  # পো/Assamese attempt to make this work
+        # Use this to get rid of unnecessary cells by propagating: for example
+        # if there's a "Notes" header and a text cell beneath it, using the
+        # header to give the text cell this tag will nuke it.
+    "dummy-reset-headers": "dummy",
     "durative": "aspect",  # Verb form  XXX same as continuative?
     "eclipsis": "misc",
     "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian
@@ -5429,7 +5445,8 @@ valid_tags = {
     "infinitive-ii": "non-finite",  # Finnish
     "infinitive-iii": "non-finite",  # Finnish
     "infinitive-iv": "non-finite",  # Finnish
-    "infinitive-ma": "non-finite",  # Estonian: positive imperfect, quotative (has happened, is happening, or will happen)
+    "infinitive-ma": "non-finite",  # Estonian: positive imperfect, quotative (has happened, is happening, or will happen) / Moksha
+    "infinitive-mda": "non-finite", # Moksha
     "infinitive-v": "non-finite",  # Finnish
     "infinitive-zu": "non-finite",  # German
     "infix": "pos",
@@ -5607,6 +5624,8 @@ valid_tags = {
     "object-class-16": "object",
     "object-class-17": "object",
     "object-class-18": "object",
+    "object-masculine": "object",  # Pashto verbs
+    "object-feminine": "object",
     "objective": "case",  # Case, used as an object
     "oblique": "case",  # Apparently like case form (e.g., Hindi)
     "obsolete": "dialect",
@@ -5665,6 +5684,7 @@ valid_tags = {
     "possessive": "possession",  # Possession (marks who possesses)
     "possessive-single": "possession",  # Possessive with single possessed
     "possessive-many": "possession",  # Possessive with multiple possessed
+    "possessive-two": "possession",  # Two possessed, Mansi
     "possessive-masculine": "possession",  # Possessive with masculine possessed
     "possessive-feminine": "possession",  # Possessive with feminine possessed
     "possessive-common": "possession",  # Possessive with common-g possessed
@@ -6025,7 +6045,7 @@ valid_tags = {
     "æ-tensing": "misc",
     "има": "misc",  # Distinguishes certain verb forms in Macedonian
     "non-human": "misc",  # XXX is there already a tag for this? himself/English - KJ
-    "with-article": "misc",  # Mosambik/German
+    "with-article": "with",  # Mosambik/German
     "before-noun": "misc",  # Mama/German
     "with-numeral": "with",  # Radlermaß/German
     "without-numeral": "misc",  # Radlermaß/German
@@ -6105,6 +6125,64 @@ valid_tags = {
     "comparative-case": "case",  # ананас/Chechen
     "representative": "case",  # a ئانا/Uyghur
     "similitude": "case",  # Uyghur
+    "v1": "misc",  # verb-first, verb-second: these have a common term V1 and V2
+    "v2": "misc",  # tèlle/Limburgish
+    "v3": "misc",
+    "intimate": "register",  # ਪਾਉਣਾ/Punjabi
+    "accusative-i": "case",  # ань/Komi-Zyrian
+    "accusative-ii": "case",  # ань/Komi-Zyrian
+    "prolative-i": "case",  # ань/Komi-Zyrian
+    "prolative-ii": "case",  # ань/Komi-Zyrian
+    "ingressive": "aspect", # hāi/Namuyi
+    "experiential": "mood", # hāi/Namuyi
+    "premeditated": "mood", # hāi/Namuyi
+    "andative": "case",  # motion away from something, nyanyi/Warlpiri
+    "nomic": "misc", # Warlpiri, no idea what it means.
+    "distant-imperfect-er": "tense",  # être/Lorrain
+    "distant-imperfect-stab": "tense",  # être/Lorrain
+    "near-imperfect": "tense",
+    "proximative": "case",  # mahkwa/Fox, contrasted with obviative
+    "perlative": "case",  #arnaq/Yup'ik
+    "gerund-temporal": "non-finite",  #тодыны/Udmurt
+    "genitive-i": "case",  #நத்தை/tamil
+    "genitive-ii": "case",
+    "locative-i": "case",
+    "locative-ii": "case",
+    "sociative-i": "case",
+    "sociative-ii": "case",
+    "gerund-i": "non-finite",  # பிடி/Tamil
+    "gerund-ii": "non-finite",
+    "gerund-iii": "non-finite",
+    "effective": "aspect",
+    "affective": "voice",
+    "gerund-iv": "non-finite",  # тодыны/Udmurt
+    "unwitnessed": "mood",  # bolmak/Turkmen
+    "approximative-i": "case",  #sugu/Veps
+    "approximative-ii": "case",  #sugu/Veps
+    "terminative-i": "case",  #sugu/Veps
+    "terminative-ii": "case",  #sugu/Veps
+    "terminative-iii": "case",  #sugu/Veps
+    "additive-i": "case",  #sugu/Veps
+    "additive-ii": "case",  #sugu/Veps
+    "suihortative": "mood",  # ಹುಟ್ಟು/Kannada
+    "cohortative-i": "mood",  # ಹುಟ್ಟು/Kannada
+    "cohortative-ii": "mood",  # ಹುಟ್ಟು/Kannada
+    # цӏехуьл/Lezgi
+    "adelative": "case",
+    "addirective": "case",
+    "postessive": "case",
+    "postelative": "case",
+    "postdirective": "case",
+    "subessive": "case",
+    "subelative": "case",
+    "subdirective": "case",
+    "inelative": "case",
+    "superelative": "case",
+    "superdirective": "case",
+    "quantitative": "misc",  # "how much" interrogative zenbat/Basque
+    #a ګړندی/Pashto
+    "oblique-i": "case",
+    "oblique-ii": "case",
 }
 
 for k, v in valid_tags.items():
