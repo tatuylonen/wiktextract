@@ -1298,7 +1298,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
         # left-side header to the full row.
         if previously_seen:  # id(cell) in seen_cells previously
             col0_followed_by_nonempty = True
-            return True # continue
+            return # continue
         elif col0_hdrspan is None:
             col0_hdrspan = hdrspan
         elif any(all_hdr_tags):
@@ -1338,7 +1338,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 not (later_cats - later_allowed) and
                 not (col0_cats & later_cats)):
                 # First case: col0 set, continue
-                return True # continue
+                return # continue
             # We are going to start new col0_hdrspan.  Check if
             # we should expand.
             if (not col0_followed_by_nonempty and
@@ -1364,7 +1364,6 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             if not previously_seen:
                 col0_hdrspan = hdrspan
                 col0_followed_by_nonempty = False
-        return False
 
     def split_text_into_alts():
     # Split the cell text into alternatives
@@ -2009,10 +2008,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 # print("new_coltags={} previously_seen={} all_hdr_tags={}"
                 #       .format(new_coltags, previously_seen, all_hdr_tags))
                 if any(new_coltags):
-                    cont = add_new_hdrspan()
-                    if cont:
-                        continue
-
+                    add_new_hdrspan()
                 continue
 
             # These values are ignored, at least for now
