@@ -1802,13 +1802,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                       "{{see translation subpage|...}}")
 
         def recurse(node, seq):
+            # print(f"seq: {seq}")
             if not seq:
                 return node
             if not isinstance(node, WikiNode):
                 return None
+            # print(f"node.kind: {node.kind}")
             if node.kind in LEVEL_KINDS:
                 t = clean_node(config, ctx, None, node.args[0])
-                if t == seq[0]:
+                # print(f"t: {t} == seq[0]: {seq[0]}?")
+                if t.lower() == seq[0].lower():
                     seq = seq[1:]
                     if not seq:
                         return node
@@ -1823,6 +1826,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         assert tree.kind == NodeKind.ROOT
         ret = recurse(tree, seq)
         if ret is None:
+            print(f"start debug {title}/{subtitle} seq {seq}")
             ctx.debug("Failed to find subpage section {}/{} seq {}"
                       .format(title, subtitle, seq))
         return ret
@@ -2319,6 +2323,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     sense_parts = []
                     sense = None
                     sub = ht.get(1)
+                    print(f"ht.get(1): {ht.get(1)}, ht: {ht}")
                     if not isinstance(sub, str):
                         ctx.error("no part-of-speech in "
                                   "{{see translation subpage|...}}")
