@@ -2322,7 +2322,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     sense_parts = []
                     sense = None
                     sub = ht.get(1)
-                    print(f"ht.get(1): {ht.get(1)}, ht: {ht}")
                     if not isinstance(sub, str):
                         ctx.error("no part-of-speech in "
                                   "{{see translation subpage|...}}")
