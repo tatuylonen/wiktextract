@@ -1826,7 +1826,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
         assert tree.kind == NodeKind.ROOT
         ret = recurse(tree, seq)
         if ret is None:
-            print(f"start debug {title}/{subtitle} seq {seq}")
             ctx.debug("Failed to find subpage section {}/{} seq {}"
                       .format(title, subtitle, seq))
         return ret
