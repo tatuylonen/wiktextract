@@ -3498,7 +3498,6 @@ infl_map = {
     # "stative stem": XXX,
     # "unmutated": XXX,
     # "unmodified": XXX,
-    # "Base form": XXX,
     # "bare": XXX,
     # "Noun class": XXX,
     # "Genitive infin.": XXX,
@@ -3954,12 +3953,12 @@ infl_map = {
     "female forms": "feminine",
     "Base form": {
         "lang": ["Arabic", "Moroccan Arabic","Maltese","Gulf Arabic",],
-        "pos": "prep",
+        # "pos": ["noun", "verb", "particle", "prep"],
         "then": "stem",
     },
     "Personal-pronoun- including forms": {
         "lang": ["Arabic", "Moroccan Arabic","Maltese","Gulf Arabic",],
-        "pos": "prep",
+        # "pos": ["noun", "verb", "particle", "prep"],
         "then": "dummy-reset-headers",
     },
     # ~ "singular": {
@@ -5680,6 +5679,23 @@ infl_map = {
         "lang": "Pashto",
         "then": "past perfective object-concord dummy-object-concord",
     },
+    # ní/Old Irish
+    "Animate": "animate",
+    # just in case
+    "Inanimate": "inanimate",
+
+    # τα/Greek
+    "1-s": "first-person singular",
+    "2-s": "second-person singular",
+    "3-ms": "third-person masculine singular",
+    "3-fs": "third-person feminine singular",
+    "3-ns": "third-person neuter singular",
+    "1-p": "first-person plural",
+    "2-p": "second-person plural",
+    "3-mp": "third-person masculine plural",
+    "3-fp": "third-person feminine plural",
+    "3-np": "third-person neuter plural",
+    
 }
 
 
