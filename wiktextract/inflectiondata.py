@@ -3499,7 +3499,6 @@ infl_map = {
     # "unmutated": XXX,
     # "unmodified": XXX,
     # "bare": XXX,
-    # "Noun class": XXX,
     # "Genitive infin.": XXX,
     # "ilz, elles": XXX,
     # "el / ela": XXX,
@@ -5695,7 +5694,25 @@ infl_map = {
     "3-mp": "third-person masculine plural",
     "3-fp": "third-person feminine plural",
     "3-np": "third-person neuter plural",
-    
+
+    # angu/Swahili
+    # "Noun class": {
+        # "lang": "Swahili",
+        # "then": "",},
+    # "M-wa class": {
+        # "if": "singular",
+        # "then": "class-1",
+        # "else": "class-2",
+        # },
+    # "M-mi class": "",
+    # "Ma class": "",
+    # "Ki-vi class": "",
+    # "N class": "",
+    # "U class": "",
+    # "Pa class": "",
+    # "Ku class": "",
+    # "Mu class": "",
+
 }
 
 
