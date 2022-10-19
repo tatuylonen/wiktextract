@@ -5302,6 +5302,8 @@ valid_tags = {
         # if there's a "Notes" header and a text cell beneath it, using the
         # header to give the text cell this tag will nuke it.
     "dummy-reset-headers": "dummy",
+    "dummy-use-as-rowtags": "dummy",
+    "dummy-use-as-coltags": "dummy",
     "durative": "aspect",  # Verb form  XXX same as continuative?
     "eclipsis": "misc",
     "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian

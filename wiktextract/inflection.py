@@ -1211,14 +1211,14 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     # for row in rows:
     #     print("  ", row)
 
-    def replace_directional_tags(tags, replacement_map):
-        newtags = set()
-        for t in tags:
-            if t in replacement_map:
-                newtags.add(replacement_map[t])
-            else:
-                newtags.add(t)
-        return newtags
+    # def replace_directional_tags(tags, replacement_map):
+        # newtags = set()
+        # for t in tags:
+            # if t in replacement_map:
+                # newtags.add(replacement_map[t])
+            # else:
+                # newtags.add(t)
+        # return newtags
         
     # Parse definitions for references (from table itself and from text
     # after it)
@@ -1641,17 +1641,21 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
         # a column or row
 
         ret = []
-        rtagreplacs = get_lang_specific(lang, "rowtag_replacements")
-        ctagreplacs = get_lang_specific(lang, "coltag_replacements")
+        # rtagreplacs = get_lang_specific(lang, "rowtag_replacements")
+        # ctagreplacs = get_lang_specific(lang, "coltag_replacements")
         for rt in sorted(rowtags):
+            if "dummy-use-as-coltags" in rt:
+                continue
             # if lang was in rowtag_replacements)
-            if not rtagreplacs == None:
-                rt = replace_directional_tags(rt, rtagreplacs)
+            # if not rtagreplacs == None:
+                # rt = replace_directional_tags(rt, rtagreplacs)
             for ct in sorted(coltags):
+                if "dummy-use-as-rowtags" in ct:
+                    continue
                 # if lang was in coltag_replacements
-                if not ctagreplacs == None:
-                    ct = replace_directional_tags(ct,
-                                              ctagreplacs)
+                # if not ctagreplacs == None:
+                    # ct = replace_directional_tags(ct,
+                                              # ctagreplacs)
                 tags = set(global_tags)
                 tags.update(extra_tags)
                 tags.update(rt)
@@ -1761,7 +1765,9 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 tags = tags - set(["dummy-mood", "dummy-tense",
                                    "dummy-ignore-skipped",
                                    "dummy-object-concord",
-                                   "dummy-reset-headers",])
+                                   "dummy-reset-headers",
+                                   "dummy-use-as-coltags",
+                                   "dummy-use-as-rowtags",])
     
                 # Perform language-specific tag replacements according
                 # to rules in a table.
