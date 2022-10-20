@@ -252,7 +252,8 @@ def_re = re.compile(r"(\s*•?\s+)?"
 
 # Regexp for cell starts that are exceptions to def_re and do not actually
 # start a definition.
-nondef_re = re.compile(r"^\s*(1|2|3)\s+(sg|pl)\s*$")
+nondef_re = re.compile(r"(^\s*(1|2|3)\s+(sg|pl)\s*$|"  # 1s or 3p etc.
+                       r"\s*\d\d?\s*/\s*\d\d?\s*$)")  # taka/Swahili "15 / 17"
 
 # Certain tags are moved from headers in tables into word tags, as they always
 # apply to the whole word.
