@@ -531,7 +531,6 @@ def extract_cell_content(lang, word, col):
                 v = v[1:-1]
             refs.append(v)
         col = col[:m.start()]
-
     # See if it is a ref definition
     # print("BEFORE REF CHECK: {!r}".format(col))
     m = re.match(def_re, col)
@@ -548,7 +547,6 @@ def extract_cell_content(lang, word, col):
             deflst.append((ref, col[ofs:].strip()))
         # print("deflst:", deflst)
         return "", [], deflst, []
-
     # See if it *looks* like a reference to a definition
     while col:
         if (is_superscript(col[-1]) or col[-1] in ("†",)):
@@ -571,7 +569,7 @@ def extract_cell_content(lang, word, col):
             col = col[:-1]
         else:
             break
-
+            
     # Check for another form of note definition
     if (len(col) > 2 and col[1] in (")", " ", ":") and
         col[0].isdigit() and
@@ -590,7 +588,6 @@ def extract_cell_content(lang, word, col):
 
     # Put back the final parenthesized part
     col = col.strip() + final_paren
-
     # print("EXTRACT_CELL_CONTENT: orig_col={!r} col={!r} refs={!r} hdr_tags={}"
     #       .format(orig_col, col, refs, hdr_tags))
     return col.strip(), refs, [], hdr_tags
@@ -1306,10 +1303,18 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                         new_rowtags.append(tags)
         return new_rowtags, new_coltags, all_hdr_tags
 
-    def add_new_hdrspan(col, hdrspans, col0_followed_by_nonempty, col0_hdrspan):
+    def add_new_hdrspan(col, hdrspans, store_new_hdrspan,
+                        col0_followed_by_nonempty, col0_hdrspan):
         hdrspan = HdrSpan(col_idx, colspan, rowspan, rownum,
                           new_coltags, col, all_headers)
         hdrspans.append(hdrspan)
+
+        # infl-map tag "dummy-store-hdrspan" causes this new hdrspan
+        # to be added to a register of stored hdrspans to be used
+        # later with "dummy-load-stored-hdrspans".
+        if store_new_hdrspan:
+            tblctx.stored_hdrspans.append(hdrspan)
+            
         # Handle headers that are above left-side header
         # columns and are followed by personal pronouns in
         # remaining columns (basically headers that
@@ -1782,7 +1787,11 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                                    "dummy-object-concord",
                                    "dummy-reset-headers",
                                    "dummy-use-as-coltags",
-                                   "dummy-use-as-rowtags",])
+                                   "dummy-use-as-rowtags",
+                                   "dummy-store-hdrspan",
+                                   "dummy-load-stored-hdrspans",
+                                   "dummy-reset-stored-hdrspans",
+                                   ])
     
                 # Perform language-specific tag replacements according
                 # to rules in a table.
@@ -2027,7 +2036,17 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 if any("dummy-skip-this" in ts for ts in rowtags):
                     continue  # Skip this cell
 
+                if any("dummy-load-stored-hdrspans" in ts for ts in v):
+                    hdrspans.extend(tblctx.stored_hdrspans)
                     
+                if any("dummy-reset-stored-hdrspans" in ts for ts in v):
+                    tblctx.stored_hdrspans = []
+
+                if any("dummy-store-hdrspan" in ts for ts in v):
+                    # print(f"STORED: {col}")
+                    store_new_hdrspan = True
+                else:
+                    store_new_hdrspan = False
                     
                 new_coltags = list(x for x in new_coltags
                                    if not any(t in noinherit_tags for t in x))
@@ -2035,14 +2054,9 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 #       .format(new_coltags, previously_seen, all_hdr_tags))
                 if any(new_coltags):
                     col, col0_followed_by_nonempty, col0_hdrspan \
-                    = add_new_hdrspan(col, hdrspans,
+                    = add_new_hdrspan(col, hdrspans, store_new_hdrspan,
                                       col0_followed_by_nonempty, col0_hdrspan)
 
-                if any("dummy-load-stored-hdrspans" in ts for ts in v):
-                    hdrspans.extend(tblctx.stored_hdrspans)
-                    
-                if any("dummy-reset-stored-hdrspans" in ts for ts in v):
-                    tblctx.stored_hdrspans = []
                     
                 continue
 
@@ -2121,6 +2135,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 # if refs:
                 #     print("REFS:", refs)
                 extra_tags.extend(hdr_tags)
+                # Extract tags from referenced footnotes
                 # Extract tags from referenced footnotes
                 refs_tags = set()
                 for ref in refs:

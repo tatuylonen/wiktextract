@@ -172,20 +172,8 @@ infl_map = {
     "Present forms": "present",
     "Transgressives": "transgressive",
     "past tense": "past",
-    "Positive past": "past positive",
     "Positive participial": "positive participle",
     "Negative participial": "negative participle",
-    "Negative past": "past negative",
-    "Positive present": "present positive",
-    "Negative present": "present negative",
-    "Positive future": "future positive",
-    "Negative future": "future negative",
-    "Positive subjunctive": "subjunctive positive",
-    "Negative subjunctive": "subjunctive negative",
-    "Positive present conditional": "present irrealis positive",
-    "Negative present conditional": "present irrealis negative",
-    "Positive past conditional": "past irrealis positive",
-    "Negative past conditional": "past irrealis negative",
     "Relative forms": "relative object-concord",
     "present tense": "present",
     "future tense": "future",
@@ -228,7 +216,6 @@ infl_map = {
     "Case / Gender": "",
     "masculine inanimate": "masculine inanimate",
     "Infinitive": "infinitive",
-    "Past": "past",
     "Past indicative": "past indicative",
     "Past participle": "past participle",
     "Past participles": "past participle",
@@ -340,12 +327,20 @@ infl_map = {
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-i",
+        "else": {
+            "lang": "Swahili",
+            "then": "dummy-store-hdrspan first-person"
+        },
     },
     "2nd":  {
         "default": "second-person",
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-ii",
+        "else": {
+            "lang": "Swahili",
+            "then": "dummy-store-hdrspan second-person"
+        },
     },
     "3rd":  {
         "default": "third-person",
@@ -1949,7 +1944,6 @@ infl_map = {
     "o (“he/she is”)": "third-person predicative",
     "predicative": "predicative",
     "subjective": "subjective",
-    "Present": "present",
     "preterite": "preterite",
     "strong/subject": "strong subjective",
     "weak (direct object)": "weak objective direct-object",
@@ -2003,7 +1997,6 @@ infl_map = {
     },
     "causative": "causative",
     "Indicative": "indicative",
-    "Subjunctive": "subjunctive",
     "Class": "",
     "11": "class-11",
     "14": "class-14",
@@ -2138,16 +2131,6 @@ infl_map = {
     "Plural (fleirtal)": "plural",
     "Original form": "",  # XXX Latin ['-bo']
     "Derived form": "",  # XXX Latin ['-bo']
-    "Gnomic": "gnomic",
-    "Perfect": "perfect",
-    '"Already"': "already-form",
-    '"Not yet"': "not-yet-form",
-    '"If/When"': "if-when-form",
-    '"If not"': "if-not-form",
-    "General positive": "general-mood positive",
-    "General negative": "general-mood negative",
-    "Present conditional": "present irrealis",
-    "Conditional contrary to fact": "conditional counterfactual",
     "Present active indicative (third conjugation)":
     "present active indicative conjugation-3",
     "Present active subjunctive": "present active subjunctive",
@@ -2872,7 +2855,6 @@ infl_map = {
     "comp": "completive",
     "simpl": "",
     "nominal non-finites": "noun-from-verb dummy-mood",
-    "Consecutive": "consecutive",
     "comitative": "comitative",
     "abessive": "abessive",
     "essive": "essive",
@@ -2906,7 +2888,6 @@ infl_map = {
     "Injunctive": "injunctive",
     "Habitual participle": "habitual participle",
     "Future conditional": "future conditional",
-    "Past conditional": "past conditional",
     "condizionale passato": "past conditional",  # ripromettersi/Italian
     "futuro anteriore": "future perfect",  # ripromettersi/Italian
     "passato prossimo": "perfect",  # ripromettersi/Italian
@@ -3259,8 +3240,6 @@ infl_map = {
     "Lemosin": "Lemosin",  # Occitan
     "Provençau": "Provençau",  # Occitan
     "Old Saxon personal pronouns": "personal pronoun",
-    "3": {"lang": head_final_numeric_langs, "then": "class-3",
-          "else": "third-person"},
     "nominative / accusative": "nominative accusative",
     "situative": "situative",
     "oppositive": "oppositive",
@@ -5612,7 +5591,10 @@ infl_map = {
     "Persons": "",
     "Persons / Classes": "",
     "Classes": "",
-    "3rd / M-wa": "third-person",
+    "3rd / M-wa": {
+        "lang": "Swahili",
+        "then": "dummy-store-hdrspan third-person",
+    },
     "M-mi": "",
     "Ma": "",
     "Ki-vi": "",
@@ -5621,21 +5603,90 @@ infl_map = {
     "Ku": "",
     "Pa": "",
     "Mu": "",
-    "Sg.": "singular",
-    "Pl.": "plural",
-    "Sg. / 1": "singular class-1",
-    "Pl. / 2": "plural class-2",
-    "4": "class-4",
-    "5": "class-5",
-    "6": "class-6",
-    "7": "class-7",
-    "8": "class-8",
-    "9": "class-9",
-    "10": "class-10",
-    "11 / 14": "class-11 class-14",
-    "15 / 17": "class-15 class-17",
-    "16": "class-16",
-    "18": "class-18",
+    "Sg.": {
+        "default": "singular",
+        "lang": "Swahili",
+        "then": "singular dummy-store-hdrspan",
+    },
+    "Pl.": {
+        "default": "plural",
+        "lang": "Swahili",
+        "then": "plural dummy-store-hdrspan",
+    },
+    "Sg. / 1": {
+        "default": "singular class-1",
+        "lang": "Swahili",
+        "then": "singular class-1 dummy-store-hdrspan",
+    },
+    "Pl. / 2":  {
+        "default": "plural class-2",
+        "lang": "Swahili",
+        "then": "plural class-2 dummy-store-hdrspan",
+    },
+    "3": {
+        "default": "third-person",
+        "lang": "Swahili",
+        "then": "class-3 dummy-store-hdrspan",
+        "else": {
+            "lang": head_final_numeric_langs,
+            "then": "class-3",
+        },
+    },
+    "4": {
+        "default": "class-4",
+        "lang": "Swahili",
+        "then": "class-4 dummy-store-hdrspan",
+    },
+    "5": {
+        "default": "class-5",
+        "lang": "Swahili",
+        "then": "class-5 dummy-store-hdrspan",
+    },
+    "6": {
+        "default": "class-6",
+        "lang": "Swahili",
+        "then": "class-6 dummy-store-hdrspan",
+    },
+    "7": {
+        "default": "class-7",
+        "lang": "Swahili",
+        "then": "class-7 dummy-store-hdrspan",
+    },
+    "8": {
+        "default": "class-8",
+        "lang": "Swahili",
+        "then": "class-8 dummy-store-hdrspan",
+    },
+    "9": {
+        "default": "class-9",
+        "lang": "Swahili",
+        "then": "class-9 dummy-store-hdrspan",
+    },
+    "10": {
+        "default": "class-10",
+        "lang": "Swahili",
+        "then": "class-10 dummy-store-hdrspan",
+    },
+    "11 / 14": {
+        "default": "class-11 class-14",
+        "lang": "Swahili",
+        "then": "dummy-store-hdrspan class-11 class-14",
+    },
+    "15 / 17": {
+        "default": "class-15 class-17",
+        "lang": "Swahili",
+        "then": "class-15 class-17 dummy-store-hdrspan",
+    },
+    "16": {
+        "default": "class-16",
+        "lang": "Swahili",
+        "then": "class-16 dummy-store-hdrspan",
+    },
+    "18": {
+        "default": "class-18",
+        "lang": "Swahili",
+        "then": "class-18 dummy-store-hdrspan",
+    },
 
     "1s": {
         "default": "first-person singular",
@@ -5900,6 +5951,168 @@ infl_map = {
     "c4/c9": "object-class-4 object-class-9",
     "Forms with object concords": "object-concord",
 
+    "Past": {
+        "default": "past",
+        "lang": "Swahili",
+        "then": "dummy-load-stored-hdrspans past",
+    },
+    "Present": {
+        "default": "present",
+        "lang": "Swahili",
+        "then": "dummy-load-stored-hdrspans present",
+    },
+    "Future": {
+        "default": "future",
+        "lang": "Swahili",
+        "then": "future dummy-load-stored-hdrspans"
+     },
+    "Subjunctive": {
+        "default": "subjunctive",
+        "lang": "Swahili",
+        "then": "subjunctive dummy-load-stored-hdrspans"
+     },
+    "Present conditional": {
+        "default": "present irrealis",
+        "lang": "Swahili",
+        "then": "present irrealis dummy-load-stored-hdrspans"
+     },
+    "Past conditional": {
+        "default": "past irrealis",
+        "lang": "Swahili",
+        "then": "past irrealis dummy-load-stored-hdrspans"
+     },
+    "Conditional contrary to fact": {
+        "default": "conditional counterfactual",
+        "lang": "Swahili",
+        "then": "conditional counterfactual dummy-load-stored-hdrspans"
+     },
+    "Gnomic": {
+        "default": "gnomic",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "gnomic dummy-load-stored-hdrspans"
+     },
+    "Perfect": {
+        "default": "perfect",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "perfect dummy-load-stored-hdrspans"
+     },
+    '"Already"': {
+        "default": "already-form",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "already-form dummy-load-stored-hdrspans"
+     },
+    '"Not yet"': {
+        "default": "not-yet-form",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "not-yet-form dummy-load-stored-hdrspans"
+     },
+    '"If/When"': {
+        "default": "if-when-form",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "if-when-form dummy-load-stored-hdrspans"
+     },
+    '"If not"': {
+        "default": "if-not-form",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "if-not-form dummy-load-stored-hdrspans"
+     },
+    "Consecutive": {
+        "default": "consecutive",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "consecutive dummy-load-stored-hdrspans"
+     },
+    "General positive": {
+        "default": "general-mood positive",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "general-mood positive dummy-load-stored-hdrspans"
+     },
+    "General negative": {
+        "default": "general-mood negative",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "general-mood negative dummy-load-stored-hdrspans"
+     },
+    "Positive past": {
+        "default": "positive past",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "positive past dummy-load-stored-hdrspans"
+     },
+    "Negative past": {
+        "default": "negative past",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "negative past dummy-load-stored-hdrspans"
+     },
+    "Positive present": {
+        "default": "positive present",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "positive present dummy-load-stored-hdrspans"
+     },
+    "Negative present": {
+        "default": "negative present",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "negative present dummy-load-stored-hdrspans"
+     },
+    "Positive future": {
+        "default": "positive future",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "positive future dummy-load-stored-hdrspans"
+     },
+    "Negative future": {
+        "default": "negative future",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "negative future dummy-load-stored-hdrspans"
+     },
+    "Positive subjunctive": {
+        "default": "positive subjunctive",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "positive subjunctive dummy-load-stored-hdrspans"
+     },
+    "Negative subjunctive": {
+        "default": "negative subjunctive",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "negative subjunctive dummy-load-stored-hdrspans"
+     },
+    "Positive present conditional": {
+        "default": "positive present irrealis",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "positive present irrealis dummy-load-stored-hdrspans"
+     },
+    "Negative present conditional": {
+        "default": "negative present irrealis",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "negative present irrealis dummy-load-stored-hdrspans"
+     },
+    "Positive past conditional": {
+        "default": "positive past irrealis",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "positive past irrealis dummy-load-stored-hdrspans"
+     },
+    "Negative past conditional": {
+        "default": "negative past irrealis",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "negative past irrealis dummy-load-stored-hdrspans"
+     },
+    
 }
 
 
