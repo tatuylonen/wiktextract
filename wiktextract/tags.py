@@ -4641,6 +4641,7 @@ xlat_tags_map = {
     "defunct": "archaic",  # flugu/Norwegian
     "used in definite form": "",  # dyrerike/Norwegian Nynorsk
     "used in definite singular form": "",  # nettet/Norwegian Nynorsk
+    "combined with se": "reflexive", # tecnificarse/Spanish
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
