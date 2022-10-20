@@ -1153,8 +1153,8 @@ def new_number():
 curiteriter = new_number()#
 parsesimpleiter = new_number()#
 
-def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
-                       after):
+def parse_simple_table(config, ctx, tblctx, word, lang, pos,
+                       rows, titles, source, after):
     """This is the default table parser.  Despite its name, it can parse
     complex tables.  This returns a list of forms to be added to the
     part-of-speech, or None if the table could not be parsed."""
@@ -1223,14 +1223,14 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     # for row in rows:
     #     print("  ", row)
 
-    # def replace_directional_tags(tags, replacement_map):
-        # newtags = set()
-        # for t in tags:
-            # if t in replacement_map:
-                # newtags.add(replacement_map[t])
-            # else:
-                # newtags.add(t)
-        # return newtags
+    # def replace_directional_tags(tags, replacement_map):#
+        # newtags = set()#
+        # for t in tags:#
+            # if t in replacement_map:#
+                # newtags.add(replacement_map[t])#
+            # else:#
+                # newtags.add(t)#
+        # return newtags#
         
     # Parse definitions for references (from table itself and from text
     # after it)
@@ -1868,7 +1868,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     for row in rows:
         # print("ROW:", row)
         # print("====")
-        # print(f"Start of PREVIOUS row hdrspans: {tuple(sp.tagsets for sp in hdrspans)}")
+        # print(f"Start of PREVIOUS row hdrspans:"
+               # f"{tuple(sp.tagsets for sp in hdrspans)}")
         # print(f"Start of row txt: {tuple(t.text for t in row)}")
         if not row:
             continue  # Skip empty rows
@@ -2021,6 +2022,9 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
 
                 if any("dummy-skip-this" in ts for ts in rowtags):
                     continue  # Skip this cell
+
+                    
+                    
                 new_coltags = list(x for x in new_coltags
                                    if not any(t in noinherit_tags for t in x))
                 # print("new_coltags={} previously_seen={} all_hdr_tags={}"
@@ -2029,6 +2033,13 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                     col, col0_followed_by_nonempty, col0_hdrspan \
                     = add_new_hdrspan(col, hdrspans,
                                       col0_followed_by_nonempty, col0_hdrspan)
+
+                if any("dummy-load-stored-hdrspans" in ts for ts in v):
+                    hdrspans.extend(tblctx.stored_hdrspans)
+                    
+                if any("dummy-reset-stored-hdrspans" in ts for ts in v):
+                    tblctx.stored_hdrspans = []
+                    
                 continue
 
             # These values are ignored, at least for now
@@ -2278,7 +2289,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
     ############################################################################
 
 
-def handle_generic_table(config, ctx, data, word, lang, pos, rows, titles,
+def handle_generic_table(config, ctx, tblctx, data, word, lang, pos, rows, titles,
                          source, after):
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, Wtp)
@@ -2298,7 +2309,7 @@ def handle_generic_table(config, ctx, data, word, lang, pos, rows, titles,
         assert isinstance(x, str)
 
     # Try to parse the table as a simple table
-    ret = parse_simple_table(config, ctx, word, lang, pos, rows, titles,
+    ret = parse_simple_table(config, ctx, tblctx, word, lang, pos, rows, titles,
                              source, after)
     if ret is None:
         # XXX handle other table formats
@@ -2330,6 +2341,13 @@ def handle_generic_table(config, ctx, data, word, lang, pos, rows, titles,
                 have_forms.add(fdt)
             data_append(ctx, data, "forms", dt)
 
+class TableContext(object):
+    """Saved context used when parsing a table and its subtables."""
+    __slot__ = (
+        "stored_hdrspans",
+        )
+    def __init__(self):
+        self.stored_hdrspans = []
 
 def handle_wikitext_table(config, ctx, word, lang, pos,
                           data, tree, titles, source, after):
@@ -2352,9 +2370,9 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
     # Imported here to avoid a circular import
     from wiktextract.page import clean_node, recursively_extract
 
-    new_rows = []
-    
-    def handle_wikitext_table1(config, ctx, word, lang, pos,
+    tblctx = TableContext()
+        
+    def handle_wikitext_table1(config, ctx, tblctx, word, lang, pos,
                               data, tree, titles, source, after):
         """Helper function allowing the 'flattening' out of the table
         recursion: instead of handling the tables in the wrong order
@@ -2389,6 +2407,9 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                             # when the cell is not considered a header; triggered
                             # by the "*" inflmap meta-tag.
         rows = []
+
+        sub_ret = []
+        
         for node in tree.children:
             if not isinstance(node, WikiNode):
                 continue
@@ -2408,11 +2429,13 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 # Parse a table row.
                 row = []
                 style = None
-                row_has_nonempty_cells = False  #Have nonempty cell not from rowspan
+                row_has_nonempty_cells = False
+                    # Have nonempty cell not from rowspan
                 for col in node.children:
                 # loop through each cell in the ROW
                     if not isinstance(col, WikiNode):
-                        # This skip is not used for counting, "None" is not used in
+                        # This skip is not used for counting,
+                        # "None" is not used in
                         # indexing or counting or looping.
                         continue
                     kind = col.kind
@@ -2423,26 +2446,30 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                         
                     while (len(row) < len(vertical_still_left) and
                            vertical_still_left[len(row)] > 0):
-                        # vertical_still_left is [...0, 0, 2...] for each column.
-                        # It is populated at the end of the loop, at the same time
-                        # as col_gap_data.
-                        # This needs to be looped and filled this way because each
-                        # `for col`-looping jumps straight to the next meaningful
-                        # cell; there is no "None" cells, only emptiness between,
-                        # and rowspan and colspan are just to generate the "fill-
-                        # map" that fills in the gaps.
+                    # vertical_still_left is [...0, 0, 2...] for each column.
+                    # It is populated at the end of the loop, at the same time
+                    # as col_gap_data.
+                    # This needs to be looped and filled this way because each
+                    # `for col`-looping jumps straight to the next meaningful
+                    # cell; there is no "None" cells, only emptiness between,
+                    # and rowspan and colspan are just to generate the "fill-
+                    # map" that fills in the gaps.
                         vertical_still_left[len(row)] -= 1
                         row.append(col_gap_data[len(row)])
                         
-                        # appending row is how "indexing" is done here; some-
-                        # thing is appended, like a filler-cell here or a "start"
-                        # cell at the end of the row-loop, which increased
-                        # len(row) which is then used as the target-index to check
-                        # for gaps. vertical_still_left is the countdown to when
-                        # to stop filling in gaps, and goes down to 0, and
-                        # col_gap_data is not touched except when a new rowspan is
-                        # needed, at the same time that vertical_still_left gets
-                        # reassigned.
+                        # appending row is how "indexing" is
+                        # done here; something is appended,
+                        # like a filler-cell here or a "start"
+                        # cell at the end of the row-loop,
+                        # which increased len(row) which is
+                        # then used as the target-index to check
+                        # for gaps. vertical_still_left is
+                        # the countdown to when to stop
+                        # filling in gaps, and goes down to 0,
+                        # and col_gap_data is not touched
+                        # except when a new rowspan is needed,
+                        # at the same time that
+                        # vertical_still_left gets reassigned.
     
                     try:
                         rowspan = int(col.attrs.get("rowspan", "1"))  # 🡙
@@ -2472,9 +2499,13 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                         new_titles = list(titles)
                         if celltext:
                             new_titles.append(celltext)
-                        handle_wikitext_table1(config, ctx, word, lang, pos,
-                                               data, tbl, new_titles,
-                                               source, "")
+                        subtbl = handle_wikitext_table1(config, ctx,
+                                                tblctx,
+                                                word, lang,
+                                                pos, data, tbl, new_titles,
+                                                source, "")
+                        if subtbl:
+                            sub_ret.extend(subtbl)
     
                     # This magic value is used as part of header detection
                     cellstyle = (col.attrs.get("style", "") + "//" +
@@ -2489,11 +2520,13 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                         titletext = titletext[:-1]
                     idx = celltext.find(": ")
                     is_title = False
-                    # remove anything in parentheses, compress whitespace, .strip()
+                    # remove anything in parentheses,
+                    # compress whitespace, .strip()
                     cleaned_titletext = re.sub(r"\s+", " ",
                                                re.sub(r"\s*\([^)]*\)", "",
                                                       titletext)).strip()
-                    cleaned, _, _, _ = extract_cell_content(lang, word, celltext)
+                    cleaned, _, _, _ = extract_cell_content(lang, word,
+                                                            celltext)
                     cleaned = re.sub(r"\s+", " ", cleaned)
                     hdr_expansion = expand_header(config, ctx, word, lang, pos,
                                                   cleaned, [],
@@ -2504,17 +2537,17 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     # KJ candidate_hdr says that a specific cell is a candidate
                     # for being a header because it passed through expand_header
                     # without getting any "error-" tags; that is, the contents
-                    # is "valid" for being a header; these are the false positives
-                    # we want to catch
+                    # is "valid" for being a header; these are the false posi-
+                    # tives we want to catch
                     ignored_cell = any(any(t.startswith("dummy-")
                                             for t in ts)
                                         for ts in hdr_expansion)
-                    # ignored_cell should NOT be used to filter for headers, like
-                    # candidate_hdr is used, but only to filter for related *debug
-                    # messages*: some dummy-tags are actually half-way to headers,
-                    # like ones with "Notes", so they MUST be headers, but later
-                    # on they're ignored *as* headers so they don't need to print
-                    # out any cells-as-headers debug messages.
+                    # ignored_cell should NOT be used to filter for headers,
+                    # like candidate_hdr is used, but only to filter for related
+                    # *debug messages*: some dummy-tags are actually half-way to
+                    # headers, like ones with "Notes", so they MUST be headers,
+                    # but later on they're ignored *as* headers so they don't
+                    # need to print out any cells-as-headers debug messages.
                     if (candidate_hdr and
                        kind != NodeKind.TABLE_HEADER_CELL and
                        cleaned != "" and cleaned != "dummy-ignored-text-cell" and
@@ -2523,8 +2556,9 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                         if (not ignored_cell and
                             lang not in LANGUAGES_WITH_CELLS_AS_HEADERS):
                             ctx.debug("rejected heuristic header: "
-                                      "table cell identified as header and given "
-                                      "candidate status, BUT {} is not in "
+                                      "table cell identified as header and "
+                                      "given candidate status,"
+                                      "BUT {} is not in "
                                       "LANGUAGES_WITH_CELLS_AS_HEADERS; "
                                       "cleaned text: {}"
                                       .format(lang, cleaned))
@@ -2532,28 +2566,31 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                         elif (cleaned not in LANGUAGES_WITH_CELLS_AS_HEADERS
                                                     .get(lang, "")):
                             ctx.debug("rejected heuristic header: "
-                                      "table cell identified as header and given "
-                                      "candidate status, BUT the cleaned text is "
-                                      "not in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
+                                      "table cell identified as header and "
+                                      "given candidate status, "
+                                      "BUT the cleaned text not in "
+                                      "LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
                                       "cleaned text: {}"
                                       .format(lang, cleaned))
                             candidate_hdr = False
                         else:
                             ctx.debug("accepted heuristic header: "
-                                      "table cell identified as header and given "
-                                      "candidate status, AND the cleaned text is "
+                                      "table cell identified as header and "
+                                      "given candidate status, "
+                                      "AND the cleaned text is "
                                       "in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
                                       "cleaned text: {}"
                                       .format(lang, cleaned))
     
                     # If the cell starts with something that could start a
-                    # definition (typically a reference symbol), make it a candidate
-                    # regardless of whether the language is listed.
+                    # definition (typically a reference symbol), make it a 
+                    # candidate regardless of whether the language is listed.
                     if (re.match(def_re, cleaned) and
                         not re.match(nondef_re, cleaned)):
                         candidate_hdr = True
     
-                    #print("titletext={!r} hdr_expansion={!r} candidate_hdr={!r} "
+                    #print("titletext={!r} hdr_expansion={!r} "
+                    #      "candidate_hdr={!r} "
                     #      "lang={} pos={}"
                     #      .format(titletext, hdr_expansion, candidate_hdr,
                     #              lang, pos))
@@ -2562,7 +2599,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                         celltext = celltext[:idx]
                         is_title = True
                     elif (kind == NodeKind.TABLE_HEADER_CELL and
-                          titletext.find(" + ") < 0 and  # For "avoir + blah blah"?
+                          titletext.find(" + ") < 0 and  # For "avoir + blah"?
                           not any(isinstance(x, WikiNode) and
                                   x.kind == NodeKind.HTML and
                                   x.args == "span" and
@@ -2577,8 +2614,9 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     #  if first column or same style as first column
                     elif (style == cellstyle and
                           # and title is not identical to word name
-                          titletext != word and cleaned not in IGNORED_COLVALUES and
-                           cleaned != "dummy-ignored-text-cell" and
+                          titletext != word and
+                          cleaned not in IGNORED_COLVALUES and
+                          cleaned != "dummy-ignored-text-cell" and
                           #  the style composite string is not broken
                           not style.startswith("////") and
                           titletext.find(" + ") < 0):
@@ -2596,7 +2634,8 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                             ctx.debug("rejected heuristic header: "
                                       "table cell identified as header based "
                                       "on style, BUT the cleaned text is "
-                                      "not in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
+                                      "not in "
+                                      "LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
                                       "cleaned text: {}, style: {}"
                                       .format(lang, cleaned, style))
                         else:
@@ -2612,8 +2651,11 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                         # Whole column has title suggesting they are headers
                         # (e.g. "Case")
                         is_title = True
-                    if re.match(r"Conjugation of |Declension of |Inflection of |"
-                                r"Mutation of |Notes\b", # \b is word-boundary
+                    if re.match(r"Conjugation of |"
+                                r"Declension of |"
+                                r"Inflection of |"
+                                r"Mutation of |"
+                                r"Notes\b", # \b is word-boundary
                                 titletext):
                         is_title = True
                         
@@ -2634,26 +2676,34 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     row_has_nonempty_cells |= is_title or celltext != ""
                     cell = InflCell(celltext, is_title, colspan, rowspan,
                                     target)
-                    for _ in range(0, colspan):  # colspan🡘 current loop (col) or 1
-                    # All the data-filling for colspan is done simply in this loop,
-                    # while rowspan needs to use vertical_still_left to count gaps
-                    # and col_gap_data to fill in those gaps with InflCell data.
+                    for _ in range(0, colspan):
+                        # colspan🡘 current loop (col) or 1
+                    # All the data-filling for colspan
+                    # is done simply in this loop,
+                    # while rowspan needs to use
+                    # vertical_still_left to count gaps
+                    # and col_gap_data to fill in
+                    # those gaps with InflCell data.
                         if rowspan > 1:  # rowspan🡙 current loop (col) or 1
                             while len(col_gap_data) <= len(row):
-                                # Initialize col_gap_data/ed if it is lacking slots
+                                # Initialize col_gap_data/ed if
+                                # it is lacking slots
                                 # for each column; col_gap_data and
-                                # vertical_still_left are never reset to [], during
+                                # vertical_still_left are never
+                                # reset to [], during
                                 # the whole table function.
                                 col_gap_data.append(None)
                                 vertical_still_left.append(0)
                             # Below is where the "rectangle" block of rowspan
                             # and colspan is filled for the future.
                             col_gap_data[len(row)] = cell
-                            # col_gap_data contains cells that will be used in the
+                            # col_gap_data contains cells that
+                            # will be used in the
                             # future, or None
                             vertical_still_left[len(row)] = rowspan - 1
                             # A counter for how many gaps🡙 are still left to be
-                            # filled (row.append or row[col_gap_data[len(row)] =>
+                            # filled (row.append or 
+                            # row[col_gap_data[len(row)] =>
                             # rows), it is not reset to [], but decremented to 0
                             # each time a row gets something from col_gap_data.
                         # Append this cell 1+ times for colspan🡘
@@ -2677,18 +2727,24 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 # print("  TOP-LEVEL CELL", node)
                 pass
 
-        new_rows.append((rows, titles, after))
-        
         print(f"End iteration {current_iteration}")#
+        main_ret = [(rows, titles, after)]
+        if sub_ret:
+            main_ret.extend(sub_ret)
+        return main_ret
+        
 
-    handle_wikitext_table1(config, ctx, word, lang, pos,
+    new_rows = handle_wikitext_table1(config, ctx, tblctx, word, lang, pos,
                               data, tree, titles, source, after)
                               
     # Now we have a table that has been parsed into rows and columns of
     # InflCell objects.  Parse the inflection table from that format.
-    for rows, titles, after in new_rows:
-        handle_generic_table(config, ctx, data, word, lang, pos, rows, titles,
-                         source, after)
+    if new_rows:
+        for rows, titles, after in new_rows:
+            print(f"========{rows}")
+            handle_generic_table(config, ctx, tblctx, data,
+                                 word, lang, pos, rows,
+                                 titles, source, after)
 
 
 

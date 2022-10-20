@@ -5304,6 +5304,9 @@ valid_tags = {
     "dummy-reset-headers": "dummy",
     "dummy-use-as-rowtags": "dummy",
     "dummy-use-as-coltags": "dummy",
+    "dummy-store-hdrspan": "dummy",
+    "dummy-load-stored-hdrspans": "dummy",
+    "dummy-reset-stored-hdrspans": "dummy",
     "durative": "aspect",  # Verb form  XXX same as continuative?
     "eclipsis": "misc",
     "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian
