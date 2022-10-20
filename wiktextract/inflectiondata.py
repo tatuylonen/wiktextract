@@ -50,6 +50,9 @@ LANGS_WITH_NUMBERED_INFINITIVES = set([
 # "if": if the current header already has some tags, check if it has these ones
 # "lang": is the current language equal to string or in a list of strings
 # "pos": is the current PART OF SPEECH equal to string or in a list of strings
+# "nested-table-depth": is the current depth of nested tables, and only tables.
+# Only in scope from handle_wikitext_table() onwards and not stored for anything
+# else.
  
 infl_map = {
     "plural": {
@@ -5937,6 +5940,10 @@ def check_v(k, v):
                               "{!r}".format(k, kk, v[kk]))
             elif kk in ("lang",):
                 pass
+            elif kk == "nested-table-depth":
+                if not isinstance(v[kk], (int, list, tuple)):
+                    print("infl_map[{!r}] contains invalid depth-value "
+                                "{!r}".format(k, v[kk]))
             else:
                 print("infl_map[{!r}] contains invalid key {!r}"
                       .format(k, kk))

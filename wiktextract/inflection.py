@@ -684,7 +684,7 @@ def parse_title(title, source):
 
 
 def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
-                  ignore_tags=False):
+                  ignore_tags=False, depth=0):
     """Expands a cell header to tagset, handling conditional expressions
     in infl_map.  This returns list of tuples of tags, each list element
     describing an alternative interpretation.  ``base_tags`` is combined
@@ -702,6 +702,7 @@ def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
     assert isinstance(text, str)
     assert isinstance(base_tags, (list, tuple, set))
     assert silent in (True, False)
+    assert isinstance(depth, int)
     # print("EXPAND_HDR: text={!r} base_tags={!r}".format(text, base_tags))
     # First map the text using the inflection map
     text = clean_value(config, text)
@@ -785,9 +786,21 @@ def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
                 else:
                     assert isinstance(c, (list, tuple, set))
                     cond = lang in c
-            if "default" in v:
-                assert isinstance(v["default"], str)
-                default_then = v["default"]
+            # Handle "nested-table-depth" condition. The value must
+            # be an int or list of ints, and the condition evaluates
+            # True if the depth is one of those values.
+            # "depth" is how deep into a nested table tree the current
+            # table lies. It is first started in handle_wikitext_table,
+            # so only applies to tables-within-tables, not other
+            # WikiNode content. `depth` is currently only passed as a
+            # parameter down the table parsing stack, and not stored.
+            if cond and "nested-table-depth" in v:
+                d = v["nested-table-depth"]
+                if isinstance(d, int):
+                    cond = d == depth
+                else:
+                    assert isinstance(d, (list, tuple, set))
+                    cond = depth in d
             # Handle "pos" condition.  The value must be either a single
             # part-of-speech or a list of them, and the condition evaluates to
             # True if the part-of-speech is any of those listed.
@@ -812,6 +825,13 @@ def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
                     cond = any(t in base_tags for t in c[5:].split())
                 else:
                     cond = all(t in base_tags for t in c.split())
+
+            # Handle "default" assignment. Store the value to be used
+            # as a default later.
+            if "default" in v:
+                assert isinstance(v["default"], str)
+                default_then = v["default"]
+
             # Warning message about missing conditions for debugging.
 
             if cond == "default-true" and not default_then and not silent:
@@ -1145,17 +1165,8 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
     assert all(isinstance(x, tuple) for x in coltags)
     return coltags
 
-def new_number():
-    x = 0
-    while True:
-        yield x
-        x += 1
-
-curiteriter = new_number()#
-parsesimpleiter = new_number()#
-
 def parse_simple_table(config, ctx, tblctx, word, lang, pos,
-                       rows, titles, source, after):
+                       rows, titles, source, after, depth):
     """This is the default table parser.  Despite its name, it can parse
     complex tables.  This returns a list of forms to be added to the
     part-of-speech, or None if the table could not be parsed."""
@@ -1167,6 +1178,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
     assert isinstance(rows, list)
     assert isinstance(source, str)
     assert isinstance(after, str)
+    assert isinstance(depth, int)
     for row in rows:
         for col in row:
             assert isinstance(col, InflCell)
@@ -1174,8 +1186,6 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
     for x in titles:
         assert isinstance(x, str)
 
-    curit = next(parsesimpleiter)#
-    print(f"parse_simple_table iteration {curit}")#
     
     # print("PARSE_SIMPLE_TABLE: TITLES:", titles)
     if debug_cell_text:
@@ -1224,14 +1234,6 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
     # for row in rows:
     #     print("  ", row)
 
-    # def replace_directional_tags(tags, replacement_map):#
-        # newtags = set()#
-        # for t in tags:#
-            # if t in replacement_map:#
-                # newtags.add(replacement_map[t])#
-            # else:#
-                # newtags.add(t)#
-        # return newtags#
         
     # Parse definitions for references (from table itself and from text
     # after it)
@@ -1275,7 +1277,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 base_tags = (set(rt0) | set(ct0) | set(global_tags) |
                          set(table_tags))  # Union.
                 alt_tags = expand_header(config, ctx, word, lang, pos,
-                                         text, base_tags)
+                                         text, base_tags, depth=depth)
                                 # base_tags are used in infl_map "if"-conds.
                 for tt in alt_tags:
                     if tt not in all_hdr_tags:
@@ -1949,13 +1951,14 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                     if ref in def_ht:
                         refs_tags.update(def_ht[ref])
                 rowtags = expand_header(config, ctx, word, lang, pos, text, [],
-                                        silent=True)
+                                        silent=True, depth=depth)
                 rowtags = list(set(tuple(sorted(set(x) | refs_tags))
                                    for x in rowtags))
                 is_title = False
                 col = cell.target
 
             # print(rownum, col_idx, col)
+            # print(f"is_title: {is_title}")
             if is_title:
                 # It is a header cell
                 text, refs, defs, hdr_tags = extract_cell_content(lang,
@@ -1971,7 +1974,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
 
                 # Expand header to tags
                 v = expand_header(config, ctx, word, lang, pos, text, [],
-                                  silent=True)
+                                  silent=True, depth=depth)
                 # print("EXPANDED {!r} to {}".format(text, v))
 
                 
@@ -2282,7 +2285,6 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
               "source": source,
               "tags": ["table-tags"]}
         ret = [dt] + ret
-    print(f"parse_simple_table iteration {curit}")#
     return ret
     # end of parse_simple_table()
     ############################################################################
@@ -2290,8 +2292,9 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
     ############################################################################
 
 
-def handle_generic_table(config, ctx, tblctx, data, word, lang, pos, rows, titles,
-                         source, after):
+def handle_generic_table(config, ctx, tblctx, data,
+                         word, lang, pos, rows, titles,
+                         source, after, depth):
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, Wtp)
     assert isinstance(data, dict)
@@ -2301,6 +2304,7 @@ def handle_generic_table(config, ctx, tblctx, data, word, lang, pos, rows, title
     assert isinstance(rows, list)
     assert isinstance(source, str)
     assert isinstance(after, str)
+    assert isinstance(depth, int)
     for row in rows:
         assert isinstance(row, list)
         for x in row:
@@ -2310,8 +2314,9 @@ def handle_generic_table(config, ctx, tblctx, data, word, lang, pos, rows, title
         assert isinstance(x, str)
 
     # Try to parse the table as a simple table
-    ret = parse_simple_table(config, ctx, tblctx, word, lang, pos, rows, titles,
-                             source, after)
+    ret = parse_simple_table(config, ctx, tblctx,
+                             word, lang, pos, rows, titles,
+                             source, after, depth)
     if ret is None:
         # XXX handle other table formats
         # We were not able to handle the table
@@ -2374,7 +2379,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
     tblctx = TableContext()
         
     def handle_wikitext_table1(config, ctx, tblctx, word, lang, pos,
-                              data, tree, titles, source, after):
+                              data, tree, titles, source, after, depth):
         """Helper function allowing the 'flattening' out of the table
         recursion: instead of handling the tables in the wrong order
         (recursively), this function adds to new_row that is then
@@ -2394,10 +2399,8 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
         for x in titles:
             assert isinstance(x, str)
         assert isinstance(after, str)
+        assert isinstance(depth, int)
         # print("HANDLE_WIKITEXT_TABLE", titles)
-    
-        current_iteration = next(curiteriter)#
-        print(f"Start iteration {current_iteration}")#
     
         col_gap_data = []   # Filling for columns with rowspan > 1
                             # col_gap_data contains None or InflCell
@@ -2504,7 +2507,7 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                                                 tblctx,
                                                 word, lang,
                                                 pos, data, tbl, new_titles,
-                                                source, "")
+                                                source, "", depth + 1)
                         if subtbl:
                             sub_ret.extend(subtbl)
     
@@ -2728,24 +2731,22 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                 # print("  TOP-LEVEL CELL", node)
                 pass
 
-        print(f"End iteration {current_iteration}")#
-        main_ret = [(rows, titles, after)]
+        main_ret = [(rows, titles, after, depth)]
         if sub_ret:
             main_ret.extend(sub_ret)
         return main_ret
         
 
     new_rows = handle_wikitext_table1(config, ctx, tblctx, word, lang, pos,
-                              data, tree, titles, source, after)
+                              data, tree, titles, source, after, 0)
                               
     # Now we have a table that has been parsed into rows and columns of
     # InflCell objects.  Parse the inflection table from that format.
     if new_rows:
-        for rows, titles, after in new_rows:
-            print(f"========{rows}")
+        for rows, titles, after, depth in new_rows:
             handle_generic_table(config, ctx, tblctx, data,
                                  word, lang, pos, rows,
-                                 titles, source, after)
+                                 titles, source, after, depth)
 
 
 
