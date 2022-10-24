@@ -2743,7 +2743,9 @@ def fix_subtitle_hierarchy(ctx: Wtp, config: WiktionaryConfig, text: str) -> str
     for i in range(1, len(old), npar + 1):
         left = old[i]
         right = old[i + npar - 1]
-        title = old[i + 1]
+        # remove Wikilinks in title
+        title = re.sub(r"^\[\[", "", old[i + 1])
+        title = re.sub(r"\]\]$", "", title)
         level = len(left)
         part = old[i + npar]
         if level != len(right):
@@ -2822,6 +2824,10 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
     text = re.sub(r"(?si)<\s*(/\s*)?noinclude\s*>", "", text)
     text = re.sub(r"(?si)<\s*(/\s*)?onlyinclude\s*>", "", text)
     text = re.sub(r"(?si)<\s*(/\s*)?includeonly\s*>", "", text)
+
+    # Expand Chinese Wiktionary language and POS heading templates
+    if config.dump_file_lang_code == "zh" and "{{-" in text:
+        text = ctx.expand(text, pre_expand=True)
 
     # Fix up the subtitle hierarchy.  There are hundreds if not thousands of
     # pages that have, for example, Translations section under Linkage, or
