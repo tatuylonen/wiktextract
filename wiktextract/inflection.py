@@ -2366,9 +2366,11 @@ class TableContext(object):
     """Saved context used when parsing a table and its subtables."""
     __slot__ = (
         "stored_hdrspans",
+        "template_name",
         )
-    def __init__(self):
+    def __init__(self, template_name=None):
         self.stored_hdrspans = []
+        self.template_name = template_name
 
 def handle_wikitext_table(config, ctx, word, lang, pos,
                           data, tree, titles, source, after):
