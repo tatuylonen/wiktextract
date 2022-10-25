@@ -680,7 +680,7 @@ def parse_title(title, source):
     return global_tags, table_tags, extra_forms
 
 
-def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
+def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags, silent=False,
                   ignore_tags=False, depth=0):
     """Expands a cell header to tagset, handling conditional expressions
     in infl_map.  This returns list of tuples of tags, each list element
@@ -798,6 +798,19 @@ def expand_header(config, ctx, word, lang, pos, text, base_tags, silent=False,
                 else:
                     assert isinstance(d, (list, tuple, set))
                     cond = depth in d
+            # Handle inflection-template condition. Must be a string
+            # or list of strings, and if tblctx.template_name is in
+            # those, accept the condition.
+            # TableContext.template_name is passed down from page/
+            # parse_inflection, before parsing and expanding itself
+            # has begun.
+            if cond and tblctx and "inflection-template" in v:
+                d = v["inflection-template"]
+                if isinstance(d, str):
+                    cond = d == tblctx.template_name
+                else:
+                    assert isinstance(d, (list, tuple, set))
+                    cond = tblctx.template_name in d
             # Handle "pos" condition.  The value must be either a single
             # part-of-speech or a list of them, and the condition evaluates to
             # True if the part-of-speech is any of those listed.
@@ -1273,7 +1286,8 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                                        ):
                 base_tags = (set(rt0) | set(ct0) | set(global_tags) |
                          set(table_tags))  # Union.
-                alt_tags = expand_header(config, ctx, word, lang, pos,
+                alt_tags = expand_header(config, ctx, tblctx,
+                                         word, lang, pos,
                                          text, base_tags, depth=depth)
                                 # base_tags are used in infl_map "if"-conds.
                 for tt in alt_tags:
@@ -1959,7 +1973,8 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 for ref in refs:  # gets tags from footnotes
                     if ref in def_ht:
                         refs_tags.update(def_ht[ref])
-                rowtags = expand_header(config, ctx, word, lang, pos, text, [],
+                rowtags = expand_header(config, ctx, tblctx,
+                                        word, lang, pos, text, [],
                                         silent=True, depth=depth)
                 rowtags = list(set(tuple(sorted(set(x) | refs_tags))
                                    for x in rowtags))
@@ -1982,7 +1997,8 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                         refs_tags.update(def_ht[ref])
 
                 # Expand header to tags
-                v = expand_header(config, ctx, word, lang, pos, text, [],
+                v = expand_header(config, ctx, tblctx,
+                                  word, lang, pos, text, [],
                                   silent=True, depth=depth)
                 # print("EXPANDED {!r} to {}".format(text, v))
 
@@ -2562,7 +2578,8 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
                     cleaned, _, _, _ = extract_cell_content(lang, word,
                                                             celltext)
                     cleaned = re.sub(r"\s+", " ", cleaned)
-                    hdr_expansion = expand_header(config, ctx, word, lang, pos,
+                    hdr_expansion = expand_header(config, ctx, tblctx,
+                                                  word, lang, pos,
                                                   cleaned, [],
                                                   silent=True, ignore_tags=True)
                     candidate_hdr = not any(any(t.startswith("error-")
