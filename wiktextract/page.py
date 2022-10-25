@@ -299,6 +299,7 @@ ignored_etymology_templates = [
     "cite-usenet",
     "cite-video/documentation",
     "Cite-journal",
+    "rfe",
 ]
 # Regexp for matching ignored etymology template names.  This adds certain
 # prefixes to the names listed above.
