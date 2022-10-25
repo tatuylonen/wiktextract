@@ -2299,7 +2299,14 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
         dt = {"form": " ".join(table_tags),
               "source": source,
               "tags": ["table-tags"]}
-        ret = [dt] + ret
+        if tblctx.template_name:
+            tn = {"form": tblctx.template_name,
+                  "source": source,
+                  "tags": ["inflection-template"]}
+            ret = [dt] + [tn] + ret
+        else:
+            ret = [dt] + ret
+                
     return ret
     # end of parse_simple_table()
     ############################################################################
@@ -2370,10 +2377,14 @@ class TableContext(object):
         )
     def __init__(self, template_name=None):
         self.stored_hdrspans = []
-        self.template_name = template_name
+        if not template_name:
+            self.template_name = ""
+        else:
+            self.template_name = template_name
 
 def handle_wikitext_table(config, ctx, word, lang, pos,
-                          data, tree, titles, source, after):
+                          data, tree, titles, source, after,
+                          tblctx=None):
     """Parses a table from parsed Wikitext format into rows and columns of
     InflCell objects and then calls handle_generic_table() to parse it into
     forms.  This adds the forms into ``data``."""
@@ -2390,10 +2401,12 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
     for x in titles:
         assert isinstance(x, str)
     assert isinstance(after, str)
+    assert tblctx is None or isinstance(tblctx, TableContext)
     # Imported here to avoid a circular import
     from wiktextract.page import clean_node, recursively_extract
 
-    tblctx = TableContext()
+    if not tblctx:
+        tblctx = TableContext()
         
     def handle_wikitext_table1(config, ctx, tblctx, word, lang, pos,
                               data, tree, titles, source, after, depth):
@@ -2791,7 +2804,9 @@ def handle_html_table(config, ctx, word, lang, pos, data, tree, titles, source,
               .format(word, lang))
 
 
-def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
+def parse_inflection_section(config, ctx, data,
+                             word, lang, pos, section, tree,
+                             tblctx=None):
     """Parses an inflection section on a page.  ``data`` should be the
     data for a part-of-speech, and inflections will be added to it."""
 
@@ -2805,6 +2820,8 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
     assert pos in config.POS_TYPES
     assert isinstance(section, str)
     assert isinstance(tree, WikiNode)
+    assert (tblctx is None or
+            isinstance(tblctx, TableContext))
     source = section
     tables = []
     titleparts = []
@@ -2815,7 +2832,8 @@ def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
             after = clean_value(config, after)
             if kind == "wikitext":
                 handle_wikitext_table(config, ctx, word, lang, pos,
-                                      data, node, titles, source, after)
+                                      data, node, titles, source, after,
+                                      tblctx=tblctx)
             elif kind == "html":
                 handle_html_table(config, ctx, word, lang, pos, data, node,
                                   titles, source, after)

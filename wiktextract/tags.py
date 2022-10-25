@@ -5839,6 +5839,7 @@ valid_tags = {
     "synonym": "misc",
     "synonym-of": "misc",
     "table-tags": "detail",  # Tags from inflection table, for all entries
+    "inflection-template": "detail",  # Name of top-level template
     "taboo": "misc",
     "tafa-form": "misc",  # Malagasy verbs
     "temporal": "misc",  # relating to time/tense, e.g., talamaq; Finnish adverbials

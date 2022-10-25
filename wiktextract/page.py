@@ -21,7 +21,7 @@ from .tags import valid_tags
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_qualifier,
     distw, parse_alt_or_inflection_of, classify_desc)
-from wiktextract.inflection import parse_inflection_section
+from wiktextract.inflection import parse_inflection_section, TableContext
 
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
@@ -1833,8 +1833,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # Parse inflection tables from the section.  The data is stored
             # under "forms".
             if config.capture_inflections:
-                parse_inflection_section(config, ctx, pos_data, word, language,
-                                         pos, section, tree)
+                template_name = re.search("{{([^}{\|]+)\|", text).group(1)
+                tblctx = TableContext(template_name)
+                    
+                parse_inflection_section(config, ctx, pos_data,
+                                         word, language,
+                                         pos, section, tree,
+                                         tblctx=tblctx)
 
     def get_subpage_section(title, subtitle, seq):
         """Loads a subpage of the given page, and finds the section
