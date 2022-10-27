@@ -275,15 +275,37 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
     have_pronunciations = False
     prefix = None
 
-    def flattened_tree(contents):
-        assert isinstance(contents, list)
-        for node in contents:
-            if isinstance(node, str):
-                yield node
-                continue
+    def flattened_tree(lines):
+        assert isinstance(lines, list)
+        for line in lines:
+            yield from flattened_tree1(line)
+            
+    def flattened_tree1(node):
+        assert isinstance(node, (WikiNode, str))
+        if isinstance(node, str):
+            yield node
+            return
+        elif node.kind == NodeKind.LIST:
+            for item in node.children:
+                yield from flattened_tree1(item)
+        elif node.kind == NodeKind.LIST_ITEM:
+            new_children = []
+            sublist = None
             for child in node.children:
-                yield child
-        
+                if isinstance(child, WikiNode) and child.kind == NodeKind.LIST:
+                    sublist = child
+                else:
+                    new_children.append(child)
+            node.children = new_children
+            node.args="*"
+            yield node
+            if sublist:
+                yield from flattened_tree1(sublist)
+
+    # XXX Do not use flattened_tree more than once here, for example for
+    # debug printing... The underlying data is changed, and the separated
+    # sublists disappear.
+
     for litem in flattened_tree(contents):
         text = clean_node(config, ctx, data, litem,
                           template_fn=parse_pronunciation_template_fn)
