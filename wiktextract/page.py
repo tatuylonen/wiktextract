@@ -903,13 +903,27 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 ctx.warning("conflicting values for {} in merge_base: "
                             "{!r} vs {!r}"
                             .format(k, data[k], v))
+
+        def complementary_pop(pron, key):
+            """Remove unnecessary keys from dict values
+            in a list comprehension..."""
+            if key in pron:
+                pron.pop(key)
+            return pron
+            
         # If the result has sounds, eliminate sounds that have a prefix that
         # does not match "word" or one of "forms"
         if "sounds" in data and "word" in data:
             accepted = [data["word"]]
             accepted.extend(f["form"] for f in data.get("forms", ()))
-            data["sounds"] = list(s for s in data["sounds"]
+            data["sounds"] = list(complementary_pop(s, "pos")
+                                  for s in data["sounds"]
                                   if "form" not in s or s["form"] in accepted)
+        # If the result has sounds, eliminate sounds that have a pos that
+        # does not match "pos"
+        if "sounds" in data and "pos" in data:
+            data["sounds"] = list(s for s in data["sounds"]
+                                  if "pos" not in s or s["pos"] == data["pos"])
 
     def push_sense():
         """Starts collecting data for a new word sense.  This returns True

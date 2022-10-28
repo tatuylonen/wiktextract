@@ -8,6 +8,7 @@ from wikitextprocessor import WikiNode, NodeKind
 from .datautils import split_at_comma_semi, data_append
 from .form_descriptions import parse_pronunciation_tags, classify_desc
 from .tags import valid_tags
+from .parts_of_speech import part_of_speech_map
 
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
                NodeKind.LEVEL5, NodeKind.LEVEL6)
@@ -272,8 +273,6 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
     # for l in contents:##rm
         # print_tree(l)##rm
     
-    have_pronunciations = False
-    prefix = None
 
     def flattened_tree(lines):
         assert isinstance(lines, list)
@@ -306,7 +305,12 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
     # debug printing... The underlying data is changed, and the separated
     # sublists disappear.
 
+    have_pronunciations = False
+    prefix = None
+    active_pos = None
+    
     for litem in flattened_tree(contents):
+
         text = clean_node(config, ctx, data, litem,
                           template_fn=parse_pronunciation_template_fn)
         ipa_text = clean_node(config, ctx, data, litem,
@@ -315,7 +319,25 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             continue
         if not ipa_text:
             ipa_text = text
-            
+
+        # Check if the text is just a word or two long, and then
+        # straight up compare it to the keys in part_of_speech_map,
+        # which is the simplest non-`decode_tags()` method I could
+        # think of roughly checking if a line is just something along
+        # the line of "Noun".
+        # active_pos is used to add a temporary "pos"-field to things
+        # added to "sounds", which later are filtered in page/merge_base()
+        # The "pos"-key is also removed at that point, resulting in
+        # pronunciation-sections being divided up if they seem to be
+        # divided along part-of-speech lines.
+        # XXX if necessary, expand on this; either better ways to
+        # detect POS-stuff, or more ways to filter sub-blocks of
+        # Pronunciation-sections.
+        m = re.match(r"\s*(\w+\s?\w*)", text)
+        if m:
+            if m.group(1).lower() in part_of_speech_map:
+                active_pos = part_of_speech_map[m.group(1).lower()]["pos"]
+        
         if text.find("IPA") >= 0:
             field = "ipa"
         else:
@@ -327,6 +349,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
         m = re.search(r"(?m)\(Tokyo\) +([^ ]+) +\[", text)
         if m:
             pron = {field: m.group(1)}
+            if active_pos: pron["pos"] = active_pos
             data_append(ctx, data, "sounds", pron)
             have_pronunciations = True
             continue
@@ -338,6 +361,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 ending = ending.strip()
                 if ending:
                     pron = {"rhymes": ending}
+                    if active_pos: pron["pos"] = active_pos
                     data_append(ctx, data, "sounds", pron)
                     have_pronunciations = True
             continue
@@ -349,6 +373,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 w = w.strip()
                 if w:
                     pron = {"homophone": w}
+                    if active_pos: pron["pos"] = active_pos
                     data_append(ctx, data, "sounds", pron)
                     have_pronunciations = True
             continue
@@ -362,6 +387,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 if w and w not in seen:
                     seen.add(w)
                     pron = {"hangeul": w}
+                    if active_pos: pron["pos"] = active_pos
                     data_append(ctx, data, "sounds", pron)
                     have_pronunciations = True
 
@@ -426,9 +452,11 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     audios[idx]["form"] = prefix
             else:
                 pron = {field: v}
+                if active_pos: pron["pos"] = active_pos
                 if prefix:
                     pron["form"] = prefix
                 parse_pronunciation_tags(ctx, tagstext, pron)
+                if active_pos: pron["pos"] = active_pos
                 data_append(ctx, data, "sounds", pron)
             have_pronunciations = True
 
@@ -485,6 +513,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                                .format(digest[:1], digest[:2], qfn, qfn))
                     audio["ogg_url"] = ogg
                     audio["mp3_url"] = mp3
+                    if active_pos: audio["pos"] = active_pos
                 if audio not in data.get("sounds", ()):
                     data_append(ctx, data, "sounds", audio)
             have_pronunciations = True
@@ -494,6 +523,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 enpr = enpr[1: -1]
             pron = {"enpr": enpr}
             parse_pronunciation_tags(ctx, tagstext, pron)
+            if active_pos: pron["pos"] = active_pos
             if pron not in data.get("sounds", ()):
                 data_append(ctx, data, "sounds", pron)
             have_pronunciations = True
