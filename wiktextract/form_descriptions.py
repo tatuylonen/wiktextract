@@ -1309,6 +1309,9 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
     base = re.sub(r"\?", " ", base)  # Removes uncertain articles etc
     base = re.sub(r"\s+", " ", base)
     base = re.sub(r" ([,;])", r"\1", base)
+    base = re.sub(r"(.*)\s+•.*", r"\1", base)
+    # Many languages use • as a punctuation mark separating the base
+    # from the rest of the head. στάδιος/Ancient Greek, issue #176
     base = base.strip()
     # print("parse_word_head: base={!r}".format(base))
 
@@ -1345,7 +1348,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction):
     # print("SPLITS:", splits)
     alts = []
     # print("parse_word_head: splits:", splits,
-    #       "head_split_re_parens:", head_split_re_parens)
+          # "head_split_re_parens:", head_split_re_parens)
     for i in range(0, len(splits) - head_split_re_parens,
                    head_split_re_parens + 1):
         v = splits[i]
