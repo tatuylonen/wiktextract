@@ -57,6 +57,7 @@ def init_prefixes(ctx: Wtp) -> None:
             ctx.NAMESPACE_DATA.get("Thesaurus", {}).get("name"),
             ctx.NAMESPACE_DATA.get("Module", {}).get("name"),
             ctx.NAMESPACE_DATA.get("Template", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Reconstruction", {}).get("name"),
         }
 
 
