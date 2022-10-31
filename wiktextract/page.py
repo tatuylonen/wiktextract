@@ -2721,8 +2721,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 data = select_data()
                 parse_translations(data, node)
             elif t in config.OTHER_SUBTITLES["ignored_sections"]:
-                # XXX does the Descendants section have something we'd like
-                # to capture?
                 pass
             elif t in config.OTHER_SUBTITLES["inflection_sections"]:
                 parse_inflection(node, t, pos)
