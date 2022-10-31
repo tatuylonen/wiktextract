@@ -8,6 +8,7 @@ from wikitextprocessor import WikiNode, NodeKind
 from .datautils import split_at_comma_semi, data_append
 from .form_descriptions import parse_pronunciation_tags, classify_desc
 from .tags import valid_tags
+from .parts_of_speech import part_of_speech_map
 
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
                NodeKind.LEVEL5, NodeKind.LEVEL6)
@@ -268,23 +269,75 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             print("MISSING ZH-PRON HDR:", repr(hdr))
             sys.stdout.flush()
 
-    # XXX change this code to iterate over node as a LIST, warning about
-    # anything else.  Don't try to split by "*".
-    # XXX fix enpr tags
-    text = clean_node(config, ctx, data, contents,
-                      template_fn=parse_pronunciation_template_fn)
-    ipa_text = clean_node(config, ctx, data, contents,
-                          post_template_fn=parse_pron_post_template_fn)
+    # from wikitextprocessor.parser import print_tree##rm
+    # for l in contents:##rm
+        # print_tree(l)##rm
+    
+
+    def flattened_tree(lines):
+        assert isinstance(lines, list)
+        for line in lines:
+            yield from flattened_tree1(line)
+            
+    def flattened_tree1(node):
+        assert isinstance(node, (WikiNode, str))
+        if isinstance(node, str):
+            yield node
+            return
+        elif node.kind == NodeKind.LIST:
+            for item in node.children:
+                yield from flattened_tree1(item)
+        elif node.kind == NodeKind.LIST_ITEM:
+            new_children = []
+            sublist = None
+            for child in node.children:
+                if isinstance(child, WikiNode) and child.kind == NodeKind.LIST:
+                    sublist = child
+                else:
+                    new_children.append(child)
+            node.children = new_children
+            node.args="*"
+            yield node
+            if sublist:
+                yield from flattened_tree1(sublist)
+
+    # XXX Do not use flattened_tree more than once here, for example for
+    # debug printing... The underlying data is changed, and the separated
+    # sublists disappear.
+
     have_pronunciations = False
-    text_splits = re.split(r":*[*#\n]+:*", text)
-    ipa_splits = re.split(r":*[*#\n]+:*", ipa_text)
-    if len(text_splits) != len(ipa_splits):
-        #ctx.warning("text_splits length differs from ipa_splits: "
-        #            "{!r} vs. {!r}"
-        #            .format(text, ipa_text))
-        ipa_splits = text_splits
     prefix = None
-    for text, ipa_text in zip(text_splits, ipa_splits):
+    active_pos = None
+    
+    for litem in flattened_tree(contents):
+
+        text = clean_node(config, ctx, data, litem,
+                          template_fn=parse_pronunciation_template_fn)
+        ipa_text = clean_node(config, ctx, data, litem,
+                              post_template_fn=parse_pron_post_template_fn)
+        if not text:
+            continue
+        if not ipa_text:
+            ipa_text = text
+
+        # Check if the text is just a word or two long, and then
+        # straight up compare it to the keys in part_of_speech_map,
+        # which is the simplest non-`decode_tags()` method I could
+        # think of roughly checking if a line is just something along
+        # the line of "Noun".
+        # active_pos is used to add a temporary "pos"-field to things
+        # added to "sounds", which later are filtered in page/merge_base()
+        # The "pos"-key is also removed at that point, resulting in
+        # pronunciation-sections being divided up if they seem to be
+        # divided along part-of-speech lines.
+        # XXX if necessary, expand on this; either better ways to
+        # detect POS-stuff, or more ways to filter sub-blocks of
+        # Pronunciation-sections.
+        m = re.match(r"\s*(\w+\s?\w*)", text)
+        if m:
+            if m.group(1).lower() in part_of_speech_map:
+                active_pos = part_of_speech_map[m.group(1).lower()]["pos"]
+        
         if text.find("IPA") >= 0:
             field = "ipa"
         else:
@@ -296,6 +349,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
         m = re.search(r"(?m)\(Tokyo\) +([^ ]+) +\[", text)
         if m:
             pron = {field: m.group(1)}
+            if active_pos: pron["pos"] = active_pos
             data_append(ctx, data, "sounds", pron)
             have_pronunciations = True
             continue
@@ -307,6 +361,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 ending = ending.strip()
                 if ending:
                     pron = {"rhymes": ending}
+                    if active_pos: pron["pos"] = active_pos
                     data_append(ctx, data, "sounds", pron)
                     have_pronunciations = True
             continue
@@ -318,6 +373,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 w = w.strip()
                 if w:
                     pron = {"homophone": w}
+                    if active_pos: pron["pos"] = active_pos
                     data_append(ctx, data, "sounds", pron)
                     have_pronunciations = True
             continue
@@ -331,6 +387,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 if w and w not in seen:
                     seen.add(w)
                     pron = {"hangeul": w}
+                    if active_pos: pron["pos"] = active_pos
                     data_append(ctx, data, "sounds", pron)
                     have_pronunciations = True
 
@@ -395,78 +452,82 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     audios[idx]["form"] = prefix
             else:
                 pron = {field: v}
+                if active_pos: pron["pos"] = active_pos
                 if prefix:
                     pron["form"] = prefix
                 parse_pronunciation_tags(ctx, tagstext, pron)
+                if active_pos: pron["pos"] = active_pos
                 data_append(ctx, data, "sounds", pron)
             have_pronunciations = True
 
         # XXX what about {{hyphenation|...}}, {{hyph|...}}
         # and those used to be stored under "hyphenation"
 
-    # Add data that was collected in template_fn
-    if audios:
-        for audio in audios:
-            if "audio" in audio:
-                # Compute audio file URLs
-                fn = audio["audio"]
-                # Strip certain characters, e.g., left-to-right mark
-                fn = re.sub(r"[\u200f\u200e]", "", fn)
-                fn = fn.strip()
-                fn = urllib.parse.unquote(fn)
-                # First character is usually uppercased
-                if re.match(r"^[a-z][a-z]+", fn):
-                    fn = fn[0].upper() + fn[1:]
-                if fn in config.redirects:
-                    fn = config.redirects[fn]
-                # File extension is lowercased
-                # XXX some words seem to need this, some don't seem to
-                # have this??? what is the exact rule?
-                # fn = re.sub(r"\.[^.]*$", lambda m: m.group(0).lower(), fn)
-                # Spaces are converted to underscores
-                fn = re.sub(r"\s+", "_", fn)
-                # Compute hash digest part
-                h = hashlib.md5()
-                hname = fn.encode("utf-8")
-                h.update(hname)
-                digest = h.hexdigest()
-                # Quote filename for URL
-                qfn = urllib.parse.quote(fn)
-                # For safety when writing files
-                qfn = re.sub(r"/", "__slash__", qfn)
-                if re.search(r"(?i)\.(ogg|oga)$", fn):
-                    ogg = ("https://upload.wikimedia.org/wikipedia/"
-                           "commons/{}/{}/{}"
-                           .format(digest[:1], digest[:2], qfn))
-                else:
-                    ogg = ("https://upload.wikimedia.org/wikipedia/"
-                           "commons/transcoded/"
-                           "{}/{}/{}/{}.ogg"
-                           .format(digest[:1], digest[:2], qfn, qfn))
-                if re.search(r"(?i)\.(mp3)$", fn):
-                    mp3 = ("https://upload.wikimedia.org/wikipedia/"
-                           "commons/{}/{}/{}"
-                           .format(digest[:1], digest[:2], qfn))
-                else:
-                    mp3 = ("https://upload.wikimedia.org/wikipedia/"
-                           "commons/transcoded/"
-                           "{}/{}/{}/{}.mp3"
-                           .format(digest[:1], digest[:2], qfn, qfn))
-                audio["ogg_url"] = ogg
-                audio["mp3_url"] = mp3
-            if audio not in data.get("sounds", ()):
-                data_append(ctx, data, "sounds", audio)
-        have_pronunciations = True
-    for enpr in enprs:
-        if re.match(r"/[^/]+/$", enpr):
-            enpr = enpr[1: -1]
-        pron = {"enpr": enpr}
-        # XXX need to parse enpr separately for each list item to get
-        # tags correct!
-        # parse_pronunciation_tags(ctx, tagstext, pron)
-        if pron not in data.get("sounds", ()):
-            data_append(ctx, data, "sounds", pron)
-        have_pronunciations = True
-
+        # Add data that was collected in template_fn
+        if audios:
+            for audio in audios:
+                if "audio" in audio:
+                    # Compute audio file URLs
+                    fn = audio["audio"]
+                    # Strip certain characters, e.g., left-to-right mark
+                    fn = re.sub(r"[\u200f\u200e]", "", fn)
+                    fn = fn.strip()
+                    fn = urllib.parse.unquote(fn)
+                    # First character is usually uppercased
+                    if re.match(r"^[a-z][a-z]+", fn):
+                        fn = fn[0].upper() + fn[1:]
+                    if fn in config.redirects:
+                        fn = config.redirects[fn]
+                    # File extension is lowercased
+                    # XXX some words seem to need this, some don't seem to
+                    # have this??? what is the exact rule?
+                    # fn = re.sub(r"\.[^.]*$", lambda m: m.group(0).lower(), fn)
+                    # Spaces are converted to underscores
+                    fn = re.sub(r"\s+", "_", fn)
+                    # Compute hash digest part
+                    h = hashlib.md5()
+                    hname = fn.encode("utf-8")
+                    h.update(hname)
+                    digest = h.hexdigest()
+                    # Quote filename for URL
+                    qfn = urllib.parse.quote(fn)
+                    # For safety when writing files
+                    qfn = re.sub(r"/", "__slash__", qfn)
+                    if re.search(r"(?i)\.(ogg|oga)$", fn):
+                        ogg = ("https://upload.wikimedia.org/wikipedia/"
+                               "commons/{}/{}/{}"
+                               .format(digest[:1], digest[:2], qfn))
+                    else:
+                        ogg = ("https://upload.wikimedia.org/wikipedia/"
+                               "commons/transcoded/"
+                               "{}/{}/{}/{}.ogg"
+                               .format(digest[:1], digest[:2], qfn, qfn))
+                    if re.search(r"(?i)\.(mp3)$", fn):
+                        mp3 = ("https://upload.wikimedia.org/wikipedia/"
+                               "commons/{}/{}/{}"
+                               .format(digest[:1], digest[:2], qfn))
+                    else:
+                        mp3 = ("https://upload.wikimedia.org/wikipedia/"
+                               "commons/transcoded/"
+                               "{}/{}/{}/{}.mp3"
+                               .format(digest[:1], digest[:2], qfn, qfn))
+                    audio["ogg_url"] = ogg
+                    audio["mp3_url"] = mp3
+                    if active_pos: audio["pos"] = active_pos
+                if audio not in data.get("sounds", ()):
+                    data_append(ctx, data, "sounds", audio)
+            have_pronunciations = True
+        audios =[]
+        for enpr in enprs:
+            if re.match(r"/[^/]+/$", enpr):
+                enpr = enpr[1: -1]
+            pron = {"enpr": enpr}
+            parse_pronunciation_tags(ctx, tagstext, pron)
+            if active_pos: pron["pos"] = active_pos
+            if pron not in data.get("sounds", ()):
+                data_append(ctx, data, "sounds", pron)
+            have_pronunciations = True
+        enprs = []
+    
     # if not have_pronunciations and not have_panel_templates:
     #     ctx.debug("no pronunciations found from pronunciation section")

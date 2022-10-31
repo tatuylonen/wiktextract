@@ -364,6 +364,7 @@ xlat_head_map = {
         "feminine inanimate plural animate",  #XXX
     "m anim or f anim or m anim pl or f anim pl or f inan or f inan pl":
         "masculine animate feminine plural singular inanimate",  #XXX
+    "defunct": "archaic",  #  flugu/Norwegian Nynorsk
 
 }
 
@@ -2531,7 +2532,8 @@ uppercase_tags = set([
     "Waiwaş Quechua",
     "Wanka Quechua",
     "Zuberoan",
-
+    "Setesdal",  # Norwegian
+    "Telemark",  # Norwegian
 
 
 ])
@@ -4636,6 +4638,10 @@ xlat_tags_map = {
     # ~ "comparative of": "comparative-of",  # miður/Icelandic
     "subst.": "noun",
     "Persic": "Persian",
+    "defunct": "archaic",  # flugu/Norwegian
+    "used in definite form": "",  # dyrerike/Norwegian Nynorsk
+    "used in definite singular form": "",  # nettet/Norwegian Nynorsk
+    "combined with se": "reflexive", # tecnificarse/Spanish
 }
 
 # This mapping is applied to full descriptions before splitting by comma.

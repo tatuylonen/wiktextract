@@ -74,26 +74,19 @@ infl_map = {
         },
     },
     "accusative": "accusative",
-    "nominative": "nominative",
     "genitive": "genitive",
     "dative": "dative",
     "instrumental": "instrumental",
     "ablative": "ablative",
-    "inessive": "inessive",
     "illative": "illative",
     "elative": "elative",
     "adessive": "adessive",
-    "translative": "translative",
     "allative": "allative",
     "possessor": "possessive",
     "vocative": "vocative",
-    "abessive": "abessive",
-    "partitive": "partitive",
     "Singular": "singular",
-    "essive": "essive",
     "instructive": "instructive",
     "Plural": "plural",
-    "comitative": "comitative",
     "1st person": {
         "if": "combined-form",
         "then": "object-first-person",
@@ -127,7 +120,6 @@ infl_map = {
     "1 pl": "first-person plural",
     "2 pl": "second-person plural",
     "3 pl": "third-person plural",
-    "locative": "locative",
     "nom.": "nominative",
     "gen.": "genitive",
     "Nominative": "nominative",
@@ -147,7 +139,6 @@ infl_map = {
         "then": "possessive-neuter",
         "else": "neuter",
     },
-    "terminative": "terminative",
     "Ablative": "ablative",
     "imperative": "imperative",
     "causal-final": "causal-final",
@@ -194,17 +185,23 @@ infl_map = {
     "Negative past conditional": "past irrealis negative",
     "Relative forms": "relative object-concord",
     "1s": {"if": "object-concord",
-           "then": "object-first-person object-singular"},
+           "then": "object-first-person object-singular",
+           "else": "first-person singular",},
     "2s": {"if": "object-concord",
-           "then": "object-second-person object-singular"},
+           "then": "object-second-person object-singular",
+           "else": "second-person singular",},
     "3s": {"if": "object-concord",
-           "then": "object-third-person object-singular"},
+           "then": "object-third-person object-singular",
+           "else": "third-person singular",},
     "1p": {"if": "object-concord",
-           "then": "object-first-person object-plural"},
+           "then": "object-first-person object-plural",
+           "else": "first-person plural",},
     "2p": {"if": "object-concord",
-           "then": "object-second-person object-plural"},
+           "then": "object-second-person object-plural",
+           "else": "second-person plural",},
     "3p": {"if": "object-concord",
-           "then": "object-third-person object-plural"},
+           "then": "object-third-person object-plural",
+           "else": "third-person plural",},
     "c1": {
         "if": "object-concord",
         "then": "object-class-1",
@@ -396,7 +393,11 @@ infl_map = {
     "case": "",
     "nominative, vocative": "nominative vocative",
     "indefinite": "indefinite",
-    "masculine personal/animate": "masculine personal animate",
+    "masculine personal/animate": {
+        "lang": "Polish",
+        "then": "masculine animate",
+        "else": "masculine personal animate",
+    },
     "perfective aspect": "perfective",
     "definite": "definite",
     "animate": "animate",
@@ -465,7 +466,6 @@ infl_map = {
         "if": "infinitive",
         "then": "infinitive-v",
     },
-    "Forms with the definite article": "definite",
     "Case / #": "",
     # XXX needs special handling ['-льник', '-овка', '-ник']
     "accusative animate inanimate": "accusative animate inanimate",
@@ -552,7 +552,6 @@ infl_map = {
     "Weak conjugation": "weak",
     "Strong conjugation": "strong",
     "Masc./Fem.": "masculine feminine",
-    "masculine animate": "masculine animate",
     "present participle": "present participle",
     "number case / gender": "",
     "Case/Gender": "",
@@ -603,7 +602,7 @@ infl_map = {
                  "Sudovian", "Tarantino", "Tocharian A", "Welsh Romani"],
         "pos":  ["verb", "suffix"],
         "if": "second-person singular",
-        "then": "second-person singular",
+        "then": "second-person",
     },
     "lui/lei, esso/essa": {
         "lang": "Italian",
@@ -781,19 +780,19 @@ infl_map = {
         "lang": "Lithuanian",
         "pos": "verb",
         "if": "first-person singular",
-        "then": "first-person singular",
+        "then": "first-person",
     },
     "jis/ji": {
         "lang": "Lithuanian",
         "pos": "verb",
         "if": "third-person singular",
-        "then": "third-person singular",
+        "then": "third-person",
     },
     "mes": {
         "lang": ["Latgalian", "Latvian", "Lithuanian", "Old Prussian"],
         "pos": "verb",
         "if": "first-person plural",
-        "then": "first-person plural",
+        "then": "first-person",
     },
     "mēs": {
         "lang": "Latvian",
@@ -829,13 +828,14 @@ infl_map = {
     "jūs": {
         "lang": ["Latvian", "Lithuanian", "Old Prussian"],
         "pos": "verb",
-        "if": "second-person singular",
+        "if": "singular",
         "then": "second-person singular",
         "else": {
             "lang": ["Latvian", "Lithuanian", "Old Prussian"],
             "pos": "verb",
-            "if": "second-person plural",
+            "if": "plural",
             "then": "second-person plural",
+            "else": "second-person plural",
         },
     },
     "jie/jos": {
@@ -905,7 +905,7 @@ infl_map = {
         "then": "first-person singular",
     },
     "cu tu": {
-        "lang": "Tarantino",
+        "lang": ["Neapolitan", "Tarantino",],
         "pos": "verb",
         "if": "second-person singular",
         "then": "second-person singular",
@@ -917,7 +917,7 @@ infl_map = {
         "then": "third-person singular",
     },
     "cu nuje": {
-        "lang": "Tarantino",
+        "lang": ["Neapolitan", "Tarantino",],
         "pos": "verb",
         "if": "first-person plural",
         "then": "first-person plural",
@@ -940,23 +940,11 @@ infl_map = {
         "if": "first-person singular",
         "then": "first-person singular",
     },
-    "cu tu": {
-        "lang": "Neapolitan",
-        "pos": "verb",
-        "if": "second-person singular",
-        "then": "second-person singular",
-    },
     "ca isso/ca essa": {
         "lang": "Neapolitan",
         "pos": "verb",
         "if": "third-person singular",
         "then": "third-person singular",
-    },
-    "cu nuje": {
-        "lang": "Neapolitan",
-        "pos": "verb",
-        "if": "first-person plural",
-        "then": "first-person plural",
     },
     "ca vuje": {
         "lang": "Neapolitan",
@@ -1882,10 +1870,6 @@ infl_map = {
         "if": "third-person plural",
         "then": ""},
 
-    "jūs": {
-        "lang": ["Lithuanian", "Latvian",],
-        "if": "second-person plural",
-        "then": ""},
     "viņš, viņa": {
         "lang": "Latvian",
         "if": "third-person singular",
@@ -2022,25 +2006,9 @@ infl_map = {
         "then": "third-person plural",
         },
 
-    "ես": {
-        "lang": "Armenian",
-        "if": "first-person singular",
-        "then": ""},
-    "դու": {
-        "lang": "Armenian",
-        "if": "second-person singular",
-        "then": ""},
-    "նա": {
-        "lang": "Armenian",
-        "if": "third-person singular",
-        "then": ""},
     "մենք": {
         "lang": "Armenian",
         "if": "first-person plural",
-        "then": ""},
-    "դուք": {
-        "lang": "Armenian",
-        "if": "second-person plural",
         "then": ""},
     "նրանք": {
         "lang": "Armenian",
@@ -2166,10 +2134,8 @@ infl_map = {
     "Second-person (vós)": "second-person plural",
     "Third-person (eles / elas / vocês)": "third-person plural",
     "Impersonal": "impersonal",
-    "masculine personal/animate": "masculine animate",
     "Personal": "personal",
     "Gerund": "gerund",
-    "Imperfect": "imperfect",
     "Preterite": "preterite",
     "Pluperfect": "pluperfect",
     "Negative (-)": "negative",
@@ -2246,12 +2212,10 @@ infl_map = {
     "notes": "",
     "m-w1": "",  # Icelandic ['-isti', '-ismi']
     "masculine animate": "masculine animate",
-    "masculine inanimate": "masculine inanimate",
     "Masculine singular": "masculine singular",
     "Neuter singular": "neuter singular",
     "n-s": "",  # Icelandic ['-leysi']
     "singular (vienskaitlis)": "singular",
-    "plural (daudzskaitlis)": "plural",
     "nominative (nominatīvs)": "nominative",
     "accusative (akuzatīvs)": "accusative",
     "genitive (ģenitīvs)": "genitive",
@@ -2276,12 +2240,6 @@ infl_map = {
     "Plural (fleirtal)": "plural",
     "Original form": "",  # XXX Latin ['-bo']
     "Derived form": "",  # XXX Latin ['-bo']
-    "1s": "first-person singular",
-    "2s": "second-person singular",
-    "3s": "third-person singular",
-    "1p": "first-person plural",
-    "2p": "second-person plural",
-    "3p": "third-person plural",
     "Gnomic": "gnomic",
     "Perfect": "perfect",
     '"Already"': "already-form",
@@ -2329,7 +2287,6 @@ infl_map = {
     "Ergative": "ergative",
     "prosecutive": "prosecutive",
     "equative": "equative",
-    "Person": "person",
     "Verbal forms": "",
     "Conditional I": "conditional conditional-i",
     "conditional I": "conditional conditional-i",
@@ -2399,7 +2356,6 @@ infl_map = {
     "auxiliary": "auxiliary",
     "Conjunctive": "conjunctive",
     "Perfective": "perfective",
-    "Causative": "causative",
     "Stem forms": "stem",
     "Continuative": "continuative",
     "Continuative (連用形)": "continuative",
@@ -2410,8 +2366,6 @@ infl_map = {
     "Hypothetical (仮定形)": "hypothetical",
     "Terminal": "terminative",
     "Attributive": "attributive",
-    "Imperative": "imperative",
-    "Key constructions": "",
     "Volitional": "volitional",
     "Imperfective": "imperfective",
     "Hypothetical": "hypothetical",
@@ -2460,7 +2414,6 @@ infl_map = {
     "n. sing.": "neuter singular",
     "masculine (vīriešu dzimte)": "masculine",
     "feminine (sieviešu dzimte)": "feminine",
-    "singular (vienskaitlis)": "singular",
     "plural (daudzskaitlis)": "plural",
     "archaic plural": "archaic plural",
     "Non-past": "non-past",
@@ -2548,7 +2501,6 @@ infl_map = {
         "then": "subjunctive dummy-tense",
         "else": "subjunctive",
     },
-    "Subjunctive mood": "subjunctive",
     "Present ➤": "present",
     "Imperfect ➤": "imperfect",
     "Simple past ➤": "past",
@@ -2571,11 +2523,9 @@ infl_map = {
     "ablative (шығыс септік)": "ablative",
     "instrumental (көмектес септік)": "instrumental",
     "compound tenses": "multiword-construction",
-    "simple tenses": "",
     "Sentence-final forms": "sentence-final",
     "Connective forms": "connective",
     "Noun and determiner forms": "",
-    "verbal noun": "noun-from-verb",
     "Verbal Noun": "noun-from-verb",
     "count form": "count-form",
     "infinitive (nafnháttur)": "infinitive",
@@ -2840,7 +2790,6 @@ infl_map = {
     "Class 6 strong": "class-6 strong",
     "Class 7 strong": "class-7 strong",
     "imperfect subjunctive": "imperfect subjunctive",
-    "present subjunctive": "present subjunctive",
     "dative-locative": "dative locative",
     "directional": "directional",
     "possessive pronoun": "possessive pronoun",
@@ -2856,7 +2805,6 @@ infl_map = {
     "Present subjunctive": "present subjunctive",
     "Future progressive presumptive": "future progressive presumptive",
     "Past progressive": "past progressive",
-    "Negative past": "negative past",
     "Negative present progressive": "negative present progressive",
     "1.": "first-person",
     "2.": "second-person",
@@ -2906,7 +2854,6 @@ infl_map = {
     "presumptive": "presumptive",
     "habitual": "habitual",
     "2ⁿᵈ person*": "second-person",
-    "preterite": "preterite",
     "мынем (“my”)": "first-person singular possessive",
     "синең (“your”)": "second-person singular possessive",
     "аның (“his/her/it”)": "third-person singular possessive",
@@ -2928,7 +2875,6 @@ infl_map = {
     "nominative (ప్రథమా విభక్తి)": "nominative",
     "genitive": "genitive",
     "locative": "locative",
-    "vocative": "vocative",
     "1st मैं": "first-person",
     "basic": "",
     "Preterite I": "preterite preterite-i",
@@ -2967,9 +2913,6 @@ infl_map = {
     "Causative": {"lang": "Tagalog", "then": "trigger-causative",
                   "else": "causative"},
     "Referential": {"lang": "Tagalog", "then": "trigger-referential"},
-    "future perfect": "future perfect",
-    "past perfect": "past perfect",
-    "present perfect": "present perfect",
     "1ˢᵗ person m": "first-person masculine",
     "1ˢᵗ person f": "first-person feminine",
     "2ⁿᵈ person m": "second-person masculine",
@@ -3032,7 +2975,6 @@ infl_map = {
     "All numbers": "",
     "m obl, pl": "masculine oblique plural",
     "m & n": "masculine neuter",
-    "feminine singular": "feminine singular",
     "dative-lative-locative": "dative lative locative",
     "aspect": "",
     "Third person m": "third-person masculine",
@@ -3051,7 +2993,6 @@ infl_map = {
     "Rel.": "relative",
     "Positive relative": "positive relative",
     "Negative relative": "negative relative",
-    "Feminine/neuter": "feminine neuter",
     "intentional": "intentive",
     "oblig": "obligative",
     "indef": "indefinite",
@@ -3067,14 +3008,8 @@ infl_map = {
     "essive": "essive",
     "terminative": "terminative",
     "translative": "translative",
-    "ablative": "ablative",
-    "adessive": "adessive",
-    "allative": "allative",
-    "elative": "elative",
     "inessive": "inessive",
-    "illative": "illative",
     "partitive": "partitive",
-    "genitive": "genitive",
     "nominative": "nominative",
     "singulare tantum": "singular-only",
     "Absolutive": "absolutive",
@@ -3192,7 +3127,6 @@ infl_map = {
     "Eclipsis": "eclipsis",
     "+ object concord": "object-concord",
     "lative": "lative",
-    "nom. sing.": "nominative singular",
     "post./nom.": "postpositional",  # XXX what is nom. ?
     "Measurement": {"lang": "Tagalog", "then": "trigger-measurement"},
     "past continuous": "past continuative",
@@ -3204,10 +3138,8 @@ infl_map = {
     "nominative definite": "nominative definite",
     "long nominative": "nominative",
     "Past subjunctive": "past subjunctive",
-    "Present subjunctive": "present subjunctive",
     "Prot.": "prototonic",
     "Deut.": "deuterotonic",
-    "Perfect": "perfect",
     "Imperfect": "imperfect",
     "Present indicative": "present indicative",
     "Passive pl.": "passive plural",
@@ -3326,7 +3258,6 @@ infl_map = {
     "adjective": "adjectival",
     "neuter gender": "neuter",
     "number and gender": "",
-    "nominative/ accusative": "nominative accusative",
     "attributive and/or after a declined word": "attributive",
     "independent as first declined word": "",
     "after a declined word": "attributive",
@@ -3524,15 +3455,12 @@ infl_map = {
     "either gender": "masculine feminine",
     "present stem": "present",
     "inclusive": "inclusive",
-    "exclusive": "exclusive",
     "NORI (dative)": "dative",
     "DURATIVE": "durative",
     "nom./acc.": "nominative accusative",
     "acc.": "accusative",
-    "masculine singular": "masculine singular",
     "FUTURE TENSE": "future",
     "OPTATIVE": "optative",
-    "past imperfective": "past imperfective",
     "possessive m": "possessive masculine",
     "past progressive": "past progressive",
     "long infinitive": "infinitive infinitive-i-long",
@@ -3570,9 +3498,7 @@ infl_map = {
     # "stative stem": XXX,
     # "unmutated": XXX,
     # "unmodified": XXX,
-    # "Base form": XXX,
     # "bare": XXX,
-    # "Noun class": XXX,
     # "Genitive infin.": XXX,
     # "ilz, elles": XXX,
     # "el / ela": XXX,
@@ -3712,7 +3638,7 @@ infl_map = {
     "With possessive pronouns": "possessed-form",
 
     "Person": {
-        "default": "",
+        "default": "person",
         "lang": ["Hebrew", "Scottish Gaelic", "Old Irish",],
         # umpa/Scottish Gaelic, la/Old Irish
         "then": "*",
@@ -3807,42 +3733,6 @@ infl_map = {
         "lang": "Lithuanian",
         "then": "third-person",
     },
-    "aš" : {
-        "lang": "Lithuanian",
-        "if": "first-person",
-        "then": "first-person",
-        "else": "",
-    },
-    "tu" : {
-        "lang": "Lithuanian",
-        "if": "second-person",
-        "then": "second-person",
-        "else": "",
-    },
-    "jis/ji" : {
-        "lang": "Lithuanian",
-        "if": "third-person",
-        "then": "third-person",
-        "else": "",
-    },
-    "mes" : {
-        "lang": "Lithuanian",
-        "if": "first-person",
-        "then": "first-person",
-        "else": "",
-    },
-    "jūs" : {
-        "lang": "Lithuanian",
-        "if": "second-person",
-        "then": "second-person",
-        "else": "",
-    },
-    "jie/jos" : {
-        "lang": "Lithuanian",
-        "if": "third-person",
-        "then": "third-person",
-        "else": "",
-    },
 
     "present dependent": { # abair/Irish, table for archaic verb paradigm
         "lang": "Irish",
@@ -3885,22 +3775,9 @@ infl_map = {
         "then": "past habitual independent",
     },
 
-    "1st singular (я (ja))": "first-person singular",  # быць/Belarusian
-    "2nd singular (ты (ty))": "second-person singular",
-    "3rd singular (ён (jon)/яна́ (janá)/яно́ (janó))": "third-person singular",
-    "1st plural (мы (my))": "first-person plural",
-    "2nd plural (вы (vy))": "second-person plural",
-    "3rd plural (яны́ (janý))": "third-person plural",
-    "plural (мы (my), вы (vy), яны́ (janý))": "plural",
-    "masculine (я (ja), ты (ty), ён (jon))": "masculine",
-    "feminine (я (ja), ты (ty), яна́ (janá))": "feminine",
-    "neuter (яно́ (janó))": "neuter",
-
     "definite singular": "definite singular",
     "indefinite plural": "indefinite plural",
     "definite plural": "definite plural",
-
-
 
     "masc." : "masculine",  # ща/Bulgarian
     "fem.": "feminine",
@@ -4012,7 +3889,6 @@ infl_map = {
 
     "masculine dual": "masculine dual",  #a סוס/Hebrew
 
-    "common, neuter": "common-gender neuter",  # kdo/Serbo-Croatian
     "his": "third-person singular masculine possessive",  # moj/Serbo-Croatian
     "her": "third-person singular feminine possessive",  # moj/Serbo-Croatian
 
@@ -4076,12 +3952,12 @@ infl_map = {
     "female forms": "feminine",
     "Base form": {
         "lang": ["Arabic", "Moroccan Arabic","Maltese","Gulf Arabic",],
-        "pos": "prep",
+        # "pos": ["noun", "verb", "particle", "prep"],
         "then": "stem",
     },
     "Personal-pronoun- including forms": {
         "lang": ["Arabic", "Moroccan Arabic","Maltese","Gulf Arabic",],
-        "pos": "prep",
+        # "pos": ["noun", "verb", "particle", "prep"],
         "then": "dummy-reset-headers",
     },
     # ~ "singular": {
@@ -4093,7 +3969,7 @@ infl_map = {
 
     "common, neuter": {  # kaj/Serbo-Croatian
         "lang": "Serbo-Croatian",
-        "then": "neuter",
+        "then": "common-gender neuter",
     },
 
     "pres.​indep.​aff.": "present independent affirmative",  # bí/Irish
@@ -4266,13 +4142,8 @@ infl_map = {
     # ϧⲉⲣϧⲉⲣ/Coptic
     # Bohairic
     "ⲁⲛⲟⲕ": "first-person singular",
-    "ⲛ̀ⲑⲟⲕ": "second-person singular masculine",
-    "ⲛ̀ⲑⲟ": "second-person singular feminine",
-    "ⲛ̀ⲑⲟϥ": "third-person singular masculine",
-    "ⲛ̀ⲑⲟⲥ": "third-person singular feminine",
+    # Removed duplicates
     "ⲁⲛⲟⲛ": "first-person plural",
-    "ⲛ̀ⲑⲱⲧⲉⲛ": "second-person plural",
-    "ⲛ̀ⲑⲱⲟⲩ": "third-person plural",
     "-": {
         "lang": "Coptic",
         "then": "nominal",
@@ -4291,12 +4162,7 @@ infl_map = {
 
     # ⲃⲱⲗ/Coptic, different pronouns in different dialects
     # Sahidic
-    "ⲛ̄ⲧⲟⲕ": "second-person singular masculine",
-    "ⲛ̄ⲧⲟ": "second-person singular feminine",
-    "ⲛ̄ⲧⲟϥ": "third-person singular masculine",
-    "ⲛ̄ⲧⲟⲥ": "third-person singular feminine",
-    "ⲛ̄ⲧⲱⲧⲛ̄": "second-person plural",
-    "ⲛ̄ⲧⲟⲟⲩ": "third-person plural",
+    # Removed duplicates
     # Akhmimic
     "ⲁⲛⲁⲕ": "first-person singular",
     "ⲛ̄ⲧⲁⲕ": "second-person singular masculine",
@@ -4321,7 +4187,6 @@ infl_map = {
     "mang-": {"lang": "Tagalog", "then": "",},
     "-an": {"lang": "Tagalog", "then": "",},
     "pang- -an": {"lang": "Tagalog", "then": "",},
-    "ipang-": {"lang": "Tagalog", "then": "",},
     "ikapang-": {"lang": "Tagalog", "then": "",},
     "magpa-": {"lang": "Tagalog", "then": "",},
     "papang- -in": {"lang": "Tagalog", "then": "",},
@@ -4361,7 +4226,6 @@ infl_map = {
     "ma-": {"lang": "Tagalog", "then": "",},
     "maipag-": {"lang": "Tagalog", "then": "",},
     "maikapag-": {"lang": "Tagalog", "then": "",},
-    "maipag-": {"lang": "Tagalog", "then": "",},
     "mapag- -an": {"lang": "Tagalog", "then": "",},
     "mapapag-": {"lang": "Tagalog", "then": "",},
     "maipa-": {"lang": "Tagalog", "then": "",},
@@ -4918,11 +4782,10 @@ infl_map = {
 
     # schlaa/Alemannic German
     "1ˢᵗ person ich, i": "first-person singular",
-    "2ⁿᵈ person du": "second-person singular",
     "3ʳᵈ person er/si/es": "third-person singular",
-    "1ˢᵗ person mir": "first-person plural",
     "2ⁿᵈ person ir": "second-person plural",
-    "3ʳᵈ person si": "third-person plural",
+    # remove duplicates
+    
     # natüürlic/Alemannic German
     "Strong inflection": "strong",
     # d/Alemannic German
@@ -5815,6 +5678,41 @@ infl_map = {
         "lang": "Pashto",
         "then": "past perfective object-concord dummy-object-concord",
     },
+    # ní/Old Irish
+    "Animate": "animate",
+    # just in case
+    "Inanimate": "inanimate",
+
+    # τα/Greek
+    "1-s": "first-person singular",
+    "2-s": "second-person singular",
+    "3-ms": "third-person masculine singular",
+    "3-fs": "third-person feminine singular",
+    "3-ns": "third-person neuter singular",
+    "1-p": "first-person plural",
+    "2-p": "second-person plural",
+    "3-mp": "third-person masculine plural",
+    "3-fp": "third-person feminine plural",
+    "3-np": "third-person neuter plural",
+
+    # angu/Swahili
+    # "Noun class": {
+        # "lang": "Swahili",
+        # "then": "",},
+    # "M-wa class": {
+        # "if": "singular",
+        # "then": "class-1",
+        # "else": "class-2",
+        # },
+    # "M-mi class": "",
+    # "Ma class": "",
+    # "Ki-vi class": "",
+    # "N class": "",
+    # "U class": "",
+    # "Pa class": "",
+    # "Ku class": "",
+    # "Mu class": "",
+
 }
 
 

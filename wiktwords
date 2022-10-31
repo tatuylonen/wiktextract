@@ -58,6 +58,7 @@ def init_prefixes(ctx: Wtp) -> None:
             ctx.NAMESPACE_DATA.get("Thesaurus", {}).get("name"),
             ctx.NAMESPACE_DATA.get("Module", {}).get("name"),
             ctx.NAMESPACE_DATA.get("Template", {}).get("name"),
+            ctx.NAMESPACE_DATA.get("Reconstruction", {}).get("name"),
         }
 
 
@@ -266,9 +267,7 @@ if __name__ == "__main__":
                     sys.exit(1)
             else:
                 new_lang_codes.append(x)
-        print(args.language)
         config.capture_language_codes = new_lang_codes
-        print(args.language)
         
     # Create expansion context
     ctx = Wtp(cache_file=args.cache, num_threads=args.num_threads,
