@@ -1249,45 +1249,49 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             # print("DEFINED: {} -> {}".format(ref, tags1))
             def_ht[ref] = tags1
 
-    def generate_tags():
-        base_tags = (set(rt0) | set(ct0) | set(global_tags) |
-                 set(table_tags))  # Union.
-        alt_tags = expand_header(config, ctx, word, lang, pos,
-                                 text, base_tags)
-                        # base_tags are used in infl_map "if"-conds.
-        for tt in alt_tags:
-            if tt not in all_hdr_tags:
-                all_hdr_tags.append(tt)
-            tt = set(tt)
-            # Certain tags are always moved to word-level tags
-            if tt & TAGS_FORCED_WORDTAGS:
-                table_tags.extend(tt & TAGS_FORCED_WORDTAGS)
-                tt = tt - TAGS_FORCED_WORDTAGS
-            # Add tags from referenced footnotes
-            tt.update(refs_tags)
-            # Sort, convert to tuple, and add to set of
-            # alternatives.
-            tt = tuple(sorted(tt))
-            if tt not in new_coltags:
-                new_coltags.append(tt)
-            # Kludge (saprast/Latvian/Verb): ignore row tags
-            # if trying to add a non-finite after mood.
-            if (any(valid_tags[t] == "mood" for t in rt0) and
-                any(valid_tags[t] == "non-finite" for t in tt)):
-                tags = tuple(sorted(set(tt) | set(hdr_tags)))
-            else:
-                tags = tuple(sorted(set(tt) | set(rt0) |
-                                    set(hdr_tags)))
-            if tags not in new_rowtags:
-                new_rowtags.append(tags)
+    def generate_tags(rowtags, table_tags):
+        new_coltags = []
+        all_hdr_tags = []  # list of tuples
+        new_rowtags = []
+        for rt0 in rowtags:
+            for ct0 in compute_coltags(lang, pos, hdrspans,
+                                       col_idx, #col_idx=>start
+                                       colspan,
+                                       col, # cell_text
+                                       ):
+                base_tags = (set(rt0) | set(ct0) | set(global_tags) |
+                         set(table_tags))  # Union.
+                alt_tags = expand_header(config, ctx, word, lang, pos,
+                                         text, base_tags)
+                                # base_tags are used in infl_map "if"-conds.
+                for tt in alt_tags:
+                    if tt not in all_hdr_tags:
+                        all_hdr_tags.append(tt)
+                    tt = set(tt)
+                    # Certain tags are always moved to word-level tags
+                    if tt & TAGS_FORCED_WORDTAGS:
+                        table_tags.extend(tt & TAGS_FORCED_WORDTAGS)
+                        tt = tt - TAGS_FORCED_WORDTAGS
+                    # Add tags from referenced footnotes
+                    tt.update(refs_tags)
+                    # Sort, convert to tuple, and add to set of
+                    # alternatives.
+                    tt = tuple(sorted(tt))
+                    if tt not in new_coltags:
+                        new_coltags.append(tt)
+                    # Kludge (saprast/Latvian/Verb): ignore row tags
+                    # if trying to add a non-finite after mood.
+                    if (any(valid_tags[t] == "mood" for t in rt0) and
+                        any(valid_tags[t] == "non-finite" for t in tt)):
+                        tags = tuple(sorted(set(tt) | set(hdr_tags)))
+                    else:
+                        tags = tuple(sorted(set(tt) | set(rt0) |
+                                            set(hdr_tags)))
+                    if tags not in new_rowtags:
+                        new_rowtags.append(tags)
+        return new_rowtags, new_coltags, all_hdr_tags
 
-    def add_new_hdrspan():
-        nonlocal col
-        nonlocal col0_followed_by_nonempty
-        nonlocal col0_hdrspan
-        nonlocal col0_cats
-        nonlocal col0_allowed
-        
+    def add_new_hdrspan(col, hdrspans, col0_followed_by_nonempty, col0_hdrspan):
         hdrspan = HdrSpan(col_idx, colspan, rowspan, rownum,
                           new_coltags, col, all_headers)
         hdrspans.append(hdrspan)
@@ -1298,7 +1302,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
         # left-side header to the full row.
         if previously_seen:  # id(cell) in seen_cells previously
             col0_followed_by_nonempty = True
-            return True # continue
+            return col, col0_followed_by_nonempty, col0_hdrspan
         elif col0_hdrspan is None:
             col0_hdrspan = hdrspan
         elif any(all_hdr_tags):
@@ -1338,7 +1342,7 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 not (later_cats - later_allowed) and
                 not (col0_cats & later_cats)):
                 # First case: col0 set, continue
-                return True # continue
+                return col, col0_followed_by_nonempty, col0_hdrspan
             # We are going to start new col0_hdrspan.  Check if
             # we should expand.
             if (not col0_followed_by_nonempty and
@@ -1364,14 +1368,11 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             if not previously_seen:
                 col0_hdrspan = hdrspan
                 col0_followed_by_nonempty = False
-        return False
+        return col, col0_followed_by_nonempty, col0_hdrspan
 
-    def split_text_into_alts():
+    def split_text_into_alts(col):
     # Split the cell text into alternatives
-        nonlocal alts
-        nonlocal col
-        nonlocal tags
-        nonlocal split_extra_tags
+        split_extra_tags = []
         if col and is_superscript(col[0]):
             alts = [col]
         else:
@@ -1453,9 +1454,9 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 for new_alt in alt.split(", "):
                     new_alts.append(new_alt)
             alts = new_alts
+        return col, alts, split_extra_tags
 
-    def handle_mixed_lines():
-        nonlocal alts
+    def handle_mixed_lines(alts):
         # Handle the special case where romanization is given under
         # normal form, e.g. in Russian.  There can be multiple
         # comma-separated forms in each case.  We also handle the case
@@ -1560,11 +1561,12 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                     # add the end of alt
             alts = list((x, "", "") for x in new_alts)
                         # [form, no romz, no ipa]
+        return alts
 
-    def find_semantic_parens():
-        nonlocal form
+    def find_semantic_parens(form):
         # "Some languages" (=Greek) use brackets to mark things that
         # require tags, like (informality), [rarity] and {archaicity}.
+        extra_tags = []
         if re.match(r"\([^][(){}]*\)$", form):
             if get_lang_specific(lang, "parentheses_for_informal"):
                 form = form[1:-1]
@@ -1593,11 +1595,9 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 extra_tags.append("rare")
             else:
                 form = form[1:-1]
+        return form, extra_tags
 
-    def handle_parens():
-        nonlocal roman
-        nonlocal form
-        nonlocal clitic
+    def handle_parens(form, roman, clitic, extra_tags):
         if re.match(r"[’'][a-z]([a-z][a-z]?)?$", paren):
         # is there a clitic starting with apostrophe?
             clitic = paren
@@ -1628,8 +1628,9 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
         elif re.search(r"^with |-form", paren):
             form = (form[:m.start()] + subst +
                     form[m.end():]).strip()
-
-    def merge_row_and_column_tags():
+        return form, roman, clitic
+        
+    def merge_row_and_column_tags(form, some_has_covered_text):
         # Merge column tags and row tags.  We give preference
         # to moods etc coming from rowtags (cf. austteigen/German/Verb
         # imperative forms).
@@ -1638,8 +1639,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
         # it is a row or column header. Depending on the language,
         # we replace certain tags with others if they're in
         # a column or row
-        nonlocal form
-        nonlocal some_has_covered_text
+
+        ret = []
         rtagreplacs = get_lang_specific(lang, "rowtag_replacements")
         ctagreplacs = get_lang_specific(lang, "coltag_replacements")
         for rt in sorted(rowtags):
@@ -1811,6 +1812,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                     dt = {"form": clitic, "tags": tags + ["clitic"],
                           "source": source}
                     ret.append(dt)
+        return ret, form, some_has_covered_text
+        
     # First extract definitions from cells
     # See defs_ht for footnote defs stuff
     for row in rows:
@@ -1991,17 +1994,10 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 # that have previously had some kind of header. It is never
                 # resetted inside the col_idx-loops OR the bigger rows-loop, so
                 # applies to the whole table.
-                new_rowtags = []
-                new_coltags = []
-                all_hdr_tags = []  # list of tuples
-                for rt0 in rowtags:
-                    for ct0 in compute_coltags(lang, pos, hdrspans,
-                                               col_idx, #col_idx=>start
-                                               colspan,
-                                               col, # cell_text
-                                               ):
-                        generate_tags()
-                rowtags = new_rowtags
+
+                rowtags, new_coltags, all_hdr_tags = generate_tags(rowtags,
+                                                                   table_tags)
+
                 if any("dummy-skip-this" in ts for ts in rowtags):
                     continue  # Skip this cell
                 new_coltags = list(x for x in new_coltags
@@ -2009,10 +2005,9 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 # print("new_coltags={} previously_seen={} all_hdr_tags={}"
                 #       .format(new_coltags, previously_seen, all_hdr_tags))
                 if any(new_coltags):
-                    cont = add_new_hdrspan()
-                    if cont:
-                        continue
-
+                    col, col0_followed_by_nonempty, col0_hdrspan \
+                    = add_new_hdrspan(col, hdrspans,
+                                      col0_followed_by_nonempty, col0_hdrspan)
                 continue
 
             # These values are ignored, at least for now
@@ -2055,14 +2050,15 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
             # print("HAVE_TEXT:", repr(col))
             # Split the text into separate forms.  First simplify spaces except
             # newline.
-            split_extra_tags = []
             col = re.sub(r"[ \t\r]+", " ", col)
             # Split the cell text into alternatives
-            split_text_into_alts()
+            
+            col, alts, split_extra_tags = \
+            split_text_into_alts(col)
 
             # Some cells have mixed form content, like text and romanization,
             # or text and IPA. Handle these.
-            handle_mixed_lines()
+            alts = handle_mixed_lines(alts)
             
             alts = list((x, combined_coltags) for x in alts)
             
@@ -2110,7 +2106,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                 form = form.strip()
 
                 # Look for parentheses that have semantic meaning
-                find_semantic_parens()
+                form, et = find_semantic_parens(form)
+                extra_tags.extend(et)
                         
                 # Handle parentheses in the table element.  We parse
                 # tags anywhere and romanizations anywhere but beginning.
@@ -2129,7 +2126,8 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
                         paren = m.group(1)
                         subst = m.group(2)
                 if paren is not None:
-                    handle_parens()
+                    form, roman, clitic = handle_parens(form, roman, clitic,
+                                                        extra_tags)
                     
                 # Ignore certain forms that are not really forms,
                 # unless they're really, really close to the article title
@@ -2155,7 +2153,10 @@ def parse_simple_table(config, ctx, word, lang, pos, rows, titles, source,
 
                 # Merge tags from row and column and do miscellaneous
                 # tag-related handling.
-                merge_row_and_column_tags()
+                merge_ret, form, some_has_covered_text = \
+                        merge_row_and_column_tags(form,
+                                                  some_has_covered_text)
+                ret.extend(merge_ret)
                 
         # End of row.
         rownum += 1

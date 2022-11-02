@@ -173,4 +173,10 @@ class WiktionaryConfig(object):
         self.LANGUAGES_BY_NAME = {}
         for lang_code, lang_names in self.LANGUAGES_BY_CODE.items():
             for lang_name in lang_names:
-                self.LANGUAGES_BY_NAME[lang_name] = lang_code
+                # some languages have the same name but different language codes
+                # only overwrite the language names of three-letter codes with
+                # the name of two-letter codes
+                if lang_name not in self.LANGUAGES_BY_NAME or len(lang_code) < len(
+                        self.LANGUAGES_BY_NAME[lang_name]
+                ):
+                    self.LANGUAGES_BY_NAME[lang_name] = lang_code

@@ -299,6 +299,7 @@ ignored_etymology_templates = [
     "cite-usenet",
     "cite-video/documentation",
     "Cite-journal",
+    "rfe",
 ]
 # Regexp for matching ignored etymology template names.  This adds certain
 # prefixes to the names listed above.
@@ -902,13 +903,27 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 ctx.warning("conflicting values for {} in merge_base: "
                             "{!r} vs {!r}"
                             .format(k, data[k], v))
+
+        def complementary_pop(pron, key):
+            """Remove unnecessary keys from dict values
+            in a list comprehension..."""
+            if key in pron:
+                pron.pop(key)
+            return pron
+            
         # If the result has sounds, eliminate sounds that have a prefix that
         # does not match "word" or one of "forms"
         if "sounds" in data and "word" in data:
             accepted = [data["word"]]
             accepted.extend(f["form"] for f in data.get("forms", ()))
-            data["sounds"] = list(s for s in data["sounds"]
+            data["sounds"] = list(complementary_pop(s, "pos")
+                                  for s in data["sounds"]
                                   if "form" not in s or s["form"] in accepted)
+        # If the result has sounds, eliminate sounds that have a pos that
+        # does not match "pos"
+        if "sounds" in data and "pos" in data:
+            data["sounds"] = list(s for s in data["sounds"]
+                                  if "pos" not in s or s["pos"] == data["pos"])
 
     def push_sense():
         """Starts collecting data for a new word sense.  This returns True
@@ -1802,13 +1817,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                       "{{see translation subpage|...}}")
 
         def recurse(node, seq):
+            # print(f"seq: {seq}")
             if not seq:
                 return node
             if not isinstance(node, WikiNode):
                 return None
+            # print(f"node.kind: {node.kind}")
             if node.kind in LEVEL_KINDS:
                 t = clean_node(config, ctx, None, node.args[0])
-                if t == seq[0]:
+                # print(f"t: {t} == seq[0]: {seq[0]}?")
+                if t.lower() == seq[0].lower():
                     seq = seq[1:]
                     if not seq:
                         return node
@@ -2740,7 +2758,9 @@ def fix_subtitle_hierarchy(ctx: Wtp, config: WiktionaryConfig, text: str) -> str
     for i in range(1, len(old), npar + 1):
         left = old[i]
         right = old[i + npar - 1]
-        title = old[i + 1]
+        # remove Wikilinks in title
+        title = re.sub(r"^\[\[", "", old[i + 1])
+        title = re.sub(r"\]\]$", "", title)
         level = len(left)
         part = old[i + npar]
         if level != len(right):
@@ -2766,9 +2786,9 @@ def fix_subtitle_hierarchy(ctx: Wtp, config: WiktionaryConfig, text: str) -> str
             level = 5
         elif lc in config.LINKAGE_SUBTITLES or lc == config.OTHER_SUBTITLES["compounds"]:
             level = 5
-        elif title in config.OTHER_SUBTITLES["inflection_sections"]:
+        elif lc in config.OTHER_SUBTITLES["inflection_sections"]:
             level = 5
-        elif title in config.OTHER_SUBTITLES["ignored_sections"]:
+        elif lc in config.OTHER_SUBTITLES["ignored_sections"]:
             level = 5
         else:
             level = 6
@@ -2819,6 +2839,10 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
     text = re.sub(r"(?si)<\s*(/\s*)?noinclude\s*>", "", text)
     text = re.sub(r"(?si)<\s*(/\s*)?onlyinclude\s*>", "", text)
     text = re.sub(r"(?si)<\s*(/\s*)?includeonly\s*>", "", text)
+
+    # Expand Chinese Wiktionary language and POS heading templates
+    if config.dump_file_lang_code == "zh" and "{{-" in text:
+        text = ctx.expand(text, pre_expand=True)
 
     # Fix up the subtitle hierarchy.  There are hundreds if not thousands of
     # pages that have, for example, Translations section under Linkage, or

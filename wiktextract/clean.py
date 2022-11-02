@@ -852,6 +852,81 @@ def to_math(text):
     # print("math text final: {!r}".format(text))
     return text
 
+def bold_follows(parts, i):
+    """Checks if there is a bold (''') in parts after parts[i].  We allow
+    intervening italics ('')."""
+    parts = parts[i + 1:]
+    for p in parts:
+        if not p.startswith("''"):
+            continue
+        if p.startswith("'''"):
+            return True
+    return False
+    
+def remove_italic_and_bold(text):
+    """Based on token_iter in wikitextprocessor"""
+    assert isinstance(text, str)
+    lines = re.split(r"(\n+)", text)  # Lines and separators
+    parts_re = re.compile(r"(''+)")
+    new_text_parts = []
+    for line in lines:
+        parts = re.split(parts_re, line)
+        state = 0  # 1=in italic 2=in bold 3=in both
+        for i, part in enumerate(parts):
+            if part.startswith("''"):
+                # This is a bold/italic part.  Scan the rest of the line
+                # to determine how it should be interpreted if there are
+                # more than two apostrophes.
+                if part.startswith("'''''"):
+                    if state == 1:  # in italic
+                        part = part[5:]
+                        state = 2
+                    elif state == 2:  # in bold
+                        part = part[5:]
+                        state = 1
+                    elif state == 3:  # in both
+                        state = 0
+                        part = part[5:]
+                    else:  # in nothing
+                        part = part[5:]
+                        state = 3
+                elif part.startswith("'''"):
+                    if state == 1:  # in italic
+                        if bold_follows(parts, i):
+                            part = part[3:]
+                            state = 3
+                        else:
+                            part = part[2:]
+                            state = 0
+                    elif state == 2:  # in bold
+                        part = part[3:]
+                        state = 0
+                    elif state == 3:  # in both
+                        part = part[3:]
+                        state = 1
+                    else:  # in nothing
+                        part = part[3:]
+                        state = 2
+                elif part.startswith("''"):
+                    if state == 1:  # in italic
+                        part = part[2:]
+                        state = 0
+                    elif state == 2:  # in bold
+                        part = part[2:]
+                        state = 3
+                    elif state == 3:  # in both
+                        part = part[2:]
+                        state = 2
+                    else:  # in nothing
+                        part = part[2:]
+                        state = 1
+                if part:
+                    new_text_parts.append(part)
+                continue
+            new_text_parts.append(part)
+        new_text_parts.append("\n")
+    new_text_parts = new_text_parts[:-1] # remove last \n
+    return "".join(new_text_parts)
 
 def clean_value(config, title, no_strip=False, no_html_strip=False):
     """Cleans a title or value into a normal string.  This should basically
@@ -993,8 +1068,10 @@ def clean_value(config, title, no_strip=False, no_html_strip=False):
                        repl_exturl, title)
         if title == orig:
             break
+
     # Remove italic and bold
-    title = re.sub(r"''+", r"", title)
+    title = remove_italic_and_bold(title)
+
     # Replace HTML entities
     title = html.unescape(title)
     title = re.sub("\xa0", " ", title)  # nbsp
