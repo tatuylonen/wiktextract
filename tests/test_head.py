@@ -20,7 +20,7 @@ class HeadTests(unittest.TestCase):
         data = {}
         self.ctx.start_page("Reconstruction:Proto-Germanic/testpage")
         self.ctx.start_section("Proto-Germanic")
-        parse_word_head(self.ctx, "noun", "*testpage", data, True)
+        parse_word_head(self.ctx, "noun", "*testpage", data, True, None)
         self.assertEqual(self.ctx.errors, [])
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
@@ -30,7 +30,7 @@ class HeadTests(unittest.TestCase):
         data = {}
         self.ctx.start_page("Reconstruction:Proto-Germanic/testpage")
         self.ctx.start_section("Proto-Germanic")
-        parse_word_head(self.ctx, "noun", "*testfoo", data, True)
+        parse_word_head(self.ctx, "noun", "*testfoo", data, True, None)
         self.assertEqual(self.ctx.errors, [])
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
@@ -39,13 +39,13 @@ class HeadTests(unittest.TestCase):
 
     def test_reconstruction3(self):
         data = {}
-        parse_word_head(self.ctx, "noun", "*testpage", data, False)
+        parse_word_head(self.ctx, "noun", "*testpage", data, False, None)
         self.assertEqual(data, {"forms": [{"form": "*testpage",
                                            "tags": ["canonical"]}]})
 
     def test_head1(self):
         data = {}
-        parse_word_head(self.ctx, "noun", "", data, False)
+        parse_word_head(self.ctx, "noun", "", data, False, None)
         self.assertEqual(self.ctx.errors, [])
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
@@ -53,7 +53,7 @@ class HeadTests(unittest.TestCase):
 
     def test_head2(self):
         data = {}
-        parse_word_head(self.ctx, "noun", "testpage", data, False)
+        parse_word_head(self.ctx, "noun", "testpage", data, False, None)
         self.assertEqual(self.ctx.errors, [])
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
@@ -61,7 +61,7 @@ class HeadTests(unittest.TestCase):
 
     def test_head3(self):
         data = {}
-        parse_word_head(self.ctx, "noun", "testpAge", data, False)
+        parse_word_head(self.ctx, "noun", "testpAge", data, False, None)
         self.assertEqual(self.ctx.errors, [])
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
@@ -70,7 +70,7 @@ class HeadTests(unittest.TestCase):
 
     def test_head4(self):
         data = {}
-        parse_word_head(self.ctx, "noun", "testpage f", data, False)
+        parse_word_head(self.ctx, "noun", "testpage f", data, False, None)
         self.assertEqual(self.ctx.errors, [])
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
@@ -78,7 +78,7 @@ class HeadTests(unittest.TestCase):
 
     def test_head5(self):
         data = {}
-        parse_word_head(self.ctx, "noun", "testpAge m", data, False)
+        parse_word_head(self.ctx, "noun", "testpAge m", data, False, None)
         self.assertEqual(self.ctx.errors, [])
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
@@ -88,14 +88,14 @@ class HeadTests(unittest.TestCase):
 
     def test_head6(self):
         data = {}
-        parse_word_head(self.ctx, "noun", "testpage n", data, False)
+        parse_word_head(self.ctx, "noun", "testpage n", data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["neuter"]})
 
     def test_head7(self):
         data = {}
-        parse_word_head(self.ctx, "noun", "testpage c", data, False)
+        parse_word_head(self.ctx, "noun", "testpage c", data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["common-gender"]})
@@ -103,7 +103,7 @@ class HeadTests(unittest.TestCase):
     def test_head8(self):
         data = {}
         self.ctx.start_section("Zulu")
-        parse_word_head(self.ctx, "noun", "testpage 1", data, False)
+        parse_word_head(self.ctx, "noun", "testpage 1", data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["class-1"]})
@@ -111,7 +111,7 @@ class HeadTests(unittest.TestCase):
     def test_head8b(self):
         # Trying to parse suffix 1 in English - should not get parsed
         data = {}
-        parse_word_head(self.ctx, "noun", "testpage 1", data, False)
+        parse_word_head(self.ctx, "noun", "testpage 1", data, False, None)
         self.assertEqual(self.ctx.errors, [])
         self.assertEqual(self.ctx.warnings, [])
         self.assertNotEqual(self.ctx.debugs, [])
@@ -121,7 +121,8 @@ class HeadTests(unittest.TestCase):
     def test_head9(self):
         data = {}
         parse_word_head(self.ctx, "noun",
-                        "testpage f (plurale tantum, inanimate)", data, False)
+                        "testpage f (plurale tantum, inanimate)",
+                        data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "inanimate",
@@ -131,7 +132,7 @@ class HeadTests(unittest.TestCase):
         data = {}
         parse_word_head(self.ctx, "noun",
                         "testpage f (plurale tantum, stem testpag, inanimate)",
-                        data, False)
+                        data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "inanimate",
@@ -144,7 +145,7 @@ class HeadTests(unittest.TestCase):
         parse_word_head(self.ctx, "noun",
                         "testpage f (plurale tantum, stem testpag, inanimate) "
                         "(+ dative)",
-                        data, False)
+                        data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         print(data)
@@ -159,7 +160,7 @@ class HeadTests(unittest.TestCase):
         # the hyphen in keyword names
         data = {}
         parse_word_head(self.ctx, "noun",
-                        "foo (McCune-Reischauer bar)", data, False)
+                        "foo (McCune-Reischauer bar)", data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"forms": [
@@ -170,7 +171,7 @@ class HeadTests(unittest.TestCase):
         data = {}
         parse_word_head(self.ctx, "noun",
                         "testpage f or m",
-                        data, False)
+                        data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "masculine"]})
@@ -179,7 +180,7 @@ class HeadTests(unittest.TestCase):
         data = {}
         parse_word_head(self.ctx, "noun",
                         "testpage f, m",
-                        data, False)
+                        data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "masculine"]})
@@ -188,7 +189,7 @@ class HeadTests(unittest.TestCase):
         data = {}
         parse_word_head(self.ctx, "noun",
                         "testpage f, m, n",
-                        data, False)
+                        data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "masculine", "neuter"]})
@@ -197,7 +198,7 @@ class HeadTests(unittest.TestCase):
         data = {}
         parse_word_head(self.ctx, "noun",
                         "testpage f or m or n",
-                        data, False)
+                        data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "masculine", "neuter"]})
@@ -209,7 +210,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "index n",
-                        data, False)
+                        data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["neuter"]})
@@ -221,7 +222,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "index m or f (genitive indicis); third declension",
-                        data, False)
+                        data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["declension-3", "feminine",
@@ -236,7 +237,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_page("index")
         self.ctx.start_section("English")
         self.ctx.start_subsection("Noun")
-        parse_word_head(self.ctx, "noun", "foo f or bar m", data, False)
+        parse_word_head(self.ctx, "noun", "foo f or bar m", data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"forms": [
@@ -249,7 +250,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_page("index")
         self.ctx.start_section("English")
         self.ctx.start_subsection("Noun")
-        parse_word_head(self.ctx, "noun", "foo or bar", data, False)
+        parse_word_head(self.ctx, "noun", "foo or bar", data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"forms": [
@@ -263,7 +264,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_section("English")
         self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun", "foo f or n or bar m or c", data,
-                        False)
+                        False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"forms": [
@@ -276,7 +277,7 @@ class HeadTests(unittest.TestCase):
         data = {}
         parse_word_head(self.ctx, "noun",
                         "testpage f or testpage2 m; person",
-                        data, False)
+                        data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["person"],
@@ -293,7 +294,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_section("English")
         self.ctx.start_subsection("Adjective")
         parse_word_head(self.ctx, "adj", "indubitables m pl or f pl", data,
-                        False)
+                        False, None)
         # print(json.dumps(data, indent=2))
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
@@ -306,7 +307,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "foo (12 strokes)",
-                        data, False)
+                        data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"forms": [
@@ -321,7 +322,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "smiley m (plural smileys, diminutive smileytje n)",
-                        data, False)
+                        data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"tags": ["masculine"],
@@ -339,7 +340,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "foos (plural of foo)",
-                        data, False)
+                        data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"forms": [
@@ -354,7 +355,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_subsection("Verb")
         parse_word_head(self.ctx, "verb",
                         "أَبْلَعَ (ʾablaʿa) IV, non-past يُبْلِعُ‎‎ (yubliʿu)",
-                        data, False)
+                        data, False, None)
         self.assertEqual(self.ctx.warnings, [])
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {
@@ -384,7 +385,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "tell (third-person singular simple present tells, present participle telling, simple past and past participle told or (dialectal or nonstandard) telled)",
-                        data, False)
+                        data, False, None)
         print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(data, {
             "forms": [
@@ -411,7 +412,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "take (third-person singular simple present takes, present participle taking, simple past took, past participle taken or (archaic or Scotland) tane)",
-                        data, False)
+                        data, False, None)
         print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(data, {
             "forms": [
@@ -463,7 +464,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "burn (third-person singular simple present burns, present participle burning, simple past and past participle burned or (mostly Commonwealth) burnt or (obsolete) brent)",
-                        data, False)
+                        data, False, None)
         print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(data, {
             "forms": [
@@ -536,7 +537,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "grind (third-person singular simple present grinds, present participle grinding, simple past and past participle ground or grinded) (see usage notes below)",
-                        data, False)
+                        data, False, None)
         print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(data, {
             "forms": [
@@ -592,7 +593,7 @@ class HeadTests(unittest.TestCase):
         self.ctx.start_subsection("Noun")
         parse_word_head(self.ctx, "noun",
                         "rive (past tense rev, past participle revet, common gender attributive reven, plural or definite attributive revne)",
-                        data, False)
+                        data, False, None)
         print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(data, {
             "forms": [
@@ -649,7 +650,7 @@ class HeadTests(unittest.TestCase):
         parse_word_head(self.ctx, "noun",
                         "rear admiral (lower half) (plural rear admirals "
                         "(lower half))",
-                        data, False)
+                        data, False, None)
         print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(data, {
             "forms": [

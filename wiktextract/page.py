@@ -1586,9 +1586,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # print("parse_part_of_speech", pos)
         pos_data["pos"] = pos
         pre = [[]]  # list of lists
+        lists = [[]]  # list of lists
         have_subtitle = False
-        lists = []
         first_para = True
+        first_head_tmplt = True
         for node in posnode.children:
             if isinstance(node, str):
                 for m in re.finditer(r"\n+|[^\n]+", node):
@@ -1602,9 +1603,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
             assert isinstance(node, WikiNode)
             kind = node.kind
             if kind == NodeKind.LIST:
-                lists.append(node)
-                break
+                lists[-1].append(node)
+                continue
             elif kind in LEVEL_KINDS:
+                # Stop parsing section if encountering any kind of
+                # level header (like ===Noun=== or ====Further Reading====).
+                # At a quick glance, this should be the default behavior,
+                # but if some kinds of source articles have sub-sub-sections
+                # that should be parsed XXX it should be handled by changing
+                # this break.
                 break
             elif kind == NodeKind.LINK:
                 # We might collect relevant links as they are often pictures
@@ -1618,135 +1625,161 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if node.args == "br":
                     if pre[-1]:
                         pre.append([])  # Switch to next head
+                        lists.append([])  # Lists parallels pre
                 elif node.args not in ("gallery", "ref", "cite", "caption"):
+                    pre[-1].append(node)
+            elif kind == NodeKind.TEMPLATE:
+                # XXX Insert code here that disambiguates between
+                # templates that generate word heads and templates
+                # that don't.
+                if first_head_tmplt and pre[-1]:
+                    first_head_tmplt = False
+                    pre[-1].append(node)
+                elif pre[-1]:
+                    pre.append([]) # Switch to the next head
+                    lists.append([]) # lists parallel pre
+                    pre[-1].append(node)
+                else:
                     pre[-1].append(node)
             elif first_para:
                 pre[-1].append(node)
         # XXX use template_fn in clean_node to check that the head macro
         # is compatible with the current part-of-speech and generate warning
         # if not.  Use template_allowed_pos_map.
-        for pre1 in pre:
+
+        there_are_many_heads = len(pre) > 1
+        for i, (pre1, ls) in enumerate(zip(pre, lists)):
+            head_group = i + 1 if there_are_many_heads else None
             # print("parse_part_of_speech: {}: {}: pre={}"
-            #       .format(ctx.section, ctx.subsection, pre1))
+                  # .format(ctx.section, ctx.subsection, pre1))
             text = clean_node(config, ctx, pos_data, pre1,
                               post_template_fn=head_post_template_fn)
             text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
-            parse_word_head(ctx, pos, text, pos_data, is_reconstruction)
+            parse_word_head(ctx, pos, text,
+                            pos_data,
+                            is_reconstruction,
+                            head_group)
             text = None
-        if "tags" in pos_data:
-            common_tags = pos_data["tags"]
-            del pos_data["tags"]
-        else:
-            common_tags = []
-        for node in lists:
-            for node in node.children:
-                if node.kind != NodeKind.LIST_ITEM:
-                    ctx.debug("{}: non-list-item inside list".format(pos))
-                    continue
-                if node.args[-1] == ":":
-                    # Sometimes there may be lists with indented examples
-                    # in otherwise the same level as real sense entries.
-                    # I assume those will get parsed as separate lists, but
-                    # we don't want to include such examples as word senses.
-                    continue
-                contents = node.children
-                sublists = [x for x in contents
-                            if isinstance(x, WikiNode) and
-                            x.kind == NodeKind.LIST and
-                            x.args == "##"]
-                others = [x for x in contents
-                          if isinstance(x, WikiNode) and
-                          x.kind == NodeKind.LIST and
-                          x.args != "##"]
-
-                # This entry has sublists of entries.  We should contain
-                # gloss information from both.  Sometimes the outer gloss
-                # is more non-gloss or tags, sometimes it is a coarse sense
-                # and the inner glosses are more specific.  The outer one does
-                # not seem to have qualifiers.
-                outer = [x for x in contents
-                         if not isinstance(x, WikiNode) or
-                         x.kind != NodeKind.LIST]
-                common_data = {"tags": list(common_tags)}
-
-                # If we have one sublist with one element, treat it specially as
-                # it may be a Wiktionary error; raise that nested element
-                # to the same level.
-                if len(sublists) == 1:
-                    slc = sublists[0].children
-                    if len(slc) == 1:
-                        parse_sense(pos, outer, common_data)
-                        parse_sense(pos, slc[0].children, {})
+            if "tags" in pos_data:
+                common_tags = pos_data["tags"]
+                del pos_data["tags"]
+            else:
+                common_tags = []
+            for node in ls:
+                for node in node.children:
+                    if node.kind != NodeKind.LIST_ITEM:
+                        ctx.debug("{}: non-list-item inside list".format(pos))
                         continue
-
-                def outer_template_fn(name, ht):
-                    if is_panel_template(name):
-                        return ""
-                    if name in ("defdate",):
-                        return ""
-                    if name in sense_linkage_templates:
-                        parse_sense_linkage(config, ctx, common_data, name, ht)
-                        return ""
-                    return None
-
-                # Process others, so that we capture any sense linkages from
-                # there
-                clean_node(config, ctx, common_data, others,
-                           template_fn=outer_template_fn)
-
-                # If there are no sublists of senses, parse it as just one
-                if not sublists:
-                    parse_sense(pos, contents, common_data)
-                    continue
-
-                # Clean the outer gloss
-                outer_text = clean_node(config, ctx, common_data, outer,
-                                        template_fn=outer_template_fn)
-                strip_ends = [", particularly:"]
-                for x in strip_ends:
-                    if outer_text.endswith(x):
-                        outer_text = outer_text[:-len(x)]
-                        break
-                # Check if the outer gloss starts with parenthesized tags/topics
-                m = re.match(r"\(([^()]+)\):?\s*", outer_text)
-                if m:
-                    q = m.group(1)
-                    outer_text = outer_text[m.end():].strip()
-                    parse_sense_qualifier(ctx, q, common_data)
-
-                if outer_text == "A pejorative:":
-                    data_append(ctx, common_data, "tags", "perjorative")
-                    outer_text = None
-                elif outer_text == "Short forms.":
-                    data_append(ctx, common_data, "tags", "abbreviation")
-                    outer_text = None
-                elif outer_text == "Technical or specialized senses.":
-                    outer_text = None
-                # XXX is it always a gloss?  Maybe non-gloss?
-                if outer_text:
-                    data_append(ctx, common_data, "glosses", outer_text)
-                    if outer_text in ("A person:",):
-                        data_append(ctx, common_data, "tags", "g-person")
-
-                # Process any inner glosses
-                added = False
-                for sublist in sublists:
-                    assert sublist.kind == NodeKind.LIST
-                    for item in sublist.children:
-                        if not isinstance(item, WikiNode):
+                    if node.args[-1] == ":":
+                        # Sometimes there may be lists with indented examples
+                        # in otherwise the same level as real sense entries.
+                        # I assume those will get parsed as separate lists, but
+                        # we don't want to include such examples as word senses.
+                        continue
+                    contents = node.children
+                    sublists = [x for x in contents
+                                if isinstance(x, WikiNode) and
+                                x.kind == NodeKind.LIST and
+                                x.args == "##"]
+                    others = [x for x in contents
+                              if isinstance(x, WikiNode) and
+                              x.kind == NodeKind.LIST and
+                              x.args != "##"]
+    
+                    # This entry has sublists of entries.  We should contain
+                    # gloss information from both.  Sometimes the outer gloss
+                    # is more non-gloss or tags, sometimes it is a coarse sense
+                    # and the inner glosses are more specific.  The outer one
+                    # does not seem to have qualifiers.
+                    outer = [x for x in contents
+                             if not isinstance(x, WikiNode) or
+                             x.kind != NodeKind.LIST]
+                    common_data = {"tags": list(common_tags)}
+                    if head_group:
+                        common_data["head_nr"] = head_group
+    
+                    # If we have one sublist with one element, treat it
+                    # specially as it may be a Wiktionary error; raise
+                    # that nested element to the same level.
+                    if len(sublists) == 1:
+                        slc = sublists[0].children
+                        if len(slc) == 1:
+                            parse_sense(pos, outer, common_data)
+                            parse_sense(pos, slc[0].children, {})
                             continue
-                        if item.kind != NodeKind.LIST_ITEM:
-                            continue
-                        sense_base = copy.deepcopy(common_data)
-                        if parse_sense(pos, item.children, sense_base):
-                            added = True
-                # If the sublists resulted in no senses added, add
-                # common_data as a sense if it has a gloss
-                if not added and common_data.get("glosses"):
-                    gls = common_data.get("glosses") or [""]
-                    assert len(gls) == 1
-                    common_data["glosses"] = []
-                    parse_sense(pos, gls, common_data)
+    
+                    def outer_template_fn(name, ht):
+                        if is_panel_template(name):
+                            return ""
+                        if name in ("defdate",):
+                            return ""
+                        if name in sense_linkage_templates:
+                            parse_sense_linkage(config, ctx,
+                                                common_data,
+                                                name,
+                                                ht)
+                            return ""
+                        return None
+    
+                    # Process others, so that we capture any sense linkages from
+                    # there
+                    clean_node(config, ctx, common_data, others,
+                               template_fn=outer_template_fn)
+    
+                    # If there are no sublists of senses, parse it as just one
+                    if not sublists:
+                        parse_sense(pos, contents, common_data)
+                        continue
+    
+                    # Clean the outer gloss
+                    outer_text = clean_node(config, ctx, common_data, outer,
+                                            template_fn=outer_template_fn)
+                    strip_ends = [", particularly:"]
+                    for x in strip_ends:
+                        if outer_text.endswith(x):
+                            outer_text = outer_text[:-len(x)]
+                            break
+                    # Check if the outer gloss starts with
+                    # parenthesized tags/topics
+                    m = re.match(r"\(([^()]+)\):?\s*", outer_text)
+                    if m:
+                        q = m.group(1)
+                        outer_text = outer_text[m.end():].strip()
+                        parse_sense_qualifier(ctx, q, common_data)
+    
+                    if outer_text == "A pejorative:":
+                        data_append(ctx, common_data, "tags", "perjorative")
+                        outer_text = None
+                    elif outer_text == "Short forms.":
+                        data_append(ctx, common_data, "tags", "abbreviation")
+                        outer_text = None
+                    elif outer_text == "Technical or specialized senses.":
+                        outer_text = None
+                    # XXX is it always a gloss?  Maybe non-gloss?
+                    if outer_text:
+                        data_append(ctx, common_data, "glosses", outer_text)
+                        if outer_text in ("A person:",):
+                            data_append(ctx, common_data, "tags", "g-person")
+    
+                    # Process any inner glosses
+                    added = False
+                    for sublist in sublists:
+                        assert sublist.kind == NodeKind.LIST
+                        for item in sublist.children:
+                            if not isinstance(item, WikiNode):
+                                continue
+                            if item.kind != NodeKind.LIST_ITEM:
+                                continue
+                            sense_base = copy.deepcopy(common_data)
+                            if parse_sense(pos, item.children, sense_base):
+                                added = True
+                    # If the sublists resulted in no senses added, add
+                    # common_data as a sense if it has a gloss
+                    if not added and common_data.get("glosses"):
+                        gls = common_data.get("glosses") or [""]
+                        assert len(gls) == 1
+                        common_data["glosses"] = []
+                        parse_sense(pos, gls, common_data)
 
         # If there are no senses extracted, add a dummy sense.  We want to
         # keep tags extracted from the head for the dummy sense.
