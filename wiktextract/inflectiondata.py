@@ -6157,6 +6157,11 @@ def check_v(k, v):
                 if not isinstance(v[kk], (int, list, tuple)):
                     print("infl_map[{!r}] contains invalid depth-value "
                                 "{!r}".format(k, v[kk]))
+            elif kk == "inflection-template":
+                if not isinstance(v[kk], (str, list, tuple)):
+                    print("infl_map[{!r}] contains invalid"
+                          "inflection-template value "
+                                "{!r}".format(k, v[kk]))
             else:
                 print("infl_map[{!r}] contains invalid key {!r}"
                       .format(k, kk))
