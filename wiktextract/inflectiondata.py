@@ -50,6 +50,9 @@ LANGS_WITH_NUMBERED_INFINITIVES = set([
 # "if": if the current header already has some tags, check if it has these ones
 # "lang": is the current language equal to string or in a list of strings
 # "pos": is the current PART OF SPEECH equal to string or in a list of strings
+# "nested-table-depth": is the current depth of nested tables, and only tables.
+# Only in scope from handle_wikitext_table() onwards and not stored for anything
+# else.
  
 infl_map = {
     "plural": {
@@ -169,126 +172,9 @@ infl_map = {
     "Present forms": "present",
     "Transgressives": "transgressive",
     "past tense": "past",
-    "Positive past": "past positive",
     "Positive participial": "positive participle",
     "Negative participial": "negative participle",
-    "Negative past": "past negative",
-    "Positive present": "present positive",
-    "Negative present": "present negative",
-    "Positive future": "future positive",
-    "Negative future": "future negative",
-    "Positive subjunctive": "subjunctive positive",
-    "Negative subjunctive": "subjunctive negative",
-    "Positive present conditional": "present irrealis positive",
-    "Negative present conditional": "present irrealis negative",
-    "Positive past conditional": "past irrealis positive",
-    "Negative past conditional": "past irrealis negative",
     "Relative forms": "relative object-concord",
-    "1s": {"if": "object-concord",
-           "then": "object-first-person object-singular",
-           "else": "first-person singular",},
-    "2s": {"if": "object-concord",
-           "then": "object-second-person object-singular",
-           "else": "second-person singular",},
-    "3s": {"if": "object-concord",
-           "then": "object-third-person object-singular",
-           "else": "third-person singular",},
-    "1p": {"if": "object-concord",
-           "then": "object-first-person object-plural",
-           "else": "first-person plural",},
-    "2p": {"if": "object-concord",
-           "then": "object-second-person object-plural",
-           "else": "second-person plural",},
-    "3p": {"if": "object-concord",
-           "then": "object-third-person object-plural",
-           "else": "third-person plural",},
-    "c1": {
-        "if": "object-concord",
-        "then": "object-class-1",
-        "else": "class-1",},
-    "c2": {
-        "if": "object-concord",
-        "then": "object-class-2",
-        "else": "class-2",},
-    "c3": {
-        "if": "object-concord",
-        "then": "object-class-3",
-        "else": "class-3",},
-    "c4": {
-        "if": "object-concord",
-        "then": "object-class-4",
-        "else": "class-4",},
-    "c5": {
-        "if": "object-concord",
-        "then": "object-class-5",
-        "else": "class-5",},
-    "c6": {
-        "if": "object-concord",
-        "then": "object-class-6",
-        "else": "class-6",},
-    "c7": {
-        "if": "object-concord",
-        "then": "object-class-7",
-        "else": "class-7",},
-    "c8": {
-        "if": "object-concord",
-        "then": "object-class-8",
-        "else": "class-8",},
-    "c9": {
-        "if": "object-concord",
-        "then": "object-class-9",
-        "else": "class-9",},
-    "c10": {
-        "if": "object-concord",
-        "then": "object-class-10",
-        "else": "class-10",},
-    "c11": {
-        "if": "object-concord",
-        "then": "object-class-11",
-        "else": "class-11",},
-    "c12": {
-        "if": "object-concord",
-        "then": "object-class-12",
-        "else": "class-12",},
-    "c13": {
-        "if": "object-concord",
-        "then": "object-class-13",
-        "else": "class-13",},
-    "c14": {
-        "if": "object-concord",
-        "then": "object-class-14",
-        "else": "class-14",},
-    "c15": {
-        "if": "object-concord",
-        "then": "object-class-15",
-        "else": "class-15",},
-    "c16": {
-        "if": "object-concord",
-        "then": "object-class-16",
-        "else": "class-16",},
-    "c17": {
-        "if": "object-concord",
-        "then": "object-class-17",
-        "else": "class-17",},
-    "c18": {
-        "if": "object-concord",
-        "then": "object-class-18",
-        "else": "class-18",},
-    "1s/2s/3s/c1": ["object-first-person object-second-person "
-                    "object-third-person object-singular",
-                    "object-class-1"],
-    "*p/2/3/11/14": ["object-plural object-first-person "
-                     "object-second-person object-third-person",
-                     "object-class-2 object-class-3 object-class-11 "
-                     "object-class-14"],
-    "c4/c6/c9": "object-class-4 object-class-6 object-class-9",
-    "2s/2p/15/17": ["object-second-person object-singular object-plural",
-                    "object-class-15 object-class-17"],
-    "2p/3p/c2": ["object-second-person object-third-person object-plural",
-                 "object-class-2"],
-    "c3/c11/c14": "object-class-3 object-class-11 object-class-14",
-    "c4/c9": "object-class-4 object-class-9",
-    "Forms with object concords": "object-concord",
     "present tense": "present",
     "future tense": "future",
     "Neuter": "neuter",
@@ -330,7 +216,6 @@ infl_map = {
     "Case / Gender": "",
     "masculine inanimate": "masculine inanimate",
     "Infinitive": "infinitive",
-    "Past": "past",
     "Past indicative": "past indicative",
     "Past participle": "past participle",
     "Past participles": "past participle",
@@ -442,12 +327,20 @@ infl_map = {
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-i",
+        "else": {
+            "lang": "Swahili",
+            "then": "dummy-store-hdrspan first-person"
+        },
     },
     "2nd":  {
         "default": "second-person",
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-ii",
+        "else": {
+            "lang": "Swahili",
+            "then": "dummy-store-hdrspan second-person"
+        },
     },
     "3rd":  {
         "default": "third-person",
@@ -2051,7 +1944,6 @@ infl_map = {
     "o (“he/she is”)": "third-person predicative",
     "predicative": "predicative",
     "subjective": "subjective",
-    "Present": "present",
     "preterite": "preterite",
     "strong/subject": "strong subjective",
     "weak (direct object)": "weak objective direct-object",
@@ -2105,7 +1997,6 @@ infl_map = {
     },
     "causative": "causative",
     "Indicative": "indicative",
-    "Subjunctive": "subjunctive",
     "Class": "",
     "11": "class-11",
     "14": "class-14",
@@ -2240,16 +2131,6 @@ infl_map = {
     "Plural (fleirtal)": "plural",
     "Original form": "",  # XXX Latin ['-bo']
     "Derived form": "",  # XXX Latin ['-bo']
-    "Gnomic": "gnomic",
-    "Perfect": "perfect",
-    '"Already"': "already-form",
-    '"Not yet"': "not-yet-form",
-    '"If/When"': "if-when-form",
-    '"If not"': "if-not-form",
-    "General positive": "general-mood positive",
-    "General negative": "general-mood negative",
-    "Present conditional": "present irrealis",
-    "Conditional contrary to fact": "conditional counterfactual",
     "Present active indicative (third conjugation)":
     "present active indicative conjugation-3",
     "Present active subjunctive": "present active subjunctive",
@@ -2558,34 +2439,6 @@ infl_map = {
     "Simple finite forms": "finite-form",
     "Positive form": "positive",
     "Complex finite forms": "dummy-reset-headers",  # Reset
-    "Polarity": "",
-    "Persons": "",
-    "Persons / Classes": "",
-    "Classes": "",
-    "3rd / M-wa": "third-person",
-    "M-mi": "",
-    "Ma": "",
-    "Ki-vi": "",
-    "N": "",
-    "U": "",
-    "Ku": "",
-    "Pa": "",
-    "Mu": "",
-    "Sg.": "singular",
-    "Pl.": "plural",
-    "Sg. / 1": "singular class-1",
-    "Pl. / 2": "plural class-2",
-    "4": "class-4",
-    "5": "class-5",
-    "6": "class-6",
-    "7": "class-7",
-    "8": "class-8",
-    "9": "class-9",
-    "10": "class-10",
-    "11 / 14": "class-11 class-14",
-    "15 / 17": "class-15 class-17",
-    "16": "class-16",
-    "18": "class-18",
     "2nd singular ти": "second-person singular",
     "3rd singular він / вона / воно": "third-person singular",
     "1st plural ми": "first-person plural",
@@ -3002,7 +2855,6 @@ infl_map = {
     "comp": "completive",
     "simpl": "",
     "nominal non-finites": "noun-from-verb dummy-mood",
-    "Consecutive": "consecutive",
     "comitative": "comitative",
     "abessive": "abessive",
     "essive": "essive",
@@ -3036,7 +2888,6 @@ infl_map = {
     "Injunctive": "injunctive",
     "Habitual participle": "habitual participle",
     "Future conditional": "future conditional",
-    "Past conditional": "past conditional",
     "condizionale passato": "past conditional",  # ripromettersi/Italian
     "futuro anteriore": "future perfect",  # ripromettersi/Italian
     "passato prossimo": "perfect",  # ripromettersi/Italian
@@ -3389,8 +3240,6 @@ infl_map = {
     "Lemosin": "Lemosin",  # Occitan
     "Provençau": "Provençau",  # Occitan
     "Old Saxon personal pronouns": "personal pronoun",
-    "3": {"lang": head_final_numeric_langs, "then": "class-3",
-          "else": "third-person"},
     "nominative / accusative": "nominative accusative",
     "situative": "situative",
     "oppositive": "oppositive",
@@ -5696,23 +5545,574 @@ infl_map = {
     "3-np": "third-person neuter plural",
 
     # angu/Swahili
-    # "Noun class": {
-        # "lang": "Swahili",
-        # "then": "",},
-    # "M-wa class": {
-        # "if": "singular",
-        # "then": "class-1",
-        # "else": "class-2",
-        # },
-    # "M-mi class": "",
-    # "Ma class": "",
-    # "Ki-vi class": "",
-    # "N class": "",
-    # "U class": "",
-    # "Pa class": "",
-    # "Ku class": "",
-    # "Mu class": "",
+    "Noun class": {
+        "lang": "Swahili",
+        "then": "",
+        },
+    "M-wa class": {
+        "lang": "Swahili",
+        "then": "class-1 class-2",
+    },
+    "M-mi class": {
+        "lang": "Swahili",
+        "then": "class-3 class-4",
+    },
+    "Ma class": {
+        "lang": "Swahili",
+        "then": "class-5 class-6",
+    },
+    "Ki-vi class": {
+        "lang": "Swahili",
+        "then": "class-7 class-8",
+    },
+    "N class": {
+        "lang": "Swahili",
+        "then": "class-9 class-10",
+    },
+    "U class": {
+        "lang": "Swahili",
+        "then": "class-11 class-12",
+    },
+    "Pa class": {
+        "lang": "Swahili",
+        "then": "class-16",
+    },
+    "Ku class": {
+        "lang": "Swahili",
+        "then": "class-15",
+    },
+    "Mu class": {
+        "lang": "Swahili",
+        "then": "class-18",
+    },
 
+    # taka/Swahili sw-conj
+    "Polarity": "",
+    "Persons": "",
+    "Persons / Classes": "",
+    "Classes": "",
+    "3rd / M-wa": {
+        "lang": "Swahili",
+        "then": "dummy-store-hdrspan third-person",
+    },
+    "M-mi": "",
+    "Ma": "",
+    "Ki-vi": "",
+    "N": "",
+    "U": "",
+    "Ku": "",
+    "Pa": "",
+    "Mu": "",
+    "Sg.": {
+        "default": "singular",
+        "lang": "Swahili",
+        "then": "singular dummy-store-hdrspan",
+    },
+    "Pl.": {
+        "default": "plural",
+        "lang": "Swahili",
+        "then": "plural dummy-store-hdrspan",
+    },
+    "Sg. / 1": {
+        "default": "singular class-1",
+        "lang": "Swahili",
+        "then": "singular class-1 dummy-store-hdrspan",
+    },
+    "Pl. / 2":  {
+        "default": "plural class-2",
+        "lang": "Swahili",
+        "then": "plural class-2 dummy-store-hdrspan",
+    },
+    "3": {
+        "default": "third-person",
+        "lang": "Swahili",
+        "then": "class-3 dummy-store-hdrspan",
+        "else": {
+            "lang": head_final_numeric_langs,
+            "then": "class-3",
+        },
+    },
+    "4": {
+        "default": "class-4",
+        "lang": "Swahili",
+        "then": "class-4 dummy-store-hdrspan",
+    },
+    "5": {
+        "default": "class-5",
+        "lang": "Swahili",
+        "then": "class-5 dummy-store-hdrspan",
+    },
+    "6": {
+        "default": "class-6",
+        "lang": "Swahili",
+        "then": "class-6 dummy-store-hdrspan",
+    },
+    "7": {
+        "default": "class-7",
+        "lang": "Swahili",
+        "then": "class-7 dummy-store-hdrspan",
+    },
+    "8": {
+        "default": "class-8",
+        "lang": "Swahili",
+        "then": "class-8 dummy-store-hdrspan",
+    },
+    "9": {
+        "default": "class-9",
+        "lang": "Swahili",
+        "then": "class-9 dummy-store-hdrspan",
+    },
+    "10": {
+        "default": "class-10",
+        "lang": "Swahili",
+        "then": "class-10 dummy-store-hdrspan",
+    },
+    "11 / 14": {
+        "default": "class-11 class-14",
+        "lang": "Swahili",
+        "then": "dummy-store-hdrspan class-11 class-14",
+    },
+    "15 / 17": {
+        "default": "class-15 class-17",
+        "lang": "Swahili",
+        "then": "class-15 class-17 dummy-store-hdrspan",
+    },
+    "16": {
+        "default": "class-16",
+        "lang": "Swahili",
+        "then": "class-16 dummy-store-hdrspan",
+    },
+    "18": {
+        "default": "class-18",
+        "lang": "Swahili",
+        "then": "class-18 dummy-store-hdrspan",
+    },
+
+    "1s": {
+        "default": "first-person singular",
+        "if": "object-concord",
+        "then": "object-first-person object-singular",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags first-person singular",
+                     "dummy-use-as-rowtags object-first-person object-singular",
+                    ],
+            },
+        },
+    "2s": {
+        "default": "second-person singular",
+        "if": "object-concord",
+        "then": "object-second-person object-singular",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags second-person singular",
+                    "dummy-use-as-rowtags object-second-person object-singular",
+                    ],
+            },
+        },
+    "3s": {
+        "default": "third-person singular",
+        "if": "object-concord",
+        "then": "object-third-person object-singular",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags third-person singular",
+                     "dummy-use-as-rowtags object-third-person object-singular",
+                    ],
+            },
+        },
+    "1p": {
+        "default": "first-person plural",
+        "if": "object-concord",
+        "then": "object-first-person object-plural",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags first-person plural",
+                     "dummy-use-as-rowtags object-first-person object-plural",
+                    ],
+            },
+        },
+    "2p": {
+        "default": "second-person plural",
+        "if": "object-concord",
+        "then": "object-second-person object-plural",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags second-person plural",
+                    "dummy-use-as-rowtags object-second-person object-plural",
+                    ],
+            },
+        },
+    "3p": {
+        "default": "third-person plural",
+        "if": "object-concord",
+        "then": "object-third-person object-plural",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags third-person plural",
+                     "dummy-use-as-rowtags object-third-person object-plural",
+                    ],
+            },
+        },
+    "c1": {
+        "default": "class-1",
+        "if": "object-concord",
+        "then": "object-class-1",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-1",
+                     "dummy-use-as-rowtags object-class-1",]
+        },
+    },
+    "c2": {
+        "default": "class-2",
+        "if": "object-concord",
+        "then": "object-class-2",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-2",
+                     "dummy-use-as-rowtags object-class-2",],
+        },
+    },
+    "c3": {
+        "default": "class-3",
+        "if": "object-concord",
+        "then": "object-class-3",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-3",
+                     "dummy-use-as-rowtags object-class-3",],
+        },
+    },
+    "c4": {
+        "default": "class-4",
+        "if": "object-concord",
+        "then": "object-class-4",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-4",
+                     "dummy-use-as-rowtags object-class-4",],
+        },
+    },
+    "c5": {
+        "default": "class-5",
+        "if": "object-concord",
+        "then": "object-class-5",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-5",
+                     "dummy-use-as-rowtags object-class-5",],
+        },
+    },
+    "c6": {
+        "default": "class-6",
+        "if": "object-concord",
+        "then": "object-class-6",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-6",
+                     "dummy-use-as-rowtags object-class-6",],
+        },
+    },
+    "c7": {
+        "default": "class-7",
+        "if": "object-concord",
+        "then": "object-class-7",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-7",
+                     "dummy-use-as-rowtags object-class-7",],
+        },
+    },
+    "c8": {
+        "default": "class-8",
+        "if": "object-concord",
+        "then": "object-class-8",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-8",
+                     "dummy-use-as-rowtags object-class-8",],
+        },
+    },
+    "c9": {
+        "default": "class-9",
+        "if": "object-concord",
+        "then": "object-class-9",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-9",
+                     "dummy-use-as-rowtags object-class-9",],
+        },
+    },
+    "c10": {
+        "default": "class-10",
+        "if": "object-concord",
+        "then": "object-class-10",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-10",
+                     "dummy-use-as-rowtags object-class-10",],
+        },
+    },
+    "c11": {
+        "default": "class-11",
+        "if": "object-concord",
+        "then": "object-class-11",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-11",
+                     "dummy-use-as-rowtags object-class-11",],
+        },
+    },
+    "c12": {
+        "default": "class-12",
+        "if": "object-concord",
+        "then": "object-class-12",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-12",
+                     "dummy-use-as-rowtags object-class-12",],
+        },
+    },
+    "c13": {
+        "default": "class-13",
+        "if": "object-concord",
+        "then": "object-class-13",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-13",
+                     "dummy-use-as-rowtags object-class-13",],
+        },
+    },
+    "c14": {
+        "default": "class-14",
+        "if": "object-concord",
+        "then": "object-class-14",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-14",
+                     "dummy-use-as-rowtags object-class-14",],
+        },
+    },
+    "c15": {
+        "default": "class-15",
+        "if": "object-concord",
+        "then": "object-class-15",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-15",
+                     "dummy-use-as-rowtags object-class-15",],
+        },
+    },
+    "c16": {
+        "default": "class-16",
+        "if": "object-concord",
+        "then": "object-class-16",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-16",
+                     "dummy-use-as-rowtags object-class-16",],
+        },
+    },
+    "c17": {
+        "default": "class-17",
+        "if": "object-concord",
+        "then": "object-class-17",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-17",
+                     "dummy-use-as-rowtags object-class-17",],
+        },
+    },
+    "c18": {
+        "default": "class-18",
+        "if": "object-concord",
+        "then": "object-class-18",
+        "else": {
+            "lang": "Swahili",
+            "then": ["dummy-use-as-coltags class-18",
+                     "dummy-use-as-rowtags object-class-18",],
+        },
+    },
+        
+    "1s/2s/3s/c1": ["object-first-person object-second-person "
+                    "object-third-person object-singular",
+                    "object-class-1"],
+    "*p/2/3/11/14": ["object-plural object-first-person "
+                     "object-second-person object-third-person",
+                     "object-class-2 object-class-3 object-class-11 "
+                     "object-class-14"],
+    "c4/c6/c9": "object-class-4 object-class-6 object-class-9",
+    "2s/2p/15/17": ["object-second-person object-singular object-plural",
+                    "object-class-15 object-class-17"],
+    "2p/3p/c2": ["object-second-person object-third-person object-plural",
+                 "object-class-2"],
+    "c3/c11/c14": "object-class-3 object-class-11 object-class-14",
+    "c4/c9": "object-class-4 object-class-9",
+    "Forms with object concords": "object-concord",
+
+    "Past": {
+        "default": "past",
+        "lang": "Swahili",
+        "then": "dummy-load-stored-hdrspans past",
+    },
+    "Present": {
+        "default": "present",
+        "lang": "Swahili",
+        "then": "dummy-load-stored-hdrspans present",
+    },
+    "Future": {
+        "default": "future",
+        "lang": "Swahili",
+        "then": "future dummy-load-stored-hdrspans"
+     },
+    "Subjunctive": {
+        "default": "subjunctive",
+        "lang": "Swahili",
+        "then": "subjunctive dummy-load-stored-hdrspans"
+     },
+    "Present conditional": {
+        "default": "present irrealis",
+        "lang": "Swahili",
+        "then": "present irrealis dummy-load-stored-hdrspans"
+     },
+    "Past conditional": {
+        "default": "past irrealis",
+        "lang": "Swahili",
+        "then": "past irrealis dummy-load-stored-hdrspans"
+     },
+    "Conditional contrary to fact": {
+        "default": "conditional counterfactual",
+        "lang": "Swahili",
+        "then": "conditional counterfactual dummy-load-stored-hdrspans"
+     },
+    "Gnomic": {
+        "default": "gnomic",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "gnomic dummy-load-stored-hdrspans"
+     },
+    "Perfect": {
+        "default": "perfect",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "perfect dummy-load-stored-hdrspans"
+     },
+    '"Already"': {
+        "default": "already-form",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "already-form dummy-load-stored-hdrspans"
+     },
+    '"Not yet"': {
+        "default": "not-yet-form",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "not-yet-form dummy-load-stored-hdrspans"
+     },
+    '"If/When"': {
+        "default": "if-when-form",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "if-when-form dummy-load-stored-hdrspans"
+     },
+    '"If not"': {
+        "default": "if-not-form",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "if-not-form dummy-load-stored-hdrspans"
+     },
+    "Consecutive": {
+        "default": "consecutive",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "consecutive dummy-load-stored-hdrspans"
+     },
+    "General positive": {
+        "default": "general-mood positive",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "general-mood positive dummy-load-stored-hdrspans"
+     },
+    "General negative": {
+        "default": "general-mood negative",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "general-mood negative dummy-load-stored-hdrspans"
+     },
+    "Positive past": {
+        "default": "positive past",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "positive past dummy-load-stored-hdrspans"
+     },
+    "Negative past": {
+        "default": "negative past",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "negative past dummy-load-stored-hdrspans"
+     },
+    "Positive present": {
+        "default": "positive present",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "positive present dummy-load-stored-hdrspans"
+     },
+    "Negative present": {
+        "default": "negative present",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "negative present dummy-load-stored-hdrspans"
+     },
+    "Positive future": {
+        "default": "positive future",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "positive future dummy-load-stored-hdrspans"
+     },
+    "Negative future": {
+        "default": "negative future",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "negative future dummy-load-stored-hdrspans"
+     },
+    "Positive subjunctive": {
+        "default": "positive subjunctive",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "positive subjunctive dummy-load-stored-hdrspans"
+     },
+    "Negative subjunctive": {
+        "default": "negative subjunctive",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "negative subjunctive dummy-load-stored-hdrspans"
+     },
+    "Positive present conditional": {
+        "default": "positive present irrealis",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "positive present irrealis dummy-load-stored-hdrspans"
+     },
+    "Negative present conditional": {
+        "default": "negative present irrealis",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "negative present irrealis dummy-load-stored-hdrspans"
+     },
+    "Positive past conditional": {
+        "default": "positive past irrealis",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "positive past irrealis dummy-load-stored-hdrspans"
+     },
+    "Negative past conditional": {
+        "default": "negative past irrealis",
+        "lang": "Swahili",
+        "nested-table-depth": [1, 2],
+        "then": "negative past irrealis dummy-load-stored-hdrspans"
+     },
+    
 }
 
 
@@ -5753,6 +6153,10 @@ def check_v(k, v):
                               "{!r}".format(k, kk, v[kk]))
             elif kk in ("lang",):
                 pass
+            elif kk == "nested-table-depth":
+                if not isinstance(v[kk], (int, list, tuple)):
+                    print("infl_map[{!r}] contains invalid depth-value "
+                                "{!r}".format(k, v[kk]))
             else:
                 print("infl_map[{!r}] contains invalid key {!r}"
                       .format(k, kk))
