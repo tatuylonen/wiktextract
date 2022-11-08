@@ -2308,6 +2308,150 @@ def handle_generic_table(config, ctx, data, word, lang, pos, rows, titles,
                 have_forms.add(fdt)
             data_append(ctx, data, "forms", dt)
 
+def determine_header(ctx, config, lang, word, pos,
+                     table_kind, kind, style,
+                     row, col, celltext, titletext,
+                     cols_headered,
+                     target, cellstyle):
+    assert isinstance(table_kind, NodeKind)
+    assert isinstance(kind, (NodeKind, str))
+    assert style is None or isinstance(style, str)
+    assert cellstyle is None or isinstance(cellstyle, str)
+
+    if table_kind == NodeKind.TABLE:
+        header_kind = NodeKind.TABLE_HEADER_CELL
+    elif table_kind == NodeKind.HTML:
+        header_kind = "tr"
+    idx = celltext.find(": ")
+    is_title = False
+    # remove anything in parentheses, compress whitespace, .strip()
+    cleaned_titletext = re.sub(r"\s+", " ",
+                               re.sub(r"\s*\([^)]*\)", "",
+                                      titletext)).strip()
+    cleaned, _, _, _ = extract_cell_content(lang, word, celltext)
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    hdr_expansion = expand_header(config, ctx, word, lang, pos,
+                                  cleaned, [],
+                                  silent=True, ignore_tags=True)
+    candidate_hdr = not any(any(t.startswith("error-")
+                                 for t in ts)
+                             for ts in hdr_expansion)
+    # KJ candidate_hdr says that a specific cell is a candidate
+    # for being a header because it passed through expand_header
+    # without getting any "error-" tags; that is, the contents
+    # is "valid" for being a header; these are the false positives
+    # we want to catch
+    ignored_cell = any(any(t.startswith("dummy-")
+                            for t in ts)
+                        for ts in hdr_expansion)
+    # ignored_cell should NOT be used to filter for headers, like
+    # candidate_hdr is used, but only to filter for related *debug
+    # messages*: some dummy-tags are actually half-way to headers,
+    # like ones with "Notes", so they MUST be headers, but later
+    # on they're ignored *as* headers so they don't need to print
+    # out any cells-as-headers debug messages.
+    if (candidate_hdr and
+       kind != header_kind and
+       cleaned != "" and cleaned != "dummy-ignored-text-cell" and
+       cleaned not in IGNORED_COLVALUES):
+        print("col: {}".format(col))
+        if (not ignored_cell and
+            lang not in LANGUAGES_WITH_CELLS_AS_HEADERS):
+            ctx.debug("rejected heuristic header: "
+                      "table cell identified as header and given "
+                      "candidate status, BUT {} is not in "
+                      "LANGUAGES_WITH_CELLS_AS_HEADERS; "
+                      "cleaned text: {}"
+                      .format(lang, cleaned))
+            candidate_hdr = False
+        elif (cleaned not in LANGUAGES_WITH_CELLS_AS_HEADERS
+                                    .get(lang, "")):
+            ctx.debug("rejected heuristic header: "
+                      "table cell identified as header and given "
+                      "candidate status, BUT the cleaned text is "
+                      "not in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
+                      "cleaned text: {}"
+                      .format(lang, cleaned))
+            candidate_hdr = False
+        else:
+            ctx.debug("accepted heuristic header: "
+                      "table cell identified as header and given "
+                      "candidate status, AND the cleaned text is "
+                      "in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
+                      "cleaned text: {}"
+                      .format(lang, cleaned))
+
+    # If the cell starts with something that could start a
+    # definition (typically a reference symbol), make it a candidate
+    # regardless of whether the language is listed.
+    if (re.match(def_re, cleaned) and
+        not re.match(nondef_re, cleaned)):
+        candidate_hdr = True
+
+    #print("titletext={!r} hdr_expansion={!r} candidate_hdr={!r} "
+    #      "lang={} pos={}"
+    #      .format(titletext, hdr_expansion, candidate_hdr,
+    #              lang, pos))
+    if idx >= 0 and titletext[:idx] in infl_map:
+        target = titletext[idx + 2:].strip()
+        celltext = celltext[:idx]
+        is_title = True
+    elif (kind == header_kind and
+          titletext.find(" + ") < 0 and  # For "avoir + blah blah"?
+          not any(isinstance(x, WikiNode) and
+                  x.kind == NodeKind.HTML and
+                  x.args == "span" and
+                  x.attrs.get("lang") in ("az",)
+                  for x in col.children)):
+        is_title = True
+    elif (candidate_hdr and
+          cleaned_titletext not in IGNORED_COLVALUES and
+          distw([cleaned_titletext], word) > 0.3 and
+          cleaned_titletext not in ("I", "es")):
+        is_title = True
+    #  if first column or same style as first column
+    elif (style == cellstyle and
+          # and title is not identical to word name
+          titletext != word and cleaned not in IGNORED_COLVALUES and
+           cleaned != "dummy-ignored-text-cell" and
+          #  the style composite string is not broken
+          not style.startswith("////") and
+          titletext.find(" + ") < 0):
+        if (not ignored_cell and
+            lang not in LANGUAGES_WITH_CELLS_AS_HEADERS):
+            ctx.debug("rejected heuristic header: "
+                      "table cell identified as header based "
+                      "on style, BUT {} is not in "
+                      "LANGUAGES_WITH_CELLS_AS_HEADERS; "
+                      "cleaned text: {}, style: {}"
+                      .format(lang, cleaned, style))
+        elif (not ignored_cell and
+              cleaned not in LANGUAGES_WITH_CELLS_AS_HEADERS
+                                    .get(lang, "")):
+            ctx.debug("rejected heuristic header: "
+                      "table cell identified as header based "
+                      "on style, BUT the cleaned text is "
+                      "not in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
+                      "cleaned text: {}, style: {}"
+                      .format(lang, cleaned, style))
+        else:
+            ctx.debug("accepted heuristic header: "
+                      "table cell identified as header based "
+                      "on style, AND the cleaned text is "
+                      "in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
+                      "cleaned text: {}, style: {}"
+                      .format(lang, cleaned, style))
+            is_title = True
+    if (not is_title and len(row) < len(cols_headered) and
+        cols_headered[len(row)]):
+        # Whole column has title suggesting they are headers
+        # (e.g. "Case")
+        is_title = True
+    if re.match(r"Conjugation of |Declension of |Inflection of |"
+                r"Mutation of |Notes\b", # \b is word-boundary
+                titletext):
+        is_title = True
+    return is_title, hdr_expansion, target, celltext
 
 def handle_wikitext_table(config, ctx, word, lang, pos,
                           data, tree, titles, source, after):
@@ -2430,140 +2574,17 @@ def handle_wikitext_table(config, ctx, word, lang, pos,
 
                 if not row:  # if first column in row
                     style = cellstyle
-                target = None
                 titletext = celltext.strip()
                 while titletext and is_superscript(titletext[-1]):
                     titletext = titletext[:-1]
-                idx = celltext.find(": ")
-                is_title = False
-                # remove anything in parentheses, compress whitespace, .strip()
-                cleaned_titletext = re.sub(r"\s+", " ",
-                                           re.sub(r"\s*\([^)]*\)", "",
-                                                  titletext)).strip()
-                cleaned, _, _, _ = extract_cell_content(lang, word, celltext)
-                cleaned = re.sub(r"\s+", " ", cleaned)
-                hdr_expansion = expand_header(config, ctx, word, lang, pos,
-                                              cleaned, [],
-                                              silent=True, ignore_tags=True)
-                candidate_hdr = not any(any(t.startswith("error-")
-                                             for t in ts)
-                                         for ts in hdr_expansion)
-                # KJ candidate_hdr says that a specific cell is a candidate
-                # for being a header because it passed through expand_header
-                # without getting any "error-" tags; that is, the contents
-                # is "valid" for being a header; these are the false positives
-                # we want to catch
-                ignored_cell = any(any(t.startswith("dummy-")
-                                        for t in ts)
-                                    for ts in hdr_expansion)
-                # ignored_cell should NOT be used to filter for headers, like
-                # candidate_hdr is used, but only to filter for related *debug
-                # messages*: some dummy-tags are actually half-way to headers,
-                # like ones with "Notes", so they MUST be headers, but later
-                # on they're ignored *as* headers so they don't need to print
-                # out any cells-as-headers debug messages.
-                if (candidate_hdr and
-                   kind != NodeKind.TABLE_HEADER_CELL and
-                   cleaned != "" and cleaned != "dummy-ignored-text-cell" and
-                   cleaned not in IGNORED_COLVALUES):
-                    print("col: {}".format(col))
-                    if (not ignored_cell and
-                        lang not in LANGUAGES_WITH_CELLS_AS_HEADERS):
-                        ctx.debug("rejected heuristic header: "
-                                  "table cell identified as header and given "
-                                  "candidate status, BUT {} is not in "
-                                  "LANGUAGES_WITH_CELLS_AS_HEADERS; "
-                                  "cleaned text: {}"
-                                  .format(lang, cleaned))
-                        candidate_hdr = False
-                    elif (cleaned not in LANGUAGES_WITH_CELLS_AS_HEADERS
-                                                .get(lang, "")):
-                        ctx.debug("rejected heuristic header: "
-                                  "table cell identified as header and given "
-                                  "candidate status, BUT the cleaned text is "
-                                  "not in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
-                                  "cleaned text: {}"
-                                  .format(lang, cleaned))
-                        candidate_hdr = False
-                    else:
-                        ctx.debug("accepted heuristic header: "
-                                  "table cell identified as header and given "
-                                  "candidate status, AND the cleaned text is "
-                                  "in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
-                                  "cleaned text: {}"
-                                  .format(lang, cleaned))
 
-                # If the cell starts with something that could start a
-                # definition (typically a reference symbol), make it a candidate
-                # regardless of whether the language is listed.
-                if (re.match(def_re, cleaned) and
-                    not re.match(nondef_re, cleaned)):
-                    candidate_hdr = True
-
-                #print("titletext={!r} hdr_expansion={!r} candidate_hdr={!r} "
-                #      "lang={} pos={}"
-                #      .format(titletext, hdr_expansion, candidate_hdr,
-                #              lang, pos))
-                if idx >= 0 and titletext[:idx] in infl_map:
-                    target = titletext[idx + 2:].strip()
-                    celltext = celltext[:idx]
-                    is_title = True
-                elif (kind == NodeKind.TABLE_HEADER_CELL and
-                      titletext.find(" + ") < 0 and  # For "avoir + blah blah"?
-                      not any(isinstance(x, WikiNode) and
-                              x.kind == NodeKind.HTML and
-                              x.args == "span" and
-                              x.attrs.get("lang") in ("az",)
-                              for x in col.children)):
-                    is_title = True
-                elif (candidate_hdr and
-                      cleaned_titletext not in IGNORED_COLVALUES and
-                      distw([cleaned_titletext], word) > 0.3 and
-                      cleaned_titletext not in ("I", "es")):
-                    is_title = True
-                #  if first column or same style as first column
-                elif (style == cellstyle and
-                      # and title is not identical to word name
-                      titletext != word and cleaned not in IGNORED_COLVALUES and
-                       cleaned != "dummy-ignored-text-cell" and
-                      #  the style composite string is not broken
-                      not style.startswith("////") and
-                      titletext.find(" + ") < 0):
-                    if (not ignored_cell and
-                        lang not in LANGUAGES_WITH_CELLS_AS_HEADERS):
-                        ctx.debug("rejected heuristic header: "
-                                  "table cell identified as header based "
-                                  "on style, BUT {} is not in "
-                                  "LANGUAGES_WITH_CELLS_AS_HEADERS; "
-                                  "cleaned text: {}, style: {}"
-                                  .format(lang, cleaned, style))
-                    elif (not ignored_cell and
-                          cleaned not in LANGUAGES_WITH_CELLS_AS_HEADERS
-                                                .get(lang, "")):
-                        ctx.debug("rejected heuristic header: "
-                                  "table cell identified as header based "
-                                  "on style, BUT the cleaned text is "
-                                  "not in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
-                                  "cleaned text: {}, style: {}"
-                                  .format(lang, cleaned, style))
-                    else:
-                        ctx.debug("accepted heuristic header: "
-                                  "table cell identified as header based "
-                                  "on style, AND the cleaned text is "
-                                  "in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
-                                  "cleaned text: {}, style: {}"
-                                  .format(lang, cleaned, style))
-                        is_title = True
-                if (not is_title and len(row) < len(cols_headered) and
-                    cols_headered[len(row)]):
-                    # Whole column has title suggesting they are headers
-                    # (e.g. "Case")
-                    is_title = True
-                if re.match(r"Conjugation of |Declension of |Inflection of |"
-                            r"Mutation of |Notes\b", # \b is word-boundary
-                            titletext):
-                    is_title = True
-                    
+                is_title, hdr_expansion, target, celltext = \
+                    determine_header(ctx, config, lang, word, pos,
+                                     NodeKind.TABLE, kind, style,
+                                     row, col, celltext, titletext,
+                                     cols_headered,
+                                     None, cellstyle)
+                
                 if is_title:
                 # If this cell gets a "*" tag, make the whole column
                 # below it (toggling it in cols_headered = [F, F, T...])
@@ -2649,8 +2670,8 @@ def handle_html_table(config, ctx, word, lang, pos, data, tree, titles, source,
     assert isinstance(source, str)
     assert isinstance(after, str)
 
-    ctx.debug("HTML TABLES NOT YET IMPLEMENTED at {}/{}"
-              .format(word, lang))
+    # ctx.debug("HTML TABLES NOT YET IMPLEMENTED at {}/{}"
+              # .format(word, lang))
 
 
 def parse_inflection_section(config, ctx, data, word, lang, pos, section, tree):
