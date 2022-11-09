@@ -1826,7 +1826,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         text = ctx.node_to_wikitext(node.children)
 
         # Split text into separate sections for each to-level template
-        brace_matches = re.split("({{|}})", text) # ["{{", "template", "}}"]
+        brace_matches = re.split("({{+|}}+)", text) # ["{{", "template", "}}"]
 
         template_sections = []
         
@@ -1837,21 +1837,31 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                      # with the first template;
                                      # otherwise, text
                                      # goes with preceding template
-            template_nesting = 0  # depth of {{ {{ nesting }} }}
+            template_nesting = 0  # depth of SINGLE BRACES { { nesting } }
+            # Because there is the possibility of triple curly braces
+            # ("{{{", "}}}") in addition to normal ("{{ }}"), we do not
+            # count nesting depth using pairs of two brackets, but
+            # instead use singular braces ("{ }").
+            # Because template delimiters should be balanced, regardless
+            # of whether {{ or {{{ is used, and because we only care
+            # about the outer-most delimiters (the highest level template)
+            # we can just count the single braces when those single
+            # braces are part of a group.
             for m in brace_matches:
-                if m == "{{":
+                if m.startswith("{{"):
                     if (template_nesting == 0 and
                         after_templates):
                         template_sections.append(tsection)
                         tsection = []
                         # start new section
                     after_templates = True
-                    template_nesting += 1
+                    template_nesting += len(m)
                     tsection.append(m)
-                elif m == "}}":
-                    template_nesting -= 1
+                elif m.startswith("}}"):
+                    template_nesting -= len(m)
                     if template_nesting < 0:
-                        ctx.error("Couldn't split inflection templates,"
+                        ctx.error("Negatively nested braces, "
+                                  "couldn't split inflection templates, "
                                   "{}/{} section {}"
                                   .format(word, language, section))
                         template_sections = [] # use whole text
@@ -1873,7 +1883,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
         else:
             for tsection in template_sections:
                 texts.append("".join(tsection))
-
+        if template_nesting != 0:
+            ctx.error("Template nesting error:"
+                      "template_nesting = {}"
+                      "couldn't split inflection templates,"
+                      "{}/{} section {}"
+                      .format(template_nesting, word, language, section))
+            texts = [text]
         for text in texts:
             tree = ctx.parse(text, expand_all=True,
                              template_fn=inflection_template_fn)
