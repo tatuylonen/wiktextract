@@ -21,7 +21,7 @@ from .tags import valid_tags
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_qualifier,
     distw, parse_alt_or_inflection_of, classify_desc)
-from wiktextract.inflection import parse_inflection_section
+from wiktextract.inflection import parse_inflection_section, TableContext
 
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
@@ -1824,14 +1824,70 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # Convert the subtree back to Wikitext, then expand all and parse,
         # capturing templates in the process
         text = ctx.node_to_wikitext(node.children)
-        tree = ctx.parse(text, expand_all=True,
-                         template_fn=inflection_template_fn)
 
-        # Parse inflection tables from the section.  The data is stored
-        # under "forms".
-        if config.capture_inflections:
-            parse_inflection_section(config, ctx, pos_data, word, language,
-                                     pos, section, tree)
+        # Split text into separate sections for each to-level template
+        brace_matches = re.split("({{|}})", text) # ["{{", "template", "}}"]
+
+        template_sections = []
+        
+        if len(brace_matches) > 1:
+            tsection = []
+            after_templates = False  # kludge to keep any text
+                                     # before first template
+                                     # with the first template;
+                                     # otherwise, text
+                                     # goes with preceding template
+            template_nesting = 0  # depth of {{ {{ nesting }} }}
+            for m in brace_matches:
+                if m == "{{":
+                    if (template_nesting == 0 and
+                        after_templates):
+                        template_sections.append(tsection)
+                        tsection = []
+                        # start new section
+                    after_templates = True
+                    template_nesting += 1
+                    tsection.append(m)
+                elif m == "}}":
+                    template_nesting -= 1
+                    if template_nesting < 0:
+                        ctx.error("Couldn't split inflection templates,"
+                                  "{}/{} section {}"
+                                  .format(word, language, section))
+                        template_sections = [] # use whole text
+                        break
+                    tsection.append(m)
+                else:
+                    tsection.append(m)
+            if tsection:  # dangling tsection
+                template_sections.append(tsection)
+                # Why do it this way around? The parser has a preference
+                # to associate bits outside of tables with the preceding
+                # table (`after`-variable), so a new tsection begins
+                # at {{ and everything before it belongs to the previous
+                # template.
+        
+        texts = []
+        if not template_sections:
+            texts = [text]
+        else:
+            for tsection in template_sections:
+                texts.append("".join(tsection))
+
+        for text in texts:
+            tree = ctx.parse(text, expand_all=True,
+                             template_fn=inflection_template_fn)
+    
+            # Parse inflection tables from the section.  The data is stored
+            # under "forms".
+            if config.capture_inflections:
+                template_name = re.search("{{([^}{\|]+)\|", text).group(1)
+                tblctx = TableContext(template_name)
+                    
+                parse_inflection_section(config, ctx, pos_data,
+                                         word, language,
+                                         pos, section, tree,
+                                         tblctx=tblctx)
 
     def get_subpage_section(title, subtitle, seq):
         """Loads a subpage of the given page, and finds the section

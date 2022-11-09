@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 from wikitextprocessor import Wtp
 from wiktextract import WiktionaryConfig
-from wiktextract.inflection import expand_header
+from wiktextract.inflection import (expand_header, TableContext)
 
 class InflTests(unittest.TestCase):
 
@@ -17,11 +17,13 @@ class InflTests(unittest.TestCase):
         self.config = WiktionaryConfig()
         self.ctx.start_page("testpage")
         self.ctx.start_section("English")
+        self.tblctx = TableContext("barfoo")
 
     def xexpand_header(self, text, i_map, lang="English", pos="verb",
                        base_tags=[],):
         with patch('wiktextract.inflection.infl_map', i_map):
-            ret = expand_header(self.config, self.ctx, "foobar", lang,
+            ret = expand_header(self.config, self.ctx, self.tblctx,
+                                "foobar", lang,
                                 pos, "foo", base_tags)
         return ret
 
@@ -290,6 +292,32 @@ class InflTests(unittest.TestCase):
             expected = [("negative",)] 
             self.assertEqual(expected, ret)
 
+    def test_tmplt_name1(self):
+            infl_map = {
+                "foo": {
+                    "inflection-template": "barfoo",
+                    "then": "positive",
+                    "else": "negative",
+                },
+            }
+            ret = self.xexpand_header("foo", infl_map,
+                                      pos="noun",)
+            expected = [("positive",)] 
+            self.assertEqual(expected, ret)
+
+    def test_tmplt_name2(self):
+            infl_map = {
+                "foo": {
+                    "inflection-template": "foofoo",
+                    "then": "positive",
+                    "else": "negative",
+                },
+            }
+            ret = self.xexpand_header("foo", infl_map,
+                                      pos="noun",)
+            expected = [("negative",)] 
+            self.assertEqual(expected, ret)
+
     def test_combined_conditions1(self):
             infl_map = {
                 "foo": {
@@ -424,6 +452,24 @@ class InflTests(unittest.TestCase):
                                       pos="noun",
                                       base_tags=["indicative"],)
             expected = [("negative",)] 
+            self.assertEqual(expected, ret)
+
+    def test_combined_conditions9(self):
+            infl_map = {
+                "foo": {
+                    "lang": "English",
+                    "pos": "verb",
+                    "inflection-template": "barfoo",
+                    "if": "indicative",
+                    "then": "positive",
+                    "else": "negative",
+                },
+            }
+            ret = self.xexpand_header("foo", infl_map,
+                                      lang="English",
+                                      pos="verb",
+                                      base_tags=["indicative"],)
+            expected = [("positive",)] 
             self.assertEqual(expected, ret)
 
     def test_mixed1(self):
