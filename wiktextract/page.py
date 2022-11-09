@@ -1056,6 +1056,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 v = v.strip()
                 if v and v.find("<") < 0:
                     gloss_template_args.add(v)
+            if config.dump_file_lang_code == "zh":
+                add_form_of_tags(ctx, name, config.FORM_OF_TEMPLATES, sense_base)
             return None
 
         def extract_link_texts(item):
@@ -3249,3 +3251,24 @@ def clean_node(config, ctx, category_data, value, template_fn=None,
     # Some templates create question mark in <sup>, e.g., some Korean Hanja form
     v = re.sub(r"\^\?", "", v)
     return v
+
+
+def add_form_of_tags(ctx, template_name, form_of_templates, sense_data):
+    # https://en.wiktionary.org/wiki/Category:Form-of_templates
+    if template_name in form_of_templates:
+        data_append(ctx, sense_data, "tags", "form-of")
+
+        if template_name in ("abbreviation of", "abbr of"):
+            data_append(ctx, sense_data, "tags", "abbreviation")
+        elif template_name.startswith(("alt ", "alternative")):
+            data_append(ctx, sense_data, "tags", "alt-of")
+        elif template_name.startswith(("female", "feminine")):
+            data_append(ctx, sense_data, "tags", "feminine")
+        elif template_name == "initialism of":
+            data_extend(ctx, sense_data, "tags", ["abbreviation", "initialism"])
+        elif template_name.startswith("masculine"):
+            data_append(ctx, sense_data, "tags", "masculine")
+        elif template_name.startswith("misspelling"):
+            data_append(ctx, sense_data, "tags", "misspelling")
+        elif template_name.startswith(("obsolete", "obs ")):
+            data_append(ctx, sense_data, "tags", "obsolete")
