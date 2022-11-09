@@ -2448,23 +2448,23 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         return
 
                     if sub.lower() in config.POS_SUBTITLES:
-                        seq = [language, sub, "Translations"]
+                        seq = [language, sub, config.OTHER_SUBTITLES["translations"]]
                     else:
                         pos = ctx.subsection
                         if pos.lower() not in config.POS_SUBTITLES:
                             ctx.debug("unhandled see translation subpage: "
                                       "language={} sub={} ctx.subsection={}"
                                       .format(language, sub, ctx.subsection))
-                        seq = [language, sub, pos, "Translations"]
-                    subnode = get_subpage_section(ctx.title, "translations",
-                                                  seq)
+                        seq = [language, sub, pos, config.OTHER_SUBTITLES["translations"]]
+                    subnode = get_subpage_section(
+                        ctx.title, config.OTHER_SUBTITLES["translations"], seq)
                     if subnode is not None:
                         parse_translations(data, subnode)
                     else:
                         # Failed to find the normal subpage section
-                        seq = ["Translations"]
-                        subnode = get_subpage_section(ctx.title, "translations",
-                                                      seq)
+                        seq = [config.OTHER_SUBTITLES["translations"]]
+                        subnode = get_subpage_section(
+                            ctx.title, config.OTHER_SUBTITLES["translations"], seq)
                         if subnode is not None:
                             parse_translations(data, subnode)
                     return ""
@@ -2564,16 +2564,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if (isinstance(arg0, (list, tuple)) and
                         arg0 and
                         isinstance(arg0[0], str) and
-                        arg0[0].endswith("/translations") and
-                        arg0[0][:-len("/translations")] == ctx.title):
+                        arg0[0].endswith("/" + config.OTHER_SUBTITLES["translations"]) and
+                        arg0[0][:-(1 + len(config.OTHER_SUBTITLES["translations"]))] == ctx.title):
                         ctx.debug("translations subpage link found on main "
                                   "page instead "
                                   "of normal {{see translation subpage|...}}")
                         sub = ctx.subsection
                         if sub.lower() in config.POS_SUBTITLES:
-                            seq = [language, sub, "Translations"]
-                            subnode = get_subpage_section(ctx.title,
-                                                          "translations", seq)
+                            seq = [language, sub, config.OTHER_SUBTITLES["translations"]]
+                            subnode = get_subpage_section(
+                                ctx.title, config.OTHER_SUBTITLES["translations"], seq)
                             if subnode is not None:
                                 parse_translations(data, subnode)
                         else:
