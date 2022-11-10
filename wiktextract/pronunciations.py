@@ -530,4 +530,5 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
         enprs = []
     
     # if not have_pronunciations and not have_panel_templates:
-    #     ctx.debug("no pronunciations found from pronunciation section")
+    #     ctx.debug("no pronunciations found from pronunciation section",
+    #               sortid="pronunciations/533")

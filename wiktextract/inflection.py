@@ -733,7 +733,8 @@ def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags,
             elif m is None:
                 if not silent:
                     ctx.debug("inflection table: unrecognized header: {}"
-                              .format(text))
+                              .format(text),
+                              sortid="inflection/735")
                 # Unrecognized header
                 combined_return = or_tagsets(lang, pos, combined_return,
                                              [("error-unrecognized-form",)])
@@ -765,7 +766,8 @@ def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags,
             if not isinstance(v, dict):
                 ctx.debug("inflection table: internal: "
                           "UNIMPLEMENTED INFL_MAP VALUE: {}"
-                          .format(infl_map[text]))
+                          .format(infl_map[text]),
+                          sortid="inflection/767")
                 tagset = [()]
                 break
             # Evaluate the conditional expression.
@@ -847,7 +849,8 @@ def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags,
             if cond == "default-true" and not default_then and not silent:
                 ctx.debug("inflection table: IF MISSING COND: word={} "
                           "lang={} text={} base_tags={} c={} cond={}"
-                          .format(word, lang, text, base_tags, c, cond))
+                          .format(word, lang, text, base_tags, c, cond),
+                          sortid="inflection/851")
             # Based on the result of evaluating the condition, select either
             # "then" part or "else" part.
             if cond:
@@ -862,7 +865,8 @@ def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags,
                             ctx.debug("inflection table: IF WITHOUT ELSE EVALS "
                                       "False: "
                                       "{}/{} {!r} base_tags={}"
-                                      .format(word, lang, text, base_tags))
+                                      .format(word, lang, text, base_tags),
+                                      sortid="inflection/865")
                         v = "error-unrecognized-form"
 
         # Merge the resulting tagset from this header part with the other
@@ -1228,7 +1232,8 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 parts = cell.text.strip().split("\n")
                 if len(parts) != 2:
                     ctx.debug("forced rowspan kludge got {} parts: {!r}"
-                              .format(len(parts), cell.text))
+                              .format(len(parts), cell.text),
+                              sortid="inflection/1234")
                 cell2 = copy.deepcopy(cell)
                 cell1.text = parts[0]
                 cell2.text = parts[1]
@@ -1819,7 +1824,8 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 # Warn if there are entries with empty tags
                 if not tags:
                     ctx.debug("inflection table: empty tags for {}"
-                              .format(form))
+                              .format(form),
+                              sortid="inflection/1826")
     
                 # Warn if form looks like IPA
                 ########## XXX ########
@@ -1834,7 +1840,8 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 if re.match(r"\s*/.*/\s*$", form):
                     ctx.debug("inflection table form looks like IPA: "
                               "form={} tags={}"
-                              .format(form, tags))
+                              .format(form, tags),
+                              sortid="inflection/1840")
     
                 # Note that this checks `form`, not `in tags`
                 if form == "dummy-ignored-text-cell":
@@ -2205,11 +2212,13 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                     if form and Lev < 0.1:
                         ctx.debug("accepted possible false positive '{}' with"
                                   "> 0.1 Levenshtein distance in {}/{}"
-                                  .format(form, word, lang))
+                                  .format(form, word, lang),
+                                  sortid="inflection/2213")
                     elif form and Lev < 0.3:
                         ctx.debug("skipped possible match '{}' with > 0.3"
                                   "Levenshtein distance in {}/{}"
-                                  .format(form, word, lang))
+                                  .format(form, word, lang),
+                                  sortid="inflection/2218")
                         continue
                     else:
                         continue
@@ -2359,7 +2368,8 @@ def handle_generic_table(config, ctx, tblctx, data,
         # XXX handle other table formats
         # We were not able to handle the table
         ctx.debug("unhandled inflection table format, {}/{}"
-                                  .format(word, lang))
+                                  .format(word, lang),
+                  sortid="inflection/2370")
         return
 
     # Add the returned forms but eliminate duplicates.
@@ -2439,7 +2449,8 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
                       "candidate status, BUT {} is not in "
                       "LANGUAGES_WITH_CELLS_AS_HEADERS; "
                       "cleaned text: {}"
-                      .format(lang, cleaned))
+                      .format(lang, cleaned),
+                      sortid="inflection/2447")
             candidate_hdr = False
         elif (cleaned not in LANGUAGES_WITH_CELLS_AS_HEADERS
                                     .get(lang, "")):
@@ -2448,7 +2459,8 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
                       "candidate status, BUT the cleaned text is "
                       "not in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
                       "cleaned text: {}"
-                      .format(lang, cleaned))
+                      .format(lang, cleaned),
+                      sortid="inflection/2457")
             candidate_hdr = False
         else:
             ctx.debug("accepted heuristic header: "
@@ -2456,7 +2468,8 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
                       "candidate status, AND the cleaned text is "
                       "in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
                       "cleaned text: {}"
-                      .format(lang, cleaned))
+                      .format(lang, cleaned),
+                      sortid="inflection/2466")
 
     # If the cell starts with something that could start a
     # definition (typically a reference symbol), make it a candidate
@@ -2501,7 +2514,8 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
                       "on style, BUT {} is not in "
                       "LANGUAGES_WITH_CELLS_AS_HEADERS; "
                       "cleaned text: {}, style: {}"
-                      .format(lang, cleaned, style))
+                      .format(lang, cleaned, style),
+                      sortid="inflection/2512")
         elif (not ignored_cell and
               cleaned not in LANGUAGES_WITH_CELLS_AS_HEADERS
                                     .get(lang, "")):
@@ -2510,14 +2524,16 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
                       "on style, BUT the cleaned text is "
                       "not in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
                       "cleaned text: {}, style: {}"
-                      .format(lang, cleaned, style))
+                      .format(lang, cleaned, style),
+                      sortid="inflection/2522")
         else:
             ctx.debug("accepted heuristic header: "
                       "table cell identified as header based "
                       "on style, AND the cleaned text is "
                       "in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
                       "cleaned text: {}, style: {}"
-                      .format(lang, cleaned, style))
+                      .format(lang, cleaned, style),
+                      sortid="inflection/2530")
             is_title = True
     if (not is_title and len(row) < len(cols_headered) and
         cols_headered[len(row)]):
@@ -2889,7 +2905,8 @@ def parse_inflection_section(config, ctx, data,
         if not isinstance(node, WikiNode):
             if navframe:
                 ctx.debug("inflection table: unhandled in NavFrame: {}"
-                                    .format(node))
+                                    .format(node),
+                          sortid="inflection/2907")
             return
         kind = node.kind
         if navframe:

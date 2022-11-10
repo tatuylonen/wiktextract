@@ -322,7 +322,8 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
     if re.search(r"\(\d+\)|\[\d+\]", item):
         if not item.find("numeral:"):
             ctx.debug("possible sense number in translation item: {}"
-                      .format(item))
+                      .format(item),
+                      sortid="translations/324")
 
     # Translation items should start with a language name (except
     # some nested translation items don't and rely on the language
@@ -366,7 +367,8 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
         else:
             # We don't recognize this prefix
             ctx.error("unrecognized prefix (language name?) in "
-                      "translation item: {}".format(item))
+                      "translation item: {}".format(item),
+                      sortid="translations/369")
             return None
         # Strip the language name/tag from the item
         item = item[m.end():]
@@ -379,7 +381,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
         else:
             if item.find("__IGNORE__") < 0:
                 ctx.error("no language name in translation item: {}"
-                          .format(item))
+                          .format(item), sortid="translations/382")
         return None
 
     # Map non-standard language names (e.g., "Apache" -> "Apachean")
@@ -607,7 +609,8 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                         "Bats",  # ^ in tree/English/Tr/Bats
                 ):
                     ctx.debug("suspicious translation with {!r}: {}"
-                              .format(m.group(0), tr))
+                              .format(m.group(0), tr),
+                              sortid="translations/611")
 
             if "tags" in tr:
                 tr["tags"] = list(sorted(set(tr["tags"])))

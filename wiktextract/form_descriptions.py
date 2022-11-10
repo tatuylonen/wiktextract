@@ -1025,7 +1025,8 @@ def parse_head_final_tags(ctx, lang, form):
                 if v.startswith("?"):
                     v = v[1:]
                     ctx.debug("suspicious suffix {!r} in language {}: {}"
-                              .format(tagkeys, lang, origform))
+                              .format(tagkeys, lang, origform),
+                              sortid="form_descriptions/1028")
                 tags.extend(v.split())
 
     # If parsing for certain Semitic languages (e.g., Arabic), handle
@@ -1040,7 +1041,8 @@ def parse_head_final_tags(ctx, lang, form):
                 if v.startswith("?"):
                     v = v[1:]
                     ctx.debug("suspicious suffix {!r} in language {}: {}"
-                              .format(tagkeys, lang, origform))
+                              .format(tagkeys, lang, origform),
+                              sortid="form_descriptions/1043")
                 tags.extend(v.split())
 
     # If parsing for certain other languages (e.g., Lithuanian,
@@ -1073,7 +1075,8 @@ def parse_head_final_tags(ctx, lang, form):
                 if v.startswith("?"):
                     v = v[1:]
                     ctx.debug("suspicious suffix {!r} in language {}: {}"
-                              .format(tagkeys, lang, origform))
+                              .format(tagkeys, lang, origform),
+                              sortid="form_descriptions/1077")
                 tags.extend(v.split())
 
     # Generate warnings about words ending in " or" after processing
@@ -1084,7 +1087,8 @@ def parse_head_final_tags(ctx, lang, form):
         form.endswith(" du")):
         if form not in ok_suspicious_forms:
             ctx.debug("suspicious unhandled suffix in {}: {!r}, originally {!r}"
-                      .format(lang, form, origform))
+                      .format(lang, form, origform),
+                      sortid="form_descriptions/1089")
 
     # print("parse_head_final_tags: form={!r} tags={}".format(form, tags))
     return form, tags
@@ -1141,7 +1145,8 @@ def add_related(ctx, data, tags_lst, related, origtext,
             if "class" in tags_lst:
                 return
             ctx.debug("suspicious related form tags {}: {!r} in {!r}"
-                      .format(tags_lst, related, origtext))
+                      .format(tags_lst, related, origtext),
+                      sortid="form_descriptions/1147")
 
     following_tagsets = None  # Tagsets to add to following related forms
     roman = None
@@ -1174,7 +1179,7 @@ def add_related(ctx, data, tags_lst, related, origtext,
                     tagsets1, topics1 = decode_tags(paren)
     if related and related.startswith("{{"):
         ctx.debug("{{ in word head form - possible Wiktionary error: {!r}"
-                  .format(related))
+                  .format(related), sortid="form_descriptions/1177")
         return  # Likely Wiktionary coding error
     related = unquote_kept_parens(related)
     # Split related by "/" (e.g., grande/Spanish) superlative in head
@@ -1229,14 +1234,16 @@ def add_related(ctx, data, tags_lst, related, origtext,
                     data_extend(ctx, form, "topics", topics1)
                     data_extend(ctx, form, "topics", topics2)
                     if topics1 or topics2:
-                        ctx.debug("word head form has topics: {}".format(form))
+                        ctx.debug("word head form has topics: {}".format(form),
+                                  sortid="form_descriptions/1233")
                     # Add tags from canonical form into the main entry
                     if "canonical" in tags:
                         if related in ("m", "f") and len(titleword) > 1:
                             ctx.debug("probably incorrect canonical form "
                                       "{!r} ignored (probably tag combination "
                                       "missing from xlat_head_map)"
-                                      .format(related))
+                                      .format(related),
+                                      sortid="form_descriptions/1241")
                             continue
                         if (related != titleword or add_all_canonicals or
                             topics1 or topics2):
@@ -1641,7 +1648,8 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                 tagsets, topics = decode_tags(tagpart, no_unknown_starts=True)
                 if topics:
                     ctx.debug("parenthized head part {!r} contains topics: {}"
-                              .format(tagpart, topics))
+                              .format(tagpart, topics),
+                              sortid="form_descriptions/1647")
             elif m is not None and re.match(r"in the sense ", m.group(1)):
                 # Handle certain ignored cases
                 # e.g. bord/Danish: in the sense "plank"
@@ -1691,7 +1699,8 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                             have_romanization = True
                             continue
                         tagsets = [["error-unrecognized-head-form"]]
-                        ctx.debug("unrecognized head form: {}".format(desc))
+                        ctx.debug("unrecognized head form: {}".format(desc),
+                                  sortid="form_descriptions/1698")
                         continue
 
                 if alt_related is not None:
@@ -1823,7 +1832,8 @@ def parse_sense_qualifier(ctx, text, data):
                     data["english"] = orig_semi
             else:
                 ctx.debug("unrecognized sense qualifier: {}"
-                          .format(text))
+                          .format(text),
+                          sortid="form_descriptions/1831")
     sense_tags = list(sorted(set(sense_tags)))
     data_extend(ctx, data, "tags", sense_tags)
 
@@ -1921,12 +1931,14 @@ def parse_translation_desc(ctx, lang, text, tr):
                      r[0].islower())):
                     if tr.get("alt") and tr.get("alt") != a:
                         ctx.debug("more than one value in \"alt\": {} vs. {}"
-                                  .format(tr["alt"], a))
+                                  .format(tr["alt"], a),
+                                  sortid="form_descriptions/1930")
                     tr["alt"] = a
                     if tr.get("roman") and tr.get("roman") != r:
                         ctx.debug("more than one value in \"roman\": "
                                   "{} vs. {}"
-                                  .format(tr["roman"], r))
+                                  .format(tr["roman"], r),
+                                  sortid="form_descriptions/1936")
                     tr["roman"] = r
                     continue
 
@@ -2004,12 +2016,14 @@ def parse_translation_desc(ctx, lang, text, tr):
             else:
                 if tr.get("roman"):
                     ctx.debug("more than one value in \"roman\": {} vs. {}"
-                              .format(tr["roman"], par))
+                              .format(tr["roman"], par),
+                              sortid="form_descriptions/2013")
                 tr["roman"] = par
         elif cls == "taxonomic":
             if tr.get("taxonomic"):
                 ctx.debug("more than one value in \"taxonomic\": {} vs. {}"
-                          .format(tr["taxonomic"], par))
+                          .format(tr["taxonomic"], par),
+                          sortid="form_descriptions/2019")
             if re.match(r"×[A-Z]", par):
                 data_append(ctx, tr, "tags", "extinct")
                 par = par[1:]
@@ -2017,11 +2031,13 @@ def parse_translation_desc(ctx, lang, text, tr):
         elif cls == "other":
             if tr.get("alt"):
                 ctx.debug("more than one value in \"alt\": {} vs. {}"
-                          .format(tr["alt"], par))
+                          .format(tr["alt"], par),
+                          sortid="form_descriptions/2028")
             tr["alt"] = par
         else:
             ctx.debug("parse_translation_desc unimplemented cls {}: {}"
-                        .format(cls, par))
+                        .format(cls, par),
+                        sortid="form_descriptions/2033")
 
     # Check for gender indications in suffix
     text, final_tags = parse_head_final_tags(ctx, lang, text)
@@ -2263,7 +2279,8 @@ def parse_alt_or_inflection_of1(ctx, gloss, gloss_template_args):
         m = re.search(r"[.,] |[{}()]", p)
         if m and not ctx.page_exists(p):
             ctx.debug("suspicious alt_of/form_of with {!r}: {}"
-                      .format(m.group(0), p))
+                      .format(m.group(0), p),
+                      sortid="form_descriptions/2278")
         if p.startswith("*") and len(p) >= 3 and p[1].isalpha():
             p = p[1:]
         dt = { "word": p }
