@@ -2408,7 +2408,7 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
     if table_kind == NodeKind.TABLE:
         header_kind = NodeKind.TABLE_HEADER_CELL
     elif table_kind == NodeKind.HTML:
-        header_kind = "tr"
+        header_kind = "th"
     idx = celltext.find(": ")
     is_title = False
     # remove anything in parentheses, compress whitespace, .strip()
