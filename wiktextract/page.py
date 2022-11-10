@@ -1056,6 +1056,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 v = v.strip()
                 if v and v.find("<") < 0:
                     gloss_template_args.add(v)
+            if config.dump_file_lang_code == "zh":
+                add_form_of_tags(ctx, name, config.FORM_OF_TEMPLATES, sense_base)
             return None
 
         def extract_link_texts(item):
@@ -1827,9 +1829,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         # Split text into separate sections for each to-level template
         brace_matches = re.split("({{+|}}+)", text) # ["{{", "template", "}}"]
-
         template_sections = []
-        
+        template_nesting = 0  # depth of SINGLE BRACES { { nesting } }
+        # Because there is the possibility of triple curly braces
+        # ("{{{", "}}}") in addition to normal ("{{ }}"), we do not
+        # count nesting depth using pairs of two brackets, but
+        # instead use singular braces ("{ }").
+        # Because template delimiters should be balanced, regardless
+        # of whether {{ or {{{ is used, and because we only care
+        # about the outer-most delimiters (the highest level template)
+        # we can just count the single braces when those single
+        # braces are part of a group.
+
         if len(brace_matches) > 1:
             tsection = []
             after_templates = False  # kludge to keep any text
@@ -1837,16 +1848,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                      # with the first template;
                                      # otherwise, text
                                      # goes with preceding template
-            template_nesting = 0  # depth of SINGLE BRACES { { nesting } }
-            # Because there is the possibility of triple curly braces
-            # ("{{{", "}}}") in addition to normal ("{{ }}"), we do not
-            # count nesting depth using pairs of two brackets, but
-            # instead use singular braces ("{ }").
-            # Because template delimiters should be balanced, regardless
-            # of whether {{ or {{{ is used, and because we only care
-            # about the outer-most delimiters (the highest level template)
-            # we can just count the single braces when those single
-            # braces are part of a group.
             for m in brace_matches:
                 if m.startswith("{{"):
                     if (template_nesting == 0 and
@@ -1897,9 +1898,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # Parse inflection tables from the section.  The data is stored
             # under "forms".
             if config.capture_inflections:
-                template_name = re.search("{{([^}{\|]+)\|", text).group(1)
-                tblctx = TableContext(template_name)
-                    
+                tblctx = None
+                m = re.search("{{([^}{|]+)\|?", text)
+                if m:
+                    template_name = m.group(1)
+                    tblctx = TableContext(template_name)
+
                 parse_inflection_section(config, ctx, pos_data,
                                          word, language,
                                          pos, section, tree,
@@ -2448,23 +2452,23 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         return
 
                     if sub.lower() in config.POS_SUBTITLES:
-                        seq = [language, sub, "Translations"]
+                        seq = [language, sub, config.OTHER_SUBTITLES["translations"]]
                     else:
                         pos = ctx.subsection
                         if pos.lower() not in config.POS_SUBTITLES:
                             ctx.debug("unhandled see translation subpage: "
                                       "language={} sub={} ctx.subsection={}"
                                       .format(language, sub, ctx.subsection))
-                        seq = [language, sub, pos, "Translations"]
-                    subnode = get_subpage_section(ctx.title, "translations",
-                                                  seq)
+                        seq = [language, sub, pos, config.OTHER_SUBTITLES["translations"]]
+                    subnode = get_subpage_section(
+                        ctx.title, config.OTHER_SUBTITLES["translations"], seq)
                     if subnode is not None:
                         parse_translations(data, subnode)
                     else:
                         # Failed to find the normal subpage section
-                        seq = ["Translations"]
-                        subnode = get_subpage_section(ctx.title, "translations",
-                                                      seq)
+                        seq = [config.OTHER_SUBTITLES["translations"]]
+                        subnode = get_subpage_section(
+                            ctx.title, config.OTHER_SUBTITLES["translations"], seq)
                         if subnode is not None:
                             parse_translations(data, subnode)
                     return ""
@@ -2564,16 +2568,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if (isinstance(arg0, (list, tuple)) and
                         arg0 and
                         isinstance(arg0[0], str) and
-                        arg0[0].endswith("/translations") and
-                        arg0[0][:-len("/translations")] == ctx.title):
+                        arg0[0].endswith("/" + config.OTHER_SUBTITLES["translations"]) and
+                        arg0[0][:-(1 + len(config.OTHER_SUBTITLES["translations"]))] == ctx.title):
                         ctx.debug("translations subpage link found on main "
                                   "page instead "
                                   "of normal {{see translation subpage|...}}")
                         sub = ctx.subsection
                         if sub.lower() in config.POS_SUBTITLES:
-                            seq = [language, sub, "Translations"]
-                            subnode = get_subpage_section(ctx.title,
-                                                          "translations", seq)
+                            seq = [language, sub, config.OTHER_SUBTITLES["translations"]]
+                            subnode = get_subpage_section(
+                                ctx.title, config.OTHER_SUBTITLES["translations"], seq)
                             if subnode is not None:
                                 parse_translations(data, subnode)
                         else:
@@ -3249,3 +3253,24 @@ def clean_node(config, ctx, category_data, value, template_fn=None,
     # Some templates create question mark in <sup>, e.g., some Korean Hanja form
     v = re.sub(r"\^\?", "", v)
     return v
+
+
+def add_form_of_tags(ctx, template_name, form_of_templates, sense_data):
+    # https://en.wiktionary.org/wiki/Category:Form-of_templates
+    if template_name in form_of_templates:
+        data_append(ctx, sense_data, "tags", "form-of")
+
+        if template_name in ("abbreviation of", "abbr of"):
+            data_append(ctx, sense_data, "tags", "abbreviation")
+        elif template_name.startswith(("alt ", "alternative")):
+            data_append(ctx, sense_data, "tags", "alt-of")
+        elif template_name.startswith(("female", "feminine")):
+            data_append(ctx, sense_data, "tags", "feminine")
+        elif template_name == "initialism of":
+            data_extend(ctx, sense_data, "tags", ["abbreviation", "initialism"])
+        elif template_name.startswith("masculine"):
+            data_append(ctx, sense_data, "tags", "masculine")
+        elif template_name.startswith("misspelling"):
+            data_append(ctx, sense_data, "tags", "misspelling")
+        elif template_name.startswith(("obsolete", "obs ")):
+            data_append(ctx, sense_data, "tags", "obsolete")

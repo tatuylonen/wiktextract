@@ -1869,7 +1869,7 @@ def parse_translation_desc(ctx, lang, text, tr):
         if m:
             par = m.group(1)
             text = text[:m.start()]
-            if par.startswith("literally ") or par.startswith("lit."):
+            if par.startswith(("literally ", "lit.")):
                 continue  # Not useful for disambiguation in many idioms
         else:
             # See if we can find a parenthesized expression at the start
