@@ -2983,6 +2983,7 @@ xlat_tags_map = {
     "marked form": "stressed",
     "inifnitive": "infinitive error-misspelling",
     "inf.": "informal",
+    "inf": "infinitive",  # darovať/Slovak
     "unformal": "informal",
     "unpolite": "impolite",
     "fairly polite": "polite",

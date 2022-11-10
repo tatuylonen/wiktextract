@@ -6112,7 +6112,8 @@ infl_map = {
         "nested-table-depth": [1, 2],
         "then": "negative past irrealis dummy-load-stored-hdrspans"
      },
-    
+
+    "transgressive": "transgressive",  # darovať/Slovak
 }
 
 
