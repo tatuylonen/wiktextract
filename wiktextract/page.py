@@ -1899,9 +1899,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # Parse inflection tables from the section.  The data is stored
             # under "forms".
             if config.capture_inflections:
-                template_name = re.search("{{([^}{\|]+)\|", text).group(1)
-                tblctx = TableContext(template_name)
-                    
+                tblctx = None
+                m = re.search("{{([^}{|]+)\|?", text)
+                if m:
+                    template_name = m.group(1)
+                    tblctx = TableContext(template_name)
+ 
                 parse_inflection_section(config, ctx, pos_data,
                                          word, language,
                                          pos, section, tree,
