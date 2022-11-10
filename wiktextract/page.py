@@ -1829,9 +1829,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         # Split text into separate sections for each to-level template
         brace_matches = re.split("({{+|}}+)", text) # ["{{", "template", "}}"]
-
         template_sections = []
-        
+        template_nesting = 0  # depth of SINGLE BRACES { { nesting } }
+        # Because there is the possibility of triple curly braces
+        # ("{{{", "}}}") in addition to normal ("{{ }}"), we do not
+        # count nesting depth using pairs of two brackets, but
+        # instead use singular braces ("{ }").
+        # Because template delimiters should be balanced, regardless
+        # of whether {{ or {{{ is used, and because we only care
+        # about the outer-most delimiters (the highest level template)
+        # we can just count the single braces when those single
+        # braces are part of a group.
+
         if len(brace_matches) > 1:
             tsection = []
             after_templates = False  # kludge to keep any text
@@ -1839,16 +1848,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                      # with the first template;
                                      # otherwise, text
                                      # goes with preceding template
-            template_nesting = 0  # depth of SINGLE BRACES { { nesting } }
-            # Because there is the possibility of triple curly braces
-            # ("{{{", "}}}") in addition to normal ("{{ }}"), we do not
-            # count nesting depth using pairs of two brackets, but
-            # instead use singular braces ("{ }").
-            # Because template delimiters should be balanced, regardless
-            # of whether {{ or {{{ is used, and because we only care
-            # about the outer-most delimiters (the highest level template)
-            # we can just count the single braces when those single
-            # braces are part of a group.
             for m in brace_matches:
                 if m.startswith("{{"):
                     if (template_nesting == 0 and
@@ -1904,7 +1903,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if m:
                     template_name = m.group(1)
                     tblctx = TableContext(template_name)
- 
+
                 parse_inflection_section(config, ctx, pos_data,
                                          word, language,
                                          pos, section, tree,
