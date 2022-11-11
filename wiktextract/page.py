@@ -1847,7 +1847,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # about the outer-most delimiters (the highest level template)
         # we can just count the single braces when those single
         # braces are part of a group.
-
+        
+        # print(text)
+        # print(repr(brace_matches))
         if len(brace_matches) > 1:
             tsection = []
             after_templates = False  # kludge to keep any text
@@ -1893,9 +1895,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
             for tsection in template_sections:
                 texts.append("".join(tsection))
         if template_nesting != 0:
-            ctx.error("Template nesting error:"
-                      "template_nesting = {}"
-                      "couldn't split inflection templates,"
+            ctx.error("Template nesting error: "
+                      "template_nesting = {} "
+                      "couldn't split inflection templates, "
                       "{}/{} section {}"
                       .format(template_nesting, word, language, section),
                       sortid="page/1896")
