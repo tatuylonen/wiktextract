@@ -1387,7 +1387,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 parse_sense_qualifier(ctx, m.group(1), sense_data)
                 gloss = gloss[m.end():].strip()
 
-            def sense_repl(m):
+            def sense_repl(m):  # Not being used ATM.
                 par = m.group(1)
                 cls = classify_desc(par)
                 # print("sense_repl: {} -> {}".format(par, cls))
@@ -1693,6 +1693,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                               if isinstance(x, WikiNode) and
                               x.kind == NodeKind.LIST and
                               x.args != "##"]
+
     
                     # This entry has sublists of entries.  We should contain
                     # gloss information from both.  Sometimes the outer gloss
@@ -1787,6 +1788,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         gls = common_data.get("glosses") or [""]
                         assert len(gls) == 1
                         common_data["glosses"] = []
+                        ctx.debug("common_data added as a sense "
+                                  "because nothing was added, {}/{}"
+                                  .format(word, language),
+                                  sortid="page/1795")
                         parse_sense(pos, gls, common_data)
 
         # If there are no senses extracted, add a dummy sense.  We want to
