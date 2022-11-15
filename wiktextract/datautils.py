@@ -193,6 +193,7 @@ def freeze(x):
 
 
 def ns_title_prefix_tuple(ctx, namespace: str, lower: bool = False) -> tuple:  # tuple[str]
+    """Based on given namespace name, create a tuple of aliases"""
     if namespace in ctx.NAMESPACE_DATA:
         return tuple(map(lambda x: x.lower() + ":" if lower else x + ":",
                          [ctx.NAMESPACE_DATA[namespace]["name"]] + ctx.NAMESPACE_DATA[namespace]["aliases"]))

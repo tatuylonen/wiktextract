@@ -1624,9 +1624,17 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # We might collect relevant links as they are often pictures
                 # relating to the word
                 if (len(node.args[0]) >= 1 and
-                    isinstance(node.args[0][0], str) and
-                    node.args[0][0].startswith(ns_title_prefix_tuple(ctx, "File"))):
-                    continue
+                    isinstance(node.args[0][0], str)):
+                    if node.args[0][0].startswith(ns_title_prefix_tuple(
+                                                        ctx, "Category")):
+                        # [[Category:...]]
+                        # We're at the end of the file, probably, so stop
+                        # here. Otherwise the head will get garbage.
+                        break
+                    if node.args[0][0].startswith(ns_title_prefix_tuple(
+                                                        ctx, "File")):
+                        # Skips file links
+                        continue
                 pre[-1].extend(node.args[-1])
             elif kind == NodeKind.HTML:
                 if node.args == "br":
@@ -1659,8 +1667,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
             head_group = i + 1 if there_are_many_heads else None
             # print("parse_part_of_speech: {}: {}: pre={}"
                   # .format(ctx.section, ctx.subsection, pre1))
-            pre1 = [x for x in pre1 if not (isinstance(x, str) and
-                                            x.startswith("Category:"))]
             text = clean_node(config, ctx, pos_data, pre1,
                               post_template_fn=head_post_template_fn)
             text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
