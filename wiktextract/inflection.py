@@ -2803,7 +2803,7 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
                 if row_has_nonempty_cells:
                     rows.append(row)
             elif kind in (NodeKind.TABLE_HEADER_CELL, NodeKind.TABLE_CELL,
-                          "th", "td"):
+                          "th", "td", "span"):
                 # print("  TOP-LEVEL CELL", node)
                 pass
 
@@ -2820,6 +2820,7 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
     # InflCell objects.  Parse the inflection table from that format.
     if new_rows:
         for rows, titles, after, depth in new_rows:
+            print(rows)  ### XXX remove me
             handle_generic_table(config, ctx, tblctx, data,
                                  word, lang, pos, rows,
                                  titles, source, after, depth)

@@ -34,8 +34,12 @@ with open("wiktextract-error-data.json") as f:
     # ~ print("iterating...")
     for entry in dt:
         msg = entry.get("msg")
-        rejected = msg.startswith("rejected heuristic header")
-        accepted = msg.startswith("accepted heuristic header")
+        sortid = entry.get("called_from")
+        rejected = bool((sortid == "inflection/2447") or
+                        (sortid == "inflection/2457") or
+                        (sortid == "inflection/2512"))
+        accepted = bool((sortid == "inflection/2530") or
+                        (sortid == "inflection/2466"))
         if (accepted or rejected):
             isnotinindex = msg.find(ISNOTIN)
             styleindex = msg.find(STYLE)

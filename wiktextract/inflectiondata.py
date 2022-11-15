@@ -5314,7 +5314,10 @@ infl_map = {
 
     # likkõ/Livonian
     "ma": "first-person singular",
-    "sa": "second-person singular",
+    "sa": {
+        "lang": "Livonian",
+        "then":"second-person singular",
+    },
     "ta": "third-person singular",
     "mēg": "first-person plural",
     "tēg": "second-person plural",
@@ -6114,6 +6117,8 @@ infl_map = {
      },
 
     "transgressive": "transgressive",  # darovať/Slovak
+    # conocer/Asturian
+    "gerundive": "gerund",
 }
 
 
