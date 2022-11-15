@@ -1659,6 +1659,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             head_group = i + 1 if there_are_many_heads else None
             # print("parse_part_of_speech: {}: {}: pre={}"
                   # .format(ctx.section, ctx.subsection, pre1))
+            pre1 = [x for x in pre1 if not (isinstance(x, str) and
+                                            x.startswith("Category:"))]
             text = clean_node(config, ctx, pos_data, pre1,
                               post_template_fn=head_post_template_fn)
             text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
