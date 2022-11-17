@@ -21,7 +21,7 @@ from .tags import valid_tags
 from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_qualifier,
     distw, parse_alt_or_inflection_of, classify_desc)
-from wiktextract.inflection import parse_inflection_section
+from wiktextract.inflection import parse_inflection_section, TableContext
 
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
@@ -870,7 +870,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         if w in unsupported_title_map:
             word = unsupported_title_map[w]
         else:
-            ctx.error("Unimplemented unsupported title: {}".format(word))
+            ctx.error("Unimplemented unsupported title: {}".format(word),
+                      sortid="page/870")
             word = w
     elif word.startswith("Reconstruction:"):
         word = re.sub(r"^Reconstruction:.*/", "", word)
@@ -905,7 +906,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             elif data[k] != v:
                 ctx.warning("conflicting values for {} in merge_base: "
                             "{!r} vs {!r}"
-                            .format(k, data[k], v))
+                            .format(k, data[k], v),
+                            sortid="page/904")
 
         def complementary_pop(pron, key):
             """Remove unnecessary keys from dict values
@@ -1059,6 +1061,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 v = v.strip()
                 if v and v.find("<") < 0:
                     gloss_template_args.add(v)
+            if config.dump_file_lang_code == "zh":
+                add_form_of_tags(ctx, name, config.FORM_OF_TEMPLATES, sense_base)
             return None
 
         def extract_link_texts(item):
@@ -1386,7 +1390,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 parse_sense_qualifier(ctx, m.group(1), sense_data)
                 gloss = gloss[m.end():].strip()
 
-            def sense_repl(m):
+            def sense_repl(m):  # Not being used ATM.
                 par = m.group(1)
                 cls = classify_desc(par)
                 # print("sense_repl: {} -> {}".format(par, cls))
@@ -1409,9 +1413,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
             ofs = max(gloss.find("#"), gloss.find("* "))
             if ofs > 10 and gloss.find("(#)") < 0:
                 ctx.debug("gloss may contain unhandled list items: {}"
-                          .format(gloss))
+                          .format(gloss),
+                          sortid="page/1412")
             elif gloss.find("\n") >= 0:
-                ctx.debug("gloss contains newline: {}".format(gloss))
+                ctx.debug("gloss contains newline: {}".format(gloss),
+                          sortid="page/1416")
 
             # Kludge, some glosses have a comma after initial qualifiers in
             # parentheses
@@ -1462,7 +1468,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             if not gloss:
                 #ctx.debug("{}: empty gloss at {}"
-                #             .format(pos, "/".join(stack)))
+                #             .format(pos, "/".join(stack)),
+                #             sortid="page/1467")
                 data_append(ctx, sense_data, "tags", "empty-gloss")
             elif gloss != "-":
                 # Add the gloss for the sense.
@@ -1589,9 +1596,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # print("parse_part_of_speech", pos)
         pos_data["pos"] = pos
         pre = [[]]  # list of lists
+        lists = [[]]  # list of lists
         have_subtitle = False
-        lists = []
         first_para = True
+        first_head_tmplt = True
         for node in posnode.children:
             if isinstance(node, str):
                 for m in re.finditer(r"\n+|[^\n]+", node):
@@ -1605,151 +1613,197 @@ def parse_language(ctx, config, langnode, language, lang_code):
             assert isinstance(node, WikiNode)
             kind = node.kind
             if kind == NodeKind.LIST:
-                lists.append(node)
-                break
+                lists[-1].append(node)
+                continue
             elif kind in LEVEL_KINDS:
+                # Stop parsing section if encountering any kind of
+                # level header (like ===Noun=== or ====Further Reading====).
+                # At a quick glance, this should be the default behavior,
+                # but if some kinds of source articles have sub-sub-sections
+                # that should be parsed XXX it should be handled by changing
+                # this break.
                 break
             elif kind == NodeKind.LINK:
                 # We might collect relevant links as they are often pictures
                 # relating to the word
                 if (len(node.args[0]) >= 1 and
-                    isinstance(node.args[0][0], str) and
-                    node.args[0][0].startswith(ns_title_prefix_tuple(ctx, "File"))):
-                    continue
+                    isinstance(node.args[0][0], str)):
+                    if node.args[0][0].startswith(ns_title_prefix_tuple(
+                                                        ctx, "Category")):
+                        # [[Category:...]]
+                        # We're at the end of the file, probably, so stop
+                        # here. Otherwise the head will get garbage.
+                        break
+                    if node.args[0][0].startswith(ns_title_prefix_tuple(
+                                                        ctx, "File")):
+                        # Skips file links
+                        continue
                 pre[-1].extend(node.args[-1])
             elif kind == NodeKind.HTML:
                 if node.args == "br":
                     if pre[-1]:
                         pre.append([])  # Switch to next head
+                        lists.append([])  # Lists parallels pre
                 elif node.args not in ("gallery", "ref", "cite", "caption"):
+                    pre[-1].append(node)
+            elif kind == NodeKind.TEMPLATE:
+                # XXX Insert code here that disambiguates between
+                # templates that generate word heads and templates
+                # that don't.
+                if first_head_tmplt and pre[-1]:
+                    first_head_tmplt = False
+                    pre[-1].append(node)
+                elif pre[-1]:
+                    pre.append([]) # Switch to the next head
+                    lists.append([]) # lists parallel pre
+                    pre[-1].append(node)
+                else:
                     pre[-1].append(node)
             elif first_para:
                 pre[-1].append(node)
         # XXX use template_fn in clean_node to check that the head macro
         # is compatible with the current part-of-speech and generate warning
         # if not.  Use template_allowed_pos_map.
-        for pre1 in pre:
+
+        there_are_many_heads = len(pre) > 1
+        for i, (pre1, ls) in enumerate(zip(pre, lists)):
+            head_group = i + 1 if there_are_many_heads else None
             # print("parse_part_of_speech: {}: {}: pre={}"
-            #       .format(ctx.section, ctx.subsection, pre1))
+                  # .format(ctx.section, ctx.subsection, pre1))
             text = clean_node(config, ctx, pos_data, pre1,
                               post_template_fn=head_post_template_fn)
             text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
-            parse_word_head(ctx, pos, text, pos_data, is_reconstruction)
+            parse_word_head(ctx, pos, text,
+                            pos_data,
+                            is_reconstruction,
+                            head_group)
             text = None
-        if "tags" in pos_data:
-            common_tags = pos_data["tags"]
-            del pos_data["tags"]
-        else:
-            common_tags = []
-        for node in lists:
-            for node in node.children:
-                if node.kind != NodeKind.LIST_ITEM:
-                    ctx.debug("{}: non-list-item inside list".format(pos))
-                    continue
-                if node.args[-1] == ":":
-                    # Sometimes there may be lists with indented examples
-                    # in otherwise the same level as real sense entries.
-                    # I assume those will get parsed as separate lists, but
-                    # we don't want to include such examples as word senses.
-                    continue
-                contents = node.children
-                sublists = [x for x in contents
-                            if isinstance(x, WikiNode) and
-                            x.kind == NodeKind.LIST and
-                            x.args == "##"]
-                others = [x for x in contents
-                          if isinstance(x, WikiNode) and
-                          x.kind == NodeKind.LIST and
-                          x.args != "##"]
-
-                # This entry has sublists of entries.  We should contain
-                # gloss information from both.  Sometimes the outer gloss
-                # is more non-gloss or tags, sometimes it is a coarse sense
-                # and the inner glosses are more specific.  The outer one does
-                # not seem to have qualifiers.
-                outer = [x for x in contents
-                         if not isinstance(x, WikiNode) or
-                         x.kind != NodeKind.LIST]
-                common_data = {"tags": list(common_tags)}
-
-                # If we have one sublist with one element, treat it specially as
-                # it may be a Wiktionary error; raise that nested element
-                # to the same level.
-                if len(sublists) == 1:
-                    slc = sublists[0].children
-                    if len(slc) == 1:
-                        parse_sense(pos, outer, common_data)
-                        parse_sense(pos, slc[0].children, {})
+            if "tags" in pos_data:
+                common_tags = pos_data["tags"]
+                del pos_data["tags"]
+            else:
+                common_tags = []
+            for node in ls:
+                for node in node.children:
+                    if node.kind != NodeKind.LIST_ITEM:
+                        ctx.debug("{}: non-list-item inside list".format(pos),
+                                  sortid="page/1678")
                         continue
+                    if node.args[-1] == ":":
+                        # Sometimes there may be lists with indented examples
+                        # in otherwise the same level as real sense entries.
+                        # I assume those will get parsed as separate lists, but
+                        # we don't want to include such examples as word senses.
+                        continue
+                    contents = node.children
+                    sublists = [x for x in contents
+                                if isinstance(x, WikiNode) and
+                                x.kind == NodeKind.LIST and
+                                x.args == "##"]
+                    others = [x for x in contents
+                              if isinstance(x, WikiNode) and
+                              x.kind == NodeKind.LIST and
+                              x.args != "##"]
 
-                def outer_template_fn(name, ht):
-                    if is_panel_template(name):
-                        return ""
-                    if name in ("defdate",):
-                        return ""
-                    if name in sense_linkage_templates:
-                        parse_sense_linkage(config, ctx, common_data, name, ht)
-                        return ""
-                    return None
-
-                # Process others, so that we capture any sense linkages from
-                # there
-                clean_node(config, ctx, common_data, others,
-                           template_fn=outer_template_fn)
-
-                # If there are no sublists of senses, parse it as just one
-                if not sublists:
-                    parse_sense(pos, contents, common_data)
-                    continue
-
-                # Clean the outer gloss
-                outer_text = clean_node(config, ctx, common_data, outer,
-                                        template_fn=outer_template_fn)
-                strip_ends = [", particularly:"]
-                for x in strip_ends:
-                    if outer_text.endswith(x):
-                        outer_text = outer_text[:-len(x)]
-                        break
-                # Check if the outer gloss starts with parenthesized tags/topics
-                m = re.match(r"\(([^()]+)\):?\s*", outer_text)
-                if m:
-                    q = m.group(1)
-                    outer_text = outer_text[m.end():].strip()
-                    parse_sense_qualifier(ctx, q, common_data)
-
-                if outer_text == "A pejorative:":
-                    data_append(ctx, common_data, "tags", "perjorative")
-                    outer_text = None
-                elif outer_text == "Short forms.":
-                    data_append(ctx, common_data, "tags", "abbreviation")
-                    outer_text = None
-                elif outer_text == "Technical or specialized senses.":
-                    outer_text = None
-                # XXX is it always a gloss?  Maybe non-gloss?
-                if outer_text:
-                    data_append(ctx, common_data, "glosses", outer_text)
-                    if outer_text in ("A person:",):
-                        data_append(ctx, common_data, "tags", "g-person")
-
-                # Process any inner glosses
-                added = False
-                for sublist in sublists:
-                    assert sublist.kind == NodeKind.LIST
-                    for item in sublist.children:
-                        if not isinstance(item, WikiNode):
+    
+                    # This entry has sublists of entries.  We should contain
+                    # gloss information from both.  Sometimes the outer gloss
+                    # is more non-gloss or tags, sometimes it is a coarse sense
+                    # and the inner glosses are more specific.  The outer one
+                    # does not seem to have qualifiers.
+                    outer = [x for x in contents
+                             if not isinstance(x, WikiNode) or
+                             x.kind != NodeKind.LIST]
+                    common_data = {"tags": list(common_tags)}
+                    if head_group:
+                        common_data["head_nr"] = head_group
+    
+                    # If we have one sublist with one element, treat it
+                    # specially as it may be a Wiktionary error; raise
+                    # that nested element to the same level.
+                    if len(sublists) == 1:
+                        slc = sublists[0].children
+                        if len(slc) == 1:
+                            parse_sense(pos, outer, common_data)
+                            parse_sense(pos, slc[0].children, {})
                             continue
-                        if item.kind != NodeKind.LIST_ITEM:
-                            continue
-                        sense_base = copy.deepcopy(common_data)
-                        if parse_sense(pos, item.children, sense_base):
-                            added = True
-                # If the sublists resulted in no senses added, add
-                # common_data as a sense if it has a gloss
-                if not added and common_data.get("glosses"):
-                    gls = common_data.get("glosses") or [""]
-                    assert len(gls) == 1
-                    common_data["glosses"] = []
-                    parse_sense(pos, gls, common_data)
+    
+                    def outer_template_fn(name, ht):
+                        if is_panel_template(name):
+                            return ""
+                        if name in ("defdate",):
+                            return ""
+                        if name in sense_linkage_templates:
+                            parse_sense_linkage(config, ctx,
+                                                common_data,
+                                                name,
+                                                ht)
+                            return ""
+                        return None
+    
+                    # Process others, so that we capture any sense linkages from
+                    # there
+                    clean_node(config, ctx, common_data, others,
+                               template_fn=outer_template_fn)
+    
+                    # If there are no sublists of senses, parse it as just one
+                    if not sublists:
+                        parse_sense(pos, contents, common_data)
+                        continue
+    
+                    # Clean the outer gloss
+                    outer_text = clean_node(config, ctx, common_data, outer,
+                                            template_fn=outer_template_fn)
+                    strip_ends = [", particularly:"]
+                    for x in strip_ends:
+                        if outer_text.endswith(x):
+                            outer_text = outer_text[:-len(x)]
+                            break
+                    # Check if the outer gloss starts with
+                    # parenthesized tags/topics
+                    m = re.match(r"\(([^()]+)\):?\s*", outer_text)
+                    if m:
+                        q = m.group(1)
+                        outer_text = outer_text[m.end():].strip()
+                        parse_sense_qualifier(ctx, q, common_data)
+    
+                    if outer_text == "A pejorative:":
+                        data_append(ctx, common_data, "tags", "perjorative")
+                        outer_text = None
+                    elif outer_text == "Short forms.":
+                        data_append(ctx, common_data, "tags", "abbreviation")
+                        outer_text = None
+                    elif outer_text == "Technical or specialized senses.":
+                        outer_text = None
+                    # XXX is it always a gloss?  Maybe non-gloss?
+                    if outer_text:
+                        data_append(ctx, common_data, "glosses", outer_text)
+                        if outer_text in ("A person:",):
+                            data_append(ctx, common_data, "tags", "g-person")
+    
+                    # Process any inner glosses
+                    added = False
+                    for sublist in sublists:
+                        assert sublist.kind == NodeKind.LIST
+                        for item in sublist.children:
+                            if not isinstance(item, WikiNode):
+                                continue
+                            if item.kind != NodeKind.LIST_ITEM:
+                                continue
+                            sense_base = copy.deepcopy(common_data)
+                            if parse_sense(pos, item.children, sense_base):
+                                added = True
+                    # If the sublists resulted in no senses added, add
+                    # common_data as a sense if it has a gloss
+                    if not added and common_data.get("glosses"):
+                        gls = common_data.get("glosses") or [""]
+                        assert len(gls) == 1
+                        common_data["glosses"] = []
+                        ctx.debug("common_data added as a sense "
+                                  "because nothing was added, {}/{}"
+                                  .format(word, language),
+                                  sortid="page/1795")
+                        parse_sense(pos, gls, common_data)
 
         # If there are no senses extracted, add a dummy sense.  We want to
         # keep tags extracted from the head for the dummy sense.
@@ -1771,7 +1825,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # print("parse_inflection:", node)
 
         if pos is None:
-            ctx.debug("inflection table outside part-of-speech")
+            ctx.debug("inflection table outside part-of-speech",
+                      sortid="page/1812")
             return
 
         def inflection_template_fn(name, ht):
@@ -1794,14 +1849,92 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # Convert the subtree back to Wikitext, then expand all and parse,
         # capturing templates in the process
         text = ctx.node_to_wikitext(node.children)
-        tree = ctx.parse(text, expand_all=True,
-                         template_fn=inflection_template_fn)
 
-        # Parse inflection tables from the section.  The data is stored
-        # under "forms".
-        if config.capture_inflections:
-            parse_inflection_section(config, ctx, pos_data, word, language,
-                                     pos, section, tree)
+        # Split text into separate sections for each to-level template
+        brace_matches = re.split("({{+|}}+)", text) # ["{{", "template", "}}"]
+        template_sections = []
+        template_nesting = 0  # depth of SINGLE BRACES { { nesting } }
+        # Because there is the possibility of triple curly braces
+        # ("{{{", "}}}") in addition to normal ("{{ }}"), we do not
+        # count nesting depth using pairs of two brackets, but
+        # instead use singular braces ("{ }").
+        # Because template delimiters should be balanced, regardless
+        # of whether {{ or {{{ is used, and because we only care
+        # about the outer-most delimiters (the highest level template)
+        # we can just count the single braces when those single
+        # braces are part of a group.
+        
+        # print(text)
+        # print(repr(brace_matches))
+        if len(brace_matches) > 1:
+            tsection = []
+            after_templates = False  # kludge to keep any text
+                                     # before first template
+                                     # with the first template;
+                                     # otherwise, text
+                                     # goes with preceding template
+            for m in brace_matches:
+                if m.startswith("{{"):
+                    if (template_nesting == 0 and
+                        after_templates):
+                        template_sections.append(tsection)
+                        tsection = []
+                        # start new section
+                    after_templates = True
+                    template_nesting += len(m)
+                    tsection.append(m)
+                elif m.startswith("}}"):
+                    template_nesting -= len(m)
+                    if template_nesting < 0:
+                        ctx.error("Negatively nested braces, "
+                                  "couldn't split inflection templates, "
+                                  "{}/{} section {}"
+                                  .format(word, language, section),
+                                  sortid="page/1871")
+                        template_sections = [] # use whole text
+                        break
+                    tsection.append(m)
+                else:
+                    tsection.append(m)
+            if tsection:  # dangling tsection
+                template_sections.append(tsection)
+                # Why do it this way around? The parser has a preference
+                # to associate bits outside of tables with the preceding
+                # table (`after`-variable), so a new tsection begins
+                # at {{ and everything before it belongs to the previous
+                # template.
+        
+        texts = []
+        if not template_sections:
+            texts = [text]
+        else:
+            for tsection in template_sections:
+                texts.append("".join(tsection))
+        if template_nesting != 0:
+            ctx.error("Template nesting error: "
+                      "template_nesting = {} "
+                      "couldn't split inflection templates, "
+                      "{}/{} section {}"
+                      .format(template_nesting, word, language, section),
+                      sortid="page/1896")
+            texts = [text]
+        for text in texts:
+            tree = ctx.parse(text, expand_all=True,
+                             template_fn=inflection_template_fn)
+    
+            # Parse inflection tables from the section.  The data is stored
+            # under "forms".
+            if config.capture_inflections:
+                tblctx = None
+                m = re.search("{{([^}{|]+)\|?", text)
+                if m:
+                    template_name = m.group(1)
+                    tblctx = TableContext(template_name)
+
+                parse_inflection_section(config, ctx, pos_data,
+                                         word, language,
+                                         pos, section, tree,
+                                         tblctx=tblctx)
 
     def get_subpage_section(title, subtitle, seq):
         """Loads a subpage of the given page, and finds the section
@@ -1817,7 +1950,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         subpage_content = ctx.read_by_title(subpage_title)
         if subpage_content is None:
             ctx.error("/translations not found despite "
-                      "{{see translation subpage|...}}")
+                      "{{see translation subpage|...}}",
+                      sortid="page/1934")
 
         def recurse(node, seq):
             # print(f"seq: {seq}")
@@ -1845,7 +1979,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         ret = recurse(tree, seq)
         if ret is None:
             ctx.debug("Failed to find subpage section {}/{} seq {}"
-                      .format(title, subtitle, seq))
+                      .format(title, subtitle, seq),
+                      sortid="page/1963")
         return ret
 
     def parse_linkage(data, field, linkagenode):
@@ -1954,7 +2089,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         item_recurse(node.children, italic=italic)
                     else:
                         ctx.debug("linkage item_recurse unhandled {}: {}"
-                                  .format(node.kind, node))
+                                  .format(node.kind, node),
+                                  sortid="page/2073")
 
             # print("LINKAGE CONTENTS BEFORE ITEM_RECURSE: {!r}"
             #       .format(contents))
@@ -2051,7 +2187,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         if sense and sense1:
                             ctx.debug("linkage qualifier-content on multiple "
                                       "levels: {!r} and {!r}"
-                                      .format(sense, sense1))
+                                      .format(sense, sense1),
+                                      sortid="page/2170")
                         parse_linkage_recurse(node.children, field, sense1)
                     elif "NavFrame" in classes:
                         # NavFrame uses previously assigned next_navframe_sense
@@ -2075,7 +2212,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     parse_linkage_recurse(node.args[-1], field, sense)
                 else:
                     ctx.debug("parse_linkage_recurse unhandled {}: {}"
-                              .format(kind, node))
+                              .format(kind, node),
+                              sortid="page/2196")
 
         def linkage_template_fn1(name, ht):
             nonlocal have_panel_template
@@ -2238,7 +2376,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 sense = clean_node(config, ctx, data, sense_parts).strip()
                 idx = sense.find("See also translations at")
                 if idx > 0:
-                    ctx.debug("Skipping translation see also: {}".format(sense))
+                    ctx.debug("Skipping translation see also: {}".format(sense),
+                              sortid="page/2361")
                     sense = sense[:idx].strip()
                 if sense.endswith(":"):
                     sense = sense[:-1].strip()
@@ -2264,7 +2403,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         if langcode and code != langcode:
                             ctx.debug("inconsistent language codes {} vs "
                                       "{} in translation item: {!r} {}"
-                                      .format(langcode, code, name, ht))
+                                      .format(langcode, code, name, ht),
+                                      sortid="page/2386")
                         langcode = code
                     tr = ht.get(2)
                     if tr:
@@ -2280,7 +2420,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         langcode = code
                     return None
                 if name == "trans-see":
-                    ctx.error("UNIMPLEMENTED trans-see template")
+                    ctx.error("UNIMPLEMENTED trans-see template",
+                              sortid="page/2405")
                     return ""
                 if name.endswith("-top"):
                     return ""
@@ -2289,7 +2430,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if name.endswith("-mid"):
                     return ""
                 #ctx.debug("UNHANDLED TRANSLATION ITEM TEMPLATE: {!r}"
-                #             .format(name))
+                #             .format(name),
+                #          sortid="page/2414")
                 return None
 
             sublists = list(x for x in contents
@@ -2342,27 +2484,29 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     sub = ht.get(1)
                     if not isinstance(sub, str):
                         ctx.error("no part-of-speech in "
-                                  "{{see translation subpage|...}}")
+                                  "{{see translation subpage|...}}",
+                                  sortid="page/2468")
                         return
 
                     if sub.lower() in config.POS_SUBTITLES:
-                        seq = [language, sub, "Translations"]
+                        seq = [language, sub, config.OTHER_SUBTITLES["translations"]]
                     else:
                         pos = ctx.subsection
                         if pos.lower() not in config.POS_SUBTITLES:
                             ctx.debug("unhandled see translation subpage: "
                                       "language={} sub={} ctx.subsection={}"
-                                      .format(language, sub, ctx.subsection))
-                        seq = [language, sub, pos, "Translations"]
-                    subnode = get_subpage_section(ctx.title, "translations",
-                                                  seq)
+                                      .format(language, sub, ctx.subsection),
+                                      sortid="page/2478")
+                        seq = [language, sub, pos, config.OTHER_SUBTITLES["translations"]]
+                    subnode = get_subpage_section(
+                        ctx.title, config.OTHER_SUBTITLES["translations"], seq)
                     if subnode is not None:
                         parse_translations(data, subnode)
                     else:
                         # Failed to find the normal subpage section
-                        seq = ["Translations"]
-                        subnode = get_subpage_section(ctx.title, "translations",
-                                                      seq)
+                        seq = [config.OTHER_SUBTITLES["translations"]]
+                        subnode = get_subpage_section(
+                            ctx.title, config.OTHER_SUBTITLES["translations"], seq)
                         if subnode is not None:
                             parse_translations(data, subnode)
                     return ""
@@ -2389,7 +2533,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     sense = None
                     return ""
                 ctx.error("UNIMPLEMENTED parse_translation_template: {} {}"
-                          .format(name, ht))
+                          .format(name, ht),
+                          sortid="page/2517")
                 return ""
             ctx.expand(ctx.node_to_wikitext(node), template_fn=template_fn)
 
@@ -2401,7 +2546,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if sense:
                         if not node.isspace():
                             ctx.debug("skipping string in the middle of "
-                                      "translations: {}".format(node))
+                                      "translations: {}".format(node),
+                                      sortid="page/2530")
                         continue
                     # Add a part to the sense
                     sense_parts.append(node)
@@ -2462,16 +2608,17 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if (isinstance(arg0, (list, tuple)) and
                         arg0 and
                         isinstance(arg0[0], str) and
-                        arg0[0].endswith("/translations") and
-                        arg0[0][:-len("/translations")] == ctx.title):
+                        arg0[0].endswith("/" + config.OTHER_SUBTITLES["translations"]) and
+                        arg0[0][:-(1 + len(config.OTHER_SUBTITLES["translations"]))] == ctx.title):
                         ctx.debug("translations subpage link found on main "
                                   "page instead "
-                                  "of normal {{see translation subpage|...}}")
+                                  "of normal {{see translation subpage|...}}",
+                                  sortid="page/2595")
                         sub = ctx.subsection
                         if sub.lower() in config.POS_SUBTITLES:
-                            seq = [language, sub, "Translations"]
-                            subnode = get_subpage_section(ctx.title,
-                                                          "translations", seq)
+                            seq = [language, sub, config.OTHER_SUBTITLES["translations"]]
+                            subnode = get_subpage_section(
+                                ctx.title, config.OTHER_SUBTITLES["translations"], seq)
                             if subnode is not None:
                                 parse_translations(data, subnode)
                         else:
@@ -2490,7 +2637,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     sense_parts.append(node)
                 else:
                     ctx.debug("skipping text between translation items/senses: "
-                              "{}".format(node))
+                              "{}".format(node),
+                              sortid="page/2621")
 
         # Main code of parse_translation().  We want ``sense`` to be assigned
         # regardless of recursion levels, and thus the code is structured
@@ -2736,13 +2884,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     ctx.start_subsection(t)
                     if "debug" in dt:
                         ctx.warning("{} in section {}"
-                                    .format(dt["debug"], t))
+                                    .format(dt["debug"], t),
+                                    sortid="page/2755")
                     if "warning" in dt:
                         ctx.warning("{} in section {}"
-                                    .format(dt["warning"], t))
+                                    .format(dt["warning"], t),
+                                    sortid="page/2759")
                     if "error" in dt:
                         ctx.error("{} in section {}"
-                                  .format(dt["error"], t))
+                                  .format(dt["error"], t),
+                                  sortid="page/2763")
                     # Parse word senses for the part-of-speech
                     parse_part_of_speech(node, pos)
                     if "tags" in dt:
@@ -2848,7 +2999,8 @@ def parse_top_template(config, ctx, node, data):
                 data_append(ctx, data, "wikidata", arg)
             return ""
         ctx.debug("UNIMPLEMENTED top-level template: {} {}"
-                  .format(name, ht))
+                  .format(name, ht),
+                  sortid="page/2870")
         return ""
 
     clean_node(config, ctx, None, [node], template_fn=top_template_fn)
@@ -2882,17 +3034,20 @@ def fix_subtitle_hierarchy(ctx: Wtp, config: WiktionaryConfig, text: str) -> str
         if level != len(right):
             ctx.debug("subtitle has unbalanced levels: "
                       "{!r} has {} on the left and {} on the right"
-                      .format(title, left, right))
+                      .format(title, left, right),
+                      sortid="page/2904")
         lc = title.lower()
         if title in config.LANGUAGES_BY_NAME:
             if level > 2:
                 ctx.debug("subtitle has language name {} at level {}"
-                          .format(title, level))
+                          .format(title, level),
+                          sortid="page/2911")
             level = 2
         elif lc.startswith(tuple(config.OTHER_SUBTITLES["etymology"])):
             if level > 3:
                 ctx.debug("etymology section {} at level {}"
-                          .format(title, level))
+                          .format(title, level),
+                          sortid="page/2917")
             level = 3
         elif lc.startswith(tuple(config.OTHER_SUBTITLES["pronunciation"])):
             level = 3
@@ -2991,12 +3146,13 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
             # Some pages have links at top level, e.g., "trees" in Wiktionary
             continue
         if langnode.kind != NodeKind.LEVEL2:
-            ctx.debug("unexpected top-level node: {}".format(langnode))
+            ctx.debug("unexpected top-level node: {}".format(langnode),
+                      sortid="page/3014")
             continue
         lang = clean_node(config, ctx, None, langnode.args)
         if lang not in config.LANGUAGES_BY_NAME:
             ctx.debug("unrecognized language name at top-level {!r}"
-                      .format(lang))
+                      .format(lang), sortid="page/3019")
             continue
         lang_code = config.LANGUAGES_BY_NAME.get(lang)
         if config.capture_language_codes and lang_code not in config.capture_language_codes:
@@ -3010,7 +3166,8 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
         # part-of-speech.
         for data in datas:
             if "lang" not in data:
-                ctx.debug("internal error -- no lang in data: {}".format(data))
+                ctx.debug("internal error -- no lang in data: {}".format(data),
+                          sortid="page/3034")
                 continue
             for k, v in top_data.items():
                 assert isinstance(v, (list, tuple))
@@ -3264,3 +3421,24 @@ def clean_node(config, ctx, category_data, value, template_fn=None,
     # Some templates create question mark in <sup>, e.g., some Korean Hanja form
     v = re.sub(r"\^\?", "", v)
     return v
+
+
+def add_form_of_tags(ctx, template_name, form_of_templates, sense_data):
+    # https://en.wiktionary.org/wiki/Category:Form-of_templates
+    if template_name in form_of_templates:
+        data_append(ctx, sense_data, "tags", "form-of")
+
+        if template_name in ("abbreviation of", "abbr of"):
+            data_append(ctx, sense_data, "tags", "abbreviation")
+        elif template_name.startswith(("alt ", "alternative")):
+            data_append(ctx, sense_data, "tags", "alt-of")
+        elif template_name.startswith(("female", "feminine")):
+            data_append(ctx, sense_data, "tags", "feminine")
+        elif template_name == "initialism of":
+            data_extend(ctx, sense_data, "tags", ["abbreviation", "initialism"])
+        elif template_name.startswith("masculine"):
+            data_append(ctx, sense_data, "tags", "masculine")
+        elif template_name.startswith("misspelling"):
+            data_append(ctx, sense_data, "tags", "misspelling")
+        elif template_name.startswith(("obsolete", "obs ")):
+            data_append(ctx, sense_data, "tags", "obsolete")

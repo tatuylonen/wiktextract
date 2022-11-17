@@ -1,0 +1,91 @@
+# -*- fundamental -*-
+#
+# Tests for parsing inflection tables
+#
+# Copyright (c) 2021-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+
+import unittest
+import json
+from wikitextprocessor import Wtp
+from wiktextract import WiktionaryConfig
+from wiktextract.inflection import (parse_inflection_section, TableContext)
+
+class InflTests(unittest.TestCase):
+
+    def setUp(self):
+        self.maxDiff = 100000
+        self.ctx = Wtp()
+        self.config = WiktionaryConfig()
+        self.ctx.start_page("testpage")
+        self.ctx.start_section("English")
+
+    def xinfl(self, word, lang, pos, section, text):
+        """Runs a single inflection table parsing test, and returns ``data``."""
+        self.ctx.start_page(word)
+        self.ctx.start_section(lang)
+        self.ctx.start_subsection(pos)
+        tree = self.ctx.parse(text)
+        data = {}
+        tblctx = TableContext("test-template-name")
+        parse_inflection_section(self.config, self.ctx, data, word, lang, pos,
+                                 section, tree, tblctx=tblctx)
+        return data
+
+    def test_Swedish_noun1(self):
+        ret = self.xinfl("berg", "Swedish", "noun", "Declension", """
+{| class="inflection-table+vsSwitcher" data-toggle-category="inflection" style="border%3A+solid+1px+%23CCCCFF%3B+text-align%3Aleft%3B" cellspacing="1" cellpadding="2"
+
+|- style="background%3A+%23CCCCFF%3B+vertical-align%3A+top%3B"
+
+! class="vsToggleElement" colspan="5" | Declension of <i class="Latn+mention" lang="sv">berg</i>&nbsp;
+
+
+|- class="vsHide" style="background%3A+%23CCCCFF%3B"
+
+! rowspan="2" style="min-width%3A+12em%3B" |
+
+
+! colspan="2" | Singular
+
+|- class="vsHide" style="background%3A+%23CCCCFF%3B"
+
+! style="min-width%3A+12em%3B" | Indefinite
+
+|- class="vsHide" style="background%3A+%23F2F2FF%3B"
+
+! style="background%3A+%23E6E6FF%3B" | Nominative
+
+
+| <span class="Latn" lang="sv">[[berg#Swedish|berg]]</span>
+
+
+|}
+""")
+        expected = {
+            "forms": [
+              {
+                "form": "",
+                "source": "Declension",
+                "tags": [
+                  "table-tags"
+                ]
+              },
+              {
+                "form": "test-template-name",
+                "source": "Declension",
+                "tags": [
+                  "inflection-template"
+                ]
+              },
+              {
+                "form": "berg",
+                "source": "Declension",
+                "tags": [
+                  "indefinite",
+                  "nominative",
+                  "singular"
+                ]
+              },
+            ],
+        }
+        self.assertEqual(expected, ret)

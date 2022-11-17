@@ -354,7 +354,8 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                 if not gl:
                     ctx.debug("parenthesized numeric linkage prefix, "
                               "but the referenced sense has no gloss: "
-                              "{}".format(desc))
+                              "{}".format(desc),
+                              sortid="linkages/355")
                 elif sense:
                     sense += "; " + gl
                 else:
@@ -363,12 +364,14 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
             else:
                 ctx.debug("parenthesized numeric linkage prefix, "
                           "but there is no sense with such index: {}"
-                          .format(desc))
+                          .format(desc),
+                          sortid="linkages/365")
                 item = rest
         else:
             ctx.debug("unrecognized linkage prefix: {} desc={} rest={} "
                       "cls={} cls2={} e1={} e2={}"
-                      .format(item, desc, rest, cls, cls2, e1, e2))
+                      .format(item, desc, rest, cls, cls2, e1, e2),
+                      sortid="linkages/371")
             item = rest
 
     base_sense = sense
@@ -661,7 +664,8 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                         if not gl:
                             ctx.debug("parenthesized number "
                                       "but the referenced sense has no "
-                                      "gloss: {}".format(par))
+                                      "gloss: {}".format(par),
+                                      sortid="linkages/665")
                         elif sense:
                             sense += "; " + gl
                         else:
@@ -669,7 +673,8 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                     else:
                         ctx.debug("parenthesized number but there is "
                                   "no sense with such index: {}"
-                                  .format(par))
+                                  .format(par),
+                                  sortid="linkages/674")
                 else:
                     if alt:
                         alt += "; " + par

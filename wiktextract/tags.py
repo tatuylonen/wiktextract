@@ -2983,6 +2983,7 @@ xlat_tags_map = {
     "marked form": "stressed",
     "inifnitive": "infinitive error-misspelling",
     "inf.": "informal",
+    "inf": "infinitive",  # darovať/Slovak
     "unformal": "informal",
     "unpolite": "impolite",
     "fairly polite": "polite",
@@ -5303,6 +5304,11 @@ valid_tags = {
         # if there's a "Notes" header and a text cell beneath it, using the
         # header to give the text cell this tag will nuke it.
     "dummy-reset-headers": "dummy",
+    "dummy-use-as-rowtags": "dummy",
+    "dummy-use-as-coltags": "dummy",
+    "dummy-store-hdrspan": "dummy",
+    "dummy-load-stored-hdrspans": "dummy",
+    "dummy-reset-stored-hdrspans": "dummy",
     "durative": "aspect",  # Verb form  XXX same as continuative?
     "eclipsis": "misc",
     "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian
@@ -5835,6 +5841,7 @@ valid_tags = {
     "synonym": "misc",
     "synonym-of": "misc",
     "table-tags": "detail",  # Tags from inflection table, for all entries
+    "inflection-template": "detail",  # Name of top-level template
     "taboo": "misc",
     "tafa-form": "misc",  # Malagasy verbs
     "temporal": "misc",  # relating to time/tense, e.g., talamaq; Finnish adverbials

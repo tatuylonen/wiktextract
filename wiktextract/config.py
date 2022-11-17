@@ -55,7 +55,8 @@ class WiktionaryConfig(object):
         "OTHER_SUBTITLES",
         "ZH_PRON_TAGS",
         "LANGUAGES_BY_NAME",
-        "LANGUAGES_BY_CODE"
+        "LANGUAGES_BY_CODE",
+        "FORM_OF_TEMPLATES"
     )
 
     def __init__(self,
@@ -115,6 +116,8 @@ class WiktionaryConfig(object):
         self.init_subtitles()
         self.init_zh_pron_tags()
         self.init_languages()
+        if dump_file_lang_code == "zh":
+            self.init_form_of_templates()
 
     def to_kwargs(self):
         return {
@@ -184,3 +187,7 @@ class WiktionaryConfig(object):
                         self.LANGUAGES_BY_NAME[lang_name]
                 ):
                     self.LANGUAGES_BY_NAME[lang_name] = lang_code
+
+    def init_form_of_templates(self):
+        with self.data_folder.joinpath("form_of_templates.json").open(encoding="utf-8") as f:
+            self.FORM_OF_TEMPLATES = set(json.load(f))

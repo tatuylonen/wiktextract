@@ -1000,8 +1000,9 @@ def clean_value(config, title, no_strip=False, no_html_strip=False):
                    r'<\s*/\s*div\s*>',
                    "", title)
     # Remove <sup> with previewonly class (generated e.g. by {{taxlink|...}})
-    title = re.sub(r'(?si)<\s*sup\b[^>]*?\bclass="[^"]*?\bpreviewonly\b[^>]*?>'
-                   r'((<.*?</[^>]*>)|.)*?<\s*/\s*sup\s*>',
+    title = re.sub(r'(?si)<\s*sup\b[^>]*?\bclass="[^"<>]*?'
+                   r'\bpreviewonly\b[^>]*?>'
+                   r'((<[^<>]>[^<>]*</[^<>]*>)|.)*?<\s*/\s*sup\s*>',
                    "", title)
     # Remove <strong class="error">...</strong>
     title = re.sub(r'(?si)<\s*strong\b[^>]*?\bclass="[^"]*?\berror\b[^>]*?>'

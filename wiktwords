@@ -62,6 +62,7 @@ def init_prefixes(ctx: Wtp) -> None:
         }
 
 
+
 def capture_page(model, orig_title, text, pages_dir):
     """Checks if the page needs special handling (and maybe saving).
     Returns True if the page should be processed normally as a
@@ -71,6 +72,10 @@ def capture_page(model, orig_title, text, pages_dir):
     assert isinstance(text, str)
     assert pages_dir is None or isinstance(pages_dir, str)
 
+    if args.language:
+        if not re.search(lang_names_re, text):
+            return False
+    
     analyze = True
     title = orig_title
     m = re.match(r"^([A-Z][a-z][-a-zA-Z0-9_]+):(.+)$", title)
@@ -268,7 +273,22 @@ if __name__ == "__main__":
             else:
                 new_lang_codes.append(x)
         config.capture_language_codes = new_lang_codes
-        
+
+    if args.language:
+        lang_names = []
+        for x in args.language:
+            if x in config.LANGUAGES_BY_CODE:
+                lang_names.extend(config.LANGUAGES_BY_CODE[x])
+            else:
+                lang_names.extend(config.LANGUAGES_BY_CODE[ 
+                                            config.LANGUAGES_BY_NAME[x] ])
+
+        lang_names = [re.escape(x) for x in lang_names]
+        lang_names_re = r"==\s*("
+        lang_names_re += "|".join(lang_names)
+        lang_names_re += r")"
+        lang_names_re = re.compile(lang_names_re)
+
     # Create expansion context
     ctx = Wtp(cache_file=args.cache, num_threads=args.num_threads,
               lang_code=args.dump_file_language_code,
