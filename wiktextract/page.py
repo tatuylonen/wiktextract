@@ -1597,6 +1597,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         have_subtitle = False
         first_para = True
         first_head_tmplt = True
+        collecting_head = False
         for node in posnode.children:
             if isinstance(node, str):
                 for m in re.finditer(r"\n+|[^\n]+", node):
@@ -1604,13 +1605,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if p.startswith("\n\n") and pre:
                         first_para = False
                         break
-                    if p:
+                    if p and collecting_head:
                         pre[-1].append(p)
                 continue
             assert isinstance(node, WikiNode)
             kind = node.kind
             if kind == NodeKind.LIST:
                 lists[-1].append(node)
+                collecting_head = False
                 continue
             elif kind in LEVEL_KINDS:
                 # Stop parsing section if encountering any kind of
@@ -1620,7 +1622,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # that should be parsed XXX it should be handled by changing
                 # this break.
                 break
-            elif kind == NodeKind.LINK:
+            elif collecting_head and kind == NodeKind.LINK:
                 # We might collect relevant links as they are often pictures
                 # relating to the word
                 if (len(node.args[0]) >= 1 and
@@ -1641,7 +1643,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if pre[-1]:
                         pre.append([])  # Switch to next head
                         lists.append([])  # Lists parallels pre
-                elif node.args not in ("gallery", "ref", "cite", "caption"):
+                        collecting_head = True
+                elif (collecting_head and
+                      node.args not in ("gallery", "ref", "cite", "caption")):
                     pre[-1].append(node)
             elif kind == NodeKind.TEMPLATE:
                 # XXX Insert code here that disambiguates between
@@ -1653,11 +1657,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 elif pre[-1]:
                     pre.append([]) # Switch to the next head
                     lists.append([]) # lists parallel pre
+                    collecting_head = True
                     pre[-1].append(node)
                 else:
                     pre[-1].append(node)
             elif first_para:
-                pre[-1].append(node)
+                if collecting_head:
+                    pre[-1].append(node)
         # XXX use template_fn in clean_node to check that the head macro
         # is compatible with the current part-of-speech and generate warning
         # if not.  Use template_allowed_pos_map.
