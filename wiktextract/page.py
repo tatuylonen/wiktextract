@@ -1597,7 +1597,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         have_subtitle = False
         first_para = True
         first_head_tmplt = True
-        collecting_head = False
+        collecting_head = True
         for node in posnode.children:
             if isinstance(node, str):
                 for m in re.finditer(r"\n+|[^\n]+", node):
