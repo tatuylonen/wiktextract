@@ -6119,6 +6119,180 @@ infl_map = {
     "transgressive": "transgressive",  # darovať/Slovak
     # conocer/Asturian
     "gerundive": "gerund",
+
+    "case \ number": "",  #δίκυκλο/Greek
+    "number case \ gender": "",  #απύρωτος/Greek
+    "conditional 2nd form": "conditional-ii",  #costosir/Occitan
+
+    #konyugön/Volapük
+    "2nd person polite singular": "second-person singular polite",
+    "3rd person male singular": "third-person masculine singular",
+    "3rd person female singular": "third-person singular feminine",
+    "reflexive singular": "reflexive singular",
+    "reciprocative singular": "reciprocal singular",
+    "2nd person polite plural": "second-person polite plural",
+    "3rd person male plural": "third-person masculine plural",
+    "3rd person female plural": "third-person feminine plural",
+    "reflexive plural": "reflexive plural",
+    "reciprocative plural": "reciprocal plural",
+    "future in the past perfect": "past perfect future",
+
+    #райҳон/Tajik
+    "bare": "",  
+    "definite object": "definite direct-object",
+
+    #brestan/Proto-West Germanic
+    "Genitive infin.": "genitive infinitive",
+    "Dative infin.": "dative infinitive",
+    "Instrum. infin.": "instrumental infinitive",
+
+    #sberegar/Venetian
+    "eło / eła": "third-person singular",
+    "noialtri / noialtre": "first-person plural",
+    "voialtri / voialtre": "second-person plural",
+    "łuri / łore": "third-person plural",
+    "che mi": "first-person singular subjunctive",
+    "che ti": "second-person singular subjunctive",
+    "che eło / eła": "third-person singular subjunctive",
+    "che noialtri / noialtre": "first-person plural subjunctive",
+    "che voialtri / voialtre": "second-person plural subjunctive",
+    "che łuri / łore": "third-person plural subjunctive",
+
+    #qolmoq/Uzbek
+    "1": {
+        "default": "first-person",
+    },
+    "2": {
+        "default": "second-person",
+    },
+    "cont A": "continuative",
+    "cont B": "continuative formal imperfective",
+    "cont C": "continuative habitual",
+    
+    #taanduma/Estonian
+    "voice": "",
+
+    "singular / indefinite": "singular indefinite",  #Өгэдэй/Mongolian/668
+
+    # Proto-Finnic/munidak
+    "passive connegative": "passive connegative",
+    "infinitives/nouns": "",
+    "infinitive 1": "infinitive-i",
+    "infinitive 2": "infinitive-ii",
+    "gerund/supine": "gerund supine",
+    
+    # glæþia/Old Swedish
+    "þū": {
+        "lang": "Old Swedish",
+        "then": "second-person singular",
+    },
+    "vīr": {
+        "lang": "Old Swedish",
+        "then": "first-person plural",
+    },
+    "īr": {
+        "lang": "Old Swedish",
+        "then": "second-person plural",
+    },
+    "iæk": {
+        "lang": "Old Swedish",
+        "then": "first-person singular",
+    },
+    "han": {
+        "lang": "Old Swedish",
+        "then": "third-person singular",
+    },
+    "þēr": {
+        "lang": "Old Swedish",
+        "then": "third-person plural",
+    },
+
+    "Absolute superlative": "absolute superlative",  #τρανός/Greek
+
+    # kolfino/Ternate
+    "Inclusive": "inclusive plural",
+    "Exclusive": "exclusive plural",
+    "Human m": "human-person masculine",
+    "Human f": "human-person feminine",
+    "Non-human": "non-human",
+
+    # ntw/Eqyptian
+    "suffix pronouns": "suffix pronoun",
+    "stative (‘pseudoparticiple’) endings": "stative",
+    "enclitic (‘dependent’) pronouns": "enclitic pronoun", 
+    "stressed (‘independent’) pronouns": "stressed pronoun",
+    "proclitic (‘subject form’) pronouns": "proclitic pronoun",
+
+    #райҳон/Tajik
+    "indefinite, definite relative": "indefinite definite relative",
+
+    "mixed after th": "after-th mutation-mixed",  #wenyn/Cornish
+    
+    "feminine gender": "feminine",  #heiße Zitrone/German
+    "masculine gender": "masculine",  #alter Drache/German
+    "specific": "specific",  #পূঁজ/Assamese
+    
+    #навохтан/Tajik
+    "ман": "first-person singular",
+    "ту": "second-person singular",
+    "ӯ": "third-person singular",
+    "мо": "first-person plural",
+    "шумо": ["second-person plural",
+             "second-person singular polite"],
+    "онҳо": "third-person plural",
+    
+    "минем (“my”)": "first-person singular possessive",  #сез/Tatar
+    "синең (“your”)": "second-person singular possessive",
+    "аның (“his/her/it”)": "third-person singular possessive",
+    "безнең (“our”)": "first-person plural possessive",
+    "сезнең (“your”)": "second-person plural possessive",
+    "аларның (“their”)": "third-person plural possessive",
+
+    "Realis mood": "realis",  #weyetun/Mapudungun
+    "singular or plural": ["singular", "plural",],  #aبڑھنا/Urdu
+    "iek": {  #ongelje/Saterland Frisian
+        "lang": "Saterland Frisian",
+        "then": "first-person singular",
+    },
+    
+    #wenschen/Middle Dutch
+    "In genitive": { "lang": "Middle Dutch", "then": "infinitive genitive", },
+    "In dative": { "lang": "Middle Dutch", "then": "infinitive dative", },
+    # ongelje/Saterland Frisian
+    "hie/ju/dät": "third-person singular",
+    "wie": { "lang": "Saterland Frisian", "then": "first-person plural", },
+    "du": { "lang": "Saterland Frisian", "then": "second-person singular", },
+
+    # यहाँका/Nepali
+    "Low": {
+        "lang": "Nepali",
+        "then": "impolite",
+    },
+    "Mid": {
+        "lang": "Nepali",
+        "then": "polite",
+    },
+    "Low/Mid": {
+        "lang": "Nepali",
+        "then": "impolite polite",
+    },
+    "High": {
+        "lang": "Nepali",
+        "then": "deferential",
+    },
+    "izofa": "ezafe",  # райҳон/Tajik
+    "adverbs": "adverb",  # tꜣj/Egyptian
+    "Equative": "equative",  # erk/Proto-Turkic
+    "Pres. subjunctive": "present subjunctive",  # adkʷiseti/Proto-Celtic
+    "Inclusive Tri-Plural": "inclusive tri-plural",  #aaombiniili'/Chickasaw
+    "1st-person dual": "first-person dual",  #ferkuupe/North Frisian
+    "2nd-person dual": "second-person dual",  #ferkuupe/North Frisian
+
+    #coymaq/Crimean Tatar
+    "repeated gerund": "gerund repeated",  
+    "temporal gerund": "temporal gerund",
+    "non-future participle": "present past participle",
+    
 }
 
 

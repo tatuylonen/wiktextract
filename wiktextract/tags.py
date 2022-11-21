@@ -4643,6 +4643,8 @@ xlat_tags_map = {
     "used in definite form": "",  # dyrerike/Norwegian Nynorsk
     "used in definite singular form": "",  # nettet/Norwegian Nynorsk
     "combined with se": "reflexive", # tecnificarse/Spanish
+    "reciprocative": "reciprocal",  # konyugön/Volapük
+
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -6058,6 +6060,7 @@ valid_tags = {
     "æ-tensing": "misc",
     "има": "misc",  # Distinguishes certain verb forms in Macedonian
     "non-human": "misc",  # XXX is there already a tag for this? himself/English - KJ
+    "human-person": "misc",
     "with-article": "with",  # Mosambik/German
     "before-noun": "misc",  # Mama/German
     "with-numeral": "with",  # Radlermaß/German
@@ -6196,6 +6199,11 @@ valid_tags = {
     #a ګړندی/Pashto
     "oblique-i": "case",
     "oblique-ii": "case",
+    "after-th": "misc",  # wenyn/Cornish
+    # https://en.wiktionary.org/wiki/Appendix:Persian_ez%C3%A2fe
+    "ezafe": "misc",  # izofa, ezâfé,  райҳон/Tajik
+    "tri-plural": "number",  # aaombiniili'/Chickasaw
+    "repeated": "misc", #coymaq/Crimean Tatar
 }
 
 for k, v in valid_tags.items():
