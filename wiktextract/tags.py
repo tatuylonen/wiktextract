@@ -365,7 +365,7 @@ xlat_head_map = {
     "m anim or f anim or m anim pl or f anim pl or f inan or f inan pl":
         "masculine animate feminine plural singular inanimate",  #XXX
     "defunct": "archaic",  #  flugu/Norwegian Nynorsk
-
+    "mfpl": "masculine feminine plural",  # extrajudiciaires/French
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly
@@ -4644,7 +4644,7 @@ xlat_tags_map = {
     "used in definite singular form": "",  # nettet/Norwegian Nynorsk
     "combined with se": "reflexive", # tecnificarse/Spanish
     "reciprocative": "reciprocal",  # konyugön/Volapük
-
+    "mfpl": "masculine feminine plural", # extrajudiciaires/French
 }
 
 # This mapping is applied to full descriptions before splitting by comma.

@@ -1598,12 +1598,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
         first_para = True
         first_head_tmplt = True
         collecting_head = True
+        found_template_in_this_paragraph = False
         for node in posnode.children:
             if isinstance(node, str):
                 for m in re.finditer(r"\n+|[^\n]+", node):
                     p = m.group(0)
                     if p.startswith("\n\n") and pre:
                         first_para = False
+                        found_template_in_this_paragraph = False
                         break
                     if p and collecting_head:
                         pre[-1].append(p)
@@ -1613,6 +1615,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if kind == NodeKind.LIST:
                 lists[-1].append(node)
                 collecting_head = False
+                found_template_in_this_paragraph = False
                 continue
             elif kind in LEVEL_KINDS:
                 # Stop parsing section if encountering any kind of
@@ -1644,6 +1647,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         pre.append([])  # Switch to next head
                         lists.append([])  # Lists parallels pre
                         collecting_head = True
+                        found_template_in_this_paragraph = False
                 elif (collecting_head and
                       node.args not in ("gallery", "ref", "cite", "caption")):
                     pre[-1].append(node)
@@ -1653,11 +1657,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # that don't.
                 if first_head_tmplt and pre[-1]:
                     first_head_tmplt = False
+                    found_template_in_this_paragraph = True
                     pre[-1].append(node)
-                elif pre[-1]:
+                elif pre[-1] and not found_template_in_this_paragraph:
                     pre.append([]) # Switch to the next head
                     lists.append([]) # lists parallel pre
                     collecting_head = True
+                    found_template_in_this_paragraph = True
                     pre[-1].append(node)
                 else:
                     pre[-1].append(node)

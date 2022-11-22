@@ -6227,6 +6227,7 @@ infl_map = {
 
     "case \ number": "",  #δίκυκλο/Greek
     "number case \ gender": "",  #απύρωτος/Greek
+    "number case \\ gender": "",  #απύρωτος/Greek
     "conditional 2nd form": "conditional-ii",  #costosir/Occitan
 
     #konyugön/Volapük
