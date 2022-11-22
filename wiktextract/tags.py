@@ -5089,6 +5089,9 @@ valid_tags = {
     "allative": "case",  # Case
     "allative-i": "case",
     "allative-ii": "case",
+    "allative-iii": "case",
+    "allative-iv": "case",
+    "allative-v": "case",
     "alphabetic-tones": "misc",
     "already-form": "tense",  # e.g. hojiwa/Swahili
     "also": "misc",
@@ -5120,6 +5123,10 @@ valid_tags = {
     "before-lenited-fh": "misc",  # Next word starts with lenited fh (Irish)
     "before-past": "misc",  # Used before the past tense (Irish)
     "before-vowel": "misc",  # next words starts with vowel (in pronunciation)
+    "before-consonant": "misc",  #oh-/Choctaw
+    "before-s": "misc",
+    "before-front-vowel": "misc",
+    "before-back-vowel": "misc",
     "benefactive": "case",  # Case (beneficiary of an action)
     "broadly": "misc",
     "būdinys": "misc",
@@ -6164,6 +6171,9 @@ valid_tags = {
     "genitive-ii": "case",
     "locative-i": "case",
     "locative-ii": "case",
+    "locative-iii": "case",
+    "locative-iv": "case",
+    "locative-v": "case",
     "sociative-i": "case",
     "sociative-ii": "case",
     "gerund-i": "non-finite",  # பிடி/Tamil
@@ -6204,6 +6214,33 @@ valid_tags = {
     "ezafe": "misc",  # izofa, ezâfé,  райҳон/Tajik
     "tri-plural": "number",  # aaombiniili'/Chickasaw
     "repeated": "misc", #coymaq/Crimean Tatar
+    "tu-derivative": "non-finite",  # pawjō/Proto-Italic
+    "s-derivative": "non-finite",
+    # birciqqo/Sidamo
+    # In Sidamo, nouns have a form when they're modified by
+    # other words in an NP, and a form when they're not.
+    "with-modifier": "misc",
+    "without-modifier": "misc",
+    "inchoative": "aspect",
+    "series-i-verb-argument": "misc",  #küm-/Maquiritari
+    "series-ii-verb-argument": "misc",
+    "patient-like": "misc",
+    "agent-like": "misc",
+    "object-dual": "number",
+    "object-exclusive": "person",
+    "ablative-i": "case",  # хӏайван/Avar
+    "ablative-ii": "case", 
+    "ablative-iii": "case", 
+    "ablative-iv": "case", 
+    "ablative-v": "case", 
+    "translative-i": "case", 
+    "translative-ii": "case", 
+    "translative-iii": "case", 
+    "translative-iv": "case", 
+    "translative-v": "case", 
+    "patient": "misc",
+    "conjectural": "mood",  #노타/Middle Korean
+    "adjective-from-verb": "derivation",
 }
 
 for k, v in valid_tags.items():
