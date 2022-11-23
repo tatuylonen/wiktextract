@@ -6241,6 +6241,7 @@ valid_tags = {
     "patient": "misc",
     "conjectural": "mood",  #노타/Middle Korean
     "adjective-from-verb": "derivation",
+    "anaphoric": "misc",   #tꜣj/Egyptian
 }
 
 for k, v in valid_tags.items():
