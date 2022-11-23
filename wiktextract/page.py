@@ -1598,14 +1598,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
         first_para = True
         first_head_tmplt = True
         collecting_head = True
-        found_template_in_this_paragraph = False
+        start_of_paragraph = True
         for node in posnode.children:
             if isinstance(node, str):
                 for m in re.finditer(r"\n+|[^\n]+", node):
                     p = m.group(0)
                     if p.startswith("\n\n") and pre:
                         first_para = False
-                        found_template_in_this_paragraph = False
+                        start_of_paragraph = True
                         break
                     if p and collecting_head:
                         pre[-1].append(p)
@@ -1615,7 +1615,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if kind == NodeKind.LIST:
                 lists[-1].append(node)
                 collecting_head = False
-                found_template_in_this_paragraph = False
+                start_of_paragraph = True
                 continue
             elif kind in LEVEL_KINDS:
                 # Stop parsing section if encountering any kind of
@@ -1640,6 +1640,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                                         ctx, "File")):
                         # Skips file links
                         continue
+                start_of_paragraph = False
                 pre[-1].extend(node.args[-1])
             elif kind == NodeKind.HTML:
                 if node.args == "br":
@@ -1647,27 +1648,31 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         pre.append([])  # Switch to next head
                         lists.append([])  # Lists parallels pre
                         collecting_head = True
-                        found_template_in_this_paragraph = False
+                        start_of_paragraph = True
                 elif (collecting_head and
                       node.args not in ("gallery", "ref", "cite", "caption")):
+                    start_of_paragraph = False
                     pre[-1].append(node)
+                else:
+                    start_of_paragraph = False
             elif kind == NodeKind.TEMPLATE:
                 # XXX Insert code here that disambiguates between
                 # templates that generate word heads and templates
                 # that don't.
                 if first_head_tmplt and pre[-1]:
                     first_head_tmplt = False
-                    found_template_in_this_paragraph = True
+                    start_of_paragraph = False
                     pre[-1].append(node)
-                elif pre[-1] and not found_template_in_this_paragraph:
+                elif pre[-1] and start_of_paragraph:
                     pre.append([]) # Switch to the next head
                     lists.append([]) # lists parallel pre
                     collecting_head = True
-                    found_template_in_this_paragraph = True
+                    start_of_paragraph = False
                     pre[-1].append(node)
                 else:
                     pre[-1].append(node)
             elif first_para:
+                start_of_paragraph = False
                 if collecting_head:
                     pre[-1].append(node)
         # XXX use template_fn in clean_node to check that the head macro
