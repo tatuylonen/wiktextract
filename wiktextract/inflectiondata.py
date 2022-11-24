@@ -4607,9 +4607,6 @@ infl_map = {
     "دوی / هغوی": "third-person plural",
     "present imperfective": "present imperfective",
     "present perfective": "present perfective",
-    "Postive": "",  # XXX remove these soon, fixed table on wiktionary
-    "Postive (Imperfective)": "imperfective",  #XXX
-    "Postive (Perfective)": "perfective",  #XXX
     "تاسو": "second-person plural",
     # This specific form seems like the addition of someone later in a
     # new part of the table, it's a Northern Pashto variant, so someone

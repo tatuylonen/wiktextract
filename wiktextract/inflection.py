@@ -2732,7 +2732,8 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
                         titletext = titletext[:-1]
 
                     is_title, hdr_expansion, target, celltext = \
-                            determine_header(ctx, tblctx, config, lang, word, pos,
+                            determine_header(ctx, tblctx, config,
+                                     lang, word, pos,
                                      tree.kind, kind, style,
                                      row, col, celltext, titletext,
                                      cols_headered,
@@ -2820,7 +2821,6 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
     # InflCell objects.  Parse the inflection table from that format.
     if new_rows:
         for rows, titles, after, depth in new_rows:
-            print(rows)  ### XXX remove me
             handle_generic_table(config, ctx, tblctx, data,
                                  word, lang, pos, rows,
                                  titles, source, after, depth)
