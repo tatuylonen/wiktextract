@@ -6245,6 +6245,9 @@ valid_tags = {
     "distant-past": "tense",  #Maquiritari, Mapudungun
     "transitional-past": "tense",  # тұту/Kazakh
     "free-state": "misc",  #aɣemmar/Tarifit
+    "proximal-to-speaker": "misc", #nꜣyw/Egyptian/38
+    "proximal-to-topic": "misc",
+    
 }
 
 for k, v in valid_tags.items():

@@ -1107,11 +1107,11 @@ infl_map = {
     },
     "vos": {
         "lang": ["Interlingua", "Ladino", "Latin", "Old French",
-                 "Old Occitan", "Sardinian", "Walloon", "Lorrain",],
+                 "Old Occitan", "Sardinian", "Lorrain",],
         "pos": "verb",
         "then": "second-person",
         "else": {
-            "lang": ["Ladin",],
+            "lang": ["Ladin", "Walloon",],
             "then": "second-person plural",
         },
     },
@@ -6589,7 +6589,11 @@ infl_map = {
     "je (j’) / i": "first-person singular",  #gizai/Bourguignon/81
     "je (j') / i": "first-person singular",  #antreprarre/Bourguignon/79
     "que je (j') / qu'i": "first-person singular subjunctive",
-    "que je (j’) / qu'i": "first-person singular subjunctive", 
+    "que je (j’) / qu'i": "first-person singular subjunctive",
+    "ai (el), ale": "third-person singular",  #gizai/Bourguignon/58
+    "ai (el), ales": "third-person plural", 
+    "qu'ai (el), qu'ale": "third-person singular subjunctive",
+    "qu'ai (el), qu'ales": "third-person plural subjunctive",
 
     "determiners and pronouns": "determiner pronoun",  #tꜣj/Egyptian/76
     "anaphoric": "anaphoric",
@@ -6627,10 +6631,6 @@ infl_map = {
     "h-prothesis": "prothesis-h",  # moved here, uncommented
 
     "distant past": "distant-past past",  #weyetun/Mapudungun/56
-    "ni": "",  #ezagutu/Basque/56
-    "hi": "",  #ezagutu/Basque/56
-    "gu": "",  #ezagutu/Basque/56
-    "zu": "",  #ezagutu/Basque/56
 
     # XXX Tatar has a ton of soft hyphens
     "Futu\xadre": "future",  #!! soft hyphen! тыңларга/Tatar
@@ -6729,6 +6729,50 @@ infl_map = {
     "free state": "free-state",  #aɣemmar/Tarifit
     "construct state": "construct",
     "dative/instr": "dative instrumental",  #unseraz/Proto-Germanic/39
+
+    "infinitive III": "infinitive infinitive-iii",  #stärwe/North Frisian
+    "determiners": "determiner",  #nꜣyw/Egyptian/38
+    "pronouns": "pronoun",  
+    "proximal to speaker": "proximal-to-speaker",
+    "proximal to spoken of": "proximal-to-topic",
+    "‘copula’": "copulative",
+    "possessive determiners (used with suffix pronouns)":
+            "possessive determiner",
+    "relational pronouns (‘possessive prefixes’)": "possessive pronoun",
+    "definite articles": "definite article",
+    "indefinite articles": "indefinite article",
+
+    "Aspirate": "mutation-aspirate",  #vynet/Middle Welsh/37
+    "dji (dj')": "first-person singular",  #atchter/Walloon/37
+    "preterit": "preterite",  
+    "dji / nos": "first-person plural", 
+    "nós nós outros nós outras": "first-person plural",  #prazer/Old Portuguese
+    "vós vós outros vós outras": "second-person plural",
+    
+    "contrastive": "contrastive",  #issito/Choctaw/36
+
+    #espurrire/Leonese
+    "you": { "lang": "Leonese", "then": "first-person singular", },
+    "él / eilla / eillu / vusté": "third-person singular", 
+    "nosoutros / nosoutras": "first-person plural", 
+    "vosoutros / vosoutras": "second-person plural",
+    "eillos / eillas / vustedes": "third-person plural",
+
+    "Personal-pronoun including forms": "",  #ܓܘ/Assyrian Neo-Aramaic/36
+    "Non-personal-pronoun-including form": "",  #במו/Hebrew/35
+
+    #pårler/Walloon
+    "i (il) / ele": "third-person singular",
+    "dji (dj') / nos": "first-person plural", 
+    "ki dj'": "first-person singular subjunctive",
+    "ki t'": "second-person singular subjunctive",
+    "k' i (il) / k' ele": "third-person singular subjunctive",
+    "ki dj' / ki nos": "first-person plural subjunctive",
+    "ki vos": "second-person plural subjunctive",
+    "k' i (il)": "third-person plural subjunctive",
+
+    
+    
 }
 
 BOOKMARK = True
