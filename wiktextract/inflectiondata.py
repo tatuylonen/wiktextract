@@ -3039,10 +3039,6 @@ infl_map = {
         "if": "mutation",
         "then": "mutation-nasal",
     },
-    "h-prothesis": {
-        "if": "mutation",
-        "then": "prothesis-h",
-    },
     "aspirate": {
         "if": "mutation",
         "then": "mutation-aspirate",
@@ -6485,7 +6481,6 @@ infl_map = {
 
     "мен": "first-person singular",  #чылгаар/Tuvan
     "бис": "first-person plural",
-    "сен": "second-person singular",  
     "силер": "second-person plural",
     "ол": "third-person singular",
     "олар": "third-person plural",
@@ -6538,8 +6533,6 @@ infl_map = {
     "affirmative commands": "imperative",  #ፈተለ/Tigrinya/110
     "negative commands": "negative imperative",
     
-    "te": "first-person singular",  #ovrar/Franco-Provençal/108
-    
     '1st-person ("my, our")': "first-person possessive",  #aaombiniili'/Chickasaw/106
     '2nd-person ("thy, your")': "second-person possessive",
     '3rd-person ("his, her, its, their")': "third-person possessive", 
@@ -6572,7 +6565,7 @@ infl_map = {
     "transitive agent": "transitive agent",
     "first person dual inclusive": "first-person dual inclusive",
     "first person dual exclusive": "first-person dual exclusive",
-    "distant past third person": "distal past",
+    "distant past third person": "distant-past past",
     "coreferential/reflexive": "reflexive",
     "series I verb argument: transitive agent and transitive patient":
         "transitive agent patient",
@@ -6595,6 +6588,8 @@ infl_map = {
     "Verbal adjective": "adjective-from-verb", 
     "je (j’) / i": "first-person singular",  #gizai/Bourguignon/81
     "je (j') / i": "first-person singular",  #antreprarre/Bourguignon/79
+    "que je (j') / qu'i": "first-person singular subjunctive",
+    "que je (j’) / qu'i": "first-person singular subjunctive", 
 
     "determiners and pronouns": "determiner pronoun",  #tꜣj/Egyptian/76
     "anaphoric": "anaphoric",
@@ -6613,7 +6608,7 @@ infl_map = {
     "i (il)/ale": "third-person singular",  #vouloér/Picard
     "i (il)/a (al)": "third-person singular",  #ète/Picard/1
     "(n)os": "first-person plural",  #vouloér/Picard/60
-    "os": "first-person second-person plural",  #vouloér/Picard
+    "os": "second-person plural",  #vouloér/Picard
     "is": "third-person plural",  #vouloér/Picard/31
     "qu'ej (j')": "first-person singular subjunctive",  #vouloér/Picard/31
     "qu'tu (t')": "second-person singular subjunctive",
@@ -6627,11 +6622,116 @@ infl_map = {
     "inanimate pronoun": "inanimate pronoun",  #mönsemjo/Maquiritari
     "medial": "medial",
 
+    "unmarked (later)": "",  #ntw/Egyptian singular/plural/unmarked
+    "H-prothesis": "prothesis-h",  #arglwyt/Middle Welsh/61
+    "h-prothesis": "prothesis-h",  # moved here, uncommented
+
+    "distant past": "distant-past past",  #weyetun/Mapudungun/56
+    "ni": "",  #ezagutu/Basque/56
+    "hi": "",  #ezagutu/Basque/56
+    "gu": "",  #ezagutu/Basque/56
+    "zu": "",  #ezagutu/Basque/56
+
+    # XXX Tatar has a ton of soft hyphens
+    "Futu\xadre": "future",  #!! soft hyphen! тыңларга/Tatar
+    "Nonfinite verb forms": "",
     
+    "transitory past": "past transitional-past",  #тұту/Kazakh
+    "сен": {
+        "lang": "Kazakh",
+        "then": "second-person singular informal",
+        "else": {
+            "lang": "Tuvan",
+            "then": "second-person singular",
+        },
+    },
+    "сіз": "second-person singular formal",
+    "біз": "first-person plural",
+    "сендер": "second-person plural informal",
+    "сіздер": "second-person plural formal",
+    "imperative/hortative": "imperative hortative",
+
+    "gend/num": "",  #vascuenciu/Asturian/54
+
+    "inf": "infinitive",  #হাঁঠ/Assamese/54
+
+    "ca je/i'": "first-person singular subjunctive",  #spantacà/Neapolitan
+    "ca tu": "second-person singular subjunctive",
+    "ca nuje": "first-person plural subjunctive",
     
+    "il, alle, nos": "third-person singular",  #cogier/Norman/52
+    "il, alles": "third-person plural", 
+    "qu'il, qu'alle, que nos": "third-person singular subjunctive",
+    "que je (que nos)": "first-person plural subjunctive",
+    "qu'il, qu'alles": "third-person plural subjunctive",
+
+    # Get yourself together, Sardinian
+    "deo": "",  #nochere/Sardinian/52
+    "deo, eo": "",  #tzappare/Sardinian/51
+    "dego, deo": "",  #tzappare/Sardinian/33
+    "isse/issa": "",  #nochere/Sardinian/27
+    "chi deo, chi eo": "",  #tzappare/Sardinian/17
+    "chi deo": "",  #impreare/Sardinian/12
+    "chi dego, chi deo": "",  #tzappare/Sardinian/11
+    "che deo": "",  #nochere/Sardinian/8
+    "che tue": "",  #nochere/Sardinian/8
+    "che isse/issa": "",  #nochere/Sardinian/8
+    "che nois": "",  #nochere/Sardinian/8
+    "che bois": "",  #nochere/Sardinian/8
+    "che issos/issas": "",  #nochere/Sardinian/8
+    "issos/ issas": "",  #finire/Sardinian/4
+    "eo, deo": "",  #finire/Sardinian/3
+    "deu": "",  #essi/Sardinian/3
+    "tui": "",  #essi/Sardinian/3
+    "nosu": "",  #essi/Sardinian/3
+    "bosatrus/bosatras": "",  #essi/Sardinian/3
+    "issus/issas": "",  #essi/Sardinian/3
+    "past/ imperfect": "",  #finire/Sardinian/2
+    "+ past participle": "",  #pòdere/Sardinian/2
+    "isse/ issa": "",  #finire/Sardinian/1
+    "chi deu": "",  #essi/Sardinian/1
+    "chi tui": "",  #essi/Sardinian/1
+    "chi nosu": "",  #essi/Sardinian/1
+    "chi bosatrus/bosatras": "",  #essi/Sardinian/1
+    "chi issus/issas": "",  #essi/Sardinian/1
+
+    
+    "Verbs beginning with a consonant.": "",  #chaaha̱ taloowa/Chickasaw/52
+
+    "te": "second-person singular",  #ovrar/Franco-Provençal
+    "nu": "first-person plural",  #legro/Dalmatian
+    "vu": "second-person plural",
+    "Perfekta": "perfect",  #sannoa/Ingrian/50
+    "Nouns in vowel-, b-, or p-": "",  #aaombiniili'/Chickasaw/50
+    "subjunctive present": "present subjunctive",  #a متشکر بودن/Persian/48
+
+    "1st Person Singular": "first-person singular",  #spigen/Middle Low German
+    "3rd Person Singular": "third-person singular",
+
+    "Rewş": "",  # "case", kerguh/Northern Kurdish
+    "Vde": "third-person singular",  #aterecer/Galician
+    "Vdes": "third-person plural",  
+    "IMPF": "imperfect",  #डिलीट होना/Hindi
+    "frm": "",  # ??? "form"? হাঁঠ/Assamese
+    "focus": "focus",  #issito/Choctaw
+    "singular 1ˢᵗ person": "first-person singular",  #гъэкӏодын/Adyghe
+    "singular 2ˢᵗ person": "second-person singular",
+    "singular 3ˢᵗ person": "third-person singular",
+    "plural 1ˢᵗ person": "first-person plural",
+    "plural 2ˢᵗ person": "second-person plural",
+    "plural 3ˢᵗ person": "third-person plural",
+    "Neuter gender": "neuter",  #𒄭𒅔𒃷/Hittite
+
+    "Plain Infinitive": "infinitive",  #spigen/Middle Low German
+    "Full Infinitive (Gerund)": "gerund infinitive", 
+    "Imperatives": "imperative",  
+    "2nd Person Plural": "second-person plural",
+    "free state": "free-state",  #aɣemmar/Tarifit
+    "construct state": "construct",
+    "dative/instr": "dative instrumental",  #unseraz/Proto-Germanic/39
 }
 
-
+BOOKMARK = True
 
 def check_tags(k, v):
     assert isinstance(k, str)

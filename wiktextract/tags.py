@@ -6242,6 +6242,9 @@ valid_tags = {
     "conjectural": "mood",  #노타/Middle Korean
     "adjective-from-verb": "derivation",
     "anaphoric": "misc",   #tꜣj/Egyptian
+    "distant-past": "tense",  #Maquiritari, Mapudungun
+    "transitional-past": "tense",  # тұту/Kazakh
+    "free-state": "misc",  #aɣemmar/Tarifit
 }
 
 for k, v in valid_tags.items():
