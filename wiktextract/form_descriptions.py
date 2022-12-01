@@ -1059,6 +1059,8 @@ def parse_head_final_tags(ctx, lang, form):
     m = re.search(head_final_re, form)
     if m is not None:
         tagkeys = m.group(3)
+        print(tagkeys)  # XXX remove
+        print(ctx.title)
         # Only replace tags ending with numbers in languages that have
         # head-final numeric tags (e.g., Bantu classes); also, don't replace
         # tags if the main title ends with them (then presume they are part
@@ -1068,7 +1070,12 @@ def parse_head_final_tags(ctx, lang, form):
         tagkeys_contains_digit = re.search(r"\d", tagkeys)
         if ((not tagkeys_contains_digit or
              lang in head_final_numeric_langs) and
-            not ctx.title.endswith(" " + tagkeys)):
+            not ctx.title.endswith(" " + tagkeys) and
+            # XXX the above test does not capture when the whole word is a
+            # xlat_head_map key, so I added the below test to complement
+            # it; does this break anything?
+            not ctx.title == tagkeys):  # defunct/English,
+                                        # "more defunct" -> "more" ["archaic"]
             if not tagkeys_contains_digit or lang in head_final_numeric_langs:
                 form = form[:m.start()]
                 v = xlat_head_map[tagkeys]
