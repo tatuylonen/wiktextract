@@ -2874,7 +2874,7 @@ def parse_top_template(config, ctx, node, data):
             return ""
         if name in ("reconstruction",):
             return ""
-        if name == "also":
+        if name.lower() == "also":
             # XXX shows related words that might really have been the intended
             # word, capture them
             return ""
