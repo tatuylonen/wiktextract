@@ -1681,6 +1681,17 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         there_are_many_heads = len(pre) > 1
         for i, (pre1, ls) in enumerate(zip(pre, lists)):
+            if all(not sl for sl in lists[i:]):
+                if i == 0:
+                    ctx.debug("head without list of senses, {}/{}".format(
+                              word, language),
+                              sortid="page/1686/20221207")
+                else:
+                    ctx.debug("later head candidate without "
+                              "list of senses, {}/{}".format(
+                              word, language),
+                              sortid="page/1690/20221207")
+                    break
             head_group = i + 1 if there_are_many_heads else None
             # print("parse_part_of_speech: {}: {}: pre={}"
                   # .format(ctx.section, ctx.subsection, pre1))
