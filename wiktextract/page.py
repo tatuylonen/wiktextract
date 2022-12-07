@@ -2885,7 +2885,7 @@ def parse_top_template(config, ctx, node, data):
             return ""
         if name in ("reconstruction",):
             return ""
-        if name == "also":
+        if name.lower() == "also":
             # XXX shows related words that might really have been the intended
             # word, capture them
             return ""
@@ -3024,7 +3024,9 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
     text = re.sub(r"(?si)<\s*(/\s*)?includeonly\s*>", "", text)
 
     # Expand Chinese Wiktionary language and POS heading templates
-    if config.dump_file_lang_code == "zh" and "{{-" in text:
+    # Language templates: https://zh.wiktionary.org/wiki/Category:语言模板
+    # POS templates: https://zh.wiktionary.org/wiki/Category:詞類模板
+    if config.dump_file_lang_code == "zh" and ("{{-" in text or "{{=" in text):
         text = ctx.expand(text, pre_expand=True)
 
     # Fix up the subtitle hierarchy.  There are hundreds if not thousands of
