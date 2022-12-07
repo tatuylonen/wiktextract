@@ -1059,8 +1059,6 @@ def parse_head_final_tags(ctx, lang, form):
     m = re.search(head_final_re, form)
     if m is not None:
         tagkeys = m.group(3)
-        print(tagkeys)  # XXX remove
-        print(ctx.title)
         # Only replace tags ending with numbers in languages that have
         # head-final numeric tags (e.g., Bantu classes); also, don't replace
         # tags if the main title ends with them (then presume they are part

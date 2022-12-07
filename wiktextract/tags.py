@@ -2534,7 +2534,7 @@ uppercase_tags = set([
     "Zuberoan",
     "Setesdal",  # Norwegian
     "Telemark",  # Norwegian
-
+    "Internet slang",  # troll/many languages
 
 ])
 
