@@ -2534,7 +2534,6 @@ uppercase_tags = set([
     "Zuberoan",
     "Setesdal",  # Norwegian
     "Telemark",  # Norwegian
-    "Internet slang",  # troll/many languages
 
 ])
 
@@ -4645,6 +4644,7 @@ xlat_tags_map = {
     "combined with se": "reflexive", # tecnificarse/Spanish
     "reciprocative": "reciprocal",  # konyugön/Volapük
     "mfpl": "masculine feminine plural", # extrajudiciaires/French
+    "Internet slang": "Internet",  # troll/many languages
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
