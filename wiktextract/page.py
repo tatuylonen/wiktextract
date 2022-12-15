@@ -1659,6 +1659,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # XXX Insert code here that disambiguates between
                 # templates that generate word heads and templates
                 # that don't.
+                # XXX stop processing at {{category}}, {{cat}}... etc.
+                # topics cat category catlangname c C top cln
                 if first_head_tmplt and pre[-1]:
                     first_head_tmplt = False
                     start_of_paragraph = False
@@ -1683,14 +1685,41 @@ def parse_language(ctx, config, langnode, language, lang_code):
         for i, (pre1, ls) in enumerate(zip(pre, lists)):
             if all(not sl for sl in lists[i:]):
                 if i == 0:
-                    ctx.debug("head without list of senses, {}/{}".format(
-                              word, language),
-                              sortid="page/1686/20221207")
+                    if isinstance(node, str):
+                        ctx.debug("first head without list of senses,"
+                                  "string: '{}[...]', {}/{}".format(
+                                  node[:20], word, language),
+                                  sortid="page/1689/20221215")
+                    if isinstance(node, WikiNode):
+                        ctx.debug("first head without list of senses,"
+                                  "template node "
+                                  "{}, {}/{}".format(
+                                  node.args, word, language),
+                                  sortid="page/1694/20221215")
+                    else:
+                        ctx.debug("first head without list of senses, "
+                                  "{}/{}".format(
+                                  word, language),
+                                  sortid="page/1700/20221215")
+                    # no break here so that the first head always
+                    # gets processed.
                 else:
-                    ctx.debug("later head candidate without "
-                              "list of senses, {}/{}".format(
-                              word, language),
-                              sortid="page/1690/20221207")
+                    if isinstance(node, str):
+                        ctx.debug("later head without list of senses,"
+                                  "string: '{}[...]', {}/{}".format(
+                                  node[:20], word, language),
+                                  sortid="page/1708/20221215")
+                    if isinstance(node, WikiNode):
+                        ctx.debug("later head without list of senses,"
+                                  "template node "
+                                  "{}, {}/{}".format(
+                                  node.args, word, language),
+                                  sortid="page/1713/20221215")
+                    else:
+                        ctx.debug("later head without list of senses, "
+                                  "{}/{}".format(
+                                  word, language),
+                                  sortid="page/1719/20221215")
                     break
             head_group = i + 1 if there_are_many_heads else None
             # print("parse_part_of_speech: {}: {}: pre={}"
