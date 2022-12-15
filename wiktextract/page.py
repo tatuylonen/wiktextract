@@ -359,9 +359,17 @@ usex_templates = {
     "zh-x",
 }
 
-stop_head_at_these_templates = set["category", "cat", "topics",
-                                   "catlangname", "c", "C", "top",
-                                   "cln",]
+stop_head_at_these_templates = {
+    "category",
+    "cat",
+    "topics",
+    "catlangname",
+    "c",
+    "C",
+    "top",
+    "cln",
+}
+
 # Set of template names that are used to define quotation examples.  If the
 # usage example contains one of these templates, then its type is set to
 # "quotation".
@@ -1710,7 +1718,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                   node[:20], word, language),
                                   sortid="page/1689/20221215")
                     if isinstance(node, WikiNode):
-                        ctx.debug("first head without list of senses,"
+                        if node.args[0][0] in ["Han char",]:
+                            # just ignore these templates
+                            pass
+                        else:
+                            ctx.debug("first head without list of senses,"
                                   "template node "
                                   "{}, {}/{}".format(
                                   node.args, word, language),
