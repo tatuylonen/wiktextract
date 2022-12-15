@@ -359,6 +359,9 @@ usex_templates = {
     "zh-x",
 }
 
+stop_head_at_these_templates = set["category", "cat", "topics",
+                                   "catlangname", "c", "C", "top",
+                                   "cln",]
 # Set of template names that are used to define quotation examples.  If the
 # usage example contains one of these templates, then its type is set to
 # "quotation".
@@ -1659,8 +1662,24 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # XXX Insert code here that disambiguates between
                 # templates that generate word heads and templates
                 # that don't.
-                # XXX stop processing at {{category}}, {{cat}}... etc.
-                # topics cat category catlangname c C top cln
+
+                # stop processing at {{category}}, {{cat}}... etc.
+                if node.args[0][0] in stop_head_at_these_templates:
+                    # we've reached a template that should be at the end,
+                    # just break without special processing
+                    break
+
+                # skip these templates; panel_templates is already used
+                # to skip certain templates else, but it also applies to
+                # head parsing quite well.
+                if node.args[0][0] in panel_templates:
+                    continue
+                # skip these templates
+                # if node.args[0][0] in skip_these_templates_in_head:
+                    # first_head_tmplt = False # no first_head_tmplt at all
+                    # start_of_paragraph = False
+                    # continue
+                
                 if first_head_tmplt and pre[-1]:
                     first_head_tmplt = False
                     start_of_paragraph = False
