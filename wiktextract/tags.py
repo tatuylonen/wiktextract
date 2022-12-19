@@ -110,6 +110,7 @@ xlat_head_map = {
     "m sg or f sg": "masculine singular feminine",  # your/Eng/Tr/Walloon
     "f sg or m sg": "masculine singular feminine",  # your/Eng/Tr/Walloon
     "n sg or n sg": "masculine singular feminine",  # your/Eng/Tr/Walloon
+    "n sg or m sg": "neuter masculine singular",  # vulgus/Latin
     # copacetic/English/Tr/Hebrew:
     "m or m pl or f or f pl": "masculine feminine singular plural",
     # your/Eng/Tr/Norwegian:
