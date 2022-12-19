@@ -1718,7 +1718,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                   node[:20], word, language),
                                   sortid="page/1689/20221215")
                     if isinstance(node, WikiNode):
-                        if node.args[0][0] in ["Han char",]:
+                        if node.args and node.args[0][0] in ["Han char",]:
                             # just ignore these templates
                             pass
                         else:
