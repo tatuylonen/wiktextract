@@ -45,6 +45,23 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
     # those.
     contents = [x for x in contents
                 if not isinstance(x, WikiNode) or x.kind not in LEVEL_KINDS]
+                # Filter out only LEVEL_KINDS; 'or' is doing heavy lifting here
+                # Slip through not-WikiNodes, then slip through WikiNodes that
+                # are not LEVEL_KINDS.
+
+    if not any(isinstance(x, WikiNode) and x.kind == NodeKind.LIST for x in contents):
+        # expand all templates
+        new_contents = []
+        for l in contents:
+            if isinstance(l, WikiNode) and l.kind == NodeKind.TEMPLATE:
+                temp = ctx.node_to_wikitext(l)
+                temp = ctx.expand(temp)
+                temp = ctx.parse(temp)
+                temp = temp.children
+                new_contents.extend(temp)
+            else:
+                new_contents.append(l)
+        contents = new_contents
 
     if have_etym and data is base_data:
         data = etym_data
@@ -269,11 +286,6 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             print("MISSING ZH-PRON HDR:", repr(hdr))
             sys.stdout.flush()
 
-    # from wikitextprocessor.parser import print_tree##rm
-    # for l in contents:##rm
-        # print_tree(l)##rm
-    
-
     def flattened_tree(lines):
         assert isinstance(lines, list)
         for line in lines:
@@ -333,6 +345,10 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
         # XXX if necessary, expand on this; either better ways to
         # detect POS-stuff, or more ways to filter sub-blocks of
         # Pronunciation-sections.
+
+        # Cleaning up "* " at the start of text.
+        text = re.sub(r"^\**\s*", "", text)
+        
         m = re.match(r"\s*(\w+\s?\w*)", text)
         if m:
             if m.group(1).lower() in part_of_speech_map:
