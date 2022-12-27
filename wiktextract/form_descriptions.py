@@ -2183,7 +2183,7 @@ def parse_alt_or_inflection_of1(ctx, gloss, gloss_template_args):
             base = gloss[m.end():]
             tagsets, topics = decode_tags(desc, no_unknown_starts=True)
             # print("ALT_OR_INFL: desc={!r} base={!r} tagsets={} topics={}"
-            #       .format(desc, base, tagsets, topics))
+                  # .format(desc, base, tagsets, topics))
             if (not topics and
                 any(not (alt_infl_disallowed & set(t)) for t in tagsets)):
                 tags = []
@@ -2216,11 +2216,20 @@ def parse_alt_or_inflection_of1(ctx, gloss, gloss_template_args):
         else:
             return None
 
+    # kludge for Spanish (again): 'x of [word] combined with [clitic]'
+    m = re.search(r"combined with \w+$", base)
+    if m:
+        tagsets, topics = decode_tags(m.group(0), no_unknown_starts=True)
+        if (not topics):
+            for ts in tagsets:
+                tags.extend(ts)
+            base = base[:m.start()]
+
     # It is fairly common for form_of glosses to end with something like
     # "ablative case" or "in instructive case".  Parse that ending.
-    # print("parse_alt_or_inflection_of: lst={}".format(lst))
     base = base.strip()
     lst = base.split()
+    # print("parse_alt_or_inflection_of: lst={}".format(lst))
     if len(lst) >= 3 and lst[-1] in ("case", "case."):
         node = valid_sequences.get(lst[-2])
         if node and "$" in node:

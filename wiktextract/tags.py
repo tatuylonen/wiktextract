@@ -4642,10 +4642,28 @@ xlat_tags_map = {
     "defunct": "archaic",  # flugu/Norwegian
     "used in definite form": "",  # dyrerike/Norwegian Nynorsk
     "used in definite singular form": "",  # nettet/Norwegian Nynorsk
-    "combined with se": "reflexive", # tecnificarse/Spanish
     "reciprocative": "reciprocal",  # konyugön/Volapük
     "mfpl": "masculine feminine plural", # extrajudiciaires/French
     "Internet slang": "Internet",  # troll/many languages
+    "combined with se": "reflexive", # tecnificarse/Spanish
+    "combined with me":
+        "object-first-person object-singular", # tergiver/Spanish
+    "combined with te":
+        "object-second-person object-singular", # tergiver/Spanish
+    "combined with le":
+        "object-third-person object-singular dative", # tergiver/Spanish
+    "combined with nos": "object-first-person object-plural", # tergiver/Spanish
+    "combined with os": "object-second-person object-plural", # tergiver/Spanish
+    "combined with les":
+        "object-third-person object-plural dative", # tergiver/Spanish
+    "combined with lo":
+        "object-third-person object-singular object-masculine accusative",
+    "combined with la":
+        "object-third-person object-singular object-feminine accusative",
+    "combined with los":
+        "object-third-person object-plural object-masculine accusative",
+    "combined with las":
+        "object-third-person object-plural object-feminine accusative",
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
