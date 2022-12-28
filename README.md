@@ -359,16 +359,22 @@ needs or want to modify the code.
 
 ### Installing and running tests on Windows with VS Code
 
-1. Create [a Python virtual environment](https://code.visualstudio.com/docs/python/environments#_creating-environments)
-(venv) in the VS Code workspace with the cloned repo.
+Tried with Python 3.9.4, newer versions of Python break `nose` tests.
 
-2. Open a PowerShell teminal. You may need to [fix terminal permissions](https://stackoverflow.com/questions/56199111/visual-studio-code-cmd-error-cannot-be-loaded-because-running-scripts-is-disabl/67420296#67420296) 
+1. Edit `requirements.txt`, replace `wikitextprocessor` line with
+`git+https://github.com/tatuylonen/wikitextprocessor.git`. This is in order to
+depend on the latest `wikitextprocessor` code from GitHub.
+
+2. Create [a Python virtual environment](https://code.visualstudio.com/docs/python/environments#_creating-environments)
+(venv) in the VS Code workspace with the cloned repo. It should automatically
+install the packages based on `requirements.txt`.
+
+3. Open a new terminal. It should be PowerShell. You may need to [fix terminal permissions](https://stackoverflow.com/questions/56199111/visual-studio-code-cmd-error-cannot-be-loaded-because-running-scripts-is-disabl/67420296#67420296) 
 in order for it to pick up the virtual environment correclty.
 
-3. In the terminal run these commands:
+4. In the terminal run these commands:
 
 ```
-pip install -r requirements.txt
 py -m nose
 ```
 
