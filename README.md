@@ -357,6 +357,21 @@ updated regularly with the latest Wiktionary dump.  Using the
 pre-extracted data may be the easiest option unless you have special
 needs or want to modify the code.
 
+### Installing and running tests on Windows with VS Code
+
+1. Create [a Python virtual environment](https://code.visualstudio.com/docs/python/environments#_creating-environments)
+(venv) in the VS Code workspace with the cloned repo.
+
+2. Open a PowerShell teminal. You may need to [fix terminal permissions](https://stackoverflow.com/questions/56199111/visual-studio-code-cmd-error-cannot-be-loaded-because-running-scripts-is-disabl/67420296#67420296) 
+in order for it to pick up the virtual environment correclty.
+
+3. In the terminal run these commands:
+
+```
+pip install -r requirements.txt
+py -m nose
+```
+
 ## Using the command-line tool
 
 The ``wiktwords`` script is the easiest way to extract data from
