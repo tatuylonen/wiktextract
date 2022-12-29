@@ -11,3 +11,5 @@ pages
 .coverage*
 kj-wiktwords.sh
 tmp/
+.venv/
+.vscode/
