@@ -323,12 +323,12 @@ This software requires Python 3.
 ### Running tests
 
 This package includes tests written using the ``unittest`` framework.
-They can be run using, for example, ``nose``, which can be installed
-using ``pip3 install nose``.
+They can be run using, for example, ``nose2``, which can be installed
+using ``pip3 install nose2``.
 
 To run the tests, just use the following command in the top-level directory:
 ```
-nosetests
+nose2
 ```
 
 (Unfortunately the test suite for ``wiktextract`` is not yet very
@@ -359,7 +359,7 @@ needs or want to modify the code.
 
 ### Installing and running tests on Windows with VS Code
 
-Tried with Python 3.9.4, newer versions of Python break `nose` tests.
+Tested with Python 3.9.4.
 
 1. Edit `requirements.txt`, replace `wikitextprocessor` line with
 `git+https://github.com/tatuylonen/wikitextprocessor.git`. This is in order to
@@ -372,10 +372,10 @@ install the packages based on `requirements.txt`.
 3. Open a new terminal. It should be PowerShell. You may need to [fix terminal permissions](https://stackoverflow.com/questions/56199111/visual-studio-code-cmd-error-cannot-be-loaded-because-running-scripts-is-disabl/67420296#67420296) 
 in order for it to pick up the virtual environment correclty.
 
-4. In the terminal run these commands:
+4. In the terminal run this command:
 
 ```
-py -m nose
+py -m nose2 -B
 ```
 
 ## Using the command-line tool

@@ -1,4 +1,8 @@
-nose
+nose2
 python-Levenshtein
-wikitextprocessor
 nltk
+
+wikitextprocessor
+# For development replace the above line with the direct git dependecy below.
+# These packages are being developed in parallel.
+# git+https://github.com/tatuylonen/wikitextprocessor.git
