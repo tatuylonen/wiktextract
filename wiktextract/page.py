@@ -2567,21 +2567,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if name == "see translation subpage":
                     sense_parts = []
                     sense = None
-                    sub = ht.get(1, "")
+                    sub = ht.get(1, None)
                     if not isinstance(sub, str):
-                        ctx.error("no part-of-speech in "
-                                  "{{see translation subpage|...}}",
+                        ctx.debug("no part-of-speech in "
+                                  "{{see translation subpage|...}}, "
+                                  "defaulting to just ctx.section "
+                                  "(= language)",
                                   sortid="page/2468")
-
-                    if not sub:
-                        pos = ctx.subsection
-                        if pos.lower() not in config.POS_SUBTITLES:
-                            ctx.debug("unhandled see translation subpage: "
-                                      "language={} sub={} ctx.subsection={}"
-                                      .format(language, sub, ctx.subsection),
-                                      sortid="page/2478")
-                        # seq sent to get_subpage_section without sub with pos
-                        seq = [language, pos, config.OTHER_SUBTITLES["translations"]]
+                        # seq sent to get_subpage_section without sub and pos
+                        seq = [language, config.OTHER_SUBTITLES["translations"]]
                     elif sub.lower() in config.POS_SUBTITLES:
                         # seq with sub but not pos
                         seq = [language, sub, config.OTHER_SUBTITLES["translations"]]
