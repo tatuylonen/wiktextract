@@ -2442,7 +2442,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         from separate translation subpages."""
         assert isinstance(data, dict)
         assert isinstance(xlatnode, WikiNode)
-        # print("===== PARSE_TRANSLATIONS {} {}".format(ctx.title, ctx.section))
+        # print("===== PARSE_TRANSLATIONS {} {} {}"
+            # .format(ctx.title, ctx.section, ctx.subsection))
         # print("parse_translations xlatnode={}".format(xlatnode))
         if not config.capture_translations:
             return
@@ -2566,16 +2567,26 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if name == "see translation subpage":
                     sense_parts = []
                     sense = None
-                    sub = ht.get(1)
+                    sub = ht.get(1, "")
                     if not isinstance(sub, str):
                         ctx.error("no part-of-speech in "
                                   "{{see translation subpage|...}}",
                                   sortid="page/2468")
-                        return
 
-                    if sub.lower() in config.POS_SUBTITLES:
+                    if not sub:
+                        pos = ctx.subsection
+                        if pos.lower() not in config.POS_SUBTITLES:
+                            ctx.debug("unhandled see translation subpage: "
+                                      "language={} sub={} ctx.subsection={}"
+                                      .format(language, sub, ctx.subsection),
+                                      sortid="page/2478")
+                        # seq sent to get_subpage_section without sub with pos
+                        seq = [language, pos, config.OTHER_SUBTITLES["translations"]]
+                    elif sub.lower() in config.POS_SUBTITLES:
+                        # seq with sub but not pos
                         seq = [language, sub, config.OTHER_SUBTITLES["translations"]]
                     else:
+                        # seq with sub and pos
                         pos = ctx.subsection
                         if pos.lower() not in config.POS_SUBTITLES:
                             ctx.debug("unhandled see translation subpage: "
