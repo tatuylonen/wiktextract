@@ -373,6 +373,28 @@ xlat_head_map = {
         "masculine animate feminine plural singular inanimate",  #XXX
     "defunct": "archaic",  #  flugu/Norwegian Nynorsk
     "mfpl": "masculine feminine plural",  # extrajudiciaires/French
+    "class 1": "class-1",
+    "class 1a": "class-1a",
+    "class 2": "class-2",
+    "class 2a": "class-2a",
+    "class 3": "class-3",
+    "class 4": "class-4",
+    "class 5": "class-5",
+    "class 6": "class-6",
+    "class 7": "class-7",
+    "class 8": "class-8",
+    "class 9": "class-9",
+    "class 9a": "class-9a",
+    "class 10": "class-10",
+    "class 10a": "class-10",
+    "class 11": "class-11",
+    "class 12": "class-12",
+    "class 13": "class-13",
+    "class 14": "class-14",
+    "class 15": "class-15",
+    "class 16": "class-16",
+    "class 17": "class-17",
+    "class 18": "class-18",
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly

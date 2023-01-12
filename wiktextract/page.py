@@ -1765,8 +1765,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
             else:
                 common_tags = []
             for node in ls:
+                print(node)
                 for node in node.children:
                     if node.kind != NodeKind.LIST_ITEM:
+                        # apparently never reached, which is good.
                         ctx.debug("{}: non-list-item inside list".format(pos),
                                   sortid="page/1678")
                         continue
