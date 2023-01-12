@@ -1765,7 +1765,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
             else:
                 common_tags = []
             for node in ls:
-                print(node)
                 for node in node.children:
                     if node.kind != NodeKind.LIST_ITEM:
                         # apparently never reached, which is good.
@@ -1849,7 +1848,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         q = m.group(1)
                         outer_text = outer_text[m.end():].strip()
                         parse_sense_qualifier(ctx, q, common_data)
-    
                     if outer_text == "A pejorative:":
                         data_append(ctx, common_data, "tags", "pejorative")
                         outer_text = None
