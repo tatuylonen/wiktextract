@@ -2581,7 +2581,7 @@ uppercase_tags = set([
     "Zuberoan",
     "Setesdal",  # Norwegian
     "Telemark",  # Norwegian
-
+    "San'ani Yemeni Arabic",
 ])
 
 

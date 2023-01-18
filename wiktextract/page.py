@@ -549,6 +549,7 @@ def is_panel_template(name):
     return False
 
 
+
 def parse_sense_linkage(config, ctx, data, name, ht):
     """Parses a linkage (synonym, etc) specified in a word sense."""
     assert isinstance(ctx, Wtp)
@@ -1009,526 +1010,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
             return base_data
         return etym_data
 
-    def parse_sense(contents, sense_base):
-        """Parses a word sense (basically, a list item describing a word sense).
-        Sometimes there may be a second-level sublist that actually contains
-        word senses (in which case the higher-level entry is just a grouping).
-        This parses such sublists as separate senses (thus this can generate
-        multiple new senses), unless the sublist has only one element, in which
-        case it is assumed to be a wiktionary error and is interpreted as
-        a top-level item.  This returns True if this added one or more
-        senses."""
-        assert isinstance(contents, (list, tuple))
-        assert isinstance(sense_base, dict)  # Added to every sense
-        # print("PARSE_SENSE ({}): {}".format(sense_base, contents))
-        lst = []
-        for x in contents:
-            if isinstance(x, WikiNode) and x.kind == NodeKind.LIST:
-                break
-            lst.append(x)
-        sublists = list(x for x in contents
-                        if isinstance(x, WikiNode) and x.kind == NodeKind.LIST)
-
-        gloss_template_args = set()
-
-        def sense_template_fn(name, ht):
-            if name in wikipedia_templates:
-                parse_wikipedia_template(config, ctx, pos_data, ht)
-                return None
-            if is_panel_template(name):
-                return ""
-            if name in ("defdate",):
-                return ""
-            if name == "senseid":
-                langid = clean_node(config, ctx, None, ht.get(1, ()))
-                arg = clean_node(config, ctx, sense_base, ht.get(2, ()))
-                if re.match(r"Q\d+$", arg):
-                    data_append(ctx, sense_base, "wikidata", arg)
-                data_append(ctx, sense_base, "senseid",
-                            langid + ":" + arg)
-            if name in sense_linkage_templates:
-                print("SENSE_TEMPLATE_FN")
-                parse_sense_linkage(config, ctx, sense_base, name, ht)
-                return ""
-            if name == "†" or name == "zh-obsolete":
-                data_append(ctx, sense_base, "tags", "obsolete")
-                return ""
-            if name in ("ux", "uxi", "usex", "afex", "zh-x", "prefixusex",
-                        "ko-usex", "ko-x", "hi-x", "ja-usex-inline", "ja-x",
-                        "quotei", "zh-x", "he-x", "hi-x", "km-x", "ne-x",
-                        "shn-x", "th-x", "ur-x"):
-                # Usage examples are captured separately below.  We don't
-                # want to expand them into glosses even when unusual coding
-                # is used in the entry.
-                return ""
-            if name == "w":
-                if ht.get(2) == "Wp":
-                    return ""
-            for k, v in ht.items():
-                v = v.strip()
-                if v and v.find("<") < 0:
-                    gloss_template_args.add(v)
-            if config.dump_file_lang_code == "zh":
-                add_form_of_tags(ctx, name, config.FORM_OF_TEMPLATES, sense_base)
-            return None
-
-        def extract_link_texts(item):
-            """Recursively extracts link texts from the gloss source.  This
-            information is used to select whether to remove final "." from
-            form_of/alt_of (e.g., ihm/Hunsrik)."""
-            if isinstance(item, (list, tuple)):
-                for x in item:
-                    extract_link_texts(x)
-                return
-            if isinstance(item, str):
-                # There seem to be HTML sections that may futher contain
-                # unparsed links.
-                for m in re.finditer(r"\[\[([^]]*)\]\]", item):
-                    print("ITER:", m.group(0))
-                    v = m.group(1).split("|")[-1].strip()
-                    if v:
-                        gloss_template_args.add(v)
-                return
-            if not isinstance(item, WikiNode):
-                return
-            if item.kind == NodeKind.LINK:
-                v = item.args[-1]
-                if (isinstance(v, list) and len(v) == 1 and
-                    isinstance(v[0], str)):
-                    gloss_template_args.add(v[0].strip())
-            for x in item.children:
-                extract_link_texts(x)
-
-        extract_link_texts(lst)
-        rawgloss = clean_node(config, ctx, sense_base, lst,
-                              template_fn=sense_template_fn)
-
-        # Extract examples that are in sublists
-        examples = []
-        if config.capture_examples:
-            for sub in sublists:
-                if not sub.args.endswith((":", "*")):
-                    continue
-                for item in sub.children:
-                    if not isinstance(item, WikiNode):
-                        continue
-                    if item.kind != NodeKind.LIST_ITEM:
-                        continue
-                    usex_type = None
-
-                    def usex_template_fn(name, ht):
-                        nonlocal usex_type
-                        if name in panel_templates:
-                            return ""
-                        if name in usex_templates:
-                            usex_type = "example"
-                        elif name in quotation_templates:
-                            usex_type = "quotation"
-                        for prefix, t in template_linkage_mappings:
-                            if re.search(r"(^|[-/\s]){}($|\b|[0-9])"
-                                         .format(prefix),
-                                         name):
-                                # XXX This causes duplicate linkages in e.g.
-                                # ladata/Finnish.  What exactly was this for
-                                # in the first place?
-                                # f = t if isinstance(t, str) else field
-                                # i = t if isinstance(t, int) else 2
-                                # while True:
-                                #     v = ht.get(i, None)
-                                #     if v is None:
-                                #         break
-                                #     v = clean_node(config, ctx, None, v)
-                                #     print("EXAMPLE LINKAGE")
-                                #     parse_linkage_item_text(ctx, word,
-                                #                             sense_data, f, v,
-                                #                             None, "", [],
-                                #                             is_reconstruction)
-                                #     i += 1
-                                return ""
-                        return None
-
-                    subtext = clean_node(config, ctx, None, item.children,
-                                         template_fn=usex_template_fn)
-                    subtext = re.sub(r"\s*\(please add an English "
-                                     r"translation of this "
-                                     "(example|usage example|quote)\)",
-                                     "", subtext).strip()
-                    subtext = re.sub(r"\^\([^)]*\)", "", subtext)
-                    subtext = re.sub(r"\s*[―—]+$", "", subtext)
-                    # print("subtext:", repr(subtext))
-
-                    lines = subtext.splitlines()
-                    lines = list(x for x in lines
-                                 if not re.match(
-                                         r"(Synonyms: |Antonyms: |Hyponyms: |"
-                                         r"Synonym: |Antonym: |Hyponym: |"
-                                         r"Hypernyms: |Derived terms: |"
-                                         r"Related terms: |"
-                                         r"Hypernym: |Derived term: |"
-                                         r"Coordinate terms:|"
-                                         r"Related term: |"
-                                         r"For more quotations using )",
-                                         x))
-                    tr = ""
-                    ref = ""
-                    roman = ""
-                    # for line in lines:
-                    #     print("LINE:", repr(line))
-                    if len(lines) == 1 and lang_code != "en":
-                        parts = re.split(r"\s*[―—]+\s*", lines[0])
-                        if (len(parts) == 2 and
-                            classify_desc(parts[1]) == "english"):
-                            lines = [parts[0].strip()]
-                            tr = parts[1].strip()
-                        elif (len(parts) == 3 and
-                              classify_desc(parts[1]) in ("romanization",
-                                                          "english") and
-                              classify_desc(parts[2]) == "english"):
-                            lines = [parts[0].strip()]
-                            roman = parts[1].strip()
-                            tr = parts[2].strip()
-                        else:
-                            parts = re.split(r"\s+-\s+", lines[0])
-                            if (len(parts) == 2 and
-                                classify_desc(parts[1]) == "english"):
-                                lines = [parts[0].strip()]
-                                tr = parts[1].strip()
-                    elif len(lines) > 1:
-                        if any(re.search(r"[]\d:)]\s*$", x)
-                               for x in lines[:-1]):
-                            ref = []
-                            for i in range(len(lines)):
-                                if re.match(r"^[#*]*:+(\s*$|\s+)", lines[i]):
-                                    break
-                                ref.append(lines[i].strip())
-                                if re.search(r"[]\d:)]\s*$", lines[i]):
-                                    break
-                            ref = " ".join(ref)
-                            lines = lines[i + 1:]
-                            if (lang_code != "en" and len(lines) >= 2 and
-                                classify_desc(lines[-1]) == "english"):
-                                i = len(lines) - 1
-                                while (i > 1 and
-                                       classify_desc(lines[i - 1])
-                                       == "english"):
-                                    i -= 1
-                                tr = "\n".join(lines[i:])
-                                lines = lines[:i]
-
-                        elif (lang_code == "en" and
-                              re.match(r"^[#*]*:+", lines[1])):
-                            ref = lines[0]
-                            lines = lines[1:]
-                        elif lang_code != "en" and len(lines) == 2:
-                            cls1 = classify_desc(lines[0])
-                            cls2 = classify_desc(lines[1])
-                            if cls2 == "english" and cls1 != "english":
-                                tr = lines[1]
-                                lines = [lines[0]]
-                            elif cls1 == "english" and cls2 != "english":
-                                tr = lines[0]
-                                lines = [lines[1]]
-                            elif (re.match(r"^[#*]*:+", lines[1]) and
-                                  classify_desc(re.sub(r"^[#*:]+\s*", "",
-                                                       lines[1])) == "english"):
-                                tr = re.sub(r"^[#*:]+\s*", "", lines[1])
-                                lines = [lines[0]]
-                            elif cls1 == "english" and cls2 == "english":
-                                # Both were classified as English, but
-                                # presumably one is not.  Assume first is
-                                # non-English, as that seems more common.
-                                tr = lines[1]
-                                lines = [lines[0]]
-                        elif (usex_type == "quotation" and
-                              lang_code != "en" and len(lines) > 2):
-                            # for x in lines:
-                            #     print("  LINE: {}: {}"
-                            #           .format(classify_desc(x), x))
-                            if re.match(r"^[#*]*:+\s*$", lines[1]):
-                                ref = lines[0]
-                                lines = lines[2:]
-                            cls1 = classify_desc(lines[-1])
-                            if cls1 == "english":
-                                i = len(lines) - 1
-                                while (i > 1 and
-                                       classify_desc(lines[i - 1])
-                                       == "english"):
-                                    i -= 1
-                                tr = "\n".join(lines[i:])
-                                lines = lines[:i]
-
-                    roman = re.sub(r"[ \t\r]+", " ", roman).strip()
-                    roman = re.sub(r"\[\s*…\s*\]", "[…]", roman)
-                    tr = re.sub(r"^[#*:]+\s*", "", tr)
-                    tr = re.sub(r"[ \t\r]+", " ", tr).strip()
-                    tr = re.sub(r"\[\s*…\s*\]", "[…]", tr)
-                    ref = re.sub(r"^[#*:]+\s*", "", ref)
-                    ref = re.sub(r", (volume |number |page )?“?"
-                                 r"\(please specify ([^)]|\(s\))*\)”?|"
-                                 ", text here$",
-                                 "", ref)
-                    ref = re.sub(r"\[\s*…\s*\]", "[…]", ref)
-                    lines = list(re.sub(r"^[#*:]+\s*", "", x) for x in lines)
-                    subtext = "\n".join(x for x in lines if x)
-                    if not tr and lang_code != "en":
-                        m = re.search(r"([.!?])\s+\(([^)]+)\)\s*$", subtext)
-                        if m and classify_desc(m.group(2)) == "english":
-                            tr = m.group(2)
-                            subtext = subtext[:m.start()] + m.group(1)
-                        elif lines:
-                            parts = re.split(r"\s*[―—]+\s*", lines[0])
-                            if (len(parts) == 2 and
-                                classify_desc(parts[1]) == "english"):
-                                subtext = parts[0].strip()
-                                tr = parts[1].strip()
-                    subtext = re.sub(r'^[“"`]([^“"`”\']*)[”"\']$', r"\1",
-                                     subtext)
-                    subtext = re.sub(r"(please add an English translation of "
-                                     r"this (quote|usage example))",
-                                     "", subtext)
-                    subtext = re.sub(r"\s*→New International Version "
-                                     "translation$",
-                                     "", subtext)  # e.g. pis/Tok Pisin (Bible)
-                    subtext = re.sub(r"[ \t\r]+", " ", subtext).strip()
-                    subtext = re.sub(r"\[\s*…\s*\]", "[…]", subtext)
-                    note = None
-                    m = re.match(r"^\(([^)]*)\):\s+", subtext)
-                    if (m is not None and lang_code != "en" and
-                        (m.group(1).startswith("with ") or
-                         classify_desc(m.group(1)) == "english")):
-                        note = m.group(1)
-                        subtext = subtext[m.end():]
-                    ref = re.sub(r"\s*\(→ISBN\)", "", ref)
-                    ref = re.sub(r",\s*→ISBN", "", ref)
-                    ref = ref.strip()
-                    if ref.endswith(":") or ref.endswith(","):
-                        ref = ref[:-1].strip()
-                    ref = re.sub(r"\s+,\s+", ", ", ref)
-                    ref = re.sub(r"\s+", " ", ref)
-                    if ref and not subtext:
-                        subtext = ref
-                        ref = ""
-                    if subtext:
-                        dt = {"text": subtext}
-                        if ref:
-                            dt["ref"] = ref
-                        if tr:
-                            dt["english"] = tr
-                        if usex_type:
-                            dt["type"] = usex_type
-                        if note:
-                            dt["note"] = note
-                        if roman:
-                            dt["roman"] = roman
-                        examples.append(dt)
-
-        # Generate no gloss for translation hub pages, but add the
-        # "translation-hub" tag for them
-        if rawgloss == "(This entry is a translation hub.)":
-            data_append(ctx, sense_data, "tags", "translation-hub")
-            return push_sense()
-
-        # The gloss could contain templates that produce more list items.
-        # This happens commonly with, e.g., {{inflection of|...}}.  Split
-        # to parts.  However, e.g. Interlingua generates multiple glosses
-        # in HTML directly without Wikitext markup, so we must also split
-        # by just newlines.
-        subglosses = re.split(r"(?m)^[#*]*\s*", rawgloss)
-
-        # Some entries, e.g., "iacebam", have weird sentences in quotes
-        # after the gloss, but these sentences don't seem to be intended
-        # as glosses.  Skip them.
-        subglosses = list(gl for gl in subglosses
-                          if gl.strip() and
-                          not re.match(r'\s*(\([^)]*\)\s*)?"[^"]*"\s*$',
-                                       gl))
-
-        if len(subglosses) > 1 and "form_of" not in sense_base:
-            gl = subglosses[0].strip()
-            if gl.endswith(":"):
-                gl = gl[:-1].strip()
-            parsed = parse_alt_or_inflection_of(ctx, gl, gloss_template_args)
-            if parsed is not None:
-                infl_tags, infl_dts = parsed
-                if (infl_dts and "form-of" in infl_tags and
-                    len(infl_tags) == 1):
-                    # Interpret others as a particular form under
-                    # "inflection of"
-                    data_extend(ctx, sense_base, "tags", infl_tags)
-                    data_extend(ctx, sense_base, "form_of", infl_dts)
-                    subglosses = subglosses[1:]
-                elif not infl_dts:
-                    data_extend(ctx, sense_base, "tags", infl_tags)
-                    subglosses = subglosses[1:]
-
-        # Create senses for remaining subglosses
-        added = False
-        for gloss_i, gloss in enumerate(subglosses):
-            gloss = gloss.strip()
-            if not gloss and len(subglosses) > 1:
-                continue
-            if gloss.startswith("; ") and gloss_i > 0:
-                gloss = gloss[1:].strip()
-            # Push a new sense (if the last one is not empty)
-            if push_sense():
-                added = True
-            data_append(ctx, sense_data, "raw_glosses", gloss)
-            if gloss_i == 0 and examples:
-                data_extend(ctx, sense_data, "examples", examples)
-            # If the gloss starts with †, mark as obsolete
-            if gloss.startswith("^†"):
-                data_append(ctx, sense_data, "tags", "obsolete")
-                gloss = gloss[2:].strip()
-            elif gloss.startswith("^‡"):
-                data_extend(ctx, sense_data, "tags", ["obsolete", "historical"])
-                gloss = gloss[2:].strip()
-            # Copy data for all senses to this sense
-            for k, v in sense_base.items():
-                if isinstance(v, (list, tuple)):
-                    if k != "tags":
-                        # Tags handled below (countable/uncountable special)
-                        data_extend(ctx, sense_data, k, v)
-                else:
-                    assert k not in ("tags", "categories", "topics")
-                    sense_data[k] = v
-            # Parse the gloss for this particular sense
-            m = re.match(r"^\((([^()]|\([^()]*\))*)\):?\s*", gloss)
-            if m:
-                parse_sense_qualifier(ctx, m.group(1), sense_data)
-                gloss = gloss[m.end():].strip()
-
-            def sense_repl(m):  # Not being used ATM.
-                par = m.group(1)
-                cls = classify_desc(par)
-                # print("sense_repl: {} -> {}".format(par, cls))
-                if cls == "tags":
-                    parse_sense_qualifier(ctx, par, sense_data)
-                    return ""
-                # Otherwise no substitution
-                return m.group(0)
-
-            # Replace parenthesized expressions commonly used for sense tags
-            # XXX disabled parsing parentheses from the end for now.
-            # How common are these and what do they really contain?
-            # gloss = re.sub(r"^\(([^()]*)\)", sense_repl, gloss)
-            # gloss = re.sub(r"\s*\(([^()]*)\)$", sense_repl, gloss)
-
-            # Remove common suffix "[from 14th c.]" and similar
-            gloss = re.sub(r"\s\[[^]]*\]\s*$", "", gloss)
-
-            # Check to make sure we don't have unhandled list items in gloss
-            ofs = max(gloss.find("#"), gloss.find("* "))
-            if ofs > 10 and gloss.find("(#)") < 0:
-                ctx.debug("gloss may contain unhandled list items: {}"
-                          .format(gloss),
-                          sortid="page/1412")
-            elif gloss.find("\n") >= 0:
-                ctx.debug("gloss contains newline: {}".format(gloss),
-                          sortid="page/1416")
-
-            # Kludge, some glosses have a comma after initial qualifiers in
-            # parentheses
-            if gloss.startswith((",", ":")):
-                gloss = gloss[1:]
-            gloss = gloss.strip()
-            if gloss.endswith(":"):
-                gloss = gloss[:-1].strip()
-            if gloss.startswith("N. of "):
-                gloss = "Name of " +  gloss[6:]
-            if gloss.startswith("†"):
-                data_append(ctx, sense_data, "tags", "obsolete")
-                gloss = gloss[1:]
-            elif gloss.startswith("^†"):
-                data_append(ctx, sense_data, "tags", "obsolete")
-                gloss = gloss[2:]
-
-            # Copy tags from sense_base if any.  This will not copy
-            # countable/uncountable if either was specified in the sense,
-            # as sometimes both are specified in word head but only one
-            # in individual senses.
-            countability_tags = []
-            base_tags = sense_base.get("tags", ())
-            sense_tags = sense_data.get("tags", ())
-            for tag in base_tags:
-                if tag in ("countable", "uncountable"):
-                    if tag not in countability_tags:
-                        countability_tags.append(tag)
-                    continue
-                if tag not in sense_tags:
-                    data_append(ctx, sense_data, "tags", tag)
-            if countability_tags:
-                if ("countable" not in sense_tags and
-                    "uncountable" not in sense_tags):
-                    data_extend(ctx, sense_data, "tags", countability_tags)
-
-            # If outer gloss specifies a form-of ("inflection of", see
-            # aquamarine/German), try to parse the inner glosses as
-            # tags for an inflected form.
-            if "form-of" in sense_base.get("tags", ()):
-                parsed = parse_alt_or_inflection_of(ctx, gloss,
-                                                    gloss_template_args)
-                if parsed is not None:
-                    infl_tags, infl_dts = parsed
-                    if not infl_dts and infl_tags:
-                        # Interpret as a particular form under "inflection of"
-                        data_extend(ctx, sense_data, "tags", infl_tags)
-
-            if not gloss:
-                data_append(ctx, sense_data, "tags", "empty-gloss")
-            elif gloss != "-":
-                # Add the gloss for the sense.
-                data_append(ctx, sense_data, "glosses", gloss)
-
-            # Kludge: there are cases (e.g., etc./Swedish) where there are
-            # two abbreviations in the same sense, both generated by the
-            # {{abbreviation of|...}} template.  Handle these with some magic.
-            position = 0
-            split_glosses = []
-            for m in re.finditer(r"Abbreviation of ", gloss):
-                if m.start() != position:
-                    split_glosses.append(gloss[position: m.start()])
-                    position = m.start()
-            split_glosses.append(gloss[position:])
-            for gloss in split_glosses:
-                # Check if this gloss describes an alt-of or inflection-of
-                if (lang_code != "en" and " " not in gloss and distw([word], gloss) < 0.3):
-                    # Don't try to parse gloss it is one word
-                    # that is close to the word itself for non-English words
-                    # (probable translations of a tag/form name)
-                    continue
-                parsed = parse_alt_or_inflection_of(ctx, gloss,
-                                                    gloss_template_args)
-                if parsed is None:
-                    continue
-                tags, dts = parsed
-                if not dts and tags:
-                    data_extend(ctx, sense_data, "tags", tags)
-                    continue
-                for dt in dts:
-                    ftags = list(tag for tag in tags if tag != "form-of")
-                    if "alt-of" in tags:
-                        data_extend(ctx, sense_data, "tags", ftags)
-                        data_append(ctx, sense_data, "alt_of", dt)
-                    elif "compound-of" in tags:
-                        data_extend(ctx, sense_data, "tags", ftags)
-                        data_append(ctx, sense_data, "compound_of", dt)
-                    elif "synonym-of" in tags:
-                        data_extend(ctx, dt, "tags", ftags)
-                        data_append(ctx, sense_data, "synonyms", dt)
-                    elif tags and dt.get("word", "").startswith("of "):
-                        dt["word"] = dt["word"][3:]
-                        data_append(ctx, sense_data, "tags", "form-of")
-                        data_extend(ctx, sense_data, "tags", ftags)
-                        data_append(ctx, sense_data, "form_of", dt)
-                    elif "form-of" in tags:
-                        data_extend(ctx, sense_data, "tags", tags)
-                        data_append(ctx, sense_data, "form_of", dt)
-
-        if push_sense():
-            added = True
-            # print("PARSE_SENSE DONE:", pos_datas[-1])
-        return added
-
     def head_post_template_fn(name, ht, expansion):
         """Handles special templates in the head section of a word.  Head
         section is the text after part-of-speech subtitle and before word
@@ -1764,127 +1245,26 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 del pos_data["tags"]
             else:
                 common_tags = []
-            for node in ls:
-                for node in node.children:
-                    if node.kind != NodeKind.LIST_ITEM:
-                        # apparently never reached, which is good.
-                        ctx.debug("{}: non-list-item inside list".format(pos),
-                                  sortid="page/1678")
-                        continue
-                    if node.args[-1] == ":":
-                        # Sometimes there may be lists with indented examples
-                        # in otherwise the same level as real sense entries.
-                        # I assume those will get parsed as separate lists, but
-                        # we don't want to include such examples as word senses.
-                        continue
-                    contents = node.children
-                    sublists = [x for x in contents
-                                if isinstance(x, WikiNode) and
-                                x.kind == NodeKind.LIST and
-                                x.args == "##"]
-                    others = [x for x in contents
-                              if isinstance(x, WikiNode) and
-                              x.kind == NodeKind.LIST and
-                              x.args != "##"]
 
-    
-                    # This entry has sublists of entries.  We should contain
-                    # gloss information from both.  Sometimes the outer gloss
-                    # is more non-gloss or tags, sometimes it is a coarse sense
-                    # and the inner glosses are more specific.  The outer one
-                    # does not seem to have qualifiers.
-                    outer = [x for x in contents
-                             if not isinstance(x, WikiNode) or
-                             x.kind != NodeKind.LIST]
+
+            for l in ls:
+                ########## NEW CODE -> #
+
+                for node in l.children:
+                    # Parse nodes in l.children recursively.
+                    # The recursion function uses push_sense() to
+                    # add stuff into pos_data, and returns True or
+                    # False if something is added, which bubbles upward.
+                    # If the bubble is "True", then higher levels of
+                    # the recursion will not push_sense(), because
+                    # the data is already pushed into a sub-gloss
+                    # downstream.
                     common_data = {"tags": list(common_tags)}
                     if head_group:
                         common_data["head_nr"] = head_group
-    
-                    # If we have one sublist with one element, treat it
-                    # specially as it may be a Wiktionary error; raise
-                    # that nested element to the same level.
-                    if len(sublists) == 1:
-                        slc = sublists[0].children
-                        if len(slc) == 1:
-                            parse_sense(outer, common_data)
-                            parse_sense(slc[0].children, {})
-                            continue
-    
-                    def outer_template_fn(name, ht):
-                        if is_panel_template(name):
-                            return ""
-                        if name in ("defdate",):
-                            return ""
-                        if name in sense_linkage_templates:
-                            parse_sense_linkage(config, ctx,
-                                                common_data,
-                                                name,
-                                                ht)
-                            return ""
-                        return None
-    
-                    # Process others, so that we capture any sense linkages from
-                    # there
-                    clean_node(config, ctx, common_data, others,
-                               template_fn=outer_template_fn)
-    
-                    # If there are no sublists of senses, parse it as just one
-                    if not sublists:
-                        parse_sense(contents, common_data)
-                        continue
-    
-                    # Clean the outer gloss
-                    outer_text = clean_node(config, ctx, common_data, outer,
-                                            template_fn=outer_template_fn)
-                    strip_ends = [", particularly:"]
-                    for x in strip_ends:
-                        if outer_text.endswith(x):
-                            outer_text = outer_text[:-len(x)]
-                            break
-                    # Check if the outer gloss starts with
-                    # parenthesized tags/topics
-                    m = re.match(r"\(([^()]+)\):?\s*", outer_text)
-                    if m:
-                        q = m.group(1)
-                        outer_text = outer_text[m.end():].strip()
-                        parse_sense_qualifier(ctx, q, common_data)
-                    if outer_text == "A pejorative:":
-                        data_append(ctx, common_data, "tags", "pejorative")
-                        outer_text = None
-                    elif outer_text == "Short forms.":
-                        data_append(ctx, common_data, "tags", "abbreviation")
-                        outer_text = None
-                    elif outer_text == "Technical or specialized senses.":
-                        outer_text = None
-                    # XXX is it always a gloss?  Maybe non-gloss?
-                    if outer_text:
-                        data_append(ctx, common_data, "glosses", outer_text)
-                        if outer_text in ("A person:",):
-                            data_append(ctx, common_data, "tags", "g-person")
-    
-                    # Process any inner glosses
-                    added = False
-                    for sublist in sublists:
-                        assert sublist.kind == NodeKind.LIST
-                        for item in sublist.children:
-                            if not isinstance(item, WikiNode):
-                                continue
-                            if item.kind != NodeKind.LIST_ITEM:
-                                continue
-                            sense_base = copy.deepcopy(common_data)
-                            if parse_sense(item.children, sense_base):
-                                added = True
-                    # If the sublists resulted in no senses added, add
-                    # common_data as a sense if it has a gloss
-                    if not added and common_data.get("glosses"):
-                        gls = common_data.get("glosses") or [""]
-                        assert len(gls) == 1
-                        common_data["glosses"] = []
-                        ctx.debug("common_data added as a sense "
-                                  "because nothing was added, {}/{}"
-                                  .format(word, language),
-                                  sortid="page/1795")
-                        parse_sense(gls, common_data)
+                    parse_sense_node(node, common_data)
+
+                # <- NEW CODE ###########
 
         # If there are no senses extracted, add a dummy sense.  We want to
         # keep tags extracted from the head for the dummy sense.
@@ -1893,6 +1273,405 @@ def parse_language(ctx, config, langnode, language, lang_code):
             data_extend(ctx, sense_data, "tags", common_tags)
             data_append(ctx, sense_data, "tags", "no-gloss")
             push_sense()
+
+    ######## NEW CODE -> #
+    def parse_sense_node(node, sense_base):
+        """Recursively (depth first) parse LIST_ITEM nodes for sense data.
+       Uses push_sense() to attempt adding data to pos_data in the scope
+       of parse_language() when it reaches deep in the recursion. push_sense()
+       returns True if it succeeds, and that is bubbled up the stack; if
+       a sense was added downstream, the higher levels (whose shared data
+       was already added by a subsense) do not push_sense()
+        """
+        assert isinstance(node, WikiNode)
+        assert isinstance(sense_base, dict)  # Added to every sense
+        if node.kind != NodeKind.LIST_ITEM:
+            ctx.debug("{}: non-list-item inside list".format(pos),
+                      sortid="page/1678")
+            return False
+    
+        if node.args == ":":
+        # Skip example entries at the highest level, ones without
+        # a sense ("...#") above them.
+        # If node.args is exactly and only ":", then it's at
+        # the highest level; lower levels would have more
+        # "indentation", like "#:" or "##:"
+            return False
+
+        # If a recursion call succeeds in push_sense(), bubble it up with added.
+        # added |= push_sense() or added |= parse_sense_node(...) to OR.
+        added = False
+
+        gloss_template_args = set()
+
+        current_depth = node.args
+    
+        children = node.children
+
+        # subentries, (presumably) a list
+        # of subglosses below this. The list's
+        # argument ends with #, and its depth should
+        # be bigger than parent node.
+        subentries = [x for x in children
+                    if isinstance(x, WikiNode) and
+                    x.kind == NodeKind.LIST and
+                    x.args == current_depth + "#"]
+
+        # sublists of examples and quotations. .args
+        # does not end with "#".
+        others = [x for x in children
+                  if isinstance(x, WikiNode) and
+                  x.kind == NodeKind.LIST and
+                  x.args != current_depth + "#"]
+
+        # the actual contents of this particular node.
+        # can be a gloss (or a template that expands into
+        # many glosses which we can't easily pre-expand)
+        # or could be an "outer gloss" with more specific
+        # subglosses, or could be a qualfier for the subglosses.
+        contents = [x for x in children
+                 if not isinstance(x, WikiNode) or
+                 x.kind != NodeKind.LIST]
+        # If this entry has sublists of entries, we should combine
+        # gloss information from both the "outer" and sublist content.
+        # Sometimes the outer gloss 
+        # is more non-gloss or tags, sometimes it is a coarse sense
+        # and the inner glosses are more specific.  The outer one
+        # does not seem to have qualifiers.
+
+        # If we have one sublist with one element, treat it
+        # specially as it may be a Wiktionary error; raise
+        # that nested element to the same level.
+        if len(subentries) == 1:
+            slc = subentries[0].children
+            if len(slc) == 1:
+                # copy current node and modify it so it doesn't
+                # loop infinitely.
+                cropped_node = copy.copy(node)
+                cropped_node.children = [x for x in children
+                                        if not (isinstance(x, WikiNode) and
+                                                x.kind == NodeKind.LIST and
+                                                x.args == current_depth + "#")]
+                added |= parse_sense_node(cropped_node, sense_base)
+                added |= parse_sense_node(slc[0], sense_base) # or sense_base
+                return added
+
+        # Capture examples
+        examples = []
+        if config.capture_examples:
+            examples = extract_examples(others)
+
+        def sense_template_fn(name, ht):
+            if name in wikipedia_templates:
+                parse_wikipedia_template(config, ctx, pos_data, ht)
+                return None
+            if is_panel_template(name):
+                return ""
+            if name in ("defdate",):
+                return ""
+            if name == "senseid":
+                langid = clean_node(config, ctx, None, ht.get(1, ()))
+                arg = clean_node(config, ctx, sense_base, ht.get(2, ()))
+                if re.match(r"Q\d+$", arg):
+                    data_append(ctx, sense_base, "wikidata", arg)
+                data_append(ctx, sense_base, "senseid",
+                            langid + ":" + arg)
+            if name in sense_linkage_templates:
+                # print("SENSE_TEMPLATE_FN")
+                parse_sense_linkage(config, ctx, sense_base, name, ht)
+                return ""
+            if name == "†" or name == "zh-obsolete":
+                data_append(ctx, sense_base, "tags", "obsolete")
+                return ""
+            if name in ("ux", "uxi", "usex", "afex", "zh-x", "prefixusex",
+                        "ko-usex", "ko-x", "hi-x", "ja-usex-inline", "ja-x",
+                        "quotei", "zh-x", "he-x", "hi-x", "km-x", "ne-x",
+                        "shn-x", "th-x", "ur-x"):
+                # Usage examples are captured separately below.  We don't
+                # want to expand them into glosses even when unusual coding
+                # is used in the entry.
+                return ""
+            if name == "w":
+                if ht.get(2) == "Wp":
+                    return ""
+            for k, v in ht.items():
+                v = v.strip()
+                if v and v.find("<") < 0:
+                    gloss_template_args.add(v)
+            if config.dump_file_lang_code == "zh":
+                add_form_of_tags(ctx, name, config.FORM_OF_TEMPLATES, sense_base)
+            return None
+
+        def extract_link_texts(item):
+            """Recursively extracts link texts from the gloss source.  This
+            information is used to select whether to remove final "." from
+            form_of/alt_of (e.g., ihm/Hunsrik)."""
+            if isinstance(item, (list, tuple)):
+                for x in item:
+                    extract_link_texts(x)
+                return
+            if isinstance(item, str):
+                # There seem to be HTML sections that may futher contain
+                # unparsed links.
+                for m in re.finditer(r"\[\[([^]]*)\]\]", item):
+                    print("ITER:", m.group(0))
+                    v = m.group(1).split("|")[-1].strip()
+                    if v:
+                        gloss_template_args.add(v)
+                return
+            if not isinstance(item, WikiNode):
+                return
+            if item.kind == NodeKind.LINK:
+                v = item.args[-1]
+                if (isinstance(v, list) and len(v) == 1 and
+                    isinstance(v[0], str)):
+                    gloss_template_args.add(v[0].strip())
+            for x in item.children:
+                extract_link_texts(x)
+
+        extract_link_texts(contents)
+
+        rawgloss = clean_node(config, ctx, sense_base, contents,
+                              template_fn=sense_template_fn)
+
+        # Generate no gloss for translation hub pages, but add the
+        # "translation-hub" tag for them
+        if rawgloss == "(This entry is a translation hub.)":
+            data_append(ctx, sense_data, "tags", "translation-hub")
+            return push_sense()
+
+        # Remove certain substrings specific to outer glosses
+        strip_ends = [", particularly:"]
+        for x in strip_ends:
+            if rawgloss.endswith(x):
+                rawgloss = rawgloss[:-len(x)]
+                break
+
+        # The gloss could contain templates that produce more list items.
+        # This happens commonly with, e.g., {{inflection of|...}}.  Split
+        # to parts.  However, e.g. Interlingua generates multiple glosses
+        # in HTML directly without Wikitext markup, so we must also split
+        # by just newlines.
+        subglosses = re.split(r"(?m)^[#*]*\s*", rawgloss)
+                                       
+        if len(subglosses) == 0:
+            return False
+
+        # A single gloss, or possibly an outer gloss.
+        # Check if the possible outer gloss starts with
+        # parenthesized tags/topics
+
+        m = re.match(r"\(([^()]+)\):?\s*", rawgloss)
+        if m:
+            q = m.group(1)
+            rawgloss = rawgloss[m.end():].strip()
+            parse_sense_qualifier(ctx, q, sense_base)
+        if rawgloss == "A pejorative:":
+            data_append(ctx, sense_base, "tags", "pejorative")
+            rawgloss = None
+        elif rawgloss == "Short forms.":
+            data_append(ctx, sense_base, "tags", "abbreviation")
+            rawgloss = None
+        elif rawgloss == "Technical or specialized senses.":
+            rawgloss = None
+        # XXX find where this fits
+        if rawgloss:
+            data_append(ctx, sense_base, "glosses", rawgloss)
+            if rawgloss in ("A person:",):
+                data_append(ctx, sense_base, "tags", "g-person")
+
+        for sublist in subentries:
+            assert sublist.kind == NodeKind.LIST
+            for item in sublist.children:
+                if not isinstance(item, WikiNode):
+                    continue
+                if item.kind != NodeKind.LIST_ITEM:
+                    continue
+                sense_base2 = copy.deepcopy(sense_base)
+                if parse_sense_node(item, sense_base2):
+                    added = True
+
+        # push_sense() succeeded somewhere down-river, so skip this one
+        if added:
+            return True
+
+        # Some entries, e.g., "iacebam", have weird sentences in quotes
+        # after the gloss, but these sentences don't seem to be intended
+        # as glosses.  Skip them.
+        subglosses = list(gl for gl in subglosses
+                          if gl.strip() and
+                          not re.match(r'\s*(\([^)]*\)\s*)?"[^"]*"\s*$',
+                                       gl))
+
+        if len(subglosses) > 1 and "form_of" not in sense_base:
+            gl = subglosses[0].strip()
+            if gl.endswith(":"):
+                gl = gl[:-1].strip()
+            parsed = parse_alt_or_inflection_of(ctx, gl, gloss_template_args)
+            if parsed is not None:
+                infl_tags, infl_dts = parsed
+                if (infl_dts and "form-of" in infl_tags and
+                    len(infl_tags) == 1):
+                    # Interpret others as a particular form under
+                    # "inflection of"
+                    data_extend(ctx, sense_base, "tags", infl_tags)
+                    data_extend(ctx, sense_base, "form_of", infl_dts)
+                    subglosses = subglosses[1:]
+                elif not infl_dts:
+                    data_extend(ctx, sense_base, "tags", infl_tags)
+                    subglosses = subglosses[1:]
+                    
+        # Create senses for remaining subglosses
+        for gloss_i, gloss in enumerate(subglosses):
+            gloss = gloss.strip()
+            if not gloss and len(subglosses) > 1:
+                continue
+            if gloss.startswith("; ") and gloss_i > 0:
+                gloss = gloss[1:].strip()
+            # Push a new sense (if the last one is not empty)
+            if push_sense():
+                added = True
+            data_append(ctx, sense_data, "raw_glosses", gloss)
+            if gloss_i == 0 and examples:
+                data_extend(ctx, sense_data, "examples", examples)
+            # If the gloss starts with †, mark as obsolete
+            if gloss.startswith("^†"):
+                data_append(ctx, sense_data, "tags", "obsolete")
+                gloss = gloss[2:].strip()
+            elif gloss.startswith("^‡"):
+                data_extend(ctx, sense_data, "tags", ["obsolete", "historical"])
+                gloss = gloss[2:].strip()
+            # Copy data for all senses to this sense
+            for k, v in sense_base.items():
+                if isinstance(v, (list, tuple)):
+                    if k != "tags":
+                        # Tags handled below (countable/uncountable special)
+                        data_extend(ctx, sense_data, k, v)
+                else:
+                    assert k not in ("tags", "categories", "topics")
+                    sense_data[k] = v
+            # Parse the gloss for this particular sense
+            m = re.match(r"^\((([^()]|\([^()]*\))*)\):?\s*", gloss)
+            if m:
+                parse_sense_qualifier(ctx, m.group(1), sense_data)
+                gloss = gloss[m.end():].strip()
+
+            # Remove common suffix "[from 14th c.]" and similar
+            gloss = re.sub(r"\s\[[^]]*\]\s*$", "", gloss)
+
+            # Check to make sure we don't have unhandled list items in gloss
+            ofs = max(gloss.find("#"), gloss.find("* "))
+            if ofs > 10 and gloss.find("(#)") < 0:
+                ctx.debug("gloss may contain unhandled list items: {}"
+                          .format(gloss),
+                          sortid="page/1412")
+            elif gloss.find("\n") >= 0:
+                ctx.debug("gloss contains newline: {}".format(gloss),
+                          sortid="page/1416")
+
+            # Kludge, some glosses have a comma after initial qualifiers in
+            # parentheses
+            if gloss.startswith((",", ":")):
+                gloss = gloss[1:]
+            gloss = gloss.strip()
+            if gloss.endswith(":"):
+                gloss = gloss[:-1].strip()
+            if gloss.startswith("N. of "):
+                gloss = "Name of " +  gloss[6:]
+            if gloss.startswith("†"):
+                data_append(ctx, sense_data, "tags", "obsolete")
+                gloss = gloss[1:]
+            elif gloss.startswith("^†"):
+                data_append(ctx, sense_data, "tags", "obsolete")
+                gloss = gloss[2:]
+
+            # Copy tags from sense_base if any.  This will not copy
+            # countable/uncountable if either was specified in the sense,
+            # as sometimes both are specified in word head but only one
+            # in individual senses.
+            countability_tags = []
+            base_tags = sense_base.get("tags", ())
+            sense_tags = sense_data.get("tags", ())
+            for tag in base_tags:
+                if tag in ("countable", "uncountable"):
+                    if tag not in countability_tags:
+                        countability_tags.append(tag)
+                    continue
+                if tag not in sense_tags:
+                    data_append(ctx, sense_data, "tags", tag)
+            if countability_tags:
+                if ("countable" not in sense_tags and
+                    "uncountable" not in sense_tags):
+                    data_extend(ctx, sense_data, "tags", countability_tags)
+
+            # If outer gloss specifies a form-of ("inflection of", see
+            # aquamarine/German), try to parse the inner glosses as
+            # tags for an inflected form.
+            if "form-of" in sense_base.get("tags", ()):
+                parsed = parse_alt_or_inflection_of(ctx, gloss,
+                                                    gloss_template_args)
+                if parsed is not None:
+                    infl_tags, infl_dts = parsed
+                    if not infl_dts and infl_tags:
+                        # Interpret as a particular form under "inflection of"
+                        data_extend(ctx, sense_data, "tags", infl_tags)
+
+            if not gloss:
+                data_append(ctx, sense_data, "tags", "empty-gloss")
+            elif gloss != "-" and gloss not in sense_data.get("glosses", []):
+                # Add the gloss for the sense.
+                data_append(ctx, sense_data, "glosses", gloss)
+
+            # Kludge: there are cases (e.g., etc./Swedish) where there are
+            # two abbreviations in the same sense, both generated by the
+            # {{abbreviation of|...}} template.  Handle these with some magic.
+            position = 0
+            split_glosses = []
+            for m in re.finditer(r"Abbreviation of ", gloss):
+                if m.start() != position:
+                    split_glosses.append(gloss[position: m.start()])
+                    position = m.start()
+            split_glosses.append(gloss[position:])
+            for gloss in split_glosses:
+                # Check if this gloss describes an alt-of or inflection-of
+                if (lang_code != "en" and " " not in gloss and distw([word], gloss) < 0.3):
+                    # Don't try to parse gloss it is one word
+                    # that is close to the word itself for non-English words
+                    # (probable translations of a tag/form name)
+                    continue
+                parsed = parse_alt_or_inflection_of(ctx, gloss,
+                                                    gloss_template_args)
+                if parsed is None:
+                    continue
+                tags, dts = parsed
+                if not dts and tags:
+                    data_extend(ctx, sense_data, "tags", tags)
+                    continue
+                for dt in dts:
+                    ftags = list(tag for tag in tags if tag != "form-of")
+                    if "alt-of" in tags:
+                        data_extend(ctx, sense_data, "tags", ftags)
+                        data_append(ctx, sense_data, "alt_of", dt)
+                    elif "compound-of" in tags:
+                        data_extend(ctx, sense_data, "tags", ftags)
+                        data_append(ctx, sense_data, "compound_of", dt)
+                    elif "synonym-of" in tags:
+                        data_extend(ctx, dt, "tags", ftags)
+                        data_append(ctx, sense_data, "synonyms", dt)
+                    elif tags and dt.get("word", "").startswith("of "):
+                        dt["word"] = dt["word"][3:]
+                        data_append(ctx, sense_data, "tags", "form-of")
+                        data_extend(ctx, sense_data, "tags", ftags)
+                        data_append(ctx, sense_data, "form_of", dt)
+                    elif "form-of" in tags:
+                        data_extend(ctx, sense_data, "tags", tags)
+                        data_append(ctx, sense_data, "form_of", dt)
+
+        if push_sense():
+            added = True
+            # print("PARSE_SENSE DONE:", pos_datas[-1])
+        return added
+# <- NEW CODE  ########
 
     def parse_inflection(node, section, pos):
         """Parses inflection data (declension, conjugation) from the given
@@ -2526,23 +2305,24 @@ def parse_language(ctx, config, langnode, language, lang_code):
             item = clean_node(config, ctx, data, contents,
                               template_fn=translation_item_template_fn)
             # print("    TRANSLATION ITEM: {!r}  [{}]".format(item, sense))
-
+            
             # Parse the translation item.
-            lang = parse_translation_item_text(ctx, word, data, item, sense,
-                                               pos_datas, lang, langcode,
-                                               translations_from_template,
-                                               is_reconstruction, config)
+            if item:
+                lang = parse_translation_item_text(ctx, word, data, item, sense,
+                                                   pos_datas, lang, langcode,
+                                                   translations_from_template,
+                                                   is_reconstruction, config)
 
-            # Handle sublists.  They are frequently used for different scripts
-            # for the language and different variants of the language.  We will
-            # include the lower-level header as a tag in those cases.
-            for listnode in sublists:
-                assert listnode.kind == NodeKind.LIST
-                for node in listnode.children:
-                    if not isinstance(node, WikiNode):
-                        continue
-                    if node.kind == NodeKind.LIST_ITEM:
-                        parse_translation_item(node.children, lang=lang)
+                # Handle sublists.  They are frequently used for different scripts
+                # for the language and different variants of the language.  We will
+                # include the lower-level header as a tag in those cases.
+                for listnode in sublists:
+                    assert listnode.kind == NodeKind.LIST
+                    for node in listnode.children:
+                        if not isinstance(node, WikiNode):
+                            continue
+                        if node.kind == NodeKind.LIST_ITEM:
+                            parse_translation_item(node.children, lang=lang)
 
         def parse_translation_template(node):
             assert isinstance(node, WikiNode)
@@ -2889,6 +2669,215 @@ def parse_language(ctx, config, langnode, language, lang_code):
             stack.append(t)
             process_children(node, pos)
             stack.pop()
+
+    def extract_examples(others):
+        """Parses through a list of definitions and quotes to find examples.
+        Returns a list of example dicts to be added to sense data."""
+        assert isinstance(others, list)
+        examples = []
+        
+        for sub in others:
+            if not sub.args.endswith((":", "*")):
+                continue
+            for item in sub.children:
+                if not isinstance(item, WikiNode):
+                    continue
+                if item.kind != NodeKind.LIST_ITEM:
+                    continue
+                usex_type = None
+    
+                def usex_template_fn(name, ht):
+                    nonlocal usex_type
+                    if name in panel_templates:
+                        return ""
+                    if name in usex_templates:
+                        usex_type = "example"
+                    elif name in quotation_templates:
+                        usex_type = "quotation"
+                    for prefix, t in template_linkage_mappings:
+                        if re.search(r"(^|[-/\s]){}($|\b|[0-9])"
+                                     .format(prefix),
+                                     name):
+                            return ""
+                    return None
+    
+                subtext = clean_node(config, ctx, None, item.children,
+                                     template_fn=usex_template_fn)
+                subtext = re.sub(r"\s*\(please add an English "
+                                 r"translation of this "
+                                 "(example|usage example|quote)\)",
+                                 "", subtext).strip()
+                subtext = re.sub(r"\^\([^)]*\)", "", subtext)
+                subtext = re.sub(r"\s*[―—]+$", "", subtext)
+                # print("subtext:", repr(subtext))
+    
+                lines = subtext.splitlines()
+                lines = list(x for x in lines
+                             if not re.match(
+                                     r"(Synonyms: |Antonyms: |Hyponyms: |"
+                                     r"Synonym: |Antonym: |Hyponym: |"
+                                     r"Hypernyms: |Derived terms: |"
+                                     r"Related terms: |"
+                                     r"Hypernym: |Derived term: |"
+                                     r"Coordinate terms:|"
+                                     r"Related term: |"
+                                     r"For more quotations using )",
+                                     x))
+                tr = ""
+                ref = ""
+                roman = ""
+                # for line in lines:
+                #     print("LINE:", repr(line))
+                if len(lines) == 1 and lang_code != "en":
+                    parts = re.split(r"\s*[―—]+\s*", lines[0])
+                    if (len(parts) == 2 and
+                        classify_desc(parts[1]) == "english"):
+                        lines = [parts[0].strip()]
+                        tr = parts[1].strip()
+                    elif (len(parts) == 3 and
+                          classify_desc(parts[1]) in ("romanization",
+                                                      "english") and
+                          classify_desc(parts[2]) == "english"):
+                        lines = [parts[0].strip()]
+                        roman = parts[1].strip()
+                        tr = parts[2].strip()
+                    else:
+                        parts = re.split(r"\s+-\s+", lines[0])
+                        if (len(parts) == 2 and
+                            classify_desc(parts[1]) == "english"):
+                            lines = [parts[0].strip()]
+                            tr = parts[1].strip()
+                elif len(lines) > 1:
+                    if any(re.search(r"[]\d:)]\s*$", x)
+                           for x in lines[:-1]):
+                        ref = []
+                        for i in range(len(lines)):
+                            if re.match(r"^[#*]*:+(\s*$|\s+)", lines[i]):
+                                break
+                            ref.append(lines[i].strip())
+                            if re.search(r"[]\d:)]\s*$", lines[i]):
+                                break
+                        ref = " ".join(ref)
+                        lines = lines[i + 1:]
+                        if (lang_code != "en" and len(lines) >= 2 and
+                            classify_desc(lines[-1]) == "english"):
+                            i = len(lines) - 1
+                            while (i > 1 and
+                                   classify_desc(lines[i - 1])
+                                   == "english"):
+                                i -= 1
+                            tr = "\n".join(lines[i:])
+                            lines = lines[:i]
+    
+                    elif (lang_code == "en" and
+                          re.match(r"^[#*]*:+", lines[1])):
+                        ref = lines[0]
+                        lines = lines[1:]
+                    elif lang_code != "en" and len(lines) == 2:
+                        cls1 = classify_desc(lines[0])
+                        cls2 = classify_desc(lines[1])
+                        if cls2 == "english" and cls1 != "english":
+                            tr = lines[1]
+                            lines = [lines[0]]
+                        elif cls1 == "english" and cls2 != "english":
+                            tr = lines[0]
+                            lines = [lines[1]]
+                        elif (re.match(r"^[#*]*:+", lines[1]) and
+                              classify_desc(re.sub(r"^[#*:]+\s*", "",
+                                                   lines[1])) == "english"):
+                            tr = re.sub(r"^[#*:]+\s*", "", lines[1])
+                            lines = [lines[0]]
+                        elif cls1 == "english" and cls2 == "english":
+                            # Both were classified as English, but
+                            # presumably one is not.  Assume first is
+                            # non-English, as that seems more common.
+                            tr = lines[1]
+                            lines = [lines[0]]
+                    elif (usex_type == "quotation" and
+                          lang_code != "en" and len(lines) > 2):
+                        # for x in lines:
+                        #     print("  LINE: {}: {}"
+                        #           .format(classify_desc(x), x))
+                        if re.match(r"^[#*]*:+\s*$", lines[1]):
+                            ref = lines[0]
+                            lines = lines[2:]
+                        cls1 = classify_desc(lines[-1])
+                        if cls1 == "english":
+                            i = len(lines) - 1
+                            while (i > 1 and
+                                   classify_desc(lines[i - 1])
+                                   == "english"):
+                                i -= 1
+                            tr = "\n".join(lines[i:])
+                            lines = lines[:i]
+    
+                roman = re.sub(r"[ \t\r]+", " ", roman).strip()
+                roman = re.sub(r"\[\s*…\s*\]", "[…]", roman)
+                tr = re.sub(r"^[#*:]+\s*", "", tr)
+                tr = re.sub(r"[ \t\r]+", " ", tr).strip()
+                tr = re.sub(r"\[\s*…\s*\]", "[…]", tr)
+                ref = re.sub(r"^[#*:]+\s*", "", ref)
+                ref = re.sub(r", (volume |number |page )?“?"
+                             r"\(please specify ([^)]|\(s\))*\)”?|"
+                             ", text here$",
+                             "", ref)
+                ref = re.sub(r"\[\s*…\s*\]", "[…]", ref)
+                lines = list(re.sub(r"^[#*:]+\s*", "", x) for x in lines)
+                subtext = "\n".join(x for x in lines if x)
+                if not tr and lang_code != "en":
+                    m = re.search(r"([.!?])\s+\(([^)]+)\)\s*$", subtext)
+                    if m and classify_desc(m.group(2)) == "english":
+                        tr = m.group(2)
+                        subtext = subtext[:m.start()] + m.group(1)
+                    elif lines:
+                        parts = re.split(r"\s*[―—]+\s*", lines[0])
+                        if (len(parts) == 2 and
+                            classify_desc(parts[1]) == "english"):
+                            subtext = parts[0].strip()
+                            tr = parts[1].strip()
+                subtext = re.sub(r'^[“"`]([^“"`”\']*)[”"\']$', r"\1",
+                                 subtext)
+                subtext = re.sub(r"(please add an English translation of "
+                                 r"this (quote|usage example))",
+                                 "", subtext)
+                subtext = re.sub(r"\s*→New International Version "
+                                 "translation$",
+                                 "", subtext)  # e.g. pis/Tok Pisin (Bible)
+                subtext = re.sub(r"[ \t\r]+", " ", subtext).strip()
+                subtext = re.sub(r"\[\s*…\s*\]", "[…]", subtext)
+                note = None
+                m = re.match(r"^\(([^)]*)\):\s+", subtext)
+                if (m is not None and lang_code != "en" and
+                    (m.group(1).startswith("with ") or
+                     classify_desc(m.group(1)) == "english")):
+                    note = m.group(1)
+                    subtext = subtext[m.end():]
+                ref = re.sub(r"\s*\(→ISBN\)", "", ref)
+                ref = re.sub(r",\s*→ISBN", "", ref)
+                ref = ref.strip()
+                if ref.endswith(":") or ref.endswith(","):
+                    ref = ref[:-1].strip()
+                ref = re.sub(r"\s+,\s+", ", ", ref)
+                ref = re.sub(r"\s+", " ", ref)
+                if ref and not subtext:
+                    subtext = ref
+                    ref = ""
+                if subtext:
+                    dt = {"text": subtext}
+                    if ref:
+                        dt["ref"] = ref
+                    if tr:
+                        dt["english"] = tr
+                    if usex_type:
+                        dt["type"] = usex_type
+                    if note:
+                        dt["note"] = note
+                    if roman:
+                        dt["roman"] = roman
+                    examples.append(dt)
+    
+        return examples
+
 
     # Main code of parse_language()
     # Process the section
