@@ -1377,7 +1377,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 data_append(ctx, sense_base, "senseid",
                             langid + ":" + arg)
             if name in sense_linkage_templates:
-                # print("SENSE_TEMPLATE_FN")
+                # print(f"SENSE_TEMPLATE_FN: {name}")
                 parse_sense_linkage(config, ctx, sense_base, name, ht)
                 return ""
             if name == "†" or name == "zh-obsolete":
@@ -1431,7 +1431,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         extract_link_texts(contents)
 
+        # get the raw text of non-list contents of this node, and other stuff
         rawgloss = clean_node(config, ctx, sense_base, contents,
+                              template_fn=sense_template_fn)
+
+        # get stuff like synonyms from "others", examples and quotations
+        clean_node(config, ctx, sense_base, others,
                               template_fn=sense_template_fn)
 
         if not rawgloss:
