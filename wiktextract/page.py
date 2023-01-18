@@ -2345,21 +2345,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     sense = None
                     sub = ht.get(1, None)
                     m = re.match(r"\s*(([^:\d]*)\s*\d*)\s*:\s*([^:]*)\s*", sub)
-                    print(sub)
-                    print(m)
                     etym = ""
                     etym_numbered = ""
                     pos = ""
                     if m:
                         etym_numbered = m.group(1)
-                        print("etym numbered:", etym_numbered)
                         etym = m.group(2)
-                        print("etym:", repr(etym))
-                        print(etym.lower() in config.OTHER_SUBTITLES["etymology"])
-                        print(config.OTHER_SUBTITLES["etymology"])
                         pos = m.group(3)
-                        print("pos:", pos)
-                        print(pos.lower() in config.POS_SUBTITLES)
                     if not isinstance(sub, str):
                         ctx.debug("no part-of-speech in "
                                   "{{see translation subpage|...}}, "
