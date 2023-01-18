@@ -1434,6 +1434,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
         rawgloss = clean_node(config, ctx, sense_base, contents,
                               template_fn=sense_template_fn)
 
+        if not rawgloss:
+            return False
+
         # Generate no gloss for translation hub pages, but add the
         # "translation-hub" tag for them
         if rawgloss == "(This entry is a translation hub.)":
@@ -1493,7 +1496,14 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         # push_sense() succeeded somewhere down-river, so skip this one
         if added:
-            return True
+            if examples:
+            # A higher-up gloss has examples that we do not want to skip
+                ctx.debug("'{}[...]' gloss has examples we want to keep, "
+                          "but there are subglosses."
+                          .format(repr(rawgloss[:30])),
+                      sortid="page/1498/20230118")
+            else:
+                return True
 
         # Some entries, e.g., "iacebam", have weird sentences in quotes
         # after the gloss, but these sentences don't seem to be intended
