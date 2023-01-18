@@ -1,0 +1,719 @@
+{
+  "aa": [
+    "afarčina"
+  ],
+  "ab": [
+    "abcházština"
+  ],
+  "ace": [
+    "acehčina"
+  ],
+  "ady": [
+    "adygejčina"
+  ],
+  "af": [
+    "afrikánčina"
+  ],
+  "ain": [
+    "ainčina"
+  ],
+  "ak": [
+    "akančina"
+  ],
+  "ale": [
+    "aleutčina"
+  ],
+  "als": [
+    "alsaština"
+  ],
+  "alt": [
+    "južná altajčina"
+  ],
+  "am": [
+    "amharčina"
+  ],
+  "an": [
+    "aragónčina"
+  ],
+  "ar": [
+    "arabčina"
+  ],
+  "arc": [
+    "aramejčina"
+  ],
+  "arn": [
+    "araukánčina"
+  ],
+  "as": [
+    "ásamčina"
+  ],
+  "ast": [
+    "astúrčina"
+  ],
+  "av": [
+    "avarčina"
+  ],
+  "ay": [
+    "aymarčina"
+  ],
+  "az": [
+    "azerbajdžančina"
+  ],
+  "ba": [
+    "baškirčina"
+  ],
+  "bal": [
+    "balúčtina"
+  ],
+  "be": [
+    "bieloruština"
+  ],
+  "bem": [
+    "bembčina"
+  ],
+  "bg": [
+    "bulharčina"
+  ],
+  "bh": [
+    "bihárčina"
+  ],
+  "bho": [
+    "bhódžpurčina"
+  ],
+  "bm": [
+    "bambarčina"
+  ],
+  "bn": [
+    "bengálčina"
+  ],
+  "bo": [
+    "tibetčina"
+  ],
+  "br": [
+    "bretónčina"
+  ],
+  "bs": [
+    "bosniačtina"
+  ],
+  "bxr": [
+    "buriatčina"
+  ],
+  "ca": [
+    "katalánčina"
+  ],
+  "ce": [
+    "čečenčina"
+  ],
+  "ceb": [
+    "cebuánčina"
+  ],
+  "ch": [
+    "čamorčina"
+  ],
+  "cmn": [
+    "mandarínčina"
+  ],
+  "cnr": [
+    "čiernohorčina"
+  ],
+  "co": [
+    "korzičtina"
+  ],
+  "cs": [
+    "čeština"
+  ],
+  "csb": [
+    "kašubčina"
+  ],
+  "cu": [
+    "staroslovienčina"
+  ],
+  "cuk": [
+    "kuna"
+  ],
+  "cv": [
+    "čuvaština"
+  ],
+  "cy": [
+    "waleština"
+  ],
+  "da": [
+    "dánčina"
+  ],
+  "de": [
+    "nemčina"
+  ],
+  "dlm": [
+    "dalmatínčina"
+  ],
+  "dv": [
+    "divehi (maldivčina)"
+  ],
+  "dz": [
+    "dzongkha"
+  ],
+  "ee": [
+    "eweština"
+  ],
+  "el": [
+    "gréčtina"
+  ],
+  "en": [
+    "angličtina"
+  ],
+  "eo": [
+    "esperanto"
+  ],
+  "es": [
+    "španielčina"
+  ],
+  "et": [
+    "estónčina"
+  ],
+  "eu": [
+    "baskičtina"
+  ],
+  "fa": [
+    "perzština"
+  ],
+  "fi": [
+    "fínčina"
+  ],
+  "fil": [
+    "filipínčina"
+  ],
+  "fj": [
+    "fidžijčina"
+  ],
+  "fo": [
+    "faerčina"
+  ],
+  "fr": [
+    "francúzština"
+  ],
+  "fur": [
+    "friulčina"
+  ],
+  "fy": [
+    "frízština"
+  ],
+  "ga": [
+    "írčina"
+  ],
+  "gag": [
+    "gagauzština"
+  ],
+  "gil": [
+    "kiribatčina"
+  ],
+  "gl": [
+    "galícijčina"
+  ],
+  "goh": [
+    "stará horná nemčina"
+  ],
+  "got": [
+    "gótčina"
+  ],
+  "grc": [
+    "starogréčtina"
+  ],
+  "gu": [
+    "gudžarátčina"
+  ],
+  "gv": [
+    "mančina"
+  ],
+  "ha": [
+    "hauština"
+  ],
+  "hak": [
+    "hakka"
+  ],
+  "haw": [
+    "havajčina"
+  ],
+  "hbs": [
+    "srbochorvátčina"
+  ],
+  "he": [
+    "hebrejčina"
+  ],
+  "hi": [
+    "hindčina"
+  ],
+  "hil": [
+    "hiligaynončina"
+  ],
+  "hit": [
+    "chetitčina"
+  ],
+  "hr": [
+    "chorvátčina"
+  ],
+  "hsb": [
+    "hornolužická srbčina"
+  ],
+  "hu": [
+    "maďarčina"
+  ],
+  "hy": [
+    "arménčina"
+  ],
+  "ia": [
+    "interlingua"
+  ],
+  "id": [
+    "indonézština"
+  ],
+  "ie": [
+    "interlingue"
+  ],
+  "ig": [
+    "igboština"
+  ],
+  "ilo": [
+    "ilokánčina"
+  ],
+  "inh": [
+    "inguština"
+  ],
+  "io": [
+    "ido"
+  ],
+  "is": [
+    "islandčina"
+  ],
+  "ist": [
+    "istrijčina"
+  ],
+  "it": [
+    "taliančina"
+  ],
+  "ja": [
+    "japončina"
+  ],
+  "jbo": [
+    "lojban"
+  ],
+  "jiv": [
+    "šuarčina"
+  ],
+  "jv": [
+    "jávčina"
+  ],
+  "ka": [
+    "gruzínčina"
+  ],
+  "kaa": [
+    "karakalpačtina"
+  ],
+  "kab": [
+    "kabylčina"
+  ],
+  "kk": [
+    "kazaština"
+  ],
+  "kl": [
+    "grónčina"
+  ],
+  "kn": [
+    "kannadčina"
+  ],
+  "ko": [
+    "kórejčina"
+  ],
+  "krl": [
+    "karelčina"
+  ],
+  "ku": [
+    "kurdčina"
+  ],
+  "kv": [
+    "komijčina"
+  ],
+  "kw": [
+    "kornčina"
+  ],
+  "ky": [
+    "kirgizština"
+  ],
+  "la": [
+    "latinčina"
+  ],
+  "lad": [
+    "ladino"
+  ],
+  "lb": [
+    "luxemburčina"
+  ],
+  "lg": [
+    "gandčina"
+  ],
+  "li": [
+    "limburčina"
+  ],
+  "lld": [
+    "ladinčina"
+  ],
+  "ln": [
+    "lingalčina"
+  ],
+  "lo": [
+    "laoština"
+  ],
+  "lt": [
+    "litovčina"
+  ],
+  "lv": [
+    "lotyština"
+  ],
+  "mas": [
+    "masajčina"
+  ],
+  "mg": [
+    "malgaština"
+  ],
+  "mi": [
+    "maorijčina"
+  ],
+  "mk": [
+    "macedónčina"
+  ],
+  "ml": [
+    "malajálamčina"
+  ],
+  "mn": [
+    "mongolčina"
+  ],
+  "mnc": [
+    "mandžuština"
+  ],
+  "mr": [
+    "maráthčina"
+  ],
+  "ms": [
+    "malajčina"
+  ],
+  "mt": [
+    "maltčina"
+  ],
+  "mwl": [
+    "mirandčina"
+  ],
+  "my": [
+    "barmčina"
+  ],
+  "na": [
+    "nauruština"
+  ],
+  "nah": [
+    "aztéčtina"
+  ],
+  "nap": [
+    "neapolčina"
+  ],
+  "nb": [
+    "nórčina (bokmål)"
+  ],
+  "ne": [
+    "nepálčina"
+  ],
+  "ng": [
+    "ndonga"
+  ],
+  "niu": [
+    "niueština"
+  ],
+  "nl": [
+    "holandčina"
+  ],
+  "nn": [
+    "nórčina (nynorsk)"
+  ],
+  "no": [
+    "nórčina"
+  ],
+  "nov": [
+    "novial"
+  ],
+  "nv": [
+    "navaho"
+  ],
+  "ny": [
+    "čeva"
+  ],
+  "oc": [
+    "okcitánčina"
+  ],
+  "om": [
+    "oromčina"
+  ],
+  "or": [
+    "uríjčina"
+  ],
+  "os": [
+    "osetčina"
+  ],
+  "pa": [
+    "pandžábčina"
+  ],
+  "pam": [
+    "pampangančina"
+  ],
+  "pap": [
+    "papiamento"
+  ],
+  "pau": [
+    "palajčina"
+  ],
+  "pjt": [
+    "pitjantjatjara"
+  ],
+  "pl": [
+    "poľština"
+  ],
+  "pnb": [
+    "pandžábčina"
+  ],
+  "pon": [
+    "pohnpeičina"
+  ],
+  "pox": [
+    "polabčina"
+  ],
+  "prg": [
+    "pruština"
+  ],
+  "ps": [
+    "paštčina"
+  ],
+  "pt": [
+    "portugalčina"
+  ],
+  "qu": [
+    "kečuánčina"
+  ],
+  "raj": [
+    "radžastančina"
+  ],
+  "rap": [
+    "rapanujčina"
+  ],
+  "rm": [
+    "rétorománčina"
+  ],
+  "rmc": [
+    "karpatská rómčina"
+  ],
+  "rmy": [
+    "vlašská rómčina"
+  ],
+  "ro": [
+    "rumunčina"
+  ],
+  "rom": [
+    "rómčina"
+  ],
+  "ru": [
+    "ruština"
+  ],
+  "rue": [
+    "rusínčina"
+  ],
+  "rup": [
+    "arumunčina"
+  ],
+  "rw": [
+    "rwandčina"
+  ],
+  "sa": [
+    "sanskrit"
+  ],
+  "sah": [
+    "jakutčina"
+  ],
+  "sc": [
+    "sardínčina"
+  ],
+  "scn": [
+    "sicílčina"
+  ],
+  "sco": [
+    "škótčina"
+  ],
+  "sd": [
+    "sindhčina"
+  ],
+  "se": [
+    "severná sámčina"
+  ],
+  "sgs": [
+    "žemajtské nárečie"
+  ],
+  "sh": [
+    "srbochorvátčina"
+  ],
+  "si": [
+    "sinhalčina"
+  ],
+  "sk": [
+    "slovenčina"
+  ],
+  "sl": [
+    "slovinčina"
+  ],
+  "sla-pro": [
+    "praslovančina"
+  ],
+  "sm": [
+    "samojčina"
+  ],
+  "sn": [
+    "šončina"
+  ],
+  "so": [
+    "somálčina"
+  ],
+  "sq": [
+    "albánčina"
+  ],
+  "sr": [
+    "srbčina"
+  ],
+  "sro": [
+    "sardínčina"
+  ],
+  "su": [
+    "sundčina"
+  ],
+  "sux": [
+    "sumerčina"
+  ],
+  "sv": [
+    "švédčina"
+  ],
+  "sw": [
+    "swahilčina"
+  ],
+  "syr": [
+    "sýrčina"
+  ],
+  "ta": [
+    "tamilčina"
+  ],
+  "tah": [
+    "tahitčina"
+  ],
+  "te": [
+    "telugčina"
+  ],
+  "tg": [
+    "tadžičtina"
+  ],
+  "th": [
+    "thajčina"
+  ],
+  "ti": [
+    "tigrejčina"
+  ],
+  "tk": [
+    "turkménčina"
+  ],
+  "tkl": [
+    "tokelaučina"
+  ],
+  "tl": [
+    "tagalčina"
+  ],
+  "tlh": [
+    "klingónčina"
+  ],
+  "to": [
+    "tongčina"
+  ],
+  "tog": [
+    "tongčina (Malawi)"
+  ],
+  "tpi": [
+    "tok pisin"
+  ],
+  "tr": [
+    "turečtina"
+  ],
+  "ts": [
+    "tsonga"
+  ],
+  "tt": [
+    "tatárčina"
+  ],
+  "tum": [
+    "tumbuka"
+  ],
+  "tvl": [
+    "tuvalčina"
+  ],
+  "tw": [
+    "twi"
+  ],
+  "ty": [
+    "tahitčina"
+  ],
+  "tyv": [
+    "tuviančina"
+  ],
+  "tzm": [
+    "tamazight"
+  ],
+  "udm": [
+    "udmurtčina"
+  ],
+  "ug": [
+    "ujgurčina"
+  ],
+  "uk": [
+    "ukrajinčina"
+  ],
+  "ur": [
+    "urdčina"
+  ],
+  "uz": [
+    "uzbečtina"
+  ],
+  "vi": [
+    "vietnamčina"
+  ],
+  "vo": [
+    "volapük"
+  ],
+  "wa": [
+    "valónčina"
+  ],
+  "wo": [
+    "wolofčina"
+  ],
+  "xal": [
+    "kalmyčtina"
+  ],
+  "xh": [
+    "xhoština"
+  ],
+  "yi": [
+    "jidiš"
+  ],
+  "yo": [
+    "jorubčina"
+  ],
+  "yue": [
+    "kantončina"
+  ],
+  "za": [
+    "čuangčina"
+  ],
+  "zh": [
+    "čínština"
+  ],
+  "zu": [
+    "zuluština"
+  ]
+}

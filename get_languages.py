@@ -31,6 +31,23 @@ def expand_template(sub_domain: str, text: str) -> str:
     data = r.json()
     return data["expandtemplates"]["wikitext"]
 
+def get_source_code(sub_domain: str, page: str) -> str:
+    # Sometimes, like for Czech, the templates cannot be expanded, so we have to parse the source code
+    import requests
+
+    # https://www.mediawiki.org/wiki/API:Parse
+    params = {
+        "action": "parse",
+        "format": "json",
+        "page": page,
+        "prop": "wikitext",
+        "formatversion": "2",
+    }
+    r = requests.get(f"https://{sub_domain}.wiktionary.org/w/api.php",
+                     params=params)
+    data = r.json()
+    return data["parse"]["wikitext"]
+
 
 def add_simplified_chinese_names(lang_names, converter):
     # The API only returns language names in Traditional Chinese characters
@@ -81,6 +98,32 @@ def get_fr_languages():
 
     save_json_file(lang_data, "fr")
 
+
+def get_languages_cs_sk(wk_lang_code: str):
+    # https://cs.wiktionary.org/wiki/Modul:Languages
+    source_code = get_source_code(wk_lang_code, "Modul:Languages")
+    source_code = source_code[source_code.index("--]]") + 4:]
+    source_code = source_code.replace("Languages = ", "", 1)
+    source_code = source_code[:source_code.rindex("}") + 1]
+
+    lang_data = {}
+    for line in source_code.splitlines():
+        line = line.strip()
+        if line.startswith("["):
+            lang_code = line[1:line.index("]")]
+            lang_code = lang_code.replace('\"', '')
+            lang_data[lang_code] = []
+        elif line.startswith("name = "):
+            lang_name = line[7:line.index(",")]
+
+            lang_name = lang_name.replace('\"', '')
+            lang_data[lang_code].append(lang_name)
+
+    lang_data = {k: v for k, v in lang_data.items() if v != [] and v != ["—"]}
+    
+    save_json_file(lang_data, wk_lang_code)
+    
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("sub_domain", help="Wiktionary sub domain")
@@ -92,6 +135,8 @@ def main():
             parse_csv(args.sub_domain, args.lang_code)
         case "fr":
             get_fr_languages()
+        case "cs" | "sk":
+            get_languages_cs_sk(args.lang_code)
 
 
 if __name__ == "__main__":
