@@ -2344,6 +2344,22 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     sense_parts = []
                     sense = None
                     sub = ht.get(1, None)
+                    m = re.match(r"\s*(([^:\d]*)\s*\d*)\s*:\s*([^:]*)\s*", sub)
+                    print(sub)
+                    print(m)
+                    etym = ""
+                    etym_numbered = ""
+                    pos = ""
+                    if m:
+                        etym_numbered = m.group(1)
+                        print("etym numbered:", etym_numbered)
+                        etym = m.group(2)
+                        print("etym:", repr(etym))
+                        print(etym.lower() in config.OTHER_SUBTITLES["etymology"])
+                        print(config.OTHER_SUBTITLES["etymology"])
+                        pos = m.group(3)
+                        print("pos:", pos)
+                        print(pos.lower() in config.POS_SUBTITLES)
                     if not isinstance(sub, str):
                         ctx.debug("no part-of-speech in "
                                   "{{see translation subpage|...}}, "
@@ -2352,9 +2368,19 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                   sortid="page/2468")
                         # seq sent to get_subpage_section without sub and pos
                         seq = [language, config.OTHER_SUBTITLES["translations"]]
+                    elif (m and etym.lower().strip()
+                                in config.OTHER_SUBTITLES["etymology"]
+                            and pos.lower() in config.POS_SUBTITLES):
+                            print("REACHED")
+                            seq = [language,
+                                   etym_numbered,
+                                   pos,
+                                   config.OTHER_SUBTITLES["translations"]]
                     elif sub.lower() in config.POS_SUBTITLES:
                         # seq with sub but not pos
-                        seq = [language, sub, config.OTHER_SUBTITLES["translations"]]
+                        seq = [language,
+                               sub,
+                               config.OTHER_SUBTITLES["translations"]]
                     else:
                         # seq with sub and pos
                         pos = ctx.subsection
@@ -2363,7 +2389,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                       "language={} sub={} ctx.subsection={}"
                                       .format(language, sub, ctx.subsection),
                                       sortid="page/2478")
-                        seq = [language, sub, pos, config.OTHER_SUBTITLES["translations"]]
+                        seq = [language,
+                               sub,
+                               pos,
+                               config.OTHER_SUBTITLES["translations"]]
                     subnode = get_subpage_section(
                         ctx.title, config.OTHER_SUBTITLES["translations"], seq)
                     if subnode is not None:
