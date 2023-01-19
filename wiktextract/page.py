@@ -1356,11 +1356,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 added |= parse_sense_node(slc[0], sense_base) # or sense_base
                 return added
 
-        # Capture examples
-        examples = []
-        if config.capture_examples:
-            examples = extract_examples(others, sense_base)
-
         def sense_template_fn(name, ht):
             if name in wikipedia_templates:
                 parse_wikipedia_template(config, ctx, pos_data, ht)
@@ -1498,6 +1493,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 sense_base2 = copy.deepcopy(sense_base)
                 if parse_sense_node(item, sense_base2):
                     added = True
+
+        # Capture examples
+        examples = []
+        if config.capture_examples:
+            examples = extract_examples(others, sense_base)
 
         # push_sense() succeeded somewhere down-river, so skip this one
         if added:
