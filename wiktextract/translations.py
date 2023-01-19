@@ -313,6 +313,9 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
 
     # print("parse_translation_item_text: {!r} lang={}".format(item, lang))
 
+    if not item:
+        return None
+
     # Find and remove nested translations from the item
     nested = list(m.group(1)
                   for m in re.finditer(nested_translations_re, item))
