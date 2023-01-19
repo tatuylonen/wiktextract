@@ -1248,8 +1248,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
 
             for l in ls:
-                ########## NEW CODE -> #
-
+                # Parse each list associated with this head.
                 for node in l.children:
                     # Parse nodes in l.children recursively.
                     # The recursion function uses push_sense() to
@@ -1258,13 +1257,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     # If the bubble is "True", then higher levels of
                     # the recursion will not push_sense(), because
                     # the data is already pushed into a sub-gloss
-                    # downstream.
+                    # downstream, unless the higher level has examples
+                    # that need to be put somewhere.
                     common_data = {"tags": list(common_tags)}
                     if head_group:
                         common_data["head_nr"] = head_group
                     parse_sense_node(node, common_data)
 
-                # <- NEW CODE ###########
 
         # If there are no senses extracted, add a dummy sense.  We want to
         # keep tags extracted from the head for the dummy sense.
@@ -1274,17 +1273,22 @@ def parse_language(ctx, config, langnode, language, lang_code):
             data_append(ctx, sense_data, "tags", "no-gloss")
             push_sense()
 
-    ######## NEW CODE -> #
     def parse_sense_node(node, sense_base):
         """Recursively (depth first) parse LIST_ITEM nodes for sense data.
-       Uses push_sense() to attempt adding data to pos_data in the scope
-       of parse_language() when it reaches deep in the recursion. push_sense()
-       returns True if it succeeds, and that is bubbled up the stack; if
-       a sense was added downstream, the higher levels (whose shared data
-       was already added by a subsense) do not push_sense()
+        Uses push_sense() to attempt adding data to pos_data in the scope
+        of parse_language() when it reaches deep in the recursion. push_sense()
+        returns True if it succeeds, and that is bubbled up the stack; if
+        a sense was added downstream, the higher levels (whose shared data
+        was already added by a subsense) do not push_sense(), unless it
+        has examples that need to be put somewhere.
         """
-        assert isinstance(node, WikiNode)
-        assert isinstance(sense_base, dict)  # Added to every sense
+        assert isinstance(sense_base, dict)  # Added to every sense deeper in
+        if not isinstance(node, WikiNode):
+            ctx.debug("{}: parse_sense_node called with"
+                      "something that isn't a WikiNode".format(pos),
+                      sortid="page/1287/20230119")
+            return False
+            
         if node.kind != NodeKind.LIST_ITEM:
             ctx.debug("{}: non-list-item inside list".format(pos),
                       sortid="page/1678")
@@ -1304,6 +1308,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         gloss_template_args = set()
 
+        # For LISTs and LIST_ITEMS, their argument is something like
+        # "##" or "##:", and using that we can rudimentally determine
+        # list 'depth' if need be, and also what kind of list or
+        # entry it is; # is for normal glosses, : for examples (indent)
+        # and * is used for quotations on wiktionary.
         current_depth = node.args
     
         children = node.children
@@ -1342,6 +1351,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # If we have one sublist with one element, treat it
         # specially as it may be a Wiktionary error; raise
         # that nested element to the same level.
+        # XXX If need be, this block can be easily removed in
+        # the current recursive logicand the result is one sense entry
+        # with both glosses in the glosses list, as you would
+        # expect. If the higher entry has examples, there will
+        # be a higher entry with some duplicated data.
         if len(subentries) == 1:
             slc = subentries[0].children
             if len(slc) == 1:
@@ -1353,7 +1367,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                                 x.kind == NodeKind.LIST and
                                                 x.args == current_depth + "#")]
                 added |= parse_sense_node(cropped_node, sense_base)
-                added |= parse_sense_node(slc[0], sense_base) # or sense_base
+                added |= parse_sense_node(slc[0], sense_base)
                 return added
 
         def sense_template_fn(name, ht):
@@ -1385,6 +1399,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # Usage examples are captured separately below.  We don't
                 # want to expand them into glosses even when unusual coding
                 # is used in the entry.
+                # These templates may slip through inside another item, but
+                # currently we're separating out example entries (..#:)
+                # well enough that there seems to very little contamination.
                 return ""
             if name == "w":
                 if ht.get(2) == "Wp":
@@ -1427,15 +1444,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
         extract_link_texts(contents)
 
         # get the raw text of non-list contents of this node, and other stuff
+        # like tag and category data added to sense_base
         rawgloss = clean_node(config, ctx, sense_base, contents,
-                              template_fn=sense_template_fn)
-
-        # get stuff like synonyms from "others", examples and quotations
-        clean_node(config, ctx, sense_base, others,
                               template_fn=sense_template_fn)
 
         if not rawgloss:
             return False
+            
+        # get stuff like synonyms and categories from "others",
+        # maybe examples and quotations
+        clean_node(config, ctx, sense_base, others,
+                              template_fn=sense_template_fn)
+
 
         # Generate no gloss for translation hub pages, but add the
         # "translation-hub" tag for them
@@ -1465,6 +1485,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # parenthesized tags/topics
 
         m = re.match(r"\(([^()]+)\):?\s*", rawgloss)
+                    # ( ..\1.. ): ... or ( ..\1.. ) ...
         if m:
             q = m.group(1)
             rawgloss = rawgloss[m.end():].strip()
@@ -1477,32 +1498,42 @@ def parse_language(ctx, config, langnode, language, lang_code):
             rawgloss = None
         elif rawgloss == "Technical or specialized senses.":
             rawgloss = None
-        # XXX find where this fits
         if rawgloss:
             data_append(ctx, sense_base, "glosses", rawgloss)
             if rawgloss in ("A person:",):
                 data_append(ctx, sense_base, "tags", "g-person")
 
+        # The main recursive call (except for the exceptions at the
+        # start of this function).
         for sublist in subentries:
-            assert sublist.kind == NodeKind.LIST
+            if not (isinstance(sublist, WikiNode) and
+                    sublist.kind == NodeKind.LIST):
+                ctx.debug(f"'{repr(rawgloss[:20])}.' gloss has `subentries`"
+                          f"with items that are not LISTs",
+                          sortid="page/1511/20230119")
+                continue
             for item in sublist.children:
-                if not isinstance(item, WikiNode):
+                if not (isinstance(item, WikiNode) and
+                        item.kind != NodeKind.LIST_ITEM):
                     continue
-                if item.kind != NodeKind.LIST_ITEM:
-                    continue
+                # copy sense_base to prevent cross-contamination between
+                # subglosses and other subglosses and superglosses
                 sense_base2 = copy.deepcopy(sense_base)
                 if parse_sense_node(item, sense_base2):
                     added = True
 
-        # Capture examples
+        # Capture examples.
+        # This is called after the recursive calls above so that
+        # sense_base is not contaminated with meta-data from
+        # example entries for *this* gloss.
         examples = []
         if config.capture_examples:
             examples = extract_examples(others, sense_base)
 
-        # push_sense() succeeded somewhere down-river, so skip this one
+        # push_sense() succeeded somewhere down-river, so skip this level
         if added:
             if examples:
-            # A higher-up gloss has examples that we do not want to skip
+            # this higher-up gloss has examples that we do not want to skip
                 ctx.debug("'{}[...]' gloss has examples we want to keep, "
                           "but there are subglosses."
                           .format(repr(rawgloss[:30])),
@@ -1548,6 +1579,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 added = True
             data_append(ctx, sense_data, "raw_glosses", gloss)
             if gloss_i == 0 and examples:
+                # In a multi-line gloss, associate examples
+                # with only one of them.
+                # XXX or you could use gloss_i == len(subglosses)
+                # to associate examples with the *last* one.
                 data_extend(ctx, sense_data, "examples", examples)
             # If the gloss starts with †, mark as obsolete
             if gloss.startswith("^†"):
@@ -1567,6 +1602,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     sense_data[k] = v
             # Parse the gloss for this particular sense
             m = re.match(r"^\((([^()]|\([^()]*\))*)\):?\s*", gloss)
+                        # (...): ... or (...(...)...): ... 
             if m:
                 parse_sense_qualifier(ctx, m.group(1), sense_data)
                 gloss = gloss[m.end():].strip()
@@ -1650,7 +1686,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             for gloss in split_glosses:
                 # Check if this gloss describes an alt-of or inflection-of
                 if (lang_code != "en" and " " not in gloss and distw([word], gloss) < 0.3):
-                    # Don't try to parse gloss it is one word
+                    # Don't try to parse gloss if it is one word
                     # that is close to the word itself for non-English words
                     # (probable translations of a tag/form name)
                     continue
@@ -1683,10 +1719,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         data_append(ctx, sense_data, "form_of", dt)
 
         if push_sense():
+            # push_sense succeded in adding a sense to pos_data
             added = True
             # print("PARSE_SENSE DONE:", pos_datas[-1])
         return added
-# <- NEW CODE  ########
 
     def parse_inflection(node, section, pos):
         """Parses inflection data (declension, conjugation) from the given
@@ -2708,7 +2744,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
     def extract_examples(others, sense_base):
         """Parses through a list of definitions and quotes to find examples.
-        Returns a list of example dicts to be added to sense data."""
+        Returns a list of example dicts to be added to sense data. Adds
+        meta-data, mostly categories, into sense_base."""
         assert isinstance(others, list)
         examples = []
         
