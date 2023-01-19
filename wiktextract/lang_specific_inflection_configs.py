@@ -55,6 +55,9 @@ lang_specific = {
         # Minor regex replacements for cleanup in parse_simple_table()
         "minor_text_cleanups": None, # dict of {regex: substitution}
         "articles_in_separate_columns": False,
+        # Cells to ignore in this language, unless the cell has the key
+        # as a tag.
+        "conditionally_ignored_cells": [],
     },
     "austronesian-group": {
         "numbers": ["singular", "dual", "plural"],
@@ -289,6 +292,14 @@ lang_specific = {
             ["adj", "^keiner ", "keiner ", "negative"],
             ["adj", "^keinen ", "keinen ", "negative"],
          ],
+        "conditionally_ignored_cells": {
+            "definite": ["der", "die", "das", "des",
+                         "dem", "den",],
+            "indefinite": ["ein", "eine", "eines", "einer",
+                           "einem", "einen",],
+        },
+            
+            
     },
     "German Low German": {
         "next": "German",
