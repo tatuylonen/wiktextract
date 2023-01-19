@@ -1359,7 +1359,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # Capture examples
         examples = []
         if config.capture_examples:
-            examples = extract_examples(others)
+            examples = extract_examples(others, sense_base)
 
         def sense_template_fn(name, ht):
             if name in wikipedia_templates:
@@ -2706,7 +2706,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             process_children(node, pos)
             stack.pop()
 
-    def extract_examples(others):
+    def extract_examples(others, sense_base):
         """Parses through a list of definitions and quotes to find examples.
         Returns a list of example dicts to be added to sense data."""
         assert isinstance(others, list)
@@ -2737,7 +2737,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             return ""
                     return None
     
-                subtext = clean_node(config, ctx, None, item.children,
+                subtext = clean_node(config, ctx, sense_base, item.children,
                                      template_fn=usex_template_fn)
                 subtext = re.sub(r"\s*\(please add an English "
                                  r"translation of this "
