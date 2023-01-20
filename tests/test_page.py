@@ -192,49 +192,94 @@ foo
             }
         ])
 
+    def test_page5(self):
+        self.ctx.start_page("foo")
+        lst = self.runpage("""
+==English==
 
+===Noun===
+foo
 
+# sense 1
+#: example 1 causes sense 1 to get pushed
+## subsense 1
+##: subexample 1
+## subsense 2
+# sense 2
+# (mycology) mushroom
+#: example 2
+#: example 3
+# (person) one who foos
+## one who foos more specifically
+## another one who foos
 
-#     def test_page1(self):
-#         lst = self.runpage("""
-# ==Swedish==
-# ===Noun===
-# foo f
+====Translations====
+* Finnish: fuu
+* Swedish: bar m, hop f
 
-# # sense 1
-# #: example 1.1
-# # sense 2
-# #: example 2.1
-# #: example 2.2
-# """)
-#         print(json.dumps(lst, indent=2, sort_keys=True))
-#         # XXX should also capture examples
-#         self.assertEqual(lst, [
-#             {
-#                 "forms": [
-#                     {
-#                         "form": "foo",
-#                         "tags": [
-#                             "canonical",
-#                             "feminine"
-#                         ]
-#                     }
-#                 ],
-#                 "lang": "Swedish",
-#                 "lang_code": "sv",
-#                 "pos": "noun",
-#                 "senses": [
-#                     {
-#                         "glosses": [
-#                             "sense 1"
-#                         ]
-#                     },
-#                     {
-#                         "glosses": [
-#                             "sense 2"
-#                         ]
-#                     }
-#                 ],
-#                 "word": "testpage"
-#             }
-#         ])
+====Related terms====
+* (sense abc) zap
+* verbs: zip, zump
+
+""")
+        print("RETURNED:", json.dumps(lst, indent=2, sort_keys=True))
+        self.assertEqual(lst, [
+            {
+                "lang": "English",
+                "lang_code": "en",
+                "pos": "noun",
+                "related": [
+                    {"sense": "sense abc", "word": "zap"},
+                    {"word": "zip", "tags": ["verb"]},
+                    {"word": "zump", "tags": ["verb"]},
+                ] ,
+                "senses": [
+                    {
+                        "glosses": ["sense 1", "subsense 1"],
+                        "raw_glosses": ["subsense 1"],
+                        "examples": [ { "text": "subexample 1" } ]
+                    },
+                    {
+                        "glosses": ["sense 1", "subsense 2"],
+                        "raw_glosses": ["subsense 2"],
+                    },
+                    {
+                        "glosses": ["sense 1"],
+                        "raw_glosses": ["sense 1"],
+                        "examples": [ { "text":
+                            "example 1 causes sense 1 to get pushed" } ]
+                    },
+                    {
+                        "glosses": ["sense 2"],
+                        "raw_glosses": ["sense 2"],
+                    },
+                    {
+                        "glosses": ["mushroom"],
+                        "raw_glosses": ["(mycology) mushroom"],
+                        "topics": ["biology", "mycology","natural-sciences"],
+                        "examples": [ { "text": "example 2" },
+                                      { "text": "example 3" } ],
+                    },
+                    {
+                        "glosses": ["one who foos",
+                                    "one who foos more specifically"],
+                        "raw_glosses": ["one who foos more specifically"],
+                        "tags": ["person"],
+                    },
+                    {
+                        "glosses": ["one who foos",
+                                    "another one who foos"],
+                        "raw_glosses": ["another one who foos"],
+                        "tags": ["person"],
+                    },
+                ],
+                "translations": [
+                    {"word": "fuu", "lang": "Finnish", "code": "fi"},
+                    {"word": "bar", "lang": "Swedish", "code": "sv",
+                     "tags": ["masculine"]},
+                    {"word": "hop", "lang": "Swedish", "code": "sv",
+                     "tags": ["feminine"]},
+                ],
+                "word": "foo",
+            }
+        ])
