@@ -1293,7 +1293,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             ctx.debug("{}: non-list-item inside list".format(pos),
                       sortid="page/1678")
             return False
-    
+            
         if node.args == ":":
         # Skip example entries at the highest level, ones without
         # a sense ("...#") above them.
@@ -1514,7 +1514,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 continue
             for item in sublist.children:
                 if not (isinstance(item, WikiNode) and
-                        item.kind != NodeKind.LIST_ITEM):
+                        item.kind == NodeKind.LIST_ITEM):
                     continue
                 # copy sense_base to prevent cross-contamination between
                 # subglosses and other subglosses and superglosses

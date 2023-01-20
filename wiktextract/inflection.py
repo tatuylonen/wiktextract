@@ -2269,8 +2269,6 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
     # Post-process German nouns with articles in separate columns.  We move the
     # definite/indefinite/usually-without-article markers into the noun and
     # remove the article entries.
-    for x in ret:
-        print(x)
     if (get_lang_specific(lang, "articles_in_separate_columns")
         and any("noun" in x["tags"] for x in ret)):
         new_ret = []
@@ -2278,7 +2276,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
         had_noun = False
         for dt in ret:
             tags = dt["tags"]
-            print(tags)
+            # print(tags)
             if "noun" in tags:
                 tags = list(sorted(set(t for t in tags if t != "noun") |
                                        saved_tags))
