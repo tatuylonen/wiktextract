@@ -2,6 +2,8 @@ import json
 import os
 import sqlite3
 import unicodedata
+import tqdm
+import logging
 
 
 def strip_accents(s: str):
@@ -100,13 +102,15 @@ class WiktionaryDictionary:
     def _load_dump_in_sqlite(self) -> None:
         """Loads the dump into a sqlite database."""
         # We have a json lines file, so we can read it line by line
+        logging.info("Loading dump into sqlite database")
 
         already_added_keys: set[str] = set()
         with open(self._input_dump, "r", encoding="utf-8") as f:
             # We create the table
             self._cur.execute("CREATE TABLE wiktionary (id INTEGER PRIMARY KEY);")
             # we parse the json
-            for line in f:
+            # for line in f:
+            for line in tqdm.tqdm(f, total=8500000):
                 obj = json.loads(line)
                 # Now we look at the obj. If it has keys that are not in the
                 # already_added_keys set, we add them to the table
@@ -135,6 +139,7 @@ class WiktionaryDictionary:
                     tuple(obj.values()),
                 )
 
+            logging.info("Creating indexes")
             # We create indexes for the important columns
             self._cur.execute(
                 "CREATE INDEX word_index ON wiktionary (word COLLATE NODIACRITIC);"
@@ -147,7 +152,11 @@ class WiktionaryDictionary:
     def _create_index_table_for_json_array(self, column_name: str, key: str) -> None:
         """JSON arrays cannot be indexed in sqlite. But even in database engines like postgresql, they can be indexed, but you cannot apply a collation to them.
         This separate table allows us to solve both problems."""
+
         # https://sqlite.org/forum/forumpost/dfd4739c57
+
+        # There probably is a better way to do it in SQL instead of using python, but I don't know it
+        logging.info(f"Creating index table for {column_name}")
 
         table_name = f"{column_name}_{key}_idx"
 
@@ -160,8 +169,12 @@ class WiktionaryDictionary:
         )
 
         self._cur.execute(f"""SELECT id, {column_name} FROM wiktionary;""")
+        # Create a new insert cursor (because we need to iterate over the other one and the return value gets reset otherwise)
+        insert_cur = self._conn.cursor()
+
         already_existing_columns: set[str] = set()
-        for word_id, json_array in self._cur.fetchall():
+        # for word_id, json_array in self._cur:
+        for word_id, json_array in tqdm.tqdm(self._cur, total=8500000):
             if json_array is not None:
                 for elem in json.loads(json_array):
                     for elem_key in elem.keys():
@@ -171,7 +184,7 @@ class WiktionaryDictionary:
                             sqlite_type = get_sqlite_type_for_python_type(
                                 type(elem[elem_key])
                             )
-                            self._cur.execute(
+                            insert_cur.execute(
                                 f"""ALTER TABLE {table_name} ADD COLUMN {elem_key} {sqlite_type};"""
                             )
                             already_existing_columns.add(elem_key)
@@ -180,12 +193,14 @@ class WiktionaryDictionary:
                         format_python_value_for_sqlite(value) for value in elem.values()
                     ]
 
-                    self._cur.execute(
+                    insert_cur.execute(
                         f"""INSERT INTO {table_name} (fid, {", ".join(elem.keys())}) VALUES (?, {", ".join(["?"] * len(elem.keys()))});""",
                         (word_id, *values),
                     )
 
-        # Create an index on the key
+        logging.info(f"Creating index for {column_name}")
+
+        # Create an index on the key. This takes very long, but it's necessary
         self._cur.execute(
             f"""CREATE INDEX {column_name}_{key}_idx_{key} ON {table_name} ({key} COLLATE NODIACRITIC);"""
         )
@@ -240,7 +255,15 @@ if __name__ == "__main__":
         type=str,
         help="The path to the sqlite file to read.",
     )
+    parser.add_argument(
+        "--log-level",
+        type=str,
+        default="INFO",
+        help="The log level.",
+    )
     args = parser.parse_args()
+
+    logging.basicConfig(level=args.log_level)
 
     wikt = WiktionaryDictionary(
         input_dump=args.input_dump,
@@ -251,9 +274,7 @@ if __name__ == "__main__":
     if args.word:
         res = wikt.search_word_with_forms(args.word)
         for word in res:
-            print(
-                word["word"], word["lang"], word["pos"], word["senses"]
-            )
+            print(word["word"], word["lang"], word["pos"], word["senses"])
 
     # Usage from python
     # wikt = WiktionaryDictionary(
