@@ -1,7 +1,6 @@
 import json
 import os
 import sqlite3
-import time
 import unicodedata
 
 
@@ -146,11 +145,15 @@ class WiktionaryDictionary:
             self._conn.commit()
 
     def _create_index_table_for_json_array(self, column_name: str, key: str) -> None:
+        """JSON arrays cannot be indexed in sqlite. But even in database engines like postgresql, they can be indexed, but you cannot apply a collation to them.
+        This separate table allows us to solve both problems."""
         # https://sqlite.org/forum/forumpost/dfd4739c57
+
+        table_name = f"{column_name}_{key}_idx"
+
         self._cur.execute(
-            f"""CREATE TABLE {column_name}_{key}_idx (
+            f"""CREATE TABLE {table_name} (
             fid INTEGER NOT NULL,
-            elem TEXT NOT NULL,
             --PRIMARY key (fid, elem),
             FOREIGN KEY (fid) REFERENCES wiktionary (id)            
             );"""
@@ -169,7 +172,7 @@ class WiktionaryDictionary:
                                 type(elem[elem_key])
                             )
                             self._cur.execute(
-                                f"""ALTER TABLE {column_name}_{key}_idx ADD COLUMN {elem_key} {sqlite_type};"""
+                                f"""ALTER TABLE {table_name} ADD COLUMN {elem_key} {sqlite_type};"""
                             )
                             already_existing_columns.add(elem_key)
                     # Now we insert the element in the index table
@@ -178,15 +181,31 @@ class WiktionaryDictionary:
                     ]
 
                     self._cur.execute(
-                        f"""INSERT INTO {column_name}_{key}_idx (fid, elem, {", ".join(elem.keys())}) VALUES (?, ?, {", ".join(["?"] * len(elem.keys()))});""",
-                        (word_id, json.dumps(elem, ensure_ascii=False), *values),
+                        f"""INSERT INTO {table_name} (fid, {", ".join(elem.keys())}) VALUES (?, {", ".join(["?"] * len(elem.keys()))});""",
+                        (word_id, *values),
                     )
+
+        # Create an index on the key
+        self._cur.execute(
+            f"""CREATE INDEX {column_name}_{key}_idx_{key} ON {table_name} ({key} COLLATE NODIACRITIC);"""
+        )
 
     def search_word(self, word: str) -> list[dict]:
         """Searches a word in the sqlite database."""
 
         cursor = self._cur.execute(
             "SELECT * FROM wiktionary WHERE word=? COLLATE NODIACRITIC;", (word,)
+        )
+        return [
+            dict(zip([column[0] for column in cursor.description], row))
+            for row in cursor.fetchall()
+        ]
+
+    def search_word_with_forms(self, word: str) -> list[dict]:
+        # This searches either in the word column or in the forms table, using a join
+        cursor = self._cur.execute(
+            "SELECT * FROM wiktionary WHERE word=? COLLATE NODIACRITIC OR id IN (SELECT fid FROM forms_form_idx WHERE form=? COLLATE NODIACRITIC);",
+            (word, word),
         )
         return [
             dict(zip([column[0] for column in cursor.description], row))
@@ -236,21 +255,18 @@ if __name__ == "__main__":
                 word["word"], word["lang"], word["pos"], word["senses"], word["forms"]
             )
 
-    # Test code
+    # Usage from python
     # wikt = WiktionaryDictionary(
     #    input_dump="kaikki.org-dictionary-Czech.jsonl",
     #    output_sqlite_path="czech-wikt.db"
     # )
 
     # wikt = WiktionaryDictionary(input_sqlite_file="czech-wikt.db")
-#
-# t0 = time.time()
-# res = wikt.search_word("Kun")
-# for word in res:
-#    print(word["word"], word["lang"], word["pos"], word["senses"])
-#    # This will also return the word kůň
-#
-# print(time.time() - t0)
-
-
-# self._cur.execute(f"""INSERT INTO {column_name}_{key}_idx (fid, elem) VALUES (?, ?);""", (word_id, elem[key]))
+    #
+    # t0 = time.time()
+    # res = wikt.search_word("Kun")
+    # for word in res:
+    #    print(word["word"], word["lang"], word["pos"], word["senses"])
+    #    # This will also return the word kůň
+    #
+    # print(time.time() - t0)
