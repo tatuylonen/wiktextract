@@ -249,10 +249,10 @@ if __name__ == "__main__":
     )
 
     if args.word:
-        res = wikt.search_word(args.word)
+        res = wikt.search_word_with_forms(args.word)
         for word in res:
             print(
-                word["word"], word["lang"], word["pos"], word["senses"], word["forms"]
+                word["word"], word["lang"], word["pos"], word["senses"]
             )
 
     # Usage from python
