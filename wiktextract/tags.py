@@ -2639,6 +2639,10 @@ uppercase_tags = set([
     "Setesdal",  # Norwegian
     "Telemark",  # Norwegian
     "San'ani Yemeni Arabic",
+    "Krobo",  # wawa/Adangme
+    "Afar",  # afoofa/Afar
+    "Saru",  # Ainu/ecioka
+    
 ])
 
 
@@ -4777,7 +4781,7 @@ xlat_tags_map = {
     "class ku": "class-15",
     "class pa": "class-16",
     "class mu": "class-18",
-}
+    "predicate marker": "predicative"}
 
 # This mapping is applied to full descriptions before splitting by comma.
 # Note: these cannot match just part of a description (even when separated

@@ -1852,7 +1852,7 @@ def parse_sense_qualifier(ctx, text, data):
                     semi = semi[1:]
                 data["taxonomic"] = semi
             elif cls == "english":
-                if "english" in data:
+                if "english" in data and data["english"] != orig_semi:
                     data["english"] += "; " + orig_semi
                 else:
                     data["english"] = orig_semi
