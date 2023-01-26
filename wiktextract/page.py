@@ -1372,7 +1372,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         def sense_template_fn(name, ht):
             if name in wikipedia_templates:
-                parse_wikipedia_template(config, ctx, pos_data, ht)
+                # parse_wikipedia_template(config, ctx, pos_data, ht)
                 return None
             if is_panel_template(name):
                 return ""
