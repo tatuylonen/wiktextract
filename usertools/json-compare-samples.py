@@ -3,7 +3,7 @@
 # Compare random samples between two Wiktextract JSON files.
 # The script first loads into memory one of the files, and then
 # goes through the other file, randomly picking a line every
-# now and then based on the --once-in-a=[int] parameter.
+# now and then based on the --one-in-a=[int] parameter.
 # The line is decoded, then the equivalent object is
 # searched for in the first file; the two lines are compared,
 # and if they differ we read in the json for both, express
@@ -24,14 +24,14 @@ if __name__ == "__main__":
                         help="First input file")
     parser.add_argument("fileb", type=str, nargs="?", default=None,
                         help="Second input file")
-    parser.add_argument("--once-in-a", type=int, default=10000,
+    parser.add_argument("--one-in-a", type=int, default=10000,
                         help="Ratio 1/N of words to sample, "
                               "defaults to 1/10000")
     args = parser.parse_args()
 
 file_a = args.filea
 file_b = args.fileb
-once_in_a = args.once_in_a
+one_in_a = args.one_in_a
 first_index = dict()
 
 
@@ -84,7 +84,7 @@ with open(file_a, "rb", buffering=16*1024*1024) as f:
         line = "!!!!!!!init!!!!!!"
         while line != "":
             i = compf.find(b"}\n", fpos)
-            r = random.randrange(once_in_a)
+            r = random.randrange(one_in_a)
             # print(r)
             if r != 0:
                 if i == -1:
