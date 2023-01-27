@@ -1852,10 +1852,10 @@ def parse_sense_qualifier(ctx, text, data):
                     semi = semi[1:]
                 data["taxonomic"] = semi
             elif cls == "english":
-                if "english" in data and data["english"] != orig_semi:
-                    data["english"] += "; " + orig_semi
+                if "qualifier" in data and data["qualifier"] != orig_semi:
+                    data["qualifier"] += "; " + orig_semi
                 else:
-                    data["english"] = orig_semi
+                    data["qualifier"] = orig_semi
             else:
                 ctx.debug("unrecognized sense qualifier: {}"
                           .format(text),
