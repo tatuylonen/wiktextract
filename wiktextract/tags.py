@@ -110,6 +110,7 @@ xlat_head_map = {
     "m sg or f sg": "masculine singular feminine",  # your/Eng/Tr/Walloon
     "f sg or m sg": "masculine singular feminine",  # your/Eng/Tr/Walloon
     "n sg or n sg": "masculine singular feminine",  # your/Eng/Tr/Walloon
+    "n sg or m sg": "neuter masculine singular",  # vulgus/Latin
     # copacetic/English/Tr/Hebrew:
     "m or m pl or f or f pl": "masculine feminine singular plural",
     # your/Eng/Tr/Norwegian:
@@ -293,6 +294,12 @@ xlat_head_map = {
     "7/8": "class-7 class-8",
     "9/10": "class-9 class-10",
     "15/17": "class-15 class-17",
+    "class 1/2": "class-1 class-2",
+    "class 3/4": "class-3 class-4",
+    "class 5/6": "class-5 class-6",
+    "class 7/8": "class-7 class-8",
+    "class 9/10": "class-9 class-10",
+    "class 15/17": "class-15 class-17",
     "1 or 2": "class-1 class-2",
     "1a or 2a": "class-1a class-2a",
     "1a or 2": "class-1a class-2",
@@ -365,7 +372,48 @@ xlat_head_map = {
     "m anim or f anim or m anim pl or f anim pl or f inan or f inan pl":
         "masculine animate feminine plural singular inanimate",  #XXX
     "defunct": "archaic",  #  flugu/Norwegian Nynorsk
-
+    "mfpl": "masculine feminine plural",  # extrajudiciaires/French
+    "class 1": "class-1",
+    "class 1a": "class-1a",
+    "class 2": "class-2",
+    "class 2a": "class-2a",
+    "class 3": "class-3",
+    "class 4": "class-4",
+    "class 5": "class-5",
+    "class 6": "class-6",
+    "class 7": "class-7",
+    "class 8": "class-8",
+    "class 9": "class-9",
+    "class 9a": "class-9a",
+    "class 10": "class-10",
+    "class 10a": "class-10",
+    "class 11": "class-11",
+    "class 12": "class-12",
+    "class 13": "class-13",
+    "class 14": "class-14",
+    "class 15": "class-15",
+    "class 16": "class-16",
+    "class 17": "class-17",
+    "class 18": "class-18",
+    "class m-wa": "class-1 class-2",
+    "class m-mi": "class-3 class-4",
+    "class ma": "class-5 class-6",
+    "class ki-vi": "class-7 class-8",
+    "class n": "class-9 class-10",
+    "class n/n": "class-9 class-10",
+    "class u": "class-11 class-12 class-14",
+    "class ku": "class-15",
+    "class pa": "class-16",
+    "class mu": "class-18",
+    "m-wa class": "class-1 class-2",
+    "m-mi class": "class-3 class-4",
+    "ma class": "class-5 class-6",
+    "ki-vi class": "class-7 class-8",
+    "n class": "class-9 class-10",
+    "u class": "class-11 class-12 class-14",
+    "ku class": "class-15",
+    "pa class": "class-16",
+    "mu class": "class-18",
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly
@@ -421,6 +469,7 @@ head_final_bantu_map = {
     "ma": "class-5 class-6",
     "ki or vi": "class-7 class-8",
     "n": "class-9 class-10",
+    "class u": "class-11 class-12 class-14",
     "u": "class-11 class-12 class-14",
     "ku": "class-15",
     "pa": "class-16",
@@ -428,7 +477,62 @@ head_final_bantu_map = {
 
     "n or n": "class-9 class-10",  # Andromeda/Eng/Tr/Swahili etc
     "u or u": "class-11 class-14",  # wife/Eng/Tr/Swahili
-
+    "class 1": "class-1",
+    "class 1a": "class-1a",
+    "class 2": "class-2",
+    "class 2a": "class-2a",
+    "class 3": "class-3",
+    "class 4": "class-4",
+    "class 4/none": "class-4 no-plural",
+    "class 5": "class-5",
+    "class 6": "class-6",
+    "class 7": "class-7",
+    "class 8": "class-8",
+    "class 9": "class-9",
+    "class 9/10": "class-9 class-10",
+    "class 9/10/1/2": "class-9 class-10 class-1 class-2",
+    "class 9/10c": "class-9 class-10",
+    "class IX/X": "class-9 class-10",
+    "class 9a": "class-9a",
+    "class 10": "class-10",
+    "class 10/11": "class-10 class-11",
+    "class 10a": "class-10",
+    "class 11": "class-11",
+    "class 11/12": "class-11 class-12",
+    "class 11/10": "class-10 class-11",
+    "class 11/10a": "class-10 class-11",
+    "class 11/14": "class-10 class-14",
+    "class 12": "class-12",
+    "class 13": "class-13",
+    "class 14": "class-14",
+    "class 15": "class-15",
+    "class 16": "class-16",
+    "class 17": "class-17",
+    "class 18": "class-18",
+    "class m-wa": "class-1 class-2",
+    "class m/wa": "class-1 class-2",
+    "class m-mi": "class-3 class-4",
+    "class m/mi": "class-3 class-4",
+    "class ma": "class-5 class-6",
+    "class ki-vi": "class-7 class-8",
+    "class ki/vi": "class-7 class-8",
+    "class n": "class-9 class-10",
+    "class n/n": "class-9 class-10",
+    "class u": "class-11 class-12 class-14",
+    "class u/zi": "class-11 class-10",
+    "class u/u": "class-11 class-12 class-14",
+    "class ku": "class-15",
+    "class pa": "class-16",
+    "class mu": "class-18",
+    "m-wa class": "class-1 class-2",
+    "m-mi class": "class-3 class-4",
+    "ma class": "class-5 class-6",
+    "ki-vi class": "class-7 class-8",
+    "n class": "class-9 class-10",
+    "u class": "class-11 class-12 class-14",
+    "ku class": "class-15",
+    "pa class": "class-16",
+    "mu class": "class-18",
 }
 
 head_final_semitic_langs = set([
@@ -2534,8 +2638,11 @@ uppercase_tags = set([
     "Zuberoan",
     "Setesdal",  # Norwegian
     "Telemark",  # Norwegian
-
-
+    "San'ani Yemeni Arabic",
+    "Krobo",  # wawa/Adangme
+    "Afar",  # afoofa/Afar
+    "Saru",  # Ainu/ecioka
+    
 ])
 
 
@@ -4642,8 +4749,39 @@ xlat_tags_map = {
     "defunct": "archaic",  # flugu/Norwegian
     "used in definite form": "",  # dyrerike/Norwegian Nynorsk
     "used in definite singular form": "",  # nettet/Norwegian Nynorsk
+    "reciprocative": "reciprocal",  # konyugön/Volapük
+    "mfpl": "masculine feminine plural", # extrajudiciaires/French
+    "Internet slang": "Internet",  # troll/many languages
     "combined with se": "reflexive", # tecnificarse/Spanish
-}
+    "combined with me":
+        "object-first-person object-singular", # tergiver/Spanish
+    "combined with te":
+        "object-second-person object-singular", # tergiver/Spanish
+    "combined with le":
+        "object-third-person object-singular dative", # tergiver/Spanish
+    "combined with nos": "object-first-person object-plural", # tergiver/Spanish
+    "combined with os": "object-second-person object-plural", # tergiver/Spanish
+    "combined with les":
+        "object-third-person object-plural dative", # tergiver/Spanish
+    "combined with lo":
+        "object-third-person object-singular object-masculine accusative",
+    "combined with la":
+        "object-third-person object-singular object-feminine accusative",
+    "combined with los":
+        "object-third-person object-plural object-masculine accusative",
+    "combined with las":
+        "object-third-person object-plural object-feminine accusative",
+    "class m-wa": "class-1 class-2",
+    "class m-mi": "class-3 class-4",
+    "class ma": "class-5 class-6",
+    "class ki-vi": "class-7 class-8",
+    "class n": "class-9 class-10",
+    "class n/n": "class-9 class-10",
+    "class u": "class-11 class-12 class-14",
+    "class ku": "class-15",
+    "class pa": "class-16",
+    "class mu": "class-18",
+    "predicate marker": "predicative"}
 
 # This mapping is applied to full descriptions before splitting by comma.
 # Note: these cannot match just part of a description (even when separated
@@ -5087,6 +5225,9 @@ valid_tags = {
     "allative": "case",  # Case
     "allative-i": "case",
     "allative-ii": "case",
+    "allative-iii": "case",
+    "allative-iv": "case",
+    "allative-v": "case",
     "alphabetic-tones": "misc",
     "already-form": "tense",  # e.g. hojiwa/Swahili
     "also": "misc",
@@ -5118,6 +5259,10 @@ valid_tags = {
     "before-lenited-fh": "misc",  # Next word starts with lenited fh (Irish)
     "before-past": "misc",  # Used before the past tense (Irish)
     "before-vowel": "misc",  # next words starts with vowel (in pronunciation)
+    "before-consonant": "misc",  #oh-/Choctaw
+    "before-s": "misc",
+    "before-front-vowel": "misc",
+    "before-back-vowel": "misc",
     "benefactive": "case",  # Case (beneficiary of an action)
     "broadly": "misc",
     "būdinys": "misc",
@@ -6058,6 +6203,7 @@ valid_tags = {
     "æ-tensing": "misc",
     "има": "misc",  # Distinguishes certain verb forms in Macedonian
     "non-human": "misc",  # XXX is there already a tag for this? himself/English - KJ
+    "human-person": "misc",
     "with-article": "with",  # Mosambik/German
     "before-noun": "misc",  # Mama/German
     "with-numeral": "with",  # Radlermaß/German
@@ -6161,6 +6307,9 @@ valid_tags = {
     "genitive-ii": "case",
     "locative-i": "case",
     "locative-ii": "case",
+    "locative-iii": "case",
+    "locative-iv": "case",
+    "locative-v": "case",
     "sociative-i": "case",
     "sociative-ii": "case",
     "gerund-i": "non-finite",  # பிடி/Tamil
@@ -6196,6 +6345,45 @@ valid_tags = {
     #a ګړندی/Pashto
     "oblique-i": "case",
     "oblique-ii": "case",
+    "after-th": "misc",  # wenyn/Cornish
+    # https://en.wiktionary.org/wiki/Appendix:Persian_ez%C3%A2fe
+    "ezafe": "misc",  # izofa, ezâfé,  райҳон/Tajik
+    "tri-plural": "number",  # aaombiniili'/Chickasaw
+    "repeated": "misc", #coymaq/Crimean Tatar
+    "tu-derivative": "non-finite",  # pawjō/Proto-Italic
+    "s-derivative": "non-finite",
+    # birciqqo/Sidamo
+    # In Sidamo, nouns have a form when they're modified by
+    # other words in an NP, and a form when they're not.
+    "with-modifier": "misc",
+    "without-modifier": "misc",
+    "inchoative": "aspect",
+    "series-i-verb-argument": "misc",  #küm-/Maquiritari
+    "series-ii-verb-argument": "misc",
+    "patient-like": "misc",
+    "agent-like": "misc",
+    "object-dual": "number",
+    "object-exclusive": "person",
+    "ablative-i": "case",  # хӏайван/Avar
+    "ablative-ii": "case", 
+    "ablative-iii": "case", 
+    "ablative-iv": "case", 
+    "ablative-v": "case", 
+    "translative-i": "case", 
+    "translative-ii": "case", 
+    "translative-iii": "case", 
+    "translative-iv": "case", 
+    "translative-v": "case", 
+    "patient": "misc",
+    "conjectural": "mood",  #노타/Middle Korean
+    "adjective-from-verb": "derivation",
+    "anaphoric": "misc",   #tꜣj/Egyptian
+    "distant-past": "tense",  #Maquiritari, Mapudungun
+    "transitional-past": "tense",  # тұту/Kazakh
+    "free-state": "misc",  #aɣemmar/Tarifit
+    "proximal-to-speaker": "misc", #nꜣyw/Egyptian/38
+    "proximal-to-topic": "misc",
+    
 }
 
 for k, v in valid_tags.items():

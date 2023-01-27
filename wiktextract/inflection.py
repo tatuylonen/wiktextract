@@ -1888,6 +1888,10 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
     table_tags = []
     special_phrase_splits = get_lang_specific(lang, "special_phrase_splits")
     form_replacements = get_lang_specific(lang, "form_replacements")
+    possibly_ignored_forms = get_lang_specific(lang,
+                                               "conditionally_ignored_cells")
+    cleanup_rules = get_lang_specific(lang, "minor_text_cleanups")
+
     for title in titles:
         more_global_tags, more_table_tags, extra_forms = \
             parse_title(title, source)
@@ -1992,9 +1996,8 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
             # print(f"is_title: {is_title}")
             if is_title:
                 # It is a header cell
-                text, refs, defs, hdr_tags = extract_cell_content(lang,
-                                                                  word,
-                                                                  col)
+                text, refs, defs, hdr_tags = \
+                        extract_cell_content(lang, word, col)
                 if not text:
                     continue
                 # Extract tags from referenced footnotes
@@ -2097,7 +2100,6 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 continue
 
             # Minor cleanup.  See e.g. είμαι/Greek/Verb present participle.
-            cleanup_rules = get_lang_specific(lang, "minor_text_cleanups")
             if cleanup_rules:
                 for regx, substitution in cleanup_rules.items():
                     col = re.sub(regx, substitution, col)
@@ -2274,6 +2276,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
         had_noun = False
         for dt in ret:
             tags = dt["tags"]
+            # print(tags)
             if "noun" in tags:
                 tags = list(sorted(set(t for t in tags if t != "noun") |
                                        saved_tags))
@@ -2295,11 +2298,44 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                                                "without-article"])
                 had_noun = False
                 continue  # Skip the articles
+
+            
             dt = dt.copy()
             dt["tags"] = tags
             new_ret.append(dt)
         ret = new_ret
 
+    elif possibly_ignored_forms:
+    # Some languages have tables with cells that are kind of separated
+    # and difficult to handle, like eulersche Formel/German where
+    # the definite and indefinite articles are just floating.
+    # If a language has a dict of conditionally_ignored_cells,
+    # and if the contents of a cell is found in one of the rules
+    # there, ignore that cell if it
+    # 1. Does not have the appropriate tag (like "definite" for "die")
+    # and
+    # 2. The title of the article is not one of the other co-words
+    #    (ie. it's an article for the definite articles in german etc.)
+        # pass
+        new_ret = []
+        for cell_data in ret:
+            tags = cell_data["tags"]
+            text = cell_data["form"]
+            skip_this = False
+            for key_tag, ignored_forms in possibly_ignored_forms.items():
+                if text not in ignored_forms:
+                    continue
+                if word in ignored_forms:
+                    continue
+                if key_tag not in tags:
+                    skip_this = True
+    
+            if skip_this:
+                continue
+            new_ret.append(cell_data)
+            
+        ret = new_ret
+        
     # Post-process English inflection tables, addding "multiword-construction"
     # when the number of words has increased.
     if lang == "English" and pos == "verb":
@@ -2333,11 +2369,6 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
             ret = [dt] + ret
                 
     return ret
-    # end of parse_simple_table()
-    ############################################################################
-    ############################################################################
-    ############################################################################
-
 
 def handle_generic_table(config, ctx, tblctx, data,
                          word, lang, pos, rows, titles,
@@ -2732,7 +2763,8 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
                         titletext = titletext[:-1]
 
                     is_title, hdr_expansion, target, celltext = \
-                            determine_header(ctx, tblctx, config, lang, word, pos,
+                            determine_header(ctx, tblctx, config,
+                                     lang, word, pos,
                                      tree.kind, kind, style,
                                      row, col, celltext, titletext,
                                      cols_headered,
@@ -2820,7 +2852,6 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
     # InflCell objects.  Parse the inflection table from that format.
     if new_rows:
         for rows, titles, after, depth in new_rows:
-            print(rows)  ### XXX remove me
             handle_generic_table(config, ctx, tblctx, data,
                                  word, lang, pos, rows,
                                  titles, source, after, depth)

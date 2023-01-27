@@ -1068,7 +1068,12 @@ def parse_head_final_tags(ctx, lang, form):
         tagkeys_contains_digit = re.search(r"\d", tagkeys)
         if ((not tagkeys_contains_digit or
              lang in head_final_numeric_langs) and
-            not ctx.title.endswith(" " + tagkeys)):
+            not ctx.title.endswith(" " + tagkeys) and
+            # XXX the above test does not capture when the whole word is a
+            # xlat_head_map key, so I added the below test to complement
+            # it; does this break anything?
+            not ctx.title == tagkeys):  # defunct/English,
+                                        # "more defunct" -> "more" ["archaic"]
             if not tagkeys_contains_digit or lang in head_final_numeric_langs:
                 form = form[:m.start()]
                 v = xlat_head_map[tagkeys]
@@ -1353,7 +1358,20 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
     # Split the head into alternatives.  This is a complicated task, as
     # we do not want so split on "or" or "," when immediately followed by more
     # head-final tags, but otherwise do want to split by them.
-    splits = re.split(head_split_re, base)
+    if "," in ctx.title:
+        # A kludge to handle article titles/phrases with commas.
+        # Preprocess splits to first capture the title, then handle
+        # all the others as usual.
+        presplits = re.split(r"({})".format(ctx.title), base)
+        splits = []
+        for psplit in presplits:
+            if psplit == ctx.title:
+                splits.append(psplit)
+            else:
+                splits.extend(re.split(head_split_re, psplit))
+    else:
+        # Do the normal split; previous only-behavior.
+        splits = re.split(head_split_re, base)
     # print("SPLITS:", splits)
     alts = []
     # print("parse_word_head: splits:", splits,
@@ -1362,7 +1380,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                    head_split_re_parens + 1):
         v = splits[i]
         ending = splits[i + 1] or ""  # XXX is this correct???
-        # print("parswe_word_head alts v={!r} ending={!r} alts={}"
+        # print("parse_word_head alts v={!r} ending={!r} alts={}"
         #       .format(v, ending, alts))
         if alts and (v == "" and ending):
             assert ending[0] == " "
@@ -1372,7 +1390,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
     last = splits[-1].strip()
     conn = "" if len(splits) < 3 else splits[-2]
     # print("parse_word_head alts last={!r} conn={!r} alts={}"
-    #       .format(last, conn, alts))
+          # .format(last, conn, alts))
     if (alts and last and
         (last.split()[0] in xlat_head_map or
          (conn == " or " and
@@ -1412,6 +1430,14 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
             alt, tags = parse_head_final_tags(ctx, language, alt)
             tags = list(tags)  # Make sure we don't modify anything cached
             tags.append("canonical")
+            if alt_i == 0 and "," in ctx.title:
+                # Kludge to handle article titles/phrases with commas.
+                # basepart's regex strips commas, which leads to a
+                # canonical form that is the title phrase without a comma.
+                # basepart in add_related is almost immediately joined with
+                # spaces anyhow. XXX not exactly sure why it's
+                # canonicals.append((tags, baseparts)) and not (tags, [alt])
+                baseparts = [alt]
             canonicals.append((tags, baseparts))
 
     for tags, baseparts in canonicals:
@@ -1826,7 +1852,7 @@ def parse_sense_qualifier(ctx, text, data):
                     semi = semi[1:]
                 data["taxonomic"] = semi
             elif cls == "english":
-                if "english" in data:
+                if "english" in data and data["english"] != orig_semi:
                     data["english"] += "; " + orig_semi
                 else:
                     data["english"] = orig_semi
@@ -2157,7 +2183,7 @@ def parse_alt_or_inflection_of1(ctx, gloss, gloss_template_args):
             base = gloss[m.end():]
             tagsets, topics = decode_tags(desc, no_unknown_starts=True)
             # print("ALT_OR_INFL: desc={!r} base={!r} tagsets={} topics={}"
-            #       .format(desc, base, tagsets, topics))
+                  # .format(desc, base, tagsets, topics))
             if (not topics and
                 any(not (alt_infl_disallowed & set(t)) for t in tagsets)):
                 tags = []
@@ -2190,11 +2216,20 @@ def parse_alt_or_inflection_of1(ctx, gloss, gloss_template_args):
         else:
             return None
 
+    # kludge for Spanish (again): 'x of [word] combined with [clitic]'
+    m = re.search(r"combined with \w+$", base)
+    if m:
+        tagsets, topics = decode_tags(m.group(0), no_unknown_starts=True)
+        if (not topics):
+            for ts in tagsets:
+                tags.extend(ts)
+            base = base[:m.start()]
+
     # It is fairly common for form_of glosses to end with something like
     # "ablative case" or "in instructive case".  Parse that ending.
-    # print("parse_alt_or_inflection_of: lst={}".format(lst))
     base = base.strip()
     lst = base.split()
+    # print("parse_alt_or_inflection_of: lst={}".format(lst))
     if len(lst) >= 3 and lst[-1] in ("case", "case."):
         node = valid_sequences.get(lst[-2])
         if node and "$" in node:
