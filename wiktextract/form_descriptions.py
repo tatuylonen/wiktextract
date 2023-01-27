@@ -1355,6 +1355,13 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                     is_reconstruction, head_group)
         base = base[:m.start()] + base[m.end():]
 
+    # Clean away some messy "Upload an image" template text used in
+    # American Sign Language:
+    # S@NearBaseForearm-PalmUp Frontandback S@BaseForearm-PalmUp
+    m = re.search(r"Upload .+ gif image.", base)
+    if m:
+        base = base[:m.start()] + base[m.end():]
+
     # Split the head into alternatives.  This is a complicated task, as
     # we do not want so split on "or" or "," when immediately followed by more
     # head-final tags, but otherwise do want to split by them.
