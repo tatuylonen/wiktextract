@@ -1928,12 +1928,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # print("ITEM_RECURSE:", contents)
                 for node in contents:
                     if isinstance(node, str):
-                        # XXX remove:
-                        # if italic:
-                        #     if qualifier:
-                        #         qualifier += node
-                        #     else:
-                        #         qualifier = node
                         parts.append(node)
                         continue
                     kind = node.kind
@@ -1983,7 +1977,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         ignore = False
                         if isinstance(node.args[0][0], str):
                             v = node.args[0][0].strip().lower()
-                            if v.startswith(ns_title_prefix_tuple(ctx, "Category", True) + ns_title_prefix_tuple(ctx, "File", True)):
+                            if v.startswith(ns_title_prefix_tuple(ctx,
+                                                            "Category", True) \
+                                            + ns_title_prefix_tuple(ctx,
+                                                            "File", True)):
                                 ignore = True
                             if not ignore:
                                 v = node.args[-1]
