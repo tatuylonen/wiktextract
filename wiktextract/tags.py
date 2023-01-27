@@ -414,6 +414,7 @@ xlat_head_map = {
     "ku class": "class-15",
     "pa class": "class-16",
     "mu class": "class-18",
+    "m or f by sense": "masculine feminine by-personal-gender",
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly
@@ -4781,7 +4782,9 @@ xlat_tags_map = {
     "class ku": "class-15",
     "class pa": "class-16",
     "class mu": "class-18",
-    "predicate marker": "predicative"}
+    "predicate marker": "predicative",
+    "m or f by sense": "masculine feminine by-personal-gender",
+    }
 
 # This mapping is applied to full descriptions before splitting by comma.
 # Note: these cannot match just part of a description (even when separated
@@ -6383,7 +6386,9 @@ valid_tags = {
     "free-state": "misc",  #aɣemmar/Tarifit
     "proximal-to-speaker": "misc", #nꜣyw/Egyptian/38
     "proximal-to-topic": "misc",
-    
+    "by-personal-gender": "gender",  # Italian has started to use
+    # "feminine or masculine, by sense" to mean "depending on the
+    # gender of the person". Bataglia/Italian
 }
 
 for k, v in valid_tags.items():
