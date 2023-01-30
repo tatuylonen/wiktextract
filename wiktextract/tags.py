@@ -4783,7 +4783,7 @@ xlat_tags_map = {
     "class pa": "class-16",
     "class mu": "class-18",
     "predicate marker": "predicative",
-    "m or f by sense": "masculine feminine by-personal-gender",
+    # "m or f by sense": "masculine feminine by-personal-gender",
     }
 
 # This mapping is applied to full descriptions before splitting by comma.
