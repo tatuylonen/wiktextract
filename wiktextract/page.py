@@ -804,7 +804,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             if data[k] == v:
                 continue
             if (isinstance(data[k], (list, tuple)) or
-                  isinstance(v, (list, tuple))):
+                       isinstance(v, (list, tuple))):
                 data[k] = list(data[k]) + list(v)
             elif data[k] != v:
                 ctx.warning("conflicting values for {} in merge_base: "
@@ -1156,7 +1156,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     common_data = {"tags": list(common_tags)}
                     if head_group:
                         common_data["head_nr"] = head_group
-                    parse_sense_node(node, common_data)
+                    parse_sense_node(node, common_data, pos)
 
 
         # If there are no senses extracted, add a dummy sense.  We want to
@@ -1167,7 +1167,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             data_append(ctx, sense_data, "tags", "no-gloss")
             push_sense()
 
-    def parse_sense_node(node, sense_base):
+    def parse_sense_node(node, sense_base, pos):
         """Recursively (depth first) parse LIST_ITEM nodes for sense data.
         Uses push_sense() to attempt adding data to pos_data in the scope
         of parse_language() when it reaches deep in the recursion. push_sense()
@@ -1260,8 +1260,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                         if not (isinstance(x, WikiNode) and
                                                 x.kind == NodeKind.LIST and
                                                 x.args == current_depth + "#")]
-                added |= parse_sense_node(cropped_node, sense_base)
-                added |= parse_sense_node(slc[0], sense_base)
+                added |= parse_sense_node(cropped_node, sense_base, pos)
+                added |= parse_sense_node(slc[0], sense_base, pos)
                 return added
 
         def sense_template_fn(name, ht):
@@ -1413,7 +1413,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # copy sense_base to prevent cross-contamination between
                 # subglosses and other subglosses and superglosses
                 sense_base2 = copy.deepcopy(sense_base)
-                if parse_sense_node(item, sense_base2):
+                if parse_sense_node(item, sense_base2, pos):
                     added = True
 
         # Capture examples.
