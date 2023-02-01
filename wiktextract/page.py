@@ -396,111 +396,6 @@ quotation_templates = {
     "Wikiquote",
 }
 
-
-def parse_sense_XXXold_going_away(config, data, text, use_text):
-    """Parses a word sense from the text.  The text is usually a list item
-    from the beginning of the dictionary entry (i.e., before the first
-    subtitle).  There is a lot of information and linkings in the sense
-    description, which we try to gather here.  We also try to convert the
-    various encodings used in Wiktionary into a fairly uniform form.
-    The goal here is to obtain any information that might be helpful in
-    automatically determining the meaning of the word sense."""
-
-    # XXX this function is going away!  Still need to review what this captures
-    # and reimplement some of them
-
-    assert isinstance(config, WiktionaryConfig)
-    assert isinstance(data, dict)
-    assert isinstance(text, str)
-    assert use_text in (True, False)
-
-    if use_text:
-        # The gloss is just the value cleaned into a string.  However, much of
-        # the useful information is in the tagging within the text.  Note that
-        # some entries don't really have a gloss text; for them, we may only
-        # obtain some machine-readable linkages.
-        gloss = clean_value(config, text)
-        gloss = re.sub(r"\s*\[\d\d\d\d\]", "", gloss)  # Remove first years
-        # Remove parenthesized start (usually tags/topics) from the gloss
-        gloss = re.sub(r"^\([^()]*\)\s*", "", gloss)
-        if gloss:
-            # Got a gloss for this sense.
-            data_append(config, data, "glosses", gloss)
-
-    # Parse the Wikimedia coding from the text.
-    p = wikitextparser.parse(text)
-
-    # Iterate over all templates in the text.
-    for t in p.templates:
-        name = t.name.strip()
-
-        # Various words have non-gloss definitions; we collect them under
-        # "nonglosses".  For many purposes they might be treated similar to
-        # glosses, though.
-        if name in ("non-gloss definition", "n-g", "ngd", "non-gloss",
-                      "non gloss definition"):
-            gloss = t_arg(config, t, 1)
-            data_append(config, data, "nonglosses", gloss)
-        # The "sense" templates are treated as additional glosses.
-        elif name in ("sense", "Sense"):
-            data_append(config, data, "tags", t_arg(config, t, 1))
-        # These weird templates seem to be used to indicate a literal sense.
-        elif name in ("&lit", "&oth"):
-            data_append(config, data, "tags", "literal")
-        # Many colors have a color panel that defines the RGB value of the
-        # color.  This provides a physical reference for what the color means
-        # and identifies the word as a color value.  Record the corresponding
-        # RGB value under "color".  Sometimes it may be a CSS color
-        # name, sometimes an RGB value in hex.
-        elif name in ("color panel", "colour panel"):
-            vec = t_vec(config, t)
-            for v in vec:
-                if re.match(r"^[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]"
-                            r"[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]$", v):
-                    v = "#" + v
-                elif re.match(r"^[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]$", v):
-                    v = "#" + v[0] + v[0] + v[1] + v[1] + v[2] + v[2]
-                data_append(config, data, "color", v)
-        elif name in ("colorbox", "colourbox"):
-            data_append(config, data, "tags", "color_value")
-            data_append(config, data, "color", t_arg(config, t, 1))
-        # Numbers often have a number box, which will indicate the numeric
-        # value meant by the word.  We record the numeric value under "value".
-        # (There is also other information that we don't currently capture.)
-        elif name == "number box":
-            data_append(config, data, "tags", "number_value")
-            data_append(config, data, "value", t_arg(config, t, 2))
-        # There are various templates that links to other Wikimedia projects,
-        # typically Wikipedia.  Record such links under "wikipedia".
-        elif name in ("slim-wikipedia", "wikipedia", "wikispecies", "w", "W",
-                      "swp", "pedlink", "specieslink", "comcatlite",
-                      "Wikipedia", "taxlinknew", "wtorw", "wj"):
-            v = t_arg(config, t, 1)
-            if not v:
-                v = config.word
-            if use_text:  # Skip wikipedia links in examples
-                data_append(config, data, "wikipedia", v)
-        elif name in ("w2",):
-            if use_text:  # Skip wikipedia links in examples
-                data_append(config, data, "wikipedia", t_arg(config, t, 2))
-
-
-def parse_pronunciation_XXX_old_going_away(config, data, text, p):
-    """Extracts pronunciation information for the word."""
-
-    # XXX this function being removed, but still has some things that should
-    # be captured by the new version
-
-    # XXX stuff removed
-    # XXX "PIE root" has been replaced by "root" in Nov 2020
-    if name == "PIE root":
-        data_append(config, variant, "pie_root", t_arg(config, t, 2))
-
-
-######################################################################
-# XXX Above this is old junk
-######################################################################
-
 # Template name component to linkage section listing.  Integer section means
 # default section, starting at that argument.
 template_linkage_mappings = [
@@ -547,7 +442,6 @@ def is_panel_template(name):
         if name.startswith(prefix):
             return True
     return False
-
 
 
 def parse_sense_linkage(config, ctx, data, name, ht):
