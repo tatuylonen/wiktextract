@@ -6768,11 +6768,14 @@ infl_map = {
     "ki vos": "second-person plural subjunctive",
     "k' i (il)": "third-person plural subjunctive",
 
-    
+    # sannoa/Ingrian, rest of these
+    "Imperfekta": "imperfect",
+    "Pluskvamperfekta": "pluperfect",
+    "Infinitivat": "infinitive",
+    "Partisipat": "participle",
     
 }
 
-BOOKMARK = True
 
 def check_tags(k, v):
     assert isinstance(k, str)
