@@ -384,6 +384,7 @@ xlat_head_map = {
     "class 7": "class-7",
     "class 8": "class-8",
     "class 9": "class-9",
+    "class 9 or 10": "class-9 class-10",
     "class 9a": "class-9a",
     "class 10": "class-10",
     "class 10a": "class-10",
