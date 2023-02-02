@@ -59,7 +59,7 @@ infl_map = {
         "default": "plural",
         "if": "possessive",
         "lang": POSSESSIVE_POSSESSED_LANGS,
-        "then": "possessive-many",
+        "then": "possessed-many",
         "else": {
             "if": "combined-form",
             "then": "object-plural",
@@ -69,7 +69,7 @@ infl_map = {
         "default": "singular",
         "if": "possessive",
         "lang": POSSESSIVE_POSSESSED_LANGS,
-        "then": "possessive-single",
+        "then": "possessed-single",
         "else": {
             "if": "combined-form",
             "then": "object-singular",
@@ -132,13 +132,13 @@ infl_map = {
     "feminine": {
         "if": "possessive",
         "lang": POSSESSIVE_POSSESSED_LANGS,
-        "then": "possessive-feminine",
+        "then": "possessed-feminine",
         "else": "feminine",
     },
     "neuter": {
         "if": "possessive",
         "lang": POSSESSIVE_POSSESSED_LANGS,
-        "then": "possessive-neuter",
+        "then": "possessed-neuter",
         "else": "neuter",
     },
     "Ablative": "ablative",
@@ -150,15 +150,15 @@ infl_map = {
     "sublative": "sublative",
     "delative": "delative",
     "non-attributive possessive - singular":
-    "predicative possessive possessive-single",  # XXX check hűtő/Hungarian/Noun
+    "predicative possessive possessed-single",  # XXX check hűtő/Hungarian/Noun
     "non-attributive possessive - plural":
-    "predicative possessive possessive-single",
+    "predicative possessive possessed-single",
     "infinitive": "infinitive",
     "prepositional": "prepositional",
     "masculine": {
         "if": "possessive",
         "lang": POSSESSIVE_POSSESSED_LANGS,
-        "then": "possessive-masculine",
+        "then": "possessed-masculine",
         "else": "masculine",
     },
     "error-unrecognized-form": "error-unrecognized-form",  # internal use
@@ -194,8 +194,8 @@ infl_map = {
     "1st person plural": "first-person plural",
     "2nd person plural": "second-person plural",
     "3rd person plural": "third-person plural",
-    "single possession": "possessive possessive-single",
-    "multiple possessions": "possessive possessive-many",
+    "single possession": "possessive possessed-single",
+    "multiple possessions": "possessive possessed-many",
     "1st person sing.": "first-person singular",
     "2nd person sing.": "second-person singular",
     "2nd person sing. (u)": "second-person singular formal",
@@ -3378,19 +3378,19 @@ infl_map = {
     "common gender": {
         "if": "possessive",
         "lang": POSSESSIVE_POSSESSED_LANGS,
-        "then": "possessive-common",
+        "then": "possessed-common",
         "else": "common-gender",
     },
     "Common gender": {
         "if": "possessive",
         "lang": POSSESSIVE_POSSESSED_LANGS,
-        "then": "possessive-common",
+        "then": "possessed-common",
         "else": "common-gender",
     },
     "common": {
         "if": "possessive",
         "lang": POSSESSIVE_POSSESSED_LANGS,
-        "then": "possessive-common",
+        "then": "possessed-common",
         "else": "common-gender",
     },
     "archaic": "archaic",
@@ -3587,7 +3587,7 @@ infl_map = {
     "masculine singular": {
         "lang": "Hebrew",
         "if": "possessed-form",
-        "then": "possessive-masculine possessive-single",  # doesn't work
+        "then": "possessed-masculine possessed-single",  # doesn't work
         "else": "masculine singular",
     },
     # could there be a third control character besides "*" and "dummy-reset-headers"
@@ -3596,19 +3596,19 @@ infl_map = {
     "masculine plural": {
         "lang": "Hebrew",
         "if": "possessed-form",
-        "then": "possessive-masculine possessive-many",
+        "then": "possessed-masculine possessed-many",
         "else": "masculine plural",
     },
     "feminine singular": {
         "lang": "Hebrew",
         "if": "possessed-form",
-        "then": "possessive-feminine possessive-single",
+        "then": "possessed-feminine possessed-single",
         "else": "feminine singular"
     },
     "feminine plural": {
         "lang": "Hebrew",
         "if": "possessed-form",
-        "then": "possessive-feminine possessive-many",
+        "then": "possessed-feminine possessed-many",
         "else": "feminine plural",
     },
 
@@ -4979,8 +4979,8 @@ infl_map = {
     "Comitative": "comitative",
 
     # ащема/Moksha
-    "one possession": "possessive possessive-single",
-    "one or multiple possessions": "possessive possessive-single possessive-many",
+    "one possession": "possessive possessed-single",
+    "one or multiple possessions": "possessive possessed-single possessed-many",
     # XXX the big headers don't express
 
     "Participles➤": "participle",  # άρχω/Greek
@@ -5338,8 +5338,8 @@ infl_map = {
     "Proximate": "proximative",
     "Obviative": "obviative",
     "Local": "locative",
-    "Singular Possessive": "possessive-single",
-    "Plural Possessive": "possessive-many",
+    "Singular Possessive": "possessed-single",
+    "Plural Possessive": "possessed-many",
     "First and second person": "first-person second-person",
 
     "perlative": "perlative",  # arnaq/Yup'ik
@@ -5348,11 +5348,11 @@ infl_map = {
     # tōku/Maori
     "singular object": {
         "lang": "Maori",
-        "then": "possessive-single",
+        "then": "possessed-single",
     },
     "dual/plural object": {
         "lang": "Maori",
-        "then": "possessive-many",
+        "then": "possessed-many",
     },
     "A category":  {
         "lang": "Maori",
@@ -5372,8 +5372,8 @@ infl_map = {
 
     "comitative-instrumental": "comitative instrumental",  #тан/Mansi
     # пыг/Mansi
-    "double possession": "possessive-two",
-    "multiple possession": "possessive-many",
+    "double possession": "possessed-two",
+    "multiple possession": "possessed-many",
     "3d person dual": "third-person dual",
     "3d person plural": "third-person plural",
 
@@ -6773,6 +6773,21 @@ infl_map = {
     "Pluskvamperfekta": "pluperfect",
     "Infinitivat": "infinitive",
     "Partisipat": "participle",
+    
+    # f/Slovene
+    "nominative imenovȃlnik": "nominative",
+    "genitive rodȋlnik": "genitive",
+    "dative dajȃlnik": "dative",
+    "accusative tožȋlnik": "accusative",
+    "locative mẹ̑stnik": "locative",
+    "instrumental orọ̑dnik": "instrumental",
+    "(vocative) (ogȏvorni imenovȃlnik)": "vocative",
+
+    # akaka/Choctaw
+    "Possession": "possessed-form",
+    '("my, our")': "first-person possessive",
+    '("thy, your")': "second-person possessive",
+    '("his, her, its, their")': "third-person possessive",
     
 }
 

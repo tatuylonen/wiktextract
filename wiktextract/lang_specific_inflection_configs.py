@@ -121,8 +121,8 @@ lang_specific = {
     "Armenian": {
         "lang_tag_mappings": {
             "noun": {
-                ("possessive", "singular"): ["possessive", "possessive-single"],
-                ("possessive", "plural"): ["possessive", "possessive-single"],
+                ("possessive", "singular"): ["possessive", "possessed-single"],
+                ("possessive", "plural"): ["possessive", "possessed-single"],
             },
         },
     },

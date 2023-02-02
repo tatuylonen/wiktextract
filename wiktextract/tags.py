@@ -2644,7 +2644,7 @@ uppercase_tags = set([
     "Krobo",  # wawa/Adangme
     "Afar",  # afoofa/Afar
     "Saru",  # Ainu/ecioka
-    
+    "Old Albanian",
 ])
 
 
@@ -5842,13 +5842,13 @@ valid_tags = {
     "positive": "degree",  # opposite of negative (usually unattested); degree
     "possessed-form": "misc",  # Marks object that is possessed, cf. possessed
     "possessive": "possession",  # Possession (marks who possesses)
-    "possessive-single": "possession",  # Possessive with single possessed
-    "possessive-many": "possession",  # Possessive with multiple possessed
-    "possessive-two": "possession",  # Two possessed, Mansi
-    "possessive-masculine": "possession",  # Possessive with masculine possessed
-    "possessive-feminine": "possession",  # Possessive with feminine possessed
-    "possessive-common": "possession",  # Possessive with common-g possessed
-    "possessive-neuter": "possession",  # Possessive with neuter possessed
+    "possessed-single": "possession",  # Possessive with single possessed
+    "possessed-many": "possession",  # Possessive with multiple possessed
+    "possessed-two": "possession",  # Two possessed, Mansi
+    "possessed-masculine": "possession",  # Possessive with masculine possessed
+    "possessed-feminine": "possession",  # Possessive with feminine possessed
+    "possessed-common": "possession",  # Possessive with common-g possessed
+    "possessed-neuter": "possession",  # Possessive with neuter possessed
     "possibly": "misc",
     "postpositional": "misc",
     "potential": "mood",  # Verb mood
