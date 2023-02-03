@@ -2120,8 +2120,8 @@ class InflTests(unittest.TestCase):
                 "form": "hűtőé",
                 "source": "Declension",
                 "tags": [
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "predicative",
                   "singular"
                 ]
@@ -2131,8 +2131,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "predicative"
                 ]
               },
@@ -2140,8 +2140,8 @@ class InflTests(unittest.TestCase):
                 "form": "hűtőéi",
                 "source": "Declension",
                 "tags": [
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "predicative",
                   "singular"
                 ]
@@ -2151,8 +2151,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "predicative"
                 ]
               },
@@ -2168,8 +2168,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "first-person",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "singular"
                 ]
               },
@@ -2178,8 +2178,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "first-person",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "singular"
                 ]
               },
@@ -2187,8 +2187,8 @@ class InflTests(unittest.TestCase):
                 "form": "hűtőd",
                 "source": "Declension",
                 "tags": [
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "second-person",
                   "singular"
                 ]
@@ -2197,8 +2197,8 @@ class InflTests(unittest.TestCase):
                 "form": "hűtőid",
                 "source": "Declension",
                 "tags": [
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "second-person",
                   "singular"
                 ]
@@ -2207,8 +2207,8 @@ class InflTests(unittest.TestCase):
                 "form": "hűtője",
                 "source": "Declension",
                 "tags": [
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "singular",
                   "third-person"
                 ]
@@ -2217,8 +2217,8 @@ class InflTests(unittest.TestCase):
                 "form": "hűtői",
                 "source": "Declension",
                 "tags": [
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "singular",
                   "third-person"
                 ]
@@ -2229,8 +2229,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "first-person",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single"
                 ]
               },
               {
@@ -2239,8 +2239,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "first-person",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many"
                 ]
               },
               {
@@ -2248,8 +2248,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "second-person"
                 ]
               },
@@ -2258,8 +2258,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "second-person"
                 ]
               },
@@ -2268,8 +2268,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "third-person"
                 ]
               },
@@ -2278,8 +2278,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "third-person"
                 ]
               }
@@ -2844,8 +2844,8 @@ class InflTests(unittest.TestCase):
                 "form": "rövidé",
                 "source": "Declension",
                 "tags": [
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "predicative",
                   "singular"
                 ]
@@ -2855,8 +2855,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "predicative"
                 ]
               },
@@ -2864,8 +2864,8 @@ class InflTests(unittest.TestCase):
                 "form": "rövidéi",
                 "source": "Declension",
                 "tags": [
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "predicative",
                   "singular"
                 ]
@@ -2875,8 +2875,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "predicative"
                 ]
               }

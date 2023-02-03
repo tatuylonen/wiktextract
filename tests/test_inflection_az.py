@@ -807,8 +807,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "first-person",
                   "nominative",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "singular"
                 ]
               },
@@ -818,8 +818,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "first-person",
                   "nominative",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "singular"
                 ]
               },
@@ -828,8 +828,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "nominative",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "second-person",
                   "singular"
                 ]
@@ -839,8 +839,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "nominative",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "second-person",
                   "singular"
                 ]
@@ -850,8 +850,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "nominative",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "singular",
                   "third-person"
                 ]
@@ -861,8 +861,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "nominative",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "singular",
                   "third-person"
                 ]
@@ -874,8 +874,8 @@ class InflTests(unittest.TestCase):
                   "first-person",
                   "nominative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single"
                 ]
               },
               {
@@ -885,8 +885,8 @@ class InflTests(unittest.TestCase):
                   "first-person",
                   "nominative",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many"
                 ]
               },
               {
@@ -895,8 +895,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "nominative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "second-person"
                 ]
               },
@@ -906,8 +906,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "nominative",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "second-person"
                 ]
               },
@@ -917,8 +917,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "nominative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "third-person"
                 ]
               },
@@ -928,8 +928,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "nominative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "third-person"
                 ]
               },
@@ -939,8 +939,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "nominative",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "third-person"
                 ]
               },
@@ -950,8 +950,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "accusative",
                   "first-person",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "singular"
                 ]
               },
@@ -961,8 +961,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "accusative",
                   "first-person",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "singular"
                 ]
               },
@@ -971,8 +971,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "accusative",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "second-person",
                   "singular"
                 ]
@@ -982,8 +982,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "accusative",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "second-person",
                   "singular"
                 ]
@@ -993,8 +993,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "accusative",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "singular",
                   "third-person"
                 ]
@@ -1004,8 +1004,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "accusative",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "singular",
                   "third-person"
                 ]
@@ -1017,8 +1017,8 @@ class InflTests(unittest.TestCase):
                   "accusative",
                   "first-person",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single"
                 ]
               },
               {
@@ -1028,8 +1028,8 @@ class InflTests(unittest.TestCase):
                   "accusative",
                   "first-person",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many"
                 ]
               },
               {
@@ -1038,8 +1038,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "accusative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "second-person"
                 ]
               },
@@ -1049,8 +1049,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "accusative",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "second-person"
                 ]
               },
@@ -1060,8 +1060,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "accusative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "third-person"
                 ]
               },
@@ -1071,8 +1071,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "accusative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "third-person"
                 ]
               },
@@ -1082,8 +1082,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "accusative",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "third-person"
                 ]
               },
@@ -1093,8 +1093,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "dative",
                   "first-person",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "singular"
                 ]
               },
@@ -1104,8 +1104,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "dative",
                   "first-person",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "singular"
                 ]
               },
@@ -1114,8 +1114,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "dative",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "second-person",
                   "singular"
                 ]
@@ -1125,8 +1125,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "dative",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "second-person",
                   "singular"
                 ]
@@ -1136,8 +1136,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "dative",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "singular",
                   "third-person"
                 ]
@@ -1147,8 +1147,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "dative",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "singular",
                   "third-person"
                 ]
@@ -1160,8 +1160,8 @@ class InflTests(unittest.TestCase):
                   "dative",
                   "first-person",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single"
                 ]
               },
               {
@@ -1171,8 +1171,8 @@ class InflTests(unittest.TestCase):
                   "dative",
                   "first-person",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many"
                 ]
               },
               {
@@ -1181,8 +1181,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "dative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "second-person"
                 ]
               },
@@ -1192,8 +1192,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "dative",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "second-person"
                 ]
               },
@@ -1203,8 +1203,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "dative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "third-person"
                 ]
               },
@@ -1214,8 +1214,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "dative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "third-person"
                 ]
               },
@@ -1225,8 +1225,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "dative",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "third-person"
                 ]
               },
@@ -1236,8 +1236,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "first-person",
                   "locative",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "singular"
                 ]
               },
@@ -1247,8 +1247,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "first-person",
                   "locative",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "singular"
                 ]
               },
@@ -1257,8 +1257,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "locative",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "second-person",
                   "singular"
                 ]
@@ -1268,8 +1268,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "locative",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "second-person",
                   "singular"
                 ]
@@ -1279,8 +1279,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "locative",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "singular",
                   "third-person"
                 ]
@@ -1290,8 +1290,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "locative",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "singular",
                   "third-person"
                 ]
@@ -1303,8 +1303,8 @@ class InflTests(unittest.TestCase):
                   "first-person",
                   "locative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single"
                 ]
               },
               {
@@ -1314,8 +1314,8 @@ class InflTests(unittest.TestCase):
                   "first-person",
                   "locative",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many"
                 ]
               },
               {
@@ -1324,8 +1324,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "locative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "second-person"
                 ]
               },
@@ -1335,8 +1335,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "locative",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "second-person"
                 ]
               },
@@ -1346,8 +1346,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "locative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "third-person"
                 ]
               },
@@ -1357,8 +1357,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "locative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "third-person"
                 ]
               },
@@ -1368,8 +1368,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "locative",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "third-person"
                 ]
               },
@@ -1379,8 +1379,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "ablative",
                   "first-person",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "singular"
                 ]
               },
@@ -1390,8 +1390,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "ablative",
                   "first-person",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "singular"
                 ]
               },
@@ -1400,8 +1400,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "ablative",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "second-person",
                   "singular"
                 ]
@@ -1411,8 +1411,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "ablative",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "second-person",
                   "singular"
                 ]
@@ -1422,8 +1422,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "ablative",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "singular",
                   "third-person"
                 ]
@@ -1433,8 +1433,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "ablative",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "singular",
                   "third-person"
                 ]
@@ -1446,8 +1446,8 @@ class InflTests(unittest.TestCase):
                   "ablative",
                   "first-person",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single"
                 ]
               },
               {
@@ -1457,8 +1457,8 @@ class InflTests(unittest.TestCase):
                   "ablative",
                   "first-person",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many"
                 ]
               },
               {
@@ -1467,8 +1467,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "ablative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "second-person"
                 ]
               },
@@ -1478,8 +1478,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "ablative",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "second-person"
                 ]
               },
@@ -1489,8 +1489,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "ablative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "third-person"
                 ]
               },
@@ -1500,8 +1500,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "ablative",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "third-person"
                 ]
               },
@@ -1511,8 +1511,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "ablative",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "third-person"
                 ]
               },
@@ -1522,8 +1522,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "first-person",
                   "genitive",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "singular"
                 ]
               },
@@ -1533,8 +1533,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "first-person",
                   "genitive",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "singular"
                 ]
               },
@@ -1543,8 +1543,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "genitive",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "second-person",
                   "singular"
                 ]
@@ -1554,8 +1554,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "genitive",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "second-person",
                   "singular"
                 ]
@@ -1565,8 +1565,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "genitive",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "singular",
                   "third-person"
                 ]
@@ -1576,8 +1576,8 @@ class InflTests(unittest.TestCase):
                 "source": "Declension",
                 "tags": [
                   "genitive",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "singular",
                   "third-person"
                 ]
@@ -1589,8 +1589,8 @@ class InflTests(unittest.TestCase):
                   "first-person",
                   "genitive",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single"
                 ]
               },
               {
@@ -1600,8 +1600,8 @@ class InflTests(unittest.TestCase):
                   "first-person",
                   "genitive",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many"
                 ]
               },
               {
@@ -1610,8 +1610,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "genitive",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "second-person"
                 ]
               },
@@ -1621,8 +1621,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "genitive",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "second-person"
                 ]
               },
@@ -1632,8 +1632,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "genitive",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "third-person"
                 ]
               },
@@ -1643,8 +1643,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "genitive",
                   "plural",
+                  "possessed-single",
                   "possessive",
-                  "possessive-single",
                   "third-person"
                 ]
               },
@@ -1654,8 +1654,8 @@ class InflTests(unittest.TestCase):
                 "tags": [
                   "genitive",
                   "plural",
+                  "possessed-many",
                   "possessive",
-                  "possessive-many",
                   "third-person"
                 ]
               }
