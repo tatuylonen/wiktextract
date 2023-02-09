@@ -2525,7 +2525,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
     def parse_descendants(data, node, is_proto_root_derived_section=False):
         """Parses a Descendants section. Also used on Derived terms and
         Extensions sections when we are dealing with a root of a reconstructed
-        language (ie. is_proto_root_derived_section == True), as they use the
+        language (i.e. is_proto_root_derived_section == True), as they use the
         same structure. In the latter case, The wiktionary convention is not to
         title the section as descendants since the immediate offspring of the
         roots are morphologically derived terms within the same proto-language.
