@@ -384,6 +384,7 @@ xlat_head_map = {
     "class 7": "class-7",
     "class 8": "class-8",
     "class 9": "class-9",
+    "class 9 or 10": "class-9 class-10",
     "class 9a": "class-9a",
     "class 10": "class-10",
     "class 10a": "class-10",
@@ -414,6 +415,7 @@ xlat_head_map = {
     "ku class": "class-15",
     "pa class": "class-16",
     "mu class": "class-18",
+    "m or f by sense": "masculine feminine by-personal-gender",
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly
@@ -2642,7 +2644,7 @@ uppercase_tags = set([
     "Krobo",  # wawa/Adangme
     "Afar",  # afoofa/Afar
     "Saru",  # Ainu/ecioka
-    
+    "Old Albanian",
 ])
 
 
@@ -4781,7 +4783,8 @@ xlat_tags_map = {
     "class ku": "class-15",
     "class pa": "class-16",
     "class mu": "class-18",
-    "predicate marker": "predicative"}
+    "predicate marker": "predicative",
+    }
 
 # This mapping is applied to full descriptions before splitting by comma.
 # Note: these cannot match just part of a description (even when separated
@@ -5839,13 +5842,13 @@ valid_tags = {
     "positive": "degree",  # opposite of negative (usually unattested); degree
     "possessed-form": "misc",  # Marks object that is possessed, cf. possessed
     "possessive": "possession",  # Possession (marks who possesses)
-    "possessive-single": "possession",  # Possessive with single possessed
-    "possessive-many": "possession",  # Possessive with multiple possessed
-    "possessive-two": "possession",  # Two possessed, Mansi
-    "possessive-masculine": "possession",  # Possessive with masculine possessed
-    "possessive-feminine": "possession",  # Possessive with feminine possessed
-    "possessive-common": "possession",  # Possessive with common-g possessed
-    "possessive-neuter": "possession",  # Possessive with neuter possessed
+    "possessed-single": "possession",  # Possessive with single possessed
+    "possessed-many": "possession",  # Possessive with multiple possessed
+    "possessed-two": "possession",  # Two possessed, Mansi
+    "possessed-masculine": "possession",  # Possessive with masculine possessed
+    "possessed-feminine": "possession",  # Possessive with feminine possessed
+    "possessed-common": "possession",  # Possessive with common-g possessed
+    "possessed-neuter": "possession",  # Possessive with neuter possessed
     "possibly": "misc",
     "postpositional": "misc",
     "potential": "mood",  # Verb mood
@@ -6383,7 +6386,9 @@ valid_tags = {
     "free-state": "misc",  #aɣemmar/Tarifit
     "proximal-to-speaker": "misc", #nꜣyw/Egyptian/38
     "proximal-to-topic": "misc",
-    
+    "by-personal-gender": "gender",  # Italian has started to use
+    # "feminine or masculine, by sense" to mean "depending on the
+    # gender of the person". Bataglia/Italian
 }
 
 for k, v in valid_tags.items():

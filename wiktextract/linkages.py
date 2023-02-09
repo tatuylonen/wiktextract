@@ -465,7 +465,9 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
 
         # Some words have derived terms with parenthesized quoted English
         # descriptions, which can sometimes essentially be tags
-        m = re.search(r"\s*\(“([^”)]*)”\)", item1)
+        # Some word (bleki/Esperanto...) can have parentheses inside
+        # the quotes, so let's make this regex even more unreadable.
+        m = re.search(r"\s*\(“([^”]+)”\)", item1)
         if m:
             t = m.group(1)
             item1 = (item1[:m.start()] + item1[m.end():]).strip()

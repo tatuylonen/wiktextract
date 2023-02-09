@@ -4,7 +4,7 @@
 # mostly been used with enwiktionary, but should be usable with other
 # wiktionaries as well.
 #
-# Copyright (c) 2018-2022 Tatu Ylonen.  See LICENSE and https://ylonen.org
+# Copyright (c) 2018-2023 Tatu Ylonen.  See LICENSE and https://ylonen.org
 #
 # For pre-extracted data files, see https://kaikki.org/dictionary/
 
@@ -62,7 +62,6 @@ def init_prefixes(ctx: Wtp) -> None:
         }
 
 
-
 def capture_page(model, orig_title, text, pages_dir):
     """Checks if the page needs special handling (and maybe saving).
     Returns True if the page should be processed normally as a
@@ -72,10 +71,6 @@ def capture_page(model, orig_title, text, pages_dir):
     assert isinstance(text, str)
     assert pages_dir is None or isinstance(pages_dir, str)
 
-    if args.language:
-        if not re.search(lang_names_re, text):
-            return False
-    
     analyze = True
     title = orig_title
     m = re.match(r"^([A-Z][a-z][-a-zA-Z0-9_]+):(.+)$", title)
@@ -280,7 +275,7 @@ if __name__ == "__main__":
             if x in config.LANGUAGES_BY_CODE:
                 lang_names.extend(config.LANGUAGES_BY_CODE[x])
             else:
-                lang_names.extend(config.LANGUAGES_BY_CODE[ 
+                lang_names.extend(config.LANGUAGES_BY_CODE[
                                             config.LANGUAGES_BY_NAME[x] ])
 
         lang_names = [re.escape(x) for x in lang_names]

@@ -157,6 +157,8 @@ script_and_dialect_names = set([
     "Southern",
     "Traditional",
     "Western",
+    "1708",
+    "1918",
 ])
 
 # These names should be interpreted as tags (as listed in the value

@@ -774,7 +774,7 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
     lists of tags and a list of topics."""
     assert isinstance(src, str)
 
-    # print("decode_tags: src={!r}".format(src))
+    # print("decode_tags: src={!r}".format(src)) 
 
     pos_paths = [[[]]]
 
@@ -788,7 +788,6 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
         if from_i >= to_i:
             return []
         words = lst[from_i: to_i]
-        # print("unknown words:", words)
         tag = " ".join(words)
         if re.match(ignored_unknown_starts_re, tag):
             # Tags with this start are to be ignored
@@ -799,7 +798,6 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
             return from_i
         if tag in ("and", "or"):
             return []
-
         if (not allow_any and
             not words[0].startswith("~") and
             (no_unknown_starts or
@@ -861,7 +859,7 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
                 # print("add_new: start_i={} last_i={}".format(start_i, last_i))
                 nonlocal max_last_i
                 # print("$ {} last_i={} start_i={}"
-                #       .format(w, last_i, start_i))
+                      # .format(w, last_i, start_i))
                 max_last_i = max(max_last_i, last_i)
                 for node2, start_i2, last_i2 in new_nodes:
                     if (node2 is node and start_i2 == start_i and
@@ -928,8 +926,11 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
                     # print("UNK END start_i={} last_i={} lst={}"
                     #       .format(start_i, last_i, lst))
                     u = check_unknown(len(lst), last_i, len(lst))
-                    for path in pos_paths[start_i]:
-                        pos_paths[-1].append(u + path)
+                    if pos_paths[start_i]:
+                        for path in pos_paths[start_i]:
+                            pos_paths[-1].append(u + path)
+                    else:
+                        pos_paths[-1].append(u)
         else:
             # Check for a final unknown tag
             # print("NO END NODES max_last_i={}".format(max_last_i))
@@ -1355,6 +1356,13 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                     is_reconstruction, head_group)
         base = base[:m.start()] + base[m.end():]
 
+    # Clean away some messy "Upload an image" template text used in
+    # American Sign Language:
+    # S@NearBaseForearm-PalmUp Frontandback S@BaseForearm-PalmUp
+    m = re.search(r"Upload .+ gif image.", base)
+    if m:
+        base = base[:m.start()] + base[m.end():]
+
     # Split the head into alternatives.  This is a complicated task, as
     # we do not want so split on "or" or "," when immediately followed by more
     # head-final tags, but otherwise do want to split by them.
@@ -1417,7 +1425,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
             expanded_alts = [alt]
         else:
             expanded_alts = map_with(xlat_descs_map, [alt])
-        # print("EXPANDED_ALTS:", expanded_alts)
+        # print("EXPANDED_ALTS:", expanded_alts)  
         for alt in expanded_alts:
             baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
             if alt_i > 0:
@@ -1427,6 +1435,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                     for tags in tagsets:
                         data_extend(ctx, data, "tags", tags)
                     continue
+
             alt, tags = parse_head_final_tags(ctx, language, alt)
             tags = list(tags)  # Make sure we don't modify anything cached
             tags.append("canonical")
@@ -1439,7 +1448,6 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                 # canonicals.append((tags, baseparts)) and not (tags, [alt])
                 baseparts = [alt]
             canonicals.append((tags, baseparts))
-
     for tags, baseparts in canonicals:
         add_related(ctx, data, tags, baseparts, text, len(canonicals) > 1,
                     is_reconstruction, head_group)
@@ -1852,10 +1860,10 @@ def parse_sense_qualifier(ctx, text, data):
                     semi = semi[1:]
                 data["taxonomic"] = semi
             elif cls == "english":
-                if "english" in data and data["english"] != orig_semi:
-                    data["english"] += "; " + orig_semi
+                if "qualifier" in data and data["qualifier"] != orig_semi:
+                    data["qualifier"] += "; " + orig_semi
                 else:
-                    data["english"] = orig_semi
+                    data["qualifier"] = orig_semi
             else:
                 ctx.debug("unrecognized sense qualifier: {}"
                           .format(text),
