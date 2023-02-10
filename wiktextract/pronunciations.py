@@ -48,12 +48,14 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 # Filter out only LEVEL_KINDS; 'or' is doing heavy lifting here
                 # Slip through not-WikiNodes, then slip through WikiNodes that
                 # are not LEVEL_KINDS.
-
-    if not any(isinstance(x, WikiNode) and x.kind == NodeKind.LIST for x in contents):
+    if (not any(isinstance(x, WikiNode) and 
+               x.kind == NodeKind.LIST for x in contents)):
         # expand all templates
         new_contents = []
         for l in contents:
-            if isinstance(l, WikiNode) and l.kind == NodeKind.TEMPLATE:
+            if (isinstance(l, WikiNode) and
+               l.kind == NodeKind.TEMPLATE and
+               l.args[0][0].strip() != "zh-pron"):
                 temp = ctx.node_to_wikitext(l)
                 temp = ctx.expand(temp)
                 temp = ctx.parse(temp)
