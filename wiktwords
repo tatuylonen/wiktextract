@@ -51,7 +51,6 @@ def init_prefixes(ctx: Wtp) -> None:
         }
     if RECOGNIZED_PREFIXES is None:
         RECOGNIZED_PREFIXES = {
-            ctx.NAMESPACE_DATA.get("Reconstruction", {}).get("name"),
             ctx.NAMESPACE_DATA.get("Category", {}).get("name"),
             ctx.NAMESPACE_DATA.get("Appendix", {}).get("name"),
             ctx.NAMESPACE_DATA.get("Project", {}).get("name"),

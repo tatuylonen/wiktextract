@@ -420,6 +420,7 @@ The following command-line options can be used to control its operation:
 * --linkages: causes linkages (synonyms etc.) to be captured
 * --examples: causes usage examples to be captured
 * --etymologies: causes etymology information to be captured
+* --descendants: causes descendants information to be captured
 * --inflections: causes inflection tables to be captured
 * --redirects: causes redirects to be extracted
 * --pages-dir DIR: save all wiktionary pages under this directory (mostly for debugging)
@@ -458,6 +459,7 @@ config = WiktionaryConfig(
              capture_redirects=True,
              capture_examples=True,
              capture_etymologies=True,
+             capture_descendants=True,
              capture_inflections=True)
 ctx = Wtp()
 
@@ -547,6 +549,7 @@ WiktionaryConfig(dump_file_lang_code="en",
                  capture_redirects=True,
                  capture_examples=True,
                  capture_etymologies=True,
+                 capture_descendants=True,
                  capture_inflections=True)
 ```
 
@@ -575,6 +578,8 @@ The arguments are as follows:
   capturing usage examples.
 * ``capture_etymologies`` (boolean) - set to ``False`` to
   disable capturing etymologies.
+* ``capture_descendants`` (boolean) - set to ``False`` to
+  disable capturing descendants.
 * ``capture_inflections`` (boolean) - set to ``False`` to
   disable capturing inflection tables.
 
@@ -610,6 +615,7 @@ following keys (others may also be present or added later):
   relations.  Certain common templates that do not signify etymological
   relations are not included.
 * ``etymology_number`` - for words with multiple numbered etymologies, this contains the number of the etymology under which this entry appeared
+* ``descendants`` - descendants of the word (see below)
 * ``synonyms`` - non-disambiguated synonym linkages for the word (see below)
 * ``antonyms`` - non-disambiguated antonym linkages for the word (see below)
 * ``hypernyms`` - non-disambiguated hypernym linkages for the word (see below)
@@ -725,6 +731,10 @@ keys:
 * ``name`` - name of the template
 * ``args`` - dictionary mapping argument names to their cleaned values.  Positional arguments have keys that are numeric strings, starting with "1".
 * ``expansion`` - the (cleaned) text the template expands to.
+
+### Descendants
+
+$$$$$$ TODO $$$$$$$
 
 ### Linkages to other words
 
