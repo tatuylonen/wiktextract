@@ -494,6 +494,7 @@ head_final_bantu_map = {
     "class 9/10": "class-9 class-10",
     "class 9/10/1/2": "class-9 class-10 class-1 class-2",
     "class 9/10c": "class-9 class-10",
+    "class 9/c10": "class-9 class-10",
     "class IX/X": "class-9 class-10",
     "class 9a": "class-9a",
     "class 10": "class-10",
