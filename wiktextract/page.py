@@ -2757,6 +2757,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             # non-English, as that seems more common.
                             tr = lines[1]
                             lines = [lines[0]]
+                    elif (usex_type != "quotation" and
+                          lang_code != "en" and
+                          len(lines) == 3):
+                        cls1 = classify_desc(lines[0])
+                        cls2 = classify_desc(lines[1])
+                        cls3 = classify_desc(lines[2])
+                        if (cls3 == "english" and
+                            cls2 in ["english", "romanization"] and
+                            cls1 != "english"):
+                            tr = lines[2].strip()
+                            roman = lines[1].strip()
+                            lines = [lines[0].strip()]
                     elif (usex_type == "quotation" and
                           lang_code != "en" and len(lines) > 2):
                         # for x in lines:
