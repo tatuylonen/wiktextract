@@ -981,63 +981,65 @@ def clean_value(config, title, no_strip=False, no_html_strip=False):
     # Remove tables
     title = re.sub(r"(?s)\{\|.*?\|\}", "\n", title)
     # Remove references (<ref>...</ref>).
-    title = re.sub(r"(?is)<\s*ref\b\s*[^>]*?>\s*.*?<\s*/\s*ref\s*>", "", title)
+    title = re.sub(r"(?is)<ref\b\s*[^>]*?>\s*.*?</ref\s*>", "", title)
     # Replace <span>...</span> by stripped content without newlines
-    title = re.sub(r"(?is)<\s*span\b\s*[^>]*?>(.*?)\s*<\s*/\s*span\s*>",
+    title = re.sub(r"(?is)<span\b\s*[^>]*?>(.*?)\s*</span\s*>",
                    lambda m: re.sub(r"\s+", " ", m.group(1)),
                    title)
     # Replace <br/> by comma space (it is used to express alternatives in some
     # declensions)
-    title = re.sub(r"(?si)\s*<\s*br\s*/?>\n*", "\n", title)
+    title = re.sub(r"(?si)\s*<br\s*/?>\n*", "\n", title)
     # Remove divs with floatright class (generated e.g. by {{ja-kanji|...}})
-    title = re.sub(r'(?si)<\s*div\b[^>]*?\bclass="[^"]*?\bfloatright\b[^>]*?>'
-                   r'((<\s*div\b(<\s*div\b.*?<\s*/\s*div\s*>|.)*?</div>)|.)*?'
-                   r'<\s*/\s*div\s*>',
+    title = re.sub(r'(?si)<div\b[^>]*?\bclass="[^"]*?\bfloatright\b[^>]*?>'
+                   r'((<div\b(<div\b.*?</div\s*>|.)*?</div>)|.)*?'
+                   r'</div\s*>',
                    "", title)
     # Remove divs with float: attribute
-    title = re.sub(r'(?si)<\s*div\b[^>]*?\bstyle="[^"]*?\bfloat:[^>]*?>'
-                   r'((<\s*div\b(<\s*div\b.*?<\s*/\s*div\s*>|.)*?</div>)|.)*?'
-                   r'<\s*/\s*div\s*>',
+    title = re.sub(r'(?si)<div\b[^>]*?\bstyle="[^"]*?\bfloat:[^>]*?>'
+                   r'((<div\b(<div\b.*?</div\s*>|.)*?</div>)|.)*?'
+                   r'</div\s*>',
                    "", title)
     # Remove <sup> with previewonly class (generated e.g. by {{taxlink|...}})
-    title = re.sub(r'(?si)<\s*sup\b[^>]*?\bclass="[^"<>]*?'
+    title = re.sub(r'(?si)<sup\b[^>]*?\bclass="[^"<>]*?'
                    r'\bpreviewonly\b[^>]*?>'
-                   r'((<[^<>]>[^<>]*</[^<>]*>)|.)*?<\s*/\s*sup\s*>',
+                   r'((<[^<>]>[^<>]*</[^<>]*>)|.)*?</sup\s*>',
                    "", title)
     # Remove <strong class="error">...</strong>
-    title = re.sub(r'(?si)<\s*strong\b[^>]*?\bclass="[^"]*?\berror\b[^>]*?>'
-                   r'((<.*?</.[^>]>)|.)*?<\s*/\s*strong\s*>',
+    title = re.sub(r'(?si)<strong\b[^>]*?\bclass="[^"]*?\berror\b[^>]*?>'
+                   r'((<.*?</.[^>]>)|.)*?</strong\s*>',
                    "", title)
     # Change <div> and </div> to newlines.  Ditto for tr, li, table, dl, ul, ol
-    title = re.sub(r"(?si)<\s*/?\s*(div|tr|li|table|dl|ul|ol)\b[^>]*>",
+    title = re.sub(r"(?si)</?(div|tr|li|table|dl|ul|ol)\b[^>]*>",
                    "\n", title)
+    # Change </dt> and </dd> into newlines; these generate new rows/lines.
+    title = re.sub(r"(?si)</(dt|dd)\s*>", "\n", title)
     # Change <td> </td> to spaces.  Ditto for th.
-    title = re.sub(r"(?si)<\s*/?\s*(td|th)\b[^>]*>", " ", title)
+    title = re.sub(r"(?si)</?(td|th)\b[^>]*>", " ", title)
     # Change <sup> ... </sup> to ^
-    title = re.sub(r"(?si)<\s*sup\b[^>]*>\s*<\s*/\s*sup\s*>", "", title)
-    title = re.sub(r"(?si)<\s*sup\b[^>]*>(.*?)<\s*/\s*sup\s*>",
+    title = re.sub(r"(?si)<sup\b[^>]*>\s*</sup\s*>", "", title)
+    title = re.sub(r"(?si)<sup\b[^>]*>(.*?)</sup\s*>",
                    repl_1_sup, title)
     # Change <sub> ... </sub> to _
-    title = re.sub(r"(?si)<\s*sub\b[^>]*>\s*<\s*/\s*sup\s*>", "", title)
-    title = re.sub(r"(?si)<\s*sub\b[^>]*>(.*?)<\s*/\s*sub\s*>",
+    title = re.sub(r"(?si)<sub\b[^>]*>\s*</sup\s*>", "", title)
+    title = re.sub(r"(?si)<sub\b[^>]*>(.*?)</sub\s*>",
                    repl_1_sub, title)
     # Change <chem> ... </chem> using subscripts for digits
-    title = re.sub(r"(?si)<\s*chem\b[^>]*>(.*?)<\s*/\s*chem\s*>",
+    title = re.sub(r"(?si)<chem\b[^>]*>(.*?)</chem\s*>",
                    repl_1_chem, title)
     # Change <math> ... </math> using special formatting.
-    title = re.sub(r"(?si)<\s*math\b[^>]*>(.*?)<\s*/\s*math\s*>",
+    title = re.sub(r"(?si)<math\b[^>]*>(.*?)</math\s*>",
                    repl_1_math, title)
     # Change <syntaxhighlight> ... </syntaxhighlight> using special formatting.
-    title = re.sub(r"(?si)<\s*syntaxhighlight\b[^>]*>(.*?)"
-                   r"<\s*/\s*syntaxhighlight\s*>",
+    title = re.sub(r"(?si)<syntaxhighlight\b[^>]*>(.*?)"
+                   r"</syntaxhighlight\s*>",
                    repl_1_syntaxhighlight, title)
     # Remove any remaining HTML tags.
     if not no_html_strip:
-        title = re.sub(r"(?s)<\s*[/!a-zA-Z][^>]*>", "", title)
-        title = re.sub(r"(?s)<\s*/\s*[^>]+>", "", title)
+        title = re.sub(r"(?s)<[/!a-zA-Z][^>]*>", "", title)
+        title = re.sub(r"(?s)</[^>]+>", "", title)
     else:
         # Strip <noinclude/> anyway
-        title = re.sub(r"(?si)<\s*noinclude\s*/\s*>", "", title)
+        title = re.sub(r"(?si)<noinclude\s*/\s*>", "", title)
     # Replace [...]
     title = re.sub(r"(?s)\[\s*\.\.\.\s*\]", "…", title)
     # Remove http links in superscript
