@@ -2285,8 +2285,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if name == "see translation subpage":
                     sense_parts = []
                     sense = None
-                    sub = ht.get(1, None)
-                    m = re.match(r"\s*(([^:\d]*)\s*\d*)\s*:\s*([^:]*)\s*", sub)
+                    sub = ht.get(1, "")
+                    if sub:
+                        m = re.match(r"\s*(([^:\d]*)\s*\d*)\s*:\s*([^:]*)\s*",
+                                     sub)
+                    else:
+                        m = None
                     etym = ""
                     etym_numbered = ""
                     pos = ""
@@ -2294,7 +2298,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         etym_numbered = m.group(1)
                         etym = m.group(2)
                         pos = m.group(3)
-                    if not isinstance(sub, str):
+                    if not sub:
                         ctx.debug("no part-of-speech in "
                                   "{{see translation subpage|...}}, "
                                   "defaulting to just ctx.section "
