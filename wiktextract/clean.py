@@ -519,7 +519,7 @@ math_map = {
     "breve": "̆",
     "check": "̌",
     "dddot": "⃛",
-    "dddot": "⃜",
+    "ddddot": "⃜",
     "ddot": "̈",
     "dot": "̇",
     "grave": "̀",

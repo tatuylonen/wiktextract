@@ -4189,6 +4189,20 @@ infl_map = {
     "superiority": {"lang": "Tagalog", "then": "superior",},
     "inferiority": {"lang": "Tagalog", "then": "inferior",},
     "equality": {"lang": "Tagalog", "then": "equal",},
+    # sumisid/Tagalog
+    "maka-": {"lang": "Tagalog", "then": "",},
+    "mapa-": {"lang": "Tagalog", "then": "",},
+    "mai-": {"lang": "Tagalog", "then": "",},
+    "maika-": {"lang": "Tagalog", "then": "",},
+    "mapag- -an": {"lang": "Tagalog", "then": "",},
+    "mapagpa- -an": {"lang": "Tagalog", "then": "",},
+    "mapapag- -an": {"lang": "Tagalog", "then": "",},
+    # ipasagot/Tagalog
+    "ma- -an": {"lang": "Tagalog", "then": "",},
+    "mapa- -an": {"lang": "Tagalog", "then": "",},
+    # ayusin/Tagalog
+    "mapag-": {"lang": "Tagalog", "then": "",},
+
 
     "resultative": "resultative",  # sloniti/Proto-Slavic
     "imperfective aorist": "aorist imperfective",  # byti/Proto-Slavic
