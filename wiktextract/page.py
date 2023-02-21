@@ -598,6 +598,79 @@ def recursively_extract(contents, fn):
     return extracted, new_contents
 
 
+def extract_ruby(config, ctx, contents):
+    # If contents is a list, process each element separately
+    extracted = []
+    new_contents = []
+    if isinstance(contents, (list, tuple)):
+        for x in contents:
+            e1, c1 = extract_ruby(config, ctx, x)
+            extracted.extend(e1)
+            new_contents.extend(c1)
+        return extracted, new_contents
+    # If content is not WikiNode, just return it as new contents.
+    if not isinstance(contents, WikiNode):
+        return [], [contents]
+    # Check if this content should be extracted
+    if contents.kind == NodeKind.HTML and contents.args == "ruby":
+        rb = parse_ruby(config, ctx, contents)
+        return [rb], [rb[0]]
+    # Otherwise content is WikiNode, and we must recurse into it.
+    kind = contents.kind
+    new_node = WikiNode(kind, contents.loc)
+    new_contents.append(new_node)
+    if kind in (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
+                NodeKind.LEVEL5, NodeKind.LEVEL6, NodeKind.LINK):
+        # Process args and children
+        assert isinstance(contents.args, (list, tuple))
+        new_args = []
+        for arg in contents.args:
+            e1, c1 = extract_ruby(config, ctx, arg)
+            new_args.append(c1)
+            extracted.extend(e1)
+        new_node.args = new_args
+        e1, c1 = extract_ruby(config, ctx, contents.children)
+        extracted.extend(e1)
+        new_node.children = c1
+    elif kind in (NodeKind.ITALIC, NodeKind.BOLD, NodeKind.TABLE,
+                  NodeKind.TABLE_CAPTION, NodeKind.TABLE_ROW,
+                  NodeKind.TABLE_HEADER_CELL, NodeKind.TABLE_CELL,
+                  NodeKind.PRE, NodeKind.PREFORMATTED):
+        # Process only children
+        e1, c1 = extract_ruby(config, ctx, contents.children)
+        extracted.extend(e1)
+        new_node.children = c1
+    elif kind in (NodeKind.HLINE,):
+        # No arguments or children
+        pass
+    elif kind in (NodeKind.LIST, NodeKind.LIST_ITEM):
+        # Keep args as-is, process children
+        new_node.args = contents.args
+        e1, c1 = extract_ruby(config, ctx, contents.children)
+        extracted.extend(e1)
+        new_node.children = c1
+    elif kind in (NodeKind.TEMPLATE, NodeKind.TEMPLATE_ARG, NodeKind.PARSER_FN,
+                  NodeKind.URL):
+        # Process only args
+        new_args = []
+        for arg in contents.args:
+            e1, c1 = extract_ruby(config, ctx, arg)
+            new_args.append(c1)
+            extracted.extend(e1)
+        new_node.args = new_args
+    elif kind == NodeKind.HTML:
+        # Keep attrs and args as-is, process children
+        new_node.attrs = contents.attrs
+        new_node.args = contents.args
+        e1, c1 = extract_ruby(config, ctx, contents.children)
+        extracted.extend(e1)
+        new_node.children = c1
+    else:
+        raise RuntimeError("extract_ruby: unhandled kind {}"
+                           .format(kind))
+    return extracted, new_contents
+
+
 def init_head_tag_re(ctx):
     global head_tag_re
     if head_tag_re is None:
@@ -1153,7 +1226,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 exp = ctx.parse(ctx.node_to_wikitext(pre1),
                                 # post_template_fn=head_post_template_fn,
                                 expand_all=True)
-                rub, rest = recursively_extract(exp.children,
+                rub, _ = recursively_extract(exp.children,
                                          lambda x: isinstance(x, WikiNode) and
                                                    x.kind == NodeKind.HTML and
                                                    x.args == "ruby")
@@ -1462,11 +1535,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # push_sense() succeeded somewhere down-river, so skip this level
         if added:
             if examples:
-            # this higher-up gloss has examples that we do not want to skip
+                # this higher-up gloss has examples that we do not want to skip
                 ctx.debug("'{}[...]' gloss has examples we want to keep, "
                           "but there are subglosses."
                           .format(repr(rawgloss[:30])),
-                      sortid="page/1498/20230118")
+                          sortid="page/1498/20230118")
             else:
                 return True
 
@@ -2704,7 +2777,21 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             return ""
                     return None
     
-                subtext = clean_node(config, ctx, sense_base, item.children,
+                # bookmark
+                ruby = []
+                contents = item.children
+                if lang_code == "ja":
+                    if contents and re.match(r"\s*$", contents[0]):
+                        contents = contents[1:]
+                    exp = ctx.parse(ctx.node_to_wikitext(contents),
+                                    # post_template_fn=head_post_template_fn,
+                                    expand_all=True)
+                    rub, rest = extract_ruby(config, ctx, exp.children)
+                    if rub:
+                        for r in rub:
+                            ruby.append(r)
+                        contents = rest
+                subtext = clean_node(config, ctx, sense_base, contents,
                                      template_fn=usex_template_fn)
                 subtext = re.sub(r"\s*\(please add an English "
                                  r"translation of this "
@@ -2715,6 +2802,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # print("subtext:", repr(subtext))
     
                 lines = subtext.splitlines()
+                # print(lines)
+
+                lines = list(re.sub(r"^[#:*]*", "", x).strip() for x in lines)
                 lines = list(x for x in lines
                              if not re.match(
                                      r"(Synonyms: |Antonyms: |Hyponyms: |"
@@ -2731,6 +2821,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 roman = ""
                 # for line in lines:
                 #     print("LINE:", repr(line))
+                #     print(classify_desc(line))
                 if len(lines) == 1 and lang_code != "en":
                     parts = re.split(r"\s*[―—]+\s*", lines[0])
                     if (len(parts) == 2 and
@@ -2889,6 +2980,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         dt["note"] = note
                     if roman:
                         dt["roman"] = roman
+                    if ruby:
+                        dt["ruby"] = ruby
                     examples.append(dt)
     
         return examples

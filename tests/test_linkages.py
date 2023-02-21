@@ -21,7 +21,7 @@ class LinkageTests(unittest.TestCase):
         self.ctx.start_section("English")
 
     def run_data(self, item, word="testpage", lang="English",
-                 field="related", ruby="", sense=None, senses=[],
+                 field="related", ruby=[], sense=None, senses=[],
                  ctx=None, is_reconstruction=False):
         """Runs a test where we expect the parsing to return None.  This
         function returns ``data``."""
@@ -29,7 +29,7 @@ class LinkageTests(unittest.TestCase):
         assert isinstance(word, str)
         assert isinstance(lang, str)
         assert isinstance(field, str)
-        assert isinstance(ruby, str)
+        assert isinstance(ruby, list)
         assert sense is None or isinstance(sense, str)
         assert isinstance(senses, list)
         assert ctx is None or isinstance(ctx, Wtp)
@@ -244,7 +244,7 @@ class LinkageTests(unittest.TestCase):
         self.ctx.start_section("Chinese")
         data = {}
         ret = parse_linkage_item_text(self.ctx, "滿", data, "synonyms",
-                                      "(arrogant):", None, "", [], False)
+                                      "(arrogant):", None, [], [], False)
         self.assertEqual(ret, "arrogant")
 
     def test_sensearg1(self):
@@ -822,11 +822,11 @@ class LinkageTests(unittest.TestCase):
 
     def test_jp1(self):
         data = self.run_data("一犬 (ikken): one dog", lang="Japanese",
-                             field="compounds", ruby="いっけん")
+                             field="compounds", ruby=[("一犬", "いっけん")])
         self.assertEqual(data, {"compounds": [
             {"word": "一犬",
              "roman": "ikken",
-             "ruby": "いっけん",
+             "ruby": [("一犬", "いっけん")],
              "english": "one dog"}]})
 
     def test_jp2(self):

@@ -2542,6 +2542,7 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
             cl = "NO"  # Not acceptable in romanizations
         classes1.append(cl)
     # print("classify_desc: {!r} classes1: {}".format(desc, classes1))
+    # print(set(classes1)    )
     if all(x in ("Ll", "Lu", "Lt", "Lm", "Mn", "Mc", "Zs", "Nd", "OK")
            for x in classes1):
         if ((num_latin >= num_greek + 2 or num_greek == 0) and

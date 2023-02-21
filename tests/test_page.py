@@ -317,7 +317,11 @@ foo
                         "examples":
                             [{"english": "to eat a meal",
                               "roman": "go-han o taberu",
-                              "text": "ご飯(はん)を食(た)べる"}],
+                              "ruby": [
+                                       ('飯', 'はん'),
+                                       ('食', 'た')
+                                      ],
+                              "text": "ご飯を食べる"}],
                     },
                 ],
                 "word": "testpage"
