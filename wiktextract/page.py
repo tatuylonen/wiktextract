@@ -2862,6 +2862,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 i -= 1
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
+                        if len(lines) >= 2:
+                            if classify_desc(lines[-1]) == "romanization":
+                                roman = lines[-1].strip()
+                                lines = lines[:-1]
     
                     elif (lang_code == "en" and
                           re.match(r"^[#*]*:+", lines[1])):
