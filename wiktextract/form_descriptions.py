@@ -1115,7 +1115,7 @@ def quote_kept_ruby(ruby_tuples, s):
     for k, r in ruby_tuples:
         ks.append(k)
         rs.append(r)
-    newm = re.compile(r"({})\(*({})\)*".format("|".join(ks), "|".join(rs)))
+    newm = re.compile(r"({})\s*\(*\s*({})\s*\)*".format("|".join(ks), "|".join(rs)))
     rub_re = re.compile(r"({})"
                         .format(r"|".join(r"{}\(*{}\)*"
                                       .format(k, r) for k, r in ruby_tuples)))
@@ -1362,9 +1362,9 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction,
     # Handle the part of the head that is not in parentheses.  However, certain
     # parenthesized parts are part of word, and those must be handled
     # specially here.
-    base = text
     if ruby:
-        base = quote_kept_ruby(ruby, base)
+        text = quote_kept_ruby(ruby, text)
+    base = text
     base = quote_kept_parens(base)
     base = re.sub(r"\(([^()]|\([^(]*\))*\)($|\s)", r"\2", base)
     base = re.sub(r"(^|\s)\(([^()]|\([^(]*\))*\)", r"\1", base)
