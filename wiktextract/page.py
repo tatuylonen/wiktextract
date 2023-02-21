@@ -444,6 +444,26 @@ def is_panel_template(name):
     return False
 
 
+def parse_ruby(config, ctx, node):
+    """Parse a HTML 'ruby' node for a kanji part and a furigana (ruby) part,
+    and return a tuple containing those. Discard the rp-element's parentheses,
+    we don't do anything with them."""
+    assert node.kind == NodeKind.HTML
+    assert node.args == "ruby"
+    ruby_nodes = []
+    furi_nodes = []
+    for child in node.children:
+        if  (not isinstance(child, WikiNode) or 
+             not child.kind == NodeKind.HTML or
+             not (child.args == "rp" or child.args == "rt")):
+            ruby_nodes.append(child)
+        elif child.args == "rt":
+            furi_nodes.append(child)
+    ruby_kanji = clean_node(config, ctx, None, ruby_nodes).strip()
+    furigana = clean_node(config, ctx, None, furi_nodes).strip()
+    return((ruby_kanji, furigana))
+
+
 def parse_sense_linkage(config, ctx, data, name, ht):
     """Parses a linkage (synonym, etc) specified in a word sense."""
     assert isinstance(ctx, Wtp)
@@ -1041,6 +1061,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # XXX Insert code here that disambiguates between
                 # templates that generate word heads and templates
                 # that don't.
+                # There's head_tag_re that seems like a regex meant
+                # to identify head templates. Too bad it's None.
 
                 # stop processing at {{category}}, {{cat}}... etc.
                 if node.args[0][0] in stop_head_at_these_templates:
@@ -1081,6 +1103,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         there_are_many_heads = len(pre) > 1
         for i, (pre1, ls) in enumerate(zip(pre, lists)):
+            ruby = []
             if all(not sl for sl in lists[i:]):
                 if i == 0:
                     if isinstance(node, str):
@@ -1126,13 +1149,24 @@ def parse_language(ctx, config, langnode, language, lang_code):
             head_group = i + 1 if there_are_many_heads else None
             # print("parse_part_of_speech: {}: {}: pre={}"
                   # .format(ctx.section, ctx.subsection, pre1))
+            if lang_code == "ja":
+                exp = ctx.parse(ctx.node_to_wikitext(pre1),
+                                # post_template_fn=head_post_template_fn,
+                                expand_all=True)
+                rub, rest = recursively_extract(exp.children,
+                                         lambda x: isinstance(x, WikiNode) and
+                                                   x.kind == NodeKind.HTML and
+                                                   x.args == "ruby")
+                if rub:
+                    for r in rub:
+                        ruby.append(parse_ruby(config, ctx, r))
             text = clean_node(config, ctx, pos_data, pre1,
                               post_template_fn=head_post_template_fn)
             text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
             parse_word_head(ctx, pos, text,
                             pos_data,
                             is_reconstruction,
-                            head_group)
+                            head_group, ruby=ruby)
             text = None
             if "tags" in pos_data:
                 common_tags = pos_data["tags"]
@@ -1265,6 +1299,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 return added
 
         def sense_template_fn(name, ht):
+            # print(f"sense_template_fn: {name}, {ht}")
             if name in wikipedia_templates:
                 # parse_wikipedia_template(config, ctx, pos_data, ht)
                 return None
@@ -1808,11 +1843,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
             assert isinstance(field, str)
             assert sense is None or isinstance(sense, str)
 
-            #print("PARSE_LINKAGE_ITEM: {} ({}): {}"
-            #      .format(field, sense, contents))
+            # print("PARSE_LINKAGE_ITEM: {} ({}): {}"
+                 # .format(field, sense, contents))
 
             parts = []
-            ruby = ""
+            ruby = []
 
             def item_recurse(contents, italic=False):
                 assert isinstance(contents, (list, tuple))
@@ -1851,10 +1886,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         classes = (node.attrs.get("class") or "").split()
                         if node.args in ("gallery", "ref", "cite", "caption"):
                             continue
-                        elif node.args == "rp":
-                            continue  # Parentheses inside <ruby>
-                        elif node.args == "rt":
-                            ruby += clean_node(config, ctx, None, node)
+                        elif node.args == "ruby":
+                            rb = parse_ruby(config, ctx, node)
+                            ruby.append(rb)
+                            parts.append(rb[0])
                             continue
                         elif node.args == "math":
                             parts.append(clean_node(config, ctx, None, node))

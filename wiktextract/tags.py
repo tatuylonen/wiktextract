@@ -4100,6 +4100,7 @@ xlat_tags_map = {
     "alternative typographic spelling of": "alt-of alternative",
     "especially in typeface names": "typography",
     "alternative spelling": "alternative",
+    "alternative reading": "alternative",  # 鹿児島/Japanese
     "alternative spelling of": "alt-of alternative",
     "alternative form": "alternative",
     "alternative form of": "alt-of alternative",

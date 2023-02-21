@@ -1109,13 +1109,30 @@ def quote_kept_parens(s):
                   r"__lpar__\1__rpar__", s)
 
 
+def quote_kept_ruby(ruby_tuples, s):
+    ks = []
+    rs = []
+    for k, r in ruby_tuples:
+        ks.append(k)
+        rs.append(r)
+    newm = re.compile(r"({})\(*({})\)*".format("|".join(ks), "|".join(rs)))
+    rub_re = re.compile(r"({})"
+                        .format(r"|".join(r"{}\(*{}\)*"
+                                      .format(k, r) for k, r in ruby_tuples)))
+    def paren_replace(m):
+        return re.sub(newm, r"\1__lrub__\2__rrub__", m.group(0))
+    return re.sub(rub_re,
+                  paren_replace, s)
+
+
 def unquote_kept_parens(s):
     """Conerts the quoted parentheses back to normal parentheses."""
     return re.sub(r"__lpar__(.*?)__rpar__", r"(\1)", s)
 
 
 def add_related(ctx, data, tags_lst, related, origtext,
-                add_all_canonicals, is_reconstruction, head_group):
+                add_all_canonicals, is_reconstruction,
+                head_group, ruby_data=[]):
     """Internal helper function for some post-processing entries for related
     forms (e.g., in word head).  This returns a list of list of tags to be
     added to following related forms or None (cf. walrus/English word head,
@@ -1127,6 +1144,7 @@ def add_related(ctx, data, tags_lst, related, origtext,
     assert isinstance(related, (list, tuple))
     assert isinstance(origtext, str)
     assert add_all_canonicals in (True, False)
+    assert isinstance(ruby_data, (list, tuple))
     # print("add_related: tags_lst={} related={}".format(tags_lst, related))
     related = " ".join(related)
     if related == "[please provide]":
@@ -1158,6 +1176,7 @@ def add_related(ctx, data, tags_lst, related, origtext,
     roman = None
     tagsets1 = [[]]
     topics1 = []
+
     m = re.match(r"\((([^()]|\([^()]*\))*)\)\s+", related)
     if m:
         paren = m.group(1)
@@ -1193,7 +1212,28 @@ def add_related(ctx, data, tags_lst, related, origtext,
         alts = split_at_comma_semi(related, separators=["/"])
     else:
         alts = [related]
+    if ruby_data:
+        # prepare some regex stuff in advance
+        ks, rs = [], []
+        for k, r in ruby_data:
+            ks.append(k)
+            rs.append(r)
+        splitter = r"((?:{})__lrub__(?:{})__rrub__)".format("|".join(ks), 
+                                                      "|".join(rs))
     for related in alts:
+        ruby = []
+        if ruby_data:
+            new_related = []
+            rub_split = re.split(splitter, related)
+            for s in rub_split:
+                m = re.match(r"(.+)__lrub__(.+)__rrub__", s)
+                if m:
+                    # add ruby with (\1, \2)
+                    ruby.append((m.group(1), m.group(2)))
+                    new_related.append(m.group(1))
+                else:
+                    new_related.append(s)
+            related = "".join(new_related)
         tagsets2, topics2 = decode_tags(" ".join(tags_lst))
         for tags1 in tagsets1:
             assert isinstance(tags1, (list, tuple))
@@ -1202,6 +1242,8 @@ def add_related(ctx, data, tags_lst, related, origtext,
                 dt = {"word": related}
                 if roman:
                     dt["roman"] = roman
+                if ruby:
+                    dt["ruby"] = ruby
                 if "alt-of" in tags2:
                     check_related(related)
                     data_extend(ctx, data, "tags", tags1)
@@ -1237,6 +1279,8 @@ def add_related(ctx, data, tags_lst, related, origtext,
                         form["head_nr"] = head_group
                     if roman:
                         form["roman"] = roman
+                    if ruby:
+                        form["ruby"] = ruby
                     data_extend(ctx, form, "topics", topics1)
                     data_extend(ctx, form, "topics", topics2)
                     if topics1 or topics2:
@@ -1252,7 +1296,7 @@ def add_related(ctx, data, tags_lst, related, origtext,
                                       sortid="form_descriptions/1241")
                             continue
                         if (related != titleword or add_all_canonicals or
-                            topics1 or topics2):
+                            topics1 or topics2 or ruby):
                             data_extend(ctx, form, "tags",
                                         list(sorted(set(tags))))
                         else:
@@ -1276,13 +1320,15 @@ def add_related(ctx, data, tags_lst, related, origtext,
     return following_tagsets
 
 
-def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
+def parse_word_head(ctx, pos, text, data, is_reconstruction,
+                    head_group, ruby=[]):
     """Parses the head line for a word for in a particular language and
     part-of-speech, extracting tags and related forms."""
     assert isinstance(ctx, Wtp)
     assert isinstance(pos, str)
     assert isinstance(text, str)
     assert isinstance(data, dict)
+    assert isinstance(ruby, (list, tuple))
     assert is_reconstruction in (True, False)
     # print("PARSE_WORD_HEAD: {}: {!r}".format(ctx.section, text))
 
@@ -1304,7 +1350,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
     m = re.search(r", non-past ([^)]+ \([^)]+\))", text)
     if m:
         add_related(ctx, data, ["non-past"], [m.group(1)], text, True,
-                    is_reconstruction, head_group)
+                    is_reconstruction, head_group, ruby)
         text = text[:m.start()] + text[m.end():]
 
     language = ctx.section
@@ -1317,6 +1363,8 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
     # parenthesized parts are part of word, and those must be handled
     # specially here.
     base = text
+    if ruby:
+        base = quote_kept_ruby(ruby, base)
     base = quote_kept_parens(base)
     base = re.sub(r"\(([^()]|\([^(]*\))*\)($|\s)", r"\2", base)
     base = re.sub(r"(^|\s)\(([^()]|\([^(]*\))*\)", r"\1", base)
@@ -1346,14 +1394,14 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
         tag = re.sub(r"\s+", "-", tag)
         for reading in split_at_comma_semi(readings):
             add_related(ctx, data, [tag], [reading], text, True,
-                        is_reconstruction, head_group)
+                        is_reconstruction, head_group, ruby)
         return
 
     # Special case: Hebrew " [pattern: nnn]" ending
     m = re.search(r"\s+\[pattern: ([^]]+)\]", base)
     if m:
         add_related(ctx, data, ["class"], [m.group(1)], text, True,
-                    is_reconstruction, head_group)
+                    is_reconstruction, head_group, ruby)
         base = base[:m.start()] + base[m.end():]
 
     # Clean away some messy "Upload an image" template text used in
@@ -1418,7 +1466,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
             alt = alt[14:].strip()
         if mode == "compound-form":
             add_related(ctx, data, ["in-compounds"], [alt], text,
-                        True, is_reconstruction, head_group)
+                        True, is_reconstruction, head_group, ruby)
             continue
         # For non-first parts, see if it can be treated as tags-only
         if alt_i == 0:
@@ -1450,7 +1498,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
             canonicals.append((tags, baseparts))
     for tags, baseparts in canonicals:
         add_related(ctx, data, tags, baseparts, text, len(canonicals) > 1,
-                    is_reconstruction, head_group)
+                    is_reconstruction, head_group, ruby)
 
     # Handle parenthesized descriptors for the word form and links to
     # related words
@@ -1501,7 +1549,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                             for t in tags)
                 tags.append("strokes")
                 add_related(ctx, data, tags, [strokes], text, True,
-                            is_reconstruction, head_group)
+                            is_reconstruction, head_group, ruby)
             return ", "
 
         paren = re.sub(r", (\d+) \(([^()]+)\), (\d+) \(([^()]+)\) strokes, ",
@@ -1531,7 +1579,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
             try:
                 if all(unicodedata.name(x).startswith("CJK ") for x in desc):
                     add_related(ctx, data, ["CJK"], [desc], text, True,
-                                is_reconstruction, head_group)
+                                is_reconstruction, head_group, ruby)
                     continue
             except ValueError:
                 pass
@@ -1545,7 +1593,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                 # mal/Portuguese/Adv
                 for ts in prev_tags:
                     add_related(ctx, data, ts, [splitdesc[0]], text, True,
-                                is_reconstruction, head_group)
+                                is_reconstruction, head_group, ruby)
                 desc = " ".join(splitdesc[1:])
             elif (len(splitdesc) == 2 and
                   splitdesc[0] in ("also", "and") and prev_tags and
@@ -1554,7 +1602,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                 # "and"
                 for ts in prev_tags:
                     add_related(ctx, data, ts, [splitdesc[1]], text, True,
-                                is_reconstruction, head_group)
+                                is_reconstruction, head_group, ruby)
                 continue
             elif (len(splitdesc) >= 2 and
                   splitdesc[0] in ("including",)):
@@ -1569,20 +1617,21 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                         # Assume comma-separated alternative to previous one
                         for ts in prev_tags:
                             add_related(ctx, data, ts, [desc], text, True,
-                                        is_reconstruction, head_group)
+                                        is_reconstruction, head_group, ruby)
                         continue
                     elif distw(titleparts, desc) <= 0.5:
                        # Similar to head word, assume a dialectal variation to
                        # the base form.  Cf. go/Alemannic German/Verb
                        add_related(ctx, data, ["alternative"], [desc], text,
-                                   True, is_reconstruction, head_group)
+                                   True, is_reconstruction, head_group, ruby)
                        continue
                     elif (cls in ("romanization", "english") and
                         not have_romanization and
                         classify_desc(titleword) == "other"):
                         # Assume it to be a romanization
                         add_related(ctx, data, ["romanization"], [desc],
-                                   text, True, is_reconstruction, head_group)
+                                    text, True, is_reconstruction, head_group,
+                                    ruby)
                         have_romanization = True
                         continue
 
@@ -1590,7 +1639,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
             if m:
                 # Special case, used to give #strokes for Han characters
                 add_related(ctx, data, ["strokes"], [m.group(1)], text, True,
-                            is_reconstruction, head_group)
+                            is_reconstruction, head_group, ruby)
                 continue
 
             # See if it is radical+strokes
@@ -1607,7 +1656,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                 if lang:
                     t.extend(lang.split())
                 add_related(ctx, data, t, [radical_strokes], text, True,
-                            is_reconstruction, head_group)
+                            is_reconstruction, head_group, ruby)
                 prev_tags = None
                 following_tags = None
                 continue
@@ -1641,7 +1690,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                 t = ["strokes"]
                 t.extend(lang.split())
                 add_related(ctx, data, t, [strokes], text, True,
-                            is_reconstruction, head_group)
+                            is_reconstruction, head_group, ruby)
                 prev_tags = None
                 following_tags = None
                 continue
@@ -1667,7 +1716,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                         tags = tags | set(add_tags.split())
                         tags = list(sorted(tags))
                         add_related(ctx, data, tags, [parts[1]], text, True,
-                                    is_reconstruction, head_group)
+                                    is_reconstruction, head_group, ruby)
                         new_prev_tags.append(tags)
                     prev_tags = new_prev_tags
                     following_tags = None
@@ -1729,7 +1778,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                             for r in split_at_comma_semi(paren, extra=[" or "]):
                                 add_related(ctx, data, ["romanization"], [r],
                                             text, True, is_reconstruction,
-                                            head_group)
+                                            head_group, ruby)
                             have_romanization = True
                             continue
                         tagsets = [["error-unrecognized-head-form"]]
@@ -1771,7 +1820,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                                 tags1 = list(sorted(set(tags) | set(ts)))
                                 add_related(ctx, data, tags1, [related],
                                             text, True, is_reconstruction,
-                                            head_group)
+                                            head_group, ruby)
                     else:
                         # Not merged with previous tags
                         for tags in tagsets:
@@ -1781,11 +1830,11 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
                                                         set(ts)))
                                     add_related(ctx, data, tags1, [related],
                                                 text, True, is_reconstruction,
-                                                head_group)
+                                                head_group, ruby)
                             else:
                                 ret = add_related(ctx, data, tags, [related],
                                                   text, True, is_reconstruction,
-                                                  head_group)
+                                                  head_group, ruby)
                                 if ret is not None:
                                     following_tags = ret
                         prev_tags = tagsets
@@ -1811,10 +1860,10 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction, head_group):
     # Finally, if we collected hirakana/katakana, add them now
     if hiragana:
         add_related(ctx, data, ["hiragana"], [hiragana], text, True,
-                    is_reconstruction, head_group)
+                    is_reconstruction, head_group, ruby)
     if katakana:
-        add_related(ctx, data, ["katagana"], [katakana], text, True,
-                    is_reconstruction, head_group)
+        add_related(ctx, data, ["katakana"], [katakana], text, True,
+                    is_reconstruction, head_group, ruby)
 
     tags = data.get("tags", [])
     if tags:
