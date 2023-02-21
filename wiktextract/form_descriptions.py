@@ -2397,6 +2397,8 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
     if not desc:
         return "other"
 
+    normalized_desc = unicodedata.normalize("NFKD", desc)
+
     # If it can be fully decoded as tags without errors, treat as tags
     tagsets, topics = decode_tags(desc, no_unknown_starts=no_unknown_starts)
     for tagset in tagsets:
@@ -2428,8 +2430,10 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
             if have_non_english >= len(lst) - 1 and have_non_english > 0:
                 return "taxonomic"
 
-    # If all words are in our English dictionary, interpret as English
-    if re.match(r"^[ -~―—“”…'‘’ʹ€]+$", desc) and len(desc) > 1:
+    # If all words are in our English dictionary, interpret as English.
+    # [ -~] is regex black magic, "all characters from space to tilde"
+    # in ASCII. Took me a while to figure out.
+    if re.match(r"^[ -~―—“”…'‘’ʹ€]+$", normalized_desc) and len(desc) > 1:
         if desc in english_words and desc[0].isalpha():
             return "english"   # Handles ones containing whitespace
         desc1 = re.sub(tokenizer_fixup_re,
@@ -2488,11 +2492,15 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
     # treat as romanization
     classes = list(unicodedata.category(x)
                    if x not in ("-", ",", ":", "/", '"') else "OK"
-                   for x in unicodedata.normalize("NFKD", desc))
+                   for x in normalized_desc)
     classes1 = []
     num_latin = 0
     num_greek = 0
-    for ch, cl in zip(desc, classes):
+    # part = ""
+    # for ch, cl in zip(normalized_desc, classes):
+    #     part += f"{ch}({cl})"
+    # print(part)
+    for ch, cl in zip(normalized_desc, classes):
         if ch in ("'",  # ' in Arabic, / in IPA-like parenthesized forms
                   ".",  # e.g., "..." in translations
                   ";",
@@ -2504,7 +2512,11 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
                   '“',
                   '”',
                   "/",
+                  "?",
                   "…",  # alternative to "..."
+                  "⁉",  # 見る/Japanese automatic transcriptions...
+                  "？",
+                  "！",
                   "⁻",  # superscript -, used in some Cantonese roman, e.g. "we"
                   "ʔ",
                   "ʼ",
