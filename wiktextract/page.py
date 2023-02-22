@@ -2781,7 +2781,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 ruby = []
                 contents = item.children
                 if lang_code == "ja":
-                    if contents and re.match(r"\s*$", contents[0]):
+                    print(contents)
+                    if (contents and isinstance(contents, str) and
+                       re.match(r"\s*$", contents[0])):
                         contents = contents[1:]
                     exp = ctx.parse(ctx.node_to_wikitext(contents),
                                     # post_template_fn=head_post_template_fn,
