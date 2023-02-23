@@ -4786,6 +4786,8 @@ xlat_tags_map = {
     "class pa": "class-16",
     "class mu": "class-18",
     "predicate marker": "predicative",
+    # riannettere/Italian
+    "ditto": "",
     }
 
 # This mapping is applied to full descriptions before splitting by comma.

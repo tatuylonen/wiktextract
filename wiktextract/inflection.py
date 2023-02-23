@@ -733,7 +733,7 @@ def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags,
             elif m is None:
                 if not silent:
                     ctx.debug("inflection table: unrecognized header: {}"
-                              .format(text),
+                              .format(repr(text)),
                               sortid="inflection/735")
                 # Unrecognized header
                 combined_return = or_tagsets(lang, pos, combined_return,

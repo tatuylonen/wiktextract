@@ -6802,7 +6802,18 @@ infl_map = {
     '("my, our")': "first-person possessive",
     '("thy, your")': "second-person possessive",
     '("his, her, its, their")': "third-person possessive",
+
+    # humingi/Tagalog
+    # Why is there \u2060 in so many differen tagalog templates like these???
+    "\u2060 ma- -an": "",
+    "\u2060mapag- -an": "",
+    "\u2060 mapa- -an": "",
+    "\u2060mapagpa- -an": "",
+    "\u2060mapapag- -an": "",
+    # katayin/Tagalog
+    "\u2060mapapag-": "",
     
+
 }
 
 
