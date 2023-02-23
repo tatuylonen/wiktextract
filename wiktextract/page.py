@@ -30,6 +30,26 @@ LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
 # Matches head tag
 head_tag_re = None
 
+# These two should contain template names that should always be
+# pre-expanded when *first* processing the tree, or not pre-expanded
+# so that the template are left in place with their identifying
+# name intact for later filtering.
+# These consts are imported into wiktionary.py, and are here only
+# because their effect is felt here; XXX move into a more appropriate
+# location?
+# Changing these will have an effect only after re-creating the pages
+# cache file with wiktwords, so when testing XXX maybe --override
+# with the affected template would work?
+PRE_EXPAND = set()
+DO_NOT_PRE_EXPAND = {
+    # az-suffix-form creates a style=floatright div that is otherwise
+    # deleted; if it is not pre-expanded, we can intercept the template
+    # XXX separate these kinds of templates into their own set if
+    # there is need to separate them and then join them with
+    # NO_PRE_EXPAND
+    "az-suffix-forms"
+    }
+
 # Additional templates to be expanded in the pre-expand phase
 additional_expand_templates = {
     "multitrans",
@@ -1074,7 +1094,31 @@ def parse_language(ctx, config, langnode, language, lang_code):
         first_head_tmplt = True
         collecting_head = True
         start_of_paragraph = True
-        for node in posnode.children:
+
+        # XXX extract templates from posnode with recursively_extract
+        # that break stuff, like ja-kanji or az-suffix-form.
+        # Do the extraction with a list of template names, combined from
+        # different lists, then separate out them into different lists
+        # that are handled at different points of the POS section.
+        # First, extract az-suffix-form, put it in `inflection`,
+        # and parse `inflection`'s content when appropriate later.
+        # The contents of az-suffix-form (and ja-kanji) that generate
+        # divs with "floatright" in their style gets deleted by
+        # clean_value, so templates that slip through from here won't
+        # break anything.
+        # XXX bookmark
+        # print(posnode.children)
+
+        floaters, poschildren = recursively_extract(posnode.children,
+                                 lambda x: isinstance(x, WikiNode) and
+                                           x.kind == NodeKind.TEMPLATE and
+                                           x.args[0][0] == "az-suffix-form")
+        print(floaters)
+        print(poschildren)
+        # XXX new above
+
+        
+        for node in poschildren:
             if isinstance(node, str):
                 for m in re.finditer(r"\n+|[^\n]+", node):
                     p = m.group(0)
