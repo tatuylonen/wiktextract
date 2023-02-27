@@ -5266,7 +5266,11 @@ valid_tags = {
     "before-lenited-fh": "misc",  # Next word starts with lenited fh (Irish)
     "before-past": "misc",  # Used before the past tense (Irish)
     "before-vowel": "misc",  # next words starts with vowel (in pronunciation)
+    "after-vowel": "misc",  # -nən/Azerbaijani
     "before-consonant": "misc",  #oh-/Choctaw
+    "after-consonant": "misc",  # -nən/Azerbaijani
+    "after-consonant-except-l": "misc",
+    "after-l-consonant": "misc",
     "before-s": "misc",
     "before-front-vowel": "misc",
     "before-back-vowel": "misc",
@@ -5530,6 +5534,10 @@ valid_tags = {
     "fourth-person": "person",
     "frequentative": "misc",
     "front-vowel": "misc",
+    "front-vowel-harmony": "misc",  # -nən/Azerbaijani
+    "back-vowel-harmony": "misc",  # -nən/Azerbaijani
+    "rounded-harmony": "misc",
+    "unrounded-harmony": "misc",
     "fusioning": "misc",  # Greenlandic suffixes
     "future": "tense",  # Verb tense
     "future-near": "tense",  # immediate future ba/Zulu

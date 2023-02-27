@@ -30,6 +30,22 @@ LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
 # Matches head tag
 head_tag_re = None
 
+floating_table_templates = {
+    # az-suffix-form creates a style=floatright div that is otherwise
+    # deleted; if it is not pre-expanded, we can intercept the template
+    # XXX separate these kinds of templates into their own set if
+    # there is need to separate them and then join them with
+    # NO_PRE_EXPAND
+    "az-suffix-forms",
+    "az-inf-p",
+    "kk-suffix-forms",
+    "ky-suffix-forms",
+    "tr-inf-p",
+    "tr-suffix-forms",
+    "tt-suffix-forms",
+    "uz-suffix-forms",
+    
+}
 # These two should contain template names that should always be
 # pre-expanded when *first* processing the tree, or not pre-expanded
 # so that the template are left in place with their identifying
@@ -41,14 +57,8 @@ head_tag_re = None
 # cache file with wiktwords, so when testing XXX maybe --override
 # with the affected template would work?
 PRE_EXPAND = set()
-DO_NOT_PRE_EXPAND = {
-    # az-suffix-form creates a style=floatright div that is otherwise
-    # deleted; if it is not pre-expanded, we can intercept the template
-    # XXX separate these kinds of templates into their own set if
-    # there is need to separate them and then join them with
-    # NO_PRE_EXPAND
-    "az-suffix-forms"
-    }
+DO_NOT_PRE_EXPAND = set()
+DO_NOT_PRE_EXPAND.update(floating_table_templates)
 
 # Additional templates to be expanded in the pre-expand phase
 additional_expand_templates = {
@@ -1110,11 +1120,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # print(posnode.children)
 
         floaters, poschildren = recursively_extract(posnode.children,
-                                 lambda x: isinstance(x, WikiNode) and
-                                           x.kind == NodeKind.TEMPLATE and
-                                           x.args[0][0] == "az-suffix-form")
+                                   lambda x: isinstance(x, WikiNode) and
+                                   x.kind == NodeKind.TEMPLATE and
+                                   x.args[0][0] in floating_table_templates)
         print(floaters)
-        print(poschildren)
+        tempnode = WikiNode(NodeKind.LEVEL5, 0)
+        tempnode.args = ['Inflection']
+        tempnode.children = floaters
+        parse_inflection(tempnode, "Floating Div", pos)
+        # print(poschildren)
         # XXX new above
 
         
@@ -1807,6 +1821,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # capturing templates in the process
         text = ctx.node_to_wikitext(node.children)
 
+        print(node)
+        print(node.children)
+        print("node_to_wikitext: ", text)
         # Split text into separate sections for each to-level template
         brace_matches = re.split("({{+|}}+)", text) # ["{{", "template", "}}"]
         template_sections = []

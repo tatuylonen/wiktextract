@@ -6812,7 +6812,34 @@ infl_map = {
     "\u2060mapapag- -an": "",
     # katayin/Tagalog
     "\u2060mapapag-": "",
-    
+
+
+    # -nən/Azerbaijani floating div! Got it to work!
+    "preceding vowel": "",
+    "A / I / O / U": "back-vowel-harmony",
+    "E / Ə / İ / Ö / Ü": "front-vowel-harmony",
+    "postconsonantal": "after-consonant",
+    "postvocalic": "after-vowel",
+    # -ül/Azerbaijani
+    "A / I": "back-vowel-harmony unrounded-harmony",
+    "E / Ə / İ": "front-vowel-harmony unrounded-harmony",
+    "O / U": "back-vowel-harmony rounded-harmony",
+    "Ö / Ü": "front-vowel-harmony rounded-harmony",
+    "postconsonantal except after L": "after-consonant-except-l",
+    "after L": "after-l-consonant",
+    # kk-suffix-forms Kazakh
+    "А / Ы / О / Ұ": "back-vowel-harmony",
+    "Ә / Е / І / Ө / Ү": "front-vowel-harmony",
+    # ky-suffix-forms Kyrgyz
+    "А / Ы": "back-vowel-harmony unrounded-harmony",
+    "Е / И": "front-vowel-harmony unrounded-harmony",
+    "О / У": "back-vowel-harmony rounded-harmony",
+    "Ө / Ү": "front-vowel-harmony unrounded-harmony",
+    # tr-inf-p Turkish
+    "E / İ": "front-vowel-harmony unrounded-harmony",
+    # tt-suffix-forms Tatar
+    "А / Ы / О / У": "back-vowel-harmony",
+    "Ә/ Е / Э / Ө / Ү": "front-vowel-harmony",
 
 }
 
