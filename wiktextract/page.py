@@ -33,9 +33,8 @@ head_tag_re = None
 floating_table_templates = {
     # az-suffix-form creates a style=floatright div that is otherwise
     # deleted; if it is not pre-expanded, we can intercept the template
-    # XXX separate these kinds of templates into their own set if
-    # there is need to separate them and then join them with
-    # NO_PRE_EXPAND
+    # so we add this set into do_not_pre_expand, and intercept the
+    # templates in parse_part_of_speech
     "az-suffix-forms",
     "az-inf-p",
     "kk-suffix-forms",
@@ -50,15 +49,9 @@ floating_table_templates = {
 # pre-expanded when *first* processing the tree, or not pre-expanded
 # so that the template are left in place with their identifying
 # name intact for later filtering.
-# These consts are imported into wiktionary.py, and are here only
-# because their effect is felt here; XXX move into a more appropriate
-# location?
-# Changing these will have an effect only after re-creating the pages
-# cache file with wiktwords, so when testing XXX maybe --override
-# with the affected template would work?
-PRE_EXPAND = set()
-DO_NOT_PRE_EXPAND = set()
-DO_NOT_PRE_EXPAND.update(floating_table_templates)
+
+do_not_pre_expand_templates = set()
+do_not_pre_expand_templates.update(floating_table_templates)
 
 # Additional templates to be expanded in the pre-expand phase
 additional_expand_templates = {
@@ -1123,7 +1116,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                    lambda x: isinstance(x, WikiNode) and
                                    x.kind == NodeKind.TEMPLATE and
                                    x.args[0][0] in floating_table_templates)
-        print(floaters)
         tempnode = WikiNode(NodeKind.LEVEL5, 0)
         tempnode.args = ['Inflection']
         tempnode.children = floaters
@@ -1821,9 +1813,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # capturing templates in the process
         text = ctx.node_to_wikitext(node.children)
 
-        print(node)
-        print(node.children)
-        print("node_to_wikitext: ", text)
         # Split text into separate sections for each to-level template
         brace_matches = re.split("({{+|}}+)", text) # ["{{", "template", "}}"]
         template_sections = []
@@ -1948,7 +1937,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             return None
 
         tree = ctx.parse(subpage_content, pre_expand=True,
-                         additional_expand=additional_expand_templates)
+                         additional_expand=additional_expand_templates,
+                         do_not_pre_expand=do_not_pre_expand_templates)
         assert tree.kind == NodeKind.ROOT
         ret = recurse(tree, seq)
         if ret is None:
@@ -3263,7 +3253,8 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
     # Parse the page, pre-expanding those templates that are likely to
     # influence parsing
     tree = ctx.parse(text, pre_expand=True,
-                     additional_expand=additional_expand_templates)
+                     additional_expand=additional_expand_templates,
+                     do_not_pre_expand=do_not_pre_expand_templates)
     # print("PAGE PARSE:", tree)
 
     top_data = {}
