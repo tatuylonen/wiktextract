@@ -1353,7 +1353,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # "indentation", like "#:" or "##:"
             return False
 
-        # If a recursion call succeeds in push_sense(), bubble it up with added.
+        # If a recursion call succeeds in push_sense(), bubble it up with
+        # `added`.
         # added |= push_sense() or added |= parse_sense_node(...) to OR.
         added = False
 
@@ -1466,10 +1467,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 add_form_of_tags(ctx, name, config.FORM_OF_TEMPLATES, sense_base)
             return None
 
+        link_tuples = []
+
         def extract_link_texts(item):
             """Recursively extracts link texts from the gloss source.  This
             information is used to select whether to remove final "." from
             form_of/alt_of (e.g., ihm/Hunsrik)."""
+            nonlocal link_tuples
             if isinstance(item, (list, tuple)):
                 for x in item:
                     extract_link_texts(x)
@@ -1498,7 +1502,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # get the raw text of non-list contents of this node, and other stuff
         # like tag and category data added to sense_base
         rawgloss = clean_node(config, ctx, sense_base, contents,
-                              template_fn=sense_template_fn)
+                              template_fn=sense_template_fn,
+                              collect_links=True)
 
         if not rawgloss:
             return False
@@ -3469,13 +3474,13 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
     return ret
 
 
-def clean_node(config, ctx, category_data, value, template_fn=None,
-               post_template_fn=None):
+def clean_node(config, ctx, sense_data, value, template_fn=None,
+               post_template_fn=None, collect_links=False):
     """Expands the node to text, cleaning up any HTML and duplicate spaces.
     This is intended for expanding things like glosses for a single sense."""
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, Wtp)
-    assert category_data is None or isinstance(category_data, dict)
+    assert sense_data is None or isinstance(sense_data, dict)
     assert template_fn is None or callable(template_fn)
     assert post_template_fn is None or callable(post_template_fn)
     # print("CLEAN_NODE:", repr(value))
@@ -3518,23 +3523,60 @@ def clean_node(config, ctx, category_data, value, template_fn=None,
                          post_template_fn=post_template_fn)
     # print("clean_node: v={!r}".format(v))
 
-    # Capture categories if category_data has been given.  We also track
+    # Capture categories if sense_data has been given.  We also track
     # Lua execution errors here.
-    if category_data is not None:
+    # If collect_links=True (for glosses), capture links
+    if sense_data is not None:
         # Check for Lua execution error
         if v.find('<strong class="error">Lua execution error') >= 0:
-            data_append(ctx, category_data, "tags", "error-lua-exec")
+            data_append(ctx, sense_data, "tags", "error-lua-exec")
         if v.find('<strong class="error">Lua timeout error') >= 0:
-            data_append(ctx, category_data, "tags", "error-lua-timeout")
+            data_append(ctx, sense_data, "tags", "error-lua-timeout")
         # Capture Category tags
-        for m in re.finditer(r"(?is)\[\[:?\s*Category\s*:([^]|]+)", v):
-            cat = clean_value(config, m.group(1))
-            cat = re.sub(r"\s+", " ", cat)
-            cat = cat.strip()
-            if not cat:
-                continue
-            if cat not in category_data.get("categories", ()):
-                data_append(ctx, category_data, "categories", cat)
+        if not collect_links:
+            for m in re.finditer(r"(?is)\[\[:?\s*Category\s*:([^]|]+)", v):
+                cat = clean_value(config, m.group(1))
+                cat = re.sub(r"\s+", " ", cat)
+                cat = cat.strip()
+                if not cat:
+                    continue
+                if cat not in sense_data.get("categories", ()):
+                    data_append(ctx, sense_data, "categories", cat)
+        else:
+            for m in re.finditer(r"(?is)\[\[:?(\s*([^][|:]+):)?\s*([^]|]+)"
+                                 r"(\|([^]|]+))?\]\]", v):
+                # Add here other stuff different "Something:restofthelink"
+                # things;
+                if m.group(1) and m.group(1).strip() == "Category":
+                    cat = clean_value(config, m.group(3))
+                    cat = re.sub(r"\s+", " ", cat)
+                    cat = cat.strip()
+                    if not cat:
+                        continue
+                    if cat not in sense_data.get("categories", ()):
+                        data_append(ctx, sense_data, "categories", cat)
+                elif not m.group(1):
+                    if m.group(5):
+                        ltext = clean_value(config, m.group(5))
+                        ltarget = clean_value(config, m.group(3))
+                    elif not m.group(3):
+                        continue
+                    else:
+                        txt = clean_value(config, m.group(3))
+                        ltext = txt
+                        ltarget = txt
+                    ltarget = re.sub(r"\s+", " ", ltarget)
+                    ltarget = ltarget.strip()
+                    ltext = re.sub(r"\s+", " ", ltext)
+                    ltext = ltext.strip()
+                    if not ltext and not ltarget:
+                        continue
+                    if not ltext and ltarget:
+                        ltext = ltarget
+                    ltuple = (ltext, ltarget)
+                    if ltuple not in sense_data.get("links", ()):
+                        data_append(ctx, sense_data, "links", ltuple)
+
 
     v = clean_value(config, v)
     # print("After clean_value:", repr(v))
