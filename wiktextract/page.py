@@ -2715,8 +2715,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # thrice-indented. A bare ";" is used to indicate a subtitle-like
             # line with no indentation. ":" at the end of one or more "*"s is
             # used to indicate that the bullet will not be displayed.
-            depth = 0 if args == ";" else args.count("*")
-            item_data = {"depth": depth}
+            item_data = {"depth": args.count("*")}
             templates = []
             is_derived = False
 
