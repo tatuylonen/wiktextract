@@ -283,3 +283,47 @@ foo
                 "word": "foo",
             }
         ])
+
+    def test_page6(self):
+        lst = self.runpage("""
+==Japanese==
+===Verb===
+foo
+
+# sense 1
+#: <dl><dd><span class="Jpan" lang="ja"><a href="/wiki/%E3%81%94%E9%A3%AF#Japanese" title="ご飯">ご<ruby>飯<rp>(</rp><rt>はん</rt><rp>)</rp></ruby></a>を<b><ruby>食<rp>(</rp><rt>た</rt><rp>)</rp></ruby>べる</b></span><dl><dd><i>go-han o <b>taberu</b></i></dd><dd>to <b>eat</b> a meal</dd></dl></dd></dl>
+""")
+        self.assertEqual(lst, [
+            {
+                "forms": [
+                    {
+                        "form": "foo",
+                        "tags": [
+                            "canonical",
+                        ]
+                    }
+                ],
+                "lang": "Japanese",
+                "lang_code": "ja",
+                "pos": "verb",
+                "senses": [
+                    {
+                        "glosses": [
+                            "sense 1"
+                        ],
+                        "raw_glosses": [
+                            "sense 1"
+                        ],
+                        "examples":
+                            [{"english": "to eat a meal",
+                              "roman": "go-han o taberu",
+                              "ruby": [
+                                       ('飯', 'はん'),
+                                       ('食', 'た')
+                                      ],
+                              "text": "ご飯を食べる"}],
+                    },
+                ],
+                "word": "testpage"
+            }
+        ])

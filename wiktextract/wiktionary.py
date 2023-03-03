@@ -11,7 +11,8 @@ import time
 import tarfile
 import collections
 from wikitextprocessor import Wtp
-from .page import parse_page
+from .page import (parse_page, additional_expand_templates, 
+                   do_not_pre_expand_templates)
 from .config import WiktionaryConfig
 from .thesaurus import extract_thesaurus_data
 from .datautils import data_append
@@ -29,7 +30,6 @@ ignore_suffixes = [
 translation_suffixes = [
     "/translations",
 ]
-
 
 def init_special_prefixes(ctx: Wtp) -> None:
     global SPECIAL_PREFIXES
@@ -131,6 +131,13 @@ def parse_wiktionary(ctx, path, config, word_cb, capture_cb,
     def page_cb(model, title, text):
         return page_handler(ctx, model, title, text, capture_cb, config_kwargs)
 
+
+    # langhd is needed for pre-expanding language heading templates in the
+    # Chinese Wiktionary dump file: https://zh.wiktionary.org/wiki/Template:-en-
+    # Move this to lang_specific
+    if ctx.lang_code == "zh":
+        additional_expand_templates.add("langhd")
+    
     list(ctx.process(path, None, phase1_only=True))
     if phase1_only:
         return []

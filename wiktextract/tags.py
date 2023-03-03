@@ -494,6 +494,7 @@ head_final_bantu_map = {
     "class 9/10": "class-9 class-10",
     "class 9/10/1/2": "class-9 class-10 class-1 class-2",
     "class 9/10c": "class-9 class-10",
+    "class 9/c10": "class-9 class-10",
     "class IX/X": "class-9 class-10",
     "class 9a": "class-9a",
     "class 10": "class-10",
@@ -4099,6 +4100,7 @@ xlat_tags_map = {
     "alternative typographic spelling of": "alt-of alternative",
     "especially in typeface names": "typography",
     "alternative spelling": "alternative",
+    "alternative reading": "alternative",  # 鹿児島/Japanese
     "alternative spelling of": "alt-of alternative",
     "alternative form": "alternative",
     "alternative form of": "alt-of alternative",
@@ -4784,6 +4786,8 @@ xlat_tags_map = {
     "class pa": "class-16",
     "class mu": "class-18",
     "predicate marker": "predicative",
+    # riannettere/Italian
+    "ditto": "",
     }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -5262,7 +5266,11 @@ valid_tags = {
     "before-lenited-fh": "misc",  # Next word starts with lenited fh (Irish)
     "before-past": "misc",  # Used before the past tense (Irish)
     "before-vowel": "misc",  # next words starts with vowel (in pronunciation)
+    "after-vowel": "misc",  # -nən/Azerbaijani
     "before-consonant": "misc",  #oh-/Choctaw
+    "after-consonant": "misc",  # -nən/Azerbaijani
+    "after-consonant-except-l": "misc",
+    "after-l-consonant": "misc",
     "before-s": "misc",
     "before-front-vowel": "misc",
     "before-back-vowel": "misc",
@@ -5526,6 +5534,10 @@ valid_tags = {
     "fourth-person": "person",
     "frequentative": "misc",
     "front-vowel": "misc",
+    "front-vowel-harmony": "misc",  # -nən/Azerbaijani
+    "back-vowel-harmony": "misc",  # -nən/Azerbaijani
+    "rounded-harmony": "misc",
+    "unrounded-harmony": "misc",
     "fusioning": "misc",  # Greenlandic suffixes
     "future": "tense",  # Verb tense
     "future-near": "tense",  # immediate future ba/Zulu

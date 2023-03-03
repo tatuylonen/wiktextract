@@ -17,6 +17,7 @@ top_data = require("Module:category tree/data")
 local function extract_tree(data, parts)
   for k, v in pairs(data.LABELS) do
     desc = v.description or ""
+    desc = tostring(desc) -- XXX remove me
     desc = string.gsub(desc, "\n", "\\n")
     table.insert(parts, k .. "@@" .. desc)
     for kk, vv in pairs(v.parents) do

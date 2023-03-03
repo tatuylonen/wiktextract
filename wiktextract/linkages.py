@@ -180,7 +180,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
     assert isinstance(field, str)  # The field under which to store linkage
     assert isinstance(item, str)   # The string to parse
     assert sense is None or isinstance(sense, str)
-    assert isinstance(ruby, str)   # Captured ruby (hiragana/katakana) or ""
+    assert isinstance(ruby, list)   # Captured ruby (hiragana/katakana) or ""
     assert isinstance(pos_datas, list)  # List of senses (containing "glosses")
     assert is_reconstruction in (True, False)
 
@@ -448,7 +448,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
             else:
                 subitems.append(item1)
     if len(subitems) > 1:  # Would be merged from multiple subitems
-        ruby = ""
+        ruby = []  # XXX what is the purpose of this?
     for item1 in subitems:
         if len(subitems) > 1 and item1 in ("...", "…"):
             # Some lists have ellipsis in the middle - don't generate
@@ -818,7 +818,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
             if r:
                 dt["roman"] = r.strip()
             if ruby:
-                dt["ruby"] = ruby.strip()
+                dt["ruby"] = ruby
             if english:
                 dt["english"] = english.strip()
             if taxonomic:

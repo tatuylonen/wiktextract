@@ -30,6 +30,29 @@ LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
 # Matches head tag
 head_tag_re = None
 
+floating_table_templates = {
+    # az-suffix-form creates a style=floatright div that is otherwise
+    # deleted; if it is not pre-expanded, we can intercept the template
+    # so we add this set into do_not_pre_expand, and intercept the
+    # templates in parse_part_of_speech
+    "az-suffix-forms",
+    "az-inf-p",
+    "kk-suffix-forms",
+    "ky-suffix-forms",
+    "tr-inf-p",
+    "tr-suffix-forms",
+    "tt-suffix-forms",
+    "uz-suffix-forms",
+    
+}
+# These two should contain template names that should always be
+# pre-expanded when *first* processing the tree, or not pre-expanded
+# so that the template are left in place with their identifying
+# name intact for later filtering.
+
+do_not_pre_expand_templates = set()
+do_not_pre_expand_templates.update(floating_table_templates)
+
 # Additional templates to be expanded in the pre-expand phase
 additional_expand_templates = {
     "multitrans",
@@ -447,6 +470,26 @@ def is_panel_template(name):
     return False
 
 
+def parse_ruby(config, ctx, node):
+    """Parse a HTML 'ruby' node for a kanji part and a furigana (ruby) part,
+    and return a tuple containing those. Discard the rp-element's parentheses,
+    we don't do anything with them."""
+    assert node.kind == NodeKind.HTML
+    assert node.args == "ruby"
+    ruby_nodes = []
+    furi_nodes = []
+    for child in node.children:
+        if  (not isinstance(child, WikiNode) or 
+             not child.kind == NodeKind.HTML or
+             not (child.args == "rp" or child.args == "rt")):
+            ruby_nodes.append(child)
+        elif child.args == "rt":
+            furi_nodes.append(child)
+    ruby_kanji = clean_node(config, ctx, None, ruby_nodes).strip()
+    furigana = clean_node(config, ctx, None, furi_nodes).strip()
+    return((ruby_kanji, furigana))
+
+
 def parse_sense_linkage(config, ctx, data, name, ht):
     """Parses a linkage (synonym, etc) specified in a word sense."""
     assert isinstance(ctx, Wtp)
@@ -577,6 +620,79 @@ def recursively_extract(contents, fn):
         new_node.children = c1
     else:
         raise RuntimeError("recursively_extract: unhandled kind {}"
+                           .format(kind))
+    return extracted, new_contents
+
+
+def extract_ruby(config, ctx, contents):
+    # If contents is a list, process each element separately
+    extracted = []
+    new_contents = []
+    if isinstance(contents, (list, tuple)):
+        for x in contents:
+            e1, c1 = extract_ruby(config, ctx, x)
+            extracted.extend(e1)
+            new_contents.extend(c1)
+        return extracted, new_contents
+    # If content is not WikiNode, just return it as new contents.
+    if not isinstance(contents, WikiNode):
+        return [], [contents]
+    # Check if this content should be extracted
+    if contents.kind == NodeKind.HTML and contents.args == "ruby":
+        rb = parse_ruby(config, ctx, contents)
+        return [rb], [rb[0]]
+    # Otherwise content is WikiNode, and we must recurse into it.
+    kind = contents.kind
+    new_node = WikiNode(kind, contents.loc)
+    new_contents.append(new_node)
+    if kind in (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
+                NodeKind.LEVEL5, NodeKind.LEVEL6, NodeKind.LINK):
+        # Process args and children
+        assert isinstance(contents.args, (list, tuple))
+        new_args = []
+        for arg in contents.args:
+            e1, c1 = extract_ruby(config, ctx, arg)
+            new_args.append(c1)
+            extracted.extend(e1)
+        new_node.args = new_args
+        e1, c1 = extract_ruby(config, ctx, contents.children)
+        extracted.extend(e1)
+        new_node.children = c1
+    elif kind in (NodeKind.ITALIC, NodeKind.BOLD, NodeKind.TABLE,
+                  NodeKind.TABLE_CAPTION, NodeKind.TABLE_ROW,
+                  NodeKind.TABLE_HEADER_CELL, NodeKind.TABLE_CELL,
+                  NodeKind.PRE, NodeKind.PREFORMATTED):
+        # Process only children
+        e1, c1 = extract_ruby(config, ctx, contents.children)
+        extracted.extend(e1)
+        new_node.children = c1
+    elif kind in (NodeKind.HLINE,):
+        # No arguments or children
+        pass
+    elif kind in (NodeKind.LIST, NodeKind.LIST_ITEM):
+        # Keep args as-is, process children
+        new_node.args = contents.args
+        e1, c1 = extract_ruby(config, ctx, contents.children)
+        extracted.extend(e1)
+        new_node.children = c1
+    elif kind in (NodeKind.TEMPLATE, NodeKind.TEMPLATE_ARG, NodeKind.PARSER_FN,
+                  NodeKind.URL):
+        # Process only args
+        new_args = []
+        for arg in contents.args:
+            e1, c1 = extract_ruby(config, ctx, arg)
+            new_args.append(c1)
+            extracted.extend(e1)
+        new_node.args = new_args
+    elif kind == NodeKind.HTML:
+        # Keep attrs and args as-is, process children
+        new_node.attrs = contents.attrs
+        new_node.args = contents.args
+        e1, c1 = extract_ruby(config, ctx, contents.children)
+        extracted.extend(e1)
+        new_node.children = c1
+    else:
+        raise RuntimeError("extract_ruby: unhandled kind {}"
                            .format(kind))
     return extracted, new_contents
 
@@ -984,7 +1100,34 @@ def parse_language(ctx, config, langnode, language, lang_code):
         first_head_tmplt = True
         collecting_head = True
         start_of_paragraph = True
-        for node in posnode.children:
+
+        # XXX extract templates from posnode with recursively_extract
+        # that break stuff, like ja-kanji or az-suffix-form.
+        # Do the extraction with a list of template names, combined from
+        # different lists, then separate out them into different lists
+        # that are handled at different points of the POS section.
+        # First, extract az-suffix-form, put it in `inflection`,
+        # and parse `inflection`'s content when appropriate later.
+        # The contents of az-suffix-form (and ja-kanji) that generate
+        # divs with "floatright" in their style gets deleted by
+        # clean_value, so templates that slip through from here won't
+        # break anything.
+        # XXX bookmark
+        # print(posnode.children)
+
+        floaters, poschildren = recursively_extract(posnode.children,
+                                   lambda x: isinstance(x, WikiNode) and
+                                   x.kind == NodeKind.TEMPLATE and
+                                   x.args[0][0] in floating_table_templates)
+        tempnode = WikiNode(NodeKind.LEVEL5, 0)
+        tempnode.args = ['Inflection']
+        tempnode.children = floaters
+        parse_inflection(tempnode, "Floating Div", pos)
+        # print(poschildren)
+        # XXX new above
+
+        
+        for node in poschildren:
             if isinstance(node, str):
                 for m in re.finditer(r"\n+|[^\n]+", node):
                     p = m.group(0)
@@ -1044,6 +1187,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # XXX Insert code here that disambiguates between
                 # templates that generate word heads and templates
                 # that don't.
+                # There's head_tag_re that seems like a regex meant
+                # to identify head templates. Too bad it's None.
 
                 # stop processing at {{category}}, {{cat}}... etc.
                 if node.args[0][0] in stop_head_at_these_templates:
@@ -1084,6 +1229,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
         there_are_many_heads = len(pre) > 1
         for i, (pre1, ls) in enumerate(zip(pre, lists)):
+            ruby = []
             if all(not sl for sl in lists[i:]):
                 if i == 0:
                     if isinstance(node, str):
@@ -1129,13 +1275,24 @@ def parse_language(ctx, config, langnode, language, lang_code):
             head_group = i + 1 if there_are_many_heads else None
             # print("parse_part_of_speech: {}: {}: pre={}"
                   # .format(ctx.section, ctx.subsection, pre1))
+            if lang_code == "ja":
+                exp = ctx.parse(ctx.node_to_wikitext(pre1),
+                                # post_template_fn=head_post_template_fn,
+                                expand_all=True)
+                rub, _ = recursively_extract(exp.children,
+                                         lambda x: isinstance(x, WikiNode) and
+                                                   x.kind == NodeKind.HTML and
+                                                   x.args == "ruby")
+                if rub:
+                    for r in rub:
+                        ruby.append(parse_ruby(config, ctx, r))
             text = clean_node(config, ctx, pos_data, pre1,
                               post_template_fn=head_post_template_fn)
             text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
             parse_word_head(ctx, pos, text,
                             pos_data,
                             is_reconstruction,
-                            head_group)
+                            head_group, ruby=ruby)
             text = None
             if "tags" in pos_data:
                 common_tags = pos_data["tags"]
@@ -1199,7 +1356,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # "indentation", like "#:" or "##:"
             return False
 
-        # If a recursion call succeeds in push_sense(), bubble it up with added.
+        # If a recursion call succeeds in push_sense(), bubble it up with
+        # `added`.
         # added |= push_sense() or added |= parse_sense_node(...) to OR.
         added = False
 
@@ -1268,6 +1426,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 return added
 
         def sense_template_fn(name, ht):
+            # print(f"sense_template_fn: {name}, {ht}")
             if name in wikipedia_templates:
                 # parse_wikipedia_template(config, ctx, pos_data, ht)
                 return None
@@ -1311,10 +1470,13 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 add_form_of_tags(ctx, name, config.FORM_OF_TEMPLATES, sense_base)
             return None
 
+        link_tuples = []
+
         def extract_link_texts(item):
             """Recursively extracts link texts from the gloss source.  This
             information is used to select whether to remove final "." from
             form_of/alt_of (e.g., ihm/Hunsrik)."""
+            nonlocal link_tuples
             if isinstance(item, (list, tuple)):
                 for x in item:
                     extract_link_texts(x)
@@ -1343,7 +1505,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # get the raw text of non-list contents of this node, and other stuff
         # like tag and category data added to sense_base
         rawgloss = clean_node(config, ctx, sense_base, contents,
-                              template_fn=sense_template_fn)
+                              template_fn=sense_template_fn,
+                              collect_links=True)
 
         if not rawgloss:
             return False
@@ -1430,11 +1593,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # push_sense() succeeded somewhere down-river, so skip this level
         if added:
             if examples:
-            # this higher-up gloss has examples that we do not want to skip
+                # this higher-up gloss has examples that we do not want to skip
                 ctx.debug("'{}[...]' gloss has examples we want to keep, "
                           "but there are subglosses."
                           .format(repr(rawgloss[:30])),
-                      sortid="page/1498/20230118")
+                          sortid="page/1498/20230118")
             else:
                 return True
 
@@ -1782,7 +1945,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             return None
 
         tree = ctx.parse(subpage_content, pre_expand=True,
-                         additional_expand=additional_expand_templates)
+                         additional_expand=additional_expand_templates,
+                         do_not_pre_expand=do_not_pre_expand_templates)
         assert tree.kind == NodeKind.ROOT
         ret = recurse(tree, seq)
         if ret is None:
@@ -1811,11 +1975,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
             assert isinstance(field, str)
             assert sense is None or isinstance(sense, str)
 
-            #print("PARSE_LINKAGE_ITEM: {} ({}): {}"
-            #      .format(field, sense, contents))
+            # print("PARSE_LINKAGE_ITEM: {} ({}): {}"
+                 # .format(field, sense, contents))
 
             parts = []
-            ruby = ""
+            ruby = []
 
             def item_recurse(contents, italic=False):
                 assert isinstance(contents, (list, tuple))
@@ -1854,10 +2018,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         classes = (node.attrs.get("class") or "").split()
                         if node.args in ("gallery", "ref", "cite", "caption"):
                             continue
-                        elif node.args == "rp":
-                            continue  # Parentheses inside <ruby>
-                        elif node.args == "rt":
-                            ruby += clean_node(config, ctx, None, node)
+                        elif node.args == "ruby":
+                            rb = parse_ruby(config, ctx, node)
+                            ruby.append(rb)
+                            parts.append(rb[0])
                             continue
                         elif node.args == "math":
                             parts.append(clean_node(config, ctx, None, node))
@@ -2288,8 +2452,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if name == "see translation subpage":
                     sense_parts = []
                     sense = None
-                    sub = ht.get(1, None)
-                    m = re.match(r"\s*(([^:\d]*)\s*\d*)\s*:\s*([^:]*)\s*", sub)
+                    sub = ht.get(1, "")
+                    if sub:
+                        m = re.match(r"\s*(([^:\d]*)\s*\d*)\s*:\s*([^:]*)\s*",
+                                     sub)
+                    else:
+                        m = None
                     etym = ""
                     etym_numbered = ""
                     pos = ""
@@ -2297,7 +2465,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         etym_numbered = m.group(1)
                         etym = m.group(2)
                         pos = m.group(3)
-                    if not isinstance(sub, str):
+                    if not sub:
                         ctx.debug("no part-of-speech in "
                                   "{{see translation subpage|...}}, "
                                   "defaulting to just ctx.section "
@@ -2807,7 +2975,23 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             return ""
                     return None
     
-                subtext = clean_node(config, ctx, sense_base, item.children,
+                # bookmark
+                ruby = []
+                contents = item.children
+                if lang_code == "ja":
+                    print(contents)
+                    if (contents and isinstance(contents, str) and
+                       re.match(r"\s*$", contents[0])):
+                        contents = contents[1:]
+                    exp = ctx.parse(ctx.node_to_wikitext(contents),
+                                    # post_template_fn=head_post_template_fn,
+                                    expand_all=True)
+                    rub, rest = extract_ruby(config, ctx, exp.children)
+                    if rub:
+                        for r in rub:
+                            ruby.append(r)
+                        contents = rest
+                subtext = clean_node(config, ctx, sense_base, contents,
                                      template_fn=usex_template_fn)
                 subtext = re.sub(r"\s*\(please add an English "
                                  r"translation of this "
@@ -2818,6 +3002,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # print("subtext:", repr(subtext))
     
                 lines = subtext.splitlines()
+                # print(lines)
+
+                lines = list(re.sub(r"^[#:*]*", "", x).strip() for x in lines)
                 lines = list(x for x in lines
                              if not re.match(
                                      r"(Synonyms: |Antonyms: |Hyponyms: |"
@@ -2834,6 +3021,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 roman = ""
                 # for line in lines:
                 #     print("LINE:", repr(line))
+                #     print(classify_desc(line))
                 if len(lines) == 1 and lang_code != "en":
                     parts = re.split(r"\s*[―—]+\s*", lines[0])
                     if (len(parts) == 2 and
@@ -2874,6 +3062,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 i -= 1
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
+                        if len(lines) >= 2:
+                            if classify_desc(lines[-1]) == "romanization":
+                                roman = lines[-1].strip()
+                                lines = lines[:-1]
     
                     elif (lang_code == "en" and
                           re.match(r"^[#*]*:+", lines[1])):
@@ -2899,6 +3091,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             # non-English, as that seems more common.
                             tr = lines[1]
                             lines = [lines[0]]
+                    elif (usex_type != "quotation" and
+                          lang_code != "en" and
+                          len(lines) == 3):
+                        cls1 = classify_desc(lines[0])
+                        cls2 = classify_desc(lines[1])
+                        cls3 = classify_desc(lines[2])
+                        if (cls3 == "english" and
+                            cls2 in ["english", "romanization"] and
+                            cls1 != "english"):
+                            tr = lines[2].strip()
+                            roman = lines[1].strip()
+                            lines = [lines[0].strip()]
                     elif (usex_type == "quotation" and
                           lang_code != "en" and len(lines) > 2):
                         # for x in lines:
@@ -2980,6 +3184,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         dt["note"] = note
                     if roman:
                         dt["roman"] = roman
+                    if ruby:
+                        dt["ruby"] = ruby
                     examples.append(dt)
     
         return examples
@@ -3198,7 +3404,8 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
     # Parse the page, pre-expanding those templates that are likely to
     # influence parsing
     tree = ctx.parse(text, pre_expand=True,
-                     additional_expand=additional_expand_templates)
+                     additional_expand=additional_expand_templates,
+                     do_not_pre_expand=do_not_pre_expand_templates)
     # print("PAGE PARSE:", tree)
 
     top_data = {}
@@ -3413,13 +3620,13 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
     return ret
 
 
-def clean_node(config, ctx, category_data, value, template_fn=None,
-               post_template_fn=None):
+def clean_node(config, ctx, sense_data, value, template_fn=None,
+               post_template_fn=None, collect_links=False):
     """Expands the node to text, cleaning up any HTML and duplicate spaces.
     This is intended for expanding things like glosses for a single sense."""
     assert isinstance(config, WiktionaryConfig)
     assert isinstance(ctx, Wtp)
-    assert category_data is None or isinstance(category_data, dict)
+    assert sense_data is None or isinstance(sense_data, dict)
     assert template_fn is None or callable(template_fn)
     assert post_template_fn is None or callable(post_template_fn)
     # print("CLEAN_NODE:", repr(value))
@@ -3462,23 +3669,60 @@ def clean_node(config, ctx, category_data, value, template_fn=None,
                          post_template_fn=post_template_fn)
     # print("clean_node: v={!r}".format(v))
 
-    # Capture categories if category_data has been given.  We also track
+    # Capture categories if sense_data has been given.  We also track
     # Lua execution errors here.
-    if category_data is not None:
+    # If collect_links=True (for glosses), capture links
+    if sense_data is not None:
         # Check for Lua execution error
         if v.find('<strong class="error">Lua execution error') >= 0:
-            data_append(ctx, category_data, "tags", "error-lua-exec")
+            data_append(ctx, sense_data, "tags", "error-lua-exec")
         if v.find('<strong class="error">Lua timeout error') >= 0:
-            data_append(ctx, category_data, "tags", "error-lua-timeout")
+            data_append(ctx, sense_data, "tags", "error-lua-timeout")
         # Capture Category tags
-        for m in re.finditer(r"(?is)\[\[:?\s*Category\s*:([^]|]+)", v):
-            cat = clean_value(config, m.group(1))
-            cat = re.sub(r"\s+", " ", cat)
-            cat = cat.strip()
-            if not cat:
-                continue
-            if cat not in category_data.get("categories", ()):
-                data_append(ctx, category_data, "categories", cat)
+        if not collect_links:
+            for m in re.finditer(r"(?is)\[\[:?\s*Category\s*:([^]|]+)", v):
+                cat = clean_value(config, m.group(1))
+                cat = re.sub(r"\s+", " ", cat)
+                cat = cat.strip()
+                if not cat:
+                    continue
+                if cat not in sense_data.get("categories", ()):
+                    data_append(ctx, sense_data, "categories", cat)
+        else:
+            for m in re.finditer(r"(?is)\[\[:?(\s*([^][|:]+):)?\s*([^]|]+)"
+                                 r"(\|([^]|]+))?\]\]", v):
+                # Add here other stuff different "Something:restofthelink"
+                # things;
+                if m.group(1) and m.group(1).strip() == "Category":
+                    cat = clean_value(config, m.group(3))
+                    cat = re.sub(r"\s+", " ", cat)
+                    cat = cat.strip()
+                    if not cat:
+                        continue
+                    if cat not in sense_data.get("categories", ()):
+                        data_append(ctx, sense_data, "categories", cat)
+                elif not m.group(1):
+                    if m.group(5):
+                        ltext = clean_value(config, m.group(5))
+                        ltarget = clean_value(config, m.group(3))
+                    elif not m.group(3):
+                        continue
+                    else:
+                        txt = clean_value(config, m.group(3))
+                        ltext = txt
+                        ltarget = txt
+                    ltarget = re.sub(r"\s+", " ", ltarget)
+                    ltarget = ltarget.strip()
+                    ltext = re.sub(r"\s+", " ", ltext)
+                    ltext = ltext.strip()
+                    if not ltext and not ltarget:
+                        continue
+                    if not ltext and ltarget:
+                        ltext = ltarget
+                    ltuple = (ltext, ltarget)
+                    if ltuple not in sense_data.get("links", ()):
+                        data_append(ctx, sense_data, "links", ltuple)
+
 
     v = clean_value(config, v)
     # print("After clean_value:", repr(v))

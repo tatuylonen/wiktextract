@@ -4189,6 +4189,20 @@ infl_map = {
     "superiority": {"lang": "Tagalog", "then": "superior",},
     "inferiority": {"lang": "Tagalog", "then": "inferior",},
     "equality": {"lang": "Tagalog", "then": "equal",},
+    # sumisid/Tagalog
+    "maka-": {"lang": "Tagalog", "then": "",},
+    "mapa-": {"lang": "Tagalog", "then": "",},
+    "mai-": {"lang": "Tagalog", "then": "",},
+    "maika-": {"lang": "Tagalog", "then": "",},
+    "mapag- -an": {"lang": "Tagalog", "then": "",},
+    "mapagpa- -an": {"lang": "Tagalog", "then": "",},
+    "mapapag- -an": {"lang": "Tagalog", "then": "",},
+    # ipasagot/Tagalog
+    "ma- -an": {"lang": "Tagalog", "then": "",},
+    "mapa- -an": {"lang": "Tagalog", "then": "",},
+    # ayusin/Tagalog
+    "mapag-": {"lang": "Tagalog", "then": "",},
+
 
     "resultative": "resultative",  # sloniti/Proto-Slavic
     "imperfective aorist": "aorist imperfective",  # byti/Proto-Slavic
@@ -6788,7 +6802,45 @@ infl_map = {
     '("my, our")': "first-person possessive",
     '("thy, your")': "second-person possessive",
     '("his, her, its, their")': "third-person possessive",
-    
+
+    # humingi/Tagalog
+    # Why is there \u2060 in so many differen tagalog templates like these???
+    "\u2060 ma- -an": "",
+    "\u2060mapag- -an": "",
+    "\u2060 mapa- -an": "",
+    "\u2060mapagpa- -an": "",
+    "\u2060mapapag- -an": "",
+    # katayin/Tagalog
+    "\u2060mapapag-": "",
+
+
+    # -nən/Azerbaijani floating div! Got it to work!
+    "preceding vowel": "",
+    "A / I / O / U": "back-vowel-harmony",
+    "E / Ə / İ / Ö / Ü": "front-vowel-harmony",
+    "postconsonantal": "after-consonant",
+    "postvocalic": "after-vowel",
+    # -ül/Azerbaijani
+    "A / I": "back-vowel-harmony unrounded-harmony",
+    "E / Ə / İ": "front-vowel-harmony unrounded-harmony",
+    "O / U": "back-vowel-harmony rounded-harmony",
+    "Ö / Ü": "front-vowel-harmony rounded-harmony",
+    "postconsonantal except after L": "after-consonant-except-l",
+    "after L": "after-l-consonant",
+    # kk-suffix-forms Kazakh
+    "А / Ы / О / Ұ": "back-vowel-harmony",
+    "Ә / Е / І / Ө / Ү": "front-vowel-harmony",
+    # ky-suffix-forms Kyrgyz
+    "А / Ы": "back-vowel-harmony unrounded-harmony",
+    "Е / И": "front-vowel-harmony unrounded-harmony",
+    "О / У": "back-vowel-harmony rounded-harmony",
+    "Ө / Ү": "front-vowel-harmony unrounded-harmony",
+    # tr-inf-p Turkish
+    "E / İ": "front-vowel-harmony unrounded-harmony",
+    # tt-suffix-forms Tatar
+    "А / Ы / О / У": "back-vowel-harmony",
+    "Ә/ Е / Э / Ө / Ү": "front-vowel-harmony",
+
 }
 
 

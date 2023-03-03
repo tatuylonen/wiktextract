@@ -13,3 +13,7 @@ kj-wiktwords.sh
 tmp/
 .venv/
 .vscode/
+p
+pages/
+bacpages/
+outtmp/

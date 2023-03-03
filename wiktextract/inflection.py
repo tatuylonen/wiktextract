@@ -733,7 +733,7 @@ def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags,
             elif m is None:
                 if not silent:
                     ctx.debug("inflection table: unrecognized header: {}"
-                              .format(text),
+                              .format(repr(text)),
                               sortid="inflection/735")
                 # Unrecognized header
                 combined_return = or_tagsets(lang, pos, combined_return,
@@ -2472,7 +2472,7 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
        kind != header_kind and
        cleaned != "" and cleaned != "dummy-ignored-text-cell" and
        cleaned not in IGNORED_COLVALUES):
-        print("col: {}".format(col))
+        # print("col: {}".format(col))
         if (not ignored_cell and
             lang not in LANGUAGES_WITH_CELLS_AS_HEADERS):
             ctx.debug("rejected heuristic header: "
