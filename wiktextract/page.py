@@ -2539,7 +2539,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
         descendants = []
 
         def process_list_item_children(args, children):
-            item_data = {"depth": 0 if args == ";" else len(args)}
+            assert isinstance(args, str)
+            assert isinstance(children, list)
+            # The descendants section is a hierarchical bulleted listed. args is
+            # usually some number of "*" characters indicating the level of
+            # indentation of the line, e.g. "***" indicates the line will be
+            # thrice-indented. A bare ";" is used to indicate a subtitle-like
+            # line with no indentation. ":" at the end of one or more "*"s is
+            # used to indicate that the bullet will not be displayed.
+            depth = 0 if args == ";" else args.count("*")
+            item_data = {"depth": depth}
             templates = []
             is_derived = False
 
