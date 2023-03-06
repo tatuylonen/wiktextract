@@ -17,7 +17,23 @@ top_data = require("Module:category tree/data")
 local function extract_tree(data, parts)
   for k, v in pairs(data.LABELS) do
     desc = v.description or ""
-    desc = tostring(desc) -- XXX remove me
+    if type(desc) == "function" then
+        -- Module:category tree/poscatboiler/data/non-lemma forms
+        -- Turns out category tree can return a function where we
+        -- expect a string, and the function is called with a `data`-
+        -- table containing some kind of context data when appropriate,
+        -- in a similar way to how all the {{{langname}}} calls are
+        -- filled in when appropriate. However, we are just getting
+        -- the "templates" here, so we don't have a context to call
+        -- the function with: so instead just give it an empty table
+        -- and hope the function has a sensible condition structure
+        -- that first checks whether it should output a default:
+        -- the gerund template in the above url does this.
+        print("Function returned in description of category tree template `"..
+              k.."`: "..tostring(v.description))
+        desc = desc({})
+    end
+    print( k..": "..desc )
     desc = string.gsub(desc, "\n", "\\n")
     table.insert(parts, k .. "@@" .. desc)
     for kk, vv in pairs(v.parents) do
