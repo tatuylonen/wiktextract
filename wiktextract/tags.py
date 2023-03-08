@@ -5465,6 +5465,11 @@ valid_tags = {
     "dummy-store-hdrspan": "dummy",
     "dummy-load-stored-hdrspans": "dummy",
     "dummy-reset-stored-hdrspans": "dummy",
+    "dummy-section-header": "dummy",  # When tables are split up into tables
+    # within a template so that the main header (like "Infinitives" in the
+    # new Swahili verb tables) is separated from the section it is a header
+    # of, use this to force a section header that is active until it is
+    # replaced by something else down the line.
     "durative": "aspect",  # Verb form  XXX same as continuative?
     "eclipsis": "misc",
     "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian
