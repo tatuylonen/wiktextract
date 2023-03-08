@@ -2748,6 +2748,10 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
                                                 pos, data, tbl, new_titles,
                                                 source, "", depth + 1)
                         if subtbl:
+                            sub_ret.append((rows, titles, after, depth))
+                            rows = []
+                            titles = []
+                            after = ""
                             sub_ret.extend(subtbl)
     
                     # This magic value is used as part of header detection
@@ -2839,9 +2843,11 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
                 # print("  TOP-LEVEL CELL", node)
                 pass
 
-        main_ret = [(rows, titles, after, depth)]
         if sub_ret:
-            main_ret.extend(sub_ret)
+            main_ret = sub_ret
+            main_ret.append((rows, titles, after, depth))
+        else:
+            main_ret = [(rows, titles, after, depth)]
         return main_ret
         
 
