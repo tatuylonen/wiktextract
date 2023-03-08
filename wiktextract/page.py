@@ -3480,6 +3480,21 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
                 if field in sense:
                     sense[field] = list(sorted(set(sense[field])))
 
+    #  If a raw_gloss is identical to something in glosses, remove it
+    for data in ret:
+        for s in data.get("senses", []):
+            new_raw_glosses = []
+            skipped = False
+            for rg in s.get("raw_glosses", []):
+                if rg not in s.get("glosses", []):
+                    new_raw_glosses.append(rg)
+                else:
+                    skipped = True
+            if not new_raw_glosses:
+                del s["raw_glosses"]
+            elif skipped:
+                s["raw_glosses"] = new_raw_glosses
+
     # Return the resulting words
     return ret
 
