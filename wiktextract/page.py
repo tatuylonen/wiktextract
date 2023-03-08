@@ -484,6 +484,12 @@ def parse_ruby(config, ctx, node):
             furi_nodes.append(child)
     ruby_kanji = clean_node(config, ctx, None, ruby_nodes).strip()
     furigana = clean_node(config, ctx, None, furi_nodes).strip()
+    if not ruby_kanji or not furigana:
+        # like in パイスラッシュ there can be a template that creates a ruby
+        # element with an empty something (apparently, seeing as how this
+        # works), leaving no trace of the broken ruby element in the final
+        # HTML source of the page!
+        return
     return((ruby_kanji, furigana))
 
 
@@ -637,7 +643,8 @@ def extract_ruby(config, ctx, contents):
     # Check if this content should be extracted
     if contents.kind == NodeKind.HTML and contents.args == "ruby":
         rb = parse_ruby(config, ctx, contents)
-        return [rb], [rb[0]]
+        if rb:
+            return [rb], [rb[0]]
     # Otherwise content is WikiNode, and we must recurse into it.
     kind = contents.kind
     new_node = WikiNode(kind, contents.loc)
@@ -1282,7 +1289,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                                    x.args == "ruby")
                 if rub:
                     for r in rub:
-                        ruby.append(parse_ruby(config, ctx, r))
+                        rt = parse_ruby(config, ctx, r)
+                        if rt:
+                            ruby.append(rt)
             text = clean_node(config, ctx, pos_data, pre1,
                               post_template_fn=head_post_template_fn)
             text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
@@ -2017,8 +2026,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             continue
                         elif node.args == "ruby":
                             rb = parse_ruby(config, ctx, node)
-                            ruby.append(rb)
-                            parts.append(rb[0])
+                            if rb:
+                                ruby.append(rb)
+                                parts.append(rb[0])
                             continue
                         elif node.args == "math":
                             parts.append(clean_node(config, ctx, None, node))
