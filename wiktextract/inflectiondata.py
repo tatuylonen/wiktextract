@@ -173,7 +173,6 @@ infl_map = {
     "past tense": "past",
     "Positive participial": "positive participle",
     "Negative participial": "negative participle",
-    "Relative forms": "relative object-concord",
     "present tense": "present",
     "future tense": "future",
     "Neuter": "neuter",
@@ -6788,7 +6787,7 @@ infl_map = {
     "Tensed forms": {
         "default": "",
         "lang": "Swahili",
-        "then": "dummy-section-header",
+        "then": "dummy-reset-section-header",
     },
     "Object concord (indicative positive)": {
         "default": "object-concord indicative positive",
@@ -6798,7 +6797,7 @@ infl_map = {
     "Relative forms": {
         "default": "",
         "lang": "Swahili",
-        "then": "dummy-section-header",
+        "then": "dummy-section-header relative object-concord",
     },
     "2nd Person Plural": "second-person plural",
     "free state": "free-state",  #aɣemmar/Tarifit

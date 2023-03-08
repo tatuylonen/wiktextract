@@ -2040,6 +2040,8 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                     if "dummy-section-header" in tt:
                         tblctx.section_header = tt
                         break
+                    if "dummy-reset-section-header" in tt:
+                        tblctx.section_header = []
                 # Text between headers on a row causes earlier headers to
                 # be reset
                 if have_text:

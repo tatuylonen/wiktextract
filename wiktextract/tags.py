@@ -5470,6 +5470,10 @@ valid_tags = {
     # new Swahili verb tables) is separated from the section it is a header
     # of, use this to force a section header that is active until it is
     # replaced by something else down the line.
+    "dummy-reset-section-header": "dummy",  # Explicitly remove the saved
+    # tags in TableContext.section_header; you can also call dummy-section-
+    # header with an otherwise empty tag list, but this is needed when you
+    # need to have tags too.
     "durative": "aspect",  # Verb form  XXX same as continuative?
     "eclipsis": "misc",
     "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian
