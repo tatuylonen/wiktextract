@@ -1208,7 +1208,8 @@ def add_related(ctx, data, tags_lst, related, origtext,
         return  # Likely Wiktionary coding error
     related = unquote_kept_parens(related)
     # Split related by "/" (e.g., grande/Spanish) superlative in head
-    if len(related) > 5:
+    # Do not split if / in word title, see π//Japanese
+    if len(related) > 5 and "/" not in ctx.title:
         alts = split_at_comma_semi(related, separators=["/"])
     else:
         alts = [related]
@@ -1431,13 +1432,13 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction,
     # print("SPLITS:", splits)
     alts = []
     # print("parse_word_head: splits:", splits,
-          # "head_split_re_parens:", head_split_re_parens)
+        # "head_split_re_parens:", head_split_re_parens)
     for i in range(0, len(splits) - head_split_re_parens,
                    head_split_re_parens + 1):
         v = splits[i]
         ending = splits[i + 1] or ""  # XXX is this correct???
         # print("parse_word_head alts v={!r} ending={!r} alts={}"
-        #       .format(v, ending, alts))
+              # .format(v, ending, alts))
         if alts and (v == "" and ending):
             assert ending[0] == " "
             alts[-1] += " or" + ending  # endings starts with space
