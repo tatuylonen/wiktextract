@@ -288,6 +288,7 @@ infl_map = {
     "indicative": "indicative",
     "subjunctive": "subjunctive",
     "person": {
+        "default": "person",
         "lang": "Polish",
         "then": "",  # Needs to be empty for mówić/Polish
     },
@@ -4088,6 +4089,7 @@ infl_map = {
     # Removed duplicates
     "ⲁⲛⲟⲛ": "first-person plural",
     "-": {
+        "default": "",
         "lang": "Coptic",
         "then": "nominal",
         "else": {
@@ -4145,7 +4147,6 @@ infl_map = {
     "mapang- -an": {"lang": "Tagalog", "then": "",},
     "makapagpa-": {"lang": "Tagalog", "then": "",},
     "mapapang-": {"lang": "Tagalog", "then": "",},
-    "mapa- -an": {"lang": "Tagalog", "then": "",},
     "maipagpa-": {"lang": "Tagalog", "then": "",},
     "maipapang-": {"lang": "Tagalog", "then": "",},
     "maikapagpapang-": {"lang": "Tagalog", "then": "",},
@@ -4169,7 +4170,6 @@ infl_map = {
     "ma-": {"lang": "Tagalog", "then": "",},
     "maipag-": {"lang": "Tagalog", "then": "",},
     "maikapag-": {"lang": "Tagalog", "then": "",},
-    "mapag- -an": {"lang": "Tagalog", "then": "",},
     "mapapag-": {"lang": "Tagalog", "then": "",},
     "maipa-": {"lang": "Tagalog", "then": "",},
     "maikapagpa-": {"lang": "Tagalog", "then": "",},
@@ -4197,11 +4197,8 @@ infl_map = {
     "mai-": {"lang": "Tagalog", "then": "",},
     "maika-": {"lang": "Tagalog", "then": "",},
     "mapag- -an": {"lang": "Tagalog", "then": "",},
-    "mapagpa- -an": {"lang": "Tagalog", "then": "",},
-    "mapapag- -an": {"lang": "Tagalog", "then": "",},
     # ipasagot/Tagalog
     "ma- -an": {"lang": "Tagalog", "then": "",},
-    "mapa- -an": {"lang": "Tagalog", "then": "",},
     # ayusin/Tagalog
     "mapag-": {"lang": "Tagalog", "then": "",},
 
@@ -4284,16 +4281,16 @@ infl_map = {
         "then": "spatial-person",
     },
     "ITERATIVE": "iterative",  # náhádleeh/Navajo
-    "early": "archaic",  #soule/Middle English
-    "nominative, accusative": "nominative accusative",  #dale/Middle English
-    "subjunctive plural": "subjunctive plural",  #been/Middle English
+    "early": "archaic",  # soule/Middle English
+    "nominative, accusative": "nominative accusative",  # dale/Middle English
+    "subjunctive plural": "subjunctive plural",  # been/Middle English
+    "Middle Voice": "middle-voice",  # शृणोति/Sanskrit
     "Middle": {
-        "lang": ["Hittite", "Sanskrit",],
+        "lang": ["Hittite", "Sanskrit", "Pali",],
         "then": "middle-voice",  # अवति/Sanskrit
     },
     "Active Voice": "active",
     "Passive Voice": "passive",
-    "Middle Voice": "middle-voice",  #शृणोति/Sanskrit
 
     "Potential mood / Optative mood": "potential",
     # ვენეციური/Georgian
@@ -6870,7 +6867,6 @@ infl_map = {
     # Why is there \u2060 in so many differen tagalog templates like these???
     "\u2060 ma- -an": "",
     "\u2060mapag- -an": "",
-    "\u2060 mapa- -an": "",
     "\u2060mapagpa- -an": "",
     "\u2060mapapag- -an": "",
     # katayin/Tagalog
