@@ -3490,7 +3490,7 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
                     new_raw_glosses.append(rg)
                 else:
                     skipped = True
-            if not new_raw_glosses:
+            if not new_raw_glosses and "raw_glosses" in s:
                 del s["raw_glosses"]
             elif skipped:
                 s["raw_glosses"] = new_raw_glosses
