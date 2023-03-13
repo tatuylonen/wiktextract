@@ -2750,7 +2750,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
             config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
             if t.startswith(tuple(config.OTHER_SUBTITLES["pronunciation"])):
-                if t.startswith(tuple(pron_title + " " for pron_title in config.OTHER_SUBTITLES["pronunciation"])):
+                if t.startswith(tuple(pron_title + " "
+                                     for pron_title in 
+                                     config.OTHER_SUBTITLES["pronunciation"])):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
                     push_etym()
@@ -2794,7 +2796,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     pos = dt["pos"]
                     ctx.start_subsection(t)
                     if "debug" in dt:
-                        ctx.warning("{} in section {}"
+                        ctx.debug("{} in section {}"
                                     .format(dt["debug"], t),
                                     sortid="page/2755")
                     if "warning" in dt:
