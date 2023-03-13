@@ -226,15 +226,15 @@ foo
                 "senses": [
                     {
                         "glosses": ["sense 1", "subsense 1"],
-                        "examples": [ { "text": "subexample 1" } ]
+                        "examples": [{"text": "subexample 1"}]
                     },
                     {
                         "glosses": ["sense 1", "subsense 2"],
                     },
                     {
                         "glosses": ["sense 1"],
-                        "examples": [ { "text":
-                            "example 1 causes sense 1 to get pushed" } ]
+                        "examples": [{"text":
+                                    "example 1 causes sense 1 to get pushed"}]
                     },
                     {
                         "glosses": ["sense 2"],
@@ -242,17 +242,21 @@ foo
                     {
                         "glosses": ["mushroom"],
                         "raw_glosses": ["(mycology) mushroom"],
-                        "topics": ["biology", "mycology","natural-sciences"],
-                        "examples": [ { "text": "example 2" },
-                                      { "text": "example 3" } ],
+                        "topics": ["biology", "mycology", "natural-sciences"],
+                        "examples": [{"text": "example 2"},
+                                     {"text": "example 3"}],
                     },
                     {
                         "glosses": ["one who foos",
+                                    "one who foos more specifically"],
+                        "raw_glosses": ["(person) one who foos",
                                     "one who foos more specifically"],
                         "tags": ["person"],
                     },
                     {
                         "glosses": ["one who foos",
+                                    "another one who foos"],
+                        "raw_glosses": ["(person) one who foos",
                                     "another one who foos"],
                         "tags": ["person"],
                     },
