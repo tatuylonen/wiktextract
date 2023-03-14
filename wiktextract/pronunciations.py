@@ -193,8 +193,6 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             new_parent_hdrs = list(parent_hdrs)
             # look no further, here be dragons...
             if ": " in text or "：" in text:
-                pron = {}
-                pron["tags"] = []
                 parts = re.split(r": |：", text)
                 m = re.match(r"\s*\((([^():]+)\s*(:|：)?\s*([^():]*))\)\s*$",
                             text)
@@ -222,32 +220,36 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     # print(f"    PARTS: {parts}")
                     extra_tags = parts[0]
                     v = ":".join(parts[1:])
-                    pron["zh-pron"] = v
-                    new_parent_hdrs.append(extra_tags)
-                    for hdr in new_parent_hdrs:
-                        hdr = hdr.strip()
-                        if hdr in config.ZH_PRON_TAGS:
-                            for tag in config.ZH_PRON_TAGS[hdr]:
-                                if tag not in pron["tags"]:
-                                    pron["tags"].append(tag)
-                        elif hdr in valid_tags:
-                            if hdr not in pron["tags"]:
-                                pron["tags"].append(hdr)
-                        else:
-                            unknown_header_tags.add(hdr)
-                    # convert into normal IPA format if has the IPA flag
-                    if "IPA" in pron["tags"]:
-                        pron["ipa"] = v
-                        del pron["zh-pron"]
-                        pron["tags"].remove("IPA")
-                    # convert into IPA but retain the Sinological-IPA tag
-                    elif "Sinological-IPA" in pron["tags"]:
-                        pron["ipa"] = v
-                        del pron["zh-pron"]
+                    # split alternative pronunciations split with "," or " / "
+                    for v in re.split(r"\s*,\s*|\s+/\s+", v):
+                        pron = {}
+                        pron["tags"] = []
+                        pron["zh-pron"] = v
+                        new_parent_hdrs.append(extra_tags)
+                        for hdr in new_parent_hdrs:
+                            hdr = hdr.strip()
+                            if hdr in config.ZH_PRON_TAGS:
+                                for tag in config.ZH_PRON_TAGS[hdr]:
+                                    if tag not in pron["tags"]:
+                                        pron["tags"].append(tag)
+                            elif hdr in valid_tags:
+                                if hdr not in pron["tags"]:
+                                    pron["tags"].append(hdr)
+                            else:
+                                unknown_header_tags.add(hdr)
+                        # convert into normal IPA format if has the IPA flag
+                        if "IPA" in pron["tags"]:
+                            pron["ipa"] = v
+                            del pron["zh-pron"]
+                            pron["tags"].remove("IPA")
+                        # convert into IPA but retain the Sinological-IPA tag
+                        elif "Sinological-IPA" in pron["tags"]:
+                            pron["ipa"] = v
+                            del pron["zh-pron"]
 
-                    pron["tags"] = list(sorted(pron["tags"]))
-                    if pron not in data.get("sounds", ()):
-                        data_append(ctx, data, "sounds", pron)
+                        pron["tags"] = list(sorted(pron["tags"]))
+                        if pron not in data.get("sounds", ()):
+                            data_append(ctx, data, "sounds", pron)
             else:
                 new_parent_hdrs.append(text)
 
