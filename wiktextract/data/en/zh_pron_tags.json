@@ -223,6 +223,11 @@
     "Guangzhou",
     "Jyutping"
   ],
+  "(Guangzhou–Hong Kong, Jyutping)": [
+    "Guangzhou",
+    "Hong Kong",
+    "Jyutping"
+  ],
   "(Hokkien": [
     "Hokkien"
   ],
@@ -708,6 +713,10 @@
   ],
   "(Standard Chinese, local variant)": [
     "Standard-Chinese"
+  ],
+  "(Standard Chinese, erhua-ed)": [
+    "Standard-Chinese",
+    "Erhua"
   ],
   "(Standard Chinese, mainland China - Hanyu Da Cidian)": [
     "Standard-Chinese"

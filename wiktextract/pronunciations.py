@@ -170,16 +170,16 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             return "stripped-by-parse_pron_post_template_fn"
         return text
 
-    def parse_expanded_zh_pron(node, parent_hdrs, ut):
+    def parse_expanded_zh_pron(node, parent_hdrs, unknown_header_tags):
         if isinstance(node, list):
             for item in node:
-                parse_expanded_zh_pron(item, parent_hdrs, ut)
+                parse_expanded_zh_pron(item, parent_hdrs, unknown_header_tags)
             return
         if not isinstance(node, WikiNode):
             return
         if node.kind != NodeKind.LIST:
             for item in node.children:
-                parse_expanded_zh_pron(item, parent_hdrs, ut)
+                parse_expanded_zh_pron(item, parent_hdrs, unknown_header_tags)
             return
         for item in node.children:
             assert isinstance(item, WikiNode)
@@ -188,6 +188,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                              if not isinstance(x, WikiNode) or
                                 x.kind != NodeKind.LIST)
             text = clean_node(config, ctx, None, base_item)
+            # print(f"{parent_hdrs}  zhpron: {text}")  # XXX remove me
             text = re.sub(r"(?s)\(Note:.*?\)", "", text)
             new_parent_hdrs = list(parent_hdrs)
             # look no further, here be dragons...
@@ -195,10 +196,11 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 pron = {}
                 pron["tags"] = []
                 parts = re.split(r": |：", text)
-                # cludge for weird synax i.e. (Hokkien: Xiamen, ...)
-                if ("," in parts[1] or
-                    parts[1].replace(")", "").replace("(", "").strip()
-                    in valid_tags):
+                m = re.match(r"\s*\((([^():]+)\s*(:|：)?\s*([^():]*))\)\s*$",
+                            text)
+                # Matches lines with stuff like "(Hokkien: Xiamen, Quanzhou)"
+                # thrown into new_parent_hdrs
+                if m:
                     new_text = text
                     new_text = new_text.replace(" (", ",")
                     new_text = new_text.replace("(", "")
@@ -217,6 +219,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     # if "Zhangzhou" in text:
                     #     print("\nFOUND IN:", text, "\n")
                     #     print("PARTS: ", repr(parts))
+                    # print(f"    PARTS: {parts}")
                     extra_tags = parts[0]
                     v = ":".join(parts[1:])
                     pron["zh-pron"] = v
@@ -231,12 +234,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                             if hdr not in pron["tags"]:
                                 pron["tags"].append(hdr)
                         else:
-                            # erhua cludge
-                            if "(Standard Chinese, erhua-ed)" in text:
-                                pron["tags"].append("Standard Chinese")
-                                pron["tags"].append("Erhua")
-                            else:
-                                ut.add(hdr)
+                            unknown_header_tags.add(hdr)
                     # convert into normal IPA format if has the IPA flag
                     if "IPA" in pron["tags"]:
                         pron["ipa"] = v
@@ -255,18 +253,19 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
 
             for x in item.children:
                 if isinstance(x, WikiNode) and x.kind == NodeKind.LIST:
-                    parse_expanded_zh_pron(x, new_parent_hdrs, ut)
+                    parse_expanded_zh_pron(x, new_parent_hdrs,
+                                           unknown_header_tags)
 
-    def parse_chinese_pron(contents, ut):
+    def parse_chinese_pron(contents, unknown_header_tags):
         if isinstance(contents, list):
             for item in contents:
-                parse_chinese_pron(item, ut)
+                parse_chinese_pron(item, unknown_header_tags)
             return
         if not isinstance(contents, WikiNode):
             return
         if contents.kind != NodeKind.TEMPLATE:
             for item in contents.children:
-                parse_chinese_pron(item, ut)
+                parse_chinese_pron(item, unknown_header_tags)
             return
         if (len(contents.args[0]) == 1 and
             isinstance(contents.args[0][0], str) and
@@ -275,18 +274,18 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             src = ctx.node_to_wikitext(contents)
             expanded = ctx.expand(src, templates_to_expand={"zh-pron"})
             parsed = ctx.parse(expanded)
-            parse_expanded_zh_pron(parsed, [], ut)
+            parse_expanded_zh_pron(parsed, [], unknown_header_tags)
         else:
             for item in contents.children:
-                parse_chinese_pron(item, ut)
+                parse_chinese_pron(item, unknown_header_tags)
             return
 
     if lang_code == "zh":
-        ut = set()
-        parse_chinese_pron(contents, ut)
-        for hdr in ut:
-            print("MISSING ZH-PRON HDR:", repr(hdr))
-            sys.stdout.flush()
+        unknown_header_tags = set()
+        parse_chinese_pron(contents, unknown_header_tags)
+        for hdr in unknown_header_tags:
+            ctx.debug(f"Zh-pron header not found in zh_pron_tags or tags: "
+                      f"{repr(hdr)}", sortid="pronunciations/296/20230324")
 
     def flattened_tree(lines):
         assert isinstance(lines, list)
