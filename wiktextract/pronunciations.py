@@ -321,11 +321,10 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
     # sublists disappear.
 
     have_pronunciations = False
-    prefix = None
     active_pos = None
     
     for litem in flattened_tree(contents):
-
+        prefix = None
         text = clean_node(config, ctx, data, litem,
                           template_fn=parse_pronunciation_template_fn)
         ipa_text = clean_node(config, ctx, data, litem,
@@ -335,6 +334,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
         if not ipa_text:
             ipa_text = text
 
+        
         # Check if the text is just a word or two long, and then
         # straight up compare it to the keys in part_of_speech_map,
         # which is the simplest non-`decode_tags()` method I could
@@ -471,11 +471,13 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     audios[idx]["form"] = prefix
             else:
                 pron = {field: v}
-                if active_pos: pron["pos"] = active_pos
+                if active_pos:
+                    pron["pos"] = active_pos
                 if prefix:
                     pron["form"] = prefix
                 parse_pronunciation_tags(ctx, tagstext, pron)
-                if active_pos: pron["pos"] = active_pos
+                if active_pos:
+                    pron["pos"] = active_pos
                 data_append(ctx, data, "sounds", pron)
             have_pronunciations = True
 
@@ -542,7 +544,8 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 enpr = enpr[1: -1]
             pron = {"enpr": enpr}
             parse_pronunciation_tags(ctx, tagstext, pron)
-            if active_pos: pron["pos"] = active_pos
+            if active_pos:
+                pron["pos"] = active_pos
             if pron not in data.get("sounds", ()):
                 data_append(ctx, data, "sounds", pron)
             have_pronunciations = True
