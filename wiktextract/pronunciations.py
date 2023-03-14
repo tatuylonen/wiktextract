@@ -320,7 +320,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
     # debug printing... The underlying data is changed, and the separated
     # sublists disappear.
 
-    have_pronunciations = False
+    # have_pronunciations = False
     active_pos = None
     
     for litem in flattened_tree(contents):
@@ -370,7 +370,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             pron = {field: m.group(1)}
             if active_pos: pron["pos"] = active_pos
             data_append(ctx, data, "sounds", pron)
-            have_pronunciations = True
+            # have_pronunciations = True
             continue
 
         # Check if it contains Rhymes
@@ -382,7 +382,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     pron = {"rhymes": ending}
                     if active_pos: pron["pos"] = active_pos
                     data_append(ctx, data, "sounds", pron)
-                    have_pronunciations = True
+                    # have_pronunciations = True
             continue
 
         # Check if it contains homophones
@@ -394,7 +394,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     pron = {"homophone": w}
                     if active_pos: pron["pos"] = active_pos
                     data_append(ctx, data, "sounds", pron)
-                    have_pronunciations = True
+                    # have_pronunciations = True
             continue
 
         # Check if it contains Phonetic hangeul
@@ -408,12 +408,12 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     pron = {"hangeul": w}
                     if active_pos: pron["pos"] = active_pos
                     data_append(ctx, data, "sounds", pron)
-                    have_pronunciations = True
+                    # have_pronunciations = True
 
         m = re.search(r"\b(Syllabification|Hyphenation): ([^\s,]*)", text)
         if m:
             data_append(ctx, data, "hyphenation", m.group(2))
-            have_pronunciations = True
+            # have_pronunciations = True
 
         # See if it contains a word prefix restricting which forms the
         # pronunciation applies to (see amica/Latin) and/or parenthesized
@@ -479,7 +479,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 if active_pos:
                     pron["pos"] = active_pos
                 data_append(ctx, data, "sounds", pron)
-            have_pronunciations = True
+            # have_pronunciations = True
 
         # XXX what about {{hyphenation|...}}, {{hyph|...}}
         # and those used to be stored under "hyphenation"
@@ -537,7 +537,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     if active_pos: audio["pos"] = active_pos
                 if audio not in data.get("sounds", ()):
                     data_append(ctx, data, "sounds", audio)
-            have_pronunciations = True
+            # have_pronunciations = True
         audios =[]
         for enpr in enprs:
             if re.match(r"/[^/]+/$", enpr):
@@ -548,9 +548,11 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 pron["pos"] = active_pos
             if pron not in data.get("sounds", ()):
                 data_append(ctx, data, "sounds", pron)
-            have_pronunciations = True
+            # have_pronunciations = True
         enprs = []
     
+    ## I have commented out the otherwise unused have_pronunciation
+    ## toggles; uncomment them to use this debug print
     # if not have_pronunciations and not have_panel_templates:
     #     ctx.debug("no pronunciations found from pronunciation section",
     #               sortid="pronunciations/533")
