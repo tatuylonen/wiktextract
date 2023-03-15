@@ -5174,7 +5174,7 @@ valid_tags = {
     "Foochow-Romanized": "detail",  # latin script for Fuzhou Eastern Min
     "Phak-fa-su": "detail",  # latin alphabet used by missionaries for Hakka (PFS)
     "Hakka-Romanization-System": "detail",  # Taiwanese Hakka Romanization System
-    "Kienning-Colloqial-Romanized": "detail",  # missionary romanization system for the Kienning Dialect of Northern Min
+    "Kienning-Colloquial-Romanized": "detail",  # missionary romanization system for the Kienning Dialect of Northern Min
     "Latinxua-Sin-Wenz": "detail",
     "Tai-lo": "detail",  # romanization system for Taiwanese Hokkien
     "Tongyong-Pinyin": "detail",  # Taiwanese romanization from 2002 to 2008

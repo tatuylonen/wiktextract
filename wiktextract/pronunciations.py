@@ -1,5 +1,4 @@
 import re
-import sys
 import urllib
 import hashlib
 
@@ -48,8 +47,8 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 # Filter out only LEVEL_KINDS; 'or' is doing heavy lifting here
                 # Slip through not-WikiNodes, then slip through WikiNodes that
                 # are not LEVEL_KINDS.
-    if (not any(isinstance(x, WikiNode) and 
-               x.kind == NodeKind.LIST for x in contents)):
+    if (not any(isinstance(x, WikiNode) and
+                x.kind == NodeKind.LIST for x in contents)):
         # expand all templates
         new_contents = []
         for l in contents:
@@ -170,16 +169,19 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             return "stripped-by-parse_pron_post_template_fn"
         return text
 
-    def parse_expanded_zh_pron(node, parent_hdrs, unknown_header_tags):
+    def parse_expanded_zh_pron(node, parent_hdrs, specific_hdrs,
+                               unknown_header_tags):
         if isinstance(node, list):
             for item in node:
-                parse_expanded_zh_pron(item, parent_hdrs, unknown_header_tags)
+                parse_expanded_zh_pron(item, parent_hdrs, specific_hdrs,
+                                       unknown_header_tags)
             return
         if not isinstance(node, WikiNode):
             return
         if node.kind != NodeKind.LIST:
             for item in node.children:
-                parse_expanded_zh_pron(item, parent_hdrs, unknown_header_tags)
+                parse_expanded_zh_pron(item, parent_hdrs, specific_hdrs,
+                                       unknown_header_tags)
             return
         for item in node.children:
             assert isinstance(item, WikiNode)
@@ -191,42 +193,55 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             # print(f"{parent_hdrs}  zhpron: {text}")  # XXX remove me
             text = re.sub(r"(?s)\(Note:.*?\)", "", text)
             new_parent_hdrs = list(parent_hdrs)
+            new_specific_hdrs = list(specific_hdrs)
             # look no further, here be dragons...
             if ": " in text or "：" in text:
                 parts = re.split(r": |：", text)
                 m = re.match(r"\s*\((([^():]+)\s*(:|：)?\s*([^():]*))\)\s*$",
-                            text)
+                             text)
                 # Matches lines with stuff like "(Hokkien: Xiamen, Quanzhou)"
                 # thrown into new_parent_hdrs
                 if m:
-                    new_text = text
-                    new_text = new_text.replace(" (", ",")
-                    new_text = new_text.replace("(", "")
-                    new_text = new_text.replace(")", "")
-                    new_text = new_text.replace(":", ",")
-                    # XXX this needs more attention.  It looks like this
-                    # only considers the first and last subtitle, but e.g.
-                    # in/Chinese has three valid levels.  @yoskari says this
-                    # was a kludge to avoid too many tags in some other cases.
-                    # The correct resolution is still unclear.
-                    #if len(new_parent_hdrs) > 1:
-                    #    new_parent_hdrs = [new_parent_hdrs[0]]
-                    for hdr in new_text.split(","):
-                        new_parent_hdrs.append(hdr.strip())
+                    new_parent_hdrs.append(m.group(2).strip())
+                    for hdr in m.group(4).split(","):
+                        new_specific_hdrs.append(hdr.strip())
                 else:
                     # if "Zhangzhou" in text:
                     #     print("\nFOUND IN:", text, "\n")
                     #     print("PARTS: ", repr(parts))
                     # print(f"    PARTS: {parts}")
                     extra_tags = parts[0]
+                    # Kludge to handle how (Hokkien: Locations) and
+                    # IPA (Specific Location) interact; this is why
+                    # specific_hdrs was introduced to the soup, just
+                    # to specify which are actual hierarchical higher
+                    # level tags (Min'nan, Hokkien, etc.) which should
+                    # always be present and then use specific_hdrs
+                    # for that list of misc sublocations and subdialects
+                    # that can be overridden by more specific stuff
+                    # later.
+                    m = re.match(r"\s*IPA\s*\((.*)\)\s*$", extra_tags)
+                    if m:
+                        new_parent_hdrs.append("IPA")
+                        new_specific_hdrs = [s.strip() for s
+                                             in m.group(1).split(",")]
+                        extra_tags = extra_tags[m.end():]
+
+                    m = re.match(r"\s*\([^()]*,[^()]*\)\s*$", extra_tags)
+                    if m:
+                        extra_tags = extra_tags.strip()[1:-1]  # remove parens
+                        new_parent_hdrs.extend(s.strip() for s in
+                                               extra_tags.split(","))
+                    elif extra_tags:
+                        new_parent_hdrs.append(extra_tags)
+
                     v = ":".join(parts[1:])
                     # split alternative pronunciations split with "," or " / "
                     for v in re.split(r"\s*,\s*|\s+/\s+", v):
                         pron = {}
                         pron["tags"] = []
                         pron["zh-pron"] = v
-                        new_parent_hdrs.append(extra_tags)
-                        for hdr in new_parent_hdrs:
+                        for hdr in new_parent_hdrs + new_specific_hdrs:
                             hdr = hdr.strip()
                             if hdr in config.ZH_PRON_TAGS:
                                 for tag in config.ZH_PRON_TAGS[hdr]:
@@ -255,7 +270,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
 
             for x in item.children:
                 if isinstance(x, WikiNode) and x.kind == NodeKind.LIST:
-                    parse_expanded_zh_pron(x, new_parent_hdrs,
+                    parse_expanded_zh_pron(x, new_parent_hdrs, specific_hdrs,
                                            unknown_header_tags)
 
     def parse_chinese_pron(contents, unknown_header_tags):
@@ -276,7 +291,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             src = ctx.node_to_wikitext(contents)
             expanded = ctx.expand(src, templates_to_expand={"zh-pron"})
             parsed = ctx.parse(expanded)
-            parse_expanded_zh_pron(parsed, [], unknown_header_tags)
+            parse_expanded_zh_pron(parsed, [], [], unknown_header_tags)
         else:
             for item in contents.children:
                 parse_chinese_pron(item, unknown_header_tags)

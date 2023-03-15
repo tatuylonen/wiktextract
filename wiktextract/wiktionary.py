@@ -11,8 +11,7 @@ import time
 import tarfile
 import collections
 from wikitextprocessor import Wtp
-from .page import (parse_page, additional_expand_templates, 
-                   do_not_pre_expand_templates)
+from .page import (parse_page, additional_expand_templates)
 from .config import WiktionaryConfig
 from .thesaurus import extract_thesaurus_data
 from .datautils import data_append
