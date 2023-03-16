@@ -237,7 +237,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
 
                     v = ":".join(parts[1:])
                     # split alternative pronunciations split with "," or " / "
-                    for v in re.split(r"\s*,\s*|\s+/\s+", v):
+                    for v in re.split(r"\s*,\s*|\s+/\s+|[()]", v):
                         pron = {}
                         pron["tags"] = []
                         pron["zh-pron"] = v
