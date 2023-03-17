@@ -1168,6 +1168,9 @@ def add_related(ctx, data, tags_lst, related, origtext,
                 return
             if "class" in tags_lst:
                 return
+            if ctx.section == "Korean" and re.search(r"^\s*\w*>\w*\s*$", related):
+                # ignore Korean "i>ni" / "라>나" values
+                return
             ctx.debug("suspicious related form tags {}: {!r} in {!r}"
                       .format(tags_lst, related, origtext),
                       sortid="form_descriptions/1147")
