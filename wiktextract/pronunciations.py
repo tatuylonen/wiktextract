@@ -236,8 +236,25 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                         new_parent_hdrs.append(extra_tags)
 
                     v = ":".join(parts[1:])
-                    # split alternative pronunciations split with "," or " / "
-                    for v in re.split(r"\s*,\s*|\s+/\s+|[()]", v):
+
+                    #  check for phrases
+                    if (("，" in ctx.title) and
+                       len(v.split(" ")) + v.count(",") == len(ctx.title)):
+                        # This just captures exact matches where you have
+                        # the pronunciation of the whole phrase and nothing
+                        # else. Split on spaces, then because we're not
+                        # splitting next to a comma we need to add the
+                        # count of commas so that it synchs up with the
+                        # unicode string length of the original hanzi,
+                        # where the comma is a separate character (unlike
+                        # in the split list, where it's part of a space-
+                        # separated string, like "teo⁴,".
+                        vals = [v]
+                    else:
+                        # split alternative pronunciations split
+                        # with "," or " / "
+                        vals = re.split(r"\s*,\s*|\s+/\s+|[()]", v)
+                    for v in vals:
                         pron = {}
                         pron["tags"] = []
                         pron["zh-pron"] = v
