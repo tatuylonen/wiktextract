@@ -364,7 +364,6 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
 
     def flattened_tree1(node):
         assert isinstance(node, (WikiNode, str))
-        print("flattened_tree1 node: ", node)
         if isinstance(node, str):
             yield node
             return
@@ -396,9 +395,9 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
 
     for litem in flattened_tree(contents):
         prefix = None
-        print("litem:     ", litem)
         text = clean_node(config, ctx, data, litem,
                           template_fn=parse_pronunciation_template_fn)
+        print(text)
         ipa_text = clean_node(config, ctx, data, litem,
                               post_template_fn=parse_pron_post_template_fn)
         if not text:
@@ -524,7 +523,9 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             data_append(ctx, data, "forms", form)
 
         # Find IPA pronunciations
-        for m in re.finditer(r"(?m)/[^][/,]+?/|\[[^]0-9,/][^],/]*?\]",
+        for m in re.finditer(r"(?m)/[^][\n/,]+?/"
+                             r"|"
+                             r"\[[^]\n0-9,/][^],/]*?\]",
                              ipa_text):
             v = m.group(0)
             # The regexp above can match file links.  Skip them.
