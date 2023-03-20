@@ -172,7 +172,6 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
     def parse_expanded_zh_pron(node, parent_hdrs, specific_hdrs,
                                unknown_header_tags):
 
-        
         def generate_pron(v, new_parent_hdrs, new_specific_hdrs):
             pron = {}
             pron["tags"] = []
@@ -201,7 +200,6 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             if not (pron.get("zh-pron") or pron.get("ipa")):
                 return None
             return pron
-
 
         if isinstance(node, list):
             for item in node:
@@ -363,9 +361,10 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
         assert isinstance(lines, list)
         for line in lines:
             yield from flattened_tree1(line)
-            
+
     def flattened_tree1(node):
         assert isinstance(node, (WikiNode, str))
+        print("flattened_tree1 node: ", node)
         if isinstance(node, str):
             yield node
             return
@@ -381,10 +380,12 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 else:
                     new_children.append(child)
             node.children = new_children
-            node.args="*"
+            node.args = "*"
             yield node
             if sublist:
                 yield from flattened_tree1(sublist)
+        else:
+            yield node
 
     # XXX Do not use flattened_tree more than once here, for example for
     # debug printing... The underlying data is changed, and the separated
@@ -392,9 +393,10 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
 
     # have_pronunciations = False
     active_pos = None
-    
+
     for litem in flattened_tree(contents):
         prefix = None
+        print("litem:     ", litem)
         text = clean_node(config, ctx, data, litem,
                           template_fn=parse_pronunciation_template_fn)
         ipa_text = clean_node(config, ctx, data, litem,
@@ -404,7 +406,6 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
         if not ipa_text:
             ipa_text = text
 
-        
         # Check if the text is just a word or two long, and then
         # straight up compare it to the keys in part_of_speech_map,
         # which is the simplest non-`decode_tags()` method I could
