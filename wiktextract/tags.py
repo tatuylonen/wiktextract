@@ -6410,6 +6410,8 @@ valid_tags = {
     "by-personal-gender": "gender",  # Italian has started to use
     # "feminine or masculine, by sense" to mean "depending on the
     # gender of the person". Bataglia/Italian
+    "toneless-final-syllable-variant": "misc",  # zh-pron template stuff
+                                                # 食物/Chinese
 }
 
 for k, v in valid_tags.items():

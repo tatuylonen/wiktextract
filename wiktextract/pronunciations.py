@@ -171,6 +171,38 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
 
     def parse_expanded_zh_pron(node, parent_hdrs, specific_hdrs,
                                unknown_header_tags):
+
+        
+        def generate_pron(v, new_parent_hdrs, new_specific_hdrs):
+            pron = {}
+            pron["tags"] = []
+            pron["zh-pron"] = v.strip()
+            for hdr in new_parent_hdrs + new_specific_hdrs:
+                hdr = hdr.strip()
+                if hdr in config.ZH_PRON_TAGS:
+                    for tag in config.ZH_PRON_TAGS[hdr]:
+                        if tag not in pron["tags"]:
+                            pron["tags"].append(tag)
+                elif hdr in valid_tags:
+                    if hdr not in pron["tags"]:
+                        pron["tags"].append(hdr)
+                else:
+                    unknown_header_tags.add(hdr)
+            # convert into normal IPA format if has the IPA flag
+            if "IPA" in pron["tags"]:
+                pron["ipa"] = v
+                del pron["zh-pron"]
+                pron["tags"].remove("IPA")
+            # convert into IPA but retain the Sinological-IPA tag
+            elif "Sinological-IPA" in pron["tags"]:
+                pron["ipa"] = v
+                del pron["zh-pron"]
+
+            if not (pron.get("zh-pron") or pron.get("ipa")):
+                return None
+            return pron
+
+
         if isinstance(node, list):
             for item in node:
                 parse_expanded_zh_pron(item, parent_hdrs, specific_hdrs,
@@ -250,38 +282,44 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                         # in the split list, where it's part of a space-
                         # separated string, like "teo⁴,".
                         vals = [v]
+                        pron = generate_pron(v,
+                                             new_parent_hdrs,
+                                             new_specific_hdrs)
+
+                        if pron:
+                            pron["tags"] = list(sorted(pron["tags"]))
+                            if pron not in data.get("sounds", ()):
+                                data_append(ctx, data, "sounds", pron)
+                    elif "→" in v:
+                        vals = re.split("→", v)
+                        for v in vals:
+                            pron = generate_pron(v,
+                                                 new_parent_hdrs,
+                                                 new_specific_hdrs)
+                            if pron:
+                                m = re.match(r"([^()]+)\s*\(toneless"
+                                             r" final syllable variant\)\s*",
+                                             v)
+                                if m:
+                                    pron ["zh-pron"] = m.group(1).strip()
+                                    pron["tags"].append(
+                                            "toneless-final-syllable-variant")
+
+                                pron["tags"] = list(sorted(pron["tags"]))
+                                if pron not in data.get("sounds", ()):
+                                    data_append(ctx, data, "sounds", pron)
                     else:
                         # split alternative pronunciations split
                         # with "," or " / "
                         vals = re.split(r"\s*,\s*|\s+/\s+|[()]", v)
-                    for v in vals:
-                        pron = {}
-                        pron["tags"] = []
-                        pron["zh-pron"] = v
-                        for hdr in new_parent_hdrs + new_specific_hdrs:
-                            hdr = hdr.strip()
-                            if hdr in config.ZH_PRON_TAGS:
-                                for tag in config.ZH_PRON_TAGS[hdr]:
-                                    if tag not in pron["tags"]:
-                                        pron["tags"].append(tag)
-                            elif hdr in valid_tags:
-                                if hdr not in pron["tags"]:
-                                    pron["tags"].append(hdr)
-                            else:
-                                unknown_header_tags.add(hdr)
-                        # convert into normal IPA format if has the IPA flag
-                        if "IPA" in pron["tags"]:
-                            pron["ipa"] = v
-                            del pron["zh-pron"]
-                            pron["tags"].remove("IPA")
-                        # convert into IPA but retain the Sinological-IPA tag
-                        elif "Sinological-IPA" in pron["tags"]:
-                            pron["ipa"] = v
-                            del pron["zh-pron"]
-
-                        pron["tags"] = list(sorted(pron["tags"]))
-                        if pron not in data.get("sounds", ()):
-                            data_append(ctx, data, "sounds", pron)
+                        for v in vals:
+                            pron = generate_pron(v,
+                                                 new_parent_hdrs,
+                                                 new_specific_hdrs)
+                            if pron:
+                                pron["tags"] = list(sorted(pron["tags"]))
+                                if pron not in data.get("sounds", ()):
+                                    data_append(ctx, data, "sounds", pron)
             else:
                 new_parent_hdrs.append(text)
 
