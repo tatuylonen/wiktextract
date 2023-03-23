@@ -137,7 +137,11 @@ def parse_wiktionary(ctx, path, config, word_cb, capture_cb,
     # Move this to lang_specific
     if ctx.lang_code == "zh":
         additional_expand_templates.add("langhd")
-    
+    if ctx.lang_code == "fr":
+        print('Adding template to expand')
+        additional_expand_templates.add("langue")
+        # additional_expand_templates.add("S")
+
     list(ctx.process(path, None, phase1_only=True))
     if phase1_only:
         return []

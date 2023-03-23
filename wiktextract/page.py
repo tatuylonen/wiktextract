@@ -43,7 +43,6 @@ floating_table_templates = {
     "tr-suffix-forms",
     "tt-suffix-forms",
     "uz-suffix-forms",
-    
 }
 # These two should contain template names that should always be
 # pre-expanded when *first* processing the tree, or not pre-expanded
@@ -52,6 +51,8 @@ floating_table_templates = {
 
 do_not_pre_expand_templates = set()
 do_not_pre_expand_templates.update(floating_table_templates)
+
+do_not_pre_expand_templates.update({"catégorie langue"})
 
 # Additional templates to be expanded in the pre-expand phase
 additional_expand_templates = {
@@ -373,7 +374,7 @@ usex_templates = {
     "th-usex",
     "th-x",
     "ur-usex",
-    "ur-x"
+    "ur-x",
     "usex",
     "usex-suffix",
     "ux",
@@ -2412,6 +2413,56 @@ def parse_language(ctx, config, langnode, language, lang_code):
                               template_fn=translation_item_template_fn)
             # print("    TRANSLATION ITEM: {!r}  [{}]".format(item, sense))
             
+            def parse_translation_item_fr(ctx, word, data, item, sense, pos_datas, contents):
+                tr = {}
+                if sense:
+                    tr["sense"] = sense
+                word_tr = None
+                alt = []
+
+                for content in contents:
+                    if (isinstance(content, WikiNode)
+                        and content.kind == NodeKind.TEMPLATE
+                        and len(content.args)):
+                        code = None
+
+                        if content.args[0][0] == "T" and len(content.args) > 1:
+                            code = content.args[1][0]
+                            tr["code"] = code
+                            if code in ctx.LANGUAGES_BY_CODE.keys():
+                                tr["lang"] = ctx.LANGUAGES_BY_CODE[code][0]
+                            else:
+                                ctx.debug("language code {} not associated with language in translation item: {!r} {}"
+                                    .format(code, item, word),
+                                    sortid="page/2386")
+
+                        if content.args[0][0] in ["trad", "trad+", "trad-"] and len(content.args) > 1:
+                            code_tr = content.args[1][0]
+                            if code and code != code_tr:
+                                ctx.debug("inconsistent language codes {} vs "
+                                      "{} in translation item: {!r} {}"
+                                      .format(code_tr, code, item, word),
+                                      sortid="page/2386")
+
+                            if word_tr is None:
+                                word_tr = content.args[2][0]
+                            else:
+                                alt.append(word_tr)
+
+                if word_tr is not None:  
+                    tr["word"] = word_tr
+                    tr["note"] = item
+                    
+                    if len(alt)>0:
+                        tr["alt"] = alt
+
+                    data_append(ctx, data, "translations", tr)
+
+
+            if ctx.lang_code == "fr":
+                parse_translation_item_fr(ctx, word, data, item, sense, pos_datas, contents)
+                return
+
             # Parse the translation item.
             if item:
                 lang = parse_translation_item_text(ctx, word, data, item, sense,
@@ -2849,7 +2900,33 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         for r in rub:
                             ruby.append(r)
                         contents = rest
-                subtext = clean_node(config, ctx, sense_base, contents,
+
+                if ctx.lang_code == "fr":
+                    fr_ref = None
+                    source_idx = None
+                    for i, content in enumerate(contents):
+                        if (
+                            isinstance(content, WikiNode)
+                            and content.kind == NodeKind.TEMPLATE
+                            and len(content.args)
+                            and content.args[0][0] == "source"
+                        ):
+                            source_idx = i
+                            fr_ref = clean_node(
+                                config,
+                                ctx,
+                                sense_base,
+                                content,
+                                template_fn=usex_template_fn,
+                            )
+                            if fr_ref.startswith("— ("):
+                                fr_ref = fr_ref[3:]
+                            if fr_ref.endswith(")"):
+                                fr_ref = fr_ref[:-1]
+                    if source_idx is not None:
+                        contents.pop(source_idx)
+
+                subtext = clean_node(config, ctx, sense_base, contents, 
                                      template_fn=usex_template_fn)
                 subtext = re.sub(r"\s*\(please add an English "
                                  r"translation of this "
@@ -3020,6 +3097,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                      classify_desc(m.group(1)) == "english")):
                     note = m.group(1)
                     subtext = subtext[m.end():]
+                if ctx.lang_code == "fr" and fr_ref is not None:
+                    ref = fr_ref
                 ref = re.sub(r"\s*\(→ISBN\)", "", ref)
                 ref = re.sub(r",\s*→ISBN", "", ref)
                 ref = ref.strip()
@@ -3130,9 +3209,17 @@ def parse_top_template(config, ctx, node, data):
             if arg.startswith("Q") or arg.startswith("Lexeme:L"):
                 data_append(ctx, data, "wikidata", arg)
             return ""
+        if ctx.lang_code == "fr":
+            if "voir" in name:
+                # XXX capture
+                return ""
+            if name == "titre incorrect":
+                # XXX this should be captured to replace page title with the
+                # correct title.  E.g. :-)
+                return ""
         ctx.debug("UNIMPLEMENTED top-level template: {} {}"
-                  .format(name, ht),
-                  sortid="page/2870")
+            .format(name, ht),
+            sortid="page/2870")
         return ""
 
     clean_node(config, ctx, None, [node], template_fn=top_template_fn)
@@ -3185,6 +3272,9 @@ def fix_subtitle_hierarchy(ctx: Wtp, config: WiktionaryConfig, text: str) -> str
             level = 3
         elif lc in config.POS_SUBTITLES:
             level = 4
+        # elif ctx.lang_code == "fr" and lc in config.POS_SUBTITLES.keys():
+        #     print('FOUND FRENCH POS')
+        #     level = 4
         elif lc == config.OTHER_SUBTITLES["translations"]:
             level = 5
         elif lc in config.LINKAGE_SUBTITLES or lc == config.OTHER_SUBTITLES["compounds"]:
@@ -3248,6 +3338,38 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
     # POS templates: https://zh.wiktionary.org/wiki/Category:詞類模板
     if config.dump_file_lang_code == "zh" and ("{{-" in text or "{{=" in text):
         text = ctx.expand(text, pre_expand=True)
+
+    if config.dump_file_lang_code == "fr":
+        if "{{langue" in text:
+
+            def replace_langue_template(match):
+                def replace_template(match):
+                    args = match[2:-2].split("|")
+
+                    return config.LANGUAGES_BY_CODE[args[1]][0]
+
+                match = re.sub(r"{{.*}}", lambda x: replace_template(x.group()), match)
+
+                return match
+
+            text = re.sub(
+                r"=+ {{langue\|.*=+", lambda x: replace_langue_template(x.group()), text
+            )
+
+        if "{{S" in text:
+
+            def replace_section_template(match):
+                def replace_template(match):
+                    args = match[2:-2].split("|")
+
+                    return args[1]
+
+                match = re.sub(r"{{.*}}", lambda x: replace_template(x.group()), match)
+                return match
+
+            text = re.sub(
+                r"=+ {{S\|.*=+", lambda x: replace_section_template(x.group()), text
+            )
 
     # Fix up the subtitle hierarchy.  There are hundreds if not thousands of
     # pages that have, for example, Translations section under Linkage, or
