@@ -1,0 +1,13 @@
+{
+  "synonymes": "synonyms",
+  "quasi-synonymes": "synonyms",
+  "hyperonymes": "hypernyms",
+  "hyponymes": "hyponyms",
+  "holonymes": "holonyms",
+  "meronymes": "meronyms",
+  "troponymes": "troponyms",
+  "antonymes": "antonyms",
+  "voir": "related",
+  "dérivés": "derived",
+  "abréviations": "abbreviations"
+}

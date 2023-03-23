@@ -1,0 +1,9 @@
+{
+  "compounds": "composé",
+  "etymology": ["étymologie"],
+  "translations": "traductions",
+  "ignored_sections": ["racine", "voir aussi"],
+  "inflection_sections": ["conjugaison"],
+  "pronunciation": ["prononciation"],
+  "sense": "mot lui-même"
+}
