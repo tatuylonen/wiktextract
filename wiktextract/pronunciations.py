@@ -397,7 +397,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
         prefix = None
         text = clean_node(config, ctx, data, litem,
                           template_fn=parse_pronunciation_template_fn)
-        print(text)
+        # print(text)
         ipa_text = clean_node(config, ctx, data, litem,
                               post_template_fn=parse_pron_post_template_fn)
         if not text:
