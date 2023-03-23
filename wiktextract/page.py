@@ -2952,6 +2952,22 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 fr_ref = fr_ref[3:]
                             if fr_ref.endswith(")"):
                                 fr_ref = fr_ref[:-1]
+                        elif (
+                            isinstance(content, WikiNode)
+                            and content.kind == NodeKind.TEMPLATE
+                            and len(content.args)
+                            and content.args[0][0] == "exemple"
+                        ):
+                            for j, arg in enumerate(content.args):
+                                if arg[0].startswith("source"):
+                                    fr_ref_raw = arg[0].split("=", 1)[1]
+                                    fr_ref = clean_node(config,
+                                                        ctx, sense_base,
+                                                        fr_ref_raw,
+                                                        template_fn=usex_template_fn)
+
+                                    content.args.pop(j)
+
                     if source_idx is not None:
                         contents.pop(source_idx)
 
