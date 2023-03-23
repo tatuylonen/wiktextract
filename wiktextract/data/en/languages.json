@@ -811,6 +811,29 @@
   "alr": [
     "Alutor"
   ],
+  "als": [
+    "Alemannic German",
+    "Swiss German",
+    "Walser German",
+    "Walserdeutsch",
+    "Walser",
+    "Wallisertiitsch",
+    "Italian Walser",
+    "Pomattertitsch",
+    "Formazza",
+    "Kampel",
+    "Remmaljertittschu",
+    "Rimella",
+    "Chalchoufe",
+    "Titzschu",
+    "Alagna",
+    "Greschóneytitsch",
+    "Greschóney",
+    "Greschoney",
+    "Gressoney",
+    "Éischemtöitschu",
+    "Issime"
+  ],
   "alt": [
     "Southern Altai"
   ],
@@ -2162,6 +2185,9 @@
   "bas": [
     "Basaa"
   ],
+  "bat-smg": [
+    "Samogitian"
+  ],
   "bau": [
     "Badanchi",
     "Bada",
@@ -2473,6 +2499,9 @@
     "Badeshi"
   ],
   "be": [
+    "Belarusian"
+  ],
+  "be-tarask": [
     "Belarusian"
   ],
   "bea": [
@@ -3696,6 +3725,9 @@
   "brz": [
     "Bilbil"
   ],
+  "bs": [
+    "Serbo-Croatian"
+  ],
   "bsa": [
     "Abinomn"
   ],
@@ -4173,6 +4205,9 @@
   ],
   "bxq": [
     "Beele"
+  ],
+  "bxr": [
+    "Buryat"
   ],
   "bxs": [
     "Busam"
@@ -6017,6 +6052,9 @@
   "dip": [
     "Northeastern Dinka"
   ],
+  "diq": [
+    "Zazaki"
+  ],
   "dir": [
     "Dirim"
   ],
@@ -6766,6 +6804,9 @@
   "emk": [
     "Eastern Maninkakan"
   ],
+  "eml": [
+    "Emilian"
+  ],
   "emm": [
     "Mamulique"
   ],
@@ -7164,6 +7205,9 @@
   ],
   "fiu-fin-pro": [
     "Proto-Finnic"
+  ],
+  "fiu-vro": [
+    "Võro"
   ],
   "fiw": [
     "Fiwaga"
@@ -9093,6 +9137,9 @@
     "Hawaiian Sign Language",
     "Hula",
     "Hawaii Sign Language"
+  ],
+  "hr": [
+    "Serbo-Croatian"
   ],
   "hra": [
     "Hrangkhol"
@@ -12059,6 +12106,14 @@
   "ksg": [
     "Kusaghe"
   ],
+  "ksh": [
+    "Central Franconian",
+    "Mittelfränkisch",
+    "Ripuarian",
+    "Moselle Franconian",
+    "Colognian",
+    "Kölsch"
+  ],
   "ksi": [
     "Krisa"
   ],
@@ -12218,6 +12273,10 @@
     "ǁX'auǁ'e",
     "Juǀ'hoansi"
   ],
+  "ku": [
+    "Northern Kurdish",
+    "Kurmanji"
+  ],
   "ku-pro": [
     "Proto-Kurdish"
   ],
@@ -12304,6 +12363,10 @@
   ],
   "kuz": [
     "Kunza"
+  ],
+  "kv": [
+    "Komi-Zyrian",
+    "Komi"
   ],
   "kva": [
     "Bagvalal"
@@ -20635,7 +20698,13 @@
     "Saintongeais",
     "Maraîchin"
   ],
+  "roa-rup": [
+    "Aromanian"
+  ],
   "roa-tar": [
+    "Tarantino"
+  ],
+  "roa-tara": [
     "Tarantino"
   ],
   "roa-tou": [
@@ -21914,6 +21983,9 @@
     "Mende",
     "Mende (New Guinea)"
   ],
+  "simple": [
+    "English"
+  ],
   "sio-pro": [
     "Proto-Siouan"
   ],
@@ -22651,6 +22723,9 @@
   ],
   "squ": [
     "Squamish"
+  ],
+  "sr": [
+    "Serbo-Croatian"
   ],
   "sra": [
     "Saruga"
@@ -28573,6 +28648,20 @@
   ],
   "zh": [
     "Chinese"
+  ],
+  "zh-classical": [
+    "Middle Chinese",
+    "Late Middle Chinese",
+    "Early Middle Chinese"
+  ],
+  "zh-min-nan": [
+    "Min Nan",
+    "Taiwanese"
+  ],
+  "zh-yue": [
+    "Cantonese",
+    "Yue",
+    "Yüeh"
   ],
   "zhb": [
     "Zhaba"

@@ -57,17 +57,11 @@ foo f
                         "glosses": [
                             "sense 1"
                         ],
-                        "raw_glosses": [
-                            "sense 1"
-                        ],
                     },
                     {
                         "glosses": [
                             "sense 2"
                         ],
-                        "raw_glosses": [
-                            "sense 2"
-                        ]
                     }
                 ],
                 "word": "testpage"
@@ -91,7 +85,6 @@ testpage f
                 "senses": [
                     {
                         "glosses": ["sense 1"],
-                        "raw_glosses": ["sense 1"],
                         "tags": ["feminine"],
                     },
                 ],
@@ -120,7 +113,6 @@ foo
                 "senses": [
                     {
                         "glosses": ["sense 1"],
-                        "raw_glosses": ["sense 1"],
                     },
                 ],
                 "word": "C#"
@@ -164,11 +156,9 @@ foo
                 "senses": [
                     {
                         "glosses": ["sense 1"],
-                        "raw_glosses": ["sense 1"],
                     },
                     {
                         "glosses": ["sense 2"],
-                        "raw_glosses": ["sense 2"],
                     },
                     {
                         "glosses": ["mushroom"],
@@ -236,40 +226,38 @@ foo
                 "senses": [
                     {
                         "glosses": ["sense 1", "subsense 1"],
-                        "raw_glosses": ["subsense 1"],
-                        "examples": [ { "text": "subexample 1" } ]
+                        "examples": [{"text": "subexample 1"}]
                     },
                     {
                         "glosses": ["sense 1", "subsense 2"],
-                        "raw_glosses": ["subsense 2"],
                     },
                     {
                         "glosses": ["sense 1"],
-                        "raw_glosses": ["sense 1"],
-                        "examples": [ { "text":
-                            "example 1 causes sense 1 to get pushed" } ]
+                        "examples": [{"text":
+                                    "example 1 causes sense 1 to get pushed"}]
                     },
                     {
                         "glosses": ["sense 2"],
-                        "raw_glosses": ["sense 2"],
                     },
                     {
                         "glosses": ["mushroom"],
                         "raw_glosses": ["(mycology) mushroom"],
-                        "topics": ["biology", "mycology","natural-sciences"],
-                        "examples": [ { "text": "example 2" },
-                                      { "text": "example 3" } ],
+                        "topics": ["biology", "mycology", "natural-sciences"],
+                        "examples": [{"text": "example 2"},
+                                     {"text": "example 3"}],
                     },
                     {
                         "glosses": ["one who foos",
                                     "one who foos more specifically"],
-                        "raw_glosses": ["one who foos more specifically"],
+                        "raw_glosses": ["(person) one who foos",
+                                    "one who foos more specifically"],
                         "tags": ["person"],
                     },
                     {
                         "glosses": ["one who foos",
                                     "another one who foos"],
-                        "raw_glosses": ["another one who foos"],
+                        "raw_glosses": ["(person) one who foos",
+                                    "another one who foos"],
                         "tags": ["person"],
                     },
                 ],
@@ -309,9 +297,6 @@ foo
                 "senses": [
                     {
                         "glosses": [
-                            "sense 1"
-                        ],
-                        "raw_glosses": [
                             "sense 1"
                         ],
                         "examples":

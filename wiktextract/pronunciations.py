@@ -1,5 +1,4 @@
 import re
-import sys
 import urllib
 import hashlib
 
@@ -48,8 +47,8 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 # Filter out only LEVEL_KINDS; 'or' is doing heavy lifting here
                 # Slip through not-WikiNodes, then slip through WikiNodes that
                 # are not LEVEL_KINDS.
-    if (not any(isinstance(x, WikiNode) and 
-               x.kind == NodeKind.LIST for x in contents)):
+    if (not any(isinstance(x, WikiNode) and
+                x.kind == NodeKind.LIST for x in contents)):
         # expand all templates
         new_contents = []
         for l in contents:
@@ -170,16 +169,49 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             return "stripped-by-parse_pron_post_template_fn"
         return text
 
-    def parse_expanded_zh_pron(node, parent_hdrs, ut):
+    def parse_expanded_zh_pron(node, parent_hdrs, specific_hdrs,
+                               unknown_header_tags):
+
+        def generate_pron(v, new_parent_hdrs, new_specific_hdrs):
+            pron = {}
+            pron["tags"] = []
+            pron["zh-pron"] = v.strip()
+            for hdr in new_parent_hdrs + new_specific_hdrs:
+                hdr = hdr.strip()
+                if hdr in config.ZH_PRON_TAGS:
+                    for tag in config.ZH_PRON_TAGS[hdr]:
+                        if tag not in pron["tags"]:
+                            pron["tags"].append(tag)
+                elif hdr in valid_tags:
+                    if hdr not in pron["tags"]:
+                        pron["tags"].append(hdr)
+                else:
+                    unknown_header_tags.add(hdr)
+            # convert into normal IPA format if has the IPA flag
+            if "IPA" in pron["tags"]:
+                pron["ipa"] = v
+                del pron["zh-pron"]
+                pron["tags"].remove("IPA")
+            # convert into IPA but retain the Sinological-IPA tag
+            elif "Sinological-IPA" in pron["tags"]:
+                pron["ipa"] = v
+                del pron["zh-pron"]
+
+            if not (pron.get("zh-pron") or pron.get("ipa")):
+                return None
+            return pron
+
         if isinstance(node, list):
             for item in node:
-                parse_expanded_zh_pron(item, parent_hdrs, ut)
+                parse_expanded_zh_pron(item, parent_hdrs, specific_hdrs,
+                                       unknown_header_tags)
             return
         if not isinstance(node, WikiNode):
             return
         if node.kind != NodeKind.LIST:
             for item in node.children:
-                parse_expanded_zh_pron(item, parent_hdrs, ut)
+                parse_expanded_zh_pron(item, parent_hdrs, specific_hdrs,
+                                       unknown_header_tags)
             return
         for item in node.children:
             assert isinstance(item, WikiNode)
@@ -188,85 +220,122 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                              if not isinstance(x, WikiNode) or
                                 x.kind != NodeKind.LIST)
             text = clean_node(config, ctx, None, base_item)
+            # print(f"{parent_hdrs}  zhpron: {text}")  # XXX remove me
             text = re.sub(r"(?s)\(Note:.*?\)", "", text)
             new_parent_hdrs = list(parent_hdrs)
+            new_specific_hdrs = list(specific_hdrs)
             # look no further, here be dragons...
             if ": " in text or "：" in text:
-                pron = {}
-                pron["tags"] = []
                 parts = re.split(r": |：", text)
-                # cludge for weird synax i.e. (Hokkien: Xiamen, ...)
-                if ("," in parts[1] or
-                    parts[1].replace(")", "").replace("(", "").strip()
-                    in valid_tags):
-                    new_text = text
-                    new_text = new_text.replace(" (", ",")
-                    new_text = new_text.replace("(", "")
-                    new_text = new_text.replace(")", "")
-                    new_text = new_text.replace(":", ",")
-                    # XXX this needs more attention.  It looks like this
-                    # only considers the first and last subtitle, but e.g.
-                    # in/Chinese has three valid levels.  @yoskari says this
-                    # was a kludge to avoid too many tags in some other cases.
-                    # The correct resolution is still unclear.
-                    #if len(new_parent_hdrs) > 1:
-                    #    new_parent_hdrs = [new_parent_hdrs[0]]
-                    for hdr in new_text.split(","):
-                        new_parent_hdrs.append(hdr.strip())
+                m = re.match(r"\s*\((([^():]+)\s*(:|：)?\s*([^():]*))\)\s*$",
+                             text)
+                # Matches lines with stuff like "(Hokkien: Xiamen, Quanzhou)"
+                # thrown into new_parent_hdrs
+                if m:
+                    new_parent_hdrs.append(m.group(2).strip())
+                    for hdr in m.group(4).split(","):
+                        new_specific_hdrs.append(hdr.strip())
                 else:
                     # if "Zhangzhou" in text:
                     #     print("\nFOUND IN:", text, "\n")
                     #     print("PARTS: ", repr(parts))
+                    # print(f"    PARTS: {parts}")
                     extra_tags = parts[0]
-                    v = ":".join(parts[1:])
-                    pron["zh-pron"] = v
-                    new_parent_hdrs.append(extra_tags)
-                    for hdr in new_parent_hdrs:
-                        hdr = hdr.strip()
-                        if hdr in config.ZH_PRON_TAGS:
-                            for tag in config.ZH_PRON_TAGS[hdr]:
-                                if tag not in pron["tags"]:
-                                    pron["tags"].append(tag)
-                        elif hdr in valid_tags:
-                            if hdr not in pron["tags"]:
-                                pron["tags"].append(hdr)
-                        else:
-                            # erhua cludge
-                            if "(Standard Chinese, erhua-ed)" in text:
-                                pron["tags"].append("Standard Chinese")
-                                pron["tags"].append("Erhua")
-                            else:
-                                ut.add(hdr)
-                    # convert into normal IPA format if has the IPA flag
-                    if "IPA" in pron["tags"]:
-                        pron["ipa"] = v
-                        del pron["zh-pron"]
-                        pron["tags"].remove("IPA")
-                    # convert into IPA but retain the Sinological-IPA tag
-                    elif "Sinological-IPA" in pron["tags"]:
-                        pron["ipa"] = v
-                        del pron["zh-pron"]
+                    # Kludge to handle how (Hokkien: Locations) and
+                    # IPA (Specific Location) interact; this is why
+                    # specific_hdrs was introduced to the soup, just
+                    # to specify which are actual hierarchical higher
+                    # level tags (Min'nan, Hokkien, etc.) which should
+                    # always be present and then use specific_hdrs
+                    # for that list of misc sublocations and subdialects
+                    # that can be overridden by more specific stuff
+                    # later.
+                    m = re.match(r"\s*IPA\s*\((.*)\)\s*$", extra_tags)
+                    if m:
+                        new_parent_hdrs.append("IPA")
+                        new_specific_hdrs = [s.strip() for s
+                                             in m.group(1).split(",")]
+                        extra_tags = extra_tags[m.end():]
 
-                    pron["tags"] = list(sorted(pron["tags"]))
-                    if pron not in data.get("sounds", ()):
-                        data_append(ctx, data, "sounds", pron)
+                    m = re.match(r"\s*\([^()]*,[^()]*\)\s*$", extra_tags)
+                    if m:
+                        extra_tags = extra_tags.strip()[1:-1]  # remove parens
+                        new_parent_hdrs.extend(s.strip() for s in
+                                               extra_tags.split(","))
+                    elif extra_tags:
+                        new_parent_hdrs.append(extra_tags)
+
+                    v = ":".join(parts[1:])
+
+                    #  check for phrases
+                    if (("，" in ctx.title) and
+                       len(v.split(" ")) + v.count(",") == len(ctx.title)):
+                        # This just captures exact matches where you have
+                        # the pronunciation of the whole phrase and nothing
+                        # else. Split on spaces, then because we're not
+                        # splitting next to a comma we need to add the
+                        # count of commas so that it synchs up with the
+                        # unicode string length of the original hanzi,
+                        # where the comma is a separate character (unlike
+                        # in the split list, where it's part of a space-
+                        # separated string, like "teo⁴,".
+                        vals = [v]
+                        pron = generate_pron(v,
+                                             new_parent_hdrs,
+                                             new_specific_hdrs)
+
+                        if pron:
+                            pron["tags"] = list(sorted(pron["tags"]))
+                            if pron not in data.get("sounds", ()):
+                                data_append(ctx, data, "sounds", pron)
+                    elif "→" in v:
+                        vals = re.split("→", v)
+                        for v in vals:
+                            pron = generate_pron(v,
+                                                 new_parent_hdrs,
+                                                 new_specific_hdrs)
+                            if pron:
+                                m = re.match(r"([^()]+)\s*\(toneless"
+                                             r" final syllable variant\)\s*",
+                                             v)
+                                if m:
+                                    pron ["zh-pron"] = m.group(1).strip()
+                                    pron["tags"].append(
+                                            "toneless-final-syllable-variant")
+
+                                pron["tags"] = list(sorted(pron["tags"]))
+                                if pron not in data.get("sounds", ()):
+                                    data_append(ctx, data, "sounds", pron)
+                    else:
+                        # split alternative pronunciations split
+                        # with "," or " / "
+                        vals = re.split(r"\s*,\s*|\s+/\s+|[()]", v)
+                        for v in vals:
+                            pron = generate_pron(v,
+                                                 new_parent_hdrs,
+                                                 new_specific_hdrs)
+                            if pron:
+                                pron["tags"] = list(sorted(pron["tags"]))
+                                if pron not in data.get("sounds", ()):
+                                    data_append(ctx, data, "sounds", pron)
             else:
                 new_parent_hdrs.append(text)
 
             for x in item.children:
                 if isinstance(x, WikiNode) and x.kind == NodeKind.LIST:
-                    parse_expanded_zh_pron(x, new_parent_hdrs, ut)
+                    parse_expanded_zh_pron(x, new_parent_hdrs, specific_hdrs,
+                                           unknown_header_tags)
 
-    def parse_chinese_pron(contents, ut):
+    def parse_chinese_pron(contents, unknown_header_tags):
         if isinstance(contents, list):
             for item in contents:
-                parse_chinese_pron(item, ut)
+                parse_chinese_pron(item, unknown_header_tags)
             return
         if not isinstance(contents, WikiNode):
             return
         if contents.kind != NodeKind.TEMPLATE:
             for item in contents.children:
-                parse_chinese_pron(item, ut)
+                parse_chinese_pron(item, unknown_header_tags)
             return
         if (len(contents.args[0]) == 1 and
             isinstance(contents.args[0][0], str) and
@@ -275,24 +344,24 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             src = ctx.node_to_wikitext(contents)
             expanded = ctx.expand(src, templates_to_expand={"zh-pron"})
             parsed = ctx.parse(expanded)
-            parse_expanded_zh_pron(parsed, [], ut)
+            parse_expanded_zh_pron(parsed, [], [], unknown_header_tags)
         else:
             for item in contents.children:
-                parse_chinese_pron(item, ut)
+                parse_chinese_pron(item, unknown_header_tags)
             return
 
     if lang_code == "zh":
-        ut = set()
-        parse_chinese_pron(contents, ut)
-        for hdr in ut:
-            print("MISSING ZH-PRON HDR:", repr(hdr))
-            sys.stdout.flush()
+        unknown_header_tags = set()
+        parse_chinese_pron(contents, unknown_header_tags)
+        for hdr in unknown_header_tags:
+            ctx.debug(f"Zh-pron header not found in zh_pron_tags or tags: "
+                      f"{repr(hdr)}", sortid="pronunciations/296/20230324")
 
     def flattened_tree(lines):
         assert isinstance(lines, list)
         for line in lines:
             yield from flattened_tree1(line)
-            
+
     def flattened_tree1(node):
         assert isinstance(node, (WikiNode, str))
         if isinstance(node, str):
@@ -310,23 +379,25 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 else:
                     new_children.append(child)
             node.children = new_children
-            node.args="*"
+            node.args = "*"
             yield node
             if sublist:
                 yield from flattened_tree1(sublist)
+        else:
+            yield node
 
     # XXX Do not use flattened_tree more than once here, for example for
     # debug printing... The underlying data is changed, and the separated
     # sublists disappear.
 
-    have_pronunciations = False
-    prefix = None
+    # have_pronunciations = False
     active_pos = None
-    
-    for litem in flattened_tree(contents):
 
+    for litem in flattened_tree(contents):
+        prefix = None
         text = clean_node(config, ctx, data, litem,
                           template_fn=parse_pronunciation_template_fn)
+        print(text)
         ipa_text = clean_node(config, ctx, data, litem,
                               post_template_fn=parse_pron_post_template_fn)
         if not text:
@@ -369,7 +440,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             pron = {field: m.group(1)}
             if active_pos: pron["pos"] = active_pos
             data_append(ctx, data, "sounds", pron)
-            have_pronunciations = True
+            # have_pronunciations = True
             continue
 
         # Check if it contains Rhymes
@@ -381,7 +452,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     pron = {"rhymes": ending}
                     if active_pos: pron["pos"] = active_pos
                     data_append(ctx, data, "sounds", pron)
-                    have_pronunciations = True
+                    # have_pronunciations = True
             continue
 
         # Check if it contains homophones
@@ -393,7 +464,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     pron = {"homophone": w}
                     if active_pos: pron["pos"] = active_pos
                     data_append(ctx, data, "sounds", pron)
-                    have_pronunciations = True
+                    # have_pronunciations = True
             continue
 
         # Check if it contains Phonetic hangeul
@@ -407,12 +478,12 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     pron = {"hangeul": w}
                     if active_pos: pron["pos"] = active_pos
                     data_append(ctx, data, "sounds", pron)
-                    have_pronunciations = True
+                    # have_pronunciations = True
 
         m = re.search(r"\b(Syllabification|Hyphenation): ([^\s,]*)", text)
         if m:
             data_append(ctx, data, "hyphenation", m.group(2))
-            have_pronunciations = True
+            # have_pronunciations = True
 
         # See if it contains a word prefix restricting which forms the
         # pronunciation applies to (see amica/Latin) and/or parenthesized
@@ -452,7 +523,9 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             data_append(ctx, data, "forms", form)
 
         # Find IPA pronunciations
-        for m in re.finditer(r"(?m)/[^][/,]+?/|\[[^]0-9,/][^],/]*?\]",
+        for m in re.finditer(r"(?m)/[^][\n/,]+?/"
+                             r"|"
+                             r"\[[^]\n0-9,/][^],/]*?\]",
                              ipa_text):
             v = m.group(0)
             # The regexp above can match file links.  Skip them.
@@ -470,13 +543,15 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     audios[idx]["form"] = prefix
             else:
                 pron = {field: v}
-                if active_pos: pron["pos"] = active_pos
+                if active_pos:
+                    pron["pos"] = active_pos
                 if prefix:
                     pron["form"] = prefix
                 parse_pronunciation_tags(ctx, tagstext, pron)
-                if active_pos: pron["pos"] = active_pos
+                if active_pos:
+                    pron["pos"] = active_pos
                 data_append(ctx, data, "sounds", pron)
-            have_pronunciations = True
+            # have_pronunciations = True
 
         # XXX what about {{hyphenation|...}}, {{hyph|...}}
         # and those used to be stored under "hyphenation"
@@ -534,19 +609,22 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     if active_pos: audio["pos"] = active_pos
                 if audio not in data.get("sounds", ()):
                     data_append(ctx, data, "sounds", audio)
-            have_pronunciations = True
+            # have_pronunciations = True
         audios =[]
         for enpr in enprs:
             if re.match(r"/[^/]+/$", enpr):
                 enpr = enpr[1: -1]
             pron = {"enpr": enpr}
             parse_pronunciation_tags(ctx, tagstext, pron)
-            if active_pos: pron["pos"] = active_pos
+            if active_pos:
+                pron["pos"] = active_pos
             if pron not in data.get("sounds", ()):
                 data_append(ctx, data, "sounds", pron)
-            have_pronunciations = True
+            # have_pronunciations = True
         enprs = []
     
+    ## I have commented out the otherwise unused have_pronunciation
+    ## toggles; uncomment them to use this debug print
     # if not have_pronunciations and not have_panel_templates:
     #     ctx.debug("no pronunciations found from pronunciation section",
     #               sortid="pronunciations/533")
