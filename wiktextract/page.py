@@ -2881,6 +2881,143 @@ def parse_language(ctx, config, langnode, language, lang_code):
             process_children(node, pos)
             stack.pop()
 
+    def extract_examples_fr(contents, sense_base):
+        dt = {}
+        if contents is None:
+            return dt
+        
+        def is_template_node(node, name=None):
+            if name:
+                return isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE and len(node.args) and node.args[0][0].strip() == name
+            else:
+                return isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE
+
+        exemple_idx = None
+        for (idx, content) in enumerate(contents):
+            if is_template_node(content, 'exemple'):
+                exemple_idx = idx
+        
+        # If examples uses the exemple template, extract information directly from the template
+        if exemple_idx is not None:
+            exemple_node = contents.pop(exemple_idx)
+            args = [arg[0] for arg in exemple_node.args if arg != []]
+
+            # Case: Exemple with no text 
+            if len(args) <= 2:
+                return dt
+            # Case: Exemple with text
+            for arg in args:
+                if arg == 'exemple':
+                    continue
+                
+                value, key = None, None
+                if not isinstance(arg, str):
+                    value = arg
+                else:
+                    arg_separated = arg.split('=', 1)
+                    if len(arg_separated) == 1:
+                        value = arg_separated[0]
+                    else:
+                        key, value = arg_separated
+
+                clean_value = clean_node(config, ctx, sense_base, value)  
+                if (key == "1" or key is None) and clean_value:
+                    dt['text'] = clean_value       
+                elif key in ["2", "sens"]:
+                    dt["translation"] = clean_value     
+                elif key in ["3","tr"] and clean_value:
+                    dt["roman"] = clean_value      
+                elif key == "lang":
+                    dt['lang_code'] = clean_value
+                elif key == "source" and clean_value:
+                    dt['ref'] = clean_value
+                elif key == "lien" and clean_value:
+                    dt['link'] = clean_value
+        
+        source_idx = None
+        for (idx, content) in enumerate(contents):
+            if is_template_node(content, 'source'):
+                source_idx = idx
+
+        # If source template is present, extract source information from the template
+        if source_idx is not None:
+            source_node = contents.pop(source_idx)
+            args = [arg[0] for arg in source_node.args if arg != []]
+
+            for arg in args:
+                if arg == 'source':
+                    continue
+                
+                
+                value, key = None, None
+                if not isinstance(arg, str):
+                    value = arg
+                else:
+                    arg_separated = arg.split('=', 1)
+                    if len(arg_separated) == 1:
+                        value = arg_separated[0]
+                    else:
+                        key, value = arg_separated
+                clean_value = clean_node(config, ctx, sense_base, value)  
+                if (key == "1" or key is None) and clean_value:
+                    if 'ref' in dt and dt['ref']:
+                        ctx.debug("Found multiple sources for example: {} and {}".format(dt['ref'], clean_value))
+                    dt['ref'] = clean_value
+                elif key == "lien" and clean_value:
+                    dt['link'] = clean_value
+
+        citation_idx = None
+        for (idx, content) in enumerate(contents):
+            if is_template_node(content) and content.args[0][0].startswith('Citation'):
+                citation_idx = idx
+
+        # If citation template is present, extract citation information from the template
+        if citation_idx:
+            citation_node = contents.pop(citation_idx)
+            clean_value = clean_node(config, ctx, sense_base, citation_node)  
+            clean_value = clean_value[3:] if clean_value.startswith('— (') else clean_value
+            clean_value = clean_value[:-2] if clean_value.endswith('.)') else clean_value
+
+            if 'ref' in dt and dt['ref']:
+                ctx.debug("Found multiple sources for example: {} and {}".format(dt['ref'], clean_value))
+            dt['ref'] = clean_value
+
+
+        # Look for category information in the example and move to note field
+        fr_category_templates = ['argot', 'figuré', 'péjoratif', 'familier']
+        # Ignore these templates
+        fr_ignore_templates = ['réf']
+
+
+        pop_idxs = []
+        for (idx, content) in enumerate(contents):
+            if is_template_node(content):
+                name = content.args[0][0].strip()
+                if name in fr_category_templates:
+                    pop_idxs.append(idx)
+                    # xxx: extract category name only from template
+                    clean_category = clean_node(config, ctx, sense_base, content)
+                    if not 'note' in dt:
+                        dt['note'] = [clean_category]
+                    else:
+                        dt['note'].append(clean_category)
+                elif name in fr_ignore_templates:
+                    pop_idxs.append(idx)
+                else:
+                    ctx.debug("Possible category template in example which is not extracted to note field: {}".format(content))
+
+        contents = [content for (idx, content) in enumerate(contents) if idx not in pop_idxs]
+
+        # Assume that remaining information is the example text itself
+        clean_text = clean_node(config, ctx, sense_base, contents)
+        if clean_text and clean_text.strip():
+            dt['text'] = clean_text
+
+        if 'text' in dt.keys():
+            return dt
+
+        return {}
+
     def extract_examples(others, sense_base):
         """Parses through a list of definitions and quotes to find examples.
         Returns a list of example dicts to be added to sense data. Adds
@@ -2917,7 +3054,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 ruby = []
                 contents = item.children
                 if lang_code == "ja":
-                    print(contents)
                     if (contents and isinstance(contents, str) and
                        re.match(r"\s*$", contents[0])):
                         contents = contents[1:]
@@ -2931,45 +3067,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
                         contents = rest
 
                 if ctx.lang_code == "fr":
-                    fr_ref = None
-                    source_idx = None
-                    for i, content in enumerate(contents):
-                        if (
-                            isinstance(content, WikiNode)
-                            and content.kind == NodeKind.TEMPLATE
-                            and len(content.args)
-                            and content.args[0][0] == "source"
-                        ):
-                            source_idx = i
-                            fr_ref = clean_node(
-                                config,
-                                ctx,
-                                sense_base,
-                                content,
-                                template_fn=usex_template_fn,
-                            )
-                            if fr_ref.startswith("— ("):
-                                fr_ref = fr_ref[3:]
-                            if fr_ref.endswith(")"):
-                                fr_ref = fr_ref[:-1]
-                        elif (
-                            isinstance(content, WikiNode)
-                            and content.kind == NodeKind.TEMPLATE
-                            and len(content.args)
-                            and content.args[0][0] == "exemple"
-                        ):
-                            for j, arg in enumerate(content.args):
-                                if arg[0].startswith("source"):
-                                    fr_ref_raw = arg[0].split("=", 1)[1]
-                                    fr_ref = clean_node(config,
-                                                        ctx, sense_base,
-                                                        fr_ref_raw,
-                                                        template_fn=usex_template_fn)
+                    dt = extract_examples_fr(contents, sense_base)
+                    if dt:
+                        examples.append(dt)
+                    continue
 
-                                    content.args.pop(j)
-
-                    if source_idx is not None:
-                        contents.pop(source_idx)
 
                 subtext = clean_node(config, ctx, sense_base, contents, 
                                      template_fn=usex_template_fn)
@@ -3142,8 +3244,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                      classify_desc(m.group(1)) == "english")):
                     note = m.group(1)
                     subtext = subtext[m.end():]
-                if ctx.lang_code == "fr" and fr_ref is not None:
-                    ref = fr_ref
                 ref = re.sub(r"\s*\(→ISBN\)", "", ref)
                 ref = re.sub(r",\s*→ISBN", "", ref)
                 ref = ref.strip()
@@ -3392,7 +3492,7 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
                 def replace_template(match):
                     args = match[2:-2].split("|")
 
-                    return config.LANGUAGES_BY_CODE[args[1]][0]
+                    return config.LANGUAGES_BY_CODE[args[1]][0] if args[1] in config.LANGUAGES_BY_CODE else args[1]
 
                 match = re.sub(r"{{.*}}", lambda x: replace_template(x.group()), match)
 
