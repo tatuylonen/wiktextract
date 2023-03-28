@@ -3515,20 +3515,23 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
         text = ctx.expand(text, pre_expand=True)
 
     if config.dump_file_lang_code == "fr":
+        template_regex = r"{{.*}}"
+
         if "{{langue" in text:
 
             def replace_langue_template(match):
                 def replace_template(match):
                     args = match[2:-2].split("|")
+                    section_lang_code = args[1]
 
-                    return config.LANGUAGES_BY_CODE[args[1]][0] if args[1] in config.LANGUAGES_BY_CODE else args[1]
+                    return config.LANGUAGES_BY_CODE[section_lang_code][0] if args[1] in config.LANGUAGES_BY_CODE else section_lang_code
 
-                match = re.sub(r"{{.*}}", lambda x: replace_template(x.group()), match)
+                match = re.sub(template_regex, lambda x: replace_template(x.group()), match)
 
                 return match
 
-            text = re.sub(
-                r"=+ {{langue\|.*=+", lambda x: replace_langue_template(x.group()), text
+            language_header_regex = r"=+[  ]*{{[  ]*langue[  ]*\|.*=+"
+            text = re.sub(language_header_regex, lambda x: replace_langue_template(x.group()), text
             )
 
         if "{{S" in text:
@@ -3536,15 +3539,17 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
             def replace_section_template(match):
                 def replace_template(match):
                     args = match[2:-2].split("|")
+                    section_name = args[1]
 
-                    return args[1]
+                    return section_name
 
-                match = re.sub(r"{{.*}}", lambda x: replace_template(x.group()), match)
+                match = re.sub(template_regex, lambda x: replace_template(x.group()), match)
                 return match
 
-            text = re.sub(
-                r"=+ {{S\|.*=+", lambda x: replace_section_template(x.group()), text
-            )
+            section_header_regex = r"=+[  ]*{{[  ]*S[  ]*\|.*=+"
+            text = re.sub(section_header_regex,
+                          lambda x: replace_section_template(x.group()),
+                          text)
 
     # Fix up the subtitle hierarchy.  There are hundreds if not thousands of
     # pages that have, for example, Translations section under Linkage, or
