@@ -22,6 +22,7 @@ from wiktextract.form_descriptions import (
     decode_tags, parse_word_head, parse_sense_qualifier,
     distw, parse_alt_or_inflection_of, classify_desc)
 from wiktextract.inflection import parse_inflection_section, TableContext
+from wiktextract.data.fr.categories_and_tags import (french_category_templates, french_tag_templates, french_keep_templates, french_ignore_templates)
 
 # NodeKind values for subtitles
 LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
@@ -1528,11 +1529,15 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # In the French Wiktionary, tags are mostly in the form of templates
         # these can be extracted before cleaning the node
         if ctx.lang_code == "fr":
-            _, cleaned_tags, tags_idxs = extract_tags_fr(config, ctx, sense_base, contents)
-            for tag in cleaned_tags:
+            categories, tags, idxs_to_remove = extract_categories_and_tags_fr(config, ctx, sense_base, contents)
+
+            for category in categories:
+                data_append(ctx, sense_base, "categories", category)
+
+            for tag in tags:
                 data_append(ctx, sense_base, "tags", tag)
 
-        contents = [content for (idx, content) in enumerate(contents) if idx not in tags_idxs]
+        contents = [content for (idx, content) in enumerate(contents) if idx not in idxs_to_remove]
 
         # get the raw text of non-list contents of this node, and other stuff
         # like tag and category data added to sense_base
@@ -2890,42 +2895,46 @@ def parse_language(ctx, config, langnode, language, lang_code):
             process_children(node, pos)
             stack.pop()
 
-    def extract_tags_fr(config, ctx, sense_base, contents):
-        """ Identifies categorical tags in the French Wiktionary. It returns the nodes themselves, their cleaned content and their indices within 'contents' so that the calling function can decide whether or not to remove them from 'contents' before proceeding.
+    def extract_categories_and_tags_fr(config, ctx, sense_base, contents):
+        """ Identifies categories and (grammatical) tags of the French Wiktionary. It returns the nodes themselves, their cleaned content and their indices within 'contents' so that the calling function can decide whether or not to remove them from 'contents' before proceeding.
         """
-        # These templates correlate to category tags in the French wiktionary.
-        fr_category_templates = ['Bourgogne', 'CA', 'CH', 'Canada', 'Congo-Brazzaville', 'Côte-d’Ivoire', 'Franche-Comté', 'Gabon', 'LGBT', 'Languedoc-Roussillon', 'Normandie', 'Occitanie', 'Provence', 'Québec', 'RÉF', 'Savoie', 'Suisse', 'Vosges', 'abréviation', 'absolument', 'anglicisme', 'archaïsme', 'argot', 'argot polytechnicien', 'armes', 'atomes', 'au masculin', 'au pluriel', 'au singulier', 'boissons', 'couleurs', 'couteaux', 'cépages', 'diaéthique', 'désuet', 'en particulier', 'extrêmement rare', 'familier', 'fchim', 'figuré', 'gâteaux', 'hapax', 'info lex', 'insectes', 'instruments à vent', 'intransitif', 'lacs', 'langues', 'lexique', 'littéraire', 'localités', 'légumes', 'léporidés', 'marque', 'néologisme', 'oiseaux', 'par analogie', 'par euphémisme', 'par extension', 'par métonymie', 'par plaisanterie', 'plantes', 'poissons', 'ponctuations', 'populaire', 'pronl', 'préparations', 'péjoratif', 'rare', 'religieux', 'région', 'régions', 'sauces', 'sens propre', 'symboles unités', 'term', 'très rare', 'vieilli', 'virus', 'vulgaire', 'ébauche-déf', 'équiv-pour', 'étyl']
 
-        # Ignore these templates
-        fr_ignore_templates = ['réf','Modèle:Accord des couleurs']
+        def get_label_in_parentheses(s):
+            if '(' in s and ')' in s:
+                return s[s.find('(')+1:s.find(')')]
+            else:
+                return s
 
-        # Keep these templates and include in gloss
-        # These templates are kept anyway, but making them explicit here allows avoiding unnecessary debugging messages
-        fr_templates_to_keep = ['lien', 'e', 'couleur', 'note', 'cf', 'R', 'w', 'variante de', 'siècle2', 'variante orthographique de', 'pron']
+        tags = []
+        categories = []
 
-        nodes = []
-        clean_nodes = []
-        idxs = []
+        idxs_to_remove = []
+
         for (idx, content) in enumerate(contents):
             if isinstance(content, WikiNode) and content.kind == NodeKind.TEMPLATE:
                 name = content.args[0][0].strip()
-                if name in fr_category_templates:
-                    idxs.append(idx)
-                    nodes.append(content)
-                    clean_category = clean_node(config, ctx, sense_base, content)
+                if name in french_category_templates:
+                    idxs_to_remove.append(idx)
+                    category = clean_node(config, ctx, sense_base, content)
+                    category = get_label_in_parentheses(category)
 
-                    if '(' in clean_category and ')' in clean_category:
-                        clean_category = clean_category[clean_category.find('(')+1:clean_category.find(')')]
+                    categories.append(category)
 
-                    clean_nodes.append(clean_category)
+                elif name in french_tag_templates:
+                    idxs_to_remove.append(idx)
+                    tag = clean_node(config, ctx, sense_base, content)
+                    tag = get_label_in_parentheses(tag)
 
-                elif name in fr_ignore_templates:
-                    idxs.append(idx)
-                elif name not in fr_templates_to_keep:
-                    clean_category = clean_node(config, ctx, sense_base, content)   
+                    tags.append(tag)
 
-                    ctx.debug("Possible category template which is not extracted: {}, cleaned: {}".format(content, clean_category))
-        return nodes, clean_nodes, idxs
+                elif name in french_ignore_templates:
+                    idxs_to_remove.append(idx)
+
+                elif name not in french_keep_templates:
+                    cleaned = clean_node(config, ctx, sense_base, content)   
+
+                    ctx.debug("Possible category template which is not extracted: {}, cleaned: {}".format(content, cleaned))
+        return categories, tags, idxs_to_remove
 
     def extract_examples_fr(contents, sense_base):
         dt = {}
@@ -3028,14 +3037,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 ctx.debug("Found multiple sources for example: {} and {}".format(dt['ref'], clean_value))
             dt['ref'] = clean_value
 
-        _, cleaned_tags, category_idxs = extract_tags_fr(config, ctx, sense_base, contents)
+        categories, tags, idxs_to_remove = extract_categories_and_tags_fr(config, ctx, sense_base, contents)
+        
+        note = ", ".join(tags + categories) 
+        if note:
+            if note and not 'note' in dt:
+                dt['note'] = note
+            else:
+                dt['note'] += ", " + note
 
-        if not 'note' in dt:
-            dt['note'] = cleaned_tags
-        else:
-            dt['note'] += cleaned_tags
-
-        contents = [content for (idx, content) in enumerate(contents) if idx not in category_idxs]
+        contents = [content for (idx, content) in enumerate(contents) if idx not in idxs_to_remove]
 
         # Assume that remaining information is the example text itself
         clean_text = clean_node(config, ctx, sense_base, contents)
