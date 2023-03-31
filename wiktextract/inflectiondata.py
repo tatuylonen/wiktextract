@@ -6869,6 +6869,7 @@ infl_map = {
     "\u2060mapag- -an": "",
     "\u2060mapagpa- -an": "",
     "\u2060mapapag- -an": "",
+    "\u2060 mapa- -an": "",
     # katayin/Tagalog
     "\u2060mapapag-": "",
 
@@ -6900,6 +6901,12 @@ infl_map = {
     "А / Ы / О / У": "back-vowel-harmony",
     "Ә/ Е / Э / Ө / Ү": "front-vowel-harmony",
 
+    # wasick/Narragansett
+    "unpossessed": {
+        "lang": "Narragansett",
+        "then": "",
+    },
+        
 }
 
 
