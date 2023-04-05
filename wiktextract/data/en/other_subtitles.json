@@ -1,7 +1,8 @@
 {
   "compounds": "compounds",
   "etymology": [
-    "etymology"
+    "etymology",
+    "glyph origin"
   ],
   "ignored_sections": [
     "anagrams",

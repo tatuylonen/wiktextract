@@ -1699,6 +1699,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 tags.update(extra_tags)
                 tags.update(rt)
                 tags.update(refs_tags)
+                tags.update(tblctx.section_header)
                 # Merge tags from column.  For certain kinds of tags,
                 # those coming from row take precedence.
                 old_tags = set(tags)
@@ -1810,6 +1811,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                                    "dummy-store-hdrspan",
                                    "dummy-load-stored-hdrspans",
                                    "dummy-reset-stored-hdrspans",
+                                   "dummy-section-header",
                                    ])
     
                 # Perform language-specific tag replacements according
@@ -2034,6 +2036,12 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                             new_hdrspans.append(hdrspan)
                     hdrspans = new_hdrspans
                         
+                for tt in v:
+                    if "dummy-section-header" in tt:
+                        tblctx.section_header = tt
+                        break
+                    if "dummy-reset-section-header" in tt:
+                        tblctx.section_header = []
                 # Text between headers on a row causes earlier headers to
                 # be reset
                 if have_text:
@@ -2581,10 +2589,12 @@ class TableContext(object):
     """Saved context used when parsing a table and its subtables."""
     __slot__ = (
         "stored_hdrspans",
+        "section_header",
         "template_name",
         )
     def __init__(self, template_name=None):
         self.stored_hdrspans = []
+        self.section_header = []
         if not template_name:
             self.template_name = ""
         else:
@@ -2748,6 +2758,10 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
                                                 pos, data, tbl, new_titles,
                                                 source, "", depth + 1)
                         if subtbl:
+                            sub_ret.append((rows, titles, after, depth))
+                            rows = []
+                            titles = []
+                            after = ""
                             sub_ret.extend(subtbl)
     
                     # This magic value is used as part of header detection
@@ -2839,9 +2853,11 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
                 # print("  TOP-LEVEL CELL", node)
                 pass
 
-        main_ret = [(rows, titles, after, depth)]
         if sub_ret:
-            main_ret.extend(sub_ret)
+            main_ret = sub_ret
+            main_ret.append((rows, titles, after, depth))
+        else:
+            main_ret = [(rows, titles, after, depth)]
         return main_ret
         
 

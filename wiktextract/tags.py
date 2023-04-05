@@ -5174,7 +5174,7 @@ valid_tags = {
     "Foochow-Romanized": "detail",  # latin script for Fuzhou Eastern Min
     "Phak-fa-su": "detail",  # latin alphabet used by missionaries for Hakka (PFS)
     "Hakka-Romanization-System": "detail",  # Taiwanese Hakka Romanization System
-    "Kienning-Colloqial-Romanized": "detail",  # missionary romanization system for the Kienning Dialect of Northern Min
+    "Kienning-Colloquial-Romanized": "detail",  # missionary romanization system for the Kienning Dialect of Northern Min
     "Latinxua-Sin-Wenz": "detail",
     "Tai-lo": "detail",  # romanization system for Taiwanese Hokkien
     "Tongyong-Pinyin": "detail",  # Taiwanese romanization from 2002 to 2008
@@ -5465,6 +5465,15 @@ valid_tags = {
     "dummy-store-hdrspan": "dummy",
     "dummy-load-stored-hdrspans": "dummy",
     "dummy-reset-stored-hdrspans": "dummy",
+    "dummy-section-header": "dummy",  # When tables are split up into tables
+    # within a template so that the main header (like "Infinitives" in the
+    # new Swahili verb tables) is separated from the section it is a header
+    # of, use this to force a section header that is active until it is
+    # replaced by something else down the line.
+    "dummy-reset-section-header": "dummy",  # Explicitly remove the saved
+    # tags in TableContext.section_header; you can also call dummy-section-
+    # header with an otherwise empty tag list, but this is needed when you
+    # need to have tags too.
     "durative": "aspect",  # Verb form  XXX same as continuative?
     "eclipsis": "misc",
     "egressive": "case",  # Case?  e.g., дворец/Komi-Zyrian
@@ -6401,6 +6410,8 @@ valid_tags = {
     "by-personal-gender": "gender",  # Italian has started to use
     # "feminine or masculine, by sense" to mean "depending on the
     # gender of the person". Bataglia/Italian
+    "toneless-final-syllable-variant": "misc",  # zh-pron template stuff
+                                                # 食物/Chinese
 }
 
 for k, v in valid_tags.items():

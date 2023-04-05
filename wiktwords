@@ -401,8 +401,8 @@ if __name__ == "__main__":
     if args.templates_file:
         extract_namespace(ctx, "Template", args.templates_file)
     if args.categories_file:
-        tree = extract_categories(ctx, config)
         print("Extracting category tree")
+        tree = extract_categories(ctx, config)
         sys.stdout.flush()
         with open(args.categories_file, "w") as f:
             json.dump(tree, f, indent=2, sort_keys=True)

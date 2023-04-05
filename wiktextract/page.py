@@ -487,6 +487,12 @@ def parse_ruby(config, ctx, node):
             furi_nodes.append(child)
     ruby_kanji = clean_node(config, ctx, None, ruby_nodes).strip()
     furigana = clean_node(config, ctx, None, furi_nodes).strip()
+    if not ruby_kanji or not furigana:
+        # like in パイスラッシュ there can be a template that creates a ruby
+        # element with an empty something (apparently, seeing as how this
+        # works), leaving no trace of the broken ruby element in the final
+        # HTML source of the page!
+        return
     return((ruby_kanji, furigana))
 
 
@@ -640,7 +646,8 @@ def extract_ruby(config, ctx, contents):
     # Check if this content should be extracted
     if contents.kind == NodeKind.HTML and contents.args == "ruby":
         rb = parse_ruby(config, ctx, contents)
-        return [rb], [rb[0]]
+        if rb:
+            return [rb], [rb[0]]
     # Otherwise content is WikiNode, and we must recurse into it.
     kind = contents.kind
     new_node = WikiNode(kind, contents.loc)
@@ -1095,7 +1102,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
         pos_data["pos"] = pos
         pre = [[]]  # list of lists
         lists = [[]]  # list of lists
-        have_subtitle = False
         first_para = True
         first_head_tmplt = True
         collecting_head = True
@@ -1285,7 +1291,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                                    x.args == "ruby")
                 if rub:
                     for r in rub:
-                        ruby.append(parse_ruby(config, ctx, r))
+                        rt = parse_ruby(config, ctx, r)
+                        if rt:
+                            ruby.append(rt)
             text = clean_node(config, ctx, pos_data, pre1,
                               post_template_fn=head_post_template_fn)
             text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
@@ -1342,18 +1350,18 @@ def parse_language(ctx, config, langnode, language, lang_code):
                       "something that isn't a WikiNode".format(pos),
                       sortid="page/1287/20230119")
             return False
-            
+
         if node.kind != NodeKind.LIST_ITEM:
             ctx.debug("{}: non-list-item inside list".format(pos),
                       sortid="page/1678")
             return False
-            
+
         if node.args == ":":
-        # Skip example entries at the highest level, ones without
-        # a sense ("...#") above them.
-        # If node.args is exactly and only ":", then it's at
-        # the highest level; lower levels would have more
-        # "indentation", like "#:" or "##:"
+            # Skip example entries at the highest level, ones without
+            # a sense ("...#") above them.
+            # If node.args is exactly and only ":", then it's at
+            # the highest level; lower levels would have more
+            # "indentation", like "#:" or "##:"
             return False
 
         # If a recursion call succeeds in push_sense(), bubble it up with
@@ -1421,8 +1429,24 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                         if not (isinstance(x, WikiNode) and
                                                 x.kind == NodeKind.LIST and
                                                 x.args == current_depth + "#")]
-                added |= parse_sense_node(cropped_node, sense_base, pos)
-                added |= parse_sense_node(slc[0], sense_base, pos)
+                added |= parse_sense_node(cropped_node,
+                                          sense_base,
+                                          pos)
+                nonlocal sense_data  # this kludge causes duplicated raw_
+                                     # glosses data if this is not done;
+                                     # if the top-level (cropped_node)
+                                     # does not push_sense() properly or
+                                     # parse_sense_node() returns early,
+                                     # sense_data is not reset. This happens
+                                     # for example when you have a no-gloss
+                                     # string like "(intransitive)":
+                                     # no gloss, push_sense() returns early
+                                     # and sense_data has duplicate data with
+                                     # sense_base
+                sense_data = {}
+                added |= parse_sense_node(slc[0],
+                                          sense_base,
+                                          pos)
                 return added
 
         def sense_template_fn(name, ht):
@@ -1467,7 +1491,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if v and v.find("<") < 0:
                     gloss_template_args.add(v)
             if config.dump_file_lang_code == "zh":
-                add_form_of_tags(ctx, name, config.FORM_OF_TEMPLATES, sense_base)
+                add_form_of_tags(ctx, name, 
+                                 config.FORM_OF_TEMPLATES, sense_base)
             return None
 
         link_tuples = []
@@ -1544,6 +1569,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
         # Check if the possible outer gloss starts with
         # parenthesized tags/topics
 
+        if rawgloss and rawgloss not in sense_base.get("raw_glosses", ()):
+            data_append(ctx, sense_base, "raw_glosses", subglosses[1])
         m = re.match(r"\(([^()]+)\):?\s*", rawgloss)
                     # ( ..\1.. ): ... or ( ..\1.. ) ...
         if m:
@@ -1637,7 +1664,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
             # Push a new sense (if the last one is not empty)
             if push_sense():
                 added = True
-            data_append(ctx, sense_data, "raw_glosses", gloss)
+            # if gloss not in sense_data.get("raw_glosses", ()):
+            #     data_append(ctx, sense_data, "raw_glosses", gloss)
             if gloss_i == 0 and examples:
                 # In a multi-line gloss, associate examples
                 # with only one of them.
@@ -2020,8 +2048,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
                             continue
                         elif node.args == "ruby":
                             rb = parse_ruby(config, ctx, node)
-                            ruby.append(rb)
-                            parts.append(rb[0])
+                            if rb:
+                                ruby.append(rb)
+                                parts.append(rb[0])
                             continue
                         elif node.args == "math":
                             parts.append(clean_node(config, ctx, None, node))
@@ -2333,7 +2362,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
             return
         sense_parts = []
         sense = None
-        sense_locked = False
 
         def parse_translation_item(contents, lang=None):
             nonlocal sense
@@ -2353,7 +2381,6 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     sense = sense[:-1].strip()
                 if sense.endswith("—"):
                     sense = sense[:-1].strip()
-            sense_detail = None
             translations_from_template = []
 
             def translation_item_template_fn(name, ht):
@@ -2857,7 +2884,9 @@ def parse_language(ctx, config, langnode, language, lang_code):
             config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
             if t.startswith(tuple(config.OTHER_SUBTITLES["pronunciation"])):
-                if t.startswith(tuple(pron_title + " " for pron_title in config.OTHER_SUBTITLES["pronunciation"])):
+                if t.startswith(tuple(pron_title + " "
+                                     for pron_title in 
+                                     config.OTHER_SUBTITLES["pronunciation"])):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
                     push_etym()
@@ -2908,7 +2937,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     pos = dt["pos"]
                     ctx.start_subsection(t)
                     if "debug" in dt:
-                        ctx.warning("{} in section {}"
+                        ctx.debug("{} in section {}"
                                     .format(dt["debug"], t),
                                     sortid="page/2755")
                     if "warning" in dt:
@@ -3367,7 +3396,8 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
     global starts_lang_re
     if starts_lang_re is None:
         starts_lang_re = re.compile(
-            r"^(" + ctx.NAMESPACE_DATA.get("Rhymes", {}).get("name", "") + ":)?(" +
+            r"^(" + ctx.NAMESPACE_DATA.get("Rhymes", {}).get("name", "") +
+            ":)?(" +
             "|".join(re.escape(x) for x in config.LANGUAGES_BY_NAME) +
             ")[ /]")
 
@@ -3405,7 +3435,8 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
     tree = ctx.parse(text, pre_expand=True,
                      additional_expand=additional_expand_templates,
                      do_not_pre_expand=do_not_pre_expand_templates)
-    # print("PAGE PARSE:", tree)
+    # from wikitextprocessor.parser import print_tree
+    # print("PAGE PARSE:", print_tree(tree))
 
     top_data = {}
 
@@ -3614,6 +3645,28 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
             for sense in data.get("senses", ()):
                 if field in sense:
                     sense[field] = list(sorted(set(sense[field])))
+
+    #  If raw_glosses is identical to glosses, remove it
+    # If "empty-gloss" in tags and there are glosses, remove the tag
+    for data in ret:
+        for s in data.get("senses", []):
+            rglosses = s.get("raw_glosses", ())
+            if not rglosses:
+                continue
+            sglosses = s.get("glosses", ())
+            if sglosses:
+                tags = s.get("tags", ())
+                while "empty-gloss" in s.get("tags", ()):
+                    tags.remove("empty-gloss")
+            if len(rglosses) != len(sglosses):
+                continue
+            same = True
+            for rg, sg in zip(rglosses, sglosses):
+                if rg != sg:
+                    same = False
+                    break
+            if same:
+                del s["raw_glosses"]
 
     # Return the resulting words
     return ret

@@ -5,12 +5,43 @@ import sys
 from pathlib import Path
 
 
-def save_json_file(data: dict[str, list[str]],
-                   lang_code: str,
-                   file_name: str = "languages.json") -> None:
+def add_wikimedia_language_codes(data: dict[str, list[str]]) -> None:
+    # https://en.wiktionary.org/wiki/Wiktionary:Wikimedia_language_codes
+    # https://en.wiktionary.org/wiki/Module:wikimedia_languages/data
+    wikimedia_codes = {
+        "als": "gsw",
+        "bat-smg": "sgs",
+        "be-tarask": "be",
+        "bs": "sh",
+        "bxr": "bua",
+        "diq": "zza",
+        "eml": "egl",
+        "fiu-vro": "vro",
+        "hr": "sh",
+        "ksh": "gmw-cfr",
+        "ku": "kmr",
+        "kv": "kpv",
+        "nrm": "nrf",
+        "roa-rup": "rup",
+        "roa-tara": "roa-tar",
+        "simple": "en",
+        "sr": "sh",
+        "zh-classical": "ltc",
+        "zh-min-nan": "nan",
+        "zh-yue": "yue",
+    }
+    for wikimedia_code, iso_code in wikimedia_codes.items():
+        if iso_code in data and wikimedia_code not in data:
+            data[wikimedia_code] = data[iso_code]
+
+
+def save_json_file(
+    data: dict[str, list[str]], lang_code: str, file_name: str = "languages.json"
+) -> None:
     data_folder = Path(f"wiktextract/data/{lang_code}")
     if not data_folder.exists():
         data_folder.mkdir()
+    add_wikimedia_language_codes(data)
     with data_folder.joinpath(file_name).open("w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False, sort_keys=True)
 

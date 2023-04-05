@@ -312,11 +312,19 @@ pip3 install wiktextract
 Alternatively, you can get the latest development version from github:
 
 ```
+git clone https://github.com/tatuylonen/wikitextprocessor.git
+cd wikitextprocessor && pip3 install -r requirements.txt && pip3 install -e .
+cd ..
 git clone https://github.com/tatuylonen/wiktextract.git
 cd wiktextract && pip3 install -r requirements.txt && pip3 install -e .
 ```
 
-This will install the ``wiktextract`` package and the ``wiktwords`` script.
+This will install the ``wikitextprocessor``, the ``wiktextract`` package
+and the ``wiktwords`` script inside wiktextract.
+
+Only installing ``wiktextract`` will probably not work, depending on how
+old the pip packages are; wikitextprocessor and wiktextract are being worked
+on in tandem, so keeping them in synch is best.
 
 This software requires Python 3.
 
