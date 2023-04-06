@@ -1537,7 +1537,22 @@ def parse_language(ctx, config, langnode, language, lang_code):
             for tag in tags:
                 data_append(ctx, sense_base, "tags", tag)
 
-        contents = [content for (idx, content) in enumerate(contents) if idx not in idxs_to_remove]
+            contents = [content for (idx, content) in enumerate(contents) if idx not in idxs_to_remove]
+
+            noteIdx = -1
+            for idx, content in enumerate(contents):
+                if isinstance(content, WikiNode) and content.kind == NodeKind.TEMPLATE and content.args[0][0] == "note":
+                    noteIdx = idx
+                    break 
+
+            if noteIdx > -1:
+                note = contents[noteIdx+1:]
+                clean_note = clean_node(config, ctx, sense_base, note, template_fn=sense_template_fn)
+                data_append(ctx, sense_base, "note", clean_note)
+
+                contents = contents[:noteIdx]
+                if len(contents) == 0:
+                    ctx.debug("no sense content remains after removing a note", sortId="page/")
 
         # get the raw text of non-list contents of this node, and other stuff
         # like tag and category data added to sense_base

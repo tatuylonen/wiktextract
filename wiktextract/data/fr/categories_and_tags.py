@@ -755,6 +755,7 @@ french_ignore_templates = [
 "R",                            #                                      
 "RÉF",                          # [1]                                  ^([1])
 "réf",                          # [2]                                  ^([2])
+"ébauche-déf",                  # //dummy.host/index.php?title=finit%C3%A9simal&action=edit Ajouter  Définition manquante ou à compléter. (//dummy.host/index.php?title=finit%C3%A9simal&action=edit Ajouter)Catégorie:Wiktionnaire:Définitions manquantes en français
 ]
 
 # This list is not currently used. It keeps track of templates that were found in error messages but are not in the above lists. Usually, either their meaning isn't clear or their expanded form resists easy extraction of a tag or category. By default, they will be written to glosses etc.
