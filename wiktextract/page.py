@@ -331,6 +331,9 @@ ignored_etymology_templates_re = re.compile(
     r"|".join(re.escape(x) for x in ignored_etymology_templates) +
     r")$")
 
+# Regexp for matching ignored descendants template names. Right now we just
+# copy the ignored etymology templates
+ignored_descendants_templates_re = ignored_etymology_templates_re
 
 # Regexp for matching category tags that start with a language name.
 # Group 2 will be the language name.  The category tag should be without
@@ -2714,6 +2717,146 @@ def parse_language(ctx, config, langnode, language, lang_code):
         data["etymology_text"] = text
         data["etymology_templates"] = templates
 
+    def parse_descendants(data, node, is_proto_root_derived_section=False):
+        """Parses a Descendants section. Also used on Derived terms and
+        Extensions sections when we are dealing with a root of a reconstructed
+        language (i.e. is_proto_root_derived_section == True), as they use the
+        same structure. In the latter case, The wiktionary convention is not to
+        title the section as descendants since the immediate offspring of the
+        roots are morphologically derived terms within the same proto-language.
+        Still, since the rest of the section lists true descendants, we use the
+        same function. Entries in the descendants list that are technically
+        derived terms will have a field "tags": ["derived"]."""
+        assert isinstance(data, dict)
+        assert isinstance(node, WikiNode)
+        assert isinstance(is_proto_root_derived_section, bool)
+
+        descendants = []
+
+        # Most templates that are not in a LIST should be ignored as they only
+        # add formatting, like "desc-top", "der-top3", etc. Any template in
+        # unignored_non_list_templates actually contains relevant descendant
+        # info. E.g. "CJKV" is often the only line at all in descendants
+        # sections in many Chinese/Japanese/Korean/Vietnamese pages, but would
+        # be skipped if we didn't handle it specially as it is not part of a
+        # LIST, and additionally is in panel_templates. There are probably more
+        # such templates that should be added to this...
+        unignored_non_list_templates = ["CJKV"]
+
+        def process_list_item_children(args, children):
+            assert isinstance(args, str)
+            assert isinstance(children, list)
+            # The descendants section is a hierarchical bulleted listed. args is
+            # usually some number of "*" characters indicating the level of
+            # indentation of the line, e.g. "***" indicates the line will be
+            # thrice-indented. A bare ";" is used to indicate a subtitle-like
+            # line with no indentation. ":" at the end of one or more "*"s is
+            # used to indicate that the bullet will not be displayed.
+            item_data = {"depth": args.count("*")}
+            templates = []
+            is_derived = False
+
+            # Counter for preventing the capture of templates when we are inside
+            # templates that we want to ignore (i.e., not capture).
+            ignore_count = 0
+
+            def desc_template_fn(name, ht):
+                nonlocal ignore_count
+                if is_panel_template(name) and name not in unignored_non_list_templates:
+                    return ""
+                if re.match(ignored_descendants_templates_re, name):
+                    ignore_count += 1
+
+            def desc_post_template_fn(name, ht, expansion):
+                nonlocal ignore_count
+                if name in wikipedia_templates:
+                    parse_wikipedia_template(config, ctx, data, ht)
+                    return None
+                if re.match(ignored_descendants_templates_re, name):
+                    ignore_count -= 1
+                    return None
+                if ignore_count == 0:
+                    ht = clean_template_args(config, ht)
+                    nonlocal is_derived
+                    # If we're in a proto-root Derived terms or Extensions section,
+                    # and the current list item has a link template to a term in the
+                    # same proto-language, then we tag this descendant entry with
+                    # "derived"
+                    is_derived = (
+                        is_proto_root_derived_section and
+                        (name == "l" or name == "link") and
+                        ("1" in ht and ht["1"] == lang_code)
+                    )
+                    expansion = clean_node(config, ctx, None, expansion)
+                    templates.append({
+                        "name": name, "args": ht, "expansion": expansion
+                    })
+                return None
+
+            text = clean_node(config, ctx, None, children, 
+                template_fn=desc_template_fn,
+                post_template_fn=desc_post_template_fn
+            )
+            item_data["templates"] = templates
+            item_data["text"] = text
+            if is_derived: item_data["tags"] = ["derived"]
+            descendants.append(item_data)
+
+        def node_children(node):
+            for i, child in enumerate(node.children):
+                if isinstance(child, WikiNode): 
+                    yield (i, child)
+
+        def get_sublist_index(list_item):
+            for i, child in node_children(list_item):
+                if child.kind == NodeKind.LIST: 
+                    return i
+            return None
+
+        def get_descendants(node):
+            """Appends the data for every list item in every list in node
+             to descendants."""
+            for _, c in node_children(node):
+                if (c.kind == NodeKind.TEMPLATE and c.args
+                    and len(c.args[0]) == 1 and isinstance(c.args[0][0], str)
+                    and c.args[0][0] in unignored_non_list_templates):
+                    # Some Descendants sections have no wikitext list. Rather,
+                    # the list is entirely generated by a single template (see
+                    # e.g. the use of {{CJKV}} in Chinese entries).
+                    process_list_item_children("", [c])
+                elif c.kind == NodeKind.HTML: 
+                    # The Descendants sections for many languages feature
+                    # templates that generate html to add styling (e.g. using
+                    # multiple columns) to the list, so that the actual wikitext
+                    # list items are found within a <div>. We look within the
+                    # children of the html node for the actual list items.
+                    get_descendants(c)
+                elif c.kind == NodeKind.LIST: 
+                    get_descendants(c)
+                elif c.kind == NodeKind.LIST_ITEM:
+                    # If a LIST_ITEM has subitems in a sublist, usually its 
+                    # last child is a LIST. However, sometimes after the LIST
+                    # there is one or more trailing LIST_ITEMs, like "\n" or
+                    # a reference template. If there is a sublist, we discard
+                    # everything after it. 
+                    i = get_sublist_index(c)
+                    if i is not None:
+                        process_list_item_children(c.args, c.children[:i])
+                        get_descendants(c.children[i])
+                    else:
+                        process_list_item_children(c.args, c.children)
+
+        # parse_descendants() actual work starts here
+        get_descendants(node)
+
+        # if e.g. on a PIE page, there may be both Derived terms and Extensions
+        # sections, in which case this function will be called multiple times,
+        # so we have to check if descendants exists first.
+        if "descendants" in data: 
+            data["descendants"].extend(descendants)
+        else:
+            data["descendants"] = descendants
+
     def process_children(treenode, pos):
         """This recurses into a subtree in the parse tree for a page."""
         nonlocal etym_data
@@ -2776,12 +2919,19 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     if m:
                         etym_data["etymology_number"] = int(m.group(1))
                     parse_etymology(etym_data, node)
+            elif t == config.OTHER_SUBTITLES["descendants"] and config.capture_descendants:
+                data = select_data()
+                parse_descendants(data, node)
+            elif (t in config.OTHER_SUBTITLES["proto_root_derived_sections"] and 
+                pos == "root" and is_reconstruction and 
+                config.capture_descendants
+            ):
+                data = select_data()
+                parse_descendants(data, node, True)
             elif t == config.OTHER_SUBTITLES["translations"]:
                 data = select_data()
                 parse_translations(data, node)
             elif t in config.OTHER_SUBTITLES["ignored_sections"]:
-                # XXX does the Descendants section have something we'd like
-                # to capture?
                 pass
             elif t in config.OTHER_SUBTITLES["inflection_sections"]:
                 parse_inflection(node, t, pos)
@@ -3219,6 +3369,10 @@ def fix_subtitle_hierarchy(ctx: Wtp, config: WiktionaryConfig, text: str) -> str
         elif lc in config.LINKAGE_SUBTITLES or lc == config.OTHER_SUBTITLES["compounds"]:
             level = 5
         elif lc in config.OTHER_SUBTITLES["inflection_sections"]:
+            level = 5
+        elif lc == config.OTHER_SUBTITLES["descendants"]:
+            level = 5
+        elif title in  config.OTHER_SUBTITLES["proto_root_derived_sections"]:
             level = 5
         elif lc in config.OTHER_SUBTITLES["ignored_sections"]:
             level = 5

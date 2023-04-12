@@ -428,6 +428,7 @@ The following command-line options can be used to control its operation:
 * --linkages: causes linkages (synonyms etc.) to be captured
 * --examples: causes usage examples to be captured
 * --etymologies: causes etymology information to be captured
+* --descendants: causes descendants information to be captured
 * --inflections: causes inflection tables to be captured
 * --redirects: causes redirects to be extracted
 * --pages-dir DIR: save all wiktionary pages under this directory (mostly for debugging)
@@ -466,6 +467,7 @@ config = WiktionaryConfig(
              capture_redirects=True,
              capture_examples=True,
              capture_etymologies=True,
+             capture_descendants=True,
              capture_inflections=True)
 ctx = Wtp()
 
@@ -555,6 +557,7 @@ WiktionaryConfig(dump_file_lang_code="en",
                  capture_redirects=True,
                  capture_examples=True,
                  capture_etymologies=True,
+                 capture_descendants=True,
                  capture_inflections=True)
 ```
 
@@ -583,6 +586,8 @@ The arguments are as follows:
   capturing usage examples.
 * ``capture_etymologies`` (boolean) - set to ``False`` to
   disable capturing etymologies.
+* ``capture_descendants`` (boolean) - set to ``False`` to
+  disable capturing descendants.
 * ``capture_inflections`` (boolean) - set to ``False`` to
   disable capturing inflection tables.
 
@@ -618,6 +623,7 @@ following keys (others may also be present or added later):
   relations.  Certain common templates that do not signify etymological
   relations are not included.
 * ``etymology_number`` - for words with multiple numbered etymologies, this contains the number of the etymology under which this entry appeared
+* ``descendants`` - descendants of the word (see below)
 * ``synonyms`` - non-disambiguated synonym linkages for the word (see below)
 * ``antonyms`` - non-disambiguated antonym linkages for the word (see below)
 * ``hypernyms`` - non-disambiguated hypernym linkages for the word (see below)
@@ -733,6 +739,16 @@ keys:
 * ``name`` - name of the template
 * ``args`` - dictionary mapping argument names to their cleaned values.  Positional arguments have keys that are numeric strings, starting with "1".
 * ``expansion`` - the (cleaned) text the template expands to.
+
+### Descendants
+
+If a word has a "Descendants" section, the `descendants` key will appear in the word's data. It contains a list of objects corresponding to each line in the section, where each object has the following keys:
+
+* `depth`: The level of indentation of the current line. This can be used to track the hierarchical structure of the list. 
+* `templates`: An array of objects corresponding to templates that appear on the line. The structure of each of these objects is the same as the structure of each object in `etymology_templates`.
+* `text`: The expanded and cleaned line text, akin to `etymology_text`. 
+
+`descendants` data will also appear for the special case of "Derived terms" and "Extensions" sections for words that are roots in reconstructed languages, as these sections have the same format. 
 
 ### Linkages to other words
 
