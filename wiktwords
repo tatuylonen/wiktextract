@@ -20,6 +20,7 @@ import argparse
 import collections
 from wikitextprocessor import Wtp
 from wiktextract.inflection import set_debug_cell_text
+from wiktextract.template_override import template_override_fns
 
 from wiktextract import (WiktionaryConfig, parse_wiktionary,
                          reprocess_wiktionary, parse_page,
@@ -283,6 +284,7 @@ if __name__ == "__main__":
     ctx = Wtp(cache_file=args.cache, num_threads=args.num_threads,
               lang_code=args.dump_file_language_code,
               languages_by_code=config.LANGUAGES_BY_CODE)
+    ctx.set_template_overrides(template_override_fns)
     # We are now having problems with "Module:no globals", which causes
     # infinite Python recursion on a number of pages (it may be a sandbox
     # problem that it is not properly reset).  Override that debugging module
