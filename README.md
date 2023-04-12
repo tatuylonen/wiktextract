@@ -742,7 +742,13 @@ keys:
 
 ### Descendants
 
-$$$$$$ TODO $$$$$$$
+If a word has a "Descendants" section, the `descendants` key will appear in the word's data. It contains a list of objects corresponding to each line in the section, where each object has the following keys:
+
+* `depth`: The level of indentation of the current line. This can be used to track the hierarchical structure of the list. 
+* `templates`: An array of objects corresponding to templates that appear on the line. The structure of each of these objects is the same as the structure of each object in `etymology_templates`.
+* `text`: The expanded and cleaned line text, akin to `etymology_text`. 
+
+`descendants` data will also appear for the special case of "Derived terms" and "Extensions" sections for words that are roots in reconstructed languages, as these sections have the same format. 
 
 ### Linkages to other words
 
