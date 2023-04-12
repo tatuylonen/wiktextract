@@ -1631,7 +1631,8 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction,
                        continue
                     elif (cls in ("romanization", "english") and
                         not have_romanization and
-                        classify_desc(titleword) == "other"):
+                        classify_desc(titleword) == "other" and
+                        not ("categories" in data and desc in data["categories"])):
                         # Assume it to be a romanization
                         add_related(ctx, data, ["romanization"], [desc],
                                     text, True, is_reconstruction, head_group,
@@ -1778,7 +1779,8 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction,
                         # Check if the parenthesized part is likely a
                         # romanization
                         if ((have_ruby or classify_desc(base) == "other") and
-                            classify_desc(paren) == "romanization"):
+                            classify_desc(paren) == "romanization" and 
+                            not ("categories" in data and desc in data["categories"])):
                             for r in split_at_comma_semi(paren, extra=[" or "]):
                                 add_related(ctx, data, ["romanization"], [r],
                                             text, True, is_reconstruction,
