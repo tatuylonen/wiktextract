@@ -6906,7 +6906,17 @@ infl_map = {
         "lang": "Narragansett",
         "then": "",
     },
-        
+
+    # patika/Swahili new tables!
+    "m-wa_((I/II))": "class-1 class-2",
+    "m-mi_((III/IV))": "class-3 class-4",
+    "ji-ma_((V/VI))": "class-5 class-6",
+    "ki-vi_((VII/VIII))": "class-7 class-8",
+    "n_((IX/X))": "class-9 class-10",
+    "u_((XI))": "class-11",
+    "ku_((XV/XVII))": "class-15 class-17",
+    "pa_((XVI))": "class-16",
+    "mu_((XVIII))": "class-18",
 }
 
 
