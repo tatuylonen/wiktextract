@@ -1,20 +1,25 @@
 {
   "compounds": "compounds",
   "etymology": [
-    "etymology"
+    "etymology",
+    "glyph origin"
   ],
   "ignored_sections": [
     "anagrams",
     "further reading",
     "references",
-    "quotations",
-    "descendants"
+    "quotations"
   ],
   "inflection_sections": [
     "declension",
     "conjugation",
     "inflection",
     "mutation"
+  ],
+  "descendants": "descendants",
+  "proto_root_derived_sections": [
+    "derived terms", 
+    "extensions"
   ],
   "pronunciation": [
     "pronunciation"

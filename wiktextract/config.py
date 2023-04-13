@@ -35,6 +35,7 @@ class WiktionaryConfig(object):
         "capture_examples",
         "capture_etymologies",
         "capture_inflections",
+        "capture_descendants",
         "expand_tables",
         "verbose",
         "num_pages",
@@ -69,6 +70,7 @@ class WiktionaryConfig(object):
                  capture_examples=True,
                  capture_etymologies=True,
                  capture_inflections=True,
+                 capture_descendants=True,
                  verbose=False,
                  expand_tables=False):
         if capture_language_codes is not None:
@@ -93,6 +95,7 @@ class WiktionaryConfig(object):
         self.capture_examples = capture_examples
         self.capture_etymologies = capture_etymologies
         self.capture_inflections = capture_inflections
+        self.capture_descendants = capture_descendants
         self.verbose = verbose
         self.expand_tables = expand_tables
         # Some fields for statistics
@@ -128,6 +131,7 @@ class WiktionaryConfig(object):
             "capture_examples": self.capture_examples,
             "capture_etymologies": self.capture_etymologies,
             "capture_inflections": self.capture_inflections,
+            "capture_descendants": self.capture_descendants,
             "verbose": self.verbose,
             "expand_tables": self.expand_tables
         }

@@ -151,6 +151,8 @@ if __name__ == "__main__":
                         help="Capture etymologies")
     parser.add_argument("--inflections", action="store_true", default=False,
                         help="Capture inflection tables")
+    parser.add_argument("--descendants", action="store_true", default=False,
+                        help="Capture descendants")
     parser.add_argument("--statistics", action="store_true", default=False,
                         help="Print statistics")
     parser.add_argument("--page", type=str,
@@ -206,6 +208,7 @@ if __name__ == "__main__":
         args.examples = True
         args.etymologies = True
         args.inflections = True
+        args.descendants = True
 
     # Default to English and Translingual if language not specified.
     if not args.language:
@@ -249,6 +252,7 @@ if __name__ == "__main__":
                               capture_examples=args.examples,
                               capture_etymologies=args.etymologies,
                               capture_inflections=args.inflections,
+                              capture_descendants=args.descendants,
                               verbose=args.verbose,
                               expand_tables=args.inflection_tables_file,)
 
