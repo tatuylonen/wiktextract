@@ -1791,6 +1791,7 @@ uppercase_tags = set([
     "Prokem",
     "Protestant",
     "Proto-Slavic",
+    "Proto-Romance",
     "Provençal",
     "Provençau",  # Dialect of Occitan
     "Pskov",
