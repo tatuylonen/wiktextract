@@ -52,10 +52,10 @@ xlat_head_map = {
     "m sg": "masculine singular",
     "f sg": "feminine singular",
     "n sg": "neuter singular",
-    "f or pl": "feminine singular plural",  # XXX information/Eng/Tr/Latgalian
-    "m or pl": "masculine singular plural",  # XXX information/Eng/Tr/Latgalian
-    "n or pl": "neuter singular plural",  # XXX table scrap/Tr/Greek
-    "c or pl": "common-gender singular plural",
+    # "f or pl": "feminine singular plural",  # XXX information/Eng/Tr/Latgalian
+    # "m or pl": "masculine singular plural",  # XXX information/Eng/Tr/Latgalian
+    # "n or pl": "neuter singular plural",  # XXX table scrap/Tr/Greek
+    # "c or pl": "common-gender singular plural",
     "pl or f": "feminine singular plural",  # XXX grit/Eng/Tr(husked...)/German
     "pl or m": "masculine singular plural",
     "pl or n": "neuter singular plural",  # ordnance/Tr/German
@@ -64,9 +64,9 @@ xlat_head_map = {
     "sg or m": "singular masculine",
     "sg or n": "singular neuter",
     "sg or c": "singular common-gender",
-    "m or sg": "masculine singular",
+    # "m or sg": "masculine singular",
     "f or sg": "feminine singular",
-    "m or sg": "neuter singular",
+    # "m or sg": "neuter singular",
     "c or sg": "common-gender singular",
     "m or pl": "masculine plural",
     "f or pl": "feminine plural",
@@ -4851,6 +4851,19 @@ xlat_tags_map = {
     "predicate marker": "predicative",
     # riannettere/Italian
     "ditto": "",
+
+    # Dungan tone markers
+    "I-I": "",
+    "I-II": "",
+    "I-I-III": "",
+    "I-I-II": "",
+    "I-II-I": "",
+    "I-III": "",
+    "I-III-I": "",
+    "I-I-I": "",
+    "I-II-II": "",
+    "I-I-II-I": "",
+    "I-III-I-I": "",
     }
 
 # This mapping is applied to full descriptions before splitting by comma.
