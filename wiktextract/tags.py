@@ -1479,7 +1479,12 @@ uppercase_tags = set([
     "Mallorca",
     "Malta",
     "Malyangapa",
+    # [ used in Kipchak entries e.g. {{head|qwm|noun|tr=aχ as}} {{tlb|qwm|Armeno-Kipchak}}
+    "Armeno-Kipchak", 
+    "Armenian Kipchak",
     "Mamluk-Kipchak",
+    "Mamluk",
+    # ]
     "Mandalay Taishanese",
     "Mandarin",  # Dialect/Language in Chinese
     "Mandi",
@@ -1791,7 +1796,14 @@ uppercase_tags = set([
     "Prokem",
     "Protestant",
     "Proto-Slavic",
-    "Proto-Romance",
+    # [ used in Reconstruction:Latin entries, e.g. {{la-verb|4|*sufferiō|*sufferīv|*suffert}} {{lb|la|Proto-Romance}}
+    "Proto-Balkan-Romance",
+    "Proto-Ibero-Romance",
+    "Proto-Italo-Western-Romance",
+    "Proto-Gallo-Romance",
+    "Proto-Romance", 
+    "Proto-Western-Romance",
+    # ]
     "Provençal",
     "Provençau",  # Dialect of Occitan
     "Pskov",
@@ -2647,6 +2659,56 @@ uppercase_tags = set([
     "Afar",  # afoofa/Afar
     "Saru",  # Ainu/ecioka
     "Old Albanian",
+    # [ used in Ashokan Prakrit entries, e.g. {{inc-ash-noun|g=f}} {{tlb|inc-ash|Delhi-Meerut|Delhi-Topra|...
+    # see https://en.wiktionary.org/wiki/Module:labels/data/lang/inc-ash
+    # and https://en.wiktionary.org/wiki/Module:inc-ash/dial/data
+    "Shahbazgarhi",
+    "Mansehra",
+    "Kanadahar",
+    "Ranigat",
+    "Kalsi",
+    "Delhi-Topra",
+    "Delhi-Meerut",
+    "Rampurva",
+    "Lauriya-Nandangarh",
+    "Lauriya-Araraj",
+    "Lumbini",
+    "Nigali-Sagar",
+    "Sarnath",
+    "Rupnath",
+    "Bairat",
+    "Sanchi",
+    "Allahabad-Kosambi",
+    "Sahasram",
+    "Gujarra",
+    "Barabar",
+    "Calcutta-Bairat",
+    "Dhauli",
+    "Jaugada",
+    "Girnar",
+    "Sopara",
+    "Yerragudi",
+    "Siddapura",
+    "Brahmagiri",
+    "Maski",
+    "Barabar Hill",
+    "Barabar Caves",
+    "Bhabru",
+    "Kaushambi",
+    "Khalsi",
+    "Kosambi",
+    "Lauria-Nandangarh",
+    "Lauria-Araraj",
+    "Mathia",
+    "Radhia",
+    "Rummindei",
+    "Topra",
+    "Meerut",
+    # ]
+    # [ used in Proto-Uralic entries e.g. {{head|urj-pro|noun}} {{tlb|urj-pro|Finno-Permic}}
+    "Finno-Permic",
+    "Finno-Volgaic"
+    # ]
 ])
 
 
