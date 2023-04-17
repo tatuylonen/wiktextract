@@ -701,7 +701,7 @@ lang_specific = {
 #                 raise AssertionError("{} key {!r} value {!r} is not defined"
 #                                      .format(k, kk, vv))
 
-def get_lang_specific(lang, field):
+def get_lang_infl_conf(lang, field):
     """Returns the given field from language-specific data or "default"
     if the language is not listed or does not have the field."""
     assert isinstance(lang, str)
@@ -727,7 +727,7 @@ def lang_specific_tags(lang, pos, form):
     assert isinstance(lang, str)
     assert isinstance(pos, str)
     assert isinstance(form, str)
-    rules = get_lang_specific(lang, "form_transformations")
+    rules = get_lang_infl_conf(lang, "form_transformations")
     for patpos, pattern, dst, tags in rules:
     #   PoS, regex, replacement, tags; pattern -> dst :: "^ich " > ""
         assert patpos in PARTS_OF_SPEECH
