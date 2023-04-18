@@ -156,14 +156,14 @@ def page_handler(model, title, text):
 
     return title
 
-ctx = Wtp(cache_file="species-cache")
+wtpctx = Wtp(cache_file="species-cache")
 # Disable this for later runs to avoid recreating the cache.  Makes developing
 # the code MUCH faster.  Remove the cache file before reading the dump.
 # Read pages from the dump file into the cache file (Phase 1)
-#list(ctx.process(dumpfile, page_handler, phase1_only=True))
+#list(wtpctx.process(dumpfile, page_handler, phase1_only=True))
 
 # Process the pages in the dump file.
-ret = list(ctx.reprocess(page_handler))
+ret = list(wtpctx.reprocess(page_handler))
 
 print("Count distinct titles:", len(set(ret)))
 firsts = set(x.split()[0] for x in ret

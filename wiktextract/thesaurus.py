@@ -71,32 +71,32 @@ def contains_list(contents):
     return contains_list(contents.children) or contains_list(contents.args)
 
 
-def extract_thesaurus_data(ctx, config):
+def extract_thesaurus_data(wtpctx, config):
     """Extracts linkages from the thesaurus pages in Wiktionary."""
-    assert isinstance(ctx, Wtp)
+    assert isinstance(wtpctx, Wtp)
     assert isinstance(config, WiktionaryConfig)
     start_t = time.time()
-    if not ctx.quiet:
+    if not wtpctx.quiet:
         print("Extracting thesaurus data")
 
     def page_handler(model, title, text):
-        if not title.startswith(ns_title_prefix_tuple(ctx, "Thesaurus")):
+        if not title.startswith(ns_title_prefix_tuple(wtpctx, "Thesaurus")):
             return None
         if title.startswith("Thesaurus:Requested entries "):
             return None
         if "/" in title:
             #print("STRANGE TITLE:", title)
             return None
-        text = ctx.read_by_title(title)
+        text = wtpctx.read_by_title(title)
         word = title[10:]
         idx = word.find(":")
         if idx > 0 and idx < 5:
             word = word[idx + 1:]  # Remove language prefix
-        expanded = ctx.expand(text, templates_to_expand=None)  # Expand all
+        expanded = wtpctx.expand(text, templates_to_expand=None)  # Expand all
         expanded = re.sub(r'(?s)<span class="tr Latn"[^>]*>(<b>)?(.*?)(</b>)?'
                           r'</span>',
                           r"XLITS\2XLITE", expanded)
-        tree = ctx.parse(expanded, pre_expand=False)
+        tree = wtpctx.parse(expanded, pre_expand=False)
         assert tree.kind == NodeKind.ROOT
         lang = None
         pos = None
@@ -135,7 +135,7 @@ def extract_thesaurus_data(ctx, config):
                 for node in contents.children:
                     if node.kind != NodeKind.LIST_ITEM:
                         continue
-                    w = clean_node(config, ctx, None, node.children)
+                    w = clean_node(config, wtpctx, None, node.children)
                     if w.find("*") >= 0:
                         print(title, lang, pos, "STAR IN WORD:", w)
                     # Check for parenthesized sense at the beginning
@@ -172,7 +172,7 @@ def extract_thesaurus_data(ctx, config):
                         if "XLITS" in q:
                             return q
                         dt = {}
-                        parse_sense_qualifier(ctx, q, dt)
+                        parse_sense_qualifier(wtpctx, q, dt)
                         tags.extend(dt.get("tags", ()))
                         topics.extend(dt.get("topics", ()))
                         return ""
@@ -196,7 +196,7 @@ def extract_thesaurus_data(ctx, config):
                         else:
                             xlit = None
                         w1 = w1.strip()
-                        if w1.startswith(ns_title_prefix_tuple(ctx, "Thesaurus")):
+                        if w1.startswith(ns_title_prefix_tuple(wtpctx, "Thesaurus")):
                             w1 = w1[10:]
                         if w1:
                             ret.append((lang, pos, rel, w1, item_sense,
@@ -206,7 +206,7 @@ def extract_thesaurus_data(ctx, config):
                 recurse(contents.args)
                 recurse(contents.children)
                 return
-            subtitle = ctx.node_to_text(contents.args)
+            subtitle = wtpctx.node_to_text(contents.args)
             if subtitle in config.LANGUAGES_BY_NAME:
                 lang = subtitle
                 pos = None
@@ -252,7 +252,7 @@ def extract_thesaurus_data(ctx, config):
 
     ret = collections.defaultdict(list)
     num_pages = 0
-    for word, linkages in ctx.reprocess(page_handler, autoload=False):
+    for word, linkages in wtpctx.reprocess(page_handler, autoload=False):
         assert isinstance(linkages, (list, tuple))
         num_pages += 1
         for lang, pos, rel, w, sense, xlit, tags, topics, title in linkages:
@@ -273,7 +273,7 @@ def extract_thesaurus_data(ctx, config):
                     ret[key].append(inv_v)
 
     total = sum(len(x) for x in ret.values())
-    if not ctx.quiet:
+    if not wtpctx.quiet:
         print("Extracted {} linkages from {} thesaurus pages "
               "(took {:.1f}s)"
               .format(total, num_pages, time.time() - start_t))

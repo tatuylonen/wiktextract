@@ -296,10 +296,10 @@ english_to_tags = {
     "he has": "third-person singular masculine",
 }
 
-def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
+def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
                                 lang, langcode, translations_from_template,
                                 is_reconstruction, config):
-    assert isinstance(ctx, Wtp)
+    assert isinstance(wtpctx, Wtp)
     assert isinstance(word, str)
     assert isinstance(data, dict)
     assert isinstance(item, str)
@@ -326,7 +326,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
 
     if re.search(r"\(\d+\)|\[\d+\]", item):
         if not item.find("numeral:"):
-            ctx.debug("possible sense number in translation item: {}"
+            wtpctx.debug("possible sense number in translation item: {}"
                       .format(item),
                       sortid="translations/324")
 
@@ -371,7 +371,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             tags.append(sublang)
         else:
             # We don't recognize this prefix
-            ctx.error("unrecognized prefix (language name?) in "
+            wtpctx.error("unrecognized prefix (language name?) in "
                       "translation item: {}".format(item),
                       sortid="translations/369")
             return None
@@ -385,7 +385,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             item = " ".join(parts[1:])
         else:
             if item.find("__IGNORE__") < 0:
-                ctx.error("no language name in translation item: {}"
+                wtpctx.error("no language name in translation item: {}"
                           .format(item), sortid="translations/382")
         return None
 
@@ -482,8 +482,8 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                 if cls == "tags":
                     tagsets2, topics2 = decode_tags(par)
                     for t in tagsets2:
-                        data_extend(ctx, tr, "tags", t)
-                    data_extend(ctx, tr, "topics", topics2)
+                        data_extend(wtpctx, tr, "tags", t)
+                    data_extend(wtpctx, tr, "topics", topics2)
                     part = rest
 
             # Check if this part ends with (tags).  Note that
@@ -497,8 +497,8 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                 if cls == "tags":
                     tagsets2, topics2 = decode_tags(par)
                     for t in tagsets2:
-                        data_extend(ctx, tr, "tags", t)
-                    data_extend(ctx, tr, "topics", topics2)
+                        data_extend(wtpctx, tr, "tags", t)
+                    data_extend(wtpctx, tr, "topics", topics2)
                     part = rest
 
             # Check if this part starts with "<tags/english>: <rest>"
@@ -514,8 +514,8 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                     if cls == "tags":
                         tagsets2, topics2 = decode_tags(par)
                         for t in tagsets2:
-                            data_extend(ctx, tr, "tags", t)
-                        data_extend(ctx, tr, "topics", topics2)
+                            data_extend(wtpctx, tr, "tags", t)
+                        data_extend(wtpctx, tr, "topics", topics2)
                         part = rest
                     elif cls == "english":
                         if re.search(tr_note_re, par):
@@ -553,7 +553,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             ):
                 if part.endswith(suffix):
                     part = part[:-len(suffix)]
-                    data_append(ctx, tr, "tags", t)
+                    data_append(wtpctx, tr, "tags", t)
                     break
 
             # Handle certain prefixes in translations
@@ -562,7 +562,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             ):
                 if part.startswith(prefix):
                     part = part[len(prefix):]
-                    data_append(ctx, tr, "tags", t)
+                    data_append(wtpctx, tr, "tags", t)
                     break
 
             # Skip certain one-character translations entirely
@@ -571,7 +571,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                 continue
 
             if "english" in tr and tr["english"] in english_to_tags:
-                data_extend(ctx, tr, "tags",
+                data_extend(wtpctx, tr, "tags",
                             english_to_tags[tr["english"]].split())
                 del tr["english"]
 
@@ -593,7 +593,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                 tr["note"] = part
             else:
                 # Interpret it as an actual translation
-                parse_translation_desc(ctx, lang, part, tr)
+                parse_translation_desc(wtpctx, lang, part, tr)
                 w = tr.get("word")
                 if not w:
                     continue  # Not set or empty
@@ -613,7 +613,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                 if m and lang not in (
                         "Bats",  # ^ in tree/English/Tr/Bats
                 ):
-                    ctx.debug("suspicious translation with {!r}: {}"
+                    wtpctx.debug("suspicious translation with {!r}: {}"
                               .format(m.group(0), tr),
                               sortid="translations/611")
 
@@ -622,7 +622,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
 
             # If we have only notes, add as-is
             if "word" not in tr:
-                data_append(ctx, data, "translations", tr)
+                data_append(wtpctx, data, "translations", tr)
                 continue
 
             # Split if it contains no spaces
@@ -641,7 +641,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                 if not alt:
                     continue
                 tr1["word"] = alt
-                data_append(ctx, data, "translations", tr1)
+                data_append(wtpctx, data, "translations", tr1)
 
     # Return the language name, in case we have subitems
     return lang

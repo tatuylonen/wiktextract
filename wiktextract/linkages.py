@@ -168,13 +168,13 @@ unicode_dc_re = re.compile(r"\w[{}]|.".format(
             if unicodedata.category(chr(x)) == "Mn")))
 
 
-def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
+def parse_linkage_item_text(wtpctx, word, data, field, item, sense, ruby,
                             pos_datas, is_reconstruction):
     """Parses a linkage item once it has been converted to a string.  This
     may add one or more linkages to ``data`` under ``field``.  This
     returns None or a string that contains thats that should be applied
     to additional linkages (commonly used in tables for Asian characters)."""
-    assert isinstance(ctx, Wtp)
+    assert isinstance(wtpctx, Wtp)
     assert isinstance(word, str)   # Main word (derived from page title)
     assert isinstance(data, dict)  # Parsed linkages are stored here under field
     assert isinstance(field, str)  # The field under which to store linkage
@@ -193,7 +193,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
     base_english = None
     script_chars = False
     base_qualifier = None
-    lang = ctx.section
+    lang = wtpctx.section
 
     # If ``sense`` can be parsed as tags, treat it as tags instead
     if sense:
@@ -216,7 +216,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
     #       .format(field, item, sense))
 
     # Replace occurrences of ~ in the item by the page title
-    safetitle = ctx.title.replace("\\", "\\\\")
+    safetitle = wtpctx.title.replace("\\", "\\\\")
     item = re.sub(r" ~ ", " " + safetitle + " ", item)
     item = re.sub(r"^~ ", safetitle + " ", item)
     item = re.sub(r" ~$", " " + safetitle, item)
@@ -311,8 +311,8 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
         # print("linkage prefix: desc={!r} cls={} rest={!r} cls2={}"
         #      .format(desc, cls, rest, cls2))
 
-        e1 = ctx.page_exists(desc)
-        e2 = ctx.page_exists(rest)
+        e1 = wtpctx.page_exists(desc)
+        e2 = wtpctx.page_exists(rest)
         if cls != "tags":
             if (cls2 == "tags" or
                 (e1 and not e1) or
@@ -352,7 +352,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                 d = pos_datas[idx]
                 gl = "; ".join(d.get("glosses", ()))
                 if not gl:
-                    ctx.debug("parenthesized numeric linkage prefix, "
+                    wtpctx.debug("parenthesized numeric linkage prefix, "
                               "but the referenced sense has no gloss: "
                               "{}".format(desc),
                               sortid="linkages/355")
@@ -362,13 +362,13 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                     sense = gl
                 item = rest
             else:
-                ctx.debug("parenthesized numeric linkage prefix, "
+                wtpctx.debug("parenthesized numeric linkage prefix, "
                           "but there is no sense with such index: {}"
                           .format(desc),
                           sortid="linkages/365")
                 item = rest
         else:
-            ctx.debug("unrecognized linkage prefix: {} desc={} rest={} "
+            wtpctx.debug("unrecognized linkage prefix: {} desc={} rest={} "
                       "cls={} cls2={} e1={} e2={}"
                       .format(item, desc, rest, cls, cls2, e1, e2),
                       sortid="linkages/371")
@@ -438,8 +438,8 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                 (not re.search(head_final_re, item2) or
                  (item2[-1].isdigit() and
                   lang not in head_final_numeric_langs)) and
-                not re.search(r"\bor\b", ctx.title) and
-                all(ctx.title not in x.split(" or ")
+                not re.search(r"\bor\b", wtpctx.title) and
+                all(wtpctx.title not in x.split(" or ")
                     for x in split_at_comma_semi(item2)
                     if x.find(" or ") >= 0)):
                 # We can split this item.  Split the non-cleaned version
@@ -495,7 +495,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
         words = item1.split(" ")
         if (len(words) > 1 and
             words[0] in linkage_beginning_tags and
-            words[0] != ctx.title):
+            words[0] != wtpctx.title):
             t = linkage_beginning_tags[words[0]]
             item1 = " ".join(words[1:])
             if qualifier:
@@ -664,7 +664,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                         d = pos_datas[idx]
                         gl = "; ".join(d.get("glosses", ()))
                         if not gl:
-                            ctx.debug("parenthesized number "
+                            wtpctx.debug("parenthesized number "
                                       "but the referenced sense has no "
                                       "gloss: {}".format(par),
                                       sortid="linkages/665")
@@ -673,7 +673,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                         else:
                             sense = gl
                     else:
-                        ctx.debug("parenthesized number but there is "
+                        wtpctx.debug("parenthesized number but there is "
                                   "no sense with such index: {}"
                                   .format(par),
                                   sortid="linkages/674")
@@ -746,7 +746,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
 
             # Parse certain tags at the end of the linked term (unless
             # we are in a letters list)
-            item1, q = parse_head_final_tags(ctx, lang, item1)
+            item1, q = parse_head_final_tags(wtpctx, lang, item1)
             if q:
                 if qualifier:
                     qualifier += ", " + ", ".join(q)
@@ -784,7 +784,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
             # which is which.
             if ((not w or w.find(",") < 0) and
                 (not r or r.find(",") < 0) and
-                not ctx.page_exists(w)):
+                not wtpctx.page_exists(w)):
                 lst = w.split("／") if len(w) > 1 else [w]
                 if len(lst) == 1:
                     lst = w.split(" / ")
@@ -799,8 +799,8 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
             # Heuristically remove "." at the end of most linkages
             # (some linkage lists end in a period, but we also have
             # abbreviations that end with a period that should be kept)
-            if (w.endswith(".") and not ctx.page_exists(w) and
-                (ctx.page_exists(w[:-1]) or
+            if (w.endswith(".") and not wtpctx.page_exists(w) and
+                (wtpctx.page_exists(w[:-1]) or
                  (len(w) >= 5) and w[:-1].find(".") < 0)):
                 w = w[:-1]
 
@@ -812,7 +812,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
             # Add the linkage
             dt = {}
             if qualifier:
-                parse_sense_qualifier(ctx, qualifier, dt)
+                parse_sense_qualifier(wtpctx, qualifier, dt)
             if sense:
                 dt["sense"] = sense.strip()
             if r:
@@ -823,14 +823,14 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                 dt["english"] = english.strip()
             if taxonomic:
                 if re.match(r"×[A-Z]", taxonomic):
-                    data_append(ctx, dt, "tags", "extinct")
+                    data_append(wtpctx, dt, "tags", "extinct")
                     taxonomic = taxonomic[1:]
                 dt["taxonomic"] = taxonomic
             if re.match(r"×[A-Z]", w):
-                data_append(ctx, dt, "tags", "extinct")
+                data_append(wtpctx, dt, "tags", "extinct")
                 w = w[1:]  # Remove × before dead species names
             if alt and re.match(r"×[A-Z]", alt):
-                data_append(ctx, dt, "tags", "extinct")
+                data_append(wtpctx, dt, "tags", "extinct")
                 alt = alt[1:]  # Remove × before dead species names
             if alt and alt.strip() != w:
                 dt["alt"] = alt.strip()
@@ -839,7 +839,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                 if dt == old:
                     break
             else:
-                data_append(ctx, data, field, dt)
+                data_append(wtpctx, data, field, dt)
 
         # Handle exceptional linkage splits and other linkage
         # conversions (including expanding to variant forms)
@@ -853,7 +853,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
         # spaces consecutively.
         v = sense or qualifier
         # print("lang={} v={} script_chars={} item1={!r}"
-        #       .format(ctx.section, v, script_chars, item1))
+        #       .format(wtpctx.section, v, script_chars, item1))
         if v and script_chars:
             if (len(item1.split()) > 1 or
                 len(list(re.finditer(unicode_dc_re, item1))) == 2 or

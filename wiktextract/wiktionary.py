@@ -30,34 +30,34 @@ translation_suffixes = [
     "/translations",
 ]
 
-def init_special_prefixes(ctx: Wtp) -> None:
+def init_special_prefixes(wtpctx: Wtp) -> None:
     global SPECIAL_PREFIXES
     if SPECIAL_PREFIXES is None:
         SPECIAL_PREFIXES = {
-            ctx.NAMESPACE_DATA.get("Category", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Module", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Template", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Citations", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Appendix", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Rhymes", {}).get("name"),  # XXX check these out
-            ctx.NAMESPACE_DATA.get("Project", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Thread", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Index", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Thesaurus", {}).get("name"),  # These are handled as a separate pass
-            ctx.NAMESPACE_DATA.get("MediaWiki", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Concordance", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Sign gloss", {}).get("name"),  # XXX would I like to capture these too?
-            ctx.NAMESPACE_DATA.get("Help", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("File", {}).get("name"),
+            wtpctx.NAMESPACE_DATA.get("Category", {}).get("name"),
+            wtpctx.NAMESPACE_DATA.get("Module", {}).get("name"),
+            wtpctx.NAMESPACE_DATA.get("Template", {}).get("name"),
+            wtpctx.NAMESPACE_DATA.get("Citations", {}).get("name"),
+            wtpctx.NAMESPACE_DATA.get("Appendix", {}).get("name"),
+            wtpctx.NAMESPACE_DATA.get("Rhymes", {}).get("name"),  # XXX check these out
+            wtpctx.NAMESPACE_DATA.get("Project", {}).get("name"),
+            wtpctx.NAMESPACE_DATA.get("Thread", {}).get("name"),
+            wtpctx.NAMESPACE_DATA.get("Index", {}).get("name"),
+            wtpctx.NAMESPACE_DATA.get("Thesaurus", {}).get("name"),  # These are handled as a separate pass
+            wtpctx.NAMESPACE_DATA.get("MediaWiki", {}).get("name"),
+            wtpctx.NAMESPACE_DATA.get("Concordance", {}).get("name"),
+            wtpctx.NAMESPACE_DATA.get("Sign gloss", {}).get("name"),  # XXX would I like to capture these too?
+            wtpctx.NAMESPACE_DATA.get("Help", {}).get("name"),
+            wtpctx.NAMESPACE_DATA.get("File", {}).get("name"),
         }
 
 
-def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
+def page_handler(wtpctx, model, title, text, capture_cb, config_kwargs,
                  thesaurus_data, dont_parse):
     # Make sure there are no newlines or other strange characters in the
     # title.  They could cause security problems at several post-processing
     # steps.
-    init_special_prefixes(ctx)
+    init_special_prefixes(wtpctx)
     title = re.sub(r"[\s\000-\037]+", " ", title)
     title = title.strip()
     if capture_cb and not capture_cb(model, title, text):
@@ -86,25 +86,25 @@ def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
         config1 = WiktionaryConfig(**config_kwargs)
         config1.thesaurus_data = thesaurus_data
         start_t = time.time()
-        ret = parse_page(ctx, title, text, config1)
+        ret = parse_page(wtpctx, title, text, config1)
         dur = time.time() - start_t
         if dur > 100:
             print("====== WARNING: PARSING PAGE TOOK {:.1f}s: {}"
                   .format(dur, title))
     stats = config1.to_return()
-    for k, v in ctx.to_return().items():
+    for k, v in wtpctx.to_return().items():
         stats[k] = v
     return (ret, stats)
 
 
-def parse_wiktionary(ctx, path, config, word_cb, capture_cb,
+def parse_wiktionary(wtpctx, path, config, word_cb, capture_cb,
                      phase1_only, dont_parse):
     """Parses Wiktionary from the dump file ``path`` (which should point
     to a "enwiktionary-<date>-pages-articles.xml.bz2" file.  This
     calls ``capture_cb(title)`` for each raw page (if provided), and
     if it returns True, and calls ``word_cb(data)`` for all words
     defined for languages in ``languages``."""
-    assert isinstance(ctx, Wtp)
+    assert isinstance(wtpctx, Wtp)
     assert isinstance(path, str)
     assert isinstance(config, WiktionaryConfig)
     assert callable(word_cb)
@@ -118,34 +118,34 @@ def parse_wiktionary(ctx, path, config, word_cb, capture_cb,
 
     # config_kwargs = config.to_kwargs()
 
-    if not ctx.quiet:
+    if not wtpctx.quiet:
         print("First phase - extracting templates, macros, and pages")
         sys.stdout.flush()
 
     # def page_cb(model, title, text):
-    #     return page_handler(ctx, model, title, text, capture_cb, config_kwargs)
+    #     return page_handler(wtpctx, model, title, text, capture_cb, config_kwargs)
 
     # langhd is needed for pre-expanding language heading templates in the
     # Chinese Wiktionary dump file: https://zh.wiktionary.org/wiki/Template:-en-
     # Move this to lang_specific
-    if ctx.lang_code == "zh":
+    if wtpctx.lang_code == "zh":
         additional_expand_templates.add("langhd")
     
-    list(ctx.process(path, None, phase1_only=True))
+    list(wtpctx.process(path, None, phase1_only=True))
     if phase1_only:
         return []
 
     # Phase 2 - process the pages using the user-supplied callback
-    if not ctx.quiet:
+    if not wtpctx.quiet:
         print("Second phase - processing pages")
         sys.stdout.flush()
 
-    return reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse)
+    return reprocess_wiktionary(wtpctx, config, word_cb, capture_cb, dont_parse)
 
 
-def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
+def reprocess_wiktionary(wtpctx, config, word_cb, capture_cb, dont_parse):
     """Reprocesses the Wiktionary from the cache file."""
-    assert isinstance(ctx, Wtp)
+    assert isinstance(wtpctx, Wtp)
     assert isinstance(config, WiktionaryConfig)
     assert callable(word_cb)
     assert capture_cb is None or callable(capture_cb)
@@ -155,15 +155,15 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
 
     # Extract thesaurus data. This iterates over all pages in the cache file,
     # but is very fast.
-    thesaurus_data = extract_thesaurus_data(ctx, config)
+    thesaurus_data = extract_thesaurus_data(wtpctx, config)
 
     # Then perform the main parsing pass.
     def page_cb(model, title, text):
-        return page_handler(ctx, model, title, text, capture_cb, config_kwargs,
+        return page_handler(wtpctx, model, title, text, capture_cb, config_kwargs,
                             thesaurus_data, dont_parse)
 
     emitted = set()
-    for ret, stats in ctx.reprocess(page_cb):
+    for ret, stats in wtpctx.reprocess(page_cb):
         config.merge_return(stats)
         for dt in ret:
             word_cb(dt)
@@ -208,7 +208,7 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
                         dt["tags"] = tags
                     if topics:
                         dt["topics"] = topics
-                    data_append(ctx, sense_dt, rel, dt)
+                    data_append(wtpctx, sense_dt, rel, dt)
                 senses.append(sense_dt)
             if not senses:
                 senses.append({"tags": ["no-gloss"]})
@@ -225,10 +225,10 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
     sys.stdout.flush()
 
 
-def extract_namespace(ctx, namespace, path):
+def extract_namespace(wtpctx, namespace, path):
     """Extracts all pages in the given namespace and writes them to a .tar
     file with the given path."""
-    assert isinstance(ctx, Wtp)
+    assert isinstance(wtpctx, Wtp)
     assert isinstance(namespace, str)
     assert isinstance(path, str)
 
@@ -241,7 +241,7 @@ def extract_namespace(ctx, namespace, path):
     def page_cb(model, title, text):
         if not title.startswith(prefix):
             return None
-        text = ctx.read_by_title(title)
+        text = wtpctx.read_by_title(title)
         title = title[len(prefix):]
         title = re.sub(r"(^|/)\.($|/)", r"\1__dotdot__\2", title)
         title = re.sub(r"(^|/)\.\.($|/)", r"\1__dotdot__\2", title)
@@ -252,7 +252,7 @@ def extract_namespace(ctx, namespace, path):
         return (title, text)
 
     with tarfile.open(path, mode="w", bufsize=16 * 1024 * 1024) as tarf:
-        for title, text in ctx.reprocess(page_cb, autoload=False):
+        for title, text in wtpctx.reprocess(page_cb, autoload=False):
             text = text.encode("utf-8")
             f = io.BytesIO(text)
             title += ".txt"

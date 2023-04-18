@@ -67,14 +67,14 @@ end
 return export
 """
 
-def extract_categories(ctx, config):
+def extract_categories(wtpctx, config):
     """Extracts the category tree from Wiktionary."""
-    assert isinstance(ctx, Wtp)
+    assert isinstance(wtpctx, Wtp)
     assert isinstance(config, WiktionaryConfig)
-    ctx.add_page("Scribunto", "Module:wiktextract cat tree", lua_code,
+    wtpctx.add_page("Scribunto", "Module:wiktextract cat tree", lua_code,
                  transient=True)
-    ctx.start_page("Wiktextract category tree extraction")
-    rawdata = ctx.expand("{{#invoke:wiktextract cat tree|main}}")
+    wtpctx.start_page("Wiktextract category tree extraction")
+    rawdata = wtpctx.expand("{{#invoke:wiktextract cat tree|main}}")
     ht = {}
     for line in rawdata.split("\n"):
         if not line:
@@ -85,7 +85,7 @@ def extract_categories(ctx, config):
         name = re.sub(r"^Category:", "", name)
         name_lc = name.lower()
         desc = re.sub(r"\\n", "\n", desc)
-        clean_desc = clean_node(config, ctx, None, desc)
+        clean_desc = clean_node(config, wtpctx, None, desc)
         if name_lc not in ht:
             ht[name_lc] = {"name": name}
         dt = ht[name_lc]
