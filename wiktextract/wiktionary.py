@@ -82,11 +82,6 @@ def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
             if title.endswith(suffix):
                 return None # XXX
 
-        # XXX old testing code, remove:
-        # if title == "drag":
-        #     print("XXX SKIPPING `drag' - THIS IS TEST CODE ONLY - REMOVE")
-        #     return None
-
         # XXX Sign gloss pages?
         config1 = WiktionaryConfig(**config_kwargs)
         config1.thesaurus_data = thesaurus_data
@@ -121,15 +116,14 @@ def parse_wiktionary(ctx, path, config, word_cb, capture_cb,
         for x in capture_language_codes:
             assert isinstance(x, str)
 
-    config_kwargs = config.to_kwargs()
+    # config_kwargs = config.to_kwargs()
 
     if not ctx.quiet:
         print("First phase - extracting templates, macros, and pages")
         sys.stdout.flush()
 
-    def page_cb(model, title, text):
-        return page_handler(ctx, model, title, text, capture_cb, config_kwargs)
-
+    # def page_cb(model, title, text):
+    #     return page_handler(ctx, model, title, text, capture_cb, config_kwargs)
 
     # langhd is needed for pre-expanding language heading templates in the
     # Chinese Wiktionary dump file: https://zh.wiktionary.org/wiki/Template:-en-
