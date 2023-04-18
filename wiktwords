@@ -29,16 +29,16 @@ from wiktextract import extract_thesaurus_data
 from wiktextract import extract_categories
 
 # Pages whose titles have any of these prefixes are ignored.
-IGNORE_PREFIEXES = None
+IGNORE_PREFIXES = None
 
 # Pages with these prefixes are captured.
 RECOGNIZED_PREFIXES = None
 
 
 def init_prefixes(ctx: Wtp) -> None:
-    global IGNORE_PREFIEXES, RECOGNIZED_PREFIXES
-    if IGNORE_PREFIEXES is None:
-        IGNORE_PREFIEXES = {
+    global IGNORE_PREFIXES, RECOGNIZED_PREFIXES
+    if IGNORE_PREFIXES is None:
+        IGNORE_PREFIXES = {
             ctx.NAMESPACE_DATA.get("Index", {}).get("name"),
             ctx.NAMESPACE_DATA.get("Help", {}).get("name"),
             ctx.NAMESPACE_DATA.get("MediaWiki", {}).get("name"),
@@ -83,7 +83,7 @@ def capture_page(model, orig_title, text, pages_dir):
         analyze = True
     else:
         prefix, tail = m.groups()
-        if prefix in IGNORE_PREFIEXES:
+        if prefix in IGNORE_PREFIXES:
             analyze = False
         elif prefix not in RECOGNIZED_PREFIXES:
             print("UNRECOGNIZED PREFIX", title)
