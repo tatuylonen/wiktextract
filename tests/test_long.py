@@ -41,7 +41,7 @@ class LongTests(unittest.TestCase):
 
         path = "tests/test-pages-articles.xml.bz2"
         print("Parsing test data")
-        ctx = Wtp()
+        wtpctx = Wtp()
         config = WiktionaryConfig(dump_file_lang_code="en",
                                   capture_language_codes=["en", "fi", "es",
                                                           "de", "zh", "ja",
@@ -51,7 +51,7 @@ class LongTests(unittest.TestCase):
                                   capture_linkages=True,
                                   capture_compounds=True,
                                   capture_redirects=True)
-        parse_wiktionary(ctx, path, config, word_cb, None, False, False)
+        parse_wiktionary(wtpctx, path, config, word_cb, None, False, False)
         print("Test data parsing complete")
         assert num_redirects > 0
         assert len(words) > 100

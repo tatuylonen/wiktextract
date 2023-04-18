@@ -13,9 +13,9 @@ class PageTests(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = 20000
-        self.ctx = Wtp()
-        self.ctx.analyze_templates()
-        self.ctx.start_page("testpage")
+        self.wtpctx = Wtp()
+        self.wtpctx.analyze_templates()
+        self.wtpctx.start_page("testpage")
         self.config = WiktionaryConfig(capture_language_codes=None,
                                        capture_translations=True,
                                        capture_pronunciation=True,
@@ -26,7 +26,7 @@ class PageTests(unittest.TestCase):
 
     def runpage(self, text):
         assert isinstance(text, str)
-        return parse_page(self.ctx, self.ctx.title, text, self.config)
+        return parse_page(self.wtpctx, self.wtpctx.title, text, self.config)
 
     def test_page1(self):
         lst = self.runpage("""
@@ -93,7 +93,7 @@ testpage f
         ])
 
     def test_page3(self):
-        self.ctx.start_page("Unsupported titles/C sharp")
+        self.wtpctx.start_page("Unsupported titles/C sharp")
         lst = self.runpage("""
 ==Swedish==
 ===Noun===
@@ -120,7 +120,7 @@ foo
         ])
 
     def test_page4(self):
-        self.ctx.start_page("foo")
+        self.wtpctx.start_page("foo")
         lst = self.runpage("""
 ==English==
 
@@ -183,7 +183,7 @@ foo
         ])
 
     def test_page5(self):
-        self.ctx.start_page("foo")
+        self.wtpctx.start_page("foo")
         lst = self.runpage("""
 ==English==
 

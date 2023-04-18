@@ -13,16 +13,16 @@ from wiktextract.inflection import (expand_header, TableContext)
 class InflTests(unittest.TestCase):
 
     def setUp(self):
-        self.ctx = Wtp()
+        self.wtpctx = Wtp()
         self.config = WiktionaryConfig()
-        self.ctx.start_page("testpage")
-        self.ctx.start_section("English")
+        self.wtpctx.start_page("testpage")
+        self.wtpctx.start_section("English")
         self.tblctx = TableContext("barfoo")
 
     def xexpand_header(self, text, i_map, lang="English", pos="verb",
                        base_tags=[],):
         with patch('wiktextract.inflection.infl_map', i_map):
-            ret = expand_header(self.config, self.ctx, self.tblctx,
+            ret = expand_header(self.config, self.wtpctx, self.tblctx,
                                 "foobar", lang,
                                 pos, "foo", base_tags)
         return ret

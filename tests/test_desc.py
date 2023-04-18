@@ -11,10 +11,10 @@ from wiktextract.datautils import split_at_comma_semi
 class DescTests(unittest.TestCase):
 
     def setUp(self):
-        self.ctx = Wtp()
+        self.wtpctx = Wtp()
         self.config = WiktionaryConfig()
-        self.ctx.start_page("testpage")
-        self.ctx.start_section("English")
+        self.wtpctx.start_page("testpage")
+        self.wtpctx.start_section("English")
 
     def test_comma_semi1(self):
         self.assertEqual(split_at_comma_semi(""), [])

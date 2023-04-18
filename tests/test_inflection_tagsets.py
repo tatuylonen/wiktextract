@@ -14,10 +14,10 @@ class TagsetTests(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = 100000
-        self.ctx = Wtp()
+        self.wtpctx = Wtp()
         self.config = WiktionaryConfig()
-        self.ctx.start_page("testpage")
-        self.ctx.start_section("English")
+        self.wtpctx.start_page("testpage")
+        self.wtpctx.start_section("English")
 
     def xop(self, op, ts1, ts2, expected, lang="English", pos="verb"):
         assert callable(op)
