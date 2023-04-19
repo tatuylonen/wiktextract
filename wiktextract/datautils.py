@@ -5,7 +5,7 @@
 import re
 import functools
 import collections
-from wikitextprocessor import Wtp
+from wiktextract.wxr_context import WiktextractContext
 
 # Keys in ``data`` that can only have string values (a list of them)
 str_keys = ("tags", "glosses")
@@ -14,10 +14,10 @@ dict_keys = set(["pronunciations", "senses", "synonyms", "related",
                  "antonyms", "hypernyms", "holonyms", "forms"])
 
 
-def data_append(wtpctx, data, key, value):
+def data_append(wxr, data, key, value):
     """Appends ``value`` under ``key`` in the dictionary ``data``.  The key
     is created if it does not exist."""
-    assert isinstance(wtpctx, Wtp)
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(data, dict)
     assert isinstance(key, str)
 
@@ -35,9 +35,9 @@ def data_append(wtpctx, data, key, value):
     lst.append(value)
 
 
-def data_extend(wtpctx, data, key, values):
+def data_extend(wxr, data, key, values):
     """Appends all values in a list under ``key`` in the dictionary ``data``."""
-    assert isinstance(wtpctx, Wtp)
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(data, dict)
     assert isinstance(key, str)
     assert isinstance(values, (list, tuple))
@@ -47,7 +47,7 @@ def data_extend(wtpctx, data, key, values):
     # out of memory.  Other ways of avoiding the sharing may be more
     # complex.
     for x in tuple(values):
-        data_append(wtpctx, data, key, x)
+        data_append(wxr, data, key, x)
 
 
 @functools.lru_cache(maxsize=20)
@@ -97,12 +97,12 @@ def split_at_comma_semi(text, separators=(",", ";", "，", "،"), extra=()):
         lst.append("".join(parts).strip())
     return lst
 
-def split_slashes(wtpctx, text):
+def split_slashes(wxr, text):
     """Splits the text at slashes.  This tries to use heuristics on how the
     split is to be interpreted, trying to prefer longer forms that can be
     found in the dictionary."""
     text = text.strip()
-    if wtpctx.page_exists(text):
+    if wxr.wtp.page_exists(text):
         return [text]
 
     text = re.sub(r"[／]", "/", text)
@@ -158,7 +158,7 @@ def split_slashes(wtpctx, text):
             words = []
             for ws in divs:
                 assert isinstance(ws, tuple)
-                exists = wtpctx.page_exists(" ".join(ws))
+                exists = wxr.wtp.page_exists(" ".join(ws))
                 words.extend(ws)
                 score += 100
                 score += 1 / len(ws)
@@ -192,10 +192,10 @@ def freeze(x):
     return x
 
 
-def ns_title_prefix_tuple(wtpctx, namespace: str, lower: bool = False) -> tuple:  # tuple[str]
+def ns_title_prefix_tuple(wxr, namespace: str, lower: bool = False) -> tuple:  # tuple[str]
     """Based on given namespace name, create a tuple of aliases"""
-    if namespace in wtpctx.NAMESPACE_DATA:
+    if namespace in wxr.wtp.NAMESPACE_DATA:
         return tuple(map(lambda x: x.lower() + ":" if lower else x + ":",
-                         [wtpctx.NAMESPACE_DATA[namespace]["name"]] + wtpctx.NAMESPACE_DATA[namespace]["aliases"]))
+                         [wxr.wtp.NAMESPACE_DATA[namespace]["name"]] + wxr.wtp.NAMESPACE_DATA[namespace]["aliases"]))
     else:
         return ()

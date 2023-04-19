@@ -6,12 +6,12 @@
 import re
 import time
 import collections
-from wikitextprocessor import Wtp, NodeKind, WikiNode
+from wikitextprocessor import NodeKind, WikiNode
+from wiktextract.wxr_context import WiktextractContext
 
 from .datautils import ns_title_prefix_tuple
 from .page import linkage_inverses, clean_node, LEVEL_KINDS
 from .form_descriptions import parse_sense_qualifier
-from .config import WiktionaryConfig
 
 ignored_subtitle_tags_map = {
     "by reason": [],
@@ -71,32 +71,31 @@ def contains_list(contents):
     return contains_list(contents.children) or contains_list(contents.args)
 
 
-def extract_thesaurus_data(wtpctx, config):
+def extract_thesaurus_data(wxr):
     """Extracts linkages from the thesaurus pages in Wiktionary."""
-    assert isinstance(wtpctx, Wtp)
-    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(wxr, WiktextractContext)
     start_t = time.time()
-    if not wtpctx.quiet:
+    if not wxr.wtp.quiet:
         print("Extracting thesaurus data")
 
     def page_handler(model, title, text):
-        if not title.startswith(ns_title_prefix_tuple(wtpctx, "Thesaurus")):
+        if not title.startswith(ns_title_prefix_tuple(wxr, "Thesaurus")):
             return None
         if title.startswith("Thesaurus:Requested entries "):
             return None
         if "/" in title:
             #print("STRANGE TITLE:", title)
             return None
-        text = wtpctx.read_by_title(title)
+        text = wxr.wtp.read_by_title(title)
         word = title[10:]
         idx = word.find(":")
         if idx > 0 and idx < 5:
             word = word[idx + 1:]  # Remove language prefix
-        expanded = wtpctx.expand(text, templates_to_expand=None)  # Expand all
+        expanded = wxr.wtp.expand(text, templates_to_expand=None)  # Expand all
         expanded = re.sub(r'(?s)<span class="tr Latn"[^>]*>(<b>)?(.*?)(</b>)?'
                           r'</span>',
                           r"XLITS\2XLITE", expanded)
-        tree = wtpctx.parse(expanded, pre_expand=False)
+        tree = wxr.wtp.parse(expanded, pre_expand=False)
         assert tree.kind == NodeKind.ROOT
         lang = None
         pos = None
@@ -108,7 +107,7 @@ def extract_thesaurus_data(wtpctx, config):
         # {{ws header|lang=xx}}
         m = re.search(r'(?s)\{\{ws header\|[^}]*lang=([^}|]*)', text)
         if m:
-            lang = config.LANGUAGES_BY_CODE.get(m.group(1), [None])[0]
+            lang = wxr.config.LANGUAGES_BY_CODE.get(m.group(1), [None])[0]
 
         def recurse(contents):
             nonlocal lang
@@ -135,7 +134,7 @@ def extract_thesaurus_data(wtpctx, config):
                 for node in contents.children:
                     if node.kind != NodeKind.LIST_ITEM:
                         continue
-                    w = clean_node(config, wtpctx, None, node.children)
+                    w = clean_node(wxr, None, node.children)
                     if w.find("*") >= 0:
                         print(title, lang, pos, "STAR IN WORD:", w)
                     # Check for parenthesized sense at the beginning
@@ -172,7 +171,7 @@ def extract_thesaurus_data(wtpctx, config):
                         if "XLITS" in q:
                             return q
                         dt = {}
-                        parse_sense_qualifier(wtpctx, q, dt)
+                        parse_sense_qualifier(wxr, q, dt)
                         tags.extend(dt.get("tags", ()))
                         topics.extend(dt.get("topics", ()))
                         return ""
@@ -196,7 +195,7 @@ def extract_thesaurus_data(wtpctx, config):
                         else:
                             xlit = None
                         w1 = w1.strip()
-                        if w1.startswith(ns_title_prefix_tuple(wtpctx, "Thesaurus")):
+                        if w1.startswith(ns_title_prefix_tuple(wxr, "Thesaurus")):
                             w1 = w1[10:]
                         if w1:
                             ret.append((lang, pos, rel, w1, item_sense,
@@ -206,16 +205,16 @@ def extract_thesaurus_data(wtpctx, config):
                 recurse(contents.args)
                 recurse(contents.children)
                 return
-            subtitle = wtpctx.node_to_text(contents.args)
-            if subtitle in config.LANGUAGES_BY_NAME:
+            subtitle = wxr.wtp.node_to_text(contents.args)
+            if subtitle in wxr.config.LANGUAGES_BY_NAME:
                 lang = subtitle
                 pos = None
                 sense = None
                 linkage = None
                 recurse(contents.children)
                 return
-            if subtitle.lower().startswith(config.OTHER_SUBTITLES["sense"].lower()):
-                sense = subtitle[len(config.OTHER_SUBTITLES["sense"]):]
+            if subtitle.lower().startswith(wxr.config.OTHER_SUBTITLES["sense"].lower()):
+                sense = subtitle[len(wxr.config.OTHER_SUBTITLES["sense"]):]
                 linkage = None
                 recurse(contents.children)
                 return
@@ -225,12 +224,12 @@ def extract_thesaurus_data(wtpctx, config):
                             "work to be done", "quantification",
                             "abbreviation", "symbol"):
                 return
-            if subtitle in config.LINKAGE_SUBTITLES:
-                linkage = config.LINKAGE_SUBTITLES[subtitle]
+            if subtitle in wxr.config.LINKAGE_SUBTITLES:
+                linkage = wxr.config.LINKAGE_SUBTITLES[subtitle]
                 recurse(contents.children)
                 return
-            if subtitle in config.POS_SUBTITLES:
-                pos = config.POS_SUBTITLES[subtitle]["pos"]
+            if subtitle in wxr.config.POS_SUBTITLES:
+                pos = wxr.config.POS_SUBTITLES[subtitle]["pos"]
                 sense = None
                 linkage = None
                 recurse(contents.children)
@@ -252,7 +251,7 @@ def extract_thesaurus_data(wtpctx, config):
 
     ret = collections.defaultdict(list)
     num_pages = 0
-    for word, linkages in wtpctx.reprocess(page_handler, autoload=False):
+    for word, linkages in wxr.wtp.reprocess(page_handler, autoload=False):
         assert isinstance(linkages, (list, tuple))
         num_pages += 1
         for lang, pos, rel, w, sense, xlit, tags, topics, title in linkages:
@@ -273,7 +272,7 @@ def extract_thesaurus_data(wtpctx, config):
                     ret[key].append(inv_v)
 
     total = sum(len(x) for x in ret.values())
-    if not wtpctx.quiet:
+    if not wxr.wtp.quiet:
         print("Extracted {} linkages from {} thesaurus pages "
               "(took {:.1f}s)"
               .format(total, num_pages, time.time() - start_t))

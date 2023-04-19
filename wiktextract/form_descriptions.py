@@ -9,7 +9,7 @@ import functools
 import unicodedata
 import Levenshtein
 from nltk import TweetTokenizer
-from wikitextprocessor import Wtp
+from wiktextract.wxr_context import WiktextractContext
 from .datautils import data_append, data_extend, split_at_comma_semi
 from .taxondata import known_species, known_firsts
 from .topics import valid_topics, topic_generalize_map
@@ -994,11 +994,11 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
     return tagsets, topics
 
 
-def parse_head_final_tags(wtpctx, lang, form):
+def parse_head_final_tags(wxr, lang, form):
     """Parses tags that are allowed at the end of a form head from the end
     of the form.  This can also be used for parsing the final gender etc tags
     from translations and linkages."""
-    assert isinstance(wtpctx, Wtp)
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(lang, str)  # Should be language that "form" is for
     assert isinstance(form, str)
 
@@ -1020,12 +1020,12 @@ def parse_head_final_tags(wtpctx, lang, form):
         m = re.search(head_final_bantu_re, form)
         if m is not None:
             tagkeys = m.group(1)
-            if not wtpctx.title.endswith(tagkeys):
+            if not wxr.wtp.title.endswith(tagkeys):
                 form = form[:m.start()]
                 v = head_final_bantu_map[tagkeys]
                 if v.startswith("?"):
                     v = v[1:]
-                    wtpctx.debug("suspicious suffix {!r} in language {}: {}"
+                    wxr.wtp.debug("suspicious suffix {!r} in language {}: {}"
                               .format(tagkeys, lang, origform),
                               sortid="form_descriptions/1028")
                 tags.extend(v.split())
@@ -1036,12 +1036,12 @@ def parse_head_final_tags(wtpctx, lang, form):
         m = re.search(head_final_semitic_re, form)
         if m is not None:
             tagkeys = m.group(1)
-            if not wtpctx.title.endswith(tagkeys):
+            if not wxr.wtp.title.endswith(tagkeys):
                 form = form[:m.start()]
                 v = head_final_semitic_map[tagkeys]
                 if v.startswith("?"):
                     v = v[1:]
-                    wtpctx.debug("suspicious suffix {!r} in language {}: {}"
+                    wxr.wtp.debug("suspicious suffix {!r} in language {}: {}"
                               .format(tagkeys, lang, origform),
                               sortid="form_descriptions/1043")
                 tags.extend(v.split())
@@ -1052,7 +1052,7 @@ def parse_head_final_tags(wtpctx, lang, form):
         m = re.search(head_final_other_re, form)
         if m is not None:
             tagkeys = m.group(1)
-            if not wtpctx.title.endswith(tagkeys):
+            if not wxr.wtp.title.endswith(tagkeys):
                 form = form[:m.start()]
                 tags.extend(head_final_other_map[tagkeys].split(" "))
 
@@ -1069,18 +1069,18 @@ def parse_head_final_tags(wtpctx, lang, form):
         tagkeys_contains_digit = re.search(r"\d", tagkeys)
         if ((not tagkeys_contains_digit or
              lang in head_final_numeric_langs) and
-            not wtpctx.title.endswith(" " + tagkeys) and
+            not wxr.wtp.title.endswith(" " + tagkeys) and
             # XXX the above test does not capture when the whole word is a
             # xlat_head_map key, so I added the below test to complement
             # it; does this break anything?
-            not wtpctx.title == tagkeys):  # defunct/English,
+            not wxr.wtp.title == tagkeys):  # defunct/English,
                                         # "more defunct" -> "more" ["archaic"]
             if not tagkeys_contains_digit or lang in head_final_numeric_langs:
                 form = form[:m.start()]
                 v = xlat_head_map[tagkeys]
                 if v.startswith("?"):
                     v = v[1:]
-                    wtpctx.debug("suspicious suffix {!r} in language {}: {}"
+                    wxr.wtp.debug("suspicious suffix {!r} in language {}: {}"
                               .format(tagkeys, lang, origform),
                               sortid="form_descriptions/1077")
                 tags.extend(v.split())
@@ -1092,7 +1092,7 @@ def parse_head_final_tags(wtpctx, lang, form):
                   r"($|/| (f|m|sg|pl|anim|inan))", form) or
         form.endswith(" du")):
         if form not in ok_suspicious_forms:
-            wtpctx.debug("suspicious unhandled suffix in {}: {!r}, originally {!r}"
+            wxr.wtp.debug("suspicious unhandled suffix in {}: {!r}, originally {!r}"
                       .format(lang, form, origform),
                       sortid="form_descriptions/1089")
 
@@ -1130,14 +1130,14 @@ def unquote_kept_parens(s):
     return re.sub(r"__lpar__(.*?)__rpar__", r"(\1)", s)
 
 
-def add_related(wtpctx, data, tags_lst, related, origtext,
+def add_related(wxr, data, tags_lst, related, origtext,
                 add_all_canonicals, is_reconstruction,
                 head_group, ruby_data=[]):
     """Internal helper function for some post-processing entries for related
     forms (e.g., in word head).  This returns a list of list of tags to be
     added to following related forms or None (cf. walrus/English word head,
     parenthesized part starting with "both")."""
-    assert isinstance(wtpctx, Wtp)
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(tags_lst, (list, tuple))
     for x in tags_lst:
         assert isinstance(x, str)
@@ -1155,7 +1155,7 @@ def add_related(wtpctx, data, tags_lst, related, origtext,
         related = related[1:]
 
     # Get title word, with any reconstruction prefix removed
-    titleword = re.sub(r"^Reconstruction:[^/]*/", "", wtpctx.title)
+    titleword = re.sub(r"^Reconstruction:[^/]*/", "", wxr.wtp.title)
 
     def check_related(related):
         # Warn about some suspicious related forms
@@ -1168,10 +1168,10 @@ def add_related(wtpctx, data, tags_lst, related, origtext,
                 return
             if "class" in tags_lst:
                 return
-            if wtpctx.section == "Korean" and re.search(r"^\s*\w*>\w*\s*$", related):
+            if wxr.wtp.section == "Korean" and re.search(r"^\s*\w*>\w*\s*$", related):
                 # ignore Korean "i>ni" / "라>나" values
                 return
-            wtpctx.debug("suspicious related form tags {}: {!r} in {!r}"
+            wxr.wtp.debug("suspicious related form tags {}: {!r} in {!r}"
                       .format(tags_lst, related, origtext),
                       sortid="form_descriptions/1147")
 
@@ -1206,13 +1206,13 @@ def add_related(wtpctx, data, tags_lst, related, origtext,
                     related = related[:m.start()]
                     tagsets1, topics1 = decode_tags(paren)
     if related and related.startswith("{{"):
-        wtpctx.debug("{{ in word head form - possible Wiktionary error: {!r}"
+        wxr.wtp.debug("{{ in word head form - possible Wiktionary error: {!r}"
                   .format(related), sortid="form_descriptions/1177")
         return  # Likely Wiktionary coding error
     related = unquote_kept_parens(related)
     # Split related by "/" (e.g., grande/Spanish) superlative in head
     # Do not split if / in word title, see π//Japanese
-    if len(related) > 5 and "/" not in wtpctx.title:
+    if len(related) > 5 and "/" not in wxr.wtp.title:
         alts = split_at_comma_semi(related, separators=["/"])
     else:
         alts = [related]
@@ -1250,28 +1250,28 @@ def add_related(wtpctx, data, tags_lst, related, origtext,
                     dt["ruby"] = ruby
                 if "alt-of" in tags2:
                     check_related(related)
-                    data_extend(wtpctx, data, "tags", tags1)
-                    data_extend(wtpctx, data, "tags", tags2)
-                    data_extend(wtpctx, data, "topics", topics1)
-                    data_extend(wtpctx, data, "topics", topics2)
-                    data_append(wtpctx, data, "alt_of", dt)
+                    data_extend(wxr, data, "tags", tags1)
+                    data_extend(wxr, data, "tags", tags2)
+                    data_extend(wxr, data, "topics", topics1)
+                    data_extend(wxr, data, "topics", topics2)
+                    data_append(wxr, data, "alt_of", dt)
                 elif "form-of" in tags2:
                     check_related(related)
-                    data_extend(wtpctx, data, "tags", tags1)
-                    data_extend(wtpctx, data, "tags", tags2)
-                    data_extend(wtpctx, data, "topics", topics1)
-                    data_extend(wtpctx, data, "topics", topics2)
-                    data_append(wtpctx, data, "form_of", dt)
+                    data_extend(wxr, data, "tags", tags1)
+                    data_extend(wxr, data, "tags", tags2)
+                    data_extend(wxr, data, "topics", topics1)
+                    data_extend(wxr, data, "topics", topics2)
+                    data_append(wxr, data, "form_of", dt)
                 elif "compound-of" in tags2:
                     check_related(related)
-                    data_extend(wtpctx, data, "tags", tags1)
-                    data_extend(wtpctx, data, "tags", tags2)
-                    data_extend(wtpctx, data, "topics", topics1)
-                    data_extend(wtpctx, data, "topics", topics2)
-                    data_append(wtpctx, data, "compound", related)
+                    data_extend(wxr, data, "tags", tags1)
+                    data_extend(wxr, data, "tags", tags2)
+                    data_extend(wxr, data, "topics", topics1)
+                    data_extend(wxr, data, "topics", topics2)
+                    data_append(wxr, data, "compound", related)
                 else:
-                    lang = wtpctx.section
-                    related, final_tags = parse_head_final_tags(wtpctx, lang,
+                    lang = wxr.wtp.section
+                    related, final_tags = parse_head_final_tags(wxr, lang,
                                                                 related)
                     # print("add_related: related={!r} tags1={!r} tags2={!r} "
                     #       "final_tags={!r}"
@@ -1285,15 +1285,15 @@ def add_related(wtpctx, data, tags_lst, related, origtext,
                         form["roman"] = roman
                     if ruby:
                         form["ruby"] = ruby
-                    data_extend(wtpctx, form, "topics", topics1)
-                    data_extend(wtpctx, form, "topics", topics2)
+                    data_extend(wxr, form, "topics", topics1)
+                    data_extend(wxr, form, "topics", topics2)
                     if topics1 or topics2:
-                        wtpctx.debug("word head form has topics: {}".format(form),
+                        wxr.wtp.debug("word head form has topics: {}".format(form),
                                   sortid="form_descriptions/1233")
                     # Add tags from canonical form into the main entry
                     if "canonical" in tags:
                         if related in ("m", "f") and len(titleword) > 1:
-                            wtpctx.debug("probably incorrect canonical form "
+                            wxr.wtp.debug("probably incorrect canonical form "
                                       "{!r} ignored (probably tag combination "
                                       "missing from xlat_head_map)"
                                       .format(related),
@@ -1301,22 +1301,22 @@ def add_related(wtpctx, data, tags_lst, related, origtext,
                             continue
                         if (related != titleword or add_all_canonicals or
                             topics1 or topics2 or ruby):
-                            data_extend(wtpctx, form, "tags",
+                            data_extend(wxr, form, "tags",
                                         list(sorted(set(tags))))
                         else:
                             # We won't add canonical form here
                             filtered_tags = list(x for x in tags
                                                  if x != "canonical")
-                            data_extend(wtpctx, data, "tags", filtered_tags)
+                            data_extend(wxr, data, "tags", filtered_tags)
                             continue
                     else:
-                        data_extend(wtpctx, form, "tags", list(sorted(set(tags))))
+                        data_extend(wxr, form, "tags", list(sorted(set(tags))))
                     # Only insert if the form is not already there
                     for old in data.get("forms", ()):
                         if form == old:
                             break
                     else:
-                        data_append(wtpctx, data, "forms", form)
+                        data_append(wxr, data, "forms", form)
 
     # If this form had pre-tags that started with "both" or "all", add those
     # tags also to following related forms that don't have their own tags
@@ -1324,17 +1324,17 @@ def add_related(wtpctx, data, tags_lst, related, origtext,
     return following_tagsets
 
 
-def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
+def parse_word_head(wxr, pos, text, data, is_reconstruction,
                     head_group, ruby=[]):
     """Parses the head line for a word for in a particular language and
     part-of-speech, extracting tags and related forms."""
-    assert isinstance(wtpctx, Wtp)
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(pos, str)
     assert isinstance(text, str)
     assert isinstance(data, dict)
     assert isinstance(ruby, (list, tuple))
     assert is_reconstruction in (True, False)
-    # print("PARSE_WORD_HEAD: {}: {!r}".format(wtpctx.section, text))
+    # print("PARSE_WORD_HEAD: {}: {!r}".format(wxr.wtp.section, text))
 
     if text.find("Lua execution error") >= 0:
         return
@@ -1353,13 +1353,13 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
     # Parse Arabic non-past forms, e.g. أبلع/Arabic/Verb
     m = re.search(r", non-past ([^)]+ \([^)]+\))", text)
     if m:
-        add_related(wtpctx, data, ["non-past"], [m.group(1)], text, True,
+        add_related(wxr, data, ["non-past"], [m.group(1)], text, True,
                     is_reconstruction, head_group, ruby)
         text = text[:m.start()] + text[m.end():]
 
-    language = wtpctx.section
-    titleword = re.sub(r"^Reconstruction:[^/]*/", "", wtpctx.title)
-    titleparts = list(m.group(0) for m in re.finditer(word_re, wtpctx.title))
+    language = wxr.wtp.section
+    titleword = re.sub(r"^Reconstruction:[^/]*/", "", wxr.wtp.title)
+    titleparts = list(m.group(0) for m in re.finditer(word_re, wxr.wtp.title))
     if not titleparts:
         return
 
@@ -1387,7 +1387,7 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
     m = re.search(head_end_re, base)
     if m:
         tags = head_end_map[m.group(1).lower()].split()
-        data_extend(wtpctx, data, "tags", tags)
+        data_extend(wxr, data, "tags", tags)
         base = base[:m.start()]
 
     # Special case: handle Hán Nôm readings for Vietnamese characters
@@ -1397,14 +1397,14 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
         tag, readings = m.groups()
         tag = re.sub(r"\s+", "-", tag)
         for reading in split_at_comma_semi(readings):
-            add_related(wtpctx, data, [tag], [reading], text, True,
+            add_related(wxr, data, [tag], [reading], text, True,
                         is_reconstruction, head_group, ruby)
         return
 
     # Special case: Hebrew " [pattern: nnn]" ending
     m = re.search(r"\s+\[pattern: ([^]]+)\]", base)
     if m:
-        add_related(wtpctx, data, ["class"], [m.group(1)], text, True,
+        add_related(wxr, data, ["class"], [m.group(1)], text, True,
                     is_reconstruction, head_group, ruby)
         base = base[:m.start()] + base[m.end():]
 
@@ -1418,14 +1418,14 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
     # Split the head into alternatives.  This is a complicated task, as
     # we do not want so split on "or" or "," when immediately followed by more
     # head-final tags, but otherwise do want to split by them.
-    if "," in wtpctx.title:
+    if "," in wxr.wtp.title:
         # A kludge to handle article titles/phrases with commas.
         # Preprocess splits to first capture the title, then handle
         # all the others as usual.
-        presplits = re.split(r"({})".format(wtpctx.title), base)
+        presplits = re.split(r"({})".format(wxr.wtp.title), base)
         splits = []
         for psplit in presplits:
-            if psplit == wtpctx.title:
+            if psplit == wxr.wtp.title:
                 splits.append(psplit)
             else:
                 splits.extend(re.split(head_split_re, psplit))
@@ -1469,7 +1469,7 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
             mode = "compound-form"
             alt = alt[14:].strip()
         if mode == "compound-form":
-            add_related(wtpctx, data, ["in-compounds"], [alt], text,
+            add_related(wxr, data, ["in-compounds"], [alt], text,
                         True, is_reconstruction, head_group, ruby)
             continue
         # For non-first parts, see if it can be treated as tags-only
@@ -1483,15 +1483,15 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
             if alt_i > 0:
                 tagsets, topics = decode_tags(" ".join(baseparts))
                 if not any("error-unknown-tag" in x for x in tagsets):
-                    data_extend(wtpctx, data, "topics", topics)
+                    data_extend(wxr, data, "topics", topics)
                     for tags in tagsets:
-                        data_extend(wtpctx, data, "tags", tags)
+                        data_extend(wxr, data, "tags", tags)
                     continue
 
-            alt, tags = parse_head_final_tags(wtpctx, language, alt)
+            alt, tags = parse_head_final_tags(wxr, language, alt)
             tags = list(tags)  # Make sure we don't modify anything cached
             tags.append("canonical")
-            if alt_i == 0 and "," in wtpctx.title:
+            if alt_i == 0 and "," in wxr.wtp.title:
                 # Kludge to handle article titles/phrases with commas.
                 # basepart's regex strips commas, which leads to a
                 # canonical form that is the title phrase without a comma.
@@ -1501,7 +1501,7 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
                 baseparts = [alt]
             canonicals.append((tags, baseparts))
     for tags, baseparts in canonicals:
-        add_related(wtpctx, data, tags, baseparts, text, len(canonicals) > 1,
+        add_related(wxr, data, tags, baseparts, text, len(canonicals) > 1,
                     is_reconstruction, head_group, ruby)
 
     # Handle parenthesized descriptors for the word form and links to
@@ -1552,7 +1552,7 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
                 tags = list("Mainland China" if t == "Mainland" else t
                             for t in tags)
                 tags.append("strokes")
-                add_related(wtpctx, data, tags, [strokes], text, True,
+                add_related(wxr, data, tags, [strokes], text, True,
                             is_reconstruction, head_group, ruby)
             return ", "
 
@@ -1582,7 +1582,7 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
             # words (e.g., ba/Vietnamese)
             try:
                 if all(unicodedata.name(x).startswith("CJK ") for x in desc):
-                    add_related(wtpctx, data, ["CJK"], [desc], text, True,
+                    add_related(wxr, data, ["CJK"], [desc], text, True,
                                 is_reconstruction, head_group, ruby)
                     continue
             except ValueError:
@@ -1596,7 +1596,7 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
                 # followed by superlative without comma.  E.g.
                 # mal/Portuguese/Adv
                 for ts in prev_tags:
-                    add_related(wtpctx, data, ts, [splitdesc[0]], text, True,
+                    add_related(wxr, data, ts, [splitdesc[0]], text, True,
                                 is_reconstruction, head_group, ruby)
                 desc = " ".join(splitdesc[1:])
             elif (len(splitdesc) == 2 and
@@ -1605,7 +1605,7 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
                 # Sometimes alternative forms are prefixed with "also" or
                 # "and"
                 for ts in prev_tags:
-                    add_related(wtpctx, data, ts, [splitdesc[1]], text, True,
+                    add_related(wxr, data, ts, [splitdesc[1]], text, True,
                                 is_reconstruction, head_group, ruby)
                 continue
             elif (len(splitdesc) >= 2 and
@@ -1620,13 +1620,13 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
                     if prev_tags:
                         # Assume comma-separated alternative to previous one
                         for ts in prev_tags:
-                            add_related(wtpctx, data, ts, [desc], text, True,
+                            add_related(wxr, data, ts, [desc], text, True,
                                         is_reconstruction, head_group, ruby)
                         continue
                     elif distw(titleparts, desc) <= 0.5:
                        # Similar to head word, assume a dialectal variation to
                        # the base form.  Cf. go/Alemannic German/Verb
-                       add_related(wtpctx, data, ["alternative"], [desc], text,
+                       add_related(wxr, data, ["alternative"], [desc], text,
                                    True, is_reconstruction, head_group, ruby)
                        continue
                     elif (cls in ("romanization", "english") and
@@ -1634,7 +1634,7 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
                         classify_desc(titleword) == "other" and
                         not ("categories" in data and desc in data["categories"])):
                         # Assume it to be a romanization
-                        add_related(wtpctx, data, ["romanization"], [desc],
+                        add_related(wxr, data, ["romanization"], [desc],
                                     text, True, is_reconstruction, head_group,
                                     ruby)
                         have_romanization = True
@@ -1643,7 +1643,7 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
             m = re.match(r"^(\d+) strokes?$", desc)
             if m:
                 # Special case, used to give #strokes for Han characters
-                add_related(wtpctx, data, ["strokes"], [m.group(1)], text, True,
+                add_related(wxr, data, ["strokes"], [m.group(1)], text, True,
                             is_reconstruction, head_group, ruby)
                 continue
 
@@ -1660,7 +1660,7 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
                 t = ["radical+strokes"]
                 if lang:
                     t.extend(lang.split())
-                add_related(wtpctx, data, t, [radical_strokes], text, True,
+                add_related(wxr, data, t, [radical_strokes], text, True,
                             is_reconstruction, head_group, ruby)
                 prev_tags = None
                 following_tags = None
@@ -1694,7 +1694,7 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
                 lang = m.group(2)
                 t = ["strokes"]
                 t.extend(lang.split())
-                add_related(wtpctx, data, t, [strokes], text, True,
+                add_related(wxr, data, t, [strokes], text, True,
                             is_reconstruction, head_group, ruby)
                 prev_tags = None
                 following_tags = None
@@ -1720,7 +1720,7 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
                             tags = set(tags) - set(rem_tags.split())
                         tags = tags | set(add_tags.split())
                         tags = list(sorted(tags))
-                        add_related(wtpctx, data, tags, [parts[1]], text, True,
+                        add_related(wxr, data, tags, [parts[1]], text, True,
                                     is_reconstruction, head_group, ruby)
                         new_prev_tags.append(tags)
                     prev_tags = new_prev_tags
@@ -1735,7 +1735,7 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
                 related = [m.group(2)]
                 tagsets, topics = decode_tags(tagpart, no_unknown_starts=True)
                 if topics:
-                    wtpctx.debug("parenthized head part {!r} contains topics: {}"
+                    wxr.wtp.debug("parenthized head part {!r} contains topics: {}"
                               .format(tagpart, topics),
                               sortid="form_descriptions/1647")
             elif m is not None and re.match(r"in the sense ", m.group(1)):
@@ -1782,13 +1782,13 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
                             classify_desc(paren) == "romanization" and 
                             not ("categories" in data and desc in data["categories"])):
                             for r in split_at_comma_semi(paren, extra=[" or "]):
-                                add_related(wtpctx, data, ["romanization"], [r],
+                                add_related(wxr, data, ["romanization"], [r],
                                             text, True, is_reconstruction,
                                             head_group, ruby)
                             have_romanization = True
                             continue
                         tagsets = [["error-unrecognized-head-form"]]
-                        wtpctx.debug("unrecognized head form: {}".format(desc),
+                        wxr.wtp.debug("unrecognized head form: {}".format(desc),
                                   sortid="form_descriptions/1698")
                         continue
 
@@ -1824,7 +1824,7 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
                         for tags in tagsets:
                             for ts in prev_tags:
                                 tags1 = list(sorted(set(tags) | set(ts)))
-                                add_related(wtpctx, data, tags1, [related],
+                                add_related(wxr, data, tags1, [related],
                                             text, True, is_reconstruction,
                                             head_group, ruby)
                     else:
@@ -1834,11 +1834,11 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
                                 for ts in following_tags:
                                     tags1 = list(sorted(set(tags) |
                                                         set(ts)))
-                                    add_related(wtpctx, data, tags1, [related],
+                                    add_related(wxr, data, tags1, [related],
                                                 text, True, is_reconstruction,
                                                 head_group, ruby)
                             else:
-                                ret = add_related(wtpctx, data, tags, [related],
+                                ret = add_related(wxr, data, tags, [related],
                                                   text, True, is_reconstruction,
                                                   head_group, ruby)
                                 if ret is not None:
@@ -1859,16 +1859,16 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
                         prev_tags = new_prev_tags
                         continue
                     for tags in tagsets:
-                        data_extend(wtpctx, data, "tags", tags)
+                        data_extend(wxr, data, "tags", tags)
                     prev_tags = tagsets
                     following_tags = None
 
     # Finally, if we collected hirakana/katakana, add them now
     if hiragana:
-        add_related(wtpctx, data, ["hiragana"], [hiragana], text, True,
+        add_related(wxr, data, ["hiragana"], [hiragana], text, True,
                     is_reconstruction, head_group, ruby)
     if katakana:
-        add_related(wtpctx, data, ["katakana"], [katakana], text, True,
+        add_related(wxr, data, ["katakana"], [katakana], text, True,
                     is_reconstruction, head_group, ruby)
 
     tags = data.get("tags", [])
@@ -1876,10 +1876,10 @@ def parse_word_head(wtpctx, pos, text, data, is_reconstruction,
         data["tags"] = list(sorted(set(tags)))
 
 
-def parse_sense_qualifier(wtpctx, text, data):
+def parse_sense_qualifier(wxr, text, data):
     """Parses tags or topics for a sense or some other data.  The values are
     added into the dictionary ``data``."""
-    assert isinstance(wtpctx, Wtp)
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(text, str)
     assert isinstance(data, dict)
     # print("parse_sense_qualifier:", text)
@@ -1902,7 +1902,7 @@ def parse_sense_qualifier(wtpctx, text, data):
             #       .format(semi, cls))
             if cls == "tags":
                 tagsets, topics = decode_tags(semi)
-                data_extend(wtpctx, data, "topics", topics)
+                data_extend(wxr, data, "topics", topics)
                 # XXX should think how to handle distinct options better,
                 # e.g., "singular and plural genitive"; that can't really be
                 # done with changing the calling convention of this function.
@@ -1920,15 +1920,15 @@ def parse_sense_qualifier(wtpctx, text, data):
                 else:
                     data["qualifier"] = orig_semi
             else:
-                wtpctx.debug("unrecognized sense qualifier: {}"
+                wxr.wtp.debug("unrecognized sense qualifier: {}"
                           .format(text),
                           sortid="form_descriptions/1831")
     sense_tags = list(sorted(set(sense_tags)))
-    data_extend(wtpctx, data, "tags", sense_tags)
+    data_extend(wxr, data, "tags", sense_tags)
 
 
-def parse_pronunciation_tags(wtpctx, text, data):
-    assert isinstance(wtpctx, Wtp)
+def parse_pronunciation_tags(wxr, text, data):
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(text, str)
     assert isinstance(data, dict)
     text = text.strip()
@@ -1938,20 +1938,20 @@ def parse_pronunciation_tags(wtpctx, text, data):
     notes = []
     if cls == "tags":
         tagsets, topics = decode_tags(text)
-        data_extend(wtpctx, data, "topics", topics)
+        data_extend(wxr, data, "topics", topics)
         for tagset in tagsets:
             for t in tagset:
                 if t.find(" ") >= 0:
                     notes.append(t)
                 else:
-                    data_append(wtpctx, data, "tags", t)
+                    data_append(wxr, data, "tags", t)
     else:
         notes.append(text)
     if notes:
         data["note"] = "; ".join(notes)
 
-def parse_translation_desc(wtpctx, lang, text, tr):
-    assert isinstance(wtpctx, Wtp)
+def parse_translation_desc(wxr, lang, text, tr):
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(lang, str)  # The language of ``text``
     assert isinstance(text, str)
     assert isinstance(tr, dict)
@@ -2019,12 +2019,12 @@ def parse_translation_desc(wtpctx, lang, text, tr):
                     (cls == "english" and len(r.split()) == 1 and
                      r[0].islower())):
                     if tr.get("alt") and tr.get("alt") != a:
-                        wtpctx.debug("more than one value in \"alt\": {} vs. {}"
+                        wxr.wtp.debug("more than one value in \"alt\": {} vs. {}"
                                   .format(tr["alt"], a),
                                   sortid="form_descriptions/1930")
                     tr["alt"] = a
                     if tr.get("roman") and tr.get("roman") != r:
-                        wtpctx.debug("more than one value in \"roman\": "
+                        wxr.wtp.debug("more than one value in \"roman\": "
                                   "{} vs. {}"
                                   .format(tr["roman"], r),
                                   sortid="form_descriptions/1936")
@@ -2038,16 +2038,16 @@ def parse_translation_desc(wtpctx, lang, text, tr):
             if cls == "tags":
                 tagsets, topics = decode_tags(lst[0])
                 for t in tagsets:
-                    data_extend(wtpctx, tr, "tags", t)
-                data_extend(wtpctx, tr, "topics", topics)
+                    data_extend(wxr, tr, "tags", t)
+                data_extend(wxr, tr, "topics", topics)
                 lst = lst[1:]
                 continue
             cls = classify_desc(lst[-1])
             if cls == "tags":
                 tagsets, topics = decode_tags(lst[-1])
                 for t in tagsets:
-                    data_extend(wtpctx, tr, "tags", t)
-                data_extend(wtpctx, tr, "topics", topics)
+                    data_extend(wxr, tr, "tags", t)
+                data_extend(wxr, tr, "topics", topics)
                 lst = lst[:-1]
                 continue
             break
@@ -2067,14 +2067,14 @@ def parse_translation_desc(wtpctx, lang, text, tr):
         if par == text:
             pass
         if par == "f":
-            data_append(wtpctx, tr, "tags", "feminine")
+            data_append(wxr, tr, "tags", "feminine")
         elif par == "m":
-            data_append(wtpctx, tr, "tags", "masculine")
+            data_append(wxr, tr, "tags", "masculine")
         elif cls == "tags":
             tagsets, topics = decode_tags(par)
             for tags in tagsets:
-                data_extend(wtpctx, tr, "tags", tags)
-            data_extend(wtpctx, tr, "topics", topics)
+                data_extend(wxr, tr, "tags", tags)
+            data_extend(wxr, tr, "topics", topics)
         elif cls == "english":
             # If the text contains any of certain grammatical words, treat it
             # as a "note" instead of "english"
@@ -2104,33 +2104,33 @@ def parse_translation_desc(wtpctx, lang, text, tr):
                     restore_end = " ({})".format(par) + restore_end
             else:
                 if tr.get("roman"):
-                    wtpctx.debug("more than one value in \"roman\": {} vs. {}"
+                    wxr.wtp.debug("more than one value in \"roman\": {} vs. {}"
                               .format(tr["roman"], par),
                               sortid="form_descriptions/2013")
                 tr["roman"] = par
         elif cls == "taxonomic":
             if tr.get("taxonomic"):
-                wtpctx.debug("more than one value in \"taxonomic\": {} vs. {}"
+                wxr.wtp.debug("more than one value in \"taxonomic\": {} vs. {}"
                           .format(tr["taxonomic"], par),
                           sortid="form_descriptions/2019")
             if re.match(r"×[A-Z]", par):
-                data_append(wtpctx, tr, "tags", "extinct")
+                data_append(wxr, tr, "tags", "extinct")
                 par = par[1:]
             tr["taxonomic"] = par
         elif cls == "other":
             if tr.get("alt"):
-                wtpctx.debug("more than one value in \"alt\": {} vs. {}"
+                wxr.wtp.debug("more than one value in \"alt\": {} vs. {}"
                           .format(tr["alt"], par),
                           sortid="form_descriptions/2028")
             tr["alt"] = par
         else:
-            wtpctx.debug("parse_translation_desc unimplemented cls {}: {}"
+            wxr.wtp.debug("parse_translation_desc unimplemented cls {}: {}"
                         .format(cls, par),
                         sortid="form_descriptions/2033")
 
     # Check for gender indications in suffix
-    text, final_tags = parse_head_final_tags(wtpctx, lang, text)
-    data_extend(wtpctx, tr, "tags", final_tags)
+    text, final_tags = parse_head_final_tags(wxr, lang, text)
+    data_extend(wxr, tr, "tags", final_tags)
 
     # Restore those parts that we did not want to remove (they are often
     # optional words or words that are always used with the given translation)
@@ -2146,10 +2146,10 @@ def parse_translation_desc(wtpctx, lang, text, tr):
     roman = tr.get("roman")
     if roman:
         if roman.endswith(" f"):
-            data_append(wtpctx, tr, "tags", "feminine")
+            data_append(wxr, tr, "tags", "feminine")
             tr["roman"] = roman[:-2].strip()
         elif roman.endswith(" m"):
-            data_append(wtpctx, tr, "tags", "masculine")
+            data_append(wxr, tr, "tags", "masculine")
             tr["roman"] = roman[:-2].strip()
 
     # If the word now has "english" field but no "roman" field, and
@@ -2174,7 +2174,7 @@ def parse_translation_desc(wtpctx, lang, text, tr):
         del tr["roman"]
 
 
-def parse_alt_or_inflection_of(wtpctx, gloss, gloss_template_args):
+def parse_alt_or_inflection_of(wxr, gloss, gloss_template_args):
     """Tries to parse an inflection-of or alt-of description.  If successful,
     this returns (tags, alt-of/inflection-of-dict).  If the description cannot
     be parsed, this returns None.  This may also return (tags, None) when the
@@ -2185,12 +2185,12 @@ def parse_alt_or_inflection_of(wtpctx, gloss, gloss_template_args):
 
     # Never interpret a gloss that is equal to the word itself as a tag
     # (e.g., instrumental/Romanian, instrumental/Spanish).
-    if (gloss.lower() == wtpctx.title.lower() or
-        (len(gloss) >= 5 and distw([gloss.lower()], wtpctx.title.lower()) < 0.2)):
+    if (gloss.lower() == wxr.wtp.title.lower() or
+        (len(gloss) >= 5 and distw([gloss.lower()], wxr.wtp.title.lower()) < 0.2)):
         return None
 
     # First try parsing it as-is
-    parsed = parse_alt_or_inflection_of1(wtpctx, gloss, gloss_template_args)
+    parsed = parse_alt_or_inflection_of1(wxr, gloss, gloss_template_args)
     if parsed is not None:
         return parsed
 
@@ -2198,7 +2198,7 @@ def parse_alt_or_inflection_of(wtpctx, gloss, gloss_template_args):
     # it was previously uppercase.
     if gloss and gloss[0].isupper():
         gloss = gloss[0].lower() + gloss[1:]
-        parsed = parse_alt_or_inflection_of1(wtpctx, gloss, gloss_template_args)
+        parsed = parse_alt_or_inflection_of1(wxr, gloss, gloss_template_args)
         if parsed is not None:
             return parsed
 
@@ -2210,7 +2210,7 @@ alt_infl_disallowed = set([
     "place",  # Not in inflected forms and causes problems e.g. house/English
 ])
 
-def parse_alt_or_inflection_of1(wtpctx, gloss, gloss_template_args):
+def parse_alt_or_inflection_of1(wxr, gloss, gloss_template_args):
     """Helper function for parse_alt_or_inflection_of.  This handles a single
     capitalization."""
     if not gloss or not gloss.strip():
@@ -2331,13 +2331,13 @@ def parse_alt_or_inflection_of1(wtpctx, gloss, gloss_template_args):
     base = base.strip()
     if base.endswith(",") and len(base) > 2:
         base = base[:-1].strip()
-    while (base.endswith(".") and not wtpctx.page_exists(base) and
+    while (base.endswith(".") and not wxr.wtp.page_exists(base) and
            base not in gloss_template_args):
         base = base[:-1].strip()
     if base.endswith("(\u201cconjecture\")"):
         base = base[:-14].strip()
         tags.append("conjecture")
-    while (base.endswith(".") and not wtpctx.page_exists(base) and
+    while (base.endswith(".") and not wxr.wtp.page_exists(base) and
            base not in gloss_template_args):
         base = base[:-1].strip()
     if (base.endswith(".") and base not in gloss_template_args and
@@ -2349,8 +2349,8 @@ def parse_alt_or_inflection_of1(wtpctx, gloss, gloss_template_args):
 
     # Kludge: Spanish verb forms seem to have a dot added at the end.
     # Remove it; we know of no Spanish verbs ending with a dot.
-    language = wtpctx.section
-    pos = wtpctx.subsection
+    language = wxr.wtp.section
+    pos = wxr.wtp.subsection
     # print("language={} pos={} base={}".format(language, pos, base))
     if (base.endswith(".") and len(base) > 1 and base[-2].isalpha() and
         (language == "Spanish" and pos == "Verb")):
@@ -2358,7 +2358,7 @@ def parse_alt_or_inflection_of1(wtpctx, gloss, gloss_template_args):
 
     # Split base to alternatives when multiple alternatives provided
     parts = split_at_comma_semi(base, extra=[" / ",  "／", r" \+ "])
-    titleword = re.sub(r"^Reconstruction:[^/]*/", "", wtpctx.title)
+    titleword = re.sub(r"^Reconstruction:[^/]*/", "", wxr.wtp.title)
     if (len(parts) <= 1 or base.startswith("/") or
         base.endswith("/") or
         titleword.find("/") >= 0):
@@ -2375,8 +2375,8 @@ def parse_alt_or_inflection_of1(wtpctx, gloss, gloss_template_args):
     for p in parts:
         # Check for some suspicious base forms
         m = re.search(r"[.,] |[{}()]", p)
-        if m and not wtpctx.page_exists(p):
-            wtpctx.debug("suspicious alt_of/form_of with {!r}: {}"
+        if m and not wxr.wtp.page_exists(p):
+            wxr.wtp.debug("suspicious alt_of/form_of with {!r}: {}"
                       .format(m.group(0), p),
                       sortid="form_descriptions/2278")
         if p.startswith("*") and len(p) >= 3 and p[1].isalpha():

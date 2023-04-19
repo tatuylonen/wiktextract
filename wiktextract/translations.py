@@ -4,9 +4,9 @@
 
 import re
 import copy
-from wikitextprocessor import Wtp, MAGIC_FIRST, MAGIC_LAST
+from wikitextprocessor import MAGIC_FIRST, MAGIC_LAST
+from wiktextract.wxr_context import WiktextractContext
 
-from .config import WiktionaryConfig
 from .datautils import split_at_comma_semi, data_append, data_extend
 from .form_descriptions import (classify_desc, decode_tags,
                                 nested_translations_re, tr_note_re,
@@ -296,10 +296,11 @@ english_to_tags = {
     "he has": "third-person singular masculine",
 }
 
-def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
+
+def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
                                 lang, langcode, translations_from_template,
-                                is_reconstruction, config):
-    assert isinstance(wtpctx, Wtp)
+                                is_reconstruction):
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(word, str)
     assert isinstance(data, dict)
     assert isinstance(item, str)
@@ -311,7 +312,6 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
     for x in translations_from_template:
         assert isinstance(x, str)
     assert is_reconstruction in (True, False)
-    assert isinstance(config, WiktionaryConfig)
 
     # print("parse_translation_item_text: {!r} lang={}".format(item, lang))
 
@@ -326,7 +326,7 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
 
     if re.search(r"\(\d+\)|\[\d+\]", item):
         if not item.find("numeral:"):
-            wtpctx.debug("possible sense number in translation item: {}"
+            wxr.wtp.debug("possible sense number in translation item: {}"
                       .format(item),
                       sortid="translations/324")
 
@@ -335,11 +335,11 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
     # name from the higher level, and some append a language variant
     # name to a broader language name)
     extra_langcodes = set()
-    if lang and lang in config.LANGUAGES_BY_NAME:
-        extra_langcodes.add(config.LANGUAGES_BY_NAME[lang])
+    if lang and lang in wxr.config.LANGUAGES_BY_NAME:
+        extra_langcodes.add(wxr.config.LANGUAGES_BY_NAME[lang])
         # Canonicalize language name (we could have gotten it via
         # alias or other_names)
-        lang = config.LANGUAGES_BY_CODE[config.LANGUAGES_BY_NAME[lang]][0]
+        lang = wxr.config.LANGUAGES_BY_CODE[wxr.config.LANGUAGES_BY_NAME[lang]][0]
         assert lang
     m = re.match(r"\*?\s*([-' \w][-'&, \w()]*)[:：]\s*", item)
     tags = []
@@ -360,18 +360,18 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
             # separate language codes, so additional lancode
             # removal tricks may need to be played below.
             tags.extend(tr_second_tagmap[sublang].split())
-        elif lang + " " + sublang in config.LANGUAGES_BY_NAME:
+        elif lang + " " + sublang in wxr.config.LANGUAGES_BY_NAME:
             lang = lang + " " + sublang
-        elif sublang + " " + lang in config.LANGUAGES_BY_NAME:
+        elif sublang + " " + lang in wxr.config.LANGUAGES_BY_NAME:
             lang = sublang + " " + lang  # E.g., Ancient Egyptian
-        elif sublang in config.LANGUAGES_BY_NAME:
+        elif sublang in wxr.config.LANGUAGES_BY_NAME:
             lang = sublang
         elif sublang[0].isupper() and classify_desc(sublang) == "tags":
             # Interpret it as a tag
             tags.append(sublang)
         else:
             # We don't recognize this prefix
-            wtpctx.error("unrecognized prefix (language name?) in "
+            wxr.wtp.error("unrecognized prefix (language name?) in "
                       "translation item: {}".format(item),
                       sortid="translations/369")
             return None
@@ -380,12 +380,12 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
     elif lang is None:
         # No mathing language prefix.  Try if it is missing colon.
         parts = item.split()
-        if len(parts) > 1 and parts[0] in config.LANGUAGES_BY_NAME:
+        if len(parts) > 1 and parts[0] in wxr.config.LANGUAGES_BY_NAME:
             lang = parts[0]
             item = " ".join(parts[1:])
         else:
             if item.find("__IGNORE__") < 0:
-                wtpctx.error("no language name in translation item: {}"
+                wxr.wtp.error("no language name in translation item: {}"
                           .format(item), sortid="translations/382")
         return None
 
@@ -394,8 +394,8 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
 
     # If we didn't get language code from the template, look it up
     # based on language name
-    if langcode is None and lang in config.LANGUAGES_BY_NAME:
-        langcode = config.LANGUAGES_BY_NAME[lang]
+    if langcode is None and lang in wxr.config.LANGUAGES_BY_NAME:
+        langcode = wxr.config.LANGUAGES_BY_NAME[lang]
 
     # Remove (<langcode>) parts from the item.  They seem to be
     # generated by {{t+|...}}.
@@ -482,8 +482,8 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
                 if cls == "tags":
                     tagsets2, topics2 = decode_tags(par)
                     for t in tagsets2:
-                        data_extend(wtpctx, tr, "tags", t)
-                    data_extend(wtpctx, tr, "topics", topics2)
+                        data_extend(wxr, tr, "tags", t)
+                    data_extend(wxr, tr, "topics", topics2)
                     part = rest
 
             # Check if this part ends with (tags).  Note that
@@ -497,8 +497,8 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
                 if cls == "tags":
                     tagsets2, topics2 = decode_tags(par)
                     for t in tagsets2:
-                        data_extend(wtpctx, tr, "tags", t)
-                    data_extend(wtpctx, tr, "topics", topics2)
+                        data_extend(wxr, tr, "tags", t)
+                    data_extend(wxr, tr, "topics", topics2)
                     part = rest
 
             # Check if this part starts with "<tags/english>: <rest>"
@@ -514,8 +514,8 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
                     if cls == "tags":
                         tagsets2, topics2 = decode_tags(par)
                         for t in tagsets2:
-                            data_extend(wtpctx, tr, "tags", t)
-                        data_extend(wtpctx, tr, "topics", topics2)
+                            data_extend(wxr, tr, "tags", t)
+                        data_extend(wxr, tr, "topics", topics2)
                         part = rest
                     elif cls == "english":
                         if re.search(tr_note_re, par):
@@ -553,7 +553,7 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
             ):
                 if part.endswith(suffix):
                     part = part[:-len(suffix)]
-                    data_append(wtpctx, tr, "tags", t)
+                    data_append(wxr, tr, "tags", t)
                     break
 
             # Handle certain prefixes in translations
@@ -562,7 +562,7 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
             ):
                 if part.startswith(prefix):
                     part = part[len(prefix):]
-                    data_append(wtpctx, tr, "tags", t)
+                    data_append(wxr, tr, "tags", t)
                     break
 
             # Skip certain one-character translations entirely
@@ -571,7 +571,7 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
                 continue
 
             if "english" in tr and tr["english"] in english_to_tags:
-                data_extend(wtpctx, tr, "tags",
+                data_extend(wxr, tr, "tags",
                             english_to_tags[tr["english"]].split())
                 del tr["english"]
 
@@ -593,7 +593,7 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
                 tr["note"] = part
             else:
                 # Interpret it as an actual translation
-                parse_translation_desc(wtpctx, lang, part, tr)
+                parse_translation_desc(wxr, lang, part, tr)
                 w = tr.get("word")
                 if not w:
                     continue  # Not set or empty
@@ -613,7 +613,7 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
                 if m and lang not in (
                         "Bats",  # ^ in tree/English/Tr/Bats
                 ):
-                    wtpctx.debug("suspicious translation with {!r}: {}"
+                    wxr.wtp.debug("suspicious translation with {!r}: {}"
                               .format(m.group(0), tr),
                               sortid="translations/611")
 
@@ -622,7 +622,7 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
 
             # If we have only notes, add as-is
             if "word" not in tr:
-                data_append(wtpctx, data, "translations", tr)
+                data_append(wxr, data, "translations", tr)
                 continue
 
             # Split if it contains no spaces
@@ -641,7 +641,7 @@ def parse_translation_item_text(wtpctx, word, data, item, sense, pos_datas,
                 if not alt:
                     continue
                 tr1["word"] = alt
-                data_append(wtpctx, data, "translations", tr1)
+                data_append(wxr, data, "translations", tr1)
 
     # Return the language name, in case we have subitems
     return lang

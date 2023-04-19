@@ -18,6 +18,7 @@ import hashlib
 import cProfile
 import argparse
 import collections
+from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
 from wiktextract.inflection import set_debug_cell_text
 from wiktextract.template_override import template_override_fns
@@ -35,30 +36,30 @@ IGNORE_PREFIXES = None
 RECOGNIZED_PREFIXES = None
 
 
-def init_prefixes(wtpctx: Wtp) -> None:
+def init_prefixes(wtp_context: Wtp) -> None:
     global IGNORE_PREFIXES, RECOGNIZED_PREFIXES
     if IGNORE_PREFIXES is None:
         IGNORE_PREFIXES = {
-            wtpctx.NAMESPACE_DATA.get("Index", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("Help", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("MediaWiki", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("Citations", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("Concordance", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("Rhymes", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("Thread", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("Summary", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("File", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("Transwiki", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Index", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Help", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("MediaWiki", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Citations", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Concordance", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Rhymes", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Thread", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Summary", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("File", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Transwiki", {}).get("name"),
         }
     if RECOGNIZED_PREFIXES is None:
         RECOGNIZED_PREFIXES = {
-            wtpctx.NAMESPACE_DATA.get("Category", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("Appendix", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("Project", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("Thesaurus", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("Module", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("Template", {}).get("name"),
-            wtpctx.NAMESPACE_DATA.get("Reconstruction", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Category", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Appendix", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Project", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Thesaurus", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Module", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Template", {}).get("name"),
+            wtp_context.NAMESPACE_DATA.get("Reconstruction", {}).get("name"),
         }
 
 
@@ -285,15 +286,15 @@ if __name__ == "__main__":
         lang_names_re = re.compile(lang_names_re)
 
     # Create expansion context
-    wtpctx = Wtp(cache_file=args.cache, num_threads=args.num_threads,
-              lang_code=args.dump_file_language_code,
-              languages_by_code=config.LANGUAGES_BY_CODE)
-    wtpctx.set_template_overrides(template_override_fns)
+    wtp_context = Wtp(cache_file=args.cache, num_threads=args.num_threads,
+                      lang_code=args.dump_file_language_code,
+                      languages_by_code=config.LANGUAGES_BY_CODE)
+    wtp_context.set_template_overrides(template_override_fns)
     # We are now having problems with "Module:no globals", which causes
     # infinite Python recursion on a number of pages (it may be a sandbox
     # problem that it is not properly reset).  Override that debugging module
     # to be empty.
-    wtpctx.add_page("Scribunto", "Module:no globals", "", transient=True)
+    wtp_context.add_page("Scribunto", "Module:no globals", "", transient=True)
 
     # If --list-languages has been specified, just print the list of supported
     # languages
@@ -324,7 +325,7 @@ if __name__ == "__main__":
                       "with Module:")
                 sys.exit(1)
             # Load it as a transient page, overriding the normal page
-            wtpctx.add_page("Scribunto", title, text, transient=True)
+            wtp_context.add_page("Scribunto", title, text, transient=True)
 
     def word_cb(data):
         global word_count
@@ -342,7 +343,7 @@ if __name__ == "__main__":
     def capture_cb(model, title, text):
         return capture_page(model, title, text, args.pages_dir)
 
-    # load redirects to wtpctx if given
+    # load redirects to wtp_context if given
     if args.redirects_file:
         with open(args.redirects_file) as f:
             config.redirects = json.load(f)
@@ -351,12 +352,14 @@ if __name__ == "__main__":
         pr = cProfile.Profile()
         pr.enable()
 
-    init_prefixes(wtpctx)
+    init_prefixes(wtp_context)
 
+    wxr = WiktextractContext(config, wtp_context)
+    
     try:
         if args.path:
             # Parse the normal full Wiktionary data dump
-            parse_wiktionary(wtpctx, args.path, config, word_cb, capture_cb,
+            parse_wiktionary(wxr, args.path,word_cb, capture_cb,
                              (args.page is not None),  # phase1_only
                              (args.pages_dir is not None and
                               not args.out))  # dont_parse
@@ -379,18 +382,18 @@ if __name__ == "__main__":
             # needed for debugging linkages with thesaurus extraction).  This
             # is disabled by default to speed up single page testing.
             if args.use_thesaurus:
-                config.thesaurus_data = extract_thesaurus_data(wtpctx, config)
+                wxr.config.thesaurus_data = extract_thesaurus_data(wxr)
             # Parse the page
-            ret = parse_page(wtpctx, title, text, config)
+            ret = parse_page(wxr, title, text)
             for x in ret:
                 word_cb(x)
-            # Merge errors from wtpctx to config, so that we can also use
+            # Merge errors from wtp_context to config, so that we can also use
             # --errors with single page extraction
-            config.merge_return(wtpctx.to_return())
+            wxr.config.merge_return(wxr.wtp.to_return())
 
         if not args.path and not args.page:
             # Parse again from the cache file
-            reprocess_wiktionary(wtpctx, config, word_cb, capture_cb,
+            reprocess_wiktionary(wxr, word_cb, capture_cb,
                                  dont_parse=(bool(args.pages_dir) and
                                                  not bool(args.out)))
 
@@ -399,12 +402,12 @@ if __name__ == "__main__":
             out_f.close()
 
     if args.modules_file:
-        extract_namespace(wtpctx, "Module", args.modules_file)
+        extract_namespace(wxr, "Module", args.modules_file)
     if args.templates_file:
-        extract_namespace(wtpctx, "Template", args.templates_file)
+        extract_namespace(wxr, "Template", args.templates_file)
     if args.categories_file:
         print("Extracting category tree")
-        tree = extract_categories(wtpctx, config)
+        tree = extract_categories(wxr)
         sys.stdout.flush()
         with open(args.categories_file, "w") as f:
             json.dump(tree, f, indent=2, sort_keys=True)
@@ -424,7 +427,7 @@ if __name__ == "__main__":
     if args.statistics:
         print("")
         print("LANGUAGE COUNTS")
-        for k, cnt in sorted(config.language_counts.items(),
+        for k, cnt in sorted(wxr.config.language_counts.items(),
                              key=lambda x: -x[1]):
             print("  {:>7d} {}".format(cnt, k))
             if cnt < 1000:
@@ -434,13 +437,13 @@ if __name__ == "__main__":
 
         print("")
         print("POS HEADER USAGE")
-        for k, cnt in sorted(config.pos_counts.items(),
+        for k, cnt in sorted(wxr.config.pos_counts.items(),
                              key=lambda x: -x[1]):
             print("  {:>7d} {}".format(cnt, k))
 
         print("")
         print("POS SUBSECTION HEADER USAGE")
-        for k, cnt in sorted(config.section_counts.items(),
+        for k, cnt in sorted(wxr.config.section_counts.items(),
                              key=lambda x: -x[1]):
             print("  {:>7d} {}".format(cnt, k))
 
@@ -450,9 +453,9 @@ if __name__ == "__main__":
     if args.errors:
         with open(args.errors, "w", encoding="utf-8") as f:
             json.dump({
-                "errors": config.errors,
-                "warnings": config.warnings,
-                "debugs": config.debugs,
+                "errors": wxr.config.errors,
+                "warnings": wxr.config.warnings,
+                "debugs": wxr.config.debugs,
                 }, f, sort_keys=True, indent=2)
 
     def dump_un(title, limit, counts, samples):

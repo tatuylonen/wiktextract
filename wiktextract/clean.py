@@ -10,7 +10,7 @@ import re
 import html
 import unicodedata
 from wikitextprocessor.common import MAGIC_FIRST, MAGIC_LAST
-from .config import WiktionaryConfig
+from wiktextract.wxr_context import WiktextractContext
 
 ######################################################################
 # Cleaning values into plain text.
@@ -928,16 +928,16 @@ def remove_italic_and_bold(text):
     new_text_parts = new_text_parts[:-1] # remove last \n
     return "".join(new_text_parts)
 
-def clean_value(config, title, no_strip=False, no_html_strip=False):
+def clean_value(wxr, title, no_strip=False, no_html_strip=False):
     """Cleans a title or value into a normal string.  This should basically
     remove any Wikimedia formatting from it: HTML tags, templates, links,
     emphasis, etc.  This will also merge multiple whitespaces into one
     normal space and will remove any surrounding whitespace."""
-    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(title, str)
 
     def repl_1(m):
-        return clean_value(config, m.group(1), no_strip=True)
+        return clean_value(wxr, m.group(1), no_strip=True)
     def repl_exturl(m):
         args = re.split(r"\s+", m.group(1))
         i = 0
@@ -950,22 +950,22 @@ def clean_value(config, title, no_strip=False, no_html_strip=False):
         if m.group(2) and m.group(2).lower() in ("file", "image"):
             return ""
         v = m.group(3).split("|")
-        return clean_value(config, v[0], no_strip=True)
+        return clean_value(wxr, v[0], no_strip=True)
     def repl_link_bars(m):
         lnk = m.group(1)
         if re.match(r"(?si)(File|Image)\s*:", lnk):
             return ""
-        return clean_value(config, m.group(4) or m.group(2) or "",
+        return clean_value(wxr, m.group(4) or m.group(2) or "",
                            no_strip=True)
 
     def repl_1_sup(m):
-        return to_superscript(clean_value(config, m.group(1)))
+        return to_superscript(clean_value(wxr, m.group(1)))
 
     def repl_1_sub(m):
-        return to_subscript(clean_value(config, m.group(1)))
+        return to_subscript(clean_value(wxr, m.group(1)))
 
     def repl_1_chem(m):
-        return to_chem(clean_value(config, m.group(1)))
+        return to_chem(clean_value(wxr, m.group(1)))
 
     def repl_1_math(m):
         v = to_math(m.group(1))
@@ -1105,11 +1105,11 @@ def clean_value(config, title, no_strip=False, no_html_strip=False):
     return title
 
 
-def clean_template_args(config, ht, no_strip=False):
+def clean_template_args(wxr, ht, no_strip=False):
     """Cleans all values in a template argument dictionary and returns the
     cleaned dictionary."""
-    assert isinstance(config, WiktionaryConfig)
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(ht, dict)
-    return {clean_value(config, str(k), no_html_strip=True):
-            clean_value(config, str(v), no_strip=no_strip, no_html_strip=True)
+    return {clean_value(wxr, str(k), no_html_strip=True):
+            clean_value(wxr, str(v), no_strip=no_strip, no_html_strip=True)
             for k, v in ht.items()}

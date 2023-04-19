@@ -3,8 +3,7 @@
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
-from wikitextprocessor import Wtp
-from .config import WiktionaryConfig
+from wiktextract.wxr_context import WiktextractContext
 from .page import clean_node
 
 lua_code = r"""
@@ -67,14 +66,13 @@ end
 return export
 """
 
-def extract_categories(wtpctx, config):
+def extract_categories(wxr):
     """Extracts the category tree from Wiktionary."""
-    assert isinstance(wtpctx, Wtp)
-    assert isinstance(config, WiktionaryConfig)
-    wtpctx.add_page("Scribunto", "Module:wiktextract cat tree", lua_code,
+    assert isinstance(wxr, WiktextractContext)
+    wxr.wtp.add_page("Scribunto", "Module:wiktextract cat tree", lua_code,
                  transient=True)
-    wtpctx.start_page("Wiktextract category tree extraction")
-    rawdata = wtpctx.expand("{{#invoke:wiktextract cat tree|main}}")
+    wxr.wtp.start_page("Wiktextract category tree extraction")
+    rawdata = wxr.wtp.expand("{{#invoke:wiktextract cat tree|main}}")
     ht = {}
     for line in rawdata.split("\n"):
         if not line:
@@ -85,7 +83,7 @@ def extract_categories(wtpctx, config):
         name = re.sub(r"^Category:", "", name)
         name_lc = name.lower()
         desc = re.sub(r"\\n", "\n", desc)
-        clean_desc = clean_node(config, wtpctx, None, desc)
+        clean_desc = clean_node(wxr, None, desc)
         if name_lc not in ht:
             ht[name_lc] = {"name": name}
         dt = ht[name_lc]
