@@ -4,8 +4,7 @@
 
 import unittest
 from wiktextract.form_descriptions import classify_desc
-from wiktextract import WiktionaryConfig
-from wikitextprocessor import Wtp
+
 
 class ClassifyTests(unittest.TestCase):
 

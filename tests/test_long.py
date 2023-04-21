@@ -2,6 +2,7 @@ import unittest
 import collections
 from wiktextract.wiktionary import WiktionaryConfig, parse_wiktionary
 from wikitextprocessor import Wtp
+from wiktextract.wxr_context import WiktextractContext
 
 
 class LongTests(unittest.TestCase):
@@ -41,7 +42,6 @@ class LongTests(unittest.TestCase):
 
         path = "tests/test-pages-articles.xml.bz2"
         print("Parsing test data")
-        wtpctx = Wtp()
         config = WiktionaryConfig(dump_file_lang_code="en",
                                   capture_language_codes=["en", "fi", "es",
                                                           "de", "zh", "ja",
@@ -51,7 +51,8 @@ class LongTests(unittest.TestCase):
                                   capture_linkages=True,
                                   capture_compounds=True,
                                   capture_redirects=True)
-        parse_wiktionary(wtpctx, path, config, word_cb, None, False, False)
+        wxr = WiktextractContext(config, Wtp())
+        parse_wiktionary(wxr, path, word_cb, None, False, False)
         print("Test data parsing complete")
         assert num_redirects > 0
         assert len(words) > 100
@@ -60,7 +61,7 @@ class LongTests(unittest.TestCase):
         assert langs["Finnish"] > 0
         assert langs["Translingual"] > 0
         assert len(langs.keys()) == 9
-        assert len(poses.keys()) <= len(config.POS_TYPES)
+        assert len(poses.keys()) <= len(wxr.config.POS_TYPES)
         assert sum(poses.values()) == sum(langs.values())
         assert sum(words.values()) == sum(poses.values()) + num_redirects
         assert num_transl > 0
