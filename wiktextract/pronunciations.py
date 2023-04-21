@@ -391,16 +391,23 @@ def parse_pronunciation(wxr, node, data, etym_data,
     # debug printing... The underlying data is changed, and the separated
     # sublists disappear.
 
+    # Kludge for templates that generate several lines, but haven't
+    # been caught by earlier kludges...
+    def split_cleaned_node_on_newlines(contents):
+        for litem in flattened_tree(contents):
+            text = clean_node(config, ctx, data, litem,
+                          template_fn=parse_pronunciation_template_fn)
+            ipa_text = clean_node(config, ctx, data, litem,
+                              post_template_fn=parse_pron_post_template_fn)
+            for line, ipaline in zip(text.splitlines(), ipa_text.splitlines()):
+                yield line, ipa_text
+
+
     # have_pronunciations = False
     active_pos = None
 
-    for litem in flattened_tree(contents):
+    for text, ipa_text in split_cleaned_node_on_newlines(contents):
         prefix = None
-        text = clean_node(wxr, data, litem,
-                          template_fn=parse_pronunciation_template_fn)
-        # print(text)
-        ipa_text = clean_node(wxr, data, litem,
-                              post_template_fn=parse_pron_post_template_fn)
         if not text:
             continue
         if not ipa_text:
@@ -422,12 +429,12 @@ def parse_pronunciation(wxr, node, data, etym_data,
 
         # Cleaning up "* " at the start of text.
         text = re.sub(r"^\**\s*", "", text)
-        
+
         m = re.match(r"\s*(\w+\s?\w*)", text)
         if m:
             if m.group(1).lower() in part_of_speech_map:
                 active_pos = part_of_speech_map[m.group(1).lower()]["pos"]
-        
+
         if text.find("IPA") >= 0:
             field = "ipa"
         else:
