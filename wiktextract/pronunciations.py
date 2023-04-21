@@ -395,9 +395,9 @@ def parse_pronunciation(wxr, node, data, etym_data,
     # been caught by earlier kludges...
     def split_cleaned_node_on_newlines(contents):
         for litem in flattened_tree(contents):
-            text = clean_node(config, ctx, data, litem,
+            text = clean_node(wxr, data, litem,
                           template_fn=parse_pronunciation_template_fn)
-            ipa_text = clean_node(config, ctx, data, litem,
+            ipa_text = clean_node(wxr,data, litem,
                               post_template_fn=parse_pron_post_template_fn)
             for line, ipaline in zip(text.splitlines(), ipa_text.splitlines()):
                 yield line, ipa_text
