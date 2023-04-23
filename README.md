@@ -304,27 +304,21 @@ Preparation: on Linux (example from Ubuntu 20.04), you may need to
 first install the ``build-essential`` and ``python3-dev`` packages
 with ``apt update && apt install build-essential python3-dev python3-pip``.
 
-To install ``wiktextract``, use ``pip`` (or ``pip3``, as appropriate):
-```
-pip3 install wiktextract
-```
-
-Alternatively, you can get the latest development version from github:
+Install `wiktextract` from source:
 
 ```
-git clone https://github.com/tatuylonen/wikitextprocessor.git
-cd wikitextprocessor && pip3 install -r requirements.txt && pip3 install -e .
-cd ..
 git clone https://github.com/tatuylonen/wiktextract.git
-cd wiktextract && pip3 install -r requirements.txt && pip3 install -e .
+cd wiktextract
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
 ```
 
-This will install the ``wikitextprocessor``, the ``wiktextract`` package
-and the ``wiktwords`` script inside wiktextract.
+Alternatively, you can install the package from pypi.org:
 
-Only installing ``wiktextract`` will probably not work, depending on how
-old the pip packages are; wikitextprocessor and wiktextract are being worked
-on in tandem, so keeping them in synch is best.
+```
+python -m pip install wiktextract
+```
 
 This software requires Python 3.
 
