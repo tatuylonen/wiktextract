@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wiktextract"
+version = "1.99.7"
+description = "Wiktionary dump file parser and multilingual data extractor"
+readme = "README.md"
+license = {text = "MIT License"}
+authors = [
+    {name = "Tatu Ylonen", email = "ylo@clausal.com"},
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Text Processing",
+    "Topic :: Text Processing :: Linguistic",
+]
+dependencies = [
+    "nltk",
+    "python-Levenshtein",
+    "wikitextprocessor @ git+https://github.com/tatuylonen/wikitextprocessor.git",
+]
+
+[project.scripts]
+wiktwords = "wiktextract.wiktwords:main"
+
+[project.urls]
+homepage = "https://github.com/tatuylonen/wiktextract"
+
+[tool.setuptools.packages.find]
+exclude = ["usertools", "tests"]
+
+[tool.setuptools.package-data]
+wiktextract = [
+    "data/*/*",
+]
