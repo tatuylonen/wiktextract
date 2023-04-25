@@ -3016,7 +3016,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 ruby = []
                 contents = item.children
                 if lang_code == "ja":
-                    print(contents)
+                    # print(contents)
                     if (contents and isinstance(contents, str) and
                        re.match(r"\s*$", contents[0])):
                         contents = contents[1:]

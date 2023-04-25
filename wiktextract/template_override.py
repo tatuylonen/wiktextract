@@ -32,7 +32,7 @@ def egy_glyph(args):
     """Intercept {{egy-glyph}}, which causes problems by creating
     tables and inserting agnostic images that can't be easily parsed
     as text data."""
-    print(args)
+    # print(args)
     ret = "EGY-GLYPH-ERROR"
     if "=" not in args[1]:
         ret = args[1]
