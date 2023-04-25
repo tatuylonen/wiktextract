@@ -19,7 +19,7 @@ from wiktextract.clean import (clean_value, )
 from wiktextract.table_headers_heuristics_data import (
                                     LANGUAGES_WITH_CELLS_AS_HEADERS)
 from wiktextract.lang_specific_inflection_configs import (
-                                                get_lang_infl_conf,
+                                                get_lang_conf,
                                                 lang_specific_tags
                                                 )
 
@@ -343,40 +343,40 @@ def remove_useless_tags(lang, pos, tags):
     assert isinstance(pos, str)
     assert isinstance(tags, set)
     if ("animate" in tags and "inanimate" in tags and
-        get_lang_infl_conf(lang, "animate_inanimate_remove")):
+        get_lang_conf(lang, "animate_inanimate_remove")):
         tags.remove("animate")
         tags.remove("inanimate")
     if ("virile" in tags and "nonvirile" in tags and
-        get_lang_infl_conf(lang, "virile_nonvirile_remove")):
+        get_lang_conf(lang, "virile_nonvirile_remove")):
         tags.remove("virile")
         tags.remove("nonvirile")
     # If all numbers in the language are listed, remove them all
-    numbers = get_lang_infl_conf(lang, "numbers")
+    numbers = get_lang_conf(lang, "numbers")
     if numbers and all(x in tags for x in numbers):
         for x in numbers:
             tags.remove(x)
     # If all genders in the language are listed, remove them all
-    genders = get_lang_infl_conf(lang, "genders")
+    genders = get_lang_conf(lang, "genders")
     if genders and all(x in tags for x in genders):
         for x in genders:
             tags.remove(x)
     # If all voices in the language are listed, remove them all
-    voices = get_lang_infl_conf(lang, "voices")
+    voices = get_lang_conf(lang, "voices")
     if voices and all(x in tags for x in voices):
         for x in voices:
             tags.remove(x)
     # If all strengths of the language are listed, remove them all
-    strengths = get_lang_infl_conf(lang, "strengths")
+    strengths = get_lang_conf(lang, "strengths")
     if strengths and all(x in tags for x in strengths):
         for x in strengths:
             tags.remove(x)
     # If all persons of the language are listed, remove them all
-    persons = get_lang_infl_conf(lang, "persons")
+    persons = get_lang_conf(lang, "persons")
     if persons and all(x in tags for x in persons):
         for x in persons:
             tags.remove(x)
     # If all definitenesses of the language are listed, remove them all
-    definitenesses = get_lang_infl_conf(lang, "definitenesses")
+    definitenesses = get_lang_conf(lang, "definitenesses")
     if definitenesses and all(x in tags for x in definitenesses):
         for x in definitenesses:
             tags.remove(x)
@@ -513,7 +513,7 @@ def extract_cell_content(lang, word, col):
 
     # Extract references and tag markers
     refs = []
-    special_references = get_lang_infl_conf(lang, "special_references")
+    special_references = get_lang_conf(lang, "special_references")
     while True:
         m = re.search(r"\^(.|\([^)]*\))$", col)
         if not m:
@@ -1034,7 +1034,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
                 print("Cellspan already used: start={} colspan={} rownum={} {}"
                       .format(hdrspan.start, hdrspan.colspan, hdrspan.rownum,
                               hdrspan.tagsets))
-            action = get_lang_infl_conf(lang, "reuse_cellspan")
+            action = get_lang_conf(lang, "reuse_cellspan")
                         # can be "stop", "skip" or "reuse"
             if action == "stop":
                 break
@@ -1083,7 +1083,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
             # Here, we block bleeding of categories from above
             elif ("non-finite" in cur_cats and
                   "non-finite" in new_cats):
-                stop = get_lang_infl_conf(lang,
+                stop = get_lang_conf(lang,
                                                 "stop_non_finite_non_finite")
                 if stop:
                     if celltext == debug_cell_text:
@@ -1091,7 +1091,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
                     break
             elif ("non-finite" in cur_cats and
                   "voice" in new_cats):
-                stop = get_lang_infl_conf(lang, "stop_non_finite_voice")
+                stop = get_lang_conf(lang, "stop_non_finite_voice")
                 if stop:
                     if celltext == debug_cell_text:
                         print("stopping on non-finite-voice")
@@ -1103,7 +1103,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
                 break
             elif ("non-finite" in new_cats and
                   "tense" in new_cats):
-                stop = get_lang_infl_conf(lang, "stop_non_finite_tense")
+                stop = get_lang_conf(lang, "stop_non_finite_tense")
                 if stop:
                     if celltext == debug_cell_text:
                         print("stopping on non-finite new")
@@ -1115,7 +1115,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
                 break
             if ("tense" in new_cats and
                 any("imperative" in x for x in coltags) and
-                get_lang_infl_conf(lang, "imperative_no_tense")):
+                get_lang_conf(lang, "imperative_no_tense")):
                 if celltext == debug_cell_text:
                     print("skipping tense in imperative")
                 continue
@@ -1126,7 +1126,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
                       for ts1 in coltags  # current
                       for ts2 in tagsets  # new (from above)
                       for t in ts2)):
-                skip = get_lang_infl_conf(lang, "skip_mood_mood")
+                skip = get_lang_conf(lang, "skip_mood_mood")
                 if skip:
                     if celltext == debug_cell_text:
                         print("skipping on mood-mood")
@@ -1137,7 +1137,7 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
                     break
             elif ("tense" in new_cats and
                   "tense" in cur_cats):
-                skip = get_lang_infl_conf(lang, "skip_tense_tense")
+                skip = get_lang_conf(lang, "skip_tense_tense")
                 if skip:
                     if celltext == debug_cell_text:
                         print("skipping on tense-tense")
@@ -1348,9 +1348,9 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
         elif any(all_hdr_tags):
             col0_cats = tagset_cats(col0_hdrspan.tagsets)
             later_cats = tagset_cats(all_hdr_tags)
-            col0_allowed = get_lang_infl_conf(lang,
+            col0_allowed = get_lang_conf(lang,
                                              "hdr_expand_first")
-            later_allowed = get_lang_infl_conf(lang,
+            later_allowed = get_lang_conf(lang,
                                               "hdr_expand_cont")
             later_allowed = later_allowed | set(["dummy"])
             # dummy2 has different behavior than plain dummy
@@ -1442,7 +1442,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 # that are given a simple incremental value, int > unicode.
                 repls = {}
                 magic_ch = MAGIC_FIRST
-                trs = get_lang_infl_conf(lang, "form_transformations")
+                trs = get_lang_conf(lang, "form_transformations")
                 # trs is a list of lists of strings
                 for _, v, _, _ in trs:
                 # v is a pattern string, like "^ich"
@@ -1608,28 +1608,28 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
         # require tags, like (informality), [rarity] and {archaicity}.
         extra_tags = []
         if re.match(r"\([^][(){}]*\)$", form):
-            if get_lang_infl_conf(lang, "parentheses_for_informal"):
+            if get_lang_conf(lang, "parentheses_for_informal"):
                 form = form[1:-1]
                 extra_tags.append("informal")
             else:
                 form = form[1:-1]
         elif re.match(r"\{\[[^][(){}]*\]\}$", form):
-            if (get_lang_infl_conf(lang, "square_brackets_for_rare") and
-                get_lang_infl_conf(lang, "curly_brackets_for_archaic")):
+            if (get_lang_conf(lang, "square_brackets_for_rare") and
+                get_lang_conf(lang, "curly_brackets_for_archaic")):
                 # είμαι/Greek/Verb
                 form = form[2:-2]
                 extra_tags.extend(["rare", "archaic"])
             else:
                 form = form[2:-2]
         elif re.match(r"\{[^][(){}]*\}$", form):
-            if get_lang_infl_conf(lang, "curly_brackets_for_archaic"):
+            if get_lang_conf(lang, "curly_brackets_for_archaic"):
                 # είμαι/Greek/Verb
                 form = form[1:-1]
                 extra_tags.extend(["archaic"])
             else:
                 form = form[1:-1]
         elif re.match(r"\[[^][(){}]*\]$", form):
-            if get_lang_infl_conf(lang, "square_brackets_for_rare"):
+            if get_lang_conf(lang, "square_brackets_for_rare"):
                 # είμαι/Greek/Verb
                 form = form[1:-1]
                 extra_tags.append("rare")
@@ -1681,8 +1681,8 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
         # a column or row
 
         ret = []
-        # rtagreplacs = get_lang_infl_conf(lang, "rowtag_replacements")
-        # ctagreplacs = get_lang_infl_conf(lang, "coltag_replacements")
+        # rtagreplacs = get_lang_conf(lang, "rowtag_replacements")
+        # ctagreplacs = get_lang_conf(lang, "coltag_replacements")
         for rt in sorted(rowtags):
             if "dummy-use-as-coltags" in rt:
                 continue
@@ -1752,7 +1752,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 # separate entries for neuter/feminine, but the
                 # distinction only applies to masculine.  Remove them
                 # form neuter/feminine and eliminate duplicates.
-                if get_lang_infl_conf(lang, "masc_only_animate"):
+                if get_lang_conf(lang, "masc_only_animate"):
                     for t1 in ("animate", "inanimate"):
                         for t2 in ("neuter", "feminine"):
                             if (t1 in tags and t2 in tags and
@@ -1817,7 +1817,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
     
                 # Perform language-specific tag replacements according
                 # to rules in a table.
-                lang_tag_mappings = get_lang_infl_conf(lang,
+                lang_tag_mappings = get_lang_conf(lang,
                                                     "lang_tag_mappings")
                 if lang_tag_mappings is not None:
                     for pre, post in lang_tag_mappings.items():
@@ -1889,11 +1889,11 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
     title = None
     global_tags = []
     table_tags = []
-    special_phrase_splits = get_lang_infl_conf(lang, "special_phrase_splits")
-    form_replacements = get_lang_infl_conf(lang, "form_replacements")
-    possibly_ignored_forms = get_lang_infl_conf(lang,
+    special_phrase_splits = get_lang_conf(lang, "special_phrase_splits")
+    form_replacements = get_lang_conf(lang, "form_replacements")
+    possibly_ignored_forms = get_lang_conf(lang,
                                                "conditionally_ignored_cells")
-    cleanup_rules = get_lang_infl_conf(lang, "minor_text_cleanups")
+    cleanup_rules = get_lang_conf(lang, "minor_text_cleanups")
 
     for title in titles:
         more_global_tags, more_table_tags, extra_forms = \
@@ -2115,7 +2115,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
 
             if (col_idx == 0 and
                 not first_col_has_text and
-                get_lang_infl_conf(lang, "ignore_top_left_text_cell") == True
+                get_lang_conf(lang, "ignore_top_left_text_cell") == True
                 ):
                 continue  # Skip text at top left, as in Icelandic, Faroese
                 
@@ -2249,11 +2249,11 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
         rownum += 1
         # For certain languages, if the row was empty, reset
         # hdrspans (saprast/Latvian/Verb, but not aussteigen/German/Verb).
-        if row_empty and get_lang_infl_conf(lang, "empty_row_resets"):
+        if row_empty and get_lang_conf(lang, "empty_row_resets"):
             hdrspans = []
         # Check if we should expand col0_hdrspan.
         if col0_hdrspan is not None:
-            col0_allowed = get_lang_infl_conf(lang, "hdr_expand_first")
+            col0_allowed = get_lang_conf(lang, "hdr_expand_first")
             col0_cats = tagset_cats(col0_hdrspan.tagsets)
             # Only expand if col0_cats and later_cats are allowed
             # and don't overlap and col0 has tags, and there have
@@ -2278,7 +2278,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
     # Post-process German nouns with articles in separate columns.  We move the
     # definite/indefinite/usually-without-article markers into the noun and
     # remove the article entries.
-    if (get_lang_infl_conf(lang, "articles_in_separate_columns")
+    if (get_lang_conf(lang, "articles_in_separate_columns")
         and any("noun" in x["tags"] for x in ret)):
         new_ret = []
         saved_tags = set()
