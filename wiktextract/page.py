@@ -1163,7 +1163,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 # We might collect relevant links as they are often pictures
                 # relating to the word
                 if (len(node.args[0]) >= 1 and
-                    isinstance(node.args[0][0], str)):
+                   isinstance(node.args[0][0], str)):
                     if node.args[0][0].startswith(ns_title_prefix_tuple(
                                                         ctx, "Category")):
                         # [[Category:...]]

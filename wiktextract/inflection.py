@@ -18,7 +18,7 @@ from wiktextract.form_descriptions import (classify_desc, decode_tags,
 from wiktextract.clean import (clean_value, )
 from wiktextract.table_headers_heuristics_data import (
                                     LANGUAGES_WITH_CELLS_AS_HEADERS)
-from wiktextract.lang_specific_inflection_configs import (
+from wiktextract.lang_specific_configs import (
                                                 get_lang_conf,
                                                 lang_specific_tags
                                                 )
