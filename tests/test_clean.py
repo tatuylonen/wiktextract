@@ -179,7 +179,7 @@ class WiktExtractTests(unittest.TestCase):
     def test_cv_math1(self):
         v = r"foo <math>a \times \zeta = c</math> bar"
         v = clean_value(self.config, v)
-        self.assertEqual(v, "foo a⨯𝜁=c bar")
+        self.assertEqual(v, "foo a×ζ=c bar")
 
     def test_cv_math2(self):
         v = r"<math>\frac{a}{b + c}</math>"
@@ -194,7 +194,7 @@ class WiktExtractTests(unittest.TestCase):
     def test_cv_math4(self):
         v = r"<math>\frac\alpha\beta</math>"
         v = clean_value(self.config, v)
-        self.assertEqual(v, "𝛼/𝛽")
+        self.assertEqual(v, "α/β")
 
     def test_cv_math5(self):
         v = r"<math>{\mathfrak A} - {\mathbb B} \cup {\mathcal K}</math>"
