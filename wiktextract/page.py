@@ -74,6 +74,7 @@ additional_expand_templates = {
     "ru-adj-alt-ё",
     "ru-proper noun-alt-ё",
     "ru-pos-alt-ё",
+    "ru-alt-ё",
 }
 
 # Inverse linkage for those that have them
@@ -2793,10 +2794,10 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     })
                 return None
 
-            text = clean_node(config, ctx, None, children, 
-                template_fn=desc_template_fn,
-                post_template_fn=desc_post_template_fn
-            )
+            text = clean_node(config, ctx, None, children,
+                              template_fn=desc_template_fn,
+                              post_template_fn=desc_post_template_fn
+                             )
             item_data["templates"] = templates
             item_data["text"] = text
             if is_derived: item_data["tags"] = ["derived"]
@@ -3784,7 +3785,6 @@ def clean_node(config, ctx, sense_data, value, template_fn=None,
                     if ltuple not in sense_data.get("links", ()):
                         data_append(ctx, sense_data, "links", ltuple)
 
-
     v = clean_value(config, v)
     # print("After clean_value:", repr(v))
 
@@ -3793,7 +3793,8 @@ def clean_node(config, ctx, sense_data, value, template_fn=None,
     # v = re.sub(r"(?s)\{\{.*", "", v)
     # Some templates create <sup>(Category: ...)</sup>; remove
     v = re.sub(r"(?si)\s*(^\s*)?\(Category:[^)]*\)", "", v)
-    # Some templates create question mark in <sup>, e.g., some Korean Hanja form
+    # Some templates create question mark in <sup>, e.g.,
+    # some Korean Hanja form
     v = re.sub(r"\^\?", "", v)
     return v
 
