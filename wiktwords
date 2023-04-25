@@ -167,7 +167,8 @@ if __name__ == "__main__":
     parser.add_argument("--human-readable", action="store_true", default=False,
                         help="Write output in human-readable JSON")
     parser.add_argument("--override", type=str, action="append",
-                        help="Override module by one in file (for debugging)")
+                        help="Override module(s) by one in file or files in "
+                             "directory (for debugging)")
     parser.add_argument("--use-thesaurus", action="store_true", default=False,
                         help="Include thesaurus in single page mode")
     parser.add_argument("--profile", action="store_true", default=False,
@@ -311,20 +312,30 @@ if __name__ == "__main__":
 
     if args.override:
         for path in args.override:
-            with open(path, "r", encoding="utf-8") as f:
-                text = f.read()
-            m = re.match(r"(?s)^TITLE: ([^\n]*)\n", text)
-            if m:
-                title = m.group(1)
-                text = text[m.end():]
-            else:
-                print("First line of file supplied with --override must be "
-                      "\"TITLE: <page title>\"")
-                print("(The page title for this would normally start "
-                      "with Module:")
-                sys.exit(1)
-            # Load it as a transient page, overriding the normal page
-            ctx.add_page("Scribunto", title, text, transient=True)
+            filepaths = [path]
+            if os.path.isdir(path):
+                filepaths = []
+                for filename in os.listdir(path):
+                    fpath = os.path.join(path, filename)
+                    if os.path.isfile(fpath):
+                        filepaths.append(fpath)
+            print("Override files: ", filepaths)
+            for filepath in filepaths:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    text = f.read()
+                m = re.match(r"(?s)^TITLE: ([^\n]*)\n", text)
+                if m:
+                    title = m.group(1)
+                    text = text[m.end():]
+                else:
+                    print("First line of file supplied with --override "
+                          "must be "
+                          "\"TITLE: <page title>\"")
+                    print("(The page title for this would normally start "
+                          "with Module:")
+                    sys.exit(1)
+                # Load it as a transient page, overriding the normal page
+                ctx.add_page("Scribunto", title, text, transient=True)
 
     def word_cb(data):
         global word_count
