@@ -399,13 +399,14 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             ipa_text = clean_node(config, ctx, data, litem,
                               post_template_fn=parse_pron_post_template_fn)
             for line, ipaline in zip(text.splitlines(), ipa_text.splitlines()):
-                yield line, ipa_text
+                yield line, ipaline
 
 
     # have_pronunciations = False
     active_pos = None
 
     for text, ipa_text in split_cleaned_node_on_newlines(contents):
+        print(text, ipa_text)
         prefix = None
         if not text:
             continue
