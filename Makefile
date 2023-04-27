@@ -4,7 +4,7 @@
 # --with-coverage --coverage-report=html --coverage-config=tests/testcov.conf
 test:
 	rm -rf .coverage*
-	nose2 --output-buffer --pretty-assert
+	python -m nose2 --output-buffer --pretty-assert
 	# rm -rf htmlcov
 	# mv -f htmlcov.new htmlcov
 
