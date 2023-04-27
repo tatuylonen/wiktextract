@@ -33,6 +33,9 @@ dependencies = [
     "wikitextprocessor @ git+https://github.com/tatuylonen/wikitextprocessor.git",
 ]
 
+[project.optional-dependencies]
+dev = ["nose2[coverage_plugin]"]
+
 [project.scripts]
 wiktwords = "wiktextract.wiktwords:main"
 

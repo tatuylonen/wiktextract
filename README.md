@@ -324,13 +324,14 @@ This software requires Python 3.
 
 ### Running tests
 
-This package includes tests written using the ``unittest`` framework.
-They can be run using, for example, ``nose2``, which can be installed
-using ``pip3 install nose2``.
+This package includes tests written using the `unittest` framework.
+They can be run using, for example, `nose2`, which can be installed
+using `python -m pip install -e ".[dev]"`.
 
-To run the tests, just use the following command in the top-level directory:
+To run the tests, use the following command in the top-level directory:
+
 ```
-nose2
+make test
 ```
 
 (Unfortunately the test suite for ``wiktextract`` is not yet very
