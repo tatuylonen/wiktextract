@@ -179,7 +179,6 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             for hdr in new_parent_hdrs + new_specific_hdrs:
                 hdr = hdr.strip()
                 valid_hdr = re.sub("\s+", "-", hdr)
-                print(hdr)
                 if hdr in config.ZH_PRON_TAGS:
                     for tag in config.ZH_PRON_TAGS[hdr]:
                         if tag not in pron["tags"]:
@@ -224,9 +223,17 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             text = clean_node(config, ctx, None, base_item)
             # print(f"{parent_hdrs}  zhpron: {text}")  # XXX remove me
             text = re.sub(r"(?s)\(Note:.*?\)", "", text)
+            # Kludge to clean up text like
+            # '(Standard Chinese, erhua-ed) (旋兒／旋儿)' where
+            # the hanzi are examples
+            hanzi_m = re.match(r"\s*(\([^()]*\))\s*\(([^()]*)\)\s*$", text)
+            if hanzi_m:
+                if re.search(u'[\u4e00-\u9fff]', hanzi_m.group(2)):
+                    text = hanzi_m.group(1)
             new_parent_hdrs = list(parent_hdrs)
             new_specific_hdrs = list(specific_hdrs)
             # look no further, here be dragons...
+            
             if ": " in text or "：" in text:
                 parts = re.split(r": |：", text)
                 m = re.match(r"\s*\((([^():]+)\s*(:|：)?\s*([^():]*))\)\s*$",
@@ -340,8 +347,8 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 parse_chinese_pron(item, unknown_header_tags)
             return
         if (len(contents.args[0]) == 1 and
-            isinstance(contents.args[0][0], str) and
-            contents.args[0][0].strip() == "zh-pron"):
+           isinstance(contents.args[0][0], str) and
+           contents.args[0][0].strip() == "zh-pron"):
 
             src = ctx.node_to_wikitext(contents)
             expanded = ctx.expand(src, templates_to_expand={"zh-pron"})
