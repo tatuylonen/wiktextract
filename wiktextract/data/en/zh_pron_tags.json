@@ -228,6 +228,10 @@
     "Hong Kong",
     "Jyutping"
   ],
+  "(Guangzhou–Hong Kong)": [
+    "Guangzhou",
+    "Hong Kong"
+  ],
   "(Hokkien": [
     "Hokkien"
   ],
@@ -1382,5 +1386,22 @@
   "Xiang (Wiktionary)": [
     "Xiang",
     "Wiktionary-specific"
+  ],
+  "(Beijing dialect, erhua-ed)": [
+    "Beijing",
+    "Erhua"
+  ],
+  "(Standard Cantonese, Guangzhou–Hong Kong)": [
+    "Cantonese",
+    "Hong-Kong",
+    "Guangzhou"
+  ],
+  "Guangzhou–Hong Kong": [
+    "Hong-Kong",
+    "Guangzhou"
+  ],
+  "(Standard Chinese, erhua-ed) (旋兒／旋儿)": [
+    "Standard Chinese",
+    "Erhua"
   ]
 }

@@ -2704,19 +2704,25 @@ uppercase_tags = set([
     "Rummindei",
     "Topra",
     "Meerut",
-    # ]
-    # [ used in Proto-Uralic entries e.g. {{head|urj-pro|noun}} {{tlb|urj-pro|Finno-Permic}}
+    # [ used in Proto-Uralic entries e.g.
+    #  {{head|urj-pro|noun}} {{tlb|urj-pro|Finno-Permic}}
     "Finno-Permic",
     "Finno-Volgaic",
-    # ]
-    # [ used in Proto-Georgian-Zan/Proto-Kartvelian entries e.g. {{head|ccs-pro|noun}} {{tlb|ccs-pro|Fähnrich-Sarǯvelaʒe}}
+    # [ used in Proto-Georgian-Zan/Proto-Kartvelian entries e.g.
+    #  {{head|ccs-pro|noun}} {{tlb|ccs-pro|Fähnrich-Sarǯvelaʒe}}
     "Čikobava",
     "Klimov",
     "Fähnrich-Sarǯvelaʒe",
     "Fähnrich",
     "Fähnrich-Sarǯvelaʒe 2000",
     "Fähnrich 2007"
-    # ]
+
+    # Chinese pronunciation table stuff
+    "Yongchun",
+    "SP",
+    "Palladius",
+    "PFS",
+    "Hanyu Pinyin",
 ])
 
 

@@ -356,7 +356,7 @@ infl_map = {
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-v",
-    },
+    }, 
     "Case / #": "",
     # XXX needs special handling ['-льник', '-овка', '-ник']
     "accusative animate inanimate": "accusative animate inanimate",
@@ -3110,8 +3110,8 @@ infl_map = {
      "third-person plural formal second-person-semantically"],
     "2nd person pl informal": "second-person plural informal",
     "3rd person sg, 2nd p. sg formal":
-     ["third-person singular",
-      "third-person singular formal second-person-semantically"],
+          ["third-person singular",
+          "third-person singular formal second-person-semantically"],
     "Participle": "participle",
     "Past tense": "past",
     "Present tense": "present",
@@ -6917,6 +6917,13 @@ infl_map = {
     "ku_((XV/XVII))": "class-15 class-17",
     "pa_((XVI))": "class-16",
     "mu_((XVIII))": "class-18",
+
+    # ծաղրել/Armenian
+    "past future": "future past",
+
+    # new Finnish verb table stuff takaisinmallintaa/Finnish
+    "plur.": "plural",
+    "sing.": "singular",
 }
 
 

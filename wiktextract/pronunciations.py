@@ -178,13 +178,15 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             pron["zh-pron"] = v.strip()
             for hdr in new_parent_hdrs + new_specific_hdrs:
                 hdr = hdr.strip()
+                valid_hdr = re.sub("\s+", "-", hdr)
+                print(hdr)
                 if hdr in config.ZH_PRON_TAGS:
                     for tag in config.ZH_PRON_TAGS[hdr]:
                         if tag not in pron["tags"]:
                             pron["tags"].append(tag)
-                elif hdr in valid_tags:
-                    if hdr not in pron["tags"]:
-                        pron["tags"].append(hdr)
+                elif valid_hdr in valid_tags:
+                    if valid_hdr not in pron["tags"]:
+                        pron["tags"].append(valid_hdr)
                 else:
                     unknown_header_tags.add(hdr)
             # convert into normal IPA format if has the IPA flag
@@ -406,7 +408,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
     active_pos = None
 
     for text, ipa_text in split_cleaned_node_on_newlines(contents):
-        print(text, ipa_text)
+        # print(text, ipa_text)
         prefix = None
         if not text:
             continue
