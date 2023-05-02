@@ -41,7 +41,11 @@ def save_json_file(
     data_folder = Path(f"wiktextract/data/{lang_code}")
     if not data_folder.exists():
         data_folder.mkdir()
-    add_wikimedia_language_codes(data)
+    # Adding wikimedia_language_codes here creates a problem when
+    # creating LANGUAGE_BY_NAME because it uses the first found
+    # code, which can be wrong like "bs" -> Serbo-Croatian;
+    # disabled for now
+    # add_wikimedia_language_codes(data)
     with data_folder.joinpath(file_name).open("w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False, sort_keys=True)
 
