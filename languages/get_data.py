@@ -1,12 +1,13 @@
 # Export Wiktionary language codes and names to JSON, saving this data to
-# data/lang_code/languages.json.
+# data/lang_code/languages.json. This script directly uses the language data in
+# the relevant lua module(s) of a language's wiktionary dump.
 #
 # Should be called from the root directory of the wiktextract repo. This script
 # expects that a lua module with the filename lang_code.lua exists in
-# languages/lua, and that this module exports a function called languages() which
-# returns a string of JSON data. The JSON data should be an object with keys of
-# lang_codes whose values are arrays of the corresponding language names, with
-# the canonical name first.
+# languages/lua, and that this module exports a function called languages()
+# which returns a string of JSON data. The JSON data should be an object with
+# keys of lang_codes whose values are arrays of the corresponding language
+# names, with the canonical name first.
 #
 # Usage:
 #
