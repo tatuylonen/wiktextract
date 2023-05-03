@@ -7,6 +7,7 @@ import json
 import collections
 import pkg_resources
 from pathlib import Path
+import sys
 
 
 def int_dict():
@@ -175,17 +176,52 @@ class WiktionaryConfig(object):
             self.ZH_PRON_TAGS = json.load(f)
 
     def init_languages(self):
+        def canon_warn(name, use_code, not_use_code):
+            print(f"WARNING: Non-unique language canonical name '{name}'."
+                  f" Mapping to '{use_code}' instead of '{not_use_code}'.")
+
+        def alias_info(name, new_code, kind, old_code, use_code, not_use_code):
+            if self.verbose:
+                print(f"Language alias '{name}' for code '{new_code}'"
+                      f" is already a{kind} for {old_code}."
+                      f" Mapping to '{use_code}' instead of '{not_use_code}'.")
+
         with self.data_folder.joinpath("languages.json").open(encoding="utf-8") as f:
             self.LANGUAGES_BY_CODE = json.load(f)
+        
         self.LANGUAGES_BY_NAME = {}
+        
+        # add canonical names first to avoid overwriting them
+        canonical_names = {}
         for lang_code, lang_names in self.LANGUAGES_BY_CODE.items():
-            for lang_name in lang_names:
-                # some languages have the same name but different language codes
-                # only overwrite the language names of three-letter codes with
-                # the name of two-letter codes
-                if lang_name not in self.LANGUAGES_BY_NAME or len(lang_code) < len(
-                        self.LANGUAGES_BY_NAME[lang_name]
-                ):
+            canonical_name = lang_names[0]
+            if canonical_name in canonical_names:
+                lang_code0 = canonical_names[canonical_name]
+                if len(lang_code) < len(lang_code0):
+                    canon_warn(canonical_name, lang_code, lang_code0)
+                    canonical_names[canonical_name] = lang_code
+                    self.LANGUAGES_BY_NAME[canonical_name] = lang_code
+                else:
+                    canon_warn(canonical_name, lang_code0, lang_code)
+            else:
+                canonical_names[canonical_name] = lang_code
+                self.LANGUAGES_BY_NAME[canonical_name] = lang_code
+
+        # add other names
+        for lang_code, lang_names in self.LANGUAGES_BY_CODE.items():
+            for lang_name in lang_names[1:]:
+                if lang_name in canonical_names:
+                    lang_code0 = canonical_names[lang_name]
+                    alias_info(lang_name, lang_code, " canonical name", lang_code0, lang_code0, lang_code)
+                    continue
+                if lang_name in self.LANGUAGES_BY_NAME:
+                    lang_code0 = self.LANGUAGES_BY_NAME[lang_name]
+                    if len(lang_code) < len(lang_code0):
+                        alias_info(lang_name, lang_code, "n alias", lang_code0, lang_code, lang_code0)
+                        self.LANGUAGES_BY_NAME[lang_name] = lang_code
+                    else:
+                        alias_info(lang_name, lang_code, "n alias", lang_code0, lang_code0, lang_code)
+                else:
                     self.LANGUAGES_BY_NAME[lang_name] = lang_code
 
     def init_form_of_templates(self):

@@ -161,13 +161,12 @@ def main():
     parser.add_argument("lang_code", help="Wiktionary language code")
     args = parser.parse_args()
 
-    match args.lang_code:
-        case "en" | "zh":
-            parse_csv(args.sub_domain, args.lang_code)
-        case "fr":
-            get_fr_languages()
-        case "cs" | "sk":
-            get_languages_cs_sk(args.lang_code)
+    if args.lang_code in ("en", "zh"):
+        parse_csv(args.sub_domain, args.lang_code)
+    elif args.lang_code == "fr":
+        get_fr_languages()
+    elif args.lang_code in ("cs", "sk"):
+        get_languages_cs_sk(args.lang_code)
 
 
 if __name__ == "__main__":
