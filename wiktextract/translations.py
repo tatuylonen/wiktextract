@@ -109,9 +109,7 @@ script_and_dialect_names = set([
     "Fascian",  # Ladin
     "Fodom",  # Ladin
     "Gherdëina",  # Ladin
-    "Central Kurdish",  # Variant of Kurdish
     "Laki",  # Variant of Kurdish
-    "Northern Kurdish",  # Variant of Kurdish
     "Anbarani",  # Variant of Talysh
     "Asalemi",  # Variant of Talysh
     "Upper Sorbian",  # Variant of Sorbian
@@ -296,6 +294,7 @@ english_to_tags = {
     "he has": "third-person singular masculine",
 }
 
+
 def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                                 lang, langcode, translations_from_template,
                                 is_reconstruction, config):
@@ -313,7 +312,8 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
     assert is_reconstruction in (True, False)
     assert isinstance(config, WiktionaryConfig)
 
-    # print("parse_translation_item_text: {!r} lang={}".format(item, lang))
+    # print("parse_translation_item_text: {!r} lang={}"
+    #       " langcode={}".format(item, lang, langcode))
 
     if not item:
         return None
@@ -357,7 +357,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
         elif sublang in tr_second_tagmap:
             # Certain second-level names are interpreted as tags
             # (mapped to tags).  Note that these may still have
-            # separate language codes, so additional lancode
+            # separate language codes, so additional langcode
             # removal tricks may need to be played below.
             tags.extend(tr_second_tagmap[sublang].split())
         elif lang + " " + sublang in config.LANGUAGES_BY_NAME:
@@ -366,6 +366,10 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             lang = sublang + " " + lang  # E.g., Ancient Egyptian
         elif sublang in config.LANGUAGES_BY_NAME:
             lang = sublang
+        elif sublang.replace(" ", "-") in config.LANGUAGES_BY_NAME:
+            lang = sublang.replace(" ", "-")
+        elif sublang.replace("-", " ") in config.LANGUAGES_BY_NAME:
+            lang = sublang.replace("-", " ")
         elif sublang[0].isupper() and classify_desc(sublang) == "tags":
             # Interpret it as a tag
             tags.append(sublang)
