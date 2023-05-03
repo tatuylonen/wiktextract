@@ -2382,6 +2382,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             langcode = None
             if sense is None:
                 sense = clean_node(config, ctx, data, sense_parts).strip()
+                # print("sense <- clean_node: ", sense)
                 idx = sense.find("See also translations at")
                 if idx > 0:
                     ctx.debug("Skipping translation see also: {}".format(sense),
@@ -2554,8 +2555,12 @@ def parse_language(ctx, config, langnode, language, lang_code):
                 if name in ("trans-top",):
                     # XXX capture id from trans-top?  Capture sense here
                     # instead of trying to parse it from expanded content?
-                    sense_parts = []
-                    sense = None
+                    if ht.get(1):
+                        sense_parts = []
+                        sense = ht.get(1)
+                    else:
+                        sense_parts = []
+                        sense = None
                     return None
                 if name in ("trans-bottom", "trans-mid",
                             "checktrans-mid", "checktrans-bottom"):
@@ -2579,6 +2584,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             nonlocal sense
             nonlocal sense_parts
             for node in xlatnode.children:
+                # print(node)
                 if isinstance(node, str):
                     if sense:
                         if not node.isspace():
@@ -2884,6 +2890,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
             return None
 
         for node in treenode.children:
+            # print(node)
             if not isinstance(node, WikiNode):
                 # print("  X{}".format(repr(node)[:40]))
                 continue
