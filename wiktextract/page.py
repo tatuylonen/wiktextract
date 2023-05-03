@@ -1973,7 +1973,16 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     return ret
             return None
 
+        # Kludge for multitrans bug, see wikitextprocessor issue 39
+        # and another place with this post_fn else on this page for
+        # the main expansion of a page
+        def multitrans_post_fn(name, ht, text):
+            if name == "multitrans" and not text.startswith("\n"):
+                return "\n" + text
+            return None
+        
         tree = ctx.parse(subpage_content, pre_expand=True,
+                         post_template_fn=multitrans_post_fn,
                          additional_expand=additional_expand_templates,
                          do_not_pre_expand=do_not_pre_expand_templates)
         assert tree.kind == NodeKind.ROOT
@@ -2357,7 +2366,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         assert isinstance(data, dict)
         assert isinstance(xlatnode, WikiNode)
         # print("===== PARSE_TRANSLATIONS {} {} {}"
-            # .format(ctx.title, ctx.section, ctx.subsection))
+        #   .format(ctx.title, ctx.section, ctx.subsection))
         # print("parse_translations xlatnode={}".format(xlatnode))
         if not config.capture_translations:
             return
@@ -2654,8 +2663,8 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                        "part-of-speech")
 
                     if (len(arg0) >= 1 and
-                        isinstance(arg0[0], str) and
-                        not arg0[0].lower().startswith("category:")):
+                       isinstance(arg0[0], str) and
+                       not arg0[0].lower().startswith("category:")):
                         for x in node.args[-1]:
                             if isinstance(x, str):
                                 sense_parts.append(x)
@@ -3440,9 +3449,20 @@ def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list
     # hierarchy by manipulating the subtitle levels in certain cases.
     text = fix_subtitle_hierarchy(ctx, config, text)
 
+    # fix for bug multitrans and trans-top templates: multitrans creates
+    # lists, but is pre-expanded in wikitextprocessor before trans-top
+    # is expanded, so the first item ends up on the same line:
+    # {{trans-top}}* Foobarian translation item <- not parsed as list item 
+    # This is duplicated elsewhere on this page for subpages
+    def multitrans_post_fn(name, ht, text):
+        if name == "multitrans" and not text.startswith("\n"):
+            return "\n" + text
+        return None
+
     # Parse the page, pre-expanding those templates that are likely to
     # influence parsing
     tree = ctx.parse(text, pre_expand=True,
+                     post_template_fn=multitrans_post_fn,
                      additional_expand=additional_expand_templates,
                      do_not_pre_expand=do_not_pre_expand_templates)
     # from wikitextprocessor.parser import print_tree
