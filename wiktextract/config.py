@@ -7,8 +7,6 @@ import json
 import collections
 import pkg_resources
 from pathlib import Path
-import sys
-
 
 def int_dict():
     return collections.defaultdict(int)
