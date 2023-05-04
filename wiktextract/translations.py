@@ -112,8 +112,6 @@ script_and_dialect_names = set([
     "Laki",  # Variant of Kurdish
     "Anbarani",  # Variant of Talysh
     "Asalemi",  # Variant of Talysh
-    "Upper Sorbian",  # Variant of Sorbian
-    "Lower Sorbian",  # Variant of Sorbian
     "Alemannic German",  # Variant of German
     "Rhine Franconian",  # Variant of German
     "German Low German",  # Variant of Low German
