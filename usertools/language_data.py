@@ -2,7 +2,7 @@
 #
 # Usage:
 #
-# python lang_data_export.py enwiktionary_dump_file [--languages languages_output_file] [--families families_output_file]
+# python language_data.py enwiktionary_dump_file [--languages languages_output_file] [--families families_output_file]
 
 import argparse
 from wikitextprocessor import Wtp
