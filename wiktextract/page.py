@@ -58,6 +58,7 @@ additional_expand_templates = {
     "multitrans",
     "multitrans-nowiki",
     "trans-top",
+    "trans-top-also",
     "trans-bottom",
     "checktrans-top",
     "checktrans-bottom",
