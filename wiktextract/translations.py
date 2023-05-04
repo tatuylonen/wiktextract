@@ -604,9 +604,13 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                 if w in ("[Term?]", ":", "/", "?"):
                     continue  # These are not valid linkage targets
                 if len(w) > 3 * len(word) + 20:
-                    # Likely descriptive text or example
-                    del tr["word"]
-                    tr["note"] = w
+                    if not word.isupper():
+                        # Likely descriptive text or example
+                        ctx.debug("Translation too long compared to word, so"
+                                  " it is skipped",
+                                  sortid="translations/609-20230504")
+                        del tr["word"]
+                        tr["note"] = w
 
             # Sanity check: try to detect certain suspicious
             # patterns in translations
