@@ -470,7 +470,8 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             if topics:
                 tr["topics"] = list(topics)
             if sense:
-                if sense.startswith(("Translations to be checked", ":The translations below need to be checked")):
+                if sense.startswith(("Translations to be checked",
+                             ":The translations below need to be checked")):
                     continue  # Skip such translations
                 else:
                     tr["sense"] = sense
@@ -604,8 +605,12 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
                 if w in ("[Term?]", ":", "/", "?"):
                     continue  # These are not valid linkage targets
                 if len(w) > 3 * len(word) + 20:
+                    # Accept translation if word looks like acronym:
+                    # 'ISBN', 'I.S.B.N'.isupper() return True, and
+                    # false positives are unlikely.
                     if not word.isupper():
-                        # Likely descriptive text or example
+                        # Likely descriptive text or example because
+                        # it is much too long.
                         ctx.debug("Translation too long compared to word, so"
                                   " it is skipped",
                                   sortid="translations/609-20230504")

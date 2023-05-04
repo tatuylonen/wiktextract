@@ -57,6 +57,10 @@ do_not_pre_expand_templates.update(floating_table_templates)
 additional_expand_templates = {
     "multitrans",
     "multitrans-nowiki",
+    "trans-top",
+    "trans-bottom",
+    "checktrans-top",
+    "checktrans-bottom",
     "col1",
     "col2",
     "col3",
