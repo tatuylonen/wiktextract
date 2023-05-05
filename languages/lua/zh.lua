@@ -10,24 +10,26 @@ function export.languages()
     -- https://zh.wiktionary.org/wiki/Module:Languages/alldata
     local allData = mw.loadData("Module:Languages/alldata")
 
+    local function addNames(allNames, names)
+        for _, name in ipairs(names) do
+            table.insert(allNames, name)
+            local nameSimplified = m_zh.ts(name)
+            if nameSimplified ~= name then
+                table.insert(allNames, nameSimplified)
+            end
+        end
+    end
+
     for code, _ in pairs(allData) do
         names = {}
         local lang = m_languages.getByCode(code)
         local canonicalName = lang:getCanonicalName()
-        table.insert(names, canonicalName)
-        local canonicalNameSimplified = m_zh.ts(canonicalName)
-        if canonicalNameSimplified ~= canonicalName then
-            table.insert(names, canonicalNameSimplified)
-        end
-        -- importantly, this returns all of `otherNames`, `aliases` and `varieties`
-        local otherNames = lang:getOtherNames()
-        for _, otherName in ipairs(otherNames) do
-            table.insert(names, otherName)
-            local otherNameSimplified = m_zh.ts(otherName)
-            if otherNameSimplified ~= otherName then
-                table.insert(names, otherNameSimplified)
-            end
-        end
+        addNames(names, {canonicalName})
+        -- the true arg gets ONLY otherNames, not including aliases/varieties
+        local otherNames = lang:getOtherNames(true)
+        addNames(names, otherNames)
+        local aliases = lang:getAliases()
+        addNames(names, aliases)
         ret[code] = names
     end
     

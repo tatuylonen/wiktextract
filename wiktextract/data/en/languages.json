@@ -359,7 +359,8 @@
     "Amundava"
   ],
   "ady": [
-    "Adyghe"
+    "Adyghe",
+    "West Circassian"
   ],
   "adz": [
     "Adzera"
@@ -721,13 +722,7 @@
     "Amri Karbi"
   ],
   "ak": [
-    "Akan",
-    "Twi-Fante",
-    "Twi",
-    "Fante",
-    "Fanti",
-    "Asante",
-    "Akuapem"
+    "Akan"
   ],
   "akb": [
     "Angkola Batak",
@@ -1389,10 +1384,7 @@
     "Arabic",
     "Standard Arabic",
     "Literary Arabic",
-    "High Arabic",
-    "Modern Standard Arabic",
-    "Classical Arabic",
-    "Judeo-Arabic"
+    "High Arabic"
   ],
   "arc": [
     "Aramaic"
@@ -1501,7 +1493,9 @@
     "Arbore"
   ],
   "arw": [
-    "Arawak"
+    "Arawak",
+    "Arowak",
+    "Lokono"
   ],
   "arx": [
     "Aruá",
@@ -1691,7 +1685,10 @@
     "Reel"
   ],
   "atv": [
-    "Northern Altai"
+    "Northern Altai",
+    "Northern Altay",
+    "Altai",
+    "Altay"
   ],
   "atw": [
     "Atsugewi",
@@ -2166,9 +2163,7 @@
     "Xârâgurè"
   ],
   "ay": [
-    "Aymara",
-    "Southern Aymara",
-    "Central Aymara"
+    "Aymara"
   ],
   "aya": [
     "Awar"
@@ -2243,17 +2238,7 @@
     "Azeri",
     "Azari",
     "Azeri Turkic",
-    "Azerbaijani Turkic",
-    "North Azerbaijani",
-    "South Azerbaijani",
-    "Afshar",
-    "Afshari",
-    "Afshar Azerbaijani",
-    "Afchar",
-    "Qashqa'i",
-    "Qashqai",
-    "Kashkay",
-    "Sonqor"
+    "Azerbaijani Turkic"
   ],
   "aza": [
     "Azha"
@@ -2346,7 +2331,8 @@
     "Barakai"
   ],
   "bal": [
-    "Baluchi"
+    "Baluchi",
+    "Balochi"
   ],
   "ban": [
     "Balinese"
@@ -3015,7 +3001,12 @@
     "Bimin"
   ],
   "bhm": [
-    "Bathari"
+    "Bathari",
+    "Batahari",
+    "Bat'hari",
+    "Bautahari",
+    "Botahari",
+    "Bathara"
   ],
   "bhn": [
     "Bohtan Neo-Aramaic"
@@ -3660,33 +3651,7 @@
     "Beezen"
   ],
   "bo": [
-    "Tibetan",
-    "Amdo Tibetan",
-    "Amdo",
-    "Dolpo",
-    "Khams",
-    "Khams Tibetan",
-    "Khamba",
-    "Gola",
-    "Humla",
-    "Limi",
-    "Lhasa",
-    "Lhasa Tibetan",
-    "Lhomi",
-    "Loke",
-    "Lowa",
-    "Mugom",
-    "Mugu",
-    "Mustang",
-    "Nubri",
-    "Panang",
-    "Shing Saapa",
-    "Thudam",
-    "Tichurong",
-    "Tseku",
-    "Ü",
-    "Dbus",
-    "Walungge"
+    "Tibetan"
   ],
   "boa": [
     "Bora"
@@ -3917,18 +3882,11 @@
     "Bakaka"
   ],
   "br": [
-    "Breton",
-    "Gwenedeg",
-    "Vannetais",
-    "Kerneveg",
-    "Cornouaillais",
-    "Leoneg",
-    "Léonard",
-    "Tregerieg",
-    "Trégorrois"
+    "Breton"
   ],
   "bra": [
-    "Braj"
+    "Braj",
+    "Braj Bhasha"
   ],
   "brb": [
     "Lave",
@@ -4007,7 +3965,11 @@
     "Bellari"
   ],
   "brx": [
-    "Bodo (India)"
+    "Bodo (India)",
+    "Bodo",
+    "Boro",
+    "Boro (India)",
+    "Mech"
   ],
   "bry": [
     "Burui"
@@ -4925,7 +4887,8 @@
     "Ede Cabe"
   ],
   "cbk": [
-    "Chavacano"
+    "Chavacano",
+    "Zamboanga Chavacano"
   ],
   "cbl": [
     "Bualkhaw Chin",
@@ -5201,21 +5164,19 @@
   ],
   "chr": [
     "Cherokee",
-    "Tsalagi",
-    "Lower Cherokee",
-    "Middle Cherokee",
-    "Kituwah",
-    "Kituhwa",
-    "Eastern Cherokee",
-    "Overhill Cherokee",
-    "Otali",
-    "Western Cherokee"
+    "Tsalagi"
   ],
   "cht": [
     "Cholón"
   ],
   "chw": [
-    "Chuabo"
+    "Chuabo",
+    "Chuwabu",
+    "Cuwabo",
+    "Cuwabu",
+    "Cuabo",
+    "Txuwabo",
+    "Echuabo"
   ],
   "chx": [
     "Chantyal"
@@ -5248,10 +5209,7 @@
     "Chitkuli Kinnauri"
   ],
   "cim": [
-    "Cimbrian",
-    "Luserna Cimbrian",
-    "Sette Comuni Cimbrian",
-    "Thirteen Communities Cimbrian"
+    "Cimbrian"
   ],
   "cin": [
     "Cinta Larga"
@@ -5304,7 +5262,13 @@
     "Chuave"
   ],
   "cjy": [
-    "Jin"
+    "Jin",
+    "Jinyu",
+    "Jinhua",
+    "Jinese",
+    "Shanxinese",
+    "Jin Chinese",
+    "Jinyu Chinese"
   ],
   "ckb": [
     "Central Kurdish",
@@ -5452,7 +5416,14 @@
     "Michigamea"
   ],
   "cmn": [
-    "Mandarin"
+    "Mandarin",
+    "Mandarin Chinese",
+    "Putonghua",
+    "Guoyu",
+    "Huayu",
+    "Guanhua",
+    "Beifanghua",
+    "Standard Chinese"
   ],
   "cmo": [
     "Central Mnong"
@@ -5994,7 +5965,8 @@
     "Cupeño"
   ],
   "cuq": [
-    "Cun"
+    "Cun",
+    "Gelong"
   ],
   "cur": [
     "Chhulung"
@@ -6002,9 +5974,7 @@
   "cus-ash": [
     "Ashraaf",
     "Ashraf",
-    "Af-Ashraaf",
-    "Marka, Lower Shabelle",
-    "Shingani"
+    "Af-Ashraaf"
   ],
   "cus-hec-pro": [
     "Proto-Highland East Cushitic"
@@ -6062,23 +6032,7 @@
     "Kuwaataay"
   ],
   "cy": [
-    "Welsh",
-    "Cofi Welsh",
-    "Dyfedeg",
-    "Dyfed Welsh",
-    "Demetian",
-    "Gwenhwyseg",
-    "Gwent Welsh",
-    "Gwentian",
-    "Gwyndodeg",
-    "Gwynedd Welsh",
-    "Venedotian",
-    "North Wales Welsh",
-    "Powyseg",
-    "Powys Welsh",
-    "Powysian",
-    "South Wales Welsh",
-    "Patagonian Welsh"
+    "Welsh"
   ],
   "cya": [
     "Nopala Chatino"
@@ -6315,29 +6269,7 @@
     "German",
     "High German",
     "New High German",
-    "Deutsch",
-    "Alsatian German",
-    "American German",
-    "Bavarian German",
-    "Belgian German",
-    "Central German",
-    "DDR German",
-    "East African German",
-    "German German",
-    "Hessian German",
-    "Indiana German",
-    "Liechtenstein German",
-    "Lorraine German",
-    "Luxembourgish German",
-    "Namibian German",
-    "Northern German",
-    "Prussian German",
-    "Silesia German",
-    "South African German",
-    "Southern German",
-    "South Tyrolean German",
-    "Switzerland German",
-    "Texan German"
+    "Deutsch"
   ],
   "dec": [
     "Dagik"
@@ -6425,9 +6357,7 @@
   "dgr": [
     "Dogrib",
     "Tłicho",
-    "Tlinchon",
-    "Tłı̨chǫ Yatıì",
-    "Wıı̀lıı̀deh Yatıı̀"
+    "Tlinchon"
   ],
   "dgs": [
     "Dogoso"
@@ -6782,7 +6712,9 @@
     "Dobu"
   ],
   "doc": [
-    "Northern Kam"
+    "Northern Kam",
+    "Northern Gam",
+    "Northern Dong"
   ],
   "doe": [
     "Doe"
@@ -6953,7 +6885,13 @@
     "Tommo So Dogon"
   ],
   "dtp": [
-    "Central Dusun"
+    "Central Dusun",
+    "Kadazandusun",
+    "Kadazan-Dusun",
+    "Kadazan Dusun",
+    "Kadazan",
+    "Bunduliwan",
+    "Boros Dusun"
   ],
   "dtr": [
     "Lotud"
@@ -7052,9 +6990,7 @@
   "dv": [
     "Dhivehi",
     "Divehi",
-    "Maldivian",
-    "Mahal",
-    "Mahl"
+    "Maldivian"
   ],
   "dva": [
     "Duau"
@@ -7314,8 +7250,7 @@
     "Malo",
     "Matoh",
     "Mbaloh",
-    "Memaloh",
-    "Kalis"
+    "Memaloh"
   ],
   "eme": [
     "Emerillon",
@@ -7364,9 +7299,7 @@
   "en": [
     "English",
     "Modern English",
-    "New English",
-    "Polari",
-    "Yinglish"
+    "New English"
   ],
   "ena": [
     "Apali"
@@ -7491,10 +7424,7 @@
   ],
   "es": [
     "Spanish",
-    "Castilian",
-    "Amazonian Spanish",
-    "Amazonic Spanish",
-    "Loreto-Ucayali Spanish"
+    "Castilian"
   ],
   "ese": [
     "Ese Ejja",
@@ -7618,7 +7548,8 @@
     "Uvbie"
   ],
   "evn": [
-    "Evenki"
+    "Evenki",
+    "Tungus"
   ],
   "ewo": [
     "Ewondo",
@@ -7645,15 +7576,7 @@
     "Persian",
     "Farsi",
     "New Persian",
-    "Modern Persian",
-    "Western Persian",
-    "Iranian Persian",
-    "Eastern Persian",
-    "Dari",
-    "Aimaq",
-    "Aimak",
-    "Aymaq",
-    "Eimak"
+    "Modern Persian"
   ],
   "faa": [
     "Fasu",
@@ -7741,17 +7664,7 @@
   ],
   "ff": [
     "Fula",
-    "Fulani",
-    "Adamawa Fulfulde",
-    "Bagirmi Fulfulde",
-    "Borgu Fulfulde",
-    "Central-Eastern Niger Fulfulde",
-    "Fulfulde",
-    "Maasina Fulfulde",
-    "Nigerian Fulfulde",
-    "Pular",
-    "Pulaar",
-    "Western Niger Fulfulde"
+    "Fulani"
   ],
   "ffi": [
     "Foia Foia"
@@ -7865,34 +7778,7 @@
   ],
   "fr": [
     "French",
-    "Modern French",
-    "African French",
-    "Algerian French",
-    "Alsatian French",
-    "Antilles French",
-    "Atlantic Canadian French",
-    "Belgian French",
-    "Congolese French",
-    "European French",
-    "French French",
-    "Haitian French",
-    "Ivorian French",
-    "Lorraine French",
-    "Louisiana French",
-    "Luxembourgish French",
-    "Malian French",
-    "Marseille French",
-    "Missourian French",
-    "Moroccan French",
-    "Newfoundland French",
-    "North American French",
-    "Picard French",
-    "Provençal French‎",
-    "Quebec French",
-    "Réunion French",
-    "Rwandan French",
-    "Tunisian French",
-    "West African French"
+    "Modern French"
   ],
   "frd": [
     "Fordata"
@@ -7901,9 +7787,7 @@
     "Middle French"
   ],
   "fro": [
-    "Old French",
-    "Judeo-French",
-    "Zarphatic"
+    "Old French"
   ],
   "frp": [
     "Franco-Provençal",
@@ -7971,20 +7855,7 @@
   "ga": [
     "Irish",
     "Irish Gaelic",
-    "Gaelic",
-    "Cois Fharraige Irish",
-    "Cois Fhairrge Irish",
-    "Connacht Irish",
-    "Connaught Irish",
-    "Cork Irish",
-    "Donegal Irish",
-    "Galway Irish",
-    "Kerry Irish",
-    "Mayo Irish",
-    "Munster Irish",
-    "Ulster Irish",
-    "Waterford Irish",
-    "West Muskerry Irish"
+    "Gaelic"
   ],
   "gaa": [
     "Ga"
@@ -8217,19 +8088,7 @@
     "Gaelic",
     "Gàidhlig",
     "Scots Gaelic",
-    "Scottish",
-    "Argyll Gaelic",
-    "Arran Scottish Gaelic",
-    "Canadian Gaelic",
-    "Canadian Scottish Gaelic",
-    "Cape Breton Gaelic",
-    "East Sutherland Gaelic",
-    "Galwegian Gaelic",
-    "Gallovidian Gaelic",
-    "Gallowegian Gaelic",
-    "Galloway Gaelic",
-    "Hebridean Gaelic",
-    "Highland Gaelic"
+    "Scottish"
   ],
   "gdb": [
     "Ollari",
@@ -8970,8 +8829,7 @@
   ],
   "grc": [
     "Ancient Greek",
-    "Classical Greek",
-    "Egyptian Ancient Greek"
+    "Classical Greek"
   ],
   "grd": [
     "Guruntum"
@@ -9026,7 +8884,10 @@
     "Gresi"
   ],
   "grt": [
-    "Garo"
+    "Garo",
+    "Garrow",
+    "Mandi",
+    "Mande"
   ],
   "gru": [
     "Kistane",
@@ -9074,7 +8935,8 @@
     "Greek Sign Language"
   ],
   "gsw": [
-    "Alemannic German"
+    "Alemannic German",
+    "Swiss German"
   ],
   "gta": [
     "Guató"
@@ -9219,9 +9081,7 @@
   ],
   "gv": [
     "Manx",
-    "Manx Gaelic",
-    "Northern Manx",
-    "Southern Manx"
+    "Manx Gaelic"
   ],
   "gva": [
     "Kaskihá",
@@ -9760,10 +9620,16 @@
     "Hani"
   ],
   "hnj": [
-    "Green Hmong"
+    "Green Hmong",
+    "Hmong Njua",
+    "Hmong Leng",
+    "Mong Leng",
+    "Green Miao",
+    "Blue Hmong"
   ],
   "hnn": [
-    "Hanunoo"
+    "Hanunoo",
+    "Hanuno'o"
   ],
   "hno": [
     "Northern Hindko",
@@ -9891,7 +9757,8 @@
     "Feni"
   ],
   "hrx": [
-    "Hunsrik"
+    "Hunsrik",
+    "Riograndenser Hunsrückisch"
   ],
   "hrz": [
     "Harzani",
@@ -10058,9 +9925,7 @@
   ],
   "hy": [
     "Armenian",
-    "Modern Armenian",
-    "Eastern Armenian",
-    "Western Armenian"
+    "Modern Armenian"
   ],
   "hya": [
     "Hya"
@@ -10360,10 +10225,14 @@
     "Ilongot"
   ],
   "ill": [
-    "Iranun"
+    "Iranun",
+    "Ilanun",
+    "Iranun (Malaysia)",
+    "Iranun (Philippines)"
   ],
   "ilo": [
-    "Ilocano"
+    "Ilocano",
+    "Ilokano"
   ],
   "ils": [
     "International Sign"
@@ -10764,23 +10633,7 @@
     "Itzaj"
   ],
   "iu": [
-    "Inuktitut",
-    "Aivilimmiut",
-    "Eastern Canadian Inuktitut",
-    "Eastern Canadian Inuit",
-    "Inuinnaq",
-    "Inuinnaqtun",
-    "Inuvialuktun",
-    "Inuvialuk",
-    "Western Canadian Inuktitut",
-    "Western Canadian Inuit",
-    "Western Canadian Inuktun",
-    "Kivallirmiut",
-    "Natsilingmiut",
-    "Nunavimmiutit",
-    "Nunatsiavummiut",
-    "Siglitun",
-    "Siglit"
+    "Inuktitut"
   ],
   "ium": [
     "Iu Mien"
@@ -10831,7 +10684,8 @@
     "Yaka"
   ],
   "izh": [
-    "Ingrian"
+    "Ingrian",
+    "Izhorian"
   ],
   "izi": [
     "Izi-Ezaa-Ikwo-Mgbo"
@@ -11101,7 +10955,9 @@
     "Buyuan Jinuo"
   ],
   "jje": [
-    "Jeju"
+    "Jeju",
+    "Cheju",
+    "Jejueo"
   ],
   "jjr": [
     "Zhár",
@@ -11308,10 +11164,7 @@
     "Jaya"
   ],
   "ka": [
-    "Georgian",
-    "Judeo-Georgian",
-    "Kivruli",
-    "Gruzinic"
+    "Georgian"
   ],
   "kaa": [
     "Karakalpak",
@@ -11322,7 +11175,8 @@
     "Kabylian"
   ],
   "kac": [
-    "Jingpho"
+    "Jingpho",
+    "Kachin"
   ],
   "kad": [
     "Kadara"
@@ -11375,7 +11229,8 @@
     "Proto-Karen"
   ],
   "kaw": [
-    "Old Javanese"
+    "Old Javanese",
+    "Kawi"
   ],
   "kax": [
     "Kao"
@@ -11404,7 +11259,8 @@
     "Waikurú"
   ],
   "kbd": [
-    "Kabardian"
+    "Kabardian",
+    "East Circassian"
   ],
   "kbe": [
     "Kanju",
@@ -11783,7 +11639,11 @@
     "Korku"
   ],
   "kfr": [
-    "Kachchi"
+    "Kachchi",
+    "Kutchi",
+    "Cutchi",
+    "Kachchhi",
+    "Kutchhi"
   ],
   "kfs": [
     "Bilaspuri"
@@ -11813,11 +11673,7 @@
   ],
   "kg": [
     "Kongo",
-    "Kikongo",
-    "Koongo",
-    "Laari",
-    "San Salvador Kongo",
-    "Yombe"
+    "Kikongo"
   ],
   "kga": [
     "Koyaga"
@@ -11953,7 +11809,8 @@
     "Kasua"
   ],
   "kht": [
-    "Khamti"
+    "Khamti",
+    "Tai Khamti"
   ],
   "khu": [
     "Nkhumbi"
@@ -12177,7 +12034,9 @@
     "Mabaka Valley Kalinga"
   ],
   "kkh": [
-    "Khün"
+    "Khün",
+    "Tai Khün",
+    "Dai Kun"
   ],
   "kki": [
     "Kagulu",
@@ -12346,7 +12205,9 @@
     "North Mbundu"
   ],
   "kmc": [
-    "Southern Kam"
+    "Southern Kam",
+    "Southern Gam",
+    "Southern Dong"
   ],
   "kmd": [
     "Madukayang Kalinga"
@@ -12400,7 +12261,8 @@
     "Kwama"
   ],
   "kmr": [
-    "Northern Kurdish"
+    "Northern Kurdish",
+    "Kurmanji"
   ],
   "kms": [
     "Kamasau"
@@ -12768,12 +12630,7 @@
     "Korana"
   ],
   "kr": [
-    "Kanuri",
-    "Kanembu",
-    "Bilma Kanuri",
-    "Central Kanuri",
-    "Manga Kanuri",
-    "Tumari Kanuri"
+    "Kanuri"
   ],
   "kra": [
     "Kumhali"
@@ -12808,12 +12665,7 @@
     "Kerek"
   ],
   "krl": [
-    "Karelian",
-    "North Karelian",
-    "Northern Karelian",
-    "South Karelian",
-    "Southern Karelian",
-    "Tver Karelian"
+    "Karelian"
   ],
   "krm": [
     "Krim"
@@ -12854,13 +12706,7 @@
   "kry": [
     "Kryts",
     "Kryc",
-    "Kryz",
-    "Jek",
-    "Dzhek",
-    "Cek",
-    "Khaput",
-    "Yergyudzh",
-    "Alyk"
+    "Kryz"
   ],
   "krz": [
     "Sota Kanum"
@@ -13315,7 +13161,8 @@
     "Khonso"
   ],
   "kxd": [
-    "Brunei Malay"
+    "Brunei Malay",
+    "Brunei"
   ],
   "kxe": [
     "Kakihum"
@@ -13596,7 +13443,10 @@
     "Hach t’an"
   ],
   "lad": [
-    "Ladino"
+    "Ladino",
+    "Judaeo-Spanish",
+    "Judæo-Spanish",
+    "Judeo-Spanish"
   ],
   "lae": [
     "Pattani"
@@ -13966,7 +13816,9 @@
     "Lemolang"
   ],
   "lez": [
-    "Lezgi"
+    "Lezgi",
+    "Lezgian",
+    "Lezgin"
   ],
   "lfa": [
     "Lefa"
@@ -14388,7 +14240,8 @@
     "Laimbue"
   ],
   "lmy": [
-    "Laboya"
+    "Laboya",
+    "Lamboya"
   ],
   "lmz": [
     "Lumbee"
@@ -14808,7 +14661,8 @@
     "Layakha"
   ],
   "lyg": [
-    "Lyngngam"
+    "Lyngngam",
+    "Lyngam"
   ],
   "lyn": [
     "Luyana"
@@ -15086,7 +14940,8 @@
     "Bura Mabang"
   ],
   "mdf": [
-    "Moksha"
+    "Moksha",
+    "Mordvin"
   ],
   "mdg": [
     "Massalat"
@@ -15199,7 +15054,9 @@
     "Mende"
   ],
   "meo": [
-    "Kedah Malay"
+    "Kedah Malay",
+    "Syburi Malay",
+    "Satun Malay"
   ],
   "mep": [
     "Miriwung"
@@ -15341,31 +15198,7 @@
     "Mabaan"
   ],
   "mg": [
-    "Malagasy",
-    "Antankarana",
-    "Antankarana Malagasy",
-    "Bara Malagasy",
-    "Bara",
-    "Betsimisaraka Malagasy",
-    "Betsimisaraka",
-    "Northern Betsimisaraka Malagasy",
-    "Northern Betsimisaraka",
-    "Southern Betsimisaraka Malagasy",
-    "Southern Betsimisaraka",
-    "Bushi",
-    "Shibushi",
-    "Kibushi",
-    "Masikoro Malagasy",
-    "Masikoro",
-    "Plateau Malagasy",
-    "Sakalava",
-    "Tandroy Malagasy",
-    "Tandroy",
-    "Tanosy",
-    "Tanosy Malagasy",
-    "Tesaka",
-    "Tsimihety",
-    "Tsimihety Malagasy"
+    "Malagasy"
   ],
   "mga": [
     "Middle Irish"
@@ -15982,8 +15815,7 @@
     "Mabaale"
   ],
   "mn": [
-    "Mongolian",
-    "Khalkha Mongolian"
+    "Mongolian"
   ],
   "mna": [
     "Mbula"
@@ -16019,7 +15851,9 @@
     "Mono"
   ],
   "mni": [
-    "Manipuri"
+    "Manipuri",
+    "Meitei",
+    "Meithei"
   ],
   "mnj": [
     "Munji",
@@ -16075,7 +15909,10 @@
     "Rennell-Bellona"
   ],
   "mnw": [
-    "Mon"
+    "Mon",
+    "Peguan",
+    "Talaing",
+    "Raman"
   ],
   "mnw-tha": [
     "Thai Mon",
@@ -16778,7 +16615,10 @@
     "Are"
   ],
   "mwe": [
-    "Mwera"
+    "Mwera",
+    "Chimwera",
+    "Cimwera",
+    "Mwela"
   ],
   "mwf": [
     "Murrinh-Patha"
@@ -16937,13 +16777,7 @@
   ],
   "my": [
     "Burmese",
-    "Myanmar",
-    "Mandalay Burmese",
-    "Myeik Burmese",
-    "Palaw Burmese",
-    "Rangoon Burmese",
-    "Yangon Burmese",
-    "Yaw Burmese"
+    "Myanmar"
   ],
   "myb": [
     "Mbay"
@@ -17001,7 +16835,8 @@
     "Mundurukú"
   ],
   "myv": [
-    "Erzya"
+    "Erzya",
+    "Mordvin"
   ],
   "myw": [
     "Muyuw"
@@ -17058,7 +16893,9 @@
     "Mumuye"
   ],
   "mzn": [
-    "Mazanderani"
+    "Mazanderani",
+    "Mazandarani",
+    "Tabari"
   ],
   "mzo": [
     "Matipuhy"
@@ -17394,7 +17231,8 @@
     "Nangikurrunggurr"
   ],
   "nan": [
-    "Min Nan"
+    "Min Nan",
+    "Taiwanese"
   ],
   "nao": [
     "Naaba",
@@ -17634,7 +17472,9 @@
     "Ndoola"
   ],
   "nds": [
-    "Low German"
+    "Low German",
+    "Low Saxon",
+    "Modern Low German"
   ],
   "nds-de": [
     "German Low German"
@@ -17665,8 +17505,7 @@
   ],
   "ne": [
     "Nepali",
-    "Nepalese",
-    "Palpa"
+    "Nepalese"
   ],
   "nea": [
     "Eastern Ngad'a"
@@ -17742,7 +17581,8 @@
     "Nyaheun"
   ],
   "new": [
-    "Newar"
+    "Newar",
+    "Newari"
   ],
   "nex": [
     "Neme"
@@ -18195,9 +18035,7 @@
     "Nkari"
   ],
   "nl": [
-    "Dutch",
-    "Netherlandic",
-    "Flemish"
+    "Dutch"
   ],
   "nla": [
     "Ngombale"
@@ -18471,7 +18309,9 @@
     "Nocamán"
   ],
   "non": [
-    "Old Norse"
+    "Old Norse",
+    "Old Icelandic",
+    "Old Norwegian"
   ],
   "nop": [
     "Numanggang"
@@ -18633,11 +18473,7 @@
     "Sangtam Naga"
   ],
   "nsb": [
-    "Lower Nossob",
-    "ǀʼAuni",
-    "ǀʼAuo",
-    "ǀʼAu",
-    "ǀHaasi"
+    "Lower Nossob"
   ],
   "nsc": [
     "Nshi"
@@ -18872,7 +18708,8 @@
     "Nyabwa"
   ],
   "nwc": [
-    "Classical Newar"
+    "Classical Newar",
+    "Classical Newari"
   ],
   "nwe": [
     "Ngwe"
@@ -18892,7 +18729,8 @@
     "Sirio"
   ],
   "nwx": [
-    "Middle Newar"
+    "Middle Newar",
+    "Middle Newari"
   ],
   "nwy": [
     "Nottoway-Meherrin"
@@ -19176,10 +19014,7 @@
   "oj": [
     "Ojibwe",
     "Ojibway",
-    "Ojibwa",
-    "Chippewa",
-    "Ojibwemowin",
-    "Southwestern Ojibwa"
+    "Ojibwa"
   ],
   "ojb": [
     "Northwestern Ojibwa"
@@ -19307,10 +19142,7 @@
     "Kuvale"
   ],
   "om": [
-    "Oromo",
-    "Orma",
-    "Borana-Arsi-Guji Oromo",
-    "West Central Oromo"
+    "Oromo"
   ],
   "oma": [
     "Omaha-Ponca",
@@ -19487,7 +19319,10 @@
     "Oorlams"
   ],
   "oos": [
-    "Old Ossetic"
+    "Old Ossetic",
+    "Old Ossetian",
+    "Alanic",
+    "Sarmatian"
   ],
   "opa": [
     "Okpamheri",
@@ -19543,7 +19378,8 @@
     "Ormuri"
   ],
   "orv": [
-    "Old East Slavic"
+    "Old East Slavic",
+    "Old Russian"
   ],
   "orw": [
     "Oro Win"
@@ -19557,9 +19393,7 @@
   "os": [
     "Ossetian",
     "Ossete",
-    "Ossetic",
-    "Digor",
-    "Iron"
+    "Ossetic"
   ],
   "os-pro": [
     "Proto-Ossetic",
@@ -19590,10 +19424,12 @@
     "Southern One"
   ],
   "osx": [
-    "Old Saxon"
+    "Old Saxon",
+    "Old Low German"
   ],
   "ota": [
-    "Ottoman Turkish"
+    "Ottoman Turkish",
+    "Ottoman"
   ],
   "otb": [
     "Old Tibetan",
@@ -19610,7 +19446,9 @@
     "Oti"
   ],
   "otk": [
-    "Old Turkic"
+    "Old Turkic",
+    "Orkhon Turkic",
+    "Orkhon"
   ],
   "otl": [
     "Tilapa Otomi"
@@ -19661,7 +19499,8 @@
     "Oune"
   ],
   "oui": [
-    "Old Uyghur"
+    "Old Uyghur",
+    "Old Uighur"
   ],
   "oum": [
     "Ouma"
@@ -19717,7 +19556,11 @@
     "Nungon"
   ],
   "pab": [
-    "Pareci"
+    "Pareci",
+    "Parecis",
+    "Parecís",
+    "Paresi",
+    "Paresí"
   ],
   "pac": [
     "Pacoh"
@@ -19746,10 +19589,13 @@
     "Awaeté"
   ],
   "pal": [
-    "Middle Persian"
+    "Middle Persian",
+    "Pahlavi",
+    "Manichaean Middle Persian"
   ],
   "pam": [
-    "Kapampangan"
+    "Kapampangan",
+    "Pampango"
   ],
   "pao": [
     "Northern Paiute",
@@ -19790,13 +19636,26 @@
     "Pawnee"
   ],
   "pax": [
-    "Pankararé"
+    "Pankararé",
+    "Pancaré",
+    "Pankaré",
+    "Pankarare",
+    "Pancare",
+    "Pankare"
   ],
   "pay": [
     "Pech"
   ],
   "paz": [
-    "Pankararú"
+    "Pankararú",
+    "Pankararu",
+    "Pankarú",
+    "Pankaru",
+    "Pankarurú",
+    "Pankaruru",
+    "Pancaru",
+    "Pankaroru",
+    "Brancararu"
   ],
   "pbb": [
     "Páez"
@@ -19917,7 +19776,8 @@
     "Anam"
   ],
   "pdc": [
-    "Pennsylvania German"
+    "Pennsylvania German",
+    "Pennsylvania Dutch"
   ],
   "pdi": [
     "Pa Di"
@@ -19929,7 +19789,13 @@
     "Padoe"
   ],
   "pdt": [
-    "Plautdietsch"
+    "Plautdietsch",
+    "Mennonite Low German",
+    "Russian Mennonite Low German",
+    "Chortitza",
+    "Molotschna",
+    "Chortica",
+    "Molotcha"
   ],
   "pdu": [
     "Kayan",
@@ -20006,7 +19872,9 @@
     "Juba Arabic"
   ],
   "pgd": [
-    "Gandhari"
+    "Gandhari",
+    "Gāndhārī",
+    "Gāndhārī Prakrit"
   ],
   "pgg": [
     "Pangwali"
@@ -20061,7 +19929,8 @@
     "Proto-Philippine"
   ],
   "phk": [
-    "Phake"
+    "Phake",
+    "Tai Phake"
   ],
   "phl": [
     "Phalura",
@@ -20207,7 +20076,12 @@
     "Pak-Tong"
   ],
   "pkh": [
-    "Pankhu"
+    "Pankhu",
+    "Pankho",
+    "Pangkhua",
+    "Pangkho",
+    "Pangkhu",
+    "Panko"
   ],
   "pkn": [
     "Pakanha"
@@ -20310,7 +20184,10 @@
     "Bare'e"
   ],
   "pmh": [
-    "Maharastri Prakrit"
+    "Maharastri Prakrit",
+    "Maharashtri Prakrit",
+    "Maharastri",
+    "Maharashtri"
   ],
   "pmi": [
     "Northern Pumi",
@@ -20678,7 +20555,9 @@
     "Prasuni"
   ],
   "pro": [
-    "Old Occitan"
+    "Old Occitan",
+    "Old Provençal",
+    "Old Provencal"
   ],
   "prq": [
     "Ashéninka Perené"
@@ -20710,13 +20589,7 @@
     "Pashtun",
     "Pushto",
     "Pashtu",
-    "Afghani",
-    "Central Pashto",
-    "Northern Pashto",
-    "Southern Pashto",
-    "Pukhto",
-    "Pakhto",
-    "Pakkhto"
+    "Afghani"
   ],
   "psa": [
     "Asue Awyu",
@@ -20769,7 +20642,9 @@
     "Kaulong"
   ],
   "psu": [
-    "Sauraseni Prakrit"
+    "Sauraseni Prakrit",
+    "Sauraseni",
+    "Shauraseni"
   ],
   "psw": [
     "Port Sandwich"
@@ -20960,7 +20835,8 @@
     "Puyuma"
   ],
   "pyx": [
-    "Tircul"
+    "Tircul",
+    "Pyu"
   ],
   "pyy": [
     "Pyen",
@@ -21164,7 +21040,9 @@
     "Rao"
   ],
   "rap": [
-    "Rapa Nui"
+    "Rapa Nui",
+    "Rapanui",
+    "Pascuense"
   ],
   "raq": [
     "Saam"
@@ -21285,7 +21163,8 @@
     "Rangkas"
   ],
   "rgn": [
-    "Romagnol"
+    "Romagnol",
+    "Romagnolo"
   ],
   "rgr": [
     "Resígaro"
@@ -21352,7 +21231,12 @@
     "Rakahanga-Manihiki"
   ],
   "rki": [
-    "Rakhine"
+    "Rakhine",
+    "Arakanese",
+    "Ramree",
+    "Yangbye",
+    "Thandwe",
+    "Chaungtha"
   ],
   "rkm": [
     "Marka"
@@ -21618,7 +21502,8 @@
     "Romblomanon"
   ],
   "rom": [
-    "Romani"
+    "Romani",
+    "Gypsy"
   ],
   "roo": [
     "Rotokas"
@@ -21724,12 +21609,7 @@
     "Ruma"
   ],
   "rw": [
-    "Rwanda-Rundi",
-    "Ha",
-    "Giha",
-    "Hangaza",
-    "Vinza",
-    "Shubi"
+    "Rwanda-Rundi"
   ],
   "rwa": [
     "Rawo"
@@ -21796,7 +21676,8 @@
     "Safaliba"
   ],
   "sah": [
-    "Yakut"
+    "Yakut",
+    "Sakha"
   ],
   "sai-ajg": [
     "Ajagua",
@@ -22500,7 +22381,8 @@
     "Chut"
   ],
   "sce": [
-    "Dongxiang"
+    "Dongxiang",
+    "Santa"
   ],
   "scf": [
     "San Miguel Creole French"
@@ -22528,7 +22410,8 @@
     "Sicilian"
   ],
   "sco": [
-    "Scots"
+    "Scots",
+    "Lowland Scots"
   ],
   "scp": [
     "Yolmo",
@@ -22537,7 +22420,8 @@
     "Helambu Sherpa"
   ],
   "scq": [
-    "Sa'och"
+    "Sa'och",
+    "Chung"
   ],
   "scs": [
     "North Slavey"
@@ -22657,11 +22541,7 @@
     "Segeju"
   ],
   "seh": [
-    "Sena",
-    "Malawi Sena",
-    "Malawian Sena",
-    "Nuclear Sena",
-    "Mozambican Sena"
+    "Sena"
   ],
   "sei": [
     "Seri"
@@ -22866,12 +22746,7 @@
     "Serbo-Croatian",
     "BCS",
     "Croato-Serbian",
-    "Serbocroatian",
-    "Bosnian",
-    "Croatian",
-    "Montenegrin",
-    "Serbian",
-    "Shtokavian"
+    "Serbocroatian"
   ],
   "sha": [
     "Shall-Zwall"
@@ -22928,7 +22803,10 @@
     "Shahrudi"
   ],
   "shn": [
-    "Shan"
+    "Shan",
+    "Kwam Tai",
+    "Kam Tai",
+    "Tai Yai"
   ],
   "sho": [
     "Shanga"
@@ -23316,7 +23194,8 @@
     "Seko Padang"
   ],
   "sky": [
-    "Sikaiana"
+    "Sikaiana",
+    "Sikayana"
   ],
   "skz": [
     "Sekar"
@@ -23561,7 +23440,9 @@
     "Somali"
   ],
   "soa": [
-    "Thai Song"
+    "Thai Song",
+    "Lao Song",
+    "Song"
   ],
   "sob": [
     "Sobei"
@@ -24079,24 +23960,7 @@
     "Skalvian"
   ],
   "sw": [
-    "Swahili",
-    "Settler Swahili",
-    "KiSetla",
-    "KiSettla",
-    "Setla",
-    "Settla",
-    "Kitchen Swahili",
-    "Kihindi",
-    "Indian Swahili",
-    "KiShamba",
-    "Kishamba",
-    "Field Swahili",
-    "Kibabu",
-    "Asian Swahili",
-    "Kimanga",
-    "Arab Swahili",
-    "Kitvita",
-    "Army Swahili"
+    "Swahili"
   ],
   "swb": [
     "Maore Comorian"
@@ -24108,7 +23972,11 @@
     "Swabian"
   ],
   "swi": [
-    "Sui"
+    "Sui",
+    "Ai Sui",
+    "Shui",
+    "Sui Li",
+    "Suipo"
   ],
   "swj": [
     "Sira"
@@ -24267,7 +24135,10 @@
     "Sengele"
   ],
   "szl": [
-    "Silesian"
+    "Silesian",
+    "Upper Silesian",
+    "Silesian Polish",
+    "Upper Silesian Polish"
   ],
   "szn": [
     "Sula"
@@ -24304,7 +24175,8 @@
     "Middle Tanana"
   ],
   "tab": [
-    "Tabasaran"
+    "Tabasaran",
+    "Tabassaran"
   ],
   "tac": [
     "Lowland Tarahumara"
@@ -24871,7 +24743,9 @@
     "Dangaura Tharu"
   ],
   "thm": [
-    "Thavung"
+    "Thavung",
+    "Aheu",
+    "So (Thavung)"
   ],
   "thn": [
     "Thachanadan"
@@ -25107,8 +24981,7 @@
     "Taloki"
   ],
   "tll": [
-    "Tetela",
-    "Indanga"
+    "Tetela"
   ],
   "tlm": [
     "Tolomako"
@@ -25275,7 +25148,8 @@
     "Whitesands"
   ],
   "tnq": [
-    "Taíno"
+    "Taíno",
+    "Taino"
   ],
   "tnr": [
     "Bedik"
@@ -25453,7 +25327,8 @@
     "Tanapag"
   ],
   "tpw": [
-    "Old Tupi"
+    "Old Tupi",
+    "Classical Tupi"
   ],
   "tpx": [
     "Acatepec Me'phaa"
@@ -25594,7 +25469,8 @@
     "Tringgus-Sembaan Bidayuh"
   ],
   "try": [
-    "Turung"
+    "Turung",
+    "Tai Turung"
   ],
   "trz": [
     "Torá"
@@ -25622,7 +25498,8 @@
     "Southwestern Tamang"
   ],
   "tsg": [
-    "Tausug"
+    "Tausug",
+    "Sūg"
   ],
   "tsh": [
     "Tsuvan"
@@ -25901,13 +25778,16 @@
     "Tewa"
   ],
   "twf": [
-    "Taos"
+    "Taos",
+    "Northern Tiwa"
   ],
   "twg": [
     "Tereweng"
   ],
   "twh": [
-    "Tai Dón"
+    "Tai Dón",
+    "Tai Khao",
+    "White Tai"
   ],
   "twm": [
     "Tawang Monpa"
@@ -26037,7 +25917,10 @@
     "Red Tai (Vietnam)"
   ],
   "tys": [
-    "Sapa"
+    "Sapa",
+    "Sa Pa",
+    "Tày Sa Pa",
+    "Tai Sapa"
   ],
   "tyt": [
     "Tày Tac"
@@ -26046,7 +25929,8 @@
     "Kua"
   ],
   "tyv": [
-    "Tuvan"
+    "Tuvan",
+    "Tyvan"
   ],
   "tyx": [
     "Teke-Tyee"
@@ -26056,13 +25940,7 @@
     "Tay",
     "Tho",
     "Bao Yen",
-    "Cao Bang",
-    "Central Tày",
-    "Eastern Tày",
-    "Northern Tày",
-    "Southern Tày",
-    "Tày Bao Lac",
-    "Tày Trung Khanh"
+    "Cao Bang"
   ],
   "tza": [
     "Tanzanian Sign Language"
@@ -26071,7 +25949,8 @@
     "Tzeltal"
   ],
   "tzj": [
-    "Tz'utujil"
+    "Tz'utujil",
+    "Tzutujil"
   ],
   "tzl": [
     "Talossan"
@@ -26168,7 +26047,8 @@
     "Ugandan Sign Language"
   ],
   "ugo": [
-    "Gong"
+    "Gong",
+    "Ugong"
   ],
   "ugy": [
     "Uruguayan Sign Language"
@@ -26256,7 +26136,8 @@
     "Ulumanda'"
   ],
   "uln": [
-    "Unserdeutsch"
+    "Unserdeutsch",
+    "Rabaul Creole German"
   ],
   "ulu": [
     "Uma' Lung"
@@ -26600,9 +26481,7 @@
     "Doko-Uyanga"
   ],
   "uz": [
-    "Uzbek",
-    "Northern Uzbek",
-    "Southern Uzbek"
+    "Uzbek"
   ],
   "vaa": [
     "Vaagri Booli"
@@ -26618,7 +26497,9 @@
     "Varhadi-Nagpuri"
   ],
   "vai": [
-    "Vai"
+    "Vai",
+    "Gallinas",
+    "Vy"
   ],
   "vaj": [
     "Sekele",
@@ -26908,11 +26789,7 @@
     "Va"
   ],
   "wa": [
-    "Walloon",
-    "Liégeois",
-    "Namurois",
-    "Wallo-Picard",
-    "Wallo-Lorrain"
+    "Walloon"
   ],
   "waa": [
     "Walla Walla"
@@ -26974,7 +26851,10 @@
     "Wogeman"
   ],
   "war": [
-    "Waray-Waray"
+    "Waray-Waray",
+    "Waray",
+    "Winaray",
+    "Samar-Leyte"
   ],
   "was": [
     "Washo"
@@ -27217,7 +27097,10 @@
     "Wik-Mungkan"
   ],
   "win": [
-    "Winnebago"
+    "Winnebago",
+    "Hocak",
+    "Hochank",
+    "Hochunk"
   ],
   "wir": [
     "Wiraféd"
@@ -27358,7 +27241,8 @@
     "Walmajarri"
   ],
   "wmw": [
-    "Mwani"
+    "Mwani",
+    "Kimwani"
   ],
   "wmx": [
     "Womo"
@@ -27409,8 +27293,7 @@
     "Waanyi"
   ],
   "wo": [
-    "Wolof",
-    "Gambian Wolof"
+    "Wolof"
   ],
   "woa": [
     "Tyaraity"
@@ -27624,7 +27507,9 @@
     "Wutung"
   ],
   "wuu": [
-    "Wu"
+    "Wu",
+    "Suzhounese",
+    "Shanghainese"
   ],
   "wuv": [
     "Wuvulu-Aua",
@@ -27703,7 +27588,10 @@
     "Bururong"
   ],
   "wym": [
-    "Vilamovian"
+    "Vilamovian",
+    "Wilamowicean",
+    "Vilamovicean",
+    "Wymysorys"
   ],
   "wyr": [
     "Wayoró",
@@ -27717,7 +27605,10 @@
     "Western Fijian"
   ],
   "xaa": [
-    "Andalusian Arabic"
+    "Andalusian Arabic",
+    "Andalusi Arabic",
+    "Moorish Arabic",
+    "Spanish Arabic"
   ],
   "xab": [
     "Sambe"
@@ -27798,7 +27689,10 @@
     "Lower Burdekin"
   ],
   "xbc": [
-    "Bactrian"
+    "Bactrian",
+    "Greco-Bactrian",
+    "Kushan",
+    "Kushano-Bactrian"
   ],
   "xbd": [
     "Bindal"
@@ -27857,7 +27751,10 @@
     "Chemakum"
   ],
   "xcl": [
-    "Old Armenian"
+    "Old Armenian",
+    "Classical Armenian",
+    "Liturgical Armenian",
+    "Grabar"
   ],
   "xcm": [
     "Comecrudo"
@@ -28917,7 +28814,10 @@
     "Kiyaka"
   ],
   "yag": [
-    "Yámana"
+    "Yámana",
+    "Yagán",
+    "Yahgan",
+    "Yaghan"
   ],
   "yah": [
     "Yazghulami",
@@ -29129,25 +29029,7 @@
     "Hlepho Phowa"
   ],
   "yi": [
-    "Yiddish",
-    "American Yiddish",
-    "Daytshmerish Yiddish",
-    "Mideastern Yiddish",
-    "Galitzish",
-    "Northeastern Yiddish",
-    "Litvish",
-    "Lithuanian Yiddish",
-    "Northwestern Yiddish",
-    "Netherlandic Yiddish",
-    "Polish Yiddish",
-    "Poylish",
-    "South African Yiddish",
-    "Southeastern Yiddish",
-    "Ukrainian Yiddish",
-    "Ukrainish",
-    "Southwestern Yiddish",
-    "Judeo-Alsatian",
-    "Udmurtish"
+    "Yiddish"
   ],
   "yia": [
     "Yinggarda"
@@ -29553,7 +29435,9 @@
     "Yuchi"
   ],
   "yue": [
-    "Cantonese"
+    "Cantonese",
+    "Yue",
+    "Yüeh"
   ],
   "yuf": [
     "Havasupai-Walapai-Yavapai"
@@ -29701,31 +29585,7 @@
     "Zokhuo"
   ],
   "za": [
-    "Zhuang",
-    "Chongzuo Zhuang",
-    "Guibei Zhuang",
-    "Guibian Zhuang",
-    "Central Hongshuihe Zhuang",
-    "Eastern Hongshuihe Zhuang",
-    "Lianshan Zhuang",
-    "Liujiang Zhuang",
-    "Liuqian Zhuang",
-    "Min Zhuang",
-    "Minz Zhuang",
-    "Nong Zhuang",
-    "Qiubei Zhuang",
-    "Shangsi Zhuang",
-    "Dai Zhuang",
-    "Wenma",
-    "Wenma Thu",
-    "Wenma Zhuang",
-    "Yang Zhuang",
-    "Yongbei Zhuang",
-    "Wuming Zhuang",
-    "Standard Zhuang",
-    "Yongnan Zhuang",
-    "Youjiang Zhuang",
-    "Zuojiang Zhuang"
+    "Zhuang"
   ],
   "zaa": [
     "Sierra de Juárez Zapotec",
@@ -29868,8 +29728,7 @@
     "Zaba"
   ],
   "zhi": [
-    "Zhire",
-    "Shang"
+    "Zhire"
   ],
   "zhn": [
     "Nong Zhuang",
@@ -30206,8 +30065,7 @@
   ],
   "zro": [
     "Záparo",
-    "Zaparo",
-    "Conambo"
+    "Zaparo"
   ],
   "zrs": [
     "Mairasi"
