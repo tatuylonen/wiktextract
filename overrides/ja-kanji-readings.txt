@@ -1,4 +1,4 @@
-TITLE: Module.ja-kanji-readings
+TITLE: Module:ja-kanji-readings
 local export = {}
 
 local titleObj = mw.title.getCurrentTitle()
