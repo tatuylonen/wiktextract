@@ -102,7 +102,7 @@ part_of_speech_map = {
         "debug": "misspelled subtitle",
     },
     "contraction": {
-        "pos": "abbrev",
+        "pos": "contraction",
         "tags": ["abbreviation"],
     },
     "converb": {
