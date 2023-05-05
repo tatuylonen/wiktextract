@@ -13,9 +13,9 @@ import re
 import sys
 import html
 import json
+import logging
 import pstats
 import hashlib
-import cProfile
 import argparse
 import collections
 from wikitextprocessor import Wtp
@@ -33,6 +33,8 @@ IGNORE_PREFIXES = None
 
 # Pages with these prefixes are captured.
 RECOGNIZED_PREFIXES = None
+RECOGNIZED_NAMESPACE_NAMES = ["Main", "Category", "Appendix", "Project", "Thesaurus",
+                              "Module", "Template", "Reconstruction"]
 
 
 def init_prefixes(ctx: Wtp) -> None:
@@ -52,21 +54,15 @@ def init_prefixes(ctx: Wtp) -> None:
         }
     if RECOGNIZED_PREFIXES is None:
         RECOGNIZED_PREFIXES = {
-            ctx.NAMESPACE_DATA.get("Category", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Appendix", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Project", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Thesaurus", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Module", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Template", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Reconstruction", {}).get("name"),
+            ctx.NAMESPACE_DATA.get(name, {}).get("name")
+            for name in RECOGNIZED_NAMESPACE_NAMES if name != "Main"
         }
 
 
-def capture_page(model, orig_title, text, pages_dir):
+def capture_page(orig_title, text, pages_dir):
     """Checks if the page needs special handling (and maybe saving).
     Returns True if the page should be processed normally as a
     dictionary entry."""
-    assert isinstance(model, str)
     assert isinstance(orig_title, str)
     assert isinstance(text, str)
     assert pages_dir is None or isinstance(pages_dir, str)
@@ -157,8 +153,8 @@ def main():
                         help="Print statistics")
     parser.add_argument("--page", type=str,
                         help="Parse a single Wiktionary page (for debugging)")
-    parser.add_argument("--cache", type=str,
-                        help="File prefix where phase1 results are saved; "
+    parser.add_argument("--db-path", type=str,
+                        help="File path of saved database; "
                         "speeds up processing a single page tremendously")
     parser.add_argument("--num-threads", type=int, default=None,
                         help="Number of parallel processes (default: #cpus)")
@@ -187,7 +183,11 @@ def main():
                     help="Extract expanded tables in this file (for test data)")
     parser.add_argument("--debug-cell-text", type=str, default=None,
                     help="Print out debug messages when encountering this text")
+    parser.add_argument("--quiet", default=False, action="store_true")
     args = parser.parse_args()
+
+    if not args.quiet:
+        logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", level=logging.DEBUG)
 
     if args.debug_cell_text:
         # importing debug_cell_text from wiktextract.inflection
@@ -286,15 +286,10 @@ def main():
         lang_names_re = re.compile(lang_names_re)
 
     # Create expansion context
-    ctx = Wtp(cache_file=args.cache, num_threads=args.num_threads,
+    ctx = Wtp(db_path=args.db_path, num_threads=args.num_threads,
               lang_code=args.dump_file_language_code,
-              languages_by_code=config.LANGUAGES_BY_CODE)
-    ctx.set_template_overrides(template_override_fns)
-    # We are now having problems with "Module:no globals", which causes
-    # infinite Python recursion on a number of pages (it may be a sandbox
-    # problem that it is not properly reset).  Override that debugging module
-    # to be empty.
-    ctx.add_page("Scribunto", "Module:no globals", "", transient=True)
+              languages_by_code=config.LANGUAGES_BY_CODE,
+              template_override_funcs=template_override_fns)
 
     # If --list-languages has been specified, just print the list of supported
     # languages
@@ -304,38 +299,11 @@ def main():
             print(f"    {lang_name}: {lang_code}")
         sys.exit(0)
 
-    if not args.path and not args.cache:
+    if not args.path and not args.db_path:
         print("The PATH argument for wiktionary dump file is normally "
               "mandatory.")
-        print("Alternatively, --cache with --page can be used.")
+        print("Alternatively, --db-path with --page can be used.")
         sys.exit(1)
-
-    if args.override:
-        for path in args.override:
-            filepaths = [path]
-            if os.path.isdir(path):
-                filepaths = []
-                for filename in os.listdir(path):
-                    fpath = os.path.join(path, filename)
-                    if os.path.isfile(fpath):
-                        filepaths.append(fpath)
-            print("Override files: ", filepaths)
-            for filepath in filepaths:
-                with open(filepath, "r", encoding="utf-8") as f:
-                    text = f.read()
-                m = re.match(r"(?s)^TITLE: ([^\n]*)\n", text)
-                if m:
-                    title = m.group(1)
-                    text = text[m.end():]
-                else:
-                    print("First line of file supplied with --override "
-                          "must be "
-                          "\"TITLE: <page title>\"")
-                    print("(The page title for this would normally start "
-                          "with Module:")
-                    sys.exit(1)
-                # Load it as a transient page, overriding the normal page
-                ctx.add_page("Scribunto", title, text, transient=True)
 
     def word_cb(data):
         nonlocal word_count
@@ -350,8 +318,8 @@ def main():
             if not out_path or out_path == "-" or word_count % 1000 == 0:
                 out_f.flush()
 
-    def capture_cb(model, title, text):
-        return capture_page(model, title, text, args.pages_dir)
+    def capture_cb(title, text):
+        return capture_page(title, text, args.pages_dir)
 
     # load redirects to ctx if given
     if args.redirects_file:
@@ -359,6 +327,8 @@ def main():
             config.redirects = json.load(f)
 
     if args.profile:
+        import cProfile
+
         pr = cProfile.Profile()
         pr.enable()
 
@@ -366,16 +336,23 @@ def main():
 
     try:
         if args.path:
+            namespace_ids = {
+                ctx.NAMESPACE_DATA.get(name, {}).get("id")
+                for name in RECOGNIZED_NAMESPACE_NAMES
+            }
             # Parse the normal full Wiktionary data dump
             parse_wiktionary(ctx, args.path, config, word_cb, capture_cb,
                              (args.page is not None),  # phase1_only
                              (args.pages_dir is not None and
-                              not args.out))  # dont_parse
+                              not args.out), # dont_parse
+                             namespace_ids,
+                             args.override,
+                             ctx.saved_page_nums() > 0)
 
         if args.page:
             # Parse a single Wiktionary page (extracted using --pages-dir)
-            if not args.cache:
-                print("NOTE: you probably want to use --cache with --page or "
+            if not args.db_path:
+                print("NOTE: you probably want to use --db-path with --page or "
                       "otherwise processing will be very slow.")
             # Load the page wikitext from the given file
             with open(args.page, "r", encoding="utf-8") as f:

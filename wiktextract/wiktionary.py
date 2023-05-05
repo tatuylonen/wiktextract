@@ -5,12 +5,18 @@
 # Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import io
+import logging
 import re
 import sys
 import time
 import tarfile
 import collections
+
+from pathlib import Path
+from typing import Optional, List, Set
+
 from wikitextprocessor import Wtp
+from wikitextprocessor.db_models import Page
 from .page import (parse_page, additional_expand_templates)
 from .config import WiktionaryConfig
 from .thesaurus import extract_thesaurus_data
@@ -52,23 +58,23 @@ def init_special_prefixes(ctx: Wtp) -> None:
         }
 
 
-def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
+def page_handler(ctx, page: Page, capture_cb, config_kwargs,
                  thesaurus_data, dont_parse):
     # Make sure there are no newlines or other strange characters in the
     # title.  They could cause security problems at several post-processing
     # steps.
     init_special_prefixes(ctx)
-    title = re.sub(r"[\s\000-\037]+", " ", title)
+    title = re.sub(r"[\s\000-\037]+", " ", page.title)
     title = title.strip()
-    if capture_cb and not capture_cb(model, title, text):
+    if capture_cb and not capture_cb(title, page.body):
         return None
     if dont_parse:
         return None
-    if model == "redirect":
+    if page.redirect_to is not None:
         config1 = WiktionaryConfig()
-        ret = [{"title": title, "redirect": text}]
+        ret = [{"title": title, "redirect": page.redirect_to}]
     else:
-        if model != "wikitext":
+        if page.model != "wikitext":
             return None
         idx = title.find(":")
         if idx >= 0:
@@ -91,7 +97,7 @@ def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
         config1 = WiktionaryConfig(**config_kwargs)
         config1.thesaurus_data = thesaurus_data
         start_t = time.time()
-        ret = parse_page(ctx, title, text, config1)
+        ret = parse_page(ctx, title, page.body, config1)
         dur = time.time() - start_t
         if dur > 100:
             print("====== WARNING: PARSING PAGE TOOK {:.1f}s: {}"
@@ -102,19 +108,17 @@ def page_handler(ctx, model, title, text, capture_cb, config_kwargs,
     return (ret, stats)
 
 
-def parse_wiktionary(ctx, path, config, word_cb, capture_cb,
-                     phase1_only, dont_parse):
+def parse_wiktionary(ctx: Wtp, path: str, config: WiktionaryConfig, word_cb, capture_cb,
+                     phase1_only: bool, dont_parse: bool, namespace_ids: Set[int],
+                     override_folders: Optional[List[str]] = None,
+                     skip_extract_dump: bool = False):
     """Parses Wiktionary from the dump file ``path`` (which should point
     to a "enwiktionary-<date>-pages-articles.xml.bz2" file.  This
     calls ``capture_cb(title)`` for each raw page (if provided), and
     if it returns True, and calls ``word_cb(data)`` for all words
     defined for languages in ``languages``."""
-    assert isinstance(ctx, Wtp)
-    assert isinstance(path, str)
-    assert isinstance(config, WiktionaryConfig)
     assert callable(word_cb)
     assert capture_cb is None or callable(capture_cb)
-    assert phase1_only in (True, False)
     capture_language_codes = config.capture_language_codes
     if capture_language_codes is not None:
         assert isinstance(capture_language_codes, (list, tuple, set))
@@ -123,28 +127,25 @@ def parse_wiktionary(ctx, path, config, word_cb, capture_cb,
 
     config_kwargs = config.to_kwargs()
 
-    if not ctx.quiet:
-        print("First phase - extracting templates, macros, and pages")
-        sys.stdout.flush()
-
-    def page_cb(model, title, text):
-        return page_handler(ctx, model, title, text, capture_cb, config_kwargs)
-
-
     # langhd is needed for pre-expanding language heading templates in the
     # Chinese Wiktionary dump file: https://zh.wiktionary.org/wiki/Template:-en-
     # Move this to lang_specific
     if ctx.lang_code == "zh":
         additional_expand_templates.add("langhd")
-    
-    list(ctx.process(path, None, phase1_only=True))
+
+    if not skip_extract_dump:
+        logging.info("First phase - extracting templates, macros, and pages")
+        if override_folders is not None:
+            override_folders = [Path(folder) for folder in override_folders]
+        list(ctx.process(path, None, namespace_ids, phase1_only=True,
+                         override_folders=override_folders))
     if phase1_only:
+        ctx.close_db_session()
+        ctx.dispose_db_engine()
         return []
 
     # Phase 2 - process the pages using the user-supplied callback
-    if not ctx.quiet:
-        print("Second phase - processing pages")
-        sys.stdout.flush()
+    logging.info("Second phase - processing pages")
 
     return reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse)
 
@@ -164,8 +165,8 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
     thesaurus_data = extract_thesaurus_data(ctx, config)
 
     # Then perform the main parsing pass.
-    def page_cb(model, title, text):
-        return page_handler(ctx, model, title, text, capture_cb, config_kwargs,
+    def page_cb(page: Page):
+        return page_handler(ctx, page, capture_cb, config_kwargs,
                             thesaurus_data, dont_parse)
 
     emitted = set()
@@ -182,8 +183,7 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
     # Emit words that occur in thesaurus as main words but for which
     # Wiktionary has no word in the main namespace. This seems to happen
     # sometimes.
-    print("Emitting words that only occur in thesaurus")
-    sys.stdout.flush()
+    logging.info("Emitting words that only occur in thesaurus")
     for (word, lang), linkages in thesaurus_data.items():
         pos_ht = collections.defaultdict(list)
         for x in linkages:
@@ -227,8 +227,10 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
                 "source": "thesaurus",
             }
             word_cb(data)
-    print("Reprocessing wiktionary complete")
-    sys.stdout.flush()
+
+    ctx.close_db_session()
+    ctx.dispose_db_engine()
+    logging.info("Reprocessing wiktionary complete")
 
 
 def extract_namespace(ctx, namespace, path):
