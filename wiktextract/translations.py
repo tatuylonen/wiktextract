@@ -109,7 +109,6 @@ script_and_dialect_names = set([
     "Fascian",  # Ladin
     "Fodom",  # Ladin
     "Gherdëina",  # Ladin
-    "Laki",  # Variant of Kurdish
     "Anbarani",  # Variant of Talysh
     "Asalemi",  # Variant of Talysh
     "Alemannic German",  # Variant of German
@@ -132,9 +131,6 @@ script_and_dialect_names = set([
     "Tashelhit",  # Variant of Berber
     "Bokmål",  # Variant of Norwegian
     "Nynorsk",  # Variant of Norwegian
-    "Inari",  # Variant of Sami
-    "Pite",  # Variant of Sami
-    "Skolt",  # Variant of Sami
     "Mycenaean",  # Variant of Greek
     # Language varieties
     "Ancient",
@@ -343,8 +339,29 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
     tags = []
     if m:
         sublang = m.group(1).strip()
+        language_name_variations = list()
+        if lang and sublang:
+            lang_sublang = lang + " " + sublang
+            sublang_lang = sublang + " " + lang
+            language_name_variations.extend(
+                (lang_sublang, sublang_lang,
+                 lang_sublang.replace(" ", "-"),
+                 sublang_lang.replace(" ", "-"),
+                 )
+            )
+        if " " in sublang:
+            language_name_variations.append(sublang.replace(" ", "-"))
+        if "-" in sublang:
+            language_name_variations.append(sublang.replace("-", " "))
+
         if lang is None:
             lang = sublang
+        elif (lang_sublang and
+                any((captured_lang := lang_comb) in config.LANGUAGES_BY_NAME
+                    # Python 3.8: catch the value of lang_comb with :=
+                    for lang_comb in language_name_variations)
+              ):
+            lang = captured_lang
         elif sublang in script_and_dialect_names:
             # If the second-level name is a script name, add it as
             # tag and keep the top-level language.
@@ -358,16 +375,8 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             # separate language codes, so additional langcode
             # removal tricks may need to be played below.
             tags.extend(tr_second_tagmap[sublang].split())
-        elif lang + " " + sublang in config.LANGUAGES_BY_NAME:
-            lang = lang + " " + sublang
-        elif sublang + " " + lang in config.LANGUAGES_BY_NAME:
-            lang = sublang + " " + lang  # E.g., Ancient Egyptian
         elif sublang in config.LANGUAGES_BY_NAME:
             lang = sublang
-        elif sublang.replace(" ", "-") in config.LANGUAGES_BY_NAME:
-            lang = sublang.replace(" ", "-")
-        elif sublang.replace("-", " ") in config.LANGUAGES_BY_NAME:
-            lang = sublang.replace("-", " ")
         elif sublang[0].isupper() and classify_desc(sublang) == "tags":
             # Interpret it as a tag
             tags.append(sublang)

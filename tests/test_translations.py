@@ -121,9 +121,9 @@ class TrTests(unittest.TestCase):
     def test_tr8(self):
         data = self.runtr("Mandarin: 是 (rrr)", lang="Chinese")
         self.assertEqual(data, {"translations": [
-            {"word": "是", "roman": "rrr", "lang": "Chinese", "code": "zh",
-             "tags": ["Mandarin"]},
-            ]})
+            {"word": "是", "roman": "rrr", "lang": "Mandarin Chinese",
+             "code": "cmn",
+             }]})
 
     def test_tr9(self):
         data = self.runtr("Mandarin: 寺 (zh) (sì) (Buddhist)",
@@ -292,8 +292,8 @@ class TrTests(unittest.TestCase):
         data = self.runtr("  Ancient: foo", lang="Greek")
         self.assertEqual(self.ctx.debugs, [])
         self.assertEqual(data, {"translations": [
-            {"word": "foo", "lang": "Greek", "code": "el",
-             "tags": ["Ancient"]}]})
+            {"word": "foo", "lang": "Ancient Greek", "code": "grc",
+             }]})
 
     def test_tr27(self):
         data = self.runtr("  Proto-Germanic: *foo", lang="Proto-Germanic",
