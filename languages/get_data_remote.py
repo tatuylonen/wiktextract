@@ -1,3 +1,20 @@
+# Fetch wiktionary language data remotely. This script is an alternative to
+# languages/get_data.py. Its output should mostly be the same, but because this
+# script relies on what is exposed through templates that are invokable through
+# the API, or on manual parsing of pages, it will generally be more reliable to
+# interact natively with the lua modules via languages/get_data.py. See there
+# for more info.
+#
+# Should be called from the root directory of the wiktextract repo.
+#
+# Usage:
+#
+# python languages/get_data_remote.py subdomain lang_code
+#
+# E.g.:
+#
+# python languages/get_data_remote.py en en
+
 import argparse
 import csv
 import json
@@ -165,13 +182,12 @@ def main():
     parser.add_argument("lang_code", help="Wiktionary language code")
     args = parser.parse_args()
 
-    match args.lang_code:
-        case "en" | "zh":
-            parse_csv(args.sub_domain, args.lang_code)
-        case "fr":
-            get_fr_languages()
-        case "cs" | "sk":
-            get_languages_cs_sk(args.lang_code)
+    if args.lang_code in ("en", "zh"):
+        parse_csv(args.sub_domain, args.lang_code)
+    elif args.lang_code == "fr":
+        get_fr_languages()
+    elif args.lang_code in ("cs", "sk"):
+        get_languages_cs_sk(args.lang_code)
 
 
 if __name__ == "__main__":

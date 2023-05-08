@@ -600,7 +600,7 @@
     "Altaï du Sud"
   ],
   "alu": [
-    "’are’are"
+    "’Are’are"
   ],
   "alv": [
     "Langues atlantico-congolaises"
@@ -664,6 +664,9 @@
   ],
   "amr": [
     "Amarakaeri"
+  ],
+  "ams": [
+    "Amami du Sud"
   ],
   "amt": [
     "Amto"
@@ -1823,6 +1826,9 @@
   "bhw": [
     "Biak"
   ],
+  "bhy": [
+    "Bhele"
+  ],
   "bhz": [
     "Bada (Indonésie)"
   ],
@@ -2162,6 +2168,9 @@
   "bol": [
     "Bole"
   ],
+  "bolze": [
+    "Bolze"
+  ],
   "bom": [
     "Birom"
   ],
@@ -2473,6 +2482,9 @@
   ],
   "but": [
     "Bungain"
+  ],
+  "buu": [
+    "Budu"
   ],
   "buw": [
     "Bubi"
@@ -3467,6 +3479,9 @@
   "csg": [
     "Langue des signes chilienne"
   ],
+  "csh": [
+    "Asho"
+  ],
   "csi": [
     "Miwok de la côte"
   ],
@@ -3616,6 +3631,9 @@
   ],
   "cvn": [
     "Chinantèque de Valle Nacional"
+  ],
+  "cwa": [
+    "Kabwa"
   ],
   "cwd": [
     "Cri des bois"
@@ -4066,6 +4084,9 @@
   ],
   "dnt": [
     "Dani de Mid Grand Valley"
+  ],
+  "dnu": [
+    "Danau"
   ],
   "dnw": [
     "Dani de l’Ouest"
@@ -5352,7 +5373,7 @@
     "Kpellé de Guinée"
   ],
   "gku": [
-    "ǂungkue"
+    "ǂUngkue"
   ],
   "gl": [
     "Galicien"
@@ -6056,6 +6077,9 @@
   "hno": [
     "Hindko du Nord"
   ],
+  "hnu": [
+    "Pong"
+  ],
   "ho": [
     "Hiri motou"
   ],
@@ -6171,7 +6195,7 @@
     "Huambisa"
   ],
   "huc": [
-    "ǂhoan"
+    "ǂHoan"
   ],
   "hue": [
     "Huave de San Francisco del Mar"
@@ -6262,6 +6286,9 @@
   ],
   "ibb": [
     "Ibibio"
+  ],
+  "ibd": [
+    "Iwaidja"
   ],
   "ibe": [
     "Akpès"
@@ -7091,6 +7118,9 @@
   "kcu": [
     "Kami (Tanzanie)"
   ],
+  "kcv": [
+    "Kete"
+  ],
   "kcx": [
     "Kachama-ganjule"
   ],
@@ -7718,6 +7748,9 @@
   "knx": [
     "Kendayan"
   ],
+  "kny": [
+    "Kanyok"
+  ],
   "ko": [
     "Coréen"
   ],
@@ -8028,7 +8061,7 @@
     "Kwinsu"
   ],
   "kud": [
-    "’auhelawa"
+    "’Auhelawa"
   ],
   "kue": [
     "Kuman"
@@ -8144,6 +8177,9 @@
   "kwe": [
     "Kwerba"
   ],
+  "kwf": [
+    "Kwara’ae"
+  ],
   "kwg": [
     "Démé"
   ],
@@ -8197,6 +8233,9 @@
   ],
   "kxj": [
     "Koulfa"
+  ],
+  "kxm": [
+    "Khmer du Nord"
   ],
   "kxn": [
     "Melanau kanowit"
@@ -8272,6 +8311,9 @@
   ],
   "kzf": [
     "Kaili de Da’a"
+  ],
+  "kzg": [
+    "Kikaï"
   ],
   "kzh": [
     "Dongolawi-kenzi"
@@ -8997,7 +9039,7 @@
     "Lutachoni"
   ],
   "lu": [
-    "Louba-katanga"
+    "Kiluba"
   ],
   "lua": [
     "Luba-lulua"
@@ -9024,7 +9066,7 @@
     "Olu’bo"
   ],
   "lun": [
-    "Lounda"
+    "Lunda"
   ],
   "luo": [
     "Luo (Kenya, Tanzanie)"
@@ -9329,6 +9371,9 @@
   "mdk": [
     "Mangbutu"
   ],
+  "mdm": [
+    "Mayogo"
+  ],
   "mdp": [
     "Mbala"
   ],
@@ -9463,6 +9508,9 @@
   ],
   "mfr": [
     "Marithiel"
+  ],
+  "mfv": [
+    "Manjak"
   ],
   "mfx": [
     "Melo"
@@ -9869,6 +9917,9 @@
   "mmw": [
     "Emae"
   ],
+  "mmx": [
+    "Madak"
+  ],
   "mmy": [
     "Migaama"
   ],
@@ -9892,6 +9943,9 @@
   ],
   "mnf": [
     "Mundani"
+  ],
+  "mng": [
+    "Mnong de l’Est"
   ],
   "mnh": [
     "Mono (République démocratique du Congo)"
@@ -10607,6 +10661,9 @@
   "mzv": [
     "Manza"
   ],
+  "mzw": [
+    "Deg"
+  ],
   "na": [
     "Nauruan"
   ],
@@ -11060,6 +11117,9 @@
   "nid": [
     "Ngandi"
   ],
+  "nie": [
+    "Niellim"
+  ],
   "nif": [
     "Nek"
   ],
@@ -11244,7 +11304,7 @@
     "Manangba"
   ],
   "nmn": [
-    "ǃxóõ"
+    "ǃXóõ"
   ],
   "nmq": [
     "Nambya"
@@ -11882,6 +11942,9 @@
   "okm": [
     "Moyen coréen"
   ],
+  "okn": [
+    "Oki-no-erabu"
+  ],
   "oko": [
     "Ancien coréen"
   ],
@@ -11968,6 +12031,9 @@
   ],
   "omv": [
     "Langues omotiques"
+  ],
+  "omx": [
+    "Vieux môn"
   ],
   "ona": [
     "Selknam"
@@ -12171,7 +12237,7 @@
     "Ouma"
   ],
   "oun": [
-    "’o’ung"
+    "’O’ung"
   ],
   "ovd": [
     "Elfdalien"
@@ -12569,6 +12635,9 @@
   "pkr": [
     "Kurumba d’Attapady"
   ],
+  "pkt": [
+    "Malieng"
+  ],
   "pku": [
     "Paku"
   ],
@@ -12914,11 +12983,26 @@
   "proto-athapascan": [
     "Proto-athapascan"
   ],
+  "proto-austroasiatique": [
+    "Proto-austroasiatique"
+  ],
   "proto-austronésien": [
     "Proto-austronésien"
   ],
+  "proto-bahnarique": [
+    "Proto-bahnarique"
+  ],
+  "proto-bahnarique central": [
+    "Proto-bahnarique central"
+  ],
   "proto-bahnarique de l’Ouest": [
     "Proto-bahnarique de l’Ouest"
+  ],
+  "proto-bahnarique du Nord": [
+    "Proto-bahnarique du Nord"
+  ],
+  "proto-bahnarique du Sud": [
+    "Proto-bahnarique du Sud"
   ],
   "proto-balte": [
     "Proto-balte"
@@ -12946,6 +13030,9 @@
   ],
   "proto-chamito-sémitique": [
     "Proto-afro-asiatique"
+  ],
+  "proto-coréen": [
+    "Proto-coréen"
   ],
   "proto-costanoan": [
     "Proto-costanoan"
@@ -12977,6 +13064,9 @@
   "proto-hrusique": [
     "Proto-hrusique"
   ],
+  "proto-ienisseïen": [
+    "Proto-ienisseïen"
+  ],
   "proto-indo-aryen": [
     "Proto-indo-aryen"
   ],
@@ -12992,11 +13082,20 @@
   "proto-italique": [
     "Proto-italique"
   ],
+  "proto-japonique": [
+    "Proto-japonique"
+  ],
+  "proto-japonique insulaire": [
+    "Proto-japonique insulaire"
+  ],
   "proto-katuique": [
     "Proto-katuique"
   ],
   "proto-keresan": [
     "Proto-keresan"
+  ],
+  "proto-khasique": [
+    "Proto-khasique"
   ],
   "proto-khmer": [
     "Proto-khmer"
@@ -13052,6 +13151,9 @@
   "proto-môn-khmer": [
     "Proto-môn-khmer"
   ],
+  "proto-mônique": [
+    "Proto-mônique"
+  ],
   "proto-nahuatl": [
     "Proto-nahuatl"
   ],
@@ -13060,6 +13162,9 @@
   ],
   "proto-nhanda-kartu": [
     "Proto-nhanda-kartu"
+  ],
+  "proto-nivkh": [
+    "Proto-nivkh"
   ],
   "proto-norrois": [
     "Proto-norrois"
@@ -13082,6 +13187,9 @@
   "proto-ouralien": [
     "Proto-ouralien"
   ],
+  "proto-palaungique": [
+    "Proto-palaungique"
+  ],
   "proto-pama-nyungan": [
     "Proto-pama-nyungan"
   ],
@@ -13094,8 +13202,20 @@
   "proto-pomo": [
     "Proto-pomo"
   ],
+  "proto-pong": [
+    "Proto-pong"
+  ],
   "proto-pwo": [
     "Proto-pwo"
+  ],
+  "proto-ryūkyū": [
+    "Proto-ryūkyū"
+  ],
+  "proto-ryūkyū du Nord": [
+    "Proto-ryūkyū du Nord"
+  ],
+  "proto-ryūkyū du Sud": [
+    "Proto-ryūkyū méridional"
   ],
   "proto-same": [
     "Proto-same"
@@ -13124,6 +13244,9 @@
   "proto-sémitique": [
     "Proto-sémitique"
   ],
+  "proto-sérère-peul": [
+    "Proto-sérère-peul"
+  ],
   "proto-talodi": [
     "Proto-talodi"
   ],
@@ -13139,6 +13262,12 @@
   "proto-tibéto-birman": [
     "Proto-tibéto-birman"
   ],
+  "proto-toungouse": [
+    "Proto-toungouse"
+  ],
+  "proto-trans-néo-guinéen": [
+    "Proto-trans-néo-guinéen"
+  ],
   "proto-tupi-guarani": [
     "Proto-tupi-guarani"
   ],
@@ -13153,6 +13282,12 @@
   ],
   "proto-viêt-muong": [
     "Proto-viêt-muong"
+  ],
+  "proto-wa-lawa": [
+    "Proto-wa-lawa"
+  ],
+  "proto-waïque": [
+    "Proto-waïque"
   ],
   "proto-wintuan": [
     "Proto-wintuan"
@@ -13682,6 +13817,9 @@
   "rna": [
     "Runa"
   ],
+  "rnd": [
+    "Ruund"
+  ],
   "rng": [
     "Ronga"
   ],
@@ -13713,7 +13851,7 @@
     "Aroumain"
   ],
   "roa-tara": [
-    "Tarantino"
+    "Tarentin"
   ],
   "rob": [
     "Tae’"
@@ -13759,6 +13897,9 @@
   ],
   "rou": [
     "Rounga"
+  ],
+  "rouran": [
+    "Rouran"
   ],
   "row": [
     "Dela-oenale"
@@ -13857,7 +13998,7 @@
     "Yaeyama"
   ],
   "ryu": [
-    "Okinawais"
+    "Okinawaïen"
   ],
   "sa": [
     "Sanskrit"
@@ -14173,6 +14314,9 @@
   ],
   "sez": [
     "Senthang chin"
+  ],
+  "sfb": [
+    "Langue des signes de Belgique francophone"
   ],
   "sfe": [
     "Subanen de l’Est"
@@ -15668,6 +15812,9 @@
   "tkl": [
     "Tokelauien"
   ],
+  "tkn": [
+    "Toku-no-shima"
+  ],
   "tkp": [
     "Tikopia"
   ],
@@ -15869,6 +16016,9 @@
   "toj": [
     "Tojolabal"
   ],
+  "tok": [
+    "Toki pona"
+  ],
   "tokipona": [
     "Toki pona"
   ],
@@ -15937,6 +16087,9 @@
   ],
   "tpl": [
     "Me’phaa de Tlacoapa"
+  ],
+  "tpm": [
+    "Tampulma"
   ],
   "tpn": [
     "Tupinambá"
@@ -16397,6 +16550,9 @@
   "typ": [
     "Thaypan"
   ],
+  "tyt": [
+    "Tày tac"
+  ],
   "tyv": [
     "Touvain"
   ],
@@ -16721,6 +16877,9 @@
   "vaf": [
     "Vafsi"
   ],
+  "vag": [
+    "Vagla"
+  ],
   "vai": [
     "Vaï"
   ],
@@ -16781,6 +16940,9 @@
   "vi": [
     "Vietnamien"
   ],
+  "vi-Hani": [
+    "Vietnamien"
+  ],
   "vi-chunho": [
     "Vietnamien"
   ],
@@ -16792,6 +16954,9 @@
   ],
   "vid": [
     "Vidunda"
+  ],
+  "vieil okinawaïen": [
+    "Vieil okinawaïen"
   ],
   "vieil écossais": [
     "Vieil écossais"
@@ -17454,7 +17619,7 @@
     "Kalmouk"
   ],
   "xam": [
-    "ǀxam"
+    "ǀXam"
   ],
   "xan": [
     "Xamtanga"
@@ -17498,6 +17663,9 @@
   "xbr": [
     "Kambera"
   ],
+  "xcb": [
+    "Cambrien"
+  ],
   "xce": [
     "Celtibère"
   ],
@@ -17506,6 +17674,9 @@
   ],
   "xcl": [
     "Arménien ancien"
+  ],
+  "xcm": [
+    "Comecrudo"
   ],
   "xcn": [
     "Cotoname"
@@ -17521,6 +17692,9 @@
   ],
   "xcu": [
     "Couronien"
+  ],
+  "xcw": [
+    "Coahuilteco"
   ],
   "xdc": [
     "Dace"
@@ -17544,7 +17718,7 @@
     "Hdi"
   ],
   "xeg": [
-    "ǁxegwi"
+    "ǁXegwi"
   ],
   "xem": [
     "Kembayan"
@@ -17771,6 +17945,9 @@
   "xpu": [
     "Punique"
   ],
+  "xpy": [
+    "Puyo"
+  ],
   "xra": [
     "Krahô"
   ],
@@ -17875,6 +18052,9 @@
   ],
   "xud": [
     "Umiida"
+  ],
+  "xug": [
+    "Kunigami"
   ],
   "xuj": [
     "Jennu kurumba"
@@ -18245,6 +18425,9 @@
   "yob": [
     "Yoba"
   ],
+  "yoi": [
+    "Yonaguni"
+  ],
   "yok-chk": [
     "Chukchansi"
   ],
@@ -18295,6 +18478,9 @@
   ],
   "yot": [
     "Yotti"
+  ],
+  "yox": [
+    "Yoron"
   ],
   "yoy": [
     "Yoy"
@@ -18635,6 +18821,9 @@
   "zkr": [
     "Zakhring"
   ],
+  "zkt": [
+    "Khitan"
+  ],
   "zku": [
     "Kaurna"
   ],
@@ -18796,6 +18985,9 @@
   ],
   "zpz": [
     "Zapotèque de Texmelucan"
+  ],
+  "zra": [
+    "Gaya"
   ],
   "zrn": [
     "Zirenkel"
