@@ -17,6 +17,8 @@ from .form_descriptions import (classify_desc, decode_tags,
 # E.g., "Apache" is not a language name, but "Apachean" is.
 tr_langname_map = {
     "Apache": "Apachean",
+    "Lutshootseed": "Lushootseed",
+    "Old Assamese": "Early Assamese",
 }
 
 # These names will be interpreted as script names or dialect names
@@ -355,6 +357,8 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             language_name_variations.append(sublang.replace("-", " "))
 
         if lang is None:
+            if sublang == "Note":
+                return None
             lang = sublang
         elif (lang_sublang and
                 any((captured_lang := lang_comb) in config.LANGUAGES_BY_NAME
