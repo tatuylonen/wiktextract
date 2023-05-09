@@ -4878,6 +4878,10 @@ xlat_tags_map = {
     "I-II-II": "",
     "I-I-II-I": "",
     "I-III-I-I": "",
+
+    # Mapuzugun/Mapudungun
+    "Raguileo spelling": "Raguileo-Alphabet",
+    "no predicative form": "no-predicative-form",  # diamanten/German
     }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -6502,6 +6506,7 @@ valid_tags = {
     # gender of the person". Bataglia/Italian
     "toneless-final-syllable-variant": "misc",  # zh-pron template stuff
                                                 # 食物/Chinese
+    "no-predicative-form": "misc",  # diamanten/German
 }
 
 for k, v in valid_tags.items():
