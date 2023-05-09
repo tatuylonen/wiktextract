@@ -1115,7 +1115,8 @@ def quote_kept_ruby(ruby_tuples, s):
     for k, r in ruby_tuples:
         ks.append(k)
         rs.append(r)
-    newm = re.compile(r"({})\s*\(*\s*({})\s*\)*".format("|".join(ks), "|".join(rs)))
+    newm = re.compile(r"({})\s*\(*\s*({})\s*\)*".format("|".join(ks),
+                      "|".join(rs)))
     rub_re = re.compile(r"({})"
                         .format(r"|".join(r"{}\(*{}\)*"
                                       .format(k, r) for k, r in ruby_tuples)))
@@ -1128,6 +1129,25 @@ def quote_kept_ruby(ruby_tuples, s):
 def unquote_kept_parens(s):
     """Conerts the quoted parentheses back to normal parentheses."""
     return re.sub(r"__lpar__(.*?)__rpar__", r"(\1)", s)
+
+
+def add_romanization(ctx, data, roman, text, is_reconstruction, head_group,
+                     ruby):
+    tags_lst = ["romanization"]
+    m = re.match(r"([^:]+):(.+)", roman)
+    # This function's purpose is to intercept broken romanizations,
+    # like "Yale: hēnpyeng" style tags. Most romanization styles
+    # are already present as tags, so we can use decode_tags to find
+    # them.
+    if m:
+        tagsets, topics = decode_tags(m.group(1))
+        if tagsets:
+            for tags in tagsets:
+                tags_lst.extend(tags)
+            roman = m.group(2)
+    add_related(ctx, data, tags_lst, [roman],
+                text, True, is_reconstruction, head_group,
+                ruby)
 
 
 def add_related(ctx, data, tags_lst, related, origtext,
@@ -1170,6 +1190,10 @@ def add_related(ctx, data, tags_lst, related, origtext,
                 return
             if ctx.section == "Korean" and re.search(r"^\s*\w*>\w*\s*$", related):
                 # ignore Korean "i>ni" / "라>나" values
+                return
+            if ctx.section == "Burmese" and re.search(r":", related):
+                # ignore Burmese with ":", that is used in Burmese
+                # translitteration of "း", the high-tone visarga.
                 return
             ctx.debug("suspicious related form tags {}: {!r} in {!r}"
                       .format(tags_lst, related, origtext),
@@ -1634,9 +1658,9 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction,
                         classify_desc(titleword) == "other" and
                         not ("categories" in data and desc in data["categories"])):
                         # Assume it to be a romanization
-                        add_related(ctx, data, ["romanization"], [desc],
-                                    text, True, is_reconstruction, head_group,
-                                    ruby)
+                        add_romanization(ctx, data, desc,
+                                        text, is_reconstruction, head_group,
+                                        ruby)
                         have_romanization = True
                         continue
 
@@ -1782,8 +1806,8 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction,
                             classify_desc(paren) == "romanization" and 
                             not ("categories" in data and desc in data["categories"])):
                             for r in split_at_comma_semi(paren, extra=[" or "]):
-                                add_related(ctx, data, ["romanization"], [r],
-                                            text, True, is_reconstruction,
+                                add_romanization(ctx, data, r,
+                                            text, is_reconstruction,
                                             head_group, ruby)
                             have_romanization = True
                             continue
