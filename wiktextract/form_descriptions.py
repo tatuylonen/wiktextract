@@ -1191,7 +1191,9 @@ def add_related(ctx, data, tags_lst, related, origtext,
             if ctx.section == "Korean" and re.search(r"^\s*\w*>\w*\s*$", related):
                 # ignore Korean "i>ni" / "라>나" values
                 return
-            if ctx.section == "Burmese" and re.search(r":", related):
+            if (ctx.section == "Burmese" and
+                "romanization" in tags_lst and
+                re.search(r":", related)):
                 # ignore Burmese with ":", that is used in Burmese
                 # translitteration of "း", the high-tone visarga.
                 return
