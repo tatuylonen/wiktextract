@@ -18,6 +18,7 @@ import pstats
 import hashlib
 import argparse
 import collections
+from pathlib import Path
 from wikitextprocessor import Wtp
 from wiktextract.inflection import set_debug_cell_text
 from wiktextract.template_override import template_override_fns
@@ -354,15 +355,20 @@ def main():
             if not args.db_path:
                 print("NOTE: you probably want to use --db-path with --page or "
                       "otherwise processing will be very slow.")
-            # Load the page wikitext from the given file
-            with open(args.page, "r", encoding="utf-8") as f:
-                text = f.read()
-            m = re.match(r"(?s)^TITLE: ([^\n]*)\n", text)
-            if m:
-                title = m.group(1)
-                text = text[m.end():]
+            if Path(args.page).exists():
+                # Load the page wikitext from the given file
+                with open(args.page, encoding="utf-8") as f:
+                    first_line = f.readline()
+                    if first_line.startswith("TITLE: "):
+                        title = first_line[7:].strip()
+                    else:
+                        title = "Test page"
+                        f.seek(0)
+                    text = f.read()
             else:
-                title = "Test page"
+                # Get page content from database
+                title = args.page
+                text = ctx.read_by_title(title)
             # Extract Thesaurus data (this is a bit slow for a single page, but
             # needed for debugging linkages with thesaurus extraction).  This
             # is disabled by default to speed up single page testing.

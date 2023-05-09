@@ -254,7 +254,8 @@ def extract_thesaurus_data(ctx: Wtp, config: WiktionaryConfig):
 
     ret = collections.defaultdict(list)
     num_pages = 0
-    for word, linkages in ctx.reprocess(page_handler, autoload=False, namespace_ids=[thesaurus_ns_id]):
+    for word, linkages in ctx.reprocess(page_handler, autoload=False, namespace_ids=[thesaurus_ns_id],
+                                        include_redirects=False):
         assert isinstance(linkages, (list, tuple))
         num_pages += 1
         for lang, pos, rel, w, sense, xlit, tags, topics, title in linkages:
