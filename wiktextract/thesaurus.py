@@ -276,8 +276,6 @@ def extract_thesaurus_data(ctx: Wtp, config: WiktionaryConfig):
                     ret[key].append(inv_v)
 
     total = sum(len(x) for x in ret.values())
-    if not ctx.quiet:
-        print("Extracted {} linkages from {} thesaurus pages "
-              "(took {:.1f}s)"
-              .format(total, num_pages, time.time() - start_t))
+    logging.info("Extracted {} linkages from {} thesaurus pages (took {:.1f}s)"
+                 .format(total, num_pages, time.time() - start_t))
     return ret

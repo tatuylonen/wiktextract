@@ -8,6 +8,8 @@ import copy
 import html
 import collections
 
+from typing import Dict, List
+
 from wikitextprocessor import Wtp, WikiNode, NodeKind
 from .parts_of_speech import PARTS_OF_SPEECH
 from .config import WiktionaryConfig
@@ -3412,7 +3414,7 @@ def fix_subtitle_hierarchy(ctx: Wtp, config: WiktionaryConfig, text: str) -> str
     return text
 
 
-def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list:  # list[dict[str, str]]
+def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> List[Dict[str, str]]:
     """Parses the text of a Wiktionary page and returns a list of
     dictionaries, one for each word/part-of-speech defined on the page
     for the languages specified by ``capture_language_codes`` (None means

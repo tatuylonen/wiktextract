@@ -118,9 +118,10 @@ following code:
 
 ```python
 import json
-...
-with open("filename.json", "r", encoding="utf-8") as f:
-    for line in f: data = json.loads(line)
+
+with open("filename.json", encoding="utf-8") as f:
+    for line in f:
+        data = json.loads(line)
         ... parse the data in this record
 ```
 
@@ -129,9 +130,9 @@ into a list with:
 
 ```python
 import json
-...
+
 lst = []
-with open("filename.json", "r", encoding="utf-8") as f:
+with open("filename.json", encoding="utf-8") as f:
     for line in f:
         data = json.loads(line)
         lst.append(data)
@@ -140,11 +141,11 @@ with open("filename.json", "r", encoding="utf-8") as f:
 You can also easily pretty-print the data into a more human-readable form using:
 
 ```python
-print(json.dumps(data, indent=2, sort_keys=True))
+print(json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False))
 ```
 
 Here is a pretty-printed example of an extracted word entry for the
-word ``thrill`` as an English verb (only one part-of-speech is shown here):
+word `thrill` as an English verb (only one part-of-speech is shown here):
 
 ```python
 {
@@ -301,8 +302,8 @@ word ``thrill`` as an English verb (only one part-of-speech is shown here):
 ### Installing
 
 Preparation: on Linux (example from Ubuntu 20.04), you may need to
-first install the ``build-essential`` and ``python3-dev`` packages
-with ``apt update && apt install build-essential python3-dev python3-pip``.
+first install the `build-essential` and `python3-dev` packages
+with `apt update && apt install build-essential python3-dev python3-pip lbzip2`.
 
 Install `wiktextract` from source:
 
@@ -365,18 +366,13 @@ needs or want to modify the code.
 
 Tested with Python 3.9.4.
 
-1. Edit `requirements.txt`, replace `wikitextprocessor` line with
-`git+https://github.com/tatuylonen/wikitextprocessor.git`. This is in order to
-depend on the latest `wikitextprocessor` code from GitHub.
+- Create [a Python virtual environment](https://code.visualstudio.com/docs/python/environments#_creating-environments)
+(venv) in the VS Code workspace with the cloned repo. It should automatically install the package.
 
-2. Create [a Python virtual environment](https://code.visualstudio.com/docs/python/environments#_creating-environments)
-(venv) in the VS Code workspace with the cloned repo. It should automatically
-install the packages based on `requirements.txt`.
-
-3. Open a new terminal. It should be PowerShell. You may need to [fix terminal permissions](https://stackoverflow.com/questions/56199111/visual-studio-code-cmd-error-cannot-be-loaded-because-running-scripts-is-disabl/67420296#67420296) 
+- Open a new terminal. It should be PowerShell. You may need to [fix terminal permissions](https://stackoverflow.com/questions/56199111/visual-studio-code-cmd-error-cannot-be-loaded-because-running-scripts-is-disabl/67420296#67420296) 
 in order for it to pick up the virtual environment correclty.
 
-4. In the terminal run this command:
+- In the terminal run this command:
 
 ```
 py -m nose2 -B
@@ -398,17 +394,18 @@ wiktwords --all --all-languages --out data.json enwiktionary-20201201-pages-arti
 If you wish to modify the code or test processing individual pages,
 the following may also be useful:
 
-1. To extract all pages from Wiktionary into separate files under
-``pages/`` and to create a cache file that you can use for quickly
+1. Pass a path to save database file that you can use for quickly
 processing individual pages:
+
 ```
-wiktwords --cache /tmp/wikt-cache --pages-dir pages enwiktionary-20201201-pages-articles.xml.bz2
+wiktwords --db-path /tmp/wikt-db enwiktionary-20201201-pages-articles.xml.bz2
 ```
 
-2. To process a single page, processing a human-readable output file
+2. To process a single page and produce a human-readable output file
 for debugging:
+
 ```
-wiktwords --cache /tmp/wikt-cache --all --all-languages --out outfile --page pages/Words/di/dictionary.txt
+wiktwords --db-path /tmp/wikt-db --all --all-languages --out outfile --page page_title
 ```
 
 The following command-line options can be used to control its operation:
@@ -428,12 +425,12 @@ The following command-line options can be used to control its operation:
 * --inflections: causes inflection tables to be captured
 * --redirects: causes redirects to be extracted
 * --pages-dir DIR: save all wiktionary pages under this directory (mostly for debugging)
-* --cache CACHE: save/use cache file(s) from this path (for debugging)
+* --db-path PATH: save/use database from this path (for debugging)
 * --page FILE: read page from file (first line can be "TITLE: pagetitle"; file should use UTF-8 encoding)
 * --num-threads THREADS: use this many parallel processes (needs 4GB/process)
 * --human-readable: print human-readable JSON with indentation (no longer
 machine-readable)
-* --override PATH: override a page or Lua module by this file (first line should be TITLE: pagetitle)
+* --override PATH: override pages with files in this directory(first line of the file should be TITLE: pagetitle)
 * --templates-file: extract Template namespace to this tar file
 * --modules-file: extract Module namespace to this tar file
 * --categories-file: extract Wiktionary category tree into this file as JSON (see description below)
@@ -479,7 +476,14 @@ some values are not to be captured (note that the ``wiktwords``
 program sets them to ``False`` unless the ``--all`` or specific capture
 options are used).
 
-#### def parse_wiktionary(ctx, path, config, word_cb, capture_cb=None, phase1_only=False)
+#### parse_wiktionary()
+
+```python
+def parse_wiktionary(ctx: Wtp, path: str, config: WiktionaryConfig, word_cb, capture_cb,
+                     phase1_only: bool, dont_parse: bool, namespace_ids: Set[int],
+                     override_folders: Optional[List[str]] = None,
+                     skip_extract_dump: bool = False)
+```
 
 The ``parse_wiktionary`` function will call ``word_cb(data)`` for
 words and redirects found in the Wiktionary dump.  ``data`` is
@@ -503,23 +507,31 @@ Its arguments are as follows:
   will be called once for each word form and part-of-speech (each time there
   may be more than one word sense under "senses").  See below for a description
   of the dictionary.
-* ``capture_cb`` (function) - this can be ``None`` or a function to be
-  called as ``capture_cb(model, title, text)`` for every page before
+* `capture_cb` (function) - this can be `None` or a function to be
+  called as `capture_cb(page: Page)` for every page before
   extracting any words from it.  It can be used to extract raw pages
-  to disk.  The ``model`` argument is ``wikitext`` for normal pages,
-  ``Scribunto`` for Lua modules, and ``redirect`` for redirects (other
-  values are also possible).  ``title`` is page title and ``text`` is
-  page content or page title to redirect to.
+  to disk. `page.model` is `wikitext` for normal pages,
+  `Scribunto` for Lua modules(other values are also possible).
+  `page.title` is page title and `page.body` is page content.
+  `page.redirect_to` is title of the redirected page.
 * ``phase1_only`` - if this is set to ``True``, then only a cache file will
   be created but no extraction will take place.  In this case the ``Wtp``
   constructor should probably be given the ``cache_file`` argument when
   creating ``ctx``.
+* `namesapce_ids` - a set of namespace ids, pages have namespace ids that not
+  included in this set won't be processed.
+* `override_folders` - override pages with files in these directories.
+* `skip_extract_dump` - skip extract dump file if database exists.
 
 This call gathers statistics in ``config``.  This function will automatically
 parallelize the extraction.  ``page_cb`` will be called in the parent process,
 however.
 
-#### def parse_page(ctx, title, text, config)
+#### parse_page()
+
+```python
+def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> List[Dict[str, str]]
+```
 
 This function parses ``text`` as if it was a Wiktionary page with the
 title ``title``.  The arguments are:
