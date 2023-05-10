@@ -133,12 +133,11 @@ def parse_wiktionary(ctx: Wtp, path: str, config: WiktionaryConfig, word_cb, cap
     if ctx.lang_code == "zh":
         additional_expand_templates.add("langhd")
 
-    if not skip_extract_dump:
-        logging.info("First phase - extracting templates, macros, and pages")
-        if override_folders is not None:
-            override_folders = [Path(folder) for folder in override_folders]
-        list(ctx.process(path, None, namespace_ids, phase1_only=True,
-                         override_folders=override_folders))
+    logging.info("First phase - extracting templates, macros, and pages")
+    if override_folders is not None:
+        override_folders = [Path(folder) for folder in override_folders]
+    list(ctx.process(path, None, namespace_ids, True, override_folders,
+                     skip_extract_dump))
     if phase1_only:
         ctx.close_db_session()
         ctx.dispose_db_engine()
@@ -160,7 +159,7 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
 
     config_kwargs = config.to_kwargs()
 
-    # Extract thesaurus data. This iterates over all pages in the cache file,
+    # Extract thesaurus data. This iterates over thesaurus pages,
     # but is very fast.
     thesaurus_data = extract_thesaurus_data(ctx, config)
 
