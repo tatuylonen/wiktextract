@@ -66,7 +66,7 @@ def page_handler(ctx, page: Page, capture_cb, config_kwargs,
     init_special_prefixes(ctx)
     title = re.sub(r"[\s\000-\037]+", " ", page.title)
     title = title.strip()
-    if capture_cb and not capture_cb(title, page.body):
+    if capture_cb and not capture_cb(title, page.redirect_to if page.redirect_to else page.body):
         return None
     if dont_parse:
         return None
