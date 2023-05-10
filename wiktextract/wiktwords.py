@@ -11,7 +11,6 @@
 import os
 import re
 import sys
-import html
 import json
 import logging
 import pstats
@@ -98,7 +97,6 @@ def capture_page(orig_title, text, pages_dir):
             os.makedirs(dirpath, exist_ok=True)
             with open(path, "w", encoding="utf-8") as f:
                 f.write("TITLE: {}\n".format(orig_title))
-                text = html.unescape(text)
                 f.write(text)
         except OSError as err:
             print("OSError: {}, "
