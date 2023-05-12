@@ -22,48 +22,12 @@ from .config import WiktionaryConfig
 from .thesaurus import extract_thesaurus_data
 from .datautils import data_append
 
-# Title prefixes that indicate that the page is not a normal page and
-# should not be used when searching for word forms
-SPECIAL_PREFIXES = None
-
-# Title suffixes that indicate that the page should be ignored
-ignore_suffixes = [
-    "/documentation",
-]
-
-# Title suffixes that indicate the page is a translation page
-translation_suffixes = [
-    "/translations",
-]
-
-def init_special_prefixes(ctx: Wtp) -> None:
-    global SPECIAL_PREFIXES
-    if SPECIAL_PREFIXES is None:
-        SPECIAL_PREFIXES = {
-            ctx.NAMESPACE_DATA.get("Category", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Module", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Template", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Citations", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Appendix", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Rhymes", {}).get("name"),  # XXX check these out
-            ctx.NAMESPACE_DATA.get("Project", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Thread", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Index", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Thesaurus", {}).get("name"),  # These are handled as a separate pass
-            ctx.NAMESPACE_DATA.get("MediaWiki", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Concordance", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Sign gloss", {}).get("name"),  # XXX would I like to capture these too?
-            ctx.NAMESPACE_DATA.get("Help", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("File", {}).get("name"),
-        }
-
 
 def page_handler(ctx, page: Page, capture_cb, config_kwargs,
                  thesaurus_data, dont_parse):
     # Make sure there are no newlines or other strange characters in the
     # title.  They could cause security problems at several post-processing
     # steps.
-    init_special_prefixes(ctx)
     title = re.sub(r"[\s\000-\037]+", " ", page.title)
     title = title.strip()
     if capture_cb and not capture_cb(title, page.redirect_to if page.redirect_to else page.body):
@@ -76,17 +40,8 @@ def page_handler(ctx, page: Page, capture_cb, config_kwargs,
     else:
         if page.model != "wikitext":
             return None
-        idx = title.find(":")
-        if idx >= 0:
-            prefix = title[:idx]
-            if prefix in SPECIAL_PREFIXES:
-                return None
-        for suffix in ignore_suffixes:
-            if title.endswith(suffix):
-                return None
-        for suffix in translation_suffixes:
-            if title.endswith(suffix):
-                return None # XXX
+        if title.endswith("/translations"):
+            return None
 
         # XXX old testing code, remove:
         # if title == "drag":
@@ -169,7 +124,11 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
                             thesaurus_data, dont_parse)
 
     emitted = set()
-    for ret, stats in ctx.reprocess(page_cb):
+    process_ns_ids = list({
+        ctx.NAMESPACE_DATA.get(ns, {}).get("id", 0)
+        for ns in ["Main", "Reconstruction"]
+    })
+    for ret, stats in ctx.reprocess(page_cb, namespace_ids=process_ns_ids):
         config.merge_return(stats)
         for dt in ret:
             word_cb(dt)
