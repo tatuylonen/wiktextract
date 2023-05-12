@@ -311,7 +311,8 @@ git clone https://github.com/tatuylonen/wiktextract.git
 cd wiktextract
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -e .
+python -m pip install -U pip
+python -m pip install --use-pep517 .
 ```
 
 Alternatively, you can install the package from pypi.org:
