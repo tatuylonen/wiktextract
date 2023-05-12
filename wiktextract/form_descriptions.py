@@ -158,7 +158,7 @@ for k, v in xlat_head_map.items():
 # in page.py.
 nested_translations_re = re.compile(
     r"\s+\((({}): ([^()]|\([^()]+\))+)\)"
-    .format("|".join(re.escape(re.sub("^\?", "", x))
+    .format("|".join(re.escape(x.removeprefix("?"))
                      for x in sorted(xlat_head_map.values(),
                                      key=lambda x: len(x),
                                      reverse=True)
@@ -722,7 +722,7 @@ for topic in valid_topics:
 # Let each original topic value stand alone.  These are not generally on
 # valid_topics.  We add the original topics with spaces replaced by hyphens.
 for topic in topic_generalize_map.keys():
-    hyphenated = re.sub(r" ", "-", topic)
+    hyphenated = topic.replace(" ", "-")
     valid_topics.add(hyphenated)
     add_to_valid_tree(valid_sequences, topic, hyphenated)
 # Add canonicalized/generalized topic values

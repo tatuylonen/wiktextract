@@ -602,7 +602,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     # Quote filename for URL
                     qfn = urllib.parse.quote(fn)
                     # For safety when writing files
-                    qfn = re.sub(r"/", "__slash__", qfn)
+                    qfn = qfn.replace("/", "__slash__")
                     if re.search(r"(?i)\.(ogg|oga)$", fn):
                         ogg = ("https://upload.wikimedia.org/wikipedia/"
                                "commons/{}/{}/{}"

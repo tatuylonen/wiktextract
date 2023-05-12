@@ -1489,8 +1489,8 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
             new_alts = []
             for alt in alts:
                 # Replace parentheses before splitting
-                alt = re.sub(r" \(", ", ", alt)
-                alt = re.sub(r"\)", "", alt)
+                alt = alt.replace(" (", ", ")
+                alt = alt.replace(")", "")
                 for new_alt in alt.split(", "):
                     new_alts.append(new_alt)
             alts = new_alts

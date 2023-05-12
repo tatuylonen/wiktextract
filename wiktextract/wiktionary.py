@@ -252,7 +252,7 @@ def extract_namespace(ctx, namespace, path):
         title = title[len(prefix):]
         title = re.sub(r"(^|/)\.($|/)", r"\1__dotdot__\2", title)
         title = re.sub(r"(^|/)\.\.($|/)", r"\1__dotdot__\2", title)
-        title = re.sub(r"//", r"__slashslash__", title)
+        title = title.replace("//", "__slashslash__")
         title = re.sub(r"^/", r"__slash__", title)
         title = re.sub(r"/$", r"__slash__", title)
         title = namespace + "/" + title

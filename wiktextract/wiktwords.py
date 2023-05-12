@@ -86,10 +86,10 @@ def capture_page(orig_title, text, pages_dir):
             analyze = False
 
     if pages_dir is not None:
-        title = re.sub(r"//", "__slashslash__", title)
-        title = re.sub(r":", "/", title)
+        title = title.replace("//", "__slashslash__")
+        title = title.replace(":", "/")
         path = pages_dir + "/" + title + ".txt"
-        path = re.sub(r"/\.+", lambda m: re.sub(r"\.", "__dot__", m.group(0)),
+        path = re.sub(r"/\.+", lambda m: m.group(0).replace(".", "__dot__"),
                       path)
         path = re.sub(r"//+", "/", path)
         dirpath = os.path.dirname(path)

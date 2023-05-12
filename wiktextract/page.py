@@ -911,7 +911,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                       sortid="page/870")
             word = w
     elif word.startswith("Reconstruction:"):
-        word = re.sub(r"^Reconstruction:.*/", "", word)
+        word = word[word.find("/") + 1:]
         is_reconstruction = True
 
     base_data = {"word": word, "lang": language, "lang_code": lang_code}

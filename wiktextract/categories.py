@@ -83,9 +83,8 @@ def extract_categories(ctx: Wtp, config: WiktionaryConfig):
         parts = line.split("@@")
         name = parts[0]
         desc = parts[1]
-        name = re.sub(r"^Category:", "", name)
+        name = name.removeprefix("Category:")
         name_lc = name.lower()
-        desc = re.sub(r"\\n", "\n", desc)
         clean_desc = clean_node(config, ctx, None, desc)
         if name_lc not in ht:
             ht[name_lc] = {"name": name}
@@ -96,7 +95,7 @@ def extract_categories(ctx: Wtp, config: WiktionaryConfig):
             dt["clean_desc"] = clean_desc
         for i in range(2, len(parts), 2):
             parent_name = parts[i]
-            parent_name = re.sub(r"^Category:", "", parent_name)
+            parent_name = parent_name.removeprefix("Category:")
             parent_name_lc = parent_name.lower()
             parent_sort = parts[i + 1]
             if parent_name_lc not in ht:

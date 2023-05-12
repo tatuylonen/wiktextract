@@ -371,7 +371,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             # This helps with languages that script names
             # on the same level; those scripts may also be valid
             # language names.  See leaf/English/Translations/Pali.
-            tags.append(re.sub(r" ", "-", sublang))
+            tags.append(sublang.replace(" ", "-"))
         elif sublang in tr_second_tagmap:
             # Certain second-level names are interpreted as tags
             # (mapped to tags).  Note that these may still have

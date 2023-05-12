@@ -184,8 +184,8 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
     assert isinstance(pos_datas, list)  # List of senses (containing "glosses")
     assert is_reconstruction in (True, False)
 
-    item = re.sub(r"\(\)", "", item)
-    item = re.sub(r"\s\s+", " ", item)
+    item = item.replace("()", "")
+    item = re.sub(r"\s+", " ", item)
     item = item.strip()
 
     base_roman = None
@@ -217,7 +217,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
 
     # Replace occurrences of ~ in the item by the page title
     safetitle = ctx.title.replace("\\", "\\\\")
-    item = re.sub(r" ~ ", " " + safetitle + " ", item)
+    item = item.replace(" ~ ",  " " + safetitle + " ")
     item = re.sub(r"^~ ", safetitle + " ", item)
     item = re.sub(r" ~$", " " + safetitle, item)
 
@@ -290,11 +290,11 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
         # removing parentheses if the value is still tags.  The part with
         # parentheses could be on either side of the colon.
         if "(" in desc:
-            x = re.sub(r"[()]", ",", desc)
+            x = desc.replace("(", ",").replace(")", ",")
             if classify_desc(x, no_unknown_starts=True) == "tags":
                 desc = x
         elif "(" in rest:
-            x = re.sub(r"[()]", ",", rest)
+            x = rest.replace("(", ",").replace(")", ",")
             if classify_desc(x, no_unknown_starts=True) == "tags":
                 rest = desc
                 desc = x
