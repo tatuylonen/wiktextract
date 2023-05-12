@@ -17,7 +17,9 @@ import pstats
 import hashlib
 import argparse
 import collections
+
 from pathlib import Path
+from typing import Optional
 from wikitextprocessor import Wtp
 from wiktextract.inflection import set_debug_cell_text
 from wiktextract.template_override import template_override_fns
@@ -28,46 +30,15 @@ from wiktextract import (WiktionaryConfig, parse_wiktionary,
 from wiktextract import extract_thesaurus_data
 from wiktextract import extract_categories
 
-# Pages whose titles have any of these prefixes are ignored.
-IGNORE_PREFIXES = None
-
-# Pages with these prefixes are captured.
-RECOGNIZED_PREFIXES = None
+# Pages within these namespaces are captured.
 RECOGNIZED_NAMESPACE_NAMES = ["Main", "Category", "Appendix", "Project", "Thesaurus",
                               "Module", "Template", "Reconstruction"]
 
 
-def init_prefixes(ctx: Wtp) -> None:
-    global IGNORE_PREFIXES, RECOGNIZED_PREFIXES
-    if IGNORE_PREFIXES is None:
-        IGNORE_PREFIXES = {
-            ctx.NAMESPACE_DATA.get("Index", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Help", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("MediaWiki", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Citations", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Concordance", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Rhymes", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Thread", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Summary", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("File", {}).get("name"),
-            ctx.NAMESPACE_DATA.get("Transwiki", {}).get("name"),
-        }
-    if RECOGNIZED_PREFIXES is None:
-        RECOGNIZED_PREFIXES = {
-            ctx.NAMESPACE_DATA.get(name, {}).get("name")
-            for name in RECOGNIZED_NAMESPACE_NAMES if name != "Main"
-        }
-
-
-def capture_page(orig_title, text, pages_dir):
+def capture_page(orig_title: str, text: str, pages_dir: Optional[str]) -> bool:
     """Checks if the page needs special handling (and maybe saving).
     Returns True if the page should be processed normally as a
     dictionary entry."""
-    assert isinstance(orig_title, str)
-    assert isinstance(text, str)
-    assert pages_dir is None or isinstance(pages_dir, str)
-
-    analyze = True
     title = orig_title
     m = re.match(r"^([A-Z][a-z][-a-zA-Z0-9_]+):(.+)$", title)
     if not m:
@@ -76,14 +47,6 @@ def capture_page(orig_title, text, pages_dir):
             h.update(title.encode("utf-8"))
             title = title[:100] + "-" + h.hexdigest()[:10]
         title = "Words:" + title[:2] + "/" + title
-        analyze = True
-    else:
-        prefix, tail = m.groups()
-        if prefix in IGNORE_PREFIXES:
-            analyze = False
-        elif prefix not in RECOGNIZED_PREFIXES:
-            print("UNRECOGNIZED PREFIX", title)
-            analyze = False
 
     if pages_dir is not None:
         title = title.replace("//", "__slashslash__")
@@ -103,7 +66,7 @@ def capture_page(orig_title, text, pages_dir):
                   "when writing file name {!r}, for "
                   "title: {!r}".format(err, path, orig_title))
 
-    return analyze
+    return True
 
 
 def main():
@@ -330,8 +293,6 @@ def main():
 
         pr = cProfile.Profile()
         pr.enable()
-
-    init_prefixes(ctx)
 
     try:
         if args.path:
