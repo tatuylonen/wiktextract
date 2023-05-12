@@ -138,7 +138,7 @@ def extract_thesaurus_data(ctx: Wtp, config: WiktionaryConfig):
                     if node.kind != NodeKind.LIST_ITEM:
                         continue
                     w = clean_node(config, ctx, None, node.children)
-                    if w.find("*") >= 0:
+                    if "*" in w:
                         print(title, lang, pos, "STAR IN WORD:", w)
                     # Check for parenthesized sense at the beginning
                     m = re.match(r"(?s)^\(([^)]*)\):\s*(.*)$", w)

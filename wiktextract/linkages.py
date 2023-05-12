@@ -289,11 +289,11 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
         # both tags (see "stink").  Handle that case by
         # removing parentheses if the value is still tags.  The part with
         # parentheses could be on either side of the colon.
-        if desc.find("(") >= 0:
+        if "(" in desc:
             x = re.sub(r"[()]", ",", desc)
             if classify_desc(x, no_unknown_starts=True) == "tags":
                 desc = x
-        elif rest.find("(") >= 0:
+        elif "(" in rest:
             x = re.sub(r"[()]", ",", rest)
             if classify_desc(x, no_unknown_starts=True) == "tags":
                 rest = desc
@@ -425,7 +425,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
         #   "ווײַב‎ n (vayb) or f, פֿרוי‎ f (froy)"
         subitems = []
         for item1 in split_at_comma_semi(item):
-            if item1.find(" or ") < 0:
+            if " or " not in item1:
                 subitems.append(item1)
                 continue
             # Item1 contains " or "
@@ -441,7 +441,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
                 not re.search(r"\bor\b", ctx.title) and
                 all(ctx.title not in x.split(" or ")
                     for x in split_at_comma_semi(item2)
-                    if x.find(" or ") >= 0)):
+                    if " or " in x)):
                 # We can split this item.  Split the non-cleaned version
                 # that still has any intervening parenthesized parts.
                 subitems.extend(split_at_comma_semi(item1, extra=[" or "]))
@@ -729,7 +729,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
             # Parse linkages with "value - english" syntax (e.g.,
             # man/Faroese)
             m = re.search(r" [-‐‑‒–—―] ", item1)
-            if m and item1.find("(") < 0:
+            if m and "(" not in item1:
                 suffix = item1[m.end():]
                 cls = classify_desc(suffix, no_unknown_starts=True)
                 if cls == "english":
@@ -782,8 +782,8 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
             # split as this is used when we have a different number
             # of romanizations than written forms, and don't know
             # which is which.
-            if ((not w or w.find(",") < 0) and
-                (not r or r.find(",") < 0) and
+            if ((not w or "," not in w) and
+                (not r or "," not in r) and
                 not ctx.page_exists(w)):
                 lst = w.split("／") if len(w) > 1 else [w]
                 if len(lst) == 1:
@@ -801,7 +801,7 @@ def parse_linkage_item_text(ctx, word, data, field, item, sense, ruby,
             # abbreviations that end with a period that should be kept)
             if (w.endswith(".") and not ctx.page_exists(w) and
                 (ctx.page_exists(w[:-1]) or
-                 (len(w) >= 5) and w[:-1].find(".") < 0)):
+                 (len(w) >= 5) and "." not in w[:-1])):
                 w = w[:-1]
 
             # If we have roman but not alt and the word is ASCII,

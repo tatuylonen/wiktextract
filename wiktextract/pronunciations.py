@@ -444,7 +444,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             if m.group(1).lower() in part_of_speech_map:
                 active_pos = part_of_speech_map[m.group(1).lower()]["pos"]
 
-        if text.find("IPA") >= 0:
+        if "IPA" in text:
             field = "ipa"
         else:
             # This is used for Rhymes, Homophones, etc
@@ -550,7 +550,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 continue
             if v == "/wiki.local/":
                 continue
-            if field == "ipa" and text.find("__AUDIO_IGNORE_THIS__") >= 0:
+            if field == "ipa" and "__AUDIO_IGNORE_THIS__" in text:
                 m = re.search(r"__AUDIO_IGNORE_THIS__(\d+)__", text)
                 assert m
                 idx = int(m.group(1))

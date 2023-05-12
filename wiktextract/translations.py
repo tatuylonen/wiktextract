@@ -320,11 +320,10 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
     if nested:
         item = re.sub(nested_translations_re, "", item)
 
-    if re.search(r"\(\d+\)|\[\d+\]", item):
-        if not item.find("numeral:"):
-            ctx.debug("possible sense number in translation item: {}"
-                      .format(item),
-                      sortid="translations/324")
+    if re.search(r"\(\d+\)|\[\d+\]", item) and "numeral:" not in item:
+        ctx.debug("possible sense number in translation item: {}"
+                  .format(item),
+                  sortid="translations/324")
 
     # Translation items should start with a language name (except
     # some nested translation items don't and rely on the language
@@ -399,7 +398,7 @@ def parse_translation_item_text(ctx, word, data, item, sense, pos_datas,
             lang = parts[0]
             item = " ".join(parts[1:])
         else:
-            if item.find("__IGNORE__") < 0:
+            if "__IGNORE__" not in item:
                 ctx.error("no language name in translation item: {}"
                           .format(item), sortid="translations/382")
         return None

@@ -660,7 +660,7 @@ def parse_title(title, source):
                     extra_forms.append(dt)
     # For titles that contains no parenthesized parts, do some special
     # handling to still interpret parts from them
-    if title.find("(") < 0:
+    if "(" not in title:
         # No parenthesized parts
         m = re.search(r"\b(Portuguese) (-.* verb) ", title)
         if m is not None:
@@ -1228,9 +1228,9 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
         row2 = []
         for cell in row:
             cell1 = copy.deepcopy(cell)
-            if cell.text.find("\n") >= 0:
+            if "\n" in cell.text:
                 # Has more than one line - split this cell
-                parts = cell.text.strip().split("\n")
+                parts = cell.text.strip().splitlines()
                 if len(parts) != 2:
                     ctx.debug("forced rowspan kludge got {} parts: {!r}"
                               .format(len(parts), cell.text),
@@ -1417,7 +1417,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
             alts = [col]
         else:
             separators = [";", "•", r"\n", " or "]
-            if col.find(" + ") < 0:
+            if " + " not in col:
                 separators.append(",")
                 if not col.endswith("/"):
                     separators.append("/")
@@ -1528,7 +1528,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
     
         # Check for romanizations, forms first, romanizations under
         elif (len(alts) % 2 == 0 and
-              not any(x.find("(") >= 0 for x in alts) and
+              not any("(" in x for x in alts) and
               all(classify_desc(re.sub(r"\^.*$", "",
                                 # Remove ends of strings starting from ^.
                                 # Supescripts have been already removed
@@ -1548,7 +1548,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                         for i in range(len2))
         # Check for romanizations, forms and romanizations alternating
         elif (len(alts) % 2 == 0 and
-              not any(x.find("(") >= 0 for x in alts) and
+              not any("(" in x for x in alts) and
               all(classify_desc(re.sub(r"\^.*$", "",
                                        "".join(xx for xx in alts[i]
                                                if not is_superscript(xx))))
@@ -1650,7 +1650,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
             if not topics1:
                 for ts in tagsets1:
                     ts = list(x for x in ts
-                              if x.find(" ") < 0)
+                              if " " not in x)
                     # There are some generated tags containing
                     # spaces; do not let them through here.
                     extra_tags.extend(ts)
@@ -1764,7 +1764,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 # for mixed declension plural.  When the adjective
                 # disappears and it becomes just one word, remove
                 # the "includes-article" tag.  e.g. eiskalt/German
-                if "includes-article" in tags and form.find(" ") < 0:
+                if "includes-article" in tags and " " not in form:
                     tags.remove("includes-article")
     
                 # Handle ignored forms.  We mark that the form was
@@ -2527,7 +2527,7 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
         celltext = celltext[:idx]
         is_title = True
     elif (kind == header_kind and
-          titletext.find(" + ") < 0 and  # For "avoir + blah blah"?
+          " + " not in titletext and  # For "avoir + blah blah"?
           not any(isinstance(x, WikiNode) and
                   x.kind == NodeKind.HTML and
                   x.args == "span" and
@@ -2546,7 +2546,7 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
            cleaned != "dummy-ignored-text-cell" and
           #  the style composite string is not broken
           not style.startswith("////") and
-          titletext.find(" + ") < 0):
+          " + " not in titletext):
         if (not ignored_cell and
             lang not in LANGUAGES_WITH_CELLS_AS_HEADERS):
             ctx.debug("rejected heuristic header: "
