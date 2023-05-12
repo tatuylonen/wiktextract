@@ -111,7 +111,7 @@ def capture_page(model, orig_title, text, pages_dir):
     return analyze
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         description="Multilingual Wiktionary data extractor")
     parser.add_argument("path", type=str, nargs="?", default=None,
@@ -338,7 +338,7 @@ if __name__ == "__main__":
                 ctx.add_page("Scribunto", title, text, transient=True)
 
     def word_cb(data):
-        global word_count
+        nonlocal word_count
         word_count += 1
         if out_f is not None:
             if args.human_readable:
@@ -497,3 +497,7 @@ if __name__ == "__main__":
             print(title)
             for (k, kk), v in lst[:limit]:
                 print("  {:5d} {}: {}".format(v, k, kk))
+
+
+if __name__ == "__main__":
+    main()
