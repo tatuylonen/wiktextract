@@ -8,8 +8,7 @@ import time
 import collections
 import logging
 
-from wikitextprocessor import Wtp, NodeKind, WikiNode
-from wikitextprocessor.db_models import Page
+from wikitextprocessor import Wtp, NodeKind, WikiNode, Page
 
 from .datautils import ns_title_prefix_tuple
 from .page import linkage_inverses, clean_node, LEVEL_KINDS

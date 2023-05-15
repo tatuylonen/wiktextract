@@ -15,8 +15,7 @@ import collections
 from pathlib import Path
 from typing import Optional, List, Set
 
-from wikitextprocessor import Wtp
-from wikitextprocessor.db_models import Page
+from wikitextprocessor import Wtp, Page
 from .page import (parse_page, additional_expand_templates)
 from .config import WiktionaryConfig
 from .thesaurus import extract_thesaurus_data
@@ -94,8 +93,7 @@ def parse_wiktionary(ctx: Wtp, path: str, config: WiktionaryConfig, word_cb, cap
     list(ctx.process(path, None, namespace_ids, True, override_folders,
                      skip_extract_dump))
     if phase1_only:
-        ctx.close_db_session()
-        ctx.dispose_db_engine()
+        ctx.close_db_conn()
         return []
 
     # Phase 2 - process the pages using the user-supplied callback
@@ -186,8 +184,7 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
             }
             word_cb(data)
 
-    ctx.close_db_session()
-    ctx.dispose_db_engine()
+    ctx.close_db_conn()
     logging.info("Reprocessing wiktionary complete")
 
 
