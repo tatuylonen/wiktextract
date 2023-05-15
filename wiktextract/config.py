@@ -159,14 +159,20 @@ class WiktionaryConfig(object):
             self.debugs.extend(ret.get("debugs", []))
 
     def init_subtitles(self) -> None:
-        with self.data_folder.joinpath("linkage_subtitles.json").open(encoding="utf-8") as f:
+        with (self.data_folder.joinpath("linkage_subtitles.json")
+             .open(encoding="utf-8") as f):
             self.LINKAGE_SUBTITLES = json.load(f)
 
-        with self.data_folder.joinpath("pos_subtitles.json").open(encoding="utf-8") as f:
+        with (self.data_folder.joinpath("pos_subtitles.json")
+             .open(encoding="utf-8") as f):
             self.POS_SUBTITLES = json.load(f)
             self.POS_TYPES = set(x["pos"] for x in self.POS_SUBTITLES.values())
+            for k, v in self.POS_SUBTITLES.items():
+                if "tags" in v:
+                    assert isinstance(v["tags"], (list, tuple))
 
-        with self.data_folder.joinpath("other_subtitles.json").open(encoding="utf-8") as f:
+        with (self.data_folder.joinpath("other_subtitles.json")
+             .open(encoding="utf-8") as f):
             self.OTHER_SUBTITLES = json.load(f)
 
     def init_zh_pron_tags(self) -> None:
