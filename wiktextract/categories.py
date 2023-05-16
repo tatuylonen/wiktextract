@@ -67,12 +67,13 @@ end
 return export
 """
 
-def extract_categories(ctx, config):
+def extract_categories(ctx: Wtp, config: WiktionaryConfig):
     """Extracts the category tree from Wiktionary."""
-    assert isinstance(ctx, Wtp)
-    assert isinstance(config, WiktionaryConfig)
-    ctx.add_page("Scribunto", "Module:wiktextract cat tree", lua_code,
-                 transient=True)
+    module_ns = ctx.NAMESPACE_DATA.get("Module", {})
+    module_ns_local_name = module_ns.get("name")
+    module_ns_id = module_ns.get("id")
+    ctx.add_page(f"{module_ns_local_name}:wiktextract cat tree",
+                 module_ns_id, lua_code, model="Scribunto")
     ctx.start_page("Wiktextract category tree extraction")
     rawdata = ctx.expand("{{#invoke:wiktextract cat tree|main}}")
     ht = {}
@@ -82,9 +83,8 @@ def extract_categories(ctx, config):
         parts = line.split("@@")
         name = parts[0]
         desc = parts[1]
-        name = re.sub(r"^Category:", "", name)
+        name = name.removeprefix("Category:")
         name_lc = name.lower()
-        desc = re.sub(r"\\n", "\n", desc)
         clean_desc = clean_node(config, ctx, None, desc)
         if name_lc not in ht:
             ht[name_lc] = {"name": name}
@@ -95,7 +95,7 @@ def extract_categories(ctx, config):
             dt["clean_desc"] = clean_desc
         for i in range(2, len(parts), 2):
             parent_name = parts[i]
-            parent_name = re.sub(r"^Category:", "", parent_name)
+            parent_name = parent_name.removeprefix("Category:")
             parent_name_lc = parent_name.lower()
             parent_sort = parts[i + 1]
             if parent_name_lc not in ht:

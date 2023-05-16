@@ -51,7 +51,7 @@ class LongTests(unittest.TestCase):
                                   capture_linkages=True,
                                   capture_compounds=True,
                                   capture_redirects=True)
-        parse_wiktionary(ctx, path, config, word_cb, None, False, False)
+        parse_wiktionary(ctx, path, config, word_cb, None, False, False, {0, 4, 10, 14, 100, 110, 118, 828})
         print("Test data parsing complete")
         assert num_redirects > 0
         assert len(words) > 100

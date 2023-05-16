@@ -6,7 +6,9 @@
 import re
 import time
 import collections
-from wikitextprocessor import Wtp, NodeKind, WikiNode
+import logging
+
+from wikitextprocessor import Wtp, NodeKind, WikiNode, Page
 
 from .datautils import ns_title_prefix_tuple
 from .page import linkage_inverses, clean_node, LEVEL_KINDS
@@ -71,24 +73,23 @@ def contains_list(contents):
     return contains_list(contents.children) or contains_list(contents.args)
 
 
-def extract_thesaurus_data(ctx, config):
+def extract_thesaurus_data(ctx: Wtp, config: WiktionaryConfig):
     """Extracts linkages from the thesaurus pages in Wiktionary."""
-    assert isinstance(ctx, Wtp)
-    assert isinstance(config, WiktionaryConfig)
     start_t = time.time()
-    if not ctx.quiet:
-        print("Extracting thesaurus data")
+    logging.info("Extracting thesaurus data")
+    thesaurus_ns_data = ctx.NAMESPACE_DATA.get("Thesaurus", {})
+    thesaurus_ns_id = thesaurus_ns_data.get("id")
+    thesaurus_ns_local_name = thesaurus_ns_data.get("name")
 
-    def page_handler(model, title, text):
-        if not title.startswith(ns_title_prefix_tuple(ctx, "Thesaurus")):
-            return None
+    def page_handler(page: Page):
+        title = page.title
+        text = page.body
         if title.startswith("Thesaurus:Requested entries "):
             return None
         if "/" in title:
             #print("STRANGE TITLE:", title)
             return None
-        text = ctx.read_by_title(title)
-        word = title[10:]
+        word = title[len(thesaurus_ns_local_name) + 1:]
         idx = word.find(":")
         if idx > 0 and idx < 5:
             word = word[idx + 1:]  # Remove language prefix
@@ -136,7 +137,7 @@ def extract_thesaurus_data(ctx, config):
                     if node.kind != NodeKind.LIST_ITEM:
                         continue
                     w = clean_node(config, ctx, None, node.children)
-                    if w.find("*") >= 0:
+                    if "*" in w:
                         print(title, lang, pos, "STAR IN WORD:", w)
                     # Check for parenthesized sense at the beginning
                     m = re.match(r"(?s)^\(([^)]*)\):\s*(.*)$", w)
@@ -252,7 +253,8 @@ def extract_thesaurus_data(ctx, config):
 
     ret = collections.defaultdict(list)
     num_pages = 0
-    for word, linkages in ctx.reprocess(page_handler, autoload=False):
+    for word, linkages in ctx.reprocess(page_handler, autoload=False, namespace_ids=[thesaurus_ns_id],
+                                        include_redirects=False):
         assert isinstance(linkages, (list, tuple))
         num_pages += 1
         for lang, pos, rel, w, sense, xlit, tags, topics, title in linkages:
@@ -273,8 +275,6 @@ def extract_thesaurus_data(ctx, config):
                     ret[key].append(inv_v)
 
     total = sum(len(x) for x in ret.values())
-    if not ctx.quiet:
-        print("Extracted {} linkages from {} thesaurus pages "
-              "(took {:.1f}s)"
-              .format(total, num_pages, time.time() - start_t))
+    logging.info("Extracted {} linkages from {} thesaurus pages (took {:.1f}s)"
+                 .format(total, num_pages, time.time() - start_t))
     return ret

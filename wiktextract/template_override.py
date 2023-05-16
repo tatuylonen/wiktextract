@@ -39,7 +39,7 @@ def egy_glyph(args):
     for arg in args[1:]:
         if "quad=" in arg:
             ret = arg[5:]
-            ret = re.sub("<br>", ":", ret)
+            ret = ret.replace("<br>", ":")
     return "«" + ret + "»"
 
 @reg("egy-glyph-img")

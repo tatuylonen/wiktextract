@@ -158,7 +158,7 @@ for k, v in xlat_head_map.items():
 # in page.py.
 nested_translations_re = re.compile(
     r"\s+\((({}): ([^()]|\([^()]+\))+)\)"
-    .format("|".join(re.escape(re.sub("^\?", "", x))
+    .format("|".join(re.escape(x.removeprefix("?"))
                      for x in sorted(xlat_head_map.values(),
                                      key=lambda x: len(x),
                                      reverse=True)
@@ -722,7 +722,7 @@ for topic in valid_topics:
 # Let each original topic value stand alone.  These are not generally on
 # valid_topics.  We add the original topics with spaces replaced by hyphens.
 for topic in topic_generalize_map.keys():
-    hyphenated = re.sub(r" ", "-", topic)
+    hyphenated = topic.replace(" ", "-")
     valid_topics.add(hyphenated)
     add_to_valid_tree(valid_sequences, topic, hyphenated)
 # Add canonicalized/generalized topic values
@@ -827,11 +827,11 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
     new_parts = []
     for part in parts:
         new_seg = ""
-        if part.find("/") >= 0:
+        if "/" in part:
             for w in part.split():
                 if w in xlat_tags_map:
                     new_seg += w + " "
-                elif w.find("/") >= 0:
+                elif "/" in w:
                     for ww in w.split("/"):
                         new_seg += ww + " "
                 else:
@@ -1180,7 +1180,7 @@ def add_related(ctx, data, tags_lst, related, origtext,
     def check_related(related):
         # Warn about some suspicious related forms
         m = re.search(suspicious_related_re, related)
-        if ((m and titleword.find(m.group(0)) < 0) or
+        if ((m and m.group(0) not in titleword) or
             (related in ("f", "m", "n", "c") and len(titleword) >= 3)):
             if "eumhun" in tags_lst:
                 return
@@ -1363,9 +1363,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction,
     assert is_reconstruction in (True, False)
     # print("PARSE_WORD_HEAD: {}: {!r}".format(ctx.section, text))
 
-    if text.find("Lua execution error") >= 0:
-        return
-    if text.find("Lua timeout error") >= 0:
+    if "Lua execution error" in text or "Lua timeout error" in text:
         return
 
     # In Aug 2021, some words had spurious Template:en at the end of head forms
@@ -1641,7 +1639,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction,
 
             # If only one word, assume it is comma-separated alternative
             # to the previous one
-            if desc.find(" ") < 0:
+            if " " not in desc:
                 cls = classify_desc(desc)
                 if cls != "tags":
                     if prev_tags:
@@ -1968,7 +1966,7 @@ def parse_pronunciation_tags(ctx, text, data):
         data_extend(ctx, data, "topics", topics)
         for tagset in tagsets:
             for t in tagset:
-                if t.find(" ") >= 0:
+                if " " in t:
                     notes.append(t)
                 else:
                     data_append(ctx, data, "tags", t)
@@ -2189,7 +2187,7 @@ def parse_translation_desc(ctx, lang, text, tr):
     if english and not roman and "word" in tr:
         cls = classify_desc(tr["word"])
         if (cls == "other" and
-            english.find(" ") < 0 and
+            " " not in english and
             english[0].islower()):
             del tr["english"]
             tr["roman"] = english
@@ -2387,8 +2385,7 @@ def parse_alt_or_inflection_of1(ctx, gloss, gloss_template_args):
     parts = split_at_comma_semi(base, extra=[" / ",  "／", r" \+ "])
     titleword = re.sub(r"^Reconstruction:[^/]*/", "", ctx.title)
     if (len(parts) <= 1 or base.startswith("/") or
-        base.endswith("/") or
-        titleword.find("/") >= 0):
+        base.endswith("/") or "/" in titleword):
         parts = [base]
     # Split base to alternatives when of form "a or b" and "a" and "b" are
     # similar (generally spelling variants of the same word or similar words)
@@ -2438,7 +2435,7 @@ def classify_desc(desc, allow_unknown_tags=False, no_unknown_starts=False):
         assert isinstance(tagset, (list, tuple, set))
         if ("error-unknown-tag" not in tagset and
             (topics or allow_unknown_tags or
-             any(x.find(" ") < 0 for x in tagset))):
+             any(" " not in x for x in tagset))):
             return "tags"
 
     # Check if it looks like the taxonomic name of a species

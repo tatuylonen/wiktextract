@@ -8,6 +8,8 @@ import copy
 import html
 import collections
 
+from typing import Dict, List
+
 from wikitextprocessor import Wtp, WikiNode, NodeKind
 from .parts_of_speech import PARTS_OF_SPEECH
 from .config import WiktionaryConfig
@@ -909,7 +911,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                       sortid="page/870")
             word = w
     elif word.startswith("Reconstruction:"):
-        word = re.sub(r"^Reconstruction:.*/", "", word)
+        word = word[word.find("/") + 1:]
         is_reconstruction = True
 
     base_data = {"word": word, "lang": language, "lang_code": lang_code}
@@ -1494,7 +1496,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                     return ""
             for k, v in ht.items():
                 v = v.strip()
-                if v and v.find("<") < 0:
+                if v and "<" not in v:
                     gloss_template_args.add(v)
             if config.dump_file_lang_code == "zh":
                 add_form_of_tags(ctx, name, 
@@ -1706,11 +1708,11 @@ def parse_language(ctx, config, langnode, language, lang_code):
 
             # Check to make sure we don't have unhandled list items in gloss
             ofs = max(gloss.find("#"), gloss.find("* "))
-            if ofs > 10 and gloss.find("(#)") < 0:
+            if ofs > 10 and "(#)" not in gloss:
                 ctx.debug("gloss may contain unhandled list items: {}"
                           .format(gloss),
                           sortid="page/1412")
-            elif gloss.find("\n") >= 0:
+            elif "\n" in gloss:
                 ctx.debug("gloss contains newline: {}".format(gloss),
                           sortid="page/1416")
 
@@ -2277,7 +2279,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
                                 data.append({"word": word.strip(), "tags": tags})
                     elif item.kind == NodeKind.HTML:
                         cleaned = clean_node(config, ctx, None, item.children)
-                        if cleaned.find("Synonyms of") >= 0:
+                        if "Synonyms of" in cleaned:
                             cleaned = cleaned.replace("Synonyms of ", "")
                             root_word = cleaned
                         parse_zh_synonyms(item.children, data, hdrs, root_word)
@@ -2360,7 +2362,7 @@ def parse_language(ctx, config, langnode, language, lang_code):
         parse_linkage_recurse(parsed.children, field, None)
         if not data.get(field) and not have_panel_template:
             text = "".join(toplevel_text).strip()
-            if (text.find("\n") < 0 and text.find(",") > 0 and
+            if ("\n" not in text and "," in text and
                 text.count(",") > 3):
                 if not text.startswith("See "):
                     parse_linkage_item([text], field, None)
@@ -3412,7 +3414,7 @@ def fix_subtitle_hierarchy(ctx: Wtp, config: WiktionaryConfig, text: str) -> str
     return text
 
 
-def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> list:  # list[dict[str, str]]
+def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> List[Dict[str, str]]:
     """Parses the text of a Wiktionary page and returns a list of
     dictionaries, one for each word/part-of-speech defined on the page
     for the languages specified by ``capture_language_codes`` (None means
@@ -3768,9 +3770,9 @@ def clean_node(config, ctx, sense_data, value, template_fn=None,
     # If collect_links=True (for glosses), capture links
     if sense_data is not None:
         # Check for Lua execution error
-        if v.find('<strong class="error">Lua execution error') >= 0:
+        if '<strong class="error">Lua execution error' in v:
             data_append(ctx, sense_data, "tags", "error-lua-exec")
-        if v.find('<strong class="error">Lua timeout error') >= 0:
+        if '<strong class="error">Lua timeout error' in v:
             data_append(ctx, sense_data, "tags", "error-lua-timeout")
         # Capture Category tags
         if not collect_links:
