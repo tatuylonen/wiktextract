@@ -1110,6 +1110,8 @@ def quote_kept_parens(s):
 
 
 def quote_kept_ruby(ruby_tuples, s):
+    # if len(ruby_tuples) < 1:
+    #     return s
     ks = []
     rs = []
     for k, r in ruby_tuples:
