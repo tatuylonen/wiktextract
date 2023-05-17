@@ -7,13 +7,12 @@
 import io
 import logging
 import re
-import sys
 import time
 import tarfile
 import collections
 
 from pathlib import Path
-from typing import Optional, List, Set
+from typing import Optional, List, Set, Tuple
 
 from wikitextprocessor import Wtp, Page
 from .page import (parse_page, additional_expand_templates)
@@ -29,7 +28,8 @@ def page_handler(ctx, page: Page, capture_cb, config_kwargs,
     # steps.
     title = re.sub(r"[\s\000-\037]+", " ", page.title)
     title = title.strip()
-    if capture_cb and not capture_cb(title, page.redirect_to if page.redirect_to else page.body):
+    if capture_cb and not capture_cb(
+            title, page.redirect_to if page.redirect_to else page.body):
         return None
     if dont_parse:
         return None
@@ -62,10 +62,11 @@ def page_handler(ctx, page: Page, capture_cb, config_kwargs,
     return (ret, stats)
 
 
-def parse_wiktionary(ctx: Wtp, path: str, config: WiktionaryConfig, word_cb, capture_cb,
-                     phase1_only: bool, dont_parse: bool, namespace_ids: Set[int],
-                     override_folders: Optional[List[str]] = None,
-                     skip_extract_dump: bool = False):
+def parse_wiktionary(
+        ctx: Wtp, path: str, config: WiktionaryConfig, word_cb, capture_cb,
+        phase1_only: bool, dont_parse: bool, namespace_ids: Set[int],
+        override_folders: Optional[List[str]] = None,
+        skip_extract_dump: bool = False):
     """Parses Wiktionary from the dump file ``path`` (which should point
     to a "enwiktionary-<date>-pages-articles.xml.bz2" file.  This
     calls ``capture_cb(title)`` for each raw page (if provided), and
@@ -187,34 +188,28 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
     logging.info("Reprocessing wiktionary complete")
 
 
-def extract_namespace(ctx, namespace, path):
+def process_ns_page_title(page: Page, ns_name: str) -> Tuple[str, str]:
+    text = page.body if page.body is not None else page.redirect_to
+    title = page.title[page.title.find(":") + 1:]
+    title = re.sub(r"(^|/)\.($|/)", r"\1__dotdot__\2", title)
+    title = re.sub(r"(^|/)\.\.($|/)", r"\1__dotdot__\2", title)
+    title = title.replace("//", "__slashslash__")
+    title = re.sub(r"^/", r"__slash__", title)
+    title = re.sub(r"/$", r"__slash__", title)
+    title = ns_name + "/" + title
+    return (title, text)
+
+
+def extract_namespace(ctx: Wtp, namespace: str, path: str) -> None:
     """Extracts all pages in the given namespace and writes them to a .tar
     file with the given path."""
-    assert isinstance(ctx, Wtp)
-    assert isinstance(namespace, str)
-    assert isinstance(path, str)
-
-    print("Extracting pages from namespace {} to tar file {}"
-          .format(namespace, path))
-
-    prefix = namespace + ":"
+    logging.info(
+        f"Extracting pages from namespace {namespace} to tar file {path}")
+    ns_id = ctx.NAMESPACE_DATA.get(namespace, {}).get("id")
     t = time.time()
-
-    def page_cb(model, title, text):
-        if not title.startswith(prefix):
-            return None
-        text = ctx.read_by_title(title)
-        title = title[len(prefix):]
-        title = re.sub(r"(^|/)\.($|/)", r"\1__dotdot__\2", title)
-        title = re.sub(r"(^|/)\.\.($|/)", r"\1__dotdot__\2", title)
-        title = title.replace("//", "__slashslash__")
-        title = re.sub(r"^/", r"__slash__", title)
-        title = re.sub(r"/$", r"__slash__", title)
-        title = namespace + "/" + title
-        return (title, text)
-
-    with tarfile.open(path, mode="w", bufsize=16 * 1024 * 1024) as tarf:
-        for title, text in ctx.reprocess(page_cb, autoload=False):
+    with tarfile.open(path, "w") as tarf:
+        for page in ctx.get_all_pages([ns_id]):
+            title, text = process_ns_page_title(page, namespace)
             text = text.encode("utf-8")
             f = io.BytesIO(text)
             title += ".txt"
