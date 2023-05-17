@@ -43,7 +43,7 @@ class UtilsTests(unittest.TestCase):
                                "foo zap a", "foo zap b"])
 
     def test_slashes7(self):
-        self.ctx.add_page("wikitext", "foo", "x")
+        self.ctx.add_page("foo", 0, "x")
         assert self.ctx.page_exists("foo")
         ret = split_slashes(self.ctx, "foo/bar zap a/b")
         print("ret:", ret)

@@ -105,12 +105,12 @@ def split_slashes(ctx, text):
     if ctx.page_exists(text):
         return [text]
 
-    text = re.sub(r"[／]", "/", text)
+    text = text.replace("／", "/")
     alts = text.split(" / ")  # Always full split at " / "
     ret = []
     for alt in alts:
         alt = alt.strip()
-        if alt.find("/") < 0 or alt[0] == "/" or alt[-1] == "/":
+        if "/" not in alt or alt[0] == "/" or alt[-1] == "/":
             # No slashes, no splitting; or starts/ends with a slash
             ret.append(alt)
             continue
