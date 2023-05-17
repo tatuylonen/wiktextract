@@ -184,7 +184,6 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
             }
             word_cb(data)
 
-    ctx.close_db_conn()
     logging.info("Reprocessing wiktionary complete")
 
 

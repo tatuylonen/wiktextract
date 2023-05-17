@@ -31,8 +31,9 @@ from wiktextract import extract_thesaurus_data
 from wiktextract import extract_categories
 
 # Pages within these namespaces are captured.
-RECOGNIZED_NAMESPACE_NAMES = ["Main", "Category", "Appendix", "Project", "Thesaurus",
-                              "Module", "Template", "Reconstruction"]
+RECOGNIZED_NAMESPACE_NAMES = [
+    "Main", "Category", "Appendix", "Project", "Thesaurus", "Module",
+    "Template", "Reconstruction"]
 
 
 def capture_page(orig_title: str, text: str, pages_dir: Optional[str]) -> bool:
@@ -149,7 +150,8 @@ def main():
     args = parser.parse_args()
 
     if not args.quiet:
-        logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", level=logging.DEBUG)
+        logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s",
+                            level=logging.DEBUG)
 
     if args.debug_cell_text:
         # importing debug_cell_text from wiktextract.inflection
@@ -185,8 +187,10 @@ def main():
 
     if args.num_threads and args.num_threads > 1:
         import multiprocessing
+
         if multiprocessing.get_start_method() == "spawn":
-            print("--num-threads not supported on this OS (no stable implementation of fork() available)")
+            logging.error("--num-threads not supported on this OS (no stable "
+                          "implementation of fork() available)")
             sys.exit(1)
 
     # Open output file.
@@ -356,11 +360,12 @@ def main():
     if args.templates_file:
         extract_namespace(ctx, "Template", args.templates_file)
     if args.categories_file:
-        print("Extracting category tree")
+        logging.info("Extracting category tree")
         tree = extract_categories(ctx, config)
-        sys.stdout.flush()
         with open(args.categories_file, "w") as f:
             json.dump(tree, f, indent=2, sort_keys=True)
+
+    ctx.close_db_conn()
 
     if args.profile:
         pr.disable()
