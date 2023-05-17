@@ -2,12 +2,11 @@
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import re
 from wikitextprocessor import Wtp
 from .config import WiktionaryConfig
 from .page import clean_node
 
-lua_code = r"""
+LUA_CODE = r"""
 local export = {}
 
 topic_data = require("Module:category tree/topic cat/data")
@@ -73,7 +72,7 @@ def extract_categories(ctx: Wtp, config: WiktionaryConfig):
     module_ns_local_name = module_ns.get("name")
     module_ns_id = module_ns.get("id")
     ctx.add_page(f"{module_ns_local_name}:wiktextract cat tree",
-                 module_ns_id, lua_code, model="Scribunto")
+                 module_ns_id, LUA_CODE, model="Scribunto")
     ctx.start_page("Wiktextract category tree extraction")
     rawdata = ctx.expand("{{#invoke:wiktextract cat tree|main}}")
     ht = {}
