@@ -1109,9 +1109,11 @@ def quote_kept_parens(s):
                   r"__lpar__\1__rpar__", s)
 
 
-def quote_kept_ruby(ruby_tuples, s):
-    # if len(ruby_tuples) < 1:
-    #     return s
+def quote_kept_ruby(ctx, ruby_tuples, s):
+    if len(ruby_tuples) < 1:
+        ctx.debug("quote_ruby called with no ruby",
+                  sortid="form_description/1114/20230517")
+        return s
     ks = []
     rs = []
     for k, r in ruby_tuples:
@@ -1394,7 +1396,7 @@ def parse_word_head(ctx, pos, text, data, is_reconstruction,
     # parenthesized parts are part of word, and those must be handled
     # specially here.
     if ruby:
-        text = quote_kept_ruby(ruby, text)
+        text = quote_kept_ruby(ctx, ruby, text)
     base = text
     base = quote_kept_parens(base)
     base = re.sub(r"\(([^()]|\([^(]*\))*\)($|\s)", r"\2", base)
