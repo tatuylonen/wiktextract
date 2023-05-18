@@ -21,16 +21,12 @@ from .thesaurus import extract_thesaurus_data
 from .datautils import data_append
 
 
-def page_handler(ctx, page: Page, capture_cb, config_kwargs,
-                 thesaurus_data, dont_parse):
+def page_handler(ctx, page: Page, config_kwargs, thesaurus_data, dont_parse):
     # Make sure there are no newlines or other strange characters in the
     # title.  They could cause security problems at several post-processing
     # steps.
     title = re.sub(r"[\s\000-\037]+", " ", page.title)
     title = title.strip()
-    if capture_cb and not capture_cb(
-            title, page.redirect_to if page.redirect_to else page.body):
-        return None
     if dont_parse:
         return None
     if page.redirect_to is not None:
@@ -54,33 +50,29 @@ def page_handler(ctx, page: Page, capture_cb, config_kwargs,
         ret = parse_page(ctx, title, page.body, config1)
         dur = time.time() - start_t
         if dur > 100:
-            print("====== WARNING: PARSING PAGE TOOK {:.1f}s: {}"
-                  .format(dur, title))
+            logging.warning("====== WARNING: PARSING PAGE TOOK {:.1f}s: {}"
+                            .format(dur, title))
     stats = config1.to_return()
     for k, v in ctx.to_return().items():
         stats[k] = v
-    return (ret, stats)
+    return ret, stats
 
 
 def parse_wiktionary(
-        ctx: Wtp, path: str, config: WiktionaryConfig, word_cb, capture_cb,
+        ctx: Wtp, path: str, config: WiktionaryConfig, word_cb,
         phase1_only: bool, dont_parse: bool, namespace_ids: Set[int],
         override_folders: Optional[List[str]] = None,
-        skip_extract_dump: bool = False):
+        skip_extract_dump: bool = False,
+        save_pages_path: Optional[str] = None):
     """Parses Wiktionary from the dump file ``path`` (which should point
     to a "enwiktionary-<date>-pages-articles.xml.bz2" file.  This
-    calls ``capture_cb(title)`` for each raw page (if provided), and
-    if it returns True, and calls ``word_cb(data)`` for all words
-    defined for languages in ``languages``."""
+    calls `word_cb(data)` for all words defined for languages in `languages`."""
     assert callable(word_cb)
-    assert capture_cb is None or callable(capture_cb)
     capture_language_codes = config.capture_language_codes
     if capture_language_codes is not None:
         assert isinstance(capture_language_codes, (list, tuple, set))
         for x in capture_language_codes:
             assert isinstance(x, str)
-
-    config_kwargs = config.to_kwargs()
 
     # langhd is needed for pre-expanding language heading templates in the
     # Chinese Wiktionary dump file: https://zh.wiktionary.org/wiki/Template:-en-
@@ -91,24 +83,24 @@ def parse_wiktionary(
     logging.info("First phase - extracting templates, macros, and pages")
     if override_folders is not None:
         override_folders = [Path(folder) for folder in override_folders]
+    if save_pages_path is not None:
+        save_pages_path = Path(save_pages_path)
     list(ctx.process(path, None, namespace_ids, True, override_folders,
-                     skip_extract_dump))
+                     skip_extract_dump, save_pages_path))
     if phase1_only:
         ctx.close_db_conn()
         return []
 
     # Phase 2 - process the pages using the user-supplied callback
     logging.info("Second phase - processing pages")
+    return reprocess_wiktionary(ctx, config, word_cb, dont_parse)
 
-    return reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse)
 
-
-def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
+def reprocess_wiktionary(ctx, config, word_cb, dont_parse):
     """Reprocesses the Wiktionary from the cache file."""
     assert isinstance(ctx, Wtp)
     assert isinstance(config, WiktionaryConfig)
     assert callable(word_cb)
-    assert capture_cb is None or callable(capture_cb)
     assert dont_parse in (True, False)
 
     config_kwargs = config.to_kwargs()
@@ -119,8 +111,8 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
 
     # Then perform the main parsing pass.
     def page_cb(page: Page):
-        return page_handler(ctx, page, capture_cb, config_kwargs,
-                            thesaurus_data, dont_parse)
+        return page_handler(
+            ctx, page, config_kwargs, thesaurus_data, dont_parse)
 
     emitted = set()
     process_ns_ids = list({
@@ -153,8 +145,9 @@ def reprocess_wiktionary(ctx, config, word_cb, capture_cb, dont_parse):
                 print("Linkage language {} not recognized".format(lang))
                 continue
             lang_code = config.LANGUAGES_BY_NAME[lang]
-            print("Emitting thesaurus main entry for {}/{}/{} (not in main)"
-                  .format(word, lang, pos))
+            logging.info(
+                "Emitting thesaurus main entry for {}/{}/{} (not in main)"
+                .format(word, lang, pos))
             sense_ht = collections.defaultdict(list)
             for tpos, rel, w, sense, xlit, tags, topics, source in linkages:
                 if not sense:

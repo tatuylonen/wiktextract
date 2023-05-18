@@ -36,40 +36,6 @@ RECOGNIZED_NAMESPACE_NAMES = [
     "Template", "Reconstruction"]
 
 
-def capture_page(orig_title: str, text: str, pages_dir: Optional[str]) -> bool:
-    """Checks if the page needs special handling (and maybe saving).
-    Returns True if the page should be processed normally as a
-    dictionary entry."""
-    title = orig_title
-    m = re.match(r"^([A-Z][a-z][-a-zA-Z0-9_]+):(.+)$", title)
-    if not m:
-        if len(title) > 100:
-            h = hashlib.sha256()
-            h.update(title.encode("utf-8"))
-            title = title[:100] + "-" + h.hexdigest()[:10]
-        title = "Words:" + title[:2] + "/" + title
-
-    if pages_dir is not None:
-        title = title.replace("//", "__slashslash__")
-        title = title.replace(":", "/")
-        path = pages_dir + "/" + title + ".txt"
-        path = re.sub(r"/\.+", lambda m: m.group(0).replace(".", "__dot__"),
-                      path)
-        path = re.sub(r"//+", "/", path)
-        dirpath = os.path.dirname(path)
-        try:
-            os.makedirs(dirpath, exist_ok=True)
-            with open(path, "w", encoding="utf-8") as f:
-                f.write("TITLE: {}\n".format(orig_title))
-                f.write(text)
-        except OSError as err:
-            print("OSError: {}, "
-                  "when writing file name {!r}, for "
-                  "title: {!r}".format(err, path, orig_title))
-
-    return True
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Multilingual Wiktionary data extractor")
@@ -230,7 +196,7 @@ def main():
                 if x in config.LANGUAGES_BY_NAME:
                     new_lang_codes.append(config.LANGUAGES_BY_NAME[x])
                 else:
-                    print("Invalid language:", x)
+                    logging.error(f"Invalid language: {x}")
                     sys.exit(1)
             else:
                 new_lang_codes.append(x)
@@ -284,9 +250,6 @@ def main():
             if not out_path or out_path == "-" or word_count % 1000 == 0:
                 out_f.flush()
 
-    def capture_cb(title, text):
-        return capture_page(title, text, args.pages_dir)
-
     # load redirects to ctx if given
     if args.redirects_file:
         with open(args.redirects_file) as f:
@@ -305,13 +268,14 @@ def main():
                 for name in RECOGNIZED_NAMESPACE_NAMES
             }
             # Parse the normal full Wiktionary data dump
-            parse_wiktionary(ctx, args.path, config, word_cb, capture_cb,
+            parse_wiktionary(ctx, args.path, config, word_cb,
                              (args.page is not None),  # phase1_only
                              (args.pages_dir is not None and
                               not args.out), # dont_parse
                              namespace_ids,
                              args.override,
-                             ctx.saved_page_nums() > 0)
+                             ctx.saved_page_nums() > 0,
+                             args.pages_dir)
 
         if args.page:
             # Parse a single Wiktionary page (extracted using --pages-dir)
@@ -347,7 +311,7 @@ def main():
 
         if not args.path and not args.page:
             # Parse again from the cache file
-            reprocess_wiktionary(ctx, config, word_cb, capture_cb,
+            reprocess_wiktionary(ctx, config, word_cb,
                                  dont_parse=(bool(args.pages_dir) and
                                                  not bool(args.out)))
 
