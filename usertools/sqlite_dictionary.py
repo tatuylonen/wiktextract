@@ -96,7 +96,6 @@ class WiktionaryDictionary:
         # SQLITE does not save collations in the file (but indexes on the collation are saved - they don't have to be recreated)
         self._conn.create_collation("NODIACRITIC", collate_unicode_no_diacritic_no_case)
 
-        # Enable foreign keys
         self._cur.execute("PRAGMA foreign_keys = ON;")
 
     def _load_dump_in_sqlite(self) -> None:
@@ -106,10 +105,7 @@ class WiktionaryDictionary:
 
         already_added_keys: set[str] = set()
         with open(self._input_dump, "r", encoding="utf-8") as f:
-            # We create the table
             self._cur.execute("CREATE TABLE wiktionary (id INTEGER PRIMARY KEY);")
-            # we parse the json
-            # for line in f:
             for line in tqdm.tqdm(f, total=8500000):
                 obj = json.loads(line)
                 # Now we look at the obj. If it has keys that are not in the
@@ -173,7 +169,6 @@ class WiktionaryDictionary:
         insert_cur = self._conn.cursor()
 
         already_existing_columns: set[str] = set()
-        # for word_id, json_array in self._cur:
         for word_id, json_array in tqdm.tqdm(self._cur, total=8500000):
             if json_array is not None:
                 for elem in json.loads(json_array):
@@ -217,6 +212,7 @@ class WiktionaryDictionary:
         ]
 
     def search_word_with_forms(self, word: str) -> list[dict]:
+        """Searches a word and its forms in the sqlite database."""
         # This searches either in the word column or in the forms table, using a join
         cursor = self._cur.execute(
             "SELECT * FROM wiktionary WHERE word=? COLLATE NODIACRITIC OR id IN (SELECT fid FROM forms_form_idx WHERE form=? COLLATE NODIACRITIC);",
@@ -229,6 +225,7 @@ class WiktionaryDictionary:
 
 
 if __name__ == "__main__":
+
     # Command line interface
     import argparse
 
