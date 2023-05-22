@@ -369,7 +369,7 @@ Tested with Python 3.9.4.
 - Create [a Python virtual environment](https://code.visualstudio.com/docs/python/environments#_creating-environments)
 (venv) in the VS Code workspace with the cloned repo. It should automatically install the package.
 
-- Open a new terminal. It should be PowerShell. You may need to [fix terminal permissions](https://stackoverflow.com/questions/56199111/visual-studio-code-cmd-error-cannot-be-loaded-because-running-scripts-is-disabl/67420296#67420296) 
+- Open a new terminal. It should be PowerShell. You may need to [fix terminal permissions](https://stackoverflow.com/questions/56199111/visual-studio-code-cmd-error-cannot-be-loaded-because-running-scripts-is-disabl/67420296#67420296)
 in order for it to pick up the virtual environment correclty.
 
 - In the terminal run this command:
@@ -479,10 +479,12 @@ options are used).
 #### parse_wiktionary()
 
 ```python
-def parse_wiktionary(ctx: Wtp, path: str, config: WiktionaryConfig, word_cb, capture_cb,
-                     phase1_only: bool, dont_parse: bool, namespace_ids: Set[int],
-                     override_folders: Optional[List[str]] = None,
-                     skip_extract_dump: bool = False)
+def parse_wiktionary(
+        ctx: Wtp, path: str, config: WiktionaryConfig, word_cb,
+        phase1_only: bool, dont_parse: bool, namespace_ids: Set[int],
+        override_folders: Optional[List[str]] = None,
+        skip_extract_dump: bool = False,
+        save_pages_path: Optional[str] = None):
 ```
 
 The ``parse_wiktionary`` function will call ``word_cb(data)`` for
@@ -507,13 +509,6 @@ Its arguments are as follows:
   will be called once for each word form and part-of-speech (each time there
   may be more than one word sense under "senses").  See below for a description
   of the dictionary.
-* `capture_cb` (function) - this can be `None` or a function to be
-  called as `capture_cb(page: Page)` for every page before
-  extracting any words from it.  It can be used to extract raw pages
-  to disk. `page.model` is `wikitext` for normal pages,
-  `Scribunto` for Lua modules(other values are also possible).
-  `page.title` is page title and `page.body` is page content.
-  `page.redirect_to` is title of the redirected page.
 * ``phase1_only`` - if this is set to ``True``, then only a cache file will
   be created but no extraction will take place.  In this case the ``Wtp``
   constructor should probably be given the ``cache_file`` argument when
@@ -522,6 +517,7 @@ Its arguments are as follows:
   included in this set won't be processed.
 * `override_folders` - override pages with files in these directories.
 * `skip_extract_dump` - skip extract dump file if database exists.
+* `save_pages_path` - path for storing extracted pages.
 
 This call gathers statistics in ``config``.  This function will automatically
 parallelize the extraction.  ``page_cb`` will be called in the parent process,
@@ -752,11 +748,11 @@ keys:
 
 If a word has a "Descendants" section, the `descendants` key will appear in the word's data. It contains a list of objects corresponding to each line in the section, where each object has the following keys:
 
-* `depth`: The level of indentation of the current line. This can be used to track the hierarchical structure of the list. 
+* `depth`: The level of indentation of the current line. This can be used to track the hierarchical structure of the list.
 * `templates`: An array of objects corresponding to templates that appear on the line. The structure of each of these objects is the same as the structure of each object in `etymology_templates`.
-* `text`: The expanded and cleaned line text, akin to `etymology_text`. 
+* `text`: The expanded and cleaned line text, akin to `etymology_text`.
 
-`descendants` data will also appear for the special case of "Derived terms" and "Extensions" sections for words that are roots in reconstructed languages, as these sections have the same format. 
+`descendants` data will also appear for the special case of "Derived terms" and "Extensions" sections for words that are roots in reconstructed languages, as these sections have the same format.
 
 ### Linkages to other words
 
