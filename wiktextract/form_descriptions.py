@@ -1111,7 +1111,7 @@ def quote_kept_parens(s):
 
 def quote_kept_ruby(ctx, ruby_tuples, s):
     if len(ruby_tuples) < 1:
-        ctx.debug("quote_ruby called with no ruby",
+        ctx.debug("quote_kept_ruby called with no ruby",
                   sortid="form_description/1114/20230517")
         return s
     ks = []
