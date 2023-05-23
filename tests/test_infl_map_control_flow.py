@@ -6,23 +6,24 @@
 
 import unittest
 from unittest.mock import patch
+from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
-from wiktextract import WiktionaryConfig
+from wiktextract.config import WiktionaryConfig
 from wiktextract.inflection import (expand_header, TableContext)
 
 class InflTests(unittest.TestCase):
 
     def setUp(self):
-        self.ctx = Wtp()
-        self.config = WiktionaryConfig()
-        self.ctx.start_page("testpage")
-        self.ctx.start_section("English")
-        self.tblctx = TableContext("barfoo")
+        self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
+
+        self.wxr.wtp.start_page("testpage")
+        self.wxr.wtp.start_section("English")
+        self.tablecontext = TableContext("barfoo")
 
     def xexpand_header(self, text, i_map, lang="English", pos="verb",
                        base_tags=[],):
         with patch('wiktextract.inflection.infl_map', i_map):
-            ret = expand_header(self.config, self.ctx, self.tblctx,
+            ret = expand_header(self.wxr, self.tablecontext,
                                 "foobar", lang,
                                 pos, "foo", base_tags)
         return ret

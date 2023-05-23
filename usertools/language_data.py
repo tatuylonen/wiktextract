@@ -6,6 +6,8 @@
 
 import argparse
 from wikitextprocessor import Wtp
+from wiktextract.config import WiktionaryConfig
+from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor.dumpparser import process_dump
 import json
 
@@ -131,9 +133,9 @@ end
 return export
 """
 
-def export_data(ctx, kind, path):
-    ctx.start_page(f"{kind} data export")
-    data = ctx.expand(f"{{{{#invoke:lang-data-export|{kind}}}}}")
+def export_data(wxr, kind, path):
+    wxr.wtp.start_page(f"{kind} data export")
+    data = wxr.wtp.expand(f"{{{{#invoke:lang-data-export|{kind}}}}}")
 
     data = json.loads(data)
     with open(path, "w") as fout:
@@ -150,16 +152,16 @@ if __name__ == "__main__":
                             help="Family data output file path")
     args = parser.parse_args()
 
-    ctx = Wtp()
+    wxr = WiktextractContext(Wtp(), WiktionaryConfig())
 
     def page_handler(model, title, text):
         if title.startswith("Module:"):
-            ctx.add_page(model, title, text)
+            wxr.wtp.add_page(model, title, text)
 
-    process_dump(ctx, args.dump, page_handler=page_handler)
+    process_dump(wxr, args.dump, page_handler=page_handler)
 
-    ctx.add_page("Scribunto", "Module:lang-data-export", lua_mod, transient=True)
+    wxr.wtp.add_page("Scribunto", "Module:lang-data-export", lua_mod, transient=True)
 
-    export_data(ctx, "languages", args.languages)
-    export_data(ctx, "families", args.families)
+    export_data(wxr, "languages", args.languages)
+    export_data(wxr, "families", args.families)
 

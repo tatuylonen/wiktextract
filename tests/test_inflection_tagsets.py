@@ -6,18 +6,19 @@
 
 import unittest
 import json
+from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
-from wiktextract import WiktionaryConfig
+from wiktextract.config import WiktionaryConfig
 from wiktextract.inflection import or_tagsets, and_tagsets
 
 class TagsetTests(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = 100000
-        self.ctx = Wtp()
-        self.config = WiktionaryConfig()
-        self.ctx.start_page("testpage")
-        self.ctx.start_section("English")
+        self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
+
+        self.wxr.wtp.start_page("testpage")
+        self.wxr.wtp.start_section("English")
 
     def xop(self, op, ts1, ts2, expected, lang="English", pos="verb"):
         assert callable(op)

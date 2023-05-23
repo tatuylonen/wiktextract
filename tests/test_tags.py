@@ -4,6 +4,7 @@
 
 import unittest
 from wiktextract.form_descriptions import decode_tags
+from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
 
 class TagTests(unittest.TestCase):

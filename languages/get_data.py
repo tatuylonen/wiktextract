@@ -19,28 +19,30 @@
 
 import argparse
 from wikitextprocessor import Wtp
+from wiktextract.config import WiktionaryConfig
+from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor.dumpparser import process_dump
 from pathlib import Path
 import json
 
 def get_lang_data(lang_code, dump_file):
-    ctx = Wtp(lang_code=lang_code)
-    module = ctx.NAMESPACE_DATA["Module"]["name"] + ":"
+    wxr = WiktextractContext(Wtp(lang_code=lang_code), WiktionaryConfig())
+    module = wxr.wtp.NAMESPACE_DATA["Module"]["name"] + ":"
 
     def page_handler(model, title, text):
         if title.startswith(module):
-            ctx.add_page(model, title, text)
+            wxr.wtp.add_page(model, title, text)
 
-    process_dump(ctx, dump_file, page_handler=page_handler)
+    process_dump(wxr, dump_file, page_handler=page_handler)
 
     with open(f"languages/lua/json.lua", "r") as lua_json_file:
         lua_json_mod = lua_json_file.read()
-    ctx.add_page("Scribunto", f"{module}wiktextract-json", lua_json_mod, transient=True)
+    wxr.wtp.add_page("Scribunto", f"{module}wiktextract-json", lua_json_mod, transient=True)
     with open(f"languages/lua/{lang_code}.lua", "r") as lua_lang_file:
         lua_lang_mod = lua_lang_file.read()
-    ctx.add_page("Scribunto", f"{module}wiktextract-lang-data", lua_lang_mod, transient=True)
-    ctx.start_page("wiktextract lang data")
-    data = ctx.expand("{{#invoke:wiktextract-lang-data|languages}}")
+    wxr.wtp.add_page("Scribunto", f"{module}wiktextract-lang-data", lua_lang_mod, transient=True)
+    wxr.wtp.start_page("wiktextract lang data")
+    data = wxr.wtp.expand("{{#invoke:wiktextract-lang-data|languages}}")
 
     data = json.loads(data)
 

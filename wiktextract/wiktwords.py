@@ -20,6 +20,7 @@ import collections
 
 from pathlib import Path
 from typing import Optional
+from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
 from wiktextract.inflection import set_debug_cell_text
 from wiktextract.template_override import template_override_fns
@@ -175,7 +176,13 @@ def main():
 
     word_count = 0
 
-    config = WiktionaryConfig(dump_file_lang_code=args.dump_file_language_code,
+    # Create expansion context
+    context1 = Wtp(db_path=args.db_path, num_threads=args.num_threads,
+              lang_code=args.dump_file_language_code,
+              languages_by_code=wxr.config.LANGUAGES_BY_CODE,
+              template_override_funcs=template_override_fns)
+
+    conf1 = WiktionaryConfig(dump_file_lang_code=args.dump_file_language_code,
                               capture_language_codes=args.language,
                               capture_translations=args.translations,
                               capture_pronunciation=args.pronunciations,
@@ -189,27 +196,29 @@ def main():
                               verbose=args.verbose,
                               expand_tables=args.inflection_tables_file,)
 
+    wxr = WiktextractContext(context1, conf1)
+
     if args.language:
         new_lang_codes = []
         for x in args.language:
-            if x not in config.LANGUAGES_BY_CODE:
-                if x in config.LANGUAGES_BY_NAME:
-                    new_lang_codes.append(config.LANGUAGES_BY_NAME[x])
+            if x not in wxr.config.LANGUAGES_BY_CODE:
+                if x in wxr.config.LANGUAGES_BY_NAME:
+                    new_lang_codes.append(wxr.config.LANGUAGES_BY_NAME[x])
                 else:
                     logging.error(f"Invalid language: {x}")
                     sys.exit(1)
             else:
                 new_lang_codes.append(x)
-        config.capture_language_codes = new_lang_codes
+        wxr.config.capture_language_codes = new_lang_codes
 
     if args.language:
         lang_names = []
         for x in args.language:
-            if x in config.LANGUAGES_BY_CODE:
-                lang_names.extend(config.LANGUAGES_BY_CODE[x])
+            if x in wxr.config.LANGUAGES_BY_CODE:
+                lang_names.extend(wxr.config.LANGUAGES_BY_CODE[x])
             else:
-                lang_names.extend(config.LANGUAGES_BY_CODE[
-                                            config.LANGUAGES_BY_NAME[x] ])
+                lang_names.extend(wxr.config.LANGUAGES_BY_CODE[
+                                            wxr.config.LANGUAGES_BY_NAME[x] ])
 
         lang_names = [re.escape(x) for x in lang_names]
         lang_names_re = r"==\s*("
@@ -217,17 +226,11 @@ def main():
         lang_names_re += r")"
         lang_names_re = re.compile(lang_names_re)
 
-    # Create expansion context
-    ctx = Wtp(db_path=args.db_path, num_threads=args.num_threads,
-              lang_code=args.dump_file_language_code,
-              languages_by_code=config.LANGUAGES_BY_CODE,
-              template_override_funcs=template_override_fns)
-
     # If --list-languages has been specified, just print the list of supported
     # languages
     if args.list_languages:
         print("Supported languages:")
-        for lang_name, lang_code in config.LANGUAGES_BY_NAME.items():
+        for lang_name, lang_code in wxr.config.LANGUAGES_BY_NAME.items():
             print(f"    {lang_name}: {lang_code}")
         sys.exit(0)
 
@@ -250,10 +253,10 @@ def main():
             if not out_path or out_path == "-" or word_count % 1000 == 0:
                 out_f.flush()
 
-    # load redirects to ctx if given
+    # load redirects if given
     if args.redirects_file:
         with open(args.redirects_file) as f:
-            config.redirects = json.load(f)
+            wxr.config.redirects = json.load(f)
 
     if args.profile:
         import cProfile
@@ -264,17 +267,17 @@ def main():
     try:
         if args.path:
             namespace_ids = {
-                ctx.NAMESPACE_DATA.get(name, {}).get("id")
+                wxr.wtp.NAMESPACE_DATA.get(name, {}).get("id")
                 for name in RECOGNIZED_NAMESPACE_NAMES
             }
             # Parse the normal full Wiktionary data dump
-            parse_wiktionary(ctx, args.path, config, word_cb,
+            parse_wiktionary(wxr, args.path, word_cb,
                              (args.page is not None),  # phase1_only
                              (args.pages_dir is not None and
                               not args.out), # dont_parse
                              namespace_ids,
                              args.override,
-                             ctx.saved_page_nums() > 0,
+                             wxr.wtp.saved_page_nums() > 0,
                              args.pages_dir)
 
         if args.page:
@@ -295,23 +298,23 @@ def main():
             else:
                 # Get page content from database
                 title = args.page
-                text = ctx.read_by_title(title)
+                text = wxr.wtp.read_by_title(title)
             # Extract Thesaurus data (this is a bit slow for a single page, but
             # needed for debugging linkages with thesaurus extraction).  This
             # is disabled by default to speed up single page testing.
             if args.use_thesaurus:
-                config.thesaurus_data = extract_thesaurus_data(ctx, config)
+                wxr.config.thesaurus_data = extract_thesaurus_data(wxr)
             # Parse the page
-            ret = parse_page(ctx, title, text, config)
+            ret = parse_page(wxr, title, text)
             for x in ret:
                 word_cb(x)
-            # Merge errors from ctx to config, so that we can also use
+            # Merge errors from wtp to config, so that we can also use
             # --errors with single page extraction
-            config.merge_return(ctx.to_return())
+            wxr.config.merge_return(wxr.wtp.to_return())
 
         if not args.path and not args.page:
             # Parse again from the cache file
-            reprocess_wiktionary(ctx, config, word_cb,
+            reprocess_wiktionary(wxr, word_cb,
                                  dont_parse=(bool(args.pages_dir) and
                                                  not bool(args.out)))
 
@@ -320,16 +323,16 @@ def main():
             out_f.close()
 
     if args.modules_file:
-        extract_namespace(ctx, "Module", args.modules_file)
+        extract_namespace(wxr, "Module", args.modules_file)
     if args.templates_file:
-        extract_namespace(ctx, "Template", args.templates_file)
+        extract_namespace(wxr, "Template", args.templates_file)
     if args.categories_file:
         logging.info("Extracting category tree")
-        tree = extract_categories(ctx, config)
+        tree = extract_categories(wxr)
         with open(args.categories_file, "w") as f:
             json.dump(tree, f, indent=2, sort_keys=True)
 
-    ctx.close_db_conn()
+    wxr.wtp.close_db_conn()
 
     if args.profile:
         pr.disable()
@@ -346,7 +349,7 @@ def main():
     if args.statistics:
         print("")
         print("LANGUAGE COUNTS")
-        for k, cnt in sorted(config.language_counts.items(),
+        for k, cnt in sorted(wxr.config.language_counts.items(),
                              key=lambda x: -x[1]):
             print("  {:>7d} {}".format(cnt, k))
             if cnt < 1000:
@@ -356,13 +359,13 @@ def main():
 
         print("")
         print("POS HEADER USAGE")
-        for k, cnt in sorted(config.pos_counts.items(),
+        for k, cnt in sorted(wxr.config.pos_counts.items(),
                              key=lambda x: -x[1]):
             print("  {:>7d} {}".format(cnt, k))
 
         print("")
         print("POS SUBSECTION HEADER USAGE")
-        for k, cnt in sorted(config.section_counts.items(),
+        for k, cnt in sorted(wxr.config.section_counts.items(),
                              key=lambda x: -x[1]):
             print("  {:>7d} {}".format(cnt, k))
 
@@ -372,9 +375,9 @@ def main():
     if args.errors:
         with open(args.errors, "w", encoding="utf-8") as f:
             json.dump({
-                "errors": config.errors,
-                "warnings": config.warnings,
-                "debugs": config.debugs,
+                "errors": wxr.config.errors,
+                "warnings": wxr.config.warnings,
+                "debugs": wxr.config.debugs,
                 }, f, sort_keys=True, indent=2)
 
     def dump_un(title, limit, counts, samples):
