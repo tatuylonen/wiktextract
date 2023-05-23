@@ -318,7 +318,16 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     else:
                         # split alternative pronunciations split
                         # with "," or " / "
-                        vals = re.split(r"\s*,\s*|\s+/\s+|[()]", v)
+                        vals = re.split(r"\s*,\s*|\s+/\s+", v)
+                        new_vals = []
+                        for v2 in vals:
+                            if v2.startswith("/") and v2.endswith("/"):
+                                # items like /kɛiŋ²¹³⁻⁵³ ^((Ø-))ŋuaŋ³³/
+                                new_vals.append(v2)
+                            else:
+                                # split in parentheses otherwise
+                                new_vals.extend(re.split(r"[()]", v2))
+                        vals = new_vals
                         for v in vals:
                             pron = generate_pron(v,
                                                  new_parent_hdrs,
