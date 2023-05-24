@@ -4,9 +4,6 @@
 
 import unittest
 from wiktextract.form_descriptions import classify_desc
-from wiktextract.config import WiktionaryConfig
-from wiktextract.wxr_context import WiktextractContext
-from wikitextprocessor import Wtp
 
 class ClassifyTests(unittest.TestCase):
 
@@ -219,9 +216,9 @@ class ClassifyTests(unittest.TestCase):
 
     def test_classify48(self):
         cls = classify_desc("中華文明")
-        self.assertEqual(cls, "중국문명")
+        self.assertEqual(cls, "other")
 
-    def test_classify48(self):
+    def test_classify48b(self):
         cls = classify_desc("중국문명")
         self.assertEqual(cls, "other")
 

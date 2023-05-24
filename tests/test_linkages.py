@@ -4,8 +4,6 @@
 
 import json
 import unittest
-import collections
-import wiktextract
 from wiktextract.linkages import parse_linkage_item_text
 from wiktextract.config import WiktionaryConfig
 from wiktextract.wxr_context import WiktextractContext
@@ -660,11 +658,6 @@ class LinkageTests(unittest.TestCase):
         data = self.run_data("to create = luoda")
         self.assertEqual(data, {"related": [
             {"word": "luoda", "english": "to create"}]})
-
-    def test_gender1(self):
-        data = self.run_data("foo f", lang="Swedish")
-        self.assertEqual(data, {"related": [
-            {"tags": ["feminine"], "word": "foo"}]})
 
     def test_gender1(self):
         data = self.run_data("foo f", lang="Swedish")

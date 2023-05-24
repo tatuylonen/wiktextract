@@ -5,7 +5,6 @@
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
-import json
 from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
@@ -2380,3 +2379,4 @@ class InflTests(unittest.TestCase):
             ],
         }
         self.assertEqual(expected, ret)
+    

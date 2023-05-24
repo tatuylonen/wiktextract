@@ -2,7 +2,6 @@
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import re
 import json
 import unittest
 from wiktextract.wxr_context import WiktextractContext
@@ -15,12 +14,12 @@ class PageTests(unittest.TestCase):
     def setUp(self):
         self.maxDiff = 20000
         conf1 = WiktionaryConfig(capture_language_codes=None,
-                                       capture_translations=True,
-                                       capture_pronunciation=True,
-                                       capture_linkages=True,
-                                       capture_compounds=True,
-                                       capture_redirects=True,
-                                       capture_examples=True)
+                                 capture_translations=True,
+                                 capture_pronunciation=True,
+                                 capture_linkages=True,
+                                 capture_compounds=True,
+                                 capture_redirects=True,
+                                 capture_examples=True)
         self.wxr = WiktextractContext(Wtp(), conf1)
         self.wxr.wtp.analyze_templates()
         self.wxr.wtp.start_page("testpage")

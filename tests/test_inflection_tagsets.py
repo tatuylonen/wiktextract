@@ -5,7 +5,6 @@
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
-import json
 from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
@@ -67,7 +66,7 @@ class TagsetTests(unittest.TestCase):
                  [["singular", "masculine"]],
                  [["masculine", "singular"]])
 
-    def test_or8(self):
+    def test_or8_b(self):
         self.xop(or_tagsets, [["masculine", "animate"]],
                  [["inanimate", "masculine"]],
                  [["masculine"]], lang="Russian")

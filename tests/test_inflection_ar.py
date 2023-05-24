@@ -5,7 +5,6 @@
 # Copyright (c) 2021, 2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
-import json
 from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
