@@ -14,7 +14,6 @@ import sys
 import json
 import logging
 import pstats
-import hashlib
 import argparse
 import collections
 
@@ -177,10 +176,6 @@ def main():
     word_count = 0
 
     # Create expansion context
-    context1 = Wtp(db_path=args.db_path, num_threads=args.num_threads,
-              lang_code=args.dump_file_language_code,
-              languages_by_code=wxr.config.LANGUAGES_BY_CODE,
-              template_override_funcs=template_override_fns)
 
     conf1 = WiktionaryConfig(dump_file_lang_code=args.dump_file_language_code,
                               capture_language_codes=args.language,
@@ -196,29 +191,28 @@ def main():
                               verbose=args.verbose,
                               expand_tables=args.inflection_tables_file,)
 
-    wxr = WiktextractContext(context1, conf1)
 
     if args.language:
         new_lang_codes = []
         for x in args.language:
-            if x not in wxr.config.LANGUAGES_BY_CODE:
-                if x in wxr.config.LANGUAGES_BY_NAME:
-                    new_lang_codes.append(wxr.config.LANGUAGES_BY_NAME[x])
+            if x not in conf1.LANGUAGES_BY_CODE:
+                if x in conf1.LANGUAGES_BY_NAME:
+                    new_lang_codes.append(conf1.LANGUAGES_BY_NAME[x])
                 else:
                     logging.error(f"Invalid language: {x}")
                     sys.exit(1)
             else:
                 new_lang_codes.append(x)
-        wxr.config.capture_language_codes = new_lang_codes
+        conf1.capture_language_codes = new_lang_codes
 
     if args.language:
         lang_names = []
         for x in args.language:
-            if x in wxr.config.LANGUAGES_BY_CODE:
-                lang_names.extend(wxr.config.LANGUAGES_BY_CODE[x])
+            if x in conf1.LANGUAGES_BY_CODE:
+                lang_names.extend(conf1.LANGUAGES_BY_CODE[x])
             else:
-                lang_names.extend(wxr.config.LANGUAGES_BY_CODE[
-                                            wxr.config.LANGUAGES_BY_NAME[x] ])
+                lang_names.extend(conf1.LANGUAGES_BY_CODE[
+                                            conf1.LANGUAGES_BY_NAME[x] ])
 
         lang_names = [re.escape(x) for x in lang_names]
         lang_names_re = r"==\s*("
@@ -230,7 +224,7 @@ def main():
     # languages
     if args.list_languages:
         print("Supported languages:")
-        for lang_name, lang_code in wxr.config.LANGUAGES_BY_NAME.items():
+        for lang_name, lang_code in conf1.LANGUAGES_BY_NAME.items():
             print(f"    {lang_name}: {lang_code}")
         sys.exit(0)
 
@@ -239,6 +233,13 @@ def main():
               "mandatory.")
         print("Alternatively, --db-path with --page can be used.")
         sys.exit(1)
+
+    context1 = Wtp(db_path=args.db_path, num_threads=args.num_threads,
+                   lang_code=args.dump_file_language_code,
+                   languages_by_code=conf1.LANGUAGES_BY_CODE,
+                   template_override_funcs=template_override_fns)
+
+    wxr = WiktextractContext(context1, conf1)
 
     def word_cb(data):
         nonlocal word_count
