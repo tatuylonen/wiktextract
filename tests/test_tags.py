@@ -4,7 +4,6 @@
 
 import unittest
 from wiktextract.form_descriptions import decode_tags
-from wikitextprocessor import Wtp
 
 class TagTests(unittest.TestCase):
 
@@ -155,10 +154,6 @@ class TagTests(unittest.TestCase):
     def test_tags31(self):
         ret, topics = decode_tags("US")
         self.assertEqual(ret, [("US",)])
-
-    def test_tags32(self):
-        ret, topics = decode_tags("UK")
-        self.assertEqual(ret, [("UK",)])
 
     def test_tags32(self):
         ret, topics = decode_tags("UK")

@@ -650,7 +650,6 @@ head_final_other_map = {
     "du or f du or n": "?",  # XXX guest/Tr/Zazaki
     "du or n or pf": "?",  # XXX how would this be expressed
     "du or n du": "neuter dual",  # bilberry/Tr/Zazaki
-    "du or f du or n": "",  # XXX guest/Tr(patron)/Zazaki
     "pl or pf": "?plural perfective",  # walk/Tr(to steal)/Russian
     "m or pf": "?masculine perfective",  # boom/Tr(make book)/Russian
     "n or n du": "neuter singular dual",

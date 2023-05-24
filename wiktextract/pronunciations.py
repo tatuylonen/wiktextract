@@ -30,7 +30,7 @@ pron_romanization_re = re.compile(
     ")([^\n]+)")
 
 
-def parse_pronunciation(ctx, config, node, data, etym_data,
+def parse_pronunciation(wxr, node, data, etym_data,
                         have_etym, base_data, lang_code):
     """Parses the pronunciation section from a language section on a
     page."""
@@ -55,9 +55,9 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             if (isinstance(l, WikiNode) and
                l.kind == NodeKind.TEMPLATE and
                l.args[0][0].strip() != "zh-pron"):
-                temp = ctx.node_to_wikitext(l)
-                temp = ctx.expand(temp)
-                temp = ctx.parse(temp)
+                temp = wxr.wtp.node_to_wikitext(l)
+                temp = wxr.wtp.expand(temp)
+                temp = wxr.wtp.parse(temp)
                 temp = temp.children
                 new_contents.extend(temp)
             else:
@@ -83,7 +83,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
         if name == "audio":
             filename = ht.get(2) or ""
             desc = ht.get(3) or ""
-            desc = clean_node(config, ctx, None, [desc])
+            desc = clean_node(wxr, None, [desc])
             audio = {"audio": filename.strip()}
             if desc:
                 audio["text"] = desc
@@ -93,7 +93,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 par = m.group(1)
                 cls = classify_desc(par)
                 if cls == "tags":
-                    parse_pronunciation_tags(ctx, par, audio)
+                    parse_pronunciation_tags(wxr, par, audio)
                 else:
                     skip = True
             if skip:
@@ -106,7 +106,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             dial = ht.get("dial")
             audio = {"audio": filename.strip()}
             if dial:
-                dial = clean_node(config, ctx, None, [dial])
+                dial = clean_node(wxr, None, [dial])
                 audio["text"] = dial
             if ipa:
                 audio["audio-ipa"] = ipa
@@ -124,11 +124,11 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             country = ht.get("country")
             audio = {"audio": filename.strip()}
             if dial:
-                dial = clean_node(config, ctx, None, [dial])
+                dial = clean_node(wxr, None, [dial])
                 audio["text"] = dial
-                parse_pronunciation_tags(ctx, dial, audio)
+                parse_pronunciation_tags(wxr, dial, audio)
             if country:
-                parse_pronunciation_tags(ctx, country, audio)
+                parse_pronunciation_tags(wxr, country, audio)
             if ipa:
                 audio["audio-ipa"] = ipa
             audios.append(audio)
@@ -138,10 +138,10 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             # if ipa:
             #     pron = {"ipa": ipa}
             #     if dial:
-            #         parse_pronunciation_tags(ctx, dial, pron)
+            #         parse_pronunciation_tags(wxr, dial, pron)
             #     if country:
-            #         parse_pronunciation_tags(ctx, country, pron)
-            #     data_append(ctx, data, "sounds", pron)
+            #         parse_pronunciation_tags(wxr, country, pron)
+            #     data_append(wxr, data, "sounds", pron)
             return "__AUDIO_IGNORE_THIS__" + str(len(audios) - 1) + "__"
         return None
 
@@ -179,8 +179,8 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             for hdr in new_parent_hdrs + new_specific_hdrs:
                 hdr = hdr.strip()
                 valid_hdr = re.sub("\s+", "-", hdr)
-                if hdr in config.ZH_PRON_TAGS:
-                    for tag in config.ZH_PRON_TAGS[hdr]:
+                if hdr in wxr.config.ZH_PRON_TAGS:
+                    for tag in wxr.config.ZH_PRON_TAGS[hdr]:
                         if tag not in pron["tags"]:
                             pron["tags"].append(tag)
                 elif valid_hdr in valid_tags:
@@ -220,7 +220,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             base_item = list(x for x in item.children
                              if not isinstance(x, WikiNode) or
                                 x.kind != NodeKind.LIST)
-            text = clean_node(config, ctx, None, base_item)
+            text = clean_node(wxr, None, base_item)
             # print(f"{parent_hdrs}  zhpron: {text}")  # XXX remove me
             text = re.sub(r"(?s)\(Note:.*?\)", "", text)
             # Kludge to clean up text like
@@ -277,8 +277,8 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     v = ":".join(parts[1:])
 
                     #  check for phrases
-                    if (("，" in ctx.title) and
-                       len(v.split(" ")) + v.count(",") == len(ctx.title)):
+                    if (("，" in wxr.wtp.title) and
+                       len(v.split(" ")) + v.count(",") == len(wxr.wtp.title)):
                         # This just captures exact matches where you have
                         # the pronunciation of the whole phrase and nothing
                         # else. Split on spaces, then because we're not
@@ -296,7 +296,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                         if pron:
                             pron["tags"] = list(sorted(pron["tags"]))
                             if pron not in data.get("sounds", ()):
-                                data_append(ctx, data, "sounds", pron)
+                                data_append(wxr, data, "sounds", pron)
                     elif "→" in v:
                         vals = re.split("→", v)
                         for v in vals:
@@ -314,7 +314,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
 
                                 pron["tags"] = list(sorted(pron["tags"]))
                                 if pron not in data.get("sounds", ()):
-                                    data_append(ctx, data, "sounds", pron)
+                                    data_append(wxr, data, "sounds", pron)
                     else:
                         # split alternative pronunciations split
                         # with "," or " / "
@@ -335,7 +335,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                             if pron:
                                 pron["tags"] = list(sorted(pron["tags"]))
                                 if pron not in data.get("sounds", ()):
-                                    data_append(ctx, data, "sounds", pron)
+                                    data_append(wxr, data, "sounds", pron)
             else:
                 new_parent_hdrs.append(text)
 
@@ -359,9 +359,9 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
            isinstance(contents.args[0][0], str) and
            contents.args[0][0].strip() == "zh-pron"):
 
-            src = ctx.node_to_wikitext(contents)
-            expanded = ctx.expand(src, templates_to_expand={"zh-pron"})
-            parsed = ctx.parse(expanded)
+            src = wxr.wtp.node_to_wikitext(contents)
+            expanded = wxr.wtp.expand(src, templates_to_expand={"zh-pron"})
+            parsed = wxr.wtp.parse(expanded)
             parse_expanded_zh_pron(parsed, [], [], unknown_header_tags)
         else:
             for item in contents.children:
@@ -372,7 +372,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
         unknown_header_tags = set()
         parse_chinese_pron(contents, unknown_header_tags)
         for hdr in unknown_header_tags:
-            ctx.debug(f"Zh-pron header not found in zh_pron_tags or tags: "
+            wxr.wtp.debug(f"Zh-pron header not found in zh_pron_tags or tags: "
                       f"{repr(hdr)}", sortid="pronunciations/296/20230324")
 
     def flattened_tree(lines):
@@ -412,9 +412,9 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
     # been caught by earlier kludges...
     def split_cleaned_node_on_newlines(contents):
         for litem in flattened_tree(contents):
-            text = clean_node(config, ctx, data, litem,
+            text = clean_node(wxr, data, litem,
                           template_fn=parse_pronunciation_template_fn)
-            ipa_text = clean_node(config, ctx, data, litem,
+            ipa_text = clean_node(wxr, data, litem,
                               post_template_fn=parse_pron_post_template_fn)
             for line, ipaline in zip(text.splitlines(), ipa_text.splitlines()):
                 yield line, ipaline
@@ -465,7 +465,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
         if m:
             pron = {field: m.group(1)}
             if active_pos: pron["pos"] = active_pos
-            data_append(ctx, data, "sounds", pron)
+            data_append(wxr, data, "sounds", pron)
             # have_pronunciations = True
             continue
 
@@ -477,7 +477,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 if ending:
                     pron = {"rhymes": ending}
                     if active_pos: pron["pos"] = active_pos
-                    data_append(ctx, data, "sounds", pron)
+                    data_append(wxr, data, "sounds", pron)
                     # have_pronunciations = True
             continue
 
@@ -489,7 +489,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                 if w:
                     pron = {"homophone": w}
                     if active_pos: pron["pos"] = active_pos
-                    data_append(ctx, data, "sounds", pron)
+                    data_append(wxr, data, "sounds", pron)
                     # have_pronunciations = True
             continue
 
@@ -503,12 +503,12 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     seen.add(w)
                     pron = {"hangeul": w}
                     if active_pos: pron["pos"] = active_pos
-                    data_append(ctx, data, "sounds", pron)
+                    data_append(wxr, data, "sounds", pron)
                     # have_pronunciations = True
 
         m = re.search(r"\b(Syllabification|Hyphenation): ([^\s,]*)", text)
         if m:
-            data_append(ctx, data, "hyphenation", m.group(2))
+            data_append(wxr, data, "hyphenation", m.group(2))
             # have_pronunciations = True
 
         # See if it contains a word prefix restricting which forms the
@@ -546,7 +546,7 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
             tag = pron_romanizations[prefix]
             form = {"form": w,
                     "tags": tag.split()}
-            data_append(ctx, data, "forms", form)
+            data_append(wxr, data, "forms", form)
 
         # Find IPA pronunciations
         for m in re.finditer(r"(?m)/[^][\n/,]+?/"
@@ -573,10 +573,10 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     pron["pos"] = active_pos
                 if prefix:
                     pron["form"] = prefix
-                parse_pronunciation_tags(ctx, tagstext, pron)
+                parse_pronunciation_tags(wxr, tagstext, pron)
                 if active_pos:
                     pron["pos"] = active_pos
-                data_append(ctx, data, "sounds", pron)
+                data_append(wxr, data, "sounds", pron)
             # have_pronunciations = True
 
         # XXX what about {{hyphenation|...}}, {{hyph|...}}
@@ -595,8 +595,8 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     # First character is usually uppercased
                     if re.match(r"^[a-z][a-z]+", fn):
                         fn = fn[0].upper() + fn[1:]
-                    if fn in config.redirects:
-                        fn = config.redirects[fn]
+                    if fn in wxr.config.redirects:
+                        fn = wxr.config.redirects[fn]
                     # File extension is lowercased
                     # XXX some words seem to need this, some don't seem to
                     # have this??? what is the exact rule?
@@ -634,23 +634,23 @@ def parse_pronunciation(ctx, config, node, data, etym_data,
                     audio["mp3_url"] = mp3
                     if active_pos: audio["pos"] = active_pos
                 if audio not in data.get("sounds", ()):
-                    data_append(ctx, data, "sounds", audio)
+                    data_append(wxr, data, "sounds", audio)
             # have_pronunciations = True
         audios =[]
         for enpr in enprs:
             if re.match(r"/[^/]+/$", enpr):
                 enpr = enpr[1: -1]
             pron = {"enpr": enpr}
-            parse_pronunciation_tags(ctx, tagstext, pron)
+            parse_pronunciation_tags(wxr, tagstext, pron)
             if active_pos:
                 pron["pos"] = active_pos
             if pron not in data.get("sounds", ()):
-                data_append(ctx, data, "sounds", pron)
+                data_append(wxr, data, "sounds", pron)
             # have_pronunciations = True
         enprs = []
     
     ## I have commented out the otherwise unused have_pronunciation
     ## toggles; uncomment them to use this debug print
     # if not have_pronunciations and not have_panel_templates:
-    #     ctx.debug("no pronunciations found from pronunciation section",
+    #     wxr.wtp.debug("no pronunciations found from pronunciation section",
     #               sortid="pronunciations/533")

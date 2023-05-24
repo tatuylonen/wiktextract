@@ -10,6 +10,8 @@ import json
 import collections
 from nltk.corpus import brown
 from wikitextprocessor import Wtp
+from wiktextract.config import WiktionaryConfig
+from wiktextract.wxr_context import WiktextractContext
 
 english_words = set(x.lower() for x in brown.words())
 
@@ -156,14 +158,14 @@ def page_handler(model, title, text):
 
     return title
 
-ctx = Wtp(cache_file="species-cache")
+wxr = WiktextractContext(Wtp(cache_file="species-cache"), WiktionaryConfig())
 # Disable this for later runs to avoid recreating the cache.  Makes developing
 # the code MUCH faster.  Remove the cache file before reading the dump.
 # Read pages from the dump file into the cache file (Phase 1)
-#list(ctx.process(dumpfile, page_handler, phase1_only=True))
+#list(wxr.wtp.process(dumpfile, page_handler, phase1_only=True))
 
 # Process the pages in the dump file.
-ret = list(ctx.reprocess(page_handler))
+ret = list(wxr.wtp.reprocess(page_handler))
 
 print("Count distinct titles:", len(set(ret)))
 firsts = set(x.split()[0] for x in ret

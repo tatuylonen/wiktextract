@@ -2,31 +2,31 @@
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import re
 import json
 import unittest
+from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
-from wiktextract import WiktionaryConfig
+from wiktextract.config import WiktionaryConfig
 from wiktextract.page import parse_page
 
 class PageTests(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = 20000
-        self.ctx = Wtp()
-        self.ctx.analyze_templates()
-        self.ctx.start_page("testpage")
-        self.config = WiktionaryConfig(capture_language_codes=None,
-                                       capture_translations=True,
-                                       capture_pronunciation=True,
-                                       capture_linkages=True,
-                                       capture_compounds=True,
-                                       capture_redirects=True,
-                                       capture_examples=True)
+        conf1 = WiktionaryConfig(capture_language_codes=None,
+                                 capture_translations=True,
+                                 capture_pronunciation=True,
+                                 capture_linkages=True,
+                                 capture_compounds=True,
+                                 capture_redirects=True,
+                                 capture_examples=True)
+        self.wxr = WiktextractContext(Wtp(), conf1)
+        self.wxr.wtp.analyze_templates()
+        self.wxr.wtp.start_page("testpage")
 
     def runpage(self, text):
         assert isinstance(text, str)
-        return parse_page(self.ctx, self.ctx.title, text, self.config)
+        return parse_page(self.wxr, self.wxr.wtp.title, text)
 
     def test_page1(self):
         lst = self.runpage("""
@@ -93,7 +93,7 @@ testpage f
         ])
 
     def test_page3(self):
-        self.ctx.start_page("Unsupported titles/C sharp")
+        self.wxr.wtp.start_page("Unsupported titles/C sharp")
         lst = self.runpage("""
 ==Swedish==
 ===Noun===
@@ -120,7 +120,7 @@ foo
         ])
 
     def test_page4(self):
-        self.ctx.start_page("foo")
+        self.wxr.wtp.start_page("foo")
         lst = self.runpage("""
 ==English==
 
@@ -183,7 +183,7 @@ foo
         ])
 
     def test_page5(self):
-        self.ctx.start_page("foo")
+        self.wxr.wtp.start_page("foo")
         lst = self.runpage("""
 ==English==
 

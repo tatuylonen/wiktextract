@@ -1,9 +1,6 @@
 import unittest
-import collections
-import wiktextract
-from wiktextract.form_descriptions import (
-    decode_tags, parse_word_head, classify_desc)
-from wiktextract import WiktionaryConfig
+from wiktextract.config import WiktionaryConfig
+from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
 from wiktextract.datautils import split_at_comma_semi
 
@@ -11,10 +8,10 @@ from wiktextract.datautils import split_at_comma_semi
 class DescTests(unittest.TestCase):
 
     def setUp(self):
-        self.ctx = Wtp()
-        self.config = WiktionaryConfig()
-        self.ctx.start_page("testpage")
-        self.ctx.start_section("English")
+        self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
+
+        self.wxr.wtp.start_page("testpage")
+        self.wxr.wtp.start_section("English")
 
     def test_comma_semi1(self):
         self.assertEqual(split_at_comma_semi(""), [])
@@ -32,9 +29,9 @@ class DescTests(unittest.TestCase):
 
     def test_comma_semi5(self):
         self.assertEqual(split_at_comma_semi("a (foo, bar); zappa"),
-                         ["a (foo bar)", "zappa"])
+                         ["a (foo, bar)", "zappa"])
 
-    def test_comma_semi5(self):
+    def test_comma_semi5b(self):
         self.assertEqual(split_at_comma_semi("a (foo, bar)[1; zappa], z"),
                          ["a (foo, bar)[1; zappa]", "z"])
 

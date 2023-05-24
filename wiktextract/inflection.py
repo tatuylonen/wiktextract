@@ -8,8 +8,8 @@ import html
 import functools
 import collections
 import unicodedata
-from wikitextprocessor import Wtp, WikiNode, NodeKind, MAGIC_FIRST
-from wiktextract.config import WiktionaryConfig
+from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor import WikiNode, NodeKind, MAGIC_FIRST
 from wiktextract.tags import valid_tags
 from wiktextract.inflectiondata import infl_map, infl_start_map, infl_start_re
 from wiktextract.datautils import data_append, freeze, split_at_comma_semi
@@ -680,7 +680,7 @@ def parse_title(title, source):
     return global_tags, table_tags, extra_forms
 
 
-def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags,
+def expand_header(wxr, tablecontext, word, lang, pos, text, base_tags,
                   silent=False, ignore_tags=False, depth=0):
     """Expands a cell header to tagset, handling conditional expressions
     in infl_map.  This returns list of tuples of tags, each list element
@@ -691,8 +691,7 @@ def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags,
     is True, then tags listed in "if" will be ignored in the test (this is
     used when trying to heuristically detect whether a non-<th> cell is anyway
     a header)."""
-    assert isinstance(config, WiktionaryConfig)
-    assert isinstance(ctx, Wtp)
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(word, str)
     assert isinstance(lang, str)
     assert isinstance(pos, str)
@@ -702,7 +701,7 @@ def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags,
     assert isinstance(depth, int)
     # print("EXPAND_HDR: text={!r} base_tags={!r}".format(text, base_tags))
     # First map the text using the inflection map
-    text = clean_value(config, text)
+    text = clean_value(wxr, text)
     combined_return = []
     parts = split_at_comma_semi(text, separators=[";"])
     for text in parts:
@@ -732,7 +731,7 @@ def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags,
                 v = infl_map[text_without_parens]
             elif m is None:
                 if not silent:
-                    ctx.debug("inflection table: unrecognized header: {}"
+                    wxr.wtp.debug("inflection table: unrecognized header: {}"
                               .format(repr(text)),
                               sortid="inflection/735")
                 # Unrecognized header
@@ -764,7 +763,7 @@ def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags,
             # Otherwise the value should be a dictionary describing a
             # conditional expression.
             if not isinstance(v, dict):
-                ctx.debug("inflection table: internal: "
+                wxr.wtp.debug("inflection table: internal: "
                           "UNIMPLEMENTED INFL_MAP VALUE: {}"
                           .format(infl_map[text]),
                           sortid="inflection/767")
@@ -801,18 +800,18 @@ def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags,
                     assert isinstance(d, (list, tuple, set))
                     cond = depth in d
             # Handle inflection-template condition. Must be a string
-            # or list of strings, and if tblctx.template_name is in
+            # or list of strings, and if tablecontext.template_name is in
             # those, accept the condition.
             # TableContext.template_name is passed down from page/
             # parse_inflection, before parsing and expanding itself
             # has begun.
-            if cond and tblctx and "inflection-template" in v:
+            if cond and tablecontext and "inflection-template" in v:
                 d = v["inflection-template"]
                 if isinstance(d, str):
-                    cond = d == tblctx.template_name
+                    cond = d == tablecontext.template_name
                 else:
                     assert isinstance(d, (list, tuple, set))
-                    cond = tblctx.template_name in d
+                    cond = tablecontext.template_name in d
             # Handle "pos" condition.  The value must be either a single
             # part-of-speech or a list of them, and the condition evaluates to
             # True if the part-of-speech is any of those listed.
@@ -847,7 +846,7 @@ def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags,
             # Warning message about missing conditions for debugging.
 
             if cond == "default-true" and not default_then and not silent:
-                ctx.debug("inflection table: IF MISSING COND: word={} "
+                wxr.wtp.debug("inflection table: IF MISSING COND: word={} "
                           "lang={} text={} base_tags={} c={} cond={}"
                           .format(word, lang, text, base_tags, c, cond),
                           sortid="inflection/851")
@@ -862,7 +861,7 @@ def expand_header(config, ctx, tblctx, word, lang, pos, text, base_tags,
                         v = default_then
                     else:
                         if not silent:
-                            ctx.debug("inflection table: IF WITHOUT ELSE EVALS "
+                            wxr.wtp.debug("inflection table: IF WITHOUT ELSE EVALS "
                                       "False: "
                                       "{}/{} {!r} base_tags={}"
                                       .format(word, lang, text, base_tags),
@@ -1180,13 +1179,13 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
     assert all(isinstance(x, tuple) for x in coltags)
     return coltags
 
-def parse_simple_table(config, ctx, tblctx, word, lang, pos,
+def parse_simple_table(wxr, tablecontext, word, lang, pos,
                        rows, titles, source, after, depth):
     """This is the default table parser.  Despite its name, it can parse
     complex tables.  This returns a list of forms to be added to the
     part-of-speech, or None if the table could not be parsed."""
-    assert isinstance(config, WiktionaryConfig)
-    assert isinstance(ctx, Wtp)
+    assert isinstance(wxr, WiktextractContext)
+    assert isinstance(tablecontext, TableContext)
     assert isinstance(word, str)
     assert isinstance(lang, str)
     assert isinstance(pos, str)
@@ -1232,7 +1231,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 # Has more than one line - split this cell
                 parts = cell.text.strip().splitlines()
                 if len(parts) != 2:
-                    ctx.debug("forced rowspan kludge got {} parts: {!r}"
+                    wxr.wtp.debug("forced rowspan kludge got {} parts: {!r}"
                               .format(len(parts), cell.text),
                               sortid="inflection/1234")
                 cell2 = copy.deepcopy(cell)
@@ -1292,7 +1291,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                                        ):
                 base_tags = (set(rt0) | set(ct0) | set(global_tags) |
                          set(table_tags))  # Union.
-                alt_tags = expand_header(config, ctx, tblctx,
+                alt_tags = expand_header(wxr, tablecontext,
                                          word, lang, pos,
                                          text, base_tags, depth=depth)
                                 # base_tags are used in infl_map "if"-conds.
@@ -1333,7 +1332,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
         # to be added to a register of stored hdrspans to be used
         # later with "dummy-load-stored-hdrspans".
         if store_new_hdrspan:
-            tblctx.stored_hdrspans.append(hdrspan)
+            tablecontext.stored_hdrspans.append(hdrspan)
             
         # Handle headers that are above left-side header
         # columns and are followed by personal pronouns in
@@ -1700,7 +1699,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 tags.update(extra_tags)
                 tags.update(rt)
                 tags.update(refs_tags)
-                tags.update(tblctx.section_header)
+                tags.update(tablecontext.section_header)
                 # Merge tags from column.  For certain kinds of tags,
                 # those coming from row take precedence.
                 old_tags = set(tags)
@@ -1721,7 +1720,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 # a gender/class suffix
                 if pos == "verb" and any(valid_tags[t] == "non-finite"
                        for t in tags):
-                    form, tt = parse_head_final_tags(ctx, lang, form)
+                    form, tt = parse_head_final_tags(wxr, lang, form)
                     tags.update(tt)
     
                 # Remove "personal" tag if have nth person; these
@@ -1826,7 +1825,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                             
                 # Warn if there are entries with empty tags
                 if not tags:
-                    ctx.debug("inflection table: empty tags for {}"
+                    wxr.wtp.debug("inflection table: empty tags for {}"
                               .format(form),
                               sortid="inflection/1826")
     
@@ -1841,7 +1840,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 # Alternatively, you could make a list of IPA-admissible
                 # characters and reject non-IPA stuff with that.
                 if re.match(r"\s*/.*/\s*$", form):
-                    ctx.debug("inflection table form looks like IPA: "
+                    wxr.wtp.debug("inflection table form looks like IPA: "
                               "form={} tags={}"
                               .format(form, tags),
                               sortid="inflection/1840")
@@ -1987,7 +1986,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 for ref in refs:  # gets tags from footnotes
                     if ref in def_ht:
                         refs_tags.update(def_ht[ref])
-                rowtags = expand_header(config, ctx, tblctx,
+                rowtags = expand_header(wxr, tablecontext,
                                         word, lang, pos, text, [],
                                         silent=True, depth=depth)
                 rowtags = list(set(tuple(sorted(set(x) | refs_tags))
@@ -2010,12 +2009,12 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                         refs_tags.update(def_ht[ref])
 
                 # Expand header to tags
-                v = expand_header(config, ctx, tblctx,
+                v = expand_header(wxr, tablecontext,
                                   word, lang, pos, text, [],
                                   silent=True, depth=depth)
                 # print("EXPANDED {!r} to {}".format(text, v))
 
-                
+
                 if col_idx == 0:
                     # first_col_has_text is used for a test to ignore
                     # upper-left cells that are just text without
@@ -2036,13 +2035,13 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                             ):
                             new_hdrspans.append(hdrspan)
                     hdrspans = new_hdrspans
-                        
+
                 for tt in v:
                     if "dummy-section-header" in tt:
-                        tblctx.section_header = tt
+                        tablecontext.section_header = tt
                         break
                     if "dummy-reset-section-header" in tt:
-                        tblctx.section_header = []
+                        tablecontext.section_header = []
                 # Text between headers on a row causes earlier headers to
                 # be reset
                 if have_text:
@@ -2072,10 +2071,10 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                     continue  # Skip this cell
 
                 if any("dummy-load-stored-hdrspans" in ts for ts in v):
-                    hdrspans.extend(tblctx.stored_hdrspans)
+                    hdrspans.extend(tablecontext.stored_hdrspans)
                     
                 if any("dummy-reset-stored-hdrspans" in ts for ts in v):
-                    tblctx.stored_hdrspans = []
+                    tablecontext.stored_hdrspans = []
 
                 if any("dummy-store-hdrspan" in ts for ts in v):
                     # print(f"STORED: {col}")
@@ -2221,12 +2220,12 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                             ):
                     Lev = distw([form], word)
                     if form and Lev < 0.1:
-                        ctx.debug("accepted possible false positive '{}' with"
+                        wxr.wtp.debug("accepted possible false positive '{}' with"
                                   "> 0.1 Levenshtein distance in {}/{}"
                                   .format(form, word, lang),
                                   sortid="inflection/2213")
                     elif form and Lev < 0.3:
-                        ctx.debug("skipped possible match '{}' with > 0.3"
+                        wxr.wtp.debug("skipped possible match '{}' with > 0.3"
                                   "Levenshtein distance in {}/{}"
                                   .format(form, word, lang),
                                   sortid="inflection/2218")
@@ -2357,7 +2356,7 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 dt["tags"] = list(dt.get("tags", []))
                 # This strange copy-assigning shuffle is preventative black
                 # magic; do not touch lest you invoke deep bugs.
-                data_append(ctx, dt, "tags", "multiword-construction")
+                data_append(wxr, dt, "tags", "multiword-construction")
             new_ret.append(dt)
         ret = new_ret
 
@@ -2369,8 +2368,8 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
         dt = {"form": " ".join(table_tags),
               "source": source,
               "tags": ["table-tags"]}
-        if tblctx.template_name:
-            tn = {"form": tblctx.template_name,
+        if tablecontext.template_name:
+            tn = {"form": tablecontext.template_name,
                   "source": source,
                   "tags": ["inflection-template"]}
             ret = [dt] + [tn] + ret
@@ -2379,11 +2378,10 @@ def parse_simple_table(config, ctx, tblctx, word, lang, pos,
                 
     return ret
 
-def handle_generic_table(config, ctx, tblctx, data,
+def handle_generic_table(wxr, tablecontext, data,
                          word, lang, pos, rows, titles,
                          source, after, depth):
-    assert isinstance(config, WiktionaryConfig)
-    assert isinstance(ctx, Wtp)
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(data, dict)
     assert isinstance(word, str)
     assert isinstance(lang, str)
@@ -2401,13 +2399,13 @@ def handle_generic_table(config, ctx, tblctx, data,
         assert isinstance(x, str)
 
     # Try to parse the table as a simple table
-    ret = parse_simple_table(config, ctx, tblctx,
+    ret = parse_simple_table(wxr, tablecontext,
                              word, lang, pos, rows, titles,
                              source, after, depth)
     if ret is None:
         # XXX handle other table formats
         # We were not able to handle the table
-        ctx.debug("unhandled inflection table format, {}/{}"
+        wxr.wtp.debug("unhandled inflection table format, {}/{}"
                                   .format(word, lang),
                   sortid="inflection/2370")
         return
@@ -2433,9 +2431,9 @@ def handle_generic_table(config, ctx, tblctx, data,
         else:
             if "table-tags" not in tags:
                 have_forms.add(fdt)
-            data_append(ctx, data, "forms", dt)
+            data_append(wxr, data, "forms", dt)
 
-def determine_header(ctx, tblctx, config, lang, word, pos,
+def determine_header(wxr, tablecontext, lang, word, pos,
                      table_kind, kind, style,
                      row, col, celltext, titletext,
                      cols_headered,
@@ -2457,7 +2455,7 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
                                       titletext)).strip()
     cleaned, _, _, _ = extract_cell_content(lang, word, celltext)
     cleaned = re.sub(r"\s+", " ", cleaned)
-    hdr_expansion = expand_header(config, ctx, tblctx, word, lang, pos,
+    hdr_expansion = expand_header(wxr, tablecontext, word, lang, pos,
                                   cleaned, [],
                                   silent=True, ignore_tags=True)
     candidate_hdr = not any(any(t.startswith("error-")
@@ -2484,7 +2482,7 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
         # print("col: {}".format(col))
         if (not ignored_cell and
             lang not in LANGUAGES_WITH_CELLS_AS_HEADERS):
-            ctx.debug("rejected heuristic header: "
+            wxr.wtp.debug("rejected heuristic header: "
                       "table cell identified as header and given "
                       "candidate status, BUT {} is not in "
                       "LANGUAGES_WITH_CELLS_AS_HEADERS; "
@@ -2494,7 +2492,7 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
             candidate_hdr = False
         elif (cleaned not in LANGUAGES_WITH_CELLS_AS_HEADERS
                                     .get(lang, "")):
-            ctx.debug("rejected heuristic header: "
+            wxr.wtp.debug("rejected heuristic header: "
                       "table cell identified as header and given "
                       "candidate status, BUT the cleaned text is "
                       "not in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
@@ -2503,7 +2501,7 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
                       sortid="inflection/2457")
             candidate_hdr = False
         else:
-            ctx.debug("accepted heuristic header: "
+            wxr.wtp.debug("accepted heuristic header: "
                       "table cell identified as header and given "
                       "candidate status, AND the cleaned text is "
                       "in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
@@ -2549,7 +2547,7 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
           " + " not in titletext):
         if (not ignored_cell and
             lang not in LANGUAGES_WITH_CELLS_AS_HEADERS):
-            ctx.debug("rejected heuristic header: "
+            wxr.wtp.debug("rejected heuristic header: "
                       "table cell identified as header based "
                       "on style, BUT {} is not in "
                       "LANGUAGES_WITH_CELLS_AS_HEADERS; "
@@ -2559,7 +2557,7 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
         elif (not ignored_cell and
               cleaned not in LANGUAGES_WITH_CELLS_AS_HEADERS
                                     .get(lang, "")):
-            ctx.debug("rejected heuristic header: "
+            wxr.wtp.debug("rejected heuristic header: "
                       "table cell identified as header based "
                       "on style, BUT the cleaned text is "
                       "not in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
@@ -2567,7 +2565,7 @@ def determine_header(ctx, tblctx, config, lang, word, pos,
                       .format(lang, cleaned, style),
                       sortid="inflection/2522")
         else:
-            ctx.debug("accepted heuristic header: "
+            wxr.wtp.debug("accepted heuristic header: "
                       "table cell identified as header based "
                       "on style, AND the cleaned text is "
                       "in LANGUAGES_WITH_CELLS_AS_HEADERS[{}]; "
@@ -2601,13 +2599,12 @@ class TableContext(object):
         else:
             self.template_name = template_name
 
-def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
-                          data, tree, titles, source, after, tblctx=None):
+def handle_wikitext_or_html_table(wxr, word, lang, pos,
+                          data, tree, titles, source, after, tablecontext=None):
     """Parses a table from parsed Wikitext format into rows and columns of
     InflCell objects and then calls handle_generic_table() to parse it into
     forms.  This adds the forms into ``data``."""
-    assert isinstance(config, WiktionaryConfig)
-    assert isinstance(ctx, Wtp)
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(word, str)
     assert isinstance(lang, str)
     assert isinstance(pos, str)
@@ -2620,14 +2617,14 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
     for x in titles:
         assert isinstance(x, str)
     assert isinstance(after, str)
-    assert tblctx is None or isinstance(tblctx, TableContext)
+    assert tablecontext is None or isinstance(tablecontext, TableContext)
     # Imported here to avoid a circular import
     from wiktextract.page import clean_node, recursively_extract
 
-    if not tblctx:
-        tblctx = TableContext()
+    if not tablecontext:
+        tablecontext = TableContext()
         
-    def handle_table1(config, ctx, tblctx, word, lang, pos,
+    def handle_table1(wxr, tablecontext, word, lang, pos,
                               data, tree, titles, source, after, depth):
         """Helper function allowing the 'flattening' out of the table
         recursion: instead of handling the tables in the wrong order
@@ -2740,7 +2737,7 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
                                                        x.args == "table"))
     
                     # Clean the rest of the cell.
-                    celltext = clean_node(config, ctx, None, rest)
+                    celltext = clean_node(wxr, None, rest)
                     # print("CLEANED:", celltext)
     
                     # Handle nested tables.
@@ -2753,8 +2750,8 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
                         new_titles = list(titles)
                         if celltext:
                             new_titles.append(celltext)
-                        subtbl = handle_table1(config, ctx,
-                                                tblctx,
+                        subtbl = handle_table1(wxr,
+                                                tablecontext,
                                                 word, lang,
                                                 pos, data, tbl, new_titles,
                                                 source, "", depth + 1)
@@ -2778,7 +2775,7 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
                         titletext = titletext[:-1]
 
                     is_title, hdr_expansion, target, celltext = \
-                            determine_header(ctx, tblctx, config,
+                            determine_header(wxr, tablecontext,
                                      lang, word, pos,
                                      tree.kind, kind, style,
                                      row, col, celltext, titletext,
@@ -2862,52 +2859,51 @@ def handle_wikitext_or_html_table(config, ctx, word, lang, pos,
         return main_ret
         
 
-    new_rows = handle_table1(config, ctx, tblctx, word, lang, pos,
+    new_rows = handle_table1(wxr, tablecontext, word, lang, pos,
                               data, tree, titles, source, after, 0)
                               
     # Now we have a table that has been parsed into rows and columns of
     # InflCell objects.  Parse the inflection table from that format.
     if new_rows:
         for rows, titles, after, depth in new_rows:
-            handle_generic_table(config, ctx, tblctx, data,
+            handle_generic_table(wxr, tablecontext, data,
                                  word, lang, pos, rows,
                                  titles, source, after, depth)
 
 
 
 
-def handle_html_table(config, ctx, word, lang, pos, data, tree, titles, source,
-                      after, tblctx=None):
+def handle_html_table(wxr, word, lang, pos, data, tree, titles, source,
+                      after, tablecontext=None):
     """A passer-on function for html-tables, XXX, remove these?"""
-    handle_wikitext_or_html_table(config, ctx, word, lang, pos,
-                                data, tree, titles, source, after, tblctx)
+    handle_wikitext_or_html_table(wxr, word, lang, pos,
+                                data, tree, titles, source, after, tablecontext)
                                 
-def handle_wikitext_table(config, ctx, word, lang, pos, data, tree, titles, source,
-                      after, tblctx=None):
+def handle_wikitext_table(wxr, word, lang, pos, data, tree, titles, source,
+                      after, tablecontext=None):
     """A passer-on function for html-tables, XXX, remove these?"""
-    handle_wikitext_or_html_table(config, ctx, word, lang, pos,
-                                data, tree, titles, source, after, tblctx)
+    handle_wikitext_or_html_table(wxr, word, lang, pos,
+                                data, tree, titles, source, after, tablecontext)
                                 
 
 
-def parse_inflection_section(config, ctx, data,
+def parse_inflection_section(wxr, data,
                              word, lang, pos, section, tree,
-                             tblctx=None):
+                             tablecontext=None):
     """Parses an inflection section on a page.  ``data`` should be the
     data for a part-of-speech, and inflections will be added to it."""
 
     # print("PARSE_INFLECTION_SECTION {}/{}/{}/{}"
     #       .format(word, lang, pos, section))
-    assert isinstance(config, WiktionaryConfig)
-    assert isinstance(ctx, Wtp)
+    assert isinstance(wxr, WiktextractContext)
     assert isinstance(data, dict)
     assert isinstance(word, str)
     assert isinstance(lang, str)
-    assert pos in config.POS_TYPES
+    assert pos in wxr.config.POS_TYPES
     assert isinstance(section, str)
     assert isinstance(tree, WikiNode)
-    assert (tblctx is None or
-            isinstance(tblctx, TableContext))
+    assert (tablecontext is None or
+            isinstance(tablecontext, TableContext))
     source = section
     tables = []
     titleparts = []
@@ -2915,14 +2911,14 @@ def parse_inflection_section(config, ctx, data,
     def process_tables():
         for kind, node, titles, after in tables:
             after = "".join(after).strip()
-            after = clean_value(config, after)
+            after = clean_value(wxr, after)
             if kind == "wikitext":
-                handle_wikitext_table(config, ctx, word, lang, pos,
+                handle_wikitext_table(wxr, word, lang, pos,
                                       data, node, titles, source, after,
-                                      tblctx=tblctx)
+                                      tablecontext=tablecontext)
             elif kind == "html":
-                handle_html_table(config, ctx, word, lang, pos, data, node,
-                                  titles, source, after, tblctx=tblctx)
+                handle_html_table(wxr, word, lang, pos, data, node,
+                                  titles, source, after, tablecontext=tablecontext)
             else:
                 raise RuntimeError("{}: unimplemented table kind {}"
                                    .format(word, kind))
@@ -2953,7 +2949,7 @@ def parse_inflection_section(config, ctx, data,
             return
         if not isinstance(node, WikiNode):
             if navframe:
-                ctx.debug("inflection table: unhandled in NavFrame: {}"
+                wxr.wtp.debug("inflection table: unhandled in NavFrame: {}"
                                     .format(node),
                           sortid="inflection/2907")
             return
@@ -3012,13 +3008,13 @@ def parse_inflection_section(config, ctx, data,
     process_tables()
 
     # XXX this code is used for extracting tables for inflection tests
-    if config.expand_tables:
+    if wxr.config.expand_tables:
         if section != "Mutation":
-            with open(config.expand_tables, "w") as f:
+            with open(wxr.config.expand_tables, "w") as f:
                 f.write(word + "\n")
                 f.write(lang + "\n")
                 f.write(pos + "\n")
                 f.write(section + "\n")
-                text = ctx.node_to_wikitext(tree)
+                text = wxr.wtp.node_to_wikitext(tree)
                 f.write(text + "\n")
                 

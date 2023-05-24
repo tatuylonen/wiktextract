@@ -5,28 +5,28 @@
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
-import json
+from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
-from wiktextract import WiktionaryConfig
+from wiktextract.config import WiktionaryConfig
 from wiktextract.inflection import parse_inflection_section
 
 class InflTests(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = 100000
-        self.ctx = Wtp()
-        self.config = WiktionaryConfig()
-        self.ctx.start_page("testpage")
-        self.ctx.start_section("English")
+        self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
+
+        self.wxr.wtp.start_page("testpage")
+        self.wxr.wtp.start_section("English")
 
     def xinfl(self, word, lang, pos, section, text):
         """Runs a single inflection table parsing test, and returns ``data``."""
-        self.ctx.start_page(word)
-        self.ctx.start_section(lang)
-        self.ctx.start_subsection(pos)
-        tree = self.ctx.parse(text)
+        self.wxr.wtp.start_page(word)
+        self.wxr.wtp.start_section(lang)
+        self.wxr.wtp.start_subsection(pos)
+        tree = self.wxr.wtp.parse(text)
         data = {}
-        parse_inflection_section(self.config, self.ctx, data, word, lang, pos,
+        parse_inflection_section(self.wxr, data, word, lang, pos,
                                  section, tree)
         return data
 

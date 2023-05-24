@@ -5,6 +5,7 @@
 from .wiktionary import (parse_wiktionary, reprocess_wiktionary,
                          extract_namespace)
 from .config import WiktionaryConfig
+from .wxr_context import WiktextractContext
 from .page import parse_page
 from .parts_of_speech import PARTS_OF_SPEECH
 from .thesaurus import extract_thesaurus_data
@@ -14,6 +15,7 @@ from .form_descriptions import valid_tags  # This file adds uppercase tags
 
 __all__ = (
     "WiktionaryConfig",
+    "WiktextractContext",
     "parse_wiktionary",
     "reprocess_wiktionary",
     "PARTS_OF_SPEECH",

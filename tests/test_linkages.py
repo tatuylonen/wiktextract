@@ -4,10 +4,9 @@
 
 import json
 import unittest
-import collections
-import wiktextract
 from wiktextract.linkages import parse_linkage_item_text
-from wiktextract import WiktionaryConfig
+from wiktextract.config import WiktionaryConfig
+from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
 
 
@@ -15,14 +14,13 @@ class LinkageTests(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = 20000
-        self.ctx = Wtp()
-        self.config = WiktionaryConfig()
-        self.ctx.start_page("testpage")
-        self.ctx.start_section("English")
+        self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
+        self.wxr.wtp.start_page("testpage")
+        self.wxr.wtp.start_section("English")
 
     def run_data(self, item, word="testpage", lang="English",
                  field="related", ruby=[], sense=None, senses=[],
-                 ctx=None, is_reconstruction=False):
+                 wxr=None, is_reconstruction=False):
         """Runs a test where we expect the parsing to return None.  This
         function returns ``data``."""
         assert isinstance(item, str)
@@ -32,20 +30,21 @@ class LinkageTests(unittest.TestCase):
         assert isinstance(ruby, list)
         assert sense is None or isinstance(sense, str)
         assert isinstance(senses, list)
-        assert ctx is None or isinstance(ctx, Wtp)
-        ctx1 = ctx if ctx is not None else Wtp()
-        self.ctx = ctx1
-        self.config = WiktionaryConfig()
-        self.ctx.start_page(word)
-        self.ctx.start_section(lang)
+        assert wxr is None or isinstance(wxr, WiktextractContext)
+        wxr1 = wxr if wxr is not None else WiktextractContext(
+                                                        Wtp(),
+                                                        WiktionaryConfig())
+        self.wxr = wxr1
+        self.wxr.wtp.start_page(word)
+        self.wxr.wtp.start_section(lang)
         data = {}
-        ret = parse_linkage_item_text(self.ctx, word, data, field, item,
+        ret = parse_linkage_item_text(self.wxr, word, data, field, item,
                                       sense, ruby, senses, is_reconstruction)
         self.assertIs(ret, None)
-        if ctx is None:
-            self.assertEqual(self.ctx.errors, [])
-            self.assertEqual(self.ctx.warnings, [])
-            self.assertEqual(self.ctx.debugs, [])
+        if wxr is None:
+            self.assertEqual(self.wxr.wtp.errors, [])
+            self.assertEqual(self.wxr.wtp.warnings, [])
+            self.assertEqual(self.wxr.wtp.debugs, [])
         return data
 
     def run_empty(self, item):
@@ -240,10 +239,10 @@ class LinkageTests(unittest.TestCase):
     def test_senseonly1(self):
         # In this case, parse_linkage_item_text should return the sense
         # for follow-on linkages
-        self.ctx.start_page("滿")
-        self.ctx.start_section("Chinese")
+        self.wxr.wtp.start_page("滿")
+        self.wxr.wtp.start_section("Chinese")
         data = {}
-        ret = parse_linkage_item_text(self.ctx, "滿", data, "synonyms",
+        ret = parse_linkage_item_text(self.wxr, "滿", data, "synonyms",
                                       "(arrogant):", None, [], [], False)
         self.assertEqual(ret, "arrogant")
 
@@ -476,14 +475,14 @@ class LinkageTests(unittest.TestCase):
 
     def test_prefix16(self):
         # Triggers an error due to invalid gloss reference
-        ctx = Wtp()
-        data = self.run_data("(4): foo", ctx=ctx, senses=[
+        wxr = WiktextractContext(Wtp(), WiktionaryConfig())
+        data = self.run_data("(4): foo", wxr=wxr, senses=[
             {"glosses": ["sense1"]},
             {"glosses": ["sense2", "sense2b"]},
             {"glosses": ["sense3"]}])
         self.assertEqual(data, {"related": [
             {"word": "foo"}]})
-        self.assertNotEqual(ctx.debugs, [])
+        self.assertNotEqual(wxr.wtp.debugs, [])
 
     def test_prefix17(self):
         data = self.run_data("(3): foo",
@@ -498,10 +497,10 @@ class LinkageTests(unittest.TestCase):
 
     def test_prefix18(self):
         # Triggers error due to invalid prefix
-        ctx = Wtp()
-        data = self.run_data("dsafjdasfkldjas: foo", ctx=ctx)
+        wxr = WiktextractContext(Wtp(), WiktionaryConfig())
+        data = self.run_data("dsafjdasfkldjas: foo", wxr=wxr)
         self.assertEqual(data, {"related": [{"word": "foo"}]})
-        self.assertNotEqual(ctx.debugs, [])
+        self.assertNotEqual(wxr.wtp.debugs, [])
 
     def test_prefix19(self):
         data = self.run_data("NATO phonetic: Bravo")
@@ -665,11 +664,6 @@ class LinkageTests(unittest.TestCase):
         self.assertEqual(data, {"related": [
             {"tags": ["feminine"], "word": "foo"}]})
 
-    def test_gender1(self):
-        data = self.run_data("foo f", lang="Swedish")
-        self.assertEqual(data, {"related": [
-            {"tags": ["feminine"], "word": "foo"}]})
-
     def test_gender2(self):
         data = self.run_data("foo m", lang="Swedish")
         self.assertEqual(data, {"related": [
@@ -689,8 +683,8 @@ class LinkageTests(unittest.TestCase):
     def test_gender5(self):
         # Numeric inflection classes should only be interpreted for certain
         # languages (e.g., Bantu languages)
-        ctx = Wtp()  # To allow debug messages
-        data = self.run_data("foo 1", lang="Swedish", ctx=ctx)
+        wxr = WiktextractContext(Wtp(), WiktionaryConfig())  # To allow debug messages
+        data = self.run_data("foo 1", lang="Swedish", wxr=wxr)
         self.assertEqual(data, {"related": [
             {"word": "foo 1"}]})
 
@@ -739,8 +733,8 @@ class LinkageTests(unittest.TestCase):
 
     def test_gender13(self):
         # They should not be interpreted for other languages
-        ctx = Wtp()  # To allow debug messages
-        data = self.run_data("foo 1 or 2", lang="English", ctx=ctx)
+        wxr = WiktextractContext(Wtp(), WiktionaryConfig())  # To allow debug messages
+        data = self.run_data("foo 1 or 2", lang="English", wxr=wxr)
         self.assertEqual(data, {"related": [
             {"word": "foo 1"},
             {"word": "2"},
@@ -755,9 +749,9 @@ class LinkageTests(unittest.TestCase):
 
     def test_gender15(self):
         # inclusive or/English/Translations
-        ctx = Wtp()  # To allow debug messages
+        wxr = WiktextractContext(Wtp(), WiktionaryConfig())  # To allow debug messages
         data = self.run_data("μη αποκλειστικό or n (mi apokleistikó or)",
-                             lang="Greek", word="inclusive or", ctx=ctx)
+                             lang="Greek", word="inclusive or", wxr=wxr)
         self.assertEqual(data, {"related": [
             {"word": "μη αποκλειστικό or", "tags": ["neuter"],
              "roman": "mi apokleistikó or"},
