@@ -446,7 +446,8 @@ the ``wikitextprocessor`` module.
 This code can be called from an application as follows:
 
 ```python
-from wiktextract import (WiktionaryConfig, parse_wiktionary, parse_page,
+from wiktextract import (WiktextractContext, WiktionaryConfig,
+                         parse_wiktionary, parse_page,
                          PARTS_OF_SPEECH)
 from wikitextprocessor import Wtp
 
@@ -462,13 +463,13 @@ config = WiktionaryConfig(
              capture_etymologies=True,
              capture_descendants=True,
              capture_inflections=True)
-ctx = Wtp()
+wxr = WiktextractContext(Wtp(), config)
 
 def word_cb(data):
     # data is dictionary containing information for one word/redirect
     ... do something with data
 
-parse_wiktionary(ctx, path, config, word_cb)
+parse_wiktionary(wxr, path, word_cb)
 ```
 
 The capture arguments default to ``True``, so they only need to be set if
@@ -480,7 +481,7 @@ options are used).
 
 ```python
 def parse_wiktionary(
-        ctx: Wtp, path: str, config: WiktionaryConfig, word_cb,
+        wxr: Wiktextractcontext, path: str, word_cb,
         phase1_only: bool, dont_parse: bool, namespace_ids: Set[int],
         override_folders: Optional[List[str]] = None,
         skip_extract_dump: bool = False,
@@ -496,14 +497,17 @@ format as the JSON-formatted dictionaries returned by the
 ``wiktwords`` tool.
 
 Its arguments are as follows:
-* ``ctx`` (Wtp) - a
+* ``wxr`` (WiktextractContext) - a Wiktextract-level processing context
+  containing fields that point to a Wtp context and WiktionarConfig object
+  (below).
+** ``wxr.wtp`` (Wtp) - a
   [wikitextprocessor](https://github.com/tatuylonen/wikitextprocessor/)
   processing context.  The number of parallel processes to use can be
-  given as the ``num_threads`` argument to the constructor, and a cache file
-  path can be provided as the ``cache_file`` argument.
+  given as the ``num_threads`` argument to the constructor, and a database
+  file path can be provided as the ``db_path`` argument.
+** ``wxr.config`` (WiktionaryConfig) - a configuration object describing
+  what to exctract (see below)
 * ``path`` (str) - path to a Wiktionary dump file (*-pages-articles.xml.bz2)
-* ``config`` (WiktionaryConfig) - a configuration object describing what to
-  exctract (see below)
 * ``word_cb`` (function) - this function will be called for every word
   extracted from Wiktionary.  The argument is a dictionary.  Typically it
   will be called once for each word form and part-of-speech (each time there
@@ -511,30 +515,32 @@ Its arguments are as follows:
   of the dictionary.
 * ``phase1_only`` - if this is set to ``True``, then only a cache file will
   be created but no extraction will take place.  In this case the ``Wtp``
-  constructor should probably be given the ``cache_file`` argument when
-  creating ``ctx``.
-* `namesapce_ids` - a set of namespace ids, pages have namespace ids that not
+  constructor should probably be given the ``db_path`` argument when
+  creating ``wxr.wtp``.
+* `namespace_ids` - a set of namespace ids, pages have namespace ids that not
   included in this set won't be processed.
 * `override_folders` - override pages with files in these directories.
 * `skip_extract_dump` - skip extract dump file if database exists.
 * `save_pages_path` - path for storing extracted pages.
 
-This call gathers statistics in ``config``.  This function will automatically
-parallelize the extraction.  ``page_cb`` will be called in the parent process,
-however.
+This call gathers statistics in ``wxr.config``.  This function will
+automatically parallelize the extraction.  ``page_cb`` will be called in
+the parent process, however.
 
 #### parse_page()
 
 ```python
-def parse_page(ctx: Wtp, word: str, text: str, config: WiktionaryConfig) -> List[Dict[str, str]]
+def parse_page(wxr: WiktextractContext, word: str, text: str
+              ) -> List[Dict[str, str]]
 ```
 
 This function parses ``text`` as if it was a Wiktionary page with the
 title ``title``.  The arguments are:
-* ``ctx`` (Wtp) - a ``wikitextprocessor`` context
+* ``wxr`` (WiktextractContext) - a ``wiktextract`` context containing:
+** ``wxr.wtp`` (Wtp) - a ``wikitextprocessor`` context
+** ``wxr.config`` (WiktionaryConfig) - specifies what to capture and is also used
 * ``title`` (str) - the title to use for the page
 * ``text`` (str) - contents of the page (wikitext)
-* ``config`` (WiktionaryConfig) - specifies what to capture and is also used
   for collecting statistics
 
 #### PARTS_OF_SPEECH
@@ -543,11 +549,36 @@ This is a constant set of all part-of-speech values (``pos`` key) that
 may occur in the extracted data.  Note that the list is somewhat larger than
 what a conventional part-of-speech list would be.
 
+### class WiktextractContext(object)
+
+The ``WiktextractContext`` object is used to hold the ``wikitextprocessor``-
+specific ``Wtp`` context object and the wiktextract's ``WiktionaryConfig``
+objects, and XXX in the future it will hold actual context that doesn't
+belong in Wtp and XXX WiktionaryConfig will be most probably integrated
+into the WiktextractContext object proper.
+
+The constructor is called simply by supplying a Wtp and WiktionaryConfig
+object:
+
+```python
+# Blanks slate for testing, usually
+wxr = WiktextractContext(Wtp(), WiktionaryConfig())
+```
+
+or
+
+```python
+# separately initialized config with a bunch of arguments like in the
+# example in the -> class WiktionaryConfig(object)-section below
+wxr = WiktextractContext(wtp, config)
+```
+
+if it is more conveneint
 ### class WiktionaryConfig(object)
 
 The ``WiktionaryConfig`` object is used for specifying what data to collect
 from Wiktionary and is also used for collecting statistics during
-extraction.
+extraction. Currently, it is a field of the WiktextractContext context object.
 
 The constructor is called as:
 
