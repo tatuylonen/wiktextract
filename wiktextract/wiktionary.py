@@ -14,8 +14,7 @@ import collections
 from pathlib import Path
 from typing import Optional, List, Set, Tuple
 
-from wiktextract.wxr_context import WiktextractContext
-from wikitextprocessor import Wtp, Page
+from wikitextprocessor import Page
 from .page import (parse_page, additional_expand_templates)
 from .config import WiktionaryConfig
 from .wxr_context import WiktextractContext
