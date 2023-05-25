@@ -336,8 +336,10 @@ xlat_head_map = {
     "m5": "masculine declension-5",
     "[uncountable]": "uncountable",
     "is more colloquial": "colloquial",
-    "(plural f)": "singular plural feminine",  # XXX chromicas/Galician
-    "(plural m)": "singular plural masculine",  # XXX Genseric/Galician
+    "(plural f)": "masculine singular feminine-plural",  # XXX chromicas/Galician
+    "(plural m)": "feminine singular masculine-plural",  # XXX Genseric/Galician
+    "m (plural f)": "masculine singular feminine-plural",  # XXX chromicas/Galician
+    "f (plural m)": "feminine singular masculine-plural",  # XXX Genseric/Galician
     "2 or 3": "?class-2 class-3",  # XXX branch/Tr/Swahili
     "m or impf": "masculine imperfective",  # pour/Tr/Ukrainian
     "f or impf": "feminine imperfective",  # fuc* around/Tr/(s with many)/Czech
@@ -452,6 +454,7 @@ head_final_numeric_langs = set([
     "Xhosa",
     "Zulu",
     "ǃXóõ",
+    "Proto-Bantu",
 ])
 
 # Languages for which to consider head_final_extra_map
@@ -609,6 +612,8 @@ head_final_other_langs = set([
     "Romanian",  # cache,acquaintance/Tr/Romanian
     "Ukrainian",
     "Ugaritic",
+    "Russian",
+    "Galician",
 ])
 
 head_final_other_map = {
@@ -657,6 +662,8 @@ head_final_other_map = {
     "sg or m du": "singular feminine neuter masculine dual",
     "m du or f du or n du": "masculine dual feminine neuter",
     "du or m": "?dual masculine",
+    "(plural f)": "singular plural feminine",  # XXX chromicas/Galician
+    "(plural m)": "singular plural masculine",  # XXX Genseric/Galician
 }
 
 # Accepted uppercase tag values.  As tags these are represented with words
@@ -3020,6 +3027,7 @@ xlat_tags_map = {
     "preterite and supine": "preterite supine",
     "genitive and dative": "genitive dative",
     "genitive and plural": "genitive plural",
+    "genitive plural": "genitive plural",
     "dative and accusative": "dative accusative",
     "accusative/illative": "accusative illative",
     "accusative and ablative": "accusative ablative",
@@ -6506,6 +6514,8 @@ valid_tags = {
     "toneless-final-syllable-variant": "misc",  # zh-pron template stuff
                                                 # 食物/Chinese
     "no-predicative-form": "misc",  # diamanten/German
+    "feminine-plural": "gender",  # Galician with different gender dep. on num.
+    "masculine-plural": "gender",
 }
 
 for k, v in valid_tags.items():
