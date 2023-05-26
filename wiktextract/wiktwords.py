@@ -18,9 +18,9 @@ import argparse
 import collections
 
 from pathlib import Path
-from typing import Optional
 from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
+from wikitextprocessor.dumpparser import analyze_and_overwrite_pages
 from wiktextract.inflection import set_debug_cell_text
 from wiktextract.template_override import template_override_fns
 
@@ -284,8 +284,14 @@ def main():
         if args.page:
             # Parse a single Wiktionary page (extracted using --pages-dir)
             if not args.db_path:
-                print("NOTE: you probably want to use --db-path with --page or "
-                      "otherwise processing will be very slow.")
+                logging.warning(
+                    "NOTE: you probably want to use --db-path with --page or "
+                    "otherwise processing will be very slow."
+                )
+            if args.override is not None and args.path is None:
+                analyze_and_overwrite_pages(
+                    wxr.wtp, [Path(p) for p in args.override]
+                )
             if Path(args.page).exists():
                 # Load the page wikitext from the given file
                 with open(args.page, encoding="utf-8") as f:
