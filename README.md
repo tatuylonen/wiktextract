@@ -426,11 +426,11 @@ The following command-line options can be used to control its operation:
 * --redirects: causes redirects to be extracted
 * --pages-dir DIR: save all wiktionary pages under this directory (mostly for debugging)
 * --db-path PATH: save/use database from this path (for debugging)
-* --page FILE: read page from file (first line can be "TITLE: pagetitle"; file should use UTF-8 encoding)
+* --page FILE or TITLE: read page from file or database, can be specified multiple times(first line must be "TITLE: pagetitle"; file should use UTF-8 encoding)
 * --num-threads THREADS: use this many parallel processes (needs 4GB/process)
 * --human-readable: print human-readable JSON with indentation (no longer
 machine-readable)
-* --override PATH: override pages with files in this directory(first line of the file should be TITLE: pagetitle)
+* --override PATH: override pages with files in this directory(first line of the file must be TITLE: pagetitle)
 * --templates-file: extract Template namespace to this tar file
 * --modules-file: extract Module namespace to this tar file
 * --categories-file: extract Wiktionary category tree into this file as JSON (see description below)
