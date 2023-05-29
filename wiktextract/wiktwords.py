@@ -58,6 +58,10 @@ def process_single_page(
         # Get page content from database
         title = path_or_title
         text = wxr.wtp.read_by_title(title)
+        if text is None:
+            logging.error(f"Can't find page '{title}' in the database.")
+            return
+
     # Extract Thesaurus data (this is a bit slow for a single page, but
     # needed for debugging linkages with thesaurus extraction).  This
     # is disabled by default to speed up single page testing.
