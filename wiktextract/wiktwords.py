@@ -18,6 +18,8 @@ import argparse
 import collections
 
 from pathlib import Path
+from typing import Any, Callable
+
 from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
 from wikitextprocessor.dumpparser import analyze_and_overwrite_pages
@@ -34,6 +36,37 @@ from wiktextract import extract_categories
 RECOGNIZED_NAMESPACE_NAMES = [
     "Main", "Category", "Appendix", "Project", "Thesaurus", "Module",
     "Template", "Reconstruction"]
+
+
+def process_single_page(
+        path_or_title: str,
+        args: argparse.Namespace,
+        wxr: WiktextractContext,
+        word_cb: Callable[[Any], None]
+) -> None:
+    if Path(path_or_title).exists():
+        # Load the page wikitext from the given file
+        with open(path_or_title, encoding="utf-8") as f:
+            first_line = f.readline()
+            if first_line.startswith("TITLE: "):
+                title = first_line[7:].strip()
+            else:
+                title = "Test page"
+                f.seek(0)
+            text = f.read()
+    else:
+        # Get page content from database
+        title = path_or_title
+        text = wxr.wtp.read_by_title(title)
+    # Extract Thesaurus data (this is a bit slow for a single page, but
+    # needed for debugging linkages with thesaurus extraction).  This
+    # is disabled by default to speed up single page testing.
+    if args.use_thesaurus:
+        wxr.config.thesaurus_data = extract_thesaurus_data(wxr)
+    # Parse the page
+    ret = parse_page(wxr, title, text)
+    for x in ret:
+        word_cb(x)
 
 
 def main():
@@ -80,8 +113,9 @@ def main():
                         help="Capture descendants")
     parser.add_argument("--statistics", action="store_true", default=False,
                         help="Print statistics")
-    parser.add_argument("--page", type=str,
-                        help="Parse a single Wiktionary page (for debugging)")
+    parser.add_argument("--page", type=str, action="append",
+                        help="Pass a Wiktionary page title or file path for "
+                        "debugging. Can be specified multiple times.")
     parser.add_argument("--db-path", type=str,
                         help="File path of saved database; "
                         "speeds up processing a single page tremendously")
@@ -292,29 +326,10 @@ def main():
                 analyze_and_overwrite_pages(
                     wxr.wtp, [Path(p) for p in args.override]
                 )
-            if Path(args.page).exists():
-                # Load the page wikitext from the given file
-                with open(args.page, encoding="utf-8") as f:
-                    first_line = f.readline()
-                    if first_line.startswith("TITLE: "):
-                        title = first_line[7:].strip()
-                    else:
-                        title = "Test page"
-                        f.seek(0)
-                    text = f.read()
-            else:
-                # Get page content from database
-                title = args.page
-                text = wxr.wtp.read_by_title(title)
-            # Extract Thesaurus data (this is a bit slow for a single page, but
-            # needed for debugging linkages with thesaurus extraction).  This
-            # is disabled by default to speed up single page testing.
-            if args.use_thesaurus:
-                wxr.config.thesaurus_data = extract_thesaurus_data(wxr)
-            # Parse the page
-            ret = parse_page(wxr, title, text)
-            for x in ret:
-                word_cb(x)
+
+            for title_or_path in args.page:
+                process_single_page(title_or_path, args, wxr, word_cb)
+
             # Merge errors from wtp to config, so that we can also use
             # --errors with single page extraction
             wxr.config.merge_return(wxr.wtp.to_return())
