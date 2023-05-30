@@ -1,0 +1,136 @@
+TITLE: Module:xnt-decl
+local lang = require("Module:languages").getByCode("xnt")
+
+local p = {}
+
+local function combine(a, b)
+	forms = {}
+	if type(a) ~= "table" then a = mw.text.split(a, ',') end
+	if type(b) ~= "table" then b = mw.text.split(b, ',') end
+	for i, x in ipairs(a) do
+		for j, y in ipairs(b) do
+			table.insert(forms, x .. y)
+		end
+	end
+	return forms
+end
+
+function p.init(frame)
+	args = frame:getParent().args
+
+	gender = args["g"]
+	if gender:find('in') then gender = 'inanimate' else gender = 'animate' end
+	plural = args["plural"]
+	locative = args["locative"]
+	if plural and not plural:find('-') then plural = '-' .. plural end
+	if locative and not locative:find('-') then locative = '-' .. locative end
+	if not plural and gender == "inanimate" then
+		plural = {'-ash', '-ass'}
+	elseif not plural then
+		plural = {'-og', '-ock', '-uck', '-aug'}
+	end
+
+	if not locative then
+		locative = {'-ick', '-uck', '-eck', '-eg', '-it', '-ut'}
+	end
+	
+	attested_forms = {
+		args['0s'], args['0p'], args['0l'],
+		args['1s'], args['1p'], args['1l'],
+		args['2s'], args['2p'], args['2l'],
+		args['3s'], args['3p'], args['3l'],
+	}
+
+	stem = string.gsub(args['0s'], "%*", "")
+	stem = mw.text.split(stem, ',')[1]
+	dependent = stem:sub(1, 1) == "-"
+	stem = mw.ustring.toNFD(stem):gsub("[^a-z]","")
+	stem = string.gsub(stem, "%-", "")
+	first = string.sub(stem, 1, 1)
+	if dependent then ustem = '-' .. stem else ustem = stem end
+	
+	if #(first:gsub('[^aeiou]', '')) and dependent then
+		n = 'n'
+		k = 'k'
+		w = 'w'
+	else
+		n = "n'"
+		k = "k'"
+		w = "w'"
+	end
+	
+	rp = combine(stem, plural)
+	rl = combine(stem, locative)
+	reconstructed_forms = {
+		{}, combine(ustem, plural), combine(ustem, locative),
+		combine(n, stem), combine(n, rp), combine(n, rl),
+		combine(k, stem), combine(k, rp), combine(k, rl),
+		combine(w, stem), combine(w, rp), combine(w, rl),
+	}
+	
+	local function link(word, display)
+		tag = require("Module:links").full_link({lang = lang, term = word, alt = display})
+		if word:find('*') then return '<span style="color:grey;">' .. tag .. '</span>' end
+		return tag
+	end
+	
+	forms = {}
+	num_attested = 0
+	for i = 1, 12 do
+		forms[i] = {}
+
+		if attested_forms[i] then
+			attested = mw.text.split(attested_forms[i], ',')
+			for j, v in ipairs(attested) do
+				table.insert(forms[i], link(v))
+				if not v:find('*') then num_attested = num_attested + 1 end
+			end
+		elseif #reconstructed_forms[i] then
+			if #reconstructed_forms[i] == 1 then
+				table.insert(forms[i], link('*' .. reconstructed_forms[i][1]))
+			else
+				recon = link('*' .. reconstructed_forms[i][1]) .. ' ('
+				recon_extra = {}
+				for j, v in ipairs(reconstructed_forms[i]) do
+					if j > 1 then
+						table.insert(recon_extra, link('*' .. v, '-' .. mw.text.split(v, '-')[#mw.text.split(v, '-')]))
+					end
+				end
+				table.insert(forms[i], recon .. table.concat(recon_extra, ', ') .. ')')
+			end
+		end
+		
+		forms[i] = table.concat(forms[i], '<br />')
+	end
+
+	word_forms = ' forms '
+	if num_attested == 1 then word_forms = ' form ' end
+
+    table = [=[<div class="NavFrame">
+<div class="NavHead" style="background:#eff7ff">Declension of ]=] .. frame:preprocess('{{SUBPAGENAME}}') .. [=[ (]=] .. gender .. ', ' .. num_attested .. word_forms .. [=[attested)</div>
+<div class="NavContent">
+{| style="background:#F9F9F9;text-align:center; width:100%%" class="inflection-table"
+|-
+! style="background:#d9ebff" |
+! style="background:#d9ebff" | singular
+! style="background:#d9ebff" | plural
+! style="background:#d9ebff" | locative
+|-
+! style="background: #eff7ff;" | unpossessed
+| %s || %s || %s
+|-
+! style="background:#F9F9F9" colspan=4 | possessed forms
+|-
+! style="background: #eff7ff;" | first-person (my)
+| %s || %s || %s
+|-
+! style="background: #eff7ff;" | second-person (your)
+| %s || %s || %s
+|-
+! style="background: #eff7ff;" | third-person (his, her)
+| %s || %s || %s
+|}</div></div>]=]
+	return table:format(unpack(forms))
+end
+
+return p
