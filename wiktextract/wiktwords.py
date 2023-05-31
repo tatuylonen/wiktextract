@@ -29,7 +29,9 @@ from wiktextract.template_override import template_override_fns
 from wiktextract import (WiktionaryConfig, parse_wiktionary,
                          reprocess_wiktionary, parse_page,
                          extract_namespace)
-from wiktextract import extract_thesaurus_data
+from .thesaurus import (
+    extract_thesaurus_data, thesaurus_linkage_number, close_thesaurus_db
+)
 from wiktextract import extract_categories
 
 # Pages within these namespaces are captured.
@@ -65,8 +67,11 @@ def process_single_page(
     # Extract Thesaurus data (this is a bit slow for a single page, but
     # needed for debugging linkages with thesaurus extraction).  This
     # is disabled by default to speed up single page testing.
-    if args.use_thesaurus:
-        wxr.config.thesaurus_data = extract_thesaurus_data(wxr)
+    if (
+        args.use_thesaurus
+        and thesaurus_linkage_number(wxr.thesaurus_db_conn) == 0
+    ):
+        extract_thesaurus_data(wxr)
     # Parse the page
     ret = parse_page(wxr, title, text)
     for x in ret:
@@ -359,6 +364,7 @@ def main():
             json.dump(tree, f, indent=2, sort_keys=True)
 
     wxr.wtp.close_db_conn()
+    close_thesaurus_db(wxr.thesaurus_db_path, wxr.thesaurus_db_conn)
 
     if args.profile:
         pr.disable()

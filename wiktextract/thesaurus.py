@@ -5,16 +5,19 @@
 
 import re
 import time
-import collections
 import logging
+import sqlite3
+import tempfile
+
+from pathlib import Path
+from typing import Tuple, Optional
 
 from wiktextract.wxr_context import WiktextractContext
-from wikitextprocessor import Wtp, NodeKind, WikiNode, Page
+from wikitextprocessor import NodeKind, WikiNode, Page
 
 from .datautils import ns_title_prefix_tuple
-from .page import linkage_inverses, clean_node, LEVEL_KINDS
+from .page import clean_node, LEVEL_KINDS
 from .form_descriptions import parse_sense_qualifier
-from .config import WiktionaryConfig
 
 ignored_subtitle_tags_map = {
     "by reason": [],
@@ -74,7 +77,7 @@ def contains_list(contents):
     return contains_list(contents.children) or contains_list(contents.args)
 
 
-def extract_thesaurus_data(wxr: WiktextractContext):
+def extract_thesaurus_data(wxr: WiktextractContext) -> None:
     """Extracts linkages from the thesaurus pages in Wiktionary."""
     start_t = time.time()
     logging.info("Extracting thesaurus data")
@@ -105,7 +108,7 @@ def extract_thesaurus_data(wxr: WiktextractContext):
         sense = None
         linkage = None
         subtitle_tags = ()
-        ret = []
+        entry_id = -1
         # Some pages don't have a language subtitle, but use
         # {{ws header|lang=xx}}
         m = re.search(r'(?s)\{\{ws header\|[^}]*lang=([^}|]*)', text)
@@ -118,6 +121,7 @@ def extract_thesaurus_data(wxr: WiktextractContext):
             nonlocal sense
             nonlocal linkage
             nonlocal subtitle_tags
+            nonlocal entry_id
             item_sense = None
             tags = None
             topics = None
@@ -131,15 +135,19 @@ def extract_thesaurus_data(wxr: WiktextractContext):
             kind = contents.kind
             if kind == NodeKind.LIST and not contains_list(contents.children):
                 if lang is None:
-                    print(title, lang, "UNEXPECTED LIST WITHOUT LANG:",
-                          contents)
+                    logging.debug(
+                        f"{title=} {lang=} UNEXPECTED LIST WITHOUT LANG: " +
+                        str(contents)
+                    )
                     return
                 for node in contents.children:
                     if node.kind != NodeKind.LIST_ITEM:
                         continue
                     w = clean_node(wxr, None, node.children)
                     if "*" in w:
-                        print(title, lang, pos, "STAR IN WORD:", w)
+                        logging.debug(
+                            f"{title=} {lang=} {pos=} STAR IN WORD: {w}"
+                        )
                     # Check for parenthesized sense at the beginning
                     m = re.match(r"(?s)^\(([^)]*)\):\s*(.*)$", w)
                     if m:
@@ -198,11 +206,36 @@ def extract_thesaurus_data(wxr: WiktextractContext):
                         else:
                             xlit = None
                         w1 = w1.strip()
-                        if w1.startswith(ns_title_prefix_tuple(wxr, "Thesaurus")):
+                        if w1.startswith(
+                                ns_title_prefix_tuple(wxr, "Thesaurus")
+                        ):
                             w1 = w1[10:]
                         if w1:
-                            ret.append((lang, pos, rel, w1, item_sense,
-                                        xlit, tags, topics, title))
+                            lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang)
+                            if lang_code is None:
+                                logging.debug(
+                                    f"Linkage language {lang} not recognized"
+                                )
+                            new_entry_id = insert_thesaurus_entry(
+                                wxr.thesaurus_db_conn,
+                                word,
+                                pos,
+                                lang_code,
+                                item_sense
+                            )
+                            if new_entry_id is not None:
+                                entry_id = new_entry_id
+                            insert_thesaurus_term(
+                                wxr.thesaurus_db_conn,
+                                w1,
+                                entry_id,
+                                rel,
+                                "|".join(tags) if tags else None,
+                                "|".join(topics) if topics else None,
+                                xlit,
+                                None,
+                                None
+                            )
                 return
             if kind not in LEVEL_KINDS:
                 recurse(contents.args)
@@ -216,7 +249,9 @@ def extract_thesaurus_data(wxr: WiktextractContext):
                 linkage = None
                 recurse(contents.children)
                 return
-            if subtitle.lower().startswith(wxr.config.OTHER_SUBTITLES["sense"].lower()):
+            if subtitle.lower().startswith(
+                    wxr.config.OTHER_SUBTITLES["sense"].lower()
+            ):
                 sense = subtitle[len(wxr.config.OTHER_SUBTITLES["sense"]):]
                 linkage = None
                 recurse(contents.children)
@@ -244,38 +279,116 @@ def extract_thesaurus_data(wxr: WiktextractContext):
                 recurse(contents.children)
                 subtitle_tags = ()
                 return
-            print(title, lang, pos, sense, "UNHANDLED SUBTITLE:", subtitle)
-            print(contents.args)
+            logging.debug(
+                f"{title=} {lang=} {pos=} {sense=} UNHANDLED SUBTITLE: " +
+                "subtitle " + str(contents.args)
+            )
             recurse(contents.children)
             return None
 
         recurse(tree)
-        return [word, ret]
 
-    ret = collections.defaultdict(list)
-    num_pages = 0
-    for word, linkages in wxr.wtp.reprocess(page_handler, include_redirects=False,
-                                        namespace_ids=[thesaurus_ns_id]):
-        assert isinstance(linkages, (list, tuple))
-        num_pages += 1
-        for lang, pos, rel, w, sense, xlit, tags, topics, title in linkages:
-            # Add the forward direction
-            v = (pos, rel, w, sense, xlit, tuple(tags), tuple(topics), title)
-            key = (word, lang)
-            ret[key].append(v)
-            if False:  # XXX don't add reverse releations here, disambig first
-                # Add inverse linkages where applicable
-                inv_rel = linkage_inverses.get(rel)
-                if inv_rel is not None:
-                    if rel in ("derived", "related"):
-                        inv_pos = None
-                    else:
-                        inv_pos = pos
-                    inv_v = (inv_pos, inv_rel, word, sense, None, (), (), title)
-                    key = (w, lang)
-                    ret[key].append(inv_v)
+    for _ in wxr.wtp.reprocess(
+            page_handler,
+            include_redirects=False,
+            namespace_ids=[thesaurus_ns_id]
+    ):
+        pass
 
-    total = sum(len(x) for x in ret.values())
+    num_pages = wxr.wtp.saved_page_nums([thesaurus_ns_id], False)
+    total = thesaurus_linkage_number(wxr.thesaurus_db_conn)
     logging.info("Extracted {} linkages from {} thesaurus pages (took {:.1f}s)"
                  .format(total, num_pages, time.time() - start_t))
-    return ret
+
+
+def init_thesaurus_db(db_path: Path) -> sqlite3.Connection:
+    conn = sqlite3.connect(db_path)
+    conn.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS entries (
+        id INTEGER PRIMARY KEY,
+        entry TEXT,
+        pos TEXT,
+        language_code TEXT,
+        sense TEXT
+        );
+        CREATE UNIQUE INDEX entries_index ON entries(entry, pos, language_code);
+
+        CREATE TABLE IF NOT EXISTS terms (
+        term TEXT,
+        entry_id INTEGER,
+        relation TEXT,  -- Synonyms, Hyponyms
+        tags TEXT,
+        topics TEXT,
+        roman TEXT,  -- Romanization
+        gloss TEXT,  -- ws template has optional hovertext gloss
+        language_variant TEXT,  -- Traditional/Simplified Chinese
+        PRIMARY KEY(term, entry_id),
+        FOREIGN KEY(entry_id) REFERENCES entries(id)
+        );
+
+        PRAGMA journal_mode = WAL;
+        PRAGMA foreign_keys = ON;
+        """
+    )
+    return conn
+
+
+def insert_thesaurus_entry(
+        db_conn: sqlite3.Connection,
+        entry: str,
+        pos: str,
+        language_code: str,
+        sense: str
+) -> Optional[int]:
+    for (entry_id,) in db_conn.execute(
+        "INSERT OR IGNORE INTO entries (entry, pos, language_code, sense) "
+        "VALUES(?, ?, ?, ?) RETURNING id",
+        (entry, pos, language_code, sense)
+    ):
+        return entry_id
+
+
+def insert_thesaurus_term(
+        db_conn: sqlite3.Connection,
+        term: str,
+        entry_id: int,
+        relation: str,
+        tags: str,
+        topics: str,
+        roman: str,
+        gloss: str,
+        language_variant: str
+) -> None:
+    db_conn.execute(
+        "INSERT OR IGNORE INTO terms (term, entry_id, relation, tags, topics, "
+        "roman, gloss, language_variant) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+        (term, entry_id, relation, tags, topics, roman, gloss, language_variant)
+    )
+    db_conn.commit()
+
+
+def thesaurus_linkage_number(db_conn: sqlite3.Connection) -> int:
+    for (r,) in db_conn.execute("SELECT count(*) FROM terms"):
+        return r
+
+
+def search_thesaurus(
+        db_conn: sqlite3.Connection,
+        entry: str,
+        lang_code: str,
+        pos: str
+) -> Tuple[str, ...]:
+    return db_conn.execute(
+        "SELECT term, relation, sense, roman, tags, topics, gloss, "
+        "language_variant "
+        "FROM terms JOIN entries ON terms.entry_id = entries.id "
+        "WHERE entry = ? AND language_code = ? AND pos = ? AND term != ?",
+        (entry, lang_code, pos, entry)
+    )
+
+
+def close_thesaurus_db(db_path: Path, db_conn: sqlite3.Connection) -> None:
+    db_conn.close()
+    if db_path.parent.samefile(Path(tempfile.gettempdir())):
+        db_path.unlink(True)
