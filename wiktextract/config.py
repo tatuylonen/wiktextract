@@ -41,7 +41,6 @@ class WiktionaryConfig(object):
         "language_counts",
         "pos_counts",
         "section_counts",
-        "thesaurus_data",
         "word",
         "errors",
         "warnings",
@@ -108,10 +107,11 @@ class WiktionaryConfig(object):
         self.errors = []
         self.warnings = []
         self.debugs = []
-        self.thesaurus_data = {}
         self.redirects = {}
 
-        self.data_folder = Path(pkg_resources.resource_filename("wiktextract", "data/")).joinpath(dump_file_lang_code)
+        self.data_folder = Path(
+            pkg_resources.resource_filename("wiktextract", "data/")
+        ).joinpath(dump_file_lang_code)
         self.init_subtitles()
         self.init_zh_pron_tags()
         self.init_languages()
@@ -192,9 +192,9 @@ class WiktionaryConfig(object):
 
         with self.data_folder.joinpath("languages.json").open(encoding="utf-8") as f:
             self.LANGUAGES_BY_CODE = json.load(f)
-        
+
         self.LANGUAGES_BY_NAME = {}
-        
+
         # add canonical names first to avoid overwriting them
         canonical_names = {}
         for lang_code, lang_names in self.LANGUAGES_BY_CODE.items():
