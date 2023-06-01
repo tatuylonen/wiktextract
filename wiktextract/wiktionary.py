@@ -90,7 +90,6 @@ def parse_wiktionary(
     ):
         pass
     if phase1_only:
-        wxr.wtp.close_db_conn()
         return []
 
     # Phase 2 - process the pages using the user-supplied callback
