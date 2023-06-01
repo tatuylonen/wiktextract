@@ -151,6 +151,12 @@ def main():
     parser.add_argument("--debug-cell-text", type=str, default=None,
                     help="Print out debug messages when encountering this text")
     parser.add_argument("--quiet", default=False, action="store_true")
+    parser.add_argument("--search-pattern", type=str, default=None,
+                    help="Filter out pages that do not contain this pattern "
+                        "of text; %% is zero, one or more wildcard characters, "
+                        "_ is exactly one wildcard character. Example: "
+                        "'%%==English==%%', '%%==Anglo_Saxon==%%'; functions " 
+                        "only with ready database file")
     args = parser.parse_args()
 
     if not args.quiet:
@@ -342,7 +348,8 @@ def main():
             # Parse again from the cache file
             reprocess_wiktionary(wxr, word_cb,
                                  dont_parse=(bool(args.pages_dir) and
-                                                 not bool(args.out)))
+                                                 not bool(args.out)),
+                                 search_pattern=args.search_pattern)
 
     finally:
         if out_path and out_path != "-" and out_f is not None:
@@ -404,7 +411,7 @@ def main():
                 "errors": wxr.config.errors,
                 "warnings": wxr.config.warnings,
                 "debugs": wxr.config.debugs,
-                }, f, sort_keys=True, indent=2)
+                }, f, sort_keys=True)
 
     def dump_un(title, limit, counts, samples):
         counts_ht = {}

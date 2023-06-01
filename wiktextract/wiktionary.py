@@ -92,7 +92,10 @@ def parse_wiktionary(
     return reprocess_wiktionary(wxr, word_cb, dont_parse)
 
 
-def reprocess_wiktionary(wxr: WiktextractContext, word_cb, dont_parse):
+def reprocess_wiktionary(wxr: WiktextractContext,
+                         word_cb,
+                         dont_parse,
+                         search_pattern: str = None):
     """Reprocesses the Wiktionary from the cache file."""
     assert callable(word_cb)
     assert dont_parse in (True, False)
@@ -113,7 +116,10 @@ def reprocess_wiktionary(wxr: WiktextractContext, word_cb, dont_parse):
         wxr.wtp.NAMESPACE_DATA.get(ns, {}).get("id", 0)
         for ns in ["Main", "Reconstruction"]
     })
-    for ret, stats in wxr.wtp.reprocess(page_cb, namespace_ids=process_ns_ids):
+    for ret, stats in wxr.wtp.reprocess(page_cb,
+                                        namespace_ids=process_ns_ids,
+                                        search_pattern=search_pattern,
+                                       ):
         wxr.config.merge_return(stats)
         for dt in ret:
             word_cb(dt)
