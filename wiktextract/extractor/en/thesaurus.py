@@ -234,7 +234,6 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
                                 "|".join(tags) if tags else None,
                                 "|".join(topics) if topics else None,
                                 xlit,
-                                None,
                                 None
                             )
                 return

@@ -9,16 +9,19 @@ import logging
 import re
 import time
 import tarfile
-import collections
 
 from pathlib import Path
-from typing import Optional, List, Set, Tuple, Callable, Any
+from typing import Optional, List, Set, Tuple
 
 from wikitextprocessor import Page
 from .page import (parse_page, additional_expand_templates)
 from .config import WiktionaryConfig
 from .wxr_context import WiktextractContext
-from .thesaurus import extract_thesaurus_data, thesaurus_linkage_number
+from .thesaurus import (
+    emit_words_in_thesaurus,
+    extract_thesaurus_data,
+    thesaurus_linkage_number,
+)
 
 
 def page_handler(wxr, page: Page, config_kwargs, dont_parse):
@@ -130,69 +133,6 @@ def reprocess_wiktionary(wxr: WiktextractContext, word_cb, dont_parse):
 
     emit_words_in_thesaurus(wxr, emitted, word_cb)
     logging.info("Reprocessing wiktionary complete")
-
-
-def emit_words_in_thesaurus(
-        wxr: WiktextractContext,
-        emitted: Set[Tuple[str, str, str]],
-        word_cb: Callable[[Any], None]
-) -> None:
-    # Emit words that occur in thesaurus as main words but for which
-    # Wiktionary has no word in the main namespace. This seems to happen
-    # sometimes.
-    logging.info("Emitting words that only occur in thesaurus")
-    for (
-            entry_id,
-            entry,
-            pos,
-            lang_code,
-            sense
-    ) in wxr.thesaurus_db_conn.execute(
-            "SELECT id, entry, pos, language_code, sense FROM entries "
-            "WHERE pos IS NOT NULL AND language_code IS NOT NULL"
-    ):
-        if (entry, lang_code, pos) in emitted:
-            continue
-        logging.info(
-            "Emitting thesaurus entry for "
-            f"{entry}/{lang_code}/{pos} (not in main)"
-        )
-        sense_dict = collections.defaultdict(list)
-        sense_dict["glosses"] = [sense]
-        for (
-                term,
-                relation,
-                tags,
-                topics,
-                roman,
-                gloss,
-                variant
-        ) in wxr.thesaurus_db_conn.execute(
-            "SELECT term, relation, tags, topics, roman, gloss, variant "
-            "FROM terms WHERE entry_id = ?",
-            (entry_id,)
-        ):
-            relation_dict = {
-                "word": term,
-                "source": f"Thesaurus:{entry}"
-            }
-            if tags is not None:
-                relation_dict["tags"] = tags.split("|")
-            if topics is not None:
-                relation_dict["topics"] = topics.split("|")
-            sense_dict[relation].append(relation_dict)
-
-        if len(sense_dict) == 1:
-            sense_dict["tags"] = ["no-gloss"]
-
-        word_cb({
-            "word": entry,
-            "lang": wxr.config.LANGUAGES_BY_CODE.get(lang_code),
-            "lang_code": lang_code,
-            "pos": pos,
-            "senses": [sense_dict],
-            "source": "thesaurus",
-        })
 
 
 def process_ns_page_title(page: Page, ns_name: str) -> Tuple[str, str]:
