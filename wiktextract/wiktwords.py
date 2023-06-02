@@ -29,7 +29,7 @@ from wiktextract.template_override import template_override_fns
 from wiktextract import (WiktionaryConfig, parse_wiktionary,
                          reprocess_wiktionary, parse_page,
                          extract_namespace)
-from .thesaurus import (
+from wiktextract.thesaurus import (
     extract_thesaurus_data, thesaurus_linkage_number, close_thesaurus_db
 )
 from wiktextract import extract_categories
