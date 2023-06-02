@@ -9,7 +9,6 @@ import logging
 import re
 import time
 import tarfile
-import collections
 
 from pathlib import Path
 from typing import Optional, List, Set, Tuple
@@ -18,11 +17,14 @@ from wikitextprocessor import Page
 from .page import (parse_page, additional_expand_templates)
 from .config import WiktionaryConfig
 from .wxr_context import WiktextractContext
-from .thesaurus import extract_thesaurus_data
-from .datautils import data_append
+from .thesaurus import (
+    emit_words_in_thesaurus,
+    extract_thesaurus_data,
+    thesaurus_linkage_number,
+)
 
 
-def page_handler(wxr, page: Page, config_kwargs, thesaurus_data, dont_parse):
+def page_handler(wxr, page: Page, config_kwargs, dont_parse):
     # Make sure there are no newlines or other strange characters in the
     # title.  They could cause security problems at several post-processing
     # steps.
@@ -41,7 +43,6 @@ def page_handler(wxr, page: Page, config_kwargs, thesaurus_data, dont_parse):
 
         # XXX Sign gloss pages?
         wxr1 = WiktextractContext(wxr.wtp, WiktionaryConfig(**config_kwargs))
-        wxr1.config.thesaurus_data = thesaurus_data
         start_t = time.time()
         ret = parse_page(wxr1, title, page.body)
         dur = time.time() - start_t
@@ -81,10 +82,17 @@ def parse_wiktionary(
         override_folders = [Path(folder) for folder in override_folders]
     if save_pages_path is not None:
         save_pages_path = Path(save_pages_path)
-    list(wxr.wtp.process(path, None, namespace_ids, True, override_folders,
-                     skip_extract_dump, save_pages_path))
+    for _ in wxr.wtp.process(
+            path,
+            None,
+            namespace_ids,
+            True,
+            override_folders,
+            skip_extract_dump,
+            save_pages_path
+    ):
+        pass
     if phase1_only:
-        wxr.wtp.close_db_conn()
         return []
 
     # Phase 2 - process the pages using the user-supplied callback
@@ -104,12 +112,12 @@ def reprocess_wiktionary(wxr: WiktextractContext,
 
     # Extract thesaurus data. This iterates over thesaurus pages,
     # but is very fast.
-    thesaurus_data = extract_thesaurus_data(wxr)
+    if thesaurus_linkage_number(wxr.thesaurus_db_conn) == 0:
+        extract_thesaurus_data(wxr)
 
     # Then perform the main parsing pass.
     def page_cb(page: Page):
-        return page_handler(
-            wxr, page, config_kwargs, thesaurus_data, dont_parse)
+        return page_handler(wxr, page, config_kwargs, dont_parse)
 
     emitted = set()
     process_ns_ids = list({
@@ -124,60 +132,12 @@ def reprocess_wiktionary(wxr: WiktextractContext,
         for dt in ret:
             word_cb(dt)
             word = dt.get("word")
-            lang = dt.get("lang")
+            lang_code= dt.get("lang_code")
             pos = dt.get("pos")
-            if word and lang and pos:
-                emitted.add((word, lang, pos))
+            if word and lang_code and pos:
+                emitted.add((word, lang_code, pos))
 
-    # Emit words that occur in thesaurus as main words but for which
-    # Wiktionary has no word in the main namespace. This seems to happen
-    # sometimes.
-    logging.info("Emitting words that only occur in thesaurus")
-    for (word, lang), linkages in thesaurus_data.items():
-        pos_ht = collections.defaultdict(list)
-        for x in linkages:
-            if x[0] is not None:
-                pos_ht[x[0]].append(x)
-        for pos, linkages in pos_ht.items():
-            if (word, lang, pos) in emitted:
-                continue
-            if lang not in wxr.config.LANGUAGES_BY_NAME:
-                print("Linkage language {} not recognized".format(lang))
-                continue
-            lang_code = wxr.config.LANGUAGES_BY_NAME[lang]
-            logging.info(
-                "Emitting thesaurus main entry for {}/{}/{} (not in main)"
-                .format(word, lang, pos))
-            sense_ht = collections.defaultdict(list)
-            for tpos, rel, w, sense, xlit, tags, topics, source in linkages:
-                if not sense:
-                    continue
-                sense_ht[sense].append((rel, w, xlit, tags, topics, source))
-            senses = []
-            for sense, linkages in sense_ht.items():
-                sense_dt = {
-                    "glosses": [sense],
-                }
-                for rel, w, xlit, tags, topics, source in linkages:
-                    dt = {"word": w, "source": source}
-                    if tags:
-                        dt["tags"] = tags
-                    if topics:
-                        dt["topics"] = topics
-                    data_append(wxr, sense_dt, rel, dt)
-                senses.append(sense_dt)
-            if not senses:
-                senses.append({"tags": ["no-gloss"]})
-            data = {
-                "word": word,
-                "lang": lang,
-                "lang_code": lang_code,
-                "pos": pos,
-                "senses": senses,
-                "source": "thesaurus",
-            }
-            word_cb(data)
-
+    emit_words_in_thesaurus(wxr, emitted, word_cb)
     logging.info("Reprocessing wiktionary complete")
 
 
@@ -193,10 +153,9 @@ def process_ns_page_title(page: Page, ns_name: str) -> Tuple[str, str]:
     return (title, text)
 
 
-def extract_namespace(wxr: WiktextractContext,
-                      namespace: str,
-                      path: str
-                    ) -> None:
+def extract_namespace(
+        wxr: WiktextractContext, namespace: str, path: str
+) -> None:
     """Extracts all pages in the given namespace and writes them to a .tar
     file with the given path."""
     logging.info(

@@ -3,279 +3,194 @@
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import re
-import time
 import collections
+import importlib
 import logging
+import sqlite3
+import tempfile
+
+from pathlib import Path
+from typing import Tuple, Optional, Set, Callable, Any, List
 
 from wiktextract.wxr_context import WiktextractContext
-from wikitextprocessor import Wtp, NodeKind, WikiNode, Page
-
-from .datautils import ns_title_prefix_tuple
-from .page import linkage_inverses, clean_node, LEVEL_KINDS
-from .form_descriptions import parse_sense_qualifier
-from .config import WiktionaryConfig
-
-ignored_subtitle_tags_map = {
-    "by reason": [],
-    "by period of time": [],
-    "by degree": [],
-    "by type": [],
-    "other": [],
-    "opaque slang terms": ["slang"],
-    "slang": ["slang"],
-    "colloquial, archaic, slang": ["colloquial", "archaic", "slang"],
-    "euphemisms": ["euphemism"],
-    "colloquialisms": ["colloquial"],
-    "colloquialisms or slang": ["colloquial"],
-    "technical terms misused": ["colloquial"],
-    "people": [],
-    "proper names": ["proper-noun"],
-    "race-based (warning- offensive)": ["offensive"],
-    "substance addicts": [],
-    "non-substance addicts": [],
-    "echoing sounds": [],
-    "movement sounds": [],
-    "impacting sounds": [],
-    "destructive sounds": [],
-    "noisy sounds": [],
-    "vocal sounds": [],
-    "miscellaneous sounds": [],
-    "age and gender": [],
-    "breeds and types": [],
-    "by function": [],
-    "wild horses": [],
-    "body parts": [],
-    "colors, patterns and markings": [],
-    "diseases": [],
-    "equipment and gear": [],
-    "groups": [],
-    "horse-drawn vehicles": [],
-    "places": [],
-    "sports": [],
-    "sounds and behavior": [],
-    "obscure derivations": [],
-    "plants": [],
-    "animals": [],
-    "common": [],
-    "rare": ["rare"],
-}
 
 
-def contains_list(contents):
-    """Returns True if there is a list somewhere nested in contents."""
-    if isinstance(contents, (list, tuple)):
-        return any(contains_list(x) for x in contents)
-    if not isinstance(contents, WikiNode):
-        return False
-    kind = contents.kind
-    if kind == NodeKind.LIST:
-        return True
-    return contains_list(contents.children) or contains_list(contents.args)
+def extract_thesaurus_data(wxr: WiktextractContext) -> None:
+    thesaurus_extractor_mod = importlib.import_module(
+        f"wiktextract.extractor/{wxr.wtp.lang_code}/thesaurus"
+    )
+    thesaurus_extractor_mod.extract_thesaurus_data(wxr)
 
 
-def extract_thesaurus_data(wxr: WiktextractContext):
-    """Extracts linkages from the thesaurus pages in Wiktionary."""
-    start_t = time.time()
-    logging.info("Extracting thesaurus data")
-    thesaurus_ns_data = wxr.wtp.NAMESPACE_DATA.get("Thesaurus", {})
-    thesaurus_ns_id = thesaurus_ns_data.get("id")
-    thesaurus_ns_local_name = thesaurus_ns_data.get("name")
+def init_thesaurus_db(db_path: Path) -> sqlite3.Connection:
+    conn = sqlite3.connect(db_path)
+    conn.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS entries (
+        id INTEGER PRIMARY KEY,
+        entry TEXT,
+        pos TEXT,
+        language_code TEXT,
+        sense TEXT
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS entries_index
+        ON entries(entry, pos, language_code);
 
-    def page_handler(page: Page):
-        title = page.title
-        text = page.body
-        if title.startswith("Thesaurus:Requested entries "):
-            return None
-        if "/" in title:
-            #print("STRANGE TITLE:", title)
-            return None
-        word = title[len(thesaurus_ns_local_name) + 1:]
-        idx = word.find(":")
-        if idx > 0 and idx < 5:
-            word = word[idx + 1:]  # Remove language prefix
-        expanded = wxr.wtp.expand(text, templates_to_expand=None)  # Expand all
-        expanded = re.sub(r'(?s)<span class="tr Latn"[^>]*>(<b>)?(.*?)(</b>)?'
-                          r'</span>',
-                          r"XLITS\2XLITE", expanded)
-        tree = wxr.wtp.parse(expanded, pre_expand=False)
-        assert tree.kind == NodeKind.ROOT
-        lang = None
-        pos = None
-        sense = None
-        linkage = None
-        subtitle_tags = ()
-        ret = []
-        # Some pages don't have a language subtitle, but use
-        # {{ws header|lang=xx}}
-        m = re.search(r'(?s)\{\{ws header\|[^}]*lang=([^}|]*)', text)
-        if m:
-            lang = wxr.config.LANGUAGES_BY_CODE.get(m.group(1), [None])[0]
+        CREATE TABLE IF NOT EXISTS terms (
+        term TEXT,
+        entry_id INTEGER,
+        linkage TEXT,  -- Synonyms, Hyponyms
+        tags TEXT,
+        topics TEXT,
+        roman TEXT,  -- Romanization
+        language_variant TEXT,  -- Traditional/Simplified Chinese
+        PRIMARY KEY(term, entry_id),
+        FOREIGN KEY(entry_id) REFERENCES entries(id)
+        );
 
-        def recurse(contents):
-            nonlocal lang
-            nonlocal pos
-            nonlocal sense
-            nonlocal linkage
-            nonlocal subtitle_tags
-            item_sense = None
-            tags = None
-            topics = None
+        PRAGMA journal_mode = WAL;
+        PRAGMA foreign_keys = ON;
+        """
+    )
+    return conn
 
-            if isinstance(contents, (list, tuple)):
-                for x in contents:
-                    recurse(x)
-                return
-            if not isinstance(contents, WikiNode):
-                return
-            kind = contents.kind
-            if kind == NodeKind.LIST and not contains_list(contents.children):
-                if lang is None:
-                    print(title, lang, "UNEXPECTED LIST WITHOUT LANG:",
-                          contents)
-                    return
-                for node in contents.children:
-                    if node.kind != NodeKind.LIST_ITEM:
-                        continue
-                    w = clean_node(wxr, None, node.children)
-                    if "*" in w:
-                        print(title, lang, pos, "STAR IN WORD:", w)
-                    # Check for parenthesized sense at the beginning
-                    m = re.match(r"(?s)^\(([^)]*)\):\s*(.*)$", w)
-                    if m:
-                        item_sense, w = m.groups()
-                        # XXX check for item_sense being part-of-speech
-                    else:
-                        item_sense = sense
 
-                    # Remove thesaurus links, if any
-                    w = re.sub(r"\s*\[W[Ss]\]", "", w)
+def insert_thesaurus_entry(
+    db_conn: sqlite3.Connection,
+    entry: str,
+    language_code: str,
+    pos: str,
+    sense: str,
+) -> Optional[int]:
+    for (entry_id,) in db_conn.execute(
+        "INSERT OR IGNORE INTO entries (entry, language_code, pos, sense) "
+        "VALUES(?, ?, ?, ?) RETURNING id",
+        (entry, language_code, pos, sense),
+    ):
+        return entry_id
 
-                    # Check for English translation in quotes.  This can be
-                    # literal translation, not necessarily the real meaning.
-                    english = None
 
-                    def engl_fn(m):
-                        nonlocal english
-                        english = m.group(1)
-                        return ""
+def insert_thesaurus_term(
+    db_conn: sqlite3.Connection,
+    term: str,
+    entry_id: int,
+    linkage: str,
+    tags: str,
+    topics: str,
+    roman: str,
+    language_variant: str,
+) -> None:
+    db_conn.execute(
+        "INSERT OR IGNORE INTO terms (term, entry_id, linkage, tags, topics, "
+        "roman, language_variant) VALUES(?, ?, ?, ?, ?, ?, ?)",
+        (term, entry_id, linkage, tags, topics, roman, language_variant),
+    )
+    db_conn.commit()
 
-                    w = re.sub(r'(\bliterally\s*)?(, )?“([^"]*)"\s*',
-                               engl_fn, w)
 
-                    # Check for qualifiers in parentheses
-                    tags = []
-                    topics = []
+def thesaurus_linkage_number(db_conn: sqlite3.Connection) -> int:
+    for (r,) in db_conn.execute("SELECT count(*) FROM terms"):
+        return r
 
-                    def qual_fn(m):
-                        q = m.group(1)
-                        if q == item_sense:
-                            return ""
-                        if "XLITS" in q:
-                            return q
-                        dt = {}
-                        parse_sense_qualifier(wxr, q, dt)
-                        tags.extend(dt.get("tags", ()))
-                        topics.extend(dt.get("topics", ()))
-                        return ""
 
-                    w = re.sub(r"\(([^)]*)\)$", qual_fn, w).strip()
+def search_thesaurus(
+    db_conn: sqlite3.Connection, entry: str, lang_code: str, pos: str
+) -> Tuple[str, ...]:
+    return db_conn.execute(
+        "SELECT term, linkage, sense, roman, tags, topics, language_variant "
+        "FROM terms JOIN entries ON terms.entry_id = entries.id "
+        "WHERE entry = ? AND language_code = ? AND pos = ?",
+        (entry, lang_code, pos),
+    )
 
-                    # XXX there could be a transliteration, e.g.
-                    # Thesaurus:老百姓
 
-                    # XXX Apparently there can also be alternative spellings,
-                    # such as 眾人／众人 on Thesaurus:老百姓
+def get_thesaurus_entry_id(
+    db_conn: sqlite3.Connection, entry: str, lang_code: str, pos: str
+) -> Optional[int]:
+    for (r,) in db_conn.execute(
+        "SELECT id FROM entries WHERE entry = ? AND language_code = ? "
+        "AND pos = ?",
+        (entry, lang_code, pos),
+    ):
+        return r
 
-                    # If the word is now empty or separator, skip
-                    if not w or w.startswith("---") or w == "\u2014":
-                        return
-                    rel = linkage or "synonyms"
-                    for w1 in w.split(","):
-                        m = re.match(r"(?s)(.*?)\s*XLITS(.*?)XLITE\s*", w1)
-                        if m:
-                            w1, xlit = m.groups()
-                        else:
-                            xlit = None
-                        w1 = w1.strip()
-                        if w1.startswith(ns_title_prefix_tuple(wxr, "Thesaurus")):
-                            w1 = w1[10:]
-                        if w1:
-                            ret.append((lang, pos, rel, w1, item_sense,
-                                        xlit, tags, topics, title))
-                return
-            if kind not in LEVEL_KINDS:
-                recurse(contents.args)
-                recurse(contents.children)
-                return
-            subtitle = wxr.wtp.node_to_text(contents.args)
-            if subtitle in wxr.config.LANGUAGES_BY_NAME:
-                lang = subtitle
-                pos = None
-                sense = None
-                linkage = None
-                recurse(contents.children)
-                return
-            if subtitle.lower().startswith(wxr.config.OTHER_SUBTITLES["sense"].lower()):
-                sense = subtitle[len(wxr.config.OTHER_SUBTITLES["sense"]):]
-                linkage = None
-                recurse(contents.children)
-                return
-            subtitle = subtitle.lower()
-            if subtitle in ("further reading", "external links",
-                            "references", "translations", "notes", "usage",
-                            "work to be done", "quantification",
-                            "abbreviation", "symbol"):
-                return
-            if subtitle in wxr.config.LINKAGE_SUBTITLES:
-                linkage = wxr.config.LINKAGE_SUBTITLES[subtitle]
-                recurse(contents.children)
-                return
-            if subtitle in wxr.config.POS_SUBTITLES:
-                pos = wxr.config.POS_SUBTITLES[subtitle]["pos"]
-                sense = None
-                linkage = None
-                recurse(contents.children)
-                return
-            if subtitle in ignored_subtitle_tags_map:
-                # These subtitles are ignored but children are processed and
-                # possibly given additional tags
-                subtitle_tags = ignored_subtitle_tags_map[subtitle]
-                recurse(contents.children)
-                subtitle_tags = ()
-                return
-            print(title, lang, pos, sense, "UNHANDLED SUBTITLE:", subtitle)
-            print(contents.args)
-            recurse(contents.children)
-            return None
 
-        recurse(tree)
-        return [word, ret]
+def insert_thesaurus_entry_and_term(
+    db_conn: sqlite3.Connection,
+    entry: str,
+    lang_code: Optional[str],
+    pos: Optional[str],
+    sense: Optional[str],
+    linkage: Optional[str],
+    term: str,
+    tags: Optional[List[str]],
+    roman: Optional[str],
+    language_variant: Optional[str],
+) -> None:
+    entry_id = insert_thesaurus_entry(db_conn, entry, lang_code, pos, sense)
+    if entry_id is None:
+        entry_id = get_thesaurus_entry_id(db_conn, entry, lang_code, pos)
+    insert_thesaurus_term(
+        db_conn, term, entry_id, linkage, tags, None, roman, language_variant
+    )
 
-    ret = collections.defaultdict(list)
-    num_pages = 0
-    for word, linkages in wxr.wtp.reprocess(page_handler, include_redirects=False,
-                                        namespace_ids=[thesaurus_ns_id]):
-        assert isinstance(linkages, (list, tuple))
-        num_pages += 1
-        for lang, pos, rel, w, sense, xlit, tags, topics, title in linkages:
-            # Add the forward direction
-            v = (pos, rel, w, sense, xlit, tuple(tags), tuple(topics), title)
-            key = (word, lang)
-            ret[key].append(v)
-            if False:  # XXX don't add reverse releations here, disambig first
-                # Add inverse linkages where applicable
-                inv_rel = linkage_inverses.get(rel)
-                if inv_rel is not None:
-                    if rel in ("derived", "related"):
-                        inv_pos = None
-                    else:
-                        inv_pos = pos
-                    inv_v = (inv_pos, inv_rel, word, sense, None, (), (), title)
-                    key = (w, lang)
-                    ret[key].append(inv_v)
 
-    total = sum(len(x) for x in ret.values())
-    logging.info("Extracted {} linkages from {} thesaurus pages (took {:.1f}s)"
-                 .format(total, num_pages, time.time() - start_t))
-    return ret
+def close_thesaurus_db(db_path: Path, db_conn: sqlite3.Connection) -> None:
+    db_conn.close()
+    if db_path.parent.samefile(Path(tempfile.gettempdir())):
+        db_path.unlink(True)
+
+
+def emit_words_in_thesaurus(
+    wxr: WiktextractContext,
+    emitted: Set[Tuple[str, str, str]],
+    word_cb: Callable[[Any], None],
+) -> None:
+    # Emit words that occur in thesaurus as main words but for which
+    # Wiktionary has no word in the main namespace. This seems to happen
+    # sometimes.
+    logging.info("Emitting words that only occur in thesaurus")
+    for entry_id, entry, pos, lang_code, sense in wxr.thesaurus_db_conn.execute(
+        "SELECT id, entry, pos, language_code, sense FROM entries "
+        "WHERE pos IS NOT NULL AND language_code IS NOT NULL"
+    ):
+        if (entry, lang_code, pos) in emitted:
+            continue
+        logging.info(
+            "Emitting thesaurus entry for "
+            f"{entry}/{lang_code}/{pos} (not in main)"
+        )
+        sense_dict = collections.defaultdict(list)
+        sense_dict["glosses"] = [sense]
+        for (
+            term,
+            linkage,
+            tags,
+            topics,
+            roman,
+            variant,
+        ) in wxr.thesaurus_db_conn.execute(
+            "SELECT term, linkage, tags, topics, roman, variant "
+            "FROM terms WHERE entry_id = ?",
+            (entry_id,),
+        ):
+            relation_dict = {"word": term, "source": f"Thesaurus:{entry}"}
+            if tags is not None:
+                relation_dict["tags"] = tags.split("|")
+            if topics is not None:
+                relation_dict["topics"] = topics.split("|")
+            sense_dict[linkage].append(relation_dict)
+
+        if len(sense_dict) == 1:
+            sense_dict["tags"] = ["no-gloss"]
+
+        word_cb(
+            {
+                "word": entry,
+                "lang": wxr.config.LANGUAGES_BY_CODE.get(lang_code),
+                "lang_code": lang_code,
+                "pos": pos,
+                "senses": [sense_dict],
+                "source": "thesaurus",
+            }
+        )

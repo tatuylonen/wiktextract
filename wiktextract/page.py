@@ -11,9 +11,8 @@ import collections
 from typing import Dict, List
 
 from wiktextract.wxr_context import WiktextractContext
-from wikitextprocessor import Wtp, WikiNode, NodeKind
+from wikitextprocessor import WikiNode, NodeKind
 from .parts_of_speech import PARTS_OF_SPEECH
-from .config import WiktionaryConfig
 from .linkages import parse_linkage_item_text
 from .translations import parse_translation_item_text
 from .clean import clean_value, clean_template_args
@@ -46,7 +45,7 @@ floating_table_templates = {
     "tr-suffix-forms",
     "tt-suffix-forms",
     "uz-suffix-forms",
-    
+
 }
 # These two should contain template names that should always be
 # pre-expanded when *first* processing the tree, or not pre-expanded
@@ -488,7 +487,7 @@ def parse_ruby(wxr, node):
     ruby_nodes = []
     furi_nodes = []
     for child in node.children:
-        if  (not isinstance(child, WikiNode) or 
+        if  (not isinstance(child, WikiNode) or
              not child.kind == NodeKind.HTML or
              not (child.args == "rp" or child.args == "rt")):
             ruby_nodes.append(child)
@@ -952,7 +951,7 @@ def parse_language(wxr, langnode, language, lang_code):
             if key in pron:
                 pron.pop(key)
             return pron
-            
+
         # If the result has sounds, eliminate sounds that have a prefix that
         # does not match "word" or one of "forms"
         if "sounds" in data and "word" in data:
@@ -1140,7 +1139,7 @@ def parse_language(wxr, langnode, language, lang_code):
         # print(poschildren)
         # XXX new above
 
-        
+
         for node in poschildren:
             if isinstance(node, str):
                 for m in re.finditer(r"\n+|[^\n]+", node):
@@ -1220,7 +1219,7 @@ def parse_language(wxr, langnode, language, lang_code):
                     # first_head_tmplt = False # no first_head_tmplt at all
                     # start_of_paragraph = False
                     # continue
-                
+
                 if first_head_tmplt and pre[-1]:
                     first_head_tmplt = False
                     start_of_paragraph = False
@@ -1385,7 +1384,7 @@ def parse_language(wxr, langnode, language, lang_code):
         # entry it is; # is for normal glosses, : for examples (indent)
         # and * is used for quotations on wiktionary.
         current_depth = node.args
-    
+
         children = node.children
 
         # subentries, (presumably) a list
@@ -1414,7 +1413,7 @@ def parse_language(wxr, langnode, language, lang_code):
                  x.kind != NodeKind.LIST]
         # If this entry has sublists of entries, we should combine
         # gloss information from both the "outer" and sublist content.
-        # Sometimes the outer gloss 
+        # Sometimes the outer gloss
         # is more non-gloss or tags, sometimes it is a coarse sense
         # and the inner glosses are more specific.  The outer one
         # does not seem to have qualifiers.
@@ -1499,7 +1498,7 @@ def parse_language(wxr, langnode, language, lang_code):
                 if v and "<" not in v:
                     gloss_template_args.add(v)
             if wxr.config.dump_file_lang_code == "zh":
-                add_form_of_tags(wxr, name, 
+                add_form_of_tags(wxr, name,
                                  wxr.config.FORM_OF_TEMPLATES, sense_base)
             return None
 
@@ -1543,7 +1542,7 @@ def parse_language(wxr, langnode, language, lang_code):
 
         if not rawgloss:
             return False
-            
+
         # get stuff like synonyms and categories from "others",
         # maybe examples and quotations
         clean_node(wxr, sense_base, others,
@@ -1569,7 +1568,7 @@ def parse_language(wxr, langnode, language, lang_code):
         # in HTML directly without Wikitext markup, so we must also split
         # by just newlines.
         subglosses = re.split(r"(?m)^[#*]*\s*", rawgloss)
-                                       
+
         if len(subglosses) == 0:
             return False
 
@@ -1661,7 +1660,7 @@ def parse_language(wxr, langnode, language, lang_code):
                 elif not infl_dts:
                     data_extend(wxr, sense_base, "tags", infl_tags)
                     subglosses = subglosses[1:]
-                    
+
         # Create senses for remaining subglosses
         for gloss_i, gloss in enumerate(subglosses):
             gloss = gloss.strip()
@@ -1698,7 +1697,7 @@ def parse_language(wxr, langnode, language, lang_code):
                     sense_data[k] = v
             # Parse the gloss for this particular sense
             m = re.match(r"^\((([^()]|\([^()]*\))*)\):?\s*", gloss)
-                        # (...): ... or (...(...)...): ... 
+                        # (...): ... or (...(...)...): ...
             if m:
                 parse_sense_qualifier(wxr, m.group(1), sense_data)
                 gloss = gloss[m.end():].strip()
@@ -1870,7 +1869,7 @@ def parse_language(wxr, langnode, language, lang_code):
         # about the outer-most delimiters (the highest level template)
         # we can just count the single braces when those single
         # braces are part of a group.
-        
+
         # print(text)
         # print(repr(brace_matches))
         if len(brace_matches) > 1:
@@ -1910,7 +1909,7 @@ def parse_language(wxr, langnode, language, lang_code):
                 # table (`after`-variable), so a new tsection begins
                 # at {{ and everything before it belongs to the previous
                 # template.
-        
+
         texts = []
         if not template_sections:
             texts = [text]
@@ -1928,7 +1927,7 @@ def parse_language(wxr, langnode, language, lang_code):
         for text in texts:
             tree = wxr.wtp.parse(text, expand_all=True,
                              template_fn=inflection_template_fn)
-    
+
             # Parse inflection tables from the section.  The data is stored
             # under "forms".
             if wxr.config.capture_inflections:
@@ -1987,7 +1986,7 @@ def parse_language(wxr, langnode, language, lang_code):
             if name == "multitrans" and not text.startswith("\n"):
                 return "\n" + text
             return None
-        
+
         tree = wxr.wtp.parse(subpage_content, pre_expand=True,
                          post_template_fn=multitrans_post_fn,
                          additional_expand=additional_expand_templates,
@@ -2459,7 +2458,7 @@ def parse_language(wxr, langnode, language, lang_code):
             item = clean_node(wxr, data, contents,
                               template_fn=translation_item_template_fn)
             # print("    TRANSLATION ITEM: {!r}  [{}]".format(item, sense))
-            
+
             # Parse the translation item.
             if item:
                 lang = parse_translation_item_text(wxr, word, data, item, sense,
@@ -2827,12 +2826,12 @@ def parse_language(wxr, langnode, language, lang_code):
 
         def node_children(node):
             for i, child in enumerate(node.children):
-                if isinstance(child, WikiNode): 
+                if isinstance(child, WikiNode):
                     yield (i, child)
 
         def get_sublist_index(list_item):
             for i, child in node_children(list_item):
-                if child.kind == NodeKind.LIST: 
+                if child.kind == NodeKind.LIST:
                     return i
             return None
 
@@ -2847,21 +2846,21 @@ def parse_language(wxr, langnode, language, lang_code):
                     # the list is entirely generated by a single template (see
                     # e.g. the use of {{CJKV}} in Chinese entries).
                     process_list_item_children("", [c])
-                elif c.kind == NodeKind.HTML: 
+                elif c.kind == NodeKind.HTML:
                     # The Descendants sections for many languages feature
                     # templates that generate html to add styling (e.g. using
                     # multiple columns) to the list, so that the actual wikitext
                     # list items are found within a <div>. We look within the
                     # children of the html node for the actual list items.
                     get_descendants(c)
-                elif c.kind == NodeKind.LIST: 
+                elif c.kind == NodeKind.LIST:
                     get_descendants(c)
                 elif c.kind == NodeKind.LIST_ITEM:
-                    # If a LIST_ITEM has subitems in a sublist, usually its 
+                    # If a LIST_ITEM has subitems in a sublist, usually its
                     # last child is a LIST. However, sometimes after the LIST
                     # there is one or more trailing LIST_ITEMs, like "\n" or
                     # a reference template. If there is a sublist, we discard
-                    # everything after it. 
+                    # everything after it.
                     i = get_sublist_index(c)
                     if i is not None:
                         process_list_item_children(c.args, c.children[:i])
@@ -2875,7 +2874,7 @@ def parse_language(wxr, langnode, language, lang_code):
         # if e.g. on a PIE page, there may be both Derived terms and Extensions
         # sections, in which case this function will be called multiple times,
         # so we have to check if descendants exists first.
-        if "descendants" in data: 
+        if "descendants" in data:
             data["descendants"].extend(descendants)
         else:
             data["descendants"] = descendants
@@ -2917,9 +2916,10 @@ def parse_language(wxr, langnode, language, lang_code):
             wxr.config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
             if t.startswith(tuple(wxr.config.OTHER_SUBTITLES["pronunciation"])):
-                if t.startswith(tuple(pron_title + " "
-                                     for pron_title in 
-                                     wxr.config.OTHER_SUBTITLES["pronunciation"])):
+                if t.startswith(tuple(
+                        pron_title + " "
+                        for pron_title in
+                        wxr.config.OTHER_SUBTITLES.get("pronunciation", []))):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
                     push_etym()
@@ -2942,21 +2942,27 @@ def parse_language(wxr, langnode, language, lang_code):
                     if m:
                         etym_data["etymology_number"] = int(m.group(1))
                     parse_etymology(etym_data, node)
-            elif t == wxr.config.OTHER_SUBTITLES["descendants"] and wxr.config.capture_descendants:
+            elif (
+                t == wxr.config.OTHER_SUBTITLES.get("descendants")
+                and wxr.config.capture_descendants
+            ):
                 data = select_data()
                 parse_descendants(data, node)
-            elif (t in wxr.config.OTHER_SUBTITLES["proto_root_derived_sections"] and 
-                pos == "root" and is_reconstruction and 
+            elif (
+                t in wxr.config.OTHER_SUBTITLES.get(
+                    "proto_root_derived_sections", []
+                )
+                and pos == "root" and is_reconstruction and
                 wxr.config.capture_descendants
             ):
                 data = select_data()
                 parse_descendants(data, node, True)
-            elif t == wxr.config.OTHER_SUBTITLES["translations"]:
+            elif t == wxr.config.OTHER_SUBTITLES.get("translations"):
                 data = select_data()
                 parse_translations(data, node)
-            elif t in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
+            elif t in wxr.config.OTHER_SUBTITLES.get("ignored_sections", []):
                 pass
-            elif t in wxr.config.OTHER_SUBTITLES["inflection_sections"]:
+            elif t in wxr.config.OTHER_SUBTITLES.get("inflection_sections", []):
                 parse_inflection(node, t, pos)
             else:
                 lst = t.split()
@@ -2965,7 +2971,7 @@ def parse_language(wxr, langnode, language, lang_code):
                 t_no_number = " ".join(lst).lower()
                 if t_no_number in wxr.config.POS_SUBTITLES:
                     push_pos()
-                    dt = wxr.config.POS_SUBTITLES[t_no_number]
+                    dt = wxr.config.POS_SUBTITLES.get(t_no_number)
                     pos = dt["pos"]
                     wxr.wtp.start_subsection(t)
                     if "debug" in dt:
@@ -2986,10 +2992,10 @@ def parse_language(wxr, langnode, language, lang_code):
                         for pdata in pos_datas:
                             data_extend(wxr, pdata, "tags", dt["tags"])
                 elif t_no_number in wxr.config.LINKAGE_SUBTITLES:
-                    rel = wxr.config.LINKAGE_SUBTITLES[t_no_number]
+                    rel = wxr.config.LINKAGE_SUBTITLES.get(t_no_number)
                     data = select_data()
                     parse_linkage(data, rel, node)
-                elif t_no_number == wxr.config.OTHER_SUBTITLES["compounds"]:
+                elif t_no_number == wxr.config.OTHER_SUBTITLES.get("compounds"):
                     data = select_data()
                     if wxr.config.capture_compounds:
                         parse_linkage(data, "derived", node)
@@ -3009,7 +3015,7 @@ def parse_language(wxr, langnode, language, lang_code):
         meta-data, mostly categories, into sense_base."""
         assert isinstance(others, list)
         examples = []
-        
+
         for sub in others:
             if not sub.args.endswith((":", "*")):
                 continue
@@ -3019,7 +3025,7 @@ def parse_language(wxr, langnode, language, lang_code):
                 if item.kind != NodeKind.LIST_ITEM:
                     continue
                 usex_type = None
-    
+
                 def usex_template_fn(name, ht):
                     nonlocal usex_type
                     if name in panel_templates:
@@ -3034,7 +3040,7 @@ def parse_language(wxr, langnode, language, lang_code):
                                      name):
                             return ""
                     return None
-    
+
                 # bookmark
                 ruby = []
                 contents = item.children
@@ -3060,7 +3066,7 @@ def parse_language(wxr, langnode, language, lang_code):
                 subtext = re.sub(r"\^\([^)]*\)", "", subtext)
                 subtext = re.sub(r"\s*[―—]+$", "", subtext)
                 # print("subtext:", repr(subtext))
-    
+
                 lines = subtext.splitlines()
                 # print(lines)
 
@@ -3126,7 +3132,7 @@ def parse_language(wxr, langnode, language, lang_code):
                             if classify_desc(lines[-1]) == "romanization":
                                 roman = lines[-1].strip()
                                 lines = lines[:-1]
-    
+
                     elif (lang_code == "en" and
                           re.match(r"^[#*]*:+", lines[1])):
                         ref = lines[0]
@@ -3180,7 +3186,7 @@ def parse_language(wxr, langnode, language, lang_code):
                                 i -= 1
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
-    
+
                 roman = re.sub(r"[ \t\r]+", " ", roman).strip()
                 roman = re.sub(r"\[\s*…\s*\]", "[…]", roman)
                 tr = re.sub(r"^[#*:]+\s*", "", tr)
@@ -3247,7 +3253,7 @@ def parse_language(wxr, langnode, language, lang_code):
                     if ruby:
                         dt["ruby"] = ruby
                     examples.append(dt)
-    
+
         return examples
 
 
@@ -3387,17 +3393,22 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext,
             level = 3
         elif lc in wxr.config.POS_SUBTITLES:
             level = 4
-        elif lc == wxr.config.OTHER_SUBTITLES["translations"]:
+        elif lc == wxr.config.OTHER_SUBTITLES.get("translations"):
             level = 5
-        elif lc in wxr.config.LINKAGE_SUBTITLES or lc == wxr.config.OTHER_SUBTITLES["compounds"]:
+        elif (
+            lc in wxr.config.LINKAGE_SUBTITLES
+            or lc == wxr.config.OTHER_SUBTITLES.get("compounds")
+        ):
             level = 5
-        elif lc in wxr.config.OTHER_SUBTITLES["inflection_sections"]:
+        elif lc in wxr.config.OTHER_SUBTITLES.get("inflection_sections", []):
             level = 5
-        elif lc == wxr.config.OTHER_SUBTITLES["descendants"]:
+        elif lc == wxr.config.OTHER_SUBTITLES.get("descendants"):
             level = 5
-        elif title in  wxr.config.OTHER_SUBTITLES["proto_root_derived_sections"]:
+        elif title in wxr.config.OTHER_SUBTITLES.get(
+            "proto_root_derived_sections", []
+        ):
             level = 5
-        elif lc in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
+        elif lc in wxr.config.OTHER_SUBTITLES.get("ignored_sections", []):
             level = 5
         else:
             level = 6
@@ -3467,7 +3478,7 @@ def parse_page(wxr: WiktextractContext,
     # fix for bug multitrans and trans-top templates: multitrans creates
     # lists, but is pre-expanded in wikitextprocessor before trans-top
     # is expanded, so the first item ends up on the same line:
-    # {{trans-top}}* Foobarian translation item <- not parsed as list item 
+    # {{trans-top}}* Foobarian translation item <- not parsed as list item
     # This is duplicated elsewhere on this page for subpages
     def multitrans_post_fn(name, ht, text):
         if name == "multitrans" and not text.startswith("\n"):
@@ -3574,33 +3585,44 @@ def parse_page(wxr: WiktextractContext,
         ret.extend(lang_datas)
 
     # Inject linkages from thesaurus entries
+    from .thesaurus import search_thesaurus
+
     for data in ret:
         if "pos" not in data:
             continue
         word = data["word"]
-        lang = data["lang"]
+        lang_code = data["lang_code"]
         pos = data["pos"]
-        for tpos, rel, w, sense, xlit, tags, topics, title in \
-            wxr.config.thesaurus_data.get((word, lang), ()):
-            if tpos is not None and pos != tpos:
-                continue
-            if w == word:
-                continue
-            for dt in data.get(rel, ()):
-                if dt.get("word") == w:
-                    if not sense or dt.get("sense") == sense:
-                        break
+        for (
+                term,
+                linkage,
+                sense,
+                roman,
+                tags,
+                topics,
+                gloss,
+                lang_variant
+        ) in search_thesaurus(wxr.thesaurus_db_conn, word, lang_code, pos):
+            for dt in data.get(linkage, ()):
+                if dt.get("word") == term and (
+                        not sense or dt.get("sense") == sense
+                ):
+                    break
             else:
-                dt = {"word": w, "source": title}
-                if sense:
+                dt = {"word": term, "source": f"Thesaurus:{word}"}
+                if sense is not None:
                     dt["sense"] = sense
-                if tags:
-                    dt["tags"] = tags
-                if topics:
-                    dt["topics"] = topics
-                if xlit:
-                    dt["roman"] = xlit
-                data_append(wxr, data, rel, dt)
+                    if gloss is not None:
+                        dt["sense"] += " " + gloss
+                if tags is not None:
+                    dt["tags"] = tags.split("|")
+                if topics is not None:
+                    dt["topics"] = topics.split("|")
+                if roman is not None:
+                    dt["roman"] = roman.split("|")
+                if lang_variant is not None:
+                    dt["language_variant"] = lang_variant
+                data_append(wxr, data, linkage, dt)
 
     # Categories are not otherwise disambiguated, but if there is only
     # one sense and only one data in ret for the same language, move
