@@ -2916,9 +2916,10 @@ def parse_language(wxr, langnode, language, lang_code):
             wxr.config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
             if t.startswith(tuple(wxr.config.OTHER_SUBTITLES["pronunciation"])):
-                if t.startswith(tuple(pron_title + " "
-                                     for pron_title in
-                                     wxr.config.OTHER_SUBTITLES["pronunciation"])):
+                if t.startswith(tuple(
+                        pron_title + " "
+                        for pron_title in
+                        wxr.config.OTHER_SUBTITLES.get("pronunciation", []))):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
                     push_etym()
@@ -2941,21 +2942,27 @@ def parse_language(wxr, langnode, language, lang_code):
                     if m:
                         etym_data["etymology_number"] = int(m.group(1))
                     parse_etymology(etym_data, node)
-            elif t == wxr.config.OTHER_SUBTITLES["descendants"] and wxr.config.capture_descendants:
+            elif (
+                t == wxr.config.OTHER_SUBTITLES.get("descendants")
+                and wxr.config.capture_descendants
+            ):
                 data = select_data()
                 parse_descendants(data, node)
-            elif (t in wxr.config.OTHER_SUBTITLES["proto_root_derived_sections"] and
-                pos == "root" and is_reconstruction and
+            elif (
+                t in wxr.config.OTHER_SUBTITLES.get(
+                    "proto_root_derived_sections", []
+                )
+                and pos == "root" and is_reconstruction and
                 wxr.config.capture_descendants
             ):
                 data = select_data()
                 parse_descendants(data, node, True)
-            elif t == wxr.config.OTHER_SUBTITLES["translations"]:
+            elif t == wxr.config.OTHER_SUBTITLES.get("translations"):
                 data = select_data()
                 parse_translations(data, node)
-            elif t in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
+            elif t in wxr.config.OTHER_SUBTITLES.get("ignored_sections", []):
                 pass
-            elif t in wxr.config.OTHER_SUBTITLES["inflection_sections"]:
+            elif t in wxr.config.OTHER_SUBTITLES.get("inflection_sections", []):
                 parse_inflection(node, t, pos)
             else:
                 lst = t.split()
@@ -2964,7 +2971,7 @@ def parse_language(wxr, langnode, language, lang_code):
                 t_no_number = " ".join(lst).lower()
                 if t_no_number in wxr.config.POS_SUBTITLES:
                     push_pos()
-                    dt = wxr.config.POS_SUBTITLES[t_no_number]
+                    dt = wxr.config.POS_SUBTITLES.get(t_no_number)
                     pos = dt["pos"]
                     wxr.wtp.start_subsection(t)
                     if "debug" in dt:
@@ -2985,10 +2992,10 @@ def parse_language(wxr, langnode, language, lang_code):
                         for pdata in pos_datas:
                             data_extend(wxr, pdata, "tags", dt["tags"])
                 elif t_no_number in wxr.config.LINKAGE_SUBTITLES:
-                    rel = wxr.config.LINKAGE_SUBTITLES[t_no_number]
+                    rel = wxr.config.LINKAGE_SUBTITLES.get(t_no_number)
                     data = select_data()
                     parse_linkage(data, rel, node)
-                elif t_no_number == wxr.config.OTHER_SUBTITLES["compounds"]:
+                elif t_no_number == wxr.config.OTHER_SUBTITLES.get("compounds"):
                     data = select_data()
                     if wxr.config.capture_compounds:
                         parse_linkage(data, "derived", node)
@@ -3386,17 +3393,22 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext,
             level = 3
         elif lc in wxr.config.POS_SUBTITLES:
             level = 4
-        elif lc == wxr.config.OTHER_SUBTITLES["translations"]:
+        elif lc == wxr.config.OTHER_SUBTITLES.get("translations"):
             level = 5
-        elif lc in wxr.config.LINKAGE_SUBTITLES or lc == wxr.config.OTHER_SUBTITLES["compounds"]:
+        elif (
+            lc in wxr.config.LINKAGE_SUBTITLES
+            or lc == wxr.config.OTHER_SUBTITLES.get("compounds")
+        ):
             level = 5
-        elif lc in wxr.config.OTHER_SUBTITLES["inflection_sections"]:
+        elif lc in wxr.config.OTHER_SUBTITLES.get("inflection_sections", []):
             level = 5
-        elif lc == wxr.config.OTHER_SUBTITLES["descendants"]:
+        elif lc == wxr.config.OTHER_SUBTITLES.get("descendants"):
             level = 5
-        elif title in  wxr.config.OTHER_SUBTITLES["proto_root_derived_sections"]:
+        elif title in wxr.config.OTHER_SUBTITLES.get(
+            "proto_root_derived_sections", []
+        ):
             level = 5
-        elif lc in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
+        elif lc in wxr.config.OTHER_SUBTITLES.get("ignored_sections", []):
             level = 5
         else:
             level = 6
@@ -3583,7 +3595,7 @@ def parse_page(wxr: WiktextractContext,
         pos = data["pos"]
         for (
                 term,
-                relation,
+                linkage,
                 sense,
                 roman,
                 tags,
@@ -3591,7 +3603,7 @@ def parse_page(wxr: WiktextractContext,
                 gloss,
                 lang_variant
         ) in search_thesaurus(wxr.thesaurus_db_conn, word, lang_code, pos):
-            for dt in data.get(relation, ()):
+            for dt in data.get(linkage, ()):
                 if dt.get("word") == term and (
                         not sense or dt.get("sense") == sense
                 ):
@@ -3607,10 +3619,10 @@ def parse_page(wxr: WiktextractContext,
                 if topics is not None:
                     dt["topics"] = topics.split("|")
                 if roman is not None:
-                    dt["roman"] = roman
+                    dt["roman"] = roman.split("|")
                 if lang_variant is not None:
                     dt["language_variant"] = lang_variant
-                data_append(wxr, data, relation, dt)
+                data_append(wxr, data, linkage, dt)
 
     # Categories are not otherwise disambiguated, but if there is only
     # one sense and only one data in ret for the same language, move
