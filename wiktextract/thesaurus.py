@@ -17,7 +17,7 @@ from wiktextract.wxr_context import WiktextractContext
 
 def extract_thesaurus_data(wxr: WiktextractContext) -> None:
     thesaurus_extractor_mod = importlib.import_module(
-        f"wiktextract.extractor/{wxr.wtp.lang_code}/thesaurus"
+        f"wiktextract.extractor.{wxr.wtp.lang_code}.thesaurus"
     )
     thesaurus_extractor_mod.extract_thesaurus_data(wxr)
 
