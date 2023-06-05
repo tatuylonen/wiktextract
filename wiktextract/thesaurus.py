@@ -168,9 +168,9 @@ def emit_words_in_thesaurus(
             tags,
             topics,
             roman,
-            variant,
+            lang_variant,
         ) in wxr.thesaurus_db_conn.execute(
-            "SELECT term, linkage, tags, topics, roman, variant "
+            "SELECT term, linkage, tags, topics, roman, language_variant "
             "FROM terms WHERE entry_id = ?",
             (entry_id,),
         ):
@@ -179,6 +179,8 @@ def emit_words_in_thesaurus(
                 relation_dict["tags"] = tags.split("|")
             if topics is not None:
                 relation_dict["topics"] = topics.split("|")
+            if lang_variant is not None:
+                relation_dict["language_variant"] = lang_variant
             sense_dict[linkage].append(relation_dict)
 
         if len(sense_dict) == 1:
