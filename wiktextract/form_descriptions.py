@@ -1120,6 +1120,10 @@ def quote_kept_ruby(wxr, ruby_tuples, s):
     for k, r in ruby_tuples:
         ks.append(k)
         rs.append(r)
+    if not (k and r):
+        wxr.wtp.debug(f"empty column in ruby_tuples: {ruby_tuples}",
+                     sortid="form_description/1124/20230606")
+        return s
     newm = re.compile(r"({})\s*\(*\s*({})\s*\)*".format("|".join(ks),
                       "|".join(rs)))
     rub_re = re.compile(r"({})"
