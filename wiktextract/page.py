@@ -3600,7 +3600,7 @@ def parse_page(wxr: WiktextractContext,
                 roman,
                 tags,
                 topics,
-                gloss,
+                # gloss,
                 lang_variant
         ) in search_thesaurus(wxr.thesaurus_db_conn, word, lang_code, pos):
             for dt in data.get(linkage, ()):
@@ -3612,8 +3612,8 @@ def parse_page(wxr: WiktextractContext,
                 dt = {"word": term, "source": f"Thesaurus:{word}"}
                 if sense is not None:
                     dt["sense"] = sense
-                    if gloss is not None:
-                        dt["sense"] += " " + gloss
+                    # if gloss is not None:
+                    #     dt["sense"] += " " + gloss
                 if tags is not None:
                     dt["tags"] = tags.split("|")
                 if topics is not None:
