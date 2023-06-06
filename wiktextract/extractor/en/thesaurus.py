@@ -75,8 +75,9 @@ def contains_list(contents):
 def extract_thesaurus_data(wxr: WiktextractContext) -> None:
     """Extracts linkages from the thesaurus pages in Wiktionary."""
     from wiktextract.thesaurus import (
-        insert_thesaurus_entry_and_term,
+        insert_thesaurus_term,
         thesaurus_linkage_number,
+        ThesaurusTerm,
     )
 
     start_t = time.time()
@@ -221,18 +222,19 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
                                 logging.debug(
                                     f"Linkage language {lang} not recognized"
                                 )
-                            insert_thesaurus_entry_and_term(
+                            insert_thesaurus_term(
                                 wxr.thesaurus_db_conn,
-                                word,
-                                lang_code,
-                                pos,
-                                item_sense,
-                                rel,
-                                w1,
-                                "|".join(tags) if tags else None,
-                                "|".join(topics) if topics else None,
-                                xlit,
-                                None,
+                                ThesaurusTerm(
+                                    entry=word,
+                                    language_code=lang_code,
+                                    pos=pos,
+                                    linkage=rel,
+                                    term=w1,
+                                    tags="|".join(tags) if tags else None,
+                                    topics="|".join(topics) if topics else None,
+                                    roman=xlit,
+                                    sense=item_sense,
+                                ),
                             )
                 return
             if kind not in LEVEL_KINDS:

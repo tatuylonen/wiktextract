@@ -9,11 +9,27 @@ import logging
 import sqlite3
 import tempfile
 
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Tuple, Optional, Set, Callable, Any, List
+from typing import Tuple, Optional, Set, Callable, Any
 from collections.abc import Iterable
 
 from wiktextract.wxr_context import WiktextractContext
+
+
+@dataclass
+class ThesaurusTerm:
+    entry: str
+    language_code: str
+    pos: str
+    linkage: str
+    term: str
+    tags: Optional[str] = None
+    topics: Optional[str] = None
+    roman: Optional[str] = None
+    language_variant: Optional[str] = None
+    entry_id: Optional[int] = None
+    sense: Optional[str] = None
 
 
 def extract_thesaurus_data(wxr: WiktextractContext) -> None:
@@ -56,39 +72,6 @@ def init_thesaurus_db(db_path: Path) -> sqlite3.Connection:
     return conn
 
 
-def insert_thesaurus_entry(
-    db_conn: sqlite3.Connection,
-    entry: str,
-    language_code: str,
-    pos: str,
-    sense: str,
-) -> Optional[int]:
-    for (entry_id,) in db_conn.execute(
-        "INSERT OR IGNORE INTO entries (entry, language_code, pos, sense) "
-        "VALUES(?, ?, ?, ?) RETURNING id",
-        (entry, language_code, pos, sense),
-    ):
-        return entry_id
-
-
-def insert_thesaurus_term(
-    db_conn: sqlite3.Connection,
-    term: str,
-    entry_id: int,
-    linkage: str,
-    tags: str,
-    topics: str,
-    roman: str,
-    language_variant: str,
-) -> None:
-    db_conn.execute(
-        "INSERT OR IGNORE INTO terms (term, entry_id, linkage, tags, topics, "
-        "roman, language_variant) VALUES(?, ?, ?, ?, ?, ?, ?)",
-        (term, entry_id, linkage, tags, topics, roman, language_variant),
-    )
-    db_conn.commit()
-
-
 def thesaurus_linkage_number(db_conn: sqlite3.Connection) -> int:
     for (r,) in db_conn.execute("SELECT count(*) FROM terms"):
         return r
@@ -96,45 +79,60 @@ def thesaurus_linkage_number(db_conn: sqlite3.Connection) -> int:
 
 def search_thesaurus(
     db_conn: sqlite3.Connection, entry: str, lang_code: str, pos: str
-) -> Iterable[Tuple[str, ...]]:
-    return db_conn.execute(
-        "SELECT term, linkage, sense, roman, tags, topics, language_variant "
+) -> Iterable[ThesaurusTerm]:
+    for r in db_conn.execute(
+        "SELECT term, entries.id, linkage, tags, topics, roman, "
+        "language_variant, sense "
         "FROM terms JOIN entries ON terms.entry_id = entries.id "
         "WHERE entry = ? AND language_code = ? AND pos = ?",
         (entry, lang_code, pos),
-    )
-
-
-def get_thesaurus_entry_id(
-    db_conn: sqlite3.Connection, entry: str, lang_code: str, pos: str
-) -> Optional[int]:
-    for (r,) in db_conn.execute(
-        "SELECT id FROM entries WHERE entry = ? AND language_code = ? "
-        "AND pos = ?",
-        (entry, lang_code, pos),
     ):
-        return r
+        yield ThesaurusTerm(
+            term=r[0],
+            entry_id=r[1],
+            linkage=r[2],
+            tags=r[3],
+            topics=r[4],
+            roman=r[5],
+            language_variant=r[6],
+            sense=r[7],
+            entry=entry,
+            pos=pos,
+            language_code=lang_code,
+        )
 
 
-def insert_thesaurus_entry_and_term(
-    db_conn: sqlite3.Connection,
-    entry: str,
-    lang_code: Optional[str],
-    pos: Optional[str],
-    sense: Optional[str],
-    linkage: Optional[str],
-    term: str,
-    tags: Optional[str],
-    topics: Optional[str],
-    roman: Optional[str],
-    language_variant: Optional[str],
+def insert_thesaurus_term(
+    db_conn: sqlite3.Connection, term: ThesaurusTerm
 ) -> None:
-    entry_id = insert_thesaurus_entry(db_conn, entry, lang_code, pos, sense)
+    entry_id = None
+    for (new_entry_id,) in db_conn.execute(
+        "INSERT OR IGNORE INTO entries (entry, language_code, pos, sense) "
+        "VALUES(?, ?, ?, ?) RETURNING id",
+        (term.entry, term.language_code, term.pos, term.sense),
+    ):
+        entry_id = new_entry_id
     if entry_id is None:
-        entry_id = get_thesaurus_entry_id(db_conn, entry, lang_code, pos)
-    insert_thesaurus_term(
-        db_conn, term, entry_id, linkage, tags, topics, roman, language_variant
+        for (old_entry_id,) in db_conn.execute(
+            "SELECT id FROM entries WHERE entry = ? AND language_code = ? "
+            "AND pos = ?",
+            (term.entry, term.language_code, term.pos),
+        ):
+            entry_id = old_entry_id
+    db_conn.execute(
+        "INSERT OR IGNORE INTO terms (term, entry_id, linkage, tags, topics, "
+        "roman, language_variant) VALUES(?, ?, ?, ?, ?, ?, ?)",
+        (
+            term.term,
+            entry_id,
+            term.linkage,
+            term.tags,
+            term.topics,
+            term.roman,
+            term.language_variant,
+        ),
     )
+    db_conn.commit()
 
 
 def close_thesaurus_db(db_path: Path, db_conn: sqlite3.Connection) -> None:
