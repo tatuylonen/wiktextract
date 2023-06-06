@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Optional, List, Set, Tuple
 
 from wikitextprocessor import Page
-from .page import (parse_page, additional_expand_templates)
+from .page import parse_page, additional_expand_templates
 from .config import WiktionaryConfig
 from .wxr_context import WiktextractContext
 from .thesaurus import (
@@ -47,8 +47,11 @@ def page_handler(wxr, page: Page, config_kwargs, dont_parse):
         ret = parse_page(wxr1, title, page.body)
         dur = time.time() - start_t
         if dur > 100:
-            logging.warning("====== WARNING: PARSING PAGE TOOK {:.1f}s: {}"
-                            .format(dur, title))
+            logging.warning(
+                "====== WARNING: PARSING PAGE TOOK {:.1f}s: {}".format(
+                    dur, title
+                )
+            )
     stats = wxr1.config.to_return()
     for k, v in wxr.wtp.to_return().items():
         stats[k] = v
@@ -56,11 +59,16 @@ def page_handler(wxr, page: Page, config_kwargs, dont_parse):
 
 
 def parse_wiktionary(
-        wxr: WiktextractContext, path: str, word_cb,
-        phase1_only: bool, dont_parse: bool, namespace_ids: Set[int],
-        override_folders: Optional[List[str]] = None,
-        skip_extract_dump: bool = False,
-        save_pages_path: Optional[str] = None):
+    wxr: WiktextractContext,
+    path: str,
+    word_cb,
+    phase1_only: bool,
+    dont_parse: bool,
+    namespace_ids: Set[int],
+    override_folders: Optional[List[str]] = None,
+    skip_extract_dump: bool = False,
+    save_pages_path: Optional[str] = None,
+):
     """Parses Wiktionary from the dump file ``path`` (which should point
     to a "enwiktionary-<date>-pages-articles.xml.bz2" file.  This
     calls `word_cb(data)` for all words defined for languages in `languages`."""
@@ -83,13 +91,13 @@ def parse_wiktionary(
     if save_pages_path is not None:
         save_pages_path = Path(save_pages_path)
     for _ in wxr.wtp.process(
-            path,
-            None,
-            namespace_ids,
-            True,
-            override_folders,
-            skip_extract_dump,
-            save_pages_path
+        path,
+        None,
+        namespace_ids,
+        True,
+        override_folders,
+        skip_extract_dump,
+        save_pages_path,
     ):
         pass
     if phase1_only:
@@ -100,10 +108,9 @@ def parse_wiktionary(
     return reprocess_wiktionary(wxr, word_cb, dont_parse)
 
 
-def reprocess_wiktionary(wxr: WiktextractContext,
-                         word_cb,
-                         dont_parse,
-                         search_pattern: str = None):
+def reprocess_wiktionary(
+    wxr: WiktextractContext, word_cb, dont_parse, search_pattern: str = None
+):
     """Reprocesses the Wiktionary from the cache file."""
     assert callable(word_cb)
     assert dont_parse in (True, False)
@@ -120,19 +127,22 @@ def reprocess_wiktionary(wxr: WiktextractContext,
         return page_handler(wxr, page, config_kwargs, dont_parse)
 
     emitted = set()
-    process_ns_ids = list({
-        wxr.wtp.NAMESPACE_DATA.get(ns, {}).get("id", 0)
-        for ns in ["Main", "Reconstruction"]
-    })
-    for ret, stats in wxr.wtp.reprocess(page_cb,
-                                        namespace_ids=process_ns_ids,
-                                        search_pattern=search_pattern,
-                                       ):
+    process_ns_ids = list(
+        {
+            wxr.wtp.NAMESPACE_DATA.get(ns, {}).get("id", 0)
+            for ns in ["Main", "Reconstruction"]
+        }
+    )
+    for ret, stats in wxr.wtp.reprocess(
+        page_cb,
+        namespace_ids=process_ns_ids,
+        search_pattern=search_pattern,
+    ):
         wxr.config.merge_return(stats)
         for dt in ret:
             word_cb(dt)
             word = dt.get("word")
-            lang_code= dt.get("lang_code")
+            lang_code = dt.get("lang_code")
             pos = dt.get("pos")
             if word and lang_code and pos:
                 emitted.add((word, lang_code, pos))
@@ -143,7 +153,7 @@ def reprocess_wiktionary(wxr: WiktextractContext,
 
 def process_ns_page_title(page: Page, ns_name: str) -> Tuple[str, str]:
     text = page.body if page.body is not None else page.redirect_to
-    title = page.title[page.title.find(":") + 1:]
+    title = page.title[page.title.find(":") + 1 :]
     title = re.sub(r"(^|/)\.($|/)", r"\1__dotdot__\2", title)
     title = re.sub(r"(^|/)\.\.($|/)", r"\1__dotdot__\2", title)
     title = title.replace("//", "__slashslash__")
@@ -154,12 +164,13 @@ def process_ns_page_title(page: Page, ns_name: str) -> Tuple[str, str]:
 
 
 def extract_namespace(
-        wxr: WiktextractContext, namespace: str, path: str
+    wxr: WiktextractContext, namespace: str, path: str
 ) -> None:
     """Extracts all pages in the given namespace and writes them to a .tar
     file with the given path."""
     logging.info(
-        f"Extracting pages from namespace {namespace} to tar file {path}")
+        f"Extracting pages from namespace {namespace} to tar file {path}"
+    )
     ns_id = wxr.wtp.NAMESPACE_DATA.get(namespace, {}).get("id")
     t = time.time()
     with tarfile.open(path, "w") as tarf:

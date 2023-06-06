@@ -55,6 +55,7 @@ def parse_ja_thesaurus_term(
             linkage,
             term,
             tags,
+            None,
             roman,
             None,
         )
@@ -106,6 +107,7 @@ def parse_zh_thesaurus_term(
             linkage,
             split_term,
             tags,
+            None,
             roman,
             language_variant,
         )
@@ -142,6 +144,7 @@ def parse_thesaurus_term(
             sense,
             linkage,
             node_str,
+            None,
             None,
             None,
             None,
