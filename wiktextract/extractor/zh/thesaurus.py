@@ -27,7 +27,7 @@ def parse_ja_thesaurus_term(
     linkage: Optional[str],
     term_str: str,
 ) -> None:
-    from wiktextract.thesaurus import insert_thesaurus_entry_and_term
+    from wiktextract.thesaurus import insert_thesaurus_term, ThesaurusTerm
 
     tags = None
     roman = None
@@ -46,18 +46,18 @@ def parse_ja_thesaurus_term(
         roman_and_gloss = term_str[term_end + 2 :].removesuffix(")").split(", ")
         if roman_and_gloss:
             roman = roman_and_gloss[0]
-        insert_thesaurus_entry_and_term(
+        insert_thesaurus_term(
             wxr.thesaurus_db_conn,
-            entry,
-            lang_code,
-            pos,
-            sense,
-            linkage,
-            term,
-            tags,
-            None,
-            roman,
-            None,
+            ThesaurusTerm(
+                entry=entry,
+                language_code=lang_code,
+                pos=pos,
+                linkage=linkage,
+                term=term,
+                tags=tags,
+                roman=roman,
+                sense=sense,
+            ),
         )
 
 
@@ -70,7 +70,7 @@ def parse_zh_thesaurus_term(
     linkage: Optional[str],
     term_str: str,
 ) -> None:
-    from wiktextract.thesaurus import insert_thesaurus_entry_and_term
+    from wiktextract.thesaurus import insert_thesaurus_term, ThesaurusTerm
 
     # Example term_str from https://zh.wiktionary.org/wiki/Thesaurus:安置
     # Fromat: traditional／simplified (pinyin) (tags)
@@ -98,18 +98,19 @@ def parse_zh_thesaurus_term(
 
     for index, split_term in enumerate(term.split("／")):
         language_variant = "zh-Hant" if index == 0 else "zh-Hans"
-        insert_thesaurus_entry_and_term(
+        insert_thesaurus_term(
             wxr.thesaurus_db_conn,
-            entry,
-            lang_code,
-            pos,
-            sense,
-            linkage,
-            split_term,
-            tags,
-            None,
-            roman,
-            language_variant,
+            ThesaurusTerm(
+                entry=entry,
+                language_code=lang_code,
+                pos=pos,
+                linkage=linkage,
+                term=split_term,
+                tags=tags,
+                roman=roman,
+                sense=sense,
+                language_variant=language_variant,
+            ),
         )
 
 
@@ -122,7 +123,7 @@ def parse_thesaurus_term(
     linkage: Optional[str],
     node: WikiNode,
 ) -> None:
-    from wiktextract.thesaurus import insert_thesaurus_entry_and_term
+    from wiktextract.thesaurus import insert_thesaurus_term, ThesaurusTerm
 
     node_str = clean_node(wxr, None, node)
     node_str = node_str.removeprefix("* ")  # remove list wikitext
@@ -136,18 +137,16 @@ def parse_thesaurus_term(
             wxr, entry, lang_code, pos, sense, linkage, node_str
         )
     else:
-        insert_thesaurus_entry_and_term(
+        insert_thesaurus_term(
             wxr.thesaurus_db_conn,
-            entry,
-            lang_code,
-            pos,
-            sense,
-            linkage,
-            node_str,
-            None,
-            None,
-            None,
-            None,
+            ThesaurusTerm(
+                entry=entry,
+                language_code=lang_code,
+                pos=pos,
+                linkage=linkage,
+                term=node_str,
+                sense=sense,
+            ),
         )
 
 

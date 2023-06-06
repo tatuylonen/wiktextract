@@ -160,7 +160,7 @@ def main():
                     help="Filter out pages that do not contain this pattern "
                         "of text; %% is zero, one or more wildcard characters, "
                         "_ is exactly one wildcard character. Example: "
-                        "'%%==English==%%', '%%==Anglo_Saxon==%%'; functions " 
+                        "'%%==English==%%', '%%==Anglo_Saxon==%%'; functions "
                         "only with ready database file")
     args = parser.parse_args()
 

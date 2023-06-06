@@ -8,10 +8,13 @@
 
 import nltk
 from nltk.corpus import brown
-from .form_descriptions import known_firsts, known_species  # w/ our additions
+from .form_descriptions import known_firsts  # w/ our additions
 
 # Download Brown corpus if not already downloaded
-nltk.download("brown", quiet=True)
+try:
+    nltk.data.find("corpora/brown.zip")
+except LookupError:
+    nltk.download("brown", quiet=True)
 
 # English words added to the default set from Brown corpus.  Multi-word
 # expressions separated by spaces can also be added but must match the whole

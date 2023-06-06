@@ -3587,42 +3587,37 @@ def parse_page(wxr: WiktextractContext,
     # Inject linkages from thesaurus entries
     from .thesaurus import search_thesaurus
 
+    local_thesaurus_ns = wxr.wtp.NAMESPACE_DATA.get('Thesaurus', {}).get("name")
     for data in ret:
         if "pos" not in data:
             continue
         word = data["word"]
         lang_code = data["lang_code"]
         pos = data["pos"]
-        for (
-                term,
-                linkage,
-                sense,
-                roman,
-                tags,
-                topics,
-                # gloss,
-                lang_variant
-        ) in search_thesaurus(wxr.thesaurus_db_conn, word, lang_code, pos):
-            for dt in data.get(linkage, ()):
-                if dt.get("word") == term and (
-                        not sense or dt.get("sense") == sense
+        for term in search_thesaurus(
+            wxr.thesaurus_db_conn, word, lang_code, pos
+        ):
+            for dt in data.get(term.linkage, ()):
+                if dt.get("word") == term.term and (
+                    not term.sense or dt.get("sense") == term.sense
                 ):
                     break
             else:
-                dt = {"word": term, "source": f"Thesaurus:{word}"}
-                if sense is not None:
-                    dt["sense"] = sense
-                    # if gloss is not None:
-                    #     dt["sense"] += " " + gloss
-                if tags is not None:
-                    dt["tags"] = tags.split("|")
-                if topics is not None:
-                    dt["topics"] = topics.split("|")
-                if roman is not None:
-                    dt["roman"] = roman.split("|")
-                if lang_variant is not None:
-                    dt["language_variant"] = lang_variant
-                data_append(wxr, data, linkage, dt)
+                dt = {
+                    "word": term.term,
+                    "source": f"{local_thesaurus_ns}:{word}"
+                }
+                if term.sense is not None:
+                    dt["sense"] = term.sense
+                if term.tags is not None:
+                    dt["tags"] = term.tags.split("|")
+                if term.topics is not None:
+                    dt["topics"] = term.topics.split("|")
+                if term.roman is not None:
+                    dt["roman"] = term.roman.split("|")
+                if term.language_variant is not None:
+                    dt["language_variant"] = term.language_variant
+                data_append(wxr, data, term.linkage, dt)
 
     # Categories are not otherwise disambiguated, but if there is only
     # one sense and only one data in ret for the same language, move
