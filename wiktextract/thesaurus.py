@@ -191,7 +191,7 @@ def emit_words_in_thesaurus(
         word_cb(
             {
                 "word": entry,
-                "lang": wxr.config.LANGUAGES_BY_CODE.get(lang_code),
+                "lang": wxr.config.LANGUAGES_BY_CODE.get(lang_code)[0],
                 "lang_code": lang_code,
                 "pos": pos,
                 "senses": [sense_dict],
