@@ -1,12 +1,13 @@
 import unittest
 import collections
+
 from wiktextract.wiktionary import WiktionaryConfig, parse_wiktionary
 from wiktextract.wxr_context import WiktextractContext
+from wiktextract.thesaurus import close_thesaurus_db, search_thesaurus
 from wikitextprocessor import Wtp
 
 
 class LongTests(unittest.TestCase):
-
     def test_long(self):
         # Just parse through the data and make sure that we find some words
         # This takes about 0.5 minutes.
@@ -42,27 +43,46 @@ class LongTests(unittest.TestCase):
 
         path = "tests/test-pages-articles.xml.bz2"
         print("Parsing test data")
-        conf1 = WiktionaryConfig(dump_file_lang_code="en",
-                                  capture_language_codes=["en", "fi", "es",
-                                                          "de", "zh", "ja",
-                                                          "it", "pt", "mul"],
-                                  capture_translations=True,
-                                  capture_pronunciation=True,
-                                  capture_linkages=True,
-                                  capture_compounds=True,
-                                  capture_redirects=True)
+        conf1 = WiktionaryConfig(
+            dump_file_lang_code="en",
+            capture_language_codes=[
+                "en",
+                "fi",
+                "es",
+                "de",
+                "zh",
+                "ja",
+                "it",
+                "pt",
+                "mul",
+            ],
+            capture_translations=True,
+            capture_pronunciation=True,
+            capture_linkages=True,
+            capture_compounds=True,
+            capture_redirects=True,
+        )
         wxr = WiktextractContext(Wtp(), conf1)
-        parse_wiktionary(wxr, path, word_cb, False, False,
-                         {0, 4, 10, 14, 100, 110, 118, 828})
+        parse_wiktionary(
+            wxr, path, word_cb, False, False, {0, 4, 10, 14, 100, 110, 118, 828}
+        )
         print("Test data parsing complete")
-        assert num_redirects > 0
-        assert len(words) > 100
-        assert all(x < 50 for x in words.values())
-        assert langs["English"] > 0
-        assert langs["Finnish"] > 0
-        assert langs["Translingual"] > 0
-        assert len(langs.keys()) == 9
-        assert len(poses.keys()) <= len(wxr.config.POS_TYPES)
-        assert sum(poses.values()) == sum(langs.values())
-        assert sum(words.values()) == sum(poses.values()) + num_redirects
-        assert num_transl > 0
+        self.assertGreater(num_redirects, 0)
+        self.assertGreater(len(words), 100)
+        self.assertTrue(all(x < 50 for x in words.values()))
+        self.assertGreater(langs["English"], 0)
+        self.assertGreater(langs["Finnish"], 0)
+        self.assertGreater(langs["Translingual"], 0)
+        self.assertEqual(len(langs.keys()), 9)
+        self.assertLessEqual(len(poses.keys()), len(wxr.config.POS_TYPES))
+        self.assertEqual(sum(poses.values()), sum(langs.values()))
+        self.assertEqual(
+            sum(words.values()), sum(poses.values()) + num_redirects
+        )
+        self.assertGreater(num_transl, 0)
+        thesaurus_data = [data for data in search_thesaurus(
+            wxr.thesaurus_db_conn, "hieno", "fi", "adj"
+        )]
+        self.assertEqual(len(thesaurus_data), 17)
+        wxr.wtp.close_db_conn()
+        close_thesaurus_db(wxr.thesaurus_db_path, wxr.thesaurus_db_conn)
