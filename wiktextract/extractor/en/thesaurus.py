@@ -75,8 +75,9 @@ def contains_list(contents):
 def extract_thesaurus_data(wxr: WiktextractContext) -> None:
     """Extracts linkages from the thesaurus pages in Wiktionary."""
     from wiktextract.thesaurus import (
-        insert_thesaurus_entry_and_term,
-        thesaurus_linkage_number
+        insert_thesaurus_term,
+        thesaurus_linkage_number,
+        ThesaurusTerm,
     )
 
     start_t = time.time()
@@ -91,16 +92,18 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
         if title.startswith("Thesaurus:Requested entries "):
             return None
         if "/" in title:
-            #print("STRANGE TITLE:", title)
+            # print("STRANGE TITLE:", title)
             return None
-        word = title[len(thesaurus_ns_local_name) + 1:]
+        word = title[len(thesaurus_ns_local_name) + 1 :]
         idx = word.find(":")
         if idx > 0 and idx < 5:
-            word = word[idx + 1:]  # Remove language prefix
+            word = word[idx + 1 :]  # Remove language prefix
         expanded = wxr.wtp.expand(text, templates_to_expand=None)  # Expand all
-        expanded = re.sub(r'(?s)<span class="tr Latn"[^>]*>(<b>)?(.*?)(</b>)?'
-                          r'</span>',
-                          r"XLITS\2XLITE", expanded)
+        expanded = re.sub(
+            r'(?s)<span class="tr Latn"[^>]*>(<b>)?(.*?)(</b>)?' r"</span>",
+            r"XLITS\2XLITE",
+            expanded,
+        )
         tree = wxr.wtp.parse(expanded, pre_expand=False)
         assert tree.kind == NodeKind.ROOT
         lang = None
@@ -111,7 +114,7 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
         entry_id = -1
         # Some pages don't have a language subtitle, but use
         # {{ws header|lang=xx}}
-        m = re.search(r'(?s)\{\{ws header\|[^}]*lang=([^}|]*)', text)
+        m = re.search(r"(?s)\{\{ws header\|[^}]*lang=([^}|]*)", text)
         if m:
             lang = wxr.config.LANGUAGES_BY_CODE.get(m.group(1), [None])[0]
 
@@ -136,8 +139,8 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
             if kind == NodeKind.LIST and not contains_list(contents.children):
                 if lang is None:
                     logging.debug(
-                        f"{title=} {lang=} UNEXPECTED LIST WITHOUT LANG: " +
-                        str(contents)
+                        f"{title=} {lang=} UNEXPECTED LIST WITHOUT LANG: "
+                        + str(contents)
                     )
                     return
                 for node in contents.children:
@@ -168,8 +171,9 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
                         english = m.group(1)
                         return ""
 
-                    w = re.sub(r'(\bliterally\s*)?(, )?“([^"]*)"\s*',
-                               engl_fn, w)
+                    w = re.sub(
+                        r'(\bliterally\s*)?(, )?“([^"]*)"\s*', engl_fn, w
+                    )
 
                     # Check for qualifiers in parentheses
                     tags = []
@@ -207,27 +211,30 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
                             xlit = None
                         w1 = w1.strip()
                         if w1.startswith(
-                                ns_title_prefix_tuple(wxr, "Thesaurus")
+                            ns_title_prefix_tuple(wxr, "Thesaurus")
                         ):
                             w1 = w1[10:]
+                        w1 = w1.removesuffix(" [⇒ thesaurus]")
+
                         if w1:
                             lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang)
                             if lang_code is None:
                                 logging.debug(
                                     f"Linkage language {lang} not recognized"
                                 )
-                            insert_thesaurus_entry_and_term(
+                            insert_thesaurus_term(
                                 wxr.thesaurus_db_conn,
-                                word,
-                                lang_code,
-                                pos,
-                                item_sense,
-                                rel,
-                                w1,
-                                "|".join(tags) if tags else None,
-                                "|".join(topics) if topics else None,
-                                xlit,
-                                None
+                                ThesaurusTerm(
+                                    entry=word,
+                                    language_code=lang_code,
+                                    pos=pos,
+                                    linkage=rel,
+                                    term=w1,
+                                    tags="|".join(tags) if tags else None,
+                                    topics="|".join(topics) if topics else None,
+                                    roman=xlit,
+                                    sense=item_sense,
+                                ),
                             )
                 return
             if kind not in LEVEL_KINDS:
@@ -243,17 +250,25 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
                 recurse(contents.children)
                 return
             if subtitle.lower().startswith(
-                    wxr.config.OTHER_SUBTITLES["sense"].lower()
+                wxr.config.OTHER_SUBTITLES["sense"].lower()
             ):
-                sense = subtitle[len(wxr.config.OTHER_SUBTITLES["sense"]):]
+                sense = subtitle[len(wxr.config.OTHER_SUBTITLES["sense"]) :]
                 linkage = None
                 recurse(contents.children)
                 return
             subtitle = subtitle.lower()
-            if subtitle in ("further reading", "external links",
-                            "references", "translations", "notes", "usage",
-                            "work to be done", "quantification",
-                            "abbreviation", "symbol"):
+            if subtitle in (
+                "further reading",
+                "external links",
+                "references",
+                "translations",
+                "notes",
+                "usage",
+                "work to be done",
+                "quantification",
+                "abbreviation",
+                "symbol",
+            ):
                 return
             if subtitle in wxr.config.LINKAGE_SUBTITLES:
                 linkage = wxr.config.LINKAGE_SUBTITLES[subtitle]
@@ -273,8 +288,9 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
                 subtitle_tags = ()
                 return
             logging.debug(
-                f"{title=} {lang=} {pos=} {sense=} UNHANDLED SUBTITLE: " +
-                "subtitle " + str(contents.args)
+                f"{title=} {lang=} {pos=} {sense=} UNHANDLED SUBTITLE: "
+                + "subtitle "
+                + str(contents.args)
             )
             recurse(contents.children)
             return None
@@ -282,13 +298,14 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
         recurse(tree)
 
     for _ in wxr.wtp.reprocess(
-            page_handler,
-            include_redirects=False,
-            namespace_ids=[thesaurus_ns_id]
+        page_handler, include_redirects=False, namespace_ids=[thesaurus_ns_id]
     ):
         pass
 
     num_pages = wxr.wtp.saved_page_nums([thesaurus_ns_id], False)
     total = thesaurus_linkage_number(wxr.thesaurus_db_conn)
-    logging.info("Extracted {} linkages from {} thesaurus pages (took {:.1f}s)"
-                 .format(total, num_pages, time.time() - start_t))
+    logging.info(
+        "Extracted {} linkages from {} thesaurus pages (took {:.1f}s)".format(
+            total, num_pages, time.time() - start_t
+        )
+    )
