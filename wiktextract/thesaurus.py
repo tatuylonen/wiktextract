@@ -11,6 +11,7 @@ import tempfile
 
 from pathlib import Path
 from typing import Tuple, Optional, Set, Callable, Any, List
+from collections.abc import Iterable
 
 from wiktextract.wxr_context import WiktextractContext
 
@@ -95,7 +96,7 @@ def thesaurus_linkage_number(db_conn: sqlite3.Connection) -> int:
 
 def search_thesaurus(
     db_conn: sqlite3.Connection, entry: str, lang_code: str, pos: str
-) -> Tuple[str, ...]:
+) -> Iterable[Tuple[str, ...]]:
     return db_conn.execute(
         "SELECT term, linkage, sense, roman, tags, topics, language_variant "
         "FROM terms JOIN entries ON terms.entry_id = entries.id "
@@ -123,7 +124,8 @@ def insert_thesaurus_entry_and_term(
     sense: Optional[str],
     linkage: Optional[str],
     term: str,
-    tags: Optional[List[str]],
+    tags: Optional[str],
+    topics: Optional[str],
     roman: Optional[str],
     language_variant: Optional[str],
 ) -> None:
@@ -131,7 +133,7 @@ def insert_thesaurus_entry_and_term(
     if entry_id is None:
         entry_id = get_thesaurus_entry_id(db_conn, entry, lang_code, pos)
     insert_thesaurus_term(
-        db_conn, term, entry_id, linkage, tags, None, roman, language_variant
+        db_conn, term, entry_id, linkage, tags, topics, roman, language_variant
     )
 
 
@@ -189,7 +191,7 @@ def emit_words_in_thesaurus(
         word_cb(
             {
                 "word": entry,
-                "lang": wxr.config.LANGUAGES_BY_CODE.get(lang_code),
+                "lang": wxr.config.LANGUAGES_BY_CODE.get(lang_code)[0],
                 "lang_code": lang_code,
                 "pos": pos,
                 "senses": [sense_dict],
