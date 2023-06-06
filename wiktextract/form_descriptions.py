@@ -1118,17 +1118,21 @@ def quote_kept_ruby(wxr, ruby_tuples, s):
     ks = []
     rs = []
     for k, r in ruby_tuples:
-        ks.append(k)
-        rs.append(r)
-    if not (k and r):
+        ks.append(re.escape(k))
+        rs.append(re.escape(r))
+    if not (ks and rs):
         wxr.wtp.debug(f"empty column in ruby_tuples: {ruby_tuples}",
                      sortid="form_description/1124/20230606")
         return s
-    newm = re.compile(r"({})\s*\(*\s*({})\s*\)*".format("|".join(ks),
+    newm = re.compile(r"({})\s*\(\s*({})\s*\)".format("|".join(ks),
                       "|".join(rs)))
     rub_re = re.compile(r"({})"
                         .format(r"|".join(r"{}\(*{}\)*"
-                                      .format(k, r) for k, r in ruby_tuples)))
+                                      .format(
+                                        re.escape(k),
+                                        re.escape(r),
+                                       )
+                                             for k, r in ruby_tuples)))
     def paren_replace(m):
         return re.sub(newm, r"\1__lrub__\2__rrub__", m.group(0))
     return re.sub(rub_re,
@@ -1256,8 +1260,8 @@ def add_related(wxr, data, tags_lst, related, origtext,
         # prepare some regex stuff in advance
         ks, rs = [], []
         for k, r in ruby_data:
-            ks.append(k)
-            rs.append(r)
+            ks.append(re.escape(k))
+            rs.append(re.escape(r))
         splitter = r"((?:{})__lrub__(?:{})__rrub__)".format("|".join(ks), 
                                                       "|".join(rs))
     for related in alts:
