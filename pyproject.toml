@@ -29,7 +29,7 @@ classifiers = [
 ]
 dependencies = [
     "nltk",
-    "python-Levenshtein",
+    "levenshtein",
     "wikitextprocessor @ git+https://github.com/tatuylonen/wikitextprocessor.git",
 ]
 
