@@ -6,6 +6,7 @@ import re
 import sys
 import copy
 import html
+import logging
 
 from collections import defaultdict
 from typing import Dict, List
@@ -3337,7 +3338,7 @@ def parse_page(
         return []
 
     if wxr.config.verbose:
-        print("Parsing page:", word)
+        logging.info(f"Parsing page: {word}")
 
     wxr.config.word = word
     wxr.wtp.start_page(word)
@@ -3348,12 +3349,6 @@ def parse_page(
     text = re.sub(r"(?si)<\s*(/\s*)?noinclude\s*>", "", text)
     text = re.sub(r"(?si)<\s*(/\s*)?onlyinclude\s*>", "", text)
     text = re.sub(r"(?si)<\s*(/\s*)?includeonly\s*>", "", text)
-
-    # Expand Chinese Wiktionary language and POS heading templates
-    # Language templates: https://zh.wiktionary.org/wiki/Category:语言模板
-    # POS templates: https://zh.wiktionary.org/wiki/Category:詞類模板
-    if wxr.config.dump_file_lang_code == "zh" and ("{{-" in text or "{{=" in text):
-        text = wxr.wtp.expand(text, pre_expand=True)
 
     # Fix up the subtitle hierarchy.  There are hundreds if not thousands of
     # pages that have, for example, Translations section under Linkage, or

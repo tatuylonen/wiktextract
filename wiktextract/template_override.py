@@ -1,8 +1,6 @@
 # Replacement functions that override specific templates,
 # which should never be run as is because they cause problems.
 
-import re
-
 # This dictionary should be assigned with the WTP.set_template_override()
 # setter method; see wiktwords.
 template_override_fns = {}
