@@ -38,7 +38,7 @@ def page_handler(wxr, page: Page, config_kwargs, dont_parse):
     else:
         if page.model != "wikitext":
             return None
-        if title.endswith("/translations"):
+        if title.endswith(f"/{wxr.config.OTHER_SUBTITLES.get('translations')}"):
             return None
 
         # XXX Sign gloss pages?
