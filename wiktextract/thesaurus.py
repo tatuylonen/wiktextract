@@ -4,7 +4,6 @@
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import collections
-import importlib
 import logging
 import sqlite3
 import tempfile
@@ -14,7 +13,8 @@ from pathlib import Path
 from typing import Tuple, Optional, Set, Callable, Any
 from collections.abc import Iterable
 
-from wiktextract.wxr_context import WiktextractContext
+from .wxr_context import WiktextractContext
+from .import_utils import import_extractor_module
 
 
 @dataclass
@@ -33,8 +33,8 @@ class ThesaurusTerm:
 
 
 def extract_thesaurus_data(wxr: WiktextractContext) -> None:
-    thesaurus_extractor_mod = importlib.import_module(
-        f"wiktextract.extractor.{wxr.wtp.lang_code}.thesaurus"
+    thesaurus_extractor_mod = import_extractor_module(
+        wxr.wtp.lang_code, "thesaurus"
     )
     thesaurus_extractor_mod.extract_thesaurus_data(wxr)
 

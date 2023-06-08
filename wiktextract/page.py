@@ -3,7 +3,6 @@
 # Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
-import importlib
 
 from collections import defaultdict
 from typing import Dict, List, Optional, Callable, Union, Tuple
@@ -12,6 +11,7 @@ from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import WikiNode, NodeKind
 from .clean import clean_value
 from .datautils import data_append, data_extend
+from .import_utils import import_extractor_module
 
 
 # NodeKind values for subtitles
@@ -25,7 +25,7 @@ LEVEL_KINDS = {
 
 
 def parse_page(
-    wxr: WiktextractContext, word: str, text: str,
+    wxr: WiktextractContext, page_title: str, page_text: str,
 ) -> List[Dict[str, str]]:
     """Parses the text of a Wiktionary page and returns a list of
     dictionaries, one for each word/part-of-speech defined on the page
@@ -33,10 +33,8 @@ def parse_page(
     all available languages).  ``word`` is page title, and ``text`` is
     page text in Wikimedia format.  Other arguments indicate what is
     captured."""
-    page_extractor_mod = importlib.import_module(
-        f"wiktextract.extractor.{wxr.wtp.lang_code}.page"
-    )
-    page_data = page_extractor_mod.parse_page(wxr, word, text)
+    page_extractor_mod = import_extractor_module(wxr.wtp.lang_code, "page")
+    page_data = page_extractor_mod.parse_page(wxr, page_title, page_text)
     return process_page_data(wxr, page_data)
 
 
@@ -44,16 +42,15 @@ def is_panel_template(wxr: WiktextractContext, template_name: str) -> bool:
     """Checks if `Template_name` is a known panel template name (i.e., one that
     produces an infobox in Wiktionary, but this also recognizes certain other
     templates that we do not wish to expand)."""
-    page_extractor_mod = importlib.import_module(
-        f"wiktextract.extractor.{wxr.wtp.lang_code}.page"
-    )
+    page_extractor_mod = import_extractor_module(wxr.wtp.lang_code, "page")
     if template_name in page_extractor_mod.PANEL_TEMPLATES:
         return True
     return template_name.startswith(tuple(page_extractor_mod.PANEL_PREFIXES))
 
 
 def recursively_extract(
-    contents: Union[WikiNode, List[WikiNode]], fn
+    contents: Union[WikiNode, List[WikiNode]],
+    fn: Callable[[Union[WikiNode, List[WikiNode]]], bool]
 ) -> Tuple[List[WikiNode], List[WikiNode]]:
     """Recursively extracts elements from contents for which ``fn`` returns
     True.  This returns two lists, the extracted elements and the remaining
