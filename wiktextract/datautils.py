@@ -6,7 +6,6 @@ import re
 import functools
 import collections
 from wiktextract.wxr_context import WiktextractContext
-from wikitextprocessor import Wtp
 
 # Keys in ``data`` that can only have string values (a list of them)
 str_keys = ("tags", "glosses")

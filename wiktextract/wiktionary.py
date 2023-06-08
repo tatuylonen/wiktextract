@@ -11,10 +11,10 @@ import time
 import tarfile
 
 from pathlib import Path
-from typing import Optional, List, Set, Tuple
+from typing import Optional, List, Set, Tuple, Dict
 
 from wikitextprocessor import Page
-from .page import parse_page, additional_expand_templates
+from .page import parse_page
 from .config import WiktionaryConfig
 from .wxr_context import WiktextractContext
 from .thesaurus import (
@@ -24,7 +24,12 @@ from .thesaurus import (
 )
 
 
-def page_handler(wxr, page: Page, config_kwargs, dont_parse):
+def page_handler(
+    wxr: WiktextractContext,
+    page: Page,
+    config_kwargs: Dict[str, str],
+    dont_parse: bool
+):
     # Make sure there are no newlines or other strange characters in the
     # title.  They could cause security problems at several post-processing
     # steps.
@@ -38,7 +43,9 @@ def page_handler(wxr, page: Page, config_kwargs, dont_parse):
     else:
         if page.model != "wikitext":
             return None
-        if title.endswith("/translations"):
+        # the value of OTHER_SUBTITLES["translations"] is a string
+        # use it to skip translation pages
+        if title.endswith(f"/{wxr.config.OTHER_SUBTITLES.get('translations')}"):
             return None
 
         # XXX Sign gloss pages?
@@ -78,12 +85,6 @@ def parse_wiktionary(
         assert isinstance(capture_language_codes, (list, tuple, set))
         for x in capture_language_codes:
             assert isinstance(x, str)
-
-    # langhd is needed for pre-expanding language heading templates in the
-    # Chinese Wiktionary dump file: https://zh.wiktionary.org/wiki/Template:-en-
-    # Move this to lang_specific
-    if wxr.wtp.lang_code == "zh":
-        additional_expand_templates.add("langhd")
 
     logging.info("First phase - extracting templates, macros, and pages")
     if override_folders is not None:

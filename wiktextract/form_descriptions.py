@@ -10,7 +10,6 @@ import unicodedata
 import Levenshtein
 from nltk import TweetTokenizer
 from wiktextract.wxr_context import WiktextractContext
-from wikitextprocessor import Wtp
 from .datautils import data_append, data_extend, split_at_comma_semi
 from .taxondata import known_species, known_firsts
 from .topics import valid_topics, topic_generalize_map
@@ -775,7 +774,7 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
     lists of tags and a list of topics."""
     assert isinstance(src, str)
 
-    # print("decode_tags: src={!r}".format(src)) 
+    # print("decode_tags: src={!r}".format(src))
 
     pos_paths = [[[]]]
 
@@ -842,8 +841,8 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
             continue
         new_parts.append(new_seg.strip())
     parts = new_parts
-                    
-    
+
+
     for part in parts:
         max_last_i = len(lst)
         lst1 = part.split()
@@ -1262,7 +1261,7 @@ def add_related(wxr, data, tags_lst, related, origtext,
         for k, r in ruby_data:
             ks.append(re.escape(k))
             rs.append(re.escape(r))
-        splitter = r"((?:{})__lrub__(?:{})__rrub__)".format("|".join(ks), 
+        splitter = r"((?:{})__lrub__(?:{})__rrub__)".format("|".join(ks),
                                                       "|".join(rs))
     for related in alts:
         ruby = []
@@ -1515,7 +1514,7 @@ def parse_word_head(wxr, pos, text, data, is_reconstruction,
             expanded_alts = [alt]
         else:
             expanded_alts = map_with(xlat_descs_map, [alt])
-        # print("EXPANDED_ALTS:", expanded_alts)  
+        # print("EXPANDED_ALTS:", expanded_alts)
         for alt in expanded_alts:
             baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
             if alt_i > 0:
@@ -1817,7 +1816,7 @@ def parse_word_head(wxr, pos, text, data, is_reconstruction,
                         # Check if the parenthesized part is likely a
                         # romanization
                         if ((have_ruby or classify_desc(base) == "other") and
-                            classify_desc(paren) == "romanization" and 
+                            classify_desc(paren) == "romanization" and
                             not ("categories" in data and desc in data["categories"])):
                             for r in split_at_comma_semi(paren, extra=[" or "]):
                                 add_romanization(wxr, data, r,

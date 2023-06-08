@@ -72,7 +72,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
 
     def parse_pronunciation_template_fn(name, ht):
         nonlocal have_panel_templates
-        if is_panel_template(name):
+        if is_panel_template(wxr, name):
             have_panel_templates = True
             return ""
         if name == "enPR":
@@ -146,7 +146,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
         return None
 
     def parse_pron_post_template_fn(name, ht, text):
-        if is_panel_template(name):
+        if is_panel_template(wxr, name):
             return ""
         if name in {"q", "qualifier", "sense", "a", "accent",
                     "l", "link", "lb", "lbl", "label"}:
@@ -233,7 +233,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
             new_parent_hdrs = list(parent_hdrs)
             new_specific_hdrs = list(specific_hdrs)
             # look no further, here be dragons...
-            
+
             if ": " in text or "：" in text:
                 parts = re.split(r": |：", text)
                 m = re.match(r"\s*\((([^():]+)\s*(:|：)?\s*([^():]*))\)\s*$",
@@ -648,7 +648,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
                 data_append(wxr, data, "sounds", pron)
             # have_pronunciations = True
         enprs = []
-    
+
     ## I have commented out the otherwise unused have_pronunciation
     ## toggles; uncomment them to use this debug print
     # if not have_pronunciations and not have_panel_templates:

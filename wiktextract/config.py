@@ -6,7 +6,10 @@
 import json
 import collections
 import pkg_resources
+
 from pathlib import Path
+from typing import Callable, Optional
+
 
 def int_dict():
     return collections.defaultdict(int)
@@ -54,7 +57,7 @@ class WiktionaryConfig(object):
         "ZH_PRON_TAGS",
         "LANGUAGES_BY_NAME",
         "LANGUAGES_BY_CODE",
-        "FORM_OF_TEMPLATES"
+        "FORM_OF_TEMPLATES",
     )
 
     def __init__(self,
@@ -113,10 +116,12 @@ class WiktionaryConfig(object):
             pkg_resources.resource_filename("wiktextract", "data/")
         ).joinpath(dump_file_lang_code)
         self.init_subtitles()
-        self.init_zh_pron_tags()
         self.init_languages()
+        self.set_attr_from_json("ZH_PRON_TAGS", "zh_pron_tags.json")
         if dump_file_lang_code == "zh":
-            self.init_form_of_templates()
+            self.set_attr_from_json(
+                "FORM_OF_TEMPLATES", "form_of_templates.json"
+            )
 
     def to_kwargs(self):
         return {
@@ -158,26 +163,30 @@ class WiktionaryConfig(object):
             self.warnings.extend(ret.get("warnings", []))
             self.debugs.extend(ret.get("debugs", []))
 
+    def set_attr_from_json(
+        self,
+        attr_name: str,
+        file_name: str,
+        convert_func: Optional[Callable] = None
+    ) -> None:
+        file_path = self.data_folder.joinpath(file_name)
+        json_value = {}
+        if file_path.exists():
+            with file_path.open(encoding="utf-8") as f:
+                json_value = json.load(f)
+                if convert_func:
+                    json_value = convert_func(json_value)
+        setattr(self, attr_name, json_value)
+
+
     def init_subtitles(self) -> None:
-        with (self.data_folder.joinpath("linkage_subtitles.json")
-             .open(encoding="utf-8") as f):
-            self.LINKAGE_SUBTITLES = json.load(f)
-
-        with (self.data_folder.joinpath("pos_subtitles.json")
-             .open(encoding="utf-8") as f):
-            self.POS_SUBTITLES = json.load(f)
-            self.POS_TYPES = set(x["pos"] for x in self.POS_SUBTITLES.values())
-            for k, v in self.POS_SUBTITLES.items():
-                if "tags" in v:
-                    assert isinstance(v["tags"], (list, tuple))
-
-        with (self.data_folder.joinpath("other_subtitles.json")
-             .open(encoding="utf-8") as f):
-            self.OTHER_SUBTITLES = json.load(f)
-
-    def init_zh_pron_tags(self) -> None:
-        with self.data_folder.joinpath("zh_pron_tags.json").open(encoding="utf-8") as f:
-            self.ZH_PRON_TAGS = json.load(f)
+        self.set_attr_from_json("LINKAGE_SUBTITLES", "linkage_subtitles.json")
+        self.set_attr_from_json("POS_SUBTITLES", "pos_subtitles.json")
+        self.POS_TYPES = set(x["pos"] for x in self.POS_SUBTITLES.values())
+        for k, v in self.POS_SUBTITLES.items():
+            if "tags" in v:
+                assert isinstance(v["tags"], (list, tuple))
+        self.set_attr_from_json("OTHER_SUBTITLES", "other_subtitles.json")
 
     def init_languages(self):
         def canon_warn(name, use_code, not_use_code):
@@ -190,8 +199,7 @@ class WiktionaryConfig(object):
                       f" is already a{kind} for {old_code}."
                       f" Mapping to '{use_code}' instead of '{not_use_code}'.")
 
-        with self.data_folder.joinpath("languages.json").open(encoding="utf-8") as f:
-            self.LANGUAGES_BY_CODE = json.load(f)
+        self.set_attr_from_json("LANGUAGES_BY_CODE", "languages.json")
 
         self.LANGUAGES_BY_NAME = {}
 
@@ -227,7 +235,3 @@ class WiktionaryConfig(object):
                         alias_info(lang_name, lang_code, "n alias", lang_code0, lang_code0, lang_code)
                 else:
                     self.LANGUAGES_BY_NAME[lang_name] = lang_code
-
-    def init_form_of_templates(self):
-        with self.data_folder.joinpath("form_of_templates.json").open(encoding="utf-8") as f:
-            self.FORM_OF_TEMPLATES = set(json.load(f))
