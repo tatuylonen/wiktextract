@@ -1119,7 +1119,7 @@ def parse_language(wxr, langnode, language, lang_code):
                 # skip these templates; panel_templates is already used
                 # to skip certain templates else, but it also applies to
                 # head parsing quite well.
-                if node.args[0][0] in wxr.config.PANEL_TEMPLATES:
+                if is_panel_template(wxr, node.args[0][0]):
                     continue
                 # skip these templates
                 # if node.args[0][0] in skip_these_templates_in_head:
@@ -2801,7 +2801,7 @@ def parse_language(wxr, langnode, language, lang_code):
                 data = select_data()
                 parse_wikipedia_template(wxr, data, ht)
                 return None
-            if is_panel_template(name):
+            if is_panel_template(wxr, name):
                 return ""
             return None
 
@@ -2938,7 +2938,7 @@ def parse_language(wxr, langnode, language, lang_code):
 
                 def usex_template_fn(name, ht):
                     nonlocal usex_type
-                    if name in wxr.config.PANEL_TEMPLATES:
+                    if is_panel_template(wxr, name):
                         return ""
                     if name in usex_templates:
                         usex_type = "example"
@@ -3217,7 +3217,7 @@ def parse_top_template(wxr, node, data):
         if name in wikipedia_templates:
             parse_wikipedia_template(wxr, data, ht)
             return None
-        if is_panel_template(name):
+        if is_panel_template(wxr, name):
             return ""
         if name in ("reconstruction",):
             return ""

@@ -311,7 +311,7 @@ def clean_node(
     def clean_template_fn(name, ht):
         if template_fn is not None:
             return template_fn(name, ht)
-        if name in wxr.config.PANEL_TEMPLATES:
+        if is_panel_template(wxr, name):
             return ""
         return None
 

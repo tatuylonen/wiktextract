@@ -43,6 +43,8 @@ def page_handler(
     else:
         if page.model != "wikitext":
             return None
+        # the value of OTHER_SUBTITLES["translations"] is a string
+        # use it to skip translation pages
         if title.endswith(f"/{wxr.config.OTHER_SUBTITLES.get('translations')}"):
             return None
 
