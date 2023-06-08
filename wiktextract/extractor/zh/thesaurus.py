@@ -169,6 +169,9 @@ def recursive_parse(
     if node.kind == NodeKind.LEVEL2:
         lang_name = clean_node(wxr, None, node.args)
         lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang_name)
+        if lang_code is None:
+            logging.warning(
+                f"Unrecognized language: {lang_name} in page Thesaurus:{entry}")
         recursive_parse(wxr, entry, lang_code, None, None, None, node.children)
     elif node.kind == NodeKind.LEVEL3:
         local_pos_name = clean_node(wxr, None, node.args)

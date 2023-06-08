@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Optional, List, Set, Tuple
 
 from wikitextprocessor import Page
-from .page import parse_page, additional_expand_templates
+from .page import parse_page
 from .config import WiktionaryConfig
 from .wxr_context import WiktextractContext
 from .thesaurus import (
@@ -82,8 +82,8 @@ def parse_wiktionary(
     # langhd is needed for pre-expanding language heading templates in the
     # Chinese Wiktionary dump file: https://zh.wiktionary.org/wiki/Template:-en-
     # Move this to lang_specific
-    if wxr.wtp.lang_code == "zh":
-        additional_expand_templates.add("langhd")
+    # if wxr.wtp.lang_code == "zh":
+    #     additional_expand_templates.add("langhd")
 
     logging.info("First phase - extracting templates, macros, and pages")
     if override_folders is not None:
