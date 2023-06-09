@@ -36,8 +36,15 @@ from wiktextract import extract_categories
 
 # Pages within these namespaces are captured.
 RECOGNIZED_NAMESPACE_NAMES = [
-    "Main", "Category", "Appendix", "Project", "Thesaurus", "Module",
-    "Template", "Reconstruction"]
+    "Main",
+    "Category",
+    "Appendix",
+    "Project",
+    "Thesaurus",
+    "Module",
+    "Template",
+    "Reconstruction"
+]
 
 
 def process_single_page(
