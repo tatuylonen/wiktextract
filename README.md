@@ -439,37 +439,57 @@ machine-readable)
 
 ## Calling the library
 
-While this package has been mostly intended to be used using the ``wiktwords``
-program, it is also possible to call this as a library.  Underneath, this uses
-the ``wikitextprocessor`` module.
+While this package has been mostly intended to be used using the
+`wiktwords` command, it is also possible to call this as a library.
+Underneath, this uses the `wikitextprocessor` module. For more usage
+examples please read the [wiktwords.py](https://github.com/tatuylonen/wiktextract/blob/master/wiktextract/wiktwords.py) and [wiktionary.py](https://github.com/tatuylonen/wiktextract/blob/master/wiktextract/wiktionary.py) files.
 
 This code can be called from an application as follows:
 
 ```python
-from wiktextract import (WiktextractContext, WiktionaryConfig,
-                         parse_wiktionary, parse_page,
-                         PARTS_OF_SPEECH)
+from wiktextract import (
+    WiktextractContext,
+    WiktionaryConfig,
+    parse_wiktionary,
+)
 from wikitextprocessor import Wtp
 
 config = WiktionaryConfig(
-             dump_file_lang_code="en",
-             capture_language_codes=["en", "mul"],
-             capture_translations=True,
-             capture_pronunciation=True,
-             capture_linkages=True,
-             capture_compounds=True,
-             capture_redirects=True,
-             capture_examples=True,
-             capture_etymologies=True,
-             capture_descendants=True,
-             capture_inflections=True)
+    dump_file_lang_code="en",
+    capture_language_codes=["en", "mul"],
+    capture_translations=True,
+    capture_pronunciation=True,
+    capture_linkages=True,
+    capture_compounds=True,
+    capture_redirects=True,
+    capture_examples=True,
+    capture_etymologies=True,
+    capture_descendants=True,
+    capture_inflections=True
+)
 wxr = WiktextractContext(Wtp(), config)
 
 def word_cb(data):
     # data is dictionary containing information for one word/redirect
     ... do something with data
 
-parse_wiktionary(wxr, path, word_cb)
+RECOGNIZED_NAMESPACE_NAMES = [
+    "Main",
+    "Category",
+    "Appendix",
+    "Project",
+    "Thesaurus",
+    "Module",
+    "Template",
+    "Reconstruction"
+]
+
+namespace_ids = {
+    wxr.wtp.NAMESPACE_DATA.get(name, {}).get("id")
+    for name in RECOGNIZED_NAMESPACE_NAMES
+}
+
+parse_wiktionary(wxr, path, word_cb, False, False, namespace_ids)
 ```
 
 The capture arguments default to ``True``, so they only need to be set if
@@ -481,11 +501,16 @@ options are used).
 
 ```python
 def parse_wiktionary(
-        wxr: Wiktextractcontext, path: str, word_cb,
-        phase1_only: bool, dont_parse: bool, namespace_ids: Set[int],
-        override_folders: Optional[List[str]] = None,
-        skip_extract_dump: bool = False,
-        save_pages_path: Optional[str] = None):
+    wxr: Wiktextractcontext,
+    path: str,
+    word_cb,
+    phase1_only: bool,
+    dont_parse: bool,
+    namespace_ids: Set[int],
+    override_folders: Optional[List[str]] = None,
+    skip_extract_dump: bool = False,
+    save_pages_path: Optional[str] = None
+):
 ```
 
 The ``parse_wiktionary`` function will call ``word_cb(data)`` for
@@ -518,7 +543,9 @@ Its arguments are as follows:
   constructor should probably be given the ``db_path`` argument when
   creating ``wxr.wtp``.
 * `namespace_ids` - a set of namespace ids, pages have namespace ids that not
-  included in this set won't be processed.
+  included in this set won't be processed. Avaliable id values can be
+  found in wikitextprocessor project's [data/en/namespaces.json](https://github.com/tatuylonen/wikitextprocessor/blob/main/wikitextprocessor/data/en/namespaces.json)
+  file and the Wiktionary *.xml.bz2 dump file.
 * `override_folders` - override pages with files in these directories.
 * `skip_extract_dump` - skip extract dump file if database exists.
 * `save_pages_path` - path for storing extracted pages.
@@ -530,8 +557,9 @@ the parent process, however.
 #### parse_page()
 
 ```python
-def parse_page(wxr: WiktextractContext, word: str, text: str
-              ) -> List[Dict[str, str]]
+def parse_page(
+    wxr: WiktextractContext, word: str, text: str
+) -> List[Dict[str, str]]
 ```
 
 This function parses ``text`` as if it was a Wiktionary page with the
