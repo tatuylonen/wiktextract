@@ -1046,6 +1046,15 @@ def parse_language(wxr, langnode, language, lang_code):
         # print(poschildren)
         # XXX new above
 
+        if not poschildren:
+            if not floaters:
+                wxr.wtp.debug(f"PoS section without contents",
+                                sortid="en/page/1051/20230612")
+            else:
+                wxr.wtp.debug(f"PoS section without contents except for "
+                              f"a floating table",
+                              sortid="en/page/1056/20230612")
+            return
 
         for node in poschildren:
             if isinstance(node, str):
