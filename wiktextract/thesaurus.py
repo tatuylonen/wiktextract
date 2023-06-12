@@ -156,12 +156,20 @@ def emit_words_in_thesaurus(
     ):
         if (entry, lang_code, pos) in emitted:
             continue
+
+        if None in (entry, lang_code, pos):
+            logging.info(f"'None' in entry, lang_code or"
+                         f" pos: {entry}, {lang_code}, {pos}")
+            continue
+            
         logging.info(
             "Emitting thesaurus entry for "
             f"{entry}/{lang_code}/{pos} (not in main)"
         )
-        sense_dict = collections.defaultdict(list)
-        sense_dict["glosses"] = [sense]
+
+        if sense:
+            sense_dict["glosses"] = [sense]
+
         for (
             term,
             linkage,
@@ -183,7 +191,7 @@ def emit_words_in_thesaurus(
                 relation_dict["language_variant"] = lang_variant
             sense_dict[linkage].append(relation_dict)
 
-        if len(sense_dict) == 1:
+        if not "glosses" in sense_dict:
             sense_dict["tags"] = ["no-gloss"]
 
         word_cb(
