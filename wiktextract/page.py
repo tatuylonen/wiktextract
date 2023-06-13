@@ -341,9 +341,12 @@ def clean_node(
         return None
 
     # print("clean_node: value={!r}".format(value))
-    v = wxr.wtp.node_to_html(value, node_handler_fn=clean_node_handler_fn,
-                         template_fn=template_fn,
-                         post_template_fn=post_template_fn)
+    v = wxr.wtp.node_to_html(
+        value,
+        node_handler_fn=clean_node_handler_fn,
+        template_fn=template_fn,
+        post_template_fn=post_template_fn
+    )
     # print("clean_node: v={!r}".format(v))
 
     # Capture categories if sense_data has been given.  We also track

@@ -33,7 +33,7 @@ from wiktextract.inflection import parse_inflection_section, TableContext
 # Matches head tag
 head_tag_re = None
 
-floating_table_templates = {
+FLOATING_TABLE_TEMPLATES = {
     # az-suffix-form creates a style=floatright div that is otherwise
     # deleted; if it is not pre-expanded, we can intercept the template
     # so we add this set into do_not_pre_expand, and intercept the
@@ -46,18 +46,17 @@ floating_table_templates = {
     "tr-suffix-forms",
     "tt-suffix-forms",
     "uz-suffix-forms",
-
 }
 # These two should contain template names that should always be
 # pre-expanded when *first* processing the tree, or not pre-expanded
 # so that the template are left in place with their identifying
 # name intact for later filtering.
 
-do_not_pre_expand_templates = set()
-do_not_pre_expand_templates.update(floating_table_templates)
+DO_NOT_PRE_EXPAND_TEMPLATES = set()
+DO_NOT_PRE_EXPAND_TEMPLATES.update(FLOATING_TABLE_TEMPLATES)
 
 # Additional templates to be expanded in the pre-expand phase
-additional_expand_templates = {
+ADDITIONAL_EXPAND_TEMPLATES = {
     "multitrans",
     "multitrans-nowiki",
     "trans-top",
@@ -1035,10 +1034,14 @@ def parse_language(wxr, langnode, language, lang_code):
         # XXX bookmark
         # print(posnode.children)
 
-        floaters, poschildren = recursively_extract(posnode.children,
-                                   lambda x: isinstance(x, WikiNode) and
-                                   x.kind == NodeKind.TEMPLATE and
-                                   x.args[0][0] in floating_table_templates)
+        floaters, poschildren = recursively_extract(
+            posnode.children,
+            lambda x: (
+                isinstance(x, WikiNode) and
+                x.kind == NodeKind.TEMPLATE and
+                x.args[0][0] in FLOATING_TABLE_TEMPLATES
+            )
+        )
         tempnode = WikiNode(NodeKind.LEVEL5, 0)
         tempnode.args = ['Inflection']
         tempnode.children = floaters
@@ -1903,10 +1906,13 @@ def parse_language(wxr, langnode, language, lang_code):
                 return "\n" + text
             return None
 
-        tree = wxr.wtp.parse(subpage_content, pre_expand=True,
-                         post_template_fn=multitrans_post_fn,
-                         additional_expand=additional_expand_templates,
-                         do_not_pre_expand=do_not_pre_expand_templates)
+        tree = wxr.wtp.parse(
+            subpage_content,
+            pre_expand=True,
+            post_template_fn=multitrans_post_fn,
+            additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
+            do_not_pre_expand=DO_NOT_PRE_EXPAND_TEMPLATES
+        )
         assert tree.kind == NodeKind.ROOT
         ret = recurse(tree, seq)
         if ret is None:
@@ -3377,10 +3383,13 @@ def parse_page(
 
     # Parse the page, pre-expanding those templates that are likely to
     # influence parsing
-    tree = wxr.wtp.parse(text, pre_expand=True,
-                     post_template_fn=multitrans_post_fn,
-                     additional_expand=additional_expand_templates,
-                     do_not_pre_expand=do_not_pre_expand_templates)
+    tree = wxr.wtp.parse(
+        text,
+        pre_expand=True,
+        post_template_fn=multitrans_post_fn,
+        additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
+        do_not_pre_expand=DO_NOT_PRE_EXPAND_TEMPLATES
+    )
     # from wikitextprocessor.parser import print_tree
     # print("PAGE PARSE:", print_tree(tree))
 
@@ -3408,7 +3417,10 @@ def parse_page(
                       .format(lang), sortid="page/3019")
             continue
         lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang)
-        if wxr.config.capture_language_codes and lang_code not in wxr.config.capture_language_codes:
+        if (
+            wxr.config.capture_language_codes
+            and lang_code not in wxr.config.capture_language_codes
+        ):
             continue
         wxr.wtp.start_section(lang)
 
@@ -3419,8 +3431,10 @@ def parse_page(
         # part-of-speech.
         for data in datas:
             if "lang" not in data:
-                wxr.wtp.debug("internal error -- no lang in data: {}".format(data),
-                          sortid="page/3034")
+                wxr.wtp.debug(
+                    "internal error -- no lang in data: {}".format(data),
+                    sortid="page/3034"
+                )
                 continue
             for k, v in top_data.items():
                 assert isinstance(v, (list, tuple))
