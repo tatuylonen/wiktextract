@@ -11,6 +11,7 @@ from wiktextract.wxr_context import WiktextractContext
 from wiktextract.datautils import ns_title_prefix_tuple
 from wiktextract.page import clean_node, LEVEL_KINDS
 from wiktextract.form_descriptions import parse_sense_qualifier
+from wiktextract.extractor.share import contains_list
 from wikitextprocessor import NodeKind, WikiNode, Page
 
 
@@ -58,18 +59,6 @@ IGNORED_SUBTITLE_TAGS_MAP = {
     "common": [],
     "rare": ["rare"],
 }
-
-
-def contains_list(contents):
-    """Returns True if there is a list somewhere nested in contents."""
-    if isinstance(contents, (list, tuple)):
-        return any(contains_list(x) for x in contents)
-    if not isinstance(contents, WikiNode):
-        return False
-    kind = contents.kind
-    if kind == NodeKind.LIST:
-        return True
-    return contains_list(contents.children) or contains_list(contents.args)
 
 
 def extract_thesaurus_data(wxr: WiktextractContext) -> None:

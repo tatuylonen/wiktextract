@@ -8,6 +8,7 @@ from typing import Dict, List, Union, Any
 from wikitextprocessor import WikiNode, NodeKind
 from wiktextract.wxr_context import WiktextractContext
 from wiktextract.page import clean_node, LEVEL_KINDS
+from wiktextract.extractor.share import contains_list, WIKIMEDIA_COMMONS_URL
 
 
 # Templates that are used to form panels on pages and that
@@ -117,14 +118,16 @@ ADDITIONAL_EXPAND_TEMPLATES = {
 }
 
 
-def append_dict(
+def append_page_data(
     page_data: List[Dict], field: str, value: Any, base_data: Dict
 ) -> bool:
-    if (
-        page_data[-1].get(field) is not None
-        and len(page_data[-1]["senses"]) > 0
-    ):
-        page_data.append(copy.deepcopy(base_data))
+    if page_data[-1].get(field) is not None:
+        if len(page_data[-1]["senses"]) > 0:
+            # append new dictionary if the last dictionary has sense data and
+            # also has the same key
+            page_data.append(copy.deepcopy(base_data))
+        elif isinstance(page_data[-1].get(field), list):
+            page_data[-1][field] += value
     else:
         page_data[-1][field] = value
 
@@ -149,7 +152,7 @@ def recursive_parse(
         elif subtitle in wxr.config.POS_SUBTITLES:
             pos_type = wxr.config.POS_SUBTITLES[subtitle]["pos"]
             base_data["pos"] = pos_type
-            append_dict(page_data, "pos", pos_type, base_data)
+            append_page_data(page_data, "pos", pos_type, base_data)
             for node in node.children:
                 if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
                     extract_gloss(wxr, page_data, node.children)
@@ -221,7 +224,7 @@ def extract_etymology(
                 ],
             )
             base_data["etymology_text"] = etymology
-            append_dict(page_data, "etymology_text", etymology, base_data)
+            append_page_data(page_data, "etymology_text", etymology, base_data)
             recursive_parse(wxr, page_data, base_data, nodes[index + 1 :])
             return
 
@@ -232,13 +235,111 @@ def extract_pronunciation(
     base_data: Dict,
     nodes: List[Union[WikiNode, str]],
 ) -> None:
+    lang_code = base_data.get("lang_code")
     for index, node in enumerate(nodes):
-        if isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE:
-            # extract ipa
-            base_data["sounds"] = "sounds_placeholder"
-            append_dict(page_data, "sounds", "sounds_placeholder", base_data)
-            recursive_parse(wxr, page_data, base_data, nodes[index + 1 :])
-            return
+        if isinstance(node, WikiNode):
+            if node.kind in LEVEL_KINDS:
+                recursive_parse(wxr, page_data, base_data, nodes[index:])
+                return
+            elif node.kind == NodeKind.TEMPLATE:
+                node = wxr.wtp.parse(
+                    wxr.wtp.expand(wxr.wtp.node_to_wikitext(node))
+                )
+        extract_pronunciation_recursively(
+            wxr, page_data, base_data, lang_code, node, []
+        )
+
+
+def extract_pronunciation_recursively(
+    wxr: WiktextractContext,
+    page_data: List[Dict],
+    base_data: Dict,
+    lang_code: str,
+    node: Union[WikiNode, List[Union[WikiNode, str]]],
+    tags: List[str],
+) -> None:
+    if isinstance(node, list):
+        for x in node:
+            extract_pronunciation_recursively(
+                wxr, page_data, base_data, lang_code, x, tags
+            )
+        return
+    if not isinstance(node, WikiNode):
+        return
+    if node.kind == NodeKind.LIST_ITEM:
+        if not contains_list(node):
+            data = extract_pronunciation_item(wxr, lang_code, node, tags)
+            if isinstance(data, str):
+                for index in range(len(page_data[-1].get("sounds", []))):
+                    page_data[-1]["sounds"][index].update(
+                        {
+                            "audio": data.removeprefix("File:"),
+                            "ogg_file": WIKIMEDIA_COMMONS_URL + data,
+                        }
+                    )
+            else:
+                append_page_data(
+                    page_data,
+                    "sounds",
+                    [data],
+                    base_data,
+                )
+        else:
+            new_tags = clean_node(
+                wxr,
+                None,
+                [
+                    child
+                    for child in node.children
+                    if not isinstance(child, WikiNode)
+                    or child.kind != NodeKind.LIST
+                ],
+            )
+            new_tags = split_pronunciation_tags(new_tags)
+            extract_pronunciation_recursively(
+                wxr,
+                page_data,
+                base_data,
+                lang_code,
+                node.children,
+                list(set(tags + new_tags)),
+            )
+    else:
+        extract_pronunciation_recursively(
+            wxr, page_data, base_data, lang_code, node.children, tags
+        )
+
+
+def split_pronunciation_tags(text: str) -> List[str]:
+    return list(
+        filter(
+            None,
+            re.split(
+                r"，|, | \(|和|包括|: ",
+                text.removesuffix(" ^((幫助))")  # remove help link
+                # remove link to page "Wiktionary:漢語發音表記"
+                .removesuffix(" (維基詞典)")
+                # remove Dungan language pronunciation warning from "Module:Zh-pron"
+                .removesuffix("(注意：東干語發音目前仍處於實驗階段，可能會不準確。)")
+                .strip("()⁺\n "),
+            ),
+        )
+    )
+
+
+def extract_pronunciation_item(
+    wxr: WiktextractContext, lang_code: str, node: WikiNode, tags: List[str]
+) -> Union[Dict, str]:
+    expanded_text = clean_node(wxr, None, node.children)
+    # breakpoint()
+    if expanded_text.startswith("File:"):
+        return expanded_text
+    else:
+        sound_tags, ipa = re.split("：|:", expanded_text, 1)
+        data = {"tags": list(set(tags + split_pronunciation_tags(sound_tags)))}
+        ipa_key = "zh-pron" if lang_code == "zh" else "ipa"
+        data[ipa_key] = ipa.strip()
+        return data
 
 
 def parse_page(
