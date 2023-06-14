@@ -208,25 +208,19 @@ def extract_etymology(
     base_data: Dict,
     nodes: List[Union[WikiNode, str]],
 ) -> None:
+    level_node_index = -1
     for index, node in enumerate(nodes):
-        if isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE:
-            etymology = clean_node(
-                wxr,
-                None,
-                [
-                    child
-                    for child in node.children
-                    if not isinstance(child, WikiNode)
-                    or (
-                        child.kind != NodeKind.LIST
-                        and child.kind not in LEVEL_KINDS
-                    )
-                ],
-            )
-            base_data["etymology_text"] = etymology
-            append_page_data(page_data, "etymology_text", etymology, base_data)
-            recursive_parse(wxr, page_data, base_data, nodes[index + 1 :])
-            return
+        if isinstance(node, WikiNode) and node.kind in LEVEL_KINDS:
+            level_node_index = index
+            break
+    if level_node_index != -1:
+        etymology = clean_node(wxr, None, nodes[:index])
+    else:
+        etymology = clean_node(wxr, None, nodes)
+    base_data["etymology_text"] = etymology
+    append_page_data(page_data, "etymology_text", etymology, base_data)
+    if level_node_index != -1:
+        recursive_parse(wxr, page_data, base_data, nodes[level_node_index:])
 
 
 def extract_pronunciation(
@@ -243,7 +237,7 @@ def extract_pronunciation(
                 return
             elif node.kind == NodeKind.TEMPLATE:
                 node = wxr.wtp.parse(
-                    wxr.wtp.expand(wxr.wtp.node_to_wikitext(node))
+                    wxr.wtp.node_to_wikitext(node), expand_all=True
                 )
         extract_pronunciation_recursively(
             wxr, page_data, base_data, lang_code, node, []
@@ -373,7 +367,6 @@ def parse_page(
             logging.warning(
                 f"Unrecognized language name at top-level {lang_name}"
             )
-            continue
         lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang_name)
         if (
             wxr.config.capture_language_codes
