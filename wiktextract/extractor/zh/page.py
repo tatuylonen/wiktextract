@@ -354,11 +354,14 @@ def parse_page(
     )
 
     page_data = []
-    for node in filter(
+    for node in filter(lambda n: isinstance(n, WikiNode), tree.children):
         # ignore link created by `also` template at the page top
-        lambda n: isinstance(n, WikiNode) and n.kind != NodeKind.LINK,
-        tree.children,
-    ):
+        if node.kind == NodeKind.TEMPLATE and node.args[0][0].lower() in {
+            "also",
+            "see also",
+            "亦",
+        }:
+            continue
         if node.kind != NodeKind.LEVEL2:
             logging.warning(f"Unexpected top-level node: {node}")
             continue
