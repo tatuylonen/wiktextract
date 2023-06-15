@@ -3,7 +3,7 @@ import logging
 import re
 import string
 
-from typing import Dict, List, Union, Any
+from typing import Dict, List, Union, Any, Optional
 
 from wikitextprocessor import WikiNode, NodeKind
 from wiktextract.wxr_context import WiktextractContext
@@ -271,7 +271,7 @@ def extract_pronunciation_recursively(
                             "ogg_file": WIKIMEDIA_COMMONS_URL + data,
                         }
                     )
-            else:
+            elif data is not None:
                 append_page_data(
                     page_data,
                     "sounds",
@@ -309,10 +309,10 @@ def split_pronunciation_tags(text: str) -> List[str]:
         filter(
             None,
             re.split(
-                r"，|, | \(|和|包括|: ",
-                text.removesuffix(" ^((幫助))")  # remove help link
+                r"，|, | \(|\) |和|包括|: |、",
+                text.removesuffix("^((幫助))")  # remove help link
                 # remove link to page "Wiktionary:漢語發音表記"
-                .removesuffix(" (維基詞典)")
+                .removesuffix("(維基詞典)")
                 # remove Dungan language pronunciation warning from "Module:Zh-pron"
                 .removesuffix("(注意：東干語發音目前仍處於實驗階段，可能會不準確。)")
                 .strip("()⁺\n "),
@@ -323,17 +323,30 @@ def split_pronunciation_tags(text: str) -> List[str]:
 
 def extract_pronunciation_item(
     wxr: WiktextractContext, lang_code: str, node: WikiNode, tags: List[str]
-) -> Union[Dict, str]:
+) -> Optional[Union[Dict, str]]:
     expanded_text = clean_node(wxr, None, node.children)
-    # breakpoint()
     if expanded_text.startswith("File:"):
         return expanded_text
     else:
-        sound_tags, ipa = re.split("：|:", expanded_text, 1)
-        data = {"tags": list(set(tags + split_pronunciation_tags(sound_tags)))}
-        ipa_key = "zh-pron" if lang_code == "zh" else "ipa"
-        data[ipa_key] = ipa.strip()
-        return data
+        sound_tags, *ipa = re.split("：|:", expanded_text, 1)
+        if len(ipa) > 0:
+            data = {
+                "tags": list(set(tags + split_pronunciation_tags(sound_tags)))
+            }
+            ipa_key = "zh-pron" if lang_code == "zh" else "ipa"
+            data[ipa_key] = ipa[0].strip()
+            return data
+
+        for child in filter(
+            lambda x: isinstance(x, WikiNode) and x.kind == NodeKind.TEMPLATE,
+            node.children,
+        ):
+            template_name, *template_args = child.args
+            if template_name == "audio":
+                audio_filename = template_args[1]
+                return audio_filename
+
+        return None
 
 
 def parse_page(
