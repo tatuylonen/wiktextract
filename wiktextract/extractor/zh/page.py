@@ -9,6 +9,7 @@ from wikitextprocessor import WikiNode, NodeKind
 from wiktextract.wxr_context import WiktextractContext
 from wiktextract.page import clean_node, LEVEL_KINDS
 from wiktextract.extractor.share import contains_list, WIKIMEDIA_COMMONS_URL
+from wiktextract.datautils import data_append
 
 
 # Templates that are used to form panels on pages and that
@@ -184,6 +185,12 @@ def extract_gloss(
             ],
         )
         extract_gloss_and_tags(wxr, page_data, gloss)
+        example_lists = [
+            child
+            for child in node.children
+            if isinstance(child, WikiNode) and child.kind == NodeKind.LIST
+        ]
+        extract_examples(wxr, page_data, example_lists)
 
 
 def extract_gloss_and_tags(
@@ -217,6 +224,68 @@ def extract_gloss_and_tags(
         )
     else:
         page_data[-1]["senses"].append({"glosses": [raw_gloss]})
+
+
+def extract_examples(
+    wxr: WiktextractContext,
+    page_data: List[Dict],
+    node: Union[WikiNode, List[WikiNode]],
+) -> None:
+    if isinstance(node, list):
+        for n in node:
+            extract_examples(wxr, page_data, n)
+    elif isinstance(node, WikiNode):
+        if node.kind == NodeKind.LIST_ITEM:
+            example_data = {"type": "example"}
+            for child in node.children:
+                if (
+                    isinstance(child, WikiNode)
+                    and child.kind == NodeKind.TEMPLATE
+                ):
+                    template_name = child.args[0][0].strip()
+                    expanded_text = clean_node(wxr, None, child)
+                    if template_name == "quote-book":
+                        example_data["type"] = "quote"
+                        for line_num, expanded_line in enumerate(
+                            expanded_text.splitlines()
+                        ):
+                            if line_num == 0:
+                                key = "ref"
+                            elif line_num == 1:
+                                key = "text"
+                            elif line_num == 2 and any(
+                                template_arg[0].startswith("transliteration=")
+                                for template_arg in child.args
+                                if len(template_arg) > 0
+                                and isinstance(template_arg[0], str)
+                            ):
+                                key = "roman"
+                            else:
+                                key = "translation"
+                            if expanded_line != "（請為本引文添加中文翻譯）":
+                                example_data[key] = expanded_line
+                    elif template_name == "ja-usex":
+                        for line_num, expanded_line in enumerate(
+                            expanded_text.splitlines()
+                        ):
+                            if line_num == 0:
+                                key = "text"
+                            elif line_num == 1:
+                                key = "roman"
+                            else:
+                                key = "translation"
+                            example_data[key] = expanded_line
+                    elif template_name == "zh-usex":
+                        pass
+                    else:
+                        example_data["text"] = expanded_text
+
+            if "text" in example_data:
+                data_append(
+                    wxr, page_data[-1]["senses"][-1], "examples", example_data
+                )
+        else:
+            extract_examples(wxr, page_data, node.children)
 
 
 def extract_etymology(
