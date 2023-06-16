@@ -183,18 +183,35 @@ def extract_gloss(
                 or child.kind != NodeKind.LIST
             ],
         )
-        extract_sense_tags(wxr, page_data, gloss)
+        extract_gloss_and_tags(wxr, page_data, gloss)
 
 
-def extract_sense_tags(
+def extract_gloss_and_tags(
     wxr: WiktextractContext, page_data: List[Dict], raw_gloss: str
 ) -> None:
-    if raw_gloss.startswith("("):
-        label_end = raw_gloss.find(")")
-        label = raw_gloss[1:label_end]
-        gloss = raw_gloss[label_end + 2 :]  # also remove space after ")"
-        # labels: https://zh.wiktionary.org/wiki/Module:Labels/data
-        tags = re.split(r",|或", label)
+    left_brackets = ("(", "（")
+    right_brackets = (")", "）")
+    if raw_gloss.startswith(left_brackets) or raw_gloss.endswith(
+        right_brackets
+    ):
+        tags = []
+        split_tag_regex = r", ?|，|或"
+        front_tag_end = -1
+        rear_tag_start = len(raw_gloss)
+        for index, left_bracket in enumerate(left_brackets):
+            if raw_gloss.startswith(left_bracket):
+                front_tag_end = raw_gloss.find(right_brackets[index])
+                front_label = raw_gloss[1:front_tag_end]
+                tags += re.split(split_tag_regex, front_label)
+        for index, right_bracket in enumerate(right_brackets):
+            if raw_gloss.endswith(right_bracket):
+                rear_tag_start = raw_gloss.rfind(left_brackets[index])
+                rear_label = raw_gloss.rstrip("".join(right_brackets))[
+                    rear_tag_start + 1 :
+                ]
+                tags += re.split(split_tag_regex, rear_label)
+
+        gloss = raw_gloss[front_tag_end + 1 : rear_tag_start].strip()
         page_data[-1]["senses"].append(
             {"glosses": [gloss], "raw_glosses": [raw_gloss], "tags": tags}
         )
