@@ -121,9 +121,6 @@ def recursively_extract(
         e1, c1 = recursively_extract(contents.children, fn)
         extracted.extend(e1)
         new_node.children = c1
-    elif kind == NodeKind.MAGIC_WORD:
-        # Can happen inside nowiki at least
-        pass
     else:
         raise RuntimeError("recursively_extract: unhandled kind {}"
                            .format(kind))

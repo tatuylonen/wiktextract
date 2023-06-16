@@ -167,6 +167,8 @@ def emit_words_in_thesaurus(
             f"{entry}/{lang_code}/{pos} (not in main)"
         )
 
+        sense_dict = dict()
+
         if sense:
             sense_dict["glosses"] = [sense]
 
@@ -194,13 +196,13 @@ def emit_words_in_thesaurus(
         if not "glosses" in sense_dict:
             sense_dict["tags"] = ["no-gloss"]
 
-        word_cb(
-            {
+        entry = {
                 "word": entry,
                 "lang": wxr.config.LANGUAGES_BY_CODE.get(lang_code)[0],
                 "lang_code": lang_code,
                 "pos": pos,
-                "senses": [sense_dict],
+                "senses": [sense_dict] if sense_dict else [],
                 "source": "thesaurus",
-            }
-        )
+                }
+        entry = {k: v for k, v in entry.items() if v}
+        word_cb(entry)
