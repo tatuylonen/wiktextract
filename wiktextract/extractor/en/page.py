@@ -1919,7 +1919,7 @@ def parse_language(wxr, langnode, language, lang_code):
         assert isinstance(data, dict)
         assert isinstance(field, str)
         assert isinstance(linkagenode, WikiNode)
-        # if field == "synonyms" and True == False:
+        # if field == "derived":
         #     print("field", field)
         #     print("data", data)
         #     print("children:")
@@ -1936,7 +1936,7 @@ def parse_language(wxr, langnode, language, lang_code):
             assert sense is None or isinstance(sense, str)
 
             # print("PARSE_LINKAGE_ITEM: {} ({}): {}"
-                 # .format(field, sense, contents))
+            #    .format(field, sense, contents))
 
             parts = []
             ruby = []
@@ -2110,7 +2110,12 @@ def parse_language(wxr, langnode, language, lang_code):
                     if node.args in ("gallery", "ref", "cite", "caption"):
                         continue
                     classes = (node.attrs.get("class") or "").split()
-                    if "qualifier-content" in classes:
+                    if node.args == "li":
+                        # duplicates code from if kind == NodeKind.LIST_ITEM ⇑
+                        v = parse_linkage_item(node.children, field, sense)
+                        if v:
+                            next_navframe_sense = v
+                    elif "qualifier-content" in classes:
                         sense1 = clean_node(wxr, None, node.children)
                         if sense1.endswith(":"):
                             sense1 = sense1[:-1].strip()
