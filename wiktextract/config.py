@@ -60,20 +60,22 @@ class WiktionaryConfig(object):
         "FORM_OF_TEMPLATES",
     )
 
-    def __init__(self,
-                 dump_file_lang_code="en",
-                 capture_language_codes=["en", "mul"],
-                 capture_translations=True,
-                 capture_pronunciation=True,
-                 capture_linkages=True,
-                 capture_compounds=True,
-                 capture_redirects=True,
-                 capture_examples=True,
-                 capture_etymologies=True,
-                 capture_inflections=True,
-                 capture_descendants=True,
-                 verbose=False,
-                 expand_tables=False):
+    def __init__(
+        self,
+        dump_file_lang_code="en",
+        capture_language_codes=["en", "mul"],
+        capture_translations=True,
+        capture_pronunciation=True,
+        capture_linkages=True,
+        capture_compounds=True,
+        capture_redirects=True,
+        capture_examples=True,
+        capture_etymologies=True,
+        capture_inflections=True,
+        capture_descendants=True,
+        verbose=False,
+        expand_tables=False
+    ):
         if capture_language_codes is not None:
             assert isinstance(capture_language_codes, (list, tuple, set))
             for x in capture_language_codes:
