@@ -1381,8 +1381,8 @@ def clean_value(wxr, title, no_strip=False, no_html_strip=False):
     # Change <div> and </div> to newlines.  Ditto for tr, li, table, dl, ul, ol
     title = re.sub(r"(?si)</?(div|tr|li|table|dl|ul|ol)\b[^>]*>",
                    "\n", title)
-    # Change </dt> and </dd> into newlines; these generate new rows/lines.
-    title = re.sub(r"(?si)</(dt|dd)\s*>", "\n", title)
+    # Change <dt> and <dd> into newlines; these generate new rows/lines.
+    title = re.sub(r"<d[dt]>", "\n", title)
     # Change <td> </td> to spaces.  Ditto for th.
     title = re.sub(r"(?si)</?(td|th)\b[^>]*>", " ", title)
     # Change <sup> ... </sup> to ^

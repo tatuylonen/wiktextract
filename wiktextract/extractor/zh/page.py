@@ -275,8 +275,22 @@ def extract_examples(
                             else:
                                 key = "translation"
                             example_data[key] = expanded_line
-                    elif template_name == "zh-usex":
-                        pass
+                    elif template_name in {"zh-x", "zh-usex"}:
+                        for expanded_line in expanded_text.splitlines():
+                            if expanded_line.endswith("體]"):
+                                # expanded simplified or traditional Chinese
+                                # example sentence usually ends with
+                                # "繁體]" or "簡體]"
+                                if example_data.get("text") is not None:
+                                    example_data["text"].append(expanded_line)
+                                else:
+                                    example_data["text"] = [expanded_line]
+                            elif expanded_line.endswith("]"):
+                                example_data["roman"] = expanded_line
+                            elif expanded_line.startswith("來自："):
+                                example_data["ref"] = expanded_line[3:]
+                            else:
+                                example_data["translation"] = expanded_line
                     else:
                         example_data["text"] = expanded_text
 
