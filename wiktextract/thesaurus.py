@@ -191,6 +191,8 @@ def emit_words_in_thesaurus(
                 relation_dict["topics"] = topics.split("|")
             if lang_variant is not None:
                 relation_dict["language_variant"] = lang_variant
+            if linkage not in sense_dict:
+                sense_dict[linkage] = []
             sense_dict[linkage].append(relation_dict)
 
         if not "glosses" in sense_dict:
