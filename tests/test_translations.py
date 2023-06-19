@@ -19,10 +19,14 @@ class TrTests(unittest.TestCase):
         self.wxr.wtp.start_page("abolitionism")  # Note: some tests use last char
         self.wxr.wtp.start_section("English")
 
-    def runtr(self, item, sense=None, pos_datas=[],
-              lang=None, langcode=None, translations_from_template=[],
+    def runtr(self, item, sense=None, pos_datas=None,
+              lang=None, langcode=None, translations_from_template=None,
               is_reconstruction=False):
         """Simple test runner.  Returns data."""
+        if pos_datas is None:
+            pos_datas = []
+        if translations_from_template is None:
+            translations_from_template = []
         data = {}
         parse_translation_item_text(self.wxr, self.wxr.wtp.title, data,
                                     item, sense, pos_datas, lang, langcode,
