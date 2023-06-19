@@ -3,13 +3,14 @@ import logging
 import re
 import string
 
-from typing import Dict, List, Union, Any, Optional
+from typing import Dict, List, Union, Any
 
 from wikitextprocessor import WikiNode, NodeKind
 from wiktextract.wxr_context import WiktextractContext
 from wiktextract.page import clean_node, LEVEL_KINDS
-from wiktextract.extractor.share import contains_list, WIKIMEDIA_COMMONS_URL
 from wiktextract.datautils import data_append
+
+from .pronunciation import extract_pronunciation_recursively
 
 
 # Templates that are used to form panels on pages and that
@@ -289,6 +290,7 @@ def extract_examples(
                                 example_data["roman"] = expanded_line
                             elif expanded_line.startswith("來自："):
                                 example_data["ref"] = expanded_line[3:]
+                                example_data["type"] = "quote"
                             else:
                                 example_data["translation"] = expanded_line
                     else:
@@ -344,111 +346,6 @@ def extract_pronunciation(
         )
 
 
-def extract_pronunciation_recursively(
-    wxr: WiktextractContext,
-    page_data: List[Dict],
-    base_data: Dict,
-    lang_code: str,
-    node: Union[WikiNode, List[Union[WikiNode, str]]],
-    tags: List[str],
-) -> None:
-    if isinstance(node, list):
-        for x in node:
-            extract_pronunciation_recursively(
-                wxr, page_data, base_data, lang_code, x, tags
-            )
-        return
-    if not isinstance(node, WikiNode):
-        return
-    if node.kind == NodeKind.LIST_ITEM:
-        if not contains_list(node):
-            data = extract_pronunciation_item(wxr, lang_code, node, tags)
-            if isinstance(data, str):
-                for index in range(len(page_data[-1].get("sounds", []))):
-                    page_data[-1]["sounds"][index].update(
-                        {
-                            "audio": data.removeprefix("File:"),
-                            "ogg_file": WIKIMEDIA_COMMONS_URL + data,
-                        }
-                    )
-            elif data is not None:
-                append_page_data(
-                    page_data,
-                    "sounds",
-                    [data],
-                    base_data,
-                )
-        else:
-            new_tags = clean_node(
-                wxr,
-                None,
-                [
-                    child
-                    for child in node.children
-                    if not isinstance(child, WikiNode)
-                    or child.kind != NodeKind.LIST
-                ],
-            )
-            new_tags = split_pronunciation_tags(new_tags)
-            extract_pronunciation_recursively(
-                wxr,
-                page_data,
-                base_data,
-                lang_code,
-                node.children,
-                list(set(tags + new_tags)),
-            )
-    else:
-        extract_pronunciation_recursively(
-            wxr, page_data, base_data, lang_code, node.children, tags
-        )
-
-
-def split_pronunciation_tags(text: str) -> List[str]:
-    return list(
-        filter(
-            None,
-            re.split(
-                r"，|, | \(|\) |和|包括|: |、",
-                text.removesuffix("^((幫助))")  # remove help link
-                # remove link to page "Wiktionary:漢語發音表記"
-                .removesuffix("(維基詞典)")
-                # remove Dungan language pronunciation warning from "Module:Zh-pron"
-                .removesuffix("(注意：東干語發音目前仍處於實驗階段，可能會不準確。)")
-                .strip("()⁺\n "),
-            ),
-        )
-    )
-
-
-def extract_pronunciation_item(
-    wxr: WiktextractContext, lang_code: str, node: WikiNode, tags: List[str]
-) -> Optional[Union[Dict, str]]:
-    expanded_text = clean_node(wxr, None, node.children)
-    if expanded_text.startswith("File:"):
-        return expanded_text
-    else:
-        sound_tags, *ipa = re.split("：|:", expanded_text, 1)
-        if len(ipa) > 0:
-            data = {
-                "tags": list(set(tags + split_pronunciation_tags(sound_tags)))
-            }
-            ipa_key = "zh-pron" if lang_code == "zh" else "ipa"
-            data[ipa_key] = ipa[0].strip()
-            return data
-
-        for child in filter(
-            lambda x: isinstance(x, WikiNode) and x.kind == NodeKind.TEMPLATE,
-            node.children,
-        ):
-            template_name, *template_args = child.args
-            if template_name == "audio":
-                audio_filename = template_args[1]
-                return audio_filename
-
-        return None
-
-
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
 ) -> List[Dict[str, str]]:
@@ -476,12 +373,16 @@ def parse_page(
         }:
             continue
         if node.kind != NodeKind.LEVEL2:
-            logging.warning(f"Unexpected top-level node: {node}")
+            wxr.wtp.warning(
+                f"Unexpected top-level node: {node}",
+                sortid="extractor/zh/page/parse_page/503",
+            )
             continue
         lang_name = clean_node(wxr, None, node.args)
         if lang_name not in wxr.config.LANGUAGES_BY_NAME:
-            logging.warning(
-                f"Unrecognized language name at top-level {lang_name}"
+            wxr.wtp.warning(
+                f"Unrecognized language name at top-level {lang_name}",
+                sortid="extractor/zh/page/parse_page/509",
             )
         lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang_name)
         if (
