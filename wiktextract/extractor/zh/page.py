@@ -289,6 +289,7 @@ def extract_examples(
                                 example_data["roman"] = expanded_line
                             elif expanded_line.startswith("來自："):
                                 example_data["ref"] = expanded_line[3:]
+                                example_data["type"] = "quote"
                             else:
                                 example_data["translation"] = expanded_line
                     else:
@@ -428,7 +429,7 @@ def extract_pronunciation_item(
     if expanded_text.startswith("File:"):
         return expanded_text
     else:
-        sound_tags, *ipa = re.split("：|:", expanded_text, 1)
+        sound_tags, *ipa = re.split(r"：|:", expanded_text, 1)
         if len(ipa) > 0:
             data = {
                 "tags": list(set(tags + split_pronunciation_tags(sound_tags)))
@@ -476,11 +477,11 @@ def parse_page(
         }:
             continue
         if node.kind != NodeKind.LEVEL2:
-            logging.warning(f"Unexpected top-level node: {node}")
+            wxr.wtp.warning(f"Unexpected top-level node: {node}")
             continue
         lang_name = clean_node(wxr, None, node.args)
         if lang_name not in wxr.config.LANGUAGES_BY_NAME:
-            logging.warning(
+            wxr.wtp.warning(
                 f"Unrecognized language name at top-level {lang_name}"
             )
         lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang_name)
