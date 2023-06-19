@@ -363,41 +363,59 @@ def extract_pronunciation_recursively(
         return
     if node.kind == NodeKind.LIST_ITEM:
         if not contains_list(node):
-            data = extract_pronunciation_item(wxr, lang_code, node, tags)
-            if isinstance(data, str):
-                for index in range(len(page_data[-1].get("sounds", []))):
-                    page_data[-1]["sounds"][index].update(
-                        {
-                            "audio": data.removeprefix("File:"),
-                            "ogg_file": WIKIMEDIA_COMMONS_URL + data,
-                        }
-                    )
-            elif data is not None:
-                append_page_data(
-                    page_data,
-                    "sounds",
-                    [data],
-                    base_data,
-                )
+            used_children = node.children
+            rest_children = []
         else:
-            new_tags = clean_node(
-                wxr,
-                None,
-                [
-                    child
-                    for child in node.children
-                    if not isinstance(child, WikiNode)
-                    or child.kind != NodeKind.LIST
-                ],
+            used_children = [
+                child
+                for child in node.children
+                if not isinstance(child, WikiNode)
+                or child.kind != NodeKind.LIST
+            ]
+            rest_children = [
+                child
+                for child in node.children
+                if isinstance(child, WikiNode) and child.kind == NodeKind.LIST
+            ]
+        data = extract_pronunciation_item(wxr, lang_code, used_children, tags)
+        if isinstance(data, str):  # is audio file name
+            # audio file usually after Pinyin
+            # add back to previous Pinyin dictionary if it doesn't have
+            # audio file data and they are sibling nodes(similar tags).
+            last_sounds_list = page_data[-1].get("sounds", [])
+            for index in range(len(last_sounds_list)):
+                if (
+                    last_sounds_list[index].get("audio") is None
+                    and tags == last_sounds_list[index].get("tags", [])[:-1]
+                ):
+                    page_data[-1].get("sounds")[index].update(
+                        create_audio_url_dict(data)
+                    )
+        elif isinstance(data, dict):
+            append_page_data(
+                page_data,
+                "sounds",
+                [data],
+                base_data,
             )
-            new_tags = split_pronunciation_tags(new_tags)
+            # list children could contain audio file
             extract_pronunciation_recursively(
                 wxr,
                 page_data,
                 base_data,
                 lang_code,
-                node.children,
-                list(set(tags + new_tags)),
+                rest_children,
+                data.get("tags")[:-1],
+            )
+        elif isinstance(data, list):
+            # list item is a tag
+            extract_pronunciation_recursively(
+                wxr,
+                page_data,
+                base_data,
+                lang_code,
+                rest_children,
+                data,
             )
     else:
         extract_pronunciation_recursively(
@@ -405,49 +423,99 @@ def extract_pronunciation_recursively(
         )
 
 
+def create_audio_url_dict(filename: str) -> Dict[str, str]:
+    file_url_key = (
+        "ogg_url"
+        if filename.endswith(".ogg")
+        else filename[filename.rfind(".") + 1 :].lower() + "_url"
+    )
+    filename_without_suffix = filename[: filename.rfind(".")]
+    audio_dict = {
+        "audio": filename.removeprefix("File:"),
+        file_url_key: WIKIMEDIA_COMMONS_URL + filename,
+    }
+    for file_suffix in ["ogg", "mp3"]:
+        url_key = f"{file_suffix}_url"
+        if file_url_key != url_key:
+            audio_dict[url_key] = (
+                WIKIMEDIA_COMMONS_URL
+                + filename_without_suffix
+                + "."
+                + file_suffix
+            )
+    return audio_dict
+
+
+def combine_pronunciation_tags(
+    old_tags: List[str], new_tags: List[str]
+) -> List[str]:
+    combined_tags = old_tags[:]
+    old_tags_set = set(old_tags)
+    for tag in new_tags:
+        if tag not in old_tags_set:
+            combined_tags.append(tag)
+    return combined_tags
+
+
 def split_pronunciation_tags(text: str) -> List[str]:
     return list(
         filter(
             None,
             re.split(
-                r"，|, | \(|\) |和|包括|: |、",
+                r"，|, | \(|\) ?|和|包括|: |、",
                 text.removesuffix("^((幫助))")  # remove help link
                 # remove link to page "Wiktionary:漢語發音表記"
-                .removesuffix("(維基詞典)")
-                # remove Dungan language pronunciation warning from "Module:Zh-pron"
-                .removesuffix("(注意：東干語發音目前仍處於實驗階段，可能會不準確。)")
-                .strip("()⁺\n "),
+                .removesuffix("(維基詞典)").strip("（）()⁺\n "),
             ),
         )
     )
 
 
 def extract_pronunciation_item(
-    wxr: WiktextractContext, lang_code: str, node: WikiNode, tags: List[str]
-) -> Optional[Union[Dict, str]]:
-    expanded_text = clean_node(wxr, None, node.children)
+    wxr: WiktextractContext,
+    lang_code: str,
+    node_children: List[WikiNode],
+    tags: List[str],
+) -> Optional[Union[Dict, str, List[str]]]:
+    """
+    Return audio file name(eg. "File:LL-Q1860 (eng)-Vealhurl-manga.wav") string
+    or a dictionary contains IPA and tags
+    or a list of tags
+    """
+    expanded_text = clean_node(wxr, None, node_children)
+    # remove Dungan language pronunciation warning from "Module:Zh-pron"
+    expanded_text = expanded_text.removesuffix(
+        "(注意：東干語發音目前仍處於實驗階段，可能會不準確。)"
+    )
+
     if expanded_text.startswith("File:"):
         return expanded_text
+    elif expanded_text.startswith("(福建: "):
+        # it's a tag
+        return combine_pronunciation_tags(
+            tags, split_pronunciation_tags(expanded_text)
+        )
     else:
-        sound_tags, *ipa = re.split(r"：|:", expanded_text, 1)
+        sound_tags_text, *ipa = re.split(r"：|:", expanded_text, 1)
+        new_tags = combine_pronunciation_tags(
+            tags, split_pronunciation_tags(sound_tags_text)
+        )
         if len(ipa) > 0:
-            data = {
-                "tags": list(set(tags + split_pronunciation_tags(sound_tags)))
-            }
+            data = {"tags": new_tags}
             ipa_key = "zh-pron" if lang_code == "zh" else "ipa"
             data[ipa_key] = ipa[0].strip()
             return data
 
         for child in filter(
             lambda x: isinstance(x, WikiNode) and x.kind == NodeKind.TEMPLATE,
-            node.children,
+            node_children,
         ):
             template_name, *template_args = child.args
             if template_name == "audio":
                 audio_filename = template_args[1]
                 return audio_filename
 
-        return None
+        return new_tags
 
 
 def parse_page(
@@ -477,12 +545,16 @@ def parse_page(
         }:
             continue
         if node.kind != NodeKind.LEVEL2:
-            wxr.wtp.warning(f"Unexpected top-level node: {node}")
+            wxr.wtp.warning(
+                f"Unexpected top-level node: {node}",
+                sortid="extractor/zh/page/parse_page/503",
+            )
             continue
         lang_name = clean_node(wxr, None, node.args)
         if lang_name not in wxr.config.LANGUAGES_BY_NAME:
             wxr.wtp.warning(
-                f"Unrecognized language name at top-level {lang_name}"
+                f"Unrecognized language name at top-level {lang_name}",
+                sortid="extractor/zh/page/parse_page/509",
             )
         lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang_name)
         if (
