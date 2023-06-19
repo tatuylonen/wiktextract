@@ -50,9 +50,9 @@ def extract_pronunciation_recursively(
             # audio file data and they are sibling nodes(similar tags).
             last_sounds_list = page_data[-1].get("sounds", [])
             for index in range(len(last_sounds_list)):
-                if (
-                    last_sounds_list[index].get("audio") is None
-                    and tags == last_sounds_list[index].get("tags", [])[:-1]
+                if last_sounds_list[index].get("audio") is None and (
+                    tags == last_sounds_list[index].get("tags", [])[:-1]
+                    or lang_code != "zh"
                 ):
                     page_data[-1].get("sounds")[index].update(
                         create_audio_url_dict(data)
@@ -187,8 +187,8 @@ def extract_pronunciation_item(
             node_children,
         ):
             template_name, *template_args = child.args
-            if template_name == "audio":
-                audio_filename = template_args[1]
+            if template_name[0] == "audio":
+                audio_filename = template_args[1][0]
                 return audio_filename
 
         return new_tags
