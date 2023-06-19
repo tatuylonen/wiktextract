@@ -1,3 +1,4 @@
+import hashlib
 import re
 
 from typing import Dict, List, Union, Optional
@@ -94,21 +95,31 @@ def create_audio_url_dict(filename: str) -> Dict[str, str]:
         if filename.endswith(".ogg")
         else filename[filename.rfind(".") + 1 :].lower() + "_url"
     )
-    filename_without_suffix = filename[: filename.rfind(".")]
+    filename_without_prefix = filename.removeprefix("File:")
     audio_dict = {
-        "audio": filename.removeprefix("File:"),
+        "audio": filename_without_prefix,
         file_url_key: WIKIMEDIA_COMMONS_URL + filename,
     }
     for file_suffix in ["ogg", "mp3"]:
-        url_key = f"{file_suffix}_url"
-        if file_url_key != url_key:
-            audio_dict[url_key] = (
-                WIKIMEDIA_COMMONS_URL
-                + filename_without_suffix
-                + "."
-                + file_suffix
+        transcode_url_key = f"{file_suffix}_url"
+        if file_url_key != transcode_url_key:
+            audio_dict[transcode_url_key] = create_transcode_url(
+                filename_without_prefix, file_suffix
             )
     return audio_dict
+
+
+def create_transcode_url(filename: str, transcode_suffix) -> str:
+    # Chinese Wiktionary template might expands filename that has the a lower
+    # first letter but the actual Wikimedia Commons file's first letter is
+    # capitalized
+    filename = filename[0].upper() + filename[1:]
+    filename = filename.replace(" ", "_")
+    md5 = hashlib.md5(filename.encode()).hexdigest()
+    return (
+        "https://upload.wikimedia.org/wikipedia/commons/transcoded/"
+        + f"{md5[0]}/{md5[:2]}/{filename}/{filename}.{transcode_suffix}"
+    )
 
 
 def combine_pronunciation_tags(

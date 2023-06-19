@@ -10,7 +10,7 @@ from wiktextract.wxr_context import WiktextractContext
 from wiktextract.page import clean_node, LEVEL_KINDS
 from wiktextract.datautils import data_append
 
-from .pronounciation import extract_pronunciation_recursively
+from .pronunciation import extract_pronunciation_recursively
 
 
 # Templates that are used to form panels on pages and that
