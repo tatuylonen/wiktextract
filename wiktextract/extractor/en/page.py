@@ -82,6 +82,8 @@ ADDITIONAL_EXPAND_TEMPLATES = {
     "ru-proper noun-alt-ё",
     "ru-pos-alt-ё",
     "ru-alt-ё",
+    "inflection of",
+    "no deprecated lang param usage",
 }
 
 # Inverse linkage for those that have them
