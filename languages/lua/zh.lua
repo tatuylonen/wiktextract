@@ -7,8 +7,8 @@ function export.languages()
     local m_zh = require("Module:Zh")
     -- https://zh.wiktionary.org/wiki/Module:Languages
     local m_languages = require("Module:Languages")
-    -- https://zh.wiktionary.org/wiki/Module:Languages/alldata
-    local allData = mw.loadData("Module:Languages/alldata")
+    -- https://zh.wiktionary.org/wiki/Module:Languages/data/all
+    local allData = mw.loadData("Module:Languages/data/all")
 
     local function addNames(allNames, names)
         for _, name in ipairs(names) do
@@ -25,11 +25,15 @@ function export.languages()
         local lang = m_languages.getByCode(code)
         local canonicalName = lang:getCanonicalName()
         addNames(names, {canonicalName})
-        -- the true arg gets ONLY otherNames, not including aliases/varieties
-        local otherNames = lang:getOtherNames(true)
-        addNames(names, otherNames)
-        local aliases = lang:getAliases()
+
+        -- There are methods getAliases() and getOtherNames(), but
+        -- getOtherNames() doesn't work as of 2023-06-27.
+        lang:loadInExtraData()
+        local aliases = lang._rawData.aliases or (lang._extraData and lang._extraData.aliases) or {}
         addNames(names, aliases)
+        local otherNames = lang._rawData.otherNames or (lang._extraData and lang._extraData.otherNames) or {}
+        addNames(names, otherNames)
+
         ret[code] = names
     end
     
