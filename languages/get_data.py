@@ -25,37 +25,53 @@ from wikitextprocessor.dumpparser import process_dump
 from pathlib import Path
 import json
 
-def get_lang_data(lang_code, dump_file):
+
+def get_lang_data(lang_code: str, dump_file: str) -> None:
     wxr = WiktextractContext(Wtp(lang_code=lang_code), WiktionaryConfig())
-    module = wxr.wtp.NAMESPACE_DATA["Module"]["name"] + ":"
+    module_ns_id = wxr.wtp.NAMESPACE_DATA["Module"]["id"]
+    module_ns_name = wxr.wtp.NAMESPACE_DATA["Module"]["name"]
+    process_dump(wxr.wtp, dump_file, {module_ns_id})
 
-    def page_handler(model, title, text):
-        if title.startswith(module):
-            wxr.wtp.add_page(model, title, text)
-
-    process_dump(wxr, dump_file, page_handler=page_handler)
-
-    with open(f"languages/lua/json.lua", "r") as lua_json_file:
-        lua_json_mod = lua_json_file.read()
-    wxr.wtp.add_page("Scribunto", f"{module}wiktextract-json", lua_json_mod, transient=True)
-    with open(f"languages/lua/{lang_code}.lua", "r") as lua_lang_file:
-        lua_lang_mod = lua_lang_file.read()
-    wxr.wtp.add_page("Scribunto", f"{module}wiktextract-lang-data", lua_lang_mod, transient=True)
+    with open("languages/lua/json.lua", encoding="utf-8") as f:
+        lua_json_code = f.read()
+        wxr.wtp.add_page(
+            f"{module_ns_name}:Wiktextract-json"
+            if lang_code == "zh"
+            else f"{module_ns_name}:wiktextract-json",
+            module_ns_id,
+            body=lua_json_code,
+            model="Scribunto",
+        )
+    with open(f"languages/lua/{lang_code}.lua", encoding="utf-8") as f:
+        lua_lang_code = f.read()
+        wxr.wtp.add_page(
+            f"{module_ns_name}:Wiktextract-lang-data"
+            if lang_code == "zh"
+            else f"{module_ns_name}:wiktextract-lang-data",
+            module_ns_id,
+            body=lua_lang_code,
+            model="Scribunto",
+        )
+    wxr.wtp.db_conn.commit()
     wxr.wtp.start_page("wiktextract lang data")
     data = wxr.wtp.expand("{{#invoke:wiktextract-lang-data|languages}}")
-
     data = json.loads(data)
-
     data_folder = Path(f"wiktextract/data/{lang_code}")
     if not data_folder.exists():
         data_folder.mkdir()
-    with data_folder.joinpath("languages.json").open("w", encoding="utf-8") as fout:
+    with data_folder.joinpath("languages.json").open(
+        "w", encoding="utf-8"
+    ) as fout:
         json.dump(data, fout, indent=2, ensure_ascii=False, sort_keys=True)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-    description="Export Wiktionary language codes and names to JSON")
-    parser.add_argument("lang_code", type=str, help="Language code")
-    parser.add_argument("dump_file", type=str, help="Wiktionary xml dump file path")
+        description="Export Wiktionary language codes and names to JSON"
+    )
+    parser.add_argument("lang_code", type=str, help="Dump file language code")
+    parser.add_argument(
+        "dump_file", type=str, help="Wiktionary xml dump file path"
+    )
     args = parser.parse_args()
     get_lang_data(args.lang_code, args.dump_file)
