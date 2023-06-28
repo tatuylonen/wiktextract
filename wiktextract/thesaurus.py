@@ -3,7 +3,6 @@
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import collections
 import logging
 import sqlite3
 import tempfile
@@ -78,15 +77,24 @@ def thesaurus_linkage_number(db_conn: sqlite3.Connection) -> int:
 
 
 def search_thesaurus(
-    db_conn: sqlite3.Connection, entry: str, lang_code: str, pos: str
+    db_conn: sqlite3.Connection,
+    entry: str,
+    lang_code: str,
+    pos: str,
+    linkage_type: Optional[str] = None
 ) -> Iterable[ThesaurusTerm]:
-    for r in db_conn.execute(
-        "SELECT term, entries.id, linkage, tags, topics, roman, "
-        "language_variant, sense "
-        "FROM terms JOIN entries ON terms.entry_id = entries.id "
-        "WHERE entry = ? AND language_code = ? AND pos = ?",
-        (entry, lang_code, pos),
-    ):
+    query_sql = """
+    SELECT term, entries.id, linkage, tags, topics, roman,
+    language_variant, sense
+    FROM terms JOIN entries ON terms.entry_id = entries.id
+    WHERE entry = ? AND language_code = ? AND pos = ?
+    """
+    query_value = (entry, lang_code, pos)
+    if linkage_type is not None:
+        query_sql += " AND linkage = ?"
+        query_value += (linkage_type,)
+
+    for r in db_conn.execute(query_sql, query_value):
         yield ThesaurusTerm(
             term=r[0],
             entry_id=r[1],
@@ -161,7 +169,7 @@ def emit_words_in_thesaurus(
             logging.info(f"'None' in entry, lang_code or"
                          f" pos: {entry}, {lang_code}, {pos}")
             continue
-            
+
         logging.info(
             "Emitting thesaurus entry for "
             f"{entry}/{lang_code}/{pos} (not in main)"
@@ -195,7 +203,7 @@ def emit_words_in_thesaurus(
                 sense_dict[linkage] = []
             sense_dict[linkage].append(relation_dict)
 
-        if not "glosses" in sense_dict:
+        if "glosses" not in sense_dict:
             sense_dict["tags"] = ["no-gloss"]
 
         entry = {

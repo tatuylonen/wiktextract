@@ -3,7 +3,7 @@ import logging
 import re
 import string
 
-from typing import Dict, List, Union, Any
+from typing import Dict, List, Union, Any, Optional
 
 from wikitextprocessor import WikiNode, NodeKind
 from wiktextract.wxr_context import WiktextractContext
@@ -117,6 +117,8 @@ ADDITIONAL_EXPAND_TEMPLATES = {
     # langhd is needed for pre-expanding language heading templates in the
     # Chinese Wiktionary dump file: https://zh.wiktionary.org/wiki/Template:-en-
     "langhd",
+    "zh-der",  # col3 for Chinese
+    "der3",  # redirects to col3
 }
 
 
@@ -160,10 +162,27 @@ def recursive_parse(
                     extract_gloss(wxr, page_data, node.children)
                 else:
                     recursive_parse(wxr, page_data, base_data, node)
-        elif subtitle in wxr.config.OTHER_SUBTITLES["etymology"]:
+        elif (
+            wxr.config.capture_etymologies
+            and subtitle in wxr.config.OTHER_SUBTITLES["etymology"]
+        ):
             extract_etymology(wxr, page_data, base_data, node.children)
-        elif subtitle in wxr.config.OTHER_SUBTITLES["pronunciation"]:
+        elif (
+            wxr.config.capture_pronunciation
+            and subtitle in wxr.config.OTHER_SUBTITLES["pronunciation"]
+        ):
             extract_pronunciation(wxr, page_data, base_data, node.children)
+        elif (
+            wxr.config.capture_linkages
+            and subtitle in wxr.config.LINKAGE_SUBTITLES
+        ):
+            extract_linkages(
+                wxr,
+                page_data,
+                node.children,
+                wxr.config.LINKAGE_SUBTITLES[subtitle],
+                None,
+            )
 
 
 def extract_gloss(
@@ -227,6 +246,85 @@ def extract_gloss_and_tags(
         page_data[-1]["senses"].append({"glosses": [raw_gloss]})
 
 
+def extract_linkages(
+    wxr: WiktextractContext,
+    page_data: List[Dict],
+    nodes: List[Union[WikiNode, str]],
+    linkage_type: str,
+    sense: Optional[str],
+) -> None:
+    strip_sense_chars = "()（）:："
+    for node in nodes:
+        if isinstance(node, str) and len(node.strip()) > 0 and sense is None:
+            sense = node.strip(strip_sense_chars)
+        elif isinstance(node, WikiNode):
+            if node.kind == NodeKind.LIST:
+                for list_child in node.children:
+                    if (
+                        isinstance(list_child, WikiNode)
+                        and list_child.kind == NodeKind.LIST_ITEM
+                    ):
+                        linkage_data = {
+                            "word": clean_node(
+                                wxr, None, list_child.children
+                            ).strip(strip_sense_chars)
+                        }
+                        if sense is not None:
+                            linkage_data["sense"] = sense
+                        data_append(
+                            wxr,
+                            page_data[-1]["senses"][-1],
+                            linkage_type,
+                            linkage_data,
+                        )
+            elif node.kind == NodeKind.TEMPLATE:
+                template_name = node.args[0][0].lower()
+                if template_name in {"s", "sense"}:
+                    sense = clean_node(wxr, None, node).strip(strip_sense_chars)
+                elif template_name.endswith("-saurus"):
+                    from wiktextract.thesaurus import search_thesaurus
+
+                    for thesaurus in search_thesaurus(
+                        wxr.thesaurus_db_conn,
+                        node.args[-1][0],
+                        page_data[-1].get("lang_code"),
+                        page_data[-1].get("pos"),
+                        linkage_type,
+                    ):
+                        linkage_data = {"word": thesaurus.term}
+                        if thesaurus.roman is not None:
+                            linkage_data["roman"] = thesaurus.roman
+                        if thesaurus.tags is not None:
+                            linkage_data["tags"] = thesaurus.tags.split("|")
+                        if thesaurus.language_variant is not None:
+                            linkage_data[
+                                "language_variant"
+                            ] = thesaurus.language_variant
+                        if thesaurus.sense is not None:
+                            linkage_data["sense"] = thesaurus.sense
+                        data_append(
+                            wxr,
+                            page_data[-1]["senses"][-1],
+                            linkage_type,
+                            linkage_data,
+                        )
+                else:
+                    expanded_node = wxr.wtp.parse(
+                        wxr.wtp.node_to_wikitext(node), expand_all=True
+                    )
+                    extract_linkages(
+                        wxr,
+                        page_data,
+                        [expanded_node],
+                        linkage_type,
+                        sense,
+                    )
+            elif node.children:
+                extract_linkages(
+                    wxr, page_data, node.children, linkage_type, sense
+                )
+
+
 def extract_examples(
     wxr: WiktextractContext,
     page_data: List[Dict],
@@ -282,10 +380,10 @@ def extract_examples(
                                 # expanded simplified or traditional Chinese
                                 # example sentence usually ends with
                                 # "繁體]" or "簡體]"
-                                if example_data.get("text") is not None:
-                                    example_data["text"].append(expanded_line)
+                                if example_data.get("texts") is not None:
+                                    example_data["texts"].append(expanded_line)
                                 else:
-                                    example_data["text"] = [expanded_line]
+                                    example_data["texts"] = [expanded_line]
                             elif expanded_line.endswith("]"):
                                 example_data["roman"] = expanded_line
                             elif expanded_line.startswith("來自："):
