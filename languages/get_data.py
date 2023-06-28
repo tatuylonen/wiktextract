@@ -63,6 +63,7 @@ def get_lang_data(lang_code: str, dump_file: str) -> None:
         "w", encoding="utf-8"
     ) as fout:
         json.dump(data, fout, indent=2, ensure_ascii=False, sort_keys=True)
+    wxr.wtp.close_db_conn()
 
 
 if __name__ == "__main__":
