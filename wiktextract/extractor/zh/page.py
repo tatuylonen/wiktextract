@@ -252,31 +252,41 @@ def extract_linkages(
     nodes: List[Union[WikiNode, str]],
     linkage_type: str,
     sense: Optional[str],
-) -> None:
+) -> Optional[str]:
+    """
+    Return linkage sense text for `sense` template inside a list item node.
+    """
     strip_sense_chars = "()（）:："
+    sense_template_names = {"s", "sense"}
     for node in nodes:
         if isinstance(node, str) and len(node.strip()) > 0 and sense is None:
             sense = node.strip(strip_sense_chars)
         elif isinstance(node, WikiNode):
-            if node.kind == NodeKind.LIST:
-                for list_child in node.children:
+            if node.kind == NodeKind.LIST_ITEM:
+                for item_child in node.children:
                     if (
-                        isinstance(list_child, WikiNode)
-                        and list_child.kind == NodeKind.LIST_ITEM
+                        isinstance(item_child, WikiNode)
+                        and item_child.kind == NodeKind.TEMPLATE
                     ):
-                        linkage_data = {
-                            "word": clean_node(
-                                wxr, None, list_child.children
-                            ).strip(strip_sense_chars)
-                        }
-                        if sense is not None:
-                            linkage_data["sense"] = sense
-                        data_append(
-                            wxr,
-                            page_data[-1]["senses"][-1],
-                            linkage_type,
-                            linkage_data,
+                        template_name = item_child.args[0][0].lower()
+                        if template_name in sense_template_names:
+                            return clean_node(wxr, None, item_child).strip(
+                                strip_sense_chars
+                            )
+                else:
+                    linkage_data = {
+                        "word": clean_node(wxr, None, node.children).strip(
+                            strip_sense_chars
                         )
+                    }
+                    if sense is not None:
+                        linkage_data["sense"] = sense
+                    data_append(
+                        wxr,
+                        page_data[-1]["senses"][-1],
+                        linkage_type,
+                        linkage_data,
+                    )
             elif node.kind == NodeKind.TEMPLATE:
                 template_name = node.args[0][0].lower()
                 if template_name in {"s", "sense"}:
@@ -284,9 +294,10 @@ def extract_linkages(
                 elif template_name.endswith("-saurus"):
                     from wiktextract.thesaurus import search_thesaurus
 
+                    thesaurus_page_title = node.args[-1][0]
                     for thesaurus in search_thesaurus(
                         wxr.thesaurus_db_conn,
-                        node.args[-1][0],
+                        thesaurus_page_title,
                         page_data[-1].get("lang_code"),
                         page_data[-1].get("pos"),
                         linkage_type,
@@ -300,7 +311,9 @@ def extract_linkages(
                             linkage_data[
                                 "language_variant"
                             ] = thesaurus.language_variant
-                        if thesaurus.sense is not None:
+                        if sense is not None:
+                            linkage_data["sense"] = sense
+                        elif thesaurus.sense is not None:
                             linkage_data["sense"] = thesaurus.sense
                         data_append(
                             wxr,
@@ -320,9 +333,11 @@ def extract_linkages(
                         sense,
                     )
             elif node.children:
-                extract_linkages(
+                returned_sense = extract_linkages(
                     wxr, page_data, node.children, linkage_type, sense
                 )
+                if returned_sense is not None:
+                    sense = returned_sense
 
 
 def extract_examples(
