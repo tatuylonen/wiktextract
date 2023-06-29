@@ -3,6 +3,7 @@ import logging
 import re
 import string
 
+from functools import partial
 from typing import Dict, List, Union, Any, Optional
 
 from wikitextprocessor import WikiNode, NodeKind
@@ -281,12 +282,7 @@ def extract_linkages(
                     }
                     if sense is not None:
                         linkage_data["sense"] = sense
-                    data_append(
-                        wxr,
-                        page_data[-1]["senses"][-1],
-                        linkage_type,
-                        linkage_data,
-                    )
+                    add_linkage_data(wxr, page_data, linkage_type, linkage_data)
             elif node.kind == NodeKind.TEMPLATE:
                 template_name = node.args[0][0].lower()
                 if template_name in {"s", "sense"}:
@@ -315,11 +311,8 @@ def extract_linkages(
                             linkage_data["sense"] = sense
                         elif thesaurus.sense is not None:
                             linkage_data["sense"] = thesaurus.sense
-                        data_append(
-                            wxr,
-                            page_data[-1]["senses"][-1],
-                            linkage_type,
-                            linkage_data,
+                        add_linkage_data(
+                            wxr, page_data, linkage_type, linkage_data
                         )
                 else:
                     expanded_node = wxr.wtp.parse(
@@ -338,6 +331,38 @@ def extract_linkages(
                 )
                 if returned_sense is not None:
                     sense = returned_sense
+
+
+def add_linkage_data(
+    wxr: WiktextractContext,
+    page_data: List[Dict],
+    linkage_type: str,
+    linkage_data: Dict,
+) -> None:
+    """
+    Append the linkage data dictionary to a sense dictionary if the linkage
+    sense is similar to the word gloss. Otherwise append to the base dictionary.
+    """
+    if "sense" in linkage_data:
+        from rapidfuzz.fuzz import partial_token_set_ratio
+        from rapidfuzz.process import extractOne
+        from rapidfuzz.utils import default_process
+
+        choices = {
+            sense_dict.get("glosses", [None])[0]: sense_dict
+            for sense_dict in page_data[-1]["senses"]
+        }
+        if match_result := extractOne(
+            linkage_data["sense"],
+            choices.keys(),
+            score_cutoff=85,
+            scorer=partial(partial_token_set_ratio, processor=default_process),
+        ):
+            match_gloss = match_result[0]
+            data_append(wxr, choices[match_gloss], linkage_type, linkage_data)
+            return
+
+    data_append(wxr, page_data[-1], linkage_type, linkage_data)
 
 
 def extract_examples(
