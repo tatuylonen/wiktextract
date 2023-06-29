@@ -93,8 +93,6 @@ def parse_zh_thesaurus_term(
                 roman = roman_and_tags  # pinyin
             else:
                 tags = roman_and_tags
-        if roman is not None:
-            roman = "|".join(roman.split(", "))
 
     for index, split_term in enumerate(term.split("／")):
         language_variant = "zh-Hant" if index == 0 else "zh-Hans"

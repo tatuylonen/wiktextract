@@ -6,10 +6,11 @@ import string
 from typing import Dict, List, Union, Any
 
 from wikitextprocessor import WikiNode, NodeKind
-from wiktextract.wxr_context import WiktextractContext
-from wiktextract.page import clean_node, LEVEL_KINDS
 from wiktextract.datautils import data_append
+from wiktextract.page import clean_node, LEVEL_KINDS
+from wiktextract.wxr_context import WiktextractContext
 
+from .linkage import extract_linkages
 from .pronunciation import extract_pronunciation_recursively
 
 
@@ -117,6 +118,8 @@ ADDITIONAL_EXPAND_TEMPLATES = {
     # langhd is needed for pre-expanding language heading templates in the
     # Chinese Wiktionary dump file: https://zh.wiktionary.org/wiki/Template:-en-
     "langhd",
+    "zh-der",  # col3 for Chinese
+    "der3",  # redirects to col3
 }
 
 
@@ -160,10 +163,27 @@ def recursive_parse(
                     extract_gloss(wxr, page_data, node.children)
                 else:
                     recursive_parse(wxr, page_data, base_data, node)
-        elif subtitle in wxr.config.OTHER_SUBTITLES["etymology"]:
+        elif (
+            wxr.config.capture_etymologies
+            and subtitle in wxr.config.OTHER_SUBTITLES["etymology"]
+        ):
             extract_etymology(wxr, page_data, base_data, node.children)
-        elif subtitle in wxr.config.OTHER_SUBTITLES["pronunciation"]:
+        elif (
+            wxr.config.capture_pronunciation
+            and subtitle in wxr.config.OTHER_SUBTITLES["pronunciation"]
+        ):
             extract_pronunciation(wxr, page_data, base_data, node.children)
+        elif (
+            wxr.config.capture_linkages
+            and subtitle in wxr.config.LINKAGE_SUBTITLES
+        ):
+            extract_linkages(
+                wxr,
+                page_data,
+                node.children,
+                wxr.config.LINKAGE_SUBTITLES[subtitle],
+                None,
+            )
 
 
 def extract_gloss(
@@ -282,10 +302,10 @@ def extract_examples(
                                 # expanded simplified or traditional Chinese
                                 # example sentence usually ends with
                                 # "繁體]" or "簡體]"
-                                if example_data.get("text") is not None:
-                                    example_data["text"].append(expanded_line)
+                                if example_data.get("texts") is not None:
+                                    example_data["texts"].append(expanded_line)
                                 else:
-                                    example_data["text"] = [expanded_line]
+                                    example_data["texts"] = [expanded_line]
                             elif expanded_line.endswith("]"):
                                 example_data["roman"] = expanded_line
                             elif expanded_line.startswith("來自："):

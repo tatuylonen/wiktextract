@@ -176,3 +176,4 @@ if __name__ == "__main__":
     wxr.wtp.db_conn.commit()
     export_data(wxr, "languages", args.languages)
     export_data(wxr, "families", args.families)
+    wxr.wtp.close_db_conn()

@@ -165,7 +165,7 @@ def inject_linkages(wxr: WiktextractContext, page_data: Dict) -> None:
                 if term.topics is not None:
                     dt["topics"] = term.topics.split("|")
                 if term.roman is not None:
-                    dt["roman"] = ", ".join(term.roman.split("|"))
+                    dt["roman"] = term.roman
                 if term.language_variant is not None:
                     dt["language_variant"] = term.language_variant
                 data_append(wxr, data, term.linkage, dt)
