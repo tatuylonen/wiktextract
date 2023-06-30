@@ -2024,7 +2024,7 @@ def parse_language(wxr, langnode, language, lang_code):
                     elif kind == NodeKind.URL:
                         if len(node.args) < 2 and node.args:
                             # Naked url captured
-                            urls.append(node.args[-1][-1])
+                            urls.extend(node.args[-1])
                             continue
                         if len(node.args) == 2:
                             # Url from link with text
