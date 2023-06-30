@@ -29,7 +29,7 @@ def page_handler(
     page: Page,
     config_kwargs: Dict[str, str],
     dont_parse: bool
-):
+) -> Optional[Tuple[List[dict], dict]]:
     # Make sure there are no newlines or other strange characters in the
     # title.  They could cause security problems at several post-processing
     # steps.

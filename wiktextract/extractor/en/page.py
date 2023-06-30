@@ -1927,7 +1927,7 @@ def parse_language(wxr, langnode, language, lang_code):
         assert isinstance(data, dict)
         assert isinstance(field, str)
         assert isinstance(linkagenode, WikiNode)
-        # if field == "derived":
+        # if field == "synonyms":
         #     print("field", field)
         #     print("data", data)
         #     print("children:")
@@ -1948,6 +1948,7 @@ def parse_language(wxr, langnode, language, lang_code):
 
             parts = []
             ruby = []
+            urls = []
 
             def item_recurse(contents, italic=False):
                 assert isinstance(contents, (list, tuple))
@@ -2021,6 +2022,14 @@ def parse_language(wxr, langnode, language, lang_code):
                                     v = [v[0][1:]] + list(v[1:])
                                 item_recurse(v, italic=italic)
                     elif kind == NodeKind.URL:
+                        if len(node.args) < 2 and node.args:
+                            # Naked url captured
+                            urls.append(node.args[-1][-1])
+                            continue
+                        if len(node.args) == 2:
+                            # Url from link with text
+                            urls.append(node.args[0][-1])
+                        # print(f"{node.args=!r}")
                         # print("linkage recurse URL {}".format(node))
                         item_recurse(node.args[-1], italic=italic)
                     elif kind in (NodeKind.PREFORMATTED, NodeKind.BOLD):
@@ -2036,10 +2045,11 @@ def parse_language(wxr, langnode, language, lang_code):
             item = clean_node(wxr, None, parts)
             # print("LINKAGE ITEM CONTENTS:", parts)
             # print("CLEANED ITEM: {!r}".format(item))
+            # print(f"URLS {urls=!r}")
 
             return parse_linkage_item_text(wxr, word, data, field, item,
                                            sense, ruby, pos_datas,
-                                           is_reconstruction)
+                                           is_reconstruction, urls)
 
         def parse_linkage_template(node):
             nonlocal have_panel_template
@@ -2449,7 +2459,6 @@ def parse_language(wxr, langnode, language, lang_code):
                     elif (m and etym.lower().strip()
                                 in wxr.config.OTHER_SUBTITLES["etymology"]
                             and pos.lower() in wxr.config.POS_SUBTITLES):
-                            print("REACHED")
                             seq = [language,
                                    etym_numbered,
                                    pos,

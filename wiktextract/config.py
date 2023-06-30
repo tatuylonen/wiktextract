@@ -8,7 +8,10 @@ import collections
 import pkg_resources
 
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from wikitextprocessor.core import StatsData
 
 
 def int_dict():
@@ -142,7 +145,7 @@ class WiktionaryConfig(object):
             "expand_tables": self.expand_tables
         }
 
-    def to_return(self):
+    def to_return(self) -> "StatsData":
         return {
             "num_pages": self.num_pages,
             "language_counts": self.language_counts,

@@ -6,6 +6,7 @@ import re
 import unicodedata
 from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
+from typing import Dict, List, Union, Optional
 from .datautils import split_at_comma_semi, data_append
 from .form_descriptions import (classify_desc, parse_head_final_tags,
                                 parse_sense_qualifier,
@@ -169,8 +170,17 @@ unicode_dc_re = re.compile(r"\w[{}]|.".format(
             if unicodedata.category(chr(x)) == "Mn")))
 
 
-def parse_linkage_item_text(wxr, word, data, field, item, sense, ruby,
-                            pos_datas, is_reconstruction):
+def parse_linkage_item_text(wxr: Wtp,
+                            word: str,
+                            data: Dict[str, Union[list, str, dict]],
+                            field: str,
+                            item: str,
+                            sense: Optional[str],
+                            ruby: list,
+                            pos_datas: list,
+                            is_reconstruction: bool,
+                            urls: Optional[List[str]] = None
+                            ) -> Optional[str]:
     """Parses a linkage item once it has been converted to a string.  This
     may add one or more linkages to ``data`` under ``field``.  This
     returns None or a string that contains thats that should be applied
@@ -183,6 +193,7 @@ def parse_linkage_item_text(wxr, word, data, field, item, sense, ruby,
     assert sense is None or isinstance(sense, str)
     assert isinstance(ruby, list)   # Captured ruby (hiragana/katakana) or ""
     assert isinstance(pos_datas, list)  # List of senses (containing "glosses")
+    assert urls is None or isinstance(urls, list) # Captured urls
     assert is_reconstruction in (True, False)
 
     item = item.replace("()", "")
@@ -211,7 +222,7 @@ def parse_linkage_item_text(wxr, word, data, field, item, sense, ruby,
 
     # Check for pre-split ignored linkages using the appropriate regexp
     if re.search(linkage_pre_split_ignore_re, item):
-        return
+        return None
 
     # print("    LINKAGE ITEM: {}: {} (sense {})"
     #       .format(field, item, sense))
@@ -795,7 +806,7 @@ def parse_linkage_item_text(wxr, word, data, field, item, sense, ruby,
                     # Treat each alternative as separate linkage
                     for w in lst:
                         add(w, r)
-                    return
+                    return None
 
             # Heuristically remove "." at the end of most linkages
             # (some linkage lists end in a period, but we also have
@@ -835,6 +846,9 @@ def parse_linkage_item_text(wxr, word, data, field, item, sense, ruby,
                 alt = alt[1:]  # Remove × before dead species names
             if alt and alt.strip() != w:
                 dt["alt"] = alt.strip()
+            if urls:
+                dt["urls"] = [url.strip() for url in urls
+                              if url and isinstance(url, str)]
             dt["word"] = w
             for old in data.get(field, ()):
                 if dt == old:
@@ -920,3 +934,4 @@ def parse_linkage_item_text(wxr, word, data, field, item, sense, ruby,
                 continue
 
         add(item1, roman)
+    return None
