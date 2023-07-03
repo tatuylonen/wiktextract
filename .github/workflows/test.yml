@@ -31,3 +31,21 @@ jobs:
           python -m pip install -U pip
           python -m pip install --use-pep517 '.[dev]'
       - run: make test
+      - uses: actions/upload-pages-artifact@v1
+        if: github.ref_name == 'master' && matrix.python-version == '3.11'
+        with:
+          path: htmlcov
+
+  depoly:
+    if: github.ref_name == 'master'
+    needs: test
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v2
