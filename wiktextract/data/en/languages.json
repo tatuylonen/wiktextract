@@ -1182,8 +1182,17 @@
   ],
   "aoc": [
     "Pemon",
+    "Pemón",
     "Arekuna",
-    "Arecuna"
+    "Arecuna",
+    "Taurepan",
+    "Taurepán",
+    "Taurepang",
+    "Taulipang",
+    "Taulipáng",
+    "Kamarakoto",
+    "Camaracoto",
+    "Camaragoto"
   ],
   "aod": [
     "Andarum"
@@ -4097,7 +4106,8 @@
   ],
   "btm": [
     "Mandailing Batak",
-    "Batak Mandailing"
+    "Batak Mandailing",
+    "Mandailing"
   ],
   "btn": [
     "Ratagnon"
@@ -4116,7 +4126,8 @@
   ],
   "bts": [
     "Simalungun Batak",
-    "Batak Simalungun"
+    "Batak Simalungun",
+    "Simalungun"
   ],
   "btt": [
     "Bete-Bendi"
@@ -5709,6 +5720,10 @@
   "crp-rsn": [
     "Russenorsk"
   ],
+  "crp-tnw": [
+    "Tangwang",
+    "Tangwanghua"
+  ],
   "crp-tpr": [
     "Taimyr Pidgin Russian"
   ],
@@ -5982,6 +5997,15 @@
   "cus-pro": [
     "Proto-Cushitic"
   ],
+  "cus-som-pro": [
+    "Proto-Somaloid",
+    "Proto-Sam",
+    "Proto-Macro-Somali"
+  ],
+  "cus-sou-pro": [
+    "Proto-South Cushitic",
+    "Proto-Rift"
+  ],
   "cut": [
     "Teutila Cuicatec"
   ],
@@ -6160,7 +6184,8 @@
     "Doka"
   ],
   "dbj": [
-    "Ida'an"
+    "Ida'an",
+    "Idahan"
   ],
   "dbl": [
     "Dyirbal"
@@ -6784,6 +6809,9 @@
   "dra-okn": [
     "Old Kannada",
     "Halegannada"
+  ],
+  "dra-ote": [
+    "Old Telugu"
   ],
   "dra-pro": [
     "Proto-Dravidian"
@@ -8349,6 +8377,10 @@
   ],
   "gih": [
     "Githabul"
+  ],
+  "gii": [
+    "Girirra",
+    "Gariire"
   ],
   "gil": [
     "Gilbertese",
@@ -10232,7 +10264,8 @@
   ],
   "ilo": [
     "Ilocano",
-    "Ilokano"
+    "Ilokano",
+    "Iloko"
   ],
   "ils": [
     "International Sign"
@@ -10604,8 +10637,8 @@
     "Iteri"
   ],
   "its": [
-    "Isekiri",
-    "Itsekiri"
+    "Itsekiri",
+    "Isekiri"
   ],
   "itt": [
     "Maeng Itneg"
@@ -10891,7 +10924,8 @@
     "Ngomba"
   ],
   "jhi": [
-    "Jehai"
+    "Jehai",
+    "Jahai"
   ],
   "jhs": [
     "Jhankot Sign Language"
@@ -14423,7 +14457,9 @@
   ],
   "lrl": [
     "Larestani",
-    "Achomi"
+    "Achomi",
+    "Lari",
+    "Khodmooni"
   ],
   "lrm": [
     "Marama"
@@ -14573,7 +14609,7 @@
     "Lumbu"
   ],
   "luq": [
-    "Lucumi"
+    "Lucumí"
   ],
   "lur": [
     "Laura"
@@ -14947,7 +14983,8 @@
     "Massalat"
   ],
   "mdh": [
-    "Maguindanao"
+    "Maguindanao",
+    "Maguindanaon"
   ],
   "mdi": [
     "Mamvu"
@@ -15303,7 +15340,8 @@
     "Inner Mbugu"
   ],
   "mhe": [
-    "Besisi"
+    "Besisi",
+    "Mah Meri"
   ],
   "mhf": [
     "Mamaa"
@@ -15879,7 +15917,9 @@
     "Min Bei"
   ],
   "mnq": [
-    "Minriq"
+    "Minriq",
+    "Mendriq",
+    "Menriq"
   ],
   "mnr": [
     "Mono (California)",
@@ -16705,7 +16745,9 @@
     "Mvuba"
   ],
   "mxi": [
-    "Mozarabic"
+    "Mozarabic",
+    "Ajami",
+    "Andalusi Romance"
   ],
   "mxj": [
     "Miju",
@@ -19091,7 +19133,8 @@
   "okn": [
     "Oki-No-Erabu",
     "Okino-Erabu",
-    "Okinoerabu"
+    "Okinoerabu",
+    "Oki-no-Erabu"
   ],
   "oko": [
     "Old Korean"
@@ -20889,6 +20932,25 @@
     "Proto-Kra-Dai",
     "Proto-Tai-Kadai"
   ],
+  "qfa-xgx-tuh": [
+    "Tuyuhun",
+    "'Azha"
+  ],
+  "qfa-xgx-tuo": [
+    "Tuoba",
+    "Tabghach",
+    "Taghbach"
+  ],
+  "qfa-xgx-wuh": [
+    "Wuhuan",
+    "Wuwan",
+    "Awar"
+  ],
+  "qfa-xgx-xbi": [
+    "Xianbei",
+    "Serbi",
+    "Shirwi"
+  ],
   "qfa-yen-pro": [
     "Proto-Yeniseian"
   ],
@@ -22484,7 +22546,8 @@
     "Gallurese"
   ],
   "sdo": [
-    "Bukar-Sadung Bidayuh"
+    "Bukar-Sadung Bidayuh",
+    "Bukar-Sadong"
   ],
   "sdp": [
     "Sherdukpen"
@@ -22844,7 +22907,8 @@
   "shy": [
     "Tachawit",
     "Shawiya Berber",
-    "Chaouïa"
+    "Chaouïa",
+    "Tacawit"
   ],
   "shz": [
     "Syenara Senoufo"
@@ -23669,7 +23733,8 @@
     "Siriano"
   ],
   "srk": [
-    "Serudung Murut"
+    "Serudung Murut",
+    "Serudung"
   ],
   "srl": [
     "Isirawa"
@@ -26127,7 +26192,8 @@
     "Ulithian"
   ],
   "ulk": [
-    "Meriam"
+    "Meriam",
+    "Meriam Mir"
   ],
   "ull": [
     "Ullatan"
@@ -27897,6 +27963,11 @@
   ],
   "xgn-pro": [
     "Proto-Mongolic"
+  ],
+  "xgn-rou": [
+    "Rouran",
+    "Ruanruan",
+    "Ruan-ruan"
   ],
   "xgr": [
     "Garza"
