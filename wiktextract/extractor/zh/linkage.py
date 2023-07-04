@@ -6,6 +6,8 @@ from wiktextract.datautils import data_append
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from ..share import strip_nodes
+
 
 def extract_linkages(
     wxr: WiktextractContext,
@@ -19,33 +21,40 @@ def extract_linkages(
     """
     strip_sense_chars = "()（）:："
     sense_template_names = {"s", "sense"}
-    for node in nodes:
-        if isinstance(node, str) and len(node.strip()) > 0 and sense is None:
+    for node in strip_nodes(nodes):
+        if isinstance(node, str) and sense is None:
             sense = node.strip(strip_sense_chars)
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.LIST_ITEM:
-                for item_child in node.children:
+                sense_index = 0
+                filtered_children = list(strip_nodes(node.children))
+                for index, item_child in enumerate(filtered_children):
                     if (
                         isinstance(item_child, WikiNode)
                         and item_child.kind == NodeKind.TEMPLATE
                     ):
                         template_name = item_child.args[0][0].lower()
                         if template_name in sense_template_names:
-                            return clean_node(wxr, None, item_child).strip(
+                            sense = clean_node(wxr, None, item_child).strip(
                                 strip_sense_chars
                             )
-                else:
-                    linkage_data = {
-                        "word": clean_node(wxr, None, node.children).strip(
-                            strip_sense_chars
-                        )
-                    }
+                            sense_index = index
+                            if index == len(filtered_children) - 1:
+                                # sense template before entry list
+                                return sense
+                # sense template before entry and they are inside the same
+                # list item
+                terms = clean_node(
+                    wxr, None, filtered_children[sense_index + 1 :]
+                )
+                for term in terms.split("、"):
+                    linkage_data = {"word": term}
                     if sense is not None:
                         linkage_data["sense"] = sense
                     add_linkage_data(wxr, page_data, linkage_type, linkage_data)
             elif node.kind == NodeKind.TEMPLATE:
                 template_name = node.args[0][0].lower()
-                if template_name in {"s", "sense"}:
+                if template_name in sense_template_names:
                     sense = clean_node(wxr, None, node).strip(strip_sense_chars)
                 elif template_name.endswith("-saurus"):
                     extract_saurus_template(
@@ -81,6 +90,11 @@ def extract_saurus_template(
     linkage_type: str,
     sense: Optional[str],
 ) -> None:
+    """
+    Extract data from template names end with "-saurus", like "zh-syn-saurus"
+    and "zh-ant-saurus". These templates get data from thesaurus pages, search
+    the thesaurus database to avoid parse these pages again.
+    """
     from wiktextract.thesaurus import search_thesaurus
 
     thesaurus_page_title = node.args[-1][0]
@@ -115,9 +129,7 @@ def extract_zh_dial_template(
     sense: Optional[str],
 ) -> None:
     dial_data = {}
-    node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(node), expand_all=True
-    )
+    node = wxr.wtp.parse(wxr.wtp.node_to_wikitext(node), expand_all=True)
     extract_zh_dial_recursively(wxr, node, dial_data, None)
     for term, tags in dial_data.items():
         linkage_data = {"word": term}
@@ -184,7 +196,9 @@ def add_linkage_data(
         from rapidfuzz.utils import default_process
 
         choices = {
-            sense_dict.get("glosses", [None])[0]: sense_dict
+            sense_dict.get("raw_glosses", sense_dict.get("glosses", [""]))[
+                0
+            ]: sense_dict
             for sense_dict in page_data[-1]["senses"]
         }
         if match_result := extractOne(
