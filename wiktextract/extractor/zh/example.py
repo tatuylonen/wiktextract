@@ -60,9 +60,7 @@ def extract_example_list(
             and child_node.kind == NodeKind.LIST
         ):
             example_data["type"] = "quote"
-            example_data["ref"] = clean_node(
-                wxr, None, node.children[:index]
-            )
+            example_data["ref"] = clean_node(wxr, None, node.children[:index])
             example_data["text"] = clean_node(
                 wxr, None, child_node.children[0].children
             )
@@ -76,20 +74,15 @@ def extract_quote_templates(
     """
     example_data["type"] = "quote"
     expanded_text = clean_node(wxr, None, node)
-    for line_num, expanded_line in enumerate(
-        expanded_text.splitlines()
-    ):
+    for line_num, expanded_line in enumerate(expanded_text.splitlines()):
         if line_num == 0:
             key = "ref"
         elif line_num == 1:
             key = "text"
         elif line_num == 2 and any(
-            template_arg[0].startswith(
-                "transliteration="
-            )
+            template_arg[0].startswith("transliteration=")
             for template_arg in node.args
-            if len(template_arg) > 0
-            and isinstance(template_arg[0], str)
+            if len(template_arg) > 0 and isinstance(template_arg[0], str)
         ):
             key = "roman"
         else:
@@ -102,9 +95,7 @@ def extract_template_ja_usex(
     wxr: WiktextractContext, node: WikiNode, example_data: Dict
 ) -> None:
     expanded_text = clean_node(wxr, None, node)
-    for line_num, expanded_line in enumerate(
-        expanded_text.splitlines()
-    ):
+    for line_num, expanded_line in enumerate(expanded_text.splitlines()):
         if line_num == 0:
             key = "text"
         elif line_num == 1:
@@ -124,9 +115,7 @@ def extract_template_zh_usex(
             # example sentence usually ends with
             # "繁體]" or "簡體]"
             if example_data.get("texts") is not None:
-                example_data["texts"].append(
-                    expanded_line
-                )
+                example_data["texts"].append(expanded_line)
             else:
                 example_data["texts"] = [expanded_line]
         elif expanded_line.endswith("]"):

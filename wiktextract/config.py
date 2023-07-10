@@ -26,7 +26,7 @@ def list_dict():
     return collections.defaultdict(list)
 
 
-class WiktionaryConfig(object):
+class WiktionaryConfig:
     """This class holds configuration data for Wiktionary parsing."""
 
     __slots__ = (
