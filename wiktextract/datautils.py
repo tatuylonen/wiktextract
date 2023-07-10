@@ -2,10 +2,14 @@
 #
 # Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import re
-import functools
 import collections
+import functools
+import re
+
+from typing import Dict, Any, Iterable
+
 from wiktextract.wxr_context import WiktextractContext
+
 
 # Keys in ``data`` that can only have string values (a list of them)
 str_keys = ("tags", "glosses")
@@ -14,7 +18,9 @@ dict_keys = set(["pronunciations", "senses", "synonyms", "related",
                  "antonyms", "hypernyms", "holonyms", "forms"])
 
 
-def data_append(wxr, data, key, value):
+def data_append(
+    wxr: WiktextractContext, data: Dict, key: str, value: Any
+) -> None:
     """Appends ``value`` under ``key`` in the dictionary ``data``.  The key
     is created if it does not exist."""
     assert isinstance(wxr, WiktextractContext)
@@ -35,7 +41,9 @@ def data_append(wxr, data, key, value):
     lst.append(value)
 
 
-def data_extend(wxr, data, key, values):
+def data_extend(
+    wxr: WiktextractContext, data: Dict, key: str, values: Iterable
+) -> None:
     """Appends all values in a list under ``key`` in the dictionary ``data``."""
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(data, dict)

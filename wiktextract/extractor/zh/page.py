@@ -10,8 +10,10 @@ from wiktextract.page import clean_node, LEVEL_KINDS
 from wiktextract.wxr_context import WiktextractContext
 
 from .example import extract_examples
+from .headword_line import extract_headword_line
 from .linkage import extract_linkages
 from .pronunciation import extract_pronunciation_recursively
+from ..share import strip_nodes
 
 
 # Templates that are used to form panels on pages and that
@@ -85,7 +87,6 @@ PANEL_TEMPLATES = {
 PANEL_PREFIXES = {
     "list:compass points/",
     "list:Gregorian calendar months/",
-    "RQ:",
 }
 
 # Additional templates to be expanded in the pre-expand phase
@@ -158,9 +159,13 @@ def recursive_parse(
             pos_type = wxr.config.POS_SUBTITLES[subtitle]["pos"]
             base_data["pos"] = pos_type
             append_page_data(page_data, "pos", pos_type, base_data)
-            for node in node.children:
-                if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
-                    extract_gloss(wxr, page_data, node.children)
+            for index, node in enumerate(strip_nodes(node.children)):
+                if isinstance(node, WikiNode):
+                    if index == 0 and node.kind == NodeKind.TEMPLATE:
+                        lang_code = base_data.get("lang_code")
+                        extract_headword_line(wxr, page_data, node, lang_code)
+                    elif node.kind == NodeKind.LIST:
+                        extract_gloss(wxr, page_data, node.children)
                 else:
                     recursive_parse(wxr, page_data, base_data, node)
         elif (
