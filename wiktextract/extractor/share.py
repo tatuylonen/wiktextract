@@ -1,3 +1,4 @@
+from html import unescape
 from typing import List, Union, Iterable
 
 from wikitextprocessor import WikiNode, NodeKind
@@ -23,9 +24,9 @@ def contains_list(
 def strip_nodes(
     nodes: List[Union[WikiNode, str]]
 ) -> Iterable[Union[WikiNode, str]]:
-    # filter nodes that only have newlines and white spaces
+    # filter nodes that only have newlines, white spaces and non-breaking spaces
     return filter(
         lambda node: isinstance(node, WikiNode)
-        or (isinstance(node, str) and len(node.strip()) > 0),
+        or (isinstance(node, str) and len(unescape(node).strip()) > 0),
         nodes,
     )
