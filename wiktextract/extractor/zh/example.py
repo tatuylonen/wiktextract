@@ -87,8 +87,9 @@ def extract_quote_templates(
             key = "roman"
         else:
             key = "translation"
-            if expanded_line != "（請為本引文添加中文翻譯）":
-                example_data[key] = expanded_line
+
+        if expanded_line != "（請為本引文添加中文翻譯）":
+            example_data[key] = expanded_line
 
 
 def extract_template_ja_usex(
