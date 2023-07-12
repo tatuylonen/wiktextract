@@ -30,3 +30,11 @@ def strip_nodes(
         or (isinstance(node, str) and len(unescape(node).strip()) > 0),
         nodes,
     )
+
+
+def filter_child_wikinodes(node: WikiNode, node_type: NodeKind) -> List[Union[WikiNode, str]]:
+    return [
+        child
+        for child in node.children
+        if isinstance(child, WikiNode) and child.kind == node_type
+    ]

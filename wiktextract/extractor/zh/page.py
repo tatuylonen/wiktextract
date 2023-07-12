@@ -3,6 +3,7 @@ import logging
 import re
 import string
 
+from collections import defaultdict
 from typing import Dict, List, Union, Any
 
 from wikitextprocessor import WikiNode, NodeKind
@@ -13,7 +14,7 @@ from .example import extract_examples
 from .headword_line import extract_headword_line
 from .linkage import extract_linkages
 from .pronunciation import extract_pronunciation_recursively
-from ..share import strip_nodes
+from ..share import strip_nodes, contains_list, filter_child_wikinodes
 
 
 # Templates that are used to form panels on pages and that
@@ -153,6 +154,7 @@ def recursive_parse(
     if node.kind in LEVEL_KINDS:
         subtitle = clean_node(wxr, None, node.args)
         subtitle = subtitle.rstrip(string.digits)
+        wxr.wtp.start_subsection(subtitle)
         if subtitle in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
             pass
         elif subtitle in wxr.config.POS_SUBTITLES:
@@ -165,7 +167,7 @@ def recursive_parse(
                         lang_code = base_data.get("lang_code")
                         extract_headword_line(wxr, page_data, node, lang_code)
                     elif node.kind == NodeKind.LIST:
-                        extract_gloss(wxr, page_data, node.children)
+                        extract_gloss(wxr, page_data, node.children, {})
                 else:
                     recursive_parse(wxr, page_data, base_data, node)
         elif (
@@ -195,33 +197,61 @@ def extract_gloss(
     wxr: WiktextractContext,
     page_data: List[Dict],
     nodes: List[Union[WikiNode, str]],
+    gloss_data: Dict[str, List[str]],
 ) -> None:
     for node in filter(
         lambda n: isinstance(n, WikiNode) and n.kind == NodeKind.LIST_ITEM,
         nodes,
     ):
-        gloss = clean_node(
-            wxr,
-            None,
-            [
-                child
-                for child in node.children
-                if not isinstance(child, WikiNode)
-                or child.kind != NodeKind.LIST
-            ],
+        raw_gloss_text = extract_raw_gloss_text(wxr, node)
+        new_gloss_data = merge_gloss_data(
+            gloss_data, extract_gloss_and_tags(raw_gloss_text)
         )
-        extract_gloss_and_tags(wxr, page_data, gloss)
-        example_lists = [
+        if contains_list(node.children):
+            for child_node in filter_child_wikinodes(node, NodeKind.LIST):
+                if child_node.args.endswith("#"):
+                    # nested gloss
+                    extract_gloss(
+                        wxr,
+                        page_data,
+                        child_node.children,
+                        new_gloss_data,
+                    )
+                else:
+                    # example list
+                    page_data[-1]["senses"].append(new_gloss_data)
+                    extract_examples(
+                        wxr,
+                        page_data,
+                        child_node,
+                    )
+        else:
+            page_data[-1]["senses"].append(new_gloss_data)
+
+
+def extract_raw_gloss_text(wxr: WiktextractContext, node: WikiNode) -> str:
+    return clean_node(
+        wxr,
+        None,
+        [
             child
             for child in node.children
-            if isinstance(child, WikiNode) and child.kind == NodeKind.LIST
-        ]
-        extract_examples(wxr, page_data, example_lists)
+            if not isinstance(child, WikiNode) or child.kind != NodeKind.LIST
+        ],
+    )
 
 
-def extract_gloss_and_tags(
-    wxr: WiktextractContext, page_data: List[Dict], raw_gloss: str
-) -> None:
+def merge_gloss_data(
+    data_a: Dict[str, List[str]], data_b: Dict[str, List[str]]
+) -> Dict[str, List[str]]:
+    new_data = defaultdict(list)
+    for data in data_a, data_b:
+        for key, value in data.items():
+            new_data[key].extend(value)
+    return new_data
+
+
+def extract_gloss_and_tags(raw_gloss: str) -> Dict[str, List[str]]:
     left_brackets = ("(", "（")
     right_brackets = (")", "）")
     if raw_gloss.startswith(left_brackets) or raw_gloss.endswith(
@@ -245,11 +275,9 @@ def extract_gloss_and_tags(
                 tags += re.split(split_tag_regex, rear_label)
 
         gloss = raw_gloss[front_tag_end + 1 : rear_tag_start].strip()
-        page_data[-1]["senses"].append(
-            {"glosses": [gloss], "raw_glosses": [raw_gloss], "tags": tags}
-        )
+        return {"glosses": [gloss], "raw_glosses": [raw_gloss], "tags": tags}
     else:
-        page_data[-1]["senses"].append({"glosses": [raw_gloss]})
+        return {"glosses": [raw_gloss]}
 
 
 def extract_etymology(
