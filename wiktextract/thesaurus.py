@@ -9,7 +9,7 @@ import tempfile
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Tuple, Optional, Set, Callable, Any
+from typing import Tuple, Optional, Set, Callable, Any, List
 from collections.abc import Iterable
 
 from .wxr_context import WiktextractContext
@@ -110,6 +110,13 @@ def search_thesaurus(
         )
 
 
+def insert_thesaurus_terms(
+    db_conn: sqlite3.Connection, terms: List[ThesaurusTerm]
+) -> None:
+    for term in terms:
+        insert_thesaurus_term(db_conn, term)
+
+
 def insert_thesaurus_term(
     db_conn: sqlite3.Connection, term: ThesaurusTerm
 ) -> None:
@@ -140,7 +147,6 @@ def insert_thesaurus_term(
             term.language_variant,
         ),
     )
-    db_conn.commit()
 
 
 def close_thesaurus_db(db_path: Path, db_conn: sqlite3.Connection) -> None:

@@ -26,8 +26,8 @@ def parse_ja_thesaurus_term(
     sense: Optional[str],
     linkage: Optional[str],
     term_str: str,
-) -> None:
-    from wiktextract.thesaurus import insert_thesaurus_term, ThesaurusTerm
+) -> List["ThesaurusTerm"]:
+    from wiktextract.thesaurus import ThesaurusTerm
 
     tags = None
     roman = None
@@ -36,6 +36,7 @@ def parse_ja_thesaurus_term(
         tags = "|".join(term_str[1:qual_bracket_idx].split(", "))
         term_str = term_str[qual_bracket_idx + 2 :]
 
+    thesaurus = []
     for term_str in term_str.split("、"):
         # Example term_str from https://zh.wiktionary.org/wiki/Thesaurus:死ぬ
         # Fromat: (qualifer) term (roman, gloss)
@@ -46,8 +47,7 @@ def parse_ja_thesaurus_term(
         roman_and_gloss = term_str[term_end + 2 :].removesuffix(")").split(", ")
         if roman_and_gloss:
             roman = roman_and_gloss[0]
-        insert_thesaurus_term(
-            wxr.thesaurus_db_conn,
+        thesaurus.append(
             ThesaurusTerm(
                 entry=entry,
                 language_code=lang_code,
@@ -57,8 +57,9 @@ def parse_ja_thesaurus_term(
                 tags=tags,
                 roman=roman,
                 sense=sense,
-            ),
+            )
         )
+    return thesaurus
 
 
 def parse_zh_thesaurus_term(
@@ -69,8 +70,8 @@ def parse_zh_thesaurus_term(
     sense: Optional[str],
     linkage: Optional[str],
     term_str: str,
-) -> None:
-    from wiktextract.thesaurus import insert_thesaurus_term, ThesaurusTerm
+) -> List["ThesaurusTerm"]:
+    from wiktextract.thesaurus import ThesaurusTerm
 
     # Example term_str from https://zh.wiktionary.org/wiki/Thesaurus:安置
     # Fromat: traditional／simplified (pinyin) (tags)
@@ -94,10 +95,10 @@ def parse_zh_thesaurus_term(
             else:
                 tags = roman_and_tags
 
+    thesaurus = []
     for index, split_term in enumerate(term.split("／")):
         language_variant = "zh-Hant" if index == 0 else "zh-Hans"
-        insert_thesaurus_term(
-            wxr.thesaurus_db_conn,
+        thesaurus.append(
             ThesaurusTerm(
                 entry=entry,
                 language_code=lang_code,
@@ -108,8 +109,9 @@ def parse_zh_thesaurus_term(
                 roman=roman,
                 sense=sense,
                 language_variant=language_variant,
-            ),
+            )
         )
+    return thesaurus
 
 
 def parse_thesaurus_term(
@@ -120,23 +122,22 @@ def parse_thesaurus_term(
     sense: Optional[str],
     linkage: Optional[str],
     node: WikiNode,
-) -> None:
-    from wiktextract.thesaurus import insert_thesaurus_term, ThesaurusTerm
+) -> List["ThesaurusTerm"]:
+    from wiktextract.thesaurus import ThesaurusTerm
 
     node_str = clean_node(wxr, None, node)
     node_str = node_str.removeprefix("* ")  # remove list wikitext
 
     if lang_code == "ja":
-        parse_ja_thesaurus_term(
+        return parse_ja_thesaurus_term(
             wxr, entry, lang_code, pos, sense, linkage, node_str
         )
     elif lang_code == "zh":
-        parse_zh_thesaurus_term(
+        return parse_zh_thesaurus_term(
             wxr, entry, lang_code, pos, sense, linkage, node_str
         )
     else:
-        insert_thesaurus_term(
-            wxr.thesaurus_db_conn,
+        return [
             ThesaurusTerm(
                 entry=entry,
                 language_code=lang_code,
@@ -144,8 +145,8 @@ def parse_thesaurus_term(
                 linkage=linkage,
                 term=node_str,
                 sense=sense,
-            ),
-        )
+            )
+        ]
 
 
 def recursive_parse(
@@ -156,11 +157,14 @@ def recursive_parse(
     sense: Optional[str],
     linkage: Optional[str],
     node: Union[WikiNode, List[Union[WikiNode, str]]],
-) -> None:
+) -> Optional[List["ThesaurusTerm"]]:
     if isinstance(node, list):
+        thesaurus = []
         for x in node:
-            recursive_parse(wxr, entry, lang_code, pos, sense, linkage, x)
-        return
+            x_result = recursive_parse(wxr, entry, lang_code, pos, sense, linkage, x)
+            if x_result is not None:
+                thesaurus.extend(x_result)
+        return thesaurus
     if not isinstance(node, WikiNode):
         return
 
@@ -171,7 +175,9 @@ def recursive_parse(
             logging.warning(
                 f"Unrecognized language: {lang_name} in page Thesaurus:{entry}"
             )
-        recursive_parse(wxr, entry, lang_code, None, None, None, node.children)
+        return recursive_parse(
+            wxr, entry, lang_code, None, None, None, node.children
+        )
     elif node.kind == NodeKind.LEVEL3:
         local_pos_name = clean_node(wxr, None, node.args)
         if local_pos_name in IGNORED_LEVEL3_SUBTITLES:
@@ -185,13 +191,15 @@ def recursive_parse(
                 f"Thesaurus:{entry}"
             )
             english_pos = local_pos_name
-        recursive_parse(
+        return recursive_parse(
             wxr, entry, lang_code, english_pos, None, None, node.children
         )
     elif node.kind == NodeKind.LEVEL4:
         sense = clean_node(wxr, None, node.args)
         sense = sense.removeprefix(SENSE_SUBTITLE_PREFIX)
-        recursive_parse(wxr, entry, lang_code, pos, sense, None, node.children)
+        return recursive_parse(
+            wxr, entry, lang_code, pos, sense, None, node.children
+        )
     elif node.kind == NodeKind.LEVEL5:
         local_linkage_name = clean_node(wxr, None, node.args)
         english_linkage = wxr.config.LINKAGE_SUBTITLES.get(local_linkage_name)
@@ -201,42 +209,53 @@ def recursive_parse(
                 f"Thesaurus:{entry}"
             )
             english_linkage = local_linkage_name
-        recursive_parse(
+        return recursive_parse(
             wxr, entry, lang_code, pos, sense, english_linkage, node.children
         )
     elif node.kind == NodeKind.LIST:
+        thesaurus = []
         for list_item_node in filter(
             lambda x: isinstance(x, WikiNode) and x.kind == NodeKind.LIST_ITEM,
             node.children,
         ):
-            parse_thesaurus_term(
-                wxr, entry, lang_code, pos, sense, linkage, list_item_node
+            thesaurus.extend(
+                parse_thesaurus_term(
+                    wxr, entry, lang_code, pos, sense, linkage, list_item_node
+                )
             )
+        return thesaurus
     elif node.children:
-        recursive_parse(
+        return recursive_parse(
             wxr, entry, lang_code, pos, sense, linkage, node.children
         )
 
 
 def extract_thesaurus_data(wxr: WiktextractContext) -> None:
-    from wiktextract.thesaurus import thesaurus_linkage_number
+    from wiktextract.thesaurus import (
+        thesaurus_linkage_number,
+        insert_thesaurus_terms,
+        ThesaurusTerm,
+    )
 
     start_t = time.time()
     logging.info("Extracting thesaurus data")
     thesaurus_ns_data = wxr.wtp.NAMESPACE_DATA.get("Thesaurus", {})
     thesaurus_ns_id = thesaurus_ns_data.get("id")
 
-    def page_handler(page: Page) -> None:
+    def page_handler(page: Page) -> Optional[List[ThesaurusTerm]]:
         entry = page.title[page.title.find(":") + 1 :]
         wxr.wtp.start_page(page.title)
         root = wxr.wtp.parse(page.body, additional_expand={"ws", "zh-syn-list"})
-        recursive_parse(wxr, entry, None, None, None, None, root.children)
+        return recursive_parse(
+            wxr, entry, None, None, None, None, root.children
+        )
 
-    for _ in wxr.wtp.reprocess(
+    for thesaurus_terms in wxr.wtp.reprocess(
         page_handler, include_redirects=False, namespace_ids=[thesaurus_ns_id]
     ):
-        pass
+        insert_thesaurus_terms(wxr.thesaurus_db_conn, thesaurus_terms)
 
+    wxr.thesaurus_db_conn.commit()
     num_pages = wxr.wtp.saved_page_nums([thesaurus_ns_id], False)
     total = thesaurus_linkage_number(wxr.thesaurus_db_conn)
     logging.info(

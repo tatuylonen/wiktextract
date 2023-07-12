@@ -7,6 +7,8 @@ import re
 import time
 import logging
 
+from typing import Optional, List
+
 from wiktextract.wxr_context import WiktextractContext
 from wiktextract.datautils import ns_title_prefix_tuple
 from wiktextract.page import clean_node, LEVEL_KINDS
@@ -64,7 +66,7 @@ IGNORED_SUBTITLE_TAGS_MAP = {
 def extract_thesaurus_data(wxr: WiktextractContext) -> None:
     """Extracts linkages from the thesaurus pages in Wiktionary."""
     from wiktextract.thesaurus import (
-        insert_thesaurus_term,
+        insert_thesaurus_terms,
         thesaurus_linkage_number,
         ThesaurusTerm,
     )
@@ -75,7 +77,7 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
     thesaurus_ns_id = thesaurus_ns_data.get("id")
     thesaurus_ns_local_name = thesaurus_ns_data.get("name")
 
-    def page_handler(page: Page):
+    def page_handler(page: Page) -> Optional[List[ThesaurusTerm]]:
         title = page.title
         text = page.body
         if title.startswith("Thesaurus:Requested entries "):
@@ -107,7 +109,7 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
         if m:
             lang = wxr.config.LANGUAGES_BY_CODE.get(m.group(1), [None])[0]
 
-        def recurse(contents):
+        def recurse(contents) -> Optional[List[ThesaurusTerm]]:
             nonlocal lang
             nonlocal pos
             nonlocal sense
@@ -119,9 +121,12 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
             topics = None
 
             if isinstance(contents, (list, tuple)):
+                thesaurus = []
                 for x in contents:
-                    recurse(x)
-                return
+                    x_result = recurse(x)
+                    if x_result is not None:
+                        thesaurus.extend(x_result)
+                return thesaurus
             if not isinstance(contents, WikiNode):
                 return
             kind = contents.kind
@@ -132,6 +137,7 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
                         + str(contents)
                     )
                     return
+                thesaurus = []
                 for node in contents.children:
                     if node.kind != NodeKind.LIST_ITEM:
                         continue
@@ -211,8 +217,7 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
                                 logging.debug(
                                     f"Linkage language {lang} not recognized"
                                 )
-                            insert_thesaurus_term(
-                                wxr.thesaurus_db_conn,
+                            thesaurus.append(
                                 ThesaurusTerm(
                                     entry=word,
                                     language_code=lang_code,
@@ -223,28 +228,32 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
                                     topics="|".join(topics) if topics else None,
                                     roman=xlit,
                                     sense=item_sense,
-                                ),
+                                )
                             )
-                return
+                return thesaurus
             if kind not in LEVEL_KINDS:
-                recurse(contents.args)
-                recurse(contents.children)
-                return
+                thesaurus = []
+                args_thesaurus = recurse(contents.args)
+                if args_thesaurus is not None:
+                    thesaurus.extend(args_thesaurus)
+                children_thesaurus = recurse(contents.children)
+                if children_thesaurus is not None:
+                    thesaurus.extend(children_thesaurus)
+                return thesaurus
             subtitle = wxr.wtp.node_to_text(contents.args)
             if subtitle in wxr.config.LANGUAGES_BY_NAME:
                 lang = subtitle
                 pos = None
                 sense = None
                 linkage = None
-                recurse(contents.children)
-                return
+                return recurse(contents.children)
             if subtitle.lower().startswith(
                 wxr.config.OTHER_SUBTITLES["sense"].lower()
             ):
                 sense = subtitle[len(wxr.config.OTHER_SUBTITLES["sense"]) :]
                 linkage = None
-                recurse(contents.children)
-                return
+                return recurse(contents.children)
+
             subtitle = subtitle.lower()
             if subtitle in (
                 "further reading",
@@ -261,36 +270,32 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
                 return
             if subtitle in wxr.config.LINKAGE_SUBTITLES:
                 linkage = wxr.config.LINKAGE_SUBTITLES[subtitle]
-                recurse(contents.children)
-                return
+                return recurse(contents.children)
             if subtitle in wxr.config.POS_SUBTITLES:
                 pos = wxr.config.POS_SUBTITLES[subtitle]["pos"]
                 sense = None
                 linkage = None
-                recurse(contents.children)
-                return
+                return recurse(contents.children)
             if subtitle in IGNORED_SUBTITLE_TAGS_MAP:
                 # These subtitles are ignored but children are processed and
                 # possibly given additional tags
                 subtitle_tags = IGNORED_SUBTITLE_TAGS_MAP[subtitle]
-                recurse(contents.children)
-                subtitle_tags = ()
-                return
+                return recurse(contents.children)
             logging.debug(
                 f"{title=} {lang=} {pos=} {sense=} UNHANDLED SUBTITLE: "
                 + "subtitle "
                 + str(contents.args)
             )
-            recurse(contents.children)
-            return None
+            return recurse(contents.children)
 
-        recurse(tree)
+        return recurse(tree)
 
-    for _ in wxr.wtp.reprocess(
+    for thesaurus_terms in wxr.wtp.reprocess(
         page_handler, include_redirects=False, namespace_ids=[thesaurus_ns_id]
     ):
-        pass
+        insert_thesaurus_terms(wxr.thesaurus_db_conn, thesaurus_terms)
 
+    wxr.thesaurus_db_conn.commit()
     num_pages = wxr.wtp.saved_page_nums([thesaurus_ns_id], False)
     total = thesaurus_linkage_number(wxr.thesaurus_db_conn)
     logging.info(
