@@ -9,10 +9,13 @@ from wiktextract.wxr_context import WiktextractContext
 
 class TestHeadword(TestCase):
     @patch(
-        "wiktextract.extractor.zh.headword_line.clean_node",
-        return_value="manga (可數 & 不可數，複數 manga 或 mangas)",
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value='<strong class="Latn headword" lang="en">manga</strong> ([[可數|可數]] & [[不可數|不可數]]，複數 <b class="Latn form-of lang-en p-form-of" lang="en"><strong class="selflink">manga</strong></b> <small>或</small> <b class="Latn form-of lang-en p-form-of" lang="en">[[mangas#英語|mangas]]</b>)',
     )
-    def test_english_headword(self, mock_clean_node):
+    def test_english_headword(self, mock_node_to_wikitext) -> None:
+        # https://zh.wiktionary.org/wiki/manga#字源1
+        # wikitext: {{en-noun|~|manga|s}}
+        # expanded text: manga (可數 & 不可數，複數 manga 或 mangas)
         node = Mock()
         node.args = [["en-noun"]]
         page_data = [{}]
@@ -36,10 +39,13 @@ class TestHeadword(TestCase):
         )
 
     @patch(
-        "wiktextract.extractor.zh.headword_line.clean_node",
-        return_value="manga m (複數 manga's，指小詞 mangaatje n)",
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value='<strong class="Latn headword" lang="nl">manga</strong>&nbsp;<span class="gender"><abbr title="陽性名詞">m</abbr></span> (複數 <b class="Latn form-of lang-nl p-form-of" lang="nl">[[manga\'s#荷蘭語|manga\'s]]</b>，指小詞 <b class="Latn form-of lang-nl 指小詞-form-of" lang="nl">[[mangaatje#荷蘭語|mangaatje]]</b>&nbsp;<span class="gender"><abbr title="中性名詞">n</abbr></span>)',
     )
-    def test_headword_gender(self, mock_clean_node):
+    def test_headword_gender(self, mock_node_to_wikitext) -> None:
+        # https://zh.wiktionary.org/wiki/manga#字源1_2
+        # wikitext: {{nl-noun|m|-'s|mangaatje}}
+        # expanded text: manga m (複數 manga's，指小詞 mangaatje n)
         node = Mock()
         node.args = [["nl-noun"]]
         page_data = [{}]
@@ -58,6 +64,35 @@ class TestHeadword(TestCase):
                         {"form": "mangaatje", "tags": ["diminutive", "neuter"]},
                     ],
                     "tags": ["masculine"],
+                }
+            ],
+        )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value='<strong class="polytonic headword" lang="grc">-κρατίᾱς</strong> (<span lang="grc-Latn" class="headword-tr tr Latn" dir="ltr">-kratíās</span>)&nbsp;<span class="gender"><abbr title="陰性名詞">f</abbr></span>',
+    )
+    def test_headword_roman(self, mock_node_to_wikitext) -> None:
+        # https://zh.wiktionary.org/wiki/-κρατίας
+        # wikitext: {{head|grc|後綴變格形|g=f|head=-κρατίᾱς}}
+        # expanded text: -κρατίᾱς (-kratíās) f
+        node = Mock()
+        node.args = [["head"]]
+        page_data = [{}]
+        wtp = Wtp()
+        wtp.title = "-κρατίας"
+        wxr = WiktextractContext(wtp, Mock())
+        extract_headword_line(wxr, page_data, node, "grc")
+        wtp.close_db_conn()
+        close_thesaurus_db(wxr.thesaurus_db_path, wxr.thesaurus_db_conn)
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "forms": [
+                        {"form": "-kratíās", "tags": ["romanization"]},
+                    ],
+                    "tags": ["feminine"],
                 }
             ],
         )
