@@ -175,37 +175,51 @@ def process_forms_text(
     tag_nodes = []
     has_forms = False
     striped_nodes = list(strip_nodes(form_nodes))
+    lang_code = page_data[-1].get("lang_code")
     for index, node in enumerate(striped_nodes):
-        if (
-            isinstance(node, WikiNode)
-            and node.kind == NodeKind.HTML
-            and node.args == "b"
-        ):
-            has_forms = True
-            form = clean_node(wxr, None, node)
-            form_tags = extract_headword_tags(
-                clean_node(wxr, None, tag_nodes).strip("() ")
-            )
-            # check if next tag has gender data
-            if index < len(striped_nodes) - 1:
-                next_node = striped_nodes[index + 1]
-                if (
-                    isinstance(next_node, WikiNode)
-                    and next_node.kind == NodeKind.HTML
-                    and next_node.args == "span"
-                    and "gender" in next_node.attrs.get("class", "")
-                ):
-                    gender = clean_node(wxr, None, next_node)
-                    form_tags.append(GENDERS.get(gender, gender))
-            data_append(
-                wxr,
-                page_data[-1],
-                "forms",
-                {
+        if isinstance(node, WikiNode) and node.kind == NodeKind.HTML:
+            if node.args == "b":
+                has_forms = True
+                ruby_data = None
+                if lang_code == "ja":
+                    ruby_data, node_without_ruby = extract_ruby(wxr, node)
+                    form = clean_node(wxr, None, node_without_ruby)
+                else:
+                    form = clean_node(wxr, None, node)
+                form_tags = extract_headword_tags(
+                    clean_node(wxr, None, tag_nodes).strip("() ")
+                )
+                # check if next tag has gender data
+                if index < len(striped_nodes) - 1:
+                    next_node = striped_nodes[index + 1]
+                    if (
+                        isinstance(next_node, WikiNode)
+                        and next_node.kind == NodeKind.HTML
+                        and next_node.args == "span"
+                        and "gender" in next_node.attrs.get("class", "")
+                    ):
+                        gender = clean_node(wxr, None, next_node)
+                        form_tags.append(GENDERS.get(gender, gender))
+
+                form_data = {
                     "form": form,
                     "tags": form_tags,
-                },
-            )
+                }
+                if ruby_data is not None:
+                    form_data["ruby"] = ruby_data
+                data_append(
+                    wxr,
+                    page_data[-1],
+                    "forms",
+                    form_data,
+                )
+            elif node.args == "span" and "tr" in node.attrs.get("class"):
+                # romanization of the previous form <b> tag
+                page_data[-1]["forms"][-1]["roman"] = clean_node(
+                    wxr, None, node
+                )
+            else:
+                tag_nodes.append(node)
         else:
             tag_nodes.append(node)
 
