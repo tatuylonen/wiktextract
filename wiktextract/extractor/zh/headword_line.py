@@ -7,7 +7,8 @@ from wiktextract.datautils import data_append, data_extend
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from ..share import strip_nodes
+from ..ruby import extract_ruby
+from ..share import strip_nodes, filter_child_wikinodes
 
 
 # https://zh.wiktionary.org/wiki/Module:Gender_and_number
@@ -116,6 +117,30 @@ def extract_headword_line(
                             "tags",
                             GENDERS.get(gender, gender),
                         )
+
+                if lang_code == "ja":
+                    for span_child in filter_child_wikinodes(
+                        child, NodeKind.HTML
+                    ):
+                        if (
+                            span_child.args == "strong"
+                            and "headword" in span_child.attrs.get("class", "")
+                        ):
+                            ruby_data, node_without_ruby = extract_ruby(
+                                wxr, span_child
+                            )
+                            data_append(
+                                wxr,
+                                page_data[-1],
+                                "forms",
+                                {
+                                    "form": clean_node(
+                                        wxr, None, node_without_ruby
+                                    ),
+                                    "ruby": ruby_data,
+                                    "tags": ["canonical"],
+                                },
+                            )
             elif child.args == "b":
                 # this is a form <b> tag, already inside form parentheses
                 break
