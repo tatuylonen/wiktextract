@@ -161,7 +161,9 @@ def recursive_parse(
     if isinstance(node, list):
         thesaurus = []
         for x in node:
-            x_result = recursive_parse(wxr, entry, lang_code, pos, sense, linkage, x)
+            x_result = recursive_parse(
+                wxr, entry, lang_code, pos, sense, linkage, x
+            )
             if x_result is not None:
                 thesaurus.extend(x_result)
         return thesaurus

@@ -29,6 +29,8 @@ from wiktextract.form_descriptions import (
     distw, parse_alt_or_inflection_of, classify_desc)
 from wiktextract.inflection import parse_inflection_section, TableContext
 
+from ..ruby import extract_ruby, parse_ruby
+
 
 # Matches head tag
 head_tag_re = None
@@ -462,32 +464,6 @@ def decode_html_entities(v):
     return html.unescape(v)
 
 
-def parse_ruby(wxr, node):
-    """Parse a HTML 'ruby' node for a kanji part and a furigana (ruby) part,
-    and return a tuple containing those. Discard the rp-element's parentheses,
-    we don't do anything with them."""
-    assert node.kind == NodeKind.HTML
-    assert node.args == "ruby"
-    ruby_nodes = []
-    furi_nodes = []
-    for child in node.children:
-        if  (not isinstance(child, WikiNode) or
-             not child.kind == NodeKind.HTML or
-             not (child.args == "rp" or child.args == "rt")):
-            ruby_nodes.append(child)
-        elif child.args == "rt":
-            furi_nodes.append(child)
-    ruby_kanji = clean_node(wxr, None, ruby_nodes).strip()
-    furigana = clean_node(wxr, None, furi_nodes).strip()
-    if not ruby_kanji or not furigana:
-        # like in パイスラッシュ there can be a template that creates a ruby
-        # element with an empty something (apparently, seeing as how this
-        # works), leaving no trace of the broken ruby element in the final
-        # HTML source of the page!
-        return
-    return((ruby_kanji, furigana))
-
-
 def parse_sense_linkage(wxr, data, name, ht):
     """Parses a linkage (synonym, etc) specified in a word sense."""
     assert isinstance(wxr, WiktextractContext)
@@ -544,80 +520,6 @@ def parse_sense_linkage(wxr, data, name, ht):
         if alt:
             dt["alt"] = alt
         data_append(wxr, data, field, dt)
-
-
-def extract_ruby(wxr, contents):
-    # If contents is a list, process each element separately
-    extracted = []
-    new_contents = []
-    if isinstance(contents, (list, tuple)):
-        for x in contents:
-            e1, c1 = extract_ruby(wxr, x)
-            extracted.extend(e1)
-            new_contents.extend(c1)
-        return extracted, new_contents
-    # If content is not WikiNode, just return it as new contents.
-    if not isinstance(contents, WikiNode):
-        return [], [contents]
-    # Check if this content should be extracted
-    if contents.kind == NodeKind.HTML and contents.args == "ruby":
-        rb = parse_ruby(wxr, contents)
-        if rb:
-            return [rb], [rb[0]]
-    # Otherwise content is WikiNode, and we must recurse into it.
-    kind = contents.kind
-    new_node = WikiNode(kind, contents.loc)
-    new_contents.append(new_node)
-    if kind in (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
-                NodeKind.LEVEL5, NodeKind.LEVEL6, NodeKind.LINK):
-        # Process args and children
-        assert isinstance(contents.args, (list, tuple))
-        new_args = []
-        for arg in contents.args:
-            e1, c1 = extract_ruby(wxr, arg)
-            new_args.append(c1)
-            extracted.extend(e1)
-        new_node.args = new_args
-        e1, c1 = extract_ruby(wxr, contents.children)
-        extracted.extend(e1)
-        new_node.children = c1
-    elif kind in (NodeKind.ITALIC, NodeKind.BOLD, NodeKind.TABLE,
-                  NodeKind.TABLE_CAPTION, NodeKind.TABLE_ROW,
-                  NodeKind.TABLE_HEADER_CELL, NodeKind.TABLE_CELL,
-                  NodeKind.PRE, NodeKind.PREFORMATTED):
-        # Process only children
-        e1, c1 = extract_ruby(wxr, contents.children)
-        extracted.extend(e1)
-        new_node.children = c1
-    elif kind in (NodeKind.HLINE,):
-        # No arguments or children
-        pass
-    elif kind in (NodeKind.LIST, NodeKind.LIST_ITEM):
-        # Keep args as-is, process children
-        new_node.args = contents.args
-        e1, c1 = extract_ruby(wxr, contents.children)
-        extracted.extend(e1)
-        new_node.children = c1
-    elif kind in (NodeKind.TEMPLATE, NodeKind.TEMPLATE_ARG, NodeKind.PARSER_FN,
-                  NodeKind.URL):
-        # Process only args
-        new_args = []
-        for arg in contents.args:
-            e1, c1 = extract_ruby(wxr, arg)
-            new_args.append(c1)
-            extracted.extend(e1)
-        new_node.args = new_args
-    elif kind == NodeKind.HTML:
-        # Keep attrs and args as-is, process children
-        new_node.attrs = contents.attrs
-        new_node.args = contents.args
-        e1, c1 = extract_ruby(wxr, contents.children)
-        extracted.extend(e1)
-        new_node.children = c1
-    else:
-        raise RuntimeError("extract_ruby: unhandled kind {}"
-                           .format(kind))
-    return extracted, new_contents
 
 
 def init_head_tag_re(wxr):
@@ -1053,12 +955,15 @@ def parse_language(wxr, langnode, language, lang_code):
 
         if not poschildren:
             if not floaters:
-                wxr.wtp.debug(f"PoS section without contents",
-                                sortid="en/page/1051/20230612")
+                wxr.wtp.debug(
+                    "PoS section without contents",
+                    sortid="en/page/1051/20230612"
+                )
             else:
-                wxr.wtp.debug(f"PoS section without contents except for "
-                              f"a floating table",
-                              sortid="en/page/1056/20230612")
+                wxr.wtp.debug(
+                    "PoS section without contents except for a floating table",
+                    sortid="en/page/1056/20230612"
+                )
             return
 
         for node in poschildren:
@@ -1210,25 +1115,33 @@ def parse_language(wxr, langnode, language, lang_code):
             # print("parse_part_of_speech: {}: {}: pre={}"
                   # .format(wxr.wtp.section, wxr.wtp.subsection, pre1))
             if lang_code == "ja":
-                exp = wxr.wtp.parse(wxr.wtp.node_to_wikitext(pre1),
-                                # post_template_fn=head_post_template_fn,
-                                expand_all=True)
-                rub, _ = recursively_extract(exp.children,
-                                         lambda x: isinstance(x, WikiNode) and
-                                                   x.kind == NodeKind.HTML and
-                                                   x.args == "ruby")
-                if rub:
+                exp = wxr.wtp.parse(
+                    wxr.wtp.node_to_wikitext(pre1), expand_all=True
+                )
+                rub, _ = recursively_extract(
+                    exp.children,
+                    lambda x: isinstance(x, WikiNode)
+                    and x.kind == NodeKind.HTML
+                    and x.args == "ruby"
+                )
+                if rub is not None:
                     for r in rub:
                         rt = parse_ruby(wxr, r)
-                        if rt:
+                        if rt is not None:
                             ruby.append(rt)
-            text = clean_node(wxr, pos_data, pre1,
-                              post_template_fn=head_post_template_fn)
+            text = clean_node(
+                wxr, pos_data, pre1, post_template_fn=head_post_template_fn
+            )
             text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
-            parse_word_head(wxr, pos, text,
-                            pos_data,
-                            is_reconstruction,
-                            head_group, ruby=ruby)
+            parse_word_head(
+                wxr,
+                pos,
+                text,
+                pos_data,
+                is_reconstruction,
+                head_group,
+                ruby=ruby,
+            )
             text = None
             if "tags" in pos_data:
                 common_tags = pos_data["tags"]

@@ -15,6 +15,7 @@ from .headword_line import extract_headword_line
 from .linkage import extract_linkages
 from .pronunciation import extract_pronunciation_recursively
 from ..share import strip_nodes, contains_list, filter_child_wikinodes
+from ..ruby import extract_ruby
 
 
 # Templates that are used to form panels on pages and that
@@ -199,14 +200,32 @@ def extract_gloss(
     nodes: List[Union[WikiNode, str]],
     gloss_data: Dict[str, List[str]],
 ) -> None:
+    lang_code = page_data[-1].get("lang_code")
     for node in filter(
         lambda n: isinstance(n, WikiNode) and n.kind == NodeKind.LIST_ITEM,
         nodes,
     ):
-        raw_gloss_text = extract_raw_gloss_text(wxr, node)
+        gloss_nodes = [
+            child
+            for child in node.children
+            if not isinstance(child, WikiNode) or child.kind != NodeKind.LIST
+        ]
+        if lang_code == "ja":
+            expanded_node = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(gloss_nodes), expand_all=True
+            )
+            ruby_data, nodes_without_ruby = extract_ruby(
+                wxr, expanded_node.children
+            )
+            raw_gloss_text = clean_node(wxr, None, nodes_without_ruby)
+        else:
+            ruby_data = []
+            raw_gloss_text = clean_node(wxr, None, gloss_nodes)
         new_gloss_data = merge_gloss_data(
             gloss_data, extract_gloss_and_tags(raw_gloss_text)
         )
+        if len(ruby_data) > 0:
+            new_gloss_data["ruby"] = ruby_data
         if contains_list(node.children):
             for child_node in filter_child_wikinodes(node, NodeKind.LIST):
                 if child_node.args.endswith("#"):
@@ -227,18 +246,6 @@ def extract_gloss(
                     )
         else:
             page_data[-1]["senses"].append(new_gloss_data)
-
-
-def extract_raw_gloss_text(wxr: WiktextractContext, node: WikiNode) -> str:
-    return clean_node(
-        wxr,
-        None,
-        [
-            child
-            for child in node.children
-            if not isinstance(child, WikiNode) or child.kind != NodeKind.LIST
-        ],
-    )
 
 
 def merge_gloss_data(
