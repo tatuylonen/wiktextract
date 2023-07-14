@@ -6,6 +6,7 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from ..share import contains_list, strip_nodes
+from ..ruby import extract_ruby
 
 
 def extract_examples(
@@ -95,7 +96,11 @@ def extract_quote_templates(
 def extract_template_ja_usex(
     wxr: WiktextractContext, node: WikiNode, example_data: Dict
 ) -> None:
-    expanded_text = clean_node(wxr, None, node)
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node), expand_all=True
+    )
+    ruby_data, node_without_ruby = extract_ruby(wxr, expanded_node.children)
+    expanded_text = clean_node(wxr, None, node_without_ruby)
     for line_num, expanded_line in enumerate(expanded_text.splitlines()):
         if line_num == 0:
             key = "text"
@@ -104,6 +109,8 @@ def extract_template_ja_usex(
         else:
             key = "translation"
         example_data[key] = expanded_line
+    if len(ruby_data) > 0:
+        example_data["ruby"] = ruby_data
 
 
 def extract_template_zh_usex(
