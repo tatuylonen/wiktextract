@@ -32,10 +32,7 @@ def extract_examples(
                         and child.kind == NodeKind.TEMPLATE
                     ):
                         template_name = child.args[0][0].strip()
-                        if (
-                            template_name == "quote-book"
-                            or template_name.startswith("RQ:")
-                        ):
+                        if template_name.startswith(("quote-", "RQ:")):
                             extract_quote_templates(wxr, child, example_data)
                         elif template_name in {"ja-x", "ja-usex"}:
                             extract_template_ja_usex(wxr, child, example_data)
