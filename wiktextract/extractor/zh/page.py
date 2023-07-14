@@ -10,6 +10,7 @@ from wiktextract.wxr_context import WiktextractContext
 
 from .gloss import extract_gloss
 from .headword_line import extract_headword_line
+from .inflection import extract_inflections
 from .linkage import extract_linkages
 from .pronunciation import extract_pronunciation_recursively
 from ..share import strip_nodes
@@ -156,18 +157,7 @@ def recursive_parse(
         if subtitle in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
             pass
         elif subtitle in wxr.config.POS_SUBTITLES:
-            pos_type = wxr.config.POS_SUBTITLES[subtitle]["pos"]
-            base_data["pos"] = pos_type
-            append_page_data(page_data, "pos", pos_type, base_data)
-            for index, node in enumerate(strip_nodes(node.children)):
-                if isinstance(node, WikiNode):
-                    if index == 0 and node.kind == NodeKind.TEMPLATE:
-                        lang_code = base_data.get("lang_code")
-                        extract_headword_line(wxr, page_data, node, lang_code)
-                    elif node.kind == NodeKind.LIST:
-                        extract_gloss(wxr, page_data, node.children, {})
-                else:
-                    recursive_parse(wxr, page_data, base_data, node)
+            process_pos_block(wxr, page_data, base_data, node, subtitle)
         elif (
             wxr.config.capture_etymologies
             and subtitle in wxr.config.OTHER_SUBTITLES["etymology"]
@@ -189,6 +179,37 @@ def recursive_parse(
                 wxr.config.LINKAGE_SUBTITLES[subtitle],
                 None,
             )
+
+
+def process_pos_block(
+    wxr: WiktextractContext,
+    page_data: List[Dict],
+    base_data: Dict,
+    node: WikiNode,
+    pos_text: str,
+):
+    pos_type = wxr.config.POS_SUBTITLES[pos_text]["pos"]
+    base_data["pos"] = pos_type
+    append_page_data(page_data, "pos", pos_type, base_data)
+    for index, child in enumerate(strip_nodes(node.children)):
+        if isinstance(child, WikiNode):
+            if index == 0 and child.kind == NodeKind.TEMPLATE:
+                lang_code = base_data.get("lang_code")
+                extract_headword_line(wxr, page_data, child, lang_code)
+            elif child.kind == NodeKind.LIST:
+                extract_gloss(wxr, page_data, child.children, {})
+            elif child.kind in LEVEL_KINDS:
+                child_level_text = clean_node(wxr, None, child.args)
+                child_level_text = child_level_text.rstrip(string.digits)
+                wxr.wtp.start_subsection(child_level_text)
+                if (
+                    wxr.config.capture_inflections
+                    and child_level_text
+                    in wxr.config.OTHER_SUBTITLES["inflection_sections"]
+                ):
+                    extract_inflections(wxr, page_data, child)
+        else:
+            recursive_parse(wxr, page_data, base_data, child)
 
 
 def extract_etymology(
