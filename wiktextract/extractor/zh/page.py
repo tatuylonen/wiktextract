@@ -1,21 +1,19 @@
 import copy
 import logging
-import re
 import string
 
-from collections import defaultdict
 from typing import Dict, List, Union, Any
 
 from wikitextprocessor import WikiNode, NodeKind
 from wiktextract.page import clean_node, LEVEL_KINDS
 from wiktextract.wxr_context import WiktextractContext
 
-from .example import extract_examples
+from .gloss import extract_gloss
 from .headword_line import extract_headword_line
+from .inflection import extract_inflections
 from .linkage import extract_linkages
 from .pronunciation import extract_pronunciation_recursively
-from ..share import strip_nodes, contains_list, filter_child_wikinodes
-from ..ruby import extract_ruby
+from ..share import strip_nodes
 
 
 # Templates that are used to form panels on pages and that
@@ -159,18 +157,7 @@ def recursive_parse(
         if subtitle in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
             pass
         elif subtitle in wxr.config.POS_SUBTITLES:
-            pos_type = wxr.config.POS_SUBTITLES[subtitle]["pos"]
-            base_data["pos"] = pos_type
-            append_page_data(page_data, "pos", pos_type, base_data)
-            for index, node in enumerate(strip_nodes(node.children)):
-                if isinstance(node, WikiNode):
-                    if index == 0 and node.kind == NodeKind.TEMPLATE:
-                        lang_code = base_data.get("lang_code")
-                        extract_headword_line(wxr, page_data, node, lang_code)
-                    elif node.kind == NodeKind.LIST:
-                        extract_gloss(wxr, page_data, node.children, {})
-                else:
-                    recursive_parse(wxr, page_data, base_data, node)
+            process_pos_block(wxr, page_data, base_data, node, subtitle)
         elif (
             wxr.config.capture_etymologies
             and subtitle in wxr.config.OTHER_SUBTITLES["etymology"]
@@ -194,97 +181,35 @@ def recursive_parse(
             )
 
 
-def extract_gloss(
+def process_pos_block(
     wxr: WiktextractContext,
     page_data: List[Dict],
-    nodes: List[Union[WikiNode, str]],
-    gloss_data: Dict[str, List[str]],
-) -> None:
-    lang_code = page_data[-1].get("lang_code")
-    for node in filter(
-        lambda n: isinstance(n, WikiNode) and n.kind == NodeKind.LIST_ITEM,
-        nodes,
-    ):
-        gloss_nodes = [
-            child
-            for child in node.children
-            if not isinstance(child, WikiNode) or child.kind != NodeKind.LIST
-        ]
-        if lang_code == "ja":
-            expanded_node = wxr.wtp.parse(
-                wxr.wtp.node_to_wikitext(gloss_nodes), expand_all=True
-            )
-            ruby_data, nodes_without_ruby = extract_ruby(
-                wxr, expanded_node.children
-            )
-            raw_gloss_text = clean_node(wxr, None, nodes_without_ruby)
+    base_data: Dict,
+    node: WikiNode,
+    pos_text: str,
+):
+    pos_type = wxr.config.POS_SUBTITLES[pos_text]["pos"]
+    base_data["pos"] = pos_type
+    append_page_data(page_data, "pos", pos_type, base_data)
+    for index, child in enumerate(strip_nodes(node.children)):
+        if isinstance(child, WikiNode):
+            if index == 0 and child.kind == NodeKind.TEMPLATE:
+                lang_code = base_data.get("lang_code")
+                extract_headword_line(wxr, page_data, child, lang_code)
+            elif child.kind == NodeKind.LIST:
+                extract_gloss(wxr, page_data, child.children, {})
+            elif child.kind in LEVEL_KINDS:
+                child_level_text = clean_node(wxr, None, child.args)
+                child_level_text = child_level_text.rstrip(string.digits)
+                wxr.wtp.start_subsection(child_level_text)
+                if (
+                    wxr.config.capture_inflections
+                    and child_level_text
+                    in wxr.config.OTHER_SUBTITLES["inflection_sections"]
+                ):
+                    extract_inflections(wxr, page_data, child)
         else:
-            ruby_data = []
-            raw_gloss_text = clean_node(wxr, None, gloss_nodes)
-        new_gloss_data = merge_gloss_data(
-            gloss_data, extract_gloss_and_tags(raw_gloss_text)
-        )
-        if len(ruby_data) > 0:
-            new_gloss_data["ruby"] = ruby_data
-        if contains_list(node.children):
-            for child_node in filter_child_wikinodes(node, NodeKind.LIST):
-                if child_node.args.endswith("#"):
-                    # nested gloss
-                    extract_gloss(
-                        wxr,
-                        page_data,
-                        child_node.children,
-                        new_gloss_data,
-                    )
-                else:
-                    # example list
-                    page_data[-1]["senses"].append(new_gloss_data)
-                    extract_examples(
-                        wxr,
-                        page_data,
-                        child_node,
-                    )
-        else:
-            page_data[-1]["senses"].append(new_gloss_data)
-
-
-def merge_gloss_data(
-    data_a: Dict[str, List[str]], data_b: Dict[str, List[str]]
-) -> Dict[str, List[str]]:
-    new_data = defaultdict(list)
-    for data in data_a, data_b:
-        for key, value in data.items():
-            new_data[key].extend(value)
-    return new_data
-
-
-def extract_gloss_and_tags(raw_gloss: str) -> Dict[str, List[str]]:
-    left_brackets = ("(", "（")
-    right_brackets = (")", "）")
-    if raw_gloss.startswith(left_brackets) or raw_gloss.endswith(
-        right_brackets
-    ):
-        tags = []
-        split_tag_regex = r", ?|，|或"
-        front_tag_end = -1
-        rear_tag_start = len(raw_gloss)
-        for index, left_bracket in enumerate(left_brackets):
-            if raw_gloss.startswith(left_bracket):
-                front_tag_end = raw_gloss.find(right_brackets[index])
-                front_label = raw_gloss[1:front_tag_end]
-                tags += re.split(split_tag_regex, front_label)
-        for index, right_bracket in enumerate(right_brackets):
-            if raw_gloss.endswith(right_bracket):
-                rear_tag_start = raw_gloss.rfind(left_brackets[index])
-                rear_label = raw_gloss.rstrip("".join(right_brackets))[
-                    rear_tag_start + 1 :
-                ]
-                tags += re.split(split_tag_regex, rear_label)
-
-        gloss = raw_gloss[front_tag_end + 1 : rear_tag_start].strip()
-        return {"glosses": [gloss], "raw_glosses": [raw_gloss], "tags": tags}
-    else:
-        return {"glosses": [raw_gloss]}
+            recursive_parse(wxr, page_data, base_data, child)
 
 
 def extract_etymology(
