@@ -429,3 +429,26 @@ foo
             data[0].get("senses"),
             [{"glosses": ["An adult castrated male of cattle."]}],
         )
+
+    @patch(
+        "wikitextprocessor.Wtp.get_page",
+        return_value=Page("test", 10, None, False, "", "wikitext"),
+    )
+    def test_ARF_page(self, mock_get_page) -> None:
+        """
+        test wikitext copied from page https://en.wiktionary.org/wiki/ARF
+        """
+        data = self.runpage(
+            """
+==English==
+
+===Phrase===
+{{head|en|phrase}}
+
+# {{lb|en|computing}} "[[abort|Abort]], [[retry|Retry]], [[fail|Fail]]?"
+            """
+        )
+        self.assertEqual(
+            data[0].get("senses", [{}])[0].get("glosses"),
+            ["\"Abort, Retry, Fail?\""]
+        )

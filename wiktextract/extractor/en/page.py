@@ -1166,7 +1166,6 @@ def parse_language(wxr, langnode, language, lang_code):
                         common_data["head_nr"] = head_group
                     parse_sense_node(node, common_data, pos)
 
-
         # If there are no senses extracted, add a dummy sense.  We want to
         # keep tags extracted from the head for the dummy sense.
         push_sense()  # Make sure unfinished data pushed, and start clean sense
@@ -1646,6 +1645,10 @@ def parse_language(wxr, langnode, language, lang_code):
                         data_extend(wxr, sense_data, "tags", tags)
                         data_append(wxr, sense_data, "form_of", dt)
 
+        if len(sense_data) == 0:
+            if len(sense_base.get("tags")) == 0:
+                del sense_base["tags"]
+            sense_data.update(sense_base)
         if push_sense():
             # push_sense succeded in adding a sense to pos_data
             added = True
