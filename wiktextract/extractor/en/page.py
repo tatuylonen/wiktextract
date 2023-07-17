@@ -1029,11 +1029,10 @@ def parse_language(wxr, langnode, language, lang_code):
                 # There's head_tag_re that seems like a regex meant
                 # to identify head templates. Too bad it's None.
 
-                # stop processing at {{category}}, {{cat}}... etc.
+                # ignore {{category}}, {{cat}}... etc.
                 if node.args[0][0] in stop_head_at_these_templates:
                     # we've reached a template that should be at the end,
-                    # just break without special processing
-                    break
+                    continue
 
                 # skip these templates; panel_templates is already used
                 # to skip certain templates else, but it also applies to
@@ -1766,7 +1765,7 @@ def parse_language(wxr, langnode, language, lang_code):
             # under "forms".
             if wxr.config.capture_inflections:
                 tablecontext = None
-                m = re.search("{{([^}{|]+)\|?", text)
+                m = re.search(r"{{([^}{|]+)\|?", text)
                 if m:
                     template_name = m.group(1)
                     tablecontext = TableContext(template_name)
@@ -2931,7 +2930,7 @@ def parse_language(wxr, langnode, language, lang_code):
                                      template_fn=usex_template_fn)
                 subtext = re.sub(r"\s*\(please add an English "
                                  r"translation of this "
-                                 "(example|usage example|quote)\)",
+                                 r"(example|usage example|quote)\)",
                                  "", subtext).strip()
                 subtext = re.sub(r"\^\([^)]*\)", "", subtext)
                 subtext = re.sub(r"\s*[―—]+$", "", subtext)
