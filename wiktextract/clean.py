@@ -1222,6 +1222,7 @@ def to_math(text):
     # print("math text final: {!r}".format(text))
     return text
 
+
 def bold_follows(parts, i):
     """Checks if there is a bold (''') in parts after parts[i].  We allow
     intervening italics ('')."""
@@ -1232,7 +1233,8 @@ def bold_follows(parts, i):
         if p.startswith("'''"):
             return True
     return False
-    
+
+
 def remove_italic_and_bold(text):
     """Based on token_iter in wikitextprocessor"""
     assert isinstance(text, str)
@@ -1350,8 +1352,10 @@ def clean_value(wxr, title, no_strip=False, no_html_strip=False):
     # title = re.sub(r"\{\{[^}]+\}\}", "", title)
     # Remove tables
     title = re.sub(r"(?s)\{\|.*?\|\}", "\n", title)
+    # Remove second reference tags (<ref name="ref_name"/>)
+    title = re.sub(r"<ref\s+name=\"[^\"]+\"\s*/>", "", title)
     # Remove references (<ref>...</ref>).
-    title = re.sub(r"(?is)<ref\b\s*[^>]*?>\s*.*?</ref\s*>", "", title)
+    title = re.sub(r"(?is)<ref\b\s*[^>/]*?>\s*.*?</ref\s*>", "", title)
     # Replace <span>...</span> by stripped content without newlines
     title = re.sub(r"(?is)<span\b\s*[^>]*?>(.*?)\s*</span\s*>",
                    lambda m: re.sub(r"\s+", " ", m.group(1)),
