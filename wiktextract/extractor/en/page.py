@@ -9,10 +9,12 @@ import html
 import logging
 
 from collections import defaultdict
-from typing import Dict, List
+from functools import partial
+from typing import Dict, List, Optional
 
-from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import WikiNode, NodeKind
+from wikitextprocessor.core import TemplateArgs
+from wiktextract.wxr_context import WiktextractContext
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.linkages import parse_linkage_item_text
 from wiktextract.translations import parse_translation_item_text
@@ -1148,7 +1150,6 @@ def parse_language(wxr, langnode, language, lang_code):
             else:
                 common_tags = []
 
-
             for l in ls:
                 # Parse each list associated with this head.
                 for node in l.children:
@@ -1288,7 +1289,9 @@ def parse_language(wxr, langnode, language, lang_code):
                                           pos)
                 return added
 
-        def sense_template_fn(name, ht):
+        def sense_template_fn(
+            name: str, ht: TemplateArgs, is_gloss: bool = False
+        ) -> Optional[str]:
             # print(f"sense_template_fn: {name}, {ht}")
             if name in wikipedia_templates:
                 # parse_wikipedia_template(wxr, pos_data, ht)
@@ -1311,10 +1314,28 @@ def parse_language(wxr, langnode, language, lang_code):
             if name == "†" or name == "zh-obsolete":
                 data_append(wxr, sense_base, "tags", "obsolete")
                 return ""
-            if name in ("ux", "uxi", "usex", "afex", "zh-x", "prefixusex",
-                        "ko-usex", "ko-x", "hi-x", "ja-usex-inline", "ja-x",
-                        "quotei", "zh-x", "he-x", "hi-x", "km-x", "ne-x",
-                        "shn-x", "th-x", "ur-x"):
+            if not is_gloss and name in {
+                "ux",
+                "uxi",
+                "usex",
+                "afex",
+                "zh-x",
+                "prefixusex",
+                "ko-usex",
+                "ko-x",
+                "hi-x",
+                "ja-usex-inline",
+                "ja-x",
+                "quotei",
+                "zh-x",
+                "he-x",
+                "hi-x",
+                "km-x",
+                "ne-x",
+                "shn-x",
+                "th-x",
+                "ur-x",
+            }:
                 # Usage examples are captured separately below.  We don't
                 # want to expand them into glosses even when unusual coding
                 # is used in the entry.
@@ -1368,17 +1389,20 @@ def parse_language(wxr, langnode, language, lang_code):
 
         # get the raw text of non-list contents of this node, and other stuff
         # like tag and category data added to sense_base
-        rawgloss = clean_node(wxr, sense_base, contents,
-                              template_fn=sense_template_fn,
-                              collect_links=True)
+        rawgloss = clean_node(
+            wxr,
+            sense_base,
+            contents,
+            template_fn=partial(sense_template_fn, is_gloss=True),
+            collect_links=True,
+        )
 
         if not rawgloss:
             return False
 
         # get stuff like synonyms and categories from "others",
         # maybe examples and quotations
-        clean_node(wxr, sense_base, others,
-                              template_fn=sense_template_fn)
+        clean_node(wxr, sense_base, others, template_fn=sense_template_fn)
 
 
         # Generate no gloss for translation hub pages, but add the

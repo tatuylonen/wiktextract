@@ -452,3 +452,33 @@ foo
             data[0].get("senses", [{}])[0].get("glosses"),
             ["\"Abort, Retry, Fail?\""]
         )
+
+
+    @patch(
+        "wikitextprocessor.Wtp.get_page",
+        return_value=Page(
+            "Template:ux",
+            10,
+            None,
+            False,
+            "Name given to a number of one-piece attires",
+            "wikitext"
+        ),
+    )
+    def test_ux_template_in_gloss(self, mock_get_page) -> None:
+        """
+        test wikitext copied from page https://en.wiktionary.org/wiki/onesie
+        """
+        data = self.runpage(
+            """
+==English==
+
+===Noun===
+
+# {{ux|en|Name given to a number of one-piece attires}}
+            """
+        )
+        self.assertEqual(
+            data[0].get("senses", [{}])[0].get("glosses"),
+            ["Name given to a number of one-piece attires"]
+        )
