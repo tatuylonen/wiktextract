@@ -1,9 +1,10 @@
 import unittest
-from wiktextract.clean import clean_value
+
 from wikitextprocessor import Wtp
+from wiktextract.clean import clean_value
 from wiktextract.config import WiktionaryConfig
-from wiktextract.wxr_context import WiktextractContext
 from wiktextract.thesaurus import close_thesaurus_db
+from wiktextract.wxr_context import WiktextractContext
 
 
 class WiktExtractTests(unittest.TestCase):
@@ -18,14 +19,10 @@ class WiktExtractTests(unittest.TestCase):
 
     def test_pos(self):
         poses = self.wxr.config.POS_TYPES
-        assert isinstance(poses, set)
-        assert "noun" in poses
-        assert "verb" in poses
-        assert "pron" in poses
-        assert "adj" in poses
-        assert "adv" in poses
-        assert "num" in poses
-        assert len(poses) < 50
+        self.assertTrue(isinstance(poses, set))
+        for pos_type in ["noun", "verb", "pron", "adj", "adv", "num"]:
+            self.assertTrue(pos_type in poses)
+        self.assertLess(len(poses), 50)
 
     def test_cv_plain(self):
         v = "This is a test."

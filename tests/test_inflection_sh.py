@@ -3,21 +3,27 @@
 # Tests for parsing inflection tables
 #
 # Copyright (c) 2021-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
-
 import unittest
-from wiktextract.wxr_context import WiktextractContext
+
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.inflection import parse_inflection_section
+from wiktextract.thesaurus import close_thesaurus_db
+from wiktextract.wxr_context import WiktextractContext
+
 
 class InflTests(unittest.TestCase):
-
     def setUp(self):
         self.maxDiff = 100000
         self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
-
         self.wxr.wtp.start_page("testpage")
         self.wxr.wtp.start_section("English")
+
+    def tearDown(self) -> None:
+        self.wxr.wtp.close_db_conn()
+        close_thesaurus_db(
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+        )
 
     def xinfl(self, word, lang, pos, section, text):
         """Runs a single inflection table parsing test, and returns ``data``."""
@@ -826,7 +832,7 @@ class InflTests(unittest.TestCase):
 
 {| class="inflection-table" style="text-align%3Acenter%3B+width%3A+100%25%3B"
 
-|- 
+|-
 
 ! style="height%3A3em%3B+background-color%3A%23d9ebff%3B" colspan="2" | '''Infinitive: <span class="Latn" lang="sh">[[nametati#Serbo-Croatian|nametati]]</span>'''
 
@@ -897,7 +903,7 @@ class InflTests(unittest.TestCase):
 ! '''<span class="Latn" lang="sh">[[oni#Serbo-Croatian|oni]]</span>''' / '''<span class="Latn" lang="sh">[[one#Serbo-Croatian|one]]</span>''' / '''<span class="Latn" lang="sh">[[ona#Serbo-Croatian|ona]]</span>'''
 
 
-|- 
+|-
 
 ! colspan="2" style="height%3A3em%3B+background-color%3A%23ccddff%3B" | '''Present'''
 
@@ -920,7 +926,7 @@ class InflTests(unittest.TestCase):
 | <span class="Latn" lang="sh">[[nameću#Serbo-Croatian|nameću]]</span>
 
 
-|- 
+|-
 
 ! rowspan="2" style="background-color%3A%23ccddff%3B" | '''Future'''
 
@@ -946,7 +952,7 @@ class InflTests(unittest.TestCase):
 | <span class="Latn" lang="sh">[[nametat#Serbo-Croatian|nametat]] [[će#Serbo-Croatian|će]]</span><sup>1</sup><br><span class="Latn" lang="sh">[[nametaće#Serbo-Croatian|nametaće]]</span>
 
 
-|- 
+|-
 
 ! style="height%3A3em%3B+background-color%3A%23ccddff%3B" | '''Future II'''
 
@@ -969,7 +975,7 @@ class InflTests(unittest.TestCase):
 | <span class="Latn" lang="sh">[[budu#Serbo-Croatian|bȕdū]] [[nametali#Serbo-Croatian|nametali]]</span><sup>2</sup>
 
 
-|- 
+|-
 
 ! rowspan="3" style="background-color%3A%23ccddff%3B" | '''Past'''
 
@@ -995,7 +1001,7 @@ class InflTests(unittest.TestCase):
 | <span class="Latn" lang="sh">[[nametali#Serbo-Croatian|nametali]] [[su#Serbo-Croatian|su]]</span><sup>2</sup>
 
 
-|- 
+|-
 
 ! style="height%3A3em%3B+background-color%3A%23ccddff%3B" | '''Pluperfect'''<sup>3</sup>
 
@@ -1018,7 +1024,7 @@ class InflTests(unittest.TestCase):
 | <span class="Latn" lang="sh">[[bili#Serbo-Croatian|bíli]] [[su#Serbo-Croatian|su]] [[nametali#Serbo-Croatian|nametali]]</span><sup>2</sup>
 
 
-|- 
+|-
 
 | style="height%3A+3em%3B+background%3A+%23ccddff%3B" | '''Imperfect'''
 
@@ -1041,7 +1047,7 @@ class InflTests(unittest.TestCase):
 | <span class="Latn" lang="sh">[[nametahu#Serbo-Croatian|nametahu]]</span>
 
 
-|- 
+|-
 
 ! colspan="2" style="height%3A3em%3B+background-color%3A%23ccddff%3B" | '''Conditional I'''
 
@@ -1064,7 +1070,7 @@ class InflTests(unittest.TestCase):
 | <span class="Latn" lang="sh">[[nametali#Serbo-Croatian|nametali]] [[bi#Serbo-Croatian|bi]]</span><sup>2</sup>
 
 
-|- 
+|-
 
 ! colspan="2" style="height%3A3em%3B+background-color%3A%23ccddff%3B" | '''Conditional II'''<sup>4</sup>
 
@@ -1087,7 +1093,7 @@ class InflTests(unittest.TestCase):
 | <span class="Latn" lang="sh">[[bili#Serbo-Croatian|bíli]] [[bi#Serbo-Croatian|bi]] [[nametali#Serbo-Croatian|nametali]]</span><sup>2</sup>
 
 
-|- 
+|-
 
 ! colspan="2" style="height%3A3em%3B+background-color%3A%23ccddff%3B" | '''Imperative'''
 
@@ -1110,7 +1116,7 @@ class InflTests(unittest.TestCase):
 | &mdash;
 
 
-|- 
+|-
 
 ! colspan="2" style="height%3A3em%3B+background-color%3A%23d9ebff%3B" | '''Active past participle'''
 
@@ -1121,7 +1127,7 @@ class InflTests(unittest.TestCase):
 | colspan="3" | <span class="Latn" lang="sh">[[nametali#Serbo-Croatian|nametali]]</span>&nbsp;<span class="gender"><abbr title="masculine+gender">m</abbr></span> / <span class="Latn" lang="sh">[[nametale#Serbo-Croatian|nametale]]</span>&nbsp;<span class="gender"><abbr title="feminine+gender">f</abbr></span> / <span class="Latn" lang="sh">[[nametala#Serbo-Croatian|nametala]]</span>&nbsp;<span class="gender"><abbr title="neuter+gender">n</abbr></span>
 
 
-|- 
+|-
 
 | colspan="2" style="height%3A+3em%3B+background%3A+%23d9ebff%3B" | '''Passive past participle'''
 
@@ -1132,7 +1138,7 @@ class InflTests(unittest.TestCase):
 | colspan="3" | <span class="Latn" lang="sh">[[nametani#Serbo-Croatian|nametani]]</span>&nbsp;<span class="gender"><abbr title="masculine+gender">m</abbr></span> / <span class="Latn" lang="sh">[[nametane#Serbo-Croatian|nametane]]</span>&nbsp;<span class="gender"><abbr title="feminine+gender">f</abbr></span> / <span class="Latn" lang="sh">[[nametana#Serbo-Croatian|nametana]]</span>&nbsp;<span class="gender"><abbr title="neuter+gender">n</abbr></span>
 
 
-|- 
+|-
 
 | colspan="8" style="text-align%3Aleft%3B" | <sup>1</sup> &nbsp; Croatian spelling: others omit the infinitive suffix completely and bind the clitic.<br><sup>2</sup> &nbsp; For masculine nouns; a feminine or neuter agent would use the feminine and neuter gender forms of the active past participle and auxiliary verb, respectively.<br><sup>3</sup> &nbsp; Often replaced by the past perfect in colloquial speech, i.e. the auxiliary verb ''[[biti]]'' (to be) is routinely dropped.
 <sup>4</sup> &nbsp; Often replaced by the conditional I in colloquial speech, i.e. the auxiliary verb ''[[biti]]'' (to be) is routinely dropped.

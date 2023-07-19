@@ -3,21 +3,27 @@
 # Tests for parsing inflection tables
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
-
 import unittest
-from wiktextract.wxr_context import WiktextractContext
+
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.inflection import parse_inflection_section
+from wiktextract.thesaurus import close_thesaurus_db
+from wiktextract.wxr_context import WiktextractContext
+
 
 class InflTests(unittest.TestCase):
-
     def setUp(self):
         self.maxDiff = 100000
         self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
-
         self.wxr.wtp.start_page("testpage")
         self.wxr.wtp.start_section("English")
+
+    def tearDown(self) -> None:
+        self.wxr.wtp.close_db_conn()
+        close_thesaurus_db(
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+        )
 
     def xinfl(self, word, lang, pos, section, text):
         """Runs a single inflection table parsing test, and returns ``data``."""
@@ -39,66 +45,66 @@ class InflTests(unittest.TestCase):
 
 {| class="wikitable" style="width%3A+43em%3B"
 
-|- 
+|-
 
 ! '''Present forms'''
 
-! colspan="2" |indicative 
+! colspan="2" |indicative
 
 ! colspan="2" |imperative
 
 
-|- 
+|-
 
-! 
-
-!singular
-
-!plural
+!
 
 !singular
 
 !plural
 
+!singular
 
-|- 
+!plural
+
+
+|-
 
 ! style="width%3A+10em%3B" |1st person
 
 
 | style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myslím#Czech|myslím]]</span>
 
-| style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myslíme#Czech|myslíme]]</span> 
+| style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myslíme#Czech|myslíme]]</span>
 
-| style="width%3A+7em%3B" | &mdash; 
+| style="width%3A+7em%3B" | &mdash;
 
 | style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[mysleme#Czech|mysleme]]</span>
 
 
-|- 
+|-
 
-!2nd person 
+!2nd person
 
 
-| <span class="Latn" lang="cs">[[myslíš#Czech|myslíš]]</span> 
+| <span class="Latn" lang="cs">[[myslíš#Czech|myslíš]]</span>
 
-| <span class="Latn" lang="cs">[[myslíte#Czech|myslíte]]</span> 
+| <span class="Latn" lang="cs">[[myslíte#Czech|myslíte]]</span>
 
-| <span class="Latn" lang="cs">[[mysli#Czech|mysli]]</span> 
+| <span class="Latn" lang="cs">[[mysli#Czech|mysli]]</span>
 
 | <span class="Latn" lang="cs">[[myslete#Czech|myslete]]</span>
 
 
-|- 
+|-
 
-!3rd person 
+!3rd person
 
 
-| <span class="Latn" lang="cs">[[myslí#Czech|myslí]]</span> 
+| <span class="Latn" lang="cs">[[myslí#Czech|myslí]]</span>
 
-| <span class="Latn" lang="cs">[[myslí#Czech|myslí]]</span>, <span class="Latn" lang="cs">[[myslejí#Czech|myslejí]]</span> 
+| <span class="Latn" lang="cs">[[myslí#Czech|myslí]]</span>, <span class="Latn" lang="cs">[[myslejí#Czech|myslejí]]</span>
 
-| &mdash; 
+| &mdash;
 
 | &mdash;
 
@@ -107,7 +113,7 @@ class InflTests(unittest.TestCase):
 
 
 
-{| 
+{|
  class="wikitable"
 <td>The future tense: a combination of a future form of <i class="Latn+mention" lang="cs">[[být#Czech|být]]</i> + infinitive ''myslet''.</td>
 
@@ -117,7 +123,7 @@ class InflTests(unittest.TestCase):
 
 {| class="wikitable" style="width%3A+43em%3B"
 
-|- 
+|-
 
 ! '''Participles'''
 
@@ -126,63 +132,63 @@ class InflTests(unittest.TestCase):
 ! colspan="2" |Passive participles
 
 
-|- 
+|-
 
-! 
+!
 
-!singular 
+!singular
 
-!plural 
+!plural
 
-!singular 
+!singular
 
 !plural
 
 
-|- 
+|-
 
-! style="width%3A+10em%3B" |masculine animate 
+! style="width%3A+10em%3B" |masculine animate
 
 
-| rowspan="2" style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myslel#Czech|myslel]]</span>, <span class="Latn" lang="cs">[[myslil#Czech|myslil]]</span> 
+| rowspan="2" style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myslel#Czech|myslel]]</span>, <span class="Latn" lang="cs">[[myslil#Czech|myslil]]</span>
 
 | style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[mysleli#Czech|mysleli]]</span>, <span class="Latn" lang="cs">[[myslili#Czech|myslili]]</span>
 
-| rowspan="2" style="width%3A+7em%3B" |  <span class="Latn" lang="cs">[[myšlen#Czech|myšlen]]</span>  
+| rowspan="2" style="width%3A+7em%3B" |  <span class="Latn" lang="cs">[[myšlen#Czech|myšlen]]</span>
 
 | style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myšleni#Czech|myšleni]]</span>
 
 
-|- 
+|-
 
-!masculine inanimate 
+!masculine inanimate
 
 
-| rowspan="2" style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myslely#Czech|myslely]]</span>, <span class="Latn" lang="cs">[[myslily#Czech|myslily]]</span> 
+| rowspan="2" style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myslely#Czech|myslely]]</span>, <span class="Latn" lang="cs">[[myslily#Czech|myslily]]</span>
 
 | rowspan="2" style="width%3A+7em%3B" |<span class="Latn" lang="cs">[[myšleny#Czech|myšleny]]</span>
 
 
-|- 
+|-
 
 !feminine
 
 
-|<span class="Latn" lang="cs">[[myslela#Czech|myslela]]</span>, <span class="Latn" lang="cs">[[myslila#Czech|myslila]]</span> 
+|<span class="Latn" lang="cs">[[myslela#Czech|myslela]]</span>, <span class="Latn" lang="cs">[[myslila#Czech|myslila]]</span>
 
 |<span class="Latn" lang="cs">[[myšlena#Czech|myšlena]]</span>
 
 
-|- 
+|-
 
 !neuter
 
 
-|<span class="Latn" lang="cs">[[myslelo#Czech|myslelo]]</span>, <span class="Latn" lang="cs">[[myslilo#Czech|myslilo]]</span> 
+|<span class="Latn" lang="cs">[[myslelo#Czech|myslelo]]</span>, <span class="Latn" lang="cs">[[myslilo#Czech|myslilo]]</span>
 
-| <span class="Latn" lang="cs">[[myslela#Czech|myslela]]</span>, <span class="Latn" lang="cs">[[myslila#Czech|myslila]]</span> 
+| <span class="Latn" lang="cs">[[myslela#Czech|myslela]]</span>, <span class="Latn" lang="cs">[[myslila#Czech|myslila]]</span>
 
-| <span class="Latn" lang="cs">[[myšleno#Czech|myšleno]]</span> 
+| <span class="Latn" lang="cs">[[myšleno#Czech|myšleno]]</span>
 
 |<span class="Latn" lang="cs">[[myšlena#Czech|myšlena]]</span>
 
@@ -193,41 +199,41 @@ class InflTests(unittest.TestCase):
 
 {| class="wikitable"
 
-|- 
+|-
 
 ! '''Transgressives'''
 
-!present 
+!present
 
 !past
 
 
-|- 
+|-
 
 ! masculine singular
 
 
-| style="width%3A+7em%3B" | <span class="Latn" lang="cs">[[mysle#Czech|mysle]]</span>, <span class="Latn" lang="cs">[[mysleje#Czech|mysleje]]</span>  
+| style="width%3A+7em%3B" | <span class="Latn" lang="cs">[[mysle#Czech|mysle]]</span>, <span class="Latn" lang="cs">[[mysleje#Czech|mysleje]]</span>
 
-| style="width%3A+7em%3B" | &mdash; 
+| style="width%3A+7em%3B" | &mdash;
 
 
-|- 
+|-
 
 !feminine + neuter singular
 
 
-|<span class="Latn" lang="cs">[[myslíc#Czech|myslíc]]</span>, <span class="Latn" lang="cs">[[myslejíc#Czech|myslejíc]]</span>  
+|<span class="Latn" lang="cs">[[myslíc#Czech|myslíc]]</span>, <span class="Latn" lang="cs">[[myslejíc#Czech|myslejíc]]</span>
 
 | &mdash;
 
 
-|- 
+|-
 
 !plural
 
 
-| <span class="Latn" lang="cs">[[myslíce#Czech|myslíce]]</span>, <span class="Latn" lang="cs">[[myslejíce#Czech|myslejíce]]</span>  
+| <span class="Latn" lang="cs">[[myslíce#Czech|myslíce]]</span>, <span class="Latn" lang="cs">[[myslejíce#Czech|myslejíce]]</span>
 
 | &mdash;
 

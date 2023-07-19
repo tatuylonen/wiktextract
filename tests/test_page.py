@@ -7,7 +7,6 @@ import unittest
 
 from unittest.mock import patch
 
-
 from wikitextprocessor import Wtp, Page
 from wiktextract.config import WiktionaryConfig
 from wiktextract.page import parse_page

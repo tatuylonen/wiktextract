@@ -8,6 +8,15 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestHeadword(TestCase):
+    def setUp(self):
+        self.wxr = WiktextractContext(Wtp(lang_code="zh"), Mock())
+
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+        close_thesaurus_db(
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+        )
+
     @patch(
         "wikitextprocessor.Wtp.node_to_wikitext",
         return_value='<strong class="Latn headword" lang="en">manga</strong> ([[可數|可數]] & [[不可數|不可數]]，複數 <b class="Latn form-of lang-en p-form-of" lang="en"><strong class="selflink">manga</strong></b> <small>或</small> <b class="Latn form-of lang-en p-form-of" lang="en">[[mangas#英語|mangas]]</b>)',
@@ -19,12 +28,8 @@ class TestHeadword(TestCase):
         node = Mock()
         node.args = [["en-noun"]]
         page_data = [{}]
-        wtp = Wtp()
-        wtp.title = "manga"
-        wxr = WiktextractContext(wtp, Mock())
-        extract_headword_line(wxr, page_data, node, "en")
-        wtp.close_db_conn()
-        close_thesaurus_db(wxr.thesaurus_db_path, wxr.thesaurus_db_conn)
+        self.wxr.wtp.title = "manga"
+        extract_headword_line(self.wxr, page_data, node, "en")
         self.assertEqual(
             page_data,
             [
@@ -49,12 +54,8 @@ class TestHeadword(TestCase):
         node = Mock()
         node.args = [["nl-noun"]]
         page_data = [{}]
-        wtp = Wtp()
-        wtp.title = "manga"
-        wxr = WiktextractContext(wtp, Mock())
-        extract_headword_line(wxr, page_data, node, "nl")
-        wtp.close_db_conn()
-        close_thesaurus_db(wxr.thesaurus_db_path, wxr.thesaurus_db_conn)
+        self.wxr.wtp.title = "manga"
+        extract_headword_line(self.wxr, page_data, node, "nl")
         self.assertEqual(
             page_data,
             [
@@ -79,12 +80,8 @@ class TestHeadword(TestCase):
         node = Mock()
         node.args = [["head"]]
         page_data = [{}]
-        wtp = Wtp()
-        wtp.title = "-κρατίας"
-        wxr = WiktextractContext(wtp, Mock())
-        extract_headword_line(wxr, page_data, node, "grc")
-        wtp.close_db_conn()
-        close_thesaurus_db(wxr.thesaurus_db_path, wxr.thesaurus_db_conn)
+        self.wxr.wtp.title = "-κρατίας"
+        extract_headword_line(self.wxr, page_data, node, "grc")
         self.assertEqual(
             page_data,
             [

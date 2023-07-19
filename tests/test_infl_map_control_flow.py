@@ -5,20 +5,28 @@
 # Copyright (c) 2021-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
+
 from unittest.mock import patch
-from wiktextract.wxr_context import WiktextractContext
+
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
-from wiktextract.inflection import (expand_header, TableContext)
+from wiktextract.inflection import expand_header, TableContext
+from wiktextract.thesaurus import close_thesaurus_db
+from wiktextract.wxr_context import WiktextractContext
+
 
 class InflTests(unittest.TestCase):
-
     def setUp(self):
         self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
-
         self.wxr.wtp.start_page("testpage")
         self.wxr.wtp.start_section("English")
         self.tablecontext = TableContext("barfoo")
+
+    def tearDown(self) -> None:
+        self.wxr.wtp.close_db_conn()
+        close_thesaurus_db(
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+        )
 
     def xexpand_header(self, text, i_map, lang="English", pos="verb",
                        base_tags=[],):
@@ -211,7 +219,7 @@ class InflTests(unittest.TestCase):
                     "if": "counterfactual",
                     "then": "positive"
                 },
-            
+
             },
         }
         ret = self.xexpand_header("foo", infl_map,
@@ -229,7 +237,7 @@ class InflTests(unittest.TestCase):
                     "if": "counterfactual",
                     "then": "positive"
                 },
-            
+
             },
         }
         ret = self.xexpand_header("foo", infl_map,
@@ -248,7 +256,7 @@ class InflTests(unittest.TestCase):
         ret = self.xexpand_header("foo", infl_map,
                                   lang="Finnish",
                                   base_tags=["indicative"],)
-        expected = [("positive",)] 
+        expected = [("positive",)]
         self.assertEqual(expected, ret)
 
     def test_lang2(self):
@@ -262,7 +270,7 @@ class InflTests(unittest.TestCase):
         ret = self.xexpand_header("foo", infl_map,
                                   lang="Finnish",
                                   base_tags=["indicative"],)
-        expected = [("negative",)] 
+        expected = [("negative",)]
         self.assertEqual(expected, ret)
 
     def test_pos1(self):
@@ -276,7 +284,7 @@ class InflTests(unittest.TestCase):
         ret = self.xexpand_header("foo", infl_map,
                                   pos="noun",
                                   base_tags=["indicative"],)
-        expected = [("positive",)] 
+        expected = [("positive",)]
         self.assertEqual(expected, ret)
 
     def test_pos2(self):
@@ -290,7 +298,7 @@ class InflTests(unittest.TestCase):
         ret = self.xexpand_header("foo", infl_map,
                                   pos="noun",
                                   base_tags=["indicative"],)
-        expected = [("negative",)] 
+        expected = [("negative",)]
         self.assertEqual(expected, ret)
 
     def test_tmplt_name1(self):
@@ -303,7 +311,7 @@ class InflTests(unittest.TestCase):
         }
         ret = self.xexpand_header("foo", infl_map,
                                   pos="noun",)
-        expected = [("positive",)] 
+        expected = [("positive",)]
         self.assertEqual(expected, ret)
 
     def test_tmplt_name2(self):
@@ -316,7 +324,7 @@ class InflTests(unittest.TestCase):
         }
         ret = self.xexpand_header("foo", infl_map,
                                   pos="noun",)
-        expected = [("negative",)] 
+        expected = [("negative",)]
         self.assertEqual(expected, ret)
 
     def test_combined_conditions1(self):
@@ -333,7 +341,7 @@ class InflTests(unittest.TestCase):
                                   lang="Finnish",
                                   pos="noun",
                                   base_tags=["indicative"],)
-        expected = [("positive",)] 
+        expected = [("positive",)]
         self.assertEqual(expected, ret)
 
     def test_combined_conditions2(self):
@@ -350,7 +358,7 @@ class InflTests(unittest.TestCase):
                                   lang="Finnish",
                                   pos="noun",
                                   base_tags=["indicative"],)
-        expected = [("negative",)] 
+        expected = [("negative",)]
         self.assertEqual(expected, ret)
 
     def test_combined_conditions3(self):
@@ -367,7 +375,7 @@ class InflTests(unittest.TestCase):
                                   lang="Finnish",
                                   pos="noun",
                                   base_tags=["indicative"],)
-        expected = [("negative",)] 
+        expected = [("negative",)]
         self.assertEqual(expected, ret)
 
     def test_combined_conditions4(self):
@@ -384,7 +392,7 @@ class InflTests(unittest.TestCase):
                                   lang="Finnish",
                                   pos="noun",
                                   base_tags=["indicative"],)
-        expected = [("negative",)] 
+        expected = [("negative",)]
         self.assertEqual(expected, ret)
 
     def test_combined_conditions5(self):
@@ -401,7 +409,7 @@ class InflTests(unittest.TestCase):
                                   lang="Finnish",
                                   pos="noun",
                                   base_tags=["indicative"],)
-        expected = [("negative",)] 
+        expected = [("negative",)]
         self.assertEqual(expected, ret)
 
     def test_combined_conditions6(self):
@@ -418,7 +426,7 @@ class InflTests(unittest.TestCase):
                                   lang="Finnish",
                                   pos="noun",
                                   base_tags=["indicative"],)
-        expected = [("negative",)] 
+        expected = [("negative",)]
         self.assertEqual(expected, ret)
 
     def test_combined_conditions7(self):
@@ -435,7 +443,7 @@ class InflTests(unittest.TestCase):
                                   lang="Finnish",
                                   pos="noun",
                                   base_tags=["indicative"],)
-        expected = [("negative",)] 
+        expected = [("negative",)]
         self.assertEqual(expected, ret)
 
     def test_combined_conditions8(self):
@@ -452,7 +460,7 @@ class InflTests(unittest.TestCase):
                                   lang="Finnish",
                                   pos="noun",
                                   base_tags=["indicative"],)
-        expected = [("negative",)] 
+        expected = [("negative",)]
         self.assertEqual(expected, ret)
 
     def test_combined_conditions9(self):
@@ -470,7 +478,7 @@ class InflTests(unittest.TestCase):
                                   lang="English",
                                   pos="verb",
                                   base_tags=["indicative"],)
-        expected = [("positive",)] 
+        expected = [("positive",)]
         self.assertEqual(expected, ret)
 
     def test_mixed1(self):
@@ -496,7 +504,7 @@ class InflTests(unittest.TestCase):
                                   lang="Finnish",
                                   pos="noun",
                                   base_tags=["indicative"],)
-        expected = [("positive",)] 
+        expected = [("positive",)]
         self.assertEqual(expected, ret)
 
     def test_mixed2(self):
@@ -522,7 +530,7 @@ class InflTests(unittest.TestCase):
                                   lang="English",
                                   pos="noun",
                                   base_tags=["indicative"],)
-        expected = [("positive",)] 
+        expected = [("positive",)]
         self.assertEqual(expected, ret)
 
     def test_mixed3(self):
@@ -548,8 +556,5 @@ class InflTests(unittest.TestCase):
                                   lang="English",
                                   pos="verb",
                                   base_tags=["indicative"],)
-        expected = [("positive",)] 
+        expected = [("positive",)]
         self.assertEqual(expected, ret)
-
-            
-

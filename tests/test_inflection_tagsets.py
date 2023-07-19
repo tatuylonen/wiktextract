@@ -3,21 +3,27 @@
 # Tests for parsing inflection tables
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
-
 import unittest
-from wiktextract.wxr_context import WiktextractContext
+
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.inflection import or_tagsets, and_tagsets
+from wiktextract.thesaurus import close_thesaurus_db
+from wiktextract.wxr_context import WiktextractContext
 
-class TagsetTests(unittest.TestCase):
 
+class InflTests(unittest.TestCase):
     def setUp(self):
         self.maxDiff = 100000
         self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
-
         self.wxr.wtp.start_page("testpage")
         self.wxr.wtp.start_section("English")
+
+    def tearDown(self) -> None:
+        self.wxr.wtp.close_db_conn()
+        close_thesaurus_db(
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+        )
 
     def xop(self, op, ts1, ts2, expected, lang="English", pos="verb"):
         assert callable(op)
