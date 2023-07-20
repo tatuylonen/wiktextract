@@ -431,7 +431,7 @@ foo
 
     @patch(
         "wikitextprocessor.Wtp.get_page",
-        return_value=Page("test", 10, None, False, "", "wikitext"),
+        return_value=Page(title="test", namespace_id=10, body=""),
     )
     def test_ARF_page(self, mock_get_page) -> None:
         """
@@ -449,19 +449,15 @@ foo
         )
         self.assertEqual(
             data[0].get("senses", [{}])[0].get("glosses"),
-            ["\"Abort, Retry, Fail?\""]
+            ['"Abort, Retry, Fail?"'],
         )
-
 
     @patch(
         "wikitextprocessor.Wtp.get_page",
         return_value=Page(
-            "Template:ux",
-            10,
-            None,
-            False,
-            "Name given to a number of one-piece attires",
-            "wikitext"
+            title="Template:ux",
+            namespace_id=10,
+            body="Name given to a number of one-piece attires",
         ),
     )
     def test_ux_template_in_gloss(self, mock_get_page) -> None:
@@ -479,5 +475,54 @@ foo
         )
         self.assertEqual(
             data[0].get("senses", [{}])[0].get("glosses"),
-            ["Name given to a number of one-piece attires"]
+            ["Name given to a number of one-piece attires"],
+        )
+
+    @patch(
+        "wikitextprocessor.Wtp.get_page",
+        return_value=Page(
+            title="Template:head",
+            namespace_id=10,
+            body='<strong class="Latn headword" lang="ga">shail</strong>[[Category:Irish non-lemma forms|SHAIL]][[Category:Irish mutated nouns|SHAIL]]',
+        ),
+    )
+    def test_gloss_not_inside_list(self, mock_get_page):
+        # https://en.wiktionary.org/wiki/shail
+        self.wxr.wtp.start_page("shail")
+        data = self.runpage(
+            """
+==Irish==
+
+===Noun===
+{{head|ga|mutated noun}}
+
+1. Celtic
+            """
+        )
+        self.assertEqual(
+            data,
+            [
+                {
+                    "head_templates": [
+                        {
+                            "args": {"1": "ga", "2": "mutated noun"},
+                            "expansion": "shail",
+                            "name": "head",
+                        }
+                    ],
+                    "lang": "Irish",
+                    "lang_code": "ga",
+                    "pos": "noun",
+                    "senses": [
+                        {
+                            "categories": [
+                                "Irish mutated nouns",
+                                "Irish non-lemma forms",
+                            ],
+                            "glosses": ["Celtic"],
+                        }
+                    ],
+                    "word": "shail",
+                }
+            ],
         )
