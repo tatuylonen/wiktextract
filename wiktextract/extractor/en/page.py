@@ -2738,6 +2738,8 @@ def parse_language(wxr, langnode, language, lang_code):
         nonlocal etym_data
         nonlocal pos_data
 
+        redirect_list: List[str] = []  # for `zh-see` template
+
         def skip_template_fn(name, ht):
             """This is called for otherwise unprocessed parts of the page.
             We still expand them so that e.g. Category links get captured."""
@@ -2754,6 +2756,15 @@ def parse_language(wxr, langnode, language, lang_code):
             if not isinstance(node, WikiNode):
                 # print("  X{}".format(repr(node)[:40]))
                 continue
+            if node.kind == NodeKind.TEMPLATE:
+                template_name = node.args[0][0]
+                if template_name == "zh-see":
+                    # handle Chinese character variant redirect
+                    # https://en.wikipedia.org/wiki/Variant_Chinese_characters
+                    redirect_to = node.args[1][0]
+                    redirect_list.append(redirect_to)
+                continue
+
             if node.kind not in LEVEL_KINDS:
                 # XXX handle e.g. wikipedia links at the top of a language
                 # XXX should at least capture "also" at top of page
@@ -2862,6 +2873,11 @@ def parse_language(wxr, langnode, language, lang_code):
             stack.append(t)
             process_children(node, pos)
             stack.pop()
+
+        if len(redirect_list) > 0:
+            new_page_data = base_data.copy()
+            new_page_data["redirects"] = redirect_list
+            page_datas.append(new_page_data)
 
     def extract_examples(others, sense_base):
         """Parses through a list of definitions and quotes to find examples.

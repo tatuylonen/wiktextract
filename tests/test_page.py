@@ -4,10 +4,14 @@
 
 import json
 import unittest
-from wiktextract.wxr_context import WiktextractContext
-from wikitextprocessor import Wtp
+
+from unittest.mock import patch
+
+from wikitextprocessor import Wtp, Page
 from wiktextract.config import WiktionaryConfig
 from wiktextract.page import parse_page
+from wiktextract.wxr_context import WiktextractContext
+
 
 class PageTests(unittest.TestCase):
 
@@ -312,3 +316,30 @@ foo
                 "word": "testpage"
             }
         ])
+
+    @patch(
+        "wikitextprocessor.Wtp.get_page",
+        return_value=Page(title="Template:zh-see", namespace_id=10, body=""),
+    )
+    def test_zh_see(self, mock_get_page):
+        # https://en.wiktionary.org/wiki/你们
+        # GitHub issue #287
+        self.wxr.wtp.start_page("你们")
+        data = self.runpage(
+            """
+==Chinese==
+{{zh-see|你們}}
+{{zh-see|妳們}}
+            """
+        )
+        self.assertEqual(
+            data,
+            [
+                {
+                    "lang": "Chinese",
+                    "lang_code": "zh",
+                    "redirects": ["你們", "妳們"],
+                    "word": "你们"
+                }
+            ],
+        )
