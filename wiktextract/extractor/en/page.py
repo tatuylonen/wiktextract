@@ -1069,6 +1069,7 @@ def parse_language(wxr, langnode, language, lang_code):
         # if not.  Use template_allowed_pos_map.
 
         there_are_many_heads = len(pre) > 1
+        header_tags = []
         for i, (pre1, ls) in enumerate(zip(pre, lists)):
             if len(ls) == 0:
                 # don't have gloss list
@@ -1119,13 +1120,7 @@ def parse_language(wxr, langnode, language, lang_code):
             head_group = i + 1 if there_are_many_heads else None
             # print("parse_part_of_speech: {}: {}: pre={}"
                   # .format(wxr.wtp.section, wxr.wtp.subsection, pre1))
-            process_gloss_header(pre1, pos, head_group, pos_data)
-            if "tags" in pos_data:
-                common_tags = pos_data["tags"]
-                del pos_data["tags"]
-            else:
-                common_tags = []
-
+            process_gloss_header(pre1, pos, head_group, pos_data, header_tags)
             for l in ls:
                 # Parse each list associated with this head.
                 for node in l.children:
@@ -1138,19 +1133,19 @@ def parse_language(wxr, langnode, language, lang_code):
                     # the data is already pushed into a sub-gloss
                     # downstream, unless the higher level has examples
                     # that need to be put somewhere.
-                    common_data = {"tags": list(common_tags)}
+                    common_data = {"tags": list(header_tags)}
                     if head_group:
                         common_data["head_nr"] = head_group
                     parse_sense_node(node, common_data, pos)
 
         if lists == [[]]:
-            process_gloss_without_list(poschildren, pos, pos_data)
+            process_gloss_without_list(poschildren, pos, pos_data, header_tags)
 
         # If there are no senses extracted, add a dummy sense.  We want to
         # keep tags extracted from the head for the dummy sense.
         push_sense()  # Make sure unfinished data pushed, and start clean sense
         if not pos_datas:
-            data_extend(wxr, sense_data, "tags", common_tags)
+            data_extend(wxr, sense_data, "tags", header_tags)
             data_append(wxr, sense_data, "tags", "no-gloss")
             push_sense()
 
@@ -1159,6 +1154,7 @@ def parse_language(wxr, langnode, language, lang_code):
         pos_type: str,
         header_group: Optional[int],
         pos_data: Dict,
+        header_tags: List[str],
     ) -> None:
         ruby = []
         if lang_code == "ja":
@@ -1189,9 +1185,17 @@ def parse_language(wxr, langnode, language, lang_code):
             header_group,
             ruby=ruby,
         )
+        if "tags" in pos_data:
+            header_tags[:] = pos_data["tags"]
+            del pos_data["tags"]
+        else:
+            header_tags.clear()
 
     def process_gloss_without_list(
-        nodes: List[Union[WikiNode, str]], pos_type: str, pos_data: Dict
+        nodes: List[Union[WikiNode, str]],
+        pos_type: str,
+        pos_data: Dict,
+        header_tags: List[str],
     ) -> None:
         # gloss text might not inside a list
         header_nodes = []
@@ -1211,16 +1215,12 @@ def parse_language(wxr, langnode, language, lang_code):
             gloss_nodes.append(node)
 
         if len(header_nodes) > 0:
-            process_gloss_header(header_nodes, pos_type, None, pos_data)
-        if "tags" in pos_data:
-            common_tags = pos_data["tags"]
-            del pos_data["tags"]
-        else:
-            common_tags = []
-
+            process_gloss_header(
+                header_nodes, pos_type, None, pos_data, header_tags
+            )
         if len(gloss_nodes) > 0:
             process_gloss_contents(
-                gloss_nodes, pos_type, {"tags": list(common_tags)}
+                gloss_nodes, pos_type, {"tags": list(header_tags)}
             )
 
     def parse_sense_node(node, sense_base, pos):
