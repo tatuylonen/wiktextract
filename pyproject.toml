@@ -34,7 +34,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["nose2[coverage_plugin]"]
+dev = [
+    "nose2[coverage_plugin]",
+    "tomli; python_version <= '3.10'",  # for coverage parsing TOML file
+]
 
 [project.scripts]
 wiktwords = "wiktextract.wiktwords:main"
@@ -42,10 +45,15 @@ wiktwords = "wiktextract.wiktwords:main"
 [project.urls]
 homepage = "https://github.com/tatuylonen/wiktextract"
 
-[tool.setuptools.packages.find]
-exclude = ["usertools", "tests"]
+[tool.setuptools]
+packages = ["wiktextract"]
 
 [tool.setuptools.package-data]
 wiktextract = [
     "data/*/*",
 ]
+
+[tool.coverage.run]
+branch = true
+concurrency = ["multiprocessing"]
+omit = ["tests/*"]
