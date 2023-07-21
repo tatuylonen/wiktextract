@@ -1,5 +1,7 @@
 import unittest
+
 from wiktextract.hieroglyphs import convert_hiero
+
 
 class TagTests(unittest.TestCase):
     def test_phoneme(self):

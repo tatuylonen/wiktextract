@@ -1,21 +1,27 @@
 # Tests for parse_word_head()
 #
 # Copyright (c) 2021-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
-
-import unittest
 import json
-from wiktextract.wxr_context import WiktextractContext
+import unittest
+
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.form_descriptions import parse_word_head
+from wiktextract.thesaurus import close_thesaurus_db
+from wiktextract.wxr_context import WiktextractContext
+
 
 class HeadTests(unittest.TestCase):
-
     def setUp(self):
         self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
-
         self.wxr.wtp.start_page("testpage")
         self.wxr.wtp.start_section("English")
+
+    def tearDown(self) -> None:
+        self.wxr.wtp.close_db_conn()
+        close_thesaurus_db(
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+        )
 
     def test_reconstruction1(self):
         data = {}

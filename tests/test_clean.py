@@ -1,24 +1,28 @@
 import unittest
-from wiktextract.clean import clean_value
+
 from wikitextprocessor import Wtp
+from wiktextract.clean import clean_value
 from wiktextract.config import WiktionaryConfig
+from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
 class WiktExtractTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
 
-    wxr = WiktextractContext(Wtp(), WiktionaryConfig())
+    def tearDown(self) -> None:
+        self.wxr.wtp.close_db_conn()
+        close_thesaurus_db(
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+        )
 
     def test_pos(self):
         poses = self.wxr.config.POS_TYPES
-        assert isinstance(poses, set)
-        assert "noun" in poses
-        assert "verb" in poses
-        assert "pron" in poses
-        assert "adj" in poses
-        assert "adv" in poses
-        assert "num" in poses
-        assert len(poses) < 50
+        self.assertTrue(isinstance(poses, set))
+        for pos_type in ["noun", "verb", "pron", "adj", "adv", "num"]:
+            self.assertTrue(pos_type in poses)
+        self.assertLess(len(poses), 50)
 
     def test_cv_plain(self):
         v = "This is a test."
@@ -273,3 +277,12 @@ class WiktExtractTests(unittest.TestCase):
         v = "a\u200eb"
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "ab")
+
+    def test_second_ref_tag(self) -> None:
+        self.assertEqual(
+            clean_value(
+                self.wxr,
+                'some text<ref name="OED"/> some other text<ref>ref text</ref>'
+            ),
+            "some text some other text"
+        )

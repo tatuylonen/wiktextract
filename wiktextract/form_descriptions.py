@@ -938,7 +938,6 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
             u = check_unknown(len(lst), max_last_i, len(lst))
             if u:
                 # print("end max_last_i={}".format(max_last_i))
-                last_paths = pos_paths[-1]
                 for path in list(paths):  # Copy in case it is the last pos
                     pos_paths[-1].append(u + path)
 

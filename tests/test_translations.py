@@ -3,21 +3,27 @@
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
-from wiktextract.wxr_context import WiktextractContext
+
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.form_descriptions import parse_translation_desc
+from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.translations import parse_translation_item_text
+from wiktextract.wxr_context import WiktextractContext
 
 
 class TrTests(unittest.TestCase):
-
     def setUp(self):
         self.maxDiff = 20000
         self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
-
         self.wxr.wtp.start_page("abolitionism")  # Note: some tests use last char
         self.wxr.wtp.start_section("English")
+
+    def tearDown(self) -> None:
+        self.wxr.wtp.close_db_conn()
+        close_thesaurus_db(
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+        )
 
     def runtr(self, item, sense=None, pos_datas=None,
               lang=None, langcode=None, translations_from_template=None,

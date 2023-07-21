@@ -2,8 +2,9 @@ import unittest
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
-from wiktextract.wxr_context import WiktextractContext
 from wiktextract.extractor.zh.linkage import extract_linkages
+from wiktextract.thesaurus import close_thesaurus_db
+from wiktextract.wxr_context import WiktextractContext
 
 
 class TestLinkage(unittest.TestCase):
@@ -14,6 +15,9 @@ class TestLinkage(unittest.TestCase):
 
     def tearDown(self):
         self.wxr.wtp.close_db_conn()
+        close_thesaurus_db(
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+        )
 
     def test_sense_term_list(self):
         page_data = [

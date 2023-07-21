@@ -9,10 +9,12 @@ import html
 import logging
 
 from collections import defaultdict
-from typing import Dict, List
+from functools import partial
+from typing import Dict, List, Optional, Set, Union
 
-from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import WikiNode, NodeKind
+from wikitextprocessor.core import TemplateArgs
+from wiktextract.wxr_context import WiktextractContext
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.linkages import parse_linkage_item_text
 from wiktextract.translations import parse_translation_item_text
@@ -30,6 +32,7 @@ from wiktextract.form_descriptions import (
 from wiktextract.inflection import parse_inflection_section, TableContext
 
 from ..ruby import extract_ruby, parse_ruby
+from ..share import strip_nodes
 
 
 # Matches head tag
@@ -1029,11 +1032,10 @@ def parse_language(wxr, langnode, language, lang_code):
                 # There's head_tag_re that seems like a regex meant
                 # to identify head templates. Too bad it's None.
 
-                # stop processing at {{category}}, {{cat}}... etc.
+                # ignore {{category}}, {{cat}}... etc.
                 if node.args[0][0] in stop_head_at_these_templates:
                     # we've reached a template that should be at the end,
-                    # just break without special processing
-                    break
+                    continue
 
                 # skip these templates; panel_templates is already used
                 # to skip certain templates else, but it also applies to
@@ -1067,8 +1069,12 @@ def parse_language(wxr, langnode, language, lang_code):
         # if not.  Use template_allowed_pos_map.
 
         there_are_many_heads = len(pre) > 1
+        header_tags = []
         for i, (pre1, ls) in enumerate(zip(pre, lists)):
-            ruby = []
+            if len(ls) == 0:
+                # don't have gloss list
+                continue
+
             if all(not sl for sl in lists[i:]):
                 if i == 0:
                     if isinstance(node, str):
@@ -1114,42 +1120,7 @@ def parse_language(wxr, langnode, language, lang_code):
             head_group = i + 1 if there_are_many_heads else None
             # print("parse_part_of_speech: {}: {}: pre={}"
                   # .format(wxr.wtp.section, wxr.wtp.subsection, pre1))
-            if lang_code == "ja":
-                exp = wxr.wtp.parse(
-                    wxr.wtp.node_to_wikitext(pre1), expand_all=True
-                )
-                rub, _ = recursively_extract(
-                    exp.children,
-                    lambda x: isinstance(x, WikiNode)
-                    and x.kind == NodeKind.HTML
-                    and x.args == "ruby"
-                )
-                if rub is not None:
-                    for r in rub:
-                        rt = parse_ruby(wxr, r)
-                        if rt is not None:
-                            ruby.append(rt)
-            text = clean_node(
-                wxr, pos_data, pre1, post_template_fn=head_post_template_fn
-            )
-            text = re.sub(r"\s+", " ", text)  # Any newlines etc to spaces
-            parse_word_head(
-                wxr,
-                pos,
-                text,
-                pos_data,
-                is_reconstruction,
-                head_group,
-                ruby=ruby,
-            )
-            text = None
-            if "tags" in pos_data:
-                common_tags = pos_data["tags"]
-                del pos_data["tags"]
-            else:
-                common_tags = []
-
-
+            process_gloss_header(pre1, pos, head_group, pos_data, header_tags)
             for l in ls:
                 # Parse each list associated with this head.
                 for node in l.children:
@@ -1162,19 +1133,95 @@ def parse_language(wxr, langnode, language, lang_code):
                     # the data is already pushed into a sub-gloss
                     # downstream, unless the higher level has examples
                     # that need to be put somewhere.
-                    common_data = {"tags": list(common_tags)}
+                    common_data = {"tags": list(header_tags)}
                     if head_group:
                         common_data["head_nr"] = head_group
                     parse_sense_node(node, common_data, pos)
 
+        if lists == [[]]:
+            process_gloss_without_list(poschildren, pos, pos_data, header_tags)
 
         # If there are no senses extracted, add a dummy sense.  We want to
         # keep tags extracted from the head for the dummy sense.
         push_sense()  # Make sure unfinished data pushed, and start clean sense
         if not pos_datas:
-            data_extend(wxr, sense_data, "tags", common_tags)
+            data_extend(wxr, sense_data, "tags", header_tags)
             data_append(wxr, sense_data, "tags", "no-gloss")
             push_sense()
+
+    def process_gloss_header(
+        header_nodes: List[Union[WikiNode, str]],
+        pos_type: str,
+        header_group: Optional[int],
+        pos_data: Dict,
+        header_tags: List[str],
+    ) -> None:
+        ruby = []
+        if lang_code == "ja":
+            exp = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(header_nodes), expand_all=True
+            )
+            rub, _ = recursively_extract(
+                exp.children,
+                lambda x: isinstance(x, WikiNode)
+                and x.kind == NodeKind.HTML
+                and x.args == "ruby"
+            )
+            if rub is not None:
+                for r in rub:
+                    rt = parse_ruby(wxr, r)
+                    if rt is not None:
+                        ruby.append(rt)
+        header_text = clean_node(
+            wxr, pos_data, header_nodes, post_template_fn=head_post_template_fn
+        )
+        header_text = re.sub(r"\s+", " ", header_text)
+        parse_word_head(
+            wxr,
+            pos_type,
+            header_text,
+            pos_data,
+            is_reconstruction,
+            header_group,
+            ruby=ruby,
+        )
+        if "tags" in pos_data:
+            header_tags[:] = pos_data["tags"]
+            del pos_data["tags"]
+        else:
+            header_tags.clear()
+
+    def process_gloss_without_list(
+        nodes: List[Union[WikiNode, str]],
+        pos_type: str,
+        pos_data: Dict,
+        header_tags: List[str],
+    ) -> None:
+        # gloss text might not inside a list
+        header_nodes = []
+        gloss_nodes = []
+        for node in strip_nodes(nodes):
+            if isinstance(node, WikiNode):
+                if node.kind == NodeKind.TEMPLATE:
+                    template_name = node.args[0][0]
+                    if (
+                            template_name == "head"
+                            or template_name.startswith(f"{lang_code}-")
+                    ):
+                        header_nodes.append(node)
+                        continue
+                elif node.kind in LEVEL_KINDS:  # following nodes are not gloss
+                    break
+            gloss_nodes.append(node)
+
+        if len(header_nodes) > 0:
+            process_gloss_header(
+                header_nodes, pos_type, None, pos_data, header_tags
+            )
+        if len(gloss_nodes) > 0:
+            process_gloss_contents(
+                gloss_nodes, pos_type, {"tags": list(header_tags)}
+            )
 
     def parse_sense_node(node, sense_base, pos):
         """Recursively (depth first) parse LIST_ITEM nodes for sense data.
@@ -1290,7 +1337,28 @@ def parse_language(wxr, langnode, language, lang_code):
                                           pos)
                 return added
 
-        def sense_template_fn(name, ht):
+        return process_gloss_contents(
+            contents,
+            pos,
+            sense_base,
+            subentries,
+            others,
+            gloss_template_args,
+            added,
+        )
+
+    def process_gloss_contents(
+        contents: List[Union[str, WikiNode]],
+        pos: str,
+        sense_base: Dict,
+        subentries: List[WikiNode] = [],
+        others: List[WikiNode] = [],
+        gloss_template_args: Set[str] = set(),
+        added: bool = False,
+    ) -> bool:
+        def sense_template_fn(
+            name: str, ht: TemplateArgs, is_gloss: bool = False
+        ) -> Optional[str]:
             # print(f"sense_template_fn: {name}, {ht}")
             if name in wikipedia_templates:
                 # parse_wikipedia_template(wxr, pos_data, ht)
@@ -1313,10 +1381,28 @@ def parse_language(wxr, langnode, language, lang_code):
             if name == "†" or name == "zh-obsolete":
                 data_append(wxr, sense_base, "tags", "obsolete")
                 return ""
-            if name in ("ux", "uxi", "usex", "afex", "zh-x", "prefixusex",
-                        "ko-usex", "ko-x", "hi-x", "ja-usex-inline", "ja-x",
-                        "quotei", "zh-x", "he-x", "hi-x", "km-x", "ne-x",
-                        "shn-x", "th-x", "ur-x"):
+            if not is_gloss and name in {
+                "ux",
+                "uxi",
+                "usex",
+                "afex",
+                "zh-x",
+                "prefixusex",
+                "ko-usex",
+                "ko-x",
+                "hi-x",
+                "ja-usex-inline",
+                "ja-x",
+                "quotei",
+                "zh-x",
+                "he-x",
+                "hi-x",
+                "km-x",
+                "ne-x",
+                "shn-x",
+                "th-x",
+                "ur-x",
+            }:
                 # Usage examples are captured separately below.  We don't
                 # want to expand them into glosses even when unusual coding
                 # is used in the entry.
@@ -1336,13 +1422,10 @@ def parse_language(wxr, langnode, language, lang_code):
                                  wxr.config.FORM_OF_TEMPLATES, sense_base)
             return None
 
-        link_tuples = []
-
         def extract_link_texts(item):
             """Recursively extracts link texts from the gloss source.  This
             information is used to select whether to remove final "." from
             form_of/alt_of (e.g., ihm/Hunsrik)."""
-            nonlocal link_tuples
             if isinstance(item, (list, tuple)):
                 for x in item:
                     extract_link_texts(x)
@@ -1370,18 +1453,23 @@ def parse_language(wxr, langnode, language, lang_code):
 
         # get the raw text of non-list contents of this node, and other stuff
         # like tag and category data added to sense_base
-        rawgloss = clean_node(wxr, sense_base, contents,
-                              template_fn=sense_template_fn,
-                              collect_links=True)
+        rawgloss = clean_node(
+            wxr,
+            sense_base,
+            contents,
+            template_fn=partial(sense_template_fn, is_gloss=True),
+            collect_links=True,
+        )
 
         if not rawgloss:
             return False
 
+        # remove manually typed ordered list text at the start("1. ")
+        rawgloss = re.sub(r"^\d+\.\s+", "", rawgloss)
+
         # get stuff like synonyms and categories from "others",
         # maybe examples and quotations
-        clean_node(wxr, sense_base, others,
-                              template_fn=sense_template_fn)
-
+        clean_node(wxr, sense_base, others, template_fn=sense_template_fn)
 
         # Generate no gloss for translation hub pages, but add the
         # "translation-hub" tag for them
@@ -1647,6 +1735,10 @@ def parse_language(wxr, langnode, language, lang_code):
                         data_extend(wxr, sense_data, "tags", tags)
                         data_append(wxr, sense_data, "form_of", dt)
 
+        if len(sense_data) == 0:
+            if len(sense_base.get("tags")) == 0:
+                del sense_base["tags"]
+            sense_data.update(sense_base)
         if push_sense():
             # push_sense succeded in adding a sense to pos_data
             added = True
@@ -1766,7 +1858,7 @@ def parse_language(wxr, langnode, language, lang_code):
             # under "forms".
             if wxr.config.capture_inflections:
                 tablecontext = None
-                m = re.search("{{([^}{|]+)\|?", text)
+                m = re.search(r"{{([^}{|]+)\|?", text)
                 if m:
                     template_name = m.group(1)
                     tablecontext = TableContext(template_name)
@@ -2931,7 +3023,7 @@ def parse_language(wxr, langnode, language, lang_code):
                                      template_fn=usex_template_fn)
                 subtext = re.sub(r"\s*\(please add an English "
                                  r"translation of this "
-                                 "(example|usage example|quote)\)",
+                                 r"(example|usage example|quote)\)",
                                  "", subtext).strip()
                 subtext = re.sub(r"\^\([^)]*\)", "", subtext)
                 subtext = re.sub(r"\s*[―—]+$", "", subtext)
