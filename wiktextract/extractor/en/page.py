@@ -1193,18 +1193,21 @@ def parse_language(wxr, langnode, language, lang_code):
     def process_gloss_without_list(
         nodes: List[Union[WikiNode, str]], pos_type: str, pos_data: Dict
     ) -> None:
-        # gloss text might not be inside a list
+        # gloss text might not inside a list
         header_nodes = []
         gloss_nodes = []
         for node in strip_nodes(nodes):
-            if isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE:
-                template_name = node.args[0][0]
-                if (
-                    template_name == "head"
-                    or template_name.startswith(f"{lang_code}-")
-                ):
-                    header_nodes.append(node)
-                    continue
+            if isinstance(node, WikiNode):
+                if node.kind == NodeKind.TEMPLATE:
+                    template_name = node.args[0][0]
+                    if (
+                            template_name == "head"
+                            or template_name.startswith(f"{lang_code}-")
+                    ):
+                        header_nodes.append(node)
+                        continue
+                elif node.kind in LEVEL_KINDS:  # following nodes are not gloss
+                    break
             gloss_nodes.append(node)
 
         if len(header_nodes) > 0:

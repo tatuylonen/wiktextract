@@ -497,6 +497,10 @@ foo
 {{head|ga|mutated noun}}
 
 1. Celtic
+
+====Translations====
+
+foo
             """
         )
         self.assertEqual(
