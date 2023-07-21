@@ -1,7 +1,8 @@
-import unittest
 import collections
+import unittest
 
-from wiktextract.wiktionary import WiktionaryConfig, parse_wiktionary
+from wiktextract.config import WiktionaryConfig
+from wiktextract.wiktionary import parse_wiktionary
 from wiktextract.wxr_context import WiktextractContext
 from wiktextract.thesaurus import close_thesaurus_db, search_thesaurus
 from wikitextprocessor import Wtp
