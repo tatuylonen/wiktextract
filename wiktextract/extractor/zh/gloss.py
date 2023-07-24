@@ -1,15 +1,15 @@
 import re
-
 from collections import defaultdict
 from typing import Dict, List, Union
 
-from wikitextprocessor import WikiNode, NodeKind
+from wikitextprocessor import NodeKind, WikiNode
+
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from .example import extract_examples
-from ..share import  contains_list, filter_child_wikinodes
 from ..ruby import extract_ruby
+from ..share import contains_list, filter_child_wikinodes
+from .example import extract_examples
 
 
 def extract_gloss(
