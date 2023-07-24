@@ -9,6 +9,21 @@ from wiktextract.wxr_context import WiktextractContext
 from ..share import strip_nodes
 
 
+# https://zh.wiktionary.org/wiki/Category:日語變格表模板
+JAPANESE_INFLECTION_TEMPLATE_PREFIXES = (
+    "ja-i",
+    "ja-adj-infl",
+    "ja-conj-bungo",
+    "ja-go",
+    "ja-honorific",
+    "ja-ichi",
+    "ja-kuru",
+    "ja-suru",
+    "ja-verbconj",
+    "ja-zuru",
+)
+
+
 def extract_inflections(
     wxr: WiktextractContext,
     page_data: List[Dict],
@@ -17,7 +32,7 @@ def extract_inflections(
     for child in node.children:
         if isinstance(child, WikiNode) and child.kind == NodeKind.TEMPLATE:
             template_name = child.args[0][0].lower()
-            if template_name == "ja-i":
+            if template_name.startswith(JAPANESE_INFLECTION_TEMPLATE_PREFIXES):
                 expanded_table = wxr.wtp.parse(
                     wxr.wtp.node_to_wikitext(node), expand_all=True
                 )
