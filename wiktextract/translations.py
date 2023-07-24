@@ -5,9 +5,8 @@
 import re
 import copy
 from wiktextract.wxr_context import WiktextractContext
-from wikitextprocessor import Wtp, MAGIC_FIRST, MAGIC_LAST
+from wikitextprocessor import MAGIC_FIRST, MAGIC_LAST
 
-from .config import WiktionaryConfig
 from .datautils import split_at_comma_semi, data_append, data_extend
 from .form_descriptions import (classify_desc, decode_tags,
                                 nested_translations_re, tr_note_re,

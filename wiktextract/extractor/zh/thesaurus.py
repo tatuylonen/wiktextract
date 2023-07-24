@@ -1,13 +1,12 @@
 import logging
 import re
 import time
+from typing import List, Optional, Union
 
-from typing import Union, List, Optional
+from wikitextprocessor import NodeKind, Page, WikiNode
 
-from wiktextract.wxr_context import WiktextractContext
 from wiktextract.page import clean_node
-from wikitextprocessor import NodeKind, WikiNode, Page
-
+from wiktextract.wxr_context import WiktextractContext
 
 SENSE_SUBTITLE_PREFIX = "詞義："
 IGNORED_LEVEL3_SUBTITLES = {
@@ -234,9 +233,9 @@ def recursive_parse(
 
 def extract_thesaurus_data(wxr: WiktextractContext) -> None:
     from wiktextract.thesaurus import (
-        thesaurus_linkage_number,
-        insert_thesaurus_terms,
         ThesaurusTerm,
+        insert_thesaurus_terms,
+        thesaurus_linkage_number,
     )
 
     start_t = time.time()

@@ -1,12 +1,12 @@
 import hashlib
 import re
+from typing import Dict, List, Optional, Union
 
-from typing import Dict, List, Union, Optional
+from wikitextprocessor import NodeKind, WikiNode
 
-from wikitextprocessor import WikiNode, NodeKind
-from wiktextract.wxr_context import WiktextractContext
+from wiktextract.extractor.share import WIKIMEDIA_COMMONS_URL, contains_list
 from wiktextract.page import clean_node
-from wiktextract.extractor.share import contains_list, WIKIMEDIA_COMMONS_URL
+from wiktextract.wxr_context import WiktextractContext
 
 
 def extract_pronunciation_recursively(

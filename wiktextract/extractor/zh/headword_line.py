@@ -1,15 +1,14 @@
 import re
-
 from typing import Dict, List, Union
 
-from wikitextprocessor import WikiNode, NodeKind
+from wikitextprocessor import NodeKind, WikiNode
+
 from wiktextract.datautils import data_append, data_extend
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby
-from ..share import strip_nodes, filter_child_wikinodes
-
+from ..share import filter_child_wikinodes, strip_nodes
 
 # https://zh.wiktionary.org/wiki/Module:Gender_and_number
 GENDERS = {

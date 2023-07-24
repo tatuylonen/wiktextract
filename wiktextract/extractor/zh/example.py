@@ -1,12 +1,13 @@
-from typing import Union, List, Dict
+from typing import Dict, List, Union
 
-from wikitextprocessor import WikiNode, NodeKind
+from wikitextprocessor import NodeKind, WikiNode
+
 from wiktextract.datautils import data_append
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from ..share import contains_list, strip_nodes
 from ..ruby import extract_ruby
+from ..share import contains_list, strip_nodes
 
 
 def extract_examples(

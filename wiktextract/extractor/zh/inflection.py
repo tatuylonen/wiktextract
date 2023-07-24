@@ -1,13 +1,12 @@
-from typing import List, Dict
+from typing import Dict, List
 
-from wikitextprocessor import WikiNode, NodeKind
+from wikitextprocessor import NodeKind, WikiNode
 
 from wiktextract.datautils import data_append
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from ..share import strip_nodes
-
 
 # https://zh.wiktionary.org/wiki/Category:日語變格表模板
 JAPANESE_INFLECTION_TEMPLATE_PREFIXES = (

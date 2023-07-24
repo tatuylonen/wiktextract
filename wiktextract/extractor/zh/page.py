@@ -1,20 +1,20 @@
 import copy
 import logging
 import string
+from typing import Any, Dict, List, Union
 
-from typing import Dict, List, Union, Any
+from wikitextprocessor import NodeKind, WikiNode
 
-from wikitextprocessor import WikiNode, NodeKind
-from wiktextract.page import clean_node, LEVEL_KINDS
+from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from ..share import strip_nodes
 from .gloss import extract_gloss
 from .headword_line import extract_headword_line
 from .inflection import extract_inflections
 from .linkage import extract_linkages
 from .pronunciation import extract_pronunciation_recursively
-from ..share import strip_nodes
-
+from .translation import extract_translation
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -93,9 +93,6 @@ PANEL_PREFIXES = {
 ADDITIONAL_EXPAND_TEMPLATES = {
     "multitrans",
     "multitrans-nowiki",
-    "trans-top",
-    "trans-top-also",
-    "trans-bottom",
     "checktrans-top",
     "checktrans-bottom",
     "col1",
@@ -179,6 +176,11 @@ def recursive_parse(
                 wxr.config.LINKAGE_SUBTITLES[subtitle],
                 None,
             )
+        elif (
+            wxr.config.capture_translations
+            and subtitle == wxr.config.OTHER_SUBTITLES["translations"]
+        ):
+            extract_translation(wxr, page_data, node)
 
 
 def process_pos_block(
@@ -208,6 +210,12 @@ def process_pos_block(
                     in wxr.config.OTHER_SUBTITLES["inflection_sections"]
                 ):
                     extract_inflections(wxr, page_data, child)
+                elif (
+                    wxr.config.capture_translations
+                    and child_level_text
+                    == wxr.config.OTHER_SUBTITLES["translations"]
+                ):
+                    extract_translation(wxr, page_data, child)
         else:
             recursive_parse(wxr, page_data, base_data, child)
 

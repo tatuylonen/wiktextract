@@ -1,7 +1,8 @@
 from functools import partial
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Optional, Union
 
-from wikitextprocessor import WikiNode, NodeKind
+from wikitextprocessor import NodeKind, WikiNode
+
 from wiktextract.datautils import data_append
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
