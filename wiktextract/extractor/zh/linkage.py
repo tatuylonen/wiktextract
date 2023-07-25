@@ -196,20 +196,23 @@ def add_linkage_data(
         from rapidfuzz.process import extractOne
         from rapidfuzz.utils import default_process
 
-        choices = {
-            sense_dict.get("raw_glosses", sense_dict.get("glosses", [""]))[
-                0
-            ]: sense_dict
+        choices = [
+            sense_dict.get("raw_glosses", sense_dict.get("glosses", [""]))[0]
             for sense_dict in page_data[-1]["senses"]
-        }
+        ]
         if match_result := extractOne(
             linkage_data["sense"],
-            choices.keys(),
+            choices,
             score_cutoff=85,
             scorer=partial(partial_token_set_ratio, processor=default_process),
         ):
-            match_gloss = match_result[0]
-            data_append(wxr, choices[match_gloss], linkage_type, linkage_data)
+            match_sense_index = match_result[2]
+            data_append(
+                wxr,
+                page_data[-1]["senses"][match_sense_index],
+                linkage_type,
+                linkage_data,
+            )
             return
 
     data_append(wxr, page_data[-1], linkage_type, linkage_data)
