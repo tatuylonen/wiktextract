@@ -328,7 +328,7 @@ This software requires Python 3.
 
 This package includes tests written using the `unittest` framework.
 They can be run using, for example, `nose2`, which can be installed
-using `python -m pip install -e ".[dev]"`.
+using `python -m pip install --use-pep517 -e ".[dev]"`.
 
 To run the tests, use the following command in the top-level directory:
 

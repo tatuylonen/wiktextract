@@ -1,5 +1,5 @@
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
 
@@ -7,7 +7,11 @@ from wiktextract.datautils import data_append
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from ..share import contains_list, filter_child_wikinodes
+from ..share import (
+    capture_text_in_parentheses,
+    contains_list,
+    filter_child_wikinodes,
+)
 
 
 def extract_translation(
@@ -93,25 +97,16 @@ def process_translation_list_item(
 
     # split words by `,` or `;` that are not inside `()`
     for word_and_tags in re.split(r"[,;、](?![^(]*\))\s*", words_text):
-        word_parts = []
-        last_group_end = 0
+        tags, word = capture_text_in_parentheses(word_and_tags)
+        tags = [tag for tag in tags if tag != lang_code]  # rm Wiktionary link
         translation_data = {
             "code": lang_code,
             "lang": lang_text,
+            "word": word,
         }
-        for m in re.finditer(r"\([^()]+\)", word_and_tags):
-            not_captured = word_and_tags[last_group_end : m.start()].strip()
-            if len(not_captured) > 0:
-                word_parts.append(not_captured)
-            last_group_end = m.end()
-            tag = m.group()[1:-1]
-            if tag != lang_code:  # Wiktionary link
-                data_append(wxr, translation_data, "tags", tag)
+        if len(tags) > 0:
+            translation_data["tags"] = tags
         # TODO: handle gender text
-
-        translation_data["word"] = (
-            " ".join(word_parts) if len(word_parts) else word_and_tags
-        )
         if len(sense) > 0:
             translation_data["sense"] = sense
         data_append(wxr, page_data[-1], "translations", translation_data)

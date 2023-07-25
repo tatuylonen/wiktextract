@@ -47,10 +47,10 @@ def extract_gloss(
             for child_node in filter_child_wikinodes(
                 list_item_node, NodeKind.LIST
             ):
-                if child_node.args.endswith("#"): # nested gloss
+                if child_node.args.endswith("#"):  # nested gloss
                     has_nested_gloss = True
                     extract_gloss(wxr, page_data, child_node, new_gloss_data)
-                else: # example list
+                else:  # example list
                     extract_examples(wxr, new_gloss_data, child_node)
 
         if not has_nested_gloss:

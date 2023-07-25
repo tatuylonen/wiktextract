@@ -1,6 +1,7 @@
-from typing import List, Tuple, Optional, Union
+from typing import List, Optional, Tuple, Union
 
-from wikitextprocessor import WikiNode, NodeKind
+from wikitextprocessor import NodeKind, WikiNode
+
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 

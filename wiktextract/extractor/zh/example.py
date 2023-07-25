@@ -43,9 +43,7 @@ def extract_examples(
                             example_data["text"] = clean_node(wxr, None, child)
 
             if "text" in example_data or "texts" in example_data:
-                data_append(
-                    wxr, sense_data, "examples", example_data
-                )
+                data_append(wxr, sense_data, "examples", example_data)
         else:
             extract_examples(wxr, sense_data, node.children)
 
