@@ -199,7 +199,7 @@ def process_pos_block(
                 lang_code = base_data.get("lang_code")
                 extract_headword_line(wxr, page_data, child, lang_code)
             elif child.kind == NodeKind.LIST:
-                extract_gloss(wxr, page_data, child.children, {})
+                extract_gloss(wxr, page_data, child, {})
             elif child.kind in LEVEL_KINDS:
                 child_level_text = clean_node(wxr, None, child.args)
                 child_level_text = child_level_text.rstrip(string.digits)

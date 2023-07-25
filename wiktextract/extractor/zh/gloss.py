@@ -1,6 +1,6 @@
 import re
 from collections import defaultdict
-from typing import Dict, List, Union
+from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
 
@@ -15,17 +15,14 @@ from .example import extract_examples
 def extract_gloss(
     wxr: WiktextractContext,
     page_data: List[Dict],
-    nodes: List[Union[WikiNode, str]],
+    list_node: WikiNode,
     gloss_data: Dict[str, List[str]],
 ) -> None:
     lang_code = page_data[-1].get("lang_code")
-    for node in filter(
-        lambda n: isinstance(n, WikiNode) and n.kind == NodeKind.LIST_ITEM,
-        nodes,
-    ):
+    for list_item_node in filter_child_wikinodes(list_node, NodeKind.LIST_ITEM):
         gloss_nodes = [
             child
-            for child in node.children
+            for child in list_item_node.children
             if not isinstance(child, WikiNode) or child.kind != NodeKind.LIST
         ]
         if lang_code == "ja":
@@ -44,25 +41,19 @@ def extract_gloss(
         )
         if len(ruby_data) > 0:
             new_gloss_data["ruby"] = ruby_data
-        if contains_list(node.children):
-            for child_node in filter_child_wikinodes(node, NodeKind.LIST):
-                if child_node.args.endswith("#"):
-                    # nested gloss
-                    extract_gloss(
-                        wxr,
-                        page_data,
-                        child_node.children,
-                        new_gloss_data,
-                    )
-                else:
-                    # example list
-                    page_data[-1]["senses"].append(new_gloss_data)
-                    extract_examples(
-                        wxr,
-                        page_data,
-                        child_node,
-                    )
-        else:
+
+        has_nested_gloss = False
+        if contains_list(list_item_node.children):
+            for child_node in filter_child_wikinodes(
+                list_item_node, NodeKind.LIST
+            ):
+                if child_node.args.endswith("#"): # nested gloss
+                    has_nested_gloss = True
+                    extract_gloss(wxr, page_data, child_node, new_gloss_data)
+                else: # example list
+                    extract_examples(wxr, new_gloss_data, child_node)
+
+        if not has_nested_gloss:
             page_data[-1]["senses"].append(new_gloss_data)
 
 
