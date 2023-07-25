@@ -135,7 +135,7 @@ def append_page_data(
         page_data[-1][field] = value
 
 
-def recursive_parse(
+def parse_section(
     wxr: WiktextractContext,
     page_data: List[Dict],
     base_data: Dict,
@@ -143,7 +143,7 @@ def recursive_parse(
 ) -> None:
     if isinstance(node, list):
         for x in node:
-            recursive_parse(wxr, page_data, base_data, x)
+            parse_section(wxr, page_data, base_data, x)
         return
     if not isinstance(node, WikiNode):
         return
@@ -181,6 +181,11 @@ def recursive_parse(
             and subtitle == wxr.config.OTHER_SUBTITLES["translations"]
         ):
             extract_translation(wxr, page_data, node)
+        elif (
+            wxr.config.capture_inflections
+            and subtitle in wxr.config.OTHER_SUBTITLES["inflection_sections"]
+        ):
+            extract_inflections(wxr, page_data, node)
 
 
 def process_pos_block(
@@ -199,25 +204,11 @@ def process_pos_block(
                 lang_code = base_data.get("lang_code")
                 extract_headword_line(wxr, page_data, child, lang_code)
             elif child.kind == NodeKind.LIST:
-                extract_gloss(wxr, page_data, child.children, {})
+                extract_gloss(wxr, page_data, child, {})
             elif child.kind in LEVEL_KINDS:
-                child_level_text = clean_node(wxr, None, child.args)
-                child_level_text = child_level_text.rstrip(string.digits)
-                wxr.wtp.start_subsection(child_level_text)
-                if (
-                    wxr.config.capture_inflections
-                    and child_level_text
-                    in wxr.config.OTHER_SUBTITLES["inflection_sections"]
-                ):
-                    extract_inflections(wxr, page_data, child)
-                elif (
-                    wxr.config.capture_translations
-                    and child_level_text
-                    == wxr.config.OTHER_SUBTITLES["translations"]
-                ):
-                    extract_translation(wxr, page_data, child)
+                parse_section(wxr, page_data, base_data, child)
         else:
-            recursive_parse(wxr, page_data, base_data, child)
+            parse_section(wxr, page_data, base_data, child)
 
 
 def extract_etymology(
@@ -238,7 +229,7 @@ def extract_etymology(
     base_data["etymology_text"] = etymology
     append_page_data(page_data, "etymology_text", etymology, base_data)
     if level_node_index != -1:
-        recursive_parse(wxr, page_data, base_data, nodes[level_node_index:])
+        parse_section(wxr, page_data, base_data, nodes[level_node_index:])
 
 
 def extract_pronunciation(
@@ -251,7 +242,7 @@ def extract_pronunciation(
     for index, node in enumerate(nodes):
         if isinstance(node, WikiNode):
             if node.kind in LEVEL_KINDS:
-                recursive_parse(wxr, page_data, base_data, nodes[index:])
+                parse_section(wxr, page_data, base_data, nodes[index:])
                 return
             elif node.kind == NodeKind.TEMPLATE:
                 node = wxr.wtp.parse(
@@ -319,6 +310,6 @@ def parse_page(
             "senses": [],
         }
         page_data.append(copy.deepcopy(base_data))
-        recursive_parse(wxr, page_data, base_data, node.children)
+        parse_section(wxr, page_data, base_data, node.children)
 
     return page_data

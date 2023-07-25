@@ -5,8 +5,9 @@ from typing import List, Optional, Union
 
 from wikitextprocessor import NodeKind, Page, WikiNode
 
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
+from ..share import capture_text_in_parentheses, split_chinese_variants
 
 SENSE_SUBTITLE_PREFIX = "詞義："
 IGNORED_LEVEL3_SUBTITLES = {
@@ -78,39 +79,29 @@ def parse_zh_thesaurus_term(
     # 擺佈／摆布 (bǎibù, bǎibu)
     # 著落／着落 (書面)
     # 措置
-    tags = None
+    tags = []
     roman = None
-    term = term_str
-    if " (" in term_str:
-        roman_or_tags_start = term_str.find(" (")
-        term = term_str[:roman_or_tags_start]
-        roman_and_tags = term_str[roman_or_tags_start + 2 :].removesuffix(")")
-        if ") (" in roman_and_tags:
-            roman, tag_str = roman_and_tags.split(") (", 1)
-            tags = tag_str
+    raw_tags, term = capture_text_in_parentheses(term_str)
+    for tag in raw_tags:
+        if re.search(r"[a-z]", tag):
+            roman = tag  # pinyin
         else:
-            if re.search(r"[a-z]", roman_and_tags):
-                roman = roman_and_tags  # pinyin
-            else:
-                tags = roman_and_tags
+            tags.append(tag)
 
-    thesaurus = []
-    for index, split_term in enumerate(term.split("／")):
-        language_variant = "zh-Hant" if index == 0 else "zh-Hans"
-        thesaurus.append(
-            ThesaurusTerm(
-                entry=entry,
-                language_code=lang_code,
-                pos=pos,
-                linkage=linkage,
-                term=split_term,
-                tags=tags,
-                roman=roman,
-                sense=sense,
-                language_variant=language_variant,
-            )
+    return [
+        ThesaurusTerm(
+            entry=entry,
+            language_code=lang_code,
+            pos=pos,
+            linkage=linkage,
+            term=variant_term,
+            tags="|".join(tags) if len(tags) > 0 else None,
+            roman=roman,
+            sense=sense,
+            language_variant=variant_type,
         )
-    return thesaurus
+        for variant_type, variant_term in split_chinese_variants(term)
+    ]
 
 
 def parse_thesaurus_term(

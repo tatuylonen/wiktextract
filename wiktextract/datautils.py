@@ -2,20 +2,26 @@
 #
 # Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import collections
 import functools
 import re
-
-from typing import Dict, Any, Iterable
+from collections import defaultdict
+from typing import Any, Dict, Iterable, Tuple
 
 from wiktextract.wxr_context import WiktextractContext
-
 
 # Keys in ``data`` that can only have string values (a list of them)
 str_keys = ("tags", "glosses")
 # Keys in ``data`` that can only have dict values (a list of them)
-dict_keys = set(["pronunciations", "senses", "synonyms", "related",
-                 "antonyms", "hypernyms", "holonyms", "forms"])
+dict_keys = {
+    "pronunciations",
+    "senses",
+    "synonyms",
+    "related",
+    "antonyms",
+    "hypernyms",
+    "holonyms",
+    "forms",
+}
 
 
 def data_append(
@@ -82,7 +88,7 @@ def split_at_comma_semi(text, separators=(",", ";", "，", "،"), extra=()):
     split_re = r"[][()]|" + "|".join(sorted(separators, key=lambda x: -len(x)))
     for m in re.finditer(split_re, text):
         if ofs < m.start():
-            parts.append(text[ofs:m.start()])
+            parts.append(text[ofs : m.start()])
         if m.start() == 0 and m.end() == len(text):
             return [text]  # Don't split if it is the only content
         ofs = m.end()
@@ -104,6 +110,7 @@ def split_at_comma_semi(text, separators=(",", ";", "，", "،"), extra=()):
     if parts:
         lst.append("".join(parts).strip())
     return lst
+
 
 def split_slashes(wxr, text):
     """Splits the text at slashes.  This tries to use heuristics on how the
@@ -159,7 +166,7 @@ def split_slashes(wxr, text):
         print("final_cands", final_cands)
 
         # XXX this does not work yet
-        ht = collections.defaultdict(list)
+        ht = defaultdict(list)
         for divs in final_cands:
             assert isinstance(divs, tuple) and isinstance(divs[0], tuple)
             score = 0
@@ -170,7 +177,7 @@ def split_slashes(wxr, text):
                 words.extend(ws)
                 score += 100
                 score += 1 / len(ws)
-                #if not exists:
+                # if not exists:
                 #    score += 1000 * len(ws)
             key = tuple(words)
             ht[key].append((score, divs))
@@ -200,10 +207,17 @@ def freeze(x):
     return x
 
 
-def ns_title_prefix_tuple(wxr, namespace: str, lower: bool = False) -> tuple:  # tuple[str]
+def ns_title_prefix_tuple(
+    wxr, namespace: str, lower: bool = False
+) -> Tuple[str, ...]:
     """Based on given namespace name, create a tuple of aliases"""
     if namespace in wxr.wtp.NAMESPACE_DATA:
-        return tuple(map(lambda x: x.lower() + ":" if lower else x + ":",
-                         [wxr.wtp.NAMESPACE_DATA[namespace]["name"]] + wxr.wtp.NAMESPACE_DATA[namespace]["aliases"]))
+        return tuple(
+            map(
+                lambda x: x.lower() + ":" if lower else x + ":",
+                [wxr.wtp.NAMESPACE_DATA[namespace]["name"]]
+                + wxr.wtp.NAMESPACE_DATA[namespace]["aliases"],
+            )
+        )
     else:
         return ()

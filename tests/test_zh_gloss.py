@@ -39,7 +39,7 @@ class TestExample(unittest.TestCase):
 ## [[很好]]的，[[卓越]]的"""
         self.wxr.wtp.start_page("test")
         node = self.wxr.wtp.parse(wikitext)
-        extract_gloss(self.wxr, page_data, node.children[0].children, {})
+        extract_gloss(self.wxr, page_data, node.children[0], {})
         self.assertEqual(
             page_data[0]["senses"],
             [

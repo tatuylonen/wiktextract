@@ -12,12 +12,12 @@ from ..share import contains_list, strip_nodes
 
 def extract_examples(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    sense_data: Dict,
     node: Union[WikiNode, List[WikiNode]],
 ) -> None:
     if isinstance(node, list):
         for n in node:
-            extract_examples(wxr, page_data, n)
+            extract_examples(wxr, sense_data, n)
     elif isinstance(node, WikiNode):
         if node.kind == NodeKind.LIST_ITEM:
             example_data = {"type": "example"}
@@ -43,11 +43,9 @@ def extract_examples(
                             example_data["text"] = clean_node(wxr, None, child)
 
             if "text" in example_data or "texts" in example_data:
-                data_append(
-                    wxr, page_data[-1]["senses"][-1], "examples", example_data
-                )
+                data_append(wxr, sense_data, "examples", example_data)
         else:
-            extract_examples(wxr, page_data, node.children)
+            extract_examples(wxr, sense_data, node.children)
 
 
 def extract_example_list(

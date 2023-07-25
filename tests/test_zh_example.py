@@ -22,23 +22,16 @@ class TestExample(unittest.TestCase):
         )
 
     def test_example_list(self) -> None:
-        page_data = [
-            {
-                "lang": "跨語言",
-                "lang_code": "mul",
-                "word": "%",
-                "senses": [{"glosses": ["百分比"]}],
-            }
-        ]
+        sense_data = {}
         wikitext = """
 #* ref text
 #*: example text
         """
         self.wxr.wtp.start_page("test")
         node = self.wxr.wtp.parse(wikitext)
-        extract_examples(self.wxr, page_data, node)
+        extract_examples(self.wxr, sense_data, node)
         self.assertEqual(
-            page_data[0]["senses"][0].get("examples"),
+            sense_data.get("examples"),
             [
                 {"ref": "ref text", "text": "example text", "type": "quote"},
             ],
@@ -51,20 +44,13 @@ quote text
 translation text""",
     )
     def test_quote_example(self, mock_clean_node) -> None:
-        page_data = [
-            {
-                "lang": "跨語言",
-                "lang_code": "mul",
-                "word": "%",
-                "senses": [{"glosses": ["百分比"]}],
-            }
-        ]
+        sense_data = {}
         wikitext = "#* {{RQ:Schuster Hepaticae}}"
         self.wxr.wtp.start_page("test")
         node = self.wxr.wtp.parse(wikitext)
-        extract_examples(self.wxr, page_data, node)
+        extract_examples(self.wxr, sense_data, node)
         self.assertEqual(
-            page_data[0]["senses"][0].get("examples"),
+            sense_data.get("examples"),
             [
                 {
                     "ref": "ref text",

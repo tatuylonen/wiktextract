@@ -1,3 +1,6 @@
+import re
+from collections import defaultdict
+from copy import deepcopy
 from functools import partial
 from typing import Dict, List, Optional, Union
 
@@ -7,7 +10,11 @@ from wiktextract.datautils import data_append
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from ..share import strip_nodes
+from ..share import (
+    capture_text_in_parentheses,
+    split_chinese_variants,
+    strip_nodes,
+)
 
 
 def extract_linkages(
@@ -27,8 +34,9 @@ def extract_linkages(
             sense = node.strip(strip_sense_chars)
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.LIST_ITEM:
-                sense_index = 0
+                not_term_indexes = set()
                 filtered_children = list(strip_nodes(node.children))
+                linkage_data = defaultdict(list)
                 for index, item_child in enumerate(filtered_children):
                     if (
                         isinstance(item_child, WikiNode)
@@ -36,23 +44,44 @@ def extract_linkages(
                     ):
                         template_name = item_child.args[0][0].lower()
                         if template_name in sense_template_names:
+                            not_term_indexes.add(index)
                             sense = clean_node(wxr, None, item_child).strip(
                                 strip_sense_chars
                             )
-                            sense_index = index
                             if index == len(filtered_children) - 1:
                                 # sense template before entry list
                                 return sense
+                        elif template_name in {"qualifier", "qual"}:
+                            not_term_indexes.add(index)
+                            linkage_data["tags"].append(
+                                clean_node(wxr, None, item_child).strip("()")
+                            )
                 # sense template before entry and they are inside the same
                 # list item
                 terms = clean_node(
-                    wxr, None, filtered_children[sense_index + 1 :]
+                    wxr,
+                    None,
+                    [
+                        n
+                        for n_index, n in enumerate(filtered_children)
+                        if n_index not in not_term_indexes
+                    ],
                 )
+                roman, terms = capture_text_in_parentheses(terms)
+                roman = roman[0] if len(roman) > 0 else None
+                if roman is not None:
+                    linkage_data["roman"] = roman
+                if sense is not None:
+                    linkage_data["sense"] = sense
                 for term in terms.split("、"):
-                    linkage_data = {"word": term}
-                    if sense is not None:
-                        linkage_data["sense"] = sense
-                    add_linkage_data(wxr, page_data, linkage_type, linkage_data)
+                    for variant_type, variant_term in split_chinese_variants(term):
+                        final_linkage_data = deepcopy(linkage_data)
+                        final_linkage_data["word"] = variant_term
+                        if variant_type is not None:
+                            final_linkage_data["language_variant"] = variant_type
+                        add_linkage_data(
+                            wxr, page_data, linkage_type, final_linkage_data
+                        )
             elif node.kind == NodeKind.TEMPLATE:
                 template_name = node.args[0][0].lower()
                 if template_name in sense_template_names:
@@ -196,20 +225,23 @@ def add_linkage_data(
         from rapidfuzz.process import extractOne
         from rapidfuzz.utils import default_process
 
-        choices = {
-            sense_dict.get("raw_glosses", sense_dict.get("glosses", [""]))[
-                0
-            ]: sense_dict
+        choices = [
+            sense_dict.get("raw_glosses", sense_dict.get("glosses", [""]))[0]
             for sense_dict in page_data[-1]["senses"]
-        }
+        ]
         if match_result := extractOne(
             linkage_data["sense"],
-            choices.keys(),
+            choices,
             score_cutoff=85,
             scorer=partial(partial_token_set_ratio, processor=default_process),
         ):
-            match_gloss = match_result[0]
-            data_append(wxr, choices[match_gloss], linkage_type, linkage_data)
+            match_sense_index = match_result[2]
+            data_append(
+                wxr,
+                page_data[-1]["senses"][match_sense_index],
+                linkage_type,
+                linkage_data,
+            )
             return
 
     data_append(wxr, page_data[-1], linkage_type, linkage_data)
