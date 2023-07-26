@@ -46,43 +46,6 @@ def data_append(
     lst.append(value)
 
 
-def append_data_to_matched_sense(
-    wxr: WiktextractContext,
-    page_data: List[Dict],
-    key: str,
-    value: Dict,
-) -> None:
-    """
-    Append the data dictionary to a sense dictionary if the sense is similar to
-    the word gloss. Otherwise append to the base dictionary.
-    """
-    if "sense" in value:
-        from rapidfuzz.fuzz import partial_token_set_ratio
-        from rapidfuzz.process import extractOne
-        from rapidfuzz.utils import default_process
-
-        choices = [
-            sense_dict.get("raw_glosses", sense_dict.get("glosses", [""]))[0]
-            for sense_dict in page_data[-1]["senses"]
-        ]
-        if match_result := extractOne(
-            value["sense"],
-            choices,
-            score_cutoff=85,
-            scorer=partial(partial_token_set_ratio, processor=default_process),
-        ):
-            match_sense_index = match_result[2]
-            data_append(
-                wxr,
-                page_data[-1]["senses"][match_sense_index],
-                key,
-                value,
-            )
-            return
-
-    data_append(wxr, page_data[-1], key, value)
-
-
 def data_extend(
     wxr: WiktextractContext, data: Dict, key: str, values: Iterable
 ) -> None:
@@ -257,3 +220,30 @@ def ns_title_prefix_tuple(
         )
     else:
         return ()
+
+
+def find_similar_gloss(page_data: List[Dict], gloss: str) -> Dict:
+    """
+    Return a sense dictionary if it has similar gloss, return the last
+    word dictionary if can't found such gloss.
+    """
+    from rapidfuzz.fuzz import partial_token_set_ratio
+    from rapidfuzz.process import extractOne
+    from rapidfuzz.utils import default_process
+
+    if len(gloss) == 0:
+        return page_data[-1]
+
+    choices = [
+        sense_dict.get("raw_glosses", sense_dict.get("glosses", [""]))[0]
+        for sense_dict in page_data[-1]["senses"]
+    ]
+    if match_result := extractOne(
+        gloss,
+        choices,
+        score_cutoff=85,
+        scorer=partial(partial_token_set_ratio, processor=default_process),
+    ):
+        return page_data[-1]["senses"][match_result[2]]
+
+    return page_data[-1]

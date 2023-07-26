@@ -1,10 +1,10 @@
 from collections import defaultdict
 from copy import deepcopy
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 
-from wiktextract.datautils import append_data_to_matched_sense
+from wiktextract.datautils import find_similar_gloss
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -20,16 +20,18 @@ def extract_linkages(
     page_data: List[Dict],
     nodes: List[Union[WikiNode, str]],
     linkage_type: str,
-    sense: Optional[str],
-) -> Optional[str]:
+    sense: str,
+    append_to: Dict,
+) -> Tuple[str, Dict]:
     """
     Return linkage sense text for `sense` template inside a list item node.
     """
     strip_sense_chars = "()（）:："
     sense_template_names = {"s", "sense"}
     for node in strip_nodes(nodes):
-        if isinstance(node, str) and sense is None:
+        if isinstance(node, str) and len(sense) == 0:
             sense = node.strip(strip_sense_chars)
+            append_to = find_similar_gloss(page_data, sense)
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.LIST_ITEM:
                 not_term_indexes = set()
@@ -46,9 +48,10 @@ def extract_linkages(
                             sense = clean_node(wxr, None, item_child).strip(
                                 strip_sense_chars
                             )
+                            append_to = find_similar_gloss(page_data, sense)
                             if index == len(filtered_children) - 1:
                                 # sense template before entry list
-                                return sense
+                                return sense, append_to
                         elif template_name in {"qualifier", "qual"}:
                             not_term_indexes.add(index)
                             linkage_data["tags"].append(
@@ -81,20 +84,18 @@ def extract_linkages(
                             final_linkage_data[
                                 "language_variant"
                             ] = variant_type
-                        append_data_to_matched_sense(
-                            wxr, page_data, linkage_type, final_linkage_data
-                        )
+                        append_to["linkage_type"].append(final_linkage_data)
             elif node.kind == NodeKind.TEMPLATE:
                 template_name = node.args[0][0].lower()
                 if template_name in sense_template_names:
                     sense = clean_node(wxr, None, node).strip(strip_sense_chars)
                 elif template_name.endswith("-saurus"):
                     extract_saurus_template(
-                        wxr, node, page_data, linkage_type, sense
+                        wxr, node, page_data, linkage_type, sense, append_to
                     )
                 elif template_name == "zh-dial":
                     extract_zh_dial_template(
-                        wxr, node, page_data, linkage_type, sense
+                        wxr, node, linkage_type, sense, append_to
                     )
                 else:
                     expanded_node = wxr.wtp.parse(
@@ -106,17 +107,32 @@ def extract_linkages(
                         [expanded_node],
                         linkage_type,
                         sense,
+                        append_to,
                     )
             elif node.kind in LEVEL_KINDS:
                 from .page import parse_section
 
-                parse_section(wxr, page_data, {}, node)
-            elif node.children:
-                returned_sense = extract_linkages(
-                    wxr, page_data, node.children, linkage_type, sense
+                base_data = defaultdict(
+                    list,
+                    {
+                        "lang": page_data[-1].get("lang"),
+                        "lang_code": page_data[-1].get("lang_code"),
+                        "word": wxr.wtp.title,
+                    },
                 )
-                if returned_sense is not None:
+                parse_section(wxr, page_data, base_data, node)
+            elif len(node.children) > 0:
+                returned_sense, returned_append_target = extract_linkages(
+                    wxr,
+                    page_data,
+                    node.children,
+                    linkage_type,
+                    sense,
+                    append_to,
+                )
+                if len(returned_sense) > 0:
                     sense = returned_sense
+                    append_to = returned_append_target
 
 
 def extract_saurus_template(
@@ -125,6 +141,7 @@ def extract_saurus_template(
     page_data: Dict,
     linkage_type: str,
     sense: Optional[str],
+    append_to: Dict,
 ) -> None:
     """
     Extract data from template names end with "-saurus", like "zh-syn-saurus"
@@ -154,15 +171,15 @@ def extract_saurus_template(
             linkage_data["sense"] = sense
         elif thesaurus.sense is not None:
             linkage_data["sense"] = thesaurus.sense
-        append_data_to_matched_sense(wxr, page_data, linkage_type, linkage_data)
+        append_to[linkage_type].append(linkage_data)
 
 
 def extract_zh_dial_template(
     wxr: WiktextractContext,
     node: Union[WikiNode, str],
-    page_data: Dict,
     linkage_type: str,
     sense: Optional[str],
+    append_to: Dict,
 ) -> None:
     dial_data = {}
     node = wxr.wtp.parse(wxr.wtp.node_to_wikitext(node), expand_all=True)
@@ -173,7 +190,7 @@ def extract_zh_dial_template(
             linkage_data["sense"] = sense
         if len(tags) > 0:
             linkage_data["tags"] = tags
-        append_data_to_matched_sense(wxr, page_data, linkage_type, linkage_data)
+        append_to[linkage_type].append(linkage_data)
 
 
 def extract_zh_dial_recursively(

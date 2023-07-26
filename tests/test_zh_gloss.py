@@ -1,10 +1,11 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
-from wiktextract.wxr_context import WiktextractContext
 from wiktextract.extractor.zh.page import extract_gloss
 from wiktextract.thesaurus import close_thesaurus_db
+from wiktextract.wxr_context import WiktextractContext
 
 
 class TestExample(unittest.TestCase):

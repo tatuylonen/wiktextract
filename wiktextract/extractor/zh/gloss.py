@@ -91,6 +91,8 @@ def extract_gloss_and_tags(raw_gloss: str) -> Dict[str, List[str]]:
                 tags += re.split(split_tag_regex, rear_label)
 
         gloss = raw_gloss[front_tag_end + 1 : rear_tag_start].strip()
-        return {"glosses": [gloss], "raw_glosses": [raw_gloss], "tags": tags}
+        return defaultdict(
+            list, {"glosses": [gloss], "raw_glosses": [raw_gloss], "tags": tags}
+        )
     else:
-        return {"glosses": [raw_gloss]}
+        return defaultdict(list, {"glosses": [raw_gloss]})

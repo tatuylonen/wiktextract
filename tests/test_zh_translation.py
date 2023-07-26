@@ -1,12 +1,12 @@
 import unittest
-
 from unittest.mock import patch
 
-from wikitextprocessor import Wtp, Page
+from wikitextprocessor import Page, Wtp
+
 from wiktextract.config import WiktionaryConfig
-from wiktextract.wxr_context import WiktextractContext
 from wiktextract.extractor.zh.translation import extract_translation
 from wiktextract.thesaurus import close_thesaurus_db
+from wiktextract.wxr_context import WiktextractContext
 
 
 class TestTranslation(unittest.TestCase):
