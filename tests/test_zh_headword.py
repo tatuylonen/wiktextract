@@ -1,7 +1,8 @@
 from unittest import TestCase
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 from wikitextprocessor import Wtp
+
 from wiktextract.extractor.zh.headword_line import extract_headword_line
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext

@@ -1,6 +1,7 @@
 import copy
 import logging
 import string
+from collections import defaultdict
 from typing import Any, Dict, List, Union
 
 from wikitextprocessor import NodeKind, WikiNode
@@ -123,7 +124,7 @@ ADDITIONAL_EXPAND_TEMPLATES = {
 
 def append_page_data(
     page_data: List[Dict], field: str, value: Any, base_data: Dict
-) -> bool:
+) -> None:
     if page_data[-1].get(field) is not None:
         if len(page_data[-1]["senses"]) > 0:
             # append new dictionary if the last dictionary has sense data and
@@ -174,7 +175,8 @@ def parse_section(
                 page_data,
                 node.children,
                 wxr.config.LINKAGE_SUBTITLES[subtitle],
-                None,
+                "",
+                page_data[-1],
             )
         elif (
             wxr.config.capture_translations
@@ -204,7 +206,7 @@ def process_pos_block(
                 lang_code = base_data.get("lang_code")
                 extract_headword_line(wxr, page_data, child, lang_code)
             elif child.kind == NodeKind.LIST:
-                extract_gloss(wxr, page_data, child, {})
+                extract_gloss(wxr, page_data, child, defaultdict(list))
             elif child.kind in LEVEL_KINDS:
                 parse_section(wxr, page_data, base_data, child)
         else:
@@ -303,12 +305,10 @@ def parse_page(
             continue
         wxr.wtp.start_section(lang_name)
 
-        base_data = {
-            "lang": lang_name,
-            "lang_code": lang_code,
-            "word": wxr.wtp.title,
-            "senses": [],
-        }
+        base_data = defaultdict(
+            list,
+            {"lang": lang_name, "lang_code": lang_code, "word": wxr.wtp.title},
+        )
         page_data.append(copy.deepcopy(base_data))
         parse_section(wxr, page_data, base_data, node.children)
 

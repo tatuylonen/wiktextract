@@ -1,10 +1,10 @@
 import re
-from typing import Dict, List
+from typing import Dict, List, Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 
-from wiktextract.datautils import data_append
-from wiktextract.page import clean_node
+from wiktextract.datautils import find_similar_gloss
+from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from ..share import (
@@ -18,6 +18,7 @@ def extract_translation(
     wxr: WiktextractContext, page_data: List[Dict], node: WikiNode
 ) -> None:
     sense_text = ""
+    append_to = page_data[-1]
     for child in node.children:
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
@@ -27,9 +28,12 @@ def extract_translation(
                     and len(child.args) > 1
                 ):
                     sense_text = clean_node(wxr, None, child.args[1][0])
+                    append_to = find_similar_gloss(page_data, sense_text)
                 elif template_name == "checktrans-top":
                     sense_text = ""  # TODO page: 自然神論
-                # TODO: handle translation subpage, page: 工作
+                    append_to = page_data[-1]
+                elif template_name == "see translation subpage":
+                    translation_subpage(wxr, page_data, child.args[1:])
             elif child.kind == NodeKind.LIST:
                 for list_item_node in filter_child_wikinodes(
                     child, NodeKind.LIST_ITEM
@@ -40,6 +44,7 @@ def extract_translation(
                             page_data,
                             clean_node(wxr, None, list_item_node.children),
                             sense_text,
+                            append_to,
                         )
                     else:
                         nested_list_index = 0
@@ -62,6 +67,7 @@ def extract_translation(
                                 list_item_node.children[:nested_list_index],
                             ),
                             sense_text,
+                            append_to,
                         )
                         for nested_list_node in filter_child_wikinodes(
                             list_item_node, NodeKind.LIST
@@ -76,6 +82,7 @@ def extract_translation(
                                         wxr, None, nested_list_item.children
                                     ),
                                     sense_text,
+                                    append_to,
                                 )
 
 
@@ -84,6 +91,7 @@ def process_translation_list_item(
     page_data: List[Dict],
     expanded_text: str,
     sense: str,
+    append_to: Dict,
 ) -> None:
     split_results = re.split(r":|：", expanded_text, maxsplit=1)
     if len(split_results) != 2:
@@ -109,4 +117,55 @@ def process_translation_list_item(
         # TODO: handle gender text
         if len(sense) > 0:
             translation_data["sense"] = sense
-        data_append(wxr, page_data[-1], "translations", translation_data)
+        append_to["translations"].append(translation_data)
+
+
+def translation_subpage(
+    wxr: WiktextractContext,
+    page_data: List[Dict],
+    template_args: List[List[str]],
+) -> None:
+    from .page import ADDITIONAL_EXPAND_TEMPLATES
+
+    page_title = wxr.wtp.title
+    target_section = None
+    if len(template_args) > 0:
+        target_section = template_args[0][0]
+    if len(template_args) > 1:
+        page_title = template_args[1][0]
+
+    translation_subpage_title = f"{page_title}/翻譯"
+    subpage = wxr.wtp.get_page(translation_subpage_title)
+    if subpage is None:
+        return
+
+    root = wxr.wtp.parse(
+        subpage.body,
+        pre_expand=True,
+        additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
+    )
+    target_section_node = (
+        root
+        if target_section is None
+        else find_subpage_section(wxr, root, target_section)
+    )
+    translation_node = find_subpage_section(
+        wxr, target_section_node, wxr.config.OTHER_SUBTITLES["translations"]
+    )
+    if translation_node is not None:
+        extract_translation(wxr, page_data, translation_node)
+
+
+def find_subpage_section(
+    wxr: WiktextractContext, node: Union[WikiNode, str], target_section: str
+) -> Optional[WikiNode]:
+    if isinstance(node, WikiNode):
+        if node.kind in LEVEL_KINDS:
+            section_title = clean_node(wxr, None, node.args)
+            if section_title == target_section:
+                return node
+
+        for child in node.children:
+            returned_node = find_subpage_section(wxr, child, target_section)
+            if returned_node is not None:
+                return returned_node
