@@ -1,11 +1,10 @@
 # Utilities for manipulating word data structures
 #
 # Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
-
-import functools
 import re
 from collections import defaultdict
-from typing import Any, Dict, Iterable, Tuple
+from functools import lru_cache, partial
+from typing import Any, Dict, Iterable, List, Tuple
 
 from wiktextract.wxr_context import WiktextractContext
 
@@ -47,6 +46,43 @@ def data_append(
     lst.append(value)
 
 
+def append_data_to_matched_sense(
+    wxr: WiktextractContext,
+    page_data: List[Dict],
+    key: str,
+    value: Dict,
+) -> None:
+    """
+    Append the data dictionary to a sense dictionary if the sense is similar to
+    the word gloss. Otherwise append to the base dictionary.
+    """
+    if "sense" in value:
+        from rapidfuzz.fuzz import partial_token_set_ratio
+        from rapidfuzz.process import extractOne
+        from rapidfuzz.utils import default_process
+
+        choices = [
+            sense_dict.get("raw_glosses", sense_dict.get("glosses", [""]))[0]
+            for sense_dict in page_data[-1]["senses"]
+        ]
+        if match_result := extractOne(
+            value["sense"],
+            choices,
+            score_cutoff=85,
+            scorer=partial(partial_token_set_ratio, processor=default_process),
+        ):
+            match_sense_index = match_result[2]
+            data_append(
+                wxr,
+                page_data[-1]["senses"][match_sense_index],
+                key,
+                value,
+            )
+            return
+
+    data_append(wxr, page_data[-1], key, value)
+
+
 def data_extend(
     wxr: WiktextractContext, data: Dict, key: str, values: Iterable
 ) -> None:
@@ -64,7 +100,7 @@ def data_extend(
         data_append(wxr, data, key, x)
 
 
-@functools.lru_cache(maxsize=20)
+@lru_cache(maxsize=20)
 def make_split_re(seps):
     """Cached helper function for split_at_comma_semi."""
 

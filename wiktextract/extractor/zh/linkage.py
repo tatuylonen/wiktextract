@@ -1,13 +1,10 @@
-import re
 from collections import defaultdict
 from copy import deepcopy
-from functools import partial
 from typing import Dict, List, Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 
-from wiktextract.datautils import data_append
-from wiktextract.page import clean_node
+from wiktextract.datautils import append_data_to_matched_sense
 from wiktextract.wxr_context import WiktextractContext
 
 from ..share import (
@@ -74,12 +71,16 @@ def extract_linkages(
                 if sense is not None:
                     linkage_data["sense"] = sense
                 for term in terms.split("、"):
-                    for variant_type, variant_term in split_chinese_variants(term):
+                    for variant_type, variant_term in split_chinese_variants(
+                        term
+                    ):
                         final_linkage_data = deepcopy(linkage_data)
                         final_linkage_data["word"] = variant_term
                         if variant_type is not None:
-                            final_linkage_data["language_variant"] = variant_type
-                        add_linkage_data(
+                            final_linkage_data[
+                                "language_variant"
+                            ] = variant_type
+                        append_data_to_matched_sense(
                             wxr, page_data, linkage_type, final_linkage_data
                         )
             elif node.kind == NodeKind.TEMPLATE:
@@ -148,7 +149,7 @@ def extract_saurus_template(
             linkage_data["sense"] = sense
         elif thesaurus.sense is not None:
             linkage_data["sense"] = thesaurus.sense
-        add_linkage_data(wxr, page_data, linkage_type, linkage_data)
+        append_data_to_matched_sense(wxr, page_data, linkage_type, linkage_data)
 
 
 def extract_zh_dial_template(
@@ -167,7 +168,7 @@ def extract_zh_dial_template(
             linkage_data["sense"] = sense
         if len(tags) > 0:
             linkage_data["tags"] = tags
-        add_linkage_data(wxr, page_data, linkage_type, linkage_data)
+        append_data_to_matched_sense(wxr, page_data, linkage_type, linkage_data)
 
 
 def extract_zh_dial_recursively(
@@ -208,40 +209,3 @@ def extract_zh_dial_recursively(
             if returned_lang is not None:
                 header_lang = returned_lang
     return header_lang
-
-
-def add_linkage_data(
-    wxr: WiktextractContext,
-    page_data: List[Dict],
-    linkage_type: str,
-    linkage_data: Dict,
-) -> None:
-    """
-    Append the linkage data dictionary to a sense dictionary if the linkage
-    sense is similar to the word gloss. Otherwise append to the base dictionary.
-    """
-    if "sense" in linkage_data:
-        from rapidfuzz.fuzz import partial_token_set_ratio
-        from rapidfuzz.process import extractOne
-        from rapidfuzz.utils import default_process
-
-        choices = [
-            sense_dict.get("raw_glosses", sense_dict.get("glosses", [""]))[0]
-            for sense_dict in page_data[-1]["senses"]
-        ]
-        if match_result := extractOne(
-            linkage_data["sense"],
-            choices,
-            score_cutoff=85,
-            scorer=partial(partial_token_set_ratio, processor=default_process),
-        ):
-            match_sense_index = match_result[2]
-            data_append(
-                wxr,
-                page_data[-1]["senses"][match_sense_index],
-                linkage_type,
-                linkage_data,
-            )
-            return
-
-    data_append(wxr, page_data[-1], linkage_type, linkage_data)
