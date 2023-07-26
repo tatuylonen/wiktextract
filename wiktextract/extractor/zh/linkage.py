@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Union
 from wikitextprocessor import NodeKind, WikiNode
 
 from wiktextract.datautils import append_data_to_matched_sense
+from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from ..share import (
@@ -106,6 +107,10 @@ def extract_linkages(
                         linkage_type,
                         sense,
                     )
+            elif node.kind in LEVEL_KINDS:
+                from .page import parse_section
+
+                parse_section(wxr, page_data, {}, node)
             elif node.children:
                 returned_sense = extract_linkages(
                     wxr, page_data, node.children, linkage_type, sense
