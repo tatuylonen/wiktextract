@@ -1,4 +1,5 @@
 import unittest
+from collections import defaultdict
 from unittest.mock import patch
 
 from wikitextprocessor import Page, Wtp
@@ -27,7 +28,7 @@ class TestTranslation(unittest.TestCase):
     )
     def test_normal(self, mock_get_page) -> None:
         # test wikitext from page "你好" and "這裡"
-        page_data = [{}]
+        page_data = [defaultdict(list)]
         wikitext = """
 {{trans-top|靠近說話者的地方}}
 * 阿爾巴尼亞語：këtu (sq)

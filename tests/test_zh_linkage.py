@@ -1,4 +1,5 @@
 import unittest
+from collections import defaultdict
 
 from wikitextprocessor import Wtp
 
@@ -26,7 +27,7 @@ class TestLinkage(unittest.TestCase):
                 "lang": "跨語言",
                 "lang_code": "mul",
                 "word": "%",
-                "senses": [{"glosses": ["百分比"]}],
+                "senses": [defaultdict(list, {"glosses": ["百分比"]})],
             }
         ]
         wikitext = "* {{sense|百分比}} {{l|mul|cU}}、[[centiuno]]"
@@ -36,7 +37,7 @@ class TestLinkage(unittest.TestCase):
         self.wxr.wtp.start_page("test")
         node = self.wxr.wtp.parse(wikitext)
         extract_linkages(
-            self.wxr, page_data, node.children, "synonyms", None, page_data[-1]
+            self.wxr, page_data, node.children, "synonyms", "", page_data[-1]
         )
         self.assertEqual(
             page_data[0]["senses"][0].get("synonyms"),

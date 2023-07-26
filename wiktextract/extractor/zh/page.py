@@ -175,7 +175,7 @@ def parse_section(
                 page_data,
                 node.children,
                 wxr.config.LINKAGE_SUBTITLES[subtitle],
-                None,
+                "",
                 page_data[-1],
             )
         elif (

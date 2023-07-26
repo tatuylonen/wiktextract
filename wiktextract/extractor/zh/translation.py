@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 
-from wiktextract.datautils import data_append
+from wiktextract.datautils import find_similar_gloss
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -18,6 +18,7 @@ def extract_translation(
     wxr: WiktextractContext, page_data: List[Dict], node: WikiNode
 ) -> None:
     sense_text = ""
+    append_to = page_data[-1]
     for child in node.children:
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
@@ -27,8 +28,10 @@ def extract_translation(
                     and len(child.args) > 1
                 ):
                     sense_text = clean_node(wxr, None, child.args[1][0])
+                    append_to = find_similar_gloss(page_data, sense_text)
                 elif template_name == "checktrans-top":
                     sense_text = ""  # TODO page: 自然神論
+                    append_to = page_data[-1]
                 elif template_name == "see translation subpage":
                     translation_subpage(wxr, page_data, child.args[1:])
             elif child.kind == NodeKind.LIST:
@@ -41,6 +44,7 @@ def extract_translation(
                             page_data,
                             clean_node(wxr, None, list_item_node.children),
                             sense_text,
+                            append_to,
                         )
                     else:
                         nested_list_index = 0
@@ -63,6 +67,7 @@ def extract_translation(
                                 list_item_node.children[:nested_list_index],
                             ),
                             sense_text,
+                            append_to,
                         )
                         for nested_list_node in filter_child_wikinodes(
                             list_item_node, NodeKind.LIST
@@ -77,6 +82,7 @@ def extract_translation(
                                         wxr, None, nested_list_item.children
                                     ),
                                     sense_text,
+                                    append_to,
                                 )
 
 
@@ -85,6 +91,7 @@ def process_translation_list_item(
     page_data: List[Dict],
     expanded_text: str,
     sense: str,
+    append_to: Dict,
 ) -> None:
     split_results = re.split(r":|：", expanded_text, maxsplit=1)
     if len(split_results) != 2:
@@ -110,7 +117,7 @@ def process_translation_list_item(
         # TODO: handle gender text
         if len(sense) > 0:
             translation_data["sense"] = sense
-        data_append(wxr, page_data[-1], "translations", translation_data)
+        append_to["translations"].append(translation_data)
 
 
 def translation_subpage(

@@ -22,7 +22,7 @@ def extract_linkages(
     linkage_type: str,
     sense: str,
     append_to: Dict,
-) -> Tuple[str, Dict]:
+) -> Optional[Tuple[str, Dict]]:
     """
     Return linkage sense text for `sense` template inside a list item node.
     """
@@ -72,7 +72,7 @@ def extract_linkages(
                 roman = roman[0] if len(roman) > 0 else None
                 if roman is not None:
                     linkage_data["roman"] = roman
-                if sense is not None:
+                if len(sense) > 0:
                     linkage_data["sense"] = sense
                 for term in terms.split("、"):
                     for variant_type, variant_term in split_chinese_variants(
@@ -84,7 +84,7 @@ def extract_linkages(
                             final_linkage_data[
                                 "language_variant"
                             ] = variant_type
-                        append_to["linkage_type"].append(final_linkage_data)
+                        append_to[linkage_type].append(final_linkage_data)
             elif node.kind == NodeKind.TEMPLATE:
                 template_name = node.args[0][0].lower()
                 if template_name in sense_template_names:
@@ -122,7 +122,7 @@ def extract_linkages(
                 )
                 parse_section(wxr, page_data, base_data, node)
             elif len(node.children) > 0:
-                returned_sense, returned_append_target = extract_linkages(
+                returned_values = extract_linkages(
                     wxr,
                     page_data,
                     node.children,
@@ -130,9 +130,11 @@ def extract_linkages(
                     sense,
                     append_to,
                 )
-                if len(returned_sense) > 0:
-                    sense = returned_sense
-                    append_to = returned_append_target
+                if returned_values is not None:
+                    returned_sense, returned_append_target = returned_values
+                    if len(returned_sense) > 0:
+                        sense = returned_sense
+                        append_to = returned_append_target
 
 
 def extract_saurus_template(
@@ -140,7 +142,7 @@ def extract_saurus_template(
     node: WikiNode,
     page_data: Dict,
     linkage_type: str,
-    sense: Optional[str],
+    sense: str,
     append_to: Dict,
 ) -> None:
     """
@@ -167,7 +169,7 @@ def extract_saurus_template(
             linkage_data["tags"] = thesaurus.tags.split("|")
         if thesaurus.language_variant is not None:
             linkage_data["language_variant"] = thesaurus.language_variant
-        if sense is not None:
+        if len(sense) > 0:
             linkage_data["sense"] = sense
         elif thesaurus.sense is not None:
             linkage_data["sense"] = thesaurus.sense
@@ -178,7 +180,7 @@ def extract_zh_dial_template(
     wxr: WiktextractContext,
     node: Union[WikiNode, str],
     linkage_type: str,
-    sense: Optional[str],
+    sense: str,
     append_to: Dict,
 ) -> None:
     dial_data = {}
@@ -186,7 +188,7 @@ def extract_zh_dial_template(
     extract_zh_dial_recursively(wxr, node, dial_data, None)
     for term, tags in dial_data.items():
         linkage_data = {"word": term}
-        if sense is not None:
+        if len(sense) > 0:
             linkage_data["sense"] = sense
         if len(tags) > 0:
             linkage_data["tags"] = tags
