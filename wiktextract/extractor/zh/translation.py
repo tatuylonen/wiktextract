@@ -30,8 +30,7 @@ def extract_translation(
                     sense_text = clean_node(wxr, None, child.args[1][0])
                     append_to = find_similar_gloss(page_data, sense_text)
                 elif template_name == "checktrans-top":
-                    sense_text = ""  # TODO page: 自然神論
-                    append_to = page_data[-1]
+                    return
                 elif template_name == "see translation subpage":
                     translation_subpage(wxr, page_data, child.args[1:])
             elif child.kind == NodeKind.LIST:
