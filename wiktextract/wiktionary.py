@@ -15,7 +15,6 @@ from typing import Optional, List, Set, Tuple, Dict
 
 from wikitextprocessor import Page
 from .page import parse_page
-from .config import WiktionaryConfig
 from .wxr_context import WiktextractContext
 from .thesaurus import (
     emit_words_in_thesaurus,
@@ -38,7 +37,6 @@ def page_handler(
     if dont_parse:
         return None
     if page.redirect_to is not None:
-        wxr1 = WiktextractContext(wxr.wtp, WiktionaryConfig())
         ret = [{"title": title, "redirect": page.redirect_to}]
     else:
         if page.model != "wikitext":
@@ -49,9 +47,8 @@ def page_handler(
             return None
 
         # XXX Sign gloss pages?
-        wxr1 = WiktextractContext(wxr.wtp, WiktionaryConfig(**config_kwargs))
         start_t = time.time()
-        ret = parse_page(wxr1, title, page.body)
+        ret = parse_page(wxr, title, page.body)
         dur = time.time() - start_t
         if dur > 100:
             logging.warning(
@@ -59,10 +56,8 @@ def page_handler(
                     dur, title
                 )
             )
-    stats = wxr1.config.to_return()
-    for k, v in wxr.wtp.to_return().items():
-        stats[k] = v
-    return ret, stats
+
+    return ret, wxr.wtp.to_return()
 
 
 def parse_wiktionary(
