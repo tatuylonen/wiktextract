@@ -218,6 +218,10 @@ def extract_zh_dial_recursively(
         for term in terms.split("、"):
             if term == wxr.wtp.title:
                 continue
+            if term.endswith(" 比喻"):
+                term = term.removesuffix(" 比喻")
+                if "比喻" not in tags:
+                    tags.append("比喻")
             old_tags = dial_data.get(term, [])
             old_tag_set = set(old_tags)
             new_tags = old_tags
