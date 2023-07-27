@@ -207,6 +207,8 @@ def extract_zh_dial_recursively(
             if isinstance(child, WikiNode):
                 if child.kind == NodeKind.TABLE_HEADER_CELL:
                     header_lang = clean_node(wxr, None, child)
+                    if header_lang == "註解":
+                        return
                 elif child.kind == NodeKind.TABLE_CELL:
                     tags.append(clean_node(wxr, None, child))
         if len(tags) < 1:  # table header
