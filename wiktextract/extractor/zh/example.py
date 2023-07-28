@@ -1,8 +1,8 @@
+from collections import defaultdict
 from typing import Dict, List, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 
-from wiktextract.datautils import data_append
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -20,7 +20,7 @@ def extract_examples(
             extract_examples(wxr, sense_data, n)
     elif isinstance(node, WikiNode):
         if node.kind == NodeKind.LIST_ITEM:
-            example_data = {"type": "example"}
+            example_data = defaultdict(list, {"type": "example"})
             # example text in the nested list
             # https://zh.wiktionary.org/wiki/%, the second example
             if contains_list(node.children):
@@ -43,7 +43,7 @@ def extract_examples(
                             example_data["text"] = clean_node(wxr, None, child)
 
             if "text" in example_data or "texts" in example_data:
-                data_append(wxr, sense_data, "examples", example_data)
+                sense_data["examples"].append(example_data)
         else:
             extract_examples(wxr, sense_data, node.children)
 
@@ -113,15 +113,21 @@ def extract_template_zh_usex(
     wxr: WiktextractContext, node: WikiNode, example_data: Dict
 ) -> None:
     expanded_text = clean_node(wxr, None, node)
+    if "―" in expanded_text:
+        for index, split_text in enumerate(expanded_text.split("―")):
+            if index == 0:
+                for example_text in split_text.split(" / "):
+                    example_data["texts"].append(example_text.strip())
+            elif index == 1:
+                example_data["roman"] = split_text.strip()
+        return
+
     for expanded_line in expanded_text.splitlines():
         if expanded_line.endswith("體]"):
             # expanded simplified or traditional Chinese
             # example sentence usually ends with
             # "繁體]" or "簡體]"
-            if example_data.get("texts") is not None:
-                example_data["texts"].append(expanded_line)
-            else:
-                example_data["texts"] = [expanded_line]
+            example_data["texts"].append(expanded_line)
         elif expanded_line.endswith("]"):
             example_data["roman"] = expanded_line
         elif expanded_line.startswith("來自："):

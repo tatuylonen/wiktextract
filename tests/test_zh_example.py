@@ -1,4 +1,5 @@
 import unittest
+from collections import defaultdict
 from unittest.mock import patch
 
 from wikitextprocessor import Wtp
@@ -44,7 +45,7 @@ quote text
 translation text""",
     )
     def test_quote_example(self, mock_clean_node) -> None:
-        sense_data = {}
+        sense_data = defaultdict(list)
         wikitext = "#* {{RQ:Schuster Hepaticae}}"
         self.wxr.wtp.start_page("test")
         node = self.wxr.wtp.parse(wikitext)
