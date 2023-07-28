@@ -3,7 +3,6 @@ from typing import Dict, List, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 
-from wiktextract.datautils import data_append, data_extend
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -92,14 +91,12 @@ def extract_headword_line(
                 class_names = child.attrs.get("class", "")
                 if "headword-tr" in class_names:
                     forms_start_index = index + 1
-                    data_append(
-                        wxr,
-                        page_data[-1],
-                        "forms",
+
+                    page_data[-1]["forms"].append(
                         {
                             "form": clean_node(wxr, None, child),
                             "tags": ["romanization"],
-                        },
+                        }
                     )
                 elif "gender" in class_names:
                     forms_start_index = index + 1
@@ -110,13 +107,9 @@ def extract_headword_line(
                         child.children,
                     ):
                         gender = abbr_tag.children[0]
-                        data_append(
-                            wxr,
-                            page_data[-1],
-                            "tags",
-                            GENDERS.get(gender, gender),
+                        page_data[-1]["tags"].append(
+                            GENDERS.get(gender, gender)
                         )
-
                 if lang_code == "ja":
                     for span_child in filter_child_wikinodes(
                         child, NodeKind.HTML
@@ -128,17 +121,14 @@ def extract_headword_line(
                             ruby_data, node_without_ruby = extract_ruby(
                                 wxr, span_child
                             )
-                            data_append(
-                                wxr,
-                                page_data[-1],
-                                "forms",
+                            page_data[-1]["forms"].append(
                                 {
                                     "form": clean_node(
                                         wxr, None, node_without_ruby
                                     ),
                                     "ruby": ruby_data,
                                     "tags": ["canonical"],
-                                },
+                                }
                             )
             elif child.args == "b":
                 # this is a form <b> tag, already inside form parentheses
@@ -206,12 +196,7 @@ def process_forms_text(
                 }
                 if ruby_data is not None:
                     form_data["ruby"] = ruby_data
-                data_append(
-                    wxr,
-                    page_data[-1],
-                    "forms",
-                    form_data,
-                )
+                page_data[-1]["forms"].append(form_data)
             elif node.args == "span" and "tr" in node.attrs.get("class"):
                 # romanization of the previous form <b> tag
                 page_data[-1]["forms"][-1]["roman"] = clean_node(
@@ -223,14 +208,11 @@ def process_forms_text(
             tag_nodes.append(node)
 
     if not has_forms:
-        data_extend(
-            wxr,
-            page_data[-1],
-            "tags",
-            extract_headword_tags(
-                clean_node(wxr, None, tag_nodes).strip("() ")
-            ),
+        tags_list = extract_headword_tags(
+            clean_node(wxr, None, tag_nodes).strip("() ")
         )
+        if len(tags_list) > 0:
+            page_data[-1]["tags"].extend(tags_list)
 
 
 def extract_headword_tags(tags_str: str) -> List[str]:

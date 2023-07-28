@@ -1,4 +1,5 @@
 import unittest
+from collections import defaultdict
 from unittest.mock import patch
 
 from wikitextprocessor import Page, Wtp
@@ -40,11 +41,14 @@ class TestInflection(unittest.TestCase):
     )
     def test_ja_i_template(self, mock_get_page) -> None:
         page_data = [
-            {
-                "lang": "日語",
-                "lang_code": "ja",
-                "word": "可笑しい",
-            }
+            defaultdict(
+                list,
+                {
+                    "lang": "日語",
+                    "lang_code": "ja",
+                    "word": "可笑しい",
+                },
+            )
         ]
         wikitext = "{{ja-i|可笑し|おかし|okashi}}"
         self.wxr.wtp.start_page("可笑しい")
