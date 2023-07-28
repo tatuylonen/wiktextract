@@ -1,4 +1,5 @@
 import unittest
+from collections import defaultdict
 
 from wikitextprocessor import Wtp
 
@@ -22,12 +23,14 @@ class TestExample(unittest.TestCase):
 
     def test_example_list(self) -> None:
         page_data = [
-            {
-                "lang": "日語",
-                "lang_code": "ja",
-                "word": "可笑しい",
-                "senses": [],
-            }
+            defaultdict(
+                list,
+                {
+                    "lang": "日語",
+                    "lang_code": "ja",
+                    "word": "可笑しい",
+                },
+            )
         ]
         wikitext = """# [[好玩]]的：
 ## 有趣的，滑稽的，可笑的

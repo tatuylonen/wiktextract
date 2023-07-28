@@ -1,3 +1,4 @@
+from collections import defaultdict
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
@@ -28,7 +29,7 @@ class TestHeadword(TestCase):
         # expanded text: manga (可數 & 不可數，複數 manga 或 mangas)
         node = Mock()
         node.args = [["en-noun"]]
-        page_data = [{}]
+        page_data = [defaultdict(list)]
         self.wxr.wtp.title = "manga"
         extract_headword_line(self.wxr, page_data, node, "en")
         self.assertEqual(
@@ -54,7 +55,7 @@ class TestHeadword(TestCase):
         # expanded text: manga m (複數 manga's，指小詞 mangaatje n)
         node = Mock()
         node.args = [["nl-noun"]]
-        page_data = [{}]
+        page_data = [defaultdict(list)]
         self.wxr.wtp.title = "manga"
         extract_headword_line(self.wxr, page_data, node, "nl")
         self.assertEqual(
@@ -80,7 +81,7 @@ class TestHeadword(TestCase):
         # expanded text: -κρατίᾱς (-kratíās) f
         node = Mock()
         node.args = [["head"]]
-        page_data = [{}]
+        page_data = [defaultdict(list)]
         self.wxr.wtp.title = "-κρατίας"
         extract_headword_line(self.wxr, page_data, node, "grc")
         self.assertEqual(

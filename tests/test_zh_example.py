@@ -23,7 +23,7 @@ class TestExample(unittest.TestCase):
         )
 
     def test_example_list(self) -> None:
-        sense_data = {}
+        sense_data = defaultdict(list)
         wikitext = """
 #* ref text
 #*: example text

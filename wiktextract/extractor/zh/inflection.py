@@ -2,7 +2,6 @@ from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
 
-from wiktextract.datautils import data_append
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -74,6 +73,6 @@ def extract_ja_i_template(
                                     )
                                 else:
                                     break
-                    data_append(wxr, page_data[-1], "forms", inflection_data)
+                    page_data[-1]["forms"].append(inflection_data)
             else:
                 extract_ja_i_template(wxr, page_data, child, table_header)
