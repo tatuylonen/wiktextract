@@ -1,4 +1,5 @@
 import re
+from collections import defaultdict
 from typing import Dict, List, Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
@@ -92,6 +93,8 @@ def process_translation_list_item(
     sense: str,
     append_to: Dict,
 ) -> None:
+    from .headword_line import GENDERS
+
     split_results = re.split(r":|：", expanded_text, maxsplit=1)
     if len(split_results) != 2:
         return
@@ -106,14 +109,29 @@ def process_translation_list_item(
     for word_and_tags in re.split(r"[,;、](?![^(]*\))\s*", words_text):
         tags, word = capture_text_in_parentheses(word_and_tags)
         tags = [tag for tag in tags if tag != lang_code]  # rm Wiktionary link
-        translation_data = {
-            "code": lang_code,
-            "lang": lang_text,
-            "word": word,
-        }
-        if len(tags) > 0:
-            translation_data["tags"] = tags
-        # TODO: handle gender text
+        translation_data = defaultdict(
+            list,
+            {
+                "code": lang_code,
+                "lang": lang_text,
+                "word": word,
+            },
+        )
+        tags_without_roman = []
+        for tag in tags:
+            if re.search(r"[a-z]", tag):
+                translation_data["roman"] = tag
+            else:
+                tags_without_roman.append(tag)
+
+        if len(tags_without_roman) > 0:
+            translation_data["tags"] = tags_without_roman
+
+        gender = word.split(" ")[-1]
+        if gender in GENDERS:
+            translation_data["word"] = word.removesuffix(f" {gender}")
+            translation_data["tags"].append(GENDERS.get(gender))
+
         if len(sense) > 0:
             translation_data["sense"] = sense
         append_to["translations"].append(translation_data)
