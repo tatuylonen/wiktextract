@@ -117,8 +117,15 @@ def process_translation_list_item(
                 "word": word,
             },
         )
-        if len(tags) > 0:
-            translation_data["tags"] = tags
+        tags_without_roman = []
+        for tag in tags:
+            if re.search(r"[a-z]", tag):
+                translation_data["roman"] = tag
+            else:
+                tags_without_roman.append(tag)
+
+        if len(tags_without_roman) > 0:
+            translation_data["tags"] = tags_without_roman
 
         gender = word.split(" ")[-1]
         if gender in GENDERS:
