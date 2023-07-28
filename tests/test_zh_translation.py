@@ -38,6 +38,7 @@ class TestTranslation(unittest.TestCase):
 *: 埃及阿拉伯語：هنا‎ (henā)
 *俄语：[[привет|приве́т]] ‎(privét) (非正式), [[здравствуйте|здра́вствуйте]] ‎(zdrávstvujte) (正式, 第一个"в"不发音)
 {{trans-bottom}}
+* 斯洛伐克語：pracovať impf
         """
         self.wxr.wtp.start_page("你好")
         node = self.wxr.wtp.parse(wikitext)
@@ -84,6 +85,13 @@ class TestTranslation(unittest.TestCase):
                     "sense": "靠近說話者的地方",
                     "tags": ["zdrávstvujte", '正式, 第一个"в"不发音'],
                     "word": "здра́вствуйте",
+                },
+                {
+                    "code": "sk",
+                    "lang": "斯洛伐克語",
+                    "sense": "靠近說話者的地方",
+                    "tags": ["imperfective aspect"],
+                    "word": "pracovať",
                 },
             ],
         )
