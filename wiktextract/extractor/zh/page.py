@@ -1,6 +1,5 @@
 import copy
 import logging
-import string
 from collections import defaultdict
 from typing import Any, Dict, List, Union
 
@@ -150,15 +149,13 @@ def parse_section(
         return
     if node.kind in LEVEL_KINDS:
         subtitle = clean_node(wxr, None, node.args)
-        subtitle = subtitle.rstrip(string.digits)
         wxr.wtp.start_subsection(subtitle)
         if subtitle in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
             pass
         elif subtitle in wxr.config.POS_SUBTITLES:
             process_pos_block(wxr, page_data, base_data, node, subtitle)
-        elif (
-            wxr.config.capture_etymologies
-            and subtitle in wxr.config.OTHER_SUBTITLES["etymology"]
+        elif wxr.config.capture_etymologies and subtitle.startswith(
+            tuple(wxr.config.OTHER_SUBTITLES["etymology"])
         ):
             extract_etymology(wxr, page_data, base_data, node.children)
         elif (
@@ -191,9 +188,8 @@ def parse_section(
         else:
             wxr.wtp.debug(
                 f"Unhandled subtitle: {subtitle}",
-                sortid="extractor/zh/page/parse_section/192"
+                sortid="extractor/zh/page/parse_section/192",
             )
-
 
 
 def process_pos_block(
