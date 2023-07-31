@@ -174,12 +174,22 @@ def translation_subpage(
 
 
 def find_subpage_section(
-    wxr: WiktextractContext, node: Union[WikiNode, str], target_section: str
+    wxr: WiktextractContext,
+    node: Union[WikiNode, str],
+    target_section: Union[str, List[str]],
 ) -> Optional[WikiNode]:
     if isinstance(node, WikiNode):
         if node.kind in LEVEL_KINDS:
             section_title = clean_node(wxr, None, node.args)
-            if section_title == target_section:
+            if (
+                isinstance(target_section, str)
+                and section_title == target_section
+            ):
+                return node
+            if (
+                isinstance(target_section, list)
+                and section_title in target_section
+            ):
                 return node
 
         for child in node.children:
