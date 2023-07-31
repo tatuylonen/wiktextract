@@ -53,8 +53,22 @@ def add_wikimedia_language_codes(data: dict[str, list[str]]) -> None:
 
 
 def save_json_file(
-    data: dict[str, list[str]], lang_code: str, file_name: str = "languages.json"
+    data: dict[str, list[str]],
+    lang_code: str,
+    file_name: str = "languages.json",
 ) -> None:
+    override_file = Path(f"languages/override/{lang_code}.json")
+    if override_file.exists():
+        with override_file.open(encoding="utf-8") as f:
+            override_data = json.load(f)
+            for override_lang_code, override_names in override_data.items():
+                if override_lang_code in data:
+                    data[override_lang_code] = list(
+                        set(data[override_lang_code]) | set(override_names)
+                    )
+                else:
+                    data[override_lang_code] = override_names
+
     data_folder = Path(f"wiktextract/data/{lang_code}")
     if not data_folder.exists():
         data_folder.mkdir()
@@ -78,10 +92,12 @@ def expand_template(sub_domain: str, text: str) -> str:
         "prop": "wikitext",
         "formatversion": "2",
     }
-    r = requests.get(f"https://{sub_domain}.wiktionary.org/w/api.php",
-                     params=params)
+    r = requests.get(
+        f"https://{sub_domain}.wiktionary.org/w/api.php", params=params
+    )
     data = r.json()
     return data["expandtemplates"]["wikitext"]
+
 
 def get_source_code(sub_domain: str, page: str) -> str:
     # Sometimes, like for Czech, the templates cannot be expanded, so we have to parse the source code
@@ -95,8 +111,9 @@ def get_source_code(sub_domain: str, page: str) -> str:
         "prop": "wikitext",
         "formatversion": "2",
     }
-    r = requests.get(f"https://{sub_domain}.wiktionary.org/w/api.php",
-                     params=params)
+    r = requests.get(
+        f"https://{sub_domain}.wiktionary.org/w/api.php", params=params
+    )
     data = r.json()
     return data["parse"]["wikitext"]
 
@@ -135,7 +152,6 @@ def parse_csv(sub_domain: str, wiki_lang_code: str) -> dict[str, list[str]]:
     save_json_file(lang_data, wiki_lang_code)
 
 
-
 def get_fr_languages():
     # https://fr.wiktionary.org/wiki/Module:langues/analyse
     json_text = expand_template(
@@ -154,27 +170,27 @@ def get_fr_languages():
 def get_languages_cs_sk(wk_lang_code: str):
     # https://cs.wiktionary.org/wiki/Modul:Languages
     source_code = get_source_code(wk_lang_code, "Modul:Languages")
-    source_code = source_code[source_code.index("--]]") + 4:]
+    source_code = source_code[source_code.index("--]]") + 4 :]
     source_code = source_code.replace("Languages = ", "", 1)
-    source_code = source_code[:source_code.rindex("}") + 1]
+    source_code = source_code[: source_code.rindex("}") + 1]
 
     lang_data = {}
     for line in source_code.splitlines():
         line = line.strip()
         if line.startswith("["):
-            lang_code = line[1:line.index("]")]
-            lang_code = lang_code.replace('\"', '')
+            lang_code = line[1 : line.index("]")]
+            lang_code = lang_code.replace('"', "")
             lang_data[lang_code] = []
         elif line.startswith("name = "):
-            lang_name = line[7:line.index(",")]
+            lang_name = line[7 : line.index(",")]
 
-            lang_name = lang_name.replace('\"', '')
+            lang_name = lang_name.replace('"', "")
             lang_data[lang_code].append(lang_name)
 
     lang_data = {k: v for k, v in lang_data.items() if v != [] and v != ["—"]}
-    
+
     save_json_file(lang_data, wk_lang_code)
-    
+
 
 def main():
     parser = argparse.ArgumentParser()

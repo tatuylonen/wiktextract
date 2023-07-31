@@ -18,19 +18,25 @@
 # python languages/get_data.py en enwiktionary-20230420-pages-articles.xml.bz2
 
 import argparse
+import json
+from pathlib import Path
+
 from wikitextprocessor import Wtp
+from wikitextprocessor.dumpparser import process_dump
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.wxr_context import WiktextractContext
-from wikitextprocessor.dumpparser import process_dump
-from pathlib import Path
-import json
+from wiktextract.thesaurus import close_thesaurus_db
 
 
-def get_lang_data(lang_code: str, dump_file: str) -> None:
-    wxr = WiktextractContext(Wtp(lang_code=lang_code), WiktionaryConfig())
+def get_lang_data(lang_code: str, dump_file: str, db_path: Path | None) -> None:
+    wxr = WiktextractContext(
+        Wtp(lang_code=lang_code, db_path=db_path), WiktionaryConfig()
+    )
     module_ns_id = wxr.wtp.NAMESPACE_DATA["Module"]["id"]
     module_ns_name = wxr.wtp.NAMESPACE_DATA["Module"]["name"]
-    process_dump(wxr.wtp, dump_file, {module_ns_id})
+    if db_path is None:
+        process_dump(wxr.wtp, dump_file, {module_ns_id})
 
     with open("languages/lua/json.lua", encoding="utf-8") as f:
         lua_json_code = f.read()
@@ -56,6 +62,19 @@ def get_lang_data(lang_code: str, dump_file: str) -> None:
     wxr.wtp.start_page("wiktextract lang data")
     data = wxr.wtp.expand("{{#invoke:wiktextract-lang-data|languages}}")
     data = json.loads(data)
+
+    override_file = Path(f"languages/override/{lang_code}.json")
+    if override_file.exists():
+        with override_file.open(encoding="utf-8") as f:
+            override_data = json.load(f)
+            for override_lang_code, override_names in override_data.items():
+                if override_lang_code in data:
+                    data[override_lang_code] = list(
+                        set(data[override_lang_code]) | set(override_names)
+                    )
+                else:
+                    data[override_lang_code] = override_names
+
     data_folder = Path(f"wiktextract/data/{lang_code}")
     if not data_folder.exists():
         data_folder.mkdir()
@@ -64,6 +83,7 @@ def get_lang_data(lang_code: str, dump_file: str) -> None:
     ) as fout:
         json.dump(data, fout, indent=2, ensure_ascii=False, sort_keys=True)
     wxr.wtp.close_db_conn()
+    close_thesaurus_db(wxr.thesaurus_db_path, wxr.thesaurus_db_conn)
 
 
 if __name__ == "__main__":
@@ -72,7 +92,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("lang_code", type=str, help="Dump file language code")
     parser.add_argument(
-        "dump_file", type=str, help="Wiktionary xml dump file path"
+        "--dump-file", type=str, help="Wiktionary xml dump file path"
     )
+    parser.add_argument("--db-file", type=str, help="Database file path")
     args = parser.parse_args()
-    get_lang_data(args.lang_code, args.dump_file)
+    get_lang_data(args.lang_code, args.dump_file, args.db_file)
