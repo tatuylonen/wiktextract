@@ -9,6 +9,12 @@
   "专有名词": {
     "pos": "name"
   },
+  "中綴": {
+    "pos": "interfix",
+    "tags": [
+      "morpheme"
+    ]
+  },
   "人称代词": {
     "pos": "pron",
     "tags": [
@@ -35,6 +41,9 @@
     "tags": [
       "idiomatic"
     ]
+  },
+  "冠詞": {
+    "pos": "article"
   },
   "冠词": {
     "pos": "article"
@@ -107,11 +116,28 @@
   "名词": {
     "pos": "noun"
   },
+  "后缀": {
+    "pos": "suffix",
+    "tags": [
+      "morpheme"
+    ]
+  },
   "字母": {
     "pos": "character",
     "tags": [
       "letter"
     ]
+  },
+  "字面": {
+    "debug": "typo",
+    "pos": "character",
+    "tags": [
+      "letter"
+    ]
+  },
+  "寧詞": {
+    "debug": "typo",
+    "pos": "noun"
   },
   "專有名詞": {
     "pos": "name"
@@ -153,10 +179,22 @@
   "成語": {
     "pos": "proverb"
   },
+  "数詞": {
+    "pos": "num"
+  },
+  "数词": {
+    "pos": "num"
+  },
   "數詞": {
     "pos": "num",
     "tags": [
       "number"
+    ]
+  },
+  "标点": {
+    "pos": "punct",
+    "tags": [
+      "punctuation"
     ]
   },
   "标点符号": {
@@ -219,6 +257,9 @@
   "罗马化": {
     "pos": "romanization"
   },
+  "罗马字": {
+    "pos": "romanization"
+  },
   "羅馬化": {
     "pos": "romanization"
   },
@@ -234,6 +275,9 @@
   "連詞": {
     "pos": "conj"
   },
+  "量詞": {
+    "pos": "classifier"
+  },
   "量词‎": {
     "pos": "classifier"
   },
@@ -247,6 +291,12 @@
     "pos": "character",
     "tags": [
       "diacritic"
+    ]
+  },
+  "附著語素": {
+    "pos": "suffix",
+    "tags": [
+      "morpheme"
     ]
   },
   "限定詞": {
