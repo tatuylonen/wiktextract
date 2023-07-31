@@ -188,6 +188,12 @@ def parse_section(
             and subtitle in wxr.config.OTHER_SUBTITLES["inflection_sections"]
         ):
             extract_inflections(wxr, page_data, node)
+        else:
+            wxr.wtp.debug(
+                f"Unhandled subtitle: {subtitle}",
+                sortid="extractor/zh/page/parse_section/192"
+            )
+
 
 
 def process_pos_block(
