@@ -177,7 +177,7 @@ def parse_section(
             )
         elif (
             wxr.config.capture_translations
-            and subtitle == wxr.config.OTHER_SUBTITLES["translations"]
+            and subtitle in wxr.config.OTHER_SUBTITLES["translations"]
         ):
             extract_translation(wxr, page_data, node)
         elif (
