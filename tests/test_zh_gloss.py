@@ -1,10 +1,11 @@
 import unittest
 from collections import defaultdict
+from unittest.mock import patch
 
-from wikitextprocessor import Wtp
+from wikitextprocessor import NodeKind, WikiNode, Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.zh.page import extract_gloss
+from wiktextract.extractor.zh.page import extract_gloss, parse_section
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
@@ -72,3 +73,25 @@ class TestExample(unittest.TestCase):
                 },
             ],
         )
+
+    @patch("wiktextract.extractor.zh.page.process_pos_block")
+    @patch("wiktextract.extractor.zh.page.clean_node", return_value="名詞1")
+    def test_pos_title_number(
+        self,
+        mock_clean_node,
+        mock_process_pos_block,
+    ) -> None:
+        node = WikiNode(NodeKind.LEVEL3, 0)
+        parse_section(self.wxr, [], {}, node)
+        mock_process_pos_block.assert_called()
+
+    @patch("wiktextract.extractor.zh.page.process_pos_block")
+    @patch("wiktextract.extractor.zh.page.clean_node", return_value="名詞（一）")
+    def test_pos_title_chinese_numeral(
+        self,
+        mock_clean_node,
+        mock_process_pos_block,
+    ) -> None:
+        node = WikiNode(NodeKind.LEVEL3, 0)
+        parse_section(self.wxr, [], {}, node)
+        mock_process_pos_block.assert_called()

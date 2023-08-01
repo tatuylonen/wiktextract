@@ -1,5 +1,6 @@
 import copy
 import logging
+import re
 from collections import defaultdict
 from typing import Any, Dict, List, Union
 
@@ -149,6 +150,8 @@ def parse_section(
         return
     if node.kind in LEVEL_KINDS:
         subtitle = clean_node(wxr, None, node.args)
+        # remove number suffix from subtitle
+        subtitle = re.sub(r"\s*(?:（.+）|\d+)$", "", subtitle)
         wxr.wtp.start_subsection(subtitle)
         if subtitle in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
             pass
