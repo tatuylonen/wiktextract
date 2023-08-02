@@ -1,4 +1,10 @@
 {
+  "不及物动词": {
+    "pos": "verb",
+    "tags": [
+      "intransitive"
+    ]
+  },
   "不及物動詞": {
     "debug": "part-of-speech Intransitive verb is proscribed",
     "pos": "verb",
@@ -6,8 +12,17 @@
       "intransitive"
     ]
   },
+  "不定代词": {
+    "pos": "pron"
+  },
   "不定冠詞": {
     "pos": "article"
+  },
+  "不定冠词": {
+    "pos": "article"
+  },
+  "专有名詞": {
+    "pos": "name"
   },
   "专有名词": {
     "pos": "name"
@@ -24,13 +39,25 @@
       "morpheme"
     ]
   },
+  "习语": {
+    "pos": "phrase",
+    "tags": [
+      "idiomatic"
+    ]
+  },
   "人称代词": {
     "pos": "pron",
     "tags": [
       "person"
     ]
   },
+  "介係詞": {
+    "pos": "prep"
+  },
   "介系詞": {
+    "pos": "prep"
+  },
+  "介系词": {
     "pos": "prep"
   },
   "介詞": {
@@ -44,6 +71,12 @@
   },
   "介词短语": {
     "pos": "prep_phrase"
+  },
+  "代名詞": {
+    "pos": "pron"
+  },
+  "代名词": {
+    "pos": "pron"
   },
   "代詞": {
     "pos": "pron"
@@ -63,11 +96,20 @@
       "idiomatic"
     ]
   },
+  "关系代词": {
+    "pos": "pron"
+  },
   "冠詞": {
     "pos": "article"
   },
   "冠词": {
     "pos": "article"
+  },
+  "分詞": {
+    "pos": "verb",
+    "tags": [
+      "participle"
+    ]
   },
   "分词": {
     "pos": "verb",
@@ -75,20 +117,35 @@
       "participle"
     ]
   },
+  "分類詞": {
+    "pos": "classifier"
+  },
   "前綴": {
     "pos": "prefix",
     "tags": [
       "morpheme"
     ]
   },
+  "前綴詞": {
+    "pos": "prefix",
+    "tags": [
+      "morpheme"
+    ]
+  },
   "前缀": {
-    "pos": "affix"
+    "pos": "prefix",
+    "tags": [
+      "morpheme"
+    ]
   },
   "前置詞": {
     "pos": "prep"
   },
   "前置词": {
     "pos": "prep"
+  },
+  "副助": {
+    "pos": "particle"
   },
   "副詞": {
     "pos": "adv"
@@ -102,7 +159,16 @@
   "动词": {
     "pos": "verb"
   },
+  "助動詞": {
+    "pos": "verb"
+  },
+  "助數詞": {
+    "pos": "counter"
+  },
   "助詞": {
+    "pos": "particle"
+  },
+  "助词": {
     "pos": "particle"
   },
   "動名詞": {
@@ -143,11 +209,23 @@
       "morpheme"
     ]
   },
+  "后置词": {
+    "pos": "postp"
+  },
+  "基数": {
+    "pos": "num"
+  },
+  "基数词": {
+    "pos": "num"
+  },
   "字母": {
     "pos": "character",
     "tags": [
       "letter"
     ]
+  },
+  "字綴": {
+    "pos": "affix"
   },
   "字面": {
     "debug": "typo",
@@ -156,9 +234,18 @@
       "letter"
     ]
   },
+  "定冠词": {
+    "pos": "article"
+  },
   "寧詞": {
     "debug": "typo",
     "pos": "noun"
+  },
+  "对应汉字": {
+    "pos": "romanization"
+  },
+  "对应词语": {
+    "pos": "romanization"
   },
   "專有名詞": {
     "pos": "name"
@@ -166,12 +253,27 @@
   "小品词": {
     "pos": "particle"
   },
+  "平假名": {
+    "pos": "syllable"
+  },
   "序數": {
     "debug": "ordinal numbers should be adjectives",
     "pos": "adj",
     "tags": [
       "ordinal"
     ]
+  },
+  "序數詞": {
+    "pos": "num"
+  },
+  "康熙部首": {
+    "pos": "symbol"
+  },
+  "形容动词": {
+    "pos": "adj_noun"
+  },
+  "形容動詞": {
+    "pos": "adj_noun"
   },
   "形容詞": {
     "pos": "adj"
@@ -194,6 +296,9 @@
       "clitic"
     ]
   },
+  "惯用语": {
+    "pos": "phrase"
+  },
   "感叹词": {
     "pos": "intj"
   },
@@ -203,14 +308,56 @@
   "感歎詞": {
     "pos": "intj"
   },
+  "慣用語": {
+    "pos": "phrase"
+  },
   "成句": {
     "pos": "proverb"
   },
   "成語": {
-    "pos": "proverb"
+    "pos": "phrase",
+    "tags": [
+      "idiomatic"
+    ]
+  },
+  "成语": {
+    "pos": "phrase",
+    "tags": [
+      "idiomatic"
+    ]
   },
   "拼音": {
     "pos": "romanization"
+  },
+  "接助": {
+    "pos": "particle"
+  },
+  "接头": {
+    "pos": "prefix"
+  },
+  "接头詞": {
+    "pos": "prefix"
+  },
+  "接头词": {
+    "pos": "prefix"
+  },
+  "接尾": {
+    "pos": "suffix"
+  },
+  "接尾詞": {
+    "pos": "suffix"
+  },
+  "接尾词": {
+    "pos": "suffix"
+  },
+  "提助": {
+    "pos": "article"
+  },
+  "擬態詞": {
+    "pos": "noun",
+    "tags": [
+      "ideophone"
+    ]
   },
   "数字": {
     "pos": "num",
@@ -225,6 +372,18 @@
     ]
   },
   "数词": {
+    "pos": "num",
+    "tags": [
+      "number"
+    ]
+  },
+  "數字": {
+    "pos": "num",
+    "tags": [
+      "number"
+    ]
+  },
+  "數字符號": {
     "pos": "num",
     "tags": [
       "number"
@@ -254,6 +413,12 @@
     "tags": [
       "punctuation"
     ]
+  },
+  "汉语拼音": {
+    "pos": "romanization"
+  },
+  "注音符號": {
+    "pos": "character"
   },
   "漢字": {
     "pos": "character",
@@ -307,6 +472,12 @@
       "contraction"
     ]
   },
+  "结合形式": {
+    "pos": "combining_form",
+    "tags": [
+      "morpheme"
+    ]
+  },
   "缩写": {
     "debug": "part-of-speech Abbreviation is proscribed",
     "pos": "abbrev",
@@ -332,17 +503,50 @@
   "羅馬字": {
     "pos": "romanization"
   },
+  "習語": {
+    "pos": "phrase",
+    "tags": [
+      "idiomatic"
+    ]
+  },
+  "表語": {
+    "pos": "adj",
+    "tags": [
+      "predicative"
+    ]
+  },
+  "詞綴": {
+    "pos": "affix"
+  },
   "諺語": {
     "pos": "proverb"
   },
+  "词组": {
+    "pos": "phrase"
+  },
+  "词缀": {
+    "pos": "affix"
+  },
+  "语气助词": {
+    "pos": "particle"
+  },
   "谚语": {
     "pos": "proverb"
+  },
+  "连体词": {
+    "pos": "adnominal"
   },
   "连词": {
     "pos": "conj"
   },
   "連詞": {
     "pos": "conj"
+  },
+  "連體詞": {
+    "pos": "adnominal"
+  },
+  "部件": {
+    "pos": "component"
   },
   "量詞": {
     "pos": "classifier"
@@ -354,6 +558,12 @@
     "pos": "interfix",
     "tags": [
       "morpheme"
+    ]
+  },
+  "關係詞": {
+    "pos": "conj",
+    "tags": [
+      "relative"
     ]
   },
   "附加符號": {
@@ -371,7 +581,13 @@
   "限定詞": {
     "pos": "det"
   },
+  "限定词": {
+    "pos": "det"
+  },
   "音節": {
+    "pos": "syllable"
+  },
+  "音节": {
     "pos": "syllable"
   },
   "首字母縮略字": {
