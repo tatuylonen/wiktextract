@@ -48,10 +48,10 @@ RECOGNIZED_NAMESPACE_NAMES = [
 
 
 def process_single_page(
-        path_or_title: str,
-        args: argparse.Namespace,
-        wxr: WiktextractContext,
-        word_cb: Callable[[Any], None]
+    path_or_title: str,
+    args: argparse.Namespace,
+    wxr: WiktextractContext,
+    word_cb: Callable[[Any], None],
 ) -> None:
     if Path(path_or_title).exists():
         # Load the page wikitext from the given file
