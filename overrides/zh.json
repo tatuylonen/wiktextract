@@ -11,6 +11,7 @@
   "Template:-n2-": "===名词===",
   "Template:-nsyn-": "===名词===",
   "Template:-p-": "===代词===",
+  "Template:-phr-": "===片語===",
   "Template:-prep-": "===介词===",
   "Template:-sx-": "===缩写===",
   "Template:-v2-": "===动词===",
@@ -26,6 +27,8 @@
   "Template:=part=": "===助词===",
   "Template:=v=": "===动词===",
   "Template:CC-CEDICT": "",
-  "Template:詞類": "==={{{1}}}===",
+  "Template:发音": "===发音===",
+  "Template:漢": "==漢字==",
+  "Template:詞類": "{{{1}}}",
   "Template:語言標題": "=={{{l|{{{語|{{{语|}}}}}}}}}=="
 }

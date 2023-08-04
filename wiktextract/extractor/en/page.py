@@ -386,7 +386,7 @@ usex_templates = {
     "th-usex",
     "th-x",
     "ur-usex",
-    "ur-x"
+    "ur-x",
     "usex",
     "usex-suffix",
     "ux",
