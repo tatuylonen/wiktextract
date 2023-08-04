@@ -337,16 +337,17 @@ def main():
                              wxr.wtp.saved_page_nums() > 0,
                              args.pages_dir)
 
+        if args.override is not None and args.path is None:
+            analyze_and_overwrite_pages(
+                wxr.wtp, [Path(p) for p in args.override]
+            )
+
         if args.page:
             # Parse a single Wiktionary page (extracted using --pages-dir)
             if not args.db_path:
                 logging.warning(
                     "NOTE: you probably want to use --db-path with --page or "
                     "otherwise processing will be very slow."
-                )
-            if args.override is not None and args.path is None:
-                analyze_and_overwrite_pages(
-                    wxr.wtp, [Path(p) for p in args.override]
                 )
 
             for title_or_path in args.page:
