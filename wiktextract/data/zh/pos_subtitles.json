@@ -162,6 +162,12 @@
   "助動詞": {
     "pos": "verb"
   },
+  "助数": {
+    "pos": "classifier",
+    "tags": [
+      "measure word"
+    ]
+  },
   "助數詞": {
     "pos": "counter"
   },
@@ -197,6 +203,12 @@
   "叹词": {
     "pos": "intj"
   },
+  "名称": {
+    "pos": "noun"
+  },
+  "名稱": {
+    "pos": "noun"
+  },
   "名詞": {
     "pos": "noun"
   },
@@ -216,6 +228,9 @@
     "pos": "num"
   },
   "基数词": {
+    "pos": "num"
+  },
+  "基數": {
     "pos": "num"
   },
   "字母": {
@@ -359,6 +374,12 @@
       "ideophone"
     ]
   },
+  "擬聲詞": {
+    "pos": "noun",
+    "tags": [
+      "onomatopoeia"
+    ]
+  },
   "数字": {
     "pos": "num",
     "tags": [
@@ -412,6 +433,18 @@
     "pos": "punct",
     "tags": [
       "punctuation"
+    ]
+  },
+  "歇后语": {
+    "pos": "proverb",
+    "tags": [
+      "xiehouyu"
+    ]
+  },
+  "歇後語": {
+    "pos": "proverb",
+    "tags": [
+      "xiehouyu"
     ]
   },
   "汉语拼音": {
@@ -551,7 +584,7 @@
   "量詞": {
     "pos": "classifier"
   },
-  "量词‎": {
+  "量词": {
     "pos": "classifier"
   },
   "間綴": {
