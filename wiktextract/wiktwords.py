@@ -466,6 +466,7 @@ def main():
         pr.enable()
 
     try:
+        skip_extract_dump = wxr.wtp.saved_page_nums() > 0
         if args.path:
             namespace_ids = {
                 wxr.wtp.NAMESPACE_DATA.get(name, {}).get("id")
@@ -476,17 +477,17 @@ def main():
                 wxr,
                 args.path,
                 word_cb,
-                (args.page is not None),  # phase1_only
-                (args.pages_dir is not None and not args.out),  # dont_parse
+                args.page is not None,  # phase1_only
+                args.pages_dir is not None and not args.out,  # dont_parse
                 namespace_ids,
                 args.override,
-                wxr.wtp.saved_page_nums() > 0,
+                skip_extract_dump,
                 args.pages_dir,
             )
 
         if args.override is not None and args.path is None:
             analyze_and_overwrite_pages(
-                wxr.wtp, [Path(p) for p in args.override]
+                wxr.wtp, [Path(p) for p in args.override], skip_extract_dump
             )
 
         if args.page:
