@@ -7,27 +7,27 @@
 import io
 import logging
 import re
-import time
 import tarfile
-
+import time
 from pathlib import Path
-from typing import Optional, List, Set, Tuple, Dict
+from typing import Dict, List, Optional, Set, Tuple
 
 from wikitextprocessor import Page
+
 from .page import parse_page
-from .wxr_context import WiktextractContext
 from .thesaurus import (
     emit_words_in_thesaurus,
     extract_thesaurus_data,
     thesaurus_linkage_number,
 )
+from .wxr_context import WiktextractContext
 
 
 def page_handler(
     wxr: WiktextractContext,
     page: Page,
     config_kwargs: Dict[str, str],
-    dont_parse: bool
+    dont_parse: bool,
 ) -> Optional[Tuple[List[dict], dict]]:
     # Make sure there are no newlines or other strange characters in the
     # title.  They could cause security problems at several post-processing
