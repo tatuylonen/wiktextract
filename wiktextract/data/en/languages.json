@@ -902,6 +902,9 @@
   "alv-cng-pro": [
     "Proto-Cangin"
   ],
+  "alv-edk-pro": [
+    "Proto-Edekiri"
+  ],
   "alv-edo-pro": [
     "Proto-Edoid"
   ],
@@ -946,6 +949,9 @@
     "Proto-Volta-Niger"
   ],
   "alv-yor-pro": [
+    "Proto-Yoruba"
+  ],
+  "alv-yrd-pro": [
     "Proto-Yoruboid"
   ],
   "alw": [
@@ -1491,6 +1497,9 @@
   ],
   "art-una": [
     "Unas"
+  ],
+  "art-vlh": [
+    "High Valyrian"
   ],
   "aru": [
     "Arua",
@@ -4698,7 +4707,8 @@
   ],
   "caa": [
     "Ch'orti'",
-    "Chorti"
+    "Chorti",
+    "Chʼortiʼ"
   ],
   "cab": [
     "Garifuna"
@@ -7765,7 +7775,8 @@
     "Flaaitaal"
   ],
   "fmp": [
-    "Fe'fe'"
+    "Fe'fe'",
+    "Feʼfeʼ"
   ],
   "fmu": [
     "Far Western Muria"
@@ -11567,7 +11578,8 @@
     "Kadar"
   ],
   "kek": [
-    "Q'eqchi"
+    "Q'eqchi",
+    "Qʼeqchi"
   ],
   "kel": [
     "Kela-Yela",
@@ -12933,7 +12945,8 @@
     "‡Kx'auǁ'ei",
     "ǂKx'auǁ'ein",
     "ǁX'auǁ'e",
-    "Juǀ'hoansi"
+    "Juǀ'hoansi",
+    "Juǀʼhoan"
   ],
   "ku-pro": [
     "Proto-Kurdish"
@@ -13140,7 +13153,8 @@
     "Kwanga"
   ],
   "kwk": [
-    "Kwak'wala"
+    "Kwak'wala",
+    "Kwakʼwala"
   ],
   "kwl": [
     "Kofyar"
@@ -20484,6 +20498,10 @@
     "Proto-Malayo-Polynesian",
     "Proto-Western Malayo-Polynesian"
   ],
+  "poz-sml": [
+    "Sarawak Malay",
+    "Sarawak"
+  ],
   "poz-ssw-pro": [
     "Proto-South Sulawesi"
   ],
@@ -20492,6 +20510,10 @@
   ],
   "poz-swa-pro": [
     "Proto-North Sarawak"
+  ],
+  "poz-ter": [
+    "Terengganu Malay",
+    "Terengganu"
   ],
   "ppa": [
     "Pao"
@@ -20965,7 +20987,9 @@
     "Arkansas"
   ],
   "quc": [
-    "K'iche'"
+    "K'iche'",
+    "Kʼicheʼ",
+    "Quiché"
   ],
   "qui": [
     "Quileute"
@@ -21715,18 +21739,10 @@
     "Buglere",
     "Bugle",
     "Murire",
-    "Muoy",
-    "Sabanero",
-    "Bokotá",
-    "Bogota"
+    "Muoy"
   ],
   "sac": [
-    "Fox",
-    "Sac",
-    "Sauk",
-    "Kickapoo",
-    "Mesquakie",
-    "Meskwaki"
+    "Fox"
   ],
   "sad": [
     "Sandawe"
@@ -22378,9 +22394,7 @@
     "Seget"
   ],
   "sbh": [
-    "Sori-Harengan",
-    "Sori",
-    "Harengan"
+    "Sori-Harengan"
   ],
   "sbi": [
     "Seti"
@@ -22463,10 +22477,7 @@
     "Sadri"
   ],
   "scl": [
-    "Shina",
-    "Gilgiti",
-    "Astori",
-    "Chilasi"
+    "Shina"
   ],
   "scn": [
     "Sicilian"
@@ -22525,10 +22536,8 @@
   ],
   "sdh": [
     "Southern Kurdish",
-    "Kermanshani",
     "Kermanshahi",
-    "Kermanshahi Kurdish",
-    "Kermanshani Kurdish"
+    "Kermanshahi Kurdish"
   ],
   "sdj": [
     "Suundi"
@@ -22614,13 +22623,17 @@
   ],
   "sek": [
     "Sekani",
-    "Tsek'ene",
-    "Kwadacha",
-    "Kwadacha Sekani",
-    "Kwadacha Tsek'ene"
+    "Tsek'ene"
   ],
-  "sel": [
-    "Selkup"
+  "sel-nor": [
+    "Northern Selkup",
+    "Taz Selkup"
+  ],
+  "sel-pro": [
+    "Proto-Selkup"
+  ],
+  "sel-sou": [
+    "Southern Selkup"
   ],
   "sem-amm": [
     "Ammonite"
@@ -22699,15 +22712,13 @@
     "Senara Sénoufo"
   ],
   "ser": [
-    "Serrano",
-    "Kitanemuk"
+    "Serrano"
   ],
   "ses": [
     "Koyraboro Senni",
     "Koyraboro Senni Songhay",
     "Koyraboro Senni Songhai",
-    "Koroboro Senni",
-    "Eastern Songhay"
+    "Koroboro Senni"
   ],
   "set": [
     "Sentani"
@@ -22799,8 +22810,7 @@
   ],
   "sgy": [
     "Sanglechi",
-    "Sanglich",
-    "Warduji"
+    "Sanglich"
   ],
   "sgz": [
     "Sursurunga"
@@ -22833,15 +22843,7 @@
   ],
   "shh": [
     "Shoshone",
-    "Shoshoni",
-    "Gosiute",
-    "Goshute",
-    "Eastern Shoshone",
-    "Eastern Shoshoni",
-    "Western Shoshone",
-    "Western Shoshoni",
-    "Northern Shoshone",
-    "Northern Shoshoni"
+    "Shoshoni"
   ],
   "shi": [
     "Tashelhit",
@@ -22851,7 +22853,8 @@
     "Tashlhiyt",
     "Tashelhit Berber",
     "Tachelhit Berber",
-    "Tashlhiyt Berber"
+    "Tashlhiyt Berber",
+    "Soussian"
   ],
   "shj": [
     "Shatt"
@@ -23089,7 +23092,9 @@
   ],
   "siz": [
     "Siwi",
-    "Siwa"
+    "Siwa",
+    "Siwan",
+    "Siwa Berber"
   ],
   "sja": [
     "Epena"
@@ -23110,10 +23115,7 @@
     "Kemi Sami"
   ],
   "sjl": [
-    "Miji",
-    "Dmay",
-    "Dhammai",
-    "Sajolang"
+    "Miji"
   ],
   "sjm": [
     "Mapun"
@@ -23166,18 +23168,10 @@
     "Seke"
   ],
   "skf": [
-    "Sakirabiá",
+    "Mekéns",
+    "Mekens",
     "Mekem",
-    "Amniapé",
-    "Sakïrabiát",
-    "Sakiráp",
-    "Koaratira",
-    "Guaratira",
-    "Kanoé",
-    "Koarategayat",
-    "Guaratégaya",
-    "Guarategaja",
-    "Warategáya"
+    "Amniapé"
   ],
   "skh": [
     "Sikule"
@@ -23752,10 +23746,10 @@
     "Serer"
   ],
   "srs": [
+    "Tsuut'ina",
     "Sarcee",
     "Sarsi",
     "Tsuu T'ina",
-    "Tsuut'ina",
     "Tsu T'ina"
   ],
   "srt": [
@@ -24169,7 +24163,8 @@
     "Sinyar"
   ],
   "syw": [
-    "Kagate"
+    "Kagate",
+    "Syuba"
   ],
   "syx": [
     "Osamayi",
