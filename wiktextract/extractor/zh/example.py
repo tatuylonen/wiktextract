@@ -39,6 +39,10 @@ def extract_examples(
                             extract_template_ja_usex(wxr, child, example_data)
                         elif template_name in {"zh-x", "zh-usex"}:
                             extract_template_zh_usex(wxr, child, example_data)
+                        elif template_name in {"ux", "eg", "usex"}:
+                            extract_template_ux(wxr, child, example_data)
+                        elif template_name == "uxi":
+                            extract_template_uxi(wxr, child, example_data)
                         else:
                             example_data["text"] = clean_node(wxr, None, child)
 
@@ -135,3 +139,47 @@ def extract_template_zh_usex(
             example_data["type"] = "quote"
         else:
             example_data["translation"] = expanded_line
+
+
+def extract_template_ux(
+    wxr: WiktextractContext, node: WikiNode, example_data: Dict
+) -> None:
+    expanded_text = clean_node(wxr, None, node)
+    if " ― " in expanded_text:
+        extract_template_uxi_text(expanded_text, example_data)
+        return
+
+    lines = expanded_text.splitlines()
+    for line_num, expanded_line in enumerate(lines):
+        if line_num == 0:
+            key = "text"
+        elif line_num == 1:
+            if line_num == len(lines) - 1:
+                key = "translation"
+            else:
+                key = "roman"
+        else:
+            key = "translation"
+        example_data[key] = expanded_line
+
+
+def extract_template_uxi(
+    wxr: WiktextractContext, node: WikiNode, example_data: Dict
+) -> None:
+    expanded_text = clean_node(wxr, None, node)
+    extract_template_uxi_text(expanded_text, example_data)
+
+
+def extract_template_uxi_text(expanded_text: str, example_data: Dict) -> None:
+    parts = expanded_text.split(" ― ")
+    for index, part in enumerate(parts):
+        if index == 0:
+            key = "text"
+        elif index == 1:
+            if index == len(parts) - 1:
+                key = "translation"
+            else:
+                key = "roman"
+        else:
+            key = "translation"
+        example_data[key] = part

@@ -136,14 +136,14 @@ def recursively_extract(
     return extracted, new_contents
 
 
-def process_page_data(wxr: WiktextractContext, data: Dict) -> Dict:
+def process_page_data(wxr: WiktextractContext, data: List[Dict]) -> Dict:
     inject_linkages(wxr, data)
     process_categories(wxr, data)
     remove_duplicate_data(data)
     return data
 
 
-def inject_linkages(wxr: WiktextractContext, page_data: Dict) -> None:
+def inject_linkages(wxr: WiktextractContext, page_data: List[Dict]) -> None:
     # Inject linkages from thesaurus entries
     from .thesaurus import search_thesaurus
 
@@ -180,7 +180,7 @@ def inject_linkages(wxr: WiktextractContext, page_data: Dict) -> None:
                 data_append(wxr, data, term.linkage, dt)
 
 
-def process_categories(wxr: WiktextractContext, page_data: Dict) -> None:
+def process_categories(wxr: WiktextractContext, page_data: List[Dict]) -> None:
     # Categories are not otherwise disambiguated, but if there is only
     # one sense and only one data in ret for the same language, move
     # categories to the only sense.  Note that categories are commonly
@@ -247,13 +247,12 @@ def process_categories(wxr: WiktextractContext, page_data: Dict) -> None:
         + wxr.wtp.NAMESPACE_DATA.get("Rhymes", {}).get("name", "")
         + ":)?("
         + "|".join(re.escape(x) for x in wxr.config.LANGUAGES_BY_NAME)
-        + ")[ /]"
+        + ")[ /]?"
     )
     # Remove category links that start with a language name from entries for
     # different languages
     for data in page_data:
-        lang = data.get("lang")
-        assert lang
+        lang_code = data.get("lang_code")
         cats = data.get("categories", ())
         new_cats = []
         for cat in cats:
@@ -261,7 +260,7 @@ def process_categories(wxr: WiktextractContext, page_data: Dict) -> None:
             if m:
                 catlang = m.group(2)
                 catlang_code = wxr.config.LANGUAGES_BY_NAME.get(catlang)
-                if catlang != lang and not (
+                if catlang_code != lang_code and not (
                     catlang_code == "en" and data.get("lang_code") == "mul"
                 ):
                     continue  # Ignore categories for a different language
