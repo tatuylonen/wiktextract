@@ -82,7 +82,7 @@ class TestExample(unittest.TestCase):
         mock_process_pos_block,
     ) -> None:
         node = WikiNode(NodeKind.LEVEL3, 0)
-        parse_section(self.wxr, [], {}, node)
+        parse_section(self.wxr, [{}], {}, node)
         mock_process_pos_block.assert_called()
 
     @patch("wiktextract.extractor.zh.page.process_pos_block")
@@ -93,5 +93,5 @@ class TestExample(unittest.TestCase):
         mock_process_pos_block,
     ) -> None:
         node = WikiNode(NodeKind.LEVEL3, 0)
-        parse_section(self.wxr, [], {}, node)
+        parse_section(self.wxr, [{}], {}, node)
         mock_process_pos_block.assert_called()
