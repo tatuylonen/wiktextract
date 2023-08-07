@@ -3,16 +3,16 @@
 # Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
-
 from collections import defaultdict
-from typing import Dict, List, Optional, Callable, Union, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
+
+from wikitextprocessor import NodeKind, WikiNode
 
 from wiktextract.wxr_context import WiktextractContext
-from wikitextprocessor import WikiNode, NodeKind
+
 from .clean import clean_value
 from .datautils import data_append, data_extend
 from .import_utils import import_extractor_module
-
 
 # NodeKind values for subtitles
 LEVEL_KINDS = {
@@ -20,12 +20,12 @@ LEVEL_KINDS = {
     NodeKind.LEVEL3,
     NodeKind.LEVEL4,
     NodeKind.LEVEL5,
-    NodeKind.LEVEL6
+    NodeKind.LEVEL6,
 }
 
 
 def parse_page(
-    wxr: WiktextractContext, page_title: str, page_text: str,
+    wxr: WiktextractContext, page_title: str, page_text: str
 ) -> List[Dict[str, str]]:
     """Parses the text of a Wiktionary page and returns a list of
     dictionaries, one for each word/part-of-speech defined on the page
@@ -50,7 +50,7 @@ def is_panel_template(wxr: WiktextractContext, template_name: str) -> bool:
 
 def recursively_extract(
     contents: Union[WikiNode, List[WikiNode]],
-    fn: Callable[[Union[WikiNode, List[WikiNode]]], bool]
+    fn: Callable[[Union[WikiNode, List[WikiNode]]], bool],
 ) -> Tuple[List[WikiNode], List[WikiNode]]:
     """Recursively extracts elements from contents for which ``fn`` returns
     True.  This returns two lists, the extracted elements and the remaining
@@ -75,8 +75,7 @@ def recursively_extract(
     kind = contents.kind
     new_node = WikiNode(kind, contents.loc)
     new_contents.append(new_node)
-    if kind in (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
-                NodeKind.LEVEL5, NodeKind.LEVEL6, NodeKind.LINK):
+    if kind in LEVEL_KINDS or kind == NodeKind.LINK:
         # Process args and children
         assert isinstance(contents.args, (list, tuple))
         new_args = []
@@ -88,10 +87,17 @@ def recursively_extract(
         e1, c1 = recursively_extract(contents.children, fn)
         extracted.extend(e1)
         new_node.children = c1
-    elif kind in (NodeKind.ITALIC, NodeKind.BOLD, NodeKind.TABLE,
-                  NodeKind.TABLE_CAPTION, NodeKind.TABLE_ROW,
-                  NodeKind.TABLE_HEADER_CELL, NodeKind.TABLE_CELL,
-                  NodeKind.PRE, NodeKind.PREFORMATTED):
+    elif kind in {
+        NodeKind.ITALIC,
+        NodeKind.BOLD,
+        NodeKind.TABLE,
+        NodeKind.TABLE_CAPTION,
+        NodeKind.TABLE_ROW,
+        NodeKind.TABLE_HEADER_CELL,
+        NodeKind.TABLE_CELL,
+        NodeKind.PRE,
+        NodeKind.PREFORMATTED,
+    }:
         # Process only children
         e1, c1 = recursively_extract(contents.children, fn)
         extracted.extend(e1)
@@ -105,8 +111,12 @@ def recursively_extract(
         e1, c1 = recursively_extract(contents.children, fn)
         extracted.extend(e1)
         new_node.children = c1
-    elif kind in (NodeKind.TEMPLATE, NodeKind.TEMPLATE_ARG, NodeKind.PARSER_FN,
-                  NodeKind.URL):
+    elif kind in {
+        NodeKind.TEMPLATE,
+        NodeKind.TEMPLATE_ARG,
+        NodeKind.PARSER_FN,
+        NodeKind.URL,
+    }:
         # Process only args
         new_args = []
         for arg in contents.args:
@@ -122,8 +132,7 @@ def recursively_extract(
         extracted.extend(e1)
         new_node.children = c1
     else:
-        raise RuntimeError("recursively_extract: unhandled kind {}"
-                           .format(kind))
+        raise RuntimeError(f"recursively_extract: unhandled kind {kind}")
     return extracted, new_contents
 
 
@@ -138,7 +147,7 @@ def inject_linkages(wxr: WiktextractContext, page_data: Dict) -> None:
     # Inject linkages from thesaurus entries
     from .thesaurus import search_thesaurus
 
-    local_thesaurus_ns = wxr.wtp.NAMESPACE_DATA.get('Thesaurus', {}).get("name")
+    local_thesaurus_ns = wxr.wtp.NAMESPACE_DATA.get("Thesaurus", {}).get("name")
     for data in page_data:
         if "pos" not in data:
             continue
@@ -156,7 +165,7 @@ def inject_linkages(wxr: WiktextractContext, page_data: Dict) -> None:
             else:
                 dt = {
                     "word": term.term,
-                    "source": f"{local_thesaurus_ns}:{word}"
+                    "source": f"{local_thesaurus_ns}:{word}",
                 }
                 if term.sense is not None:
                     dt["sense"] = term.sense
@@ -234,10 +243,12 @@ def process_categories(wxr: WiktextractContext, page_data: Dict) -> None:
     # Group 2 will be the language name. The category tag should be without
     # the namespace prefix.
     starts_lang_re = re.compile(
-            r"^(" + wxr.wtp.NAMESPACE_DATA.get("Rhymes", {}).get("name", "") +
-            ":)?(" +
-            "|".join(re.escape(x) for x in wxr.config.LANGUAGES_BY_NAME) +
-            ")[ /]")
+        r"^("
+        + wxr.wtp.NAMESPACE_DATA.get("Rhymes", {}).get("name", "")
+        + ":)?("
+        + "|".join(re.escape(x) for x in wxr.config.LANGUAGES_BY_NAME)
+        + ")[ /]"
+    )
     # Remove category links that start with a language name from entries for
     # different languages
     for data in page_data:
@@ -250,8 +261,9 @@ def process_categories(wxr: WiktextractContext, page_data: Dict) -> None:
             if m:
                 catlang = m.group(2)
                 catlang_code = wxr.config.LANGUAGES_BY_NAME.get(catlang)
-                if (catlang != lang and not (catlang_code == "en" and
-                                             data.get("lang_code") == "mul")):
+                if catlang != lang and not (
+                    catlang_code == "en" and data.get("lang_code") == "mul"
+                ):
                     continue  # Ignore categories for a different language
             new_cats.append(cat)
         if not new_cats:
@@ -300,10 +312,11 @@ def clean_node(
     value: Union[str, WikiNode, List[WikiNode]],
     template_fn: Optional[Callable[[str, Dict], str]] = None,
     post_template_fn: Optional[Callable[[str, Dict, str], str]] = None,
-    collect_links: bool = False
+    collect_links: bool = False,
 ) -> str:
     """Expands the node to text, cleaning up any HTML and duplicate spaces.
     This is intended for expanding things like glosses for a single sense."""
+
     # print("CLEAN_NODE:", repr(value))
     def clean_template_fn(name, ht):
         if template_fn is not None:
@@ -321,8 +334,11 @@ def clean_node(
             if value.kind in (NodeKind.TABLE_CELL, NodeKind.TABLE_HEADER_CELL):
                 ret = recurse(value.children)
             else:
-                ret = wxr.wtp.node_to_html(value, template_fn=clean_template_fn,
-                                       post_template_fn=post_template_fn)
+                ret = wxr.wtp.node_to_html(
+                    value,
+                    template_fn=clean_template_fn,
+                    post_template_fn=post_template_fn,
+                )
             # print("clean_value recurse node_to_html value={!r} ret={!r}"
             #      .format(value, ret))
         else:
@@ -332,8 +348,12 @@ def clean_node(
     def clean_node_handler_fn(node):
         assert isinstance(node, WikiNode)
         kind = node.kind
-        if kind in (NodeKind.TABLE_CELL, NodeKind.TABLE_HEADER_CELL,
-                    NodeKind.BOLD, NodeKind.ITALIC):
+        if kind in {
+            NodeKind.TABLE_CELL,
+            NodeKind.TABLE_HEADER_CELL,
+            NodeKind.BOLD,
+            NodeKind.ITALIC,
+        }:
             return node.children
         return None
 
@@ -342,14 +362,18 @@ def clean_node(
         value,
         node_handler_fn=clean_node_handler_fn,
         template_fn=template_fn,
-        post_template_fn=post_template_fn
+        post_template_fn=post_template_fn,
     )
     # print("clean_node: v={!r}".format(v))
 
     # Capture categories if sense_data has been given.  We also track
     # Lua execution errors here.
     # If collect_links=True (for glosses), capture links
-    local_category_ns = wxr.wtp.NAMESPACE_DATA.get("Category", {}).get("name")
+    catagory_ns_data = wxr.wtp.NAMESPACE_DATA.get("Category", {})
+    category_ns_names = {catagory_ns_data.get("name")} | set(
+        catagory_ns_data.get("aliases")
+    )
+    catagory_names_pattern = rf"(?:{'|'.join(category_ns_names)})"
     if sense_data is not None:
         # Check for Lua execution error
         if '<strong class="error">Lua execution error' in v:
@@ -359,7 +383,8 @@ def clean_node(
         # Capture Category tags
         if not collect_links:
             for m in re.finditer(
-                fr"(?is)\[\[:?\s*{local_category_ns}\s*:([^]|]+)", v
+                rf"(?is)\[\[:?\s*{catagory_names_pattern}\s*:([^]|]+)",
+                v,
             ):
                 cat = clean_value(wxr, m.group(1))
                 cat = re.sub(r"\s+", " ", cat)
@@ -369,11 +394,13 @@ def clean_node(
                 if cat not in sense_data.get("categories", ()):
                     data_append(wxr, sense_data, "categories", cat)
         else:
-            for m in re.finditer(r"(?is)\[\[:?(\s*([^][|:]+):)?\s*([^]|]+)"
-                                 r"(\|([^]|]+))?\]\]", v):
+            for m in re.finditer(
+                r"(?is)\[\[:?(\s*([^][|:]+):)?\s*([^]|]+)" r"(\|([^]|]+))?\]\]",
+                v,
+            ):
                 # Add here other stuff different "Something:restofthelink"
                 # things;
-                if m.group(1) and m.group(1).strip() == local_category_ns:
+                if m.group(1) and m.group(1).strip() in category_ns_names:
                     cat = clean_value(wxr, m.group(3))
                     cat = re.sub(r"\s+", " ", cat)
                     cat = cat.strip()
@@ -410,7 +437,11 @@ def clean_node(
     # to clean up erroneous codings in the original text.
     # v = re.sub(r"(?s)\{\{.*", "", v)
     # Some templates create <sup>(Category: ...)</sup>; remove
-    v = re.sub(fr"(?si)\s*(^\s*)?\({local_category_ns}:[^)]*\)", "", v)
+    v = re.sub(
+        rf"(?si)\s*(?:<sup>)?\({catagory_names_pattern}:[^)]+\)(?:</sup>)?",
+        "",
+        v,
+    )
     # Some templates create question mark in <sup>, e.g.,
     # some Korean Hanja form
     v = re.sub(r"\^\?", "", v)

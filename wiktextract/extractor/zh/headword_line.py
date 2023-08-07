@@ -94,7 +94,7 @@ def extract_headword_line(
 
                     page_data[-1]["forms"].append(
                         {
-                            "form": clean_node(wxr, None, child),
+                            "form": clean_node(wxr, page_data[-1], child),
                             "tags": ["romanization"],
                         }
                     )
@@ -124,7 +124,7 @@ def extract_headword_line(
                             page_data[-1]["forms"].append(
                                 {
                                     "form": clean_node(
-                                        wxr, None, node_without_ruby
+                                        wxr, page_data[-1], node_without_ruby
                                     ),
                                     "ruby": ruby_data,
                                     "tags": ["canonical"],
@@ -209,10 +209,12 @@ def process_forms_text(
 
     if not has_forms:
         tags_list = extract_headword_tags(
-            clean_node(wxr, None, tag_nodes).strip("() ")
+            clean_node(wxr, page_data[-1], tag_nodes).strip("() ")
         )
         if len(tags_list) > 0:
             page_data[-1]["tags"].extend(tags_list)
+    else:
+        clean_node(wxr, page_data[-1], tag_nodes)  # find categories
 
 
 def extract_headword_tags(tags_str: str) -> List[str]:

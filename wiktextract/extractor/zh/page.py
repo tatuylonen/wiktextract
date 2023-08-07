@@ -149,7 +149,7 @@ def parse_section(
     if not isinstance(node, WikiNode):
         return
     if node.kind in LEVEL_KINDS:
-        subtitle = clean_node(wxr, None, node.args)
+        subtitle = clean_node(wxr, page_data[-1], node.args)
         # remove number suffix from subtitle
         subtitle = re.sub(r"\s*(?:（.+）|\d+)$", "", subtitle)
         wxr.wtp.start_subsection(subtitle)
@@ -230,9 +230,9 @@ def extract_etymology(
             level_node_index = index
             break
     if level_node_index != -1:
-        etymology = clean_node(wxr, None, nodes[:index])
+        etymology = clean_node(wxr, page_data[-1], nodes[:index])
     else:
-        etymology = clean_node(wxr, None, nodes)
+        etymology = clean_node(wxr, page_data[-1], nodes)
     base_data["etymology_text"] = etymology
     append_page_data(page_data, "etymology_text", etymology, base_data)
     if level_node_index != -1:
@@ -296,7 +296,9 @@ def parse_page(
                 sortid="extractor/zh/page/parse_page/503",
             )
             continue
-        lang_name = clean_node(wxr, None, node.args)
+
+        categories_and_links = defaultdict(list)
+        lang_name = clean_node(wxr, categories_and_links, node.args)
         if lang_name not in wxr.config.LANGUAGES_BY_NAME:
             wxr.wtp.warning(
                 f"Unrecognized language name at top-level {lang_name}",
@@ -314,6 +316,7 @@ def parse_page(
             list,
             {"lang": lang_name, "lang_code": lang_code, "word": wxr.wtp.title},
         )
+        base_data.update(categories_and_links)
         page_data.append(copy.deepcopy(base_data))
         parse_section(wxr, page_data, base_data, node.children)
 

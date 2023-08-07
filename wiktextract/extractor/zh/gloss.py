@@ -32,10 +32,10 @@ def extract_gloss(
             ruby_data, nodes_without_ruby = extract_ruby(
                 wxr, expanded_node.children
             )
-            raw_gloss_text = clean_node(wxr, None, nodes_without_ruby)
+            raw_gloss_text = clean_node(wxr, gloss_data, nodes_without_ruby)
         else:
             ruby_data = []
-            raw_gloss_text = clean_node(wxr, None, gloss_nodes)
+            raw_gloss_text = clean_node(wxr, gloss_data, gloss_nodes)
         new_gloss_data = merge_gloss_data(
             gloss_data, extract_gloss_and_tags(raw_gloss_text)
         )
