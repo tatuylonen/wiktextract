@@ -1381,7 +1381,7 @@ def parse_language(wxr, langnode, language, lang_code):
             if name == "†" or name == "zh-obsolete":
                 data_append(wxr, sense_base, "tags", "obsolete")
                 return ""
-            if not is_gloss and name in {
+            if name in {
                 "ux",
                 "uxi",
                 "usex",
@@ -1409,7 +1409,13 @@ def parse_language(wxr, langnode, language, lang_code):
                 # These templates may slip through inside another item, but
                 # currently we're separating out example entries (..#:)
                 # well enough that there seems to very little contamination.
-                return ""
+                if is_gloss:
+                    wxr.wtp.warning(
+                        "Example template is used for gloss text",
+                        sortid="extractor.en.page.sense_template_fn/1415"
+                    )
+                else:
+                    return ""
             if name == "w":
                 if ht.get(2) == "Wp":
                     return ""
