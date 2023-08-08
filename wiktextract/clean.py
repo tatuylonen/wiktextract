@@ -1422,11 +1422,20 @@ def clean_value(wxr, title, no_strip=False, no_html_strip=False):
     # Remove any edit links to local pages
     title = re.sub(r"\[//[^]\s]+\s+edit\s*\]", "", title)
     # Replace links by their text
+
+    catagory_ns_data = wxr.wtp.NAMESPACE_DATA.get("Category", {})
+    category_ns_names = {catagory_ns_data.get("name")} | set(
+        catagory_ns_data.get("aliases")
+    )
+    catagory_names_pattern = rf"(?:{'|'.join(category_ns_names)})"
     while True:
         # Links may be nested, so keep replacing until there is no more change.
         orig = title
-        title = re.sub(r"(?si)\[\[\s*Category\s*:\s*([^]]+?)\s*\]\]",
-                       r"", title)
+        title = re.sub(
+            rf"(?si)\[\[\s*{catagory_names_pattern}\s*:\s*([^]]+?)\s*\]\]",
+            "",
+            title,
+        )
         title = re.sub(r"(?s)\[\[\s*:?([^]|#<>]+?)\s*(#[^][|<>]*?)?\]\]",
                        repl_1, title)
         title = re.sub(r"(?s)\[\[\s*(([a-zA-z0-9]+)\s*:)?\s*([^][#|<>]+?)"
