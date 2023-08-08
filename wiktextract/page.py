@@ -138,7 +138,8 @@ def recursively_extract(
 
 def process_page_data(wxr: WiktextractContext, data: List[Dict]) -> Dict:
     inject_linkages(wxr, data)
-    process_categories(wxr, data)
+    if wxr.config.dump_file_lang_code == "en":
+        process_categories(wxr, data)
     remove_duplicate_data(data)
     return data
 
