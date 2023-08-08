@@ -8,4 +8,4 @@ quick:
 	python -m nose2 --output-buffer --pretty-assert
 clean:
 	rm -rf __pycache__
-	rm -rf .coverage htmlcov
+	rm -rf .coverage* htmlcov*
