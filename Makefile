@@ -4,6 +4,8 @@
 test:
 	rm -rf .coverage htmlcov
 	python -m nose2 --output-buffer --pretty-assert --with-coverage --coverage-report=html
+quick:
+	python -m nose2 --output-buffer --pretty-assert
 clean:
 	rm -rf __pycache__
 	rm -rf .coverage htmlcov
