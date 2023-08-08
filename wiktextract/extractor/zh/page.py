@@ -2,10 +2,11 @@ import copy
 import logging
 import re
 from collections import defaultdict
-from typing import Any, Dict, List, Union
+from typing import Dict, List, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 
+from wiktextract.datautils import append_base_data
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -122,20 +123,6 @@ ADDITIONAL_EXPAND_TEMPLATES = {
 }
 
 
-def append_page_data(
-    page_data: List[Dict], field: str, value: Any, base_data: Dict
-) -> None:
-    if page_data[-1].get(field) is not None:
-        if len(page_data[-1]["senses"]) > 0:
-            # append new dictionary if the last dictionary has sense data and
-            # also has the same key
-            page_data.append(copy.deepcopy(base_data))
-        elif isinstance(page_data[-1].get(field), list):
-            page_data[-1][field] += value
-    else:
-        page_data[-1][field] = value
-
-
 def parse_section(
     wxr: WiktextractContext,
     page_data: List[Dict],
@@ -204,7 +191,7 @@ def process_pos_block(
 ):
     pos_type = wxr.config.POS_SUBTITLES[pos_text]["pos"]
     base_data["pos"] = pos_type
-    append_page_data(page_data, "pos", pos_type, base_data)
+    append_base_data(page_data, "pos", pos_type, base_data)
     for index, child in enumerate(strip_nodes(node.children)):
         if isinstance(child, WikiNode):
             if index == 0 and child.kind == NodeKind.TEMPLATE:
@@ -234,7 +221,7 @@ def extract_etymology(
     else:
         etymology = clean_node(wxr, page_data[-1], nodes)
     base_data["etymology_text"] = etymology
-    append_page_data(page_data, "etymology_text", etymology, base_data)
+    append_base_data(page_data, "etymology_text", etymology, base_data)
     if level_node_index != -1:
         parse_section(wxr, page_data, base_data, nodes[level_node_index:])
 

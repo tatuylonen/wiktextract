@@ -1,6 +1,7 @@
 # Utilities for manipulating word data structures
 #
 # Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+import copy
 import re
 from collections import defaultdict
 from functools import lru_cache, partial
@@ -172,7 +173,7 @@ def split_slashes(wxr, text):
             words = []
             for ws in divs:
                 assert isinstance(ws, tuple)
-                exists = wxr.wtp.page_exists(" ".join(ws))
+                # exists = wxr.wtp.page_exists(" ".join(ws))
                 words.extend(ws)
                 score += 100
                 score += 1 / len(ws)
@@ -247,3 +248,17 @@ def find_similar_gloss(page_data: List[Dict], gloss: str) -> Dict:
         return page_data[-1]["senses"][match_result[2]]
 
     return page_data[-1]
+
+
+def append_base_data(
+    page_data: List[Dict], field: str, value: Any, base_data: Dict
+) -> None:
+    if page_data[-1].get(field) is not None:
+        if len(page_data[-1]["senses"]) > 0:
+            # append new dictionary if the last dictionary has sense data and
+            # also has the same key
+            page_data.append(copy.deepcopy(base_data))
+        elif isinstance(page_data[-1].get(field), list):
+            page_data[-1][field] += value
+    else:
+        page_data[-1][field] = value

@@ -394,7 +394,7 @@ def clean_node(
                     data_append(wxr, sense_data, "categories", cat)
         else:
             for m in re.finditer(
-                r"(?is)\[\[:?(\s*([^][|:]+):)?\s*([^]|]+)" r"(\|([^]|]+))?\]\]",
+                r"(?is)\[\[:?(\s*([^][|:]+):)?\s*([^]|]+)(\|([^]|]+))?\]\]",
                 v,
             ):
                 # Add here other stuff different "Something:restofthelink"
