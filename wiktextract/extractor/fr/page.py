@@ -31,6 +31,7 @@ def parse_section(
     base_data: Dict,
     node: Union[WikiNode, List[Union[WikiNode, str]]],
 ) -> None:
+    # https://fr.wiktionary.org/wiki/Wiktionnaire:Structure_des_pages
     if isinstance(node, list):
         for x in node:
             parse_section(wxr, page_data, base_data, x)
@@ -158,11 +159,12 @@ def parse_page(
     page_data = []
     for node in filter(lambda n: isinstance(n, WikiNode), tree.children):
         # ignore link created by `voir` template at the page top
-        if node.kind == NodeKind.TEMPLATE and node.args[0][0].lower() in {
-            "voir",
-            "voir2",
-        }:
-            continue
+        if node.kind == NodeKind.TEMPLATE:
+            template_name = node.args[0][0]
+            if template_name in {"voir", "voir2"} or template_name.startswith(
+                "voir/"
+            ):
+                continue
         if node.kind != NodeKind.LEVEL2:
             wxr.wtp.warning(
                 f"Unexpected top-level node: {node}",
