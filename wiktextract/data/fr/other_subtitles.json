@@ -1,0 +1,44 @@
+{
+  "compounds": [
+    "composés",
+    "compos"
+  ],
+  "etymology": [
+    "étymologie",
+    "étym",
+    "etym"
+  ],
+  "ignored_sections": [
+    "anagrammes",
+    "anagramme",
+    "anagr",
+    "références",
+    "référence",
+    "réf",
+    "ref",
+    "sources",
+    "src",
+    "bibliographie",
+    "bib",
+    "citations",
+    "cit"
+  ],
+  "inflection_sections": [
+    "déclinaison",
+    "décl",
+    "conjugaison",
+    "conjug"
+  ],
+  "pronunciation": [
+    "prononciation",
+    "pron",
+    "prononciations"
+  ],
+  "translations": [
+    "traductions",
+    "trad",
+    "traductions à trier",
+    "trad-trier",
+    "trad trier"
+  ]
+}

@@ -551,6 +551,9 @@
   "alc": [
     "Kawésqar"
   ],
+  "alchuka": [
+    "Alchuka"
+  ],
   "ald": [
     "Alladian"
   ],
@@ -1370,6 +1373,9 @@
   "bal": [
     "Baloutche"
   ],
+  "bala (Chine)": [
+    "Bala (Chine)"
+  ],
   "ban": [
     "Balinais"
   ],
@@ -1960,6 +1966,9 @@
   ],
   "bkn": [
     "Beketan"
+  ],
+  "bko": [
+    "Kwa’"
   ],
   "bkq": [
     "Bakairí"
@@ -5792,6 +5801,9 @@
   "gwu": [
     "Guwamu"
   ],
+  "gwx": [
+    "Gua"
+  ],
   "gya": [
     "Gbaya du Nord-Ouest"
   ],
@@ -5849,6 +5861,9 @@
   "hac": [
     "Gurani"
   ],
+  "hachijo": [
+    "Hachijō"
+  ],
   "had": [
     "Hatam"
   ],
@@ -5896,6 +5911,9 @@
   ],
   "hay": [
     "Haya"
+  ],
+  "hayato": [
+    "Hayato"
   ],
   "haz": [
     "Hazara"
@@ -7358,6 +7376,9 @@
   "khe": [
     "Korowai"
   ],
+  "khf": [
+    "Khuen"
+  ],
   "khg": [
     "Kham"
   ],
@@ -8267,6 +8288,9 @@
   "kya": [
     "Kwaya"
   ],
+  "kyakala": [
+    "Kyakala"
+  ],
   "kyc": [
     "Kyaka"
   ],
@@ -8503,6 +8527,9 @@
   ],
   "ldi": [
     "Laari"
+  ],
+  "ldm": [
+    "Landuma"
   ],
   "ldn": [
     "Láadan"
@@ -10061,8 +10088,17 @@
   "moyen danois": [
     "Moyen danois"
   ],
+  "moyen japonais": [
+    "Moyen japonais"
+  ],
   "moyen khmer": [
     "Moyen khmer"
+  ],
+  "moyen môn": [
+    "Moyen môn"
+  ],
+  "moyen okinawaïen": [
+    "Moyen okinawaïen"
   ],
   "moyen polonais": [
     "Moyen polonais"
@@ -10736,6 +10772,9 @@
   "navarro-aragonais": [
     "Navarro-aragonais"
   ],
+  "naw": [
+    "Nawuri"
+  ],
   "nay": [
     "Ngarrindjeri"
   ],
@@ -10762,6 +10801,9 @@
   ],
   "nbh": [
     "Ngamo"
+  ],
+  "nbi": [
+    "Mao"
   ],
   "nbk": [
     "Nake"
@@ -10995,7 +11037,7 @@
     "Ngando (République centrafricaine)"
   ],
   "nge": [
-    "Ngemba"
+    "Mankon"
   ],
   "ngf": [
     "Langues trans-néo-guinéennes"
@@ -11198,6 +11240,9 @@
   "njm": [
     "Angami"
   ],
+  "njn": [
+    "Liangmai"
+  ],
   "njo": [
     "Ao"
   ],
@@ -11220,7 +11265,7 @@
     "Khezha"
   ],
   "nki": [
-    "Naga de Thangal"
+    "Thangal"
   ],
   "nkj": [
     "Nakai"
@@ -11293,6 +11338,9 @@
   ],
   "nmf": [
     "Tangkhul naga"
+  ],
+  "nmh": [
+    "Monsang"
   ],
   "nmk": [
     "Namakura"
@@ -11634,7 +11682,7 @@
     "Nyole"
   ],
   "nuk": [
-    "Nuu-chah-nulth"
+    "Nuuchahnulth"
   ],
   "nul": [
     "Nusa laut"
@@ -12980,6 +13028,9 @@
   "proto-altaïque": [
     "Proto-altaïque"
   ],
+  "proto-aslien": [
+    "Proto-aslien"
+  ],
   "proto-athapascan": [
     "Proto-athapascan"
   ],
@@ -13016,6 +13067,9 @@
   "proto-basque": [
     "Proto-basque"
   ],
+  "proto-berbère": [
+    "Proto-berbère"
+  ],
   "proto-bodique oriental": [
     "Proto-bodique oriental"
   ],
@@ -13042,6 +13096,9 @@
   ],
   "proto-dura": [
     "Proto-dura"
+  ],
+  "proto-eskimo": [
+    "Proto-eskimo"
   ],
   "proto-fennique": [
     "Proto-fennique"
@@ -13088,17 +13145,26 @@
   "proto-japonique insulaire": [
     "Proto-japonique insulaire"
   ],
+  "proto-japono-coréanique": [
+    "Proto-japono-coréanique"
+  ],
   "proto-katuique": [
     "Proto-katuique"
   ],
   "proto-keresan": [
     "Proto-keresan"
   ],
+  "proto-khanty": [
+    "Proto-khanty"
+  ],
   "proto-khasique": [
     "Proto-khasique"
   ],
   "proto-khmer": [
     "Proto-khmer"
+  ],
+  "proto-khmuique": [
+    "Proto-khmuique"
   ],
   "proto-kiowa-tanoan": [
     "Proto-kiowa-tanoan"
@@ -13127,6 +13193,12 @@
   "proto-malaïque": [
     "Proto-malaïque"
   ],
+  "proto-mansi": [
+    "Proto-mansi"
+  ],
+  "proto-mari": [
+    "Proto-mari"
+  ],
   "proto-masa": [
     "Proto-masa"
   ],
@@ -13141,6 +13213,15 @@
   ],
   "proto-mongol": [
     "Proto-mongol"
+  ],
+  "proto-mordve": [
+    "Proto-mordve"
+  ],
+  "proto-munda": [
+    "Proto-munda"
+  ],
+  "proto-munda du Nord": [
+    "Proto-munda du Nord"
   ],
   "proto-murutique": [
     "Proto-murutique"
@@ -13196,6 +13277,9 @@
   "proto-paman": [
     "Proto-paman"
   ],
+  "proto-permien": [
+    "Proto-permien"
+  ],
   "proto-polynésien": [
     "Proto-polynésien"
   ],
@@ -13205,8 +13289,14 @@
   "proto-pong": [
     "Proto-pong"
   ],
+  "proto-pramique": [
+    "Proto-pramique"
+  ],
   "proto-pwo": [
     "Proto-pwo"
+  ],
+  "proto-péarique": [
+    "Proto-péarique"
   ],
   "proto-ryūkyū": [
     "Proto-ryūkyū"
@@ -13219,6 +13309,9 @@
   ],
   "proto-same": [
     "Proto-same"
+  ],
+  "proto-samoyède": [
+    "Proto-samoyède"
   ],
   "proto-sangirien": [
     "Proto-sangirien"
@@ -13244,6 +13337,9 @@
   "proto-sémitique": [
     "Proto-sémitique"
   ],
+  "proto-sénoïque": [
+    "Proto-sénoïque"
+  ],
   "proto-sérère-peul": [
     "Proto-sérère-peul"
   ],
@@ -13264,6 +13360,9 @@
   ],
   "proto-toungouse": [
     "Proto-toungouse"
+  ],
+  "proto-toungouse du Nord": [
+    "Proto-toungouse du Nord"
   ],
   "proto-trans-néo-guinéen": [
     "Proto-trans-néo-guinéen"
@@ -13309,6 +13408,9 @@
   ],
   "prx": [
     "Purki"
+  ],
+  "pré-ancien japonais": [
+    "Pré-ancien japonais"
   ],
   "ps": [
     "Pachto"
@@ -14351,6 +14453,9 @@
   "sgn": [
     "Langues des signes"
   ],
+  "sgp": [
+    "Singpho"
+  ],
   "sgr": [
     "Sangesari"
   ],
@@ -14800,6 +14905,9 @@
   ],
   "sol": [
     "Solos"
+  ],
+  "solon": [
+    "Solon"
   ],
   "solrésol": [
     "Solrésol"
@@ -15470,6 +15578,9 @@
   "tch": [
     "Créole anglais des îles Turques-et-Caïques"
   ],
+  "tcl": [
+    "Taman"
+  ],
   "tcp": [
     "Tawr"
   ],
@@ -15994,6 +16105,9 @@
   ],
   "tnx": [
     "Tanema"
+  ],
+  "tnz": [
+    "Maniq"
   ],
   "to": [
     "Tongien"
@@ -16973,6 +17087,9 @@
   "vieux khmer pré-angkorien": [
     "Vieux khmer pré-angkorien"
   ],
+  "vieux mandarin": [
+    "Vieux mandarin"
+  ],
   "vieux norvégien": [
     "Vieux norvégien"
   ],
@@ -17773,6 +17890,9 @@
   ],
   "xin": [
     "Xinca"
+  ],
+  "xiong-nu": [
+    "Xiong-nu"
   ],
   "xiy": [
     "Xipaya"
