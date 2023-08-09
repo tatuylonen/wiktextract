@@ -27,15 +27,15 @@ class TestInflection(unittest.TestCase):
         return_value="""{|
 ! Singulier !! Pluriel
 |-
-|'''<span lang='fr' xml:lang='fr' class='lang-fr'><bdi>productrice</bdi></span>'''
-| <bdi lang='fr' xml:lang='fr' class='lang-fr'>[[productrices#fr|productrices]]</bdi>
+|'''<span><bdi>productrice</bdi></span>'''
+| <bdi>[[productrices#fr|productrices]]</bdi>
 |-
 | colspan='2'
-|[[Annexe:Prononciation/français|<span class='API' title='Prononciation API'>\pʁɔ.dyk.tʁis\</span>]]
+|[[Annexe:Prononciation/français|<span>\\pʁɔ.dyk.tʁis\\</span>]]
 |}
         """,
     )
-    def test_fr_reg(self, mock_get_page):
+    def test_fr_reg(self, mock_node_to_wikitext):
         page_data = [defaultdict(list, {"word": "productrice"})]
         node = WikiNode(NodeKind.TEMPLATE, 0)
         self.wxr.wtp.start_page("productrice")
@@ -43,4 +43,47 @@ class TestInflection(unittest.TestCase):
         self.assertEqual(
             page_data[-1].get("forms"),
             [{"form": "productrices", "tags": ["plural"]}],
+        )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{|
+|-
+| class='invisible' |
+! scope='col' ! Singulier !! Pluriel
+|-
+! scope='row' | Masculin
+| [[producteur]]<br/>[[Annexe:Prononciation/français|<span>\\pʁɔ.dyk.tœʁ\\</span>]]
+| [[producteurs]]<br/>[[Annexe:Prononciation/français|<span>\\pʁɔ.dyk.tœʁ\\</span>]]
+|-
+! scope='row' | Féminin
+| [[productrice]]<br/>[[Annexe:Prononciation/français|<span>\\pʁɔ.dyk.tʁis\\</span>]]
+| [[productrices]]<br/>[[Annexe:Prononciation/français|<span>\\pʁɔ.dyk.tʁis\\</span>]]
+|}
+        """,
+    )
+    def test_fr_accord(self, mock_node_to_wikitext):
+        page_data = [defaultdict(list, {"word": "productrice"})]
+        node = WikiNode(NodeKind.TEMPLATE, 0)
+        self.wxr.wtp.start_page("productrice")
+        extract_inflection(self.wxr, page_data, node, "fr-accord-eur")
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [
+                {
+                    "form": "producteur",
+                    "tags": ["singular", "masculine"],
+                    "ipa": "\\pʁɔ.dyk.tœʁ\\",
+                },
+                {
+                    "form": "producteurs",
+                    "tags": ["plural", "masculine"],
+                    "ipa": "\\pʁɔ.dyk.tœʁ\\",
+                },
+                {
+                    "form": "productrices",
+                    "tags": ["plural", "feminine"],
+                    "ipa": "\\pʁɔ.dyk.tʁis\\",
+                },
+            ],
         )
