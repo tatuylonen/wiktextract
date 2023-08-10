@@ -35,7 +35,11 @@ def parse_page(
     captured."""
     page_extractor_mod = import_extractor_module(wxr.wtp.lang_code, "page")
     page_data = page_extractor_mod.parse_page(wxr, page_title, page_text)
-    return process_page_data(wxr, page_data)
+    inject_linkages(wxr, page_data)
+    if wxr.config.dump_file_lang_code == "en":
+        process_categories(wxr, page_data)
+    remove_duplicate_data(page_data)
+    return page_data
 
 
 def is_panel_template(wxr: WiktextractContext, template_name: str) -> bool:
@@ -134,14 +138,6 @@ def recursively_extract(
     else:
         raise RuntimeError(f"recursively_extract: unhandled kind {kind}")
     return extracted, new_contents
-
-
-def process_page_data(wxr: WiktextractContext, data: List[Dict]) -> Dict:
-    inject_linkages(wxr, data)
-    if wxr.config.dump_file_lang_code == "en":
-        process_categories(wxr, data)
-    remove_duplicate_data(data)
-    return data
 
 
 def inject_linkages(wxr: WiktextractContext, page_data: List[Dict]) -> None:
