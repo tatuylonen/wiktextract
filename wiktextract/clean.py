@@ -1423,16 +1423,16 @@ def clean_value(wxr, title, no_strip=False, no_html_strip=False):
     title = re.sub(r"\[//[^]\s]+\s+edit\s*\]", "", title)
     # Replace links by their text
 
-    catagory_ns_data = wxr.wtp.NAMESPACE_DATA.get("Category", {})
-    category_ns_names = {catagory_ns_data.get("name")} | set(
-        catagory_ns_data.get("aliases")
+    category_ns_data = wxr.wtp.NAMESPACE_DATA.get("Category", {})
+    category_ns_names = {category_ns_data.get("name")} | set(
+        category_ns_data.get("aliases")
     )
-    catagory_names_pattern = rf"(?:{'|'.join(category_ns_names)})"
+    category_names_pattern = rf"(?:{'|'.join(category_ns_names)})"
     while True:
         # Links may be nested, so keep replacing until there is no more change.
         orig = title
         title = re.sub(
-            rf"(?si)\[\[\s*{catagory_names_pattern}\s*:\s*([^]]+?)\s*\]\]",
+            rf"(?si)\[\[\s*{category_names_pattern}\s*:\s*([^]]+?)\s*\]\]",
             "",
             title,
         )

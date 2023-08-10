@@ -36,7 +36,7 @@ jobs:
         with:
           path: htmlcov
 
-  depoly:
+  deploy:
     if: github.ref_name == 'master'
     needs: test
     permissions:
