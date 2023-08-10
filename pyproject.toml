@@ -46,12 +46,16 @@ wiktwords = "wiktextract.wiktwords:main"
 [project.urls]
 homepage = "https://github.com/tatuylonen/wiktextract"
 
+[tool.setuptools]
+zip-safe = false
+
 [tool.setuptools.packages.find]
 exclude = ["languages", "overrides", "tests", "tools", "usertools"]
 
 [tool.setuptools.package-data]
 wiktextract = [
     "data/*/*",
+    "py.typed",
 ]
 
 [tool.coverage.run]
