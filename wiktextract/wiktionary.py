@@ -7,10 +7,11 @@
 import io
 import logging
 import re
+import sqlite3
 import tarfile
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
 from wikitextprocessor import Page
 
@@ -26,12 +27,12 @@ from .wxr_context import WiktextractContext
 def page_handler(
     wxr: WiktextractContext,
     page: Page,
-    config_kwargs: Dict[str, str],
     dont_parse: bool,
 ) -> Optional[Tuple[List[dict], dict]]:
     # Make sure there are no newlines or other strange characters in the
     # title.  They could cause security problems at several post-processing
     # steps.
+
     title = re.sub(r"[\s\000-\037]+", " ", page.title)
     title = title.strip()
     if dont_parse:
@@ -47,6 +48,12 @@ def page_handler(
             return None
 
         # XXX Sign gloss pages?
+
+        # This function runs inside worker process, the sqlite connection needs
+        # to be recreated to avoid `SQLite objects created in a thread can only
+        # be used in that same thread` error
+        wxr.thesaurus_db_conn.close()
+        wxr.thesaurus_db_conn = sqlite3.connect(wxr.thesaurus_db_path)
         start_t = time.time()
         ret = parse_page(wxr, title, page.body)
         dur = time.time() - start_t
@@ -56,6 +63,7 @@ def page_handler(
                     dur, title
                 )
             )
+        wxr.thesaurus_db_conn.close()
 
     return ret, wxr.wtp.to_return()
 
@@ -111,8 +119,6 @@ def reprocess_wiktionary(
     assert callable(word_cb)
     assert dont_parse in (True, False)
 
-    config_kwargs = wxr.config.to_kwargs()
-
     # Extract thesaurus data. This iterates over thesaurus pages,
     # but is very fast.
     if thesaurus_linkage_number(wxr.thesaurus_db_conn) == 0:
@@ -120,7 +126,7 @@ def reprocess_wiktionary(
 
     # Then perform the main parsing pass.
     def page_cb(page: Page):
-        return page_handler(wxr, page, config_kwargs, dont_parse)
+        return page_handler(wxr, page, dont_parse)
 
     emitted = set()
     process_ns_ids = list(
