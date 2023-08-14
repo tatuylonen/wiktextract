@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 
+from wiktextract.datautils import append_base_data
 from wiktextract.extractor.share import WIKIMEDIA_COMMONS_URL, contains_list
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -17,8 +18,6 @@ def extract_pronunciation_recursively(
     node: Union[WikiNode, List[Union[WikiNode, str]]],
     tags: List[str],
 ) -> None:
-    from .page import append_page_data
-
     if isinstance(node, list):
         for x in node:
             extract_pronunciation_recursively(
@@ -58,7 +57,7 @@ def extract_pronunciation_recursively(
                         create_audio_url_dict(data)
                     )
         elif isinstance(data, dict):
-            append_page_data(
+            append_base_data(
                 page_data,
                 "sounds",
                 [data],
