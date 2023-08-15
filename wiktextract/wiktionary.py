@@ -52,7 +52,6 @@ def page_handler(
         # This function runs inside worker process, the sqlite connection needs
         # to be recreated to avoid `SQLite objects created in a thread can only
         # be used in that same thread` error
-        wxr.thesaurus_db_conn.close()
         wxr.thesaurus_db_conn = sqlite3.connect(wxr.thesaurus_db_path)
         start_t = time.time()
         ret = parse_page(wxr, title, page.body)
