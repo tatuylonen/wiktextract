@@ -1068,78 +1068,114 @@ def parse_language(wxr, langnode, language, lang_code):
         # is compatible with the current part-of-speech and generate warning
         # if not.  Use template_allowed_pos_map.
 
+        # Clean up empty pairs, and fix messes with extra newlines that
+        # separate templates that are followed by lists wiktextract issue #314
+
+        cleaned_pre = []
+        cleaned_lists = []
+        pairless_pre_index = None
+
+        for pre1, ls in zip(pre, lists):
+            if pre1 and not ls:
+                pairless_pre_index = len(cleaned_pre)
+            if not pre1 and not ls:
+                # skip [] + []
+                continue
+            if not ls and all((isinstance(x, str) and not x.strip())
+                               for x in pre1):
+                # skip ["\n", " "] + []
+                continue
+            if ls and not pre1:
+                if pairless_pre_index is not None:
+                    cleaned_lists[pairless_pre_index] = ls
+                    pairless_pre_index = None
+                    continue
+            cleaned_pre.append(pre1)
+            cleaned_lists.append(ls)
+
+        pre = cleaned_pre
+        lists = cleaned_lists
+
         there_are_many_heads = len(pre) > 1
         header_tags = []
-        for i, (pre1, ls) in enumerate(zip(pre, lists)):
-            if len(ls) == 0:
-                # don't have gloss list
-                continue
 
-            if all(not sl for sl in lists[i:]):
-                if i == 0:
-                    if isinstance(node, str):
-                        wxr.wtp.debug("first head without list of senses,"
-                                  "string: '{}[...]', {}/{}".format(
-                                  node[:20], word, language),
-                                  sortid="page/1689/20221215")
-                    if isinstance(node, WikiNode):
-                        if node.args and node.args[0][0] in ["Han char",]:
-                            # just ignore these templates
-                            pass
-                        else:
-                            wxr.wtp.debug("first head without list of senses,"
-                                  "template node "
-                                  "{}, {}/{}".format(
-                                  node.args, word, language),
-                                  sortid="page/1694/20221215")
-                    else:
-                        wxr.wtp.debug("first head without list of senses, "
-                                  "{}/{}".format(
-                                  word, language),
-                                  sortid="page/1700/20221215")
-                    # no break here so that the first head always
-                    # gets processed.
-                else:
-                    if isinstance(node, str):
-                        wxr.wtp.debug("later head without list of senses,"
-                                  "string: '{}[...]', {}/{}".format(
-                                  node[:20], word, language),
-                                  sortid="page/1708/20221215")
-                    if isinstance(node, WikiNode):
-                        wxr.wtp.debug("later head without list of senses,"
-                                  "template node "
-                                  "{}, {}/{}".format(
-                                  node.args, word, language),
-                                  sortid="page/1713/20221215")
-                    else:
-                        wxr.wtp.debug("later head without list of senses, "
-                                  "{}/{}".format(
-                                  word, language),
-                                  sortid="page/1719/20221215")
-                    break
-            head_group = i + 1 if there_are_many_heads else None
-            # print("parse_part_of_speech: {}: {}: pre={}"
-                  # .format(wxr.wtp.section, wxr.wtp.subsection, pre1))
-            process_gloss_header(pre1, pos, head_group, pos_data, header_tags)
-            for l in ls:
-                # Parse each list associated with this head.
-                for node in l.children:
-                    # Parse nodes in l.children recursively.
-                    # The recursion function uses push_sense() to
-                    # add stuff into pos_data, and returns True or
-                    # False if something is added, which bubbles upward.
-                    # If the bubble is "True", then higher levels of
-                    # the recursion will not push_sense(), because
-                    # the data is already pushed into a sub-gloss
-                    # downstream, unless the higher level has examples
-                    # that need to be put somewhere.
-                    common_data = {"tags": list(header_tags)}
-                    if head_group:
-                        common_data["head_nr"] = head_group
-                    parse_sense_node(node, common_data, pos)
-
-        if lists == [[]]:
+        if not any(g for g in lists):
             process_gloss_without_list(poschildren, pos, pos_data, header_tags)
+        else:
+            for i, (pre1, ls) in enumerate(zip(pre, lists)):
+                # if len(ls) == 0:
+                #     # don't have gloss list
+                #     # XXX add code here to filter out 'garbage', like text
+                #     # that isn't a head template or head.
+                    # continue
+
+                if all(not sl for sl in lists[i:]):
+                    if i == 0:
+                        if isinstance(node, str):
+                            wxr.wtp.debug("first head without list of senses,"
+                                      "string: '{}[...]', {}/{}".format(
+                                      node[:20], word, language),
+                                      sortid="page/1689/20221215")
+                        if isinstance(node, WikiNode):
+                            if node.args and node.args[0][0] in ["Han char",]:
+                                # just ignore these templates
+                                pass
+                            else:
+                                wxr.wtp.debug("first head without "
+                                      "list of senses, "
+                                      "template node "
+                                      "{}, {}/{}".format(
+                                      node.args, word, language),
+                                      sortid="page/1694/20221215")
+                        else:
+                            wxr.wtp.debug("first head without list of senses, "
+                                      "{}/{}".format(
+                                      word, language),
+                                      sortid="page/1700/20221215")
+                        # no break here so that the first head always
+                        # gets processed.
+                    else:
+                        if isinstance(node, str):
+                            wxr.wtp.debug("later head without list of senses,"
+                                      "string: '{}[...]', {}/{}".format(
+                                      node[:20], word, language),
+                                      sortid="page/1708/20221215")
+                        if isinstance(node, WikiNode):
+                            wxr.wtp.debug("later head without list of senses,"
+                                      "template node "
+                                      "{}, {}/{}".format(
+                                      node.args, word, language),
+                                      sortid="page/1713/20221215")
+                        else:
+                            wxr.wtp.debug("later head without list of senses, "
+                                      "{}/{}".format(
+                                      word, language),
+                                      sortid="page/1719/20221215")
+                        break
+                head_group = i + 1 if there_are_many_heads else None
+                # print("parse_part_of_speech: {}: {}: pre={}"
+                      # .format(wxr.wtp.section, wxr.wtp.subsection, pre1))
+                process_gloss_header(pre1,
+                                    pos,
+                                    head_group,
+                                    pos_data,
+                                    header_tags)
+                for l in ls:
+                    # Parse each list associated with this head.
+                    for node in l.children:
+                        # Parse nodes in l.children recursively.
+                        # The recursion function uses push_sense() to
+                        # add stuff into pos_data, and returns True or
+                        # False if something is added, which bubbles upward.
+                        # If the bubble is "True", then higher levels of
+                        # the recursion will not push_sense(), because
+                        # the data is already pushed into a sub-gloss
+                        # downstream, unless the higher level has examples
+                        # that need to be put somewhere.
+                        common_data = {"tags": list(header_tags)}
+                        if head_group:
+                            common_data["head_nr"] = head_group
+                        parse_sense_node(node, common_data, pos)
 
         # If there are no senses extracted, add a dummy sense.  We want to
         # keep tags extracted from the head for the dummy sense.

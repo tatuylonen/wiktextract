@@ -503,6 +503,8 @@ foo
 foo
             """
         )
+        # from pprint import pp
+        # pp(data)
         self.assertEqual(
             data,
             [
