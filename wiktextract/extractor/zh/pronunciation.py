@@ -185,7 +185,7 @@ def extract_pronunciation_item(
             lambda x: isinstance(x, WikiNode) and x.kind == NodeKind.TEMPLATE,
             node_children,
         ):
-            template_name, *template_args = child.args
+            template_name, *template_args = child.largs
             if template_name[0] == "audio":
                 audio_filename = template_args[1][0]
                 return audio_filename

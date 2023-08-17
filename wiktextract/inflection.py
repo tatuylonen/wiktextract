@@ -2528,7 +2528,7 @@ def determine_header(wxr, tablecontext, lang, word, pos,
           " + " not in titletext and  # For "avoir + blah blah"?
           not any(isinstance(x, WikiNode) and
                   x.kind == NodeKind.HTML and
-                  x.args == "span" and
+                  x.sarg == "span" and
                   x.attrs.get("lang") in ("az",)
                   for x in col.children)):
         is_title = True
@@ -2611,7 +2611,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
     assert isinstance(data, dict)
     assert isinstance(tree, WikiNode)
     assert (tree.kind == NodeKind.TABLE or
-           (tree.kind == NodeKind.HTML and tree.args == "table"))
+           (tree.kind == NodeKind.HTML and tree.sarg == "table"))
     assert isinstance(titles, list)
     assert isinstance(source, str)
     for x in titles:
@@ -2657,7 +2657,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
             if not isinstance(node, WikiNode):
                 continue
             if node.kind == NodeKind.HTML:
-                kind = node.args
+                kind = node.sarg
             else:
                 kind = node.kind
             
@@ -2685,7 +2685,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
                         # indexing or counting or looping.
                         continue
                     if col.kind == NodeKind.HTML:
-                        kind = col.args
+                        kind = col.sarg
                     else:
                         kind = col.kind
                     if kind not in (NodeKind.TABLE_HEADER_CELL,
@@ -2734,7 +2734,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
                                                        and
                                                        (x.kind == NodeKind.TABLE
                                                        or
-                                                       x.args == "table"))
+                                                       x.sarg == "table"))
     
                     # Clean the rest of the cell.
                     celltext = clean_node(wxr, None, rest)
@@ -2977,7 +2977,7 @@ def parse_inflection_section(wxr, data,
             if kind == NodeKind.TABLE:
                 tables.append(["wikitext", node, titles, []])
                 return
-            elif kind == NodeKind.HTML and node.args == "table":
+            elif kind == NodeKind.HTML and node.sarg == "table":
                 classes = node.attrs.get("class", ())
                 if "audiotable" in classes:
                     return
@@ -2986,15 +2986,15 @@ def parse_inflection_section(wxr, data,
             elif kind in (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
                           NodeKind.LEVEL5, NodeKind.LEVEL6):
                 return  # Skip subsections
-            if (kind == NodeKind.HTML and node.args == "div" and
+            if (kind == NodeKind.HTML and node.sarg == "div" and
                 "NavFrame" in node.attrs.get("class", "").split()):
                 recurse_navframe(node, titles)
                 return
         if kind == NodeKind.LINK:
-            if len(node.args) > 1:
-                recurse(node.args[1:], titles, navframe)
+            if len(node.largs) > 1:
+                recurse(node.largs[1:], titles, navframe)
             else:
-                recurse(node.args[0], titles, navframe)
+                recurse(node.largs[0], titles, navframe)
             return
         for x in node.children:
             recurse(x, titles, navframe)

@@ -71,7 +71,7 @@ def extract_headword_line(
     node: WikiNode,
     lang_code: str,
 ) -> None:
-    template_name = node.args[0][0]
+    template_name = node.largs[0][0]
     if template_name != "head" and not template_name.startswith(
         f"{lang_code}-"
     ):
@@ -83,11 +83,11 @@ def extract_headword_line(
     forms_start_index = 0
     for index, child in enumerate(expanded_node.children):
         if isinstance(child, WikiNode) and child.kind == NodeKind.HTML:
-            if child.args == "strong" and "headword" in child.attrs.get(
+            if child.sarg == "strong" and "headword" in child.attrs.get(
                 "class", ""
             ):
                 forms_start_index = index + 1
-            elif child.args == "span":
+            elif child.sarg == "span":
                 class_names = child.attrs.get("class", "")
                 if "headword-tr" in class_names:
                     forms_start_index = index + 1
@@ -103,7 +103,7 @@ def extract_headword_line(
                     for abbr_tag in filter(
                         lambda x: isinstance(x, WikiNode)
                         and x.kind == NodeKind.HTML
-                        and x.args == "abbr",
+                        and x.sarg == "abbr",
                         child.children,
                     ):
                         gender = abbr_tag.children[0]
@@ -115,7 +115,7 @@ def extract_headword_line(
                         child, NodeKind.HTML
                     ):
                         if (
-                            span_child.args == "strong"
+                            span_child.sarg == "strong"
                             and "headword" in span_child.attrs.get("class", "")
                         ):
                             ruby_data, node_without_ruby = extract_ruby(
@@ -130,7 +130,7 @@ def extract_headword_line(
                                     "tags": ["canonical"],
                                 }
                             )
-            elif child.args == "b":
+            elif child.sarg == "b":
                 # this is a form <b> tag, already inside form parentheses
                 break
 
@@ -167,7 +167,7 @@ def process_forms_text(
     lang_code = page_data[-1].get("lang_code")
     for index, node in enumerate(striped_nodes):
         if isinstance(node, WikiNode) and node.kind == NodeKind.HTML:
-            if node.args == "b":
+            if node.sarg == "b":
                 has_forms = True
                 ruby_data = None
                 if lang_code == "ja":
@@ -184,7 +184,7 @@ def process_forms_text(
                     if (
                         isinstance(next_node, WikiNode)
                         and next_node.kind == NodeKind.HTML
-                        and next_node.args == "span"
+                        and next_node.sarg == "span"
                         and "gender" in next_node.attrs.get("class", "")
                     ):
                         gender = clean_node(wxr, None, next_node)
@@ -197,7 +197,7 @@ def process_forms_text(
                 if ruby_data is not None:
                     form_data["ruby"] = ruby_data
                 page_data[-1]["forms"].append(form_data)
-            elif node.args == "span" and "tr" in node.attrs.get("class", ""):
+            elif node.sarg == "span" and "tr" in node.attrs.get("class", ""):
                 # romanization of the previous form <b> tag
                 page_data[-1]["forms"][-1]["roman"] = clean_node(
                     wxr, None, node

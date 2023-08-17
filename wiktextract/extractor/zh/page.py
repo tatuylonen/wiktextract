@@ -136,7 +136,7 @@ def parse_section(
     if not isinstance(node, WikiNode):
         return
     if node.kind in LEVEL_KINDS:
-        subtitle = clean_node(wxr, page_data[-1], node.args)
+        subtitle = clean_node(wxr, page_data[-1], node.largs)
         # remove number suffix from subtitle
         subtitle = re.sub(r"\s*(?:（.+）|\d+)$", "", subtitle)
         wxr.wtp.start_subsection(subtitle)
@@ -268,7 +268,7 @@ def parse_page(
     for node in filter(lambda n: isinstance(n, WikiNode), tree.children):
         # ignore link created by `also` template at the page top
         # also ignore "character info" templates
-        if node.kind == NodeKind.TEMPLATE and node.args[0][0].lower() in {
+        if node.kind == NodeKind.TEMPLATE and node.largs[0][0].lower() in {
             "also",
             "see also",
             "亦",
@@ -285,7 +285,7 @@ def parse_page(
             continue
 
         categories_and_links = defaultdict(list)
-        lang_name = clean_node(wxr, categories_and_links, node.args)
+        lang_name = clean_node(wxr, categories_and_links, node.largs)
         if lang_name not in wxr.config.LANGUAGES_BY_NAME:
             wxr.wtp.warning(
                 f"Unrecognized language name at top-level {lang_name}",

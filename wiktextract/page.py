@@ -81,13 +81,12 @@ def recursively_extract(
     new_contents.append(new_node)
     if kind in LEVEL_KINDS or kind == NodeKind.LINK:
         # Process args and children
-        assert isinstance(contents.args, (list, tuple))
         new_args = []
-        for arg in contents.args:
+        for arg in contents.largs:
             e1, c1 = recursively_extract(arg, fn)
             new_args.append(c1)
             extracted.extend(e1)
-        new_node.args = new_args
+        new_node.largs = new_args
         e1, c1 = recursively_extract(contents.children, fn)
         extracted.extend(e1)
         new_node.children = c1
@@ -111,7 +110,7 @@ def recursively_extract(
         pass
     elif kind in (NodeKind.LIST, NodeKind.LIST_ITEM):
         # Keep args as-is, process children
-        new_node.args = contents.args
+        new_node.sarg = contents.sarg
         e1, c1 = recursively_extract(contents.children, fn)
         extracted.extend(e1)
         new_node.children = c1
@@ -123,15 +122,15 @@ def recursively_extract(
     }:
         # Process only args
         new_args = []
-        for arg in contents.args:
+        for arg in contents.largs:
             e1, c1 = recursively_extract(arg, fn)
             new_args.append(c1)
             extracted.extend(e1)
-        new_node.args = new_args
+        new_node.largs = new_args
     elif kind == NodeKind.HTML:
         # Keep attrs and args as-is, process children
         new_node.attrs = contents.attrs
-        new_node.args = contents.args
+        new_node.sarg = contents.sarg
         e1, c1 = recursively_extract(contents.children, fn)
         extracted.extend(e1)
         new_node.children = c1
@@ -305,7 +304,7 @@ def remove_duplicate_data(page_data: Dict) -> None:
 def clean_node(
     wxr: WiktextractContext,
     sense_data: Optional[Dict],
-    value: Union[str, WikiNode, List[WikiNode]],
+    value: Union[str, WikiNode, List[Union[str, WikiNode, List]]],
     template_fn: Optional[Callable[[str, Dict], str]] = None,
     post_template_fn: Optional[Callable[[str, Dict, str], str]] = None,
     collect_links: bool = False,

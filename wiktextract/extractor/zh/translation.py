@@ -23,17 +23,17 @@ def extract_translation(
     for child in node.children:
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
-                template_name = child.args[0][0].lower()
+                template_name = child.largs[0][0].lower()
                 if (
                     template_name in {"trans-top", "翻譯-頂", "trans-top-also"}
-                    and len(child.args) > 1
+                    and len(child.largs) > 1
                 ):
-                    sense_text = clean_node(wxr, None, child.args[1][0])
+                    sense_text = clean_node(wxr, None, child.largs[1][0])
                     append_to = find_similar_gloss(page_data, sense_text)
                 elif template_name == "checktrans-top":
                     return
                 elif template_name == "see translation subpage":
-                    translation_subpage(wxr, page_data, child.args[1:])
+                    translation_subpage(wxr, page_data, child.largs[1:])
             elif child.kind == NodeKind.LIST:
                 for list_item_node in filter_child_wikinodes(
                     child, NodeKind.LIST_ITEM
@@ -180,7 +180,7 @@ def find_subpage_section(
 ) -> Optional[WikiNode]:
     if isinstance(node, WikiNode):
         if node.kind in LEVEL_KINDS:
-            section_title = clean_node(wxr, None, node.args)
+            section_title = clean_node(wxr, None, node.largs)
             if (
                 isinstance(target_section, str)
                 and section_title == target_section
@@ -196,3 +196,4 @@ def find_subpage_section(
             returned_node = find_subpage_section(wxr, child, target_section)
             if returned_node is not None:
                 return returned_node
+    return None

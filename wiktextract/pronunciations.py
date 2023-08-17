@@ -54,7 +54,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
         for l in contents:
             if (isinstance(l, WikiNode) and
                l.kind == NodeKind.TEMPLATE and
-               l.args[0][0].strip() != "zh-pron"):
+               l.largs[0][0].strip() != "zh-pron"):
                 temp = wxr.wtp.node_to_wikitext(l)
                 temp = wxr.wtp.expand(temp)
                 temp = wxr.wtp.parse(temp)
@@ -355,9 +355,9 @@ def parse_pronunciation(wxr, node, data, etym_data,
             for item in contents.children:
                 parse_chinese_pron(item, unknown_header_tags)
             return
-        if (len(contents.args[0]) == 1 and
-           isinstance(contents.args[0][0], str) and
-           contents.args[0][0].strip() == "zh-pron"):
+        if (len(contents.largs[0]) == 1 and
+           isinstance(contents.largs[0][0], str) and
+           contents.largs[0][0].strip() == "zh-pron"):
 
             src = wxr.wtp.node_to_wikitext(contents)
             expanded = wxr.wtp.expand(src, templates_to_expand={"zh-pron"})
@@ -397,7 +397,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
                 else:
                     new_children.append(child)
             node.children = new_children
-            node.args = "*"
+            node.sarg = "*"
             yield node
             if sublist:
                 yield from flattened_tree1(sublist)
