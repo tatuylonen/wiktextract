@@ -40,14 +40,14 @@ def parse_section(
     if not isinstance(node, WikiNode):
         return
     if node.kind in LEVEL_KINDS:
-        level_node = node.args[0][0]
+        level_node = node.largs[0][0]
         if level_node.kind == NodeKind.TEMPLATE:
-            level_template_name, *level_template_args = level_node.args
+            level_template_name, *level_template_args = level_node.largs
             if level_template_name == ["S"]:
                 # https://fr.wiktionary.org/wiki/Modèle:S
                 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
                 section_type = level_template_args[0][0]
-                subtitle = clean_node(wxr, page_data[-1], node.args)
+                subtitle = clean_node(wxr, page_data[-1], node.largs)
                 wxr.wtp.start_subsection(subtitle)
                 if (
                     section_type
@@ -111,7 +111,7 @@ def process_pos_block(
     for index, child in enumerate(child_nodes):
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
-                template_name = child.args[0][0]
+                template_name = child.largs[0][0]
                 lang_code = base_data.get("lang_code")
                 if template_name.startswith(f"{lang_code}-"):
                     extract_inflection(wxr, page_data, child, template_name)
@@ -170,7 +170,7 @@ def parse_page(
     for node in filter(lambda n: isinstance(n, WikiNode), tree.children):
         # ignore link created by `voir` template at the page top
         if node.kind == NodeKind.TEMPLATE:
-            template_name = node.args[0][0]
+            template_name = node.largs[0][0]
             if template_name in {"voir", "voir2"} or template_name.startswith(
                 "voir/"
             ):
@@ -182,9 +182,9 @@ def parse_page(
             )
             continue
 
-        level_node = node.args[0][0]
+        level_node = node.largs[0][0]
         if level_node.kind == NodeKind.TEMPLATE:
-            level_template_name, *level_template_args = level_node.args
+            level_template_name, *level_template_args = level_node.largs
             # https://fr.wiktionary.org/wiki/Modèle:langue
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_langues
             if level_template_name == ["langue"]:

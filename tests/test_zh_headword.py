@@ -28,7 +28,7 @@ class TestHeadword(TestCase):
         # wikitext: {{en-noun|~|manga|s}}
         # expanded text: manga (可數 & 不可數，複數 manga 或 mangas)
         node = Mock()
-        node.args = [["en-noun"]]
+        node.largs = [["en-noun"]]
         page_data = [defaultdict(list)]
         self.wxr.wtp.title = "manga"
         extract_headword_line(self.wxr, page_data, node, "en")
@@ -54,7 +54,7 @@ class TestHeadword(TestCase):
         # wikitext: {{nl-noun|m|-'s|mangaatje}}
         # expanded text: manga m (複數 manga's，指小詞 mangaatje n)
         node = Mock()
-        node.args = [["nl-noun"]]
+        node.largs = [["nl-noun"]]
         page_data = [defaultdict(list)]
         self.wxr.wtp.title = "manga"
         extract_headword_line(self.wxr, page_data, node, "nl")
@@ -80,7 +80,7 @@ class TestHeadword(TestCase):
         # wikitext: {{head|grc|後綴變格形|g=f|head=-κρατίᾱς}}
         # expanded text: -κρατίᾱς (-kratíās) f
         node = Mock()
-        node.args = [["head"]]
+        node.largs = [["head"]]
         page_data = [defaultdict(list)]
         self.wxr.wtp.title = "-κρατίας"
         extract_headword_line(self.wxr, page_data, node, "grc")

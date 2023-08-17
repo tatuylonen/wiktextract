@@ -29,7 +29,7 @@ def extract_inflections(
 ) -> None:
     for child in node.children:
         if isinstance(child, WikiNode) and child.kind == NodeKind.TEMPLATE:
-            template_name = child.args[0][0].lower()
+            template_name = child.largs[0][0].lower()
             if template_name.startswith(JAPANESE_INFLECTION_TEMPLATE_PREFIXES):
                 expanded_table = wxr.wtp.parse(
                     wxr.wtp.node_to_wikitext(node), expand_all=True

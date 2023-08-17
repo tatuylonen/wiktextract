@@ -18,7 +18,8 @@ def contains_list(
     kind = contents.kind
     if kind == NodeKind.LIST:
         return True
-    return contains_list(contents.children) or contains_list(contents.args)
+    return contains_list(contents.children) or contains_list(contents.sarg if
+                                            contents.sarg else contents.largs)
 
 
 def strip_nodes(

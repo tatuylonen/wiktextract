@@ -78,7 +78,7 @@ def extract_fr_accord(
                         if (
                             isinstance(table_cell_child, WikiNode)
                             and table_cell_child.kind == NodeKind.HTML
-                            and table_cell_child.args == "br"
+                            and table_cell_child.sarg == "br"
                         ):
                             br_tag_index = cell_child_index
                             break

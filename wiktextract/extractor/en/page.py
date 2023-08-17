@@ -946,11 +946,11 @@ def parse_language(wxr, langnode, language, lang_code):
             lambda x: (
                 isinstance(x, WikiNode) and
                 x.kind == NodeKind.TEMPLATE and
-                x.args[0][0] in FLOATING_TABLE_TEMPLATES
+                x.largs[0][0] in FLOATING_TABLE_TEMPLATES
             )
         )
         tempnode = WikiNode(NodeKind.LEVEL5, 0)
-        tempnode.args = ['Inflection']
+        tempnode.largs = ['Inflection']
         tempnode.children = floaters
         parse_inflection(tempnode, "Floating Div", pos)
         # print(poschildren)
@@ -998,29 +998,29 @@ def parse_language(wxr, langnode, language, lang_code):
             elif collecting_head and kind == NodeKind.LINK:
                 # We might collect relevant links as they are often pictures
                 # relating to the word
-                if (len(node.args[0]) >= 1 and
-                   isinstance(node.args[0][0], str)):
-                    if node.args[0][0].startswith(ns_title_prefix_tuple(
+                if (len(node.largs[0]) >= 1 and
+                   isinstance(node.largs[0][0], str)):
+                    if node.largs[0][0].startswith(ns_title_prefix_tuple(
                                                         wxr, "Category")):
                         # [[Category:...]]
                         # We're at the end of the file, probably, so stop
                         # here. Otherwise the head will get garbage.
                         break
-                    if node.args[0][0].startswith(ns_title_prefix_tuple(
+                    if node.largs[0][0].startswith(ns_title_prefix_tuple(
                                                         wxr, "File")):
                         # Skips file links
                         continue
                 start_of_paragraph = False
-                pre[-1].extend(node.args[-1])
+                pre[-1].extend(node.largs[-1])
             elif kind == NodeKind.HTML:
-                if node.args == "br":
+                if node.sarg == "br":
                     if pre[-1]:
                         pre.append([])  # Switch to next head
                         lists.append([])  # Lists parallels pre
                         collecting_head = True
                         start_of_paragraph = True
                 elif (collecting_head and
-                      node.args not in ("gallery", "ref", "cite", "caption")):
+                      node.sarg not in ("gallery", "ref", "cite", "caption")):
                     start_of_paragraph = False
                     pre[-1].append(node)
                 else:
@@ -1033,17 +1033,17 @@ def parse_language(wxr, langnode, language, lang_code):
                 # to identify head templates. Too bad it's None.
 
                 # ignore {{category}}, {{cat}}... etc.
-                if node.args[0][0] in stop_head_at_these_templates:
+                if node.largs[0][0] in stop_head_at_these_templates:
                     # we've reached a template that should be at the end,
                     continue
 
                 # skip these templates; panel_templates is already used
                 # to skip certain templates else, but it also applies to
                 # head parsing quite well.
-                if is_panel_template(wxr, node.args[0][0]):
+                if is_panel_template(wxr, node.largs[0][0]):
                     continue
                 # skip these templates
-                # if node.args[0][0] in skip_these_templates_in_head:
+                # if node.largs[0][0] in skip_these_templates_in_head:
                     # first_head_tmplt = False # no first_head_tmplt at all
                     # start_of_paragraph = False
                     # continue
@@ -1117,7 +1117,7 @@ def parse_language(wxr, langnode, language, lang_code):
                                       node[:20], word, language),
                                       sortid="page/1689/20221215")
                         if isinstance(node, WikiNode):
-                            if node.args and node.args[0][0] in ["Han char",]:
+                            if node.largs and node.largs[0][0] in ["Han char",]:
                                 # just ignore these templates
                                 pass
                             else:
@@ -1125,7 +1125,7 @@ def parse_language(wxr, langnode, language, lang_code):
                                       "list of senses, "
                                       "template node "
                                       "{}, {}/{}".format(
-                                      node.args, word, language),
+                                      node.largs, word, language),
                                       sortid="page/1694/20221215")
                         else:
                             wxr.wtp.debug("first head without list of senses, "
@@ -1144,7 +1144,8 @@ def parse_language(wxr, langnode, language, lang_code):
                             wxr.wtp.debug("later head without list of senses,"
                                       "template node "
                                       "{}, {}/{}".format(
-                                      node.args, word, language),
+                                      node.sarg if node.sarg else node.largs,
+                                      word, language),
                                       sortid="page/1713/20221215")
                         else:
                             wxr.wtp.debug("later head without list of senses, "
@@ -1201,7 +1202,7 @@ def parse_language(wxr, langnode, language, lang_code):
                 exp.children,
                 lambda x: isinstance(x, WikiNode)
                 and x.kind == NodeKind.HTML
-                and x.args == "ruby"
+                and x.sarg == "ruby"
             )
             if rub is not None:
                 for r in rub:
@@ -1239,7 +1240,7 @@ def parse_language(wxr, langnode, language, lang_code):
         for node in strip_nodes(nodes):
             if isinstance(node, WikiNode):
                 if node.kind == NodeKind.TEMPLATE:
-                    template_name = node.args[0][0]
+                    template_name = node.largs[0][0]
                     if (
                             template_name == "head"
                             or template_name.startswith(f"{lang_code}-")
@@ -1280,10 +1281,10 @@ def parse_language(wxr, langnode, language, lang_code):
                       sortid="page/1678")
             return False
 
-        if node.args == ":":
+        if node.sarg == ":":
             # Skip example entries at the highest level, ones without
             # a sense ("...#") above them.
-            # If node.args is exactly and only ":", then it's at
+            # If node.sarg is exactly and only ":", then it's at
             # the highest level; lower levels would have more
             # "indentation", like "#:" or "##:"
             return False
@@ -1300,7 +1301,7 @@ def parse_language(wxr, langnode, language, lang_code):
         # list 'depth' if need be, and also what kind of list or
         # entry it is; # is for normal glosses, : for examples (indent)
         # and * is used for quotations on wiktionary.
-        current_depth = node.args
+        current_depth = node.sarg
 
         children = node.children
 
@@ -1311,14 +1312,14 @@ def parse_language(wxr, langnode, language, lang_code):
         subentries = [x for x in children
                     if isinstance(x, WikiNode) and
                     x.kind == NodeKind.LIST and
-                    x.args == current_depth + "#"]
+                    x.sarg == current_depth + "#"]
 
-        # sublists of examples and quotations. .args
+        # sublists of examples and quotations. .sarg
         # does not end with "#".
         others = [x for x in children
                   if isinstance(x, WikiNode) and
                   x.kind == NodeKind.LIST and
-                  x.args != current_depth + "#"]
+                  x.sarg != current_depth + "#"]
 
         # the actual contents of this particular node.
         # can be a gloss (or a template that expands into
@@ -1352,7 +1353,7 @@ def parse_language(wxr, langnode, language, lang_code):
                 cropped_node.children = [x for x in children
                                         if not (isinstance(x, WikiNode) and
                                                 x.kind == NodeKind.LIST and
-                                                x.args == current_depth + "#")]
+                                                x.sarg == current_depth + "#")]
                 added |= parse_sense_node(cropped_node,
                                           sense_base,
                                           pos)
@@ -1484,7 +1485,7 @@ def parse_language(wxr, langnode, language, lang_code):
             if not isinstance(item, WikiNode):
                 return
             if item.kind == NodeKind.LINK:
-                v = item.args[-1]
+                v = item.largs[-1]
                 if (isinstance(v, list) and len(v) == 1 and
                     isinstance(v[0], str)):
                     gloss_template_args.add(v[0].strip())
@@ -1935,7 +1936,7 @@ def parse_language(wxr, langnode, language, lang_code):
                 return None
             # print(f"node.kind: {node.kind}")
             if node.kind in LEVEL_KINDS:
-                t = clean_node(wxr, None, node.args[0])
+                t = clean_node(wxr, None, node.largs[0])
                 # print(f"t: {t} == seq[0]: {seq[0]}?")
                 if t.lower() == seq[0].lower():
                     seq = seq[1:]
@@ -2008,7 +2009,8 @@ def parse_language(wxr, langnode, language, lang_code):
                         parts.append(node)
                         continue
                     kind = node.kind
-                    # print("ITEM_RECURSE KIND:", kind, node.args)
+                    # print("ITEM_RECURSE KIND:", kind,
+                    #        node.sarg if node.sarg else node.largs)
                     if kind == NodeKind.LIST:
                         if parts:
                             sense1 = clean_node(wxr, None, parts)
@@ -2032,15 +2034,15 @@ def parse_language(wxr, langnode, language, lang_code):
                         continue
                     elif kind == NodeKind.HTML:
                         classes = (node.attrs.get("class") or "").split()
-                        if node.args in ("gallery", "ref", "cite", "caption"):
+                        if node.sarg in ("gallery", "ref", "cite", "caption"):
                             continue
-                        elif node.args == "ruby":
+                        elif node.sarg == "ruby":
                             rb = parse_ruby(wxr, node)
                             if rb:
                                 ruby.append(rb)
                                 parts.append(rb[0])
                             continue
-                        elif node.args == "math":
+                        elif node.sarg == "math":
                             parts.append(clean_node(wxr, None, node))
                             continue
                         elif "interProject" in classes:
@@ -2053,32 +2055,32 @@ def parse_language(wxr, langnode, language, lang_code):
                         item_recurse(node.children, italic=True)
                     elif kind == NodeKind.LINK:
                         ignore = False
-                        if isinstance(node.args[0][0], str):
-                            v = node.args[0][0].strip().lower()
+                        if isinstance(node.largs[0][0], str):
+                            v = node.largs[0][0].strip().lower()
                             if v.startswith(ns_title_prefix_tuple(wxr,
                                                             "Category", True) \
                                             + ns_title_prefix_tuple(wxr,
                                                             "File", True)):
                                 ignore = True
                             if not ignore:
-                                v = node.args[-1]
-                                if (len(node.args) == 1 and
+                                v = node.largs[-1]
+                                if (len(node.largs) == 1 and
                                     len(v) > 0 and
                                     isinstance(v[0], str) and
                                     v[0][0] == ":"):
                                     v = [v[0][1:]] + list(v[1:])
                                 item_recurse(v, italic=italic)
                     elif kind == NodeKind.URL:
-                        if len(node.args) < 2 and node.args:
+                        if len(node.largs) < 2 and node.largs:
                             # Naked url captured
-                            urls.extend(node.args[-1])
+                            urls.extend(node.largs[-1])
                             continue
-                        if len(node.args) == 2:
+                        if len(node.largs) == 2:
                             # Url from link with text
-                            urls.append(node.args[0][-1])
-                        # print(f"{node.args=!r}")
+                            urls.append(node.largs[0][-1])
+                        # print(f"{node.largs=!r}")
                         # print("linkage recurse URL {}".format(node))
-                        item_recurse(node.args[-1], italic=italic)
+                        item_recurse(node.largs[-1], italic=italic)
                     elif kind in (NodeKind.PREFORMATTED, NodeKind.BOLD):
                         item_recurse(node.children, italic=italic)
                     else:
@@ -2172,10 +2174,10 @@ def parse_language(wxr, langnode, language, lang_code):
                     continue
                 elif kind == NodeKind.HTML:
                     # Recurse to process inside the HTML for most tags
-                    if node.args in ("gallery", "ref", "cite", "caption"):
+                    if node.sarg in ("gallery", "ref", "cite", "caption"):
                         continue
                     classes = (node.attrs.get("class") or "").split()
-                    if node.args == "li":
+                    if node.sarg == "li":
                         # duplicates code from if kind == NodeKind.LIST_ITEM ⇑
                         v = parse_linkage_item(node.children, field, sense)
                         if v:
@@ -2209,7 +2211,7 @@ def parse_language(wxr, langnode, language, lang_code):
                     # Recurse into the last argument
                     # Apparently ":/" is used as a link to "/", so strip
                     # initial value
-                    parse_linkage_recurse(node.args[-1], field, sense)
+                    parse_linkage_recurse(node.largs[-1], field, sense)
                 else:
                     wxr.wtp.debug("parse_linkage_recurse unhandled {}: {}"
                               .format(kind, node),
@@ -2595,10 +2597,10 @@ def parse_language(wxr, langnode, language, lang_code):
                             continue
                         if item.kind != NodeKind.LIST_ITEM:
                             continue
-                        if item.args == ":":
+                        if item.sarg == ":":
                             continue
                         parse_translation_item(item.children)
-                elif kind == NodeKind.LIST_ITEM and node.args == ":":
+                elif kind == NodeKind.LIST_ITEM and node.sarg == ":":
                     # Silently skip list items that are just indented; these
                     # are used for text between translations, such as indicating
                     # translations that need to be checked.
@@ -2631,7 +2633,7 @@ def parse_language(wxr, langnode, language, lang_code):
                 elif kind == NodeKind.PREFORMATTED:
                     print("parse_translation_recurse: PREFORMATTED:", node)
                 elif kind == NodeKind.LINK:
-                    arg0 = node.args[0]
+                    arg0 = node.largs[0]
                     # Kludge: I've seen occasional normal links to translation
                     # subpages from main pages (e.g., language/English/Noun
                     # in July 2021) instead of the normal
@@ -2662,7 +2664,7 @@ def parse_language(wxr, langnode, language, lang_code):
                     if (len(arg0) >= 1 and
                        isinstance(arg0[0], str) and
                        not arg0[0].lower().startswith("category:")):
-                        for x in node.args[-1]:
+                        for x in node.largs[-1]:
                             if isinstance(x, str):
                                 sense_parts.append(x)
                             else:
@@ -2750,16 +2752,16 @@ def parse_language(wxr, langnode, language, lang_code):
         # such templates that should be added to this...
         unignored_non_list_templates = ["CJKV"]
 
-        def process_list_item_children(args, children):
-            assert isinstance(args, str)
+        def process_list_item_children(sarg, children):
+            assert isinstance(sarg, str)
             assert isinstance(children, list)
-            # The descendants section is a hierarchical bulleted listed. args is
+            # The descendants section is a hierarchical bulleted listed. sarg is
             # usually some number of "*" characters indicating the level of
             # indentation of the line, e.g. "***" indicates the line will be
             # thrice-indented. A bare ";" is used to indicate a subtitle-like
             # line with no indentation. ":" at the end of one or more "*"s is
             # used to indicate that the bullet will not be displayed.
-            item_data = {"depth": args.count("*")}
+            item_data = {"depth": sarg.count("*")}
             templates = []
             is_derived = False
 
@@ -2809,7 +2811,8 @@ def parse_language(wxr, langnode, language, lang_code):
                              )
             item_data["templates"] = templates
             item_data["text"] = text
-            if is_derived: item_data["tags"] = ["derived"]
+            if is_derived:
+                item_data["tags"] = ["derived"]
             descendants.append(item_data)
 
         def node_children(node):
@@ -2827,9 +2830,9 @@ def parse_language(wxr, langnode, language, lang_code):
             """Appends the data for every list item in every list in node
              to descendants."""
             for _, c in node_children(node):
-                if (c.kind == NodeKind.TEMPLATE and c.args
-                    and len(c.args[0]) == 1 and isinstance(c.args[0][0], str)
-                    and c.args[0][0] in unignored_non_list_templates):
+                if (c.kind == NodeKind.TEMPLATE and c.largs
+                    and len(c.largs[0]) == 1 and isinstance(c.largs[0][0], str)
+                    and c.largs[0][0] in unignored_non_list_templates):
                     # Some Descendants sections have no wikitext list. Rather,
                     # the list is entirely generated by a single template (see
                     # e.g. the use of {{CJKV}} in Chinese entries).
@@ -2851,10 +2854,10 @@ def parse_language(wxr, langnode, language, lang_code):
                     # everything after it.
                     i = get_sublist_index(c)
                     if i is not None:
-                        process_list_item_children(c.args, c.children[:i])
+                        process_list_item_children(c.sarg, c.children[:i])
                         get_descendants(c.children[i])
                     else:
-                        process_list_item_children(c.args, c.children)
+                        process_list_item_children(c.sarg, c.children)
 
         # parse_descendants() actual work starts here
         get_descendants(node)
@@ -2891,11 +2894,11 @@ def parse_language(wxr, langnode, language, lang_code):
                 # print("  X{}".format(repr(node)[:40]))
                 continue
             if node.kind == NodeKind.TEMPLATE:
-                template_name = node.args[0][0]
+                template_name = node.largs[0][0]
                 if template_name == "zh-see":
                     # handle Chinese character variant redirect
                     # https://en.wikipedia.org/wiki/Variant_Chinese_characters
-                    redirect_to = node.args[1][0]
+                    redirect_to = node.largs[1][0]
                     redirect_list.append(redirect_to)
                 continue
 
@@ -2910,7 +2913,8 @@ def parse_language(wxr, langnode, language, lang_code):
                 clean_node(wxr, etym_data, node,
                            template_fn=skip_template_fn)
                 continue
-            t = clean_node(wxr, etym_data, node.args)
+            t = clean_node(wxr, etym_data,
+                           node.sarg if node.sarg else node.largs)
             t = t.lower()
             wxr.config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
@@ -3021,7 +3025,7 @@ def parse_language(wxr, langnode, language, lang_code):
         examples = []
 
         for sub in others:
-            if not sub.args.endswith((":", "*")):
+            if not sub.sarg.endswith((":", "*")):
                 continue
             for item in sub.children:
                 if not isinstance(item, WikiNode):
@@ -3490,7 +3494,8 @@ def parse_page(
             wxr.wtp.debug("unexpected top-level node: {}".format(langnode),
                       sortid="page/3014")
             continue
-        lang = clean_node(wxr, None, langnode.args)
+        lang = clean_node(wxr, None,
+                          langnode.sarg if langnode.sarg else langnode.largs)
         if lang not in wxr.config.LANGUAGES_BY_NAME:
             wxr.wtp.debug("unrecognized language name at top-level {!r}"
                       .format(lang), sortid="page/3019")

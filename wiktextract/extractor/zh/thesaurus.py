@@ -161,7 +161,7 @@ def recursive_parse(
         return
 
     if node.kind == NodeKind.LEVEL2:
-        lang_name = clean_node(wxr, None, node.args)
+        lang_name = clean_node(wxr, None, node.largs)
         lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang_name)
         if lang_code is None:
             logging.warning(
@@ -171,9 +171,9 @@ def recursive_parse(
             wxr, entry, lang_code, None, None, None, node.children
         )
     elif node.kind == NodeKind.LEVEL3:
-        local_pos_name = clean_node(wxr, None, node.args)
+        local_pos_name = clean_node(wxr, None, node.largs)
         if local_pos_name in IGNORED_LEVEL3_SUBTITLES:
-            return
+            return None
         english_pos = wxr.config.POS_SUBTITLES.get(local_pos_name, {}).get(
             "pos"
         )
@@ -187,13 +187,13 @@ def recursive_parse(
             wxr, entry, lang_code, english_pos, None, None, node.children
         )
     elif node.kind == NodeKind.LEVEL4:
-        sense = clean_node(wxr, None, node.args)
+        sense = clean_node(wxr, None, node.largs)
         sense = sense.removeprefix(SENSE_SUBTITLE_PREFIX)
         return recursive_parse(
             wxr, entry, lang_code, pos, sense, None, node.children
         )
     elif node.kind == NodeKind.LEVEL5:
-        local_linkage_name = clean_node(wxr, None, node.args)
+        local_linkage_name = clean_node(wxr, None, node.largs)
         english_linkage = wxr.config.LINKAGE_SUBTITLES.get(local_linkage_name)
         if english_linkage is None:
             logging.warning(
@@ -220,6 +220,7 @@ def recursive_parse(
         return recursive_parse(
             wxr, entry, lang_code, pos, sense, linkage, node.children
         )
+    return None
 
 
 def extract_thesaurus_data(wxr: WiktextractContext) -> None:

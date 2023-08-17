@@ -32,7 +32,7 @@ def extract_examples(
                         isinstance(child, WikiNode)
                         and child.kind == NodeKind.TEMPLATE
                     ):
-                        template_name = child.args[0][0].strip()
+                        template_name = child.largs[0][0].strip()
                         if template_name.startswith(("quote-", "RQ:")):
                             extract_quote_templates(wxr, child, example_data)
                         elif template_name in {"ja-x", "ja-usex"}:
@@ -82,7 +82,7 @@ def extract_quote_templates(
             key = "text"
         elif line_num == 2 and any(
             template_arg[0].startswith("transliteration=")
-            for template_arg in node.args
+            for template_arg in node.largs
             if len(template_arg) > 0 and isinstance(template_arg[0], str)
         ):
             key = "roman"

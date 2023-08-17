@@ -18,10 +18,10 @@ def parse_ruby(
         if (
             not isinstance(child, WikiNode)
             or child.kind != NodeKind.HTML
-            or child.args not in {"rp", "rt"}
+            or child.sarg not in {"rp", "rt"}
         ):
             ruby_nodes.append(child)
-        elif child.args == "rt":
+        elif child.sarg == "rt":
             furi_nodes.append(child)
     ruby_kanji = clean_node(wxr, None, ruby_nodes).strip()
     furigana = clean_node(wxr, None, furi_nodes).strip()
@@ -51,7 +51,7 @@ def extract_ruby(
     if not isinstance(contents, WikiNode):
         return [], [contents]
     # Check if this content should be extracted
-    if contents.kind == NodeKind.HTML and contents.args == "ruby":
+    if contents.kind == NodeKind.HTML and contents.sarg == "ruby":
         rb = parse_ruby(wxr, contents)
         if rb is not None:
             return [rb], [rb[0]]
@@ -68,13 +68,12 @@ def extract_ruby(
         NodeKind.LINK,
     }:
         # Process args and children
-        assert isinstance(contents.args, (list, tuple))
         new_args = []
-        for arg in contents.args:
+        for arg in contents.largs:
             e1, c1 = extract_ruby(wxr, arg)
             new_args.append(c1)
             extracted.extend(e1)
-        new_node.args = new_args
+        new_node.largs = new_args
         e1, c1 = extract_ruby(wxr, contents.children)
         extracted.extend(e1)
         new_node.children = c1
@@ -98,7 +97,7 @@ def extract_ruby(
         pass
     elif kind in (NodeKind.LIST, NodeKind.LIST_ITEM):
         # Keep args as-is, process children
-        new_node.args = contents.args
+        new_node.sarg = contents.sarg
         e1, c1 = extract_ruby(wxr, contents.children)
         extracted.extend(e1)
         new_node.children = c1
@@ -110,15 +109,15 @@ def extract_ruby(
     }:
         # Process only args
         new_args = []
-        for arg in contents.args:
+        for arg in contents.largs:
             e1, c1 = extract_ruby(wxr, arg)
             new_args.append(c1)
             extracted.extend(e1)
-        new_node.args = new_args
+        new_node.largs = new_args
     elif kind == NodeKind.HTML:
         # Keep attrs and args as-is, process children
         new_node.attrs = contents.attrs
-        new_node.args = contents.args
+        new_node.sarg = contents.sarg
         e1, c1 = extract_ruby(wxr, contents.children)
         extracted.extend(e1)
         new_node.children = c1

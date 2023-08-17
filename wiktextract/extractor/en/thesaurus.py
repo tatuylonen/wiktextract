@@ -128,7 +128,7 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
                         thesaurus.extend(x_result)
                 return thesaurus
             if not isinstance(contents, WikiNode):
-                return
+                return None
             kind = contents.kind
             if kind == NodeKind.LIST and not contains_list(contents.children):
                 if lang is None:
@@ -233,14 +233,16 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
                 return thesaurus
             if kind not in LEVEL_KINDS:
                 thesaurus = []
-                args_thesaurus = recurse(contents.args)
+                args_thesaurus = recurse(contents.sarg if contents.sarg
+                                                else contents.largs)
                 if args_thesaurus is not None:
                     thesaurus.extend(args_thesaurus)
                 children_thesaurus = recurse(contents.children)
                 if children_thesaurus is not None:
                     thesaurus.extend(children_thesaurus)
                 return thesaurus
-            subtitle = wxr.wtp.node_to_text(contents.args)
+            subtitle = wxr.wtp.node_to_text(contents.sarg if contents.sarg
+                                            else contents.largs)
             if subtitle in wxr.config.LANGUAGES_BY_NAME:
                 lang = subtitle
                 pos = None
@@ -284,7 +286,7 @@ def extract_thesaurus_data(wxr: WiktextractContext) -> None:
             logging.debug(
                 f"{title=} {lang=} {pos=} {sense=} UNHANDLED SUBTITLE: "
                 + "subtitle "
-                + str(contents.args)
+                + str(contents.sarg if contents.sarg else contents.largs)
             )
             return recurse(contents.children)
 
