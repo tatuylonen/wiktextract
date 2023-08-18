@@ -77,7 +77,7 @@ class WiktionaryConfig:
         capture_inflections=True,
         capture_descendants=True,
         verbose=False,
-        expand_tables=False
+        expand_tables=False,
     ):
         if capture_language_codes is not None:
             assert isinstance(capture_language_codes, (list, tuple, set))

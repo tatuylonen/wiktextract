@@ -92,7 +92,7 @@ def parse_wiktionary(
     phase1_only: bool,
     namespace_ids: Set[int],
     out_f: TextIO,
-    human_readable: bool,
+    human_readable: bool = False,
     override_folders: Optional[List[str]] = None,
     skip_extract_dump: bool = False,
     save_pages_path: Optional[str] = None,
@@ -170,7 +170,7 @@ def reprocess_wiktionary(
     wxr: WiktextractContext,
     num_processes: Optional[int],
     out_f: TextIO,
-    human_readable: bool,
+    human_readable: bool = False,
     search_pattern: Optional[str] = None,
 ) -> None:
     """Reprocesses the Wiktionary from the sqlite db."""
@@ -191,7 +191,7 @@ def reprocess_wiktionary(
     start_time = time.time()
     last_time = start_time
     all_page_nums = wxr.wtp.saved_page_nums(
-        process_ns_ids, True, search_pattern
+        process_ns_ids, True, "wikitext", search_pattern
     )
     wxr.remove_unpicklable_objects()
     with Pool(num_processes, init_worker_process, (page_handler, wxr)) as pool:
@@ -200,7 +200,7 @@ def reprocess_wiktionary(
             pool.imap_unordered(
                 page_handler,
                 wxr.wtp.get_all_pages(
-                    process_ns_ids, True, search_pattern=search_pattern
+                    process_ns_ids, True, "wikitext", search_pattern
                 ),
             )
         ):

@@ -85,7 +85,7 @@ def process_single_page(
         args.use_thesaurus
         and thesaurus_linkage_number(wxr.thesaurus_db_conn) == 0
     ):
-        extract_thesaurus_data(wxr, 1)
+        extract_thesaurus_data(wxr)
     # Parse the page
     ret = parse_page(wxr, title, text)
     for data in ret:
@@ -486,6 +486,7 @@ def main():
             # Parse again from the db file
             reprocess_wiktionary(
                 wxr,
+                args.num_processes,
                 out_f,
                 args.human_readable,
                 search_pattern=args.search_pattern,

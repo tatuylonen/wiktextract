@@ -349,12 +349,8 @@ processor cores, provided you have enough memory (about 10GB/core or
 5GB/hyperthread recommended).
 
 You can control the number of parallel processes to use with the
-``--num-threads`` option; the default on Linux is to use the number of
-available cores/hyperthreads.  On Windows and MacOS, ``--num-threads``
-should currently be set to 1 (default on those systems). We don't
-really recommend using Windows or Mac for the extraction, because it
-will be very slow.  Extracting only a few languages or a subset of the data
-will be faster.
+`--num-processes` option; the default is to use the number of
+available cores/hyperthreads.
 
 You can download the full pre-extracted data from
 [kaikki.org](https://kaikki.org/dictionary/). The pre-extraction is
@@ -388,7 +384,7 @@ run the script.  The correct dump file the name
 
 An example of a typical invocation for extracting all data would be:
 ```
-wiktwords --all --all-languages --out data.json enwiktionary-20201201-pages-articles.xml.bz2
+wiktwords --all --all-languages --out data.json enwiktionary-20230801-pages-articles.xml.bz2
 ```
 
 If you wish to modify the code or test processing individual pages,
@@ -398,14 +394,14 @@ the following may also be useful:
 processing individual pages:
 
 ```
-wiktwords --db-path /tmp/wikt-db enwiktionary-20201201-pages-articles.xml.bz2
+wiktwords --db-path en_20230801.db enwiktionary-20230801-pages-articles.xml.bz2
 ```
 
 2. To process a single page and produce a human-readable output file
 for debugging:
 
 ```
-wiktwords --db-path /tmp/wikt-db --all --all-languages --out outfile --page page_title
+wiktwords --db-path en_20230801.db --all --all-languages --out outfile --page page_title
 ```
 
 The following command-line options can be used to control its operation:
@@ -427,7 +423,7 @@ The following command-line options can be used to control its operation:
 * --pages-dir DIR: save all wiktionary pages under this directory (mostly for debugging)
 * --db-path PATH: save/use database from this path (for debugging)
 * --page FILE or TITLE: read page from file or database, can be specified multiple times(first line must be "TITLE: pagetitle"; file should use UTF-8 encoding)
-* --num-threads THREADS: use this many parallel processes (needs 4GB/process)
+* --num-processes PROCESSES: use this many parallel processes (needs 4GB/process)
 * --human-readable: print human-readable JSON with indentation (no longer
 machine-readable)
 * --override PATH: override pages with files in this directory(first line of the file must be TITLE: pagetitle)
@@ -465,13 +461,9 @@ config = WiktionaryConfig(
     capture_examples=True,
     capture_etymologies=True,
     capture_descendants=True,
-    capture_inflections=True
+    capture_inflections=True,
 )
 wxr = WiktextractContext(Wtp(), config)
-
-def word_cb(data):
-    # data is dictionary containing information for one word/redirect
-    ... do something with data
 
 RECOGNIZED_NAMESPACE_NAMES = [
     "Main",
@@ -488,8 +480,8 @@ namespace_ids = {
     wxr.wtp.NAMESPACE_DATA.get(name, {}).get("id")
     for name in RECOGNIZED_NAMESPACE_NAMES
 }
-
-parse_wiktionary(wxr, path, word_cb, False, False, namespace_ids)
+with open("output.json", "w", encoding="utf-8") as f:
+    parse_wiktionary(wxr, dump_path, None, False, namespace_ids, f)
 ```
 
 The capture arguments default to ``True``, so they only need to be set if
@@ -501,16 +493,17 @@ options are used).
 
 ```python
 def parse_wiktionary(
-    wxr: Wiktextractcontext,
-    path: str,
-    word_cb,
+    wxr: WiktextractContext,
+    dump_path: str,
+    num_processes: Optional[int],
     phase1_only: bool,
-    dont_parse: bool,
     namespace_ids: Set[int],
+    out_f: TextIO,
+    human_readable: bool = False,
     override_folders: Optional[List[str]] = None,
     skip_extract_dump: bool = False,
-    save_pages_path: Optional[str] = None
-):
+    save_pages_path: Optional[str] = None,
+) -> None:
 ```
 
 The ``parse_wiktionary`` function will call ``word_cb(data)`` for
@@ -532,12 +525,7 @@ Its arguments are as follows:
   file path can be provided as the ``db_path`` argument.
 ** ``wxr.config`` (WiktionaryConfig) - a configuration object describing
   what to exctract (see below)
-* ``path`` (str) - path to a Wiktionary dump file (*-pages-articles.xml.bz2)
-* ``word_cb`` (function) - this function will be called for every word
-  extracted from Wiktionary.  The argument is a dictionary.  Typically it
-  will be called once for each word form and part-of-speech (each time there
-  may be more than one word sense under "senses").  See below for a description
-  of the dictionary.
+* `dump_path` (str) - path to a Wiktionary dump file (*-pages-articles.xml.bz2)
 * ``phase1_only`` - if this is set to ``True``, then only a cache file will
   be created but no extraction will take place.  In this case the ``Wtp``
   constructor should probably be given the ``db_path`` argument when
@@ -546,6 +534,8 @@ Its arguments are as follows:
   included in this set won't be processed. Avaliable id values can be
   found in wikitextprocessor project's [data/en/namespaces.json](https://github.com/tatuylonen/wikitextprocessor/blob/main/wikitextprocessor/data/en/namespaces.json)
   file and the Wiktionary *.xml.bz2 dump file.
+* `out_f` - output file object.
+* `human_readable` - if set to `True`, the output JSON will be formatted with indentation.
 * `override_folders` - override pages with files in these directories.
 * `skip_extract_dump` - skip extract dump file if database exists.
 * `save_pages_path` - path for storing extracted pages.
@@ -558,17 +548,15 @@ the parent process, however.
 
 ```python
 def parse_page(
-    wxr: WiktextractContext, word: str, text: str
-) -> List[Dict[str, str]]
+    wxr: WiktextractContext, page_title: str, page_text: str
+) -> List[Dict[str, str]]:
 ```
 
-This function parses ``text`` as if it was a Wiktionary page with the
-title ``title``.  The arguments are:
 * ``wxr`` (WiktextractContext) - a ``wiktextract`` context containing:
 ** ``wxr.wtp`` (Wtp) - a ``wikitextprocessor`` context
 ** ``wxr.config`` (WiktionaryConfig) - specifies what to capture and is also used
-* ``title`` (str) - the title to use for the page
-* ``text`` (str) - contents of the page (wikitext)
+* `page_title` (str) - the title to use for the page
+* `page_text` (str) - contents of the page (wikitext)
   for collecting statistics
 
 #### PARTS_OF_SPEECH
@@ -608,20 +596,25 @@ The ``WiktionaryConfig`` object is used for specifying what data to collect
 from Wiktionary and is also used for collecting statistics during
 extraction. Currently, it is a field of the WiktextractContext context object.
 
-The constructor is called as:
+The constructor:
 
 ```python
-WiktionaryConfig(dump_file_lang_code="en",
-                 capture_language_codes=["en", "mul"],
-                 capture_translations=True,
-                 capture_pronunciation=True,
-                 capture_linkages=True,
-                 capture_compounds=True,
-                 capture_redirects=True,
-                 capture_examples=True,
-                 capture_etymologies=True,
-                 capture_descendants=True,
-                 capture_inflections=True)
+def __init__(
+    self,
+    dump_file_lang_code="en",
+    capture_language_codes=["en", "mul"],
+    capture_translations=True,
+    capture_pronunciation=True,
+    capture_linkages=True,
+    capture_compounds=True,
+    capture_redirects=True,
+    capture_examples=True,
+    capture_etymologies=True,
+    capture_inflections=True,
+    capture_descendants=True,
+    verbose=False,
+    expand_tables=False,
+):
 ```
 
 The arguments are as follows:

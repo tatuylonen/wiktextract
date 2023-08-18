@@ -72,7 +72,7 @@ def extract_thesaurus_page(
 
 
 def extract_thesaurus_data(
-    wxr: WiktextractContext, num_processes: Optional[int]
+    wxr: WiktextractContext, num_processes: Optional[int] = None
 ) -> None:
     from .wiktionary import init_worker_process
 
