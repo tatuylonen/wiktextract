@@ -17,7 +17,7 @@ import pstats
 import re
 import sys
 from pathlib import Path
-from typing import Any, Callable
+from typing import TextIO
 
 from wikitextprocessor import Wtp
 from wikitextprocessor.dumpparser import analyze_and_overwrite_pages
@@ -37,6 +37,7 @@ from wiktextract.thesaurus import (
     extract_thesaurus_data,
     thesaurus_linkage_number,
 )
+from wiktextract.wiktionary import write_json_data
 from wiktextract.wxr_context import WiktextractContext
 
 # Pages within these namespaces are captured.
@@ -56,7 +57,8 @@ def process_single_page(
     path_or_title: str,
     args: argparse.Namespace,
     wxr: WiktextractContext,
-    word_cb: Callable[[Any], None],
+    out_f: TextIO,
+    human_readable: bool,
 ) -> None:
     if Path(path_or_title).exists():
         # Load the page wikitext from the given file
@@ -83,11 +85,11 @@ def process_single_page(
         args.use_thesaurus
         and thesaurus_linkage_number(wxr.thesaurus_db_conn) == 0
     ):
-        extract_thesaurus_data(wxr)
+        extract_thesaurus_data(wxr, 1)
     # Parse the page
     ret = parse_page(wxr, title, text)
-    for x in ret:
-        word_cb(x)
+    for data in ret:
+        write_json_data(data, out_f, human_readable)
 
 
 def main():
@@ -222,7 +224,7 @@ def main():
         "tremendously",
     )
     parser.add_argument(
-        "--num-threads",
+        "--num-processes",
         type=int,
         default=None,
         help="Number of parallel processes (default: #cpus)",
@@ -340,16 +342,6 @@ def main():
     else:
         print("Capturing words for:", ", ".join(args.language))
 
-    if args.num_threads and args.num_threads > 1:
-        import multiprocessing
-
-        if multiprocessing.get_start_method() == "spawn":
-            logging.error(
-                "--num-threads not supported on this OS (no stable "
-                "implementation of fork() available)"
-            )
-            sys.exit(1)
-
     # Open output file.
     out_path = args.out
     if not out_path and args.pages_dir:
@@ -363,8 +355,6 @@ def main():
     else:
         out_tmp_path = out_path
         out_f = sys.stdout
-
-    word_count = 0
 
     # Create expansion context
 
@@ -430,29 +420,12 @@ def main():
 
     context1 = Wtp(
         db_path=args.db_path,
-        num_threads=args.num_threads,
         lang_code=args.dump_file_language_code,
         languages_by_code=conf1.LANGUAGES_BY_CODE,
         template_override_funcs=template_override_fns,
     )
 
     wxr = WiktextractContext(context1, conf1)
-
-    def word_cb(data):
-        nonlocal word_count
-        word_count += 1
-        if out_f is not None:
-            if args.human_readable:
-                out_f.write(
-                    json.dumps(
-                        data, indent=2, sort_keys=True, ensure_ascii=False
-                    )
-                )
-            else:
-                out_f.write(json.dumps(data, ensure_ascii=False))
-            out_f.write("\n")
-            if not out_path or out_path == "-" or word_count % 1000 == 0:
-                out_f.flush()
 
     # load redirects if given
     if args.redirects_file:
@@ -467,7 +440,7 @@ def main():
 
     try:
         skip_extract_dump = wxr.wtp.saved_page_nums() > 0
-        if args.path:
+        if args.path is not None:
             namespace_ids = {
                 wxr.wtp.NAMESPACE_DATA.get(name, {}).get("id")
                 for name in RECOGNIZED_NAMESPACE_NAMES
@@ -476,10 +449,12 @@ def main():
             parse_wiktionary(
                 wxr,
                 args.path,
-                word_cb,
-                args.page is not None,  # phase1_only
-                args.pages_dir is not None and not args.out,  # dont_parse
+                args.num_processes,
+                args.page is not None
+                or (args.pages_dir is not None and not args.out),  # phase1_only
                 namespace_ids,
+                out_f,
+                args.human_readable,
                 args.override,
                 skip_extract_dump,
                 args.pages_dir,
@@ -499,18 +474,20 @@ def main():
                 )
 
             for title_or_path in args.page:
-                process_single_page(title_or_path, args, wxr, word_cb)
+                process_single_page(
+                    title_or_path, args, wxr, out_f, args.human_readable
+                )
 
             # Merge errors from wtp to config, so that we can also use
             # --errors with single page extraction
             wxr.config.merge_return(wxr.wtp.to_return())
 
         if not args.path and not args.page:
-            # Parse again from the cache file
+            # Parse again from the db file
             reprocess_wiktionary(
                 wxr,
-                word_cb,
-                dont_parse=(bool(args.pages_dir) and not bool(args.out)),
+                out_f,
+                args.human_readable,
                 search_pattern=args.search_pattern,
             )
 
@@ -568,9 +545,6 @@ def main():
             wxr.config.section_counts.items(), key=lambda x: -x[1]
         ):
             print("  {:>7d} {}".format(cnt, k))
-
-        print("")
-        print("{} WORDS CAPTURED".format(word_count))
 
     if args.errors:
         with open(args.errors, "w", encoding="utf-8") as f:
