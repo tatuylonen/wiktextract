@@ -824,23 +824,23 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
     # "first/third-person"), and if not, split on "/"
     # and append on the string; will definitely give errors,
     # but less of them.
-    new_parts = []
-    for part in parts:
-        new_seg = ""
-        if "/" in part:
-            for w in part.split():
-                if w in xlat_tags_map:
-                    new_seg += w + " "
-                elif "/" in w:
-                    for ww in w.split("/"):
-                        new_seg += ww + " "
-                else:
-                    new_seg += w + " "
-        else:
-            new_parts.append(part)
-            continue
-        new_parts.append(new_seg.strip())
-    parts = new_parts
+    # new_parts = []
+    # for part in parts:
+    #     new_seg = ""
+    #     if "/" in part:
+    #         for w in part.split():
+    #             if w in xlat_tags_map:
+    #                 new_seg += w + " "
+    #             elif "/" in w:
+    #                 for ww in w.split("/"):
+    #                     new_seg += ww + " "
+    #             else:
+    #                 new_seg += w + " "
+    #     else:
+    #         new_parts.append(part)
+    #         continue
+    #     new_parts.append(new_seg.strip())
+    # parts = new_parts
 
 
     for part in parts:
@@ -861,11 +861,7 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
                 # print("$ {} last_i={} start_i={}"
                       # .format(w, last_i, start_i))
                 max_last_i = max(max_last_i, last_i)
-                for node2, start_i2, last_i2 in new_nodes:
-                    if (node2 is node and start_i2 == start_i and
-                        last_i2 == last_i):
-                        break
-                else:
+                if (node, start_i, last_i) not in new_nodes:
                     new_nodes.append((node, start_i, last_i))
                 if "$" in node:
                     u = check_unknown(start_i, last_i, i)
@@ -906,6 +902,23 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
                     if w in valid_sequences:
                         add_new(valid_sequences[w], i, max_last_i, new_paths)
             nodes = new_nodes
+            # 2023-08-18, fix to improve performance
+            # Decode tags does a big search of the best-shortest matching
+            # sequences of tags, but the original algorithm didn't have
+            # any culling happen during operation, so in a case with
+            # a lot of tags (for example, big blocks of text inserted
+            # somewhere by mistake that is processed by decode_tags),
+            # it would lead to exponential growth of new_paths contents.
+            # This culling, using the same weighting algorithm code as
+            # in the original is just applied to new_paths before it is
+            # added to pos_paths. Basically it's "take the 10 best paths".
+            pw = []
+            for path in new_paths:
+                weight = len(path)
+                if any(x[1] == "UNKNOWN" for x in path):
+                    weight += 100  # Penalize unknown paths
+                pw.append((weight, path))
+            new_paths = [weightpath[1] for weightpath in sorted(pw)[:10]]
             pos_paths.append(new_paths)
 
         # print("END max_last_i={} len(lst)={} len(pos_paths)={}"
@@ -961,6 +974,10 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
     tagsets = [[]]
     topics = []
     for i, tagspec, topicspec in path:
+        if len(tagsets or "") > 16:
+            # ctx.error("Too many tagsets! This is probably exponential",
+            #           sortid="form_descriptions/20230818")
+            return [["error-unknown-tag", "error-exponential-tagsets"]], []
         if tagspec == "UNKNOWN":
             new_tagsets = []
             for x in tagsets:

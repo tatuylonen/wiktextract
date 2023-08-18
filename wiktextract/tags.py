@@ -5593,6 +5593,7 @@ valid_tags = {
     "error-lua-timeout": "error",  # Lua code execution timed out
     "error-unknown-tag": "error",  # Tag not recognized
     "error-misspelling": "error",  # Misspelling was recognized in Wiktionary
+    "error-exponential-tagsets": "error",
     "error-unrecognized-form": "error",  # Word head or table hdr unrecognized
     "especially": "misc",
     "essive": "case",  # Case
