@@ -175,11 +175,12 @@ def search_thesaurus(
 
 
 def insert_thesaurus_terms(
-    db_conn: sqlite3.Connection, terms: List[ThesaurusTerm]
+    db_conn: sqlite3.Connection, terms: Optional[List[ThesaurusTerm]]
 ) -> None:
-    for term in terms:
-        insert_thesaurus_term(db_conn, term)
-    db_conn.commit()
+    if terms is not None:
+        for term in terms:
+            insert_thesaurus_term(db_conn, term)
+        db_conn.commit()
 
 
 def insert_thesaurus_term(
