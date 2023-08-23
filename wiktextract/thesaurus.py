@@ -2,18 +2,22 @@
 # merged into word linkages in later stages.
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
-
 import logging
+import os
 import sqlite3
 import tempfile
-
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Tuple, Optional, Set, Callable, Any, List
+import time
+import traceback
 from collections.abc import Iterable
+from dataclasses import dataclass
+from multiprocessing import Pool, current_process
+from pathlib import Path
+from typing import List, Optional, Set, TextIO, Tuple
 
-from .wxr_context import WiktextractContext
+from wikitextprocessor import Page
+
 from .import_utils import import_extractor_module
+from .wxr_context import WiktextractContext
 
 
 @dataclass
@@ -31,11 +35,71 @@ class ThesaurusTerm:
     sense: Optional[str] = None
 
 
-def extract_thesaurus_data(wxr: WiktextractContext) -> None:
+def worker_func(page: Page) -> Tuple[bool, dict, str]:
+    wxr: WiktextractContext = worker_func.wxr
+    with tempfile.TemporaryDirectory(prefix="wiktextract") as tmpdirname:
+        debug_path = "{}/wiktextract-{}".format(tmpdirname, os.getpid())
+        with open(debug_path, "w", encoding="utf-8") as f:
+            f.write(page.title + "\n")
+
+        wxr.wtp.start_page(page.title)
+        try:
+            terms = extract_thesaurus_page(wxr, page)
+            insert_thesaurus_terms(wxr.thesaurus_db_conn, terms)
+            return True, wxr.wtp.to_return(), None
+        except Exception as e:
+            lst = traceback.format_exception(
+                type(e), value=e, tb=e.__traceback__
+            )
+            msg = (
+                '=== EXCEPTION while parsing page "{}":\n '
+                "in process {}".format(
+                    page.title,
+                    current_process().name,
+                )
+                + "".join(lst)
+            )
+            return False, {}, msg
+
+
+def extract_thesaurus_page(
+    wxr: WiktextractContext, page: Page
+) -> Optional[List[ThesaurusTerm]]:
     thesaurus_extractor_mod = import_extractor_module(
         wxr.wtp.lang_code, "thesaurus"
     )
-    thesaurus_extractor_mod.extract_thesaurus_data(wxr)
+    return thesaurus_extractor_mod.extract_thesaurus_page(wxr, page)
+
+
+def extract_thesaurus_data(
+    wxr: WiktextractContext, num_processes: Optional[int] = None
+) -> None:
+    from .wiktionary import init_worker_process
+
+    start_t = time.time()
+    logging.info("Extracting thesaurus data")
+    thesaurus_ns_data = wxr.wtp.NAMESPACE_DATA.get("Thesaurus", {})
+    thesaurus_ns_id = thesaurus_ns_data.get("id")
+
+    wxr.remove_unpicklable_objects()
+    with Pool(num_processes, init_worker_process, (worker_func, wxr)) as pool:
+        wxr.reconnect_databases(False)
+        for success, stats, err in pool.imap_unordered(
+            worker_func, wxr.wtp.get_all_pages([thesaurus_ns_id], False)
+        ):
+            if not success:
+                # Print error in parent process - do not remove
+                logging.error(err)
+                continue
+            wxr.config.merge_return(stats)
+
+    num_pages = wxr.wtp.saved_page_nums([thesaurus_ns_id], False)
+    total = thesaurus_linkage_number(wxr.thesaurus_db_conn)
+    logging.info(
+        "Extracted {} linkages from {} thesaurus pages (took {:.1f}s)".format(
+            total, num_pages, time.time() - start_t
+        )
+    )
 
 
 def init_thesaurus_db(db_path: Path) -> sqlite3.Connection:
@@ -81,7 +145,7 @@ def search_thesaurus(
     entry: str,
     lang_code: str,
     pos: str,
-    linkage_type: Optional[str] = None
+    linkage_type: Optional[str] = None,
 ) -> Iterable[ThesaurusTerm]:
     query_sql = """
     SELECT term, entries.id, linkage, tags, topics, roman,
@@ -111,10 +175,12 @@ def search_thesaurus(
 
 
 def insert_thesaurus_terms(
-    db_conn: sqlite3.Connection, terms: List[ThesaurusTerm]
+    db_conn: sqlite3.Connection, terms: Optional[List[ThesaurusTerm]]
 ) -> None:
-    for term in terms:
-        insert_thesaurus_term(db_conn, term)
+    if terms is not None:
+        for term in terms:
+            insert_thesaurus_term(db_conn, term)
+        db_conn.commit()
 
 
 def insert_thesaurus_term(
@@ -158,11 +224,14 @@ def close_thesaurus_db(db_path: Path, db_conn: sqlite3.Connection) -> None:
 def emit_words_in_thesaurus(
     wxr: WiktextractContext,
     emitted: Set[Tuple[str, str, str]],
-    word_cb: Callable[[Any], None],
+    out_f: TextIO,
+    human_readable: bool,
 ) -> None:
     # Emit words that occur in thesaurus as main words but for which
     # Wiktionary has no word in the main namespace. This seems to happen
     # sometimes.
+    from .wiktionary import write_json_data
+
     logging.info("Emitting words that only occur in thesaurus")
     for entry_id, entry, pos, lang_code, sense in wxr.thesaurus_db_conn.execute(
         "SELECT id, entry, pos, language_code, sense FROM entries "
@@ -172,8 +241,10 @@ def emit_words_in_thesaurus(
             continue
 
         if None in (entry, lang_code, pos):
-            logging.info(f"'None' in entry, lang_code or"
-                         f" pos: {entry}, {lang_code}, {pos}")
+            logging.info(
+                f"'None' in entry, lang_code or"
+                f" pos: {entry}, {lang_code}, {pos}"
+            )
             continue
 
         logging.info(
@@ -213,12 +284,12 @@ def emit_words_in_thesaurus(
             sense_dict["tags"] = ["no-gloss"]
 
         entry = {
-                "word": entry,
-                "lang": wxr.config.LANGUAGES_BY_CODE.get(lang_code)[0],
-                "lang_code": lang_code,
-                "pos": pos,
-                "senses": [sense_dict] if sense_dict else [],
-                "source": "thesaurus",
-                }
+            "word": entry,
+            "lang": wxr.config.LANGUAGES_BY_CODE.get(lang_code)[0],
+            "lang_code": lang_code,
+            "pos": pos,
+            "senses": [sense_dict] if sense_dict else [],
+            "source": "thesaurus",
+        }
         entry = {k: v for k, v in entry.items() if v}
-        word_cb(entry)
+        write_json_data(entry, out_f, human_readable)

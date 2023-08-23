@@ -1,6 +1,5 @@
 import logging
 import re
-import time
 from typing import List, Optional, Union
 
 from wikitextprocessor import NodeKind, Page, WikiNode
@@ -223,36 +222,10 @@ def recursive_parse(
     return None
 
 
-def extract_thesaurus_data(wxr: WiktextractContext) -> None:
-    from wiktextract.thesaurus import (
-        ThesaurusTerm,
-        insert_thesaurus_terms,
-        thesaurus_linkage_number,
-    )
-
-    start_t = time.time()
-    logging.info("Extracting thesaurus data")
-    thesaurus_ns_data = wxr.wtp.NAMESPACE_DATA.get("Thesaurus", {})
-    thesaurus_ns_id = thesaurus_ns_data.get("id")
-
-    def page_handler(page: Page) -> Optional[List[ThesaurusTerm]]:
-        entry = page.title[page.title.find(":") + 1 :]
-        wxr.wtp.start_page(page.title)
-        root = wxr.wtp.parse(page.body, additional_expand={"ws", "zh-syn-list"})
-        return recursive_parse(
-            wxr, entry, None, None, None, None, root.children
-        )
-
-    for thesaurus_terms in wxr.wtp.reprocess(
-        page_handler, include_redirects=False, namespace_ids=[thesaurus_ns_id]
-    ):
-        insert_thesaurus_terms(wxr.thesaurus_db_conn, thesaurus_terms)
-
-    wxr.thesaurus_db_conn.commit()
-    num_pages = wxr.wtp.saved_page_nums([thesaurus_ns_id], False)
-    total = thesaurus_linkage_number(wxr.thesaurus_db_conn)
-    logging.info(
-        "Extracted {} linkages from {} thesaurus pages (took {:.1f}s)".format(
-            total, num_pages, time.time() - start_t
-        )
-    )
+def extract_thesaurus_page(
+    wxr: WiktextractContext, page: Page
+) -> Optional[List["ThesaurusTerm"]]:
+    entry = page.title[page.title.find(":") + 1 :]
+    wxr.wtp.start_page(page.title)
+    root = wxr.wtp.parse(page.body, additional_expand={"ws", "zh-syn-list"})
+    return recursive_parse(wxr, entry, None, None, None, None, root.children)

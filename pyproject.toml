@@ -31,7 +31,6 @@ dependencies = [
     "nltk",
     "levenshtein",
     "wikitextprocessor @ git+https://github.com/tatuylonen/wikitextprocessor.git",
-    "tomli; python_version <= '3.10'",  # temporary fix server install script error
 ]
 
 [project.optional-dependencies]
