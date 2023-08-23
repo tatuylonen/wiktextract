@@ -20,6 +20,15 @@ from .tags import (xlat_head_map, valid_tags, form_of_tags, alt_of_tags,
                    head_final_semitic_langs, head_final_semitic_map,
                    head_final_other_langs, head_final_other_map)
 from .english_words import english_words, not_english_words
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 # Tokenizer for classify_desc()
 tokenizer = TweetTokenizer()
@@ -374,7 +383,8 @@ allowed_unknown_starts = set([
 allowed_unknown_starts.update(ignored_unknown_starts)
 
 # Full unknown tags that will be ignored in decode_tags()
-ignored_unknown_tags = set([
+# XXX this is unused, ask Tatu where the contents is now
+ignored_unknown_tags: Set[str] = set([
 ])
 
 # Head endings that are mapped to tags
@@ -611,56 +621,91 @@ alt_of_form_of_clean_re = re.compile(
     r").*$")
 
 
-def add_to_valid_tree(tree, desc, v):
+class ValidNode():
+    """Node in the valid_sequences tree. Each node is part of a chain
+        or chains that form sequences built out of keys in key->tags
+        maps like xlat_tags, etc. The ValidNode's 'word' is the key
+        by which it is refered to in the root dict or a `children` dict,
+        `end` marks that the node is the end-terminus of a sequence (but
+        it can still continue if the sequence is shared by the start of
+        other sequences: "nominative$" and "nominative plural$" for example),
+        `tags` and `topics` are the dicts containing tag and topic strings
+        for terminal nodes (end==True)."""
+    __slots__ = ( 
+                  "end",
+                  "tags",
+                  "topics",
+                  "children",
+                )
+
+    def __init__(self,
+                 end=False,
+                 tags: Optional[List[str]] = None,
+                 topics: Optional[List[str]] = None,
+                 children: Optional[Dict[str, "ValidNode"]] = None):
+        self.end = end
+        self.tags: List[str] = tags or []
+        self.topics: List[str] = topics or []
+        self.children: Dict[str, "ValidNode"] = children or {}
+
+
+def add_to_valid_tree(tree: ValidNode,
+                      desc: str,
+                      v: Optional[str]
+) -> None:
     """Helper function for building trees of valid tags/sequences during
     initialization."""
-    assert isinstance(tree, dict)
+    assert isinstance(tree, ValidNode)
     assert isinstance(desc, str)
     assert v is None or isinstance(v, str)
     node = tree
-    for w in desc.split(" "):
-        if w in node:
-            node = node[w]
-        else:
-            new_node = {}
-            node[w] = new_node
-            node = new_node
-    if "$" not in node:
-        node["$"] = {}
-    if not v:
-        return
 
-    node = node["$"]
-    tags = []
-    topics = []
+    # Build the tree structure: each node has children nodes
+    # whose names are denoted by their dict key.
+    for w in desc.split(" "):
+        if w in node.children:
+            node = node.children[w]
+        else:
+            new_node = ValidNode()
+            node.children[w] = new_node
+            node = new_node
+    if not node.end:
+        node.end = True
+    if not v:
+        return None  # Terminate early because there are no tags
+
+    tagslist = []
+    topicslist = []
     for vv in v.split():
         if vv in valid_tags:
-            tags.append(vv)
+            tagslist.append(vv)
         elif vv in valid_topics:
-            topics.append(vv)
+            topicslist.append(vv)
         else:
             print("WARNING: tag/topic {!r} maps to unknown {!r}"
                   .format(desc, vv))
-    topics = " ".join(topics)
-    tags = " ".join(tags)
+    topics = " ".join(topicslist)
+    tags = " ".join(tagslist)
+    # Changed to "_tags" and "_topics" to avoid possible key-collisions.
     if topics:
-        if "topics" not in node:
-            node["topics"] = ()
-        node["topics"] += (topics,)
+        node.topics.extend([topics])
     if tags:
-        if "tags" not in node:
-            node["tags"] = ()
-        node["tags"] += (tags,)
+        node.tags.extend([tags])
 
 
-def add_to_valid_tree1(tree, k, v, valid_values):
-    assert isinstance(tree, dict)
+def add_to_valid_tree1(
+        tree: ValidNode,
+        k: str,
+        v: Union[List[str], Tuple[str, ...], str],
+        valid_values: Union[Set[str], Dict[str, Any]]
+) -> List[str]:
+    assert isinstance(tree, ValidNode)
     assert isinstance(k, str)
     assert v is None or isinstance(v, (list, tuple, str))
     assert isinstance(valid_values, (set, dict))
     if not v:
         add_to_valid_tree(valid_sequences, k, None)
-        return
+        return []
     elif isinstance(v, str):
         v = [v]
     q = []
@@ -670,11 +715,17 @@ def add_to_valid_tree1(tree, k, v, valid_values):
         vvs = vv.split()
         for x in vvs:
             q.append(x)
+    # return each individual tag
     return q
 
 
-def add_to_valid_tree_mapping(tree, mapping, valid_values, recurse):
-    assert isinstance(tree, dict)
+def add_to_valid_tree_mapping(
+    tree: ValidNode,
+    mapping: Union[Dict[str, Union[List[str], str]], Dict[str, str]],
+    valid_values: Union[Set[str], Dict[str, Any]],
+    recurse: bool,
+) -> None:
+    assert isinstance(tree, ValidNode)
     assert isinstance(mapping, dict)
     assert isinstance(valid_values, (set, dict))
     assert recurse in (True, False)
@@ -682,8 +733,9 @@ def add_to_valid_tree_mapping(tree, mapping, valid_values, recurse):
         assert isinstance(k, str)
         assert isinstance(v, (list, str))
         if isinstance(v, str):
-            v = [v]
-        q = add_to_valid_tree1(tree, k, v, valid_values)
+            q = add_to_valid_tree1(tree, k, [v], valid_values)
+        else:
+            q = add_to_valid_tree1(tree, k, v, valid_values)
         if recurse:
             visited = set()
             while q:
@@ -700,8 +752,11 @@ def add_to_valid_tree_mapping(tree, mapping, valid_values, recurse):
 
 # Tree of sequences considered to be tags (includes sequences that are
 # mapped to something that becomes one or more valid tags)
-valid_sequences = {}
+valid_sequences = ValidNode()
 for tag in valid_tags:
+    # The basic tags used in our tag system; some are a bit weird, but easier
+    # to implement this with 'false' positives than filter out stuff no one else
+    # uses.
     add_to_valid_tree(valid_sequences, tag, tag)
 for tag in uppercase_tags:
     hyphenated = re.sub(r"\s+", "-", tag)
@@ -709,11 +764,14 @@ for tag in uppercase_tags:
         print("DUPLICATE TAG: {} (from uppercase tag {!r})"
               .format(hyphenated, tag))
     assert hyphenated not in valid_tags
+    # Might as well, while we're here: Add hyphenated location tag.
     valid_tags[hyphenated] = "dialect"
     add_to_valid_tree(valid_sequences, hyphenated, hyphenated)
 for tag in uppercase_tags:
     hyphenated = re.sub(r"\s+", "-", tag)
+    # XXX Move to above loop? Or is this here for readability?
     add_to_valid_tree(valid_sequences, tag, hyphenated)
+# xlat_tags_map!
 add_to_valid_tree_mapping(valid_sequences, xlat_tags_map, valid_tags, False)
 # Add topics to the same table, with all generalized topics also added
 for topic in valid_topics:
@@ -768,50 +826,118 @@ def map_with(ht, lst):
     return ret
 
 
+TagList = List[str]
+PosPathStep = Tuple[int, TagList, TagList]
+
+def check_unknown(from_i: int,
+                  to_i: int,
+                  i:int,
+                  wordlst,
+                  allow_any: bool,
+                  no_unknown_starts: bool,
+) -> List[PosPathStep]:
+    """Check if the current section from_i->to_i is actually unknown
+    or if it needs some special handling. We already presupposed that
+    this is UNKNOWN; this is just called to see what *kind* of UNKNOWN."""
+    assert isinstance(to_i, int)
+    assert isinstance(from_i, int)
+    assert isinstance(i, int)
+    # Adds unknown tag if needed.  Returns new last_i
+    # print("check_unknown to_i={} from_i={} i={}"
+    #       .format(to_i, from_i, i))
+    if from_i >= to_i:
+        return []
+    words = wordlst[from_i: to_i]
+    tag = " ".join(words)
+    assert tag
+    if re.match(ignored_unknown_starts_re, tag):
+        # Tags with this start are to be ignored
+        return [(from_i, ["UNKNOWN"], [])]
+    if tag in ignored_unknown_tags:
+        return []  # One of the tags listed as to be ignored
+    if tag in ("and", "or"):
+        return []
+    if (not allow_any and
+        not words[0].startswith("~") and
+        (no_unknown_starts or
+         words[0] not in allowed_unknown_starts or
+         len(words) <= 1)):
+        # print("ERR allow_any={} words={}"
+        #       .format(allow_any, words))
+        return [(from_i, ["UNKNOWN"],
+                 ["error-unknown-tag"])]  # Add ``tag`` here to include
+    else:
+        return [(from_i, ["UNKNOWN"], [tag])]
+
+
+def add_new1(
+    node: ValidNode,
+    i: int,
+    start_i: int,
+    last_i: int,
+    new_paths: List[List[PosPathStep]],
+    new_nodes: List[Tuple[ValidNode, int, int]],
+    pos_paths: List[List[List[PosPathStep]]],
+    wordlst: List[str],
+    allow_any: bool,
+    no_unknown_starts: bool,
+    max_last_i: int,
+) -> int:
+    assert isinstance(new_paths, list)
+    # print("add_new: start_i={} last_i={}".format(start_i, last_i))
+    # print("$ {} last_i={} start_i={}"
+          # .format(w, last_i, start_i))
+    max_last_i = max(max_last_i, last_i)  # if last_i has grown
+    if (node, start_i, last_i) not in new_nodes:
+        new_nodes.append((node, start_i, last_i))
+    if node.end:
+        # We can see a terminal point in the search tree.
+        u = check_unknown(
+                        last_i,
+                        start_i,
+                        i,
+                        wordlst,
+                        allow_any,
+                        no_unknown_starts)
+        # Create new paths candidates based on different past possible
+        # paths; pos_path[last_i] contains possible paths, so add this
+        # new one at the beginning(?)
+        # The list comprehension inside the parens generates an iterable
+        # of lists, so this is .extend( [(last_i...)], [(last_i...)], ... )
+        # XXX: this is becoming impossible to annotate, nodes might
+        # need to become classed objects and not just dicts, or at least
+        # a TypedDict with a "children" node
+        new_paths.extend([(last_i,
+                           node.tags,
+                           node.topics)] + u + x
+                         for x in pos_paths[last_i])
+        max_last_i = i + 1
+    return max_last_i
+
 @functools.lru_cache(maxsize=65536)
-def decode_tags(src, allow_any=False, no_unknown_starts=False):
+def decode_tags(
+    src: str,
+    allow_any=False,
+    no_unknown_starts=False,
+) -> Tuple[List[Tuple[str, ...]], List[str]]:
     """Decodes tags, doing some canonicalizations.  This returns a list of
     lists of tags and a list of topics."""
     assert isinstance(src, str)
 
     # print("decode_tags: src={!r}".format(src))
 
-    pos_paths = [[[]]]
+    pos_paths: List[List[List[PosPathStep]]] = [[[]]]
+    wordlst: List[str] = []
+    max_last_i = 0  # pre-initialized here so that it can be used as a ref
 
-    def check_unknown(to_i, from_i, i):
-        assert isinstance(to_i, int)
-        assert isinstance(from_i, int)
-        assert isinstance(i, int)
-        # Adds unknown tag if needed.  Returns new last_i
-        # print("check_unknown to_i={} from_i={} i={}"
-        #       .format(to_i, from_i, i))
-        if from_i >= to_i:
-            return []
-        words = lst[from_i: to_i]
-        tag = " ".join(words)
-        if re.match(ignored_unknown_starts_re, tag):
-            # Tags with this start are to be ignored
-            return [(from_i, "UNKNOWN", [])]
-        if tag in ignored_unknown_tags:
-            return []  # One of the tags listed as to be ignored
-        if not tag:
-            return from_i
-        if tag in ("and", "or"):
-            return []
-        if (not allow_any and
-            not words[0].startswith("~") and
-            (no_unknown_starts or
-             words[0] not in allowed_unknown_starts or
-             len(words) <= 1)):
-            # print("ERR allow_any={} words={}"
-            #       .format(allow_any, words))
-            return [(from_i, "UNKNOWN",
-                     ["error-unknown-tag"])]  # Add ``tag`` here to include
-        else:
-            return [(from_i, "UNKNOWN", [tag])]
-
-    lst = []
-
+    add_new = functools.partial(
+        add_new1,  # pre-set parameters and references for function
+        pos_paths=pos_paths,
+        wordlst=wordlst,
+        allow_any=allow_any,
+        no_unknown_starts=no_unknown_starts,
+        max_last_i=max_last_i,
+    )
     # First split the tags at commas and semicolons.  Their significance is that
     # a multi-word sequence cannot continue across them.
     parts = split_at_comma_semi(src, extra=[";", ":"])
@@ -844,64 +970,85 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
 
 
     for part in parts:
-        max_last_i = len(lst)
+        max_last_i = len(wordlst)  # "how far have we gone?"
         lst1 = part.split()
         if not lst1:
             continue
-        lst.extend(lst1)
-        nodes = []
+        wordlst.extend(lst1)
+        cur_nodes: List[Tuple[ValidNode, int, int]] = []  # Currently seen
         for w in lst1:
             i = len(pos_paths) - 1
-            new_nodes = []
-
-            def add_new(node, start_i, last_i, new_paths):
-                assert isinstance(new_paths, list)
-                # print("add_new: start_i={} last_i={}".format(start_i, last_i))
-                nonlocal max_last_i
-                # print("$ {} last_i={} start_i={}"
-                      # .format(w, last_i, start_i))
-                max_last_i = max(max_last_i, last_i)
-                if (node, start_i, last_i) not in new_nodes:
-                    new_nodes.append((node, start_i, last_i))
-                if "$" in node:
-                    u = check_unknown(start_i, last_i, i)
-                    new_paths.extend([(last_i,
-                                       node["$"].get("tags"),
-                                       node["$"].get("topics"))] + u + x
-                                     for x in pos_paths[last_i])
-                    max_last_i = i + 1
-
-            new_paths = []
-            # print("ITER i={} w={} max_last_i={} lst={}"
-            #       .format(i, w, max_last_i, lst))
-            for node, start_i, last_i in nodes:
-                if w in node:
+            new_nodes: List[Tuple[ValidNode, int, int]] = []
+                # replacement nodes for next loop
+            new_paths: List[List[PosPathStep]] = []
+            # print("ITER i={} w={} max_last_i={} wordlst={}"
+            #       .format(i, w, max_last_i, wordlst))
+            node: ValidNode
+            start_i: int
+            last_i: int
+            for node, start_i, last_i in cur_nodes:
+            # ValidNodes are part of a search tree that checks if a 
+            # phrase is found in xlat_tags_map and other text->tags dicts.
+                if w in node.children:
+                # the phrase continues down the tree
                     # print("INC", w)
-                    add_new(node[w], start_i, last_i, new_paths)
-                if "$" in node:
-                    if w in valid_sequences:
-                        add_new(valid_sequences[w], i, i, new_paths)
-                if w not in node and "$" not in node:
-                    # print("w not in node and $: i={} last_i={} lst={}"
-                    #       .format(i, last_i, lst))
+                    max_last_i = add_new(
+                                    node.children[w],
+                                    i,
+                                    start_i,
+                                    last_i,
+                                    new_paths,
+                                    new_nodes)
+                if node.end:
+                # we've hit an end point, the tags and topics have already been
+                # gathered at some point, don't do anything with the old stuff
+                    if w in valid_sequences.children:
+                        # This starts a *new* possible section
+                        max_last_i = add_new(
+                                        valid_sequences.children[w],  # root->
+                                        i,
+                                        i,
+                                        i,
+                                        new_paths,
+                                        new_nodes)
+                if w not in node.children and not node.end:
+                    # print("w not in node and $: i={} last_i={} wordlst={}"
+                    #       .format(i, last_i, wordlst))
+                    # If i == last_i == 0, for example (beginning)
                     if (i == last_i or
                         no_unknown_starts or
-                        lst[last_i] not in allowed_unknown_starts):
+                        wordlst[last_i] not in allowed_unknown_starts):
                         # print("NEW", w)
-                        if w in valid_sequences:
-                            add_new(valid_sequences[w], i, last_i, new_paths)
+                        if w in valid_sequences.children:
+                            # Start new sequences here
+                            max_last_i = add_new(
+                                            valid_sequences.children[w],
+                                            i,
+                                            i,
+                                            last_i,
+                                            new_paths,
+                                            new_nodes)
             if not new_nodes:
+                # This is run at the start when i == max_last_i == 0,
+                # which is what populates the first node in new_nodes.
                 # Some initial words cause the rest to be interpreted as unknown
-                # print("not new nodes: i={} last_i={} lst={}"
-                #       .format(i, max_last_i, lst))
+                # print("not new nodes: i={} last_i={} wordlst={}"
+                #       .format(i, max_last_i, wordlst))
                 if (i == max_last_i or
                     no_unknown_starts or
-                    lst[max_last_i] not in allowed_unknown_starts):
-                    # print("RECOVER w={} i={} max_last_i={} lst={}"
-                    #       .format(w, i, max_last_i, lst))
-                    if w in valid_sequences:
-                        add_new(valid_sequences[w], i, max_last_i, new_paths)
-            nodes = new_nodes
+                    wordlst[max_last_i] not in allowed_unknown_starts):
+                    # print("RECOVER w={} i={} max_last_i={} wordlst={}"
+                    #       .format(w, i, max_last_i, wordlst))
+                    if w in valid_sequences.children:
+                        max_last_i = add_new(
+                                        # new sequence from root
+                                        valid_sequences.children[w],
+                                        i,
+                                        i,
+                                        max_last_i,
+                                        new_paths,
+                                        new_nodes)
+            cur_nodes = new_nodes  # Completely replace nodes!
             # 2023-08-18, fix to improve performance
             # Decode tags does a big search of the best-shortest matching
             # sequences of tags, but the original algorithm didn't have
@@ -912,33 +1059,43 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
             # This culling, using the same weighting algorithm code as
             # in the original is just applied to new_paths before it is
             # added to pos_paths. Basically it's "take the 10 best paths".
+            # This *can* cause bugs if it gets stuck in a local minimum
+            # or something, but this whole process is one-dimensional
+            # and not that complex, so hopefully it works out...
             pw = []
+            path: List[PosPathStep]
             for path in new_paths:
                 weight = len(path)
-                if any(x[1] == "UNKNOWN" for x in path):
+                if any(x[1] == ["UNKNOWN"] for x in path):
                     weight += 100  # Penalize unknown paths
                 pw.append((weight, path))
             new_paths = [weightpath[1] for weightpath in sorted(pw)[:10]]
             pos_paths.append(new_paths)
 
-        # print("END max_last_i={} len(lst)={} len(pos_paths)={}"
-        #       .format(max_last_i, len(lst), len(pos_paths)))
+        # print("END max_last_i={} len(wordlst)={} len(pos_paths)={}"
+        #       .format(max_last_i, len(wordlst), len(pos_paths)))
 
-        if nodes:
+        if cur_nodes:
             # print("END HAVE_NODES")
-            for node, start_i, last_i in nodes:
-                if "$" in node:
+            for node, start_i, last_i in cur_nodes:
+                if node.end:
                     # print("$ END start_i={} last_i={}"
                     #       .format(start_i, last_i))
                     for path in pos_paths[start_i]:
                         pos_paths[-1].append([(last_i,
-                                               node["$"].get("tags"),
-                                               node["$"].get("topics"))] +
+                                               node.tags,
+                                               node.topics)] +
                                              path)
                 else:
-                    # print("UNK END start_i={} last_i={} lst={}"
-                    #       .format(start_i, last_i, lst))
-                    u = check_unknown(len(lst), last_i, len(lst))
+                    # print("UNK END start_i={} last_i={} wordlst={}"
+                    #       .format(start_i, last_i, wordlst))
+                    u = check_unknown(
+                            last_i,
+                            len(wordlst),
+                            len(wordlst),
+                            wordlst,
+                            allow_any,
+                            no_unknown_starts)
                     if pos_paths[start_i]:
                         for path in pos_paths[start_i]:
                             pos_paths[-1].append(u + path)
@@ -948,7 +1105,13 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
             # Check for a final unknown tag
             # print("NO END NODES max_last_i={}".format(max_last_i))
             paths = pos_paths[max_last_i] or [[]]
-            u = check_unknown(len(lst), max_last_i, len(lst))
+            u = check_unknown(
+                            max_last_i,
+                            len(wordlst),
+                            len(wordlst),
+                            wordlst,
+                            allow_any,
+                            no_unknown_starts)
             if u:
                 # print("end max_last_i={}".format(max_last_i))
                 for path in list(paths):  # Copy in case it is the last pos
@@ -965,20 +1128,20 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
     pw = []
     for path in pos_paths[-1]:
         weight = len(path)
-        if any(x[1] == "UNKNOWN" for x in path):
+        if any(x[1] == ["UNKNOWN"] for x in path):
             weight += 100  # Penalize unknown paths
         pw.append((weight, path))
     path = min(pw)[1]
 
     # Convert the best path to tagsets and topics
-    tagsets = [[]]
-    topics = []
+    tagsets: List[List[str]] = [[]]
+    topics: List[str] = []
     for i, tagspec, topicspec in path:
         if len(tagsets or "") > 16:
             # ctx.error("Too many tagsets! This is probably exponential",
             #           sortid="form_descriptions/20230818")
-            return [["error-unknown-tag", "error-exponential-tagsets"]], []
-        if tagspec == "UNKNOWN":
+            return [("error-unknown-tag", "error-exponential-tagsets")], []
+        if tagspec == ["UNKNOWN"]:
             new_tagsets = []
             for x in tagsets:
                 new_tagsets.append(x + topicspec)
@@ -1004,10 +1167,18 @@ def decode_tags(src, allow_any=False, no_unknown_starts=False):
                         topics.append(topic)
 
     # print("unsorted tagsets:", tagsets)
-    tagsets = list(sorted(set(tuple(sorted(set(tags))) for tags in tagsets)))
+    ret_tagsets = sorted(
+                    set(
+                        tuple(sorted(set(tags))) for tags in tagsets
+                        )
+                  )
     # topics = list(sorted(set(topics)))   XXX tests expect not sorted
     # print("decode_tags: {} -> {} topics {}".format(src, tagsets, topics))
-    return tagsets, topics
+    # Yes, ret_tagsets is a list of tags in tuples, while topics is a LIST
+    # of tags. Turning topics into a tuple breaks tests, turning the tuples
+    # inside tagsets into lists breaks tests, I'm leaving them mismatched
+    # for now. XXX
+    return ret_tagsets, topics
 
 
 def parse_head_final_tags(wxr, lang, form):
@@ -2347,9 +2518,9 @@ def parse_alt_or_inflection_of1(wxr, gloss, gloss_template_args):
     lst = base.split()
     # print("parse_alt_or_inflection_of: lst={}".format(lst))
     if len(lst) >= 3 and lst[-1] in ("case", "case."):
-        node = valid_sequences.get(lst[-2])
-        if node and "$" in node:
-            for t in node["$"].get("tags", ()):
+        node = valid_sequences.children.get(lst[-2])
+        if node and node.end:
+            for t in node.tags:
                 tags.extend(t.split(" "))
             lst = lst[:-2]
             if lst[-1] == "in" and len(lst) > 1:

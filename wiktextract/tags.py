@@ -4,6 +4,7 @@
 #
 # Copyright (c) 2020-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
+from typing import Dict, List, Union
 # Mappings for tags in template head line ends outside parentheses.  These are
 # also used to parse final tags from translations.
 xlat_head_map = {
@@ -2737,7 +2738,7 @@ uppercase_tags = set([
 # category can all be listed in the same string (e.g., multiple genders).
 # XXX should analyze imperfect vs. imperfective - are they just used in
 # different languages, or is there an actual difference in meaning?
-xlat_tags_map = {
+xlat_tags_map: Dict[str, Union[str, List[str]]] = {
     "sg": "singular",
     "pl": "plural",
     "sg.": "singular",
