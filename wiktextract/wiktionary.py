@@ -5,15 +5,20 @@
 # Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import io
+import json
 import logging
+import os
 import re
-import sqlite3
 import tarfile
+import tempfile
 import time
+import traceback
+from multiprocessing import Pool, current_process
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, TextIO, Tuple
 
 from wikitextprocessor import Page
+from wikitextprocessor.dumpparser import process_dump
 
 from .page import parse_page
 from .thesaurus import (
@@ -24,64 +29,77 @@ from .thesaurus import (
 from .wxr_context import WiktextractContext
 
 
-def page_handler(
-    wxr: WiktextractContext,
-    page: Page,
-    dont_parse: bool,
-) -> Optional[Tuple[List[dict], dict]]:
+def page_handler(page: Page) -> Tuple[bool, Tuple[List[dict], dict], str]:
     # Make sure there are no newlines or other strange characters in the
     # title.  They could cause security problems at several post-processing
     # steps.
+    wxr: WiktextractContext = page_handler.wxr
+    # Helps debug extraction hangs. This writes the path of each file being
+    # processed into /tmp/wiktextract*/wiktextract-*.  Once a hang
+    # has been observed, these files contain page(s) that hang.  They should
+    # be checked before aborting the process, as an interrupt might delete them.
+    with tempfile.TemporaryDirectory(prefix="wiktextract") as tmpdirname:
+        debug_path = "{}/wiktextract-{}".format(tmpdirname, os.getpid())
+        with open(debug_path, "w", encoding="utf-8") as f:
+            f.write(page.title + "\n")
 
-    title = re.sub(r"[\s\000-\037]+", " ", page.title)
-    title = title.strip()
-    if dont_parse:
-        return None
-    if page.redirect_to is not None:
-        ret = [{"title": title, "redirect": page.redirect_to}]
-    else:
-        if page.model != "wikitext":
-            return None
-        # the value of OTHER_SUBTITLES["translations"] is a string
-        # use it to skip translation pages
-        if title.endswith(f"/{wxr.config.OTHER_SUBTITLES.get('translations')}"):
-            return None
+        wxr.wtp.start_page(page.title)
+        try:
+            title = re.sub(r"[\s\000-\037]+", " ", page.title)
+            title = title.strip()
+            if page.redirect_to is not None:
+                ret = [{"title": title, "redirect": page.redirect_to}]
+            else:
+                # the value of OTHER_SUBTITLES["translations"] is a string
+                # use it to skip translation pages
+                if title.endswith(
+                    f"/{wxr.config.OTHER_SUBTITLES.get('translations')}"
+                ):
+                    return True, ([], {}), None
 
-        # XXX Sign gloss pages?
+                # XXX Sign gloss pages?
 
-        # This function runs inside worker process, the sqlite connection needs
-        # to be recreated to avoid `SQLite objects created in a thread can only
-        # be used in that same thread` error
-        wxr.thesaurus_db_conn = sqlite3.connect(wxr.thesaurus_db_path)
-        start_t = time.time()
-        ret = parse_page(wxr, title, page.body)
-        dur = time.time() - start_t
-        if dur > 100:
-            logging.warning(
-                "====== WARNING: PARSING PAGE TOOK {:.1f}s: {}".format(
-                    dur, title
-                )
+                start_t = time.time()
+                ret = parse_page(wxr, title, page.body)
+                dur = time.time() - start_t
+                if dur > 100:
+                    logging.warning(
+                        "====== WARNING: PARSING PAGE TOOK {:.1f}s: {}".format(
+                            dur, title
+                        )
+                    )
+
+            return True, (ret, wxr.wtp.to_return()), None
+        except Exception as e:
+            lst = traceback.format_exception(
+                type(e), value=e, tb=e.__traceback__
             )
-        wxr.thesaurus_db_conn.close()
-
-    return ret, wxr.wtp.to_return()
+            msg = (
+                '=== EXCEPTION while parsing page "{}":\n '
+                "in process {}".format(
+                    page.title,
+                    current_process().name,
+                )
+                + "".join(lst)
+            )
+            return False, ([], {}), msg
 
 
 def parse_wiktionary(
     wxr: WiktextractContext,
-    path: str,
-    word_cb,
+    dump_path: str,
+    num_processes: Optional[int],
     phase1_only: bool,
-    dont_parse: bool,
     namespace_ids: Set[int],
+    out_f: TextIO,
+    human_readable: bool = False,
     override_folders: Optional[List[str]] = None,
     skip_extract_dump: bool = False,
     save_pages_path: Optional[str] = None,
-):
+) -> None:
     """Parses Wiktionary from the dump file ``path`` (which should point
     to a "enwiktionary-<date>-pages-articles.xml.bz2" file.  This
     calls `word_cb(data)` for all words defined for languages in `languages`."""
-    assert callable(word_cb)
     capture_language_codes = wxr.config.capture_language_codes
     if capture_language_codes is not None:
         assert isinstance(capture_language_codes, (list, tuple, set))
@@ -93,39 +111,75 @@ def parse_wiktionary(
         override_folders = [Path(folder) for folder in override_folders]
     if save_pages_path is not None:
         save_pages_path = Path(save_pages_path)
-    for _ in wxr.wtp.process(
-        path,
-        None,
+
+    process_dump(
+        wxr.wtp,
+        dump_path,
         namespace_ids,
-        True,
         override_folders,
         skip_extract_dump,
         save_pages_path,
-    ):
-        pass
-    if phase1_only:
-        return []
+    )
 
-    # Phase 2 - process the pages using the user-supplied callback
-    logging.info("Second phase - processing pages")
-    return reprocess_wiktionary(wxr, word_cb, dont_parse)
+    if not phase1_only:
+        reprocess_wiktionary(wxr, num_processes, out_f, human_readable)
+
+
+def write_json_data(data: Dict, out_f: TextIO, human_readable: bool) -> None:
+    if out_f is not None:
+        if human_readable:
+            out_f.write(
+                json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False)
+            )
+        else:
+            out_f.write(json.dumps(data, ensure_ascii=False))
+        out_f.write("\n")
+
+
+def estimate_progress(
+    processed_pages: int, all_pages: int, start_time: float, last_time: float
+) -> float:
+    current_time = time.time()
+    processed_pages += 1
+    if current_time - last_time > 1:
+        remaining_pages = all_pages - processed_pages
+        estimate_seconds = (
+            (current_time - start_time) / processed_pages * remaining_pages
+        )
+        logging.info(
+            "  ... {}/{} pages ({:.1%}) processed, "
+            "{:02d}:{:02d}:{:02d} remaining".format(
+                processed_pages,
+                all_pages,
+                processed_pages / all_pages,
+                int(estimate_seconds / 3600),
+                int(estimate_seconds / 60 % 60),
+                int(estimate_seconds % 60),
+            )
+        )
+        last_time = current_time
+    return last_time
+
+
+def init_worker_process(worker_func, wxr: WiktextractContext) -> None:
+    wxr.reconnect_databases()
+    worker_func.wxr = wxr
 
 
 def reprocess_wiktionary(
-    wxr: WiktextractContext, word_cb, dont_parse, search_pattern: str = None
-):
-    """Reprocesses the Wiktionary from the cache file."""
-    assert callable(word_cb)
-    assert dont_parse in (True, False)
+    wxr: WiktextractContext,
+    num_processes: Optional[int],
+    out_f: TextIO,
+    human_readable: bool = False,
+    search_pattern: Optional[str] = None,
+) -> None:
+    """Reprocesses the Wiktionary from the sqlite db."""
+    logging.info("Second phase - processing pages")
 
     # Extract thesaurus data. This iterates over thesaurus pages,
     # but is very fast.
     if thesaurus_linkage_number(wxr.thesaurus_db_conn) == 0:
-        extract_thesaurus_data(wxr)
-
-    # Then perform the main parsing pass.
-    def page_cb(page: Page):
-        return page_handler(wxr, page, dont_parse)
+        extract_thesaurus_data(wxr, num_processes)
 
     emitted = set()
     process_ns_ids = list(
@@ -134,21 +188,41 @@ def reprocess_wiktionary(
             for ns in ["Main", "Reconstruction"]
         }
     )
-    for ret, stats in wxr.wtp.reprocess(
-        page_cb,
-        namespace_ids=process_ns_ids,
-        search_pattern=search_pattern,
-    ):
-        wxr.config.merge_return(stats)
-        for dt in ret:
-            word_cb(dt)
-            word = dt.get("word")
-            lang_code = dt.get("lang_code")
-            pos = dt.get("pos")
-            if word and lang_code and pos:
-                emitted.add((word, lang_code, pos))
+    start_time = time.time()
+    last_time = start_time
+    all_page_nums = wxr.wtp.saved_page_nums(
+        process_ns_ids, True, "wikitext", search_pattern
+    )
+    wxr.remove_unpicklable_objects()
+    with Pool(num_processes, init_worker_process, (page_handler, wxr)) as pool:
+        wxr.reconnect_databases(False)
+        for processed_pages, (success, ret, err) in enumerate(
+            pool.imap_unordered(
+                page_handler,
+                wxr.wtp.get_all_pages(
+                    process_ns_ids, True, "wikitext", search_pattern
+                ),
+            )
+        ):
+            if not success:
+                # Print error in parent process - do not remove
+                logging.error(err)
+                continue
 
-    emit_words_in_thesaurus(wxr, emitted, word_cb)
+            page_data, stats = ret
+            wxr.config.merge_return(stats)
+            for dt in page_data:
+                write_json_data(dt, out_f, human_readable)
+                word = dt.get("word")
+                lang_code = dt.get("lang_code")
+                pos = dt.get("pos")
+                if word and lang_code and pos:
+                    emitted.add((word, lang_code, pos))
+            last_time = estimate_progress(
+                processed_pages, all_page_nums, start_time, last_time
+            )
+
+    emit_words_in_thesaurus(wxr, emitted, out_f, human_readable)
     logging.info("Reprocessing wiktionary complete")
 
 
@@ -161,7 +235,7 @@ def process_ns_page_title(page: Page, ns_name: str) -> Tuple[str, str]:
     title = re.sub(r"^/", r"__slash__", title)
     title = re.sub(r"/$", r"__slash__", title)
     title = ns_name + "/" + title
-    return (title, text)
+    return title, text
 
 
 def extract_namespace(
