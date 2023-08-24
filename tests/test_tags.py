@@ -307,6 +307,14 @@ class TagTests(unittest.TestCase):
         ret, topics = decode_tags("archaic, totallyinvalidgarbage")
         self.assertEqual(ret, [("archaic", "error-unknown-tag")])
 
+    def test_tags66(self):
+        # Turn slashes into spaces when encountering errors in decode_tags()
+        # during the first run, except for keys with slashes in them.
+        ret, topics = decode_tags("nominative/plural masculine/feminine")
+        # -> "nominative plural masculine/feminine"
+        self.assertEqual(ret, [("feminine", "masculine",
+                                "nominative", "plural",)])
+
     def test_topics1(self):
         ret, topics = decode_tags("nautical")
         self.assertEqual(topics, ["nautical", "transport"])

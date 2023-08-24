@@ -753,10 +753,13 @@ def add_to_valid_tree_mapping(
 # Tree of sequences considered to be tags (includes sequences that are
 # mapped to something that becomes one or more valid tags)
 valid_sequences = ValidNode()
+sequences_with_slashes: Set[str] = set()
 for tag in valid_tags:
     # The basic tags used in our tag system; some are a bit weird, but easier
     # to implement this with 'false' positives than filter out stuff no one else
     # uses.
+    if "/" in tag:
+        sequences_with_slashes.add(tag)
     add_to_valid_tree(valid_sequences, tag, tag)
 for tag in uppercase_tags:
     hyphenated = re.sub(r"\s+", "-", tag)
@@ -770,23 +773,36 @@ for tag in uppercase_tags:
 for tag in uppercase_tags:
     hyphenated = re.sub(r"\s+", "-", tag)
     # XXX Move to above loop? Or is this here for readability?
+    if "/" in tag:
+        sequences_with_slashes.add(tag)
     add_to_valid_tree(valid_sequences, tag, hyphenated)
 # xlat_tags_map!
 add_to_valid_tree_mapping(valid_sequences, xlat_tags_map, valid_tags, False)
+for k in xlat_tags_map:
+    if "/" in k:
+        sequences_with_slashes.add(k)
 # Add topics to the same table, with all generalized topics also added
 for topic in valid_topics:
     assert " " not in topic
+    if "/" in topic:
+        sequences_with_slashes.add(topic)
     add_to_valid_tree(valid_sequences, topic, topic)
 # Let each original topic value stand alone.  These are not generally on
 # valid_topics.  We add the original topics with spaces replaced by hyphens.
 for topic in topic_generalize_map.keys():
     hyphenated = topic.replace(" ", "-")
     valid_topics.add(hyphenated)
+    if "/" in topic:
+        sequences_with_slashes.add(tag)
     add_to_valid_tree(valid_sequences, topic, hyphenated)
 # Add canonicalized/generalized topic values
 add_to_valid_tree_mapping(valid_sequences, topic_generalize_map,
                           valid_topics, True)
 
+# Regex used to divide a decode candidate into parts that shouldn't
+# have their slashes turned into spaces
+slashes_re = re.compile(r"(" + "|"
+                .join((re.escape(s) for s in sequences_with_slashes)) + r")")
 
 # Regexp used to find "words" from word heads and linguistic descriptions
 word_re = re.compile(r"[^ ,;()\u200e]+|"
@@ -920,27 +936,42 @@ def decode_tags(
     allow_any=False,
     no_unknown_starts=False,
 ) -> Tuple[List[Tuple[str, ...]], List[str]]:
-    """Decodes tags, doing some canonicalizations.  This returns a list of
-    lists of tags and a list of topics."""
-    assert isinstance(src, str)
+    tagsets, topics = decode_tags1(src, allow_any, no_unknown_starts)
 
-    # print("decode_tags: src={!r}".format(src))
+    # Insert retry-code here that modifies the text source
+    if (any(s.startswith("error-") for tagset in tagsets for s in tagset)
+        # I hate Python's *nested* list comprehension syntax ^
+        or any(s.startswith("error-") for s in topics)):
+        # slashes_re contains valid key entries with slashes; we're going to
+        # skip them by splitting the string and skipping handling every
+        # second entry, which contains the splitting group like "masculine/
+        # feminine" style keys.
+        split_parts = re.split(slashes_re, src)
+        if len(split_parts) <= 1:
+            return tagsets, topics
+        new_parts: List[str] = []
+        for i, s in enumerate(split_parts):
+            if i % 2 == 0:
+                new_parts.append(s.replace("/", " "))
+            else:
+                new_parts.append(s)
+        new_src = "".join(new_parts)
+        new_tagsets, new_topics = decode_tags1(
+                                    new_src,
+                                    allow_any,
+                                    no_unknown_starts)
 
-    pos_paths: List[List[List[PosPathStep]]] = [[[]]]
-    wordlst: List[str] = []
-    max_last_i = 0  # pre-initialized here so that it can be used as a ref
+        old_errors = sum(1 for tagset in tagsets
+                            for s in tagset if s.startswith("error"))
+        old_errors += sum(1 for s in topics if s.startswith("error"))
+        new_errors = sum(1 for new_tagset in new_tagsets
+                            for s in new_tagset if s.startswith("error"))
+        new_errors += sum(1 for s in new_topics if s.startswith("error"))
 
-    add_new = functools.partial(
-        add_new1,  # pre-set parameters and references for function
-        pos_paths=pos_paths,
-        wordlst=wordlst,
-        allow_any=allow_any,
-        no_unknown_starts=no_unknown_starts,
-        max_last_i=max_last_i,
-    )
-    # First split the tags at commas and semicolons.  Their significance is that
-    # a multi-word sequence cannot continue across them.
-    parts = split_at_comma_semi(src, extra=[";", ":"])
+        if new_errors <= old_errors:
+            return new_tagsets, new_topics
+
+    return tagsets, topics
 
     # Kludge to a wide-spread problem with Latin, where a lot of
     # "indicative/imperative" style combinations aren't in
@@ -968,6 +999,32 @@ def decode_tags(
     #     new_parts.append(new_seg.strip())
     # parts = new_parts
 
+def decode_tags1(
+    src: str,
+    allow_any=False,
+    no_unknown_starts=False,
+) -> Tuple[List[Tuple[str, ...]], List[str]]:
+    """Decodes tags, doing some canonicalizations.  This returns a list of
+    lists of tags and a list of topics."""
+    assert isinstance(src, str)
+
+    # print("decode_tags: src={!r}".format(src))
+
+    pos_paths: List[List[List[PosPathStep]]] = [[[]]]
+    wordlst: List[str] = []
+    max_last_i = 0  # pre-initialized here so that it can be used as a ref
+
+    add_new = functools.partial(
+        add_new1,  # pre-set parameters and references for function
+        pos_paths=pos_paths,
+        wordlst=wordlst,
+        allow_any=allow_any,
+        no_unknown_starts=no_unknown_starts,
+        max_last_i=max_last_i,
+    )
+    # First split the tags at commas and semicolons.  Their significance is that
+    # a multi-word sequence cannot continue across them.
+    parts = split_at_comma_semi(src, extra=[";", ":"])
 
     for part in parts:
         max_last_i = len(wordlst)  # "how far have we gone?"
