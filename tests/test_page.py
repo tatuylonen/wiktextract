@@ -377,6 +377,60 @@ foo
             ],
         )
 
+    def test_page7(self):
+        """When inside a list, an HTML element should not interrupt the
+        list"""
+        # unfortunately, I've only figured out a simple way to do this
+        # if the closing tag is exactly at the start of the next line, and
+        # there's nothing else in-between breaking the list... But it's
+        # better than nothing and fixes a few issues.
+        self.wxr.wtp.start_page("foo")
+        lst = self.runpage(
+            """
+==English==
+
+===Noun===
+foo
+
+# sense 1
+# sense 2
+## (mycology) mushroom<div>
+</div>
+## (person) one who foos
+"""
+        )
+        print("RETURNED:", json.dumps(lst, indent=2, sort_keys=True))
+        # XXX should also capture examples
+        self.assertEqual(
+            lst,
+            [
+                {
+                    "lang": "English",
+                    "lang_code": "en",
+                    "pos": "noun",
+                    "senses": [
+                        {
+                            "glosses": ["sense 1"],
+                        },
+                        {
+                            "glosses": ["sense 2", "mushroom"],
+                            "raw_glosses": ["sense 2", "(mycology) mushroom"],
+                            "topics": [
+                                "biology",
+                                "mycology",
+                                "natural-sciences",
+                            ],
+                        },
+                        {
+                            "glosses": ["sense 2", "one who foos"],
+                            "raw_glosses": ["sense 2", "(person) one who foos"],
+                            "tags": ["person"],
+                        },
+                    ],
+                    "word": "foo",
+                }
+            ],
+        )
 
     @patch(
         "wikitextprocessor.Wtp.get_page",
