@@ -946,30 +946,32 @@ def decode_tags(
         # skip them by splitting the string and skipping handling every
         # second entry, which contains the splitting group like "masculine/
         # feminine" style keys.
-        split_parts = re.split(slashes_re, src)
-        if len(split_parts) <= 1:
-            return tagsets, topics
-        new_parts: List[str] = []
-        for i, s in enumerate(split_parts):
-            if i % 2 == 0:
-                new_parts.append(s.replace("/", " "))
+        if "/" in src:
+            split_parts = re.split(slashes_re, src)
+            new_parts: List[str] = []
+            if len(split_parts) > 1:
+                for i, s in enumerate(split_parts):
+                    if i % 2 == 0:
+                        new_parts.append(s.replace("/", " "))
+                    else:
+                        new_parts.append(s)
+                new_src = "".join(new_parts)
             else:
-                new_parts.append(s)
-        new_src = "".join(new_parts)
-        new_tagsets, new_topics = decode_tags1(
-                                    new_src,
-                                    allow_any,
-                                    no_unknown_starts)
+                new_src = src
+            new_tagsets, new_topics = decode_tags1(
+                                        new_src,
+                                        allow_any,
+                                        no_unknown_starts)
 
-        old_errors = sum(1 for tagset in tagsets
-                            for s in tagset if s.startswith("error"))
-        old_errors += sum(1 for s in topics if s.startswith("error"))
-        new_errors = sum(1 for new_tagset in new_tagsets
-                            for s in new_tagset if s.startswith("error"))
-        new_errors += sum(1 for s in new_topics if s.startswith("error"))
+            old_errors = sum(1 for tagset in tagsets
+                                for s in tagset if s.startswith("error"))
+            old_errors += sum(1 for s in topics if s.startswith("error"))
+            new_errors = sum(1 for new_tagset in new_tagsets
+                                for s in new_tagset if s.startswith("error"))
+            new_errors += sum(1 for s in new_topics if s.startswith("error"))
 
-        if new_errors <= old_errors:
-            return new_tagsets, new_topics
+            if new_errors <= old_errors:
+                return new_tagsets, new_topics
 
     return tagsets, topics
 
