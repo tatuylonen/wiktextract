@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Union
 from wikitextprocessor import NodeKind, WikiNode
 
 from wiktextract.datautils import append_base_data
-from wiktextract.extractor.share import WIKIMEDIA_COMMONS_URL, contains_list
+from wiktextract.extractor.share import WIKIMEDIA_COMMONS_URL
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -27,7 +27,7 @@ def extract_pronunciation_recursively(
     if not isinstance(node, WikiNode):
         return
     if node.kind == NodeKind.LIST_ITEM:
-        if not contains_list(node):
+        if not node.contain_node(NodeKind.LIST):
             used_children = node.children
             rest_children = []
         else:

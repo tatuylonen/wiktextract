@@ -7,7 +7,7 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby
-from ..share import filter_child_wikinodes, strip_nodes
+from ..share import strip_nodes
 
 # https://zh.wiktionary.org/wiki/Module:Gender_and_number
 GENDERS = {
@@ -111,9 +111,7 @@ def extract_headword_line(
                             GENDERS.get(gender, gender)
                         )
                 if lang_code == "ja":
-                    for span_child in filter_child_wikinodes(
-                        child, NodeKind.HTML
-                    ):
+                    for span_child in child.find_child(NodeKind.HTML):
                         if (
                             span_child.sarg == "strong"
                             and "headword" in span_child.attrs.get("class", "")

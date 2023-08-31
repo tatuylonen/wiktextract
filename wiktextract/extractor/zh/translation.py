@@ -8,11 +8,7 @@ from wiktextract.datautils import find_similar_gloss
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from ..share import (
-    capture_text_in_parentheses,
-    contains_list,
-    filter_child_wikinodes,
-)
+from ..share import capture_text_in_parentheses
 
 
 def extract_translation(
@@ -35,10 +31,8 @@ def extract_translation(
                 elif template_name == "see translation subpage":
                     translation_subpage(wxr, page_data, child.largs[1:])
             elif child.kind == NodeKind.LIST:
-                for list_item_node in filter_child_wikinodes(
-                    child, NodeKind.LIST_ITEM
-                ):
-                    if not contains_list(list_item_node):
+                for list_item_node in child.find_child(NodeKind.LIST_ITEM):
+                    if not list_item_node.contain_node(NodeKind.LIST):
                         process_translation_list_item(
                             wxr,
                             page_data,
@@ -69,11 +63,11 @@ def extract_translation(
                             sense_text,
                             append_to,
                         )
-                        for nested_list_node in filter_child_wikinodes(
-                            list_item_node, NodeKind.LIST
+                        for nested_list_node in list_item_node.find_child(
+                            NodeKind.LIST
                         ):
-                            for nested_list_item in filter_child_wikinodes(
-                                nested_list_node, NodeKind.LIST_ITEM
+                            for nested_list_item in nested_list_node.find_child(
+                                NodeKind.LIST_ITEM
                             ):
                                 process_translation_list_item(
                                     wxr,

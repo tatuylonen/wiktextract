@@ -10,7 +10,6 @@ from wiktextract.datautils import append_base_data
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from ..share import strip_nodes
 from .gloss import extract_gloss
 from .headword_line import extract_headword_line
 from .inflection import extract_inflections
@@ -192,7 +191,7 @@ def process_pos_block(
     pos_type = wxr.config.POS_SUBTITLES[pos_text]["pos"]
     base_data["pos"] = pos_type
     append_base_data(page_data, "pos", pos_type, base_data)
-    for index, child in enumerate(strip_nodes(node.children)):
+    for index, child in enumerate(node.filter_empty_str_child()):
         if isinstance(child, WikiNode):
             if index == 0 and child.kind == NodeKind.TEMPLATE:
                 lang_code = base_data.get("lang_code")

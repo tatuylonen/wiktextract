@@ -9,7 +9,6 @@ from wiktextract.datautils import append_base_data
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from ..share import strip_nodes
 from .gloss import extract_gloss
 from .inflection import extract_inflection
 
@@ -105,7 +104,7 @@ def process_pos_block(
     pos_type = wxr.config.POS_SUBTITLES[pos_argument]["pos"]
     base_data["pos"] = pos_type
     append_base_data(page_data, "pos", pos_type, base_data)
-    child_nodes = list(strip_nodes(node.children))
+    child_nodes = list(node.filter_empty_str_child())
     headword_start = 0
     gloss_start = len(child_nodes)
     for index, child in enumerate(child_nodes):

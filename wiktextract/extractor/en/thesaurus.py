@@ -10,7 +10,6 @@ from typing import List, Optional
 from wikitextprocessor import NodeKind, Page, WikiNode
 
 from wiktextract.datautils import ns_title_prefix_tuple
-from wiktextract.extractor.share import contains_list
 from wiktextract.form_descriptions import parse_sense_qualifier
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -122,7 +121,7 @@ def extract_thesaurus_page(
         if not isinstance(contents, WikiNode):
             return
         kind = contents.kind
-        if kind == NodeKind.LIST and not contains_list(contents.children):
+        if kind == NodeKind.LIST and not contents.contain_node(NodeKind.LIST):
             if lang is None:
                 logging.debug(
                     f"{title=} {lang=} UNEXPECTED LIST WITHOUT LANG: "

@@ -5,7 +5,6 @@ from wikitextprocessor import NodeKind, WikiNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from ..share import strip_nodes
 
 # https://zh.wiktionary.org/wiki/Category:日語變格表模板
 JAPANESE_INFLECTION_TEMPLATE_PREFIXES = (
@@ -27,14 +26,13 @@ def extract_inflections(
     page_data: List[Dict],
     node: WikiNode,
 ) -> None:
-    for child in node.children:
-        if isinstance(child, WikiNode) and child.kind == NodeKind.TEMPLATE:
-            template_name = child.largs[0][0].lower()
-            if template_name.startswith(JAPANESE_INFLECTION_TEMPLATE_PREFIXES):
-                expanded_table = wxr.wtp.parse(
-                    wxr.wtp.node_to_wikitext(node), expand_all=True
-                )
-                extract_ja_i_template(wxr, page_data, expanded_table, "")
+    for child in node.find_node(NodeKind.TEMPLATE):
+        template_name = child.template_name.lower()
+        if template_name.startswith(JAPANESE_INFLECTION_TEMPLATE_PREFIXES):
+            expanded_table = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(node), expand_all=True
+            )
+            extract_ja_i_template(wxr, page_data, expanded_table, "")
 
 
 def extract_ja_i_template(
@@ -46,7 +44,7 @@ def extract_ja_i_template(
     for child in node.children:
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TABLE_ROW:
-                if len(list(strip_nodes(child.children))) == 1:
+                if len(list(child.filter_empty_str_child())) == 1:
                     table_header = clean_node(wxr, None, child.children)
                 else:
                     inflection_data = {

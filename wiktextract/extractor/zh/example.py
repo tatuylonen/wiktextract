@@ -7,7 +7,6 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby
-from ..share import contains_list, strip_nodes
 
 
 def extract_examples(
@@ -23,28 +22,24 @@ def extract_examples(
             example_data = defaultdict(list, {"type": "example"})
             # example text in the nested list
             # https://zh.wiktionary.org/wiki/%, the second example
-            if contains_list(node.children):
+            if node.contain_node(NodeKind.LIST):
                 extract_example_list(wxr, node, example_data)
             else:
                 # parse example templates
-                for child in strip_nodes(node.children):
-                    if (
-                        isinstance(child, WikiNode)
-                        and child.kind == NodeKind.TEMPLATE
-                    ):
-                        template_name = child.largs[0][0].strip()
-                        if template_name.startswith(("quote-", "RQ:")):
-                            extract_quote_templates(wxr, child, example_data)
-                        elif template_name in {"ja-x", "ja-usex"}:
-                            extract_template_ja_usex(wxr, child, example_data)
-                        elif template_name in {"zh-x", "zh-usex"}:
-                            extract_template_zh_usex(wxr, child, example_data)
-                        elif template_name in {"ux", "eg", "usex"}:
-                            extract_template_ux(wxr, child, example_data)
-                        elif template_name == "uxi":
-                            extract_template_uxi(wxr, child, example_data)
-                        else:
-                            example_data["text"] = clean_node(wxr, None, child)
+                for child in node.find_child(NodeKind.TEMPLATE):
+                    template_name = child.template_name
+                    if template_name.startswith(("quote-", "RQ:")):
+                        extract_quote_templates(wxr, child, example_data)
+                    elif template_name in {"ja-x", "ja-usex"}:
+                        extract_template_ja_usex(wxr, child, example_data)
+                    elif template_name in {"zh-x", "zh-usex"}:
+                        extract_template_zh_usex(wxr, child, example_data)
+                    elif template_name in {"ux", "eg", "usex"}:
+                        extract_template_ux(wxr, child, example_data)
+                    elif template_name == "uxi":
+                        extract_template_uxi(wxr, child, example_data)
+                    else:
+                        example_data["text"] = clean_node(wxr, None, child)
 
             if "text" in example_data or "texts" in example_data:
                 sense_data["examples"].append(example_data)

@@ -35,7 +35,7 @@ def extract_linkages(
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.LIST_ITEM:
                 not_term_indexes = set()
-                filtered_children = list(strip_nodes(node.children))
+                filtered_children = list(node.filter_empty_str_child())
                 linkage_data = defaultdict(list)
                 for index, item_child in enumerate(filtered_children):
                     if (

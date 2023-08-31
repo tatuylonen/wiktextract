@@ -5,8 +5,6 @@ from wikitextprocessor import NodeKind, WikiNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from ..share import filter_child_wikinodes, strip_nodes
-
 
 def extract_inflection(
     wxr: WiktextractContext,
@@ -32,11 +30,11 @@ def extract_fr_reg(
     )
     table_node = expanded_node.children[0]
     pass_first_row = False
-    for table_row in filter_child_wikinodes(table_node, NodeKind.TABLE_ROW):
+    for table_row in table_node.find_node(NodeKind.TABLE_ROW):
         if pass_first_row:
             break  # the second row is IPA
         for index, table_cell in enumerate(
-            filter_child_wikinodes(table_row, NodeKind.TABLE_CELL)
+            table_row.find_node(NodeKind.TABLE_CELL)
         ):
             form_text = clean_node(wxr, None, table_cell)
             if form_text != page_data[-1].get("word"):
@@ -54,10 +52,10 @@ def extract_fr_accord(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
     table_node = expanded_node.children[0]
-    for table_row in filter_child_wikinodes(table_node, NodeKind.TABLE_ROW):
+    for table_row in table_node.find_child(NodeKind.TABLE_ROW):
         gender_type = ""
         for cell_index, table_cell_node in enumerate(
-            strip_nodes(table_row.children)
+            table_row.filter_empty_str_child()
         ):
             if isinstance(table_cell_node, WikiNode):
                 if table_cell_node.kind == NodeKind.TABLE_HEADER_CELL:
@@ -69,7 +67,7 @@ def extract_fr_accord(
                     gender_type = gender_types.get(gender_text, "")
                 elif table_cell_node.kind == NodeKind.TABLE_CELL:
                     table_cell_children = list(
-                        strip_nodes(table_cell_node.children)
+                        table_cell_node.filter_empty_str_child()
                     )
                     br_tag_index = len(table_cell_children)
                     for cell_child_index, table_cell_child in enumerate(

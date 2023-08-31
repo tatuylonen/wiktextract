@@ -8,7 +8,6 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby
-from ..share import contains_list, filter_child_wikinodes
 from .example import extract_examples
 
 
@@ -19,7 +18,7 @@ def extract_gloss(
     gloss_data: Dict[str, List[str]],
 ) -> None:
     lang_code = page_data[-1].get("lang_code")
-    for list_item_node in filter_child_wikinodes(list_node, NodeKind.LIST_ITEM):
+    for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         gloss_nodes = [
             child
             for child in list_item_node.children
@@ -43,10 +42,8 @@ def extract_gloss(
             new_gloss_data["ruby"] = ruby_data
 
         has_nested_gloss = False
-        if contains_list(list_item_node.children):
-            for child_node in filter_child_wikinodes(
-                list_item_node, NodeKind.LIST
-            ):
+        if list_item_node.contain_node(NodeKind.LIST):
+            for child_node in list_item_node.find_child(NodeKind.LIST):
                 if child_node.sarg.endswith("#"):  # nested gloss
                     has_nested_gloss = True
                     extract_gloss(wxr, page_data, child_node, new_gloss_data)
