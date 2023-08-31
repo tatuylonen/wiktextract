@@ -71,7 +71,7 @@ def extract_headword_line(
     node: WikiNode,
     lang_code: str,
 ) -> None:
-    template_name = node.largs[0][0]
+    template_name = node.template_name
     if template_name != "head" and not template_name.startswith(
         f"{lang_code}-"
     ):

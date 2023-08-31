@@ -110,7 +110,7 @@ def process_pos_block(
     for index, child in enumerate(child_nodes):
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
-                template_name = child.largs[0][0]
+                template_name = child.template_name
                 lang_code = base_data.get("lang_code")
                 if template_name.startswith(f"{lang_code}-"):
                     extract_inflection(wxr, page_data, child, template_name)
@@ -169,7 +169,7 @@ def parse_page(
     for node in filter(lambda n: isinstance(n, WikiNode), tree.children):
         # ignore link created by `voir` template at the page top
         if node.kind == NodeKind.TEMPLATE:
-            template_name = node.largs[0][0]
+            template_name = node.template_name
             if template_name in {"voir", "voir2"} or template_name.startswith(
                 "voir/"
             ):

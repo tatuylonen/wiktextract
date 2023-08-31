@@ -267,7 +267,7 @@ def parse_page(
     for node in filter(lambda n: isinstance(n, WikiNode), tree.children):
         # ignore link created by `also` template at the page top
         # also ignore "character info" templates
-        if node.kind == NodeKind.TEMPLATE and node.largs[0][0].lower() in {
+        if node.kind == NodeKind.TEMPLATE and node.template_name.lower() in {
             "also",
             "see also",
             "亦",

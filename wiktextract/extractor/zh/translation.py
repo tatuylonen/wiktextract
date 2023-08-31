@@ -19,7 +19,7 @@ def extract_translation(
     for child in node.children:
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
-                template_name = child.largs[0][0].lower()
+                template_name = child.template_name.lower()
                 if (
                     template_name in {"trans-top", "翻譯-頂", "trans-top-also"}
                     and len(child.largs) > 1
