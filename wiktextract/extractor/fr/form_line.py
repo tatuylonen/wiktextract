@@ -6,6 +6,17 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 
+GENDER_TEMPLATES = {
+    "m": "masculine",
+    "f": "feminine",
+    "n": "neuter",
+    "c": "common",
+    "mf": "masculine and feminine identical",
+    "mf ?": "masculine or feminine (usage hesitates)",
+    "fm ?": "feminine or masculine (usage hesitates)",
+}
+
+
 def extract_form_line(
     wxr: WiktextractContext,
     page_data: List[Dict],
@@ -16,4 +27,8 @@ def extract_form_line(
             if node.template_name in {"pron", "prononciation"}:
                 page_data[-1]["sounds"].append(
                     {"ipa": clean_node(wxr, None, node)}
+                )
+            elif node.template_name in GENDER_TEMPLATES:
+                page_data[-1]["tags"].append(
+                    GENDER_TEMPLATES.get(node.template_name)
                 )

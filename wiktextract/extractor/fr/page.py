@@ -42,11 +42,10 @@ def parse_section(
     if node.kind in LEVEL_KINDS:
         level_node = node.largs[0][0]
         if level_node.kind == NodeKind.TEMPLATE:
-            level_template_name, *level_template_args = level_node.largs
-            if level_template_name == ["S"]:
+            if level_node.template_name == "S":
                 # https://fr.wiktionary.org/wiki/Modèle:S
                 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
-                section_type = level_template_args[0][0]
+                section_type = level_node.template_parameters.get(1)
                 subtitle = clean_node(wxr, page_data[-1], node.largs)
                 wxr.wtp.start_subsection(subtitle)
                 if (
