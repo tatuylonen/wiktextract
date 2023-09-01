@@ -5,7 +5,6 @@ from wikitextprocessor import NodeKind, WikiNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-
 # https://zh.wiktionary.org/wiki/Category:日語變格表模板
 JAPANESE_INFLECTION_TEMPLATE_PREFIXES = (
     "ja-i",

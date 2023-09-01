@@ -61,3 +61,6 @@ wiktextract = [
 branch = true
 concurrency = ["multiprocessing"]
 omit = ["tests/*"]
+
+[tool.black]
+line-length = 80

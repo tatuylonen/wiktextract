@@ -9,6 +9,7 @@ from wiktextract.datautils import append_base_data
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .form_line import extract_form_line
 from .gloss import extract_gloss
 from .inflection import extract_inflection
 
@@ -105,7 +106,7 @@ def process_pos_block(
     base_data["pos"] = pos_type
     append_base_data(page_data, "pos", pos_type, base_data)
     child_nodes = list(node.filter_empty_str_child())
-    headword_start = 0
+    form_line_start = 0  # Ligne de forme
     gloss_start = len(child_nodes)
     for index, child in enumerate(child_nodes):
         if isinstance(child, WikiNode):
@@ -115,7 +116,7 @@ def process_pos_block(
                 if template_name.startswith(f"{lang_code}-"):
                     extract_inflection(wxr, page_data, child, template_name)
             elif child.kind == NodeKind.BOLD:
-                headword_start = index + 1
+                form_line_start = index + 1
             elif child.kind == NodeKind.LIST:
                 gloss_start = index
                 extract_gloss(wxr, page_data, child)
@@ -124,7 +125,8 @@ def process_pos_block(
         else:
             parse_section(wxr, page_data, base_data, child)
 
-    headword_nodes = child_nodes[headword_start:gloss_start]
+    form_line_nodes = child_nodes[form_line_start:gloss_start]
+    extract_form_line(wxr, page_data, form_line_nodes)
 
 
 def extract_etymology(
