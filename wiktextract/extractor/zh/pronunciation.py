@@ -108,7 +108,7 @@ def create_audio_url_dict(filename: str) -> Dict[str, str]:
     return audio_dict
 
 
-def create_transcode_url(filename: str, transcode_suffix) -> str:
+def create_transcode_url(filename: str, transcode_suffix: str) -> str:
     # Chinese Wiktionary template might expands filename that has the a lower
     # first letter but the actual Wikimedia Commons file's first letter is
     # capitalized

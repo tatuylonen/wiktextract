@@ -26,7 +26,7 @@ def extract_inflections(
     page_data: List[Dict],
     node: WikiNode,
 ) -> None:
-    for child in node.find_node(NodeKind.TEMPLATE):
+    for child in node.find_child(NodeKind.TEMPLATE):
         template_name = child.template_name.lower()
         if template_name.startswith(JAPANESE_INFLECTION_TEMPLATE_PREFIXES):
             expanded_table = wxr.wtp.parse(

@@ -30,11 +30,11 @@ def extract_fr_reg(
     )
     table_node = expanded_node.children[0]
     pass_first_row = False
-    for table_row in table_node.find_node(NodeKind.TABLE_ROW):
+    for table_row in table_node.find_child(NodeKind.TABLE_ROW):
         if pass_first_row:
             break  # the second row is IPA
         for index, table_cell in enumerate(
-            table_row.find_node(NodeKind.TABLE_CELL)
+            table_row.find_child(NodeKind.TABLE_CELL)
         ):
             form_text = clean_node(wxr, None, table_cell)
             if form_text != page_data[-1].get("word"):
