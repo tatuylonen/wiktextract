@@ -153,7 +153,7 @@ def extract_saurus_template(
     """
     from wiktextract.thesaurus import search_thesaurus
 
-    thesaurus_page_title = node.largs[-1][0]
+    thesaurus_page_title = node.template_parameters.get(1)
     for thesaurus in search_thesaurus(
         wxr.thesaurus_db_conn,
         thesaurus_page_title,

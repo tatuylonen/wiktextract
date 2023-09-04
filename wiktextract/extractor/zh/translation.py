@@ -22,14 +22,14 @@ def extract_translation(
                 template_name = child.template_name.lower()
                 if (
                     template_name in {"trans-top", "翻譯-頂", "trans-top-also"}
-                    and len(child.largs) > 1
+                    and len(child.template_parameters) > 0
                 ):
-                    sense_text = clean_node(wxr, None, child.largs[1][0])
+                    sense_text = clean_node(wxr, None, child.template_parameters.get(1))
                     append_to = find_similar_gloss(page_data, sense_text)
                 elif template_name == "checktrans-top":
                     return
                 elif template_name == "see translation subpage":
-                    translation_subpage(wxr, page_data, child.largs[1:])
+                    translation_subpage(wxr, page_data, child.template_parameters)
             elif child.kind == NodeKind.LIST:
                 for list_item_node in child.find_child(NodeKind.LIST_ITEM):
                     if not list_item_node.contain_node(NodeKind.LIST):
@@ -134,16 +134,16 @@ def process_translation_list_item(
 def translation_subpage(
     wxr: WiktextractContext,
     page_data: List[Dict],
-    template_args: List[List[str]],
+    template_args: Dict[str, str],
 ) -> None:
     from .page import ADDITIONAL_EXPAND_TEMPLATES
 
     page_title = wxr.wtp.title
     target_section = None
     if len(template_args) > 0:
-        target_section = template_args[0][0]
+        target_section = template_args.get(1)
     if len(template_args) > 1:
-        page_title = template_args[1][0]
+        page_title = template_args.get(2)
 
     translation_subpage_title = f"{page_title}/翻譯"
     subpage = wxr.wtp.get_page(translation_subpage_title)

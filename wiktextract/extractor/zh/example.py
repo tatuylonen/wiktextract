@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import Dict, List, Union
 
 from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor.parser import TemplateNode
 
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -63,7 +64,7 @@ def extract_example_list(
 
 
 def extract_quote_templates(
-    wxr: WiktextractContext, node: WikiNode, example_data: Dict
+    wxr: WiktextractContext, node: TemplateNode, example_data: Dict
 ) -> None:
     """
     Process template `quote-book` and "RQ:*".
@@ -75,11 +76,7 @@ def extract_quote_templates(
             key = "ref"
         elif line_num == 1:
             key = "text"
-        elif line_num == 2 and any(
-            template_arg[0].startswith("transliteration=")
-            for template_arg in node.largs
-            if len(template_arg) > 0 and isinstance(template_arg[0], str)
-        ):
+        elif line_num == 2 and "transliteration" in node.template_parameters:
             key = "roman"
         else:
             key = "translation"

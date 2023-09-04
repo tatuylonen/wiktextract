@@ -184,12 +184,11 @@ def parse_page(
 
         level_node = node.largs[0][0]
         if level_node.kind == NodeKind.TEMPLATE:
-            level_template_name, *level_template_args = level_node.largs
             # https://fr.wiktionary.org/wiki/Modèle:langue
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_langues
-            if level_template_name == ["langue"]:
+            if level_node.template_name == "langue":
                 categories_and_links = defaultdict(list)
-                lang_code = level_template_args[0][0]
+                lang_code = level_node.template_parameters.get(1)
                 lang_name = clean_node(wxr, categories_and_links, level_node)
                 wxr.wtp.start_section(lang_name)
                 base_data = defaultdict(

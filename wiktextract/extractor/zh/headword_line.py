@@ -81,56 +81,43 @@ def extract_headword_line(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
     forms_start_index = 0
-    for index, child in enumerate(expanded_node.children):
-        if isinstance(child, WikiNode) and child.kind == NodeKind.HTML:
-            if child.sarg == "strong" and "headword" in child.attrs.get(
-                "class", ""
-            ):
+    for index, child in expanded_node.find_child(NodeKind.HTML, True):
+        if child.tag == "strong" and "headword" in child.attrs.get("class", ""):
+            forms_start_index = index + 1
+        elif child.tag == "span":
+            class_names = child.attrs.get("class", "")
+            if "headword-tr" in class_names:
                 forms_start_index = index + 1
-            elif child.sarg == "span":
-                class_names = child.attrs.get("class", "")
-                if "headword-tr" in class_names:
-                    forms_start_index = index + 1
 
-                    page_data[-1]["forms"].append(
-                        {
-                            "form": clean_node(wxr, page_data[-1], child),
-                            "tags": ["romanization"],
-                        }
-                    )
-                elif "gender" in class_names:
-                    forms_start_index = index + 1
-                    for abbr_tag in filter(
-                        lambda x: isinstance(x, WikiNode)
-                        and x.kind == NodeKind.HTML
-                        and x.sarg == "abbr",
-                        child.children,
-                    ):
-                        gender = abbr_tag.children[0]
-                        page_data[-1]["tags"].append(
-                            GENDERS.get(gender, gender)
+                page_data[-1]["forms"].append(
+                    {
+                        "form": clean_node(wxr, page_data[-1], child),
+                        "tags": ["romanization"],
+                    }
+                )
+            elif "gender" in class_names:
+                forms_start_index = index + 1
+                for abbr_tag in child.find_html("abbr"):
+                    gender = abbr_tag.children[0]
+                    page_data[-1]["tags"].append(GENDERS.get(gender, gender))
+            if lang_code == "ja":
+                for span_child in child.find_html("strong"):
+                    if "headword" in span_child.attrs.get("class", ""):
+                        ruby_data, node_without_ruby = extract_ruby(
+                            wxr, span_child
                         )
-                if lang_code == "ja":
-                    for span_child in child.find_child(NodeKind.HTML):
-                        if (
-                            span_child.sarg == "strong"
-                            and "headword" in span_child.attrs.get("class", "")
-                        ):
-                            ruby_data, node_without_ruby = extract_ruby(
-                                wxr, span_child
-                            )
-                            page_data[-1]["forms"].append(
-                                {
-                                    "form": clean_node(
-                                        wxr, page_data[-1], node_without_ruby
-                                    ),
-                                    "ruby": ruby_data,
-                                    "tags": ["canonical"],
-                                }
-                            )
-            elif child.sarg == "b":
-                # this is a form <b> tag, already inside form parentheses
-                break
+                        page_data[-1]["forms"].append(
+                            {
+                                "form": clean_node(
+                                    wxr, page_data[-1], node_without_ruby
+                                ),
+                                "ruby": ruby_data,
+                                "tags": ["canonical"],
+                            }
+                        )
+        elif child.tag == "b":
+            # this is a form <b> tag, already inside form parentheses
+            break
 
     extract_headword_forms(
         wxr, page_data, expanded_node.children[forms_start_index:]
@@ -165,7 +152,7 @@ def process_forms_text(
     lang_code = page_data[-1].get("lang_code")
     for index, node in enumerate(striped_nodes):
         if isinstance(node, WikiNode) and node.kind == NodeKind.HTML:
-            if node.sarg == "b":
+            if node.tag == "b":
                 has_forms = True
                 ruby_data = None
                 if lang_code == "ja":
@@ -182,7 +169,7 @@ def process_forms_text(
                     if (
                         isinstance(next_node, WikiNode)
                         and next_node.kind == NodeKind.HTML
-                        and next_node.sarg == "span"
+                        and next_node.tag == "span"
                         and "gender" in next_node.attrs.get("class", "")
                     ):
                         gender = clean_node(wxr, None, next_node)
@@ -195,7 +182,7 @@ def process_forms_text(
                 if ruby_data is not None:
                     form_data["ruby"] = ruby_data
                 page_data[-1]["forms"].append(form_data)
-            elif node.sarg == "span" and "tr" in node.attrs.get("class", ""):
+            elif node.tag == "span" and "tr" in node.attrs.get("class", ""):
                 # romanization of the previous form <b> tag
                 page_data[-1]["forms"][-1]["roman"] = clean_node(
                     wxr, None, node
