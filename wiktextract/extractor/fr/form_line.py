@@ -22,6 +22,13 @@ def extract_form_line(
     page_data: List[Dict],
     nodes: List[Union[WikiNode, str]],
 ) -> None:
+    """
+    Ligne de forme
+    https://fr.wiktionary.org/wiki/Wiktionnaire:Structure_des_pages#Syntaxe
+
+    A line of wikitext between pos subtitle and the first gloss, contains IPA,
+    gender and inflection forms.
+    """
     for node in nodes:
         if isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE:
             if node.template_name in {"pron", "prononciation"}:

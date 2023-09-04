@@ -32,7 +32,7 @@ def parse_section(
     base_data: Dict,
     node: Union[WikiNode, List[Union[WikiNode, str]]],
 ) -> None:
-    # https://fr.wiktionary.org/wiki/Wiktionnaire:Structure_des_pages
+    # Page structure: https://fr.wiktionary.org/wiki/Wiktionnaire:Structure_des_pages
     if isinstance(node, list):
         for x in node:
             parse_section(wxr, page_data, base_data, x)

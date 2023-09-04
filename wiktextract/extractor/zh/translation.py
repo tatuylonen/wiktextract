@@ -24,12 +24,16 @@ def extract_translation(
                     template_name in {"trans-top", "翻譯-頂", "trans-top-also"}
                     and len(child.template_parameters) > 0
                 ):
-                    sense_text = clean_node(wxr, None, child.template_parameters.get(1))
+                    sense_text = clean_node(
+                        wxr, None, child.template_parameters.get(1)
+                    )
                     append_to = find_similar_gloss(page_data, sense_text)
                 elif template_name == "checktrans-top":
                     return
                 elif template_name == "see translation subpage":
-                    translation_subpage(wxr, page_data, child.template_parameters)
+                    translation_subpage(
+                        wxr, page_data, child.template_parameters
+                    )
             elif child.kind == NodeKind.LIST:
                 for list_item_node in child.find_child(NodeKind.LIST_ITEM):
                     if not list_item_node.contain_node(NodeKind.LIST):
