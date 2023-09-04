@@ -9,7 +9,7 @@ from wiktextract.datautils import append_base_data
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from ..share import strip_nodes
+from .form_line import extract_form_line
 from .gloss import extract_gloss
 from .inflection import extract_inflection
 
@@ -32,7 +32,7 @@ def parse_section(
     base_data: Dict,
     node: Union[WikiNode, List[Union[WikiNode, str]]],
 ) -> None:
-    # https://fr.wiktionary.org/wiki/Wiktionnaire:Structure_des_pages
+    # Page structure: https://fr.wiktionary.org/wiki/Wiktionnaire:Structure_des_pages
     if isinstance(node, list):
         for x in node:
             parse_section(wxr, page_data, base_data, x)
@@ -42,11 +42,10 @@ def parse_section(
     if node.kind in LEVEL_KINDS:
         level_node = node.largs[0][0]
         if level_node.kind == NodeKind.TEMPLATE:
-            level_template_name, *level_template_args = level_node.largs
-            if level_template_name == ["S"]:
+            if level_node.template_name == "S":
                 # https://fr.wiktionary.org/wiki/Modèle:S
                 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
-                section_type = level_template_args[0][0]
+                section_type = level_node.template_parameters.get(1)
                 subtitle = clean_node(wxr, page_data[-1], node.largs)
                 wxr.wtp.start_subsection(subtitle)
                 if (
@@ -105,18 +104,18 @@ def process_pos_block(
     pos_type = wxr.config.POS_SUBTITLES[pos_argument]["pos"]
     base_data["pos"] = pos_type
     append_base_data(page_data, "pos", pos_type, base_data)
-    child_nodes = list(strip_nodes(node.children))
-    headword_start = 0
+    child_nodes = list(node.filter_empty_str_child())
+    form_line_start = 0  # Ligne de forme
     gloss_start = len(child_nodes)
     for index, child in enumerate(child_nodes):
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
-                template_name = child.largs[0][0]
+                template_name = child.template_name
                 lang_code = base_data.get("lang_code")
                 if template_name.startswith(f"{lang_code}-"):
                     extract_inflection(wxr, page_data, child, template_name)
             elif child.kind == NodeKind.BOLD:
-                headword_start = index + 1
+                form_line_start = index + 1
             elif child.kind == NodeKind.LIST:
                 gloss_start = index
                 extract_gloss(wxr, page_data, child)
@@ -125,7 +124,8 @@ def process_pos_block(
         else:
             parse_section(wxr, page_data, base_data, child)
 
-    headword_nodes = child_nodes[headword_start:gloss_start]
+    form_line_nodes = child_nodes[form_line_start:gloss_start]
+    extract_form_line(wxr, page_data, form_line_nodes)
 
 
 def extract_etymology(
@@ -170,7 +170,7 @@ def parse_page(
     for node in filter(lambda n: isinstance(n, WikiNode), tree.children):
         # ignore link created by `voir` template at the page top
         if node.kind == NodeKind.TEMPLATE:
-            template_name = node.largs[0][0]
+            template_name = node.template_name
             if template_name in {"voir", "voir2"} or template_name.startswith(
                 "voir/"
             ):
@@ -184,12 +184,11 @@ def parse_page(
 
         level_node = node.largs[0][0]
         if level_node.kind == NodeKind.TEMPLATE:
-            level_template_name, *level_template_args = level_node.largs
             # https://fr.wiktionary.org/wiki/Modèle:langue
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_langues
-            if level_template_name == ["langue"]:
+            if level_node.template_name == "langue":
                 categories_and_links = defaultdict(list)
-                lang_code = level_template_args[0][0]
+                lang_code = level_node.template_parameters.get(1)
                 lang_name = clean_node(wxr, categories_and_links, level_node)
                 wxr.wtp.start_section(lang_name)
                 base_data = defaultdict(

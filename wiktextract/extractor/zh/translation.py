@@ -8,11 +8,7 @@ from wiktextract.datautils import find_similar_gloss
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from ..share import (
-    capture_text_in_parentheses,
-    contains_list,
-    filter_child_wikinodes,
-)
+from ..share import capture_text_in_parentheses
 
 
 def extract_translation(
@@ -23,22 +19,24 @@ def extract_translation(
     for child in node.children:
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
-                template_name = child.largs[0][0].lower()
+                template_name = child.template_name.lower()
                 if (
                     template_name in {"trans-top", "翻譯-頂", "trans-top-also"}
-                    and len(child.largs) > 1
+                    and len(child.template_parameters) > 0
                 ):
-                    sense_text = clean_node(wxr, None, child.largs[1][0])
+                    sense_text = clean_node(
+                        wxr, None, child.template_parameters.get(1)
+                    )
                     append_to = find_similar_gloss(page_data, sense_text)
                 elif template_name == "checktrans-top":
                     return
                 elif template_name == "see translation subpage":
-                    translation_subpage(wxr, page_data, child.largs[1:])
+                    translation_subpage(
+                        wxr, page_data, child.template_parameters
+                    )
             elif child.kind == NodeKind.LIST:
-                for list_item_node in filter_child_wikinodes(
-                    child, NodeKind.LIST_ITEM
-                ):
-                    if not contains_list(list_item_node):
+                for list_item_node in child.find_child(NodeKind.LIST_ITEM):
+                    if not list_item_node.contain_node(NodeKind.LIST):
                         process_translation_list_item(
                             wxr,
                             page_data,
@@ -69,11 +67,11 @@ def extract_translation(
                             sense_text,
                             append_to,
                         )
-                        for nested_list_node in filter_child_wikinodes(
-                            list_item_node, NodeKind.LIST
+                        for nested_list_node in list_item_node.find_child(
+                            NodeKind.LIST
                         ):
-                            for nested_list_item in filter_child_wikinodes(
-                                nested_list_node, NodeKind.LIST_ITEM
+                            for nested_list_item in nested_list_node.find_child(
+                                NodeKind.LIST_ITEM
                             ):
                                 process_translation_list_item(
                                     wxr,
@@ -140,16 +138,16 @@ def process_translation_list_item(
 def translation_subpage(
     wxr: WiktextractContext,
     page_data: List[Dict],
-    template_args: List[List[str]],
+    template_args: Dict[str, str],
 ) -> None:
     from .page import ADDITIONAL_EXPAND_TEMPLATES
 
     page_title = wxr.wtp.title
     target_section = None
     if len(template_args) > 0:
-        target_section = template_args[0][0]
+        target_section = template_args.get(1)
     if len(template_args) > 1:
-        page_title = template_args[1][0]
+        page_title = template_args.get(2)
 
     translation_subpage_title = f"{page_title}/翻譯"
     subpage = wxr.wtp.get_page(translation_subpage_title)

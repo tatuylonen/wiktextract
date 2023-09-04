@@ -2,24 +2,9 @@ import re
 from html import unescape
 from typing import Iterable, List, Optional, Tuple, Union
 
-from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor import WikiNode
 
 WIKIMEDIA_COMMONS_URL = "https://commons.wikimedia.org/wiki/Special:FilePath/"
-
-
-def contains_list(
-    contents: Union[WikiNode, List[Union[WikiNode, str]]]
-) -> bool:
-    """Returns True if there is a list somewhere nested in contents."""
-    if isinstance(contents, (list, tuple)):
-        return any(contains_list(x) for x in contents)
-    if not isinstance(contents, WikiNode):
-        return False
-    kind = contents.kind
-    if kind == NodeKind.LIST:
-        return True
-    return contains_list(contents.children) or contains_list(contents.sarg if
-                                            contents.sarg else contents.largs)
 
 
 def strip_nodes(
@@ -31,16 +16,6 @@ def strip_nodes(
         or (isinstance(node, str) and len(unescape(node).strip()) > 0),
         nodes,
     )
-
-
-def filter_child_wikinodes(
-    node: WikiNode, node_type: NodeKind
-) -> List[Union[WikiNode, str]]:
-    return [
-        child
-        for child in node.children
-        if isinstance(child, WikiNode) and child.kind == node_type
-    ]
 
 
 def capture_text_in_parentheses(text: str) -> Tuple[List[str], str]:

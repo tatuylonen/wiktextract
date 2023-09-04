@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Union
 from wikitextprocessor import NodeKind, WikiNode
 
 from wiktextract.datautils import append_base_data
-from wiktextract.extractor.share import WIKIMEDIA_COMMONS_URL, contains_list
+from wiktextract.extractor.share import WIKIMEDIA_COMMONS_URL
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -27,7 +27,7 @@ def extract_pronunciation_recursively(
     if not isinstance(node, WikiNode):
         return
     if node.kind == NodeKind.LIST_ITEM:
-        if not contains_list(node):
+        if not node.contain_node(NodeKind.LIST):
             used_children = node.children
             rest_children = []
         else:
@@ -108,7 +108,7 @@ def create_audio_url_dict(filename: str) -> Dict[str, str]:
     return audio_dict
 
 
-def create_transcode_url(filename: str, transcode_suffix) -> str:
+def create_transcode_url(filename: str, transcode_suffix: str) -> str:
     # Chinese Wiktionary template might expands filename that has the a lower
     # first letter but the actual Wikimedia Commons file's first letter is
     # capitalized
@@ -185,9 +185,7 @@ def extract_pronunciation_item(
             lambda x: isinstance(x, WikiNode) and x.kind == NodeKind.TEMPLATE,
             node_children,
         ):
-            template_name, *template_args = child.largs
-            if template_name[0] == "audio":
-                audio_filename = template_args[1][0]
-                return audio_filename
+            if child.template_name == "audio":
+                return child.template_parameters.get(2)
 
         return new_tags

@@ -35,14 +35,14 @@ def extract_linkages(
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.LIST_ITEM:
                 not_term_indexes = set()
-                filtered_children = list(strip_nodes(node.children))
+                filtered_children = list(node.filter_empty_str_child())
                 linkage_data = defaultdict(list)
                 for index, item_child in enumerate(filtered_children):
                     if (
                         isinstance(item_child, WikiNode)
                         and item_child.kind == NodeKind.TEMPLATE
                     ):
-                        template_name = item_child.largs[0][0].lower()
+                        template_name = item_child.template_name
                         if template_name in sense_template_names:
                             not_term_indexes.add(index)
                             sense = clean_node(wxr, None, item_child).strip(
@@ -86,7 +86,7 @@ def extract_linkages(
                             ] = variant_type
                         append_to[linkage_type].append(final_linkage_data)
             elif node.kind == NodeKind.TEMPLATE:
-                template_name = node.largs[0][0].lower()
+                template_name = node.template_name.lower()
                 if template_name in sense_template_names:
                     sense = clean_node(wxr, None, node).strip(strip_sense_chars)
                 elif template_name.endswith("-saurus"):
@@ -153,7 +153,7 @@ def extract_saurus_template(
     """
     from wiktextract.thesaurus import search_thesaurus
 
-    thesaurus_page_title = node.largs[-1][0]
+    thesaurus_page_title = node.template_parameters.get(1)
     for thesaurus in search_thesaurus(
         wxr.thesaurus_db_conn,
         thesaurus_page_title,

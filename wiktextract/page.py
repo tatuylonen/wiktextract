@@ -4,6 +4,7 @@
 
 import re
 from collections import defaultdict
+from copy import copy
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from wikitextprocessor import NodeKind, WikiNode
@@ -77,7 +78,11 @@ def recursively_extract(
         return [contents], []
     # Otherwise content is WikiNode, and we must recurse into it.
     kind = contents.kind
-    new_node = WikiNode(kind, contents.loc)
+    new_node = copy(contents)
+    new_node.children = []
+    new_node.sarg = ""
+    new_node.largs = []
+    new_node.attrs = []
     new_contents.append(new_node)
     if kind in LEVEL_KINDS or kind == NodeKind.LINK:
         # Process args and children
