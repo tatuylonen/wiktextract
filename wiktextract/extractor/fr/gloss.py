@@ -29,6 +29,9 @@ def extract_gloss(
                 if (
                     not isinstance(gloss_node, WikiNode)
                     or gloss_node.kind != NodeKind.TEMPLATE
+                    # template "variante de" is not a modifier
+                    # https://fr.wiktionary.org/wiki/Modèle:variante_de
+                    or gloss_node.template_name != "variante de"
                 ):
                     gloss_start = index
                     break
