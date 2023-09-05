@@ -6,15 +6,7 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 
-GENDER_TEMPLATES = {
-    "m": "masculine",
-    "f": "feminine",
-    "n": "neuter",
-    "c": "common",
-    "mf": "masculine and feminine identical",
-    "mf ?": "masculine or feminine (usage hesitates)",
-    "fm ?": "feminine or masculine (usage hesitates)",
-}
+GENDER_TEMPLATES = {"m", "f", "n", "c", "mf", "mf ?", "fm ?"}
 
 
 def extract_form_line(
@@ -36,6 +28,18 @@ def extract_form_line(
                     {"ipa": clean_node(wxr, None, node)}
                 )
             elif node.template_name in GENDER_TEMPLATES:
-                page_data[-1]["tags"].append(
-                    GENDER_TEMPLATES.get(node.template_name)
-                )
+                gender_text = clean_node(wxr, None, node)  # category
+                page_data[-1]["tags"].append(gender_text)
+            elif node.template_name == "équiv-pour":
+                process_equiv_pour_template(node, page_data)
+
+
+def process_equiv_pour_template(node: WikiNode, page_data: List[Dict]) -> None:
+    # equivalent form: https://fr.wiktionary.org/wiki/Modèle:équiv-pour
+    form_type = node.template_parameters.get(1)
+    for template_arg_index in range(2, 8):
+        form = node.template_parameters.get(template_arg_index)
+        if form is not None:
+            page_data[-1]["forms"].append(
+                {"form": form, "tags": [f"pour {form_type}"]}
+            )
