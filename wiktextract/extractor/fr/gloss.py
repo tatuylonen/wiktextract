@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor.parser import TemplateNode
 
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -38,4 +39,55 @@ def extract_gloss(
 
         gloss_text = clean_node(wxr, gloss_data, gloss_nodes[gloss_start:])
         gloss_data["glosses"] = [gloss_text]
+        extract_examples(wxr, gloss_data, list_item_node)
         page_data[-1]["senses"].append(gloss_data)
+
+
+def extract_examples(
+    wxr: WiktextractContext,
+    gloss_data: Dict,
+    gloss_list_node: WikiNode,
+) -> None:
+    for example_node in gloss_list_node.find_child_recursively(
+        NodeKind.LIST_ITEM
+    ):
+        example_node_children = list(example_node.filter_empty_str_child())
+        if len(example_node_children) == 0:
+            continue
+        first_child = example_node_children[0]
+        if (
+            isinstance(first_child, WikiNode)
+            and first_child.kind == NodeKind.TEMPLATE
+            and (
+                first_child.template_name == "exemple"
+                or first_child.template_name.endswith("-exemple")
+            )
+        ):
+            process_exemple_template(wxr, first_child, gloss_data)
+
+
+def process_exemple_template(
+    wxr: WiktextractContext, node: TemplateNode, gloss_data: Dict
+) -> None:
+    # https://fr.wiktionary.org/wiki/Modèle:exemple
+    # https://fr.wiktionary.org/wiki/Modèle:ja-exemple
+    # https://fr.wiktionary.org/wiki/Modèle:zh-exemple
+    text = node.template_parameters.get(1, "")
+    translation = node.template_parameters.get(
+        2, node.template_parameters.get("sens", "")
+    )
+    transcription = node.template_parameters.get(
+        3, node.template_parameters.get("tr", "")
+    )
+    source = node.template_parameters.get("source", "")
+    example_data = {}
+    if len(text) > 0:
+        example_data["text"] = clean_node(wxr, None, text)
+    if len(translation) > 0:
+        example_data["translation"] = clean_node(wxr, None, translation)
+    if len(transcription) > 0:
+        example_data["roman"] = clean_node(wxr, None, transcription)
+    if len(source) > 0:
+        example_data["source"] = clean_node(wxr, None, source)
+    if len(example_data) > 0:
+        gloss_data["examples"].append(example_data)

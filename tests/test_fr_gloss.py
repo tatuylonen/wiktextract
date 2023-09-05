@@ -45,3 +45,31 @@ class TestFormLine(unittest.TestCase):
                 }
             ],
         )
+
+    def test_example_template(self):
+        self.wxr.wtp.start_page("")
+        root = self.wxr.wtp.parse(
+            "# gloss.\n#* {{exemple|text|translation|roman|source=source}}"
+        )
+        page_data = [defaultdict(list)]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "senses": [
+                        {
+                            "glosses": ["gloss."],
+                            "examples": [
+                                {
+                                    "text": "text",
+                                    "translation": "translation",
+                                    "roman": "roman",
+                                    "source": "source",
+                                }
+                            ],
+                        }
+                    ]
+                }
+            ],
+        )
