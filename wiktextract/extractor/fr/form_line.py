@@ -6,9 +6,6 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 
-GENDER_TEMPLATES = {"m", "f", "n", "c", "mf", "mf ?", "fm ?"}
-
-
 def extract_form_line(
     wxr: WiktextractContext,
     page_data: List[Dict],
@@ -23,15 +20,15 @@ def extract_form_line(
     """
     for node in nodes:
         if isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE:
-            if node.template_name in {"pron", "prononciation"}:
+            if node.template_name in {"pron", "prononciation", "//"}:
                 page_data[-1]["sounds"].append(
                     {"ipa": clean_node(wxr, None, node)}
                 )
-            elif node.template_name in GENDER_TEMPLATES:
-                gender_text = clean_node(wxr, None, node)  # category
-                page_data[-1]["tags"].append(gender_text)
             elif node.template_name == "équiv-pour":
                 process_equiv_pour_template(node, page_data)
+            else:
+                tag = clean_node(wxr, None, node)  # category
+                page_data[-1]["tags"].append(tag)
 
 
 def process_equiv_pour_template(node: WikiNode, page_data: List[Dict]) -> None:
