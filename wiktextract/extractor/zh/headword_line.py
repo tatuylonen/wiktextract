@@ -101,20 +101,21 @@ def extract_headword_line(
                     gender = abbr_tag.children[0]
                     page_data[-1]["tags"].append(GENDERS.get(gender, gender))
             if lang_code == "ja":
-                for span_child in child.find_html("strong"):
-                    if "headword" in span_child.attrs.get("class", ""):
-                        ruby_data, node_without_ruby = extract_ruby(
-                            wxr, span_child
-                        )
-                        page_data[-1]["forms"].append(
-                            {
-                                "form": clean_node(
-                                    wxr, page_data[-1], node_without_ruby
-                                ),
-                                "ruby": ruby_data,
-                                "tags": ["canonical"],
+                for span_child in child.find_html(
+                    "strong", attr_name="class", attr_value="headword"
+                ):
+                    ruby_data, node_without_ruby = extract_ruby(
+                        wxr, span_child
+                    )
+                    page_data[-1]["forms"].append(
+                        {
+                            "form": clean_node(
+                                wxr, page_data[-1], node_without_ruby
+                            ),
+                            "ruby": ruby_data,
+                            "tags": ["canonical"],
                             }
-                        )
+                    )
         elif child.tag == "b":
             # this is a form <b> tag, already inside form parentheses
             break
