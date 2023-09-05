@@ -64,6 +64,22 @@ def extract_examples(
             )
         ):
             process_exemple_template(wxr, first_child, gloss_data)
+        else:
+            example_nodes = []
+            source_template = None
+            for example_template in example_node.find_child(NodeKind.TEMPLATE):
+                if example_template.template_name == "source":
+                    source_template = example_template
+            example_nodes = [
+                node
+                for node in example_node_children
+                if node != source_template
+            ]
+            example_data = {}
+            example_data["text"] = clean_node(wxr, None, example_nodes)
+            if source_template is not None:
+                example_data["source"] = clean_node(wxr, None, source_template)
+            gloss_data["examples"].append(example_data)
 
 
 def process_exemple_template(
