@@ -82,7 +82,7 @@ def recursively_extract(
     new_node.children = []
     new_node.sarg = ""
     new_node.largs = []
-    new_node.attrs = []
+    new_node.attrs = {}
     new_contents.append(new_node)
     if kind in LEVEL_KINDS or kind == NodeKind.LINK:
         # Process args and children
