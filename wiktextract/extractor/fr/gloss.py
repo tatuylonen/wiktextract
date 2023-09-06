@@ -78,10 +78,11 @@ def extract_examples(
                 for node in example_node_children
                 if node != source_template
             ]
-            example_data = {}
+            example_data = {"type": "example"}
             example_data["text"] = clean_node(wxr, None, example_nodes)
             if source_template is not None:
                 example_data["source"] = clean_node(wxr, None, source_template)
+                example_data["type"] = "quotation"
             gloss_data["examples"].append(example_data)
 
 
@@ -99,7 +100,7 @@ def process_exemple_template(
         3, node.template_parameters.get("tr", "")
     )
     source = node.template_parameters.get("source", "")
-    example_data = {}
+    example_data = {"type": "example"}
     if len(text) > 0:
         example_data["text"] = clean_node(wxr, None, text)
     if len(translation) > 0:
@@ -108,5 +109,6 @@ def process_exemple_template(
         example_data["roman"] = clean_node(wxr, None, transcription)
     if len(source) > 0:
         example_data["source"] = clean_node(wxr, None, source)
+        example_data["type"] = "quotation"
     if len(example_data) > 0:
         gloss_data["examples"].append(example_data)

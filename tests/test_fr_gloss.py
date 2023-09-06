@@ -44,7 +44,9 @@ class TestFormLine(unittest.TestCase):
                             "glosses": ["gloss."],
                             "tags": ["Sport"],
                             "categories": ["Sportifs en français"],
-                            "examples": [{"text": "example"}],
+                            "examples": [
+                                {"text": "example", "type": "example"}
+                            ],
                         }
                     ]
                 }
@@ -71,6 +73,7 @@ class TestFormLine(unittest.TestCase):
                                     "translation": "translation",
                                     "roman": "roman",
                                     "source": "source",
+                                    "type": "quotation",
                                 }
                             ],
                         }
@@ -99,7 +102,11 @@ class TestFormLine(unittest.TestCase):
                         {
                             "glosses": ["gloss."],
                             "examples": [
-                                {"text": "example", "source": "source_title"}
+                                {
+                                    "text": "example",
+                                    "source": "source_title",
+                                    "type": "quotation",
+                                }
                             ],
                         }
                     ]
