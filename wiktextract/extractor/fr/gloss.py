@@ -61,10 +61,7 @@ def extract_examples(
         if (
             isinstance(first_child, WikiNode)
             and first_child.kind == NodeKind.TEMPLATE
-            and (
-                first_child.template_name == "exemple"
-                or first_child.template_name.endswith("-exemple")
-            )
+            and first_child.template_name == "exemple"
         ):
             process_exemple_template(wxr, first_child, gloss_data)
         else:

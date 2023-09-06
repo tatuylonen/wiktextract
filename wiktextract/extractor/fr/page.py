@@ -10,7 +10,7 @@ from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from .form_line import extract_form_line
-from .gloss import extract_gloss
+from .gloss import extract_gloss, process_exemple_template
 from .inflection import extract_inflection
 
 # Templates that are used to form panels on pages and that
@@ -111,8 +111,15 @@ def process_pos_block(
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
                 template_name = child.template_name
-                lang_code = base_data.get("lang_code")
-                if template_name.startswith(f"{lang_code}-"):
+                if template_name.endswith("-exemple"):
+                    # zh-exemple and ja-exemple expand to list thus are not the
+                    # child of gloss list item.
+                    process_exemple_template(
+                        wxr, child, page_data[-1]["senses"][-1]
+                    )
+                elif template_name.startswith(("fr-accord-", "fr-rég")):
+                    # inflection templates
+                    # https://fr.wiktionary.org/wiki/Catégorie:Modèles_d’accord_en_français
                     extract_inflection(wxr, page_data, child, template_name)
             elif child.kind == NodeKind.BOLD:
                 form_line_start = index + 1
