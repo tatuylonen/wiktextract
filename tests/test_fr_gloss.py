@@ -141,7 +141,7 @@ class TestFormLine(unittest.TestCase):
                                 }
                             ],
                         }
-                    ]
+                    ],
                 }
             ],
         )
