@@ -6,6 +6,7 @@ from wikitextprocessor import Wtp, Page
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.gloss import extract_gloss
+from wiktextract.extractor.fr.page import process_pos_block
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
@@ -44,7 +45,9 @@ class TestFormLine(unittest.TestCase):
                             "glosses": ["gloss."],
                             "tags": ["Sport"],
                             "categories": ["Sportifs en français"],
-                            "examples": [{"text": "example"}],
+                            "examples": [
+                                {"text": "example", "type": "example"}
+                            ],
                         }
                     ]
                 }
@@ -71,6 +74,7 @@ class TestFormLine(unittest.TestCase):
                                     "translation": "translation",
                                     "roman": "roman",
                                     "source": "source",
+                                    "type": "quotation",
                                 }
                             ],
                         }
@@ -89,7 +93,6 @@ class TestFormLine(unittest.TestCase):
             "# gloss.\n#* example {{source|source_title}}"
         )
         page_data = [defaultdict(list)]
-        page_data = [defaultdict(list)]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
             page_data,
@@ -99,7 +102,43 @@ class TestFormLine(unittest.TestCase):
                         {
                             "glosses": ["gloss."],
                             "examples": [
-                                {"text": "example", "source": "source_title"}
+                                {
+                                    "text": "example",
+                                    "source": "source_title",
+                                    "type": "quotation",
+                                }
+                            ],
+                        }
+                    ]
+                }
+            ],
+        )
+
+    def test_zh_exemple_template(self):
+        # https://fr.wiktionary.org/wiki/马
+        self.wxr.wtp.start_page("")
+        root = self.wxr.wtp.parse(
+            "=== {{S|nom|zh}} ===\n# Cheval.\n{{zh-exemple|这匹'''马'''很大。|Ce cheval est grand.|Zhè pǐ '''mǎ''' hěn dà.<br/>⠌⠢⠆ ⠏⠊⠄ ⠍⠔⠄ ⠓⠴⠄ ⠙⠔⠆⠐⠆}}"
+        )
+        page_data = [defaultdict(list)]
+        process_pos_block(
+            self.wxr, page_data, defaultdict(list), root.children[0], "nom"
+        )
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "pos": "noun",
+                    "senses": [
+                        {
+                            "glosses": ["Cheval."],
+                            "examples": [
+                                {
+                                    "text": "这匹马很大。",
+                                    "translation": "Ce cheval est grand.",
+                                    "roman": "Zhè pǐ mǎ hěn dà.\n⠌⠢⠆ ⠏⠊⠄ ⠍⠔⠄ ⠓⠴⠄ ⠙⠔⠆⠐⠆",
+                                    "type": "example",
+                                }
                             ],
                         }
                     ]
