@@ -4,6 +4,7 @@ from collections import defaultdict
 from typing import Dict, List, Union
 
 from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor.parser import TemplateNode
 
 from wiktextract.datautils import append_base_data
 from wiktextract.page import LEVEL_KINDS, clean_node
@@ -98,13 +99,13 @@ def process_pos_block(
     wxr: WiktextractContext,
     page_data: List[Dict],
     base_data: Dict,
-    node: WikiNode,
+    pos_title_node: TemplateNode,
     pos_argument: str,
 ):
     pos_type = wxr.config.POS_SUBTITLES[pos_argument]["pos"]
     base_data["pos"] = pos_type
     append_base_data(page_data, "pos", pos_type, base_data)
-    child_nodes = list(node.filter_empty_str_child())
+    child_nodes = list(pos_title_node.filter_empty_str_child())
     form_line_start = 0  # Ligne de forme
     gloss_start = len(child_nodes)
     for index, child in enumerate(child_nodes):
