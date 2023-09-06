@@ -5,7 +5,10 @@ from unittest.mock import patch
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.fr.form_line import extract_form_line
+from wiktextract.extractor.fr.form_line import (
+    extract_form_line,
+    process_zh_mot_template,
+)
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
@@ -57,6 +60,26 @@ class TestFormLine(unittest.TestCase):
                         {"form": "autrice", "tags": ["pour une femme"]},
                         {"form": "auteure", "tags": ["pour une femme"]},
                         {"form": "auteuse", "tags": ["pour une femme"]},
+                    ]
+                }
+            ],
+        )
+
+    def test_zh_mot(self):
+        self.wxr.wtp.start_page("")
+        self.wxr.wtp.add_page("Modèle:zh-mot", 10, body="{{lang}} {{pron}}")
+        self.wxr.wtp.add_page("Modèle:lang", 10, body="mǎ")
+        self.wxr.wtp.add_page("Modèle:pron", 10, body="\\ma̠˨˩˦\\")
+        root = self.wxr.wtp.parse("{{zh-mot|马|mǎ}}")
+        page_data = [defaultdict(list)]
+        process_zh_mot_template(self.wxr, root.children[0], page_data)
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "sounds": [
+                        {"tags": ["Pinyin"], "zh-pron": "mǎ"},
+                        {"ipa": "\\ma̠˨˩˦\\"},
                     ]
                 }
             ],
