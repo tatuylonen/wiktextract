@@ -78,7 +78,9 @@ def extract_examples(
             example_data = {"type": "example"}
             example_data["text"] = clean_node(wxr, None, example_nodes)
             if source_template is not None:
-                example_data["source"] = clean_node(wxr, None, source_template)
+                example_data["source"] = clean_node(
+                    wxr, None, source_template
+                ).strip("— ()")
                 example_data["type"] = "quotation"
             gloss_data["examples"].append(example_data)
 
