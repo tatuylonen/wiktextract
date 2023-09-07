@@ -1701,7 +1701,8 @@ def parse_word_head(wxr, pos, text, data, is_reconstruction,
     # Split the head into alternatives.  This is a complicated task, as
     # we do not want so split on "or" or "," when immediately followed by more
     # head-final tags, but otherwise do want to split by them.
-    if "," in wxr.wtp.title:
+    # 20230907 added "or" to this to handle 'true or false', titles with 'or'
+    if "," in wxr.wtp.title or "or" in wxr.wtp.title:
         # A kludge to handle article titles/phrases with commas.
         # Preprocess splits to first capture the title, then handle
         # all the others as usual.
