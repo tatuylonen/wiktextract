@@ -35,7 +35,9 @@ class ThesaurusTerm:
     sense: Optional[str] = None
 
 
-def worker_func(page: Page) -> Tuple[bool, dict, str]:
+def worker_func(
+    page: Page,
+) -> Tuple[bool, Optional[List[ThesaurusTerm]], dict, str]:
     wxr: WiktextractContext = worker_func.wxr
     with tempfile.TemporaryDirectory(prefix="wiktextract") as tmpdirname:
         debug_path = "{}/wiktextract-{}".format(tmpdirname, os.getpid())
@@ -45,8 +47,7 @@ def worker_func(page: Page) -> Tuple[bool, dict, str]:
         wxr.wtp.start_page(page.title)
         try:
             terms = extract_thesaurus_page(wxr, page)
-            insert_thesaurus_terms(wxr.thesaurus_db_conn, terms)
-            return True, wxr.wtp.to_return(), None
+            return True, terms, wxr.wtp.to_return(), None
         except Exception as e:
             lst = traceback.format_exception(
                 type(e), value=e, tb=e.__traceback__
@@ -59,7 +60,7 @@ def worker_func(page: Page) -> Tuple[bool, dict, str]:
                 )
                 + "".join(lst)
             )
-            return False, {}, msg
+            return False, None, {}, msg
 
 
 def extract_thesaurus_page(
@@ -84,15 +85,19 @@ def extract_thesaurus_data(
     wxr.remove_unpicklable_objects()
     with Pool(num_processes, init_worker_process, (worker_func, wxr)) as pool:
         wxr.reconnect_databases(False)
-        for success, stats, err in pool.imap_unordered(
+        for success, terms, stats, err in pool.imap_unordered(
             worker_func, wxr.wtp.get_all_pages([thesaurus_ns_id], False)
         ):
             if not success:
                 # Print error in parent process - do not remove
                 logging.error(err)
                 continue
+            if terms is not None:
+                for term in terms:
+                    insert_thesaurus_term(wxr.thesaurus_db_conn, term)
             wxr.config.merge_return(stats)
 
+    wxr.thesaurus_db_conn.commit()
     num_pages = wxr.wtp.saved_page_nums([thesaurus_ns_id], False)
     total = thesaurus_linkage_number(wxr.thesaurus_db_conn)
     logging.info(
@@ -172,15 +177,6 @@ def search_thesaurus(
             pos=pos,
             language_code=lang_code,
         )
-
-
-def insert_thesaurus_terms(
-    db_conn: sqlite3.Connection, terms: Optional[List[ThesaurusTerm]]
-) -> None:
-    if terms is not None:
-        for term in terms:
-            insert_thesaurus_term(db_conn, term)
-        db_conn.commit()
 
 
 def insert_thesaurus_term(
