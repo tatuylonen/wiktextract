@@ -369,11 +369,11 @@ def clean_node(
     # Capture categories if sense_data has been given.  We also track
     # Lua execution errors here.
     # If collect_links=True (for glosses), capture links
-    catagory_ns_data = wxr.wtp.NAMESPACE_DATA.get("Category", {})
-    category_ns_names = {catagory_ns_data.get("name")} | set(
-        catagory_ns_data.get("aliases")
+    category_ns_data = wxr.wtp.NAMESPACE_DATA.get("Category", {})
+    category_ns_names = {category_ns_data.get("name")} | set(
+        category_ns_data.get("aliases")
     )
-    catagory_names_pattern = rf"(?:{'|'.join(category_ns_names)})"
+    category_names_pattern = rf"(?:{'|'.join(category_ns_names)})"
     if sense_data is not None:
         # Check for Lua execution error
         if '<strong class="error">Lua execution error' in v:
@@ -383,7 +383,7 @@ def clean_node(
         # Capture Category tags
         if not collect_links:
             for m in re.finditer(
-                rf"(?is)\[\[:?\s*{catagory_names_pattern}\s*:([^]|]+)",
+                rf"(?is)\[\[:?\s*{category_names_pattern}\s*:([^]|]+)",
                 v,
             ):
                 cat = clean_value(wxr, m.group(1))
@@ -396,11 +396,12 @@ def clean_node(
         else:
             for m in re.finditer(
                 r"(?is)\[\[:?(\s*([^][|:]+):)?\s*([^]|]+)(\|([^]|]+))?\]\]",
+                #            1   2               3       4  5
                 v,
             ):
                 # Add here other stuff different "Something:restofthelink"
                 # things;
-                if m.group(1) and m.group(1).strip() in category_ns_names:
+                if m.group(2) and m.group(2).strip() in category_ns_names:
                     cat = clean_value(wxr, m.group(3))
                     cat = re.sub(r"\s+", " ", cat)
                     cat = cat.strip()
@@ -438,7 +439,7 @@ def clean_node(
     # v = re.sub(r"(?s)\{\{.*", "", v)
     # Some templates create <sup>(Category: ...)</sup>; remove
     v = re.sub(
-        rf"(?si)\s*(?:<sup>)?\({catagory_names_pattern}:[^)]+\)(?:</sup>)?",
+        rf"(?si)\s*(?:<sup>)?\({category_names_pattern}:[^)]+\)(?:</sup>)?",
         "",
         v,
     )

@@ -432,6 +432,43 @@ foo
             ],
         )
 
+    def test_page8(self):
+        """Capture category links and normal links in glosses"""
+        self.wxr.wtp.start_page("foo")
+        lst = self.runpage(
+            """
+==English==
+
+===Noun===
+foo
+
+# sense 1 [[Category:bar]], [[bazlink|baz]]
+"""
+        )
+        # print("RETURNED:", json.dumps(lst, indent=2, sort_keys=True))
+        self.assertEqual(
+            lst,
+            [
+                {
+                    "lang": "English",
+                    "lang_code": "en",
+                    "pos": "noun",
+                    "senses": [
+                        {
+                            "categories": [
+                                "bar"
+                            ],
+                            "glosses": ["sense 1 , baz"],
+                            "links": [
+                                ("baz", "bazlink")
+                            ],
+                        },
+                    ],
+                    "word": "foo",
+                }
+            ],
+        )
+
     @patch(
         "wikitextprocessor.Wtp.get_page",
         return_value=Page(title="Template:zh-see", namespace_id=10, body=""),
