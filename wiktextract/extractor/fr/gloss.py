@@ -31,10 +31,12 @@ def extract_gloss(
                     or gloss_node.kind != NodeKind.TEMPLATE
                     # template "variante de" is not a modifier
                     # https://fr.wiktionary.org/wiki/Modèle:variante_de
-                    or gloss_node.template_name != "variante de"
+                    or gloss_node.template_name == "variante de"
                 ):
                     gloss_start = index
                     break
+                else:
+                    gloss_start = index + 1
             for mod_template in gloss_nodes[:gloss_start]:
                 gloss_data["tags"].append(
                     clean_node(wxr, gloss_data, mod_template).strip("()")
@@ -78,7 +80,9 @@ def extract_examples(
             example_data = {"type": "example"}
             example_data["text"] = clean_node(wxr, None, example_nodes)
             if source_template is not None:
-                example_data["source"] = clean_node(wxr, None, source_template)
+                example_data["source"] = clean_node(
+                    wxr, None, source_template
+                ).strip("— ()")
                 example_data["type"] = "quotation"
             gloss_data["examples"].append(example_data)
 

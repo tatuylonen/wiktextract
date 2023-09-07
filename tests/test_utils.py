@@ -5,8 +5,10 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.datautils import split_slashes
+from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
@@ -45,7 +47,7 @@ class UtilsTests(unittest.TestCase):
 
     def test_slashes6(self):
         ret = split_slashes(self.wxr, "foo/bar zap a/b")
-        print("ret:", ret)
+        # print("ret:", ret)
         self.assertEqual(
             ret, ["bar zap a", "bar zap b", "foo zap a", "foo zap b"]
         )
@@ -58,4 +60,27 @@ class UtilsTests(unittest.TestCase):
         # existing
         self.assertEqual(
             ret, ["bar zap a", "bar zap b", "foo zap a", "foo zap b"]
+        )
+
+    def test_audio_transcode_url(self):
+        sound_data = create_audio_url_dict(
+            "LL-Q150 (fra)-DenisdeShawi-bonjour.wav"
+        )
+        self.assertEqual(
+            sound_data,
+            {
+                "audio": "LL-Q150 (fra)-DenisdeShawi-bonjour.wav",
+                "wav_url": "https://commons.wikimedia.org/wiki/Special:FilePath/LL-Q150 (fra)-DenisdeShawi-bonjour.wav",
+                "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/e/e1/LL-Q150_(fra)-DenisdeShawi-bonjour.wav/LL-Q150_(fra)-DenisdeShawi-bonjour.wav.mp3",
+                "ogg_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/e/e1/LL-Q150_(fra)-DenisdeShawi-bonjour.wav/LL-Q150_(fra)-DenisdeShawi-bonjour.wav.ogg",
+            },
+        )
+        sound_data = create_audio_url_dict("File:Fr-BonjourF.oga")
+        self.assertEqual(
+            sound_data,
+            {
+                "audio": "Fr-BonjourF.oga",
+                "oga_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Fr-BonjourF.oga",
+                "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/b9/Fr-BonjourF.oga/Fr-BonjourF.oga.mp3",
+            },
         )

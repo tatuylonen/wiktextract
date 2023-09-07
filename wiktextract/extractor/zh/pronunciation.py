@@ -1,11 +1,10 @@
-import hashlib
 import re
 from typing import Dict, List, Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 
 from wiktextract.datautils import append_base_data
-from wiktextract.extractor.share import WIKIMEDIA_COMMONS_URL
+from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -86,39 +85,6 @@ def extract_pronunciation_recursively(
         extract_pronunciation_recursively(
             wxr, page_data, base_data, lang_code, node.children, tags
         )
-
-
-def create_audio_url_dict(filename: str) -> Dict[str, str]:
-    file_url_key = (
-        "ogg_url"
-        if filename.endswith(".ogg")
-        else filename[filename.rfind(".") + 1 :].lower() + "_url"
-    )
-    filename_without_prefix = filename.removeprefix("File:")
-    audio_dict = {
-        "audio": filename_without_prefix,
-        file_url_key: WIKIMEDIA_COMMONS_URL + filename,
-    }
-    for file_suffix in ["ogg", "mp3"]:
-        transcode_url_key = f"{file_suffix}_url"
-        if file_url_key != transcode_url_key:
-            audio_dict[transcode_url_key] = create_transcode_url(
-                filename_without_prefix, file_suffix
-            )
-    return audio_dict
-
-
-def create_transcode_url(filename: str, transcode_suffix: str) -> str:
-    # Chinese Wiktionary template might expands filename that has the a lower
-    # first letter but the actual Wikimedia Commons file's first letter is
-    # capitalized
-    filename = filename[0].upper() + filename[1:]
-    filename = filename.replace(" ", "_")
-    md5 = hashlib.md5(filename.encode()).hexdigest()
-    return (
-        "https://upload.wikimedia.org/wikipedia/commons/transcoded/"
-        + f"{md5[0]}/{md5[:2]}/{filename}/{filename}.{transcode_suffix}"
-    )
 
 
 def combine_pronunciation_tags(

@@ -13,6 +13,7 @@ from wiktextract.wxr_context import WiktextractContext
 from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
 from .inflection import extract_inflection
+from .pronunciation import extract_pronunciation
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -31,23 +32,23 @@ def parse_section(
     wxr: WiktextractContext,
     page_data: List[Dict],
     base_data: Dict,
-    node: Union[WikiNode, List[Union[WikiNode, str]]],
+    level_node: Union[WikiNode, List[Union[WikiNode, str]]],
 ) -> None:
     # Page structure: https://fr.wiktionary.org/wiki/Wiktionnaire:Structure_des_pages
-    if isinstance(node, list):
-        for x in node:
+    if isinstance(level_node, list):
+        for x in level_node:
             parse_section(wxr, page_data, base_data, x)
         return
-    if not isinstance(node, WikiNode):
+    if not isinstance(level_node, WikiNode):
         return
-    if node.kind in LEVEL_KINDS:
-        level_node = node.largs[0][0]
-        if level_node.kind == NodeKind.TEMPLATE:
-            if level_node.template_name == "S":
+    if level_node.kind in LEVEL_KINDS:
+        level_node_content = level_node.largs[0][0]
+        if level_node_content.kind == NodeKind.TEMPLATE:
+            if level_node_content.template_name == "S":
                 # https://fr.wiktionary.org/wiki/Modèle:S
                 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
-                section_type = level_node.template_parameters.get(1)
-                subtitle = clean_node(wxr, page_data[-1], node.largs)
+                section_type = level_node_content.template_parameters.get(1)
+                subtitle = clean_node(wxr, page_data[-1], level_node.largs)
                 wxr.wtp.start_subsection(subtitle)
                 if (
                     section_type
@@ -57,19 +58,21 @@ def parse_section(
                 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections_de_types_de_mots
                 elif section_type in wxr.config.POS_SUBTITLES:
                     process_pos_block(
-                        wxr, page_data, base_data, node, section_type
+                        wxr, page_data, base_data, level_node, section_type
                     )
                 elif (
                     wxr.config.capture_etymologies
                     and section_type in wxr.config.OTHER_SUBTITLES["etymology"]
                 ):
-                    extract_etymology(wxr, page_data, base_data, node.children)
+                    extract_etymology(
+                        wxr, page_data, base_data, level_node.children
+                    )
                 elif (
                     wxr.config.capture_pronunciation
                     and section_type
                     in wxr.config.OTHER_SUBTITLES["pronunciation"]
                 ):
-                    pass
+                    extract_pronunciation(wxr, page_data, level_node)
                 elif (
                     wxr.config.capture_linkages
                     and section_type in wxr.config.LINKAGE_SUBTITLES

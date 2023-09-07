@@ -145,3 +145,33 @@ class TestFormLine(unittest.TestCase):
                 }
             ],
         )
+
+    def test_variante_de(self):
+        # https://fr.wiktionary.org/wiki/basket-ball
+        self.wxr.wtp.start_page("")
+        self.wxr.wtp.add_page("Modèle:désuet", 10, body="(Désuet)")
+        self.wxr.wtp.add_page("Modèle:sports", 10, body="(Sport)")
+        self.wxr.wtp.add_page(
+            "Modèle:indénombrable", 10, body="(Indénombrable)"
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:variante de", 10, body="Variante de basketball"
+        )
+        root = self.wxr.wtp.parse(
+            "# {{désuet|en}} {{sports|en}} {{indénombrable|en}} {{variante de|basketball|en}}."
+        )
+        page_data = [defaultdict(list)]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "senses": [
+                        {
+                            "glosses": ["Variante de basketball."],
+                            "tags": ["Désuet", "Sport", "Indénombrable"],
+                        }
+                    ]
+                }
+            ],
+        )
