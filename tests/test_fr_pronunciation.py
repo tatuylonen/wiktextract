@@ -34,7 +34,7 @@ class TestPronunciation(unittest.TestCase):
         ]
         self.wxr.wtp.start_page("")
         root = self.wxr.wtp.parse(
-            "=== Prononciation  ===\n* {{pron|bɔ̃.ʒuʁ|fr}}\n** {{écouter|France (Paris)|bõ.ʒuːʁ|audio=Fr-bonjour.ogg|lang=fr}}"
+            "=== Prononciation ===\n* {{pron|bɔ̃.ʒuʁ|fr}}\n** {{écouter|France (Paris)|bõ.ʒuːʁ|audio=Fr-bonjour.ogg|lang=fr}}"
         )
         extract_pronunciation(self.wxr, page_data, root.children[0])
         self.assertEqual(
