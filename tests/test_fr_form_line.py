@@ -84,3 +84,29 @@ class TestFormLine(unittest.TestCase):
                 }
             ],
         )
+
+    def test_ipa_location_tag(self):
+        # https://fr.wiktionary.org/wiki/basket-ball
+        self.wxr.wtp.start_page("")
+        self.wxr.wtp.add_page("Modèle:pron", 10, body="{{{1}}}")
+        self.wxr.wtp.add_page("Modèle:FR", 10, body="(France)")
+        self.wxr.wtp.add_page("Modèle:CA", 10, body="(Canada)")
+        self.wxr.wtp.add_page("Modèle:m", 10, body="masculin")
+        root = self.wxr.wtp.parse(
+            "{{pron|bas.kɛt.bol|fr}} {{FR|nocat=1}} ''ou'' {{pron|bas.kɛt.bɔl|fr}} {{FR|nocat=1}} ''ou'' {{pron|bas.kɛt.bɑl|fr}} {{CA|nocat=1}} {{m}}"
+        )
+        page_data = [defaultdict(list)]
+        extract_form_line(self.wxr, page_data, root.children)
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "tags": ["masculin"],
+                    "sounds": [
+                        {"ipa": "bas.kɛt.bol", "tags": ["France"]},
+                        {"ipa": "bas.kɛt.bɔl", "tags": ["France"]},
+                        {"ipa": "bas.kɛt.bɑl", "tags": ["Canada"]},
+                    ],
+                }
+            ],
+        )

@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Dict, List, Union
 
 from wikitextprocessor import NodeKind, WikiNode
@@ -19,11 +20,14 @@ def extract_form_line(
     A line of wikitext between pos subtitle and the first gloss, contains IPA,
     gender and inflection forms.
     """
+    pre_template_name = ""
+    pron_templates = frozenset(["pron", "prononciation", "//"])
+
     for node in nodes:
         if isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE:
-            if node.template_name in {"pron", "prononciation", "//"}:
+            if node.template_name in pron_templates:
                 page_data[-1]["sounds"].append(
-                    {"ipa": clean_node(wxr, None, node)}
+                    defaultdict(list, {"ipa": clean_node(wxr, None, node)})
                 )
             elif node.template_name == "équiv-pour":
                 process_equiv_pour_template(node, page_data)
@@ -31,7 +35,17 @@ def extract_form_line(
                 process_zh_mot_template(wxr, node, page_data)
             else:
                 tag = clean_node(wxr, page_data[-1], node)
-                page_data[-1]["tags"].append(tag)
+                if (
+                    tag.startswith("(")
+                    and tag.endswith(")")
+                    and pre_template_name in pron_templates
+                ):
+                    # it's the location of the previous IPA template
+                    page_data[-1]["sounds"][-1]["tags"].append(tag.strip("()"))
+                else:
+                    page_data[-1]["tags"].append(tag)
+
+            pre_template_name = node.template_name
 
 
 def process_equiv_pour_template(
