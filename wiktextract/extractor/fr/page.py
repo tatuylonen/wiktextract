@@ -14,6 +14,7 @@ from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
 from .inflection import extract_inflection
 from .pronunciation import extract_pronunciation
+from .translation import extract_translation
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -83,7 +84,7 @@ def parse_section(
                     and section_type
                     in wxr.config.OTHER_SUBTITLES["translations"]
                 ):
-                    pass
+                    extract_translation(wxr, page_data, level_node)
                 elif (
                     wxr.config.capture_inflections
                     and section_type
