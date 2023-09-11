@@ -40,7 +40,12 @@ def process_pron_list_item(
     sound_data: Dict[str, Union[str, List[str]]],
 ) -> List[Dict[str, Union[str, List[str]]]]:
     for template_node in list_item_node.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name in {"pron", "prononciation", "phon"}:
+        if template_node.template_name in {
+            "pron",
+            "prononciation",
+            "phon",
+            "lang",  # used in template "cmn-pron"
+        }:
             sound_data["ipa"] = clean_node(wxr, None, template_node)
         elif template_node.template_name in {"écouter", "audio", "pron-rég"}:
             process_ecouter_template(template_node, sound_data)
