@@ -1,4 +1,5 @@
 from collections import defaultdict
+from copy import deepcopy
 from typing import Dict, List, Union
 
 from wikitextprocessor import NodeKind, WikiNode
@@ -39,9 +40,22 @@ def process_pron_list_item(
     page_data: List[Dict],
     sound_data: Dict[str, Union[str, List[str]]],
 ) -> List[Dict[str, Union[str, List[str]]]]:
+    pron_key = "zh-pron" if page_data[-1].get("lang_code") == "zh" else "ipa"
+
     for template_node in list_item_node.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name in {"pron", "prononciation", "phon"}:
-            sound_data["ipa"] = clean_node(wxr, None, template_node)
+        if template_node.template_name in {
+            "pron",
+            "prononciation",
+            "phon",
+            "lang",  # used in template "cmn-pron"
+        }:
+            if (
+                template_node.template_name in {"pron", "prononciation"}
+                and len(template_node.template_parameters.get(1, "").strip())
+                == 0
+            ):
+                continue  # no IPA data
+            sound_data[pron_key] = clean_node(wxr, None, template_node)
         elif template_node.template_name in {"écouter", "audio", "pron-rég"}:
             process_ecouter_template(template_node, sound_data)
         else:
@@ -51,17 +65,35 @@ def process_pron_list_item(
 
     if list_item_node.contain_node(NodeKind.LIST):
         returned_data = []
+        for bold_node in list_item_node.find_child(NodeKind.BOLD):
+            sound_data["tags"].append(clean_node(wxr, None, bold_node))
+
         for nest_list_item in list_item_node.find_child_recursively(
             NodeKind.LIST_ITEM
         ):
-            new_sound_data = sound_data.copy()
+            new_sound_data = deepcopy(sound_data)
             process_pron_list_item(
                 wxr, nest_list_item, page_data, new_sound_data
             )
-            returned_data.append(new_sound_data)
+            if pron_key in new_sound_data:
+                returned_data.append(new_sound_data)
+
         return returned_data
     elif len(sound_data) > 0:
-        return [sound_data]
+        if pron_key not in sound_data:
+            for child in list_item_node.filter_empty_str_child():
+                if isinstance(child, str):
+                    if child.strip().startswith(": "):
+                        # IPA text after "language : "
+                        sound_data[pron_key] = (
+                            child.strip().removeprefix(": ").strip()
+                        )
+                    elif len(child.strip()) > 0 and child.strip() != ":":
+                        # language text before ":"
+                        sound_data["tags"].append(child.strip())
+
+        if pron_key in sound_data:
+            return [sound_data]
 
 
 def process_ecouter_template(

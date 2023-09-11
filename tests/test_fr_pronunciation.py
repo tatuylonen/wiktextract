@@ -67,3 +67,16 @@ class TestPronunciation(unittest.TestCase):
                 },
             ],
         )
+
+    def test_str_pron(self):
+        page_data = [defaultdict(list, {"lang_code": "zh"})]
+        self.wxr.wtp.add_page("Modèle:Yale-zh", 10, body="Yale")
+        self.wxr.wtp.start_page("")
+        root = self.wxr.wtp.parse(
+            "=== {{S|prononciation}} ===\n* '''cantonais''' {{pron||yue}}\n** {{Yale-zh}} : nei⁵hou²"
+        )
+        extract_pronunciation(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data[0].get("sounds"),
+            [{"tags": ["cantonais", "Yale"], "zh-pron": "nei⁵hou²"}],
+        )
