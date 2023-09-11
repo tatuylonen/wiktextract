@@ -13,6 +13,7 @@ from wiktextract.wxr_context import WiktextractContext
 from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
 from .inflection import extract_inflection
+from .linkage import extract_linkage
 from .pronunciation import extract_pronunciation
 from .translation import extract_translation
 
@@ -46,6 +47,9 @@ def parse_section(
         level_node_content = level_node.largs[0][0]
         if level_node_content.kind == NodeKind.TEMPLATE:
             if level_node_content.template_name == "S":
+                # French Wiktionary uses a `S` template for all subtitles, we
+                # could find the subtitle type by only checking the template
+                # parameter.
                 # https://fr.wiktionary.org/wiki/Modèle:S
                 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
                 section_type = level_node_content.template_parameters.get(1)
@@ -78,7 +82,12 @@ def parse_section(
                     wxr.config.capture_linkages
                     and section_type in wxr.config.LINKAGE_SUBTITLES
                 ):
-                    pass
+                    extract_linkage(
+                        wxr,
+                        page_data,
+                        level_node,
+                        wxr.config.LINKAGE_SUBTITLES.get(section_type),
+                    )
                 elif (
                     wxr.config.capture_translations
                     and section_type
