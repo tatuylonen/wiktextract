@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
@@ -12,15 +13,20 @@ def extract_inflection(
     node: WikiNode,
     template_name: str,
 ) -> None:
-    extract_template_funcs = {"fr-rég": extract_fr_reg}
-    extract_func = extract_template_funcs.get(template_name)
-    if extract_func is not None:
-        extract_func(wxr, page_data, node)
-    elif template_name.startswith("fr-accord-"):
-        extract_fr_accord(wxr, page_data, node)
+    # inflection templates
+    # https://fr.wiktionary.org/wiki/Catégorie:Modèles_d’accord_en_français
+    process_inflection_table(wxr, page_data, node)
 
 
-def extract_fr_reg(
+IGNORE_TABLE_HEADERS = {
+    "Terme",  # https://fr.wiktionary.org/wiki/Modèle:de-adj
+}
+IGNORE_TABLE_CELL = {
+    "Déclinaisons",  # de-adj
+}
+
+
+def process_inflection_table(
     wxr: WiktextractContext,
     page_data: List[Dict],
     node: WikiNode,
@@ -29,68 +35,55 @@ def extract_fr_reg(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
     table_node = expanded_node.children[0]
-    pass_first_row = False
-    for table_row in table_node.find_child(NodeKind.TABLE_ROW):
-        if pass_first_row:
-            break  # the second row is IPA
-        for index, table_cell in enumerate(
-            table_row.find_child(NodeKind.TABLE_CELL)
+    column_headers = []
+    for row_num, table_row in enumerate(
+        table_node.find_child(NodeKind.TABLE_ROW)
+    ):
+        if (
+            row_num != 0
+            and len(list(table_row.filter_empty_str_child()))
+            == len(column_headers) + 1
         ):
-            form_text = clean_node(wxr, None, table_cell)
-            if form_text != page_data[-1].get("word"):
-                tags = ["singular"] if index == 0 else ["plural"]
-                page_data[-1]["forms"].append({"form": form_text, "tags": tags})
-            pass_first_row = True
+            # data row has one more column then header: "fr-accord-al" template
+            column_headers.insert(0, "")
 
-
-def extract_fr_accord(
-    wxr: WiktextractContext,
-    page_data: List[Dict],
-    node: WikiNode,
-) -> None:
-    expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(node), expand_all=True
-    )
-    table_node = expanded_node.children[0]
-    for table_row in table_node.find_child(NodeKind.TABLE_ROW):
-        gender_type = ""
-        for cell_index, table_cell_node in enumerate(
+        row_header = ""
+        for column_num, table_cell in enumerate(
             table_row.filter_empty_str_child()
         ):
-            if isinstance(table_cell_node, WikiNode):
-                if table_cell_node.kind == NodeKind.TABLE_HEADER_CELL:
-                    gender_text = clean_node(wxr, None, table_cell_node)
-                    gender_types = {
-                        "Masculin": "masculine",
-                        "Féminin": "feminine",
-                    }
-                    gender_type = gender_types.get(gender_text, "")
-                elif table_cell_node.kind == NodeKind.TABLE_CELL:
-                    table_cell_children = list(
-                        table_cell_node.filter_empty_str_child()
-                    )
-                    br_tag_index = len(table_cell_children)
-                    for cell_child_index, table_cell_child in enumerate(
-                        table_cell_children
+            form_data = defaultdict(list)
+            if isinstance(table_cell, WikiNode):
+                if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
+                    table_header_text = clean_node(wxr, None, table_cell)
+                    if row_num == 0:
+                        column_headers.append(table_header_text)
+                    elif (
+                        column_num == 0
+                        and table_header_text not in IGNORE_TABLE_HEADERS
                     ):
-                        if (
-                            isinstance(table_cell_child, WikiNode)
-                            and table_cell_child.kind == NodeKind.HTML
-                            and table_cell_child.tag == "br"
+                        row_header = table_header_text
+                    elif table_header_text not in IGNORE_TABLE_HEADERS:
+                        form_data["tags"].append(table_header_text)
+                elif table_cell.kind == NodeKind.TABLE_CELL:
+                    table_cell_lines = clean_node(wxr, None, table_cell)
+                    for table_cell_line in table_cell_lines.splitlines():
+                        if table_cell_line.startswith(
+                            "\\"
+                        ) and table_cell_line.endswith("\\"):
+                            form_data["ipa"] = table_cell_line
+                        elif (
+                            table_cell_line != page_data[-1].get("word")
+                            and table_cell_line not in IGNORE_TABLE_CELL
                         ):
-                            br_tag_index = cell_child_index
-                            break
-                    form = clean_node(
-                        wxr, None, table_cell_children[:br_tag_index]
-                    )
-                    if len(form) > 0 and form != page_data[-1].get("word"):
-                        ipa = clean_node(
-                            wxr, None, table_cell_children[br_tag_index + 1 :]
-                        )
-                        tags = ["singular"] if cell_index == 1 else ["plural"]
-                        form_data = {"form": form, "tags": tags}
-                        if len(ipa) > 0:
-                            form_data["ipa"] = ipa
-                        if len(gender_type) > 0:
-                            form_data["tags"].append(gender_type)
-                        page_data[-1]["forms"].append(form_data)
+                            form_data["form"] = table_cell_line
+                    if (
+                        len(column_headers) > column_num
+                        and column_headers[column_num]
+                        not in IGNORE_TABLE_HEADERS
+                    ):
+                        form_data["tags"].append(column_headers[column_num])
+
+            if len(row_header) > 0:
+                form_data["tags"].append(row_header)
+            if "form" in form_data:
+                page_data[-1]["forms"].append(form_data)

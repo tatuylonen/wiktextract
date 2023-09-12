@@ -7,6 +7,8 @@ from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .pronunciation import PRON_TEMPLATES, process_pron_template
+
 
 def extract_form_line(
     wxr: WiktextractContext,
@@ -21,14 +23,14 @@ def extract_form_line(
     gender and inflection forms.
     """
     pre_template_name = ""
-    pron_templates = frozenset(["pron", "prononciation", "//"])
-
     for node in nodes:
         if isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE:
-            if node.template_name in pron_templates:
-                page_data[-1]["sounds"].append(
-                    defaultdict(list, {"ipa": clean_node(wxr, None, node)})
-                )
+            if node.template_name in PRON_TEMPLATES:
+                ipa_text = process_pron_template(wxr, node)
+                if len(ipa_text) > 0:
+                    page_data[-1]["sounds"].append(
+                        defaultdict(list, {"ipa": ipa_text})
+                    )
             elif node.template_name == "équiv-pour":
                 process_equiv_pour_template(node, page_data)
             elif node.template_name.startswith("zh-mot"):
@@ -38,7 +40,7 @@ def extract_form_line(
                 if (
                     tag.startswith("(")
                     and tag.endswith(")")
-                    and pre_template_name in pron_templates
+                    and pre_template_name in PRON_TEMPLATES
                 ):
                     # it's the location of the previous IPA template
                     page_data[-1]["sounds"][-1]["tags"].append(tag.strip("()"))

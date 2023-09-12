@@ -30,7 +30,6 @@ class TestInflection(unittest.TestCase):
 |'''<span><bdi>productrice</bdi></span>'''
 | <bdi>[[productrices#fr|productrices]]</bdi>
 |-
-| colspan='2'
 |[[Annexe:Prononciation/français|<span>\\pʁɔ.dyk.tʁis\\</span>]]
 |}
         """,
@@ -42,48 +41,49 @@ class TestInflection(unittest.TestCase):
         extract_inflection(self.wxr, page_data, node, "fr-rég")
         self.assertEqual(
             page_data[-1].get("forms"),
-            [{"form": "productrices", "tags": ["plural"]}],
+            [{"form": "productrices", "tags": ["Pluriel"]}],
         )
 
     @patch(
         "wikitextprocessor.Wtp.node_to_wikitext",
         return_value="""{|
 |-
-| class='invisible' |
-! scope='col' ! Singulier !! Pluriel
-|-
-! scope='row' | Masculin
-| [[producteur]]<br/>[[Annexe:Prononciation/français|<span>\\pʁɔ.dyk.tœʁ\\</span>]]
-| [[producteurs]]<br/>[[Annexe:Prononciation/français|<span>\\pʁɔ.dyk.tœʁ\\</span>]]
-|-
-! scope='row' | Féminin
-| [[productrice]]<br/>[[Annexe:Prononciation/français|<span>\\pʁɔ.dyk.tʁis\\</span>]]
-| [[productrices]]<br/>[[Annexe:Prononciation/français|<span>\\pʁɔ.dyk.tʁis\\</span>]]
-|}
-        """,
+|class='invisible'|
+!scope='col'| Singulier
+!scope='col'| Pluriel
+|- class='flextable-fr-m'
+!scope='row'| Masculin
+|[[animal]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mal\\</span>]]
+|[[animaux]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mo\\</span>]]
+|- class='flextable-fr-f'
+!scope='row'| Féminin
+|[[animale]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mal\\</span>]]
+|[[animales]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mal\\</span>]]
+|}"""
     )
-    def test_fr_accord(self, mock_node_to_wikitext):
-        page_data = [defaultdict(list, {"word": "productrice"})]
+    def test_fr_accord_al(self, mock_node_to_wikitext):
+        # https://fr.wiktionary.org/wiki/animal#Adjectif
+        page_data = [defaultdict(list, {"word": "animal", "lang_code": "fr"})]
         node = WikiNode(NodeKind.TEMPLATE, 0)
-        self.wxr.wtp.start_page("productrice")
-        extract_inflection(self.wxr, page_data, node, "fr-accord-eur")
+        self.wxr.wtp.start_page("animal")
+        extract_inflection(self.wxr, page_data, node, "fr-accord-al")
         self.assertEqual(
             page_data[-1].get("forms"),
             [
                 {
-                    "form": "producteur",
-                    "tags": ["singular", "masculine"],
-                    "ipa": "\\pʁɔ.dyk.tœʁ\\",
+                    "ipa": "\\a.ni.mo\\",
+                    "tags": ["Pluriel", "Masculin"],
+                    "form": "animaux"
                 },
                 {
-                    "form": "producteurs",
-                    "tags": ["plural", "masculine"],
-                    "ipa": "\\pʁɔ.dyk.tœʁ\\",
+                    "ipa": "\\a.ni.mal\\",
+                    "tags": ["Singulier", "Féminin"],
+                    "form": "animale"
                 },
                 {
-                    "form": "productrices",
-                    "tags": ["plural", "feminine"],
-                    "ipa": "\\pʁɔ.dyk.tʁis\\",
-                },
-            ],
+                    "ipa": "\\a.ni.mal\\",
+                    "tags": ["Pluriel", "Féminin"],
+                    "form": "animales"
+                }
+            ]
         )

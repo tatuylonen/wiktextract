@@ -26,7 +26,8 @@ class TestFormLine(unittest.TestCase):
         )
 
     @patch(
-        "wiktextract.extractor.fr.form_line.clean_node", return_value="/lə nɔ̃/"
+        "wiktextract.extractor.fr.pronunciation.clean_node",
+        return_value="/lə nɔ̃/",
     )
     def test_ipa(self, mock_clean_node):
         self.wxr.wtp.start_page("")

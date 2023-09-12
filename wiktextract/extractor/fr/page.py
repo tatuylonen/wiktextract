@@ -121,6 +121,7 @@ def process_pos_block(
     child_nodes = list(pos_title_node.filter_empty_str_child())
     form_line_start = 0  # Ligne de forme
     gloss_start = len(child_nodes)
+    lang_code = page_data[-1].get("lang_code")
     for index, child in enumerate(child_nodes):
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
@@ -131,9 +132,7 @@ def process_pos_block(
                     process_exemple_template(
                         wxr, child, page_data[-1]["senses"][-1]
                     )
-                elif template_name.startswith(("fr-accord-", "fr-rég")):
-                    # inflection templates
-                    # https://fr.wiktionary.org/wiki/Catégorie:Modèles_d’accord_en_français
+                elif template_name.startswith(f"{lang_code}-"):
                     extract_inflection(wxr, page_data, child, template_name)
             elif child.kind == NodeKind.BOLD:
                 form_line_start = index + 1
