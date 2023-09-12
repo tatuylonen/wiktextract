@@ -94,6 +94,8 @@ def process_pron_list_item(
 
         if pron_key in sound_data:
             return [sound_data]
+        else:
+            return []
 
 
 def process_ecouter_template(
