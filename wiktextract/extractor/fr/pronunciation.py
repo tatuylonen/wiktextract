@@ -22,6 +22,9 @@ def extract_pronunciation(
                 )
             )
 
+    if len(sound_data) == 0:
+        return
+
     if level_node.kind == NodeKind.LEVEL3:
         # Add extracted sound data to all sense dictionaries that have the same
         # language code when the prononciation subtitle is a level 3 title node.
@@ -34,6 +37,10 @@ def extract_pronunciation(
         page_data[-1]["sounds"].extend(sound_data)
 
 
+# "lang" is used in template "cmn-pron"
+PRON_TEMPLATES = frozenset(["pron", "prononciation", "//", "phon", "lang"])
+
+
 def process_pron_list_item(
     wxr: WiktextractContext,
     list_item_node: WikiNode,
@@ -43,19 +50,10 @@ def process_pron_list_item(
     pron_key = "zh-pron" if page_data[-1].get("lang_code") == "zh" else "ipa"
 
     for template_node in list_item_node.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name in {
-            "pron",
-            "prononciation",
-            "phon",
-            "lang",  # used in template "cmn-pron"
-        }:
-            if (
-                template_node.template_name in {"pron", "prononciation"}
-                and len(template_node.template_parameters.get(1, "").strip())
-                == 0
-            ):
-                continue  # no IPA data
-            sound_data[pron_key] = clean_node(wxr, None, template_node)
+        if template_node.template_name in PRON_TEMPLATES:
+            pron_text = process_pron_template(wxr, template_node)
+            if len(pron_text) > 0:
+                sound_data[pron_key] = pron_text
         elif template_node.template_name in {"écouter", "audio", "pron-rég"}:
             process_ecouter_template(template_node, sound_data)
         else:
@@ -96,6 +94,19 @@ def process_pron_list_item(
             return [sound_data]
         else:
             return []
+
+
+def process_pron_template(
+    wxr: WiktextractContext, template_node: TemplateNode
+) -> str:
+    if (
+        template_node.template_name in {"pron", "prononciation", "//"}
+        and len(template_node.template_parameters.get(1, "").strip()) == 0
+    ):
+        # some pages don't pass IPA parameter to the "pron" template
+        # and expand to an edit link for adding the missing data.
+        return ""
+    return clean_node(wxr, None, template_node)
 
 
 def process_ecouter_template(
