@@ -93,14 +93,20 @@ def process_exemple_template(
     # https://fr.wiktionary.org/wiki/Modèle:exemple
     # https://fr.wiktionary.org/wiki/Modèle:ja-exemple
     # https://fr.wiktionary.org/wiki/Modèle:zh-exemple
-    text = node.template_parameters.get(1, "")
-    translation = node.template_parameters.get(
-        2, node.template_parameters.get("sens", "")
+    text = clean_node(wxr, None, node.template_parameters.get(1, ""))
+    translation = clean_node(
+        wxr,
+        None,
+        node.template_parameters.get(
+            2, node.template_parameters.get("sens", "")
+        ),
     )
-    transcription = node.template_parameters.get(
-        3, node.template_parameters.get("tr", "")
+    transcription = clean_node(
+        wxr,
+        None,
+        node.template_parameters.get(3, node.template_parameters.get("tr", "")),
     )
-    source = node.template_parameters.get("source", "")
+    source = clean_node(wxr, None, node.template_parameters.get("source", ""))
     example_data = {"type": "example"}
     if len(text) > 0:
         example_data["text"] = clean_node(wxr, None, text)
