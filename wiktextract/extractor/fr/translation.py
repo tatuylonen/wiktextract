@@ -53,6 +53,7 @@ def process_italic_node(
         and tag.endswith(")")
         and previous_node.kind == NodeKind.TEMPLATE
         and previous_node.template_name.startswith("trad")
+        and len(page_data[-1].get("translations", [])) > 0
     ):
         page_data[-1]["translations"][-1]["tags"].append(tag.strip("()"))
 
@@ -105,6 +106,6 @@ def process_translation_templates(
                 "traditional_writing"
             ] = translation_traditional_writing
         page_data[-1]["translations"].append(translation_data)
-    else:
+    elif len(page_data[-1].get("translations", [])) > 0:
         tag = clean_node(wxr, None, template_node).strip("()")
         page_data[-1]["translations"][-1]["tags"].append(tag)
