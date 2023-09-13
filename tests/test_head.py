@@ -667,3 +667,35 @@ class HeadTests(unittest.TestCase):
                     "plural"
                   ]
                 }]})
+
+    def test_head34(self):
+        data = {}
+        self.wxr.wtp.start_page("foo or baz")
+        self.wxr.wtp.start_section("Latin")
+        self.wxr.wtp.start_subsection("Noun")
+        parse_word_head(self.wxr, "noun",
+                        "foo or baz (plural)",
+                        data, False, None)
+        print(json.dumps(data, indent=2, sort_keys=True))
+        self.assertEqual(data, {
+                  # no 'canonical' because identical to title
+                  "tags": [
+                    "plural"
+                  ]
+                })
+
+    def test_head35(self):
+        data = {}
+        self.wxr.wtp.start_page("intueor")
+        self.wxr.wtp.start_section("Latin")
+        self.wxr.wtp.start_subsection("Noun")
+        parse_word_head(self.wxr, "noun",
+                        "intueor (plural)",
+                        data, False, None)
+        print(json.dumps(data, indent=2, sort_keys=True))
+        self.assertEqual(data, {
+                  # no 'canonical' because identical to title
+                  "tags": [
+                    "plural"
+                  ]
+                })
