@@ -144,6 +144,10 @@ def split_ipa(text: str) -> list[str] | str:
         return text.split(" ou ")
     if text.startswith("ou "):
         return text.removeprefix("ou ")
+    if text.endswith(" Prononciation ?\\"):
+        # inflection table templates use a edit link when the ipa data is
+        # missing, and the link usually ends with " Prononciation ?"
+        return ""
     return text
 
 
@@ -151,6 +155,9 @@ def insert_ipa(target_dict: dict[str, str | list[str]], ipa_text: str) -> None:
     # insert IPA text to a dictionary, and merge values of the key "ipa" and
     # "ipas", `target_dict` is created by `defaultdict(list)`.
     ipa_data = split_ipa(ipa_text)
+    if len(ipa_data) == 0:
+        return
+
     if isinstance(ipa_data, str):
         if "ipas" in target_dict:
             target_dict["ipas"].append(ipa_data)

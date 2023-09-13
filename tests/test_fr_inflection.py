@@ -141,3 +141,24 @@ class TestInflection(unittest.TestCase):
                 }
             ],
         )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{|
+! '''Singulier'''
+! '''Pluriel'''
+|-
+| [[animal]]<span><br /><span>\\<small><span>[//fr.wiktionary.org/w/index.php?title=ration&action=edit Prononciation ?]</span></small>\\</span></span>
+| [[animales]]<span><br /><span>\\<small><span>[//fr.wiktionary.org/w/index.php?title=ration&action=edit Prononciation ?]</span></small>\\</span></span>
+|}""",
+    )
+    def test_invalid_ipa(self, mock_node_to_wikitext):
+        # https://fr.wiktionary.org/wiki/animal#Nom_commun_3
+        page_data = [defaultdict(list, {"lang_code": "en", "word": "animal"})]
+        node = WikiNode(NodeKind.TEMPLATE, 0)
+        self.wxr.wtp.start_page("animal")
+        extract_inflection(self.wxr, page_data, node, "ast-accord-mf")
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [{"tags": ["Pluriel"], "form": "animales"}],
+        )
