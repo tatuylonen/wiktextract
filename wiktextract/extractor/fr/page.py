@@ -44,15 +44,14 @@ def parse_section(
     if not isinstance(level_node, WikiNode):
         return
     if level_node.kind in LEVEL_KINDS:
-        level_node_content = level_node.largs[0][0]
-        if level_node_content.kind == NodeKind.TEMPLATE:
-            if level_node_content.template_name == "S":
+        for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
+            if level_node_template.template_name == "S":
                 # French Wiktionary uses a `S` template for all subtitles, we
                 # could find the subtitle type by only checking the template
                 # parameter.
                 # https://fr.wiktionary.org/wiki/Modèle:S
                 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
-                section_type = level_node_content.template_parameters.get(1)
+                section_type = level_node_template.template_parameters.get(1)
                 subtitle = clean_node(wxr, page_data[-1], level_node.largs)
                 wxr.wtp.start_subsection(subtitle)
                 if (
@@ -202,14 +201,15 @@ def parse_page(
             )
             continue
 
-        level_node = node.largs[0][0]
-        if level_node.kind == NodeKind.TEMPLATE:
+        for subtitle_template in node.find_content(NodeKind.TEMPLATE):
             # https://fr.wiktionary.org/wiki/Modèle:langue
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_langues
-            if level_node.template_name == "langue":
+            if subtitle_template.template_name == "langue":
                 categories_and_links = defaultdict(list)
-                lang_code = level_node.template_parameters.get(1)
-                lang_name = clean_node(wxr, categories_and_links, level_node)
+                lang_code = subtitle_template.template_parameters.get(1)
+                lang_name = clean_node(
+                    wxr, categories_and_links, subtitle_template
+                )
                 wxr.wtp.start_section(lang_name)
                 base_data = defaultdict(
                     list,
