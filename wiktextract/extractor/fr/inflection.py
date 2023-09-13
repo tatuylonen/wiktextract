@@ -22,9 +22,11 @@ def extract_inflection(
 
 IGNORE_TABLE_HEADERS = {
     "Terme",  # https://fr.wiktionary.org/wiki/Modèle:de-adj
+    "Forme",  # https://fr.wiktionary.org/wiki/Modèle:br-flex-adj
 }
 IGNORE_TABLE_CELL = {
     "Déclinaisons",  # de-adj
+    "—",  # https://fr.wiktionary.org/wiki/Modèle:vls-nom
 }
 
 
