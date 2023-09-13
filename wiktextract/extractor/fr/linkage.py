@@ -54,14 +54,20 @@ def process_lien_template(
     linkage_data: Dict[str, Union[str, List[str]]],
 ) -> None:
     # https://fr.wiktionary.org/wiki/Modèle:lien
-    word = node.template_parameters.get(1)
     if "dif" in node.template_parameters:
-        word = node.template_parameters.get("dif")
+        word = clean_node(wxr, None, node.template_parameters.get("dif"))
+    else:
+        word = clean_node(wxr, None, node.template_parameters.get(1))
+
     linkage_data["word"] = word
     if "tr" in node.template_parameters:
-        linkage_data["roman"] = node.template_parameters.get("tr")
+        linkage_data["roman"] = clean_node(
+            wxr, None, node.template_parameters.get("tr")
+        )
     if "sens" in node.template_parameters:
-        linkage_data["translation"] = node.template_parameters.get("sens")
+        linkage_data["translation"] = clean_node(
+            wxr, None, node.template_parameters.get("sens")
+        )
 
 
 def process_zh_lien_template(
@@ -70,8 +76,14 @@ def process_zh_lien_template(
     linkage_data: Dict[str, Union[str, List[str]]],
 ) -> None:
     # https://fr.wiktionary.org/wiki/Modèle:zh-lien
-    linkage_data["word"] = node.template_parameters.get(1)
-    linkage_data["roman"] = node.template_parameters.get(2)  # pinyin
-    traditional_form = node.template_parameters.get(3, "")
+    linkage_data["word"] = clean_node(
+        wxr, None, node.template_parameters.get(1)
+    )
+    linkage_data["roman"] = clean_node(
+        wxr, None, node.template_parameters.get(2)
+    )  # pinyin
+    traditional_form = clean_node(
+        wxr, None, node.template_parameters.get(3, "")
+    )
     if len(traditional_form) > 0:
         linkage_data["alt"] = traditional_form
