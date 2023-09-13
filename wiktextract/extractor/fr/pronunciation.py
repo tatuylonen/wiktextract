@@ -93,8 +93,8 @@ def process_pron_list_item(
 
         if pron_key in sound_data:
             return [sound_data]
-        else:
-            return []
+
+    return []
 
 
 def process_pron_template(
