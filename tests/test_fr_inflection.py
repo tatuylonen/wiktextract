@@ -60,7 +60,7 @@ class TestInflection(unittest.TestCase):
 !scope='row'| Féminin
 |[[animale]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mal\\</span>]]
 |[[animales]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mal\\</span>]]
-|}"""
+|}""",
     )
     def test_fr_accord_al(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/animal#Adjectif
@@ -74,17 +74,70 @@ class TestInflection(unittest.TestCase):
                 {
                     "ipa": "\\a.ni.mo\\",
                     "tags": ["Pluriel", "Masculin"],
-                    "form": "animaux"
+                    "form": "animaux",
                 },
                 {
                     "ipa": "\\a.ni.mal\\",
                     "tags": ["Singulier", "Féminin"],
-                    "form": "animale"
+                    "form": "animale",
                 },
                 {
                     "ipa": "\\a.ni.mal\\",
                     "tags": ["Pluriel", "Féminin"],
-                    "form": "animales"
+                    "form": "animales",
+                },
+            ],
+        )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{| class='flextable flextable-en'
+! Singulier !! Pluriel
+|-
+| '''<span lang='en' xml:lang='en' class='lang-en'><bdi>ration</bdi></span>'''<br />[[Annexe:Prononciation/anglais|<span>\\ˈɹæʃ.ən\\</span>]]<br /><small>ou</small> [[Annexe:Prononciation/anglais|<span>\\ˈɹeɪʃ.ən\\</span>]]
+|  <bdi lang='en' xml:lang='en' class='lang-en'>[[rations#en-flex-nom|rations]]</bdi><br />[[Annexe:Prononciation/anglais|<span>\\ˈɹæʃ.ənz\\</span>]]<br /><small>ou</small> [[Annexe:Prononciation/anglais|<span>\\ˈɹeɪʃ.ənz\\</span>]]
+|}""",
+    )
+    def test_multiple_lines_ipa(self, mock_node_to_wikitext):
+        # https://fr.wiktionary.org/wiki/ration#Nom_commun_2
+        page_data = [defaultdict(list, {"lang_code": "en", "word": "ration"})]
+        node = WikiNode(NodeKind.TEMPLATE, 0)
+        self.wxr.wtp.start_page("ration")
+        extract_inflection(self.wxr, page_data, node, "en-nom-rég")
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [
+                {
+                    "ipas": ["\\ˈɹæʃ.ənz\\", "\\ˈɹeɪʃ.ənz\\"],
+                    "tags": ["Pluriel"],
+                    "form": "rations",
                 }
-            ]
+            ],
+        )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{|class='flextable'
+! Temps
+! Forme
+|-
+! Infinitif
+| <span lang='en' xml:lang='en' class='lang-en'><bdi>to</bdi></span> '''<span lang='en' xml:lang='en' class='lang-en'><bdi>ration</bdi></span>'''<br />[[Annexe:Prononciation/anglais|<span>\\ˈɹæʃ.ən\\</span>]]<small> ou </small>[[Annexe:Prononciation/anglais|<span>\\ˈɹeɪʃ.ən\\</span>]]
+|}""",
+    )
+    def test_single_line_multiple_ipa(self, mock_node_to_wikitext):
+        # https://fr.wiktionary.org/wiki/ration#Verbe
+        page_data = [defaultdict(list, {"lang_code": "en", "word": "ration"})]
+        node = WikiNode(NodeKind.TEMPLATE, 0)
+        self.wxr.wtp.start_page("ration")
+        extract_inflection(self.wxr, page_data, node, "en-conj-rég")
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [
+                {
+                    "ipas": ["\\ˈɹæʃ.ən\\", "\\ˈɹeɪʃ.ən\\"],
+                    "tags": ["Infinitif"],
+                    "form": "to ration",
+                }
+            ],
         )

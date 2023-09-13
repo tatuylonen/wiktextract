@@ -74,10 +74,8 @@ def process_inflection_table(
                 elif table_cell.kind == NodeKind.TABLE_CELL:
                     table_cell_lines = clean_node(wxr, None, table_cell)
                     for table_cell_line in table_cell_lines.splitlines():
-                        if table_cell_line.startswith(
-                            "\\"
-                        ) and table_cell_line.endswith("\\"):
-                            form_data["ipa"] = table_cell_line
+                        if is_ipa_text(table_cell_line):
+                            insert_ipa(form_data, table_cell_line)
                         elif (
                             table_cell_line != page_data[-1].get("word")
                             and table_cell_line not in IGNORE_TABLE_CELL

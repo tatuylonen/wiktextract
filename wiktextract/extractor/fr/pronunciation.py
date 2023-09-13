@@ -124,3 +124,45 @@ def process_ecouter_template(
         sound_data["ipa"] = ipa
     if len(audio_file) > 0:
         sound_data.update(create_audio_url_dict(audio_file))
+
+
+def is_ipa_text(text: str) -> bool:
+    # check if the text is IPA, used for inflection table cell text
+    if text.startswith("\\") and text.endswith("\\"):
+        return True
+    if text.startswith("ou ") and text.endswith("\\"):
+        # some inflection table template like "en-nom-rég" might have a second
+        # ipa text in a new line
+        return True
+    return False
+
+
+def split_ipa(text: str) -> list[str] | str:
+    # break IPA text if it contains "ou"(or)
+    if " ou " in text:
+        # two ipa texts in the same line: "en-conj-rég" template
+        return text.split(" ou ")
+    if text.startswith("ou "):
+        return text.removeprefix("ou ")
+    return text
+
+
+def insert_ipa(target_dict: dict[str, str | list[str]], ipa_text: str) -> None:
+    # insert IPA text to a dictionary, and merge values of the key "ipa" and
+    # "ipas", `target_dict` is created by `defaultdict(list)`.
+    ipa_data = split_ipa(ipa_text)
+    if isinstance(ipa_data, str):
+        if "ipas" in target_dict:
+            target_dict["ipas"].append(ipa_data)
+        elif "ipa" in target_dict:
+            target_dict["ipas"].append(target_dict["ipa"])
+            target_dict["ipas"].append(ipa_data)
+            del target_dict["ipa"]
+        else:
+            target_dict["ipa"] = ipa_data
+    elif isinstance(ipa_data, list):
+        if "ipa" in target_dict:
+            target_dict["ipas"].append(target_dict["ipa"])
+            del target_dict["ipa"]
+
+        target_dict["ipas"].extend(ipa_data)
