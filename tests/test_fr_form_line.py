@@ -58,9 +58,21 @@ class TestFormLine(unittest.TestCase):
             [
                 {
                     "forms": [
-                        {"form": "autrice", "tags": ["pour une femme"]},
-                        {"form": "auteure", "tags": ["pour une femme"]},
-                        {"form": "auteuse", "tags": ["pour une femme"]},
+                        {
+                            "form": "autrice",
+                            "tags": ["pour une femme"],
+                            "source": "form line template 'équiv-pour'",
+                        },
+                        {
+                            "form": "auteure",
+                            "tags": ["pour une femme"],
+                            "source": "form line template 'équiv-pour'",
+                        },
+                        {
+                            "form": "auteuse",
+                            "tags": ["pour une femme"],
+                            "source": "form line template 'équiv-pour'",
+                        },
                     ]
                 }
             ],

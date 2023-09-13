@@ -59,7 +59,11 @@ def process_equiv_pour_template(
         form = node.template_parameters.get(template_arg_index)
         if form is not None:
             page_data[-1]["forms"].append(
-                {"form": form, "tags": [f"pour {form_type}"]}
+                {
+                    "form": form,
+                    "tags": [f"pour {form_type}"],
+                    "source": "form line template 'équiv-pour'",
+                }
             )
 
 
