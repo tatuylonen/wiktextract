@@ -41,6 +41,7 @@ def extract_form_line(
                     tag.startswith("(")
                     and tag.endswith(")")
                     and pre_template_name in PRON_TEMPLATES
+                    and len(page_data[-1].get("sounds", [])) > 0
                 ):
                     # it's the location of the previous IPA template
                     page_data[-1]["sounds"][-1]["tags"].append(tag.strip("()"))
