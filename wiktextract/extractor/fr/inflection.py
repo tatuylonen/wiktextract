@@ -6,6 +6,8 @@ from wikitextprocessor import NodeKind, WikiNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .pronunciation import is_ipa_text, insert_ipa
+
 
 def extract_inflection(
     wxr: WiktextractContext,
@@ -34,7 +36,10 @@ def process_inflection_table(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
-    table_node = expanded_node.children[0]
+    table_nodes = list(expanded_node.find_child(NodeKind.TABLE))
+    if len(table_nodes) == 0:
+        return
+    table_node = table_nodes[0]
     column_headers = []
     for row_num, table_row in enumerate(
         table_node.find_child(NodeKind.TABLE_ROW)

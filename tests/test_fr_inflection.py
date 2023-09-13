@@ -24,7 +24,8 @@ class TestInflection(unittest.TestCase):
 
     @patch(
         "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""{|
+        return_value="""
+{|
 ! Singulier !! Pluriel
 |-
 |'''<span><bdi>productrice</bdi></span>'''
