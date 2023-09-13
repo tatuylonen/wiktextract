@@ -55,11 +55,12 @@ def process_pron_list_item(
             if len(pron_text) > 0:
                 sound_data[pron_key] = pron_text
         elif template_node.template_name in {"écouter", "audio", "pron-rég"}:
-            process_ecouter_template(template_node, sound_data)
+            process_ecouter_template(wxr, template_node, sound_data)
         else:
-            sound_data["tags"].append(
-                clean_node(wxr, None, template_node).strip("() ")
-            )
+            sound_tag = clean_node(wxr, None, template_node)
+            if sound_tag.startswith("(") and sound_tag.endswith(")"):
+                sound_tag = sound_tag.strip("()")
+            sound_data["tags"].append(sound_tag)
 
     if list_item_node.contain_node(NodeKind.LIST):
         returned_data = []
@@ -110,14 +111,26 @@ def process_pron_template(
 
 
 def process_ecouter_template(
-    template_node: TemplateNode, sound_data: Dict[str, Union[str, List[str]]]
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    sound_data: Dict[str, Union[str, List[str]]],
 ) -> None:
     # sound file template: https://fr.wiktionary.org/wiki/Modèle:écouter
-    location = template_node.template_parameters.get(1, "")
-    ipa = template_node.template_parameters.get(
-        2, template_node.template_parameters.get("pron", "")
+    location = clean_node(
+        wxr, None, template_node.template_parameters.get(1, "")
     )
-    audio_file = template_node.template_parameters.get("audio", "")
+    if location.startswith("(") and location.endswith(")"):
+        location = location.strip("()")
+    ipa = clean_node(
+        wxr,
+        None,
+        template_node.template_parameters.get(
+            2, template_node.template_parameters.get("pron", "")
+        ),
+    )
+    audio_file = clean_node(
+        wxr, None, template_node.template_parameters.get("audio", "")
+    )
     if len(location) > 0:
         sound_data["tags"].append(location)
     if len(ipa) > 0:

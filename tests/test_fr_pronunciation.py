@@ -22,16 +22,13 @@ class TestPronunciation(unittest.TestCase):
             self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
         )
 
-    @patch(
-        "wiktextract.extractor.fr.pronunciation.clean_node",
-        return_value="\\bɔ̃.ʒuʁ\\",
-    )
-    def test_pron_list(self, mock_clean_node):
+    def test_pron_list(self):
         page_data = [
             defaultdict(list, {"lang_code": "en"}),
             defaultdict(list, {"lang_code": "fr"}),
             defaultdict(list, {"lang_code": "fr"}),
         ]
+        self.wxr.wtp.add_page("Modèle:pron", 10, body="\\bɔ̃.ʒuʁ\\")
         self.wxr.wtp.start_page("")
         root = self.wxr.wtp.parse(
             "=== Prononciation ===\n* {{pron|bɔ̃.ʒuʁ|fr}}\n** {{écouter|France (Paris)|bõ.ʒuːʁ|audio=Fr-bonjour.ogg|lang=fr}}"
