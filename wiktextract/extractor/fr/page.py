@@ -125,7 +125,10 @@ def process_pos_block(
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
                 template_name = child.template_name
-                if template_name.endswith("-exemple"):
+                if (
+                    template_name.endswith("-exemple")
+                    and len(page_data[-1].get("senses", [])) > 0
+                ):
                     # zh-exemple and ja-exemple expand to list thus are not the
                     # child of gloss list item.
                     process_exemple_template(
