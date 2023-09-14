@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
@@ -43,7 +43,7 @@ def extract_translation(
 def process_italic_node(
     wxr: WiktextractContext,
     italic_node: WikiNode,
-    previous_node: WikiNode,
+    previous_node: Union[WikiNode, None],
     page_data: List[Dict],
 ) -> None:
     # add italic text after a "trad" template as a tag
@@ -51,6 +51,7 @@ def process_italic_node(
     if (
         tag.startswith("(")
         and tag.endswith(")")
+        and previous_node is not None
         and previous_node.kind == NodeKind.TEMPLATE
         and previous_node.template_name.startswith("trad")
         and len(page_data[-1].get("translations", [])) > 0
