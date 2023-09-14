@@ -102,7 +102,8 @@ def process_pron_template(
 ) -> str:
     if (
         template_node.template_name in {"pron", "prononciation", "//"}
-        and len(template_node.template_parameters.get(1, "").strip()) == 0
+        and isinstance(template_node.template_parameters.get(1, ""), str)
+        and len(template_node.template_parameters.get(1, "")) == 0
     ):
         # some pages don't pass IPA parameter to the "pron" template
         # and expand to an edit link for adding the missing data.
