@@ -31,6 +31,8 @@ jobs:
           python -m pip install -U pip
           python -m pip install --use-pep517 '.[dev]'
       - run: make test
+      - name: Remove huge file taxondata_py.html
+        run: rm -f htmlcov/*_taxondata_py.html
       - uses: actions/upload-pages-artifact@v2
         if: github.ref_name == 'master' && matrix.python-version == '3.11'
         with:
