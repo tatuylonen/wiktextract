@@ -156,18 +156,28 @@ def extract_etymology(
     base_data: Dict,
     nodes: List[Union[WikiNode, str]],
 ) -> None:
-    level_node_index = -1
+    level_node_index = len(nodes)
     for index, node in enumerate(nodes):
         if isinstance(node, WikiNode) and node.kind in LEVEL_KINDS:
             level_node_index = index
             break
-    if level_node_index != -1:
-        etymology = clean_node(wxr, page_data[-1], nodes[:index])
-    else:
-        etymology = clean_node(wxr, page_data[-1], nodes)
+    # ignore missing etymology template "ébauche-étym"
+    for etymology_node in nodes[:level_node_index]:
+        if isinstance(etymology_node, WikiNode):
+            if (
+                etymology_node.kind == NodeKind.TEMPLATE
+                and etymology_node.template_name == "ébauche-étym"
+            ):
+                return
+            for node in etymology_node.find_child_recursively(
+                NodeKind.TEMPLATE
+            ):
+                if node.template_name == "ébauche-étym":
+                    return
+    etymology = clean_node(wxr, page_data[-1], nodes[:level_node_index])
     base_data["etymology_text"] = etymology
     append_base_data(page_data, "etymology_text", etymology, base_data)
-    if level_node_index != -1:
+    if level_node_index < len(nodes):
         parse_section(wxr, page_data, base_data, nodes[level_node_index:])
 
 
