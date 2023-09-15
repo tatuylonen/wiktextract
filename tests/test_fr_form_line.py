@@ -58,9 +58,21 @@ class TestFormLine(unittest.TestCase):
             [
                 {
                     "forms": [
-                        {"form": "autrice", "tags": ["pour une femme"]},
-                        {"form": "auteure", "tags": ["pour une femme"]},
-                        {"form": "auteuse", "tags": ["pour une femme"]},
+                        {
+                            "form": "autrice",
+                            "tags": ["pour une femme"],
+                            "source": "form line template 'équiv-pour'",
+                        },
+                        {
+                            "form": "auteure",
+                            "tags": ["pour une femme"],
+                            "source": "form line template 'équiv-pour'",
+                        },
+                        {
+                            "form": "auteuse",
+                            "tags": ["pour une femme"],
+                            "source": "form line template 'équiv-pour'",
+                        },
                     ]
                 }
             ],
@@ -110,4 +122,19 @@ class TestFormLine(unittest.TestCase):
                     ],
                 }
             ],
+        )
+
+    def test_template_in_pron_argument(self):
+        # https://fr.wiktionary.org/wiki/minéral argileux
+        self.wxr.wtp.start_page("")
+        self.wxr.wtp.add_page("Modèle:pron", 10, body="{{{1}}}")
+        self.wxr.wtp.add_page("Modèle:liaison", 10, body="‿")
+        root = self.wxr.wtp.parse(
+            "'''minéral argileux''' {{pron|mi.ne.ʁa.l{{liaison|fr}}aʁ.ʒi.lø|fr}}"
+        )
+        page_data = [defaultdict(list)]
+        extract_form_line(self.wxr, page_data, root.children)
+        self.assertEqual(
+            page_data,
+            [{"sounds": [{"ipa": "mi.ne.ʁa.l‿aʁ.ʒi.lø"}]}],
         )

@@ -32,7 +32,7 @@ def extract_form_line(
                         defaultdict(list, {"ipa": ipa_text})
                     )
             elif node.template_name == "équiv-pour":
-                process_equiv_pour_template(node, page_data)
+                process_equiv_pour_template(wxr, node, page_data)
             elif node.template_name.startswith("zh-mot"):
                 process_zh_mot_template(wxr, node, page_data)
             else:
@@ -41,25 +41,32 @@ def extract_form_line(
                     tag.startswith("(")
                     and tag.endswith(")")
                     and pre_template_name in PRON_TEMPLATES
+                    and len(page_data[-1].get("sounds", [])) > 0
                 ):
                     # it's the location of the previous IPA template
                     page_data[-1]["sounds"][-1]["tags"].append(tag.strip("()"))
                 else:
-                    page_data[-1]["tags"].append(tag)
+                    page_data[-1]["tags"].append(tag.strip("()"))
 
             pre_template_name = node.template_name
 
 
 def process_equiv_pour_template(
-    node: TemplateNode, page_data: List[Dict]
+    wxr: WiktextractContext, node: TemplateNode, page_data: List[Dict]
 ) -> None:
     # equivalent form: https://fr.wiktionary.org/wiki/Modèle:équiv-pour
     form_type = node.template_parameters.get(1)
     for template_arg_index in range(2, 8):
-        form = node.template_parameters.get(template_arg_index)
-        if form is not None:
+        form = clean_node(
+            wxr, None, node.template_parameters.get(template_arg_index, "")
+        )
+        if len(form) > 0:
             page_data[-1]["forms"].append(
-                {"form": form, "tags": [f"pour {form_type}"]}
+                {
+                    "form": form,
+                    "tags": [f"pour {form_type}"],
+                    "source": "form line template 'équiv-pour'",
+                }
             )
 
 

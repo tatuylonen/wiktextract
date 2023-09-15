@@ -6,6 +6,8 @@ from wikitextprocessor import NodeKind, WikiNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .pronunciation import is_ipa_text, insert_ipa
+
 
 def extract_inflection(
     wxr: WiktextractContext,
@@ -20,9 +22,11 @@ def extract_inflection(
 
 IGNORE_TABLE_HEADERS = {
     "Terme",  # https://fr.wiktionary.org/wiki/Modèle:de-adj
+    "Forme",  # https://fr.wiktionary.org/wiki/Modèle:br-flex-adj
 }
 IGNORE_TABLE_CELL = {
     "Déclinaisons",  # de-adj
+    "—",  # https://fr.wiktionary.org/wiki/Modèle:vls-nom
 }
 
 
@@ -34,7 +38,10 @@ def process_inflection_table(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
-    table_node = expanded_node.children[0]
+    table_nodes = list(expanded_node.find_child(NodeKind.TABLE))
+    if len(table_nodes) == 0:
+        return
+    table_node = table_nodes[0]
     column_headers = []
     for row_num, table_row in enumerate(
         table_node.find_child(NodeKind.TABLE_ROW)
@@ -67,10 +74,8 @@ def process_inflection_table(
                 elif table_cell.kind == NodeKind.TABLE_CELL:
                     table_cell_lines = clean_node(wxr, None, table_cell)
                     for table_cell_line in table_cell_lines.splitlines():
-                        if table_cell_line.startswith(
-                            "\\"
-                        ) and table_cell_line.endswith("\\"):
-                            form_data["ipa"] = table_cell_line
+                        if is_ipa_text(table_cell_line):
+                            insert_ipa(form_data, table_cell_line)
                         elif (
                             table_cell_line != page_data[-1].get("word")
                             and table_cell_line not in IGNORE_TABLE_CELL

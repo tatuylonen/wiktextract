@@ -55,11 +55,12 @@ def process_pron_list_item(
             if len(pron_text) > 0:
                 sound_data[pron_key] = pron_text
         elif template_node.template_name in {"écouter", "audio", "pron-rég"}:
-            process_ecouter_template(template_node, sound_data)
+            process_ecouter_template(wxr, template_node, sound_data)
         else:
-            sound_data["tags"].append(
-                clean_node(wxr, None, template_node).strip("() ")
-            )
+            sound_tag = clean_node(wxr, None, template_node)
+            if sound_tag.startswith("(") and sound_tag.endswith(")"):
+                sound_tag = sound_tag.strip("()")
+            sound_data["tags"].append(sound_tag)
 
     if list_item_node.contain_node(NodeKind.LIST):
         returned_data = []
@@ -92,8 +93,8 @@ def process_pron_list_item(
 
         if pron_key in sound_data:
             return [sound_data]
-        else:
-            return []
+
+    return []
 
 
 def process_pron_template(
@@ -101,7 +102,8 @@ def process_pron_template(
 ) -> str:
     if (
         template_node.template_name in {"pron", "prononciation", "//"}
-        and len(template_node.template_parameters.get(1, "").strip()) == 0
+        and isinstance(template_node.template_parameters.get(1, ""), str)
+        and len(template_node.template_parameters.get(1, "")) == 0
     ):
         # some pages don't pass IPA parameter to the "pron" template
         # and expand to an edit link for adding the missing data.
@@ -110,17 +112,78 @@ def process_pron_template(
 
 
 def process_ecouter_template(
-    template_node: TemplateNode, sound_data: Dict[str, Union[str, List[str]]]
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    sound_data: Dict[str, Union[str, List[str]]],
 ) -> None:
     # sound file template: https://fr.wiktionary.org/wiki/Modèle:écouter
-    location = template_node.template_parameters.get(1, "")
-    ipa = template_node.template_parameters.get(
-        2, template_node.template_parameters.get("pron", "")
+    location = clean_node(
+        wxr, None, template_node.template_parameters.get(1, "")
     )
-    audio_file = template_node.template_parameters.get("audio", "")
+    if location.startswith("(") and location.endswith(")"):
+        location = location.strip("()")
+    ipa = clean_node(
+        wxr,
+        None,
+        template_node.template_parameters.get(
+            2, template_node.template_parameters.get("pron", "")
+        ),
+    )
+    audio_file = clean_node(
+        wxr, None, template_node.template_parameters.get("audio", "")
+    )
     if len(location) > 0:
         sound_data["tags"].append(location)
     if len(ipa) > 0:
         sound_data["ipa"] = ipa
     if len(audio_file) > 0:
         sound_data.update(create_audio_url_dict(audio_file))
+
+
+def is_ipa_text(text: str) -> bool:
+    # check if the text is IPA, used for inflection table cell text
+    if text.startswith("\\") and text.endswith("\\"):
+        return True
+    if text.startswith("ou ") and text.endswith("\\"):
+        # some inflection table template like "en-nom-rég" might have a second
+        # ipa text in a new line
+        return True
+    return False
+
+
+def split_ipa(text: str) -> list[str] | str:
+    # break IPA text if it contains "ou"(or)
+    if " ou " in text:
+        # two ipa texts in the same line: "en-conj-rég" template
+        return text.split(" ou ")
+    if text.startswith("ou "):
+        return text.removeprefix("ou ")
+    if text.endswith(" Prononciation ?\\"):
+        # inflection table templates use a edit link when the ipa data is
+        # missing, and the link usually ends with " Prononciation ?"
+        return ""
+    return text
+
+
+def insert_ipa(target_dict: dict[str, str | list[str]], ipa_text: str) -> None:
+    # insert IPA text to a dictionary, and merge values of the key "ipa" and
+    # "ipas", `target_dict` is created by `defaultdict(list)`.
+    ipa_data = split_ipa(ipa_text)
+    if len(ipa_data) == 0:
+        return
+
+    if isinstance(ipa_data, str):
+        if "ipas" in target_dict:
+            target_dict["ipas"].append(ipa_data)
+        elif "ipa" in target_dict:
+            target_dict["ipas"].append(target_dict["ipa"])
+            target_dict["ipas"].append(ipa_data)
+            del target_dict["ipa"]
+        else:
+            target_dict["ipa"] = ipa_data
+    elif isinstance(ipa_data, list):
+        if "ipa" in target_dict:
+            target_dict["ipas"].append(target_dict["ipa"])
+            del target_dict["ipa"]
+
+        target_dict["ipas"].extend(ipa_data)
