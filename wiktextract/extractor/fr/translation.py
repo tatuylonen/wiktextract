@@ -65,7 +65,10 @@ def process_translation_templates(
     page_data: List[Dict],
     base_translation_data: Dict[str, str],
 ) -> None:
-    if template_node.template_name == "trad-début":
+    if template_node.template_name == "trad-fin":
+        # ignore translation end template
+        return
+    elif template_node.template_name == "trad-début":
         # translation box start: https://fr.wiktionary.org/wiki/Modèle:trad-début
         translation_sense_wikitext = template_node.template_parameters.get(
             1, ""
