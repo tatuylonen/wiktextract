@@ -91,7 +91,7 @@ def process_pron_list_item(
                         # language text before ":"
                         sound_data["tags"].append(child.strip())
 
-        if pron_key in sound_data:
+        if pron_key in sound_data or "audio" in sound_data:
             return [sound_data]
 
     return []
