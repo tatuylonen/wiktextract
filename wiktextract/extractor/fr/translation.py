@@ -65,7 +65,10 @@ def process_translation_templates(
     page_data: List[Dict],
     base_translation_data: Dict[str, str],
 ) -> None:
-    if template_node.template_name == "trad-début":
+    if template_node.template_name == "trad-fin":
+        # ignore translation end template
+        return
+    elif template_node.template_name == "trad-début":
         # translation box start: https://fr.wiktionary.org/wiki/Modèle:trad-début
         translation_sense_wikitext = template_node.template_parameters.get(
             1, ""
@@ -106,6 +109,13 @@ def process_translation_templates(
             translation_data[
                 "traditional_writing"
             ] = translation_traditional_writing
+        if 3 in template_node.template_parameters:
+            expaned_node = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(template_node), expand_all=True
+            )
+            for gender_node in expaned_node.find_child(NodeKind.ITALIC):
+                translation_data["tags"] = [clean_node(wxr, None, gender_node)]
+                break
         page_data[-1]["translations"].append(translation_data)
     elif len(page_data[-1].get("translations", [])) > 0:
         tag = clean_node(wxr, None, template_node).strip("()")
