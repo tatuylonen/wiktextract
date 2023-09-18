@@ -199,7 +199,7 @@ def parse_page(
         do_not_pre_expand={
             "trad-début",  # don't expand translation start/end tempaltes
             "trad-fin",
-        }
+        },
     )
 
     page_data = []

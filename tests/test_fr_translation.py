@@ -103,3 +103,28 @@ class TestTranslation(unittest.TestCase):
                 }
             ],
         )
+
+    def test_trad_template_gender_parameter(self):
+        self.wxr.wtp.start_page("")
+        self.wxr.wtp.add_page("Modèle:T", 10, body="Allemand")
+        self.wxr.wtp.add_page("Modèle:trad", 10, body="''neutre''")
+        root = self.wxr.wtp.parse(
+            "=== Traductions ===\n* {{T|de}} : {{trad|de|Kambium|n}}"
+        )
+        page_data = [defaultdict(list)]
+        extract_translation(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "translations": [
+                        {
+                            "code": "de",
+                            "lang": "Allemand",
+                            "word": "Kambium",
+                            "tags": ["neutre"],
+                        },
+                    ]
+                }
+            ],
+        )
