@@ -1,34 +1,160 @@
 {
-  "Template:-abbr-": "===缩写===",
-  "Template:-adjn-": "===形容動詞===",
-  "Template:-art-": "===冠词===",
-  "Template:-asyn-": "===形容词===",
-  "Template:-c-": "===连词===",
-  "Template:-det-": "===限定词===",
-  "Template:-interj-": "===叹词===",
-  "Template:-meas-": "===量词===",
-  "Template:-n p-": "===專有名詞===",
-  "Template:-n2-": "===名词===",
-  "Template:-nsyn-": "===名词===",
-  "Template:-p-": "===代词===",
-  "Template:-phr-": "===片語===",
-  "Template:-prep-": "===介词===",
-  "Template:-sx-": "===缩写===",
-  "Template:-v2-": "===动词===",
-  "Template:-verb-": "===動詞===",
-  "Template:-vsyn-": "===动词===",
-  "Template:-vt-": "===及物動詞===",
-  "Template:=a=": "===形容詞===",
-  "Template:=adv=": "===副词===",
-  "Template:=c=": "===连词===",
-  "Template:=i=": "===感叹词===",
-  "Template:=n=": "===名词===",
-  "Template:=p=": "===代词===",
-  "Template:=part=": "===助词===",
-  "Template:=v=": "===动词===",
-  "Template:CC-CEDICT": "",
-  "Template:发音": "===发音===",
-  "Template:漢": "==漢字==",
-  "Template:詞類": "{{{1}}}",
-  "Template:語言標題": "=={{{l|{{{語|{{{语|}}}}}}}}}=="
+  "Template:-abbr-": {
+    "body": "===缩写===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-adjn-": {
+    "body": "===形容動詞===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-art-": {
+    "body": "===冠词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-asyn-": {
+    "body": "===形容词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-c-": {
+    "body": "===连词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-det-": {
+    "body": "===限定词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-interj-": {
+    "body": "===叹词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-meas-": {
+    "body": "===量词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-n p-": {
+    "body": "===專有名詞===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-n2-": {
+    "body": "===名词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-nsyn-": {
+    "body": "===名词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-p-": {
+    "body": "===代词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-phr-": {
+    "body": "===片語===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-prep-": {
+    "body": "===介词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-sx-": {
+    "body": "===缩写===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-v2-": {
+    "body": "===动词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-verb-": {
+    "body": "===動詞===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-vsyn-": {
+    "body": "===动词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-vt-": {
+    "body": "===及物動詞===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:=a=": {
+    "body": "===形容詞===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:=adv=": {
+    "body": "===副词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:=c=": {
+    "body": "===连词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:=i=": {
+    "body": "===感叹词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:=n=": {
+    "body": "===名词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:=p=": {
+    "body": "===代词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:=part=": {
+    "body": "===助词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:=v=": {
+    "body": "===动词===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:CC-CEDICT": {
+    "body": "",
+    "namespace_id": 10
+  },
+  "Template:发音": {
+    "body": "===发音===",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:漢": {
+    "body": "==漢字==",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:詞類": {
+    "body": "{{{1}}}",
+    "namespace_id": 10
+  },
+  "Template:語言標題": {
+    "body": "=={{{l|{{{語|{{{语|}}}}}}}}}==",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  }
 }
