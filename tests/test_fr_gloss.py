@@ -175,3 +175,22 @@ class TestFormLine(unittest.TestCase):
                 }
             ],
         )
+
+    def test_italic_tag(self):
+        # https://fr.wiktionary.org/wiki/lenn
+        self.wxr.wtp.start_page("lenn")
+        root = self.wxr.wtp.parse(
+            "# (''localement'') [[bassin#Nom_commun|Bassin]], [[lavoir#Nom_commun|lavoir]]."
+        )
+        page_data = [defaultdict(list)]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "senses": [
+                        {"glosses": ["Bassin, lavoir."], "tags": ["localement"]}
+                    ]
+                }
+            ],
+        )
