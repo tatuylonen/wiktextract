@@ -37,12 +37,22 @@ def extract_gloss(
                     break
                 else:
                     gloss_start = index + 1
-            for mod_template in gloss_nodes[:gloss_start]:
+            for tag_node in gloss_nodes[:gloss_start]:
                 gloss_data["tags"].append(
-                    clean_node(wxr, gloss_data, mod_template).strip("()")
+                    clean_node(wxr, gloss_data, tag_node).strip("()")
                 )
 
-        gloss_text = clean_node(wxr, gloss_data, gloss_nodes[gloss_start:])
+        gloss_only_nodes = []
+        # extract italic tags
+        for node in gloss_nodes[gloss_start:]:
+            if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+                gloss_data["tags"].append(clean_node(wxr, None, node))
+                continue
+            elif isinstance(node, str) and node.strip() in ["(", ")"]:
+                # remove parentheses around italic node
+                continue
+            gloss_only_nodes.append(node)
+        gloss_text = clean_node(wxr, gloss_data, gloss_only_nodes)
         gloss_data["glosses"] = [gloss_text]
         extract_examples(wxr, gloss_data, list_item_node)
         page_data[-1]["senses"].append(gloss_data)
