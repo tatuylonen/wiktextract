@@ -1,7 +1,7 @@
 import copy
 import logging
 from collections import defaultdict
-from typing import Dict, List, Union
+from typing import Dict, List, Optional
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
@@ -10,6 +10,7 @@ from wiktextract.datautils import append_base_data
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .etymology import EtymologyData, extract_etymology, insert_etymology_data
 from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
 from .inflection import extract_inflection
@@ -34,77 +35,61 @@ def parse_section(
     wxr: WiktextractContext,
     page_data: List[Dict],
     base_data: Dict,
-    level_node: Union[WikiNode, List[Union[WikiNode, str]]],
-) -> None:
+    level_node: WikiNode,
+) -> Optional[List[EtymologyData]]:
     # Page structure: https://fr.wiktionary.org/wiki/Wiktionnaire:Structure_des_pages
-    if isinstance(level_node, list):
-        for x in level_node:
-            parse_section(wxr, page_data, base_data, x)
-        return
-    if not isinstance(level_node, WikiNode):
-        return
-    if level_node.kind in LEVEL_KINDS:
-        for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
-            if level_node_template.template_name == "S":
-                # French Wiktionary uses a `S` template for all subtitles, we
-                # could find the subtitle type by only checking the template
-                # parameter.
-                # https://fr.wiktionary.org/wiki/Modèle:S
-                # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
-                section_type = level_node_template.template_parameters.get(1)
-                subtitle = clean_node(wxr, page_data[-1], level_node.largs)
-                wxr.wtp.start_subsection(subtitle)
-                if (
-                    section_type
-                    in wxr.config.OTHER_SUBTITLES["ignored_sections"]
-                ):
-                    pass
-                # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections_de_types_de_mots
-                elif section_type in wxr.config.POS_SUBTITLES:
-                    process_pos_block(
-                        wxr, page_data, base_data, level_node, section_type
-                    )
-                elif (
-                    wxr.config.capture_etymologies
-                    and section_type in wxr.config.OTHER_SUBTITLES["etymology"]
-                ):
-                    extract_etymology(
-                        wxr, page_data, base_data, level_node.children
-                    )
-                elif (
-                    wxr.config.capture_pronunciation
-                    and section_type
-                    in wxr.config.OTHER_SUBTITLES["pronunciation"]
-                ):
-                    extract_pronunciation(wxr, page_data, level_node)
-                elif (
-                    wxr.config.capture_linkages
-                    and section_type in wxr.config.LINKAGE_SUBTITLES
-                ):
-                    extract_linkage(
-                        wxr,
-                        page_data,
-                        level_node,
-                        wxr.config.LINKAGE_SUBTITLES.get(section_type),
-                    )
-                elif (
-                    wxr.config.capture_translations
-                    and section_type
-                    in wxr.config.OTHER_SUBTITLES["translations"]
-                ):
-                    extract_translation(wxr, page_data, level_node)
-                elif (
-                    wxr.config.capture_inflections
-                    and section_type
-                    in wxr.config.OTHER_SUBTITLES["inflection_sections"]
-                ):
-                    pass
-                else:
-                    pass
-                # wxr.wtp.debug(
-                #     f"Unhandled section type: {subtitle}",
-                #     sortid="extractor/fr/page/parse_section/192",
-                # )
+    for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
+        if level_node_template.template_name == "S":
+            # French Wiktionary uses a `S` template for all subtitles, we could
+            # find the subtitle type by only checking the template parameter.
+            # https://fr.wiktionary.org/wiki/Modèle:S
+            # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
+            section_type = level_node_template.template_parameters.get(1)
+            subtitle = clean_node(wxr, page_data[-1], level_node.largs)
+            wxr.wtp.start_subsection(subtitle)
+            if section_type in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
+                pass
+            # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections_de_types_de_mots
+            elif section_type in wxr.config.POS_SUBTITLES:
+                process_pos_block(
+                    wxr,
+                    page_data,
+                    base_data,
+                    level_node,
+                    section_type,
+                    subtitle,
+                )
+            elif (
+                wxr.config.capture_etymologies
+                and section_type in wxr.config.OTHER_SUBTITLES["etymology"]
+            ):
+                return extract_etymology(wxr, level_node.children)
+            elif (
+                wxr.config.capture_pronunciation
+                and section_type in wxr.config.OTHER_SUBTITLES["pronunciation"]
+            ):
+                extract_pronunciation(wxr, page_data, level_node)
+            elif (
+                wxr.config.capture_linkages
+                and section_type in wxr.config.LINKAGE_SUBTITLES
+            ):
+                extract_linkage(
+                    wxr,
+                    page_data,
+                    level_node,
+                    wxr.config.LINKAGE_SUBTITLES.get(section_type),
+                )
+            elif (
+                wxr.config.capture_translations
+                and section_type in wxr.config.OTHER_SUBTITLES["translations"]
+            ):
+                extract_translation(wxr, page_data, level_node)
+            elif (
+                wxr.config.capture_inflections
+                and section_type
+                in wxr.config.OTHER_SUBTITLES["inflection_sections"]
+            ):
+                pass
 
 
 def process_pos_block(
@@ -113,10 +98,11 @@ def process_pos_block(
     base_data: Dict,
     pos_title_node: TemplateNode,
     pos_argument: str,
+    pos_title: str,
 ):
     pos_type = wxr.config.POS_SUBTITLES[pos_argument]["pos"]
-    base_data["pos"] = pos_type
     append_base_data(page_data, "pos", pos_type, base_data)
+    page_data[-1]["pos_title"] = pos_title
     child_nodes = list(pos_title_node.filter_empty_str_child())
     form_line_start = 0  # Ligne de forme
     gloss_start = len(child_nodes)
@@ -143,42 +129,9 @@ def process_pos_block(
                 extract_gloss(wxr, page_data, child)
             elif child.kind in LEVEL_KINDS:
                 parse_section(wxr, page_data, base_data, child)
-        else:
-            parse_section(wxr, page_data, base_data, child)
 
     form_line_nodes = child_nodes[form_line_start:gloss_start]
     extract_form_line(wxr, page_data, form_line_nodes)
-
-
-def extract_etymology(
-    wxr: WiktextractContext,
-    page_data: List[Dict],
-    base_data: Dict,
-    nodes: List[Union[WikiNode, str]],
-) -> None:
-    level_node_index = len(nodes)
-    for index, node in enumerate(nodes):
-        if isinstance(node, WikiNode) and node.kind in LEVEL_KINDS:
-            level_node_index = index
-            break
-    # ignore missing etymology template "ébauche-étym"
-    for etymology_node in nodes[:level_node_index]:
-        if isinstance(etymology_node, WikiNode):
-            if (
-                etymology_node.kind == NodeKind.TEMPLATE
-                and etymology_node.template_name == "ébauche-étym"
-            ):
-                return
-            for node in etymology_node.find_child_recursively(
-                NodeKind.TEMPLATE
-            ):
-                if node.template_name == "ébauche-étym":
-                    return
-    etymology = clean_node(wxr, page_data[-1], nodes[:level_node_index])
-    base_data["etymology_text"] = etymology
-    append_base_data(page_data, "etymology_text", etymology, base_data)
-    if level_node_index < len(nodes):
-        parse_section(wxr, page_data, base_data, nodes[level_node_index:])
 
 
 def parse_page(
@@ -199,6 +152,8 @@ def parse_page(
         do_not_pre_expand={
             "trad-début",  # don't expand translation start/end tempaltes
             "trad-fin",
+            "(",  # similar to "trad-debut", pre-expand breaks node structre
+            ")",
         },
     )
 
@@ -238,6 +193,15 @@ def parse_page(
                 )
                 base_data.update(categories_and_links)
                 page_data.append(copy.deepcopy(base_data))
-                parse_section(wxr, page_data, base_data, node.children)
+                etymology_data: Optional[EtymologyData] = None
+                for level_three_node in node.find_child(NodeKind.LEVEL3):
+                    new_etymology_data = parse_section(
+                        wxr, page_data, base_data, level_three_node
+                    )
+                    if new_etymology_data is not None:
+                        etymology_data = new_etymology_data
+
+                if etymology_data is not None:
+                    insert_etymology_data(lang_code, page_data, etymology_data)
 
     return page_data
