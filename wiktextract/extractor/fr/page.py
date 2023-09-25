@@ -199,6 +199,8 @@ def parse_page(
         do_not_pre_expand={
             "trad-début",  # don't expand translation start/end tempaltes
             "trad-fin",
+            "(",  # similar to "trad-debut", pre-expand breaks node structre
+            ")",
         },
     )
 
