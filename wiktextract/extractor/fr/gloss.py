@@ -18,7 +18,7 @@ def extract_gloss(
         gloss_data = defaultdict(list)
         gloss_start = 0
         # process modifier, theme tempaltes before gloss text
-        # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste de tous les modèles/Précisions de sens
+        # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_de_tous_les_modèles/Précisions_de_sens
         if (
             len(gloss_nodes) > 0
             and isinstance(gloss_nodes[0], WikiNode)

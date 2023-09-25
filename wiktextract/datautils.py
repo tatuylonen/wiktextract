@@ -259,6 +259,7 @@ def append_base_data(
             # append new dictionary if the last dictionary has sense data and
             # also has the same key
             page_data.append(copy.deepcopy(base_data))
+            page_data[-1][field] = value
         elif isinstance(page_data[-1].get(field), list):
             page_data[-1][field] += value
     else:

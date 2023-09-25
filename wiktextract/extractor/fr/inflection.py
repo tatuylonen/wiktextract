@@ -6,7 +6,7 @@ from wikitextprocessor import NodeKind, WikiNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from .pronunciation import is_ipa_text, insert_ipa
+from .pronunciation import insert_ipa, is_ipa_text
 
 
 def extract_inflection(

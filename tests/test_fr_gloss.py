@@ -122,13 +122,19 @@ class TestFormLine(unittest.TestCase):
         )
         page_data = [defaultdict(list)]
         process_pos_block(
-            self.wxr, page_data, defaultdict(list), root.children[0], "nom"
+            self.wxr,
+            page_data,
+            defaultdict(list),
+            root.children[0],
+            "nom",
+            "Nom commun",
         )
         self.assertEqual(
             page_data,
             [
                 {
                     "pos": "noun",
+                    "pos_title": "Nom commun",
                     "senses": [
                         {
                             "glosses": ["Cheval."],
