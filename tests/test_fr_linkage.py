@@ -84,3 +84,22 @@ class TestLinkage(unittest.TestCase):
                 }
             ],
         )
+
+    def test_list_item_has_two_words(self):
+        page_data = [defaultdict(list)]
+        self.wxr.wtp.start_page("masse")
+        root = self.wxr.wtp.parse(
+            "==== {{S|dérivés}} ====\n* [[être à la masse]], [[mettre à la masse]]"
+        )
+        extract_linkage(self.wxr, page_data, root.children[0], "derived")
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "derived": [
+                        {"word": "être à la masse"},
+                        {"word": "mettre à la masse"},
+                    ]
+                }
+            ],
+        )

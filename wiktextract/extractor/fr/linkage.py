@@ -20,11 +20,8 @@ def extract_linkage(
         for index, child_node in enumerate(
             list_item_node.filter_empty_str_child()
         ):
-            if index == 0:
-                if (
-                    isinstance(child_node, WikiNode)
-                    and child_node.kind == NodeKind.TEMPLATE
-                ):
+            if index == 0 or "word" not in linkage_data:
+                if isinstance(child_node, TemplateNode):
                     process_linkage_template(wxr, child_node, linkage_data)
                 else:
                     linkage_data["word"] = clean_node(wxr, None, child_node)
@@ -44,6 +41,11 @@ def extract_linkage(
                 ):
                     tag = pending_tag + tag
                     pending_tag = ""
+                elif tag.strip() == ",":
+                    # list item has more than one word
+                    page_data[-1][linkage_type].append(linkage_data)
+                    linkage_data = defaultdict(list)
+                    continue
                 elif len(pending_tag) > 0:
                     pending_tag += tag
                     continue
