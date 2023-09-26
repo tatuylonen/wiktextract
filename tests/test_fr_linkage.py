@@ -23,7 +23,7 @@ class TestLinkage(unittest.TestCase):
 
     def test_tags(self):
         page_data = [defaultdict(list)]
-        self.wxr.wtp.start_page("")
+        self.wxr.wtp.start_page("bonjour")
         self.wxr.wtp.add_page("Modèle:Canada", 10, body="(Canada)")
         self.wxr.wtp.add_page("Modèle:Louisiane", 10, body="(Louisiane)")
         root = self.wxr.wtp.parse(
@@ -43,7 +43,7 @@ class TestLinkage(unittest.TestCase):
 
     def test_zh_synonyms(self):
         page_data = [defaultdict(list)]
-        self.wxr.wtp.start_page("")
+        self.wxr.wtp.start_page("你好")
         root = self.wxr.wtp.parse(
             "==== {{S|synonymes}} ====\n* {{zh-lien|你们好|nǐmen hǎo|你們好}} — Bonjour (au pluriel)."
         )
@@ -59,6 +59,27 @@ class TestLinkage(unittest.TestCase):
                             "alt": "你們好",
                             "translation": "Bonjour (au pluriel).",
                         }
+                    ]
+                }
+            ],
+        )
+
+    def test_template_as_partial_tag(self):
+        page_data = [defaultdict(list)]
+        self.wxr.wtp.start_page("bonjour")
+        self.wxr.wtp.add_page("Modèle:lien", 10, body="kwei")
+        self.wxr.wtp.add_page("Modèle:Canada", 10, body="(Canada)")
+        self.wxr.wtp.add_page("Modèle:L", 10, body="Atikamekw")
+        root = self.wxr.wtp.parse(
+            "==== {{S|synonymes}} ====\n* {{lien|kwei|fr}} {{Canada|nocat=1}} (mot {{L|atj}})"
+        )
+        extract_linkage(self.wxr, page_data, root.children[0], "synonyms")
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "synonyms": [
+                        {"word": "kwei", "tags": ["Canada", "mot Atikamekw"]}
                     ]
                 }
             ],

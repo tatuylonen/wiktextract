@@ -16,6 +16,7 @@ def extract_linkage(
 ) -> None:
     for list_item_node in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         linkage_data = defaultdict(list)
+        pending_tag = ""
         for index, child_node in enumerate(
             list_item_node.filter_empty_str_child()
         ):
@@ -28,10 +29,29 @@ def extract_linkage(
                 else:
                     linkage_data["word"] = clean_node(wxr, None, child_node)
             else:
-                tag = clean_node(wxr, page_data[-1], child_node).strip("()")
+                tag = (
+                    child_node
+                    if isinstance(child_node, str)
+                    else clean_node(wxr, page_data[-1], child_node)
+                )
+                if tag.strip().startswith("(") and not tag.strip().endswith(
+                    ")"
+                ):
+                    pending_tag = tag
+                    continue
+                elif not tag.strip().startswith("(") and tag.strip().endswith(
+                    ")"
+                ):
+                    tag = pending_tag + tag
+                    pending_tag = ""
+                elif len(pending_tag) > 0:
+                    pending_tag += tag
+                    continue
+
+                tag = tag.strip("() \n")
                 if tag.startswith("— "):
                     linkage_data["translation"] = tag.removeprefix("— ")
-                else:
+                elif len(tag) > 0:
                     linkage_data["tags"].append(tag)
 
         page_data[-1][linkage_type].append(linkage_data)
@@ -53,8 +73,8 @@ def process_lien_template(
     node: TemplateNode,
     linkage_data: Dict[str, Union[str, List[str]]],
 ) -> None:
-    # https://fr.wiktionary.org/wiki/Modèle:lien
-    if "dif" in node.template_parameters:
+    # link word template: https://fr.wiktionary.org/wiki/Modèle:lien
+    if "dif" in node.template_parameters:  # displayed word
         word = clean_node(wxr, None, node.template_parameters.get("dif"))
     else:
         word = clean_node(wxr, None, node.template_parameters.get(1))
