@@ -69,7 +69,7 @@ def find_pos_in_etymology_list(
         if (
             index == 0
             and isinstance(node, TemplateNode)
-            and node.template_name == "lien-ancre-étym"
+            and node.template_name in ("lien-ancre-étym", "laé")
         ):
             return clean_node(wxr, None, node).strip("()"), clean_node(
                 wxr, None, child_nodes[index + 1 :]
