@@ -120,6 +120,9 @@ def process_pos_block(
                     process_exemple_template(
                         wxr, child, page_data[-1]["senses"][-1]
                     )
+                elif template_name.startswith(("zh-mot", "ja-mot")):
+                    # skip form line templates
+                    continue
                 elif template_name.startswith(f"{lang_code}-"):
                     extract_inflection(wxr, page_data, child, template_name)
             elif child.kind == NodeKind.BOLD:
