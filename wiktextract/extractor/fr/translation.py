@@ -70,12 +70,10 @@ def process_translation_templates(
         return
     elif template_node.template_name == "trad-début":
         # translation box start: https://fr.wiktionary.org/wiki/Modèle:trad-début
-        translation_sense_wikitext = template_node.template_parameters.get(
-            1, ""
-        )
-        if len(translation_sense_wikitext) > 0:
+        sense_parameter = template_node.template_parameters.get(1)
+        if sense_parameter is not None:
             base_translation_data["sense"] = clean_node(
-                wxr, None, translation_sense_wikitext
+                wxr, None, sense_parameter
             )
     elif template_node.template_name == "T":
         # Translation language: https://fr.wiktionary.org/wiki/Modèle:T
@@ -86,7 +84,11 @@ def process_translation_templates(
     elif template_node.template_name.startswith("trad"):
         # Translation term: https://fr.wiktionary.org/wiki/Modèle:trad
         translation_term = clean_node(
-            wxr, None, template_node.template_parameters.get(2)
+            wxr,
+            None,
+            template_node.template_parameters.get(
+                "dif", template_node.template_parameters.get(2)
+            ),
         )
         translation_roman = clean_node(
             wxr,

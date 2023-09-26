@@ -46,23 +46,29 @@ def process_inflection_table(
     for row_num, table_row in enumerate(
         table_node.find_child(NodeKind.TABLE_ROW)
     ):
-        if (
-            row_num != 0
-            and len(list(table_row.filter_empty_str_child()))
-            == len(column_headers) + 1
-        ):
+        table_row_nodes = list(table_row.filter_empty_str_child())
+        first_row_has_data_cell = False
+        if row_num == 0:
+            first_row_has_data_cell = not any(
+                isinstance(cell, WikiNode)
+                and cell.kind == NodeKind.TABLE_CELL
+                for cell in table_row_nodes
+            )
+
+        if row_num != 0 and len(table_row_nodes) == len(column_headers) + 1:
             # data row has one more column then header: "fr-accord-al" template
             column_headers.insert(0, "")
 
         row_header = ""
-        for column_num, table_cell in enumerate(
-            table_row.filter_empty_str_child()
-        ):
+        for column_num, table_cell in enumerate(table_row_nodes):
             form_data = defaultdict(list)
             if isinstance(table_cell, WikiNode):
                 if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
                     table_header_text = clean_node(wxr, None, table_cell)
-                    if row_num == 0:
+                    if row_num == 0 and first_row_has_data_cell:
+                        # if cells of the first row are not all header cells
+                        # then the header cells are row headers but not column
+                        # headers
                         column_headers.append(table_header_text)
                     elif (
                         column_num == 0

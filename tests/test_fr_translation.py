@@ -70,7 +70,7 @@ class TestTranslation(unittest.TestCase):
                         {
                             "code": "ar",
                             "lang": "Arabe",
-                            "word": "مرحبا",
+                            "word": "مرحبًا",
                             "roman": "mrḥbā",
                             "tags": ["Informel"],
                         },
@@ -123,6 +123,34 @@ class TestTranslation(unittest.TestCase):
                             "lang": "Allemand",
                             "word": "Kambium",
                             "tags": ["neutre"],
+                        },
+                    ]
+                }
+            ],
+        )
+
+    def test_template_sense_parameter(self):
+        self.wxr.wtp.start_page("masse")
+        self.wxr.wtp.add_page("Modèle:info lex", 10, body="(Finance)")
+        self.wxr.wtp.add_page("Modèle:T", 10, body="Croate")
+        self.wxr.wtp.add_page("Modèle:trad+", 10, body="masa")
+        root = self.wxr.wtp.parse(
+            """=== Traductions ===
+{{trad-début|{{info lex|finance}}|12}}
+* {{T|hr}} : {{trad+|hr|masa}}"""
+        )
+        page_data = [defaultdict(list)]
+        extract_translation(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "translations": [
+                        {
+                            "code": "hr",
+                            "lang": "Croate",
+                            "word": "masa",
+                            "sense": "(Finance)",
                         },
                     ]
                 }
