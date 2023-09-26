@@ -2,7 +2,8 @@ import unittest
 from collections import defaultdict
 from unittest.mock import patch
 
-from wikitextprocessor import NodeKind, WikiNode, Wtp
+from wikitextprocessor import Wtp
+from wikitextprocessor.parser import TemplateNode
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.inflection import extract_inflection
@@ -37,7 +38,7 @@ class TestInflection(unittest.TestCase):
     )
     def test_fr_reg(self, mock_node_to_wikitext):
         page_data = [defaultdict(list, {"word": "productrice"})]
-        node = WikiNode(NodeKind.TEMPLATE, 0)
+        node = TemplateNode(0)
         self.wxr.wtp.start_page("productrice")
         extract_inflection(self.wxr, page_data, node, "fr-rég")
         self.assertEqual(
@@ -47,25 +48,25 @@ class TestInflection(unittest.TestCase):
 
     @patch(
         "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""{|
+        return_value="""{|class="flextable flextable-fr-mfsp"
 |-
-|class='invisible'|
-!scope='col'| Singulier
-!scope='col'| Pluriel
-|- class='flextable-fr-m'
-!scope='row'| Masculin
+!scope="col"| Singulier
+!scope="col"| Pluriel
+|- class="flextable-fr-m"
+!scope="row"| Masculin
 |[[animal]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mal\\</span>]]
 |[[animaux]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mo\\</span>]]
-|- class='flextable-fr-f'
-!scope='row'| Féminin
+|- class="flextable-fr-f"
+!scope="row"| Féminin
 |[[animale]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mal\\</span>]]
 |[[animales]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mal\\</span>]]
 |}""",
     )
     def test_fr_accord_al(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/animal#Adjectif
+        self.maxDiff = None
         page_data = [defaultdict(list, {"word": "animal", "lang_code": "fr"})]
-        node = WikiNode(NodeKind.TEMPLATE, 0)
+        node = TemplateNode(0)
         self.wxr.wtp.start_page("animal")
         extract_inflection(self.wxr, page_data, node, "fr-accord-al")
         self.assertEqual(
@@ -101,7 +102,7 @@ class TestInflection(unittest.TestCase):
     def test_multiple_lines_ipa(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/ration#Nom_commun_2
         page_data = [defaultdict(list, {"lang_code": "en", "word": "ration"})]
-        node = WikiNode(NodeKind.TEMPLATE, 0)
+        node = TemplateNode(0)
         self.wxr.wtp.start_page("ration")
         extract_inflection(self.wxr, page_data, node, "en-nom-rég")
         self.assertEqual(
@@ -128,7 +129,7 @@ class TestInflection(unittest.TestCase):
     def test_single_line_multiple_ipa(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/ration#Verbe
         page_data = [defaultdict(list, {"lang_code": "en", "word": "ration"})]
-        node = WikiNode(NodeKind.TEMPLATE, 0)
+        node = TemplateNode(0)
         self.wxr.wtp.start_page("ration")
         extract_inflection(self.wxr, page_data, node, "en-conj-rég")
         self.assertEqual(
@@ -155,10 +156,32 @@ class TestInflection(unittest.TestCase):
     def test_invalid_ipa(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/animal#Nom_commun_3
         page_data = [defaultdict(list, {"lang_code": "en", "word": "animal"})]
-        node = WikiNode(NodeKind.TEMPLATE, 0)
+        node = TemplateNode(0)
         self.wxr.wtp.start_page("animal")
         extract_inflection(self.wxr, page_data, node, "ast-accord-mf")
         self.assertEqual(
             page_data[-1].get("forms"),
             [{"tags": ["Pluriel"], "form": "animales"}],
+        )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{| class="flextable"
+|-
+! Simplifié
+| <bdi lang="zh-Hans" xml:lang="zh-Hans" class="lang-zh-Hans">[[一万#zh|一万]]</bdi>
+|-
+! Traditionnel
+| <bdi lang="zh-Hant" xml:lang="zh-Hant" class="lang-zh-Hant">[[一萬#zh|一萬]]</bdi>
+|}""",
+    )
+    def test_no_column_headers(self, mock_node_to_wikitext):
+        # https://fr.wiktionary.org/wiki/一万#Nom_commun
+        page_data = [defaultdict(list, {"lang_code": "zh", "word": "一万"})]
+        node = TemplateNode(0)
+        self.wxr.wtp.start_page("一万")
+        extract_inflection(self.wxr, page_data, node, "zh-formes")
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [{"tags": ["Traditionnel"], "form": "一萬"}],
         )
