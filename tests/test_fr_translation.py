@@ -70,7 +70,7 @@ class TestTranslation(unittest.TestCase):
                         {
                             "code": "ar",
                             "lang": "Arabe",
-                            "word": "مرحبا",
+                            "word": "مرحبًا",
                             "roman": "mrḥbā",
                             "tags": ["Informel"],
                         },

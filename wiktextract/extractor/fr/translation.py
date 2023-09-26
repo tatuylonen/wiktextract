@@ -84,7 +84,11 @@ def process_translation_templates(
     elif template_node.template_name.startswith("trad"):
         # Translation term: https://fr.wiktionary.org/wiki/Modèle:trad
         translation_term = clean_node(
-            wxr, None, template_node.template_parameters.get(2)
+            wxr,
+            None,
+            template_node.template_parameters.get(
+                "dif", template_node.template_parameters.get(2)
+            ),
         )
         translation_roman = clean_node(
             wxr,

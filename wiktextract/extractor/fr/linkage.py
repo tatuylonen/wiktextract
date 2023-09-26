@@ -74,11 +74,11 @@ def process_lien_template(
     linkage_data: Dict[str, Union[str, List[str]]],
 ) -> None:
     # link word template: https://fr.wiktionary.org/wiki/Modèle:lien
-    if "dif" in node.template_parameters:  # displayed word
-        word = clean_node(wxr, None, node.template_parameters.get("dif"))
-    else:
-        word = clean_node(wxr, None, node.template_parameters.get(1))
-
+    word = clean_node(
+        wxr,
+        None,
+        node.template_parameters.get("dif", node.template_parameters.get(1)),
+    )
     linkage_data["word"] = word
     if "tr" in node.template_parameters:
         linkage_data["roman"] = clean_node(
