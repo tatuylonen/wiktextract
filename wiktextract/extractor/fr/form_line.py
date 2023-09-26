@@ -45,7 +45,7 @@ def extract_form_line(
                 ):
                     # it's the location of the previous IPA template
                     page_data[-1]["sounds"][-1]["tags"].append(tag.strip("()"))
-                else:
+                elif len(tag.strip("()")) > 0:
                     page_data[-1]["tags"].append(tag.strip("()"))
 
             pre_template_name = node.template_name
