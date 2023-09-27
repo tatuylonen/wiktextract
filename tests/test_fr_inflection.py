@@ -40,7 +40,7 @@ class TestInflection(unittest.TestCase):
         page_data = [defaultdict(list, {"word": "productrice"})]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("productrice")
-        extract_inflection(self.wxr, page_data, node, "fr-rég")
+        extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
             page_data[-1].get("forms"),
             [{"form": "productrices", "tags": ["Pluriel"]}],
@@ -68,7 +68,7 @@ class TestInflection(unittest.TestCase):
         page_data = [defaultdict(list, {"word": "animal", "lang_code": "fr"})]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("animal")
-        extract_inflection(self.wxr, page_data, node, "fr-accord-al")
+        extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
             page_data[-1].get("forms"),
             [
@@ -104,7 +104,7 @@ class TestInflection(unittest.TestCase):
         page_data = [defaultdict(list, {"lang_code": "en", "word": "ration"})]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("ration")
-        extract_inflection(self.wxr, page_data, node, "en-nom-rég")
+        extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
             page_data[-1].get("forms"),
             [
@@ -131,7 +131,7 @@ class TestInflection(unittest.TestCase):
         page_data = [defaultdict(list, {"lang_code": "en", "word": "ration"})]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("ration")
-        extract_inflection(self.wxr, page_data, node, "en-conj-rég")
+        extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
             page_data[-1].get("forms"),
             [
@@ -158,7 +158,7 @@ class TestInflection(unittest.TestCase):
         page_data = [defaultdict(list, {"lang_code": "en", "word": "animal"})]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("animal")
-        extract_inflection(self.wxr, page_data, node, "ast-accord-mf")
+        extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
             page_data[-1].get("forms"),
             [{"tags": ["Pluriel"], "form": "animales"}],
@@ -180,8 +180,31 @@ class TestInflection(unittest.TestCase):
         page_data = [defaultdict(list, {"lang_code": "zh", "word": "一万"})]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("一万")
-        extract_inflection(self.wxr, page_data, node, "zh-formes")
+        extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
             page_data[-1].get("forms"),
             [{"tags": ["Traditionnel"], "form": "一萬"}],
+        )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{| class="flextable"
+!Cas
+! Singulier
+! Pluriel
+|-
+! Nominatif
+|| <bdi lang="lt" xml:lang="lt" class="lang-lt">[[abadas#lt|abadas]]</bdi>
+|| '''<span lang="lt" xml:lang="lt" class="lang-lt"><bdi>abadai</bdi></span>'''
+|}""",
+    )
+    def test_lt_décl_as(self, mock_node_to_wikitext):
+        # empty table cells should be ignored
+        page_data = [defaultdict(list, {"lang_code": "lt", "word": "abadai"})]
+        node = TemplateNode(0)
+        self.wxr.wtp.start_page("abadai")
+        extract_inflection(self.wxr, page_data, node)
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [{"tags": ["Singulier", "Nominatif"], "form": "abadas"}],
         )

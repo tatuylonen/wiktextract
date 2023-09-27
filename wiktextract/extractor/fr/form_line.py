@@ -97,6 +97,7 @@ def process_zh_mot_template(
                 {"ipa": clean_node(wxr, None, template_node)}
             )
 
+
 def process_ja_mot_template(
     wxr: WiktextractContext,
     template_node: TemplateNode,
@@ -104,10 +105,12 @@ def process_ja_mot_template(
 ) -> None:
     # Japanese form line template: https://fr.wiktionary.org/wiki/Modèle:ja-mot
     expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node),
-        expand_all=True
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
-    existing_forms = {existing_form.get("form") for existing_form in page_data[-1].get("forms", [])}
+    existing_forms = {
+        existing_form.get("form")
+        for existing_form in page_data[-1].get("forms", [])
+    }
     for index, node in expanded_node.find_html("span", with_index=True):
         # the first span tag is the word, the second is Hepburn romanization
         if index == 1:
@@ -115,8 +118,7 @@ def process_ja_mot_template(
             if form_text not in existing_forms:
                 # avoid adding duplicated form data extracted from
                 # inflection table before the form line
-                page_data[-1]["forms"].append({
-                    "form": roman_form,
-                    "tags": ["romanization"]
-                })
+                page_data[-1]["forms"].append(
+                    {"form": roman_form, "tags": ["romanization"]}
+                )
             break

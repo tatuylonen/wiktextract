@@ -124,7 +124,7 @@ def process_pos_block(
                     # skip form line templates
                     continue
                 elif template_name.startswith(f"{lang_code}-"):
-                    extract_inflection(wxr, page_data, child, template_name)
+                    extract_inflection(wxr, page_data, child)
             elif child.kind == NodeKind.BOLD:
                 form_line_start = index + 1
             elif child.kind == NodeKind.LIST:
