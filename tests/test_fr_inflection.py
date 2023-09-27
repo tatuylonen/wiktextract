@@ -64,7 +64,6 @@ class TestInflection(unittest.TestCase):
     )
     def test_fr_accord_al(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/animal#Adjectif
-        self.maxDiff = None
         page_data = [defaultdict(list, {"word": "animal", "lang_code": "fr"})]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("animal")
@@ -101,6 +100,7 @@ class TestInflection(unittest.TestCase):
     )
     def test_multiple_lines_ipa(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/ration#Nom_commun_2
+        # template "en-nom-rég"
         page_data = [defaultdict(list, {"lang_code": "en", "word": "ration"})]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("ration")
@@ -128,6 +128,7 @@ class TestInflection(unittest.TestCase):
     )
     def test_single_line_multiple_ipa(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/ration#Verbe
+        # template "en-conj-rég"
         page_data = [defaultdict(list, {"lang_code": "en", "word": "ration"})]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("ration")
@@ -155,6 +156,7 @@ class TestInflection(unittest.TestCase):
     )
     def test_invalid_ipa(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/animal#Nom_commun_3
+        # template "ast-accord-mf"
         page_data = [defaultdict(list, {"lang_code": "en", "word": "animal"})]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("animal")
@@ -177,6 +179,7 @@ class TestInflection(unittest.TestCase):
     )
     def test_no_column_headers(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/一万#Nom_commun
+        # template "zh-formes"
         page_data = [defaultdict(list, {"lang_code": "zh", "word": "一万"})]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("一万")
@@ -207,4 +210,47 @@ class TestInflection(unittest.TestCase):
         self.assertEqual(
             page_data[-1].get("forms"),
             [{"tags": ["Singulier", "Nominatif"], "form": "abadas"}],
+        )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{|class="flextable flextable-fr-mfsp"
+
+|-
+| class="invisible" |
+! scope="col" | Singulier
+! scope="col" | Pluriel
+|- class="flextable-fr-m"
+! scope="row" | Masculin
+|colspan="2"| [[aastais]]<br
+/>[[Annexe:Prononciation/français|<span>\\a.a.stɛ\\</span>]]
+
+|- class="flextable-fr-f"
+! scope="row" | Féminin
+| [[aastaise]]<br
+/>[[Annexe:Prononciation/français|<span>\\a.a.stɛz\\</span>]]
+| [[aastaises]]<br
+/>[[Annexe:Prononciation/français|<span>\\a.a.stɛz\\</span>]]
+|}""",
+    )
+    def test_fr_accord_s(self, mock_node_to_wikitext):
+        # https://fr.wiktionary.org/wiki/
+        page_data = [defaultdict(list, {"lang_code": "fr", "word": "aastais"})]
+        node = TemplateNode(0)
+        self.wxr.wtp.start_page("aastais")
+        extract_inflection(self.wxr, page_data, node)
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [
+                {
+                    "tags": ["Singulier", "Féminin"],
+                    "form": "aastaise",
+                    "ipa": "\\a.a.stɛz\\",
+                },
+                {
+                    "tags": ["Pluriel", "Féminin"],
+                    "form": "aastaises",
+                    "ipa": "\\a.a.stɛz\\",
+                },
+            ],
         )

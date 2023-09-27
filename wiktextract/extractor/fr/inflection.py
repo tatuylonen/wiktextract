@@ -63,7 +63,9 @@ def process_inflection_table(
         ]
         if row_num == 0:
             first_row_has_data_cell = any(
-                isinstance(cell, WikiNode) and cell.kind == NodeKind.TABLE_CELL
+                isinstance(cell, WikiNode)
+                and cell.kind == NodeKind.TABLE_CELL
+                and "invisible" not in cell.attrs.get("class", "")
                 for cell in table_row_nodes
             )
 
