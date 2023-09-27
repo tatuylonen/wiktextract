@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor.parser import TemplateNode
 
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -12,12 +13,11 @@ from .pronunciation import insert_ipa, is_ipa_text
 def extract_inflection(
     wxr: WiktextractContext,
     page_data: List[Dict],
-    node: WikiNode,
-    template_name: str,
+    template_node: TemplateNode,
 ) -> None:
     # inflection templates
     # https://fr.wiktionary.org/wiki/Catégorie:Modèles_d’accord_en_français
-    process_inflection_table(wxr, page_data, node)
+    process_inflection_table(wxr, page_data, template_node)
 
 
 IGNORE_TABLE_HEADERS = {
@@ -43,15 +43,29 @@ def process_inflection_table(
         return
     table_node = table_nodes[0]
     column_headers = []
+    first_row_has_data_cell = False
     for row_num, table_row in enumerate(
         table_node.find_child(NodeKind.TABLE_ROW)
     ):
-        table_row_nodes = list(table_row.filter_empty_str_child())
-        first_row_has_data_cell = False
+        # filter empty table cells
+        table_row_nodes = [
+            row_node_child
+            for row_node_child in table_row.children
+            if isinstance(row_node_child, WikiNode)
+            and (
+                row_node_child.kind == NodeKind.TABLE_HEADER_CELL
+                or (
+                    row_node_child.kind == NodeKind.TABLE_CELL
+                    and len(row_node_child.children) > 0
+                )
+            )
+            and row_node_child.attrs.get("style") != "display:none"
+        ]
         if row_num == 0:
-            first_row_has_data_cell = not any(
+            first_row_has_data_cell = any(
                 isinstance(cell, WikiNode)
                 and cell.kind == NodeKind.TABLE_CELL
+                and "invisible" not in cell.attrs.get("class", "")
                 for cell in table_row_nodes
             )
 
@@ -59,24 +73,19 @@ def process_inflection_table(
             # data row has one more column then header: "fr-accord-al" template
             column_headers.insert(0, "")
 
-        row_header = ""
+        row_headers = []
         for column_num, table_cell in enumerate(table_row_nodes):
             form_data = defaultdict(list)
             if isinstance(table_cell, WikiNode):
                 if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
                     table_header_text = clean_node(wxr, None, table_cell)
-                    if row_num == 0 and first_row_has_data_cell:
+                    if row_num == 0 and not first_row_has_data_cell:
                         # if cells of the first row are not all header cells
                         # then the header cells are row headers but not column
                         # headers
                         column_headers.append(table_header_text)
-                    elif (
-                        column_num == 0
-                        and table_header_text not in IGNORE_TABLE_HEADERS
-                    ):
-                        row_header = table_header_text
                     elif table_header_text not in IGNORE_TABLE_HEADERS:
-                        form_data["tags"].append(table_header_text)
+                        row_headers.append(table_header_text)
                 elif table_cell.kind == NodeKind.TABLE_CELL:
                     table_cell_lines = clean_node(wxr, None, table_cell)
                     for table_cell_line in table_cell_lines.splitlines():
@@ -94,7 +103,7 @@ def process_inflection_table(
                     ):
                         form_data["tags"].append(column_headers[column_num])
 
-            if len(row_header) > 0:
-                form_data["tags"].append(row_header)
-            if "form" in form_data:
-                page_data[-1]["forms"].append(form_data)
+                    if len(row_headers) > 0:
+                        form_data["tags"].extend(row_headers)
+                    if "form" in form_data:
+                        page_data[-1]["forms"].append(form_data)

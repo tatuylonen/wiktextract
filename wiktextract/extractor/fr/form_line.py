@@ -35,6 +35,8 @@ def extract_form_line(
                 process_equiv_pour_template(wxr, node, page_data)
             elif node.template_name.startswith("zh-mot"):
                 process_zh_mot_template(wxr, node, page_data)
+            elif node.template_name == "ja-mot":
+                process_ja_mot_template(wxr, node, page_data)
             else:
                 tag = clean_node(wxr, page_data[-1], node)
                 if (
@@ -75,7 +77,7 @@ def process_zh_mot_template(
     node: TemplateNode,
     page_data: List[Dict],
 ) -> None:
-    # zh-mot, zh-mot-s, zh-mot-t
+    # Chinese form line template: zh-mot, zh-mot-s, zh-mot-t
     # https://fr.wiktionary.org/wiki/Modèle:zh-mot
     node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node),
@@ -83,14 +85,40 @@ def process_zh_mot_template(
         additional_expand={node.template_name},
     )
     for template_node in node.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name == "lang":
+        if template_node.template_name.lower() == "lang":
             page_data[-1]["sounds"].append(
                 {
                     "zh-pron": clean_node(wxr, None, template_node),
                     "tags": ["Pinyin"],
                 }
             )
-        elif template_node.template_name == "pron":
+        elif template_node.template_name in ("pron", "prononciation"):
             page_data[-1]["sounds"].append(
                 {"ipa": clean_node(wxr, None, template_node)}
             )
+
+
+def process_ja_mot_template(
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    page_data: List[Dict],
+) -> None:
+    # Japanese form line template: https://fr.wiktionary.org/wiki/Modèle:ja-mot
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    existing_forms = {
+        existing_form.get("form")
+        for existing_form in page_data[-1].get("forms", [])
+    }
+    for index, node in expanded_node.find_html("span", with_index=True):
+        # the first span tag is the word, the second is Hepburn romanization
+        if index == 1:
+            form_text = clean_node(wxr, None, node)
+            if form_text not in existing_forms:
+                # avoid adding duplicated form data extracted from
+                # inflection table before the form line
+                page_data[-1]["forms"].append(
+                    {"form": roman_form, "tags": ["romanization"]}
+                )
+            break
