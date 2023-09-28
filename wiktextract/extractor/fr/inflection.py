@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, deque
 from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
@@ -22,7 +22,9 @@ def extract_inflection(
 
 IGNORE_TABLE_HEADERS = {
     "Terme",  # https://fr.wiktionary.org/wiki/Modèle:de-adj
-    "Forme",  # https://fr.wiktionary.org/wiki/Modèle:br-flex-adj
+    "Forme",  # br-flex-adj
+    "Temps",  # en-conj-rég,
+    "Cas",  # lt_décl_as
 }
 IGNORE_TABLE_CELL = {
     "Déclinaisons",  # de-adj
@@ -43,6 +45,7 @@ def process_inflection_table(
         return
     table_node = table_nodes[0]
     column_headers = []
+    rowspan_headers = deque()
     first_row_has_data_cell = False
     for row_num, table_row in enumerate(
         table_node.find_child(NodeKind.TABLE_ROW)
@@ -56,7 +59,7 @@ def process_inflection_table(
                 row_node_child.kind == NodeKind.TABLE_HEADER_CELL
                 or (
                     row_node_child.kind == NodeKind.TABLE_CELL
-                    and len(row_node_child.children) > 0
+                    and len(list(row_node_child.filter_empty_str_child())) > 0
                 )
             )
             and row_node_child.attrs.get("style") != "display:none"
@@ -68,24 +71,38 @@ def process_inflection_table(
                 and "invisible" not in cell.attrs.get("class", "")
                 for cell in table_row_nodes
             )
-
-        if row_num != 0 and len(table_row_nodes) == len(column_headers) + 1:
-            # data row has one more column then header: "fr-accord-al" template
-            column_headers.insert(0, "")
-
         row_headers = []
+        for index, (rowspan_text, rowspan_count) in enumerate(
+            rowspan_headers.copy()
+        ):
+            row_headers.append(rowspan_text)
+            if rowspan_count - 1 == 0:
+                del rowspan_headers[index]
+            else:
+                rowspan_headers[index] = (rowspan_text, rowspan_count - 1)
+
+        column_cell_index = 0
         for column_num, table_cell in enumerate(table_row_nodes):
             form_data = defaultdict(list)
             if isinstance(table_cell, WikiNode):
                 if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
                     table_header_text = clean_node(wxr, None, table_cell)
-                    if row_num == 0 and not first_row_has_data_cell:
+                    if table_header_text in IGNORE_TABLE_HEADERS:
+                        continue
+                    elif row_num == 0 and not first_row_has_data_cell:
                         # if cells of the first row are not all header cells
                         # then the header cells are row headers but not column
                         # headers
                         column_headers.append(table_header_text)
-                    elif table_header_text not in IGNORE_TABLE_HEADERS:
+                    elif row_num > 0:
                         row_headers.append(table_header_text)
+                        if "rowspan" in table_cell.attrs:
+                            rowspan_headers.append(
+                                (
+                                    table_header_text,
+                                    int(table_cell.attrs.get("rowspan")) - 1,
+                                )
+                            )
                 elif table_cell.kind == NodeKind.TABLE_CELL:
                     table_cell_lines = clean_node(wxr, None, table_cell)
                     for table_cell_line in table_cell_lines.splitlines():
@@ -97,13 +114,16 @@ def process_inflection_table(
                         ):
                             form_data["form"] = table_cell_line
                     if (
-                        len(column_headers) > column_num
-                        and column_headers[column_num]
+                        len(column_headers) > column_cell_index
+                        and column_headers[column_cell_index]
                         not in IGNORE_TABLE_HEADERS
                     ):
-                        form_data["tags"].append(column_headers[column_num])
+                        form_data["tags"].append(
+                            column_headers[column_cell_index]
+                        )
 
                     if len(row_headers) > 0:
                         form_data["tags"].extend(row_headers)
                     if "form" in form_data:
                         page_data[-1]["forms"].append(form_data)
+                    column_cell_index += 1
