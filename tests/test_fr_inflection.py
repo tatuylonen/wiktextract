@@ -254,3 +254,51 @@ class TestInflection(unittest.TestCase):
                 },
             ],
         )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{| class="flextable"
+| colspan="2" |
+! Singulier !! Pluriel
+|-
+! rowspan="2" | 1<sup>e</sup> personne
+! Masculin
+| [[enculé de ma race]]<br/>[[Annexe:Prononciation/français|<span>\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\</span>]]
+| [[enculés de notre race]]<br/>[[Annexe:Prononciation/français|<span>\\ɑ̃.ky.ˌle.də.nɔ.tʁə.ˈʁas\\</span>]]
+|-
+! Féminin
+| [[enculée de ma race]]<br/>[[Annexe:Prononciation/français|<span>\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\</span>]]
+| [[enculées de notre race]]<br/>[[Annexe:Prononciation/français|<span>\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\</span>]]
+|}""",
+    )
+    def test_fr_accord_personne(self, mock_node_to_wikitext):
+        # https://fr.wiktionary.org/wiki/enculé_de_ta_race
+        page_data = [defaultdict(list)]
+        node = TemplateNode(0)
+        self.wxr.wtp.start_page("enculé de ta race")
+        extract_inflection(self.wxr, page_data, node)
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [
+                {
+                    "form": "enculé de ma race",
+                    "ipa": "\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\",
+                    "tags": ["Singulier", "1ᵉ personne", "Masculin"],
+                },
+                {
+                    "form": "enculés de notre race",
+                    "ipa": "\\ɑ̃.ky.ˌle.də.nɔ.tʁə.ˈʁas\\",
+                    "tags": ["Pluriel", "1ᵉ personne", "Masculin"],
+                },
+                {
+                    "form": "enculée de ma race",
+                    "ipa": "\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\",
+                    "tags": ["Singulier", "1ᵉ personne", "Féminin"],
+                },
+                {
+                    "form": "enculées de notre race",
+                    "ipa": "\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\",
+                    "tags": ["Pluriel", "1ᵉ personne", "Féminin"],
+                },
+            ],
+        )
