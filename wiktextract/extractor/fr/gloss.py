@@ -127,5 +127,5 @@ def process_exemple_template(
     if len(source) > 0:
         example_data["source"] = clean_node(wxr, None, source)
         example_data["type"] = "quotation"
-    if len(example_data) > 0:
+    if "text" in example_data:
         gloss_data["examples"].append(example_data)
