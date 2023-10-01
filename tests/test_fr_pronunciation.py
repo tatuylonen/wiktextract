@@ -77,3 +77,30 @@ class TestPronunciation(unittest.TestCase):
             page_data[0].get("sounds"),
             [{"tags": ["cantonais", "Yale"], "zh-pron": "nei⁵hou²"}],
         )
+
+    def test_no_ipa(self):
+        """
+        The pronunciation block could have no IPA data but contain some audio
+        files.
+        Test wikitext from https://fr.wiktionary.org/wiki/mars
+        """
+        page_data = [defaultdict(list)]
+        self.wxr.wtp.start_page("")
+        root = self.wxr.wtp.parse(
+            """=== {{S|prononciation}} ===
+{{ébauche-pron|sv}}
+* {{écouter|lang=sv|Suède||audio=LL-Q9027 (swe)-Moonhouse-mars.wav}}"""
+        )
+        extract_pronunciation(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data[0].get("sounds"),
+            [
+                {
+                    "tags": ["Suède"],
+                    "audio": "LL-Q9027 (swe)-Moonhouse-mars.wav",
+                    "wav_url": "https://commons.wikimedia.org/wiki/Special:FilePath/LL-Q9027 (swe)-Moonhouse-mars.wav",
+                    "ogg_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/3f/LL-Q9027_(swe)-Moonhouse-mars.wav/LL-Q9027_(swe)-Moonhouse-mars.wav.ogg",
+                    "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/3f/LL-Q9027_(swe)-Moonhouse-mars.wav/LL-Q9027_(swe)-Moonhouse-mars.wav.mp3",
+                }
+            ],
+        )

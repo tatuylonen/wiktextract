@@ -18,12 +18,6 @@ class FrPageTests(unittest.TestCase):
         conf1 = WiktionaryConfig(
             dump_file_lang_code="fr",
             capture_language_codes=None,
-            capture_translations=True,
-            capture_pronunciation=True,
-            capture_linkages=True,
-            capture_compounds=True,
-            capture_redirects=True,
-            capture_examples=True,
         )
         self.wxr = WiktextractContext(Wtp(lang_code="fr"), conf1)
 
@@ -52,6 +46,7 @@ class FrPageTests(unittest.TestCase):
                     "lang": "Français",
                     "lang_code": "fr",
                     "pos": "noun",
+                    "pos_title": "Nom commun",
                     "word": "exemple",
                 }
             ],

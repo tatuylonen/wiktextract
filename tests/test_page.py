@@ -4,10 +4,10 @@
 
 import json
 import unittest
-
 from unittest.mock import patch
 
-from wikitextprocessor import Wtp, Page
+from wikitextprocessor import Page, Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.page import parse_page
 from wiktextract.thesaurus import close_thesaurus_db
@@ -16,7 +16,7 @@ from wiktextract.wxr_context import WiktextractContext
 
 class PageTests(unittest.TestCase):
     def setUp(self):
-        self.maxDiff = 20000
+        self.maxDiff = None
         conf1 = WiktionaryConfig(
             capture_language_codes=None,
             capture_translations=True,
@@ -27,8 +27,6 @@ class PageTests(unittest.TestCase):
             capture_examples=True,
         )
         self.wxr = WiktextractContext(Wtp(), conf1)
-        self.wxr.wtp.analyze_templates()
-        self.wxr.wtp.start_page("testpage")
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
@@ -36,12 +34,10 @@ class PageTests(unittest.TestCase):
             self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
         )
 
-    def runpage(self, text):
-        assert isinstance(text, str)
-        return parse_page(self.wxr, self.wxr.wtp.title, text)
-
     def test_page1(self):
-        lst = self.runpage(
+        lst = parse_page(
+            self.wxr,
+            "testpage",
             """
 ==Swedish==
 ===Noun===
@@ -49,7 +45,7 @@ foo f
 
 # sense 1
 # sense 2
-"""
+""",
         )
         # XXX should also capture examples
         self.assertEqual(
@@ -76,16 +72,17 @@ foo f
         )
 
     def test_page2(self):
-        lst = self.runpage(
+        lst = parse_page(
+            self.wxr,
+            "testpage",
             """
 ==Swedish==
 ===Noun===
 testpage f
 
 # sense 1
-"""
+""",
         )
-        # XXX should also capture examples
         self.assertEqual(
             lst,
             [
@@ -105,17 +102,17 @@ testpage f
         )
 
     def test_page3(self):
-        self.wxr.wtp.start_page("Unsupported titles/C sharp")
-        lst = self.runpage(
+        lst = parse_page(
+            self.wxr,
+            "Unsupported titles/C sharp",
             """
 ==Swedish==
 ===Noun===
 foo
 
 # sense 1
-"""
+""",
         )
-        # XXX should also capture examples
         self.assertEqual(
             lst,
             [
@@ -137,8 +134,9 @@ foo
         )
 
     def test_page4(self):
-        self.wxr.wtp.start_page("foo")
-        lst = self.runpage(
+        lst = parse_page(
+            self.wxr,
+            "foo",
             """
 ==English==
 
@@ -158,10 +156,9 @@ foo
 * (sense abc) zap
 * verbs: zip, zump
 
-"""
+""",
         )
-        print("RETURNED:", json.dumps(lst, indent=2, sort_keys=True))
-        # XXX should also capture examples
+        # print("RETURNED:", json.dumps(lst, indent=2, sort_keys=True))
         self.assertEqual(
             lst,
             [
@@ -217,8 +214,9 @@ foo
         )
 
     def test_page5(self):
-        self.wxr.wtp.start_page("foo")
-        lst = self.runpage(
+        lst = parse_page(
+            self.wxr,
+            "foo",
             """
 ==English==
 
@@ -246,9 +244,9 @@ foo
 * (sense abc) zap
 * verbs: zip, zump
 
-"""
+""",
         )
-        print("RETURNED:", json.dumps(lst, indent=2, sort_keys=True))
+        # print("RETURNED:", json.dumps(lst, indent=2, sort_keys=True))
         self.assertEqual(
             lst,
             [
@@ -334,7 +332,9 @@ foo
         )
 
     def test_page6(self):
-        lst = self.runpage(
+        lst = parse_page(
+            self.wxr,
+            "testpage",
             """
 ==Japanese==
 ===Verb===
@@ -342,7 +342,7 @@ foo
 
 # sense 1
 #: <dl><dd><span class="Jpan" lang="ja"><a href="/wiki/%E3%81%94%E9%A3%AF#Japanese" title="ご飯">ご<ruby>飯<rp>(</rp><rt>はん</rt><rp>)</rp></ruby></a>を<b><ruby>食<rp>(</rp><rt>た</rt><rp>)</rp></ruby>べる</b></span><dl><dd><i>go-han o <b>taberu</b></i></dd><dd>to <b>eat</b> a meal</dd></dl></dd></dl>
-"""
+""",
         )
         self.assertEqual(
             lst,
@@ -384,8 +384,9 @@ foo
         # if the closing tag is exactly at the start of the next line, and
         # there's nothing else in-between breaking the list... But it's
         # better than nothing and fixes a few issues.
-        self.wxr.wtp.start_page("foo")
-        lst = self.runpage(
+        lst = parse_page(
+            self.wxr,
+            "foo",
             """
 ==English==
 
@@ -397,10 +398,9 @@ foo
 ## (mycology) mushroom<div>
 </div>
 ## (person) one who foos
-"""
+""",
         )
-        print("RETURNED:", json.dumps(lst, indent=2, sort_keys=True))
-        # XXX should also capture examples
+        # print("RETURNED:", json.dumps(lst, indent=2, sort_keys=True))
         self.assertEqual(
             lst,
             [
@@ -434,8 +434,9 @@ foo
 
     def test_page8(self):
         """Capture category links and normal links in glosses"""
-        self.wxr.wtp.start_page("foo")
-        lst = self.runpage(
+        lst = parse_page(
+            self.wxr,
+            "foo",
             """
 ==English==
 
@@ -443,7 +444,7 @@ foo
 foo
 
 # sense 1 [[Category:bar]], [[bazlink|baz]]
-"""
+""",
         )
         # print("RETURNED:", json.dumps(lst, indent=2, sort_keys=True))
         self.assertEqual(
@@ -455,13 +456,9 @@ foo
                     "pos": "noun",
                     "senses": [
                         {
-                            "categories": [
-                                "bar"
-                            ],
+                            "categories": ["bar"],
                             "glosses": ["sense 1 , baz"],
-                            "links": [
-                                ("baz", "bazlink")
-                            ],
+                            "links": [("baz", "bazlink")],
                         },
                     ],
                     "word": "foo",
@@ -476,13 +473,14 @@ foo
     def test_zh_see(self, mock_get_page):
         # https://en.wiktionary.org/wiki/你们
         # GitHub issue #287
-        self.wxr.wtp.start_page("你们")
-        data = self.runpage(
+        data = parse_page(
+            self.wxr,
+            "你们",
             """
 ==Chinese==
 {{zh-see|你們}}
 {{zh-see|妳們}}
-            """
+            """,
         )
         self.assertEqual(
             data,
@@ -491,7 +489,7 @@ foo
                     "lang": "Chinese",
                     "lang_code": "zh",
                     "redirects": ["你們", "妳們"],
-                    "word": "你们"
+                    "word": "你们",
                 }
             ],
         )
@@ -506,14 +504,16 @@ foo
         headword line, GitHub issue #285
         test wikitext from page https://en.wiktionary.org/wiki/ox
         """
-        data = self.runpage(
+        data = parse_page(
+            self.wxr,
+            "",
             """
 ==English==
 
 ===Noun===
 {{en-noun|oxen|oxes|pl2qual=nonstandard}} {{catlangname|en|nouns with irregular plurals|two-letter words}}
 
-# An adult castrated male of cattle."""
+# An adult castrated male of cattle.""",
         )
         self.assertEqual(
             data[0].get("senses"),
@@ -528,7 +528,9 @@ foo
         """
         test wikitext copied from page https://en.wiktionary.org/wiki/ARF
         """
-        data = self.runpage(
+        data = parse_page(
+            self.wxr,
+            "",
             """
 ==English==
 
@@ -536,7 +538,7 @@ foo
 {{head|en|phrase}}
 
 # {{lb|en|computing}} "[[abort|Abort]], [[retry|Retry]], [[fail|Fail]]?"
-            """
+            """,
         )
         self.assertEqual(
             data[0].get("senses", [{}])[0].get("glosses"),
@@ -555,14 +557,16 @@ foo
         """
         test wikitext copied from page https://en.wiktionary.org/wiki/onesie
         """
-        data = self.runpage(
+        data = parse_page(
+            self.wxr,
+            "",
             """
 ==English==
 
 ===Noun===
 
 # {{ux|en|Name given to a number of one-piece attires}}
-            """
+            """,
         )
         self.assertEqual(
             data[0].get("senses", [{}])[0].get("glosses"),
@@ -579,8 +583,9 @@ foo
     )
     def test_gloss_not_inside_list(self, mock_get_page):
         # https://en.wiktionary.org/wiki/shail
-        self.wxr.wtp.start_page("shail")
-        data = self.runpage(
+        data = parse_page(
+            self.wxr,
+            "shail",
             """
 ==Irish==
 
@@ -592,7 +597,7 @@ foo
 ====Translations====
 
 foo
-            """
+            """,
         )
         # from pprint import pp
         # pp(data)

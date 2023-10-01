@@ -18,7 +18,7 @@ def extract_gloss(
         gloss_data = defaultdict(list)
         gloss_start = 0
         # process modifier, theme tempaltes before gloss text
-        # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste de tous les modèles/Précisions de sens
+        # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_de_tous_les_modèles/Précisions_de_sens
         if (
             len(gloss_nodes) > 0
             and isinstance(gloss_nodes[0], WikiNode)
@@ -37,12 +37,22 @@ def extract_gloss(
                     break
                 else:
                     gloss_start = index + 1
-            for mod_template in gloss_nodes[:gloss_start]:
+            for tag_node in gloss_nodes[:gloss_start]:
                 gloss_data["tags"].append(
-                    clean_node(wxr, gloss_data, mod_template).strip("()")
+                    clean_node(wxr, gloss_data, tag_node).strip("()")
                 )
 
-        gloss_text = clean_node(wxr, gloss_data, gloss_nodes[gloss_start:])
+        gloss_only_nodes = []
+        # extract italic tags
+        for node in gloss_nodes[gloss_start:]:
+            if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+                gloss_data["tags"].append(clean_node(wxr, None, node))
+                continue
+            elif isinstance(node, str) and node.strip() in ["(", ")"]:
+                # remove parentheses around italic node
+                continue
+            gloss_only_nodes.append(node)
+        gloss_text = clean_node(wxr, gloss_data, gloss_only_nodes)
         gloss_data["glosses"] = [gloss_text]
         extract_examples(wxr, gloss_data, list_item_node)
         page_data[-1]["senses"].append(gloss_data)
@@ -117,5 +127,5 @@ def process_exemple_template(
     if len(source) > 0:
         example_data["source"] = clean_node(wxr, None, source)
         example_data["type"] = "quotation"
-    if len(example_data) > 0:
+    if "text" in example_data:
         gloss_data["examples"].append(example_data)

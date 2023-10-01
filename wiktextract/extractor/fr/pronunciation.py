@@ -91,7 +91,7 @@ def process_pron_list_item(
                         # language text before ":"
                         sound_data["tags"].append(child.strip())
 
-        if pron_key in sound_data:
+        if pron_key in sound_data or "audio" in sound_data:
             return [sound_data]
 
     return []
@@ -151,7 +151,7 @@ def is_ipa_text(text: str) -> bool:
     return False
 
 
-def split_ipa(text: str) -> list[str] | str:
+def split_ipa(text: str) -> Union[List[str], str]:
     # break IPA text if it contains "ou"(or)
     if " ou " in text:
         # two ipa texts in the same line: "en-conj-rég" template
@@ -165,7 +165,9 @@ def split_ipa(text: str) -> list[str] | str:
     return text
 
 
-def insert_ipa(target_dict: dict[str, str | list[str]], ipa_text: str) -> None:
+def insert_ipa(
+    target_dict: Dict[str, Union[str, List[str]]], ipa_text: str
+) -> None:
     # insert IPA text to a dictionary, and merge values of the key "ipa" and
     # "ipas", `target_dict` is created by `defaultdict(list)`.
     ipa_data = split_ipa(ipa_text)

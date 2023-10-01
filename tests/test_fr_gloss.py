@@ -122,13 +122,19 @@ class TestFormLine(unittest.TestCase):
         )
         page_data = [defaultdict(list)]
         process_pos_block(
-            self.wxr, page_data, defaultdict(list), root.children[0], "nom"
+            self.wxr,
+            page_data,
+            defaultdict(list),
+            root.children[0],
+            "nom",
+            "Nom commun",
         )
         self.assertEqual(
             page_data,
             [
                 {
                     "pos": "noun",
+                    "pos_title": "Nom commun",
                     "senses": [
                         {
                             "glosses": ["Cheval."],
@@ -171,6 +177,25 @@ class TestFormLine(unittest.TestCase):
                             "glosses": ["Variante de basketball."],
                             "tags": ["Désuet", "Sport", "Indénombrable"],
                         }
+                    ]
+                }
+            ],
+        )
+
+    def test_italic_tag(self):
+        # https://fr.wiktionary.org/wiki/lenn
+        self.wxr.wtp.start_page("lenn")
+        root = self.wxr.wtp.parse(
+            "# (''localement'') [[bassin#Nom_commun|Bassin]], [[lavoir#Nom_commun|lavoir]]."
+        )
+        page_data = [defaultdict(list)]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "senses": [
+                        {"glosses": ["Bassin, lavoir."], "tags": ["localement"]}
                     ]
                 }
             ],

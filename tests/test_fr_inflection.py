@@ -2,7 +2,8 @@ import unittest
 from collections import defaultdict
 from unittest.mock import patch
 
-from wikitextprocessor import NodeKind, WikiNode, Wtp
+from wikitextprocessor import Wtp
+from wikitextprocessor.parser import TemplateNode
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.inflection import extract_inflection
@@ -37,9 +38,9 @@ class TestInflection(unittest.TestCase):
     )
     def test_fr_reg(self, mock_node_to_wikitext):
         page_data = [defaultdict(list, {"word": "productrice"})]
-        node = WikiNode(NodeKind.TEMPLATE, 0)
+        node = TemplateNode(0)
         self.wxr.wtp.start_page("productrice")
-        extract_inflection(self.wxr, page_data, node, "fr-rég")
+        extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
             page_data[-1].get("forms"),
             [{"form": "productrices", "tags": ["Pluriel"]}],
@@ -47,17 +48,16 @@ class TestInflection(unittest.TestCase):
 
     @patch(
         "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""{|
+        return_value="""{|class="flextable flextable-fr-mfsp"
 |-
-|class='invisible'|
-!scope='col'| Singulier
-!scope='col'| Pluriel
-|- class='flextable-fr-m'
-!scope='row'| Masculin
+!scope="col"| Singulier
+!scope="col"| Pluriel
+|- class="flextable-fr-m"
+!scope="row"| Masculin
 |[[animal]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mal\\</span>]]
 |[[animaux]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mo\\</span>]]
-|- class='flextable-fr-f'
-!scope='row'| Féminin
+|- class="flextable-fr-f"
+!scope="row"| Féminin
 |[[animale]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mal\\</span>]]
 |[[animales]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mal\\</span>]]
 |}""",
@@ -65,9 +65,9 @@ class TestInflection(unittest.TestCase):
     def test_fr_accord_al(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/animal#Adjectif
         page_data = [defaultdict(list, {"word": "animal", "lang_code": "fr"})]
-        node = WikiNode(NodeKind.TEMPLATE, 0)
+        node = TemplateNode(0)
         self.wxr.wtp.start_page("animal")
-        extract_inflection(self.wxr, page_data, node, "fr-accord-al")
+        extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
             page_data[-1].get("forms"),
             [
@@ -100,10 +100,11 @@ class TestInflection(unittest.TestCase):
     )
     def test_multiple_lines_ipa(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/ration#Nom_commun_2
+        # template "en-nom-rég"
         page_data = [defaultdict(list, {"lang_code": "en", "word": "ration"})]
-        node = WikiNode(NodeKind.TEMPLATE, 0)
+        node = TemplateNode(0)
         self.wxr.wtp.start_page("ration")
-        extract_inflection(self.wxr, page_data, node, "en-nom-rég")
+        extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
             page_data[-1].get("forms"),
             [
@@ -127,10 +128,11 @@ class TestInflection(unittest.TestCase):
     )
     def test_single_line_multiple_ipa(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/ration#Verbe
+        # template "en-conj-rég"
         page_data = [defaultdict(list, {"lang_code": "en", "word": "ration"})]
-        node = WikiNode(NodeKind.TEMPLATE, 0)
+        node = TemplateNode(0)
         self.wxr.wtp.start_page("ration")
-        extract_inflection(self.wxr, page_data, node, "en-conj-rég")
+        extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
             page_data[-1].get("forms"),
             [
@@ -154,11 +156,149 @@ class TestInflection(unittest.TestCase):
     )
     def test_invalid_ipa(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/animal#Nom_commun_3
+        # template "ast-accord-mf"
         page_data = [defaultdict(list, {"lang_code": "en", "word": "animal"})]
-        node = WikiNode(NodeKind.TEMPLATE, 0)
+        node = TemplateNode(0)
         self.wxr.wtp.start_page("animal")
-        extract_inflection(self.wxr, page_data, node, "ast-accord-mf")
+        extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
             page_data[-1].get("forms"),
             [{"tags": ["Pluriel"], "form": "animales"}],
+        )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{| class="flextable"
+|-
+! Simplifié
+| <bdi lang="zh-Hans" xml:lang="zh-Hans" class="lang-zh-Hans">[[一万#zh|一万]]</bdi>
+|-
+! Traditionnel
+| <bdi lang="zh-Hant" xml:lang="zh-Hant" class="lang-zh-Hant">[[一萬#zh|一萬]]</bdi>
+|}""",
+    )
+    def test_no_column_headers(self, mock_node_to_wikitext):
+        # https://fr.wiktionary.org/wiki/一万#Nom_commun
+        # template "zh-formes"
+        page_data = [defaultdict(list, {"lang_code": "zh", "word": "一万"})]
+        node = TemplateNode(0)
+        self.wxr.wtp.start_page("一万")
+        extract_inflection(self.wxr, page_data, node)
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [{"tags": ["Traditionnel"], "form": "一萬"}],
+        )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{| class="flextable"
+!Cas
+! Singulier
+! Pluriel
+|-
+! Nominatif
+|| <bdi lang="lt" xml:lang="lt" class="lang-lt">[[abadas#lt|abadas]]</bdi>
+|| '''<span lang="lt" xml:lang="lt" class="lang-lt"><bdi>abadai</bdi></span>'''
+|}""",
+    )
+    def test_lt_décl_as(self, mock_node_to_wikitext):
+        # empty table cells should be ignored
+        page_data = [defaultdict(list, {"lang_code": "lt", "word": "abadai"})]
+        node = TemplateNode(0)
+        self.wxr.wtp.start_page("abadai")
+        extract_inflection(self.wxr, page_data, node)
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [{"tags": ["Singulier", "Nominatif"], "form": "abadas"}],
+        )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{|class="flextable flextable-fr-mfsp"
+
+|-
+| class="invisible" |
+! scope="col" | Singulier
+! scope="col" | Pluriel
+|- class="flextable-fr-m"
+! scope="row" | Masculin
+|colspan="2"| [[aastais]]<br
+/>[[Annexe:Prononciation/français|<span>\\a.a.stɛ\\</span>]]
+
+|- class="flextable-fr-f"
+! scope="row" | Féminin
+| [[aastaise]]<br
+/>[[Annexe:Prononciation/français|<span>\\a.a.stɛz\\</span>]]
+| [[aastaises]]<br
+/>[[Annexe:Prononciation/français|<span>\\a.a.stɛz\\</span>]]
+|}""",
+    )
+    def test_fr_accord_s(self, mock_node_to_wikitext):
+        # https://fr.wiktionary.org/wiki/
+        page_data = [defaultdict(list, {"lang_code": "fr", "word": "aastais"})]
+        node = TemplateNode(0)
+        self.wxr.wtp.start_page("aastais")
+        extract_inflection(self.wxr, page_data, node)
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [
+                {
+                    "tags": ["Singulier", "Féminin"],
+                    "form": "aastaise",
+                    "ipa": "\\a.a.stɛz\\",
+                },
+                {
+                    "tags": ["Pluriel", "Féminin"],
+                    "form": "aastaises",
+                    "ipa": "\\a.a.stɛz\\",
+                },
+            ],
+        )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{| class="flextable"
+| colspan="2" |
+! Singulier !! Pluriel
+|-
+! rowspan="2" | 1<sup>e</sup> personne
+! Masculin
+| [[enculé de ma race]]<br/>[[Annexe:Prononciation/français|<span>\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\</span>]]
+| [[enculés de notre race]]<br/>[[Annexe:Prononciation/français|<span>\\ɑ̃.ky.ˌle.də.nɔ.tʁə.ˈʁas\\</span>]]
+|-
+! Féminin
+| [[enculée de ma race]]<br/>[[Annexe:Prononciation/français|<span>\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\</span>]]
+| [[enculées de notre race]]<br/>[[Annexe:Prononciation/français|<span>\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\</span>]]
+|}""",
+    )
+    def test_fr_accord_personne(self, mock_node_to_wikitext):
+        # https://fr.wiktionary.org/wiki/enculé_de_ta_race
+        page_data = [defaultdict(list)]
+        node = TemplateNode(0)
+        self.wxr.wtp.start_page("enculé de ta race")
+        extract_inflection(self.wxr, page_data, node)
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [
+                {
+                    "form": "enculé de ma race",
+                    "ipa": "\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\",
+                    "tags": ["Singulier", "1ᵉ personne", "Masculin"],
+                },
+                {
+                    "form": "enculés de notre race",
+                    "ipa": "\\ɑ̃.ky.ˌle.də.nɔ.tʁə.ˈʁas\\",
+                    "tags": ["Pluriel", "1ᵉ personne", "Masculin"],
+                },
+                {
+                    "form": "enculée de ma race",
+                    "ipa": "\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\",
+                    "tags": ["Singulier", "1ᵉ personne", "Féminin"],
+                },
+                {
+                    "form": "enculées de notre race",
+                    "ipa": "\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\",
+                    "tags": ["Pluriel", "1ᵉ personne", "Féminin"],
+                },
+            ],
         )
