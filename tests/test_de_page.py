@@ -100,7 +100,7 @@ class DePageTests(unittest.TestCase):
             page_data[-1][field] = value
 
     @patch("wiktextract.extractor.de.page.append_base_data")
-    def test_de_parse_section(self, mock_append_base_data):
+    def test_de_parse_section_with_mock(self, mock_append_base_data):
         mock_append_base_data.side_effect = (
             self.mock_append_base_data_side_effects
         )
@@ -130,6 +130,102 @@ class DePageTests(unittest.TestCase):
                 {"lang_code": "de", "pos": "noun"},
             ],
         )
+
+    def test_de_parse_section_with_senses(self):
+        self.wxr.wtp.add_page("Vorlage:Wortart", 10, "")
+        self.wxr.wtp.add_page("Vorlage:Bedeutungen", 10, "")
+        page_text = """
+=== {{Wortart|Adjektiv|Englisch}}, {{Wortart|Adverb|Englisch}} ===
+{{Bedeutungen}}
+:[1] gloss1
+=== {{Wortart|Verb|Englisch}} ===
+{{Bedeutungen}}
+:[1] gloss1
+=== {{Wortart|Substantiv|Englisch}} ===
+{{Bedeutungen}}
+:[1] gloss1
+
+"""
+        self.wxr.wtp.start_page("")
+        root = self.wxr.wtp.parse(
+            page_text,
+            pre_expand=True,
+        )
+
+        base_data = defaultdict(list, {"lang_code": "de"})
+        page_data = [defaultdict(list, {"lang_code": "de"})]
+        parse_section(self.wxr, page_data, base_data, root.children)
+
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "lang_code": "de",
+                    "pos": "adj",
+                    "senses": [
+                        {
+                            "glosses": ["gloss1"],
+                        },
+                    ],
+                },
+                {
+                    "lang_code": "de",
+                    "pos": "adv",
+                    "senses": [
+                        {
+                            "glosses": ["gloss1"],
+                        },
+                    ],
+                },
+                {
+                    "lang_code": "de",
+                    "pos": "verb",
+                    "senses": [
+                        {
+                            "glosses": ["gloss1"],
+                        },
+                    ],
+                },
+                {
+                    "lang_code": "de",
+                    "pos": "noun",
+                    "senses": [
+                        {
+                            "glosses": ["gloss1"],
+                        },
+                    ],
+                },
+            ],
+        )
+
+    def test_de_parse_section_without_mock(self):
+        self.wxr.wtp.add_page("Vorlage:Wortart", 10, "")
+        page_text = """
+=== {{Wortart|Adjektiv|Englisch}}, {{Wortart|Adverb|Englisch}} ===
+=== {{Wortart|Verb|Englisch}} ===
+=== {{Wortart|Substantiv|Englisch}} ===
+"""
+        self.wxr.wtp.start_page("")
+        root = self.wxr.wtp.parse(
+            page_text,
+            pre_expand=True,
+        )
+
+        base_data = defaultdict(list, {"lang_code": "de"})
+        page_data = [defaultdict(list, {"lang_code": "de"})]
+        parse_section(self.wxr, page_data, base_data, root.children)
+
+        self.assertEqual(
+            page_data,
+            [
+                {"lang_code": "de", "pos": "adj", "senses": []},
+                {"lang_code": "de", "pos": "adv", "senses": []},
+                {"lang_code": "de", "pos": "verb", "senses": []},
+                {"lang_code": "de", "pos": "noun"},
+            ],
+        )
+        # Assertion fails. The resulting page_data is just:
+        # [{'lang_code': 'de', 'pos': 'adj', 'senses': []}]
 
     def test_de_fix_level_hierarchy_of_subsections(self):
         self.wxr.wtp.add_page("Vorlage:Englisch Substantiv Übersicht", 10, "")
