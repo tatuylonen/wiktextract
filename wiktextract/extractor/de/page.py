@@ -25,132 +25,12 @@ PANEL_PREFIXES = set()
 # Additional templates to be expanded in the pre-expand phase
 ADDITIONAL_EXPAND_TEMPLATES = set()
 
-FORM_TABLE_TEMPLATES = {
-    "Deutsch Substantiv Übersicht",
-    "Deutsch Substantiv Übersicht -sch",
-    "Deutsch Toponym Übersicht",
-    "Deutsch adjektivisch Übersicht",
-    "Deutsch Eigenname Übersicht",
-    "Deutsch Name Übersicht",
-    "Deutsch Vorname Übersicht m",
-    "Deutsch Vorname Übersicht f",
-    "Deutsch Vorname Übersicht n",
-    "Deutsch Verb Übersicht",
-    "Deutsch Adjektiv Übersicht",
-    "Pronomina-Tabelle",
-    "Afrikaans Substantiv Übersicht",
-    "Albanisch Verb Übersicht",
-    "Altgriechisch Adjektiv Übersicht",
-    "Altgriechisch Substantiv Übersicht",
-    "Altirisch Substantiv Übersicht",
-    "Altnordisch Substantiv Übersicht",
-    "Aserbaidschanisch Substantiv Übersicht",
-    "Asturisch Substantiv Übersicht",
-    "Baschkirisch Substantiv Übersicht",
-    "Baskisch Substantiv Übersicht",
-    "Bosnisch Substantiv Übersicht",
-    "Bretonisch Substantiv Übersicht",
-    "Bulgarisch Verb Übersicht",
-    "Dänisch Adjektiv Übersicht",
-    "Dänisch Possessivpronomen Übersicht",
-    "Dänisch Substantiv Übersicht",
-    "Dänisch Verb Übersicht",
-    "Englisch Adjektiv Übersicht",
-    "Englisch Substantiv Übersicht",
-    "Englisch Verb Übersicht",
-    "Esperanto Substantiv Übersicht",
-    "Färöisch Substantiv Übersicht",
-    "Färöisch Verb Übersicht",
-    "Finnisch Substantiv Übersicht",
-    "Finnisch Verb Übersicht",
-    "Französisch Adjektiv Übersicht",
-    "Französisch Substantiv Übersicht",
-    "Französisch Verb Übersicht",
-    "Galicisch Substantiv Übersicht",
-    "Hausa Adjektiv Übersicht",
-    "Hausa Possessiv Übersicht",
-    "Hausa Substantiv Übersicht",
-    "Hebräisch Substantiv Übersicht",
-    "Ido Substantiv Übersicht",
-    "Irisch Adjektiv Übersicht",
-    "Irisch Substantiv Übersicht",
-    "Isländisch Name Übersicht",
-    "Isländisch Substantiv Übersicht",
-    "Isländisch Verb Übersicht",
-    "Italienisch Adjektiv Übersicht",
-    "Italienisch Substantiv Übersicht",
-    "Italienisch Verb Übersicht",
-    "Katalanisch Adjektiv Übersicht",
-    "Katalanisch Substantiv Übersicht",
-    "Katalanisch Verb Übersicht",
-    "Keilschrift Übersicht",
-    "Korsisch Substantiv Übersicht",
-    "Kroatisch Adjektiv Übersicht",
-    "Kroatisch Substantiv Übersicht",
-    "Kurdisch Substantiv Übersicht",
-    "Latein Adjektiv Übersicht",
-    "Latein Adverb Übersicht",
-    "Latein Substantiv Übersicht",
-    "Lettisch Substantiv Übersicht",
-    "Lettisch Verb Übersicht",
-    "Mazedonisch Substantiv Übersicht",
-    "Nahuatl Substantiv Übersicht",
-    "Neugriechisch Substantiv Übersicht",
-    "Niederdeutsch Adjektiv Übersicht",
-    "Niederländisch Adjektiv Übersicht" "Niederländisch Substantiv Übersicht",
-    "Niedersorbisch Substantiv Übersicht",
-    "Norwegisch Adjektiv Übersicht",
-    "Norwegisch Eigenname Übersicht",
-    "Norwegisch Substantiv Übersicht",
-    "Norwegisch Verb Übersicht",
-    "Okzitanisch Substantiv Übersicht",
-    "Okzitanisch Verb Übersicht",
-    "Papiamentu Substantiv Übersicht",
-    "Polnisch Grundzahl Übersicht",
-    "Polnisch Substantiv Übersicht",
-    "Portugiesisch Substantiv Übersicht",
-    "Rumänisch Numerale Übersicht",
-    "Rumänisch Personalpronomen Übersicht",
-    "Rumänisch Substantiv Übersicht",
-    "Rumänisch Verb Übersicht",
-    "Russisch Substantiv Übersicht",
-    "Sardisch Substantiv Übersicht",
-    "Schwedisch Adjektiv Übersicht",
-    "Schwedisch Adverb Übersicht",
-    "Schwedisch Eigenname Übersicht",
-    "Schwedisch Pronomen Übersicht",
-    "Schwedisch Verb Übersicht",
-    "Scots Substantiv Übersicht",
-    "Serbisch Substantiv Übersicht",
-    "Sesotho Substantiv Übersicht",
-    "Slowakisch Adjektiv Übersicht",
-    "Slowenisch Substantiv Übersicht",
-    "Spanisch Adjektiv Übersicht",
-    "Spanisch Substantiv Übersicht",
-    "Spanisch Verb Übersicht",
-    "Suaheli Substantiv Übersicht",
-    "Suaheli Verb Übersicht",
-    "Symbol Übersicht",
-    "Tschechisch universal Übersicht",
-    "Türkisch Substantiv Übersicht",
-    "Ukrainisch Substantiv Übersicht",
-    "Umbrisch Substantiv Übersicht",
-    "Ungarisch Adjektiv Übersicht",
-    "Ungarisch Substantiv Übersicht",
-    "Ungarisch Verb Übersicht",
-    "Usbekisch Substantiv Übersicht",
-    "Venezianisch Substantiv Übersicht",
-    "Walisisch Substantiv Übersicht",
-    "Westflämisch Substantiv Übersicht",
-}
 
 # Templates that should not be pre-expanded
 DO_NOT_PRE_EXPAND_TEMPLATES = {
     "Ü-Tabelle",  # Translation table
     "Quellen",  # Can be ignored since we have the <ref> tags in the tree
 }
-
-DO_NOT_PRE_EXPAND_TEMPLATES.update(FORM_TABLE_TEMPLATES)
 
 
 def fix_level_hierarchy_of_subsections(
@@ -322,9 +202,13 @@ def process_pos_section(
 ) -> None:
     # Extract the POS
     pos_argument = pos_template_node.template_parameters.get(1)
-    if pos_argument in FORM_POS.union(IGNORE_POS):
-        # XXX: Extract forms from form sections
+    if pos_argument in IGNORE_POS:
         return
+    if pos_argument in FORM_POS:
+        # XXX: Extract form from form pages. Investigate first if this is needed
+        # at all or redundant with form tables.
+        return
+
     pos_type = wxr.config.POS_SUBTITLES.get(pos_argument)
 
     if pos_type is None:
@@ -432,7 +316,9 @@ def parse_page(
         page_text,
         pre_expand=True,
         additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
-        do_not_pre_expand=DO_NOT_PRE_EXPAND_TEMPLATES,
+        do_not_pre_expand=DO_NOT_PRE_EXPAND_TEMPLATES.update(
+            wxr.config.DE_FORM_TABLES
+        ),
     )
 
     page_data = []

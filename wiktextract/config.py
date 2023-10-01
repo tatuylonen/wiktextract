@@ -56,6 +56,8 @@ class WiktionaryConfig:
         "POS_TYPES",
         "OTHER_SUBTITLES",
         "ZH_PRON_TAGS",
+        "FR_FORM_TABLES",
+        "DE_FORM_TABLES",
         "LANGUAGES_BY_NAME",
         "LANGUAGES_BY_CODE",
         "FORM_OF_TEMPLATES",
@@ -123,6 +125,10 @@ class WiktionaryConfig:
             self.set_attr_from_json(
                 "FORM_OF_TEMPLATES", "form_of_templates.json"
             )
+        if dump_file_lang_code == "fr":
+            self.set_attr_from_json("FR_FORM_TABLES", "form_tables.json")
+        if dump_file_lang_code == "de":
+            self.set_attr_from_json("DE_FORM_TABLES", "form_templates.json")
 
     def to_kwargs(self):
         return {
