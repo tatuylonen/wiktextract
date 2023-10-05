@@ -27,6 +27,7 @@ class DePageTests(unittest.TestCase):
             # capture_examples=True,
         )
         self.wxr = WiktextractContext(Wtp(lang_code="de"), conf1)
+        self.maxDiff = None
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
@@ -81,6 +82,7 @@ class DePageTests(unittest.TestCase):
     # The way append_base_data() works requires the presence of a sense
     # dictionary before starting a new pos section. Therefore, we need to add
     # at least one sense data point to the test case.
+
     def test_de_parse_section(self):
         self.wxr.wtp.add_page("Vorlage:Wortart", 10, "")
         self.wxr.wtp.add_page("Vorlage:Bedeutungen", 10, "")
@@ -104,6 +106,8 @@ class DePageTests(unittest.TestCase):
                     "senses": [
                         {
                             "glosses": ["gloss1"],
+                            "senseid": "1",
+                            "raw_glosses": ["[1] gloss1"],
                         },
                     ],
                 },
@@ -113,6 +117,8 @@ class DePageTests(unittest.TestCase):
                     "senses": [
                         {
                             "glosses": ["gloss1"],
+                            "senseid": "1",
+                            "raw_glosses": ["[1] gloss1"],
                         },
                     ],
                 },
@@ -122,6 +128,8 @@ class DePageTests(unittest.TestCase):
                     "senses": [
                         {
                             "glosses": ["gloss2"],
+                            "senseid": "1",
+                            "raw_glosses": ["[1] gloss2"],
                         },
                     ],
                 },
@@ -131,6 +139,8 @@ class DePageTests(unittest.TestCase):
                     "senses": [
                         {
                             "glosses": ["gloss3"],
+                            "senseid": "1",
+                            "raw_glosses": ["[1] gloss3"],
                         },
                     ],
                 },
