@@ -10,6 +10,7 @@ from wiktextract.datautils import append_base_data
 from wiktextract.wxr_context import WiktextractContext
 
 from .gloss import extract_glosses
+from .example import extract_examples
 
 # Templates that are used to form panels on pages and that should be ignored in
 # various positions
@@ -70,6 +71,9 @@ def parse_section(
         wxr.wtp.start_subsection(section_name)
         if section_name == "Bedeutungen":
             extract_glosses(wxr, page_data, level_node)
+        if section_name == "Beispiele":
+            for list_node in level_node.find_child(NodeKind.LIST):
+                extract_examples(wxr, page_data, list_node)
 
 
 FORM_POS = {
