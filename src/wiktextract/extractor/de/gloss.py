@@ -3,6 +3,7 @@ from collections import defaultdict
 from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
+from wiktextract.extractor.de.utils import find_and_remove_child, match_senseid
 
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -43,15 +44,17 @@ def extract_glosses(
                 find_and_remove_child(list_item_node, NodeKind.LIST)
             )
 
-            raw_gloss = clean_node(wxr, gloss_data, list_item_node.children)
+            raw_gloss = clean_node(wxr, {}, list_item_node.children)
             gloss_data["raw_glosses"] = [raw_gloss]
 
             extract_categories_from_gloss_node(wxr, gloss_data, list_item_node)
 
             gloss_text = clean_node(wxr, gloss_data, list_item_node.children)
 
-            senseid, gloss_text = get_senseid(gloss_text, parent_senseid)
+            senseid, gloss_text = match_senseid(gloss_text)
+
             if senseid:
+                senseid if senseid[0].isnumeric() else parent_senseid + senseid
                 gloss_data["senseid"] = senseid
             else:
                 wxr.wtp.debug(
@@ -125,27 +128,3 @@ def extract_categories_from_gloss_text(
             return parts[1].strip()
 
     return gloss_text
-
-
-def get_senseid(gloss_text: str, parent_senseid=""):
-    match = re.match(r"\[(\d*[a-z]?)\]", gloss_text)
-
-    if match:
-        senseid = match.group(1)
-        gloss_text = gloss_text[match.end() :].strip()
-
-        senseid = (
-            senseid if senseid[0].isnumeric() else parent_senseid + senseid
-        )
-    else:
-        senseid = None
-
-    return senseid, gloss_text
-
-
-def find_and_remove_child(node, kind):
-    children = []
-    for idx, child in reversed(list(node.find_child(kind, with_index=True))):
-        del node.children[idx]
-        children.append(child)
-    return reversed(children)
