@@ -7,6 +7,7 @@ from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
 
 from wiktextract.datautils import append_base_data
+from wiktextract.extractor.de.pronunciation import extract_pronunciation
 from wiktextract.wxr_context import WiktextractContext
 
 from .gloss import extract_glosses
@@ -71,9 +72,10 @@ def parse_section(
         wxr.wtp.start_subsection(section_name)
         if section_name == "Bedeutungen":
             extract_glosses(wxr, page_data, level_node)
+        if section_name == "Aussprache":
+            extract_pronunciation(wxr, page_data, level_node)
         if section_name == "Beispiele":
-            for list_node in level_node.find_child(NodeKind.LIST):
-                extract_examples(wxr, page_data, list_node)
+            extract_examples(wxr, page_data, level_node)
 
 
 FORM_POS = {

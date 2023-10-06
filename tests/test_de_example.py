@@ -36,7 +36,7 @@ class TestDEExample(unittest.TestCase):
             defaultdict(list, {"senseid": "2"}),
         ]
 
-        extract_examples(self.wxr, page_data, root.children[0])
+        extract_examples(self.wxr, page_data, root)
 
         self.assertEqual(
             page_data,
@@ -68,7 +68,7 @@ class TestDEExample(unittest.TestCase):
             defaultdict(list, {"senseid": "1"}),
         ]
 
-        extract_examples(self.wxr, page_data, root.children[0])
+        extract_examples(self.wxr, page_data, root)
 
         self.assertEqual(
             page_data,
@@ -89,10 +89,13 @@ class TestDEExample(unittest.TestCase):
             ],
         )
 
-    def test_de_extract_reference(self):
-        self.wxr.wtp.start_page("")
+    def test_de_extract_reference_from_literatur_template(self):
+        # https://de.wiktionary.org/wiki/Beispiel
+        self.wxr.wtp.start_page("Beispiel")
         self.wxr.wtp.add_page("Vorlage:Literatur", 10, "Expanded template")
-        root = self.wxr.wtp.parse("<ref>{{Literatur|Titel=title}}</ref>")
+        root = self.wxr.wtp.parse(
+            "<ref>{{Literatur|Autor=Steffen Möller|Titel=Viva Warszawa|TitelErg=Polen für Fortgeschrittene|Verlag=Piper|Ort=München/Berlin|Jahr=2015}}, Seite 273. ISBN 978-3-89029-459-9.</ref>"
+        )
 
         example_data = defaultdict(str)
 
@@ -100,5 +103,38 @@ class TestDEExample(unittest.TestCase):
 
         self.assertEqual(
             example_data,
-            {"ref": {"raw_ref": "Expanded template", "titel": "title"}},
+            {
+                "ref": {
+                    "raw_ref": "Expanded template, Seite 273. ISBN 978-3-89029-459-9.",
+                    "titel": "Viva Warszawa",
+                    "autor": "Steffen Möller",
+                    "titelerg": "Polen für Fortgeschrittene",
+                    "verlag": "Piper",
+                    "ort": "München/Berlin",
+                    "jahr": "2015",
+                }
+            },
+        )
+
+    def test_de_extract_reference_from_templates_without_named_args(self):
+        # https://de.wiktionary.org/wiki/Beispiel
+        # Reference templates not following the Literatur template pattern are
+        # currently not extracted field by field (e.g. Vorlage:Ref-OWID)
+        self.wxr.wtp.start_page("Beispiel")
+        self.wxr.wtp.add_page("Vorlage:Ref-OWID", 10, "Expanded template")
+        root = self.wxr.wtp.parse(
+            "<ref>{{Ref-OWID|Sprichwörter|401781|Schlechte Beispiele verderben gute Sitten.}}</ref>"
+        )
+
+        example_data = defaultdict(str)
+
+        extract_reference(self.wxr, example_data, root.children[0])
+
+        self.assertEqual(
+            example_data,
+            {
+                "ref": {
+                    "raw_ref": "Expanded template",
+                }
+            },
         )

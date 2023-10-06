@@ -33,7 +33,7 @@ class TestGlossList(unittest.TestCase):
 
         page_data = [defaultdict(list)]
 
-        extract_glosses(self.wxr, page_data, root.children[0])
+        extract_glosses(self.wxr, page_data, root)
 
         self.assertEqual(
             page_data,
@@ -63,7 +63,7 @@ class TestGlossList(unittest.TestCase):
 
         page_data = [defaultdict(list)]
 
-        extract_glosses(self.wxr, page_data, root.children[0])
+        extract_glosses(self.wxr, page_data, root)
 
         self.assertEqual(
             page_data,
@@ -99,7 +99,7 @@ class TestGlossList(unittest.TestCase):
 
         page_data = [defaultdict(list)]
 
-        extract_glosses(self.wxr, page_data, root.children[0])
+        extract_glosses(self.wxr, page_data, root)
 
         self.assertEqual(
             page_data,

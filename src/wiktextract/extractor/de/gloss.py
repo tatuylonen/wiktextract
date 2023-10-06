@@ -3,6 +3,7 @@ from collections import defaultdict
 from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor.parser import LevelNode
 from wiktextract.extractor.de.utils import find_and_remove_child, match_senseid
 
 from wiktextract.page import clean_node
@@ -10,6 +11,21 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 def extract_glosses(
+    wxr: WiktextractContext,
+    page_data: List[Dict],
+    level_node: LevelNode,
+) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        process_gloss_list_item(wxr, page_data, list_node)
+
+    for non_list_node in level_node.invert_find_child(NodeKind.LIST):
+        wxr.wtp.debug(
+            f"Found unexpected non-list node in pronunciation section: {non_list_node}",
+            sortid="extractor/de/pronunciation/extract_pronunciation/64",
+        )
+
+
+def process_gloss_list_item(
     wxr: WiktextractContext,
     page_data: List[Dict],
     list_node: WikiNode,
@@ -54,7 +70,11 @@ def extract_glosses(
             senseid, gloss_text = match_senseid(gloss_text)
 
             if senseid:
-                senseid if senseid[0].isnumeric() else parent_senseid + senseid
+                senseid = (
+                    senseid
+                    if senseid[0].isnumeric()
+                    else parent_senseid + senseid
+                )
                 gloss_data["senseid"] = senseid
             else:
                 wxr.wtp.debug(
@@ -71,7 +91,7 @@ def extract_glosses(
                 page_data[-1]["senses"].append(gloss_data)
 
             for sub_list_node in sub_glosses_list_nodes:
-                extract_glosses(
+                process_gloss_list_item(
                     wxr,
                     page_data,
                     sub_list_node,
