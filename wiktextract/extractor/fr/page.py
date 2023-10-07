@@ -161,22 +161,8 @@ def parse_page(
     )
 
     page_data = []
-    for node in filter(lambda n: isinstance(n, WikiNode), tree.children):
-        # ignore link created by `voir` template at the page top
-        if node.kind == NodeKind.TEMPLATE:
-            template_name = node.template_name
-            if template_name in {"voir", "voir2"} or template_name.startswith(
-                "voir/"
-            ):
-                continue
-        if node.kind != NodeKind.LEVEL2:
-            wxr.wtp.warning(
-                f"Unexpected top-level node: {node}",
-                sortid="extractor/fr/page/parse_page/94",
-            )
-            continue
-
-        for subtitle_template in node.find_content(NodeKind.TEMPLATE):
+    for level2_node in tree.find_child(NodeKind.LEVEL2):
+        for subtitle_template in level2_node.find_content(NodeKind.TEMPLATE):
             # https://fr.wiktionary.org/wiki/Modèle:langue
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_langues
             if subtitle_template.template_name == "langue":
@@ -197,9 +183,9 @@ def parse_page(
                 base_data.update(categories_and_links)
                 page_data.append(copy.deepcopy(base_data))
                 etymology_data: Optional[EtymologyData] = None
-                for level_three_node in node.find_child(NodeKind.LEVEL3):
+                for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     new_etymology_data = parse_section(
-                        wxr, page_data, base_data, level_three_node
+                        wxr, page_data, base_data, level3_node
                     )
                     if new_etymology_data is not None:
                         etymology_data = new_etymology_data

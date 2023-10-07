@@ -1,11 +1,9 @@
 import copy
 import logging
-
 from collections import defaultdict
 from typing import Dict, List, Union
 
 from wikitextprocessor import NodeKind, WikiNode
-
 from wikitextprocessor.parser import LevelNode
 
 from wiktextract.datautils import append_base_data
@@ -322,50 +320,8 @@ def parse_page(
     )
 
     page_data = []
-    for node in filter(lambda n: isinstance(n, WikiNode), tree.children):
-        # ignore certain top level templates
-        if node.kind == NodeKind.TEMPLATE:
-            template_name = node.template_name
-
-            # Mostly meta-templates at the top of the page that do not carry
-            # any semantic information
-            IGNORE_TOP_LEVEL_TEMPLATES = {
-                "Wort der Woche",
-                "Siehe auch",
-                "erweitern",
-                "Abschnitte fehlen",
-                "überarbeiten",
-                "Zeichen",
-                "Wortart fehlt",
-                "TOC limit",
-                "Neuer Eintrag",
-                "Löschantrag/Vorlage",
-                "keine Belegstelle/Vorlage",
-                "Anmerkung Keilschrift",
-                "In Arbeit",
-                "Halbgeschützte Seite",
-                "anpassen",
-            }
-
-            if template_name in IGNORE_TOP_LEVEL_TEMPLATES:
-                continue
-
-        # ignore certain top level magic words
-        if node.kind == NodeKind.MAGIC_WORD and node.sarg in {
-            "__TOC__",
-            "__NOTOC__",
-            "__NOEDITSECTION__",
-        }:
-            continue
-
-        if node.kind != NodeKind.LEVEL2:
-            wxr.wtp.warning(
-                f"Unexpected top-level node: {node}",
-                sortid="extractor/de/page/parse_page/61",
-            )
-            continue
-
-        for subtitle_template in node.find_content(NodeKind.TEMPLATE):
+    for level2_node in tree.find_child(NodeKind.LEVEL2):
+        for subtitle_template in level2_node.find_content(NodeKind.TEMPLATE):
             # The language sections are marked with
             # == <title> ({{Sprache|<lang_name>}}) ==
             # where <title> is the title of the page and <lang_name> is the
@@ -389,6 +345,6 @@ def parse_page(
                     },
                 )
                 page_data.append(copy.deepcopy(base_data))
-                parse_section(wxr, page_data, base_data, node.children)
+                parse_section(wxr, page_data, base_data, level2_node.children)
 
     return page_data
