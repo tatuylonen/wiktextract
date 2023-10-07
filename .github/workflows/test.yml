@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.10', '3.11']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -31,10 +31,12 @@ jobs:
           python -m pip install -U pip
           python -m pip install --use-pep517 '.[dev]'
       - run: make test
+        env:
+          PYTHONWARNINGS: default
       - name: Remove huge file taxondata_py.html
         run: rm -f htmlcov/*_taxondata_py.html
       - uses: actions/upload-pages-artifact@v2
-        if: github.ref_name == 'master' && matrix.python-version == '3.11'
+        if: github.ref_name == 'master' && matrix.python-version == '3.12'
         with:
           path: htmlcov
 
