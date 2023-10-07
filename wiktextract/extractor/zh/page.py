@@ -264,30 +264,12 @@ def parse_page(
     )
 
     page_data = []
-    for node in filter(lambda n: isinstance(n, WikiNode), tree.children):
-        # ignore link created by `also` template at the page top
-        # also ignore "character info" templates
-        if node.kind == NodeKind.TEMPLATE and node.template_name.lower() in {
-            "also",
-            "see also",
-            "亦",
-            "character info",
-            "character info/new",
-            "character info/var",
-        }:
-            continue
-        if node.kind != NodeKind.LEVEL2:
-            wxr.wtp.warning(
-                f"Unexpected top-level node: {node}",
-                sortid="extractor/zh/page/parse_page/503",
-            )
-            continue
-
+    for level2_node in tree.find_child(NodeKind.LEVEL2):
         categories_and_links = defaultdict(list)
-        lang_name = clean_node(wxr, categories_and_links, node.largs)
+        lang_name = clean_node(wxr, categories_and_links, level2_node.largs)
         if lang_name not in wxr.config.LANGUAGES_BY_NAME:
             wxr.wtp.warning(
-                f"Unrecognized language name at top-level {lang_name}",
+                f"Unrecognized language name: {lang_name}",
                 sortid="extractor/zh/page/parse_page/509",
             )
         lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang_name)
@@ -304,6 +286,6 @@ def parse_page(
         )
         base_data.update(categories_and_links)
         page_data.append(copy.deepcopy(base_data))
-        parse_section(wxr, page_data, base_data, node.children)
+        parse_section(wxr, page_data, base_data, level2_node.children)
 
     return page_data

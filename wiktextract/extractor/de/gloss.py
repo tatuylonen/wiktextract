@@ -1,7 +1,6 @@
+import re
 from collections import defaultdict
 from typing import Dict, List
-
-import re
 
 from wikitextprocessor import NodeKind, WikiNode
 

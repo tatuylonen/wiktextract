@@ -104,9 +104,7 @@ def extract_headword_line(
                 for span_child in child.find_html(
                     "strong", attr_name="class", attr_value="headword"
                 ):
-                    ruby_data, node_without_ruby = extract_ruby(
-                        wxr, span_child
-                    )
+                    ruby_data, node_without_ruby = extract_ruby(wxr, span_child)
                     page_data[-1]["forms"].append(
                         {
                             "form": clean_node(
@@ -114,7 +112,7 @@ def extract_headword_line(
                             ),
                             "ruby": ruby_data,
                             "tags": ["canonical"],
-                            }
+                        }
                     )
         elif child.tag == "b":
             # this is a form <b> tag, already inside form parentheses

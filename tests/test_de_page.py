@@ -1,16 +1,15 @@
 # Tests for parsing a page from the German Wiktionary
 
 import unittest
-
 from collections import defaultdict
 
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.page import (
+    fix_level_hierarchy_of_subsections,
     parse_page,
     parse_section,
-    fix_level_hierarchy_of_subsections,
 )
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
