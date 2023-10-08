@@ -53,7 +53,7 @@ LANGS_WITH_NUMBERED_INFINITIVES = set([
 # "nested-table-depth": is the current depth of nested tables, and only tables.
 # Only in scope from handle_wikitext_table() onwards and not stored for anything
 # else.
- 
+
 infl_map = {
     "plural": {
         "default": "plural",
@@ -356,7 +356,7 @@ infl_map = {
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-v",
-    }, 
+    },
     "Case / #": "",
     # XXX needs special handling ['-льник', '-овка', '-ник']
     "accusative animate inanimate": "accusative animate inanimate",
@@ -418,7 +418,7 @@ infl_map = {
                     },
                 },
             },
-                
+
           },
     },
     "long I": {
@@ -2172,7 +2172,7 @@ infl_map = {
     "pred.": "predicative",
     "2nd person archaic or regiolectal": "second-person archaic dialectal",
     "m-s1": "",  # Icelandic ['-lingur', '-hlaðningur']
-    "Tense \ Voice": "",
+    r"Tense \ Voice": "",
     "Strong declension": "strong",
     "gender": "",
     "Weak declension": "weak",
@@ -3934,13 +3934,13 @@ infl_map = {
     "Qamrin": "qamrin-unassimilation",
 
     "State": {
-        "lang": ["Aramaic", "Hebrew", "Assyrian Neo-Aramaic",], 
+        "lang": ["Aramaic", "Hebrew", "Assyrian Neo-Aramaic",],
         "pos": "noun",
         "then": "*",
         "else": "",
     },
     "state": {
-        "lang": "Assyrian Neo-Aramaic", 
+        "lang": "Assyrian Neo-Aramaic",
         "pos": "noun",
         "then": "*",
         "else": "",
@@ -4736,7 +4736,7 @@ infl_map = {
     "3ʳᵈ person er/si/es": "third-person singular",
     "2ⁿᵈ person ir": "second-person plural",
     # remove duplicates
-    
+
     # natüürlic/Alemannic German
     "Strong inflection": "strong",
     # d/Alemannic German
@@ -4977,9 +4977,9 @@ infl_map = {
     "broken paucal triptote in ـَة (-a)": "broken-form paucal triptote ar-infl-a",
     "singular of irregular pronoun": "singular irregular pronoun",
     "basic broken paucal diptote": "broken-form paucal diptote",
-    
-    
-    
+
+
+
     # teie/Estonian
     "Partitive": "partitive",
     "Inessive": "inessive",
@@ -5132,7 +5132,7 @@ infl_map = {
     },
 
     "2nd person f": "second-person feminine",
-    
+
     "ја": {  # THIS IS CYRILLIC!! Not Latin! подразумевати/Serbo-Croatian
         "lang": "Serbo-Croatian",
         "then": "first-person singular",
@@ -5189,7 +5189,7 @@ infl_map = {
     "3ʳᵈ, 2ⁿᵈ ये/वो/वे, आप":
         ["third-person plural",
          "second-person formal"],
-    
+
     # -ra/Basque
     "proximal plural": "proximal plural",
 
@@ -5309,7 +5309,7 @@ infl_map = {
     "qu'â (al), qu'ale": "third-person singular",
     "qu'âs, qu'ales": "third-person plural",
 
-    
+
     "ham": {
         "lang": "Fiji Hindi",
         "then": "first-person singular",
@@ -5357,7 +5357,7 @@ infl_map = {
 
     "perlative": "perlative",  # arnaq/Yup'ik
 
-    
+
     # tōku/Maori
     "singular object": {
         "lang": "Maori",
@@ -5617,7 +5617,7 @@ infl_map = {
     "í": "second-person plural",
     "dé":  "third-person plural",
     "present imperative": "present imperative",
-    
+
     #a ګړندی/Pashto
     "oblique I": "oblique oblique-i",
     "oblique II (dialectal)": "oblique oblique-ii dialectal",
@@ -6081,7 +6081,7 @@ infl_map = {
                      "dummy-use-as-rowtags object-class-18",],
         },
     },
-        
+
     "1s/2s/3s/c1": ["object-first-person object-second-person "
                     "object-third-person object-singular",
                     "object-class-1"],
@@ -6264,8 +6264,8 @@ infl_map = {
     # conocer/Asturian
     "gerundive": "gerund",
 
-    "case \ number": "",  #δίκυκλο/Greek
-    "number case \ gender": "",  #απύρωτος/Greek
+    r"case \ number": "",  #δίκυκλο/Greek
+    r"number case \ gender": "",  #απύρωτος/Greek
     "conditional 2nd form": "conditional conditional-ii",  #costosir/Occitan
 
     #konyugön/Volapük
@@ -6282,7 +6282,7 @@ infl_map = {
     "future in the past perfect": "past perfect future",
 
     #райҳон/Tajik
-    "bare": "",  
+    "bare": "",
     "definite object": "definite direct-object",
 
     #brestan/Proto-West Germanic
@@ -6311,7 +6311,7 @@ infl_map = {
     "cont A": "continuative",
     "cont B": "continuative formal imperfective",
     "cont C": "continuative habitual",
-    
+
     #taanduma/Estonian
     "voice": "",
 
@@ -6323,7 +6323,7 @@ infl_map = {
     "infinitive 1": "infinitive infinitive-i",
     "infinitive 2": "infinitive infinitive-ii",
     "gerund/supine": "gerund supine",
-    
+
     # glæþia/Old Swedish
     "þū": {
         "lang": "Old Swedish",
@@ -6362,7 +6362,7 @@ infl_map = {
     # ntw/Eqyptian
     "suffix pronouns": "suffix pronoun",
     "stative (‘pseudoparticiple’) endings": "stative",
-    "enclitic (‘dependent’) pronouns": "enclitic pronoun", 
+    "enclitic (‘dependent’) pronouns": "enclitic pronoun",
     "stressed (‘independent’) pronouns": "stressed pronoun",
     "proclitic (‘subject form’) pronouns": "proclitic pronoun",
 
@@ -6370,13 +6370,13 @@ infl_map = {
     "indefinite, definite relative": "indefinite definite relative",
 
     "mixed after th": "after-th mutation-mixed",  #wenyn/Cornish
-    
+
     "feminine gender": "feminine",  #heiße Zitrone/German
     "masculine gender": "masculine",  #alter Drache/German
     "specific": "specific",  #পূঁজ/Assamese
     "not specific": "unspecified",  #পূঁজ/Assamese/163
 
-    
+
     #навохтан/Tajik
     "ман": "first-person singular",
     "ӯ": "third-person singular",
@@ -6384,7 +6384,7 @@ infl_map = {
     "шумо": ["second-person plural",
              "second-person singular polite"],
     "онҳо": "third-person plural",
-    
+
     "минем (“my”)": "first-person singular possessive",  #сез/Tatar
     "синең (“your”)": "second-person singular possessive",
     "аның (“his/her/it”)": "third-person singular possessive",
@@ -6398,7 +6398,7 @@ infl_map = {
         "lang": "Saterland Frisian",
         "then": "first-person singular",
     },
-    
+
     #wenschen/Middle Dutch
     "In genitive": { "lang": "Middle Dutch", "then": "infinitive genitive", },
     "In dative": { "lang": "Middle Dutch", "then": "infinitive dative", },
@@ -6435,7 +6435,7 @@ infl_map = {
     "2nd-person dual": "second-person dual",  #ferkuupe/North Frisian
 
     #coymaq/Crimean Tatar
-    "repeated gerund": "gerund repeated",  
+    "repeated gerund": "gerund repeated",
     "temporal gerund": "temporal gerund",
     "non-future participle": "present past participle",
 
@@ -6443,14 +6443,14 @@ infl_map = {
     "postpositional adv.": "adverb postpositional",
 
     #védde/Ligurian
-    "lê o/a": "third-person singular",  
-    "noî, niâtri": "first-person plural", 
-    "voî, viâtri": "second-person plural", 
+    "lê o/a": "third-person singular",
+    "noî, niâtri": "first-person plural",
+    "voî, viâtri": "second-person plural",
     "lô, liâtri": "third-person plural",
-    "che ti": "second-person singular subjunctive",  
-    "che lê o/a": "third-person singular subjunctive",  
-    "che noî, che niâtri": "first-person plural subjunctive", 
-    "che voî, che viâtri": "second-person plural subjunctive", 
+    "che ti": "second-person singular subjunctive",
+    "che lê o/a": "third-person singular subjunctive",
+    "che noî, che niâtri": "first-person plural subjunctive",
+    "che voî, che viâtri": "second-person plural subjunctive",
     "che lô, che liâtri": "second-person plural subjunctive",
 
     "હું": "first-person singular",  #અવતરવું/Gujarati/92
@@ -6458,76 +6458,76 @@ infl_map = {
     "તું": "second-person singular",  #અવતરવું/Gujarati/184
     "તમે": "second-person plural",  #અવતરવું/Gujarati/184
     "તું, આ, આઓ, તે, તેઓ": "third-person",  #અવતરવું/Gujarati/92
-    
+
     "marked indefinite or relative definite": [   #a دریچه/Persian
         "stressed indefinite",
         "relative definite",
     ],
 
     #delegher/Ladin
-    "el / ela": "third-person singular",  
+    "el / ela": "third-person singular",
     "ei / eles": "third-person plural",
-    "che ie": "first-person singular subjunctive",  
+    "che ie": "first-person singular subjunctive",
     "che el / ela": "third-person singular subjunctive",
-    "che nos": "first-person plural subjunctive", 
-    "che vos": "second-person plural subjunctive", 
+    "che nos": "first-person plural subjunctive",
+    "che vos": "second-person plural subjunctive",
     "che ei / eles": "third-person plural subjunctive",
 
     "preposition": "prepositional",  #daarmede/Dutch
-    
+
     "Prolative II": "prolative prolative-ii",  #килең/Tuvan
 
     # pawjō/Proto-Italic
     "Perfect indicative": "perfect indicative",
-    "Present imperative": "present imperative",  
-    "Future imperative": "future imperative",  
-    "tu-derivative": "tu-derivative",  
+    "Present imperative": "present imperative",
+    "Future imperative": "future imperative",
+    "tu-derivative": "tu-derivative",
     "s-derivative": "s-derivative",
 
     #weyetun/Mapudungun
-    "Tense particles (See particles)": "particle", 
+    "Tense particles (See particles)": "particle",
     "iñce": "first-person singular",
     "eymi": "second-person singular",
-    "fey": "third-person singular", 
+    "fey": "third-person singular",
     "iñciw": "first-person dual",
-    "eymu": "second-person dual", 
+    "eymu": "second-person dual",
     "feygu": "third-person dual",
     "iñciñ": "first-person plural",
     "eymvn": "second-person plural",
     "feygvn": "third-person plural",
 
     "attributive": "attributive",  #Өгэдэй/Mongolian/167
-    
+
     "Active indicative": "indicative active",  #konyugön/Volapük/166
     "Active subjunctive": "subjunctive active",  #konyugön/Volapük/166
     "Active optative": "optative active",  #konyugön/Volapük/166
     "Active interrogative": "interrogative active",  #konyugön/Volapük/166
     "Active jussive": "jussive active",  #konyugön/Volapük/166
-    
+
     "definitive direct object": "direct-object definite",  #دریچه/Persian/154
 
     "preceding noun": "before-noun",  #jenöfik/Volapük/151
     "separated": "without-noun",  #jenöfik/Volapük/151
-    
+
     "temp. dist.": "temporal distributive",  #sisässä/Finnish/145
     "oblique/vocative/instrumental": "oblique vocative instrumental",  #કેટલું/Gujarati
     "I-stem (Passive)": "passive",  #सोहोर्नु/Nepali/144
-    
+
     "Passive indicative": "passive indicative",  #konyugön/Volapük
     "Passive subjunctive": "passive subjunctive",
     "Passive optative": "passive optative",
-    "Passive interrogative": "passive interrogative",  
+    "Passive interrogative": "passive interrogative",
     "Passive jussive": "passive jussive",
-    
+
     "unmodified": "without-modifier",  #birciqqo/Sidamo
     "modified": "with-modifier",  #birciqqo/Sidamo
 
     "Past/present inchoative": "past present inchoative",  #ganansiya/Cebuano
     "Future/habitual inchoative": "future habitual inchoative",
-    
+
     "el / ela / Vde": "third-person singular",  #aterecer/Galician
     "eles / elas / Vdes": "third-person plural",  #aterecer/Galician
-    
+
     "busatros busatras": "second-person plural",  #foratar/Aragonese
     "agentive / prospective": "agentive prospective",  #a بڑھنا/Urdu
 
@@ -6536,9 +6536,9 @@ infl_map = {
     "силер": "second-person plural",
     "ол": "third-person singular",
     "олар": "third-person plural",
-    "-лар": "third-person plural", 
+    "-лар": "third-person plural",
     "Past II": "past past-ii",
-    "Evidential": "evidential", 
+    "Evidential": "evidential",
     "-тар": "third-person plural",
     "-нар": "third-person plural",
     "-лер": "third-person plural",  #дээр/Tuvan
@@ -6559,20 +6559,20 @@ infl_map = {
     "+a/o": { "lang": "Choctaw",
             "then": "before-back-vowel", },
     # +s 	+C 	+V 	+C/i 	+a/o 	+C 	+V 	+C 	+V 	+C 	+V
-            
+
     "past subjunctive": "past subjunctive",  #شباهت داشتن/Persian/120
 
     "vus": "second-person plural",  #cumprar/Romansch/117
-    "nus": "first-person plural",  
+    "nus": "first-person plural",
     "jeu": "first-person singular",
     "el/ella": "third-person singular",
     "els/ellas": "third-person plural",
-    "che nus": "first-person plural subjunctive", 
-    "che vus": "second-person plural subjunctive", 
+    "che nus": "first-person plural subjunctive",
+    "che vus": "second-person plural subjunctive",
     "ch'els/ch'ellas": "third-person plural subjunctive",
     "che jeu": "first-person singular subjunctive",
     "ch'el/ch'ella": "third-person singular subjunctive",
-    "direct future": "direct future",  
+    "direct future": "direct future",
     "indirect future": "indirect future",
 
     "unmarked": "",  #tꜣj/Egyptian/114
@@ -6581,21 +6581,21 @@ infl_map = {
     "Volitive mood": "volitive",  #weyetun/Mapudungun/112
 
     "distant": "distal",  #тұту/Kazakh/110
-    
+
     "affirmative commands": "imperative",  #ፈተለ/Tigrinya/110
     "negative commands": "negative imperative",
-    
+
     '1st-person ("my, our")': "first-person possessive",  #aaombiniili'/Chickasaw/106
     '2nd-person ("thy, your")': "second-person possessive",
-    '3rd-person ("his, her, its, their")': "third-person possessive", 
+    '3rd-person ("his, her, its, their")': "third-person possessive",
     "je (nos)": "first-person",  #cogier/Norman/104
     "Agentive": "agentive",  #হাঁঠ/Assamese/102
     "Middle voice": "middle-voice",  #ḱléwseti/Proto-Indo-European/100
     "1st-person (I, we)": "first-person",  #chaaha̱ taloowa/Chickasaw/99
-    "2nd-person (you, you all)": "second-person", 
-    "3rd-person (he, she, it, they)": "third-person", 
+    "2nd-person (you, you all)": "second-person",
+    "3rd-person (he, she, it, they)": "third-person",
     "ils": "third-person plural",  #ovrar/Franco-Provençal/98
-    "que je (j')": "first-person singular subjunctive", 
+    "que je (j')": "first-person singular subjunctive",
     "que te (t')": "second-person singular subjunctive",
     "qu'il/el": "third-person singular subjunctive",
     "qu'ils/els": "third-person plural subjunctive",
@@ -6629,30 +6629,30 @@ infl_map = {
         "second-person object-first-person object-dual object-exclusive",
     "third person > any person X …or… any person X > third person":
         ["third-person", "object-third-person"],
-    
+
     "2nd Person Singular": "second-person singular",  #spigen/Middle Low German
     "él": "third-person singular",  #foratar/Aragonese
     "nusatros nusatras": "first-person plural",
-    "ellos/els ellas": "third-person plural", 
+    "ellos/els ellas": "third-person plural",
     "Conjectural": "",  #노타/Middle Korean/85
     "transgressive present": "present transgressive",  #naposlouchat/Czech
     "transgressive past": "past transgressive",
-    "Verbal adjective": "adjective-from-verb", 
+    "Verbal adjective": "adjective-from-verb",
     "je (j’) / i": "first-person singular",  #gizai/Bourguignon/81
     "je (j') / i": "first-person singular",  #antreprarre/Bourguignon/79
     "que je (j') / qu'i": "first-person singular subjunctive",
     "que je (j’) / qu'i": "first-person singular subjunctive",
     "ai (el), ale": "third-person singular",  #gizai/Bourguignon/58
-    "ai (el), ales": "third-person plural", 
+    "ai (el), ales": "third-person plural",
     "qu'ai (el), qu'ale": "third-person singular subjunctive",
     "qu'ai (el), qu'ales": "third-person plural subjunctive",
 
     "determiners and pronouns": "determiner pronoun",  #tꜣj/Egyptian/76
     "anaphoric": "anaphoric",
-    
+
     "regular": "",  #এৱা গাখীৰ/Assamese/74
     "very formal": "deferential",
-    
+
     "infinitive II": "infinitive-ii infinitive",  #ferkuupe/North Frisian
     "PROGRESSIVE": "progressive",  #yitih/Navajo
     "past stem": "stem past",  #a شباهت داشتن/Persian
@@ -6687,7 +6687,7 @@ infl_map = {
     # XXX Tatar has a ton of soft hyphens
     "Futu\xadre": "future",  #!! soft hyphen! тыңларга/Tatar
     "Nonfinite verb forms": "",
-    
+
     "transitory past": "past transitional-past",  #тұту/Kazakh
     "сен": {
         "lang": "Kazakh",
@@ -6710,9 +6710,9 @@ infl_map = {
     "ca je/i'": "first-person singular subjunctive",  #spantacà/Neapolitan
     "ca tu": "second-person singular subjunctive",
     "ca nuje": "first-person plural subjunctive",
-    
+
     "il, alle, nos": "third-person singular",  #cogier/Norman/52
-    "il, alles": "third-person plural", 
+    "il, alles": "third-person plural",
     "qu'il, qu'alle, que nos": "third-person singular subjunctive",
     "que je (que nos)": "first-person plural subjunctive",
     "qu'il, qu'alles": "third-person plural subjunctive",
@@ -6747,7 +6747,7 @@ infl_map = {
     "chi bosatrus/bosatras": "",  #essi/Sardinian/1
     "chi issus/issas": "",  #essi/Sardinian/1
 
-    
+
     "Verbs beginning with a consonant.": "",  #chaaha̱ taloowa/Chickasaw/52
 
     "te": "second-person singular",  #ovrar/Franco-Provençal
@@ -6762,7 +6762,7 @@ infl_map = {
 
     "Rewş": "",  # "case", kerguh/Northern Kurdish
     "Vde": "third-person singular",  #aterecer/Galician
-    "Vdes": "third-person plural",  
+    "Vdes": "third-person plural",
     "IMPF": "imperfect",  #डिलीट होना/Hindi
     "frm": "",  # ??? "form"? হাঁঠ/Assamese
     "focus": "focus",  #issito/Choctaw
@@ -6775,7 +6775,7 @@ infl_map = {
     "Neuter gender": "neuter",  #𒄭𒅔𒃷/Hittite
 
     "Plain Infinitive": "infinitive",  #spigen/Middle Low German
-    "Full Infinitive (Gerund)": "gerund infinitive", 
+    "Full Infinitive (Gerund)": "gerund infinitive",
     "Imperatives": {
         "default": "imperative",
         "lang": "Swahili",
@@ -6803,7 +6803,7 @@ infl_map = {
 
     "infinitive III": "infinitive infinitive-iii",  #stärwe/North Frisian
     "determiners": "determiner",  #nꜣyw/Egyptian/38
-    "pronouns": "pronoun",  
+    "pronouns": "pronoun",
     "proximal to speaker": "proximal-to-speaker",
     "proximal to spoken of": "proximal-to-topic",
     "‘copula’": "copulative",
@@ -6815,17 +6815,17 @@ infl_map = {
 
     "Aspirate": "mutation-aspirate",  #vynet/Middle Welsh/37
     "dji (dj')": "first-person singular",  #atchter/Walloon/37
-    "preterit": "preterite",  
-    "dji / nos": "first-person plural", 
+    "preterit": "preterite",
+    "dji / nos": "first-person plural",
     "nós nós outros nós outras": "first-person plural",  #prazer/Old Portuguese
     "vós vós outros vós outras": "second-person plural",
-    
+
     "contrastive": "contrastive",  #issito/Choctaw/36
 
     #espurrire/Leonese
     "you": { "lang": "Leonese", "then": "first-person singular", },
-    "él / eilla / eillu / vusté": "third-person singular", 
-    "nosoutros / nosoutras": "first-person plural", 
+    "él / eilla / eillu / vusté": "third-person singular",
+    "nosoutros / nosoutras": "first-person plural",
     "vosoutros / vosoutras": "second-person plural",
     "eillos / eillas / vustedes": "third-person plural",
 
@@ -6834,7 +6834,7 @@ infl_map = {
 
     #pårler/Walloon
     "i (il) / ele": "third-person singular",
-    "dji (dj') / nos": "first-person plural", 
+    "dji (dj') / nos": "first-person plural",
     "ki dj'": "first-person singular subjunctive",
     "ki t'": "second-person singular subjunctive",
     "k' i (il) / k' ele": "third-person singular subjunctive",
@@ -6847,7 +6847,7 @@ infl_map = {
     "Pluskvamperfekta": "pluperfect",
     "Infinitivat": "infinitive",
     "Partisipat": "participle",
-    
+
     # f/Slovene
     "nominative imenovȃlnik": "nominative",
     "genitive rodȋlnik": "genitive",
