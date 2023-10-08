@@ -556,7 +556,7 @@ def parse_linkage_item_text(wxr: Wtp,
                 else:
                     # Try to find a parenthesized part at the end or from the
                     # middle.
-                    m = re.search("\s+\((\d|\d\d|[^\d]([^()]|\([^()]*\))*)\)"
+                    m = re.search(r"\s+\((\d|\d\d|[^\d]([^()]|\([^()]*\))*)\)"
                                   r"(\.$)?",
                                   item1)
                     if m:

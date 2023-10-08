@@ -243,47 +243,47 @@ ignored_translations = set([
 # of these words
 tr_note_re = re.compile(
     r"(\b(article|definite|indefinite|superlative|comparative|pattern|"
-    "adjective|adjectives|clause|clauses|pronoun|pronouns|preposition|prep|"
-    "postposition|postp|action|actions|articles|"
-    "adverb|adverbs|noun|nouns|verb|verbs|before|"
-    "after|placed|prefix|suffix|used with|translated|"
-    "nominative|genitive|dative|infinitive|participle|past|perfect|imperfect|"
-    "perfective|imperfective|auxiliary|negative|future|present|tense|aspect|"
-    "conjugation|declension|class|category|plural|singular|positive|"
-    "seldom used|formal|informal|familiar|unspoken|spoken|written|"
-    "indicative|progressive|conditional|potential|"
-    "accusative|adessive|inessive|superessive|elative|allative|"
-    "dialect|dialects|object|subject|predicate|movies|recommended|language|"
-    "locative|continuous|simple|continuousness|gerund|subjunctive|"
-    "periphrastically|no equivalent|not used|not always used|"
-    "used only with|not applicable|use the|signifying|wordplay|pronounced|"
-    "preconsonantal|spelled|spelling|respelling|respellings|phonetic|"
-    "may be replaced|stricter sense|for nonhumans|"
-    "sense:|used:|in full:|informally used|followed by|"
-    "not restricted to|pertaining to|or optionally with|are optional|"
-    "in conjunction with|in compounds|depending on the relationship|"
-    "person addressed|one person|multiple persons|may be replaced with|"
-    "optionally completed with|in the phrase|in response to|"
-    "before a|before an|preceded by|verbs ending|very common|after a verb|"
-    "with verb|with uncountable|with the objects|with stative|"
-    "can be replaced by|often after|used before|used after|"
-    "used in|clipping of|spoken|somewhat|capitalized|"
-    "short form|shortening of|shortened form|initialism of|"
-    "said to|rare:|rarer also|is rarer|negatively connoted|"
-    "previously mentioned|uncountable noun|countable noun|"
-    "countable nouns|uncountable nouns|"
-    "with predicative|with -|with imperfect|with a negated|"
-    "colloquial|misspelling|holophrastic|frequently|esp\.|especially|"
-    '"|'
-    "general term|after a vowel|before a vowel|"
-    "form|regular|irregular|alternative)"
-    ")($|[) ])|^("
+    r"adjective|adjectives|clause|clauses|pronoun|pronouns|preposition|prep|"
+    r"postposition|postp|action|actions|articles|"
+    r"adverb|adverbs|noun|nouns|verb|verbs|before|"
+    r"after|placed|prefix|suffix|used with|translated|"
+    r"nominative|genitive|dative|infinitive|participle|past|perfect|imperfect|"
+    r"perfective|imperfective|auxiliary|negative|future|present|tense|aspect|"
+    r"conjugation|declension|class|category|plural|singular|positive|"
+    r"seldom used|formal|informal|familiar|unspoken|spoken|written|"
+    r"indicative|progressive|conditional|potential|"
+    r"accusative|adessive|inessive|superessive|elative|allative|"
+    r"dialect|dialects|object|subject|predicate|movies|recommended|language|"
+    r"locative|continuous|simple|continuousness|gerund|subjunctive|"
+    r"periphrastically|no equivalent|not used|not always used|"
+    r"used only with|not applicable|use the|signifying|wordplay|pronounced|"
+    r"preconsonantal|spelled|spelling|respelling|respellings|phonetic|"
+    r"may be replaced|stricter sense|for nonhumans|"
+    r"sense:|used:|in full:|informally used|followed by|"
+    r"not restricted to|pertaining to|or optionally with|are optional|"
+    r"in conjunction with|in compounds|depending on the relationship|"
+    r"person addressed|one person|multiple persons|may be replaced with|"
+    r"optionally completed with|in the phrase|in response to|"
+    r"before a|before an|preceded by|verbs ending|very common|after a verb|"
+    r"with verb|with uncountable|with the objects|with stative|"
+    r"can be replaced by|often after|used before|used after|"
+    r"used in|clipping of|spoken|somewhat|capitalized|"
+    r"short form|shortening of|shortened form|initialism of|"
+    r"said to|rare:|rarer also|is rarer|negatively connoted|"
+    r"previously mentioned|uncountable noun|countable noun|"
+    r"countable nouns|uncountable nouns|"
+    r"with predicative|with -|with imperfect|with a negated|"
+    r"colloquial|misspelling|holophrastic|frequently|esp\.|especially|"
+    r'"|'
+    r"general term|after a vowel|before a vowel|"
+    r"form|regular|irregular|alternative)"
+    r")($|[) ])|^("
     # Following are only matched at the beginning of the string
-    "pl|pl\.|see:|pl:|sg:|plurals:|e\.g\.|e\.g\.:|e\.g\.,|cf\.|compare|such as|"
-    "see|only|often|usually|used|usage:|of|not|in|compare|usu\.|"
-    "as|about|abbrv\.|abbreviation|abbr\.|that:|optionally|"
-    "mainly|from|for|also|also:|acronym|"
-    "\+|with) ")
+    r"pl|pl\.|see:|pl:|sg:|plurals:|e\.g\.|e\.g\.:|e\.g\.,|cf\.|compare|such as|"
+    r"see|only|often|usually|used|usage:|of|not|in|compare|usu\.|"
+    r"as|about|abbrv\.|abbreviation|abbr\.|that:|optionally|"
+    r"mainly|from|for|also|also:|acronym|"
+    r"\+|with) ")
 # \b does not work at the end???
 
 # Related forms matching this regexp will be considered suspicious if the
@@ -631,7 +631,7 @@ class ValidNode():
         other sequences: "nominative$" and "nominative plural$" for example),
         `tags` and `topics` are the dicts containing tag and topic strings
         for terminal nodes (end==True)."""
-    __slots__ = ( 
+    __slots__ = (
                   "end",
                   "tags",
                   "topics",
@@ -1046,7 +1046,7 @@ def decode_tags1(
             start_i: int
             last_i: int
             for node, start_i, last_i in cur_nodes:
-            # ValidNodes are part of a search tree that checks if a 
+            # ValidNodes are part of a search tree that checks if a
             # phrase is found in xlat_tags_map and other text->tags dicts.
                 if w in node.children:
                 # the phrase continues down the tree

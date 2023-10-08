@@ -178,7 +178,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
             pron["zh-pron"] = v.strip()
             for hdr in new_parent_hdrs + new_specific_hdrs:
                 hdr = hdr.strip()
-                valid_hdr = re.sub("\s+", "-", hdr)
+                valid_hdr = re.sub(r"\s+", "-", hdr)
                 if hdr in wxr.config.ZH_PRON_TAGS:
                     for tag in wxr.config.ZH_PRON_TAGS[hdr]:
                         if tag not in pron["tags"]:

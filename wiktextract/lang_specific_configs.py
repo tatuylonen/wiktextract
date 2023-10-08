@@ -176,7 +176,7 @@ lang_specific = {
     "Danish": {
         "genders": ["common-gender", "feminine", "masculine", "neuter"],
         "form_transformations": [
-            ["noun", "^\(as a measure\) ", "", ""],
+            ["noun", r"^\(as a measure\) ", "", ""],
         ],
     },
     "Eblaite": {
@@ -282,8 +282,8 @@ lang_specific = {
              "second-person plural subordinate-clause"],
             ["verb", "^dass sie ", "",
              "third-person plural subordinate-clause"],
-            ["verb", " \(du\)$", "", "second-person singular"],
-            ["verb", " \(ihr\)$", "", "second-person plural"],
+            ["verb", r" \(du\)$", "", "second-person singular"],
+            ["verb", r" \(ihr\)$", "", "second-person plural"],
             ["adj", "^er ist ", "", "masculine singular"],
             ["adj", "^sie ist ", "", "feminine singular"],
             ["adj", "^es ist ", "", "neuter singular"],
@@ -298,8 +298,8 @@ lang_specific = {
             "indefinite": ["ein", "eine", "eines", "einer",
                            "einem", "einen",],
         },
-            
-            
+
+
     },
     "German Low German": {
         "next": "German",
