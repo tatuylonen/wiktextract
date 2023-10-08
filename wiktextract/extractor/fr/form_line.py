@@ -119,6 +119,6 @@ def process_ja_mot_template(
                 # avoid adding duplicated form data extracted from
                 # inflection table before the form line
                 page_data[-1]["forms"].append(
-                    {"form": roman_form, "tags": ["romanization"]}
+                    {"form": form_text, "tags": ["romanization"]}
                 )
             break

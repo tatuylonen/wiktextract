@@ -5,8 +5,13 @@
 
 import collections
 import json
-from importlib.resources import files
+import sys
 from typing import TYPE_CHECKING, Callable, Optional
+
+if sys.version_info < (3, 10):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
 
 if TYPE_CHECKING:
     from wikitextprocessor.core import StatsData
