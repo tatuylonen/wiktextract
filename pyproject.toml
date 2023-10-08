@@ -21,21 +21,27 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Text Processing",
     "Topic :: Text Processing :: Linguistic",
 ]
+requires-python = ">=3.9"
 dependencies = [
-    "nltk",
+    "importlib_resources; python_version < '3.10'",
     "levenshtein",
+    "nltk",
     "wikitextprocessor @ git+https://github.com/tatuylonen/wikitextprocessor.git",
 ]
 
 [project.optional-dependencies]
 dev = [
+    "black",
+    "mypy",
     "nose2[coverage_plugin]",
+    "ruff",
     "tomli; python_version <= '3.10'",  # for coverage parsing TOML file
 ]
 
@@ -64,3 +70,12 @@ omit = ["tests/*"]
 
 [tool.black]
 line-length = 80
+
+[tool.ruff]
+line-length = 80
+select = [
+    "E",  # pycodestyle error
+    "F",  # Pyflakes
+    "I",  # isort
+    "W",  # pycodestyle warning
+]
