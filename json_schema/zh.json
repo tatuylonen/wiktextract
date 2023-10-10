@@ -11,7 +11,7 @@
     },
     "lang_code": {
       "description": "ISO 639-1 language code",
-      "type": "string"
+      "type": ["string", "null"]
     },
     "word": {
       "description": "word string",
@@ -269,7 +269,7 @@
       "properties": {
         "code": {
           "description": "ISO 639-1 code of the translation term",
-          "type": "string"
+          "type": ["string", "null"]
         },
         "lang": {
           "description": "Transation language name",
