@@ -56,7 +56,7 @@ def extract_example_list(
             isinstance(child_node, WikiNode)
             and child_node.kind == NodeKind.LIST
         ):
-            example_data["type"] = "quote"
+            example_data["type"] = "quotation"
             example_data["ref"] = clean_node(wxr, None, node.children[:index])
             example_data["text"] = clean_node(
                 wxr, None, child_node.children[0].children
@@ -69,7 +69,7 @@ def extract_quote_templates(
     """
     Process template `quote-book` and "RQ:*".
     """
-    example_data["type"] = "quote"
+    example_data["type"] = "quotation"
     expanded_text = clean_node(wxr, None, node)
     for line_num, expanded_line in enumerate(expanded_text.splitlines()):
         if line_num == 0:
@@ -128,7 +128,7 @@ def extract_template_zh_usex(
             example_data["roman"] = expanded_line
         elif expanded_line.startswith("來自："):
             example_data["ref"] = expanded_line[3:]
-            example_data["type"] = "quote"
+            example_data["type"] = "quotation"
         else:
             example_data["translation"] = expanded_line
 
