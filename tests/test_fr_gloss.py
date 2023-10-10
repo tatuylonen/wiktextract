@@ -73,7 +73,7 @@ class TestFormLine(unittest.TestCase):
                                     "text": "text",
                                     "translation": "translation",
                                     "roman": "roman",
-                                    "source": "source",
+                                    "ref": "source",
                                     "type": "quotation",
                                 }
                             ],
@@ -104,7 +104,7 @@ class TestFormLine(unittest.TestCase):
                             "examples": [
                                 {
                                     "text": "example",
-                                    "source": "source_title",
+                                    "ref": "source_title",
                                     "type": "quotation",
                                 }
                             ],

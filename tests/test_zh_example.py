@@ -34,7 +34,11 @@ class TestExample(unittest.TestCase):
         self.assertEqual(
             sense_data.get("examples"),
             [
-                {"ref": "ref text", "text": "example text", "type": "quote"},
+                {
+                    "ref": "ref text",
+                    "text": "example text",
+                    "type": "quotation",
+                },
             ],
         )
 
@@ -57,7 +61,7 @@ translation text""",
                     "ref": "ref text",
                     "text": "quote text",
                     "translation": "translation text",
-                    "type": "quote",
+                    "type": "quotation",
                 },
             ],
         )
