@@ -1,4 +1,5 @@
 from collections import defaultdict, deque
+from dataclasses import dataclass
 from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
@@ -20,16 +21,26 @@ def extract_inflection(
     process_inflection_table(wxr, page_data, template_node)
 
 
-IGNORE_TABLE_HEADERS = {
-    "Terme",  # https://fr.wiktionary.org/wiki/Modèle:de-adj
-    "Forme",  # br-flex-adj
-    "Temps",  # en-conj-rég,
-    "Cas",  # lt_décl_as
-}
-IGNORE_TABLE_CELL = {
-    "Déclinaisons",  # de-adj
-    "—",  # https://fr.wiktionary.org/wiki/Modèle:vls-nom
-}
+IGNORE_TABLE_HEADERS = frozenset(
+    {
+        "terme",  # https://fr.wiktionary.org/wiki/Modèle:de-adj
+        "forme",  # br-flex-adj
+        "temps",  # en-conj-rég,
+        "cas",  # lt_décl_as, ro-nom-tab(lower case)
+    }
+)
+IGNORE_TABLE_CELL = frozenset(
+    {
+        "Déclinaisons",  # de-adj
+        "—",  # https://fr.wiktionary.org/wiki/Modèle:vls-nom
+    }
+)
+
+@dataclass
+class ColspanHeader:
+    text: str
+    index: int
+    span: int
 
 
 def process_inflection_table(
@@ -46,7 +57,7 @@ def process_inflection_table(
     table_node = table_nodes[0]
     column_headers = []
     rowspan_headers = deque()
-    first_row_has_data_cell = False
+    colspan_headers = []
     for row_num, table_row in enumerate(
         table_node.find_child(NodeKind.TABLE_ROW)
     ):
@@ -64,13 +75,12 @@ def process_inflection_table(
             )
             and row_node_child.attrs.get("style") != "display:none"
         ]
-        if row_num == 0:
-            first_row_has_data_cell = any(
-                isinstance(cell, WikiNode)
-                and cell.kind == NodeKind.TABLE_CELL
-                and "invisible" not in cell.attrs.get("class", "")
-                for cell in table_row_nodes
-            )
+        current_row_has_data_cell = any(
+            isinstance(cell, WikiNode)
+            and cell.kind == NodeKind.TABLE_CELL
+            and "invisible" not in cell.attrs.get("class", "")
+            for cell in table_row_nodes
+        )
         row_headers = []
         for index, (rowspan_text, rowspan_count) in enumerate(
             rowspan_headers.copy()
@@ -86,14 +96,34 @@ def process_inflection_table(
             form_data = defaultdict(list)
             if isinstance(table_cell, WikiNode):
                 if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
-                    table_header_text = clean_node(wxr, None, table_cell)
-                    if table_header_text in IGNORE_TABLE_HEADERS:
+                    if any(
+                        table_cell.find_html(
+                            "span",
+                            attr_name="class",
+                            attr_value="ligne-de-forme",
+                        )
+                    ):
+                        # ignore gender header in template "ro-nom-tab"
                         continue
-                    elif row_num == 0 and not first_row_has_data_cell:
-                        # if cells of the first row are not all header cells
-                        # then the header cells are row headers but not column
-                        # headers
-                        column_headers.append(table_header_text)
+                    table_header_text = clean_node(
+                        wxr, None, table_cell
+                    ).replace("\n", " ")
+                    if table_header_text.lower() in IGNORE_TABLE_HEADERS:
+                        continue
+                    if not current_row_has_data_cell:
+                        # if all cells of the row are header cells
+                        # then the header cells are column headers
+                        if "colspan" in table_cell.attrs:
+                            colspan_headers.append(
+                                ColspanHeader(
+                                    table_header_text,
+                                    column_cell_index,
+                                    int(table_cell.attrs.get("colspan")),
+                                )
+                            )
+                        else:
+                            column_headers.append(table_header_text)
+                        column_cell_index += int(table_cell.attrs.get("colspan", 1))
                     elif row_num > 0:
                         row_headers.append(table_header_text)
                         if "rowspan" in table_cell.attrs:
@@ -113,9 +143,17 @@ def process_inflection_table(
                             and table_cell_line not in IGNORE_TABLE_CELL
                         ):
                             form_data["form"] = table_cell_line
+                    for colspan_header in colspan_headers:
+                        if (
+                            column_cell_index >= colspan_header.index
+                            and column_cell_index
+                            < colspan_header.index + colspan_header.span
+                        ):
+                            form_data["tags"].append(colspan_header.text)
                     if (
-                        len(column_headers) > column_cell_index
-                        and column_headers[column_cell_index]
+                        "colspan" not in table_cell.attrs
+                        and len(column_headers) > column_cell_index
+                        and column_headers[column_cell_index].lower()
                         not in IGNORE_TABLE_HEADERS
                     ):
                         form_data["tags"].append(
@@ -126,4 +164,5 @@ def process_inflection_table(
                         form_data["tags"].extend(row_headers)
                     if "form" in form_data:
                         page_data[-1]["forms"].append(form_data)
-                    column_cell_index += 1
+
+                    column_cell_index += int(table_cell.attrs.get("colspan", 1))

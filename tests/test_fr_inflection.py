@@ -302,3 +302,49 @@ class TestInflection(unittest.TestCase):
                 },
             ],
         )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{| class="flextable"
+! <span class="ligne-de-forme"  ><i>masculin</i></span>
+! colspan=2 | Singulier
+! colspan=2 | Pluriel
+|-
+! cas || non articulé || articulé || non articulé || articulé
+|-
+! Nominatif<br />Accusatif
+| <bdi lang="ro" xml:lang="ro" class="lang-ro">[[fenil#ro-nom|fenil]]</bdi>
+| <bdi lang="ro" xml:lang="ro" class="lang-ro">[[fenilul#ro-nom|fenilul]]</bdi>
+| <bdi lang="ro" xml:lang="ro" class="lang-ro">[[fenili#ro-nom|fenili]]</bdi>
+| <bdi lang="ro" xml:lang="ro" class="lang-ro">[[fenilii#ro-nom|fenilii]]</bdi>
+|-
+! Vocatif
+| colspan=2| <bdi lang="ro" xml:lang="ro" class="lang-ro">[[fenilule#ro-nom|fenilule]]</bdi>
+| colspan=2| <bdi lang="ro" xml:lang="ro" class="lang-ro">[[fenililor#ro-nom|fenililor]]</bdi>
+|}""",
+    )
+    def test_ro_nom_tab(self, mock_node_to_wikitext):
+        # https://fr.wiktionary.org/wiki/fenil#Nom_commun_4
+        page_data = [defaultdict(list, {"word": "fenil"})]
+        node = TemplateNode(0)
+        self.wxr.wtp.start_page("fenil")
+        extract_inflection(self.wxr, page_data, node)
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [
+                {
+                    "form": "fenilul",
+                    "tags": ["Singulier", "articulé", "Nominatif Accusatif"],
+                },
+                {
+                    "form": "fenili",
+                    "tags": ["Pluriel", "non articulé", "Nominatif Accusatif"],
+                },
+                {
+                    "form": "fenilii",
+                    "tags": ["Pluriel", "articulé", "Nominatif Accusatif"],
+                },
+                {"form": "fenilule", "tags": ["Singulier", "Vocatif"]},
+                {"form": "fenililor", "tags": ["Pluriel", "Vocatif"]},
+            ],
+        )
