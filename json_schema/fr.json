@@ -131,6 +131,12 @@
     "redirect": {
       "description": "Redirect page target title",
       "type": "string"
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "$defs": {
@@ -178,7 +184,7 @@
           "description": "Romanization of the example sentence",
           "type": "string"
         },
-        "source": {
+        "ref": {
           "description": "Source of the sentence, like book title and page number",
           "type": "string"
         },
