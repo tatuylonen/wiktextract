@@ -13,6 +13,7 @@ from ..share import (
     split_chinese_variants,
     strip_nodes,
 )
+from .descendant import DESCENDANT_TEMPLATES, extract_descendant_list_item
 
 
 def extract_linkages(
@@ -34,6 +35,7 @@ def extract_linkages(
             append_to = find_similar_gloss(page_data, sense)
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.LIST_ITEM:
+                is_descendant = False
                 not_term_indexes = set()
                 filtered_children = list(node.filter_empty_str_child())
                 linkage_data = defaultdict(list)
@@ -57,6 +59,14 @@ def extract_linkages(
                             linkage_data["tags"].append(
                                 clean_node(wxr, None, item_child).strip("()")
                             )
+                        elif template_name.lower() in DESCENDANT_TEMPLATES:
+                            extract_descendant_list_item(
+                                wxr, node, page_data[-1]
+                            )
+                            is_descendant = True
+                            break
+                if is_descendant:
+                    continue
                 # sense template before entry and they are inside the same
                 # list item
                 terms = clean_node(
