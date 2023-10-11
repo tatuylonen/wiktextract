@@ -1,6 +1,7 @@
 from typing import List, Optional, Tuple, Union
 
 from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor.parser import HTMLNode, LevelNode, TemplateNode
 
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -58,7 +59,6 @@ def extract_ruby(
     # Otherwise content is WikiNode, and we must recurse into it.
     kind = contents.kind
     new_node = WikiNode(kind, contents.loc)
-    new_contents.append(new_node)
     if kind in {
         NodeKind.LEVEL2,
         NodeKind.LEVEL3,
@@ -68,6 +68,8 @@ def extract_ruby(
         NodeKind.LINK,
     }:
         # Process args and children
+        if kind != NodeKind.LINK:
+            new_node = LevelNode(new_node.loc)
         new_args = []
         for arg in contents.largs:
             e1, c1 = extract_ruby(wxr, arg)
@@ -108,6 +110,8 @@ def extract_ruby(
         NodeKind.URL,
     }:
         # Process only args
+        if kind == NodeKind.TEMPLATE:
+            new_node = TemplateNode(new_node.loc)
         new_args = []
         for arg in contents.largs:
             e1, c1 = extract_ruby(wxr, arg)
@@ -116,6 +120,7 @@ def extract_ruby(
         new_node.largs = new_args
     elif kind == NodeKind.HTML:
         # Keep attrs and args as-is, process children
+        new_node = HTMLNode(new_node.loc)
         new_node.attrs = contents.attrs
         new_node.sarg = contents.sarg
         e1, c1 = extract_ruby(wxr, contents.children)
@@ -123,4 +128,5 @@ def extract_ruby(
         new_node.children = c1
     else:
         raise RuntimeError(f"extract_ruby: unhandled kind {kind}")
+    new_contents.append(new_node)
     return extracted, new_contents
