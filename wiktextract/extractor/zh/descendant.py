@@ -41,7 +41,6 @@ def extract_descendant_list_item(
         )
         if len(ruby_data) > 0:
             descendant_data["ruby"] = ruby_data
-        # breakpoint()
         for child_index, child_node in enumerate(nodes_without_ruby):
             if isinstance(child_node, str) and child_node.endswith("："):
                 lang_name = child_node.strip(" ：")
@@ -52,24 +51,28 @@ def extract_descendant_list_item(
             ):
                 if child_node.tag == "span":
                     class_names = child_node.attrs.get("class", "")
-                    if "Latn" in class_names or "tr" in class_names:
+                    if (
+                        "Latn" in class_names or "tr" in class_names
+                    ) and "word" in descendant_data:
                         # template:ja-r
                         descendant_data["roman"] = clean_node(
                             wxr, None, child_node
                         )
                     elif "lang" in child_node.attrs:
-                        if "term" in descendant_data:
+                        if "word" in descendant_data:
                             parent_data["descendants"].append(descendant_data)
                             descendant_data = defaultdict(
                                 list,
                                 {
                                     "lang_code": lang_code,
-                                    "lang_name": lang_name
+                                    "lang_name": lang_name,
                                 },
                             )
                             if len(ruby_data) > 0:
                                 descendant_data["ruby"] = ruby_data
-                        descendant_data["term"] = clean_node(wxr, None, child_node)
+                        descendant_data["word"] = clean_node(
+                            wxr, None, child_node
+                        )
                     if "qualifier-content" in class_names:
                         descendant_data["tags"].append(
                             clean_node(wxr, None, child_node)
@@ -83,13 +86,12 @@ def extract_descendant_list_item(
                             wxr, None, span_tag
                         )
 
-        if "term" in descendant_data:
+        if "word" in descendant_data:
             parent_data["descendants"].append(descendant_data)
 
     if list_item_node.contain_node(NodeKind.LIST):
-        # breakpoint()
         extract_descendants(
             wxr,
             list_item_node,
-            descendant_data if "terms" in descendant_data else parent_data,
+            descendant_data if "word" in descendant_data else parent_data,
         )

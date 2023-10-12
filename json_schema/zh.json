@@ -147,6 +147,12 @@
       "items": {
         "type": "string"
       }
+    },
+    "descendants": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/descendant"
+      }
     }
   },
   "$defs": {
@@ -313,6 +319,46 @@
           "description": "Chinese character variant",
           "type": "string",
           "enum": ["zh-Hant", "zh-Hans"]
+        }
+      }
+    },
+    "descendant": {
+      "type": "object",
+      "properties": {
+        "lang_code": {
+          "description": "ISO 639-1 code",
+          "type": "string"
+        },
+        "lang_name": {
+          "type": "string"
+        },
+        "word": {
+          "type": "string"
+        },
+        "roman": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "descendants": {
+          "type": "array",
+          "items": {
+            "$refs": "#/$defs/descendant"
+          }
+        },
+        "ruby": {
+          "description": "Japanese Kanji and furigana",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       }
     }
