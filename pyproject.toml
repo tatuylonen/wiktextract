@@ -55,16 +55,6 @@ homepage = "https://github.com/tatuylonen/wiktextract"
 [tool.setuptools]
 zip-safe = false
 
-[tool.setuptools.packages.find]
-exclude = [
-    "languages",
-    "overrides",
-    "tests",
-    "tools",
-    "usertools",
-    "json_schema"
-]
-
 [tool.setuptools.package-data]
 wiktextract = [
     "data/*/*",
