@@ -10,6 +10,7 @@ from wiktextract.datautils import append_base_data
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .descendant import extract_descendants
 from .gloss import extract_gloss
 from .headword_line import extract_headword_line
 from .inflection import extract_inflections
@@ -19,76 +20,12 @@ from .translation import extract_translation
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
-PANEL_TEMPLATES = {
-    "CJKV",
-    "French personal pronouns",
-    "French possessive adjectives",
-    "French possessive pronouns",
-    "Han etym",
-    "Japanese demonstratives",
-    "Latn-script",
-    "Webster 1913",
-    "attention",
-    "attn",
-    "character info",
-    "character info/new",
-    "character info/var",
-    "delete",
-    "dial syn",
-    "dialect synonyms",
-    "examples",
-    "hu-corr",
-    "hu-suff-pron",
-    "interwiktionary",
-    "ja-kanjitab",
-    "ko-hanja-search",
-    "maintenance box",
-    "maintenance line",
-    "merge",
-    "morse links",
-    "move",
-    "multiple images",
-    "picdic",
-    "picdicimg",
-    "picdiclabel",
-    "punctuation",
-    "reconstructed",
-    "request box",
-    "rfap",
-    "rfc",
-    "rfc-header",
-    "rfc-level",
-    "rfc-sense",
-    "rfd",
-    "rfdate",
-    "rfdatek",
-    "rfdef",
-    "rfe",
-    "rfe/dowork",
-    "rfgender",
-    "rfi",
-    "rfinfl",
-    "rfp",
-    "rfquotek",
-    "rfscript",
-    "rftranslit",
-    "selfref",
-    "stroke order",
-    "t-needed",
-    "unblock",
-    "unsupportedpage",
-    "wrongtitle",
-    "zh-forms",
-    "zh-hanzi-box",
-}
+PANEL_TEMPLATES = {}
 
 # Template name prefixes used for language-specific panel templates (i.e.,
 # templates that create side boxes or notice boxes or that should generally
 # be ignored).
-PANEL_PREFIXES = {
-    "list:compass points/",
-    "list:Gregorian calendar months/",
-}
+PANEL_PREFIXES = {}
 
 # Additional templates to be expanded in the pre-expand phase
 ADDITIONAL_EXPAND_TEMPLATES = {
@@ -174,6 +111,11 @@ def parse_section(
             and subtitle in wxr.config.OTHER_SUBTITLES["inflection_sections"]
         ):
             extract_inflections(wxr, page_data, node)
+        elif (
+                wxr.config.capture_descendants
+                and subtitle in wxr.config.OTHER_SUBTITLES["descendants"]
+        ):
+            extract_descendants(wxr, node, page_data[-1])
         else:
             wxr.wtp.debug(
                 f"Unhandled subtitle: {subtitle}",
