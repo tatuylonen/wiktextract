@@ -26,7 +26,9 @@ ADDITIONAL_EXPAND_TEMPLATES = set()
 
 # Templates that should not be pre-expanded
 DO_NOT_PRE_EXPAND_TEMPLATES = {
+    "Übersetzungen",
     "Ü-Tabelle",  # Translation table
+    "Übersetzungen umleiten",  # Translation table redirect
     "Quellen",  # Can be ignored since we have the <ref> tags in the tree
 }
 
@@ -310,13 +312,12 @@ def parse_page(
 
     # Parse the page, pre-expanding those templates that are likely to
     # influence parsing
+    DO_NOT_PRE_EXPAND_TEMPLATES.update(wxr.config.DE_FORM_TABLES)
     tree = wxr.wtp.parse(
         page_text,
         pre_expand=True,
         additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
-        do_not_pre_expand=DO_NOT_PRE_EXPAND_TEMPLATES.update(
-            wxr.config.DE_FORM_TABLES
-        ),
+        do_not_pre_expand=DO_NOT_PRE_EXPAND_TEMPLATES,
     )
 
     page_data = []
