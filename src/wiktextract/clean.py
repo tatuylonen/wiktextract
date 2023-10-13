@@ -1131,7 +1131,7 @@ def to_math(text):
                 if a == "2":
                     v = "√"
                 elif a == "3":
-                    v = "∛",
+                    v = "∛"
                 elif a == "4":
                     v = "∜"
                 else:

@@ -72,9 +72,9 @@ def process_translation_templates(
         # translation box start: https://fr.wiktionary.org/wiki/Modèle:trad-début
         sense_parameter = template_node.template_parameters.get(1)
         if sense_parameter is not None:
-            base_translation_data["sense"] = clean_node(
-                wxr, None, sense_parameter
-            )
+            sense_text = clean_node(wxr, None, sense_parameter)
+            if len(sense_text) > 0:
+                base_translation_data["sense"] = sense_text
     elif template_node.template_name == "T":
         # Translation language: https://fr.wiktionary.org/wiki/Modèle:T
         base_translation_data["code"] = template_node.template_parameters.get(1)

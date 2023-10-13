@@ -169,7 +169,7 @@ nested_translations_re = re.compile(
     r"\s+\((({}): ([^()]|\([^()]+\))+)\)"
     .format("|".join(re.escape(x.removeprefix("?"))
                      for x in sorted(xlat_head_map.values(),
-                                     key=lambda x: len(x),
+                                     key=len,
                                      reverse=True)
                      if x and not x.startswith("class-"))))
 
@@ -179,7 +179,7 @@ head_final_re_text = r"( -)?( ({}))+".format(
     "|".join(re.escape(x) for x in
              # The sort is to put longer ones first, preferring them in
              # the regexp match
-             sorted(xlat_head_map.keys(), key=lambda x: len(x),
+             sorted(xlat_head_map.keys(), key=len,
                     reverse=True)))
 head_final_re = re.compile(head_final_re_text + "$")
 

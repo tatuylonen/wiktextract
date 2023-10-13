@@ -25,7 +25,7 @@ pron_romanizations = {
 pron_romanization_re = re.compile(
     "(?m)^(" +
     "|".join(re.escape(x) for x in
-             sorted(pron_romanizations.keys(), key=lambda x: len(x),
+             sorted(pron_romanizations.keys(), key=len,
                     reverse=True)) +
     ")([^\n]+)")
 
