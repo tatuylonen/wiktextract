@@ -1438,7 +1438,7 @@ def clean_value(wxr, title, no_strip=False, no_html_strip=False):
         )
         title = re.sub(r"(?s)\[\[\s*:?([^]|#<>]+?)\s*(#[^][|<>]*?)?\]\]",
                        repl_1, title)
-        title = re.sub(r"(?s)\[\[\s*(([a-zA-z0-9]+)\s*:)?\s*([^][#|<>]+?)"
+        title = re.sub(r"(?s)\[\[\s*(([a-zA-Z0-9]+)\s*:)?\s*([^][#|<>]+?)"
                        r"\s*(#[^][|]*?)?\|?\]\]",
                        repl_link, title)
         title = re.sub(r"(?s)\[\[\s*([^][|<>]+?)\s*\|"
