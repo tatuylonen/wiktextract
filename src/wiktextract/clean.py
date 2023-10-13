@@ -1376,11 +1376,11 @@ def clean_value(wxr, title, no_strip=False, no_html_strip=False):
     # Remove <sup> with previewonly class (generated e.g. by {{taxlink|...}})
     title = re.sub(r'(?si)<sup\b[^>]*?\bclass="[^"<>]*?'
                    r'\bpreviewonly\b[^>]*?>'
-                   r'((<[^<>]>[^<>]*</[^<>]*>)|.)*?</sup\s*>',
+                   r'.+?</sup\s*>',
                    "", title)
     # Remove <strong class="error">...</strong>
     title = re.sub(r'(?si)<strong\b[^>]*?\bclass="[^"]*?\berror\b[^>]*?>'
-                   r'((<.*?</.[^>]>)|.)*?</strong\s*>',
+                   r'.+?</strong\s*>',
                    "", title)
     # Change <div> and </div> to newlines.  Ditto for tr, li, table, dl, ul, ol
     title = re.sub(r"(?si)</?(div|tr|li|table|dl|ul|ol)\b[^>]*>",
@@ -1438,7 +1438,7 @@ def clean_value(wxr, title, no_strip=False, no_html_strip=False):
         )
         title = re.sub(r"(?s)\[\[\s*:?([^]|#<>]+?)\s*(#[^][|<>]*?)?\]\]",
                        repl_1, title)
-        title = re.sub(r"(?s)\[\[\s*(([a-zA-z0-9]+)\s*:)?\s*([^][#|<>]+?)"
+        title = re.sub(r"(?s)\[\[\s*(([a-zA-Z0-9]+)\s*:)?\s*([^][#|<>]+?)"
                        r"\s*(#[^][|]*?)?\|?\]\]",
                        repl_link, title)
         title = re.sub(r"(?s)\[\[\s*([^][|<>]+?)\s*\|"
