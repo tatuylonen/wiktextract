@@ -26,109 +26,9 @@ ADDITIONAL_EXPAND_TEMPLATES = set()
 
 # Templates that should not be pre-expanded
 DO_NOT_PRE_EXPAND_TEMPLATES = {
-    "Übersetzungen",
     "Ü-Tabelle",  # Translation table
     "Übersetzungen umleiten",  # Translation table redirect
-    "Quellen",  # Can be ignored since we have the <ref> tags in the tree
 }
-
-
-def fix_level_hierarchy_of_subsections(
-    wxr: WiktextractContext, tree: List[WikiNode]
-) -> List[WikiNode]:
-    """
-    This function introduces level hierarchy to subsections and their content.
-
-    The German Wiktionary does generally not use level 4 headings but instead
-    uses templates to define the subsections. These templates are usually
-    followed by a list of content that belongs to the subsection. Yet, in the
-    tree the content is on the same level as the subsection template. In Gernman
-    wiktionary, for cosmetic reasons, a level 4 heading is used to introduce the
-    translation subsection that then also contains other subsections not related
-    to translations.
-
-    See:
-    https://de.wiktionary.org/wiki/Hilfe:Formatvorlage#Der_%E2%80%9EEndteil%E2%80%9C
-    """
-    level_nodes: List[WikiNode] = []
-    for node in tree:
-        if isinstance(node, WikiNode):
-            # A level 4 heading is used to introduce the translation
-            # section.
-            if node.kind == NodeKind.LEVEL4:
-                # Find the index of the first template after the Ü-Tabelle
-                # template
-                split_idx = len(node.children)
-                for idx, child in enumerate(node.children):
-                    if split_idx < len(node.children):
-                        if (
-                            isinstance(child, WikiNode)
-                            and child.kind == NodeKind.TEMPLATE
-                        ):
-                            break
-                        else:
-                            split_idx = idx + 1
-                    if (
-                        isinstance(child, WikiNode)
-                        and child.kind == NodeKind.TEMPLATE
-                        and child.template_name == "Ü-Tabelle"
-                    ):
-                        split_idx = idx + 1
-
-                children_until_translation_table = node.children[:split_idx]
-
-                children_after_translation_table = node.children[split_idx:]
-
-                node.children = children_until_translation_table
-                level_nodes.append(node)
-
-                level_nodes.extend(
-                    fix_level_hierarchy_of_subsections(
-                        wxr, children_after_translation_table
-                    )
-                )
-
-            elif node.kind == NodeKind.TEMPLATE:
-                level_node = LevelNode(NodeKind.LEVEL4, node.loc)
-                level_node.largs = [[node]]
-                level_nodes.append(level_node)
-
-            elif node.kind == NodeKind.LIST:
-                if len(level_nodes) > 0:
-                    level_nodes[-1].children.append(node)
-                else:
-                    wxr.wtp.debug(
-                        f"Unexpected list while introducing level hierarchy: {node}",
-                        sortid="extractor/de/page/introduce_level_hierarchy/52",
-                    )
-                    continue
-
-            # Sometimes links are used outside of a section to link the whole
-            # entry to a category. We treat them here as level 4 headings,
-            # without any children.
-            elif node.kind == NodeKind.LINK:
-                level_node = LevelNode(NodeKind.LEVEL4, node.loc)
-                level_node.largs = [[node]]
-                level_nodes.append(level_node)
-
-            # ignore <br> tags
-            elif node.kind == NodeKind.HTML and node.sarg == "br":
-                pass
-            else:
-                wxr.wtp.debug(
-                    f"Unexpected WikiNode while introducing level hierarchy: {node}",
-                    sortid="extractor/de/page/introduce_level_hierarchy/55",
-                )
-        else:
-            if not len(level_nodes):
-                if not isinstance(node, str) or not node.strip() == "":
-                    wxr.wtp.debug(
-                        f"Unexpected string while introducing level hierarchy: {node}",
-                        sortid="extractor/de/page/introduce_level_hierarchy/61",
-                    )
-                continue
-            level_nodes[-1].children.append(node)
-    return level_nodes
 
 
 def parse_section(
@@ -163,15 +63,13 @@ def parse_section(
                 )
         return
 
-    # Level 4 headings were introduced by fix_level_hierarchy_of_subsections()
-    # for subsections that are introduced by templates.
+    # Level 4 headings were introduced by overriding the default templates.
+    # See overrides/de.json for details.
     elif level_node.kind == NodeKind.LEVEL4:
-        for template_node in level_node.find_content(NodeKind.TEMPLATE):
-            section_name = template_node.template_name
-            wxr.wtp.start_subsection(section_name)
-            if section_name == "Bedeutungen":
-                for list_node in level_node.find_child(NodeKind.LIST):
-                    extract_glosses(wxr, page_data, list_node)
+        section_name = level_node.largs[0][0]
+        wxr.wtp.start_subsection(section_name)
+        if section_name == "Bedeutungen":
+            extract_glosses(wxr, page_data, level_node)
 
 
 FORM_POS = {
@@ -294,10 +192,22 @@ def process_pos_section(
                 sortid="extractor/de/page/process_pos_section/31",
             )
 
-    subsections = fix_level_hierarchy_of_subsections(wxr, level_node.children)
+    for level_4_node in level_node.find_child(NodeKind.LEVEL4):
+        parse_section(wxr, page_data, base_data, level_4_node)
 
-    for subsection in subsections:
-        parse_section(wxr, page_data, base_data, subsection)
+    for non_l4_node in level_node.invert_find_child(NodeKind.LEVEL4):
+        if (
+            isinstance(non_l4_node, WikiNode)
+            and non_l4_node.kind == NodeKind.TEMPLATE
+            and "Übersicht" in non_l4_node.template_name
+        ):
+            # XXX: de: Extract form tables
+            pass
+        else:
+            wxr.wtp.debug(
+                f"Unexpected node in pos section: {non_l4_node}",
+                sortid="extractor/de/page/process_pos_section/41",
+            )
     return
 
 
