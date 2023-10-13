@@ -7,7 +7,6 @@ from wikitextprocessor.parser import TemplateNode
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.inflection import extract_inflection
-from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -19,9 +18,6 @@ class TestInflection(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     @patch(
         "wikitextprocessor.Wtp.node_to_wikitext",

@@ -83,7 +83,8 @@ def get_lang_data(lang_code: str, dump_file: str, db_path: Path | None) -> None:
     ) as fout:
         json.dump(data, fout, indent=2, ensure_ascii=False, sort_keys=True)
     wxr.wtp.close_db_conn()
-    close_thesaurus_db(wxr.thesaurus_db_path, wxr.thesaurus_db_conn)
+    if wxr.config.extract_thesaurus_pages:
+        close_thesaurus_db(wxr.thesaurus_db_path, wxr.thesaurus_db_conn)
 
 
 if __name__ == "__main__":

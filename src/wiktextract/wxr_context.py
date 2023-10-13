@@ -28,15 +28,20 @@ class WiktextractContext:
         self.thesaurus_db_path = wtp.db_path.with_stem(
             f"{wtp.db_path.stem}_thesaurus"
         )
-        self.thesaurus_db_conn = init_thesaurus_db(self.thesaurus_db_path)
+        self.thesaurus_db_conn = (
+            init_thesaurus_db(self.thesaurus_db_path)
+            if config.extract_thesaurus_pages
+            else None
+        )
 
     def reconnect_databases(self, check_same_thread: bool = True) -> None:
         # `multiprocessing.pool.Pool.imap()` runs in another thread, if the db
         # connection is used to create iterable data for `imap`,
         # `check_same_thread` must be `False`.
-        self.thesaurus_db_conn = sqlite3.connect(
-            self.thesaurus_db_path, check_same_thread=check_same_thread
-        )
+        if self.config.extract_thesaurus_pages:
+            self.thesaurus_db_conn = sqlite3.connect(
+                self.thesaurus_db_path, check_same_thread=check_same_thread
+            )
         self.wtp.db_conn = sqlite3.connect(
             self.wtp.db_path, check_same_thread=check_same_thread
         )
@@ -44,7 +49,8 @@ class WiktextractContext:
     def remove_unpicklable_objects(self) -> None:
         # remove these variables before passing the `WiktextractContext` object
         # to worker processes
-        self.thesaurus_db_conn.close()
+        if self.config.extract_thesaurus_pages:
+            self.thesaurus_db_conn.close()
         self.thesaurus_db_conn = None
         self.wtp.db_conn.close()
         self.wtp.db_conn = None

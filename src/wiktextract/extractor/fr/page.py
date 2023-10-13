@@ -152,12 +152,6 @@ def parse_page(
         page_text,
         pre_expand=True,
         additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
-        do_not_pre_expand={
-            "trad-début",  # don't expand translation start/end tempaltes
-            "trad-fin",
-            "(",  # similar to "trad-debut", pre-expand breaks node structre
-            ")",
-        },
     )
 
     page_data = []
