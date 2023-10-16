@@ -36,6 +36,7 @@ IGNORE_TABLE_CELL = frozenset(
     }
 )
 
+
 @dataclass
 class ColspanHeader:
     text: str
@@ -123,7 +124,9 @@ def process_inflection_table(
                             )
                         else:
                             column_headers.append(table_header_text)
-                        column_cell_index += int(table_cell.attrs.get("colspan", 1))
+                        column_cell_index += int(
+                            table_cell.attrs.get("colspan", 1)
+                        )
                     elif row_num > 0:
                         row_headers.append(table_header_text)
                         if "rowspan" in table_cell.attrs:

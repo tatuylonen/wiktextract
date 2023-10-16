@@ -196,3 +196,22 @@ class TestFormLine(unittest.TestCase):
                 }
             ],
         )
+
+    def test_not_italic_tag(self):
+        # https://fr.wiktionary.org/wiki/bec-en-ciseaux
+        self.wxr.wtp.start_page("bec-en-ciseaux")
+        root = self.wxr.wtp.parse(
+            "# [[oiseau|Oiseau]] aquatique de taille moyenne du genre ''[[Rhynchops]]''."
+        )
+        page_data = [defaultdict(list)]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "senses": [
+                        {"glosses": ["Oiseau aquatique de taille moyenne du genre Rhynchops."]}
+                    ]
+                }
+            ],
+        )

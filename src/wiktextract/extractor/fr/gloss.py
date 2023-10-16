@@ -43,15 +43,29 @@ def extract_gloss(
                 )
 
         gloss_only_nodes = []
-        # extract italic tags
-        for node in gloss_nodes[gloss_start:]:
-            if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+        tag_indexes = set()
+        for index, node in enumerate(gloss_nodes[gloss_start:], gloss_start):
+            # if an italic node is between parentheses then it's a tag, also
+            # don't add the parenthese strings to `gloss_only_nodes`
+            if (
+                isinstance(node, WikiNode)
+                and node.kind == NodeKind.ITALIC
+                and index > gloss_start
+                and isinstance(gloss_nodes[index - 1], str)
+                and gloss_nodes[index - 1].strip() == "("
+                and index + 1 < len(gloss_nodes)
+                and isinstance(gloss_nodes[index + 1], str)
+                and gloss_nodes[index + 1].strip() == ")"
+            ):
                 gloss_data["tags"].append(clean_node(wxr, None, node))
+                tag_indexes |= {index - 1, index, index + 1}
                 continue
-            elif isinstance(node, str) and node.strip() in ["(", ")"]:
-                # remove parentheses around italic node
-                continue
-            gloss_only_nodes.append(node)
+
+        gloss_only_nodes = [
+            node
+            for index, node in enumerate(gloss_nodes[gloss_start:], gloss_start)
+            if index not in tag_indexes
+        ]
         gloss_text = clean_node(wxr, gloss_data, gloss_only_nodes)
         gloss_data["glosses"] = [gloss_text]
         extract_examples(wxr, gloss_data, list_item_node)
