@@ -21,7 +21,7 @@ class WiktExtractTests(unittest.TestCase):
         poses = self.wxr.config.POS_TYPES
         self.assertTrue(isinstance(poses, set))
         for pos_type in ["noun", "verb", "pron", "adj", "adv", "num"]:
-            self.assertTrue(pos_type in poses)
+            self.assertIn(pos_type, poses)
         self.assertLess(len(poses), 50)
 
     def test_cv_plain(self):

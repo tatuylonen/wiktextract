@@ -7,7 +7,6 @@ from wikitextprocessor import Wtp, Page
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.gloss import extract_gloss
 from wiktextract.extractor.fr.page import process_pos_block
-from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -19,9 +18,6 @@ class TestFormLine(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     @patch(
         "wikitextprocessor.Wtp.get_page",
@@ -196,6 +192,45 @@ class TestFormLine(unittest.TestCase):
                 {
                     "senses": [
                         {"glosses": ["Bassin, lavoir."], "tags": ["localement"]}
+                    ]
+                }
+            ],
+        )
+
+    def test_not_italic_tag(self):
+        # https://fr.wiktionary.org/wiki/bec-en-ciseaux
+        self.wxr.wtp.start_page("bec-en-ciseaux")
+        root = self.wxr.wtp.parse(
+            "# [[oiseau|Oiseau]] aquatique de taille moyenne du genre ''[[Rhynchops]]''."
+        )
+        page_data = [defaultdict(list)]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "senses": [
+                        {"glosses": ["Oiseau aquatique de taille moyenne du genre Rhynchops."]}
+                    ]
+                }
+            ],
+        )
+
+    def test_preserve_space_between_tags(self):
+        # https://fr.wiktionary.org/wiki/becs-en-ciseaux
+        # the space between italic node and the link node should be preserved
+        self.wxr.wtp.start_page("becs-en-ciseaux")
+        root = self.wxr.wtp.parse(
+            "# ''Pluriel de'' [[bec-en-ciseaux]]."
+        )
+        page_data = [defaultdict(list)]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "senses": [
+                        {"glosses": ["Pluriel de bec-en-ciseaux."]}
                     ]
                 }
             ],

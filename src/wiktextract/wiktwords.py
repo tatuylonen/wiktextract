@@ -83,6 +83,7 @@ def process_single_page(
     # is disabled by default to speed up single page testing.
     if (
         args.use_thesaurus
+        and wxr.config.extract_thesaurus_pages
         and thesaurus_linkage_number(wxr.thesaurus_db_conn) == 0
     ):
         extract_thesaurus_data(wxr)
@@ -507,7 +508,8 @@ def main():
             json.dump(tree, f, indent=2, sort_keys=True)
 
     wxr.wtp.close_db_conn()
-    close_thesaurus_db(wxr.thesaurus_db_path, wxr.thesaurus_db_conn)
+    if wxr.config.extract_thesaurus_pages:
+        close_thesaurus_db(wxr.thesaurus_db_path, wxr.thesaurus_db_conn)
 
     if args.profile:
         pr.disable()

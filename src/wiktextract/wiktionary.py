@@ -119,6 +119,7 @@ def parse_wiktionary(
         override_folders,
         skip_extract_dump,
         save_pages_path,
+        not wxr.config.analyze_templates,
     )
 
     if not phase1_only:
@@ -178,7 +179,10 @@ def reprocess_wiktionary(
 
     # Extract thesaurus data. This iterates over thesaurus pages,
     # but is very fast.
-    if thesaurus_linkage_number(wxr.thesaurus_db_conn) == 0:
+    if (
+        wxr.config.extract_thesaurus_pages
+        and thesaurus_linkage_number(wxr.thesaurus_db_conn) == 0
+    ):
         extract_thesaurus_data(wxr, num_processes)
 
     emitted = set()

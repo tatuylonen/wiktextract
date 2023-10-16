@@ -6,27 +6,14 @@
 import collections
 import json
 import sys
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import Callable, Optional
+
+from wikitextprocessor.core import CollatedErrorReturnData
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
 else:
     from importlib.resources import files
-
-if TYPE_CHECKING:
-    from wikitextprocessor.core import StatsData
-
-
-def int_dict():
-    return collections.defaultdict(int)
-
-
-def int_dict_dict():
-    return collections.defaultdict(int_dict)
-
-
-def list_dict():
-    return collections.defaultdict(list)
 
 
 class WiktionaryConfig:
@@ -66,6 +53,8 @@ class WiktionaryConfig:
         "LANGUAGES_BY_NAME",
         "LANGUAGES_BY_CODE",
         "FORM_OF_TEMPLATES",
+        "analyze_templates",
+        "extract_thesaurus_pages",
     )
 
     def __init__(
@@ -130,38 +119,13 @@ class WiktionaryConfig:
             self.set_attr_from_json(
                 "FORM_OF_TEMPLATES", "form_of_templates.json"
             )
-        if dump_file_lang_code == "fr":
-            self.set_attr_from_json("FR_FORM_TABLES", "form_tables.json")
         if dump_file_lang_code == "de":
             self.set_attr_from_json("DE_FORM_TABLES", "form_templates.json")
+        self.analyze_templates = True  # find templates that need pre-expand
+        self.extract_thesaurus_pages = True
+        self.load_edition_settings()
 
-    def to_kwargs(self):
-        return {
-            "dump_file_lang_code": self.dump_file_lang_code,
-            "capture_language_codes": self.capture_language_codes,
-            "capture_translations": self.capture_translations,
-            "capture_pronunciation": self.capture_pronunciation,
-            "capture_linkages": self.capture_linkages,
-            "capture_compounds": self.capture_compounds,
-            "capture_redirects": self.capture_redirects,
-            "capture_examples": self.capture_examples,
-            "capture_etymologies": self.capture_etymologies,
-            "capture_inflections": self.capture_inflections,
-            "capture_descendants": self.capture_descendants,
-            "verbose": self.verbose,
-            "expand_tables": self.expand_tables,
-        }
-
-    def to_return(self) -> "StatsData":
-        return {
-            "num_pages": self.num_pages,
-            "language_counts": self.language_counts,
-            "pos_counts": self.pos_counts,
-            "section_counts": self.section_counts,
-        }
-
-    def merge_return(self, ret):
-        assert isinstance(ret, dict)
+    def merge_return(self, ret: CollatedErrorReturnData):
         if "num_pages" in ret:
             self.num_pages += ret["num_pages"]
             for k, v in ret["language_counts"].items():
@@ -271,3 +235,10 @@ class WiktionaryConfig:
                         )
                 else:
                     self.LANGUAGES_BY_NAME[lang_name] = lang_code
+
+    def load_edition_settings(self):
+        file_path = self.data_folder / "config.json"
+        if file_path.exists():
+            with file_path.open(encoding="utf-8") as f:
+                for key, value in json.load(f).items():
+                    setattr(self, key, value)

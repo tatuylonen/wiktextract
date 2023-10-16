@@ -5,7 +5,6 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.linkage import extract_linkage
-from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -17,9 +16,6 @@ class TestLinkage(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     def test_tags(self):
         page_data = [defaultdict(list)]

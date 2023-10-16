@@ -36,7 +36,8 @@ def parse_page(
     captured."""
     page_extractor_mod = import_extractor_module(wxr.wtp.lang_code, "page")
     page_data = page_extractor_mod.parse_page(wxr, page_title, page_text)
-    inject_linkages(wxr, page_data)
+    if wxr.config.extract_thesaurus_pages:
+        inject_linkages(wxr, page_data)
     if wxr.config.dump_file_lang_code == "en":
         process_categories(wxr, page_data)
     remove_duplicate_data(page_data)

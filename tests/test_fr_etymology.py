@@ -8,7 +8,6 @@ from wiktextract.extractor.fr.etymology import (
     extract_etymology,
     insert_etymology_data,
 )
-from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -20,9 +19,6 @@ class TestEtymology(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     def test_ebauche_etym(self):
         # https://fr.wiktionary.org/wiki/Hörsaal

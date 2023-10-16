@@ -262,7 +262,7 @@ TAGS_FORCED_WORDTAGS = set([
     # Arabic, but that is being handled elsewhere now.
 ])
 
-class InflCell(object):
+class InflCell:
     """Cell in an inflection table."""
     __slots__ = (
         "text",
@@ -292,7 +292,7 @@ class InflCell(object):
         return str(self)
 
 
-class HdrSpan(object):
+class HdrSpan:
     """Saved information about a header cell/span during the parsing
     of a table."""
     __slots__ = (
@@ -569,7 +569,7 @@ def extract_cell_content(lang, word, col):
             col = col[:-1]
         else:
             break
-            
+
     # Check for another form of note definition
     if (len(col) > 2 and col[1] in (")", " ", ":") and
         col[0].isdigit() and
@@ -1200,7 +1200,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
     for x in titles:
         assert isinstance(x, str)
 
-    
+
     # print("PARSE_SIMPLE_TABLE: TITLES:", titles)
     if debug_cell_text:
         print("ROWS:")
@@ -1249,7 +1249,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
     # for row in rows:
     #     print("  ", row)
 
-        
+
     # Parse definitions for references (from table itself and from text
     # after it)
     def_ht = {}
@@ -1333,7 +1333,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
         # later with "dummy-load-stored-hdrspans".
         if store_new_hdrspan:
             tablecontext.stored_hdrspans.append(hdrspan)
-            
+
         # Handle headers that are above left-side header
         # columns and are followed by personal pronouns in
         # remaining columns (basically headers that
@@ -1354,7 +1354,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
             later_allowed = later_allowed | set(["dummy"])
             # dummy2 has different behavior than plain dummy
             # and does not belong here.
-            
+
             # print("col0_cats={} later_cats={} "
             #       "fol_by_nonempty={} col_idx={} end={} "
             #       "tagsets={}"
@@ -1524,7 +1524,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
               # First is base and the rest is IPA alternatives
             alts = list((alts[0], "", alts[i])
                         for i in range(1, len(alts)))
-    
+
         # Check for romanizations, forms first, romanizations under
         elif (len(alts) % 2 == 0 and
               not any("(" in x for x in alts) and
@@ -1668,12 +1668,12 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
             form = (form[:m.start()] + subst +
                     form[m.end():]).strip()
         return form, roman, clitic
-        
+
     def merge_row_and_column_tags(form, some_has_covered_text):
         # Merge column tags and row tags.  We give preference
         # to moods etc coming from rowtags (cf. austteigen/German/Verb
         # imperative forms).
-        
+
         # In certain cases, what a tag means depends on whether
         # it is a row or column header. Depending on the language,
         # we replace certain tags with others if they're in
@@ -1710,19 +1710,19 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                             for tt in old_tags)):
                         continue
                     tags.add(t)
-    
+
                 # Extract language-specific tags from the
                 # form.  This may also adjust the form.
                 form, lang_tags = lang_specific_tags(lang, pos, form)
                 tags.update(lang_tags)
-    
+
                 # For non-finite verb forms, see if they have
                 # a gender/class suffix
                 if pos == "verb" and any(valid_tags[t] == "non-finite"
                        for t in tags):
                     form, tt = parse_head_final_tags(wxr, lang, form)
                     tags.update(tt)
-    
+
                 # Remove "personal" tag if have nth person; these
                 # come up with e.g. reconhecer/Portuguese/Verb.  But
                 # not if we also have "pronoun"
@@ -1732,20 +1732,20 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                        ["first-person", "second-person",
                         "third-person"])):
                     tags.remove("personal")
-    
+
                 # If we have impersonal, remove person and number.
                 # This happens with e.g. viajar/Portuguese/Verb
                 if "impersonal" in tags:
                     tags = tags - set(["first-person", "second-person",
                                        "third-person",
                                        "singular", "plural"])
-    
+
                 # Remove unnecessary "positive" tag from verb forms
                 if pos == "verb" and "positive" in tags:
                     if "negative" in tags:
                         tags.remove("negative")
                     tags.remove("positive")
-    
+
                 # Many Russian (and other Slavic) inflection tables
                 # have animate/inanimate distinction that generates
                 # separate entries for neuter/feminine, but the
@@ -1758,14 +1758,14 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                                 "masculine" not in tags and
                                 "plural" not in tags):
                                 tags.remove(t1)
-    
+
                 # German adjective tables contain "(keiner)" etc
                 # for mixed declension plural.  When the adjective
                 # disappears and it becomes just one word, remove
                 # the "includes-article" tag.  e.g. eiskalt/German
                 if "includes-article" in tags and " " not in form:
                     tags.remove("includes-article")
-    
+
                 # Handle ignored forms.  We mark that the form was
                 # provided.  This is important information; some words
                 # just do not have a certain form.  However, there also
@@ -1784,7 +1784,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                     form = "-"
                 elif col_idx in has_covering_hdr:
                     some_has_covered_text = True
-    
+
                 # Handle ambiguous object concord. If a header
                 # gives the "dummy-object-concord"-tag to a word,
                 # replace person, number and gender tags with
@@ -1798,7 +1798,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                         if subtag in tags:
                             tags.remove(subtag)
                             tags.add(objtag)
-    
+
                 # Remove the dummy mood tag that we sometimes
                 # use to block adding other mood and related
                 # tags
@@ -1813,7 +1813,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                                    "dummy-reset-stored-hdrspans",
                                    "dummy-section-header",
                                    ])
-    
+
                 # Perform language-specific tag replacements according
                 # to rules in a table.
                 lang_tag_mappings = get_lang_conf(lang,
@@ -1822,13 +1822,13 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                     for pre, post in lang_tag_mappings.items():
                         if all(t in tags for t in pre):
                             tags = (tags - set(pre)) | set(post)
-                            
+
                 # Warn if there are entries with empty tags
                 if not tags:
                     wxr.wtp.debug("inflection table: empty tags for {}"
                               .format(form),
                               sortid="inflection/1826")
-    
+
                 # Warn if form looks like IPA
                 ########## XXX ########
                 # Because IPA is its own unicode block, we could also
@@ -1844,14 +1844,14 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                               "form={} tags={}"
                               .format(form, tags),
                               sortid="inflection/1840")
-    
+
                 # Note that this checks `form`, not `in tags`
                 if form == "dummy-ignored-text-cell":
                     continue
-    
+
                 if "dummy-remove-this-cell" in tags:
                     continue
-    
+
                 # Add the form
                 tags = list(sorted(tags))
                 dt = {"form": form, "tags": tags, "source": source}
@@ -1866,7 +1866,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                           "source": source}
                     ret.append(dt)
         return ret, form, some_has_covered_text
-        
+
     # First extract definitions from cells
     # See defs_ht for footnote defs stuff
     for row in rows:
@@ -2072,7 +2072,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
 
                 if any("dummy-load-stored-hdrspans" in ts for ts in v):
                     hdrspans.extend(tablecontext.stored_hdrspans)
-                    
+
                 if any("dummy-reset-stored-hdrspans" in ts for ts in v):
                     tablecontext.stored_hdrspans = []
 
@@ -2081,7 +2081,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                     store_new_hdrspan = True
                 else:
                     store_new_hdrspan = False
-                    
+
                 new_coltags = list(x for x in new_coltags
                                    if not any(t in noinherit_tags for t in x))
                 # print("new_coltags={} previously_seen={} all_hdr_tags={}"
@@ -2091,13 +2091,13 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                     = add_new_hdrspan(col, hdrspans, store_new_hdrspan,
                                       col0_followed_by_nonempty, col0_hdrspan)
 
-                    
+
                 continue
 
             # These values are ignored, at least for now
             if re.match(r"^(# |\(see )", col):
                 continue
-                
+
             if any("dummy-skip-this" in ts for ts in rowtags):
                 continue  # Skip this cell
 
@@ -2117,7 +2117,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                 get_lang_conf(lang, "ignore_top_left_text_cell") == True
                 ):
                 continue  # Skip text at top left, as in Icelandic, Faroese
-                
+
             # if col0_hdrspan is not None:
             #     print("COL0 FOLLOWED NONHDR: {!r} by {!r}"
             #           .format(col0_hdrspan.text, col))
@@ -2135,16 +2135,16 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
             # newline.
             col = re.sub(r"[ \t\r]+", " ", col)
             # Split the cell text into alternatives
-            
+
             col, alts, split_extra_tags = \
             split_text_into_alts(col)
 
             # Some cells have mixed form content, like text and romanization,
             # or text and IPA. Handle these.
             alts = handle_mixed_lines(alts)
-            
+
             alts = list((x, combined_coltags) for x in alts)
-            
+
             # Generate forms from the alternatives
             # alts is a list of (tuple of forms, tuple of tags)
             for (form, base_roman, ipa), coltags in alts:
@@ -2180,7 +2180,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                                                               word,
                                                               base_roman)
                     extra_tags.extend(hdr_tags)
-                                        
+
                 # Do some additional cleanup on the cell.
                 form = re.sub(r"^\s*,\s*", "", form)
                 form = re.sub(r"\s*,\s*$", "", form)
@@ -2192,7 +2192,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                 # Look for parentheses that have semantic meaning
                 form, et = find_semantic_parens(form)
                 extra_tags.extend(et)
-                        
+
                 # Handle parentheses in the table element.  We parse
                 # tags anywhere and romanizations anywhere but beginning.
                 roman = base_roman
@@ -2212,7 +2212,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                 if paren is not None:
                     form, roman, clitic = handle_parens(form, roman, clitic,
                                                         extra_tags)
-                    
+
                 # Ignore certain forms that are not really forms,
                 # unless they're really, really close to the article title
                 if form in ("", "unchanged",
@@ -2243,7 +2243,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                         merge_row_and_column_tags(form,
                                                   some_has_covered_text)
                 ret.extend(merge_ret)
-                
+
         # End of row.
         rownum += 1
         # For certain languages, if the row was empty, reset
@@ -2307,7 +2307,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                 had_noun = False
                 continue  # Skip the articles
 
-            
+
             dt = dt.copy()
             dt["tags"] = tags
             new_ret.append(dt)
@@ -2337,13 +2337,13 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                     continue
                 if key_tag not in tags:
                     skip_this = True
-    
+
             if skip_this:
                 continue
             new_ret.append(cell_data)
-            
+
         ret = new_ret
-        
+
     # Post-process English inflection tables, addding "multiword-construction"
     # when the number of words has increased.
     if lang == "English" and pos == "verb":
@@ -2375,7 +2375,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
             ret = [dt] + [tn] + ret
         else:
             ret = [dt] + ret
-                
+
     return ret
 
 def handle_generic_table(wxr, tablecontext, data,
@@ -2584,7 +2584,7 @@ def determine_header(wxr, tablecontext, lang, word, pos,
         is_title = True
     return is_title, hdr_expansion, target, celltext
 
-class TableContext(object):
+class TableContext:
     """Saved context used when parsing a table and its subtables."""
     __slot__ = (
         "stored_hdrspans",
@@ -2623,7 +2623,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
 
     if not tablecontext:
         tablecontext = TableContext()
-        
+
     def handle_table1(wxr, tablecontext, word, lang, pos,
                               data, tree, titles, source, after, depth):
         """Helper function allowing the 'flattening' out of the table
@@ -2640,7 +2640,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
         assert isinstance(after, str)
         assert isinstance(depth, int)
         # print("HANDLE_WIKITEXT_TABLE", titles)
-    
+
         col_gap_data = []   # Filling for columns with rowspan > 1
                             # col_gap_data contains None or InflCell
         vertical_still_left = []  # Number of remaining rows for which to fill
@@ -2652,7 +2652,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
         rows = []
 
         sub_ret = []
-        
+
         for node in tree.children:
             if not isinstance(node, WikiNode):
                 continue
@@ -2660,7 +2660,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
                 kind = node.sarg
             else:
                 kind = node.kind
-            
+
             # print("  {}".format(node))
             if kind in (NodeKind.TABLE_CAPTION, "caption"):
                 # print("  CAPTION:", node)
@@ -2671,7 +2671,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
                     # have more data.  The hidden data duplicates these rows, so
                     # we skip it and just process the hidden data.
                     continue
-    
+
                 # Parse a table row.
                 row = []
                 style = None
@@ -2693,7 +2693,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
                                     "th", "td"):
                         print("    UNEXPECTED ROW CONTENT: {}".format(col))
                         continue
-                        
+
                     while (len(row) < len(vertical_still_left) and
                            vertical_still_left[len(row)] > 0):
                     # vertical_still_left is [...0, 0, 2...] for each column.
@@ -2705,7 +2705,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
                     # and rowspan and colspan are just to generate the "fill-
                         vertical_still_left[len(row)] -= 1
                         row.append(col_gap_data[len(row)])
-                        
+
                         # appending row is how "indexing" is
                         # done here; something is appended,
                         # like a filler-cell here or a "start"
@@ -2719,7 +2719,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
                         # except when a new rowspan is needed,
                         # at the same time that
                         # vertical_still_left gets reassigned.
-    
+
                     try:
                         rowspan = int(col.attrs.get("rowspan", "1"))  # 🡙
                         colspan = int(col.attrs.get("colspan", "1"))  # 🡘
@@ -2727,7 +2727,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
                         rowspan = 1
                         colspan = 1
                     # print("COL:", col)
-    
+
                     # Process any nested tables recursively.
                     tables, rest = recursively_extract(col, lambda x:
                                                        isinstance(x, WikiNode)
@@ -2735,11 +2735,11 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
                                                        (x.kind == NodeKind.TABLE
                                                        or
                                                        x.sarg == "table"))
-    
+
                     # Clean the rest of the cell.
                     celltext = clean_node(wxr, None, rest)
                     # print("CLEANED:", celltext)
-    
+
                     # Handle nested tables.
                     for tbl in tables:
                         # Some nested tables (e.g., croí/Irish) have subtitles
@@ -2761,12 +2761,12 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
                             titles = []
                             after = ""
                             sub_ret.extend(subtbl)
-    
+
                     # This magic value is used as part of header detection
                     cellstyle = (col.attrs.get("style", "") + "//" +
                                  col.attrs.get("class", "") + "//" +
                                  str(kind))
-    
+
                     if not row:  # if first column in row
                         style = cellstyle
                     target = None
@@ -2781,7 +2781,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
                                      row, col, celltext, titletext,
                                      cols_headered,
                                      None, cellstyle)
-                                      
+
                     if is_title:
                     # If this cell gets a "*" tag, make the whole column
                     # below it (toggling it in cols_headered = [F, F, T...])
@@ -2825,7 +2825,7 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
                             # future, or None
                             vertical_still_left[len(row)] = rowspan - 1
                             # A counter for how many gaps🡙 are still left to be
-                            # filled (row.append or 
+                            # filled (row.append or
                             # row[col_gap_data[len(row)] =>
                             # rows), it is not reset to [], but decremented to 0
                             # each time a row gets something from col_gap_data.
@@ -2857,11 +2857,11 @@ def handle_wikitext_or_html_table(wxr, word, lang, pos,
         else:
             main_ret = [(rows, titles, after, depth)]
         return main_ret
-        
+
 
     new_rows = handle_table1(wxr, tablecontext, word, lang, pos,
                               data, tree, titles, source, after, 0)
-                              
+
     # Now we have a table that has been parsed into rows and columns of
     # InflCell objects.  Parse the inflection table from that format.
     if new_rows:
@@ -2878,13 +2878,13 @@ def handle_html_table(wxr, word, lang, pos, data, tree, titles, source,
     """A passer-on function for html-tables, XXX, remove these?"""
     handle_wikitext_or_html_table(wxr, word, lang, pos,
                                 data, tree, titles, source, after, tablecontext)
-                                
+
 def handle_wikitext_table(wxr, word, lang, pos, data, tree, titles, source,
                       after, tablecontext=None):
     """A passer-on function for html-tables, XXX, remove these?"""
     handle_wikitext_or_html_table(wxr, word, lang, pos,
                                 data, tree, titles, source, after, tablecontext)
-                                
+
 
 
 def parse_inflection_section(wxr, data,
@@ -3017,4 +3017,3 @@ def parse_inflection_section(wxr, data,
                 f.write(section + "\n")
                 text = wxr.wtp.node_to_wikitext(tree)
                 f.write(text + "\n")
-                
