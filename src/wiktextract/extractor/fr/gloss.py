@@ -14,19 +14,30 @@ def extract_gloss(
     list_node: WikiNode,
 ) -> None:
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
-        gloss_nodes = list(list_item_node.invert_find_child(NodeKind.LIST))
+        gloss_nodes = list(
+            list_item_node.invert_find_child(
+                NodeKind.LIST, include_empty_str=True
+            )
+        )
+        # remove the first empty space in list item nodes
+        if (
+            len(gloss_nodes) > 0
+            and isinstance(gloss_nodes[0], str)
+            and len(gloss_nodes[0].strip()) == 0
+        ):
+            gloss_nodes = gloss_nodes[1:]
+
         gloss_data = defaultdict(list)
         gloss_start = 0
         # process modifier, theme tempaltes before gloss text
         # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_de_tous_les_modèles/Précisions_de_sens
-        if (
-            len(gloss_nodes) > 0
-            and isinstance(gloss_nodes[0], WikiNode)
-            and gloss_nodes[0].kind == NodeKind.TEMPLATE
-        ):
+        if len(gloss_nodes) > 0 and isinstance(gloss_nodes[0], TemplateNode):
             gloss_start = 1
             for index, gloss_node in enumerate(gloss_nodes[1:], 1):
-                if (
+                if isinstance(gloss_node, str) and len(gloss_node.strip()) == 0:
+                    # ignore empty string
+                    gloss_start = index + 1
+                elif (
                     not isinstance(gloss_node, WikiNode)
                     or gloss_node.kind != NodeKind.TEMPLATE
                     # template "variante de" is not a modifier
@@ -38,9 +49,9 @@ def extract_gloss(
                 else:
                     gloss_start = index + 1
             for tag_node in gloss_nodes[:gloss_start]:
-                gloss_data["tags"].append(
-                    clean_node(wxr, gloss_data, tag_node).strip("()")
-                )
+                tag = clean_node(wxr, gloss_data, tag_node).strip("() ")
+                if len(tag) > 0:
+                    gloss_data["tags"].append(tag)
 
         gloss_only_nodes = []
         tag_indexes = set()
