@@ -63,7 +63,7 @@ def process_gloss_list_item(
             raw_gloss = clean_node(wxr, {}, list_item_node.children)
             gloss_data["raw_glosses"] = [raw_gloss]
 
-            extract_categories_from_gloss_node(wxr, gloss_data, list_item_node)
+            process_K_template(wxr, gloss_data, list_item_node)
 
             gloss_text = clean_node(wxr, gloss_data, list_item_node.children)
 
@@ -82,9 +82,8 @@ def process_gloss_list_item(
                     sortid="extractor/de/glosses/extract_glosses/28",
                 )
 
-            gloss_text = extract_categories_from_gloss_text(
-                gloss_data, gloss_text
-            )
+            # XXX: Extract tags from nodes instead using Italic and Template
+            gloss_text = extract_tags_from_gloss_text(gloss_data, gloss_text)
 
             if gloss_text or not sub_glosses_list_nodes:
                 gloss_data["glosses"] = [gloss_text]
@@ -117,34 +116,50 @@ def handle_sense_modifier(wxr, list_item_node):
     pass
 
 
-def extract_categories_from_gloss_node(
+def process_K_template(
     wxr: WiktextractContext,
     gloss_data: defaultdict(list),
     list_item_node: NodeKind.LIST_ITEM,
 ) -> None:
     for template_node in list_item_node.find_child(NodeKind.TEMPLATE):
         if template_node.template_name == "K":
-            categories = template_node.template_parameters.values()
+            text = clean_node(wxr, gloss_data, template_node).removesuffix(":")
+            tags = re.split(r";|,", text)
+            gloss_data["tags"] = [t.strip() for t in tags]
 
-            categories = [clean_node(wxr, {}, [c]) for c in categories]
+            # Prepositional and case information is sometimes only expanded to
+            # category links and not present in cleaned node. We still want it
+            # as a tag.
+            prep = template_node.template_parameters.get("Prä")
+            case = template_node.template_parameters.get("Kas")
+            category = (prep if prep else "") + (" + " + case if case else "")
+            if category:
+                gloss_data["tags"].append(category)
 
+            # XXX: Investigate better ways to handle free text in K template
+            ft = template_node.template_parameters.get("ft")
+            if ft:
+                wxr.wtp.debug(
+                    f"Found ft '{ft}' in K template which could be considered part of the gloss. Moved to tags for now.",
+                    sortid="extractor/de/glosses/extract_glosses/63",
+                )
+
+            # Remove the template_node from the children of list_item_node
             list_item_node.children = [
                 c for c in list_item_node.children if c != template_node
             ]
 
-            gloss_data["categories"].extend(categories)
 
-
-def extract_categories_from_gloss_text(
+def extract_tags_from_gloss_text(
     gloss_data: defaultdict(list), gloss_text: str
 ) -> None:
     parts = gloss_text.split(":", 1)
     if len(parts) > 1:
-        categories_part = parts[0].strip()
+        tags_part = parts[0].strip()
 
-        categories = [c.strip() for c in re.split(",|and", categories_part)]
+        categories = [c.strip() for c in re.split(",", tags_part)]
         if all(c.isalnum() for c in categories):
-            gloss_data["categories"].extend(categories)
+            gloss_data["tags"].extend(categories)
             return parts[1].strip()
 
     return gloss_text
