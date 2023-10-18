@@ -19,8 +19,8 @@ class DePageTests(unittest.TestCase):
     def setUp(self):
         conf1 = WiktionaryConfig(
             dump_file_lang_code="de",
-            # capture_language_codes=None,
-            # capture_translations=True,
+            capture_language_codes=None,
+            capture_translations=True,
             # capture_pronunciation=True,
             # capture_linkages=True,
             # capture_compounds=True,
