@@ -162,6 +162,11 @@ def parse_page(
             if subtitle_template.template_name == "langue":
                 categories_and_links = defaultdict(list)
                 lang_code = subtitle_template.template_parameters.get(1)
+                if (
+                    wxr.config.capture_language_codes
+                    and lang_code not in wxr.config.capture_language_codes
+                ):
+                    continue
                 lang_name = clean_node(
                     wxr, categories_and_links, subtitle_template
                 )

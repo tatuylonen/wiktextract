@@ -335,6 +335,11 @@ def parse_page(
                         sortid="extractor/de/page/parse_page/76",
                     )
                     continue
+                if (
+                    wxr.config.capture_language_codes
+                    and lang_code not in wxr.config.capture_language_codes
+                ):
+                    continue
 
                 base_data = defaultdict(
                     list,
