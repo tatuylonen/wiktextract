@@ -80,3 +80,13 @@ def create_transcode_url(filename: str, transcode_suffix: str) -> str:
         "https://upload.wikimedia.org/wikipedia/commons/transcoded/"
         + f"{md5[0]}/{md5[:2]}/{filename}/{filename}.{transcode_suffix}"
     )
+
+
+def split_tag_text(text: str) -> List[str]:
+    """
+    Find tags enclosded in parentheses and remove parentheses
+    """
+    return [
+        tag.strip("()").strip()
+        for tag in re.split(r"(?<=\))\s+(?=\()", text.strip())
+    ]

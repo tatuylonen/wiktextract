@@ -49,6 +49,7 @@ def parse_section(
             wxr.wtp.start_subsection(subtitle)
             if section_type in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
                 pass
+            # POS parameters:
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections_de_types_de_mots
             elif section_type in wxr.config.POS_SUBTITLES:
                 process_pos_block(
