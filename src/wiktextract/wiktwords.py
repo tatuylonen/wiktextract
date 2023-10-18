@@ -463,7 +463,10 @@ def main():
 
         if args.override is not None and args.path is None:
             analyze_and_overwrite_pages(
-                wxr.wtp, [Path(p) for p in args.override], skip_extract_dump
+                wxr.wtp,
+                [Path(p) for p in args.override],
+                skip_extract_dump,
+                wxr.config.analyze_templates,
             )
 
         if args.page:
