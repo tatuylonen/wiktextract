@@ -7,7 +7,6 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.page import (
-    fix_level_hierarchy_of_subsections,
     parse_page,
     parse_section,
 )
@@ -28,6 +27,7 @@ class DePageTests(unittest.TestCase):
             # capture_examples=True,
         )
         self.wxr = WiktextractContext(Wtp(lang_code="de"), conf1)
+        self.maxDiff = None
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
@@ -82,21 +82,11 @@ class DePageTests(unittest.TestCase):
     # The way append_base_data() works requires the presence of a sense
     # dictionary before starting a new pos section. Therefore, we need to add
     # at least one sense data point to the test case.
+
     def test_de_parse_section(self):
         self.wxr.wtp.add_page("Vorlage:Wortart", 10, "")
         self.wxr.wtp.add_page("Vorlage:Bedeutungen", 10, "")
-        page_text = """
-=== {{Wortart|Adjektiv|Englisch}}, {{Wortart|Adverb|Englisch}} ===
-{{Bedeutungen}}
-:[1] gloss1
-=== {{Wortart|Verb|Englisch}} ===
-{{Bedeutungen}}
-:[1] gloss2
-=== {{Wortart|Substantiv|Englisch}} ===
-{{Bedeutungen}}
-:[1] gloss3
-
-"""
+        page_text = "=== {{Wortart|Adjektiv|Englisch}}, {{Wortart|Adverb|Englisch}} ===\n====Bedeutungen====\n:[1] gloss1\n=== {{Wortart|Verb|Englisch}} ===\n====Bedeutungen====\n:[1] gloss2\n=== {{Wortart|Substantiv|Englisch}} ===\n====Bedeutungen====\n:[1] gloss3"
         self.wxr.wtp.start_page("")
         root = self.wxr.wtp.parse(
             page_text,
@@ -116,6 +106,8 @@ class DePageTests(unittest.TestCase):
                     "senses": [
                         {
                             "glosses": ["gloss1"],
+                            "senseid": "1",
+                            "raw_glosses": ["[1] gloss1"],
                         },
                     ],
                 },
@@ -125,6 +117,8 @@ class DePageTests(unittest.TestCase):
                     "senses": [
                         {
                             "glosses": ["gloss1"],
+                            "senseid": "1",
+                            "raw_glosses": ["[1] gloss1"],
                         },
                     ],
                 },
@@ -134,6 +128,8 @@ class DePageTests(unittest.TestCase):
                     "senses": [
                         {
                             "glosses": ["gloss2"],
+                            "senseid": "1",
+                            "raw_glosses": ["[1] gloss2"],
                         },
                     ],
                 },
@@ -143,70 +139,10 @@ class DePageTests(unittest.TestCase):
                     "senses": [
                         {
                             "glosses": ["gloss3"],
+                            "senseid": "1",
+                            "raw_glosses": ["[1] gloss3"],
                         },
                     ],
                 },
             ],
-        )
-
-    def test_de_fix_level_hierarchy_of_subsections(self):
-        self.wxr.wtp.add_page("Vorlage:Englisch Substantiv Übersicht", 10, "")
-        self.wxr.wtp.add_page("Vorlage:Worttrennung", 10, "")
-        self.wxr.wtp.add_page("Vorlage:Aussprache", 10, "")
-        self.wxr.wtp.add_page("Vorlage:Übersetzungen", 10, "")
-        self.wxr.wtp.add_page("Vorlage:Ü-Tabelle", 10, "")
-        self.wxr.wtp.add_page("Vorlage:Referenzen", 10, "")
-
-        page_text = """
-{{Englisch Substantiv Übersicht
-|args=args}}
-
-{{Worttrennung}}
-:item
-
-{{Aussprache}}
-:item
-
-==== {{Übersetzungen}} ====
-{{Ü-Tabelle|1|G=arg|Ü-Liste=
-:item
-}}
-
-{{Referenzen}}
-:item
-"""
-        self.wxr.wtp.start_page("")
-        root = self.wxr.wtp.parse(
-            page_text,
-            pre_expand=True,
-        )
-
-        subsections = fix_level_hierarchy_of_subsections(
-            self.wxr, root.children
-        )
-
-        target_page_text = """==== {{Englisch Substantiv Übersicht\n|args=args}} ====
-
-==== {{Worttrennung}} ====
-:item
-
-==== {{Aussprache}} ====
-:item
-
-==== {{Übersetzungen}} ====
-{{Ü-Tabelle|1|G=arg|Ü-Liste=
-:item
-}}
-
-==== {{Referenzen}} ====
-:item
-"""
-        root = self.wxr.wtp.parse(
-            target_page_text,
-            pre_expand=True,
-        )
-
-        self.assertEqual(
-            [str(s) for s in subsections],
-            [str(t) for t in root.children],
         )

@@ -1,0 +1,202 @@
+{
+  "Vorlage:Abkürzungen": {
+    "body": "==== Abkürzungen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Alternative Schreibweisen": {
+    "body": "==== Alternative Schreibweisen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Anmerkung": {
+    "body": "==== Anmerkung ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Aussprache": {
+    "body": "==== Aussprache ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Bedeutungen": {
+    "body": "==== Bedeutungen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Beispiele": {
+    "body": "==== Beispiele ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Bekannte Namensträger": {
+    "body": "==== Bekannte Namensträger ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Charakteristische Wortkombinationen": {
+    "body": "==== Charakteristische Wortkombinationen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Entlehnungen": {
+    "body": "==== Entlehnungen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Gegenwörter": {
+    "body": "==== Gegenwörter ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Grammatische Merkmale": {
+    "body": "==== Grammatische Merkmale ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Herkunft": {
+    "body": "==== Herkunft ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Holonyme": {
+    "body": "==== Holonyme ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Koseformen": {
+    "body": "==== Koseformen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Lesungen": {
+    "body": "==== Lesungen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Männliche Wortformen": {
+    "body": "==== Männliche Wortformen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Namensvarianten": {
+    "body": "==== Namensvarianten ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Nebenformen": {
+    "body": "==== Nebenformen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Nicht mehr gültige Schreibweisen": {
+    "body": "==== Nicht mehr gültige Schreibweisen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Oberbegriffe": {
+    "body": "==== Oberbegriffe ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Quellen": {
+    "body": "",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:erweitern": {
+    "body": "",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:QS Herkunft": {
+    "body": "",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:QS Bedeutungen": {
+    "body": "",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Redewendungen": {
+    "body": "==== Redewendungen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Referenzen": {
+    "body": "==== Referenzen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Sinnverwandte Wörter": {
+    "body": "==== Sinnverwandte Wörter ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Sprichwörter": {
+    "body": "==== Sprichwörter ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Symbole": {
+    "body": "==== Symbole ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Synonyme": {
+    "body": "==== Synonyme ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Umschrift": {
+    "body": "==== Umschrift ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Unterbegriffe": {
+    "body": "==== Unterbegriffe ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Verkleinerungsformen": {
+    "body": "==== Verkleinerungsformen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Vokalisierung": {
+    "body": "==== Vokalisierung ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Weibliche Wortformen": {
+    "body": "==== Weibliche Wortformen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Wortbildungen": {
+    "body": "==== Wortbildungen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Wortfamilie": {
+    "body": "==== Wortfamilie ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Worttrennung": {
+    "body": "==== Worttrennung ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:in kyrillischer Schrift": {
+    "body": "==== in kyrillischer Schrift ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Übersetzungen": {
+    "body": "Übersetzungen",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  }
+}
