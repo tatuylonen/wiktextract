@@ -23,9 +23,9 @@ class TestLinkage(unittest.TestCase):
         self.wxr.wtp.add_page("Modèle:Canada", 10, body="(Canada)")
         self.wxr.wtp.add_page("Modèle:Louisiane", 10, body="(Louisiane)")
         root = self.wxr.wtp.parse(
-            "==== {{S|synonymes}} ====\n* [[bon matin]] {{Canada|nocat=1}} {{Louisiane|nocat=1}}"
+            "* [[bon matin]] {{Canada|nocat=1}} {{Louisiane|nocat=1}}"
         )
-        extract_linkage(self.wxr, page_data, root.children[0], "synonyms")
+        extract_linkage(self.wxr, page_data, root, "synonyms")
         self.assertEqual(
             page_data,
             [
@@ -41,9 +41,9 @@ class TestLinkage(unittest.TestCase):
         page_data = [defaultdict(list)]
         self.wxr.wtp.start_page("你好")
         root = self.wxr.wtp.parse(
-            "==== {{S|synonymes}} ====\n* {{zh-lien|你们好|nǐmen hǎo|你們好}} — Bonjour (au pluriel)."
+            "* {{zh-lien|你们好|nǐmen hǎo|你們好}} — Bonjour (au pluriel)."
         )
-        extract_linkage(self.wxr, page_data, root.children[0], "synonyms")
+        extract_linkage(self.wxr, page_data, root, "synonyms")
         self.assertEqual(
             page_data,
             [
@@ -67,9 +67,9 @@ class TestLinkage(unittest.TestCase):
         self.wxr.wtp.add_page("Modèle:Canada", 10, body="(Canada)")
         self.wxr.wtp.add_page("Modèle:L", 10, body="Atikamekw")
         root = self.wxr.wtp.parse(
-            "==== {{S|synonymes}} ====\n* {{lien|kwei|fr}} {{Canada|nocat=1}} (mot {{L|atj}})"
+            "* {{lien|kwei|fr}} {{Canada|nocat=1}} (mot {{L|atj}})"
         )
-        extract_linkage(self.wxr, page_data, root.children[0], "synonyms")
+        extract_linkage(self.wxr, page_data, root, "synonyms")
         self.assertEqual(
             page_data,
             [
@@ -85,9 +85,9 @@ class TestLinkage(unittest.TestCase):
         page_data = [defaultdict(list)]
         self.wxr.wtp.start_page("masse")
         root = self.wxr.wtp.parse(
-            "==== {{S|dérivés}} ====\n* [[être à la masse]], [[mettre à la masse]]"
+            "* [[être à la masse]], [[mettre à la masse]]"
         )
-        extract_linkage(self.wxr, page_data, root.children[0], "derived")
+        extract_linkage(self.wxr, page_data, root, "derived")
         self.assertEqual(
             page_data,
             [
@@ -95,6 +95,33 @@ class TestLinkage(unittest.TestCase):
                     "derived": [
                         {"word": "être à la masse"},
                         {"word": "mettre à la masse"},
+                    ]
+                }
+            ],
+        )
+
+    def test_sub_list(self):
+        page_data = [defaultdict(list)]
+        self.wxr.wtp.start_page("lézard ocellé")
+        root = self.wxr.wtp.parse(
+            """* [[saurien]]s (Sauria)
+** [[lacertidé]]s (Lacertidae) (famille des lézards typiques)
+"""
+        )
+        extract_linkage(self.wxr, page_data, root, "hypernyms")
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "hypernyms": [
+                        {"tags": ["Sauria"], "word": "sauriens"},
+                        {
+                            "tags": [
+                                "Lacertidae",
+                                "famille des lézards typiques",
+                            ],
+                            "word": "lacertidés",
+                        },
                     ]
                 }
             ],

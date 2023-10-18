@@ -7,6 +7,8 @@ from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from ..share import split_tag_text
+
 
 def extract_linkage(
     wxr: WiktextractContext,
@@ -17,8 +19,8 @@ def extract_linkage(
     for list_item_node in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         linkage_data = defaultdict(list)
         pending_tag = ""
-        for index, child_node in enumerate(
-            list_item_node.filter_empty_str_child()
+        for index, child_node in enumerate(  # remove nested lists
+            list_item_node.invert_find_child(NodeKind.LIST)
         ):
             if index == 0 or "word" not in linkage_data:
                 if isinstance(child_node, TemplateNode):
@@ -26,35 +28,35 @@ def extract_linkage(
                 else:
                     linkage_data["word"] = clean_node(wxr, None, child_node)
             else:
-                tag = (
+                tag_text = (
                     child_node
                     if isinstance(child_node, str)
                     else clean_node(wxr, page_data[-1], child_node)
                 )
-                if tag.strip().startswith("(") and not tag.strip().endswith(
-                    ")"
-                ):
-                    pending_tag = tag
+                if tag_text.strip().startswith(
+                    "("
+                ) and not tag_text.strip().endswith(")"):
+                    pending_tag = tag_text
                     continue
-                elif not tag.strip().startswith("(") and tag.strip().endswith(
-                    ")"
-                ):
-                    tag = pending_tag + tag
+                elif not tag_text.strip().startswith(
+                    "("
+                ) and tag_text.strip().endswith(")"):
+                    tag_text = pending_tag + tag_text
                     pending_tag = ""
-                elif tag.strip() == ",":
+                elif tag_text.strip() == ",":
                     # list item has more than one word
                     page_data[-1][linkage_type].append(linkage_data)
                     linkage_data = defaultdict(list)
                     continue
                 elif len(pending_tag) > 0:
-                    pending_tag += tag
+                    pending_tag += tag_text
                     continue
 
-                tag = tag.strip("() \n")
-                if tag.startswith("— "):
-                    linkage_data["translation"] = tag.removeprefix("— ")
-                elif len(tag) > 0:
-                    linkage_data["tags"].append(tag)
+                for tag in split_tag_text(tag_text):
+                    if tag.startswith("— "):
+                        linkage_data["translation"] = tag.removeprefix("— ")
+                    elif len(tag) > 0:
+                        linkage_data["tags"].append(tag)
 
         page_data[-1][linkage_type].append(linkage_data)
 
