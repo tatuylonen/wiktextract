@@ -8,10 +8,11 @@ from wikitextprocessor.parser import LevelNode
 
 from wiktextract.datautils import append_base_data
 from wiktextract.extractor.de.pronunciation import extract_pronunciation
+from wiktextract.extractor.de.translation import extract_translation
 from wiktextract.wxr_context import WiktextractContext
 
-from .gloss import extract_glosses
 from .example import extract_examples
+from .gloss import extract_glosses
 
 # Templates that are used to form panels on pages and that should be ignored in
 # various positions
@@ -76,6 +77,8 @@ def parse_section(
             extract_pronunciation(wxr, page_data, level_node)
         if section_name == "Beispiele":
             extract_examples(wxr, page_data, level_node)
+        if section_name == "Übersetzungen":
+            extract_translation(wxr, page_data, level_node)
 
 
 FORM_POS = {
