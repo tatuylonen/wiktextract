@@ -119,8 +119,6 @@ class WiktionaryConfig:
             self.set_attr_from_json(
                 "FORM_OF_TEMPLATES", "form_of_templates.json"
             )
-        if dump_file_lang_code == "de":
-            self.set_attr_from_json("DE_FORM_TABLES", "form_tables.json")
         self.analyze_templates = True  # find templates that need pre-expand
         self.extract_thesaurus_pages = True
         self.load_edition_settings()

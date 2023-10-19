@@ -8,11 +8,12 @@ from wikitextprocessor.parser import LevelNode
 
 from wiktextract.datautils import append_base_data
 from wiktextract.extractor.de.pronunciation import extract_pronunciation
-from wiktextract.extractor.de.translation import extract_translation
 from wiktextract.wxr_context import WiktextractContext
 
 from .example import extract_examples
 from .gloss import extract_glosses
+from .pronunciation import extract_pronunciation
+from .translation import extract_translation
 
 # Templates that are used to form panels on pages and that should be ignored in
 # various positions
@@ -24,14 +25,7 @@ PANEL_TEMPLATES = set()
 PANEL_PREFIXES = set()
 
 # Additional templates to be expanded in the pre-expand phase
-ADDITIONAL_EXPAND_TEMPLATES = set()
-
-
-# Templates that should not be pre-expanded
-DO_NOT_PRE_EXPAND_TEMPLATES = {
-    "Ü-Tabelle",  # Translation table
-    "Übersetzungen umleiten",  # Translation table redirect
-}
+ADDITIONAL_EXPAND_TEMPLATES = {"NoCat"}
 
 
 def parse_section(
@@ -231,12 +225,10 @@ def parse_page(
 
     # Parse the page, pre-expanding those templates that are likely to
     # influence parsing
-    DO_NOT_PRE_EXPAND_TEMPLATES.update(wxr.config.DE_FORM_TABLES)
     tree = wxr.wtp.parse(
         page_text,
         pre_expand=True,
         additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
-        do_not_pre_expand=DO_NOT_PRE_EXPAND_TEMPLATES,
     )
 
     page_data = []
