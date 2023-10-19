@@ -204,7 +204,23 @@ def process_pos_section(
             and non_l4_node.kind == NodeKind.TEMPLATE
             and "Übersicht" in non_l4_node.template_name
         ):
-            # XXX: de: Extract form tables
+            # XXX: de: Extract form table templates
+            pass
+        elif (
+            isinstance(non_l4_node, WikiNode)
+            and non_l4_node.kind == NodeKind.TABLE
+            and "inflection-table" in non_l4_node.attrs.get("class")
+        ):
+            # XXX: de: Extract html form table
+            pass
+        elif (
+            isinstance(non_l4_node, WikiNode)
+            and non_l4_node.kind == NodeKind.LINK
+            and len(non_l4_node.largs) > 0
+            and len(non_l4_node.largs[0]) > 0
+            and "Kategorie" in non_l4_node.largs[0][0]
+        ):
+            # XXX Process categories
             pass
         else:
             wxr.wtp.debug(
