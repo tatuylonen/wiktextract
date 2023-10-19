@@ -5,8 +5,8 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.pronunciation import (
-    process_ipa,
     process_hoerbeispiele,
+    process_ipa,
 )
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext

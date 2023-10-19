@@ -6,15 +6,12 @@ from collections import defaultdict
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.de.page import (
-    parse_page,
-    parse_section,
-)
+from wiktextract.extractor.de.page import parse_page, parse_section
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
-class DePageTests(unittest.TestCase):
+class TestDEPage(unittest.TestCase):
     def setUp(self):
         conf1 = WiktionaryConfig(
             dump_file_lang_code="de",

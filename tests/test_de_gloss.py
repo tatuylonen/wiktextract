@@ -14,7 +14,7 @@ from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestGlossList(unittest.TestCase):
+class TestDEGloss(unittest.TestCase):
     maxDiff = None
 
     def setUp(self) -> None:
