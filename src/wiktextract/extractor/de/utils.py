@@ -1,4 +1,5 @@
 import re
+
 from wikitextprocessor import NodeKind, WikiNode
 
 

@@ -3,8 +3,8 @@ from typing import Dict, List, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
-from wiktextract.extractor.share import create_audio_url_dict
 
+from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
