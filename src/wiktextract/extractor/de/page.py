@@ -7,12 +7,12 @@ from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
 
 from wiktextract.datautils import append_base_data
-from wiktextract.extractor.de.pronunciation import extract_pronunciation
 from wiktextract.wxr_context import WiktextractContext
 
 from .example import extract_examples
 from .gloss import extract_glosses
 from .pronunciation import extract_pronunciation
+from .semantic_relations import SEMANTIC_RELATIONS, extract_semantic_relations
 from .translation import extract_translation
 
 # Templates that are used to form panels on pages and that should be ignored in
@@ -67,12 +67,14 @@ def parse_section(
         wxr.wtp.start_subsection(section_name)
         if section_name == "Bedeutungen":
             extract_glosses(wxr, page_data, level_node)
-        if section_name == "Aussprache":
+        elif section_name == "Aussprache":
             extract_pronunciation(wxr, page_data, level_node)
-        if section_name == "Beispiele":
+        elif section_name == "Beispiele":
             extract_examples(wxr, page_data, level_node)
-        if section_name == "Übersetzungen":
+        elif section_name == "Übersetzungen":
             extract_translation(wxr, page_data, level_node)
+        elif section_name in SEMANTIC_RELATIONS:
+            extract_semantic_relations(wxr, page_data, level_node)
 
 
 FORM_POS = {
