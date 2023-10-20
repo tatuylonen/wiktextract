@@ -25,9 +25,6 @@ class TestDEGloss(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     def test_de_extract_glosses(self):
         self.wxr.wtp.start_page("")

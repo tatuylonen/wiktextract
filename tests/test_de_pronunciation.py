@@ -8,7 +8,6 @@ from wiktextract.extractor.de.pronunciation import (
     process_hoerbeispiele,
     process_ipa,
 )
-from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -22,9 +21,6 @@ class TestDEPronunciation(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     def test_de_process_ipa(self):
         test_cases = [

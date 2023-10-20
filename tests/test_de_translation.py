@@ -8,7 +8,6 @@ from wiktextract.extractor.de.translation import (
     extract_translation,
     process_translation_list,
 )
-from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -28,9 +27,6 @@ class TestDETranslation(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     def test_de_extract_translation(self):
         test_cases = [
