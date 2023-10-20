@@ -19,6 +19,11 @@ import sys
 from pathlib import Path
 from typing import TextIO
 
+if sys.version_info < (3, 10):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
+
 from wikitextprocessor import Wtp
 from wikitextprocessor.dumpparser import analyze_and_overwrite_pages
 
@@ -246,8 +251,7 @@ def main():
         "--override",
         type=str,
         action="append",
-        help="Override module(s) by one in file or files in directory "
-        "(for debugging)",
+        help="Path of JSON file contains override page data",
     )
     parser.add_argument(
         "--use-thesaurus",
@@ -439,8 +443,20 @@ def main():
         pr = cProfile.Profile()
         pr.enable()
 
+    skip_extract_dump = wxr.wtp.saved_page_nums() > 0
+    default_override_json_path = (
+        files("wiktextract")
+        / "data"
+        / "overrides"
+        / f"{args.dump_file_language_code}.json"
+    )
+    if default_override_json_path.exists() and not skip_extract_dump:
+        if args.override is None:
+            args.override = [default_override_json_path]
+        elif default_override_json_path not in args.override:
+            args.override.append(default_override_json_path)
+
     try:
-        skip_extract_dump = wxr.wtp.saved_page_nums() > 0
         if args.path is not None:
             namespace_ids = {
                 wxr.wtp.NAMESPACE_DATA.get(name, {}).get("id")
