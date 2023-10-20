@@ -112,10 +112,12 @@ def process_translation_list(
             if node.template_name[-1] == "?":
                 translation_data["uncertain"] = True
 
-            translation_data["word"] = node.template_parameters.get(2)
+            translation_data["word"] = clean_node(
+                wxr, {}, node.template_parameters.get(2)
+            )
 
             if node.template_name.removesuffix("?") == "Ü":
-                process_Ü_template(translation_data, node)
+                process_Ü_template(wxr, translation_data, node)
 
             if node.template_name.removesuffix("?") == "Üt":
                 process_Üt_template(wxr, translation_data, node)
@@ -134,12 +136,13 @@ def is_translation_template(node: any) -> bool:
 
 
 def process_Ü_template(
+    wxr: WiktextractContext,
     translation_data: Dict[str, Union[str, List, bool]],
     template_node: TemplateNode,
 ):
-    overwrite_word = template_node.template_parameters.get(3)
-    if overwrite_word:
-        translation_data["word"] = overwrite_word
+    overwrite_word(
+        wxr, translation_data, template_node.template_parameters.get(3)
+    )
 
 
 def process_Üt_template(
@@ -158,7 +161,19 @@ def process_Üt_template(
         if match:
             translation_data["roman"] = match.group(1)
 
-    overwrite_word = template_node.template_parameters.get(4)
+    overwrite_word(
+        wxr, translation_data, template_node.template_parameters.get(4)
+    )
+
+
+def overwrite_word(
+    wxr: WiktextractContext,
+    translation_data: Dict[str, Union[str, List, bool]],
+    nodes: Union[List[Union[WikiNode, str]], WikiNode, str, None],
+):
+    if nodes == None:
+        return
+    overwrite_word = clean_node(wxr, {}, nodes).strip()
     if overwrite_word:
         translation_data["word"] = overwrite_word
 
