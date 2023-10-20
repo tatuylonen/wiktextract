@@ -4,13 +4,11 @@ from collections import defaultdict
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.de.semantic_relations import (
-    extract_semantic_relations,
-)
+from wiktextract.extractor.de.linkage import extract_linkages
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestDETranslation(unittest.TestCase):
+class TestDELinkages(unittest.TestCase):
     maxDiff = None
 
     def setUp(self) -> None:
@@ -21,7 +19,7 @@ class TestDETranslation(unittest.TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
-    def test_de_extract_semantic_relations(self):
+    def test_de_extract_linkages(self):
         test_cases = [
             # https://de.wiktionary.org/wiki/Beispiel
             # Extracts linkages and places them in the correct sense.
@@ -109,8 +107,6 @@ class TestDETranslation(unittest.TestCase):
                 self.wxr.wtp.start_page("")
                 root = self.wxr.wtp.parse(case["input"])
 
-                extract_semantic_relations(
-                    self.wxr, case["page_data"], root.children[0]
-                )
+                extract_linkages(self.wxr, case["page_data"], root.children[0])
 
                 self.assertEqual(case["page_data"], case["expected"])
