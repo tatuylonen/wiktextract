@@ -5,7 +5,6 @@ from typing import Dict, List, Optional
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
-
 from wiktextract.datautils import append_base_data
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -15,6 +14,7 @@ from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
 from .inflection import extract_inflection
 from .linkage import extract_linkage
+from .note import extract_note
 from .pronunciation import extract_pronunciation
 from .translation import extract_translation
 
@@ -91,6 +91,8 @@ def parse_section(
                 in wxr.config.OTHER_SUBTITLES["inflection_sections"]
             ):
                 pass
+            elif section_type in wxr.config.OTHER_SUBTITLES["notes"]:
+                extract_note(wxr, page_data, level_node)
 
 
 def process_pos_block(
@@ -164,7 +166,7 @@ def parse_page(
                 categories_and_links = defaultdict(list)
                 lang_code = subtitle_template.template_parameters.get(1)
                 if (
-                    wxr.config.capture_language_codes
+                    wxr.config.capture_language_codes is not None
                     and lang_code not in wxr.config.capture_language_codes
                 ):
                     continue

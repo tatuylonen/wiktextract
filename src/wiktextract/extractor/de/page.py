@@ -264,7 +264,7 @@ def parse_page(
                     )
                     continue
                 if (
-                    wxr.config.capture_language_codes
+                    wxr.config.capture_language_codes is not None
                     and lang_code not in wxr.config.capture_language_codes
                 ):
                     continue
