@@ -8,23 +8,11 @@ from wiktextract.extractor.de.utils import split_senseids
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-SEMANTIC_RELATIONS = {
-    "Gegenwörter": "antonyms",
-    "Holonyme": "holonyms",
-    "Oberbegriffe": "hypernyms",
-    "Redewendungen": "expressions",
-    "Sinnverwandte Wörter": "coordinate_terms",
-    "Sprichwörter": "proverbs",
-    "Synonyme": "synonyms",
-    "Unterbegriffe": "hyponyms",
-    "Wortbildungen": "derived",
-}
 
-
-def extract_semantic_relations(
+def extract_linkages(
     wxr: WiktextractContext, page_data: List[Dict], level_node: LevelNode
 ):
-    relation_key = SEMANTIC_RELATIONS.get(level_node.largs[0][0])
+    linkage_type = wxr.config.LINKAGE_SUBTITLES.get(level_node.largs[0][0])
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             # Get the senseids
@@ -38,8 +26,8 @@ def extract_semantic_relations(
             )
 
             # Extract links
-            semantic_links = []
-            if relation_key == "expressions":
+            linkages = []
+            if linkage_type == "expressions":
                 for child in list_item.children:
                     if isinstance(child, str) and contains_dash(child):
                         # XXX Capture the part after the dash as an explanatory note to the expression, e.g.:
@@ -50,26 +38,26 @@ def extract_semantic_relations(
                         isinstance(child, WikiNode)
                         and child.kind == NodeKind.LINK
                     ):
-                        process_link(wxr, semantic_links, child)
+                        process_link(wxr, linkages, child)
             else:
                 for link in list_item.find_child(NodeKind.LINK):
-                    process_link(wxr, semantic_links, link)
+                    process_link(wxr, linkages, link)
 
             # Add links to the page data
             if len(page_data[-1]["senses"]) == 1:
-                page_data[-1]["senses"][0][relation_key].extend(semantic_links)
+                page_data[-1]["senses"][0][linkage_type].extend(linkages)
             elif len(senseids) > 0:
                 for senseid in senseids:
                     for sense in page_data[-1]["senses"]:
                         if sense["senseid"] == senseid:
-                            sense[relation_key].extend(semantic_links)
+                            sense[linkage_type].extend(linkages)
             else:
-                page_data[-1][relation_key].extend(semantic_links)
+                page_data[-1][linkage_type].extend(linkages)
 
             # Check for potentially missed data
             for non_link in list_item.invert_find_child(NodeKind.LINK):
                 if (
-                    relation_key == "expressions"
+                    linkage_type == "expressions"
                     and isinstance(non_link, str)
                     and contains_dash(non_link)
                 ):
@@ -80,7 +68,7 @@ def extract_semantic_relations(
                     continue
                 wxr.wtp.debug(
                     f"Found unexpected non-link node '{non_link}' in: {list_item}",
-                    sortid="extractor/de/semantic_relations/extract_semantic_relations/84",
+                    sortid="extractor/de/linkages/extract_linkages/84",
                 )
 
 

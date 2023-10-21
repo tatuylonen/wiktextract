@@ -11,8 +11,8 @@ from wiktextract.wxr_context import WiktextractContext
 
 from .example import extract_examples
 from .gloss import extract_glosses
+from .linkage import extract_linkages
 from .pronunciation import extract_pronunciation
-from .semantic_relations import SEMANTIC_RELATIONS, extract_semantic_relations
 from .translation import extract_translation
 
 # Templates that are used to form panels on pages and that should be ignored in
@@ -67,14 +67,19 @@ def parse_section(
         wxr.wtp.start_subsection(section_name)
         if section_name == "Bedeutungen":
             extract_glosses(wxr, page_data, level_node)
-        elif section_name == "Aussprache":
+        elif wxr.config.capture_pronunciation and section_name == "Aussprache":
             extract_pronunciation(wxr, page_data, level_node)
-        elif section_name == "Beispiele":
+        elif wxr.config.capture_examples and section_name == "Beispiele":
             extract_examples(wxr, page_data, level_node)
-        elif section_name == "Übersetzungen":
+        elif (
+            wxr.config.capture_translations and section_name == "Übersetzungen"
+        ):
             extract_translation(wxr, page_data, level_node)
-        elif section_name in SEMANTIC_RELATIONS:
-            extract_semantic_relations(wxr, page_data, level_node)
+        elif (
+            wxr.config.capture_linkages
+            and section_name in wxr.config.LINKAGE_SUBTITLES
+        ):
+            extract_linkages(wxr, page_data, level_node)
 
 
 FORM_POS = {
