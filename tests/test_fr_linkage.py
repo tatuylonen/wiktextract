@@ -126,3 +126,27 @@ class TestLinkage(unittest.TestCase):
                 }
             ],
         )
+
+    def test_sense(self):
+        page_data = [defaultdict(list)]
+        self.wxr.wtp.start_page("autrice")
+        root = self.wxr.wtp.parse(
+            """{{(|Celle qui est à l’origine de quelque chose|1}}
+* [[artisane]]
+"""
+        )
+        extract_linkage(self.wxr, page_data, root, "synonyms")
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "synonyms": [
+                        {
+                            "word": "artisane",
+                            "sense": "Celle qui est à l’origine de quelque chose",
+                            "sense_index": 1,
+                        },
+                    ]
+                }
+            ],
+        )

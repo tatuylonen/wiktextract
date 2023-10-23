@@ -315,6 +315,14 @@
         "translation": {
           "description": "French translation",
           "type": "string"
+        },
+        "sense": {
+          "description": "Definition of the word",
+          "type": "string"
+        },
+        "sense_index": {
+          "description": "Number of the definition, start from 1",
+          "type": "integer"
         }
       }
     }
