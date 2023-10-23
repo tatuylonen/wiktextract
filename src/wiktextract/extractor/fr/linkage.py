@@ -80,7 +80,8 @@ def extract_linkage(
                     elif len(tag) > 0:
                         linkage_data["tags"].append(tag)
 
-        page_data[-1][linkage_type].append(linkage_data)
+        if "word" in linkage_data:
+            page_data[-1][linkage_type].append(linkage_data)
 
 
 def process_linkage_template(
