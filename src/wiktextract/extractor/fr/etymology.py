@@ -53,6 +53,10 @@ def extract_etymology(
                         )
                         etymology_dict[pos_title].append(etymology_text)
 
+    if len(etymology_dict) == 0:
+        etymology_dict[None].append(
+            clean_node(wxr, None, nodes[:level_node_index])
+        )
     return etymology_dict
 
 
