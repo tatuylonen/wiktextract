@@ -15,11 +15,34 @@ def extract_linkage(
     level_node: WikiNode,
     linkage_type: str,
 ) -> None:
-    for list_item_node in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+    sense_text = ""
+    sense_index = 0
+    for template_or_list_node in level_node.find_child_recursively(
+        NodeKind.LIST_ITEM | NodeKind.TEMPLATE
+    ):
+        # list table start template: https://fr.wiktionary.org/wiki/Modèle:(
+        if (
+            isinstance(template_or_list_node, TemplateNode)
+            and template_or_list_node.template_name == "("
+        ):
+            sense_text = clean_node(
+                wxr, None, template_or_list_node.template_parameters.get(1, "")
+            )
+            sense_index_text = template_or_list_node.template_parameters.get(
+                2, "0"
+            )
+            if sense_index_text.isdigit():
+                sense_index = int(sense_index_text)
+            continue
+
         linkage_data = defaultdict(list)
+        if len(sense_text) > 0:
+            linkage_data["sense"] = sense_text
+        if sense_index != 0:
+            linkage_data["sense_index"] = sense_index
         pending_tag = ""
         for index, child_node in enumerate(  # remove nested lists
-            list_item_node.invert_find_child(NodeKind.LIST)
+            template_or_list_node.invert_find_child(NodeKind.LIST)
         ):
             if index == 0 or "word" not in linkage_data:
                 if isinstance(child_node, TemplateNode):
@@ -57,7 +80,8 @@ def extract_linkage(
                     elif len(tag) > 0:
                         linkage_data["tags"].append(tag)
 
-        page_data[-1][linkage_type].append(linkage_data)
+        if "word" in linkage_data:
+            page_data[-1][linkage_type].append(linkage_data)
 
 
 def process_linkage_template(

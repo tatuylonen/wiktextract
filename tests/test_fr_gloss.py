@@ -210,7 +210,11 @@ class TestFormLine(unittest.TestCase):
             [
                 {
                     "senses": [
-                        {"glosses": ["Oiseau aquatique de taille moyenne du genre Rhynchops."]}
+                        {
+                            "glosses": [
+                                "Oiseau aquatique de taille moyenne du genre Rhynchops."
+                            ]
+                        }
                     ]
                 }
             ],
@@ -220,18 +224,10 @@ class TestFormLine(unittest.TestCase):
         # https://fr.wiktionary.org/wiki/becs-en-ciseaux
         # the space between italic node and the link node should be preserved
         self.wxr.wtp.start_page("becs-en-ciseaux")
-        root = self.wxr.wtp.parse(
-            "# ''Pluriel de'' [[bec-en-ciseaux]]."
-        )
+        root = self.wxr.wtp.parse("# ''Pluriel de'' [[bec-en-ciseaux]].")
         page_data = [defaultdict(list)]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
             page_data,
-            [
-                {
-                    "senses": [
-                        {"glosses": ["Pluriel de bec-en-ciseaux."]}
-                    ]
-                }
-            ],
+            [{"senses": [{"glosses": ["Pluriel de bec-en-ciseaux."]}]}],
         )

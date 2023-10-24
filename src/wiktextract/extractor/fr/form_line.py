@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import Dict, List, Union
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
+from wikitextprocessor.parser import TemplateNode, HTMLNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -56,19 +56,22 @@ def process_equiv_pour_template(
     wxr: WiktextractContext, node: TemplateNode, page_data: List[Dict]
 ) -> None:
     # equivalent form: https://fr.wiktionary.org/wiki/Modèle:équiv-pour
-    form_type = node.template_parameters.get(1)
-    for template_arg_index in range(2, 8):
-        form = clean_node(
-            wxr, None, node.template_parameters.get(template_arg_index, "")
-        )
-        if len(form) > 0:
-            page_data[-1]["forms"].append(
-                {
-                    "form": form,
-                    "tags": [f"pour {form_type}"],
-                    "source": "form line template 'équiv-pour'",
-                }
-            )
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node), expand_all=True
+    )
+    form_tag = ""
+    for child in expanded_node.find_child(NodeKind.ITALIC | NodeKind.HTML):
+        if child.kind == NodeKind.ITALIC:
+            form_tag = clean_node(wxr, None, child).strip("() ")
+        elif isinstance(child, HTMLNode) and child.tag == "bdi":
+            form_data = {
+                "form": clean_node(wxr, None, child),
+                "source": "form line template 'équiv-pour'",
+            }
+            if len(form_tag) > 0:
+                form_data["tags"] = [form_tag]
+            if len(form_data["form"]) > 0:
+                page_data[-1]["forms"].append(form_data)
 
 
 def process_zh_mot_template(
