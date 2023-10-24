@@ -42,38 +42,6 @@ class TestFormLine(unittest.TestCase):
         extract_form_line(self.wxr, page_data, root.children)
         self.assertEqual(page_data, [{"tags": ["masculin"]}])
 
-    def test_equiv_pour(self):
-        self.wxr.wtp.start_page("")
-        root = self.wxr.wtp.parse(
-            "{{équiv-pour|une femme|autrice|auteure|auteuse|lang=fr}}"
-        )
-        page_data = [defaultdict(list)]
-        extract_form_line(self.wxr, page_data, root.children)
-        self.assertEqual(
-            page_data,
-            [
-                {
-                    "forms": [
-                        {
-                            "form": "autrice",
-                            "tags": ["pour une femme"],
-                            "source": "form line template 'équiv-pour'",
-                        },
-                        {
-                            "form": "auteure",
-                            "tags": ["pour une femme"],
-                            "source": "form line template 'équiv-pour'",
-                        },
-                        {
-                            "form": "auteuse",
-                            "tags": ["pour une femme"],
-                            "source": "form line template 'équiv-pour'",
-                        },
-                    ]
-                }
-            ],
-        )
-
     def test_zh_mot(self):
         self.wxr.wtp.start_page("")
         self.wxr.wtp.add_page("Modèle:zh-mot", 10, body="{{lang}} {{pron}}")
@@ -139,7 +107,7 @@ class TestFormLine(unittest.TestCase):
         "wikitextprocessor.Wtp.node_to_wikitext",
         return_value="''(pour un homme, on dit'' : <bdi lang=\"fr\" xml:lang=\"fr\" class=\"lang-fr\">[[auteur#fr|auteur]]</bdi> ; ''pour une personne non-binaire, on peut dire'' : <bdi lang=\"fr\" xml:lang=\"fr\" class=\"lang-fr\">[[autaire#fr|autaire]]</bdi>, <bdi lang=\"fr\" xml:lang=\"fr\" class=\"lang-fr\">[[auteurice#fr|auteurice]]</bdi>, <bdi lang=\"fr\" xml:lang=\"fr\" class=\"lang-fr\">[[auteur·ice#fr|auteur·ice]]</bdi>'')''"
     )
-    def test_complex_equiv_pour_template(self, mock_node_to_wikitext):
+    def test_equiv_pour_template(self, mock_node_to_wikitext):
         self.maxDiff = None
         self.wxr.wtp.start_page("autrice")
         root = self.wxr.wtp.parse(

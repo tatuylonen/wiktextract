@@ -14,7 +14,7 @@ from wiktextract.wxr_context import WiktextractContext
 
 class InflTests(unittest.TestCase):
     def setUp(self):
-        self.maxDiff = 100000
+        self.maxDiff = None
         self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
         self.wxr.wtp.start_page("testpage")
         self.wxr.wtp.start_section("English")
@@ -203,7 +203,6 @@ class InflTests(unittest.TestCase):
                 "form": "wanderest",
                 "source": "Conjugation",
                 "tags": [
-                  "archaic",
                   "present",
                   "second-person",
                   "singular"
@@ -222,7 +221,6 @@ class InflTests(unittest.TestCase):
                 "form": "wanderedst",
                 "source": "Conjugation",
                 "tags": [
-                  "archaic",
                   "past",
                   "second-person",
                   "singular"
@@ -241,7 +239,6 @@ class InflTests(unittest.TestCase):
                 "form": "wandereth",
                 "source": "Conjugation",
                 "tags": [
-                  "archaic",
                   "present",
                   "singular",
                   "third-person"

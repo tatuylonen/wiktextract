@@ -64,16 +64,14 @@ def process_equiv_pour_template(
         if child.kind == NodeKind.ITALIC:
             form_tag = clean_node(wxr, None, child).strip("() ")
         elif isinstance(child, HTMLNode) and child.tag == "bdi":
-            forms_text = clean_node(wxr, None, child)
-            for form in forms_text.split(", "):
-                form_data = {
-                    "form": form,
-                    "source": "form line template 'équiv-pour'",
-                }
-                if len(form_tag) > 0:
-                    form_data["tags"] = [form_tag]
-                if len(form_data["form"]) > 0:
-                    page_data[-1]["forms"].append(form_data)
+            form_data = {
+                "form": clean_node(wxr, None, child),
+                "source": "form line template 'équiv-pour'",
+            }
+            if len(form_tag) > 0:
+                form_data["tags"] = [form_tag]
+            if len(form_data["form"]) > 0:
+                page_data[-1]["forms"].append(form_data)
 
 
 def process_zh_mot_template(
