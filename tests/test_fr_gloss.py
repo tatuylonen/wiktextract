@@ -231,3 +231,30 @@ class TestFormLine(unittest.TestCase):
             page_data,
             [{"senses": [{"glosses": ["Pluriel de bec-en-ciseaux."]}]}],
         )
+
+    @patch(
+        "wikitextprocessor.Wtp.get_page",
+        return_value=Page("Modèle:lien", 10, body="Autrice"),
+    )
+    def test_template_is_not_tag(self, mock_get_page):
+        # https://fr.wiktionary.org/wiki/autrice#Nom_commun_3
+        self.wxr.wtp.start_page("autrice")
+        root = self.wxr.wtp.parse(
+            "# {{lien|autrice|fr|dif=Autrice}}, [[celle]] qui est à l’[[origine]] de [[quelque chose]]."
+        )
+        page_data = [defaultdict(list)]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "senses": [
+                        {
+                            "glosses": [
+                                "Autrice, celle qui est à l’origine de quelque chose."
+                            ]
+                        }
+                    ]
+                }
+            ],
+        )
