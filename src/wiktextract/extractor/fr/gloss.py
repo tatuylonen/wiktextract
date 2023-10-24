@@ -18,39 +18,25 @@ def extract_gloss(
                 NodeKind.LIST, include_empty_str=True
             )
         )
-        # remove the first empty space in list item nodes
-        if (
-            len(gloss_nodes) > 0
-            and isinstance(gloss_nodes[0], str)
-            and len(gloss_nodes[0].strip()) == 0
-        ):
-            gloss_nodes = gloss_nodes[1:]
-
         gloss_data = defaultdict(list)
         gloss_start = 0
         # process modifier, theme tempaltes before gloss text
         # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_de_tous_les_modèles/Précisions_de_sens
-        if len(gloss_nodes) > 0 and isinstance(gloss_nodes[0], TemplateNode):
-            gloss_start = 1
-            for index, gloss_node in enumerate(gloss_nodes[1:], 1):
-                if isinstance(gloss_node, str) and len(gloss_node.strip()) == 0:
-                    # ignore empty string
-                    gloss_start = index + 1
-                elif (
-                    not isinstance(gloss_node, WikiNode)
-                    or gloss_node.kind != NodeKind.TEMPLATE
-                    # template "variante de" is not a modifier
-                    # https://fr.wiktionary.org/wiki/Modèle:variante_de
-                    or gloss_node.template_name == "variante de"
+        for index, gloss_node in enumerate(gloss_nodes):
+            if isinstance(gloss_node, TemplateNode):
+                categories_data = defaultdict(list)
+                expanded_text = clean_node(wxr, categories_data, gloss_node)
+                if expanded_text.startswith("(") and expanded_text.endswith(
+                    ")"
                 ):
-                    gloss_start = index
-                    break
-                else:
                     gloss_start = index + 1
-            for tag_node in gloss_nodes[:gloss_start]:
-                tag = clean_node(wxr, gloss_data, tag_node).strip("() ")
-                if len(tag) > 0:
-                    gloss_data["tags"].append(tag)
+                    tag = expanded_text.strip("() \n")
+                    if len(tag) > 0:
+                        gloss_data["tags"].append(tag)
+                    if "categories" in categories_data:
+                        gloss_data["categories"].extend(
+                            categories_data["categories"]
+                        )
 
         gloss_only_nodes = []
         tag_indexes = set()

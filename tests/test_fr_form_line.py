@@ -105,7 +105,7 @@ class TestFormLine(unittest.TestCase):
 
     @patch(
         "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="''(pour un homme, on dit'' : <bdi lang=\"fr\" xml:lang=\"fr\" class=\"lang-fr\">[[auteur#fr|auteur]]</bdi> ; ''pour une personne non-binaire, on peut dire'' : <bdi lang=\"fr\" xml:lang=\"fr\" class=\"lang-fr\">[[autaire#fr|autaire]]</bdi>, <bdi lang=\"fr\" xml:lang=\"fr\" class=\"lang-fr\">[[auteurice#fr|auteurice]]</bdi>, <bdi lang=\"fr\" xml:lang=\"fr\" class=\"lang-fr\">[[auteur·ice#fr|auteur·ice]]</bdi>'')''"
+        return_value='\'\'(pour un homme, on dit\'\' : <bdi lang="fr" xml:lang="fr" class="lang-fr">[[auteur#fr|auteur]]</bdi> ; \'\'pour une personne non-binaire, on peut dire\'\' : <bdi lang="fr" xml:lang="fr" class="lang-fr">[[autaire#fr|autaire]]</bdi>, <bdi lang="fr" xml:lang="fr" class="lang-fr">[[auteurice#fr|auteurice]]</bdi>, <bdi lang="fr" xml:lang="fr" class="lang-fr">[[auteur·ice#fr|auteur·ice]]</bdi>\'\')\'\'',
     )
     def test_equiv_pour_template(self, mock_node_to_wikitext):
         self.maxDiff = None

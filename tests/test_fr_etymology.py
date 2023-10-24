@@ -169,3 +169,9 @@ class TestEtymology(unittest.TestCase):
                 "Nom commun": ["Par substantivation de l’interjection."],
             },
         )
+
+    def test_no_list_etymology_block(self):
+        self.wxr.wtp.start_page("autrice")
+        root = self.wxr.wtp.parse("Paragraph 1\nParagraph 2")
+        etymology_data = extract_etymology(self.wxr, root.children)
+        self.assertEqual(etymology_data, {None: ["Paragraph 1\nParagraph 2"]})

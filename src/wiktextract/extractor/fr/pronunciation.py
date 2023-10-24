@@ -36,8 +36,16 @@ def extract_pronunciation(
         page_data[-1]["sounds"].extend(sound_data)
 
 
-# "lang" is used in template "cmn-pron"
-PRON_TEMPLATES = frozenset(["pron", "prononciation", "//", "phon", "lang"])
+PRON_TEMPLATES = frozenset([
+    "pron",  # redirect to "prononciation"
+    "prononciation",
+    "//",  # redirect to "prononciation"
+    "phon",  # redirect to "prononciation"
+    "pron-recons",  # use "pron"
+    "prononciation reconstruite",  # redirect to "pron-recons"
+    "pron recons",  # redirect to "pron-recons"
+    "lang"  # used in template "cmn-pron", which expands to list of Pinyin
+])
 
 
 def process_pron_list_item(
@@ -100,7 +108,7 @@ def process_pron_template(
     wxr: WiktextractContext, template_node: TemplateNode
 ) -> str:
     if (
-        template_node.template_name in {"pron", "prononciation", "//"}
+        template_node.template_name in PRON_TEMPLATES
         and isinstance(template_node.template_parameters.get(1, ""), str)
         and len(template_node.template_parameters.get(1, "")) == 0
     ):
