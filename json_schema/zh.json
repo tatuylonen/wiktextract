@@ -6,11 +6,11 @@
   "type": "object",
   "properties": {
     "lang_name": {
-      "description": "Localized langauge name of the word",
+      "description": "Localized language name of the word",
       "type": "string"
     },
     "lang_code": {
-      "description": "ISO 639-1 language code",
+      "description": "Wiktionary language code",
       "type": ["string", "null"]
     },
     "word": {
@@ -274,11 +274,11 @@
       "type": "object",
       "properties": {
         "lang_code": {
-          "description": "ISO 639-1 code of the translation term",
+          "description": "Wiktionary language code of the translation term",
           "type": ["string", "null"]
         },
         "lang_name": {
-          "description": "Transation language name",
+          "description": "Translation language name",
           "type": "string"
         },
         "word": {
@@ -326,7 +326,7 @@
       "type": "object",
       "properties": {
         "lang_code": {
-          "description": "ISO 639-1 code",
+          "description": "Wiktionary language code",
           "type": "string"
         },
         "lang_name": {
