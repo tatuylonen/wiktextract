@@ -1,9 +1,7 @@
 import unittest
 from collections import defaultdict
-from unittest.mock import patch
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.pronunciation import extract_pronunciation
 from wiktextract.wxr_context import WiktextractContext

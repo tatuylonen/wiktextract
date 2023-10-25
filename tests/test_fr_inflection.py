@@ -4,7 +4,6 @@ from unittest.mock import patch
 
 from wikitextprocessor import Wtp
 from wikitextprocessor.parser import TemplateNode
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.inflection import extract_inflection
 from wiktextract.wxr_context import WiktextractContext

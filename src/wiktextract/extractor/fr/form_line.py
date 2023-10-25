@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import Dict, List, Union
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode, HTMLNode
+from wikitextprocessor.parser import HTMLNode, TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 

@@ -2,7 +2,6 @@ import unittest
 from collections import defaultdict
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.linkage import extract_linkage
 from wiktextract.wxr_context import WiktextractContext

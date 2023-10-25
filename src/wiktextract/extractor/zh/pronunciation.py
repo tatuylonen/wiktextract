@@ -2,7 +2,6 @@ import re
 from typing import Dict, List, Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
-
 from wiktextract.datautils import append_base_data
 from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node

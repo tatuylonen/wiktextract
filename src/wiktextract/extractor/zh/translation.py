@@ -3,7 +3,6 @@ from collections import defaultdict
 from typing import Dict, List, Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
-
 from wiktextract.datautils import find_similar_gloss
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext

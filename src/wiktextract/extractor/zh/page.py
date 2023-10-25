@@ -5,7 +5,6 @@ from collections import defaultdict
 from typing import Dict, List, Union
 
 from wikitextprocessor import NodeKind, WikiNode
-
 from wiktextract.datautils import append_base_data
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -15,6 +14,7 @@ from .gloss import extract_gloss
 from .headword_line import extract_headword_line
 from .inflection import extract_inflections
 from .linkage import extract_linkages
+from .note import extract_note
 from .pronunciation import extract_pronunciation_recursively
 from .translation import extract_translation
 
@@ -116,6 +116,8 @@ def parse_section(
             and subtitle in wxr.config.OTHER_SUBTITLES["descendants"]
         ):
             extract_descendants(wxr, node, page_data[-1])
+        elif subtitle in wxr.config.OTHER_SUBTITLES["notes"]:
+            extract_note(wxr, page_data, node)
         else:
             wxr.wtp.debug(
                 f"Unhandled subtitle: {subtitle}",
