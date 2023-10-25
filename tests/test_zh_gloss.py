@@ -27,7 +27,7 @@ class TestExample(unittest.TestCase):
             defaultdict(
                 list,
                 {
-                    "lang": "日語",
+                    "lang_name": "日語",
                     "lang_code": "ja",
                     "word": "可笑しい",
                 },

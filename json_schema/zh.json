@@ -5,7 +5,7 @@
   "description": "JSON schema of the Chinese Wiktionary extractor",
   "type": "object",
   "properties": {
-    "lang": {
+    "lang_name": {
       "description": "Localized langauge name of the word",
       "type": "string"
     },
@@ -273,11 +273,11 @@
     "translation": {
       "type": "object",
       "properties": {
-        "code": {
+        "lang_code": {
           "description": "ISO 639-1 code of the translation term",
           "type": ["string", "null"]
         },
-        "lang": {
+        "lang_name": {
           "description": "Transation language name",
           "type": "string"
         },

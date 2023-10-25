@@ -31,14 +31,14 @@ class TestTranslation(unittest.TestCase):
                 {
                     "translations": [
                         {
-                            "code": "sq",
-                            "lang": "Albanais",
+                            "lang_code": "sq",
+                            "lang_name": "Albanais",
                             "word": "mirëdita",
                             "sense": "Formule pour saluer",
                         },
                         {
-                            "code": "sq",
-                            "lang": "Albanais",
+                            "lang_code": "sq",
+                            "lang_name": "Albanais",
                             "word": "mirë mëngjes",
                             "sense": "Formule pour saluer",
                             "tags": ["le matin"],
@@ -64,8 +64,8 @@ class TestTranslation(unittest.TestCase):
                 {
                     "translations": [
                         {
-                            "code": "ar",
-                            "lang": "Arabe",
+                            "lang_code": "ar",
+                            "lang_name": "Arabe",
                             "word": "مرحبًا",
                             "roman": "mrḥbā",
                             "tags": ["Informel"],
@@ -89,8 +89,8 @@ class TestTranslation(unittest.TestCase):
                 {
                     "translations": [
                         {
-                            "code": "mn",
-                            "lang": "Mongol",
+                            "lang_code": "mn",
+                            "lang_name": "Mongol",
                             "word": "сайн байна уу",
                             "roman": "sain baina uu",
                             "traditional_writing": "ᠰᠠᠶᠢᠨ ᠪᠠᠶᠢᠨ᠎ᠠ ᠤᠤ",
@@ -115,8 +115,8 @@ class TestTranslation(unittest.TestCase):
                 {
                     "translations": [
                         {
-                            "code": "de",
-                            "lang": "Allemand",
+                            "lang_code": "de",
+                            "lang_name": "Allemand",
                             "word": "Kambium",
                             "tags": ["neutre"],
                         },
@@ -143,8 +143,8 @@ class TestTranslation(unittest.TestCase):
                 {
                     "translations": [
                         {
-                            "code": "hr",
-                            "lang": "Croate",
+                            "lang_code": "hr",
+                            "lang_name": "Croate",
                             "word": "masa",
                             "sense": "(Finance)",
                         },

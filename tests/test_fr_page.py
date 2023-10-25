@@ -39,7 +39,7 @@ class FrPageTests(unittest.TestCase):
             lst,
             [
                 {
-                    "lang": "Français",
+                    "lang_name": "Français",
                     "lang_code": "fr",
                     "pos": "noun",
                     "pos_title": "Nom commun",

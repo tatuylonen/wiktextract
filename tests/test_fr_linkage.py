@@ -25,7 +25,7 @@ class TestLinkage(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "* [[bon matin]] {{Canada|nocat=1}} {{Louisiane|nocat=1}}"
         )
-        extract_linkage(self.wxr, page_data, root, "synonyms")
+        extract_linkage(self.wxr, page_data, root, "synonymes")
         self.assertEqual(
             page_data,
             [
@@ -43,7 +43,7 @@ class TestLinkage(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "* {{zh-lien|你们好|nǐmen hǎo|你們好}} — Bonjour (au pluriel)."
         )
-        extract_linkage(self.wxr, page_data, root, "synonyms")
+        extract_linkage(self.wxr, page_data, root, "synonymes")
         self.assertEqual(
             page_data,
             [
@@ -69,7 +69,7 @@ class TestLinkage(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "* {{lien|kwei|fr}} {{Canada|nocat=1}} (mot {{L|atj}})"
         )
-        extract_linkage(self.wxr, page_data, root, "synonyms")
+        extract_linkage(self.wxr, page_data, root, "synonymes")
         self.assertEqual(
             page_data,
             [
@@ -87,7 +87,7 @@ class TestLinkage(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "* [[être à la masse]], [[mettre à la masse]]"
         )
-        extract_linkage(self.wxr, page_data, root, "derived")
+        extract_linkage(self.wxr, page_data, root, "dérivés")
         self.assertEqual(
             page_data,
             [
@@ -108,7 +108,7 @@ class TestLinkage(unittest.TestCase):
 ** [[lacertidé]]s (Lacertidae) (famille des lézards typiques)
 """
         )
-        extract_linkage(self.wxr, page_data, root, "hypernyms")
+        extract_linkage(self.wxr, page_data, root, "hyper")
         self.assertEqual(
             page_data,
             [
@@ -135,7 +135,7 @@ class TestLinkage(unittest.TestCase):
 * [[artisane]]
 """
         )
-        extract_linkage(self.wxr, page_data, root, "synonyms")
+        extract_linkage(self.wxr, page_data, root, "synonymes")
         self.assertEqual(
             page_data,
             [
@@ -145,6 +145,36 @@ class TestLinkage(unittest.TestCase):
                             "word": "artisane",
                             "sense": "Celle qui est à l’origine de quelque chose",
                             "sense_index": 1,
+                        },
+                    ]
+                }
+            ],
+        )
+
+    def test_derives_autres_langues_section(self):
+        # https://fr.wiktionary.org/wiki/eau#Dérivés_dans_d’autres_langues
+        self.wxr.wtp.add_page("Modèle:lien", 10, body="{{{1}}}")
+        self.wxr.wtp.add_page("Modèle:L", 10, body="Karipúna")
+        page_data = [defaultdict(list)]
+        self.wxr.wtp.start_page("eau")
+        root = self.wxr.wtp.parse(
+            "* {{L|kmv}} : {{lien|dlo|kmv}}, {{lien|djilo|kmv}}"
+        )
+        extract_linkage(self.wxr, page_data, root, "dérivés autres langues")
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "derived": [
+                        {
+                            "word": "dlo",
+                            "lang_code": "kmv",
+                            "lang_name": "Karipúna",
+                        },
+                        {
+                            "word": "djilo",
+                            "lang_code": "kmv",
+                            "lang_name": "Karipúna",
                         },
                     ]
                 }
