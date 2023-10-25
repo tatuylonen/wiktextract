@@ -125,7 +125,7 @@ def extract_linkages(
                 base_data = defaultdict(
                     list,
                     {
-                        "lang": page_data[-1].get("lang"),
+                        "lang_name": page_data[-1].get("lang_name"),
                         "lang_code": page_data[-1].get("lang_code"),
                         "word": wxr.wtp.title,
                     },
