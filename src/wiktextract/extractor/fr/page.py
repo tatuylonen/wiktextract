@@ -177,7 +177,7 @@ def parse_page(
                 base_data = defaultdict(
                     list,
                     {
-                        "lang": lang_name,
+                        "lang_name": lang_name,
                         "lang_code": lang_code,
                         "word": wxr.wtp.title,
                     },
