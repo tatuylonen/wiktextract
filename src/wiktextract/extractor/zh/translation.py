@@ -110,8 +110,8 @@ def process_translation_list_item(
         translation_data = defaultdict(
             list,
             {
-                "code": lang_code,
-                "lang": lang_text,
+                "lang_code": lang_code,
+                "lang_name": lang_text,
                 "word": word,
             },
         )

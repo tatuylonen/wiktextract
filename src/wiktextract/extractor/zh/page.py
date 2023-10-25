@@ -112,8 +112,8 @@ def parse_section(
         ):
             extract_inflections(wxr, page_data, node)
         elif (
-                wxr.config.capture_descendants
-                and subtitle in wxr.config.OTHER_SUBTITLES["descendants"]
+            wxr.config.capture_descendants
+            and subtitle in wxr.config.OTHER_SUBTITLES["descendants"]
         ):
             extract_descendants(wxr, node, page_data[-1])
         else:
@@ -224,7 +224,11 @@ def parse_page(
 
         base_data = defaultdict(
             list,
-            {"lang": lang_name, "lang_code": lang_code, "word": wxr.wtp.title},
+            {
+                "lang_name": lang_name,
+                "lang_code": lang_code,
+                "word": wxr.wtp.title,
+            },
         )
         base_data.update(categories_and_links)
         page_data.append(copy.deepcopy(base_data))
