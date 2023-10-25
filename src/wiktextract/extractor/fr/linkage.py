@@ -13,6 +13,47 @@ def extract_linkage(
     wxr: WiktextractContext,
     page_data: List[Dict],
     level_node: WikiNode,
+    section_type: str,
+) -> None:
+    if section_type == "dérivés autres langues":
+        process_derives_autres_list(wxr, page_data, level_node)
+    else:
+        process_linkage_list(
+            wxr,
+            page_data,
+            level_node,
+            wxr.config.LINKAGE_SUBTITLES.get(section_type),
+        )
+
+
+def process_derives_autres_list(
+    wxr: WiktextractContext,
+    page_data: List[Dict],
+    level_node: WikiNode,
+):
+    # drrive to other languages list
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        lang_code = ""
+        lang_name = ""
+        for template_node in list_item.find_child(NodeKind.TEMPLATE):
+            if template_node.template_name == "L":
+                lang_code = template_node.template_parameters.get(1)
+                lang_name = clean_node(wxr, None, template_node)
+            elif template_node.template_name == "lien":
+                word = clean_node(wxr, None, template_node)
+                page_data[-1]["derived"].append(
+                    {
+                        "lang_code": lang_code,
+                        "lang_name": lang_name,
+                        "word": word,
+                    }
+                )
+
+
+def process_linkage_list(
+    wxr: WiktextractContext,
+    page_data: List[Dict],
+    level_node: WikiNode,
     linkage_type: str,
 ) -> None:
     sense_text = ""

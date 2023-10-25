@@ -36,16 +36,18 @@ def extract_pronunciation(
         page_data[-1]["sounds"].extend(sound_data)
 
 
-PRON_TEMPLATES = frozenset([
-    "pron",  # redirect to "prononciation"
-    "prononciation",
-    "//",  # redirect to "prononciation"
-    "phon",  # redirect to "prononciation"
-    "pron-recons",  # use "pron"
-    "prononciation reconstruite",  # redirect to "pron-recons"
-    "pron recons",  # redirect to "pron-recons"
-    "lang"  # used in template "cmn-pron", which expands to list of Pinyin
-])
+PRON_TEMPLATES = frozenset(
+    [
+        "pron",  # redirect to "prononciation"
+        "prononciation",
+        "//",  # redirect to "prononciation"
+        "phon",  # redirect to "prononciation"
+        "pron-recons",  # use "pron"
+        "prononciation reconstruite",  # redirect to "pron-recons"
+        "pron recons",  # redirect to "pron-recons"
+        "lang",  # used in template "cmn-pron", which expands to list of Pinyin
+    ]
+)
 
 
 def process_pron_list_item(

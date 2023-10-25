@@ -323,6 +323,14 @@
         "sense_index": {
           "description": "Number of the definition, start from 1",
           "type": "integer"
+        },
+        "lang_name": {
+          "description": "Localized langauge name of the word, for the 'Dérivés dans d’autres langues' section",
+          "type": "string"
+        },
+        "lang_code": {
+          "description": "ISO 639-1 language code, for the 'Dérivés dans d’autres langues' section",
+          "type": "string"
         }
       }
     }
