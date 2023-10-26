@@ -3,7 +3,6 @@ from collections import defaultdict
 from unittest.mock import patch
 
 from wikitextprocessor import NodeKind, WikiNode, Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.page import extract_gloss, parse_section
 from wiktextract.thesaurus import close_thesaurus_db

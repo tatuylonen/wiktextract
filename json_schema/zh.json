@@ -153,6 +153,13 @@
       "items": {
         "$ref": "#/$defs/descendant"
       }
+    },
+    "notes": {
+      "description": "Usage notes",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "$defs": {

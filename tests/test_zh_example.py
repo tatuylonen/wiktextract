@@ -3,7 +3,6 @@ from collections import defaultdict
 from unittest.mock import patch
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.example import extract_examples
 from wiktextract.thesaurus import close_thesaurus_db

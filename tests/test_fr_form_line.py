@@ -3,7 +3,6 @@ from collections import defaultdict
 from unittest.mock import patch
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.form_line import (
     extract_form_line,

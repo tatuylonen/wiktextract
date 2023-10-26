@@ -2,8 +2,7 @@ import unittest
 from collections import defaultdict
 from unittest.mock import patch
 
-from wikitextprocessor import Wtp, Page
-
+from wikitextprocessor import Page, Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.gloss import extract_gloss
 from wiktextract.extractor.fr.page import process_pos_block

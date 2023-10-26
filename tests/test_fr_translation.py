@@ -2,7 +2,6 @@ import unittest
 from collections import defaultdict
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.translation import extract_translation
 from wiktextract.wxr_context import WiktextractContext
