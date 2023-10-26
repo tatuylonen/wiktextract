@@ -2,7 +2,7 @@ import re
 from typing import Any, Dict, List, Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import HTMLNode
+from wikitextprocessor.parser import HTMLNode, TemplateNode
 from wiktextract.datautils import append_base_data
 from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node
@@ -130,8 +130,8 @@ def extract_pronunciation_item(
         return combine_pronunciation_tags(
             tags, split_pronunciation_tags(expanded_text)
         )
-    elif expanded_text.startswith("同音詞"):
-        process_homophone_table(wxr, page_data, node_children, tags)
+    elif expanded_text.startswith(("同音詞", "同音词")):
+        process_homophone_data(wxr, page_data, node_children, tags)
     else:
         sound_tags_text, *ipa = re.split(r"：|:", expanded_text, 1)
         new_tags = combine_pronunciation_tags(
@@ -153,24 +153,37 @@ def extract_pronunciation_item(
         return new_tags
 
 
-def process_homophone_table(
+def process_homophone_data(
     wxr: WiktextractContext,
     page_data: List[Dict],
     node_children: List[WikiNode],
     tags: List[str],
 ) -> None:
     # Process the collapsible homophone table created from "zh-pron" template
+    # and the "homophones" template
+    tags = combine_pronunciation_tags(tags, ["同音詞"])
     for node in node_children:
-        if isinstance(node, HTMLNode):
-            if node.tag == "small":
-                tags = combine_pronunciation_tags(
-                    tags, [clean_node(wxr, None, node)]
-                )
-            elif node.tag == "table":
-                for span_node in node.find_html_recursively(
-                    "span", attr_name="lang"
-                ):
-                    sound_data = {"homophone": clean_node(wxr, None, span_node)}
-                    if len(tags) > 0:
-                        sound_data["tags"] = tags
-                    page_data[-1]["sounds"].append(sound_data)
+        if isinstance(node, HTMLNode) and node.tag == "table":
+            for span_node in node.find_html_recursively(
+                "span", attr_name="lang"
+            ):
+                sound_data = {
+                    "homophone": clean_node(wxr, None, span_node),
+                    "tags": tags,
+                }
+                page_data[-1]["sounds"].append(sound_data)
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name == "homophones"
+        ):
+            expaned_template = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(node), expand_all=True
+            )
+            for span_node in expaned_template.find_html_recursively(
+                "span", attr_name="lang"
+            ):
+                sound_data = {
+                    "homophone": clean_node(wxr, None, span_node),
+                    "tags": tags,
+                }
+                page_data[-1]["sounds"].append(sound_data)

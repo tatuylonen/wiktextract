@@ -40,3 +40,28 @@ class TestPronunciation(TestCase):
                 }
             ],
         )
+
+    def test_homophone_template(self):
+        self.wxr.wtp.start_page("大家")
+        self.wxr.wtp.add_page(
+            "Template:homophones",
+            10,
+            '<span class="homophones">[[Appendix:Glossary#同音词|同音词]]：<span class="Jpan" lang="ja">[[大矢#日語|-{大矢}-]]</span>, <span class="Jpan" lang="ja">[[大宅#日語|-{大宅}-]]</span>, <span class="Jpan" lang="ja">[[大谷#日語|-{大谷}-]]</span></span>[[Category:有同音詞的日語詞]]',
+        )
+        root = self.wxr.wtp.parse("* {{homophones|ja|大矢|大宅|大谷}}")
+        page_data = [defaultdict(list)]
+        extract_pronunciation_recursively(
+            self.wxr, page_data, {}, "ja", root, []
+        )
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "sounds": [
+                        {"homophone": "大矢", "tags": ["同音詞"]},
+                        {"homophone": "大宅", "tags": ["同音詞"]},
+                        {"homophone": "大谷", "tags": ["同音詞"]},
+                    ]
+                }
+            ],
+        )
