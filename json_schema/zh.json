@@ -274,6 +274,9 @@
         },
         "mp3_url": {
           "type": "string"
+        },
+        "homophone": {
+          "type": "string"
         }
       }
     },

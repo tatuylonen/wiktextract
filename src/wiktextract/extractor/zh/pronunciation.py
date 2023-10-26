@@ -1,7 +1,8 @@
 import re
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor.parser import HTMLNode
 from wiktextract.datautils import append_base_data
 from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node
@@ -10,8 +11,8 @@ from wiktextract.wxr_context import WiktextractContext
 
 def extract_pronunciation_recursively(
     wxr: WiktextractContext,
-    page_data: List[Dict],
-    base_data: Dict,
+    page_data: List[Dict[str, Any]],
+    base_data: Dict[str, Any],
     lang_code: str,
     node: Union[WikiNode, List[Union[WikiNode, str]]],
     tags: List[str],
@@ -29,18 +30,11 @@ def extract_pronunciation_recursively(
             used_children = node.children
             rest_children = []
         else:
-            used_children = [
-                child
-                for child in node.children
-                if not isinstance(child, WikiNode)
-                or child.kind != NodeKind.LIST
-            ]
-            rest_children = [
-                child
-                for child in node.children
-                if isinstance(child, WikiNode) and child.kind == NodeKind.LIST
-            ]
-        data = extract_pronunciation_item(wxr, lang_code, used_children, tags)
+            used_children = list(node.invert_find_child(NodeKind.LIST))
+            rest_children = list(node.find_child(NodeKind.LIST))
+        data = extract_pronunciation_item(
+            wxr, page_data, lang_code, used_children, tags
+        )
         if isinstance(data, str):  # is audio file name
             # audio file usually after Pinyin
             # add back to previous Pinyin dictionary if it doesn't have
@@ -113,10 +107,11 @@ def split_pronunciation_tags(text: str) -> List[str]:
 
 def extract_pronunciation_item(
     wxr: WiktextractContext,
+    page_data: List[Dict],
     lang_code: str,
     node_children: List[WikiNode],
     tags: List[str],
-) -> Optional[Union[Dict, str, List[str]]]:
+) -> Optional[Union[Dict[str, Any], str, List[str]]]:
     """
     Return audio file name(eg. "File:LL-Q1860 (eng)-Vealhurl-manga.wav") string
     or a dictionary contains IPA and tags
@@ -135,6 +130,8 @@ def extract_pronunciation_item(
         return combine_pronunciation_tags(
             tags, split_pronunciation_tags(expanded_text)
         )
+    elif expanded_text.startswith("同音詞"):
+        process_homophone_table(wxr, page_data, node_children, tags)
     else:
         sound_tags_text, *ipa = re.split(r"：|:", expanded_text, 1)
         new_tags = combine_pronunciation_tags(
@@ -154,3 +151,26 @@ def extract_pronunciation_item(
                 return child.template_parameters.get(2)
 
         return new_tags
+
+
+def process_homophone_table(
+    wxr: WiktextractContext,
+    page_data: List[Dict],
+    node_children: List[WikiNode],
+    tags: List[str],
+) -> None:
+    # Process the collapsible homophone table created from "zh-pron" template
+    for node in node_children:
+        if isinstance(node, HTMLNode):
+            if node.tag == "small":
+                tags = combine_pronunciation_tags(
+                    tags, [clean_node(wxr, None, node)]
+                )
+            elif node.tag == "table":
+                for span_node in node.find_html_recursively(
+                    "span", attr_name="lang"
+                ):
+                    sound_data = {"homophone": clean_node(wxr, None, span_node)}
+                    if len(tags) > 0:
+                        sound_data["tags"] = tags
+                    page_data[-1]["sounds"].append(sound_data)
