@@ -163,8 +163,9 @@ def extract_etymology(
         etymology = clean_node(wxr, page_data[-1], nodes[:index])
     else:
         etymology = clean_node(wxr, page_data[-1], nodes)
-    base_data["etymology_text"] = etymology
-    append_base_data(page_data, "etymology_text", etymology, base_data)
+    if len(etymology) > 0:
+        base_data["etymology_text"] = etymology
+        append_base_data(page_data, "etymology_text", etymology, base_data)
     if level_node_index != -1:
         parse_section(wxr, page_data, base_data, nodes[level_node_index:])
 
