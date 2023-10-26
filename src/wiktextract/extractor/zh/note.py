@@ -14,3 +14,8 @@ def extract_note(
         page_data[-1]["notes"].append(
             clean_node(wxr, page_data[-1], list_item.children)
         )
+
+    if not level_node.contain_node(NodeKind.LIST):
+        page_data[-1]["notes"].append(
+            clean_node(wxr, page_data[-1], level_node.children)
+        )

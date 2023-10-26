@@ -25,3 +25,11 @@ class TestNote(TestCase):
         page_data = [defaultdict(list)]
         extract_note(self.wxr, page_data, root)
         self.assertEqual(page_data, [{"notes": ["note list 1", "note list 2"]}])
+
+    def test_note_no_list(self):
+        # https://zh.wiktionary.org/wiki/clavarder
+        self.wxr.wtp.start_page("clavarder")
+        root = self.wxr.wtp.parse("note text")
+        page_data = [defaultdict(list)]
+        extract_note(self.wxr, page_data, root)
+        self.assertEqual(page_data, [{"notes": ["note text"]}])
