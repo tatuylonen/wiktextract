@@ -1,12 +1,14 @@
 from collections import defaultdict
 from copy import deepcopy
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor.parser import TemplateNode
 from wiktextract.datautils import find_similar_gloss
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from ..ruby import extract_ruby
 from ..share import (
     capture_text_in_parentheses,
     split_chinese_variants,
@@ -34,7 +36,6 @@ def extract_linkages(
             append_to = find_similar_gloss(page_data, sense)
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.LIST_ITEM:
-                is_descendant = False
                 not_term_indexes = set()
                 filtered_children = list(node.filter_empty_str_child())
                 linkage_data = defaultdict(list)
@@ -59,12 +60,18 @@ def extract_linkages(
                                 clean_node(wxr, None, item_child).strip("()")
                             )
                         elif template_name.lower() in DESCENDANT_TEMPLATES:
+                            not_term_indexes.add(index)
                             extract_descendant_list_item(
                                 wxr, node, page_data[-1]
                             )
-                            is_descendant = True
                             break
-                if is_descendant:
+                        elif template_name == "ja-r":
+                            not_term_indexes.add(index)
+                            process_ja_r_template(
+                                wxr, page_data, item_child, linkage_type, sense
+                            )
+
+                if len(not_term_indexes) == len(filtered_children):
                     continue
                 # sense template before entry and they are inside the same
                 # list item
@@ -93,7 +100,8 @@ def extract_linkages(
                             final_linkage_data[
                                 "language_variant"
                             ] = variant_type
-                        append_to[linkage_type].append(final_linkage_data)
+                        if len(final_linkage_data["word"]) > 0:
+                            append_to[linkage_type].append(final_linkage_data)
             elif node.kind == NodeKind.TEMPLATE:
                 template_name = node.template_name.lower()
                 if template_name in sense_template_names:
@@ -249,3 +257,30 @@ def extract_zh_dial_recursively(
             if returned_lang is not None:
                 header_lang = returned_lang
     return header_lang
+
+
+def process_ja_r_template(
+    wxr: WiktextractContext,
+    page_data: Dict[str, Any],
+    template_node: TemplateNode,
+    linkage_type: str,
+    sense: str,
+) -> None:
+    # https://zh.wiktionary.org/wiki/Template:Ja-r
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    linkage_data = defaultdict(list)
+    if len(sense) > 0:
+        linkage_data["sense"] = sense
+    for span_node in expanded_node.find_html("span"):
+        if "lang" in span_node.attrs:
+            ruby_data, no_ruby_nodes = extract_ruby(wxr, span_node)
+            linkage_data["word"] = clean_node(wxr, None, no_ruby_nodes)
+            if len(ruby_data) > 0:
+                linkage_data["ruby"] = ruby_data
+        elif "tr" in span_node.attrs.get("class", ""):
+            linkage_data["roman"] = clean_node(wxr, None, span_node)
+
+    if len(linkage_data.get("word", "")) > 0:
+        page_data[-1][linkage_type].append(linkage_data)

@@ -38,7 +38,7 @@ def parse_ruby(
 def extract_ruby(
     wxr: WiktextractContext,
     contents: Union[WikiNode, List[Union[WikiNode, str]]],
-) -> Tuple[List[str], List[Union[WikiNode, str]]]:
+) -> Tuple[List[Tuple[str]], List[Union[WikiNode, str]]]:
     # If contents is a list, process each element separately
     extracted = []
     new_contents = []
