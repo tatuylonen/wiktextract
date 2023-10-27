@@ -343,3 +343,36 @@ class TestInflection(unittest.TestCase):
                 {"form": "fenililor", "tags": ["Pluriel", "Vocatif"]},
             ],
         )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{| class="flextable flextable-sv"
+! class="invisible" |
+|-
+! Commun
+! Indéfini
+! Défini
+|-
+! Singulier
+| class="sing-indef" |<bdi lang="sv" xml:lang="sv" class="lang-sv">[[robot|robot]]</bdi>
+| class="sing-def" |<bdi lang="sv" xml:lang="sv" class="lang-sv">[[roboten#sv|roboten]]</bdi>
+|-
+! Pluriel
+| class="plur-indef" |<bdi lang="sv" xml:lang="sv" class="lang-sv">[[robotar#sv|robotar]]</bdi>
+| class="plur-def" |<bdi lang="sv" xml:lang="sv" class="lang-sv">[[robotarna#sv|robotarna]]</bdi>
+|}""",
+    )
+    def test_sv_nom_c_ar(self, mock_node_to_wikitext):
+        # https://fr.wiktionary.org/wiki/robot#Nom_commun_7
+        page_data = [defaultdict(list, {"word": "robot"})]
+        node = TemplateNode(0)
+        self.wxr.wtp.start_page("robot")
+        extract_inflection(self.wxr, page_data, node)
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [
+                {"form": "roboten", "tags": ["Défini", "Singulier"]},
+                {"form": "robotar", "tags": ["Indéfini", "Pluriel"]},
+                {"form": "robotarna", "tags": ["Défini", "Pluriel"]},
+            ],
+        )

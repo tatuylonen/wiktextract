@@ -26,6 +26,7 @@ IGNORE_TABLE_HEADERS = frozenset(
         "forme",  # br-flex-adj
         "temps",  # en-conj-rég,
         "cas",  # lt_décl_as, ro-nom-tab(lower case)
+        "commun",  # sv-nom-c-ar
     }
 )
 IGNORE_TABLE_CELL = frozenset(
@@ -74,11 +75,11 @@ def process_inflection_table(
                 )
             )
             and row_node_child.attrs.get("style") != "display:none"
+            and "invisible" not in row_node_child.attrs.get("class", "")
         ]
         current_row_has_data_cell = any(
             isinstance(cell, WikiNode)
             and cell.kind == NodeKind.TABLE_CELL
-            and "invisible" not in cell.attrs.get("class", "")
             for cell in table_row_nodes
         )
         row_headers = []
