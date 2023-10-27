@@ -1,4 +1,5 @@
 from collections import defaultdict, deque
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Dict, List
 
@@ -26,6 +27,7 @@ IGNORE_TABLE_HEADERS = frozenset(
         "forme",  # br-flex-adj
         "temps",  # en-conj-rég,
         "cas",  # lt_décl_as, ro-nom-tab(lower case)
+        "commun",  # sv-nom-c-ar
     }
 )
 IGNORE_TABLE_CELL = frozenset(
@@ -74,11 +76,11 @@ def process_inflection_table(
                 )
             )
             and row_node_child.attrs.get("style") != "display:none"
+            and "invisible" not in row_node_child.attrs.get("class", "")
         ]
         current_row_has_data_cell = any(
             isinstance(cell, WikiNode)
             and cell.kind == NodeKind.TABLE_CELL
-            and "invisible" not in cell.attrs.get("class", "")
             for cell in table_row_nodes
         )
         row_headers = []
@@ -144,7 +146,10 @@ def process_inflection_table(
                             table_cell_line != page_data[-1].get("word")
                             and table_cell_line not in IGNORE_TABLE_CELL
                         ):
-                            form_data["form"] = table_cell_line
+                            if "form" not in form_data:
+                                form_data["form"] = table_cell_line
+                            else:
+                                form_data["form"] += " " + table_cell_line
                     for colspan_header in colspan_headers:
                         if (
                             column_cell_index >= colspan_header.index
@@ -165,6 +170,9 @@ def process_inflection_table(
                     if len(row_headers) > 0:
                         form_data["tags"].extend(row_headers)
                     if "form" in form_data:
-                        page_data[-1]["forms"].append(form_data)
+                        for form in form_data["form"].split(" ou "):
+                            new_form_data = deepcopy(form_data)
+                            new_form_data["form"] = form
+                            page_data[-1]["forms"].append(new_form_data)
 
                     column_cell_index += int(table_cell.attrs.get("colspan", 1))
