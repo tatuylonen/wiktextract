@@ -376,3 +376,30 @@ class TestInflection(unittest.TestCase):
                 {"form": "robotarna", "tags": ["Défini", "Pluriel"]},
             ],
         )
+
+    @patch(
+        "wikitextprocessor.Wtp.node_to_wikitext",
+        return_value="""{|class="flextable"
+|-
+!scope="col"| Cas<nowiki />
+!scope="col"| Singulier<nowiki />
+!scope="col"| Pluriel
+|-
+!scope="row"| Nominatif<nowiki />
+| [[robot#cs-nom|robot''' ''']]<nowiki />
+| [[roboti#cs-flex-nom|robot'''i ''']]<br /><small>''ou''</small> [[robotové#cs-flex-nom|robot'''ové ''']]<nowiki />
+|}""",
+    )
+    def test_cs_decl_nom_ma_dur(self, mock_node_to_wikitext):
+        # https://fr.wiktionary.org/wiki/robot#Nom_commun_1_2
+        page_data = [defaultdict(list, {"word": "robot"})]
+        node = TemplateNode(0)
+        self.wxr.wtp.start_page("robot")
+        extract_inflection(self.wxr, page_data, node)
+        self.assertEqual(
+            page_data[-1].get("forms"),
+            [
+                {"form": "roboti", "tags": ["Pluriel", "Nominatif"]},
+                {"form": "robotové", "tags": ["Pluriel", "Nominatif"]},
+            ],
+        )
