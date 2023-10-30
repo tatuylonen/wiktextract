@@ -11,6 +11,7 @@ def extract_gloss(
     wxr: WiktextractContext,
     page_data: List[Dict],
     list_node: WikiNode,
+    parent_glosses: List[str] = [],
 ) -> None:
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         gloss_nodes = list(
@@ -63,19 +64,23 @@ def extract_gloss(
             if index not in tag_indexes
         ]
         gloss_text = clean_node(wxr, gloss_data, gloss_only_nodes)
-        gloss_data["glosses"] = [gloss_text]
-        extract_examples(wxr, gloss_data, list_item_node)
+        gloss_data["glosses"] = parent_glosses + [gloss_text]
         page_data[-1]["senses"].append(gloss_data)
+        for nest_gloss_list in list_item_node.find_child(NodeKind.LIST):
+            if nest_gloss_list.sarg.endswith("#"):
+                extract_gloss(
+                    wxr, page_data, nest_gloss_list, gloss_data["glosses"]
+                )
+            elif nest_gloss_list.sarg.endswith("*"):
+                extract_examples(wxr, gloss_data, nest_gloss_list)
 
 
 def extract_examples(
     wxr: WiktextractContext,
     gloss_data: Dict,
-    gloss_list_node: WikiNode,
+    example_list_node: WikiNode,
 ) -> None:
-    for example_node in gloss_list_node.find_child_recursively(
-        NodeKind.LIST_ITEM
-    ):
+    for example_node in example_list_node.find_child(NodeKind.LIST_ITEM):
         example_node_children = list(example_node.filter_empty_str_child())
         if len(example_node_children) == 0:
             continue

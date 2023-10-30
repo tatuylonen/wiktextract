@@ -257,3 +257,44 @@ class TestFormLine(unittest.TestCase):
                 }
             ],
         )
+
+    def test_nest_gloss(self):
+        self.maxDiff = None
+        self.wxr.wtp.start_page("eau")
+        root = self.wxr.wtp.parse(
+            """# [[fluide|Fluides]], [[sérosité]]s qui se trouvent ou qui se forment dans le [[corps]] de l’[[homme]] ou de l’[[animal]].
+#* example 1
+## [[salive|Salive]].
+##* nest example
+            """
+        )
+        page_data = [defaultdict(list)]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data[-1]["senses"],
+            [
+                {
+                    "examples": [
+                        {
+                            "text": "example 1",
+                            "type": "example",
+                        }
+                    ],
+                    "glosses": [
+                        "Fluides, sérosités qui se trouvent ou qui se forment dans le corps de l’homme ou de l’animal."
+                    ],
+                },
+                {
+                    "examples": [
+                        {
+                            "text": "nest example",
+                            "type": "example",
+                        }
+                    ],
+                    "glosses": [
+                        "Fluides, sérosités qui se trouvent ou qui se forment dans le corps de l’homme ou de l’animal.",
+                        "Salive.",
+                    ],
+                },
+            ],
+        )
