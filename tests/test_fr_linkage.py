@@ -179,3 +179,20 @@ class TestLinkage(unittest.TestCase):
                 }
             ],
         )
+
+    def test_words_divided_by_slash(self):
+        page_data = [defaultdict(list)]
+        self.wxr.wtp.start_page("eau")
+        root = self.wxr.wtp.parse("* [[benoîte d’eau]] / [[benoite d’eau]]")
+        extract_linkage(self.wxr, page_data, root, "dérivés")
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "derived": [
+                        {"word": "benoîte d’eau"},
+                        {"word": "benoite d’eau"},
+                    ]
+                }
+            ],
+        )

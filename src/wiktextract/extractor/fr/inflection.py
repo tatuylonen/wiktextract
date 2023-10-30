@@ -79,8 +79,7 @@ def process_inflection_table(
             and "invisible" not in row_node_child.attrs.get("class", "")
         ]
         current_row_has_data_cell = any(
-            isinstance(cell, WikiNode)
-            and cell.kind == NodeKind.TABLE_CELL
+            isinstance(cell, WikiNode) and cell.kind == NodeKind.TABLE_CELL
             for cell in table_row_nodes
         )
         row_headers = []

@@ -106,7 +106,7 @@ def process_linkage_list(
                 ) and tag_text.strip().endswith(")"):
                     tag_text = pending_tag + tag_text
                     pending_tag = ""
-                elif tag_text.strip() == ",":
+                elif tag_text.strip() in {",", "/"}:
                     # list item has more than one word
                     page_data[-1][linkage_type].append(linkage_data)
                     linkage_data = defaultdict(list)
