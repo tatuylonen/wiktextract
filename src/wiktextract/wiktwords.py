@@ -482,7 +482,7 @@ def main():
                 wxr.wtp,
                 [Path(p) for p in args.override],
                 skip_extract_dump,
-                wxr.config.analyze_templates,
+                not wxr.config.analyze_templates,
             )
 
         if args.page:
