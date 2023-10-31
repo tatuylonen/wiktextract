@@ -5,15 +5,14 @@
 # python language_data.py de dewiktionary_dump_file [--languages languages_output_file]
 
 import argparse
-from wikitextprocessor import Wtp
-from wiktextract.config import WiktionaryConfig
-from wiktextract.wxr_context import WiktextractContext
-from wiktextract.page import clean_node
-from wikitextprocessor.dumpparser import process_dump
-from wikitextprocessor import NodeKind, WikiNode
-
 import json
 
+from wikitextprocessor import NodeKind, WikiNode, Wtp
+from wikitextprocessor.dumpparser import process_dump
+
+from wiktextract.config import WiktionaryConfig
+from wiktextract.page import clean_node
+from wiktextract.wxr_context import WiktextractContext
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -21,12 +20,6 @@ if __name__ == "__main__":
     )
     parser.add_argument("lang_code", type=str, help="Dump file language code")
     parser.add_argument("dump", type=str, help="Wiktionary xml dump file path")
-    parser.add_argument(
-        "--languages",
-        type=str,
-        default="languages.json",
-        help="Language data output file path",
-    )
     args = parser.parse_args()
     wxr = WiktextractContext(Wtp(lang_code=args.lang_code), WiktionaryConfig())
 
@@ -40,7 +33,7 @@ if __name__ == "__main__":
     template_ns_id = wxr.wtp.NAMESPACE_DATA["Template"]["id"]
     process_dump(wxr.wtp, args.dump, {help_ns_id, template_ns_id})
 
-    # The page 'Hilfe:Sprachkürzel seems to be the only central collection of 
+    # The page 'Hilfe:Sprachkürzel seems to be the only central collection of
     # language codes and their German expansions. We will use this until we find
     #  perhaps a more authoritative source.
     sprachkuerzel = wxr.wtp.get_page("Hilfe:Sprachkürzel")
@@ -68,5 +61,9 @@ if __name__ == "__main__":
 
             languages[lang_code] = [clean_node(wxr, None, third_row_content)]
 
-    with open(args.languages, "w", encoding="utf-8") as fout:
+    with open(
+        f"src/wiktextract/data/{args.lang_code}/languages.json",
+        "w",
+        encoding="utf-8",
+    ) as fout:
         json.dump(languages, fout, indent=2, ensure_ascii=False, sort_keys=True)
