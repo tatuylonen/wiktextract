@@ -152,7 +152,7 @@ def process_Üt_template(
 ):
     transcription = template_node.template_parameters.get(3)
     if transcription:
-        translation_data["roman"] = transcription
+        translation_data["roman"] = clean_node(wxr, {}, transcription)
     # Look for automatic transcription
     else:
         cleaned_node = clean_node(wxr, {}, template_node)
