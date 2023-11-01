@@ -426,7 +426,6 @@ def main():
     context1 = Wtp(
         db_path=args.db_path,
         lang_code=args.dump_file_language_code,
-        languages_by_code=conf1.LANGUAGES_BY_CODE,
         template_override_funcs=template_override_fns,
     )
 
