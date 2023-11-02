@@ -19,7 +19,6 @@ from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.linkages import parse_linkage_item_text
 from wiktextract.translations import parse_translation_item_text
 from wiktextract.clean import clean_template_args
-from wiktextract.unsupported_titles import unsupported_title_map
 from wiktextract.datautils import data_append, data_extend, ns_title_prefix_tuple
 from wiktextract.tags import valid_tags
 from wiktextract.page import (
@@ -34,6 +33,7 @@ from wiktextract.inflection import parse_inflection_section, TableContext
 from ..ruby import extract_ruby, parse_ruby
 from ..share import strip_nodes
 
+from .unsupported_titles import unsupported_title_map
 
 # Matches head tag
 head_tag_re = None
@@ -3572,6 +3572,18 @@ def parse_page(
                     data["topics"] = list(new_topics)  # Copy list!
         ret.extend(lang_datas)
 
+    for x in ret:
+        if x["word"] != word:
+            if word.startswith("Unsupported titles/"):
+                wxr.wtp.debug(f"UNSUPPORTED TITLE: '{word}' -> '{x['word']}'",
+                                sortid="20231101/3578page.py"
+                            )
+            else:
+                wxr.wtp.debug(f"DIFFERENT ORIGINAL TITLE: '{word}' "
+                              f"-> '{x['word']}'",
+                              sortid="20231101/3582page.py"
+                             )
+            x["original_title"] = word
     return ret
 
 
