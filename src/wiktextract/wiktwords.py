@@ -23,7 +23,7 @@ if sys.version_info < (3, 10):
 else:
     from importlib.resources import files
 
-from mediawiki_langcodes import code_to_name
+from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import Wtp
 from wikitextprocessor.dumpparser import analyze_and_overwrite_pages
 
@@ -125,12 +125,20 @@ def main():
         help="Language code of the dump file.",
     )
     parser.add_argument(
-        "--language",
+        "--language-code",
         type=str,
         action="append",
         default=[],
         help="Language code to capture (can specify multiple times, defaults "
-        "to English [en] and Translingual [mul])",
+        "to dump file language code and `mul`(Translingual))",
+    )
+    parser.add_argument(
+        "--language-name",
+        type=str,
+        action="append",
+        default=[],
+        help="Language names to capture (can specify multiple times, defaults "
+        "to dump file language and Translingual)",
     )
     parser.add_argument(
         "--all-languages",
@@ -331,19 +339,30 @@ def main():
         args.inflections = True
         args.descendants = True
 
-    # Default to English and Translingual if language not specified.
-    if not args.language:
-        args.language = ["en", "mul"]
-    else:
-        for lang_code in args.language:
-            if code_to_name(lang_code) == "":
+    # Default to dump file language and Translingual if not specified.
+    capture_lang_codes = set()
+    if len(args.language_code) > 0:
+        for lang_code in args.language_code:
+            lang_name = code_to_name(lang_code, args.dump_file_language_code)
+            if lang_name == "":
                 logging.warning(f"Unknown language code: {lang_code}")
+            else:
+                capture_lang_codes.add(lang_code)
+    if len(args.language_name) > 0:
+        for lang_name in args.language_name:
+            lang_code = name_to_code(lang_name, args.dump_file_language_code)
+            if lang_code == "":
+                logging.warning(f"Unknown language name: {lang_name}")
+            else:
+                capture_lang_codes.add(lang_code)
+    if len(capture_lang_codes) == 0:
+        capture_lang_codes = {args.dump_file_language_code, "mul"}
 
     if args.all_languages:
-        args.language = None
-        print("Capturing words for all available languages")
+        capture_lang_codes = None
+        logging.info("Capturing words for all available languages")
     else:
-        print("Capturing words for:", ", ".join(args.language))
+        logging.info(f"Capturing words for: {', '.join(capture_lang_codes)}")
 
     # Open output file.
     out_path = args.out
@@ -363,7 +382,7 @@ def main():
 
     conf1 = WiktionaryConfig(
         dump_file_lang_code=args.dump_file_language_code,
-        capture_language_codes=args.language,
+        capture_language_codes=capture_lang_codes,
         capture_translations=args.translations,
         capture_pronunciation=args.pronunciations,
         capture_linkages=args.linkages,

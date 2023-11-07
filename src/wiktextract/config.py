@@ -58,7 +58,7 @@ class WiktionaryConfig:
     def __init__(
         self,
         dump_file_lang_code="en",
-        capture_language_codes=["en", "mul"],
+        capture_language_codes={"en", "mul"},
         capture_translations=True,
         capture_pronunciation=True,
         capture_linkages=True,
