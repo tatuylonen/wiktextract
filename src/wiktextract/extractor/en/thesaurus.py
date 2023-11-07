@@ -7,8 +7,8 @@ import logging
 import re
 from typing import List, Optional
 
+from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import NodeKind, Page, WikiNode
-
 from wiktextract.datautils import ns_title_prefix_tuple
 from wiktextract.form_descriptions import parse_sense_qualifier
 from wiktextract.page import LEVEL_KINDS, clean_node
@@ -98,7 +98,7 @@ def extract_thesaurus_page(
     # {{ws header|lang=xx}}
     m = re.search(r"(?s)\{\{ws header\|[^}]*lang=([^}|]*)", text)
     if m:
-        lang = wxr.config.LANGUAGES_BY_CODE.get(m.group(1), [None])[0]
+        lang = code_to_name(m.group(1), "en")
 
     def recurse(contents) -> Optional[List[ThesaurusTerm]]:
         nonlocal lang
@@ -197,7 +197,7 @@ def extract_thesaurus_page(
                     w1 = w1.removesuffix(" [⇒ thesaurus]")
 
                     if w1:
-                        lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang)
+                        lang_code = name_to_code(lang, "en")
                         if lang_code is None:
                             logging.debug(
                                 f"Linkage language {lang} not recognized"
@@ -230,7 +230,7 @@ def extract_thesaurus_page(
         subtitle = wxr.wtp.node_to_text(
             contents.sarg if contents.sarg else contents.largs
         )
-        if subtitle in wxr.config.LANGUAGES_BY_NAME:
+        if name_to_code(subtitle, "en") != "":
             lang = subtitle
             pos = None
             sense = None

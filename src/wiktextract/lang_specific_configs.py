@@ -3,7 +3,7 @@
 # parsing.
 
 import re
-# from wiktextract.datautils import languages_by_name
+
 from wiktextract.tags import valid_tags, tag_categories
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 

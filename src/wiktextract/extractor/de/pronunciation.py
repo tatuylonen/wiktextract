@@ -1,9 +1,9 @@
 from collections import defaultdict
 from typing import Dict, List, Union
 
+from mediawiki_langcodes import code_to_name
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
-
 from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -94,7 +94,7 @@ def process_lautschrift_template(
 
     lang_code = template_parameters.get("spr")
     if lang_code:
-        language = wxr.wtp.LANGUAGES_BY_CODE[lang_code]
+        language = code_to_name(lang_code, "de")
         add_sound_data_without_appending_to_existing_properties(
             sound_data,
             {

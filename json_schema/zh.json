@@ -11,7 +11,7 @@
     },
     "lang_code": {
       "description": "Wiktionary language code",
-      "type": ["string", "null"]
+      "type": "string"
     },
     "word": {
       "description": "word string",
@@ -285,7 +285,7 @@
       "properties": {
         "lang_code": {
           "description": "Wiktionary language code of the translation term",
-          "type": ["string", "null"]
+          "type": "string"
         },
         "lang_name": {
           "description": "Translation language name",

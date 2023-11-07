@@ -7,8 +7,8 @@ from collections import defaultdict
 from copy import copy
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
+from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
-
 from wiktextract.wxr_context import WiktextractContext
 
 from .clean import clean_value
@@ -248,7 +248,7 @@ def process_categories(wxr: WiktextractContext, page_data: List[Dict]) -> None:
         r"^("
         + wxr.wtp.NAMESPACE_DATA.get("Rhymes", {}).get("name", "")
         + ":)?("
-        + "|".join(re.escape(x) for x in wxr.config.LANGUAGES_BY_NAME)
+        + "|".join(re.escape(x) for _, x in get_all_names("en"))
         + ")[ /]?"
     )
     # Remove category links that start with a language name from entries for
@@ -261,7 +261,7 @@ def process_categories(wxr: WiktextractContext, page_data: List[Dict]) -> None:
             m = re.match(starts_lang_re, cat)
             if m:
                 catlang = m.group(2)
-                catlang_code = wxr.config.LANGUAGES_BY_NAME.get(catlang)
+                catlang_code = name_to_code(catlang, "en")
                 if catlang_code != lang_code and not (
                     catlang_code == "en" and data.get("lang_code") == "mul"
                 ):

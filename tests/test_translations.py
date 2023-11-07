@@ -132,8 +132,8 @@ class TrTests(unittest.TestCase):
     def test_tr8(self):
         data = self.runtr("Mandarin: 是 (rrr)", lang="Chinese")
         self.assertEqual(data, {"translations": [
-            {"word": "是", "roman": "rrr", "lang": "Mandarin Chinese",
-             "code": "cmn",
+            {"word": "是", "roman": "rrr", "lang": "Chinese Mandarin",
+             "code": "zh",
              }]})
 
     def test_tr9(self):

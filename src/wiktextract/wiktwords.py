@@ -139,12 +139,6 @@ def main():
         help="Extract words for all languages",
     )
     parser.add_argument(
-        "--list-languages",
-        action="store_true",
-        default=False,
-        help="Print list of supported languages",
-    )
-    parser.add_argument(
         "--pages-dir",
         type=str,
         default=None,
@@ -378,43 +372,6 @@ def main():
         verbose=args.verbose,
         expand_tables=args.inflection_tables_file,
     )
-
-    if args.language:
-        new_lang_codes = []
-        for x in args.language:
-            if x not in conf1.LANGUAGES_BY_CODE:
-                if x in conf1.LANGUAGES_BY_NAME:
-                    new_lang_codes.append(conf1.LANGUAGES_BY_NAME[x])
-                else:
-                    logging.error(f"Invalid language: {x}")
-                    sys.exit(1)
-            else:
-                new_lang_codes.append(x)
-        conf1.capture_language_codes = new_lang_codes
-
-    if args.language:
-        lang_names = []
-        for x in args.language:
-            if x in conf1.LANGUAGES_BY_CODE:
-                lang_names.extend(conf1.LANGUAGES_BY_CODE[x])
-            else:
-                lang_names.extend(
-                    conf1.LANGUAGES_BY_CODE[conf1.LANGUAGES_BY_NAME[x]]
-                )
-
-        lang_names = [re.escape(x) for x in lang_names]
-        lang_names_re = r"==\s*("
-        lang_names_re += "|".join(lang_names)
-        lang_names_re += r")"
-        lang_names_re = re.compile(lang_names_re)
-
-    # If --list-languages has been specified, just print the list of supported
-    # languages
-    if args.list_languages:
-        print("Supported languages:")
-        for lang_name, lang_code in conf1.LANGUAGES_BY_NAME.items():
-            print(f"    {lang_name}: {lang_code}")
-        sys.exit(0)
 
     if not args.path and not args.db_path:
         print(

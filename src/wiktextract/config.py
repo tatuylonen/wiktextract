@@ -50,8 +50,6 @@ class WiktionaryConfig:
         "ZH_PRON_TAGS",
         "FR_FORM_TABLES",
         "DE_FORM_TABLES",
-        "LANGUAGES_BY_NAME",
-        "LANGUAGES_BY_CODE",
         "FORM_OF_TEMPLATES",
         "analyze_templates",
         "extract_thesaurus_pages",
@@ -113,7 +111,6 @@ class WiktionaryConfig:
         self.redirects = {}
         self.data_folder = files("wiktextract") / "data" / dump_file_lang_code
         self.init_subtitles()
-        self.init_languages()
         self.set_attr_from_json("ZH_PRON_TAGS", "zh_pron_tags.json")
         if dump_file_lang_code == "zh":
             self.set_attr_from_json(
@@ -160,79 +157,6 @@ class WiktionaryConfig:
             if "tags" in v:
                 assert isinstance(v["tags"], (list, tuple))
         self.set_attr_from_json("OTHER_SUBTITLES", "other_subtitles.json")
-
-    def init_languages(self):
-        def canon_warn(name, use_code, not_use_code):
-            print(
-                f"WARNING: Non-unique language canonical name '{name}'."
-                f" Mapping to '{use_code}' instead of '{not_use_code}'."
-            )
-
-        def alias_info(name, new_code, kind, old_code, use_code, not_use_code):
-            if self.verbose:
-                print(
-                    f"Language alias '{name}' for code '{new_code}'"
-                    f" is already a{kind} for {old_code}."
-                    f" Mapping to '{use_code}' instead of '{not_use_code}'."
-                )
-
-        self.set_attr_from_json("LANGUAGES_BY_CODE", "languages.json")
-
-        self.LANGUAGES_BY_NAME = {}
-
-        # add canonical names first to avoid overwriting them
-        canonical_names = {}
-        for lang_code, lang_names in self.LANGUAGES_BY_CODE.items():
-            canonical_name = lang_names[0]
-            if canonical_name in canonical_names:
-                lang_code0 = canonical_names[canonical_name]
-                if len(lang_code) < len(lang_code0):
-                    canon_warn(canonical_name, lang_code, lang_code0)
-                    canonical_names[canonical_name] = lang_code
-                    self.LANGUAGES_BY_NAME[canonical_name] = lang_code
-                else:
-                    canon_warn(canonical_name, lang_code0, lang_code)
-            else:
-                canonical_names[canonical_name] = lang_code
-                self.LANGUAGES_BY_NAME[canonical_name] = lang_code
-
-        # add other names
-        for lang_code, lang_names in self.LANGUAGES_BY_CODE.items():
-            for lang_name in lang_names[1:]:
-                if lang_name in canonical_names:
-                    lang_code0 = canonical_names[lang_name]
-                    alias_info(
-                        lang_name,
-                        lang_code,
-                        " canonical name",
-                        lang_code0,
-                        lang_code0,
-                        lang_code,
-                    )
-                    continue
-                if lang_name in self.LANGUAGES_BY_NAME:
-                    lang_code0 = self.LANGUAGES_BY_NAME[lang_name]
-                    if len(lang_code) < len(lang_code0):
-                        alias_info(
-                            lang_name,
-                            lang_code,
-                            "n alias",
-                            lang_code0,
-                            lang_code,
-                            lang_code0,
-                        )
-                        self.LANGUAGES_BY_NAME[lang_name] = lang_code
-                    else:
-                        alias_info(
-                            lang_name,
-                            lang_code,
-                            "n alias",
-                            lang_code0,
-                            lang_code0,
-                            lang_code,
-                        )
-                else:
-                    self.LANGUAGES_BY_NAME[lang_name] = lang_code
 
     def load_edition_settings(self):
         file_path = self.data_folder / "config.json"

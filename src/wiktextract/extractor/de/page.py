@@ -3,9 +3,9 @@ import logging
 from collections import defaultdict
 from typing import Dict, List, Union
 
+from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
-
 from wiktextract.datautils import append_base_data
 from wiktextract.wxr_context import WiktextractContext
 
@@ -263,13 +263,12 @@ def parse_page(
             # German name of the language of the section.
             if subtitle_template.template_name == "Sprache":
                 lang_name = subtitle_template.template_parameters.get(1)
-                lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang_name)
-                if not lang_code:
+                lang_code = name_to_code(lang_name, "de")
+                if lang_code == "":
                     wxr.wtp.warning(
                         f"Unknown language: {lang_name}",
                         sortid="extractor/de/page/parse_page/76",
                     )
-                    continue
                 if (
                     wxr.config.capture_language_codes is not None
                     and lang_code not in wxr.config.capture_language_codes

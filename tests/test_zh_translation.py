@@ -52,7 +52,7 @@ class TestTranslation(unittest.TestCase):
                     "word": "këtu",
                 },
                 {
-                    "lang_code": None,
+                    "lang_code": "",
                     "lang_name": "西阿帕切語",
                     "sense": "靠近說話者的地方",
                     "word": "kú",

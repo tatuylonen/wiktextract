@@ -2,37 +2,47 @@
 #
 # Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import re
-import sys
 import copy
 import html
 import logging
-
+import re
+import sys
 from collections import defaultdict
 from functools import partial
 from typing import Dict, List, Optional, Set, Union
 
-from wikitextprocessor import WikiNode, NodeKind
+from mediawiki_langcodes import get_all_names, name_to_code
+from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.core import TemplateArgs
-from wiktextract.wxr_context import WiktextractContext
-from wiktextract.parts_of_speech import PARTS_OF_SPEECH
-from wiktextract.linkages import parse_linkage_item_text
-from wiktextract.translations import parse_translation_item_text
 from wiktextract.clean import clean_template_args
-from wiktextract.datautils import data_append, data_extend, ns_title_prefix_tuple
-from wiktextract.tags import valid_tags
-from wiktextract.page import (
-    clean_node, recursively_extract, LEVEL_KINDS, is_panel_template
+from wiktextract.datautils import (
+    data_append,
+    data_extend,
+    ns_title_prefix_tuple,
 )
-
 from wiktextract.form_descriptions import (
-    decode_tags, parse_word_head, parse_sense_qualifier,
-    distw, parse_alt_or_inflection_of, classify_desc)
-from wiktextract.inflection import parse_inflection_section, TableContext
+    classify_desc,
+    decode_tags,
+    distw,
+    parse_alt_or_inflection_of,
+    parse_sense_qualifier,
+    parse_word_head,
+)
+from wiktextract.inflection import TableContext, parse_inflection_section
+from wiktextract.linkages import parse_linkage_item_text
+from wiktextract.page import (
+    LEVEL_KINDS,
+    clean_node,
+    is_panel_template,
+    recursively_extract,
+)
+from wiktextract.parts_of_speech import PARTS_OF_SPEECH
+from wiktextract.tags import valid_tags
+from wiktextract.translations import parse_translation_item_text
+from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby, parse_ruby
 from ..share import strip_nodes
-
 from .unsupported_titles import unsupported_title_map
 
 # Matches head tag
@@ -532,7 +542,7 @@ def init_head_tag_re(wxr):
             r"^(head|Han char|arabic-noun|arabic-noun-form|"
             r"hangul-symbol|syllable-hangul)$|" +
             r"^(latin|" +
-            "|".join(wxr.wtp.LANGUAGES_BY_CODE) + r")-(" +
+            "|".join(lang_name for _, lang_name in get_all_names("en")) + r")-(" +
             "|".join([
                 "abbr",
                 "adj",
@@ -3356,7 +3366,6 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
     """Fix subtitle hierarchy to be strict Language -> Etymology ->
     Part-of-Speech -> Translation/Linkage."""
 
-    # Known language names are in languages_by_name
     # Known lowercase PoS names are in part_of_speech_map
     # Known lowercase linkage section names are in linkage_map
 
@@ -3381,7 +3390,7 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
                       .format(title, left, right),
                       sortid="page/2904")
         lc = title.lower()
-        if title in wxr.config.LANGUAGES_BY_NAME:
+        if name_to_code(title, "en") != "":
             if level > 2:
                 wxr.wtp.debug("subtitle has language name {} at level {}"
                           .format(title, level),
@@ -3491,16 +3500,18 @@ def parse_page(
             # Some pages have links at top level, e.g., "trees" in Wiktionary
             continue
         if langnode.kind != NodeKind.LEVEL2:
-            wxr.wtp.debug("unexpected top-level node: {}".format(langnode),
-                      sortid="page/3014")
+            wxr.wtp.debug(
+                f"unexpected top-level node: {langnode}", sortid="page/3014"
+            )
             continue
-        lang = clean_node(wxr, None,
-                          langnode.sarg if langnode.sarg else langnode.largs)
-        if lang not in wxr.config.LANGUAGES_BY_NAME:
-            wxr.wtp.debug("unrecognized language name at top-level {!r}"
-                      .format(lang), sortid="page/3019")
-            continue
-        lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang)
+        lang = clean_node(
+            wxr, None, langnode.sarg if langnode.sarg else langnode.largs
+        )
+        lang_code = name_to_code(lang, "en")
+        if lang_code == "":
+            wxr.wtp.debug(
+                f"unrecognized language name: {lang}", sortid="page/3019"
+            )
         if (
             wxr.config.capture_language_codes
             and lang_code not in wxr.config.capture_language_codes

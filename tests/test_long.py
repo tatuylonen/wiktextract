@@ -99,10 +99,7 @@ class LongTests(unittest.TestCase):
             sum(words.values()), sum(poses.values()) + num_redirects
         )
         self.assertGreater(num_transl, 0)
-        thesaurus_data = [
-            data
-            for data in search_thesaurus(
-                self.wxr.thesaurus_db_conn, "hieno", "fi", "adj"
-            )
-        ]
+        thesaurus_data = list(search_thesaurus(
+            self.wxr.thesaurus_db_conn, "hieno", "fi", "adj"
+        ))
         self.assertEqual(len(thesaurus_data), 17)

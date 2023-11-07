@@ -225,7 +225,7 @@ def reprocess_wiktionary(
             last_time = estimate_progress(
                 processed_pages, all_page_nums, start_time, last_time
             )
-    if wxr.config.extract_thesaurus_pages:
+    if wxr.config.dump_file_lang_code == "en":
         emit_words_in_thesaurus(wxr, emitted, out_f, human_readable)
     logging.info("Reprocessing wiktionary complete")
 

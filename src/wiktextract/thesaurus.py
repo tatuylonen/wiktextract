@@ -14,6 +14,7 @@ from multiprocessing import Pool, current_process
 from pathlib import Path
 from typing import List, Optional, Set, TextIO, Tuple
 
+from mediawiki_langcodes import name_to_code
 from wikitextprocessor import Page
 
 from .import_utils import import_extractor_module
@@ -281,7 +282,7 @@ def emit_words_in_thesaurus(
 
         entry = {
             "word": entry,
-            "lang": wxr.config.LANGUAGES_BY_CODE.get(lang_code)[0],
+            "lang": code_to_name(lang_code, "en"),
             "lang_code": lang_code,
             "pos": pos,
             "senses": [sense_dict] if sense_dict else [],
