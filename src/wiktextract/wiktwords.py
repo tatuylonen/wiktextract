@@ -14,7 +14,6 @@ import json
 import logging
 import os
 import pstats
-import re
 import sys
 from pathlib import Path
 from typing import TextIO
@@ -24,6 +23,7 @@ if sys.version_info < (3, 10):
 else:
     from importlib.resources import files
 
+from mediawiki_langcodes import code_to_name
 from wikitextprocessor import Wtp
 from wikitextprocessor.dumpparser import analyze_and_overwrite_pages
 
@@ -334,6 +334,10 @@ def main():
     # Default to English and Translingual if language not specified.
     if not args.language:
         args.language = ["en", "mul"]
+    else:
+        for lang_code in args.language:
+            if code_to_name(lang_code) == "":
+                logging.warning(f"Unknown language code: {lang_code}")
 
     if args.all_languages:
         args.language = None
