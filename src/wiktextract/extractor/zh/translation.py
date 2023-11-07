@@ -2,6 +2,7 @@ import re
 from collections import defaultdict
 from typing import Dict, List, Optional, Union
 
+from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wiktextract.datautils import find_similar_gloss
 from wiktextract.page import LEVEL_KINDS, clean_node
@@ -100,7 +101,7 @@ def process_translation_list_item(
     words_text = words_text.strip()
     if len(words_text) == 0:
         return
-    lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang_text)
+    lang_code = name_to_code(lang_text, "zh")
 
     # split words by `,` or `;` that are not inside `()`
     for word_and_tags in re.split(r"[,;、](?![^(]*\))\s*", words_text):

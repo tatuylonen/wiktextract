@@ -18,12 +18,6 @@ class TestDETranslation(unittest.TestCase):
         self.wxr = WiktextractContext(
             Wtp(lang_code="de"), WiktionaryConfig(dump_file_lang_code="de")
         )
-        self.wxr.wtp.LANGUAGES_BY_CODE["en"] = ["Englisch"]
-        self.wxr.wtp.LANGUAGES_BY_CODE["hy"] = ["Armenisch"]
-        self.wxr.wtp.LANGUAGES_BY_CODE["ru"] = ["Russisch"]
-        self.wxr.wtp.LANGUAGES_BY_CODE["fr"] = ["Französisch"]
-        self.wxr.wtp.LANGUAGES_BY_CODE["ar"] = ["Arabisch"]
-        self.wxr.wtp.LANGUAGES_BY_CODE["la"] = ["Latein"]
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()

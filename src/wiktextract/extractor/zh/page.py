@@ -4,6 +4,7 @@ import re
 from collections import defaultdict
 from typing import Dict, List, Union
 
+from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wiktextract.datautils import append_base_data
 from wiktextract.page import LEVEL_KINDS, clean_node
@@ -212,12 +213,12 @@ def parse_page(
     for level2_node in tree.find_child(NodeKind.LEVEL2):
         categories_and_links = defaultdict(list)
         lang_name = clean_node(wxr, categories_and_links, level2_node.largs)
-        if lang_name not in wxr.config.LANGUAGES_BY_NAME:
+        if name_to_code(lang_name, "zh") == "":
             wxr.wtp.warning(
                 f"Unrecognized language name: {lang_name}",
                 sortid="extractor/zh/page/parse_page/509",
             )
-        lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang_name)
+        lang_code = name_to_code(lang_name, "zh")
         if (
             wxr.config.capture_language_codes is not None
             and lang_code not in wxr.config.capture_language_codes

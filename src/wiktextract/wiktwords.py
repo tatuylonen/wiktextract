@@ -14,7 +14,6 @@ import json
 import logging
 import os
 import pstats
-import re
 import sys
 from pathlib import Path
 from typing import TextIO
@@ -24,6 +23,7 @@ if sys.version_info < (3, 10):
 else:
     from importlib.resources import files
 
+from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import Wtp
 from wikitextprocessor.dumpparser import analyze_and_overwrite_pages
 
@@ -125,24 +125,26 @@ def main():
         help="Language code of the dump file.",
     )
     parser.add_argument(
-        "--language",
+        "--language-code",
         type=str,
         action="append",
         default=[],
         help="Language code to capture (can specify multiple times, defaults "
-        "to English [en] and Translingual [mul])",
+        "to dump file language code and `mul`(Translingual))",
+    )
+    parser.add_argument(
+        "--language-name",
+        type=str,
+        action="append",
+        default=[],
+        help="Language names to capture (can specify multiple times, defaults "
+        "to dump file language and Translingual)",
     )
     parser.add_argument(
         "--all-languages",
         action="store_true",
         default=False,
         help="Extract words for all languages",
-    )
-    parser.add_argument(
-        "--list-languages",
-        action="store_true",
-        default=False,
-        help="Print list of supported languages",
     )
     parser.add_argument(
         "--pages-dir",
@@ -337,15 +339,30 @@ def main():
         args.inflections = True
         args.descendants = True
 
-    # Default to English and Translingual if language not specified.
-    if not args.language:
-        args.language = ["en", "mul"]
+    # Default to dump file language and Translingual if not specified.
+    capture_lang_codes = set()
+    if len(args.language_code) > 0:
+        for lang_code in args.language_code:
+            lang_name = code_to_name(lang_code, args.dump_file_language_code)
+            if lang_name == "":
+                logging.warning(f"Unknown language code: {lang_code}")
+            else:
+                capture_lang_codes.add(lang_code)
+    if len(args.language_name) > 0:
+        for lang_name in args.language_name:
+            lang_code = name_to_code(lang_name, args.dump_file_language_code)
+            if lang_code == "":
+                logging.warning(f"Unknown language name: {lang_name}")
+            else:
+                capture_lang_codes.add(lang_code)
+    if len(capture_lang_codes) == 0:
+        capture_lang_codes = {args.dump_file_language_code, "mul"}
 
     if args.all_languages:
-        args.language = None
-        print("Capturing words for all available languages")
+        capture_lang_codes = None
+        logging.info("Capturing words for all available languages")
     else:
-        print("Capturing words for:", ", ".join(args.language))
+        logging.info(f"Capturing words for: {', '.join(capture_lang_codes)}")
 
     # Open output file.
     out_path = args.out
@@ -365,7 +382,7 @@ def main():
 
     conf1 = WiktionaryConfig(
         dump_file_lang_code=args.dump_file_language_code,
-        capture_language_codes=args.language,
+        capture_language_codes=capture_lang_codes,
         capture_translations=args.translations,
         capture_pronunciation=args.pronunciations,
         capture_linkages=args.linkages,
@@ -379,43 +396,6 @@ def main():
         expand_tables=args.inflection_tables_file,
     )
 
-    if args.language:
-        new_lang_codes = []
-        for x in args.language:
-            if x not in conf1.LANGUAGES_BY_CODE:
-                if x in conf1.LANGUAGES_BY_NAME:
-                    new_lang_codes.append(conf1.LANGUAGES_BY_NAME[x])
-                else:
-                    logging.error(f"Invalid language: {x}")
-                    sys.exit(1)
-            else:
-                new_lang_codes.append(x)
-        conf1.capture_language_codes = new_lang_codes
-
-    if args.language:
-        lang_names = []
-        for x in args.language:
-            if x in conf1.LANGUAGES_BY_CODE:
-                lang_names.extend(conf1.LANGUAGES_BY_CODE[x])
-            else:
-                lang_names.extend(
-                    conf1.LANGUAGES_BY_CODE[conf1.LANGUAGES_BY_NAME[x]]
-                )
-
-        lang_names = [re.escape(x) for x in lang_names]
-        lang_names_re = r"==\s*("
-        lang_names_re += "|".join(lang_names)
-        lang_names_re += r")"
-        lang_names_re = re.compile(lang_names_re)
-
-    # If --list-languages has been specified, just print the list of supported
-    # languages
-    if args.list_languages:
-        print("Supported languages:")
-        for lang_name, lang_code in conf1.LANGUAGES_BY_NAME.items():
-            print(f"    {lang_name}: {lang_code}")
-        sys.exit(0)
-
     if not args.path and not args.db_path:
         print(
             "The PATH argument for wiktionary dump file is normally mandatory."
@@ -426,7 +406,6 @@ def main():
     context1 = Wtp(
         db_path=args.db_path,
         lang_code=args.dump_file_language_code,
-        languages_by_code=conf1.LANGUAGES_BY_CODE,
         template_override_funcs=template_override_fns,
     )
 

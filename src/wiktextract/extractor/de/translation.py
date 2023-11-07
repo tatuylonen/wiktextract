@@ -2,9 +2,9 @@ import re
 from collections import defaultdict
 from typing import Dict, List, Union
 
+from mediawiki_langcodes import code_to_name
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
-
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -101,12 +101,10 @@ def process_translation_list(
 
             lang_code = node.template_parameters.get(1)
             translation_data["code"] = lang_code
-            languages = wxr.wtp.LANGUAGES_BY_CODE.get(lang_code)
-            if languages:
-                translation_data["lang"] = languages[0]
-            else:
+            translation_data["lang"] = code_to_name(lang_code, "de")
+            if translation_data["lang"] == "":
                 wxr.wtp.debug(
-                    f"Unknown language code: {lang_code}",
+                    f"Unknown language code: {translation_data['lang']}",
                     sortid="extractor/de/translation/process_translation_list/70",
                 )
             if node.template_name[-1] == "?":

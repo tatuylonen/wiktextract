@@ -60,8 +60,6 @@ class TestDEPronunciation(unittest.TestCase):
                 self.wxr.wtp.add_page("Vorlage:IPA", 10, "")
                 self.wxr.wtp.add_page("Vorlage:Lautschrift", 10, "(Deutsch)")
 
-                self.wxr.wtp.LANGUAGES_BY_CODE["de"] = "Deutsch"
-
                 root = self.wxr.wtp.parse(case["input"])
 
                 sound_data = [defaultdict(list)]
@@ -137,8 +135,6 @@ class TestDEPronunciation(unittest.TestCase):
                 self.wxr.wtp.start_page("")
                 self.wxr.wtp.add_page("Vorlage:IPA", 10, "")
                 self.wxr.wtp.add_page("Vorlage:Audio", 10, "")
-
-                self.wxr.wtp.LANGUAGES_BY_CODE["de"] = "Deutsch"
 
                 root = self.wxr.wtp.parse(case["input"])
 

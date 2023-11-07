@@ -2,6 +2,7 @@ import logging
 import re
 from typing import List, Optional, Union
 
+from mediawiki_codes import name_to_code
 from wikitextprocessor import NodeKind, Page, WikiNode
 
 from ...page import clean_node
@@ -161,7 +162,7 @@ def recursive_parse(
 
     if node.kind == NodeKind.LEVEL2:
         lang_name = clean_node(wxr, None, node.largs)
-        lang_code = wxr.config.LANGUAGES_BY_NAME.get(lang_name)
+        lang_code = name_to_code(lang_name, "zh")
         if lang_code is None:
             logging.warning(
                 f"Unrecognized language: {lang_name} in page Thesaurus:{entry}"
