@@ -1,4 +1,4 @@
-from collections import defaultdict, deque
+from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
 from typing import Dict, List
@@ -58,7 +58,7 @@ def process_inflection_table(
         return
     table_node = table_nodes[0]
     column_headers = []
-    rowspan_headers = deque()
+    rowspan_headers = []
     colspan_headers = []
     for row_num, table_row in enumerate(
         table_node.find_child(NodeKind.TABLE_ROW)
@@ -83,14 +83,12 @@ def process_inflection_table(
             for cell in table_row_nodes
         )
         row_headers = []
-        for index, (rowspan_text, rowspan_count) in enumerate(
-            rowspan_headers.copy()
-        ):
+        new_rowspan_headers = []
+        for rowspan_text, rowspan_count in rowspan_headers:
             row_headers.append(rowspan_text)
-            if rowspan_count - 1 == 0:
-                del rowspan_headers[index]
-            else:
-                rowspan_headers[index] = (rowspan_text, rowspan_count - 1)
+            if rowspan_count - 1 > 0:
+                new_rowspan_headers.append((rowspan_text, rowspan_count - 1))
+        rowspan_headers = new_rowspan_headers
 
         column_cell_index = 0
         for column_num, table_cell in enumerate(table_row_nodes):
@@ -174,4 +172,6 @@ def process_inflection_table(
                             new_form_data["form"] = form
                             page_data[-1]["forms"].append(new_form_data)
 
-                    column_cell_index += int(table_cell.attrs.get("colspan", 1))
+                    colspan_text = table_cell.attrs.get("colspan", "1")
+                    if colspan_text.isdigit():
+                        column_cell_index += int(colspan_text)
