@@ -14,7 +14,7 @@ from multiprocessing import Pool, current_process
 from pathlib import Path
 from typing import List, Optional, Set, TextIO, Tuple
 
-from mediawiki_langcodes import name_to_code
+from mediawiki_langcodes import code_to_name
 from wikitextprocessor import Page
 
 from .import_utils import import_extractor_module
