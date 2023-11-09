@@ -172,4 +172,6 @@ def process_inflection_table(
                             new_form_data["form"] = form
                             page_data[-1]["forms"].append(new_form_data)
 
-                    column_cell_index += int(table_cell.attrs.get("colspan", 1))
+                    colspan_text = table_cell.attrs.get("colspan", "1")
+                    if colspan_text.isdigit():
+                        column_cell_index += int(colspan_text)
