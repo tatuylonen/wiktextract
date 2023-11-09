@@ -2,7 +2,7 @@ import logging
 import re
 from typing import List, Optional, Union
 
-from mediawiki_codes import name_to_code
+from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, Page, WikiNode
 
 from ...page import clean_node
