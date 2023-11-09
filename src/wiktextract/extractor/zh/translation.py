@@ -22,7 +22,7 @@ def extract_translation(
                 template_name = child.template_name.lower()
                 if (
                     template_name in {"trans-top", "翻譯-頂", "trans-top-also"}
-                    and len(child.template_parameters) > 0
+                    and 1 in child.template_parameters
                 ):
                     sense_text = clean_node(
                         wxr, None, child.template_parameters.get(1)
