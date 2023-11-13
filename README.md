@@ -301,11 +301,17 @@ word `thrill` as an English verb (only one part-of-speech is shown here):
 
 ### Installing
 
-Preparation: on Linux (example from Ubuntu 20.04), you may need to
+#### Use container:
+
+```
+$ podman run -it --rm ghcr.io/tatuylonen/wiktextract --help
+```
+
+#### Install from source:
+
+On Linux (example from Ubuntu 20.04), you may need to
 first install the `build-essential` and `python3-dev` packages
 with `apt update && apt install build-essential python3-dev python3-pip lbzip2`.
-
-Install `wiktextract` from source:
 
 ```
 git clone https://github.com/tatuylonen/wiktextract.git
@@ -314,12 +320,6 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
 python -m pip install --use-pep517 .
-```
-
-Alternatively, you can install the package from pypi.org:
-
-```
-python -m pip install wiktextract
 ```
 
 This software requires Python 3.

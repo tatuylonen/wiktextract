@@ -1,0 +1,22 @@
+name: Publish container
+
+on:
+  workflow_run:
+    workflows: [test]
+    types:
+      - completed
+    branches:
+      - master
+
+jobs:
+  publish_container:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: podman login -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
+      - run: podman build -t ghcr.io/${{ github.repository }} .
+      - run: podman push ghcr.io/${{ github.repository }}
