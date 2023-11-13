@@ -304,8 +304,7 @@ word `thrill` as an English verb (only one part-of-speech is shown here):
 #### Use container:
 
 ```
-$ podman build -t wiktextract .
-$ podman run -it --rm wiktextract wiktwords --help
+$ podman run -it --rm ghcr.io/tatuylonen/wiktextract --help
 ```
 
 #### Install from source:
