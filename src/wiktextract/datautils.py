@@ -61,7 +61,8 @@ def data_extend(data: Dict, key: str, values: Iterable) -> None:
         data_append(data, key, x)
 
 
-def split_at_comma_semi(text: str, separators=(",", ";", "，", "،"), extra=()
+def split_at_comma_semi(
+    text: str, separators=(",", ";", "，", "،"), extra=()
 ) -> List[str]:
     """Splits the text at commas and semicolons, unless they are inside
     parenthesis.  ``separators`` is default separators (setting it eliminates

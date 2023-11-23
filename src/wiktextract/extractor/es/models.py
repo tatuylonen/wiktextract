@@ -3,7 +3,7 @@ import json
 
 import logging
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, ValidationError
 from pydantic.json_schema import GenerateJsonSchema
 
 from wiktextract.wxr_context import WiktextractContext
@@ -28,15 +28,21 @@ class BaseModelWrap(BaseModel):
         validate_assignment = True
 
     def update(self, data: dict):
-        update = self.dict(exclude_defaults=True, exclude_none=True)
-        update.update(data)
-        for k, v in (
-            self.validate(update)
-            .dict(exclude_defaults=True, exclude_none=True)
-            .items()
-        ):
+        for k, v in data.items():
             setattr(self, k, v)
         return self
+
+    def get(self, key: str, _=None):
+        return getattr(self, key)
+
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+    def __setitem__(self, item, value):
+        try:
+            setattr(self, item, value)
+        except ValidationError:
+            pass
 
 
 class LoggingExtraFieldsModel(BaseModelWrap):
@@ -80,6 +86,7 @@ class WordEntry(LoggingExtraFieldsModel):
 
     word: str = Field(description="word string")
     pos: str = Field(default=None, description="Part of speech type")
+    pos_title: str = Field(default=None, description="Original POS title")
     lang_code: str = Field(
         description="Wiktionary language code", examples=["es"]
     )
