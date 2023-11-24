@@ -5,6 +5,7 @@ from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
 from wiktextract.datautils import append_base_data
+from wiktextract.extractor.es.gloss import extract_gloss
 from wiktextract.extractor.es.pronunciation import extract_pronunciation
 from wiktextract.extractor.es.models import WordEntry, PydanticLogger
 
@@ -76,9 +77,13 @@ def process_pos_block(
         ):
             # XXX: Extract forms
             pass
-        elif isinstance(child, WikiNode) and child.kind == NodeKind.LIST:
-            # XXX: Extract data
-            pass
+        elif (
+            isinstance(child, WikiNode)
+            and child.kind == NodeKind.LIST
+            and child.sarg == ";"
+        ):
+            extract_gloss(wxr, page_data, child)
+
         else:
             # XXX: Extract data
             pass
