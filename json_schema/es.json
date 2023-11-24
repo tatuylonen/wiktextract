@@ -56,6 +56,143 @@
       ],
       "title": "Sense",
       "type": "object"
+    },
+    "Sound": {
+      "properties": {
+        "audio": {
+          "default": [],
+          "description": "Audio file name",
+          "items": {
+            "type": "string"
+          },
+          "title": "Audio",
+          "type": "array"
+        },
+        "flac_url": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Flac Url",
+          "type": "array"
+        },
+        "ipa": {
+          "default": [],
+          "description": "International Phonetic Alphabet",
+          "items": {
+            "type": "string"
+          },
+          "title": "Ipa",
+          "type": "array"
+        },
+        "mp3_url": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Mp3 Url",
+          "type": "array"
+        },
+        "ogg_url": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Ogg Url",
+          "type": "array"
+        },
+        "phonetic_transcription": {
+          "default": [],
+          "description": "Phonetic transcription, less exact than IPA.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Phonetic Transcription",
+          "type": "array"
+        },
+        "roman": {
+          "default": [],
+          "description": "Translitaration to Roman characters",
+          "items": {
+            "type": "string"
+          },
+          "title": "Roman",
+          "type": "array"
+        },
+        "syllabic": {
+          "default": [],
+          "description": "Syllabic transcription",
+          "items": {
+            "type": "string"
+          },
+          "title": "Syllabic",
+          "type": "array"
+        },
+        "tag": {
+          "default": [],
+          "description": "Specifying the variant of the pronunciation",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tag",
+          "type": "array"
+        },
+        "wav_url": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Wav Url",
+          "type": "array"
+        }
+      },
+      "title": "Sound",
+      "type": "object"
+    },
+    "Spelling": {
+      "properties": {
+        "alternative": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Alternative spelling with same pronunciation",
+          "title": "Alternative"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Note regarding alternative spelling",
+          "title": "Note"
+        },
+        "same_pronunciation": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Whether the alternative spelling has the same pronunciation as the default spelling",
+          "title": "Same Pronunciation"
+        }
+      },
+      "title": "Spelling",
+      "type": "object"
     }
   },
   "$id": "https://kaikki.org/es.json",
@@ -113,6 +250,36 @@
       ],
       "default": [],
       "title": "Senses"
+    },
+    "sounds": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Sound"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Sounds"
+    },
+    "spellings": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Spelling"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Spellings"
     },
     "word": {
       "description": "word string",
