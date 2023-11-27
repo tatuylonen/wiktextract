@@ -20,6 +20,9 @@ def extract_gloss(
         definition: WikiNodeChildrenList = []
         other: WikiNodeChildrenList = []
 
+        if not list_item.definition:
+            continue
+
         for node in list_item.definition:
             if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
                 other.append(node)
