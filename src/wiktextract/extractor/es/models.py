@@ -7,6 +7,25 @@ class BaseModelWrap(BaseModel):
     model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
 
+class Translation(BaseModelWrap):
+    word: str = Field(description="Translation term")
+    lang_code: str = Field(
+        description="Wiktionary language code of the translation term"
+    )
+    senseids: list[str] = Field(
+        default=[],
+        description="List of senseids where this translation applies",
+    )
+    tags: list[str] = Field(
+        default=[],
+        description="Tags specifying the translated term, usually gender information",
+    )
+    notes: list[str] = Field(default=[], description="A list of notes")
+    roman: Optional[str] = Field(
+        default=None, description="Transliteration in roman characters"
+    )
+
+
 class Reference(BaseModelWrap):
     url: Optional[str] = Field(default=None, description="A web link")
     first_name: Optional[str] = Field(
@@ -98,8 +117,7 @@ class Sound(BaseModelWrap):
 
 class WordEntry(BaseModelWrap):
     """
-    WordEntry is a dictionary containing lexical information of a single word
-    extracted from Wiktionary with wiktextract.
+    WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.
     """
     model_config = ConfigDict(title="Spanish Wiktionary")
 
@@ -119,3 +137,4 @@ class WordEntry(BaseModelWrap):
     )
     sounds: Optional[list[Sound]] = []
     spellings: Optional[list[Spelling]] = []
+    translations: Optional[list[Translation]] = []

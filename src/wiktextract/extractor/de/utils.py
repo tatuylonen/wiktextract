@@ -1,5 +1,4 @@
 import re
-from typing import List
 
 from wikitextprocessor import NodeKind, WikiNode
 
@@ -26,7 +25,7 @@ def find_and_remove_child(node: WikiNode, kind: NodeKind, cb=None):
     return reversed(children)
 
 
-def split_senseids(senseids_str: str) -> List[str]:
+def split_senseids(senseids_str: str) -> list[str]:
     senseids = []
     raw_ids = (
         senseids_str.strip().removeprefix("[").removesuffix("]").split(",")
