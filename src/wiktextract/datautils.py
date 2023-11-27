@@ -10,18 +10,20 @@ from typing import Any, Dict, Iterable, List, Tuple
 from wiktextract.wxr_context import WiktextractContext
 
 # Keys in ``data`` that can only have string values (a list of them)
-str_keys = ("tags", "glosses")
+STR_KEYS = frozenset({"tags", "glosses"})
 # Keys in ``data`` that can only have dict values (a list of them)
-dict_keys = {
-    "pronunciations",
-    "senses",
-    "synonyms",
-    "related",
-    "antonyms",
-    "hypernyms",
-    "holonyms",
-    "forms",
-}
+DICT_KEYS = frozenset(
+    {
+        "pronunciations",
+        "senses",
+        "synonyms",
+        "related",
+        "antonyms",
+        "hypernyms",
+        "holonyms",
+        "forms",
+    }
+)
 
 
 def data_append(
@@ -30,21 +32,22 @@ def data_append(
     """Appends ``value`` under ``key`` in the dictionary ``data``.  The key
     is created if it does not exist."""
     assert isinstance(wxr, WiktextractContext)
-    assert isinstance(data, dict)
     assert isinstance(key, str)
 
-    if key in str_keys:
+    if key in STR_KEYS:
         assert isinstance(value, str)
-    elif key in dict_keys:
+    elif key in DICT_KEYS:
         assert isinstance(value, dict)
-    if key == "tags":
-        if value == "":
-            return
-    lst = data.get(key)
-    if lst is None:
-        lst = []
-        data[key] = lst
-    lst.append(value)
+    if key == "tags" and value == "":
+        return
+    list_value = (
+        getattr(data, key, []) if hasattr(data, key) else data.get(key, [])
+    )
+    list_value.append(value)
+    if hasattr(data, key):
+        setattr(data, key, list_value)
+    elif isinstance(data, dict):
+        data[key] = list_value
 
 
 def data_extend(

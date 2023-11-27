@@ -9,6 +9,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
+
 from wiktextract.wxr_context import WiktextractContext
 
 from .clean import clean_value
@@ -392,7 +393,7 @@ def clean_node(
                 cat = cat.strip()
                 if not cat:
                     continue
-                if cat not in sense_data.get("categories", ()):
+                if not sense_data_has_value(sense_data, "categories", cat):
                     data_append(wxr, sense_data, "categories", cat)
         else:
             for m in re.finditer(
@@ -408,7 +409,7 @@ def clean_node(
                     cat = cat.strip()
                     if not cat:
                         continue
-                    if cat not in sense_data.get("categories", ()):
+                    if not sense_data_has_value(sense_data, "categories", cat):
                         data_append(wxr, sense_data, "categories", cat)
                 elif not m.group(1):
                     if m.group(5):
@@ -429,7 +430,7 @@ def clean_node(
                     if not ltext and ltarget:
                         ltext = ltarget
                     ltuple = (ltext, ltarget)
-                    if ltuple not in sense_data.get("links", ()):
+                    if not sense_data_has_value(sense_data, "links", ltuple):
                         data_append(wxr, sense_data, "links", ltuple)
 
     v = clean_value(wxr, v)
@@ -448,3 +449,15 @@ def clean_node(
     # some Korean Hanja form
     v = re.sub(r"\^\?", "", v)
     return v
+
+
+def sense_data_has_value(sense_data, name, value):
+    """
+    Return True if `sense_data` has value in the attribute `name`'s value or
+    in the value of key `name` if `sense_date` is dictionary.
+    """
+    if hasattr(sense_data, name):
+        return value in getattr(sense_data, name)
+    elif isinstance(sense_data, dict):
+        return value in sense_data.get(name, ())
+    return False
