@@ -1,17 +1,17 @@
 import re
-from typing import List
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import WikiNodeChildrenList
 
 from wiktextract.extractor.es.models import Sense, WordEntry
+from wiktextract.extractor.es.sense_data import process_sense_data_list
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 
 def extract_gloss(
     wxr: WiktextractContext,
-    page_data: List[WordEntry],
+    page_data: list[WordEntry],
     list_node: WikiNode,
 ) -> None:
     for list_item in list_node.find_child(NodeKind.LIST_ITEM):
@@ -53,10 +53,18 @@ def extract_gloss(
             if tag:
                 gloss_data.tags.append(tag)
 
-        if other:
-            wxr.wtp.debug(
-                f"Found nodes that are not part of definition: {other}",
-                sortid="extractor/es/gloss/extract_gloss/46",
-            )
-
         page_data[-1].senses.append(gloss_data)
+
+        if other:
+            for node in other:
+                if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+                    process_sense_data_list(
+                        wxr,
+                        page_data[-1].senses[-1],
+                        node,
+                    )
+                else:
+                    wxr.wtp.debug(
+                        f"Found nodes that are not part of definition: {node}",
+                        sortid="extractor/es/gloss/extract_gloss/46",
+                    )
