@@ -9,6 +9,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
+
 from wiktextract.wxr_context import WiktextractContext
 
 from .clean import clean_value
@@ -179,7 +180,7 @@ def inject_linkages(wxr: WiktextractContext, page_data: List[Dict]) -> None:
                     dt["roman"] = term.roman
                 if term.language_variant is not None:
                     dt["language_variant"] = term.language_variant
-                data_append(wxr, data, term.linkage, dt)
+                data_append(data, term.linkage, dt)
 
 
 def process_categories(wxr: WiktextractContext, page_data: List[Dict]) -> None:
@@ -209,7 +210,7 @@ def process_categories(wxr: WiktextractContext, page_data: List[Dict]) -> None:
                     assert data.get(field) is not vals
                     if data.get("alt_of") or data.get("form_of"):
                         continue  # Don't add to alt-of/form-of entries
-                    data_extend(wxr, data, field, vals)
+                    data_extend(data, field, vals)
             continue
         if len(lst) != 1:
             continue
@@ -223,7 +224,7 @@ def process_categories(wxr: WiktextractContext, page_data: List[Dict]) -> None:
             if field in data:
                 v = data[field]
                 del data[field]
-                data_extend(wxr, senses[0], field, v)
+                data_extend(senses[0], field, v)
 
     # If the last part-of-speech of the last language (i.e., last item in "ret")
     # has categories or topics not bound to a sense, propagate those
@@ -239,7 +240,7 @@ def process_categories(wxr: WiktextractContext, page_data: List[Dict]) -> None:
             for data in page_data[:-1]:
                 if data.get("form_of") or data.get("alt_of"):
                     continue  # Don't add to form_of or alt_of entries
-                data_extend(wxr, data, field, lst)
+                data_extend(data, field, lst)
 
     # Regexp for matching category tags that start with a language name.
     # Group 2 will be the language name. The category tag should be without
@@ -383,9 +384,9 @@ def clean_node(
     if sense_data is not None:
         # Check for Lua execution error
         if '<strong class="error">Lua execution error' in v:
-            data_append(wxr, sense_data, "tags", "error-lua-exec")
+            data_append(sense_data, "tags", "error-lua-exec")
         if '<strong class="error">Lua timeout error' in v:
-            data_append(wxr, sense_data, "tags", "error-lua-timeout")
+            data_append(sense_data, "tags", "error-lua-timeout")
         # Capture Category tags
         if not collect_links:
             for m in re.finditer(
@@ -397,8 +398,8 @@ def clean_node(
                 cat = cat.strip()
                 if not cat:
                     continue
-                if cat not in sense_data.get("categories", ()):
-                    data_append(wxr, sense_data, "categories", cat)
+                if not sense_data_has_value(sense_data, "categories", cat):
+                    data_append(sense_data, "categories", cat)
         else:
             for m in re.finditer(
                 r"(?is)\[\[:?(\s*([^][|:]+):)?\s*([^]|]+)(\|([^]|]+))?\]\]",
@@ -413,8 +414,8 @@ def clean_node(
                     cat = cat.strip()
                     if not cat:
                         continue
-                    if cat not in sense_data.get("categories", ()):
-                        data_append(wxr, sense_data, "categories", cat)
+                    if not sense_data_has_value(sense_data, "categories", cat):
+                        data_append(sense_data, "categories", cat)
                 elif not m.group(1):
                     if m.group(5):
                         ltext = clean_value(wxr, m.group(5))
@@ -434,8 +435,8 @@ def clean_node(
                     if not ltext and ltarget:
                         ltext = ltarget
                     ltuple = (ltext, ltarget)
-                    if ltuple not in sense_data.get("links", ()):
-                        data_append(wxr, sense_data, "links", ltuple)
+                    if not sense_data_has_value(sense_data, "links", ltuple):
+                        data_append(sense_data, "links", ltuple)
 
     v = clean_value(wxr, v)
     # print("After clean_value:", repr(v))
@@ -453,3 +454,15 @@ def clean_node(
     # some Korean Hanja form
     v = re.sub(r"\^\?", "", v)
     return v
+
+
+def sense_data_has_value(sense_data, name, value):
+    """
+    Return True if `sense_data` has value in the attribute `name`'s value or
+    in the value of key `name` if `sense_date` is dictionary.
+    """
+    if hasattr(sense_data, name):
+        return value in getattr(sense_data, name)
+    elif isinstance(sense_data, dict):
+        return value in sense_data.get(name, ())
+    return False

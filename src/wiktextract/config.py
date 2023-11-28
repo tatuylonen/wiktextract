@@ -48,9 +48,6 @@ class WiktionaryConfig:
         "POS_TYPES",
         "OTHER_SUBTITLES",
         "ZH_PRON_TAGS",
-        "FR_FORM_TABLES",
-        "DE_FORM_TABLES",
-        "FORM_OF_TEMPLATES",
         "analyze_templates",
         "extract_thesaurus_pages",
     )
@@ -112,10 +109,6 @@ class WiktionaryConfig:
         self.data_folder = files("wiktextract") / "data" / dump_file_lang_code
         self.init_subtitles()
         self.set_attr_from_json("ZH_PRON_TAGS", "zh_pron_tags.json")
-        if dump_file_lang_code == "zh":
-            self.set_attr_from_json(
-                "FORM_OF_TEMPLATES", "form_of_templates.json"
-            )
         self.analyze_templates = True  # find templates that need pre-expand
         self.extract_thesaurus_pages = True
         self.load_edition_settings()

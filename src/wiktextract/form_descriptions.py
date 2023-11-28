@@ -1535,25 +1535,25 @@ def add_related(wxr, data, tags_lst, related, origtext,
                     dt["ruby"] = ruby
                 if "alt-of" in tags2:
                     check_related(related)
-                    data_extend(wxr, data, "tags", tags1)
-                    data_extend(wxr, data, "tags", tags2)
-                    data_extend(wxr, data, "topics", topics1)
-                    data_extend(wxr, data, "topics", topics2)
-                    data_append(wxr, data, "alt_of", dt)
+                    data_extend(data, "tags", tags1)
+                    data_extend(data, "tags", tags2)
+                    data_extend(data, "topics", topics1)
+                    data_extend(data, "topics", topics2)
+                    data_append(data, "alt_of", dt)
                 elif "form-of" in tags2:
                     check_related(related)
-                    data_extend(wxr, data, "tags", tags1)
-                    data_extend(wxr, data, "tags", tags2)
-                    data_extend(wxr, data, "topics", topics1)
-                    data_extend(wxr, data, "topics", topics2)
-                    data_append(wxr, data, "form_of", dt)
+                    data_extend(data, "tags", tags1)
+                    data_extend(data, "tags", tags2)
+                    data_extend(data, "topics", topics1)
+                    data_extend(data, "topics", topics2)
+                    data_append(data, "form_of", dt)
                 elif "compound-of" in tags2:
                     check_related(related)
-                    data_extend(wxr, data, "tags", tags1)
-                    data_extend(wxr, data, "tags", tags2)
-                    data_extend(wxr, data, "topics", topics1)
-                    data_extend(wxr, data, "topics", topics2)
-                    data_append(wxr, data, "compound", related)
+                    data_extend(data, "tags", tags1)
+                    data_extend(data, "tags", tags2)
+                    data_extend(data, "topics", topics1)
+                    data_extend(data, "topics", topics2)
+                    data_append(data, "compound", related)
                 else:
                     lang = wxr.wtp.section
                     related, final_tags = parse_head_final_tags(wxr, lang,
@@ -1570,8 +1570,8 @@ def add_related(wxr, data, tags_lst, related, origtext,
                         form["roman"] = roman
                     if ruby:
                         form["ruby"] = ruby
-                    data_extend(wxr, form, "topics", topics1)
-                    data_extend(wxr, form, "topics", topics2)
+                    data_extend(form, "topics", topics1)
+                    data_extend(form, "topics", topics2)
                     if topics1 or topics2:
                         wxr.wtp.debug("word head form has topics: {}".format(form),
                                   sortid="form_descriptions/1233")
@@ -1586,22 +1586,22 @@ def add_related(wxr, data, tags_lst, related, origtext,
                             continue
                         if (related != titleword or add_all_canonicals or
                             topics1 or topics2 or ruby):
-                            data_extend(wxr, form, "tags",
+                            data_extend(form, "tags",
                                         list(sorted(set(tags))))
                         else:
                             # We won't add canonical form here
                             filtered_tags = list(x for x in tags
                                                  if x != "canonical")
-                            data_extend(wxr, data, "tags", filtered_tags)
+                            data_extend(data, "tags", filtered_tags)
                             continue
                     else:
-                        data_extend(wxr, form, "tags", list(sorted(set(tags))))
+                        data_extend(form, "tags", list(sorted(set(tags))))
                     # Only insert if the form is not already there
                     for old in data.get("forms", ()):
                         if form == old:
                             break
                     else:
-                        data_append(wxr, data, "forms", form)
+                        data_append(data, "forms", form)
 
     # If this form had pre-tags that started with "both" or "all", add those
     # tags also to following related forms that don't have their own tags
@@ -1670,7 +1670,7 @@ def parse_word_head(wxr, pos, text, data, is_reconstruction,
     m = re.search(head_end_re, base)
     if m:
         tags = head_end_map[m.group(1).lower()].split()
-        data_extend(wxr, data, "tags", tags)
+        data_extend(data, "tags", tags)
         base = base[:m.start()]
 
     # Special case: handle Hán Nôm readings for Vietnamese characters
@@ -1767,9 +1767,9 @@ def parse_word_head(wxr, pos, text, data, is_reconstruction,
             if alt_i > 0:
                 tagsets, topics = decode_tags(" ".join(baseparts))
                 if not any("error-unknown-tag" in x for x in tagsets):
-                    data_extend(wxr, data, "topics", topics)
+                    data_extend(data, "topics", topics)
                     for tags in tagsets:
-                        data_extend(wxr, data, "tags", tags)
+                        data_extend(data, "tags", tags)
                     continue
 
             alt, tags = parse_head_final_tags(wxr, language, alt)
@@ -2143,7 +2143,7 @@ def parse_word_head(wxr, pos, text, data, is_reconstruction,
                         prev_tags = new_prev_tags
                         continue
                     for tags in tagsets:
-                        data_extend(wxr, data, "tags", tags)
+                        data_extend(data, "tags", tags)
                     prev_tags = tagsets
                     following_tags = None
 
@@ -2186,7 +2186,7 @@ def parse_sense_qualifier(wxr, text, data):
             #       .format(semi, cls))
             if cls == "tags":
                 tagsets, topics = decode_tags(semi)
-                data_extend(wxr, data, "topics", topics)
+                data_extend(data, "topics", topics)
                 # XXX should think how to handle distinct options better,
                 # e.g., "singular and plural genitive"; that can't really be
                 # done with changing the calling convention of this function.
@@ -2208,7 +2208,7 @@ def parse_sense_qualifier(wxr, text, data):
                           .format(text),
                           sortid="form_descriptions/1831")
     sense_tags = list(sorted(set(sense_tags)))
-    data_extend(wxr, data, "tags", sense_tags)
+    data_extend(data, "tags", sense_tags)
 
 
 def parse_pronunciation_tags(wxr, text, data):
@@ -2222,13 +2222,13 @@ def parse_pronunciation_tags(wxr, text, data):
     notes = []
     if cls == "tags":
         tagsets, topics = decode_tags(text)
-        data_extend(wxr, data, "topics", topics)
+        data_extend(data, "topics", topics)
         for tagset in tagsets:
             for t in tagset:
                 if " " in t:
                     notes.append(t)
                 else:
-                    data_append(wxr, data, "tags", t)
+                    data_append(data, "tags", t)
     else:
         notes.append(text)
     if notes:
@@ -2322,16 +2322,16 @@ def parse_translation_desc(wxr, lang, text, tr):
             if cls == "tags":
                 tagsets, topics = decode_tags(lst[0])
                 for t in tagsets:
-                    data_extend(wxr, tr, "tags", t)
-                data_extend(wxr, tr, "topics", topics)
+                    data_extend(tr, "tags", t)
+                data_extend(tr, "topics", topics)
                 lst = lst[1:]
                 continue
             cls = classify_desc(lst[-1])
             if cls == "tags":
                 tagsets, topics = decode_tags(lst[-1])
                 for t in tagsets:
-                    data_extend(wxr, tr, "tags", t)
-                data_extend(wxr, tr, "topics", topics)
+                    data_extend(tr, "tags", t)
+                data_extend(tr, "topics", topics)
                 lst = lst[:-1]
                 continue
             break
@@ -2351,14 +2351,14 @@ def parse_translation_desc(wxr, lang, text, tr):
         if par == text:
             pass
         if par == "f":
-            data_append(wxr, tr, "tags", "feminine")
+            data_append(tr, "tags", "feminine")
         elif par == "m":
-            data_append(wxr, tr, "tags", "masculine")
+            data_append(tr, "tags", "masculine")
         elif cls == "tags":
             tagsets, topics = decode_tags(par)
             for tags in tagsets:
-                data_extend(wxr, tr, "tags", tags)
-            data_extend(wxr, tr, "topics", topics)
+                data_extend(tr, "tags", tags)
+            data_extend(tr, "topics", topics)
         elif cls == "english":
             # If the text contains any of certain grammatical words, treat it
             # as a "note" instead of "english"
@@ -2398,7 +2398,7 @@ def parse_translation_desc(wxr, lang, text, tr):
                           .format(tr["taxonomic"], par),
                           sortid="form_descriptions/2019")
             if re.match(r"×[A-Z]", par):
-                data_append(wxr, tr, "tags", "extinct")
+                data_append(tr, "tags", "extinct")
                 par = par[1:]
             tr["taxonomic"] = par
         elif cls == "other":
@@ -2414,7 +2414,7 @@ def parse_translation_desc(wxr, lang, text, tr):
 
     # Check for gender indications in suffix
     text, final_tags = parse_head_final_tags(wxr, lang, text)
-    data_extend(wxr, tr, "tags", final_tags)
+    data_extend(tr, "tags", final_tags)
 
     # Restore those parts that we did not want to remove (they are often
     # optional words or words that are always used with the given translation)
@@ -2430,10 +2430,10 @@ def parse_translation_desc(wxr, lang, text, tr):
     roman = tr.get("roman")
     if roman:
         if roman.endswith(" f"):
-            data_append(wxr, tr, "tags", "feminine")
+            data_append(tr, "tags", "feminine")
             tr["roman"] = roman[:-2].strip()
         elif roman.endswith(" m"):
-            data_append(wxr, tr, "tags", "masculine")
+            data_append(tr, "tags", "masculine")
             tr["roman"] = roman[:-2].strip()
 
     # If the word now has "english" field but no "roman" field, and

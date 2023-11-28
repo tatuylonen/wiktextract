@@ -835,14 +835,14 @@ def parse_linkage_item_text(wxr: Wtp,
                 dt["english"] = english.strip()
             if taxonomic:
                 if re.match(r"×[A-Z]", taxonomic):
-                    data_append(wxr, dt, "tags", "extinct")
+                    data_append(dt, "tags", "extinct")
                     taxonomic = taxonomic[1:]
                 dt["taxonomic"] = taxonomic
             if re.match(r"×[A-Z]", w):
-                data_append(wxr, dt, "tags", "extinct")
+                data_append(dt, "tags", "extinct")
                 w = w[1:]  # Remove × before dead species names
             if alt and re.match(r"×[A-Z]", alt):
-                data_append(wxr, dt, "tags", "extinct")
+                data_append(dt, "tags", "extinct")
                 alt = alt[1:]  # Remove × before dead species names
             if alt and alt.strip() != w:
                 dt["alt"] = alt.strip()
@@ -854,7 +854,7 @@ def parse_linkage_item_text(wxr: Wtp,
                 if dt == old:
                     break
             else:
-                data_append(wxr, data, field, dt)
+                data_append(data, field, dt)
 
         # Handle exceptional linkage splits and other linkage
         # conversions (including expanding to variant forms)

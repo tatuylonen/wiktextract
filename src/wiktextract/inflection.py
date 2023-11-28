@@ -2356,7 +2356,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
                 dt["tags"] = list(dt.get("tags", []))
                 # This strange copy-assigning shuffle is preventative black
                 # magic; do not touch lest you invoke deep bugs.
-                data_append(wxr, dt, "tags", "multiword-construction")
+                data_append(dt, "tags", "multiword-construction")
             new_ret.append(dt)
         ret = new_ret
 
@@ -2431,7 +2431,7 @@ def handle_generic_table(wxr, tablecontext, data,
         else:
             if "table-tags" not in tags:
                 have_forms.add(fdt)
-            data_append(wxr, data, "forms", dt)
+            data_append(data, "forms", dt)
 
 def determine_header(wxr, tablecontext, lang, word, pos,
                      table_kind, kind, style,

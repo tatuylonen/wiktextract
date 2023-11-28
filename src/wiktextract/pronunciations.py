@@ -141,7 +141,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
             #         parse_pronunciation_tags(wxr, dial, pron)
             #     if country:
             #         parse_pronunciation_tags(wxr, country, pron)
-            #     data_append(wxr, data, "sounds", pron)
+            #     data_append(data, "sounds", pron)
             return "__AUDIO_IGNORE_THIS__" + str(len(audios) - 1) + "__"
         return None
 
@@ -296,7 +296,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
                         if pron:
                             pron["tags"] = list(sorted(pron["tags"]))
                             if pron not in data.get("sounds", ()):
-                                data_append(wxr, data, "sounds", pron)
+                                data_append(data, "sounds", pron)
                     elif "→" in v:
                         vals = re.split("→", v)
                         for v in vals:
@@ -314,7 +314,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
 
                                 pron["tags"] = list(sorted(pron["tags"]))
                                 if pron not in data.get("sounds", ()):
-                                    data_append(wxr, data, "sounds", pron)
+                                    data_append(data, "sounds", pron)
                     else:
                         # split alternative pronunciations split
                         # with "," or " / "
@@ -335,7 +335,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
                             if pron:
                                 pron["tags"] = list(sorted(pron["tags"]))
                                 if pron not in data.get("sounds", ()):
-                                    data_append(wxr, data, "sounds", pron)
+                                    data_append(data, "sounds", pron)
             else:
                 new_parent_hdrs.append(text)
 
@@ -465,7 +465,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
         if m:
             pron = {field: m.group(1)}
             if active_pos: pron["pos"] = active_pos
-            data_append(wxr, data, "sounds", pron)
+            data_append(data, "sounds", pron)
             # have_pronunciations = True
             continue
 
@@ -477,7 +477,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
                 if ending:
                     pron = {"rhymes": ending}
                     if active_pos: pron["pos"] = active_pos
-                    data_append(wxr, data, "sounds", pron)
+                    data_append(data, "sounds", pron)
                     # have_pronunciations = True
             continue
 
@@ -489,7 +489,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
                 if w:
                     pron = {"homophone": w}
                     if active_pos: pron["pos"] = active_pos
-                    data_append(wxr, data, "sounds", pron)
+                    data_append(data, "sounds", pron)
                     # have_pronunciations = True
             continue
 
@@ -503,12 +503,12 @@ def parse_pronunciation(wxr, node, data, etym_data,
                     seen.add(w)
                     pron = {"hangeul": w}
                     if active_pos: pron["pos"] = active_pos
-                    data_append(wxr, data, "sounds", pron)
+                    data_append(data, "sounds", pron)
                     # have_pronunciations = True
 
         m = re.search(r"\b(Syllabification|Hyphenation): ([^\s,]*)", text)
         if m:
-            data_append(wxr, data, "hyphenation", m.group(2))
+            data_append(data, "hyphenation", m.group(2))
             # have_pronunciations = True
 
         # See if it contains a word prefix restricting which forms the
@@ -546,7 +546,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
             tag = pron_romanizations[prefix]
             form = {"form": w,
                     "tags": tag.split()}
-            data_append(wxr, data, "forms", form)
+            data_append(data, "forms", form)
 
         # Find IPA pronunciations
         for m in re.finditer(r"(?m)/[^][\n/,]+?/"
@@ -576,7 +576,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
                 parse_pronunciation_tags(wxr, tagstext, pron)
                 if active_pos:
                     pron["pos"] = active_pos
-                data_append(wxr, data, "sounds", pron)
+                data_append(data, "sounds", pron)
             # have_pronunciations = True
 
         # XXX what about {{hyphenation|...}}, {{hyph|...}}
@@ -634,7 +634,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
                     audio["mp3_url"] = mp3
                     if active_pos: audio["pos"] = active_pos
                 if audio not in data.get("sounds", ()):
-                    data_append(wxr, data, "sounds", audio)
+                    data_append(data, "sounds", audio)
             # have_pronunciations = True
         audios =[]
         for enpr in enprs:
@@ -645,7 +645,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
             if active_pos:
                 pron["pos"] = active_pos
             if pron not in data.get("sounds", ()):
-                data_append(wxr, data, "sounds", pron)
+                data_append(data, "sounds", pron)
             # have_pronunciations = True
         enprs = []
 
