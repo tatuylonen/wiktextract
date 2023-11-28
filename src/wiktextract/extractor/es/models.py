@@ -1,9 +1,14 @@
-from typing import Optional
 import json
-
 import logging
+from typing import Optional
 
-from pydantic import BaseModel, Field, model_validator, ValidationError
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationError,
+    model_validator,
+)
 from pydantic.json_schema import GenerateJsonSchema
 
 from wiktextract.wxr_context import WiktextractContext
@@ -23,9 +28,7 @@ class PydanticLogger:
 
 
 class BaseModelWrap(BaseModel):
-    class Config:
-        extra = "ignore"
-        validate_assignment = True
+    model_config = ConfigDict(validate_assignment=True)
 
     def update(self, data: dict):
         for k, v in data.items():
@@ -48,7 +51,7 @@ class BaseModelWrap(BaseModel):
 class LoggingExtraFieldsModel(BaseModelWrap):
     @model_validator(mode="before")
     def log_extra_fields(cls, values):
-        all_allowed_field_names = {key for key in cls.__fields__.keys()}
+        all_allowed_field_names = cls.model_fields.keys()
         extra_fields = {
             name: str(value)
             for name, value in values.items()
