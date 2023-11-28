@@ -498,8 +498,8 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
                 if cls == "tags":
                     tagsets2, topics2 = decode_tags(par)
                     for t in tagsets2:
-                        data_extend(wxr, tr, "tags", t)
-                    data_extend(wxr, tr, "topics", topics2)
+                        data_extend(tr, "tags", t)
+                    data_extend(tr, "topics", topics2)
                     part = rest
 
             # Check if this part ends with (tags).  Note that
@@ -513,8 +513,8 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
                 if cls == "tags":
                     tagsets2, topics2 = decode_tags(par)
                     for t in tagsets2:
-                        data_extend(wxr, tr, "tags", t)
-                    data_extend(wxr, tr, "topics", topics2)
+                        data_extend(tr, "tags", t)
+                    data_extend(tr, "topics", topics2)
                     part = rest
 
             # Check if this part starts with "<tags/english>: <rest>"
@@ -530,8 +530,8 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
                     if cls == "tags":
                         tagsets2, topics2 = decode_tags(par)
                         for t in tagsets2:
-                            data_extend(wxr, tr, "tags", t)
-                        data_extend(wxr, tr, "topics", topics2)
+                            data_extend(tr, "tags", t)
+                        data_extend(tr, "topics", topics2)
                         part = rest
                     elif cls == "english":
                         if re.search(tr_note_re, par):
@@ -569,7 +569,7 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
             ):
                 if part.endswith(suffix):
                     part = part[:-len(suffix)]
-                    data_append(wxr, tr, "tags", t)
+                    data_append(tr, "tags", t)
                     break
 
             # Handle certain prefixes in translations
@@ -578,7 +578,7 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
             ):
                 if part.startswith(prefix):
                     part = part[len(prefix):]
-                    data_append(wxr, tr, "tags", t)
+                    data_append(tr, "tags", t)
                     break
 
             # Skip certain one-character translations entirely
@@ -587,7 +587,7 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
                 continue
 
             if "english" in tr and tr["english"] in english_to_tags:
-                data_extend(wxr, tr, "tags",
+                data_extend(tr, "tags",
                             english_to_tags[tr["english"]].split())
                 del tr["english"]
 
@@ -646,7 +646,7 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
 
             # If we have only notes, add as-is
             if "word" not in tr:
-                data_append(wxr, data, "translations", tr)
+                data_append(data, "translations", tr)
                 continue
 
             # Split if it contains no spaces
@@ -665,7 +665,7 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
                 if not alt:
                     continue
                 tr1["word"] = alt
-                data_append(wxr, data, "translations", tr1)
+                data_append(data, "translations", tr1)
 
     # Return the language name, in case we have subitems
     return lang

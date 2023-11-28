@@ -525,14 +525,14 @@ def parse_sense_linkage(wxr, data, name, ht):
 
         dt = {"word": w}
         if tags:
-            data_extend(wxr, dt, "tags", tags)
+            data_extend(dt, "tags", tags)
         if topics:
-            data_extend(wxr, dt, "topics", topics)
+            data_extend(dt, "topics", topics)
         if english:
             dt["english"] = english
         if alt:
             dt["alt"] = alt
-        data_append(wxr, data, field, dt)
+        data_append(data, field, dt)
 
 
 def init_head_tag_re(wxr):
@@ -738,7 +738,7 @@ def parse_language(wxr, langnode, language, lang_code):
 
     base_data = {"word": word, "lang": language, "lang_code": lang_code}
     if is_reconstruction:
-        data_append(wxr, base_data, "tags", "reconstruction")
+        data_append(base_data, "tags", "reconstruction")
     sense_data = {}
     pos_data = {}  # For a current part-of-speech
     etym_data = {}  # For one etymology
@@ -811,15 +811,15 @@ def parse_language(wxr, langnode, language, lang_code):
                 tags, lst = ret
                 assert isinstance(lst, (list, tuple))
                 if "form-of" in tags:
-                    data_extend(wxr, sense_data, "form_of", lst)
-                    data_extend(wxr, sense_data, "tags", tags)
+                    data_extend(sense_data, "form_of", lst)
+                    data_extend(sense_data, "tags", tags)
                 elif "alt-of" in tags:
-                    data_extend(wxr, sense_data, "alt_of", lst)
-                    data_extend(wxr, sense_data, "tags", tags)
+                    data_extend(sense_data, "alt_of", lst)
+                    data_extend(sense_data, "tags", tags)
 
         if (not sense_data.get("glosses") and
             "no-gloss" not in sense_data.get("tags", ())):
-            data_append(wxr, sense_data, "tags", "no-gloss")
+            data_append(sense_data, "tags", "no-gloss")
 
         pos_datas.append(sense_data)
         sense_data = {}
@@ -876,15 +876,15 @@ def parse_language(wxr, langnode, language, lang_code):
             # be removed?
             t = ht.get(2, "")
             if t == "pinyin":
-                data_append(wxr, pos_data, "tags", "Pinyin")
+                data_append(pos_data, "tags", "Pinyin")
             elif t == "romanization":
-                data_append(wxr, pos_data, "tags", "romanization")
+                data_append(pos_data, "tags", "romanization")
         m = re.search(head_tag_re, name)
         if m:
             args_ht = clean_template_args(wxr, ht)
             cleaned_expansion = clean_node(wxr, None, expansion)
             dt = {"name": name, "args": args_ht, "expansion": cleaned_expansion}
-            data_append(wxr, pos_data, "head_templates", dt)
+            data_append(pos_data, "head_templates", dt)
 
         # The following are both captured in head_templates and parsed
         # separately
@@ -1192,8 +1192,8 @@ def parse_language(wxr, langnode, language, lang_code):
         # keep tags extracted from the head for the dummy sense.
         push_sense()  # Make sure unfinished data pushed, and start clean sense
         if not pos_datas:
-            data_extend(wxr, sense_data, "tags", header_tags)
-            data_append(wxr, sense_data, "tags", "no-gloss")
+            data_extend(sense_data, "tags", header_tags)
+            data_append(sense_data, "tags", "no-gloss")
             push_sense()
 
     def process_gloss_header(
@@ -1418,15 +1418,15 @@ def parse_language(wxr, langnode, language, lang_code):
                 langid = clean_node(wxr, None, ht.get(1, ()))
                 arg = clean_node(wxr, sense_base, ht.get(2, ()))
                 if re.match(r"Q\d+$", arg):
-                    data_append(wxr, sense_base, "wikidata", arg)
-                data_append(wxr, sense_base, "senseid",
+                    data_append(sense_base, "wikidata", arg)
+                data_append(sense_base, "senseid",
                             langid + ":" + arg)
             if name in sense_linkage_templates:
                 # print(f"SENSE_TEMPLATE_FN: {name}")
                 parse_sense_linkage(wxr, sense_base, name, ht)
                 return ""
             if name == "†" or name == "zh-obsolete":
-                data_append(wxr, sense_base, "tags", "obsolete")
+                data_append(sense_base, "tags", "obsolete")
                 return ""
             if name in {
                 "ux",
@@ -1527,7 +1527,7 @@ def parse_language(wxr, langnode, language, lang_code):
         # Generate no gloss for translation hub pages, but add the
         # "translation-hub" tag for them
         if rawgloss == "(This entry is a translation hub.)":
-            data_append(wxr, sense_data, "tags", "translation-hub")
+            data_append(sense_data, "tags", "translation-hub")
             return push_sense()
 
         # Remove certain substrings specific to outer glosses
@@ -1552,7 +1552,7 @@ def parse_language(wxr, langnode, language, lang_code):
         # parenthesized tags/topics
 
         if rawgloss and rawgloss not in sense_base.get("raw_glosses", ()):
-            data_append(wxr, sense_base, "raw_glosses", subglosses[1])
+            data_append(sense_base, "raw_glosses", subglosses[1])
         m = re.match(r"\(([^()]+)\):?\s*", rawgloss)
                     # ( ..\1.. ): ... or ( ..\1.. ) ...
         if m:
@@ -1560,17 +1560,17 @@ def parse_language(wxr, langnode, language, lang_code):
             rawgloss = rawgloss[m.end():].strip()
             parse_sense_qualifier(wxr, q, sense_base)
         if rawgloss == "A pejorative:":
-            data_append(wxr, sense_base, "tags", "pejorative")
+            data_append(sense_base, "tags", "pejorative")
             rawgloss = None
         elif rawgloss == "Short forms.":
-            data_append(wxr, sense_base, "tags", "abbreviation")
+            data_append(sense_base, "tags", "abbreviation")
             rawgloss = None
         elif rawgloss == "Technical or specialized senses.":
             rawgloss = None
         if rawgloss:
-            data_append(wxr, sense_base, "glosses", rawgloss)
+            data_append(sense_base, "glosses", rawgloss)
             if rawgloss in ("A person:",):
-                data_append(wxr, sense_base, "tags", "g-person")
+                data_append(sense_base, "tags", "g-person")
 
         # The main recursive call (except for the exceptions at the
         # start of this function).
@@ -1629,11 +1629,11 @@ def parse_language(wxr, langnode, language, lang_code):
                     len(infl_tags) == 1):
                     # Interpret others as a particular form under
                     # "inflection of"
-                    data_extend(wxr, sense_base, "tags", infl_tags)
-                    data_extend(wxr, sense_base, "form_of", infl_dts)
+                    data_extend(sense_base, "tags", infl_tags)
+                    data_extend(sense_base, "form_of", infl_dts)
                     subglosses = subglosses[1:]
                 elif not infl_dts:
-                    data_extend(wxr, sense_base, "tags", infl_tags)
+                    data_extend(sense_base, "tags", infl_tags)
                     subglosses = subglosses[1:]
 
         # Create senses for remaining subglosses
@@ -1647,26 +1647,26 @@ def parse_language(wxr, langnode, language, lang_code):
             if push_sense():
                 added = True
             # if gloss not in sense_data.get("raw_glosses", ()):
-            #     data_append(wxr, sense_data, "raw_glosses", gloss)
+            #     data_append(sense_data, "raw_glosses", gloss)
             if gloss_i == 0 and examples:
                 # In a multi-line gloss, associate examples
                 # with only one of them.
                 # XXX or you could use gloss_i == len(subglosses)
                 # to associate examples with the *last* one.
-                data_extend(wxr, sense_data, "examples", examples)
+                data_extend(sense_data, "examples", examples)
             # If the gloss starts with †, mark as obsolete
             if gloss.startswith("^†"):
-                data_append(wxr, sense_data, "tags", "obsolete")
+                data_append(sense_data, "tags", "obsolete")
                 gloss = gloss[2:].strip()
             elif gloss.startswith("^‡"):
-                data_extend(wxr, sense_data, "tags", ["obsolete", "historical"])
+                data_extend(sense_data, "tags", ["obsolete", "historical"])
                 gloss = gloss[2:].strip()
             # Copy data for all senses to this sense
             for k, v in sense_base.items():
                 if isinstance(v, (list, tuple)):
                     if k != "tags":
                         # Tags handled below (countable/uncountable special)
-                        data_extend(wxr, sense_data, k, v)
+                        data_extend(sense_data, k, v)
                 else:
                     assert k not in ("tags", "categories", "topics")
                     sense_data[k] = v
@@ -1700,10 +1700,10 @@ def parse_language(wxr, langnode, language, lang_code):
             if gloss.startswith("N. of "):
                 gloss = "Name of " +  gloss[6:]
             if gloss.startswith("†"):
-                data_append(wxr, sense_data, "tags", "obsolete")
+                data_append(sense_data, "tags", "obsolete")
                 gloss = gloss[1:]
             elif gloss.startswith("^†"):
-                data_append(wxr, sense_data, "tags", "obsolete")
+                data_append(sense_data, "tags", "obsolete")
                 gloss = gloss[2:]
 
             # Copy tags from sense_base if any.  This will not copy
@@ -1719,11 +1719,11 @@ def parse_language(wxr, langnode, language, lang_code):
                         countability_tags.append(tag)
                     continue
                 if tag not in sense_tags:
-                    data_append(wxr, sense_data, "tags", tag)
+                    data_append(sense_data, "tags", tag)
             if countability_tags:
                 if ("countable" not in sense_tags and
                     "uncountable" not in sense_tags):
-                    data_extend(wxr, sense_data, "tags", countability_tags)
+                    data_extend(sense_data, "tags", countability_tags)
 
             # If outer gloss specifies a form-of ("inflection of", see
             # aquamarine/German), try to parse the inner glosses as
@@ -1735,13 +1735,13 @@ def parse_language(wxr, langnode, language, lang_code):
                     infl_tags, infl_dts = parsed
                     if not infl_dts and infl_tags:
                         # Interpret as a particular form under "inflection of"
-                        data_extend(wxr, sense_data, "tags", infl_tags)
+                        data_extend(sense_data, "tags", infl_tags)
 
             if not gloss:
-                data_append(wxr, sense_data, "tags", "empty-gloss")
+                data_append(sense_data, "tags", "empty-gloss")
             elif gloss != "-" and gloss not in sense_data.get("glosses", []):
                 # Add the gloss for the sense.
-                data_append(wxr, sense_data, "glosses", gloss)
+                data_append(sense_data, "glosses", gloss)
 
             # Kludge: there are cases (e.g., etc./Swedish) where there are
             # two abbreviations in the same sense, both generated by the
@@ -1766,27 +1766,27 @@ def parse_language(wxr, langnode, language, lang_code):
                     continue
                 tags, dts = parsed
                 if not dts and tags:
-                    data_extend(wxr, sense_data, "tags", tags)
+                    data_extend(sense_data, "tags", tags)
                     continue
                 for dt in dts:
                     ftags = list(tag for tag in tags if tag != "form-of")
                     if "alt-of" in tags:
-                        data_extend(wxr, sense_data, "tags", ftags)
-                        data_append(wxr, sense_data, "alt_of", dt)
+                        data_extend(sense_data, "tags", ftags)
+                        data_append(sense_data, "alt_of", dt)
                     elif "compound-of" in tags:
-                        data_extend(wxr, sense_data, "tags", ftags)
-                        data_append(wxr, sense_data, "compound_of", dt)
+                        data_extend(sense_data, "tags", ftags)
+                        data_append(sense_data, "compound_of", dt)
                     elif "synonym-of" in tags:
-                        data_extend(wxr, dt, "tags", ftags)
-                        data_append(wxr, sense_data, "synonyms", dt)
+                        data_extend(dt, "tags", ftags)
+                        data_append(sense_data, "synonyms", dt)
                     elif tags and dt.get("word", "").startswith("of "):
                         dt["word"] = dt["word"][3:]
-                        data_append(wxr, sense_data, "tags", "form-of")
-                        data_extend(wxr, sense_data, "tags", ftags)
-                        data_append(wxr, sense_data, "form_of", dt)
+                        data_append(sense_data, "tags", "form-of")
+                        data_extend(sense_data, "tags", ftags)
+                        data_append(sense_data, "form_of", dt)
                     elif "form-of" in tags:
-                        data_extend(wxr, sense_data, "tags", tags)
-                        data_append(wxr, sense_data, "form_of", dt)
+                        data_extend(sense_data, "tags", tags)
+                        data_append(sense_data, "form_of", dt)
 
         if len(sense_data) == 0:
             if len(sense_base.get("tags")) == 0:
@@ -1827,7 +1827,7 @@ def parse_language(wxr, langnode, language, lang_code):
             if m:
                 args_ht = clean_template_args(wxr, ht)
                 dt = {"name": name, "args": args_ht}
-                data_append(wxr, pos_data, "inflection_templates", dt)
+                data_append(pos_data, "inflection_templates", dt)
 
             return None
 
@@ -2355,7 +2355,7 @@ def parse_language(wxr, langnode, language, lang_code):
             else:
                 parse_zh_synonyms(parsed.children, synonyms, [], "")
             #print(json.dumps(synonyms, indent=4, ensure_ascii=False))
-            data_extend(wxr, data, "synonyms", synonyms)
+            data_extend(data, "synonyms", synonyms)
         parse_linkage_recurse(parsed.children, field, None)
         if not data.get(field) and not have_panel_template:
             text = "".join(toplevel_text).strip()
@@ -3003,7 +3003,7 @@ def parse_language(wxr, langnode, language, lang_code):
                     parse_part_of_speech(node, pos)
                     if "tags" in dt:
                         for pdata in pos_datas:
-                            data_extend(wxr, pdata, "tags", dt["tags"])
+                            data_extend(pdata, "tags", dt["tags"])
                 elif t_no_number in wxr.config.LINKAGE_SUBTITLES:
                     rel = wxr.config.LINKAGE_SUBTITLES.get(t_no_number)
                     data = select_data()
@@ -3296,7 +3296,7 @@ def parse_language(wxr, langnode, language, lang_code):
         if "tags" in data:
             del data["tags"]
         for sense in data["senses"]:
-            data_extend(wxr, sense, "tags", tags)
+            data_extend(sense, "tags", tags)
 
     return ret
 
@@ -3309,9 +3309,9 @@ def parse_wikipedia_template(wxr, data, ht):
     langid = clean_node(wxr, data, ht.get("lang", ()))
     pagename = clean_node(wxr, data, ht.get(1, ())) or wxr.wtp.title
     if langid:
-        data_append(wxr, data, "wikipedia", langid + ":" + pagename)
+        data_append(data, "wikipedia", langid + ":" + pagename)
     else:
-        data_append(wxr, data, "wikipedia", pagename)
+        data_append(data, "wikipedia", pagename)
 
 
 def parse_top_template(wxr, node, data):
@@ -3352,7 +3352,7 @@ def parse_top_template(wxr, node, data):
         if name == "wikidata":
             arg = clean_node(wxr, data, ht.get(1, ()))
             if arg.startswith("Q") or arg.startswith("Lexeme:L"):
-                data_append(wxr, data, "wikidata", arg)
+                data_append(data, "wikidata", arg)
             return ""
         wxr.wtp.debug("UNIMPLEMENTED top-level template: {} {}"
                   .format(name, ht),
@@ -3533,7 +3533,7 @@ def parse_page(
                 continue
             for k, v in top_data.items():
                 assert isinstance(v, (list, tuple))
-                data_extend(wxr, data, k, v)
+                data_extend(data, k, v)
             by_lang[data["lang"]].append(data)
 
     # XXX this code is clearly out of date.  There is no longer a "conjugation"
@@ -3601,19 +3601,19 @@ def parse_page(
 def add_form_of_tags(wxr, template_name, form_of_templates, sense_data):
     # https://en.wiktionary.org/wiki/Category:Form-of_templates
     if template_name in form_of_templates:
-        data_append(wxr, sense_data, "tags", "form-of")
+        data_append(sense_data, "tags", "form-of")
 
         if template_name in ("abbreviation of", "abbr of"):
-            data_append(wxr, sense_data, "tags", "abbreviation")
+            data_append(sense_data, "tags", "abbreviation")
         elif template_name.startswith(("alt ", "alternative")):
-            data_append(wxr, sense_data, "tags", "alt-of")
+            data_append(sense_data, "tags", "alt-of")
         elif template_name.startswith(("female", "feminine")):
-            data_append(wxr, sense_data, "tags", "feminine")
+            data_append(sense_data, "tags", "feminine")
         elif template_name == "initialism of":
-            data_extend(wxr, sense_data, "tags", ["abbreviation", "initialism"])
+            data_extend(sense_data, "tags", ["abbreviation", "initialism"])
         elif template_name.startswith("masculine"):
-            data_append(wxr, sense_data, "tags", "masculine")
+            data_append(sense_data, "tags", "masculine")
         elif template_name.startswith("misspelling"):
-            data_append(wxr, sense_data, "tags", "misspelling")
+            data_append(sense_data, "tags", "misspelling")
         elif template_name.startswith(("obsolete", "obs ")):
-            data_append(wxr, sense_data, "tags", "obsolete")
+            data_append(sense_data, "tags", "obsolete")

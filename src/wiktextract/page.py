@@ -180,7 +180,7 @@ def inject_linkages(wxr: WiktextractContext, page_data: List[Dict]) -> None:
                     dt["roman"] = term.roman
                 if term.language_variant is not None:
                     dt["language_variant"] = term.language_variant
-                data_append(wxr, data, term.linkage, dt)
+                data_append(data, term.linkage, dt)
 
 
 def process_categories(wxr: WiktextractContext, page_data: List[Dict]) -> None:
@@ -210,7 +210,7 @@ def process_categories(wxr: WiktextractContext, page_data: List[Dict]) -> None:
                     assert data.get(field) is not vals
                     if data.get("alt_of") or data.get("form_of"):
                         continue  # Don't add to alt-of/form-of entries
-                    data_extend(wxr, data, field, vals)
+                    data_extend(data, field, vals)
             continue
         if len(lst) != 1:
             continue
@@ -224,7 +224,7 @@ def process_categories(wxr: WiktextractContext, page_data: List[Dict]) -> None:
             if field in data:
                 v = data[field]
                 del data[field]
-                data_extend(wxr, senses[0], field, v)
+                data_extend(senses[0], field, v)
 
     # If the last part-of-speech of the last language (i.e., last item in "ret")
     # has categories or topics not bound to a sense, propagate those
@@ -240,7 +240,7 @@ def process_categories(wxr: WiktextractContext, page_data: List[Dict]) -> None:
             for data in page_data[:-1]:
                 if data.get("form_of") or data.get("alt_of"):
                     continue  # Don't add to form_of or alt_of entries
-                data_extend(wxr, data, field, lst)
+                data_extend(data, field, lst)
 
     # Regexp for matching category tags that start with a language name.
     # Group 2 will be the language name. The category tag should be without
@@ -379,9 +379,9 @@ def clean_node(
     if sense_data is not None:
         # Check for Lua execution error
         if '<strong class="error">Lua execution error' in v:
-            data_append(wxr, sense_data, "tags", "error-lua-exec")
+            data_append(sense_data, "tags", "error-lua-exec")
         if '<strong class="error">Lua timeout error' in v:
-            data_append(wxr, sense_data, "tags", "error-lua-timeout")
+            data_append(sense_data, "tags", "error-lua-timeout")
         # Capture Category tags
         if not collect_links:
             for m in re.finditer(
@@ -394,7 +394,7 @@ def clean_node(
                 if not cat:
                     continue
                 if not sense_data_has_value(sense_data, "categories", cat):
-                    data_append(wxr, sense_data, "categories", cat)
+                    data_append(sense_data, "categories", cat)
         else:
             for m in re.finditer(
                 r"(?is)\[\[:?(\s*([^][|:]+):)?\s*([^]|]+)(\|([^]|]+))?\]\]",
@@ -410,7 +410,7 @@ def clean_node(
                     if not cat:
                         continue
                     if not sense_data_has_value(sense_data, "categories", cat):
-                        data_append(wxr, sense_data, "categories", cat)
+                        data_append(sense_data, "categories", cat)
                 elif not m.group(1):
                     if m.group(5):
                         ltext = clean_value(wxr, m.group(5))
@@ -431,7 +431,7 @@ def clean_node(
                         ltext = ltarget
                     ltuple = (ltext, ltarget)
                     if not sense_data_has_value(sense_data, "links", ltuple):
-                        data_append(wxr, sense_data, "links", ltuple)
+                        data_append(sense_data, "links", ltuple)
 
     v = clean_value(wxr, v)
     # print("After clean_value:", repr(v))

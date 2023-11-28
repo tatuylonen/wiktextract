@@ -4,7 +4,7 @@
 import copy
 import re
 from collections import defaultdict
-from functools import lru_cache, partial
+from functools import partial
 from typing import Any, Dict, Iterable, List, Tuple
 
 from wiktextract.wxr_context import WiktextractContext
@@ -26,12 +26,9 @@ DICT_KEYS = frozenset(
 )
 
 
-def data_append(
-    wxr: WiktextractContext, data: Dict, key: str, value: Any
-) -> None:
+def data_append(data: Dict, key: str, value: Any) -> None:
     """Appends ``value`` under ``key`` in the dictionary ``data``.  The key
     is created if it does not exist."""
-    assert isinstance(wxr, WiktextractContext)
     assert isinstance(key, str)
 
     if key in STR_KEYS:
@@ -50,11 +47,8 @@ def data_append(
         data[key] = list_value
 
 
-def data_extend(
-    wxr: WiktextractContext, data: Dict, key: str, values: Iterable
-) -> None:
+def data_extend(data: Dict, key: str, values: Iterable) -> None:
     """Appends all values in a list under ``key`` in the dictionary ``data``."""
-    assert isinstance(wxr, WiktextractContext)
     assert isinstance(data, dict)
     assert isinstance(key, str)
     assert isinstance(values, (list, tuple))
@@ -64,12 +58,7 @@ def data_extend(
     # out of memory.  Other ways of avoiding the sharing may be more
     # complex.
     for x in tuple(values):
-        data_append(wxr, data, key, x)
-
-
-@lru_cache(maxsize=20)
-def make_split_re(seps):
-    """Cached helper function for split_at_comma_semi."""
+        data_append(data, key, x)
 
 
 def split_at_comma_semi(text: str, separators=(",", ";", "，", "،"), extra=()
