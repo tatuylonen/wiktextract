@@ -4,11 +4,11 @@ from collections import defaultdict
 from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
+
 from wiktextract.datautils import append_base_data
 from wiktextract.extractor.es.gloss import extract_gloss
+from wiktextract.extractor.es.models import PydanticLogger, WordEntry
 from wiktextract.extractor.es.pronunciation import extract_pronunciation
-from wiktextract.extractor.es.models import WordEntry, PydanticLogger
-
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -63,7 +63,7 @@ def process_pos_block(
 ):
     pos_type = wxr.config.POS_SUBTITLES[pos_template_name]["pos"]
     append_base_data(page_data, "pos", pos_type, base_data)
-    page_data[-1]["pos_title"] = pos_title
+    page_data[-1].pos_title = pos_title
     child_nodes = list(pos_level_node.filter_empty_str_child())
 
     for child in child_nodes:

@@ -1,10 +1,12 @@
 import re
 from typing import List
+
+from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor.parser import WikiNodeChildrenList
+
 from wiktextract.extractor.es.models import Sense, WordEntry
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
-from wikitextprocessor import WikiNode, NodeKind
-from wikitextprocessor.parser import WikiNodeChildrenList
 
 
 def extract_gloss(
@@ -34,10 +36,10 @@ def extract_gloss(
         match = re.match(r"^(\d+)", gloss_note)
 
         if match:
-            gloss_data["senseid"] = int(match.group(1))
+            gloss_data.senseid = int(match.group(1))
             tag_string = gloss_note[len(match.group(1)) :].strip()
         else:
-            tag_string = gloss_data["tags"] = gloss_note.strip()
+            tag_string = gloss_data.tags = gloss_note.strip()
 
         # split tags by comma or "y"
         tags = re.split(r",|y", tag_string)
@@ -49,7 +51,7 @@ def extract_gloss(
                 .removeprefix("Main")
             )
             if tag:
-                gloss_data["tags"].append(tag)
+                gloss_data.tags.append(tag)
 
         if other:
             wxr.wtp.debug(
