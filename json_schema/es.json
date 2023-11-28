@@ -40,6 +40,45 @@
       "title": "Example",
       "type": "object"
     },
+    "Linkage": {
+      "additionalProperties": false,
+      "properties": {
+        "alternative_spelling": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Alternative spelling of the word",
+          "title": "Alternative Spelling"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "word": {
+          "title": "Word",
+          "type": "string"
+        }
+      },
+      "required": [
+        "word"
+      ],
+      "title": "Linkage",
+      "type": "object"
+    },
     "Reference": {
       "additionalProperties": false,
       "properties": {
@@ -193,6 +232,21 @@
     "Sense": {
       "additionalProperties": false,
       "properties": {
+        "antonyms": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Linkage"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Antonyms"
+        },
         "categories": {
           "default": [],
           "description": "list of sense-disambiguated category names extracted from (a subset) of the Category links on the page",
@@ -201,6 +255,36 @@
           },
           "title": "Categories",
           "type": "array"
+        },
+        "compounds": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Linkage"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Compounds"
+        },
+        "derived": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Linkage"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Derived"
         },
         "examples": {
           "default": [],
@@ -219,6 +303,81 @@
           "title": "Glosses",
           "type": "array"
         },
+        "hypernyms": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Linkage"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Hypernyms"
+        },
+        "hyponyms": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Linkage"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Hyponyms"
+        },
+        "idioms": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Linkage"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Idioms"
+        },
+        "meronyms": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Linkage"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Meronyms"
+        },
+        "related": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Linkage"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Related"
+        },
         "senseid": {
           "anyOf": [
             {
@@ -232,14 +391,20 @@
           "description": "Sense number used in Wiktionary",
           "title": "Senseid"
         },
-        "subsenses": {
+        "synonyms": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Linkage"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": [],
-          "description": "List of subsenses",
-          "items": {
-            "$ref": "#/$defs/Sense"
-          },
-          "title": "Subsenses",
-          "type": "array"
+          "title": "Synonyms"
         },
         "tags": {
           "default": [],
@@ -463,6 +628,21 @@
   "additionalProperties": false,
   "description": "WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.",
   "properties": {
+    "antonyms": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Linkage"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Antonyms"
+    },
     "categories": {
       "default": [],
       "description": "list of non-disambiguated categories for the word",
@@ -471,6 +651,81 @@
       },
       "title": "Categories",
       "type": "array"
+    },
+    "compounds": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Linkage"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Compounds"
+    },
+    "derived": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Linkage"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Derived"
+    },
+    "hypernyms": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Linkage"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Hypernyms"
+    },
+    "hyponyms": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Linkage"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Hyponyms"
+    },
+    "idioms": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Linkage"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Idioms"
     },
     "lang_code": {
       "description": "Wiktionary language code",
@@ -488,6 +743,21 @@
       "title": "Lang Name",
       "type": "string"
     },
+    "meronyms": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Linkage"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Meronyms"
+    },
     "pos": {
       "default": null,
       "description": "Part of speech type",
@@ -499,6 +769,21 @@
       "description": "Original POS title",
       "title": "Pos Title",
       "type": "string"
+    },
+    "related": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Linkage"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Related"
     },
     "senses": {
       "anyOf": [
@@ -544,6 +829,21 @@
       ],
       "default": [],
       "title": "Spellings"
+    },
+    "synonyms": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Linkage"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Synonyms"
     },
     "translations": {
       "anyOf": [

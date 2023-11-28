@@ -1,9 +1,13 @@
 {
   "antónimo": "antonyms",
+  "compuestos": "compounds",
   "derivad": "derived",
   "hipónimo": "hyponyms",
   "hiperónimo": "hypernyms",
   "merónimo": "meronyms",
+  "locucion": "idioms",
+  "locuciones": "idioms",
   "relacionado": "related",
+  "refranes": "proverbs",
   "sinónimo": "synonyms"
 }
