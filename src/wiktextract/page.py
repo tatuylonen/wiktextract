@@ -310,13 +310,18 @@ def remove_duplicate_data(page_data: Dict) -> None:
 def clean_node(
     wxr: WiktextractContext,
     sense_data: Optional[Dict],
-    value: Union[str, WikiNode, List[Union[str, WikiNode, List]]],
+    wikinode: Union[str, WikiNode, List[Union[str, WikiNode, List]]],
     template_fn: Optional[Callable[[str, Dict], str]] = None,
     post_template_fn: Optional[Callable[[str, Dict, str], str]] = None,
     collect_links: bool = False,
 ) -> str:
-    """Expands the node to text, cleaning up any HTML and duplicate spaces.
-    This is intended for expanding things like glosses for a single sense."""
+    """
+    Expands node or nodes to text, cleaning up HTML tags and duplicate spaces.
+
+    If `sense_data` is a dictionary, expanded category links will be added to
+    it under the `categories` key. And if `collect_link` is `True`, expanded
+    links will be added to the `links` key.
+    """
 
     # print("CLEAN_NODE:", repr(value))
     def clean_template_fn(name, ht):
@@ -360,7 +365,7 @@ def clean_node(
 
     # print("clean_node: value={!r}".format(value))
     v = wxr.wtp.node_to_html(
-        value,
+        wikinode,
         node_handler_fn=clean_node_handler_fn,
         template_fn=template_fn,
         post_template_fn=post_template_fn,
