@@ -5,7 +5,6 @@ from typing import Dict, List, Optional
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
-from wiktextract.datautils import append_base_data
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -45,7 +44,11 @@ def parse_section(
             # https://fr.wiktionary.org/wiki/Modèle:S
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
             section_type = level_node_template.template_parameters.get(1)
-            subtitle = clean_node(wxr, page_data[-1], level_node.largs)
+            subtitle = clean_node(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node.largs,
+            )
             wxr.wtp.start_subsection(subtitle)
             if section_type in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
                 pass
@@ -69,7 +72,7 @@ def parse_section(
                 wxr.config.capture_pronunciation
                 and section_type in wxr.config.OTHER_SUBTITLES["pronunciation"]
             ):
-                extract_pronunciation(wxr, page_data, level_node)
+                extract_pronunciation(wxr, page_data, level_node, base_data)
             elif (
                 wxr.config.capture_linkages
                 and section_type in wxr.config.LINKAGE_SUBTITLES
@@ -104,7 +107,8 @@ def process_pos_block(
     pos_title: str,
 ):
     pos_type = wxr.config.POS_SUBTITLES[pos_argument]["pos"]
-    append_base_data(page_data, "pos", pos_type, base_data)
+    page_data.append(copy.deepcopy(base_data))
+    page_data[-1]["pos"] = pos_type
     page_data[-1]["pos_title"] = pos_title
     child_nodes = list(pos_title_node.filter_empty_str_child())
     form_line_start = 0  # Ligne de forme
@@ -163,27 +167,17 @@ def parse_page(
             # https://fr.wiktionary.org/wiki/Modèle:langue
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_langues
             if subtitle_template.template_name == "langue":
-                categories_and_links = defaultdict(list)
+                base_data = defaultdict(list, {"word": wxr.wtp.title})
                 lang_code = subtitle_template.template_parameters.get(1)
                 if (
                     wxr.config.capture_language_codes is not None
                     and lang_code not in wxr.config.capture_language_codes
                 ):
                     continue
-                lang_name = clean_node(
-                    wxr, categories_and_links, subtitle_template
-                )
+                lang_name = clean_node(wxr, base_data, subtitle_template)
                 wxr.wtp.start_section(lang_name)
-                base_data = defaultdict(
-                    list,
-                    {
-                        "lang_name": lang_name,
-                        "lang_code": lang_code,
-                        "word": wxr.wtp.title,
-                    },
-                )
-                base_data.update(categories_and_links)
-                page_data.append(copy.deepcopy(base_data))
+                base_data["lang_name"] = lang_name
+                base_data["lang_code"] = lang_code
                 etymology_data: Optional[EtymologyData] = None
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     new_etymology_data = parse_section(

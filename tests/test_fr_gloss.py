@@ -9,7 +9,7 @@ from wiktextract.extractor.fr.page import process_pos_block
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestFormLine(unittest.TestCase):
+class TestFrGloss(unittest.TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
@@ -115,7 +115,7 @@ class TestFormLine(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "=== {{S|nom|zh}} ===\n# Cheval.\n{{zh-exemple|这匹'''马'''很大。|Ce cheval est grand.|Zhè pǐ '''mǎ''' hěn dà.<br/>⠌⠢⠆ ⠏⠊⠄ ⠍⠔⠄ ⠓⠴⠄ ⠙⠔⠆⠐⠆}}"
         )
-        page_data = [defaultdict(list)]
+        page_data = []
         process_pos_block(
             self.wxr,
             page_data,

@@ -10,19 +10,25 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 def extract_pronunciation(
-    wxr: WiktextractContext, page_data: List[Dict], level_node: WikiNode
+    wxr: WiktextractContext,
+    page_data: List[Dict],
+    level_node: WikiNode,
+    base_data: Dict[str, str],
 ) -> None:
     sound_data = []
+    lang_code = base_data.get("lang_code")
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
             sound_data.extend(
                 process_pron_list_item(
-                    wxr, list_item_node, page_data, defaultdict(list)
+                    wxr, list_item_node, defaultdict(list), lang_code
                 )
             )
 
     if len(sound_data) == 0:
         return
+    if len(page_data) == 0:
+        page_data.append(deepcopy(base_data))
 
     if level_node.kind == NodeKind.LEVEL3:
         # Add extracted sound data to all sense dictionaries that have the same
@@ -53,10 +59,10 @@ PRON_TEMPLATES = frozenset(
 def process_pron_list_item(
     wxr: WiktextractContext,
     list_item_node: WikiNode,
-    page_data: List[Dict],
     sound_data: Dict[str, Union[str, List[str]]],
+    lang_code: str,
 ) -> List[Dict[str, Union[str, List[str]]]]:
-    pron_key = "zh-pron" if page_data[-1].get("lang_code") == "zh" else "ipa"
+    pron_key = "zh-pron" if lang_code == "zh" else "ipa"
 
     for template_node in list_item_node.find_child(NodeKind.TEMPLATE):
         if template_node.template_name in PRON_TEMPLATES:
@@ -81,7 +87,7 @@ def process_pron_list_item(
         ):
             new_sound_data = deepcopy(sound_data)
             process_pron_list_item(
-                wxr, nest_list_item, page_data, new_sound_data
+                wxr, nest_list_item, new_sound_data, lang_code
             )
             if pron_key in new_sound_data:
                 returned_data.append(new_sound_data)
