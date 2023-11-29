@@ -27,7 +27,7 @@ class TestPronunciation(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "=== Prononciation ===\n* {{pron|bɔ̃.ʒuʁ|fr}}\n** {{écouter|France (Paris)|bõ.ʒuːʁ|audio=Fr-bonjour.ogg|lang=fr}}"
         )
-        extract_pronunciation(self.wxr, page_data, root.children[0])
+        extract_pronunciation(self.wxr, page_data, root.children[0], {})
         self.assertEqual(
             page_data,
             [
@@ -60,13 +60,18 @@ class TestPronunciation(unittest.TestCase):
         )
 
     def test_str_pron(self):
-        page_data = [defaultdict(list, {"lang_code": "zh"})]
+        page_data = []
         self.wxr.wtp.add_page("Modèle:Yale-zh", 10, body="Yale")
         self.wxr.wtp.start_page("")
         root = self.wxr.wtp.parse(
             "=== {{S|prononciation}} ===\n* '''cantonais''' {{pron||yue}}\n** {{Yale-zh}} : nei⁵hou²"
         )
-        extract_pronunciation(self.wxr, page_data, root.children[0])
+        extract_pronunciation(
+            self.wxr,
+            page_data,
+            root.children[0],
+            defaultdict(list, {"lang_code": "zh"}),
+        )
         self.assertEqual(
             page_data[0].get("sounds"),
             [{"tags": ["cantonais", "Yale"], "zh-pron": "nei⁵hou²"}],
@@ -78,14 +83,16 @@ class TestPronunciation(unittest.TestCase):
         files.
         Test wikitext from https://fr.wiktionary.org/wiki/mars
         """
-        page_data = [defaultdict(list)]
+        page_data = []
         self.wxr.wtp.start_page("")
         root = self.wxr.wtp.parse(
             """=== {{S|prononciation}} ===
 {{ébauche-pron|sv}}
 * {{écouter|lang=sv|Suède||audio=LL-Q9027 (swe)-Moonhouse-mars.wav}}"""
         )
-        extract_pronunciation(self.wxr, page_data, root.children[0])
+        extract_pronunciation(
+            self.wxr, page_data, root.children[0], defaultdict(list)
+        )
         self.assertEqual(
             page_data[0].get("sounds"),
             [

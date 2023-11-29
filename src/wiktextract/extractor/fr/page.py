@@ -72,7 +72,7 @@ def parse_section(
                 wxr.config.capture_pronunciation
                 and section_type in wxr.config.OTHER_SUBTITLES["pronunciation"]
             ):
-                extract_pronunciation(wxr, page_data, level_node)
+                extract_pronunciation(wxr, page_data, level_node, base_data)
             elif (
                 wxr.config.capture_linkages
                 and section_type in wxr.config.LINKAGE_SUBTITLES
