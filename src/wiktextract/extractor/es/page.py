@@ -1,11 +1,9 @@
 import copy
 import logging
-from collections import defaultdict
 from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
 
-from wiktextract.datautils import append_base_data
 from wiktextract.extractor.es.gloss import extract_gloss
 from wiktextract.extractor.es.models import PydanticLogger, WordEntry
 from wiktextract.extractor.es.pronunciation import extract_pronunciation
@@ -32,7 +30,7 @@ def parse_section(
     level_node: WikiNode,
 ) -> None:
     # Page Structure: https://es.wiktionary.org/wiki/Wikcionario:Estructura
-    subtitle = clean_node(wxr, page_data[-1], level_node.largs)
+    subtitle = clean_node(wxr, base_data, level_node.largs)
     wxr.wtp.start_subsection(subtitle)
 
     pos_template_name = None
@@ -62,7 +60,8 @@ def process_pos_block(
     pos_title: str,
 ):
     pos_type = wxr.config.POS_SUBTITLES[pos_template_name]["pos"]
-    append_base_data(page_data, "pos", pos_type, base_data)
+    page_data.append(copy.deepcopy(base_data))
+    page_data[-1].pos = pos_type
     page_data[-1].pos_title = pos_title
     child_nodes = list(pos_level_node.filter_empty_str_child())
 
@@ -115,7 +114,7 @@ def parse_page(
             # https://es.wiktionary.org/wiki/Plantilla:lengua
             # https://es.wiktionary.org/wiki/Apéndice:Códigos_de_idioma
             if subtitle_template.template_name == "lengua":
-                categories_and_links = defaultdict(list)
+                categories = {"categories": []}
                 lang_code = subtitle_template.template_parameters.get(1)
                 if (
                     wxr.config.capture_language_codes is not None
@@ -123,15 +122,13 @@ def parse_page(
                 ):
                     continue
 
-                lang_name = clean_node(
-                    wxr, categories_and_links, subtitle_template
-                )
+                lang_name = clean_node(wxr, categories, subtitle_template)
                 wxr.wtp.start_section(lang_name)
                 base_data = WordEntry(
                     lang_name=lang_name, lang_code=lang_code, word=wxr.wtp.title
                 )
-                base_data.update(categories_and_links)
-                page_data.append(copy.deepcopy(base_data))
+                base_data.categories.extend(categories["categories"])
+                # page_data.append(copy.deepcopy(base_data))
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     parse_section(wxr, page_data, base_data, level3_node)
 
