@@ -15,7 +15,7 @@ import time
 import traceback
 from multiprocessing import Pool, current_process
 from pathlib import Path
-from typing import Dict, List, Optional, Set, TextIO, Tuple
+from typing import Optional, TextIO
 
 from wikitextprocessor import Page
 from wikitextprocessor.dumpparser import process_dump
@@ -29,7 +29,7 @@ from .thesaurus import (
 from .wxr_context import WiktextractContext
 
 
-def page_handler(page: Page) -> Tuple[bool, Tuple[List[dict], dict], str]:
+def page_handler(page: Page) -> tuple[list[dict], dict]:
     # Make sure there are no newlines or other strange characters in the
     # title.  They could cause security problems at several post-processing
     # steps.
@@ -48,19 +48,19 @@ def page_handler(page: Page) -> Tuple[bool, Tuple[List[dict], dict], str]:
             title = re.sub(r"[\s\000-\037]+", " ", page.title)
             title = title.strip()
             if page.redirect_to is not None:
-                ret = [{"title": title, "redirect": page.redirect_to}]
+                page_data = [{"title": title, "redirect": page.redirect_to}]
             else:
                 # the value of OTHER_SUBTITLES["translations"] is a string
                 # use it to skip translation pages
                 if title.endswith(
                     f"/{wxr.config.OTHER_SUBTITLES.get('translations')}"
                 ):
-                    return True, ([], {}), None
+                    return [], {}
 
                 # XXX Sign gloss pages?
 
                 start_t = time.time()
-                ret = parse_page(wxr, title, page.body)
+                page_data = parse_page(wxr, title, page.body)
                 dur = time.time() - start_t
                 if dur > 100:
                     logging.warning(
@@ -69,20 +69,15 @@ def page_handler(page: Page) -> Tuple[bool, Tuple[List[dict], dict], str]:
                         )
                     )
 
-            return True, (ret, wxr.wtp.to_return()), None
-        except Exception as e:
-            lst = traceback.format_exception(
-                type(e), value=e, tb=e.__traceback__
+            return page_data, wxr.wtp.to_return()
+        except Exception:
+            wxr.wtp.error(
+                f'=== EXCEPTION while parsing page "{page.title}" '
+                f"in process {current_process().name}",
+                traceback.format_exc(),
+                "page_handler_exception",
             )
-            msg = (
-                '=== EXCEPTION while parsing page "{}":\n '
-                "in process {}".format(
-                    page.title,
-                    current_process().name,
-                )
-                + "".join(lst)
-            )
-            return False, ([], {}), msg
+            return [], wxr.wtp.to_return()
 
 
 def parse_wiktionary(
@@ -90,10 +85,10 @@ def parse_wiktionary(
     dump_path: str,
     num_processes: Optional[int],
     phase1_only: bool,
-    namespace_ids: Set[int],
+    namespace_ids: set[int],
     out_f: TextIO,
     human_readable: bool = False,
-    override_folders: Optional[List[str]] = None,
+    override_folders: Optional[list[str]] = None,
     skip_extract_dump: bool = False,
     save_pages_path: Optional[str] = None,
 ) -> None:
@@ -126,7 +121,7 @@ def parse_wiktionary(
         reprocess_wiktionary(wxr, num_processes, out_f, human_readable)
 
 
-def write_json_data(data: Dict, out_f: TextIO, human_readable: bool) -> None:
+def write_json_data(data: dict, out_f: TextIO, human_readable: bool) -> None:
     if out_f is not None:
         if human_readable:
             out_f.write(
@@ -200,7 +195,7 @@ def reprocess_wiktionary(
     wxr.remove_unpicklable_objects()
     with Pool(num_processes, init_worker_process, (page_handler, wxr)) as pool:
         wxr.reconnect_databases(False)
-        for processed_pages, (success, ret, err) in enumerate(
+        for processed_pages, (page_data, wtp_stats) in enumerate(
             pool.imap_unordered(
                 page_handler,
                 wxr.wtp.get_all_pages(
@@ -208,13 +203,7 @@ def reprocess_wiktionary(
                 ),
             )
         ):
-            if not success:
-                # Print error in parent process - do not remove
-                logging.error(err)
-                continue
-
-            page_data, stats = ret
-            wxr.config.merge_return(stats)
+            wxr.config.merge_return(wtp_stats)
             for dt in page_data:
                 write_json_data(dt, out_f, human_readable)
                 word = dt.get("word")
@@ -230,7 +219,7 @@ def reprocess_wiktionary(
     logging.info("Reprocessing wiktionary complete")
 
 
-def process_ns_page_title(page: Page, ns_name: str) -> Tuple[str, str]:
+def process_ns_page_title(page: Page, ns_name: str) -> tuple[str, str]:
     text = page.body if page.body is not None else page.redirect_to
     title = page.title[page.title.find(":") + 1 :]
     title = re.sub(r"(^|/)\.($|/)", r"\1__dotdot__\2", title)
