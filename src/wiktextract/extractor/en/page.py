@@ -1955,18 +1955,9 @@ def parse_language(wxr, langnode, language, lang_code):
                     return ret
             return None
 
-        # Kludge for multitrans bug, see wikitextprocessor issue 39
-        # and another place with this post_fn else on this page for
-        # the main expansion of a page
-        def multitrans_post_fn(name, ht, text):
-            if name == "multitrans" and not text.startswith("\n"):
-                return "\n" + text
-            return None
-
         tree = wxr.wtp.parse(
             subpage_content,
             pre_expand=True,
-            post_template_fn=multitrans_post_fn,
             additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
             do_not_pre_expand=DO_NOT_PRE_EXPAND_TEMPLATES
         )
@@ -3460,22 +3451,11 @@ def parse_page(
     # hierarchy by manipulating the subtitle levels in certain cases.
     text = fix_subtitle_hierarchy(wxr, text)
 
-    # fix for bug multitrans and trans-top templates: multitrans creates
-    # lists, but is pre-expanded in wikitextprocessor before trans-top
-    # is expanded, so the first item ends up on the same line:
-    # {{trans-top}}* Foobarian translation item <- not parsed as list item
-    # This is duplicated elsewhere on this page for subpages
-    def multitrans_post_fn(name, ht, text):
-        if name == "multitrans" and not text.startswith("\n"):
-            return "\n" + text
-        return None
-
     # Parse the page, pre-expanding those templates that are likely to
     # influence parsing
     tree = wxr.wtp.parse(
         text,
         pre_expand=True,
-        post_template_fn=multitrans_post_fn,
         additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
         do_not_pre_expand=DO_NOT_PRE_EXPAND_TEMPLATES
     )
