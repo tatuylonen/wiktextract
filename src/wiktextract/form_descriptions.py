@@ -2515,7 +2515,15 @@ def parse_alt_or_inflection_of1(wxr, gloss, gloss_template_args):
                               for ts in tagsets):
             # Successfully parsed, including "of" etc.
             tags = []
+            # If you have ("Western-Armenian", ..., "form-of") as your
+            # tag set, it's most probable that it's something like
+            # "Western Armenian form of խոսել (xosel)", which should
+            # get "alt-of" instead of "form-of" (inflection).
+            # խօսիլ/Armenian
             for ts in tagsets:
+                if ("form-of" in ts and
+                    any(valid_tags.get(tk) == "dialect" for tk in ts)):
+                    ts = (set(ts) - {"form-of"}) | {"alt-of"}
                 if not (alt_infl_disallowed & set(ts)):
                     tags.extend(ts)
             if ("alt-of" in tags or
