@@ -475,7 +475,9 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
                 continue
 
             # Strip language links
-            tr = {"lang": lang, "code": langcode}
+            tr = {"lang": lang}
+            if langcode:
+                tr["code"] = langcode
             if tags:
                 tr["tags"] = list(tags)
                 for t in tagsets:
