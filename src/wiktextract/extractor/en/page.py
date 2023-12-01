@@ -46,7 +46,7 @@ from ..share import strip_nodes
 from .unsupported_titles import unsupported_title_map
 
 # Matches head tag
-head_tag_re = None
+HEAD_TAG_RE = None
 
 FLOATING_TABLE_TEMPLATES = {
     # az-suffix-form creates a style=floatright div that is otherwise
@@ -535,14 +535,15 @@ def parse_sense_linkage(wxr, data, name, ht):
         data_append(data, field, dt)
 
 
-def init_head_tag_re(wxr):
-    global head_tag_re
-    if head_tag_re is None:
-        head_tag_re = re.compile(
+def init_head_tag_re():
+    global HEAD_TAG_RE
+    if HEAD_TAG_RE is None:
+        HEAD_TAG_RE = re.compile(
             r"^(head|Han char|arabic-noun|arabic-noun-form|"
             r"hangul-symbol|syllable-hangul)$|" +
             r"^(latin|" +
-            "|".join(lang_name for _, lang_name in get_all_names("en")) + r")-(" +
+            "|".join(lang_code for lang_code, *_ in get_all_names("en")) +
+            r")-(" +
             "|".join([
                 "abbr",
                 "adj",
@@ -720,7 +721,7 @@ def parse_language(wxr, langnode, language, lang_code):
     assert isinstance(lang_code, str)
     # print("parse_language", language)
 
-    init_head_tag_re(wxr)
+    init_head_tag_re()
     is_reconstruction = False
     word = wxr.wtp.title
     unsupported_prefix = "Unsupported titles/"
@@ -879,8 +880,7 @@ def parse_language(wxr, langnode, language, lang_code):
                 data_append(pos_data, "tags", "Pinyin")
             elif t == "romanization":
                 data_append(pos_data, "tags", "romanization")
-        m = re.search(head_tag_re, name)
-        if m:
+        if HEAD_TAG_RE.fullmatch(name) is not None:
             args_ht = clean_template_args(wxr, ht)
             cleaned_expansion = clean_node(wxr, None, expansion)
             dt = {"name": name, "args": args_ht, "expansion": cleaned_expansion}
