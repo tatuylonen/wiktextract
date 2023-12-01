@@ -1,0 +1,130 @@
+{
+  "$defs": {
+    "Sense": {
+      "properties": {
+        "categories": {
+          "default": [],
+          "description": "list of sense-disambiguated category names extracted from (a subset) of the Category links on the page",
+          "items": {
+            "type": "string"
+          },
+          "title": "Categories",
+          "type": "array"
+        },
+        "glosses": {
+          "description": "list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Glosses",
+          "type": "array"
+        },
+        "senseid": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sense number used in Wiktionary",
+          "title": "Senseid"
+        },
+        "subsenses": {
+          "default": [],
+          "description": "List of subsenses",
+          "items": {
+            "$ref": "#/$defs/Sense"
+          },
+          "title": "Subsenses",
+          "type": "array"
+        },
+        "tags": {
+          "default": [],
+          "description": "list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "glosses"
+      ],
+      "title": "Sense",
+      "type": "object"
+    }
+  },
+  "$id": "https://kaikki.org/es.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.",
+  "properties": {
+    "categories": {
+      "default": [],
+      "description": "list of non-disambiguated categories for the word",
+      "items": {
+        "type": "string"
+      },
+      "title": "Categories",
+      "type": "array"
+    },
+    "lang_code": {
+      "description": "Wiktionary language code",
+      "examples": [
+        "es"
+      ],
+      "title": "Lang Code",
+      "type": "string"
+    },
+    "lang_name": {
+      "description": "Localized language name of the word",
+      "examples": [
+        "español"
+      ],
+      "title": "Lang Name",
+      "type": "string"
+    },
+    "pos": {
+      "default": null,
+      "description": "Part of speech type",
+      "title": "Pos",
+      "type": "string"
+    },
+    "pos_title": {
+      "default": null,
+      "description": "Original POS title",
+      "title": "Pos Title",
+      "type": "string"
+    },
+    "senses": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Sense"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Senses"
+    },
+    "word": {
+      "description": "word string",
+      "title": "Word",
+      "type": "string"
+    }
+  },
+  "required": [
+    "word",
+    "lang_code",
+    "lang_name"
+  ],
+  "title": "Spanish Wiktionary",
+  "type": "object"
+}
