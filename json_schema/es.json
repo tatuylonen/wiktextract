@@ -19,6 +19,19 @@
           "title": "Glosses",
           "type": "array"
         },
+        "senseid": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sense number used in Wiktionary",
+          "title": "Senseid"
+        },
         "subsenses": {
           "default": [],
           "description": "List of subsenses",
@@ -78,6 +91,12 @@
       "default": null,
       "description": "Part of speech type",
       "title": "Pos",
+      "type": "string"
+    },
+    "pos_title": {
+      "default": null,
+      "description": "Original POS title",
+      "title": "Pos Title",
       "type": "string"
     },
     "senses": {

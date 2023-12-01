@@ -25,8 +25,8 @@ ADDITIONAL_EXPAND_TEMPLATES = set()
 
 def parse_section(
     wxr: WiktextractContext,
-    page_data: List[Dict],
-    base_data: Dict,
+    page_data: List[WordEntry],
+    base_data: WordEntry,
     level_node: WikiNode,
 ) -> None:
     # Page Structure: https://es.wiktionary.org/wiki/Wikcionario:Estructura
@@ -53,13 +53,14 @@ def parse_section(
 
 def process_pos_block(
     wxr: WiktextractContext,
-    page_data: List[Dict],
-    base_data: Dict,
+    page_data: List[WordEntry],
+    base_data: WordEntry,
     pos_level_node: WikiNode,
     pos_template_name: str,
     pos_title: str,
 ):
     pos_type = wxr.config.POS_SUBTITLES[pos_template_name]["pos"]
+
     page_data.append(copy.deepcopy(base_data))
     page_data[-1].pos = pos_type
     page_data[-1].pos_title = pos_title
@@ -91,7 +92,7 @@ def process_pos_block(
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
-) -> List[Dict[str, str]]:
+) -> List[Dict[str, any]]:
     if wxr.config.verbose:
         logging.info(f"Parsing page: {page_title}")
         # Pass current wiktextractcontext to pydantic for more better logging
@@ -128,7 +129,6 @@ def parse_page(
                     lang_name=lang_name, lang_code=lang_code, word=wxr.wtp.title
                 )
                 base_data.categories.extend(categories["categories"])
-                # page_data.append(copy.deepcopy(base_data))
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     parse_section(wxr, page_data, base_data, level3_node)
 

@@ -2,13 +2,7 @@ import json
 import logging
 from typing import Optional
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    ValidationError,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic.json_schema import GenerateJsonSchema
 
 from wiktextract.wxr_context import WiktextractContext
@@ -29,23 +23,6 @@ class PydanticLogger:
 
 class BaseModelWrap(BaseModel):
     model_config = ConfigDict(validate_assignment=True)
-
-    # def update(self, data: dict):
-    #     for k, v in data.items():
-    #         setattr(self, k, v)
-    #     return self
-
-    # def get(self, key: str, _=None):
-    #     return getattr(self, key)
-
-    # def __getitem__(self, item):
-    #     return getattr(self, item)
-
-    # def __setitem__(self, item, value):
-    #     try:
-    #         setattr(self, item, value)
-    #     except ValidationError:
-    #         pass
 
 
 class LoggingExtraFieldsModel(BaseModelWrap):
