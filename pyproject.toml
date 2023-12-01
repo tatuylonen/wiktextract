@@ -33,6 +33,7 @@ dependencies = [
     "importlib_resources; python_version < '3.10'",
     "levenshtein",
     "nltk",
+    "pydantic",
     "wikitextprocessor @ git+https://github.com/tatuylonen/wikitextprocessor.git",
 ]
 
