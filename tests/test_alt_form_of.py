@@ -125,3 +125,12 @@ class FormOfTests(unittest.TestCase):
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(ret, (["abbreviation", "alt-of"], [{"word": "OK"}]))
+
+    def test_dialect1(self):
+        ret = parse_alt_or_inflection_of(
+            self.wxr, "Western-Armenian form of OK.", set(["OK"])
+        )
+        self.assertEqual(self.wxr.wtp.errors, [])
+        self.assertEqual(self.wxr.wtp.warnings, [])
+        self.assertEqual(self.wxr.wtp.debugs, [])
+        self.assertEqual(ret, (["Western-Armenian", "alt-of"], [{"word": "OK"}]))
