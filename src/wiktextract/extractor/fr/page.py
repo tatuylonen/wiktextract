@@ -77,12 +77,16 @@ def parse_section(
                 wxr.config.capture_linkages
                 and section_type in wxr.config.LINKAGE_SUBTITLES
             ):
+                if len(page_data) == 0:
+                    page_data.append(copy.deepcopy(base_data))
                 extract_linkage(
                     wxr,
                     page_data,
                     level_node,
                     section_type,
                 )
+                if page_data[-1].keys() == base_data.keys():
+                    page_data.pop()  # no data was added
             elif (
                 wxr.config.capture_translations
                 and section_type in wxr.config.OTHER_SUBTITLES["translations"]

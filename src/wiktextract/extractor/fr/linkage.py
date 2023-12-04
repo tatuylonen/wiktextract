@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List, Union
+from typing import Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
@@ -11,7 +11,7 @@ from ..share import split_tag_text
 
 def extract_linkage(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    page_data: list[dict],
     level_node: WikiNode,
     section_type: str,
 ) -> None:
@@ -28,7 +28,7 @@ def extract_linkage(
 
 def process_derives_autres_list(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    page_data: list[dict],
     level_node: WikiNode,
 ):
     # drrive to other languages list
@@ -52,7 +52,7 @@ def process_derives_autres_list(
 
 def process_linkage_list(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    page_data: list[dict],
     level_node: WikiNode,
     linkage_type: str,
 ) -> None:
@@ -128,7 +128,7 @@ def process_linkage_list(
 def process_linkage_template(
     wxr: WiktextractContext,
     node: TemplateNode,
-    linkage_data: Dict[str, Union[str, List[str]]],
+    linkage_data: dict[str, Union[str, list[str]]],
 ) -> None:
     if node.template_name == "lien":
         process_lien_template(wxr, node, linkage_data)
@@ -139,7 +139,7 @@ def process_linkage_template(
 def process_lien_template(
     wxr: WiktextractContext,
     node: TemplateNode,
-    linkage_data: Dict[str, Union[str, List[str]]],
+    linkage_data: dict[str, Union[str, list[str]]],
 ) -> None:
     # link word template: https://fr.wiktionary.org/wiki/Modèle:lien
     word = clean_node(
@@ -161,7 +161,7 @@ def process_lien_template(
 def process_zh_lien_template(
     wxr: WiktextractContext,
     node: TemplateNode,
-    linkage_data: Dict[str, Union[str, List[str]]],
+    linkage_data: dict[str, Union[str, list[str]]],
 ) -> None:
     # https://fr.wiktionary.org/wiki/Modèle:zh-lien
     linkage_data["word"] = clean_node(
