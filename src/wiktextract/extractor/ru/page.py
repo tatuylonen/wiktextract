@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Dict, List, Optional
+from typing import Optional
 
 from wikitextprocessor import NodeKind, WikiNode
 
@@ -24,7 +24,7 @@ ADDITIONAL_EXPAND_TEMPLATES = set()
 
 def process_semantic_section(
     wxr: WiktextractContext,
-    page_data: List[WordEntry],
+    page_data: list[WordEntry],
     semantic_level_node: WikiNode,
 ):
     pass
@@ -94,7 +94,7 @@ def get_pos(
 
 def parse_section(
     wxr: WiktextractContext,
-    page_data: List[WordEntry],
+    page_data: list[WordEntry],
     level3_node: WikiNode,
 ):
     section_title = clean_node(wxr, {}, level3_node.largs).strip()
@@ -148,7 +148,7 @@ def parse_section(
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     # Help site describing page structure: https://ru.wiktionary.org/wiki/Викисловарь:Правила_оформления_статей
 
     if wxr.config.verbose:
@@ -167,7 +167,7 @@ def parse_page(
         additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
     )
 
-    page_data: List[WordEntry] = []
+    page_data: list[WordEntry] = []
     for level1_node in tree.find_child(NodeKind.LEVEL1):
         for subtitle_template in level1_node.find_content(NodeKind.TEMPLATE):
             lang_code = (
