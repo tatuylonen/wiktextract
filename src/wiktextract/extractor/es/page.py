@@ -6,7 +6,7 @@ from wikitextprocessor import NodeKind, WikiNode
 
 from wiktextract.extractor.es.gloss import extract_gloss
 from wiktextract.extractor.es.models import PydanticLogger, WordEntry
-from wiktextract.extractor.es.pronunciation import extract_pronunciation
+from wiktextract.extractor.es.pronunciation import process_pron_graf_template
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -140,8 +140,11 @@ def parse_page(
                         and not_level3_node.kind == NodeKind.TEMPLATE
                         and not_level3_node.template_name == "pron-graf"
                     ):
-                        if wxr.config.capture_pronunciation:
-                            extract_pronunciation(
+                        if (
+                            wxr.config.capture_pronunciation
+                            and len(page_data) > 0
+                        ):
+                            process_pron_graf_template(
                                 wxr, page_data[-1], not_level3_node
                             )
                     else:
