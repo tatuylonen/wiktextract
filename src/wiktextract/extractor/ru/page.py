@@ -69,8 +69,8 @@ def get_pos(
             "числ": "number",
         }
         template_name = template_node.template_name.lower()
-        for part in template_name.split():
-            for subpart in part.split("-"):
+        for part in template_name.split()[:2]:
+            for subpart in part.split("-")[:2]:
                 if subpart in POS_MAP:
                     return POS_MAP[subpart]
 
