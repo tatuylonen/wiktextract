@@ -1,8 +1,6 @@
 import unittest
-from typing import List
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.models import WordEntry
 from wiktextract.extractor.es.pronunciation import process_pron_graf_template
@@ -20,7 +18,7 @@ class TestESPronunciation(unittest.TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
-    def get_default_page_data(self) -> List[WordEntry]:
+    def get_default_page_data(self) -> list[WordEntry]:
         return [WordEntry(word="test", lang_code="es", lang_name="Language")]
 
     def test_es_extract_pronunciation(self):
@@ -122,7 +120,7 @@ class TestESPronunciation(unittest.TestCase):
                     self.wxr, page_data[-1], root.children[0]
                 )
 
-                if case["sounds"] != []:
+                if len(case["sounds"]) > 0:
                     sounds = page_data[0].model_dump(exclude_defaults=True)[
                         "sounds"
                     ]
@@ -131,14 +129,11 @@ class TestESPronunciation(unittest.TestCase):
                             del sound["ogg_url"]
                         if "mp3_url" in sound:
                             del sound["mp3_url"]
-                    self.assertEqual(
-                        sounds,
-                        case["sounds"],
-                    )
+                    self.assertEqual(sounds, case["sounds"])
                 else:
-                    self.assertFalse(page_data[0].sounds, case["sounds"])
+                    self.assertEqual(len(page_data[0].sounds), 0)
 
-                if case["spellings"] != []:
+                if len(case["spellings"]) > 0:
                     self.assertEqual(
                         page_data[0].model_dump(exclude_defaults=True)[
                             "spellings"
@@ -146,4 +141,4 @@ class TestESPronunciation(unittest.TestCase):
                         case["spellings"],
                     )
                 else:
-                    self.assertFalse(page_data[0].spellings, case["spellings"])
+                    self.assertEqual(len(page_data[0].spellings), 0)
