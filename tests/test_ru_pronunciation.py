@@ -48,7 +48,7 @@ class TestRUPronunciation(unittest.TestCase):
         )
 
         for expected, sound in zip(expected_results, sounds):
-            self.assertDictContainsSubset(expected, sound)
+            self.assertEqual(sound, sound | expected)
 
     def test_process_transcription_template(self):
         # https://ru.wiktionary.org/wiki/Шаблон:transcription
