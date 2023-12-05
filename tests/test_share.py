@@ -1,9 +1,9 @@
 import unittest
 
-from wiktextract.extractor.de.utils import split_senseids
+from wiktextract.extractor.share import split_senseids
 
 
-class TestDEUtils(unittest.TestCase):
+class TestShare(unittest.TestCase):
     maxDiff = None
 
     def test_split_senseids(self):

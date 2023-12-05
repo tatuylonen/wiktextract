@@ -23,31 +23,3 @@ def find_and_remove_child(node: WikiNode, kind: NodeKind, cb=None):
         del node.children[idx]
         children.append(child)
     return reversed(children)
-
-
-def split_senseids(senseids_str: str) -> list[str]:
-    senseids = []
-    raw_ids = (
-        senseids_str.strip().removeprefix("[").removesuffix("]").split(",")
-    )
-    for raw_id in raw_ids:
-        range_split = raw_id.split("-")
-        if len(range_split) == 1:
-            senseids.append(raw_id.strip())
-        elif len(range_split) == 2:
-            try:
-                start = re.sub(r"[a-z]", "", range_split[0].strip())
-                end = re.sub(r"[a-z]", "", range_split[1].strip())
-                senseids.extend(
-                    [
-                        str(id)
-                        for id in range(
-                            int(start),
-                            int(end) + 1,
-                        )
-                    ]
-                )
-            except:
-                pass
-
-    return senseids

@@ -3,7 +3,7 @@ from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
-from wiktextract.extractor.de.utils import split_senseids
+from wiktextract.extractor.share import split_senseids
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
