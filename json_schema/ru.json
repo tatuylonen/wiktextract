@@ -1,0 +1,56 @@
+{
+  "$id": "https://kaikki.org/ru.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.",
+  "properties": {
+    "categories": {
+      "default": [],
+      "description": "list of non-disambiguated categories for the word",
+      "items": {
+        "type": "string"
+      },
+      "title": "Categories",
+      "type": "array"
+    },
+    "lang_code": {
+      "description": "Wiktionary language code",
+      "examples": [
+        "ru"
+      ],
+      "title": "Lang Code",
+      "type": "string"
+    },
+    "lang_name": {
+      "description": "Localized language name of the word",
+      "examples": [
+        "Русский"
+      ],
+      "title": "Lang Name",
+      "type": "string"
+    },
+    "pos": {
+      "default": null,
+      "description": "Part of speech type",
+      "title": "Pos",
+      "type": "string"
+    },
+    "pos_title": {
+      "default": null,
+      "description": "Original POS title",
+      "title": "Pos Title",
+      "type": "string"
+    },
+    "word": {
+      "description": "word string",
+      "title": "Word",
+      "type": "string"
+    }
+  },
+  "required": [
+    "word",
+    "lang_code",
+    "lang_name"
+  ],
+  "title": "Russian Wiktionary",
+  "type": "object"
+}
