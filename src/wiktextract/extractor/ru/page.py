@@ -4,7 +4,7 @@ from typing import Optional
 
 from wikitextprocessor import NodeKind, WikiNode
 
-from wiktextract.extractor.ru.models import PydanticLogger, WordEntry
+from wiktextract.extractor.ru.models import WordEntry
 from wiktextract.extractor.ru.pronunciation import extract_pronunciation
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -153,8 +153,6 @@ def parse_page(
 
     if wxr.config.verbose:
         logging.info(f"Parsing page: {page_title}")
-        # Pass current wiktextractcontext to pydantic for more better logging
-        PydanticLogger.wxr = wxr
 
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)
