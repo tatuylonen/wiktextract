@@ -1,8 +1,6 @@
-import json
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
-from pydantic.json_schema import GenerateJsonSchema
 
 
 class BaseModelWrap(BaseModel):
@@ -99,7 +97,11 @@ class Sound(BaseModelWrap):
 
 
 class WordEntry(BaseModelWrap):
-    """WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract."""
+    """
+    WordEntry is a dictionary containing lexical information of a single word
+    extracted from Wiktionary with wiktextract.
+    """
+    model_config = ConfigDict(title="Spanish Wiktionary")
 
     word: str = Field(description="word string")
     pos: str = Field(default=None, description="Part of speech type")
@@ -117,23 +119,3 @@ class WordEntry(BaseModelWrap):
     )
     sounds: Optional[list[Sound]] = []
     spellings: Optional[list[Spelling]] = []
-
-
-if __name__ == "__main__":
-
-    class JsonSchemaGenerator(GenerateJsonSchema):
-        def generate(self, schema, mode="validation"):
-            json_schema = super().generate(schema, mode=mode)
-            json_schema["title"] = "Spanish Wiktionary"
-            json_schema["$id"] = "https://kaikki.org/es.json"
-            json_schema["$schema"] = self.schema_dialect
-            return json_schema
-
-    with open("json_schema/es.json", "w") as f:
-        json.dump(
-            WordEntry.model_json_schema(schema_generator=JsonSchemaGenerator),
-            f,
-            indent=2,
-            ensure_ascii=False,
-            sort_keys=True,
-        )
