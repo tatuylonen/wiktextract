@@ -1,49 +1,15 @@
 import json
-import logging
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic.json_schema import GenerateJsonSchema
-
-from wiktextract.wxr_context import WiktextractContext
-
-
-class PydanticLogger:
-    wxr: Optional[WiktextractContext] = None
-
-    @classmethod
-    def debug(
-        cls, msg: str, trace: Optional[str] = None, sortid: str = "XYZunsorted"
-    ):
-        if cls.wxr:
-            cls.wxr.wtp.debug(msg, trace=trace, sortid=sortid)
-        else:
-            logging.debug(msg)
 
 
 class BaseModelWrap(BaseModel):
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
 
-class LoggingExtraFieldsModel(BaseModelWrap):
-    @model_validator(mode="before")
-    def log_extra_fields(cls, values):
-        all_allowed_field_names = cls.model_fields.keys()
-        extra_fields = {
-            name: str(value)
-            for name, value in values.items()
-            if name not in all_allowed_field_names
-        }
-        if extra_fields:
-            class_full_name = cls.__name__
-            PydanticLogger.debug(
-                msg=f"Pydantic - Got extra fields in {class_full_name}: {extra_fields}",
-                sortid="wiktextract/extractor/es/pydantic/extra_fields/33",
-            )
-        return values
-
-
-class Reference(LoggingExtraFieldsModel):
+class Reference(BaseModelWrap):
     url: Optional[str] = Field(default=None, description="A web link")
     first_name: Optional[str] = Field(
         default=None, description="Author's first name"
@@ -65,7 +31,7 @@ class Reference(LoggingExtraFieldsModel):
     editor: Optional[str] = Field(default=None, description="Editor")
 
 
-class Example(LoggingExtraFieldsModel):
+class Example(BaseModelWrap):
     text: str = Field(description="Example usage sentence")
     translation: Optional[str] = Field(
         default=None, description="Spanish translation of the example sentence"
@@ -73,7 +39,7 @@ class Example(LoggingExtraFieldsModel):
     ref: Optional["Reference"] = Field(default=None, description="")
 
 
-class Sense(LoggingExtraFieldsModel):
+class Sense(BaseModelWrap):
     glosses: list[str] = Field(
         description="list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging."
     )
@@ -96,7 +62,7 @@ class Sense(LoggingExtraFieldsModel):
     )
 
 
-class Spelling(LoggingExtraFieldsModel):
+class Spelling(BaseModelWrap):
     alternative: Optional[str] = Field(
         default=None, description="Alternative spelling with same pronunciation"
     )
@@ -109,7 +75,7 @@ class Spelling(LoggingExtraFieldsModel):
     )
 
 
-class Sound(LoggingExtraFieldsModel):
+class Sound(BaseModelWrap):
     ipa: list[str] = Field(
         default=[], description="International Phonetic Alphabet"
     )
@@ -132,7 +98,7 @@ class Sound(LoggingExtraFieldsModel):
     )
 
 
-class WordEntry(LoggingExtraFieldsModel):
+class WordEntry(BaseModelWrap):
     """WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract."""
 
     word: str = Field(description="word string")

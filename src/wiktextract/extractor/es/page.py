@@ -8,7 +8,7 @@ from wikitextprocessor.parser import WikiNodeChildrenList
 from wiktextract.extractor.es.example import extract_example
 from wiktextract.extractor.es.gloss import extract_gloss
 from wiktextract.extractor.es.linkage import extract_linkage
-from wiktextract.extractor.es.models import PydanticLogger, WordEntry
+from wiktextract.extractor.es.models import WordEntry
 from wiktextract.extractor.es.pronunciation import process_pron_graf_template
 from wiktextract.extractor.es.sense_data import process_sense_data_list
 from wiktextract.page import clean_node
@@ -297,8 +297,6 @@ def parse_page(
 ) -> list[dict[str, any]]:
     if wxr.config.verbose:
         logging.info(f"Parsing page: {page_title}")
-        # Pass current wiktextractcontext to pydantic for more better logging
-        PydanticLogger.wxr = wxr
 
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)
