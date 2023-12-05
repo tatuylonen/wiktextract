@@ -1,49 +1,45 @@
 import json
-import logging
-from typing import List, Optional
+from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic.json_schema import GenerateJsonSchema
-
-from wiktextract.wxr_context import WiktextractContext
-
-
-class PydanticLogger:
-    wxr: Optional[WiktextractContext] = None
-
-    @classmethod
-    def debug(
-        cls, msg: str, trace: Optional[str] = None, sortid: str = "XYZunsorted"
-    ):
-        if cls.wxr:
-            cls.wxr.wtp.debug(msg, trace=trace, sortid=sortid)
-        else:
-            logging.debug(msg)
 
 
 class BaseModelWrap(BaseModel):
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
 
-class LoggingExtraFieldsModel(BaseModelWrap):
-    @model_validator(mode="before")
-    def log_extra_fields(cls, values):
-        all_allowed_field_names = cls.model_fields.keys()
-        extra_fields = {
-            name: str(value)
-            for name, value in values.items()
-            if name not in all_allowed_field_names
-        }
-        if extra_fields:
-            class_full_name = cls.__name__
-            PydanticLogger.debug(
-                msg=f"Pydantic - Got extra fields in {class_full_name}: {extra_fields}",
-                sortid="wiktextract/extractor/es/pydantic/extra_fields/33",
-            )
-        return values
+class Reference(BaseModelWrap):
+    url: Optional[str] = Field(default=None, description="A web link")
+    first_name: Optional[str] = Field(
+        default=None, description="Author's first name"
+    )
+    last_name: Optional[str] = Field(
+        default=None, description="Author's last name"
+    )
+    title: Optional[str] = Field(
+        default=None, description="Title of the reference"
+    )
+    pages: Optional[str] = Field(default=None, description="Page numbers")
+    year: Optional[str] = Field(default=None, description="Year of publication")
+    date: Optional[str] = Field(default=None, description="Date of publication")
+    journal: Optional[str] = Field(default=None, description="Name of journal")
+    chapter: Optional[str] = Field(default=None, description="Chapter name")
+    place: Optional[str] = Field(
+        default=None, description="Place of publication"
+    )
+    editor: Optional[str] = Field(default=None, description="Editor")
 
 
-class Sense(LoggingExtraFieldsModel):
+class Example(BaseModelWrap):
+    text: str = Field(description="Example usage sentence")
+    translation: Optional[str] = Field(
+        default=None, description="Spanish translation of the example sentence"
+    )
+    ref: Optional["Reference"] = Field(default=None, description="")
+
+
+class Sense(BaseModelWrap):
     glosses: list[str] = Field(
         description="list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging."
     )
@@ -55,7 +51,9 @@ class Sense(LoggingExtraFieldsModel):
         default=[],
         description="list of sense-disambiguated category names extracted from (a subset) of the Category links on the page",
     )
-    # examples: list[SenseExample] = []
+    examples: list["Example"] = Field(
+        default=[], description="List of examples"
+    )
     subsenses: list["Sense"] = Field(
         default=[], description="List of subsenses"
     )
@@ -64,7 +62,7 @@ class Sense(LoggingExtraFieldsModel):
     )
 
 
-class Spelling(LoggingExtraFieldsModel):
+class Spelling(BaseModelWrap):
     alternative: Optional[str] = Field(
         default=None, description="Alternative spelling with same pronunciation"
     )
@@ -77,30 +75,30 @@ class Spelling(LoggingExtraFieldsModel):
     )
 
 
-class Sound(LoggingExtraFieldsModel):
-    ipa: List[str] = Field(
+class Sound(BaseModelWrap):
+    ipa: list[str] = Field(
         default=[], description="International Phonetic Alphabet"
     )
-    phonetic_transcription: List[str] = Field(
+    phonetic_transcription: list[str] = Field(
         default=[], description="Phonetic transcription, less exact than IPA."
     )
-    audio: List[str] = Field(default=[], description="Audio file name")
-    wav_url: List[str] = Field(default=[])
-    ogg_url: List[str] = Field(default=[])
-    mp3_url: List[str] = Field(default=[])
-    flac_url: List[str] = Field(default=[])
-    roman: List[str] = Field(
+    audio: list[str] = Field(default=[], description="Audio file name")
+    wav_url: list[str] = Field(default=[])
+    ogg_url: list[str] = Field(default=[])
+    mp3_url: list[str] = Field(default=[])
+    flac_url: list[str] = Field(default=[])
+    roman: list[str] = Field(
         default=[], description="Translitaration to Roman characters"
     )
-    syllabic: List[str] = Field(
+    syllabic: list[str] = Field(
         default=[], description="Syllabic transcription"
     )
-    tag: List[str] = Field(
+    tag: list[str] = Field(
         default=[], description="Specifying the variant of the pronunciation"
     )
 
 
-class WordEntry(LoggingExtraFieldsModel):
+class WordEntry(BaseModelWrap):
     """WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract."""
 
     word: str = Field(description="word string")
