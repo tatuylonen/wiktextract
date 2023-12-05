@@ -1,15 +1,16 @@
 import re
-from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
+
+from wiktextract.extractor.de.models import WordEntry
 from wiktextract.extractor.de.utils import split_senseids
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 
 def extract_linkages(
-    wxr: WiktextractContext, page_data: List[Dict], level_node: LevelNode
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
 ):
     linkage_type = wxr.config.LINKAGE_SUBTITLES.get(level_node.largs[0][0])
     for list_node in level_node.find_child(NodeKind.LIST):
@@ -25,7 +26,7 @@ def extract_linkages(
             )
 
             # Extract links
-            linkages = []
+            linkages: list[str] = []
             if linkage_type == "expressions":
                 for child in list_item.children:
                     if isinstance(child, str) and contains_dash(child):
@@ -43,15 +44,33 @@ def extract_linkages(
                     process_link(wxr, linkages, link)
 
             # Add links to the page data
-            if len(page_data[-1]["senses"]) == 1:
-                page_data[-1]["senses"][0][linkage_type].extend(linkages)
+            if len(word_entry.senses) == 1:
+                if linkage_type in word_entry.senses[0].model_fields:
+                    getattr(word_entry.senses[0], linkage_type).extend(linkages)
+                else:
+                    wxr.wtp.debug(
+                        f"Linkage type {linkage_type} not in sense model fields",
+                        sortid="extractor/de/linkages/extract_linkages/54}",
+                    )
             elif len(senseids) > 0:
                 for senseid in senseids:
-                    for sense in page_data[-1]["senses"]:
-                        if sense["senseid"] == senseid:
-                            sense[linkage_type].extend(linkages)
+                    for sense in word_entry.senses:
+                        if sense.senseid == senseid:
+                            if linkage_type in sense.model_fields:
+                                getattr(sense, linkage_type).extend(linkages)
+                            else:
+                                wxr.wtp.debug(
+                                    f"Linkage type {linkage_type} not in sense model fields",
+                                    sortid="extractor/de/linkages/extract_linkages/54}",
+                                )
             else:
-                page_data[-1][linkage_type].extend(linkages)
+                if linkage_type in word_entry.model_fields:
+                    getattr(word_entry, linkage_type).extend(linkages)
+                else:
+                    wxr.wtp.debug(
+                        f"Linkage type {linkage_type} not in entry model fields",
+                        sortid="extractor/de/linkages/extract_linkages/54}",
+                    )
 
             # Check for potentially missed data
             for non_link in list_item.invert_find_child(NodeKind.LINK):
@@ -72,7 +91,7 @@ def extract_linkages(
 
 
 def process_link(
-    wxr: WiktextractContext, semantic_links: List[str], link: WikiNode
+    wxr: WiktextractContext, semantic_links: list[str], link: WikiNode
 ):
     clean_link = clean_node(wxr, {}, link)
     if clean_link.startswith("Verzeichnis:"):

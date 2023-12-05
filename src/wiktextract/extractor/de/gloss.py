@@ -1,9 +1,10 @@
+import copy
 import re
-from collections import defaultdict
-from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
+
+from wiktextract.extractor.de.models import Sense, WordEntry
 from wiktextract.extractor.de.utils import find_and_remove_child, match_senseid
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -11,25 +12,25 @@ from wiktextract.wxr_context import WiktextractContext
 
 def extract_glosses(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    word_entry: WordEntry,
     level_node: LevelNode,
 ) -> None:
     for list_node in level_node.find_child(NodeKind.LIST):
-        process_gloss_list_item(wxr, page_data, list_node)
+        process_gloss_list_item(wxr, word_entry, list_node)
 
     for non_list_node in level_node.invert_find_child(NodeKind.LIST):
         wxr.wtp.debug(
-            f"Found unexpected non-list node in pronunciation section: {non_list_node}",
-            sortid="extractor/de/pronunciation/extract_pronunciation/64",
+            f"Found unexpected non-list node in gloss section: {non_list_node}",
+            sortid="extractor/de/gloss/extract_gloss/24",
         )
 
 
 def process_gloss_list_item(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    word_entry: WordEntry,
     list_node: WikiNode,
     parent_senseid: str = "",
-    parent_gloss_data: defaultdict(list) = None,
+    parent_gloss_data: Sense = None,
 ) -> None:
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         item_type = list_item_node.sarg
@@ -48,10 +49,10 @@ def process_gloss_list_item(
             ):
                 continue
 
-            gloss_data = (
-                defaultdict(list)
+            sense_data = (
+                Sense()
                 if parent_gloss_data is None
-                else parent_gloss_data.copy()
+                else copy.deepcopy(parent_gloss_data)
             )
 
             # Extract sub-glosses for later processing
@@ -60,11 +61,11 @@ def process_gloss_list_item(
             )
 
             raw_gloss = clean_node(wxr, {}, list_item_node.children)
-            gloss_data["raw_glosses"] = [raw_gloss]
+            sense_data.raw_glosses = [raw_gloss]
 
-            process_K_template(wxr, gloss_data, list_item_node)
+            process_K_template(wxr, sense_data, list_item_node)
 
-            gloss_text = clean_node(wxr, gloss_data, list_item_node.children)
+            gloss_text = clean_node(wxr, sense_data, list_item_node.children)
 
             senseid, gloss_text = match_senseid(gloss_text)
 
@@ -74,7 +75,7 @@ def process_gloss_list_item(
                     if senseid[0].isnumeric()
                     else parent_senseid + senseid
                 )
-                gloss_data["senseid"] = senseid
+                sense_data.senseid = senseid
             else:
                 wxr.wtp.debug(
                     f"Failed to extract sense number from gloss node: {list_item_node}",
@@ -82,19 +83,19 @@ def process_gloss_list_item(
                 )
 
             # XXX: Extract tags from nodes instead using Italic and Template
-            gloss_text = extract_tags_from_gloss_text(gloss_data, gloss_text)
+            gloss_text = extract_tags_from_gloss_text(sense_data, gloss_text)
 
             if gloss_text or not sub_glosses_list_nodes:
-                gloss_data["glosses"] = [gloss_text]
-                page_data[-1]["senses"].append(gloss_data)
+                sense_data.glosses = [gloss_text]
+                word_entry.senses.append(sense_data)
 
             for sub_list_node in sub_glosses_list_nodes:
                 process_gloss_list_item(
                     wxr,
-                    page_data,
+                    word_entry,
                     sub_list_node,
                     senseid,
-                    gloss_data if not gloss_text else None,
+                    sense_data if not gloss_text else None,
                 )
 
         else:
@@ -105,7 +106,7 @@ def process_gloss_list_item(
             continue
 
 
-def handle_sense_modifier(wxr, list_item_node):
+def handle_sense_modifier(wxr: WiktextractContext, list_item_node: WikiNode):
     wxr.wtp.debug(
         f"Skipped a sense modifier in gloss list: {list_item_node}",
         sortid="extractor/de/glosses/extract_glosses/19",
@@ -117,14 +118,16 @@ def handle_sense_modifier(wxr, list_item_node):
 
 def process_K_template(
     wxr: WiktextractContext,
-    gloss_data: defaultdict(list),
+    sense_data: Sense,
     list_item_node: NodeKind.LIST_ITEM,
 ) -> None:
     for template_node in list_item_node.find_child(NodeKind.TEMPLATE):
         if template_node.template_name == "K":
-            text = clean_node(wxr, gloss_data, template_node).removesuffix(":")
+            categories = {"categories": []}
+            text = clean_node(wxr, categories, template_node).removesuffix(":")
+            sense_data.categories.extend(categories["categories"])
             tags = re.split(r";|,", text)
-            gloss_data["tags"] = [t.strip() for t in tags]
+            sense_data.tags = [t.strip() for t in tags]
 
             # Prepositional and case information is sometimes only expanded to
             # category links and not present in cleaned node. We still want it
@@ -133,7 +136,7 @@ def process_K_template(
             case = template_node.template_parameters.get("Kas")
             category = (prep if prep else "") + (" + " + case if case else "")
             if category:
-                gloss_data["tags"].append(category)
+                sense_data.tags.append(category)
 
             # XXX: Investigate better ways to handle free text in K template
             ft = template_node.template_parameters.get("ft")
@@ -149,16 +152,14 @@ def process_K_template(
             ]
 
 
-def extract_tags_from_gloss_text(
-    gloss_data: defaultdict(list), gloss_text: str
-) -> None:
+def extract_tags_from_gloss_text(sense_data: Sense, gloss_text: str) -> None:
     parts = gloss_text.split(":", 1)
     if len(parts) > 1:
         tags_part = parts[0].strip()
 
         categories = [c.strip() for c in re.split(",", tags_part)]
         if all(c.isalnum() for c in categories):
-            gloss_data["tags"].extend(categories)
+            sense_data.tags.extend(categories)
             return parts[1].strip()
 
     return gloss_text

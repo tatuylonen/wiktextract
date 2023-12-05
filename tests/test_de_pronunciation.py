@@ -1,13 +1,11 @@
 import unittest
-from collections import defaultdict
 
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.de.pronunciation import (
-    process_hoerbeispiele,
-    process_ipa,
-)
+from wiktextract.extractor.de.models import Sound
+from wiktextract.extractor.de.pronunciation import (process_hoerbeispiele,
+                                                    process_ipa)
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -35,14 +33,22 @@ class TestDEPronunciation(unittest.TestCase):
             {
                 "input": "{{Lautschrift|ipa1|spr=de}}",
                 "expected": [
-                    {"ipa": ["ipa1"], "language": "Deutsch", "lang_code": "de"}
+                    {
+                        "ipa": ["ipa1"],
+                        "lang_name": ["Deutsch"],
+                        "lang_code": ["de"],
+                    }
                 ],
             },
             {
                 "input": "{{Lautschrift|ipa1}} {{Lautschrift|ipa2}}{{Lautschrift|ipa3|spr=de}}",
                 "expected": [
                     {"ipa": ["ipa1", "ipa2"]},
-                    {"ipa": ["ipa3"], "language": "Deutsch", "lang_code": "de"},
+                    {
+                        "ipa": ["ipa3"],
+                        "lang_name": ["Deutsch"],
+                        "lang_code": ["de"],
+                    },
                 ],
             },
             {
@@ -62,13 +68,16 @@ class TestDEPronunciation(unittest.TestCase):
 
                 root = self.wxr.wtp.parse(case["input"])
 
-                sound_data = [defaultdict(list)]
+                sound_data = [Sound()]
 
                 process_ipa(
                     self.wxr, sound_data, list(root.filter_empty_str_child())
                 )
 
-                self.assertEqual(sound_data, case["expected"])
+                sounds = [
+                    s.model_dump(exclude_defaults=True) for s in sound_data
+                ]
+                self.assertEqual(sounds, case["expected"])
 
     def test_de_process_hoerbeispiele(self):
         # https://de.wiktionary.org/wiki/Beispiel
@@ -80,7 +89,7 @@ class TestDEPronunciation(unittest.TestCase):
                 "input": "{{Audio|" + filename1 + "}}",
                 "expected": [
                     {
-                        "audio": filename1,
+                        "audio": [filename1],
                         "mp3_url": None,  # None indicates we don't care about the exact value
                         "ogg_url": None,
                     }
@@ -94,12 +103,12 @@ class TestDEPronunciation(unittest.TestCase):
                 + "}}",
                 "expected": [
                     {
-                        "audio": filename1,
+                        "audio": [filename1],
                         "mp3_url": None,
                         "ogg_url": None,
                     },
                     {
-                        "audio": filename2,
+                        "audio": [filename2],
                         "ogg_url": None,
                         "mp3_url": None,
                         "wav_url": None,
@@ -114,13 +123,13 @@ class TestDEPronunciation(unittest.TestCase):
                 + "}}",
                 "expected": [
                     {
-                        "audio": filename1,
+                        "audio": [filename1],
                         "mp3_url": None,
                         "ogg_url": None,
                         "tags": ["tag1"],
                     },
                     {
-                        "audio": filename2,
+                        "audio": [filename2],
                         "mp3_url": None,
                         "ogg_url": None,
                         "wav_url": None,
@@ -138,15 +147,16 @@ class TestDEPronunciation(unittest.TestCase):
 
                 root = self.wxr.wtp.parse(case["input"])
 
-                sound_data = [defaultdict(list)]
+                sound_data = [Sound()]
 
                 process_hoerbeispiele(
                     self.wxr, sound_data, list(root.filter_empty_str_child())
                 )
 
-                self.assertSoundDataMatchesExpected(
-                    sound_data, case["expected"]
-                )
+                sounds = [
+                    s.model_dump(exclude_defaults=True) for s in sound_data
+                ]
+                self.assertSoundDataMatchesExpected(sounds, case["expected"])
 
     def assertSoundDataMatchesExpected(self, sound_data, expected):
         self.assertEqual(
