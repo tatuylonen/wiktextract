@@ -107,7 +107,7 @@ class TestESTranslation(unittest.TestCase):
 
                 root = self.wxr.wtp.parse(case["input"])
 
-                extract_translation(self.wxr, page_data, root.children[0])
+                extract_translation(self.wxr, page_data[-1], root.children[0])
 
                 translations = [
                     t.model_dump(exclude_defaults=True)
