@@ -60,11 +60,7 @@ def add_template_params_to_reference(
         if isinstance(key, int):
             continue
 
-        ref_key = (
-            EXAMPLE_TEMPLATE_KEY_MAPPING[key]
-            if key in EXAMPLE_TEMPLATE_KEY_MAPPING
-            else key
-        )
+        ref_key = EXAMPLE_TEMPLATE_KEY_MAPPING.get(key, key)
         if ref_key in reference.model_fields:
             setattr(reference, ref_key, clean_node(wxr, {}, params.get(key)))
         else:
@@ -130,7 +126,7 @@ def extract_example(
             sortid="extractor/es/example/extract_example/87",
         )
 
-    if sense_data.examples and reference.dict(exclude_defaults=True):
+    if sense_data.examples and reference.model_dump(exclude_defaults=True):
         sense_data.examples[-1].ref = reference
 
 
