@@ -1,6 +1,7 @@
 {
   "$id": "https://kaikki.org/ru.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
   "description": "WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.",
   "properties": {
     "categories": {
