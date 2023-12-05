@@ -111,7 +111,7 @@ def parse_section(
 
     elif section_title == "Произношение":
         if wxr.config.capture_pronunciation:
-            extract_pronunciation(wxr, page_data, level3_node)
+            extract_pronunciation(wxr, page_data[-1], level3_node)
     elif section_title == "Семантические свойства":  # Semantic properties
         process_semantic_section(wxr, page_data, level3_node)
     elif section_title == "Значение":
@@ -190,19 +190,31 @@ def parse_page(
             )
             base_data.categories.extend(categories["categories"])
 
+            unprocessed_nodes = []
             for non_level23_node in level1_node.invert_find_child(
                 NodeKind.LEVEL2 | NodeKind.LEVEL3
             ):
-                IGNORED_TEMPLATES = ["wikipedia", "Омонимы", "improve"]
+                IGNORED_TEMPLATES = [
+                    "wikipedia",
+                    "Омонимы",
+                    "improve",
+                    "Лексема в Викиданных",
+                ]
                 if not (
                     isinstance(non_level23_node, WikiNode)
                     and non_level23_node.kind == NodeKind.TEMPLATE
                     and non_level23_node.template_name in IGNORED_TEMPLATES
                 ):
-                    wxr.wtp.debug(
-                        f"Found unexpected child in level node {level1_node.largs}: {non_level23_node}",
-                        sortid="extractor/es/page/parse_page/80",
-                    )
+                    unprocessed_nodes.append(non_level23_node)
+
+            if (
+                unprocessed_nodes
+                and clean_node(wxr, {}, unprocessed_nodes).strip()
+            ):
+                wxr.wtp.debug(
+                    f"Unprocessed nodes in level node {level1_node.largs}: {non_level23_node}",
+                    sortid="extractor/es/page/parse_page/80",
+                )
 
             for level2_node in level1_node.find_child(NodeKind.LEVEL2):
                 page_data.append(copy.deepcopy(base_data))
