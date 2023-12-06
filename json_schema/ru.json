@@ -1,4 +1,131 @@
 {
+  "$defs": {
+    "Sound": {
+      "additionalProperties": false,
+      "properties": {
+        "audio": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Audio file name",
+          "title": "Audio"
+        },
+        "flac_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Flac Url"
+        },
+        "homophones": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "description": "Words with same pronunciation",
+          "title": "Homophones"
+        },
+        "ipa": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "International Phonetic Alphabet",
+          "title": "Ipa"
+        },
+        "mp3_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mp3 Url"
+        },
+        "oga_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Oga Url"
+        },
+        "ogg_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ogg Url"
+        },
+        "tags": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "description": "Specifying the variant of the pronunciation",
+          "title": "Tags"
+        },
+        "wav_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Wav Url"
+        }
+      },
+      "title": "Sound",
+      "type": "object"
+    }
+  },
   "$id": "https://kaikki.org/ru.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
@@ -40,6 +167,21 @@
       "description": "Original POS title",
       "title": "Pos Title",
       "type": "string"
+    },
+    "sounds": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Sound"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Sounds"
     },
     "word": {
       "description": "word string",
