@@ -30,19 +30,23 @@ jobs:
       - run: |
           python -m pip install -U pip
           python -m pip install --use-pep517 '.[dev]'
-      - run: make test
+      - run: make test_coverage
         env:
           PYTHONWARNINGS: default
-      - name: Remove huge file taxondata_py.html
-        run: rm -f htmlcov/*_taxondata_py.html
+
+  coverage_report:
+    if: github.ref_name == 'master'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - run: make coverage_report
       - uses: actions/upload-pages-artifact@v2
-        if: github.ref_name == 'master' && matrix.python-version == '3.12'
         with:
           path: htmlcov
 
   deploy:
     if: github.ref_name == 'master'
-    needs: test
+    needs: coverage_report
     permissions:
       pages: write
       id-token: write
