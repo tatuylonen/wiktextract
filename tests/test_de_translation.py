@@ -1,13 +1,11 @@
 import unittest
-from collections import defaultdict
 
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.de.translation import (
-    extract_translation,
-    process_translation_list,
-)
+from wiktextract.extractor.de.models import Sense, Translation, WordEntry
+from wiktextract.extractor.de.translation import (extract_translation,
+                                                  process_translation_list)
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -22,85 +20,70 @@ class TestDETranslation(unittest.TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
+    def get_default_word_entry(self):
+        return WordEntry(word="Beispiel", lang_code="de", lang_name="Deutsch")
+
     def test_de_extract_translation(self):
         test_cases = [
             # Adds sense data to correct sense
             {
                 "input": "{{Ü-Tabelle|1|G=Beispiel|Ü-Liste=*{{en}}: {{Ü|en|example}}}}",
-                "page_data": [
-                    defaultdict(
-                        list, {"senses": [defaultdict(list, {"senseid": "1"})]}
-                    )
-                ],
-                "expected": [
-                    {
-                        "senses": [
-                            {
-                                "senseid": "1",
-                                "translations": [
-                                    {
-                                        "sense": "Beispiel",
-                                        "code": "en",
-                                        "lang": "Englisch",
-                                        "word": "example",
-                                    }
-                                ],
-                            }
-                        ]
-                    }
-                ],
+                "senses": [Sense(senseid="1")],
+                "expected": {
+                    "senses": [
+                        {
+                            "senseid": "1",
+                            "translations": [
+                                {
+                                    "sense": "Beispiel",
+                                    "lang_code": "en",
+                                    "lang_name": "Englisch",
+                                    "word": "example",
+                                }
+                            ],
+                        }
+                    ]
+                },
             },
             # Adds sense data to page_data root if no senseid is given
             {
                 "input": "{{Ü-Tabelle||G=Beispiel|Ü-Liste=*{{en}}: {{Ü|en|example}}}}",
-                "page_data": [
-                    defaultdict(
-                        list, {"senses": [defaultdict(list, {"senseid": "1"})]}
-                    )
-                ],
-                "expected": [
-                    {
-                        "senses": [
-                            {
-                                "senseid": "1",
-                            }
-                        ],
-                        "translations": [
-                            {
-                                "sense": "Beispiel",
-                                "code": "en",
-                                "lang": "Englisch",
-                                "word": "example",
-                            }
-                        ],
-                    }
-                ],
+                "senses": [Sense(senseid="1")],
+                "expected": {
+                    "senses": [
+                        {
+                            "senseid": "1",
+                        }
+                    ],
+                    "translations": [
+                        {
+                            "sense": "Beispiel",
+                            "lang_code": "en",
+                            "lang_name": "Englisch",
+                            "word": "example",
+                        }
+                    ],
+                },
             },
             # Adds sense data to page_data root if senseid could not be matched
             {
                 "input": "{{Ü-Tabelle|2|G=Beispiel|Ü-Liste=*{{en}}: {{Ü|en|example}}}}",
-                "page_data": [
-                    defaultdict(
-                        list, {"senses": [defaultdict(list, {"senseid": "1"})]}
-                    )
-                ],
-                "expected": [
-                    {
-                        "senses": [
-                            {
-                                "senseid": "1",
-                            }
-                        ],
-                        "translations": [
-                            {
-                                "sense": "Beispiel",
-                                "code": "en",
-                                "lang": "Englisch",
-                                "word": "example",
-                            }
-                        ],
-                    }
-                ],
+                "senses": [Sense(senseid="1")],
+                "expected": {
+                    "senses": [
+                        {
+                            "senseid": "1",
+                        }
+                    ],
+                    "translations": [
+                        {
+                            "sense": "Beispiel",
+                            "lang_code": "en",
+                            "lang_name": "Englisch",
+                            "word": "example",
+                        }
+                    ],
+                },
             },
         ]
 
@@ -109,11 +92,18 @@ class TestDETranslation(unittest.TestCase):
                 self.wxr.wtp.start_page("")
                 root = self.wxr.wtp.parse(case["input"])
 
-                page_data = case["page_data"]
+                word_entry = self.get_default_word_entry()
+                word_entry.senses = case.get("senses", [])
 
-                extract_translation(self.wxr, page_data, root)
+                extract_translation(self.wxr, word_entry, root)
 
-                self.assertEqual(page_data, case["expected"])
+                self.assertEqual(
+                    word_entry.model_dump(
+                        exclude_defaults=True,
+                        exclude={"word", "lang_code", "lang_name"},
+                    ),
+                    case["expected"],
+                )
 
     def test_de_process_translation_list(self):
         test_cases = [
@@ -122,7 +112,11 @@ class TestDETranslation(unittest.TestCase):
             {
                 "input": "{{Ü-Tabelle|||Ü-Liste=\n*{{en}}: {{Ü|en|example}}}}",
                 "expected_sense_translations": [
-                    {"code": "en", "lang": "Englisch", "word": "example"}
+                    {
+                        "lang_code": "en",
+                        "lang_name": "Englisch",
+                        "word": "example",
+                    }
                 ],
             },
             # https://de.wiktionary.org/wiki/Beispiel
@@ -131,8 +125,8 @@ class TestDETranslation(unittest.TestCase):
                 "input": "{{Ü-Tabelle|||Ü-Liste=\n*{{hy}}: {{Üt|hy|օրինակ|orinak}}}}",
                 "expected_sense_translations": [
                     {
-                        "code": "hy",
-                        "lang": "Armenisch",
+                        "lang_code": "hy",
+                        "lang_name": "Armenisch",
                         "word": "օրինակ",
                         "roman": "orinak",
                     }
@@ -145,8 +139,8 @@ class TestDETranslation(unittest.TestCase):
                 "input": "{{Ü-Tabelle|||Ü-Liste=\n*{{ru}}: {{Üt|ru|пример}}}}",
                 "expected_sense_translations": [
                     {
-                        "code": "ru",
-                        "lang": "Russisch",
+                        "lang_code": "ru",
+                        "lang_name": "Russisch",
                         "word": "пример",
                         "roman": "primer",
                     }
@@ -159,8 +153,8 @@ class TestDETranslation(unittest.TestCase):
                 "input": "{{Ü-Tabelle|||Ü-Liste=\n*{{ar}}: {{Üt?|ar|عريضة|}}}}",
                 "expected_sense_translations": [
                     {
-                        "code": "ar",
-                        "lang": "Arabisch",
+                        "lang_code": "ar",
+                        "lang_name": "Arabisch",
                         "word": "عريضة",
                         "uncertain": True,
                     }
@@ -178,7 +172,7 @@ class TestDETranslation(unittest.TestCase):
                 root = self.wxr.wtp.parse(case["input"])
 
                 sense_translations = []
-                base_translation_data = defaultdict(list)
+                base_translation_data = Translation()
 
                 translation_list = root.children[0].template_parameters.get(
                     "Ü-Liste"
@@ -190,8 +184,12 @@ class TestDETranslation(unittest.TestCase):
                     base_translation_data,
                     translation_list,
                 )
+                translations = [
+                    t.model_dump(exclude_defaults=True)
+                    for t in sense_translations
+                ]
                 self.assertEqual(
-                    sense_translations, case["expected_sense_translations"]
+                    translations, case["expected_sense_translations"]
                 )
 
     def test_de_process_translation_list_with_modifiers(self):
@@ -199,12 +197,16 @@ class TestDETranslation(unittest.TestCase):
             # https://de.wiktionary.org/wiki/Beispiel
             # Modifying the following translation
             {
-                "input": "{{Ü-Tabelle|||Ü-Liste=\n*{{en}}: {{Ü|en|instance}}, ''Vorbild:'' {{Ü|en|model}}}}",
+                "input": "{{Ü-Tabelle|||Ü-Liste=\n*{{en}}: {{Ü|en|instance}}, '''Vorbild:''' {{Ü|en|model}}}}",
                 "expected_sense_translations": [
-                    {"code": "en", "lang": "Englisch", "word": "instance"},
                     {
-                        "code": "en",
-                        "lang": "Englisch",
+                        "lang_code": "en",
+                        "lang_name": "Englisch",
+                        "word": "instance",
+                    },
+                    {
+                        "lang_code": "en",
+                        "lang_name": "Englisch",
                         "word": "model",
                         "tags": ["Vorbild"],
                     },
@@ -217,8 +219,8 @@ class TestDETranslation(unittest.TestCase):
                 "input": "{{Ü-Tabelle|||Ü-Liste=\n**{{fr}}: {{Ü|fr|exemple}} {{m}}}}",
                 "expected_sense_translations": [
                     {
-                        "code": "fr",
-                        "lang": "Französisch",
+                        "lang_code": "fr",
+                        "lang_name": "Französisch",
                         "word": "exemple",
                         "tags": ["m"],
                     }
@@ -231,20 +233,20 @@ class TestDETranslation(unittest.TestCase):
                 "input": "{{Ü-Tabelle|||Ü-Liste=\n*{{la}}: {{Ü|la|crus}} {{f}}, {{Ü|la|camba}} (vulgärlateinisch) {{f}}, {{Ü|la|gamba}} (vulgärlateinisch) {{f}}}}",
                 "expected_sense_translations": [
                     {
-                        "code": "la",
-                        "lang": "Latein",
+                        "lang_code": "la",
+                        "lang_name": "Latein",
                         "word": "crus",
                         "tags": ["f"],
                     },
                     {
-                        "code": "la",
-                        "lang": "Latein",
+                        "lang_code": "la",
+                        "lang_name": "Latein",
                         "word": "camba",
                         "tags": ["vulgärlateinisch", "f"],
                     },
                     {
-                        "code": "la",
-                        "lang": "Latein",
+                        "lang_code": "la",
+                        "lang_name": "Latein",
                         "word": "gamba",
                         "tags": ["vulgärlateinisch", "f"],
                     },
@@ -259,31 +261,31 @@ class TestDETranslation(unittest.TestCase):
                 "input": "{{Ü-Tabelle|||Ü-Liste=\n*{{en}}: [1] {{Ü|en|subscription}}; [1a] {{Ü|en|dues}}, {{Ü|en|membership fee}}; [1, 2] {{Ü|en|contribution}}; [3] {{Ü|en|article}}}}",
                 "expected_sense_translations": [
                     {
-                        "code": "en",
-                        "lang": "Englisch",
+                        "lang_code": "en",
+                        "lang_name": "Englisch",
                         "word": "subscription",
                         "tags": ["[1a]"],
                     },
                     {
-                        "code": "en",
-                        "lang": "Englisch",
+                        "lang_code": "en",
+                        "lang_name": "Englisch",
                         "word": "dues",
                     },
                     {
-                        "code": "en",
-                        "lang": "Englisch",
+                        "lang_code": "en",
+                        "lang_name": "Englisch",
                         "word": "membership fee",
                         "tags": ["[1", "2]"],
                     },
                     {
-                        "code": "en",
-                        "lang": "Englisch",
+                        "lang_code": "en",
+                        "lang_name": "Englisch",
                         "word": "contribution",
                         "tags": ["[3]"],
                     },
                     {
-                        "code": "en",
-                        "lang": "Englisch",
+                        "lang_code": "en",
+                        "lang_name": "Englisch",
                         "word": "article",
                     },
                 ],
@@ -300,7 +302,7 @@ class TestDETranslation(unittest.TestCase):
                 root = self.wxr.wtp.parse(case["input"])
 
                 sense_translations = []
-                base_translation_data = defaultdict(list)
+                base_translation_data = Translation()
 
                 translation_list = root.children[0].template_parameters.get(
                     "Ü-Liste"
@@ -312,6 +314,10 @@ class TestDETranslation(unittest.TestCase):
                     base_translation_data,
                     translation_list,
                 )
+                translations = [
+                    t.model_dump(exclude_defaults=True)
+                    for t in sense_translations
+                ]
                 self.assertEqual(
-                    sense_translations, case["expected_sense_translations"]
+                    translations, case["expected_sense_translations"]
                 )

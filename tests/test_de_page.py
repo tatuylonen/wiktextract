@@ -1,11 +1,11 @@
 # Tests for parsing a page from the German Wiktionary
 
 import unittest
-from collections import defaultdict
 
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
+from wiktextract.extractor.de.models import WordEntry
 from wiktextract.extractor.de.page import parse_page, parse_section
 from wiktextract.wxr_context import WiktextractContext
 
@@ -28,22 +28,27 @@ class TestDEPage(unittest.TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
+    def get_default_base_data(self):
+        return WordEntry(lang_code="de", lang_name="Deutsch", word="Beispiel")
+
     def test_de_parse_page(self):
         self.wxr.wtp.add_page("Vorlage:Sprache", 10, "")
+        self.wxr.wtp.add_page("Vorlage:Wortart", 10, "")
         lst = parse_page(
             self.wxr,
             "Beispiel",
-            """
-== Beispiel ({{Sprache|Deutsch}}) ==
+            """== Beispiel ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Substantiv|Deutsch}} ===
 """,
         )
         self.assertEqual(
             lst,
             [
                 {
-                    "lang": "Deutsch",
+                    "lang_name": "Deutsch",
                     "lang_code": "de",
                     "word": "Beispiel",
+                    "pos": "noun",
                 }
             ],
         )
@@ -52,22 +57,24 @@ class TestDEPage(unittest.TestCase):
         self.wxr.wtp.add_page("Vorlage:Wort der Woche", 10, "")
         self.wxr.wtp.add_page("Vorlage:Siehe auch", 10, "")
         self.wxr.wtp.add_page("Vorlage:Sprache", 10, "")
+        self.wxr.wtp.add_page("Vorlage:Wortart", 10, "")
         lst = parse_page(
             self.wxr,
             "Beispiel",
-            """
-{{Wort der Woche|46|2020}}
+            """{{Wort der Woche|46|2020}}
 {{Siehe auch|[[cát]]}}
 == Beispiel ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Substantiv|Deutsch}} ===
 """,
         )
         self.assertEqual(
             lst,
             [
                 {
-                    "lang": "Deutsch",
+                    "lang_name": "Deutsch",
                     "lang_code": "de",
                     "word": "Beispiel",
+                    "pos": "noun",
                 }
             ],
         )
@@ -86,15 +93,18 @@ class TestDEPage(unittest.TestCase):
             pre_expand=True,
         )
 
-        base_data = defaultdict(list, {"lang_code": "de"})
-        page_data = [defaultdict(list, {"lang_code": "de"})]
+        base_data = self.get_default_base_data()
+        page_data = []
         parse_section(self.wxr, page_data, base_data, root.children)
 
+        pages = [p.model_dump(exclude_defaults=True) for p in page_data]
         self.assertEqual(
-            page_data,
+            pages,
             [
                 {
+                    "word": "Beispiel",
                     "lang_code": "de",
+                    "lang_name": "Deutsch",
                     "pos": "adj",
                     "senses": [
                         {
@@ -105,8 +115,10 @@ class TestDEPage(unittest.TestCase):
                     ],
                 },
                 {
+                    "word": "Beispiel",
                     "lang_code": "de",
                     "pos": "adv",
+                    "lang_name": "Deutsch",
                     "senses": [
                         {
                             "glosses": ["gloss1"],
@@ -116,8 +128,10 @@ class TestDEPage(unittest.TestCase):
                     ],
                 },
                 {
+                    "word": "Beispiel",
                     "lang_code": "de",
                     "pos": "verb",
+                    "lang_name": "Deutsch",
                     "senses": [
                         {
                             "glosses": ["gloss2"],
@@ -127,8 +141,10 @@ class TestDEPage(unittest.TestCase):
                     ],
                 },
                 {
+                    "word": "Beispiel",
                     "lang_code": "de",
                     "pos": "noun",
+                    "lang_name": "Deutsch",
                     "senses": [
                         {
                             "glosses": ["gloss3"],

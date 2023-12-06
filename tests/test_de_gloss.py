@@ -5,12 +5,11 @@ from unittest.mock import patch
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.de.gloss import (
-    extract_glosses,
-    extract_tags_from_gloss_text,
-    process_K_template,
-)
-from wiktextract.thesaurus import close_thesaurus_db
+from wiktextract.extractor.de.gloss import (extract_glosses,
+                                            extract_tags_from_gloss_text,
+                                            process_K_template)
+from wiktextract.extractor.de.models import Sense
+from wiktextract.extractor.es.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -26,31 +25,34 @@ class TestDEGloss(unittest.TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
+    def get_default_word_entry(self):
+        return WordEntry(lang_code="de", lang_name="Deutsch", word="Beispiel")
+
     def test_de_extract_glosses(self):
         self.wxr.wtp.start_page("")
         root = self.wxr.wtp.parse(":[1] gloss1 \n:[2] gloss2")
 
-        page_data = [defaultdict(list)]
+        word_entry = self.get_default_word_entry()
 
-        extract_glosses(self.wxr, page_data, root)
+        extract_glosses(self.wxr, word_entry, root)
+
+        senses = [
+            s.model_dump(exclude_defaults=True) for s in word_entry.senses
+        ]
 
         self.assertEqual(
-            page_data,
+            senses,
             [
                 {
-                    "senses": [
-                        {
-                            "glosses": ["gloss1"],
-                            "raw_glosses": ["[1] gloss1"],
-                            "senseid": "1",
-                        },
-                        {
-                            "glosses": ["gloss2"],
-                            "raw_glosses": ["[2] gloss2"],
-                            "senseid": "2",
-                        },
-                    ]
-                }
+                    "glosses": ["gloss1"],
+                    "raw_glosses": ["[1] gloss1"],
+                    "senseid": "1",
+                },
+                {
+                    "glosses": ["gloss2"],
+                    "raw_glosses": ["[2] gloss2"],
+                    "senseid": "2",
+                },
             ],
         )
 
@@ -60,32 +62,32 @@ class TestDEGloss(unittest.TestCase):
             ":[1] gloss1\n::[a] subglossA\n::[b] subglossB"
         )
 
-        page_data = [defaultdict(list)]
+        word_entry = self.get_default_word_entry()
 
-        extract_glosses(self.wxr, page_data, root)
+        extract_glosses(self.wxr, word_entry, root)
+
+        senses = [
+            s.model_dump(exclude_defaults=True) for s in word_entry.senses
+        ]
 
         self.assertEqual(
-            page_data,
+            senses,
             [
                 {
-                    "senses": [
-                        {
-                            "glosses": ["gloss1"],
-                            "raw_glosses": ["[1] gloss1"],
-                            "senseid": "1",
-                        },
-                        {
-                            "glosses": ["subglossA"],
-                            "raw_glosses": ["[a] subglossA"],
-                            "senseid": "1a",
-                        },
-                        {
-                            "glosses": ["subglossB"],
-                            "raw_glosses": ["[b] subglossB"],
-                            "senseid": "1b",
-                        },
-                    ]
-                }
+                    "glosses": ["gloss1"],
+                    "raw_glosses": ["[1] gloss1"],
+                    "senseid": "1",
+                },
+                {
+                    "glosses": ["subglossA"],
+                    "raw_glosses": ["[a] subglossA"],
+                    "senseid": "1a",
+                },
+                {
+                    "glosses": ["subglossB"],
+                    "raw_glosses": ["[b] subglossB"],
+                    "senseid": "1b",
+                },
             ],
         )
 
@@ -96,28 +98,29 @@ class TestDEGloss(unittest.TestCase):
             ":[1] {{K|tag}}\n::[a] subglossA\n::[1b] subglossB"
         )
 
-        page_data = [defaultdict(list)]
+        word_entry = self.get_default_word_entry()
 
-        extract_glosses(self.wxr, page_data, root)
+        extract_glosses(self.wxr, word_entry, root)
+
+        senses = [
+            s.model_dump(exclude_defaults=True) for s in word_entry.senses
+        ]
+
         self.assertEqual(
-            page_data,
+            senses,
             [
                 {
-                    "senses": [
-                        {
-                            "tags": ["tag"],
-                            "glosses": ["subglossA"],
-                            "raw_glosses": ["[a] subglossA"],
-                            "senseid": "1a",
-                        },
-                        {
-                            "tags": ["tag"],
-                            "glosses": ["subglossB"],
-                            "raw_glosses": ["[1b] subglossB"],
-                            "senseid": "1b",
-                        },
-                    ]
-                }
+                    "tags": ["tag"],
+                    "glosses": ["subglossA"],
+                    "raw_glosses": ["[a] subglossA"],
+                    "senseid": "1a",
+                },
+                {
+                    "tags": ["tag"],
+                    "glosses": ["subglossB"],
+                    "raw_glosses": ["[1b] subglossB"],
+                    "senseid": "1b",
+                },
             ],
         )
 
@@ -126,14 +129,14 @@ class TestDEGloss(unittest.TestCase):
         self.wxr.wtp.start_page("")
         root = self.wxr.wtp.parse("{{K|tag1|tag2}} gloss1")
 
-        gloss_data = defaultdict(list)
+        sense_data = Sense()
 
         self.assertEqual(len(root.children), 2)
 
-        process_K_template(self.wxr, gloss_data, root)
+        process_K_template(self.wxr, sense_data, root)
 
         self.assertEqual(
-            gloss_data,
+            sense_data.model_dump(exclude_defaults=True),
             {
                 "tags": ["tag1", "tag2"],
             },
@@ -225,7 +228,7 @@ class TestDEGloss(unittest.TestCase):
 
         for case in test_cases:
             with self.subTest(case=case):
-                gloss_data = defaultdict(list)
+                sense_data = Sense()
 
                 self.wxr.wtp.start_page("")
 
@@ -235,9 +238,9 @@ class TestDEGloss(unittest.TestCase):
                     "wiktextract.extractor.de.gloss.clean_node",
                     self.get_mock(case["mock_return"]),
                 ):
-                    process_K_template(self.wxr, gloss_data, root)
+                    process_K_template(self.wxr, sense_data, root)
                     self.assertEqual(
-                        gloss_data["tags"],
+                        sense_data.tags,
                         case["expected_tags"],
                     )
 
@@ -265,19 +268,19 @@ class TestDEGloss(unittest.TestCase):
         ]
         for case in test_cases:
             with self.subTest(case=case):
-                gloss_data = defaultdict(list)
+                sense_data = Sense()
 
                 gloss_text = extract_tags_from_gloss_text(
-                    gloss_data, case["input"]
+                    sense_data, case["input"]
                 )
 
                 if case["expected_tags"] is None:
-                    self.assertEqual(gloss_data, {})
+                    self.assertEqual(
+                        sense_data.model_dump(exclude_defaults=True), {}
+                    )
                 else:
                     self.assertEqual(
-                        gloss_data,
-                        {
-                            "tags": case["expected_tags"],
-                        },
+                        sense_data.tags,
+                        case["expected_tags"],
                     )
                 self.assertEqual(gloss_text, case["expected_gloss"])

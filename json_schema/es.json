@@ -1,6 +1,197 @@
 {
   "$defs": {
+    "Example": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Reference"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": ""
+        },
+        "text": {
+          "description": "Example usage sentence",
+          "title": "Text",
+          "type": "string"
+        },
+        "translation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Spanish translation of the example sentence",
+          "title": "Translation"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "Example",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "chapter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Chapter name",
+          "title": "Chapter"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date of publication",
+          "title": "Date"
+        },
+        "editor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Editor",
+          "title": "Editor"
+        },
+        "first_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Author's first name",
+          "title": "First Name"
+        },
+        "journal": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Name of journal",
+          "title": "Journal"
+        },
+        "last_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Author's last name",
+          "title": "Last Name"
+        },
+        "pages": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Page numbers",
+          "title": "Pages"
+        },
+        "place": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Place of publication",
+          "title": "Place"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Title of the reference",
+          "title": "Title"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A web link",
+          "title": "Url"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Year of publication",
+          "title": "Year"
+        }
+      },
+      "title": "Reference",
+      "type": "object"
+    },
     "Sense": {
+      "additionalProperties": false,
       "properties": {
         "categories": {
           "default": [],
@@ -9,6 +200,15 @@
             "type": "string"
           },
           "title": "Categories",
+          "type": "array"
+        },
+        "examples": {
+          "default": [],
+          "description": "List of examples",
+          "items": {
+            "$ref": "#/$defs/Example"
+          },
+          "title": "Examples",
           "type": "array"
         },
         "glosses": {
@@ -58,6 +258,7 @@
       "type": "object"
     },
     "Sound": {
+      "additionalProperties": false,
       "properties": {
         "audio": {
           "default": [],
@@ -150,6 +351,7 @@
       "type": "object"
     },
     "Spelling": {
+      "additionalProperties": false,
       "properties": {
         "alternative": {
           "anyOf": [
@@ -193,10 +395,72 @@
       },
       "title": "Spelling",
       "type": "object"
+    },
+    "Translation": {
+      "additionalProperties": false,
+      "properties": {
+        "lang_code": {
+          "description": "Wiktionary language code of the translation term",
+          "title": "Lang Code",
+          "type": "string"
+        },
+        "notes": {
+          "default": [],
+          "description": "A list of notes",
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        },
+        "roman": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Transliteration in roman characters",
+          "title": "Roman"
+        },
+        "senseids": {
+          "default": [],
+          "description": "List of senseids where this translation applies",
+          "items": {
+            "type": "string"
+          },
+          "title": "Senseids",
+          "type": "array"
+        },
+        "tags": {
+          "default": [],
+          "description": "Tags specifying the translated term, usually gender information",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "word": {
+          "description": "Translation term",
+          "title": "Word",
+          "type": "string"
+        }
+      },
+      "required": [
+        "word",
+        "lang_code"
+      ],
+      "title": "Translation",
+      "type": "object"
     }
   },
   "$id": "https://kaikki.org/es.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
   "description": "WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.",
   "properties": {
     "categories": {
@@ -280,6 +544,21 @@
       ],
       "default": [],
       "title": "Spellings"
+    },
+    "translations": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Translation"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Translations"
     },
     "word": {
       "description": "word string",
