@@ -11,6 +11,7 @@ from wiktextract.extractor.es.linkage import extract_linkage
 from wiktextract.extractor.es.models import WordEntry
 from wiktextract.extractor.es.pronunciation import process_pron_graf_template
 from wiktextract.extractor.es.sense_data import process_sense_data_list
+from wiktextract.extractor.es.translation import extract_translation
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -128,8 +129,11 @@ def parse_section(
             pass
     elif section_title in wxr.config.OTHER_SUBTITLES["translations"]:
         if wxr.config.capture_translations:
-            # XXX: Extract translations
-            pass
+            for template_node in level_node.find_child_recursively(
+                NodeKind.TEMPLATE
+            ):
+                if template_node.template_name == "t+" and len(page_data)>0:
+                    extract_translation(wxr, page_data[-1], template_node)
     else:
         wxr.wtp.debug(
             f"Unprocessed section: {section_title}",

@@ -7,8 +7,7 @@ class BaseModelWrap(BaseModel):
 
 class WordEntry(BaseModelWrap):
     """
-    WordEntry is a dictionary containing lexical information of a single
-    word extracted from Wiktionary with wiktextract.
+    WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.
     """
     model_config = ConfigDict(title="Russian Wiktionary")
 
