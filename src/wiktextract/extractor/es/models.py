@@ -7,6 +7,14 @@ class BaseModelWrap(BaseModel):
     model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
 
+class Linkage(BaseModelWrap):
+    word: str
+    note: Optional[str] = Field(default=None)
+    alternative_spelling: Optional[str] = Field(
+        default=None, description="Alternative spelling of the word"
+    )
+
+
 class Translation(BaseModelWrap):
     word: str = Field(description="Translation term")
     lang_code: str = Field(
@@ -71,12 +79,21 @@ class Sense(BaseModelWrap):
     examples: list["Example"] = Field(
         default=[], description="List of examples"
     )
-    subsenses: list["Sense"] = Field(
-        default=[], description="List of subsenses"
-    )
+    # subsenses: list["Sense"] = Field(
+    #     default=[], description="List of subsenses"
+    # )
     senseid: Optional[int] = Field(
         default=None, description="Sense number used in Wiktionary"
     )
+    antonyms: Optional[list[Linkage]] = []
+    compounds: Optional[list[Linkage]] = []
+    derived: Optional[list[Linkage]] = []
+    hyponyms: Optional[list[Linkage]] = []
+    hypernyms: Optional[list[Linkage]] = []
+    idioms: Optional[list[Linkage]] = []
+    meronyms: Optional[list[Linkage]] = []
+    related: Optional[list[Linkage]] = []
+    synonyms: Optional[list[Linkage]] = []
 
 
 class Spelling(BaseModelWrap):
@@ -119,6 +136,7 @@ class WordEntry(BaseModelWrap):
     """
     WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.
     """
+
     model_config = ConfigDict(title="Spanish Wiktionary")
 
     word: str = Field(description="word string")
@@ -138,3 +156,12 @@ class WordEntry(BaseModelWrap):
     sounds: Optional[list[Sound]] = []
     spellings: Optional[list[Spelling]] = []
     translations: Optional[list[Translation]] = []
+    antonyms: Optional[list[Linkage]] = []
+    compounds: Optional[list[Linkage]] = []
+    derived: Optional[list[Linkage]] = []
+    hyponyms: Optional[list[Linkage]] = []
+    hypernyms: Optional[list[Linkage]] = []
+    idioms: Optional[list[Linkage]] = []
+    meronyms: Optional[list[Linkage]] = []
+    related: Optional[list[Linkage]] = []
+    synonyms: Optional[list[Linkage]] = []
