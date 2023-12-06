@@ -3,7 +3,6 @@ import string
 from collections import defaultdict
 
 from wikitextprocessor import WikiNode
-
 from wiktextract.extractor.es.models import Sound, Spelling, WordEntry
 from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node

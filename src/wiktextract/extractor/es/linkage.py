@@ -2,7 +2,6 @@ from typing import Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import WikiNodeChildrenList
-
 from wiktextract.extractor.es.models import Linkage, Sense, WordEntry
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -14,7 +13,7 @@ def extract_linkage(
     node: WikiNode,
     linkage_type: str,
 ):
-    if not linkage_type in data_container.model_fields:
+    if linkage_type not in data_container.model_fields:
         wxr.wtp.debug(
             f"Linkage type {linkage_type} not found in pydantic model",
             sortid="extractor/es/linkage/extract_linkage/20",
@@ -41,7 +40,7 @@ def process_linkage_template(
     linkage_type = wxr.config.LINKAGE_SUBTITLES.get(
         template_node.template_name.removesuffix("s")
     )
-    if not linkage_type in data_container.model_fields:
+    if linkage_type not in data_container.model_fields:
         wxr.wtp.debug(
             f"Linkage type {linkage_type} not found in pydantic model",
             sortid="extractor/es/linkage/process_linkage_template/51",
@@ -75,7 +74,7 @@ def process_linkage_list_children(
     nodes: WikiNodeChildrenList,
     linkage_type: str,
 ):
-    if not linkage_type in data_container.model_fields:
+    if linkage_type not in data_container.model_fields:
         wxr.wtp.debug(
             f"Linkage type {linkage_type} not found in pydantic model",
             sortid="extractor/es/linkage/process_linkage_list_children/89",

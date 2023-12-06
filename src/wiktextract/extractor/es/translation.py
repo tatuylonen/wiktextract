@@ -1,9 +1,8 @@
 from typing import Optional
 
 from wikitextprocessor import WikiNode
-
-from wiktextract.extractor.share import split_senseids
 from wiktextract.extractor.es.models import Translation, WordEntry
+from wiktextract.extractor.share import split_senseids
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
