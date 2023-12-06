@@ -1,21 +1,48 @@
-from collections import defaultdict
-from typing import Dict, List
+import copy
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
+
+from wiktextract.extractor.de.models import Example, Reference, WordEntry
 from wiktextract.extractor.de.utils import find_and_remove_child, match_senseid
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+REF_KEY_MAP = {
+    "autor": "author",
+    "a": "author",
+    "titel": "title",
+    "titelerg": "title_complement",
+    "auflage": "edition",
+    "verlag": "publisher",
+    "ort": "place",
+    "jahr": "year",
+    "seiten": "pages",
+    "isbn": "isbn",
+    "übersetzer": "translator",
+    "herausgeber": "editor",
+    "sammelwerk": "collection",
+    "werk": "collection",
+    "band": "volume",
+    "kommentar": "comment",
+    "online": "url",
+    "tag": "day",
+    "monat": "month",
+    "zugriff": "accessdate",
+    "nummer": "number",
+    "datum": "date",
+    "hrsg": "editor",
+}
+
 
 def extract_examples(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    word_entry: WordEntry,
     level_node: LevelNode,
 ) -> None:
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
-            example_data = defaultdict(str)
+            example_data = Example()
 
             ref_nodes = find_and_remove_child(
                 list_item_node,
@@ -30,12 +57,12 @@ def extract_examples(
             senseid, example_text = match_senseid(example_text)
 
             if example_text:
-                example_data["text"] = example_text
+                example_data.text = example_text
 
             if senseid:
-                for sense in page_data[-1]["senses"]:
-                    if sense["senseid"] == senseid:
-                        sense["examples"].append(example_data)
+                for sense in word_entry.senses:
+                    if sense.senseid == senseid:
+                        sense.examples.append(copy.deepcopy(example_data))
 
             else:
                 if example_data:
@@ -51,11 +78,11 @@ def extract_examples(
 
 
 def extract_reference(
-    wxr: WiktextractContext, example_data: Dict[str, str], ref_node: WikiNode
+    wxr: WiktextractContext, example_data: Example, ref_node: WikiNode
 ):
-    reference_data = defaultdict()
+    reference_data = Reference()
 
-    reference_data["raw_ref"] = clean_node(wxr, {}, ref_node.children)
+    reference_data.raw_ref = clean_node(wxr, {}, ref_node.children)
 
     template_nodes = list(ref_node.find_child(NodeKind.TEMPLATE))
 
@@ -72,9 +99,18 @@ def extract_reference(
         # https://de.wiktionary.org/wiki/Vorlage:Literatur
         for key, value in template_node.template_parameters.items():
             if isinstance(key, str):
-                reference_data[key.lower()] = clean_node(wxr, {}, value)
+                key_english = REF_KEY_MAP.get(key.lower(), key.lower())
+                if key_english in reference_data.model_fields:
+                    setattr(
+                        reference_data, key_english, clean_node(wxr, {}, value)
+                    )
+                else:
+                    wxr.wtp.debug(
+                        f"Unexpected key in reference: {key_english}",
+                        sortid="extractor/de/examples/extract_examples/77",
+                    )
 
         # XXX: Treat other templates as well.
         # E.g. https://de.wiktionary.org/wiki/Vorlage:Ref-OWID
 
-    example_data["ref"] = reference_data
+    example_data.ref = reference_data

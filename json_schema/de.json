@@ -1,0 +1,932 @@
+{
+  "$defs": {
+    "Example": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Reference"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": ""
+        },
+        "text": {
+          "default": null,
+          "description": "Example usage sentence",
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "title": "Example",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "accessdate": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date of access of online reference",
+          "title": "Accessdate"
+        },
+        "author": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Author's name",
+          "title": "Author"
+        },
+        "collection": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Name of collection that reference was published in",
+          "title": "Collection"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Comment on the reference",
+          "title": "Comment"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Date of publication",
+          "title": "Date"
+        },
+        "day": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Day of publication",
+          "title": "Day"
+        },
+        "edition": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Edition number",
+          "title": "Edition"
+        },
+        "editor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Editor",
+          "title": "Editor"
+        },
+        "isbn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISBN number",
+          "title": "Isbn"
+        },
+        "month": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Month of publication",
+          "title": "Month"
+        },
+        "number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Issue number",
+          "title": "Number"
+        },
+        "pages": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Page numbers",
+          "title": "Pages"
+        },
+        "place": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Place of publication",
+          "title": "Place"
+        },
+        "publisher": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Published by",
+          "title": "Publisher"
+        },
+        "raw_ref": {
+          "default": null,
+          "description": "Raw reference string",
+          "title": "Raw Ref",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Title of the reference",
+          "title": "Title"
+        },
+        "title_complement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Complement to the title",
+          "title": "Title Complement"
+        },
+        "translator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Translator",
+          "title": "Translator"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A web link. Not necessarily well-formated.",
+          "title": "Url"
+        },
+        "volume": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Volume number",
+          "title": "Volume"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Year of publication",
+          "title": "Year"
+        }
+      },
+      "title": "Reference",
+      "type": "object"
+    },
+    "Sense": {
+      "additionalProperties": false,
+      "properties": {
+        "antonyms": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Antonyms"
+        },
+        "categories": {
+          "default": [],
+          "description": "list of sense-disambiguated category names extracted from (a subset) of the Category links on the page",
+          "items": {
+            "type": "string"
+          },
+          "title": "Categories",
+          "type": "array"
+        },
+        "coordinate_terms": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Coordinate Terms"
+        },
+        "derived": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Derived"
+        },
+        "examples": {
+          "default": [],
+          "description": "List of examples",
+          "items": {
+            "$ref": "#/$defs/Example"
+          },
+          "title": "Examples",
+          "type": "array"
+        },
+        "expressions": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Expressions"
+        },
+        "glosses": {
+          "default": [],
+          "description": "list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Glosses",
+          "type": "array"
+        },
+        "holonyms": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Holonyms"
+        },
+        "hypernyms": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Hypernyms"
+        },
+        "hyponyms": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Hyponyms"
+        },
+        "proverbs": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Proverbs"
+        },
+        "raw_glosses": {
+          "default": [],
+          "description": "list of uncleaned raw glosses for the word sense (usually only one).",
+          "items": {
+            "type": "string"
+          },
+          "title": "Raw Glosses",
+          "type": "array"
+        },
+        "senseid": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sense number used in Wiktionary",
+          "title": "Senseid"
+        },
+        "synonyms": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Synonyms"
+        },
+        "tags": {
+          "default": [],
+          "description": "list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "translations": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Translation"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": [],
+          "title": "Translations"
+        }
+      },
+      "title": "Sense",
+      "type": "object"
+    },
+    "Sound": {
+      "additionalProperties": false,
+      "properties": {
+        "audio": {
+          "default": [],
+          "description": "Audio file name",
+          "items": {
+            "type": "string"
+          },
+          "title": "Audio",
+          "type": "array"
+        },
+        "flac_url": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Flac Url",
+          "type": "array"
+        },
+        "ipa": {
+          "default": [],
+          "description": "International Phonetic Alphabet",
+          "items": {
+            "type": "string"
+          },
+          "title": "Ipa",
+          "type": "array"
+        },
+        "lang_code": {
+          "default": [],
+          "description": "Wiktionary language code",
+          "items": {
+            "type": "string"
+          },
+          "title": "Lang Code",
+          "type": "array"
+        },
+        "lang_name": {
+          "default": [],
+          "description": "Localized language name",
+          "items": {
+            "type": "string"
+          },
+          "title": "Lang Name",
+          "type": "array"
+        },
+        "mp3_url": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Mp3 Url",
+          "type": "array"
+        },
+        "oga_url": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Oga Url",
+          "type": "array"
+        },
+        "ogg_url": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Ogg Url",
+          "type": "array"
+        },
+        "tags": {
+          "default": [],
+          "description": "Specifying the variant of the pronunciation",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "wav_url": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Wav Url",
+          "type": "array"
+        }
+      },
+      "title": "Sound",
+      "type": "object"
+    },
+    "Translation": {
+      "additionalProperties": false,
+      "properties": {
+        "lang_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Wiktionary language code of the translation term",
+          "title": "Lang Code"
+        },
+        "lang_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Localized language name",
+          "title": "Lang Name"
+        },
+        "notes": {
+          "default": [],
+          "description": "A list of notes",
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        },
+        "roman": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Transliteration in roman characters",
+          "title": "Roman"
+        },
+        "sense": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A gloss of the sense being translated",
+          "title": "Sense"
+        },
+        "tags": {
+          "default": [],
+          "description": "Tags specifying the translated term, usually gender information",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "uncertain": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": false,
+          "description": "Translation marked as uncertain",
+          "title": "Uncertain"
+        },
+        "word": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Translation term",
+          "title": "Word"
+        }
+      },
+      "title": "Translation",
+      "type": "object"
+    }
+  },
+  "$id": "https://kaikki.org/de.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.",
+  "properties": {
+    "antonyms": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Antonyms"
+    },
+    "coordinate_terms": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Coordinate Terms"
+    },
+    "derived": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Derived"
+    },
+    "expressions": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Expressions"
+    },
+    "holonyms": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Holonyms"
+    },
+    "hypernyms": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Hypernyms"
+    },
+    "hyponyms": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Hyponyms"
+    },
+    "lang_code": {
+      "description": "Wiktionary language code",
+      "examples": [
+        "es"
+      ],
+      "title": "Lang Code",
+      "type": "string"
+    },
+    "lang_name": {
+      "description": "Localized language name of the word",
+      "examples": [
+        "español"
+      ],
+      "title": "Lang Name",
+      "type": "string"
+    },
+    "pos": {
+      "default": null,
+      "description": "Part of speech type",
+      "title": "Pos",
+      "type": "string"
+    },
+    "proverbs": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Proverbs"
+    },
+    "senses": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Sense"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Senses"
+    },
+    "sounds": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Sound"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Sounds"
+    },
+    "synonyms": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Synonyms"
+    },
+    "translations": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Translation"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": [],
+      "title": "Translations"
+    },
+    "word": {
+      "description": "word string",
+      "title": "Word",
+      "type": "string"
+    }
+  },
+  "required": [
+    "word",
+    "lang_code",
+    "lang_name"
+  ],
+  "title": "German Wiktionary",
+  "type": "object"
+}
