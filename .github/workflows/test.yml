@@ -29,24 +29,20 @@ jobs:
           cache: 'pip'
       - run: |
           python -m pip install -U pip
-          python -m pip install --use-pep517 '.[dev]'
+          python -m pip install --use-pep517 -e '.[dev]'
       - run: make test_coverage
         env:
           PYTHONWARNINGS: default
-
-  coverage_report:
-    if: github.ref_name == 'master'
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - run: make coverage_report
+      - run: |
+          make coverage_report
+          make github_pages
+        if: github.ref_name == 'master' && matrix.python-version == '3.12'
       - uses: actions/upload-pages-artifact@v2
-        with:
-          path: htmlcov
+        if: github.ref_name == 'master' && matrix.python-version == '3.12'
 
   deploy:
     if: github.ref_name == 'master'
-    needs: coverage_report
+    needs: test
     permissions:
       pages: write
       id-token: write
