@@ -35,7 +35,7 @@ jobs:
           PYTHONWARNINGS: default
       - run: |
           make coverage_report
-          make github_pages
+          make github_pages REPO=${{ github.repository }} SHA=${{ github.sha }}
         if: github.ref_name == 'master' && matrix.python-version == '3.12'
       - uses: actions/upload-pages-artifact@v2
         if: github.ref_name == 'master' && matrix.python-version == '3.12'

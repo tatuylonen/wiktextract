@@ -1,3 +1,4 @@
+import argparse
 import json
 from pathlib import Path
 
@@ -6,6 +7,11 @@ def main():
     """
     Generate a simple HTML page to list files in the `_site` folder.
     """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("repo", help="The owner and repository name.")
+    parser.add_argument("sha", help="The commit SHA.")
+    args = parser.parse_args()
+
     html = """
     <!DOCTYPE HTML>
     <html lang="en-US">
@@ -21,6 +27,7 @@ def main():
             <ul>
             <schema_list>
             </ul>
+            <commit_sha>
         </body>
     </html>
     """
@@ -37,6 +44,10 @@ def main():
             schema_data = json.load(f)
             schema_list_html += f"<li><a href='{schema_path.name}'>{schema_data.get('title')}</a></li>"
     html = html.replace("<schema_list>", schema_list_html)
+
+    commit_sha = f"<p>Commit: <a href='https://github.com/{args.repo}/commit/{args.sha}'>{args.sha[:7]}</a></p>"
+    html = html.replace("<commit_sha>", commit_sha)
+
     with open("_site/index.html", "w", encoding="utf-8") as f:
         f.write(html)
 

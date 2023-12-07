@@ -1,5 +1,8 @@
 # Run "make test" to run tests
 # Run "make clean" to remove automatically generated files
+REPO ?= tatuylonen/wiktextract
+SHA ?= HEAD
+
 test:
 	python -m unittest discover -b -s tests
 test_coverage:
@@ -11,7 +14,7 @@ coverage_report:
 github_pages:
 	python tools/generate_schema.py
 	cp json_schema/*.json _site
-	python tools/github_pages.py
+	python tools/github_pages.py $(REPO) $(SHA)
 clean:
 	python -m coverage erase
 	rm -rf __pycache__ _site
