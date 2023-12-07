@@ -126,3 +126,34 @@ class WordEntry(BaseModelWrap):
     sounds: Optional[list[Sound]] = []
     senses: Optional[list[Sense]] = []
     translations: Optional[list[Translation]] = []
+
+    antonyms: Optional[list[str]] = Field(
+        default=[], description="List of antonyms"
+    )
+    anagrams: Optional[list[str]] = Field(
+        default=[], description="List of anagrams"
+    )
+    variants: Optional[list[str]] = Field(
+        default=[], description="List of variants"
+    )
+    hypernyms: Optional[list[str]] = Field(
+        default=[], description="List of hypernyms"
+    )
+    hyponyms: Optional[list[str]] = Field(
+        default=[], description="List of hyponyms"
+    )
+    derived: Optional[list[str]] = Field(
+        default=[], description="List of derived terms"
+    )
+    meronyms: Optional[list[str]] = Field(
+        default=[], description="List of meronyms"
+    )
+    synonyms: Optional[list[str]] = Field(
+        default=[], description="List of synonyms"
+    )
+    coordinate_terms: Optional[list[str]] = Field(
+        default=[], description="List of coordinate terms"
+    )
+    holonyms: Optional[list[str]] = Field(
+        default=[], description="List of holonyms"
+    )
