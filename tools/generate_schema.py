@@ -1,5 +1,6 @@
 import importlib
 import json
+from pathlib import Path
 from importlib.resources import files
 
 
@@ -11,6 +12,8 @@ def main() -> None:
     """
 
     extractor_folder = files("wiktextract") / "extractor"
+    output_path = Path("_site")
+    output_path.mkdir(exist_ok=True)
     for extractor_folder in filter(
         lambda p: p.is_dir(), (files("wiktextract") / "extractor").iterdir()
     ):
@@ -24,8 +27,8 @@ def main() -> None:
             model_schema[
                 "$schema"
             ] = "https://json-schema.org/draft/2020-12/schema"
-            with open(
-                f"json_schema/{lang_code}.json", "w", encoding="utf-8"
+            with (output_path / f"{lang_code}.json").open(
+                "w", encoding="utf-8"
             ) as f:
                 json.dump(
                     model_schema,

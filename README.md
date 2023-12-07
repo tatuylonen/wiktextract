@@ -322,13 +322,11 @@ python -m pip install -U pip
 python -m pip install --use-pep517 .
 ```
 
-This software requires Python 3.
-
 ### Running tests
 
 This package includes tests written using the `unittest` framework.
-They can be run using, for example, `nose2`, which can be installed
-using `python -m pip install --use-pep517 -e ".[dev]"`.
+The test dependencies can be installed with command
+`python -m pip install --use-pep517 -e ".[dev]"`.
 
 To run the tests, use the following command in the top-level directory:
 
@@ -357,22 +355,6 @@ You can download the full pre-extracted data from
 updated regularly with the latest Wiktionary dump.  Using the
 pre-extracted data may be the easiest option unless you have special
 needs or want to modify the code.
-
-### Installing and running tests on Windows with VS Code
-
-Tested with Python 3.9.4.
-
-- Create [a Python virtual environment](https://code.visualstudio.com/docs/python/environments#_creating-environments)
-(venv) in the VS Code workspace with the cloned repo. It should automatically install the package.
-
-- Open a new terminal. It should be PowerShell. You may need to [fix terminal permissions](https://stackoverflow.com/questions/56199111/visual-studio-code-cmd-error-cannot-be-loaded-because-running-scripts-is-disabl/67420296#67420296)
-in order for it to pick up the virtual environment correclty.
-
-- In the terminal run this command:
-
-```
-py -m nose2 -B
-```
 
 ## Using the command-line tool
 

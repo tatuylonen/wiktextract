@@ -22,3 +22,6 @@ usertools/data/
 bac-wikt-*
 pagesbac/
 wikt-db*
+
+# GitHub Pages
+_site
