@@ -8,6 +8,7 @@ from wiktextract.extractor.ru.gloss import extract_gloss
 from wiktextract.extractor.ru.linkage import extract_linkages
 from wiktextract.extractor.ru.models import WordEntry
 from wiktextract.extractor.ru.pronunciation import extract_pronunciation
+from wiktextract.extractor.ru.translation import extract_translations
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -147,7 +148,7 @@ def parse_section(
             pass
     elif section_title == "Перевод":
         if wxr.config.capture_translations:
-            pass
+            extract_translations(wxr, page_data[-1], level3_node)
     elif section_title in ["Анаграммы", "Метаграммы", "Синонимы", "Антонимы"]:
         pass
     elif section_title == "Библиография":

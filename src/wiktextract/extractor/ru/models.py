@@ -7,6 +7,20 @@ class BaseModelWrap(BaseModel):
     model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
 
+class Translation(BaseModelWrap):
+    word: str = Field(description="Translation term")
+    lang_code: str = Field(
+        description="Wiktionary language code of the translation term"
+    )
+    lang_name: str = Field(
+        description="Localized language name of the translation term"
+    )
+    sense: Optional[str] = Field(
+        default=None,
+        description="An optional gloss describing the sense translated",
+    )
+
+
 class Sound(BaseModelWrap):
     ipa: Optional[str] = Field(
         default=None, description="International Phonetic Alphabet"
@@ -111,3 +125,4 @@ class WordEntry(BaseModelWrap):
     )
     sounds: Optional[list[Sound]] = []
     senses: Optional[list[Sense]] = []
+    translations: Optional[list[Translation]] = []

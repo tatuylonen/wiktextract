@@ -8,7 +8,7 @@ from wiktextract.extractor.ru.models import Sense
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestRUGloss(unittest.TestCase):
+class TestRUExample(unittest.TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="ru"),
@@ -21,7 +21,7 @@ class TestRUGloss(unittest.TestCase):
     def get_default_sense_data(self) -> Sense:
         return Sense()
 
-    def test_ru_extract_gloss(self):
+    def test_ru_extract_example(self):
         test_cases = [
             # Ignores empty template
             {"input": "{{пример|}}", "expected": []},
