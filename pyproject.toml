@@ -41,7 +41,6 @@ dependencies = [
 dev = [
     "black",
     "coverage[toml]",
-    "jsonschema",
     "mypy",
     "ruff",
 ]

@@ -9,7 +9,7 @@ coverage_report:
 	python -m coverage combine
 	python -m coverage html
 github_pages:
-	python json_schema/generate_schema.py
+	python tools/generate_schema.py
 	cp json_schema/*.json _site
 	python tools/github_pages.py
 clean:
