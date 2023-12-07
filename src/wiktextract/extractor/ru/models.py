@@ -1,4 +1,5 @@
 from typing import Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -24,6 +25,38 @@ class Sound(BaseModelWrap):
     )
 
 
+class Sense(BaseModelWrap):
+    raw_gloss: Optional[str] = Field(
+        default=None,
+        description="Raw gloss string for the word sense. This might contain tags and other markup.",
+    )
+    gloss: Optional[str] = Field(
+        default=None,
+        description="Gloss string for the word sense. This has been cleaned, and should be straightforward text with no tags.",
+    )
+    tags: list[str] = Field(
+        default=[],
+        description="List of tags affecting the word sense.",
+    )
+    notes: list[str] = Field(
+        default=[],
+        description="List of notes for the word sense. Usually describing usage.",
+    )
+    categories: list[str] = Field(
+        default=[],
+        description="list of sense-disambiguated category names extracted from (a subset) of the Category links on the page",
+    )
+    # examples: list["Example"] = Field(
+    #     default=[], description="List of examples"
+    # )
+    # subsenses: list["Sense"] = Field(
+    #     default=[], description="List of subsenses"
+    # )
+    # senseid: Optional[int] = Field(
+    #     default=None, description="Sense number used in Wiktionary"
+    # )
+
+
 class WordEntry(BaseModelWrap):
     """
     WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.
@@ -45,3 +78,4 @@ class WordEntry(BaseModelWrap):
         description="list of non-disambiguated categories for the word",
     )
     sounds: Optional[list[Sound]] = []
+    senses: Optional[list[Sense]] = []
