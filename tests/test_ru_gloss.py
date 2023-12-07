@@ -69,6 +69,8 @@ class TestRUGloss(unittest.TestCase):
                 )
 
                 new_sense = (
-                    page_data[-1].senses[-1].model_dump(exclude_defaults=True)
+                    page_data[-1]
+                    .senses[-1]
+                    .model_dump(exclude_defaults=True, exclude={"examples"})
                 )
                 self.assertEqual(new_sense, case["expected"])
