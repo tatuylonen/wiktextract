@@ -6,47 +6,57 @@ from wiktextract.extractor.ru.models import Sense, WordEntry
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-TAGS_TEMPLATE_NAMES = {
-    # XXX: This list is incomplete. There are many more tag templates. Perhaps it would be better to assume all templates that are not recognized as something else are tags?
-    "жарг.",
-    "зоол.",
-    "искусств.",
-    "истор.",
-    "ихтиол.",
-    "книжн.",
-    "кулин.",
-    "ласк.",
-    "лингв.",
-    "матем.",
-    "мед.",
-    "минер.",
-    "минерал.",
-    "миф.",
-    "мифол.",
-    "неодобр.",
-    "п.",
-    "перен.",
-    "полит.",
-    "поэт.",
-    "пренебр.",
-    "прост.",
-    "разг.",
-    "религ.",
-    "техн.",
-    "устар.",
-    "фарм.",
-    "физ.",
-    "физиол.",
-    "филол.",
-    "филос.",
-    "фолькл.",
-    "хим.",
-    "церк.",
-    "шутл.",
-    "эвф.",
-    "экон.",
-    "юр.",
+# Wiktioniary intern templates that can be ignores
+META_TEMPLATES = {
+    "помета.",
+    "Нужен перевод",
+    "?",
 }
+
+# Templates that are part of the clean gloss when expanded
+GLOSS_TEMPLATES = {
+    "-",
+    "=",
+    "===",
+    "english surname example",
+    "lang",
+    "аббр.",
+    "выдел",
+    "гипокор.",
+    "дееприч.",
+    "действие",
+    "женск.",
+    "ласк.",
+    "мн",
+    "морфема",
+    "нареч.",
+    "наречие",
+    "однокр.",
+    "отн.",
+    "по.",
+    "по",
+    "превосх.",
+    "прич.",
+    "свойство",
+    "совершить",
+    "сокр.",
+    "сокращ",
+    "соотн.",
+    "сравн.",
+    "страд.",
+    "то же",
+    "увелич.",
+    "уменьш.",
+    "умласк",
+    "умласк.",
+    "унич.",
+    "уничиж.",
+    "хим-элем",
+    "элемент",
+}
+
+# Templates that specify a note for the gloss
+NOTE_TEMPLATES = {"пример", "помета", "??", "as ru"}
 
 
 def extract_gloss(
@@ -66,22 +76,25 @@ def extract_gloss(
             if child.template_name == "пример":
                 process_example_template(wxr, sense, child)
 
-            elif child.template_name in TAGS_TEMPLATE_NAMES:
-                tag_templates.append(child)
-                raw_gloss_children.append(child)
-
-            elif child.template_name == "помета":
+            elif child.template_name == "семантика":
+                # https://ru.wiktionary.org/wiki/Шаблон:семантика
+                # XXX: Extract semantic templates to linkages
+                continue
+            elif child.template_name in NOTE_TEMPLATES:
                 note_templates.append(child)
                 raw_gloss_children.append(child)
 
-            else:
+            elif child.template_name in META_TEMPLATES:
+                continue
+
+            elif child.template_name in GLOSS_TEMPLATES:
                 clean_gloss_children.append(child)
                 raw_gloss_children.append(child)
+            else:
+                # Assume node is tag template
+                tag_templates.append(child)
+                raw_gloss_children.append(child)
 
-                wxr.wtp.debug(
-                    f"Found template '{child.template_name}' in gloss that could be a tag",
-                    sortid="extractor/ru/gloss/extract_gloss/75",
-                )
         else:
             clean_gloss_children.append(child)
             raw_gloss_children.append(child)
@@ -100,6 +113,7 @@ def extract_gloss(
             sense.gloss = gloss
 
     for tag_template in tag_templates:
+        # XXX: Expanded tags are mostly still abbreviations. In Wiktionary, however, they show the full word on hover. Perhaps it's possible to extract the full word from the template?
         tag = clean_node(wxr, {}, tag_template).strip()
         if tag:
             sense.tags.append(tag)
