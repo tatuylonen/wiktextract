@@ -64,7 +64,7 @@ def extract_gloss(
     for child in item_node.children:
         if isinstance(child, WikiNode) and child.kind == NodeKind.TEMPLATE:
             if child.template_name == "пример":
-                process_example_template(wxr, word_entry, child)
+                process_example_template(wxr, sense, child)
 
             elif child.template_name in TAGS_TEMPLATE_NAMES:
                 tag_templates.append(child)

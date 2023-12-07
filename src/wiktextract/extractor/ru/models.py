@@ -46,15 +46,47 @@ class Sense(BaseModelWrap):
         default=[],
         description="list of sense-disambiguated category names extracted from (a subset) of the Category links on the page",
     )
-    # examples: list["Example"] = Field(
-    #     default=[], description="List of examples"
-    # )
+    examples: list["Example"] = Field(
+        default=[], description="List of examples"
+    )
     # subsenses: list["Sense"] = Field(
     #     default=[], description="List of subsenses"
     # )
     # senseid: Optional[int] = Field(
     #     default=None, description="Sense number used in Wiktionary"
     # )
+
+
+class Reference(BaseModelWrap):
+    author: Optional[str] = Field(default=None, description="Author's name")
+    title: Optional[str] = Field(
+        default=None, description="Title of the reference"
+    )
+    date: Optional[str] = Field(default=None, description="Original date")
+    date_published: Optional[str] = Field(
+        default=None, description="Date of publication"
+    )
+
+    collection: Optional[str] = Field(
+        default=None,
+        description="Name of the collection the example was taken from",
+    )
+    editor: Optional[str] = Field(default=None, description="Editor")
+    translator: Optional[str] = Field(default=None, description="Translator")
+    source: Optional[str] = Field(
+        default=None,
+        description="Source of reference, corresponds to template parameter 'источник'",
+    )
+
+
+class Example(BaseModelWrap):
+    text: Optional[str] = Field(
+        default=None, description="Example usage sentence"
+    )
+    translation: Optional[str] = Field(
+        default=None, description="Spanish translation of the example sentence"
+    )
+    ref: Optional["Reference"] = Field(default=None, description="")
 
 
 class WordEntry(BaseModelWrap):
