@@ -5,9 +5,11 @@ from unittest.mock import patch
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.de.gloss import (extract_glosses,
-                                            extract_tags_from_gloss_text,
-                                            process_K_template)
+from wiktextract.extractor.de.gloss import (
+    extract_glosses,
+    extract_tags_from_gloss_text,
+    process_K_template,
+)
 from wiktextract.extractor.de.models import Sense
 from wiktextract.extractor.es.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
@@ -284,3 +286,33 @@ class TestDEGloss(unittest.TestCase):
                         case["expected_tags"],
                     )
                 self.assertEqual(gloss_text, case["expected_gloss"])
+
+    def test_handle_sense_modifier(self):
+        # https://de.wiktionary.org/wiki/habitare
+        input = """
+* {{trans.}}
+:[1] etwas [[oft]] [[haben]], zu haben [[pflegen]]
+:[2] ''Stadt/Dorf:''
+::[2.1] ''aktiv:'' [[bewohnen]], [[wohnen]]
+::[2.2] ''passiv:'' bewohnt werden, zum [[Wohnsitz]] dienen
+* {{intrans.}}
+:[3] ''sich befinden:'' [[wohnen]]
+:[4] sich [[aufhalten]], [[heimisch]] sein, zu Hause sein
+:[5] sich eifrig mit etwas [[beschäftigen]]
+"""
+        self.wxr.wtp.start_page("")
+        self.wxr.wtp.add_page("Vorlage:trans.", 10, "transitiv")
+        self.wxr.wtp.add_page("Vorlage:intrans.", 10, "intransitiv")
+
+        root = self.wxr.wtp.parse(input)
+
+        word_entry = self.get_default_word_entry()
+
+        extract_glosses(self.wxr, word_entry, root)
+
+        for i in range(2):
+            self.assertEqual(word_entry.senses[i].tags, ["transitiv"])
+        self.assertEqual(word_entry.senses[2].tags, ["transitiv", "aktiv"])
+        self.assertEqual(word_entry.senses[3].tags, ["transitiv", "passiv"])
+        for i in range(4, 6):
+            self.assertEqual(word_entry.senses[i].tags, ["intransitiv"])
