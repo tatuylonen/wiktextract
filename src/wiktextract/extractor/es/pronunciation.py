@@ -3,6 +3,7 @@ import string
 from collections import defaultdict
 
 from wikitextprocessor import WikiNode
+
 from wiktextract.extractor.es.models import Sound, Spelling, WordEntry
 from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node
@@ -80,7 +81,7 @@ def process_pron_graf_template(
                 elif key not in ["leng"]:
                     wxr.wtp.debug(
                         f"Skipped extracting key {key} from pron-graf template",
-                        sortid="wiktextract/extractor/es/pronunciation/extract_pronunciation/77",
+                        sortid="extractor/es/pronunciation/extract_pronunciation/77",
                     )
 
             if len(spelling_g.model_dump(exclude_defaults=True)) > 1:

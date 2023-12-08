@@ -1,12 +1,13 @@
+import re
 from typing import Union
+
 from wikitextprocessor import NodeKind
-from wikitextprocessor.parser import LevelNode, WikiNodeChildrenList, WikiNode
+from wikitextprocessor.parser import LevelNode, WikiNode, WikiNodeChildrenList
 
 from wiktextract.extractor.ru.models import Sound, WordEntry
 from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
-import re
 
 
 def extract_pronunciation(
@@ -44,7 +45,7 @@ def extract_pronunciation(
     if unprocessed_nodes and clean_node(wxr, {}, unprocessed_nodes).strip():
         wxr.wtp.debug(
             f"Unprocessed nodes in pronunciation section: {unprocessed_nodes}",
-            sortid="wiktextract/extractor/ru/pronunciation/extract_pronunciation/24",
+            sortid="extractor/ru/pronunciation/extract_pronunciation/24",
         )
 
 
@@ -196,7 +197,7 @@ def extract_audio_file(
                 else:
                     wxr.wtp.debug(
                         f"Unknown key {dict_key} in audio_url_dict",
-                        sortid="wiktextract/extractor/ru/pronunciation/add_audio_file/123",
+                        sortid="extractor/ru/pronunciation/add_audio_file/123",
                     )
 
 

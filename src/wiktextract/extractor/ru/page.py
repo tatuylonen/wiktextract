@@ -108,7 +108,7 @@ def get_pos(
     if text.strip():
         wxr.wtp.debug(
             f"No part of speech found in children: {level_node.children} with clean text {text}",
-            sortid="wiktextract/extractor/ru/page/get_pos/98",
+            sortid="extractor/ru/page/get_pos/98",
         )
 
 
