@@ -4,7 +4,7 @@ from wikitextprocessor import NodeKind, WikiNode
 
 
 def match_senseid(node_text: str):
-    match = re.match(r"\[(\d*[a-z]?)\]", node_text)
+    match = re.match(r"\[(\d*(?:[a-z]|(?:\.\d+))?)\]", node_text)
 
     if match:
         senseid = match.group(1)

@@ -76,7 +76,7 @@ def process_gloss_list_item(
                     else parent_senseid + senseid
                 )
                 sense_data.senseid = senseid
-            else:
+            elif gloss_text.strip():
                 wxr.wtp.debug(
                     f"Failed to extract sense number from gloss node: {list_item_node}",
                     sortid="extractor/de/glosses/extract_glosses/28",
