@@ -1929,7 +1929,7 @@ def parse_language(wxr, langnode, language, lang_code):
         for x in seq:
             assert isinstance(x, str)
         subpage_title = word + "/" + subtitle
-        subpage_content = wxr.wtp.read_by_title(subpage_title)
+        subpage_content = wxr.wtp.get_page_body(subpage_title, 0)
         if subpage_content is None:
             wxr.wtp.error("/translations not found despite "
                       "{{see translation subpage|...}}",
