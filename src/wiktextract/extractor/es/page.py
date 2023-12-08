@@ -136,8 +136,14 @@ def parse_section(
     elif section_title in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
         pass
 
-    elif pos_template_name and pos_template_name in wxr.config.POS_SUBTITLES:
-        pos_type = wxr.config.POS_SUBTITLES[pos_template_name]["pos"]
+    elif (
+        pos_template_name
+        and pos_template_name in wxr.config.POS_SUBTITLES
+        or section_title in wxr.config.POS_SUBTITLES
+    ):
+        pos_type = wxr.config.POS_SUBTITLES[
+            pos_template_name if pos_template_name else section_title
+        ]["pos"]
 
         page_data.append(copy.deepcopy(base_data))
         page_data[-1].pos = pos_type
