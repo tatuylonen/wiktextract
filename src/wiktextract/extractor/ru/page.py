@@ -198,7 +198,6 @@ def parse_page(
                 wxr.config.capture_language_codes is not None
                 and lang_code not in wxr.config.capture_language_codes
             ):
-                print(f"Skipping language {lang_code}")
                 continue
 
             categories = {"categories": []}

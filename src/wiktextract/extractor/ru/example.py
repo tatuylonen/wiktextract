@@ -13,6 +13,11 @@ EXAMPLE_TEMPLATE_KEY_MAPPING = {
     "ответственный": "editor",
     "перев": "translator",
     "источник": "source",
+    2: "author",
+    3: "title",
+    4: "date",
+    5: "collection",
+    6: "date_published",
 }
 
 
@@ -27,21 +32,11 @@ def process_example_template(
         value = clean_node(wxr, {}, value_raw).strip()
         if not value:
             continue
-        if isinstance(key, int):
-            if int(key) == 1:
-                example.text = value
-            elif int(key) == 2:
-                reference.author = value
-            elif int(key) == 3:
-                reference.title = value
-            elif int(key) == 4:
-                reference.date = value
-            elif int(key) == 5:
-                reference.collection = value
-            elif int(key) == 6:
-                reference.date_published = value
+        if isinstance(key, int) and key == 1:
+            example.text = value
+
         else:
-            key = clean_node(wxr, {}, key)
+            key = clean_node(wxr, {}, key) if not isinstance(key, int) else key
             if key == "текст":
                 example.text = value
             elif key == "перевод":

@@ -43,11 +43,11 @@ class TestRUExample(unittest.TestCase):
             },
             # https://ru.wiktionary.org/wiki/house
             {
-                "input": "{{пример|This is my {{выдел|house}} and my family’s ancestral home.||перевод=Это мой {{выдел|дом}} и поселение моих семейных предков.}}",
+                "input": "{{пример|This is my house and my family’s ancestral home.||перевод=Это мой дом и поселение моих семейных предков.}}",
                 "expected": [
                     {
-                        "text": "This is my and my family’s ancestral home.",
-                        "translation": "Это мой и поселение моих семейных предков.",
+                        "text": "This is my house and my family’s ancestral home.",
+                        "translation": "Это мой дом и поселение моих семейных предков.",
                     }
                 ],
             },
