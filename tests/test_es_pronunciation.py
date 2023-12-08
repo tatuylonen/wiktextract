@@ -1,9 +1,13 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.models import WordEntry
-from wiktextract.extractor.es.pronunciation import process_pron_graf_template
+from wiktextract.extractor.es.pronunciation import (
+    process_audio_template,
+    process_pron_graf_template,
+)
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -142,3 +146,30 @@ class TestESPronunciation(unittest.TestCase):
                     )
                 else:
                     self.assertEqual(len(page_data[0].spellings), 0)
+
+    def test_process_audio_template(self):
+        # https://es.wiktionary.org/wiki/os
+        input = """{{audio|la-cls-os-long.ogg|'''Audio''' (clásico)|nb=apr}}"""
+
+        self.wxr.wtp.start_page("")
+
+        page_data = self.get_default_page_data()
+
+        root = self.wxr.wtp.parse(input)
+
+        process_audio_template(self.wxr, page_data[-1], root.children[0])
+
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["sounds"],
+            [
+                {
+                    "audio": ["la-cls-os-long.ogg"],
+                    "mp3_url": [
+                        "https://upload.wikimedia.org/wikipedia/commons/transcoded/1/18/La-cls-os-long.ogg/La-cls-os-long.ogg.mp3"
+                    ],
+                    "ogg_url": [
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/la-cls-os-long.ogg"
+                    ],
+                }
+            ],
+        )
