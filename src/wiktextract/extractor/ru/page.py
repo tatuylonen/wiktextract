@@ -4,8 +4,11 @@ from typing import Optional
 
 from wikitextprocessor import NodeKind, WikiNode
 
+from wiktextract.extractor.ru.gloss import extract_gloss
+from wiktextract.extractor.ru.linkage import extract_linkages
 from wiktextract.extractor.ru.models import WordEntry
 from wiktextract.extractor.ru.pronunciation import extract_pronunciation
+from wiktextract.extractor.ru.translation import extract_translations
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -27,7 +30,24 @@ def process_semantic_section(
     page_data: list[WordEntry],
     semantic_level_node: WikiNode,
 ):
-    pass
+    for level4_node in semantic_level_node.find_child(NodeKind.LEVEL4):
+        section_title = clean_node(wxr, {}, level4_node.largs).lower()
+        if section_title == "значение":
+            for list_item in level4_node.find_child_recursively(
+                NodeKind.LIST_ITEM
+            ):
+                extract_gloss(wxr, page_data[-1], list_item)
+
+        elif section_title in wxr.config.LINKAGE_SUBTITLES:
+            linkage_type = wxr.config.LINKAGE_SUBTITLES.get(section_title)
+            extract_linkages(wxr, page_data[-1], linkage_type, level4_node)
+        else:
+            wxr.wtp.debug(
+                f"Unprocessed section {section_title} in semantic section",
+                sortid="extractor/ru/page/process_semantic_section/35",
+            )
+
+    # XXX: Process non level4 nodes such as illustration templates "{илл|...}", cf. https://ru.wiktionary.org/wiki/овощ
 
 
 def get_pos(
@@ -128,7 +148,7 @@ def parse_section(
             pass
     elif section_title == "Перевод":
         if wxr.config.capture_translations:
-            pass
+            extract_translations(wxr, page_data[-1], level3_node)
     elif section_title in ["Анаграммы", "Метаграммы", "Синонимы", "Антонимы"]:
         pass
     elif section_title == "Библиография":
@@ -221,8 +241,11 @@ def parse_page(
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     parse_section(wxr, page_data, level3_node)
 
-            page_data.append(copy.deepcopy(base_data))
+            is_first_level2_node = True
             for level3_node in level1_node.find_child(NodeKind.LEVEL3):
+                if is_first_level2_node:
+                    page_data.append(copy.deepcopy(base_data))
+                    is_first_level2_node = False
                 parse_section(wxr, page_data, level3_node)
 
     return [d.model_dump(exclude_defaults=True) for d in page_data]

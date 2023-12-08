@@ -1,9 +1,24 @@
 from typing import Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class BaseModelWrap(BaseModel):
     model_config = ConfigDict(validate_assignment=True, extra="forbid")
+
+
+class Translation(BaseModelWrap):
+    word: str = Field(description="Translation term")
+    lang_code: str = Field(
+        description="Wiktionary language code of the translation term"
+    )
+    lang_name: str = Field(
+        description="Localized language name of the translation term"
+    )
+    sense: Optional[str] = Field(
+        default=None,
+        description="An optional gloss describing the sense translated",
+    )
 
 
 class Sound(BaseModelWrap):
@@ -22,6 +37,62 @@ class Sound(BaseModelWrap):
     homophones: Optional[list[str]] = Field(
         default=[], description="Words with same pronunciation"
     )
+
+
+class Reference(BaseModelWrap):
+    author: Optional[str] = Field(default=None, description="Author's name")
+    title: Optional[str] = Field(
+        default=None, description="Title of the reference"
+    )
+    date: Optional[str] = Field(default=None, description="Original date")
+    date_published: Optional[str] = Field(
+        default=None, description="Date of publication"
+    )
+
+    collection: Optional[str] = Field(
+        default=None,
+        description="Name of the collection the example was taken from",
+    )
+    editor: Optional[str] = Field(default=None, description="Editor")
+    translator: Optional[str] = Field(default=None, description="Translator")
+    source: Optional[str] = Field(
+        default=None,
+        description="Source of reference, corresponds to template parameter 'источник'",
+    )
+
+
+class Example(BaseModelWrap):
+    text: Optional[str] = Field(
+        default=None, description="Example usage sentence"
+    )
+    translation: Optional[str] = Field(
+        default=None, description="Spanish translation of the example sentence"
+    )
+    ref: Optional[Reference] = Field(default=None, description="")
+
+
+class Sense(BaseModelWrap):
+    raw_gloss: Optional[str] = Field(
+        default=None,
+        description="Raw gloss string for the word sense. This might contain tags and other markup.",
+    )
+    gloss: Optional[str] = Field(
+        default=None,
+        description="Gloss string for the word sense. This has been cleaned, and should be straightforward text with no tags.",
+    )
+    tags: list[str] = Field(
+        default=[],
+        description="List of tags affecting the word sense.",
+    )
+    notes: list[str] = Field(
+        default=[],
+        description="List of notes for the word sense. Usually describing usage.",
+    )
+    categories: list[str] = Field(
+        default=[],
+        description="list of sense-disambiguated category names extracted from (a subset) of the Category links on the page",
+    )
+    examples: list[Example] = Field(default=[], description="List of examples")
 
 
 class WordEntry(BaseModelWrap):
@@ -45,3 +116,36 @@ class WordEntry(BaseModelWrap):
         description="list of non-disambiguated categories for the word",
     )
     sounds: Optional[list[Sound]] = []
+    senses: Optional[list[Sense]] = []
+    translations: Optional[list[Translation]] = []
+
+    antonyms: Optional[list[str]] = Field(
+        default=[], description="List of antonyms"
+    )
+    anagrams: Optional[list[str]] = Field(
+        default=[], description="List of anagrams"
+    )
+    variants: Optional[list[str]] = Field(
+        default=[], description="List of variants"
+    )
+    hypernyms: Optional[list[str]] = Field(
+        default=[], description="List of hypernyms"
+    )
+    hyponyms: Optional[list[str]] = Field(
+        default=[], description="List of hyponyms"
+    )
+    derived: Optional[list[str]] = Field(
+        default=[], description="List of derived terms"
+    )
+    meronyms: Optional[list[str]] = Field(
+        default=[], description="List of meronyms"
+    )
+    synonyms: Optional[list[str]] = Field(
+        default=[], description="List of synonyms"
+    )
+    coordinate_terms: Optional[list[str]] = Field(
+        default=[], description="List of coordinate terms"
+    )
+    holonyms: Optional[list[str]] = Field(
+        default=[], description="List of holonyms"
+    )
