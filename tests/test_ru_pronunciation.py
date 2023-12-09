@@ -1,9 +1,12 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ru.models import WordEntry
 from wiktextract.extractor.ru.pronunciation import (
+    process_transcription_grc_template,
+    process_transcription_la_template,
     process_transcription_ru_template,
     process_transcription_template,
     process_transcriptions_ru_template,
@@ -198,5 +201,48 @@ class TestRUPronunciation(unittest.TestCase):
                     "ipa": "bɐˈlʲidɨ",
                     "tags": ["plural"],
                 },
+            ],
+        )
+
+    def test_process_transcription_la_template(self):
+        # https://ru.wiktionary.org/wiki/procrastinatio
+        self.wxr.wtp.add_page(
+            "Шаблон:transcription-la",
+            10,
+            "МФА (классическое произношение): [proː.kraːs.tiˈnaː.ti.oː]",
+        )
+        self.process_template_and_assert(
+            "{{transcription-la|prōcrāstinātiō |}}",
+            process_transcription_la_template,
+            [
+                {
+                    "ipa": "proː.kraːs.tiˈnaː.ti.oː",
+                    "tags": ["классическое произношение"],
+                }
+            ],
+        )
+
+    def test_process_transcription_grc_template(self):
+        # https://ru.wiktionary.org/wiki/Ζεύς
+        self.wxr.wtp.add_page(
+            "Шаблон:transcription-grc",
+            10,
+            """МФА: [zde͜ʊ́s] → [zeɸs] → [zefs]
+* Аттическое произношение: [zde͜ʊ́s]
+* Египетское произношение: [zeʍs]
+* Койне: [zeɸs]
+* Византийское произношение: [zefs]
+* Константинопольское произношение: [zefs]
+""",
+        )
+        self.process_template_and_assert(
+            "{{transcription-grc|Ζεύς}}",
+            process_transcription_grc_template,
+            [
+                {"ipa": "zde͜ʊ́s", "tags": ["Аттическое произношение"]},
+                {"ipa": "zeʍs", "tags": ["Египетское произношение"]},
+                {"ipa": "zeɸs", "tags": ["Койне"]},
+                {"ipa": "zefs", "tags": ["Византийское произношение"]},
+                {"ipa": "zefs", "tags": ["Константинопольское произношение"]},
             ],
         )

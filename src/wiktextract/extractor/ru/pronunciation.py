@@ -10,45 +10,6 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 
-def extract_pronunciation(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    level_node: LevelNode,
-):
-    unprocessed_nodes: WikiNodeChildrenList = []
-    for child in level_node.filter_empty_str_child():
-        if isinstance(child, WikiNode) and child.kind == NodeKind.TEMPLATE:
-            template_name = child.template_name
-            if template_name == "transcription":
-                process_transcription_template(wxr, word_entry, child)
-            elif template_name == "transcriptions":
-                process_transcriptions_template(wxr, word_entry, child)
-            elif template_name == "transcription-ru":
-                process_transcription_ru_template(wxr, word_entry, child)
-            elif template_name == "transcriptions-ru":
-                process_transcriptions_ru_template(wxr, word_entry, child)
-            elif template_name in ["audio", "аудио", "медиа"]:
-                # XXX: Process simple audio file templates
-                pass
-            elif template_name in [
-                "transcription-grc",
-                "transcription-uk",
-                "transcription eo",
-            ]:
-                # XXX: Process other pronunciation templates
-                pass
-            else:
-                unprocessed_nodes.append(child)
-        else:
-            unprocessed_nodes.append(child)
-
-    if unprocessed_nodes and clean_node(wxr, {}, unprocessed_nodes).strip():
-        wxr.wtp.debug(
-            f"Unprocessed nodes in pronunciation section: {unprocessed_nodes}",
-            sortid="extractor/ru/pronunciation/extract_pronunciation/24",
-        )
-
-
 def process_transcription_template(
     wxr: WiktextractContext,
     word_entry: WordEntry,
@@ -170,6 +131,32 @@ def process_transcriptions_ru_template(
         word_entry.sounds.append(sound_pl)
 
 
+def process_transcription_la_template(
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: WikiNode
+):
+    # https://ru.wiktionary.org/wiki/Шаблон:transcription-la
+    sound = Sound()
+    cleaned_node = clean_node(wxr, {}, template_node)
+    ipa_match = re.search(r"\((.*?)\): \[(.*?)\]", cleaned_node)
+
+    if ipa_match:
+        sound.ipa = ipa_match.group(2)
+        sound.tags = [ipa_match.group(1).strip()]
+        word_entry.sounds.append(sound)
+
+
+def process_transcription_grc_template(
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: WikiNode
+):
+    # https://ru.wiktionary.org/wiki/Шаблон:transcription-grc
+    sound = Sound()
+    cleaned_node = clean_node(wxr, {}, template_node)
+    ipa_with_labels = re.findall(r"\* (.*?): \[(.*?)\]", cleaned_node)
+    for label, ipa in ipa_with_labels:
+        sound = Sound(ipa=ipa, tags=[label.strip()])
+        word_entry.sounds.append(sound)
+
+
 def extract_ipa(
     wxr: WiktextractContext,
     sound: Sound,
@@ -228,3 +215,43 @@ def extract_homophones(
                 sound.homophones = homophones
         else:
             sounds.homophones = homophones
+
+
+TRANSCRIPTION_TEMPLATE_PROCESSORS = {
+    "transcription": process_transcription_template,
+    "transcriptions": process_transcriptions_template,
+    "transcription-ru": process_transcription_ru_template,
+    "transcriptions-ru": process_transcriptions_ru_template,
+    "transcription-la": process_transcription_la_template,
+    "transcription-uk": None,
+    "transcription-grc": process_transcription_grc_template,
+    "transcription eo": None,
+}
+
+
+def extract_pronunciation(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+):
+    unprocessed_nodes: WikiNodeChildrenList = []
+    for child in level_node.filter_empty_str_child():
+        if isinstance(child, WikiNode) and child.kind == NodeKind.TEMPLATE:
+            template_name = child.template_name
+            if template_name in TRANSCRIPTION_TEMPLATE_PROCESSORS:
+                processor = TRANSCRIPTION_TEMPLATE_PROCESSORS.get(template_name)
+                if processor:
+                    processor(wxr, word_entry, child)
+            elif template_name in ["audio", "аудио", "медиа"]:
+                # XXX: Process simple audio file templates
+                pass
+            else:
+                unprocessed_nodes.append(child)
+        else:
+            unprocessed_nodes.append(child)
+
+    if unprocessed_nodes and clean_node(wxr, {}, unprocessed_nodes).strip():
+        wxr.wtp.debug(
+            f"Unprocessed nodes in pronunciation section: {unprocessed_nodes}",
+            sortid="extractor/ru/pronunciation/extract_pronunciation/24",
+        )
