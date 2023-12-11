@@ -12,7 +12,10 @@ from wiktextract.extractor.es.linkage import (
     process_linkage_template,
 )
 from wiktextract.extractor.es.models import WordEntry
-from wiktextract.extractor.es.pronunciation import process_pron_graf_template
+from wiktextract.extractor.es.pronunciation import (
+    process_audio_template,
+    process_pron_graf_template,
+)
 from wiktextract.extractor.es.sense_data import process_sense_data_list
 from wiktextract.extractor.es.translation import extract_translation
 from wiktextract.page import clean_node
@@ -62,6 +65,7 @@ def parse_entries(
     # to entries that it shouldn't be applied to
     base_data_copy = copy.deepcopy(base_data)
 
+    unexpected_nodes = []
     # Parse data affecting all subsections and add to base_data_copy
     for not_sub_level_node in level_node.invert_find_child(next_level_kind):
         if (
@@ -73,11 +77,29 @@ def parse_entries(
                 process_pron_graf_template(
                     wxr, base_data_copy, not_sub_level_node
                 )
+        elif (
+            (isinstance(not_sub_level_node, WikiNode))
+            and not_sub_level_node.kind == NodeKind.LIST
+            and not_sub_level_node.sarg == ":*"
+        ):
+            # XXX: There might be other uses for this kind of list which are being ignored here
+            for child in not_sub_level_node.find_child_recursively(
+                NodeKind.TEMPLATE
+            ):
+                if (
+                    child.template_name == "audio"
+                    and wxr.config.capture_pronunciation
+                ):
+                    process_audio_template(wxr, base_data_copy, child)
+
         else:
-            wxr.wtp.debug(
-                f"Found unexpected child in page_entry for {level_node.largs}: {not_sub_level_node}",
-                sortid="extractor/es/page/parse_entries/69",
-            )
+            unexpected_nodes.append(not_sub_level_node)
+
+    if unexpected_nodes:
+        wxr.wtp.debug(
+            f"Found unexpected nodes {unexpected_nodes} in section {level_node.largs}",
+            sortid="extractor/es/page/parse_entries/69",
+        )
 
     for sub_level_node in level_node.find_child(next_level_kind):
         parse_section(wxr, page_data, base_data_copy, sub_level_node)
@@ -114,8 +136,14 @@ def parse_section(
     elif section_title in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
         pass
 
-    elif pos_template_name and pos_template_name in wxr.config.POS_SUBTITLES:
-        pos_type = wxr.config.POS_SUBTITLES[pos_template_name]["pos"]
+    elif (
+        pos_template_name
+        and pos_template_name in wxr.config.POS_SUBTITLES
+        or section_title in wxr.config.POS_SUBTITLES
+    ):
+        pos_type = wxr.config.POS_SUBTITLES[
+            pos_template_name if pos_template_name else section_title
+        ]["pos"]
 
         page_data.append(copy.deepcopy(base_data))
         page_data[-1].pos = pos_type

@@ -66,7 +66,7 @@ def add_template_params_to_reference(
         else:
             wxr.wtp.debug(
                 f"Unknown key {key} in example template {params}",
-                sortid="wiktextract/extractor/es/example/add_template_params_to_reference/73",
+                sortid="extractor/es/example/add_template_params_to_reference/73",
             )
 
 

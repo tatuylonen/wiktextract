@@ -15,8 +15,9 @@ def extract_glosses(
     word_entry: WordEntry,
     level_node: LevelNode,
 ) -> None:
+    base_sense = Sense()
     for list_node in level_node.find_child(NodeKind.LIST):
-        process_gloss_list_item(wxr, word_entry, list_node)
+        process_gloss_list_item(wxr, word_entry, base_sense, list_node)
 
     for non_list_node in level_node.invert_find_child(NodeKind.LIST):
         wxr.wtp.debug(
@@ -28,6 +29,7 @@ def extract_glosses(
 def process_gloss_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
+    base_sense: Sense,
     list_node: WikiNode,
     parent_senseid: str = "",
     parent_gloss_data: Sense = None,
@@ -35,8 +37,7 @@ def process_gloss_list_item(
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         item_type = list_item_node.sarg
         if item_type == "*":
-            handle_sense_modifier(wxr, list_item_node)
-
+            handle_sense_modifier(wxr, base_sense, list_item_node)
         elif item_type in [":", "::"]:
             if any(
                 [
@@ -50,7 +51,7 @@ def process_gloss_list_item(
                 continue
 
             sense_data = (
-                Sense()
+                copy.deepcopy(base_sense)
                 if parent_gloss_data is None
                 else copy.deepcopy(parent_gloss_data)
             )
@@ -76,7 +77,7 @@ def process_gloss_list_item(
                     else parent_senseid + senseid
                 )
                 sense_data.senseid = senseid
-            else:
+            elif gloss_text.strip():
                 wxr.wtp.debug(
                     f"Failed to extract sense number from gloss node: {list_item_node}",
                     sortid="extractor/de/glosses/extract_glosses/28",
@@ -93,6 +94,7 @@ def process_gloss_list_item(
                 process_gloss_list_item(
                     wxr,
                     word_entry,
+                    base_sense,
                     sub_list_node,
                     senseid,
                     sense_data if not gloss_text else None,
@@ -106,14 +108,18 @@ def process_gloss_list_item(
             continue
 
 
-def handle_sense_modifier(wxr: WiktextractContext, list_item_node: WikiNode):
-    wxr.wtp.debug(
-        f"Skipped a sense modifier in gloss list: {list_item_node}",
-        sortid="extractor/de/glosses/extract_glosses/19",
-    )
-    # XXX: We should extract the modifier. However, it seems to affect
-    # multiple glosses. Needs investigation.
-    pass
+def handle_sense_modifier(
+    wxr: WiktextractContext, sense: Sense, list_item_node: WikiNode
+):
+    if len(list(list_item_node.filter_empty_str_child())) > 1:
+        # XXX: Clean up sense modifier where there is more than one modifier
+        wxr.wtp.debug(
+            f"Found more than one child in sense modifier: {list_item_node.children}",
+            sortid="extractor/de/gloss/handle_sense_modifier/114",
+        )
+    modifier = clean_node(wxr, {}, list_item_node.children)
+    if modifier:
+        sense.tags = [modifier]
 
 
 def process_K_template(
@@ -127,7 +133,7 @@ def process_K_template(
             text = clean_node(wxr, categories, template_node).removesuffix(":")
             sense_data.categories.extend(categories["categories"])
             tags = re.split(r";|,", text)
-            sense_data.tags = [t.strip() for t in tags]
+            sense_data.tags.extend([t.strip() for t in tags])
 
             # Prepositional and case information is sometimes only expanded to
             # category links and not present in cleaned node. We still want it

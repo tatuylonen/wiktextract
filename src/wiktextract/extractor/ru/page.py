@@ -108,7 +108,7 @@ def get_pos(
     if text.strip():
         wxr.wtp.debug(
             f"No part of speech found in children: {level_node.children} with clean text {text}",
-            sortid="wiktextract/extractor/ru/page/get_pos/98",
+            sortid="extractor/ru/page/get_pos/98",
         )
 
 
@@ -227,12 +227,15 @@ def parse_page(
                 ):
                     unprocessed_nodes.append(non_level23_node)
 
+                # XXX: Extract form pages that never reach a level 2 or 3 node, such as:
+                # https://ru.wiktionary.org/wiki/Διὸς
+
             if (
                 unprocessed_nodes
                 and clean_node(wxr, {}, unprocessed_nodes).strip()
             ):
                 wxr.wtp.debug(
-                    f"Unprocessed nodes in level node {level1_node.largs}: {non_level23_node}",
+                    f"Unprocessed nodes in level node {level1_node.largs}: {unprocessed_nodes}",
                     sortid="extractor/es/page/parse_page/80",
                 )
 

@@ -42,7 +42,7 @@ def extract_gloss(
             gloss_data.senseid = int(match.group(1))
             tag_string = gloss_note[len(match.group(1)) :].strip()
         else:
-            tag_string = gloss_data.tags = gloss_note.strip()
+            tag_string = gloss_note.strip()
 
         # split tags by comma or "y"
         tags = re.split(r",|y", tag_string)

@@ -48,7 +48,7 @@ def process_example_template(
                 else:
                     wxr.wtp.debug(
                         f"Unknown key {key} in example template {template_node}",
-                        sortid="wiktextract/extractor/ru/example/process_example_template/54",
+                        sortid="extractor/ru/example/process_example_template/54",
                     )
 
     if example.model_dump(exclude_defaults=True) != {}:
