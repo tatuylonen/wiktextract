@@ -99,7 +99,11 @@ def parse_section(
             ):
                 pass
             elif section_type in wxr.config.OTHER_SUBTITLES["notes"]:
+                if len(page_data) == 0:
+                    page_data.append(copy.deepcopy(base_data))
                 extract_note(wxr, page_data, level_node)
+                if page_data[-1].keys() == base_data.keys():
+                    page_data.pop()  # no data was added
 
 
 def process_pos_block(
@@ -111,7 +115,8 @@ def process_pos_block(
     pos_title: str,
 ):
     pos_type = wxr.config.POS_SUBTITLES[pos_argument]["pos"]
-    page_data.append(copy.deepcopy(base_data))
+    if len(page_data) == 0 or "pos" in page_data[-1]:
+        page_data.append(copy.deepcopy(base_data))
     page_data[-1]["pos"] = pos_type
     page_data[-1]["pos_title"] = pos_title
     child_nodes = list(pos_title_node.filter_empty_str_child())
