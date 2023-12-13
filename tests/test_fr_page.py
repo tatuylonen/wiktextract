@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import unittest
+from unittest import TestCase
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
@@ -10,7 +10,7 @@ from wiktextract.extractor.fr.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
-class FrPageTests(unittest.TestCase):
+class TestFrPage(TestCase):
     def setUp(self):
         self.maxDiff = None
         conf1 = WiktionaryConfig(
@@ -25,7 +25,7 @@ class FrPageTests(unittest.TestCase):
     def test_fr_parse_page(self):
         self.wxr.wtp.add_page("Modèle:langue", 10, "Français")
         self.wxr.wtp.add_page("Modèle:S", 10, "Nom commun")
-        lst = parse_page(
+        page_data = parse_page(
             self.wxr,
             "exemple",
             """
@@ -35,7 +35,7 @@ class FrPageTests(unittest.TestCase):
 """,
         )
         self.assertEqual(
-            lst,
+            page_data,
             [
                 {
                     "lang_name": "Français",

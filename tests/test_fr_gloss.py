@@ -1,15 +1,15 @@
-import unittest
-from collections import defaultdict
+from unittest import TestCase
 from unittest.mock import patch
 
 from wikitextprocessor import Page, Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.gloss import extract_gloss
+from wiktextract.extractor.fr.models import WordEntry
 from wiktextract.extractor.fr.page import process_pos_block
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestFrGloss(unittest.TestCase):
+class TestFrGloss(TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
@@ -29,22 +29,18 @@ class TestFrGloss(unittest.TestCase):
     def test_theme_templates(self, mock_get_page):
         self.wxr.wtp.start_page("")
         root = self.wxr.wtp.parse("# {{sportifs|fr}} gloss.\n#* example")
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
-            page_data,
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
             [
                 {
-                    "senses": [
-                        {
-                            "glosses": ["gloss."],
-                            "tags": ["Sport"],
-                            "categories": ["Sportifs en français"],
-                            "examples": [
-                                {"text": "example", "type": "example"}
-                            ],
-                        }
-                    ]
+                    "glosses": ["gloss."],
+                    "tags": ["Sport"],
+                    "categories": ["Sportifs en français"],
+                    "examples": [{"text": "example"}],
                 }
             ],
         )
@@ -54,26 +50,23 @@ class TestFrGloss(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "# gloss.\n#* {{exemple|text|translation|roman|source=source}}"
         )
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
-            page_data,
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
             [
                 {
-                    "senses": [
+                    "glosses": ["gloss."],
+                    "examples": [
                         {
-                            "glosses": ["gloss."],
-                            "examples": [
-                                {
-                                    "text": "text",
-                                    "translation": "translation",
-                                    "roman": "roman",
-                                    "ref": "source",
-                                    "type": "quotation",
-                                }
-                            ],
+                            "text": "text",
+                            "translation": "translation",
+                            "roman": "roman",
+                            "ref": "source",
                         }
-                    ]
+                    ],
                 }
             ],
         )
@@ -87,31 +80,28 @@ class TestFrGloss(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "# gloss.\n#* example {{source|source_title}}"
         )
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
-            page_data,
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
             [
                 {
-                    "senses": [
+                    "glosses": ["gloss."],
+                    "examples": [
                         {
-                            "glosses": ["gloss."],
-                            "examples": [
-                                {
-                                    "text": "example",
-                                    "ref": "source_title",
-                                    "type": "quotation",
-                                }
-                            ],
+                            "text": "example",
+                            "ref": "source_title",
                         }
-                    ]
+                    ],
                 }
             ],
         )
 
     def test_zh_exemple_template(self):
         # https://fr.wiktionary.org/wiki/马
-        self.wxr.wtp.start_page("")
+        self.wxr.wtp.start_page("马")
         root = self.wxr.wtp.parse(
             "=== {{S|nom|zh}} ===\n# Cheval.\n{{zh-exemple|这匹'''马'''很大。|Ce cheval est grand.|Zhè pǐ '''mǎ''' hěn dà.<br/>⠌⠢⠆ ⠏⠊⠄ ⠍⠔⠄ ⠓⠴⠄ ⠙⠔⠆⠐⠆}}"
         )
@@ -119,32 +109,32 @@ class TestFrGloss(unittest.TestCase):
         process_pos_block(
             self.wxr,
             page_data,
-            defaultdict(list),
+            WordEntry(word="马", lang_code="zh", lang_name="Chinois"),
             root.children[0],
             "nom",
             "Nom commun",
         )
         self.assertEqual(
-            page_data,
-            [
-                {
-                    "pos": "noun",
-                    "pos_title": "Nom commun",
-                    "senses": [
-                        {
-                            "glosses": ["Cheval."],
-                            "examples": [
-                                {
-                                    "text": "这匹马很大。",
-                                    "translation": "Ce cheval est grand.",
-                                    "roman": "Zhè pǐ mǎ hěn dà.\n⠌⠢⠆ ⠏⠊⠄ ⠍⠔⠄ ⠓⠴⠄ ⠙⠔⠆⠐⠆",
-                                    "type": "example",
-                                }
-                            ],
-                        }
-                    ],
-                }
-            ],
+            page_data[-1].model_dump(exclude_defaults=True),
+            {
+                "word": "马",
+                "lang_code": "zh",
+                "lang_name": "Chinois",
+                "pos": "noun",
+                "pos_title": "Nom commun",
+                "senses": [
+                    {
+                        "glosses": ["Cheval."],
+                        "examples": [
+                            {
+                                "text": "这匹马很大。",
+                                "translation": "Ce cheval est grand.",
+                                "roman": "Zhè pǐ mǎ hěn dà.\n⠌⠢⠆ ⠏⠊⠄ ⠍⠔⠄ ⠓⠴⠄ ⠙⠔⠆⠐⠆",
+                            }
+                        ],
+                    }
+                ],
+            },
         )
 
     def test_variante_de(self):
@@ -161,18 +151,16 @@ class TestFrGloss(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "# {{désuet|en}} {{sports|en}} {{indénombrable|en}} {{variante de|basketball|en}}."
         )
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
-            page_data,
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
             [
                 {
-                    "senses": [
-                        {
-                            "glosses": ["Variante de basketball."],
-                            "tags": ["Désuet", "Sport", "Indénombrable"],
-                        }
-                    ]
+                    "glosses": ["Variante de basketball."],
+                    "tags": ["Désuet", "Sport", "Indénombrable"],
                 }
             ],
         )
@@ -183,17 +171,13 @@ class TestFrGloss(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "# (''localement'') [[bassin#Nom_commun|Bassin]], [[lavoir#Nom_commun|lavoir]]."
         )
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
-            page_data,
-            [
-                {
-                    "senses": [
-                        {"glosses": ["Bassin, lavoir."], "tags": ["localement"]}
-                    ]
-                }
-            ],
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
+            [{"glosses": ["Bassin, lavoir."], "tags": ["localement"]}],
         )
 
     def test_not_italic_tag(self):
@@ -202,18 +186,16 @@ class TestFrGloss(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "# [[oiseau|Oiseau]] aquatique de taille moyenne du genre ''[[Rhynchops]]''."
         )
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
-            page_data,
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
             [
                 {
-                    "senses": [
-                        {
-                            "glosses": [
-                                "Oiseau aquatique de taille moyenne du genre Rhynchops."
-                            ]
-                        }
+                    "glosses": [
+                        "Oiseau aquatique de taille moyenne du genre Rhynchops."
                     ]
                 }
             ],
@@ -224,11 +206,13 @@ class TestFrGloss(unittest.TestCase):
         # the space between italic node and the link node should be preserved
         self.wxr.wtp.start_page("becs-en-ciseaux")
         root = self.wxr.wtp.parse("# ''Pluriel de'' [[bec-en-ciseaux]].")
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
-            page_data,
-            [{"senses": [{"glosses": ["Pluriel de bec-en-ciseaux."]}]}],
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
+            [{"glosses": ["Pluriel de bec-en-ciseaux."]}],
         )
 
     @patch(
@@ -241,18 +225,16 @@ class TestFrGloss(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "# {{lien|autrice|fr|dif=Autrice}}, [[celle]] qui est à l’[[origine]] de [[quelque chose]]."
         )
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
-            page_data,
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
             [
                 {
-                    "senses": [
-                        {
-                            "glosses": [
-                                "Autrice, celle qui est à l’origine de quelque chose."
-                            ]
-                        }
+                    "glosses": [
+                        "Autrice, celle qui est à l’origine de quelque chose."
                     ]
                 }
             ],
@@ -268,16 +250,17 @@ class TestFrGloss(unittest.TestCase):
 ##* nest example
             """
         )
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
-            page_data[-1]["senses"],
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
             [
                 {
                     "examples": [
                         {
                             "text": "example 1",
-                            "type": "example",
                         }
                     ],
                     "glosses": [
@@ -288,7 +271,6 @@ class TestFrGloss(unittest.TestCase):
                     "examples": [
                         {
                             "text": "nest example",
-                            "type": "example",
                         }
                     ],
                     "glosses": [

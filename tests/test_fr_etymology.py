@@ -1,5 +1,4 @@
-import unittest
-from collections import defaultdict
+from unittest import TestCase
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
@@ -7,10 +6,11 @@ from wiktextract.extractor.fr.etymology import (
     extract_etymology,
     insert_etymology_data,
 )
+from wiktextract.extractor.fr.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestEtymology(unittest.TestCase):
+class TestEtymology(TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
@@ -51,21 +51,29 @@ class TestEtymology(unittest.TestCase):
             },
         )
         page_data = [
-            defaultdict(
-                list,
-                {"lang_code": "fr", "pos": "noun", "pos_title": "Nom commun 1"},
+            WordEntry(
+                word="test",
+                lang_code="fr",
+                lang_name="Français",
+                pos="noun",
+                pos_title="Nom commun 1",
             ),
-            defaultdict(
-                list,
-                {"lang_code": "fr", "pos": "noun", "pos_title": "Nom commun 2"},
+            WordEntry(
+                word="test",
+                lang_code="fr",
+                lang_name="Français",
+                pos="noun",
+                pos_title="Nom commun 2",
             ),
         ]
         insert_etymology_data("fr", page_data, etymology_data)
         self.assertEqual(
-            page_data,
+            [d.model_dump(exclude_defaults=True) for d in page_data],
             [
                 {
+                    "word": "test",
                     "lang_code": "fr",
+                    "lang_name": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 1",
                     "etymology_texts": [
@@ -74,7 +82,9 @@ class TestEtymology(unittest.TestCase):
                     ],
                 },
                 {
+                    "word": "test",
                     "lang_code": "fr",
+                    "lang_name": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 2",
                     "etymology_texts": [
@@ -106,25 +116,36 @@ class TestEtymology(unittest.TestCase):
             },
         )
         page_data = [
-            defaultdict(
-                list,
-                {"lang_code": "fr", "pos": "noun", "pos_title": "Nom commun 1"},
+            WordEntry(
+                word="test",
+                lang_code="fr",
+                lang_name="Français",
+                pos="noun",
+                pos_title="Nom commun 1",
             ),
-            defaultdict(
-                list,
-                {"lang_code": "fr", "pos": "noun", "pos_title": "Nom commun 2"},
+            WordEntry(
+                word="test",
+                lang_code="fr",
+                lang_name="Français",
+                pos="noun",
+                pos_title="Nom commun 2",
             ),
-            defaultdict(
-                list,
-                {"lang_code": "fr", "pos": "intj", "pos_title": "Interjection"},
+            WordEntry(
+                word="test",
+                lang_code="fr",
+                lang_name="Français",
+                pos="intj",
+                pos_title="Interjection",
             ),
         ]
         insert_etymology_data("fr", page_data, etymology_data)
         self.assertEqual(
-            page_data,
+            [d.model_dump(exclude_defaults=True) for d in page_data],
             [
                 {
+                    "word": "test",
                     "lang_code": "fr",
+                    "lang_name": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 1",
                     "etymology_texts": [
@@ -132,7 +153,9 @@ class TestEtymology(unittest.TestCase):
                     ],
                 },
                 {
+                    "word": "test",
                     "lang_code": "fr",
+                    "lang_name": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 2",
                     "etymology_texts": [
@@ -140,7 +163,9 @@ class TestEtymology(unittest.TestCase):
                     ],
                 },
                 {
+                    "word": "test",
                     "lang_code": "fr",
+                    "lang_name": "Français",
                     "pos": "intj",
                     "pos_title": "Interjection",
                     "etymology_texts": [

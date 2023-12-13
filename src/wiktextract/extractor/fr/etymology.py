@@ -1,17 +1,19 @@
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-EtymologyData = Dict[str, List[str]]
+from .models import WordEntry
+
+EtymologyData = dict[str, list[str]]
 
 
 def extract_etymology(
     wxr: WiktextractContext,
-    nodes: List[Union[WikiNode, str]],
+    nodes: list[Union[WikiNode, str]],
 ) -> Optional[EtymologyData]:
     etymology_dict: EtymologyData = defaultdict(list)
     level_node_index = len(nodes)
@@ -62,7 +64,7 @@ def extract_etymology(
 
 def find_pos_in_etymology_list(
     wxr: WiktextractContext, list_item_node: WikiNode
-) -> Optional[Tuple[str, str]]:
+) -> Optional[tuple[str, str]]:
     """
     Return tuple of POS title and etymology text if the passed lis item node
     starts with italic POS node or POS template, otherwise return None.
@@ -96,26 +98,27 @@ def find_pos_in_etymology_list(
 
 
 def insert_etymology_data(
-    lang_code: str, page_data: List[Dict], etymology_data: EtymologyData
+    lang_code: str, page_data: list[WordEntry], etymology_data: EtymologyData
 ) -> None:
     """
     Insert list of etymology data extracted from the level 3 node to each sense
     dictionary matches the language and POS.
     """
-    sense_dict = {}  # group by pos title
+    sense_dict = defaultdict(list)  # group by pos title
     for sense_data in page_data:
-        if sense_data.get("lang_code") == lang_code:
-            sense_dict[sense_data.get("pos_title")] = sense_data
+        if sense_data.lang_code == lang_code:
+            sense_dict[sense_data.pos_title].append(sense_data)
 
     for pos_title, etymology_texts in etymology_data.items():
         if pos_title is None:  # add to all sense dictionaries
-            for sense_data in sense_dict.values():
-                sense_data["etymology_texts"] = etymology_texts
+            for sense_data_list in sense_dict.values():
+                for sense_data in sense_data_list:
+                    sense_data.etymology_texts = etymology_texts
         elif pos_title in sense_dict:
-            sense_dict[pos_title]["etymology_texts"] = etymology_texts
+            for sense_data in sense_dict[pos_title]:
+                sense_data.etymology_texts = etymology_texts
         elif pos_title.removesuffix(" 1") in sense_dict:
             # an index number is added in the etymology section but not added in
             # POS title
-            sense_dict[pos_title.removesuffix(" 1")][
-                "etymology_texts"
-            ] = etymology_texts
+            for sense_data in sense_dict[pos_title.removesuffix(" 1")]:
+                sense_data.etymology_texts = etymology_texts

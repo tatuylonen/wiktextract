@@ -1,5 +1,4 @@
-import unittest
-from collections import defaultdict
+from unittest import TestCase
 from unittest.mock import patch
 
 from wikitextprocessor import Wtp
@@ -8,10 +7,11 @@ from wiktextract.extractor.fr.form_line import (
     extract_form_line,
     process_zh_mot_template,
 )
+from wiktextract.extractor.fr.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestFormLine(unittest.TestCase):
+class TestFormLine(TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
@@ -20,50 +20,50 @@ class TestFormLine(unittest.TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
-    @patch(
-        "wiktextract.extractor.fr.pronunciation.clean_node",
-        return_value="/lə nɔ̃/",
-    )
-    def test_ipa(self, mock_clean_node):
-        self.wxr.wtp.start_page("")
-        root = self.wxr.wtp.parse("'''le nom''' {{pron|lə nɔ̃|fr}}")
-        page_data = [defaultdict(list)]
+    def test_ipa(self):
+        self.wxr.wtp.start_page("bonjour")
+        self.wxr.wtp.add_page("Modèle:pron", 10, "\\bɔ̃.ʒuʁ\\")
+        root = self.wxr.wtp.parse("'''bonjour''' {{pron|bɔ̃.ʒuʁ|fr}}")
+        page_data = [
+            WordEntry(word="bonjour", lang_code="fr", lang_name="Français")
+        ]
         extract_form_line(self.wxr, page_data, root.children)
-        self.assertEqual(page_data, [{"sounds": [{"ipa": "/lə nɔ̃/"}]}])
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].sounds],
+            [{"ipa": "\\bɔ̃.ʒuʁ\\"}],
+        )
 
-    @patch(
-        "wiktextract.extractor.fr.form_line.clean_node", return_value="masculin"
-    )
-    def test_gender(self, mock_clean_node):
-        self.wxr.wtp.start_page("")
-        root = self.wxr.wtp.parse("'''le nom''' {{m}}")
-        page_data = [defaultdict(list)]
+    def test_gender(self):
+        self.wxr.wtp.start_page("bonjour")
+        self.wxr.wtp.add_page("Modèle:m", 10, "masculin")
+        root = self.wxr.wtp.parse("'''bonjour''' {{m}}")
+        page_data = [
+            WordEntry(word="bonjour", lang_code="fr", lang_name="Français")
+        ]
         extract_form_line(self.wxr, page_data, root.children)
-        self.assertEqual(page_data, [{"tags": ["masculin"]}])
+        self.assertEqual(page_data[-1].tags, ["masculin"])
 
     def test_zh_mot(self):
-        self.wxr.wtp.start_page("")
+        self.wxr.wtp.start_page("马")
         self.wxr.wtp.add_page("Modèle:zh-mot", 10, body="{{lang}} {{pron}}")
         self.wxr.wtp.add_page("Modèle:lang", 10, body="mǎ")
         self.wxr.wtp.add_page("Modèle:pron", 10, body="\\ma̠˨˩˦\\")
         root = self.wxr.wtp.parse("{{zh-mot|马|mǎ}}")
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         process_zh_mot_template(self.wxr, root.children[0], page_data)
         self.assertEqual(
-            page_data,
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].sounds],
             [
-                {
-                    "sounds": [
-                        {"tags": ["Pinyin"], "zh-pron": "mǎ"},
-                        {"ipa": "\\ma̠˨˩˦\\"},
-                    ]
-                }
+                {"tags": ["Pinyin"], "zh_pron": "mǎ"},
+                {"ipa": "\\ma̠˨˩˦\\"},
             ],
         )
 
     def test_ipa_location_tag(self):
         # https://fr.wiktionary.org/wiki/basket-ball
-        self.wxr.wtp.start_page("")
+        self.wxr.wtp.start_page("basket-ball")
         self.wxr.wtp.add_page("Modèle:pron", 10, body="{{{1}}}")
         self.wxr.wtp.add_page("Modèle:FR", 10, body="(France)")
         self.wxr.wtp.add_page("Modèle:CA", 10, body="(Canada)")
@@ -71,35 +71,40 @@ class TestFormLine(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "{{pron|bas.kɛt.bol|fr}} {{FR|nocat=1}} ''ou'' {{pron|bas.kɛt.bɔl|fr}} {{FR|nocat=1}} ''ou'' {{pron|bas.kɛt.bɑl|fr}} {{CA|nocat=1}} {{m}}"
         )
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="basket-ball", lang_code="fr", lang_name="Français")
+        ]
         extract_form_line(self.wxr, page_data, root.children)
         self.assertEqual(
-            page_data,
-            [
-                {
-                    "tags": ["masculin"],
-                    "sounds": [
-                        {"ipa": "bas.kɛt.bol", "tags": ["France"]},
-                        {"ipa": "bas.kɛt.bɔl", "tags": ["France"]},
-                        {"ipa": "bas.kɛt.bɑl", "tags": ["Canada"]},
-                    ],
-                }
-            ],
+            page_data[-1].model_dump(exclude_defaults=True),
+            {
+                "word": "basket-ball",
+                "lang_code": "fr",
+                "lang_name": "Français",
+                "tags": ["masculin"],
+                "sounds": [
+                    {"ipa": "bas.kɛt.bol", "tags": ["France"]},
+                    {"ipa": "bas.kɛt.bɔl", "tags": ["France"]},
+                    {"ipa": "bas.kɛt.bɑl", "tags": ["Canada"]},
+                ],
+            },
         )
 
     def test_template_in_pron_argument(self):
-        # https://fr.wiktionary.org/wiki/minéral argileux
+        # https://fr.wiktionary.org/wiki/minéral_argileux
         self.wxr.wtp.start_page("")
         self.wxr.wtp.add_page("Modèle:pron", 10, body="{{{1}}}")
         self.wxr.wtp.add_page("Modèle:liaison", 10, body="‿")
         root = self.wxr.wtp.parse(
             "'''minéral argileux''' {{pron|mi.ne.ʁa.l{{liaison|fr}}aʁ.ʒi.lø|fr}}"
         )
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         extract_form_line(self.wxr, page_data, root.children)
         self.assertEqual(
-            page_data,
-            [{"sounds": [{"ipa": "mi.ne.ʁa.l‿aʁ.ʒi.lø"}]}],
+            page_data[-1].sounds[0].model_dump(exclude_defaults=True),
+            {"ipa": "mi.ne.ʁa.l‿aʁ.ʒi.lø"},
         )
 
     @patch(
@@ -112,40 +117,37 @@ class TestFormLine(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "{{équiv-pour|un homme|auteur|2egenre=une personne non-binaire|2egenre1=autaire|2egenre2=auteurice|2egenre3=auteur·ice|lang=fr}}"
         )
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="autrice", lang_code="fr", lang_name="Français")
+        ]
         extract_form_line(self.wxr, page_data, root.children)
         self.assertEqual(
-            page_data,
-            [
-                {
-                    "forms": [
-                        {
-                            "form": "auteur",
-                            "tags": ["pour un homme, on dit"],
-                            "source": "form line template 'équiv-pour'",
-                        },
-                        {
-                            "form": "autaire",
-                            "tags": [
-                                "pour une personne non-binaire, on peut dire"
-                            ],
-                            "source": "form line template 'équiv-pour'",
-                        },
-                        {
-                            "form": "auteurice",
-                            "tags": [
-                                "pour une personne non-binaire, on peut dire"
-                            ],
-                            "source": "form line template 'équiv-pour'",
-                        },
-                        {
-                            "form": "auteur·ice",
-                            "tags": [
-                                "pour une personne non-binaire, on peut dire"
-                            ],
-                            "source": "form line template 'équiv-pour'",
-                        },
-                    ]
-                }
-            ],
+            page_data[-1].model_dump(exclude_defaults=True),
+            {
+                "word": "autrice",
+                "lang_code": "fr",
+                "lang_name": "Français",
+                "forms": [
+                    {
+                        "form": "auteur",
+                        "tags": ["pour un homme, on dit"],
+                        "source": "form line template 'équiv-pour'",
+                    },
+                    {
+                        "form": "autaire",
+                        "tags": ["pour une personne non-binaire, on peut dire"],
+                        "source": "form line template 'équiv-pour'",
+                    },
+                    {
+                        "form": "auteurice",
+                        "tags": ["pour une personne non-binaire, on peut dire"],
+                        "source": "form line template 'équiv-pour'",
+                    },
+                    {
+                        "form": "auteur·ice",
+                        "tags": ["pour une personne non-binaire, on peut dire"],
+                        "source": "form line template 'équiv-pour'",
+                    },
+                ],
+            },
         )

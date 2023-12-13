@@ -1,15 +1,15 @@
-import unittest
-from collections import defaultdict
+from unittest import TestCase
 from unittest.mock import patch
 
 from wikitextprocessor import Wtp
 from wikitextprocessor.parser import TemplateNode
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.inflection import extract_inflection
+from wiktextract.extractor.fr.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestInflection(unittest.TestCase):
+class TestInflection(TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
@@ -32,12 +32,14 @@ class TestInflection(unittest.TestCase):
         """,
     )
     def test_fr_reg(self, mock_node_to_wikitext):
-        page_data = [defaultdict(list, {"word": "productrice"})]
+        page_data = [
+            WordEntry(word="productrice", lang_code="fr", lang_name="Français")
+        ]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("productrice")
         extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
-            page_data[-1].get("forms"),
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [{"form": "productrices", "tags": ["Pluriel"]}],
         )
 
@@ -59,25 +61,27 @@ class TestInflection(unittest.TestCase):
     )
     def test_fr_accord_al(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/animal#Adjectif
-        page_data = [defaultdict(list, {"word": "animal", "lang_code": "fr"})]
+        page_data = [
+            WordEntry(word="animal", lang_code="fr", lang_name="Français")
+        ]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("animal")
         extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
-            page_data[-1].get("forms"),
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
                 {
-                    "ipa": "\\a.ni.mo\\",
+                    "ipas": ["\\a.ni.mo\\"],
                     "tags": ["Pluriel", "Masculin"],
                     "form": "animaux",
                 },
                 {
-                    "ipa": "\\a.ni.mal\\",
+                    "ipas": ["\\a.ni.mal\\"],
                     "tags": ["Singulier", "Féminin"],
                     "form": "animale",
                 },
                 {
-                    "ipa": "\\a.ni.mal\\",
+                    "ipas": ["\\a.ni.mal\\"],
                     "tags": ["Pluriel", "Féminin"],
                     "form": "animales",
                 },
@@ -96,12 +100,14 @@ class TestInflection(unittest.TestCase):
     def test_multiple_lines_ipa(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/ration#Nom_commun_2
         # template "en-nom-rég"
-        page_data = [defaultdict(list, {"lang_code": "en", "word": "ration"})]
+        page_data = [
+            WordEntry(word="ration", lang_code="en", lang_name="Anglais")
+        ]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("ration")
         extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
-            page_data[-1].get("forms"),
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
                 {
                     "ipas": ["\\ˈɹæʃ.ənz\\", "\\ˈɹeɪʃ.ənz\\"],
@@ -124,12 +130,14 @@ class TestInflection(unittest.TestCase):
     def test_single_line_multiple_ipa(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/ration#Verbe
         # template "en-conj-rég"
-        page_data = [defaultdict(list, {"lang_code": "en", "word": "ration"})]
+        page_data = [
+            WordEntry(word="ration", lang_code="en", lang_name="Anglais")
+        ]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("ration")
         extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
-            page_data[-1].get("forms"),
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
                 {
                     "ipas": ["\\ˈɹæʃ.ən\\", "\\ˈɹeɪʃ.ən\\"],
@@ -152,12 +160,14 @@ class TestInflection(unittest.TestCase):
     def test_invalid_ipa(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/animal#Nom_commun_3
         # template "ast-accord-mf"
-        page_data = [defaultdict(list, {"lang_code": "en", "word": "animal"})]
+        page_data = [
+            WordEntry(word="animal", lang_code="en", lang_name="Français")
+        ]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("animal")
         extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
-            page_data[-1].get("forms"),
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [{"tags": ["Pluriel"], "form": "animales"}],
         )
 
@@ -175,12 +185,12 @@ class TestInflection(unittest.TestCase):
     def test_no_column_headers(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/一万#Nom_commun
         # template "zh-formes"
-        page_data = [defaultdict(list, {"lang_code": "zh", "word": "一万"})]
+        page_data = [WordEntry(word="一万", lang_code="zh", lang_name="Chinois")]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("一万")
         extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
-            page_data[-1].get("forms"),
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [{"tags": ["Traditionnel"], "form": "一萬"}],
         )
 
@@ -198,12 +208,14 @@ class TestInflection(unittest.TestCase):
     )
     def test_lt_décl_as(self, mock_node_to_wikitext):
         # empty table cells should be ignored
-        page_data = [defaultdict(list, {"lang_code": "lt", "word": "abadai"})]
+        page_data = [
+            WordEntry(word="abadai", lang_code="lt", lang_name="Lituanien")
+        ]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("abadai")
         extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
-            page_data[-1].get("forms"),
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [{"tags": ["Singulier", "Nominatif"], "form": "abadas"}],
         )
 
@@ -229,23 +241,24 @@ class TestInflection(unittest.TestCase):
 |}""",
     )
     def test_fr_accord_s(self, mock_node_to_wikitext):
-        # https://fr.wiktionary.org/wiki/
-        page_data = [defaultdict(list, {"lang_code": "fr", "word": "aastais"})]
+        page_data = [
+            WordEntry(word="aastais", lang_code="fr", lang_name="Français")
+        ]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("aastais")
         extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
-            page_data[-1].get("forms"),
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
                 {
                     "tags": ["Singulier", "Féminin"],
                     "form": "aastaise",
-                    "ipa": "\\a.a.stɛz\\",
+                    "ipas": ["\\a.a.stɛz\\"],
                 },
                 {
                     "tags": ["Pluriel", "Féminin"],
                     "form": "aastaises",
-                    "ipa": "\\a.a.stɛz\\",
+                    "ipas": ["\\a.a.stɛz\\"],
                 },
             ],
         )
@@ -268,31 +281,35 @@ class TestInflection(unittest.TestCase):
     )
     def test_fr_accord_personne(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/enculé_de_ta_race
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(
+                word="enculé de ta race", lang_code="fr", lang_name="Français"
+            )
+        ]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("enculé de ta race")
         extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
-            page_data[-1].get("forms"),
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
                 {
                     "form": "enculé de ma race",
-                    "ipa": "\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\",
+                    "ipas": ["\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\"],
                     "tags": ["Singulier", "1ᵉ personne", "Masculin"],
                 },
                 {
                     "form": "enculés de notre race",
-                    "ipa": "\\ɑ̃.ky.ˌle.də.nɔ.tʁə.ˈʁas\\",
+                    "ipas": ["\\ɑ̃.ky.ˌle.də.nɔ.tʁə.ˈʁas\\"],
                     "tags": ["Pluriel", "1ᵉ personne", "Masculin"],
                 },
                 {
                     "form": "enculée de ma race",
-                    "ipa": "\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\",
+                    "ipas": ["\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\"],
                     "tags": ["Singulier", "1ᵉ personne", "Féminin"],
                 },
                 {
                     "form": "enculées de notre race",
-                    "ipa": "\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\",
+                    "ipas": ["\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\"],
                     "tags": ["Pluriel", "1ᵉ personne", "Féminin"],
                 },
             ],
@@ -320,12 +337,14 @@ class TestInflection(unittest.TestCase):
     )
     def test_ro_nom_tab(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/fenil#Nom_commun_4
-        page_data = [defaultdict(list, {"word": "fenil"})]
+        page_data = [
+            WordEntry(word="fenil", lang_code="fr", lang_name="Français")
+        ]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("fenil")
         extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
-            page_data[-1].get("forms"),
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
                 {
                     "form": "fenilul",
@@ -364,12 +383,14 @@ class TestInflection(unittest.TestCase):
     )
     def test_sv_nom_c_ar(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/robot#Nom_commun_7
-        page_data = [defaultdict(list, {"word": "robot"})]
+        page_data = [
+            WordEntry(word="robot", lang_code="fr", lang_name="Français")
+        ]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("robot")
         extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
-            page_data[-1].get("forms"),
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
                 {"form": "roboten", "tags": ["Défini", "Singulier"]},
                 {"form": "robotar", "tags": ["Indéfini", "Pluriel"]},
@@ -392,12 +413,14 @@ class TestInflection(unittest.TestCase):
     )
     def test_cs_decl_nom_ma_dur(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/robot#Nom_commun_1_2
-        page_data = [defaultdict(list, {"word": "robot"})]
+        page_data = [
+            WordEntry(word="robot", lang_code="fr", lang_name="Français")
+        ]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("robot")
         extract_inflection(self.wxr, page_data, node)
         self.assertEqual(
-            page_data[-1].get("forms"),
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
                 {"form": "roboti", "tags": ["Pluriel", "Nominatif"]},
                 {"form": "robotové", "tags": ["Pluriel", "Nominatif"]},
