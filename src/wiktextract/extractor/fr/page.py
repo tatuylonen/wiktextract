@@ -1,7 +1,5 @@
-import copy
 import logging
-from collections import defaultdict
-from typing import Dict, List, Optional
+from typing import Any, Optional
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
@@ -13,6 +11,7 @@ from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
 from .inflection import extract_inflection
 from .linkage import extract_linkage
+from .models import WordEntry
 from .note import extract_note
 from .pronunciation import extract_pronunciation
 from .translation import extract_translation
@@ -32,10 +31,10 @@ ADDITIONAL_EXPAND_TEMPLATES = set()
 
 def parse_section(
     wxr: WiktextractContext,
-    page_data: List[Dict],
-    base_data: Dict,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
     level_node: WikiNode,
-) -> Optional[List[EtymologyData]]:
+) -> Optional[list[EtymologyData]]:
     # Page structure: https://fr.wiktionary.org/wiki/Wiktionnaire:Structure_des_pages
     for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
         if level_node_template.template_name == "S":
@@ -78,14 +77,14 @@ def parse_section(
                 and section_type in wxr.config.LINKAGE_SUBTITLES
             ):
                 if len(page_data) == 0:
-                    page_data.append(copy.deepcopy(base_data))
+                    page_data.append(base_data.model_copy(deep=True))
                 extract_linkage(
                     wxr,
                     page_data,
                     level_node,
                     section_type,
                 )
-                if page_data[-1].keys() == base_data.keys():
+                if page_data[-1] == base_data:
                     page_data.pop()  # no data was added
             elif (
                 wxr.config.capture_translations
@@ -100,41 +99,41 @@ def parse_section(
                 pass
             elif section_type in wxr.config.OTHER_SUBTITLES["notes"]:
                 if len(page_data) == 0:
-                    page_data.append(copy.deepcopy(base_data))
+                    page_data.append(base_data.model_copy(deep=True))
                 extract_note(wxr, page_data, level_node)
-                if page_data[-1].keys() == base_data.keys():
+                if page_data[-1] == base_data:
                     page_data.pop()  # no data was added
 
 
 def process_pos_block(
     wxr: WiktextractContext,
-    page_data: List[Dict],
-    base_data: Dict,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
     pos_title_node: TemplateNode,
     pos_argument: str,
     pos_title: str,
 ):
     pos_type = wxr.config.POS_SUBTITLES[pos_argument]["pos"]
-    if len(page_data) == 0 or "pos" in page_data[-1]:
-        page_data.append(copy.deepcopy(base_data))
-    page_data[-1]["pos"] = pos_type
-    page_data[-1]["pos_title"] = pos_title
+    if len(page_data) == 0 or "pos" not in page_data[-1].model_fields_set:
+        page_data.append(base_data.model_copy(deep=True))
+    page_data[-1].pos = pos_type
+    page_data[-1].pos_title = pos_title
     child_nodes = list(pos_title_node.filter_empty_str_child())
     form_line_start = 0  # Ligne de forme
     gloss_start = len(child_nodes)
-    lang_code = page_data[-1].get("lang_code")
+    lang_code = page_data[-1].lang_code
     for index, child in enumerate(child_nodes):
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
                 template_name = child.template_name
                 if (
                     template_name.endswith("-exemple")
-                    and len(page_data[-1].get("senses", [])) > 0
+                    and len(page_data[-1].senses) > 0
                 ):
                     # zh-exemple and ja-exemple expand to list thus are not the
                     # child of gloss list item.
                     process_exemple_template(
-                        wxr, child, page_data[-1]["senses"][-1]
+                        wxr, child, page_data[-1].senses[-1]
                     )
                 elif template_name.startswith(("zh-mot", "ja-mot")):
                     # skip form line templates
@@ -155,7 +154,7 @@ def process_pos_block(
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
-) -> List[Dict[str, str]]:
+) -> list[dict[str, Any]]:
     if wxr.config.verbose:
         logging.info(f"Parsing page: {page_title}")
 
@@ -170,23 +169,27 @@ def parse_page(
         additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
     )
 
-    page_data = []
+    page_data: list[WordEntry] = []
     for level2_node in tree.find_child(NodeKind.LEVEL2):
         for subtitle_template in level2_node.find_content(NodeKind.TEMPLATE):
             # https://fr.wiktionary.org/wiki/Modèle:langue
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_langues
             if subtitle_template.template_name == "langue":
-                base_data = defaultdict(list, {"word": wxr.wtp.title})
+                categories = {}
                 lang_code = subtitle_template.template_parameters.get(1)
                 if (
                     wxr.config.capture_language_codes is not None
                     and lang_code not in wxr.config.capture_language_codes
                 ):
                     continue
-                lang_name = clean_node(wxr, base_data, subtitle_template)
+                lang_name = clean_node(wxr, categories, subtitle_template)
                 wxr.wtp.start_section(lang_name)
-                base_data["lang_name"] = lang_name
-                base_data["lang_code"] = lang_code
+                base_data = WordEntry(
+                    word=wxr.wtp.title,
+                    lang_code=lang_code,
+                    lang_name=lang_name,
+                    categories=categories.get("categories", []),
+                )
                 etymology_data: Optional[EtymologyData] = None
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     new_etymology_data = parse_section(
@@ -198,4 +201,4 @@ def parse_page(
                 if etymology_data is not None:
                     insert_etymology_data(lang_code, page_data, etymology_data)
 
-    return page_data
+    return [m.model_dump(exclude_defaults=True) for m in page_data]

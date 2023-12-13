@@ -1,17 +1,15 @@
-from collections import defaultdict
-from typing import Union
-
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from ..share import split_tag_text
+from .models import Linkage, WordEntry
 
 
 def extract_linkage(
     wxr: WiktextractContext,
-    page_data: list[dict],
+    page_data: list[WordEntry],
     level_node: WikiNode,
     section_type: str,
 ) -> None:
@@ -28,7 +26,7 @@ def extract_linkage(
 
 def process_derives_autres_list(
     wxr: WiktextractContext,
-    page_data: list[dict],
+    page_data: list[WordEntry],
     level_node: WikiNode,
 ):
     # drrive to other languages list
@@ -41,18 +39,14 @@ def process_derives_autres_list(
                 lang_name = clean_node(wxr, None, template_node)
             elif template_node.template_name == "lien":
                 word = clean_node(wxr, None, template_node)
-                page_data[-1]["derived"].append(
-                    {
-                        "lang_code": lang_code,
-                        "lang_name": lang_name,
-                        "word": word,
-                    }
+                page_data[-1].derived.append(
+                    Linkage(lang_code=lang_code, lang_name=lang_name, word=word)
                 )
 
 
 def process_linkage_list(
     wxr: WiktextractContext,
-    page_data: list[dict],
+    page_data: list[WordEntry],
     level_node: WikiNode,
     linkage_type: str,
 ) -> None:
@@ -76,20 +70,20 @@ def process_linkage_list(
                 sense_index = int(sense_index_text)
             continue
 
-        linkage_data = defaultdict(list)
+        linkage_data = Linkage()
         if len(sense_text) > 0:
-            linkage_data["sense"] = sense_text
+            linkage_data.sense = sense_text
         if sense_index != 0:
-            linkage_data["sense_index"] = sense_index
+            linkage_data.sense_index = sense_index
         pending_tag = ""
         for index, child_node in enumerate(  # remove nested lists
             template_or_list_node.invert_find_child(NodeKind.LIST)
         ):
-            if index == 0 or "word" not in linkage_data:
+            if index == 0 or "word" not in linkage_data.model_fields_set:
                 if isinstance(child_node, TemplateNode):
                     process_linkage_template(wxr, child_node, linkage_data)
                 else:
-                    linkage_data["word"] = clean_node(wxr, None, child_node)
+                    linkage_data.word = clean_node(wxr, None, child_node)
             else:
                 tag_text = (
                     child_node
@@ -108,8 +102,9 @@ def process_linkage_list(
                     pending_tag = ""
                 elif tag_text.strip() in {",", "/"}:
                     # list item has more than one word
-                    page_data[-1][linkage_type].append(linkage_data)
-                    linkage_data = defaultdict(list)
+                    pre_data = getattr(page_data[-1], linkage_type)
+                    pre_data.append(linkage_data)
+                    linkage_data = Linkage()
                     continue
                 elif len(pending_tag) > 0:
                     pending_tag += tag_text
@@ -117,18 +112,19 @@ def process_linkage_list(
 
                 for tag in split_tag_text(tag_text):
                     if tag.startswith("— "):
-                        linkage_data["translation"] = tag.removeprefix("— ")
+                        linkage_data.translation = tag.removeprefix("— ")
                     elif len(tag) > 0:
-                        linkage_data["tags"].append(tag)
+                        linkage_data.tags.append(tag)
 
-        if "word" in linkage_data:
-            page_data[-1][linkage_type].append(linkage_data)
+        if "word" in linkage_data.model_fields_set:
+            pre_data = getattr(page_data[-1], linkage_type)
+            pre_data.append(linkage_data)
 
 
 def process_linkage_template(
     wxr: WiktextractContext,
     node: TemplateNode,
-    linkage_data: dict[str, Union[str, list[str]]],
+    linkage_data: Linkage,
 ) -> None:
     if node.template_name == "lien":
         process_lien_template(wxr, node, linkage_data)
@@ -139,7 +135,7 @@ def process_linkage_template(
 def process_lien_template(
     wxr: WiktextractContext,
     node: TemplateNode,
-    linkage_data: dict[str, Union[str, list[str]]],
+    linkage_data: Linkage,
 ) -> None:
     # link word template: https://fr.wiktionary.org/wiki/Modèle:lien
     word = clean_node(
@@ -147,13 +143,13 @@ def process_lien_template(
         None,
         node.template_parameters.get("dif", node.template_parameters.get(1)),
     )
-    linkage_data["word"] = word
+    linkage_data.word = word
     if "tr" in node.template_parameters:
-        linkage_data["roman"] = clean_node(
+        linkage_data.roman = clean_node(
             wxr, None, node.template_parameters.get("tr")
         )
     if "sens" in node.template_parameters:
-        linkage_data["translation"] = clean_node(
+        linkage_data.translation = clean_node(
             wxr, None, node.template_parameters.get("sens")
         )
 
@@ -161,17 +157,15 @@ def process_lien_template(
 def process_zh_lien_template(
     wxr: WiktextractContext,
     node: TemplateNode,
-    linkage_data: dict[str, Union[str, list[str]]],
+    linkage_data: Linkage,
 ) -> None:
     # https://fr.wiktionary.org/wiki/Modèle:zh-lien
-    linkage_data["word"] = clean_node(
-        wxr, None, node.template_parameters.get(1)
-    )
-    linkage_data["roman"] = clean_node(
+    linkage_data.word = clean_node(wxr, None, node.template_parameters.get(1))
+    linkage_data.roman = clean_node(
         wxr, None, node.template_parameters.get(2)
     )  # pinyin
     traditional_form = clean_node(
         wxr, None, node.template_parameters.get(3, "")
     )
     if len(traditional_form) > 0:
-        linkage_data["alt"] = traditional_form
+        linkage_data.alt = traditional_form

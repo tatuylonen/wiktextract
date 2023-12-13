@@ -1,19 +1,17 @@
-from collections import defaultdict
-from copy import deepcopy
 from dataclasses import dataclass
-from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from .pronunciation import insert_ipa, is_ipa_text
+from .models import Form, WordEntry
+from .pronunciation import is_ipa_text
 
 
 def extract_inflection(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    page_data: list[WordEntry],
     template_node: TemplateNode,
 ) -> None:
     # inflection templates
@@ -47,7 +45,7 @@ class ColspanHeader:
 
 def process_inflection_table(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    page_data: list[WordEntry],
     node: WikiNode,
 ) -> None:
     expanded_node = wxr.wtp.parse(
@@ -92,7 +90,7 @@ def process_inflection_table(
 
         column_cell_index = 0
         for column_num, table_cell in enumerate(table_row_nodes):
-            form_data = defaultdict(list)
+            form_data = Form()
             if isinstance(table_cell, WikiNode):
                 if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
                     if any(
@@ -140,38 +138,57 @@ def process_inflection_table(
                         if is_ipa_text(table_cell_line):
                             insert_ipa(form_data, table_cell_line)
                         elif (
-                            table_cell_line != page_data[-1].get("word")
+                            table_cell_line != page_data[-1].word
                             and table_cell_line not in IGNORE_TABLE_CELL
                         ):
-                            if "form" not in form_data:
-                                form_data["form"] = table_cell_line
+                            if "form" not in form_data.model_fields_set:
+                                form_data.form = table_cell_line
                             else:
-                                form_data["form"] += " " + table_cell_line
+                                form_data.form += " " + table_cell_line
                     for colspan_header in colspan_headers:
                         if (
                             column_cell_index >= colspan_header.index
                             and column_cell_index
                             < colspan_header.index + colspan_header.span
                         ):
-                            form_data["tags"].append(colspan_header.text)
+                            form_data.tags.append(colspan_header.text)
                     if (
                         "colspan" not in table_cell.attrs
                         and len(column_headers) > column_cell_index
                         and column_headers[column_cell_index].lower()
                         not in IGNORE_TABLE_HEADERS
                     ):
-                        form_data["tags"].append(
-                            column_headers[column_cell_index]
-                        )
+                        form_data.tags.append(column_headers[column_cell_index])
 
                     if len(row_headers) > 0:
-                        form_data["tags"].extend(row_headers)
-                    if "form" in form_data:
-                        for form in form_data["form"].split(" ou "):
-                            new_form_data = deepcopy(form_data)
-                            new_form_data["form"] = form
-                            page_data[-1]["forms"].append(new_form_data)
+                        form_data.tags.extend(row_headers)
+                    if "form" in form_data.model_fields_set:
+                        for form in form_data.form.split(" ou "):
+                            new_form_data = form_data.model_copy(deep=True)
+                            new_form_data.form = form
+                            page_data[-1].forms.append(new_form_data)
 
                     colspan_text = table_cell.attrs.get("colspan", "1")
                     if colspan_text.isdigit():
                         column_cell_index += int(colspan_text)
+
+
+def split_ipa(text: str) -> list[str]:
+    # break IPA text if it contains "ou"(or)
+    if " ou " in text:
+        # two ipa texts in the same line: "en-conj-rég" template
+        return text.split(" ou ")
+    if text.startswith("ou "):
+        return [text.removeprefix("ou ")]
+    if text.endswith(" Prononciation ?\\"):
+        # inflection table templates use a edit link when the ipa data is
+        # missing, and the link usually ends with " Prononciation ?"
+        return ""
+    return [text]
+
+
+def insert_ipa(form: Form, ipa_text: str) -> None:
+    ipa_data = split_ipa(ipa_text)
+    if len(ipa_data) == 0:
+        return
+    form.ipas.extend(ipa_data)
