@@ -1,13 +1,9 @@
 # Utilities for manipulating word data structures
 #
 # Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
-import copy
 import re
 from collections import defaultdict
-from functools import partial
-from typing import Any, Dict, Iterable, List, Tuple
-
-from wiktextract.wxr_context import WiktextractContext
+from typing import Any, Iterable
 
 # Keys in ``data`` that can only have string values (a list of them)
 STR_KEYS = frozenset({"tags", "glosses"})
@@ -26,7 +22,7 @@ DICT_KEYS = frozenset(
 )
 
 
-def data_append(data: Dict, key: str, value: Any) -> None:
+def data_append(data: Any, key: str, value: Any) -> None:
     """Appends ``value`` under ``key`` in the dictionary ``data``.  The key
     is created if it does not exist."""
     assert isinstance(key, str)
@@ -47,8 +43,10 @@ def data_append(data: Dict, key: str, value: Any) -> None:
         data[key] = list_value
 
 
-def data_extend(data: Dict, key: str, values: Iterable) -> None:
-    """Appends all values in a list under ``key`` in the dictionary ``data``."""
+def data_extend(data: Any, key: str, values: Iterable) -> None:
+    """
+    Appends all values in a list under ``key`` in the dictionary ``data``.
+    """
     assert isinstance(data, dict)
     assert isinstance(key, str)
     assert isinstance(values, (list, tuple))
@@ -63,7 +61,7 @@ def data_extend(data: Dict, key: str, values: Iterable) -> None:
 
 def split_at_comma_semi(
     text: str, separators=(",", ";", "，", "،"), extra=()
-) -> List[str]:
+) -> list[str]:
     """Splits the text at commas and semicolons, unless they are inside
     parenthesis.  ``separators`` is default separators (setting it eliminates
     default separators).  ``extra`` is extra separators to be used in addition
@@ -203,7 +201,7 @@ def freeze(x):
 
 def ns_title_prefix_tuple(
     wxr, namespace: str, lower: bool = False
-) -> Tuple[str, ...]:
+) -> tuple[str, ...]:
     """Based on given namespace name, create a tuple of aliases"""
     if namespace in wxr.wtp.NAMESPACE_DATA:
         return tuple(
@@ -215,45 +213,3 @@ def ns_title_prefix_tuple(
         )
     else:
         return ()
-
-
-def find_similar_gloss(page_data: List[Dict], gloss: str) -> Dict:
-    """
-    Return a sense dictionary if it has similar gloss, return the last
-    word dictionary if can't found such gloss.
-    """
-    from rapidfuzz.fuzz import partial_token_set_ratio
-    from rapidfuzz.process import extractOne
-    from rapidfuzz.utils import default_process
-
-    if len(gloss) == 0:
-        return page_data[-1]
-
-    choices = [
-        sense_dict.get("raw_glosses", sense_dict.get("glosses", [""]))[0]
-        for sense_dict in page_data[-1]["senses"]
-    ]
-    if match_result := extractOne(
-        gloss,
-        choices,
-        score_cutoff=85,
-        scorer=partial(partial_token_set_ratio, processor=default_process),
-    ):
-        return page_data[-1]["senses"][match_result[2]]
-
-    return page_data[-1]
-
-
-def append_base_data(
-    page_data: List[Dict], field: str, value: Any, base_data: Dict
-) -> None:
-    if page_data[-1].get(field) is not None:
-        if len(page_data[-1]["senses"]) > 0:
-            # append new dictionary if the last dictionary has sense data and
-            # also has the same key
-            page_data.append(copy.deepcopy(base_data))
-            page_data[-1][field] = value
-        elif isinstance(page_data[-1].get(field), list):
-            page_data[-1][field] += value
-    else:
-        page_data[-1][field] = value

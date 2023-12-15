@@ -1,15 +1,15 @@
-import unittest
-from collections import defaultdict
+from unittest import TestCase
 from unittest.mock import patch
 
 from wikitextprocessor import NodeKind, WikiNode, Wtp
 from wiktextract.config import WiktionaryConfig
+from wiktextract.extractor.zh.models import Sense, WordEntry
 from wiktextract.extractor.zh.page import extract_gloss, parse_section
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestExample(unittest.TestCase):
+class TestExample(TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="zh"), WiktionaryConfig(dump_file_lang_code="zh")
@@ -23,13 +23,10 @@ class TestExample(unittest.TestCase):
 
     def test_example_list(self) -> None:
         page_data = [
-            defaultdict(
-                list,
-                {
-                    "lang_name": "日語",
-                    "lang_code": "ja",
-                    "word": "可笑しい",
-                },
+            WordEntry(
+                lang_name="日語",
+                lang_code="ja",
+                word="可笑しい",
             )
         ]
         wikitext = """# [[好玩]]的：
@@ -43,9 +40,9 @@ class TestExample(unittest.TestCase):
 ## [[很好]]的，[[卓越]]的"""
         self.wxr.wtp.start_page("test")
         node = self.wxr.wtp.parse(wikitext)
-        extract_gloss(self.wxr, page_data, node.children[0], {})
+        extract_gloss(self.wxr, page_data, node.children[0], Sense())
         self.assertEqual(
-            page_data[0]["senses"],
+            [s.model_dump(exclude_defaults=True) for s in page_data[0].senses],
             [
                 {"glosses": ["好玩的：", "有趣的，滑稽的，可笑的"]},
                 {"glosses": ["好玩的：", "奇怪的，不正常的"]},
@@ -81,7 +78,8 @@ class TestExample(unittest.TestCase):
         mock_process_pos_block,
     ) -> None:
         node = WikiNode(NodeKind.LEVEL3, 0)
-        parse_section(self.wxr, [{}], {}, node)
+        base_data = WordEntry(word="", lang_code="", lang_name="")
+        parse_section(self.wxr, [base_data], base_data, node)
         mock_process_pos_block.assert_called()
 
     @patch("wiktextract.extractor.zh.page.process_pos_block")
@@ -92,5 +90,6 @@ class TestExample(unittest.TestCase):
         mock_process_pos_block,
     ) -> None:
         node = WikiNode(NodeKind.LEVEL3, 0)
-        parse_section(self.wxr, [{}], {}, node)
+        base_data = WordEntry(word="", lang_code="", lang_name="")
+        parse_section(self.wxr, [base_data], base_data, node)
         mock_process_pos_block.assert_called()
