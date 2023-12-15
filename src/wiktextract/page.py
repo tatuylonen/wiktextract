@@ -5,7 +5,7 @@
 import re
 from collections import defaultdict
 from copy import copy
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Optional, Union
 
 from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
@@ -28,7 +28,7 @@ LEVEL_KINDS = {
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
-) -> List[Dict[str, str]]:
+) -> list[dict[str, Any]]:
     """Parses the text of a Wiktionary page and returns a list of
     dictionaries, one for each word/part-of-speech defined on the page
     for the languages specified by ``capture_language_codes`` (None means
@@ -56,9 +56,9 @@ def is_panel_template(wxr: WiktextractContext, template_name: str) -> bool:
 
 
 def recursively_extract(
-    contents: Union[WikiNode, List[WikiNode]],
-    fn: Callable[[Union[WikiNode, List[WikiNode]]], bool],
-) -> Tuple[List[WikiNode], List[WikiNode]]:
+    contents: Union[WikiNode, list[WikiNode]],
+    fn: Callable[[Union[WikiNode, list[WikiNode]]], bool],
+) -> tuple[list[WikiNode], list[WikiNode]]:
     """Recursively extracts elements from contents for which ``fn`` returns
     True.  This returns two lists, the extracted elements and the remaining
     content (with the extracted elements removed at each level).  Only
@@ -146,7 +146,7 @@ def recursively_extract(
     return extracted, new_contents
 
 
-def inject_linkages(wxr: WiktextractContext, page_data: List[Dict]) -> None:
+def inject_linkages(wxr: WiktextractContext, page_data: list[dict]) -> None:
     # Inject linkages from thesaurus entries
     from .thesaurus import search_thesaurus
 
@@ -183,7 +183,7 @@ def inject_linkages(wxr: WiktextractContext, page_data: List[Dict]) -> None:
                 data_append(data, term.linkage, dt)
 
 
-def process_categories(wxr: WiktextractContext, page_data: List[Dict]) -> None:
+def process_categories(wxr: WiktextractContext, page_data: list[dict]) -> None:
     # Categories are not otherwise disambiguated, but if there is only
     # one sense and only one data in ret for the same language, move
     # categories to the only sense.  Note that categories are commonly
@@ -275,7 +275,7 @@ def process_categories(wxr: WiktextractContext, page_data: List[Dict]) -> None:
             data["categories"] = new_cats
 
 
-def remove_duplicate_data(page_data: Dict) -> None:
+def remove_duplicate_data(page_data: dict) -> None:
     # Remove duplicates from tags, categories, etc.
     for data in page_data:
         for field in ("categories", "topics", "tags", "wikidata", "wikipedia"):
@@ -310,10 +310,10 @@ def remove_duplicate_data(page_data: Dict) -> None:
 
 def clean_node(
     wxr: WiktextractContext,
-    sense_data: Optional[Dict],
-    wikinode: Union[str, WikiNode, List[Union[str, WikiNode, List]]],
-    template_fn: Optional[Callable[[str, Dict], str]] = None,
-    post_template_fn: Optional[Callable[[str, Dict, str], str]] = None,
+    sense_data: Optional[Any],
+    wikinode: Union[str, WikiNode, list[Union[str, WikiNode]]],
+    template_fn: Optional[Callable[[str, dict], str]] = None,
+    post_template_fn: Optional[Callable[[str, dict, str], str]] = None,
     collect_links: bool = False,
 ) -> str:
     """

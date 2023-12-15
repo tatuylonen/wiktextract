@@ -1,21 +1,23 @@
 import re
-from typing import Any, Dict, List, Optional, Union
+from typing import Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import HTMLNode, TemplateNode
-from wiktextract.datautils import append_base_data
 from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .models import Sound, WordEntry
+from .util import append_base_data
+
 
 def extract_pronunciation_recursively(
     wxr: WiktextractContext,
-    page_data: List[Dict[str, Any]],
-    base_data: Dict[str, Any],
+    page_data: list[WordEntry],
+    base_data: WordEntry,
     lang_code: str,
-    node: Union[WikiNode, List[Union[WikiNode, str]]],
-    tags: List[str],
+    node: Union[WikiNode, list[Union[WikiNode, str]]],
+    tags: list[str],
 ) -> None:
     if isinstance(node, list):
         for x in node:
@@ -39,20 +41,25 @@ def extract_pronunciation_recursively(
             # audio file usually after Pinyin
             # add back to previous Pinyin dictionary if it doesn't have
             # audio file data and they are sibling nodes(similar tags).
-            last_sounds_list = page_data[-1].get("sounds", [])
+            last_sounds_list = page_data[-1].sounds
             for index in range(len(last_sounds_list)):
-                if last_sounds_list[index].get("audio") is None and (
-                    tags == last_sounds_list[index].get("tags", [])[:-1]
+                if last_sounds_list[index].audio == "" and (
+                    tags == last_sounds_list[index].tags[:-1]
                     or lang_code != "zh"
                 ):
-                    page_data[-1].get("sounds")[index].update(
-                        create_audio_url_dict(data)
-                    )
-        elif isinstance(data, dict):
+                    for key, value in create_audio_url_dict(data).items():
+                        if key in Sound.model_fields:
+                            setattr(page_data[-1].sounds[index], key, value)
+                        else:
+                            wxr.wtp.warning(
+                                f"{key=} not defined in Sound",
+                                sortid="zh.pronunciation/56",
+                            )
+        elif isinstance(data, Sound):
             append_base_data(
                 page_data,
                 "sounds",
-                [data],
+                data,
                 base_data,
             )
             # list children could contain audio file
@@ -62,7 +69,7 @@ def extract_pronunciation_recursively(
                 base_data,
                 lang_code,
                 rest_children,
-                data.get("tags")[:-1],
+                data.tags[:-1],
             )
         elif isinstance(data, list):
             # list item is a tag
@@ -81,8 +88,8 @@ def extract_pronunciation_recursively(
 
 
 def combine_pronunciation_tags(
-    old_tags: List[str], new_tags: List[str]
-) -> List[str]:
+    old_tags: list[str], new_tags: list[str]
+) -> list[str]:
     combined_tags = old_tags[:]
     old_tags_set = set(old_tags)
     for tag in new_tags:
@@ -91,7 +98,7 @@ def combine_pronunciation_tags(
     return combined_tags
 
 
-def split_pronunciation_tags(text: str) -> List[str]:
+def split_pronunciation_tags(text: str) -> list[str]:
     return list(
         filter(
             None,
@@ -107,11 +114,11 @@ def split_pronunciation_tags(text: str) -> List[str]:
 
 def extract_pronunciation_item(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    page_data: list[WordEntry],
     lang_code: str,
-    node_children: List[WikiNode],
-    tags: List[str],
-) -> Optional[Union[Dict[str, Any], str, List[str]]]:
+    node_children: list[WikiNode],
+    tags: list[str],
+) -> Optional[Union[Sound, str, list[str]]]:
     """
     Return audio file name(eg. "File:LL-Q1860 (eng)-Vealhurl-manga.wav") string
     or a dictionary contains IPA and tags
@@ -138,9 +145,9 @@ def extract_pronunciation_item(
             tags, split_pronunciation_tags(sound_tags_text)
         )
         if len(ipa) > 0:
-            data = {"tags": new_tags}
-            ipa_key = "zh-pron" if lang_code == "zh" else "ipa"
-            data[ipa_key] = ipa[0].strip()
+            data = Sound(tags=new_tags)
+            ipa_key = "zh_pron" if lang_code == "zh" else "ipa"
+            setattr(data, ipa_key, ipa[0].strip())
             return data
 
         for child in filter(
@@ -155,9 +162,9 @@ def extract_pronunciation_item(
 
 def process_homophone_data(
     wxr: WiktextractContext,
-    page_data: List[Dict],
-    node_children: List[WikiNode],
-    tags: List[str],
+    page_data: list[WordEntry],
+    node_children: list[WikiNode],
+    tags: list[str],
 ) -> None:
     # Process the collapsible homophone table created from "zh-pron" template
     # and the "homophones" template
@@ -167,11 +174,10 @@ def process_homophone_data(
             for span_node in node.find_html_recursively(
                 "span", attr_name="lang"
             ):
-                sound_data = {
-                    "homophone": clean_node(wxr, None, span_node),
-                    "tags": tags,
-                }
-                page_data[-1]["sounds"].append(sound_data)
+                sound_data = Sound(
+                    homophone=clean_node(wxr, None, span_node), tags=tags
+                )
+                page_data[-1].sounds.append(sound_data)
         elif (
             isinstance(node, TemplateNode)
             and node.template_name == "homophones"
@@ -182,8 +188,7 @@ def process_homophone_data(
             for span_node in expaned_template.find_html_recursively(
                 "span", attr_name="lang"
             ):
-                sound_data = {
-                    "homophone": clean_node(wxr, None, span_node),
-                    "tags": tags,
-                }
-                page_data[-1]["sounds"].append(sound_data)
+                sound_data = Sound(
+                    homophone=clean_node(wxr, None, span_node), tags=tags
+                )
+                page_data[-1].sounds.append(sound_data)

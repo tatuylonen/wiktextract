@@ -1,21 +1,19 @@
 import re
-from collections import defaultdict
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
-from wiktextract.datautils import find_similar_gloss
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from ..share import capture_text_in_parentheses
+from .models import Translation, WordEntry
 
 
 def extract_translation(
-    wxr: WiktextractContext, page_data: List[Dict], node: WikiNode
+    wxr: WiktextractContext, page_data: list[WordEntry], node: WikiNode
 ) -> None:
     sense_text = ""
-    append_to = page_data[-1]
     for child in node.children:
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
@@ -27,7 +25,6 @@ def extract_translation(
                     sense_text = clean_node(
                         wxr, None, child.template_parameters.get(1)
                     )
-                    append_to = find_similar_gloss(page_data, sense_text)
                 elif template_name == "checktrans-top":
                     return
                 elif template_name == "see translation subpage":
@@ -42,7 +39,6 @@ def extract_translation(
                             page_data,
                             clean_node(wxr, None, list_item_node.children),
                             sense_text,
-                            append_to,
                         )
                     else:
                         nested_list_index = 0
@@ -65,7 +61,6 @@ def extract_translation(
                                 list_item_node.children[:nested_list_index],
                             ),
                             sense_text,
-                            append_to,
                         )
                         for nested_list_node in list_item_node.find_child(
                             NodeKind.LIST
@@ -80,16 +75,14 @@ def extract_translation(
                                         wxr, None, nested_list_item.children
                                     ),
                                     sense_text,
-                                    append_to,
                                 )
 
 
 def process_translation_list_item(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    page_data: list[WordEntry],
     expanded_text: str,
     sense: str,
-    append_to: Dict,
 ) -> None:
     from .headword_line import GENDERS
 
@@ -107,38 +100,33 @@ def process_translation_list_item(
     for word_and_tags in re.split(r"[,;、](?![^(]*\))\s*", words_text):
         tags, word = capture_text_in_parentheses(word_and_tags)
         tags = [tag for tag in tags if tag != lang_code]  # rm Wiktionary link
-        translation_data = defaultdict(
-            list,
-            {
-                "lang_code": lang_code,
-                "lang_name": lang_text,
-                "word": word,
-            },
+        translation_data = Translation(
+            lang_code=lang_code, lang_name=lang_text, word=word
         )
         tags_without_roman = []
         for tag in tags:
             if re.search(r"[a-z]", tag):
-                translation_data["roman"] = tag
+                translation_data.roman = tag
             else:
                 tags_without_roman.append(tag)
 
         if len(tags_without_roman) > 0:
-            translation_data["tags"] = tags_without_roman
+            translation_data.tags = tags_without_roman
 
         gender = word.split(" ")[-1]
         if gender in GENDERS:
-            translation_data["word"] = word.removesuffix(f" {gender}")
-            translation_data["tags"].append(GENDERS.get(gender))
+            translation_data.word = word.removesuffix(f" {gender}")
+            translation_data.tags.append(GENDERS.get(gender))
 
         if len(sense) > 0:
-            translation_data["sense"] = sense
-        append_to["translations"].append(translation_data)
+            translation_data.sense = sense
+        page_data[-1].translations.append(translation_data)
 
 
 def translation_subpage(
     wxr: WiktextractContext,
-    page_data: List[Dict],
-    template_args: Dict[str, str],
+    page_data: list[WordEntry],
+    template_args: dict[str, str],
 ) -> None:
     from .page import ADDITIONAL_EXPAND_TEMPLATES
 
@@ -174,7 +162,7 @@ def translation_subpage(
 def find_subpage_section(
     wxr: WiktextractContext,
     node: Union[WikiNode, str],
-    target_section: Union[str, List[str]],
+    target_section: Union[str, list[str]],
 ) -> Optional[WikiNode]:
     if isinstance(node, WikiNode):
         if node.kind in LEVEL_KINDS:

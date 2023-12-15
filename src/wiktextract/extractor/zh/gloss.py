@@ -1,6 +1,4 @@
 import re
-from collections import defaultdict
-from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
 from wiktextract.page import clean_node
@@ -8,15 +6,16 @@ from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby
 from .example import extract_examples
+from .models import Sense, WordEntry
 
 
 def extract_gloss(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    page_data: list[WordEntry],
     list_node: WikiNode,
-    gloss_data: Dict[str, List[str]],
+    gloss_data: Sense,
 ) -> None:
-    lang_code = page_data[-1].get("lang_code")
+    lang_code = page_data[-1].lang_code
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         gloss_nodes = [
             child
@@ -38,7 +37,7 @@ def extract_gloss(
             gloss_data, extract_gloss_and_tags(raw_gloss_text)
         )
         if len(ruby_data) > 0:
-            new_gloss_data["ruby"] = ruby_data
+            new_gloss_data.ruby = ruby_data
 
         has_nested_gloss = False
         if list_item_node.contain_node(NodeKind.LIST):
@@ -50,20 +49,19 @@ def extract_gloss(
                     extract_examples(wxr, new_gloss_data, child_node)
 
         if not has_nested_gloss:
-            page_data[-1]["senses"].append(new_gloss_data)
+            page_data[-1].senses.append(new_gloss_data)
 
 
-def merge_gloss_data(
-    data_a: Dict[str, List[str]], data_b: Dict[str, List[str]]
-) -> Dict[str, List[str]]:
-    new_data = defaultdict(list)
+def merge_gloss_data(data_a: Sense, data_b: Sense) -> Sense:
+    new_data = Sense()
     for data in data_a, data_b:
-        for key, value in data.items():
-            new_data[key].extend(value)
+        for field in data.model_fields:
+            pre_data = getattr(new_data, field)
+            pre_data.extend(getattr(data, field))
     return new_data
 
 
-def extract_gloss_and_tags(raw_gloss: str) -> Dict[str, List[str]]:
+def extract_gloss_and_tags(raw_gloss: str) -> Sense:
     left_brackets = ("(", "（")
     right_brackets = (")", "）")
     if raw_gloss.startswith(left_brackets) or raw_gloss.endswith(
@@ -87,8 +85,6 @@ def extract_gloss_and_tags(raw_gloss: str) -> Dict[str, List[str]]:
                 tags += re.split(split_tag_regex, rear_label)
 
         gloss = raw_gloss[front_tag_end + 1 : rear_tag_start].strip()
-        return defaultdict(
-            list, {"glosses": [gloss], "raw_glosses": [raw_gloss], "tags": tags}
-        )
+        return Sense(glosses=[gloss], raw_glosses=[raw_gloss], tags=tags)
     else:
-        return defaultdict(list, {"glosses": [raw_gloss]})
+        return Sense(glosses=[raw_gloss])

@@ -1,8 +1,8 @@
-from collections import defaultdict
 from unittest import TestCase
 from unittest.mock import Mock
 
 from wikitextprocessor import Wtp
+from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.extractor.zh.note import extract_note
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
@@ -22,14 +22,14 @@ class TestNote(TestCase):
         # https://zh.wiktionary.org/wiki/オタク
         self.wxr.wtp.start_page("オタク")
         root = self.wxr.wtp.parse("* note list 1\n* note list 2")
-        page_data = [defaultdict(list)]
+        page_data = [WordEntry(word="オタク", lang_code="ja", lang_name="日語")]
         extract_note(self.wxr, page_data, root)
-        self.assertEqual(page_data, [{"notes": ["note list 1", "note list 2"]}])
+        self.assertEqual(page_data[-1].notes, ["note list 1", "note list 2"])
 
     def test_note_no_list(self):
         # https://zh.wiktionary.org/wiki/clavarder
         self.wxr.wtp.start_page("clavarder")
         root = self.wxr.wtp.parse("note text")
-        page_data = [defaultdict(list)]
+        page_data = [WordEntry(word="オタク", lang_code="fr", lang_name="法語")]
         extract_note(self.wxr, page_data, root)
-        self.assertEqual(page_data, [{"notes": ["note text"]}])
+        self.assertEqual(page_data[-1].notes, ["note text"])
