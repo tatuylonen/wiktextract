@@ -212,12 +212,14 @@ def main():
         default=False,
         help="Capture descendants",
     )
-    parser.add_argument(
-        "--statistics",
-        action="store_true",
-        default=False,
-        help="Print statistics",
-    )
+    # XXX Was never implemented fully.
+    # Search: STATISTICS_IMPLEMENTATION
+    # parser.add_argument(
+    #     "--statistics",
+    #     action="store_true",
+    #     default=False,
+    #     help="Print statistics",
+    # )
     parser.add_argument(
         "--page",
         type=str,
@@ -521,6 +523,7 @@ def main():
             pass
         os.rename(out_tmp_path, out_path)
 
+    # XXX was never implemented fully. Search for: STATISTICS_IMPLEMENTATION
     if args.statistics:
         print("")
         print("LANGUAGE COUNTS")

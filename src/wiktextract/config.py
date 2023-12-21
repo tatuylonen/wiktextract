@@ -96,9 +96,9 @@ class WiktionaryConfig:
         self.expand_tables = expand_tables
         # Some fields for statistics
         self.num_pages = 0
-        self.language_counts = collections.defaultdict(int)
-        self.pos_counts = collections.defaultdict(int)
-        self.section_counts = collections.defaultdict(int)
+        self.language_counts: dict[str, int] = collections.defaultdict(int)
+        self.pos_counts: dict[str, int] = collections.defaultdict(int)
+        self.section_counts: dict[str, int] = collections.defaultdict(int)
         # Some fields related to errors
         # The word currently being processed.
         self.word = None
@@ -114,14 +114,18 @@ class WiktionaryConfig:
         self.load_edition_settings()
 
     def merge_return(self, ret: CollatedErrorReturnData):
-        if "num_pages" in ret:
-            self.num_pages += ret["num_pages"]
-            for k, v in ret["language_counts"].items():
-                self.language_counts[k] += v
-            for k, v in ret["pos_counts"].items():
-                self.pos_counts[k] += v
-            for k, v in ret["section_counts"].items():
-                self.section_counts[k] += v
+        # XXX This was never properly implemented; even the only
+        # count (self.section_counts) that is updated during running
+        # gets discarded when doing batches instead of individual
+        # pages. Search: STATISTICS_IMPLEMENTATION
+        # if "num_pages" in ret:
+        #     self.num_pages += ret["num_pages"]
+        #     for k, v in ret["language_counts"].items():
+        #         self.language_counts[k] += v
+        #     for k, v in ret["pos_counts"].items():
+        #         self.pos_counts[k] += v
+        #     for k, v in ret["section_counts"].items():
+        #         self.section_counts[k] += v
         if "errors" in ret:
             self.errors.extend(ret.get("errors", []))
             self.warnings.extend(ret.get("warnings", []))

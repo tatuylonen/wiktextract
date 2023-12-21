@@ -2914,6 +2914,8 @@ def parse_language(wxr, langnode, language, lang_code):
             t = clean_node(wxr, etym_data,
                            node.sarg if node.sarg else node.largs)
             t = t.lower()
+            # XXX these counts were never implemented fully, and even this
+            # gets discarded: Search STATISTICS_IMPLEMENTATION
             wxr.config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
             if t.startswith(tuple(wxr.config.OTHER_SUBTITLES["pronunciation"])):
