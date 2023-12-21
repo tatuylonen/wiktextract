@@ -6,14 +6,32 @@
 import collections
 import json
 import sys
-from typing import Callable, Optional
+from typing import (
+    Callable,
+    Iterable,
+    Optional,
+    TypedDict,
+    Union,
+)
 
-from wikitextprocessor.core import CollatedErrorReturnData
+from wikitextprocessor.core import ErrorMessageData, CollatedErrorReturnData
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
 else:
     from importlib.resources import files
+
+SoundFileRedirects = dict[str, str]
+
+POSSubtitleData = TypedDict(
+    "POSSubtitleData",
+    {
+        "pos": str,
+        "debug": str,
+        "tags": list[str],
+    },
+    total=False,
+)
 
 
 class WiktionaryConfig:
@@ -54,19 +72,19 @@ class WiktionaryConfig:
 
     def __init__(
         self,
-        dump_file_lang_code="en",
-        capture_language_codes={"en", "mul"},
-        capture_translations=True,
-        capture_pronunciation=True,
-        capture_linkages=True,
-        capture_compounds=True,
-        capture_redirects=True,
-        capture_examples=True,
-        capture_etymologies=True,
-        capture_inflections=True,
-        capture_descendants=True,
-        verbose=False,
-        expand_tables=False,
+        dump_file_lang_code: str = "en",
+        capture_language_codes: Optional[Iterable[str]] = {"en", "mul"},
+        capture_translations = True,
+        capture_pronunciation = True,
+        capture_linkages = True,
+        capture_compounds = True,
+        capture_redirects = True,
+        capture_examples = True,
+        capture_etymologies = True,
+        capture_inflections = True,
+        capture_descendants = True,
+        verbose = False,
+        expand_tables = False,
     ):
         if capture_language_codes is not None:
             assert isinstance(capture_language_codes, (list, tuple, set))
@@ -101,13 +119,19 @@ class WiktionaryConfig:
         self.section_counts: dict[str, int] = collections.defaultdict(int)
         # Some fields related to errors
         # The word currently being processed.
-        self.word = None
-        self.errors = []
-        self.warnings = []
-        self.debugs = []
-        self.redirects = {}
+        self.word: Optional[str] = None
+        self.errors: list[ErrorMessageData] = []
+        self.warnings: list[ErrorMessageData] = []
+        self.debugs: list[ErrorMessageData] = []
+        self.redirects: SoundFileRedirects = {}
         self.data_folder = files("wiktextract") / "data" / dump_file_lang_code
+        self.POS_SUBTITLES: Optional[dict[str, POSSubtitleData]] = None
+        self.POS_TYPES: Optional[set[str]] = None
+        self.LINKAGE_SUBTITLES: Optional[dict[str, str]] = None
+        self.OTHER_SUBTITLES: Optional[dict[str, Union[str, list[str]]]] = None
+        # set the above three in the function below
         self.init_subtitles()
+        self.ZH_PRON_TAGS: Optional[list[str]] = None
         self.set_attr_from_json("ZH_PRON_TAGS", "zh_pron_tags.json")
         self.analyze_templates = True  # find templates that need pre-expand
         self.extract_thesaurus_pages = True
@@ -149,13 +173,14 @@ class WiktionaryConfig:
     def init_subtitles(self) -> None:
         self.set_attr_from_json("LINKAGE_SUBTITLES", "linkage_subtitles.json")
         self.set_attr_from_json("POS_SUBTITLES", "pos_subtitles.json")
-        self.POS_TYPES = set(x["pos"] for x in self.POS_SUBTITLES.values())
-        for k, v in self.POS_SUBTITLES.items():
-            if "tags" in v:
-                assert isinstance(v["tags"], (list, tuple))
+        if self.POS_SUBTITLES is not None:
+            self.POS_TYPES = set(x["pos"] for x in self.POS_SUBTITLES.values())
+            for k, v in self.POS_SUBTITLES.items():
+                if "tags" in v:
+                    assert isinstance(v["tags"], (list, tuple))
         self.set_attr_from_json("OTHER_SUBTITLES", "other_subtitles.json")
 
-    def load_edition_settings(self):
+    def load_edition_settings(self) -> None:
         file_path = self.data_folder / "config.json"
         if file_path.exists():
             with file_path.open(encoding="utf-8") as f:

@@ -82,3 +82,11 @@ select = [
     "I",  # isort
     "W",  # pycodestyle warning
 ]
+
+[tool.mypy]
+mypy_path = "typestubs"
+python_version = 3.9
+
+[[tool.mypy.overrides]]
+module = "importlib_resources.*"
+ignore_missing_imports = true
