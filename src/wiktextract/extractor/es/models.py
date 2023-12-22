@@ -34,6 +34,17 @@ class Translation(BaseModelWrap):
     )
 
 
+class EtymologyTemplate(BaseModelWrap):
+    name: str = Field(default="", description="Template's name.")
+    args: Optional[dict[str, str]] = Field(
+        default=None, description="Arguments given to the template, if any."
+    )
+    expansion: str = Field(
+        default="",
+        description="The result of expanding the template, the final text it outputs.",
+    )
+
+
 class Reference(BaseModelWrap):
     url: Optional[str] = Field(default=None, description="A web link")
     first_name: Optional[str] = Field(
@@ -156,6 +167,17 @@ class WordEntry(BaseModelWrap):
     sounds: Optional[list[Sound]] = []
     spellings: Optional[list[Spelling]] = []
     translations: Optional[list[Translation]] = []
+    etymology_text: Optional[str] = Field(
+        default=None, description="Etymology section as cleaned text."
+    )
+    etymology_templates: Optional[list[EtymologyTemplate]] = Field(
+        default=None,
+        description="Templates and their arguments and expansions from the etymology section.",
+    )
+    etymology_number: Optional[int] = Field(
+        default=None,
+        description="For words with multiple numbered etymologies, this contains the number of the etymology under which this entry appeared.",
+    )
     antonyms: Optional[list[Linkage]] = []
     compounds: Optional[list[Linkage]] = []
     derived: Optional[list[Linkage]] = []

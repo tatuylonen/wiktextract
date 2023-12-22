@@ -1,5 +1,5 @@
 import re
-from typing import Dict, List, Union
+from typing import Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wiktextract.page import clean_node
@@ -7,6 +7,7 @@ from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby
 from ..share import strip_nodes
+from .models import Form, WordEntry
 
 # https://zh.wiktionary.org/wiki/Module:Gender_and_number
 GENDERS = {
@@ -36,37 +37,9 @@ GENDERS = {
 }
 
 
-FORM_TAGS = {
-    "不可數": ["uncountable"],
-    "通常不可數": ["uncountable"],
-    "可數": ["countable"],
-    "複數": ["plural"],
-    # en-verb
-    "第三人稱單數簡單現在時": ["third-person", "singular", "simple", "present"],
-    "現在分詞": ["present", "participle"],
-    "一般過去時及過去分詞": ["past", "participle"],
-    # fr-noun, fr-adj
-    # https://zh.wiktionary.org/wiki/Module:Fr-headword
-    "指小詞": ["diminutive"],
-    "陰性": ["feminine"],
-    "陽性": ["masculine"],
-    "陽性複數": ["masculine", "plural"],
-    "陰性複數": ["feminine", "plural"],
-    "陽性單數": ["masculine", "singular"],
-    "元音前陽性單數": ["masculine", "singular", "before-vowel"],
-    "比較級": ["comparative"],
-    "最高級": ["superlative"],
-    # voice
-    "主動": ["active"],
-    "被動": ["passive"],
-    "及物": ["transitive"],
-    "不規則": ["irregular"],
-}
-
-
 def extract_headword_line(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    page_data: list[WordEntry],
     node: WikiNode,
     lang_code: str,
 ) -> None:
@@ -88,30 +61,30 @@ def extract_headword_line(
             if "headword-tr" in class_names:
                 forms_start_index = index + 1
 
-                page_data[-1]["forms"].append(
-                    {
-                        "form": clean_node(wxr, page_data[-1], child),
-                        "tags": ["romanization"],
-                    }
+                page_data[-1].forms.append(
+                    Form(
+                        form=clean_node(wxr, page_data[-1], child),
+                        tags=["romanization"],
+                    )
                 )
             elif "gender" in class_names:
                 forms_start_index = index + 1
                 for abbr_tag in child.find_html("abbr"):
                     gender = abbr_tag.children[0]
-                    page_data[-1]["tags"].append(GENDERS.get(gender, gender))
+                    page_data[-1].tags.append(GENDERS.get(gender, gender))
             if lang_code == "ja":
                 for span_child in child.find_html(
                     "strong", attr_name="class", attr_value="headword"
                 ):
                     ruby_data, node_without_ruby = extract_ruby(wxr, span_child)
-                    page_data[-1]["forms"].append(
-                        {
-                            "form": clean_node(
+                    page_data[-1].forms.append(
+                        Form(
+                            form=clean_node(
                                 wxr, page_data[-1], node_without_ruby
                             ),
-                            "ruby": ruby_data,
-                            "tags": ["canonical"],
-                        }
+                            ruby=ruby_data,
+                            tags=["canonical"],
+                        )
                     )
         elif child.tag == "b":
             # this is a form <b> tag, already inside form parentheses
@@ -124,8 +97,8 @@ def extract_headword_line(
 
 def extract_headword_forms(
     wxr: WiktextractContext,
-    page_data: List[Dict],
-    form_nodes: List[Union[WikiNode, str]],
+    page_data: list[WordEntry],
+    form_nodes: list[Union[WikiNode, str]],
 ) -> None:
     current_nodes = []
     for node in form_nodes:
@@ -141,18 +114,18 @@ def extract_headword_forms(
 
 def process_forms_text(
     wxr: WiktextractContext,
-    page_data: List[Dict],
-    form_nodes: List[Union[WikiNode, str]],
+    page_data: list[WordEntry],
+    form_nodes: list[Union[WikiNode, str]],
 ) -> None:
     tag_nodes = []
     has_forms = False
     striped_nodes = list(strip_nodes(form_nodes))
-    lang_code = page_data[-1].get("lang_code")
+    lang_code = page_data[-1].lang_code
     for index, node in enumerate(striped_nodes):
         if isinstance(node, WikiNode) and node.kind == NodeKind.HTML:
             if node.tag == "b":
                 has_forms = True
-                ruby_data = None
+                ruby_data = []
                 if lang_code == "ja":
                     ruby_data, node_without_ruby = extract_ruby(wxr, node)
                     form = clean_node(wxr, None, node_without_ruby)
@@ -173,18 +146,11 @@ def process_forms_text(
                         gender = clean_node(wxr, None, next_node)
                         form_tags.append(GENDERS.get(gender, gender))
 
-                form_data = {
-                    "form": form,
-                    "tags": form_tags,
-                }
-                if ruby_data is not None:
-                    form_data["ruby"] = ruby_data
-                page_data[-1]["forms"].append(form_data)
+                form_data = Form(form=form, tags=form_tags, ruby=ruby_data)
+                page_data[-1].forms.append(form_data)
             elif node.tag == "span" and "tr" in node.attrs.get("class", ""):
                 # romanization of the previous form <b> tag
-                page_data[-1]["forms"][-1]["roman"] = clean_node(
-                    wxr, None, node
-                )
+                page_data[-1].forms[-1].roman = clean_node(wxr, None, node)
             else:
                 tag_nodes.append(node)
         else:
@@ -195,15 +161,15 @@ def process_forms_text(
             clean_node(wxr, page_data[-1], tag_nodes).strip("() ")
         )
         if len(tags_list) > 0:
-            page_data[-1]["tags"].extend(tags_list)
+            page_data[-1].tags.extend(tags_list)
     else:
         clean_node(wxr, page_data[-1], tag_nodes)  # find categories
 
 
-def extract_headword_tags(tags_str: str) -> List[str]:
+def extract_headword_tags(tags_str: str) -> list[str]:
     tags = []
     for tag_str in (
         s.strip() for s in re.split("&|或", tags_str) if len(s.strip()) > 0
     ):
-        tags.extend(FORM_TAGS.get(tag_str, [tag_str]))
+        tags.append(tag_str)
     return tags

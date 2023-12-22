@@ -25,3 +25,6 @@ wikt-db*
 
 # GitHub Pages
 _site
+
+# Emacs files
+*~

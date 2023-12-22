@@ -1,13 +1,13 @@
-import unittest
-from collections import defaultdict
+from unittest import TestCase
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.linkage import extract_linkage
+from wiktextract.extractor.fr.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestLinkage(unittest.TestCase):
+class TestLinkage(TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
@@ -17,7 +17,9 @@ class TestLinkage(unittest.TestCase):
         self.wxr.wtp.close_db_conn()
 
     def test_tags(self):
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         self.wxr.wtp.start_page("bonjour")
         self.wxr.wtp.add_page("Modèle:Canada", 10, body="(Canada)")
         self.wxr.wtp.add_page("Modèle:Louisiane", 10, body="(Louisiane)")
@@ -26,41 +28,33 @@ class TestLinkage(unittest.TestCase):
         )
         extract_linkage(self.wxr, page_data, root, "synonymes")
         self.assertEqual(
-            page_data,
-            [
-                {
-                    "synonyms": [
-                        {"word": "bon matin", "tags": ["Canada", "Louisiane"]}
-                    ]
-                }
-            ],
+            page_data[-1].synonyms[0].model_dump(exclude_defaults=True),
+            {"word": "bon matin", "tags": ["Canada", "Louisiane"]},
         )
 
     def test_zh_synonyms(self):
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         self.wxr.wtp.start_page("你好")
         root = self.wxr.wtp.parse(
             "* {{zh-lien|你们好|nǐmen hǎo|你們好}} — Bonjour (au pluriel)."
         )
         extract_linkage(self.wxr, page_data, root, "synonymes")
         self.assertEqual(
-            page_data,
-            [
-                {
-                    "synonyms": [
-                        {
-                            "word": "你们好",
-                            "roman": "nǐmen hǎo",
-                            "alt": "你們好",
-                            "translation": "Bonjour (au pluriel).",
-                        }
-                    ]
-                }
-            ],
+            page_data[-1].synonyms[0].model_dump(exclude_defaults=True),
+            {
+                "word": "你们好",
+                "roman": "nǐmen hǎo",
+                "alt": "你們好",
+                "translation": "Bonjour (au pluriel).",
+            },
         )
 
     def test_template_as_partial_tag(self):
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         self.wxr.wtp.start_page("bonjour")
         self.wxr.wtp.add_page("Modèle:lien", 10, body="kwei")
         self.wxr.wtp.add_page("Modèle:Canada", 10, body="(Canada)")
@@ -70,37 +64,34 @@ class TestLinkage(unittest.TestCase):
         )
         extract_linkage(self.wxr, page_data, root, "synonymes")
         self.assertEqual(
-            page_data,
-            [
-                {
-                    "synonyms": [
-                        {"word": "kwei", "tags": ["Canada", "mot Atikamekw"]}
-                    ]
-                }
-            ],
+            page_data[-1].synonyms[0].model_dump(exclude_defaults=True),
+            {"word": "kwei", "tags": ["Canada", "mot Atikamekw"]},
         )
 
     def test_list_item_has_two_words(self):
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         self.wxr.wtp.start_page("masse")
         root = self.wxr.wtp.parse(
             "* [[être à la masse]], [[mettre à la masse]]"
         )
         extract_linkage(self.wxr, page_data, root, "dérivés")
         self.assertEqual(
-            page_data,
             [
-                {
-                    "derived": [
-                        {"word": "être à la masse"},
-                        {"word": "mettre à la masse"},
-                    ]
-                }
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].derived
+            ],
+            [
+                {"word": "être à la masse"},
+                {"word": "mettre à la masse"},
             ],
         )
 
     def test_sub_list(self):
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         self.wxr.wtp.start_page("lézard ocellé")
         root = self.wxr.wtp.parse(
             """* [[saurien]]s (Sauria)
@@ -109,25 +100,26 @@ class TestLinkage(unittest.TestCase):
         )
         extract_linkage(self.wxr, page_data, root, "hyper")
         self.assertEqual(
-            page_data,
             [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].hypernyms
+            ],
+            [
+                {"tags": ["Sauria"], "word": "sauriens"},
                 {
-                    "hypernyms": [
-                        {"tags": ["Sauria"], "word": "sauriens"},
-                        {
-                            "tags": [
-                                "Lacertidae",
-                                "famille des lézards typiques",
-                            ],
-                            "word": "lacertidés",
-                        },
-                    ]
-                }
+                    "tags": [
+                        "Lacertidae",
+                        "famille des lézards typiques",
+                    ],
+                    "word": "lacertidés",
+                },
             ],
         )
 
     def test_sense(self):
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         self.wxr.wtp.start_page("autrice")
         root = self.wxr.wtp.parse(
             """{{(|Celle qui est à l’origine de quelque chose|1}}
@@ -136,17 +128,16 @@ class TestLinkage(unittest.TestCase):
         )
         extract_linkage(self.wxr, page_data, root, "synonymes")
         self.assertEqual(
-            page_data,
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].synonyms
+            ],
             [
                 {
-                    "synonyms": [
-                        {
-                            "word": "artisane",
-                            "sense": "Celle qui est à l’origine de quelque chose",
-                            "sense_index": 1,
-                        },
-                    ]
-                }
+                    "word": "artisane",
+                    "sense": "Celle qui est à l’origine de quelque chose",
+                    "sense_index": 1,
+                },
             ],
         )
 
@@ -154,45 +145,47 @@ class TestLinkage(unittest.TestCase):
         # https://fr.wiktionary.org/wiki/eau#Dérivés_dans_d’autres_langues
         self.wxr.wtp.add_page("Modèle:lien", 10, body="{{{1}}}")
         self.wxr.wtp.add_page("Modèle:L", 10, body="Karipúna")
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         self.wxr.wtp.start_page("eau")
         root = self.wxr.wtp.parse(
             "* {{L|kmv}} : {{lien|dlo|kmv}}, {{lien|djilo|kmv}}"
         )
         extract_linkage(self.wxr, page_data, root, "dérivés autres langues")
         self.assertEqual(
-            page_data,
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].derived
+            ],
             [
                 {
-                    "derived": [
-                        {
-                            "word": "dlo",
-                            "lang_code": "kmv",
-                            "lang_name": "Karipúna",
-                        },
-                        {
-                            "word": "djilo",
-                            "lang_code": "kmv",
-                            "lang_name": "Karipúna",
-                        },
-                    ]
-                }
+                    "word": "dlo",
+                    "lang_code": "kmv",
+                    "lang_name": "Karipúna",
+                },
+                {
+                    "word": "djilo",
+                    "lang_code": "kmv",
+                    "lang_name": "Karipúna",
+                },
             ],
         )
 
     def test_words_divided_by_slash(self):
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         self.wxr.wtp.start_page("eau")
         root = self.wxr.wtp.parse("* [[benoîte d’eau]] / [[benoite d’eau]]")
         extract_linkage(self.wxr, page_data, root, "dérivés")
         self.assertEqual(
-            page_data,
             [
-                {
-                    "derived": [
-                        {"word": "benoîte d’eau"},
-                        {"word": "benoite d’eau"},
-                    ]
-                }
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].derived
+            ],
+            [
+                {"word": "benoîte d’eau"},
+                {"word": "benoite d’eau"},
             ],
         )

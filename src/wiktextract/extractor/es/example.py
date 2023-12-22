@@ -3,7 +3,6 @@ from typing import Optional, Tuple, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import WikiNodeChildrenList
-
 from wiktextract.extractor.es.models import Example, Reference, Sense
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext

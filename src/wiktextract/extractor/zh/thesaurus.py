@@ -1,11 +1,12 @@
 import logging
 import re
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, Page, WikiNode
 
 from ...page import clean_node
+from ...thesaurus import ThesaurusTerm
 from ...wxr_context import WiktextractContext
 from ..share import capture_text_in_parentheses, split_chinese_variants
 
@@ -26,9 +27,7 @@ def parse_ja_thesaurus_term(
     sense: Optional[str],
     linkage: Optional[str],
     term_str: str,
-) -> List["ThesaurusTerm"]:
-    from wiktextract.thesaurus import ThesaurusTerm
-
+) -> list[ThesaurusTerm]:
     tags = None
     roman = None
     if term_str.startswith("("):  # has qualifier
@@ -40,8 +39,8 @@ def parse_ja_thesaurus_term(
     for term_str in term_str.split("、"):
         # Example term_str from https://zh.wiktionary.org/wiki/Thesaurus:死ぬ
         # Fromat: (qualifer) term (roman, gloss)
-        # 'この世(よ)を去(さ)る (kono yo o saru, 字面意思為“to leave this world”)'
-        # '若死(わかじ)にする (wakajini suru, “还年轻时死去”)'
+        # この世(よ)を去(さ)る (kono yo o saru, 字面意思為“to leave this world”)
+        # 若死(わかじ)にする (wakajini suru, “还年轻时死去”)
         term_end = term_str.find(" (")
         term = term_str[:term_end]
         roman_and_gloss = term_str[term_end + 2 :].removesuffix(")").split(", ")
@@ -70,9 +69,7 @@ def parse_zh_thesaurus_term(
     sense: Optional[str],
     linkage: Optional[str],
     term_str: str,
-) -> List["ThesaurusTerm"]:
-    from wiktextract.thesaurus import ThesaurusTerm
-
+) -> list[ThesaurusTerm]:
     # Example term_str from https://zh.wiktionary.org/wiki/Thesaurus:安置
     # Fromat: traditional／simplified (pinyin) (tags)
     # 施設／施设 (shīshè) (書面)
@@ -112,9 +109,7 @@ def parse_thesaurus_term(
     sense: Optional[str],
     linkage: Optional[str],
     node: WikiNode,
-) -> List["ThesaurusTerm"]:
-    from wiktextract.thesaurus import ThesaurusTerm
-
+) -> list[ThesaurusTerm]:
     node_str = clean_node(wxr, None, node)
     node_str = node_str.removeprefix("* ")  # remove list wikitext
 
@@ -146,8 +141,8 @@ def recursive_parse(
     pos: Optional[str],
     sense: Optional[str],
     linkage: Optional[str],
-    node: Union[WikiNode, List[Union[WikiNode, str]]],
-) -> Optional[List["ThesaurusTerm"]]:
+    node: Union[WikiNode, list[Union[WikiNode, str]]],
+) -> Optional[list[ThesaurusTerm]]:
     if isinstance(node, list):
         thesaurus = []
         for x in node:
@@ -225,7 +220,7 @@ def recursive_parse(
 
 def extract_thesaurus_page(
     wxr: WiktextractContext, page: Page
-) -> Optional[List["ThesaurusTerm"]]:
+) -> Optional[list[ThesaurusTerm]]:
     entry = page.title[page.title.find(":") + 1 :]
     wxr.wtp.start_page(page.title)
     root = wxr.wtp.parse(page.body, additional_expand={"ws", "zh-syn-list"})

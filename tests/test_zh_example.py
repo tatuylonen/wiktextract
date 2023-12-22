@@ -1,15 +1,15 @@
-import unittest
-from collections import defaultdict
+from unittest import TestCase
 from unittest.mock import patch
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.example import extract_examples
+from wiktextract.extractor.zh.models import Sense
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestExample(unittest.TestCase):
+class TestExample(TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="zh"), WiktionaryConfig(dump_file_lang_code="zh")
@@ -22,7 +22,7 @@ class TestExample(unittest.TestCase):
         )
 
     def test_example_list(self) -> None:
-        sense_data = defaultdict(list)
+        sense_data = Sense()
         wikitext = """
 #* ref text
 #*: example text
@@ -31,14 +31,11 @@ class TestExample(unittest.TestCase):
         node = self.wxr.wtp.parse(wikitext)
         extract_examples(self.wxr, sense_data, node)
         self.assertEqual(
-            sense_data.get("examples"),
-            [
-                {
-                    "ref": "ref text",
-                    "text": "example text",
-                    "type": "quotation",
-                },
-            ],
+            sense_data.examples[0].model_dump(exclude_defaults=True),
+            {
+                "ref": "ref text",
+                "texts": ["example text"],
+            },
         )
 
     @patch(
@@ -48,19 +45,16 @@ quote text
 translation text""",
     )
     def test_quote_example(self, mock_clean_node) -> None:
-        sense_data = defaultdict(list)
+        sense_data = Sense()
         wikitext = "#* {{RQ:Schuster Hepaticae}}"
         self.wxr.wtp.start_page("test")
         node = self.wxr.wtp.parse(wikitext)
         extract_examples(self.wxr, sense_data, node)
         self.assertEqual(
-            sense_data.get("examples"),
-            [
-                {
-                    "ref": "ref text",
-                    "text": "quote text",
-                    "translation": "translation text",
-                    "type": "quotation",
-                },
-            ],
+            sense_data.examples[0].model_dump(exclude_defaults=True),
+            {
+                "ref": "ref text",
+                "texts": ["quote text"],
+                "translation": "translation text",
+            },
         )
