@@ -1,9 +1,9 @@
-from collections import defaultdict
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from wikitextprocessor import Wtp
 from wiktextract.extractor.zh.headword_line import extract_headword_line
+from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
@@ -28,18 +28,21 @@ class TestHeadword(TestCase):
         # expanded text: manga (可數 & 不可數，複數 manga 或 mangas)
         node = Mock()
         node.largs = [["en-noun"]]
-        page_data = [defaultdict(list)]
+        page_data = [WordEntry(word="manga", lang_code="en", lang_name="英語")]
         self.wxr.wtp.title = "manga"
         extract_headword_line(self.wxr, page_data, node, "en")
         self.assertEqual(
-            page_data,
+            [d.model_dump(exclude_defaults=True) for d in page_data],
             [
                 {
+                    "word": "manga",
+                    "lang_code": "en",
+                    "lang_name": "英語",
                     "forms": [
-                        {"form": "manga", "tags": ["plural"]},
-                        {"form": "mangas", "tags": ["plural"]},
+                        {"form": "manga", "tags": ["複數"]},
+                        {"form": "mangas", "tags": ["複數"]},
                     ],
-                    "tags": ["countable", "uncountable"],
+                    "tags": ["可數", "不可數"],
                 }
             ],
         )
@@ -54,16 +57,19 @@ class TestHeadword(TestCase):
         # expanded text: manga m (複數 manga's，指小詞 mangaatje n)
         node = Mock()
         node.largs = [["nl-noun"]]
-        page_data = [defaultdict(list)]
+        page_data = [WordEntry(word="manga", lang_code="en", lang_name="英語")]
         self.wxr.wtp.title = "manga"
         extract_headword_line(self.wxr, page_data, node, "nl")
         self.assertEqual(
-            page_data,
+            [d.model_dump(exclude_defaults=True) for d in page_data],
             [
                 {
+                    "word": "manga",
+                    "lang_code": "en",
+                    "lang_name": "英語",
                     "forms": [
-                        {"form": "manga's", "tags": ["plural"]},
-                        {"form": "mangaatje", "tags": ["diminutive", "neuter"]},
+                        {"form": "manga's", "tags": ["複數"]},
+                        {"form": "mangaatje", "tags": ["指小詞", "neuter"]},
                     ],
                     "tags": ["masculine"],
                 }
@@ -80,13 +86,18 @@ class TestHeadword(TestCase):
         # expanded text: -κρατίᾱς (-kratíās) f
         node = Mock()
         node.largs = [["head"]]
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="-κρατίας", lang_code="grc", lang_name="古希臘語")
+        ]
         self.wxr.wtp.title = "-κρατίας"
         extract_headword_line(self.wxr, page_data, node, "grc")
         self.assertEqual(
-            page_data,
+            [d.model_dump(exclude_defaults=True) for d in page_data],
             [
                 {
+                    "word": "-κρατίας",
+                    "lang_code": "grc",
+                    "lang_name": "古希臘語",
                     "forms": [
                         {"form": "-kratíās", "tags": ["romanization"]},
                     ],

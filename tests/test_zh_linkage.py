@@ -1,14 +1,14 @@
-import unittest
-from collections import defaultdict
+from unittest import TestCase
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.linkage import extract_linkages
+from wiktextract.extractor.zh.models import Sense, WordEntry
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestLinkage(unittest.TestCase):
+class TestLinkage(TestCase):
     def setUp(self):
         self.wxr = WiktextractContext(
             Wtp(lang_code="zh"), WiktionaryConfig(dump_file_lang_code="zh")
@@ -22,12 +22,12 @@ class TestLinkage(unittest.TestCase):
 
     def test_sense_term_list(self):
         page_data = [
-            {
-                "lang": "跨語言",
-                "lang_code": "mul",
-                "word": "%",
-                "senses": [defaultdict(list, {"glosses": ["百分比"]})],
-            }
+            WordEntry(
+                lang_name="跨語言",
+                lang_code="mul",
+                word="%",
+                senses=[Sense(glosses=["百分比"])],
+            )
         ]
         wikitext = "* {{sense|百分比}} {{l|mul|cU}}、[[centiuno]]"
         self.wxr.wtp.add_page("Template:Sense", 10, "{{{1}}}")
@@ -35,11 +35,12 @@ class TestLinkage(unittest.TestCase):
         self.wxr.wtp.db_conn.commit()
         self.wxr.wtp.start_page("%")
         node = self.wxr.wtp.parse(wikitext)
-        extract_linkages(
-            self.wxr, page_data, node.children, "synonyms", "", page_data[-1]
-        )
+        extract_linkages(self.wxr, page_data, node.children, "synonyms", "")
         self.assertEqual(
-            page_data[0]["senses"][0].get("synonyms"),
+            [
+                s.model_dump(exclude_defaults=True)
+                for s in page_data[0].synonyms
+            ],
             [
                 {"sense": "百分比", "word": "cU"},
                 {"sense": "百分比", "word": "centiuno"},
@@ -55,22 +56,14 @@ class TestLinkage(unittest.TestCase):
             '<span class="Jpan" lang="ja">[[家主#日語|-{<ruby>家<rp>(</rp><rt>や</rt><rp>)</rp></ruby><ruby>主<rp>(</rp><rt>ぬし</rt><rp>)</rp></ruby>}-]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr"><span class="mention-tr tr">yanushi</span></span><span class="mention-gloss-paren annotation-paren">)</span>',
         )
         node = self.wxr.wtp.parse("{{s|房東}}\n* {{ja-r|家%主|や%ぬし}}")
-        page_data = [defaultdict(list)]
-        extract_linkages(
-            self.wxr, page_data, node.children, "synonyms", "", page_data[-1]
-        )
+        page_data = [WordEntry(word="大家", lang_code="zh", lang_name="漢語")]
+        extract_linkages(self.wxr, page_data, node.children, "synonyms", "")
         self.assertEqual(
-            page_data,
-            [
-                {
-                    "synonyms": [
-                        {
-                            "roman": "yanushi",
-                            "ruby": [("家", "や"), ("主", "ぬし")],
-                            "sense": "房東",
-                            "word": "家主",
-                        }
-                    ]
-                }
-            ],
+            page_data[0].synonyms[0].model_dump(exclude_defaults=True),
+            {
+                "roman": "yanushi",
+                "ruby": [["家", "や"], ["主", "ぬし"]],
+                "sense": "房東",
+                "word": "家主",
+            },
         )

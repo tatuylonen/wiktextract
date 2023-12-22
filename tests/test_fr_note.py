@@ -1,13 +1,13 @@
-import unittest
-from collections import defaultdict
+from unittest import TestCase
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
+from wiktextract.extractor.fr.models import WordEntry
 from wiktextract.extractor.fr.note import extract_note
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestNotes(unittest.TestCase):
+class TestNotes(TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
@@ -28,8 +28,11 @@ class TestNotes(unittest.TestCase):
 paragrapy 1
 {{note-féminisation}}"""
         )
-        page_data = [defaultdict(list)]
+        page_data = [
+            WordEntry(word="test", lang_code="fr", lang_name="Français")
+        ]
         extract_note(self.wxr, page_data, nodes.children[0])
         self.assertEqual(
-            page_data, [{"notes": ["paragrapy 1", "list 1", "list 2"]}]
+            page_data[-1].notes,
+            ["paragrapy 1", "list 1", "list 2"],
         )

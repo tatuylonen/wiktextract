@@ -1,17 +1,18 @@
 from collections import defaultdict
-from typing import Dict, List
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .models import Example, Sense, WordEntry
+
 
 def extract_gloss(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    page_data: list[WordEntry],
     list_node: WikiNode,
-    parent_glosses: List[str] = [],
+    parent_glosses: list[str] = [],
 ) -> None:
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         gloss_nodes = list(
@@ -19,7 +20,7 @@ def extract_gloss(
                 NodeKind.LIST, include_empty_str=True
             )
         )
-        gloss_data = defaultdict(list)
+        gloss_data = Sense()
         gloss_start = 0
         # process modifier, theme tempaltes before gloss text
         # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_de_tous_les_modèles/Précisions_de_sens
@@ -33,9 +34,9 @@ def extract_gloss(
                     gloss_start = index + 1
                     tag = expanded_text.strip("() \n")
                     if len(tag) > 0:
-                        gloss_data["tags"].append(tag)
+                        gloss_data.tags.append(tag)
                     if "categories" in categories_data:
-                        gloss_data["categories"].extend(
+                        gloss_data.categories.extend(
                             categories_data["categories"]
                         )
 
@@ -54,7 +55,7 @@ def extract_gloss(
                 and isinstance(gloss_nodes[index + 1], str)
                 and gloss_nodes[index + 1].strip() == ")"
             ):
-                gloss_data["tags"].append(clean_node(wxr, None, node))
+                gloss_data.tags.append(clean_node(wxr, None, node))
                 tag_indexes |= {index - 1, index, index + 1}
                 continue
 
@@ -64,12 +65,12 @@ def extract_gloss(
             if index not in tag_indexes
         ]
         gloss_text = clean_node(wxr, gloss_data, gloss_only_nodes)
-        gloss_data["glosses"] = parent_glosses + [gloss_text]
-        page_data[-1]["senses"].append(gloss_data)
+        gloss_data.glosses = parent_glosses + [gloss_text]
+        page_data[-1].senses.append(gloss_data)
         for nest_gloss_list in list_item_node.find_child(NodeKind.LIST):
             if nest_gloss_list.sarg.endswith("#"):
                 extract_gloss(
-                    wxr, page_data, nest_gloss_list, gloss_data["glosses"]
+                    wxr, page_data, nest_gloss_list, gloss_data.glosses
                 )
             elif nest_gloss_list.sarg.endswith("*"):
                 extract_examples(wxr, gloss_data, nest_gloss_list)
@@ -77,7 +78,7 @@ def extract_gloss(
 
 def extract_examples(
     wxr: WiktextractContext,
-    gloss_data: Dict,
+    gloss_data: Sense,
     example_list_node: WikiNode,
 ) -> None:
     for example_node in example_list_node.find_child(NodeKind.LIST_ITEM):
@@ -102,18 +103,17 @@ def extract_examples(
                 for node in example_node_children
                 if node != source_template
             ]
-            example_data = {"type": "example"}
-            example_data["text"] = clean_node(wxr, None, example_nodes)
+            example_data = Example()
+            example_data.text = clean_node(wxr, None, example_nodes)
             if source_template is not None:
-                example_data["ref"] = clean_node(
-                    wxr, None, source_template
-                ).strip("— ()")
-                example_data["type"] = "quotation"
-            gloss_data["examples"].append(example_data)
+                example_data.ref = clean_node(wxr, None, source_template).strip(
+                    "— ()"
+                )
+            gloss_data.examples.append(example_data)
 
 
 def process_exemple_template(
-    wxr: WiktextractContext, node: TemplateNode, gloss_data: Dict
+    wxr: WiktextractContext, node: TemplateNode, gloss_data: Sense
 ) -> None:
     # https://fr.wiktionary.org/wiki/Modèle:exemple
     # https://fr.wiktionary.org/wiki/Modèle:ja-exemple
@@ -132,15 +132,11 @@ def process_exemple_template(
         node.template_parameters.get(3, node.template_parameters.get("tr", "")),
     )
     source = clean_node(wxr, None, node.template_parameters.get("source", ""))
-    example_data = {"type": "example"}
-    if len(text) > 0:
-        example_data["text"] = clean_node(wxr, None, text)
-    if len(translation) > 0:
-        example_data["translation"] = clean_node(wxr, None, translation)
-    if len(transcription) > 0:
-        example_data["roman"] = clean_node(wxr, None, transcription)
-    if len(source) > 0:
-        example_data["ref"] = clean_node(wxr, None, source)
-        example_data["type"] = "quotation"
-    if "text" in example_data:
-        gloss_data["examples"].append(example_data)
+    example_data = Example(
+        text=clean_node(wxr, None, text),
+        translation=clean_node(wxr, None, translation),
+        roman=clean_node(wxr, None, transcription),
+        ref=clean_node(wxr, None, source),
+    )
+    if len(example_data.text) > 0:
+        gloss_data.examples.append(example_data)

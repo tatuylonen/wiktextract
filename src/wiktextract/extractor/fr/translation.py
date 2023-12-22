@@ -1,16 +1,17 @@
-from collections import defaultdict
-from typing import Dict, List, Union
+from typing import Optional
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .models import Translation, WordEntry
+
 
 def extract_translation(
-    wxr: WiktextractContext, page_data: List[Dict], level_node: WikiNode
+    wxr: WiktextractContext, page_data: list[WordEntry], level_node: WikiNode
 ) -> None:
-    base_translation_data = defaultdict(list)
+    base_translation_data = Translation()
     for level_node_child in level_node.filter_empty_str_child():
         if isinstance(level_node_child, WikiNode):
             if level_node_child.kind == NodeKind.TEMPLATE:
@@ -42,8 +43,8 @@ def extract_translation(
 def process_italic_node(
     wxr: WiktextractContext,
     italic_node: WikiNode,
-    previous_node: Union[WikiNode, None],
-    page_data: List[Dict],
+    previous_node: Optional[WikiNode],
+    page_data: list[WordEntry],
 ) -> None:
     # add italic text after a "trad" template as a tag
     tag = clean_node(wxr, None, italic_node)
@@ -53,16 +54,16 @@ def process_italic_node(
         and previous_node is not None
         and previous_node.kind == NodeKind.TEMPLATE
         and previous_node.template_name.startswith("trad")
-        and len(page_data[-1].get("translations", [])) > 0
+        and len(page_data[-1].translations) > 0
     ):
-        page_data[-1]["translations"][-1]["tags"].append(tag.strip("()"))
+        page_data[-1].translations[-1].tags.append(tag.strip("()"))
 
 
 def process_translation_templates(
     wxr: WiktextractContext,
     template_node: TemplateNode,
-    page_data: List[Dict],
-    base_translation_data: Dict[str, str],
+    page_data: list[WordEntry],
+    base_translation_data: Translation,
 ) -> None:
     if template_node.template_name == "trad-fin":
         # ignore translation end template
@@ -73,13 +74,13 @@ def process_translation_templates(
         if sense_parameter is not None:
             sense_text = clean_node(wxr, None, sense_parameter)
             if len(sense_text) > 0:
-                base_translation_data["sense"] = sense_text
+                base_translation_data.sense = sense_text
     elif template_node.template_name == "T":
         # Translation language: https://fr.wiktionary.org/wiki/Modèle:T
-        base_translation_data[
-            "lang_code"
-        ] = template_node.template_parameters.get(1)
-        base_translation_data["lang_name"] = clean_node(
+        base_translation_data.lang_code = template_node.template_parameters.get(
+            1
+        )
+        base_translation_data.lang_name = clean_node(
             wxr, page_data[-1], template_node
         )
     elif template_node.template_name.startswith("trad"):
@@ -104,22 +105,22 @@ def process_translation_templates(
         translation_traditional_writing = clean_node(
             wxr, None, template_node.template_parameters.get("tradi", "")
         )
-        translation_data = base_translation_data.copy()
-        translation_data["word"] = translation_term
+        translation_data = base_translation_data.model_copy(deep=True)
+        translation_data.word = translation_term
         if len(translation_roman) > 0:
-            translation_data["roman"] = translation_roman
+            translation_data.roman = translation_roman
         if len(translation_traditional_writing) > 0:
-            translation_data[
-                "traditional_writing"
-            ] = translation_traditional_writing
+            translation_data.traditional_writing = (
+                translation_traditional_writing
+            )
         if 3 in template_node.template_parameters:
             expaned_node = wxr.wtp.parse(
                 wxr.wtp.node_to_wikitext(template_node), expand_all=True
             )
             for gender_node in expaned_node.find_child(NodeKind.ITALIC):
-                translation_data["tags"] = [clean_node(wxr, None, gender_node)]
+                translation_data.tags = [clean_node(wxr, None, gender_node)]
                 break
-        page_data[-1]["translations"].append(translation_data)
-    elif len(page_data[-1].get("translations", [])) > 0:
+        page_data[-1].translations.append(translation_data)
+    elif len(page_data[-1].translations) > 0:
         tag = clean_node(wxr, None, template_node).strip("()")
-        page_data[-1]["translations"][-1]["tags"].append(tag)
+        page_data[-1].translations[-1].tags.append(tag)

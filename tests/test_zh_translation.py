@@ -1,15 +1,15 @@
-import unittest
-from collections import defaultdict
+from unittest import TestCase
 from unittest.mock import patch
 
 from wikitextprocessor import Page, Wtp
 from wiktextract.config import WiktionaryConfig
+from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.extractor.zh.translation import extract_translation
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestTranslation(unittest.TestCase):
+class TestZhTranslation(TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="zh"), WiktionaryConfig(dump_file_lang_code="zh")
@@ -27,7 +27,7 @@ class TestTranslation(unittest.TestCase):
     )
     def test_normal(self, mock_get_page) -> None:
         # test wikitext from page "你好" and "這裡"
-        page_data = [defaultdict(list)]
+        page_data = [WordEntry(word="你好", lang_code="zh", lang_name="漢語")]
         wikitext = """
 {{trans-top|靠近說話者的地方}}
 * 阿爾巴尼亞語：këtu (sq)
@@ -43,7 +43,10 @@ class TestTranslation(unittest.TestCase):
         node = self.wxr.wtp.parse(wikitext)
         extract_translation(self.wxr, page_data, node)
         self.assertEqual(
-            page_data[0].get("translations"),
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[0].translations
+            ],
             [
                 {
                     "lang_code": "sq",
@@ -52,7 +55,6 @@ class TestTranslation(unittest.TestCase):
                     "word": "këtu",
                 },
                 {
-                    "lang_code": "",
                     "lang_name": "西阿帕切語",
                     "sense": "靠近說話者的地方",
                     "word": "kú",

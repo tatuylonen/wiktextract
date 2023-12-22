@@ -1,8 +1,8 @@
-from typing import Dict, List
-
 from wikitextprocessor import NodeKind, WikiNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
+
+from .models import Form, WordEntry
 
 # https://zh.wiktionary.org/wiki/Category:日語變格表模板
 JAPANESE_INFLECTION_TEMPLATE_PREFIXES = (
@@ -21,21 +21,21 @@ JAPANESE_INFLECTION_TEMPLATE_PREFIXES = (
 
 def extract_inflections(
     wxr: WiktextractContext,
-    page_data: List[Dict],
-    node: WikiNode,
+    page_data: list[WordEntry],
+    level_node: WikiNode,
 ) -> None:
-    for child in node.find_child(NodeKind.TEMPLATE):
+    for child in level_node.find_child(NodeKind.TEMPLATE):
         template_name = child.template_name.lower()
         if template_name.startswith(JAPANESE_INFLECTION_TEMPLATE_PREFIXES):
             expanded_table = wxr.wtp.parse(
-                wxr.wtp.node_to_wikitext(node), expand_all=True
+                wxr.wtp.node_to_wikitext(level_node), expand_all=True
             )
             extract_ja_i_template(wxr, page_data, expanded_table, "")
 
 
 def extract_ja_i_template(
     wxr: WiktextractContext,
-    page_data: List[Dict],
+    page_data: list[WordEntry],
     node: WikiNode,
     table_header: str,
 ) -> None:
@@ -45,16 +45,15 @@ def extract_ja_i_template(
                 if len(list(child.filter_empty_str_child())) == 1:
                     table_header = clean_node(wxr, None, child.children)
                 else:
-                    inflection_data = {
-                        "tags": [table_header],
-                        "source": "inflection",
-                    }
+                    inflection_data = Form(
+                        tags=[table_header], source="inflection"
+                    )
                     cell_node_index = 0
                     keys = ["form", "hiragana", "roman"]
                     for row_child in child.children:
                         if isinstance(row_child, WikiNode):
                             if row_child.kind == NodeKind.TABLE_HEADER_CELL:
-                                inflection_data["tags"].append(
+                                inflection_data.tags.append(
                                     clean_node(wxr, None, row_child)
                                 )
                             elif row_child.kind == NodeKind.TABLE_CELL:
@@ -64,11 +63,13 @@ def extract_ja_i_template(
                                 if cell_node_index < len(keys):
                                     key = keys[cell_node_index]
                                     cell_node_index += 1
-                                    inflection_data[key] = clean_node(
-                                        wxr, None, row_child
+                                    setattr(
+                                        inflection_data,
+                                        key,
+                                        clean_node(wxr, None, row_child),
                                     )
                                 else:
                                     break
-                    page_data[-1]["forms"].append(inflection_data)
+                    page_data[-1].forms.append(inflection_data)
             else:
                 extract_ja_i_template(wxr, page_data, child, table_header)

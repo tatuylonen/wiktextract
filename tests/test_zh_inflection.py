@@ -1,15 +1,15 @@
-import unittest
-from collections import defaultdict
+from unittest import TestCase
 from unittest.mock import patch
 
 from wikitextprocessor import Page, Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.inflection import extract_inflections
+from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestInflection(unittest.TestCase):
+class TestInflection(TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="zh"), WiktionaryConfig(dump_file_lang_code="zh")
@@ -39,22 +39,13 @@ class TestInflection(unittest.TestCase):
         ),
     )
     def test_ja_i_template(self, mock_get_page) -> None:
-        page_data = [
-            defaultdict(
-                list,
-                {
-                    "lang": "日語",
-                    "lang_code": "ja",
-                    "word": "可笑しい",
-                },
-            )
-        ]
+        page_data = [WordEntry(lang_name="日語", lang_code="ja", word="可笑しい")]
         wikitext = "{{ja-i|可笑し|おかし|okashi}}"
         self.wxr.wtp.start_page("可笑しい")
         node = self.wxr.wtp.parse(wikitext)
         extract_inflections(self.wxr, page_data, node)
         self.assertEqual(
-            page_data[0].get("forms"),
+            [d.model_dump(exclude_defaults=True) for d in page_data[0].forms],
             [
                 {
                     "form": "可笑しかろ",

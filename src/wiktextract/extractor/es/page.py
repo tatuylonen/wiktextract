@@ -4,7 +4,7 @@ import re
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import WikiNodeChildrenList
-
+from wiktextract.extractor.es.etymology import process_etymology_block
 from wiktextract.extractor.es.example import extract_example
 from wiktextract.extractor.es.gloss import extract_gloss
 from wiktextract.extractor.es.linkage import (
@@ -130,6 +130,7 @@ def parse_section(
     for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
         pos_template_name = level_node_template.template_name
 
+    # XXX Handle numbered etymology sections.
     if re.match(r"etimología \d+", section_title):
         parse_entries(wxr, page_data, base_data, level_node)
 
@@ -154,10 +155,11 @@ def parse_section(
             page_data,
             level_node,
         )
+
     elif section_title in wxr.config.OTHER_SUBTITLES["etymology"]:
         if wxr.config.capture_etymologies:
-            # XXX: Extract etymology
-            pass
+            process_etymology_block(wxr, base_data, level_node)
+
     elif section_title in wxr.config.OTHER_SUBTITLES["translations"]:
         if wxr.config.capture_translations:
             for template_node in level_node.find_child_recursively(
@@ -165,6 +167,7 @@ def parse_section(
             ):
                 if template_node.template_name == "t+" and len(page_data) > 0:
                     extract_translation(wxr, page_data[-1], template_node)
+
     elif section_title in wxr.config.LINKAGE_SUBTITLES:
         linkage_type = wxr.config.LINKAGE_SUBTITLES[section_title]
 

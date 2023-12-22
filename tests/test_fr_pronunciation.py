@@ -1,13 +1,15 @@
-import unittest
-from collections import defaultdict
+from unittest import TestCase
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
+from wiktextract.extractor.fr.models import WordEntry
 from wiktextract.extractor.fr.pronunciation import extract_pronunciation
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestPronunciation(unittest.TestCase):
+class TestPronunciation(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
@@ -18,22 +20,29 @@ class TestPronunciation(unittest.TestCase):
 
     def test_pron_list(self):
         page_data = [
-            defaultdict(list, {"lang_code": "en"}),
-            defaultdict(list, {"lang_code": "fr"}),
-            defaultdict(list, {"lang_code": "fr"}),
+            WordEntry(word="bonjour", lang_code="en", lang_name="Anglais"),
+            WordEntry(word="bonjour", lang_code="fr", lang_name="Français"),
+            WordEntry(word="bonjour", lang_code="fr", lang_name="Français"),
         ]
         self.wxr.wtp.add_page("Modèle:pron", 10, body="\\bɔ̃.ʒuʁ\\")
-        self.wxr.wtp.start_page("")
+        self.wxr.wtp.start_page("bonjour")
         root = self.wxr.wtp.parse(
             "=== Prononciation ===\n* {{pron|bɔ̃.ʒuʁ|fr}}\n** {{écouter|France (Paris)|bõ.ʒuːʁ|audio=Fr-bonjour.ogg|lang=fr}}"
         )
-        extract_pronunciation(self.wxr, page_data, root.children[0], {})
-        self.assertEqual(
+        extract_pronunciation(
+            self.wxr,
             page_data,
+            root.children[0],
+            WordEntry(word="bonjour", lang_code="fr", lang_name="Français"),
+        )
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data],
             [
-                {"lang_code": "en"},
+                {"word": "bonjour", "lang_code": "en", "lang_name": "Anglais"},
                 {
+                    "word": "bonjour",
                     "lang_code": "fr",
+                    "lang_name": "Français",
                     "sounds": [
                         {
                             "ipa": "bõ.ʒuːʁ",
@@ -45,7 +54,9 @@ class TestPronunciation(unittest.TestCase):
                     ],
                 },
                 {
+                    "word": "bonjour",
                     "lang_code": "fr",
+                    "lang_name": "Français",
                     "sounds": [
                         {
                             "ipa": "bõ.ʒuːʁ",
@@ -62,7 +73,7 @@ class TestPronunciation(unittest.TestCase):
     def test_str_pron(self):
         page_data = []
         self.wxr.wtp.add_page("Modèle:Yale-zh", 10, body="Yale")
-        self.wxr.wtp.start_page("")
+        self.wxr.wtp.start_page("你好")
         root = self.wxr.wtp.parse(
             "=== {{S|prononciation}} ===\n* '''cantonais''' {{pron||yue}}\n** {{Yale-zh}} : nei⁵hou²"
         )
@@ -70,11 +81,14 @@ class TestPronunciation(unittest.TestCase):
             self.wxr,
             page_data,
             root.children[0],
-            defaultdict(list, {"lang_code": "zh"}),
+            WordEntry(word="你好", lang_code="zh", lang_name="Chinois"),
         )
         self.assertEqual(
-            page_data[0].get("sounds"),
-            [{"tags": ["cantonais", "Yale"], "zh-pron": "nei⁵hou²"}],
+            [
+                sound.model_dump(exclude_defaults=True)
+                for sound in page_data[-1].sounds
+            ],
+            [{"tags": ["cantonais", "Yale"], "zh_pron": "nei⁵hou²"}],
         )
 
     def test_no_ipa(self):
@@ -84,24 +98,25 @@ class TestPronunciation(unittest.TestCase):
         Test wikitext from https://fr.wiktionary.org/wiki/mars
         """
         page_data = []
-        self.wxr.wtp.start_page("")
+        self.wxr.wtp.start_page("mars")
         root = self.wxr.wtp.parse(
             """=== {{S|prononciation}} ===
 {{ébauche-pron|sv}}
 * {{écouter|lang=sv|Suède||audio=LL-Q9027 (swe)-Moonhouse-mars.wav}}"""
         )
         extract_pronunciation(
-            self.wxr, page_data, root.children[0], defaultdict(list)
+            self.wxr,
+            page_data,
+            root.children[0],
+            WordEntry(word="你好", lang_code="fr", lang_name="Français"),
         )
         self.assertEqual(
-            page_data[0].get("sounds"),
-            [
-                {
-                    "tags": ["Suède"],
-                    "audio": "LL-Q9027 (swe)-Moonhouse-mars.wav",
-                    "wav_url": "https://commons.wikimedia.org/wiki/Special:FilePath/LL-Q9027 (swe)-Moonhouse-mars.wav",
-                    "ogg_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/3f/LL-Q9027_(swe)-Moonhouse-mars.wav/LL-Q9027_(swe)-Moonhouse-mars.wav.ogg",
-                    "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/3f/LL-Q9027_(swe)-Moonhouse-mars.wav/LL-Q9027_(swe)-Moonhouse-mars.wav.mp3",
-                }
-            ],
+            page_data[-1].sounds[0].model_dump(exclude_defaults=True),
+            {
+                "tags": ["Suède"],
+                "audio": "LL-Q9027 (swe)-Moonhouse-mars.wav",
+                "wav_url": "https://commons.wikimedia.org/wiki/Special:FilePath/LL-Q9027 (swe)-Moonhouse-mars.wav",
+                "ogg_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/3f/LL-Q9027_(swe)-Moonhouse-mars.wav/LL-Q9027_(swe)-Moonhouse-mars.wav.ogg",
+                "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/3f/LL-Q9027_(swe)-Moonhouse-mars.wav/LL-Q9027_(swe)-Moonhouse-mars.wav.mp3",
+            },
         )

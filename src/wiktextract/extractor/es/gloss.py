@@ -2,7 +2,6 @@ import re
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import WikiNodeChildrenList
-
 from wiktextract.extractor.es.models import Sense, WordEntry
 from wiktextract.extractor.es.sense_data import process_sense_data_list
 from wiktextract.page import clean_node
