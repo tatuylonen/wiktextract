@@ -125,13 +125,13 @@ class WiktionaryConfig:
         self.debugs: list[ErrorMessageData] = []
         self.redirects: SoundFileRedirects = {}
         self.data_folder = files("wiktextract") / "data" / dump_file_lang_code
-        self.POS_SUBTITLES: Optional[dict[str, POSSubtitleData]] = None
-        self.POS_TYPES: Optional[set[str]] = None
-        self.LINKAGE_SUBTITLES: Optional[dict[str, str]] = None
-        self.OTHER_SUBTITLES: Optional[dict[str, Union[str, list[str]]]] = None
+        self.POS_SUBTITLES: dict[str, POSSubtitleData]
+        self.POS_TYPES: set[str]
+        self.LINKAGE_SUBTITLES: dict[str, str]
+        self.OTHER_SUBTITLES: dict[str, Union[str, list[str]]]
         # set the above three in the function below
         self.init_subtitles()
-        self.ZH_PRON_TAGS: Optional[list[str]] = None
+        self.ZH_PRON_TAGS: list[str]
         self.set_attr_from_json("ZH_PRON_TAGS", "zh_pron_tags.json")
         self.analyze_templates = True  # find templates that need pre-expand
         self.extract_thesaurus_pages = True
@@ -173,11 +173,10 @@ class WiktionaryConfig:
     def init_subtitles(self) -> None:
         self.set_attr_from_json("LINKAGE_SUBTITLES", "linkage_subtitles.json")
         self.set_attr_from_json("POS_SUBTITLES", "pos_subtitles.json")
-        if self.POS_SUBTITLES is not None:
-            self.POS_TYPES = set(x["pos"] for x in self.POS_SUBTITLES.values())
-            for k, v in self.POS_SUBTITLES.items():
-                if "tags" in v:
-                    assert isinstance(v["tags"], (list, tuple))
+        self.POS_TYPES = set(x["pos"] for x in self.POS_SUBTITLES.values())
+        for k, v in self.POS_SUBTITLES.items():
+            if "tags" in v:
+                assert isinstance(v["tags"], list)
         self.set_attr_from_json("OTHER_SUBTITLES", "other_subtitles.json")
 
     def load_edition_settings(self) -> None:
