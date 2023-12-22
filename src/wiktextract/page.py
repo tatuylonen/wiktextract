@@ -358,8 +358,6 @@ def clean_node(
         if kind in {
             NodeKind.TABLE_CELL,
             NodeKind.TABLE_HEADER_CELL,
-            NodeKind.BOLD,
-            NodeKind.ITALIC,
         }:
             return node.children
         return None

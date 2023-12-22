@@ -286,3 +286,37 @@ class WiktExtractTests(unittest.TestCase):
             ),
             "some text some other text"
         )
+
+    def test_bold_node_in_link(self):
+        from wiktextract.page import clean_node
+
+        # https://en.wiktionary.org/wiki/ちゃんねる
+        # GitHub issue: tatuylonen/wikitextprocessor#170
+        wikitext = "{{ja-usex|[[w:ja:2ちゃんねる|2'''ちゃんねる''']]}}"
+        self.wxr.wtp.add_page(
+            "Template:ja-usex", 10, "{{#invoke:ja-usex|show}}"
+        )
+        self.wxr.wtp.add_page(
+            "Module:ja-usex",
+            828,
+            """
+            local export = {}
+
+            function export.show(frame)
+              local first_arg = frame:getParent().args[1]
+              if first_arg == "[[w:ja:2ちゃんねる|2'''ちゃんねる''']]" then
+                -- bold wikitext shouldn't be removed
+                return first_arg .. ", ''italic''"
+              end
+              return "failed"
+            end
+
+            return export
+            """
+        )
+        self.wxr.wtp.start_page("")
+        tree = self.wxr.wtp.parse(wikitext)
+        # bold and italic nodes should be converted to plain text
+        self.assertEqual(
+            clean_node(self.wxr, None, tree.children), "2ちゃんねる, italic"
+        )
