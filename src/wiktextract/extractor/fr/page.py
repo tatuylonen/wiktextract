@@ -114,7 +114,7 @@ def process_pos_block(
     pos_title: str,
 ):
     pos_type = wxr.config.POS_SUBTITLES[pos_argument]["pos"]
-    if len(page_data) == 0 or "pos" not in page_data[-1].model_fields_set:
+    if len(page_data) == 0 or "pos" in page_data[-1].model_fields_set:
         page_data.append(base_data.model_copy(deep=True))
     page_data[-1].pos = pos_type
     page_data[-1].pos_title = pos_title
