@@ -280,3 +280,29 @@ class TestFrGloss(TestCase):
                 },
             ],
         )
+
+    def test_sandwich_tag(self):
+        # https://fr.wiktionary.org/wiki/autrice#Nom_commun_4
+        self.wxr.wtp.start_page("autrice")
+        self.wxr.wtp.add_page("Modèle:lexique", 10, "''(Littérature)''")
+        self.wxr.wtp.add_page("Modèle:rare", 10, "''(Rare)''")
+        self.wxr.wtp.add_page("Modèle:lien", 10, "Autrice")
+        self.wxr.wtp.add_page("Modèle:absolument", 10, "''(Absolument)''")
+        root = self.wxr.wtp.parse(
+            "# {{lexique|littérature|nl}} {{rare|nl}} {{lien|autrice|fr|dif=Autrice}}, femme qui a créé une œuvre littéraire. {{absolument}} [[écrivaine|Écrivaine]]."
+        )
+        page_data = [
+            WordEntry(word="autrice", lang_code="nl", lang_name="Néerlandais")
+        ]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
+            [
+                {
+                    "glosses": [
+                        "Autrice, femme qui a créé une œuvre littéraire. Écrivaine."
+                    ],
+                    "tags": ["Littérature", "Rare", "Absolument"]
+                }
+            ],
+        )
