@@ -85,6 +85,8 @@ def process_translation_templates(
         )
     elif template_node.template_name.startswith("trad"):
         # Translation term: https://fr.wiktionary.org/wiki/Modèle:trad
+        if 2 not in template_node.template_parameters:  # required parameter
+            return
         translation_term = clean_node(
             wxr,
             None,
