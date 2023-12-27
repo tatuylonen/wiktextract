@@ -33,12 +33,14 @@ def process_derives_autres_list(
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         lang_code = ""
         lang_name = ""
-        for template_node in list_item.find_child(NodeKind.TEMPLATE):
-            if template_node.template_name == "L":
-                lang_code = template_node.template_parameters.get(1)
-                lang_name = clean_node(wxr, None, template_node)
-            elif template_node.template_name == "lien":
-                word = clean_node(wxr, None, template_node)
+        for node in list_item.find_child(NodeKind.TEMPLATE | NodeKind.LINK):
+            if isinstance(node, TemplateNode) and node.template_name == "L":
+                lang_code = node.template_parameters.get(1)
+                lang_name = clean_node(wxr, None, node)
+            elif node.kind == NodeKind.LINK or (
+                isinstance(node, TemplateNode) and node.template_name == "lien"
+            ):
+                word = clean_node(wxr, None, node)
                 page_data[-1].derived.append(
                     Linkage(lang_code=lang_code, lang_name=lang_name, word=word)
                 )
