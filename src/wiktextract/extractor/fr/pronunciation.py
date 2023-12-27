@@ -1,5 +1,5 @@
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -15,11 +15,18 @@ def extract_pronunciation(
 ) -> None:
     sound_data = []
     lang_code = base_data.lang_code
-    for list_node in level_node.find_child(NodeKind.LIST):
-        for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
-            sound_data.extend(
-                process_pron_list_item(wxr, list_item_node, Sound(), lang_code)
-            )
+    for node in level_node.find_child(NodeKind.LIST | LEVEL_KIND_FLAGS):
+        if node.kind == NodeKind.LIST:
+            for list_item_node in node.find_child(NodeKind.LIST_ITEM):
+                sound_data.extend(
+                    process_pron_list_item(
+                        wxr, list_item_node, Sound(), lang_code
+                    )
+                )
+        else:
+            from .page import parse_section
+
+            parse_section(wxr, page_data, base_data, node)
 
     if len(sound_data) == 0:
         return

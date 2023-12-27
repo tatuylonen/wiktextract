@@ -120,3 +120,34 @@ class TestPronunciation(TestCase):
                 "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/3f/LL-Q9027_(swe)-Moonhouse-mars.wav/LL-Q9027_(swe)-Moonhouse-mars.wav.mp3",
             },
         )
+
+    def test_paronymes_subsection(self):
+        # https://fr.wiktionary.org/wiki/wagonnet
+        page_data = []
+        self.wxr.wtp.add_page("Modèle:pron", 10, body="\\{{{1|}}}\\")
+        self.wxr.wtp.start_page("wagonnet")
+        root = self.wxr.wtp.parse(
+            """=== {{S|prononciation}} ===
+* {{pron|va.ɡɔ.nɛ|fr}}
+
+==== {{S|paronymes}} ====
+* [[wagonnée]]
+* [[wagonnier]]
+"""
+        )
+        extract_pronunciation(
+            self.wxr,
+            page_data,
+            root.children[0],
+            WordEntry(word="wagonnet", lang_code="fr", lang_name="Français"),
+        )
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True),
+            {
+                "word": "wagonnet",
+                "lang_code": "fr",
+                "lang_name": "Français",
+                "paronyms": [{"word": "wagonnée"}, {"word": "wagonnier"}],
+                "sounds": [{"ipa": "\\va.ɡɔ.nɛ\\"}],
+            },
+        )
