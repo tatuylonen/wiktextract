@@ -48,6 +48,9 @@ class Translation(FrenchBaseModel):
     lang_name: str = Field("", description="Translation language name")
     word: str = Field("", description="Translation term")
     sense: str = Field("", description="Translation gloss")
+    sense_index: int = Field(
+        0, ge=0, description="Number of the definition, start from 1"
+    )
     tags: list[str] = []
     roman: str = ""
     traditional_writing: str = Field(

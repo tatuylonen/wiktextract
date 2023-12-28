@@ -185,7 +185,9 @@ class TestInflection(TestCase):
     def test_no_column_headers(self, mock_node_to_wikitext):
         # https://fr.wiktionary.org/wiki/一万#Nom_commun
         # template "zh-formes"
-        page_data = [WordEntry(word="一万", lang_code="zh", lang_name="Chinois")]
+        page_data = [
+            WordEntry(word="一万", lang_code="zh", lang_name="Chinois")
+        ]
         node = TemplateNode(0)
         self.wxr.wtp.start_page("一万")
         extract_inflection(self.wxr, page_data, node)
