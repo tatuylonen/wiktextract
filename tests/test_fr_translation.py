@@ -164,6 +164,7 @@ class TestTranslation(TestCase):
                         "lang_name": "Croate",
                         "word": "masa",
                         "sense": "(Finance)",
+                        "sense_index": 12,
                     },
                 ],
             },
