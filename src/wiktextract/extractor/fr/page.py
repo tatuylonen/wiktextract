@@ -90,7 +90,7 @@ def parse_section(
                 wxr.config.capture_translations
                 and section_type in wxr.config.OTHER_SUBTITLES["translations"]
             ):
-                extract_translation(wxr, page_data, level_node)
+                extract_translation(wxr, page_data, base_data, level_node)
             elif (
                 wxr.config.capture_inflections
                 and section_type

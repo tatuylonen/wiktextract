@@ -1,7 +1,7 @@
 from typing import Optional
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -9,7 +9,10 @@ from .models import Translation, WordEntry
 
 
 def extract_translation(
-    wxr: WiktextractContext, page_data: list[WordEntry], level_node: WikiNode
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: WikiNode,
 ) -> None:
     base_translation_data = Translation()
     for level_node_child in level_node.filter_empty_str_child():
@@ -38,6 +41,10 @@ def extract_translation(
                                     wxr, child_node, previous_node, page_data
                                 )
                             previous_node = child_node
+            elif level_node_child.kind in LEVEL_KIND_FLAGS:
+                from .page import parse_section
+
+                parse_section(wxr, page_data, base_data, level_node_child)
 
 
 def process_italic_node(

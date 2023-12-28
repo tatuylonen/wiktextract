@@ -302,7 +302,7 @@ class TestFrGloss(TestCase):
                     "glosses": [
                         "Autrice, femme qui a créé une œuvre littéraire. Écrivaine."
                     ],
-                    "tags": ["Littérature", "Rare", "Absolument"]
+                    "tags": ["Littérature", "Rare", "Absolument"],
                 }
             ],
         )
