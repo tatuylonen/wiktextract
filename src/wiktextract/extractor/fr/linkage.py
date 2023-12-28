@@ -1,3 +1,5 @@
+import re
+
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import clean_node
@@ -70,6 +72,18 @@ def process_linkage_list(
             )
             if sense_index_text.isdigit():
                 sense_index = int(sense_index_text)
+            continue
+        # sense could also be in ";" description list
+        if (
+            template_or_list_node.kind == NodeKind.LIST_ITEM
+            and template_or_list_node.sarg == ";"
+        ):
+            sense_text = clean_node(wxr, None, template_or_list_node.children)
+            index_pattern = r"\s*\((?:sens\s*)?(\d+)\)$"
+            m = re.search(index_pattern, sense_text)
+            if m is not None:
+                sense_text = re.sub(index_pattern, "", sense_text)
+                sense_index = int(m.group(1))
             continue
 
         linkage_data = Linkage()
