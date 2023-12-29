@@ -16,7 +16,10 @@ def extract_inflection(
 ) -> None:
     # inflection templates
     # https://fr.wiktionary.org/wiki/Catégorie:Modèles_d’accord_en_français
-    process_inflection_table(wxr, page_data, template_node)
+    if template_node.template_name.startswith("en-adj"):
+        process_en_adj_table(wxr, page_data, template_node)
+    else:
+        process_inflection_table(wxr, page_data, template_node)
 
 
 IGNORE_TABLE_HEADERS = frozenset(
@@ -192,3 +195,37 @@ def insert_ipa(form: Form, ipa_text: str) -> None:
     if len(ipa_data) == 0:
         return
     form.ipas.extend(ipa_data)
+
+
+def process_en_adj_table(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    template_node: WikiNode,
+) -> None:
+    # https://fr.wiktionary.org/wiki/Modèle:en-adj
+    # and other en-adj* templates
+    # these templates use normal table cell for column table header
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    table_nodes = list(expanded_node.find_child(NodeKind.TABLE))
+    if len(table_nodes) == 0:
+        return
+    table_node = table_nodes[0]
+    for row_num, table_row in enumerate(
+        table_node.find_child(NodeKind.TABLE_ROW)
+    ):
+        if row_num == 0:
+            # skip header
+            continue
+        if len(table_row.children) > 1:
+            form_data = Form()
+            form_data.tags.append(clean_node(wxr, None, table_row.children[0]))
+            form_text = clean_node(wxr, None, table_row.children[1])
+            for form_line in form_text.splitlines():
+                if is_ipa_text(form_line):
+                    insert_ipa(form_data, form_line)
+                else:
+                    form_data.form = form_line
+            if form_data.form != page_data[-1].word:
+                page_data[-1].forms.append(form_data)

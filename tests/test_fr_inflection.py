@@ -1,8 +1,6 @@
 from unittest import TestCase
-from unittest.mock import patch
 
 from wikitextprocessor import Wtp
-from wikitextprocessor.parser import TemplateNode
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.inflection import extract_inflection
 from wiktextract.extractor.fr.models import WordEntry
@@ -18,9 +16,14 @@ class TestInflection(TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
-    @patch(
-        "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""
+    def test_fr_reg(self):
+        page_data = [
+            WordEntry(word="productrice", lang_code="fr", lang_name="Français")
+        ]
+        self.wxr.wtp.add_page(
+            "Modèle:fr-rég",
+            10,
+            """
 {|
 ! Singulier !! Pluriel
 |-
@@ -28,24 +31,25 @@ class TestInflection(TestCase):
 | <bdi>[[productrices#fr|productrices]]</bdi>
 |-
 |[[Annexe:Prononciation/français|<span>\\pʁɔ.dyk.tʁis\\</span>]]
-|}
-        """,
-    )
-    def test_fr_reg(self, mock_node_to_wikitext):
-        page_data = [
-            WordEntry(word="productrice", lang_code="fr", lang_name="Français")
-        ]
-        node = TemplateNode(0)
+|}""",
+        )
         self.wxr.wtp.start_page("productrice")
-        extract_inflection(self.wxr, page_data, node)
+        root = self.wxr.wtp.parse("{{fr-rég|pʁɔ.dyk.tʁis}}")
+        extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [{"form": "productrices", "tags": ["Pluriel"]}],
         )
 
-    @patch(
-        "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""{|class="flextable flextable-fr-mfsp"
+    def test_fr_accord_al(self):
+        # https://fr.wiktionary.org/wiki/animal#Adjectif
+        page_data = [
+            WordEntry(word="animal", lang_code="fr", lang_name="Français")
+        ]
+        self.wxr.wtp.add_page(
+            "Modèle:fr-accord-al",
+            10,
+            """{|class="flextable flextable-fr-mfsp"
 |-
 !scope="col"| Singulier
 !scope="col"| Pluriel
@@ -58,15 +62,10 @@ class TestInflection(TestCase):
 |[[animale]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mal\\</span>]]
 |[[animales]]<br>[[Annexe:Prononciation/français|<span>\\a.ni.mal\\</span>]]
 |}""",
-    )
-    def test_fr_accord_al(self, mock_node_to_wikitext):
-        # https://fr.wiktionary.org/wiki/animal#Adjectif
-        page_data = [
-            WordEntry(word="animal", lang_code="fr", lang_name="Français")
-        ]
-        node = TemplateNode(0)
+        )
         self.wxr.wtp.start_page("animal")
-        extract_inflection(self.wxr, page_data, node)
+        root = self.wxr.wtp.parse("{{fr-accord-al|a.ni.m}}")
+        extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
@@ -88,24 +87,25 @@ class TestInflection(TestCase):
             ],
         )
 
-    @patch(
-        "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""{| class='flextable flextable-en'
-! Singulier !! Pluriel
-|-
-| '''<span lang='en' xml:lang='en' class='lang-en'><bdi>ration</bdi></span>'''<br />[[Annexe:Prononciation/anglais|<span>\\ˈɹæʃ.ən\\</span>]]<br /><small>ou</small> [[Annexe:Prononciation/anglais|<span>\\ˈɹeɪʃ.ən\\</span>]]
-|  <bdi lang='en' xml:lang='en' class='lang-en'>[[rations#en-flex-nom|rations]]</bdi><br />[[Annexe:Prononciation/anglais|<span>\\ˈɹæʃ.ənz\\</span>]]<br /><small>ou</small> [[Annexe:Prononciation/anglais|<span>\\ˈɹeɪʃ.ənz\\</span>]]
-|}""",
-    )
-    def test_multiple_lines_ipa(self, mock_node_to_wikitext):
+    def test_multiple_lines_ipa(self):
         # https://fr.wiktionary.org/wiki/ration#Nom_commun_2
         # template "en-nom-rég"
         page_data = [
             WordEntry(word="ration", lang_code="en", lang_name="Anglais")
         ]
-        node = TemplateNode(0)
+        self.wxr.wtp.add_page(
+            "Modèle:en-nom-rég",
+            10,
+            """{| class='flextable flextable-en'
+! Singulier !! Pluriel
+|-
+| '''<span lang='en' xml:lang='en' class='lang-en'><bdi>ration</bdi></span>'''<br />[[Annexe:Prononciation/anglais|<span>\\ˈɹæʃ.ən\\</span>]]<br /><small>ou</small> [[Annexe:Prononciation/anglais|<span>\\ˈɹeɪʃ.ən\\</span>]]
+|  <bdi lang='en' xml:lang='en' class='lang-en'>[[rations#en-flex-nom|rations]]</bdi><br />[[Annexe:Prononciation/anglais|<span>\\ˈɹæʃ.ənz\\</span>]]<br /><small>ou</small> [[Annexe:Prononciation/anglais|<span>\\ˈɹeɪʃ.ənz\\</span>]]
+|}""",
+        )
         self.wxr.wtp.start_page("ration")
-        extract_inflection(self.wxr, page_data, node)
+        root = self.wxr.wtp.parse("{{en-nom-rég|ˈɹæʃ.ən|ˈɹeɪʃ.ən}}")
+        extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
@@ -117,25 +117,28 @@ class TestInflection(TestCase):
             ],
         )
 
-    @patch(
-        "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""{|class='flextable'
+    def test_single_line_multiple_ipa(self):
+        # https://fr.wiktionary.org/wiki/ration#Verbe
+        # template "en-conj-rég"
+        page_data = [
+            WordEntry(word="ration", lang_code="en", lang_name="Anglais")
+        ]
+        self.wxr.wtp.add_page(
+            "Modèle:en-conj-rég",
+            10,
+            """{|class='flextable'
 ! Temps
 ! Forme
 |-
 ! Infinitif
 | <span lang='en' xml:lang='en' class='lang-en'><bdi>to</bdi></span> '''<span lang='en' xml:lang='en' class='lang-en'><bdi>ration</bdi></span>'''<br />[[Annexe:Prononciation/anglais|<span>\\ˈɹæʃ.ən\\</span>]]<small> ou </small>[[Annexe:Prononciation/anglais|<span>\\ˈɹeɪʃ.ən\\</span>]]
 |}""",
-    )
-    def test_single_line_multiple_ipa(self, mock_node_to_wikitext):
-        # https://fr.wiktionary.org/wiki/ration#Verbe
-        # template "en-conj-rég"
-        page_data = [
-            WordEntry(word="ration", lang_code="en", lang_name="Anglais")
-        ]
-        node = TemplateNode(0)
+        )
         self.wxr.wtp.start_page("ration")
-        extract_inflection(self.wxr, page_data, node)
+        root = self.wxr.wtp.parse(
+            "{{en-conj-rég|inf.pron=ˈɹæʃ.ən|inf.pron2=ˈɹeɪʃ.ən}}"
+        )
+        extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
@@ -147,33 +150,42 @@ class TestInflection(TestCase):
             ],
         )
 
-    @patch(
-        "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""{|
+    def test_invalid_ipa(self):
+        # https://fr.wiktionary.org/wiki/animal#Nom_commun_3
+        page_data = [
+            WordEntry(word="animal", lang_code="en", lang_name="Français")
+        ]
+        self.wxr.wtp.add_page(
+            "Modèle:ast-accord-mf",
+            10,
+            """{|
 ! '''Singulier'''
 ! '''Pluriel'''
 |-
 | [[animal]]<span><br /><span>\\<small><span>[//fr.wiktionary.org/w/index.php?title=ration&action=edit Prononciation ?]</span></small>\\</span></span>
 | [[animales]]<span><br /><span>\\<small><span>[//fr.wiktionary.org/w/index.php?title=ration&action=edit Prononciation ?]</span></small>\\</span></span>
 |}""",
-    )
-    def test_invalid_ipa(self, mock_node_to_wikitext):
-        # https://fr.wiktionary.org/wiki/animal#Nom_commun_3
-        # template "ast-accord-mf"
-        page_data = [
-            WordEntry(word="animal", lang_code="en", lang_name="Français")
-        ]
-        node = TemplateNode(0)
+        )
         self.wxr.wtp.start_page("animal")
-        extract_inflection(self.wxr, page_data, node)
+        root = self.wxr.wtp.parse(
+            "{{ast-accord-mf|s=animal|ps=|p=animales|pp=}}"
+        )
+        extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [{"tags": ["Pluriel"], "form": "animales"}],
         )
 
-    @patch(
-        "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""{| class="flextable"
+    def test_no_column_headers(self):
+        # https://fr.wiktionary.org/wiki/一万#Nom_commun
+        # template "zh-formes"
+        page_data = [
+            WordEntry(word="一万", lang_code="zh", lang_name="Chinois")
+        ]
+        self.wxr.wtp.add_page(
+            "Modèle:zh-formes",
+            10,
+            """{| class="flextable"
 |-
 ! Simplifié
 | <bdi lang="zh-Hans" xml:lang="zh-Hans" class="lang-zh-Hans">[[一万#zh|一万]]</bdi>
@@ -181,24 +193,24 @@ class TestInflection(TestCase):
 ! Traditionnel
 | <bdi lang="zh-Hant" xml:lang="zh-Hant" class="lang-zh-Hant">[[一萬#zh|一萬]]</bdi>
 |}""",
-    )
-    def test_no_column_headers(self, mock_node_to_wikitext):
-        # https://fr.wiktionary.org/wiki/一万#Nom_commun
-        # template "zh-formes"
-        page_data = [
-            WordEntry(word="一万", lang_code="zh", lang_name="Chinois")
-        ]
-        node = TemplateNode(0)
+        )
         self.wxr.wtp.start_page("一万")
-        extract_inflection(self.wxr, page_data, node)
+        root = self.wxr.wtp.parse("{{zh-formes|一万|一萬}}")
+        extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [{"tags": ["Traditionnel"], "form": "一萬"}],
         )
 
-    @patch(
-        "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""{| class="flextable"
+    def test_lt_décl_as(self):
+        # empty table cells should be ignored
+        page_data = [
+            WordEntry(word="abadai", lang_code="lt", lang_name="Lituanien")
+        ]
+        self.wxr.wtp.add_page(
+            "Modèle:lt-décl-as",
+            10,
+            """{| class="flextable"
 !Cas
 ! Singulier
 ! Pluriel
@@ -207,23 +219,23 @@ class TestInflection(TestCase):
 || <bdi lang="lt" xml:lang="lt" class="lang-lt">[[abadas#lt|abadas]]</bdi>
 || '''<span lang="lt" xml:lang="lt" class="lang-lt"><bdi>abadai</bdi></span>'''
 |}""",
-    )
-    def test_lt_décl_as(self, mock_node_to_wikitext):
-        # empty table cells should be ignored
-        page_data = [
-            WordEntry(word="abadai", lang_code="lt", lang_name="Lituanien")
-        ]
-        node = TemplateNode(0)
+        )
         self.wxr.wtp.start_page("abadai")
-        extract_inflection(self.wxr, page_data, node)
+        root = self.wxr.wtp.parse("{{lt-décl-as|abad}}")
+        extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [{"tags": ["Singulier", "Nominatif"], "form": "abadas"}],
         )
 
-    @patch(
-        "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""{|class="flextable flextable-fr-mfsp"
+    def test_fr_accord_s(self):
+        page_data = [
+            WordEntry(word="aastais", lang_code="fr", lang_name="Français")
+        ]
+        self.wxr.wtp.add_page(
+            "Modèle:fr-accord-s",
+            10,
+            """{|class="flextable flextable-fr-mfsp"
 
 |-
 | class="invisible" |
@@ -241,14 +253,10 @@ class TestInflection(TestCase):
 | [[aastaises]]<br
 />[[Annexe:Prononciation/français|<span>\\a.a.stɛz\\</span>]]
 |}""",
-    )
-    def test_fr_accord_s(self, mock_node_to_wikitext):
-        page_data = [
-            WordEntry(word="aastais", lang_code="fr", lang_name="Français")
-        ]
-        node = TemplateNode(0)
+        )
         self.wxr.wtp.start_page("aastais")
-        extract_inflection(self.wxr, page_data, node)
+        root = self.wxr.wtp.parse("{{fr-accord-s|a.a.stɛ|ms=aastais}}")
+        extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
@@ -265,9 +273,17 @@ class TestInflection(TestCase):
             ],
         )
 
-    @patch(
-        "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""{| class="flextable"
+    def test_fr_accord_personne(self):
+        # https://fr.wiktionary.org/wiki/enculé_de_ta_race
+        page_data = [
+            WordEntry(
+                word="enculé de ta race", lang_code="fr", lang_name="Français"
+            )
+        ]
+        self.wxr.wtp.add_page(
+            "Modèle:fr-accord-personne",
+            10,
+            """{| class="flextable"
 | colspan="2" |
 ! Singulier !! Pluriel
 |-
@@ -280,17 +296,12 @@ class TestInflection(TestCase):
 | [[enculée de ma race]]<br/>[[Annexe:Prononciation/français|<span>\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\</span>]]
 | [[enculées de notre race]]<br/>[[Annexe:Prononciation/français|<span>\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\</span>]]
 |}""",
-    )
-    def test_fr_accord_personne(self, mock_node_to_wikitext):
-        # https://fr.wiktionary.org/wiki/enculé_de_ta_race
-        page_data = [
-            WordEntry(
-                word="enculé de ta race", lang_code="fr", lang_name="Français"
-            )
-        ]
-        node = TemplateNode(0)
+        )
         self.wxr.wtp.start_page("enculé de ta race")
-        extract_inflection(self.wxr, page_data, node)
+        root = self.wxr.wtp.parse(
+            "{{fr-accord-personne|1ms = enculé de ma race}}"
+        )
+        extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
@@ -317,9 +328,15 @@ class TestInflection(TestCase):
             ],
         )
 
-    @patch(
-        "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""{| class="flextable"
+    def test_ro_nom_tab(self):
+        # https://fr.wiktionary.org/wiki/fenil#Nom_commun_4
+        page_data = [
+            WordEntry(word="fenil", lang_code="fr", lang_name="Français")
+        ]
+        self.wxr.wtp.add_page(
+            "Modèle:ro-nom-tab",
+            10,
+            """{| class="flextable"
 ! <span class="ligne-de-forme"  ><i>masculin</i></span>
 ! colspan=2 | Singulier
 ! colspan=2 | Pluriel
@@ -336,15 +353,17 @@ class TestInflection(TestCase):
 | colspan=2| <bdi lang="ro" xml:lang="ro" class="lang-ro">[[fenilule#ro-nom|fenilule]]</bdi>
 | colspan=2| <bdi lang="ro" xml:lang="ro" class="lang-ro">[[fenililor#ro-nom|fenililor]]</bdi>
 |}""",
-    )
-    def test_ro_nom_tab(self, mock_node_to_wikitext):
-        # https://fr.wiktionary.org/wiki/fenil#Nom_commun_4
-        page_data = [
-            WordEntry(word="fenil", lang_code="fr", lang_name="Français")
-        ]
-        node = TemplateNode(0)
+        )
         self.wxr.wtp.start_page("fenil")
-        extract_inflection(self.wxr, page_data, node)
+        root = self.wxr.wtp.parse(
+            """{{ro-nom-tab|gen=masculin
+|ns=fenil |np=fenili
+|as=fenilul |ap=fenilii
+|ds=fenilului |dp=fenililor
+|vs=fenilule |vp=fenililor
+}}""",
+        )
+        extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
@@ -365,9 +384,15 @@ class TestInflection(TestCase):
             ],
         )
 
-    @patch(
-        "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""{| class="flextable flextable-sv"
+    def test_sv_nom_c_ar(self):
+        # https://fr.wiktionary.org/wiki/robot#Nom_commun_7
+        page_data = [
+            WordEntry(word="robot", lang_code="fr", lang_name="Français")
+        ]
+        self.wxr.wtp.add_page(
+            "Modèle:sv-nom-c-ar",
+            10,
+            """{| class="flextable flextable-sv"
 ! class="invisible" |
 |-
 ! Commun
@@ -382,15 +407,10 @@ class TestInflection(TestCase):
 | class="plur-indef" |<bdi lang="sv" xml:lang="sv" class="lang-sv">[[robotar#sv|robotar]]</bdi>
 | class="plur-def" |<bdi lang="sv" xml:lang="sv" class="lang-sv">[[robotarna#sv|robotarna]]</bdi>
 |}""",
-    )
-    def test_sv_nom_c_ar(self, mock_node_to_wikitext):
-        # https://fr.wiktionary.org/wiki/robot#Nom_commun_7
-        page_data = [
-            WordEntry(word="robot", lang_code="fr", lang_name="Français")
-        ]
-        node = TemplateNode(0)
+        )
         self.wxr.wtp.start_page("robot")
-        extract_inflection(self.wxr, page_data, node)
+        root = self.wxr.wtp.parse("{{sv-nom-c-ar}}")
+        extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
@@ -400,9 +420,15 @@ class TestInflection(TestCase):
             ],
         )
 
-    @patch(
-        "wikitextprocessor.Wtp.node_to_wikitext",
-        return_value="""{|class="flextable"
+    def test_cs_decl_nom_ma_dur(self):
+        # https://fr.wiktionary.org/wiki/robot#Nom_commun_1_2
+        page_data = [
+            WordEntry(word="robot", lang_code="fr", lang_name="Français")
+        ]
+        self.wxr.wtp.add_page(
+            "Modèle:cs-décl-nom-ma-dur",
+            10,
+            """{|class="flextable"
 |-
 !scope="col"| Cas<nowiki />
 !scope="col"| Singulier<nowiki />
@@ -412,19 +438,53 @@ class TestInflection(TestCase):
 | [[robot#cs-nom|robot''' ''']]<nowiki />
 | [[roboti#cs-flex-nom|robot'''i ''']]<br /><small>''ou''</small> [[robotové#cs-flex-nom|robot'''ové ''']]<nowiki />
 |}""",
-    )
-    def test_cs_decl_nom_ma_dur(self, mock_node_to_wikitext):
-        # https://fr.wiktionary.org/wiki/robot#Nom_commun_1_2
-        page_data = [
-            WordEntry(word="robot", lang_code="fr", lang_name="Français")
-        ]
-        node = TemplateNode(0)
+        )
         self.wxr.wtp.start_page("robot")
-        extract_inflection(self.wxr, page_data, node)
+        root = self.wxr.wtp.parse("{{cs-décl-nom-ma-dur|rad=robot}}")
+        extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
                 {"form": "roboti", "tags": ["Pluriel", "Nominatif"]},
                 {"form": "robotové", "tags": ["Pluriel", "Nominatif"]},
+            ],
+        )
+
+    def test_en_adj(self):
+        # https://fr.wiktionary.org/wiki/new
+        page_data = [WordEntry(word="new", lang_code="en", lang_name="Anglais")]
+        self.wxr.wtp.start_page("new")
+        root = self.wxr.wtp.parse("{{en-adj-er|pron=ˈnu|pronGB=ˈnjuː}}")
+        self.wxr.wtp.add_page(
+            "Modèle:en-adj-er",
+            10,
+            """{| class="flextable"
+! Nature
+! Forme
+|-
+| class="titre" | Positif
+| '''<span lang="en" xml:lang="en" class="lang-en"><bdi>new</bdi></span>'''<br />[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnu\\</span>]]<small> ou </small>[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnjuː\\</span>]]
+|-
+| class="titre" | Comparatif
+| <bdi lang="en" xml:lang="en" class="lang-en">[[newer#en|newer]]</bdi><br />[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnu.ɚ\\</span>]]<small> ou </small>[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnjuː.ə\\</span>]]
+|-
+| class="titre" | Superlatif
+| <bdi lang="en" xml:lang="en" class="lang-en">[[newest#en|newest]]</bdi><br />[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnu.ɪst\\</span>]]<small> ou </small>[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnjuː.ɪst\\</span>]]
+|}""",
+        )
+        extract_inflection(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
+            [
+                {
+                    "form": "newer",
+                    "tags": ["Comparatif"],
+                    "ipas": ["\\ˈnu.ɚ\\", "\\ˈnjuː.ə\\"],
+                },
+                {
+                    "form": "newest",
+                    "tags": ["Superlatif"],
+                    "ipas": ["\\ˈnu.ɪst\\", "\\ˈnjuː.ɪst\\"],
+                },
             ],
         )
