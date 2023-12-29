@@ -184,7 +184,7 @@ def reprocess_wiktionary(
     process_ns_ids = list(
         {
             wxr.wtp.NAMESPACE_DATA.get(ns, {}).get("id", 0)
-            for ns in ["Main", "Reconstruction"]
+            for ns in wxr.config.extract_ns_names
         }
     )
     start_time = time.time()
