@@ -80,9 +80,9 @@ def process_translation_templates(
         sense_parameter = template_node.template_parameters.get(1, "")
         sense_text = clean_node(wxr, None, sense_parameter)
         base_translation_data.sense = sense_text
-        base_translation_data.sense_index = int(
-            template_node.template_parameters.get(2, "0")
-        )
+        sense_index_str = template_node.template_parameters.get(2, "0")
+        if isinstance(sense_index_str, str) and sense_index_str.isdigit():
+            base_translation_data.sense_index = int(sense_index_str)
 
     elif template_node.template_name == "T":
         # Translation language: https://fr.wiktionary.org/wiki/Modèle:T
