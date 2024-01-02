@@ -1,3 +1,5 @@
+import re
+
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import clean_node
@@ -33,12 +35,14 @@ def process_derives_autres_list(
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         lang_code = ""
         lang_name = ""
-        for template_node in list_item.find_child(NodeKind.TEMPLATE):
-            if template_node.template_name == "L":
-                lang_code = template_node.template_parameters.get(1)
-                lang_name = clean_node(wxr, None, template_node)
-            elif template_node.template_name == "lien":
-                word = clean_node(wxr, None, template_node)
+        for node in list_item.find_child(NodeKind.TEMPLATE | NodeKind.LINK):
+            if isinstance(node, TemplateNode) and node.template_name == "L":
+                lang_code = node.template_parameters.get(1)
+                lang_name = clean_node(wxr, None, node)
+            elif node.kind == NodeKind.LINK or (
+                isinstance(node, TemplateNode) and node.template_name == "lien"
+            ):
+                word = clean_node(wxr, None, node)
                 page_data[-1].derived.append(
                     Linkage(lang_code=lang_code, lang_name=lang_name, word=word)
                 )
@@ -66,8 +70,20 @@ def process_linkage_list(
             sense_index_text = template_or_list_node.template_parameters.get(
                 2, "0"
             )
-            if sense_index_text.isdigit():
+            if isinstance(sense_index_text, str) and sense_index_text.isdigit():
                 sense_index = int(sense_index_text)
+            continue
+        # sense could also be in ";" description list
+        if (
+            template_or_list_node.kind == NodeKind.LIST_ITEM
+            and template_or_list_node.sarg == ";"
+        ):
+            sense_text = clean_node(wxr, None, template_or_list_node.children)
+            index_pattern = r"\s*\((?:sens\s*)?(\d+)\)$"
+            m = re.search(index_pattern, sense_text)
+            if m is not None:
+                sense_text = re.sub(index_pattern, "", sense_text)
+                sense_index = int(m.group(1))
             continue
 
         linkage_data = Linkage()

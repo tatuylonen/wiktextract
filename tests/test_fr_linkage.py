@@ -117,13 +117,18 @@ class TestLinkage(TestCase):
         )
 
     def test_sense(self):
+        # https://fr.wiktionary.org/wiki/autrice
+        # https://fr.wiktionary.org/wiki/embouteillage
         page_data = [
-            WordEntry(word="test", lang_code="fr", lang_name="Français")
+            WordEntry(word="autrice", lang_code="fr", lang_name="Français")
         ]
         self.wxr.wtp.start_page("autrice")
         root = self.wxr.wtp.parse(
             """{{(|Celle qui est à l’origine de quelque chose|1}}
 * [[artisane]]
+
+; Mise en bouteille (sens 1)
+* [[bouchonnerie]]
 """
         )
         extract_linkage(self.wxr, page_data, root, "synonymes")
@@ -138,19 +143,33 @@ class TestLinkage(TestCase):
                     "sense": "Celle qui est à l’origine de quelque chose",
                     "sense_index": 1,
                 },
+                {
+                    "word": "bouchonnerie",
+                    "sense": "Mise en bouteille",
+                    "sense_index": 1,
+                },
             ],
         )
 
     def test_derives_autres_langues_section(self):
         # https://fr.wiktionary.org/wiki/eau#Dérivés_dans_d’autres_langues
+        # https://fr.wiktionary.org/wiki/caligineux#Dérivés_dans_d’autres_langues
         self.wxr.wtp.add_page("Modèle:lien", 10, body="{{{1}}}")
-        self.wxr.wtp.add_page("Modèle:L", 10, body="Karipúna")
+        self.wxr.wtp.add_page(
+            "Modèle:L",
+            10,
+            body="""{{#switch: {{{1}}}
+| kmv = Karipúna
+| en = Anglais
+}}""",
+        )
         page_data = [
             WordEntry(word="test", lang_code="fr", lang_name="Français")
         ]
         self.wxr.wtp.start_page("eau")
         root = self.wxr.wtp.parse(
-            "* {{L|kmv}} : {{lien|dlo|kmv}}, {{lien|djilo|kmv}}"
+            """* {{L|kmv}} : {{lien|dlo|kmv}}, {{lien|djilo|kmv}}
+* {{L|en}} : [[caliginous#en|caliginous]]"""
         )
         extract_linkage(self.wxr, page_data, root, "dérivés autres langues")
         self.assertEqual(
@@ -168,6 +187,11 @@ class TestLinkage(TestCase):
                     "word": "djilo",
                     "lang_code": "kmv",
                     "lang_name": "Karipúna",
+                },
+                {
+                    "word": "caliginous",
+                    "lang_code": "en",
+                    "lang_name": "Anglais",
                 },
             ],
         )
