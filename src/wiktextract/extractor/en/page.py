@@ -9,7 +9,12 @@ import re
 import sys
 from collections import defaultdict
 from functools import partial
-from typing import Dict, List, Optional, Set, Union
+from re import Pattern
+from typing import (
+    Optional,
+    Set,
+    Union,
+)
 
 from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
@@ -46,9 +51,9 @@ from ..share import strip_nodes
 from .unsupported_titles import unsupported_title_map
 
 # Matches head tag
-HEAD_TAG_RE = None
+HEAD_TAG_RE: Optional[Pattern] = None
 
-FLOATING_TABLE_TEMPLATES = {
+FLOATING_TABLE_TEMPLATES: set[str] = {
     # az-suffix-form creates a style=floatright div that is otherwise
     # deleted; if it is not pre-expanded, we can intercept the template
     # so we add this set into do_not_pre_expand, and intercept the
@@ -67,11 +72,11 @@ FLOATING_TABLE_TEMPLATES = {
 # so that the template are left in place with their identifying
 # name intact for later filtering.
 
-DO_NOT_PRE_EXPAND_TEMPLATES = set()
+DO_NOT_PRE_EXPAND_TEMPLATES: set[str] = set()
 DO_NOT_PRE_EXPAND_TEMPLATES.update(FLOATING_TABLE_TEMPLATES)
 
 # Additional templates to be expanded in the pre-expand phase
-ADDITIONAL_EXPAND_TEMPLATES = {
+ADDITIONAL_EXPAND_TEMPLATES: set[str] = {
     "multitrans",
     "multitrans-nowiki",
     "trans-top",
@@ -102,7 +107,7 @@ ADDITIONAL_EXPAND_TEMPLATES = {
 }
 
 # Inverse linkage for those that have them
-linkage_inverses = {
+linkage_inverses: dict[str, str] = {
     # XXX this is not currently used, move to post-processing
     "synonyms": "synonyms",
     "hypernyms": "hyponyms",
@@ -119,7 +124,7 @@ linkage_inverses = {
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
-PANEL_TEMPLATES = {
+PANEL_TEMPLATES: set[str] = {
     "Character info",
     "CJKV",
     "French personal pronouns",
@@ -236,7 +241,7 @@ PANEL_TEMPLATES = {
 }
 
 # lookup table for the tags of Chinese dialectal synonyms
-zh_tag_lookup = {
+zh_tag_lookup: dict[str, list[str]] = {
     "Formal": ["formal"],
     "Written-Standard-Chinese": ["Standard-Chinese"],
     "historical or Internet slang": ["historical", "internet-slang"],
@@ -247,14 +252,14 @@ zh_tag_lookup = {
 # Template name prefixes used for language-specific panel templates (i.e.,
 # templates that create side boxes or notice boxes or that should generally
 # be ignored).
-PANEL_PREFIXES = {
+PANEL_PREFIXES: set[str] = {
     "list:compass points/",
     "list:Gregorian calendar months/",
     "RQ:",
 }
 
 # Templates used for wikipedia links.
-wikipedia_templates = {
+wikipedia_templates: set[str] = {
     "wikipedia",
     "slim-wikipedia",
     "w",
@@ -1197,11 +1202,11 @@ def parse_language(wxr, langnode, language, lang_code):
             push_sense()
 
     def process_gloss_header(
-        header_nodes: List[Union[WikiNode, str]],
+        header_nodes: list[Union[WikiNode, str]],
         pos_type: str,
         header_group: Optional[int],
-        pos_data: Dict,
-        header_tags: List[str],
+        pos_data: dict,
+        header_tags: list[str],
     ) -> None:
         ruby = []
         if lang_code == "ja":
@@ -1239,10 +1244,10 @@ def parse_language(wxr, langnode, language, lang_code):
             header_tags.clear()
 
     def process_gloss_without_list(
-        nodes: List[Union[WikiNode, str]],
+        nodes: list[Union[WikiNode, str]],
         pos_type: str,
-        pos_data: Dict,
-        header_tags: List[str],
+        pos_data: dict,
+        header_tags: list[str],
     ) -> None:
         # gloss text might not inside a list
         header_nodes = []
@@ -1395,11 +1400,11 @@ def parse_language(wxr, langnode, language, lang_code):
         )
 
     def process_gloss_contents(
-        contents: List[Union[str, WikiNode]],
+        contents: list[Union[str, WikiNode]],
         pos: str,
-        sense_base: Dict,
-        subentries: List[WikiNode] = [],
-        others: List[WikiNode] = [],
+        sense_base: dict,
+        subentries: list[WikiNode] = [],
+        others: list[WikiNode] = [],
         gloss_template_args: Set[str] = set(),
         added: bool = False,
     ) -> bool:
@@ -2873,7 +2878,7 @@ def parse_language(wxr, langnode, language, lang_code):
         nonlocal etym_data
         nonlocal pos_data
 
-        redirect_list: List[str] = []  # for `zh-see` template
+        redirect_list: list[str] = []  # for `zh-see` template
 
         def skip_template_fn(name, ht):
             """This is called for otherwise unprocessed parts of the page.
@@ -3429,7 +3434,7 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
 
 def parse_page(
     wxr: WiktextractContext, word: str, text: str
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     # Skip words that have been moved to the Attic
     if word.startswith("/(Attic) "):
         return []

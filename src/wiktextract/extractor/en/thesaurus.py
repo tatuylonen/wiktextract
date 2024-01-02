@@ -5,16 +5,22 @@
 
 import logging
 import re
-from typing import List, Optional
+from typing import (
+    Optional,
+    TYPE_CHECKING,
+    Union,
+)
 
 from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import NodeKind, Page, WikiNode
+from wikitextprocessor.core import NamespaceDataEntry
 from wiktextract.datautils import ns_title_prefix_tuple
 from wiktextract.form_descriptions import parse_sense_qualifier
 from wiktextract.page import LEVEL_KINDS, clean_node
+from wiktextract.thesaurus import ThesaurusTerm
 from wiktextract.wxr_context import WiktextractContext
 
-IGNORED_SUBTITLE_TAGS_MAP = {
+IGNORED_SUBTITLE_TAGS_MAP: dict[str, list[str]] = {
     "by reason": [],
     "by period of time": [],
     "by degree": [],
@@ -62,15 +68,17 @@ IGNORED_SUBTITLE_TAGS_MAP = {
 
 def extract_thesaurus_page(
     wxr: WiktextractContext, page: Page
-) -> Optional[List["ThesaurusTerm"]]:
+) -> Optional[list[ThesaurusTerm]]:
     """Extracts linkages from the thesaurus pages in Wiktionary."""
-    from wiktextract.thesaurus import ThesaurusTerm
 
-    thesaurus_ns_data = wxr.wtp.NAMESPACE_DATA.get("Thesaurus", {})
-    thesaurus_ns_local_name = thesaurus_ns_data.get("name")
+    thesaurus_ns_data: NamespaceDataEntry
+    thesaurus_ns_data = wxr.wtp.NAMESPACE_DATA["Thesaurus"]
+
+    thesaurus_ns_local_name = thesaurus_ns_data["name"]
 
     title = page.title
     text = page.body
+    assert text is not None
     if title.startswith("Thesaurus:Requested entries "):
         return None
     if "/" in title:
@@ -92,7 +100,7 @@ def extract_thesaurus_page(
     pos = None
     sense = None
     linkage = None
-    subtitle_tags = ()
+    subtitle_tags = []
     entry_id = -1
     # Some pages don't have a language subtitle, but use
     # {{ws header|lang=xx}}
@@ -100,7 +108,7 @@ def extract_thesaurus_page(
     if m:
         lang = code_to_name(m.group(1), "en")
 
-    def recurse(contents) -> Optional[List[ThesaurusTerm]]:
+    def recurse(contents) -> Optional[list[ThesaurusTerm]]:
         nonlocal lang
         nonlocal pos
         nonlocal sense
@@ -119,7 +127,7 @@ def extract_thesaurus_page(
                     thesaurus.extend(x_result)
             return thesaurus
         if not isinstance(contents, WikiNode):
-            return
+            return None
         kind = contents.kind
         if kind == NodeKind.LIST and not contents.contain_node(NodeKind.LIST):
             if lang is None:
@@ -127,10 +135,10 @@ def extract_thesaurus_page(
                     f"{title=} {lang=} UNEXPECTED LIST WITHOUT LANG: "
                     + str(contents)
                 )
-                return
+                return None
             thesaurus = []
             for node in contents.children:
-                if node.kind != NodeKind.LIST_ITEM:
+                if isinstance(node, str) or node.kind != NodeKind.LIST_ITEM:
                     continue
                 w = clean_node(wxr, None, node.children)
                 if "*" in w:
@@ -183,7 +191,7 @@ def extract_thesaurus_page(
 
                 # If the word is now empty or separator, skip
                 if not w or w.startswith("---") or w == "\u2014":
-                    return
+                    return None
                 rel = linkage or "synonyms"
                 for w1 in w.split(","):
                     m = re.match(r"(?s)(.*?)\s*XLITS(.*?)XLITE\s*", w1)
@@ -236,6 +244,8 @@ def extract_thesaurus_page(
             sense = None
             linkage = None
             return recurse(contents.children)
+        if TYPE_CHECKING:
+            assert isinstance(wxr.config.OTHER_SUBTITLES["sense"], str)
         if subtitle.lower().startswith(
             wxr.config.OTHER_SUBTITLES["sense"].lower()
         ):
@@ -256,7 +266,7 @@ def extract_thesaurus_page(
             "abbreviation",
             "symbol",
         ):
-            return
+            return None
         if subtitle in wxr.config.LINKAGE_SUBTITLES:
             linkage = wxr.config.LINKAGE_SUBTITLES[subtitle]
             return recurse(contents.children)
