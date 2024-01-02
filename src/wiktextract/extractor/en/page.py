@@ -3024,9 +3024,12 @@ def parse_language(wxr: WiktextractContext,
             stack.pop()
 
         if len(redirect_list) > 0:
-            new_page_data = base_data.copy()
-            new_page_data["redirects"] = redirect_list
-            page_datas.append(new_page_data)
+            if len(pos_data) > 0:
+                pos_data["redirects"] = redirect_list
+            else:
+                new_page_data = base_data.copy()
+                new_page_data["redirects"] = redirect_list
+                page_datas.append(new_page_data)
 
     def extract_examples(others, sense_base):
         """Parses through a list of definitions and quotes to find examples.
