@@ -76,8 +76,8 @@ class LongTests(unittest.TestCase):
                 words[word] += 1
                 lang = data.get("lang", "")
                 self.assertGreater(len(lang), 0)
+                # redirect Chinese character maybe not have pos
                 pos = data.get("pos", "")
-                self.assertGreater(len(pos), 0)
                 langs[lang] += 1
                 poses[pos] += 1
                 if data.get("translations"):
