@@ -2,12 +2,10 @@
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import json
 import unittest
 from unittest.mock import patch
 
 from wikitextprocessor import Page, Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.page import parse_page
 from wiktextract.thesaurus import close_thesaurus_db
@@ -491,6 +489,34 @@ foo
                     "lang_code": "zh",
                     "redirects": ["你們", "妳們"],
                     "word": "你们",
+                }
+            ],
+        )
+        data = parse_page(
+            self.wxr,
+            "车",
+            """
+==Chinese==
+===Glyph origin===
+From cursive script of 車.
+
+===Definitions===
+{{zh-see|車|s}}
+{{zh-see|龺|ss}}
+            """,
+        )
+        self.assertEqual(
+            data,
+            [
+                {
+                    "etymology_templates": [],
+                    "etymology_text": "From cursive script of 車.",
+                    "lang": "Chinese",
+                    "lang_code": "zh",
+                    "redirects": ["車", "龺"],
+                    "word": "车",
+                    "pos": "character",
+                    "senses": [{"tags": ["no-gloss"]}],
                 }
             ],
         )
