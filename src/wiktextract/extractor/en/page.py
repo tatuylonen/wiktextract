@@ -44,6 +44,7 @@ from wiktextract.page import (
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.tags import valid_tags
 from wiktextract.translations import parse_translation_item_text
+from wiktextract.type_utils import WordData
 from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby, parse_ruby
@@ -277,7 +278,7 @@ for x in PANEL_PREFIXES & wikipedia_templates:
 # (e.g., fi-noun, fi-adj, en-verb) to permitted parts-of-speech in which
 # it could validly occur.  This is used as just a sanity check to give
 # warnings about probably incorrect coding in Wiktionary.
-template_allowed_pos_map = {
+template_allowed_pos_map: dict[str, list[str]] = {
     "abbr": ["abbrev"],
     "noun": ["noun", "abbrev", "pron", "name", "num", "adj_noun"],
     "plural noun": ["noun", "name"],
@@ -320,7 +321,7 @@ for k, v in template_allowed_pos_map.items():
 
 # Templates ignored during etymology extraction, i.e., these will not be listed
 # in the extracted etymology templates.
-ignored_etymology_templates = [
+ignored_etymology_templates: list[str] = [
     "...",
     "IPAchar",
     "ipachar",
@@ -368,7 +369,7 @@ ignored_descendants_templates_re = ignored_etymology_templates_re
 # Set of template names that are used to define usage examples.  If the usage
 # example contains one of these templates, then it its type is set to
 # "example"
-usex_templates = {
+usex_templates: set[str] = {
     "afex",
     "affixusex",
     "el-example",
@@ -410,7 +411,7 @@ usex_templates = {
     "zh-x",
 }
 
-stop_head_at_these_templates = {
+stop_head_at_these_templates: set[str] = {
     "category",
     "cat",
     "topics",
@@ -424,7 +425,7 @@ stop_head_at_these_templates = {
 # Set of template names that are used to define quotation examples.  If the
 # usage example contains one of these templates, then its type is set to
 # "quotation".
-quotation_templates = {
+quotation_templates: set[str] = {
     "collapse-quote",
     "quote-av",
     "quote-book",
@@ -449,7 +450,7 @@ quotation_templates = {
 
 # Template name component to linkage section listing.  Integer section means
 # default section, starting at that argument.
-template_linkage_mappings = [
+template_linkage_mappings: list[list[Union[str, int]]] = [
     ["syn", "synonyms"],
     ["synonyms", "synonyms"],
     ["ant", "antonyms"],
@@ -464,7 +465,7 @@ template_linkage_mappings = [
 ]
 
 # Maps template name used in a word sense to a linkage field that it adds.
-sense_linkage_templates = {
+sense_linkage_templates: dict[str, str] = {
     "syn": "synonyms",
     "synonyms": "synonyms",
     "hyp": "hyponyms",
@@ -474,15 +475,24 @@ sense_linkage_templates = {
 }
 
 
-def decode_html_entities(v):
+def decode_html_entities(v: Union[str, int]) -> str:
     """Decodes HTML entities from a value, converting them to the respective
     Unicode characters/strings."""
     if isinstance(v, int):
-        v = str(v)
+        # I changed this to return str(v) instead of v = str(v),
+        # but there might have been the intention to have more logic
+        # here. html.unescape would not do anything special with an integer,
+        # it needs html escape symbols (&xx;).
+        return str(v)
     return html.unescape(v)
 
 
-def parse_sense_linkage(wxr, data, name, ht):
+def parse_sense_linkage(wxr:
+                        WiktextractContext,
+                        data: WordData,
+                        name: str,
+                        ht: TemplateArgs,
+):
     """Parses a linkage (synonym, etc) specified in a word sense."""
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(data, dict)
@@ -496,8 +506,8 @@ def parse_sense_linkage(wxr, data, name, ht):
             w = w[10:]
         if not w:
             break
-        tags = []
-        topics = []
+        tags: list[str] = []
+        topics: list[str] = []
         english = None
         # Try to find qualifiers for this synonym
         q = ht.get("q{}".format(i - 1))
