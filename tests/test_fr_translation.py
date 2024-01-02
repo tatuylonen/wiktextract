@@ -23,10 +23,11 @@ class TestTranslation(TestCase):
         root = self.wxr.wtp.parse(
             "=== Traductions ===\n* {{trad-début|Formule pour saluer}}\n* {{T|sq}} : {{trad+|sq|mirëdita}}, {{trad-|sq|mirë mëngjes}} ''(le matin)''"
         )
-        page_data = [
-            WordEntry(word="bonjour", lang_code="fr", lang_name="Français")
-        ]
-        extract_translation(self.wxr, page_data, root.children[0])
+        base_data = WordEntry(
+            word="bonjour", lang_code="fr", lang_name="Français"
+        )
+        page_data = [base_data.model_copy(deep=True)]
+        extract_translation(self.wxr, page_data, base_data, root.children[0])
         self.assertEqual(
             page_data[-1].model_dump(exclude_defaults=True),
             {
@@ -59,10 +60,11 @@ class TestTranslation(TestCase):
         root = self.wxr.wtp.parse(
             "=== Traductions ===\n* {{T|ar}} : {{trad+|ar|مرحبا|dif=مرحبًا|tr={{transliterator|ar|مرحبا}}}} {{informel|nocat=1}}"
         )
-        page_data = [
-            WordEntry(word="bonjour", lang_code="fr", lang_name="Français")
-        ]
-        extract_translation(self.wxr, page_data, root.children[0])
+        base_data = WordEntry(
+            word="bonjour", lang_code="fr", lang_name="Français"
+        )
+        page_data = [base_data.model_copy(deep=True)]
+        extract_translation(self.wxr, page_data, base_data, root.children[0])
         self.assertEqual(
             page_data[-1].model_dump(exclude_defaults=True),
             {
@@ -87,10 +89,11 @@ class TestTranslation(TestCase):
         root = self.wxr.wtp.parse(
             "=== Traductions ===\n* {{T|mn}} : {{trad+|mn|сайн байна уу|tr=sain baina uu|tradi=ᠰᠠᠶᠢᠨ ᠪᠠᠶᠢᠨ᠎ᠠ ᠤᠤ}}"
         )
-        page_data = [
-            WordEntry(word="bonjour", lang_code="fr", lang_name="Français")
-        ]
-        extract_translation(self.wxr, page_data, root.children[0])
+        base_data = WordEntry(
+            word="bonjour", lang_code="fr", lang_name="Français"
+        )
+        page_data = [base_data.model_copy(deep=True)]
+        extract_translation(self.wxr, page_data, base_data, root.children[0])
         self.assertEqual(
             page_data[-1].model_dump(exclude_defaults=True),
             {
@@ -117,10 +120,11 @@ class TestTranslation(TestCase):
         root = self.wxr.wtp.parse(
             "=== Traductions ===\n* {{T|de}} : {{trad|de|Kambium|n}}"
         )
-        page_data = [
-            WordEntry(word="cambium", lang_code="fr", lang_name="Français")
-        ]
-        extract_translation(self.wxr, page_data, root.children[0])
+        base_data = WordEntry(
+            word="cambium", lang_code="fr", lang_name="Français"
+        )
+        page_data = [base_data.model_copy(deep=True)]
+        extract_translation(self.wxr, page_data, base_data, root.children[0])
         self.assertEqual(
             page_data[-1].model_dump(exclude_defaults=True),
             {
@@ -140,18 +144,31 @@ class TestTranslation(TestCase):
 
     def test_template_sense_parameter(self):
         self.wxr.wtp.start_page("masse")
-        self.wxr.wtp.add_page("Modèle:info lex", 10, body="(Finance)")
-        self.wxr.wtp.add_page("Modèle:T", 10, body="Croate")
-        self.wxr.wtp.add_page("Modèle:trad+", 10, body="masa")
-        root = self.wxr.wtp.parse(
-            """=== Traductions ===
-{{trad-début|{{info lex|finance}}|12}}
-* {{T|hr}} : {{trad+|hr|masa}}"""
+        self.wxr.wtp.add_page("Modèle:S", 10, "{{{1}}}")
+        self.wxr.wtp.add_page("Modèle:info lex", 10, "(Finance)")
+        self.wxr.wtp.add_page(
+            "Modèle:T",
+            10,
+            """{{#switch: {{{1}}}
+| hr = Croate
+| af = Afrikaans
+}}""",
         )
-        page_data = [
-            WordEntry(word="masse", lang_code="fr", lang_name="Français")
-        ]
-        extract_translation(self.wxr, page_data, root.children[0])
+        self.wxr.wtp.add_page("Modèle:trad+", 10, "masa")
+        root = self.wxr.wtp.parse(
+            """==== {{S|traductions}} ====
+{{trad-début|{{info lex|finance}}|12}}
+* {{T|hr}} : {{trad+|hr|masa}}
+{{trad-fin}}
+
+===== {{S|traductions à trier}} =====
+* {{T|af|trier}} : {{trad+|af|massa}}"""
+        )
+        base_data = WordEntry(
+            word="masse", lang_code="fr", lang_name="Français"
+        )
+        page_data = [base_data.model_copy(deep=True)]
+        extract_translation(self.wxr, page_data, base_data, root.children[0])
         self.assertEqual(
             page_data[-1].model_dump(exclude_defaults=True),
             {
@@ -164,6 +181,12 @@ class TestTranslation(TestCase):
                         "lang_name": "Croate",
                         "word": "masa",
                         "sense": "(Finance)",
+                        "sense_index": 12,
+                    },
+                    {
+                        "lang_code": "af",
+                        "lang_name": "Afrikaans",
+                        "word": "massa",
                     },
                 ],
             },

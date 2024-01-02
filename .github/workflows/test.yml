@@ -37,7 +37,7 @@ jobs:
           make coverage_report
           make github_pages REPO=${{ github.repository }} SHA=${{ github.sha }}
         if: github.ref_name == 'master' && matrix.python-version == '3.12'
-      - uses: actions/upload-pages-artifact@v2
+      - uses: actions/upload-pages-artifact@v3
         if: github.ref_name == 'master' && matrix.python-version == '3.12'
 
   deploy:
@@ -52,4 +52,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v3
+        uses: actions/deploy-pages@v4

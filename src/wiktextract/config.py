@@ -68,6 +68,8 @@ class WiktionaryConfig:
         "ZH_PRON_TAGS",
         "analyze_templates",
         "extract_thesaurus_pages",
+        "save_ns_names",
+        "extract_ns_names",
     )
 
     def __init__(
@@ -135,6 +137,20 @@ class WiktionaryConfig:
         self.set_attr_from_json("ZH_PRON_TAGS", "zh_pron_tags.json")
         self.analyze_templates = True  # find templates that need pre-expand
         self.extract_thesaurus_pages = True
+        # these namespace pages will be copied from the XML dump file and
+        # saved to a SQLite db file
+        self.save_ns_names = [
+            "Main",
+            "Category",  # do we use this?
+            "Appendix",
+            "Project",
+            "Thesaurus",
+            "Module",
+            "Template",
+            "Reconstruction",
+        ]
+        # these are extracted namespaces
+        self.extract_ns_names = ["Main", "Reconstruction"]
         self.load_edition_settings()
 
     def merge_return(self, ret: CollatedErrorReturnData):

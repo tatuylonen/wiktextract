@@ -45,18 +45,6 @@ from wiktextract.thesaurus import (
 from wiktextract.wiktionary import write_json_data
 from wiktextract.wxr_context import WiktextractContext
 
-# Pages within these namespaces are captured.
-RECOGNIZED_NAMESPACE_NAMES = [
-    "Main",
-    "Category",
-    "Appendix",
-    "Project",
-    "Thesaurus",
-    "Module",
-    "Template",
-    "Reconstruction",
-]
-
 
 def process_single_page(
     path_or_title: str,
@@ -440,8 +428,8 @@ def main():
     try:
         if args.path is not None:
             namespace_ids = {
-                wxr.wtp.NAMESPACE_DATA.get(name, {}).get("id")
-                for name in RECOGNIZED_NAMESPACE_NAMES
+                wxr.wtp.NAMESPACE_DATA.get(name, {}).get("id", 0)
+                for name in wxr.config.save_ns_names
             }
             # Parse the normal full Wiktionary data dump
             parse_wiktionary(

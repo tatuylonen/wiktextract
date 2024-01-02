@@ -21,9 +21,9 @@ def extract_gloss(
             )
         )
         gloss_data = Sense()
-        gloss_start = 0
         # process modifier, theme tempaltes before gloss text
         # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_de_tous_les_modèles/Précisions_de_sens
+        tag_indexes = set()
         for index, gloss_node in enumerate(gloss_nodes):
             if isinstance(gloss_node, TemplateNode):
                 categories_data = defaultdict(list)
@@ -31,7 +31,6 @@ def extract_gloss(
                 if expanded_text.startswith("(") and expanded_text.endswith(
                     ")"
                 ):
-                    gloss_start = index + 1
                     tag = expanded_text.strip("() \n")
                     if len(tag) > 0:
                         gloss_data.tags.append(tag)
@@ -39,29 +38,24 @@ def extract_gloss(
                         gloss_data.categories.extend(
                             categories_data["categories"]
                         )
-
-        gloss_only_nodes = []
-        tag_indexes = set()
-        for index, node in enumerate(gloss_nodes[gloss_start:], gloss_start):
+                    tag_indexes.add(index)
             # if an italic node is between parentheses then it's a tag, also
             # don't add the parenthese strings to `gloss_only_nodes`
-            if (
-                isinstance(node, WikiNode)
-                and node.kind == NodeKind.ITALIC
-                and index > gloss_start
+            elif (
+                isinstance(gloss_node, WikiNode)
+                and gloss_node.kind == NodeKind.ITALIC
                 and isinstance(gloss_nodes[index - 1], str)
                 and gloss_nodes[index - 1].strip() == "("
                 and index + 1 < len(gloss_nodes)
                 and isinstance(gloss_nodes[index + 1], str)
                 and gloss_nodes[index + 1].strip() == ")"
             ):
-                gloss_data.tags.append(clean_node(wxr, None, node))
+                gloss_data.tags.append(clean_node(wxr, None, gloss_node))
                 tag_indexes |= {index - 1, index, index + 1}
-                continue
 
         gloss_only_nodes = [
             node
-            for index, node in enumerate(gloss_nodes[gloss_start:], gloss_start)
+            for index, node in enumerate(gloss_nodes)
             if index not in tag_indexes
         ]
         gloss_text = clean_node(wxr, gloss_data, gloss_only_nodes)

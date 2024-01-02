@@ -1,7 +1,7 @@
 from typing import Optional
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -9,7 +9,10 @@ from .models import Translation, WordEntry
 
 
 def extract_translation(
-    wxr: WiktextractContext, page_data: list[WordEntry], level_node: WikiNode
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: WikiNode,
 ) -> None:
     base_translation_data = Translation()
     for level_node_child in level_node.filter_empty_str_child():
@@ -38,6 +41,10 @@ def extract_translation(
                                     wxr, child_node, previous_node, page_data
                                 )
                             previous_node = child_node
+            elif level_node_child.kind in LEVEL_KIND_FLAGS:
+                from .page import parse_section
+
+                parse_section(wxr, page_data, base_data, level_node_child)
 
 
 def process_italic_node(
@@ -70,11 +77,13 @@ def process_translation_templates(
         return
     elif template_node.template_name == "trad-début":
         # translation box start: https://fr.wiktionary.org/wiki/Modèle:trad-début
-        sense_parameter = template_node.template_parameters.get(1)
-        if sense_parameter is not None:
-            sense_text = clean_node(wxr, None, sense_parameter)
-            if len(sense_text) > 0:
-                base_translation_data.sense = sense_text
+        sense_parameter = template_node.template_parameters.get(1, "")
+        sense_text = clean_node(wxr, None, sense_parameter)
+        base_translation_data.sense = sense_text
+        sense_index_str = template_node.template_parameters.get(2, "0")
+        if isinstance(sense_index_str, str) and sense_index_str.isdigit():
+            base_translation_data.sense_index = int(sense_index_str)
+
     elif template_node.template_name == "T":
         # Translation language: https://fr.wiktionary.org/wiki/Modèle:T
         base_translation_data.lang_code = template_node.template_parameters.get(
@@ -85,6 +94,8 @@ def process_translation_templates(
         )
     elif template_node.template_name.startswith("trad"):
         # Translation term: https://fr.wiktionary.org/wiki/Modèle:trad
+        if 2 not in template_node.template_parameters:  # required parameter
+            return
         translation_term = clean_node(
             wxr,
             None,
