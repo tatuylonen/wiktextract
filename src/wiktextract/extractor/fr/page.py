@@ -6,6 +6,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .conjugation import extract_conjugation
 from .etymology import EtymologyData, extract_etymology, insert_etymology_data
 from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
@@ -150,6 +151,8 @@ def process_pos_block(
 
     form_line_nodes = child_nodes[form_line_start:gloss_start]
     extract_form_line(wxr, page_data, form_line_nodes)
+    if pos_type == "verb":
+        extract_conjugation(wxr, page_data[-1])
 
 
 def parse_page(
