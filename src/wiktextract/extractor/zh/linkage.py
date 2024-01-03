@@ -1,8 +1,8 @@
 from typing import Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
-from wiktextract.page import LEVEL_KINDS, clean_node
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
+from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby
@@ -115,7 +115,7 @@ def extract_linkages(
                     extract_linkages(
                         wxr, page_data, [expanded_node], linkage_type, sense
                     )
-            elif node.kind in LEVEL_KINDS:
+            elif node.kind in LEVEL_KIND_FLAGS:
                 from .page import parse_section
 
                 base_data = WordEntry(

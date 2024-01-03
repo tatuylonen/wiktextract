@@ -2,8 +2,8 @@ from collections import defaultdict
 from typing import Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
-from wiktextract.page import LEVEL_KINDS, clean_node
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
+from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from .models import WordEntry
@@ -19,7 +19,7 @@ def extract_etymology(
     level_node_index = len(nodes)
     # find nodes after the etymology subtitle and before the next level node
     for index, node in enumerate(nodes):
-        if isinstance(node, WikiNode) and node.kind in LEVEL_KINDS:
+        if isinstance(node, WikiNode) and node.kind in LEVEL_KIND_FLAGS:
             level_node_index = index
             break
 

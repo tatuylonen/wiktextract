@@ -2,8 +2,8 @@ import logging
 from typing import Any, Optional
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
-from wiktextract.page import LEVEL_KINDS, clean_node
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
+from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from .etymology import EtymologyData, extract_etymology, insert_etymology_data
@@ -145,7 +145,7 @@ def process_pos_block(
             elif child.kind == NodeKind.LIST:
                 gloss_start = index
                 extract_gloss(wxr, page_data, child)
-            elif child.kind in LEVEL_KINDS:
+            elif child.kind in LEVEL_KIND_FLAGS:
                 parse_section(wxr, page_data, base_data, child)
 
     form_line_nodes = child_nodes[form_line_start:gloss_start]
