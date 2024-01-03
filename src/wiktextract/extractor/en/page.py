@@ -687,7 +687,7 @@ def parse_sense_linkage(
             break
         tags: list[str] = []
         topics: list[str] = []
-        english = None
+        english: Optional[str] = None
         # Try to find qualifiers for this synonym
         q = ht.get("q{}".format(i - 1))
         if q:
@@ -764,14 +764,14 @@ def parse_language(
     base_data = {"word": word, "lang": language, "lang_code": lang_code}
     if is_reconstruction:
         data_append(base_data, "tags", "reconstruction")
-    sense_data = {}
-    pos_data = {}  # For a current part-of-speech
-    etym_data = {}  # For one etymology
-    pos_datas = []
-    etym_datas = []
-    page_datas = []
+    sense_data: WordData = {}
+    pos_data: WordData = {}  # For a current part-of-speech
+    etym_data: WordData = {}  # For one etymology
+    pos_datas: list[WordData] = []
+    etym_datas: list[WordData] = []
+    page_datas: list[WordData] = []
     have_etym = False
-    stack = []
+    stack: list[str] = []  # names of items on the "stack"
 
     def merge_base(data, base):
         for k, v in base.items():
