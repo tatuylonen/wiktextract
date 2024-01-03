@@ -1439,10 +1439,10 @@ def clean_value(wxr: WiktextractContext,
     title = re.sub(r"\[//[^]\s]+\s+edit\s*\]", "", title)
     # Replace links by their text
 
-    category_ns_data: Optional[NamespaceDataEntry]
+    category_ns_data: NamespaceDataEntry
     # XXX "Category" -> config variable for portability
-    category_ns_data = wxr.wtp.NAMESPACE_DATA.get("Category", None)
-    assert category_ns_data is not None
+    category_ns_data = wxr.wtp.NAMESPACE_DATA.get("Category", {}) # type: ignore[typeddict-item]
+    # Fail if we received empty dict from .get()
     category_ns_names = {category_ns_data["name"]} | set(
         category_ns_data["aliases"]
     )

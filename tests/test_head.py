@@ -703,11 +703,6 @@ class HeadTests(unittest.TestCase):
 
     def test_head_templates_regex(self):
         # GitHub issue 405
-        import re
-
-        from wiktextract.extractor.en.page import init_head_tag_re
-
-        init_head_tag_re()
         from wiktextract.extractor.en.page import HEAD_TAG_RE
 
         self.assertTrue(HEAD_TAG_RE.fullmatch("ru-noun+") is not None)
