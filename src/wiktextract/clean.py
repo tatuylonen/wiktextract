@@ -9,14 +9,20 @@
 import re
 import html
 import unicodedata
+from typing import (
+    Callable,
+    Optional,
+    Union
+)
 from wikitextprocessor.common import MAGIC_FIRST, MAGIC_LAST
+from wikitextprocessor.core import NamespaceDataEntry
 from .wxr_context import WiktextractContext
 
 ######################################################################
 # Cleaning values into plain text.
 ######################################################################
 
-superscript_ht = {
+superscript_ht: dict[str, str] = {
     "0": "⁰",
     "1": "¹",
     "2": "²",
@@ -91,7 +97,7 @@ superscript_ht = {
     "∞": "\u2002᪲"  # This is a KLUDGE
 }
 
-subscript_ht = {
+subscript_ht: dict[str, str] = {
     "0": "₀",
     "1": "₁",
     "2": "₂",
@@ -131,7 +137,7 @@ subscript_ht = {
     "χ": "ᵪ",
 }
 
-def to_superscript(text):
+def to_superscript(text: str) -> str:
     "Converts text to superscript."
     if not text:
         return ""
@@ -141,7 +147,7 @@ def to_superscript(text):
         return "^" + text
     return "^({})".format(text)
 
-def to_subscript(text):
+def to_subscript(text: str) -> str:
     """Converts text to subscript."""
     if not text:
         return ""
@@ -151,14 +157,14 @@ def to_subscript(text):
         return "_" + text
     return "_({})".format(text)
 
-def to_chem(text):
+def to_chem(text: str) -> str:
     """Converts text to chemical formula, making digits subscript."""
     return "".join(to_subscript(x) if x.isdigit() else x
                    for x in text)
 
 # Mapping from Latex names to Unicode characters/strings.  This is the
 # default mapping (some cases are handled specially in the code).
-math_map = {
+math_map: dict[str, str] = {
     # XXX should probably change greek characters to non-slanted ones?
     "AC": "∿",
     "APLcomment": "⍝",
@@ -912,7 +918,7 @@ math_map = {
     "mathrm": "",
 }
 
-mathcal_map = {
+mathcal_map: dict[str, str] = {
     "A": "𝒜",
     "B": "ℬ",
     "C": "𝒞",
@@ -967,7 +973,7 @@ mathcal_map = {
     "z": "𝓏",
 }
 
-mathfrak_map = {
+mathfrak_map: dict[str, str]= {
     "A": "𝔄",
     "B": "𝔅",
     "C": "ℭ",
@@ -994,7 +1000,7 @@ mathfrak_map = {
     "Z": "ℨ",
 }
 
-mathbb_map = {
+mathbb_map: dict[str, str] = {
     "A": "𝔸",
     "B": "𝔹",
     "C": "ℂ",
@@ -1064,23 +1070,24 @@ mathbb_map = {
     "9": "𝟡",
 }
 
-def mathcal_fn(text):
+def mathcal_fn(text: str) -> str:
     return "".join(mathcal_map.get(x, x) for x in text)
 
-def mathfrak_fn(text):
+def mathfrak_fn(text: str) -> str:
     return "".join(mathfrak_map.get(x, x) for x in text)
 
-def mathbb_fn(text):
+def mathbb_fn(text: str) -> str:
     return "".join(mathbb_map.get(x, x) for x in text)
 
-def to_math(text):
+def to_math(text: str) -> str:
     """Converts a mathematical formula to ASCII."""
     # print("to_math: {!r}".format(text))
-    magic_vec = []
+    magic_vec: list[str] = []
 
-    def expand(text):
+    def expand(text: str) -> str:
         while True:
             orig = text
+            # formatting with {:c} converts input into character
             text = re.sub(r"[{:c}-{:c}]".format(MAGIC_FIRST, MAGIC_LAST),
                           lambda m: magic_vec[ord(m.group(0)) - MAGIC_FIRST],
                           text)
@@ -1088,14 +1095,18 @@ def to_math(text):
                 break
         return text
 
-    def recurse(text):
-        def math_magic(text, left, right, fn):
-            regexp = r"{}([^{}{}]+){}".format(
+    def recurse(text: str) -> str:
+        def math_magic(text: str,
+                        left: str,
+                        right: str,
+                        fn: Callable[[str], str]
+        ) -> str:
+            regexp_str = r"{}([^{}{}]+){}".format(
                 re.escape(left), re.escape(left),
                 re.escape(right), re.escape(right))
-            regexp = re.compile(regexp)
+            regexp = re.compile(regexp_str)
 
-            def repl(m):
+            def repl(m: re.Match) -> str:
                 magic = chr(MAGIC_FIRST + len(magic_vec))
                 t = fn(m.group(1)).strip()
                 magic_vec.append(t)
@@ -1108,8 +1119,8 @@ def to_math(text):
                     break
             return text
 
-        def expand_group(v):
-            fn = None
+        def expand_group(v: str) -> str:
+            fn: Optional[Callable[[str], str]] = None
             if re.match(r"\\mathcal\b", v):
                 fn = mathcal_fn
                 v = v[8:].strip()
@@ -1181,7 +1192,7 @@ def to_math(text):
             v = expand(v)
             return v
 
-        parts = []
+        parts: list[str] = []
         while True:
             orig = text
             text = math_magic(text, "{", "}", recurse)
@@ -1223,7 +1234,7 @@ def to_math(text):
     return text
 
 
-def bold_follows(parts, i):
+def bold_follows(parts: list[str], i: int) -> bool:
     """Checks if there is a bold (''') in parts after parts[i].  We allow
     intervening italics ('')."""
     parts = parts[i + 1:]
@@ -1235,7 +1246,7 @@ def bold_follows(parts, i):
     return False
 
 
-def remove_italic_and_bold(text):
+def remove_italic_and_bold(text: str) -> str:
     """Based on token_iter in wikitextprocessor"""
     assert isinstance(text, str)
     lines = re.split(r"(\n+)", text)  # Lines and separators
@@ -1300,7 +1311,11 @@ def remove_italic_and_bold(text):
     new_text_parts = new_text_parts[:-1] # remove last \n
     return "".join(new_text_parts)
 
-def clean_value(wxr, title, no_strip=False, no_html_strip=False):
+def clean_value(wxr: WiktextractContext,
+                title: str,
+                no_strip=False,
+                no_html_strip=False
+) -> str:
     """Cleans a title or value into a normal string.  This should basically
     remove any Wikimedia formatting from it: HTML tags, templates, links,
     emphasis, etc.  This will also merge multiple whitespaces into one
@@ -1308,9 +1323,10 @@ def clean_value(wxr, title, no_strip=False, no_html_strip=False):
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(title, str)
 
-    def repl_1(m):
+    def repl_1(m: re.Match) -> str:
         return clean_value(wxr, m.group(1), no_strip=True)
-    def repl_exturl(m):
+
+    def repl_exturl(m: re.Match) -> str:
         args = re.split(r"\s+", m.group(1))
         i = 0
         while i < len(args) - 1:
@@ -1318,33 +1334,33 @@ def clean_value(wxr, title, no_strip=False, no_html_strip=False):
                 break
             i += 1
         return " ".join(args[i:])
-    def repl_link(m):
+    def repl_link(m: re.Match) -> str:
         if m.group(2) and m.group(2).lower() in ("file", "image"):
             return ""
         v = m.group(3).split("|")
         return clean_value(wxr, v[0], no_strip=True)
-    def repl_link_bars(m):
+    def repl_link_bars(m: re.Match) -> str:
         lnk = m.group(1)
         if re.match(r"(?si)(File|Image)\s*:", lnk):
             return ""
         return clean_value(wxr, m.group(4) or m.group(2) or "",
                            no_strip=True)
 
-    def repl_1_sup(m):
+    def repl_1_sup(m: re.Match) -> str:
         return to_superscript(clean_value(wxr, m.group(1)))
 
-    def repl_1_sub(m):
+    def repl_1_sub(m: re.Match) -> str:
         return to_subscript(clean_value(wxr, m.group(1)))
 
-    def repl_1_chem(m):
+    def repl_1_chem(m: re.Match) -> str:
         return to_chem(clean_value(wxr, m.group(1)))
 
-    def repl_1_math(m):
+    def repl_1_math(m: re.Match) -> str:
         v = to_math(m.group(1))
         # print("to_math:", ascii(v))
         return v
 
-    def repl_1_syntaxhighlight(m):
+    def repl_1_syntaxhighlight(m: re.Match) -> str:
         # Content is preformatted
         return "\n" + m.group(1).strip() + "\n"
 
@@ -1423,9 +1439,12 @@ def clean_value(wxr, title, no_strip=False, no_html_strip=False):
     title = re.sub(r"\[//[^]\s]+\s+edit\s*\]", "", title)
     # Replace links by their text
 
-    category_ns_data = wxr.wtp.NAMESPACE_DATA.get("Category", {})
-    category_ns_names = {category_ns_data.get("name")} | set(
-        category_ns_data.get("aliases")
+    category_ns_data: NamespaceDataEntry
+    # XXX "Category" -> config variable for portability
+    category_ns_data = wxr.wtp.NAMESPACE_DATA.get("Category", {}) # type: ignore[typeddict-item]
+    # Fail if we received empty dict from .get()
+    category_ns_names = {category_ns_data["name"]} | set(
+        category_ns_data["aliases"]
     )
     category_names_pattern = rf"(?:{'|'.join(category_ns_names)})"
     while True:
@@ -1489,7 +1508,10 @@ def clean_value(wxr, title, no_strip=False, no_html_strip=False):
     return title
 
 
-def clean_template_args(wxr, ht, no_strip=False):
+def clean_template_args(wxr: WiktextractContext,
+                        ht: dict[Union[int, str], str], # XXX -> "TemplateArgs"
+                        no_strip=False
+) -> dict[str, str]:
     """Cleans all values in a template argument dictionary and returns the
     cleaned dictionary."""
     assert isinstance(wxr, WiktextractContext)

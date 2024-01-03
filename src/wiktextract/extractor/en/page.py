@@ -9,7 +9,12 @@ import re
 import sys
 from collections import defaultdict
 from functools import partial
-from typing import Dict, List, Optional, Set, Union
+from re import Pattern
+from typing import (
+    Optional,
+    Set,
+    Union,
+)
 
 from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
@@ -39,6 +44,7 @@ from wiktextract.page import (
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.tags import valid_tags
 from wiktextract.translations import parse_translation_item_text
+from wiktextract.type_utils import WordData
 from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby, parse_ruby
@@ -46,499 +52,7 @@ from ..share import strip_nodes
 from .unsupported_titles import unsupported_title_map
 
 # Matches head tag
-HEAD_TAG_RE = None
-
-FLOATING_TABLE_TEMPLATES = {
-    # az-suffix-form creates a style=floatright div that is otherwise
-    # deleted; if it is not pre-expanded, we can intercept the template
-    # so we add this set into do_not_pre_expand, and intercept the
-    # templates in parse_part_of_speech
-    "az-suffix-forms",
-    "az-inf-p",
-    "kk-suffix-forms",
-    "ky-suffix-forms",
-    "tr-inf-p",
-    "tr-suffix-forms",
-    "tt-suffix-forms",
-    "uz-suffix-forms",
-}
-# These two should contain template names that should always be
-# pre-expanded when *first* processing the tree, or not pre-expanded
-# so that the template are left in place with their identifying
-# name intact for later filtering.
-
-DO_NOT_PRE_EXPAND_TEMPLATES = set()
-DO_NOT_PRE_EXPAND_TEMPLATES.update(FLOATING_TABLE_TEMPLATES)
-
-# Additional templates to be expanded in the pre-expand phase
-ADDITIONAL_EXPAND_TEMPLATES = {
-    "multitrans",
-    "multitrans-nowiki",
-    "trans-top",
-    "trans-top-also",
-    "trans-bottom",
-    "checktrans-top",
-    "checktrans-bottom",
-    "col1",
-    "col2",
-    "col3",
-    "col4",
-    "col5",
-    "col1-u",
-    "col2-u",
-    "col3-u",
-    "col4-u",
-    "col5-u",
-    "check deprecated lang param usage",
-    "deprecated code",
-    "ru-verb-alt-ё",
-    "ru-noun-alt-ё",
-    "ru-adj-alt-ё",
-    "ru-proper noun-alt-ё",
-    "ru-pos-alt-ё",
-    "ru-alt-ё",
-    "inflection of",
-    "no deprecated lang param usage",
-}
-
-# Inverse linkage for those that have them
-linkage_inverses = {
-    # XXX this is not currently used, move to post-processing
-    "synonyms": "synonyms",
-    "hypernyms": "hyponyms",
-    "hyponyms": "hypernyms",
-    "holonyms": "meronyms",
-    "meronyms": "holonyms",
-    "derived": "derived_from",
-    "coordinate_terms": "coordinate_terms",
-    "troponyms": "hypernyms",
-    "antonyms": "antonyms",
-    "instances": "instance_of",
-    "related": "related",
-}
-
-# Templates that are used to form panels on pages and that
-# should be ignored in various positions
-PANEL_TEMPLATES = {
-    "Character info",
-    "CJKV",
-    "French personal pronouns",
-    "French possessive adjectives",
-    "French possessive pronouns",
-    "Han etym",
-    "Japanese demonstratives",
-    "Latn-script",
-    "LDL",
-    "MW1913Abbr",
-    "Number-encoding",
-    "Nuttall",
-    "Spanish possessive adjectives",
-    "Spanish possessive pronouns",
-    "USRegionDisputed",
-    "Webster 1913",
-    "ase-rfr",
-    "attention",
-    "attn",
-    "beer",
-    "broken ref",
-    "ca-compass",
-    "character info",
-    "character info/var",
-    "checksense",
-    "compass-fi",
-    "copyvio suspected",
-    "delete",
-    "dial syn",  # Currently ignore these, but could be useful in Chinese/Korean
-    "etystub",
-    "examples",
-    "hu-corr",
-    "hu-suff-pron",
-    "interwiktionary",
-    "ja-kanjitab",
-    "ko-hanja-search",
-    "look",
-    "maintenance box",
-    "maintenance line",
-    "mediagenic terms",
-    "merge",
-    "missing template",
-    "morse links",
-    "move",
-    "multiple images",
-    "no inline",
-    "picdic",
-    "picdicimg",
-    "picdiclabel",
-    "polyominoes",
-    "predidential nomics",
-    "punctuation",  # This actually gets pre-expanded
-    "reconstructed",
-    "request box",
-    "rf-sound example",
-    "rfaccents",
-    "rfap",
-    "rfaspect",
-    "rfc",
-    "rfc-auto",
-    "rfc-header",
-    "rfc-level",
-    "rfc-pron-n",
-    "rfc-sense",
-    "rfclarify",
-    "rfd",
-    "rfd-redundant",
-    "rfd-sense",
-    "rfdate",
-    "rfdatek",
-    "rfdef",
-    "rfe",
-    "rfe/dowork",
-    "rfex",
-    "rfexp",
-    "rfform",
-    "rfgender",
-    "rfi",
-    "rfinfl",
-    "rfm",
-    "rfm-sense",
-    "rfp",
-    "rfp-old",
-    "rfquote",
-    "rfquote-sense",
-    "rfquotek",
-    "rfref",
-    "rfscript",
-    "rft2",
-    "rftaxon",
-    "rftone",
-    "rftranslit",
-    "rfv",
-    "rfv-etym",
-    "rfv-pron",
-    "rfv-quote",
-    "rfv-sense",
-    "selfref",
-    "split",
-    "stroke order",  # XXX consider capturing this?
-    "stub entry",
-    "t-needed",
-    "tbot entry",
-    "tea room",
-    "tea room sense",
-    # "ttbc", - XXX needed in at least on/Preposition/Translation page
-    "unblock",
-    "unsupportedpage",
-    "video frames",
-    "was wotd",
-    "wrongtitle",
-    "zh-forms",
-    "zh-hanzi-box",
-}
-
-# lookup table for the tags of Chinese dialectal synonyms
-zh_tag_lookup = {
-    "Formal": ["formal"],
-    "Written-Standard-Chinese": ["Standard-Chinese"],
-    "historical or Internet slang": ["historical", "internet-slang"],
-    "now usually derogatory or offensive": ["offensive", "derogatory"],
-    "lofty": [],
-}
-
-# Template name prefixes used for language-specific panel templates (i.e.,
-# templates that create side boxes or notice boxes or that should generally
-# be ignored).
-PANEL_PREFIXES = {
-    "list:compass points/",
-    "list:Gregorian calendar months/",
-    "RQ:",
-}
-
-# Templates used for wikipedia links.
-wikipedia_templates = {
-    "wikipedia",
-    "slim-wikipedia",
-    "w",
-    "W",
-    "swp",
-    "wiki",
-    "Wikipedia",
-    "wtorw",
-}
-for x in PANEL_PREFIXES & wikipedia_templates:
-    print("WARNING: {!r} in both panel_templates and wikipedia_templates"
-          .format(x))
-
-# Mapping from a template name (without language prefix) for the main word
-# (e.g., fi-noun, fi-adj, en-verb) to permitted parts-of-speech in which
-# it could validly occur.  This is used as just a sanity check to give
-# warnings about probably incorrect coding in Wiktionary.
-template_allowed_pos_map = {
-    "abbr": ["abbrev"],
-    "noun": ["noun", "abbrev", "pron", "name", "num", "adj_noun"],
-    "plural noun": ["noun", "name"],
-    "plural-noun": ["noun", "name"],
-    "proper noun": ["noun", "name"],
-    "proper-noun": ["name", "noun"],
-    "prop": ["name", "noun"],
-    "verb": ["verb", "phrase"],
-    "gerund": ["verb"],
-    "particle": ["adv", "particle"],
-    "adj": ["adj", "adj_noun"],
-    "pron": ["pron", "noun"],
-    "name": ["name", "noun"],
-    "adv": ["adv", "intj", "conj", "particle"],
-    "phrase": ["phrase", "prep_phrase"],
-    "noun phrase": ["phrase"],
-    "ordinal": ["num"],
-    "number": ["num"],
-    "pos": ["affix", "name", "num"],
-    "suffix": ["suffix", "affix"],
-    "character": ["character"],
-    "letter": ["character"],
-    "kanji": ["character"],
-    "cont": ["abbrev"],
-    "interj": ["intj"],
-    "con": ["conj"],
-    "part": ["particle"],
-    "prep": ["prep", "postp"],
-    "postp": ["postp"],
-    "misspelling": ["noun", "adj", "verb", "adv"],
-    "part-form": ["verb"],
-}
-for k, v in template_allowed_pos_map.items():
-    for x in v:
-        if x not in PARTS_OF_SPEECH:
-            print("BAD PART OF SPEECH {!r} IN template_allowed_pos_map: {}={}"
-                  "".format(x, k, v))
-            assert False
-
-
-# Templates ignored during etymology extraction, i.e., these will not be listed
-# in the extracted etymology templates.
-ignored_etymology_templates = [
-    "...",
-    "IPAchar",
-    "ipachar",
-    "ISBN",
-    "isValidPageName",
-    "redlink category",
-    "deprecated code",
-    "check deprecated lang param usage",
-    "para",
-    "p",
-    "cite",
-    "Cite news",
-    "Cite newsgroup",
-    "cite paper",
-    "cite MLLM 1976",
-    "cite journal",
-    "cite news/documentation",
-    "cite paper/documentation",
-    "cite video game",
-    "cite video game/documentation",
-    "cite newsgroup",
-    "cite newsgroup/documentation",
-    "cite web/documentation",
-    "cite news",
-    "Cite book",
-    "Cite-book",
-    "cite book",
-    "cite web",
-    "cite-usenet",
-    "cite-video/documentation",
-    "Cite-journal",
-    "rfe",
-]
-# Regexp for matching ignored etymology template names.  This adds certain
-# prefixes to the names listed above.
-ignored_etymology_templates_re = re.compile(
-    r"^((cite-|R:|RQ:).*|" +
-    r"|".join(re.escape(x) for x in ignored_etymology_templates) +
-    r")$")
-
-# Regexp for matching ignored descendants template names. Right now we just
-# copy the ignored etymology templates
-ignored_descendants_templates_re = ignored_etymology_templates_re
-
-# Set of template names that are used to define usage examples.  If the usage
-# example contains one of these templates, then it its type is set to
-# "example"
-usex_templates = {
-    "afex",
-    "affixusex",
-    "el-example",
-    "el-x",
-    "example",
-    "examples",
-    "he-usex",
-    "he-x",
-    "hi-usex",
-    "hi-x",
-    "ja-usex-inline",
-    "ja-usex",
-    "ja-x",
-    "jbo-example",
-    "jbo-x",
-    "km-usex",
-    "km-x",
-    "ko-usex",
-    "ko-x",
-    "lo-usex",
-    "lo-x",
-    "ne-x",
-    "ne-usex",
-    "prefixusex",
-    "ryu-usex",
-    "ryu-x",
-    "shn-usex",
-    "shn-x",
-    "suffixusex",
-    "th-usex",
-    "th-x",
-    "ur-usex",
-    "ur-x",
-    "usex",
-    "usex-suffix",
-    "ux",
-    "uxi",
-    "zh-usex",
-    "zh-x",
-}
-
-stop_head_at_these_templates = {
-    "category",
-    "cat",
-    "topics",
-    "catlangname",
-    "c",
-    "C",
-    "top",
-    "cln",
-}
-
-# Set of template names that are used to define quotation examples.  If the
-# usage example contains one of these templates, then its type is set to
-# "quotation".
-quotation_templates = {
-    "collapse-quote",
-    "quote-av",
-    "quote-book",
-    "quote-GYLD",
-    "quote-hansard",
-    "quotei",
-    "quote-journal",
-    "quotelite",
-    "quote-mailing list",
-    "quote-meta",
-    "quote-newsgroup",
-    "quote-song",
-    "quote-text",
-    "quote",
-    "quote-us-patent",
-    "quote-video game",
-    "quote-web",
-    "quote-wikipedia",
-    "wikiquote",
-    "Wikiquote",
-}
-
-# Template name component to linkage section listing.  Integer section means
-# default section, starting at that argument.
-template_linkage_mappings = [
-    ["syn", "synonyms"],
-    ["synonyms", "synonyms"],
-    ["ant", "antonyms"],
-    ["antonyms", "antonyms"],
-    ["hyp", "hyponyms"],
-    ["hyponyms", "hyponyms"],
-    ["der", "derived"],
-    ["derived terms", "derived"],
-    ["coordinate terms", "coordinate_terms"],
-    ["rel", "related"],
-    ["col", 2],
-]
-
-# Maps template name used in a word sense to a linkage field that it adds.
-sense_linkage_templates = {
-    "syn": "synonyms",
-    "synonyms": "synonyms",
-    "hyp": "hyponyms",
-    "hyponyms": "hyponyms",
-    "ant": "antonyms",
-    "antonyms": "antonyms",
-}
-
-
-def decode_html_entities(v):
-    """Decodes HTML entities from a value, converting them to the respective
-    Unicode characters/strings."""
-    if isinstance(v, int):
-        v = str(v)
-    return html.unescape(v)
-
-
-def parse_sense_linkage(wxr, data, name, ht):
-    """Parses a linkage (synonym, etc) specified in a word sense."""
-    assert isinstance(wxr, WiktextractContext)
-    assert isinstance(data, dict)
-    assert isinstance(name, str)
-    assert isinstance(ht, dict)
-    field = sense_linkage_templates[name]
-    for i in range(2, 20):
-        w = ht.get(i) or ""
-        w = clean_node(wxr, data, w)
-        if w.startswith(ns_title_prefix_tuple(wxr, "Thesaurus")):
-            w = w[10:]
-        if not w:
-            break
-        tags = []
-        topics = []
-        english = None
-        # Try to find qualifiers for this synonym
-        q = ht.get("q{}".format(i - 1))
-        if q:
-            cls = classify_desc(q)
-            if cls == "tags":
-                tagsets1, topics1 = decode_tags(q)
-                for ts in tagsets1:
-                    tags.extend(ts)
-                topics.extend(topics1)
-            elif cls == "english":
-                if english:
-                    english += "; " + q
-                else:
-                    english = q
-        # Try to find English translation for this synonym
-        t = ht.get("t{}".format(i - 1))
-        if t:
-            if english:
-                english += "; " + t
-            else:
-                english = t
-
-        # See if the linkage contains a parenthesized alt
-        alt = None
-        m = re.search(r"\(([^)]+)\)$", w)
-        if m:
-            w = w[:m.start()].strip()
-            alt = m.group(1)
-
-        dt = {"word": w}
-        if tags:
-            data_extend(dt, "tags", tags)
-        if topics:
-            data_extend(dt, "topics", topics)
-        if english:
-            dt["english"] = english
-        if alt:
-            dt["alt"] = alt
-        data_append(data, field, dt)
-
-
-def init_head_tag_re():
-    global HEAD_TAG_RE
-    if HEAD_TAG_RE is None:
-        HEAD_TAG_RE = re.compile(
+HEAD_TAG_RE: Pattern = re.compile(
             r"^(head|Han char|arabic-noun|arabic-noun-form|"
             r"hangul-symbol|syllable-hangul)$|" +
             r"^(latin|" +
@@ -708,8 +222,506 @@ def init_head_tag_re():
             ]) +
             r")(-|/|\+|$)")
 
+FLOATING_TABLE_TEMPLATES: set[str] = {
+    # az-suffix-form creates a style=floatright div that is otherwise
+    # deleted; if it is not pre-expanded, we can intercept the template
+    # so we add this set into do_not_pre_expand, and intercept the
+    # templates in parse_part_of_speech
+    "az-suffix-forms",
+    "az-inf-p",
+    "kk-suffix-forms",
+    "ky-suffix-forms",
+    "tr-inf-p",
+    "tr-suffix-forms",
+    "tt-suffix-forms",
+    "uz-suffix-forms",
+}
+# These two should contain template names that should always be
+# pre-expanded when *first* processing the tree, or not pre-expanded
+# so that the template are left in place with their identifying
+# name intact for later filtering.
 
-def parse_language(wxr, langnode, language, lang_code):
+DO_NOT_PRE_EXPAND_TEMPLATES: set[str] = set()
+DO_NOT_PRE_EXPAND_TEMPLATES.update(FLOATING_TABLE_TEMPLATES)
+
+# Additional templates to be expanded in the pre-expand phase
+ADDITIONAL_EXPAND_TEMPLATES: set[str] = {
+    "multitrans",
+    "multitrans-nowiki",
+    "trans-top",
+    "trans-top-also",
+    "trans-bottom",
+    "checktrans-top",
+    "checktrans-bottom",
+    "col1",
+    "col2",
+    "col3",
+    "col4",
+    "col5",
+    "col1-u",
+    "col2-u",
+    "col3-u",
+    "col4-u",
+    "col5-u",
+    "check deprecated lang param usage",
+    "deprecated code",
+    "ru-verb-alt-ё",
+    "ru-noun-alt-ё",
+    "ru-adj-alt-ё",
+    "ru-proper noun-alt-ё",
+    "ru-pos-alt-ё",
+    "ru-alt-ё",
+    "inflection of",
+    "no deprecated lang param usage",
+}
+
+# Inverse linkage for those that have them
+linkage_inverses: dict[str, str] = {
+    # XXX this is not currently used, move to post-processing
+    "synonyms": "synonyms",
+    "hypernyms": "hyponyms",
+    "hyponyms": "hypernyms",
+    "holonyms": "meronyms",
+    "meronyms": "holonyms",
+    "derived": "derived_from",
+    "coordinate_terms": "coordinate_terms",
+    "troponyms": "hypernyms",
+    "antonyms": "antonyms",
+    "instances": "instance_of",
+    "related": "related",
+}
+
+# Templates that are used to form panels on pages and that
+# should be ignored in various positions
+PANEL_TEMPLATES: set[str] = {
+    "Character info",
+    "CJKV",
+    "French personal pronouns",
+    "French possessive adjectives",
+    "French possessive pronouns",
+    "Han etym",
+    "Japanese demonstratives",
+    "Latn-script",
+    "LDL",
+    "MW1913Abbr",
+    "Number-encoding",
+    "Nuttall",
+    "Spanish possessive adjectives",
+    "Spanish possessive pronouns",
+    "USRegionDisputed",
+    "Webster 1913",
+    "ase-rfr",
+    "attention",
+    "attn",
+    "beer",
+    "broken ref",
+    "ca-compass",
+    "character info",
+    "character info/var",
+    "checksense",
+    "compass-fi",
+    "copyvio suspected",
+    "delete",
+    "dial syn",  # Currently ignore these, but could be useful in Chinese/Korean
+    "etystub",
+    "examples",
+    "hu-corr",
+    "hu-suff-pron",
+    "interwiktionary",
+    "ja-kanjitab",
+    "ko-hanja-search",
+    "look",
+    "maintenance box",
+    "maintenance line",
+    "mediagenic terms",
+    "merge",
+    "missing template",
+    "morse links",
+    "move",
+    "multiple images",
+    "no inline",
+    "picdic",
+    "picdicimg",
+    "picdiclabel",
+    "polyominoes",
+    "predidential nomics",
+    "punctuation",  # This actually gets pre-expanded
+    "reconstructed",
+    "request box",
+    "rf-sound example",
+    "rfaccents",
+    "rfap",
+    "rfaspect",
+    "rfc",
+    "rfc-auto",
+    "rfc-header",
+    "rfc-level",
+    "rfc-pron-n",
+    "rfc-sense",
+    "rfclarify",
+    "rfd",
+    "rfd-redundant",
+    "rfd-sense",
+    "rfdate",
+    "rfdatek",
+    "rfdef",
+    "rfe",
+    "rfe/dowork",
+    "rfex",
+    "rfexp",
+    "rfform",
+    "rfgender",
+    "rfi",
+    "rfinfl",
+    "rfm",
+    "rfm-sense",
+    "rfp",
+    "rfp-old",
+    "rfquote",
+    "rfquote-sense",
+    "rfquotek",
+    "rfref",
+    "rfscript",
+    "rft2",
+    "rftaxon",
+    "rftone",
+    "rftranslit",
+    "rfv",
+    "rfv-etym",
+    "rfv-pron",
+    "rfv-quote",
+    "rfv-sense",
+    "selfref",
+    "split",
+    "stroke order",  # XXX consider capturing this?
+    "stub entry",
+    "t-needed",
+    "tbot entry",
+    "tea room",
+    "tea room sense",
+    # "ttbc", - XXX needed in at least on/Preposition/Translation page
+    "unblock",
+    "unsupportedpage",
+    "video frames",
+    "was wotd",
+    "wrongtitle",
+    "zh-forms",
+    "zh-hanzi-box",
+}
+
+# lookup table for the tags of Chinese dialectal synonyms
+zh_tag_lookup: dict[str, list[str]] = {
+    "Formal": ["formal"],
+    "Written-Standard-Chinese": ["Standard-Chinese"],
+    "historical or Internet slang": ["historical", "internet-slang"],
+    "now usually derogatory or offensive": ["offensive", "derogatory"],
+    "lofty": [],
+}
+
+# Template name prefixes used for language-specific panel templates (i.e.,
+# templates that create side boxes or notice boxes or that should generally
+# be ignored).
+PANEL_PREFIXES: set[str] = {
+    "list:compass points/",
+    "list:Gregorian calendar months/",
+    "RQ:",
+}
+
+# Templates used for wikipedia links.
+wikipedia_templates: set[str] = {
+    "wikipedia",
+    "slim-wikipedia",
+    "w",
+    "W",
+    "swp",
+    "wiki",
+    "Wikipedia",
+    "wtorw",
+}
+for x in PANEL_PREFIXES & wikipedia_templates:
+    print("WARNING: {!r} in both panel_templates and wikipedia_templates"
+          .format(x))
+
+# Mapping from a template name (without language prefix) for the main word
+# (e.g., fi-noun, fi-adj, en-verb) to permitted parts-of-speech in which
+# it could validly occur.  This is used as just a sanity check to give
+# warnings about probably incorrect coding in Wiktionary.
+template_allowed_pos_map: dict[str, list[str]] = {
+    "abbr": ["abbrev"],
+    "noun": ["noun", "abbrev", "pron", "name", "num", "adj_noun"],
+    "plural noun": ["noun", "name"],
+    "plural-noun": ["noun", "name"],
+    "proper noun": ["noun", "name"],
+    "proper-noun": ["name", "noun"],
+    "prop": ["name", "noun"],
+    "verb": ["verb", "phrase"],
+    "gerund": ["verb"],
+    "particle": ["adv", "particle"],
+    "adj": ["adj", "adj_noun"],
+    "pron": ["pron", "noun"],
+    "name": ["name", "noun"],
+    "adv": ["adv", "intj", "conj", "particle"],
+    "phrase": ["phrase", "prep_phrase"],
+    "noun phrase": ["phrase"],
+    "ordinal": ["num"],
+    "number": ["num"],
+    "pos": ["affix", "name", "num"],
+    "suffix": ["suffix", "affix"],
+    "character": ["character"],
+    "letter": ["character"],
+    "kanji": ["character"],
+    "cont": ["abbrev"],
+    "interj": ["intj"],
+    "con": ["conj"],
+    "part": ["particle"],
+    "prep": ["prep", "postp"],
+    "postp": ["postp"],
+    "misspelling": ["noun", "adj", "verb", "adv"],
+    "part-form": ["verb"],
+}
+for k, v in template_allowed_pos_map.items():
+    for x in v:
+        if x not in PARTS_OF_SPEECH:
+            print("BAD PART OF SPEECH {!r} IN template_allowed_pos_map: {}={}"
+                  "".format(x, k, v))
+            assert False
+
+
+# Templates ignored during etymology extraction, i.e., these will not be listed
+# in the extracted etymology templates.
+ignored_etymology_templates: list[str] = [
+    "...",
+    "IPAchar",
+    "ipachar",
+    "ISBN",
+    "isValidPageName",
+    "redlink category",
+    "deprecated code",
+    "check deprecated lang param usage",
+    "para",
+    "p",
+    "cite",
+    "Cite news",
+    "Cite newsgroup",
+    "cite paper",
+    "cite MLLM 1976",
+    "cite journal",
+    "cite news/documentation",
+    "cite paper/documentation",
+    "cite video game",
+    "cite video game/documentation",
+    "cite newsgroup",
+    "cite newsgroup/documentation",
+    "cite web/documentation",
+    "cite news",
+    "Cite book",
+    "Cite-book",
+    "cite book",
+    "cite web",
+    "cite-usenet",
+    "cite-video/documentation",
+    "Cite-journal",
+    "rfe",
+]
+# Regexp for matching ignored etymology template names.  This adds certain
+# prefixes to the names listed above.
+ignored_etymology_templates_re = re.compile(
+    r"^((cite-|R:|RQ:).*|" +
+    r"|".join(re.escape(x) for x in ignored_etymology_templates) +
+    r")$")
+
+# Regexp for matching ignored descendants template names. Right now we just
+# copy the ignored etymology templates
+ignored_descendants_templates_re = ignored_etymology_templates_re
+
+# Set of template names that are used to define usage examples.  If the usage
+# example contains one of these templates, then it its type is set to
+# "example"
+usex_templates: set[str] = {
+    "afex",
+    "affixusex",
+    "el-example",
+    "el-x",
+    "example",
+    "examples",
+    "he-usex",
+    "he-x",
+    "hi-usex",
+    "hi-x",
+    "ja-usex-inline",
+    "ja-usex",
+    "ja-x",
+    "jbo-example",
+    "jbo-x",
+    "km-usex",
+    "km-x",
+    "ko-usex",
+    "ko-x",
+    "lo-usex",
+    "lo-x",
+    "ne-x",
+    "ne-usex",
+    "prefixusex",
+    "ryu-usex",
+    "ryu-x",
+    "shn-usex",
+    "shn-x",
+    "suffixusex",
+    "th-usex",
+    "th-x",
+    "ur-usex",
+    "ur-x",
+    "usex",
+    "usex-suffix",
+    "ux",
+    "uxi",
+    "zh-usex",
+    "zh-x",
+}
+
+stop_head_at_these_templates: set[str] = {
+    "category",
+    "cat",
+    "topics",
+    "catlangname",
+    "c",
+    "C",
+    "top",
+    "cln",
+}
+
+# Set of template names that are used to define quotation examples.  If the
+# usage example contains one of these templates, then its type is set to
+# "quotation".
+quotation_templates: set[str] = {
+    "collapse-quote",
+    "quote-av",
+    "quote-book",
+    "quote-GYLD",
+    "quote-hansard",
+    "quotei",
+    "quote-journal",
+    "quotelite",
+    "quote-mailing list",
+    "quote-meta",
+    "quote-newsgroup",
+    "quote-song",
+    "quote-text",
+    "quote",
+    "quote-us-patent",
+    "quote-video game",
+    "quote-web",
+    "quote-wikipedia",
+    "wikiquote",
+    "Wikiquote",
+}
+
+# Template name component to linkage section listing.  Integer section means
+# default section, starting at that argument.
+template_linkage_mappings: list[list[Union[str, int]]] = [
+    ["syn", "synonyms"],
+    ["synonyms", "synonyms"],
+    ["ant", "antonyms"],
+    ["antonyms", "antonyms"],
+    ["hyp", "hyponyms"],
+    ["hyponyms", "hyponyms"],
+    ["der", "derived"],
+    ["derived terms", "derived"],
+    ["coordinate terms", "coordinate_terms"],
+    ["rel", "related"],
+    ["col", 2],
+]
+
+# Maps template name used in a word sense to a linkage field that it adds.
+sense_linkage_templates: dict[str, str] = {
+    "syn": "synonyms",
+    "synonyms": "synonyms",
+    "hyp": "hyponyms",
+    "hyponyms": "hyponyms",
+    "ant": "antonyms",
+    "antonyms": "antonyms",
+}
+
+
+def decode_html_entities(v: Union[str, int]) -> str:
+    """Decodes HTML entities from a value, converting them to the respective
+    Unicode characters/strings."""
+    if isinstance(v, int):
+        # I changed this to return str(v) instead of v = str(v),
+        # but there might have been the intention to have more logic
+        # here. html.unescape would not do anything special with an integer,
+        # it needs html escape symbols (&xx;).
+        return str(v)
+    return html.unescape(v)
+
+
+def parse_sense_linkage(wxr:
+                        WiktextractContext,
+                        data: WordData,
+                        name: str,
+                        ht: TemplateArgs,
+) -> None:
+    """Parses a linkage (synonym, etc) specified in a word sense."""
+    assert isinstance(wxr, WiktextractContext)
+    assert isinstance(data, dict)
+    assert isinstance(name, str)
+    assert isinstance(ht, dict)
+    field = sense_linkage_templates[name]
+    for i in range(2, 20):
+        w = ht.get(i) or ""
+        w = clean_node(wxr, data, w)
+        if w.startswith(ns_title_prefix_tuple(wxr, "Thesaurus")):
+            w = w[10:]
+        if not w:
+            break
+        tags: list[str] = []
+        topics: list[str] = []
+        english = None
+        # Try to find qualifiers for this synonym
+        q = ht.get("q{}".format(i - 1))
+        if q:
+            cls = classify_desc(q)
+            if cls == "tags":
+                tagsets1, topics1 = decode_tags(q)
+                for ts in tagsets1:
+                    tags.extend(ts)
+                topics.extend(topics1)
+            elif cls == "english":
+                if english:
+                    english += "; " + q
+                else:
+                    english = q
+        # Try to find English translation for this synonym
+        t = ht.get("t{}".format(i - 1))
+        if t:
+            if english:
+                english += "; " + t
+            else:
+                english = t
+
+        # See if the linkage contains a parenthesized alt
+        alt = None
+        m = re.search(r"\(([^)]+)\)$", w)
+        if m:
+            w = w[:m.start()].strip()
+            alt = m.group(1)
+
+        dt = {"word": w}
+        if tags:
+            data_extend(dt, "tags", tags)
+        if topics:
+            data_extend(dt, "topics", topics)
+        if english:
+            dt["english"] = english
+        if alt:
+            dt["alt"] = alt
+        data_append(data, field, dt)
+
+
+def parse_language(wxr: WiktextractContext,
+                   langnode: WikiNode,
+                   language: str,
+                   lang_code: str) -> list[WordData]:
     """Iterates over the text of the page, returning words (parts-of-speech)
     defined on the page one at a time.  (Individual word senses for the
     same part-of-speech are typically encoded in the same entry.)"""
@@ -721,7 +733,6 @@ def parse_language(wxr, langnode, language, lang_code):
     assert isinstance(lang_code, str)
     # print("parse_language", language)
 
-    init_head_tag_re()
     is_reconstruction = False
     word = wxr.wtp.title
     unsupported_prefix = "Unsupported titles/"
@@ -1197,11 +1208,11 @@ def parse_language(wxr, langnode, language, lang_code):
             push_sense()
 
     def process_gloss_header(
-        header_nodes: List[Union[WikiNode, str]],
+        header_nodes: list[Union[WikiNode, str]],
         pos_type: str,
         header_group: Optional[int],
-        pos_data: Dict,
-        header_tags: List[str],
+        pos_data: dict,
+        header_tags: list[str],
     ) -> None:
         ruby = []
         if lang_code == "ja":
@@ -1239,10 +1250,10 @@ def parse_language(wxr, langnode, language, lang_code):
             header_tags.clear()
 
     def process_gloss_without_list(
-        nodes: List[Union[WikiNode, str]],
+        nodes: list[Union[WikiNode, str]],
         pos_type: str,
-        pos_data: Dict,
-        header_tags: List[str],
+        pos_data: dict,
+        header_tags: list[str],
     ) -> None:
         # gloss text might not inside a list
         header_nodes = []
@@ -1395,11 +1406,11 @@ def parse_language(wxr, langnode, language, lang_code):
         )
 
     def process_gloss_contents(
-        contents: List[Union[str, WikiNode]],
+        contents: list[Union[str, WikiNode]],
         pos: str,
-        sense_base: Dict,
-        subentries: List[WikiNode] = [],
-        others: List[WikiNode] = [],
+        sense_base: dict,
+        subentries: list[WikiNode] = [],
+        others: list[WikiNode] = [],
         gloss_template_args: Set[str] = set(),
         added: bool = False,
     ) -> bool:
@@ -2873,7 +2884,7 @@ def parse_language(wxr, langnode, language, lang_code):
         nonlocal etym_data
         nonlocal pos_data
 
-        redirect_list: List[str] = []  # for `zh-see` template
+        redirect_list: list[str] = []  # for `zh-see` template
 
         def skip_template_fn(name, ht):
             """This is called for otherwise unprocessed parts of the page.
@@ -2914,6 +2925,8 @@ def parse_language(wxr, langnode, language, lang_code):
             t = clean_node(wxr, etym_data,
                            node.sarg if node.sarg else node.largs)
             t = t.lower()
+            # XXX these counts were never implemented fully, and even this
+            # gets discarded: Search STATISTICS_IMPLEMENTATION
             wxr.config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
             if t.startswith(tuple(wxr.config.OTHER_SUBTITLES["pronunciation"])):
@@ -3430,7 +3443,7 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
 
 def parse_page(
     wxr: WiktextractContext, word: str, text: str
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     # Skip words that have been moved to the Attic
     if word.startswith("/(Attic) "):
         return []

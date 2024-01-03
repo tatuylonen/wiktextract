@@ -6,14 +6,32 @@
 import collections
 import json
 import sys
-from typing import Callable, Optional
+from typing import (
+    Callable,
+    Iterable,
+    Optional,
+    TypedDict,
+    Union,
+)
 
-from wikitextprocessor.core import CollatedErrorReturnData
+from wikitextprocessor.core import ErrorMessageData, CollatedErrorReturnData
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
 else:
     from importlib.resources import files
+
+SoundFileRedirects = dict[str, str]
+
+POSSubtitleData = TypedDict(
+    "POSSubtitleData",
+    {
+        "pos": str,
+        "debug": str,
+        "tags": list[str],
+    },
+    total=False,
+)
 
 
 class WiktionaryConfig:
@@ -56,19 +74,19 @@ class WiktionaryConfig:
 
     def __init__(
         self,
-        dump_file_lang_code="en",
-        capture_language_codes={"en", "mul"},
-        capture_translations=True,
-        capture_pronunciation=True,
-        capture_linkages=True,
-        capture_compounds=True,
-        capture_redirects=True,
-        capture_examples=True,
-        capture_etymologies=True,
-        capture_inflections=True,
-        capture_descendants=True,
-        verbose=False,
-        expand_tables=False,
+        dump_file_lang_code: str = "en",
+        capture_language_codes: Optional[Iterable[str]] = {"en", "mul"},
+        capture_translations = True,
+        capture_pronunciation = True,
+        capture_linkages = True,
+        capture_compounds = True,
+        capture_redirects = True,
+        capture_examples = True,
+        capture_etymologies = True,
+        capture_inflections = True,
+        capture_descendants = True,
+        verbose = False,
+        expand_tables = False,
     ):
         if capture_language_codes is not None:
             assert isinstance(capture_language_codes, (list, tuple, set))
@@ -98,18 +116,24 @@ class WiktionaryConfig:
         self.expand_tables = expand_tables
         # Some fields for statistics
         self.num_pages = 0
-        self.language_counts = collections.defaultdict(int)
-        self.pos_counts = collections.defaultdict(int)
-        self.section_counts = collections.defaultdict(int)
+        self.language_counts: dict[str, int] = collections.defaultdict(int)
+        self.pos_counts: dict[str, int] = collections.defaultdict(int)
+        self.section_counts: dict[str, int] = collections.defaultdict(int)
         # Some fields related to errors
         # The word currently being processed.
-        self.word = None
-        self.errors = []
-        self.warnings = []
-        self.debugs = []
-        self.redirects = {}
+        self.word: Optional[str] = None
+        self.errors: list[ErrorMessageData] = []
+        self.warnings: list[ErrorMessageData] = []
+        self.debugs: list[ErrorMessageData] = []
+        self.redirects: SoundFileRedirects = {}
         self.data_folder = files("wiktextract") / "data" / dump_file_lang_code
+        self.POS_SUBTITLES: dict[str, POSSubtitleData]
+        self.POS_TYPES: set[str]
+        self.LINKAGE_SUBTITLES: dict[str, str]
+        self.OTHER_SUBTITLES: dict[str, Union[str, list[str]]]
+        # set the above three in the function below
         self.init_subtitles()
+        self.ZH_PRON_TAGS: list[str]
         self.set_attr_from_json("ZH_PRON_TAGS", "zh_pron_tags.json")
         self.analyze_templates = True  # find templates that need pre-expand
         self.extract_thesaurus_pages = True
@@ -130,14 +154,18 @@ class WiktionaryConfig:
         self.load_edition_settings()
 
     def merge_return(self, ret: CollatedErrorReturnData):
-        if "num_pages" in ret:
-            self.num_pages += ret["num_pages"]
-            for k, v in ret["language_counts"].items():
-                self.language_counts[k] += v
-            for k, v in ret["pos_counts"].items():
-                self.pos_counts[k] += v
-            for k, v in ret["section_counts"].items():
-                self.section_counts[k] += v
+        # XXX This was never properly implemented; even the only
+        # count (self.section_counts) that is updated during running
+        # gets discarded when doing batches instead of individual
+        # pages. Search: STATISTICS_IMPLEMENTATION
+        # if "num_pages" in ret:
+        #     self.num_pages += ret["num_pages"]
+        #     for k, v in ret["language_counts"].items():
+        #         self.language_counts[k] += v
+        #     for k, v in ret["pos_counts"].items():
+        #         self.pos_counts[k] += v
+        #     for k, v in ret["section_counts"].items():
+        #         self.section_counts[k] += v
         if "errors" in ret:
             self.errors.extend(ret.get("errors", []))
             self.warnings.extend(ret.get("warnings", []))
@@ -164,10 +192,10 @@ class WiktionaryConfig:
         self.POS_TYPES = set(x["pos"] for x in self.POS_SUBTITLES.values())
         for k, v in self.POS_SUBTITLES.items():
             if "tags" in v:
-                assert isinstance(v["tags"], (list, tuple))
+                assert isinstance(v["tags"], list)
         self.set_attr_from_json("OTHER_SUBTITLES", "other_subtitles.json")
 
-    def load_edition_settings(self):
+    def load_edition_settings(self) -> None:
         file_path = self.data_folder / "config.json"
         if file_path.exists():
             with file_path.open(encoding="utf-8") as f:

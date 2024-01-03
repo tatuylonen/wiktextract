@@ -2,6 +2,13 @@
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
+from wikitextprocessor.core import NamespaceDataEntry
+from typing import (
+    Any,
+    Optional,
+    TypedDict,
+    Union,
+)
 from wiktextract.wxr_context import WiktextractContext
 from .page import clean_node
 
@@ -65,16 +72,39 @@ end
 return export
 """
 
-def extract_categories(wxr: WiktextractContext):
+CategoryEntry = TypedDict(
+    "CategoryEntry",
+    {
+        "name": str,
+        "desc": str,
+        "clean_desc": str,
+        "children": list[str],
+        "sort": list[str],
+    },
+    total=False,
+)
+
+CategoryReturn = TypedDict(
+    "CategoryReturn",
+    {
+        "roots": list[str],
+        "nodes": dict[str, CategoryEntry],
+    },
+    total=False,
+)
+
+def extract_categories(wxr: WiktextractContext) -> CategoryReturn:
     """Extracts the category tree from Wiktionary."""
-    module_ns = wxr.wtp.NAMESPACE_DATA.get("Module", {})
+    module_ns: Optional[NamespaceDataEntry] = wxr.wtp.NAMESPACE_DATA.get(
+                                                            "Module", None)
+    assert module_ns is not None
     module_ns_local_name = module_ns.get("name")
     module_ns_id = module_ns.get("id")
     wxr.wtp.add_page(f"{module_ns_local_name}:wiktextract cat tree",
                  module_ns_id, LUA_CODE, model="Scribunto")
     wxr.wtp.start_page("Wiktextract category tree extraction")
     rawdata = wxr.wtp.expand("{{#invoke:wiktextract cat tree|main}}")
-    ht = {}
+    ht: dict[str, CategoryEntry] = {}
     for line in rawdata.split("\n"):
         if not line:
             continue
@@ -97,7 +127,7 @@ def extract_categories(wxr: WiktextractContext):
             parent_name_lc = parent_name.lower()
             parent_sort = parts[i + 1]
             if parent_name_lc not in ht:
-                p = {"name": parent_name}
+                p: CategoryEntry  = {"name": parent_name}
                 ht[parent_name_lc] = p
             else:
                 p = ht[parent_name_lc]
@@ -109,10 +139,10 @@ def extract_categories(wxr: WiktextractContext):
                     p["sort"] = []
                 p["sort"].append(parent_sort)
 
-    seen = set()
-    is_child = set()
+    seen: set[str] = set()
+    is_child: set[str] = set()
 
-    def recurse(name):
+    def recurse(name: str) -> None:
         if name in seen:
             return
         seen.add(name)
@@ -125,8 +155,8 @@ def extract_categories(wxr: WiktextractContext):
         for child in v.get("children", ()):
             is_child.add(child.lower())
 
-    notseen = set(x.lower() for x in ht.keys()) - seen - is_child
-    notseen = list(ht[x]["name"] for x in sorted(notseen))
+    notseen_set = set(x.lower() for x in ht.keys()) - seen - is_child
+    notseen = list(ht[x]["name"] for x in sorted(notseen_set))
     #if notseen:
     #    print("NOT SEEN:", "; ".join(notseen))
 
@@ -137,7 +167,7 @@ def extract_categories(wxr: WiktextractContext):
 
     roots = ["Fundamental"]
     roots.extend(notseen)
-    ret = {"roots": roots, "nodes": ht}
+    ret: CategoryReturn = {"roots": roots, "nodes": ht}
     # import json
     # print(json.dumps(ret, sort_keys=True, indent=2))
     return ret

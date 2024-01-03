@@ -25,7 +25,7 @@ from .wxr_context import WiktextractContext
 class ThesaurusTerm:
     entry: str
     language_code: str
-    pos: str
+    pos: Optional[str]
     linkage: str
     term: str
     tags: Optional[str] = None
