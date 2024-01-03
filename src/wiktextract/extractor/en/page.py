@@ -773,7 +773,7 @@ def parse_language(
     have_etym = False
     stack: list[str] = []  # names of items on the "stack"
 
-    def merge_base(data, base):
+    def merge_base(data: WordData, base: WordData) -> None:
         for k, v in base.items():
             # Copy the value to ensure that we don't share lists or
             # dicts between structures (even nested ones).
@@ -785,9 +785,9 @@ def parse_language(
             if data[k] == v:
                 continue
             if isinstance(data[k], (list, tuple)) or isinstance(
-                v, (list, tuple)
+                v, (list, tuple)  # Should this be "and"?
             ):
-                data[k] = list(data[k]) + list(v)
+                data[k] = list(data[k]) + list(v)  # type: ignore
             elif data[k] != v:
                 wxr.wtp.warning(
                     "conflicting values for {} in merge_base: "
@@ -795,7 +795,8 @@ def parse_language(
                     sortid="page/904",
                 )
 
-        def complementary_pop(pron, key):
+        def complementary_pop(pron: WordData, key: str
+        ) -> WordData:
             """Remove unnecessary keys from dict values
             in a list comprehension..."""
             if key in pron:
@@ -806,19 +807,19 @@ def parse_language(
         # does not match "word" or one of "forms"
         if "sounds" in data and "word" in data:
             accepted = [data["word"]]
-            accepted.extend(f["form"] for f in data.get("forms", ()))
+            accepted.extend(f["form"] for f in data.get("forms", dict()))  # type:ignore
             data["sounds"] = list(
-                complementary_pop(s, "pos")
-                for s in data["sounds"]
-                if "form" not in s or s["form"] in accepted
+                s
+                for s in data["sounds"]  # type:ignore
+                if "form" not in s or s["form"] in accepted  # type:ignore
             )
         # If the result has sounds, eliminate sounds that have a pos that
         # does not match "pos"
         if "sounds" in data and "pos" in data:
             data["sounds"] = list(
-                s
-                for s in data["sounds"]
-                if "pos" not in s or s["pos"] == data["pos"]
+                complementary_pop(s, "pos")  # type:ignore
+                for s in data["sounds"]  # type: ignore
+                if "pos" not in s or s["pos"] == data["pos"]  # type:ignore
             )
 
     def push_sense():
