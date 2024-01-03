@@ -679,8 +679,10 @@ def parse_sense_linkage(
     for i in range(2, 20):
         w = ht.get(i) or ""
         w = clean_node(wxr, data, w)
-        if w.startswith(ns_title_prefix_tuple(wxr, "Thesaurus")):
-            w = w[10:]
+        for alias in ns_title_prefix_tuple(wxr, "Thesaurus"):
+            if w.startswith(alias):
+                w = w[len(alias):]
+                break
         if not w:
             break
         tags: list[str] = []
