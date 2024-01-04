@@ -37,7 +37,33 @@ class TestNotes(TestCase):
 |<span>\\lɑ̃.se\\</span>
 |avoir
 |[[lancé]]
-|<span>\\a.vwaʁ<nowiki> </nowiki>lɑ̃.se\\</span>
+|<span>\\a.vwaʁ lɑ̃.se\\</span>
+|}
+</div>
+
+<h3> Indicatif </h3>
+<div>
+{|
+|-
+|<table>
+  <tr>
+    <th colspan=\"4\">Présent</th>
+  </tr>
+  <tr>
+    <td>je&nbsp;</td>
+    <td>[[lance]]</td>
+    <td>\\<span>ʒə&nbsp;</span></td>
+    <td><span>lɑ̃s</span>\\</td>
+  </tr>
+</table>
+|{|
+|-
+!colspan=\"4\"|Passé composé
+|-
+|j’ai&nbsp;
+|lancé&nbsp;
+|<span>\\ʒ‿e lɑ̃.se\\</span>
+|}
 |}
 </div>""",
         )
@@ -57,6 +83,18 @@ class TestNotes(TestCase):
                     "ipas": ["\\a.vwaʁ lɑ̃.se\\"],
                     "source": "Conjugaison page",
                     "tags": ["Modes impersonnels", "Infinitif", "Passé"],
+                },
+                {
+                    "form": "je lance",
+                    "ipas": ["\\ʒə lɑ̃s\\"],
+                    "source": "Conjugaison page",
+                    "tags": ["Indicatif", "Présent"],
+                },
+                {
+                    "form": "j’ai lancé",
+                    "ipas": ["\\ʒ‿e lɑ̃.se\\"],
+                    "source": "Conjugaison page",
+                    "tags": ["Indicatif", "Passé composé"],
                 },
             ],
         )
