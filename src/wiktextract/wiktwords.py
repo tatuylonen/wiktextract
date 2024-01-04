@@ -200,14 +200,6 @@ def main():
         default=False,
         help="Capture descendants",
     )
-    # XXX Was never implemented fully.
-    # Search: STATISTICS_IMPLEMENTATION
-    # parser.add_argument(
-    #     "--statistics",
-    #     action="store_true",
-    #     default=False,
-    #     help="Print statistics",
-    # )
     parser.add_argument(
         "--page",
         type=str,
@@ -510,33 +502,6 @@ def main():
         except FileNotFoundError:
             pass
         os.rename(out_tmp_path, out_path)
-
-    # XXX was never implemented fully. Search for: STATISTICS_IMPLEMENTATION
-    if args.statistics:
-        print("")
-        print("LANGUAGE COUNTS")
-        for k, cnt in sorted(
-            wxr.config.language_counts.items(), key=lambda x: -x[1]
-        ):
-            print("  {:>7d} {}".format(cnt, k))
-            if cnt < 1000:
-                break
-        print("  ...")
-        print("")
-
-        print("")
-        print("POS HEADER USAGE")
-        for k, cnt in sorted(
-            wxr.config.pos_counts.items(), key=lambda x: -x[1]
-        ):
-            print("  {:>7d} {}".format(cnt, k))
-
-        print("")
-        print("POS SUBSECTION HEADER USAGE")
-        for k, cnt in sorted(
-            wxr.config.section_counts.items(), key=lambda x: -x[1]
-        ):
-            print("  {:>7d} {}".format(cnt, k))
 
     if args.errors:
         with open(args.errors, "w", encoding="utf-8") as f:
