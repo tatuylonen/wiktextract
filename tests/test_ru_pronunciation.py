@@ -69,7 +69,7 @@ class TestRUPronunciation(unittest.TestCase):
                 "expected": {
                     "ipa": "vot",
                     "audio": "Ru-вот.ogg",
-                    "homophones": ["вод"],
+                    "homophones": [{"word": "вод"}],
                 },
             },
         ]
@@ -103,7 +103,7 @@ class TestRUPronunciation(unittest.TestCase):
                 "expected": [
                     {
                         "ipa": "bɐˈlʲit",
-                        "homophones": ["болит"],
+                        "homophones": [{"word": "болит"}],
                         "tags": ["singular"],
                     },
                     {
@@ -154,7 +154,7 @@ class TestRUPronunciation(unittest.TestCase):
                 {
                     "ipa": "vot",
                     "audio": "Ru-вот.ogg",
-                    "homophones": ["вод"],
+                    "homophones": [{"word": "вод"}],
                 }
             ],
         )
@@ -194,7 +194,7 @@ class TestRUPronunciation(unittest.TestCase):
             [
                 {
                     "ipa": "bɐˈlʲit",
-                    "homophones": ["болит"],
+                    "homophones": [{"word": "болит"}],
                     "tags": ["singular"],
                 },
                 {
