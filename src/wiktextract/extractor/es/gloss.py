@@ -2,6 +2,7 @@ import re
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import WikiNodeChildrenList
+
 from wiktextract.extractor.es.models import Sense, WordEntry
 from wiktextract.extractor.es.sense_data import process_sense_data_list
 from wiktextract.page import clean_node
@@ -38,7 +39,7 @@ def extract_gloss(
         match = re.match(r"^(\d+)", gloss_note)
 
         if match:
-            gloss_data.senseid = int(match.group(1))
+            gloss_data.senseid = match.group(1)
             tag_string = gloss_note[len(match.group(1)) :].strip()
         else:
             tag_string = gloss_note.strip()

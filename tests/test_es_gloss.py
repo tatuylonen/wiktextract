@@ -44,13 +44,13 @@ class TestESGloss(unittest.TestCase):
                     "glosses": [
                         "Contribuir esfuerzo o recursos para la realización de algo."
                     ],
-                    "senseid": 1,
+                    "senseid": "1",
                 },
                 {
                     "glosses": [
                         "Por antonomasia, cooperar a que alguno salga de una situación dificultosa"
                     ],
-                    "senseid": 2,
+                    "senseid": "2",
                 },
             ],
         )
@@ -80,7 +80,7 @@ class TestESGloss(unittest.TestCase):
                     "glosses": [
                         "Sentimiento afectivo de atracción, unión y afinidad que se experimenta hacia una persona, animal o cosa"
                     ],
-                    "senseid": 1,
+                    "senseid": "1",
                     "tags": ["Humanidades"],
                     "categories": ["ES:Sentimientos"],
                 }

@@ -93,7 +93,7 @@ class Sense(BaseModelWrap):
     # subsenses: list["Sense"] = Field(
     #     default=[], description="List of subsenses"
     # )
-    senseid: Optional[int] = Field(
+    senseid: Optional[str] = Field(
         default=None, description="Sense number used in Wiktionary"
     )
     antonyms: Optional[list[Linkage]] = []
