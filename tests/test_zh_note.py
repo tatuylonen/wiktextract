@@ -22,7 +22,7 @@ class TestNote(TestCase):
         # https://zh.wiktionary.org/wiki/オタク
         self.wxr.wtp.start_page("オタク")
         root = self.wxr.wtp.parse("* note list 1\n* note list 2")
-        page_data = [WordEntry(word="オタク", lang_code="ja", lang_name="日語")]
+        page_data = [WordEntry(word="オタク", lang_code="ja", lang="日語")]
         extract_note(self.wxr, page_data, root)
         self.assertEqual(page_data[-1].notes, ["note list 1", "note list 2"])
 
@@ -30,6 +30,6 @@ class TestNote(TestCase):
         # https://zh.wiktionary.org/wiki/clavarder
         self.wxr.wtp.start_page("clavarder")
         root = self.wxr.wtp.parse("note text")
-        page_data = [WordEntry(word="オタク", lang_code="fr", lang_name="法語")]
+        page_data = [WordEntry(word="オタク", lang_code="fr", lang="法語")]
         extract_note(self.wxr, page_data, root)
         self.assertEqual(page_data[-1].notes, ["note text"])

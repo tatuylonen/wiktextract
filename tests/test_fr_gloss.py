@@ -30,7 +30,7 @@ class TestFrGloss(TestCase):
         self.wxr.wtp.start_page("")
         root = self.wxr.wtp.parse("# {{sportifs|fr}} gloss.\n#* example")
         page_data = [
-            WordEntry(word="test", lang_code="fr", lang_name="Français")
+            WordEntry(word="test", lang_code="fr", lang="Français")
         ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
@@ -51,7 +51,7 @@ class TestFrGloss(TestCase):
             "# gloss.\n#* {{exemple|text|translation|roman|source=source}}"
         )
         page_data = [
-            WordEntry(word="test", lang_code="fr", lang_name="Français")
+            WordEntry(word="test", lang_code="fr", lang="Français")
         ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
@@ -81,7 +81,7 @@ class TestFrGloss(TestCase):
             "# gloss.\n#* example {{source|source_title}}"
         )
         page_data = [
-            WordEntry(word="test", lang_code="fr", lang_name="Français")
+            WordEntry(word="test", lang_code="fr", lang="Français")
         ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
@@ -109,7 +109,7 @@ class TestFrGloss(TestCase):
         process_pos_block(
             self.wxr,
             page_data,
-            WordEntry(word="马", lang_code="zh", lang_name="Chinois"),
+            WordEntry(word="马", lang_code="zh", lang="Chinois"),
             root.children[0],
             "nom",
             "Nom commun",
@@ -119,7 +119,7 @@ class TestFrGloss(TestCase):
             {
                 "word": "马",
                 "lang_code": "zh",
-                "lang_name": "Chinois",
+                "lang": "Chinois",
                 "pos": "noun",
                 "pos_title": "Nom commun",
                 "senses": [
@@ -152,7 +152,7 @@ class TestFrGloss(TestCase):
             "# {{désuet|en}} {{sports|en}} {{indénombrable|en}} {{variante de|basketball|en}}."
         )
         page_data = [
-            WordEntry(word="test", lang_code="fr", lang_name="Français")
+            WordEntry(word="test", lang_code="fr", lang="Français")
         ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
@@ -172,7 +172,7 @@ class TestFrGloss(TestCase):
             "# (''localement'') [[bassin#Nom_commun|Bassin]], [[lavoir#Nom_commun|lavoir]]."
         )
         page_data = [
-            WordEntry(word="test", lang_code="fr", lang_name="Français")
+            WordEntry(word="test", lang_code="fr", lang="Français")
         ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
@@ -187,7 +187,7 @@ class TestFrGloss(TestCase):
             "# [[oiseau|Oiseau]] aquatique de taille moyenne du genre ''[[Rhynchops]]''."
         )
         page_data = [
-            WordEntry(word="test", lang_code="fr", lang_name="Français")
+            WordEntry(word="test", lang_code="fr", lang="Français")
         ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
@@ -207,7 +207,7 @@ class TestFrGloss(TestCase):
         self.wxr.wtp.start_page("becs-en-ciseaux")
         root = self.wxr.wtp.parse("# ''Pluriel de'' [[bec-en-ciseaux]].")
         page_data = [
-            WordEntry(word="test", lang_code="fr", lang_name="Français")
+            WordEntry(word="test", lang_code="fr", lang="Français")
         ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
@@ -226,7 +226,7 @@ class TestFrGloss(TestCase):
             "# {{lien|autrice|fr|dif=Autrice}}, [[celle]] qui est à l’[[origine]] de [[quelque chose]]."
         )
         page_data = [
-            WordEntry(word="test", lang_code="fr", lang_name="Français")
+            WordEntry(word="test", lang_code="fr", lang="Français")
         ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
@@ -251,7 +251,7 @@ class TestFrGloss(TestCase):
             """
         )
         page_data = [
-            WordEntry(word="test", lang_code="fr", lang_name="Français")
+            WordEntry(word="test", lang_code="fr", lang="Français")
         ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
@@ -292,7 +292,7 @@ class TestFrGloss(TestCase):
             "# {{lexique|littérature|nl}} {{rare|nl}} {{lien|autrice|fr|dif=Autrice}}, femme qui a créé une œuvre littéraire. {{absolument}} [[écrivaine|Écrivaine]]."
         )
         page_data = [
-            WordEntry(word="autrice", lang_code="nl", lang_name="Néerlandais")
+            WordEntry(word="autrice", lang_code="nl", lang="Néerlandais")
         ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(

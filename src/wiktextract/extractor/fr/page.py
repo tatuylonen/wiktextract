@@ -190,7 +190,7 @@ def parse_page(
                 base_data = WordEntry(
                     word=wxr.wtp.title,
                     lang_code=lang_code,
-                    lang_name=lang_name,
+                    lang=lang_name,
                     categories=categories.get("categories", []),
                 )
                 etymology_data: Optional[EtymologyData] = None

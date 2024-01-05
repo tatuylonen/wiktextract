@@ -29,7 +29,7 @@ paragrapy 1
 {{note-féminisation}}"""
         )
         page_data = [
-            WordEntry(word="test", lang_code="fr", lang_name="Français")
+            WordEntry(word="test", lang_code="fr", lang="Français")
         ]
         extract_note(self.wxr, page_data, nodes.children[0])
         self.assertEqual(

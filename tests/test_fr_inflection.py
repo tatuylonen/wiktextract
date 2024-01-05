@@ -18,7 +18,7 @@ class TestInflection(TestCase):
 
     def test_fr_reg(self):
         page_data = [
-            WordEntry(word="productrice", lang_code="fr", lang_name="Français")
+            WordEntry(word="productrice", lang_code="fr", lang="Français")
         ]
         self.wxr.wtp.add_page(
             "Modèle:fr-rég",
@@ -44,7 +44,7 @@ class TestInflection(TestCase):
     def test_fr_accord_al(self):
         # https://fr.wiktionary.org/wiki/animal#Adjectif
         page_data = [
-            WordEntry(word="animal", lang_code="fr", lang_name="Français")
+            WordEntry(word="animal", lang_code="fr", lang="Français")
         ]
         self.wxr.wtp.add_page(
             "Modèle:fr-accord-al",
@@ -91,7 +91,7 @@ class TestInflection(TestCase):
         # https://fr.wiktionary.org/wiki/ration#Nom_commun_2
         # template "en-nom-rég"
         page_data = [
-            WordEntry(word="ration", lang_code="en", lang_name="Anglais")
+            WordEntry(word="ration", lang_code="en", lang="Anglais")
         ]
         self.wxr.wtp.add_page(
             "Modèle:en-nom-rég",
@@ -121,7 +121,7 @@ class TestInflection(TestCase):
         # https://fr.wiktionary.org/wiki/ration#Verbe
         # template "en-conj-rég"
         page_data = [
-            WordEntry(word="ration", lang_code="en", lang_name="Anglais")
+            WordEntry(word="ration", lang_code="en", lang="Anglais")
         ]
         self.wxr.wtp.add_page(
             "Modèle:en-conj-rég",
@@ -153,7 +153,7 @@ class TestInflection(TestCase):
     def test_invalid_ipa(self):
         # https://fr.wiktionary.org/wiki/animal#Nom_commun_3
         page_data = [
-            WordEntry(word="animal", lang_code="en", lang_name="Français")
+            WordEntry(word="animal", lang_code="en", lang="Français")
         ]
         self.wxr.wtp.add_page(
             "Modèle:ast-accord-mf",
@@ -180,7 +180,7 @@ class TestInflection(TestCase):
         # https://fr.wiktionary.org/wiki/一万#Nom_commun
         # template "zh-formes"
         page_data = [
-            WordEntry(word="一万", lang_code="zh", lang_name="Chinois")
+            WordEntry(word="一万", lang_code="zh", lang="Chinois")
         ]
         self.wxr.wtp.add_page(
             "Modèle:zh-formes",
@@ -205,7 +205,7 @@ class TestInflection(TestCase):
     def test_lt_décl_as(self):
         # empty table cells should be ignored
         page_data = [
-            WordEntry(word="abadai", lang_code="lt", lang_name="Lituanien")
+            WordEntry(word="abadai", lang_code="lt", lang="Lituanien")
         ]
         self.wxr.wtp.add_page(
             "Modèle:lt-décl-as",
@@ -230,7 +230,7 @@ class TestInflection(TestCase):
 
     def test_fr_accord_s(self):
         page_data = [
-            WordEntry(word="aastais", lang_code="fr", lang_name="Français")
+            WordEntry(word="aastais", lang_code="fr", lang="Français")
         ]
         self.wxr.wtp.add_page(
             "Modèle:fr-accord-s",
@@ -277,7 +277,7 @@ class TestInflection(TestCase):
         # https://fr.wiktionary.org/wiki/enculé_de_ta_race
         page_data = [
             WordEntry(
-                word="enculé de ta race", lang_code="fr", lang_name="Français"
+                word="enculé de ta race", lang_code="fr", lang="Français"
             )
         ]
         self.wxr.wtp.add_page(
@@ -331,7 +331,7 @@ class TestInflection(TestCase):
     def test_ro_nom_tab(self):
         # https://fr.wiktionary.org/wiki/fenil#Nom_commun_4
         page_data = [
-            WordEntry(word="fenil", lang_code="fr", lang_name="Français")
+            WordEntry(word="fenil", lang_code="fr", lang="Français")
         ]
         self.wxr.wtp.add_page(
             "Modèle:ro-nom-tab",
@@ -387,7 +387,7 @@ class TestInflection(TestCase):
     def test_sv_nom_c_ar(self):
         # https://fr.wiktionary.org/wiki/robot#Nom_commun_7
         page_data = [
-            WordEntry(word="robot", lang_code="fr", lang_name="Français")
+            WordEntry(word="robot", lang_code="fr", lang="Français")
         ]
         self.wxr.wtp.add_page(
             "Modèle:sv-nom-c-ar",
@@ -423,7 +423,7 @@ class TestInflection(TestCase):
     def test_cs_decl_nom_ma_dur(self):
         # https://fr.wiktionary.org/wiki/robot#Nom_commun_1_2
         page_data = [
-            WordEntry(word="robot", lang_code="fr", lang_name="Français")
+            WordEntry(word="robot", lang_code="fr", lang="Français")
         ]
         self.wxr.wtp.add_page(
             "Modèle:cs-décl-nom-ma-dur",
@@ -452,7 +452,7 @@ class TestInflection(TestCase):
 
     def test_en_adj(self):
         # https://fr.wiktionary.org/wiki/new
-        page_data = [WordEntry(word="new", lang_code="en", lang_name="Anglais")]
+        page_data = [WordEntry(word="new", lang_code="en", lang="Anglais")]
         self.wxr.wtp.start_page("new")
         root = self.wxr.wtp.parse("{{en-adj-er|pron=ˈnu|pronGB=ˈnjuː}}")
         self.wxr.wtp.add_page(

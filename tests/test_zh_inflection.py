@@ -39,7 +39,7 @@ class TestInflection(TestCase):
         ),
     )
     def test_ja_i_template(self, mock_get_page) -> None:
-        page_data = [WordEntry(lang_name="日語", lang_code="ja", word="可笑しい")]
+        page_data = [WordEntry(lang="日語", lang_code="ja", word="可笑しい")]
         wikitext = "{{ja-i|可笑し|おかし|okashi}}"
         self.wxr.wtp.start_page("可笑しい")
         node = self.wxr.wtp.parse(wikitext)

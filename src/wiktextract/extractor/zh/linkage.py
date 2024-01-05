@@ -120,7 +120,7 @@ def extract_linkages(
 
                 base_data = WordEntry(
                     lang_code=page_data[-1].lang_code,
-                    lang_name=page_data[-1].lang_name,
+                    lang=page_data[-1].lang,
                     word=page_data[-1].word,
                 )
                 parse_section(wxr, page_data, base_data, node)

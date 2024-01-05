@@ -43,7 +43,7 @@ def extract_descendant_list_item(
         for child_index, child_node in enumerate(nodes_without_ruby):
             if isinstance(child_node, str) and child_node.endswith("："):
                 lang_name = child_node.strip(" ：")
-                descendant_data.lang_name = lang_name
+                descendant_data.lang = lang_name
             elif (
                 isinstance(child_node, WikiNode)
                 and child_node.kind == NodeKind.HTML
@@ -61,7 +61,7 @@ def extract_descendant_list_item(
                         if len(descendant_data.word) > 0:
                             parent_data.descendants.append(descendant_data)
                             descendant_data = Descendant(
-                                lang_code=lang_code, lang_name=lang_name
+                                lang_code=lang_code, lang=lang_name
                             )
                             if len(ruby_data) > 0:
                                 descendant_data.ruby = ruby_data

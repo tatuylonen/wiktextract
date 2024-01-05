@@ -89,7 +89,7 @@ def process_translation_templates(
         base_translation_data.lang_code = template_node.template_parameters.get(
             1
         )
-        base_translation_data.lang_name = clean_node(
+        base_translation_data.lang = clean_node(
             wxr, page_data[-1], template_node
         )
     elif template_node.template_name.startswith("trad"):

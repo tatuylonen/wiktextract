@@ -66,7 +66,7 @@ class TestFrPage(TestCase):
             page_data,
             [
                 {
-                    "lang_name": "Français",
+                    "lang": "Français",
                     "lang_code": "fr",
                     "pos": "noun",
                     "pos_title": "Nom commun",
@@ -82,7 +82,7 @@ class TestFrPage(TestCase):
                     "etymology_texts": ["(1549) Du latin anthracites."],
                 },
                 {
-                    "lang_name": "Français",
+                    "lang": "Français",
                     "lang_code": "fr",
                     "pos": "adj",
                     "pos_title": "Adjectif",
@@ -97,7 +97,7 @@ class TestFrPage(TestCase):
                     "etymology_texts": ["(1549) Du latin anthracites."],
                 },
                 {
-                    "lang_name": "Anglais",
+                    "lang": "Anglais",
                     "lang_code": "en",
                     "pos": "noun",
                     "pos_title": "Nom commun",

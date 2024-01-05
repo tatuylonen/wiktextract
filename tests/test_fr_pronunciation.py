@@ -20,9 +20,9 @@ class TestPronunciation(TestCase):
 
     def test_pron_list(self):
         page_data = [
-            WordEntry(word="bonjour", lang_code="en", lang_name="Anglais"),
-            WordEntry(word="bonjour", lang_code="fr", lang_name="Français"),
-            WordEntry(word="bonjour", lang_code="fr", lang_name="Français"),
+            WordEntry(word="bonjour", lang_code="en", lang="Anglais"),
+            WordEntry(word="bonjour", lang_code="fr", lang="Français"),
+            WordEntry(word="bonjour", lang_code="fr", lang="Français"),
         ]
         self.wxr.wtp.add_page("Modèle:pron", 10, body="\\bɔ̃.ʒuʁ\\")
         self.wxr.wtp.start_page("bonjour")
@@ -33,16 +33,16 @@ class TestPronunciation(TestCase):
             self.wxr,
             page_data,
             root.children[0],
-            WordEntry(word="bonjour", lang_code="fr", lang_name="Français"),
+            WordEntry(word="bonjour", lang_code="fr", lang="Français"),
         )
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data],
             [
-                {"word": "bonjour", "lang_code": "en", "lang_name": "Anglais"},
+                {"word": "bonjour", "lang_code": "en", "lang": "Anglais"},
                 {
                     "word": "bonjour",
                     "lang_code": "fr",
-                    "lang_name": "Français",
+                    "lang": "Français",
                     "sounds": [
                         {
                             "ipa": "bõ.ʒuːʁ",
@@ -56,7 +56,7 @@ class TestPronunciation(TestCase):
                 {
                     "word": "bonjour",
                     "lang_code": "fr",
-                    "lang_name": "Français",
+                    "lang": "Français",
                     "sounds": [
                         {
                             "ipa": "bõ.ʒuːʁ",
@@ -81,7 +81,7 @@ class TestPronunciation(TestCase):
             self.wxr,
             page_data,
             root.children[0],
-            WordEntry(word="你好", lang_code="zh", lang_name="Chinois"),
+            WordEntry(word="你好", lang_code="zh", lang="Chinois"),
         )
         self.assertEqual(
             [
@@ -108,7 +108,7 @@ class TestPronunciation(TestCase):
             self.wxr,
             page_data,
             root.children[0],
-            WordEntry(word="你好", lang_code="fr", lang_name="Français"),
+            WordEntry(word="你好", lang_code="fr", lang="Français"),
         )
         self.assertEqual(
             page_data[-1].sounds[0].model_dump(exclude_defaults=True),
@@ -139,14 +139,14 @@ class TestPronunciation(TestCase):
             self.wxr,
             page_data,
             root.children[0],
-            WordEntry(word="wagonnet", lang_code="fr", lang_name="Français"),
+            WordEntry(word="wagonnet", lang_code="fr", lang="Français"),
         )
         self.assertEqual(
             page_data[0].model_dump(exclude_defaults=True),
             {
                 "word": "wagonnet",
                 "lang_code": "fr",
-                "lang_name": "Français",
+                "lang": "Français",
                 "paronyms": [{"word": "wagonnée"}, {"word": "wagonnier"}],
                 "sounds": [{"ipa": "\\va.ɡɔ.nɛ\\"}],
             },

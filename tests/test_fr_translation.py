@@ -24,7 +24,7 @@ class TestTranslation(TestCase):
             "=== Traductions ===\n* {{trad-début|Formule pour saluer}}\n* {{T|sq}} : {{trad+|sq|mirëdita}}, {{trad-|sq|mirë mëngjes}} ''(le matin)''"
         )
         base_data = WordEntry(
-            word="bonjour", lang_code="fr", lang_name="Français"
+            word="bonjour", lang_code="fr", lang="Français"
         )
         page_data = [base_data.model_copy(deep=True)]
         extract_translation(self.wxr, page_data, base_data, root.children[0])
@@ -33,17 +33,17 @@ class TestTranslation(TestCase):
             {
                 "word": "bonjour",
                 "lang_code": "fr",
-                "lang_name": "Français",
+                "lang": "Français",
                 "translations": [
                     {
                         "lang_code": "sq",
-                        "lang_name": "Albanais",
+                        "lang": "Albanais",
                         "word": "mirëdita",
                         "sense": "Formule pour saluer",
                     },
                     {
                         "lang_code": "sq",
-                        "lang_name": "Albanais",
+                        "lang": "Albanais",
                         "word": "mirë mëngjes",
                         "sense": "Formule pour saluer",
                         "tags": ["le matin"],
@@ -61,7 +61,7 @@ class TestTranslation(TestCase):
             "=== Traductions ===\n* {{T|ar}} : {{trad+|ar|مرحبا|dif=مرحبًا|tr={{transliterator|ar|مرحبا}}}} {{informel|nocat=1}}"
         )
         base_data = WordEntry(
-            word="bonjour", lang_code="fr", lang_name="Français"
+            word="bonjour", lang_code="fr", lang="Français"
         )
         page_data = [base_data.model_copy(deep=True)]
         extract_translation(self.wxr, page_data, base_data, root.children[0])
@@ -70,11 +70,11 @@ class TestTranslation(TestCase):
             {
                 "word": "bonjour",
                 "lang_code": "fr",
-                "lang_name": "Français",
+                "lang": "Français",
                 "translations": [
                     {
                         "lang_code": "ar",
-                        "lang_name": "Arabe",
+                        "lang": "Arabe",
                         "word": "مرحبًا",
                         "roman": "mrḥbā",
                         "tags": ["Informel"],
@@ -90,7 +90,7 @@ class TestTranslation(TestCase):
             "=== Traductions ===\n* {{T|mn}} : {{trad+|mn|сайн байна уу|tr=sain baina uu|tradi=ᠰᠠᠶᠢᠨ ᠪᠠᠶᠢᠨ᠎ᠠ ᠤᠤ}}"
         )
         base_data = WordEntry(
-            word="bonjour", lang_code="fr", lang_name="Français"
+            word="bonjour", lang_code="fr", lang="Français"
         )
         page_data = [base_data.model_copy(deep=True)]
         extract_translation(self.wxr, page_data, base_data, root.children[0])
@@ -99,11 +99,11 @@ class TestTranslation(TestCase):
             {
                 "word": "bonjour",
                 "lang_code": "fr",
-                "lang_name": "Français",
+                "lang": "Français",
                 "translations": [
                     {
                         "lang_code": "mn",
-                        "lang_name": "Mongol",
+                        "lang": "Mongol",
                         "word": "сайн байна уу",
                         "roman": "sain baina uu",
                         "traditional_writing": "ᠰᠠᠶᠢᠨ ᠪᠠᠶᠢᠨ᠎ᠠ ᠤᠤ",
@@ -121,7 +121,7 @@ class TestTranslation(TestCase):
             "=== Traductions ===\n* {{T|de}} : {{trad|de|Kambium|n}}"
         )
         base_data = WordEntry(
-            word="cambium", lang_code="fr", lang_name="Français"
+            word="cambium", lang_code="fr", lang="Français"
         )
         page_data = [base_data.model_copy(deep=True)]
         extract_translation(self.wxr, page_data, base_data, root.children[0])
@@ -130,11 +130,11 @@ class TestTranslation(TestCase):
             {
                 "word": "cambium",
                 "lang_code": "fr",
-                "lang_name": "Français",
+                "lang": "Français",
                 "translations": [
                     {
                         "lang_code": "de",
-                        "lang_name": "Allemand",
+                        "lang": "Allemand",
                         "word": "Kambium",
                         "tags": ["neutre"],
                     },
@@ -165,7 +165,7 @@ class TestTranslation(TestCase):
 * {{T|af|trier}} : {{trad+|af|massa}}"""
         )
         base_data = WordEntry(
-            word="masse", lang_code="fr", lang_name="Français"
+            word="masse", lang_code="fr", lang="Français"
         )
         page_data = [base_data.model_copy(deep=True)]
         extract_translation(self.wxr, page_data, base_data, root.children[0])
@@ -174,18 +174,18 @@ class TestTranslation(TestCase):
             {
                 "word": "masse",
                 "lang_code": "fr",
-                "lang_name": "Français",
+                "lang": "Français",
                 "translations": [
                     {
                         "lang_code": "hr",
-                        "lang_name": "Croate",
+                        "lang": "Croate",
                         "word": "masa",
                         "sense": "(Finance)",
                         "sense_index": 12,
                     },
                     {
                         "lang_code": "af",
-                        "lang_name": "Afrikaans",
+                        "lang": "Afrikaans",
                         "word": "massa",
                     },
                 ],
