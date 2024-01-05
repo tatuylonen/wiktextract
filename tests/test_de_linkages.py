@@ -20,7 +20,7 @@ class TestDELinkages(unittest.TestCase):
         self.wxr.wtp.close_db_conn()
 
     def get_default_word_entry(self) -> WordEntry:
-        return WordEntry(word="Beispiel", lang_code="de", lang_name="Deutsch")
+        return WordEntry(word="Beispiel", lang_code="de", lang="Deutsch")
 
     def test_de_extract_linkages(self):
         test_cases = [
@@ -33,11 +33,17 @@ class TestDELinkages(unittest.TestCase):
                     "senses": [
                         {
                             "senseid": "1",
-                            "coordinate_terms": ["Beleg", "Exempel"],
+                            "coordinate_terms": [
+                                {"word": "Beleg"},
+                                {"word": "Exempel"},
+                            ],
                         },
                         {
                             "senseid": "2",
-                            "coordinate_terms": ["Muster", "Vorbild"],
+                            "coordinate_terms": [
+                                {"word": "Muster"},
+                                {"word": "Vorbild"},
+                            ],
                         },
                     ]
                 },
@@ -50,7 +56,9 @@ class TestDELinkages(unittest.TestCase):
                 "expected": {
                     "senses": [
                         {
-                            "expressions": ["ein gutes Beispiel geben"],
+                            "expressions": [
+                                {"word": "ein gutes Beispiel geben"}
+                            ],
                         }
                     ]
                 },
@@ -60,7 +68,9 @@ class TestDELinkages(unittest.TestCase):
                 "input": "====Synonyme====\n:[[Synonym1]]",
                 "senses": [Sense(senseid="1")],
                 "expected": {
-                    "senses": [{"senseid": "1", "synonyms": ["Synonym1"]}],
+                    "senses": [
+                        {"senseid": "1", "synonyms": [{"word": "Synonym1"}]}
+                    ],
                 },
             },
             # https://de.wiktionary.org/wiki/Kokospalme
@@ -73,8 +83,8 @@ class TestDELinkages(unittest.TestCase):
                         {
                             "senseid": "1",
                             "synonyms": [
-                                "Kokosnusspalme",
-                                "Cocos nucifera",
+                                {"word": "Kokosnusspalme"},
+                                {"word": "Cocos nucifera"},
                             ],
                         }
                     ],
@@ -95,7 +105,7 @@ class TestDELinkages(unittest.TestCase):
                 self.assertEqual(
                     word_entry.model_dump(
                         exclude_defaults=True,
-                        exclude={"word", "lang_code", "lang_name"},
+                        exclude={"word", "lang_code", "lang"},
                     ),
                     case["expected"],
                 )

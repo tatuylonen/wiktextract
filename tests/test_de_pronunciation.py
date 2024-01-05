@@ -4,8 +4,10 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.models import Sound
-from wiktextract.extractor.de.pronunciation import (process_hoerbeispiele,
-                                                    process_ipa)
+from wiktextract.extractor.de.pronunciation import (
+    process_hoerbeispiele,
+    process_ipa,
+)
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -35,7 +37,7 @@ class TestDEPronunciation(unittest.TestCase):
                 "expected": [
                     {
                         "ipa": ["ipa1"],
-                        "lang_name": ["Deutsch"],
+                        "lang": ["Deutsch"],
                         "lang_code": ["de"],
                     }
                 ],
@@ -46,7 +48,7 @@ class TestDEPronunciation(unittest.TestCase):
                     {"ipa": ["ipa1", "ipa2"]},
                     {
                         "ipa": ["ipa3"],
-                        "lang_name": ["Deutsch"],
+                        "lang": ["Deutsch"],
                         "lang_code": ["de"],
                     },
                 ],

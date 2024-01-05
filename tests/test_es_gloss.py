@@ -2,6 +2,7 @@ import unittest
 from typing import List
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.gloss import extract_gloss
 from wiktextract.extractor.es.models import WordEntry
@@ -19,7 +20,7 @@ class TestESGloss(unittest.TestCase):
         self.wxr.wtp.close_db_conn()
 
     def get_default_page_data(self) -> List[WordEntry]:
-        return [WordEntry(word="test", lang_code="es", lang_name="Language")]
+        return [WordEntry(word="test", lang_code="es", lang="Language")]
 
     def test_es_extract_glosses(self):
         # https://es.wiktionary.org/wiki/ayudar
@@ -43,13 +44,13 @@ class TestESGloss(unittest.TestCase):
                     "glosses": [
                         "Contribuir esfuerzo o recursos para la realización de algo."
                     ],
-                    "senseid": 1,
+                    "senseid": "1",
                 },
                 {
                     "glosses": [
                         "Por antonomasia, cooperar a que alguno salga de una situación dificultosa"
                     ],
-                    "senseid": 2,
+                    "senseid": "2",
                 },
             ],
         )
@@ -79,7 +80,7 @@ class TestESGloss(unittest.TestCase):
                     "glosses": [
                         "Sentimiento afectivo de atracción, unión y afinidad que se experimenta hacia una persona, animal o cosa"
                     ],
-                    "senseid": 1,
+                    "senseid": "1",
                     "tags": ["Humanidades"],
                     "categories": ["ES:Sentimientos"],
                 }

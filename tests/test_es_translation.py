@@ -1,6 +1,7 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.models import WordEntry
 from wiktextract.extractor.es.translation import extract_translation
@@ -22,7 +23,7 @@ class TestESTranslation(unittest.TestCase):
             WordEntry(
                 word="test",
                 lang_code="es",
-                lang_name="Language",
+                lang="Language",
             )
         ]
 

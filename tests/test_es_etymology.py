@@ -1,6 +1,7 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.etymology import process_etymology_block
 from wiktextract.extractor.es.models import WordEntry
@@ -84,15 +85,13 @@ class TestESEtymology(unittest.TestCase):
             with self.subTest(case=case):
                 self.wxr.wtp.start_page("")
                 root = self.wxr.wtp.parse(case["input"])
-                data = WordEntry(
-                    word="test", lang_code="es", lang_name="Español"
-                )
+                data = WordEntry(word="test", lang_code="es", lang="Español")
                 process_etymology_block(self.wxr, data, root)
                 case["expected"].update(
                     {
                         "word": "test",
                         "lang_code": "es",
-                        "lang_name": "Español",
+                        "lang": "Español",
                     }
                 )
                 self.assertEqual(

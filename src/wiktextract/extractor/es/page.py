@@ -4,6 +4,7 @@ import re
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import WikiNodeChildrenList
+
 from wiktextract.extractor.es.etymology import process_etymology_block
 from wiktextract.extractor.es.example import extract_example
 from wiktextract.extractor.es.gloss import extract_gloss
@@ -368,10 +369,10 @@ def parse_page(
                 ):
                     continue
 
-                lang_name = clean_node(wxr, categories, subtitle_template)
-                wxr.wtp.start_section(lang_name)
+                lang = clean_node(wxr, categories, subtitle_template)
+                wxr.wtp.start_section(lang)
                 base_data = WordEntry(
-                    lang_name=lang_name, lang_code=lang_code, word=wxr.wtp.title
+                    lang=lang, lang_code=lang_code, word=wxr.wtp.title
                 )
                 base_data.categories.extend(categories["categories"])
                 parse_entries(wxr, page_data, base_data, level2_node)

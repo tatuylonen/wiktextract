@@ -20,7 +20,7 @@ def extract_translations(
             for key, raw_value in template_node.template_parameters.items():
                 if isinstance(key, str):
                     lang_code = key
-                    lang_name = code_to_name(lang_code, "ru")
+                    lang = code_to_name(lang_code, "ru")
 
                     for value_node in (
                         raw_value
@@ -36,7 +36,7 @@ def extract_translations(
                                 word_entry.translations.append(
                                     Translation(
                                         lang_code=lang_code,
-                                        lang_name=lang_name,
+                                        lang=lang,
                                         word=word,
                                         sense=sense if sense else None,
                                     )

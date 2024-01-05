@@ -1,6 +1,7 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.models import WordEntry
 from wiktextract.extractor.es.page import parse_entries
@@ -18,7 +19,7 @@ class TestESPage(unittest.TestCase):
         self.wxr.wtp.close_db_conn()
 
     def get_default_page_data(self) -> list[WordEntry]:
-        return [WordEntry(word="test", lang_code="es", lang_name="Language")]
+        return [WordEntry(word="test", lang_code="es", lang="Language")]
 
     def test_es_parse_entries(self):
         """

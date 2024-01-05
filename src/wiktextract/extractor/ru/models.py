@@ -12,7 +12,7 @@ class Translation(BaseModelWrap):
     lang_code: str = Field(
         description="Wiktionary language code of the translation term"
     )
-    lang_name: str = Field(
+    lang: str = Field(
         description="Localized language name of the translation term"
     )
     sense: Optional[str] = Field(
@@ -112,7 +112,7 @@ class WordEntry(BaseModelWrap):
     lang_code: str = Field(
         description="Wiktionary language code", examples=["ru"]
     )
-    lang_name: str = Field(
+    lang: str = Field(
         description="Localized language name of the word", examples=["Русский"]
     )
     categories: list[str] = Field(

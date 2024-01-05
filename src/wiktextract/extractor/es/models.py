@@ -93,7 +93,7 @@ class Sense(BaseModelWrap):
     # subsenses: list["Sense"] = Field(
     #     default=[], description="List of subsenses"
     # )
-    senseid: Optional[int] = Field(
+    senseid: Optional[str] = Field(
         default=None, description="Sense number used in Wiktionary"
     )
     antonyms: Optional[list[Linkage]] = []
@@ -156,7 +156,7 @@ class WordEntry(BaseModelWrap):
     lang_code: str = Field(
         description="Wiktionary language code", examples=["es"]
     )
-    lang_name: str = Field(
+    lang: str = Field(
         description="Localized language name of the word", examples=["español"]
     )
     senses: Optional[list[Sense]] = []

@@ -2,7 +2,8 @@ import re
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
-from wiktextract.extractor.de.models import WordEntry
+
+from wiktextract.extractor.de.models import Linkage, WordEntry
 from wiktextract.extractor.share import split_senseids
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -25,7 +26,7 @@ def extract_linkages(
             )
 
             # Extract links
-            linkages: list[str] = []
+            linkages: list[Linkage] = []
             if linkage_type == "expressions":
                 for child in list_item.children:
                     if isinstance(child, str) and contains_dash(child):
@@ -90,12 +91,12 @@ def extract_linkages(
 
 
 def process_link(
-    wxr: WiktextractContext, semantic_links: list[str], link: WikiNode
+    wxr: WiktextractContext, semantic_links: list[Linkage], link: WikiNode
 ):
     clean_link = clean_node(wxr, {}, link)
     if clean_link.startswith("Verzeichnis:"):
         return
-    semantic_links.append(clean_link)
+    semantic_links.append(Linkage(word=clean_link))
 
 
 def contains_dash(text: str):
