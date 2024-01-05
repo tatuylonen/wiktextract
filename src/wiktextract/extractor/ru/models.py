@@ -21,6 +21,10 @@ class Translation(BaseModelWrap):
     )
 
 
+class Linkage(BaseModelWrap):
+    word: str = ""
+
+
 class Sound(BaseModelWrap):
     ipa: Optional[str] = Field(
         default=None, description="International Phonetic Alphabet"
@@ -34,7 +38,7 @@ class Sound(BaseModelWrap):
     tags: Optional[list[str]] = Field(
         default=[], description="Specifying the variant of the pronunciation"
     )
-    homophones: Optional[list[str]] = Field(
+    homophones: list[Linkage] = Field(
         default=[], description="Words with same pronunciation"
     )
 
@@ -118,34 +122,19 @@ class WordEntry(BaseModelWrap):
     sounds: Optional[list[Sound]] = []
     senses: Optional[list[Sense]] = []
     translations: Optional[list[Translation]] = []
-
-    antonyms: Optional[list[str]] = Field(
-        default=[], description="List of antonyms"
-    )
-    anagrams: Optional[list[str]] = Field(
-        default=[], description="List of anagrams"
-    )
-    variants: Optional[list[str]] = Field(
-        default=[], description="List of variants"
-    )
-    hypernyms: Optional[list[str]] = Field(
+    antonyms: list[Linkage] = Field(default=[], description="List of antonyms")
+    anagrams: list[Linkage] = Field(default=[], description="List of anagrams")
+    variants: list[Linkage] = Field(default=[], description="List of variants")
+    hypernyms: list[Linkage] = Field(
         default=[], description="List of hypernyms"
     )
-    hyponyms: Optional[list[str]] = Field(
-        default=[], description="List of hyponyms"
-    )
-    derived: Optional[list[str]] = Field(
+    hyponyms: list[Linkage] = Field(default=[], description="List of hyponyms")
+    derived: list[Linkage] = Field(
         default=[], description="List of derived terms"
     )
-    meronyms: Optional[list[str]] = Field(
-        default=[], description="List of meronyms"
-    )
-    synonyms: Optional[list[str]] = Field(
-        default=[], description="List of synonyms"
-    )
-    coordinate_terms: Optional[list[str]] = Field(
+    meronyms: list[Linkage] = Field(default=[], description="List of meronyms")
+    synonyms: list[Linkage] = Field(default=[], description="List of synonyms")
+    coordinate_terms: list[Linkage] = Field(
         default=[], description="List of coordinate terms"
     )
-    holonyms: Optional[list[str]] = Field(
-        default=[], description="List of holonyms"
-    )
+    holonyms: list[Linkage] = Field(default=[], description="List of holonyms")

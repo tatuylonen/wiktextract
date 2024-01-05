@@ -4,7 +4,7 @@ from typing import Union
 from wikitextprocessor import NodeKind
 from wikitextprocessor.parser import LevelNode, WikiNode, WikiNodeChildrenList
 
-from wiktextract.extractor.ru.models import Sound, WordEntry
+from wiktextract.extractor.ru.models import Linkage, Sound, WordEntry
 from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -208,7 +208,9 @@ def extract_homophones(
     template_params: dict[str, WikiNode],
 ):
     homophones_raw = clean_node(wxr, {}, template_params.get("омофоны", ""))
-    homophones = [h.strip() for h in homophones_raw.split(",") if h.strip()]
+    homophones = [
+        Linkage(word=h.strip()) for h in homophones_raw.split(",") if h.strip()
+    ]
     if homophones:
         if isinstance(sounds, list):
             for sound in sounds:

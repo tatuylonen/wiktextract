@@ -1,6 +1,6 @@
 from wikitextprocessor import NodeKind, WikiNode
 
-from wiktextract.extractor.ru.models import WordEntry
+from wiktextract.extractor.ru.models import Linkage, WordEntry
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -20,4 +20,4 @@ def extract_linkages(
     for link_node in level_node.find_child_recursively(NodeKind.LINK):
         word = clean_node(wxr, {}, link_node).strip()
         if word:
-            getattr(word_entry, linkage_type).append(word)
+            getattr(word_entry, linkage_type).append(Linkage(word=word))
