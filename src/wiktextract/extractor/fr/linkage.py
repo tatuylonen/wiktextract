@@ -44,7 +44,7 @@ def process_derives_autres_list(
             ):
                 word = clean_node(wxr, None, node)
                 page_data[-1].derived.append(
-                    Linkage(lang_code=lang_code, lang_name=lang_name, word=word)
+                    Linkage(lang_code=lang_code, lang=lang_name, word=word)
                 )
 
 

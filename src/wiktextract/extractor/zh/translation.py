@@ -102,7 +102,7 @@ def process_translation_list_item(
         tags, word = capture_text_in_parentheses(word_and_tags)
         tags = [tag for tag in tags if tag != lang_code]  # rm Wiktionary link
         translation_data = Translation(
-            lang_code=lang_code, lang_name=lang_text, word=word
+            lang_code=lang_code, lang=lang_text, word=word
         )
         tags_without_roman = []
         for tag in tags:

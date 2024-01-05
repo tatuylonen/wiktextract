@@ -27,7 +27,7 @@ class TestZhTranslation(TestCase):
     )
     def test_normal(self, mock_get_page) -> None:
         # test wikitext from page "你好" and "這裡"
-        page_data = [WordEntry(word="你好", lang_code="zh", lang_name="漢語")]
+        page_data = [WordEntry(word="你好", lang_code="zh", lang="漢語")]
         wikitext = """
 {{trans-top|靠近說話者的地方}}
 * 阿爾巴尼亞語：këtu (sq)
@@ -50,32 +50,32 @@ class TestZhTranslation(TestCase):
             [
                 {
                     "lang_code": "sq",
-                    "lang_name": "阿爾巴尼亞語",
+                    "lang": "阿爾巴尼亞語",
                     "sense": "靠近說話者的地方",
                     "word": "këtu",
                 },
                 {
-                    "lang_name": "西阿帕切語",
+                    "lang": "西阿帕切語",
                     "sense": "靠近說話者的地方",
                     "word": "kú",
                 },
                 {
                     "lang_code": "ar",
-                    "lang_name": "阿拉伯語",
+                    "lang": "阿拉伯語",
                     "sense": "靠近說話者的地方",
                     "roman": "hunā",
                     "word": "هُنَا",
                 },
                 {
                     "lang_code": "arz",
-                    "lang_name": "埃及阿拉伯語",
+                    "lang": "埃及阿拉伯語",
                     "sense": "靠近說話者的地方",
                     "roman": "henā",
                     "word": "هنا",
                 },
                 {
                     "lang_code": "ru",
-                    "lang_name": "俄语",
+                    "lang": "俄语",
                     "sense": "靠近說話者的地方",
                     "roman": "privét",
                     "tags": ["非正式"],
@@ -83,7 +83,7 @@ class TestZhTranslation(TestCase):
                 },
                 {
                     "lang_code": "ru",
-                    "lang_name": "俄语",
+                    "lang": "俄语",
                     "sense": "靠近說話者的地方",
                     "roman": "zdrávstvujte",
                     "tags": ['正式, 第一个"в"不发音'],
@@ -91,7 +91,7 @@ class TestZhTranslation(TestCase):
                 },
                 {
                     "lang_code": "sk",
-                    "lang_name": "斯洛伐克語",
+                    "lang": "斯洛伐克語",
                     "sense": "靠近說話者的地方",
                     "tags": ["imperfective aspect"],
                     "word": "pracovať",

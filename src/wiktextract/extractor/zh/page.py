@@ -226,7 +226,7 @@ def parse_page(
             continue
         wxr.wtp.start_section(lang_name)
         base_data = WordEntry(
-            word=wxr.wtp.title, lang_code=lang_code, lang_name=lang_name
+            word=wxr.wtp.title, lang_code=lang_code, lang=lang_name
         )
         base_data.categories = categories.get("categories", [])
         page_data.append(base_data.model_copy(deep=True))

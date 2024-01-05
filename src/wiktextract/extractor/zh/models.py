@@ -64,7 +64,7 @@ class Translation(ChineseBaseModel):
     lang_code: str = Field(
         "", description="Wiktionary language code of the translation term"
     )
-    lang_name: str = Field("", description="Translation language name")
+    lang: str = Field("", description="Translation language name")
     word: str = Field("", description="Translation term")
     sense: str = Field("", description="Translation gloss")
     tags: list[str] = []
@@ -83,8 +83,8 @@ class Linkage(ChineseBaseModel):
 
 
 class Descendant(ChineseBaseModel):
-    lang_code: str = Field("", description="Wiktionary language code of")
-    lang_name: str = Field("", description="Translation language name")
+    lang_code: str = Field("", description="Wiktionary language code")
+    lang: str = Field("", description="Language name")
     word: str = ""
     roman: str = ""
     tags: list[str] = []
@@ -97,7 +97,7 @@ class WordEntry(ChineseBaseModel):
 
     word: str = Field(description="Word string")
     lang_code: str = Field(description="Wiktionary language code")
-    lang_name: str = Field(description="Localized language name")
+    lang: str = Field(description="Localized language name")
     pos: str = Field("", description="Part of speech type")
     etymology_text: str = ""
     senses: list[Sense] = Field([], description="Sense list")

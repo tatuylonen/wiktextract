@@ -16,7 +16,7 @@ def extract_conjugation(wxr: WiktextractContext, entry: WordEntry) -> None:
     """
     conj_ns = wxr.wtp.NAMESPACE_DATA["Conjugaison"]
     conj_page_title = (
-        f"{conj_ns['name']}:{entry.lang_name.lower()}/{entry.word}"
+        f"{conj_ns['name']}:{entry.lang.lower()}/{entry.word}"
     )
     conj_page = wxr.wtp.get_page_body(conj_page_title, conj_ns["id"])
     if conj_page is None:

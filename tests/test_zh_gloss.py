@@ -24,7 +24,7 @@ class TestExample(TestCase):
     def test_example_list(self) -> None:
         page_data = [
             WordEntry(
-                lang_name="日語",
+                lang="日語",
                 lang_code="ja",
                 word="可笑しい",
             )
@@ -78,7 +78,7 @@ class TestExample(TestCase):
         mock_process_pos_block,
     ) -> None:
         node = WikiNode(NodeKind.LEVEL3, 0)
-        base_data = WordEntry(word="", lang_code="", lang_name="")
+        base_data = WordEntry(word="", lang_code="", lang="")
         parse_section(self.wxr, [base_data], base_data, node)
         mock_process_pos_block.assert_called()
 
@@ -90,6 +90,6 @@ class TestExample(TestCase):
         mock_process_pos_block,
     ) -> None:
         node = WikiNode(NodeKind.LEVEL3, 0)
-        base_data = WordEntry(word="", lang_code="", lang_name="")
+        base_data = WordEntry(word="", lang_code="", lang="")
         parse_section(self.wxr, [base_data], base_data, node)
         mock_process_pos_block.assert_called()

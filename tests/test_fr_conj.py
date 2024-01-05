@@ -67,7 +67,7 @@ class TestNotes(TestCase):
 |}
 </div>""",
         )
-        entry = WordEntry(lang_code="fr", lang_name="Français", word="lancer")
+        entry = WordEntry(lang_code="fr", lang="Français", word="lancer")
         extract_conjugation(self.wxr, entry)
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in entry.forms],

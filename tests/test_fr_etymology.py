@@ -54,14 +54,14 @@ class TestEtymology(TestCase):
             WordEntry(
                 word="test",
                 lang_code="fr",
-                lang_name="Français",
+                lang="Français",
                 pos="noun",
                 pos_title="Nom commun 1",
             ),
             WordEntry(
                 word="test",
                 lang_code="fr",
-                lang_name="Français",
+                lang="Français",
                 pos="noun",
                 pos_title="Nom commun 2",
             ),
@@ -73,7 +73,7 @@ class TestEtymology(TestCase):
                 {
                     "word": "test",
                     "lang_code": "fr",
-                    "lang_name": "Français",
+                    "lang": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 1",
                     "etymology_texts": [
@@ -84,7 +84,7 @@ class TestEtymology(TestCase):
                 {
                     "word": "test",
                     "lang_code": "fr",
-                    "lang_name": "Français",
+                    "lang": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 2",
                     "etymology_texts": [
@@ -119,21 +119,21 @@ class TestEtymology(TestCase):
             WordEntry(
                 word="test",
                 lang_code="fr",
-                lang_name="Français",
+                lang="Français",
                 pos="noun",
                 pos_title="Nom commun 1",
             ),
             WordEntry(
                 word="test",
                 lang_code="fr",
-                lang_name="Français",
+                lang="Français",
                 pos="noun",
                 pos_title="Nom commun 2",
             ),
             WordEntry(
                 word="test",
                 lang_code="fr",
-                lang_name="Français",
+                lang="Français",
                 pos="intj",
                 pos_title="Interjection",
             ),
@@ -145,7 +145,7 @@ class TestEtymology(TestCase):
                 {
                     "word": "test",
                     "lang_code": "fr",
-                    "lang_name": "Français",
+                    "lang": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 1",
                     "etymology_texts": [
@@ -155,7 +155,7 @@ class TestEtymology(TestCase):
                 {
                     "word": "test",
                     "lang_code": "fr",
-                    "lang_name": "Français",
+                    "lang": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 2",
                     "etymology_texts": [
@@ -165,7 +165,7 @@ class TestEtymology(TestCase):
                 {
                     "word": "test",
                     "lang_code": "fr",
-                    "lang_name": "Français",
+                    "lang": "Français",
                     "pos": "intj",
                     "pos_title": "Interjection",
                     "etymology_texts": [
