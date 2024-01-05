@@ -3,7 +3,8 @@ from typing import Optional, Union
 
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
-from wiktextract.page import LEVEL_KINDS, clean_node
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS
+from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from ..share import capture_text_in_parentheses
@@ -165,7 +166,7 @@ def find_subpage_section(
     target_section: Union[str, list[str]],
 ) -> Optional[WikiNode]:
     if isinstance(node, WikiNode):
-        if node.kind in LEVEL_KINDS:
+        if node.kind in LEVEL_KIND_FLAGS:
             section_title = clean_node(wxr, None, node.largs)
             if (
                 isinstance(target_section, str)

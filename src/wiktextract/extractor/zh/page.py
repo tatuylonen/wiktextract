@@ -4,7 +4,8 @@ from typing import Any, Union
 
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
-from wiktextract.page import LEVEL_KINDS, clean_node
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS
+from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from .descendant import extract_descendants
@@ -71,7 +72,7 @@ def parse_section(
         return
     if not isinstance(node, WikiNode):
         return
-    if node.kind in LEVEL_KINDS:
+    if node.kind in LEVEL_KIND_FLAGS:
         subtitle = clean_node(wxr, page_data[-1], node.largs)
         # remove number suffix from subtitle
         subtitle = re.sub(r"\s*(?:（.+）|\d+)$", "", subtitle)
@@ -142,7 +143,7 @@ def process_pos_block(
                 )
             elif child.kind == NodeKind.LIST:
                 extract_gloss(wxr, page_data, child, Sense())
-            elif child.kind in LEVEL_KINDS:
+            elif child.kind in LEVEL_KIND_FLAGS:
                 parse_section(wxr, page_data, base_data, child)
         else:
             parse_section(wxr, page_data, base_data, child)
@@ -156,7 +157,7 @@ def extract_etymology(
 ) -> None:
     level_node_index = -1
     for index, node in enumerate(nodes):
-        if isinstance(node, WikiNode) and node.kind in LEVEL_KINDS:
+        if isinstance(node, WikiNode) and node.kind in LEVEL_KIND_FLAGS:
             level_node_index = index
             break
     if level_node_index != -1:
@@ -179,7 +180,7 @@ def extract_pronunciation(
     lang_code = base_data.lang_code
     for index, node in enumerate(nodes):
         if isinstance(node, WikiNode):
-            if node.kind in LEVEL_KINDS:
+            if node.kind in LEVEL_KIND_FLAGS:
                 parse_section(wxr, page_data, base_data, nodes[index:])
                 return
             elif node.kind == NodeKind.TEMPLATE:

@@ -2,10 +2,11 @@ import logging
 from typing import Any, Optional
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
-from wiktextract.page import LEVEL_KINDS, clean_node
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
+from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .conjugation import extract_conjugation
 from .etymology import EtymologyData, extract_etymology, insert_etymology_data
 from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
@@ -145,11 +146,13 @@ def process_pos_block(
             elif child.kind == NodeKind.LIST:
                 gloss_start = index
                 extract_gloss(wxr, page_data, child)
-            elif child.kind in LEVEL_KINDS:
+            elif child.kind in LEVEL_KIND_FLAGS:
                 parse_section(wxr, page_data, base_data, child)
 
     form_line_nodes = child_nodes[form_line_start:gloss_start]
     extract_form_line(wxr, page_data, form_line_nodes)
+    if pos_type == "verb":
+        extract_conjugation(wxr, page_data[-1])
 
 
 def parse_page(

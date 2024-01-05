@@ -106,7 +106,8 @@ def split_pronunciation_tags(text: str) -> list[str]:
                 r"，|, | \(|\) ?|和|包括|: |、",
                 text.removesuffix("^((幫助))")  # remove help link
                 # remove link to page "Wiktionary:漢語發音表記"
-                .removesuffix("(維基詞典)").strip("（）()⁺\n "),
+                .removesuffix("(維基詞典)")
+                .strip("（）()⁺\n "),
             ),
         )
     )
