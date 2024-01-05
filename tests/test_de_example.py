@@ -20,7 +20,7 @@ class TestDEExample(unittest.TestCase):
         self.wxr.wtp.close_db_conn()
 
     def get_default_page_data(self) -> list[WordEntry]:
-        return [WordEntry(word="Beispiel", lang_code="de", lang_name="Deutsch")]
+        return [WordEntry(word="Beispiel", lang_code="de", lang="Deutsch")]
 
     def test_de_extract_examples(self):
         self.wxr.wtp.start_page("")

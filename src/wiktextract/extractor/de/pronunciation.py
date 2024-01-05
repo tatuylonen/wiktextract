@@ -99,14 +99,14 @@ def process_lautschrift_template(
 
     lang_code = template_parameters.get("spr")
     if lang_code:
-        lang_name = code_to_name(lang_code, "de")
+        lang = code_to_name(lang_code, "de")
         add_sound_data_without_appending_to_existing_properties(
             wxr,
             sound_data,
             {
                 "ipa": [ipa],
                 "lang_code": lang_code,
-                "lang_name": lang_name,
+                "lang": lang,
             },
         )
     else:

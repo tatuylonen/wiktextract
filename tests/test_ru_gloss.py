@@ -19,7 +19,7 @@ class TestRUGloss(unittest.TestCase):
         self.wxr.wtp.close_db_conn()
 
     def get_default_page_data(self) -> list[WordEntry]:
-        return [WordEntry(word="пример", lang_code="ru", lang_name="Русский")]
+        return [WordEntry(word="пример", lang_code="ru", lang="Русский")]
 
     def test_ru_extract_gloss(self):
         # https://ru.wiktionary.org/wiki/овощ

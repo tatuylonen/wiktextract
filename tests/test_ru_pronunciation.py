@@ -27,7 +27,7 @@ class TestRUPronunciation(unittest.TestCase):
         self.wxr.wtp.close_db_conn()
 
     def get_default_word_entry(self) -> WordEntry:
-        return WordEntry(word="тест", lang_code="ru", lang_name="русский")
+        return WordEntry(word="тест", lang_code="ru", lang="русский")
 
     def process_template_and_assert(
         self,

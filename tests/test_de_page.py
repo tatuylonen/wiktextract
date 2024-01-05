@@ -29,7 +29,7 @@ class TestDEPage(unittest.TestCase):
         self.wxr.wtp.close_db_conn()
 
     def get_default_base_data(self):
-        return WordEntry(lang_code="de", lang_name="Deutsch", word="Beispiel")
+        return WordEntry(lang_code="de", lang="Deutsch", word="Beispiel")
 
     def test_de_parse_page(self):
         self.wxr.wtp.add_page("Vorlage:Sprache", 10, "")
@@ -45,7 +45,7 @@ class TestDEPage(unittest.TestCase):
             lst,
             [
                 {
-                    "lang_name": "Deutsch",
+                    "lang": "Deutsch",
                     "lang_code": "de",
                     "word": "Beispiel",
                     "pos": "noun",
@@ -71,7 +71,7 @@ class TestDEPage(unittest.TestCase):
             lst,
             [
                 {
-                    "lang_name": "Deutsch",
+                    "lang": "Deutsch",
                     "lang_code": "de",
                     "word": "Beispiel",
                     "pos": "noun",
@@ -104,7 +104,7 @@ class TestDEPage(unittest.TestCase):
                 {
                     "word": "Beispiel",
                     "lang_code": "de",
-                    "lang_name": "Deutsch",
+                    "lang": "Deutsch",
                     "pos": "adj",
                     "senses": [
                         {
@@ -118,7 +118,7 @@ class TestDEPage(unittest.TestCase):
                     "word": "Beispiel",
                     "lang_code": "de",
                     "pos": "adv",
-                    "lang_name": "Deutsch",
+                    "lang": "Deutsch",
                     "senses": [
                         {
                             "glosses": ["gloss1"],
@@ -131,7 +131,7 @@ class TestDEPage(unittest.TestCase):
                     "word": "Beispiel",
                     "lang_code": "de",
                     "pos": "verb",
-                    "lang_name": "Deutsch",
+                    "lang": "Deutsch",
                     "senses": [
                         {
                             "glosses": ["gloss2"],
@@ -144,7 +144,7 @@ class TestDEPage(unittest.TestCase):
                     "word": "Beispiel",
                     "lang_code": "de",
                     "pos": "noun",
-                    "lang_name": "Deutsch",
+                    "lang": "Deutsch",
                     "senses": [
                         {
                             "glosses": ["gloss3"],

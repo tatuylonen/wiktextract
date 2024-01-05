@@ -2,6 +2,7 @@ import unittest
 from typing import List
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.gloss import extract_gloss
 from wiktextract.extractor.es.models import WordEntry
@@ -19,7 +20,7 @@ class TestESGloss(unittest.TestCase):
         self.wxr.wtp.close_db_conn()
 
     def get_default_page_data(self) -> List[WordEntry]:
-        return [WordEntry(word="test", lang_code="es", lang_name="Language")]
+        return [WordEntry(word="test", lang_code="es", lang="Language")]
 
     def test_es_extract_glosses(self):
         # https://es.wiktionary.org/wiki/ayudar

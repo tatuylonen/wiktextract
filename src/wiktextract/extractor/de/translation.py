@@ -103,10 +103,10 @@ def process_translation_list(
 
             lang_code = node.template_parameters.get(1)
             translation_data.lang_code = lang_code
-            translation_data.lang_name = code_to_name(lang_code, "de")
-            if translation_data.lang_name == "":
+            translation_data.lang = code_to_name(lang_code, "de")
+            if translation_data.lang == "":
                 wxr.wtp.debug(
-                    f"Unknown language code: {translation_data.lang_name}",
+                    f"Unknown language code: {translation_data.lang}",
                     sortid="extractor/de/translation/process_translation_list/70",
                 )
             if node.template_name[-1] == "?":

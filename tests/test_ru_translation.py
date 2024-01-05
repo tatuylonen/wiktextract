@@ -19,7 +19,7 @@ class TestRUTranslation(unittest.TestCase):
         self.wxr.wtp.close_db_conn()
 
     def get_default_word_entry(self) -> WordEntry:
-        return WordEntry(word="test", lang_code="ru", lang_name="русский")
+        return WordEntry(word="test", lang_code="ru", lang="русский")
 
     def test_ru_extract_gloss(self):
         # Test cases adapted from: https://ru.wiktionary.org/wiki/дом
@@ -41,9 +41,9 @@ class TestRUTranslation(unittest.TestCase):
                     {
                         "word": "house",
                         "lang_code": "en",
-                        "lang_name": "английский",
+                        "lang": "английский",
                     },
-                    {"word": "بيت", "lang_code": "ar", "lang_name": "арабский"},
+                    {"word": "بيت", "lang_code": "ar", "lang": "арабский"},
                 ],
             },
             {
@@ -53,13 +53,13 @@ class TestRUTranslation(unittest.TestCase):
                     {
                         "word": "house",
                         "lang_code": "en",
-                        "lang_name": "английский",
+                        "lang": "английский",
                         "sense": "сооружение",
                     },
                     {
                         "word": "بيت",
                         "lang_code": "ar",
-                        "lang_name": "арабский",
+                        "lang": "арабский",
                         "sense": "сооружение",
                     },
                 ],
@@ -70,22 +70,22 @@ class TestRUTranslation(unittest.TestCase):
                     {
                         "word": "ti",
                         "lang_code": "br",
-                        "lang_name": "бретонский",
+                        "lang": "бретонский",
                     },
                     {
                         "word": "αὐλή",
                         "lang_code": "grc",
-                        "lang_name": "древнегреческий",
+                        "lang": "древнегреческий",
                     },
                     {
                         "word": "δόμος",
                         "lang_code": "grc",
-                        "lang_name": "древнегреческий",
+                        "lang": "древнегреческий",
                     },
                     {
                         "word": "δῶμα",
                         "lang_code": "grc",
-                        "lang_name": "древнегреческий",
+                        "lang": "древнегреческий",
                     },
                 ],
             },

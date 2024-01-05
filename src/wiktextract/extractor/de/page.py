@@ -272,15 +272,15 @@ def parse_page(
     for level2_node in tree.find_child(NodeKind.LEVEL2):
         for subtitle_template in level2_node.find_content(NodeKind.TEMPLATE):
             # The language sections are marked with
-            # == <title> ({{Sprache|<lang_name>}}) ==
-            # where <title> is the title of the page and <lang_name> is the
+            # == <title> ({{Sprache|<lang>}}) ==
+            # where <title> is the title of the page and <lang> is the
             # German name of the language of the section.
             if subtitle_template.template_name == "Sprache":
-                lang_name = subtitle_template.template_parameters.get(1)
-                lang_code = name_to_code(lang_name, "de")
+                lang = subtitle_template.template_parameters.get(1)
+                lang_code = name_to_code(lang, "de")
                 if lang_code == "":
                     wxr.wtp.warning(
-                        f"Unknown language: {lang_name}",
+                        f"Unknown language: {lang}",
                         sortid="extractor/de/page/parse_page/76",
                     )
                 if (
@@ -290,7 +290,7 @@ def parse_page(
                     continue
 
                 base_data = WordEntry(
-                    lang_name=lang_name, lang_code=lang_code, word=wxr.wtp.title
+                    lang=lang, lang_code=lang_code, word=wxr.wtp.title
                 )
                 parse_section(wxr, page_data, base_data, level2_node.children)
 

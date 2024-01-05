@@ -20,7 +20,7 @@ class TestDELinkages(unittest.TestCase):
         self.wxr.wtp.close_db_conn()
 
     def get_default_word_entry(self) -> WordEntry:
-        return WordEntry(word="Beispiel", lang_code="de", lang_name="Deutsch")
+        return WordEntry(word="Beispiel", lang_code="de", lang="Deutsch")
 
     def test_de_extract_linkages(self):
         test_cases = [
@@ -105,7 +105,7 @@ class TestDELinkages(unittest.TestCase):
                 self.assertEqual(
                     word_entry.model_dump(
                         exclude_defaults=True,
-                        exclude={"word", "lang_code", "lang_name"},
+                        exclude={"word", "lang_code", "lang"},
                     ),
                     case["expected"],
                 )

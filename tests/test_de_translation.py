@@ -4,8 +4,10 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.models import Sense, Translation, WordEntry
-from wiktextract.extractor.de.translation import (extract_translation,
-                                                  process_translation_list)
+from wiktextract.extractor.de.translation import (
+    extract_translation,
+    process_translation_list,
+)
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -21,7 +23,7 @@ class TestDETranslation(unittest.TestCase):
         self.wxr.wtp.close_db_conn()
 
     def get_default_word_entry(self):
-        return WordEntry(word="Beispiel", lang_code="de", lang_name="Deutsch")
+        return WordEntry(word="Beispiel", lang_code="de", lang="Deutsch")
 
     def test_de_extract_translation(self):
         test_cases = [
@@ -37,7 +39,7 @@ class TestDETranslation(unittest.TestCase):
                                 {
                                     "sense": "Beispiel",
                                     "lang_code": "en",
-                                    "lang_name": "Englisch",
+                                    "lang": "Englisch",
                                     "word": "example",
                                 }
                             ],
@@ -59,7 +61,7 @@ class TestDETranslation(unittest.TestCase):
                         {
                             "sense": "Beispiel",
                             "lang_code": "en",
-                            "lang_name": "Englisch",
+                            "lang": "Englisch",
                             "word": "example",
                         }
                     ],
@@ -79,7 +81,7 @@ class TestDETranslation(unittest.TestCase):
                         {
                             "sense": "Beispiel",
                             "lang_code": "en",
-                            "lang_name": "Englisch",
+                            "lang": "Englisch",
                             "word": "example",
                         }
                     ],
@@ -100,7 +102,7 @@ class TestDETranslation(unittest.TestCase):
                 self.assertEqual(
                     word_entry.model_dump(
                         exclude_defaults=True,
-                        exclude={"word", "lang_code", "lang_name"},
+                        exclude={"word", "lang_code", "lang"},
                     ),
                     case["expected"],
                 )
@@ -114,7 +116,7 @@ class TestDETranslation(unittest.TestCase):
                 "expected_sense_translations": [
                     {
                         "lang_code": "en",
-                        "lang_name": "Englisch",
+                        "lang": "Englisch",
                         "word": "example",
                     }
                 ],
@@ -126,7 +128,7 @@ class TestDETranslation(unittest.TestCase):
                 "expected_sense_translations": [
                     {
                         "lang_code": "hy",
-                        "lang_name": "Armenisch",
+                        "lang": "Armenisch",
                         "word": "օրինակ",
                         "roman": "orinak",
                     }
@@ -140,7 +142,7 @@ class TestDETranslation(unittest.TestCase):
                 "expected_sense_translations": [
                     {
                         "lang_code": "ru",
-                        "lang_name": "Russisch",
+                        "lang": "Russisch",
                         "word": "пример",
                         "roman": "primer",
                     }
@@ -154,7 +156,7 @@ class TestDETranslation(unittest.TestCase):
                 "expected_sense_translations": [
                     {
                         "lang_code": "ar",
-                        "lang_name": "Arabisch",
+                        "lang": "Arabisch",
                         "word": "عريضة",
                         "uncertain": True,
                     }
@@ -201,12 +203,12 @@ class TestDETranslation(unittest.TestCase):
                 "expected_sense_translations": [
                     {
                         "lang_code": "en",
-                        "lang_name": "Englisch",
+                        "lang": "Englisch",
                         "word": "instance",
                     },
                     {
                         "lang_code": "en",
-                        "lang_name": "Englisch",
+                        "lang": "Englisch",
                         "word": "model",
                         "tags": ["Vorbild"],
                     },
@@ -220,7 +222,7 @@ class TestDETranslation(unittest.TestCase):
                 "expected_sense_translations": [
                     {
                         "lang_code": "fr",
-                        "lang_name": "Französisch",
+                        "lang": "Französisch",
                         "word": "exemple",
                         "tags": ["m"],
                     }
@@ -234,19 +236,19 @@ class TestDETranslation(unittest.TestCase):
                 "expected_sense_translations": [
                     {
                         "lang_code": "la",
-                        "lang_name": "Latein",
+                        "lang": "Latein",
                         "word": "crus",
                         "tags": ["f"],
                     },
                     {
                         "lang_code": "la",
-                        "lang_name": "Latein",
+                        "lang": "Latein",
                         "word": "camba",
                         "tags": ["vulgärlateinisch", "f"],
                     },
                     {
                         "lang_code": "la",
-                        "lang_name": "Latein",
+                        "lang": "Latein",
                         "word": "gamba",
                         "tags": ["vulgärlateinisch", "f"],
                     },
@@ -262,30 +264,30 @@ class TestDETranslation(unittest.TestCase):
                 "expected_sense_translations": [
                     {
                         "lang_code": "en",
-                        "lang_name": "Englisch",
+                        "lang": "Englisch",
                         "word": "subscription",
                         "tags": ["[1a]"],
                     },
                     {
                         "lang_code": "en",
-                        "lang_name": "Englisch",
+                        "lang": "Englisch",
                         "word": "dues",
                     },
                     {
                         "lang_code": "en",
-                        "lang_name": "Englisch",
+                        "lang": "Englisch",
                         "word": "membership fee",
                         "tags": ["[1", "2]"],
                     },
                     {
                         "lang_code": "en",
-                        "lang_name": "Englisch",
+                        "lang": "Englisch",
                         "word": "contribution",
                         "tags": ["[3]"],
                     },
                     {
                         "lang_code": "en",
-                        "lang_name": "Englisch",
+                        "lang": "Englisch",
                         "word": "article",
                     },
                 ],

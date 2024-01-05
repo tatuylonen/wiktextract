@@ -20,7 +20,7 @@ class Translation(BaseModelWrap):
         default=None,
         description="Wiktionary language code of the translation term",
     )
-    lang_name: Optional[str] = Field(
+    lang: Optional[str] = Field(
         default=None, description="Localized language name"
     )
     uncertain: Optional[bool] = Field(
@@ -151,9 +151,7 @@ class Sound(BaseModelWrap):
     lang_code: list[str] = Field(
         default=[], description="Wiktionary language code"
     )
-    lang_name: list[str] = Field(
-        default=[], description="Localized language name"
-    )
+    lang: list[str] = Field(default=[], description="Localized language name")
     # roman: list[str] = Field(
     #     default=[], description="Translitaration to Roman characters"
     # )
@@ -179,7 +177,7 @@ class WordEntry(BaseModelWrap):
     lang_code: str = Field(
         description="Wiktionary language code", examples=["es"]
     )
-    lang_name: str = Field(
+    lang: str = Field(
         description="Localized language name of the word", examples=["español"]
     )
     senses: Optional[list[Sense]] = []

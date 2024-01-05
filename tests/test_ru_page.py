@@ -20,7 +20,7 @@ class TestRUPage(unittest.TestCase):
         self.wxr.wtp.close_db_conn()
 
     # def get_default_page_data(self) -> list[WordEntry]:
-    #     return [WordEntry(word="test", lang_code="es", lang_name="Language")]
+    #     return [WordEntry(word="test", lang_code="es", lang="Language")]
 
     def test_ru_parse_page_1(self):
         # Navigates homonyms/homographs

@@ -156,7 +156,7 @@ class WordEntry(BaseModelWrap):
     lang_code: str = Field(
         description="Wiktionary language code", examples=["es"]
     )
-    lang_name: str = Field(
+    lang: str = Field(
         description="Localized language name of the word", examples=["español"]
     )
     senses: Optional[list[Sense]] = []

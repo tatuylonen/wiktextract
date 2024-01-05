@@ -28,7 +28,7 @@ class TestDEGloss(unittest.TestCase):
         self.wxr.wtp.close_db_conn()
 
     def get_default_word_entry(self):
-        return WordEntry(lang_code="de", lang_name="Deutsch", word="Beispiel")
+        return WordEntry(lang_code="de", lang="Deutsch", word="Beispiel")
 
     def test_de_extract_glosses(self):
         self.wxr.wtp.start_page("")
