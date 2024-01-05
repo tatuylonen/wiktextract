@@ -7,6 +7,10 @@ class BaseModelWrap(BaseModel):
     model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
 
+class Linkage(BaseModelWrap):
+    word: str
+
+
 class Translation(BaseModelWrap):
     sense: Optional[str] = Field(
         default=None, description="A gloss of the sense being translated"
@@ -120,15 +124,15 @@ class Sense(BaseModelWrap):
         default=None, description="Sense number used in Wiktionary"
     )
     translations: Optional[list[Translation]] = []
-    antonyms: Optional[list[str]] = []
-    derived: Optional[list[str]] = []
-    hyponyms: Optional[list[str]] = []
-    hypernyms: Optional[list[str]] = []
-    holonyms: Optional[list[str]] = []
-    expressions: Optional[list[str]] = []
-    coordinate_terms: Optional[list[str]] = []
-    proverbs: Optional[list[str]] = []
-    synonyms: Optional[list[str]] = []
+    antonyms: Optional[list[Linkage]] = []
+    derived: Optional[list[Linkage]] = []
+    hyponyms: Optional[list[Linkage]] = []
+    hypernyms: Optional[list[Linkage]] = []
+    holonyms: Optional[list[Linkage]] = []
+    expressions: Optional[list[Linkage]] = []
+    coordinate_terms: Optional[list[Linkage]] = []
+    proverbs: Optional[list[Linkage]] = []
+    synonyms: Optional[list[Linkage]] = []
 
 
 class Sound(BaseModelWrap):
@@ -185,12 +189,12 @@ class WordEntry(BaseModelWrap):
     # )
     translations: Optional[list[Translation]] = []
     sounds: Optional[list[Sound]] = []
-    antonyms: Optional[list[str]] = []
-    derived: Optional[list[str]] = []
-    hyponyms: Optional[list[str]] = []
-    hypernyms: Optional[list[str]] = []
-    holonyms: Optional[list[str]] = []
-    expressions: Optional[list[str]] = []
-    coordinate_terms: Optional[list[str]] = []
-    proverbs: Optional[list[str]] = []
-    synonyms: Optional[list[str]] = []
+    antonyms: Optional[list[Linkage]] = []
+    derived: Optional[list[Linkage]] = []
+    hyponyms: Optional[list[Linkage]] = []
+    hypernyms: Optional[list[Linkage]] = []
+    holonyms: Optional[list[Linkage]] = []
+    expressions: Optional[list[Linkage]] = []
+    coordinate_terms: Optional[list[Linkage]] = []
+    proverbs: Optional[list[Linkage]] = []
+    synonyms: Optional[list[Linkage]] = []
