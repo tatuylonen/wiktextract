@@ -138,13 +138,14 @@ def process_pos_block(
                     )
                 elif template_name.startswith(("zh-mot", "ja-mot")):
                     # skip form line templates
-                    continue
+                    form_line_start = index
                 elif template_name.startswith(f"{lang_code}-"):
                     extract_inflection(wxr, page_data, child)
             elif child.kind == NodeKind.BOLD:
                 form_line_start = index + 1
             elif child.kind == NodeKind.LIST:
-                gloss_start = index
+                if index < gloss_start:
+                    gloss_start = index
                 extract_gloss(wxr, page_data, child)
             elif child.kind in LEVEL_KIND_FLAGS:
                 parse_section(wxr, page_data, base_data, child)
@@ -152,7 +153,14 @@ def process_pos_block(
     form_line_nodes = child_nodes[form_line_start:gloss_start]
     extract_form_line(wxr, page_data, form_line_nodes)
     if pos_type == "verb":
-        extract_conjugation(wxr, page_data[-1])
+        if (
+            len(page_data) > 1
+            and page_data[-2].pos == pos_type
+            and page_data[-2].lang_code == page_data[-1].lang_code
+        ):
+            page_data[-1].forms = page_data[-2].forms
+        else:
+            extract_conjugation(wxr, page_data[-1])
 
 
 def parse_page(

@@ -288,3 +288,23 @@ class TestFrGloss(TestCase):
                 }
             ],
         )
+
+    def test_gloss_note_template(self):
+        # https://fr.wiktionary.org/wiki/autrice#Nom_commun
+        self.wxr.wtp.start_page("autrice")
+        self.wxr.wtp.add_page("Modèle:plus rare", 10, "''(Plus rare)''")
+        root = self.wxr.wtp.parse(
+            "# {{plus rare}} [[génitrice|Génitrice]] ; [[ascendante]] ({{note}} ce sens n’est plus guère utilisé que sous la forme de la locution « [[autrice de mes jours]] »)."
+        )
+        page_data = [WordEntry(word="autrice", lang_code="fr", lang="Français")]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
+            [
+                {
+                    "glosses": ["Génitrice ; ascendante"],
+                    "note": "ce sens n’est plus guère utilisé que sous la forme de la locution « autrice de mes jours »",
+                    "tags": ["Plus rare"],
+                }
+            ],
+        )
