@@ -23,9 +23,7 @@ class TestTranslation(TestCase):
         root = self.wxr.wtp.parse(
             "=== Traductions ===\n* {{trad-début|Formule pour saluer}}\n* {{T|sq}} : {{trad+|sq|mirëdita}}, {{trad-|sq|mirë mëngjes}} ''(le matin)''"
         )
-        base_data = WordEntry(
-            word="bonjour", lang_code="fr", lang="Français"
-        )
+        base_data = WordEntry(word="bonjour", lang_code="fr", lang="Français")
         page_data = [base_data.model_copy(deep=True)]
         extract_translation(self.wxr, page_data, base_data, root.children[0])
         self.assertEqual(
@@ -60,9 +58,7 @@ class TestTranslation(TestCase):
         root = self.wxr.wtp.parse(
             "=== Traductions ===\n* {{T|ar}} : {{trad+|ar|مرحبا|dif=مرحبًا|tr={{transliterator|ar|مرحبا}}}} {{informel|nocat=1}}"
         )
-        base_data = WordEntry(
-            word="bonjour", lang_code="fr", lang="Français"
-        )
+        base_data = WordEntry(word="bonjour", lang_code="fr", lang="Français")
         page_data = [base_data.model_copy(deep=True)]
         extract_translation(self.wxr, page_data, base_data, root.children[0])
         self.assertEqual(
@@ -89,9 +85,7 @@ class TestTranslation(TestCase):
         root = self.wxr.wtp.parse(
             "=== Traductions ===\n* {{T|mn}} : {{trad+|mn|сайн байна уу|tr=sain baina uu|tradi=ᠰᠠᠶᠢᠨ ᠪᠠᠶᠢᠨ᠎ᠠ ᠤᠤ}}"
         )
-        base_data = WordEntry(
-            word="bonjour", lang_code="fr", lang="Français"
-        )
+        base_data = WordEntry(word="bonjour", lang_code="fr", lang="Français")
         page_data = [base_data.model_copy(deep=True)]
         extract_translation(self.wxr, page_data, base_data, root.children[0])
         self.assertEqual(
@@ -120,9 +114,7 @@ class TestTranslation(TestCase):
         root = self.wxr.wtp.parse(
             "=== Traductions ===\n* {{T|de}} : {{trad|de|Kambium|n}}"
         )
-        base_data = WordEntry(
-            word="cambium", lang_code="fr", lang="Français"
-        )
+        base_data = WordEntry(word="cambium", lang_code="fr", lang="Français")
         page_data = [base_data.model_copy(deep=True)]
         extract_translation(self.wxr, page_data, base_data, root.children[0])
         self.assertEqual(
@@ -164,9 +156,7 @@ class TestTranslation(TestCase):
 ===== {{S|traductions à trier}} =====
 * {{T|af|trier}} : {{trad+|af|massa}}"""
         )
-        base_data = WordEntry(
-            word="masse", lang_code="fr", lang="Français"
-        )
+        base_data = WordEntry(word="masse", lang_code="fr", lang="Français")
         page_data = [base_data.model_copy(deep=True)]
         extract_translation(self.wxr, page_data, base_data, root.children[0])
         self.assertEqual(

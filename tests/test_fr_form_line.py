@@ -24,9 +24,7 @@ class TestFormLine(TestCase):
         self.wxr.wtp.start_page("bonjour")
         self.wxr.wtp.add_page("Modèle:pron", 10, "\\bɔ̃.ʒuʁ\\")
         root = self.wxr.wtp.parse("'''bonjour''' {{pron|bɔ̃.ʒuʁ|fr}}")
-        page_data = [
-            WordEntry(word="bonjour", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="bonjour", lang_code="fr", lang="Français")]
         extract_form_line(self.wxr, page_data, root.children)
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].sounds],
@@ -37,9 +35,7 @@ class TestFormLine(TestCase):
         self.wxr.wtp.start_page("bonjour")
         self.wxr.wtp.add_page("Modèle:m", 10, "masculin")
         root = self.wxr.wtp.parse("'''bonjour''' {{m}}")
-        page_data = [
-            WordEntry(word="bonjour", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="bonjour", lang_code="fr", lang="Français")]
         extract_form_line(self.wxr, page_data, root.children)
         self.assertEqual(page_data[-1].tags, ["masculin"])
 
@@ -49,9 +45,7 @@ class TestFormLine(TestCase):
         self.wxr.wtp.add_page("Modèle:lang", 10, body="mǎ")
         self.wxr.wtp.add_page("Modèle:pron", 10, body="\\ma̠˨˩˦\\")
         root = self.wxr.wtp.parse("{{zh-mot|马|mǎ}}")
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         process_zh_mot_template(self.wxr, root.children[0], page_data)
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].sounds],
@@ -98,9 +92,7 @@ class TestFormLine(TestCase):
         root = self.wxr.wtp.parse(
             "'''minéral argileux''' {{pron|mi.ne.ʁa.l{{liaison|fr}}aʁ.ʒi.lø|fr}}"
         )
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         extract_form_line(self.wxr, page_data, root.children)
         self.assertEqual(
             page_data[-1].sounds[0].model_dump(exclude_defaults=True),
@@ -117,9 +109,7 @@ class TestFormLine(TestCase):
         root = self.wxr.wtp.parse(
             "{{équiv-pour|un homme|auteur|2egenre=une personne non-binaire|2egenre1=autaire|2egenre2=auteurice|2egenre3=auteur·ice|lang=fr}}"
         )
-        page_data = [
-            WordEntry(word="autrice", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="autrice", lang_code="fr", lang="Français")]
         extract_form_line(self.wxr, page_data, root.children)
         self.assertEqual(
             page_data[-1].model_dump(exclude_defaults=True),
