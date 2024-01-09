@@ -75,7 +75,7 @@ def process_fr_conj_modes_table(
                     entry.forms.append(form)
                     form_text = ""
                 else:
-                    if len(form_text) > 0:
+                    if len(form_text) > 0 and not form_text.endswith("’"):
                         form_text += " "
                     form_text += clean_node(wxr, None, cell)
 
@@ -120,16 +120,19 @@ def process_fr_conj_html_table(
             for td_index, td_node in enumerate(
                 tr_node.find_html_recursively("td")
             ):
+                td_text = clean_node(wxr, None, td_node)
                 if td_index < 2:
-                    if len(form.form) > 0:
+                    form.form += td_text
+                    if td_index == 0 and not td_text.endswith("’"):
                         form.form += " "
-                    form.form += clean_node(wxr, None, td_node)
                 else:
                     if len(form.ipas) > 0:
-                        form.ipas[0] += " "
-                        form.ipas[0] += clean_node(wxr, None, td_node)
+                        form.ipas[0] += td_text
                     else:
-                        form.ipas.append(clean_node(wxr, None, td_node))
+                        if not td_text.endswith("‿"):
+                            td_text += " "
+                        form.ipas.append(td_text)
+
             entry.forms.append(form)
 
 
@@ -148,10 +151,12 @@ def process_fr_conj_wiki_table(
             for cell_index, cell in enumerate(
                 row.find_child(NodeKind.TABLE_CELL)
             ):
+                cell_text = clean_node(wxr, None, cell)
                 if cell_index < 2:
-                    if len(form.form) > 0:
+                    form.form += cell_text
+                    if cell_index == 0:
                         form.form += " "
-                    form.form += clean_node(wxr, None, cell.children)
                 else:
-                    form.ipas.append(clean_node(wxr, None, cell.children))
+                    form.ipas.append(cell_text)
+
             entry.forms.append(form)
