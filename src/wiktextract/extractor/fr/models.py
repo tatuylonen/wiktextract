@@ -77,6 +77,7 @@ class Sense(FrenchBaseModel):
     tags: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
+    note: str = ""
 
 
 class WordEntry(FrenchBaseModel):

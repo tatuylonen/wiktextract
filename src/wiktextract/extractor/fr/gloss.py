@@ -58,8 +58,20 @@ def extract_gloss(
             for index, node in enumerate(gloss_nodes)
             if index not in tag_indexes
         ]
-        gloss_text = clean_node(wxr, gloss_data, gloss_only_nodes)
+        note_index = len(gloss_only_nodes)
+        for index in range(note_index):
+            if (
+                isinstance(gloss_only_nodes[index], TemplateNode)
+                and gloss_only_nodes[index].template_name == "note"
+            ):
+                note_index = index
+        gloss_text = clean_node(
+            wxr, gloss_data, gloss_only_nodes[:note_index]
+        ).strip(" ()")
         gloss_data.glosses = parent_glosses + [gloss_text]
+        gloss_data.note = clean_node(
+            wxr, gloss_data, gloss_only_nodes[note_index + 1 :]
+        ).strip(" ().")
         page_data[-1].senses.append(gloss_data)
         for nest_gloss_list in list_item_node.find_child(NodeKind.LIST):
             if nest_gloss_list.sarg.endswith("#"):
