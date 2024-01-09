@@ -153,7 +153,14 @@ def process_pos_block(
     form_line_nodes = child_nodes[form_line_start:gloss_start]
     extract_form_line(wxr, page_data, form_line_nodes)
     if pos_type == "verb":
-        extract_conjugation(wxr, page_data[-1])
+        if (
+            len(page_data) > 1
+            and page_data[-2].pos == pos_type
+            and page_data[-2].lang_code == page_data[-1].lang_code
+        ):
+            page_data[-1].forms = page_data[-2].forms
+        else:
+            extract_conjugation(wxr, page_data[-1])
 
 
 def parse_page(
