@@ -138,13 +138,14 @@ def process_pos_block(
                     )
                 elif template_name.startswith(("zh-mot", "ja-mot")):
                     # skip form line templates
-                    continue
+                    form_line_start = index
                 elif template_name.startswith(f"{lang_code}-"):
                     extract_inflection(wxr, page_data, child)
             elif child.kind == NodeKind.BOLD:
                 form_line_start = index + 1
             elif child.kind == NodeKind.LIST:
-                gloss_start = index
+                if index < gloss_start:
+                    gloss_start = index
                 extract_gloss(wxr, page_data, child)
             elif child.kind in LEVEL_KIND_FLAGS:
                 parse_section(wxr, page_data, base_data, child)
