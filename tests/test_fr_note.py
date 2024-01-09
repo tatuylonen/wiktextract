@@ -28,9 +28,7 @@ class TestNotes(TestCase):
 paragrapy 1
 {{note-féminisation}}"""
         )
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         extract_note(self.wxr, page_data, nodes.children[0])
         self.assertEqual(
             page_data[-1].notes,

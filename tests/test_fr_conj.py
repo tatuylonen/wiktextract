@@ -98,3 +98,62 @@ class TestNotes(TestCase):
                 },
             ],
         )
+
+    def test_onglets_conjugaison(self):
+        # https://fr.wiktionary.org/wiki/Conjugaison:français/s’abattre
+        self.wxr.wtp.start_page("s’abattre")
+        self.wxr.wtp.add_page(
+            "Conjugaison:français/abattre",
+            116,
+            """{{Onglets conjugaison
+| onglet1  =Conjugaison active
+| contenu1 ={{fr-conj-3-attre|ab|a.b|'=oui}}
+| onglet2  =Conjugaison pronominale
+| contenu2 ={{fr-conj-3-attre|ab|a.b|'=oui|réfl=1}}
+| sél ={{{sél|1}}}
+}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Conjugaison:français/s’abattre",
+            116,
+            "{{:Conjugaison:français/abattre|sél=2}}",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:fr-conj-3-attre",
+            10,
+            """<h3> Modes impersonnels </h3>
+<div>
+{|
+|-[[mode|Mode]]
+!colspan=\"3\"|[[présent|Présent]]
+!colspan=\"3\"|[[passé|Passé]]
+|-
+|'''[[infinitif|Infinitif]]'''
+|s’
+|[[abattre]]
+|<span>\\s‿a.batʁ\\</span>
+|s’être
+|[[abattu]]
+|<span>\\s‿ɛtʁ‿a.ba.ty\\</span>
+|}
+</div>""",
+        )
+        entry = WordEntry(lang_code="fr", lang="Français", word="s’abattre")
+        extract_conjugation(self.wxr, entry)
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in entry.forms],
+            [
+                {
+                    "form": "s’abattre",
+                    "ipas": ["\\s‿a.batʁ\\"],
+                    "source": "Conjugaison page",
+                    "tags": ["Modes impersonnels", "Infinitif", "Présent"],
+                },
+                {
+                    "form": "s’être abattu",
+                    "ipas": ["\\s‿ɛtʁ‿a.ba.ty\\"],
+                    "source": "Conjugaison page",
+                    "tags": ["Modes impersonnels", "Infinitif", "Passé"],
+                },
+            ],
+        )

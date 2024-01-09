@@ -17,9 +17,7 @@ class TestLinkage(TestCase):
         self.wxr.wtp.close_db_conn()
 
     def test_tags(self):
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         self.wxr.wtp.start_page("bonjour")
         self.wxr.wtp.add_page("Modèle:Canada", 10, body="(Canada)")
         self.wxr.wtp.add_page("Modèle:Louisiane", 10, body="(Louisiane)")
@@ -33,9 +31,7 @@ class TestLinkage(TestCase):
         )
 
     def test_zh_synonyms(self):
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         self.wxr.wtp.start_page("你好")
         root = self.wxr.wtp.parse(
             "* {{zh-lien|你们好|nǐmen hǎo|你們好}} — Bonjour (au pluriel)."
@@ -52,9 +48,7 @@ class TestLinkage(TestCase):
         )
 
     def test_template_as_partial_tag(self):
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         self.wxr.wtp.start_page("bonjour")
         self.wxr.wtp.add_page("Modèle:lien", 10, body="kwei")
         self.wxr.wtp.add_page("Modèle:Canada", 10, body="(Canada)")
@@ -69,9 +63,7 @@ class TestLinkage(TestCase):
         )
 
     def test_list_item_has_two_words(self):
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         self.wxr.wtp.start_page("masse")
         root = self.wxr.wtp.parse(
             "* [[être à la masse]], [[mettre à la masse]]"
@@ -89,9 +81,7 @@ class TestLinkage(TestCase):
         )
 
     def test_sub_list(self):
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         self.wxr.wtp.start_page("lézard ocellé")
         root = self.wxr.wtp.parse(
             """* [[saurien]]s (Sauria)
@@ -119,9 +109,7 @@ class TestLinkage(TestCase):
     def test_sense(self):
         # https://fr.wiktionary.org/wiki/autrice
         # https://fr.wiktionary.org/wiki/embouteillage
-        page_data = [
-            WordEntry(word="autrice", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="autrice", lang_code="fr", lang="Français")]
         self.wxr.wtp.start_page("autrice")
         root = self.wxr.wtp.parse(
             """{{(|Celle qui est à l’origine de quelque chose|1}}
@@ -163,9 +151,7 @@ class TestLinkage(TestCase):
 | en = Anglais
 }}""",
         )
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         self.wxr.wtp.start_page("eau")
         root = self.wxr.wtp.parse(
             """* {{L|kmv}} : {{lien|dlo|kmv}}, {{lien|djilo|kmv}}
@@ -197,9 +183,7 @@ class TestLinkage(TestCase):
         )
 
     def test_words_divided_by_slash(self):
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         self.wxr.wtp.start_page("eau")
         root = self.wxr.wtp.parse("* [[benoîte d’eau]] / [[benoite d’eau]]")
         extract_linkage(self.wxr, page_data, root, "dérivés")

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import HTMLNode, TemplateNode
 from wiktextract.page import clean_node
@@ -6,7 +8,12 @@ from wiktextract.wxr_context import WiktextractContext
 from .models import Form, WordEntry
 
 
-def extract_conjugation(wxr: WiktextractContext, entry: WordEntry) -> None:
+def extract_conjugation(
+    wxr: WiktextractContext,
+    entry: WordEntry,
+    word: str = "",
+    select_template: str = "1",
+) -> None:
     """
     Find and extract conjugation page.
 
@@ -15,9 +22,9 @@ def extract_conjugation(wxr: WiktextractContext, entry: WordEntry) -> None:
     https://fr.wiktionary.org/wiki/Aide:Conjugaisons
     """
     conj_ns = wxr.wtp.NAMESPACE_DATA["Conjugaison"]
-    conj_page_title = (
-        f"{conj_ns['name']}:{entry.lang.lower()}/{entry.word}"
-    )
+    if len(word) == 0:
+        word = entry.word
+    conj_page_title = f"{conj_ns['name']}:{entry.lang.lower()}/{word}"
     conj_page = wxr.wtp.get_page_body(conj_page_title, conj_ns["id"])
     if conj_page is None:
         return
@@ -25,6 +32,11 @@ def extract_conjugation(wxr: WiktextractContext, entry: WordEntry) -> None:
     for conj_template in conj_root.find_child(NodeKind.TEMPLATE):
         if conj_template.template_name.startswith("fr-conj-"):
             process_fr_conj_template(wxr, entry, conj_template)
+        elif conj_template.template_name == "Onglets conjugaison":
+            process_onglets_template(wxr, entry, conj_template, select_template)
+        elif conj_template.template_name.startswith(":Conjugaison:"):
+            word = conj_template.template_name.rsplit("/", 1)[-1]
+            extract_conjugation(wxr, entry, word, "2")
 
 
 def process_fr_conj_template(
@@ -75,7 +87,7 @@ def process_fr_conj_modes_table(
                     entry.forms.append(form)
                     form_text = ""
                 else:
-                    if len(form_text) > 0:
+                    if len(form_text) > 0 and not form_text.endswith("’"):
                         form_text += " "
                     form_text += clean_node(wxr, None, cell)
 
@@ -120,16 +132,19 @@ def process_fr_conj_html_table(
             for td_index, td_node in enumerate(
                 tr_node.find_html_recursively("td")
             ):
+                td_text = clean_node(wxr, None, td_node)
                 if td_index < 2:
-                    if len(form.form) > 0:
+                    form.form += td_text
+                    if td_index == 0 and not td_text.endswith("’"):
                         form.form += " "
-                    form.form += clean_node(wxr, None, td_node)
                 else:
                     if len(form.ipas) > 0:
-                        form.ipas[0] += " "
-                        form.ipas[0] += clean_node(wxr, None, td_node)
+                        form.ipas[0] += td_text
                     else:
-                        form.ipas.append(clean_node(wxr, None, td_node))
+                        if not td_text.endswith("‿"):
+                            td_text += " "
+                        form.ipas.append(td_text)
+
             entry.forms.append(form)
 
 
@@ -148,10 +163,28 @@ def process_fr_conj_wiki_table(
             for cell_index, cell in enumerate(
                 row.find_child(NodeKind.TABLE_CELL)
             ):
+                cell_text = clean_node(wxr, None, cell)
                 if cell_index < 2:
-                    if len(form.form) > 0:
+                    form.form += cell_text
+                    if cell_index == 0 and len(cell_text) > 0:
                         form.form += " "
-                    form.form += clean_node(wxr, None, cell.children)
                 else:
-                    form.ipas.append(clean_node(wxr, None, cell.children))
-            entry.forms.append(form)
+                    form.ipas.append(cell_text)
+
+            if len(form.form) > 0 and form.form != "—":
+                entry.forms.append(form)
+
+
+def process_onglets_template(
+    wxr: WiktextractContext,
+    entry: WordEntry,
+    template_node: TemplateNode,
+    select: str,
+) -> None:
+    # https://fr.wiktionary.org/wiki/Modèle:Onglets_conjugaison
+    # this template expands to two tabs of tables
+    selected_template = template_node.template_parameters.get(
+        f"contenu{select}"
+    )
+    if selected_template is not None:
+        process_fr_conj_template(wxr, entry, selected_template)

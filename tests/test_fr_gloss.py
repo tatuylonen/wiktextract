@@ -29,9 +29,7 @@ class TestFrGloss(TestCase):
     def test_theme_templates(self, mock_get_page):
         self.wxr.wtp.start_page("")
         root = self.wxr.wtp.parse("# {{sportifs|fr}} gloss.\n#* example")
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
@@ -50,9 +48,7 @@ class TestFrGloss(TestCase):
         root = self.wxr.wtp.parse(
             "# gloss.\n#* {{exemple|text|translation|roman|source=source}}"
         )
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
@@ -80,9 +76,7 @@ class TestFrGloss(TestCase):
         root = self.wxr.wtp.parse(
             "# gloss.\n#* example {{source|source_title}}"
         )
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
@@ -151,9 +145,7 @@ class TestFrGloss(TestCase):
         root = self.wxr.wtp.parse(
             "# {{désuet|en}} {{sports|en}} {{indénombrable|en}} {{variante de|basketball|en}}."
         )
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
@@ -171,9 +163,7 @@ class TestFrGloss(TestCase):
         root = self.wxr.wtp.parse(
             "# (''localement'') [[bassin#Nom_commun|Bassin]], [[lavoir#Nom_commun|lavoir]]."
         )
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
@@ -186,9 +176,7 @@ class TestFrGloss(TestCase):
         root = self.wxr.wtp.parse(
             "# [[oiseau|Oiseau]] aquatique de taille moyenne du genre ''[[Rhynchops]]''."
         )
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
@@ -206,9 +194,7 @@ class TestFrGloss(TestCase):
         # the space between italic node and the link node should be preserved
         self.wxr.wtp.start_page("becs-en-ciseaux")
         root = self.wxr.wtp.parse("# ''Pluriel de'' [[bec-en-ciseaux]].")
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
@@ -225,9 +211,7 @@ class TestFrGloss(TestCase):
         root = self.wxr.wtp.parse(
             "# {{lien|autrice|fr|dif=Autrice}}, [[celle]] qui est à l’[[origine]] de [[quelque chose]]."
         )
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
@@ -250,9 +234,7 @@ class TestFrGloss(TestCase):
 ##* nest example
             """
         )
-        page_data = [
-            WordEntry(word="test", lang_code="fr", lang="Français")
-        ]
+        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
