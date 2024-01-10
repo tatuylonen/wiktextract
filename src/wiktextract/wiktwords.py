@@ -107,7 +107,7 @@ def main():
         "--errors", type=str, help="File in which to save error information"
     )
     parser.add_argument(
-        "--dump-file-language-code",
+        "--dump-file-language-code", "--edition",
         type=str,
         default="en",
         help="Language code of the dump file.",
