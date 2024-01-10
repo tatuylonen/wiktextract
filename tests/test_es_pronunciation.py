@@ -31,7 +31,7 @@ class TestESPronunciation(unittest.TestCase):
         test_cases = [
             {
                 "input": "{{pron-graf|fone=ˈsim.ple}}",
-                "sounds": [{"ipa": ["ˈsim.ple"]}],
+                "sounds": [{"ipa": "ˈsim.ple"}],
                 "spellings": [],
             },
             {
@@ -47,7 +47,7 @@ class TestESPronunciation(unittest.TestCase):
             },
             {
                 "input": "{{pron-graf|leng=grc|tl=parádeigma}}",
-                "sounds": [{"roman": ["parádeigma"]}],
+                "sounds": [{"roman": "parádeigma"}],
                 "spellings": [],
             },
             {
@@ -59,9 +59,13 @@ class TestESPronunciation(unittest.TestCase):
             """,
                 "sounds": [
                     {
-                        "roman": ["wātar", "u̯ātar"],
-                        "syllabic": ["wa-a-tar", "u̯a-a-tar"],
-                    }
+                        "roman": "wātar",
+                        "syllabic": "wa-a-tar",
+                    },
+                    {
+                        "roman": "u̯ātar",
+                        "syllabic": "u̯a-a-tar",
+                    },
                 ],
                 "spellings": [
                     {
@@ -73,31 +77,36 @@ class TestESPronunciation(unittest.TestCase):
             },
             {
                 "input": "{{pron-graf|leng=de|fone=ˈzɪm.pəl|fone2=ˈzɪmpl̩}}",
-                "sounds": [{"ipa": ["ˈzɪm.pəl", "ˈzɪmpl̩"]}],
+                "sounds": [
+                    {"ipa": "ˈzɪm.pəl"},
+                    {"ipa": "ˈzɪmpl̩"},
+                ],
                 "spellings": [],
             },
             {
                 "input": "{{pron-graf|leng=en|pron=Reino Unido|fone=ˈɒ.pə.zɪt|fone2=ˈɒ.pə.sɪt|2pron=EE.UU.|2fone=ˈɑ.pə.sɪt|2fone2=ˈɑ.pə.sət}}",
                 "sounds": [
-                    {"ipa": ["ˈɒ.pə.zɪt", "ˈɒ.pə.sɪt"], "tag": ["Reino Unido"]},
-                    {"ipa": ["ˈɑ.pə.sɪt", "ˈɑ.pə.sət"], "tag": ["EE.UU."]},
+                    {"ipa": "ˈɒ.pə.zɪt", "tags": ["Reino Unido"]},
+                    {"ipa": "ˈɒ.pə.sɪt", "tags": ["Reino Unido"]},
+                    {"ipa": "ˈɑ.pə.sɪt", "tags": ["EE.UU."]},
+                    {"ipa": "ˈɑ.pə.sət", "tags": ["EE.UU."]},
                 ],
                 "spellings": [],
             },
             {
-                "input": "{{pron-graf|leng=en|pron=británico|audio2=En-uk-direction.ogg|2pron=americano|2audio=En-us-direction.ogg}}",
+                "input": "{{pron-graf|leng=en|pron=británico|audio=En-uk-direction.ogg|2pron=americano|2audio=En-us-direction.ogg}}",
                 "sounds": [
                     {
-                        "audio": ["En-uk-direction.ogg"],
-                        "tag": ["británico"],
+                        "audio": "En-uk-direction.ogg",
+                        "tags": ["británico"],
                     },
                     {
-                        "audio": ["En-us-direction.ogg"],
-                        "tag": ["americano"],
+                        "audio": "En-us-direction.ogg",
+                        "tags": ["americano"],
                     },
                 ],
                 "spellings": [],
-            }
+            },
             #             {
             #                 "input": """{{pron-graf|leng=??
             # |ts=pa-ra-me-tir-uš
@@ -163,13 +172,9 @@ class TestESPronunciation(unittest.TestCase):
             page_data[0].model_dump(exclude_defaults=True)["sounds"],
             [
                 {
-                    "audio": ["la-cls-os-long.ogg"],
-                    "mp3_url": [
-                        "https://upload.wikimedia.org/wikipedia/commons/transcoded/1/18/La-cls-os-long.ogg/La-cls-os-long.ogg.mp3"
-                    ],
-                    "ogg_url": [
-                        "https://commons.wikimedia.org/wiki/Special:FilePath/la-cls-os-long.ogg"
-                    ],
+                    "audio": "la-cls-os-long.ogg",
+                    "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/1/18/La-cls-os-long.ogg/La-cls-os-long.ogg.mp3",
+                    "ogg_url": "https://commons.wikimedia.org/wiki/Special:FilePath/la-cls-os-long.ogg",
                 }
             ],
         )
