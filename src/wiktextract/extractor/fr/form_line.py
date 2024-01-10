@@ -35,7 +35,10 @@ def extract_form_line(
                 process_zh_mot_template(wxr, node, page_data)
             elif node.template_name == "ja-mot":
                 process_ja_mot_template(wxr, node, page_data)
-            elif node.template_name in ("conj", "conjugaison"):
+            elif node.template_name in (
+                "conj",
+                "conjugaison",
+            ) or node.template_name.startswith(("ja-adj-", "ja-verb-")):
                 process_conj_template(wxr, node, page_data)
             else:
                 tag = clean_node(wxr, page_data[-1], node)
@@ -162,4 +165,8 @@ def process_conj_template(
     tag = clean_node(wxr, page_data[-1], expanded_node)
     if template_node.template_name in ("conj", "conjugaison"):
         tag = tag.removesuffix("(voir la conjugaison)").strip()
+    elif template_node.template_name.startswith("ja-"):
+        tag = (
+            tag.removesuffix("(conjugaison)").removesuffix("(flexions)").strip()
+        )
     page_data[-1].tags.append(tag)

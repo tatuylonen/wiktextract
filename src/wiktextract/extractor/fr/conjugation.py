@@ -42,6 +42,10 @@ def extract_conjugation(
             extract_conjugation(
                 wxr, entry, conj_template.template_name[1:], "2"
             )
+        elif conj_template.template_name.startswith("ja-flx-adj"):
+            proces_ja_flx_adj_template(
+                wxr, entry, conj_template, conj_page_title
+            )
 
 
 def process_fr_conj_template(
@@ -194,3 +198,46 @@ def process_fr_conj_wiki_table(
 
             if len(form.form) > 0 and form.form != "—":
                 entry.forms.append(form)
+
+
+def proces_ja_flx_adj_template(
+    wxr: WiktextractContext,
+    entry: WordEntry,
+    template_node: TemplateNode,
+    conj_page_title: str,
+) -> None:
+    # https://fr.wiktionary.org/wiki/Modèle:ja-adj
+    # https://fr.wiktionary.org/wiki/Modèle:ja-flx-adj-な
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    for table_node in expanded_template.find_child(NodeKind.TABLE):
+        first_tag = ""
+        for row in table_node.find_child(NodeKind.TABLE_ROW):
+            forms = []
+            tags = [first_tag]
+            for cell_index, row_child in enumerate(
+                row.find_child(NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL)
+            ):
+                row_child_text = clean_node(wxr, None, row_child)
+                if row_child.kind == NodeKind.TABLE_HEADER_CELL:
+                    first_tag = row_child_text
+                else:
+                    for line_index, line in enumerate(
+                        row_child_text.splitlines()
+                    ):
+                        if cell_index == 0:
+                            tags.append(line)
+                            continue
+                        if line_index + 1 > len(forms):
+                            forms.append(
+                                Form(tags=tags, source=conj_page_title)
+                            )
+                        if cell_index == 1:
+                            forms[line_index].form = line
+                        elif cell_index == 2:
+                            forms[line_index].hiragana = line
+                        elif cell_index == 3:
+                            forms[line_index].roman = line
+
+            entry.forms.extend(forms)
