@@ -54,6 +54,10 @@ def extract_form_line(
                     page_data[-1].tags.append(tag.strip("()"))
 
             pre_template_name = node.template_name
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+            tag = clean_node(wxr, None, node)
+            if tag != "ou":
+                page_data[-1].tags.append(tag)
 
 
 def process_equiv_pour_template(
