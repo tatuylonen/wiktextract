@@ -121,24 +121,24 @@ class Spelling(BaseModelWrap):
 
 
 class Sound(BaseModelWrap):
-    ipa: list[str] = Field(
-        default=[], description="International Phonetic Alphabet"
+    ipa: Optional[str] = Field(
+        default=None, description="International Phonetic Alphabet"
     )
-    phonetic_transcription: list[str] = Field(
-        default=[], description="Phonetic transcription, less exact than IPA."
+    phonetic_transcription: Optional[str] = Field(
+        default=None, description="Phonetic transcription, less exact than IPA."
     )
-    audio: list[str] = Field(default=[], description="Audio file name")
-    wav_url: list[str] = Field(default=[])
-    ogg_url: list[str] = Field(default=[])
-    mp3_url: list[str] = Field(default=[])
-    flac_url: list[str] = Field(default=[])
-    roman: list[str] = Field(
-        default=[], description="Translitaration to Roman characters"
+    audio: Optional[str] = Field(default=None, description="Audio file name")
+    wav_url: Optional[str] = Field(default=None)
+    ogg_url: Optional[str] = Field(default=None)
+    mp3_url: Optional[str] = Field(default=None)
+    flac_url: Optional[str] = Field(default=None)
+    roman: Optional[str] = Field(
+        default=None, description="Translitaration to Roman characters"
     )
-    syllabic: list[str] = Field(
-        default=[], description="Syllabic transcription"
+    syllabic: Optional[str] = Field(
+        default=None, description="Syllabic transcription"
     )
-    tag: list[str] = Field(
+    tags: list[str] = Field(
         default=[], description="Specifying the variant of the pronunciation"
     )
 
