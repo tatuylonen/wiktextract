@@ -68,32 +68,32 @@ class TestNotes(TestCase):
 </div>""",
         )
         entry = WordEntry(lang_code="fr", lang="Français", word="lancer")
-        extract_conjugation(self.wxr, entry)
+        extract_conjugation(self.wxr, entry, "Conjugaison:français/lancer")
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in entry.forms],
             [
                 {
                     "form": "lancer",
                     "ipas": ["\\lɑ̃.se\\"],
-                    "source": "Conjugaison page",
+                    "source": "Conjugaison:français/lancer",
                     "tags": ["Modes impersonnels", "Infinitif", "Présent"],
                 },
                 {
                     "form": "avoir lancé",
                     "ipas": ["\\a.vwaʁ lɑ̃.se\\"],
-                    "source": "Conjugaison page",
+                    "source": "Conjugaison:français/lancer",
                     "tags": ["Modes impersonnels", "Infinitif", "Passé"],
                 },
                 {
                     "form": "je lance",
                     "ipas": ["\\ʒə lɑ̃s\\"],
-                    "source": "Conjugaison page",
+                    "source": "Conjugaison:français/lancer",
                     "tags": ["Indicatif", "Présent"],
                 },
                 {
                     "form": "j’ai lancé",
                     "ipas": ["\\ʒ‿e lɑ̃.se\\"],
-                    "source": "Conjugaison page",
+                    "source": "Conjugaison:français/lancer",
                     "tags": ["Indicatif", "Passé composé"],
                 },
             ],
@@ -139,20 +139,20 @@ class TestNotes(TestCase):
 </div>""",
         )
         entry = WordEntry(lang_code="fr", lang="Français", word="s’abattre")
-        extract_conjugation(self.wxr, entry)
+        extract_conjugation(self.wxr, entry, "Conjugaison:français/s’abattre")
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in entry.forms],
             [
                 {
                     "form": "s’abattre",
                     "ipas": ["\\s‿a.batʁ\\"],
-                    "source": "Conjugaison page",
+                    "source": "Conjugaison:français/abattre",
                     "tags": ["Modes impersonnels", "Infinitif", "Présent"],
                 },
                 {
                     "form": "s’être abattu",
                     "ipas": ["\\s‿ɛtʁ‿a.ba.ty\\"],
-                    "source": "Conjugaison page",
+                    "source": "Conjugaison:français/abattre",
                     "tags": ["Modes impersonnels", "Infinitif", "Passé"],
                 },
             ],

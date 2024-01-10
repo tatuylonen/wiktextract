@@ -5,6 +5,7 @@ from wikitextprocessor.parser import HTMLNode, TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .conjugation import extract_conjugation
 from .models import Form, Sound, WordEntry
 from .pronunciation import PRON_TEMPLATES, process_pron_template
 
@@ -34,6 +35,8 @@ def extract_form_line(
                 process_zh_mot_template(wxr, node, page_data)
             elif node.template_name == "ja-mot":
                 process_ja_mot_template(wxr, node, page_data)
+            elif node.template_name in ("conj", "conjugaison"):
+                process_conj_template(wxr, node, page_data)
             else:
                 tag = clean_node(wxr, page_data[-1], node)
                 if (
@@ -121,3 +124,42 @@ def process_ja_mot_template(
                     Form(form=form_text, tags=["romanization"])
                 )
             break
+
+
+def process_conj_template(
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    page_data: list[WordEntry],
+) -> None:
+    # https://fr.wiktionary.org/wiki/Modèle:conjugaison
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    for link in expanded_node.find_child(NodeKind.LINK):
+        if len(link.largs) == 0:
+            continue
+        conj_title = link.largs[0][0]
+        if not conj_title.startswith("Conjugaison:"):
+            continue
+        conj_word = conj_title.split("/", 1)[-1]
+        if conj_word in (
+            "Premier groupe",
+            "Deuxième groupe",
+            "Troisième groupe",
+        ):
+            continue
+        if (
+            len(page_data) > 1
+            and page_data[-2].lang_code == page_data[-1].lang_code
+            and page_data[-2].pos == page_data[-1].pos
+            and len(page_data[-2].forms) > 0
+            and page_data[-2].forms[-1].source == conj_title
+        ):
+            page_data[-1].forms = page_data[-2].forms
+        else:
+            extract_conjugation(wxr, page_data[-1], conj_title)
+
+    tag = clean_node(wxr, page_data[-1], expanded_node)
+    if template_node.template_name in ("conj", "conjugaison"):
+        tag = tag.removesuffix("(voir la conjugaison)").strip()
+    page_data[-1].tags.append(tag)
