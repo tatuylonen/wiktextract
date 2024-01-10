@@ -41,7 +41,7 @@ def process_pron_graf_template(
     )
 
     for sound_keys in sound_keys_grouped.values():
-        sound = Sound()
+        variations: dict[int, Sound] = defaultdict(Sound)
         for variant_keys in sound_keys.values():
             spelling_g = Spelling(
                 same_pronunciation=True
@@ -51,6 +51,11 @@ def process_pron_graf_template(
             )  # Collect different variants
             for key in variant_keys:
                 key_plain = key.strip(string.digits)
+                if key_plain == key:
+                    sound = variations[0]
+                else:
+                    m = re.search(r"\d+", key)
+                    sound = variations[int(m.group(0))]  # type: ignore
                 value_raw = template_node.template_parameters.get(key)
                 value = clean_node(wxr, {}, value_raw).strip()
                 if key_plain == "fone" and value != "...":
@@ -88,8 +93,17 @@ def process_pron_graf_template(
             if len(spelling_v.model_dump(exclude_defaults=True)) > 1:
                 spelling_data.append(spelling_v)
 
-        if len(sound.model_dump(exclude_defaults=True)) > 0:
-            sound_data.append(sound)
+        main_sound = variations[0]
+        for key in main_sound.model_fields_set:
+            for i, other_variation in variations.items():
+                if i == 0:
+                    continue
+                if key not in other_variation.model_fields_set:
+                    other_variation.__setattr__(key, 
+                                main_sound.__getattribute__(key))
+        for sound in variations.values():
+            if len(sound.model_dump(exclude_defaults=True)) > 0:
+                sound_data.append(sound)
 
     if len(sound_data) > 0:
         word_entry.sounds = sound_data
