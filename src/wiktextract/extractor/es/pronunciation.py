@@ -109,7 +109,7 @@ def process_pron_graf_template(
                 spelling_data.append(spelling_v)
 
         main_sound = variations[0]
-        for key in main_sound.model_fields_set | {"tags"}:
+        for key in main_sound.model_fields_set:
         # because "tags" is a field that is never 'set' (just appended to)
         # it apparently doesn't appear in mode_fields_set.
             for i, other_variation in variations.items():
@@ -117,6 +117,13 @@ def process_pron_graf_template(
                     continue
                 if key not in other_variation.model_fields_set:
                     setattr(other_variation, key, getattr(main_sound, key))
+        if main_sound.tags:
+            for i, other_variaton in variations.items():
+                if i == 0:
+                    continue
+                if not other_variation.tags:
+                    other_variation.tags = main_sound.tags.copy()
+            
         for sound in variations.values():
             if len(sound.model_dump(exclude_defaults=True)) > 0:
                 sound_data.append(sound)
