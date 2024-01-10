@@ -26,7 +26,11 @@ class Form(FrenchBaseModel):
     form: str = ""
     tags: list[str] = []
     ipas: list[str] = []
-    source: str = Field("", description="Form line template name")
+    source: str = Field(
+        "", description="Form line template name or Conjugaison page title"
+    )
+    hiragana: str = ""
+    roman: str = ""
 
 
 class Sound(FrenchBaseModel):

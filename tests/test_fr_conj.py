@@ -68,32 +68,32 @@ class TestNotes(TestCase):
 </div>""",
         )
         entry = WordEntry(lang_code="fr", lang="Français", word="lancer")
-        extract_conjugation(self.wxr, entry)
+        extract_conjugation(self.wxr, entry, "Conjugaison:français/lancer")
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in entry.forms],
             [
                 {
                     "form": "lancer",
                     "ipas": ["\\lɑ̃.se\\"],
-                    "source": "Conjugaison page",
+                    "source": "Conjugaison:français/lancer",
                     "tags": ["Modes impersonnels", "Infinitif", "Présent"],
                 },
                 {
                     "form": "avoir lancé",
                     "ipas": ["\\a.vwaʁ lɑ̃.se\\"],
-                    "source": "Conjugaison page",
+                    "source": "Conjugaison:français/lancer",
                     "tags": ["Modes impersonnels", "Infinitif", "Passé"],
                 },
                 {
                     "form": "je lance",
                     "ipas": ["\\ʒə lɑ̃s\\"],
-                    "source": "Conjugaison page",
+                    "source": "Conjugaison:français/lancer",
                     "tags": ["Indicatif", "Présent"],
                 },
                 {
                     "form": "j’ai lancé",
                     "ipas": ["\\ʒ‿e lɑ̃.se\\"],
-                    "source": "Conjugaison page",
+                    "source": "Conjugaison:français/lancer",
                     "tags": ["Indicatif", "Passé composé"],
                 },
             ],
@@ -139,21 +139,73 @@ class TestNotes(TestCase):
 </div>""",
         )
         entry = WordEntry(lang_code="fr", lang="Français", word="s’abattre")
-        extract_conjugation(self.wxr, entry)
+        extract_conjugation(self.wxr, entry, "Conjugaison:français/s’abattre")
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in entry.forms],
             [
                 {
                     "form": "s’abattre",
                     "ipas": ["\\s‿a.batʁ\\"],
-                    "source": "Conjugaison page",
+                    "source": "Conjugaison:français/abattre",
                     "tags": ["Modes impersonnels", "Infinitif", "Présent"],
                 },
                 {
                     "form": "s’être abattu",
                     "ipas": ["\\s‿ɛtʁ‿a.ba.ty\\"],
-                    "source": "Conjugaison page",
+                    "source": "Conjugaison:français/abattre",
                     "tags": ["Modes impersonnels", "Infinitif", "Passé"],
+                },
+            ],
+        )
+
+    def test_ja_flx_adj(self):
+        # https://fr.wiktionary.org/wiki/Conjugaison:japonais/格好だ
+        self.wxr.wtp.start_page("格好")
+        self.wxr.wtp.add_page(
+            "Conjugaison:japonais/格好だ",
+            116,
+            "{{ja-flx-adj-な|格好|かっこう|kakkou}}",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:ja-flx-adj-な",
+            10,
+            """<h4>Flexions</h4>
+{|
+|-
+! colspan=\"4\" | '''Formes de base'''
+|-
+| '''Imperfectif''' (<span>未然形</span>) || <span>[[格好だろ]]</span>  || <span>[[かっこうだろ]]</span>  || ''kakkou daro''
+|-
+! colspan=\"4\" | '''Clefs de constructions'''
+|-
+| '''Neutre négatif''' || <span>[[格好ではない]]<br>[[格好じゃない]]</span> || <span>[[かっこうではない]]<br>[[かっこうじゃない]]</span> || ''kakkou dewa nai<br>kakkou ja nai''
+|}""",
+        )
+        entry = WordEntry(lang_code="ja", lang="Japonais", word="格好")
+        extract_conjugation(self.wxr, entry, "Conjugaison:japonais/格好だ")
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in entry.forms],
+            [
+                {
+                    "form": "格好だろ",
+                    "hiragana": "かっこうだろ",
+                    "roman": "kakkou daro",
+                    "source": "Conjugaison:japonais/格好だ",
+                    "tags": ["Formes de base", "Imperfectif (未然形)"],
+                },
+                {
+                    "form": "格好ではない",
+                    "hiragana": "かっこうではない",
+                    "roman": "kakkou dewa nai",
+                    "source": "Conjugaison:japonais/格好だ",
+                    "tags": ["Clefs de constructions", "Neutre négatif"],
+                },
+                {
+                    "form": "格好じゃない",
+                    "hiragana": "かっこうじゃない",
+                    "roman": "kakkou ja nai",
+                    "source": "Conjugaison:japonais/格好だ",
+                    "tags": ["Clefs de constructions", "Neutre négatif"],
                 },
             ],
         )

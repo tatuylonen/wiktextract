@@ -1,5 +1,3 @@
-from typing import Optional
-
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import HTMLNode, TemplateNode
 from wiktextract.page import clean_node
@@ -11,7 +9,7 @@ from .models import Form, WordEntry
 def extract_conjugation(
     wxr: WiktextractContext,
     entry: WordEntry,
-    word: str = "",
+    conj_page_title: str,
     select_template: str = "1",
 ) -> None:
     """
@@ -21,26 +19,40 @@ def extract_conjugation(
     https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_de_tous_les_modèles/Français/Conjugaison
     https://fr.wiktionary.org/wiki/Aide:Conjugaisons
     """
-    conj_ns = wxr.wtp.NAMESPACE_DATA["Conjugaison"]
-    if len(word) == 0:
-        word = entry.word
-    conj_page_title = f"{conj_ns['name']}:{entry.lang.lower()}/{word}"
-    conj_page = wxr.wtp.get_page_body(conj_page_title, conj_ns["id"])
+    conj_page = wxr.wtp.get_page_body(
+        conj_page_title, wxr.wtp.NAMESPACE_DATA["Conjugaison"]["id"]
+    )
     if conj_page is None:
         return
     conj_root = wxr.wtp.parse(conj_page)
     for conj_template in conj_root.find_child(NodeKind.TEMPLATE):
         if conj_template.template_name.startswith("fr-conj-"):
-            process_fr_conj_template(wxr, entry, conj_template)
+            process_fr_conj_template(wxr, entry, conj_template, conj_page_title)
         elif conj_template.template_name == "Onglets conjugaison":
-            process_onglets_template(wxr, entry, conj_template, select_template)
+            # https://fr.wiktionary.org/wiki/Modèle:Onglets_conjugaison
+            # this template expands to two tabs of tables
+            selected_template = conj_template.template_parameters.get(
+                f"contenu{select_template}"
+            )
+            if selected_template is not None:
+                process_fr_conj_template(
+                    wxr, entry, selected_template, conj_page_title
+                )
         elif conj_template.template_name.startswith(":Conjugaison:"):
-            word = conj_template.template_name.rsplit("/", 1)[-1]
-            extract_conjugation(wxr, entry, word, "2")
+            extract_conjugation(
+                wxr, entry, conj_template.template_name[1:], "2"
+            )
+        elif conj_template.template_name.startswith("ja-flx-adj"):
+            proces_ja_flx_adj_template(
+                wxr, entry, conj_template, conj_page_title
+            )
 
 
 def process_fr_conj_template(
-    wxr: WiktextractContext, entry: WordEntry, template_node: TemplateNode
+    wxr: WiktextractContext,
+    entry: WordEntry,
+    template_node: TemplateNode,
+    conj_page_title: str,
 ) -> None:
     # https://fr.wiktionary.org/wiki/Catégorie:Modèles_de_conjugaison_en_français
     # https://fr.wiktionary.org/wiki/Modèle:fr-conj-1-ger
@@ -54,13 +66,20 @@ def process_fr_conj_template(
                 h3_text = clean_node(wxr, None, node)
             elif node.tag == "div":
                 if h3_text == "Modes impersonnels":
-                    process_fr_conj_modes_table(wxr, entry, node)
+                    process_fr_conj_modes_table(
+                        wxr, entry, node, conj_page_title
+                    )
                 else:
-                    process_fr_conj_table(wxr, entry, node, h3_text)
+                    process_fr_conj_table(
+                        wxr, entry, node, h3_text, conj_page_title
+                    )
 
 
 def process_fr_conj_modes_table(
-    wxr: WiktextractContext, entry: WordEntry, div_node: HTMLNode
+    wxr: WiktextractContext,
+    entry: WordEntry,
+    div_node: HTMLNode,
+    conj_page_title: str,
 ) -> None:
     # the first "Modes impersonnels" table
     for table_node in div_node.find_child(NodeKind.TABLE):
@@ -81,7 +100,7 @@ def process_fr_conj_modes_table(
                         form=form_text,
                         tags=tags.copy(),
                         ipas=[clean_node(wxr, None, cell)],
-                        source="Conjugaison page",
+                        source=conj_page_title,
                     )
                     form.tags.append("Présent" if cell_index == 3 else "Passé")
                     entry.forms.append(form)
@@ -93,7 +112,11 @@ def process_fr_conj_modes_table(
 
 
 def process_fr_conj_table(
-    wxr: WiktextractContext, entry: WordEntry, div_node: HTMLNode, h3_text: str
+    wxr: WiktextractContext,
+    entry: WordEntry,
+    div_node: HTMLNode,
+    h3_text: str,
+    conj_page_title: str,
 ) -> None:
     for table_node in div_node.find_child(NodeKind.TABLE):
         for row_index, row in enumerate(
@@ -109,11 +132,11 @@ def process_fr_conj_table(
                             and cell_child.tag == "table"
                         ):
                             process_fr_conj_html_table(
-                                wxr, entry, cell_child, h3_text
+                                wxr, entry, cell_child, h3_text, conj_page_title
                             )
                         elif cell_child.kind == NodeKind.TABLE:
                             process_fr_conj_wiki_table(
-                                wxr, entry, cell_child, h3_text
+                                wxr, entry, cell_child, h3_text, conj_page_title
                             )
 
 
@@ -122,13 +145,14 @@ def process_fr_conj_html_table(
     entry: WordEntry,
     table_node: HTMLNode,
     h3_text: str,
+    conj_page_title: str,
 ):
     tags = [h3_text]
     for tr_index, tr_node in enumerate(table_node.find_html_recursively("tr")):
         if tr_index == 0:
             tags.append(clean_node(wxr, None, tr_node.children))
         else:
-            form = Form(tags=tags, source="Conjugaison page")
+            form = Form(tags=tags, source=conj_page_title)
             for td_index, td_node in enumerate(
                 tr_node.find_html_recursively("td")
             ):
@@ -153,13 +177,14 @@ def process_fr_conj_wiki_table(
     entry: WordEntry,
     table_node: WikiNode,
     h3_text: str,
+    conj_page_title: str,
 ):
     tags = [h3_text]
     for row_index, row in enumerate(table_node.find_child(NodeKind.TABLE_ROW)):
         if row_index == 0:
             tags.append(clean_node(wxr, None, row.children))
         else:
-            form = Form(tags=tags, source="Conjugaison page")
+            form = Form(tags=tags, source=conj_page_title)
             for cell_index, cell in enumerate(
                 row.find_child(NodeKind.TABLE_CELL)
             ):
@@ -175,16 +200,44 @@ def process_fr_conj_wiki_table(
                 entry.forms.append(form)
 
 
-def process_onglets_template(
+def proces_ja_flx_adj_template(
     wxr: WiktextractContext,
     entry: WordEntry,
     template_node: TemplateNode,
-    select: str,
+    conj_page_title: str,
 ) -> None:
-    # https://fr.wiktionary.org/wiki/Modèle:Onglets_conjugaison
-    # this template expands to two tabs of tables
-    selected_template = template_node.template_parameters.get(
-        f"contenu{select}"
+    # https://fr.wiktionary.org/wiki/Modèle:ja-adj
+    # https://fr.wiktionary.org/wiki/Modèle:ja-flx-adj-な
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
-    if selected_template is not None:
-        process_fr_conj_template(wxr, entry, selected_template)
+    for table_node in expanded_template.find_child(NodeKind.TABLE):
+        first_tag = ""
+        for row in table_node.find_child(NodeKind.TABLE_ROW):
+            forms = []
+            tags = [first_tag]
+            for cell_index, row_child in enumerate(
+                row.find_child(NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL)
+            ):
+                row_child_text = clean_node(wxr, None, row_child)
+                if row_child.kind == NodeKind.TABLE_HEADER_CELL:
+                    first_tag = row_child_text
+                else:
+                    for line_index, line in enumerate(
+                        row_child_text.splitlines()
+                    ):
+                        if cell_index == 0:
+                            tags.append(line)
+                            continue
+                        if line_index + 1 > len(forms):
+                            forms.append(
+                                Form(tags=tags, source=conj_page_title)
+                            )
+                        if cell_index == 1:
+                            forms[line_index].form = line
+                        elif cell_index == 2:
+                            forms[line_index].hiragana = line
+                        elif cell_index == 3:
+                            forms[line_index].roman = line
+
+            entry.forms.extend(forms)
