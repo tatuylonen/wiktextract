@@ -41,6 +41,18 @@ def process_pron_graf_template(
     )
 
     for sound_keys in sound_keys_grouped.values():
+        # variations is used to separate out arguments with different
+        # numbers at the *end*; Spanish pron templates can have several
+        # layers of arguments, with numbers at both sides. Here, we
+        # create minor variations, for example when a pronunciation has
+        # two sets of audio-files, like es-wiktionary 'brown': the
+        # UK and US files should not be in the same 'audio' field,
+        # because the field name is meaningful and should contain only
+        # one item. It makes some sense to separate these arguments
+        # out into their own variant Sound objects that then get
+        # filled with all the missing fields from their main (dict
+        # key 0) Sound object that got all the arguments without
+        # postpositional numbers.
         variations: dict[int, Sound] = defaultdict(Sound)
         for variant_keys in sound_keys.values():
             spelling_g = Spelling(
@@ -54,26 +66,29 @@ def process_pron_graf_template(
                 if key_plain == key:
                     sound = variations[0]
                 else:
-                    m = re.search(r"\d+", key)
-                    sound = variations[int(m.group(0))]  # type: ignore
+                    m = re.search(r"\d+$", key)
+                    if m is None:
+                        sound = variations[0]
+                    else:
+                        sound = variations[int(m.group(0))]  # type: ignore
                 value_raw = template_node.template_parameters.get(key)
                 value = clean_node(wxr, {}, value_raw).strip()
                 if key_plain == "fone" and value != "...":
-                    sound.ipa.append(value)
+                    sound.ipa = value
                 elif key_plain == "fono":
-                    sound.phonetic_transcription.append(value)
+                    sound.phonetic_transcription = value
                 elif key_plain == "tl":
-                    sound.roman.append(value)
+                    sound.roman = value
                 elif key_plain == "ts":
-                    sound.syllabic.append(value)
+                    sound.syllabic = value
                 elif key_plain == "pron":
                     if value != "no":
-                        sound.tag.append(value)
+                        sound.tags.append(value)
                 elif key_plain == "audio":
                     audio_url_dict = create_audio_url_dict(value)
                     for dict_key, dict_value in audio_url_dict.items():
                         if dict_value and dict_key in sound.model_fields:
-                            getattr(sound, dict_key).append(dict_value)
+                            setattr(sound, dict_key, dict_value)
                 elif key_plain in ["g", "ga", "grafía alternativa"]:
                     spelling_g.alternative = value
                 elif key_plain == "gnota":
@@ -94,13 +109,14 @@ def process_pron_graf_template(
                 spelling_data.append(spelling_v)
 
         main_sound = variations[0]
-        for key in main_sound.model_fields_set:
+        for key in main_sound.model_fields_set | {"tags"}:
+        # because "tags" is a field that is never 'set' (just appended to)
+        # it apparently doesn't appear in mode_fields_set.
             for i, other_variation in variations.items():
                 if i == 0:
                     continue
                 if key not in other_variation.model_fields_set:
-                    other_variation.__setattr__(key, 
-                                main_sound.__getattribute__(key))
+                    setattr(other_variation, key, getattr(main_sound, key))
         for sound in variations.values():
             if len(sound.model_dump(exclude_defaults=True)) > 0:
                 sound_data.append(sound)
@@ -121,7 +137,7 @@ def process_audio_template(
         audio_url_dict = create_audio_url_dict(audio)
         for dict_key, dict_value in audio_url_dict.items():
             if dict_value and dict_key in sound.model_fields:
-                getattr(sound, dict_key).append(dict_value)
+                setattr(sound, dict_key, dict_value)
 
     # XXX: Extract other parameters from the Spanish audio template
 
