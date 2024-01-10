@@ -141,3 +141,10 @@ class TestFormLine(TestCase):
                 ],
             },
         )
+
+    def test_italic_tag(self):
+        self.wxr.wtp.start_page("飢える")
+        page_data = [WordEntry(word="飢える", lang_code="ja", lang="Japonais")]
+        root = self.wxr.wtp.parse("'''飢える''' ''ichidan''")
+        extract_form_line(self.wxr, page_data, root.children)
+        self.assertEqual(page_data[-1].tags, ["ichidan"])

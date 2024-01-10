@@ -38,7 +38,7 @@ def extract_form_line(
             elif node.template_name in (
                 "conj",
                 "conjugaison",
-            ) or node.template_name.startswith(("ja-adj-", "ja-verb-")):
+            ) or node.template_name.startswith(("ja-adj-", "ja-verbe")):
                 process_conj_template(wxr, node, page_data)
             else:
                 tag = clean_node(wxr, page_data[-1], node)
@@ -54,6 +54,10 @@ def extract_form_line(
                     page_data[-1].tags.append(tag.strip("()"))
 
             pre_template_name = node.template_name
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+            tag = clean_node(wxr, None, node)
+            if tag != "ou":
+                page_data[-1].tags.append(tag)
 
 
 def process_equiv_pour_template(
@@ -169,4 +173,5 @@ def process_conj_template(
         tag = (
             tag.removesuffix("(conjugaison)").removesuffix("(flexions)").strip()
         )
-    page_data[-1].tags.append(tag)
+    if len(tag) > 0:
+        page_data[-1].tags.append(tag)

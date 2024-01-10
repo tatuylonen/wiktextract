@@ -209,3 +209,94 @@ class TestNotes(TestCase):
                 },
             ],
         )
+
+    def test_ja_conj(self):
+        # https://fr.wiktionary.org/wiki/Conjugaison:japonais/在る
+        self.wxr.wtp.start_page("在る")
+        self.wxr.wtp.add_page("Conjugaison:japonais/在る", 116, "{{ja-在る}}")
+        self.wxr.wtp.add_page(
+            "Modèle:ja-在る",
+            10,
+            """{|
+! colspan=\"7\" | '''Formes de base'''
+|-
+! colspan=\"4\" | '''L'inaccompli'''
+| <bdi>[[在る#ja|在る]]</bdi>
+| <bdi>[[ある#ja|ある]]</bdi>
+| ''aru\n''
+|-
+! colspan=\"4\" | '''Imperfectif''' (<bdi>[[未然形#ja-nom|未然形]]</bdi>, <bdi>''mizen-kei''</bdi>)
+| <bdi>[[無い#ja|無い]]</bdi>
+| <bdi>[[ない#ja|ない]]</bdi>
+| ''nai\n''
+|-
+! colspan=\"7\" | '''Clefs de constructions'''
+|-
+! colspan=\"2\" | Temps
+! Forme
+! Terme
+! [[kanji|Kanji]]
+! [[hiragana|Hiragana]]
+! [[romaji|Rōmaji]]
+|-
+! rowspan=\"4\" colspan=\"2\" | Présent / Futur
+! rowspan=\"2\" | poli
+! affirmatif
+| <bdi>[[在ります#ja|在ります]]</bdi>
+| <bdi>[[あります#ja|あります]]</bdi>
+| ''arimasu\n''
+|-
+! négatif
+| <bdi>[[在りません#ja|在りません]]</bdi>
+| <bdi>[[ありません#ja|ありません]]</bdi>
+| ''arimasen\n''
+|}""",
+        )
+        entry = WordEntry(lang_code="ja", lang="Japonais", word="在る")
+        extract_conjugation(self.wxr, entry, "Conjugaison:japonais/在る")
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in entry.forms],
+            [
+                {
+                    "form": "在る",
+                    "hiragana": "ある",
+                    "roman": "aru",
+                    "source": "Conjugaison:japonais/在る",
+                    "tags": ["Formes de base", "L'inaccompli"],
+                },
+                {
+                    "form": "無い",
+                    "hiragana": "ない",
+                    "roman": "nai",
+                    "source": "Conjugaison:japonais/在る",
+                    "tags": [
+                        "Formes de base",
+                        "Imperfectif (未然形, mizen-kei)",
+                    ],
+                },
+                {
+                    "form": "在ります",
+                    "hiragana": "あります",
+                    "roman": "arimasu",
+                    "source": "Conjugaison:japonais/在る",
+                    "tags": [
+                        "Clefs de constructions",
+                        "Présent / Futur",
+                        "poli",
+                        "affirmatif",
+                    ],
+                },
+                {
+                    "form": "在りません",
+                    "hiragana": "ありません",
+                    "roman": "arimasen",
+                    "source": "Conjugaison:japonais/在る",
+                    "tags": [
+                        "Clefs de constructions",
+                        "Présent / Futur",
+                        "poli",
+                        "négatif",
+                    ],
+                },
+            ],
+        )
