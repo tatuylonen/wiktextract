@@ -46,6 +46,8 @@ def extract_conjugation(
             proces_ja_flx_adj_template(
                 wxr, entry, conj_template, conj_page_title
             )
+        elif conj_template.template_name.startswith("ja-"):
+            proces_ja_conj_template(wxr, entry, conj_template, conj_page_title)
 
 
 def process_fr_conj_template(
@@ -241,3 +243,60 @@ def proces_ja_flx_adj_template(
                             forms[line_index].roman = line
 
             entry.forms.extend(forms)
+
+
+def proces_ja_conj_template(
+    wxr: WiktextractContext,
+    entry: WordEntry,
+    template_node: TemplateNode,
+    conj_page_title: str,
+) -> None:
+    # https://fr.wiktionary.org/wiki/Modèle:ja-verbe-conj
+    # Modèle:ja-在る
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    for table_node in expanded_template.find_child(NodeKind.TABLE):
+        first_tag = ""
+        row_headers = {}
+        for row in table_node.find_child(NodeKind.TABLE_ROW):
+            if (
+                all(
+                    isinstance(c, WikiNode)
+                    and c.kind == NodeKind.TABLE_HEADER_CELL
+                    for c in row.children
+                )
+                and len(row.children) > 1
+            ):
+                # skip header row of the "Clefs de constructions" table
+                continue
+
+            for header in row.find_child(NodeKind.TABLE_HEADER_CELL):
+                header_text = clean_node(wxr, None, header)
+                if len(row.children) == 1:
+                    first_tag = header_text
+                else:
+                    row_headers[header_text] = int(
+                        header.attrs.get("rowspan", "1")
+                    )
+
+            tags = [first_tag]
+            for tag, rowspan in row_headers.copy().items():
+                tags.append(tag)
+                if rowspan == 1:
+                    del row_headers[tag]
+                else:
+                    row_headers[tag] = rowspan - 1
+            form = Form(tags=tags, source=conj_page_title)
+            for cell_index, cell in enumerate(
+                row.find_child(NodeKind.TABLE_CELL)
+            ):
+                cell_text = clean_node(wxr, None, cell)
+                if cell_index == 0:
+                    form.form = cell_text
+                elif cell_index == 1:
+                    form.hiragana = cell_text
+                elif cell_index == 2:
+                    form.roman = cell_text
+            if len(form.form) > 0:
+                entry.forms.append(form)

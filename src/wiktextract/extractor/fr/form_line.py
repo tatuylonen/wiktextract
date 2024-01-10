@@ -38,7 +38,7 @@ def extract_form_line(
             elif node.template_name in (
                 "conj",
                 "conjugaison",
-            ) or node.template_name.startswith(("ja-adj-", "ja-verb-")):
+            ) or node.template_name.startswith(("ja-adj-", "ja-verbe")):
                 process_conj_template(wxr, node, page_data)
             else:
                 tag = clean_node(wxr, page_data[-1], node)
@@ -169,4 +169,5 @@ def process_conj_template(
         tag = (
             tag.removesuffix("(conjugaison)").removesuffix("(flexions)").strip()
         )
-    page_data[-1].tags.append(tag)
+    if len(tag) > 0:
+        page_data[-1].tags.append(tag)
