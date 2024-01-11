@@ -45,7 +45,8 @@ class TestNotes(TestCase):
 <div>
 {|
 |-
-|<table>
+|width="50%"|
+<table>
   <tr>
     <th colspan=\"4\">Présent</th>
   </tr>
@@ -56,7 +57,7 @@ class TestNotes(TestCase):
     <td><span>lɑ̃s</span>\\</td>
   </tr>
 </table>
-|
+|width="50%"|
 {|
 |-
 !colspan=\"4\"|Passé composé
@@ -137,6 +138,28 @@ class TestNotes(TestCase):
 |[[abattu]]
 |<span>\\s‿ɛtʁ‿a.ba.ty\\</span>
 |}
+</div>
+<h3> Impératif </h3>
+<div>
+{|
+|-
+|width=\"50%\"|
+{|
+|-
+!colspan=\"3\"|Présent<nowiki />
+|-
+|[[abats]]
+|width=\"25%\"|-toi&nbsp;<nowiki />
+|width=\"50%\"|[[Annexe:Prononciation/français|<span>\\a.ba.twa\\</span>]]
+|}
+|width=\"50%\"|
+{|
+|-
+!Passé<nowiki />
+|-
+|align=\"center\"|—
+|}
+|}
 </div>""",
         )
         entry = WordEntry(lang_code="fr", lang="Français", word="s’abattre")
@@ -155,6 +178,12 @@ class TestNotes(TestCase):
                     "ipas": ["\\s‿ɛtʁ‿a.ba.ty\\"],
                     "source": "Conjugaison:français/abattre",
                     "tags": ["Modes impersonnels", "Infinitif", "Passé"],
+                },
+                {
+                    "form": "abats-toi",
+                    "ipas": ["\\a.ba.twa\\"],
+                    "source": "Conjugaison:français/abattre",
+                    "tags": ["Impératif", "Présent"],
                 },
             ],
         )
