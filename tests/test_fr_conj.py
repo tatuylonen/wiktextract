@@ -56,7 +56,8 @@ class TestNotes(TestCase):
     <td><span>lɑ̃s</span>\\</td>
   </tr>
 </table>
-|{|
+|
+{|
 |-
 !colspan=\"4\"|Passé composé
 |-
