@@ -76,12 +76,12 @@ class Example(BaseModelWrap):
 
 
 class Sense(BaseModelWrap):
-    raw_gloss: Optional[str] = Field(
-        default=None,
+    raw_glosses: list[str] = Field(
+        default=[],
         description="Raw gloss string for the word sense. This might contain tags and other markup.",
     )
-    gloss: Optional[str] = Field(
-        default=None,
+    glosses: list[str] = Field(
+        default=[],
         description="Gloss string for the word sense. This has been cleaned, and should be straightforward text with no tags.",
     )
     tags: list[str] = Field(

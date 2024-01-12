@@ -105,12 +105,12 @@ def extract_gloss(
     if raw_gloss_children:
         raw_gloss = clean_node(wxr, {}, raw_gloss_children).strip()
         if raw_gloss:
-            sense.raw_gloss = raw_gloss
+            sense.raw_glosses.append(raw_gloss)
 
     if clean_gloss_children:
         gloss = clean_node(wxr, {}, clean_gloss_children).strip()
         if gloss:
-            sense.gloss = gloss
+            sense.glosses.append(gloss)
 
     for tag_template in tag_templates:
         # XXX: Expanded tags are mostly still abbreviations. In Wiktionary, however, they show the full word on hover. Perhaps it's possible to extract the full word from the template?
