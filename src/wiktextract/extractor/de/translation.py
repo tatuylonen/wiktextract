@@ -109,6 +109,7 @@ def process_translation_list(
                     f"Unknown language code: {translation_data.lang}",
                     sortid="extractor/de/translation/process_translation_list/70",
                 )
+                translation_data.lang = f"Unknown({lang_code})"
             if node.template_name[-1] == "?":
                 translation_data.uncertain = True
 
