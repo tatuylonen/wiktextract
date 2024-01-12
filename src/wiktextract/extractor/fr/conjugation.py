@@ -192,13 +192,17 @@ def process_fr_conj_wiki_table(
             ):
                 cell_text = clean_node(wxr, None, cell)
                 if cell_index < 2:
+                    if cell_text == "—":
+                        continue
+                    if cell_text.startswith("-"):
+                        form.form = form.form.strip()
                     form.form += cell_text
                     if cell_index == 0 and len(cell_text) > 0:
                         form.form += " "
                 else:
                     form.ipas.append(cell_text)
 
-            if len(form.form) > 0 and form.form != "—":
+            if len(form.form) > 0:
                 entry.forms.append(form)
 
 
