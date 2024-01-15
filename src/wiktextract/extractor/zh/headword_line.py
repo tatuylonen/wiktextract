@@ -148,7 +148,11 @@ def process_forms_text(
 
                 form_data = Form(form=form, tags=form_tags, ruby=ruby_data)
                 page_data[-1].forms.append(form_data)
-            elif node.tag == "span" and "tr" in node.attrs.get("class", ""):
+            elif (
+                node.tag == "span"
+                and "tr" in node.attrs.get("class", "")
+                and len(page_data[-1].forms) > 0
+            ):
                 # romanization of the previous form <b> tag
                 page_data[-1].forms[-1].roman = clean_node(wxr, None, node)
             else:
