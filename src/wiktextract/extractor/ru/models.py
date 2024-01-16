@@ -1,10 +1,13 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class BaseModelWrap(BaseModel):
-    model_config = ConfigDict(validate_assignment=True, extra="forbid")
+    model_config = ConfigDict(
+        extra="forbid",
+        strict=True,
+        validate_assignment=True,
+        validate_default=True,
+    )
 
 
 class Translation(BaseModelWrap):
@@ -15,8 +18,8 @@ class Translation(BaseModelWrap):
     lang: str = Field(
         description="Localized language name of the translation term"
     )
-    sense: Optional[str] = Field(
-        default=None,
+    sense: str = Field(
+        default="",
         description="An optional gloss describing the sense translated",
     )
 
@@ -26,16 +29,14 @@ class Linkage(BaseModelWrap):
 
 
 class Sound(BaseModelWrap):
-    ipa: Optional[str] = Field(
-        default=None, description="International Phonetic Alphabet"
-    )
-    audio: Optional[str] = Field(default=None, description="Audio file name")
-    wav_url: Optional[str] = Field(default=None)
-    ogg_url: Optional[str] = Field(default=None)
-    oga_url: Optional[str] = Field(default=None)
-    mp3_url: Optional[str] = Field(default=None)
-    flac_url: Optional[str] = Field(default=None)
-    tags: Optional[list[str]] = Field(
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    ogg_url: str = ""
+    oga_url: str = ""
+    mp3_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = Field(
         default=[], description="Specifying the variant of the pronunciation"
     )
     homophones: list[Linkage] = Field(
@@ -43,36 +44,25 @@ class Sound(BaseModelWrap):
     )
 
 
-class Reference(BaseModelWrap):
-    author: Optional[str] = Field(default=None, description="Author's name")
-    title: Optional[str] = Field(
-        default=None, description="Title of the reference"
+class Example(BaseModelWrap):
+    text: str = Field(default="", description="Example usage sentence")
+    translation: str = Field(
+        default="", description="Spanish translation of the example sentence"
     )
-    date: Optional[str] = Field(default=None, description="Original date")
-    date_published: Optional[str] = Field(
-        default=None, description="Date of publication"
-    )
-
-    collection: Optional[str] = Field(
-        default=None,
+    author: str = Field(default="", description="Author's name")
+    title: str = Field(default="", description="Title of the reference")
+    date: str = Field(default="", description="Original date")
+    date_published: str = Field(default="", description="Date of publication")
+    collection: str = Field(
+        default="",
         description="Name of the collection the example was taken from",
     )
-    editor: Optional[str] = Field(default=None, description="Editor")
-    translator: Optional[str] = Field(default=None, description="Translator")
-    source: Optional[str] = Field(
-        default=None,
+    editor: str = Field(default="", description="Editor")
+    translator: str = Field(default="", description="Translator")
+    source: str = Field(
+        default="",
         description="Source of reference, corresponds to template parameter 'источник'",
     )
-
-
-class Example(BaseModelWrap):
-    text: Optional[str] = Field(
-        default=None, description="Example usage sentence"
-    )
-    translation: Optional[str] = Field(
-        default=None, description="Spanish translation of the example sentence"
-    )
-    ref: Optional[Reference] = Field(default=None, description="")
 
 
 class Sense(BaseModelWrap):
@@ -101,14 +91,15 @@ class Sense(BaseModelWrap):
 
 class WordEntry(BaseModelWrap):
     """
-    WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.
+    WordEntry is a dictionary containing lexical information of a single word
+    extracted from Wiktionary with wiktextract.
     """
 
     model_config = ConfigDict(title="Russian Wiktionary")
 
     word: str = Field(description="word string")
-    pos: str = Field(default=None, description="Part of speech type")
-    pos_title: str = Field(default=None, description="Original POS title")
+    pos: str = Field(default="", description="Part of speech type")
+    pos_title: str = Field(default="", description="Original POS title")
     lang_code: str = Field(
         description="Wiktionary language code", examples=["ru"]
     )
@@ -119,9 +110,9 @@ class WordEntry(BaseModelWrap):
         default=[],
         description="list of non-disambiguated categories for the word",
     )
-    sounds: Optional[list[Sound]] = []
-    senses: Optional[list[Sense]] = []
-    translations: Optional[list[Translation]] = []
+    sounds: list[Sound] = []
+    senses: list[Sense] = []
+    translations: list[Translation] = []
     antonyms: list[Linkage] = Field(default=[], description="List of antonyms")
     anagrams: list[Linkage] = Field(default=[], description="List of anagrams")
     variants: list[Linkage] = Field(default=[], description="List of variants")
