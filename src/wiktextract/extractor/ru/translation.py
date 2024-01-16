@@ -11,12 +11,12 @@ def extract_translations(
     word_entry: WordEntry,
     level3_node: WikiNode,
 ):
-    sense = None
+    sense = ""
     for template_node in level3_node.find_child(NodeKind.TEMPLATE):
         if template_node.template_name == "перев-блок":
             gloss_nodes = template_node.template_parameters.get(1, [])
             if gloss_nodes:
-                sense = clean_node(wxr, {}, gloss_nodes).strip()
+                sense = clean_node(wxr, None, gloss_nodes)
             for key, raw_value in template_node.template_parameters.items():
                 if isinstance(key, str):
                     lang_code = key
@@ -38,7 +38,7 @@ def extract_translations(
                                         lang_code=lang_code,
                                         lang=lang,
                                         word=word,
-                                        sense=sense if sense else None,
+                                        sense=sense,
                                     )
                                 )
                         # XXX: Extract non link content such as tags

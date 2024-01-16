@@ -99,5 +99,5 @@ def process_link(
     semantic_links.append(Linkage(word=clean_link))
 
 
-def contains_dash(text: str):
-    return re.search(r"[–—―‒-]", text)
+def contains_dash(text: str) -> bool:
+    return re.search(r"[–—―‒-]", text) is not None
