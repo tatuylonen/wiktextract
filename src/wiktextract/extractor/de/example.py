@@ -2,8 +2,7 @@ import copy
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
-
-from wiktextract.extractor.de.models import Example, Reference, WordEntry
+from wiktextract.extractor.de.models import Example, WordEntry
 from wiktextract.extractor.de.utils import find_and_remove_child, match_senseid
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -80,9 +79,7 @@ def extract_examples(
 def extract_reference(
     wxr: WiktextractContext, example_data: Example, ref_node: WikiNode
 ):
-    reference_data = Reference()
-
-    reference_data.raw_ref = clean_node(wxr, {}, ref_node.children)
+    example_data.raw_ref = clean_node(wxr, {}, ref_node.children)
 
     template_nodes = list(ref_node.find_child(NodeKind.TEMPLATE))
 
@@ -100,9 +97,9 @@ def extract_reference(
         for key, value in template_node.template_parameters.items():
             if isinstance(key, str):
                 key_english = REF_KEY_MAP.get(key.lower(), key.lower())
-                if key_english in reference_data.model_fields:
+                if key_english in example_data.model_fields:
                     setattr(
-                        reference_data, key_english, clean_node(wxr, {}, value)
+                        example_data, key_english, clean_node(wxr, {}, value)
                     )
                 else:
                     wxr.wtp.debug(
@@ -112,5 +109,3 @@ def extract_reference(
 
         # XXX: Treat other templates as well.
         # E.g. https://de.wiktionary.org/wiki/Vorlage:Ref-OWID
-
-    example_data.ref = reference_data

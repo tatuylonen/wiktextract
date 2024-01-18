@@ -1,7 +1,6 @@
 import unittest
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.example import extract_examples, extract_reference
 from wiktextract.extractor.de.models import Example, Sense, WordEntry
@@ -72,7 +71,7 @@ class TestDEExample(unittest.TestCase):
                     "examples": [
                         {
                             "text": "example1",
-                            "ref": {"raw_ref": "ref1A"},
+                            "raw_ref": "ref1A",
                         },
                     ],
                     "senseid": "1",
@@ -95,15 +94,13 @@ class TestDEExample(unittest.TestCase):
         self.assertEqual(
             example_data.model_dump(exclude_defaults=True),
             {
-                "ref": {
-                    "raw_ref": "Expanded template, Seite 273. ISBN 978-3-89029-459-9.",
-                    "title": "Viva Warszawa",
-                    "author": "Steffen Möller",
-                    "title_complement": "Polen für Fortgeschrittene",
-                    "publisher": "Piper",
-                    "place": "München/Berlin",
-                    "year": "2015",
-                }
+                "raw_ref": "Expanded template, Seite 273. ISBN 978-3-89029-459-9.",
+                "title": "Viva Warszawa",
+                "author": "Steffen Möller",
+                "title_complement": "Polen für Fortgeschrittene",
+                "publisher": "Piper",
+                "place": "München/Berlin",
+                "year": "2015",
             },
         )
 
@@ -124,8 +121,6 @@ class TestDEExample(unittest.TestCase):
         self.assertEqual(
             example_data.model_dump(exclude_defaults=True),
             {
-                "ref": {
-                    "raw_ref": "Expanded template",
-                }
+                "raw_ref": "Expanded template",
             },
         )

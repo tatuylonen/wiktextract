@@ -27,6 +27,10 @@ def main() -> None:
             model_schema[
                 "$schema"
             ] = "https://json-schema.org/draft/2020-12/schema"
+            if "description" in model_schema:
+                model_schema["description"] = model_schema[
+                    "description"
+                ].replace("\n", " ")
             with (output_path / f"{lang_code}.json").open(
                 "w", encoding="utf-8"
             ) as f:

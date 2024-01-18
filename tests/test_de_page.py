@@ -3,7 +3,6 @@
 import unittest
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.models import WordEntry
 from wiktextract.extractor.de.page import parse_page, parse_section

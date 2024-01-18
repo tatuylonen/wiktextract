@@ -4,7 +4,6 @@ import re
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import WikiNodeChildrenList
-
 from wiktextract.extractor.es.etymology import process_etymology_block
 from wiktextract.extractor.es.example import extract_example
 from wiktextract.extractor.es.gloss import extract_gloss
@@ -194,10 +193,8 @@ def process_pos_block(
     """
 
     child_nodes = list(pos_level_node.filter_empty_str_child())
-
-    sense_children: WikiNodeChildrenList = (
-        []
-    )  # All non-gloss nodes that add additional information to a sense
+    # All non-gloss nodes that add additional information to a sense
+    sense_children: WikiNodeChildrenList = []
 
     for child in child_nodes:
         if (
