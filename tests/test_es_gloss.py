@@ -2,7 +2,6 @@ import unittest
 from typing import List
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.gloss import extract_gloss
 from wiktextract.extractor.es.models import WordEntry

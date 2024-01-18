@@ -36,9 +36,7 @@ class TestESExample(unittest.TestCase):
                 "expected": [
                     {
                         "text": "Nos gusta lo oscuro, y por eso triunfa la Necroporra, sea ético o no",
-                        "ref": {
-                            "url": "https://www.menzig.es/a/necroporra-fantamorto-porra-famosos-muertos/"
-                        },
+                        "url": "https://www.menzig.es/a/necroporra-fantamorto-porra-famosos-muertos/",
                     }
                 ],
             },
@@ -48,9 +46,7 @@ class TestESExample(unittest.TestCase):
                 "expected": [
                     {
                         "text": """Papel: más viejo que Matusalén, pero graduado "cum laude" en eficacia publicitaria""",
-                        "ref": {
-                            "url": "https://www.marketingdirecto.com/marketing-general/publicidad/papel-mas-viejo-matusalen-pero-graduado-cum-laude-eficacia-publicitaria"
-                        },
+                        "url": "https://www.marketingdirecto.com/marketing-general/publicidad/papel-mas-viejo-matusalen-pero-graduado-cum-laude-eficacia-publicitaria",
                     }
                 ],
             },
@@ -60,14 +56,12 @@ class TestESExample(unittest.TestCase):
                 "expected": [
                     {
                         "text": "Era persona inteligente, culta, que me permitía zapotear los libros y me hacía comentarios sobre ellos y sus autores",
-                        "ref": {
-                            "title": "Memorias intelectuales",
-                            "first_name": "Jaime",
-                            "last_name": "Jaramillo Uribe",
-                            "pages": "19",
-                            "url": "https://books.google.com.co/books?id=X9MSAQAAIAAJ&q=zapotear",
-                            "year": "2007",
-                        },
+                        "title": "Memorias intelectuales",
+                        "first_name": "Jaime",
+                        "last_name": "Jaramillo Uribe",
+                        "pages": "19",
+                        "url": "https://books.google.com.co/books?id=X9MSAQAAIAAJ&q=zapotear",
+                        "year": "2007",
                     }
                 ],
             },
@@ -119,10 +113,8 @@ class TestESExample(unittest.TestCase):
                 "expected": [
                     {
                         "text": "«Apoyado contra el quicio de la puerta, adivina, de pronto, a su marido.»",
-                        "ref": {
-                            "first_name": "María Luisa",
-                            "last_name": "Bombal",
-                        },
+                        "first_name": "María Luisa",
+                        "last_name": "Bombal",
                     }
                 ],
             },
