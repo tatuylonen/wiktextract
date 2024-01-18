@@ -3,7 +3,6 @@ import re
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
-
 from wiktextract.extractor.de.models import Sense, WordEntry
 from wiktextract.extractor.de.utils import find_and_remove_child, match_senseid
 from wiktextract.page import clean_node

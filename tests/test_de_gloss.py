@@ -1,9 +1,7 @@
 import unittest
-from collections import defaultdict
 from unittest.mock import patch
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.gloss import (
     extract_glosses,
@@ -265,7 +263,7 @@ class TestDEGloss(unittest.TestCase):
                 "input": "Drama von Samuel Beckett: Menschliche Existenz in der Endphase des Verfalls und der vergeblichen Suche nach einem Ausweg",
                 "expected_tags": None,
                 "expected_gloss": "Drama von Samuel Beckett: Menschliche Existenz in der Endphase des Verfalls und der vergeblichen Suche nach einem Ausweg",
-            }
+            },
             # Add more test cases as needed
         ]
         for case in test_cases:

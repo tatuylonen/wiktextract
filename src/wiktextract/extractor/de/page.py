@@ -5,7 +5,6 @@ from typing import Union
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
-
 from wiktextract.extractor.de.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
 

@@ -2,7 +2,6 @@ import re
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
-
 from wiktextract.extractor.de.models import Linkage, WordEntry
 from wiktextract.extractor.share import split_senseids
 from wiktextract.page import clean_node

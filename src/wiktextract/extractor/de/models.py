@@ -1,10 +1,13 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class BaseModelWrap(BaseModel):
-    model_config = ConfigDict(validate_assignment=True, extra="forbid")
+    model_config = ConfigDict(
+        extra="forbid",
+        strict=True,
+        validate_assignment=True,
+        validate_default=True,
+    )
 
 
 class Linkage(BaseModelWrap):
@@ -12,22 +15,20 @@ class Linkage(BaseModelWrap):
 
 
 class Translation(BaseModelWrap):
-    sense: Optional[str] = Field(
-        default=None, description="A gloss of the sense being translated"
+    sense: str = Field(
+        default="", description="A gloss of the sense being translated"
     )
-    word: Optional[str] = Field(default=None, description="Translation term")
-    lang_code: Optional[str] = Field(
-        default=None,
+    word: str = Field(default="", description="Translation term")
+    lang_code: str = Field(
+        default="",
         description="Wiktionary language code of the translation term",
     )
-    lang: Optional[str] = Field(
-        default=None, description="Localized language name"
-    )
-    uncertain: Optional[bool] = Field(
+    lang: str = Field(default="", description="Localized language name")
+    uncertain: bool = Field(
         default=False, description="Translation marked as uncertain"
     )
-    roman: Optional[str] = Field(
-        default=None, description="Transliteration to Roman characters"
+    roman: str = Field(
+        default="", description="Transliteration to Roman characters"
     )
     # senseids: list[str] = Field(
     #     default=[],
@@ -38,63 +39,49 @@ class Translation(BaseModelWrap):
         description="Tags specifying the translated term, usually gender information",
     )
     notes: list[str] = Field(default=[], description="A list of notes")
-    roman: Optional[str] = Field(
-        default=None, description="Transliteration in roman characters"
+    roman: str = Field(
+        default="", description="Transliteration in roman characters"
     )
-
-
-class Reference(BaseModelWrap):
-    raw_ref: str = Field(default=None, description="Raw reference string")
-    url: Optional[str] = Field(
-        default=None, description="A web link. Not necessarily well-formated."
-    )
-    author: Optional[str] = Field(default=None, description="Author's name")
-
-    title: Optional[str] = Field(
-        default=None, description="Title of the reference"
-    )
-    title_complement: Optional[str] = Field(
-        default=None, description="Complement to the title"
-    )
-    pages: Optional[str] = Field(default=None, description="Page numbers")
-    year: Optional[str] = Field(default=None, description="Year of publication")
-    publisher: Optional[str] = Field(default=None, description="Published by")
-    editor: Optional[str] = Field(default=None, description="Editor")
-    translator: Optional[str] = Field(default=None, description="Translator")
-    collection: Optional[str] = Field(
-        default=None,
-        description="Name of collection that reference was published in",
-    )
-    volume: Optional[str] = Field(default=None, description="Volume number")
-    comment: Optional[str] = Field(
-        default=None, description="Comment on the reference"
-    )
-    day: Optional[str] = Field(default=None, description="Day of publication")
-    month: Optional[str] = Field(
-        default=None, description="Month of publication"
-    )
-    accessdate: Optional[str] = Field(
-        default=None, description="Date of access of online reference"
-    )
-
-    date: Optional[str] = Field(default=None, description="Date of publication")
-    number: Optional[str] = Field(default=None, description="Issue number")
-    # journal: Optional[str] = Field(default=None, description="Name of journal")
-    # chapter: Optional[str] = Field(default=None, description="Chapter name")
-    place: Optional[str] = Field(
-        default=None, description="Place of publication"
-    )
-    # editor: Optional[str] = Field(default=None, description="Editor")
-    edition: Optional[str] = Field(default=None, description="Edition number")
-    isbn: Optional[str] = Field(default=None, description="ISBN number")
 
 
 class Example(BaseModelWrap):
-    text: str = Field(default=None, description="Example usage sentence")
+    text: str = Field(default="", description="Example usage sentence")
     # translation: Optional[str] = Field(
     #     default=None, description="Spanish translation of the example sentence"
     # )
-    ref: Optional["Reference"] = Field(default=None, description="")
+    raw_ref: str = Field(default="", description="Raw reference string")
+    url: str = Field(
+        default="", description="A web link. Not necessarily well-formated."
+    )
+    author: str = Field(default="", description="Author's name")
+    title: str = Field(default="", description="Title of the reference")
+    title_complement: str = Field(
+        default="", description="Complement to the title"
+    )
+    pages: str = Field(default="", description="Page numbers")
+    year: str = Field(default="", description="Year of publication")
+    publisher: str = Field(default="", description="Published by")
+    editor: str = Field(default="", description="Editor")
+    translator: str = Field(default="", description="Translator")
+    collection: str = Field(
+        default="",
+        description="Name of collection that reference was published in",
+    )
+    volume: str = Field(default="", description="Volume number")
+    comment: str = Field(default="", description="Comment on the reference")
+    day: str = Field(default="", description="Day of publication")
+    month: str = Field(default="", description="Month of publication")
+    accessdate: str = Field(
+        default="", description="Date of access of online reference"
+    )
+    date: str = Field(default="", description="Date of publication")
+    number: str = Field(default="", description="Issue number")
+    # journal: Optional[str] = Field(default=None, description="Name of journal")
+    # chapter: Optional[str] = Field(default=None, description="Chapter name")
+    place: str = Field(default="", description="Place of publication")
+    # editor: Optional[str] = Field(default=None, description="Editor")
+    edition: str = Field(default="", description="Edition number")
+    isbn: str = Field(default="", description="ISBN number")
 
 
 class Sense(BaseModelWrap):
@@ -120,19 +107,19 @@ class Sense(BaseModelWrap):
     # subsenses: list["Sense"] = Field(
     #     default=[], description="List of subsenses"
     # )
-    senseid: Optional[str] = Field(
-        default=None, description="Sense number used in Wiktionary"
+    senseid: str = Field(
+        default="", description="Sense number used in Wiktionary"
     )
-    translations: Optional[list[Translation]] = []
-    antonyms: Optional[list[Linkage]] = []
-    derived: Optional[list[Linkage]] = []
-    hyponyms: Optional[list[Linkage]] = []
-    hypernyms: Optional[list[Linkage]] = []
-    holonyms: Optional[list[Linkage]] = []
-    expressions: Optional[list[Linkage]] = []
-    coordinate_terms: Optional[list[Linkage]] = []
-    proverbs: Optional[list[Linkage]] = []
-    synonyms: Optional[list[Linkage]] = []
+    translations: list[Translation] = []
+    antonyms: list[Linkage] = []
+    derived: list[Linkage] = []
+    hyponyms: list[Linkage] = []
+    hypernyms: list[Linkage] = []
+    holonyms: list[Linkage] = []
+    expressions: list[Linkage] = []
+    coordinate_terms: list[Linkage] = []
+    proverbs: list[Linkage] = []
+    synonyms: list[Linkage] = []
 
 
 class Sound(BaseModelWrap):
@@ -161,18 +148,18 @@ class Sound(BaseModelWrap):
     tags: list[str] = Field(
         default=[], description="Specifying the variant of the pronunciation"
     )
-    pass
 
 
 class WordEntry(BaseModelWrap):
     """
-    WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.
+    WordEntry is a dictionary containing lexical information of a single word
+    extracted from Wiktionary with wiktextract.
     """
 
     model_config = ConfigDict(title="German Wiktionary")
 
     word: str = Field(description="word string")
-    pos: str = Field(default=None, description="Part of speech type")
+    pos: str = Field(default="", description="Part of speech type")
     # pos_title: str = Field(default=None, description="Original POS title")
     lang_code: str = Field(
         description="Wiktionary language code", examples=["es"]
@@ -180,19 +167,19 @@ class WordEntry(BaseModelWrap):
     lang: str = Field(
         description="Localized language name of the word", examples=["español"]
     )
-    senses: Optional[list[Sense]] = []
+    senses: list[Sense] = []
     # categories: list[str] = Field(
     #     default=[],
     #     description="list of non-disambiguated categories for the word",
     # )
-    translations: Optional[list[Translation]] = []
-    sounds: Optional[list[Sound]] = []
-    antonyms: Optional[list[Linkage]] = []
-    derived: Optional[list[Linkage]] = []
-    hyponyms: Optional[list[Linkage]] = []
-    hypernyms: Optional[list[Linkage]] = []
-    holonyms: Optional[list[Linkage]] = []
-    expressions: Optional[list[Linkage]] = []
-    coordinate_terms: Optional[list[Linkage]] = []
-    proverbs: Optional[list[Linkage]] = []
-    synonyms: Optional[list[Linkage]] = []
+    translations: list[Translation] = []
+    sounds: list[Sound] = []
+    antonyms: list[Linkage] = []
+    derived: list[Linkage] = []
+    hyponyms: list[Linkage] = []
+    hypernyms: list[Linkage] = []
+    holonyms: list[Linkage] = []
+    expressions: list[Linkage] = []
+    coordinate_terms: list[Linkage] = []
+    proverbs: list[Linkage] = []
+    synonyms: list[Linkage] = []

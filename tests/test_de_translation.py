@@ -1,7 +1,6 @@
 import unittest
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.models import Sense, Translation, WordEntry
 from wiktextract.extractor.de.translation import (

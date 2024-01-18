@@ -3,7 +3,6 @@ from typing import Union
 from mediawiki_langcodes import code_to_name
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
-
 from wiktextract.extractor.de.models import Sound, WordEntry
 from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node

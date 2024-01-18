@@ -39,7 +39,6 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "black",
     "coverage[toml]",
     "mypy",
     "ruff",
