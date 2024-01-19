@@ -3,7 +3,6 @@ import logging
 from typing import Optional
 
 from wikitextprocessor import NodeKind, WikiNode
-
 from wiktextract.extractor.ru.gloss import extract_gloss
 from wiktextract.extractor.ru.linkage import extract_linkages
 from wiktextract.extractor.ru.models import WordEntry
@@ -117,18 +116,19 @@ def parse_section(
     page_data: list[WordEntry],
     level3_node: WikiNode,
 ):
-    section_title = clean_node(wxr, {}, level3_node.largs).strip()
+    section_title = clean_node(wxr, None, level3_node.largs).strip()
     wxr.wtp.start_subsection(section_title)
     if section_title in [
-        "Морфологические и синтаксические свойства",  # Morphological and syntactic properties
-        "Тип и синтаксические свойства сочетания",  # Type and syntactic properties of the word combination
+        # Morphological and syntactic properties
+        "Морфологические и синтаксические свойства",
+        # Type and syntactic properties of the word combination
+        "Тип и синтаксические свойства сочетания",
     ]:
         pos = get_pos(wxr, level3_node)
-        if pos:
+        if pos is not None:
             page_data[-1].pos = pos
         # XXX: Extract forms from Russian Wiktionary
         # XXX: Extract grammatical tags (gender, etc.) from Russian Wiktionary
-
     elif section_title == "Произношение":
         if wxr.config.capture_pronunciation:
             extract_pronunciation(wxr, page_data[-1], level3_node)
@@ -146,9 +146,8 @@ def parse_section(
     elif section_title == "Фразеологизмы и устойчивые сочетания":
         if wxr.config.capture_linkages:
             pass
-    elif section_title == "Перевод":
-        if wxr.config.capture_translations:
-            extract_translations(wxr, page_data[-1], level3_node)
+    elif section_title == "Перевод" and wxr.config.capture_translations:
+        extract_translations(wxr, page_data[-1], level3_node)
     elif section_title in ["Анаграммы", "Метаграммы", "Синонимы", "Антонимы"]:
         pass
     elif section_title == "Библиография":

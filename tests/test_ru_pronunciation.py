@@ -1,7 +1,6 @@
 import unittest
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ru.models import WordEntry
 from wiktextract.extractor.ru.pronunciation import (

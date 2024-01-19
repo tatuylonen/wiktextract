@@ -1,6 +1,5 @@
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import WikiNodeChildrenList
-
 from wiktextract.extractor.ru.example import process_example_template
 from wiktextract.extractor.ru.models import Sense, WordEntry
 from wiktextract.page import clean_node

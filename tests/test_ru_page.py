@@ -1,7 +1,6 @@
 import unittest
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ru.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
