@@ -13,7 +13,8 @@ class BaseModelWrap(BaseModel):
 class Translation(BaseModelWrap):
     word: str = Field(description="Translation term")
     lang_code: str = Field(
-        description="Wiktionary language code of the translation term"
+        default="",
+        description="Wiktionary language code of the translation term",
     )
     lang: str = Field(
         description="Localized language name of the translation term"
@@ -22,6 +23,8 @@ class Translation(BaseModelWrap):
         default="",
         description="An optional gloss describing the sense translated",
     )
+    roman: str = Field(default="", description="Romanization of the word")
+    tags: list[str] = []
 
 
 class Linkage(BaseModelWrap):

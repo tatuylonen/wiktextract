@@ -1,5 +1,4 @@
 from wikitextprocessor import NodeKind, WikiNode
-
 from wiktextract.extractor.ru.models import Linkage, WordEntry
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -11,7 +10,7 @@ def extract_linkages(
     linkage_type: str,
     level_node: WikiNode,
 ):
-    if not linkage_type in word_entry.model_fields:
+    if linkage_type not in word_entry.model_fields:
         wxr.wtp.debug(
             f"Linkage type {linkage_type} not defined for word entry",
             sortid="extractor/ru/linkage/extract_linkages/10",

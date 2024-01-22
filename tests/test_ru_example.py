@@ -1,7 +1,6 @@
 import unittest
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ru.example import process_example_template
 from wiktextract.extractor.ru.models import Sense
