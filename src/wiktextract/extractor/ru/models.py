@@ -29,6 +29,7 @@ class Translation(BaseModelWrap):
 
 class Linkage(BaseModelWrap):
     word: str = ""
+    tags: list[str] = []
 
 
 class Sound(BaseModelWrap):
