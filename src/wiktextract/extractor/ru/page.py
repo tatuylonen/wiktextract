@@ -1,15 +1,16 @@
-import copy
 import logging
 from typing import Optional
 
 from wikitextprocessor import NodeKind, WikiNode
-from wiktextract.extractor.ru.gloss import extract_gloss
-from wiktextract.extractor.ru.linkage import extract_linkages
-from wiktextract.extractor.ru.models import WordEntry
-from wiktextract.extractor.ru.pronunciation import extract_pronunciation
-from wiktextract.extractor.ru.translation import extract_translations
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
+
+from .gloss import extract_gloss
+from .inflection import extract_inflection
+from .linkage import extract_linkages
+from .models import WordEntry
+from .pronunciation import extract_pronunciation
+from .translation import extract_translations
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -46,7 +47,8 @@ def process_semantic_section(
                 sortid="extractor/ru/page/process_semantic_section/35",
             )
 
-    # XXX: Process non level4 nodes such as illustration templates "{илл|...}", cf. https://ru.wiktionary.org/wiki/овощ
+    # XXX: Process non level4 nodes such as illustration templates "{илл|...}",
+    # cf. https://ru.wiktionary.org/wiki/овощ
 
 
 def get_pos(
@@ -106,7 +108,8 @@ def get_pos(
 
     if text.strip():
         wxr.wtp.debug(
-            f"No part of speech found in children: {level_node.children} with clean text {text}",
+            f"No part of speech found in children: {level_node.children} "
+            f"with clean text {text}",
             sortid="extractor/ru/page/get_pos/98",
         )
 
@@ -127,25 +130,25 @@ def parse_section(
         pos = get_pos(wxr, level3_node)
         if pos is not None:
             page_data[-1].pos = pos
-        # XXX: Extract forms from Russian Wiktionary
+        extract_inflection(wxr, page_data[-1], level3_node)
         # XXX: Extract grammatical tags (gender, etc.) from Russian Wiktionary
-    elif section_title == "Произношение":
-        if wxr.config.capture_pronunciation:
-            extract_pronunciation(wxr, page_data[-1], level3_node)
+    elif section_title == "Произношение" and wxr.config.capture_pronunciation:
+        extract_pronunciation(wxr, page_data[-1], level3_node)
     elif section_title == "Семантические свойства":  # Semantic properties
         process_semantic_section(wxr, page_data, level3_node)
     elif section_title == "Значение":
         pass
-    elif section_title == "Родственные слова":  # Word family
-        if wxr.config.capture_linkages:
-            pass
-    elif section_title == "Этимология":
-        if wxr.config.capture_etymologies:
-            # XXX: Extract etymology
-            pass
-    elif section_title == "Фразеологизмы и устойчивые сочетания":
-        if wxr.config.capture_linkages:
-            pass
+    elif section_title == "Родственные слова" and wxr.config.capture_linkages:
+        # Word family
+        pass
+    elif section_title == "Этимология" and wxr.config.capture_etymologies:
+        # XXX: Extract etymology
+        pass
+    elif (
+        section_title == "Фразеологизмы и устойчивые сочетания"
+        and wxr.config.capture_linkages
+    ):
+        pass
     elif section_title == "Перевод" and wxr.config.capture_translations:
         extract_translations(wxr, page_data[-1], level3_node)
     elif section_title in ["Анаграммы", "Метаграммы", "Синонимы", "Антонимы"]:
@@ -168,7 +171,8 @@ def parse_section(
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
 ) -> list[dict[str, str]]:
-    # Help site describing page structure: https://ru.wiktionary.org/wiki/Викисловарь:Правила_оформления_статей
+    # Help site describing page structure:
+    # https://ru.wiktionary.org/wiki/Викисловарь:Правила_оформления_статей
 
     if wxr.config.verbose:
         logging.info(f"Parsing page: {page_title}")
@@ -226,7 +230,7 @@ def parse_page(
                 ):
                     unprocessed_nodes.append(non_level23_node)
 
-                # XXX: Extract form pages that never reach a level 2 or 3 node, such as:
+                # XXX: Extract form pages that never reach a level 2 or 3 node
                 # https://ru.wiktionary.org/wiki/Διὸς
 
             if (
@@ -234,19 +238,20 @@ def parse_page(
                 and clean_node(wxr, {}, unprocessed_nodes).strip()
             ):
                 wxr.wtp.debug(
-                    f"Unprocessed nodes in level node {level1_node.largs}: {unprocessed_nodes}",
+                    f"Unprocessed nodes in level node {level1_node.largs}: "
+                    + unprocessed_nodes,
                     sortid="extractor/es/page/parse_page/80",
                 )
 
             for level2_node in level1_node.find_child(NodeKind.LEVEL2):
-                page_data.append(copy.deepcopy(base_data))
+                page_data.append(base_data.model_copy(deep=True))
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     parse_section(wxr, page_data, level3_node)
 
             is_first_level2_node = True
             for level3_node in level1_node.find_child(NodeKind.LEVEL3):
                 if is_first_level2_node:
-                    page_data.append(copy.deepcopy(base_data))
+                    page_data.append(base_data.model_copy(deep=True))
                     is_first_level2_node = False
                 parse_section(wxr, page_data, level3_node)
 

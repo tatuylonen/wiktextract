@@ -3,10 +3,11 @@ from typing import Union
 
 from wikitextprocessor import NodeKind
 from wikitextprocessor.parser import LevelNode, WikiNode, WikiNodeChildrenList
-from wiktextract.extractor.ru.models import Linkage, Sound, WordEntry
-from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
+
+from ..share import create_audio_url_dict
+from .models import Linkage, Sound, WordEntry
 
 
 def process_transcription_template(
