@@ -1,9 +1,10 @@
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import WikiNodeChildrenList
-from wiktextract.extractor.ru.example import process_example_template
-from wiktextract.extractor.ru.models import Sense, WordEntry
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
+
+from .example import process_example_template
+from .models import Sense, WordEntry
 
 # Wiktioniary intern templates that can be ignores
 META_TEMPLATES = {

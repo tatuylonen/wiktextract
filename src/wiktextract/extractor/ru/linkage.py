@@ -1,8 +1,9 @@
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
-from wiktextract.extractor.ru.models import Linkage, WordEntry
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
+
+from .models import Linkage, WordEntry
 
 
 def extract_linkages(

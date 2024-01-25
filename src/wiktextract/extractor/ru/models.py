@@ -93,6 +93,11 @@ class Sense(BaseModelWrap):
     examples: list[Example] = Field(default=[], description="List of examples")
 
 
+class Form(BaseModelWrap):
+    form: str
+    tags: list[str] = []
+
+
 class WordEntry(BaseModelWrap):
     """
     WordEntry is a dictionary containing lexical information of a single word
@@ -117,6 +122,7 @@ class WordEntry(BaseModelWrap):
     sounds: list[Sound] = []
     senses: list[Sense] = []
     translations: list[Translation] = []
+    forms: list[Form] = []
     antonyms: list[Linkage] = Field(default=[], description="List of antonyms")
     anagrams: list[Linkage] = Field(default=[], description="List of anagrams")
     variants: list[Linkage] = Field(default=[], description="List of variants")

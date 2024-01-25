@@ -1,7 +1,8 @@
 from wikitextprocessor import WikiNode
-from wiktextract.extractor.ru.models import Example, Sense
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
+
+from .models import Example, Sense
 
 EXAMPLE_TEMPLATE_KEY_MAPPING = {
     "автор": "author",

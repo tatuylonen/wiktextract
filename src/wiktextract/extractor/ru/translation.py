@@ -1,9 +1,10 @@
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import HTMLNode, TemplateNode
-from wiktextract.extractor.ru.models import Translation, WordEntry
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
+
+from .models import Translation, WordEntry
 
 
 def extract_translations(
