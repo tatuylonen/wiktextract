@@ -8,7 +8,18 @@ from copy import copy
 from typing import Any, Callable, Optional, Union
 
 from mediawiki_langcodes import get_all_names, name_to_code
-from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor import (
+    NodeKind,
+    WikiNode,
+)
+from wikitextprocessor.core import (
+    TemplateArgs,
+    TemplateFnCallable,
+    PostTemplateFnCallable,
+)
+from wikitextprocessor.parser import (
+    GeneralNode,
+)
 
 from wiktextract.wxr_context import WiktextractContext
 
@@ -56,9 +67,9 @@ def is_panel_template(wxr: WiktextractContext, template_name: str) -> bool:
 
 
 def recursively_extract(
-    contents: Union[WikiNode, list[WikiNode]],
+    contents: Union[WikiNode, str, list[Union[str, WikiNode]]],
     fn: Callable[[Union[WikiNode, list[WikiNode]]], bool],
-) -> tuple[list[WikiNode], list[WikiNode]]:
+) -> tuple[list[Union[str, WikiNode]], list[Union[str, WikiNode]]]:
     """Recursively extracts elements from contents for which ``fn`` returns
     True.  This returns two lists, the extracted elements and the remaining
     content (with the extracted elements removed at each level).  Only
@@ -311,9 +322,9 @@ def remove_duplicate_data(page_data: dict) -> None:
 def clean_node(
     wxr: WiktextractContext,
     sense_data: Optional[Any],
-    wikinode: Union[str, WikiNode, list[Union[str, WikiNode]]],
-    template_fn: Optional[Callable[[str, dict], str]] = None,
-    post_template_fn: Optional[Callable[[str, dict, str], str]] = None,
+    wikinode: GeneralNode,
+    template_fn: Optional[TemplateFnCallable] = None,
+    post_template_fn: Optional[PostTemplateFnCallable] = None,
     collect_links: bool = False,
 ) -> str:
     """

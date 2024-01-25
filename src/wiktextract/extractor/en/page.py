@@ -11,14 +11,22 @@ from collections import defaultdict
 from functools import partial
 from re import Pattern
 from typing import (
+    TYPE_CHECKING,
+    Callable,
     Optional,
     Set,
     Union,
+    cast,
 )
 
 from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.core import TemplateArgs
+from wikitextprocessor.core import (
+    TemplateArgs,
+    TemplateFnCallable,
+    PostTemplateFnCallable,
+)
+from wikitextprocessor.parser import GeneralNode
 from wiktextract.clean import clean_template_args
 from wiktextract.datautils import (
     data_append,
@@ -44,7 +52,11 @@ from wiktextract.page import (
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.tags import valid_tags
 from wiktextract.translations import parse_translation_item_text
-from wiktextract.type_utils import WordData
+from wiktextract.type_utils import (
+    SenseData,
+    SoundData,
+    WordData,
+)
 from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby, parse_ruby
@@ -666,7 +678,7 @@ def decode_html_entities(v: Union[str, int]) -> str:
 
 def parse_sense_linkage(
     wxr: WiktextractContext,
-    data: WordData,
+    data: SenseData,
     name: str,
     ht: TemplateArgs,
 ) -> None:
@@ -681,7 +693,7 @@ def parse_sense_linkage(
         w = clean_node(wxr, data, w)
         for alias in ns_title_prefix_tuple(wxr, "Thesaurus"):
             if w.startswith(alias):
-                w = w[len(alias):]
+                w = w[len(alias) :]
                 break
         if not w:
             break
@@ -761,13 +773,17 @@ def parse_language(
         word = word[word.find("/") + 1 :]
         is_reconstruction = True
 
-    base_data = {"word": word, "lang": language, "lang_code": lang_code}
+    base_data: WordData = {
+        "word": word,
+        "lang": language,
+        "lang_code": lang_code,
+    }
     if is_reconstruction:
         data_append(base_data, "tags", "reconstruction")
-    sense_data: WordData = {}
+    sense_data: SenseData = {}
     pos_data: WordData = {}  # For a current part-of-speech
     etym_data: WordData = {}  # For one etymology
-    pos_datas: list[WordData] = []
+    pos_datas: list[SenseData] = []
     etym_datas: list[WordData] = []
     page_datas: list[WordData] = []
     have_etym = False
@@ -780,49 +796,54 @@ def parse_language(
             v = copy.deepcopy(v)
             if k not in data:
                 # The list was copied above, so this will not create shared ref
-                data[k] = v
+                data[k] = v  # type: ignore[literal-required]
                 continue
-            if data[k] == v:
+            if data[k] == v:  # type: ignore[literal-required]
                 continue
-            if isinstance(data[k], (list, tuple)) or isinstance(
-                v, (list, tuple)  # Should this be "and"?
+            if (
+                isinstance(data[k], (list, tuple))  # type: ignore[literal-required]
+                or isinstance(
+                    v,
+                    (list, tuple),  # Should this be "and"?
+                )
             ):
                 data[k] = list(data[k]) + list(v)  # type: ignore
-            elif data[k] != v:
+            elif data[k] != v:  # type: ignore[literal-required]
                 wxr.wtp.warning(
                     "conflicting values for {} in merge_base: "
-                    "{!r} vs {!r}".format(k, data[k], v),
+                    "{!r} vs {!r}".format(k, data[k], v),  # type: ignore[literal-required]
                     sortid="page/904",
                 )
 
-        def complementary_pop(pron: WordData, key: str
-        ) -> WordData:
+        def complementary_pop(pron: SoundData, key: str) -> SoundData:
             """Remove unnecessary keys from dict values
             in a list comprehension..."""
             if key in pron:
-                pron.pop(key)
+                pron.pop(key)  # type: ignore
             return pron
 
         # If the result has sounds, eliminate sounds that have a prefix that
         # does not match "word" or one of "forms"
         if "sounds" in data and "word" in data:
             accepted = [data["word"]]
-            accepted.extend(f["form"] for f in data.get("forms", dict()))  # type:ignore
+            accepted.extend(f["form"] for f in data.get("forms", dict()))
             data["sounds"] = list(
                 s
-                for s in data["sounds"]  # type:ignore
-                if "form" not in s or s["form"] in accepted  # type:ignore
+                for s in data["sounds"]
+                if "form" not in s or s["form"] in accepted
             )
         # If the result has sounds, eliminate sounds that have a pos that
         # does not match "pos"
         if "sounds" in data and "pos" in data:
             data["sounds"] = list(
-                complementary_pop(s, "pos")  # type:ignore
-                for s in data["sounds"]  # type: ignore
-                if "pos" not in s or s["pos"] == data["pos"]  # type:ignore
+                complementary_pop(s, "pos")
+                for s in data["sounds"]
+                # "pos" is not a field of SoundData, correctly, so we're
+                # removing it here. It's a kludge on a kludge on a kludge.
+                if "pos" not in s or s["pos"] == data["pos"]  # type: ignore[typeddict-item]
             )
 
-    def push_sense():
+    def push_sense() -> bool:
         """Starts collecting data for a new word sense.  This returns True
         if a sense was added."""
         nonlocal sense_data
@@ -865,20 +886,20 @@ def parse_language(
         sense_data = {}
         return True
 
-    def push_pos():
+    def push_pos() -> None:
         """Starts collecting data for a new part-of-speech."""
         nonlocal pos_data
         nonlocal pos_datas
         push_sense()
         if wxr.wtp.subsection:
-            data = {"senses": pos_datas}
+            data: WordData = {"senses": pos_datas}
             merge_base(data, pos_data)
             etym_datas.append(data)
         pos_data = {}
         pos_datas = []
         wxr.wtp.start_subsection(None)
 
-    def push_etym():
+    def push_etym() -> None:
         """Starts collecting data for a new etymology."""
         nonlocal etym_data
         nonlocal etym_datas
@@ -891,7 +912,7 @@ def parse_language(
         etym_data = {}
         etym_datas = []
 
-    def select_data():
+    def select_data() -> WordData:
         """Selects where to store data (pos or etym) based on whether we
         are inside a pos (part-of-speech)."""
         if wxr.wtp.subsection is not None:
@@ -900,7 +921,9 @@ def parse_language(
             return base_data
         return etym_data
 
-    def head_post_template_fn(name, ht, expansion):
+    def head_post_template_fn(
+        name: str, ht: TemplateArgs, expansion: str
+    ) -> str:
         """Handles special templates in the head section of a word.  Head
         section is the text after part-of-speech subtitle and before word
         sense list. Typically it generates the bold line for the word, but
@@ -932,7 +955,7 @@ def parse_language(
             # Note: various places expect to have content from wikipedia
             # templates, so cannot convert this to empty
             parse_wikipedia_template(wxr, pos_data, ht)
-            return None
+            return ""
 
         if name == "number box":
             # XXX extract numeric value?
@@ -960,17 +983,17 @@ def parse_language(
             # XXX extract?
             return ""
 
-        return None
+        return ""
 
-    def parse_part_of_speech(posnode, pos):
+    def parse_part_of_speech(posnode: WikiNode, pos: str) -> None:
         """Parses the subsection for a part-of-speech under a language on
         a page."""
         assert isinstance(posnode, WikiNode)
         assert isinstance(pos, str)
         # print("parse_part_of_speech", pos)
         pos_data["pos"] = pos
-        pre = [[]]  # list of lists
-        lists = [[]]  # list of lists
+        pre: list[list[Union[str, WikiNode]]] = [[]]  # list of lists
+        lists: list[list[WikiNode]] = [[]]  # list of lists
         first_para = True
         first_head_tmplt = True
         collecting_head = True
@@ -999,7 +1022,7 @@ def parse_language(
             ),
         )
         tempnode = WikiNode(NodeKind.LEVEL5, 0)
-        tempnode.largs = ["Inflection"]
+        tempnode.largs = [["Inflection"]]
         tempnode.children = floaters
         parse_inflection(tempnode, "Floating Div", pos)
         # print(poschildren)
@@ -1096,7 +1119,9 @@ def parse_language(
                 # skip these templates; panel_templates is already used
                 # to skip certain templates else, but it also applies to
                 # head parsing quite well.
-                if is_panel_template(wxr, node.largs[0][0]):
+                # node.largs[0][0] should always be str, but can't type-check
+                # that.
+                if is_panel_template(wxr, node.largs[0][0]):  # type: ignore[arg-type]
                     continue
                 # skip these templates
                 # if node.largs[0][0] in skip_these_templates_in_head:
@@ -1127,8 +1152,8 @@ def parse_language(
         # Clean up empty pairs, and fix messes with extra newlines that
         # separate templates that are followed by lists wiktextract issue #314
 
-        cleaned_pre = []
-        cleaned_lists = []
+        cleaned_pre: list[list[Union[str, WikiNode]]] = []
+        cleaned_lists: list[list[WikiNode]] = []
         pairless_pre_index = None
 
         for pre1, ls in zip(pre, lists):
@@ -1154,7 +1179,7 @@ def parse_language(
         lists = cleaned_lists
 
         there_are_many_heads = len(pre) > 1
-        header_tags = []
+        header_tags: list[str] = []
 
         if not any(g for g in lists):
             process_gloss_without_list(poschildren, pos, pos_data, header_tags)
@@ -1245,10 +1270,10 @@ def parse_language(
                         # the data is already pushed into a sub-gloss
                         # downstream, unless the higher level has examples
                         # that need to be put somewhere.
-                        common_data = {"tags": list(header_tags)}
+                        common_data: SenseData = {"tags": list(header_tags)}
                         if head_group:
                             common_data["head_nr"] = head_group
-                        parse_sense_node(node, common_data, pos)
+                        parse_sense_node(node, common_data, pos)  # type: ignore[arg-type]
 
         # If there are no senses extracted, add a dummy sense.  We want to
         # keep tags extracted from the head for the dummy sense.
@@ -1262,7 +1287,7 @@ def parse_language(
         header_nodes: list[Union[WikiNode, str]],
         pos_type: str,
         header_group: Optional[int],
-        pos_data: dict,
+        pos_data: WordData,
         header_tags: list[str],
     ) -> None:
         ruby = []
@@ -1278,6 +1303,10 @@ def parse_language(
             )
             if rub is not None:
                 for r in rub:
+                    if TYPE_CHECKING:
+                        # we know the lambda above in recursively_extract
+                        # returns only WikiNodes in rub
+                        assert isinstance(r, WikiNode)
                     rt = parse_ruby(wxr, r)
                     if rt is not None:
                         ruby.append(rt)
@@ -1295,24 +1324,28 @@ def parse_language(
             ruby=ruby,
         )
         if "tags" in pos_data:
-            header_tags[:] = pos_data["tags"]
-            del pos_data["tags"]
+            # pos_data can get "tags" data from some source; type-checkers
+            # doesn't like it, so let's ignore it.
+            header_tags[:] = pos_data["tags"]  # type: ignore[typeddict-item]
+            del pos_data["tags"]  # type: ignore[typeddict-item]
         else:
             header_tags.clear()
 
     def process_gloss_without_list(
         nodes: list[Union[WikiNode, str]],
         pos_type: str,
-        pos_data: dict,
+        pos_data: WordData,
         header_tags: list[str],
     ) -> None:
         # gloss text might not inside a list
-        header_nodes = []
-        gloss_nodes = []
+        header_nodes: list[Union[str, WikiNode]] = []
+        gloss_nodes: list[Union[str, WikiNode]] = []
         for node in strip_nodes(nodes):
             if isinstance(node, WikiNode):
                 if node.kind == NodeKind.TEMPLATE:
                     template_name = node.largs[0][0]
+                    if TYPE_CHECKING:
+                        assert isinstance(template_name, str)
                     if template_name == "head" or template_name.startswith(
                         f"{lang_code}-"
                     ):
@@ -1331,7 +1364,11 @@ def parse_language(
                 gloss_nodes, pos_type, {"tags": list(header_tags)}
             )
 
-    def parse_sense_node(node, sense_base, pos):
+    def parse_sense_node(
+        node: Union[str, WikiNode],  # never receives str
+        sense_base: SenseData,
+        pos: str,
+    ) -> bool:
         """Recursively (depth first) parse LIST_ITEM nodes for sense data.
         Uses push_sense() to attempt adding data to pos_data in the scope
         of parse_language() when it reaches deep in the recursion. push_sense()
@@ -1342,6 +1379,7 @@ def parse_language(
         """
         assert isinstance(sense_base, dict)  # Added to every sense deeper in
         if not isinstance(node, WikiNode):
+            # This doesn't seem to ever happen in practice.
             wxr.wtp.debug(
                 "{}: parse_sense_node called with"
                 "something that isn't a WikiNode".format(pos),
@@ -1368,7 +1406,7 @@ def parse_language(
         # added |= push_sense() or added |= parse_sense_node(...) to OR.
         added = False
 
-        gloss_template_args = set()
+        gloss_template_args: set[str] = set()
 
         # For LISTs and LIST_ITEMS, their argument is something like
         # "##" or "##:", and using that we can rudimentally determine
@@ -1470,7 +1508,7 @@ def parse_language(
     def process_gloss_contents(
         contents: list[Union[str, WikiNode]],
         pos: str,
-        sense_base: dict,
+        sense_base: SenseData,
         subentries: list[WikiNode] = [],
         others: list[WikiNode] = [],
         gloss_template_args: Set[str] = set(),
@@ -1544,7 +1582,7 @@ def parse_language(
                     gloss_template_args.add(v)
             return None
 
-        def extract_link_texts(item):
+        def extract_link_texts(item: GeneralNode) -> None:
             """Recursively extracts link texts from the gloss source.  This
             information is used to select whether to remove final "." from
             form_of/alt_of (e.g., ihm/Hunsrik)."""
@@ -1578,11 +1616,16 @@ def parse_language(
 
         # get the raw text of non-list contents of this node, and other stuff
         # like tag and category data added to sense_base
+        # cast = no-op type-setter for the type-checker
+        partial_template_fn = cast(
+            TemplateFnCallable,
+            partial(sense_template_fn, is_gloss=True),
+        )
         rawgloss = clean_node(
             wxr,
             sense_base,
             contents,
-            template_fn=partial(sense_template_fn, is_gloss=True),
+            template_fn=partial_template_fn,
             collect_links=True,
         )
 
@@ -1633,12 +1676,12 @@ def parse_language(
             parse_sense_qualifier(wxr, q, sense_base)
         if rawgloss == "A pejorative:":
             data_append(sense_base, "tags", "pejorative")
-            rawgloss = None
+            rawgloss = ""
         elif rawgloss == "Short forms.":
             data_append(sense_base, "tags", "abbreviation")
-            rawgloss = None
+            rawgloss = ""
         elif rawgloss == "Technical or specialized senses.":
-            rawgloss = None
+            rawgloss = ""
         if rawgloss:
             data_append(sense_base, "glosses", rawgloss)
             if rawgloss in ("A person:",):
@@ -1747,7 +1790,7 @@ def parse_language(
                         data_extend(sense_data, k, v)
                 else:
                     assert k not in ("tags", "categories", "topics")
-                    sense_data[k] = v
+                    sense_data[k] = v  # type:ignore[literal-required]
             # Parse the gloss for this particular sense
             m = re.match(r"^\((([^()]|\([^()]*\))*)\):?\s*", gloss)
             # (...): ... or (...(...)...): ...
@@ -1878,7 +1921,7 @@ def parse_language(
                         data_append(sense_data, "form_of", dt)
 
         if len(sense_data) == 0:
-            if len(sense_base.get("tags")) == 0:
+            if len(sense_base.get("tags", [])) == 0:
                 del sense_base["tags"]
             sense_data.update(sense_base)
         if push_sense():
@@ -1887,7 +1930,9 @@ def parse_language(
             # print("PARSE_SENSE DONE:", pos_datas[-1])
         return added
 
-    def parse_inflection(node, section, pos):
+    def parse_inflection(
+        node: WikiNode, section: str, pos: Optional[str]
+    ) -> None:
         """Parses inflection data (declension, conjugation) from the given
         page.  This retrieves the actual inflection template
         parameters, which are very useful for applications that need
@@ -1904,7 +1949,9 @@ def parse_language(
             )
             return
 
-        def inflection_template_fn(name, ht):
+        def inflection_template_fn(
+            name: str, ht: TemplateArgs
+        ) -> Optional[str]:
             # print("decl_conj_template_fn", name, ht)
             if is_panel_template(wxr, name):
                 return ""
@@ -1945,7 +1992,7 @@ def parse_language(
         # print(text)
         # print(repr(brace_matches))
         if len(brace_matches) > 1:
-            tsection = []
+            tsection: list[str] = []
             after_templates = False  # kludge to keep any text
             # before first template
             # with the first template;
@@ -2024,7 +2071,9 @@ def parse_language(
                     tablecontext=tablecontext,
                 )
 
-    def get_subpage_section(title, subtitle, seq):
+    def get_subpage_section(
+        title: str, subtitle: str, seq: Union[list[str], tuple[str, ...]]
+    ) -> Optional[Union[WikiNode, str]]:
         """Loads a subpage of the given page, and finds the section
         for the given language, part-of-speech, and section title.  This
         is used for finding translations and other sections on subpages."""
@@ -2042,8 +2091,11 @@ def parse_language(
                 "{{see translation subpage|...}}",
                 sortid="page/1934",
             )
+            return None
 
-        def recurse(node, seq):
+        def recurse(
+            node: Union[str, WikiNode], seq: Union[list[str], tuple[str, ...]]
+        ) -> Optional[Union[str, WikiNode]]:
             # print(f"seq: {seq}")
             if not seq:
                 return node
@@ -2080,7 +2132,9 @@ def parse_language(
             )
         return ret
 
-    def parse_linkage(data, field, linkagenode):
+    def parse_linkage(
+        data: WordData, field: str, linkagenode: WikiNode
+    ) -> None:
         assert isinstance(data, dict)
         assert isinstance(field, str)
         assert isinstance(linkagenode, WikiNode)
@@ -2095,7 +2149,11 @@ def parse_language(
         toplevel_text = []
         next_navframe_sense = None  # Used for "(sense):" before NavFrame
 
-        def parse_linkage_item(contents, field, sense):
+        def parse_linkage_item(
+            contents: list[Union[str, WikiNode]],
+            field: str,
+            sense: Optional[str] = None,
+        ):
             assert isinstance(contents, (list, tuple))
             assert isinstance(field, str)
             assert sense is None or isinstance(sense, str)
@@ -2103,11 +2161,13 @@ def parse_language(
             # print("PARSE_LINKAGE_ITEM: {} ({}): {}"
             #    .format(field, sense, contents))
 
-            parts = []
-            ruby = []
-            urls = []
+            parts: list[str] = []
+            ruby: list[tuple[str, str]] = []
+            urls: list[str] = []
 
-            def item_recurse(contents, italic=False):
+            def item_recurse(
+                contents: list[Union[str, WikiNode]], italic=False
+            ) -> None:
                 assert isinstance(contents, (list, tuple))
                 nonlocal sense
                 nonlocal ruby
@@ -2122,6 +2182,7 @@ def parse_language(
                     #        node.sarg if node.sarg else node.largs)
                     if kind == NodeKind.LIST:
                         if parts:
+                            sense1: Optional[str]
                             sense1 = clean_node(wxr, None, parts)
                             if sense1.endswith(":"):
                                 sense1 = sense1[:-1].strip()
@@ -2174,8 +2235,8 @@ def parse_language(
                     elif kind == NodeKind.LINK:
                         ignore = False
                         if isinstance(node.largs[0][0], str):
-                            v = node.largs[0][0].strip().lower()
-                            if v.startswith(
+                            v1 = node.largs[0][0].strip().lower()
+                            if v1.startswith(
                                 ns_title_prefix_tuple(wxr, "Category", True)
                                 + ns_title_prefix_tuple(wxr, "File", True)
                             ):
@@ -2188,16 +2249,16 @@ def parse_language(
                                     and isinstance(v[0], str)
                                     and v[0][0] == ":"
                                 ):
-                                    v = [v[0][1:]] + list(v[1:])
+                                    v = [v[0][1:]] + list(v[1:])  # type:ignore
                                 item_recurse(v, italic=italic)
                     elif kind == NodeKind.URL:
                         if len(node.largs) < 2 and node.largs:
                             # Naked url captured
-                            urls.extend(node.largs[-1])
+                            urls.extend(node.largs[-1])  # type:ignore[arg-type]
                             continue
                         if len(node.largs) == 2:
                             # Url from link with text
-                            urls.append(node.largs[0][-1])
+                            urls.append(node.largs[0][-1])  # type:ignore[arg-type]
                         # print(f"{node.largs=!r}")
                         # print("linkage recurse URL {}".format(node))
                         item_recurse(node.largs[-1], italic=italic)

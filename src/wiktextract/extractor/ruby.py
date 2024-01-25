@@ -1,8 +1,12 @@
 from typing import List, Optional, Tuple, Union
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import HTMLNode, LevelNode, TemplateNode
-
+from wikitextprocessor.parser import (
+    GeneralNode,
+    HTMLNode,
+    LevelNode,
+    TemplateNode,
+)
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -13,8 +17,9 @@ def parse_ruby(
     """Parse a HTML 'ruby' node for a kanji part and a furigana (ruby) part,
     and return a tuple containing those. Discard the rp-element's parentheses,
     we don't do anything with them."""
-    ruby_nodes = []
-    furi_nodes = []
+    ruby_nodes: list[Union[str, WikiNode]] = []
+    furi_nodes: list[Union[str, WikiNode]] = []  # furi_nodes is technically
+    # just list[WikiNode], but this appeases the type-checker for clean_node()
     for child in node.children:
         if (
             not isinstance(child, WikiNode)
@@ -31,14 +36,14 @@ def parse_ruby(
         # element with an empty something (apparently, seeing as how this
         # works), leaving no trace of the broken ruby element in the final
         # HTML source of the page!
-        return
+        return None
     return ruby_kanji, furigana
 
 
 def extract_ruby(
     wxr: WiktextractContext,
-    contents: Union[WikiNode, List[Union[WikiNode, str]]],
-) -> Tuple[List[Tuple[str]], List[Union[WikiNode, str]]]:
+    contents: GeneralNode,
+) -> tuple[list[tuple[str, str]], list[Union[WikiNode, str]]]:
     # If contents is a list, process each element separately
     extracted = []
     new_contents = []
@@ -69,7 +74,7 @@ def extract_ruby(
     }:
         # Process args and children
         if kind != NodeKind.LINK:
-            new_node = LevelNode(new_node.loc)
+            new_node = LevelNode(kind, new_node.loc)
         new_args = []
         for arg in contents.largs:
             e1, c1 = extract_ruby(wxr, arg)

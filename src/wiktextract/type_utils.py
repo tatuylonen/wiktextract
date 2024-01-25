@@ -1,7 +1,6 @@
 from typing import (
     Sequence,
     TypedDict,
-    Union,
 )
 
 
