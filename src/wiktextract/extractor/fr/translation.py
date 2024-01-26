@@ -1,5 +1,6 @@
 from typing import Optional
 
+from mediawiki_langcodes import code_to_name
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 from wiktextract.page import clean_node
@@ -87,7 +88,7 @@ def process_translation_templates(
     elif template_node.template_name == "T":
         # Translation language: https://fr.wiktionary.org/wiki/Modèle:T
         base_translation_data.lang_code = template_node.template_parameters.get(
-            1
+            1, ""
         )
         base_translation_data.lang = clean_node(
             wxr, page_data[-1], template_node
@@ -131,6 +132,14 @@ def process_translation_templates(
             for gender_node in expaned_node.find_child(NodeKind.ITALIC):
                 translation_data.tags = [clean_node(wxr, None, gender_node)]
                 break
+        if translation_data.lang_code == "":
+            translation_data.lang_code = template_node.template_parameters.get(
+                1, ""
+            )
+        if translation_data.lang == "":
+            translation_data.lang = code_to_name(
+                translation_data.lang_code, "fr"
+            ).capitalize()
         page_data[-1].translations.append(translation_data)
     elif len(page_data[-1].translations) > 0:
         tag = clean_node(wxr, None, template_node).strip("()")
