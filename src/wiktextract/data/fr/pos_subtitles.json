@@ -444,13 +444,22 @@
     "pos": "num"
   },
   "onom": {
-    "pos": "onomatopoeia"
+    "pos": "onomatopoeia",
+    "tags": [
+      "onomatopoeic"
+    ]
   },
   "onoma": {
-    "pos": "onomatopoeia"
+    "pos": "onomatopoeia",
+    "tags": [
+      "onomatopoeic"
+    ]
   },
   "onomatopée": {
-    "pos": "onomatopoeia"
+    "pos": "onomatopoeia",
+    "tags": [
+      "onomatopoeic"
+    ]
   },
   "part": {
     "pos": "particle"
