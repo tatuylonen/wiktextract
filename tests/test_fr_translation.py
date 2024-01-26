@@ -181,3 +181,23 @@ class TestTranslation(TestCase):
                 ],
             },
         )
+
+    def test_translation_list_without_t_template(self):
+        self.wxr.wtp.start_page("medium")
+        root = self.wxr.wtp.parse("* Anglais : {{trad+|en|MDF}}")
+        base_data = WordEntry(word="medium", lang_code="fr", lang="Français")
+        page_data = [base_data.model_copy(deep=True)]
+        extract_translation(self.wxr, page_data, base_data, root)
+        self.assertEqual(
+            [
+                t.model_dump(exclude_defaults=True)
+                for t in page_data[-1].translations
+            ],
+            [
+                {
+                    "lang_code": "en",
+                    "lang": "Anglais",
+                    "word": "MDF",
+                }
+            ],
+        )
