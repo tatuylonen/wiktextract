@@ -174,4 +174,3 @@ def find_alt_of_form(
                 alt_of = clean_node(wxr, None, link)
         if len(alt_of) > 0:
             gloss_data.alt_of.append(AltForm(word=alt_of))
-            gloss_data.tags.append("alt-of")

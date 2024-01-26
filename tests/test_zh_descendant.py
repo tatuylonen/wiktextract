@@ -31,7 +31,9 @@ class TestDescendant(TestCase):
             10,
             '<span class="Jpan" lang="ja">[[你好#日語|-{<ruby>你好<rp>(</rp><rt>ニイハオ</rt><rp>)</rp></ruby>}-]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr"><span class="mention-tr tr">nīhao</span></span><span class="mention-gloss-paren annotation-paren">)</span>',
         )
-        root = self.wxr.wtp.parse("* {{desc|bor=1|ja|-}} {{ja-r|你好|ニイハオ}}")
+        root = self.wxr.wtp.parse(
+            "* {{desc|bor=1|ja|-}} {{ja-r|你好|ニイハオ}}"
+        )
         page_data = WordEntry(word="你好", lang_code="ja", lang="日語")
         extract_descendants(self.wxr, root, page_data)
         self.assertEqual(

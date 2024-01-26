@@ -125,3 +125,7 @@ class WordEntry(ChineseBaseModel):
     notes: list[str] = []
     tags: list[str] = []
     descendants: list[Descendant] = []
+    redirects: list[str] = Field(
+        [],
+        description="Soft redirect page, extracted from template zh-see and ja-see",
+    )

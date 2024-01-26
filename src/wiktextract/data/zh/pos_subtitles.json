@@ -554,6 +554,9 @@
   "諺語": {
     "pos": "proverb"
   },
+  "變位": {
+    "pos": "conj"
+  },
   "词组": {
     "pos": "phrase"
   },
@@ -580,6 +583,10 @@
   },
   "部件": {
     "pos": "component"
+  },
+  "釋義": {
+    "description": "Means 'definition', some pages don't have POS but use this title",
+    "pos": ""
   },
   "量詞": {
     "pos": "classifier"

@@ -2,6 +2,7 @@ import re
 from typing import Union
 
 from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -40,13 +41,14 @@ GENDERS = {
 def extract_headword_line(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
-    node: WikiNode,
+    node: TemplateNode,
     lang_code: str,
 ) -> None:
     template_name = node.template_name
-    if template_name != "head" and not template_name.startswith(
-        f"{lang_code}-"
-    ):
+    if (
+        template_name != "head"
+        and not template_name.startswith(f"{lang_code}-")
+    ) or template_name.endswith("-see"):
         return
 
     expanded_node = wxr.wtp.parse(
