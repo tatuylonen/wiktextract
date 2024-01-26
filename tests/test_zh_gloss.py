@@ -138,3 +138,21 @@ class TestExample(TestCase):
                 }
             ],
         )
+
+    def test_gloss_text_only_page(self):
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "paraphrase",
+                """== 英语 ==
+释义；意译""",
+            ),
+            [
+                {
+                    "lang": "英语",
+                    "lang_code": "en",
+                    "senses": [{"glosses": ["释义；意译"]}],
+                    "word": "paraphrase",
+                }
+            ],
+        )

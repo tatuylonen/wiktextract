@@ -72,9 +72,7 @@ def parse_section(
         return
     if not isinstance(node, WikiNode):
         return
-    if isinstance(node, TemplateNode):
-        process_soft_redirect_template(wxr, node, page_data)
-    elif node.kind in LEVEL_KIND_FLAGS:
+    if node.kind in LEVEL_KIND_FLAGS:
         subtitle = clean_node(wxr, page_data[-1], node.largs)
         # remove number suffix from subtitle
         subtitle = re.sub(r"\s*(?:（.+）|\d+)$", "", subtitle)
@@ -134,9 +132,11 @@ def process_pos_block(
     node: WikiNode,
     pos_text: str,
 ):
-    pos_type = wxr.config.POS_SUBTITLES[pos_text]["pos"]
+    pos_data = wxr.config.POS_SUBTITLES[pos_text]
+    pos_type = pos_data["pos"]
     base_data.pos = pos_type
     append_base_data(page_data, "pos", pos_type, base_data)
+    page_data[-1].tags.extend(pos_data.get("tags", []))
     for index, child in enumerate(node.filter_empty_str_child()):
         if isinstance(child, WikiNode):
             if index == 0 and isinstance(child, TemplateNode):
@@ -233,9 +233,27 @@ def parse_page(
         )
         base_data.categories = categories.get("categories", [])
         page_data.append(base_data.model_copy(deep=True))
-        parse_section(wxr, page_data, base_data, level2_node.children)
+        for level3_node in level2_node.find_child(NodeKind.LEVEL3):
+            parse_section(wxr, page_data, base_data, level3_node)
+        if not level2_node.contain_node(NodeKind.LEVEL3):
+            process_low_quality_page(wxr, level2_node, page_data)
 
     return [d.model_dump(exclude_defaults=True) for d in page_data]
+
+
+def process_low_quality_page(
+    wxr: WiktextractContext,
+    level_node: WikiNode,
+    page_data: list[WordEntry],
+) -> None:
+    if level_node.contain_node(NodeKind.TEMPLATE):
+        for template_node in level_node.find_child(NodeKind.TEMPLATE):
+            process_soft_redirect_template(wxr, template_node, page_data)
+    else:
+        # only have a gloss text
+        page_data[-1].senses.append(
+            Sense(glosses=[clean_node(wxr, page_data[-1], level_node.children)])
+        )
 
 
 def process_soft_redirect_template(
