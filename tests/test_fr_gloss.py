@@ -334,7 +334,6 @@ class TestFrGloss(TestCase):
                         "Orthographe par contrainte typographique par système h de abaĵuro."
                     ],
                     "alt_of": [{"word": "abaĵuro"}],
-                    "tags": ["alt-of"],
                 }
             ],
         )
@@ -361,7 +360,6 @@ class TestFrGloss(TestCase):
                         "Variante par contrainte typographique de alphœnix."
                     ],
                     "alt_of": [{"word": "alphœnix"}],
-                    "tags": ["alt-of"],
                 }
             ],
         )
