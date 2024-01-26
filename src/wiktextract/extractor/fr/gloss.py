@@ -1,11 +1,12 @@
 from collections import defaultdict
+from typing import Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from .models import Example, Sense, WordEntry
+from .models import AltForm, Example, Sense, WordEntry
 
 
 def extract_gloss(
@@ -65,6 +66,9 @@ def extract_gloss(
                 and gloss_only_nodes[index].template_name == "note"
             ):
                 note_index = index
+        find_alt_of_form(
+            wxr, gloss_only_nodes[:note_index], page_data[-1].pos, gloss_data
+        )
         gloss_text = clean_node(
             wxr, gloss_data, gloss_only_nodes[:note_index]
         ).strip(" ()")
@@ -146,3 +150,28 @@ def process_exemple_template(
     )
     if len(example_data.text) > 0:
         gloss_data.examples.append(example_data)
+
+
+def find_alt_of_form(
+    wxr: WiktextractContext,
+    gloss_nodes: list[Union[str, WikiNode]],
+    pos_type: str,
+    gloss_data: Sense,
+):
+    if pos_type == "typographic variant":
+        alt_of = ""
+        for gloss_node in filter(
+            lambda n: isinstance(n, WikiNode), gloss_nodes
+        ):
+            # use the last link
+            if gloss_node.kind == NodeKind.LINK:
+                alt_of = clean_node(wxr, None, gloss_node)
+            if isinstance(gloss_node, TemplateNode):
+                gloss_node = wxr.wtp.parse(
+                    wxr.wtp.node_to_wikitext(gloss_node), expand_all=True
+                )
+            for link in gloss_node.find_child_recursively(NodeKind.LINK):
+                alt_of = clean_node(wxr, None, link)
+        if len(alt_of) > 0:
+            gloss_data.alt_of.append(AltForm(word=alt_of))
+            gloss_data.tags.append("alt-of")

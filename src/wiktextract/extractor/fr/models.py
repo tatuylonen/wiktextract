@@ -76,12 +76,17 @@ class Linkage(FrenchBaseModel):
     lang_code: str = Field("", description="Wiktionary language code")
 
 
+class AltForm(FrenchBaseModel):
+    word: str
+
+
 class Sense(FrenchBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
     note: str = ""
+    alt_of: list[AltForm] = []
 
 
 class WordEntry(FrenchBaseModel):

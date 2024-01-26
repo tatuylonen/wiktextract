@@ -308,3 +308,60 @@ class TestFrGloss(TestCase):
                 }
             ],
         )
+
+    def test_typographic_variant_alt_of_template(self):
+        self.wxr.wtp.start_page("abajhuro")
+        self.wxr.wtp.add_page(
+            "Modèle:eo-sys-h",
+            10,
+            """''Orthographe par contrainte typographique par [[Annexe:Systèmes h et x en espéranto#Système h|système h]] de'' <bdi>[[abaĵuro#eo|abaĵuro]]</bdi>""",
+        )
+        root = self.wxr.wtp.parse("# {{eo-sys-h|abaĵuro}}.")
+        page_data = [
+            WordEntry(
+                word="abajhuro",
+                lang_code="fr",
+                lang="Français",
+                pos="typographic variant",
+            )
+        ]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
+            [
+                {
+                    "glosses": [
+                        "Orthographe par contrainte typographique par système h de abaĵuro."
+                    ],
+                    "alt_of": [{"word": "abaĵuro"}],
+                    "tags": ["alt-of"],
+                }
+            ],
+        )
+
+    def test_typographic_variant_alt_of_text(self):
+        self.wxr.wtp.start_page("alphoenix")
+        root = self.wxr.wtp.parse(
+            "# ''Variante par contrainte typographique de'' [[alphœnix]]."
+        )
+        page_data = [
+            WordEntry(
+                word="alphoenix",
+                lang_code="fr",
+                lang="Français",
+                pos="typographic variant",
+            )
+        ]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
+            [
+                {
+                    "glosses": [
+                        "Variante par contrainte typographique de alphœnix."
+                    ],
+                    "alt_of": [{"word": "alphœnix"}],
+                    "tags": ["alt-of"],
+                }
+            ],
+        )

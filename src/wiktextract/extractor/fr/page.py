@@ -113,11 +113,13 @@ def process_pos_block(
     pos_argument: str,
     pos_title: str,
 ):
-    pos_type = wxr.config.POS_SUBTITLES[pos_argument]["pos"]
+    pos_data = wxr.config.POS_SUBTITLES[pos_argument]
+    pos_type = pos_data["pos"]
     if len(page_data) == 0 or "pos" in page_data[-1].model_fields_set:
         page_data.append(base_data.model_copy(deep=True))
     page_data[-1].pos = pos_type
     page_data[-1].pos_title = pos_title
+    page_data[-1].tags.extend(pos_data.get("tags", []))
     child_nodes = list(pos_title_node.filter_empty_str_child())
     form_line_start = 0  # Ligne de forme
     gloss_start = len(child_nodes)
