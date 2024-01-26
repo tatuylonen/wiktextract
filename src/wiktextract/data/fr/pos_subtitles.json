@@ -753,16 +753,28 @@
     "pos": "symbol"
   },
   "var-typo": {
-    "pos": "typographic variant"
+    "pos": "typographic variant",
+    "tags": [
+      "alt-of"
+    ]
   },
   "variante par contrainte typographique": {
-    "pos": "typographic variant"
+    "pos": "typographic variant",
+    "tags": [
+      "alt-of"
+    ]
   },
   "variante typo": {
-    "pos": "typographic variant"
+    "pos": "typographic variant",
+    "tags": [
+      "alt-of"
+    ]
   },
   "variante typographique": {
-    "pos": "typographic variant"
+    "pos": "typographic variant",
+    "tags": [
+      "alt-of"
+    ]
   },
   "verb pr": {
     "pos": "verb",
