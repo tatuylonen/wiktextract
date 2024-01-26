@@ -4,7 +4,7 @@ from typing import Any, Union
 
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -72,7 +72,9 @@ def parse_section(
         return
     if not isinstance(node, WikiNode):
         return
-    if node.kind in LEVEL_KIND_FLAGS:
+    if isinstance(node, TemplateNode):
+        process_soft_redirect_template(wxr, node, page_data)
+    elif node.kind in LEVEL_KIND_FLAGS:
         subtitle = clean_node(wxr, page_data[-1], node.largs)
         # remove number suffix from subtitle
         subtitle = re.sub(r"\s*(?:（.+）|\d+)$", "", subtitle)
@@ -137,10 +139,11 @@ def process_pos_block(
     append_base_data(page_data, "pos", pos_type, base_data)
     for index, child in enumerate(node.filter_empty_str_child()):
         if isinstance(child, WikiNode):
-            if index == 0 and child.kind == NodeKind.TEMPLATE:
+            if index == 0 and isinstance(child, TemplateNode):
                 extract_headword_line(
                     wxr, page_data, child, base_data.lang_code
                 )
+                process_soft_redirect_template(wxr, child, page_data)
             elif child.kind == NodeKind.LIST:
                 extract_gloss(wxr, page_data, child, Sense())
             elif child.kind in LEVEL_KIND_FLAGS:
@@ -233,3 +236,20 @@ def parse_page(
         parse_section(wxr, page_data, base_data, level2_node.children)
 
     return [d.model_dump(exclude_defaults=True) for d in page_data]
+
+
+def process_soft_redirect_template(
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    page_data: list[WordEntry],
+) -> None:
+    # https://zh.wiktionary.org/wiki/Template:Ja-see
+    # https://zh.wiktionary.org/wiki/Template:Zh-see
+    if template_node.template_name.lower() == "zh-see":
+        page_data[-1].redirects.append(
+            clean_node(wxr, None, template_node.template_parameters.get(1, ""))
+        )
+    elif template_node.template_name.lower() == "ja-see":
+        for key, value in template_node.template_parameters.items():
+            if isinstance(key, int):
+                page_data[-1].redirects.append(clean_node(wxr, None, value))
