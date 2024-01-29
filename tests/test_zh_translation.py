@@ -1,7 +1,6 @@
 from unittest import TestCase
-from unittest.mock import patch
 
-from wikitextprocessor import Page, Wtp
+from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.extractor.zh.translation import extract_translation
@@ -21,25 +20,22 @@ class TestZhTranslation(TestCase):
             self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
         )
 
-    @patch(
-        "wikitextprocessor.Wtp.get_page",
-        return_value=Page(title="", namespace_id=10, body=""),
-    )
-    def test_normal(self, mock_get_page) -> None:
-        # test wikitext from page "你好" and "這裡"
-        page_data = [WordEntry(word="你好", lang_code="zh", lang="漢語")]
-        wikitext = """
-{{trans-top|靠近說話者的地方}}
-* 阿爾巴尼亞語：këtu (sq)
-* 阿帕切語：
-*: 西阿帕切語：kú
-* 阿拉伯語：هُنَا‎ (hunā)
-*: 埃及阿拉伯語：هنا‎ (henā)
-*俄语：[[привет|приве́т]] ‎(privét) (非正式), [[здравствуйте|здра́вствуйте]] ‎(zdrávstvujte) (正式, 第一个"в"不发音)
-{{trans-bottom}}
-* 斯洛伐克語：pracovať impf
-        """
-        self.wxr.wtp.start_page("你好")
+    def test_t_template(self):
+        self.wxr.wtp.start_page("太陽風")
+        self.wxr.wtp.add_page(
+            "Template:t+",
+            10,
+            """{{#switch:{{{3}}}
+|f=<span class="gender"><abbr title="陰性名詞">f</abbr></span>
+|m=<span class="gender"><abbr title="陽性名詞">m</abbr></span>
+}}""",
+        )
+        self.wxr.wtp.add_page("Template:qualifier", 10, "({{{1}}})")
+        page_data = [WordEntry(word="太陽風", lang_code="zh", lang="漢語")]
+        wikitext = """{{trans-top|太陽上層大氣射出的超高速電漿流}}
+* 希伯来语：{{t+|he|רוח השמש|tr=ruakh ha-shemesh}}、{{t+|he|רוח סולרית|f|tr=ruakh solarit}}
+* 塞尔维亚-克罗地亚语：
+*: 西里尔字母：{{qualifier|Ekavian}} {{t+|sh|сунчев ветар|m}}"""
         node = self.wxr.wtp.parse(wikitext)
         extract_translation(self.wxr, page_data, node)
         self.assertEqual(
@@ -49,52 +45,52 @@ class TestZhTranslation(TestCase):
             ],
             [
                 {
-                    "lang_code": "sq",
-                    "lang": "阿爾巴尼亞語",
-                    "sense": "靠近說話者的地方",
-                    "word": "këtu",
+                    "lang_code": "he",
+                    "lang": "希伯来语",
+                    "sense": "太陽上層大氣射出的超高速電漿流",
+                    "word": "רוח השמש",
+                    "roman": "ruakh ha-shemesh",
                 },
                 {
-                    "lang": "西阿帕切語",
-                    "sense": "靠近說話者的地方",
-                    "word": "kú",
+                    "lang_code": "he",
+                    "lang": "希伯来语",
+                    "sense": "太陽上層大氣射出的超高速電漿流",
+                    "word": "רוח סולרית",
+                    "roman": "ruakh solarit",
+                    "tags": ["陰性名詞"],
                 },
                 {
-                    "lang_code": "ar",
-                    "lang": "阿拉伯語",
-                    "sense": "靠近說話者的地方",
-                    "roman": "hunā",
-                    "word": "هُنَا",
+                    "lang_code": "sh",
+                    "lang": "西里尔字母",
+                    "sense": "太陽上層大氣射出的超高速電漿流",
+                    "word": "сунчев ветар",
+                    "tags": ["Ekavian", "陽性名詞"],
+                },
+            ],
+        )
+
+    def test_link_words(self):
+        self.wxr.wtp.start_page("你好")
+        page_data = [WordEntry(word="你好", lang_code="zh", lang="漢語")]
+        wikitext = """{{翻譯-頂}}
+*英语：[[how do you do]]; [[how are you]]"""
+        node = self.wxr.wtp.parse(wikitext)
+        extract_translation(self.wxr, page_data, node)
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[0].translations
+            ],
+            [
+                {
+                    "lang_code": "en",
+                    "lang": "英语",
+                    "word": "how do you do",
                 },
                 {
-                    "lang_code": "arz",
-                    "lang": "埃及阿拉伯語",
-                    "sense": "靠近說話者的地方",
-                    "roman": "henā",
-                    "word": "هنا",
-                },
-                {
-                    "lang_code": "ru",
-                    "lang": "俄语",
-                    "sense": "靠近說話者的地方",
-                    "roman": "privét",
-                    "tags": ["非正式"],
-                    "word": "приве́т",
-                },
-                {
-                    "lang_code": "ru",
-                    "lang": "俄语",
-                    "sense": "靠近說話者的地方",
-                    "roman": "zdrávstvujte",
-                    "tags": ['正式, 第一个"в"不发音'],
-                    "word": "здра́вствуйте",
-                },
-                {
-                    "lang_code": "sk",
-                    "lang": "斯洛伐克語",
-                    "sense": "靠近說話者的地方",
-                    "tags": ["imperfective aspect"],
-                    "word": "pracovať",
+                    "lang_code": "en",
+                    "lang": "英语",
+                    "word": "how are you",
                 },
             ],
         )

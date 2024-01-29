@@ -1,127 +1,128 @@
-import re
 from typing import Optional, Union
 
-from mediawiki_langcodes import name_to_code
+from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from ..share import capture_text_in_parentheses
 from .models import Translation, WordEntry
 
 
 def extract_translation(
-    wxr: WiktextractContext, page_data: list[WordEntry], node: WikiNode
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    level_node: WikiNode,
+    sense: str = "",
 ) -> None:
-    sense_text = ""
-    for child in node.children:
-        if isinstance(child, WikiNode):
-            if child.kind == NodeKind.TEMPLATE:
-                template_name = child.template_name.lower()
-                if (
-                    template_name in {"trans-top", "翻譯-頂", "trans-top-also"}
-                    and 1 in child.template_parameters
-                ):
-                    sense_text = clean_node(
-                        wxr, None, child.template_parameters.get(1)
-                    )
-                elif template_name == "checktrans-top":
-                    return
-                elif template_name == "see translation subpage":
-                    translation_subpage(
-                        wxr, page_data, child.template_parameters
-                    )
-            elif child.kind == NodeKind.LIST:
-                for list_item_node in child.find_child(NodeKind.LIST_ITEM):
-                    if not list_item_node.contain_node(NodeKind.LIST):
-                        process_translation_list_item(
-                            wxr,
-                            page_data,
-                            clean_node(wxr, None, list_item_node.children),
-                            sense_text,
-                        )
-                    else:
-                        nested_list_index = 0
-                        for index, item_child in enumerate(
-                            list_item_node.children
-                        ):
-                            if (
-                                isinstance(item_child, WikiNode)
-                                and item_child.kind == NodeKind.LIST
-                            ):
-                                nested_list_index = index
-                                break
-
-                        process_translation_list_item(
-                            wxr,
-                            page_data,
-                            clean_node(
-                                wxr,
-                                None,
-                                list_item_node.children[:nested_list_index],
-                            ),
-                            sense_text,
-                        )
-                        for nested_list_node in list_item_node.find_child(
-                            NodeKind.LIST
-                        ):
-                            for nested_list_item in nested_list_node.find_child(
-                                NodeKind.LIST_ITEM
-                            ):
-                                process_translation_list_item(
-                                    wxr,
-                                    page_data,
-                                    clean_node(
-                                        wxr, None, nested_list_item.children
-                                    ),
-                                    sense_text,
-                                )
+    for child in level_node.find_child(NodeKind.TEMPLATE | NodeKind.LIST):
+        if isinstance(child, TemplateNode):
+            template_name = child.template_name.lower()
+            if (
+                template_name in {"trans-top", "翻譯-頂", "trans-top-also"}
+                and 1 in child.template_parameters
+            ):
+                sense = clean_node(wxr, None, child.template_parameters.get(1))
+            elif template_name == "see translation subpage":
+                translation_subpage(wxr, page_data, child.template_parameters)
+        else:
+            for list_item in child.find_child_recursively(NodeKind.LIST_ITEM):
+                process_translation_list_item(
+                    wxr,
+                    page_data,
+                    list_item,
+                    sense,
+                )
 
 
 def process_translation_list_item(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
-    expanded_text: str,
+    list_item: WikiNode,
     sense: str,
 ) -> None:
-    from .headword_line import GENDERS
+    tr_data = Translation(word="", sense=sense)
 
-    split_results = re.split(r":|：", expanded_text, maxsplit=1)
-    if len(split_results) != 2:
-        return
-    lang_text, words_text = split_results
-    lang_text = lang_text.strip()
-    words_text = words_text.strip()
-    if len(words_text) == 0:
-        return
-    lang_code = name_to_code(lang_text, "zh")
-
-    # split words by `,` or `;` that are not inside `()`
-    for word_and_tags in re.split(r"[,;、](?![^(]*\))\s*", words_text):
-        tags, word = capture_text_in_parentheses(word_and_tags)
-        tags = [tag for tag in tags if tag != lang_code]  # rm Wiktionary link
-        translation_data = Translation(
-            lang_code=lang_code, lang=lang_text, word=word
-        )
-        tags_without_roman = []
-        for tag in tags:
-            if re.search(r"[a-z]", tag):
-                translation_data.roman = tag
+    for child in list_item.children:
+        if isinstance(child, str) and child.strip().endswith(("：", ":")):
+            tr_data.lang = clean_node(wxr, None, child).strip("：:")
+            tr_data.lang_code = name_to_code(tr_data.lang, "zh")
+        elif isinstance(child, TemplateNode):
+            template_name = child.template_name
+            if template_name in {
+                "t",
+                "t+",
+                "tt",
+                "tt+",
+                "t-check",
+                "t+check",
+                "t-needed",
+            }:
+                if len(tr_data.word) > 0:
+                    page_data[-1].translations.append(
+                        tr_data.model_copy(deep=True)
+                    )
+                    tr_data = Translation(
+                        word="",
+                        lang=tr_data.lang,
+                        lang_code=tr_data.lang_code,
+                        sense=sense,
+                    )
+                if tr_data.lang_code == "":
+                    tr_data.lang_code = child.template_parameters[1]
+                if tr_data.lang == "":
+                    tr_data.lang = code_to_name(tr_data.lang_code, "zh")
+                tr_data.word = clean_node(
+                    wxr, None, child.template_parameters[2]
+                )
+                tr_data.roman = clean_node(
+                    wxr, None, child.template_parameters.get("tr", "")
+                )
+                tr_data.alt = clean_node(
+                    wxr, None, child.template_parameters.get("alt", "")
+                )
+                tr_data.lit = clean_node(
+                    wxr, None, child.template_parameters.get("lit", "")
+                )
+                # find gender tags
+                expanded_template = wxr.wtp.parse(
+                    wxr.wtp.node_to_wikitext(child), expand_all=True
+                )
+                for span_node in expanded_template.find_html("span"):
+                    class_str = span_node.attrs.get("class", "")
+                    if "gender" in class_str:
+                        for abbr_tag in span_node.find_html("abbr"):
+                            if len(abbr_tag.attrs.get("title")) > 0:
+                                tr_data.tags.append(
+                                    clean_node(
+                                        wxr, None, abbr_tag.attrs.get("title")
+                                    )
+                                )
+                    elif tr_data.roman == "" and class_str.startswith("tr "):
+                        tr_data.roman = clean_node(wxr, None, span_node)
+            elif template_name == "multitrans":
+                multitrans = wxr.wtp.parse(
+                    child.template_parameter.get("data", "")
+                )
+                extract_translation(wxr, page_data, multitrans, sense)
             else:
-                tags_without_roman.append(tag)
+                # qualifier template
+                tag = clean_node(wxr, None, child)
+                if len(tag) > 0:
+                    tr_data.tags.append(tag.strip("()"))
+        elif isinstance(child, WikiNode) and child.kind == NodeKind.LINK:
+            if len(tr_data.word) > 0:
+                page_data[-1].translations.append(tr_data.model_copy(deep=True))
+                tr_data = Translation(
+                    word="",
+                    lang=tr_data.lang,
+                    lang_code=tr_data.lang_code,
+                    sense=sense,
+                )
+            tr_data.word = clean_node(wxr, None, child)
 
-        if len(tags_without_roman) > 0:
-            translation_data.tags = tags_without_roman
-
-        gender = word.split(" ")[-1]
-        if gender in GENDERS:
-            translation_data.word = word.removesuffix(f" {gender}")
-            translation_data.tags.append(GENDERS.get(gender))
-
-        if len(sense) > 0:
-            translation_data.sense = sense
-        page_data[-1].translations.append(translation_data)
+    if len(tr_data.word) > 0:
+        page_data[-1].translations.append(tr_data.model_copy(deep=True))
 
 
 def translation_subpage(

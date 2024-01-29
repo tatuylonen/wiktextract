@@ -65,10 +65,12 @@ class Translation(ChineseBaseModel):
         "", description="Wiktionary language code of the translation term"
     )
     lang: str = Field("", description="Translation language name")
-    word: str = Field("", description="Translation term")
+    word: str = Field(description="Translation term")
     sense: str = Field("", description="Translation gloss")
     tags: list[str] = []
-    roman: str = ""
+    roman: str = Field("", description="Roman script")
+    alt: str = Field("", description="Alternative form")
+    lit: str = Field("", description="Literal translation for the term")
 
 
 class Linkage(ChineseBaseModel):
@@ -127,5 +129,5 @@ class WordEntry(ChineseBaseModel):
     descendants: list[Descendant] = []
     redirects: list[str] = Field(
         [],
-        description="Soft redirect page, extracted from template zh-see and ja-see",
+        description="Soft redirect page, extracted from template zh-see ja-see",
     )

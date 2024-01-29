@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 from wikitextprocessor import Wtp
 from wiktextract.extractor.zh.headword_line import extract_headword_line
