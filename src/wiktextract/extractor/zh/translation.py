@@ -50,9 +50,9 @@ def process_translation_list_item(
 ) -> None:
     tr_data = Translation(word="", sense=sense)
 
-    for child in list_item.children:
-        if isinstance(child, str) and child.strip().endswith(("：", ":")):
-            tr_data.lang = clean_node(wxr, None, child).strip("：:")
+    for child_index, child in enumerate(list_item.children):
+        if child_index == 0 and isinstance(child, str) and "：" in child:
+            tr_data.lang = clean_node(wxr, None, child[: child.index("：")])
             tr_data.lang_code = name_to_code(tr_data.lang, "zh")
         elif isinstance(child, TemplateNode):
             template_name = child.template_name

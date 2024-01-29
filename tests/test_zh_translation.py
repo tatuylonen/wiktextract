@@ -126,3 +126,34 @@ class TestZhTranslation(TestCase):
                 }
             ],
         )
+
+    def test_strange_russian_translation(self):
+        self.wxr.wtp.start_page("林场")
+        page_data = [WordEntry(word="林场", lang_code="zh", lang="漢語")]
+        node = self.wxr.wtp.parse(
+            "*俄语：1) [[лесничество]], [[лесхоз]]; 2) [[лесосека]]"
+        )
+        extract_translation(self.wxr, page_data, node)
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[0].translations
+            ],
+            [
+                {
+                    "lang_code": "ru",
+                    "lang": "俄语",
+                    "word": "лесничество",
+                },
+                {
+                    "lang_code": "ru",
+                    "lang": "俄语",
+                    "word": "лесхоз",
+                },
+                {
+                    "lang_code": "ru",
+                    "lang": "俄语",
+                    "word": "лесосека",
+                },
+            ],
+        )
