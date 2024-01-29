@@ -105,6 +105,7 @@ class TestZhTranslation(TestCase):
 ====翻譯====
 {{trans-top|一種源於英格蘭的語言}}{{multitrans|data=
 * 阿布哈茲語：{{tt|ab|англыз бызшәа}}
+* 阿拉貢語：{{t-needed|an}}
 }}""",
         )
         page_data = [WordEntry(word="英語", lang_code="zh", lang="漢語")]

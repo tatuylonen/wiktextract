@@ -63,7 +63,6 @@ def process_translation_list_item(
                 "tt+",
                 "t-check",
                 "t+check",
-                "t-needed",
             }:
                 if len(tr_data.word) > 0:
                     page_data[-1].translations.append(
@@ -76,11 +75,11 @@ def process_translation_list_item(
                         sense=sense,
                     )
                 if tr_data.lang_code == "":
-                    tr_data.lang_code = child.template_parameters[1]
+                    tr_data.lang_code = child.template_parameters.get(1, "")
                 if tr_data.lang == "":
                     tr_data.lang = code_to_name(tr_data.lang_code, "zh")
                 tr_data.word = clean_node(
-                    wxr, None, child.template_parameters[2]
+                    wxr, None, child.template_parameters.get(2, "")
                 )
                 tr_data.roman = clean_node(
                     wxr, None, child.template_parameters.get("tr", "")
@@ -107,6 +106,9 @@ def process_translation_list_item(
                                 )
                     elif tr_data.roman == "" and class_str.startswith("tr "):
                         tr_data.roman = clean_node(wxr, None, span_node)
+            elif template_name == "t-needed":
+                # ignore empty translation
+                continue
             else:
                 # qualifier template
                 tag = clean_node(wxr, None, child)
