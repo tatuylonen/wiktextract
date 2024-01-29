@@ -50,10 +50,19 @@ def process_translation_list_item(
 ) -> None:
     tr_data = Translation(word="", sense=sense)
 
-    for child_index, child in enumerate(list_item.children):
-        if child_index == 0 and isinstance(child, str) and "：" in child:
-            tr_data.lang = clean_node(wxr, None, child[: child.index("：")])
-            tr_data.lang_code = name_to_code(tr_data.lang, "zh")
+    for child_index, child in enumerate(list_item.filter_empty_str_child()):
+        if child_index == 0:
+            lang_text = ""
+            if isinstance(child, str):
+                if "：" in child:
+                    lang_text = child[: child.index("：")]
+                elif ":" in child:
+                    lang_text = child[: child.index(":")]
+            else:
+                lang_text = clean_node(wxr, None, child)
+            if len(lang_text) > 0:
+                tr_data.lang = lang_text.strip()
+                tr_data.lang_code = name_to_code(tr_data.lang, "zh")
         elif isinstance(child, TemplateNode):
             template_name = child.template_name
             if template_name in {

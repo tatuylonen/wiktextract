@@ -157,3 +157,23 @@ class TestZhTranslation(TestCase):
                 },
             ],
         )
+
+    def test_language_name_template(self):
+        self.wxr.wtp.start_page("解析幾何")
+        page_data = [WordEntry(word="解析幾何", lang_code="zh", lang="漢語")]
+        self.wxr.wtp.add_page("Template:en", 10, "英語")
+        node = self.wxr.wtp.parse("* {{en}}：{{t+|en|analytic geometry}}")
+        extract_translation(self.wxr, page_data, node)
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[0].translations
+            ],
+            [
+                {
+                    "lang_code": "en",
+                    "lang": "英語",
+                    "word": "analytic geometry",
+                },
+            ],
+        )
