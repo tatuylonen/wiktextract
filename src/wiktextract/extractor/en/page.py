@@ -942,7 +942,7 @@ def parse_language(
 
     def head_post_template_fn(
         name: str, ht: TemplateArgs, expansion: str
-    ) -> str:
+    ) -> Optional[str]:
         """Handles special templates in the head section of a word.  Head
         section is the text after part-of-speech subtitle and before word
         sense list. Typically it generates the bold line for the word, but
@@ -974,7 +974,7 @@ def parse_language(
             # Note: various places expect to have content from wikipedia
             # templates, so cannot convert this to empty
             parse_wikipedia_template(wxr, pos_data, ht)
-            return ""
+            return None
 
         if name == "number box":
             # XXX extract numeric value?
@@ -1002,7 +1002,7 @@ def parse_language(
             # XXX extract?
             return ""
 
-        return ""
+        return None
 
     def parse_part_of_speech(posnode: WikiNode, pos: str) -> None:
         """Parses the subsection for a part-of-speech under a language on
