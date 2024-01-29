@@ -639,19 +639,38 @@ quotation_templates: set[str] = {
 
 # Template name component to linkage section listing.  Integer section means
 # default section, starting at that argument.
-template_linkage_mappings: list[list[Union[str, int]]] = [
-    ["syn", "synonyms"],
-    ["synonyms", "synonyms"],
-    ["ant", "antonyms"],
-    ["antonyms", "antonyms"],
-    ["hyp", "hyponyms"],
-    ["hyponyms", "hyponyms"],
-    ["der", "derived"],
-    ["derived terms", "derived"],
-    ["coordinate terms", "coordinate_terms"],
-    ["rel", "related"],
-    ["col", 2],
-]
+# XXX not used anymore, except for the first elements: moved to
+# template_linkages
+# template_linkage_mappings: list[list[Union[str, int]]] = [
+#     ["syn", "synonyms"],
+#     ["synonyms", "synonyms"],
+#     ["ant", "antonyms"],
+#     ["antonyms", "antonyms"],
+#     ["hyp", "hyponyms"],
+#     ["hyponyms", "hyponyms"],
+#     ["der", "derived"],
+#     ["derived terms", "derived"],
+#     ["coordinate terms", "coordinate_terms"],
+#     ["rel", "related"],
+#     ["col", 2],
+# ]
+
+# Template names, this was exctracted from template_linkage_mappings,
+# because the code using template_linkage_mappings was actually not used
+# (but not removed).
+template_linkages: set[str] = {
+    "syn",
+    "synonyms",
+    "ant",
+    "antonyms",
+    "hyp",
+    "hyponyms",
+    "der",
+    "derived terms",
+    "coordinate terms",
+    "rel",
+    "col",
+}
 
 # Maps template name used in a word sense to a linkage field that it adds.
 sense_linkage_templates: dict[str, str] = {
@@ -2293,50 +2312,6 @@ def parse_language(
                 urls,
             )
 
-        def parse_linkage_template(node):
-            nonlocal have_panel_template
-            # XXX remove this function but check how to handle the
-            # template_linkage_mappings
-            # print("LINKAGE TEMPLATE:", node)
-
-            def linkage_template_fn(name, ht):
-                # print("LINKAGE_TEMPLATE_FN:", name, ht)
-                nonlocal field
-                nonlocal have_panel_template
-                if is_panel_template(wxr, name):
-                    have_panel_template = True
-                    return ""
-                for prefix, t in template_linkage_mappings:
-                    if re.search(
-                        r"(^|[-/\s]){}($|\b|[0-9])".format(prefix), name
-                    ):
-                        f = t if isinstance(t, str) else field
-                        if (
-                            name.endswith("-top")
-                            or name.endswith("-bottom")
-                            or name.endswith("-mid")
-                        ):
-                            field = f
-                            return ""
-                        i = t if isinstance(t, int) else 2
-                        while True:
-                            v = ht.get(i, None)
-                            if v is None:
-                                break
-                            v = clean_node(wxr, None, v)
-                            parse_linkage_item(v, f)
-                            i += 1
-                        return ""
-                # print("UNHANDLED LINKAGE TEMPLATE:", name, ht)
-                return None
-
-            # Main body of parse_linkage_template()
-            text = wxr.wtp.node_to_wikitext(node)
-            parsed = wxr.wtp.parse(
-                text, expand_all=True, template_fn=linkage_template_fn
-            )
-            parse_linkage_recurse(parsed.children, field, None)
-
         def parse_linkage_recurse(contents, field, sense):
             assert isinstance(contents, (list, tuple))
             assert sense is None or isinstance(sense, str)
@@ -3393,7 +3368,7 @@ def parse_language(
                         usex_type = "example"
                     elif name in quotation_templates:
                         usex_type = "quotation"
-                    for prefix, t in template_linkage_mappings:
+                    for prefix in template_linkages:
                         if re.search(
                             r"(^|[-/\s]){}($|\b|[0-9])".format(prefix), name
                         ):
