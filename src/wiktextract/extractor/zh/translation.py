@@ -23,8 +23,15 @@ def extract_translation(
                 and 1 in child.template_parameters
             ):
                 sense = clean_node(wxr, None, child.template_parameters.get(1))
-            elif template_name == "see translation subpage":
-                translation_subpage(wxr, page_data, child.template_parameters)
+            elif template_name in {"see translation subpage", "trans-see"}:
+                translation_subpage(wxr, page_data, child)
+            elif template_name == "multitrans":
+                wikitext = "".join(
+                    wxr.wtp.node_to_wikitext(c)
+                    for c in child.template_parameters.get("data", [])
+                )
+                multitrans = wxr.wtp.parse(wikitext)
+                extract_translation(wxr, page_data, multitrans, sense)
         else:
             for list_item in child.find_child_recursively(NodeKind.LIST_ITEM):
                 process_translation_list_item(
@@ -100,11 +107,6 @@ def process_translation_list_item(
                                 )
                     elif tr_data.roman == "" and class_str.startswith("tr "):
                         tr_data.roman = clean_node(wxr, None, span_node)
-            elif template_name == "multitrans":
-                multitrans = wxr.wtp.parse(
-                    child.template_parameter.get("data", "")
-                )
-                extract_translation(wxr, page_data, multitrans, sense)
             else:
                 # qualifier template
                 tag = clean_node(wxr, None, child)
@@ -128,18 +130,21 @@ def process_translation_list_item(
 def translation_subpage(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
-    template_args: dict[str, str],
+    template_node: TemplateNode,
 ) -> None:
+    # https://zh.wiktionary.org/wiki/Template:翻譯-見
+    # https://zh.wiktionary.org/wiki/Template:See_translation_subpage
     from .page import ADDITIONAL_EXPAND_TEMPLATES
 
     page_title = wxr.wtp.title
     target_section = None
-    if len(template_args) > 0:
-        target_section = template_args.get(1)
-    if len(template_args) > 1:
-        page_title = template_args.get(2)
+    if template_node.template_name == "see translation subpage":
+        target_section = template_node.template_parameters.get(1)
+    page_title = template_node.template_parameters.get(2, wxr.wtp.title)
 
-    translation_subpage_title = f"{page_title}/翻譯"
+    translation_subpage_title = page_title
+    if page_title == wxr.wtp.title:
+        translation_subpage_title = f"{page_title}/翻譯"
     subpage = wxr.wtp.get_page(translation_subpage_title)
     if subpage is None:
         return
@@ -166,22 +171,12 @@ def find_subpage_section(
     node: Union[WikiNode, str],
     target_section: Union[str, list[str]],
 ) -> Optional[WikiNode]:
-    if isinstance(node, WikiNode):
-        if node.kind in LEVEL_KIND_FLAGS:
-            section_title = clean_node(wxr, None, node.largs)
-            if (
-                isinstance(target_section, str)
-                and section_title == target_section
-            ):
-                return node
-            if (
-                isinstance(target_section, list)
-                and section_title in target_section
-            ):
-                return node
-
-        for child in node.children:
-            returned_node = find_subpage_section(wxr, child, target_section)
-            if returned_node is not None:
-                return returned_node
+    if not isinstance(node, WikiNode):
+        return None
+    for level_node in node.find_child_recursively(LEVEL_KIND_FLAGS):
+        section_title = clean_node(wxr, None, level_node.largs)
+        if isinstance(target_section, str) and section_title == target_section:
+            return level_node
+        if isinstance(target_section, list) and section_title in target_section:
+            return level_node
     return None

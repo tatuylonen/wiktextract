@@ -94,3 +94,34 @@ class TestZhTranslation(TestCase):
                 },
             ],
         )
+
+    def test_subpage_multitrans(self):
+        self.wxr.wtp.start_page("英語")
+        self.wxr.wtp.add_page(
+            "英語/翻譯",
+            0,
+            """==漢語==
+===名詞===
+====翻譯====
+{{trans-top|一種源於英格蘭的語言}}{{multitrans|data=
+* 阿布哈茲語：{{tt|ab|англыз бызшәа}}
+}}""",
+        )
+        page_data = [WordEntry(word="英語", lang_code="zh", lang="漢語")]
+        wikitext = "{{trans-see|源於英格蘭的語言|英語/翻譯}}"
+        node = self.wxr.wtp.parse(wikitext)
+        extract_translation(self.wxr, page_data, node)
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[0].translations
+            ],
+            [
+                {
+                    "lang_code": "ab",
+                    "lang": "阿布哈茲語",
+                    "word": "англыз бызшәа",
+                    "sense": "一種源於英格蘭的語言",
+                }
+            ],
+        )
