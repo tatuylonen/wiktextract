@@ -31,8 +31,6 @@ PANEL_PREFIXES = {}
 # Additional templates to be expanded in the pre-expand phase
 ADDITIONAL_EXPAND_TEMPLATES = frozenset(
     {
-        "multitrans",
-        "multitrans-nowiki",
         "col1",
         "col2",
         "col3",
@@ -198,6 +196,9 @@ def extract_pronunciation(
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
 ) -> list[dict[str, Any]]:
+    # page layout documents
+    # https://zh.wiktionary.org/wiki/Wiktionary:佈局解釋
+    # https://zh.wiktionary.org/wiki/Wiktionary:体例说明
     if wxr.config.verbose:
         logging.info(f"Parsing page: {page_title}")
 

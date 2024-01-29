@@ -6,8 +6,8 @@ from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.models import Sense, WordEntry
 from wiktextract.extractor.zh.page import (
     extract_gloss,
-    parse_section,
     parse_page,
+    parse_section,
 )
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
