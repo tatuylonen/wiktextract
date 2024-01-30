@@ -123,6 +123,7 @@ class WordEntry(BaseModelWrap):
     senses: list[Sense] = []
     translations: list[Translation] = []
     forms: list[Form] = []
+    tags: list[str] = []
     antonyms: list[Linkage] = Field(default=[], description="List of antonyms")
     anagrams: list[Linkage] = Field(default=[], description="List of anagrams")
     variants: list[Linkage] = Field(default=[], description="List of variants")

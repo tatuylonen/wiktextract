@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 
 from wikitextprocessor import NodeKind, WikiNode
+from wiktextract.config import POSSubtitleData
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -51,62 +52,63 @@ def process_semantic_section(
     # cf. https://ru.wiktionary.org/wiki/овощ
 
 
+POS_TEMPLATE_NAME_MAP = {
+    "abbrev": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "adv": {"pos": "adv"},
+    "affix": {"pos": "affix"},
+    "conj": {"pos": "conj"},
+    "interj": {"pos": "intj"},
+    "noun": {"pos": "noun"},
+    "onomatop": {"pos": "onomatopeia", "tags": ["onomatopoeic"]},
+    "part": {"pos": "particle"},
+    "phrase": {"pos": "phrase"},
+    "predic": {"pos": "adj"},
+    "prep": {"pos": "prep"},
+    "suffix": {"pos": "suffix"},
+    "буква": {"pos": "character"},
+    "гидроним": {"pos": "name"},
+    "гл": {"pos": "verb"},
+    "дее": {"pos": "verb", "tags": ["participle", "gerund"]},
+    "деепр": {"pos": "verb", "tags": ["participle", "gerund"]},
+    "мест": {"pos": "pron"},
+    "нар": {"pos": "adv"},
+    "падежи": {"pos": "noun"},
+    "послелог": {"pos": "postp"},
+    "прил": {"pos": "adj"},
+    "прич": {"pos": "verb", "tags": ["participle"]},
+    "союз": {"pos": "conj"},
+    "сущ": {"pos": "noun"},
+    "существительное": {"pos": "noun"},
+    "топоним": {"pos": "name"},
+    "фам": {"pos": "name"},
+    "част": {"pos": "particle"},
+    "числ": {"pos": "num"},
+}
+
+
 def get_pos(
-    wxr: WiktextractContext,
-    level_node: WikiNode,
-) -> Optional[str]:
+    wxr: WiktextractContext, level_node: WikiNode
+) -> Optional[POSSubtitleData]:
     # Search for POS in template names
     for template_node in level_node.find_child(NodeKind.TEMPLATE):
-        POS_MAP = {
-            "abbrev": "abbrev",
-            "adv": "adv",
-            "affix": "affix",
-            "conj": "conj",
-            "interj": "interj",
-            "noun": "noun",
-            "onomatop": "onomatopeia",
-            "part": "particle",
-            "phrase": "phrase",
-            "predic": "adj",
-            "prep": "prep",
-            "suffix": "suffix",
-            "буква": "character",
-            "гидроним": "name",
-            "гл": "verb",
-            "дее": "gerund",
-            "деепр": "gerund",
-            "мест": "pronoun",
-            "нар": "adv",
-            "падежи": "noun",
-            "послелог": "postp",
-            "прил": "adj",
-            "прич": "participle",
-            "союз": "conj",
-            "сущ": "noun",
-            "существительное": "noun",
-            "топоним": "name",
-            "фам": "name",
-            "част": "particle",
-            "числ": "number",
-        }
         template_name = template_node.template_name.lower()
         for part in template_name.split()[:2]:
             for subpart in part.split("-")[:2]:
-                if subpart in POS_MAP:
-                    return POS_MAP[subpart]
+                if subpart in POS_TEMPLATE_NAME_MAP:
+                    return POS_TEMPLATE_NAME_MAP[subpart]
 
     # Search for POS in clean_text
     text = clean_node(wxr, {}, level_node.children)
 
-    for POS_string in wxr.config.POS_SUBTITLES.keys():
-        if POS_string in text.lower():
-            return wxr.config.POS_SUBTITLES[POS_string]["pos"]
+    for pos_string in wxr.config.POS_SUBTITLES.keys():
+        if pos_string in text.lower():
+            return wxr.config.POS_SUBTITLES[pos_string]
 
     if "форма" in text.lower():
         # XXX: Decide what to do with form entries
         return
 
-    if text.strip():
+    if len(text) > 0:
         wxr.wtp.debug(
             f"No part of speech found in children: {level_node.children} "
             f"with clean text {text}",
@@ -127,9 +129,10 @@ def parse_section(
         # Type and syntactic properties of the word combination
         "Тип и синтаксические свойства сочетания",
     ]:
-        pos = get_pos(wxr, level3_node)
-        if pos is not None:
-            page_data[-1].pos = pos
+        pos_data = get_pos(wxr, level3_node)
+        if pos_data is not None:
+            page_data[-1].pos = pos_data["pos"]
+            page_data[-1].tags.extend(pos_data.get("tags", []))
         extract_inflection(wxr, page_data[-1], level3_node)
         # XXX: Extract grammatical tags (gender, etc.) from Russian Wiktionary
     elif section_title == "Произношение" and wxr.config.capture_pronunciation:
