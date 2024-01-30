@@ -13,7 +13,7 @@ from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestExample(TestCase):
+class TestGloss(TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="zh"),
@@ -140,19 +140,42 @@ class TestExample(TestCase):
         )
 
     def test_gloss_text_only_page(self):
-        self.assertEqual(
-            parse_page(
-                self.wxr,
-                "paraphrase",
-                """== 英语 ==
-释义；意译""",
-            ),
+        # title, page wikitext, results
+        test_cases = [
             [
-                {
-                    "lang": "英语",
-                    "lang_code": "en",
-                    "senses": [{"glosses": ["释义；意译"]}],
-                    "word": "paraphrase",
-                }
+                "paraphrase",
+                "== 英语 ==\n释义；意译",
+                [
+                    {
+                        "lang": "英语",
+                        "lang_code": "en",
+                        "senses": [{"glosses": ["释义；意译"]}],
+                        "word": "paraphrase",
+                    }
+                ],
             ],
-        )
+            [
+                "鐵面無私",
+                "==漢語==\n===釋義===\n形容[[公正]]严明，绝不因[[徇私]]或畏权而讲情面。",
+                [
+                    {
+                        "lang": "漢語",
+                        "lang_code": "zh",
+                        "senses": [
+                            {
+                                "glosses": [
+                                    "形容公正严明，绝不因徇私或畏权而讲情面。"
+                                ]
+                            }
+                        ],
+                        "word": "鐵面無私",
+                    }
+                ],
+            ],
+        ]
+        for title, wikitext, results in test_cases:
+            with self.subTest(title=title, wikitext=wikitext, results=results):
+                self.assertEqual(
+                    parse_page(self.wxr, title, wikitext),
+                    results,
+                )
