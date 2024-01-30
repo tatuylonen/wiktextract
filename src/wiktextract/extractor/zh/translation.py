@@ -64,7 +64,7 @@ def process_translation_list_item(
                 tr_data.lang = lang_text.strip()
                 tr_data.lang_code = name_to_code(tr_data.lang, "zh")
         elif isinstance(child, TemplateNode):
-            template_name = child.template_name
+            template_name = child.template_name.lower()
             if template_name in {
                 "t",
                 "t+",
@@ -72,6 +72,7 @@ def process_translation_list_item(
                 "tt+",
                 "t-check",
                 "t+check",
+                "l",
             }:
                 if len(tr_data.word) > 0:
                     page_data[-1].translations.append(

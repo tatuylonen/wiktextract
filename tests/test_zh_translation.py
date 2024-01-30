@@ -177,3 +177,22 @@ class TestZhTranslation(TestCase):
                 },
             ],
         )
+
+    def test_l_template(self):
+        self.wxr.wtp.start_page("茄子")
+        page_data = [WordEntry(word="茄子", lang_code="zh", lang="漢語")]
+        node = self.wxr.wtp.parse("* 南非語: {{l|af|eiervrug}}")
+        extract_translation(self.wxr, page_data, node)
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[0].translations
+            ],
+            [
+                {
+                    "lang_code": "af",
+                    "lang": "南非語",
+                    "word": "eiervrug",
+                },
+            ],
+        )
