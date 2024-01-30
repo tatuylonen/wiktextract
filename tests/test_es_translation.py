@@ -32,13 +32,19 @@ class TestESTranslation(unittest.TestCase):
             {
                 "input": "{{t+|af|1|kat}}",
                 "expected": [
-                    {"lang_code": "af", "word": "kat", "senseids": ["1"]}
+                    {
+                        "lang": "afrikáans",
+                        "lang_code": "af",
+                        "word": "kat",
+                        "senseids": ["1"],
+                    }
                 ],
             },
             {
                 "input": "{{t+|de|1, 2|Katze|f|,|1|Kater|m|nota|gato macho|,|8|Tic Tac Toe}}",
                 "expected": [
                     {
+                        "lang": "alemán",
                         "lang_code": "de",
                         "word": "Katze",
                         "senseids": ["1", "2"],
@@ -46,6 +52,7 @@ class TestESTranslation(unittest.TestCase):
                     },
                     {
                         "lang_code": "de",
+                        "lang": "alemán",
                         "word": "Kater",
                         "senseids": ["1"],
                         "tags": ["m"],
@@ -53,6 +60,7 @@ class TestESTranslation(unittest.TestCase):
                     },
                     {
                         "lang_code": "de",
+                        "lang": "alemán",
                         "word": "Tic Tac Toe",
                         "senseids": ["8"],
                     },
@@ -62,6 +70,7 @@ class TestESTranslation(unittest.TestCase):
                 "input": "{{t+|fr|1|profession|nl|de|bateleur}}",
                 "expected": [
                     {
+                        "lang": "francés",
                         "lang_code": "fr",
                         "word": "profession de bateleur",
                         "senseids": ["1"],
@@ -72,6 +81,7 @@ class TestESTranslation(unittest.TestCase):
                 "input": "{{t+|hy|1|կատու|tr|katu}}",
                 "expected": [
                     {
+                        "lang": "armenio",
                         "lang_code": "hy",
                         "word": "կատու",
                         "roman": "katu",
@@ -83,6 +93,7 @@ class TestESTranslation(unittest.TestCase):
                 "input": "{{t+|hy|1|կատու|tr=katu}}",
                 "expected": [
                     {
+                        "lang": "armenio",
                         "lang_code": "hy",
                         "word": "կատու",
                         "roman": "katu",
@@ -93,9 +104,24 @@ class TestESTranslation(unittest.TestCase):
             {
                 "input": "{{t+|de|amphibisch|adj|,|Amphibie|sust|,|Amphibium|sust}}",
                 "expected": [
-                    {"lang_code": "de", "word": "amphibisch", "tags": ["adj"]},
-                    {"lang_code": "de", "word": "Amphibie", "tags": ["sust"]},
-                    {"lang_code": "de", "word": "Amphibium", "tags": ["sust"]},
+                    {
+                        "lang": "alemán",
+                        "lang_code": "de",
+                        "word": "amphibisch",
+                        "tags": ["adj"],
+                    },
+                    {
+                        "lang": "alemán",
+                        "lang_code": "de",
+                        "word": "Amphibie",
+                        "tags": ["sust"],
+                    },
+                    {
+                        "lang": "alemán",
+                        "lang_code": "de",
+                        "word": "Amphibium",
+                        "tags": ["sust"],
+                    },
                 ],
             },
         ]
