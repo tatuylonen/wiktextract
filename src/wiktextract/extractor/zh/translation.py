@@ -64,7 +64,7 @@ def process_translation_list_item(
                 tr_data.lang = lang_text.strip()
                 tr_data.lang_code = name_to_code(tr_data.lang, "zh")
         elif isinstance(child, TemplateNode):
-            template_name = child.template_name
+            template_name = child.template_name.lower()
             if template_name in {
                 "t",
                 "t+",
@@ -72,6 +72,7 @@ def process_translation_list_item(
                 "tt+",
                 "t-check",
                 "t+check",
+                "l",
             }:
                 if len(tr_data.word) > 0:
                     page_data[-1].translations.append(
@@ -120,9 +121,19 @@ def process_translation_list_item(
                 continue
             else:
                 # qualifier template
-                tag = clean_node(wxr, None, child)
-                if len(tag) > 0:
-                    tr_data.tags.append(tag.strip("()"))
+                expanded_template = wxr.wtp.parse(
+                    wxr.wtp.node_to_wikitext(child), expand_all=True
+                )
+                find_title = False
+                for span_node in expanded_template.find_html("span"):
+                    tag = span_node.attrs.get("title", "")
+                    if len(tag) > 0:
+                        tr_data.tags.append(tag.strip())
+                        find_title = True
+                if not find_title:
+                    tag = clean_node(wxr, None, child)
+                    if len(tag) > 0:
+                        tr_data.tags.append(tag.strip("()"))
         elif isinstance(child, WikiNode) and child.kind == NodeKind.LINK:
             if len(tr_data.word) > 0:
                 page_data[-1].translations.append(tr_data.model_copy(deep=True))

@@ -148,6 +148,13 @@ def process_pos_block(
                 parse_section(wxr, page_data, base_data, child)
         else:
             parse_section(wxr, page_data, base_data, child)
+    if len(page_data[-1].senses) == 0:
+        # low quality pages don't put gloss in list
+        gloss_text = clean_node(
+            wxr, page_data[-1], list(node.invert_find_child(LEVEL_KIND_FLAGS))
+        )
+        if len(gloss_text) > 0:
+            page_data[-1].senses.append(Sense(glosses=[gloss_text]))
 
 
 def extract_etymology(
