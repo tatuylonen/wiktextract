@@ -152,7 +152,8 @@ class TestFrGloss(TestCase):
             [
                 {
                     "glosses": ["Variante de basketball."],
-                    "tags": ["Désuet", "Sport", "Indénombrable"],
+                    "tags": ["Désuet", "Sport", "Indénombrable", "alt-of"],
+                    "alt_of": [{"word": "basketball"}],
                 }
             ],
         )
@@ -360,6 +361,34 @@ class TestFrGloss(TestCase):
                         "Variante par contrainte typographique de alphœnix."
                     ],
                     "alt_of": [{"word": "alphœnix"}],
+                }
+            ],
+        )
+
+    def test_variante_de_dif(self):
+        self.wxr.wtp.start_page("Me.")
+        self.wxr.wtp.add_page("Modèle:e", 10, "<sup>e</sup>")
+        self.wxr.wtp.add_page(
+            "Modèle:variante ortho de",
+            10,
+            "''Variante orthographique de'' {{{dif}}}",
+        )
+        root = self.wxr.wtp.parse(
+            "# ''[[abréviation|Abréviation]] de'' [[maître]]. {{variante ortho de|Me|dif=M{{e}}}}."
+        )
+        page_data = [
+            WordEntry(word="Me.", lang_code="fr", lang="Français", pos="noun")
+        ]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
+            [
+                {
+                    "glosses": [
+                        "Abréviation de maître. Variante orthographique de Mᵉ."
+                    ],
+                    "alt_of": [{"word": "Mᵉ"}],
+                    "tags": ["alt-of"],
                 }
             ],
         )

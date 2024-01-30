@@ -48,17 +48,21 @@ def extract_etymology(
                     )
                     if etymology_data is not None:
                         new_pos_title, new_etymology_text = etymology_data
-                        etymology_dict[new_pos_title].append(new_etymology_text)
+                        if len(new_etymology_text) > 0:
+                            etymology_dict[new_pos_title].append(
+                                new_etymology_text
+                            )
                     else:
                         etymology_text = clean_node(
                             wxr, None, etymology_item.children
                         )
-                        etymology_dict[pos_title].append(etymology_text)
+                        if len(etymology_text) > 0:
+                            etymology_dict[pos_title].append(etymology_text)
 
     if len(etymology_dict) == 0:
-        etymology_dict[None].append(
-            clean_node(wxr, None, nodes[:level_node_index])
-        )
+        etymology_text = clean_node(wxr, None, nodes[:level_node_index])
+        if len(etymology_text) > 0:
+            etymology_dict[None].append(etymology_text)
     return etymology_dict
 
 
