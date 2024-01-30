@@ -39,9 +39,6 @@ class Translation(BaseModelWrap):
         description="Tags specifying the translated term, usually gender information",
     )
     notes: list[str] = Field(default=[], description="A list of notes")
-    roman: str = Field(
-        default="", description="Transliteration in roman characters"
-    )
 
 
 class Example(BaseModelWrap):
@@ -123,22 +120,18 @@ class Sense(BaseModelWrap):
 
 
 class Sound(BaseModelWrap):
-    ipa: list[str] = Field(
-        default=[], description="International Phonetic Alphabet"
-    )
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
     # phonetic_transcription: list[str] = Field(
     #     default=[], description="Phonetic transcription, less exact than IPA."
     # )
-    audio: list[str] = Field(default=[], description="Audio file name")
-    wav_url: list[str] = Field(default=[])
-    ogg_url: list[str] = Field(default=[])
-    mp3_url: list[str] = Field(default=[])
-    oga_url: list[str] = Field(default=[])
-    flac_url: list[str] = Field(default=[])
-    lang_code: list[str] = Field(
-        default=[], description="Wiktionary language code"
-    )
-    lang: list[str] = Field(default=[], description="Localized language name")
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = Field(default="")
+    ogg_url: str = Field(default="")
+    mp3_url: str = Field(default="")
+    oga_url: str = Field(default="")
+    flac_url: str = Field(default="")
+    lang_code: str = Field(default="", description="Wiktionary language code")
+    lang: str = Field(default="", description="Localized language name")
     # roman: list[str] = Field(
     #     default=[], description="Translitaration to Roman characters"
     # )
