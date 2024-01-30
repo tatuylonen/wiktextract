@@ -180,8 +180,21 @@ class TestZhTranslation(TestCase):
 
     def test_l_template(self):
         self.wxr.wtp.start_page("茄子")
+        self.wxr.wtp.add_page("Template:cs", 10, "捷克语")
+        self.wxr.wtp.add_page(
+            "Template:l",
+            10,
+            """<span>{{{2}}}</span>
+{{#if:{{{g|}}}|<span class="gender"><abbr title="陽性名詞">m</abbr></span>}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Template:口", 10, '<span title="口语词汇">口</span>〉'
+        )
         page_data = [WordEntry(word="茄子", lang_code="zh", lang="漢語")]
-        node = self.wxr.wtp.parse("* 南非語: {{l|af|eiervrug}}")
+        node = self.wxr.wtp.parse(
+            """* 南非語: {{l|af|eiervrug}}
+* {{cs}}: {{l|cs|patližán|g=m}} {{口}}"""
+        )
         extract_translation(self.wxr, page_data, node)
         self.assertEqual(
             [
@@ -193,6 +206,12 @@ class TestZhTranslation(TestCase):
                     "lang_code": "af",
                     "lang": "南非語",
                     "word": "eiervrug",
+                },
+                {
+                    "lang_code": "cs",
+                    "lang": "捷克语",
+                    "word": "patližán",
+                    "tags": ["陽性名詞", "口语词汇"],
                 },
             ],
         )
