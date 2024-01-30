@@ -1,3 +1,4 @@
+import re
 from collections import defaultdict
 from typing import Union
 
@@ -158,8 +159,25 @@ def find_alt_of_form(
     pos_type: str,
     gloss_data: Sense,
 ):
-    if pos_type == "typographic variant":
-        alt_of = ""
+    alt_of = ""
+    for template_node in filter(
+        lambda n: isinstance(n, TemplateNode), gloss_nodes
+    ):
+        # https://fr.wiktionary.org/wiki/Modèle:variante_de
+        # https://fr.wiktionary.org/wiki/Modèle:variante_kyujitai_de
+        if re.fullmatch(r"variante \w*\s*de", template_node.template_name):
+            alt_of = clean_node(
+                wxr, None, template_node.template_parameters.get("dif", "")
+            )
+            if len(alt_of) == 0:
+                alt_of = clean_node(
+                    wxr, None, template_node.template_parameters.get(1, "")
+                )
+            if len(alt_of) > 0:
+                gloss_data.alt_of.append(AltForm(word=alt_of))
+                gloss_data.tags.append("alt-of")
+
+    if alt_of == "" and pos_type == "typographic variant":
         for gloss_node in filter(
             lambda n: isinstance(n, WikiNode), gloss_nodes
         ):
