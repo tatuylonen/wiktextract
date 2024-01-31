@@ -27,7 +27,7 @@ class TestDEPronunciation(unittest.TestCase):
                 "input": "{{Lautschrift|ipa1}}",
                 "expected": [
                     {
-                        "ipa": ["ipa1"],
+                        "ipa": "ipa1",
                     }
                 ],
             },
@@ -35,28 +35,29 @@ class TestDEPronunciation(unittest.TestCase):
                 "input": "{{Lautschrift|ipa1|spr=de}}",
                 "expected": [
                     {
-                        "ipa": ["ipa1"],
-                        "lang": ["Deutsch"],
-                        "lang_code": ["de"],
+                        "ipa": "ipa1",
+                        "lang": "Deutsch",
+                        "lang_code": "de",
                     }
                 ],
             },
             {
                 "input": "{{Lautschrift|ipa1}} {{Lautschrift|ipa2}}{{Lautschrift|ipa3|spr=de}}",
                 "expected": [
-                    {"ipa": ["ipa1", "ipa2"]},
+                    {"ipa": "ipa1"},
+                    {"ipa": "ipa2"},
                     {
-                        "ipa": ["ipa3"],
-                        "lang": ["Deutsch"],
-                        "lang_code": ["de"],
+                        "ipa": "ipa3",
+                        "lang": "Deutsch",
+                        "lang_code": "de",
                     },
                 ],
             },
             {
                 "input": "{{Lautschrift|ipa1}}, ''tag1'' {{Lautschrift|ipa2}}",
                 "expected": [
-                    {"ipa": ["ipa1"]},
-                    {"ipa": ["ipa2"], "tags": ["tag1"]},
+                    {"ipa": "ipa1"},
+                    {"ipa": "ipa2", "tags": ["tag1"]},
                 ],
             },
         ]
@@ -90,7 +91,7 @@ class TestDEPronunciation(unittest.TestCase):
                 "input": "{{Audio|" + filename1 + "}}",
                 "expected": [
                     {
-                        "audio": [filename1],
+                        "audio": filename1,
                         "mp3_url": None,  # None indicates we don't care about the exact value
                         "ogg_url": None,
                     }
@@ -104,12 +105,12 @@ class TestDEPronunciation(unittest.TestCase):
                 + "}}",
                 "expected": [
                     {
-                        "audio": [filename1],
+                        "audio": filename1,
                         "mp3_url": None,
                         "ogg_url": None,
                     },
                     {
-                        "audio": [filename2],
+                        "audio": filename2,
                         "ogg_url": None,
                         "mp3_url": None,
                         "wav_url": None,
@@ -124,13 +125,13 @@ class TestDEPronunciation(unittest.TestCase):
                 + "}}",
                 "expected": [
                     {
-                        "audio": [filename1],
+                        "audio": filename1,
                         "mp3_url": None,
                         "ogg_url": None,
                         "tags": ["tag1"],
                     },
                     {
-                        "audio": [filename2],
+                        "audio": filename2,
                         "mp3_url": None,
                         "ogg_url": None,
                         "wav_url": None,

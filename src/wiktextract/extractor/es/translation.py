@@ -1,5 +1,6 @@
 from typing import Optional
 
+from mediawiki_langcodes import code_to_name
 from wikitextprocessor import WikiNode
 from wiktextract.extractor.es.models import Translation, WordEntry
 from wiktextract.extractor.share import split_senseids
@@ -15,6 +16,9 @@ def extract_translation(
     # Documentation: https://es.wiktionary.org/wiki/Plantilla:t+
 
     lang_code = template_node.template_parameters.get(1)  # Language code
+    lang = code_to_name(lang_code, "es")
+    if not lang:
+        lang = f"Unknown({lang_code})"
 
     # Initialize variables
     current_translation: Optional[Translation] = None
@@ -82,7 +86,10 @@ def extract_translation(
 
                 else:
                     current_translation = Translation(
-                        word=value, lang_code=lang_code, senseids=list(senseids)
+                        word=value,
+                        lang_code=lang_code,
+                        lang=lang,
+                        senseids=list(senseids),
                     )
         elif isinstance(key, str):
             if key == "tr":

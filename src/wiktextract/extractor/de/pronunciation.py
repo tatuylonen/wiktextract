@@ -21,7 +21,8 @@ def extract_pronunciation(
             NodeKind.LIST_ITEM
         ):
             wxr.wtp.debug(
-                f"Found unexpected non-list-item node in pronunciation section: {not_list_item_node}",
+                f"Found unexpected non-list-item node in pronunciation "
+                f"section: {not_list_item_node}",
                 sortid="extractor/de/pronunciation/extract_pronunciation/28",
             )
 
@@ -37,8 +38,10 @@ def extract_pronunciation(
                 or not rest
             ):
                 wxr.wtp.debug(
-                    f"Found unexpected non-template node in pronunciation section: {head_template}",
-                    sortid="extractor/de/pronunciation/extract_pronunciation/37",
+                    f"Found unexpected non-template node in pronunciation "
+                    f"section: {head_template}",
+                    sortid="extractor/de/pronunciation/"
+                    "extract_pronunciation/37",
                 )
                 continue
             if head_template.template_name == "IPA":
@@ -91,7 +94,7 @@ def process_ipa(
 
 def process_lautschrift_template(
     wxr: WiktextractContext, sound_data: list[Sound], node: WikiNode
-):
+) -> None:
     template_parameters = node.template_parameters
 
     ipa = template_parameters.get(1)
@@ -99,21 +102,26 @@ def process_lautschrift_template(
     lang_code = template_parameters.get("spr")
     if lang_code:
         lang = code_to_name(lang_code, "de")
-        add_sound_data_without_appending_to_existing_properties(
-            wxr,
-            sound_data,
-            {
-                "ipa": [ipa],
-                "lang_code": lang_code,
-                "lang": lang,
-            },
-        )
+        new_data = {
+            "lang_code": lang_code,
+            "lang": lang,
+        }
     else:
-        sound_data[-1].ipa.append(ipa)
+        new_data = dict()
+
+    new_data["ipa"] = ipa
+
+    add_sound_data_without_appending_to_existing_properties(
+        wxr,
+        sound_data,
+        new_data,
+    )
 
 
 def process_hoerbeispiele(
-    wxr: WiktextractContext, sound_data: list[Sound], nodes: list[WikiNode]
+    wxr: WiktextractContext,
+    sound_data: list[Sound],
+    nodes: list[Union[str, WikiNode]],
 ):
     for node in nodes:
         if is_template_node_with_name(node, "Audio"):
@@ -157,7 +165,7 @@ def is_template_node_with_name(node: Union[WikiNode, str], template_name: str):
 def add_sound_data_without_appending_to_existing_properties(
     wxr: WiktextractContext,
     sound_data: list[Sound],
-    new_sound_data: list[dict],
+    new_sound_data: dict,
 ):
     """Creates a new IPA data entry if properties exist in previous entry."""
     if any(
@@ -171,7 +179,7 @@ def add_sound_data_without_appending_to_existing_properties(
     for key, value in new_sound_data.items():
         if key in sound_data[-1].model_fields:
             if isinstance(value, str):
-                getattr(sound_data[-1], key).append(value)
+                setattr(sound_data[-1], key, value)
             else:
                 getattr(sound_data[-1], key).extend(value)
         else:

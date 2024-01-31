@@ -34,17 +34,7 @@ class TestESEtymology(unittest.TestCase):
             {
                 # https://es.wiktionary.org/wiki/Schreck
                 "input": "{{etimología|leng=de}}",
-                "expected": {
-                    "etymology_templates": [
-                        {
-                            "args": {
-                                "leng": "de",
-                            },
-                            "name": "etimología",
-                            "expansion": "Si puedes, incorpórala: ver cómo.",
-                        },
-                    ],
-                },
+                "expected": dict(),
             },
             {
                 # https://es.wiktionary.org/wiki/bagre

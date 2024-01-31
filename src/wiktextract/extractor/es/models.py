@@ -23,6 +23,7 @@ class Translation(BaseModelWrap):
     lang_code: str = Field(
         description="Wiktionary language code of the translation term"
     )
+    lang: str = Field(description="Name of the language of translation")
     senseids: list[str] = Field(
         default=[],
         description="List of senseids where this translation applies",
