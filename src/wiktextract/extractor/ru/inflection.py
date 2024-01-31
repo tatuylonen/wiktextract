@@ -97,8 +97,9 @@ def parse_adj_forms_table(
                             word_entry.forms.append(form)
                     col_index += 1
 
-            for index, row_header in enumerate(row_headers.copy()):
-                if row_header.span == 1:
-                    row_headers.remove(row_header)
-                else:
-                    row_headers[index].span = row_header.span - 1
+            updated_row_headers = []
+            for row_header in row_headers:
+                if row_header.span > 1:
+                    row_header.span -= 1
+                    updated_row_headers.append(row_header)
+            row_headers = updated_row_headers
