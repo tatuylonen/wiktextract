@@ -47,7 +47,7 @@ class TestLinkage(TestCase):
 </tr>
 <tr>
 <td colspan="2" bgcolor="#EEF9FF"> [[творительный|Т.]]</td>
-<td bgcolor="#ffffff">ру́сской ру́сскою</td>
+<td>ру́сской ру́сскою</td>
 </tr>
 </table>""",
         )

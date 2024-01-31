@@ -60,7 +60,7 @@ def parse_adj_forms_table(
                 col_index = 0
                 has_rowspan = False
                 for td_element in tr_element.find_html("td"):
-                    if td_element.attrs.get("bgcolor") != "#ffffff":
+                    if td_element.attrs.get("bgcolor") == "#EEF9FF":
                         # this is a td tag but contains header text
                         header_text = ""
                         for header_link in td_element.find_child(NodeKind.LINK):
@@ -97,8 +97,9 @@ def parse_adj_forms_table(
                             word_entry.forms.append(form)
                     col_index += 1
 
-            for index, row_header in enumerate(row_headers.copy()):
-                if row_header.span == 1:
-                    row_headers.remove(row_header)
-                else:
-                    row_headers[index].span = row_header.span - 1
+            updated_row_headers = []
+            for row_header in row_headers:
+                if row_header.span > 1:
+                    row_header.span -= 1
+                    updated_row_headers.append(row_header)
+            row_headers = updated_row_headers
