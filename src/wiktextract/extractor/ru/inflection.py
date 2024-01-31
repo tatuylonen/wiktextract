@@ -60,7 +60,7 @@ def parse_adj_forms_table(
                 col_index = 0
                 has_rowspan = False
                 for td_element in tr_element.find_html("td"):
-                    if td_element.attrs.get("bgcolor") != "#ffffff":
+                    if td_element.attrs.get("bgcolor") == "#EEF9FF":
                         # this is a td tag but contains header text
                         header_text = ""
                         for header_link in td_element.find_child(NodeKind.LINK):
