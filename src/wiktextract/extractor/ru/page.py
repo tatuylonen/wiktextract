@@ -121,7 +121,7 @@ def parse_section(
     page_data: list[WordEntry],
     level3_node: WikiNode,
 ):
-    section_title = clean_node(wxr, None, level3_node.largs).strip()
+    section_title = clean_node(wxr, None, level3_node.largs)
     wxr.wtp.start_subsection(section_title)
     if section_title in [
         # Morphological and syntactic properties
@@ -135,6 +135,12 @@ def parse_section(
             page_data[-1].tags.extend(pos_data.get("tags", []))
         extract_inflection(wxr, page_data[-1], level3_node)
         # XXX: Extract grammatical tags (gender, etc.) from Russian Wiktionary
+    elif section_title in wxr.config.POS_SUBTITLES:
+        pos_data = wxr.config.POS_SUBTITLES[section_title]
+        page_data[-1].pos = pos_data["pos"]
+        page_data[-1].tags.extend(pos_data.get("tags", []))
+        for list_item in level3_node.find_child_recursively(NodeKind.LIST_ITEM):
+            extract_gloss(wxr, page_data[-1], list_item)
     elif section_title == "Произношение" and wxr.config.capture_pronunciation:
         extract_pronunciation(wxr, page_data[-1], level3_node)
     elif section_title == "Семантические свойства":  # Semantic properties
@@ -194,12 +200,7 @@ def parse_page(
     page_data: list[WordEntry] = []
     for level1_node in tree.find_child(NodeKind.LEVEL1):
         for subtitle_template in level1_node.find_content(NodeKind.TEMPLATE):
-            lang_code = (
-                subtitle_template.template_name.strip()
-                .removeprefix("-")
-                .removesuffix("-")
-            )
-
+            lang_code = subtitle_template.template_name.strip(" -")
             if (
                 wxr.config.capture_language_codes is not None
                 and lang_code not in wxr.config.capture_language_codes

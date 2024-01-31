@@ -11,7 +11,7 @@ class TestRUPage(unittest.TestCase):
         self.wxr = WiktextractContext(
             Wtp(lang_code="ru"),
             WiktionaryConfig(
-                dump_file_lang_code="ru", capture_language_codes={"ru"}
+                dump_file_lang_code="ru", capture_language_codes=None
             ),
         )
 
@@ -52,3 +52,26 @@ class TestRUPage(unittest.TestCase):
         page_data_dicts = parse_page(self.wxr, "овощ", page_text)
 
         self.assertEqual(len(page_data_dicts), 1)
+
+    def test_pos_in_title(self):
+        self.maxDiff = None
+        self.wxr.wtp.start_page("difference")
+        self.wxr.wtp.add_page("Шаблон:-en-", 10, "Английский")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "difference",
+                """= {{-en-}} =
+=== существительное ===
+*[[различие]], [[отличие]], [[разница]]""",
+            ),
+            [
+                {
+                    "lang": "Английский",
+                    "lang_code": "en",
+                    "pos": "noun",
+                    "word": "difference",
+                    "senses": [{"glosses": ["различие, отличие, разница"]}],
+                }
+            ],
+        )

@@ -102,18 +102,17 @@ def extract_gloss(
     remove_obsolete_leading_nodes(raw_gloss_children)
     remove_obsolete_leading_nodes(clean_gloss_children)
 
-    if raw_gloss_children:
-        raw_gloss = clean_node(wxr, {}, raw_gloss_children).strip()
-        if raw_gloss:
-            sense.raw_glosses.append(raw_gloss)
-
-    if clean_gloss_children:
-        gloss = clean_node(wxr, {}, clean_gloss_children).strip()
-        if gloss:
-            sense.glosses.append(gloss)
+    gloss = clean_node(wxr, None, clean_gloss_children)
+    if len(gloss) > 0:
+        sense.glosses.append(gloss)
+    raw_gloss = clean_node(wxr, None, raw_gloss_children)
+    if len(raw_gloss) > 0 and raw_gloss != gloss:
+        sense.raw_glosses.append(raw_gloss)
 
     for tag_template in tag_templates:
-        # XXX: Expanded tags are mostly still abbreviations. In Wiktionary, however, they show the full word on hover. Perhaps it's possible to extract the full word from the template?
+        # XXX: Expanded tags are mostly still abbreviations. In Wiktionary,
+        # however, they show the full word on hover. Perhaps it's possible to
+        # extract the full word from the template?
         tag = clean_node(wxr, {}, tag_template).strip()
         if tag:
             sense.tags.append(tag)
