@@ -237,12 +237,12 @@ def parse_page(
                 # https://ru.wiktionary.org/wiki/Διὸς
 
             if (
-                unprocessed_nodes
-                and clean_node(wxr, {}, unprocessed_nodes).strip()
+                len(unprocessed_nodes) > 0
+                and len(clean_node(wxr, None, unprocessed_nodes)) > 0
             ):
                 wxr.wtp.debug(
                     f"Unprocessed nodes in level node {level1_node.largs}: "
-                    + unprocessed_nodes,
+                    + str(unprocessed_nodes),
                     sortid="extractor/es/page/parse_page/80",
                 )
 
