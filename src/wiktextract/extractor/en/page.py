@@ -11,14 +11,22 @@ from collections import defaultdict
 from functools import partial
 from re import Pattern
 from typing import (
+    TYPE_CHECKING,
+    Callable,
     Optional,
     Set,
     Union,
+    cast,
 )
 
 from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.core import TemplateArgs
+from wikitextprocessor.core import (
+    TemplateArgs,
+    TemplateFnCallable,
+    PostTemplateFnCallable,
+)
+from wikitextprocessor.parser import GeneralNode
 from wiktextract.clean import clean_template_args
 from wiktextract.datautils import (
     data_append,
@@ -44,7 +52,11 @@ from wiktextract.page import (
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.tags import valid_tags
 from wiktextract.translations import parse_translation_item_text
-from wiktextract.type_utils import WordData
+from wiktextract.type_utils import (
+    SenseData,
+    SoundData,
+    WordData,
+)
 from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby, parse_ruby
@@ -53,174 +65,177 @@ from .unsupported_titles import unsupported_title_map
 
 # Matches head tag
 HEAD_TAG_RE: Pattern = re.compile(
-            r"^(head|Han char|arabic-noun|arabic-noun-form|"
-            r"hangul-symbol|syllable-hangul)$|" +
-            r"^(latin|" +
-            "|".join(lang_code for lang_code, *_ in get_all_names("en")) +
-            r")-(" +
-            "|".join([
-                "abbr",
-                "adj",
-                "adjective",
-                "adjective form",
-                "adjective-form",
-                "adv",
-                "adverb",
-                "affix",
-                "animal command",
-                "art",
-                "article",
-                "aux",
-                "bound pronoun",
-                "bound-pronoun",
-                "Buyla",
-                "card num",
-                "card-num",
-                "cardinal",
-                "chunom",
-                "classifier",
-                "clitic",
-                "cls",
-                "cmene",
-                "cmavo",
-                "colloq-verb",
-                "colverbform",
-                "combining form",
-                "combining-form",
-                "comparative",
-                "con",
-                "concord",
-                "conj",
-                "conjunction",
-                "conjug",
-                "cont",
-                "contr",
-                "converb",
-                "daybox",
-                "decl",
-                "decl noun",
-                "def",
-                "dem",
-                "det",
-                "determ",
-                "Deva",
-                "ending",
-                "entry",
-                "form",
-                "fuhivla",
-                "gerund",
-                "gismu",
-                "hanja",
-                "hantu",
-                "hanzi",
-                "head",
-                "ideophone",
-                "idiom",
-                "inf",
-                "indef",
-                "infixed pronoun",
-                "infixed-pronoun",
-                "infl",
-                "inflection",
-                "initialism",
-                "int",
-                "interfix",
-                "interj",
-                "interjection",
-                "jyut",
-                "latin",
-                "letter",
-                "locative",
-                "lujvo",
-                "monthbox",
-                "mutverb",
-                "name",
-                "nisba",
-                "nom",
-                "noun",
-                "noun form",
-                "noun-form",
-                "noun plural",
-                "noun-plural",
-                "nounprefix",
-                "num",
-                "number",
-                "numeral",
-                "ord",
-                "ordinal",
-                "par",
-                "part",
-                "part form",
-                "part-form",
-                "participle",
-                "particle",
-                "past",
-                "past neg",
-                "past-neg",
-                "past participle",
-                "past-participle",
-                "perfect participle",
-                "perfect-participle",
-                "personal pronoun",
-                "personal-pronoun",
-                "pref",
-                "prefix",
-                "phrase",
-                "pinyin",
-                "plural noun",
-                "plural-noun",
-                "pos",
-                "poss-noun",
-                "post",
-                "postp",
-                "postposition",
-                "PP",
-                "pp",
-                "ppron",
-                "pred",
-                "predicative",
-                "prep",
-                "prep phrase",
-                "prep-phrase",
-                "preposition",
-                "present participle",
-                "present-participle",
-                "pron",
-                "prondem",
-                "pronindef",
-                "pronoun",
-                "prop",
-                "proper noun",
-                "proper-noun",
-                "proper noun form",
-                "proper-noun form",
-                "proper noun-form",
-                "proper-noun-form",
-                "prov",
-                "proverb",
-                "prpn",
-                "prpr",
-                "punctuation mark",
-                "punctuation-mark",
-                "regnoun",
-                "rel",
-                "rom",
-                "romanji",
-                "root",
-                "sign",
-                "suff",
-                "suffix",
-                "syllable",
-                "symbol",
-                "verb",
-                "verb form",
-                "verb-form",
-                "verbal noun",
-                "verbal-noun",
-                "verbnec",
-                "vform",
-            ]) +
-            r")(-|/|\+|$)")
+    r"^(head|Han char|arabic-noun|arabic-noun-form|"
+    r"hangul-symbol|syllable-hangul)$|"
+    + r"^(latin|"
+    + "|".join(lang_code for lang_code, *_ in get_all_names("en"))
+    + r")-("
+    + "|".join(
+        [
+            "abbr",
+            "adj",
+            "adjective",
+            "adjective form",
+            "adjective-form",
+            "adv",
+            "adverb",
+            "affix",
+            "animal command",
+            "art",
+            "article",
+            "aux",
+            "bound pronoun",
+            "bound-pronoun",
+            "Buyla",
+            "card num",
+            "card-num",
+            "cardinal",
+            "chunom",
+            "classifier",
+            "clitic",
+            "cls",
+            "cmene",
+            "cmavo",
+            "colloq-verb",
+            "colverbform",
+            "combining form",
+            "combining-form",
+            "comparative",
+            "con",
+            "concord",
+            "conj",
+            "conjunction",
+            "conjug",
+            "cont",
+            "contr",
+            "converb",
+            "daybox",
+            "decl",
+            "decl noun",
+            "def",
+            "dem",
+            "det",
+            "determ",
+            "Deva",
+            "ending",
+            "entry",
+            "form",
+            "fuhivla",
+            "gerund",
+            "gismu",
+            "hanja",
+            "hantu",
+            "hanzi",
+            "head",
+            "ideophone",
+            "idiom",
+            "inf",
+            "indef",
+            "infixed pronoun",
+            "infixed-pronoun",
+            "infl",
+            "inflection",
+            "initialism",
+            "int",
+            "interfix",
+            "interj",
+            "interjection",
+            "jyut",
+            "latin",
+            "letter",
+            "locative",
+            "lujvo",
+            "monthbox",
+            "mutverb",
+            "name",
+            "nisba",
+            "nom",
+            "noun",
+            "noun form",
+            "noun-form",
+            "noun plural",
+            "noun-plural",
+            "nounprefix",
+            "num",
+            "number",
+            "numeral",
+            "ord",
+            "ordinal",
+            "par",
+            "part",
+            "part form",
+            "part-form",
+            "participle",
+            "particle",
+            "past",
+            "past neg",
+            "past-neg",
+            "past participle",
+            "past-participle",
+            "perfect participle",
+            "perfect-participle",
+            "personal pronoun",
+            "personal-pronoun",
+            "pref",
+            "prefix",
+            "phrase",
+            "pinyin",
+            "plural noun",
+            "plural-noun",
+            "pos",
+            "poss-noun",
+            "post",
+            "postp",
+            "postposition",
+            "PP",
+            "pp",
+            "ppron",
+            "pred",
+            "predicative",
+            "prep",
+            "prep phrase",
+            "prep-phrase",
+            "preposition",
+            "present participle",
+            "present-participle",
+            "pron",
+            "prondem",
+            "pronindef",
+            "pronoun",
+            "prop",
+            "proper noun",
+            "proper-noun",
+            "proper noun form",
+            "proper-noun form",
+            "proper noun-form",
+            "proper-noun-form",
+            "prov",
+            "proverb",
+            "prpn",
+            "prpr",
+            "punctuation mark",
+            "punctuation-mark",
+            "regnoun",
+            "rel",
+            "rom",
+            "romanji",
+            "root",
+            "sign",
+            "suff",
+            "suffix",
+            "syllable",
+            "symbol",
+            "verb",
+            "verb form",
+            "verb-form",
+            "verbal noun",
+            "verbal-noun",
+            "verbnec",
+            "vform",
+        ]
+    )
+    + r")(-|/|\+|$)"
+)
 
 FLOATING_TABLE_TEMPLATES: set[str] = {
     # az-suffix-form creates a style=floatright div that is otherwise
@@ -439,8 +454,11 @@ wikipedia_templates: set[str] = {
     "wtorw",
 }
 for x in PANEL_PREFIXES & wikipedia_templates:
-    print("WARNING: {!r} in both panel_templates and wikipedia_templates"
-          .format(x))
+    print(
+        "WARNING: {!r} in both panel_templates and wikipedia_templates".format(
+            x
+        )
+    )
 
 # Mapping from a template name (without language prefix) for the main word
 # (e.g., fi-noun, fi-adj, en-verb) to permitted parts-of-speech in which
@@ -482,8 +500,10 @@ template_allowed_pos_map: dict[str, list[str]] = {
 for k, v in template_allowed_pos_map.items():
     for x in v:
         if x not in PARTS_OF_SPEECH:
-            print("BAD PART OF SPEECH {!r} IN template_allowed_pos_map: {}={}"
-                  "".format(x, k, v))
+            print(
+                "BAD PART OF SPEECH {!r} IN template_allowed_pos_map: {}={}"
+                "".format(x, k, v)
+            )
             assert False
 
 
@@ -526,9 +546,10 @@ ignored_etymology_templates: list[str] = [
 # Regexp for matching ignored etymology template names.  This adds certain
 # prefixes to the names listed above.
 ignored_etymology_templates_re = re.compile(
-    r"^((cite-|R:|RQ:).*|" +
-    r"|".join(re.escape(x) for x in ignored_etymology_templates) +
-    r")$")
+    r"^((cite-|R:|RQ:).*|"
+    + r"|".join(re.escape(x) for x in ignored_etymology_templates)
+    + r")$"
+)
 
 # Regexp for matching ignored descendants template names. Right now we just
 # copy the ignored etymology templates
@@ -618,19 +639,38 @@ quotation_templates: set[str] = {
 
 # Template name component to linkage section listing.  Integer section means
 # default section, starting at that argument.
-template_linkage_mappings: list[list[Union[str, int]]] = [
-    ["syn", "synonyms"],
-    ["synonyms", "synonyms"],
-    ["ant", "antonyms"],
-    ["antonyms", "antonyms"],
-    ["hyp", "hyponyms"],
-    ["hyponyms", "hyponyms"],
-    ["der", "derived"],
-    ["derived terms", "derived"],
-    ["coordinate terms", "coordinate_terms"],
-    ["rel", "related"],
-    ["col", 2],
-]
+# XXX not used anymore, except for the first elements: moved to
+# template_linkages
+# template_linkage_mappings: list[list[Union[str, int]]] = [
+#     ["syn", "synonyms"],
+#     ["synonyms", "synonyms"],
+#     ["ant", "antonyms"],
+#     ["antonyms", "antonyms"],
+#     ["hyp", "hyponyms"],
+#     ["hyponyms", "hyponyms"],
+#     ["der", "derived"],
+#     ["derived terms", "derived"],
+#     ["coordinate terms", "coordinate_terms"],
+#     ["rel", "related"],
+#     ["col", 2],
+# ]
+
+# Template names, this was exctracted from template_linkage_mappings,
+# because the code using template_linkage_mappings was actually not used
+# (but not removed).
+template_linkages: set[str] = {
+    "syn",
+    "synonyms",
+    "ant",
+    "antonyms",
+    "hyp",
+    "hyponyms",
+    "der",
+    "derived terms",
+    "coordinate terms",
+    "rel",
+    "col",
+}
 
 # Maps template name used in a word sense to a linkage field that it adds.
 sense_linkage_templates: dict[str, str] = {
@@ -655,11 +695,11 @@ def decode_html_entities(v: Union[str, int]) -> str:
     return html.unescape(v)
 
 
-def parse_sense_linkage(wxr:
-                        WiktextractContext,
-                        data: WordData,
-                        name: str,
-                        ht: TemplateArgs,
+def parse_sense_linkage(
+    wxr: WiktextractContext,
+    data: SenseData,
+    name: str,
+    ht: TemplateArgs,
 ) -> None:
     """Parses a linkage (synonym, etc) specified in a word sense."""
     assert isinstance(wxr, WiktextractContext)
@@ -670,13 +710,15 @@ def parse_sense_linkage(wxr:
     for i in range(2, 20):
         w = ht.get(i) or ""
         w = clean_node(wxr, data, w)
-        if w.startswith(ns_title_prefix_tuple(wxr, "Thesaurus")):
-            w = w[10:]
+        for alias in ns_title_prefix_tuple(wxr, "Thesaurus"):
+            if w.startswith(alias):
+                w = w[len(alias) :]
+                break
         if not w:
             break
         tags: list[str] = []
         topics: list[str] = []
-        english = None
+        english: Optional[str] = None
         # Try to find qualifiers for this synonym
         q = ht.get("q{}".format(i - 1))
         if q:
@@ -703,7 +745,7 @@ def parse_sense_linkage(wxr:
         alt = None
         m = re.search(r"\(([^)]+)\)$", w)
         if m:
-            w = w[:m.start()].strip()
+            w = w[: m.start()].strip()
             alt = m.group(1)
 
         dt = {"word": w}
@@ -718,15 +760,15 @@ def parse_sense_linkage(wxr:
         data_append(data, field, dt)
 
 
-def parse_language(wxr: WiktextractContext,
-                   langnode: WikiNode,
-                   language: str,
-                   lang_code: str) -> list[WordData]:
+def parse_language(
+    wxr: WiktextractContext, langnode: WikiNode, language: str, lang_code: str
+) -> list[WordData]:
     """Iterates over the text of the page, returning words (parts-of-speech)
     defined on the page one at a time.  (Individual word senses for the
     same part-of-speech are typically encoded in the same entry.)"""
     # imported here to avoid circular import
     from wiktextract.pronunciations import parse_pronunciation
+
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(langnode, WikiNode)
     assert isinstance(language, str)
@@ -737,85 +779,110 @@ def parse_language(wxr: WiktextractContext,
     word = wxr.wtp.title
     unsupported_prefix = "Unsupported titles/"
     if word.startswith(unsupported_prefix):
-        w = word[len(unsupported_prefix):]
+        w = word[len(unsupported_prefix) :]
         if w in unsupported_title_map:
             word = unsupported_title_map[w]
         else:
-            wxr.wtp.error("Unimplemented unsupported title: {}".format(word),
-                      sortid="page/870")
+            wxr.wtp.error(
+                "Unimplemented unsupported title: {}".format(word),
+                sortid="page/870",
+            )
             word = w
     elif word.startswith("Reconstruction:"):
-        word = word[word.find("/") + 1:]
+        word = word[word.find("/") + 1 :]
         is_reconstruction = True
 
-    base_data = {"word": word, "lang": language, "lang_code": lang_code}
+    base_data: WordData = {
+        "word": word,
+        "lang": language,
+        "lang_code": lang_code,
+    }
     if is_reconstruction:
         data_append(base_data, "tags", "reconstruction")
-    sense_data = {}
-    pos_data = {}  # For a current part-of-speech
-    etym_data = {}  # For one etymology
-    pos_datas = []
-    etym_datas = []
-    page_datas = []
+    sense_data: SenseData = {}
+    pos_data: WordData = {}  # For a current part-of-speech
+    etym_data: WordData = {}  # For one etymology
+    pos_datas: list[SenseData] = []
+    etym_datas: list[WordData] = []
+    page_datas: list[WordData] = []
     have_etym = False
-    stack = []
+    stack: list[str] = []  # names of items on the "stack"
 
-    def merge_base(data, base):
+    def merge_base(data: WordData, base: WordData) -> None:
         for k, v in base.items():
             # Copy the value to ensure that we don't share lists or
             # dicts between structures (even nested ones).
             v = copy.deepcopy(v)
             if k not in data:
                 # The list was copied above, so this will not create shared ref
-                data[k] = v
+                data[k] = v  # type: ignore[literal-required]
                 continue
-            if data[k] == v:
+            if data[k] == v:  # type: ignore[literal-required]
                 continue
-            if (isinstance(data[k], (list, tuple)) or
-                       isinstance(v, (list, tuple))):
-                data[k] = list(data[k]) + list(v)
-            elif data[k] != v:
-                wxr.wtp.warning("conflicting values for {} in merge_base: "
-                            "{!r} vs {!r}"
-                            .format(k, data[k], v),
-                            sortid="page/904")
+            if (
+                isinstance(data[k], (list, tuple))  # type: ignore[literal-required]
+                or isinstance(
+                    v,
+                    (list, tuple),  # Should this be "and"?
+                )
+            ):
+                data[k] = list(data[k]) + list(v)  # type: ignore
+            elif data[k] != v:  # type: ignore[literal-required]
+                wxr.wtp.warning(
+                    "conflicting values for {} in merge_base: "
+                    "{!r} vs {!r}".format(k, data[k], v),  # type: ignore[literal-required]
+                    sortid="page/904",
+                )
 
-        def complementary_pop(pron, key):
+        def complementary_pop(pron: SoundData, key: str) -> SoundData:
             """Remove unnecessary keys from dict values
             in a list comprehension..."""
             if key in pron:
-                pron.pop(key)
+                pron.pop(key)  # type: ignore
             return pron
 
         # If the result has sounds, eliminate sounds that have a prefix that
         # does not match "word" or one of "forms"
         if "sounds" in data and "word" in data:
             accepted = [data["word"]]
-            accepted.extend(f["form"] for f in data.get("forms", ()))
-            data["sounds"] = list(complementary_pop(s, "pos")
-                                  for s in data["sounds"]
-                                  if "form" not in s or s["form"] in accepted)
+            accepted.extend(f["form"] for f in data.get("forms", dict()))
+            data["sounds"] = list(
+                s
+                for s in data["sounds"]
+                if "form" not in s or s["form"] in accepted
+            )
         # If the result has sounds, eliminate sounds that have a pos that
         # does not match "pos"
         if "sounds" in data and "pos" in data:
-            data["sounds"] = list(s for s in data["sounds"]
-                                  if "pos" not in s or s["pos"] == data["pos"])
+            data["sounds"] = list(
+                complementary_pop(s, "pos")
+                for s in data["sounds"]
+                # "pos" is not a field of SoundData, correctly, so we're
+                # removing it here. It's a kludge on a kludge on a kludge.
+                if "pos" not in s or s["pos"] == data["pos"]  # type: ignore[typeddict-item]
+            )
 
-    def push_sense():
+    def push_sense() -> bool:
         """Starts collecting data for a new word sense.  This returns True
         if a sense was added."""
         nonlocal sense_data
         tags = sense_data.get("tags", ())
-        if (not sense_data.get("glosses") and
-            "translation-hub" not in tags and
-            "no-gloss" not in tags):
+        if (
+            not sense_data.get("glosses")
+            and "translation-hub" not in tags
+            and "no-gloss" not in tags
+        ):
             return False
 
-        if (("participle" in sense_data.get("tags", ()) or
-             "infinitive" in sense_data.get("tags", ())) and
-            "alt_of" not in sense_data and
-            "form_of" not in sense_data and
-            "etymology_text" in etym_data):
+        if (
+            (
+                "participle" in sense_data.get("tags", ())
+                or "infinitive" in sense_data.get("tags", ())
+            )
+            and "alt_of" not in sense_data
+            and "form_of" not in sense_data
+            and "etymology_text" in etym_data
+        ):
             etym = etym_data["etymology_text"]
             etym = etym.split(". ")[0]
             ret = parse_alt_or_inflection_of(wxr, etym, set())
@@ -829,28 +896,29 @@ def parse_language(wxr: WiktextractContext,
                     data_extend(sense_data, "alt_of", lst)
                     data_extend(sense_data, "tags", tags)
 
-        if (not sense_data.get("glosses") and
-            "no-gloss" not in sense_data.get("tags", ())):
+        if not sense_data.get("glosses") and "no-gloss" not in sense_data.get(
+            "tags", ()
+        ):
             data_append(sense_data, "tags", "no-gloss")
 
         pos_datas.append(sense_data)
         sense_data = {}
         return True
 
-    def push_pos():
+    def push_pos() -> None:
         """Starts collecting data for a new part-of-speech."""
         nonlocal pos_data
         nonlocal pos_datas
         push_sense()
         if wxr.wtp.subsection:
-            data = {"senses": pos_datas}
+            data: WordData = {"senses": pos_datas}
             merge_base(data, pos_data)
             etym_datas.append(data)
         pos_data = {}
         pos_datas = []
         wxr.wtp.start_subsection(None)
 
-    def push_etym():
+    def push_etym() -> None:
         """Starts collecting data for a new etymology."""
         nonlocal etym_data
         nonlocal etym_datas
@@ -863,7 +931,7 @@ def parse_language(wxr: WiktextractContext,
         etym_data = {}
         etym_datas = []
 
-    def select_data():
+    def select_data() -> WordData:
         """Selects where to store data (pos or etym) based on whether we
         are inside a pos (part-of-speech)."""
         if wxr.wtp.subsection is not None:
@@ -872,7 +940,9 @@ def parse_language(wxr: WiktextractContext,
             return base_data
         return etym_data
 
-    def head_post_template_fn(name, ht, expansion):
+    def head_post_template_fn(
+        name: str, ht: TemplateArgs, expansion: str
+    ) -> Optional[str]:
         """Handles special templates in the head section of a word.  Head
         section is the text after part-of-speech subtitle and before word
         sense list. Typically it generates the bold line for the word, but
@@ -934,15 +1004,15 @@ def parse_language(wxr: WiktextractContext,
 
         return None
 
-    def parse_part_of_speech(posnode, pos):
+    def parse_part_of_speech(posnode: WikiNode, pos: str) -> None:
         """Parses the subsection for a part-of-speech under a language on
         a page."""
         assert isinstance(posnode, WikiNode)
         assert isinstance(pos, str)
         # print("parse_part_of_speech", pos)
         pos_data["pos"] = pos
-        pre = [[]]  # list of lists
-        lists = [[]]  # list of lists
+        pre: list[list[Union[str, WikiNode]]] = [[]]  # list of lists
+        lists: list[list[WikiNode]] = [[]]  # list of lists
         first_para = True
         first_head_tmplt = True
         collecting_head = True
@@ -965,13 +1035,13 @@ def parse_language(wxr: WiktextractContext,
         floaters, poschildren = recursively_extract(
             posnode.children,
             lambda x: (
-                isinstance(x, WikiNode) and
-                x.kind == NodeKind.TEMPLATE and
-                x.largs[0][0] in FLOATING_TABLE_TEMPLATES
-            )
+                isinstance(x, WikiNode)
+                and x.kind == NodeKind.TEMPLATE
+                and x.largs[0][0] in FLOATING_TABLE_TEMPLATES
+            ),
         )
         tempnode = WikiNode(NodeKind.LEVEL5, 0)
-        tempnode.largs = ['Inflection']
+        tempnode.largs = [["Inflection"]]
         tempnode.children = floaters
         parse_inflection(tempnode, "Floating Div", pos)
         # print(poschildren)
@@ -981,12 +1051,12 @@ def parse_language(wxr: WiktextractContext,
             if not floaters:
                 wxr.wtp.debug(
                     "PoS section without contents",
-                    sortid="en/page/1051/20230612"
+                    sortid="en/page/1051/20230612",
                 )
             else:
                 wxr.wtp.debug(
                     "PoS section without contents except for a floating table",
-                    sortid="en/page/1056/20230612"
+                    sortid="en/page/1056/20230612",
                 )
             return
 
@@ -1019,16 +1089,19 @@ def parse_language(wxr: WiktextractContext,
             elif collecting_head and kind == NodeKind.LINK:
                 # We might collect relevant links as they are often pictures
                 # relating to the word
-                if (len(node.largs[0]) >= 1 and
-                   isinstance(node.largs[0][0], str)):
-                    if node.largs[0][0].startswith(ns_title_prefix_tuple(
-                                                        wxr, "Category")):
+                if len(node.largs[0]) >= 1 and isinstance(
+                    node.largs[0][0], str
+                ):
+                    if node.largs[0][0].startswith(
+                        ns_title_prefix_tuple(wxr, "Category")
+                    ):
                         # [[Category:...]]
                         # We're at the end of the file, probably, so stop
                         # here. Otherwise the head will get garbage.
                         break
-                    if node.largs[0][0].startswith(ns_title_prefix_tuple(
-                                                        wxr, "File")):
+                    if node.largs[0][0].startswith(
+                        ns_title_prefix_tuple(wxr, "File")
+                    ):
                         # Skips file links
                         continue
                 start_of_paragraph = False
@@ -1040,8 +1113,12 @@ def parse_language(wxr: WiktextractContext,
                         lists.append([])  # Lists parallels pre
                         collecting_head = True
                         start_of_paragraph = True
-                elif (collecting_head and
-                      node.sarg not in ("gallery", "ref", "cite", "caption")):
+                elif collecting_head and node.sarg not in (
+                    "gallery",
+                    "ref",
+                    "cite",
+                    "caption",
+                ):
                     start_of_paragraph = False
                     pre[-1].append(node)
                 else:
@@ -1061,21 +1138,23 @@ def parse_language(wxr: WiktextractContext,
                 # skip these templates; panel_templates is already used
                 # to skip certain templates else, but it also applies to
                 # head parsing quite well.
-                if is_panel_template(wxr, node.largs[0][0]):
+                # node.largs[0][0] should always be str, but can't type-check
+                # that.
+                if is_panel_template(wxr, node.largs[0][0]):  # type: ignore[arg-type]
                     continue
                 # skip these templates
                 # if node.largs[0][0] in skip_these_templates_in_head:
-                    # first_head_tmplt = False # no first_head_tmplt at all
-                    # start_of_paragraph = False
-                    # continue
+                # first_head_tmplt = False # no first_head_tmplt at all
+                # start_of_paragraph = False
+                # continue
 
                 if first_head_tmplt and pre[-1]:
                     first_head_tmplt = False
                     start_of_paragraph = False
                     pre[-1].append(node)
                 elif pre[-1] and start_of_paragraph:
-                    pre.append([]) # Switch to the next head
-                    lists.append([]) # lists parallel pre
+                    pre.append([])  # Switch to the next head
+                    lists.append([])  # lists parallel pre
                     collecting_head = True
                     start_of_paragraph = False
                     pre[-1].append(node)
@@ -1092,8 +1171,8 @@ def parse_language(wxr: WiktextractContext,
         # Clean up empty pairs, and fix messes with extra newlines that
         # separate templates that are followed by lists wiktextract issue #314
 
-        cleaned_pre = []
-        cleaned_lists = []
+        cleaned_pre: list[list[Union[str, WikiNode]]] = []
+        cleaned_lists: list[list[WikiNode]] = []
         pairless_pre_index = None
 
         for pre1, ls in zip(pre, lists):
@@ -1102,8 +1181,9 @@ def parse_language(wxr: WiktextractContext,
             if not pre1 and not ls:
                 # skip [] + []
                 continue
-            if not ls and all((isinstance(x, str) and not x.strip())
-                               for x in pre1):
+            if not ls and all(
+                (isinstance(x, str) and not x.strip()) for x in pre1
+            ):
                 # skip ["\n", " "] + []
                 continue
             if ls and not pre1:
@@ -1118,7 +1198,7 @@ def parse_language(wxr: WiktextractContext,
         lists = cleaned_lists
 
         there_are_many_heads = len(pre) > 1
-        header_tags = []
+        header_tags: list[str] = []
 
         if not any(g for g in lists):
             process_gloss_without_list(poschildren, pos, pos_data, header_tags)
@@ -1128,60 +1208,75 @@ def parse_language(wxr: WiktextractContext,
                 #     # don't have gloss list
                 #     # XXX add code here to filter out 'garbage', like text
                 #     # that isn't a head template or head.
-                    # continue
+                # continue
 
                 if all(not sl for sl in lists[i:]):
                     if i == 0:
                         if isinstance(node, str):
-                            wxr.wtp.debug("first head without list of senses,"
-                                      "string: '{}[...]', {}/{}".format(
-                                      node[:20], word, language),
-                                      sortid="page/1689/20221215")
+                            wxr.wtp.debug(
+                                "first head without list of senses,"
+                                "string: '{}[...]', {}/{}".format(
+                                    node[:20], word, language
+                                ),
+                                sortid="page/1689/20221215",
+                            )
                         if isinstance(node, WikiNode):
-                            if node.largs and node.largs[0][0] in ["Han char",]:
+                            if node.largs and node.largs[0][0] in [
+                                "Han char",
+                            ]:
                                 # just ignore these templates
                                 pass
                             else:
-                                wxr.wtp.debug("first head without "
-                                      "list of senses, "
-                                      "template node "
-                                      "{}, {}/{}".format(
-                                      node.largs, word, language),
-                                      sortid="page/1694/20221215")
+                                wxr.wtp.debug(
+                                    "first head without "
+                                    "list of senses, "
+                                    "template node "
+                                    "{}, {}/{}".format(
+                                        node.largs, word, language
+                                    ),
+                                    sortid="page/1694/20221215",
+                                )
                         else:
-                            wxr.wtp.debug("first head without list of senses, "
-                                      "{}/{}".format(
-                                      word, language),
-                                      sortid="page/1700/20221215")
+                            wxr.wtp.debug(
+                                "first head without list of senses, "
+                                "{}/{}".format(word, language),
+                                sortid="page/1700/20221215",
+                            )
                         # no break here so that the first head always
                         # gets processed.
                     else:
                         if isinstance(node, str):
-                            wxr.wtp.debug("later head without list of senses,"
-                                      "string: '{}[...]', {}/{}".format(
-                                      node[:20], word, language),
-                                      sortid="page/1708/20221215")
+                            wxr.wtp.debug(
+                                "later head without list of senses,"
+                                "string: '{}[...]', {}/{}".format(
+                                    node[:20], word, language
+                                ),
+                                sortid="page/1708/20221215",
+                            )
                         if isinstance(node, WikiNode):
-                            wxr.wtp.debug("later head without list of senses,"
-                                      "template node "
-                                      "{}, {}/{}".format(
-                                      node.sarg if node.sarg else node.largs,
-                                      word, language),
-                                      sortid="page/1713/20221215")
+                            wxr.wtp.debug(
+                                "later head without list of senses,"
+                                "template node "
+                                "{}, {}/{}".format(
+                                    node.sarg if node.sarg else node.largs,
+                                    word,
+                                    language,
+                                ),
+                                sortid="page/1713/20221215",
+                            )
                         else:
-                            wxr.wtp.debug("later head without list of senses, "
-                                      "{}/{}".format(
-                                      word, language),
-                                      sortid="page/1719/20221215")
+                            wxr.wtp.debug(
+                                "later head without list of senses, "
+                                "{}/{}".format(word, language),
+                                sortid="page/1719/20221215",
+                            )
                         break
                 head_group = i + 1 if there_are_many_heads else None
                 # print("parse_part_of_speech: {}: {}: pre={}"
-                      # .format(wxr.wtp.section, wxr.wtp.subsection, pre1))
-                process_gloss_header(pre1,
-                                    pos,
-                                    head_group,
-                                    pos_data,
-                                    header_tags)
+                # .format(wxr.wtp.section, wxr.wtp.subsection, pre1))
+                process_gloss_header(
+                    pre1, pos, head_group, pos_data, header_tags
+                )
                 for l in ls:
                     # Parse each list associated with this head.
                     for node in l.children:
@@ -1194,10 +1289,10 @@ def parse_language(wxr: WiktextractContext,
                         # the data is already pushed into a sub-gloss
                         # downstream, unless the higher level has examples
                         # that need to be put somewhere.
-                        common_data = {"tags": list(header_tags)}
+                        common_data: SenseData = {"tags": list(header_tags)}
                         if head_group:
                             common_data["head_nr"] = head_group
-                        parse_sense_node(node, common_data, pos)
+                        parse_sense_node(node, common_data, pos)  # type: ignore[arg-type]
 
         # If there are no senses extracted, add a dummy sense.  We want to
         # keep tags extracted from the head for the dummy sense.
@@ -1211,7 +1306,7 @@ def parse_language(wxr: WiktextractContext,
         header_nodes: list[Union[WikiNode, str]],
         pos_type: str,
         header_group: Optional[int],
-        pos_data: dict,
+        pos_data: WordData,
         header_tags: list[str],
     ) -> None:
         ruby = []
@@ -1223,10 +1318,14 @@ def parse_language(wxr: WiktextractContext,
                 exp.children,
                 lambda x: isinstance(x, WikiNode)
                 and x.kind == NodeKind.HTML
-                and x.sarg == "ruby"
+                and x.sarg == "ruby",
             )
             if rub is not None:
                 for r in rub:
+                    if TYPE_CHECKING:
+                        # we know the lambda above in recursively_extract
+                        # returns only WikiNodes in rub
+                        assert isinstance(r, WikiNode)
                     rt = parse_ruby(wxr, r)
                     if rt is not None:
                         ruby.append(rt)
@@ -1244,27 +1343,30 @@ def parse_language(wxr: WiktextractContext,
             ruby=ruby,
         )
         if "tags" in pos_data:
-            header_tags[:] = pos_data["tags"]
-            del pos_data["tags"]
+            # pos_data can get "tags" data from some source; type-checkers
+            # doesn't like it, so let's ignore it.
+            header_tags[:] = pos_data["tags"]  # type: ignore[typeddict-item]
+            del pos_data["tags"]  # type: ignore[typeddict-item]
         else:
             header_tags.clear()
 
     def process_gloss_without_list(
         nodes: list[Union[WikiNode, str]],
         pos_type: str,
-        pos_data: dict,
+        pos_data: WordData,
         header_tags: list[str],
     ) -> None:
         # gloss text might not inside a list
-        header_nodes = []
-        gloss_nodes = []
+        header_nodes: list[Union[str, WikiNode]] = []
+        gloss_nodes: list[Union[str, WikiNode]] = []
         for node in strip_nodes(nodes):
             if isinstance(node, WikiNode):
                 if node.kind == NodeKind.TEMPLATE:
                     template_name = node.largs[0][0]
-                    if (
-                            template_name == "head"
-                            or template_name.startswith(f"{lang_code}-")
+                    if TYPE_CHECKING:
+                        assert isinstance(template_name, str)
+                    if template_name == "head" or template_name.startswith(
+                        f"{lang_code}-"
                     ):
                         header_nodes.append(node)
                         continue
@@ -1281,7 +1383,11 @@ def parse_language(wxr: WiktextractContext,
                 gloss_nodes, pos_type, {"tags": list(header_tags)}
             )
 
-    def parse_sense_node(node, sense_base, pos):
+    def parse_sense_node(
+        node: Union[str, WikiNode],  # never receives str
+        sense_base: SenseData,
+        pos: str,
+    ) -> bool:
         """Recursively (depth first) parse LIST_ITEM nodes for sense data.
         Uses push_sense() to attempt adding data to pos_data in the scope
         of parse_language() when it reaches deep in the recursion. push_sense()
@@ -1292,14 +1398,18 @@ def parse_language(wxr: WiktextractContext,
         """
         assert isinstance(sense_base, dict)  # Added to every sense deeper in
         if not isinstance(node, WikiNode):
-            wxr.wtp.debug("{}: parse_sense_node called with"
-                      "something that isn't a WikiNode".format(pos),
-                      sortid="page/1287/20230119")
+            # This doesn't seem to ever happen in practice.
+            wxr.wtp.debug(
+                "{}: parse_sense_node called with"
+                "something that isn't a WikiNode".format(pos),
+                sortid="page/1287/20230119",
+            )
             return False
 
         if node.kind != NodeKind.LIST_ITEM:
-            wxr.wtp.debug("{}: non-list-item inside list".format(pos),
-                      sortid="page/1678")
+            wxr.wtp.debug(
+                "{}: non-list-item inside list".format(pos), sortid="page/1678"
+            )
             return False
 
         if node.sarg == ":":
@@ -1315,7 +1425,7 @@ def parse_language(wxr: WiktextractContext,
         # added |= push_sense() or added |= parse_sense_node(...) to OR.
         added = False
 
-        gloss_template_args = set()
+        gloss_template_args: set[str] = set()
 
         # For LISTs and LIST_ITEMS, their argument is something like
         # "##" or "##:", and using that we can rudimentally determine
@@ -1330,26 +1440,34 @@ def parse_language(wxr: WiktextractContext,
         # of subglosses below this. The list's
         # argument ends with #, and its depth should
         # be bigger than parent node.
-        subentries = [x for x in children
-                    if isinstance(x, WikiNode) and
-                    x.kind == NodeKind.LIST and
-                    x.sarg == current_depth + "#"]
+        subentries = [
+            x
+            for x in children
+            if isinstance(x, WikiNode)
+            and x.kind == NodeKind.LIST
+            and x.sarg == current_depth + "#"
+        ]
 
         # sublists of examples and quotations. .sarg
         # does not end with "#".
-        others = [x for x in children
-                  if isinstance(x, WikiNode) and
-                  x.kind == NodeKind.LIST and
-                  x.sarg != current_depth + "#"]
+        others = [
+            x
+            for x in children
+            if isinstance(x, WikiNode)
+            and x.kind == NodeKind.LIST
+            and x.sarg != current_depth + "#"
+        ]
 
         # the actual contents of this particular node.
         # can be a gloss (or a template that expands into
         # many glosses which we can't easily pre-expand)
         # or could be an "outer gloss" with more specific
         # subglosses, or could be a qualfier for the subglosses.
-        contents = [x for x in children
-                 if not isinstance(x, WikiNode) or
-                 x.kind != NodeKind.LIST]
+        contents = [
+            x
+            for x in children
+            if not isinstance(x, WikiNode) or x.kind != NodeKind.LIST
+        ]
         # If this entry has sublists of entries, we should combine
         # gloss information from both the "outer" and sublist content.
         # Sometimes the outer gloss
@@ -1371,28 +1489,29 @@ def parse_language(wxr: WiktextractContext,
                 # copy current node and modify it so it doesn't
                 # loop infinitely.
                 cropped_node = copy.copy(node)
-                cropped_node.children = [x for x in children
-                                        if not (isinstance(x, WikiNode) and
-                                                x.kind == NodeKind.LIST and
-                                                x.sarg == current_depth + "#")]
-                added |= parse_sense_node(cropped_node,
-                                          sense_base,
-                                          pos)
+                cropped_node.children = [
+                    x
+                    for x in children
+                    if not (
+                        isinstance(x, WikiNode)
+                        and x.kind == NodeKind.LIST
+                        and x.sarg == current_depth + "#"
+                    )
+                ]
+                added |= parse_sense_node(cropped_node, sense_base, pos)
                 nonlocal sense_data  # this kludge causes duplicated raw_
-                                     # glosses data if this is not done;
-                                     # if the top-level (cropped_node)
-                                     # does not push_sense() properly or
-                                     # parse_sense_node() returns early,
-                                     # sense_data is not reset. This happens
-                                     # for example when you have a no-gloss
-                                     # string like "(intransitive)":
-                                     # no gloss, push_sense() returns early
-                                     # and sense_data has duplicate data with
-                                     # sense_base
+                # glosses data if this is not done;
+                # if the top-level (cropped_node)
+                # does not push_sense() properly or
+                # parse_sense_node() returns early,
+                # sense_data is not reset. This happens
+                # for example when you have a no-gloss
+                # string like "(intransitive)":
+                # no gloss, push_sense() returns early
+                # and sense_data has duplicate data with
+                # sense_base
                 sense_data = {}
-                added |= parse_sense_node(slc[0],
-                                          sense_base,
-                                          pos)
+                added |= parse_sense_node(slc[0], sense_base, pos)
                 return added
 
         return process_gloss_contents(
@@ -1408,7 +1527,7 @@ def parse_language(wxr: WiktextractContext,
     def process_gloss_contents(
         contents: list[Union[str, WikiNode]],
         pos: str,
-        sense_base: dict,
+        sense_base: SenseData,
         subentries: list[WikiNode] = [],
         others: list[WikiNode] = [],
         gloss_template_args: Set[str] = set(),
@@ -1430,8 +1549,7 @@ def parse_language(wxr: WiktextractContext,
                 arg = clean_node(wxr, sense_base, ht.get(2, ()))
                 if re.match(r"Q\d+$", arg):
                     data_append(sense_base, "wikidata", arg)
-                data_append(sense_base, "senseid",
-                            langid + ":" + arg)
+                data_append(sense_base, "senseid", langid + ":" + arg)
             if name in sense_linkage_templates:
                 # print(f"SENSE_TEMPLATE_FN: {name}")
                 parse_sense_linkage(wxr, sense_base, name, ht)
@@ -1470,7 +1588,7 @@ def parse_language(wxr: WiktextractContext,
                 if is_gloss:
                     wxr.wtp.warning(
                         "Example template is used for gloss text",
-                        sortid="extractor.en.page.sense_template_fn/1415"
+                        sortid="extractor.en.page.sense_template_fn/1415",
                     )
                 else:
                     return ""
@@ -1483,7 +1601,7 @@ def parse_language(wxr: WiktextractContext,
                     gloss_template_args.add(v)
             return None
 
-        def extract_link_texts(item):
+        def extract_link_texts(item: GeneralNode) -> None:
             """Recursively extracts link texts from the gloss source.  This
             information is used to select whether to remove final "." from
             form_of/alt_of (e.g., ihm/Hunsrik)."""
@@ -1504,8 +1622,11 @@ def parse_language(wxr: WiktextractContext,
                 return
             if item.kind == NodeKind.LINK:
                 v = item.largs[-1]
-                if (isinstance(v, list) and len(v) == 1 and
-                    isinstance(v[0], str)):
+                if (
+                    isinstance(v, list)
+                    and len(v) == 1
+                    and isinstance(v[0], str)
+                ):
                     gloss_template_args.add(v[0].strip())
             for x in item.children:
                 extract_link_texts(x)
@@ -1514,11 +1635,16 @@ def parse_language(wxr: WiktextractContext,
 
         # get the raw text of non-list contents of this node, and other stuff
         # like tag and category data added to sense_base
+        # cast = no-op type-setter for the type-checker
+        partial_template_fn = cast(
+            TemplateFnCallable,
+            partial(sense_template_fn, is_gloss=True),
+        )
         rawgloss = clean_node(
             wxr,
             sense_base,
             contents,
-            template_fn=partial(sense_template_fn, is_gloss=True),
+            template_fn=partial_template_fn,
             collect_links=True,
         )
 
@@ -1542,7 +1668,7 @@ def parse_language(wxr: WiktextractContext,
         strip_ends = [", particularly:"]
         for x in strip_ends:
             if rawgloss.endswith(x):
-                rawgloss = rawgloss[:-len(x)]
+                rawgloss = rawgloss[: -len(x)]
                 break
 
         # The gloss could contain templates that produce more list items.
@@ -1562,19 +1688,19 @@ def parse_language(wxr: WiktextractContext,
         if rawgloss and rawgloss not in sense_base.get("raw_glosses", ()):
             data_append(sense_base, "raw_glosses", subglosses[1])
         m = re.match(r"\(([^()]+)\):?\s*", rawgloss)
-                    # ( ..\1.. ): ... or ( ..\1.. ) ...
+        # ( ..\1.. ): ... or ( ..\1.. ) ...
         if m:
             q = m.group(1)
-            rawgloss = rawgloss[m.end():].strip()
+            rawgloss = rawgloss[m.end() :].strip()
             parse_sense_qualifier(wxr, q, sense_base)
         if rawgloss == "A pejorative:":
             data_append(sense_base, "tags", "pejorative")
-            rawgloss = None
+            rawgloss = ""
         elif rawgloss == "Short forms.":
             data_append(sense_base, "tags", "abbreviation")
-            rawgloss = None
+            rawgloss = ""
         elif rawgloss == "Technical or specialized senses.":
-            rawgloss = None
+            rawgloss = ""
         if rawgloss:
             data_append(sense_base, "glosses", rawgloss)
             if rawgloss in ("A person:",):
@@ -1583,15 +1709,20 @@ def parse_language(wxr: WiktextractContext,
         # The main recursive call (except for the exceptions at the
         # start of this function).
         for sublist in subentries:
-            if not (isinstance(sublist, WikiNode) and
-                    sublist.kind == NodeKind.LIST):
-                wxr.wtp.debug(f"'{repr(rawgloss[:20])}.' gloss has `subentries`"
-                          f"with items that are not LISTs",
-                          sortid="page/1511/20230119")
+            if not (
+                isinstance(sublist, WikiNode) and sublist.kind == NodeKind.LIST
+            ):
+                wxr.wtp.debug(
+                    f"'{repr(rawgloss[:20])}.' gloss has `subentries`"
+                    f"with items that are not LISTs",
+                    sortid="page/1511/20230119",
+                )
                 continue
             for item in sublist.children:
-                if not (isinstance(item, WikiNode) and
-                        item.kind == NodeKind.LIST_ITEM):
+                if not (
+                    isinstance(item, WikiNode)
+                    and item.kind == NodeKind.LIST_ITEM
+                ):
                     continue
                 # copy sense_base to prevent cross-contamination between
                 # subglosses and other subglosses and superglosses
@@ -1611,20 +1742,22 @@ def parse_language(wxr: WiktextractContext,
         if added:
             if examples:
                 # this higher-up gloss has examples that we do not want to skip
-                wxr.wtp.debug("'{}[...]' gloss has examples we want to keep, "
-                          "but there are subglosses."
-                          .format(repr(rawgloss[:30])),
-                          sortid="page/1498/20230118")
+                wxr.wtp.debug(
+                    "'{}[...]' gloss has examples we want to keep, "
+                    "but there are subglosses.".format(repr(rawgloss[:30])),
+                    sortid="page/1498/20230118",
+                )
             else:
                 return True
 
         # Some entries, e.g., "iacebam", have weird sentences in quotes
         # after the gloss, but these sentences don't seem to be intended
         # as glosses.  Skip them.
-        subglosses = list(gl for gl in subglosses
-                          if gl.strip() and
-                          not re.match(r'\s*(\([^)]*\)\s*)?"[^"]*"\s*$',
-                                       gl))
+        subglosses = list(
+            gl
+            for gl in subglosses
+            if gl.strip() and not re.match(r'\s*(\([^)]*\)\s*)?"[^"]*"\s*$', gl)
+        )
 
         if len(subglosses) > 1 and "form_of" not in sense_base:
             gl = subglosses[0].strip()
@@ -1633,8 +1766,7 @@ def parse_language(wxr: WiktextractContext,
             parsed = parse_alt_or_inflection_of(wxr, gl, gloss_template_args)
             if parsed is not None:
                 infl_tags, infl_dts = parsed
-                if (infl_dts and "form-of" in infl_tags and
-                    len(infl_tags) == 1):
+                if infl_dts and "form-of" in infl_tags and len(infl_tags) == 1:
                     # Interpret others as a particular form under
                     # "inflection of"
                     data_extend(sense_base, "tags", infl_tags)
@@ -1677,13 +1809,13 @@ def parse_language(wxr: WiktextractContext,
                         data_extend(sense_data, k, v)
                 else:
                     assert k not in ("tags", "categories", "topics")
-                    sense_data[k] = v
+                    sense_data[k] = v  # type:ignore[literal-required]
             # Parse the gloss for this particular sense
             m = re.match(r"^\((([^()]|\([^()]*\))*)\):?\s*", gloss)
-                        # (...): ... or (...(...)...): ...
+            # (...): ... or (...(...)...): ...
             if m:
                 parse_sense_qualifier(wxr, m.group(1), sense_data)
-                gloss = gloss[m.end():].strip()
+                gloss = gloss[m.end() :].strip()
 
             # Remove common suffix "[from 14th c.]" and similar
             gloss = re.sub(r"\s\[[^]]*\]\s*$", "", gloss)
@@ -1691,12 +1823,15 @@ def parse_language(wxr: WiktextractContext,
             # Check to make sure we don't have unhandled list items in gloss
             ofs = max(gloss.find("#"), gloss.find("* "))
             if ofs > 10 and "(#)" not in gloss:
-                wxr.wtp.debug("gloss may contain unhandled list items: {}"
-                          .format(gloss),
-                          sortid="page/1412")
+                wxr.wtp.debug(
+                    "gloss may contain unhandled list items: {}".format(gloss),
+                    sortid="page/1412",
+                )
             elif "\n" in gloss:
-                wxr.wtp.debug("gloss contains newline: {}".format(gloss),
-                          sortid="page/1416")
+                wxr.wtp.debug(
+                    "gloss contains newline: {}".format(gloss),
+                    sortid="page/1416",
+                )
 
             # Kludge, some glosses have a comma after initial qualifiers in
             # parentheses
@@ -1706,7 +1841,7 @@ def parse_language(wxr: WiktextractContext,
             if gloss.endswith(":"):
                 gloss = gloss[:-1].strip()
             if gloss.startswith("N. of "):
-                gloss = "Name of " +  gloss[6:]
+                gloss = "Name of " + gloss[6:]
             if gloss.startswith("†"):
                 data_append(sense_data, "tags", "obsolete")
                 gloss = gloss[1:]
@@ -1729,16 +1864,19 @@ def parse_language(wxr: WiktextractContext,
                 if tag not in sense_tags:
                     data_append(sense_data, "tags", tag)
             if countability_tags:
-                if ("countable" not in sense_tags and
-                    "uncountable" not in sense_tags):
+                if (
+                    "countable" not in sense_tags
+                    and "uncountable" not in sense_tags
+                ):
                     data_extend(sense_data, "tags", countability_tags)
 
             # If outer gloss specifies a form-of ("inflection of", see
             # aquamarine/German), try to parse the inner glosses as
             # tags for an inflected form.
             if "form-of" in sense_base.get("tags", ()):
-                parsed = parse_alt_or_inflection_of(wxr, gloss,
-                                                    gloss_template_args)
+                parsed = parse_alt_or_inflection_of(
+                    wxr, gloss, gloss_template_args
+                )
                 if parsed is not None:
                     infl_tags, infl_dts = parsed
                     if not infl_dts and infl_tags:
@@ -1758,18 +1896,23 @@ def parse_language(wxr: WiktextractContext,
             split_glosses = []
             for m in re.finditer(r"Abbreviation of ", gloss):
                 if m.start() != position:
-                    split_glosses.append(gloss[position: m.start()])
+                    split_glosses.append(gloss[position : m.start()])
                     position = m.start()
             split_glosses.append(gloss[position:])
             for gloss in split_glosses:
                 # Check if this gloss describes an alt-of or inflection-of
-                if (lang_code != "en" and " " not in gloss and distw([word], gloss) < 0.3):
+                if (
+                    lang_code != "en"
+                    and " " not in gloss
+                    and distw([word], gloss) < 0.3
+                ):
                     # Don't try to parse gloss if it is one word
                     # that is close to the word itself for non-English words
                     # (probable translations of a tag/form name)
                     continue
-                parsed = parse_alt_or_inflection_of(wxr, gloss,
-                                                    gloss_template_args)
+                parsed = parse_alt_or_inflection_of(
+                    wxr, gloss, gloss_template_args
+                )
                 if parsed is None:
                     continue
                 tags, dts = parsed
@@ -1797,7 +1940,7 @@ def parse_language(wxr: WiktextractContext,
                         data_append(sense_data, "form_of", dt)
 
         if len(sense_data) == 0:
-            if len(sense_base.get("tags")) == 0:
+            if len(sense_base.get("tags", [])) == 0:
                 del sense_base["tags"]
             sense_data.update(sense_base)
         if push_sense():
@@ -1806,7 +1949,9 @@ def parse_language(wxr: WiktextractContext,
             # print("PARSE_SENSE DONE:", pos_datas[-1])
         return added
 
-    def parse_inflection(node, section, pos):
+    def parse_inflection(
+        node: WikiNode, section: str, pos: Optional[str]
+    ) -> None:
         """Parses inflection data (declension, conjugation) from the given
         page.  This retrieves the actual inflection template
         parameters, which are very useful for applications that need
@@ -1818,11 +1963,14 @@ def parse_language(wxr: WiktextractContext,
         # print("parse_inflection:", node)
 
         if pos is None:
-            wxr.wtp.debug("inflection table outside part-of-speech",
-                      sortid="page/1812")
+            wxr.wtp.debug(
+                "inflection table outside part-of-speech", sortid="page/1812"
+            )
             return
 
-        def inflection_template_fn(name, ht):
+        def inflection_template_fn(
+            name: str, ht: TemplateArgs
+        ) -> Optional[str]:
             # print("decl_conj_template_fn", name, ht)
             if is_panel_template(wxr, name):
                 return ""
@@ -1830,8 +1978,11 @@ def parse_language(wxr: WiktextractContext,
                 # These are not to be captured as an exception to the
                 # generic code below
                 return None
-            m = re.search(r"-(conj|decl|ndecl|adecl|infl|conjugation|"
-                          r"declension|inflection|mut|mutation)($|-)", name)
+            m = re.search(
+                r"-(conj|decl|ndecl|adecl|infl|conjugation|"
+                r"declension|inflection|mut|mutation)($|-)",
+                name,
+            )
             if m:
                 args_ht = clean_template_args(wxr, ht)
                 dt = {"name": name, "args": args_ht}
@@ -1844,7 +1995,7 @@ def parse_language(wxr: WiktextractContext,
         text = wxr.wtp.node_to_wikitext(node.children)
 
         # Split text into separate sections for each to-level template
-        brace_matches = re.split("({{+|}}+)", text) # ["{{", "template", "}}"]
+        brace_matches = re.split("({{+|}}+)", text)  # ["{{", "template", "}}"]
         template_sections = []
         template_nesting = 0  # depth of SINGLE BRACES { { nesting } }
         # Because there is the possibility of triple curly braces
@@ -1860,16 +2011,15 @@ def parse_language(wxr: WiktextractContext,
         # print(text)
         # print(repr(brace_matches))
         if len(brace_matches) > 1:
-            tsection = []
+            tsection: list[str] = []
             after_templates = False  # kludge to keep any text
-                                     # before first template
-                                     # with the first template;
-                                     # otherwise, text
-                                     # goes with preceding template
+            # before first template
+            # with the first template;
+            # otherwise, text
+            # goes with preceding template
             for m in brace_matches:
                 if m.startswith("{{"):
-                    if (template_nesting == 0 and
-                        after_templates):
+                    if template_nesting == 0 and after_templates:
                         template_sections.append(tsection)
                         tsection = []
                         # start new section
@@ -1879,12 +2029,13 @@ def parse_language(wxr: WiktextractContext,
                 elif m.startswith("}}"):
                     template_nesting -= len(m)
                     if template_nesting < 0:
-                        wxr.wtp.error("Negatively nested braces, "
-                                  "couldn't split inflection templates, "
-                                  "{}/{} section {}"
-                                  .format(word, language, section),
-                                  sortid="page/1871")
-                        template_sections = [] # use whole text
+                        wxr.wtp.error(
+                            "Negatively nested braces, "
+                            "couldn't split inflection templates, "
+                            "{}/{} section {}".format(word, language, section),
+                            sortid="page/1871",
+                        )
+                        template_sections = []  # use whole text
                         break
                     tsection.append(m)
                 else:
@@ -1904,16 +2055,20 @@ def parse_language(wxr: WiktextractContext,
             for tsection in template_sections:
                 texts.append("".join(tsection))
         if template_nesting != 0:
-            wxr.wtp.error("Template nesting error: "
-                      "template_nesting = {} "
-                      "couldn't split inflection templates, "
-                      "{}/{} section {}"
-                      .format(template_nesting, word, language, section),
-                      sortid="page/1896")
+            wxr.wtp.error(
+                "Template nesting error: "
+                "template_nesting = {} "
+                "couldn't split inflection templates, "
+                "{}/{} section {}".format(
+                    template_nesting, word, language, section
+                ),
+                sortid="page/1896",
+            )
             texts = [text]
         for text in texts:
-            tree = wxr.wtp.parse(text, expand_all=True,
-                             template_fn=inflection_template_fn)
+            tree = wxr.wtp.parse(
+                text, expand_all=True, template_fn=inflection_template_fn
+            )
 
             # Parse inflection tables from the section.  The data is stored
             # under "forms".
@@ -1924,12 +2079,20 @@ def parse_language(wxr: WiktextractContext,
                     template_name = m.group(1)
                     tablecontext = TableContext(template_name)
 
-                parse_inflection_section(wxr, pos_data,
-                                         word, language,
-                                         pos, section, tree,
-                                         tablecontext=tablecontext)
+                parse_inflection_section(
+                    wxr,
+                    pos_data,
+                    word,
+                    language,
+                    pos,
+                    section,
+                    tree,
+                    tablecontext=tablecontext,
+                )
 
-    def get_subpage_section(title, subtitle, seq):
+    def get_subpage_section(
+        title: str, subtitle: str, seq: Union[list[str], tuple[str, ...]]
+    ) -> Optional[Union[WikiNode, str]]:
         """Loads a subpage of the given page, and finds the section
         for the given language, part-of-speech, and section title.  This
         is used for finding translations and other sections on subpages."""
@@ -1942,11 +2105,16 @@ def parse_language(wxr: WiktextractContext,
         subpage_title = word + "/" + subtitle
         subpage_content = wxr.wtp.get_page_body(subpage_title, 0)
         if subpage_content is None:
-            wxr.wtp.error("/translations not found despite "
-                      "{{see translation subpage|...}}",
-                      sortid="page/1934")
+            wxr.wtp.error(
+                "/translations not found despite "
+                "{{see translation subpage|...}}",
+                sortid="page/1934",
+            )
+            return None
 
-        def recurse(node, seq):
+        def recurse(
+            node: Union[str, WikiNode], seq: Union[list[str], tuple[str, ...]]
+        ) -> Optional[Union[str, WikiNode]]:
             # print(f"seq: {seq}")
             if not seq:
                 return node
@@ -1970,17 +2138,22 @@ def parse_language(wxr: WiktextractContext,
             subpage_content,
             pre_expand=True,
             additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
-            do_not_pre_expand=DO_NOT_PRE_EXPAND_TEMPLATES
+            do_not_pre_expand=DO_NOT_PRE_EXPAND_TEMPLATES,
         )
         assert tree.kind == NodeKind.ROOT
         ret = recurse(tree, seq)
         if ret is None:
-            wxr.wtp.debug("Failed to find subpage section {}/{} seq {}"
-                      .format(title, subtitle, seq),
-                      sortid="page/1963")
+            wxr.wtp.debug(
+                "Failed to find subpage section {}/{} seq {}".format(
+                    title, subtitle, seq
+                ),
+                sortid="page/1963",
+            )
         return ret
 
-    def parse_linkage(data, field, linkagenode):
+    def parse_linkage(
+        data: WordData, field: str, linkagenode: WikiNode
+    ) -> None:
         assert isinstance(data, dict)
         assert isinstance(field, str)
         assert isinstance(linkagenode, WikiNode)
@@ -1995,7 +2168,11 @@ def parse_language(wxr: WiktextractContext,
         toplevel_text = []
         next_navframe_sense = None  # Used for "(sense):" before NavFrame
 
-        def parse_linkage_item(contents, field, sense):
+        def parse_linkage_item(
+            contents: list[Union[str, WikiNode]],
+            field: str,
+            sense: Optional[str] = None,
+        ):
             assert isinstance(contents, (list, tuple))
             assert isinstance(field, str)
             assert sense is None or isinstance(sense, str)
@@ -2003,11 +2180,13 @@ def parse_language(wxr: WiktextractContext,
             # print("PARSE_LINKAGE_ITEM: {} ({}): {}"
             #    .format(field, sense, contents))
 
-            parts = []
-            ruby = []
-            urls = []
+            parts: list[str] = []
+            ruby: list[tuple[str, str]] = []
+            urls: list[str] = []
 
-            def item_recurse(contents, italic=False):
+            def item_recurse(
+                contents: list[Union[str, WikiNode]], italic=False
+            ) -> None:
                 assert isinstance(contents, (list, tuple))
                 nonlocal sense
                 nonlocal ruby
@@ -2022,24 +2201,34 @@ def parse_language(wxr: WiktextractContext,
                     #        node.sarg if node.sarg else node.largs)
                     if kind == NodeKind.LIST:
                         if parts:
+                            sense1: Optional[str]
                             sense1 = clean_node(wxr, None, parts)
                             if sense1.endswith(":"):
                                 sense1 = sense1[:-1].strip()
                             if sense1.startswith("(") and sense1.endswith(")"):
                                 sense1 = sense1[1:-1].strip()
-                            if sense1.lower() == wxr.config.OTHER_SUBTITLES["translations"]:
+                            if (
+                                sense1.lower()
+                                == wxr.config.OTHER_SUBTITLES["translations"]
+                            ):
                                 sense1 = None
                             # print("linkage item_recurse LIST sense1:", sense1)
-                            parse_linkage_recurse(node.children, field,
-                                                  sense=sense1 or sense)
+                            parse_linkage_recurse(
+                                node.children, field, sense=sense1 or sense
+                            )
                             parts = []
                         else:
                             parse_linkage_recurse(node.children, field, sense)
-                    elif kind in (NodeKind.TABLE, NodeKind.TABLE_ROW,
-                                  NodeKind.TABLE_CELL):
+                    elif kind in (
+                        NodeKind.TABLE,
+                        NodeKind.TABLE_ROW,
+                        NodeKind.TABLE_CELL,
+                    ):
                         parse_linkage_recurse(node.children, field, sense)
-                    elif kind in (NodeKind.TABLE_HEADER_CELL,
-                                  NodeKind.TABLE_CAPTION):
+                    elif kind in (
+                        NodeKind.TABLE_HEADER_CELL,
+                        NodeKind.TABLE_CAPTION,
+                    ):
                         continue
                     elif kind == NodeKind.HTML:
                         classes = (node.attrs.get("class") or "").split()
@@ -2065,37 +2254,42 @@ def parse_language(wxr: WiktextractContext,
                     elif kind == NodeKind.LINK:
                         ignore = False
                         if isinstance(node.largs[0][0], str):
-                            v = node.largs[0][0].strip().lower()
-                            if v.startswith(ns_title_prefix_tuple(wxr,
-                                                            "Category", True) \
-                                            + ns_title_prefix_tuple(wxr,
-                                                            "File", True)):
+                            v1 = node.largs[0][0].strip().lower()
+                            if v1.startswith(
+                                ns_title_prefix_tuple(wxr, "Category", True)
+                                + ns_title_prefix_tuple(wxr, "File", True)
+                            ):
                                 ignore = True
                             if not ignore:
                                 v = node.largs[-1]
-                                if (len(node.largs) == 1 and
-                                    len(v) > 0 and
-                                    isinstance(v[0], str) and
-                                    v[0][0] == ":"):
-                                    v = [v[0][1:]] + list(v[1:])
+                                if (
+                                    len(node.largs) == 1
+                                    and len(v) > 0
+                                    and isinstance(v[0], str)
+                                    and v[0][0] == ":"
+                                ):
+                                    v = [v[0][1:]] + list(v[1:])  # type:ignore
                                 item_recurse(v, italic=italic)
                     elif kind == NodeKind.URL:
                         if len(node.largs) < 2 and node.largs:
                             # Naked url captured
-                            urls.extend(node.largs[-1])
+                            urls.extend(node.largs[-1])  # type:ignore[arg-type]
                             continue
                         if len(node.largs) == 2:
                             # Url from link with text
-                            urls.append(node.largs[0][-1])
+                            urls.append(node.largs[0][-1])  # type:ignore[arg-type]
                         # print(f"{node.largs=!r}")
                         # print("linkage recurse URL {}".format(node))
                         item_recurse(node.largs[-1], italic=italic)
                     elif kind in (NodeKind.PREFORMATTED, NodeKind.BOLD):
                         item_recurse(node.children, italic=italic)
                     else:
-                        wxr.wtp.debug("linkage item_recurse unhandled {}: {}"
-                                  .format(node.kind, node),
-                                  sortid="page/2073")
+                        wxr.wtp.debug(
+                            "linkage item_recurse unhandled {}: {}".format(
+                                node.kind, node
+                            ),
+                            sortid="page/2073",
+                        )
 
             # print("LINKAGE CONTENTS BEFORE ITEM_RECURSE: {!r}"
             #       .format(contents))
@@ -2105,48 +2299,18 @@ def parse_language(wxr: WiktextractContext,
             # print("CLEANED ITEM: {!r}".format(item))
             # print(f"URLS {urls=!r}")
 
-            return parse_linkage_item_text(wxr, word, data, field, item,
-                                           sense, ruby, pos_datas,
-                                           is_reconstruction, urls)
-
-        def parse_linkage_template(node):
-            nonlocal have_panel_template
-            # XXX remove this function but check how to handle the
-            # template_linkage_mappings
-            # print("LINKAGE TEMPLATE:", node)
-
-            def linkage_template_fn(name, ht):
-                # print("LINKAGE_TEMPLATE_FN:", name, ht)
-                nonlocal field
-                nonlocal have_panel_template
-                if is_panel_template(wxr, name):
-                    have_panel_template = True
-                    return ""
-                for prefix, t in template_linkage_mappings:
-                    if re.search(r"(^|[-/\s]){}($|\b|[0-9])".format(prefix),
-                                 name):
-                        f = t if isinstance(t, str) else field
-                        if (name.endswith("-top") or name.endswith("-bottom") or
-                            name.endswith("-mid")):
-                            field = f
-                            return ""
-                        i = t if isinstance(t, int) else 2
-                        while True:
-                            v = ht.get(i, None)
-                            if v is None:
-                                break
-                            v = clean_node(wxr, None, v)
-                            parse_linkage_item(v, f)
-                            i += 1
-                        return ""
-                # print("UNHANDLED LINKAGE TEMPLATE:", name, ht)
-                return None
-
-            # Main body of parse_linkage_template()
-            text = wxr.wtp.node_to_wikitext(node)
-            parsed = wxr.wtp.parse(text, expand_all=True,
-                               template_fn=linkage_template_fn)
-            parse_linkage_recurse(parsed.children, field, None)
+            return parse_linkage_item_text(
+                wxr,
+                word,
+                data,
+                field,
+                item,
+                sense,
+                ruby,
+                pos_datas,
+                is_reconstruction,
+                urls,
+            )
 
         def parse_linkage_recurse(contents, field, sense):
             assert isinstance(contents, (list, tuple))
@@ -2177,9 +2341,12 @@ def parse_language(wxr: WiktextractContext,
                     parse_linkage_recurse(node.children, field, sense)
                 elif kind == NodeKind.TABLE_CELL:
                     parse_linkage_item(node.children, field, sense)
-                elif kind in (NodeKind.TABLE_CAPTION,
-                              NodeKind.TABLE_HEADER_CELL,
-                              NodeKind.PREFORMATTED, NodeKind.BOLD):
+                elif kind in (
+                    NodeKind.TABLE_CAPTION,
+                    NodeKind.TABLE_HEADER_CELL,
+                    NodeKind.PREFORMATTED,
+                    NodeKind.BOLD,
+                ):
                     continue
                 elif kind == NodeKind.HTML:
                     # Recurse to process inside the HTML for most tags
@@ -2196,16 +2363,18 @@ def parse_language(wxr: WiktextractContext,
                         if sense1.endswith(":"):
                             sense1 = sense1[:-1].strip()
                         if sense and sense1:
-                            wxr.wtp.debug("linkage qualifier-content on multiple "
-                                      "levels: {!r} and {!r}"
-                                      .format(sense, sense1),
-                                      sortid="page/2170")
+                            wxr.wtp.debug(
+                                "linkage qualifier-content on multiple "
+                                "levels: {!r} and {!r}".format(sense, sense1),
+                                sortid="page/2170",
+                            )
                         parse_linkage_recurse(node.children, field, sense1)
                     elif "NavFrame" in classes:
                         # NavFrame uses previously assigned next_navframe_sense
                         # (from a "(sense):" item) and clears it afterwards
-                        parse_linkage_recurse(node.children, field,
-                                              sense or next_navframe_sense)
+                        parse_linkage_recurse(
+                            node.children, field, sense or next_navframe_sense
+                        )
                         next_navframe_sense = None
                     else:
                         parse_linkage_recurse(node.children, field, sense)
@@ -2222,9 +2391,12 @@ def parse_language(wxr: WiktextractContext,
                     # initial value
                     parse_linkage_recurse(node.largs[-1], field, sense)
                 else:
-                    wxr.wtp.debug("parse_linkage_recurse unhandled {}: {}"
-                              .format(kind, node),
-                              sortid="page/2196")
+                    wxr.wtp.debug(
+                        "parse_linkage_recurse unhandled {}: {}".format(
+                            kind, node
+                        ),
+                        sortid="page/2196",
+                    )
 
         def linkage_template_fn1(name, ht):
             nonlocal have_panel_template
@@ -2239,10 +2411,14 @@ def parse_language(wxr: WiktextractContext,
                 if isinstance(item, WikiNode):
                     if item.kind == NodeKind.TABLE_ROW:
                         cleaned = clean_node(wxr, None, item.children)
-                        #print("cleaned:", repr(cleaned))
-                        if any(["Variety" in cleaned,
-                               "Location" in cleaned,
-                               "Words" in cleaned]):
+                        # print("cleaned:", repr(cleaned))
+                        if any(
+                            [
+                                "Variety" in cleaned,
+                                "Location" in cleaned,
+                                "Words" in cleaned,
+                            ]
+                        ):
                             pass
                         else:
                             split = cleaned.split("\n")
@@ -2268,11 +2444,15 @@ def parse_language(wxr: WiktextractContext,
                                         if tag in zh_tag_lookup:
                                             tags.extend(zh_tag_lookup[tag])
                                         else:
-                                            print(f"MISSING ZH SYNONYM TAG for root {root_word}, word {words}: {tag}")
+                                            print(
+                                                f"MISSING ZH SYNONYM TAG for root {root_word}, word {words}: {tag}"
+                                            )
                                             sys.stdout.flush()
 
                             for word in words:
-                                data.append({"word": word.strip(), "tags": tags})
+                                data.append(
+                                    {"word": word.strip(), "tags": tags}
+                                )
                     elif item.kind == NodeKind.HTML:
                         cleaned = clean_node(wxr, None, item.children)
                         if "Synonyms of" in cleaned:
@@ -2288,10 +2468,14 @@ def parse_language(wxr: WiktextractContext,
                 if isinstance(item, WikiNode):
                     if item.kind == NodeKind.LIST_ITEM:
                         cleaned = clean_node(wxr, None, item.children)
-                        #print("cleaned:", repr(cleaned))
-                        if any(["Variety" in cleaned,
-                               "Location" in cleaned,
-                               "Words" in cleaned]):
+                        # print("cleaned:", repr(cleaned))
+                        if any(
+                            [
+                                "Variety" in cleaned,
+                                "Location" in cleaned,
+                                "Words" in cleaned,
+                            ]
+                        ):
                             pass
                         else:
                             cleaned = cleaned.replace("(", ",")
@@ -2309,11 +2493,15 @@ def parse_language(wxr: WiktextractContext,
                                     tags.append(tag)
                                 elif tag in zh_tag_lookup:
                                     tags.extend(zh_tag_lookup[tag])
-                                elif classify_desc(tag) == "romanization" \
-                                        and roman is None:
+                                elif (
+                                    classify_desc(tag) == "romanization"
+                                    and roman is None
+                                ):
                                     roman = tag
                                 else:
-                                    print(f"MISSING ZH SYNONYM TAG (possibly pinyin) - root {root_word}, word {words}: {tag}")
+                                    print(
+                                        f"MISSING ZH SYNONYM TAG (possibly pinyin) - root {root_word}, word {words}: {tag}"
+                                    )
                                     sys.stdout.flush()
 
                             for word in words:
@@ -2328,9 +2516,13 @@ def parse_language(wxr: WiktextractContext,
                         if cleaned.find("Synonyms of") >= 0:
                             cleaned = cleaned.replace("Synonyms of ", "")
                             root_word = cleaned
-                        parse_zh_synonyms_list(item.children, data, hdrs, root_word)
+                        parse_zh_synonyms_list(
+                            item.children, data, hdrs, root_word
+                        )
                     else:
-                        parse_zh_synonyms_list(item.children, data, hdrs, root_word)
+                        parse_zh_synonyms_list(
+                            item.children, data, hdrs, root_word
+                        )
 
         def contains_kind(children, nodekind):
             assert isinstance(children, list)
@@ -2345,21 +2537,21 @@ def parse_language(wxr: WiktextractContext,
 
         # Main body of parse_linkage()
         text = wxr.wtp.node_to_wikitext(linkagenode.children)
-        parsed = wxr.wtp.parse(text, expand_all=True,
-                           template_fn=linkage_template_fn1)
+        parsed = wxr.wtp.parse(
+            text, expand_all=True, template_fn=linkage_template_fn1
+        )
         if field == "synonyms" and lang_code == "zh":
             synonyms = []
             if contains_kind(parsed.children, NodeKind.LIST):
                 parse_zh_synonyms_list(parsed.children, synonyms, [], "")
             else:
                 parse_zh_synonyms(parsed.children, synonyms, [], "")
-            #print(json.dumps(synonyms, indent=4, ensure_ascii=False))
+            # print(json.dumps(synonyms, indent=4, ensure_ascii=False))
             data_extend(data, "synonyms", synonyms)
         parse_linkage_recurse(parsed.children, field, None)
         if not data.get(field) and not have_panel_template:
             text = "".join(toplevel_text).strip()
-            if ("\n" not in text and "," in text and
-                text.count(",") > 3):
+            if "\n" not in text and "," in text and text.count(",") > 3:
                 if not text.startswith("See "):
                     parse_linkage_item([text], field, None)
 
@@ -2388,8 +2580,10 @@ def parse_language(wxr: WiktextractContext,
                 # print("sense <- clean_node: ", sense)
                 idx = sense.find("See also translations at")
                 if idx > 0:
-                    wxr.wtp.debug("Skipping translation see also: {}".format(sense),
-                              sortid="page/2361")
+                    wxr.wtp.debug(
+                        "Skipping translation see also: {}".format(sense),
+                        sortid="page/2361",
+                    )
                     sense = sense[:idx].strip()
                 if sense.endswith(":"):
                     sense = sense[:-1].strip()
@@ -2412,10 +2606,13 @@ def parse_language(wxr: WiktextractContext,
                     code = ht.get(1)
                     if code:
                         if langcode and code != langcode:
-                            wxr.wtp.debug("inconsistent language codes {} vs "
-                                      "{} in translation item: {!r} {}"
-                                      .format(langcode, code, name, ht),
-                                      sortid="page/2386")
+                            wxr.wtp.debug(
+                                "inconsistent language codes {} vs "
+                                "{} in translation item: {!r} {}".format(
+                                    langcode, code, name, ht
+                                ),
+                                sortid="page/2386",
+                            )
                         langcode = code
                     tr = ht.get(2)
                     if tr:
@@ -2431,8 +2628,9 @@ def parse_language(wxr: WiktextractContext,
                         langcode = code
                     return None
                 if name == "trans-see":
-                    wxr.wtp.error("UNIMPLEMENTED trans-see template",
-                              sortid="page/2405")
+                    wxr.wtp.error(
+                        "UNIMPLEMENTED trans-see template", sortid="page/2405"
+                    )
                     return ""
                 if name.endswith("-top"):
                     return ""
@@ -2440,28 +2638,41 @@ def parse_language(wxr: WiktextractContext,
                     return ""
                 if name.endswith("-mid"):
                     return ""
-                #wxr.wtp.debug("UNHANDLED TRANSLATION ITEM TEMPLATE: {!r}"
+                # wxr.wtp.debug("UNHANDLED TRANSLATION ITEM TEMPLATE: {!r}"
                 #             .format(name),
                 #          sortid="page/2414")
                 return None
 
-            sublists = list(x for x in contents
-                            if isinstance(x, WikiNode) and
-                            x.kind == NodeKind.LIST)
-            contents = list(x for x in contents
-                            if not isinstance(x, WikiNode) or
-                            x.kind != NodeKind.LIST)
+            sublists = list(
+                x
+                for x in contents
+                if isinstance(x, WikiNode) and x.kind == NodeKind.LIST
+            )
+            contents = list(
+                x
+                for x in contents
+                if not isinstance(x, WikiNode) or x.kind != NodeKind.LIST
+            )
 
-            item = clean_node(wxr, data, contents,
-                              template_fn=translation_item_template_fn)
+            item = clean_node(
+                wxr, data, contents, template_fn=translation_item_template_fn
+            )
             # print("    TRANSLATION ITEM: {!r}  [{}]".format(item, sense))
 
             # Parse the translation item.
             if item:
-                lang = parse_translation_item_text(wxr, word, data, item, sense,
-                                                   pos_datas, lang, langcode,
-                                                   translations_from_template,
-                                                   is_reconstruction)
+                lang = parse_translation_item_text(
+                    wxr,
+                    word,
+                    data,
+                    item,
+                    sense,
+                    pos_datas,
+                    lang,
+                    langcode,
+                    translations_from_template,
+                    is_reconstruction,
+                )
 
                 # Handle sublists.  They are frequently used for different scripts
                 # for the language and different variants of the language.  We will
@@ -2495,8 +2706,9 @@ def parse_language(wxr: WiktextractContext,
                     sense = None
                     sub = ht.get(1, "")
                     if sub:
-                        m = re.match(r"\s*(([^:\d]*)\s*\d*)\s*:\s*([^:]*)\s*",
-                                     sub)
+                        m = re.match(
+                            r"\s*(([^:\d]*)\s*\d*)\s*:\s*([^:]*)\s*", sub
+                        )
                     else:
                         m = None
                     etym = ""
@@ -2507,51 +2719,83 @@ def parse_language(wxr: WiktextractContext,
                         etym = m.group(2)
                         pos = m.group(3)
                     if not sub:
-                        wxr.wtp.debug("no part-of-speech in "
-                                  "{{see translation subpage|...}}, "
-                                  "defaulting to just wxr.wtp.section "
-                                  "(= language)",
-                                  sortid="page/2468")
+                        wxr.wtp.debug(
+                            "no part-of-speech in "
+                            "{{see translation subpage|...}}, "
+                            "defaulting to just wxr.wtp.section "
+                            "(= language)",
+                            sortid="page/2468",
+                        )
                         # seq sent to get_subpage_section without sub and pos
-                        seq = [language, wxr.config.OTHER_SUBTITLES["translations"]]
-                    elif (m and etym.lower().strip()
-                                in wxr.config.OTHER_SUBTITLES["etymology"]
-                            and pos.lower() in wxr.config.POS_SUBTITLES):
-                            seq = [language,
-                                   etym_numbered,
-                                   pos,
-                                   wxr.config.OTHER_SUBTITLES["translations"]]
+                        seq = [
+                            language,
+                            wxr.config.OTHER_SUBTITLES["translations"],
+                        ]
+                    elif (
+                        m
+                        and etym.lower().strip()
+                        in wxr.config.OTHER_SUBTITLES["etymology"]
+                        and pos.lower() in wxr.config.POS_SUBTITLES
+                    ):
+                        seq = [
+                            language,
+                            etym_numbered,
+                            pos,
+                            wxr.config.OTHER_SUBTITLES["translations"],
+                        ]
                     elif sub.lower() in wxr.config.POS_SUBTITLES:
                         # seq with sub but not pos
-                        seq = [language,
-                               sub,
-                               wxr.config.OTHER_SUBTITLES["translations"]]
+                        seq = [
+                            language,
+                            sub,
+                            wxr.config.OTHER_SUBTITLES["translations"],
+                        ]
                     else:
                         # seq with sub and pos
                         pos = wxr.wtp.subsection
                         if pos.lower() not in wxr.config.POS_SUBTITLES:
-                            wxr.wtp.debug("unhandled see translation subpage: "
-                                      "language={} sub={} wxr.wtp.subsection={}"
-                                      .format(language, sub, wxr.wtp.subsection),
-                                      sortid="page/2478")
-                        seq = [language,
-                               sub,
-                               pos,
-                               wxr.config.OTHER_SUBTITLES["translations"]]
+                            wxr.wtp.debug(
+                                "unhandled see translation subpage: "
+                                "language={} sub={} wxr.wtp.subsection={}".format(
+                                    language, sub, wxr.wtp.subsection
+                                ),
+                                sortid="page/2478",
+                            )
+                        seq = [
+                            language,
+                            sub,
+                            pos,
+                            wxr.config.OTHER_SUBTITLES["translations"],
+                        ]
                     subnode = get_subpage_section(
-                        wxr.wtp.title, wxr.config.OTHER_SUBTITLES["translations"], seq)
+                        wxr.wtp.title,
+                        wxr.config.OTHER_SUBTITLES["translations"],
+                        seq,
+                    )
                     if subnode is not None:
                         parse_translations(data, subnode)
                     else:
                         # Failed to find the normal subpage section
                         seq = [wxr.config.OTHER_SUBTITLES["translations"]]
                         subnode = get_subpage_section(
-                            wxr.wtp.title, wxr.config.OTHER_SUBTITLES["translations"], seq)
+                            wxr.wtp.title,
+                            wxr.config.OTHER_SUBTITLES["translations"],
+                            seq,
+                        )
                         if subnode is not None:
                             parse_translations(data, subnode)
                     return ""
-                if name in ("c", "C", "categorize", "cat", "catlangname",
-                            "topics", "top", "qualifier", "cln"):
+                if name in (
+                    "c",
+                    "C",
+                    "categorize",
+                    "cat",
+                    "catlangname",
+                    "topics",
+                    "top",
+                    "qualifier",
+                    "cln",
+                ):
                     # These are expanded in the default way
                     return None
                 if name in ("trans-top",):
@@ -2564,8 +2808,12 @@ def parse_language(wxr: WiktextractContext,
                         sense_parts = []
                         sense = None
                     return None
-                if name in ("trans-bottom", "trans-mid",
-                            "checktrans-mid", "checktrans-bottom"):
+                if name in (
+                    "trans-bottom",
+                    "trans-mid",
+                    "checktrans-mid",
+                    "checktrans-bottom",
+                ):
                     return None
                 if name == "checktrans-top":
                     sense_parts = []
@@ -2576,11 +2824,17 @@ def parse_language(wxr: WiktextractContext,
                     sense_parts = []
                     sense = None
                     return ""
-                wxr.wtp.error("UNIMPLEMENTED parse_translation_template: {} {}"
-                          .format(name, ht),
-                          sortid="page/2517")
+                wxr.wtp.error(
+                    "UNIMPLEMENTED parse_translation_template: {} {}".format(
+                        name, ht
+                    ),
+                    sortid="page/2517",
+                )
                 return ""
-            wxr.wtp.expand(wxr.wtp.node_to_wikitext(node), template_fn=template_fn)
+
+            wxr.wtp.expand(
+                wxr.wtp.node_to_wikitext(node), template_fn=template_fn
+            )
 
         def parse_translation_recurse(xlatnode):
             nonlocal sense
@@ -2590,9 +2844,11 @@ def parse_language(wxr: WiktextractContext,
                 if isinstance(node, str):
                     if sense:
                         if not node.isspace():
-                            wxr.wtp.debug("skipping string in the middle of "
-                                      "translations: {}".format(node),
-                                      sortid="page/2530")
+                            wxr.wtp.debug(
+                                "skipping string in the middle of "
+                                "translations: {}".format(node),
+                                sortid="page/2530",
+                            )
                         continue
                     # Add a part to the sense
                     sense_parts.append(node)
@@ -2616,8 +2872,11 @@ def parse_language(wxr: WiktextractContext,
                     pass
                 elif kind == NodeKind.TEMPLATE:
                     parse_translation_template(node)
-                elif kind in (NodeKind.TABLE, NodeKind.TABLE_ROW,
-                              NodeKind.TABLE_CELL):
+                elif kind in (
+                    NodeKind.TABLE,
+                    NodeKind.TABLE_ROW,
+                    NodeKind.TABLE_CELL,
+                ):
                     parse_translation_recurse(node)
                 elif kind == NodeKind.HTML:
                     if node.attrs.get("class") == "NavFrame":
@@ -2636,8 +2895,7 @@ def parse_language(wxr: WiktextractContext,
                 elif kind in LEVEL_KINDS:
                     # Sub-levels will be recursed elsewhere
                     pass
-                elif kind in (NodeKind.ITALIC,
-                              NodeKind.BOLD):
+                elif kind in (NodeKind.ITALIC, NodeKind.BOLD):
                     parse_translation_recurse(node)
                 elif kind == NodeKind.PREFORMATTED:
                     print("parse_translation_recurse: PREFORMATTED:", node)
@@ -2650,29 +2908,53 @@ def parse_language(wxr: WiktextractContext,
                     # handle them.  Note: must be careful not to read other
                     # links, particularly things like in "human being":
                     # "a human being -- see [[man/translations]]" (group title)
-                    if (isinstance(arg0, (list, tuple)) and
-                        arg0 and
-                        isinstance(arg0[0], str) and
-                        arg0[0].endswith("/" + wxr.config.OTHER_SUBTITLES["translations"]) and
-                        arg0[0][:-(1 + len(wxr.config.OTHER_SUBTITLES["translations"]))] == wxr.wtp.title):
-                        wxr.wtp.debug("translations subpage link found on main "
-                                  "page instead "
-                                  "of normal {{see translation subpage|...}}",
-                                  sortid="page/2595")
+                    if (
+                        isinstance(arg0, (list, tuple))
+                        and arg0
+                        and isinstance(arg0[0], str)
+                        and arg0[0].endswith(
+                            "/" + wxr.config.OTHER_SUBTITLES["translations"]
+                        )
+                        and arg0[0][
+                            : -(
+                                1
+                                + len(
+                                    wxr.config.OTHER_SUBTITLES["translations"]
+                                )
+                            )
+                        ]
+                        == wxr.wtp.title
+                    ):
+                        wxr.wtp.debug(
+                            "translations subpage link found on main "
+                            "page instead "
+                            "of normal {{see translation subpage|...}}",
+                            sortid="page/2595",
+                        )
                         sub = wxr.wtp.subsection
                         if sub.lower() in wxr.config.POS_SUBTITLES:
-                            seq = [language, sub, wxr.config.OTHER_SUBTITLES["translations"]]
+                            seq = [
+                                language,
+                                sub,
+                                wxr.config.OTHER_SUBTITLES["translations"],
+                            ]
                             subnode = get_subpage_section(
-                                wxr.wtp.title, wxr.config.OTHER_SUBTITLES["translations"], seq)
+                                wxr.wtp.title,
+                                wxr.config.OTHER_SUBTITLES["translations"],
+                                seq,
+                            )
                             if subnode is not None:
                                 parse_translations(data, subnode)
                         else:
-                            wxr.wtp.errors("/translations link outside "
-                                       "part-of-speech")
+                            wxr.wtp.errors(
+                                "/translations link outside " "part-of-speech"
+                            )
 
-                    if (len(arg0) >= 1 and
-                       isinstance(arg0[0], str) and
-                       not arg0[0].lower().startswith("category:")):
+                    if (
+                        len(arg0) >= 1
+                        and isinstance(arg0[0], str)
+                        and not arg0[0].lower().startswith("category:")
+                    ):
                         for x in node.largs[-1]:
                             if isinstance(x, str):
                                 sense_parts.append(x)
@@ -2681,9 +2963,11 @@ def parse_language(wxr: WiktextractContext,
                 elif not sense:
                     sense_parts.append(node)
                 else:
-                    wxr.wtp.debug("skipping text between translation items/senses: "
-                              "{}".format(node),
-                              sortid="page/2621")
+                    wxr.wtp.debug(
+                        "skipping text between translation items/senses: "
+                        "{}".format(node),
+                        sortid="page/2621",
+                    )
 
         # Main code of parse_translation().  We want ``sense`` to be assigned
         # regardless of recursion levels, and thus the code is structured
@@ -2720,17 +3004,25 @@ def parse_language(wxr: WiktextractContext,
             if ignore_count == 0:
                 ht = clean_template_args(wxr, ht)
                 expansion = clean_node(wxr, None, expansion)
-                templates.append({"name": name, "args": ht, "expansion": expansion})
+                templates.append(
+                    {"name": name, "args": ht, "expansion": expansion}
+                )
             return None
 
         # Remove any subsections
-        contents = list(x for x in node.children
-                        if not isinstance(x, WikiNode) or
-                        x.kind not in LEVEL_KINDS)
+        contents = list(
+            x
+            for x in node.children
+            if not isinstance(x, WikiNode) or x.kind not in LEVEL_KINDS
+        )
         # Convert to text, also capturing templates using post_template_fn
-        text = clean_node(wxr, None, contents,
-                          template_fn=etym_template_fn,
-                          post_template_fn=etym_post_template_fn)
+        text = clean_node(
+            wxr,
+            None,
+            contents,
+            template_fn=etym_template_fn,
+            post_template_fn=etym_post_template_fn,
+        )
         # Save the collected information.
         data["etymology_text"] = text
         data["etymology_templates"] = templates
@@ -2804,20 +3096,23 @@ def parse_language(wxr: WiktextractContext,
                     # same proto-language, then we tag this descendant entry with
                     # "derived"
                     is_derived = (
-                        is_proto_root_derived_section and
-                        (name == "l" or name == "link") and
-                        ("1" in ht and ht["1"] == lang_code)
+                        is_proto_root_derived_section
+                        and (name == "l" or name == "link")
+                        and ("1" in ht and ht["1"] == lang_code)
                     )
                     expansion = clean_node(wxr, None, expansion)
-                    templates.append({
-                        "name": name, "args": ht, "expansion": expansion
-                    })
+                    templates.append(
+                        {"name": name, "args": ht, "expansion": expansion}
+                    )
                 return None
 
-            text = clean_node(wxr, None, children,
-                              template_fn=desc_template_fn,
-                              post_template_fn=desc_post_template_fn
-                             )
+            text = clean_node(
+                wxr,
+                None,
+                children,
+                template_fn=desc_template_fn,
+                post_template_fn=desc_post_template_fn,
+            )
             item_data["templates"] = templates
             item_data["text"] = text
             if is_derived:
@@ -2837,11 +3132,15 @@ def parse_language(wxr: WiktextractContext,
 
         def get_descendants(node):
             """Appends the data for every list item in every list in node
-             to descendants."""
+            to descendants."""
             for _, c in node_children(node):
-                if (c.kind == NodeKind.TEMPLATE and c.largs
-                    and len(c.largs[0]) == 1 and isinstance(c.largs[0][0], str)
-                    and c.largs[0][0] in unignored_non_list_templates):
+                if (
+                    c.kind == NodeKind.TEMPLATE
+                    and c.largs
+                    and len(c.largs[0]) == 1
+                    and isinstance(c.largs[0][0], str)
+                    and c.largs[0][0] in unignored_non_list_templates
+                ):
                     # Some Descendants sections have no wikitext list. Rather,
                     # the list is entirely generated by a single template (see
                     # e.g. the use of {{CJKV}} in Chinese entries).
@@ -2914,40 +3213,48 @@ def parse_language(wxr: WiktextractContext,
             if node.kind not in LEVEL_KINDS:
                 # XXX handle e.g. wikipedia links at the top of a language
                 # XXX should at least capture "also" at top of page
-                if node.kind in (NodeKind.HLINE, NodeKind.LIST,
-                                 NodeKind.LIST_ITEM):
+                if node.kind in (
+                    NodeKind.HLINE,
+                    NodeKind.LIST,
+                    NodeKind.LIST_ITEM,
+                ):
                     continue
                 # print("      UNEXPECTED: {}".format(node))
                 # Clean the node to collect category links
-                clean_node(wxr, etym_data, node,
-                           template_fn=skip_template_fn)
+                clean_node(wxr, etym_data, node, template_fn=skip_template_fn)
                 continue
-            t = clean_node(wxr, etym_data,
-                           node.sarg if node.sarg else node.largs)
+            t = clean_node(
+                wxr, etym_data, node.sarg if node.sarg else node.largs
+            )
             t = t.lower()
             # XXX these counts were never implemented fully, and even this
             # gets discarded: Search STATISTICS_IMPLEMENTATION
             wxr.config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
             if t.startswith(tuple(wxr.config.OTHER_SUBTITLES["pronunciation"])):
-                if t.startswith(tuple(
+                if t.startswith(
+                    tuple(
                         pron_title + " "
-                        for pron_title in
-                        wxr.config.OTHER_SUBTITLES.get("pronunciation", []))):
+                        for pron_title in wxr.config.OTHER_SUBTITLES.get(
+                            "pronunciation", []
+                        )
+                    )
+                ):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
                     push_etym()
                     wxr.wtp.start_subsection(None)
                 if wxr.config.capture_pronunciation:
                     data = select_data()
-                    parse_pronunciation(wxr,
-                                        node,
-                                        data,
-                                        etym_data,
-                                        have_etym,
-                                        base_data,
-                                        lang_code,
-                                        )
+                    parse_pronunciation(
+                        wxr,
+                        node,
+                        data,
+                        etym_data,
+                        have_etym,
+                        base_data,
+                        lang_code,
+                    )
             elif t.startswith(tuple(wxr.config.OTHER_SUBTITLES["etymology"])):
                 push_etym()
                 wxr.wtp.start_subsection(None)
@@ -2963,11 +3270,13 @@ def parse_language(wxr: WiktextractContext,
                 data = select_data()
                 parse_descendants(data, node)
             elif (
-                t in wxr.config.OTHER_SUBTITLES.get(
+                t
+                in wxr.config.OTHER_SUBTITLES.get(
                     "proto_root_derived_sections", []
                 )
-                and pos == "root" and is_reconstruction and
-                wxr.config.capture_descendants
+                and pos == "root"
+                and is_reconstruction
+                and wxr.config.capture_descendants
             ):
                 data = select_data()
                 parse_descendants(data, node, True)
@@ -2989,17 +3298,20 @@ def parse_language(wxr: WiktextractContext,
                     pos = dt["pos"]
                     wxr.wtp.start_subsection(t)
                     if "debug" in dt:
-                        wxr.wtp.debug("{} in section {}"
-                                    .format(dt["debug"], t),
-                                    sortid="page/2755")
+                        wxr.wtp.debug(
+                            "{} in section {}".format(dt["debug"], t),
+                            sortid="page/2755",
+                        )
                     if "warning" in dt:
-                        wxr.wtp.warning("{} in section {}"
-                                    .format(dt["warning"], t),
-                                    sortid="page/2759")
+                        wxr.wtp.warning(
+                            "{} in section {}".format(dt["warning"], t),
+                            sortid="page/2759",
+                        )
                     if "error" in dt:
-                        wxr.wtp.error("{} in section {}"
-                                  .format(dt["error"], t),
-                                  sortid="page/2763")
+                        wxr.wtp.error(
+                            "{} in section {}".format(dt["error"], t),
+                            sortid="page/2763",
+                        )
                     # Parse word senses for the part-of-speech
                     parse_part_of_speech(node, pos)
                     if "tags" in dt:
@@ -3056,10 +3368,10 @@ def parse_language(wxr: WiktextractContext,
                         usex_type = "example"
                     elif name in quotation_templates:
                         usex_type = "quotation"
-                    for prefix, t in template_linkage_mappings:
-                        if re.search(r"(^|[-/\s]){}($|\b|[0-9])"
-                                     .format(prefix),
-                                     name):
+                    for prefix in template_linkages:
+                        if re.search(
+                            r"(^|[-/\s]){}($|\b|[0-9])".format(prefix), name
+                        ):
                             return ""
                     return None
 
@@ -3068,23 +3380,32 @@ def parse_language(wxr: WiktextractContext,
                 contents = item.children
                 if lang_code == "ja":
                     # print(contents)
-                    if (contents and isinstance(contents, str) and
-                       re.match(r"\s*$", contents[0])):
+                    if (
+                        contents
+                        and isinstance(contents, str)
+                        and re.match(r"\s*$", contents[0])
+                    ):
                         contents = contents[1:]
-                    exp = wxr.wtp.parse(wxr.wtp.node_to_wikitext(contents),
-                                    # post_template_fn=head_post_template_fn,
-                                    expand_all=True)
+                    exp = wxr.wtp.parse(
+                        wxr.wtp.node_to_wikitext(contents),
+                        # post_template_fn=head_post_template_fn,
+                        expand_all=True,
+                    )
                     rub, rest = extract_ruby(wxr, exp.children)
                     if rub:
                         for r in rub:
                             ruby.append(r)
                         contents = rest
-                subtext = clean_node(wxr, sense_base, contents,
-                                     template_fn=usex_template_fn)
-                subtext = re.sub(r"\s*\(please add an English "
-                                 r"translation of this "
-                                 r"(example|usage example|quote)\)",
-                                 "", subtext).strip()
+                subtext = clean_node(
+                    wxr, sense_base, contents, template_fn=usex_template_fn
+                )
+                subtext = re.sub(
+                    r"\s*\(please add an English "
+                    r"translation of this "
+                    r"(example|usage example|quote)\)",
+                    "",
+                    subtext,
+                ).strip()
                 subtext = re.sub(r"\^\([^)]*\)", "", subtext)
                 subtext = re.sub(r"\s*[―—]+$", "", subtext)
                 # print("subtext:", repr(subtext))
@@ -3093,17 +3414,21 @@ def parse_language(wxr: WiktextractContext,
                 # print(lines)
 
                 lines = list(re.sub(r"^[#:*]*", "", x).strip() for x in lines)
-                lines = list(x for x in lines
-                             if not re.match(
-                                     r"(Synonyms: |Antonyms: |Hyponyms: |"
-                                     r"Synonym: |Antonym: |Hyponym: |"
-                                     r"Hypernyms: |Derived terms: |"
-                                     r"Related terms: |"
-                                     r"Hypernym: |Derived term: |"
-                                     r"Coordinate terms:|"
-                                     r"Related term: |"
-                                     r"For more quotations using )",
-                                     x))
+                lines = list(
+                    x
+                    for x in lines
+                    if not re.match(
+                        r"(Synonyms: |Antonyms: |Hyponyms: |"
+                        r"Synonym: |Antonym: |Hyponym: |"
+                        r"Hypernyms: |Derived terms: |"
+                        r"Related terms: |"
+                        r"Hypernym: |Derived term: |"
+                        r"Coordinate terms:|"
+                        r"Related term: |"
+                        r"For more quotations using )",
+                        x,
+                    )
+                )
                 tr = ""
                 ref = ""
                 roman = ""
@@ -3112,26 +3437,28 @@ def parse_language(wxr: WiktextractContext,
                 #     print(classify_desc(line))
                 if len(lines) == 1 and lang_code != "en":
                     parts = re.split(r"\s*[―—]+\s*", lines[0])
-                    if (len(parts) == 2 and
-                        classify_desc(parts[1]) == "english"):
+                    if len(parts) == 2 and classify_desc(parts[1]) == "english":
                         lines = [parts[0].strip()]
                         tr = parts[1].strip()
-                    elif (len(parts) == 3 and
-                          classify_desc(parts[1]) in ("romanization",
-                                                      "english") and
-                          classify_desc(parts[2]) == "english"):
+                    elif (
+                        len(parts) == 3
+                        and classify_desc(parts[1])
+                        in ("romanization", "english")
+                        and classify_desc(parts[2]) == "english"
+                    ):
                         lines = [parts[0].strip()]
                         roman = parts[1].strip()
                         tr = parts[2].strip()
                     else:
                         parts = re.split(r"\s+-\s+", lines[0])
-                        if (len(parts) == 2 and
-                            classify_desc(parts[1]) == "english"):
+                        if (
+                            len(parts) == 2
+                            and classify_desc(parts[1]) == "english"
+                        ):
                             lines = [parts[0].strip()]
                             tr = parts[1].strip()
                 elif len(lines) > 1:
-                    if any(re.search(r"[]\d:)]\s*$", x)
-                           for x in lines[:-1]):
+                    if any(re.search(r"[]\d:)]\s*$", x) for x in lines[:-1]):
                         ref = []
                         for i in range(len(lines)):
                             if re.match(r"^[#*]*:+(\s*$|\s+)", lines[i]):
@@ -3140,13 +3467,17 @@ def parse_language(wxr: WiktextractContext,
                             if re.search(r"[]\d:)]\s*$", lines[i]):
                                 break
                         ref = " ".join(ref)
-                        lines = lines[i + 1:]
-                        if (lang_code != "en" and len(lines) >= 2 and
-                            classify_desc(lines[-1]) == "english"):
+                        lines = lines[i + 1 :]
+                        if (
+                            lang_code != "en"
+                            and len(lines) >= 2
+                            and classify_desc(lines[-1]) == "english"
+                        ):
                             i = len(lines) - 1
-                            while (i > 1 and
-                                   classify_desc(lines[i - 1])
-                                   == "english"):
+                            while (
+                                i > 1
+                                and classify_desc(lines[i - 1]) == "english"
+                            ):
                                 i -= 1
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
@@ -3155,8 +3486,7 @@ def parse_language(wxr: WiktextractContext,
                                 roman = lines[-1].strip()
                                 lines = lines[:-1]
 
-                    elif (lang_code == "en" and
-                          re.match(r"^[#*]*:+", lines[1])):
+                    elif lang_code == "en" and re.match(r"^[#*]*:+", lines[1]):
                         ref = lines[0]
                         lines = lines[1:]
                     elif lang_code != "en" and len(lines) == 2:
@@ -3168,9 +3498,13 @@ def parse_language(wxr: WiktextractContext,
                         elif cls1 == "english" and cls2 != "english":
                             tr = lines[0]
                             lines = [lines[1]]
-                        elif (re.match(r"^[#*]*:+", lines[1]) and
-                              classify_desc(re.sub(r"^[#*:]+\s*", "",
-                                                   lines[1])) == "english"):
+                        elif (
+                            re.match(r"^[#*]*:+", lines[1])
+                            and classify_desc(
+                                re.sub(r"^[#*:]+\s*", "", lines[1])
+                            )
+                            == "english"
+                        ):
                             tr = re.sub(r"^[#*:]+\s*", "", lines[1])
                             lines = [lines[0]]
                         elif cls1 == "english" and cls2 == "english":
@@ -3179,20 +3513,27 @@ def parse_language(wxr: WiktextractContext,
                             # non-English, as that seems more common.
                             tr = lines[1]
                             lines = [lines[0]]
-                    elif (usex_type != "quotation" and
-                          lang_code != "en" and
-                          len(lines) == 3):
+                    elif (
+                        usex_type != "quotation"
+                        and lang_code != "en"
+                        and len(lines) == 3
+                    ):
                         cls1 = classify_desc(lines[0])
                         cls2 = classify_desc(lines[1])
                         cls3 = classify_desc(lines[2])
-                        if (cls3 == "english" and
-                            cls2 in ["english", "romanization"] and
-                            cls1 != "english"):
+                        if (
+                            cls3 == "english"
+                            and cls2 in ["english", "romanization"]
+                            and cls1 != "english"
+                        ):
                             tr = lines[2].strip()
                             roman = lines[1].strip()
                             lines = [lines[0].strip()]
-                    elif (usex_type == "quotation" and
-                          lang_code != "en" and len(lines) > 2):
+                    elif (
+                        usex_type == "quotation"
+                        and lang_code != "en"
+                        and len(lines) > 2
+                    ):
                         # for x in lines:
                         #     print("  LINE: {}: {}"
                         #           .format(classify_desc(x), x))
@@ -3202,9 +3543,10 @@ def parse_language(wxr: WiktextractContext,
                         cls1 = classify_desc(lines[-1])
                         if cls1 == "english":
                             i = len(lines) - 1
-                            while (i > 1 and
-                                   classify_desc(lines[i - 1])
-                                   == "english"):
+                            while (
+                                i > 1
+                                and classify_desc(lines[i - 1]) == "english"
+                            ):
                                 i -= 1
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
@@ -3215,10 +3557,13 @@ def parse_language(wxr: WiktextractContext,
                 tr = re.sub(r"[ \t\r]+", " ", tr).strip()
                 tr = re.sub(r"\[\s*…\s*\]", "[…]", tr)
                 ref = re.sub(r"^[#*:]+\s*", "", ref)
-                ref = re.sub(r", (volume |number |page )?“?"
-                             r"\(please specify ([^)]|\(s\))*\)”?|"
-                             ", text here$",
-                             "", ref)
+                ref = re.sub(
+                    r", (volume |number |page )?“?"
+                    r"\(please specify ([^)]|\(s\))*\)”?|"
+                    ", text here$",
+                    "",
+                    ref,
+                )
                 ref = re.sub(r"\[\s*…\s*\]", "[…]", ref)
                 lines = list(re.sub(r"^[#*:]+\s*", "", x) for x in lines)
                 subtext = "\n".join(x for x in lines if x)
@@ -3226,30 +3571,41 @@ def parse_language(wxr: WiktextractContext,
                     m = re.search(r"([.!?])\s+\(([^)]+)\)\s*$", subtext)
                     if m and classify_desc(m.group(2)) == "english":
                         tr = m.group(2)
-                        subtext = subtext[:m.start()] + m.group(1)
+                        subtext = subtext[: m.start()] + m.group(1)
                     elif lines:
                         parts = re.split(r"\s*[―—]+\s*", lines[0])
-                        if (len(parts) == 2 and
-                            classify_desc(parts[1]) == "english"):
+                        if (
+                            len(parts) == 2
+                            and classify_desc(parts[1]) == "english"
+                        ):
                             subtext = parts[0].strip()
                             tr = parts[1].strip()
-                subtext = re.sub(r'^[“"`]([^“"`”\']*)[”"\']$', r"\1",
-                                 subtext)
-                subtext = re.sub(r"(please add an English translation of "
-                                 r"this (quote|usage example))",
-                                 "", subtext)
-                subtext = re.sub(r"\s*→New International Version "
-                                 "translation$",
-                                 "", subtext)  # e.g. pis/Tok Pisin (Bible)
+                subtext = re.sub(r'^[“"`]([^“"`”\']*)[”"\']$', r"\1", subtext)
+                subtext = re.sub(
+                    r"(please add an English translation of "
+                    r"this (quote|usage example))",
+                    "",
+                    subtext,
+                )
+                subtext = re.sub(
+                    r"\s*→New International Version " "translation$",
+                    "",
+                    subtext,
+                )  # e.g. pis/Tok Pisin (Bible)
                 subtext = re.sub(r"[ \t\r]+", " ", subtext).strip()
                 subtext = re.sub(r"\[\s*…\s*\]", "[…]", subtext)
                 note = None
                 m = re.match(r"^\(([^)]*)\):\s+", subtext)
-                if (m is not None and lang_code != "en" and
-                    (m.group(1).startswith("with ") or
-                     classify_desc(m.group(1)) == "english")):
+                if (
+                    m is not None
+                    and lang_code != "en"
+                    and (
+                        m.group(1).startswith("with ")
+                        or classify_desc(m.group(1)) == "english"
+                    )
+                ):
                     note = m.group(1)
-                    subtext = subtext[m.end():]
+                    subtext = subtext[m.end() :]
                 ref = re.sub(r"\s*\(→ISBN\)", "", ref)
                 ref = re.sub(r",\s*→ISBN", "", ref)
                 ref = ref.strip()
@@ -3277,7 +3633,6 @@ def parse_language(wxr: WiktextractContext,
                     examples.append(dt)
 
         return examples
-
 
     # Main code of parse_language()
     # Process the section
@@ -3358,9 +3713,10 @@ def parse_top_template(wxr, node, data):
             if arg.startswith("Q") or arg.startswith("Lexeme:L"):
                 data_append(data, "wikidata", arg)
             return ""
-        wxr.wtp.debug("UNIMPLEMENTED top-level template: {} {}"
-                  .format(name, ht),
-                  sortid="page/2870")
+        wxr.wtp.debug(
+            "UNIMPLEMENTED top-level template: {} {}".format(name, ht),
+            sortid="page/2870",
+        )
         return ""
 
     clean_node(wxr, None, [node], template_fn=top_template_fn)
@@ -3373,9 +3729,9 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
     # Known lowercase PoS names are in part_of_speech_map
     # Known lowercase linkage section names are in linkage_map
 
-    old = re.split(r"(?m)^(==+)[ \t]*([^= \t]([^=\n]|=[^=])*?)"
-                     r"[ \t]*(==+)[ \t]*$",
-                     text)
+    old = re.split(
+        r"(?m)^(==+)[ \t]*([^= \t]([^=\n]|=[^=])*?)" r"[ \t]*(==+)[ \t]*$", text
+    )
 
     parts = []
     npar = 4  # Number of parentheses in above expression
@@ -3389,22 +3745,29 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
         level = len(left)
         part = old[i + npar]
         if level != len(right):
-            wxr.wtp.debug("subtitle has unbalanced levels: "
-                      "{!r} has {} on the left and {} on the right"
-                      .format(title, left, right),
-                      sortid="page/2904")
+            wxr.wtp.debug(
+                "subtitle has unbalanced levels: "
+                "{!r} has {} on the left and {} on the right".format(
+                    title, left, right
+                ),
+                sortid="page/2904",
+            )
         lc = title.lower()
         if name_to_code(title, "en") != "":
             if level > 2:
-                wxr.wtp.debug("subtitle has language name {} at level {}"
-                          .format(title, level),
-                          sortid="page/2911")
+                wxr.wtp.debug(
+                    "subtitle has language name {} at level {}".format(
+                        title, level
+                    ),
+                    sortid="page/2911",
+                )
             level = 2
         elif lc.startswith(tuple(wxr.config.OTHER_SUBTITLES["etymology"])):
             if level > 3:
-                wxr.wtp.debug("etymology section {} at level {}"
-                          .format(title, level),
-                          sortid="page/2917")
+                wxr.wtp.debug(
+                    "etymology section {} at level {}".format(title, level),
+                    sortid="page/2917",
+                )
             level = 3
         elif lc.startswith(tuple(wxr.config.OTHER_SUBTITLES["pronunciation"])):
             level = 3
@@ -3473,7 +3836,7 @@ def parse_page(
         text,
         pre_expand=True,
         additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
-        do_not_pre_expand=DO_NOT_PRE_EXPAND_TEMPLATES
+        do_not_pre_expand=DO_NOT_PRE_EXPAND_TEMPLATES,
     )
     # from wikitextprocessor.parser import print_tree
     # print("PAGE PARSE:", print_tree(tree))
@@ -3521,7 +3884,7 @@ def parse_page(
             if "lang" not in data:
                 wxr.wtp.debug(
                     "internal error -- no lang in data: {}".format(data),
-                    sortid="page/3034"
+                    sortid="page/3034",
                 )
                 continue
             for k, v in top_data.items():
@@ -3552,16 +3915,26 @@ def parse_page(
                     if not conjs:
                         continue
                     cpos = dt.get("pos")
-                    if (pos == cpos or
-                        (pos, cpos) in (("noun", "adj"),
-                                        ("noun", "name"),
-                                        ("name", "noun"),
-                                        ("name", "adj"),
-                                        ("adj", "noun"),
-                                        ("adj", "name")) or
-                        (pos == "adj" and cpos == "verb" and
-                         any("participle" in s.get("tags", ())
-                             for s in dt.get("senses", ())))):
+                    if (
+                        pos == cpos
+                        or (pos, cpos)
+                        in (
+                            ("noun", "adj"),
+                            ("noun", "name"),
+                            ("name", "noun"),
+                            ("name", "adj"),
+                            ("adj", "noun"),
+                            ("adj", "name"),
+                        )
+                        or (
+                            pos == "adj"
+                            and cpos == "verb"
+                            and any(
+                                "participle" in s.get("tags", ())
+                                for s in dt.get("senses", ())
+                            )
+                        )
+                    ):
                         data["conjugation"] = list(conjs)  # Copy list!
                         break
         # Add topics from the last sense of a language to its other senses,
@@ -3579,13 +3952,14 @@ def parse_page(
     for x in ret:
         if x["word"] != word:
             if word.startswith("Unsupported titles/"):
-                wxr.wtp.debug(f"UNSUPPORTED TITLE: '{word}' -> '{x['word']}'",
-                                sortid="20231101/3578page.py"
-                            )
+                wxr.wtp.debug(
+                    f"UNSUPPORTED TITLE: '{word}' -> '{x['word']}'",
+                    sortid="20231101/3578page.py",
+                )
             else:
-                wxr.wtp.debug(f"DIFFERENT ORIGINAL TITLE: '{word}' "
-                              f"-> '{x['word']}'",
-                              sortid="20231101/3582page.py"
-                             )
+                wxr.wtp.debug(
+                    f"DIFFERENT ORIGINAL TITLE: '{word}' " f"-> '{x['word']}'",
+                    sortid="20231101/3582page.py",
+                )
             x["original_title"] = word
     return ret

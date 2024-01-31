@@ -9,13 +9,12 @@
 import re
 import html
 import unicodedata
-from typing import (
-    Callable,
-    Optional,
-    Union
-)
+from typing import Callable, Optional, Union
 from wikitextprocessor.common import MAGIC_FIRST, MAGIC_LAST
-from wikitextprocessor.core import NamespaceDataEntry
+from wikitextprocessor.core import (
+    NamespaceDataEntry,
+    TemplateArgs,
+)
 from .wxr_context import WiktextractContext
 
 ######################################################################
@@ -94,7 +93,7 @@ superscript_ht: dict[str, str] = {
     "ι": "ᶥ",
     "φ": "ᵠ",
     "χ": "ᵡ",
-    "∞": "\u2002᪲"  # This is a KLUDGE
+    "∞": "\u2002᪲",  # This is a KLUDGE
 }
 
 subscript_ht: dict[str, str] = {
@@ -137,6 +136,7 @@ subscript_ht: dict[str, str] = {
     "χ": "ᵪ",
 }
 
+
 def to_superscript(text: str) -> str:
     "Converts text to superscript."
     if not text:
@@ -146,6 +146,7 @@ def to_superscript(text: str) -> str:
     if len(text) == 1:
         return "^" + text
     return "^({})".format(text)
+
 
 def to_subscript(text: str) -> str:
     """Converts text to subscript."""
@@ -157,10 +158,11 @@ def to_subscript(text: str) -> str:
         return "_" + text
     return "_({})".format(text)
 
+
 def to_chem(text: str) -> str:
     """Converts text to chemical formula, making digits subscript."""
-    return "".join(to_subscript(x) if x.isdigit() else x
-                   for x in text)
+    return "".join(to_subscript(x) if x.isdigit() else x for x in text)
+
 
 # Mapping from Latex names to Unicode characters/strings.  This is the
 # default mapping (some cases are handled specially in the code).
@@ -886,7 +888,6 @@ math_map: dict[str, str] = {
     "zpipe": "⨠",
     "zproject": "⨡",
     "|": "‖",
-
     # Accents XXX these really should be handled specially with diacritics
     # after argument
     "acute": "́",
@@ -906,8 +907,6 @@ math_map: dict[str, str] = {
     "overline": "◌̅",
     "tilde": "̃",
     "vec": "⃑",
-
-
     # Some ignored operators
     "bigl": "",
     "bigr": "",
@@ -973,7 +972,7 @@ mathcal_map: dict[str, str] = {
     "z": "𝓏",
 }
 
-mathfrak_map: dict[str, str]= {
+mathfrak_map: dict[str, str] = {
     "A": "𝔄",
     "B": "𝔅",
     "C": "ℭ",
@@ -1070,14 +1069,18 @@ mathbb_map: dict[str, str] = {
     "9": "𝟡",
 }
 
+
 def mathcal_fn(text: str) -> str:
     return "".join(mathcal_map.get(x, x) for x in text)
+
 
 def mathfrak_fn(text: str) -> str:
     return "".join(mathfrak_map.get(x, x) for x in text)
 
+
 def mathbb_fn(text: str) -> str:
     return "".join(mathbb_map.get(x, x) for x in text)
+
 
 def to_math(text: str) -> str:
     """Converts a mathematical formula to ASCII."""
@@ -1088,22 +1091,25 @@ def to_math(text: str) -> str:
         while True:
             orig = text
             # formatting with {:c} converts input into character
-            text = re.sub(r"[{:c}-{:c}]".format(MAGIC_FIRST, MAGIC_LAST),
-                          lambda m: magic_vec[ord(m.group(0)) - MAGIC_FIRST],
-                          text)
+            text = re.sub(
+                r"[{:c}-{:c}]".format(MAGIC_FIRST, MAGIC_LAST),
+                lambda m: magic_vec[ord(m.group(0)) - MAGIC_FIRST],
+                text,
+            )
             if text == orig:
                 break
         return text
 
     def recurse(text: str) -> str:
-        def math_magic(text: str,
-                        left: str,
-                        right: str,
-                        fn: Callable[[str], str]
+        def math_magic(
+            text: str, left: str, right: str, fn: Callable[[str], str]
         ) -> str:
             regexp_str = r"{}([^{}{}]+){}".format(
-                re.escape(left), re.escape(left),
-                re.escape(right), re.escape(right))
+                re.escape(left),
+                re.escape(left),
+                re.escape(right),
+                re.escape(right),
+            )
             regexp = re.compile(regexp_str)
 
             def repl(m: re.Match) -> str:
@@ -1150,8 +1156,11 @@ def to_math(text: str) -> str:
             elif re.match(r"\\sqrt($|[0-9]|\b)", v):
                 v = "√"
             elif re.match(r"\\(frac|binom)($|[0-9]|\b)", v):
-                m = re.match(r"\\(frac|binom)\s*(\\[a-zA-Z]+|\\.|.)\s*"
-                             r"(\\[a-zA-Z]+|\\.|.)$", v)
+                m = re.match(
+                    r"\\(frac|binom)\s*(\\[a-zA-Z]+|\\.|.)\s*"
+                    r"(\\[a-zA-Z]+|\\.|.)$",
+                    v,
+                )
                 if not m:
                     print("MATH FRAC/BINOM ERROR: {!r}".format(v))
                     return v
@@ -1198,31 +1207,37 @@ def to_math(text: str) -> str:
             text = math_magic(text, "{", "}", recurse)
             if text == orig:
                 break
-        for m in re.finditer(r"\s+|"
-                             r"\\frac\s*(\\[a-zA-Z]+|\\.|.)\s*"
-                             r"(\\dot\\(bigvee|cup|cap|lor|vee)|"
-                             r"\\not\\(subset|supset|subseteq|supseteq|in|ni|"
-                             r"preceq|succeq|vartrianglelefteq|"
-                             r"vartrianglerighteq|trianglelefteq|"
-                             r"trianglerighteq)|"
-                             r"\\widehat\{=\}|\\widehat=|"
-                             r"\\overset\{?\}\{=\}|"
-                             r"\\overset\?=|"
-                             r"\\overset\{\\operatorname\{def\}\}\{=\}|"
-                             r"\\[a-zA-Z]+|\\.|.)|"
-                             r"(\\(mathcal|mathfrak|mathbb|text|begin|end|pmod)"
-                             r"\b\s*|"
-                             r"\\sqrt\b(\[\d+\])?)?"
-                             r"[_^]?(\\[a-zA-Z]+\s*|\\.|\w+|.)", text):
+        for m in re.finditer(
+            r"\s+|"
+            r"\\frac\s*(\\[a-zA-Z]+|\\.|.)\s*"
+            r"(\\dot\\(bigvee|cup|cap|lor|vee)|"
+            r"\\not\\(subset|supset|subseteq|supseteq|in|ni|"
+            r"preceq|succeq|vartrianglelefteq|"
+            r"vartrianglerighteq|trianglelefteq|"
+            r"trianglerighteq)|"
+            r"\\widehat\{=\}|\\widehat=|"
+            r"\\overset\{?\}\{=\}|"
+            r"\\overset\?=|"
+            r"\\overset\{\\operatorname\{def\}\}\{=\}|"
+            r"\\[a-zA-Z]+|\\.|.)|"
+            r"(\\(mathcal|mathfrak|mathbb|text|begin|end|pmod)"
+            r"\b\s*|"
+            r"\\sqrt\b(\[\d+\])?)?"
+            r"[_^]?(\\[a-zA-Z]+\s*|\\.|\w+|.)",
+            text,
+        ):
             v = m.group(0).strip()
             if not v:
                 continue
             v = expand_group(v)
             if v:
-                if ((parts and parts[-1][-1].isalpha() and
-                     v[0] in "0123456789") or
-                    (parts and parts[-1][-1] in "0123456789" and
-                     v[0] in "0123456789")):
+                if (
+                    parts and parts[-1][-1].isalpha() and v[0] in "0123456789"
+                ) or (
+                    parts
+                    and parts[-1][-1] in "0123456789"
+                    and v[0] in "0123456789"
+                ):
                     v = " " + v
                 parts.append(v)
 
@@ -1237,7 +1252,7 @@ def to_math(text: str) -> str:
 def bold_follows(parts: list[str], i: int) -> bool:
     """Checks if there is a bold (''') in parts after parts[i].  We allow
     intervening italics ('')."""
-    parts = parts[i + 1:]
+    parts = parts[i + 1 :]
     for p in parts:
         if not p.startswith("''"):
             continue
@@ -1308,13 +1323,12 @@ def remove_italic_and_bold(text: str) -> str:
                 continue
             new_text_parts.append(part)
         new_text_parts.append("\n")
-    new_text_parts = new_text_parts[:-1] # remove last \n
+    new_text_parts = new_text_parts[:-1]  # remove last \n
     return "".join(new_text_parts)
 
-def clean_value(wxr: WiktextractContext,
-                title: str,
-                no_strip=False,
-                no_html_strip=False
+
+def clean_value(
+    wxr: WiktextractContext, title: str, no_strip=False, no_html_strip=False
 ) -> str:
     """Cleans a title or value into a normal string.  This should basically
     remove any Wikimedia formatting from it: HTML tags, templates, links,
@@ -1334,17 +1348,18 @@ def clean_value(wxr: WiktextractContext,
                 break
             i += 1
         return " ".join(args[i:])
+
     def repl_link(m: re.Match) -> str:
         if m.group(2) and m.group(2).lower() in ("file", "image"):
             return ""
         v = m.group(3).split("|")
         return clean_value(wxr, v[0], no_strip=True)
+
     def repl_link_bars(m: re.Match) -> str:
         lnk = m.group(1)
         if re.match(r"(?si)(File|Image)\s*:", lnk):
             return ""
-        return clean_value(wxr, m.group(4) or m.group(2) or "",
-                           no_strip=True)
+        return clean_value(wxr, m.group(4) or m.group(2) or "", no_strip=True)
 
     def repl_1_sup(m: re.Match) -> str:
         return to_superscript(clean_value(wxr, m.group(1)))
@@ -1373,34 +1388,47 @@ def clean_value(wxr: WiktextractContext,
     # Remove references (<ref>...</ref>).
     title = re.sub(r"(?is)<ref\b\s*[^>/]*?>\s*.*?</ref\s*>", "", title)
     # Replace <span>...</span> by stripped content without newlines
-    title = re.sub(r"(?is)<span\b\s*[^>]*?>(.*?)\s*</span\s*>",
-                   lambda m: re.sub(r"\s+", " ", m.group(1)),
-                   title)
+    title = re.sub(
+        r"(?is)<span\b\s*[^>]*?>(.*?)\s*</span\s*>",
+        lambda m: re.sub(r"\s+", " ", m.group(1)),
+        title,
+    )
     # Replace <br/> by comma space (it is used to express alternatives in some
     # declensions)
     title = re.sub(r"(?si)\s*<br\s*/?>\n*", "\n", title)
     # Remove divs with floatright class (generated e.g. by {{ja-kanji|...}})
-    title = re.sub(r'(?si)<div\b[^>]*?\bclass="[^"]*?\bfloatright\b[^>]*?>'
-                   r'((<div\b(<div\b.*?</div\s*>|.)*?</div>)|.)*?'
-                   r'</div\s*>',
-                   "", title)
+    title = re.sub(
+        r'(?si)<div\b[^>]*?\bclass="[^"]*?\bfloatright\b[^>]*?>'
+        r"((<div\b(<div\b.*?</div\s*>|.)*?</div>)|.)*?"
+        r"</div\s*>",
+        "",
+        title,
+    )
     # Remove divs with float: attribute
-    title = re.sub(r'(?si)<div\b[^>]*?\bstyle="[^"]*?\bfloat:[^>]*?>'
-                   r'((<div\b(<div\b.*?</div\s*>|.)*?</div>)|.)*?'
-                   r'</div\s*>',
-                   "", title)
+    title = re.sub(
+        r'(?si)<div\b[^>]*?\bstyle="[^"]*?\bfloat:[^>]*?>'
+        r"((<div\b(<div\b.*?</div\s*>|.)*?</div>)|.)*?"
+        r"</div\s*>",
+        "",
+        title,
+    )
     # Remove <sup> with previewonly class (generated e.g. by {{taxlink|...}})
-    title = re.sub(r'(?si)<sup\b[^>]*?\bclass="[^"<>]*?'
-                   r'\bpreviewonly\b[^>]*?>'
-                   r'.+?</sup\s*>',
-                   "", title)
+    title = re.sub(
+        r'(?si)<sup\b[^>]*?\bclass="[^"<>]*?'
+        r"\bpreviewonly\b[^>]*?>"
+        r".+?</sup\s*>",
+        "",
+        title,
+    )
     # Remove <strong class="error">...</strong>
-    title = re.sub(r'(?si)<strong\b[^>]*?\bclass="[^"]*?\berror\b[^>]*?>'
-                   r'.+?</strong\s*>',
-                   "", title)
+    title = re.sub(
+        r'(?si)<strong\b[^>]*?\bclass="[^"]*?\berror\b[^>]*?>'
+        r".+?</strong\s*>",
+        "",
+        title,
+    )
     # Change <div> and </div> to newlines.  Ditto for tr, li, table, dl, ul, ol
-    title = re.sub(r"(?si)</?(div|tr|li|table|dl|ul|ol)\b[^>]*>",
-                   "\n", title)
+    title = re.sub(r"(?si)</?(div|tr|li|table|dl|ul|ol)\b[^>]*>", "\n", title)
     # Change <dt>, <dd>, </dt> and </dd> into newlines;
     # these generate new rows/lines.
     title = re.sub(r"(?i)</?d[dt]\s*>", "\n", title)
@@ -1408,22 +1436,20 @@ def clean_value(wxr: WiktextractContext,
     title = re.sub(r"(?si)</?(td|th)\b[^>]*>", " ", title)
     # Change <sup> ... </sup> to ^
     title = re.sub(r"(?si)<sup\b[^>]*>\s*</sup\s*>", "", title)
-    title = re.sub(r"(?si)<sup\b[^>]*>(.*?)</sup\s*>",
-                   repl_1_sup, title)
+    title = re.sub(r"(?si)<sup\b[^>]*>(.*?)</sup\s*>", repl_1_sup, title)
     # Change <sub> ... </sub> to _
     title = re.sub(r"(?si)<sub\b[^>]*>\s*</sup\s*>", "", title)
-    title = re.sub(r"(?si)<sub\b[^>]*>(.*?)</sub\s*>",
-                   repl_1_sub, title)
+    title = re.sub(r"(?si)<sub\b[^>]*>(.*?)</sub\s*>", repl_1_sub, title)
     # Change <chem> ... </chem> using subscripts for digits
-    title = re.sub(r"(?si)<chem\b[^>]*>(.*?)</chem\s*>",
-                   repl_1_chem, title)
+    title = re.sub(r"(?si)<chem\b[^>]*>(.*?)</chem\s*>", repl_1_chem, title)
     # Change <math> ... </math> using special formatting.
-    title = re.sub(r"(?si)<math\b[^>]*>(.*?)</math\s*>",
-                   repl_1_math, title)
+    title = re.sub(r"(?si)<math\b[^>]*>(.*?)</math\s*>", repl_1_math, title)
     # Change <syntaxhighlight> ... </syntaxhighlight> using special formatting.
-    title = re.sub(r"(?si)<syntaxhighlight\b[^>]*>(.*?)"
-                   r"</syntaxhighlight\s*>",
-                   repl_1_syntaxhighlight, title)
+    title = re.sub(
+        r"(?si)<syntaxhighlight\b[^>]*>(.*?)" r"</syntaxhighlight\s*>",
+        repl_1_syntaxhighlight,
+        title,
+    )
     # Remove any remaining HTML tags.
     if not no_html_strip:
         title = re.sub(r"(?s)<[/!a-zA-Z][^>]*>", "", title)
@@ -1441,7 +1467,7 @@ def clean_value(wxr: WiktextractContext,
 
     category_ns_data: NamespaceDataEntry
     # XXX "Category" -> config variable for portability
-    category_ns_data = wxr.wtp.NAMESPACE_DATA.get("Category", {}) # type: ignore[typeddict-item]
+    category_ns_data = wxr.wtp.NAMESPACE_DATA.get("Category", {})  # type: ignore[typeddict-item]
     # Fail if we received empty dict from .get()
     category_ns_names = {category_ns_data["name"]} | set(
         category_ns_data["aliases"]
@@ -1455,22 +1481,30 @@ def clean_value(wxr: WiktextractContext,
             "",
             title,
         )
-        title = re.sub(r"(?s)\[\[\s*:?([^]|#<>]+?)\s*(#[^][|<>]*?)?\]\]",
-                       repl_1, title)
-        title = re.sub(r"(?s)\[\[\s*(([a-zA-Z0-9]+)\s*:)?\s*([^][#|<>]+?)"
-                       r"\s*(#[^][|]*?)?\|?\]\]",
-                       repl_link, title)
-        title = re.sub(r"(?s)\[\[\s*([^][|<>]+?)\s*\|"
-                       r"\s*(([^][|]|\[[^]]*\])+?)"
-                       r"(\s*\|\s*(([^]|]|\[[^]]*\])+?))*\s*\]\]",
-                       repl_link_bars, title)
+        title = re.sub(
+            r"(?s)\[\[\s*:?([^]|#<>]+?)\s*(#[^][|<>]*?)?\]\]", repl_1, title
+        )
+        title = re.sub(
+            r"(?s)\[\[\s*(([a-zA-Z0-9]+)\s*:)?\s*([^][#|<>]+?)"
+            r"\s*(#[^][|]*?)?\|?\]\]",
+            repl_link,
+            title,
+        )
+        title = re.sub(
+            r"(?s)\[\[\s*([^][|<>]+?)\s*\|"
+            r"\s*(([^][|]|\[[^]]*\])+?)"
+            r"(\s*\|\s*(([^]|]|\[[^]]*\])+?))*\s*\]\]",
+            repl_link_bars,
+            title,
+        )
         if title == orig:
             break
     # Replace remaining HTML links by the URL.
     while True:
         orig = title
-        title = re.sub(r"\[\s*((https?:|mailto:)?//([^][]+?))\s*\]",
-                       repl_exturl, title)
+        title = re.sub(
+            r"\[\s*((https?:|mailto:)?//([^][]+?))\s*\]", repl_exturl, title
+        )
         if title == orig:
             break
 
@@ -1508,14 +1542,16 @@ def clean_value(wxr: WiktextractContext,
     return title
 
 
-def clean_template_args(wxr: WiktextractContext,
-                        ht: dict[Union[int, str], str], # XXX -> "TemplateArgs"
-                        no_strip=False
+def clean_template_args(
+    wxr: WiktextractContext, ht: TemplateArgs, no_strip=False
 ) -> dict[str, str]:
     """Cleans all values in a template argument dictionary and returns the
     cleaned dictionary."""
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(ht, dict)
-    return {clean_value(wxr, str(k), no_html_strip=True):
-            clean_value(wxr, str(v), no_strip=no_strip, no_html_strip=True)
-            for k, v in ht.items()}
+    return {
+        clean_value(wxr, str(k), no_html_strip=True): clean_value(
+            wxr, str(v), no_strip=no_strip, no_html_strip=True
+        )
+        for k, v in ht.items()
+    }

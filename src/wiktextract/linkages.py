@@ -8,21 +8,33 @@ from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
 from typing import Dict, List, Union, Optional
 from .datautils import split_at_comma_semi, data_append
-from .form_descriptions import (classify_desc, parse_head_final_tags,
-                                parse_sense_qualifier,
-                                head_final_bantu_langs, head_final_bantu_re,
-                                head_final_other_langs, head_final_other_re,
-                                head_final_numeric_langs, head_final_re)
+from .form_descriptions import (
+    classify_desc,
+    parse_head_final_tags,
+    parse_sense_qualifier,
+    head_final_bantu_langs,
+    head_final_bantu_re,
+    head_final_other_langs,
+    head_final_other_re,
+    head_final_numeric_langs,
+    head_final_re,
+)
 from .tags import linkage_beginning_tags
+from .type_utils import WordData
 
 # Linkage will be ignored if it matches this regexp before splitting
 linkage_pre_split_ignore_re = re.compile(
-    r"^(" + "|".join(re.escape(x) for x in [
-        "For more variations, see ",
-        "Signal flag:",
-        "Semaphore:",
-        ]) +
-    r")")
+    r"^("
+    + "|".join(
+        re.escape(x)
+        for x in [
+            "For more variations, see ",
+            "Signal flag:",
+            "Semaphore:",
+        ]
+    )
+    + r")"
+)
 
 # Linkage will be ignored if it has one of these prefixes
 linkage_ignore_prefixes = [
@@ -63,31 +75,40 @@ linkage_ignore_whole = [
 
 # Linkage will be ignored if it matches this regexp
 linkage_ignore_re = re.compile(
-    r"^(" + "|".join(re.escape(x) for x in linkage_ignore_whole) +
-    r")$|^(" + "|".join(re.escape(x) for x in linkage_ignore_prefixes) +
-    r")|(" + "|".join(re.escape(x) for x in linkage_ignore_suffixes) +
-    r")$")
+    r"^("
+    + "|".join(re.escape(x) for x in linkage_ignore_whole)
+    + r")$|^("
+    + "|".join(re.escape(x) for x in linkage_ignore_prefixes)
+    + r")|("
+    + "|".join(re.escape(x) for x in linkage_ignore_suffixes)
+    + r")$"
+)
 
 # These prefixes will be removed from linkages, leaving the rest.  This is
 # considered separately for each linkage in a list.
 linkage_remove_prefixes_re = re.compile(
-    r"^(" +
-    r"|".join(re.escape(x) for x in [
-        ":",
-        "see Thesaurus:",
-        "See Thesaurus:",
-        "see also Thesaurus:",
-        "See also Thesaurus:",
-        "see also ",
-        "See also ",
-        "see ",
-        "See ",
-        "from ",
-        "abbreviation of ",
-        "ISO 639-1 code ",
-        "ISO 639-3 code ",
-        "Thesaurus:"]) +
-    ")")
+    r"^("
+    + r"|".join(
+        re.escape(x)
+        for x in [
+            ":",
+            "see Thesaurus:",
+            "See Thesaurus:",
+            "see also Thesaurus:",
+            "See also Thesaurus:",
+            "see also ",
+            "See also ",
+            "see ",
+            "See ",
+            "from ",
+            "abbreviation of ",
+            "ISO 639-1 code ",
+            "ISO 639-3 code ",
+            "Thesaurus:",
+        ]
+    )
+    + ")"
+)
 
 # When removing prefix from linkage, this dictionary can be used to map
 # the removed prefix to a space-separated list of tags to add
@@ -101,17 +122,22 @@ linkage_remove_suffixes_re = re.compile(
     r"(\s+on (Wikispecies|Wikimedia Commons|"
     r"[A-Z]\w+ Wiktionary|[A-Z]\w+ Wikipedia)\.?|"
     r"\s*[-–] Pre-reform orthography.*)"
-    r"$")
+    r"$"
+)
 
 # Ignore linkage parenthesized sections that contain one of these strings
 linkage_paren_ignore_contains_re = re.compile(
-    r"\b(" +
-    "|".join(re.escape(x) for x in [
-        "from Etymology",
-        "used as",
-        "usage notes",
-        ]) +
-    ")([, ]|$)")
+    r"\b("
+    + "|".join(
+        re.escape(x)
+        for x in [
+            "from Etymology",
+            "used as",
+            "usage notes",
+        ]
+    )
+    + ")([, ]|$)"
+)
 
 taxonomic_ending_map = {
     "superkingdoms": "superkingdom",
@@ -133,7 +159,9 @@ for k, v in list(taxonomic_ending_map.items()):
     taxonomic_ending_map[v] = v  # Also add singular -> singular
 taxonomic_ending_re = re.compile(
     r"\s+[-‐‑‒–—]\s+({})$".format(
-        "|".join(re.escape(x) for x in taxonomic_ending_map)))
+        "|".join(re.escape(x) for x in taxonomic_ending_map)
+    )
+)
 
 # Exceptional splits for linkages.  This can be used to fix particular linkages
 # that are not handled correctly by the default code.  This can also be used
@@ -146,10 +174,14 @@ linkage_split_exceptions = {
 
 # Truncate linkage word if it matches any of these strings
 linkage_truncate_re = re.compile(
-    "|".join(re.escape(x) for x in [
-        " and its derived terms",
-        " UTF-16 0x214C",
-        ]))
+    "|".join(
+        re.escape(x)
+        for x in [
+            " and its derived terms",
+            " UTF-16 0x214C",
+        ]
+    )
+)
 
 # Regexp for identifying special linkages containing lists of letters, digits,
 # or characters
@@ -161,39 +193,47 @@ script_chars_re = re.compile(
     r" digits)(;|$)|"
     r"(^|; )(Letters using |Letters of the |"
     r"Variations of letter )|"
-    r"^(Hiragana|Katakana)$")
+    r"^(Hiragana|Katakana)$"
+)
 
 # Matches an unicode character including any combining diacritics (even if
 # separate characters)
-unicode_dc_re = re.compile(r"\w[{}]|.".format(
-    "".join(chr(x) for x in range(0, 0x110000)
-            if unicodedata.category(chr(x)) == "Mn")))
+unicode_dc_re = re.compile(
+    r"\w[{}]|.".format(
+        "".join(
+            chr(x)
+            for x in range(0, 0x110000)
+            if unicodedata.category(chr(x)) == "Mn"
+        )
+    )
+)
 
 
-def parse_linkage_item_text(wxr: Wtp,
-                            word: str,
-                            data: Dict[str, Union[list, str, dict]],
-                            field: str,
-                            item: str,
-                            sense: Optional[str],
-                            ruby: list,
-                            pos_datas: list,
-                            is_reconstruction: bool,
-                            urls: Optional[List[str]] = None
-                            ) -> Optional[str]:
+def parse_linkage_item_text(
+    wxr: WiktextractContext,
+    word: str,
+    data: WordData,
+    field: str,
+    item: str,
+    sense: Optional[str],
+    ruby: list,
+    pos_datas: list,
+    is_reconstruction: bool,
+    urls: Optional[List[str]] = None,
+) -> Optional[str]:
     """Parses a linkage item once it has been converted to a string.  This
     may add one or more linkages to ``data`` under ``field``.  This
     returns None or a string that contains thats that should be applied
     to additional linkages (commonly used in tables for Asian characters)."""
     assert isinstance(wxr, WiktextractContext)
-    assert isinstance(word, str)   # Main word (derived from page title)
+    assert isinstance(word, str)  # Main word (derived from page title)
     assert isinstance(data, dict)  # Parsed linkages are stored here under field
     assert isinstance(field, str)  # The field under which to store linkage
-    assert isinstance(item, str)   # The string to parse
+    assert isinstance(item, str)  # The string to parse
     assert sense is None or isinstance(sense, str)
-    assert isinstance(ruby, list)   # Captured ruby (hiragana/katakana) or ""
+    assert isinstance(ruby, list)  # Captured ruby (hiragana/katakana) or ""
     assert isinstance(pos_datas, list)  # List of senses (containing "glosses")
-    assert urls is None or isinstance(urls, list) # Captured urls
+    assert urls is None or isinstance(urls, list)  # Captured urls
     assert is_reconstruction in (True, False)
 
     item = item.replace("()", "")
@@ -229,7 +269,7 @@ def parse_linkage_item_text(wxr: Wtp,
 
     # Replace occurrences of ~ in the item by the page title
     safetitle = wxr.wtp.title.replace("\\", "\\\\")
-    item = item.replace(" ~ ",  " " + safetitle + " ")
+    item = item.replace(" ~ ", " " + safetitle + " ")
     item = re.sub(r"^~ ", safetitle + " ", item)
     item = re.sub(r" ~$", " " + safetitle, item)
 
@@ -239,7 +279,7 @@ def parse_linkage_item_text(wxr: Wtp,
     m = re.search(taxonomic_ending_re, item)
     if m:
         base_english = taxonomic_ending_map[m.group(1)]
-        item = item[:m.start()]
+        item = item[: m.start()]
 
     # Some Korean and Japanese words use "word (romanized): english" pattern
     # Sometimes the parenthesized part contains comma-separated alt and roman.
@@ -248,13 +288,17 @@ def parse_linkage_item_text(wxr: Wtp,
         rom = m.group(2)
         eng = m.group(3)
         rest = m.group(1)
-        if (classify_desc(rest, no_unknown_starts=True) == "other" and
-            classify_desc(eng, no_unknown_starts=True) == "english"):
+        if (
+            classify_desc(rest, no_unknown_starts=True) == "other"
+            and classify_desc(eng, no_unknown_starts=True) == "english"
+        ):
             item = rest
             base_roman = rom
             lst = base_roman.split(", ")
-            if (len(lst) == 2 and
-                classify_desc(lst[0], no_unknown_starts=True) == "other"):
+            if (
+                len(lst) == 2
+                and classify_desc(lst[0], no_unknown_starts=True) == "other"
+            ):
                 base_alt = lst[0]
                 base_roman = lst[1]
             if base_english:
@@ -265,9 +309,10 @@ def parse_linkage_item_text(wxr: Wtp,
     # Many words have tags or similar descriptions in the beginning
     # followed by a colon and one or more linkages (e.g.,
     # panetella/Finnish)
-    m = (re.match(r"^\((([^():]|\([^()]*\))+)\): ([^:]*)$", item) or
-         re.match(r"^([a-zA-Z][-'a-zA-Z0-9 ]*"
-                  r"(\([^()]+\)[-'a-zA-Z0-9 ]*)*): ([^:]*)$", item))
+    m = re.match(r"^\((([^():]|\([^()]*\))+)\): ([^:]*)$", item) or re.match(
+        r"^([a-zA-Z][-'a-zA-Z0-9 ]*" r"(\([^()]+\)[-'a-zA-Z0-9 ]*)*): ([^:]*)$",
+        item,
+    )
     if m:
         desc = m.group(1)
         rest = m.group(len(m.groups()))
@@ -326,12 +371,22 @@ def parse_linkage_item_text(wxr: Wtp,
         e1 = wxr.wtp.page_exists(desc)
         e2 = wxr.wtp.page_exists(rest)
         if cls != "tags":
-            if (cls2 == "tags" or
-                (e1 and not e1) or
-                (e1 and e2 and cls2 == "english" and
-                 cls in ("other", "romanization")) or
-                (not e1 and not e2 and cls2 == "english" and
-                 cls in ("other", "romanization"))):
+            if (
+                cls2 == "tags"
+                or (e1 and not e1)
+                or (
+                    e1
+                    and e2
+                    and cls2 == "english"
+                    and cls in ("other", "romanization")
+                )
+                or (
+                    not e1
+                    and not e2
+                    and cls2 == "english"
+                    and cls in ("other", "romanization")
+                )
+            ):
                 desc, rest = rest, desc  # Looks like swapped syntax
                 cls = cls2
         if re.search(linkage_paren_ignore_contains_re, desc):
@@ -364,48 +419,56 @@ def parse_linkage_item_text(wxr: Wtp,
                 d = pos_datas[idx]
                 gl = "; ".join(d.get("glosses", ()))
                 if not gl:
-                    wxr.wtp.debug("parenthesized numeric linkage prefix, "
-                              "but the referenced sense has no gloss: "
-                              "{}".format(desc),
-                              sortid="linkages/355")
+                    wxr.wtp.debug(
+                        "parenthesized numeric linkage prefix, "
+                        "but the referenced sense has no gloss: "
+                        "{}".format(desc),
+                        sortid="linkages/355",
+                    )
                 elif sense:
                     sense += "; " + gl
                 else:
                     sense = gl
                 item = rest
             else:
-                wxr.wtp.debug("parenthesized numeric linkage prefix, "
-                          "but there is no sense with such index: {}"
-                          .format(desc),
-                          sortid="linkages/365")
+                wxr.wtp.debug(
+                    "parenthesized numeric linkage prefix, "
+                    "but there is no sense with such index: {}".format(desc),
+                    sortid="linkages/365",
+                )
                 item = rest
         else:
-            wxr.wtp.debug("unrecognized linkage prefix: {} desc={} rest={} "
-                      "cls={} cls2={} e1={} e2={}"
-                      .format(item, desc, rest, cls, cls2, e1, e2),
-                      sortid="linkages/371")
+            wxr.wtp.debug(
+                "unrecognized linkage prefix: {} desc={} rest={} "
+                "cls={} cls2={} e1={} e2={}".format(
+                    item, desc, rest, cls, cls2, e1, e2
+                ),
+                sortid="linkages/371",
+            )
             item = rest
 
     base_sense = sense
 
     # Check for certain plural tag forms at end of items list, and apply
     # them to all items if found
-    m = re.search(r" [-‐‑‒–—―] (diminutives|Diminutives|letters|digits|"
-                  r"characters|symbols|tetragrams|letter names|names|"
-                  r"female names|male names|proper nouns|contractions|"
-                  r"nonstandard spellings|verbs|prepositions|postpositions|"
-                  r"interjections|Abbreviations|abbreviations|variants|"
-                  r"ordinals|nouns|phrases|adjectives|adverbs|"
-                  r"augmentatives|pejoratives|compound words|numerals|"
-                  r"Tally marks|surnames|modern nonstandard spellings)$",
-                  item)
+    m = re.search(
+        r" [-‐‑‒–—―] (diminutives|Diminutives|letters|digits|"
+        r"characters|symbols|tetragrams|letter names|names|"
+        r"female names|male names|proper nouns|contractions|"
+        r"nonstandard spellings|verbs|prepositions|postpositions|"
+        r"interjections|Abbreviations|abbreviations|variants|"
+        r"ordinals|nouns|phrases|adjectives|adverbs|"
+        r"augmentatives|pejoratives|compound words|numerals|"
+        r"Tally marks|surnames|modern nonstandard spellings)$",
+        item,
+    )
     if m:
         suffix = m.group(1)
         if base_qualifier:
             base_qualifier += ", " + suffix
         else:
             base_qualifier = suffix
-        item = item[:m.start()]
+        item = item[: m.start()]
 
     # Certain linkage items have space-separated valus.  These are
     # generated by, e.g., certain templates
@@ -443,17 +506,29 @@ def parse_linkage_item_text(wxr: Wtp,
             # Item1 contains " or "
             item2 = re.sub(r"\s*\([^)]*\)", "", item1)
             item2 = re.sub(r"\s+", " ", item2)
-            if ((lang not in head_final_bantu_langs or
-                 not re.search(head_final_bantu_re, item2)) and
-                (lang not in head_final_other_langs or
-                 not re.search(head_final_other_re, item2)) and
-                (not re.search(head_final_re, item2) or
-                 (item2[-1].isdigit() and
-                  lang not in head_final_numeric_langs)) and
-                not re.search(r"\bor\b", wxr.wtp.title) and
-                all(wxr.wtp.title not in x.split(" or ")
+            if (
+                (
+                    lang not in head_final_bantu_langs
+                    or not re.search(head_final_bantu_re, item2)
+                )
+                and (
+                    lang not in head_final_other_langs
+                    or not re.search(head_final_other_re, item2)
+                )
+                and (
+                    not re.search(head_final_re, item2)
+                    or (
+                        item2[-1].isdigit()
+                        and lang not in head_final_numeric_langs
+                    )
+                )
+                and not re.search(r"\bor\b", wxr.wtp.title)
+                and all(
+                    wxr.wtp.title not in x.split(" or ")
                     for x in split_at_comma_semi(item2)
-                    if " or " in x)):
+                    if " or " in x
+                )
+            ):
                 # We can split this item.  Split the non-cleaned version
                 # that still has any intervening parenthesized parts.
                 subitems.extend(split_at_comma_semi(item1, extra=[" or "]))
@@ -482,7 +557,7 @@ def parse_linkage_item_text(wxr: Wtp,
         m = re.search(r"\s*\(“([^”]+)”\)", item1)
         if m:
             t = m.group(1)
-            item1 = (item1[:m.start()] + item1[m.end():]).strip()
+            item1 = (item1[: m.start()] + item1[m.end() :]).strip()
             cls = classify_desc(t)
             if cls == "tags":
                 if qualifier:
@@ -494,20 +569,27 @@ def parse_linkage_item_text(wxr: Wtp,
 
         # Some Korean words use "word (alt, oman, “english”) pattern
         # See 滿/Korean
-        m = re.match(r'([^(),;:]+) \(([^(),;:]+), ([^(),;:]+), '
-                     r'[“”"]([^”“"]+)[“”"]\)$', item1)
-        if (m and
-            classify_desc(m.group(1), no_unknown_starts=True) == "other" and
-            classify_desc(m.group(2), no_unknown_starts=True) == "other"):
+        m = re.match(
+            r"([^(),;:]+) \(([^(),;:]+), ([^(),;:]+), "
+            r'[“”"]([^”“"]+)[“”"]\)$',
+            item1,
+        )
+        if (
+            m
+            and classify_desc(m.group(1), no_unknown_starts=True) == "other"
+            and classify_desc(m.group(2), no_unknown_starts=True) == "other"
+        ):
             alt = m.group(2)
             roman = m.group(3)
             english = m.group(4)
             item1 = m.group(1)
 
         words = item1.split(" ")
-        if (len(words) > 1 and
-            words[0] in linkage_beginning_tags and
-            words[0] != wxr.wtp.title):
+        if (
+            len(words) > 1
+            and words[0] in linkage_beginning_tags
+            and words[0] != wxr.wtp.title
+        ):
             t = linkage_beginning_tags[words[0]]
             item1 = " ".join(words[1:])
             if qualifier:
@@ -543,8 +625,9 @@ def parse_linkage_item_text(wxr: Wtp,
         # sometimes both at the beginning and at the end.
         # And sometimes even in the middle, as in e.g.
         # wife/English/Translations/Yiddish
-        while (not script_chars and
-               (not sense or not re.search(script_chars_re, sense))):
+        while not script_chars and (
+            not sense or not re.search(script_chars_re, sense)
+        ):
             par = None
             nonfirst_par = False
             if par is None:
@@ -552,16 +635,17 @@ def parse_linkage_item_text(wxr: Wtp,
                 m = re.match(r"\((([^()]|\([^()]*\))*)\):?\s*", item1)
                 if m:
                     par = m.group(1)
-                    item1 = item1[m.end():]
+                    item1 = item1[m.end() :]
                 else:
                     # Try to find a parenthesized part at the end or from the
                     # middle.
-                    m = re.search(r"\s+\((\d|\d\d|[^\d]([^()]|\([^()]*\))*)\)"
-                                  r"(\.$)?",
-                                  item1)
+                    m = re.search(
+                        r"\s+\((\d|\d\d|[^\d]([^()]|\([^()]*\))*)\)" r"(\.$)?",
+                        item1,
+                    )
                     if m:
                         par = m.group(1)
-                        item1 = item1[:m.start()] + item1[m.end():]
+                        item1 = item1[: m.start()] + item1[m.end() :]
                         nonfirst_par = True
             if not par:
                 break
@@ -588,7 +672,7 @@ def parse_linkage_item_text(wxr: Wtp,
                         qualifier = par[:idx]
                 else:
                     break
-                par = par[idx + 1:].strip()
+                par = par[idx + 1 :].strip()
 
             # Check for certain comma-separated tags combined
             # with English text at the beginning or end of a
@@ -676,19 +760,22 @@ def parse_linkage_item_text(wxr: Wtp,
                         d = pos_datas[idx]
                         gl = "; ".join(d.get("glosses", ()))
                         if not gl:
-                            wxr.wtp.debug("parenthesized number "
-                                      "but the referenced sense has no "
-                                      "gloss: {}".format(par),
-                                      sortid="linkages/665")
+                            wxr.wtp.debug(
+                                "parenthesized number "
+                                "but the referenced sense has no "
+                                "gloss: {}".format(par),
+                                sortid="linkages/665",
+                            )
                         elif sense:
                             sense += "; " + gl
                         else:
                             sense = gl
                     else:
-                        wxr.wtp.debug("parenthesized number but there is "
-                                  "no sense with such index: {}"
-                                  .format(par),
-                                  sortid="linkages/674")
+                        wxr.wtp.debug(
+                            "parenthesized number but there is "
+                            "no sense with such index: {}".format(par),
+                            sortid="linkages/674",
+                        )
                 else:
                     if alt:
                         alt += "; " + par
@@ -706,8 +793,8 @@ def parse_linkage_item_text(wxr: Wtp,
             # Remove certain prefixes from linkages
             m = re.match(linkage_remove_prefixes_re, item1)
             if m:
-                prefix = item1[:m.end()]
-                item1 = item1[m.end():]
+                prefix = item1[: m.end()]
+                item1 = item1[m.end() :]
                 if prefix in linkage_remove_prefixes_tags:
                     if qualifier:
                         qualifier += ", " + linkage_remove_prefixes_tags[prefix]
@@ -720,13 +807,13 @@ def parse_linkage_item_text(wxr: Wtp,
             # Remove certain suffixes from linkages
             m = re.search(linkage_remove_suffixes_re, item1)
             if m:
-                item1 = item1[:m.start()]
+                item1 = item1[: m.start()]
 
             # Parse linkages with "value = english" syntax (e.g.,
             # väittää/Finnish)
             idx = item1.find(" = ")
             if idx >= 0:
-                eng = item1[idx + 3:]
+                eng = item1[idx + 3 :]
                 if classify_desc(eng, no_unknown_starts=True) == "english":
                     english = eng
                     item1 = item1[:idx]
@@ -736,25 +823,25 @@ def parse_linkage_item_text(wxr: Wtp,
                     eng = item1[:idx]
                     if classify_desc(eng, no_unknown_starts=True) == "english":
                         english = eng
-                        item1 = item1[idx + 3:]
+                        item1 = item1[idx + 3 :]
 
             # Parse linkages with "value - english" syntax (e.g.,
             # man/Faroese)
             m = re.search(r" [-‐‑‒–—―] ", item1)
             if m and "(" not in item1:
-                suffix = item1[m.end():]
+                suffix = item1[m.end() :]
                 cls = classify_desc(suffix, no_unknown_starts=True)
                 if cls == "english":
                     # This case intentionally ignores old values from english
                     # (otherwise taxonomic lists fail)
                     english = suffix
-                    item1 = item1[:m.start()]
+                    item1 = item1[: m.start()]
                 elif cls == "tags":
                     if qualifier:
                         qualifier += ", " + suffix
                     else:
                         qualifier = suffix
-                    item1 = item1[:m.start()]
+                    item1 = item1[: m.start()]
 
             # Parse certain tags at the end of the linked term (unless
             # we are in a letters list)
@@ -768,7 +855,7 @@ def parse_linkage_item_text(wxr: Wtp,
         m = re.search(linkage_truncate_re, item1)
         if m:
             # suffix = item1[m.start():]  # Currently ignored
-            item1 = item1[:m.start()]
+            item1 = item1[: m.start()]
         if not item1:
             continue  # Ignore empty link targets
         if item1 == word:
@@ -794,9 +881,11 @@ def parse_linkage_item_text(wxr: Wtp,
             # split as this is used when we have a different number
             # of romanizations than written forms, and don't know
             # which is which.
-            if ((not w or "," not in w) and
-                (not r or "," not in r) and
-                not wxr.wtp.page_exists(w)):
+            if (
+                (not w or "," not in w)
+                and (not r or "," not in r)
+                and not wxr.wtp.page_exists(w)
+            ):
                 lst = w.split("／") if len(w) > 1 else [w]
                 if len(lst) == 1:
                     lst = w.split(" / ")
@@ -811,9 +900,15 @@ def parse_linkage_item_text(wxr: Wtp,
             # Heuristically remove "." at the end of most linkages
             # (some linkage lists end in a period, but we also have
             # abbreviations that end with a period that should be kept)
-            if (w.endswith(".") and not wxr.wtp.page_exists(w) and
-                (wxr.wtp.page_exists(w[:-1]) or
-                 (len(w) >= 5) and "." not in w[:-1])):
+            if (
+                w.endswith(".")
+                and not wxr.wtp.page_exists(w)
+                and (
+                    wxr.wtp.page_exists(w[:-1])
+                    or (len(w) >= 5)
+                    and "." not in w[:-1]
+                )
+            ):
                 w = w[:-1]
 
             # If we have roman but not alt and the word is ASCII,
@@ -847,8 +942,9 @@ def parse_linkage_item_text(wxr: Wtp,
             if alt and alt.strip() != w:
                 dt["alt"] = alt.strip()
             if urls:
-                dt["urls"] = [url.strip() for url in urls
-                              if url and isinstance(url, str)]
+                dt["urls"] = [
+                    url.strip() for url in urls if url and isinstance(url, str)
+                ]
             dt["word"] = w
             for old in data.get(field, ()):
                 if dt == old:
@@ -870,9 +966,11 @@ def parse_linkage_item_text(wxr: Wtp,
         # print("lang={} v={} script_chars={} item1={!r}"
         #       .format(wxr.wtp.section, v, script_chars, item1))
         if v and script_chars:
-            if (len(item1.split()) > 1 or
-                len(list(re.finditer(unicode_dc_re, item1))) == 2 or
-                (len(subitems) > 10 and v in ("Hiragana", "Katakana"))):
+            if (
+                len(item1.split()) > 1
+                or len(list(re.finditer(unicode_dc_re, item1))) == 2
+                or (len(subitems) > 10 and v in ("Hiragana", "Katakana"))
+            ):
                 if v == qualifier:
                     # if sense:
                     #     sense += "; " + qualifier
@@ -881,9 +979,12 @@ def parse_linkage_item_text(wxr: Wtp,
                     qualifier = None
                 if re.search(r" (letters|digits|script)$", v):
                     qualifier = v  # Also parse as qualifier
-                elif re.search(r"Variations of letter |"
-                               r"Letters using |"
-                               r"Letters of the ", v):
+                elif re.search(
+                    r"Variations of letter |"
+                    r"Letters using |"
+                    r"Letters of the ",
+                    v,
+                ):
                     qualifier = "letter"
                 parts = item1.split(". ")
                 extra = ()
@@ -892,23 +993,28 @@ def parse_linkage_item_text(wxr: Wtp,
                     item1 = parts[0]
                 # Handle multi-character names for chars in language's
                 # alphabet, e.g., "Ny ny" in P/Hungarian.
-                if (len(subitems) > 20 and len(item1.split()) == 2 and
-                    all(len(x) <= 3 for x in item1.split())):
-                    parts = list(m.group(0) for m in
-                                 re.finditer(r"(\w[\u0300-\u036f]?)+|.",
-                                             item1)
-                                 if not m.group(0).isspace() and
-                                 m.group(0) not in ("(", ")"))
+                if (
+                    len(subitems) > 20
+                    and len(item1.split()) == 2
+                    and all(len(x) <= 3 for x in item1.split())
+                ):
+                    parts = list(
+                        m.group(0)
+                        for m in re.finditer(r"(\w[\u0300-\u036f]?)+|.", item1)
+                        if not m.group(0).isspace()
+                        and m.group(0) not in ("(", ")")
+                    )
                 else:
-                    parts = list(m.group(0) for m in
-                                 re.finditer(r".[\u0300-\u036f]?",
-                                             item1)
-                                 if not m.group(0).isspace() and
-                                 m.group(0) not in ("(", ")"))
+                    parts = list(
+                        m.group(0)
+                        for m in re.finditer(r".[\u0300-\u036f]?", item1)
+                        if not m.group(0).isspace()
+                        and m.group(0) not in ("(", ")")
+                    )
                 for e in extra:
                     idx = e.find(":")
                     if idx >= 0:
-                        e = e[idx + 1:].strip()
+                        e = e[idx + 1 :].strip()
                         if e.endswith("."):
                             e = e[:-1]
                         parts.extend(e.split())
@@ -920,10 +1026,11 @@ def parse_linkage_item_text(wxr: Wtp,
 
                 rparts = None
                 if roman:
-                    rparts = list(m.group(0) for m in
-                                  re.finditer(r".[\u0300-\u036f]",
-                                              roman)
-                                  if not m.group(0).isspace())
+                    rparts = list(
+                        m.group(0)
+                        for m in re.finditer(r".[\u0300-\u036f]", roman)
+                        if not m.group(0).isspace()
+                    )
                     if len(rparts) != len(parts):
                         rparts = None
                 if not rparts:
