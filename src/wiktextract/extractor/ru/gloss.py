@@ -60,10 +60,8 @@ NOTE_TEMPLATES = {"пример", "помета", "??", "as ru"}
 
 
 def extract_gloss(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    item_node: WikiNode,
-):
+    wxr: WiktextractContext, word_entry: WordEntry, item_node: WikiNode
+) -> None:
     sense = Sense()
 
     raw_gloss_children: WikiNodeChildrenList = []

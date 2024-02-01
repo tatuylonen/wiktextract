@@ -1,7 +1,8 @@
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor.parser import TemplateNode
 from wiktextract.config import POSSubtitleData
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -85,21 +86,70 @@ POS_TEMPLATE_NAME_MAP = {
     "числ": {"pos": "num"},
 }
 
+MORPH_TEMPLATE_ARGS = {
+    "p": "prefix",
+    "prefix": "prefix",
+    "i": "interfix",
+    "interfix": "interfix",
+    "in": "infix",
+    "infix": "infix",
+    "s": "suffix",
+    "suffix": "suffix",
+    "t": "transfix",
+    "transfix": "transfix",
+    "po": "suffix",
+    "postfix": "suffix",
+    "c": "circumfix",
+    "confix": "circumfix",
+    "circumfix": "circumfix",
+    "r": "root",
+    "e": "suffix",
+    "ending": "suffix",
+}
+
+
+def get_pos_from_template(
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+) -> Optional[POSSubtitleData]:
+    # Search for POS in template names
+    template_name = template_node.template_name.lower()
+    if template_name == "morph":
+        # https://ru.wiktionary.org/wiki/Шаблон:morph
+        pos_type = template_node.template_parameters.get("тип", "")
+        if pos_type in MORPH_TEMPLATE_ARGS:
+            return {
+                "pos": MORPH_TEMPLATE_ARGS[pos_type],
+                "tags": ["morpheme"],
+            }
+    elif (
+        template_name in {"заголовок", "з"}
+        and 1 in template_node.template_parameters
+    ):
+        pos_text = (
+            clean_node(wxr, None, template_node.template_parameters[1])
+            .strip("()")
+            .split()[0]
+        )
+        if pos_text in wxr.config.POS_SUBTITLES:
+            return wxr.config.POS_SUBTITLES[pos_text]
+
+    for part in template_name.split()[:2]:
+        for subpart in part.split("-")[:2]:
+            if subpart in POS_TEMPLATE_NAME_MAP:
+                return POS_TEMPLATE_NAME_MAP[subpart]
+
 
 def get_pos(
     wxr: WiktextractContext, level_node: WikiNode
 ) -> Optional[POSSubtitleData]:
-    # Search for POS in template names
     for template_node in level_node.find_child(NodeKind.TEMPLATE):
-        template_name = template_node.template_name.lower()
-        for part in template_name.split()[:2]:
-            for subpart in part.split("-")[:2]:
-                if subpart in POS_TEMPLATE_NAME_MAP:
-                    return POS_TEMPLATE_NAME_MAP[subpart]
+        pos_data = get_pos_from_template(wxr, template_node)
+        if pos_data is not None:
+            return pos_data
 
     # Search for POS in clean_text
-    text = clean_node(wxr, {}, level_node.children)
-
+    text = clean_node(wxr, None, level_node.children)
     for pos_string in wxr.config.POS_SUBTITLES.keys():
         if pos_string in text.lower():
             return wxr.config.POS_SUBTITLES[pos_string]
@@ -117,17 +167,15 @@ def get_pos(
 
 
 def parse_section(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    level3_node: WikiNode,
-):
-    section_title = clean_node(wxr, None, level3_node.largs)
+    wxr: WiktextractContext, page_data: list[WordEntry], level3_node: WikiNode
+) -> None:
+    section_title = clean_node(wxr, None, level3_node.largs).lower()
     wxr.wtp.start_subsection(section_title)
     if section_title in [
         # Morphological and syntactic properties
-        "Морфологические и синтаксические свойства",
+        "морфологические и синтаксические свойства",
         # Type and syntactic properties of the word combination
-        "Тип и синтаксические свойства сочетания",
+        "тип и синтаксические свойства сочетания",
     ]:
         pos_data = get_pos(wxr, level3_node)
         if pos_data is not None:
@@ -141,34 +189,35 @@ def parse_section(
         page_data[-1].tags.extend(pos_data.get("tags", []))
         for list_item in level3_node.find_child_recursively(NodeKind.LIST_ITEM):
             extract_gloss(wxr, page_data[-1], list_item)
-    elif section_title == "Произношение" and wxr.config.capture_pronunciation:
+    elif section_title == "произношение" and wxr.config.capture_pronunciation:
         extract_pronunciation(wxr, page_data[-1], level3_node)
-    elif section_title == "Семантические свойства":  # Semantic properties
+    elif section_title == "семантические свойства":  # Semantic properties
         process_semantic_section(wxr, page_data, level3_node)
-    elif section_title == "Значение":
-        pass
-    elif section_title == "Родственные слова" and wxr.config.capture_linkages:
+    elif section_title == "значение":
+        for list_item in level3_node.find_child_recursively(NodeKind.LIST_ITEM):
+            extract_gloss(wxr, page_data[-1], list_item)
+    elif section_title == "родственные слова" and wxr.config.capture_linkages:
         # Word family
         pass
-    elif section_title == "Этимология" and wxr.config.capture_etymologies:
+    elif section_title == "этимология" and wxr.config.capture_etymologies:
         # XXX: Extract etymology
         pass
     elif (
-        section_title == "Фразеологизмы и устойчивые сочетания"
+        section_title == "фразеологизмы и устойчивые сочетания"
         and wxr.config.capture_linkages
     ):
         pass
-    elif section_title == "Перевод" and wxr.config.capture_translations:
+    elif section_title == "перевод" and wxr.config.capture_translations:
         extract_translations(wxr, page_data[-1], level3_node)
-    elif section_title in ["Анаграммы", "Метаграммы", "Синонимы", "Антонимы"]:
+    elif section_title in ["анаграммы", "метаграммы", "синонимы", "антонимы"]:
         pass
-    elif section_title == "Библиография":
+    elif section_title == "библиография":
         pass
-    elif section_title in ["Латиница (Latinça)", "Латиница (Latinca)"]:
+    elif section_title in ["латиница (latinça)", "латиница (latinca)"]:
         pass
-    elif section_title == "Иноязычные аналоги":
+    elif section_title == "иноязычные аналоги":
         pass
-    elif section_title == "Прочее":
+    elif section_title == "прочее":
         pass
     else:
         wxr.wtp.debug(
@@ -179,7 +228,7 @@ def parse_section(
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
-) -> list[dict[str, str]]:
+) -> list[dict[str, Any]]:
     # Help site describing page structure:
     # https://ru.wiktionary.org/wiki/Викисловарь:Правила_оформления_статей
 
@@ -247,16 +296,34 @@ def parse_page(
                     sortid="extractor/es/page/parse_page/80",
                 )
 
+            for template_node in level1_node.find_child(NodeKind.TEMPLATE):
+                pos_data = get_pos_from_template(wxr, template_node)
+                if pos_data is not None:
+                    base_data.pos = pos_data["pos"]
+                    base_data.tags.extend(pos_data.get("tags", []))
+
             for level2_node in level1_node.find_child(NodeKind.LEVEL2):
                 page_data.append(base_data.model_copy(deep=True))
+                if base_data.pos == "":
+                    for template_node in level2_node.find_content(
+                        NodeKind.TEMPLATE
+                    ):
+                        pos_data = get_pos_from_template(wxr, template_node)
+                        if pos_data is not None:
+                            page_data[-1].pos = pos_data["pos"]
+                            page_data[-1].tags.extend(pos_data.get("tags", []))
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     parse_section(wxr, page_data, level3_node)
+                if page_data[-1] == base_data:
+                    page_data.pop()
 
-            is_first_level2_node = True
-            for level3_node in level1_node.find_child(NodeKind.LEVEL3):
-                if is_first_level2_node:
+            for level3_index, level3_node in enumerate(
+                level1_node.find_child(NodeKind.LEVEL3)
+            ):
+                if level3_index == 0:
                     page_data.append(base_data.model_copy(deep=True))
-                    is_first_level2_node = False
                 parse_section(wxr, page_data, level3_node)
+                if page_data[-1] == base_data:
+                    page_data.pop()
 
     return [d.model_dump(exclude_defaults=True) for d in page_data]
