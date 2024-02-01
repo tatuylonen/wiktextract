@@ -2,6 +2,7 @@ import logging
 from typing import Any, Optional
 
 from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor.parser import TemplateNode
 from wiktextract.config import POSSubtitleData
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -107,35 +108,48 @@ MORPH_TEMPLATE_ARGS = {
 }
 
 
-def get_pos_from_template(level_node: WikiNode) -> Optional[POSSubtitleData]:
+def get_pos_from_template(
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+) -> Optional[POSSubtitleData]:
     # Search for POS in template names
-    for template_node in level_node.find_child(NodeKind.TEMPLATE):
-        template_name = template_node.template_name.lower()
-        if template_name == "morph":
-            # https://ru.wiktionary.org/wiki/Шаблон:morph
-            pos_type = template_node.template_parameters.get("тип", "")
-            if pos_type in MORPH_TEMPLATE_ARGS:
-                return {
-                    "pos": MORPH_TEMPLATE_ARGS[pos_type],
-                    "tags": ["morpheme"],
-                }
-            return
+    template_name = template_node.template_name.lower()
+    if template_name == "morph":
+        # https://ru.wiktionary.org/wiki/Шаблон:morph
+        pos_type = template_node.template_parameters.get("тип", "")
+        if pos_type in MORPH_TEMPLATE_ARGS:
+            return {
+                "pos": MORPH_TEMPLATE_ARGS[pos_type],
+                "tags": ["morpheme"],
+            }
+    elif (
+        template_name in {"заголовок", "з"}
+        and 1 in template_node.template_parameters
+    ):
+        pos_text = (
+            clean_node(wxr, None, template_node.template_parameters[1])
+            .strip("()")
+            .split()[0]
+        )
+        if pos_text in wxr.config.POS_SUBTITLES:
+            return wxr.config.POS_SUBTITLES[pos_text]
 
-        for part in template_name.split()[:2]:
-            for subpart in part.split("-")[:2]:
-                if subpart in POS_TEMPLATE_NAME_MAP:
-                    return POS_TEMPLATE_NAME_MAP[subpart]
+    for part in template_name.split()[:2]:
+        for subpart in part.split("-")[:2]:
+            if subpart in POS_TEMPLATE_NAME_MAP:
+                return POS_TEMPLATE_NAME_MAP[subpart]
 
 
 def get_pos(
     wxr: WiktextractContext, level_node: WikiNode
 ) -> Optional[POSSubtitleData]:
-    pos_data = get_pos_from_template(level_node)
-    if pos_data is not None:
-        return pos_data
+    for template_node in level_node.find_child(NodeKind.TEMPLATE):
+        pos_data = get_pos_from_template(wxr, template_node)
+        if pos_data is not None:
+            return pos_data
 
     # Search for POS in clean_text
-    text = clean_node(wxr, {}, level_node.children)
+    text = clean_node(wxr, None, level_node.children)
     for pos_string in wxr.config.POS_SUBTITLES.keys():
         if pos_string in text.lower():
             return wxr.config.POS_SUBTITLES[pos_string]
@@ -282,13 +296,22 @@ def parse_page(
                     sortid="extractor/es/page/parse_page/80",
                 )
 
-            pos_data = get_pos_from_template(level1_node)
-            if pos_data is not None:
-                base_data.pos = pos_data["pos"]
-                base_data.tags.extend(pos_data.get("tags", []))
+            for template_node in level1_node.find_child(NodeKind.TEMPLATE):
+                pos_data = get_pos_from_template(wxr, template_node)
+                if pos_data is not None:
+                    base_data.pos = pos_data["pos"]
+                    base_data.tags.extend(pos_data.get("tags", []))
 
             for level2_node in level1_node.find_child(NodeKind.LEVEL2):
                 page_data.append(base_data.model_copy(deep=True))
+                if base_data.pos == "":
+                    for template_node in level2_node.find_content(
+                        NodeKind.TEMPLATE
+                    ):
+                        pos_data = get_pos_from_template(wxr, template_node)
+                        if pos_data is not None:
+                            page_data[-1].pos = pos_data["pos"]
+                            page_data[-1].tags.extend(pos_data.get("tags", []))
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     parse_section(wxr, page_data, level3_node)
                 if page_data[-1] == base_data:

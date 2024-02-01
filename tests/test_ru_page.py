@@ -142,3 +142,27 @@ class TestRUPage(TestCase):
                 }
             ],
         )
+
+    def test_pos_in_header_template(self):
+        self.wxr.wtp.start_page("go")
+        self.wxr.wtp.add_page("Шаблон:-romaji-", 10, "Ромадзи")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "go",
+                """= {{-romaji-}} =
+== {{заголовок|(существительное I)}} ==
+=== Семантические свойства ===
+==== Значение ====
+# язык""",
+            ),
+            [
+                {
+                    "lang": "Ромадзи",
+                    "lang_code": "romaji",
+                    "word": "go",
+                    "pos": "noun",
+                    "senses": [{"glosses": ["язык"]}],
+                }
+            ],
+        )
