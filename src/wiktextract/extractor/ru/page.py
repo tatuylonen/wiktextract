@@ -178,6 +178,7 @@ def parse_section(
         "морфологические и синтаксические свойства",
         # Type and syntactic properties of the word combination
         "тип и синтаксические свойства сочетания",
+        "тип и свойства сочетания",
     ]:
         pos_data = get_pos(wxr, level3_node)
         if pos_data is not None:
