@@ -144,7 +144,8 @@ def parse_section(
     elif section_title == "семантические свойства":  # Semantic properties
         process_semantic_section(wxr, page_data, level3_node)
     elif section_title == "значение":
-        pass
+        for list_item in level3_node.find_child_recursively(NodeKind.LIST_ITEM):
+            extract_gloss(wxr, page_data[-1], list_item)
     elif section_title == "родственные слова" and wxr.config.capture_linkages:
         # Word family
         pass

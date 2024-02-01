@@ -116,3 +116,26 @@ class TestRUPage(TestCase):
                 }
             ],
         )
+
+    def test_level_3_sense(self):
+        self.wxr.wtp.start_page("-ability")
+        self.wxr.wtp.add_page("Шаблон:-en-", 10, "Английский")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "-ability",
+                """= {{-en-}} =
+=== Значение ===
+# при добавлении к прилагательным""",
+            ),
+            [
+                {
+                    "lang": "Английский",
+                    "lang_code": "en",
+                    "word": "-ability",
+                    "senses": [
+                        {"glosses": ["при добавлении к прилагательным"]}
+                    ],
+                }
+            ],
+        )
