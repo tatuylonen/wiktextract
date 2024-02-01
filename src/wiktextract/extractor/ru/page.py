@@ -249,12 +249,16 @@ def parse_page(
                 page_data.append(base_data.model_copy(deep=True))
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     parse_section(wxr, page_data, level3_node)
+                if page_data[-1] == base_data:
+                    page_data.pop()
 
-            is_first_level2_node = True
-            for level3_node in level1_node.find_child(NodeKind.LEVEL3):
-                if is_first_level2_node:
+            for level3_index, level3_node in enumerate(
+                level1_node.find_child(NodeKind.LEVEL3)
+            ):
+                if level3_index == 0:
                     page_data.append(base_data.model_copy(deep=True))
-                    is_first_level2_node = False
                 parse_section(wxr, page_data, level3_node)
+                if page_data[-1] == base_data:
+                    page_data.pop()
 
     return [d.model_dump(exclude_defaults=True) for d in page_data]
