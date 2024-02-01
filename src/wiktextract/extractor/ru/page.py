@@ -33,7 +33,7 @@ def process_semantic_section(
     semantic_level_node: WikiNode,
 ):
     for level4_node in semantic_level_node.find_child(NodeKind.LEVEL4):
-        section_title = clean_node(wxr, {}, level4_node.largs).lower()
+        section_title = clean_node(wxr, None, level4_node.largs).lower()
         if section_title == "значение":
             for list_item in level4_node.find_child_recursively(
                 NodeKind.LIST_ITEM
@@ -129,8 +129,10 @@ def get_pos_from_template(
         pos_text = (
             clean_node(wxr, None, template_node.template_parameters[1])
             .strip("()")
-            .split()[0]
         )
+        if len(pos_text) == 0:
+            return
+        pos_text = pos_text.split()[0]
         if pos_text in wxr.config.POS_SUBTITLES:
             return wxr.config.POS_SUBTITLES[pos_text]
 
@@ -323,7 +325,7 @@ def parse_page(
                 if level3_index == 0:
                     page_data.append(base_data.model_copy(deep=True))
                 parse_section(wxr, page_data, level3_node)
-                if page_data[-1] == base_data:
-                    page_data.pop()
+            if len(page_data) > 0 and page_data[-1] == base_data:
+                page_data.pop()
 
     return [d.model_dump(exclude_defaults=True) for d in page_data]
