@@ -85,21 +85,57 @@ POS_TEMPLATE_NAME_MAP = {
     "числ": {"pos": "num"},
 }
 
+MORPH_TEMPLATE_ARGS = {
+    "p": "prefix",
+    "prefix": "prefix",
+    "i": "interfix",
+    "interfix": "interfix",
+    "in": "infix",
+    "infix": "infix",
+    "s": "suffix",
+    "suffix": "suffix",
+    "t": "transfix",
+    "transfix": "transfix",
+    "po": "suffix",
+    "postfix": "suffix",
+    "c": "circumfix",
+    "confix": "circumfix",
+    "circumfix": "circumfix",
+    "r": "root",
+    "e": "suffix",
+    "ending": "suffix",
+}
 
-def get_pos(
-    wxr: WiktextractContext, level_node: WikiNode
-) -> Optional[POSSubtitleData]:
+
+def get_pos_from_template(level_node: WikiNode) -> Optional[POSSubtitleData]:
     # Search for POS in template names
     for template_node in level_node.find_child(NodeKind.TEMPLATE):
         template_name = template_node.template_name.lower()
+        if template_name == "morph":
+            # https://ru.wiktionary.org/wiki/Шаблон:morph
+            pos_type = template_node.template_parameters.get("тип", "")
+            if pos_type in MORPH_TEMPLATE_ARGS:
+                return {
+                    "pos": MORPH_TEMPLATE_ARGS[pos_type],
+                    "tags": ["morpheme"],
+                }
+            return
+
         for part in template_name.split()[:2]:
             for subpart in part.split("-")[:2]:
                 if subpart in POS_TEMPLATE_NAME_MAP:
                     return POS_TEMPLATE_NAME_MAP[subpart]
 
+
+def get_pos(
+    wxr: WiktextractContext, level_node: WikiNode
+) -> Optional[POSSubtitleData]:
+    pos_data = get_pos_from_template(level_node)
+    if pos_data is not None:
+        return pos_data
+
     # Search for POS in clean_text
     text = clean_node(wxr, {}, level_node.children)
-
     for pos_string in wxr.config.POS_SUBTITLES.keys():
         if pos_string in text.lower():
             return wxr.config.POS_SUBTITLES[pos_string]
@@ -159,11 +195,11 @@ def parse_section(
         pass
     elif section_title == "перевод" and wxr.config.capture_translations:
         extract_translations(wxr, page_data[-1], level3_node)
-    elif section_title in ['анаграммы', 'метаграммы', 'синонимы', 'антонимы']:
+    elif section_title in ["анаграммы", "метаграммы", "синонимы", "антонимы"]:
         pass
     elif section_title == "библиография":
         pass
-    elif section_title in ['латиница (latinça)', 'латиница (latinca)']:
+    elif section_title in ["латиница (latinça)", "латиница (latinca)"]:
         pass
     elif section_title == "иноязычные аналоги":
         pass
@@ -245,6 +281,11 @@ def parse_page(
                     + str(unprocessed_nodes),
                     sortid="extractor/es/page/parse_page/80",
                 )
+
+            pos_data = get_pos_from_template(level1_node)
+            if pos_data is not None:
+                base_data.pos = pos_data["pos"]
+                base_data.tags.extend(pos_data.get("tags", []))
 
             for level2_node in level1_node.find_child(NodeKind.LEVEL2):
                 page_data.append(base_data.model_copy(deep=True))

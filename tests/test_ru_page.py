@@ -125,6 +125,7 @@ class TestRUPage(TestCase):
                 self.wxr,
                 "-ability",
                 """= {{-en-}} =
+{{morph|тип=s|lang=en|}}
 === Значение ===
 # при добавлении к прилагательным""",
             ),
@@ -133,6 +134,8 @@ class TestRUPage(TestCase):
                     "lang": "Английский",
                     "lang_code": "en",
                     "word": "-ability",
+                    "pos": "suffix",
+                    "tags": ["morpheme"],
                     "senses": [
                         {"glosses": ["при добавлении к прилагательным"]}
                     ],
