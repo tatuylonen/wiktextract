@@ -166,3 +166,48 @@ class TestRUPage(TestCase):
                 }
             ],
         )
+
+    def test_level_3_pronunciation(self):
+        self.wxr.wtp.start_page("wait")
+        self.wxr.wtp.add_page("Шаблон:-en-", 10, "Английский")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "wait",
+                """= {{-en-}} =
+=== Произношение ===
+{{transcription|weɪt}}
+
+== {{заголовок|(глагол)}} ==
+=== Морфологические и синтаксические свойства ===
+{{гл en reg|wait}}
+=== Семантические свойства ===
+==== Значение ====
+# ждать
+
+== {{заголовок|(существительное)}} ==
+=== Морфологические и синтаксические свойства ===
+{{сущ en|wait}}
+
+=== Семантические свойства ===
+==== Значение ====
+# ожидание""",
+            ),
+            [
+                {
+                    "lang": "Английский",
+                    "lang_code": "en",
+                    "word": "wait",
+                    "pos": "verb",
+                    "senses": [{"glosses": ["ждать"]}],
+                },
+                {
+                    "lang": "Английский",
+                    "lang_code": "en",
+                    "word": "wait",
+                    "pos": "noun",
+                    "sounds": [{"ipa": "weɪt"}],
+                    "senses": [{"glosses": ["ожидание"]}],
+                }
+            ],
+        )

@@ -128,10 +128,9 @@ def get_pos_from_template(
         template_name in {"заголовок", "з"}
         and 1 in template_node.template_parameters
     ):
-        pos_text = (
-            clean_node(wxr, None, template_node.template_parameters[1])
-            .strip("()")
-        )
+        pos_text = clean_node(
+            wxr, None, template_node.template_parameters[1]
+        ).strip("()")
         if len(pos_text) == 0:
             return
         pos_text = pos_text.split()[0]
@@ -325,7 +324,10 @@ def parse_page(
             for level3_index, level3_node in enumerate(
                 level1_node.find_child(NodeKind.LEVEL3)
             ):
-                if level3_index == 0:
+                if level3_index == 0 and (
+                    len(page_data) == 0
+                    or page_data[-1].lang_code != base_data.lang_code
+                ):
                     page_data.append(base_data.model_copy(deep=True))
                 parse_section(wxr, page_data, level3_node)
             if len(page_data) > 0 and page_data[-1] == base_data:
