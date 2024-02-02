@@ -1333,6 +1333,7 @@ def parse_language(
             wxr, pos_data, header_nodes, post_template_fn=head_post_template_fn
         )
         header_text = re.sub(r"\s+", " ", header_text)
+        # print(f"{header_text=}")
         parse_word_head(
             wxr,
             pos_type,
@@ -3550,6 +3551,8 @@ def parse_language(
                                 i -= 1
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
+
+
 
                 roman = re.sub(r"[ \t\r]+", " ", roman).strip()
                 roman = re.sub(r"\[\s*…\s*\]", "[…]", roman)
