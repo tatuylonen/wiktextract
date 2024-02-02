@@ -76,6 +76,7 @@ POS_TEMPLATE_NAME_MAP = {
     "нар": {"pos": "adv"},
     "падежи": {"pos": "noun"},
     "послелог": {"pos": "postp"},
+    "посл": {"pos": "postp"},
     "прил": {"pos": "adj"},
     "прич": {"pos": "verb", "tags": ["participle"]},
     "союз": {"pos": "conj"},
