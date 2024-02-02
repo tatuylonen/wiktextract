@@ -1753,6 +1753,7 @@ def parse_word_head(
     assert isinstance(ruby, (list, tuple))
     assert is_reconstruction in (True, False)
     # print("PARSE_WORD_HEAD: {}: {!r}".format(wxr.wtp.section, text))
+    # print(f"PARSE_WORD_HEAD: {data=}")
 
     if "Lua execution error" in text or "Lua timeout error" in text:
         return
@@ -1804,7 +1805,6 @@ def parse_word_head(
     # Many languages use • as a punctuation mark separating the base
     # from the rest of the head. στάδιος/Ancient Greek, issue #176
     base = base.strip()
-    # print("parse_word_head: base={!r}".format(base))
 
     # Check for certain endings in head (mostly for compatibility with weird
     # heads, e.g. rata/Romanian "1st conj." at end)
@@ -1910,7 +1910,9 @@ def parse_word_head(
         alts[-1] += " or " + last
     elif last:
         alts.append(last)
+
     # print("parse_word_head alts: {}".format(alts))
+    # print(f"{base=}")
 
     # Process the head alternatives
     canonicals = []
@@ -2283,6 +2285,23 @@ def parse_word_head(
                 following_tags = None
                 continue
 
+            # American Sign Language has images (or requests for image)
+            # as heads, + this ASL gloss after.
+            m2 = re.search(r"\(ASL gloss:\s+(.*)\)", text)
+            if m2:
+                add_related(
+                    wxr,
+                    data,
+                    ["ASL-gloss"],
+                    [m2.group(1)],
+                    text,
+                    True,
+                    is_reconstruction,
+                    head_group,
+                    ruby,
+                )
+                continue
+
             parts = list(m.group(0) for m in re.finditer(word_re, desc))
             if not parts:
                 prev_tags = None
@@ -2410,6 +2429,9 @@ def parse_word_head(
                     related = alt_related
                     tagsets = alt_tagsets
 
+                    
+
+
             # print("FORM END: tagsets={} related={}".format(tagsets, related))
             if not tagsets:
                 continue
@@ -2422,6 +2444,8 @@ def parse_word_head(
                 alts = split_at_comma_semi(related, separators=[" or "])
                 if not alts:
                     alts = [""]
+            print(f"!!!!!!PARSE_WORD_HEAD: {data.get('tags')=}")
+            print(f"{alts=}")
             for related in alts:
                 if related:
                     if prev_tags and (
@@ -2509,6 +2533,8 @@ def parse_word_head(
                         data_extend(data, "tags", tags)
                     prev_tags = tagsets
                     following_tags = None
+
+            print(f"?????PARSE_WORD_HEAD: {data.get('tags')=}")
 
     # Finally, if we collected hirakana/katakana, add them now
     if hiragana:
