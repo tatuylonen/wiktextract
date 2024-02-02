@@ -1,5 +1,5 @@
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import WikiNodeChildrenList
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, WikiNodeChildrenList
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -60,7 +60,23 @@ NOTE_TEMPLATES = {"пример", "помета", "??", "as ru"}
 
 
 def extract_gloss(
-    wxr: WiktextractContext, word_entry: WordEntry, item_node: WikiNode
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: WikiNode
+) -> None:
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        process_gloss_nodes(wxr, word_entry, list_item.children)
+    if len(word_entry.senses) == 0:
+        # no list or empty list
+        process_gloss_nodes(
+            wxr,
+            word_entry,
+            list(level_node.invert_find_child(LEVEL_KIND_FLAGS)),
+        )
+
+
+def process_gloss_nodes(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    gloss_nodes: WikiNodeChildrenList,
 ) -> None:
     sense = Sense()
 
@@ -69,7 +85,7 @@ def extract_gloss(
     tag_templates: list[WikiNode] = []
     note_templates: list[WikiNode] = []
 
-    for child in item_node.children:
+    for child in gloss_nodes:
         if isinstance(child, WikiNode) and child.kind == NodeKind.TEMPLATE:
             if child.template_name == "пример":
                 process_example_template(wxr, sense, child)

@@ -2,7 +2,7 @@ import logging
 from typing import Any, Optional
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 from wiktextract.config import POSSubtitleData
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -35,10 +35,7 @@ def process_semantic_section(
     for level4_node in semantic_level_node.find_child(NodeKind.LEVEL4):
         section_title = clean_node(wxr, None, level4_node.largs).lower()
         if section_title == "значение":
-            for list_item in level4_node.find_child_recursively(
-                NodeKind.LIST_ITEM
-            ):
-                extract_gloss(wxr, page_data[-1], list_item)
+            extract_gloss(wxr, page_data[-1], level4_node)
 
         elif section_title in wxr.config.LINKAGE_SUBTITLES:
             linkage_type = wxr.config.LINKAGE_SUBTITLES.get(section_title)
@@ -57,6 +54,7 @@ POS_TEMPLATE_NAME_MAP = {
     "abbrev": {"pos": "abbrev", "tags": ["abbreviation"]},
     "adv": {"pos": "adv"},
     "affix": {"pos": "affix"},
+    "article": {"pos": "article"},
     "conj": {"pos": "conj"},
     "interj": {"pos": "intj"},
     "noun": {"pos": "noun"},
@@ -75,6 +73,7 @@ POS_TEMPLATE_NAME_MAP = {
     "нар": {"pos": "adv"},
     "падежи": {"pos": "noun"},
     "послелог": {"pos": "postp"},
+    "посл": {"pos": "postp"},
     "прил": {"pos": "adj"},
     "прич": {"pos": "verb", "tags": ["participle"]},
     "союз": {"pos": "conj"},
@@ -126,10 +125,9 @@ def get_pos_from_template(
         template_name in {"заголовок", "з"}
         and 1 in template_node.template_parameters
     ):
-        pos_text = (
-            clean_node(wxr, None, template_node.template_parameters[1])
-            .strip("()")
-        )
+        pos_text = clean_node(
+            wxr, None, template_node.template_parameters[1]
+        ).strip("()")
         if len(pos_text) == 0:
             return
         pos_text = pos_text.split()[0]
@@ -151,7 +149,9 @@ def get_pos(
             return pos_data
 
     # Search for POS in clean_text
-    text = clean_node(wxr, None, level_node.children)
+    text = clean_node(
+        wxr, None, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+    )
     for pos_string in wxr.config.POS_SUBTITLES.keys():
         if pos_string in text.lower():
             return wxr.config.POS_SUBTITLES[pos_string]
@@ -159,13 +159,6 @@ def get_pos(
     if "форма" in text.lower():
         # XXX: Decide what to do with form entries
         return
-
-    if len(text) > 0:
-        wxr.wtp.debug(
-            f"No part of speech found in children: {level_node.children} "
-            f"with clean text {text}",
-            sortid="extractor/ru/page/get_pos/98",
-        )
 
 
 def parse_section(
@@ -178,6 +171,7 @@ def parse_section(
         "морфологические и синтаксические свойства",
         # Type and syntactic properties of the word combination
         "тип и синтаксические свойства сочетания",
+        "тип и свойства сочетания",
     ]:
         pos_data = get_pos(wxr, level3_node)
         if pos_data is not None:
@@ -189,15 +183,13 @@ def parse_section(
         pos_data = wxr.config.POS_SUBTITLES[section_title]
         page_data[-1].pos = pos_data["pos"]
         page_data[-1].tags.extend(pos_data.get("tags", []))
-        for list_item in level3_node.find_child_recursively(NodeKind.LIST_ITEM):
-            extract_gloss(wxr, page_data[-1], list_item)
+        extract_gloss(wxr, page_data[-1], level3_node)
     elif section_title == "произношение" and wxr.config.capture_pronunciation:
         extract_pronunciation(wxr, page_data[-1], level3_node)
     elif section_title == "семантические свойства":  # Semantic properties
         process_semantic_section(wxr, page_data, level3_node)
     elif section_title == "значение":
-        for list_item in level3_node.find_child_recursively(NodeKind.LIST_ITEM):
-            extract_gloss(wxr, page_data[-1], list_item)
+        extract_gloss(wxr, page_data[-1], level3_node)
     elif section_title == "родственные слова" and wxr.config.capture_linkages:
         # Word family
         pass
@@ -298,11 +290,10 @@ def parse_page(
                     sortid="extractor/es/page/parse_page/80",
                 )
 
-            for template_node in level1_node.find_child(NodeKind.TEMPLATE):
-                pos_data = get_pos_from_template(wxr, template_node)
-                if pos_data is not None:
-                    base_data.pos = pos_data["pos"]
-                    base_data.tags.extend(pos_data.get("tags", []))
+            pos_data = get_pos(wxr, level1_node)
+            if pos_data is not None:
+                base_data.pos = pos_data["pos"]
+                base_data.tags.extend(pos_data.get("tags", []))
 
             for level2_node in level1_node.find_child(NodeKind.LEVEL2):
                 page_data.append(base_data.model_copy(deep=True))
@@ -322,7 +313,10 @@ def parse_page(
             for level3_index, level3_node in enumerate(
                 level1_node.find_child(NodeKind.LEVEL3)
             ):
-                if level3_index == 0:
+                if level3_index == 0 and (
+                    len(page_data) == 0
+                    or page_data[-1].lang_code != base_data.lang_code
+                ):
                     page_data.append(base_data.model_copy(deep=True))
                 parse_section(wxr, page_data, level3_node)
             if len(page_data) > 0 and page_data[-1] == base_data:

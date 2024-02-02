@@ -4,6 +4,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ru.gloss import extract_gloss
 from wiktextract.extractor.ru.models import WordEntry
+from wiktextract.extractor.ru.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -16,9 +17,6 @@ class TestRUGloss(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
-
-    def get_default_page_data(self) -> list[WordEntry]:
-        return [WordEntry(word="пример", lang_code="ru", lang="Русский")]
 
     def test_ru_extract_gloss(self):
         # https://ru.wiktionary.org/wiki/овощ
@@ -65,14 +63,14 @@ class TestRUGloss(unittest.TestCase):
 
         for case in test_cases:
             with self.subTest(case=case):
-                self.wxr.wtp.start_page("")
-                page_data = self.get_default_page_data()
+                self.wxr.wtp.start_page("овощ")
+                page_data = [
+                    WordEntry(word="овощ", lang_code="ru", lang="Русский")
+                ]
 
                 root = self.wxr.wtp.parse(case["input"])
 
-                extract_gloss(
-                    self.wxr, page_data[-1], root.children[0].children[0]
-                )
+                extract_gloss(self.wxr, page_data[-1], root)
 
                 new_sense = (
                     page_data[-1]
@@ -80,3 +78,29 @@ class TestRUGloss(unittest.TestCase):
                     .model_dump(exclude_defaults=True, exclude={"examples"})
                 )
                 self.assertEqual(new_sense, case["expected"])
+
+    def test_no_list_gloss(self):
+        self.wxr.wtp.start_page("east")
+        self.wxr.wtp.add_page("Шаблон:-en-", 10, "Английский")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "east",
+                """= {{-en-}} =
+== {{заголовок|(существительное)}} ==
+=== Морфологические и синтаксические свойства ===
+{{сущ en -}}
+=== Семантические свойства ===
+==== Значение ====
+[[восток]]""",
+            ),
+            [
+                {
+                    "lang": "Английский",
+                    "lang_code": "en",
+                    "word": "east",
+                    "pos": "noun",
+                    "senses": [{"glosses": ["восток"]}],
+                }
+            ],
+        )
