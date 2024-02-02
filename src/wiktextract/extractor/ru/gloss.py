@@ -67,7 +67,9 @@ def extract_gloss(
     if len(word_entry.senses) == 0:
         # no list or empty list
         process_gloss_nodes(
-            wxr, word_entry, level_node.invert_find_child(LEVEL_KIND_FLAGS)
+            wxr,
+            word_entry,
+            list(level_node.invert_find_child(LEVEL_KIND_FLAGS)),
         )
 
 

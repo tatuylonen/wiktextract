@@ -2,7 +2,7 @@ import logging
 from typing import Any, Optional
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 from wiktextract.config import POSSubtitleData
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -149,7 +149,9 @@ def get_pos(
             return pos_data
 
     # Search for POS in clean_text
-    text = clean_node(wxr, None, level_node.children)
+    text = clean_node(
+        wxr, None, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+    )
     for pos_string in wxr.config.POS_SUBTITLES.keys():
         if pos_string in text.lower():
             return wxr.config.POS_SUBTITLES[pos_string]
@@ -157,13 +159,6 @@ def get_pos(
     if "форма" in text.lower():
         # XXX: Decide what to do with form entries
         return
-
-    if len(text) > 0:
-        wxr.wtp.debug(
-            f"No part of speech found in children: {level_node.children} "
-            f"with clean text {text}",
-            sortid="extractor/ru/page/get_pos/98",
-        )
 
 
 def parse_section(
@@ -295,11 +290,10 @@ def parse_page(
                     sortid="extractor/es/page/parse_page/80",
                 )
 
-            for template_node in level1_node.find_child(NodeKind.TEMPLATE):
-                pos_data = get_pos_from_template(wxr, template_node)
-                if pos_data is not None:
-                    base_data.pos = pos_data["pos"]
-                    base_data.tags.extend(pos_data.get("tags", []))
+            pos_data = get_pos(wxr, level1_node)
+            if pos_data is not None:
+                base_data.pos = pos_data["pos"]
+                base_data.tags.extend(pos_data.get("tags", []))
 
             for level2_node in level1_node.find_child(NodeKind.LEVEL2):
                 page_data.append(base_data.model_copy(deep=True))

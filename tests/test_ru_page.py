@@ -211,3 +211,27 @@ class TestRUPage(TestCase):
                 },
             ],
         )
+
+    def test_plain_text_pos(self):
+        self.wxr.wtp.start_page("anima")
+        self.wxr.wtp.add_page("Шаблон:-eo-", 10, "Эсперанто")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "anima",
+                """= {{-eo-}} =
+Прилагательное.
+=== Семантические свойства ===
+==== Значение ====
+[[душевный]], [[духовный]]""",
+            ),
+            [
+                {
+                    "lang": "Эсперанто",
+                    "lang_code": "eo",
+                    "word": "anima",
+                    "pos": "adj",
+                    "senses": [{"glosses": ["душевный, духовный"]}],
+                },
+            ],
+        )
