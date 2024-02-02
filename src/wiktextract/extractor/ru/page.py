@@ -57,6 +57,7 @@ POS_TEMPLATE_NAME_MAP = {
     "abbrev": {"pos": "abbrev", "tags": ["abbreviation"]},
     "adv": {"pos": "adv"},
     "affix": {"pos": "affix"},
+    "article": {"pos": "article"},
     "conj": {"pos": "conj"},
     "interj": {"pos": "intj"},
     "noun": {"pos": "noun"},
