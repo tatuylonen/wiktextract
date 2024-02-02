@@ -35,10 +35,7 @@ def process_semantic_section(
     for level4_node in semantic_level_node.find_child(NodeKind.LEVEL4):
         section_title = clean_node(wxr, None, level4_node.largs).lower()
         if section_title == "значение":
-            for list_item in level4_node.find_child_recursively(
-                NodeKind.LIST_ITEM
-            ):
-                extract_gloss(wxr, page_data[-1], list_item)
+            extract_gloss(wxr, page_data[-1], level4_node)
 
         elif section_title in wxr.config.LINKAGE_SUBTITLES:
             linkage_type = wxr.config.LINKAGE_SUBTITLES.get(section_title)
@@ -191,15 +188,13 @@ def parse_section(
         pos_data = wxr.config.POS_SUBTITLES[section_title]
         page_data[-1].pos = pos_data["pos"]
         page_data[-1].tags.extend(pos_data.get("tags", []))
-        for list_item in level3_node.find_child_recursively(NodeKind.LIST_ITEM):
-            extract_gloss(wxr, page_data[-1], list_item)
+        extract_gloss(wxr, page_data[-1], level3_node)
     elif section_title == "произношение" and wxr.config.capture_pronunciation:
         extract_pronunciation(wxr, page_data[-1], level3_node)
     elif section_title == "семантические свойства":  # Semantic properties
         process_semantic_section(wxr, page_data, level3_node)
     elif section_title == "значение":
-        for list_item in level3_node.find_child_recursively(NodeKind.LIST_ITEM):
-            extract_gloss(wxr, page_data[-1], list_item)
+        extract_gloss(wxr, page_data[-1], level3_node)
     elif section_title == "родственные слова" and wxr.config.capture_linkages:
         # Word family
         pass

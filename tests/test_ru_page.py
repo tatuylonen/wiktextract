@@ -208,6 +208,6 @@ class TestRUPage(TestCase):
                     "pos": "noun",
                     "sounds": [{"ipa": "weɪt"}],
                     "senses": [{"glosses": ["ожидание"]}],
-                }
+                },
             ],
         )
