@@ -73,11 +73,8 @@ def process_pron_list_item(
                 setattr(sound_data, pron_key, pron_text)
         elif template_node.template_name in {"écouter", "audio", "pron-rég"}:
             process_ecouter_template(wxr, template_node, sound_data)
-        else:
-            sound_tag = clean_node(wxr, None, template_node)
-            if sound_tag.startswith("(") and sound_tag.endswith(")"):
-                sound_tag = sound_tag.strip("()")
-            sound_data.tags.append(sound_tag)
+        elif template_node.template_name == "pron-rimes":
+            process_pron_rimes_template(wxr, template_node, sound_data)
 
     if list_item_node.contain_node(NodeKind.LIST):
         returned_data = []
@@ -97,18 +94,16 @@ def process_pron_list_item(
         return returned_data
     elif len(sound_data.model_dump(exclude_defaults=True)) > 0:
         if pron_key not in sound_data.model_fields_set:
-            for child in list_item_node.filter_empty_str_child():
-                if isinstance(child, str):
-                    if child.strip().startswith(": "):
-                        # IPA text after "language : "
-                        setattr(
-                            sound_data,
-                            pron_key,
-                            child.strip().removeprefix(": ").strip(),
-                        )
-                    elif len(child.strip()) > 0 and child.strip() != ":":
-                        # language text before ":"
-                        sound_data.tags.append(child.strip())
+            list_item_text = clean_node(wxr, None, list_item_node.children)
+            split_list = list_item_text.split(": ")
+            if len(split_list) == 2:
+                location, ipa = split_list
+                setattr(
+                    sound_data,
+                    pron_key,
+                    "".join(ipa).strip(),
+                )
+                sound_data.tags.append("".join(location.strip()))
 
         if len({pron_key, "audio"} & sound_data.model_fields_set) > 0:
             return [sound_data]
@@ -175,3 +170,15 @@ def is_ipa_text(text: str) -> bool:
         # ipa text in a new line
         return True
     return False
+
+
+def process_pron_rimes_template(
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    sound_data: Sound,
+) -> None:
+    # https://fr.wiktionary.org/wiki/Modèle:pron-rimes
+    sound_data.ipa = clean_node(
+        wxr, None, template_node.template_parameters.get(1, "")
+    )
+    # this templates also has rhyme data, not sure where to put it

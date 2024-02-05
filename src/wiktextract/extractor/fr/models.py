@@ -63,7 +63,7 @@ class Translation(FrenchBaseModel):
 
 
 class Linkage(FrenchBaseModel):
-    word: str = ""
+    word: str
     tags: list[str] = []
     roman: str = ""
     alt: str = Field("", description="Alternative form")
