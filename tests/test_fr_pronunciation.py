@@ -151,3 +151,25 @@ class TestPronunciation(TestCase):
                 "sounds": [{"ipa": "\\va.ɡɔ.nɛ\\"}],
             },
         )
+
+    def test_pron_prim_template(self):
+        page_data = []
+        self.wxr.wtp.start_page("dictionnaire")
+        root = self.wxr.wtp.parse(
+            "=== {{S|prononciation}} ===\n* {{pron-rimes|dik.sjɔ.nɛʁ|fr}}"
+        )
+        extract_pronunciation(
+            self.wxr,
+            page_data,
+            root.children[0],
+            WordEntry(word="dictionnaire", lang_code="fr", lang="Français"),
+        )
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True),
+            {
+                "word": "dictionnaire",
+                "lang_code": "fr",
+                "lang": "Français",
+                "sounds": [{"ipa": "dik.sjɔ.nɛʁ"}],
+            },
+        )
