@@ -76,7 +76,7 @@ def process_linkage_list(
         # sense could also be in ";" description list
         if (
             template_or_list_node.kind == NodeKind.LIST_ITEM
-            and template_or_list_node.sarg == ";"
+            and template_or_list_node.sarg in {";", ":"}
         ):
             sense_text = clean_node(wxr, None, template_or_list_node.children)
             index_pattern = r"\s*\((?:sens\s*)?(\d+)\)$"
@@ -86,7 +86,7 @@ def process_linkage_list(
                 sense_index = int(m.group(1))
             continue
 
-        linkage_data = Linkage()
+        linkage_data = Linkage(word="")
         if len(sense_text) > 0:
             linkage_data.sense = sense_text
         if sense_index != 0:
@@ -95,7 +95,7 @@ def process_linkage_list(
         for index, child_node in enumerate(  # remove nested lists
             template_or_list_node.invert_find_child(NodeKind.LIST)
         ):
-            if index == 0 or "word" not in linkage_data.model_fields_set:
+            if index == 0 or linkage_data.word == "":
                 if isinstance(child_node, TemplateNode):
                     process_linkage_template(wxr, child_node, linkage_data)
                 else:
@@ -120,7 +120,7 @@ def process_linkage_list(
                     # list item has more than one word
                     pre_data = getattr(page_data[-1], linkage_type)
                     pre_data.append(linkage_data)
-                    linkage_data = Linkage()
+                    linkage_data = Linkage(word="")
                     continue
                 elif len(pending_tag) > 0:
                     pending_tag += tag_text
@@ -132,7 +132,7 @@ def process_linkage_list(
                     elif len(tag) > 0:
                         linkage_data.tags.append(tag)
 
-        if "word" in linkage_data.model_fields_set:
+        if len(linkage_data.word) > 0:
             pre_data = getattr(page_data[-1], linkage_type)
             pre_data.append(linkage_data)
 
