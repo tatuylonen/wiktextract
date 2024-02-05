@@ -147,6 +147,14 @@ def main():
         help="Capture everything for the selected languages",
     )
     parser.add_argument(
+        "--skip-extraction",
+        action="store_true",
+        default="False",
+        help="Skip the (usually lengthy) json data extraction "
+        "procedure to do other things, like creating a database "
+        "file or other files."
+    )
+    parser.add_argument(
         "--translations",
         action="store_true",
         default=False,
@@ -429,7 +437,8 @@ def main():
                 args.path,
                 args.num_processes,
                 args.page is not None
-                or (args.pages_dir is not None and not args.out),  # phase1_only
+                or (args.pages_dir is not None and not args.out)
+                or args.skip_extraction,  # phase1_only
                 namespace_ids,
                 out_f,
                 args.human_readable,
@@ -446,7 +455,7 @@ def main():
                 not wxr.config.analyze_templates,
             )
 
-        if args.page:
+        if args.page and not args.skip_extraction:
             # Parse a single Wiktionary page (extracted using --pages-dir)
             if not args.db_path:
                 logging.warning(
@@ -463,7 +472,7 @@ def main():
             # --errors with single page extraction
             wxr.config.merge_return(wxr.wtp.to_return())
 
-        if not args.path and not args.page:
+        if not args.path and not args.page and not args.skip_extraction:
             # Parse again from the db file
             reprocess_wiktionary(
                 wxr,
