@@ -104,9 +104,11 @@ def process_linkage_list(
                 isinstance(child_node, WikiNode)
                 and child_node.kind == NodeKind.ITALIC
             ):
-                linkage_data.sense = clean_node(wxr, None, child_node).strip(
-                    "()"
-                )
+                current_sense = clean_node(wxr, None, child_node).strip("()")
+                if current_sense.isdigit():
+                    linkage_data.sense_index = int(current_sense)
+                else:
+                    linkage_data.sense = current_sense
             else:
                 tag_text = (
                     child_node
