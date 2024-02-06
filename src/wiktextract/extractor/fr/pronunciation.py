@@ -93,7 +93,9 @@ def process_pron_list_item(
 
         return returned_data
     elif len(sound_data.model_dump(exclude_defaults=True)) > 0:
-        if pron_key not in sound_data.model_fields_set:
+        if pron_key not in sound_data.model_fields_set and any(
+            isinstance(x, str) for x in list_item_node.filter_empty_str_child()
+        ):
             list_item_text = clean_node(wxr, None, list_item_node.children)
             split_list = list_item_text.split(": ")
             if len(split_list) == 2:

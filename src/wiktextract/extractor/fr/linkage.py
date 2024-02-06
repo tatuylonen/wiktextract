@@ -5,7 +5,7 @@ from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from ..share import split_tag_text
+from ..share import capture_text_in_parentheses
 from .models import Linkage, WordEntry
 
 
@@ -100,6 +100,15 @@ def process_linkage_list(
                     process_linkage_template(wxr, child_node, linkage_data)
                 else:
                     linkage_data.word = clean_node(wxr, None, child_node)
+            elif (
+                isinstance(child_node, WikiNode)
+                and child_node.kind == NodeKind.ITALIC
+            ):
+                current_sense = clean_node(wxr, None, child_node).strip("()")
+                if current_sense.isdigit():
+                    linkage_data.sense_index = int(current_sense)
+                else:
+                    linkage_data.sense = current_sense
             else:
                 tag_text = (
                     child_node
@@ -126,11 +135,17 @@ def process_linkage_list(
                     pending_tag += tag_text
                     continue
 
-                for tag in split_tag_text(tag_text):
-                    if tag.startswith("— "):
-                        linkage_data.translation = tag.removeprefix("— ")
-                    elif len(tag) > 0:
-                        linkage_data.tags.append(tag)
+                if tag_text.strip().startswith("— "):
+                    linkage_data.translation = tag_text.strip().removeprefix(
+                        "— "
+                    )
+                else:
+                    tags, _ = capture_text_in_parentheses(tag_text)
+                    for tag in tags:
+                        if tag.isdigit():
+                            linkage_data.sense_index = int(tag)
+                        else:
+                            linkage_data.tags.append(tag)
 
         if len(linkage_data.word) > 0:
             pre_data = getattr(page_data[-1], linkage_type)
@@ -142,7 +157,7 @@ def process_linkage_template(
     node: TemplateNode,
     linkage_data: Linkage,
 ) -> None:
-    if node.template_name == "lien":
+    if node.template_name in {"lien", "l"}:
         process_lien_template(wxr, node, linkage_data)
     elif node.template_name.startswith("zh-lien"):
         process_zh_lien_template(wxr, node, linkage_data)

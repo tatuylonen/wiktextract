@@ -1,13 +1,13 @@
 import hashlib
 import re
 from html import unescape
-from typing import Dict, Iterable, List, Optional, Tuple, Union
+from typing import Iterable, Optional, Union
 
 from wikitextprocessor import WikiNode
 
 
 def strip_nodes(
-    nodes: List[Union[WikiNode, str]]
+    nodes: list[Union[WikiNode, str]]
 ) -> Iterable[Union[WikiNode, str]]:
     # filter nodes that only have newlines, white spaces and non-breaking spaces
     return filter(
@@ -17,7 +17,7 @@ def strip_nodes(
     )
 
 
-def capture_text_in_parentheses(text: str) -> Tuple[List[str], str]:
+def capture_text_in_parentheses(text: str) -> tuple[list[str], str]:
     """
     Return a list of text inside parentheses, and the rest test.
     """
@@ -35,7 +35,7 @@ def capture_text_in_parentheses(text: str) -> Tuple[List[str], str]:
     return capture_text_list, rest_text
 
 
-def split_chinese_variants(text: str) -> Iterable[Tuple[Optional[str], str]]:
+def split_chinese_variants(text: str) -> Iterable[tuple[Optional[str], str]]:
     """
     Return Chinese character variant and text
     """
@@ -50,7 +50,7 @@ def split_chinese_variants(text: str) -> Iterable[Tuple[Optional[str], str]]:
         yield None, text
 
 
-def create_audio_url_dict(filename: str) -> Dict[str, str]:
+def create_audio_url_dict(filename: str) -> dict[str, str]:
     file_url_key = filename[filename.rfind(".") + 1 :].lower() + "_url"
     filename_without_prefix = filename.removeprefix("File:")
     audio_dict = {
@@ -80,16 +80,6 @@ def create_transcode_url(filename: str, transcode_suffix: str) -> str:
         "https://upload.wikimedia.org/wikipedia/commons/transcoded/"
         + f"{md5[0]}/{md5[:2]}/{filename}/{filename}.{transcode_suffix}"
     )
-
-
-def split_tag_text(text: str) -> List[str]:
-    """
-    Find tags enclosded in parentheses and remove parentheses
-    """
-    return [
-        tag.strip("()").strip()
-        for tag in re.split(r"(?<=\))\s+(?=\()", text.strip())
-    ]
 
 
 def split_senseids(senseids_str: str) -> list[str]:
