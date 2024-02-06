@@ -27,7 +27,9 @@ class TestPronunciation(TestCase):
         self.wxr.wtp.add_page("Modèle:pron", 10, body="\\bɔ̃.ʒuʁ\\")
         self.wxr.wtp.start_page("bonjour")
         root = self.wxr.wtp.parse(
-            "=== Prononciation ===\n* {{pron|bɔ̃.ʒuʁ|fr}}\n** {{écouter|France (Paris)|bõ.ʒuːʁ|audio=Fr-bonjour.ogg|lang=fr}}"
+            """=== Prononciation ===
+* {{pron|bɔ̃.ʒuʁ|fr}}
+** {{écouter|France (Paris)|bõ.ʒuːʁ|audio=Fr-bonjour.ogg|lang=fr}}"""
         )
         extract_pronunciation(
             self.wxr,
@@ -75,7 +77,9 @@ class TestPronunciation(TestCase):
         self.wxr.wtp.add_page("Modèle:Yale-zh", 10, body="Yale")
         self.wxr.wtp.start_page("你好")
         root = self.wxr.wtp.parse(
-            "=== {{S|prononciation}} ===\n* '''cantonais''' {{pron||yue}}\n** {{Yale-zh}} : nei⁵hou²"
+            """=== {{S|prononciation}} ===
+* '''cantonais''' {{pron||yue}}
+** {{Yale-zh}} : nei⁵hou²"""
         )
         extract_pronunciation(
             self.wxr,
@@ -103,6 +107,11 @@ class TestPronunciation(TestCase):
             """=== {{S|prononciation}} ===
 {{ébauche-pron|sv}}
 * {{écouter|lang=sv|Suède||audio=LL-Q9027 (swe)-Moonhouse-mars.wav}}"""
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:écouter",
+            10,
+            '<span><span>Suède</span>&nbsp;: écouter «&nbsp;<span>mars</span> <span><span>[<small><span>[//fr.wiktionary.org Prononciation ?]</span></small>]</span></span>&nbsp;» <span>[[File:LL-Q9027 (swe)-Moonhouse-mars.wav]]</span></span>',
         )
         extract_pronunciation(
             self.wxr,
