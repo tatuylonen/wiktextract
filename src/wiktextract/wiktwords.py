@@ -149,7 +149,7 @@ def main():
     parser.add_argument(
         "--skip-extraction",
         action="store_true",
-        default="False",
+        default=False,
         help="Skip the (usually lengthy) json data extraction "
         "procedure to do other things, like creating a database "
         "file or other files."
