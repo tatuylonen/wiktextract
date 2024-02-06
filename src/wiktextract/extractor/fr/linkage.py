@@ -155,7 +155,7 @@ def process_linkage_template(
     node: TemplateNode,
     linkage_data: Linkage,
 ) -> None:
-    if node.template_name == "lien":
+    if node.template_name in {"lien", "l"}:
         process_lien_template(wxr, node, linkage_data)
     elif node.template_name.startswith("zh-lien"):
         process_zh_lien_template(wxr, node, linkage_data)
