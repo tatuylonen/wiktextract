@@ -197,3 +197,36 @@ class TestLinkage(TestCase):
                 {"word": "benoite d’eau"},
             ],
         )
+
+    def test_sense_index_str(self):
+        page_data = [WordEntry(word="-er", lang_code="fr", lang="Néerlandais")]
+        self.wxr.wtp.start_page("-er")
+        root = self.wxr.wtp.parse("* [[-aar]] (1)")
+        extract_linkage(self.wxr, page_data, root, "paronymes")
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].paronyms
+            ],
+            [
+                {"word": "-aar", "sense_index": 1},
+            ],
+        )
+
+    def test_italic_sense_node(self):
+        self.wxr.wtp.add_page("Modèle:lien", 10, body="{{{1}}}")
+        page_data = [WordEntry(word="-er", lang_code="en", lang="Anglais")]
+        self.wxr.wtp.start_page("-er")
+        root = self.wxr.wtp.parse(
+            "* {{lien|more|en}} ''(selon les adjectifs)''"
+        )
+        extract_linkage(self.wxr, page_data, root, "synonymes")
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].synonyms
+            ],
+            [
+                {"word": "more", "sense": "selon les adjectifs"},
+            ],
+        )
