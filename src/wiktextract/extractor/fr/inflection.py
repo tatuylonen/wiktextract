@@ -31,6 +31,9 @@ IGNORE_TABLE_HEADERS = frozenset(
         "commun",  # sv-nom-c-ar
     }
 )
+IGNORE_TABLE_HEADER_PREFIXES = (
+    "voir la conjugaison du verbe",  # Modèle:fr-verbe-flexion
+)
 IGNORE_TABLE_CELL = frozenset(
     {
         "Déclinaisons",  # de-adj
@@ -108,7 +111,13 @@ def process_inflection_table(
                     table_header_text = clean_node(
                         wxr, None, table_cell
                     ).replace("\n", " ")
-                    if table_header_text.lower() in IGNORE_TABLE_HEADERS:
+                    if (
+                        table_header_text.lower() in IGNORE_TABLE_HEADERS
+                        or table_header_text.lower().startswith(
+                            IGNORE_TABLE_HEADER_PREFIXES
+                        )
+                        or len(table_header_text.strip()) == 0
+                    ):
                         continue
                     if not current_row_has_data_cell:
                         # if all cells of the row are header cells

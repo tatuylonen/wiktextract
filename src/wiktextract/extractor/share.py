@@ -29,7 +29,9 @@ def capture_text_in_parentheses(text: str) -> tuple[list[str], str]:
         if len(not_captured) > 0:
             rest_parts.append(not_captured)
         last_group_end = m.end()
-        capture_text_list.append(m.group()[1:-1])
+        text = m.group()[1:-1].strip()
+        if len(text) > 0:
+            capture_text_list.append(text)
 
     rest_text = " ".join(rest_parts) if len(rest_parts) > 0 else text
     return capture_text_list, rest_text

@@ -87,6 +87,7 @@ class Sense(FrenchBaseModel):
     examples: list[Example] = []
     note: str = ""
     alt_of: list[AltForm] = []
+    form_of: list[AltForm] = []
 
 
 class WordEntry(FrenchBaseModel):
@@ -104,6 +105,7 @@ class WordEntry(FrenchBaseModel):
     forms: list[Form] = Field([], description="Inflection forms list")
     sounds: list[Sound] = []
     translations: list[Translation] = []
+    antonyms: list[Linkage] = []
     synonyms: list[Linkage] = []
     hyponyms: list[Linkage] = []
     hypernyms: list[Linkage] = []
