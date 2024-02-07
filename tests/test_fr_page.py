@@ -11,13 +11,16 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestFrPage(TestCase):
+    maxDiff = None
+
     def setUp(self):
-        self.maxDiff = None
-        conf1 = WiktionaryConfig(
-            dump_file_lang_code="fr",
-            capture_language_codes=None,
+        self.wxr = WiktextractContext(
+            Wtp(lang_code="fr"),
+            WiktionaryConfig(
+                dump_file_lang_code="fr",
+                capture_language_codes=None,
+            ),
         )
-        self.wxr = WiktextractContext(Wtp(lang_code="fr"), conf1)
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()

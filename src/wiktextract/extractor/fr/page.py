@@ -2,7 +2,7 @@ import logging
 from typing import Any, Optional
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -109,7 +109,7 @@ def process_pos_block(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     base_data: WordEntry,
-    pos_title_node: TemplateNode,
+    pos_title_node: WikiNode,
     pos_argument: str,
     pos_title: str,
 ):
@@ -120,6 +120,12 @@ def process_pos_block(
     page_data[-1].pos = pos_type
     page_data[-1].pos_title = pos_title
     page_data[-1].tags.extend(pos_data.get("tags", []))
+    for level_node_template in pos_title_node.find_content(NodeKind.TEMPLATE):
+        if (
+            level_node_template.template_name == "S"
+            and level_node_template.template_parameters.get(3) == "flexion"
+        ):
+            page_data[-1].tags.append("form-of")
     child_nodes = list(pos_title_node.filter_empty_str_child())
     form_line_start = 0  # Ligne de forme
     gloss_start = len(child_nodes)

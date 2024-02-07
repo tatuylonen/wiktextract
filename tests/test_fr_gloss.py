@@ -5,14 +5,20 @@ from wikitextprocessor import Page, Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.gloss import extract_gloss
 from wiktextract.extractor.fr.models import WordEntry
-from wiktextract.extractor.fr.page import process_pos_block
+from wiktextract.extractor.fr.page import parse_page, process_pos_block
 from wiktextract.wxr_context import WiktextractContext
 
 
 class TestFrGloss(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
+            Wtp(lang_code="fr"),
+            WiktionaryConfig(
+                dump_file_lang_code="fr",
+                capture_language_codes=None,
+            ),
         )
 
     def tearDown(self) -> None:
@@ -389,6 +395,45 @@ class TestFrGloss(TestCase):
                     ],
                     "alt_of": [{"word": "Mᵉ"}],
                     "tags": ["alt-of"],
+                }
+            ],
+        )
+
+    def test_form_of(self):
+        self.wxr.wtp.start_page("dièse")
+        self.wxr.wtp.add_page("Modèle:langue", 10, "Français")
+        self.wxr.wtp.add_page("Modèle:S", 10, "Forme de verbe")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "dièse",
+                """== {{langue|fr}} ==
+=== {{S|verbe|fr|flexion}} ===
+# ''Première personne du singulier de l’indicatif présent du verbe'' [[diéser]].
+# ''Troisième personne du singulier de l’indicatif présent du verbe'' [[diéser]].""",
+            ),
+            [
+                {
+                    "lang": "Français",
+                    "lang_code": "fr",
+                    "pos": "verb",
+                    "pos_title": "Forme de verbe",
+                    "senses": [
+                        {
+                            "form_of": [{"word": "diéser"}],
+                            "glosses": [
+                                "Première personne du singulier de l’indicatif présent du verbe diéser."
+                            ],
+                        },
+                        {
+                            "form_of": [{"word": "diéser"}],
+                            "glosses": [
+                                "Troisième personne du singulier de l’indicatif présent du verbe diéser."
+                            ],
+                        },
+                    ],
+                    "tags": ["form-of"],
+                    "word": "dièse"
                 }
             ],
         )

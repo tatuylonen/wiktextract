@@ -87,6 +87,7 @@ class Sense(FrenchBaseModel):
     examples: list[Example] = []
     note: str = ""
     alt_of: list[AltForm] = []
+    form_of: list[AltForm] = []
 
 
 class WordEntry(FrenchBaseModel):

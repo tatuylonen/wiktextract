@@ -70,6 +70,8 @@ def extract_gloss(
         find_alt_of_form(
             wxr, gloss_only_nodes[:note_index], page_data[-1].pos, gloss_data
         )
+        if "form-of" in page_data[-1].tags:
+            find_form_of_word(wxr, gloss_only_nodes[:note_index], gloss_data)
         gloss_text = clean_node(
             wxr, gloss_data, gloss_only_nodes[:note_index]
         ).strip(" ()")
@@ -192,3 +194,16 @@ def find_alt_of_form(
                 alt_of = clean_node(wxr, None, link)
         if len(alt_of) > 0:
             gloss_data.alt_of.append(AltForm(word=alt_of))
+
+
+def find_form_of_word(
+    wxr: WiktextractContext,
+    gloss_nodes: list[Union[str, WikiNode]],
+    gloss_data: Sense,
+) -> None:
+    form_of = ""
+    for node in gloss_nodes:
+        if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            form_of = clean_node(wxr, None, node)
+    if len(form_of) > 0:
+        gloss_data.form_of.append(AltForm(word=form_of))
