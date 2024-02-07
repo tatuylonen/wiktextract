@@ -64,7 +64,9 @@ def process_italic_node(
         and previous_node.template_name.startswith("trad")
         and len(page_data[-1].translations) > 0
     ):
-        page_data[-1].translations[-1].tags.append(tag.strip("()"))
+        tag = tag.strip("()")
+        if len(tag) > 0:
+            page_data[-1].translations[-1].tags.append(tag)
 
 
 def process_translation_templates(
@@ -143,4 +145,5 @@ def process_translation_templates(
         page_data[-1].translations.append(translation_data)
     elif len(page_data[-1].translations) > 0:
         tag = clean_node(wxr, None, template_node).strip("()")
-        page_data[-1].translations[-1].tags.append(tag)
+        if len(tag) > 0:
+            page_data[-1].translations[-1].tags.append(tag)
