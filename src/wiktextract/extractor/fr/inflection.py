@@ -108,7 +108,10 @@ def process_inflection_table(
                     table_header_text = clean_node(
                         wxr, None, table_cell
                     ).replace("\n", " ")
-                    if table_header_text.lower() in IGNORE_TABLE_HEADERS:
+                    if (
+                        table_header_text.lower() in IGNORE_TABLE_HEADERS
+                        or len(table_header_text.strip()) == 0
+                    ):
                         continue
                     if not current_row_has_data_cell:
                         # if all cells of the row are header cells
