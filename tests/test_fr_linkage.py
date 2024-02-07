@@ -230,3 +230,20 @@ class TestLinkage(TestCase):
                 {"word": "more", "sense": "selon les adjectifs"},
             ],
         )
+
+    def test_no_linkage_empty_tag(self):
+        page_data = [WordEntry(word="gambo", lang_code="eo", lang="Espéranto")]
+        self.wxr.wtp.start_page("gambo")
+        root = self.wxr.wtp.parse(
+            "* [[korpo]] ( ''[[corps]]'' )"
+        )
+        extract_linkage(self.wxr, page_data, root, "holonymes")
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].holonyms
+            ],
+            [
+                {"word": "korpo", "sense": "corps"},
+            ],
+        )
