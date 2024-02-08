@@ -49,6 +49,21 @@ class ColspanHeader:
     span: int
 
 
+def table_data_cell_is_header(
+    wxr: WiktextractContext, cell_node: WikiNode, page_title: str
+) -> bool:
+    # first child is bold node
+    if cell_node.kind == NodeKind.TABLE_CELL:
+        for child in cell_node.filter_empty_str_child():
+            return (
+                isinstance(child, WikiNode)
+                and child.kind == NodeKind.BOLD
+                and clean_node(wxr, None, child) != page_title
+            )
+
+    return False
+
+
 def process_inflection_table(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
@@ -83,7 +98,9 @@ def process_inflection_table(
             and "invisible" not in row_node_child.attrs.get("class", "")
         ]
         current_row_has_data_cell = any(
-            isinstance(cell, WikiNode) and cell.kind == NodeKind.TABLE_CELL
+            isinstance(cell, WikiNode)
+            and cell.kind == NodeKind.TABLE_CELL
+            and not table_data_cell_is_header(wxr, cell, page_data[-1].word)
             for cell in table_row_nodes
         )
         row_headers = []
@@ -98,7 +115,12 @@ def process_inflection_table(
         for column_num, table_cell in enumerate(table_row_nodes):
             form_data = Form()
             if isinstance(table_cell, WikiNode):
-                if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
+                if (
+                    table_cell.kind == NodeKind.TABLE_HEADER_CELL
+                    or table_data_cell_is_header(
+                        wxr, table_cell, page_data[-1].word
+                    )
+                ):
                     if any(
                         table_cell.find_html(
                             "span",
