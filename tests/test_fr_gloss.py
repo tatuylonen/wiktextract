@@ -433,7 +433,44 @@ class TestFrGloss(TestCase):
                         },
                     ],
                     "tags": ["form-of"],
-                    "word": "dièse"
+                    "word": "dièse",
+                }
+            ],
+        )
+
+    def test_variante_kyujitai_de(self):
+        self.wxr.wtp.start_page("萬歲")
+        self.wxr.wtp.add_page("Modèle:langue", 10, "Japonais")
+        self.wxr.wtp.add_page("Modèle:S", 10, "Interjection")
+        self.wxr.wtp.add_page(
+            "Modèle:variante kyujitai de",
+            10,
+            "(Désuet) Orthographe en kyūjitai de 万歳 (« vive ! »)",
+        )
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "萬歲",
+                """== {{langue|ja}} ==
+=== {{S|interjection|ja}} ===
+# {{variante kyujitai de|万歳|sens=[[vive#fr-interj|vive]] !}}""",
+            ),
+            [
+                {
+                    "pos": "intj",
+                    "pos_title": "Interjection",
+                    "lang": "Japonais",
+                    "lang_code": "ja",
+                    "word": "萬歲",
+                    "senses": [
+                        {
+                            "alt_of": [{"word": "万歳"}],
+                            "tags": ["alt-of"],
+                            "glosses": [
+                                "(Désuet) Orthographe en kyūjitai de 万歳 (« vive ! »)"
+                            ],
+                        }
+                    ],
                 }
             ],
         )
