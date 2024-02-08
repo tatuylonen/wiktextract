@@ -466,3 +466,35 @@ class TestInflection(TestCase):
                 },
             ],
         )
+
+    def test_fr_verbe_flexion(self):
+        page_data = [WordEntry(word="dièse", lang_code="fr", lang="Français")]
+        self.wxr.wtp.start_page("dièse")
+        root = self.wxr.wtp.parse("{{fr-verbe-flexion|diéser}}")
+        self.wxr.wtp.add_page(
+            "Modèle:fr-verbe-flexion",
+            10,
+            """{|
+!colspan="3"|Voir la conjugaison du verbe ''diéser''
+|-
+|rowspan="2" | '''Indicatif'''
+|rowspan="2" | '''Présent'''
+| je <nowiki />dièse
+|-
+| il/elle/on dièse
+|}""",
+        )
+        extract_inflection(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
+            [
+                {
+                    "form": "je dièse",
+                    "tags": ["Indicatif", "Présent"],
+                },
+                {
+                    "form": "il/elle/on dièse",
+                    "tags": ["Indicatif", "Présent"],
+                },
+            ],
+        )
