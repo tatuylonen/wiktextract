@@ -30,8 +30,10 @@ def extract_gloss(
             if isinstance(gloss_node, TemplateNode):
                 categories_data = defaultdict(list)
                 expanded_text = clean_node(wxr, categories_data, gloss_node)
-                if expanded_text.startswith("(") and expanded_text.endswith(
-                    ")"
+                if (
+                    expanded_text.startswith("(")
+                    and expanded_text.endswith(")")
+                    and "(" not in expanded_text[1:-1]
                 ):
                     tag = expanded_text.strip("() \n")
                     if len(tag) > 0:
@@ -72,9 +74,9 @@ def extract_gloss(
         )
         if "form-of" in page_data[-1].tags:
             find_form_of_word(wxr, gloss_only_nodes[:note_index], gloss_data)
-        gloss_text = clean_node(
-            wxr, gloss_data, gloss_only_nodes[:note_index]
-        ).strip(" ()")
+        gloss_text = clean_node(wxr, gloss_data, gloss_only_nodes[:note_index])
+        if not (gloss_text.startswith("(") and gloss_text.endswith(")")):
+            gloss_text = gloss_text.strip(" ()")
         gloss_data.glosses = parent_glosses + [gloss_text]
         gloss_data.note = clean_node(
             wxr, gloss_data, gloss_only_nodes[note_index + 1 :]

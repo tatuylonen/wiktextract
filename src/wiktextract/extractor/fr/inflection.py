@@ -32,7 +32,9 @@ IGNORE_TABLE_HEADERS = frozenset(
     }
 )
 IGNORE_TABLE_HEADER_PREFIXES = (
-    "voir la conjugaison du verbe",  # Modèle:fr-verbe-flexion
+    "voir la conjugaison du verbe ",  # Modèle:fr-verbe-flexion
+    "conjugaison de ",  # sv-conj-ar
+    "déclinaison de ",  # da-adj
 )
 IGNORE_TABLE_CELL = frozenset(
     {

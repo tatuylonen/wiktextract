@@ -22,10 +22,14 @@ def extract_form_line(
     A line of wikitext between pos subtitle and the first gloss, contains IPA,
     gender and inflection forms.
     """
+    IGNORE_TEMPLATES = frozenset(["voir-conj"])
+
     pre_template_name = ""
     for node in nodes:
         if isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE:
-            if node.template_name in PRON_TEMPLATES:
+            if node.template_name in IGNORE_TEMPLATES:
+                continue
+            elif node.template_name in PRON_TEMPLATES:
                 ipa_text = process_pron_template(wxr, node)
                 if len(ipa_text) > 0:
                     page_data[-1].sounds.append(Sound(ipa=ipa_text))
