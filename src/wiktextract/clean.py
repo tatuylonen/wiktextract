@@ -1359,7 +1359,7 @@ def clean_value(
         lnk = m.group(1)
         if re.match(r"(?si)(File|Image)\s*:", lnk):
             return ""
-        return clean_value(wxr, m.group(4) or m.group(2) or "", no_strip=True)
+        return clean_value(wxr, m.group(5) or m.group(2) or "", no_strip=True)
 
     def repl_1_sup(m: re.Match) -> str:
         return to_superscript(clean_value(wxr, m.group(1)))
