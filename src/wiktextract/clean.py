@@ -1359,6 +1359,8 @@ def clean_value(
         lnk = m.group(1)
         if re.match(r"(?si)(File|Image)\s*:", lnk):
             return ""
+        # m.group(5) is always the last matching group because you can
+        # only access the last matched group; the indexes don't 'grow'
         return clean_value(wxr, m.group(5) or m.group(2) or "", no_strip=True)
 
     def repl_1_sup(m: re.Match) -> str:
@@ -1493,7 +1495,7 @@ def clean_value(
         title = re.sub(
             r"(?s)\[\[\s*([^][|<>]+?)\s*\|"
             r"\s*(([^][|]|\[[^]]*\])+?)"
-            r"(\s*\|\s*(([^]|]|\[[^]]*\])+?))*\s*\]\]",
+            r"(\s*\|\s*(([^][|]|\[[^]]*\])+?))*\s*\]\]",
             repl_link_bars,
             title,
         )

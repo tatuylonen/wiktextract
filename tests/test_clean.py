@@ -101,6 +101,30 @@ class WiktExtractTests(unittest.TestCase):
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "Borrowed")
 
+    def test_cv_link9(self):
+        v = "[[Foo:bar.JPG|conf bar|baz|Alt Text]]"
+        v = clean_value(self.wxr, v)
+        self.assertEqual(v, "Alt Text")
+
+    def test_cv_link10(self):
+        # This test was created when encountering issues with French
+        # Wikipedia "Fichier" prefixes that replace Image:. The
+        # parsing of links with multiple parameters was broken
+        v = ("[[Unknownprefix:Ikhwan.jpg|vignette|gauche|Troupes"
+        " des [[Ikhwan (Arabie saoudite)|Ikhwâns]].]]")
+        v = clean_value(self.wxr, v)
+        self.assertEqual(v, "Troupes des Ikhwâns.")
+
+    def test_cv_link11(self):
+        # This behavior might not be correct or desirable: when
+        # cleaning a link with several parameters, if you print it
+        # (that is, you don't notice it's a File: or Image: which should
+        # be skipped) then output the expansion of the last group 
+        # (which is always m.group(5)).
+        v = "[[Foo:bar.JPG|conf bar|baz|baz2|baz3|baz4|Alt Text]]"
+        v = clean_value(self.wxr, v)
+        self.assertEqual(v, "Alt Text")
+
     def test_cv_url1(self):
         v = "This is a [http://ylonen.org test]."
         v = clean_value(self.wxr, v)
