@@ -343,26 +343,6 @@ def clean_node(
             return ""
         return None
 
-    def recurse(value):
-        if isinstance(value, str):
-            ret = value
-        elif isinstance(value, (list, tuple)):
-            ret = "".join(map(recurse, value))
-        elif isinstance(value, WikiNode):
-            if value.kind in (NodeKind.TABLE_CELL, NodeKind.TABLE_HEADER_CELL):
-                ret = recurse(value.children)
-            else:
-                ret = wxr.wtp.node_to_html(
-                    value,
-                    template_fn=clean_template_fn,
-                    post_template_fn=post_template_fn,
-                )
-            # print("clean_value recurse node_to_html value={!r} ret={!r}"
-            #      .format(value, ret))
-        else:
-            ret = str(value)
-        return ret
-
     def clean_node_handler_fn(node):
         assert isinstance(node, WikiNode)
         kind = node.kind
