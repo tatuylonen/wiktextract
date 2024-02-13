@@ -20,6 +20,7 @@ from wikitextprocessor.core import (
 from wikitextprocessor.parser import (
     GeneralNode,
 )
+from wikitextprocessor.node_expand import NodeHandlerFnCallable
 
 from wiktextract.wxr_context import WiktextractContext
 
@@ -325,6 +326,7 @@ def clean_node(
     wikinode: GeneralNode,
     template_fn: Optional[TemplateFnCallable] = None,
     post_template_fn: Optional[PostTemplateFnCallable] = None,
+    node_handler_fn: Optional[NodeHandlerFnCallable] = None,
     collect_links: bool = False,
 ) -> str:
     """
@@ -352,6 +354,10 @@ def clean_node(
         }:
             return node.children
         return None
+
+    if node_handler_fn is not None:
+        # override clean_node_handler_fn, the def above can't be accessed
+        clean_node_handler_fn = node_handler_fn
 
     # print("clean_node: value={!r}".format(value))
     v = wxr.wtp.node_to_html(
