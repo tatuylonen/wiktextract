@@ -322,6 +322,12 @@ python -m pip install -U pip
 python -m pip install --use-pep517 .
 ```
 
+If you are installing wiktextract from source, you also need to install
+wikitextprocessor from source separately; otherwise, a newer wiktextract
+version will be installed alongside an older pypi version of wikitextprocessor,
+which will not work out.
+
+
 ### Running tests
 
 This package includes tests written using the `unittest` framework.
