@@ -2444,8 +2444,6 @@ def parse_word_head(
                 alts = split_at_comma_semi(related, separators=[" or "])
                 if not alts:
                     alts = [""]
-            print(f"!!!!!!PARSE_WORD_HEAD: {data.get('tags')=}")
-            print(f"{alts=}")
             for related in alts:
                 if related:
                     if prev_tags and (
@@ -2534,7 +2532,6 @@ def parse_word_head(
                     prev_tags = tagsets
                     following_tags = None
 
-            print(f"?????PARSE_WORD_HEAD: {data.get('tags')=}")
 
     # Finally, if we collected hirakana/katakana, add them now
     if hiragana:
