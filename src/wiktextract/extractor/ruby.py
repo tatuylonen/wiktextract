@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import (
@@ -13,7 +13,7 @@ from wiktextract.wxr_context import WiktextractContext
 
 def parse_ruby(
     wxr: WiktextractContext, node: WikiNode
-) -> Optional[Tuple[str, str]]:
+) -> Optional[tuple[str, str]]:
     """Parse a HTML 'ruby' node for a kanji part and a furigana (ruby) part,
     and return a tuple containing those. Discard the rp-element's parentheses,
     we don't do anything with them."""
@@ -116,7 +116,12 @@ def extract_ruby(
     }:
         # Process only args
         if kind == NodeKind.TEMPLATE:
-            new_node = TemplateNode(new_node.loc)
+            new_node = TemplateNode(
+                new_node.loc,
+                wxr.wtp.namespace_prefixes(
+                    wxr.wtp.NAMESPACE_DATA["Template"]["id"]
+                ),
+            )
         new_args = []
         for arg in contents.largs:
             e1, c1 = extract_ruby(wxr, arg)
