@@ -37,6 +37,10 @@ jobs:
       - run: |
           python -m pip install -U pip
           python -m pip install --use-pep517 -e '.[dev]'
+      # Enable `sys.monitoring` for 3.12 to improve coverage tests performance
+      # See GitHub issue: nedbat/coveragepy#1665
+      - run: echo "COVERAGE_CORE=sysmon" >> $GITHUB_ENV
+        if: matrix.python-version == '3.12'
       - run: make test_coverage
         env:
           PYTHONWARNINGS: default
