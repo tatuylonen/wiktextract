@@ -95,17 +95,19 @@ def process_linkage_list(
         for index, child_node in enumerate(  # remove nested lists
             template_or_list_node.invert_find_child(NodeKind.LIST)
         ):
-            if index == 0 or linkage_data.word == "":
-                if isinstance(child_node, TemplateNode):
-                    process_linkage_template(wxr, child_node, linkage_data)
-                else:
-                    linkage_data.word = clean_node(wxr, None, child_node)
+            if index == 0 and isinstance(child_node, TemplateNode):
+                process_linkage_template(wxr, child_node, linkage_data)
+            elif (
+                isinstance(child_node, WikiNode)
+                and child_node.kind == NodeKind.LINK
+            ):
+                linkage_data.word = clean_node(wxr, None, child_node)
             elif (
                 isinstance(child_node, WikiNode)
                 and child_node.kind == NodeKind.ITALIC
             ):
                 current_sense = clean_node(wxr, None, child_node).strip("()")
-                if current_sense.isdigit():
+                if current_sense.isdecimal():
                     linkage_data.sense_index = int(current_sense)
                 else:
                     linkage_data.sense = current_sense

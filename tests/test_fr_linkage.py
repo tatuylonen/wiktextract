@@ -245,3 +245,18 @@ class TestLinkage(TestCase):
                 {"word": "korpo", "sense": "corps"},
             ],
         )
+
+    def test_italic_number_sense(self):
+        page_data = [WordEntry(word="gigabit", lang_code="en", lang="Anglais")]
+        self.wxr.wtp.start_page("gigabit")
+        root = self.wxr.wtp.parse("* (''10<sup>9</sup>'') [[Gb]]")
+        extract_linkage(self.wxr, page_data, root, "variantes orthographiques")
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].related
+            ],
+            [
+                {"word": "Gb", "sense": "10⁹"},
+            ],
+        )
