@@ -195,6 +195,9 @@ def inject_linkages(wxr: WiktextractContext, page_data: list[dict]) -> None:
                 data_append(data, term.linkage, dt)
 
 
+STARTS_LANG_RE = None
+
+
 def process_categories(wxr: WiktextractContext, page_data: list[dict]) -> None:
     # Categories are not otherwise disambiguated, but if there is only
     # one sense and only one data in ret for the same language, move
@@ -257,13 +260,15 @@ def process_categories(wxr: WiktextractContext, page_data: list[dict]) -> None:
     # Regexp for matching category tags that start with a language name.
     # Group 2 will be the language name. The category tag should be without
     # the namespace prefix.
-    starts_lang_re = re.compile(
-        r"^("
-        + wxr.wtp.NAMESPACE_DATA.get("Rhymes", {}).get("name", "")
-        + ":)?("
-        + "|".join(re.escape(x) for _, x in get_all_names("en"))
-        + ")[ /]?"
-    )
+    global STARTS_LANG_RE
+    if STARTS_LANG_RE is None:
+        STARTS_LANG_RE = re.compile(
+            r"^("
+            + wxr.wtp.NAMESPACE_DATA.get("Rhymes", {}).get("name", "")
+            + ":)?("
+            + "|".join(re.escape(x) for _, x in get_all_names("en"))
+            + ")[ /]?"
+        )
     # Remove category links that start with a language name from entries for
     # different languages
     for data in page_data:
@@ -271,7 +276,7 @@ def process_categories(wxr: WiktextractContext, page_data: list[dict]) -> None:
         cats = data.get("categories", ())
         new_cats = []
         for cat in cats:
-            m = re.match(starts_lang_re, cat)
+            m = re.match(STARTS_LANG_RE, cat)
             if m:
                 catlang = m.group(2)
                 catlang_code = name_to_code(catlang, "en")
