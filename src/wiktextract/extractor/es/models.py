@@ -89,15 +89,6 @@ class Sense(BaseModelWrap):
     senseid: str = Field(
         default="", description="Sense number used in Wiktionary"
     )
-    antonyms: list[Linkage] = []
-    compounds: list[Linkage] = []
-    derived: list[Linkage] = []
-    hyponyms: list[Linkage] = []
-    hypernyms: list[Linkage] = []
-    idioms: list[Linkage] = []
-    meronyms: list[Linkage] = []
-    related: list[Linkage] = []
-    synonyms: list[Linkage] = []
 
 
 class Spelling(BaseModelWrap):
