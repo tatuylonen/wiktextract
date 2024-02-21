@@ -25,9 +25,9 @@ def extract_translation(
             )
         else:
             sense_translations = []
-            base_translation_data = Translation()
-            senseid = level_node_child.template_parameters.get(1)
-            if senseid == None:
+            sense_id = level_node_child.template_parameters.get(1, "")
+            base_translation_data = Translation(sense_id=sense_id)
+            if sense_id == "":
                 # XXX: Sense-disambiguate where senseids are in Ü-Liste (ca. 0.03% of pages), e.g.:
                 # https://de.wiktionary.org/wiki/Beitrag
                 # """
@@ -68,19 +68,7 @@ def extract_translation(
             if dialect_table:
                 process_dialect_table(wxr, base_translation_data, dialect_table)
 
-            matched_senseid = False
-            if senseid:
-                for sense in word_entry.senses:
-                    if sense.senseid == senseid.strip():
-                        sense.translations.extend(sense_translations)
-                        matched_senseid = True
-
-            if not matched_senseid:
-                wxr.wtp.debug(
-                    f"Unknown senseid: {senseid}.",
-                    sortid="extractor/de/translation/extract_translation/65",
-                )
-                word_entry.translations.extend(sense_translations)
+            word_entry.translations.extend(sense_translations)
 
 
 def process_translation_list(
@@ -171,7 +159,7 @@ def overwrite_word(
     translation_data: Translation,
     nodes: Union[list[Union[WikiNode, str]], WikiNode, str, None],
 ):
-    if nodes == None:
+    if nodes is None:
         return
     overwrite_word = clean_node(wxr, {}, nodes).strip()
     if overwrite_word:

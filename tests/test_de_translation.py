@@ -2,7 +2,7 @@ import unittest
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.de.models import Sense, Translation, WordEntry
+from wiktextract.extractor.de.models import Translation, WordEntry
 from wiktextract.extractor.de.translation import (
     extract_translation,
     process_translation_list,
@@ -29,33 +29,22 @@ class TestDETranslation(unittest.TestCase):
             # Adds sense data to correct sense
             {
                 "input": "{{Ü-Tabelle|1|G=Beispiel|Ü-Liste=*{{en}}: {{Ü|en|example}}}}",
-                "senses": [Sense(senseid="1")],
                 "expected": {
-                    "senses": [
+                    "translations": [
                         {
-                            "senseid": "1",
-                            "translations": [
-                                {
-                                    "sense": "Beispiel",
-                                    "lang_code": "en",
-                                    "lang": "Englisch",
-                                    "word": "example",
-                                }
-                            ],
+                            "sense": "Beispiel",
+                            "sense_id": "1",
+                            "lang_code": "en",
+                            "lang": "Englisch",
+                            "word": "example",
                         }
-                    ]
+                    ],
                 },
             },
             # Adds sense data to page_data root if no senseid is given
             {
                 "input": "{{Ü-Tabelle||G=Beispiel|Ü-Liste=*{{en}}: {{Ü|en|example}}}}",
-                "senses": [Sense(senseid="1")],
                 "expected": {
-                    "senses": [
-                        {
-                            "senseid": "1",
-                        }
-                    ],
                     "translations": [
                         {
                             "sense": "Beispiel",
@@ -69,16 +58,11 @@ class TestDETranslation(unittest.TestCase):
             # Adds sense data to page_data root if senseid could not be matched
             {
                 "input": "{{Ü-Tabelle|2|G=Beispiel|Ü-Liste=*{{en}}: {{Ü|en|example}}}}",
-                "senses": [Sense(senseid="1")],
                 "expected": {
-                    "senses": [
-                        {
-                            "senseid": "1",
-                        }
-                    ],
                     "translations": [
                         {
                             "sense": "Beispiel",
+                            "sense_id": "2",
                             "lang_code": "en",
                             "lang": "Englisch",
                             "word": "example",
@@ -92,12 +76,8 @@ class TestDETranslation(unittest.TestCase):
             with self.subTest(case=case):
                 self.wxr.wtp.start_page("")
                 root = self.wxr.wtp.parse(case["input"])
-
                 word_entry = self.get_default_word_entry()
-                word_entry.senses = case.get("senses", [])
-
                 extract_translation(self.wxr, word_entry, root)
-
                 self.assertEqual(
                     word_entry.model_dump(
                         exclude_defaults=True,

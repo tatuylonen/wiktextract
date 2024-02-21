@@ -30,10 +30,7 @@ class Translation(BaseModelWrap):
     roman: str = Field(
         default="", description="Transliteration to Roman characters"
     )
-    # senseids: list[str] = Field(
-    #     default=[],
-    #     description="List of senseids where this translation applies",
-    # )
+    sense_id: str = ""
     tags: list[str] = Field(
         default=[],
         description="Tags specifying the translated term, usually gender information",
@@ -107,7 +104,6 @@ class Sense(BaseModelWrap):
     senseid: str = Field(
         default="", description="Sense number used in Wiktionary"
     )
-    translations: list[Translation] = []
     antonyms: list[Linkage] = []
     derived: list[Linkage] = []
     hyponyms: list[Linkage] = []
