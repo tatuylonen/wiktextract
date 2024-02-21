@@ -26,66 +26,39 @@ class TestDELinkages(unittest.TestCase):
             # https://de.wiktionary.org/wiki/Beispiel
             # Extracts linkages and places them in the correct sense.
             {
-                "input": "==== Sinnverwandte Wörter ====\n:[1] [[Beleg]], [[Exempel]]\n:[2] [[Muster]], [[Vorbild]]",
-                "senses": [Sense(senseid="1"), Sense(senseid="2")],
+                "input": """==== Sinnverwandte Wörter ====
+:[1] [[Beleg]], [[Exempel]]
+:[2] [[Muster]], [[Vorbild]]""",
                 "expected": {
-                    "senses": [
-                        {
-                            "senseid": "1",
-                            "coordinate_terms": [
-                                {"word": "Beleg"},
-                                {"word": "Exempel"},
-                            ],
-                        },
-                        {
-                            "senseid": "2",
-                            "coordinate_terms": [
-                                {"word": "Muster"},
-                                {"word": "Vorbild"},
-                            ],
-                        },
-                    ]
+                    "coordinate_terms": [
+                        {"word": "Beleg", "sense_id": "1"},
+                        {"word": "Exempel", "sense_id": "1"},
+                        {"word": "Muster", "sense_id": "2"},
+                        {"word": "Vorbild", "sense_id": "2"},
+                    ],
                 },
             },
             # https://de.wiktionary.org/wiki/Beispiel
             # Cleans explanatory text from expressions.
             {
                 "input": "====Redewendungen====\n:[[ein gutes Beispiel geben|ein gutes ''Beispiel'' geben]] – als [[Vorbild]] zur [[Nachahmung]] [[dienen]]/[[herausfordern]]",
-                "senses": [Sense()],
                 "expected": {
-                    "senses": [
-                        {
-                            "expressions": [
-                                {"word": "ein gutes Beispiel geben"}
-                            ],
-                        }
-                    ]
+                    "expressions": [{"word": "ein gutes Beispiel geben"}],
                 },
             },
             # Always places relations in first sense if just one sense.
             {
                 "input": "====Synonyme====\n:[[Synonym1]]",
-                "senses": [Sense(senseid="1")],
-                "expected": {
-                    "senses": [
-                        {"senseid": "1", "synonyms": [{"word": "Synonym1"}]}
-                    ],
-                },
+                "expected": {"synonyms": [{"word": "Synonym1"}]},
             },
             # https://de.wiktionary.org/wiki/Kokospalme
             # Ignores modifiers of relations and all other text.
             {
                 "input": "====Synonyme====\n:[1] [[Kokosnusspalme]], ''wissenschaftlich:'' [[Cocos nucifera]]",
-                "senses": [Sense(senseid="1")],
                 "expected": {
-                    "senses": [
-                        {
-                            "senseid": "1",
-                            "synonyms": [
-                                {"word": "Kokosnusspalme"},
-                                {"word": "Cocos nucifera"},
-                            ],
-                        }
+                    "synonyms": [
+                        {"word": "Kokosnusspalme", "sense_id": "1"},
+                        {"word": "Cocos nucifera", "sense_id": "1"},
                     ],
                 },
             },
@@ -95,12 +68,8 @@ class TestDELinkages(unittest.TestCase):
             with self.subTest(case=case):
                 self.wxr.wtp.start_page("")
                 root = self.wxr.wtp.parse(case["input"])
-
                 word_entry = self.get_default_word_entry()
-                word_entry.senses = case["senses"]
-
                 extract_linkages(self.wxr, word_entry, root.children[0])
-
                 self.assertEqual(
                     word_entry.model_dump(
                         exclude_defaults=True,

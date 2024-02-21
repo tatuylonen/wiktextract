@@ -12,6 +12,7 @@ class BaseModelWrap(BaseModel):
 
 class Linkage(BaseModelWrap):
     word: str
+    sense_id: str = ""
 
 
 class Translation(BaseModelWrap):
@@ -104,15 +105,6 @@ class Sense(BaseModelWrap):
     senseid: str = Field(
         default="", description="Sense number used in Wiktionary"
     )
-    antonyms: list[Linkage] = []
-    derived: list[Linkage] = []
-    hyponyms: list[Linkage] = []
-    hypernyms: list[Linkage] = []
-    holonyms: list[Linkage] = []
-    expressions: list[Linkage] = []
-    coordinate_terms: list[Linkage] = []
-    proverbs: list[Linkage] = []
-    synonyms: list[Linkage] = []
 
 
 class Sound(BaseModelWrap):
