@@ -16,12 +16,12 @@ class TestDEUtils(unittest.TestCase):
 
     def test_match_senseid3(self):
         senseid, node_text = match_senseid("[abc] qux")
-        self.assertEqual(senseid, None)
+        self.assertEqual(senseid, "")
         self.assertEqual(node_text, "[abc] qux")
 
     def test_match_senseid4(self):
         senseid, node_text = match_senseid("no senseid")
-        self.assertIsNone(senseid)
+        self.assertEqual(senseid, "")
         self.assertEqual(node_text, "no senseid")
 
     def test_match_senseid5(self):
@@ -31,7 +31,7 @@ class TestDEUtils(unittest.TestCase):
 
     def test_match_senseid6(self):
         senseid, node_text = match_senseid("[a1b2c3] foo [xyz] bar")
-        self.assertEqual(senseid, None)
+        self.assertEqual(senseid, "")
         self.assertEqual(node_text, "[a1b2c3] foo [xyz] bar")
 
     def test_match_senseid7(self):
@@ -41,10 +41,10 @@ class TestDEUtils(unittest.TestCase):
 
     def test_match_senseid8(self):
         senseid, node_text = match_senseid("[1.1a] foo bar")
-        self.assertEqual(senseid, None)
+        self.assertEqual(senseid, "")
         self.assertEqual(node_text, "[1.1a] foo bar")
 
     def test_match_senseid9(self):
         senseid, node_text = match_senseid("[1.1.1] foo bar")
-        self.assertEqual(senseid, None)
+        self.assertEqual(senseid, "")
         self.assertEqual(node_text, "[1.1.1] foo bar")
