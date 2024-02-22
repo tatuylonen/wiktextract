@@ -217,3 +217,37 @@ LINKAGE_SECTIONS: dict[str, str] = {
     "vocabulaire proche": "related",
     "vocabulaire": "related",
 }
+
+IGNORED_SECTIONS = frozenset(
+    [
+        "anagrammes",
+        "anagramme",
+        "anagr",
+        "références",
+        "référence",
+        "réf",
+        "ref",
+        "sources",
+        "src",
+        "bibliographie",
+        "bib",
+        "citations",
+        "cit",
+    ]
+)
+
+COMPOUNDS_SECTIONS = frozenset(["composés", "compos"])
+
+ETYMOLOGY_SECTIONS = frozenset(["étymologie", "étym", "etym"])
+
+INFLECTION_SECTIONS = frozenset(
+    ["déclinaison", "décl", "conjugaison", "conjug"]
+)
+
+NOTES_SECTIONS = frozenset(["notes", "note"])
+
+PRONUNCIATION_SECTIONS = frozenset(["prononciation", "pron", "prononciations"])
+
+TRANSLATION_SECTIONS = frozenset(
+    ["traductions", "trad", "traductions à trier", "trad-trier", "trad trier"]
+)
