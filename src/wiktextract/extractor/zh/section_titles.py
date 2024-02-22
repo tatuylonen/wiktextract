@@ -1,4 +1,6 @@
-POS_TITLES = {
+from wiktextract.config import POSSubtitleData
+
+POS_TITLES: POSSubtitleData = {
     "不及物动词": {"pos": "verb", "tags": ["intransitive"]},
     "不及物動詞": {
         "debug": "part-of-speech Intransitive verb is proscribed",
@@ -186,7 +188,7 @@ POS_TITLES = {
 }
 
 # map title to pydantic field
-LINKAGE_TITLES = {
+LINKAGE_TITLES: dict[str, str] = {
     "上下位關係": "hypernyms",
     "上义词": "hypernyms",
     "上位詞": "hypernyms",
@@ -322,7 +324,7 @@ LINKAGE_TITLES = {
     "關聯詞彙": "related",
 }
 
-ETYMOLOGY_TITLES = frozenset(
+ETYMOLOGY_TITLES: frozenset[str] = frozenset(
     [
         "詞源",
         "词源",
@@ -337,7 +339,7 @@ ETYMOLOGY_TITLES = frozenset(
     ]
 )
 
-IGNORED_TITLES = frozenset(
+IGNORED_TITLES: frozenset[str] = frozenset(
     [
         "異序詞",
         "异序词",
@@ -370,7 +372,7 @@ IGNORED_TITLES = frozenset(
     ]
 )
 
-INFLECTION_TITLES = frozenset(
+INFLECTION_TITLES: frozenset[str] = frozenset(
     [
         "变格",
         "變格",
@@ -394,12 +396,12 @@ INFLECTION_TITLES = frozenset(
     ]
 )
 
-PRONUNCIATION_TITLES = frozenset(
+PRONUNCIATION_TITLES: frozenset[str] = frozenset(
     ["發音", "发音", "读音", "讀音", "注音", "讀法"]
 )
 
-TRANSLATIONS_TITLES = frozenset(["翻譯", "翻译"])
+TRANSLATIONS_TITLES: frozenset[str] = frozenset(["翻譯", "翻译"])
 
-DESCENDANTS_TITLES = frozenset(["派生語彙"])
+DESCENDANTS_TITLES: frozenset[str] = frozenset(["派生語彙"])
 
-NOTES_TITLES = frozenset(["使用說明"])
+NOTES_TITLES: frozenset[str] = frozenset(["使用說明"])
