@@ -6,7 +6,6 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from .section_types import POS_SECTIONS
 from .etymology import EtymologyData, extract_etymology, insert_etymology_data
 from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
@@ -15,6 +14,7 @@ from .linkage import extract_linkage
 from .models import WordEntry
 from .note import extract_note
 from .pronunciation import extract_pronunciation
+from .section_types import LINKAGE_SECTIONS, POS_SECTIONS
 from .translation import extract_translation
 
 # Templates that are used to form panels on pages and that
@@ -74,8 +74,7 @@ def parse_section(
             ):
                 extract_pronunciation(wxr, page_data, level_node, base_data)
             elif (
-                wxr.config.capture_linkages
-                and section_type in wxr.config.LINKAGE_SUBTITLES
+                wxr.config.capture_linkages and section_type in LINKAGE_SECTIONS
             ):
                 if len(page_data) == 0:
                     page_data.append(base_data.model_copy(deep=True))

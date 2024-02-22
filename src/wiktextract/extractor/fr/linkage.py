@@ -7,6 +7,7 @@ from wiktextract.wxr_context import WiktextractContext
 
 from ..share import capture_text_in_parentheses
 from .models import Linkage, WordEntry
+from .section_types import LINKAGE_SECTIONS
 
 
 def extract_linkage(
@@ -22,7 +23,7 @@ def extract_linkage(
             wxr,
             page_data,
             level_node,
-            wxr.config.LINKAGE_SUBTITLES.get(section_type),
+            LINKAGE_SECTIONS[section_type],
         )
 
 
