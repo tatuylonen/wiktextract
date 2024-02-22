@@ -84,7 +84,7 @@ def process_translation_templates(
         sense_text = clean_node(wxr, None, sense_parameter)
         base_translation_data.sense = sense_text
         sense_index_str = template_node.template_parameters.get(2, "0")
-        if isinstance(sense_index_str, str) and sense_index_str.isdigit():
+        if isinstance(sense_index_str, str) and sense_index_str.isdecimal():
             base_translation_data.sense_index = int(sense_index_str)
 
     elif template_node.template_name == "T":

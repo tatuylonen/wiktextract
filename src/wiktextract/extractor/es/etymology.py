@@ -1,4 +1,5 @@
 from typing import cast
+
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
 from wiktextract.extractor.es.models import EtymologyTemplate, WordEntry
