@@ -1,7 +1,9 @@
+from wiktextract.config import POSSubtitleData
+
 # the keys are the first argument of the `S` template
 # https://fr.wiktionary.org/wiki/Modèle:S
 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
-POS_SECTIONS = {
+POS_SECTIONS: POSSubtitleData = {
     "adj": {"pos": "adj"},
     "adj-dém": {"pos": "adj", "tags": ["demonstrative"]},
     "adj-excl": {"pos": "adj", "tags": ["exclamatory"]},
@@ -218,7 +220,7 @@ LINKAGE_SECTIONS: dict[str, str] = {
     "vocabulaire": "related",
 }
 
-IGNORED_SECTIONS = frozenset(
+IGNORED_SECTIONS: frozenset[str] = frozenset(
     [
         "anagrammes",
         "anagramme",
@@ -236,18 +238,20 @@ IGNORED_SECTIONS = frozenset(
     ]
 )
 
-COMPOUNDS_SECTIONS = frozenset(["composés", "compos"])
+COMPOUNDS_SECTIONS: frozenset[str] = frozenset(["composés", "compos"])
 
-ETYMOLOGY_SECTIONS = frozenset(["étymologie", "étym", "etym"])
+ETYMOLOGY_SECTIONS: frozenset[str] = frozenset(["étymologie", "étym", "etym"])
 
-INFLECTION_SECTIONS = frozenset(
+INFLECTION_SECTIONS: frozenset[str] = frozenset(
     ["déclinaison", "décl", "conjugaison", "conjug"]
 )
 
-NOTES_SECTIONS = frozenset(["notes", "note"])
+NOTES_SECTIONS: frozenset[str] = frozenset(["notes", "note"])
 
-PRONUNCIATION_SECTIONS = frozenset(["prononciation", "pron", "prononciations"])
+PRONUNCIATION_SECTIONS: frozenset[str] = frozenset(
+    ["prononciation", "pron", "prononciations"]
+)
 
-TRANSLATION_SECTIONS = frozenset(
+TRANSLATION_SECTIONS: frozenset[str] = frozenset(
     ["traductions", "trad", "traductions à trier", "trad-trier", "trad trier"]
 )
