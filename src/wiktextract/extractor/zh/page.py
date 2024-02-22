@@ -16,6 +16,7 @@ from .linkage import extract_linkages
 from .models import Sense, WordEntry
 from .note import extract_note
 from .pronunciation import extract_pronunciation_recursively
+from .section_titles import POS_TITLES
 from .translation import extract_translation
 from .util import append_base_data
 
@@ -77,7 +78,7 @@ def parse_section(
         wxr.wtp.start_subsection(subtitle)
         if subtitle in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
             pass
-        elif subtitle in wxr.config.POS_SUBTITLES:
+        elif subtitle in POS_TITLES:
             process_pos_block(wxr, page_data, base_data, node, subtitle)
         elif wxr.config.capture_etymologies and subtitle.startswith(
             tuple(wxr.config.OTHER_SUBTITLES["etymology"])
@@ -130,7 +131,7 @@ def process_pos_block(
     node: WikiNode,
     pos_text: str,
 ):
-    pos_data = wxr.config.POS_SUBTITLES[pos_text]
+    pos_data = POS_TITLES[pos_text]
     pos_type = pos_data["pos"]
     base_data.pos = pos_type
     append_base_data(page_data, "pos", pos_type, base_data)
