@@ -1,4 +1,3 @@
-import copy
 import logging
 from typing import Union
 
@@ -12,6 +11,7 @@ from .example import extract_examples
 from .gloss import extract_glosses
 from .linkage import extract_linkages
 from .pronunciation import extract_pronunciation
+from .section_titles import POS_SECTIONS
 from .translation import extract_translation
 
 # Templates that are used to form panels on pages and that should be ignored in
@@ -130,18 +130,16 @@ def process_pos_section(
         # at all or redundant with form tables.
         return
 
-    pos_type = wxr.config.POS_SUBTITLES.get(pos_argument)
-
-    if pos_type is None:
+    pos = ""
+    if pos_argument in POS_SECTIONS:
+        pos = POS_SECTIONS[pos_argument]["pos"]
+    else:
         wxr.wtp.debug(
             f"Unknown POS type: {pos_argument}",
             sortid="extractor/de/page/process_pos_section/55",
         )
-        return
-    pos = pos_type["pos"]
-
     base_data.pos = pos
-    page_data.append(copy.deepcopy(base_data))
+    page_data.append(base_data.model_copy(deep=True))
 
     wxr.wtp.start_section(page_data[-1].lang_code + "_" + pos)
 
