@@ -113,3 +113,9 @@ LINKAGE_TITLES: dict[str, str] = {
     "refranes": "proverbs",
     "sinónimo": "synonyms",
 }
+
+ETYMOLOGY_TITLES: frozenset[str] = frozenset(["etimología"])
+
+IGNORED_TITLES: frozenset[str] = frozenset(["véase también"])
+
+TRANSLATIONS_TITLES: frozenset[str] = frozenset(["traducciones", "traducción"])

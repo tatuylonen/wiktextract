@@ -20,7 +20,13 @@ from wiktextract.extractor.es.translation import extract_translation
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from .section_titles import LINKAGE_TITLES, POS_TITLES
+from .section_titles import (
+    ETYMOLOGY_TITLES,
+    IGNORED_TITLES,
+    LINKAGE_TITLES,
+    POS_TITLES,
+    TRANSLATIONS_TITLES,
+)
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -64,7 +70,7 @@ def parse_entries(
 
     # This might not be necessary but it's to prevent that base_data is applied
     # to entries that it shouldn't be applied to
-    base_data_copy = base_data.copy(deep=True)
+    base_data_copy = base_data.model_copy(deep=True)
 
     unexpected_nodes = []
     # Parse data affecting all subsections and add to base_data_copy
@@ -135,7 +141,7 @@ def parse_section(
     if re.match(r"etimología \d+", section_title):
         parse_entries(wxr, page_data, base_data, level_node)
 
-    elif section_title in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
+    elif section_title in IGNORED_TITLES:
         pass
 
     elif pos_template_name in POS_TITLES or section_title in POS_TITLES:
@@ -143,7 +149,7 @@ def parse_section(
             pos_template_name if pos_template_name != "" else section_title
         ]["pos"]
 
-        page_data.append(base_data.copy(deep=True))
+        page_data.append(base_data.model_copy(deep=True))
         page_data[-1].pos = pos_type
         page_data[-1].pos_title = section_title
 
@@ -153,11 +159,11 @@ def parse_section(
             level_node,
         )
 
-    elif section_title in wxr.config.OTHER_SUBTITLES["etymology"]:
+    elif section_title in ETYMOLOGY_TITLES:
         if wxr.config.capture_etymologies:
             process_etymology_block(wxr, base_data, level_node)
 
-    elif section_title in wxr.config.OTHER_SUBTITLES["translations"]:
+    elif section_title in TRANSLATIONS_TITLES:
         if wxr.config.capture_translations:
             for template_node in level_node.find_child_recursively(
                 NodeKind.TEMPLATE
