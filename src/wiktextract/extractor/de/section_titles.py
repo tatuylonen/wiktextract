@@ -92,3 +92,19 @@ POS_SECTIONS: POSSubtitleData = {
     "Zirkumfix": {"pos": "circumfix"},
     "Zirkumposition": {"pos": "circumpos"},
 }
+
+LINKAGE_TITLES: dict[str, str] = {
+    "Gegenwörter": "antonyms",
+    "Holonyme": "holonyms",
+    "Oberbegriffe": "hypernyms",
+    "Redewendungen": "expressions",
+    "Sinnverwandte Wörter": "coordinate_terms",
+    "Sprichwörter": "proverbs",
+    "Synonyme": "synonyms",
+    "Unterbegriffe": "hyponyms",
+    "Wortbildungen": "derived",
+}
+
+ETYMOLOGY_TITLES: frozenset[str] = frozenset(["Herkunft"])
+
+PRONUNCIATION_TITLES: frozenset[str] = frozenset(["Aussprache"])

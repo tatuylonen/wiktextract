@@ -11,7 +11,7 @@ from .example import extract_examples
 from .gloss import extract_glosses
 from .linkage import extract_linkages
 from .pronunciation import extract_pronunciation
-from .section_titles import POS_SECTIONS
+from .section_titles import LINKAGE_TITLES, POS_SECTIONS
 from .translation import extract_translation
 
 # Templates that are used to form panels on pages and that should be ignored in
@@ -88,10 +88,7 @@ def parse_section(
             wxr.config.capture_translations and section_name == "Übersetzungen"
         ):
             extract_translation(wxr, page_data[-1], level_node_or_children)
-        elif (
-            wxr.config.capture_linkages
-            and section_name in wxr.config.LINKAGE_SUBTITLES
-        ):
+        elif wxr.config.capture_linkages and section_name in LINKAGE_TITLES:
             extract_linkages(wxr, page_data[-1], level_node_or_children)
 
 

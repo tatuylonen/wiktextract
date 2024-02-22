@@ -7,11 +7,13 @@ from wiktextract.extractor.share import split_senseids
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .section_titles import LINKAGE_TITLES
+
 
 def extract_linkages(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
 ):
-    linkage_type = wxr.config.LINKAGE_SUBTITLES.get(level_node.largs[0][0])
+    linkage_type = LINKAGE_TITLES.get(level_node.largs[0][0])
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             # Get the senseids
