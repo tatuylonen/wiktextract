@@ -7,6 +7,7 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from .models import Translation, WordEntry
+from .section_titles import TRANSLATIONS_TITLES
 
 
 def extract_translation(
@@ -181,9 +182,7 @@ def translation_subpage(
         if target_section is None
         else find_subpage_section(wxr, root, target_section)
     )
-    translation_node = find_subpage_section(
-        wxr, target_section_node, wxr.config.OTHER_SUBTITLES["translations"]
-    )
+    translation_node = find_subpage_section(wxr, target_section_node)
     if translation_node is not None:
         extract_translation(wxr, page_data, translation_node)
 
@@ -191,7 +190,7 @@ def translation_subpage(
 def find_subpage_section(
     wxr: WiktextractContext,
     node: Union[WikiNode, str],
-    target_section: Union[str, list[str]],
+    target_section: Union[str, None] = None,
 ) -> Optional[WikiNode]:
     if not isinstance(node, WikiNode):
         return None
@@ -199,6 +198,6 @@ def find_subpage_section(
         section_title = clean_node(wxr, None, level_node.largs)
         if isinstance(target_section, str) and section_title == target_section:
             return level_node
-        if isinstance(target_section, list) and section_title in target_section:
+        if section_title in TRANSLATIONS_TITLES:
             return level_node
     return None
