@@ -16,7 +16,7 @@ from .linkage import extract_linkages
 from .models import Sense, WordEntry
 from .note import extract_note
 from .pronunciation import extract_pronunciation_recursively
-from .section_titles import POS_TITLES
+from .section_titles import LINKAGE_TITLES, POS_TITLES
 from .translation import extract_translation
 from .util import append_base_data
 
@@ -89,15 +89,12 @@ def parse_section(
             and subtitle in wxr.config.OTHER_SUBTITLES["pronunciation"]
         ):
             extract_pronunciation(wxr, page_data, base_data, node.children)
-        elif (
-            wxr.config.capture_linkages
-            and subtitle in wxr.config.LINKAGE_SUBTITLES
-        ):
+        elif wxr.config.capture_linkages and subtitle in LINKAGE_TITLES:
             extract_linkages(
                 wxr,
                 page_data,
                 node.children,
-                wxr.config.LINKAGE_SUBTITLES[subtitle],
+                LINKAGE_TITLES[subtitle],
                 "",
             )
         elif (
