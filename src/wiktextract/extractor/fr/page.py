@@ -14,6 +14,16 @@ from .linkage import extract_linkage
 from .models import WordEntry
 from .note import extract_note
 from .pronunciation import extract_pronunciation
+from .section_types import (
+    ETYMOLOGY_SECTIONS,
+    IGNORED_SECTIONS,
+    INFLECTION_SECTIONS,
+    LINKAGE_SECTIONS,
+    NOTES_SECTIONS,
+    POS_SECTIONS,
+    PRONUNCIATION_SECTIONS,
+    TRANSLATION_SECTIONS,
+)
 from .translation import extract_translation
 
 # Templates that are used to form panels on pages and that
@@ -49,11 +59,11 @@ def parse_section(
                 level_node.largs,
             )
             wxr.wtp.start_subsection(subtitle)
-            if section_type in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
+            if section_type in IGNORED_SECTIONS:
                 pass
             # POS parameters:
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections_de_types_de_mots
-            elif section_type in wxr.config.POS_SUBTITLES:
+            elif section_type in POS_SECTIONS:
                 process_pos_block(
                     wxr,
                     page_data,
@@ -64,17 +74,16 @@ def parse_section(
                 )
             elif (
                 wxr.config.capture_etymologies
-                and section_type in wxr.config.OTHER_SUBTITLES["etymology"]
+                and section_type in ETYMOLOGY_SECTIONS
             ):
                 return extract_etymology(wxr, level_node.children)
             elif (
                 wxr.config.capture_pronunciation
-                and section_type in wxr.config.OTHER_SUBTITLES["pronunciation"]
+                and section_type in PRONUNCIATION_SECTIONS
             ):
                 extract_pronunciation(wxr, page_data, level_node, base_data)
             elif (
-                wxr.config.capture_linkages
-                and section_type in wxr.config.LINKAGE_SUBTITLES
+                wxr.config.capture_linkages and section_type in LINKAGE_SECTIONS
             ):
                 if len(page_data) == 0:
                     page_data.append(base_data.model_copy(deep=True))
@@ -88,16 +97,15 @@ def parse_section(
                     page_data.pop()  # no data was added
             elif (
                 wxr.config.capture_translations
-                and section_type in wxr.config.OTHER_SUBTITLES["translations"]
+                and section_type in TRANSLATION_SECTIONS
             ):
                 extract_translation(wxr, page_data, base_data, level_node)
             elif (
                 wxr.config.capture_inflections
-                and section_type
-                in wxr.config.OTHER_SUBTITLES["inflection_sections"]
+                and section_type in INFLECTION_SECTIONS
             ):
                 pass
-            elif section_type in wxr.config.OTHER_SUBTITLES["notes"]:
+            elif section_type in NOTES_SECTIONS:
                 if len(page_data) == 0:
                     page_data.append(base_data.model_copy(deep=True))
                 extract_note(wxr, page_data, level_node)
@@ -113,7 +121,7 @@ def process_pos_block(
     pos_argument: str,
     pos_title: str,
 ):
-    pos_data = wxr.config.POS_SUBTITLES[pos_argument]
+    pos_data = POS_SECTIONS[pos_argument]
     pos_type = pos_data["pos"]
     if len(page_data) == 0 or "pos" in page_data[-1].model_fields_set:
         page_data.append(base_data.model_copy(deep=True))
