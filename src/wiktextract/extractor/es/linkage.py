@@ -4,6 +4,8 @@ from wiktextract.extractor.es.models import Linkage, WordEntry
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .section_titles import LINKAGE_TITLES
+
 
 def extract_linkage(
     wxr: WiktextractContext,
@@ -35,7 +37,7 @@ def process_linkage_template(
     word_entry: WordEntry,
     template_node: WikiNode,
 ):
-    linkage_type = wxr.config.LINKAGE_SUBTITLES.get(
+    linkage_type = LINKAGE_TITLES.get(
         template_node.template_name.removesuffix("s")
     )
     if linkage_type not in word_entry.model_fields:

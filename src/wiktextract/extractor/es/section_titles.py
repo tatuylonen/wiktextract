@@ -99,3 +99,17 @@ POS_TITLES: POSSubtitleData = {
     "verbo transitivo": {"pos": "verb"},
     "verbo": {"pos": "verb"},
 }
+
+LINKAGE_TITLES: dict[str, str] = {
+    "antónimo": "antonyms",
+    "compuestos": "compounds",
+    "derivad": "derived",
+    "hipónimo": "hyponyms",
+    "hiperónimo": "hypernyms",
+    "merónimo": "meronyms",
+    "locucion": "idioms",
+    "locuciones": "idioms",
+    "relacionado": "related",
+    "refranes": "proverbs",
+    "sinónimo": "synonyms",
+}

@@ -5,6 +5,8 @@ from wiktextract.extractor.es.models import Sense
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .section_titles import LINKAGE_TITLES
+
 
 def process_sense_data_list(
     wxr: WiktextractContext,
@@ -30,12 +32,12 @@ def process_sense_data_list(
 
             if list_type == "ejemplo":
                 process_example_list(wxr, sense_data, list_item)
-            elif list_type in wxr.config.LINKAGE_SUBTITLES:
+            elif list_type in LINKAGE_TITLES:
                 process_linkage_list_children(
                     wxr,
                     sense_data,
                     children[1:],
-                    wxr.config.LINKAGE_SUBTITLES.get(list_type),
+                    LINKAGE_TITLES[list_type],
                 )
             elif list_type == "ámbito":
                 # XXX: Extract scope tag

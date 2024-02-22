@@ -20,7 +20,7 @@ from wiktextract.extractor.es.translation import extract_translation
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from .section_titles import POS_TITLES
+from .section_titles import LINKAGE_TITLES, POS_TITLES
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -165,10 +165,10 @@ def parse_section(
                 if template_node.template_name == "t+" and len(page_data) > 0:
                     extract_translation(wxr, page_data[-1], template_node)
 
-    elif section_title in wxr.config.LINKAGE_SUBTITLES:
-        linkage_type = wxr.config.LINKAGE_SUBTITLES[section_title]
-
-        extract_linkage(wxr, page_data[-1], level_node, linkage_type)
+    elif section_title in LINKAGE_TITLES:
+        extract_linkage(
+            wxr, page_data[-1], level_node, LINKAGE_TITLES[section_title]
+        )
 
     else:
         wxr.wtp.debug(
@@ -277,9 +277,7 @@ def process_sense_children(
 
             if template_name == "clear":
                 return
-            elif (
-                template_name.removesuffix("s") in wxr.config.LINKAGE_SUBTITLES
-            ):
+            elif template_name.removesuffix("s") in LINKAGE_TITLES:
                 process_linkage_template(
                     wxr, page_data[-1].senses[-1], group[0]
                 )
