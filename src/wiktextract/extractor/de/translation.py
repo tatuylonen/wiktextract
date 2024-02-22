@@ -101,7 +101,7 @@ def process_translation_list(
                 translation_data.uncertain = True
 
             translation_data.word = clean_node(
-                wxr, {}, node.template_parameters.get(2)
+                wxr, None, node.template_parameters.get(2, "")
             )
 
             if node.template_name.removesuffix("?") == "Ü":
@@ -110,7 +110,8 @@ def process_translation_list(
             if node.template_name.removesuffix("?") == "Üt":
                 process_Üt_template(wxr, translation_data, node)
 
-            sense_translations.append(translation_data)
+            if len(translation_data.word) > 0:
+                sense_translations.append(translation_data)
     # Process modifiers at the end of the list
     process_modifiers(wxr, sense_translations, Translation(), modifiers)
 

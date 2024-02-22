@@ -3,7 +3,7 @@ import unittest
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.linkage import extract_linkages
-from wiktextract.extractor.de.models import Sense, WordEntry
+from wiktextract.extractor.de.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
 
