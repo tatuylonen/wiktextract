@@ -68,15 +68,11 @@ def process_gloss_list_item(
             gloss_text = clean_node(wxr, sense_data, list_item_node.children)
 
             senseid, gloss_text = match_senseid(gloss_text)
-
-            if senseid:
-                senseid = (
-                    senseid
-                    if senseid[0].isnumeric()
-                    else parent_senseid + senseid
-                )
+            if senseid != "":
+                if not senseid[0].isnumeric():
+                    senseid = parent_senseid + senseid
                 sense_data.senseid = senseid
-            elif gloss_text.strip():
+            elif len(gloss_text.strip()) > 0:
                 wxr.wtp.debug(
                     f"Failed to extract sense number from gloss node: {list_item_node}",
                     sortid="extractor/de/glosses/extract_glosses/28",

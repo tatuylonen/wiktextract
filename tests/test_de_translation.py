@@ -302,3 +302,18 @@ class TestDETranslation(unittest.TestCase):
                 self.assertEqual(
                     translations, case["expected_sense_translations"]
                 )
+
+    def test_empty_translation(self):
+        self.wxr.wtp.start_page("AM")
+        word_entry = WordEntry(word="AM", lang="English", lang_code="en")
+        root = self.wxr.wtp.parse(
+            """==== {{Übersetzungen}} ====
+{{Ü-Tabelle|Ü-Liste=
+*{{fr}}: [1] {{Ü|fr|}}
+}}"""
+        )
+        extract_translation(self.wxr, word_entry, root)
+        self.assertEqual(
+            word_entry.model_dump(exclude_defaults=True),
+            {"word": "AM", "lang": "English", "lang_code": "en"},
+        )
