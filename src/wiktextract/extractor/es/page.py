@@ -1,4 +1,3 @@
-import copy
 import logging
 import re
 
@@ -20,6 +19,8 @@ from wiktextract.extractor.es.sense_data import process_sense_data_list
 from wiktextract.extractor.es.translation import extract_translation
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
+
+from .section_titles import POS_TITLES
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -63,7 +64,7 @@ def parse_entries(
 
     # This might not be necessary but it's to prevent that base_data is applied
     # to entries that it shouldn't be applied to
-    base_data_copy = copy.deepcopy(base_data)
+    base_data_copy = base_data.copy(deep=True)
 
     unexpected_nodes = []
     # Parse data affecting all subsections and add to base_data_copy
@@ -126,7 +127,7 @@ def parse_section(
     section_title = clean_node(wxr, base_data, level_node.largs).lower()
     wxr.wtp.start_subsection(section_title)
 
-    pos_template_name = None
+    pos_template_name = ""
     for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
         pos_template_name = level_node_template.template_name
 
@@ -137,16 +138,12 @@ def parse_section(
     elif section_title in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
         pass
 
-    elif (
-        pos_template_name
-        and pos_template_name in wxr.config.POS_SUBTITLES
-        or section_title in wxr.config.POS_SUBTITLES
-    ):
-        pos_type = wxr.config.POS_SUBTITLES[
-            pos_template_name if pos_template_name else section_title
+    elif pos_template_name in POS_TITLES or section_title in POS_TITLES:
+        pos_type = POS_TITLES[
+            pos_template_name if pos_template_name != "" else section_title
         ]["pos"]
 
-        page_data.append(copy.deepcopy(base_data))
+        page_data.append(base_data.copy(deep=True))
         page_data[-1].pos = pos_type
         page_data[-1].pos_title = section_title
 
