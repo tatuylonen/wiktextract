@@ -12,7 +12,7 @@ from .inflection import extract_inflection
 from .linkage import extract_linkages
 from .models import WordEntry
 from .pronunciation import extract_pronunciation
-from .section_titles import POS_TEMPLATE_NAMES, POS_TITLES
+from .section_titles import LINKAGE_TITLES, POS_TEMPLATE_NAMES, POS_TITLES
 from .translation import extract_translations
 
 # Templates that are used to form panels on pages and that
@@ -38,8 +38,8 @@ def process_semantic_section(
         if section_title == "значение":
             extract_gloss(wxr, page_data[-1], level4_node)
 
-        elif section_title in wxr.config.LINKAGE_SUBTITLES:
-            linkage_type = wxr.config.LINKAGE_SUBTITLES.get(section_title)
+        elif section_title in LINKAGE_TITLES:
+            linkage_type = LINKAGE_TITLES[section_title]
             extract_linkages(wxr, page_data[-1], linkage_type, level4_node)
         else:
             wxr.wtp.debug(

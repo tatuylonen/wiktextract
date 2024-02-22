@@ -1,4 +1,6 @@
-POS_TITLES = {
+from wiktextract.config import POSSubtitleData
+
+POS_TITLES: POSSubtitleData = {
     "аббревиатура": {"pos": "abbrev"},
     "глагол": {"pos": "verb"},
     "деепричастие": {"pos": "gerund"},
@@ -14,7 +16,7 @@ POS_TITLES = {
     "наречие": {"pos": "adv"},
 }
 
-POS_TEMPLATE_NAMES = {
+POS_TEMPLATE_NAMES: POSSubtitleData = {
     "abbrev": {"pos": "abbrev", "tags": ["abbreviation"]},
     "adv": {"pos": "adv"},
     "affix": {"pos": "affix"},
@@ -47,4 +49,17 @@ POS_TEMPLATE_NAMES = {
     "фам": {"pos": "name"},
     "част": {"pos": "particle"},
     "числ": {"pos": "num"},
+}
+
+LINKAGE_TITLES: dict[str, str] = {
+    "антонимы": "antonyms",
+    "анаграммы": "anagrams",
+    "варианты": "variants",
+    "гиперонимы": "hypernyms",
+    "гипонимы": "hyponyms",
+    "дериваты": "derived",
+    "меронимы": "meronyms",
+    "синонимы": "synonyms",
+    "согипонимы": "coordinate_terms",
+    "холонимы": "holonyms",
 }
