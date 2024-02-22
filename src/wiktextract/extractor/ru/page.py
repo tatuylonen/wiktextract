@@ -12,6 +12,7 @@ from .inflection import extract_inflection
 from .linkage import extract_linkages
 from .models import WordEntry
 from .pronunciation import extract_pronunciation
+from .section_titles import POS_TEMPLATE_NAMES, POS_TITLES
 from .translation import extract_translations
 
 # Templates that are used to form panels on pages and that
@@ -49,41 +50,6 @@ def process_semantic_section(
     # XXX: Process non level4 nodes such as illustration templates "{илл|...}",
     # cf. https://ru.wiktionary.org/wiki/овощ
 
-
-POS_TEMPLATE_NAME_MAP = {
-    "abbrev": {"pos": "abbrev", "tags": ["abbreviation"]},
-    "adv": {"pos": "adv"},
-    "affix": {"pos": "affix"},
-    "article": {"pos": "article"},
-    "conj": {"pos": "conj"},
-    "interj": {"pos": "intj"},
-    "noun": {"pos": "noun"},
-    "onomatop": {"pos": "onomatopeia", "tags": ["onomatopoeic"]},
-    "part": {"pos": "particle"},
-    "phrase": {"pos": "phrase"},
-    "predic": {"pos": "adj"},
-    "prep": {"pos": "prep"},
-    "suffix": {"pos": "suffix"},
-    "буква": {"pos": "character"},
-    "гидроним": {"pos": "name"},
-    "гл": {"pos": "verb"},
-    "дее": {"pos": "verb", "tags": ["participle", "gerund"]},
-    "деепр": {"pos": "verb", "tags": ["participle", "gerund"]},
-    "мест": {"pos": "pron"},
-    "нар": {"pos": "adv"},
-    "падежи": {"pos": "noun"},
-    "послелог": {"pos": "postp"},
-    "посл": {"pos": "postp"},
-    "прил": {"pos": "adj"},
-    "прич": {"pos": "verb", "tags": ["participle"]},
-    "союз": {"pos": "conj"},
-    "сущ": {"pos": "noun"},
-    "существительное": {"pos": "noun"},
-    "топоним": {"pos": "name"},
-    "фам": {"pos": "name"},
-    "част": {"pos": "particle"},
-    "числ": {"pos": "num"},
-}
 
 MORPH_TEMPLATE_ARGS = {
     "p": "prefix",
@@ -131,13 +97,13 @@ def get_pos_from_template(
         if len(pos_text) == 0:
             return
         pos_text = pos_text.split()[0]
-        if pos_text in wxr.config.POS_SUBTITLES:
-            return wxr.config.POS_SUBTITLES[pos_text]
+        if pos_text in POS_TITLES:
+            return POS_TITLES[pos_text]
 
     for part in template_name.split()[:2]:
         for subpart in part.split("-")[:2]:
-            if subpart in POS_TEMPLATE_NAME_MAP:
-                return POS_TEMPLATE_NAME_MAP[subpart]
+            if subpart in POS_TEMPLATE_NAMES:
+                return POS_TEMPLATE_NAMES[subpart]
 
 
 def get_pos(
@@ -152,9 +118,9 @@ def get_pos(
     text = clean_node(
         wxr, None, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
     )
-    for pos_string in wxr.config.POS_SUBTITLES.keys():
+    for pos_string in POS_TITLES.keys():
         if pos_string in text.lower():
-            return wxr.config.POS_SUBTITLES[pos_string]
+            return POS_TITLES[pos_string]
 
     if "форма" in text.lower():
         # XXX: Decide what to do with form entries
@@ -179,8 +145,8 @@ def parse_section(
             page_data[-1].tags.extend(pos_data.get("tags", []))
         extract_inflection(wxr, page_data[-1], level3_node)
         # XXX: Extract grammatical tags (gender, etc.) from Russian Wiktionary
-    elif section_title in wxr.config.POS_SUBTITLES:
-        pos_data = wxr.config.POS_SUBTITLES[section_title]
+    elif section_title in POS_TITLES:
+        pos_data = POS_TITLES[section_title]
         page_data[-1].pos = pos_data["pos"]
         page_data[-1].tags.extend(pos_data.get("tags", []))
         extract_gloss(wxr, page_data[-1], level3_node)
