@@ -16,6 +16,17 @@ from .linkage import extract_linkages
 from .models import Sense, WordEntry
 from .note import extract_note
 from .pronunciation import extract_pronunciation_recursively
+from .section_titles import (
+    DESCENDANTS_TITLES,
+    ETYMOLOGY_TITLES,
+    IGNORED_TITLES,
+    INFLECTION_TITLES,
+    LINKAGE_TITLES,
+    NOTES_TITLES,
+    POS_TITLES,
+    PRONUNCIATION_TITLES,
+    TRANSLATIONS_TITLES,
+)
 from .translation import extract_translation
 from .util import append_base_data
 
@@ -75,46 +86,36 @@ def parse_section(
         # remove number suffix from subtitle
         subtitle = re.sub(r"\s*(?:（.+）|\d+)$", "", subtitle)
         wxr.wtp.start_subsection(subtitle)
-        if subtitle in wxr.config.OTHER_SUBTITLES["ignored_sections"]:
+        if subtitle in IGNORED_TITLES:
             pass
-        elif subtitle in wxr.config.POS_SUBTITLES:
+        elif subtitle in POS_TITLES:
             process_pos_block(wxr, page_data, base_data, node, subtitle)
         elif wxr.config.capture_etymologies and subtitle.startswith(
-            tuple(wxr.config.OTHER_SUBTITLES["etymology"])
+            tuple(ETYMOLOGY_TITLES)
         ):
             extract_etymology(wxr, page_data, base_data, node.children)
         elif (
             wxr.config.capture_pronunciation
-            and subtitle in wxr.config.OTHER_SUBTITLES["pronunciation"]
+            and subtitle in PRONUNCIATION_TITLES
         ):
             extract_pronunciation(wxr, page_data, base_data, node.children)
-        elif (
-            wxr.config.capture_linkages
-            and subtitle in wxr.config.LINKAGE_SUBTITLES
-        ):
+        elif wxr.config.capture_linkages and subtitle in LINKAGE_TITLES:
             extract_linkages(
                 wxr,
                 page_data,
                 node.children,
-                wxr.config.LINKAGE_SUBTITLES[subtitle],
+                LINKAGE_TITLES[subtitle],
                 "",
             )
         elif (
-            wxr.config.capture_translations
-            and subtitle in wxr.config.OTHER_SUBTITLES["translations"]
+            wxr.config.capture_translations and subtitle in TRANSLATIONS_TITLES
         ):
             extract_translation(wxr, page_data, node)
-        elif (
-            wxr.config.capture_inflections
-            and subtitle in wxr.config.OTHER_SUBTITLES["inflection_sections"]
-        ):
+        elif wxr.config.capture_inflections and subtitle in INFLECTION_TITLES:
             extract_inflections(wxr, page_data, node)
-        elif (
-            wxr.config.capture_descendants
-            and subtitle in wxr.config.OTHER_SUBTITLES["descendants"]
-        ):
+        elif wxr.config.capture_descendants and subtitle in DESCENDANTS_TITLES:
             extract_descendants(wxr, node, page_data[-1])
-        elif subtitle in wxr.config.OTHER_SUBTITLES["notes"]:
+        elif subtitle in NOTES_TITLES:
             extract_note(wxr, page_data, node)
         else:
             wxr.wtp.debug(
@@ -130,7 +131,7 @@ def process_pos_block(
     node: WikiNode,
     pos_text: str,
 ):
-    pos_data = wxr.config.POS_SUBTITLES[pos_text]
+    pos_data = POS_TITLES[pos_text]
     pos_type = pos_data["pos"]
     base_data.pos = pos_type
     append_base_data(page_data, "pos", pos_type, base_data)

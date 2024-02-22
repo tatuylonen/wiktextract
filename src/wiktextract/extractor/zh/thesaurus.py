@@ -9,6 +9,7 @@ from ...page import clean_node
 from ...thesaurus import ThesaurusTerm
 from ...wxr_context import WiktextractContext
 from ..share import capture_text_in_parentheses, split_chinese_variants
+from .section_titles import LINKAGE_TITLES, POS_TITLES
 
 SENSE_SUBTITLE_PREFIX = "詞義："
 IGNORED_LEVEL3_SUBTITLES = {
@@ -169,9 +170,7 @@ def recursive_parse(
         local_pos_name = clean_node(wxr, None, node.largs)
         if local_pos_name in IGNORED_LEVEL3_SUBTITLES:
             return None
-        english_pos = wxr.config.POS_SUBTITLES.get(local_pos_name, {}).get(
-            "pos"
-        )
+        english_pos = POS_TITLES.get(local_pos_name, {}).get("pos")
         if english_pos is None:
             logging.warning(
                 f"Unrecognized POS subtitle: {local_pos_name} in page "
@@ -189,7 +188,7 @@ def recursive_parse(
         )
     elif node.kind == NodeKind.LEVEL5:
         local_linkage_name = clean_node(wxr, None, node.largs)
-        english_linkage = wxr.config.LINKAGE_SUBTITLES.get(local_linkage_name)
+        english_linkage = LINKAGE_TITLES.get(local_linkage_name)
         if english_linkage is None:
             logging.warning(
                 f"Unrecognized linkage subtitle: {local_linkage_name} in page "
