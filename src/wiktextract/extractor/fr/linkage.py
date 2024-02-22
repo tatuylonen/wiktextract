@@ -71,7 +71,10 @@ def process_linkage_list(
             sense_index_text = template_or_list_node.template_parameters.get(
                 2, "0"
             )
-            if isinstance(sense_index_text, str) and sense_index_text.isdigit():
+            if (
+                isinstance(sense_index_text, str)
+                and sense_index_text.isdecimal()
+            ):
                 sense_index = int(sense_index_text)
             continue
         # sense could also be in ";" description list
@@ -145,7 +148,7 @@ def process_linkage_list(
                 else:
                     tags, _ = capture_text_in_parentheses(tag_text)
                     for tag in tags:
-                        if tag.isdigit():
+                        if tag.isdecimal():
                             linkage_data.sense_index = int(tag)
                         else:
                             linkage_data.tags.append(tag)
