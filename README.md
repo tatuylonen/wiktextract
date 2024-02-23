@@ -712,14 +712,14 @@ sense is a dictionary that may contain the following keys (among others, and mor
 * ``hypernyms`` - sense-disambiguated hypernym linkages for the word (see below)
 * ``holonyms`` - sense-disambiguated linkages indicating being part of something (see below) (not systematically encoded)
 * ``meronyms`` - sense-disambiguated linkages indicating having a part (see below) (fairly rare)
-* ``coordianate_terms`` - sense-disambiguated coordinate_terms linkages (see below)
+* ``coordinate_terms`` - sense-disambiguated coordinate_terms linkages (see below)
 * ``derived`` - sense-disambiguated derived word linkages for the word (see below)
 * ``related`` - sense-disambiguated related word linkages for the word (see below)
 * ``senseid`` - list of textual identifiers collected for the sense.  If there is a QID for the entry (e.g., Q123), those are stored in the ``wikidata`` field.
 * ``wikidata`` - list of QIDs (e.g., Q123) for the sense
 * ``wikipedia`` - list of Wikipedia page titles (with optional language code prefix)
 * ``examples`` - list of usage examples, each example being a dictionary with ``text`` field containing the example text, optional ``ref`` field containing a source reference, optional ``english`` field containing English translation, optional ``type`` field containing example type (currently ``example`` or ``quotation`` if present), optional ``roman`` field containing romanization (for some languages written in non-Latin scripts), and optional (rare) ``note`` field contains English-language parenthesized note from the beginning of a non-english example.
-* ``english`` - if the word sense has a qualifier that could not be parsed, that qualifier is put in this field (rare).  Most qualifiers parsed into ``tags`` and/or ``topics``.  The gloss with the qualifier still present can be found in ``raw_glosses``.
+* ``english`` - if the word sense has a qualifier that could not be parsed, that qualifier is put in this field (rare).  Most qualifiers are parsed into ``tags`` and/or ``topics``.  The gloss with the qualifier still present can be found in ``raw_glosses``.
 
 ### Pronunciation
 
