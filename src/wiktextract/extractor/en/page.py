@@ -1702,6 +1702,8 @@ def parse_language(
             rawgloss = ""
         elif rawgloss == "Technical or specialized senses.":
             rawgloss = ""
+        elif rawgloss.startswith("inflection of "):
+            data_append(sense_base, "tags", "form-of")
         if rawgloss:
             data_append(sense_base, "glosses", rawgloss)
             if rawgloss in ("A person:",):
