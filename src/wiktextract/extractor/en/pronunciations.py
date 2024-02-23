@@ -1,37 +1,47 @@
+import hashlib
 import re
 import urllib
-import hashlib
 
-from .page import clean_node, is_panel_template
-from wikitextprocessor import WikiNode, NodeKind
-from .datautils import split_at_comma_semi, data_append
-from .form_descriptions import parse_pronunciation_tags, classify_desc
-from .tags import valid_tags
-from .parts_of_speech import part_of_speech_map
+from wikitextprocessor import NodeKind, WikiNode
+from wiktextract.datautils import data_append, split_at_comma_semi
+from wiktextract.form_descriptions import (
+    classify_desc,
+    parse_pronunciation_tags,
+)
+from wiktextract.page import clean_node, is_panel_template
+from wiktextract.parts_of_speech import part_of_speech_map
+from wiktextract.tags import valid_tags
 
-LEVEL_KINDS = (NodeKind.LEVEL2, NodeKind.LEVEL3, NodeKind.LEVEL4,
-               NodeKind.LEVEL5, NodeKind.LEVEL6)
+LEVEL_KINDS = (
+    NodeKind.LEVEL2,
+    NodeKind.LEVEL3,
+    NodeKind.LEVEL4,
+    NodeKind.LEVEL5,
+    NodeKind.LEVEL6,
+)
 
 # Prefixes, tags, and regexp for finding romanizations from the pronuncation
 # section
 pron_romanizations = {
     " Revised Romanization ": "romanization revised",
-    " Revised Romanization (translit.) ":
-    "romanization revised transliteration",
+    " Revised Romanization (translit.) ": "romanization revised transliteration",
     " McCune-Reischauer ": "McCune-Reischauer romanization",
     " McCune–Reischauer ": "McCune-Reischauer romanization",
     " Yale Romanization ": "Yale romanization",
 }
 pron_romanization_re = re.compile(
-    "(?m)^(" +
-    "|".join(re.escape(x) for x in
-             sorted(pron_romanizations.keys(), key=len,
-                    reverse=True)) +
-    ")([^\n]+)")
+    "(?m)^("
+    + "|".join(
+        re.escape(x)
+        for x in sorted(pron_romanizations.keys(), key=len, reverse=True)
+    )
+    + ")([^\n]+)"
+)
 
 
-def parse_pronunciation(wxr, node, data, etym_data,
-                        have_etym, base_data, lang_code):
+def parse_pronunciation(
+    wxr, node, data, etym_data, have_etym, base_data, lang_code
+):
     """Parses the pronunciation section from a language section on a
     page."""
     assert isinstance(node, WikiNode)
@@ -42,19 +52,25 @@ def parse_pronunciation(wxr, node, data, etym_data,
     # Remove subsections, such as Usage notes.  They may contain IPAchar
     # templates in running text, and we do not want to extract IPAs from
     # those.
-    contents = [x for x in contents
-                if not isinstance(x, WikiNode) or x.kind not in LEVEL_KINDS]
-                # Filter out only LEVEL_KINDS; 'or' is doing heavy lifting here
-                # Slip through not-WikiNodes, then slip through WikiNodes that
-                # are not LEVEL_KINDS.
-    if (not any(isinstance(x, WikiNode) and
-                x.kind == NodeKind.LIST for x in contents)):
+    contents = [
+        x
+        for x in contents
+        if not isinstance(x, WikiNode) or x.kind not in LEVEL_KINDS
+    ]
+    # Filter out only LEVEL_KINDS; 'or' is doing heavy lifting here
+    # Slip through not-WikiNodes, then slip through WikiNodes that
+    # are not LEVEL_KINDS.
+    if not any(
+        isinstance(x, WikiNode) and x.kind == NodeKind.LIST for x in contents
+    ):
         # expand all templates
         new_contents = []
         for l in contents:
-            if (isinstance(l, WikiNode) and
-               l.kind == NodeKind.TEMPLATE and
-               l.largs[0][0].strip() != "zh-pron"):
+            if (
+                isinstance(l, WikiNode)
+                and l.kind == NodeKind.TEMPLATE
+                and l.largs[0][0].strip() != "zh-pron"
+            ):
                 temp = wxr.wtp.node_to_wikitext(l)
                 temp = wxr.wtp.expand(temp)
                 temp = wxr.wtp.parse(temp)
@@ -148,8 +164,18 @@ def parse_pronunciation(wxr, node, data, etym_data,
     def parse_pron_post_template_fn(name, ht, text):
         if is_panel_template(wxr, name):
             return ""
-        if name in {"q", "qualifier", "sense", "a", "accent",
-                    "l", "link", "lb", "lbl", "label"}:
+        if name in {
+            "q",
+            "qualifier",
+            "sense",
+            "a",
+            "accent",
+            "l",
+            "link",
+            "lb",
+            "lbl",
+            "label",
+        }:
             # Kludge: when these templates expand to /.../ or [...],
             # replace the expansion by something safe.  This is used
             # to filter spurious IPA-looking expansions that aren't really
@@ -169,9 +195,9 @@ def parse_pronunciation(wxr, node, data, etym_data,
             return "stripped-by-parse_pron_post_template_fn"
         return text
 
-    def parse_expanded_zh_pron(node, parent_hdrs, specific_hdrs,
-                               unknown_header_tags):
-
+    def parse_expanded_zh_pron(
+        node, parent_hdrs, specific_hdrs, unknown_header_tags
+    ):
         def generate_pron(v, new_parent_hdrs, new_specific_hdrs):
             pron = {}
             pron["tags"] = []
@@ -204,22 +230,26 @@ def parse_pronunciation(wxr, node, data, etym_data,
 
         if isinstance(node, list):
             for item in node:
-                parse_expanded_zh_pron(item, parent_hdrs, specific_hdrs,
-                                       unknown_header_tags)
+                parse_expanded_zh_pron(
+                    item, parent_hdrs, specific_hdrs, unknown_header_tags
+                )
             return
         if not isinstance(node, WikiNode):
             return
         if node.kind != NodeKind.LIST:
             for item in node.children:
-                parse_expanded_zh_pron(item, parent_hdrs, specific_hdrs,
-                                       unknown_header_tags)
+                parse_expanded_zh_pron(
+                    item, parent_hdrs, specific_hdrs, unknown_header_tags
+                )
             return
         for item in node.children:
             assert isinstance(item, WikiNode)
             assert item.kind == NodeKind.LIST_ITEM
-            base_item = list(x for x in item.children
-                             if not isinstance(x, WikiNode) or
-                                x.kind != NodeKind.LIST)
+            base_item = list(
+                x
+                for x in item.children
+                if not isinstance(x, WikiNode) or x.kind != NodeKind.LIST
+            )
             text = clean_node(wxr, None, base_item)
             # print(f"{parent_hdrs}  zhpron: {text}")  # XXX remove me
             text = re.sub(r"(?s)\(Note:.*?\)", "", text)
@@ -228,7 +258,7 @@ def parse_pronunciation(wxr, node, data, etym_data,
             # the hanzi are examples
             hanzi_m = re.match(r"\s*(\([^()]*\))\s*\(([^()]*)\)\s*$", text)
             if hanzi_m:
-                if re.search(u'[\u4e00-\u9fff]', hanzi_m.group(2)):
+                if re.search("[\u4e00-\u9fff]", hanzi_m.group(2)):
                     text = hanzi_m.group(1)
             new_parent_hdrs = list(parent_hdrs)
             new_specific_hdrs = list(specific_hdrs)
@@ -236,8 +266,9 @@ def parse_pronunciation(wxr, node, data, etym_data,
 
             if ": " in text or "：" in text:
                 parts = re.split(r": |：", text)
-                m = re.match(r"\s*\((([^():]+)\s*(:|：)?\s*([^():]*))\)\s*$",
-                             text)
+                m = re.match(
+                    r"\s*\((([^():]+)\s*(:|：)?\s*([^():]*))\)\s*$", text
+                )
                 # Matches lines with stuff like "(Hokkien: Xiamen, Quanzhou)"
                 # thrown into new_parent_hdrs
                 if m:
@@ -262,23 +293,26 @@ def parse_pronunciation(wxr, node, data, etym_data,
                     m = re.match(r"\s*IPA\s*\((.*)\)\s*$", extra_tags)
                     if m:
                         new_parent_hdrs.append("IPA")
-                        new_specific_hdrs = [s.strip() for s
-                                             in m.group(1).split(",")]
-                        extra_tags = extra_tags[m.end():]
+                        new_specific_hdrs = [
+                            s.strip() for s in m.group(1).split(",")
+                        ]
+                        extra_tags = extra_tags[m.end() :]
 
                     m = re.match(r"\s*\([^()]*,[^()]*\)\s*$", extra_tags)
                     if m:
                         extra_tags = extra_tags.strip()[1:-1]  # remove parens
-                        new_parent_hdrs.extend(s.strip() for s in
-                                               extra_tags.split(","))
+                        new_parent_hdrs.extend(
+                            s.strip() for s in extra_tags.split(",")
+                        )
                     elif extra_tags:
                         new_parent_hdrs.append(extra_tags)
 
                     v = ":".join(parts[1:])
 
                     #  check for phrases
-                    if (("，" in wxr.wtp.title) and
-                       len(v.split(" ")) + v.count(",") == len(wxr.wtp.title)):
+                    if ("，" in wxr.wtp.title) and len(v.split(" ")) + v.count(
+                        ","
+                    ) == len(wxr.wtp.title):
                         # This just captures exact matches where you have
                         # the pronunciation of the whole phrase and nothing
                         # else. Split on spaces, then because we're not
@@ -289,9 +323,9 @@ def parse_pronunciation(wxr, node, data, etym_data,
                         # in the split list, where it's part of a space-
                         # separated string, like "teo⁴,".
                         vals = [v]
-                        pron = generate_pron(v,
-                                             new_parent_hdrs,
-                                             new_specific_hdrs)
+                        pron = generate_pron(
+                            v, new_parent_hdrs, new_specific_hdrs
+                        )
 
                         if pron:
                             pron["tags"] = list(sorted(pron["tags"]))
@@ -300,17 +334,20 @@ def parse_pronunciation(wxr, node, data, etym_data,
                     elif "→" in v:
                         vals = re.split("→", v)
                         for v in vals:
-                            pron = generate_pron(v,
-                                                 new_parent_hdrs,
-                                                 new_specific_hdrs)
+                            pron = generate_pron(
+                                v, new_parent_hdrs, new_specific_hdrs
+                            )
                             if pron:
-                                m = re.match(r"([^()]+)\s*\(toneless"
-                                             r" final syllable variant\)\s*",
-                                             v)
+                                m = re.match(
+                                    r"([^()]+)\s*\(toneless"
+                                    r" final syllable variant\)\s*",
+                                    v,
+                                )
                                 if m:
-                                    pron ["zh-pron"] = m.group(1).strip()
+                                    pron["zh-pron"] = m.group(1).strip()
                                     pron["tags"].append(
-                                            "toneless-final-syllable-variant")
+                                        "toneless-final-syllable-variant"
+                                    )
 
                                 pron["tags"] = list(sorted(pron["tags"]))
                                 if pron not in data.get("sounds", ()):
@@ -329,9 +366,9 @@ def parse_pronunciation(wxr, node, data, etym_data,
                                 new_vals.extend(re.split(r"[()]", v2))
                         vals = new_vals
                         for v in vals:
-                            pron = generate_pron(v,
-                                                 new_parent_hdrs,
-                                                 new_specific_hdrs)
+                            pron = generate_pron(
+                                v, new_parent_hdrs, new_specific_hdrs
+                            )
                             if pron:
                                 pron["tags"] = list(sorted(pron["tags"]))
                                 if pron not in data.get("sounds", ()):
@@ -341,8 +378,9 @@ def parse_pronunciation(wxr, node, data, etym_data,
 
             for x in item.children:
                 if isinstance(x, WikiNode) and x.kind == NodeKind.LIST:
-                    parse_expanded_zh_pron(x, new_parent_hdrs, specific_hdrs,
-                                           unknown_header_tags)
+                    parse_expanded_zh_pron(
+                        x, new_parent_hdrs, specific_hdrs, unknown_header_tags
+                    )
 
     def parse_chinese_pron(contents, unknown_header_tags):
         if isinstance(contents, list):
@@ -355,10 +393,11 @@ def parse_pronunciation(wxr, node, data, etym_data,
             for item in contents.children:
                 parse_chinese_pron(item, unknown_header_tags)
             return
-        if (len(contents.largs[0]) == 1 and
-           isinstance(contents.largs[0][0], str) and
-           contents.largs[0][0].strip() == "zh-pron"):
-
+        if (
+            len(contents.largs[0]) == 1
+            and isinstance(contents.largs[0][0], str)
+            and contents.largs[0][0].strip() == "zh-pron"
+        ):
             src = wxr.wtp.node_to_wikitext(contents)
             expanded = wxr.wtp.expand(src, templates_to_expand={"zh-pron"})
             parsed = wxr.wtp.parse(expanded)
@@ -372,8 +411,11 @@ def parse_pronunciation(wxr, node, data, etym_data,
         unknown_header_tags = set()
         parse_chinese_pron(contents, unknown_header_tags)
         for hdr in unknown_header_tags:
-            wxr.wtp.debug(f"Zh-pron header not found in zh_pron_tags or tags: "
-                      f"{repr(hdr)}", sortid="pronunciations/296/20230324")
+            wxr.wtp.debug(
+                f"Zh-pron header not found in zh_pron_tags or tags: "
+                f"{repr(hdr)}",
+                sortid="pronunciations/296/20230324",
+            )
 
     def flattened_tree(lines):
         assert isinstance(lines, list)
@@ -412,13 +454,14 @@ def parse_pronunciation(wxr, node, data, etym_data,
     # been caught by earlier kludges...
     def split_cleaned_node_on_newlines(contents):
         for litem in flattened_tree(contents):
-            text = clean_node(wxr, data, litem,
-                          template_fn=parse_pronunciation_template_fn)
-            ipa_text = clean_node(wxr, data, litem,
-                              post_template_fn=parse_pron_post_template_fn)
+            text = clean_node(
+                wxr, data, litem, template_fn=parse_pronunciation_template_fn
+            )
+            ipa_text = clean_node(
+                wxr, data, litem, post_template_fn=parse_pron_post_template_fn
+            )
             for line, ipaline in zip(text.splitlines(), ipa_text.splitlines()):
                 yield line, ipaline
-
 
     # have_pronunciations = False
     active_pos = None
@@ -464,7 +507,8 @@ def parse_pronunciation(wxr, node, data, etym_data,
         m = re.search(r"(?m)\(Tokyo\) +([^ ]+) +\[", text)
         if m:
             pron = {field: m.group(1)}
-            if active_pos: pron["pos"] = active_pos
+            if active_pos:
+                pron["pos"] = active_pos
             data_append(data, "sounds", pron)
             # have_pronunciations = True
             continue
@@ -476,7 +520,8 @@ def parse_pronunciation(wxr, node, data, etym_data,
                 ending = ending.strip()
                 if ending:
                     pron = {"rhymes": ending}
-                    if active_pos: pron["pos"] = active_pos
+                    if active_pos:
+                        pron["pos"] = active_pos
                     data_append(data, "sounds", pron)
                     # have_pronunciations = True
             continue
@@ -488,7 +533,8 @@ def parse_pronunciation(wxr, node, data, etym_data,
                 w = w.strip()
                 if w:
                     pron = {"homophone": w}
-                    if active_pos: pron["pos"] = active_pos
+                    if active_pos:
+                        pron["pos"] = active_pos
                     data_append(data, "sounds", pron)
                     # have_pronunciations = True
             continue
@@ -502,7 +548,8 @@ def parse_pronunciation(wxr, node, data, etym_data,
                 if w and w not in seen:
                     seen.add(w)
                     pron = {"hangeul": w}
-                    if active_pos: pron["pos"] = active_pos
+                    if active_pos:
+                        pron["pos"] = active_pos
                     data_append(data, "sounds", pron)
                     # have_pronunciations = True
 
@@ -514,18 +561,17 @@ def parse_pronunciation(wxr, node, data, etym_data,
         # See if it contains a word prefix restricting which forms the
         # pronunciation applies to (see amica/Latin) and/or parenthesized
         # tags.
-        m = re.match(r"^[*#\s]*(([-\w]+):\s+)?\((([^()]|\([^()]*\))*?)\)",
-                     text)
+        m = re.match(r"^[*#\s]*(([-\w]+):\s+)?\((([^()]|\([^()]*\))*?)\)", text)
         if m:
             prefix = m.group(2) or ""
             tagstext = m.group(3)
-            text = text[m.end():]
+            text = text[m.end() :]
         else:
             m = re.match(r"^[*#\s]*([-\w]+):\s+", text)
             if m:
                 prefix = m.group(1)
                 tagstext = ""
-                text = text[m.end():]
+                text = text[m.end() :]
             else:
                 # Spanish has tags before pronunciations, eg. aceite/Spanish
                 m = re.match(r".*:\s+\(([^)]*)\)\s+(.*)", text)
@@ -544,15 +590,13 @@ def parse_pronunciation(wxr, node, data, etym_data,
             prefix = m.group(1)
             w = m.group(2).strip()
             tag = pron_romanizations[prefix]
-            form = {"form": w,
-                    "tags": tag.split()}
+            form = {"form": w, "tags": tag.split()}
             data_append(data, "forms", form)
 
         # Find IPA pronunciations
-        for m in re.finditer(r"(?m)/[^][\n/,]+?/"
-                             r"|"
-                             r"\[[^]\n0-9,/][^],/]*?\]",
-                             ipa_text):
+        for m in re.finditer(
+            r"(?m)/[^][\n/,]+?/" r"|" r"\[[^]\n0-9,/][^],/]*?\]", ipa_text
+        ):
             v = m.group(0)
             # The regexp above can match file links.  Skip them.
             if v.startswith("[[File:"):
@@ -612,34 +656,39 @@ def parse_pronunciation(wxr, node, data, etym_data,
             # For safety when writing files
             qfn = qfn.replace("/", "__slash__")
             if re.search(r"(?i)\.(ogg|oga)$", fn):
-                ogg = ("https://upload.wikimedia.org/wikipedia/"
-                       "commons/{}/{}/{}"
-                       .format(digest[:1], digest[:2], qfn))
+                ogg = (
+                    "https://upload.wikimedia.org/wikipedia/"
+                    "commons/{}/{}/{}".format(digest[:1], digest[:2], qfn)
+                )
             else:
-                ogg = ("https://upload.wikimedia.org/wikipedia/"
-                       "commons/transcoded/"
-                       "{}/{}/{}/{}.ogg"
-                       .format(digest[:1], digest[:2], qfn, qfn))
+                ogg = (
+                    "https://upload.wikimedia.org/wikipedia/"
+                    "commons/transcoded/"
+                    "{}/{}/{}/{}.ogg".format(digest[:1], digest[:2], qfn, qfn)
+                )
             if re.search(r"(?i)\.(mp3)$", fn):
-                mp3 = ("https://upload.wikimedia.org/wikipedia/"
-                       "commons/{}/{}/{}"
-                       .format(digest[:1], digest[:2], qfn))
+                mp3 = (
+                    "https://upload.wikimedia.org/wikipedia/"
+                    "commons/{}/{}/{}".format(digest[:1], digest[:2], qfn)
+                )
             else:
-                mp3 = ("https://upload.wikimedia.org/wikipedia/"
-                       "commons/transcoded/"
-                       "{}/{}/{}/{}.mp3"
-                       .format(digest[:1], digest[:2], qfn, qfn))
+                mp3 = (
+                    "https://upload.wikimedia.org/wikipedia/"
+                    "commons/transcoded/"
+                    "{}/{}/{}/{}.mp3".format(digest[:1], digest[:2], qfn, qfn)
+                )
             audio["ogg_url"] = ogg
             audio["mp3_url"] = mp3
-            if active_pos: audio["pos"] = active_pos
+            if active_pos:
+                audio["pos"] = active_pos
         if audio not in data.get("sounds", ()):
             data_append(data, "sounds", audio)
     # if audios:
     #     have_pronunciations = True
-    audios =[]
+    audios = []
     for enpr in enprs:
         if re.match(r"/[^/]+/$", enpr):
-            enpr = enpr[1: -1]
+            enpr = enpr[1:-1]
         pron = {"enpr": enpr}
         parse_pronunciation_tags(wxr, tagstext, pron)
         if active_pos:
