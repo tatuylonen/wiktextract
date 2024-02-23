@@ -12,6 +12,8 @@ from wiktextract.page import clean_node, is_panel_template
 from wiktextract.parts_of_speech import part_of_speech_map
 from wiktextract.tags import valid_tags
 
+from .zh_pron_tags import ZH_PRON_TAGS
+
 LEVEL_KINDS = (
     NodeKind.LEVEL2,
     NodeKind.LEVEL3,
@@ -205,8 +207,8 @@ def parse_pronunciation(
             for hdr in new_parent_hdrs + new_specific_hdrs:
                 hdr = hdr.strip()
                 valid_hdr = re.sub(r"\s+", "-", hdr)
-                if hdr in wxr.config.ZH_PRON_TAGS:
-                    for tag in wxr.config.ZH_PRON_TAGS[hdr]:
+                if hdr in ZH_PRON_TAGS:
+                    for tag in ZH_PRON_TAGS[hdr]:
                         if tag not in pron["tags"]:
                             pron["tags"].append(tag)
                 elif valid_hdr in valid_tags:
