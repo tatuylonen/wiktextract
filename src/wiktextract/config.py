@@ -61,7 +61,6 @@ class WiktionaryConfig:
         "debugs",
         "redirects",
         "data_folder",
-        "LINKAGE_SUBTITLES",
         "OTHER_SUBTITLES",
         "ZH_PRON_TAGS",
         "analyze_templates",
@@ -125,7 +124,6 @@ class WiktionaryConfig:
         self.debugs: list[ErrorMessageData] = []
         self.redirects: SoundFileRedirects = {}
         self.data_folder = files("wiktextract") / "data" / dump_file_lang_code
-        self.LINKAGE_SUBTITLES: dict[str, str]
         self.OTHER_SUBTITLES: dict[str, Union[str, list[str]]]
         # set the above three in the function below
         self.init_subtitles()
@@ -183,7 +181,6 @@ class WiktionaryConfig:
         setattr(self, attr_name, json_value)
 
     def init_subtitles(self) -> None:
-        self.set_attr_from_json("LINKAGE_SUBTITLES", "linkage_subtitles.json")
         self.set_attr_from_json("OTHER_SUBTITLES", "other_subtitles.json")
 
     def load_edition_settings(self) -> None:

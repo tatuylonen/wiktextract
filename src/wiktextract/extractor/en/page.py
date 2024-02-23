@@ -51,7 +51,7 @@ from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby, parse_ruby
 from ..share import strip_nodes
-from .section_titles import POS_TITLES
+from .section_titles import LINKAGE_TITLES, POS_TITLES
 from .unsupported_titles import unsupported_title_map
 
 # Matches head tag
@@ -3309,8 +3309,8 @@ def parse_language(
                     if "tags" in dt:
                         for pdata in pos_datas:
                             data_extend(pdata, "tags", dt["tags"])
-                elif t_no_number in wxr.config.LINKAGE_SUBTITLES:
-                    rel = wxr.config.LINKAGE_SUBTITLES.get(t_no_number)
+                elif t_no_number in LINKAGE_TITLES:
+                    rel = LINKAGE_TITLES[t_no_number]
                     data = select_data()
                     parse_linkage(data, rel, node)
                 elif t_no_number == wxr.config.OTHER_SUBTITLES.get("compounds"):
@@ -3543,8 +3543,6 @@ def parse_language(
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
 
-
-
                 roman = re.sub(r"[ \t\r]+", " ", roman).strip()
                 roman = re.sub(r"\[\s*…\s*\]", "[…]", roman)
                 tr = re.sub(r"^[#*:]+\s*", "", tr)
@@ -3769,9 +3767,8 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
             level = 4
         elif lc == wxr.config.OTHER_SUBTITLES.get("translations"):
             level = 5
-        elif (
-            lc in wxr.config.LINKAGE_SUBTITLES
-            or lc == wxr.config.OTHER_SUBTITLES.get("compounds")
+        elif lc in LINKAGE_TITLES or lc == wxr.config.OTHER_SUBTITLES.get(
+            "compounds"
         ):
             level = 5
         elif lc in wxr.config.OTHER_SUBTITLES.get("inflection_sections", []):

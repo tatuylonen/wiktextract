@@ -16,7 +16,7 @@ from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.thesaurus import ThesaurusTerm
 from wiktextract.wxr_context import WiktextractContext
 
-from .section_titles import POS_TITLES
+from .section_titles import LINKAGE_TITLES, POS_TITLES
 
 IGNORED_SUBTITLE_TAGS_MAP: dict[str, list[str]] = {
     "by reason": [],
@@ -265,8 +265,8 @@ def extract_thesaurus_page(
             "symbol",
         ):
             return None
-        if subtitle in wxr.config.LINKAGE_SUBTITLES:
-            linkage = wxr.config.LINKAGE_SUBTITLES[subtitle]
+        if subtitle in LINKAGE_TITLES:
+            linkage = LINKAGE_TITLES[subtitle]
             return recurse(contents.children)
         if subtitle in POS_TITLES:
             pos = POS_TITLES[subtitle]["pos"]
