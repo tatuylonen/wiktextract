@@ -9,10 +9,8 @@ import re
 import sys
 from collections import defaultdict
 from functools import partial
-from re import Pattern
 from typing import (
     TYPE_CHECKING,
-    Callable,
     Optional,
     Set,
     Union,
@@ -21,11 +19,7 @@ from typing import (
 
 from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.core import (
-    TemplateArgs,
-    TemplateFnCallable,
-    PostTemplateFnCallable,
-)
+from wikitextprocessor.core import TemplateArgs, TemplateFnCallable
 from wikitextprocessor.parser import GeneralNode
 from wiktextract.clean import clean_template_args
 from wiktextract.datautils import (
@@ -52,19 +46,16 @@ from wiktextract.page import (
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.tags import valid_tags
 from wiktextract.translations import parse_translation_item_text
-from wiktextract.type_utils import (
-    SenseData,
-    SoundData,
-    WordData,
-)
+from wiktextract.type_utils import SenseData, SoundData, WordData
 from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby, parse_ruby
 from ..share import strip_nodes
+from .section_titles import POS_TITLES
 from .unsupported_titles import unsupported_title_map
 
 # Matches head tag
-HEAD_TAG_RE: Pattern = re.compile(
+HEAD_TAG_RE = re.compile(
     r"^(head|Han char|arabic-noun|arabic-noun-form|"
     r"hangul-symbol|syllable-hangul)$|"
     + r"^(latin|"
@@ -2736,7 +2727,7 @@ def parse_language(
                         m
                         and etym.lower().strip()
                         in wxr.config.OTHER_SUBTITLES["etymology"]
-                        and pos.lower() in wxr.config.POS_SUBTITLES
+                        and pos.lower() in POS_TITLES
                     ):
                         seq = [
                             language,
@@ -2744,7 +2735,7 @@ def parse_language(
                             pos,
                             wxr.config.OTHER_SUBTITLES["translations"],
                         ]
-                    elif sub.lower() in wxr.config.POS_SUBTITLES:
+                    elif sub.lower() in POS_TITLES:
                         # seq with sub but not pos
                         seq = [
                             language,
@@ -2754,7 +2745,7 @@ def parse_language(
                     else:
                         # seq with sub and pos
                         pos = wxr.wtp.subsection
-                        if pos.lower() not in wxr.config.POS_SUBTITLES:
+                        if pos.lower() not in POS_TITLES:
                             wxr.wtp.debug(
                                 "unhandled see translation subpage: "
                                 "language={} sub={} wxr.wtp.subsection={}".format(
@@ -2933,7 +2924,7 @@ def parse_language(
                             sortid="page/2595",
                         )
                         sub = wxr.wtp.subsection
-                        if sub.lower() in wxr.config.POS_SUBTITLES:
+                        if sub.lower() in POS_TITLES:
                             seq = [
                                 language,
                                 sub,
@@ -3293,9 +3284,9 @@ def parse_language(
                 while len(lst) > 1 and lst[-1].isdigit():
                     lst = lst[:-1]
                 t_no_number = " ".join(lst).lower()
-                if t_no_number in wxr.config.POS_SUBTITLES:
+                if t_no_number in POS_TITLES:
                     push_pos()
-                    dt = wxr.config.POS_SUBTITLES.get(t_no_number)
+                    dt = POS_TITLES[t_no_number]
                     pos = dt["pos"]
                     wxr.wtp.start_subsection(t)
                     if "debug" in dt:
@@ -3774,7 +3765,7 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
             level = 3
         elif lc.startswith(tuple(wxr.config.OTHER_SUBTITLES["pronunciation"])):
             level = 3
-        elif lc in wxr.config.POS_SUBTITLES:
+        elif lc in POS_TITLES:
             level = 4
         elif lc == wxr.config.OTHER_SUBTITLES.get("translations"):
             level = 5

@@ -5,11 +5,7 @@
 
 import logging
 import re
-from typing import (
-    Optional,
-    TYPE_CHECKING,
-    Union,
-)
+from typing import TYPE_CHECKING, Optional
 
 from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import NodeKind, Page, WikiNode
@@ -19,6 +15,8 @@ from wiktextract.form_descriptions import parse_sense_qualifier
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.thesaurus import ThesaurusTerm
 from wiktextract.wxr_context import WiktextractContext
+
+from .section_titles import POS_TITLES
 
 IGNORED_SUBTITLE_TAGS_MAP: dict[str, list[str]] = {
     "by reason": [],
@@ -270,8 +268,8 @@ def extract_thesaurus_page(
         if subtitle in wxr.config.LINKAGE_SUBTITLES:
             linkage = wxr.config.LINKAGE_SUBTITLES[subtitle]
             return recurse(contents.children)
-        if subtitle in wxr.config.POS_SUBTITLES:
-            pos = wxr.config.POS_SUBTITLES[subtitle]["pos"]
+        if subtitle in POS_TITLES:
+            pos = POS_TITLES[subtitle]["pos"]
             sense = None
             linkage = None
             return recurse(contents.children)

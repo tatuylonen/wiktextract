@@ -17,13 +17,6 @@ class WiktExtractTests(unittest.TestCase):
             self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
         )
 
-    def test_pos(self):
-        poses = self.wxr.config.POS_TYPES
-        self.assertTrue(isinstance(poses, set))
-        for pos_type in ["noun", "verb", "pron", "adj", "adv", "num"]:
-            self.assertIn(pos_type, poses)
-        self.assertLess(len(poses), 50)
-
     def test_cv_plain(self):
         v = "This is a test."
         v = clean_value(self.wxr, v)
@@ -119,7 +112,7 @@ class WiktExtractTests(unittest.TestCase):
         # This behavior might not be correct or desirable: when
         # cleaning a link with several parameters, if you print it
         # (that is, you don't notice it's a File: or Image: which should
-        # be skipped) then output the expansion of the last group 
+        # be skipped) then output the expansion of the last group
         # (which is always m.group(5)).
         v = "[[Foo:bar.JPG|conf bar|baz|baz2|baz3|baz4|Alt Text]]"
         v = clean_value(self.wxr, v)
