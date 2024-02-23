@@ -205,7 +205,8 @@ def check_tags(
         return
     if not isinstance(tags, str):
         check_error(wxr, dt, word, lang, pos,
-                    "\"tags\" field value must be a string: {}"
+                    "\"tags\" field value must be a string (tags separated "
+                    "by spaces): {}"
                     .format(repr(tags)))
         return
     if tags.find("  ") >= 0:
@@ -223,6 +224,7 @@ def check_tags(
                             "invalid tag {} not in valid_tags (or "
                             "uppercase_tags)"
                             .format(repr(tag)))
+
 
 def check_str_fields(
         wxr: WiktextractContext,
