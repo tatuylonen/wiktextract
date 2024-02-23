@@ -230,3 +230,25 @@ LINKAGE_TITLES: dict[str, str] = {
     "derived terms": "derived",
     "alternative forms": "synonyms",
 }
+
+COMPOUNDS_TITLE = "compounds"
+
+ETYMOLOGY_TITLES: frozenset[str] = frozenset(["etymology", "glyph origin"])
+
+IGNORED_TITLES: frozenset[str] = frozenset(
+    ["anagrams", "further reading", "references", "quotations"]
+)
+
+INFLECTION_TITLES: frozenset[str] = frozenset(
+    ["declension", "conjugation", "inflection", "mutation"]
+)
+
+DESCENDANTS_TITLE = "descendants"
+
+PROTO_ROOT_DERIVED_TITLES: frozenset[str] = frozenset(
+    ["derived terms", "extensions"]
+)
+
+PRONUNCIATION_TITLE = "pronunciation"
+
+TRANSLATIONS_TITLE = "translations"

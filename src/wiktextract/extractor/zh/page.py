@@ -207,9 +207,15 @@ def parse_page(
     # page layout documents
     # https://zh.wiktionary.org/wiki/Wiktionary:佈局解釋
     # https://zh.wiktionary.org/wiki/Wiktionary:体例说明
+
+    # skip translation pages
+    if page_title.endswith(
+        tuple("/" + tr_title for tr_title in TRANSLATIONS_TITLES)
+    ):
+        return []
+
     if wxr.config.verbose:
         logging.info(f"Parsing page: {page_title}")
-
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)
 

@@ -61,7 +61,6 @@ class WiktionaryConfig:
         "debugs",
         "redirects",
         "data_folder",
-        "OTHER_SUBTITLES",
         "ZH_PRON_TAGS",
         "analyze_templates",
         "extract_thesaurus_pages",
@@ -124,9 +123,6 @@ class WiktionaryConfig:
         self.debugs: list[ErrorMessageData] = []
         self.redirects: SoundFileRedirects = {}
         self.data_folder = files("wiktextract") / "data" / dump_file_lang_code
-        self.OTHER_SUBTITLES: dict[str, Union[str, list[str]]]
-        # set the above three in the function below
-        self.init_subtitles()
         self.ZH_PRON_TAGS: list[str]
         self.set_attr_from_json("ZH_PRON_TAGS", "zh_pron_tags.json")
         self.analyze_templates = True  # find templates that need pre-expand
@@ -179,9 +175,6 @@ class WiktionaryConfig:
                 if convert_func:
                     json_value = convert_func(json_value)
         setattr(self, attr_name, json_value)
-
-    def init_subtitles(self) -> None:
-        self.set_attr_from_json("OTHER_SUBTITLES", "other_subtitles.json")
 
     def load_edition_settings(self) -> None:
         file_path = self.data_folder / "config.json"
