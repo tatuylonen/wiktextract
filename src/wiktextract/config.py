@@ -1,7 +1,7 @@
 # Definition of the configuration object for Wiktionary data extraction.
 # The same object is also used for collecting statistics.
 #
-# Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE or https://ylonen.org
+# Copyright (c) 2018-2022, 2024 Tatu Ylonen.  See file LICENSE or https://ylonen.org
 
 import collections
 import json
@@ -166,9 +166,11 @@ class WiktionaryConfig:
         #         self.pos_counts[k] += v
         #     for k, v in ret["section_counts"].items():
         #         self.section_counts[k] += v
-        if "errors" in ret:
+        if "errors" in ret and len(self.errors) < 100000:
             self.errors.extend(ret.get("errors", []))
+        if "warnings" in ret and len(self.warnings) < 100000:
             self.warnings.extend(ret.get("warnings", []))
+        if "debugs" in ret and len(self.debugs) < 100000:
             self.debugs.extend(ret.get("debugs", []))
 
     def set_attr_from_json(

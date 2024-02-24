@@ -180,6 +180,8 @@ def check_error(
     if prefix:
         msg = prefix + ": " + msg
     print(msg)
+    if len(config.debugs) > 100000:  # Avoid excessive size
+        return
     config = wxr.config
     dt = { "msg": msg,
            "trace": "",
