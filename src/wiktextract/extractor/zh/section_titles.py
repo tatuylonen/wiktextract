@@ -195,6 +195,7 @@ LINKAGE_TITLES: dict[str, str] = {
     "上位語": "hypernyms",
     "上位词": "hypernyms",
     "上義詞": "hypernyms",
+    "上义词": "hypernyms",
     "下义词": "hyponyms",
     "下位詞": "hyponyms",
     "下位語": "hyponyms",
