@@ -6,6 +6,7 @@ from wiktextract.extractor.de.models import Sound
 from wiktextract.extractor.de.pronunciation import (
     process_hoerbeispiele,
     process_ipa,
+    process_lautschrift_template,
 )
 from wiktextract.wxr_context import WiktextractContext
 
@@ -178,3 +179,10 @@ class TestDEPronunciation(unittest.TestCase):
                 self.assertIn(key, exp)
                 if exp[key] is not None:
                     self.assertEqual(data[key], exp[key])
+
+    def test_empty_ipa_in_lautschrift(self):
+        self.wxr.wtp.start_page("BU")
+        root = self.wxr.wtp.parse("{{Lautschrift}}")
+        sound_data = [Sound()]
+        process_lautschrift_template(self.wxr, sound_data, root.children[0])
+        self.assertEqual(sound_data[0].model_dump(exclude_defaults=True), {})

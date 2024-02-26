@@ -97,7 +97,7 @@ def process_lautschrift_template(
 ) -> None:
     template_parameters = node.template_parameters
 
-    ipa = template_parameters.get(1)
+    ipa = template_parameters.get(1, "")
 
     lang_code = template_parameters.get("spr")
     if lang_code:
