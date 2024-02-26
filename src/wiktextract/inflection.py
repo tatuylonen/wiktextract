@@ -2899,7 +2899,6 @@ def parse_inflection_section(wxr, data,
     assert isinstance(data, dict)
     assert isinstance(word, str)
     assert isinstance(lang, str)
-    assert pos in wxr.config.POS_TYPES
     assert isinstance(section, str)
     assert isinstance(tree, WikiNode)
     assert (tablecontext is None or

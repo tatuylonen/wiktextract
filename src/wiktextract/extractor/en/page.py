@@ -9,10 +9,9 @@ import re
 import sys
 from collections import defaultdict
 from functools import partial
-from re import Pattern
 from typing import (
     TYPE_CHECKING,
-    Callable,
+    Any,
     Optional,
     Set,
     Union,
@@ -21,11 +20,7 @@ from typing import (
 
 from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.core import (
-    TemplateArgs,
-    TemplateFnCallable,
-    PostTemplateFnCallable,
-)
+from wikitextprocessor.core import TemplateArgs, TemplateFnCallable
 from wikitextprocessor.parser import GeneralNode
 from wiktextract.clean import clean_template_args
 from wiktextract.datautils import (
@@ -52,19 +47,27 @@ from wiktextract.page import (
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.tags import valid_tags
 from wiktextract.translations import parse_translation_item_text
-from wiktextract.type_utils import (
-    SenseData,
-    SoundData,
-    WordData,
-)
+from wiktextract.type_utils import SenseData, SoundData, WordData
 from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby, parse_ruby
 from ..share import strip_nodes
+from .section_titles import (
+    COMPOUNDS_TITLE,
+    DESCENDANTS_TITLE,
+    ETYMOLOGY_TITLES,
+    IGNORED_TITLES,
+    INFLECTION_TITLES,
+    LINKAGE_TITLES,
+    POS_TITLES,
+    PRONUNCIATION_TITLE,
+    PROTO_ROOT_DERIVED_TITLES,
+    TRANSLATIONS_TITLE,
+)
 from .unsupported_titles import unsupported_title_map
 
 # Matches head tag
-HEAD_TAG_RE: Pattern = re.compile(
+HEAD_TAG_RE = re.compile(
     r"^(head|Han char|arabic-noun|arabic-noun-form|"
     r"hangul-symbol|syllable-hangul)$|"
     + r"^(latin|"
@@ -767,7 +770,7 @@ def parse_language(
     defined on the page one at a time.  (Individual word senses for the
     same part-of-speech are typically encoded in the same entry.)"""
     # imported here to avoid circular import
-    from wiktextract.pronunciations import parse_pronunciation
+    from .pronunciations import parse_pronunciation
 
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(langnode, WikiNode)
@@ -2210,10 +2213,7 @@ def parse_language(
                                 sense1 = sense1[:-1].strip()
                             if sense1.startswith("(") and sense1.endswith(")"):
                                 sense1 = sense1[1:-1].strip()
-                            if (
-                                sense1.lower()
-                                == wxr.config.OTHER_SUBTITLES["translations"]
-                            ):
+                            if sense1.lower() == TRANSLATIONS_TITLE:
                                 sense1 = None
                             # print("linkage item_recurse LIST sense1:", sense1)
                             parse_linkage_recurse(
@@ -2732,31 +2732,30 @@ def parse_language(
                         # seq sent to get_subpage_section without sub and pos
                         seq = [
                             language,
-                            wxr.config.OTHER_SUBTITLES["translations"],
+                            TRANSLATIONS_TITLE,
                         ]
                     elif (
                         m
-                        and etym.lower().strip()
-                        in wxr.config.OTHER_SUBTITLES["etymology"]
-                        and pos.lower() in wxr.config.POS_SUBTITLES
+                        and etym.lower().strip() in ETYMOLOGY_TITLES
+                        and pos.lower() in POS_TITLES
                     ):
                         seq = [
                             language,
                             etym_numbered,
                             pos,
-                            wxr.config.OTHER_SUBTITLES["translations"],
+                            TRANSLATIONS_TITLE,
                         ]
-                    elif sub.lower() in wxr.config.POS_SUBTITLES:
+                    elif sub.lower() in POS_TITLES:
                         # seq with sub but not pos
                         seq = [
                             language,
                             sub,
-                            wxr.config.OTHER_SUBTITLES["translations"],
+                            TRANSLATIONS_TITLE,
                         ]
                     else:
                         # seq with sub and pos
                         pos = wxr.wtp.subsection
-                        if pos.lower() not in wxr.config.POS_SUBTITLES:
+                        if pos.lower() not in POS_TITLES:
                             wxr.wtp.debug(
                                 "unhandled see translation subpage: "
                                 "language={} sub={} wxr.wtp.subsection={}".format(
@@ -2764,26 +2763,17 @@ def parse_language(
                                 ),
                                 sortid="page/2478",
                             )
-                        seq = [
-                            language,
-                            sub,
-                            pos,
-                            wxr.config.OTHER_SUBTITLES["translations"],
-                        ]
+                        seq = [language, sub, pos, TRANSLATIONS_TITLE]
                     subnode = get_subpage_section(
-                        wxr.wtp.title,
-                        wxr.config.OTHER_SUBTITLES["translations"],
-                        seq,
+                        wxr.wtp.title, TRANSLATIONS_TITLE, seq
                     )
                     if subnode is not None:
                         parse_translations(data, subnode)
                     else:
                         # Failed to find the normal subpage section
-                        seq = [wxr.config.OTHER_SUBTITLES["translations"]]
+                        seq = [TRANSLATIONS_TITLE]
                         subnode = get_subpage_section(
-                            wxr.wtp.title,
-                            wxr.config.OTHER_SUBTITLES["translations"],
-                            seq,
+                            wxr.wtp.title, TRANSLATIONS_TITLE, seq
                         )
                         if subnode is not None:
                             parse_translations(data, subnode)
@@ -2915,17 +2905,8 @@ def parse_language(
                         isinstance(arg0, (list, tuple))
                         and arg0
                         and isinstance(arg0[0], str)
-                        and arg0[0].endswith(
-                            "/" + wxr.config.OTHER_SUBTITLES["translations"]
-                        )
-                        and arg0[0][
-                            : -(
-                                1
-                                + len(
-                                    wxr.config.OTHER_SUBTITLES["translations"]
-                                )
-                            )
-                        ]
+                        and arg0[0].endswith("/" + TRANSLATIONS_TITLE)
+                        and arg0[0][: -(1 + len(TRANSLATIONS_TITLE))]
                         == wxr.wtp.title
                     ):
                         wxr.wtp.debug(
@@ -2935,15 +2916,15 @@ def parse_language(
                             sortid="page/2595",
                         )
                         sub = wxr.wtp.subsection
-                        if sub.lower() in wxr.config.POS_SUBTITLES:
+                        if sub.lower() in POS_TITLES:
                             seq = [
                                 language,
                                 sub,
-                                wxr.config.OTHER_SUBTITLES["translations"],
+                                TRANSLATIONS_TITLE,
                             ]
                             subnode = get_subpage_section(
                                 wxr.wtp.title,
-                                wxr.config.OTHER_SUBTITLES["translations"],
+                                TRANSLATIONS_TITLE,
                                 seq,
                             )
                             if subnode is not None:
@@ -3234,15 +3215,8 @@ def parse_language(
             # gets discarded: Search STATISTICS_IMPLEMENTATION
             wxr.config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
-            if t.startswith(tuple(wxr.config.OTHER_SUBTITLES["pronunciation"])):
-                if t.startswith(
-                    tuple(
-                        pron_title + " "
-                        for pron_title in wxr.config.OTHER_SUBTITLES.get(
-                            "pronunciation", []
-                        )
-                    )
-                ):
+            if t.startswith(PRONUNCIATION_TITLE):
+                if t.startswith(PRONUNCIATION_TITLE + " "):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
                     push_etym()
@@ -3258,7 +3232,7 @@ def parse_language(
                         base_data,
                         lang_code,
                     )
-            elif t.startswith(tuple(wxr.config.OTHER_SUBTITLES["etymology"])):
+            elif t.startswith(tuple(ETYMOLOGY_TITLES)):
                 push_etym()
                 wxr.wtp.start_subsection(None)
                 if wxr.config.capture_etymologies:
@@ -3266,38 +3240,32 @@ def parse_language(
                     if m:
                         etym_data["etymology_number"] = int(m.group(1))
                     parse_etymology(etym_data, node)
-            elif (
-                t == wxr.config.OTHER_SUBTITLES.get("descendants")
-                and wxr.config.capture_descendants
-            ):
+            elif t == DESCENDANTS_TITLE and wxr.config.capture_descendants:
                 data = select_data()
                 parse_descendants(data, node)
             elif (
-                t
-                in wxr.config.OTHER_SUBTITLES.get(
-                    "proto_root_derived_sections", []
-                )
+                t in PROTO_ROOT_DERIVED_TITLES
                 and pos == "root"
                 and is_reconstruction
                 and wxr.config.capture_descendants
             ):
                 data = select_data()
                 parse_descendants(data, node, True)
-            elif t == wxr.config.OTHER_SUBTITLES.get("translations"):
+            elif t == TRANSLATIONS_TITLE:
                 data = select_data()
                 parse_translations(data, node)
-            elif t in wxr.config.OTHER_SUBTITLES.get("ignored_sections", []):
+            elif t in IGNORED_TITLES:
                 pass
-            elif t in wxr.config.OTHER_SUBTITLES.get("inflection_sections", []):
+            elif t in INFLECTION_TITLES:
                 parse_inflection(node, t, pos)
             else:
                 lst = t.split()
                 while len(lst) > 1 and lst[-1].isdigit():
                     lst = lst[:-1]
                 t_no_number = " ".join(lst).lower()
-                if t_no_number in wxr.config.POS_SUBTITLES:
+                if t_no_number in POS_TITLES:
                     push_pos()
-                    dt = wxr.config.POS_SUBTITLES.get(t_no_number)
+                    dt = POS_TITLES[t_no_number]
                     pos = dt["pos"]
                     wxr.wtp.start_subsection(t)
                     if "debug" in dt:
@@ -3320,11 +3288,11 @@ def parse_language(
                     if "tags" in dt:
                         for pdata in pos_datas:
                             data_extend(pdata, "tags", dt["tags"])
-                elif t_no_number in wxr.config.LINKAGE_SUBTITLES:
-                    rel = wxr.config.LINKAGE_SUBTITLES.get(t_no_number)
+                elif t_no_number in LINKAGE_TITLES:
+                    rel = LINKAGE_TITLES[t_no_number]
                     data = select_data()
                     parse_linkage(data, rel, node)
-                elif t_no_number == wxr.config.OTHER_SUBTITLES.get("compounds"):
+                elif t_no_number == COMPOUNDS_TITLE:
                     data = select_data()
                     if wxr.config.capture_compounds:
                         parse_linkage(data, "derived", node)
@@ -3554,8 +3522,6 @@ def parse_language(
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
 
-
-
                 roman = re.sub(r"[ \t\r]+", " ", roman).strip()
                 roman = re.sub(r"\[\s*…\s*\]", "[…]", roman)
                 tr = re.sub(r"^[#*:]+\s*", "", tr)
@@ -3767,33 +3733,28 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
                     sortid="page/2911",
                 )
             level = 2
-        elif lc.startswith(tuple(wxr.config.OTHER_SUBTITLES["etymology"])):
+        elif lc.startswith(tuple(ETYMOLOGY_TITLES)):
             if level > 3:
                 wxr.wtp.debug(
                     "etymology section {} at level {}".format(title, level),
                     sortid="page/2917",
                 )
             level = 3
-        elif lc.startswith(tuple(wxr.config.OTHER_SUBTITLES["pronunciation"])):
+        elif lc.startswith(PRONUNCIATION_TITLE):
             level = 3
-        elif lc in wxr.config.POS_SUBTITLES:
+        elif lc in POS_TITLES:
             level = 4
-        elif lc == wxr.config.OTHER_SUBTITLES.get("translations"):
+        elif lc == TRANSLATIONS_TITLE:
             level = 5
-        elif (
-            lc in wxr.config.LINKAGE_SUBTITLES
-            or lc == wxr.config.OTHER_SUBTITLES.get("compounds")
-        ):
+        elif lc in LINKAGE_TITLES or lc == COMPOUNDS_TITLE:
             level = 5
-        elif lc in wxr.config.OTHER_SUBTITLES.get("inflection_sections", []):
+        elif lc in INFLECTION_TITLES:
             level = 5
-        elif lc == wxr.config.OTHER_SUBTITLES.get("descendants"):
+        elif lc == DESCENDANTS_TITLE:
             level = 5
-        elif title in wxr.config.OTHER_SUBTITLES.get(
-            "proto_root_derived_sections", []
-        ):
+        elif title in PROTO_ROOT_DERIVED_TITLES:
             level = 5
-        elif lc in wxr.config.OTHER_SUBTITLES.get("ignored_sections", []):
+        elif lc in IGNORED_TITLES:
             level = 5
         else:
             level = 6
@@ -3811,9 +3772,9 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
 
 def parse_page(
     wxr: WiktextractContext, word: str, text: str
-) -> list[dict[str, str]]:
-    # Skip words that have been moved to the Attic
-    if word.startswith("/(Attic) "):
+) -> list[dict[str, Any]]:
+    # Skip translation pages
+    if word.endswith("/" + TRANSLATIONS_TITLE):
         return []
 
     if wxr.config.verbose:

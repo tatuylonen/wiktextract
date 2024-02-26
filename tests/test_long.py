@@ -1,6 +1,5 @@
 import collections
 import json
-import logging
 import tempfile
 import unittest
 
@@ -92,8 +91,8 @@ class LongTests(unittest.TestCase):
         self.assertGreater(langs["English"], 0)
         self.assertGreater(langs["Finnish"], 0)
         self.assertGreater(langs["Translingual"], 0)
-        self.assertEqual(len(langs.keys()), 9)
-        self.assertLessEqual(len(poses.keys()), len(self.wxr.config.POS_TYPES))
+        self.assertEqual(len(langs), 9)
+        self.assertEqual(len(poses), 24)
         self.assertEqual(sum(poses.values()), sum(langs.values()))
         self.assertEqual(
             sum(words.values()), sum(poses.values()) + num_redirects

@@ -50,15 +50,7 @@ def page_handler(page: Page) -> tuple[list[dict], dict]:
             if page.redirect_to is not None:
                 page_data = [{"title": title, "redirect": page.redirect_to}]
             else:
-                # the value of OTHER_SUBTITLES["translations"] is a string
-                # use it to skip translation pages
-                if title.endswith(
-                    f"/{wxr.config.OTHER_SUBTITLES.get('translations')}"
-                ):
-                    return [], {}
-
                 # XXX Sign gloss pages?
-
                 start_t = time.time()
                 page_data = parse_page(wxr, title, page.body)
                 dur = time.time() - start_t

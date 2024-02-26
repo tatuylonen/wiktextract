@@ -7,14 +7,12 @@ import collections
 import json
 import sys
 from typing import (
-    Callable,
     Iterable,
     Optional,
     TypedDict,
-    Union,
 )
 
-from wikitextprocessor.core import ErrorMessageData, CollatedErrorReturnData
+from wikitextprocessor.core import CollatedErrorReturnData, ErrorMessageData
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -61,11 +59,6 @@ class WiktionaryConfig:
         "debugs",
         "redirects",
         "data_folder",
-        "LINKAGE_SUBTITLES",
-        "POS_SUBTITLES",
-        "POS_TYPES",
-        "OTHER_SUBTITLES",
-        "ZH_PRON_TAGS",
         "analyze_templates",
         "extract_thesaurus_pages",
         "save_ns_names",
@@ -76,17 +69,17 @@ class WiktionaryConfig:
         self,
         dump_file_lang_code: str = "en",
         capture_language_codes: Optional[Iterable[str]] = {"en", "mul"},
-        capture_translations = True,
-        capture_pronunciation = True,
-        capture_linkages = True,
-        capture_compounds = True,
-        capture_redirects = True,
-        capture_examples = True,
-        capture_etymologies = True,
-        capture_inflections = True,
-        capture_descendants = True,
-        verbose = False,
-        expand_tables = False,
+        capture_translations=True,
+        capture_pronunciation=True,
+        capture_linkages=True,
+        capture_compounds=True,
+        capture_redirects=True,
+        capture_examples=True,
+        capture_etymologies=True,
+        capture_inflections=True,
+        capture_descendants=True,
+        verbose=False,
+        expand_tables=False,
     ):
         if capture_language_codes is not None:
             assert isinstance(capture_language_codes, (list, tuple, set))
@@ -127,14 +120,6 @@ class WiktionaryConfig:
         self.debugs: list[ErrorMessageData] = []
         self.redirects: SoundFileRedirects = {}
         self.data_folder = files("wiktextract") / "data" / dump_file_lang_code
-        self.POS_SUBTITLES: dict[str, POSSubtitleData]
-        self.POS_TYPES: set[str]
-        self.LINKAGE_SUBTITLES: dict[str, str]
-        self.OTHER_SUBTITLES: dict[str, Union[str, list[str]]]
-        # set the above three in the function below
-        self.init_subtitles()
-        self.ZH_PRON_TAGS: list[str]
-        self.set_attr_from_json("ZH_PRON_TAGS", "zh_pron_tags.json")
         self.analyze_templates = True  # find templates that need pre-expand
         self.extract_thesaurus_pages = True
         # these namespace pages will be copied from the XML dump file and
@@ -172,30 +157,6 @@ class WiktionaryConfig:
             self.warnings.extend(ret.get("warnings", []))
         if "debugs" in ret and len(self.debugs) < 100000:
             self.debugs.extend(ret.get("debugs", []))
-
-    def set_attr_from_json(
-        self,
-        attr_name: str,
-        file_name: str,
-        convert_func: Optional[Callable] = None,
-    ) -> None:
-        file_path = self.data_folder.joinpath(file_name)
-        json_value = {}
-        if file_path.exists():
-            with file_path.open(encoding="utf-8") as f:
-                json_value = json.load(f)
-                if convert_func:
-                    json_value = convert_func(json_value)
-        setattr(self, attr_name, json_value)
-
-    def init_subtitles(self) -> None:
-        self.set_attr_from_json("LINKAGE_SUBTITLES", "linkage_subtitles.json")
-        self.set_attr_from_json("POS_SUBTITLES", "pos_subtitles.json")
-        self.POS_TYPES = set(x["pos"] for x in self.POS_SUBTITLES.values())
-        for k, v in self.POS_SUBTITLES.items():
-            if "tags" in v:
-                assert isinstance(v["tags"], list)
-        self.set_attr_from_json("OTHER_SUBTITLES", "other_subtitles.json")
 
     def load_edition_settings(self) -> None:
         file_path = self.data_folder / "config.json"
