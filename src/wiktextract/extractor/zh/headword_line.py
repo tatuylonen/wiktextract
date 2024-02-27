@@ -73,7 +73,10 @@ def extract_headword_line(
                 forms_start_index = index + 1
                 for abbr_tag in child.find_html("abbr"):
                     gender = abbr_tag.children[0]
-                    page_data[-1].tags.append(GENDERS.get(gender, gender))
+                    if gender in GENDERS:
+                        page_data[-1].tags.append(GENDERS[gender])
+                    else:
+                        page_data[-1].raw_tags.append(gender)
             if lang_code == "ja":
                 for span_child in child.find_html(
                     "strong", attr_name="class", attr_value="headword"
@@ -133,9 +136,10 @@ def process_forms_text(
                     form = clean_node(wxr, None, node_without_ruby)
                 else:
                     form = clean_node(wxr, None, node)
-                form_tags = extract_headword_tags(
+                raw_form_tags = extract_headword_tags(
                     clean_node(wxr, None, tag_nodes).strip("() ")
                 )
+                form_tags = []
                 # check if next tag has gender data
                 if index < len(striped_nodes) - 1:
                     next_node = striped_nodes[index + 1]
@@ -146,9 +150,17 @@ def process_forms_text(
                         and "gender" in next_node.attrs.get("class", "")
                     ):
                         gender = clean_node(wxr, None, next_node)
-                        form_tags.append(GENDERS.get(gender, gender))
+                        if gender in GENDERS:
+                            form_tags.append(GENDERS[gender])
+                        else:
+                            raw_form_tags.append(gender)
 
-                form_data = Form(form=form, tags=form_tags, ruby=ruby_data)
+                form_data = Form(
+                    form=form,
+                    raw_tags=raw_form_tags,
+                    tags=form_tags,
+                    ruby=ruby_data,
+                )
                 page_data[-1].forms.append(form_data)
             elif (
                 node.tag == "span"
@@ -167,7 +179,7 @@ def process_forms_text(
             clean_node(wxr, page_data[-1], tag_nodes).strip("() ")
         )
         if len(tags_list) > 0:
-            page_data[-1].tags.extend(tags_list)
+            page_data[-1].raw_tags.extend(tags_list)
     else:
         clean_node(wxr, page_data[-1], tag_nodes)  # find categories
 

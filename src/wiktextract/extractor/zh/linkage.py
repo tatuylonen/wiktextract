@@ -51,7 +51,7 @@ def extract_linkages(
                                 return sense
                         elif template_name in {"qualifier", "qual"}:
                             not_term_indexes.add(index)
-                            linkage_data.tags.append(
+                            linkage_data.raw_tags.append(
                                 clean_node(wxr, None, item_child).strip("()")
                             )
                         elif template_name.lower() in DESCENDANT_TEMPLATES:
@@ -165,7 +165,7 @@ def extract_saurus_template(
         if thesaurus.roman is not None:
             linkage_data.roman = thesaurus.roman
         if thesaurus.tags is not None:
-            linkage_data.tags = thesaurus.tags.split("|")
+            linkage_data.raw_tags = thesaurus.tags.split("|")
         if thesaurus.language_variant is not None:
             linkage_data.language_variant = thesaurus.language_variant
         if len(sense) > 0:
@@ -192,7 +192,7 @@ def extract_zh_dial_template(
         if len(sense) > 0:
             linkage_data.sense = sense
         if len(tags) > 0:
-            linkage_data.tags = tags
+            linkage_data.raw_tags = tags
         pre_data = getattr(page_data[-1], linkage_type)
         pre_data.append(linkage_data)
 

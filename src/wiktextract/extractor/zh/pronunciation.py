@@ -44,7 +44,7 @@ def extract_pronunciation_recursively(
             last_sounds_list = page_data[-1].sounds
             for index in range(len(last_sounds_list)):
                 if last_sounds_list[index].audio == "" and (
-                    tags == last_sounds_list[index].tags[:-1]
+                    tags == last_sounds_list[index].raw_tags[:-1]
                     or lang_code != "zh"
                 ):
                     for key, value in create_audio_url_dict(data).items():
@@ -69,7 +69,7 @@ def extract_pronunciation_recursively(
                 base_data,
                 lang_code,
                 rest_children,
-                data.tags[:-1],
+                data.raw_tags[:-1],
             )
         elif isinstance(data, list):
             # list item is a tag
@@ -146,7 +146,7 @@ def extract_pronunciation_item(
             tags, split_pronunciation_tags(sound_tags_text)
         )
         if len(ipa) > 0:
-            data = Sound(tags=new_tags)
+            data = Sound(raw_tags=new_tags)
             ipa_key = "zh_pron" if lang_code == "zh" else "ipa"
             setattr(data, ipa_key, ipa[0].strip())
             return data
@@ -176,7 +176,7 @@ def process_homophone_data(
                 "span", attr_name="lang"
             ):
                 sound_data = Sound(
-                    homophone=clean_node(wxr, None, span_node), tags=tags
+                    homophone=clean_node(wxr, None, span_node), raw_tags=tags
                 )
                 page_data[-1].sounds.append(sound_data)
         elif (
@@ -190,6 +190,6 @@ def process_homophone_data(
                 "span", attr_name="lang"
             ):
                 sound_data = Sound(
-                    homophone=clean_node(wxr, None, span_node), tags=tags
+                    homophone=clean_node(wxr, None, span_node), raw_tags=tags
                 )
                 page_data[-1].sounds.append(sound_data)

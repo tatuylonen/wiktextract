@@ -29,11 +29,11 @@ def parse_ja_thesaurus_term(
     linkage: Optional[str],
     term_str: str,
 ) -> list[ThesaurusTerm]:
-    tags = None
+    # tags = None
     roman = None
     if term_str.startswith("("):  # has qualifier
         qual_bracket_idx = term_str.find(")")
-        tags = "|".join(term_str[1:qual_bracket_idx].split(", "))
+        # tags = "|".join(term_str[1:qual_bracket_idx].split(", "))
         term_str = term_str[qual_bracket_idx + 2 :]
 
     thesaurus = []
@@ -54,7 +54,7 @@ def parse_ja_thesaurus_term(
                 pos=pos,
                 linkage=linkage,
                 term=term,
-                tags=tags,
+                # tags=tags,
                 roman=roman,
                 sense=sense,
             )
@@ -93,7 +93,7 @@ def parse_zh_thesaurus_term(
             pos=pos,
             linkage=linkage,
             term=variant_term,
-            tags="|".join(tags) if len(tags) > 0 else None,
+            # tags="|".join(tags) if len(tags) > 0 else None,
             roman=roman,
             sense=sense,
             language_variant=variant_type,

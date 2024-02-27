@@ -85,6 +85,6 @@ def extract_gloss_and_tags(raw_gloss: str) -> Sense:
                 tags += re.split(split_tag_regex, rear_label)
 
         gloss = raw_gloss[front_tag_end + 1 : rear_tag_start].strip()
-        return Sense(glosses=[gloss], raw_glosses=[raw_gloss], tags=tags)
+        return Sense(glosses=[gloss], raw_glosses=[raw_gloss], raw_tags=tags)
     else:
         return Sense(glosses=[raw_gloss])

@@ -110,7 +110,7 @@ def process_translation_list_item(
                     if "gender" in class_str:
                         for abbr_tag in span_node.find_html("abbr"):
                             if len(abbr_tag.attrs.get("title")) > 0:
-                                tr_data.tags.append(
+                                tr_data.raw_tags.append(
                                     clean_node(
                                         wxr, None, abbr_tag.attrs.get("title")
                                     )
@@ -129,12 +129,12 @@ def process_translation_list_item(
                 for span_node in expanded_template.find_html("span"):
                     tag = span_node.attrs.get("title", "")
                     if len(tag) > 0:
-                        tr_data.tags.append(tag.strip())
+                        tr_data.raw_tags.append(tag.strip())
                         find_title = True
                 if not find_title:
                     tag = clean_node(wxr, None, child)
                     if len(tag) > 0:
-                        tr_data.tags.append(tag.strip("()"))
+                        tr_data.raw_tags.append(tag.strip("()"))
         elif isinstance(child, WikiNode) and child.kind == NodeKind.LINK:
             if len(tr_data.word) > 0:
                 page_data[-1].translations.append(tr_data.model_copy(deep=True))

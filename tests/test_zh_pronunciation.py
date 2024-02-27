@@ -33,8 +33,8 @@ class TestPronunciation(TestCase):
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[0].sounds],
             [
-                {"homophone": "大姑", "tags": ["同音詞"]},
-                {"homophone": "小姑", "tags": ["同音詞"]},
+                {"homophone": "大姑", "raw_tags": ["同音詞"]},
+                {"homophone": "小姑", "raw_tags": ["同音詞"]},
             ],
         )
 
@@ -54,8 +54,8 @@ class TestPronunciation(TestCase):
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[0].sounds],
             [
-                {"homophone": "大矢", "tags": ["同音詞"]},
-                {"homophone": "大宅", "tags": ["同音詞"]},
-                {"homophone": "大谷", "tags": ["同音詞"]},
+                {"homophone": "大矢", "raw_tags": ["同音詞"]},
+                {"homophone": "大宅", "raw_tags": ["同音詞"]},
+                {"homophone": "大谷", "raw_tags": ["同音詞"]},
             ],
         )

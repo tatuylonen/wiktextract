@@ -40,10 +40,10 @@ class TestHeadword(TestCase):
                     "lang_code": "en",
                     "lang": "英語",
                     "forms": [
-                        {"form": "manga", "tags": ["複數"]},
-                        {"form": "mangas", "tags": ["複數"]},
+                        {"form": "manga", "raw_tags": ["複數"]},
+                        {"form": "mangas", "raw_tags": ["複數"]},
                     ],
-                    "tags": ["可數", "不可數"],
+                    "raw_tags": ["可數", "不可數"],
                 }
             ],
         )
@@ -70,8 +70,14 @@ class TestHeadword(TestCase):
                     "lang_code": "en",
                     "lang": "英語",
                     "forms": [
-                        {"form": "manga's", "tags": ["複數"]},
-                        {"form": "mangaatje", "tags": ["指小詞", "neuter"]},
+                        {"form": "manga's", "raw_tags": ["複數"]},
+                        {
+                            "form": "mangaatje",
+                            "raw_tags": [
+                                "指小詞",
+                            ],
+                            "tags": ["neuter"],
+                        },
                     ],
                     "tags": ["masculine"],
                 }
