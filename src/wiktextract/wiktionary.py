@@ -197,22 +197,21 @@ def check_tags(
     tags = dt.get("tags")
     if tags is None:
         return
-    if not isinstance(tags, str):
+    if not isinstance(tags, (list, tuple)):
         check_error(wxr, dt, word, lang, pos,
-                    "\"tags\" field value must be a string (tags separated "
-                    "by spaces): {}"
+                    "\"tags\" field value must be a list of strings: {}"
                     .format(repr(tags)))
         return
-    if tags.find("  ") >= 0:
-        check_error(wxr, dt, word, lang, pos,
-                    "\"tags\" field should not contain duplicate spaces "
-                    "(perhaps an empty tag was added?): {}"
-                    .format(repr(tags)))
-    # XXX enable the following later (currently too many bogus tags in
-    # non-English editions).  Tag values should be standardized across
-    # editions, except for uppercase tags (e.g., regional variants).
-    if wtp.lang_code in ("en",):  # Check edition
-        for tag in tags.split():
+    for tag in tags:
+        if not isinstance(tag, str):
+            check_error(wxr, dt, word, lang, pos,
+                        "\"tags\" field should only contain strings: {}"
+                        .format(repr(tag)))
+            continue
+        # XXX enable the following later (currently too many bogus tags in
+        # non-English editions).  Tag values should be standardized across
+        # editions, except for uppercase tags (e.g., regional variants).
+        if wtp.lang_code in ("en",):  # Check edition
             if tag not in valid_tags:
                 check_error(wxr, dt, word, lang, pos,
                             "invalid tag {} not in valid_tags (or "
@@ -362,9 +361,11 @@ def check_json_data(
     # Check the "forms" field
     forms = dt.get("forms") or []
     for form in forms:
-        check_str_fields(wxr, dt, word, lang, pos, form, ["form"],
-                         mandatory=True)
         check_tags(wxr, dt, word, lang, pos, form)
+        tags = = dt.get("tags")
+        if not isinstance(tags, (list, tuple)) or "table-tags" not in tags:
+            check_str_fields(wxr, dt, word, lang, pos, form, ["form"],
+                             mandatory=True)
     check_str_list_fields(wxr, dt, word, lang, pos, dt,
                           ["categories", "topics", "wikidata",
                            "wikipedia"])
