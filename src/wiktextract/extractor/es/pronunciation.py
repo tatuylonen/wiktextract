@@ -99,7 +99,7 @@ def process_pron_graf_template(
                     sound.syllabic = value
                 elif key_plain == "pron":
                     if value != "no":
-                        sound.tags.append(value)
+                        sound.raw_tags.append(value)
                 elif key_plain == "audio":
                     audio_url_dict = create_audio_url_dict(value)
                     for dict_key, dict_value in audio_url_dict.items():
@@ -133,12 +133,12 @@ def process_pron_graf_template(
                     continue
                 if key not in other_variation.model_fields_set:
                     setattr(other_variation, key, getattr(main_sound, key))
-        if main_sound.tags:
+        if len(main_sound.raw_tags) > 0:
             for i, other_variaton in variations.items():
                 if i == 0:
                     continue
-                if not other_variation.tags:
-                    other_variation.tags = main_sound.tags.copy()
+                if len(other_variation.raw_tags) == 0:
+                    other_variation.raw_tags = main_sound.raw_tags.copy()
 
         for sound in variations.values():
             if len(sound.model_dump(exclude_defaults=True)) > 0:

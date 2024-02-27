@@ -53,7 +53,7 @@ def extract_gloss(
                 .removeprefix("Main")
             )
             if tag:
-                gloss_data.tags.append(tag)
+                gloss_data.raw_tags.append(tag)
 
         page_data[-1].senses.append(gloss_data)
 

@@ -85,10 +85,10 @@ class TestESPronunciation(unittest.TestCase):
             {
                 "input": "{{pron-graf|leng=en|pron=Reino Unido|fone=ˈɒ.pə.zɪt|fone2=ˈɒ.pə.sɪt|2pron=EE.UU.|2fone=ˈɑ.pə.sɪt|2fone2=ˈɑ.pə.sət}}",
                 "sounds": [
-                    {"ipa": "ˈɒ.pə.zɪt", "tags": ["Reino Unido"]},
-                    {"ipa": "ˈɒ.pə.sɪt", "tags": ["Reino Unido"]},
-                    {"ipa": "ˈɑ.pə.sɪt", "tags": ["EE.UU."]},
-                    {"ipa": "ˈɑ.pə.sət", "tags": ["EE.UU."]},
+                    {"ipa": "ˈɒ.pə.zɪt", "raw_tags": ["Reino Unido"]},
+                    {"ipa": "ˈɒ.pə.sɪt", "raw_tags": ["Reino Unido"]},
+                    {"ipa": "ˈɑ.pə.sɪt", "raw_tags": ["EE.UU."]},
+                    {"ipa": "ˈɑ.pə.sət", "raw_tags": ["EE.UU."]},
                 ],
                 "spellings": [],
             },
@@ -97,11 +97,11 @@ class TestESPronunciation(unittest.TestCase):
                 "sounds": [
                     {
                         "audio": "En-uk-direction.ogg",
-                        "tags": ["británico"],
+                        "raw_tags": ["británico"],
                     },
                     {
                         "audio": "En-us-direction.ogg",
-                        "tags": ["americano"],
+                        "raw_tags": ["americano"],
                     },
                 ],
                 "spellings": [],
