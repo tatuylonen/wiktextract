@@ -475,3 +475,36 @@ class TestFrGloss(TestCase):
                 }
             ],
         )
+
+    def test_example_translation_list(self):
+        self.wxr.wtp.start_page("advena")
+        self.wxr.wtp.add_page("Modèle:source", 10, "{{{1}}}")
+        root = self.wxr.wtp.parse(
+            """# [[étranger|Étranger]], de passage, venu du dehors.
+#* '''''advena''' belli'' {{source|Sil.}}
+#*: étranger à la guerre."""
+        )
+        page_data = [
+            WordEntry(word="advena", lang_code="la", lang="Latin", pos="adj")
+        ]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data[0].model_dump(
+                exclude_defaults=True,
+                exclude=["word", "lang_code", "lang", "pos"],
+            ),
+            {
+                "senses": [
+                    {
+                        "examples": [
+                            {
+                                "text": "advena belli",
+                                "ref": "Sil.",
+                                "translation": "étranger à la guerre.",
+                            }
+                        ],
+                        "glosses": ["Étranger, de passage, venu du dehors."],
+                    }
+                ]
+            },
+        )

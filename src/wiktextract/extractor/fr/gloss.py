@@ -108,22 +108,29 @@ def extract_examples(
         ):
             process_exemple_template(wxr, first_child, gloss_data)
         else:
-            example_nodes = []
-            source_template = None
-            for example_template in example_node.find_child(NodeKind.TEMPLATE):
-                if example_template.template_name == "source":
-                    source_template = example_template
+            example_data = Example()
+            ignored_nodes = []
+            for node in example_node.find_child(
+                NodeKind.TEMPLATE | NodeKind.LIST
+            ):
+                if (
+                    node.kind == NodeKind.TEMPLATE
+                    and node.template_name == "source"
+                ):
+                    example_data.ref = clean_node(wxr, None, node).strip("— ()")
+                    ignored_nodes.append(node)
+                elif node.kind == NodeKind.LIST:
+                    for tr_item in node.find_child(NodeKind.LIST_ITEM):
+                        example_data.translation = clean_node(
+                            wxr, None, tr_item.children
+                        )
+                    ignored_nodes.append(node)
             example_nodes = [
                 node
                 for node in example_node_children
-                if node != source_template
+                if node not in ignored_nodes
             ]
-            example_data = Example()
             example_data.text = clean_node(wxr, None, example_nodes)
-            if source_template is not None:
-                example_data.ref = clean_node(wxr, None, source_template).strip(
-                    "— ()"
-                )
             gloss_data.examples.append(example_data)
 
 
