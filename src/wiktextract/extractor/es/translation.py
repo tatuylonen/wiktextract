@@ -58,7 +58,7 @@ def extract_translation(
                 "adj y sust",
             ]:
                 if current_translation:
-                    current_translation.tags.append(value)
+                    current_translation.raw_tags.append(value)
             elif value in ["nota", "tr", "nl"]:
                 continue
             elif (

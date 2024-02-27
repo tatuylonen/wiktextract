@@ -80,7 +80,7 @@ class TestESGloss(unittest.TestCase):
                         "Sentimiento afectivo de atracción, unión y afinidad que se experimenta hacia una persona, animal o cosa"
                     ],
                     "senseid": "1",
-                    "tags": ["Humanidades"],
+                    "raw_tags": ["Humanidades"],
                     "categories": ["ES:Sentimientos"],
                 }
             ],
