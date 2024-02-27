@@ -184,11 +184,11 @@ def process_modifiers(
     if clean_text:
         tags = re.split(r";|,|\(|\)|:", clean_text)
         tags = [tag.strip() for tag in tags if tag.strip()]
-        if tags:
+        if len(tags) > 0:
             if clean_text.endswith(":"):
-                base_translation_data.tags.extend(tags)
+                base_translation_data.raw_tags.extend(tags)
             elif sense_translations:
-                sense_translations[-1].tags.extend(tags)
+                sense_translations[-1].raw_tags.extend(tags)
 
     # Reset modifiers
     modifiers.clear()

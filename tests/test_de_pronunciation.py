@@ -58,7 +58,7 @@ class TestDEPronunciation(unittest.TestCase):
                 "input": "{{Lautschrift|ipa1}}, ''tag1'' {{Lautschrift|ipa2}}",
                 "expected": [
                     {"ipa": "ipa1"},
-                    {"ipa": "ipa2", "tags": ["tag1"]},
+                    {"ipa": "ipa2", "raw_tags": ["tag1"]},
                 ],
             },
         ]
@@ -129,14 +129,14 @@ class TestDEPronunciation(unittest.TestCase):
                         "audio": filename1,
                         "mp3_url": None,
                         "ogg_url": None,
-                        "tags": ["tag1"],
+                        "raw_tags": ["tag1"],
                     },
                     {
                         "audio": filename2,
                         "mp3_url": None,
                         "ogg_url": None,
                         "wav_url": None,
-                        "tags": ["tag2"],
+                        "raw_tags": ["tag2"],
                     },
                 ],
             },

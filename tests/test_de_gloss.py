@@ -110,13 +110,13 @@ class TestDEGloss(unittest.TestCase):
             senses,
             [
                 {
-                    "tags": ["tag"],
+                    "raw_tags": ["tag"],
                     "glosses": ["subglossA"],
                     "raw_glosses": ["[a] subglossA"],
                     "senseid": "1a",
                 },
                 {
-                    "tags": ["tag"],
+                    "raw_tags": ["tag"],
                     "glosses": ["subglossB"],
                     "raw_glosses": ["[1b] subglossB"],
                     "senseid": "1b",
@@ -138,7 +138,7 @@ class TestDEGloss(unittest.TestCase):
         self.assertEqual(
             sense_data.model_dump(exclude_defaults=True),
             {
-                "tags": ["tag1", "tag2"],
+                "raw_tags": ["tag1", "tag2"],
             },
         )
 
@@ -240,7 +240,7 @@ class TestDEGloss(unittest.TestCase):
                 ):
                     process_K_template(self.wxr, sense_data, root)
                     self.assertEqual(
-                        sense_data.tags,
+                        sense_data.raw_tags,
                         case["expected_tags"],
                     )
 
@@ -280,14 +280,14 @@ class TestDEGloss(unittest.TestCase):
                     )
                 else:
                     self.assertEqual(
-                        sense_data.tags,
+                        sense_data.raw_tags,
                         case["expected_tags"],
                     )
                 self.assertEqual(gloss_text, case["expected_gloss"])
 
     def test_handle_sense_modifier(self):
         # https://de.wiktionary.org/wiki/habitare
-        input = """
+        wikitext = """
 * {{trans.}}
 :[1] etwas [[oft]] [[haben]], zu haben [[pflegen]]
 :[2] ''Stadt/Dorf:''
@@ -302,15 +302,15 @@ class TestDEGloss(unittest.TestCase):
         self.wxr.wtp.add_page("Vorlage:trans.", 10, "transitiv")
         self.wxr.wtp.add_page("Vorlage:intrans.", 10, "intransitiv")
 
-        root = self.wxr.wtp.parse(input)
+        root = self.wxr.wtp.parse(wikitext)
 
         word_entry = self.get_default_word_entry()
 
         extract_glosses(self.wxr, word_entry, root)
 
         for i in range(2):
-            self.assertEqual(word_entry.senses[i].tags, ["transitiv"])
-        self.assertEqual(word_entry.senses[2].tags, ["transitiv", "aktiv"])
-        self.assertEqual(word_entry.senses[3].tags, ["transitiv", "passiv"])
+            self.assertEqual(word_entry.senses[i].raw_tags, ["transitiv"])
+        self.assertEqual(word_entry.senses[2].raw_tags, ["transitiv", "aktiv"])
+        self.assertEqual(word_entry.senses[3].raw_tags, ["transitiv", "passiv"])
         for i in range(4, 6):
-            self.assertEqual(word_entry.senses[i].tags, ["intransitiv"])
+            self.assertEqual(word_entry.senses[i].raw_tags, ["intransitiv"])
