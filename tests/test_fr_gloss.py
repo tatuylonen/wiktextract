@@ -42,7 +42,7 @@ class TestFrGloss(TestCase):
             [
                 {
                     "glosses": ["gloss."],
-                    "tags": ["Sport"],
+                    "raw_tags": ["Sport"],
                     "categories": ["Sportifs en français"],
                     "examples": [{"text": "example"}],
                 }
@@ -158,7 +158,8 @@ class TestFrGloss(TestCase):
             [
                 {
                     "glosses": ["Variante de basketball."],
-                    "tags": ["Désuet", "Sport", "Indénombrable", "alt-of"],
+                    "raw_tags": ["Désuet", "Sport", "Indénombrable"],
+                    "tags": ["alt-of"],
                     "alt_of": [{"word": "basketball"}],
                 }
             ],
@@ -174,7 +175,7 @@ class TestFrGloss(TestCase):
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
-            [{"glosses": ["Bassin, lavoir."], "tags": ["localement"]}],
+            [{"glosses": ["Bassin, lavoir."], "raw_tags": ["localement"]}],
         )
 
     def test_not_italic_tag(self):
@@ -291,7 +292,7 @@ class TestFrGloss(TestCase):
                     "glosses": [
                         "Autrice, femme qui a créé une œuvre littéraire. Écrivaine."
                     ],
-                    "tags": ["Littérature", "Rare", "Absolument"],
+                    "raw_tags": ["Littérature", "Rare", "Absolument"],
                 }
             ],
         )
@@ -311,7 +312,7 @@ class TestFrGloss(TestCase):
                 {
                     "glosses": ["Génitrice ; ascendante"],
                     "note": "ce sens n’est plus guère utilisé que sous la forme de la locution « autrice de mes jours »",
-                    "tags": ["Plus rare"],
+                    "raw_tags": ["Plus rare"],
                 }
             ],
         )

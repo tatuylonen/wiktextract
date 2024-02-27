@@ -187,17 +187,19 @@ def process_inflection_table(
                             and column_cell_index
                             < colspan_header.index + colspan_header.span
                         ):
-                            form_data.tags.append(colspan_header.text)
+                            form_data.raw_tags.append(colspan_header.text)
                     if (
                         "colspan" not in table_cell.attrs
                         and len(column_headers) > column_cell_index
                         and column_headers[column_cell_index].lower()
                         not in IGNORE_TABLE_HEADERS
                     ):
-                        form_data.tags.append(column_headers[column_cell_index])
+                        form_data.raw_tags.append(
+                            column_headers[column_cell_index]
+                        )
 
                     if len(row_headers) > 0:
-                        form_data.tags.extend(row_headers)
+                        form_data.raw_tags.extend(row_headers)
                     if "form" in form_data.model_fields_set:
                         for form in form_data.form.split(" ou "):
                             new_form_data = form_data.model_copy(deep=True)
@@ -253,7 +255,9 @@ def process_en_adj_table(
             continue
         if len(table_row.children) > 1:
             form_data = Form()
-            form_data.tags.append(clean_node(wxr, None, table_row.children[0]))
+            form_data.raw_tags.append(
+                clean_node(wxr, None, table_row.children[0])
+            )
             form_text = clean_node(wxr, None, table_row.children[1])
             for form_line in form_text.splitlines():
                 if is_ipa_text(form_line):

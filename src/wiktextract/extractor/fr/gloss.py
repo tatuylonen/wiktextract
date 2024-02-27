@@ -37,7 +37,7 @@ def extract_gloss(
                 ):
                     tag = expanded_text.strip("() \n")
                     if len(tag) > 0:
-                        gloss_data.tags.append(tag)
+                        gloss_data.raw_tags.append(tag)
                     if "categories" in categories_data:
                         gloss_data.categories.extend(
                             categories_data["categories"]
@@ -54,7 +54,7 @@ def extract_gloss(
                 and isinstance(gloss_nodes[index + 1], str)
                 and gloss_nodes[index + 1].strip() == ")"
             ):
-                gloss_data.tags.append(clean_node(wxr, None, gloss_node))
+                gloss_data.raw_tags.append(clean_node(wxr, None, gloss_node))
                 tag_indexes |= {index - 1, index, index + 1}
 
         gloss_only_nodes = [

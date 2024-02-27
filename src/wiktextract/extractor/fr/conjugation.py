@@ -100,11 +100,13 @@ def process_fr_conj_modes_table(
                 elif cell_index % 3 == 0:
                     form = Form(
                         form=form_text,
-                        tags=tags.copy(),
+                        raw_tags=tags.copy(),
                         ipas=[clean_node(wxr, None, cell)],
                         source=conj_page_title,
                     )
-                    form.tags.append("Présent" if cell_index == 3 else "Passé")
+                    form.raw_tags.append(
+                        "Présent" if cell_index == 3 else "Passé"
+                    )
                     entry.forms.append(form)
                     form_text = ""
                 else:
@@ -154,7 +156,7 @@ def process_fr_conj_html_table(
         if tr_index == 0:
             tags.append(clean_node(wxr, None, tr_node.children))
         else:
-            form = Form(tags=tags, source=conj_page_title)
+            form = Form(raw_tags=tags, source=conj_page_title)
             for td_index, td_node in enumerate(
                 tr_node.find_html_recursively("td")
             ):
@@ -186,7 +188,7 @@ def process_fr_conj_wiki_table(
         if row_index == 0:
             tags.append(clean_node(wxr, None, row.children))
         else:
-            form = Form(tags=tags, source=conj_page_title)
+            form = Form(raw_tags=tags, source=conj_page_title)
             for cell_index, cell in enumerate(
                 row.find_child(NodeKind.TABLE_CELL)
             ):
@@ -237,7 +239,7 @@ def proces_ja_flx_adj_template(
                             continue
                         if line_index + 1 > len(forms):
                             forms.append(
-                                Form(tags=tags, source=conj_page_title)
+                                Form(raw_tags=tags, source=conj_page_title)
                             )
                         if cell_index == 1:
                             forms[line_index].form = line
@@ -291,7 +293,7 @@ def proces_ja_conj_template(
                     del row_headers[tag]
                 else:
                     row_headers[tag] = rowspan - 1
-            form = Form(tags=tags, source=conj_page_title)
+            form = Form(raw_tags=tags, source=conj_page_title)
             for cell_index, cell in enumerate(
                 row.find_child(NodeKind.TABLE_CELL)
             ):

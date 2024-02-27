@@ -53,15 +53,15 @@ def extract_form_line(
                     and len(page_data[-1].sounds) > 0
                 ):
                     # it's the location of the previous IPA template
-                    page_data[-1].sounds[-1].tags.append(tag.strip("()"))
+                    page_data[-1].sounds[-1].raw_tags.append(tag.strip("()"))
                 elif len(tag.strip("()")) > 0:
-                    page_data[-1].tags.append(tag.strip("()"))
+                    page_data[-1].raw_tags.append(tag.strip("()"))
 
             pre_template_name = node.template_name
         elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
             tag = clean_node(wxr, None, node)
             if tag != "ou":
-                page_data[-1].tags.append(tag)
+                page_data[-1].raw_tags.append(tag)
 
 
 def process_equiv_pour_template(
@@ -81,7 +81,7 @@ def process_equiv_pour_template(
                 source="form line template 'équiv-pour'",
             )
             if len(form_tag) > 0:
-                form_data.tags = [form_tag]
+                form_data.raw_tags = [form_tag]
             if len(form_data.form) > 0:
                 page_data[-1].forms.append(form_data)
 
@@ -178,4 +178,4 @@ def process_conj_template(
             tag.removesuffix("(conjugaison)").removesuffix("(flexions)").strip()
         )
     if len(tag) > 0:
-        page_data[-1].tags.append(tag)
+        page_data[-1].raw_tags.append(tag)

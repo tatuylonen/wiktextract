@@ -78,25 +78,25 @@ class TestNotes(TestCase):
                     "form": "lancer",
                     "ipas": ["\\lɑ̃.se\\"],
                     "source": "Conjugaison:français/lancer",
-                    "tags": ["Modes impersonnels", "Infinitif", "Présent"],
+                    "raw_tags": ["Modes impersonnels", "Infinitif", "Présent"],
                 },
                 {
                     "form": "avoir lancé",
                     "ipas": ["\\a.vwaʁ lɑ̃.se\\"],
                     "source": "Conjugaison:français/lancer",
-                    "tags": ["Modes impersonnels", "Infinitif", "Passé"],
+                    "raw_tags": ["Modes impersonnels", "Infinitif", "Passé"],
                 },
                 {
                     "form": "je lance",
                     "ipas": ["\\ʒə lɑ̃s\\"],
                     "source": "Conjugaison:français/lancer",
-                    "tags": ["Indicatif", "Présent"],
+                    "raw_tags": ["Indicatif", "Présent"],
                 },
                 {
                     "form": "j’ai lancé",
                     "ipas": ["\\ʒ‿e lɑ̃.se\\"],
                     "source": "Conjugaison:français/lancer",
-                    "tags": ["Indicatif", "Passé composé"],
+                    "raw_tags": ["Indicatif", "Passé composé"],
                 },
             ],
         )
@@ -171,19 +171,19 @@ class TestNotes(TestCase):
                     "form": "s’abattre",
                     "ipas": ["\\s‿a.batʁ\\"],
                     "source": "Conjugaison:français/abattre",
-                    "tags": ["Modes impersonnels", "Infinitif", "Présent"],
+                    "raw_tags": ["Modes impersonnels", "Infinitif", "Présent"],
                 },
                 {
                     "form": "s’être abattu",
                     "ipas": ["\\s‿ɛtʁ‿a.ba.ty\\"],
                     "source": "Conjugaison:français/abattre",
-                    "tags": ["Modes impersonnels", "Infinitif", "Passé"],
+                    "raw_tags": ["Modes impersonnels", "Infinitif", "Passé"],
                 },
                 {
                     "form": "abats-toi",
                     "ipas": ["\\a.ba.twa\\"],
                     "source": "Conjugaison:français/abattre",
-                    "tags": ["Impératif", "Présent"],
+                    "raw_tags": ["Impératif", "Présent"],
                 },
             ],
         )
@@ -221,21 +221,21 @@ class TestNotes(TestCase):
                     "hiragana": "かっこうだろ",
                     "roman": "kakkou daro",
                     "source": "Conjugaison:japonais/格好だ",
-                    "tags": ["Formes de base", "Imperfectif (未然形)"],
+                    "raw_tags": ["Formes de base", "Imperfectif (未然形)"],
                 },
                 {
                     "form": "格好ではない",
                     "hiragana": "かっこうではない",
                     "roman": "kakkou dewa nai",
                     "source": "Conjugaison:japonais/格好だ",
-                    "tags": ["Clefs de constructions", "Neutre négatif"],
+                    "raw_tags": ["Clefs de constructions", "Neutre négatif"],
                 },
                 {
                     "form": "格好じゃない",
                     "hiragana": "かっこうじゃない",
                     "roman": "kakkou ja nai",
                     "source": "Conjugaison:japonais/格好だ",
-                    "tags": ["Clefs de constructions", "Neutre négatif"],
+                    "raw_tags": ["Clefs de constructions", "Neutre négatif"],
                 },
             ],
         )
@@ -292,14 +292,14 @@ class TestNotes(TestCase):
                     "hiragana": "ある",
                     "roman": "aru",
                     "source": "Conjugaison:japonais/在る",
-                    "tags": ["Formes de base", "L'inaccompli"],
+                    "raw_tags": ["Formes de base", "L'inaccompli"],
                 },
                 {
                     "form": "無い",
                     "hiragana": "ない",
                     "roman": "nai",
                     "source": "Conjugaison:japonais/在る",
-                    "tags": [
+                    "raw_tags": [
                         "Formes de base",
                         "Imperfectif (未然形, mizen-kei)",
                     ],
@@ -309,7 +309,7 @@ class TestNotes(TestCase):
                     "hiragana": "あります",
                     "roman": "arimasu",
                     "source": "Conjugaison:japonais/在る",
-                    "tags": [
+                    "raw_tags": [
                         "Clefs de constructions",
                         "Présent / Futur",
                         "poli",
@@ -321,7 +321,7 @@ class TestNotes(TestCase):
                     "hiragana": "ありません",
                     "roman": "arimasen",
                     "source": "Conjugaison:japonais/在る",
-                    "tags": [
+                    "raw_tags": [
                         "Clefs de constructions",
                         "Présent / Futur",
                         "poli",

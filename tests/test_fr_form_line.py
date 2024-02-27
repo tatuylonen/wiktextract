@@ -37,7 +37,7 @@ class TestFormLine(TestCase):
         root = self.wxr.wtp.parse("'''bonjour''' {{m}}")
         page_data = [WordEntry(word="bonjour", lang_code="fr", lang="Français")]
         extract_form_line(self.wxr, page_data, root.children)
-        self.assertEqual(page_data[-1].tags, ["masculin"])
+        self.assertEqual(page_data[-1].raw_tags, ["masculin"])
 
     def test_zh_mot(self):
         self.wxr.wtp.start_page("马")
@@ -75,11 +75,11 @@ class TestFormLine(TestCase):
                 "word": "basket-ball",
                 "lang_code": "fr",
                 "lang": "Français",
-                "tags": ["masculin"],
+                "raw_tags": ["masculin"],
                 "sounds": [
-                    {"ipa": "bas.kɛt.bol", "tags": ["France"]},
-                    {"ipa": "bas.kɛt.bɔl", "tags": ["France"]},
-                    {"ipa": "bas.kɛt.bɑl", "tags": ["Canada"]},
+                    {"ipa": "bas.kɛt.bol", "raw_tags": ["France"]},
+                    {"ipa": "bas.kɛt.bɔl", "raw_tags": ["France"]},
+                    {"ipa": "bas.kɛt.bɑl", "raw_tags": ["Canada"]},
                 ],
             },
         )
@@ -120,22 +120,28 @@ class TestFormLine(TestCase):
                 "forms": [
                     {
                         "form": "auteur",
-                        "tags": ["pour un homme, on dit"],
+                        "raw_tags": ["pour un homme, on dit"],
                         "source": "form line template 'équiv-pour'",
                     },
                     {
                         "form": "autaire",
-                        "tags": ["pour une personne non-binaire, on peut dire"],
+                        "raw_tags": [
+                            "pour une personne non-binaire, on peut dire"
+                        ],
                         "source": "form line template 'équiv-pour'",
                     },
                     {
                         "form": "auteurice",
-                        "tags": ["pour une personne non-binaire, on peut dire"],
+                        "raw_tags": [
+                            "pour une personne non-binaire, on peut dire"
+                        ],
                         "source": "form line template 'équiv-pour'",
                     },
                     {
                         "form": "auteur·ice",
-                        "tags": ["pour une personne non-binaire, on peut dire"],
+                        "raw_tags": [
+                            "pour une personne non-binaire, on peut dire"
+                        ],
                         "source": "form line template 'équiv-pour'",
                     },
                 ],
@@ -147,4 +153,4 @@ class TestFormLine(TestCase):
         page_data = [WordEntry(word="飢える", lang_code="ja", lang="Japonais")]
         root = self.wxr.wtp.parse("'''飢える''' ''ichidan''")
         extract_form_line(self.wxr, page_data, root.children)
-        self.assertEqual(page_data[-1].tags, ["ichidan"])
+        self.assertEqual(page_data[-1].raw_tags, ["ichidan"])

@@ -66,7 +66,7 @@ def process_italic_node(
     ):
         tag = tag.strip("()")
         if len(tag) > 0:
-            page_data[-1].translations[-1].tags.append(tag)
+            page_data[-1].translations[-1].raw_tags.append(tag)
 
 
 def process_translation_templates(
@@ -132,7 +132,7 @@ def process_translation_templates(
                 wxr.wtp.node_to_wikitext(template_node), expand_all=True
             )
             for gender_node in expaned_node.find_child(NodeKind.ITALIC):
-                translation_data.tags = [clean_node(wxr, None, gender_node)]
+                translation_data.raw_tags = [clean_node(wxr, None, gender_node)]
                 break
         if translation_data.lang_code == "":
             translation_data.lang_code = template_node.template_parameters.get(
@@ -146,4 +146,4 @@ def process_translation_templates(
     elif len(page_data[-1].translations) > 0:
         tag = clean_node(wxr, None, template_node).strip("()")
         if len(tag) > 0:
-            page_data[-1].translations[-1].tags.append(tag)
+            page_data[-1].translations[-1].raw_tags.append(tag)
