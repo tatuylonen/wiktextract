@@ -141,7 +141,7 @@ def process_transcription_la_template(
 
     if ipa_match:
         sound.ipa = ipa_match.group(2)
-        sound.tags = [ipa_match.group(1).strip()]
+        sound.raw_tags = [ipa_match.group(1).strip()]
         word_entry.sounds.append(sound)
 
 
@@ -153,7 +153,7 @@ def process_transcription_grc_template(
     cleaned_node = clean_node(wxr, {}, template_node)
     ipa_with_labels = re.findall(r"\* (.*?): \[(.*?)\]", cleaned_node)
     for label, ipa in ipa_with_labels:
-        sound = Sound(ipa=ipa, tags=[label.strip()])
+        sound = Sound(ipa=ipa, raw_tags=[label.strip()])
         word_entry.sounds.append(sound)
 
 
@@ -193,13 +193,13 @@ def extract_tags(
     sounds: Union[Sound, list[Sound]],
     template_params: dict[str, WikiNode],
 ):
-    tags = clean_node(wxr, {}, template_params.get("норма", ""))
-    if tags:
+    tags = clean_node(wxr, None, template_params.get("норма", ""))
+    if tags != "":
         if isinstance(sounds, list):
             for sound in sounds:
-                sound.tags = [tags]
+                sound.raw_tags = [tags]
         else:
-            sounds.tags = [tags]
+            sounds.raw_tags = [tags]
 
 
 def extract_homophones(

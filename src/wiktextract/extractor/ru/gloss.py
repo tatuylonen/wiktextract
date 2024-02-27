@@ -127,13 +127,13 @@ def process_gloss_nodes(
         # XXX: Expanded tags are mostly still abbreviations. In Wiktionary,
         # however, they show the full word on hover. Perhaps it's possible to
         # extract the full word from the template?
-        tag = clean_node(wxr, {}, tag_template).strip()
-        if tag:
-            sense.tags.append(tag)
+        tag = clean_node(wxr, None, tag_template)
+        if tag != "":
+            sense.raw_tags.append(tag)
 
     for note_template in note_templates:
-        note = clean_node(wxr, {}, note_template).strip()
-        if note:
+        note = clean_node(wxr, None, note_template)
+        if note != "":
             sense.notes.append(note)
 
     if sense.model_dump(exclude_defaults=True) != {}:

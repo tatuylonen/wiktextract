@@ -29,10 +29,10 @@ def extract_linkages(
             elif isinstance(node, str) and node.strip() in (";", ","):
                 if len(linkage.word) > 0:
                     getattr(word_entry, linkage_type).append(linkage)
-                    tags = linkage.tags
+                    tags = linkage.raw_tags
                     linkage = Linkage()
                     if node.strip() == ",":
-                        linkage.tags = tags
+                        linkage.raw_tags = tags
 
         if len(linkage.word) > 0:
             getattr(word_entry, linkage_type).append(linkage)
@@ -53,4 +53,4 @@ def find_linkage_tag(
         else:
             tag = clean_node(wxr, None, span_node)
         if len(tag) > 0:
-            linkage.tags.append(tag)
+            linkage.raw_tags.append(tag)

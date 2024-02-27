@@ -60,7 +60,7 @@ class TestRUPronunciation(unittest.TestCase):
                 "expected": {
                     "ipa": "məɫɐˈko",
                     "audio": "Ru-молоко.ogg",
-                    "tags": ["московская норма"],
+                    "raw_tags": ["московская норма"],
                 },
             },
             {
@@ -89,11 +89,13 @@ class TestRUPronunciation(unittest.TestCase):
                     {
                         "ipa": "ˈɫoʂɨtʲ",
                         "audio": "Ru-лошадь.ogg",
-                        "tags": ["московская норма", "singular"],
+                        "raw_tags": ["московская норма"],
+                        "tags": ["singular"],
                     },
                     {
                         "ipa": "ˈɫoʂɨdʲɪ",
-                        "tags": ["московская норма", "plural"],
+                        "raw_tags": ["московская норма"],
+                        "tags": ["plural"],
                     },
                 ],
             },
@@ -114,7 +116,11 @@ class TestRUPronunciation(unittest.TestCase):
             {
                 "input": "{{transcriptions|ˈkʌl.ə(ɹ)|норма=брит.}}",
                 "expected": [
-                    {"ipa": "ˈkʌl.ə(ɹ)", "tags": ["брит.", "singular"]}
+                    {
+                        "ipa": "ˈkʌl.ə(ɹ)",
+                        "raw_tags": ["брит."],
+                        "tags": ["singular"],
+                    }
                 ],
             },
         ]
@@ -137,7 +143,7 @@ class TestRUPronunciation(unittest.TestCase):
                 {
                     "ipa": "məlɐˈko",
                     "audio": "Ru-молоко.ogg",
-                    "tags": ["московская норма"],
+                    "raw_tags": ["московская норма"],
                 }
             ],
         )
@@ -171,11 +177,13 @@ class TestRUPronunciation(unittest.TestCase):
                 {
                     "ipa": "ˈɫoʂətʲ",
                     "audio": "Ru-лошадь.ogg",
-                    "tags": ["московская норма", "singular"],
+                    "raw_tags": ["московская норма"],
+                    "tags": ["singular"],
                 },
                 {
                     "ipa": "ˈɫoʂədʲɪ",
-                    "tags": ["московская норма", "plural"],
+                    "raw_tags": ["московская норма"],
+                    "tags": ["plural"],
                 },
             ],
         )
@@ -216,7 +224,7 @@ class TestRUPronunciation(unittest.TestCase):
             [
                 {
                     "ipa": "proː.kraːs.tiˈnaː.ti.oː",
-                    "tags": ["классическое произношение"],
+                    "raw_tags": ["классическое произношение"],
                 }
             ],
         )
@@ -238,10 +246,13 @@ class TestRUPronunciation(unittest.TestCase):
             "{{transcription-grc|Ζεύς}}",
             process_transcription_grc_template,
             [
-                {"ipa": "zde͜ʊ́s", "tags": ["Аттическое произношение"]},
-                {"ipa": "zeʍs", "tags": ["Египетское произношение"]},
-                {"ipa": "zeɸs", "tags": ["Койне"]},
-                {"ipa": "zefs", "tags": ["Византийское произношение"]},
-                {"ipa": "zefs", "tags": ["Константинопольское произношение"]},
+                {"ipa": "zde͜ʊ́s", "raw_tags": ["Аттическое произношение"]},
+                {"ipa": "zeʍs", "raw_tags": ["Египетское произношение"]},
+                {"ipa": "zeɸs", "raw_tags": ["Койне"]},
+                {"ipa": "zefs", "raw_tags": ["Византийское произношение"]},
+                {
+                    "ipa": "zefs",
+                    "raw_tags": ["Константинопольское произношение"],
+                },
             ],
         )
