@@ -91,8 +91,8 @@ def parse_adj_forms_table(
                                 and col_index
                                 < col_header.start_index + col_header.span
                             ):
-                                form.tags.append(col_header.text)
-                        form.tags.extend([h.text for h in row_headers])
+                                form.raw_tags.append(col_header.text)
+                        form.raw_tags.extend([h.text for h in row_headers])
                         if len(form.form) > 0:
                             word_entry.forms.append(form)
                     col_index += 1

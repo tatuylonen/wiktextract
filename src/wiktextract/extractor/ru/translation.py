@@ -48,7 +48,7 @@ def process_translate_block_template(
                         # language index
                         title = node.attrs.get("title", "")
                         if len(title) > 0:
-                            translation.tags.append(title)
+                            translation.raw_tags.append(title)
                     elif node.tag == "span":
                         process_translate_list_span_tag(
                             wxr, word_entry, translation, node
@@ -56,7 +56,7 @@ def process_translate_block_template(
                 elif node.kind == NodeKind.LINK:
                     translation.lang = clean_node(wxr, None, node)
             elif isinstance(node, str) and len(node.strip(" ():\n")) > 0:
-                translation.tags.append(node.strip(" ():\n"))
+                translation.raw_tags.append(node.strip(" ():\n"))
 
         if translation.word != "" and translation.lang != "":
             if translation.lang_code == "":
@@ -79,15 +79,15 @@ def process_translate_list_span_tag(
                 # gender tag
                 title = node.attrs.get("title", "")
                 if len(title) > 0:
-                    translation.tags.append(title)
+                    translation.raw_tags.append(title)
                     added_tags_num += 1
                 else:
                     tag = clean_node(wxr, None, node)
                     if len(tag) > 0:
-                        translation.tags.append(tag)
+                        translation.raw_tags.append(tag)
                         added_tags_num += 1
             elif node.kind == NodeKind.ITALIC:
-                translation.tags.append(clean_node(wxr, None, node))
+                translation.raw_tags.append(clean_node(wxr, None, node))
                 added_tags_num += 1
         elif isinstance(node, str):
             # convert escaped characters like "&nbsp;"
@@ -107,7 +107,7 @@ def process_translate_list_span_tag(
                     )
                 # remove data of the last word
                 for _ in range(added_tags_num):
-                    translation.tags.pop()
+                    translation.raw_tags.pop()
                 translation.roman = ""
                 added_tags_num = 0
             elif text.startswith("(") and text.endswith(")"):

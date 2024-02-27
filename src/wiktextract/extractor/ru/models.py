@@ -25,11 +25,13 @@ class Translation(BaseModelWrap):
     )
     roman: str = Field(default="", description="Romanization of the word")
     tags: list[str] = []
+    raw_tags: list[str] = []
 
 
 class Linkage(BaseModelWrap):
     word: str = ""
     tags: list[str] = []
+    raw_tags: list[str] = []
 
 
 class Sound(BaseModelWrap):
@@ -43,6 +45,7 @@ class Sound(BaseModelWrap):
     tags: list[str] = Field(
         default=[], description="Specifying the variant of the pronunciation"
     )
+    raw_tags: list[str] = []
     homophones: list[Linkage] = Field(
         default=[], description="Words with same pronunciation"
     )
@@ -82,6 +85,7 @@ class Sense(BaseModelWrap):
         default=[],
         description="List of tags affecting the word sense.",
     )
+    raw_tags: list[str] = []
     notes: list[str] = Field(
         default=[],
         description="List of notes for the word sense. Usually describing usage.",
@@ -96,6 +100,7 @@ class Sense(BaseModelWrap):
 class Form(BaseModelWrap):
     form: str
     tags: list[str] = []
+    raw_tags: list[str] = []
 
 
 class WordEntry(BaseModelWrap):
@@ -124,6 +129,7 @@ class WordEntry(BaseModelWrap):
     translations: list[Translation] = []
     forms: list[Form] = []
     tags: list[str] = []
+    raw_tags: list[str] = []
     antonyms: list[Linkage] = Field(default=[], description="List of antonyms")
     anagrams: list[Linkage] = Field(default=[], description="List of anagrams")
     variants: list[Linkage] = Field(default=[], description="List of variants")
