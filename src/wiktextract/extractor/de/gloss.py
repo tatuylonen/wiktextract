@@ -112,9 +112,9 @@ def handle_sense_modifier(
             f"Found more than one child in sense modifier: {list_item_node.children}",
             sortid="extractor/de/gloss/handle_sense_modifier/114",
         )
-    modifier = clean_node(wxr, {}, list_item_node.children)
-    if modifier:
-        sense.tags = [modifier]
+    modifier = clean_node(wxr, None, list_item_node.children)
+    if modifier != "":
+        sense.raw_tags = [modifier]
 
 
 def process_K_template(
@@ -128,7 +128,7 @@ def process_K_template(
             text = clean_node(wxr, categories, template_node).removesuffix(":")
             sense_data.categories.extend(categories["categories"])
             tags = re.split(r";|,", text)
-            sense_data.tags.extend([t.strip() for t in tags])
+            sense_data.raw_tags.extend([t.strip() for t in tags])
 
             # Prepositional and case information is sometimes only expanded to
             # category links and not present in cleaned node. We still want it
@@ -137,7 +137,7 @@ def process_K_template(
             case = template_node.template_parameters.get("Kas")
             category = (prep if prep else "") + (" + " + case if case else "")
             if category:
-                sense_data.tags.append(category)
+                sense_data.raw_tags.append(category)
 
             # XXX: Investigate better ways to handle free text in K template
             ft = template_node.template_parameters.get("ft")
@@ -160,7 +160,7 @@ def extract_tags_from_gloss_text(sense_data: Sense, gloss_text: str) -> None:
 
         categories = [c.strip() for c in re.split(",", tags_part)]
         if all(c.isalnum() for c in categories):
-            sense_data.tags.extend(categories)
+            sense_data.raw_tags.extend(categories)
             return parts[1].strip()
 
     return gloss_text

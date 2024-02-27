@@ -32,10 +32,11 @@ class Translation(BaseModelWrap):
         default="", description="Transliteration to Roman characters"
     )
     sense_id: str = ""
-    tags: list[str] = Field(
+    raw_tags: list[str] = Field(
         default=[],
         description="Tags specifying the translated term, usually gender information",
     )
+    tags: list[str] = []
     notes: list[str] = Field(default=[], description="A list of notes")
 
 
@@ -88,10 +89,11 @@ class Sense(BaseModelWrap):
         default=[],
         description="list of uncleaned raw glosses for the word sense (usually only one).",
     )
-    tags: list[str] = Field(
+    raw_tags: list[str] = Field(
         default=[],
         description="list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging.",
     )
+    tags: list[str] = []
     categories: list[str] = Field(
         default=[],
         description="list of sense-disambiguated category names extracted from (a subset) of the Category links on the page",
@@ -126,9 +128,10 @@ class Sound(BaseModelWrap):
     # syllabic: list[str] = Field(
     #     default=[], description="Syllabic transcription"
     # )
-    tags: list[str] = Field(
+    raw_tags: list[str] = Field(
         default=[], description="Specifying the variant of the pronunciation"
     )
+    tags: list[str] = []
 
 
 class WordEntry(BaseModelWrap):
@@ -164,3 +167,4 @@ class WordEntry(BaseModelWrap):
     coordinate_terms: list[Linkage] = []
     proverbs: list[Linkage] = []
     synonyms: list[Linkage] = []
+    tags: list[str] = []

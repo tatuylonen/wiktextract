@@ -197,9 +197,9 @@ def is_tag_node(node: Union[WikiNode, str]):
 
 
 def append_tag(wxr: WiktextractContext, sound_data: Sound, node: WikiNode):
-    tag = clean_node(wxr, {}, node).strip()
-    if tag:
-        sound_data.tags.append(tag)
+    tag = clean_node(wxr, None, node)
+    if tag != "":
+        sound_data.raw_tags.append(tag)
 
 
 def is_new_sound_data_entry_sep(node: Union[WikiNode, str]):
