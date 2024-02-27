@@ -67,7 +67,7 @@ def extract_descendant_list_item(
                                 descendant_data.ruby = ruby_data
                         descendant_data.word = clean_node(wxr, None, child_node)
                     if "qualifier-content" in class_names:
-                        descendant_data.tags.append(
+                        descendant_data.raw_tags.append(
                             clean_node(wxr, None, child_node)
                         )
                 elif child_node.tag == "i":

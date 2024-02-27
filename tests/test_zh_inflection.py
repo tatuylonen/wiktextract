@@ -52,7 +52,7 @@ class TestInflection(TestCase):
                     "hiragana": "おかしかろ",
                     "roman": "okashikaro",
                     "source": "inflection",
-                    "tags": ["基本形", "未然形"],
+                    "raw_tags": ["基本形", "未然形"],
                 },
             ],
         )

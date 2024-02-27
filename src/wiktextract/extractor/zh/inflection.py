@@ -46,14 +46,14 @@ def extract_ja_i_template(
                     table_header = clean_node(wxr, None, child.children)
                 else:
                     inflection_data = Form(
-                        tags=[table_header], source="inflection"
+                        raw_tags=[table_header], source="inflection"
                     )
                     cell_node_index = 0
                     keys = ["form", "hiragana", "roman"]
                     for row_child in child.children:
                         if isinstance(row_child, WikiNode):
                             if row_child.kind == NodeKind.TABLE_HEADER_CELL:
-                                inflection_data.tags.append(
+                                inflection_data.raw_tags.append(
                                     clean_node(wxr, None, row_child)
                                 )
                             elif row_child.kind == NodeKind.TABLE_CELL:

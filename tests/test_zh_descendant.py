@@ -62,7 +62,7 @@ class TestDescendant(TestCase):
             {
                 "lang_code": "za",
                 "lang": "壯語",
-                "tags": ["仿譯"],
+                "raw_tags": ["仿譯"],
                 "word": "mwngz ndei",
             },
         )

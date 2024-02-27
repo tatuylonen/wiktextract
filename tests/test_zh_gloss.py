@@ -57,22 +57,22 @@ class TestGloss(TestCase):
                 {
                     "glosses": ["有趣的：", "有趣的"],
                     "raw_glosses": ["(棄用) 有趣的："],
-                    "tags": ["棄用"],
+                    "raw_tags": ["棄用"],
                 },
                 {
                     "glosses": ["有趣的：", "美味的"],
                     "raw_glosses": ["(棄用) 有趣的："],
-                    "tags": ["棄用"],
+                    "raw_tags": ["棄用"],
                 },
                 {
                     "glosses": ["有趣的：", "漂亮的"],
                     "raw_glosses": ["(棄用) 有趣的："],
-                    "tags": ["棄用"],
+                    "raw_tags": ["棄用"],
                 },
                 {
                     "glosses": ["有趣的：", "很好的，卓越的"],
                     "raw_glosses": ["(棄用) 有趣的："],
-                    "tags": ["棄用"],
+                    "raw_tags": ["棄用"],
                 },
             ],
         )

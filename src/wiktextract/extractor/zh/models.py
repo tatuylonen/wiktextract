@@ -33,6 +33,7 @@ class Sense(ChineseBaseModel):
     glosses: list[str] = []
     raw_glosses: list[str] = Field([], description="Gloss text without tags")
     tags: list[str] = []
+    raw_tags: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
     ruby: list[list[str]] = Field([], description="Japanese Kanji and furigana")
@@ -41,6 +42,7 @@ class Sense(ChineseBaseModel):
 class Form(ChineseBaseModel):
     form: str = ""
     tags: list[str] = []
+    raw_tags: list[str] = []
     source: str = ""
     ruby: list[list[str]] = Field([], description="Japanese Kanji and furigana")
     hiragana: str = ""
@@ -57,6 +59,7 @@ class Sound(ChineseBaseModel):
     mp3_url: str = ""
     opus_url: str = ""
     tags: list[str] = []
+    raw_tags: list[str] = []
     homophone: str = ""
 
 
@@ -68,6 +71,7 @@ class Translation(ChineseBaseModel):
     word: str = Field(description="Translation term")
     sense: str = Field("", description="Translation gloss")
     tags: list[str] = []
+    raw_tags: list[str] = []
     roman: str = Field("", description="Roman script")
     alt: str = Field("", description="Alternative form")
     lit: str = Field("", description="Literal translation for the term")
@@ -76,6 +80,7 @@ class Translation(ChineseBaseModel):
 class Linkage(ChineseBaseModel):
     word: str = ""
     tags: list[str] = []
+    raw_tags: list[str] = []
     roman: str = ""
     sense: str = ""
     language_variant: Literal["", "zh-Hant", "zh-Hans"] = Field(
@@ -90,6 +95,7 @@ class Descendant(ChineseBaseModel):
     word: str = ""
     roman: str = ""
     tags: list[str] = []
+    raw_tags: list[str] = []
     descendants: list["Descendant"] = []
     ruby: list[list[str]] = Field([], description="Japanese Kanji and furigana")
 
@@ -126,6 +132,7 @@ class WordEntry(ChineseBaseModel):
     categories: list[str] = []
     notes: list[str] = []
     tags: list[str] = []
+    raw_tags: list[str] = []
     descendants: list[Descendant] = []
     redirects: list[str] = Field(
         [],
