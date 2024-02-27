@@ -224,7 +224,7 @@ def process_pos_section(
         elif (
             isinstance(non_l4_node, WikiNode)
             and non_l4_node.kind == NodeKind.TABLE
-            and "inflection-table" in non_l4_node.attrs.get("class")
+            and "inflection-table" in non_l4_node.attrs.get("class", "")
         ):
             # XXX: de: Extract html form table
             pass
