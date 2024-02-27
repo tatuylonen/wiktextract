@@ -362,7 +362,7 @@ def check_json_data(
     forms = dt.get("forms") or []
     for form in forms:
         check_tags(wxr, dt, word, lang, pos, form)
-        tags = = dt.get("tags")
+        tags = dt.get("tags")
         if not isinstance(tags, (list, tuple)) or "table-tags" not in tags:
             check_str_fields(wxr, dt, word, lang, pos, form, ["form"],
                              mandatory=True)
