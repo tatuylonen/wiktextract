@@ -79,7 +79,7 @@ class TestFrPage(TestCase):
                             "glosses": [
                                 "Variété de charbon de terre, à reflet métallique et à combustion lente."
                             ],
-                            "tags": ["Pétrographie"],
+                            "raw_tags": ["Pétrographie"],
                         }
                     ],
                     "etymology_texts": ["(1549) Du latin anthracites."],
@@ -106,7 +106,10 @@ class TestFrPage(TestCase):
                     "pos_title": "Nom commun",
                     "word": "anthracite",
                     "senses": [
-                        {"glosses": ["Anthracite."], "tags": ["Indénombrable"]}
+                        {
+                            "glosses": ["Anthracite."],
+                            "raw_tags": ["Indénombrable"],
+                        }
                     ],
                     "etymology_texts": ["Du latin anthracites."],
                 },

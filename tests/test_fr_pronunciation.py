@@ -48,7 +48,7 @@ class TestPronunciation(TestCase):
                     "sounds": [
                         {
                             "ipa": "bõ.ʒuːʁ",
-                            "tags": ["France (Paris)"],
+                            "raw_tags": ["France (Paris)"],
                             "audio": "Fr-bonjour.ogg",
                             "ogg_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Fr-bonjour.ogg",
                             "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/bc/Fr-bonjour.ogg/Fr-bonjour.ogg.mp3",
@@ -62,7 +62,7 @@ class TestPronunciation(TestCase):
                     "sounds": [
                         {
                             "ipa": "bõ.ʒuːʁ",
-                            "tags": ["France (Paris)"],
+                            "raw_tags": ["France (Paris)"],
                             "audio": "Fr-bonjour.ogg",
                             "ogg_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Fr-bonjour.ogg",
                             "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/bc/Fr-bonjour.ogg/Fr-bonjour.ogg.mp3",
@@ -92,7 +92,7 @@ class TestPronunciation(TestCase):
                 sound.model_dump(exclude_defaults=True)
                 for sound in page_data[-1].sounds
             ],
-            [{"tags": ["cantonais", "Yale"], "zh_pron": "nei⁵hou²"}],
+            [{"raw_tags": ["cantonais", "Yale"], "zh_pron": "nei⁵hou²"}],
         )
 
     def test_no_ipa(self):
@@ -122,7 +122,7 @@ class TestPronunciation(TestCase):
         self.assertEqual(
             page_data[-1].sounds[0].model_dump(exclude_defaults=True),
             {
-                "tags": ["Suède"],
+                "raw_tags": ["Suède"],
                 "audio": "LL-Q9027 (swe)-Moonhouse-mars.wav",
                 "wav_url": "https://commons.wikimedia.org/wiki/Special:FilePath/LL-Q9027 (swe)-Moonhouse-mars.wav",
                 "ogg_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/3f/LL-Q9027_(swe)-Moonhouse-mars.wav/LL-Q9027_(swe)-Moonhouse-mars.wav.ogg",

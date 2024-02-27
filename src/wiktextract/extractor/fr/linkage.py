@@ -151,7 +151,7 @@ def process_linkage_list(
                         if tag.isdecimal():
                             linkage_data.sense_index = int(tag)
                         else:
-                            linkage_data.tags.append(tag)
+                            linkage_data.raw_tags.append(tag)
 
         if len(linkage_data.word) > 0:
             pre_data = getattr(page_data[-1], linkage_type)

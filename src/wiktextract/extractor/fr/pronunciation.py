@@ -79,7 +79,7 @@ def process_pron_list_item(
     if list_item_node.contain_node(NodeKind.LIST):
         returned_data = []
         for bold_node in list_item_node.find_child(NodeKind.BOLD):
-            sound_data.tags.append(clean_node(wxr, None, bold_node))
+            sound_data.raw_tags.append(clean_node(wxr, None, bold_node))
 
         for nest_list_item in list_item_node.find_child_recursively(
             NodeKind.LIST_ITEM
@@ -105,7 +105,7 @@ def process_pron_list_item(
                     pron_key,
                     "".join(ipa).strip(),
                 )
-                sound_data.tags.append("".join(location.strip()))
+                sound_data.raw_tags.append("".join(location.strip()))
 
         if len({pron_key, "audio"} & sound_data.model_fields_set) > 0:
             return [sound_data]
@@ -148,7 +148,7 @@ def process_ecouter_template(
         wxr, None, template_node.template_parameters.get("audio", "")
     )
     if len(location) > 0:
-        sound_data.tags.append(location)
+        sound_data.raw_tags.append(location)
     if len(ipa) > 0:
         sound_data.ipa = ipa
     if len(audio_file) > 0:

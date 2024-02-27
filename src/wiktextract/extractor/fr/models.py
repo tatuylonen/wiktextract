@@ -25,6 +25,7 @@ class Example(FrenchBaseModel):
 class Form(FrenchBaseModel):
     form: str = ""
     tags: list[str] = []
+    raw_tags: list[str] = []
     ipas: list[str] = []
     source: str = Field(
         "", description="Form line template name or Conjugaison page title"
@@ -43,6 +44,7 @@ class Sound(FrenchBaseModel):
     mp3_url: str = ""
     opus_url: str = ""
     tags: list[str] = []
+    raw_tags: list[str] = []
 
 
 class Translation(FrenchBaseModel):
@@ -56,6 +58,7 @@ class Translation(FrenchBaseModel):
         0, ge=0, description="Number of the definition, start from 1"
     )
     tags: list[str] = []
+    raw_tags: list[str] = []
     roman: str = ""
     traditional_writing: str = Field(
         "", description="Alternative writting for Chinese, Korean and Mongolian"
@@ -65,6 +68,7 @@ class Translation(FrenchBaseModel):
 class Linkage(FrenchBaseModel):
     word: str
     tags: list[str] = []
+    raw_tags: list[str] = []
     roman: str = ""
     alt: str = Field("", description="Alternative form")
     translation: str = Field("", description="French translation")
@@ -83,6 +87,7 @@ class AltForm(FrenchBaseModel):
 class Sense(FrenchBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
+    raw_tags: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
     note: str = ""
@@ -122,3 +127,4 @@ class WordEntry(FrenchBaseModel):
     categories: list[str] = []
     notes: list[str] = []
     tags: list[str] = []
+    raw_tags: list[str] = []

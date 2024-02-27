@@ -27,7 +27,7 @@ class TestLinkage(TestCase):
         extract_linkage(self.wxr, page_data, root, "synonymes")
         self.assertEqual(
             page_data[-1].synonyms[0].model_dump(exclude_defaults=True),
-            {"word": "bon matin", "tags": ["Canada", "Louisiane"]},
+            {"word": "bon matin", "raw_tags": ["Canada", "Louisiane"]},
         )
 
     def test_zh_synonyms(self):
@@ -59,7 +59,7 @@ class TestLinkage(TestCase):
         extract_linkage(self.wxr, page_data, root, "synonymes")
         self.assertEqual(
             page_data[-1].synonyms[0].model_dump(exclude_defaults=True),
-            {"word": "kwei", "tags": ["Canada", "mot Atikamekw"]},
+            {"word": "kwei", "raw_tags": ["Canada", "mot Atikamekw"]},
         )
 
     def test_list_item_has_two_words(self):
@@ -95,9 +95,9 @@ class TestLinkage(TestCase):
                 for d in page_data[-1].hypernyms
             ],
             [
-                {"tags": ["Sauria"], "word": "sauriens"},
+                {"raw_tags": ["Sauria"], "word": "sauriens"},
                 {
-                    "tags": [
+                    "raw_tags": [
                         "Lacertidae",
                         "famille des lézards typiques",
                     ],
