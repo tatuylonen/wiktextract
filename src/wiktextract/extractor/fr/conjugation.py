@@ -4,6 +4,7 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from .models import Form, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_conjugation(
@@ -91,7 +92,7 @@ def process_fr_conj_modes_table(
             if row_index == 0:
                 continue  # skip header
             form_text = ""
-            tags = ["Modes impersonnels"]
+            tags = []
             for cell_index, cell in enumerate(
                 row.find_child(NodeKind.TABLE_CELL)
             ):
@@ -107,6 +108,7 @@ def process_fr_conj_modes_table(
                     form.raw_tags.append(
                         "Présent" if cell_index == 3 else "Passé"
                     )
+                    translate_raw_tags(form)
                     entry.forms.append(form)
                     form_text = ""
                 else:
@@ -173,6 +175,7 @@ def process_fr_conj_html_table(
                             td_text += " "
                         form.ipas.append(td_text)
 
+            translate_raw_tags(form)
             entry.forms.append(form)
 
 
@@ -205,6 +208,7 @@ def process_fr_conj_wiki_table(
                     form.ipas.append(cell_text)
 
             if len(form.form) > 0:
+                translate_raw_tags(form)
                 entry.forms.append(form)
 
 
@@ -239,7 +243,9 @@ def proces_ja_flx_adj_template(
                             continue
                         if line_index + 1 > len(forms):
                             forms.append(
-                                Form(raw_tags=tags, source=conj_page_title)
+                                translate_raw_tags(
+                                    Form(raw_tags=tags, source=conj_page_title)
+                                )
                             )
                         if cell_index == 1:
                             forms[line_index].form = line
@@ -305,4 +311,5 @@ def proces_ja_conj_template(
                 elif cell_index == 2:
                     form.roman = cell_text
             if len(form.form) > 0:
+                translate_raw_tags(form)
                 entry.forms.append(form)

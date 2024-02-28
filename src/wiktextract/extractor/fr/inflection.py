@@ -7,6 +7,7 @@ from wiktextract.wxr_context import WiktextractContext
 
 from .models import Form, WordEntry
 from .pronunciation import is_ipa_text
+from .tags import translate_raw_tags
 
 
 def extract_inflection(
@@ -204,6 +205,7 @@ def process_inflection_table(
                         for form in form_data.form.split(" ou "):
                             new_form_data = form_data.model_copy(deep=True)
                             new_form_data.form = form
+                            translate_raw_tags(new_form_data)
                             page_data[-1].forms.append(new_form_data)
 
                     colspan_text = table_cell.attrs.get("colspan", "1")
@@ -265,4 +267,5 @@ def process_en_adj_table(
                 else:
                     form_data.form = form_line
             if form_data.form != page_data[-1].word:
+                translate_raw_tags(form_data)
                 page_data[-1].forms.append(form_data)

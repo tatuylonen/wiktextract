@@ -38,7 +38,7 @@ class TestInflection(TestCase):
         extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
-            [{"form": "productrices", "raw_tags": ["Pluriel"]}],
+            [{"form": "productrices", "tags": ["plural"]}],
         )
 
     def test_fr_accord_al(self):
@@ -69,17 +69,17 @@ class TestInflection(TestCase):
             [
                 {
                     "ipas": ["\\a.ni.mo\\"],
-                    "raw_tags": ["Pluriel", "Masculin"],
+                    "tags": ["plural", "masculine"],
                     "form": "animaux",
                 },
                 {
                     "ipas": ["\\a.ni.mal\\"],
-                    "raw_tags": ["Singulier", "Féminin"],
+                    "tags": ["singular", "feminine"],
                     "form": "animale",
                 },
                 {
                     "ipas": ["\\a.ni.mal\\"],
-                    "raw_tags": ["Pluriel", "Féminin"],
+                    "tags": ["plural", "feminine"],
                     "form": "animales",
                 },
             ],
@@ -107,7 +107,7 @@ class TestInflection(TestCase):
             [
                 {
                     "ipas": ["\\ˈɹæʃ.ənz\\", "\\ˈɹeɪʃ.ənz\\"],
-                    "raw_tags": ["Pluriel"],
+                    "tags": ["plural"],
                     "form": "rations",
                 }
             ],
@@ -138,7 +138,7 @@ class TestInflection(TestCase):
             [
                 {
                     "ipas": ["\\ˈɹæʃ.ən\\", "\\ˈɹeɪʃ.ən\\"],
-                    "raw_tags": ["Infinitif"],
+                    "tags": ["infinitive"],
                     "form": "to ration",
                 }
             ],
@@ -165,7 +165,7 @@ class TestInflection(TestCase):
         extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
-            [{"raw_tags": ["Pluriel"], "form": "animales"}],
+            [{"tags": ["plural"], "form": "animales"}],
         )
 
     def test_no_column_headers(self):
@@ -213,7 +213,7 @@ class TestInflection(TestCase):
         extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
-            [{"raw_tags": ["Singulier", "Nominatif"], "form": "abadas"}],
+            [{"tags": ["singular", "nominative"], "form": "abadas"}],
         )
 
     def test_fr_accord_s(self):
@@ -247,12 +247,12 @@ class TestInflection(TestCase):
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
                 {
-                    "raw_tags": ["Singulier", "Féminin"],
+                    "tags": ["singular", "feminine"],
                     "form": "aastaise",
                     "ipas": ["\\a.a.stɛz\\"],
                 },
                 {
-                    "raw_tags": ["Pluriel", "Féminin"],
+                    "tags": ["plural", "feminine"],
                     "form": "aastaises",
                     "ipas": ["\\a.a.stɛz\\"],
                 },
@@ -292,22 +292,22 @@ class TestInflection(TestCase):
                 {
                     "form": "enculé de ma race",
                     "ipas": ["\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\"],
-                    "raw_tags": ["Singulier", "1ᵉ personne", "Masculin"],
+                    "tags": ["singular", "first-person", "masculine"],
                 },
                 {
                     "form": "enculés de notre race",
                     "ipas": ["\\ɑ̃.ky.ˌle.də.nɔ.tʁə.ˈʁas\\"],
-                    "raw_tags": ["Pluriel", "1ᵉ personne", "Masculin"],
+                    "tags": ["plural", "first-person", "masculine"],
                 },
                 {
                     "form": "enculée de ma race",
                     "ipas": ["\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\"],
-                    "raw_tags": ["Singulier", "1ᵉ personne", "Féminin"],
+                    "tags": ["singular", "first-person", "feminine"],
                 },
                 {
                     "form": "enculées de notre race",
                     "ipas": ["\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\"],
-                    "raw_tags": ["Pluriel", "1ᵉ personne", "Féminin"],
+                    "tags": ["plural", "first-person", "feminine"],
                 },
             ],
         )
@@ -351,26 +351,27 @@ class TestInflection(TestCase):
             [
                 {
                     "form": "fenilul",
+                    "tags": ["singular"],
                     "raw_tags": [
-                        "Singulier",
                         "articulé",
                         "Nominatif Accusatif",
                     ],
                 },
                 {
                     "form": "fenili",
+                    "tags": ["plural"],
                     "raw_tags": [
-                        "Pluriel",
                         "non articulé",
                         "Nominatif Accusatif",
                     ],
                 },
                 {
                     "form": "fenilii",
-                    "raw_tags": ["Pluriel", "articulé", "Nominatif Accusatif"],
+                    "tags": ["plural"],
+                    "raw_tags": ["articulé", "Nominatif Accusatif"],
                 },
-                {"form": "fenilule", "raw_tags": ["Singulier", "Vocatif"]},
-                {"form": "fenililor", "raw_tags": ["Pluriel", "Vocatif"]},
+                {"form": "fenilule", "tags": ["singular", "vocative"]},
+                {"form": "fenililor", "tags": ["plural", "vocative"]},
             ],
         )
 
@@ -402,9 +403,9 @@ class TestInflection(TestCase):
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
-                {"form": "roboten", "raw_tags": ["Défini", "Singulier"]},
-                {"form": "robotar", "raw_tags": ["Indéfini", "Pluriel"]},
-                {"form": "robotarna", "raw_tags": ["Défini", "Pluriel"]},
+                {"form": "roboten", "tags": ["definite", "singular"]},
+                {"form": "robotar", "tags": ["indefinite", "plural"]},
+                {"form": "robotarna", "tags": ["definite", "plural"]},
             ],
         )
 
@@ -431,8 +432,8 @@ class TestInflection(TestCase):
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
-                {"form": "roboti", "raw_tags": ["Pluriel", "Nominatif"]},
-                {"form": "robotové", "raw_tags": ["Pluriel", "Nominatif"]},
+                {"form": "roboti", "tags": ["plural", "nominative"]},
+                {"form": "robotové", "tags": ["plural", "nominative"]},
             ],
         )
 
@@ -464,12 +465,12 @@ class TestInflection(TestCase):
             [
                 {
                     "form": "newer",
-                    "raw_tags": ["Comparatif"],
+                    "tags": ["comparative"],
                     "ipas": ["\\ˈnu.ɚ\\", "\\ˈnjuː.ə\\"],
                 },
                 {
                     "form": "newest",
-                    "raw_tags": ["Superlatif"],
+                    "tags": ["superlative"],
                     "ipas": ["\\ˈnu.ɪst\\", "\\ˈnjuː.ɪst\\"],
                 },
             ],
@@ -498,11 +499,11 @@ class TestInflection(TestCase):
             [
                 {
                     "form": "je dièse",
-                    "raw_tags": ["Indicatif", "Présent"],
+                    "tags": ["indicative", "present"],
                 },
                 {
                     "form": "il/elle/on dièse",
-                    "raw_tags": ["Indicatif", "Présent"],
+                    "tags": ["indicative", "present"],
                 },
             ],
         )

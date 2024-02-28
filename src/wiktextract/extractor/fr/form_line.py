@@ -8,7 +8,7 @@ from wiktextract.wxr_context import WiktextractContext
 from .conjugation import extract_conjugation
 from .models import Form, Sound, WordEntry
 from .pronunciation import PRON_TEMPLATES, process_pron_template
-from .tags import GRAMMATICAL_TAGS
+from .tags import translate_raw_tags
 
 
 def extract_form_line(
@@ -58,17 +58,15 @@ def extract_form_line(
                         raw_tag.strip("()")
                     )
                 elif len(raw_tag.strip("()")) > 0:
-                    raw_tag = raw_tag.strip("()")
-                    if raw_tag in GRAMMATICAL_TAGS:
-                        page_data[-1].tags.append(GRAMMATICAL_TAGS[raw_tag])
-                    else:
-                        page_data[-1].raw_tags.append(raw_tag)
+                    page_data[-1].raw_tags.append(raw_tag.strip("()"))
 
             pre_template_name = node.template_name
         elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
             raw_tag = clean_node(wxr, None, node)
             if raw_tag != "ou":
                 page_data[-1].raw_tags.append(raw_tag)
+
+        translate_raw_tags(page_data[-1])
 
 
 def process_equiv_pour_template(

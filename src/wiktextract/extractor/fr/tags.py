@@ -1,4 +1,5 @@
 # https://fr.wiktionary.org/wiki/Annexe:Glossaire_grammatical
+from .models import WordEntry
 
 # https://en.wikipedia.org/wiki/Grammatical_gender
 GENDER_TAGS: dict[str, str] = {
@@ -17,7 +18,7 @@ NUMBER_TAGS: dict[str, str] = {
 
 # https://en.wikipedia.org/wiki/Grammatical_mood
 MOOD_TAGS: dict[str, str] = {
-    "indicatif": " indicative",
+    "indicatif": "indicative",
     "subjonctif": "subjunctive",
     "conditionnel": "conditional",
     "impératif": "imperative",
@@ -51,9 +52,23 @@ TENSE_TAGS: dict[str, str] = {
 
 # https://en.wikipedia.org/wiki/Grammatical_person
 PERSON_TAGS: dict[str, str] = {
+    "1ᵉ personne": "first-person",
     "1ʳᵉ personne": "first-person",
     "2ᵉ personne": "second-person",
     "3ᵉ personne": "third-person",
+}
+
+SEMANTICS_TAGS: dict[str, str] = {
+    # https://en.wikipedia.org/wiki/Definiteness
+    "défini": "definite",
+    "indéfini": "indefinite",
+}
+
+COMPARISON_TAGS: dict[str, str] = {
+    # https://en.wikipedia.org/wiki/Comparison_(grammar)
+    "positif": "positive",
+    "comparatif": "comparative",
+    "superlatif": "superlative",
 }
 
 GRAMMATICAL_TAGS: dict[str, str] = {
@@ -64,4 +79,17 @@ GRAMMATICAL_TAGS: dict[str, str] = {
     **CASE_TAGS,
     **TENSE_TAGS,
     **PERSON_TAGS,
+    **SEMANTICS_TAGS,
+    **COMPARISON_TAGS,
 }
+
+
+def translate_raw_tags(data: WordEntry) -> WordEntry:
+    raw_tags = []
+    for raw_tag in data.raw_tags:
+        if raw_tag.lower() in GRAMMATICAL_TAGS:
+            data.tags.append(GRAMMATICAL_TAGS[raw_tag.lower()])
+        else:
+            raw_tags.append(raw_tag)
+    data.raw_tags = raw_tags
+    return data
