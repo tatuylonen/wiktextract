@@ -194,7 +194,7 @@ def check_tags(
         item: dict
 ) -> None:
     assert isinstance(item, dict)
-    tags = dt.get("tags")
+    tags = item.get("tags")
     if tags is None:
         return
     if not isinstance(tags, (list, tuple)):
@@ -211,7 +211,9 @@ def check_tags(
         # XXX enable the following later (currently too many bogus tags in
         # non-English editions).  Tag values should be standardized across
         # editions, except for uppercase tags (e.g., regional variants).
-        if wtp.lang_code in ("en",):  # Check edition
+        if wxr.wtp.lang_code in ("en",):  # Check edition
+            from .tags import valid_tags
+
             if tag not in valid_tags:
                 check_error(wxr, dt, word, lang, pos,
                             "invalid tag {} not in valid_tags (or "
