@@ -30,6 +30,7 @@ IGNORE_TABLE_HEADERS = frozenset(
         "temps",  # en-conj-rég,
         "cas",  # lt_décl_as, ro-nom-tab(lower case)
         "commun",  # sv-nom-c-ar
+        "personne",  # hu-pos-otok
     }
 )
 IGNORE_TABLE_HEADER_PREFIXES = (
