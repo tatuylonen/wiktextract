@@ -37,7 +37,7 @@ class TestFormLine(TestCase):
         root = self.wxr.wtp.parse("'''bonjour''' {{m}}")
         page_data = [WordEntry(word="bonjour", lang_code="fr", lang="Français")]
         extract_form_line(self.wxr, page_data, root.children)
-        self.assertEqual(page_data[-1].raw_tags, ["masculin"])
+        self.assertEqual(page_data[-1].tags, ["masculine"])
 
     def test_zh_mot(self):
         self.wxr.wtp.start_page("马")
@@ -75,7 +75,7 @@ class TestFormLine(TestCase):
                 "word": "basket-ball",
                 "lang_code": "fr",
                 "lang": "Français",
-                "raw_tags": ["masculin"],
+                "tags": ["masculine"],
                 "sounds": [
                     {"ipa": "bas.kɛt.bol", "raw_tags": ["France"]},
                     {"ipa": "bas.kɛt.bɔl", "raw_tags": ["France"]},
@@ -120,28 +120,22 @@ class TestFormLine(TestCase):
                 "forms": [
                     {
                         "form": "auteur",
-                        "raw_tags": ["pour un homme, on dit"],
+                        "tags": ["masculine"],
                         "source": "form line template 'équiv-pour'",
                     },
                     {
                         "form": "autaire",
-                        "raw_tags": [
-                            "pour une personne non-binaire, on peut dire"
-                        ],
+                        "tags": ["neuter"],
                         "source": "form line template 'équiv-pour'",
                     },
                     {
                         "form": "auteurice",
-                        "raw_tags": [
-                            "pour une personne non-binaire, on peut dire"
-                        ],
+                        "tags": ["neuter"],
                         "source": "form line template 'équiv-pour'",
                     },
                     {
                         "form": "auteur·ice",
-                        "raw_tags": [
-                            "pour une personne non-binaire, on peut dire"
-                        ],
+                        "tags": ["neuter"],
                         "source": "form line template 'équiv-pour'",
                     },
                 ],
