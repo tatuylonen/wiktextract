@@ -128,7 +128,7 @@ class TestTranslation(TestCase):
                         "lang_code": "de",
                         "lang": "Allemand",
                         "word": "Kambium",
-                        "raw_tags": ["neutre"],
+                        "tags": ["neuter"],
                     },
                 ],
             },
