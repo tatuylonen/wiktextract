@@ -1782,13 +1782,19 @@ def parse_word_head(
         )
         text = text[: m.start()] + text[m.end() :]
 
-    # Remove " or" from the end to prevent weird canonical forms
-    text = re.sub(r"\s+or$", "", text)
     language = wxr.wtp.section
     titleword = re.sub(r"^Reconstruction:[^/]*/", "", wxr.wtp.title)
     titleparts = list(m.group(0) for m in re.finditer(word_re, wxr.wtp.title))
     if not titleparts:
         return
+
+    # Remove " or" from the end to prevent weird canonical forms
+    if text.endswith(" or"):
+        for tp in titleparts:
+            if text.endswith(tp):
+                break
+        else:
+            text = re.sub(r"\s+or$", "", text)
 
     # Handle the part of the head that is not in parentheses.  However, certain
     # parenthesized parts are part of word, and those must be handled
