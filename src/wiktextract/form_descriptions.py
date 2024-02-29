@@ -1782,6 +1782,8 @@ def parse_word_head(
         )
         text = text[: m.start()] + text[m.end() :]
 
+    # Remove " or" from the end to prevent weird canonical forms
+    text = re.sub(r"\s+or$", "", text)
     language = wxr.wtp.section
     titleword = re.sub(r"^Reconstruction:[^/]*/", "", wxr.wtp.title)
     titleparts = list(m.group(0) for m in re.finditer(word_re, wxr.wtp.title))
