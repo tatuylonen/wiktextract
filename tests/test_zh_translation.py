@@ -57,14 +57,15 @@ class TestZhTranslation(TestCase):
                     "sense": "太陽上層大氣射出的超高速電漿流",
                     "word": "רוח סולרית",
                     "roman": "ruakh solarit",
-                    "raw_tags": ["陰性名詞"],
+                    "tags": ["feminine"],
                 },
                 {
                     "lang_code": "sh",
                     "lang": "西里尔字母",
                     "sense": "太陽上層大氣射出的超高速電漿流",
                     "word": "сунчев ветар",
-                    "raw_tags": ["Ekavian", "陽性名詞"],
+                    "tags": ["masculine"],
+                    "raw_tags": ["Ekavian"],
                 },
             ],
         )
@@ -211,7 +212,8 @@ class TestZhTranslation(TestCase):
                     "lang_code": "cs",
                     "lang": "捷克语",
                     "word": "patližán",
-                    "raw_tags": ["陽性名詞", "口语词汇"],
+                    "tags": ["masculine"],
+                    "raw_tags": ["口语词汇"],
                 },
             ],
         )
