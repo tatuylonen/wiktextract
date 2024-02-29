@@ -26,7 +26,7 @@ class TestHeadword(TestCase):
         self.wxr.wtp.add_page(
             "Template:en-noun",
             10,
-            '<strong class="Latn headword" lang="en">manga</strong> ([[可數|可數]] & [[不可數|不可數]]，複數 <b class="Latn form-of lang-en p-form-of" lang="en"><strong class="selflink">manga</strong></b> <small>或</small> <b class="Latn form-of lang-en p-form-of" lang="en">[[mangas#英語|mangas]]</b>)',
+            '<span class="headword-line"><strong class="Latn headword" lang="en">-{manga}-</strong> ([[可數|可數]] <small>和</small> [[不可數|不可數]]-{}-，複數-{ <b lang="en"><strong class="selflink">manga</strong></b> <small>或</small> <b>[[mangas#英語|-{mangas}-]]</b>}-)</span>',
         )
         root = self.wxr.wtp.parse("{{en-noun|~|manga|s}}")
         page_data = [WordEntry(word="manga", lang_code="en", lang="英語")]
@@ -40,10 +40,10 @@ class TestHeadword(TestCase):
                     "lang_code": "en",
                     "lang": "英語",
                     "forms": [
-                        {"form": "manga", "raw_tags": ["複數"]},
-                        {"form": "mangas", "raw_tags": ["複數"]},
+                        {"form": "manga", "tags": ["plural"]},
+                        {"form": "mangas", "tags": ["plural"]},
                     ],
-                    "raw_tags": ["可數", "不可數"],
+                    "tags": ["countable", "uncountable"],
                 }
             ],
         )
@@ -56,7 +56,7 @@ class TestHeadword(TestCase):
         self.wxr.wtp.add_page(
             "Template:nl-noun",
             10,
-            '<strong class="Latn headword" lang="nl">manga</strong>&nbsp;<span class="gender"><abbr title="陽性名詞">m</abbr></span> (複數 <b class="Latn form-of lang-nl p-form-of" lang="nl">[[manga\'s#荷蘭語|manga\'s]]</b>，指小詞 <b class="Latn form-of lang-nl 指小詞-form-of" lang="nl">[[mangaatje#荷蘭語|mangaatje]]</b>&nbsp;<span class="gender"><abbr title="中性名詞">n</abbr></span>)',
+            '<span class="headword-line"><strong class="Latn headword" lang="nl">-{manga}-</strong>&nbsp;<span class="gender"><abbr title="陽性名詞">m</abbr></span> (複數-{ <b>[[manga\'s#荷蘭語|-{manga\'s}-]]</b>}-，指小詞-{ <b>[[mangaatje#荷蘭語|-{mangaatje}-]]</b>&nbsp;<span class="gender"><abbr title="中性名詞">n</abbr></span>}-)</span>',
         )
         root = self.wxr.wtp.parse("{{nl-noun|m|-'s|mangaatje}}")
         page_data = [WordEntry(word="manga", lang_code="en", lang="英語")]
@@ -70,13 +70,10 @@ class TestHeadword(TestCase):
                     "lang_code": "en",
                     "lang": "英語",
                     "forms": [
-                        {"form": "manga's", "raw_tags": ["複數"]},
+                        {"form": "manga's", "tags": ["plural"]},
                         {
                             "form": "mangaatje",
-                            "raw_tags": [
-                                "指小詞",
-                            ],
-                            "tags": ["neuter"],
+                            "tags": ["neuter", "diminutive"],
                         },
                     ],
                     "tags": ["masculine"],
@@ -92,7 +89,7 @@ class TestHeadword(TestCase):
         self.wxr.wtp.add_page(
             "Template:head",
             10,
-            '<strong class="polytonic headword" lang="grc">-κρατίᾱς</strong> (<span lang="grc-Latn" class="headword-tr tr Latn" dir="ltr">-kratíās</span>)&nbsp;<span class="gender"><abbr title="陰性名詞">f</abbr></span>',
+            '<span class="headword-line"><strong class="Polyt headword" lang="grc">-{-κρατίᾱς}-</strong> (<span lang="grc-Latn" class="headword-tr tr Latn" dir="ltr">-kratíās</span>)&nbsp;<span class="gender"><abbr title="陰性名詞">f</abbr></span></span>',
         )
         root = self.wxr.wtp.parse("{{head|grc|後綴變格形|g=f|head=-κρατίᾱς}}")
         page_data = [

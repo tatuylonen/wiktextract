@@ -9,33 +9,7 @@ from wiktextract.wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from ..share import strip_nodes
 from .models import Form, WordEntry
-
-# https://zh.wiktionary.org/wiki/Module:Gender_and_number
-GENDERS = {
-    "f": "feminine",
-    "m": "masculine",
-    "n": "neuter",
-    "c": "common",
-    # Animacy
-    "an": "animate",
-    "in": "inanimate",
-    # Animal (for Ukrainian, Belarusian, Polish)
-    "anml": "animal",
-    # Personal (for Ukrainian, Belarusian, Polish)
-    "pr": "personal",
-    # Nonpersonal not currently used
-    "np": "nonpersonal",
-    # Virility (for Polish)
-    "vr": "virile",
-    "nv": "nonvirile",
-    # Numbers
-    "s": "singular number",
-    "d": "dual number",
-    "p": "plural number",
-    # Verb qualifiers
-    "impf": "imperfective aspect",
-    "pf": "perfective aspect",
-}
+from .tags import TEMPLATE_TAG_ARGS, translate_raw_tags
 
 
 def extract_headword_line(
@@ -55,32 +29,34 @@ def extract_headword_line(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
     forms_start_index = 0
-    for index, child in expanded_node.find_child(NodeKind.HTML, True):
-        if child.tag == "strong" and "headword" in child.attrs.get("class", ""):
-            forms_start_index = index + 1
-        elif child.tag == "span":
-            class_names = child.attrs.get("class", "")
-            if "headword-tr" in class_names:
+    for span_node in expanded_node.find_html(
+        "span", attr_name="class", attr_value="headword-line"
+    ):
+        for index, span_child in span_node.find_child(NodeKind.HTML, True):
+            if span_child.tag == "span":
                 forms_start_index = index + 1
-
-                page_data[-1].forms.append(
-                    Form(
-                        form=clean_node(wxr, page_data[-1], child),
-                        tags=["romanization"],
+                class_names = span_child.attrs.get("class", "")
+                if "headword-tr" in class_names:
+                    page_data[-1].forms.append(
+                        Form(
+                            form=clean_node(wxr, page_data[-1], span_child),
+                            tags=["romanization"],
+                        )
                     )
-                )
-            elif "gender" in class_names:
+                elif "gender" in class_names:
+                    for abbr_tag in span_child.find_html("abbr"):
+                        gender = abbr_tag.children[0]
+                        if gender in TEMPLATE_TAG_ARGS:
+                            page_data[-1].tags.append(TEMPLATE_TAG_ARGS[gender])
+                        else:
+                            page_data[-1].raw_tags.append(gender)
+                            translate_raw_tags(page_data[-1])
+            elif (
+                span_child.tag == "strong"
+                and "headword" in span_child.attrs.get("class", "")
+            ):
                 forms_start_index = index + 1
-                for abbr_tag in child.find_html("abbr"):
-                    gender = abbr_tag.children[0]
-                    if gender in GENDERS:
-                        page_data[-1].tags.append(GENDERS[gender])
-                    else:
-                        page_data[-1].raw_tags.append(gender)
-            if lang_code == "ja":
-                for span_child in child.find_html(
-                    "strong", attr_name="class", attr_value="headword"
-                ):
+                if lang_code == "ja":
                     ruby_data, node_without_ruby = extract_ruby(wxr, span_child)
                     page_data[-1].forms.append(
                         Form(
@@ -91,13 +67,13 @@ def extract_headword_line(
                             tags=["canonical"],
                         )
                     )
-        elif child.tag == "b":
-            # this is a form <b> tag, already inside form parentheses
-            break
+            elif span_child.tag == "b":
+                # this is a form <b> tag, already inside form parentheses
+                break
 
-    extract_headword_forms(
-        wxr, page_data, expanded_node.children[forms_start_index:]
-    )
+        extract_headword_forms(
+            wxr, page_data, span_node.children[forms_start_index:]
+        )
 
 
 def extract_headword_forms(
@@ -150,8 +126,8 @@ def process_forms_text(
                         and "gender" in next_node.attrs.get("class", "")
                     ):
                         gender = clean_node(wxr, None, next_node)
-                        if gender in GENDERS:
-                            form_tags.append(GENDERS[gender])
+                        if gender in TEMPLATE_TAG_ARGS:
+                            form_tags.append(TEMPLATE_TAG_ARGS[gender])
                         else:
                             raw_form_tags.append(gender)
 
@@ -161,6 +137,7 @@ def process_forms_text(
                     tags=form_tags,
                     ruby=ruby_data,
                 )
+                translate_raw_tags(form_data)
                 page_data[-1].forms.append(form_data)
             elif (
                 node.tag == "span"
@@ -180,6 +157,7 @@ def process_forms_text(
         )
         if len(tags_list) > 0:
             page_data[-1].raw_tags.extend(tags_list)
+            translate_raw_tags(page_data[-1])
     else:
         clean_node(wxr, page_data[-1], tag_nodes)  # find categories
 
@@ -187,7 +165,7 @@ def process_forms_text(
 def extract_headword_tags(tags_str: str) -> list[str]:
     tags = []
     for tag_str in (
-        s.strip() for s in re.split("&|或", tags_str) if len(s.strip()) > 0
+        s.strip() for s in re.split("&|或|和", tags_str) if len(s.strip()) > 0
     ):
         tags.append(tag_str)
     return tags

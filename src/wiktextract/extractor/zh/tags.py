@@ -88,3 +88,34 @@ def translate_raw_tags(data: WordEntry) -> WordEntry:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
     return data
+
+
+# https://zh.wiktionary.org/wiki/Template:T
+# https://zh.wiktionary.org/wiki/Template:Head
+# https://zh.wiktionary.org/wiki/Module:Gender_and_number
+TEMPLATE_TAG_ARGS = {
+    "f": "feminine",
+    "m": "masculine",
+    "n": "neuter",
+    "c": "common",
+    # Animacy
+    "an": "animate",
+    "in": "inanimate",
+    # Animal (for Ukrainian, Belarusian, Polish)
+    "anml": "animal",
+    # Personal (for Ukrainian, Belarusian, Polish)
+    "pr": "personal",
+    # Nonpersonal not currently used
+    "np": "nonpersonal",
+    # Virility (for Polish)
+    "vr": "virile",
+    "nv": "nonvirile",
+    # Numbers
+    "s": "singular number",
+    "d": "dual number",
+    "p": "plural number",
+    # Verb qualifiers
+    "impf": "imperfective aspect",
+    "pf": "perfective aspect",
+    "mf": "masculine feminine",
+}
