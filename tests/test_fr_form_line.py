@@ -120,28 +120,22 @@ class TestFormLine(TestCase):
                 "forms": [
                     {
                         "form": "auteur",
-                        "raw_tags": ["pour un homme, on dit"],
+                        "tags": ["masculine"],
                         "source": "form line template 'équiv-pour'",
                     },
                     {
                         "form": "autaire",
-                        "raw_tags": [
-                            "pour une personne non-binaire, on peut dire"
-                        ],
+                        "tags": ["neuter"],
                         "source": "form line template 'équiv-pour'",
                     },
                     {
                         "form": "auteurice",
-                        "raw_tags": [
-                            "pour une personne non-binaire, on peut dire"
-                        ],
+                        "tags": ["neuter"],
                         "source": "form line template 'équiv-pour'",
                     },
                     {
                         "form": "auteur·ice",
-                        "raw_tags": [
-                            "pour une personne non-binaire, on peut dire"
-                        ],
+                        "tags": ["neuter"],
                         "source": "form line template 'équiv-pour'",
                     },
                 ],
