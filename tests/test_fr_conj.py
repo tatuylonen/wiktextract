@@ -96,8 +96,7 @@ class TestNotes(TestCase):
                     "form": "j’ai lancé",
                     "ipas": ["\\ʒ‿e lɑ̃.se\\"],
                     "source": "Conjugaison:français/lancer",
-                    "tags": ["indicative"],
-                    "raw_tags": ["Passé composé"],
+                    "tags": ["indicative", "past multiword-construction"],
                 },
             ],
         )

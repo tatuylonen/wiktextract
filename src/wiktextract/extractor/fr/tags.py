@@ -48,6 +48,11 @@ TENSE_TAGS: dict[str, str] = {
     "passé": "past",
     "passé simple": "past",
     "futur simple": "future",
+    # https://en.wikipedia.org/wiki/Passé_composé
+    "passé composé": "past multiword-construction",
+    "plus-que-parfait": "pluperfect",
+    "passé antérieur": "past anterior",
+    "futur antérieur": "future perfect",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_person
