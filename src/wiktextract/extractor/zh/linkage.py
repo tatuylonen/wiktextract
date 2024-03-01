@@ -13,6 +13,7 @@ from ..share import (
 )
 from .descendant import DESCENDANT_TEMPLATES, extract_descendant_list_item
 from .models import Linkage, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_linkages(
@@ -54,6 +55,7 @@ def extract_linkages(
                             linkage_data.raw_tags.append(
                                 clean_node(wxr, None, item_child).strip("()")
                             )
+                            translate_raw_tags(linkage_data)
                         elif template_name.lower() in DESCENDANT_TEMPLATES:
                             not_term_indexes.add(index)
                             extract_descendant_list_item(

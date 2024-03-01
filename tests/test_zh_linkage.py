@@ -67,3 +67,20 @@ class TestLinkage(TestCase):
                 "word": "家主",
             },
         )
+
+    def test_qual_tag(self):
+        page_data = [WordEntry(lang="漢語", lang_code="zh", word="駱駝")]
+        self.wxr.wtp.add_page("Template:qual", 10, "({{{1}}})")
+        self.wxr.wtp.add_page("Template:zh-l", 10, "{{{1}}}")
+        self.wxr.wtp.start_page("駱駝")
+        node = self.wxr.wtp.parse("* {{qual|比喻}} {{zh-l|沙漠之舟}}")
+        extract_linkages(self.wxr, page_data, node.children, "synonyms", "")
+        self.assertEqual(
+            [
+                s.model_dump(exclude_defaults=True)
+                for s in page_data[0].synonyms
+            ],
+            [
+                {"tags": ["figuratively"], "word": "沙漠之舟"},
+            ],
+        )
