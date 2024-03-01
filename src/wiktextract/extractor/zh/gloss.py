@@ -1,4 +1,3 @@
-
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import clean_node
