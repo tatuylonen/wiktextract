@@ -1,4 +1,3 @@
-import re
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
@@ -8,6 +7,7 @@ from wiktextract.wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from .example import extract_examples
 from .models import Sense, WordEntry
+from .tags import translate_raw_tags
 
 # https://zh.wiktionary.org/wiki/Template:Label
 LABEL_TEMPLATES = frozenset(["lb", "lbl", "label"])
@@ -62,4 +62,5 @@ def extract_gloss(
                     extract_examples(wxr, new_gloss_data, child_node)
 
         if not has_nested_gloss:
+            translate_raw_tags(new_gloss_data)
             page_data[-1].senses.append(new_gloss_data)

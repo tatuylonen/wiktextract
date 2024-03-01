@@ -212,8 +212,7 @@ class TestZhTranslation(TestCase):
                     "lang_code": "cs",
                     "lang": "捷克语",
                     "word": "patližán",
-                    "tags": ["masculine"],
-                    "raw_tags": ["口"],
+                    "tags": ["masculine", "colloquial"],
                 },
             ],
         )

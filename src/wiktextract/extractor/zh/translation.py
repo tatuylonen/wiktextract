@@ -8,7 +8,7 @@ from wiktextract.wxr_context import WiktextractContext
 
 from .models import Translation, WordEntry
 from .section_titles import TRANSLATIONS_TITLES
-from .tags import TEMPLATE_TAG_ARGS
+from .tags import TEMPLATE_TAG_ARGS, translate_raw_tags
 
 
 def extract_translation(
@@ -134,6 +134,7 @@ def process_translation_list_item(
             tr_data.word = clean_node(wxr, None, child)
 
     if len(tr_data.word) > 0:
+        translate_raw_tags(tr_data)
         page_data[-1].translations.append(tr_data.model_copy(deep=True))
 
 

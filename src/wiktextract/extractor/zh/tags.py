@@ -78,12 +78,36 @@ GRAMMATICAL_TAGS: dict[str, str] = {
     **VOICE_TAGS,
 }
 
+# https://zh.wiktionary.org/wiki/Template:Label
+# https://zh.wiktionary.org/wiki/Template:Qualifier
+# https://zh.wiktionary.org/wiki/Template:古
+# https://zh.wiktionary.org/wiki/Template:注释
+LABEL_TAGS = {
+    "棄用": "obsolete",
+    "古": "archaic",
+    "陽": "masculine",
+    "陰": "feminine",
+    "喻": "figuratively",
+    "書": "literary",
+    "口": "colloquial",
+    "俚": "slang",
+    "俗": "slang",
+    "方": "dialectal",
+    "废": "obsolete",
+    "貶": "derogatory",
+    "罕": "rare",
+    "引": "broadly",
+}
+
+
+ALL_TAGS = {**GRAMMATICAL_TAGS, **LABEL_TAGS}
+
 
 def translate_raw_tags(data: WordEntry) -> WordEntry:
     raw_tags = []
     for raw_tag in data.raw_tags:
-        if raw_tag.lower() in GRAMMATICAL_TAGS:
-            data.tags.append(GRAMMATICAL_TAGS[raw_tag.lower()])
+        if raw_tag.lower() in ALL_TAGS:
+            data.tags.append(ALL_TAGS[raw_tag.lower()])
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags

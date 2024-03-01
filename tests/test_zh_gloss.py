@@ -57,19 +57,19 @@ class TestGloss(TestCase):
                 {"glosses": ["好玩的：", "不合理的，不合邏輯的"]},
                 {
                     "glosses": ["有趣的：", "有趣的"],
-                    "raw_tags": ["棄用"],
+                    "tags": ["obsolete"],
                 },
                 {
                     "glosses": ["有趣的：", "美味的"],
-                    "raw_tags": ["棄用"],
+                    "tags": ["obsolete"],
                 },
                 {
                     "glosses": ["有趣的：", "漂亮的"],
-                    "raw_tags": ["棄用"],
+                    "tags": ["obsolete"],
                 },
                 {
                     "glosses": ["有趣的：", "很好的，卓越的"],
-                    "raw_tags": ["棄用"],
+                    "tags": ["obsolete"],
                 },
             ],
         )
