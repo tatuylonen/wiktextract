@@ -31,7 +31,6 @@ class Example(ChineseBaseModel):
 
 class Sense(ChineseBaseModel):
     glosses: list[str] = []
-    raw_glosses: list[str] = Field([], description="Gloss text without tags")
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []

@@ -40,12 +40,13 @@ class TestGloss(TestCase):
 ## 有趣的，滑稽的，可笑的
 ## 奇怪的，不正常的
 ## 不合理的，不合邏輯的
-# (棄用) [[有趣]]的：
+# {{lb|ja|棄用}} [[有趣]]的：
 ## [[有趣]]的
 ## [[美味]]的
 ## [[漂亮]]的
 ## [[很好]]的，[[卓越]]的"""
         self.wxr.wtp.start_page("test")
+        self.wxr.wtp.add_page("Template:lb", 10, "({{{2|}}})")
         node = self.wxr.wtp.parse(wikitext)
         extract_gloss(self.wxr, page_data, node.children[0], Sense())
         self.assertEqual(
@@ -56,22 +57,18 @@ class TestGloss(TestCase):
                 {"glosses": ["好玩的：", "不合理的，不合邏輯的"]},
                 {
                     "glosses": ["有趣的：", "有趣的"],
-                    "raw_glosses": ["(棄用) 有趣的："],
                     "raw_tags": ["棄用"],
                 },
                 {
                     "glosses": ["有趣的：", "美味的"],
-                    "raw_glosses": ["(棄用) 有趣的："],
                     "raw_tags": ["棄用"],
                 },
                 {
                     "glosses": ["有趣的：", "漂亮的"],
-                    "raw_glosses": ["(棄用) 有趣的："],
                     "raw_tags": ["棄用"],
                 },
                 {
                     "glosses": ["有趣的：", "很好的，卓越的"],
-                    "raw_glosses": ["(棄用) 有趣的："],
                     "raw_tags": ["棄用"],
                 },
             ],
