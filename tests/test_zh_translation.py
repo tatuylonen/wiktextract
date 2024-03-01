@@ -189,7 +189,7 @@ class TestZhTranslation(TestCase):
 {{#if:{{{g|}}}|<span class="gender"><abbr title="陽性名詞">m</abbr></span>}}""",
         )
         self.wxr.wtp.add_page(
-            "Template:口", 10, '<span title="口语词汇">口</span>〉'
+            "Template:口", 10, '〈<span title="口语词汇">口</span>〉'
         )
         page_data = [WordEntry(word="茄子", lang_code="zh", lang="漢語")]
         node = self.wxr.wtp.parse(
@@ -213,7 +213,7 @@ class TestZhTranslation(TestCase):
                     "lang": "捷克语",
                     "word": "patližán",
                     "tags": ["masculine"],
-                    "raw_tags": ["口语词汇"],
+                    "raw_tags": ["口"],
                 },
             ],
         )

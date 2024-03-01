@@ -113,21 +113,15 @@ def process_translation_list_item(
             elif template_name == "t-needed":
                 # ignore empty translation
                 continue
+            elif template_name in ("qualifier", "q"):
+                raw_tag = clean_node(wxr, None, child)
+                tr_data.raw_tags.append(raw_tag.strip("()"))
             else:
-                # qualifier template
-                expanded_template = wxr.wtp.parse(
-                    wxr.wtp.node_to_wikitext(child), expand_all=True
-                )
-                find_title = False
-                for span_node in expanded_template.find_html("span"):
-                    tag = span_node.attrs.get("title", "")
-                    if len(tag) > 0:
-                        tr_data.raw_tags.append(tag.strip())
-                        find_title = True
-                if not find_title:
-                    tag = clean_node(wxr, None, child)
-                    if len(tag) > 0:
-                        tr_data.raw_tags.append(tag.strip("()"))
+                # zh qualifier templates that use template "注释"
+                # https://zh.wiktionary.org/wiki/Template:注释
+                raw_tag = clean_node(wxr, None, child)
+                if raw_tag.startswith("〈") and raw_tag.endswith("〉"):
+                    tr_data.raw_tags.append(raw_tag.strip("〈〉"))
         elif isinstance(child, WikiNode) and child.kind == NodeKind.LINK:
             if len(tr_data.word) > 0:
                 page_data[-1].translations.append(tr_data.model_copy(deep=True))

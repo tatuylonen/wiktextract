@@ -24,11 +24,12 @@ def extract_gloss(
         gloss_nodes = []
         raw_tags = []
         for node in list_item_node.children:
-            if (
-                isinstance(node, TemplateNode)
-                and node.template_name in LABEL_TEMPLATES
-            ):
-                raw_tags.append(clean_node(wxr, None, node).strip("()"))
+            if isinstance(node, TemplateNode):
+                raw_tag = clean_node(wxr, None, node)
+                if node.template_name in LABEL_TEMPLATES:
+                    raw_tags.append(raw_tag.strip("()"))
+                elif raw_tag.startswith("〈") and raw_tag.endswith("〉"):
+                    raw_tags.append(raw_tag.strip("〈〉"))
             elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
                 continue
             else:
