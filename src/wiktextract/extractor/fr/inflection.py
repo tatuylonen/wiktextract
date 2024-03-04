@@ -33,6 +33,7 @@ IGNORE_TABLE_HEADERS = frozenset(
         "personne",  # hu-pos-otok
         "pronom personnel",  # it-enclise
         "mutation",  # br-nom
+        "nombre",  # ca-accord-mixte2
     }
 )
 IGNORE_TABLE_HEADER_PREFIXES = (
