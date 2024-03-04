@@ -31,6 +31,7 @@ IGNORE_TABLE_HEADERS = frozenset(
         "cas",  # lt_décl_as, ro-nom-tab(lower case)
         "commun",  # sv-nom-c-ar
         "personne",  # hu-pos-otok
+        "pronom personnel",  # it-enclise
     }
 )
 IGNORE_TABLE_HEADER_PREFIXES = (
@@ -59,10 +60,13 @@ def table_data_cell_is_header(
     # first child is bold node
     if cell_node.kind == NodeKind.TABLE_CELL:
         for child in cell_node.filter_empty_str_child():
+            cell_text = clean_node(wxr, None, child)
             return (
                 isinstance(child, WikiNode)
                 and child.kind == NodeKind.BOLD
-                and clean_node(wxr, None, child) != page_title
+                and len(cell_text) > 0
+                and cell_text[0].isupper()
+                and cell_text != page_title
             )
 
     return False
@@ -161,7 +165,7 @@ def process_inflection_table(
                         column_cell_index += int(
                             table_cell.attrs.get("colspan", 1)
                         )
-                    elif row_num > 0:
+                    else:
                         row_headers.append(table_header_text)
                         if "rowspan" in table_cell.attrs:
                             rowspan_headers.append(
