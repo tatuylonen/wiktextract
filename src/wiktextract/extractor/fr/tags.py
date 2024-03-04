@@ -96,6 +96,16 @@ OCCITAN_NORM_TAGS: dict[str, str] = {
     # "graphie bonnaudienne": "",
 }
 
+# https://en.wikipedia.org/wiki/Breton_mutations
+# https://fr.wiktionary.org/wiki/Modèle:br-nom
+BRETON_MUTATION_TAGS: dict[str, str] = {
+    "non muté": "unmutated",
+    "adoucissante": "mutation-soft",
+    "durcissante": "mutation-hard",
+    "spirante": "mutation-spirant",
+    "nasale": "mutation-nasal",
+}
+
 GRAMMATICAL_TAGS: dict[str, str] = {
     **GENDER_TAGS,
     **NUMBER_TAGS,
@@ -107,6 +117,7 @@ GRAMMATICAL_TAGS: dict[str, str] = {
     **SEMANTICS_TAGS,
     **COMPARISON_TAGS,
     **OCCITAN_NORM_TAGS,
+    **BRETON_MUTATION_TAGS,
 }
 
 

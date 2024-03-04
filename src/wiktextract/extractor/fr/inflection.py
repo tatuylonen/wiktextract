@@ -32,6 +32,7 @@ IGNORE_TABLE_HEADERS = frozenset(
         "commun",  # sv-nom-c-ar
         "personne",  # hu-pos-otok
         "pronom personnel",  # it-enclise
+        "mutation",  # br-nom
     }
 )
 IGNORE_TABLE_HEADER_PREFIXES = (
@@ -149,6 +150,11 @@ def process_inflection_table(
                         or len(table_header_text.strip()) == 0
                     ):
                         continue
+                    rsplit_header = table_header_text.rsplit(maxsplit=1)
+                    if len(rsplit_header) > 1 and rsplit_header[-1].isdecimal():
+                        # "Pluriel 1" in template "br-nom"
+                        table_header_text = rsplit_header[0]
+
                     if not current_row_has_data_cell:
                         # if all cells of the row are header cells
                         # then the header cells are column headers

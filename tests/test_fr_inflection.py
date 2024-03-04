@@ -546,3 +546,37 @@ class TestInflection(TestCase):
                 },
             ],
         )
+
+    def test_br_nom(self):
+        page_data = [WordEntry(word="poltron", lang_code="br", lang="Breton")]
+        self.wxr.wtp.start_page("poltron")
+        root = self.wxr.wtp.parse("{{br-nom|poltron|poltroned|poltronien}}")
+        self.wxr.wtp.add_page(
+            "Modèle:br-nom",
+            10,
+            """{| class="flextable"
+! Mutation
+! Singulier
+! Pluriel 1
+! Pluriel 2
+|-
+! Non muté
+| [[poltron#br|poltron]]
+| [[poltroned#br|poltroned]]
+| [[poltronien#br|poltronien]]
+|}""",
+        )
+        extract_inflection(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
+            [
+                {
+                    "form": "poltroned",
+                    "tags": ["plural", "unmutated"],
+                },
+                {
+                    "form": "poltronien",
+                    "tags": ["plural", "unmutated"],
+                },
+            ],
+        )
