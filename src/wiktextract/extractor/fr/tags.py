@@ -1,12 +1,21 @@
+# Grammatical glossary appendix:
 # https://fr.wiktionary.org/wiki/Annexe:Glossaire_grammatical
+# List of templates:
+# https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_de_tous_les_modèles
+from typing import Union
+
 from .models import WordEntry
 
 # https://en.wikipedia.org/wiki/Grammatical_gender
-GENDER_TAGS: dict[str, str] = {
+GENDER_TAGS: dict[str, Union[str, list[str]]] = {
     "commun": "common",
     "féminin": "feminine",
     "masculin": "masculine",
     "neutre": "neuter",
+    # https://fr.wiktionary.org/wiki/Modèle:mf
+    "masculin et féminin identiques": ["masculine", "feminine"],
+    # table header: https://fr.wiktionary.org/wiki/Modèle:fr-rég
+    "masculin et féminin": ["masculine", "feminine"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_number
@@ -33,6 +42,7 @@ VERB_FORM_TAGS: dict[str, str] = {
 
 # https://en.wikipedia.org/wiki/Grammatical_case
 CASE_TAGS: dict[str, str] = {
+    "ablatif": "ablative",
     "accusatif": "accusative",
     "nominatif": "nominative",
     "datif": "dative",
@@ -76,6 +86,16 @@ COMPARISON_TAGS: dict[str, str] = {
     "superlatif": "superlative",
 }
 
+# https://en.wikipedia.org/wiki/Occitan_language#Writing_system
+OCCITAN_NORM_TAGS: dict[str, str] = {
+    # https://fr.wiktionary.org/wiki/Modèle:oc-norme_mistralienne
+    "graphie mistralienne": "Mistralian",
+    # https://fr.wiktionary.org/wiki/Modèle:oc-norme_classique
+    # "graphie normalisée": "",
+    # Modèle:oc-norme bonnaudienne
+    # "graphie bonnaudienne": "",
+}
+
 GRAMMATICAL_TAGS: dict[str, str] = {
     **GENDER_TAGS,
     **NUMBER_TAGS,
@@ -86,6 +106,7 @@ GRAMMATICAL_TAGS: dict[str, str] = {
     **PERSON_TAGS,
     **SEMANTICS_TAGS,
     **COMPARISON_TAGS,
+    **OCCITAN_NORM_TAGS,
 }
 
 
@@ -93,7 +114,11 @@ def translate_raw_tags(data: WordEntry) -> WordEntry:
     raw_tags = []
     for raw_tag in data.raw_tags:
         if raw_tag.lower() in GRAMMATICAL_TAGS:
-            data.tags.append(GRAMMATICAL_TAGS[raw_tag.lower()])
+            tr_tag = GRAMMATICAL_TAGS[raw_tag.lower()]
+            if isinstance(tr_tag, str):
+                data.tags.append(tr_tag)
+            elif isinstance(tr_tag, list):
+                data.tags.extend(tr_tag)
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
