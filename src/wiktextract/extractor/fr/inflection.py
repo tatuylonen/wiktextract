@@ -47,6 +47,9 @@ IGNORE_TABLE_CELL = frozenset(
         "—",  # https://fr.wiktionary.org/wiki/Modèle:vls-nom
     }
 )
+IGNORE_TABLE_CELL_PREFIXES = (
+    "voir conjugaison ",  # en-conj
+)
 
 
 @dataclass
@@ -189,8 +192,11 @@ def process_inflection_table(
                         elif (
                             table_cell_line != page_data[-1].word
                             and table_cell_line not in IGNORE_TABLE_CELL
+                            and not table_cell_line.startswith(
+                                IGNORE_TABLE_CELL_PREFIXES
+                            )
                         ):
-                            if "form" not in form_data.model_fields_set:
+                            if form_data.form == "":
                                 form_data.form = table_cell_line
                             else:
                                 form_data.form += " " + table_cell_line

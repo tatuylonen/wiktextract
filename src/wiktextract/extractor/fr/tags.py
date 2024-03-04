@@ -23,6 +23,8 @@ NUMBER_TAGS: dict[str, str] = {
     "singulier": "singular",
     "pluriel": "plural",
     "duel": "dual",
+    "collectif": "collective",
+    "singulatif": "singulative",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_mood
@@ -33,11 +35,13 @@ MOOD_TAGS: dict[str, str] = {
     "impératif": "imperative",
 }
 
-VERB_FORM_TAGS: dict[str, str] = {
+VERB_FORM_TAGS: dict[str, Union[str]] = {
     "participe": "participle",
     "imparfait": "imperfect",
     "infinitif": "infinitive",
     "gérondif": "gerund",
+    # template "pt-verbe-flexion"
+    "infinitif personnel": ["infinitive", "personal"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_case
@@ -53,7 +57,7 @@ CASE_TAGS: dict[str, str] = {
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_tense
-TENSE_TAGS: dict[str, str] = {
+TENSE_TAGS: dict[str, Union[str, list[str]]] = {
     "présent": "present",
     "passé": "past",
     "passé simple": "past",
@@ -63,6 +67,10 @@ TENSE_TAGS: dict[str, str] = {
     "plus-que-parfait": "pluperfect",
     "passé antérieur": "past anterior",
     "futur antérieur": "future perfect",
+    "prétérit": "preterite",
+    "présent simple, 3ᵉ pers. sing.": ["present", "third-person", "singular"],
+    "participe passé": ["participle", "past"],
+    "participe présent": ["participle", "present"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_person
