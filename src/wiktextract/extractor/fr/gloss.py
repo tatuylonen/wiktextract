@@ -8,6 +8,7 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from .models import AltForm, Example, Sense, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_gloss(
@@ -89,6 +90,7 @@ def extract_gloss(
                 )
             elif nest_gloss_list.sarg.endswith("*"):
                 extract_examples(wxr, gloss_data, nest_gloss_list)
+        translate_raw_tags(gloss_data)
 
 
 def extract_examples(

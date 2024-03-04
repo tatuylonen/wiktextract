@@ -25,6 +25,7 @@ NUMBER_TAGS: dict[str, str] = {
     "duel": "dual",
     "collectif": "collective",
     "singulatif": "singulative",
+    "indénombrable": "uncountable",  # sv-nom-c-ind
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_mood
@@ -35,7 +36,7 @@ MOOD_TAGS: dict[str, str] = {
     "impératif": "imperative",
 }
 
-VERB_FORM_TAGS: dict[str, Union[str]] = {
+VERB_FORM_TAGS: dict[str, Union[str, list[str]]] = {
     "participe": "participle",
     "imparfait": "imperfect",
     "infinitif": "infinitive",
@@ -114,6 +115,36 @@ BRETON_MUTATION_TAGS: dict[str, str] = {
     "nasale": "mutation-nasal",
 }
 
+JA_TAGS: dict[str, str] = {
+    # https://fr.wiktionary.org/wiki/Modèle:ja-trans
+    "kanji": "kanji",
+    "hiragana": "hiragana",
+    "katakana": "katakana",
+    "transcription": "transcription",
+}
+
+OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
+    # https://fr.wiktionary.org/wiki/Modèle:be-tab-cas
+    "prépositionnel": "prepositional",
+}
+
+# template text before gloss
+SENSE_TAGS: dict[str, str] = {
+    # https://fr.wiktionary.org/wiki/Modèle:figuré
+    "sens figuré": "figuratively",
+    "enclise": "enclitic",
+    "idiotisme": "idiomatic",
+    "péjoratif": "pejorative",
+    "désuet": "obsolete",
+    "archaïsme": "archaic",
+    "vieilli": "dated",
+    "néologisme": "neologism",
+    "argot": "slang",
+    "rare": "rare",
+    "plus rare": "rare",
+    "familier": "colloquial",
+}
+
 GRAMMATICAL_TAGS: dict[str, str] = {
     **GENDER_TAGS,
     **NUMBER_TAGS,
@@ -126,6 +157,9 @@ GRAMMATICAL_TAGS: dict[str, str] = {
     **COMPARISON_TAGS,
     **OCCITAN_NORM_TAGS,
     **BRETON_MUTATION_TAGS,
+    **JA_TAGS,
+    **OTHER_GRAMMATICAL_TAGS,
+    **SENSE_TAGS,
 }
 
 

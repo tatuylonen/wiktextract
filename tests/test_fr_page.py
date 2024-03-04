@@ -108,7 +108,7 @@ class TestFrPage(TestCase):
                     "senses": [
                         {
                             "glosses": ["Anthracite."],
-                            "raw_tags": ["Indénombrable"],
+                            "tags": ["uncountable"],
                         }
                     ],
                     "etymology_texts": ["Du latin anthracites."],

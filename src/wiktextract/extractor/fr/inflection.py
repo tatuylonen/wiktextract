@@ -34,6 +34,8 @@ IGNORE_TABLE_HEADERS = frozenset(
         "pronom personnel",  # it-enclise
         "mutation",  # br-nom
         "nombre",  # ca-accord-mixte2
+        "nature",  # de-adj
+        "genre",  # es-accord-oa
     }
 )
 IGNORE_TABLE_HEADER_PREFIXES = (
@@ -219,7 +221,7 @@ def process_inflection_table(
 
                     if len(row_headers) > 0:
                         form_data.raw_tags.extend(row_headers)
-                    if "form" in form_data.model_fields_set:
+                    if form_data.form != "":
                         for form in form_data.form.split(" ou "):
                             new_form_data = form_data.model_copy(deep=True)
                             new_form_data.form = form
