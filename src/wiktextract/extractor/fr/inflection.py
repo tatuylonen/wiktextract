@@ -31,6 +31,11 @@ IGNORE_TABLE_HEADERS = frozenset(
         "cas",  # lt_décl_as, ro-nom-tab(lower case)
         "commun",  # sv-nom-c-ar
         "personne",  # hu-pos-otok
+        "pronom personnel",  # it-enclise
+        "mutation",  # br-nom
+        "nombre",  # ca-accord-mixte2
+        "nature",  # de-adj
+        "genre",  # es-accord-oa
     }
 )
 IGNORE_TABLE_HEADER_PREFIXES = (
@@ -43,6 +48,9 @@ IGNORE_TABLE_CELL = frozenset(
         "Déclinaisons",  # de-adj
         "—",  # https://fr.wiktionary.org/wiki/Modèle:vls-nom
     }
+)
+IGNORE_TABLE_CELL_PREFIXES = (
+    "voir conjugaison ",  # en-conj
 )
 
 
@@ -59,10 +67,13 @@ def table_data_cell_is_header(
     # first child is bold node
     if cell_node.kind == NodeKind.TABLE_CELL:
         for child in cell_node.filter_empty_str_child():
+            cell_text = clean_node(wxr, None, child)
             return (
                 isinstance(child, WikiNode)
                 and child.kind == NodeKind.BOLD
-                and clean_node(wxr, None, child) != page_title
+                and len(cell_text) > 0
+                and cell_text[0].isupper()
+                and cell_text != page_title
             )
 
     return False
@@ -145,6 +156,11 @@ def process_inflection_table(
                         or len(table_header_text.strip()) == 0
                     ):
                         continue
+                    rsplit_header = table_header_text.rsplit(maxsplit=1)
+                    if len(rsplit_header) > 1 and rsplit_header[-1].isdecimal():
+                        # "Pluriel 1" in template "br-nom"
+                        table_header_text = rsplit_header[0]
+
                     if not current_row_has_data_cell:
                         # if all cells of the row are header cells
                         # then the header cells are column headers
@@ -161,7 +177,7 @@ def process_inflection_table(
                         column_cell_index += int(
                             table_cell.attrs.get("colspan", 1)
                         )
-                    elif row_num > 0:
+                    else:
                         row_headers.append(table_header_text)
                         if "rowspan" in table_cell.attrs:
                             rowspan_headers.append(
@@ -178,8 +194,11 @@ def process_inflection_table(
                         elif (
                             table_cell_line != page_data[-1].word
                             and table_cell_line not in IGNORE_TABLE_CELL
+                            and not table_cell_line.startswith(
+                                IGNORE_TABLE_CELL_PREFIXES
+                            )
                         ):
-                            if "form" not in form_data.model_fields_set:
+                            if form_data.form == "":
                                 form_data.form = table_cell_line
                             else:
                                 form_data.form += " " + table_cell_line
@@ -202,7 +221,7 @@ def process_inflection_table(
 
                     if len(row_headers) > 0:
                         form_data.raw_tags.extend(row_headers)
-                    if "form" in form_data.model_fields_set:
+                    if form_data.form != "":
                         for form in form_data.form.split(" ou "):
                             new_form_data = form_data.model_copy(deep=True)
                             new_form_data.form = form

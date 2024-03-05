@@ -507,3 +507,76 @@ class TestInflection(TestCase):
                 },
             ],
         )
+
+    def test_it_enclise(self):
+        page_data = [
+            WordEntry(word="abbacarla", lang_code="it", lang="Italien")
+        ]
+        self.wxr.wtp.start_page("abbacarla")
+        root = self.wxr.wtp.parse("{{it-enclise|abbacare|abbacar|abbacando}}")
+        self.wxr.wtp.add_page(
+            "Modèle:it-enclise",
+            10,
+            """{| class="flextable"
+! Infinitif
+| colspan=2| '''<bdi>[[abbacare#it|abbacare]]</bdi>'''
+|-
+! pronom<br />personnel || singulier || pluriel
+|-
+! masculin
+| <bdi>[[abbacarlo#it|abbacarlo]]</bdi>
+| <bdi>[[abbacargli#it|abbacargli]]</bdi>
+|}""",
+        )
+        extract_inflection(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
+            [
+                {
+                    "form": "abbacare",
+                    "tags": ["infinitive"],
+                },
+                {
+                    "form": "abbacarlo",
+                    "tags": ["singular", "masculine"],
+                },
+                {
+                    "form": "abbacargli",
+                    "tags": ["plural", "masculine"],
+                },
+            ],
+        )
+
+    def test_br_nom(self):
+        page_data = [WordEntry(word="poltron", lang_code="br", lang="Breton")]
+        self.wxr.wtp.start_page("poltron")
+        root = self.wxr.wtp.parse("{{br-nom|poltron|poltroned|poltronien}}")
+        self.wxr.wtp.add_page(
+            "Modèle:br-nom",
+            10,
+            """{| class="flextable"
+! Mutation
+! Singulier
+! Pluriel 1
+! Pluriel 2
+|-
+! Non muté
+| [[poltron#br|poltron]]
+| [[poltroned#br|poltroned]]
+| [[poltronien#br|poltronien]]
+|}""",
+        )
+        extract_inflection(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
+            [
+                {
+                    "form": "poltroned",
+                    "tags": ["plural", "unmutated"],
+                },
+                {
+                    "form": "poltronien",
+                    "tags": ["plural", "unmutated"],
+                },
+            ],
+        )

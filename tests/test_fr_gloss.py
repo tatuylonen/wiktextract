@@ -158,8 +158,8 @@ class TestFrGloss(TestCase):
             [
                 {
                     "glosses": ["Variante de basketball."],
-                    "raw_tags": ["Désuet", "Sport", "Indénombrable"],
-                    "tags": ["alt-of"],
+                    "raw_tags": ["Sport"],
+                    "tags": ["alt-of", "obsolete", "uncountable"],
                     "alt_of": [{"word": "basketball"}],
                 }
             ],
@@ -292,7 +292,8 @@ class TestFrGloss(TestCase):
                     "glosses": [
                         "Autrice, femme qui a créé une œuvre littéraire. Écrivaine."
                     ],
-                    "raw_tags": ["Littérature", "Rare", "Absolument"],
+                    "raw_tags": ["Littérature", "Absolument"],
+                    "tags": ["rare"],
                 }
             ],
         )
@@ -312,7 +313,7 @@ class TestFrGloss(TestCase):
                 {
                     "glosses": ["Génitrice ; ascendante"],
                     "note": "ce sens n’est plus guère utilisé que sous la forme de la locution « autrice de mes jours »",
-                    "raw_tags": ["Plus rare"],
+                    "tags": ["rare"],
                 }
             ],
         )
