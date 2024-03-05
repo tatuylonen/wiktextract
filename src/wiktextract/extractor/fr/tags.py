@@ -34,6 +34,7 @@ MOOD_TAGS: dict[str, str] = {
     "subjonctif": "subjunctive",
     "conditionnel": "conditional",
     "impératif": "imperative",
+    "volitif": "volitive",
 }
 
 VERB_FORM_TAGS: dict[str, Union[str, list[str]]] = {
@@ -62,6 +63,7 @@ TENSE_TAGS: dict[str, Union[str, list[str]]] = {
     "présent": "present",
     "passé": "past",
     "passé simple": "past",
+    "futur": "future",
     "futur simple": "future",
     # https://en.wikipedia.org/wiki/Passé_composé
     "passé composé": "past multiword-construction",
@@ -75,11 +77,19 @@ TENSE_TAGS: dict[str, Union[str, list[str]]] = {
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_person
-PERSON_TAGS: dict[str, str] = {
+PERSON_TAGS: dict[str, Union[str, list[str]]] = {
     "1ᵉ personne": "first-person",
     "1ʳᵉ personne": "first-person",
     "2ᵉ personne": "second-person",
     "3ᵉ personne": "third-person",
+    # Modèle:avk-conj
+    "1ʳᵉ du sing.": ["first-person", "singular"],
+    "2ᵉ du sing.": ["second-person", "singular"],
+    "3ᵉ du sing.": ["third-person", "singular"],
+    "1ʳᵉ du plur.": ["first-person", "plural"],
+    "2ᵉ du plur.": ["second-person", "plural"],
+    "3ᵉ du plur.": ["third-person", "plural"],
+    "4ᵉ du plur.": ["fourth-person", "plural"],
 }
 
 SEMANTICS_TAGS: dict[str, str] = {
@@ -143,9 +153,21 @@ SENSE_TAGS: dict[str, str] = {
     "rare": "rare",
     "plus rare": "rare",
     "familier": "colloquial",
+    "par extension": "broadly",
 }
 
-GRAMMATICAL_TAGS: dict[str, str] = {
+# https://en.wikipedia.org/wiki/Voice_(grammar)
+VOICE_TAGS: dict[str, Union[str, list[str]]] = {
+    # https://fr.wiktionary.org/wiki/Modèle:eo-conj
+    "participe actif": ["participle", "active"],
+    "participe passif": ["participle", "passive"],
+    "adverbe actif": ["adverb", "active"],
+    "adverbe passif": ["adverb", "passive"],
+    "substantif actif": ["subsuntive", "active"],
+    "substantif passif": ["subsuntive", "passive"],
+}
+
+GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
     **GENDER_TAGS,
     **NUMBER_TAGS,
     **MOOD_TAGS,
@@ -160,14 +182,19 @@ GRAMMATICAL_TAGS: dict[str, str] = {
     **JA_TAGS,
     **OTHER_GRAMMATICAL_TAGS,
     **SENSE_TAGS,
+    **VOICE_TAGS,
 }
 
 
-def translate_raw_tags(data: WordEntry) -> WordEntry:
+def translate_raw_tags(
+    data: WordEntry,
+    table_template_name: str = "",
+    tag_dict: dict[str, str] = GRAMMATICAL_TAGS,
+) -> WordEntry:
     raw_tags = []
     for raw_tag in data.raw_tags:
-        if raw_tag.lower() in GRAMMATICAL_TAGS:
-            tr_tag = GRAMMATICAL_TAGS[raw_tag.lower()]
+        if raw_tag.lower() in tag_dict:
+            tr_tag = tag_dict[raw_tag.lower()]
             if isinstance(tr_tag, str):
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
@@ -175,4 +202,19 @@ def translate_raw_tags(data: WordEntry) -> WordEntry:
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
+    if table_template_name != "":
+        return convert_table_headers(data, table_template_name)
+    return data
+
+
+def convert_table_headers(data: WordEntry, template_name: str) -> WordEntry:
+    if template_name == "avk-tab-conjug":
+        # https://fr.wiktionary.org/wiki/Modèle:avk-tab-conjug
+        tags = {
+            "1": "first-person",
+            "2": "second-person",
+            "3": "third-person",
+            "4": "fourth-person",
+        }
+        return translate_raw_tags(data, tag_dict=tags)
     return data

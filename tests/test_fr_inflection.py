@@ -580,3 +580,91 @@ class TestInflection(TestCase):
                 },
             ],
         )
+
+    def tes_avk_tab_conjug(self):
+        page_data = [WordEntry(word="aalar", lang_code="avk", lang="Kotava")]
+        self.wxr.wtp.start_page("aalar")
+        root = self.wxr.wtp.parse("{{avk-tab-conjug|aalá|aala}}")
+        self.wxr.wtp.add_page(
+            "Modèle:avk-tab-conjug",
+            10,
+            """{| class="flextable"
+|-
+| class="titre" colspan="4" align="center" | '''Conjugaison Présent Indicatif'''
+|-
+! Personne
+! Singulier
+! Personne
+! Pluriel
+|-
+! 1
+| [[aalá]]
+! 1
+| [[aalat|aala'''t''']]
+|}""",
+        )
+        extract_inflection(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
+            [
+                {
+                    "form": "aalá",
+                    "tags": ["singular", "first-person"],
+                },
+                {
+                    "form": "aalat",
+                    "tags": ["plural", "first-person"],
+                },
+            ],
+        )
+
+    def test_eo_conj(self):
+        page_data = [
+            WordEntry(word="abdikanta", lang_code="eo", lang="Espéranto")
+        ]
+        self.wxr.wtp.start_page("abdikanta")
+        root = self.wxr.wtp.parse("{{eo-conj|abdik|adp=1|sub=mf|subp=}}")
+        self.wxr.wtp.add_page(
+            "Modèle:eo-conj",
+            10,
+            """{| class="flextable"
+|-
+! Temps
+! Passé
+! Présent
+! Futur
+|-
+!Substantif<br />actif
+| [[abdikinto#eo|abdikinto(j,n)]]<br>[[abdikintino#eo|abdikintino(j,n)]]
+|-
+! Mode
+! Conditionnel
+! Volitif
+! Infinitif
+|-
+! Présent
+| [[abdikus#eo|abdikus]] || [[abdiku#eo|abdiku]]
+|}""",
+        )
+        extract_inflection(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
+            [
+                {
+                    "form": "abdikinto(j,n)",
+                    "tags": ["past", "subsuntive", "active"],
+                },
+                {
+                    "form": "abdikintino(j,n)",
+                    "tags": ["past", "subsuntive", "active"],
+                },
+                {
+                    "form": "abdikus",
+                    "tags": ["conditional", "present"],
+                },
+                {
+                    "form": "abdiku",
+                    "tags": ["volitive", "present"],
+                },
+            ],
+        )

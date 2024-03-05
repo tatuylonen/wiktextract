@@ -36,6 +36,8 @@ IGNORE_TABLE_HEADERS = frozenset(
         "nombre",  # ca-accord-mixte2
         "nature",  # de-adj
         "genre",  # es-accord-oa
+        "conjugaison présent indicatif",  # avk-tab-conjug
+        "mode",  # eo-conj
     }
 )
 IGNORE_TABLE_HEADER_PREFIXES = (
@@ -50,7 +52,7 @@ IGNORE_TABLE_CELL = frozenset(
     }
 )
 IGNORE_TABLE_CELL_PREFIXES = (
-    "voir conjugaison ",  # en-conj
+    "voir conjugaison ",  # en-conj, avk-conj
 )
 
 
@@ -82,10 +84,10 @@ def table_data_cell_is_header(
 def process_inflection_table(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
-    node: WikiNode,
+    table_template: TemplateNode,
 ) -> None:
     expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(node), expand_all=True
+        wxr.wtp.node_to_wikitext(table_template), expand_all=True
     )
     table_nodes = list(expanded_node.find_child(NodeKind.TABLE))
     if len(table_nodes) == 0:
@@ -118,6 +120,8 @@ def process_inflection_table(
             and not table_data_cell_is_header(wxr, cell, page_data[-1].word)
             for cell in table_row_nodes
         )
+        if not current_row_has_data_cell:
+            column_headers.clear()
         row_headers = []
         new_rowspan_headers = []
         for rowspan_text, rowspan_count in rowspan_headers:
@@ -178,7 +182,8 @@ def process_inflection_table(
                             table_cell.attrs.get("colspan", 1)
                         )
                     else:
-                        row_headers.append(table_header_text)
+                        if table_header_text not in row_headers:
+                            row_headers.append(table_header_text)
                         if "rowspan" in table_cell.attrs:
                             rowspan_headers.append(
                                 (
@@ -194,14 +199,14 @@ def process_inflection_table(
                         elif (
                             table_cell_line != page_data[-1].word
                             and table_cell_line not in IGNORE_TABLE_CELL
-                            and not table_cell_line.startswith(
+                            and not table_cell_line.lower().startswith(
                                 IGNORE_TABLE_CELL_PREFIXES
                             )
                         ):
                             if form_data.form == "":
                                 form_data.form = table_cell_line
                             else:
-                                form_data.form += " " + table_cell_line
+                                form_data.form += "\n" + table_cell_line
                     for colspan_header in colspan_headers:
                         if (
                             column_cell_index >= colspan_header.index
@@ -222,10 +227,12 @@ def process_inflection_table(
                     if len(row_headers) > 0:
                         form_data.raw_tags.extend(row_headers)
                     if form_data.form != "":
-                        for form in form_data.form.split(" ou "):
+                        for form in form_data.form.splitlines():
                             new_form_data = form_data.model_copy(deep=True)
-                            new_form_data.form = form
-                            translate_raw_tags(new_form_data)
+                            new_form_data.form = form.removeprefix("ou ")
+                            translate_raw_tags(
+                                new_form_data, table_template.template_name
+                            )
                             page_data[-1].forms.append(new_form_data)
 
                     colspan_text = table_cell.attrs.get("colspan", "1")
