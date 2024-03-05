@@ -244,7 +244,10 @@ def parse_page(
             continue
         wxr.wtp.start_section(lang_name)
         base_data = WordEntry(
-            word=wxr.wtp.title, lang_code=lang_code, lang=lang_name
+            word=wxr.wtp.title,
+            lang_code=lang_code,
+            lang=lang_name,
+            pos="unknown",
         )
         base_data.categories = categories.get("categories", [])
         page_data.append(base_data.model_copy(deep=True))
@@ -278,11 +281,17 @@ def process_soft_redirect_template(
 ) -> None:
     # https://zh.wiktionary.org/wiki/Template:Ja-see
     # https://zh.wiktionary.org/wiki/Template:Zh-see
+    update_pos = False
     if template_node.template_name.lower() == "zh-see":
         page_data[-1].redirects.append(
             clean_node(wxr, None, template_node.template_parameters.get(1, ""))
         )
+        update_pos = True
     elif template_node.template_name.lower() == "ja-see":
         for key, value in template_node.template_parameters.items():
             if isinstance(key, int):
                 page_data[-1].redirects.append(clean_node(wxr, None, value))
+        update_pos = True
+
+    if update_pos and page_data[-1].pos == "unknown":
+        page_data[-1].pos = "soft-redirect"
