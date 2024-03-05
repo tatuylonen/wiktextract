@@ -34,6 +34,7 @@ MOOD_TAGS: dict[str, str] = {
     "subjonctif": "subjunctive",
     "conditionnel": "conditional",
     "impératif": "imperative",
+    "volitif": "volitive",
 }
 
 VERB_FORM_TAGS: dict[str, Union[str, list[str]]] = {
@@ -152,9 +153,21 @@ SENSE_TAGS: dict[str, str] = {
     "rare": "rare",
     "plus rare": "rare",
     "familier": "colloquial",
+    "par extension": "broadly",
 }
 
-GRAMMATICAL_TAGS: dict[str, str] = {
+# https://en.wikipedia.org/wiki/Voice_(grammar)
+VOICE_TAGS: dict[str, Union[str, list[str]]] = {
+    # https://fr.wiktionary.org/wiki/Modèle:eo-conj
+    "participe actif": ["participle", "active"],
+    "participe passif": ["participle", "passive"],
+    "adverbe actif": ["adverb", "active"],
+    "adverbe passif": ["adverb", "passive"],
+    "substantif actif": ["subsuntive", "active"],
+    "substantif passif": ["subsuntive", "passive"],
+}
+
+GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
     **GENDER_TAGS,
     **NUMBER_TAGS,
     **MOOD_TAGS,
@@ -169,6 +182,7 @@ GRAMMATICAL_TAGS: dict[str, str] = {
     **JA_TAGS,
     **OTHER_GRAMMATICAL_TAGS,
     **SENSE_TAGS,
+    **VOICE_TAGS,
 }
 
 

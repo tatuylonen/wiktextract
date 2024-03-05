@@ -37,6 +37,7 @@ IGNORE_TABLE_HEADERS = frozenset(
         "nature",  # de-adj
         "genre",  # es-accord-oa
         "conjugaison présent indicatif",  # avk-tab-conjug
+        "mode",  # eo-conj
     }
 )
 IGNORE_TABLE_HEADER_PREFIXES = (
@@ -119,6 +120,8 @@ def process_inflection_table(
             and not table_data_cell_is_header(wxr, cell, page_data[-1].word)
             for cell in table_row_nodes
         )
+        if not current_row_has_data_cell:
+            column_headers.clear()
         row_headers = []
         new_rowspan_headers = []
         for rowspan_text, rowspan_count in rowspan_headers:
@@ -203,7 +206,7 @@ def process_inflection_table(
                             if form_data.form == "":
                                 form_data.form = table_cell_line
                             else:
-                                form_data.form += " " + table_cell_line
+                                form_data.form += "\n" + table_cell_line
                     for colspan_header in colspan_headers:
                         if (
                             column_cell_index >= colspan_header.index
@@ -224,9 +227,9 @@ def process_inflection_table(
                     if len(row_headers) > 0:
                         form_data.raw_tags.extend(row_headers)
                     if form_data.form != "":
-                        for form in form_data.form.split(" ou "):
+                        for form in form_data.form.splitlines():
                             new_form_data = form_data.model_copy(deep=True)
-                            new_form_data.form = form
+                            new_form_data.form = form.removeprefix("ou ")
                             translate_raw_tags(
                                 new_form_data, table_template.template_name
                             )
