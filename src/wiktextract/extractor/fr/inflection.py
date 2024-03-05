@@ -51,7 +51,7 @@ IGNORE_TABLE_CELL = frozenset(
     }
 )
 IGNORE_TABLE_CELL_PREFIXES = (
-    "voir conjugaison ",  # en-conj
+    "voir conjugaison ",  # en-conj, avk-conj
 )
 
 
@@ -196,7 +196,7 @@ def process_inflection_table(
                         elif (
                             table_cell_line != page_data[-1].word
                             and table_cell_line not in IGNORE_TABLE_CELL
-                            and not table_cell_line.startswith(
+                            and not table_cell_line.lower().startswith(
                                 IGNORE_TABLE_CELL_PREFIXES
                             )
                         ):

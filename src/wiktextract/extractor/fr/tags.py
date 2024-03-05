@@ -62,6 +62,7 @@ TENSE_TAGS: dict[str, Union[str, list[str]]] = {
     "présent": "present",
     "passé": "past",
     "passé simple": "past",
+    "futur": "future",
     "futur simple": "future",
     # https://en.wikipedia.org/wiki/Passé_composé
     "passé composé": "past multiword-construction",
@@ -75,11 +76,19 @@ TENSE_TAGS: dict[str, Union[str, list[str]]] = {
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_person
-PERSON_TAGS: dict[str, str] = {
+PERSON_TAGS: dict[str, Union[str, list[str]]] = {
     "1ᵉ personne": "first-person",
     "1ʳᵉ personne": "first-person",
     "2ᵉ personne": "second-person",
     "3ᵉ personne": "third-person",
+    # Modèle:avk-conj
+    "1ʳᵉ du sing.": ["first-person", "singular"],
+    "2ᵉ du sing.": ["second-person", "singular"],
+    "3ᵉ du sing.": ["third-person", "singular"],
+    "1ʳᵉ du plur.": ["first-person", "plural"],
+    "2ᵉ du plur.": ["second-person", "plural"],
+    "3ᵉ du plur.": ["third-person", "plural"],
+    "4ᵉ du plur.": ["fourth-person", "plural"],
 }
 
 SEMANTICS_TAGS: dict[str, str] = {
