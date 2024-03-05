@@ -163,11 +163,15 @@ GRAMMATICAL_TAGS: dict[str, str] = {
 }
 
 
-def translate_raw_tags(data: WordEntry) -> WordEntry:
+def translate_raw_tags(
+    data: WordEntry,
+    table_template_name: str = "",
+    tag_dict: dict[str, str] = GRAMMATICAL_TAGS,
+) -> WordEntry:
     raw_tags = []
     for raw_tag in data.raw_tags:
-        if raw_tag.lower() in GRAMMATICAL_TAGS:
-            tr_tag = GRAMMATICAL_TAGS[raw_tag.lower()]
+        if raw_tag.lower() in tag_dict:
+            tr_tag = tag_dict[raw_tag.lower()]
             if isinstance(tr_tag, str):
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
@@ -175,4 +179,19 @@ def translate_raw_tags(data: WordEntry) -> WordEntry:
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
+    if table_template_name != "":
+        return convert_table_headers(data, table_template_name)
+    return data
+
+
+def convert_table_headers(data: WordEntry, template_name: str) -> WordEntry:
+    if template_name == "avk-tab-conjug":
+        # https://fr.wiktionary.org/wiki/Modèle:avk-tab-conjug
+        tags = {
+            "1": "first-person",
+            "2": "second-person",
+            "3": "third-person",
+            "4": "fourth-person",
+        }
+        return translate_raw_tags(data, tag_dict=tags)
     return data

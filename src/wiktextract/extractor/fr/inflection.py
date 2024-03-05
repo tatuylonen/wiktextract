@@ -36,6 +36,7 @@ IGNORE_TABLE_HEADERS = frozenset(
         "nombre",  # ca-accord-mixte2
         "nature",  # de-adj
         "genre",  # es-accord-oa
+        "conjugaison présent indicatif",  # avk-tab-conjug
     }
 )
 IGNORE_TABLE_HEADER_PREFIXES = (
@@ -82,10 +83,10 @@ def table_data_cell_is_header(
 def process_inflection_table(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
-    node: WikiNode,
+    table_template: TemplateNode,
 ) -> None:
     expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(node), expand_all=True
+        wxr.wtp.node_to_wikitext(table_template), expand_all=True
     )
     table_nodes = list(expanded_node.find_child(NodeKind.TABLE))
     if len(table_nodes) == 0:
@@ -178,7 +179,8 @@ def process_inflection_table(
                             table_cell.attrs.get("colspan", 1)
                         )
                     else:
-                        row_headers.append(table_header_text)
+                        if table_header_text not in row_headers:
+                            row_headers.append(table_header_text)
                         if "rowspan" in table_cell.attrs:
                             rowspan_headers.append(
                                 (
@@ -225,7 +227,9 @@ def process_inflection_table(
                         for form in form_data.form.split(" ou "):
                             new_form_data = form_data.model_copy(deep=True)
                             new_form_data.form = form
-                            translate_raw_tags(new_form_data)
+                            translate_raw_tags(
+                                new_form_data, table_template.template_name
+                            )
                             page_data[-1].forms.append(new_form_data)
 
                     colspan_text = table_cell.attrs.get("colspan", "1")
