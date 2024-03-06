@@ -13,7 +13,6 @@ from wikitextprocessor import (
     WikiNode,
 )
 from wikitextprocessor.core import (
-    TemplateArgs,
     TemplateFnCallable,
     PostTemplateFnCallable,
 )
