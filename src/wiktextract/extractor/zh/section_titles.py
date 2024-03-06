@@ -166,7 +166,7 @@ POS_TITLES: POSSubtitleData = {
     "部件": {"pos": "component"},
     "釋義": {
         # Means 'definition', some pages don't have POS but use this title
-        "pos": ""
+        "pos": "unknown"
     },
     "量詞": {"pos": "classifier"},
     "量词": {"pos": "classifier"},

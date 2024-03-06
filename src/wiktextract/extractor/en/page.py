@@ -21,7 +21,7 @@ from typing import (
 from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.core import TemplateArgs, TemplateFnCallable
-from wikitextprocessor.parser import GeneralNode
+from wikitextprocessor.parser import GeneralNode, TemplateNode
 from wiktextract.clean import clean_template_args
 from wiktextract.datautils import (
     data_append,
@@ -3185,13 +3185,8 @@ def parse_language(
             if not isinstance(node, WikiNode):
                 # print("  X{}".format(repr(node)[:40]))
                 continue
-            if node.kind == NodeKind.TEMPLATE:
-                template_name = node.largs[0][0]
-                if template_name == "zh-see":
-                    # handle Chinese character variant redirect
-                    # https://en.wikipedia.org/wiki/Variant_Chinese_characters
-                    redirect_to = node.largs[1][0]
-                    redirect_list.append(redirect_to)
+            if isinstance(node, TemplateNode):
+                process_soft_redirect_template(wxr, node, redirect_list)
                 continue
 
             if node.kind not in LEVEL_KINDS:
@@ -3309,9 +3304,13 @@ def parse_language(
         if len(redirect_list) > 0:
             if len(pos_data) > 0:
                 pos_data["redirects"] = redirect_list
+                if "pos" not in pos_data:
+                    pos_data["pos"] = "soft-redirect"
             else:
                 new_page_data = base_data.copy()
                 new_page_data["redirects"] = redirect_list
+                if "pos" not in new_page_data:
+                    new_page_data["pos"] = "soft-redirect"
                 page_datas.append(new_page_data)
 
     def extract_examples(others, sense_base):
@@ -3929,3 +3928,24 @@ def parse_page(
                 )
             x["original_title"] = word
     return ret
+
+
+def process_soft_redirect_template(
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    redirect_pages: list[str],
+) -> None:
+    if template_node.template_name == "zh-see":
+        # https://en.wiktionary.org/wiki/Template:zh-see
+        title = clean_node(
+            wxr, None, template_node.template_parameters.get(1, "")
+        )
+        if title != "":
+            redirect_pages.append(title)
+    elif template_node.template_name == "ja-see":
+        # https://en.wiktionary.org/wiki/Template:ja-see
+        for key, value in template_node.template_parameters.items():
+            if isinstance(key, int):
+                title = clean_node(wxr, None, value)
+                if title != "":
+                    redirect_pages.append(title)

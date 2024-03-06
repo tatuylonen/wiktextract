@@ -105,7 +105,7 @@ class WordEntry(ChineseBaseModel):
     word: str = Field(description="Word string")
     lang_code: str = Field(description="Wiktionary language code")
     lang: str = Field(description="Localized language name")
-    pos: str = Field("", description="Part of speech type")
+    pos: str = Field(description="Part of speech type")
     etymology_text: str = ""
     senses: list[Sense] = Field([], description="Sense list")
     forms: list[Form] = Field([], description="Inflection forms list")

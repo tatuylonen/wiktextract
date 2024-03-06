@@ -34,6 +34,7 @@ class TestGloss(TestCase):
                 lang="日語",
                 lang_code="ja",
                 word="可笑しい",
+                pos="adj",
             )
         ]
         wikitext = """# [[好玩]]的：
@@ -45,7 +46,7 @@ class TestGloss(TestCase):
 ## [[美味]]的
 ## [[漂亮]]的
 ## [[很好]]的，[[卓越]]的"""
-        self.wxr.wtp.start_page("test")
+        self.wxr.wtp.start_page("可笑しい")
         self.wxr.wtp.add_page("Template:lb", 10, "({{{2|}}})")
         node = self.wxr.wtp.parse(wikitext)
         extract_gloss(self.wxr, page_data, node.children[0], Sense())
@@ -82,7 +83,7 @@ class TestGloss(TestCase):
         mock_process_pos_block,
     ) -> None:
         node = WikiNode(NodeKind.LEVEL3, 0)
-        base_data = WordEntry(word="", lang_code="", lang="")
+        base_data = WordEntry(word="", lang_code="", lang="", pos="")
         parse_section(self.wxr, [base_data], base_data, node)
         mock_process_pos_block.assert_called()
 
@@ -96,7 +97,7 @@ class TestGloss(TestCase):
         mock_process_pos_block,
     ) -> None:
         node = WikiNode(NodeKind.LEVEL3, 0)
-        base_data = WordEntry(word="", lang_code="", lang="")
+        base_data = WordEntry(word="", lang_code="", lang="", pos="")
         parse_section(self.wxr, [base_data], base_data, node)
         mock_process_pos_block.assert_called()
 
@@ -112,6 +113,7 @@ class TestGloss(TestCase):
                 {
                     "lang": "漢語",
                     "lang_code": "zh",
+                    "pos": "soft-redirect",
                     "redirects": ["別個"],
                     "word": "別个",
                 }
@@ -130,6 +132,7 @@ class TestGloss(TestCase):
                 {
                     "lang": "日語",
                     "lang_code": "ja",
+                    "pos": "soft-redirect",
                     "redirects": ["如月", "二月", "更衣", "衣更着"],
                     "word": "きさらぎ",
                 }
@@ -146,6 +149,7 @@ class TestGloss(TestCase):
                     {
                         "lang": "英语",
                         "lang_code": "en",
+                        "pos": "unknown",
                         "senses": [{"glosses": ["释义；意译"]}],
                         "word": "paraphrase",
                     }
@@ -158,6 +162,7 @@ class TestGloss(TestCase):
                     {
                         "lang": "漢語",
                         "lang_code": "zh",
+                        "pos": "unknown",
                         "senses": [
                             {
                                 "glosses": [

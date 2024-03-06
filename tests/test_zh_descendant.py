@@ -34,7 +34,9 @@ class TestDescendant(TestCase):
         root = self.wxr.wtp.parse(
             "* {{desc|bor=1|ja|-}} {{ja-r|你好|ニイハオ}}"
         )
-        page_data = WordEntry(word="你好", lang_code="ja", lang="日語")
+        page_data = WordEntry(
+            word="你好", lang_code="ja", lang="日語", pos="intj"
+        )
         extract_descendants(self.wxr, root, page_data)
         self.assertEqual(
             page_data.descendants[0].model_dump(exclude_defaults=True),
@@ -55,7 +57,9 @@ class TestDescendant(TestCase):
             '<span class="desc-arr" title="仿譯詞">→</span> 壯語：<span class="Latn" lang="za">[[mwngz ndei#壯語|-{mwngz ndei}-]]</span> <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">仿譯</span><span class="ib-brac qualifier-brac">)</span>',
         )
         root = self.wxr.wtp.parse("* {{desc|za|mwngz ndei|cal=1}}")
-        page_data = WordEntry(word="你好", lang_code="zh", lang="漢語")
+        page_data = WordEntry(
+            word="你好", lang_code="zh", lang="漢語", pos="intj"
+        )
         extract_descendants(self.wxr, root, page_data)
         self.assertEqual(
             page_data.descendants[0].model_dump(exclude_defaults=True),
@@ -86,7 +90,9 @@ class TestDescendant(TestCase):
 *:* {{desc|cmn|-|der=1}} {{zh-l|宅男}}
 *:* {{desc|cmn|-|der=1}} {{zh-l|宅女}}"""
         )
-        page_data = WordEntry(word="オタク", lang_code="ja", lang="日語")
+        page_data = WordEntry(
+            word="オタク", lang_code="ja", lang="日語", pos="noun"
+        )
         extract_descendants(self.wxr, root, page_data)
         self.assertEqual(
             page_data.descendants[0].model_dump(exclude_defaults=True),

@@ -141,6 +141,7 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
 # template text before gloss
 SENSE_TAGS: dict[str, str] = {
     # https://fr.wiktionary.org/wiki/Modèle:figuré
+    # https://fr.wiktionary.org/wiki/Catégorie:Modèles_de_relation_entre_les_définitions
     "sens figuré": "figuratively",
     "enclise": "enclitic",
     "idiotisme": "idiomatic",

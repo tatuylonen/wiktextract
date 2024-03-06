@@ -31,7 +31,9 @@ class TestZhTranslation(TestCase):
 }}""",
         )
         self.wxr.wtp.add_page("Template:qualifier", 10, "({{{1}}})")
-        page_data = [WordEntry(word="太陽風", lang_code="zh", lang="漢語")]
+        page_data = [
+            WordEntry(word="太陽風", lang_code="zh", lang="漢語", pos="noun")
+        ]
         wikitext = """{{trans-top|太陽上層大氣射出的超高速電漿流}}
 * 希伯来语：{{t+|he|רוח השמש|tr=ruakh ha-shemesh}}、{{t+|he|רוח סולרית|f|tr=ruakh solarit}}
 * 塞尔维亚-克罗地亚语：
@@ -72,7 +74,9 @@ class TestZhTranslation(TestCase):
 
     def test_link_words(self):
         self.wxr.wtp.start_page("你好")
-        page_data = [WordEntry(word="你好", lang_code="zh", lang="漢語")]
+        page_data = [
+            WordEntry(word="你好", lang_code="zh", lang="漢語", pos="intj")
+        ]
         wikitext = """{{翻譯-頂}}
 *英语：[[how do you do]]; [[how are you]]"""
         node = self.wxr.wtp.parse(wikitext)
@@ -109,7 +113,9 @@ class TestZhTranslation(TestCase):
 * 阿拉貢語：{{t-needed|an}}
 }}""",
         )
-        page_data = [WordEntry(word="英語", lang_code="zh", lang="漢語")]
+        page_data = [
+            WordEntry(word="英語", lang_code="zh", lang="漢語", pos="noun")
+        ]
         wikitext = "{{trans-see|源於英格蘭的語言|英語/翻譯}}"
         node = self.wxr.wtp.parse(wikitext)
         extract_translation(self.wxr, page_data, node)
@@ -130,7 +136,9 @@ class TestZhTranslation(TestCase):
 
     def test_strange_russian_translation(self):
         self.wxr.wtp.start_page("林场")
-        page_data = [WordEntry(word="林场", lang_code="zh", lang="漢語")]
+        page_data = [
+            WordEntry(word="林场", lang_code="zh", lang="漢語", pos="noun")
+        ]
         node = self.wxr.wtp.parse(
             "*俄语：1) [[лесничество]], [[лесхоз]]; 2) [[лесосека]]"
         )
@@ -161,7 +169,9 @@ class TestZhTranslation(TestCase):
 
     def test_language_name_template(self):
         self.wxr.wtp.start_page("解析幾何")
-        page_data = [WordEntry(word="解析幾何", lang_code="zh", lang="漢語")]
+        page_data = [
+            WordEntry(word="解析幾何", lang_code="zh", lang="漢語", pos="noun")
+        ]
         self.wxr.wtp.add_page("Template:en", 10, "英語")
         node = self.wxr.wtp.parse("* {{en}}：{{t+|en|analytic geometry}}")
         extract_translation(self.wxr, page_data, node)
@@ -191,7 +201,9 @@ class TestZhTranslation(TestCase):
         self.wxr.wtp.add_page(
             "Template:口", 10, '〈<span title="口语词汇">口</span>〉'
         )
-        page_data = [WordEntry(word="茄子", lang_code="zh", lang="漢語")]
+        page_data = [
+            WordEntry(word="茄子", lang_code="zh", lang="漢語", pos="noun")
+        ]
         node = self.wxr.wtp.parse(
             """* 南非語: {{l|af|eiervrug}}
 * {{cs}}: {{l|cs|patližán|g=m}} {{口}}"""

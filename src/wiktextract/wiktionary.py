@@ -48,7 +48,13 @@ def page_handler(page: Page) -> tuple[list[dict], dict]:
             title = re.sub(r"[\s\000-\037]+", " ", page.title)
             title = title.strip()
             if page.redirect_to is not None:
-                page_data = [{"title": title, "redirect": page.redirect_to}]
+                page_data = [
+                    {
+                        "title": title,
+                        "redirect": page.redirect_to,
+                        "pos": "hard-redirect",
+                    }
+                ]
             else:
                 # XXX Sign gloss pages?
                 start_t = time.time()

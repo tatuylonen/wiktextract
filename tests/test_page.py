@@ -487,6 +487,7 @@ foo
                 {
                     "lang": "Chinese",
                     "lang_code": "zh",
+                    "pos": "soft-redirect",
                     "redirects": ["你們", "妳們"],
                     "word": "你们",
                 }
@@ -652,6 +653,27 @@ foo
                         }
                     ],
                     "word": "shail",
+                }
+            ],
+        )
+
+    def test_ja_see(self):
+        # https://en.wiktionary.org/wiki/ひとり
+        self.wxr.wtp.start_page("ひとり")
+        data = parse_page(
+            self.wxr,
+            "ひとり",
+            "==Japanese==\n{{ja-see|一人|独り}}",
+        )
+        self.assertEqual(
+            data,
+            [
+                {
+                    "lang": "Japanese",
+                    "lang_code": "ja",
+                    "pos": "soft-redirect",
+                    "redirects": ["一人", "独り"],
+                    "word": "ひとり",
                 }
             ],
         )

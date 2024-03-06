@@ -29,7 +29,9 @@ class TestHeadword(TestCase):
             '<span class="headword-line"><strong class="Latn headword" lang="en">-{manga}-</strong> ([[可數|可數]] <small>和</small> [[不可數|不可數]]-{}-，複數-{ <b lang="en"><strong class="selflink">manga</strong></b> <small>或</small> <b>[[mangas#英語|-{mangas}-]]</b>}-)</span>',
         )
         root = self.wxr.wtp.parse("{{en-noun|~|manga|s}}")
-        page_data = [WordEntry(word="manga", lang_code="en", lang="英語")]
+        page_data = [
+            WordEntry(word="manga", lang_code="en", lang="英語", pos="noun")
+        ]
         self.wxr.wtp.title = "manga"
         extract_headword_line(self.wxr, page_data, root.children[0], "en")
         self.assertEqual(
@@ -44,6 +46,7 @@ class TestHeadword(TestCase):
                         {"form": "mangas", "tags": ["plural"]},
                     ],
                     "tags": ["countable", "uncountable"],
+                    "pos": "noun",
                 }
             ],
         )
@@ -59,7 +62,9 @@ class TestHeadword(TestCase):
             '<span class="headword-line"><strong class="Latn headword" lang="nl">-{manga}-</strong>&nbsp;<span class="gender"><abbr title="陽性名詞">m</abbr></span> (複數-{ <b>[[manga\'s#荷蘭語|-{manga\'s}-]]</b>}-，指小詞-{ <b>[[mangaatje#荷蘭語|-{mangaatje}-]]</b>&nbsp;<span class="gender"><abbr title="中性名詞">n</abbr></span>}-)</span>',
         )
         root = self.wxr.wtp.parse("{{nl-noun|m|-'s|mangaatje}}")
-        page_data = [WordEntry(word="manga", lang_code="en", lang="英語")]
+        page_data = [
+            WordEntry(word="manga", lang_code="en", lang="英語", pos="noun")
+        ]
         self.wxr.wtp.title = "manga"
         extract_headword_line(self.wxr, page_data, root.children[0], "nl")
         self.assertEqual(
@@ -77,6 +82,7 @@ class TestHeadword(TestCase):
                         },
                     ],
                     "tags": ["masculine"],
+                    "pos": "noun",
                 }
             ],
         )
@@ -93,7 +99,9 @@ class TestHeadword(TestCase):
         )
         root = self.wxr.wtp.parse("{{head|grc|後綴變格形|g=f|head=-κρατίᾱς}}")
         page_data = [
-            WordEntry(word="-κρατίας", lang_code="grc", lang="古希臘語")
+            WordEntry(
+                word="-κρατίας", lang_code="grc", lang="古希臘語", pos="suffix"
+            )
         ]
         self.wxr.wtp.title = "-κρατίας"
         extract_headword_line(self.wxr, page_data, root.children[0], "grc")
@@ -108,6 +116,7 @@ class TestHeadword(TestCase):
                         {"form": "-kratíās", "tags": ["romanization"]},
                     ],
                     "tags": ["feminine"],
+                    "pos": "suffix",
                 }
             ],
         )

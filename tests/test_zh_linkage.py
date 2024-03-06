@@ -27,6 +27,7 @@ class TestLinkage(TestCase):
                 lang_code="mul",
                 word="%",
                 senses=[Sense(glosses=["百分比"])],
+                pos="symbol",
             )
         ]
         wikitext = "* {{sense|百分比}} {{l|mul|cU}}、[[centiuno]]"
@@ -56,7 +57,9 @@ class TestLinkage(TestCase):
             '<span class="Jpan" lang="ja">[[家主#日語|-{<ruby>家<rp>(</rp><rt>や</rt><rp>)</rp></ruby><ruby>主<rp>(</rp><rt>ぬし</rt><rp>)</rp></ruby>}-]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr"><span class="mention-tr tr">yanushi</span></span><span class="mention-gloss-paren annotation-paren">)</span>',
         )
         node = self.wxr.wtp.parse("{{s|房東}}\n* {{ja-r|家%主|や%ぬし}}")
-        page_data = [WordEntry(word="大家", lang_code="zh", lang="漢語")]
+        page_data = [
+            WordEntry(word="大家", lang_code="zh", lang="漢語", pos="noun")
+        ]
         extract_linkages(self.wxr, page_data, node.children, "synonyms", "")
         self.assertEqual(
             page_data[0].synonyms[0].model_dump(exclude_defaults=True),
@@ -69,7 +72,9 @@ class TestLinkage(TestCase):
         )
 
     def test_qual_tag(self):
-        page_data = [WordEntry(lang="漢語", lang_code="zh", word="駱駝")]
+        page_data = [
+            WordEntry(lang="漢語", lang_code="zh", word="駱駝", pos="noun")
+        ]
         self.wxr.wtp.add_page("Template:qual", 10, "({{{1}}})")
         self.wxr.wtp.add_page("Template:zh-l", 10, "{{{1}}}")
         self.wxr.wtp.start_page("駱駝")
