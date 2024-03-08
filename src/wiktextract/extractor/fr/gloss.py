@@ -36,9 +36,9 @@ def extract_gloss(
                     and expanded_text.endswith(")")
                     and "(" not in expanded_text[1:-1]
                 ):
-                    tag = expanded_text.strip("() \n")
-                    if len(tag) > 0:
-                        gloss_data.raw_tags.append(tag)
+                    tags = expanded_text.strip("() \n").split(", ")
+                    if len(tags) > 0:
+                        gloss_data.raw_tags.extend(tags)
                     if "categories" in categories_data:
                         gloss_data.categories.extend(
                             categories_data["categories"]

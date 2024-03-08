@@ -42,7 +42,7 @@ class TestFrGloss(TestCase):
             [
                 {
                     "glosses": ["gloss."],
-                    "raw_tags": ["Sport"],
+                    "topics": ["sports"],
                     "categories": ["Sportifs en français"],
                     "examples": [{"text": "example"}],
                 }
@@ -158,8 +158,8 @@ class TestFrGloss(TestCase):
             [
                 {
                     "glosses": ["Variante de basketball."],
-                    "raw_tags": ["Sport"],
                     "tags": ["alt-of", "obsolete", "uncountable"],
+                    "topics": ["sports"],
                     "alt_of": [{"word": "basketball"}],
                 }
             ],
@@ -292,8 +292,9 @@ class TestFrGloss(TestCase):
                     "glosses": [
                         "Autrice, femme qui a créé une œuvre littéraire. Écrivaine."
                     ],
-                    "raw_tags": ["Littérature", "Absolument"],
+                    "raw_tags": ["Absolument"],
                     "tags": ["rare"],
+                    "topics": ["literature"],
                 }
             ],
         )
@@ -505,6 +506,31 @@ class TestFrGloss(TestCase):
                             }
                         ],
                         "glosses": ["Étranger, de passage, venu du dehors."],
+                    }
+                ]
+            },
+        )
+
+    def test_topic(self):
+        self.wxr.wtp.start_page("агроботанічний")
+        self.wxr.wtp.add_page("Modèle:lexique", 10, "(Agriculture, Botanique)")
+        root = self.wxr.wtp.parse(
+            "# {{lexique|agriculture|botanique|uk}} [[agrobotanique|Agrobotanique]]."
+        )
+        page_data = [
+            WordEntry(word="агроботанічний", lang_code="uk", lang="Ukrainien", pos="adj")
+        ]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data[0].model_dump(
+                exclude_defaults=True,
+                exclude=["word", "lang_code", "lang", "pos"],
+            ),
+            {
+                "senses": [
+                    {
+                        "glosses": ["Agrobotanique."],
+                        "topics": ["agriculture", "botany"],
                     }
                 ]
             },
