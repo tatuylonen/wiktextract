@@ -44,18 +44,23 @@ VERB_FORM_TAGS: dict[str, Union[str, list[str]]] = {
     "gérondif": "gerund",
     # template "pt-verbe-flexion"
     "infinitif personnel": ["infinitive", "personal"],
+    "supin": "supine",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_case
-CASE_TAGS: dict[str, str] = {
+CASE_TAGS: dict[str, Union[str, list[str]]] = {
     "ablatif": "ablative",
     "accusatif": "accusative",
+    "accusatif génitif": ["accusative", "genitive"],
     "nominatif": "nominative",
     "datif": "dative",
     "génitif": "genitive",
     "vocatif": "vocative",
     "instrumental": "instrumental",
     "locatif": "locative",
+    "comitatif": "comitative",
+    "essif": "essive",
+    "illatif": "illative",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_tense
@@ -136,6 +141,9 @@ JA_TAGS: dict[str, str] = {
 OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     # https://fr.wiktionary.org/wiki/Modèle:be-tab-cas
     "prépositionnel": "prepositional",
+    "anglicism": "Anglicism",
+    "pronominal": "pronominal",
+    "diminutif": "diminutive",
 }
 
 # template text before gloss
@@ -155,6 +163,7 @@ SENSE_TAGS: dict[str, str] = {
     "plus rare": "rare",
     "familier": "colloquial",
     "par extension": "broadly",
+    "en particulier": "especially",
 }
 
 # https://en.wikipedia.org/wiki/Voice_(grammar)
@@ -166,6 +175,8 @@ VOICE_TAGS: dict[str, Union[str, list[str]]] = {
     "adverbe passif": ["adverb", "passive"],
     "substantif actif": ["subsuntive", "active"],
     "substantif passif": ["subsuntive", "passive"],
+    "actif": "active",
+    "passif": "passive",
 }
 
 GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
