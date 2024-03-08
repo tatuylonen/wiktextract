@@ -44,18 +44,23 @@ VERB_FORM_TAGS: dict[str, Union[str, list[str]]] = {
     "gérondif": "gerund",
     # template "pt-verbe-flexion"
     "infinitif personnel": ["infinitive", "personal"],
+    "supin": "supine",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_case
-CASE_TAGS: dict[str, str] = {
+CASE_TAGS: dict[str, Union[str, list[str]]] = {
     "ablatif": "ablative",
     "accusatif": "accusative",
+    "accusatif génitif": ["accusative", "genitive"],
     "nominatif": "nominative",
     "datif": "dative",
     "génitif": "genitive",
     "vocatif": "vocative",
     "instrumental": "instrumental",
     "locatif": "locative",
+    "comitatif": "comitative",
+    "essif": "essive",
+    "illatif": "illative",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_tense
@@ -136,6 +141,9 @@ JA_TAGS: dict[str, str] = {
 OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     # https://fr.wiktionary.org/wiki/Modèle:be-tab-cas
     "prépositionnel": "prepositional",
+    "anglicisme": "Anglicism",
+    "pronominal": "pronominal",
+    "diminutif": "diminutive",
 }
 
 # template text before gloss
@@ -155,6 +163,7 @@ SENSE_TAGS: dict[str, str] = {
     "plus rare": "rare",
     "familier": "colloquial",
     "par extension": "broadly",
+    "en particulier": "especially",
 }
 
 # https://en.wikipedia.org/wiki/Voice_(grammar)
@@ -166,6 +175,8 @@ VOICE_TAGS: dict[str, Union[str, list[str]]] = {
     "adverbe passif": ["adverb", "passive"],
     "substantif actif": ["subsuntive", "active"],
     "substantif passif": ["subsuntive", "passive"],
+    "actif": "active",
+    "passif": "passive",
 }
 
 GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
@@ -192,14 +203,19 @@ def translate_raw_tags(
     table_template_name: str = "",
     tag_dict: dict[str, str] = GRAMMATICAL_TAGS,
 ) -> WordEntry:
+    from .topics import TOPIC_TAGS
+
     raw_tags = []
     for raw_tag in data.raw_tags:
-        if raw_tag.lower() in tag_dict:
-            tr_tag = tag_dict[raw_tag.lower()]
+        raw_tag_lower = raw_tag.lower()
+        if raw_tag_lower in tag_dict:
+            tr_tag = tag_dict[raw_tag_lower]
             if isinstance(tr_tag, str):
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
                 data.tags.extend(tr_tag)
+        elif hasattr(data, "topics") and raw_tag_lower in TOPIC_TAGS:
+            data.topics.append(TOPIC_TAGS[raw_tag_lower])
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags

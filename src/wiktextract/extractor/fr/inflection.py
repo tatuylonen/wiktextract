@@ -38,6 +38,7 @@ IGNORE_TABLE_HEADERS = frozenset(
         "genre",  # es-accord-oa
         "conjugaison présent indicatif",  # avk-tab-conjug
         "mode",  # eo-conj
+        "avec suffixes possessifs",  # fi-décl-valo
     }
 )
 IGNORE_TABLE_HEADER_PREFIXES = (

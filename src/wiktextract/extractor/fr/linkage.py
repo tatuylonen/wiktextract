@@ -8,6 +8,7 @@ from wiktextract.wxr_context import WiktextractContext
 from ..share import capture_text_in_parentheses
 from .models import Linkage, WordEntry
 from .section_types import LINKAGE_SECTIONS
+from .tags import translate_raw_tags
 
 
 def extract_linkage(
@@ -155,6 +156,7 @@ def process_linkage_list(
 
         if len(linkage_data.word) > 0:
             pre_data = getattr(page_data[-1], linkage_type)
+            translate_raw_tags(linkage_data)
             pre_data.append(linkage_data)
 
 
