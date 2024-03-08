@@ -69,6 +69,7 @@ class Linkage(FrenchBaseModel):
     word: str
     tags: list[str] = []
     raw_tags: list[str] = []
+    topics: list[str] = []
     roman: str = ""
     alt: str = Field("", description="Alternative form")
     translation: str = Field("", description="French translation")

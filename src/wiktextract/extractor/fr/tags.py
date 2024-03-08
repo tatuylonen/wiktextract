@@ -141,7 +141,7 @@ JA_TAGS: dict[str, str] = {
 OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     # https://fr.wiktionary.org/wiki/Modèle:be-tab-cas
     "prépositionnel": "prepositional",
-    "anglicism": "Anglicism",
+    "anglicisme": "Anglicism",
     "pronominal": "pronominal",
     "diminutif": "diminutive",
 }

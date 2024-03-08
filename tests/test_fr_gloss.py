@@ -518,7 +518,12 @@ class TestFrGloss(TestCase):
             "# {{lexique|agriculture|botanique|uk}} [[agrobotanique|Agrobotanique]]."
         )
         page_data = [
-            WordEntry(word="агроботанічний", lang_code="uk", lang="Ukrainien", pos="adj")
+            WordEntry(
+                word="агроботанічний",
+                lang_code="uk",
+                lang="Ukrainien",
+                pos="adj",
+            )
         ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(

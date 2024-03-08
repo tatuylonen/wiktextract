@@ -16,7 +16,7 @@ class TestLinkage(TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
-    def test_tags(self):
+    def test_location_tags(self):
         page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         self.wxr.wtp.start_page("bonjour")
         self.wxr.wtp.add_page("Modèle:Canada", 10, body="(Canada)")
@@ -258,5 +258,24 @@ class TestLinkage(TestCase):
             ],
             [
                 {"word": "Gb", "sense": "10⁹"},
+            ],
+        )
+
+    def test_linkage_tags(self):
+        page_data = [WordEntry(word="autrice", lang_code="fr", lang="Français")]
+        self.wxr.wtp.add_page("Modèle:désuet", 10, body="(Désuet)")
+        self.wxr.wtp.add_page("Modèle:anglicisme", 10, body="(Anglicisme)")
+        self.wxr.wtp.start_page("autrice")
+        root = self.wxr.wtp.parse(
+            "* [[authoress]] {{désuet|nocat=1}} {{anglicisme|nocat=1}}"
+        )
+        extract_linkage(self.wxr, page_data, root, "synonymes")
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].synonyms
+            ],
+            [
+                {"word": "authoress", "tags": ["obsolete", "Anglicism"]},
             ],
         )
