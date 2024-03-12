@@ -103,8 +103,10 @@ class WiktExtractTests(unittest.TestCase):
         # This test was created when encountering issues with French
         # Wikipedia "Fichier" prefixes that replace Image:. The
         # parsing of links with multiple parameters was broken
-        v = ("[[Unknownprefix:Ikhwan.jpg|vignette|gauche|Troupes"
-        " des [[Ikhwan (Arabie saoudite)|Ikhwâns]].]]")
+        v = (
+            "[[Unknownprefix:Ikhwan.jpg|vignette|gauche|Troupes"
+            " des [[Ikhwan (Arabie saoudite)|Ikhwâns]].]]"
+        )
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "Troupes des Ikhwâns.")
 
@@ -117,6 +119,15 @@ class WiktExtractTests(unittest.TestCase):
         v = "[[Foo:bar.JPG|conf bar|baz|baz2|baz3|baz4|Alt Text]]"
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "Alt Text")
+
+    def test_cv_link12(self):
+        # if a File, Image or Wtp.file_alias link (an image)
+        # does not have anything from a set of parameters (left, right,
+        # thumb etc.) that would not make it inline, it is an inline
+        # image and its alt= text should be printer with [Alt: ...]
+        v = "[[File:bar.JPG|conf bar|baz|baz2|baz3|baz4|alt=Bar]]"
+        v = clean_value(self.wxr, v)
+        self.assertEqual(v, "[Alt: Bar]")
 
     def test_cv_url1(self):
         v = "This is a [http://ylonen.org test]."
@@ -299,9 +310,9 @@ class WiktExtractTests(unittest.TestCase):
         self.assertEqual(
             clean_value(
                 self.wxr,
-                'some text<ref name="OED"/> some other text<ref>ref text</ref>'
+                'some text<ref name="OED"/> some other text<ref>ref text</ref>',
             ),
-            "some text some other text"
+            "some text some other text",
         )
 
     def test_bold_node_in_link(self):
@@ -329,7 +340,7 @@ class WiktExtractTests(unittest.TestCase):
             end
 
             return export
-            """
+            """,
         )
         self.wxr.wtp.start_page("")
         tree = self.wxr.wtp.parse(wikitext)

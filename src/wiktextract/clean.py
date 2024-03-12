@@ -1327,6 +1327,11 @@ def remove_italic_and_bold(text: str) -> str:
     return "".join(new_text_parts)
 
 
+# regex to find File/Image link attributes that would mean an image
+# is *not* inline
+inline_re = re.compile(r"\|\s*(right|left|center|thumb|frame)\s*\|")
+
+
 def clean_value(
     wxr: WiktextractContext, title: str, no_strip=False, no_html_strip=False
 ) -> str:
@@ -1357,7 +1362,13 @@ def clean_value(
 
     def repl_link_bars(m: re.Match) -> str:
         lnk = m.group(1)
-        if re.match(r"(?si)(File|Image)\s*:", lnk):
+        if wxr.wtp.file_aliases_re.match(lnk):
+            # Handle File / Image / Fichier 'links' here.
+            if not inline_re.match(m.group(0)) and "alt" in m.group(0):
+                # This image should be inline, so let's print its alt text
+                alt_m = re.search(r"\|\s*alt\s*=([^]|]+)(\||\]\])", m.group(0))
+                if alt_m is not None:
+                    return "[Alt: " + alt_m.group(1) + "]"
             return ""
         # m.group(5) is always the last matching group because you can
         # only access the last matched group; the indexes don't 'grow'
