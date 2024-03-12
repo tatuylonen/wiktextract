@@ -17,3 +17,6 @@ github_pages:
 clean:
 	python -m coverage erase
 	rm -rf __pycache__ _site
+rcheck:
+	python -m ruff check --diff src/wiktextract
+	python -m ruff check --diff tests

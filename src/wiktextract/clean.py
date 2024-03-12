@@ -1337,6 +1337,7 @@ url_starts_re = re.compile(
     r"({})".format(r"|".join(URL_STARTS)), flags=re.IGNORECASE
 )
 
+
 def clean_value(
     wxr: WiktextractContext, title: str, no_strip=False, no_html_strip=False
 ) -> str:
