@@ -35,4 +35,5 @@ TOPIC_TAGS: dict[str, str] = {
     "grammaire": "linguistics",
     "journalisme": "journalism",
     "commerce": "commerce",
+    "habillement": "textiles fashion",
 }
