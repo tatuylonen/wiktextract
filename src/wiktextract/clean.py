@@ -15,6 +15,7 @@ from wikitextprocessor.core import (
     NamespaceDataEntry,
     TemplateArgs,
 )
+from wikitextprocessor.common import URL_STARTS
 from .wxr_context import WiktextractContext
 
 ######################################################################
@@ -1332,6 +1333,10 @@ def remove_italic_and_bold(text: str) -> str:
 inline_re = re.compile(r"\|\s*(right|left|center|thumb|frame)\s*\|")
 
 
+url_starts_re = re.compile(
+    r"({})".format(r"|".join(URL_STARTS)), flags=re.IGNORECASE
+)
+
 def clean_value(
     wxr: WiktextractContext, title: str, no_strip=False, no_html_strip=False
 ) -> str:
@@ -1349,7 +1354,7 @@ def clean_value(
         args = re.split(r"\s+", m.group(1))
         i = 0
         while i < len(args) - 1:
-            if not re.match(r"(https?|mailto)://", args[i]):
+            if not url_starts_re.match(args[i]):
                 break
             i += 1
         return " ".join(args[i:])
