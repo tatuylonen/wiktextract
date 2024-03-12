@@ -1029,32 +1029,6 @@ def decode_tags(
 
     return tagsets, topics
 
-    # Kludge to a wide-spread problem with Latin, where a lot of
-    # "indicative/imperative" style combinations aren't in
-    # xlat_tags_map. Instead of adding every possible combination
-    # manually, we look if there are any slashes in the string,
-    # then check for valid stuff in xlat_tags_map (like
-    # "first/third-person"), and if not, split on "/"
-    # and append on the string; will definitely give errors,
-    # but less of them.
-    # new_parts = []
-    # for part in parts:
-    #     new_seg = ""
-    #     if "/" in part:
-    #         for w in part.split():
-    #             if w in xlat_tags_map:
-    #                 new_seg += w + " "
-    #             elif "/" in w:
-    #                 for ww in w.split("/"):
-    #                     new_seg += ww + " "
-    #             else:
-    #                 new_seg += w + " "
-    #     else:
-    #         new_parts.append(part)
-    #         continue
-    #     new_parts.append(new_seg.strip())
-    # parts = new_parts
-
 
 def decode_tags1(
     src: str,
@@ -2437,9 +2411,6 @@ def parse_word_head(
                     related = alt_related
                     tagsets = alt_tagsets
 
-                    
-
-
             # print("FORM END: tagsets={} related={}".format(tagsets, related))
             if not tagsets:
                 continue
@@ -2539,7 +2510,6 @@ def parse_word_head(
                         data_extend(data, "tags", tags)
                     prev_tags = tagsets
                     following_tags = None
-
 
     # Finally, if we collected hirakana/katakana, add them now
     if hiragana:
