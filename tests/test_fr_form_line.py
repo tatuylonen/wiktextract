@@ -59,8 +59,12 @@ class TestFormLine(TestCase):
         # https://fr.wiktionary.org/wiki/basket-ball
         self.wxr.wtp.start_page("basket-ball")
         self.wxr.wtp.add_page("Modèle:pron", 10, body="{{{1}}}")
-        self.wxr.wtp.add_page("Modèle:FR", 10, body="(France)")
-        self.wxr.wtp.add_page("Modèle:CA", 10, body="(Canada)")
+        self.wxr.wtp.add_page(
+            "Modèle:FR", 10, body="""<span id="région">''(France)''</span>"""
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:CA", 10, body="""<span id="région">''(Canada)''</span>"""
+        )
         self.wxr.wtp.add_page("Modèle:m", 10, body="masculin")
         root = self.wxr.wtp.parse(
             "{{pron|bas.kɛt.bol|fr}} {{FR|nocat=1}} ''ou'' {{pron|bas.kɛt.bɔl|fr}} {{FR|nocat=1}} ''ou'' {{pron|bas.kɛt.bɑl|fr}} {{CA|nocat=1}} {{m}}"
@@ -148,3 +152,16 @@ class TestFormLine(TestCase):
         root = self.wxr.wtp.parse("'''飢える''' ''ichidan''")
         extract_form_line(self.wxr, page_data, root.children)
         self.assertEqual(page_data[-1].raw_tags, ["ichidan"])
+
+    def test_not_region_tag_after_ipa(self):
+        self.wxr.wtp.start_page("5-0")
+        self.wxr.wtp.add_page("Modèle:pron", 10, body="{{{1}}}")
+        self.wxr.wtp.add_page(
+            "Modèle:indénombrable", 10, body="(Indénombrable)"
+        )
+        page_data = [WordEntry(word="5-0", lang_code="en", lang="Anglais")]
+        root = self.wxr.wtp.parse(
+            "'''5-0''' {{pron|ˈfaɪvˌoʊ|en}} {{indénombrable|en}}"
+        )
+        extract_form_line(self.wxr, page_data, root.children)
+        self.assertEqual(page_data[-1].tags, ["uncountable"])

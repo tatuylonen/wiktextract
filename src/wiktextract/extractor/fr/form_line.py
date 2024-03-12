@@ -47,13 +47,23 @@ def extract_form_line(
                 process_conj_template(wxr, node, page_data)
             else:
                 raw_tag = clean_node(wxr, page_data[-1], node)
+                expanded_template = wxr.wtp.parse(
+                    wxr.wtp.node_to_wikitext(node), expand_all=True
+                )
                 if (
-                    raw_tag.startswith("(")
-                    and raw_tag.endswith(")")
+                    len(
+                        list(
+                            expanded_template.find_html(
+                                "span", attr_name="id", attr_value="région"
+                            )
+                        )
+                    )
+                    == 1
                     and pre_template_name in PRON_TEMPLATES
                     and len(page_data[-1].sounds) > 0
                 ):
                     # it's the location of the previous IPA template
+                    # https://fr.wiktionary.org/wiki/Modèle:région
                     page_data[-1].sounds[-1].raw_tags.append(
                         raw_tag.strip("()")
                     )
