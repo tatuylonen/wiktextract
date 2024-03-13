@@ -248,10 +248,10 @@ def split_ipa(text: str) -> list[str]:
         return text.split(" ou ")
     if text.startswith("ou "):
         return [text.removeprefix("ou ")]
-    if text.endswith(" Prononciation ?\\"):
+    if text.endswith("Prononciation ?\\"):
         # inflection table templates use a edit link when the ipa data is
-        # missing, and the link usually ends with " Prononciation ?"
-        return ""
+        # missing, and the link usually ends with "Prononciation ?"
+        return []
     return [text]
 
 

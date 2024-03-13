@@ -348,3 +348,10 @@ class WiktExtractTests(unittest.TestCase):
         self.assertEqual(
             clean_node(self.wxr, None, tree.children), "2ちゃんねる, italic"
         )
+
+    def test_protocol_relative_url(self):
+        # https://en.wikipedia.org/wiki/Wikipedia:Protocol-relative_URL
+        self.assertEqual(
+            clean_value(self.wxr, "[//obsolete_url shouldn't be used]"),
+            "shouldn't be used",
+        )
