@@ -1330,7 +1330,7 @@ def remove_italic_and_bold(text: str) -> str:
 
 # regex to find File/Image link attributes that would mean an image
 # is *not* inline
-INLINE_RE = re.compile(r"\|\s*(right|left|center|thumb|frame)\s*\|")
+NOT_INLINE_IMG_RE = re.compile(r"\|\s*(right|left|center|thumb|frame)\s*\|")
 
 
 URL_STARTS_RE = re.compile(
@@ -1372,16 +1372,16 @@ def clean_value(
         return " ".join(args[i:])
 
     def repl_link(m: re.Match) -> str:
-        if IMAGE_LINK_RE.match(m.group(1)):
+        if m.group(1) is not None and IMAGE_LINK_RE.match(m.group(1)) is not None:
             return ""
         v = m.group(3).split("|")
         return clean_value(wxr, v[0], no_strip=True)
 
     def repl_link_bars(m: re.Match) -> str:
         link = m.group(1)
-        if IMAGE_LINK_RE.match(link):
+        if IMAGE_LINK_RE.match(link) is not None:
             # Handle File / Image / Fichier 'links' here.
-            if not INLINE_RE.match(m.group(0)) and "alt" in m.group(0):
+            if NOT_INLINE_IMG_RE.match(m.group(0)) is None and "alt" in m.group(0):
                 # This image should be inline, so let's print its alt text
                 alt_m = re.search(r"\|\s*alt\s*=([^]|]+)(\||\]\])", m.group(0))
                 if alt_m is not None:
