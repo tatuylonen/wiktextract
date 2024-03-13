@@ -1337,6 +1337,8 @@ URL_STARTS_RE = re.compile(
     r"({})".format(r"|".join(URL_STARTS)), flags=re.IGNORECASE
 )
 
+IMAGE_LINK_RE: Optional[re.Pattern] = None
+
 
 def clean_value(
     wxr: WiktextractContext, title: str, no_strip=False, no_html_strip=False
@@ -1347,6 +1349,15 @@ def clean_value(
     normal space and will remove any surrounding whitespace."""
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(title, str)
+
+    global IMAGE_LINK_RE
+    if IMAGE_LINK_RE is None:
+        image_link_prefixes = wxr.wtp.namespace_prefixes(
+            wxr.wtp.NAMESPACE_DATA["File"]["id"], suffix=""
+        )
+        IMAGE_LINK_RE = re.compile(
+            rf"(?:{'|'.join(image_link_prefixes)})\s*:", re.IGNORECASE
+        )
 
     def repl_1(m: re.Match) -> str:
         return clean_value(wxr, m.group(1), no_strip=True)
@@ -1361,14 +1372,14 @@ def clean_value(
         return " ".join(args[i:])
 
     def repl_link(m: re.Match) -> str:
-        if m.group(2) and m.group(2).lower() in ("file", "image"):
+        if IMAGE_LINK_RE.match(m.group(1)):
             return ""
         v = m.group(3).split("|")
         return clean_value(wxr, v[0], no_strip=True)
 
     def repl_link_bars(m: re.Match) -> str:
-        lnk = m.group(1)
-        if wxr.wtp.file_aliases_re.match(lnk):
+        link = m.group(1)
+        if IMAGE_LINK_RE.match(link):
             # Handle File / Image / Fichier 'links' here.
             if not INLINE_RE.match(m.group(0)) and "alt" in m.group(0):
                 # This image should be inline, so let's print its alt text

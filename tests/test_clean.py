@@ -116,7 +116,7 @@ class WiktExtractTests(unittest.TestCase):
         # (that is, you don't notice it's a File: or Image: which should
         # be skipped) then output the expansion of the last group
         # (which is always m.group(5)).
-        v = "[[Foo:bar.JPG|conf bar|baz|baz2|baz3|baz4|Alt Text]]"
+        v = "[[ Foo :bar.JPG|conf bar|baz|baz2|baz3|baz4|Alt Text]]"
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "Alt Text")
 
@@ -125,7 +125,7 @@ class WiktExtractTests(unittest.TestCase):
         # does not have anything from a set of parameters (left, right,
         # thumb etc.) that would not make it inline, it is an inline
         # image and its alt= text should be printer with [Alt: ...]
-        v = "[[File:bar.JPG|conf bar|baz|baz2|baz3|baz4|alt=Bar]]"
+        v = "[[ File :bar.JPG|conf bar|baz|baz2|baz3|baz4|alt=Bar]]"
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "[Alt: Bar]")
 
