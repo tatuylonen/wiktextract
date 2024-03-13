@@ -7,19 +7,19 @@ from collections import defaultdict
 from copy import copy
 from typing import Any, Callable, Optional, Union
 
-from mediawiki_langcodes import get_all_names, name_to_code
+from mediawiki_langcodes import name_to_code
 from wikitextprocessor import (
     NodeKind,
     WikiNode,
 )
 from wikitextprocessor.core import (
-    TemplateFnCallable,
     PostTemplateFnCallable,
+    TemplateFnCallable,
 )
+from wikitextprocessor.node_expand import NodeHandlerFnCallable
 from wikitextprocessor.parser import (
     GeneralNode,
 )
-from wikitextprocessor.node_expand import NodeHandlerFnCallable
 
 from wiktextract.wxr_context import WiktextractContext
 
@@ -195,10 +195,9 @@ def inject_linkages(wxr: WiktextractContext, page_data: list[dict]) -> None:
                     data_append(data, term.linkage, dt)
 
 
-STARTS_LANG_RE = None
-
-
-def process_categories(wxr: WiktextractContext, page_data: list[dict]) -> None:
+def process_categories(
+    wxr: WiktextractContext, page_data: list[dict[str, Any]]
+) -> None:
     # Categories are not otherwise disambiguated, but if there is only
     # one sense and only one data in ret for the same language, move
     # categories to the only sense.  Note that categories are commonly
@@ -257,35 +256,29 @@ def process_categories(wxr: WiktextractContext, page_data: list[dict]) -> None:
                     continue  # Don't add to form_of or alt_of entries
                 data_extend(data, field, lst)
 
-    # Regexp for matching category tags that start with a language name.
-    # Group 2 will be the language name. The category tag should be without
-    # the namespace prefix.
-    global STARTS_LANG_RE
-    if STARTS_LANG_RE is None:
-        STARTS_LANG_RE = re.compile(
-            r"^("
-            + wxr.wtp.NAMESPACE_DATA.get("Rhymes", {}).get("name", "")
-            + ":)?("
-            + "|".join(re.escape(x) for _, x in get_all_names("en"))
-            + ")[ /]?"
-        )
     # Remove category links that start with a language name from entries for
     # different languages
+    rhymes_ns_prefix = (
+        wxr.wtp.NAMESPACE_DATA.get("Rhymes", {}).get("name", "") + ":"
+    )
     for data in page_data:
         lang_code = data.get("lang_code")
-        cats = data.get("categories", ())
+        cats = data.get("categories", [])
         new_cats = []
         for cat in cats:
-            m = re.match(STARTS_LANG_RE, cat)
-            if m:
-                catlang = m.group(2)
-                catlang_code = name_to_code(catlang, "en")
-                if catlang_code != lang_code and not (
-                    catlang_code == "en" and data.get("lang_code") == "mul"
-                ):
-                    continue  # Ignore categories for a different language
+            no_prefix_cat = cat.removeprefix(rhymes_ns_prefix)
+            cat_lang = no_prefix_cat.split(maxsplit=1)[0].split(
+                "/", maxsplit=1
+            )[0]
+            cat_lang_code = name_to_code(cat_lang, "en")
+            if (
+                cat_lang_code != ""
+                and cat_lang_code != lang_code
+                and not (lang_code == "mul" and cat_lang_code == "en")
+            ):
+                continue
             new_cats.append(cat)
-        if not new_cats:
+        if len(new_cats) == 0:
             if "categories" in data:
                 del data["categories"]
         else:
