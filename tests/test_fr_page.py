@@ -115,3 +115,53 @@ class TestFrPage(TestCase):
                 },
             ],
         )
+
+    def test_pos_under_etymology_section(self):
+        # https://fr.wiktionary.org/wiki/Deutsche
+        self.wxr.wtp.add_page("Modèle:langue", 10, "Allemand")
+        self.wxr.wtp.add_page(
+            "Modèle:substantivation de",
+            10,
+            "Substantivation de l’adjectif deutsch",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:S",
+            10,
+            """{{#switch: {{{1}}}
+| étymologie = Étymologie
+| nom = Nom commun
+}} {{{num|}}}""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Deutsche",
+            """== {{langue|de}} ==
+=== {{S|étymologie}} ===
+: {{substantivation de|type=adjectif|deutsch|de}}
+
+==== {{S|nom|de|num=1}} ====
+# Allemand, la langue allemande, langue indo-européenne germanique.""",
+        )
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "word": "Deutsche",
+                    "lang": "Allemand",
+                    "lang_code": "de",
+                    "pos": "noun",
+                    "pos_title": "Nom commun 1",
+                    "etymology_texts": [
+                        "Substantivation de l’adjectif deutsch"
+                    ],
+                    "senses": [
+                        {
+                            "glosses": [
+                                "Allemand, la langue allemande, langue "
+                                "indo-européenne germanique."
+                            ]
+                        }
+                    ],
+                }
+            ],
+        )

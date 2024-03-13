@@ -1,8 +1,8 @@
 from collections import defaultdict
-from typing import Optional, Union
+from typing import Optional
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode, LevelNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -12,37 +12,29 @@ EtymologyData = dict[str, list[str]]
 
 
 def extract_etymology(
-    wxr: WiktextractContext,
-    nodes: list[Union[WikiNode, str]],
+    wxr: WiktextractContext, level_node: LevelNode
 ) -> Optional[EtymologyData]:
     etymology_dict: EtymologyData = defaultdict(list)
-    level_node_index = len(nodes)
-    # find nodes after the etymology subtitle and before the next level node
-    for index, node in enumerate(nodes):
-        if isinstance(node, WikiNode) and node.kind in LEVEL_KIND_FLAGS:
-            level_node_index = index
-            break
-
-    pos_title: Optional[str] = None
-    for etymology_node in nodes[:level_node_index]:
-        if (
-            isinstance(etymology_node, WikiNode)
-            and etymology_node.kind == NodeKind.LIST
-        ):
-            if etymology_node.sarg == "*":
-                pos_title = clean_node(wxr, None, etymology_node)
+    pos_title = ""
+    level_node_index = len(level_node.children)
+    for node_index, node in level_node.find_child(
+        NodeKind.LIST | LEVEL_KIND_FLAGS, True
+    ):
+        if node.kind in LEVEL_KIND_FLAGS:
+            level_node_index = node_index
+        elif node.kind == NodeKind.LIST:
+            if node.sarg == "*":
+                pos_title = clean_node(wxr, None, node)
                 pos_title = pos_title.removeprefix("* ").removesuffix(" :")
-            elif etymology_node.sarg == ":":
+            elif node.sarg == ":":
                 # ignore missing etymology template "ébauche-étym"
-                for template_node in etymology_node.find_child_recursively(
+                for template_node in node.find_child_recursively(
                     NodeKind.TEMPLATE
                 ):
                     if template_node.template_name == "ébauche-étym":
                         return
 
-                for etymology_item in etymology_node.find_child(
-                    NodeKind.LIST_ITEM
-                ):
+                for etymology_item in node.find_child(NodeKind.LIST_ITEM):
                     etymology_data = find_pos_in_etymology_list(
                         wxr, etymology_item
                     )
@@ -60,9 +52,12 @@ def extract_etymology(
                             etymology_dict[pos_title].append(etymology_text)
 
     if len(etymology_dict) == 0:
-        etymology_text = clean_node(wxr, None, nodes[:level_node_index])
+        etymology_text = clean_node(
+            wxr, None, level_node.children[:level_node_index]
+        )
         if len(etymology_text) > 0:
             etymology_dict[None].append(etymology_text)
+
     return etymology_dict
 
 
@@ -114,7 +109,7 @@ def insert_etymology_data(
             sense_dict[sense_data.pos_title].append(sense_data)
 
     for pos_title, etymology_texts in etymology_data.items():
-        if pos_title is None:  # add to all sense dictionaries
+        if pos_title == "":  # add to all sense dictionaries
             for sense_data_list in sense_dict.values():
                 for sense_data in sense_data_list:
                     sense_data.etymology_texts = etymology_texts
