@@ -9,7 +9,7 @@
 import re
 import html
 import unicodedata
-from typing import Callable, Optional, Union
+from typing import Callable, Optional
 from wikitextprocessor.common import MAGIC_FIRST, MAGIC_LAST
 from wikitextprocessor.core import (
     NamespaceDataEntry,
@@ -1330,10 +1330,10 @@ def remove_italic_and_bold(text: str) -> str:
 
 # regex to find File/Image link attributes that would mean an image
 # is *not* inline
-inline_re = re.compile(r"\|\s*(right|left|center|thumb|frame)\s*\|")
+INLINE_RE = re.compile(r"\|\s*(right|left|center|thumb|frame)\s*\|")
 
 
-url_starts_re = re.compile(
+URL_STARTS_RE = re.compile(
     r"({})".format(r"|".join(URL_STARTS)), flags=re.IGNORECASE
 )
 
@@ -1355,7 +1355,7 @@ def clean_value(
         args = re.split(r"\s+", m.group(1))
         i = 0
         while i < len(args) - 1:
-            if not url_starts_re.match(args[i]):
+            if not URL_STARTS_RE.match(args[i]):
                 break
             i += 1
         return " ".join(args[i:])
@@ -1370,7 +1370,7 @@ def clean_value(
         lnk = m.group(1)
         if wxr.wtp.file_aliases_re.match(lnk):
             # Handle File / Image / Fichier 'links' here.
-            if not inline_re.match(m.group(0)) and "alt" in m.group(0):
+            if not INLINE_RE.match(m.group(0)) and "alt" in m.group(0):
                 # This image should be inline, so let's print its alt text
                 alt_m = re.search(r"\|\s*alt\s*=([^]|]+)(\||\]\])", m.group(0))
                 if alt_m is not None:
