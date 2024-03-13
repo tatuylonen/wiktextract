@@ -360,3 +360,15 @@ class WiktExtractTests(unittest.TestCase):
             clean_value(self.wxr, "[//obsolete_url shouldn't be used]"),
             "shouldn't be used",
         )
+
+    def test_table1(self):
+        self.assertEqual(
+            clean_value(self.wxr, "FOO\n{| test |}\nBAR"),
+            "FOO\nBAR",
+        )
+
+    def test_table2(self):
+        self.assertEqual(
+            clean_value(self.wxr, "FOO\n{| {| inner table |} |}\nBAR"),
+            "FOO\nBAR",
+        )
