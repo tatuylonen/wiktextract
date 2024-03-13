@@ -76,7 +76,10 @@ def parse_section(
                 wxr.config.capture_etymologies
                 and section_type in ETYMOLOGY_SECTIONS
             ):
-                return extract_etymology(wxr, level_node.children)
+                etymology_data = extract_etymology(wxr, level_node)
+                for node in level_node.find_child(LEVEL_KIND_FLAGS):
+                    parse_section(wxr, page_data, base_data, node)
+                return etymology_data
             elif (
                 wxr.config.capture_pronunciation
                 and section_type in PRONUNCIATION_SECTIONS
