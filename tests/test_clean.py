@@ -129,6 +129,11 @@ class WiktExtractTests(unittest.TestCase):
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "[Alt: Bar]")
 
+    def test_cv_link13(self):
+        v = "[[  File  :Foo.jpg]]Bar"
+        v = clean_value(self.wxr, v)
+        self.assertEqual(v, "Bar")
+
     def test_cv_url1(self):
         v = "This is a [http://ylonen.org test]."
         v = clean_value(self.wxr, v)
