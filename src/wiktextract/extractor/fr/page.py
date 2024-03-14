@@ -11,7 +11,7 @@ from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
 from .inflection import extract_inflection
 from .linkage import extract_linkage
-from .models import WordEntry
+from .models import Sense, WordEntry
 from .note import extract_note
 from .pronunciation import extract_pronunciation
 from .section_types import (
@@ -170,6 +170,8 @@ def process_pos_block(
 
     form_line_nodes = child_nodes[form_line_start:gloss_start]
     extract_form_line(wxr, page_data, form_line_nodes)
+    if len(page_data[-1].senses) == 0:
+        page_data[-1].senses.append(Sense(tags=["no-gloss"]))
 
 
 def parse_page(

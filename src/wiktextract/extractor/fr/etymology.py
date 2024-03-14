@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import Optional
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode, LevelNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
